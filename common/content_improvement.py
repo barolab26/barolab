@@ -21,7 +21,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from common.dashboard_jobs import write
-from common.llm_client import parse_json
+from common.llm_client import parse_json, generate_json
 from common.content_quality import CONTENT_QUALITY_POLICY, content_quality_sha256
 from common.answer_brief import ANSWER_BRIEF_POLICY
 
@@ -337,7 +337,7 @@ def compact_policy(text: str, max_chars: int = 850) -> str:
 
 
 def model_json(role,task,payload,deadline,model_override=None):
-    """Actual shared authenticated auto→agy routing; candidate remains untrusted data."""
+    """Use the enabled provider; preserve candidate-only review and audit gates."""
     if deadline-time.monotonic() < 80:
         raise TimeoutError('공유 편집 라우터 실행 예산 부족 · 새 요청 보류')
     if model_override not in (None, 'auto'):
@@ -362,34 +362,36 @@ def model_json(role,task,payload,deadline,model_override=None):
              '이번 JSON 계약에 없는 answerBrief나 원고 필드를 요구하거나 생성하지 않는다. '
              '요청 범위의 실제 핵심 누락·오류와 사실·발행 안전 문제는 그대로 기록한다.\n'
             +'참고 역할 지침:\n'+compact_policy(policy, 900)+'\n이번 계약(이번 범위가 우선):\n'+task+'\n자료:\n'+json.dumps(payload,ensure_ascii=False))
-    module=routing_module()
-    if len(prompt)>module.MAX_INPUT:
+    # Match the previous router's input bound without loading its disabled AGY/FreeLLM routes.
+    if len(prompt)>16000:
         raise ValueError('공유 편집 입력 상한 초과 · 원문을 자르지 않고 수동 분할 검토 대기')
     attempts=[]
-    class AuditedRouter(module.Router):
-        def ledger(self,entry):
-            super().ledger(entry)
-            attempts.append({k:entry[k] for k in ('provider','requested_model','returned_model','status','attempt','latency_ms','usage') if k in entry})
-    router=AuditedRouter(ROOT)
     started=time.monotonic()
-    response=router.generate(prompt,candidate=True,level='standard')
-    metadata={'provider':'shared_agent_router','checkedAt':stamp(),'routingAttempts':attempts,
-              'elapsedMs':round((time.monotonic()-started)*1000),
+    metadata={'provider':'codex','checkedAt':stamp(),'routingAttempts':attempts,
               'instructionSha256':hashlib.sha256(instruction.read_bytes()).hexdigest() if instruction.exists() else None,
-              'contentQualitySha256':quality_hash,
-              'promptSha256':digest(prompt),'requestedModel':'auto'}
-    if response.get('route')!='worker' or not response.get('candidate'):
-        consec_fails = int(prior_routing.get('consecutiveFailures', 0)) + 1
-        cooldown_mins = 10 if consec_fails >= 2 else 1
-        failure={**metadata,'httpStatus':None,'errorCode':'shared_routing_unavailable',
+              'contentQualitySha256':quality_hash,'promptSha256':digest(prompt)}
+    def observe(provider, model, status, **details):
+        entry={'provider':provider,'requested_model':model,'returned_model':details.get('actual_model','unknown'),
+               'status':status,'attempt':1,'latency_ms':round((time.monotonic()-started)*1000)}
+        attempts.append(entry)
+        metadata.update(provider=provider,requestedModel=model)
+    try:
+        result=generate_json(prompt,provider='codex',observer=observe)
+    except Exception:
+        consec_fails=int(prior_routing.get('consecutiveFailures',0))+1
+        failure={**metadata,'httpStatus':None,'errorCode':'enabled_provider_unavailable',
                  'consecutiveFailures':consec_fails,
-                 'nextRetryAt':(datetime.now(timezone.utc)+timedelta(minutes=cooldown_mins)).isoformat()}
+                 'nextRetryAt':(datetime.now(timezone.utc)+timedelta(minutes=10 if consec_fails>=2 else 1)).isoformat()}
         provider_record('shared-routing',failure)
-        raise ProviderUnavailable(failure)
-    candidate=(ROOT/response['candidate']).resolve()
+        raise ProviderUnavailable(failure) from None
+    metadata['elapsedMs']=round((time.monotonic()-started)*1000)
+    raw=json.dumps(result,ensure_ascii=False)
+    if len(raw.encode('utf-8'))>96000:
+        raise ValueError('공유 편집 후보 크기 계약 미확인')
     allowed=(ROOT/'.agent-routing'/'candidates').resolve()
-    if not candidate.is_relative_to(allowed) or not candidate.is_file() or candidate.stat().st_size>96000:
-        raise ValueError('공유 편집 후보 경로·크기 계약 미확인')
+    allowed.mkdir(parents=True,exist_ok=True)
+    candidate=allowed/(hashlib.sha256(raw.encode('utf-8')).hexdigest()+'.json')
+    candidate.write_text(raw,encoding='utf-8')
     if time.monotonic()>deadline:
         raise TimeoutError('편집 후보 도착 시 실행 예산 만료 · 검수·적용 안 함')
     raw=candidate.read_text(encoding='utf-8')

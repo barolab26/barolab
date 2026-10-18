@@ -1,0 +1,1788 @@
+
+sm        57 Thu Jan 01 01:01:02 KST 1981 BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      6101 Thu Jan 01 01:01:02 KST 1981 BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        79 Thu Jan 01 01:01:02 KST 1981 BUNDLE-METADATA/com.android.tools/d8.json
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       628 Thu Jan 01 01:01:02 KST 1981 BundleConfig.pb
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        12 Thu Jan 01 01:01:02 KST 1981 base/assets.pb
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      9411 Thu Jan 01 01:01:02 KST 1981 base/assets/verses.json
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm    8131852 Thu Jan 01 01:01:02 KST 1981 base/dex/classes.dex
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm    5636212 Thu Jan 01 01:01:02 KST 1981 base/dex/classes2.dex
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm     19963 Thu Jan 01 01:01:02 KST 1981 base/manifest/AndroidManifest.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1105 Thu Jan 01 01:01:02 KST 1981 base/res/color/common_google_signin_btn_text_dark.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1113 Thu Jan 01 01:01:02 KST 1981 base/res/color/common_google_signin_btn_text_light.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       409 Thu Jan 01 01:01:02 KST 1981 base/res/color/common_google_signin_btn_tint.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1515 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-anydpi-v21/ic_call_answer.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1373 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-anydpi-v21/ic_call_answer_low.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       931 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-anydpi-v21/ic_call_answer_video.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       789 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-anydpi-v21/ic_call_answer_video_low.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1689 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-anydpi-v21/ic_call_decline.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1547 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-anydpi-v21/ic_call_decline_low.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       681 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/common_full_open_on_phone.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       897 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       683 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       960 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       694 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/common_google_signin_btn_text_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       410 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/googleg_disabled_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       808 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/googleg_standard_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       472 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/ic_call_answer.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       472 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/ic_call_answer_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       254 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/ic_call_answer_video.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       254 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/ic_call_answer_video_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       375 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/ic_call_decline.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       375 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/ic_call_decline_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       212 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/notification_bg_low_normal.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       225 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/notification_bg_low_pressed.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       212 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/notification_bg_normal.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       225 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/notification_bg_normal_pressed.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       107 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-hdpi-v4/notify_panel_notification_icon_bg.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       270 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-ldpi-v4/ic_call_answer.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       270 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-ldpi-v4/ic_call_answer_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       199 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-ldpi-v4/ic_call_answer_video.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       199 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-ldpi-v4/ic_call_answer_video_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       201 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-ldpi-v4/ic_call_decline.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       201 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-ldpi-v4/ic_call_decline_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       610 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       500 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       615 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       465 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/common_google_signin_btn_text_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       281 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/googleg_disabled_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       562 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/googleg_standard_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       317 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/ic_call_answer.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       317 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/ic_call_answer_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       206 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/ic_call_answer_video.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       206 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/ic_call_answer_video_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       264 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/ic_call_decline.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       264 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/ic_call_decline_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       215 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/notification_bg_low_normal.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       223 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/notification_bg_low_pressed.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       215 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/notification_bg_normal.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       223 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/notification_bg_normal_pressed.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        98 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-mdpi-v4/notify_panel_notification_icon_bg.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2250 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-v21/notification_action_background.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       489 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/common_full_open_on_phone.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1032 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       776 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1086 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       808 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/common_google_signin_btn_text_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       516 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/googleg_disabled_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       982 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/googleg_standard_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       623 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/ic_call_answer.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       623 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/ic_call_answer_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       290 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/ic_call_answer_video.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       290 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/ic_call_answer_video_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       452 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/ic_call_decline.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       452 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/ic_call_decline_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       221 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/notification_bg_low_normal.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       252 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/notification_bg_low_pressed.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       221 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/notification_bg_normal.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       247 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/notification_bg_normal_pressed.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       138 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xhdpi-v4/notify_panel_notification_icon_bg.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1510 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1138 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1638 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1255 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/common_google_signin_btn_text_light_normal_background.9.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       727 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/googleg_disabled_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1441 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/googleg_standard_color_18.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       884 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/ic_call_answer.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       884 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/ic_call_answer_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       384 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/ic_call_answer_video.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       384 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/ic_call_answer_video_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       628 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/ic_call_decline.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       628 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxhdpi-v4/ic_call_decline_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1171 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxxhdpi-v4/ic_call_answer.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1171 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxxhdpi-v4/ic_call_answer_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       465 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxxhdpi-v4/ic_call_answer_video.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       465 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxxhdpi-v4/ic_call_answer_video_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       823 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxxhdpi-v4/ic_call_decline.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       823 Thu Jan 01 01:01:02 KST 1981 base/res/drawable-xxxhdpi-v4/ic_call_decline_low.png
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       666 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/abc_vector_test.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1237 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/admob_close_button_black_circle_white_cross.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1242 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/admob_close_button_white_circle_black_cross.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       754 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/admob_close_button_white_cross.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       844 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_dark.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1017 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_dark_focused.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       567 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_dark_normal.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1261 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_disabled.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       848 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_light.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1019 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_light_focused.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       569 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_icon_light_normal.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       844 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_dark.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1017 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_dark_focused.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       659 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_dark_normal.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1355 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_disabled.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       848 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_light.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1019 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_light_focused.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       661 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/common_google_signin_btn_text_light_normal.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1108 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/ic_bible.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1354 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/logo_play_prism_24dp.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       751 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/notification_bg.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       753 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/notification_bg_low.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       314 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/notification_icon_background.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       319 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/notification_tile_bg.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       270 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/offline_dialog_background.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1390 Thu Jan 01 01:01:02 KST 1981 base/res/drawable/offline_dialog_default_icon_42dp.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2216 Thu Jan 01 01:01:02 KST 1981 base/res/layout-v21/notification_action.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2677 Thu Jan 01 01:01:02 KST 1981 base/res/layout-v21/notification_action_tombstone.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      6318 Thu Jan 01 01:01:02 KST 1981 base/res/layout-v21/notification_template_custom_big.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2432 Thu Jan 01 01:01:02 KST 1981 base/res/layout-v21/notification_template_icon_group.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       546 Thu Jan 01 01:01:02 KST 1981 base/res/layout/admob_empty_layout.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      3165 Thu Jan 01 01:01:02 KST 1981 base/res/layout/browser_actions_context_menu_page.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2211 Thu Jan 01 01:01:02 KST 1981 base/res/layout/browser_actions_context_menu_row.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       828 Thu Jan 01 01:01:02 KST 1981 base/res/layout/custom_dialog.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2128 Thu Jan 01 01:01:02 KST 1981 base/res/layout/hsdp_service_prism_with_loading_indicator.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       374 Thu Jan 01 01:01:02 KST 1981 base/res/layout/hsdp_shim_activity.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       643 Thu Jan 01 01:01:02 KST 1981 base/res/layout/notification_template_part_chronometer.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       630 Thu Jan 01 01:01:02 KST 1981 base/res/layout/notification_template_part_time.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      3442 Thu Jan 01 01:01:02 KST 1981 base/res/layout/offline_ads_dialog.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2010 Thu Jan 01 01:01:02 KST 1981 base/res/layout/sdk_loading_panel.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       482 Thu Jan 01 01:01:02 KST 1981 base/res/xml/data_extraction_rules.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        93 Thu Jan 01 01:01:02 KST 1981 base/res/xml/image_share_filepaths.xml
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm    298308 Thu Jan 01 01:01:02 KST 1981 base/resources.pb
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      1738 Thu Jan 01 01:01:02 KST 1981 base/root/DebugProbesKt.bin
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.activity_activity.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.annotation_annotation-experimental.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.appcompat_appcompat-resources.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.arch.core_core-runtime.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.browser_browser.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         7 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.core_core-ktx.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         7 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.core_core.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.customview_customview.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.datastore_datastore.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.fragment_fragment.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.interpolator_interpolator.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.lifecycle_lifecycle-livedata-core.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.lifecycle_lifecycle-livedata.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.lifecycle_lifecycle-runtime.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.lifecycle_lifecycle-service.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.lifecycle_lifecycle-viewmodel.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.loader_loader.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        13 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.privacysandbox.ads_ads-adservices-java.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        13 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.privacysandbox.ads_ads-adservices.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.room_room-runtime.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.savedstate_savedstate.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.sqlite_sqlite-framework.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.sqlite_sqlite.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.startup_startup-runtime.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.tracing_tracing.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.vectordrawable_vectordrawable-animated.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.vectordrawable_vectordrawable.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.versionedparcelable_versionedparcelable.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.viewpager_viewpager.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         7 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.webkit_webkit.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         6 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/androidx.work_work-runtime.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        57 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/com/android/build/gradle/app-metadata.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         5 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/kotlinx_coroutines_android.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm         5 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/kotlinx_coroutines_core.version
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        54 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        52 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        46 Thu Jan 01 01:01:02 KST 1981 base/root/META-INF/version-control-info.textproto
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        44 Thu Jan 01 01:01:02 KST 1981 base/root/hsdp.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       865 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/annotation/annotation.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      3635 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/collections/collections.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       137 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/coroutines/coroutines.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       583 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/internal/internal.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm     18653 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/kotlin.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      3349 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/ranges/ranges.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm      2370 Thu Jan 01 01:01:02 KST 1981 base/root/kotlin/reflect/reflect.kotlin_builtins
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        80 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-ads-api.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        94 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-ads-identifier.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        72 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-ads.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        78 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-appset.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        74 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-base.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        82 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-basement.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        98 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-measurement-base.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       104 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-measurement-sdk-api.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        76 Thu Jan 01 01:01:02 KST 1981 base/root/play-services-tasks.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        82 Thu Jan 01 01:01:02 KST 1981 base/root/user-messaging-platform.properties
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+       24895 Thu Jan 01 01:01:02 KST 1981 META-INF/HARUBIBL.SF
+        1638 Thu Jan 01 01:01:02 KST 1981 META-INF/HARUBIBL.RSA
+s      24846 Thu Jan 01 01:01:02 KST 1981 META-INF/MANIFEST.MF
+
+      >>> Signer
+      X.509, CN=BaroLab HaruBible Upload, O=YoonLab, C=KR
+      Signature algorithm: SHA384withRSA, 3072-bit key
+      [certificate is valid from 10/14/26, 3:02?PM to 3/1/54, 3:02?PM]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+
+  s = signature was verified
+  m = entry is listed in manifest
+  k = at least one certificate was found in keystore
+
+- Signed by "CN=BaroLab HaruBible Upload, O=YoonLab, C=KR"
+    Digest algorithm: SHA-256
+    Signature algorithm: SHA256withRSA, 3072-bit key
+
+jar verified.
+
+Warning:
+This jar contains entries whose certificate chain is invalid. Reason: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+This jar contains entries whose signer certificate is self-signed.
+This jar contains signatures that do not include a timestamp. Without a timestamp, users may not be able to validate this jar after any of the signer certificates expire (as early as 2054-03-01).
+POSIX file permission and/or symlink attributes detected. These attributes are ignored when signing and are not protected by the signature.
+
+This JAR file contains internal inconsistencies that may result in different contents when reading via JarFile and JarInputStream:
+- Manifest is missing when reading via JarInputStream
+- Entry BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties is signed in JarFile but is not signed in JarInputStream
+- Entry BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb is signed in JarFile but is not signed in JarInputStream
+- Entry BUNDLE-METADATA/com.android.tools/d8.json is signed in JarFile but is not signed in JarInputStream
+- Entry BundleConfig.pb is signed in JarFile but is not signed in JarInputStream
+- Entry base/assets.pb is signed in JarFile but is not signed in JarInputStream
+- Entry base/assets/verses.json is signed in JarFile but is not signed in JarInputStream
+- Entry base/dex/classes.dex is signed in JarFile but is not signed in JarInputStream
+- Entry base/dex/classes2.dex is signed in JarFile but is not signed in JarInputStream
+- Entry base/manifest/AndroidManifest.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/color/common_google_signin_btn_text_dark.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/color/common_google_signin_btn_text_light.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/color/common_google_signin_btn_tint.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-anydpi-v21/ic_call_answer.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-anydpi-v21/ic_call_answer_low.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-anydpi-v21/ic_call_answer_video.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-anydpi-v21/ic_call_answer_video_low.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-anydpi-v21/ic_call_decline.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-anydpi-v21/ic_call_decline_low.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/common_full_open_on_phone.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/common_google_signin_btn_text_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/googleg_disabled_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/googleg_standard_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/ic_call_answer.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/ic_call_answer_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/ic_call_answer_video.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/ic_call_answer_video_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/ic_call_decline.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/ic_call_decline_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/notification_bg_low_normal.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/notification_bg_low_pressed.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/notification_bg_normal.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/notification_bg_normal_pressed.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-hdpi-v4/notify_panel_notification_icon_bg.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-ldpi-v4/ic_call_answer.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-ldpi-v4/ic_call_answer_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-ldpi-v4/ic_call_answer_video.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-ldpi-v4/ic_call_answer_video_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-ldpi-v4/ic_call_decline.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-ldpi-v4/ic_call_decline_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/common_google_signin_btn_text_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/googleg_disabled_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/googleg_standard_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/ic_call_answer.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/ic_call_answer_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/ic_call_answer_video.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/ic_call_answer_video_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/ic_call_decline.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/ic_call_decline_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/notification_bg_low_normal.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/notification_bg_low_pressed.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/notification_bg_normal.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/notification_bg_normal_pressed.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-mdpi-v4/notify_panel_notification_icon_bg.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-v21/notification_action_background.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/common_full_open_on_phone.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/common_google_signin_btn_text_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/googleg_disabled_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/googleg_standard_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/ic_call_answer.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/ic_call_answer_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/ic_call_answer_video.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/ic_call_answer_video_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/ic_call_decline.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/ic_call_decline_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/notification_bg_low_normal.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/notification_bg_low_pressed.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/notification_bg_normal.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/notification_bg_normal_pressed.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xhdpi-v4/notify_panel_notification_icon_bg.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/common_google_signin_btn_icon_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/common_google_signin_btn_icon_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/common_google_signin_btn_text_dark_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/common_google_signin_btn_text_light_normal_background.9.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/googleg_disabled_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/googleg_standard_color_18.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/ic_call_answer.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/ic_call_answer_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/ic_call_answer_video.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/ic_call_answer_video_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/ic_call_decline.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxhdpi-v4/ic_call_decline_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxxhdpi-v4/ic_call_answer.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxxhdpi-v4/ic_call_answer_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxxhdpi-v4/ic_call_answer_video.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxxhdpi-v4/ic_call_answer_video_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxxhdpi-v4/ic_call_decline.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable-xxxhdpi-v4/ic_call_decline_low.png is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/abc_vector_test.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/admob_close_button_black_circle_white_cross.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/admob_close_button_white_circle_black_cross.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/admob_close_button_white_cross.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_dark.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_dark_focused.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_dark_normal.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_disabled.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_light.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_light_focused.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_icon_light_normal.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_dark.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_dark_focused.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_dark_normal.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_disabled.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_light.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_light_focused.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/common_google_signin_btn_text_light_normal.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/ic_bible.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/logo_play_prism_24dp.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/notification_bg.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/notification_bg_low.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/notification_icon_background.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/notification_tile_bg.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/offline_dialog_background.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/drawable/offline_dialog_default_icon_42dp.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout-v21/notification_action.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout-v21/notification_action_tombstone.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout-v21/notification_template_custom_big.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout-v21/notification_template_icon_group.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/admob_empty_layout.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/browser_actions_context_menu_page.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/browser_actions_context_menu_row.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/custom_dialog.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/hsdp_service_prism_with_loading_indicator.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/hsdp_shim_activity.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/notification_template_part_chronometer.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/notification_template_part_time.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/offline_ads_dialog.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/layout/sdk_loading_panel.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/xml/data_extraction_rules.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/res/xml/image_share_filepaths.xml is signed in JarFile but is not signed in JarInputStream
+- Entry base/resources.pb is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/DebugProbesKt.bin is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.activity_activity.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.annotation_annotation-experimental.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.appcompat_appcompat-resources.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.arch.core_core-runtime.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.browser_browser.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.core_core-ktx.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.core_core.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.customview_customview.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.datastore_datastore.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.fragment_fragment.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.interpolator_interpolator.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.lifecycle_lifecycle-livedata-core.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.lifecycle_lifecycle-livedata.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.lifecycle_lifecycle-runtime.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.lifecycle_lifecycle-service.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.lifecycle_lifecycle-viewmodel.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.loader_loader.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.privacysandbox.ads_ads-adservices-java.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.privacysandbox.ads_ads-adservices.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.room_room-runtime.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.savedstate_savedstate.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.sqlite_sqlite-framework.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.sqlite_sqlite.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.startup_startup-runtime.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.tracing_tracing.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.vectordrawable_vectordrawable-animated.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.vectordrawable_vectordrawable.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.versionedparcelable_versionedparcelable.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.viewpager_viewpager.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.webkit_webkit.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/androidx.work_work-runtime.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/com/android/build/gradle/app-metadata.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/kotlinx_coroutines_android.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/kotlinx_coroutines_core.version is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/META-INF/version-control-info.textproto is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/hsdp.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/annotation/annotation.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/collections/collections.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/coroutines/coroutines.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/internal/internal.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/kotlin.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/ranges/ranges.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/kotlin/reflect/reflect.kotlin_builtins is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-ads-api.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-ads-identifier.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-ads.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-appset.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-base.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-basement.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-measurement-base.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-measurement-sdk-api.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/play-services-tasks.properties is signed in JarFile but is not signed in JarInputStream
+- Entry base/root/user-messaging-platform.properties is signed in JarFile but is not signed in JarInputStream
+- Entry META-INF/MANIFEST.MF is signed in JarFile but is not signed in JarInputStream
+
+The signer certificate will expire on 2054-03-01.

@@ -1,9 +1,6 @@
 """Provider adapters for JSON article generation; no silent provider fallback."""
 import json
 import re
-import shutil
-import subprocess
-import tempfile
 import time
 from pathlib import Path
 import requests
@@ -119,54 +116,19 @@ def _compact_schema_hint(schema):
     return json.dumps(summary, ensure_ascii=False)
 
 
+def _enabled_route(config, provider=None, model_override=None):
+    """AGY is disabled after weekly quota exhaustion (2026-10-19)."""
+    provider = provider or config['active']
+    if provider == 'agy':
+        # AGY model IDs are not valid Codex model overrides.
+        return 'codex', config['providers'].get('codex', {}).get('model') or 'gpt-6.1-sol'
+    return provider, model_override
+
+
 def agy_generate(prompt, model, response_schema=None):
-    executable = settings.resolve_agy_executable() if hasattr(settings, 'resolve_agy_executable') else shutil.which('agy')
-    if not executable:
-        raise RuntimeError('AGY CLI가 설치되지 않았습니다.')
-    if isinstance(model, str) and model.lower() in ('argon', '아르곤', 'gemini-4-argon'):
-        model = 'gemini-4-argon-high'
-    if response_schema:
-        hint = _compact_schema_hint(response_schema)
-        prompt = (
-            f"{prompt}\n\n"
-            f"[STRICT JSON OUTPUT CONTRACT]\n"
-            f"반드시 아래 키와 타입 구조를 만족하는 단일 JSON 객체만 출력하세요(마크다운 코드블록이나 설명 없이 순수 JSON만 출력):\n"
-            f"{hint}"
-        )
-    scratch = Path.home() / '.barolab' / 'scratch'
-    scratch.mkdir(parents=True, exist_ok=True)
-    enforce_agy_cooldown(AGY_MIN_COOLDOWN_SEC)
-    # No project context, shell interpolation, auto-approval, or previous conversation.
-    with tempfile.TemporaryDirectory(prefix='llm-agy-', dir=scratch) as cwd:
-        cmd = [executable, '--input-format', 'stream-json',
-               '--output-format', 'stream-json', '--model', model,
-               '--disable-slash-commands', '--sandbox', '--print-timeout', '180s']
-        try:
-            proc = subprocess.run(cmd,
-                input=json.dumps({'event': 'user', 'message': {'content': prompt}})+'\n',
-                capture_output=True, text=True, encoding='utf-8', cwd=cwd, timeout=200,
-                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-        except (OSError, subprocess.TimeoutExpired):
-            raise RuntimeError('AGY 실행 실패 또는 시간 초과. 설치·로그인을 확인하세요.') from None
-        finally:
-            try:
-                AGY_COOLDOWN_FILE.write_text(json.dumps({'last_call_epoch': time.time()}), encoding='utf-8')
-            except Exception:
-                pass
-    if proc.returncode:
-        raise RuntimeError('AGY 생성 실패. AGY 로그인·모델·잔액을 확인하세요.')
-    try:
-        results = [json.loads(line)['result'] for line in proc.stdout.splitlines()
-                   if line.strip() and line.strip().startswith('{') and json.loads(line).get('event') == 'result']
-        result = results[-1]
-        if result.get('status') != 'SUCCESS':
-            raise ValueError()
-        resp = result.get('response')
-        if isinstance(resp, dict) and resp:
-            return resp
-        return parse_json(resp)
-    except (KeyError, ValueError, IndexError, TypeError, RuntimeError):
-        raise RuntimeError('AGY가 완료된 JSON 응답을 반환하지 않았습니다.') from None
+    """Compatibility entry point; never start AGY, even for direct callers."""
+    result, _ = _generate_json(prompt, provider='agy', response_schema=response_schema)
+    return result
 
 
 def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None):
@@ -175,7 +137,7 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         brain = settings.get_agent_brain(agent_slot, config)
         provider = brain.get('provider') or config['active']
         model_override = brain.get('model') or None
-    provider = provider or config['active']
+    provider, model_override = _enabled_route(config, provider, model_override)
     model = model_override or config['providers'].get(provider, {}).get('model', '')
     if observer:
         observer(provider, model, 'calling')
@@ -194,13 +156,11 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
 
 def _generate_json(prompt, provider=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None):
     config = settings.load()
-    provider = provider or config['active']
+    provider, model_override = _enabled_route(config, provider, model_override)
     if provider not in settings.PROVIDERS:
         raise RuntimeError('기존 연결 모드는 각 워크플로우에서 검증하세요.')
     row = config['providers'].get(provider, {})
     model = model_override or row.get('model', '')
-    if not model and provider == 'agy':
-        model = 'gemini-4-argon-high'
     if not model and provider == 'codex':
         model = 'gpt-6.1-sol'
     if not model:
@@ -210,25 +170,6 @@ def _generate_json(prompt, provider=None, images=None, model_override=None, resp
         # Map gpt-6.1-sol gracefully if local codex CLI requires an installed alias or pass directly
         return generate(prompt, model, images, response_schema, audit_directory=audit_directory,
                         reasoning_effort=reasoning_effort)
-    if provider == 'agy':
-        orig_prompt = prompt
-        if images:
-            img_desc = ', '.join(str(Path(p).name) for p in images if p)
-            prompt = f"[Attached Visual Assets Verified on Disk: {img_desc}]\n" + prompt
-        prompt = 'Return only a complete JSON object. Do not use tools or access files.\n' + prompt
-        try:
-            return agy_generate(prompt, model, response_schema=response_schema), model
-        except Exception as agy_err:
-            # Automatic fallback to local Codex CLI so scheduled pipelines never halt on AGY timeout/schema hiccups
-            try:
-                from common.codex_cli import generate as codex_generate
-                codex_model = config['providers'].get('codex', {}).get('model') or 'gpt-5.4'
-                print(f"[llm_client] AGY ({model}) failed ({agy_err}); falling back to codex ({codex_model})", flush=True)
-                res, actual = codex_generate(orig_prompt, codex_model, images, response_schema,
-                                             audit_directory=audit_directory, reasoning_effort=reasoning_effort)
-                return res, actual
-            except Exception:
-                raise agy_err
     if reasoning_effort is not None:
         raise RuntimeError('선택한 공급자 어댑터는 명시적 추론 강도 전달을 지원하지 않습니다.')
     prompt = 'Return only a complete JSON object. Do not use tools or access files.\n'+prompt

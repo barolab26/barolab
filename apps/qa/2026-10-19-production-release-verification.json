@@ -1,0 +1,269 @@
+{
+  "recordedAt": "2026-10-19T02:17:23.363507+09:00",
+  "status": "signed_release_build_verified",
+  "scope": "Build, signature, production ad identity, debug and release unit/lint verified; Play release and physical testing of these new versions are separate.",
+  "modules": {
+    "bible": {
+      "versionCode": 5,
+      "versionName": "0.5.0",
+      "aab": "Y:\\10_Project\\BaroLab\\apps\\bible\\app\\build\\outputs\\bundle\\release\\app-release.aab",
+      "aabSha256": "840040fb48aac4d21424f7c33d2762e5f8f81b037287ac871daae351841ce84f",
+      "aabBytes": 5564554,
+      "packageName": "com.barolab.harubible",
+      "admobAppId": "ca-app-pub-7642010403138987~3426234878",
+      "bannerAdUnitId": "ca-app-pub-7642010403138987/9298253515",
+      "manifestVerified": true,
+      "dexBannerVerified": true,
+      "dexAdUnitIds": [
+        "ca-app-pub-7642010403138987/9298253515"
+      ],
+      "testAdsOnly": false,
+      "productionAdsEnabled": true,
+      "bundletoolValidated": true,
+      "signatureVerified": true,
+      "signingCertificateSha256": "D6:F8:3A:17:BD:7F:00:BD:F9:37:3A:C3:B5:FF:8E:14:21:16:97:27:0B:A9:BF:9E:4C:1C:E6:8A:23:E0:1F:3D",
+      "persistentSigningIdentityMatches": true,
+      "previousSigningCertificateMatches": null,
+      "unitTests": {
+        "debug": {
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "release": {
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "lint": {
+        "debug": [
+          {
+            "id": "AndroidGradlePluginVersion",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          }
+        ],
+        "release": [
+          {
+            "id": "AndroidGradlePluginVersion",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          }
+        ]
+      },
+      "physicalDeviceVerifiedForThisBuild": false,
+      "playUploadVerified": false
+    },
+    "greeting": {
+      "versionCode": 3,
+      "versionName": "0.3.0",
+      "aab": "Y:\\10_Project\\BaroLab\\apps\\greeting\\build\\outputs\\bundle\\release\\greeting-release.aab",
+      "aabSha256": "303a5f34be0995157cf83619cb9ae8aeafcda0c56c00b2e2019bebb743aeaa7e",
+      "aabBytes": 11552628,
+      "packageName": "com.barolab.morningcard",
+      "admobAppId": "ca-app-pub-7642010403138987~7847239341",
+      "bannerAdUnitId": "ca-app-pub-7642010403138987/8940829169",
+      "manifestVerified": true,
+      "dexBannerVerified": true,
+      "dexAdUnitIds": [
+        "ca-app-pub-7642010403138987/8940829169"
+      ],
+      "testAdsOnly": false,
+      "productionAdsEnabled": true,
+      "bundletoolValidated": true,
+      "signatureVerified": true,
+      "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+      "persistentSigningIdentityMatches": true,
+      "previousSigningCertificateMatches": null,
+      "unitTests": {
+        "debug": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "release": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "lint": {
+        "debug": [],
+        "release": []
+      },
+      "physicalDeviceVerifiedForThisBuild": false,
+      "playUploadVerified": false
+    },
+    "magnifier": {
+      "versionCode": 3,
+      "versionName": "0.3.0",
+      "aab": "Y:\\10_Project\\BaroLab\\apps\\magnifier\\build\\outputs\\bundle\\release\\magnifier-release.aab",
+      "aabSha256": "d29017bf34add2a066ed5e42a9d2330ca284a0837b0d06619108fd69e31e2060",
+      "aabBytes": 8330004,
+      "packageName": "com.barolab.biglens",
+      "admobAppId": "ca-app-pub-7642010403138987~5789333475",
+      "bannerAdUnitId": "ca-app-pub-7642010403138987/4744854277",
+      "manifestVerified": true,
+      "dexBannerVerified": true,
+      "dexAdUnitIds": [
+        "ca-app-pub-7642010403138987/4744854277"
+      ],
+      "testAdsOnly": false,
+      "productionAdsEnabled": true,
+      "bundletoolValidated": true,
+      "signatureVerified": true,
+      "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+      "persistentSigningIdentityMatches": true,
+      "previousSigningCertificateMatches": null,
+      "unitTests": {
+        "debug": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "release": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "lint": {
+        "debug": [
+          {
+            "id": "ClickableViewAccessibility",
+            "severity": "Warning"
+          },
+          {
+            "id": "ClickableViewAccessibility",
+            "severity": "Warning"
+          }
+        ],
+        "release": [
+          {
+            "id": "ClickableViewAccessibility",
+            "severity": "Warning"
+          },
+          {
+            "id": "ClickableViewAccessibility",
+            "severity": "Warning"
+          }
+        ]
+      },
+      "physicalDeviceVerifiedForThisBuild": false,
+      "playUploadVerified": false
+    },
+    "shopping": {
+      "versionCode": 3,
+      "versionName": "0.3.0",
+      "aab": "Y:\\10_Project\\BaroLab\\apps\\shopping\\build\\outputs\\bundle\\release\\shopping-release.aab",
+      "aabSha256": "16eea1913a8c5c39da80167387e127c6badcd59b64c32e9d463cf5ada4f1dc29",
+      "aabBytes": 5914558,
+      "packageName": "com.barolab.voicebasket",
+      "admobAppId": "ca-app-pub-7642010403138987~6881642030",
+      "bannerAdUnitId": "ca-app-pub-7642010403138987/2730644038",
+      "manifestVerified": true,
+      "dexBannerVerified": true,
+      "dexAdUnitIds": [
+        "ca-app-pub-7642010403138987/2730644038"
+      ],
+      "testAdsOnly": false,
+      "productionAdsEnabled": true,
+      "bundletoolValidated": true,
+      "signatureVerified": true,
+      "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+      "persistentSigningIdentityMatches": true,
+      "previousSigningCertificateMatches": null,
+      "unitTests": {
+        "debug": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "release": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "lint": {
+        "debug": [
+          {
+            "id": "ObsoleteSdkInt",
+            "severity": "Warning"
+          },
+          {
+            "id": "AccessibilityFocus",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          }
+        ],
+        "release": [
+          {
+            "id": "ObsoleteSdkInt",
+            "severity": "Warning"
+          },
+          {
+            "id": "AccessibilityFocus",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          },
+          {
+            "id": "SetTextI18n",
+            "severity": "Warning"
+          }
+        ]
+      },
+      "physicalDeviceVerifiedForThisBuild": false,
+      "playUploadVerified": false
+    }
+  }
+}

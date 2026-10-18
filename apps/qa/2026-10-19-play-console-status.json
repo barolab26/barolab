@@ -1,0 +1,399 @@
+{
+  "checkedAt": "2026-10-18T17:54:49.673448+00:00",
+  "bible": {
+    "checkedAt": "2026-10-18T17:47:08.821Z",
+    "app": "bible",
+    "versionCode": 5,
+    "versionName": "0.5.0",
+    "internal": {
+      "released": true,
+      "status": "내부 테스터에게 제공됨",
+      "url": "https://play.google.com/apps/internaltest/4700464139727332365"
+    },
+    "alpha": {
+      "submitted": true,
+      "status": "검토 중",
+      "quickChecksPending": false,
+      "trackActive": true,
+      "countries": [
+        "KR"
+      ],
+      "testerList": "하루말씀 내부 테스트",
+      "testerCount": 13,
+      "testerListChecked": true,
+      "url": "https://play.google.com/apps/testing/com.barolab.harubible",
+      "linkCopyEnabled": true,
+      "publicJoinAvailabilityVerified": false,
+      "googleReviewConfirmed": true
+    },
+    "evidence": [
+      "bible-v5-internal-released.jpg",
+      "bible-alpha-submission.jpg",
+      "bible-alpha-country.txt",
+      "bible-alpha-testers.jpg",
+      "bible-alpha-in-review.jpg"
+    ]
+  },
+  "magnifier": {
+    "checkedAt": "2026-10-18T17:54:49.673448+00:00",
+    "app": "magnifier",
+    "versionCode": 3,
+    "versionName": "0.3.0",
+    "internal": {
+      "released": true,
+      "status": "내부 테스터에게 제공됨",
+      "publishedAtLocal": "2026-10-19T02:45:00+09:00",
+      "publishedAtPrecision": "minute",
+      "url": "https://play.google.com/apps/internaltest/4701703053640983596",
+      "testerCount": 13,
+      "testerListChecked": true
+    },
+    "alpha": {
+      "submitted": true,
+      "status": "검토 중",
+      "quickChecksPending": true,
+      "googleReviewConfirmed": false,
+      "trackActive": true,
+      "trackId": "4701097179127398061",
+      "countries": [
+        "KR"
+      ],
+      "testerList": "BaroLab 생활 앱 내부 테스트",
+      "testerCount": 13,
+      "testerListChecked": true,
+      "url": "https://play.google.com/apps/testing/com.barolab.biglens",
+      "linkCopyEnabled": true,
+      "publicJoinAvailabilityVerified": false,
+      "reviewApproved": false,
+      "quickChecksProgressPct": 42,
+      "quickChecksRemainingMinutesMaximum": 8
+    },
+    "store": {
+      "readyForReview": true,
+      "iconCount": 1,
+      "featureGraphicCount": 1,
+      "screenshotCount": 4,
+      "aiLabeledAssets": [
+        "icon-512.png",
+        "feature-1024x500.png"
+      ],
+      "realScreenshotsAiLabeled": false
+    },
+    "advertisingIdDeclaration": "no_AD_ID_removed_targetSdk36",
+    "evidence": [
+      "magnifier-v3-internal-released.png",
+      "magnifier-alpha-submitted.png",
+      "magnifier-alpha-country.png",
+      "magnifier-alpha-testers.png",
+      "magnifier-internal-testers.png",
+      "magnifier-dashboard-after.png",
+      "magnifier-alpha-final.png",
+      "magnifier-alpha-final.txt"
+    ]
+  },
+  "web": {
+    "bible": {
+      "verifiedAt": "2026-10-18T17:32:52.389549+00:00",
+      "deployment": "https://54bbd0ec.haru-malsseum.pages.dev",
+      "checks": [
+        {
+          "url": "https://haru-malsseum.pages.dev/",
+          "status": 200,
+          "sha256": "38507060bcc21a2032af5fc51d51461cf7f8354407db20296c424d31787203d3",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://haru-malsseum.pages.dev/privacy",
+          "status": 200,
+          "sha256": "92e8c0abed7fe420cbceb6ce883b26f1e43391ade7538c1da12de1877e4d8d30",
+          "byteIdentical": true
+        }
+      ]
+    },
+    "dailyApps": {
+      "checkedAt": "2026-10-18T17:18:38.367507+00:00",
+      "deploymentUrl": "https://8ac1b473.barolab-daily-apps.pages.dev",
+      "checks": [
+        {
+          "url": "https://barolab-daily-apps.pages.dev/greeting/",
+          "status": 200,
+          "sha256": "8148b08f0cf695dde84763986bf0e72ffb8e9c450a6813e455eb4e79814caecb",
+          "matchesLocal": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/greeting/privacy",
+          "status": 200,
+          "sha256": "6a9889d896a5861c0ea8a7205a3a035f3a7d0be52fa12e9b790bf247d648ec3b",
+          "matchesLocal": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/magnifier/",
+          "status": 200,
+          "sha256": "f07c4c6d655307349482a055042e83f33651a029914209d9e113ab59dead8c0e",
+          "matchesLocal": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/magnifier/privacy",
+          "status": 200,
+          "sha256": "58cdf5c65ed2d240890758fcf32143993d40e34d8751f8e732babee132d95be5",
+          "matchesLocal": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/shopping/",
+          "status": 200,
+          "sha256": "a1efea22030cff801bef4a94f2088ecdff875e8c6c4f7cfe147c2b19e49ed460",
+          "matchesLocal": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/shopping/privacy",
+          "status": 200,
+          "sha256": "2627477ee8af1fda700022b4108652013d37672cada3f5da176357118947c575",
+          "matchesLocal": true
+        }
+      ]
+    },
+    "finalDailyApps": {
+      "checkedAt": "2026-10-18T17:52:40.903514+00:00",
+      "deploymentUrl": "https://b273632d.barolab-daily-apps.pages.dev",
+      "checks": [
+        {
+          "url": "https://barolab-daily-apps.pages.dev/greeting/",
+          "status": 200,
+          "sha256": "3dcb2000de8ab8142e4f0f7d44870f126e92b325c590455b4d65f04d07a61a1b",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/greeting/privacy",
+          "status": 200,
+          "sha256": "e6b23c24b6a49a44fe12783a2c87f9ca9932a9edc7d47f2a6d60789ff4ca665d",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/magnifier/",
+          "status": 200,
+          "sha256": "f817c136487b515725966dcd39b62aa19552e380d6ffecdcc93088bd4f99dd5b",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/magnifier/privacy",
+          "status": 200,
+          "sha256": "e5c2d19326b4e23e13811939abb64c08c263bb80912b9cd981a21b7ce258dcf2",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/shopping/",
+          "status": 200,
+          "sha256": "1f32f0d61243f37d6981d3b82d4e62c36c01d679553833cc6e465978448a7978",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/shopping/privacy",
+          "status": 200,
+          "sha256": "25f2355a91c034acc0ab6d8d3ac5273d82013e821f25c54ba019cbbb80caeebf",
+          "byteIdentical": true
+        },
+        {
+          "url": "https://barolab-daily-apps.pages.dev/testers/",
+          "status": 200,
+          "sha256": "761cd499cc2fce8806e7e8903d6ad20e11dc5602e6c9077d40e1454817ca568f",
+          "byteIdentical": true,
+          "alphaLinks": 4,
+          "internalFallbackLinks": 4,
+          "versions": [
+            "5",
+            "3",
+            "3",
+            "3"
+          ]
+        }
+      ]
+    }
+  },
+  "greeting": {
+    "app": "greeting",
+    "package": "com.barolab.morningcard",
+    "appId": "4973731498485355571",
+    "updatedAt": "2026-10-18T17:48:52.207Z",
+    "tab": {
+      "id": "520644192",
+      "owned": true,
+      "status": "review_submitted_waiting_google_automatic_checks"
+    },
+    "release": {
+      "versionCode": 3,
+      "versionName": "0.3.0",
+      "aab": "Y:\\10_Project\\BaroLab\\apps\\greeting\\build\\outputs\\bundle\\release\\greeting-release.aab",
+      "sha256": "303a5f34be0995157cf83619cb9ae8aeafcda0c56c00b2e2019bebb743aeaa7e",
+      "uploaded": true,
+      "blocker": null
+    },
+    "setup": {
+      "completedOf11": 11,
+      "privacyUrl": "https://barolab-daily-apps.pages.dev/greeting/privacy",
+      "appAccess": "all_features_without_login",
+      "ads": true,
+      "iarc": {
+        "approvedTermsByUser": true,
+        "saved": true,
+        "korea": "3+",
+        "pegi": "3",
+        "esrb": "Everyone"
+      },
+      "target": "18+",
+      "dataSafety": {
+        "saved": true,
+        "collectedAndShared": [
+          "approximate_location",
+          "app_interactions",
+          "diagnostics",
+          "device_or_other_ids"
+        ],
+        "purposes": [
+          "advertising_or_marketing",
+          "analytics",
+          "fraud_prevention_security_compliance"
+        ],
+        "required": true,
+        "ephemeral": false,
+        "encryptedInTransit": true,
+        "accountCreation": false,
+        "deletionUrl": "https://barolab-daily-apps.pages.dev/greeting/privacy#data-deletion"
+      },
+      "government": false,
+      "financial": false,
+      "health": false,
+      "category": "Lifestyle",
+      "email": "baro76650@gmail.com",
+      "website": "https://barolab-daily-apps.pages.dev/greeting/",
+      "storeListing": {
+        "textDraftSaved": true,
+        "imagesMissing": false,
+        "saved": true,
+        "iconCount": 1,
+        "featureCount": 1,
+        "phoneScreenshotCount": 4,
+        "aiLabels": [
+          "icon-512.png",
+          "feature-1024x500.png",
+          "v2-greeting-03-photo-home.png"
+        ]
+      }
+    },
+    "advertisingId": {
+      "declaredUses": false,
+      "saved": true,
+      "evidence": "target>=33 and final manifest has no com.google.android.gms.permission.AD_ID; official AdvertisingIdClient.Info returns zero UUID if missing and explicitly documents tools:node=remove",
+      "source": "https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info",
+      "distinctFromOtherIds": true
+    },
+    "alpha": {
+      "trackId": "4699442447711468691",
+      "releaseSubmitted": true,
+      "countries": [
+        "KR"
+      ],
+      "testerList": "BaroLab 생활 앱 내부 테스트",
+      "testersCount": 13,
+      "testerListSelected": true,
+      "optInUrl": "https://play.google.com/apps/testing/com.barolab.morningcard",
+      "optInStatus": "console_copy_button_enabled_first_review_pending_availability_not_verified",
+      "reviewStatus": "changes_in_review_automatic_checks_running"
+    },
+    "internal": {
+      "trackId": "4701400802151181455",
+      "newReleaseDraftId": "3",
+      "latestUploadedVersionCode": 3,
+      "optInUrl": "https://play.google.com/apps/internaltest/4701400802151181455",
+      "status": "active_provided_to_internal_testers",
+      "publishedAt": "2026-10-19T02:45:00+09:00",
+      "publishedAtPrecision": "minute",
+      "testersCount": 13,
+      "testerListSelected": true
+    },
+    "screenshots": [
+      "greeting-data-safety-preview.jpg",
+      "greeting-setup-9of11.jpg",
+      "greeting-ad-id-declaration.jpg",
+      "greeting-setup-complete.jpg",
+      "greeting-ai-assets.jpg",
+      "greeting-v3-internal-release.jpg",
+      "greeting-alpha-testers.jpg",
+      "greeting-alpha-review-submitted.jpg"
+    ]
+  },
+  "shopping": {
+    "app": "shopping",
+    "appId": "4972748430542309887",
+    "packageName": "com.barolab.voicebasket",
+    "versionCode": 3,
+    "versionName": "0.3.0",
+    "checkedAt": "2026-10-19T02:50:41.9258910+09:00",
+    "internal": {
+      "trackId": "4701721871486482124",
+      "releaseId": "3",
+      "status": "available_to_internal_testers",
+      "publishedAt": "2026-10-19T02:47:00+09:00",
+      "optInUrl": "https://play.google.com/apps/internaltest/4701721871486482124",
+      "linkEnabled": true
+    },
+    "alpha": {
+      "trackId": "4699937692277090821",
+      "releaseId": "1",
+      "bundlePromotedFromInternal": true,
+      "versionCode": 3,
+      "country": "KR",
+      "countrySaved": true,
+      "testerList": "BaroLab daily apps internal test",
+      "testerCount": 13,
+      "testerListChecked": true,
+      "optInUrl": "https://play.google.com/apps/testing/com.barolab.voicebasket",
+      "optInLinkEnabled": false,
+      "reviewSubmitted": true,
+      "reviewStatus": "changes_in_review",
+      "preReviewChecks": "running automatically when observed",
+      "changedItemsSubmitted": 13,
+      "publishedVerified": false
+    },
+    "appSetup": {
+      "requiredStoreAssets": "icon512 feature1024x500 phoneScreenshots4 verified and saved",
+      "privacy": "https://barolab-daily-apps.pages.dev/shopping/privacy",
+      "GAIDDeclaration": "no, release manifest removes com.google.android.gms.permission.AD_ID",
+      "aiAssetLabels": [
+        "icon-512.png",
+        "feature-1024x500.png"
+      ],
+      "screenshotsAiLabeled": false
+    },
+    "dataSafety": {
+      "sdkCollectedAndSharedTypes": [
+        "approximate location",
+        "diagnostics",
+        "app interactions",
+        "device or other IDs"
+      ],
+      "sdkPurposes": [
+        "analytics",
+        "advertising or marketing",
+        "fraud security compliance"
+      ],
+      "audio": "optional collected and shared for app functionality; provider-dependent processing",
+      "allTransitEncryptedDeclared": false,
+      "speechProviderRetention": "not independently verified",
+      "declaredNonEphemeral": true,
+      "previewPurposesVerified": true
+    },
+    "warnings": [
+      "Console nonblocking missing deobfuscation file warning"
+    ],
+    "evidenceRoot": "C:\\Users\\baro7\\.barolab\\scratch\\release-20261019",
+    "evidence": [
+      "shopping-internal-v3.jpg",
+      "shopping-alpha-testers.txt",
+      "shopping-alpha-testers.jpg",
+      "shopping-review-submitted.txt",
+      "shopping-review-submitted.jpg",
+      "shopping-internal-testers.txt",
+      "shopping-internal-testers.jpg"
+    ]
+  }
+}

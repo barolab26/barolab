@@ -16,19 +16,54 @@
 
   // Fallback catalog: the NAS image may predate versionCode/versionName/joinUrl fields in /api/projects.
   const APP_CATALOG = {
-    bible_app: {packageName: 'com.barolab.harubible', versionCode: 4, versionName: '0.4.0-internal-preview',
+    bible_app: {packageName: 'com.barolab.harubible', versionCode: 5, versionName: '0.5.0', internalAvailableVersionCode: 5, verifiedDeviceVersionCode: 4, closedReviewStatus: '검토 중',
       internalJoinUrl: 'https://play.google.com/apps/internaltest/4700464139727332365',
       closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.harubible'},
-    greeting: {packageName: 'com.barolab.morningcard', versionCode: 2, versionName: '0.2.0-internal-preview',
+    greeting: {packageName: 'com.barolab.morningcard', versionCode: 3, versionName: '0.3.0', internalAvailableVersionCode: 3, verifiedDeviceVersionCode: 2, closedReviewStatus: '검토 중',
       internalJoinUrl: 'https://play.google.com/apps/internaltest/4701400802151181455',
       closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.morningcard'},
-    magnifier: {packageName: 'com.barolab.biglens', versionCode: 2, versionName: '0.2.0-internal-preview',
+    magnifier: {packageName: 'com.barolab.biglens', versionCode: 3, versionName: '0.3.0', internalAvailableVersionCode: 3, verifiedDeviceVersionCode: 2, closedReviewStatus: '검토 중',
       internalJoinUrl: 'https://play.google.com/apps/internaltest/4701703053640983596',
       closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.biglens'},
-    shopping: {packageName: 'com.barolab.voicebasket', versionCode: 2, versionName: '0.2.0-internal-preview',
+    shopping: {packageName: 'com.barolab.voicebasket', versionCode: 3, versionName: '0.3.0', internalAvailableVersionCode: 3, verifiedDeviceVersionCode: 2, closedReviewStatus: '검토 중',
       internalJoinUrl: 'https://play.google.com/apps/internaltest/4701721871486482124',
       closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.voicebasket'}
   };
+  // Verified release ledger snapshot; used only when the API lacks release truth fields.
+  const RELEASE_LEDGER_CHECKED_AT = '2026-10-19T02:50:00+09:00';
+  const CEO_DEVICE_VERIFIED_AT = '2026-10-19T02:08:41.441688+09:00';
+  function withReleaseLedgerFallback(data) {
+    if (!Array.isArray(data?.projects)) return data;
+    return {...data, projects: data.projects.map(p => {
+      const cat = APP_CATALOG[p.id];
+      if (!cat || p.latestBuildVersionCode !== undefined) return p;
+      const historicDevice = p.deviceVerified === undefined ? true : p.deviceVerified;
+      const version = cat.versionCode;
+      const currentTrackLabel = `내부 v${version} 제공 · Alpha v${version} 검토 제출`;
+      return {...p,
+        versionCode: p.versionCode || version,
+        versionName: p.versionName || cat.versionName,
+        deviceVerified: historicDevice,
+        deviceVerifiedAt: p.deviceVerifiedAt || CEO_DEVICE_VERIFIED_AT,
+        deviceVerifiedVersionCode: p.deviceVerifiedVersionCode || cat.verifiedDeviceVersionCode,
+        latestBuildPhysicalDeviceVerified: p.latestBuildPhysicalDeviceVerified === true,
+        internalAvailableVersionCode: cat.internalAvailableVersionCode,
+        releaseLedgerFallbackAt: RELEASE_LEDGER_CHECKED_AT,
+        closedReviewStatus: '검토 중',
+        testSchedule: {...(p.testSchedule || {}),
+          currentTrackLabel,
+          closedTrackStatusLabel: `Alpha v${version} 검토 제출 · 대한민국 · 등록명단 13명 · 실제 참여 수 미확인`,
+          registeredTestersCount: 13, internalTestersCount: 13,
+          closedReviewSubmitted: true, closedReviewApproved: false,
+          closedTestOptInsVerified: false, countdownStarted: false,
+          internalReleaseDate: '2026-10-19'},
+        nextAction: 'Google 검토 후 Alpha 참여 가능 여부 확인 · 최소 12명의 연속 14일 참여 요건 확인',
+        milestones: (p.milestones || []).map(m => m.id === 'device_test' && p.deviceVerified === undefined
+          ? {...m, status: 'verified', verifiedAt: CEO_DEVICE_VERIFIED_AT, verifiedVersionCode: cat.verifiedDeviceVersionCode,
+            evidence: 'Samsung Galaxy physical device verified by CEO (2026-10-19)'} : m)
+      };
+    })};
+  }
   function appMeta(p) {
     const cat = APP_CATALOG[p?.id] || {};
     return {
@@ -36,7 +71,10 @@
       versionCode: p?.versionCode || cat.versionCode || '',
       versionName: p?.versionName || p?.releaseName || cat.versionName || '',
       internalJoinUrl: p?.internalJoinUrl || cat.internalJoinUrl || 'https://barolab-daily-apps.pages.dev/testers/',
-      closedJoinUrl: p?.closedJoinUrl || cat.closedJoinUrl || ''
+      closedJoinUrl: p?.closedJoinUrl || cat.closedJoinUrl || '',
+      internalAvailableVersionCode: p?.internalAvailableVersionCode || cat.internalAvailableVersionCode || '',
+      verifiedDeviceVersionCode: p?.deviceVerifiedVersionCode || p?.verifiedVersionCode || cat.verifiedDeviceVersionCode || '',
+      closedReviewStatus: p?.closedReviewStatus || cat.closedReviewStatus || '상태 미확인'
     };
   }
 
@@ -95,7 +133,7 @@
     if (relVal) {
       relVal.innerHTML = firstSched.countdownStarted
         ? `D+${firstSched.elapsedDays}일째 <small style="font-size:13px; color:#2563eb;">(14일 요건 D-${firstSched.remainingDays}일)</small>`
-        : `0 / 12명 <small style="font-size:13px; color:#d97706;">(⚠️ 14일 카운트 미시작)</small>`;
+        : `${firstSched.closedTestOptInsVerified === false ? '참여 수 미확인' : `${firstSched.closedTestOptIns || 0} / 12명`} <small style="font-size:13px; color:#d97706;">(14일 요건 미완료)</small>`;
     }
     set('apps-kpi-release-badge', curTrack);
     set('apps-kpi-release-desc', closedStatus);
@@ -179,6 +217,7 @@
     // [Zone C] Real 14-Day Countdown Tracker
     const regCount = tc.emailCount || firstSched.registeredTestersCount || 1;
     const optIns = Number(firstSched.closedTestOptIns || tc.closedTestOptIns || 0);
+    const optInsLabel = firstSched.closedTestOptInsVerified === false ? '미확인' : String(optIns);
     const reqTesters = Number(firstSched.requiredClosedTesters || 12);
     const reqDays = Number(firstSched.requiredDays || 14);
     const countdownStarted = Boolean(firstSched.countdownStarted);
@@ -190,9 +229,9 @@
       set('zc-closed-status', `🟢 비공개 테스트 가동 중 · Opt-in ${optIns} / ${reqTesters}명 (D+${firstSched.elapsedDays} / ${reqDays}일)`);
       set('zc-closed-sub', `14일 요건 충족 예정일: ${firstSched.targetProductionDate} (D-${firstSched.remainingDays}일 남음)`);
     } else {
-      const trackTxt = (firstSched.closedTrackOpened || tc.closedTrackPromoted) ? '비공개 트랙 개설 완료' : '비공개 트랙 승격 대기';
-      set('zc-closed-status', `${trackTxt} · 참여 테스터(Opt-in) ${optIns} / ${reqTesters}명 (D+0 / ${reqDays}일)`);
-      set('zc-closed-sub', `12명 이상 Opt-in 완료 시점(closedTestStartAt)부터 D+1 ~ D+14 실측 카운트다운이 시작됩니다.`);
+      const trackTxt = firstSched.closedReviewSubmitted && !firstSched.closedReviewApproved ? 'Alpha 검토 중' : ((firstSched.closedTrackOpened || tc.closedTrackPromoted) ? '비공개 트랙 개설 완료' : '비공개 트랙 승격 대기');
+      set('zc-closed-status', `${trackTxt} · 참여 테스터(Opt-in) ${optInsLabel} / ${reqTesters}명 (D+0 / ${reqDays}일)`);
+      set('zc-closed-sub', `등록명단 수와 실제 참여 수는 다릅니다. 최소 12명이 최근 14일 동안 연속 참여한 증거를 확인해야 합니다.`);
     }
 
     const progBar = document.getElementById('zc-progress-bar');
@@ -213,14 +252,16 @@
       cardsBox.replaceChildren();
       projects.forEach((p, idx) => {
         const isVer = Boolean(p.deviceVerified);
+        const meta = appMeta(p);
+        const latestDeviceVerified = p.latestBuildPhysicalDeviceVerified === true;
+        const verifiedScope = latestDeviceVerified ? `삼성 확인 v${meta.versionCode}` : (isVer ? `삼성 확인 v${meta.verifiedDeviceVersionCode} · 새 v${meta.versionCode} 실기기 미확인` : `v${meta.versionCode} 실기기 확인 대기`);
         const card = node('div', '', 'direct-app-card' + (isVer ? ' verified' : ''));
         const top = node('div', '', 'direct-app-top');
         top.innerHTML = `
           <strong>${idx + 1}. ${p.name}</strong>
-          <span class="pillar-badge ${isVer ? 'badge-green' : 'badge-orange'}">${isVer ? '실기기 검증 완료' : '실기기 1회 확인 대기'}</span>
+          <span class="pillar-badge ${isVer ? 'badge-green' : 'badge-orange'}">${verifiedScope}</span>
         `;
-        const meta = appMeta(p);
-        const metaLine = node('div', `${meta.packageName} · v${meta.versionCode} (${meta.versionName})`, 'direct-app-meta');
+        const metaLine = node('div', `${meta.packageName} · 빌드 v${meta.versionCode} (${meta.versionName}) · 내부 제공 v${meta.internalAvailableVersionCode} · 실기기 확인 v${meta.verifiedDeviceVersionCode}`, 'direct-app-meta');
 
         const linkRow = node('div', '', 'direct-link-row');
         const btnInt = node('a', '📲 ① 테스트 참여하기 (내부 테스트) ↗', 'direct-install-btn internal');
@@ -228,7 +269,7 @@
         btnInt.target = '_blank';
         btnInt.rel = 'noopener noreferrer';
 
-        const btnClosed = node('a', '🔒 비공개 테스트 참여 (트랙 개설 후) ↗', 'direct-install-btn closed');
+        const btnClosed = node('a', `🔒 Alpha 참여 링크 (${meta.closedReviewStatus}) ↗`, 'direct-install-btn closed');
         btnClosed.href = meta.closedJoinUrl || `https://play.google.com/apps/testing/${meta.packageName}`;
         btnClosed.target = '_blank';
         btnClosed.rel = 'noopener noreferrer';
@@ -239,7 +280,7 @@
         const checkUl = node('ul', '', 'direct-check-list');
         const items = Array.isArray(p.deviceCheckItems) && p.deviceCheckItems.length
           ? p.deviceCheckItems
-          : ['실휴대폰 앱 실행 및 주요 화면 동작 확인', '하단 AdMob 테스트 배너 표시 확인'];
+          : ['실휴대폰 앱 실행 및 주요 화면 동작 확인', '신규 빌드의 하단 배너와 조작 영역 간격 확인'];
         for (const chkText of items) {
           const li = node('li');
           const lbl = node('label');
@@ -253,7 +294,7 @@
 
         const verBtn = node(
           'button',
-          isVer ? `✅ 삼성 실기기 검증 완료 (${formatKST(p.deviceVerifiedAt)})` : '✅ 삼성 실기기 정상 동작 확인 완료',
+          isVer ? `✅ ${verifiedScope} (${formatKST(p.deviceVerifiedAt)})` : `✅ v${meta.versionCode} 삼성 실기기 정상 동작 확인 기록`,
           'direct-verify-btn' + (isVer ? ' is-verified' : '')
         );
         verBtn.type = 'button';
@@ -285,6 +326,7 @@
   }
 
   function render(data) {
+    data = withReleaseLedgerFallback(data);
     latestData = data;
     list.replaceChildren();
     if (!['collected','partial'].includes(data.status) || !Array.isArray(data.projects) || !data.projects.length) {
@@ -298,7 +340,8 @@
     const sched = data.projects[0]?.testSchedule || {};
     const curTrackTop = sched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
     const closedTop = sched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
-    state.textContent = `현재 트랙: ${curTrackTop} | 비공개 테스트 현황: ${closedTop}`;
+    const fallbackAt = data.projects.find(p => p.releaseLedgerFallbackAt)?.releaseLedgerFallbackAt;
+    state.textContent = `현재 트랙: ${curTrackTop} | 비공개 테스트 현황: ${closedTop}${fallbackAt ? ` | 배포 원장 기준 ${formatKST(fallbackAt)} (API에 최신 필드 없음)` : ''}`;
 
     const visibleProjects = currentFilter === 'all'
       ? data.projects

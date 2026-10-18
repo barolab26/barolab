@@ -19,16 +19,18 @@ import androidx.camera.core.*;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import com.barolab.daily.common.AdConsentBanner;
 import com.barolab.daily.common.DailyUi;
 import com.barolab.daily.common.ShareFiles;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Locale;
 import java.util.concurrent.*;
 
-/** The live camera path contains no ad view, SDK call, upload, or image analysis. */
+/** Camera frames stay on device; the consent-gated banner is separate from camera controls. */
 public final class MainActivity extends ComponentActivity {
     private static final int NAVY = Color.rgb(16,28,48), PANEL = Color.rgb(28,43,66), AMBER = Color.rgb(255,203,96), WHITE = Color.rgb(244,247,251);
     private static final int CAMERA_REQUEST = 40, SAVE_REQUEST = 41;
+    private AdConsentBanner ads;
     private PreviewView preview;
     private FrozenImageView still;
     private LinearLayout permissionPanel, presets;
@@ -85,6 +87,8 @@ public final class MainActivity extends ComponentActivity {
         still.setChanged(() -> { if(frozenMode) { zoomLabel.setText(String.format(Locale.KOREAN,"정지 사진 %.1f배 · 끌어서 이동",still.photoZoom()));if(!dragging)zoom.setProgress(Math.round((still.photoZoom()-1)*200)); } });
         if(old instanceof Retained)still.restore(((Retained)old).position);
         GestureDetector taps=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDown(MotionEvent e){return true;}@Override public boolean onSingleTapUp(MotionEvent e){preview.performClick();requestFocusAt(e.getX(),e.getY());return true;}});preview.setOnTouchListener((v,e)->taps.onTouchEvent(e));
+        LinearLayout bannerHost = column(); bannerHost.setPadding(0, dp(10), 0, dp(4)); root.addView(bannerHost);
+        ads = new AdConsentBanner(this, bannerHost, BuildConfig.AD_UNIT_ID); ads.start();
         setContentView(root); preview.getPreviewStreamState().observe(this, value -> { streamReady = value == PreviewView.StreamState.STREAMING; updateControls(); });
         if (frozenMode) showFrozen(); else permissionExplanation();
     }
@@ -210,9 +214,9 @@ public final class MainActivity extends ComponentActivity {
         } catch (OutOfMemoryError e) { toast("저장할 메모리가 부족해요. 다른 앱을 닫고 다시 시도해 주세요."); }
     }
     @Override public void onRequestPermissionsResult(int request,String[] permissions,int[] results) { super.onRequestPermissionsResult(request,permissions,results); if (request==CAMERA_REQUEST) { if (permitted()) startCamera(); else { permissionExplanation(); status.setText("카메라 권한이 없어 확대 화면을 열지 않았습니다. 다시 허용하거나 기기 권한 설정을 확인해 주세요."); } } }
-    @Override protected void onResume() { super.onResume(); active=true; if (frozenMode) showFrozen(); else if (permitted()) startCamera(); else permissionExplanation(); }
-    @Override protected void onPause() { active=false; closeCamera(); super.onPause(); }
-    @Override protected void onDestroy() { closeCamera(); files.shutdown(); super.onDestroy(); }
+    @Override protected void onResume() { super.onResume(); if (ads != null) ads.resume(); active=true; if (frozenMode) showFrozen(); else if (permitted()) startCamera(); else permissionExplanation(); }
+    @Override protected void onPause() { if (ads != null) ads.pause(); active=false; closeCamera(); super.onPause(); }
+    @Override protected void onDestroy() { if (ads != null) ads.destroy(); closeCamera(); files.shutdown(); super.onDestroy(); }
     @Override protected void onSaveInstanceState(Bundle out) { out.putFloat("zoom",chosenZoom); super.onSaveInstanceState(out); }
     @Override public Object onRetainCustomNonConfigurationInstance() { return new Retained(frozen,filterMode,savePending,still.position()); }
     private void toast(String message) { Toast.makeText(this,message,Toast.LENGTH_LONG).show(); }

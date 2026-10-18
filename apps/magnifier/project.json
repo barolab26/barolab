@@ -10,14 +10,14 @@
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/magnifier/",
-  "updatedAt": "2026-10-19T01:27:09+09:00",
+  "updatedAt": "2026-10-18T17:51:45.471373+00:00",
   "measurement": {
     "admob": {
       "status": "collected",
       "revenue": 0.0,
       "currency": "USD",
       "period": "2026-10-19 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
-      "checkedAt": "2026-10-19T01:27:09+09:00",
+      "checkedAt": "2026-10-19T02:47:22+09:00",
       "mode": "TEST_ADS_INTERNAL_TRACK",
       "impressions": 0
     },
@@ -26,7 +26,7 @@
       "activeUsers": 1,
       "currency": "USD",
       "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
-      "checkedAt": "2026-10-19T01:27:09+09:00",
+      "checkedAt": "2026-10-19T02:47:22+09:00",
       "mode": "",
       "impressions": 0
     }
@@ -43,10 +43,11 @@
     {
       "id": "device_test",
       "label": "기기 검증",
-      "status": "in_progress",
-      "scope": "API36 에뮬레이터: 가상 카메라 정지사진 확대·이동·초기화·흑백 반전·전체사진 저장·큰 글씨 화면 검증. 삼성 실제 카메라·초점·조명 및 TalkBack 전체 검증 대기.",
-      "verifiedAt": null,
-      "evidence": "apps/qa/v2-build-verification.json"
+      "status": "verified",
+      "scope": "대표님이 삼성 갤럭시 실휴대폰에서 v2 설치 및 핵심 기능 동작을 2026-10-19 확인했습니다. 신규 v3 빌드의 실기기 검증은 별도입니다.",
+      "verifiedAt": "2026-10-19T02:08:41.441688+09:00",
+      "evidence": "Samsung Galaxy physical device verified by CEO (2026-10-19)",
+      "verifiedVersionCode": 2
     },
     {
       "id": "admob_app",
@@ -116,9 +117,9 @@
       "id": "build",
       "label": "서명 빌드·정적 검증",
       "status": "verified",
-      "scope": "v2 / 0.2.0-internal-preview 서명 AAB·테스트 광고. debug 단위 9건 통과, lint 오류 0·경고 2건. 아티팩트 해시 대조 완료.",
-      "verifiedAt": "2026-10-14T10:17:11.433164+00:00",
-      "evidence": "apps/qa/v2-build-verification.json"
+      "scope": "서명된 release v3 / 0.3.0; AAB manifest·DEX의 SJ 실광고 ID 확인; release 단위 9건 통과; lint 오류 0·경고 2; SHA-256·영속 서명 인증서 대조 완료. Play 배포 및 신규 버전 실기기 검증은 별도입니다.",
+      "verifiedAt": "2026-10-19T02:17:23.363507+09:00",
+      "evidence": "apps/qa/2026-10-19-production-release-verification.json"
     }
   ],
   "googlePlay": {
@@ -127,22 +128,27 @@
     "internalReleaseVerified": true,
     "productionReleased": false,
     "internalTrack": "internal",
-    "releaseStatus": "internal_preview_available",
-    "releaseName": "0.2.0-internal-preview",
-    "versionCode": 2,
-    "internalListedTesters": 13
+    "releaseStatus": "internal_available_alpha_review_submitted",
+    "releaseName": "0.3.0 정식 광고 및 첫 화면 사용성 개선",
+    "versionCode": 3,
+    "internalListedTesters": 13,
+    "versionName": "0.3.0",
+    "closedReviewSubmitted": true,
+    "internalJoinUrl": "https://play.google.com/apps/internaltest/4701703053640983596",
+    "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
+    "playEvidence": "apps/qa/2026-10-19-play-console-status.json"
   },
-  "progressPct": 57,
+  "progressPct": 60,
   "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-  "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기",
+  "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실기기 정상 동작 검증 완료 ✅",
   "nextAction": "[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요.",
   "testSchedule": {
     "internalTrack": "internal",
-    "internalTestersCount": 1,
+    "internalTestersCount": 13,
     "registeredTestersCount": 13,
-    "internalReleaseAt": "2026-10-14T19:15:00+09:00",
-    "internalReleaseDate": "2026-10-14",
-    "closedTrackOpened": false,
+    "internalReleaseAt": "2026-10-19T02:45:00+09:00",
+    "internalReleaseDate": "2026-10-19",
+    "closedTrackOpened": true,
     "closedTestOptIns": 0,
     "requiredClosedTesters": 12,
     "countdownStarted": false,
@@ -152,12 +158,15 @@
     "requiredDays": 14,
     "targetProductionDate": "미정 (12명 Opt-in 완료 후 +14일)",
     "dayProgressPct": 0,
-    "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
-    "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
-    "dDayBadge": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
+    "currentTrackLabel": "내부 v3 제공 · Alpha v3 검토 중",
+    "closedTrackStatusLabel": "Alpha v3 검토 제출 · 대한민국 · 등록명단 13명 · 실제 참여 수 미확인",
+    "dDayBadge": "내부 v3 제공 · Alpha v3 검토 중",
     "testerGroupEmail": "barolab-testers@googlegroups.com",
     "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
-    "readyForProductionTrack": false
+    "readyForProductionTrack": false,
+    "closedReviewSubmitted": true,
+    "closedReviewApproved": false,
+    "closedTestOptInsVerified": false
   },
   "admobTracker": {
     "account": "SJ (pub-7642010403138987)",
@@ -178,16 +187,16 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-10-19T01:27:07+09:00"
+      "checkedAt": "2026-10-19T02:47:22+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
     "impressionsToday": 0,
     "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
     "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
-    "deviceVerified": false,
+    "deviceVerified": true,
     "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-    "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기",
+    "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실기기 정상 동작 검증 완료 ✅",
     "nextAction": "[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요.",
     "ceoActionRequired": true,
     "productionChecklist": [
@@ -202,8 +211,8 @@
         "step": 2,
         "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
         "owner": "대표님 (실기기 1회 체크) · @patch (release.properties 자동주입)",
-        "status": "ready",
-        "detail": "삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기 · 실광고 배너(ca-app-pub-7642010403138987/4744854277) 코드 매핑 완료"
+        "status": "verified",
+        "detail": "삼성 실기기 정상 동작 검증 완료 ✅ · 실광고 배너(ca-app-pub-7642010403138987/4744854277) 코드 매핑 완료"
       },
       {
         "step": 3,
@@ -213,5 +222,90 @@
         "detail": "비공개 트랙 12명 Opt-in 달성 시점부터 14일 연속 유지 후 프로덕션 심사 제출"
       }
     ]
+  },
+  "versionCode": 3,
+  "versionName": "0.3.0",
+  "testAdsOnly": false,
+  "productionAdsEnabled": true,
+  "releaseBuild": {
+    "versionCode": 3,
+    "versionName": "0.3.0",
+    "aab": "Y:\\10_Project\\BaroLab\\apps\\magnifier\\build\\outputs\\bundle\\release\\magnifier-release.aab",
+    "aabSha256": "d29017bf34add2a066ed5e42a9d2330ca284a0837b0d06619108fd69e31e2060",
+    "aabBytes": 8330004,
+    "packageName": "com.barolab.biglens",
+    "admobAppId": "ca-app-pub-7642010403138987~5789333475",
+    "bannerAdUnitId": "ca-app-pub-7642010403138987/4744854277",
+    "manifestVerified": true,
+    "dexBannerVerified": true,
+    "dexAdUnitIds": [
+      "ca-app-pub-7642010403138987/4744854277"
+    ],
+    "testAdsOnly": false,
+    "productionAdsEnabled": true,
+    "bundletoolValidated": true,
+    "signatureVerified": true,
+    "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+    "persistentSigningIdentityMatches": true,
+    "previousSigningCertificateMatches": null,
+    "unitTests": {
+      "debug": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "release": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "lint": {
+      "debug": [
+        {
+          "id": "ClickableViewAccessibility",
+          "severity": "Warning"
+        },
+        {
+          "id": "ClickableViewAccessibility",
+          "severity": "Warning"
+        }
+      ],
+      "release": [
+        {
+          "id": "ClickableViewAccessibility",
+          "severity": "Warning"
+        },
+        {
+          "id": "ClickableViewAccessibility",
+          "severity": "Warning"
+        }
+      ]
+    },
+    "physicalDeviceVerifiedForThisBuild": false,
+    "playUploadVerified": true,
+    "evidence": "apps/qa/2026-10-19-production-release-verification.json",
+    "builtAt": "2026-10-19T02:17:23.363507+09:00",
+    "playUploadEvidence": "apps/qa/2026-10-19-play-console-status.json",
+    "playUploadVerifiedAt": "2026-10-18T17:54:49.673448+00:00"
+  },
+  "internalJoinUrl": "https://play.google.com/apps/internaltest/4701703053640983596",
+  "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
+  "internalAvailableVersionCode": 3,
+  "internalAvailableVerified": true,
+  "closedReviewStatus": "검토 중",
+  "closedJoinAvailabilityVerified": false,
+  "previousGooglePlay": {
+    "appId": "4972819523776643880",
+    "draftCreated": true,
+    "internalReleaseVerified": true,
+    "productionReleased": false,
+    "internalTrack": "internal",
+    "releaseStatus": "internal_preview_available",
+    "releaseName": "0.2.0-internal-preview",
+    "versionCode": 2,
+    "internalListedTesters": 13
   }
 }

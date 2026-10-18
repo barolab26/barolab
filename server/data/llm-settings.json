@@ -1,5 +1,5 @@
 {
-  "active": "agy",
+  "active": "codex",
   "providers": {
     "gemini": {
       "model": ""
@@ -22,10 +22,10 @@
   },
   "agentBrains": {
     "jarvis": {
-      "provider": "agy",
-      "model": "gemini-4-argon-high",
-      "badge": "Argon High",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "badge": "gpt-6-luna",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "publi": {
       "provider": "codex",
@@ -40,22 +40,22 @@
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "radar": {
-      "provider": "agy",
-      "model": "gemini-4-argon-medium",
-      "badge": "Argon Med",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "badge": "gpt-6-luna",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "doctor": {
-      "provider": "agy",
-      "model": "gemini-3.8-flash-medium",
-      "badge": "3.8 Flash",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "badge": "gpt-6-luna",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "trace": {
-      "provider": "agy",
-      "model": "gemini-3.8-flash-medium",
-      "badge": "3.8 Flash",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "badge": "gpt-6-luna",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "cf_pipeline": {
       "provider": "codex",
@@ -76,10 +76,10 @@
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "threads_pipeline": {
-      "provider": "agy",
-      "model": "gemini-4-argon-medium",
-      "badge": "Argon Med",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "badge": "gpt-6-luna",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     }
   }
 }

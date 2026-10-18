@@ -295,6 +295,7 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
     internal_track = "internal"
     internal_testers_count = 1
     closed_track_opened = False
+    closed_review_submitted = False
     closed_test_opt_ins = 0
     required_closed_testers = 12
     required_closed_days = 14
@@ -311,7 +312,8 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
                 required_closed_days = int(gp.get("requiredClosedTestDays") or 14)
                 closed_test_opt_ins = int(gp.get("optedInClosedTestersObserved") or 0)
                 closed_info = gp.get("closedTesting") or {}
-                closed_track_opened = bool(closed_info.get("trackOpened", False))
+                closed_track_opened = bool(closed_info.get("trackOpened") or closed_info.get("trackActive"))
+                closed_review_submitted = closed_info.get("reviewSubmitted") is True or closed_info.get("submitted") is True
                 closed_test_started_at = closed_info.get("startedAt")
                 if gp.get("internalTrack"):
                     internal_track = str(gp.get("internalTrack"))
@@ -321,8 +323,10 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
                 dep = json.loads(dep_path.read_text(encoding="utf-8-sig"))
                 app_dep = (dep.get("apps") or {}).get(project_id) or {}
                 internal_track = str(app_dep.get("internalTrack") or "internal")
+                internal_testers_count = int(app_dep.get("internalTesterListCount") or 1)
                 closed_info = app_dep.get("closedTesting") or {}
-                closed_track_opened = bool(closed_info.get("trackOpened", False))
+                closed_track_opened = bool(closed_info.get("trackOpened") or closed_info.get("trackActive"))
+                closed_review_submitted = closed_info.get("reviewSubmitted") is True or closed_info.get("submitted") is True
                 closed_test_opt_ins = int(closed_info.get("optedInTesters") or 0)
                 closed_test_started_at = closed_info.get("startedAt")
     except Exception:
@@ -354,6 +358,7 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
         "internalTestersCount": internal_testers_count,
         "registeredTestersCount": int(testers_doc.get("emailCount") or 1),
         "closedTrackOpened": closed_track_opened,
+        "closedReviewSubmitted": closed_review_submitted,
         "closedTestOptIns": closed_test_opt_ins,
         "requiredClosedTesters": required_closed_testers,
         "requiredClosedDays": required_closed_days,
@@ -418,6 +423,7 @@ def compute_closed_test_schedule(
             "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
             "internalReleaseDate": internal_dt.date().isoformat(),
             "closedTrackOpened": closed_opened,
+            "closedReviewSubmitted": bool(truth.get("closedReviewSubmitted")),
             "closedTestOptIns": opt_ins,
             "requiredClosedTesters": req_testers,
             "countdownStarted": False,
@@ -454,6 +460,7 @@ def compute_closed_test_schedule(
         "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
         "internalReleaseDate": internal_dt.date().isoformat(),
         "closedTrackOpened": True,
+        "closedReviewSubmitted": bool(truth.get("closedReviewSubmitted")),
         "closedTestOptIns": opt_ins,
         "requiredClosedTesters": req_testers,
         "countdownStarted": True,
@@ -500,6 +507,9 @@ def build_admob_tracker(
     schedule_info: Dict[str, Any],
     device_verified: bool = False,
     force_Verify: bool = False,
+    device_verified_version=None,
+    latest_build_version=None,
+    latest_build_physical_verified: bool = False,
 ) -> Dict[str, Any]:
     meta = APP_MONETIZATION_CATALOG.get(project_id, {})
     ads_txt = verify_app_ads_txt(meta.get("appAdsTxtUrl", "https://barolab-daily-apps.pages.dev/app-ads.txt"), force=force_Verify)
@@ -508,11 +518,25 @@ def build_admob_tracker(
         "closedTrackStatusLabel",
         "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
     )
-    device_status_text = (
-        "삼성 실기기 정상 동작 검증 완료 ✅"
-        if device_verified
-        else f"{meta.get('ceoCheckItem', '실기기 최종 확인')} 대기"
-    )
+    device_status_text = f"{meta.get('ceoCheckItem', '실기기 최종 확인')} 대기"
+    if device_verified:
+        version_label = f"v{device_verified_version}" if device_verified_version else "검증 버전 미기록"
+        device_status_text = f"삼성 실기기 {version_label} 검증 완료"
+    if latest_build_version and not latest_build_physical_verified:
+        device_status_text += f" · 신규 v{latest_build_version} 실기기 미검증"
+    elif latest_build_version and latest_build_physical_verified:
+        device_status_text += f" · 최신 v{latest_build_version} 실기기 검증 완료"
+    current_device_verified = latest_build_physical_verified if latest_build_version else device_verified
+    required_testers = schedule_info.get("requiredClosedTesters", 12)
+    required_days = schedule_info.get("requiredDays", 14)
+    if schedule_info.get("countdownStarted"):
+        next_action = f"Alpha 실참여 {required_testers}명 이상을 {required_days}일 연속 유지하고 Play Console의 요건 충족 상태를 확인하세요."
+    elif schedule_info.get("closedReviewSubmitted"):
+        next_action = f"Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, {required_testers}명 이상 실참여와 {required_days}일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다."
+    elif schedule_info.get("closedTrackOpened"):
+        next_action = f"Alpha 출시·검토 상태와 등록 명단을 확인하고 참여 링크를 안내하세요. 실제 참여 {required_testers}명 이상과 {required_days}일 연속 유지가 필요합니다."
+    else:
+        next_action = f"테스터 명단과 Alpha 출시 설정을 확인하세요. 실제 참여 {required_testers}명 이상과 {required_days}일 연속 유지가 필요하며 명단 등록만으로 시작되지 않습니다."
 
     return {
         "account": "SJ (pub-7642010403138987)",
@@ -534,21 +558,22 @@ def build_admob_tracker(
         "currentTrackLabel": current_track_label,
         "closedTrackStatusLabel": closed_status_label,
         "deviceVerified": device_verified,
+        "deviceVerifiedVersionCode": device_verified_version,
+        "latestBuildVersionCode": latest_build_version,
+        "latestBuildPhysicalDeviceVerified": latest_build_physical_verified,
+        "deviceVerificationLabel": device_status_text,
         "owner": meta.get("owner", "@patch · @trace"),
         "blocker": (
             f"현재 트랙: {current_track_label} | "
             f"비공개 테스트 현황: {closed_status_label} | "
             f"실기기 확인: {device_status_text}"
         ),
-        "nextAction": (
-            f"[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 "
-            f"비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요."
-        ),
-        "ceoActionRequired": not (device_verified and schedule_info.get("countdownStarted")),
+        "nextAction": next_action,
+        "ceoActionRequired": not (current_device_verified and schedule_info.get("countdownStarted")),
         "productionChecklist": [
             {
                 "step": 1,
-                "label": "1단계: 14인 테스터 명단 등록 & 비공개 트랙(Closed Track) 12명 Opt-in",
+                "label": f"1단계: 테스터 명단 확인 · Alpha 실참여 {required_testers}명 이상",
                 "owner": "대표님 (QR 4터치 설치) · @patch (반자동 스크립트)",
                 "status": "verified" if schedule_info.get("countdownStarted") else "in_progress",
                 "detail": f"{closed_status_label}",
@@ -557,7 +582,7 @@ def build_admob_tracker(
                 "step": 2,
                 "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
                 "owner": "대표님 (실기기 1회 체크) · @patch (release.properties 자동주입)",
-                "status": "verified" if device_verified else "ready",
+                "status": "verified" if current_device_verified else "ready",
                 "detail": f"{device_status_text} · 실광고 배너({meta.get('admobBannerUnitId', '')}) 코드 매핑 완료",
             },
             {
@@ -586,6 +611,7 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
         steps = []
         device_verified = False
         device_verified_at = ""
+        device_verified_version = None
         for item in milestones[:20]:
             if not isinstance(item, dict):
                 raise ValueError("invalid milestone")
@@ -596,6 +622,9 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             if item.get("id") == "device_test" and status == "verified":
                 device_verified = True
                 device_verified_at = text(item.get("verifiedAt"))
+                version = item.get("verifiedVersionCode")
+                if type(version) is int and version > 0:
+                    device_verified_version = version
             steps.append(
                 {
                     key: text(item.get(key), 500 if key == "evidence" else 240)
@@ -605,6 +634,11 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             steps[-1]["status"] = status
 
         meta = APP_MONETIZATION_CATALOG.get(expected_id, {})
+        release_build = raw.get("releaseBuild") if isinstance(raw.get("releaseBuild"), dict) else {}
+        latest_build_version = release_build.get("versionCode")
+        if type(latest_build_version) is not int or latest_build_version <= 0:
+            latest_build_version = None
+        latest_build_physical_verified = bool(latest_build_version and release_build.get("physicalDeviceVerifiedForThisBuild") is True)
         track_truth = _load_play_track_truth(expected_id, ROOT)
         schedule_info = compute_closed_test_schedule(
             meta.get("internalReleaseAt", "2026-10-14T19:10:00+09:00"),
@@ -615,6 +649,9 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             schedule_info,
             device_verified=device_verified,
             force_Verify=force_verify,
+            device_verified_version=device_verified_version,
+            latest_build_version=latest_build_version,
+            latest_build_physical_verified=latest_build_physical_verified,
         )
 
         verified_cnt = sum(1 for s in steps if s["status"] == "verified")
@@ -660,8 +697,8 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             "name": text(raw.get("name")),
             "packageName": meta.get("packageName") or text(raw.get("packageName")),
             "playAppId": meta.get("playAppId", ""),
-            "versionName": meta.get("versionName", ""),
-            "versionCode": meta.get("versionCode", 1),
+            "versionName": text(release_build.get("versionName")) or text(raw.get("versionName")) or meta.get("versionName", ""),
+            "versionCode": latest_build_version or meta.get("versionCode", 1),
             "internalJoinUrl": meta.get("internalJoinUrl", ""),
             "closedJoinUrl": meta.get("closedJoinUrl", ""),
             "playStoreUrl": meta.get("playStoreUrl", ""),
@@ -670,6 +707,10 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             "deviceCheckItems": meta.get("deviceCheckItems", []),
             "deviceVerified": device_verified,
             "deviceVerifiedAt": device_verified_at,
+            "deviceVerifiedVersionCode": device_verified_version,
+            "latestBuildVersionCode": latest_build_version,
+            "latestBuildPhysicalDeviceVerified": latest_build_physical_verified,
+            "deviceVerificationLabel": admob_tracker["deviceVerificationLabel"],
             "description": text(raw.get("description"), 500),
             "stage": dynamic_stage,
             "updatedAt": now_iso,

@@ -234,11 +234,11 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
         response = parse_json(Path(output).read_text(encoding='utf-8'))
         if response_schema:
-            return response, model
+            return response, cli_model
         if not isinstance(response.get('json'), str):
             raise RuntimeError('Codex 구조화 응답 계약 불일치')
         try:
-            return parse_json(response['json']), model
+            return parse_json(response['json']), cli_model
         except RuntimeError:
             (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
             raise

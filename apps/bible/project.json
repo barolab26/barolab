@@ -3,28 +3,28 @@
   "name": "오늘의 성경말씀",
   "description": "하루 한 구절을 큰 글씨로 읽고 듣고 공유하는 Android 앱. 수록된 30개 말씀 찾기와 저장을 지원하며 수익·이용자 지표는 아직 미연동입니다.",
   "status": "preview",
-  "stage": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
+  "stage": "현재 트랙: 내부 테스트 (테스터 13명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
   "platforms": [
     "Android"
   ],
   "publicUrl": "https://haru-malsseum.pages.dev/",
-  "updatedAt": "2026-10-19T01:27:08+09:00",
+  "updatedAt": "2026-10-18T17:51:45.471373+00:00",
   "measurement": {
     "admob": {
       "status": "collected",
       "revenue": 0.0,
       "currency": "USD",
       "period": "2026-10-19 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
-      "checkedAt": "2026-10-19T01:27:08+09:00",
+      "checkedAt": "2026-10-19T02:47:22+09:00",
       "mode": "TEST_ADS_INTERNAL_TRACK",
       "impressions": 0
     },
     "analytics": {
       "status": "collected",
-      "activeUsers": 1,
+      "activeUsers": 13,
       "currency": "USD",
       "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
-      "checkedAt": "2026-10-19T01:27:08+09:00",
+      "checkedAt": "2026-10-19T02:47:22+09:00",
       "mode": "",
       "impressions": 0
     }
@@ -42,17 +42,18 @@
       "id": "build",
       "label": "Android 앱 빌드",
       "status": "verified",
-      "scope": "서명된 v4 / 0.4.0-internal-preview APK/AAB · debug 단위 12건 통과 · lint 오류0·경고3 · 테스트 광고 · 최종 해시 대조 완료",
-      "verifiedAt": "2026-10-14T10:17:11.433164+00:00",
-      "evidence": "apps/bible/qa/v4-build-verification.json"
+      "scope": "서명된 release v5 / 0.5.0; AAB manifest·DEX의 SJ 실광고 ID 확인; release 단위 12건 통과; lint 오류 0·경고 3; SHA-256·영속 서명 인증서 대조 완료. Play 배포 및 신규 버전 실기기 검증은 별도입니다.",
+      "verifiedAt": "2026-10-19T02:17:23.363507+09:00",
+      "evidence": "apps/qa/2026-10-19-production-release-verification.json"
     },
     {
       "id": "device_test",
       "label": "실기기 검증",
-      "status": "in_progress",
-      "scope": "API36 에뮬레이터에서 v3→v4 저장 유지·onStart/정지·구절/42크기/읽던자리 복원·큰 글씨/가로 확인. 삼성 실휴대폰 실제 스피커 재생과 엔진 미설치/설정 복귀 전체 회귀는 미검증.",
-      "verifiedAt": null,
-      "evidence": "apps/bible/qa/v4-build-verification.json"
+      "status": "verified",
+      "scope": "대표님이 삼성 갤럭시 실휴대폰에서 v4 설치 및 핵심 기능 동작을 2026-10-19 확인했습니다. 신규 v5 빌드의 실기기 검증은 별도입니다.",
+      "verifiedAt": "2026-10-19T02:08:41.441688+09:00",
+      "evidence": "Samsung Galaxy physical device verified by CEO (2026-10-19)",
+      "verifiedVersionCode": 4
     },
     {
       "id": "content_rights",
@@ -95,17 +96,17 @@
       "evidence": "apps/bible/qa/play-v3-store-listing.txt"
     }
   ],
-  "progressPct": 61,
+  "progressPct": 66,
   "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-  "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 갤럭시 실휴대폰에서 v4 성경말씀 실제 스피커 음성 듣기·정지 1회 최종 확인 대기",
+  "blocker": "현재 트랙: 내부 테스트 (테스터 13명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실기기 정상 동작 검증 완료 ✅",
   "nextAction": "[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요.",
   "testSchedule": {
     "internalTrack": "internal",
-    "internalTestersCount": 1,
+    "internalTestersCount": 13,
     "registeredTestersCount": 13,
     "internalReleaseAt": "2026-10-14T19:13:00+09:00",
     "internalReleaseDate": "2026-10-14",
-    "closedTrackOpened": false,
+    "closedTrackOpened": true,
     "closedTestOptIns": 0,
     "requiredClosedTesters": 12,
     "countdownStarted": false,
@@ -115,12 +116,15 @@
     "requiredDays": 14,
     "targetProductionDate": "미정 (12명 Opt-in 완료 후 +14일)",
     "dayProgressPct": 0,
-    "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
-    "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
-    "dDayBadge": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
+    "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 중",
+    "closedTrackStatusLabel": "Alpha v5 검토 제출 · 대한민국 · 등록명단 13명 · 실제 참여 수 미확인",
+    "dDayBadge": "내부 v5 제공 · Alpha v5 검토 중",
     "testerGroupEmail": "barolab-testers@googlegroups.com",
     "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
-    "readyForProductionTrack": false
+    "readyForProductionTrack": false,
+    "closedReviewSubmitted": true,
+    "closedReviewApproved": false,
+    "closedTestOptInsVerified": false
   },
   "admobTracker": {
     "account": "SJ (pub-7642010403138987)",
@@ -141,16 +145,16 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-10-19T01:27:07+09:00"
+      "checkedAt": "2026-10-19T02:47:22+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
     "impressionsToday": 0,
-    "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
+    "currentTrackLabel": "내부 테스트 (테스터 13명) — ⚠️ 14일 카운트다운 미시작",
     "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
-    "deviceVerified": false,
+    "deviceVerified": true,
     "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-    "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 갤럭시 실휴대폰에서 v4 성경말씀 실제 스피커 음성 듣기·정지 1회 최종 확인 대기",
+    "blocker": "현재 트랙: 내부 테스트 (테스터 13명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실기기 정상 동작 검증 완료 ✅",
     "nextAction": "[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요.",
     "ceoActionRequired": true,
     "productionChecklist": [
@@ -165,8 +169,8 @@
         "step": 2,
         "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
         "owner": "대표님 (실기기 1회 체크) · @patch (release.properties 자동주입)",
-        "status": "ready",
-        "detail": "삼성 갤럭시 실휴대폰에서 v4 성경말씀 실제 스피커 음성 듣기·정지 1회 최종 확인 대기 · 실광고 배너(ca-app-pub-7642010403138987/9298253515) 코드 매핑 완료"
+        "status": "verified",
+        "detail": "삼성 실기기 정상 동작 검증 완료 ✅ · 실광고 배너(ca-app-pub-7642010403138987/9298253515) 코드 매핑 완료"
       },
       {
         "step": 3,
@@ -178,6 +182,98 @@
     ]
   },
   "googlePlay": {
-    "internalListedTesters": 13
-  }
+    "internalListedTesters": 13,
+    "versionCode": 5,
+    "versionName": "0.5.0",
+    "releaseName": "0.5.0 정식 광고 및 첫 화면 사용성 개선",
+    "releaseStatus": "internal_available_alpha_review_submitted",
+    "internalReleaseVerified": true,
+    "closedReviewSubmitted": true,
+    "productionReleased": false,
+    "internalJoinUrl": "https://play.google.com/apps/internaltest/4700464139727332365",
+    "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.harubible",
+    "playEvidence": "apps/qa/2026-10-19-play-console-status.json"
+  },
+  "versionCode": 5,
+  "versionName": "0.5.0",
+  "testAdsOnly": false,
+  "productionAdsEnabled": true,
+  "releaseBuild": {
+    "versionCode": 5,
+    "versionName": "0.5.0",
+    "aab": "Y:\\10_Project\\BaroLab\\apps\\bible\\app\\build\\outputs\\bundle\\release\\app-release.aab",
+    "aabSha256": "840040fb48aac4d21424f7c33d2762e5f8f81b037287ac871daae351841ce84f",
+    "aabBytes": 5564554,
+    "packageName": "com.barolab.harubible",
+    "admobAppId": "ca-app-pub-7642010403138987~3426234878",
+    "bannerAdUnitId": "ca-app-pub-7642010403138987/9298253515",
+    "manifestVerified": true,
+    "dexBannerVerified": true,
+    "dexAdUnitIds": [
+      "ca-app-pub-7642010403138987/9298253515"
+    ],
+    "testAdsOnly": false,
+    "productionAdsEnabled": true,
+    "bundletoolValidated": true,
+    "signatureVerified": true,
+    "signingCertificateSha256": "D6:F8:3A:17:BD:7F:00:BD:F9:37:3A:C3:B5:FF:8E:14:21:16:97:27:0B:A9:BF:9E:4C:1C:E6:8A:23:E0:1F:3D",
+    "persistentSigningIdentityMatches": true,
+    "previousSigningCertificateMatches": null,
+    "unitTests": {
+      "debug": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "release": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "lint": {
+      "debug": [
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning"
+        },
+        {
+          "id": "SetTextI18n",
+          "severity": "Warning"
+        },
+        {
+          "id": "SetTextI18n",
+          "severity": "Warning"
+        }
+      ],
+      "release": [
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning"
+        },
+        {
+          "id": "SetTextI18n",
+          "severity": "Warning"
+        },
+        {
+          "id": "SetTextI18n",
+          "severity": "Warning"
+        }
+      ]
+    },
+    "physicalDeviceVerifiedForThisBuild": false,
+    "playUploadVerified": true,
+    "evidence": "apps/qa/2026-10-19-production-release-verification.json",
+    "builtAt": "2026-10-19T02:17:23.363507+09:00",
+    "playUploadEvidence": "apps/qa/2026-10-19-play-console-status.json",
+    "playUploadVerifiedAt": "2026-10-18T17:54:49.673448+00:00"
+  },
+  "internalJoinUrl": "https://play.google.com/apps/internaltest/4700464139727332365",
+  "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.harubible",
+  "internalAvailableVersionCode": 5,
+  "internalAvailableVerified": true,
+  "closedReviewStatus": "검토 중",
+  "closedJoinAvailabilityVerified": false
 }

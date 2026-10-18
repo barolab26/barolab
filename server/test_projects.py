@@ -3,8 +3,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from projects import PROJECT_REGISTRY, inventory
+from projects import PROJECT_REGISTRY, inventory, load_manifest, _load_play_track_truth, compute_closed_test_schedule, build_admob_tracker
 
 
 class ProjectInventoryTests(unittest.TestCase):
@@ -72,6 +73,54 @@ class ProjectInventoryTests(unittest.TestCase):
             result = inventory(self.root)
             self.assertIsNone(result['projects'][0]['publicUrl'])
             self.assertNotIn('DO_NOT_ECHO', json.dumps(result))
+
+    def test_historical_device_verification_does_not_verify_new_release(self):
+        path = self.write('greeting', milestones=[{
+            'id': 'device_test', 'status': 'verified',
+            'verifiedAt': '2026-10-19T02:08:41+09:00', 'evidence': 'CEO Samsung v2',
+            'verifiedVersionCode': 2,
+        }], releaseBuild={'versionCode': 3, 'versionName': '0.3.0', 'physicalDeviceVerifiedForThisBuild': False})
+        with patch('projects.verify_app_ads_txt', return_value={}), patch('projects._load_play_track_truth', return_value={}):
+            app = load_manifest(path, 'greeting')['projects'][0]
+        self.assertTrue(app['deviceVerified'])
+        self.assertEqual(app['deviceVerifiedVersionCode'], 2)
+        self.assertEqual(app['latestBuildVersionCode'], 3)
+        self.assertEqual((app['versionCode'], app['versionName']), (3, '0.3.0'))
+        self.assertFalse(app['latestBuildPhysicalDeviceVerified'])
+        self.assertIn('v2 검증 완료', app['blocker'])
+        self.assertIn('v3 실기기 미검증', app['blocker'])
+        self.assertEqual(app['deviceVerificationLabel'], app['admobTracker']['deviceVerificationLabel'])
+        self.assertEqual(app['admobTracker']['productionChecklist'][1]['status'], 'ready')
+
+    def test_missing_device_version_is_not_inferred_from_release(self):
+        path = self.write('bible_app', milestones=[{
+            'id': 'device_test', 'status': 'verified',
+            'verifiedAt': '2026-10-19T02:08:41+09:00', 'evidence': 'CEO report',
+        }], releaseBuild={'versionCode': 5, 'physicalDeviceVerifiedForThisBuild': False})
+        with patch('projects.verify_app_ads_txt', return_value={}), patch('projects._load_play_track_truth', return_value={}):
+            app = load_manifest(path, 'bible_app')['projects'][0]
+        self.assertIsNone(app['deviceVerifiedVersionCode'])
+        self.assertIn('검증 버전 미기록', app['deviceVerificationLabel'])
+        self.assertIn('v5 실기기 미검증', app['deviceVerificationLabel'])
+
+    def test_submitted_alpha_does_not_request_promotion_or_start_from_list_count(self):
+        path = self.root / 'apps' / 'deployment.json'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({'apps': {'greeting': {
+            'internalTesterListCount': 13,
+            'closedTesting': {'reviewSubmitted': True, 'trackActive': True},
+        }}}), encoding='utf-8')
+        with patch('projects.load_app_testers', return_value={'emailCount': 13}), patch('projects.verify_app_ads_txt', return_value={}):
+            truth = _load_play_track_truth('greeting', self.root)
+            schedule = compute_closed_test_schedule('2026-10-19T02:45:00+09:00', track_truth=truth)
+            tracker = build_admob_tracker('greeting', schedule)
+        self.assertEqual(truth['internalTestersCount'], 13)
+        self.assertTrue(schedule['closedReviewSubmitted'])
+        self.assertFalse(schedule['countdownStarted'])
+        self.assertIn('Google 검토 완료 후', tracker['nextAction'])
+        self.assertIn('등록 명단 수는 참여 인원이 아니며', tracker['nextAction'])
+        self.assertNotIn('승격을 실행', tracker['nextAction'])
+        self.assertNotIn('14개 구글 계정', tracker['nextAction'])
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@
       "packageName": "com.barolab.morningcard",
       "playAppId": "4973731498485355571",
       "internalTrack": "internal",
-      "releaseStatus": "internal_preview_available",
+      "releaseStatus": "internal_v3_available_alpha_review_submitted",
       "internalReleaseVerified": true,
       "productionReleased": false,
       "publicUrl": "https://barolab-daily-apps.pages.dev/greeting/",
@@ -29,41 +29,100 @@
         "playApp": "apps/qa/play-greeting-created.txt",
         "uploadedPreview": "apps/qa/play-greeting-v2-release-preview.txt",
         "testers": "apps/qa/play-greeting-v2-testers.json",
-        "internalRelease": "apps/qa/play-greeting-v2-internal-release.txt"
+        "internalRelease": "apps/qa/2026-10-19-play-console-status.json",
+        "alphaReviewSubmission": "apps/qa/2026-10-19-play-console-status.json"
       },
       "webCheck": {
         "url": "https://barolab-daily-apps.pages.dev/greeting/",
         "status": 200,
-        "sha256": "822a73b5774be42915bedf2ef48406d7db2c03c1bd8b7871068b32cf5fb9498a",
-        "checkedAt": "2026-10-14T08:54:57.801729+00:00"
+        "sha256": "3dcb2000de8ab8142e4f0f7d44870f126e92b325c590455b4d65f04d07a61a1b",
+        "byteIdentical": true,
+        "checkedAt": "2026-10-18T17:52:40.903514+00:00",
+        "deploymentUrl": "https://b273632d.barolab-daily-apps.pages.dev"
       },
       "internalJoinUrl": "https://play.google.com/apps/internaltest/4701400802151181455",
-      "releaseName": "0.2.0-internal-preview",
-      "publishedAtLocal": "2026-10-14T19:10:00+09:00",
+      "releaseName": "0.3.0 정식 광고 및 첫 화면 사용성 개선",
+      "publishedAtLocal": "2026-10-19T02:45:00+09:00",
       "build": {
-        "versionCode": 2,
-        "versionName": "0.2.0-internal-preview",
-        "aabSha256": "54615bb43ea9f09d4868c289b15c1c737692a4a547820951249fb7be22d71a51",
-        "unitTestsPassed": 6,
-        "lintErrors": 0,
-        "lintWarnings": 0,
-        "evidence": "apps/qa/v2-build-verification.json",
-        "aabBytes": 11840975,
-        "unitTestVariant": "debug",
-        "lintVariant": "debug"
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "aab": "Y:\\10_Project\\BaroLab\\apps\\greeting\\build\\outputs\\bundle\\release\\greeting-release.aab",
+        "aabSha256": "303a5f34be0995157cf83619cb9ae8aeafcda0c56c00b2e2019bebb743aeaa7e",
+        "aabBytes": 11552628,
+        "packageName": "com.barolab.morningcard",
+        "admobAppId": "ca-app-pub-7642010403138987~7847239341",
+        "bannerAdUnitId": "ca-app-pub-7642010403138987/8940829169",
+        "manifestVerified": true,
+        "dexBannerVerified": true,
+        "dexAdUnitIds": [
+          "ca-app-pub-7642010403138987/8940829169"
+        ],
+        "testAdsOnly": false,
+        "productionAdsEnabled": true,
+        "bundletoolValidated": true,
+        "signatureVerified": true,
+        "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+        "persistentSigningIdentityMatches": true,
+        "previousSigningCertificateMatches": null,
+        "unitTests": {
+          "debug": {
+            "tests": 6,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "release": {
+            "tests": 6,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "lint": {
+          "debug": [],
+          "release": []
+        },
+        "physicalDeviceVerifiedForThisBuild": false,
+        "playUploadVerified": true,
+        "evidence": "apps/qa/2026-10-19-production-release-verification.json",
+        "builtAt": "2026-10-19T02:17:23.363507+09:00"
       },
       "deviceValidation": {
         "emulatorVerified": true,
-        "physicalDeviceVerified": false,
-        "evidence": "apps/qa/v2-build-verification.json"
+        "physicalDeviceVerified": true,
+        "evidence": "Samsung Galaxy physical device verified by CEO (2026-10-19)",
+        "verifiedAt": "2026-10-19T02:08:41.441688+09:00",
+        "verifiedVersionCode": 2,
+        "latestBuildPhysicalDeviceVerified": false,
+        "pendingVersionCode": 3
       },
       "closedTesting": {
         "completed": false,
-        "scope": "필요한 비공개 테스트 요건 미완료"
+        "scope": "필요한 비공개 테스트 요건 미완료",
+        "status": "review_submitted_automatic_checks_running",
+        "reviewSubmitted": true,
+        "reviewApproved": false,
+        "participationUrl": "https://play.google.com/apps/testing/com.barolab.morningcard",
+        "publicJoinAvailabilityVerified": false,
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "trackId": "4699442447711468691",
+        "submitted": true,
+        "quickChecksPending": true,
+        "googleReviewConfirmed": false,
+        "trackActive": true,
+        "countries": [
+          "KR"
+        ],
+        "testerListSelected": true,
+        "testerListCount": 13,
+        "linkCopyEnabled": true,
+        "checkedAt": "2026-10-18T17:48:52.207Z",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
       },
-      "versionCode": 2,
-      "testAdsOnly": true,
-      "internalTesterListVerifiedAt": "2026-10-19T01:34:47+09:00",
+      "versionCode": 3,
+      "testAdsOnly": false,
+      "internalTesterListVerifiedAt": "2026-10-18T17:48:52.207Z",
       "internalTesterListCount": 13,
       "internalTesterEmails": [
         "baro76650@gmail.com",
@@ -79,14 +138,67 @@
         "justincome82@gmail.com",
         "moonsongbua495@gmail.com",
         "sjorbit28@gmail.com"
-      ]
+      ],
+      "previousBuild": {
+        "versionCode": 2,
+        "versionName": "0.2.0-internal-preview",
+        "aabSha256": "54615bb43ea9f09d4868c289b15c1c737692a4a547820951249fb7be22d71a51",
+        "unitTestsPassed": 6,
+        "lintErrors": 0,
+        "lintWarnings": 0,
+        "evidence": "apps/qa/v2-build-verification.json",
+        "aabBytes": 11840975,
+        "unitTestVariant": "debug",
+        "lintVariant": "debug"
+      },
+      "versionName": "0.3.0",
+      "productionAdsEnabled": true,
+      "internalReleaseVersionCode": 3,
+      "pendingRelease": {
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "status": "alpha_review_submitted_automatic_checks_running",
+        "uploaded": true,
+        "reviewSubmitted": true,
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+      },
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.morningcard",
+      "internalAvailableVersionCode": 3,
+      "internalAvailableVerified": true,
+      "internalRelease": {
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "status": "active",
+        "providedToInternalTesters": true,
+        "publishedAtLocal": "2026-10-19T02:45:00+09:00",
+        "publishedAtPrecision": "minute",
+        "testAdsOnly": false,
+        "productionAdsEnabled": true,
+        "verifiedAt": "2026-10-18T17:48:52.207Z",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+      },
+      "storeSetup": {
+        "completed": true,
+        "reviewSubmitted": true,
+        "containsAds": true,
+        "loginRequired": false,
+        "targetAge": "18+",
+        "screenshots": 4,
+        "privacyUrl": "https://barolab-daily-apps.pages.dev/greeting/privacy",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json",
+        "aiLabeledAssets": [
+          "icon-512.png",
+          "feature-1024x500.png",
+          "v2-greeting-03-photo-home.png"
+        ]
+      }
     },
     "magnifier": {
       "name": "큰글씨 돋보기",
       "packageName": "com.barolab.biglens",
       "playAppId": "4972819523776643880",
       "internalTrack": "internal",
-      "releaseStatus": "internal_preview_available",
+      "releaseStatus": "internal_v3_available_alpha_review_submitted",
       "internalReleaseVerified": true,
       "productionReleased": false,
       "publicUrl": "https://barolab-daily-apps.pages.dev/magnifier/",
@@ -109,41 +221,118 @@
         "playApp": "apps/qa/play-magnifier-created.txt",
         "uploadedPreview": "apps/qa/play-magnifier-v2-release-preview.txt",
         "testers": "apps/qa/play-magnifier-v2-testers.json",
-        "internalRelease": "apps/qa/play-magnifier-v2-internal-release.txt"
+        "internalRelease": "apps/qa/2026-10-19-play-console-status.json",
+        "alphaReviewSubmission": "apps/qa/2026-10-19-play-console-status.json"
       },
       "webCheck": {
         "url": "https://barolab-daily-apps.pages.dev/magnifier/",
         "status": 200,
-        "sha256": "f2360706a1424e1d4726706ce7db1ba10e3d858d68d26cc9f349c5e64b1bb123",
-        "checkedAt": "2026-10-14T08:54:57.801729+00:00"
+        "sha256": "f817c136487b515725966dcd39b62aa19552e380d6ffecdcc93088bd4f99dd5b",
+        "byteIdentical": true,
+        "checkedAt": "2026-10-18T17:52:40.903514+00:00",
+        "deploymentUrl": "https://b273632d.barolab-daily-apps.pages.dev"
       },
       "internalJoinUrl": "https://play.google.com/apps/internaltest/4701703053640983596",
-      "releaseName": "0.2.0-internal-preview",
-      "publishedAtLocal": "2026-10-14T19:15:00+09:00",
+      "releaseName": "0.3.0 정식 광고 및 첫 화면 사용성 개선",
+      "publishedAtLocal": "2026-10-19T02:45:00+09:00",
       "build": {
-        "versionCode": 2,
-        "versionName": "0.2.0-internal-preview",
-        "aabSha256": "c6f3755cbcabc18593e9378aaa4af61c3334668183ca94615b663722bcd3577e",
-        "unitTestsPassed": 9,
-        "lintErrors": 0,
-        "lintWarnings": 2,
-        "evidence": "apps/qa/v2-build-verification.json",
-        "aabBytes": 8329856,
-        "unitTestVariant": "debug",
-        "lintVariant": "debug"
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "aab": "Y:\\10_Project\\BaroLab\\apps\\magnifier\\build\\outputs\\bundle\\release\\magnifier-release.aab",
+        "aabSha256": "d29017bf34add2a066ed5e42a9d2330ca284a0837b0d06619108fd69e31e2060",
+        "aabBytes": 8330004,
+        "packageName": "com.barolab.biglens",
+        "admobAppId": "ca-app-pub-7642010403138987~5789333475",
+        "bannerAdUnitId": "ca-app-pub-7642010403138987/4744854277",
+        "manifestVerified": true,
+        "dexBannerVerified": true,
+        "dexAdUnitIds": [
+          "ca-app-pub-7642010403138987/4744854277"
+        ],
+        "testAdsOnly": false,
+        "productionAdsEnabled": true,
+        "bundletoolValidated": true,
+        "signatureVerified": true,
+        "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+        "persistentSigningIdentityMatches": true,
+        "previousSigningCertificateMatches": null,
+        "unitTests": {
+          "debug": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "release": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "lint": {
+          "debug": [
+            {
+              "id": "ClickableViewAccessibility",
+              "severity": "Warning"
+            },
+            {
+              "id": "ClickableViewAccessibility",
+              "severity": "Warning"
+            }
+          ],
+          "release": [
+            {
+              "id": "ClickableViewAccessibility",
+              "severity": "Warning"
+            },
+            {
+              "id": "ClickableViewAccessibility",
+              "severity": "Warning"
+            }
+          ]
+        },
+        "physicalDeviceVerifiedForThisBuild": false,
+        "playUploadVerified": true,
+        "evidence": "apps/qa/2026-10-19-production-release-verification.json",
+        "builtAt": "2026-10-19T02:17:23.363507+09:00"
       },
       "deviceValidation": {
         "emulatorVerified": true,
-        "physicalDeviceVerified": false,
-        "evidence": "apps/qa/v2-build-verification.json"
+        "physicalDeviceVerified": true,
+        "evidence": "Samsung Galaxy physical device verified by CEO (2026-10-19)",
+        "verifiedAt": "2026-10-19T02:08:41.441688+09:00",
+        "verifiedVersionCode": 2,
+        "latestBuildPhysicalDeviceVerified": false,
+        "pendingVersionCode": 3
       },
       "closedTesting": {
         "completed": false,
-        "scope": "필요한 비공개 테스트 요건 미완료"
+        "scope": "필요한 비공개 테스트 요건 미완료",
+        "status": "review_submitted_automatic_checks_running",
+        "reviewSubmitted": true,
+        "reviewApproved": false,
+        "participationUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
+        "publicJoinAvailabilityVerified": false,
+        "trackId": "4701097179127398061",
+        "testerListSelected": true,
+        "testerListCount": 13,
+        "countries": [
+          "KR"
+        ],
+        "linkCopyEnabled": true,
+        "checkedAt": "2026-10-18T17:49:36.983Z",
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "submitted": true,
+        "quickChecksPending": true,
+        "googleReviewConfirmed": false,
+        "trackActive": true,
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
       },
-      "versionCode": 2,
-      "testAdsOnly": true,
-      "internalTesterListVerifiedAt": "2026-10-19T01:34:47+09:00",
+      "versionCode": 3,
+      "testAdsOnly": false,
+      "internalTesterListVerifiedAt": "2026-10-18T17:49:36.983Z",
       "internalTesterListCount": 13,
       "internalTesterEmails": [
         "baro76650@gmail.com",
@@ -159,14 +348,66 @@
         "justincome82@gmail.com",
         "moonsongbua495@gmail.com",
         "sjorbit28@gmail.com"
-      ]
+      ],
+      "previousBuild": {
+        "versionCode": 2,
+        "versionName": "0.2.0-internal-preview",
+        "aabSha256": "c6f3755cbcabc18593e9378aaa4af61c3334668183ca94615b663722bcd3577e",
+        "unitTestsPassed": 9,
+        "lintErrors": 0,
+        "lintWarnings": 2,
+        "evidence": "apps/qa/v2-build-verification.json",
+        "aabBytes": 8329856,
+        "unitTestVariant": "debug",
+        "lintVariant": "debug"
+      },
+      "versionName": "0.3.0",
+      "productionAdsEnabled": true,
+      "internalReleaseVersionCode": 3,
+      "pendingRelease": {
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "status": "alpha_review_submitted_automatic_checks_running",
+        "uploaded": true,
+        "reviewSubmitted": true,
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+      },
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
+      "internalAvailableVersionCode": 3,
+      "internalAvailableVerified": true,
+      "internalRelease": {
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "status": "active",
+        "providedToInternalTesters": true,
+        "publishedAtLocal": "2026-10-19T02:45:00+09:00",
+        "publishedAtPrecision": "minute",
+        "testAdsOnly": false,
+        "productionAdsEnabled": true,
+        "verifiedAt": "2026-10-18T17:49:36.983Z",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+      },
+      "storeSetup": {
+        "completed": true,
+        "reviewSubmitted": true,
+        "containsAds": true,
+        "loginRequired": false,
+        "targetAge": "18+",
+        "screenshots": 4,
+        "privacyUrl": "https://barolab-daily-apps.pages.dev/magnifier/privacy",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json",
+        "aiLabeledAssets": [
+          "icon-512.png",
+          "feature-1024x500.png"
+        ]
+      }
     },
     "shopping": {
       "name": "말로 장보기",
       "packageName": "com.barolab.voicebasket",
       "playAppId": "4972748430542309887",
       "internalTrack": "internal",
-      "releaseStatus": "internal_preview_available",
+      "releaseStatus": "internal_v3_available_alpha_review_submitted",
       "internalReleaseVerified": true,
       "productionReleased": false,
       "publicUrl": "https://barolab-daily-apps.pages.dev/shopping/",
@@ -189,41 +430,150 @@
         "playApp": "apps/qa/play-shopping-created.txt",
         "uploadedPreview": "apps/qa/play-shopping-v2-release-preview.txt",
         "testers": "apps/qa/play-shopping-v2-testers.json",
-        "internalRelease": "apps/qa/play-shopping-v2-internal-release.txt"
+        "internalRelease": "apps/qa/2026-10-19-play-console-status.json",
+        "alphaReviewSubmission": "apps/qa/2026-10-19-play-console-status.json"
       },
       "webCheck": {
         "url": "https://barolab-daily-apps.pages.dev/shopping/",
         "status": 200,
-        "sha256": "fa18256237db49e30c901d0212fa9f91d30291f235489ff40e65f4d9956d64c9",
-        "checkedAt": "2026-10-14T08:54:57.801729+00:00"
+        "sha256": "1f32f0d61243f37d6981d3b82d4e62c36c01d679553833cc6e465978448a7978",
+        "byteIdentical": true,
+        "checkedAt": "2026-10-18T17:52:40.903514+00:00",
+        "deploymentUrl": "https://b273632d.barolab-daily-apps.pages.dev"
       },
       "internalJoinUrl": "https://play.google.com/apps/internaltest/4701721871486482124",
-      "releaseName": "0.2.0-internal-preview",
-      "publishedAtLocal": "2026-10-14T19:10:00+09:00",
+      "releaseName": "0.3.0 정식 광고 및 첫 화면 사용성 개선",
+      "publishedAtLocal": "2026-10-19T02:47:00+09:00",
       "build": {
-        "versionCode": 2,
-        "versionName": "0.2.0-internal-preview",
-        "aabSha256": "7940daf974e87ad5ccda8384a8726fb4cd943396b250d8da6d2a4f076b434955",
-        "unitTestsPassed": 9,
-        "lintErrors": 0,
-        "lintWarnings": 6,
-        "evidence": "apps/qa/v2-build-verification.json",
-        "aabBytes": 5914075,
-        "unitTestVariant": "debug",
-        "lintVariant": "debug"
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "aab": "Y:\\10_Project\\BaroLab\\apps\\shopping\\build\\outputs\\bundle\\release\\shopping-release.aab",
+        "aabSha256": "16eea1913a8c5c39da80167387e127c6badcd59b64c32e9d463cf5ada4f1dc29",
+        "aabBytes": 5914558,
+        "packageName": "com.barolab.voicebasket",
+        "admobAppId": "ca-app-pub-7642010403138987~6881642030",
+        "bannerAdUnitId": "ca-app-pub-7642010403138987/2730644038",
+        "manifestVerified": true,
+        "dexBannerVerified": true,
+        "dexAdUnitIds": [
+          "ca-app-pub-7642010403138987/2730644038"
+        ],
+        "testAdsOnly": false,
+        "productionAdsEnabled": true,
+        "bundletoolValidated": true,
+        "signatureVerified": true,
+        "signingCertificateSha256": "81:7D:73:FA:70:03:CC:0C:06:34:8F:94:D4:63:DF:50:E5:C5:F6:1C:3B:6C:5A:DA:2B:EB:F1:29:94:ED:57:7A",
+        "persistentSigningIdentityMatches": true,
+        "previousSigningCertificateMatches": null,
+        "unitTests": {
+          "debug": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "release": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "lint": {
+          "debug": [
+            {
+              "id": "ObsoleteSdkInt",
+              "severity": "Warning"
+            },
+            {
+              "id": "AccessibilityFocus",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            }
+          ],
+          "release": [
+            {
+              "id": "ObsoleteSdkInt",
+              "severity": "Warning"
+            },
+            {
+              "id": "AccessibilityFocus",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            },
+            {
+              "id": "SetTextI18n",
+              "severity": "Warning"
+            }
+          ]
+        },
+        "physicalDeviceVerifiedForThisBuild": false,
+        "playUploadVerified": true,
+        "evidence": "apps/qa/2026-10-19-production-release-verification.json",
+        "builtAt": "2026-10-19T02:17:23.363507+09:00"
       },
       "deviceValidation": {
         "emulatorVerified": true,
-        "physicalDeviceVerified": false,
-        "evidence": "apps/qa/v2-build-verification.json"
+        "physicalDeviceVerified": true,
+        "evidence": "Samsung Galaxy physical device verified by CEO (2026-10-19)",
+        "verifiedAt": "2026-10-19T02:08:41.441688+09:00",
+        "verifiedVersionCode": 2,
+        "latestBuildPhysicalDeviceVerified": false,
+        "pendingVersionCode": 3
       },
       "closedTesting": {
         "completed": false,
-        "scope": "필요한 비공개 테스트 요건 미완료"
+        "scope": "필요한 비공개 테스트 요건 미완료",
+        "status": "review_submitted_automatic_checks_running",
+        "reviewSubmitted": true,
+        "reviewApproved": false,
+        "participationUrl": "https://play.google.com/apps/testing/com.barolab.voicebasket",
+        "publicJoinAvailabilityVerified": false,
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "trackId": "4699937692277090821",
+        "submitted": true,
+        "quickChecksPending": true,
+        "googleReviewConfirmed": false,
+        "trackActive": null,
+        "countries": [
+          "KR"
+        ],
+        "testerListSelected": true,
+        "testerListCount": 13,
+        "linkCopyEnabled": false,
+        "checkedAt": "2026-10-19T02:50:41.9258910+09:00",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
       },
-      "versionCode": 2,
-      "testAdsOnly": true,
-      "internalTesterListVerifiedAt": "2026-10-19T01:34:47+09:00",
+      "versionCode": 3,
+      "testAdsOnly": false,
+      "internalTesterListVerifiedAt": "2026-10-19T02:50:41.9258910+09:00",
       "internalTesterListCount": 13,
       "internalTesterEmails": [
         "baro76650@gmail.com",
@@ -239,9 +589,99 @@
         "justincome82@gmail.com",
         "moonsongbua495@gmail.com",
         "sjorbit28@gmail.com"
-      ]
+      ],
+      "previousBuild": {
+        "versionCode": 2,
+        "versionName": "0.2.0-internal-preview",
+        "aabSha256": "7940daf974e87ad5ccda8384a8726fb4cd943396b250d8da6d2a4f076b434955",
+        "unitTestsPassed": 9,
+        "lintErrors": 0,
+        "lintWarnings": 6,
+        "evidence": "apps/qa/v2-build-verification.json",
+        "aabBytes": 5914075,
+        "unitTestVariant": "debug",
+        "lintVariant": "debug"
+      },
+      "versionName": "0.3.0",
+      "productionAdsEnabled": true,
+      "internalReleaseVersionCode": 3,
+      "pendingRelease": {
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "status": "alpha_review_submitted_automatic_checks_running",
+        "uploaded": true,
+        "reviewSubmitted": true,
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+      },
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.voicebasket",
+      "internalAvailableVersionCode": 3,
+      "internalAvailableVerified": true,
+      "internalRelease": {
+        "versionCode": 3,
+        "versionName": "0.3.0",
+        "status": "active",
+        "providedToInternalTesters": true,
+        "publishedAtLocal": "2026-10-19T02:47:00+09:00",
+        "publishedAtPrecision": "minute",
+        "testAdsOnly": false,
+        "productionAdsEnabled": true,
+        "verifiedAt": "2026-10-19T02:50:41.9258910+09:00",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+      },
+      "storeSetup": {
+        "completed": true,
+        "reviewSubmitted": true,
+        "containsAds": true,
+        "loginRequired": false,
+        "targetAge": "18+",
+        "screenshots": 4,
+        "privacyUrl": "https://barolab-daily-apps.pages.dev/shopping/privacy",
+        "evidence": "apps/qa/2026-10-19-play-console-status.json",
+        "aiLabeledAssets": [
+          "icon-512.png",
+          "feature-1024x500.png"
+        ],
+        "dataSafety": {
+          "sdkCollectedAndSharedTypes": [
+            "approximate location",
+            "diagnostics",
+            "app interactions",
+            "device or other IDs"
+          ],
+          "sdkPurposes": [
+            "analytics",
+            "advertising or marketing",
+            "fraud security compliance"
+          ],
+          "audio": "optional collected and shared for app functionality; provider-dependent processing",
+          "allTransitEncryptedDeclared": false,
+          "speechProviderRetention": "not independently verified",
+          "declaredNonEphemeral": true,
+          "previewPurposesVerified": true
+        }
+      }
     }
   },
-  "updatedAt": "2026-10-14T10:17:11.433164+00:00",
-  "scope": "Three daily apps; preview test ads; no public production release or ad-serving approval claimed."
+  "updatedAt": "2026-10-18T17:51:45.471373+00:00",
+  "scope": "Three daily apps: signed SJ production-ad v3 bundles are available to internal testers; Alpha releases submitted with KR and selected 13-person tester lists. Google automatic checks/review pending; production, closed-test completion, actual opt-ins and v3 physical-device verification are not claimed.",
+  "deviceValidation": {
+    "physicalDeviceVerified": true,
+    "verifiedAt": "2026-10-19T02:08:41.441688+09:00",
+    "evidence": "Samsung Galaxy physical device verified by CEO (2026-10-19)",
+    "verifiedVersionCodes": {
+      "greeting": 2,
+      "magnifier": 2,
+      "shopping": 2
+    }
+  },
+  "testerPortal": {
+    "url": "https://barolab-daily-apps.pages.dev/testers/",
+    "deploymentUrl": "https://b273632d.barolab-daily-apps.pages.dev",
+    "httpVerified": true,
+    "byteIdentical": true,
+    "checkedAt": "2026-10-18T17:52:40.903514+00:00",
+    "alphaLinks": 4,
+    "internalFallbackLinks": 4,
+    "evidence": "apps/qa/2026-10-19-play-console-status.json"
+  }
 }
