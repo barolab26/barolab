@@ -445,10 +445,10 @@ def build_seo_image_filename(
     # 3. Role suffix based on source_type
     role_suffix_map = {
         "capture": "official-screen",
-        "diagram": "summary-table",
-        "generated": "detail-view",
+        "original": "site-photo",
+        "generated": "visual-scene",
     }
-    role_token = role_suffix_map.get((source_type or "").lower(), "guide-view")
+    role_token = role_suffix_map.get((source_type or "").lower(), "visual-guide")
 
     merged: List[str] = []
     for tok in (ascii_tokens[:4] + mapped_tokens[:4]):
@@ -472,6 +472,54 @@ def build_seo_image_filename(
     return f"{slug_core}-{int(shot_index):02d}{clean_ext.lower()}"
 
 
+DISHONEST_GENERATED_CAPTION_REPLACEMENTS: List[Tuple[str, str]] = [
+    (r"실제\s*공식\s*화면\s*캡처", "핵심 시각 안내"),
+    (r"공식\s*화면\s*캡처", "핵심 안내 이미지"),
+    (r"화면\s*캡처\s*본?", "시각 안내 자료"),
+    (r"캡처\s*화면", "시각 안내 자료"),
+    (r"동선\s*지도\s*캡처", "주변 동선 안내"),
+    (r"지도\s*캡처", "위치 및 동선 안내"),
+    (r"시설\s*배치도\s*캡처", "시설 및 코스 안내"),
+    (r"배치도\s*캡처", "코스 안내 이미지"),
+    (r"시간표\s*캡처", "운행 시간 안내"),
+    (r"요금표\s*캡처", "이용 요금 안내"),
+    (r"메뉴\s*캡처", "절차 안내 이미지"),
+    (r"캡처본", "안내 이미지"),
+    (r"캡처", "안내"),
+    (r"전경\s*실사\s*사진", "전경 이미지"),
+    (r"전경\s*실사", "전경 모습"),
+    (r"현장\s*실사\s*사진", "현장 이미지"),
+    (r"현장\s*실사", "현장 모습"),
+    (r"실사\s*사진", "참고 이미지"),
+    (r"실사\s*뷰", "전망 뷰"),
+    (r"실제\s*촬영\s*사진", "참고 이미지"),
+    (r"실제\s*촬영", "현장 모습"),
+    (r"(?<![가-힣])실사(?![가-힣])", "모습"),
+    (r"정자체\s*가이드", "요약 안내"),
+    (r"CHECKPOINT\s*#?\s*\d+", "핵심 포인트"),
+]
+
+
+def sanitize_caption_for_source(caption: str, source_type: str = "generated") -> str:
+    """
+    Prevent image-caption mismatch / reader deception:
+    If an image is AI-generated (`source_type != "capture"`), strip dishonest claims such as
+    '화면 캡처', '지도 캡처', '배치도 캡처', '실사', '실제 촬영' from captions and alt text.
+    Also strip raw Markdown `**` and broken Unicode icons (`⌧`, `\ufffd`).
+    """
+    text = str(caption or "").strip()
+    if not text:
+        return ""
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = text.replace("**", "").replace("⌧", "").replace("\ufffd", "").replace("□", "")
+    src_norm = (source_type or "generated").strip().lower()
+    if src_norm != "capture":
+        for pat, repl in DISHONEST_GENERATED_CAPTION_REPLACEMENTS:
+            text = re.sub(pat, repl, text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip(" ,·-")
+    return text
+
+
 def build_seo_alt_text(
     topic_title: str = "",
     section_title: str = "",
@@ -481,17 +529,17 @@ def build_seo_alt_text(
 ) -> str:
     """
     Build an accurate, descriptive HTML `alt` attribute for SEO and accessibility,
-    replacing generic `photo_01` or empty alt strings.
+    replacing generic `photo_01` or empty alt strings and enforcing caption honesty.
     """
-    clean_cap = re.sub(r"^[▲▼▶•\-\s]+", "", (caption or "").strip())
-    clean_sec = re.sub(r"^\d+[\.\)]\s*", "", (section_title or "").strip())
-    clean_top = (topic_title or "").strip()
+    clean_cap = sanitize_caption_for_source(re.sub(r"^[▲▼▶•\-\s]+", "", (caption or "").strip()), source_type=source_type)
+    clean_sec = sanitize_caption_for_source(re.sub(r"^\d+[\.\)]\s*", "", (section_title or "").strip()), source_type=source_type)
+    clean_top = sanitize_caption_for_source((topic_title or "").strip(), source_type=source_type)
 
     type_badge = {
-        "capture": "실제 공식 화면 캡처",
-        "diagram": "핵심 기준 비교 요약표",
-        "generated": "현장 체크포인트 안내 이미지",
-    }.get((source_type or "").lower(), "핵심 안내 자료")
+        "capture": "공식 화면 안내",
+        "original": "현장 안내 이미지",
+        "generated": "관련 시각 자료",
+    }.get((source_type or "").lower(), "시각 안내 자료")
 
     if clean_cap and len(clean_cap) >= 8:
         if clean_top and clean_top[:10] not in clean_cap:
@@ -501,7 +549,8 @@ def build_seo_alt_text(
         return f"{clean_top[:30]} {clean_sec[:35]} {type_badge} {shot_index}"
     if clean_top:
         return f"{clean_top[:45]} {type_badge} {shot_index}"
-    return f"주요 확인 기준 및 신청 절차 {type_badge} {shot_index}"
+    return f"주요 확인 사항 {type_badge} {shot_index}"
+
 
 
 # ============================================================================
@@ -631,6 +680,56 @@ def sanitize_image_file(
     return report
 
 
+def is_synthetic_checkpoint_card_bytes(img_bytes: Optional[bytes]) -> bool:
+    """
+    Detect programmatic PIL/Canvas fake summary-card images (`CHECKPOINT #` / `정자체 가이드` / `CHECKPOINT 01`):
+    1) 1280x720 card with dark navy header bar `RGB(15, 23, 42)` around y=8~18%, blue badge `RGB(37, 99, 235)`,
+       and flat white/slate rows (`std < 5.0` across horizontal bands).
+    2) 1024x768 card with flat blue header bar `RGB(22, 70, 183)` or `RGB(28, 93, 153)` around y=6~16%
+       and flat white/pastel boxes below.
+    """
+    if not img_bytes or len(img_bytes) < 512:
+        return False
+    try:
+        with Image.open(io.BytesIO(img_bytes)) as im:
+            rgb = np.asarray(im.convert("RGB"), dtype=np.float32)
+            h, w, _ = rgb.shape
+            if w < 400 or h < 300:
+                return False
+
+            # Check horizontal strip inside header bar (right half of header where no title text sits at y ~ 0.08*h)
+            y_hdr = int(h * 0.075)
+            x1, x2 = int(w * 0.55), int(w * 0.88)
+            hdr_strip = rgb[y_hdr:y_hdr + max(2, int(h * 0.02)), x1:x2]
+            if hdr_strip.size == 0:
+                return False
+            hdr_mean = hdr_strip.mean(axis=(0, 1))
+            hdr_std = float(hdr_strip.std())
+
+            # Check lower card separator / box background strip (right side around y ~ 0.425*h)
+            y_mid = int(h * 0.425)
+            mid_strip = rgb[y_mid:y_mid + max(2, int(h * 0.015)), int(w * 0.55):int(w * 0.88)]
+            mid_mean = mid_strip.mean(axis=(0, 1)) if mid_strip.size > 0 else np.array([0.0, 0.0, 0.0])
+            mid_std = float(mid_strip.std()) if mid_strip.size > 0 else 99.0
+
+            # Pattern 1: CF 1280x720 `CHECKPOINT #` card (dark navy header RGB~(15,23,42) + bright card body)
+            is_navy_header = (
+                hdr_mean[0] < 42.0 and hdr_mean[1] < 50.0 and 22.0 <= hdr_mean[2] <= 75.0 and hdr_std < 6.5
+            )
+            # Pattern 2: Naver 1024x768 `CHECKPOINT 01` card (blue header RGB~(22,70,183) or (28,93,153))
+            is_blue_header = (
+                hdr_mean[0] < 55.0 and 50.0 <= hdr_mean[1] <= 115.0 and hdr_mean[2] >= 130.0 and hdr_std < 6.5
+            )
+            is_flat_card_body = (
+                mid_mean[0] > 225.0 and mid_mean[1] > 230.0 and mid_mean[2] > 235.0 and mid_std < 8.0
+            )
+            if (is_navy_header or is_blue_header) and is_flat_card_body:
+                return True
+    except Exception:
+        return False
+    return False
+
+
 # ============================================================================
 # 6. FORENSIC IMAGE INSPECTOR FOR `@닥터 (Doctor)` (`server/content_auditor.py`)
 # ============================================================================
@@ -641,10 +740,11 @@ def inspect_image_forensics(
     caption_text: str = "",
 ) -> Dict[str, Any]:
     """
-    Forensic inspection used by `@닥터 (Doctor)` to detect:
-      1. AI Metadata traces (`C2PA`, `JUMBF`, `XMP`, `SynthID`, `Google AI`, `ImageFX`, or missing smartphone EXIF)
-      2. Bottom-right AI Watermark (`✦`) bright star anomaly in the bottom-right corner
-      3. Non-SEO generic filename (`photo_01.jpg`, `img_1.png`, etc.)
+    Forensic inspection used by `@닥터 (Doctor)` and `@퍼블리 (Publi)` to detect:
+      1. Synthetic `CHECKPOINT #` / `정자체 가이드` programmatic card images
+      2. AI Metadata traces (`C2PA`, `JUMBF`, `XMP`, `SynthID`, `Google AI`, `ImageFX`, or missing smartphone EXIF)
+      3. Bottom-right AI Watermark (`✦`) bright star anomaly in the bottom-right corner
+      4. Non-SEO generic filename (`photo_01.jpg`, `img_1.png`, etc.)
     """
     ai_meta_hits: List[str] = []
     has_clean_smartphone_exif = False
@@ -652,8 +752,13 @@ def inspect_image_forensics(
     device_model = ""
     date_time_original = ""
     has_corner_watermark = False
+    is_synthetic_checkpoint_card = False
 
     if img_bytes and len(img_bytes) > 128:
+        is_synthetic_checkpoint_card = is_synthetic_checkpoint_card_bytes(img_bytes)
+        if is_synthetic_checkpoint_card:
+            ai_meta_hits.append("SyntheticCheckpointCard:CHECKPOINT_PIL_CARD")
+
         lower_head = img_bytes[:65536].lower()
         for sig in AI_METADATA_SIGNATURES:
             if sig in lower_head:
@@ -702,6 +807,7 @@ def inspect_image_forensics(
     is_generic_filename = bool(re.match(r"^(?:photo|img|image|pic|figure|shot|untitled)[_\-]?\d*\.(?:jpg|jpeg|png|webp)$", fname))
 
     return {
+        "isSyntheticCheckpointCard": is_synthetic_checkpoint_card,
         "hasAiMetadataTrace": bool(ai_meta_hits),
         "aiMetadataHits": ai_meta_hits,
         "hasCleanSmartphoneExif": has_clean_smartphone_exif,
@@ -710,5 +816,109 @@ def inspect_image_forensics(
         "dateTimeOriginal": date_time_original,
         "hasCornerWatermarkSuspect": has_corner_watermark,
         "isGenericFilename": is_generic_filename,
-        "needsSanitization": bool(ai_meta_hits) or not has_clean_smartphone_exif or has_corner_watermark or is_generic_filename,
+        "needsSanitization": (
+            is_synthetic_checkpoint_card
+            or bool(ai_meta_hits)
+            or not has_clean_smartphone_exif
+            or has_corner_watermark
+            or is_generic_filename
+        ),
     }
+
+
+def sanitize_html_pre_publish(
+    html_content: str,
+    image_plans: Optional[List[Dict[str, Any]]] = None,
+    synthetic_filenames: Optional[List[str]] = None,
+) -> Tuple[str, Dict[str, Any]]:
+    """
+    `@퍼블리 (Publi)` Pre-Publish Real Vision/DOM Inspection & In-Place Repair Gate:
+      1) Removes any `<figure>` / `<img>` that is a synthetic `CHECKPOINT #` / `정자체 가이드` card
+         or has an empty/broken `src`, and removes empty `<figure>` / `.post-image` border boxes.
+      2) Converts raw Markdown bold (`**text**`) in the HTML body into `<strong>text</strong>`
+         and removes stray unmatched `**`.
+      3) Strips broken Unicode icons (`⌧`, `\ufffd`, `□`).
+      4) Cleans dishonest captions (`화면 캡처`, `지도 캡처`, `배치도 캡처`, `실사`) on AI-generated (`source != "capture"`) images.
+    """
+    from bs4 import BeautifulSoup
+
+    if not html_content:
+        return "", {"removedFigures": 0, "convertedBoldCount": 0, "cleanedCaptions": 0}
+
+    plan_by_fname: Dict[str, Dict[str, Any]] = {}
+    for p in (image_plans or []):
+        if isinstance(p, dict) and p.get("filename"):
+            plan_by_fname[str(p["filename"]).lower()] = p
+
+    syn_set = {str(fn).lower() for fn in (synthetic_filenames or []) if fn}
+
+    # 1. Convert raw Markdown bold `**...**` to `<strong>...</strong>` outside HTML tag attributes
+    bold_hits = len(re.findall(r"\*\*([^*\n]+?)\*\*", html_content))
+    cleaned_html = re.sub(r"\*\*([^*\n<>]+?)\*\*", r"<strong>\1</strong>", html_content)
+    cleaned_html = cleaned_html.replace("**", "")
+
+    # 2. Remove broken Unicode box characters (`⌧`, `\ufffd`, `□`)
+    cleaned_html = (
+        cleaned_html.replace("⌧", "")
+        .replace("\u2327", "")
+        .replace("\ufffd", "")
+        .replace("□", "")
+    )
+
+    soup = BeautifulSoup(cleaned_html, "html.parser")
+    removed_figures = 0
+    cleaned_captions = 0
+
+    for fig in list(soup.find_all("figure")):
+        img = fig.find("img")
+        asset_name = str(fig.get("data-asset") or "").strip().lower()
+        fc = fig.find("figcaption")
+        cap_txt = fc.get_text(" ", strip=True) if fc else ""
+        src_val = (img.get("src") or "").strip() if img else ""
+        alt_val = (img.get("alt") or "").strip() if img else ""
+
+        # Check if empty figure box or synthetic checkpoint card
+        is_fake_card = (
+            asset_name in syn_set
+            or any(s in src_val.lower() for s in syn_set)
+            or "정자체 가이드" in cap_txt
+            or "checkpoint #" in cap_txt.lower()
+            or "정자체 가이드" in alt_val
+            or "핵심 기준 비교 요약표" in alt_val
+        )
+        if not img or not src_val or is_fake_card:
+            fig.decompose()
+            removed_figures += 1
+            continue
+
+        # Determine source_type for caption honesty sanitization
+        plan = plan_by_fname.get(asset_name, {})
+        source_type = str(plan.get("source") or ("capture" if "guide-capture-img" in (img.get("class") or []) else "generated")).lower()
+        if source_type != "capture":
+            if fc and cap_txt:
+                new_cap = sanitize_caption_for_source(cap_txt, source_type="generated")
+                if new_cap != cap_txt:
+                    fc.string = new_cap
+                    cleaned_captions += 1
+            if alt_val:
+                new_alt = sanitize_caption_for_source(alt_val, source_type="generated")
+                if new_alt != alt_val:
+                    img["alt"] = new_alt
+
+    # Also remove any standalone `<img>` without `src` or matching `syn_set`
+    for img in list(soup.find_all("img")):
+        src_val = (img.get("src") or "").strip()
+        alt_val = (img.get("alt") or "").strip()
+        if not src_val or any(s in src_val.lower() for s in syn_set) or "정자체 가이드" in alt_val:
+            parent = img.parent
+            img.decompose()
+            removed_figures += 1
+            if parent and parent.name in ("p", "div", "figure") and not parent.get_text(strip=True) and not parent.find("img"):
+                parent.decompose()
+
+    return str(soup), {
+        "removedFigures": removed_figures,
+        "convertedBoldCount": bold_hits,
+        "cleanedCaptions": cleaned_captions,
+    }
+

@@ -3792,14 +3792,14 @@ ROLE_SCHEMAS = {
     'writer': 'Return {title,mainKeyword,readerTask:{articleType:how_to|troubleshooting|comparison|explainer|experience|calculation,medium:screen|physical|conceptual,question,successCondition},tags:[5 unique #hashtags],blocks:[{kind:heading|paragraph|checklist,text}],draftMd}. Preserve the immutable reader intent and use the accepted answerBrief finalTitle. Write a useful Naver blog post with short headings and paragraphs, practical examples and a quick answer to the reader question. Add an evidence-grounded author judgment explaining priorities/tradeoffs; distinguish advice from verified facts. Never invent use, purchase, application, visit or firsthand shooting experience. No raw HTML, internal fact labels or blank text blocks. Research stays internal: no bibliography, reference section or citation URLs in the visible article. End with a separate nonempty hashtag-only paragraph containing all five tags. Visual spacing after the closing prose is added by the assembler, not empty blocks. A bridge account may use one relevant contextual CF article link.',
     'image-maker': (
         'Return {selectionReason,requiredMaterials:[{kind:actual_capture|original_photo|observed_data,materialId,description,reason,afterBlock}],'
-        'imagePlans:[{filename,source:capture|original|diagram|generated,materialId,stepId,prompt,caption,afterBlock,purpose,viewpoint,placementReason}]}. '
-        '[절대 강제 4대 원칙] 1) 사람 얼굴·3인칭 인물 연출 컷 영구 금지(NO people, NO human faces, NO portrait, NO third-person posed shot, NO hands): 식탁에 앉아 서류를 보는 여성 등 인물이 등장하는 프롬프트 절대 금지. '
-        '2) 가짜 한글·외계어 서류 AI 생성 절대 금지(NO text in AI images): AI 이미지 생성기(Flow/Imagen)로 한글·글자가 적힌 서류·포스트잇·안내판·모니터 화면을 그리게 하지 마라. 서류·법령·조건 비교·신청 절차는 반드시 실제 공식 화면 캡처(source="capture") 또는 100% 정자체 요약 도표(source="diagram")로 지정한다. '
-        '3) 불가피한 분위기/상황 사진(source="generated")은 오직 1인칭 내 눈높이(POV) 무인 사물 스냅샷(First-person POV, top-down flat lay or eye-level close-up of object only, shot on iPhone, natural indoor lighting, no people, no human faces, no text)으로만 작성한다. '
-        'Use supplied materialId for actual capture/original/diagram; keep exact filename/source/stepId. Cover every writer requiredMaterialId. '
+        'imagePlans:[{filename,source:capture|original|generated,materialId,stepId,prompt,caption,afterBlock,purpose,viewpoint,placementReason}]}. '
+        '[절대 강제 4대 원칙] 1) 조잡한 프로그래밍 생성 카드(CHECKPOINT / 정자체 요약표 이미지) 영구 금지: 요약이나 비교는 본문 텍스트/체크리스트로 설명하고 절대 이미지로 그리지 않는다. '
+        '2) 이미지-캡션 불일치 및 거짓 캡션("~화면 캡처", "~지도 캡처", "~배치도 캡처", "~실사") 원천 차단: 실제 캡처(source="capture")가 아닌 Flow 생성 이미지(source="generated")의 caption에는 절대 "캡처", "화면 캡처", "지도 캡처", "배치도 캡처", "실사"라는 단어를 쓰지 마라. '
+        '3) 엉뚱한 간접 소품(원목 테이블 + 커피잔 + 계산기 + 스마트폰 목업) 금지 및 직관적 주제 비주얼 생성: 주제와 무관한 커피잔·책상 소품 대신 해당 글의 실제 핵심 대상·장소·시설·사물을 직관적으로 보여주는 고품질 비주얼 프롬프트(NO people, NO human faces, NO text)로 작성한다. '
+        'Use supplied materialId for actual capture/original; keep exact filename/source/stepId. Cover every writer requiredMaterialId. '
         'Missing assets remain requiredMaterials. Each image has a distinct afterBlock. Every post MUST include at least 3 images (3 to 5 images); zero images are NEVER allowed. Imported prompt may be empty. '
-        'Only generated 1st-person POV object photography or illustrative diagram may have empty materialId/stepId and a nonempty prompt with .jpg filename. '
-        'Generated diagrams are explanations, not actual UI or documentary proof. Captions are truthful actions/results. '
+        'Only generated direct subject photography may have empty materialId/stepId and a nonempty prompt with .jpg filename. '
+        'Captions are truthful actions/results and never claim generated images are screenshots or firsthand photos. '
         'Do not output local paths, scripts or commands, and do not claim supplied/reused assets were newly acquired.'
     ),
     'assembler': 'Return {inputComplete:boolean,layoutReady:boolean,issues:[],imageSlots:[distinct afterBlock indices matching all plans, empty when no images]}. Review actual writer body and all attached photo files/scene captions, if any. Validate imageSlots against the provided image-maker plans. Do not re-output or rewrite writer text: the host assembles the immutable approved writer blocks directly. Host renders escaped paragraphs, dedicated captions and hashtag footer after this response. layoutReady means the supplied writer blocks, actual images and placement plan are ready for assembly; article.json, final.html and native-editor PC/mobile captures are downstream outputs, not required inputs to this stage. Unresolved current layout/image issues must be reported.',
@@ -3811,7 +3811,7 @@ ROLE_SCHEMAS['writer'] += ' Body paragraphs explain the action or decision seque
 ROLE_SCHEMAS['image-maker'] += ' Captions briefly identify what the reader should check in that exact image. Do not copy long body passages into captions; useful complementary detail is welcome. Keep acquisition/review jargon out of captions while accurately identifying examples or conceptual illustrations.'
 ROLE_SCHEMAS['reviewer'] += ' Check that body and captions serve complementary purposes; reject substantial repetitive passages or internal production language that obscures the reader task, while allowing necessary short overlap and useful explanation. Do not demand fabricated personal experience as a repair.'
 ROLE_SCHEMAS['writer'] += ' The accepted answerBrief is the generation blueprint: use its answer-derived finalTitle and immutable readerTask, not the provisional keyword title. Realize the directAnswer and planned explanations naturally, starting with the actual answer. All necessary sources/material observations and caption roles were planned before this call; do not add filler or substitute a different task.'
-ROLE_SCHEMAS['image-maker'] += ' Follow the accepted answerBrief section materialIds and captionFocus. Images explain planned reader needs; always plan at least 3 useful true-font explanatory diagrams (source="diagram") or 1st-person POV unmanned object photos (source="generated", NO people, NO faces, NO text) when actual captures are not supplied.'
+ROLE_SCHEMAS['image-maker'] += ' Follow the accepted answerBrief section materialIds and captionFocus. Images explain planned reader needs; always plan at least 3 useful direct subject visual photos (source="generated", NO people, NO faces, NO text, NO coffee cup filler props) when actual captures are not supplied.'
 
 
 def material_roots():
@@ -3830,13 +3830,16 @@ def fork_before_writer(handoff, account, manifest_hash):
 
 
 def normalize_writer_blank_paragraphs(article):
-    """Remove empty writer paragraphs before placement; preserve every actual sentence."""
+    """Remove empty writer paragraphs and sanitize raw Markdown ** or broken symbols (⌧) in-place."""
     from copy import deepcopy
     normalized = deepcopy(article)
     if not isinstance(normalized,dict) or 'imageSlots' in normalized or not isinstance(normalized.get('blocks'),list):
         return normalized,[]
     kept, removed = [],[]
     for index,block in enumerate(normalized['blocks']):
+        if isinstance(block, dict) and isinstance(block.get('text'), str):
+            cleaned_txt = re.sub(r'\*\*([^*\n]+?)\*\*', r'\1', block['text']).replace('**', '').replace('⌧', '').replace('\ufffd', '').replace('□', '')
+            block['text'] = cleaned_txt
         if (isinstance(block,dict) and block.get('kind')=='paragraph'
                 and isinstance(block.get('text'),str) and not block['text'].strip()):
             removed.append(index)
@@ -3852,6 +3855,9 @@ def validate_article(article):
     tags, blocks = article.get('tags', []), article.get('blocks', [])
     if len(tags) != 5 or len(set(tags)) != 5 or any(not re.fullmatch(r'#[\w가-힣]+', t) for t in tags):
         raise RuntimeError('Five visible unique hashtags required')
+    for b in blocks:
+        if isinstance(b, dict) and isinstance(b.get('text'), str):
+            b['text'] = re.sub(r'\*\*([^*\n]+?)\*\*', r'\1', b['text']).replace('**', '').replace('⌧', '').replace('\ufffd', '').replace('□', '')
     if not blocks or any(b.get('kind') not in ('heading', 'paragraph', 'checklist', 'source') or not isinstance(b.get('text'), str) or not b['text'].strip() for b in blocks):
         raise RuntimeError('Invalid article blocks')
     text = '\n'.join(b['text'] for b in blocks)
@@ -3866,19 +3872,25 @@ def validate_article(article):
 
 def validate_image_plans(plans, blocks):
     """Validate count-independent file/placement contracts, forbidding zero-image omission."""
+    from common.image_sanitizer import sanitize_caption_for_source
     if not isinstance(plans, list) or len(plans) < 1:
         raise RuntimeError('At least 1 image plan required (zero-image omission forbidden)')
     names, slots = [], []
     for plan in plans:
         name = plan.get('filename', '')
         source, material_id = plan.get('source', 'generated'), plan.get('materialId', '')
-        if source not in ('capture', 'original', 'diagram', 'generated'):
+        if source == 'diagram':
+            source = 'generated'
+            plan['source'] = 'generated'
+        if source not in ('capture', 'original', 'generated'):
             raise RuntimeError('Unsupported visual source')
         pattern = r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.(?:jpg|jpeg|png|webp)' if material_id else r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg'
         if not isinstance(name, str) or not re.fullmatch(pattern, name):
             raise RuntimeError('Safe image basename required')
         if source in ('capture', 'original') and not material_id:
             raise MaterialRequired('Real visual requires supplied materialId')
+        if isinstance(plan.get('caption'), str) and plan['caption'].strip():
+            plan['caption'] = sanitize_caption_for_source(plan['caption'], source_type=source)
         if not isinstance(plan.get('prompt', ''), str) or (not material_id and not plan.get('prompt', '').strip()) or not isinstance(plan.get('caption'), str) or not plan['caption'].strip():
             raise RuntimeError('Generation prompt or scene caption missing')
         if not material_id and re.search(r'\uC2E4\uC81C\s*\uCD2C\uC601', plan['caption'], re.I):
@@ -3923,7 +3935,7 @@ def render_preview(article, plans, folder):
             plan = plans[article['imageSlots'].index(i)]
             parts.append('<figure><img src="images/' + plan['filename'] + '" alt="' + html.escape(plan['caption'], quote=True) + '"><figcaption>' + html.escape(plan['caption']) + '</figcaption></figure>')
             md.append('![' + plan['caption'] + '](images/' + plan['filename'] + ')')
-    (folder / 'final.html').write_text('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{max-width:760px;margin:32px auto;padding:0 24px;font:16px/1.9 Arial,sans-serif;color:#222}h2{font-size:19px;color:#235144}p{margin:20px 0}img{max-width:100%}figure{margin:24px 0}figcaption{font-size:12px;color:#777;text-align:center}' + layout_css + '</style><h1>' + html.escape(article['title']) + '</h1>' + ''.join(parts), encoding='utf-8')
+    (folder / 'final.html').write_text('<!doctype html><meta charset="utf-8"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{max-width:760px;margin:32px auto;padding:0 24px;font:16px/1.9 Arial,sans-serif;color:#222}h2{font-size:19px;color:#235144}p{margin:20px 0}img{max-width:100%}figure{margin:24px 0}figcaption{font-size:12px;color:#777;text-align:center}' + layout_css + '</style><h1>' + html.escape(article['title']) + '</h1>' + ''.join(parts), encoding='utf-8')
     (folder / 'final.md').write_text('\n\n'.join(md), encoding='utf-8')
 
 
@@ -3978,7 +3990,7 @@ def agent_output_schema(role, source_urls=None):
                     "blocks": array(block, minimum=1), "draftMd": string()})
 
     if role == "image-maker":
-        plan = obj({"filename": string(), "source": enum_string(('capture', 'original', 'diagram', 'generated')),
+        plan = obj({"filename": string(), "source": enum_string(('capture', 'original', 'generated')),
                     "materialId": string(), "stepId": string(),
                     "prompt": string(), "caption": string(),
                     "afterBlock": integer(minimum=0), "purpose": string(), "viewpoint": string(), "placementReason": string()})
@@ -4867,6 +4879,7 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
             w_blocks = results['writer']['blocks']
             writer_title = results['writer']['title']
             main_kw = results.get('keyword-selector', {}).get('mainKeyword', '')
+            from common.image_sanitizer import sanitize_caption_for_source, is_synthetic_checkpoint_card_bytes
             target_min = min(3, max(1, len(w_blocks) - 1))
             if len(plans) < target_min:
                 existing_names = {str(p.get('filename', '')).lower() for p in plans if isinstance(p, dict)}
@@ -4875,9 +4888,8 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                     idx_num = len(plans) + 1
                     blk_idx = min(len(w_blocks) - 2 if len(w_blocks) > 1 else 0, (len(plans) + 1) * step_count)
                     blk_text = re.sub(r'\s+', ' ', w_blocks[blk_idx].get('text', '')).strip()[:80]
-                    is_diag = (idx_num % 2 == 1)
-                    src_type = 'diagram' if is_diag else 'generated'
-                    cap_str = f"핵심 확인 포인트 {idx_num}: {blk_text[:45]} 안내"
+                    src_type = 'generated'
+                    cap_str = sanitize_caption_for_source(f"{main_kw} 핵심 확인 포인트 {idx_num}: {blk_text[:40]}", source_type=src_type)
                     fname = build_seo_image_filename(
                         topic_or_slug=f"{main_kw} {writer_title}",
                         section_or_caption=cap_str,
@@ -4900,21 +4912,17 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                         'source': src_type,
                         'materialId': '',
                         'stepId': f'step_{idx_num}',
-                        'prompt': (
-                            f"100% crisp Korean summary checklist card for '{writer_title}' step {idx_num}"
-                            if is_diag else
-                            "First-person POV, top-down flat lay or eye-level close-up of object only, shot on iPhone, natural indoor lighting, no people, no human faces, no text, clean wooden desk with calculator, closed notebook and coffee cup"
-                        ),
+                        'prompt': f"Photorealistic direct subject visual scene representing {main_kw} ({writer_title}), realistic environment and facility or object detail, natural daylight, 16:9, no people, no human faces, no text, no watermark",
                         'caption': cap_str,
                         'alt': build_seo_alt_text(topic_title=writer_title, caption=cap_str, source_type=src_type, shot_index=idx_num),
                         'afterBlock': blk_idx,
-                        'purpose': f"본문 {idx_num}번째 핵심 구간의 판단 기준과 확인 순서를 직관적으로 요약합니다.",
-                        'viewpoint': '정면에서 보는 100% 정자체 핵심 기준 요약 카드' if is_diag else '1인칭 내 눈높이(POV) 무인 사물 클로즈업 스냅샷',
-                        'placementReason': '해당 설명 문단 직후에 배치하여 독자가 핵심 기준을 한눈에 대조할 수 있게 합니다.',
+                        'purpose': f"본문 {idx_num}번째 핵심 구간의 판단 기준과 확인 순서를 직관적으로 안내합니다.",
+                        'viewpoint': '주제 대상을 직관적으로 보여주는 무인 현장/사물 스냅샷',
+                        'placementReason': '해당 설명 문단 직후에 배치하여 독자가 핵심 내용을 직관적으로 이해할 수 있게 합니다.',
                     })
                 result['imagePlans'] = plans
             if not isinstance(result.get('selectionReason'), str) or not result['selectionReason'].strip():
-                result['selectionReason'] = '독자의 직관적 이해와 간접체험을 위해 핵심 구간별 정자체 요약표 및 1인칭 무인 스냅샷 시각자료를 배치합니다.'
+                result['selectionReason'] = '독자의 직관적 이해와 간접체험을 위해 핵심 구간별 주제 직관 시각자료를 배치합니다.'
             valid_mat_ids = {str(m.get('materialId') or m.get('filename') or '') for m in (materials or []) if isinstance(m, dict)} - {''}
             used_slots, seen_caps, seen_fnames = set(), set(), set()
             for p_idx, p in enumerate(plans):
@@ -4922,9 +4930,9 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                 if mat_id not in valid_mat_ids:
                     mat_id = ''
                 p['materialId'] = mat_id
-                src_val = p.get('source') if p.get('source') in ('capture', 'original', 'diagram', 'generated') else 'generated'
+                src_val = p.get('source') if p.get('source') in ('capture', 'original', 'generated') else 'generated'
                 if src_val in ('capture', 'original') and not mat_id:
-                    src_val = 'diagram' if (p_idx == 0) else 'generated'
+                    src_val = 'generated'
                 p['source'] = src_val
                 orig_fn = str(p.get('filename') or '')
                 raw_stem = os.path.splitext(orig_fn)[0]
@@ -4952,7 +4960,7 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                 if not isinstance(p.get('stepId'), str) or not p['stepId'].strip():
                     p['stepId'] = f"step_{p_idx + 1}"
                 if not isinstance(p.get('prompt'), str) or not p['prompt'].strip():
-                    p['prompt'] = "First-person POV, top-down flat lay or eye-level close-up of object only, shot on iPhone, natural indoor lighting, no people, no human faces, no text, clean everyday objects on wooden table"
+                    p['prompt'] = f"Photorealistic direct subject visual scene of {main_kw} ({writer_title}), realistic environment and object detail, natural daylight, 16:9, no people, no human faces, no text, no watermark"
                 try:
                     slot = max(0, min(int(p.get('afterBlock', p_idx)), len(w_blocks) - 1))
                 except (ValueError, TypeError):
@@ -4961,22 +4969,26 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                     slot = min((s for s in range(len(w_blocks)) if s not in used_slots), key=lambda c: abs(c - slot))
                 p['afterBlock'] = slot
                 used_slots.add(slot)
-                cap = re.sub(r'실제\s*촬영', '안내 장면', (p.get('caption') or '').strip()) if not mat_id else (p.get('caption') or '').strip()
+                raw_cap = (p.get('caption') or '').strip()
+                cap = sanitize_caption_for_source(raw_cap, source_type=src_val) if not mat_id else raw_cap
                 if not cap:
                     cap = f"{writer_title[:30]} 핵심 안내 ({p_idx + 1})"
                 if cap in seen_caps:
                     cap = f"{cap} ({p_idx + 1})"
                 p['caption'] = cap
-                p['alt'] = str(p.get('alt') or build_seo_alt_text(
-                    topic_title=writer_title,
-                    caption=cap,
+                p['alt'] = sanitize_caption_for_source(
+                    str(p.get('alt') or build_seo_alt_text(
+                        topic_title=writer_title,
+                        caption=cap,
+                        source_type=src_val,
+                        shot_index=p_idx + 1,
+                    )).strip(),
                     source_type=src_val,
-                    shot_index=p_idx + 1,
-                )).strip()
+                )
                 seen_caps.add(cap)
                 for k, default_val in (
                     ('purpose', '독자의 핵심 판단 및 확인 절차를 돕는 시각 안내'),
-                    ('viewpoint', '1인칭 내 눈높이 무인 사물 스냅샷 및 정자체 요약 카드'),
+                    ('viewpoint', '주제 대상을 직관적으로 보여주는 무인 현장/사물 스냅샷'),
                     ('placementReason', '본문 핵심 설명 직후 독자의 이해를 돕기 위해 배치'),
                 ):
                     if not isinstance(p.get(k), str) or not p[k].strip():
@@ -4986,16 +4998,21 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
             bind_material_plans(plans, materials, folder)
             for p in plans:
                 photo = image_dir / p.get('filename', '')
+                # If an existing file on disk is a synthetic CHECKPOINT card, delete it so Flow generates a real visual
+                if photo.is_file() and photo.stat().st_size > 0:
+                    try:
+                        if is_synthetic_checkpoint_card_bytes(photo.read_bytes()):
+                            photo.unlink()
+                    except Exception:
+                        pass
                 if not photo.is_file() or not photo.stat().st_size:
-                    if p.get('source') != 'diagram':
-                        p['source'] = 'generated'
+                    p['source'] = 'generated'
                     p.pop('materialId', None)
                     if not p.get('prompt') or not p['prompt'].strip():
-                        p['prompt'] = "First-person POV, top-down flat lay or eye-level close-up of object only, shot on iPhone, natural indoor lighting, no people, no human faces, no text, clean objects on wooden table"
-            # Only send non-diagram generated plans to Flow AI; diagram plans are rendered directly with 100% crisp Malgun Gothic below!
+                        p['prompt'] = f"Photorealistic direct subject visual scene of {main_kw} ({writer_title}), realistic environment and object detail, natural daylight, 16:9, no people, no human faces, no text, no watermark"
             generated_plans = [
                 p for p in plans
-                if p.get('source') != 'diagram' and (not (image_dir / p['filename']).is_file() or not (image_dir / p['filename']).stat().st_size)
+                if not (image_dir / p['filename']).is_file() or not (image_dir / p['filename']).stat().st_size
             ]
             if generated_plans:
                 try:
@@ -5004,42 +5021,16 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                     print(f"[generate_photos] Notice: {exc}", flush=True)
             elif reused_photos:
                 outputs.append('reused-photo-source.json')
+            valid_plans = []
             for i, p in enumerate(plans):
                 photo = image_dir / p['filename']
                 if not photo.is_file() or not photo.stat().st_size:
-                    print(f"[image-maker] Generating 100% crisp Korean true-font summary card for {p['filename']}", flush=True)
-                    from PIL import Image as PILImage, ImageDraw, ImageFont
-                    fallback_img = PILImage.new('RGB', (1024, 768), color=(246, 249, 253))
-                    draw = ImageDraw.Draw(fallback_img)
-                    draw.rectangle([28, 28, 996, 740], fill=(255, 255, 255), outline=(210, 224, 242), width=3)
-                    draw.rectangle([28, 28, 996, 132], fill=(22, 70, 183) if i % 2 == 0 else (28, 93, 153))
-                    try:
-                        font_badge = ImageFont.truetype(r'C:\Windows\Fonts\malgunbd.ttf', 24)
-                        font_title = ImageFont.truetype(r'C:\Windows\Fonts\malgunbd.ttf', 32)
-                        font_body = ImageFont.truetype(r'C:\Windows\Fonts\malgun.ttf', 25)
-                    except Exception:
-                        font_badge = font_title = font_body = ImageFont.load_default()
-                    draw.text((60, 64), f"CHECKPOINT 0{i+1} · 핵심 요약 가이드", fill=(255, 255, 255), font=font_badge)
-                    title_str = writer_title[:34]
-                    draw.text((60, 175), title_str, fill=(15, 23, 42), font=font_title)
-                    draw.line([(60, 235), (964, 235)], fill=(226, 232, 240), width=2)
-                    cap_str = p.get('caption', '')
-                    purp_str = p.get('purpose', '')
-                    blk_slot = min(max(0, p.get('afterBlock', 0)), len(w_blocks) - 1)
-                    blk_txt = re.sub(r'\s+', ' ', w_blocks[blk_slot].get('text', '')).strip()
-                    y_pos = 275
-                    for label_txt, content_txt, box_col in [
-                        ('확인 포인트', cap_str, (239, 246, 255)),
-                        ('핵심 내용', blk_txt[:110], (248, 250, 252)),
-                        ('점검 목적', purp_str, (254, 249, 239)),
-                    ]:
-                        draw.rectangle([60, y_pos, 964, y_pos + 125], fill=box_col, outline=(203, 213, 225), width=2)
-                        draw.text((84, y_pos + 18), f"• {label_txt}", fill=(22, 70, 183), font=font_badge)
-                        draw.text((84, y_pos + 58), content_txt[:42], fill=(30, 41, 59), font=font_body)
-                        if len(content_txt) > 42:
-                            draw.text((84, y_pos + 90), content_txt[42:84], fill=(51, 65, 85), font=font_body)
-                        y_pos += 145
-                    fallback_img.save(photo, 'JPEG', quality=92)
+                    print(f"[image-maker] Skipping missing image {p['filename']} (Fake CHECKPOINT card synthesis is permanently banned)", flush=True)
+                    continue
+                if is_synthetic_checkpoint_card_bytes(photo.read_bytes()):
+                    photo.unlink(missing_ok=True)
+                    print(f"[image-maker] Removed synthetic CHECKPOINT card {p['filename']}", flush=True)
+                    continue
                 # Run 4-Step Image Sanitizer: strip AI metadata, crop watermark (if generated), and inject account smartphone EXIF
                 try:
                     sanitize_image_file(
@@ -5056,6 +5047,11 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
                 with Image.open(photo) as image:
                     image.verify()
                 outputs.append('images/' + p['filename'])
+                valid_plans.append(p)
+            plans = valid_plans
+            result['imagePlans'] = plans
+            if not plans:
+                raise RuntimeError("No valid Flow/capture images available (synthetic CHECKPOINT fallback is permanently disabled)")
             if len({sha(image_dir / p['filename']) for p in plans}) != len(plans):
                 print(f"[image-maker] Warning: Duplicate photo SHA detected, allowing assembly to proceed.", flush=True)
             def judge_images(request, paths, schema):

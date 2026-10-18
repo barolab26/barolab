@@ -2,7 +2,7 @@
   "schema": "threads-measurement-v1",
   "status": "partial",
   "complete": false,
-  "collected_at": "2026-10-18T05:38:42.220748+00:00",
+  "collected_at": "2026-10-18T11:43:41.166230+00:00",
   "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
   "windows": {
     "24h": {
@@ -11,8 +11,8 @@
       "captured_parts": 0
     },
     "72h": {
-      "status": "not_due",
-      "due_parts": 0,
+      "status": "partial",
+      "due_parts": 1,
       "captured_parts": 0
     },
     "7d": {
@@ -64,6 +64,39 @@
             "start_date": "2026-10-15",
             "end_date": "2026-10-17"
           }
+        },
+        "72h": {
+          "target_hours": 72,
+          "captured_at": "2026-10-18T11:43:41.166230+00:00",
+          "actual_age_hours": 72.399,
+          "capture_lag_hours": 0.399,
+          "platform": {
+            "status": "collected",
+            "scope": "platform_reported_lifetime_post_metrics",
+            "metrics": {
+              "views": 0,
+              "likes": 0,
+              "replies": 0,
+              "reposts": 0,
+              "quotes": 0,
+              "shares": 0
+            },
+            "collected_at": "2026-10-18T11:43:45.061780+00:00"
+          },
+          "ga4": {
+            "status": "collection_error",
+            "complete": false,
+            "sessions": null,
+            "engaged_sessions": null,
+            "page_views": null,
+            "source": "GA4 Data API",
+            "timezone": "Asia/Seoul",
+            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+            "provisional": true,
+            "reason": "ga4_ValueError",
+            "start_date": "2026-10-15",
+            "end_date": "2026-10-17"
+          }
         }
       }
     },
@@ -99,6 +132,17 @@
       "published_at": "2026-10-18T03:38:48+00:00",
       "publication_time_basis": "api_timestamp",
       "snapshots": {}
+    },
+    {
+      "part_id": "dff78e2118be4085b64ecff63ba758a2-0",
+      "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
+      "platform_id": "17998602047823391",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DeoWCrQHxDQ",
+      "format": "unclassified",
+      "topic": "unclassified",
+      "published_at": "2026-10-18T09:18:50+00:00",
+      "publication_time_basis": "api_timestamp",
+      "snapshots": {}
     }
   ],
   "account_metrics": {
@@ -106,14 +150,14 @@
     "clicks": 0,
     "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
     "requested_since": "2026-10-15T11:19:14.891210+00:00",
-    "requested_until": "2026-10-18T05:38:42.220748+00:00",
-    "collected_at": "2026-10-18T05:38:44.175361+00:00"
+    "requested_until": "2026-10-18T11:43:41.166230+00:00",
+    "collected_at": "2026-10-18T11:43:42.359299+00:00"
   },
   "revenue": null,
   "revenue_status": "publisher_attribution_unverified",
   "feedback": {
     "status": "insufficient_data",
-    "computedAt": "2026-10-18T05:38:42.220748+00:00",
+    "computedAt": "2026-10-18T11:43:41.166230+00:00",
     "checkpoint": null,
     "comparablePosts": 0,
     "evidence": [],

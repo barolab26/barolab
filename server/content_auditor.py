@@ -580,10 +580,10 @@ def _inspect_local_output_for_fake_ai_prompts(slug: str, title: str) -> List[str
 def _check_images_and_suitability(domain: str, title: str, content_html: str, slug: str = "") -> Dict[str, Any]:
     """
     Checklist #4: [시각적 어색함 검열 & 이미지 메타데이터(EXIF) 정밀 감식]
-    1. 3인칭 인물 연출 사진 적발 -> `🔴 이미지 교체 대상`
-    2. 깨진 한글/외계어 서류 이미지 적발 -> 실제 공식 사이트 캡처(`capture_guide.py`) 또는 정자체 요약표로 교체
+    1. 조잡한 프로그래밍 생성 도표(`CHECKPOINT #` / `정자체 가이드`) 적발 -> 즉시 제거 및 반응형 HTML `<table>` 전환
+    2. 3인칭 인물 연출 사진 / 깨진 한글 외계어 서류 이미지 적발 -> `🔴 이미지 교체 대상`
     3. AI 워터마크(`✦`) 및 메타데이터(C2PA/XMP/Software) 오염 적발 -> `common/image_sanitizer.py`로 즉시 세탁 및 스마트폰 EXIF 주입 후 재업로드
-    4. 성의 없는 파일명(`photo_01.jpg`) 적발 -> SEO 키워드 슬러그 파일명 및 `alt` 속성 바인딩
+    4. 거짓 캡션(`~화면 캡처`, `~지도 캡처`, `~배치도 캡처`, `~실사`) 및 마크다운 별표(`**`)/깨진 유니코드(`⌧`) 적발 -> 즉시 정화
     """
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
@@ -601,8 +601,9 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
     exif_contaminated_urls: List[str] = []
     watermark_suspect_urls: List[str] = []
     generic_filename_urls: List[str] = []
+    synthetic_checkpoint_urls: List[str] = []
 
-    for idx_i, img in enumerate(imgs[:4]):
+    for idx_i, img in enumerate(imgs[:6]):
         src = (img.get("src") or "").strip()
         alt_str = (img.get("alt") or "").strip()
         cap_str = captions[idx_i] if idx_i < len(captions) else ""
@@ -626,6 +627,8 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
                 )
                 f_res["url"] = src
                 forensic_results.append(f_res)
+                if f_res.get("isSyntheticCheckpointCard"):
+                    synthetic_checkpoint_urls.append(src)
                 if f_res.get("hasAiMetadataTrace") or not f_res.get("hasCleanSmartphoneExif"):
                     exif_contaminated_urls.append(src)
                 if f_res.get("hasCornerWatermarkSuspect"):
@@ -638,7 +641,7 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
     needs_real_capture = any(kw in title for kw in CAPTURE_REQUIRED_KEYWORDS)
     has_ai_disclaimer = any("AI" in p.get_text(" ", strip=True) and "이해를 돕기" in p.get_text(" ", strip=True) for p in soup.find_all("p"))
     capture_evidence_in_caption = any(
-        any(w in cap for w in ("화면", "메뉴", "클릭", "입력", "캡처", "버튼", "조회", "신청", "표"))
+        any(w in cap for w in ("화면", "메뉴", "클릭", "입력", "버튼", "조회", "신청", "표"))
         for cap in captions
     )
 
@@ -656,14 +659,12 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
     has_r2_flow_ai_img = any(
         ("r2.dev" in u or "/images/" in u or "flow" in u.lower())
         and "capture" not in u.lower()
-        and "diagram" not in u.lower()
-        and "summary-table" not in u.lower()
         for u in checked_urls
     )
 
     third_person_portrait_detected = bool(prompt_hits) or (has_ai_disclaimer and is_doc_or_policy_topic)
     broken_korean_text_detected = bool(is_doc_or_policy_topic and has_r2_flow_ai_img and not capture_evidence_in_caption)
-    has_fake_person_or_broken_text_ai = third_person_portrait_detected or broken_korean_text_detected
+    has_fake_person_or_broken_text_ai = bool(synthetic_checkpoint_urls) or third_person_portrait_detected or broken_korean_text_detected
     has_watermark_or_exif_contamination = bool(exif_contaminated_urls or watermark_suspect_urls)
     target_device = get_device_profile(domain)["label"]
 
@@ -674,6 +675,13 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
         suitability = "broken"
         verdict_badge = "🔴 이미지 깨짐 (즉시 복구 대상)"
         issue = f"깨진 이미지 {len(broken_urls)}건 감지 ({broken_urls[0][:50]}...)"
+    elif synthetic_checkpoint_urls:
+        suitability = "synthetic_checkpoint_card"
+        verdict_badge = "🔴 가짜 도표 이미지 적발 (`CHECKPOINT #` / `정자체 가이드` 즉시 제거 대상)"
+        issue = (
+            f"🔴 [가짜 도표 적발] 조잡한 프로그래밍 생성 카드(`CHECKPOINT #` / `정자체 가이드`) {len(synthetic_checkpoint_urls)}장 적발 ➔ "
+            f"가짜 이미지 즉시 제거 및 반응형 HTML `<table>`·정직한 캡션으로 교정"
+        )
     elif total_imgs == 0:
         suitability = "missing"
         verdict_badge = "🔴 이미지 누락 (시각자료 0장)"
@@ -684,7 +692,7 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
         hit_note = f" (감지: {prompt_hits[0]})" if prompt_hits else ""
         issue = (
             f"🔴 [이미지 교체 대상] 3인칭 가짜 인물 사진·깨진 한글 서류 및 AI 워터마크(✦)/메타데이터 오염 적발{hit_note} ➔ "
-            f"실제 캡처·정자체 요약표 및 클린 EXIF({target_device}) 이미지로 즉시 세탁·교체"
+            f"실제 캡처·고품질 주제 비주얼 및 클린 EXIF({target_device}) 이미지로 즉시 세탁·교체"
         )
     elif has_watermark_or_exif_contamination:
         suitability = "watermark_or_exif_contaminated"
@@ -706,6 +714,8 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
         "totalImages": total_imgs,
         "brokenCount": len(broken_urls),
         "brokenUrls": broken_urls,
+        "syntheticCheckpointCount": len(synthetic_checkpoint_urls),
+        "syntheticCheckpointUrls": synthetic_checkpoint_urls,
         "needsRealCapture": needs_real_capture,
         "hasAiDisclaimer": has_ai_disclaimer,
         "hasFakePersonOrBrokenTextAi": has_fake_person_or_broken_text_ai,
@@ -864,20 +874,21 @@ def remediate_post_images_with_sanitizer(
 ) -> Dict[str, Any]:
     """
     When `@닥터 (Doctor)` detects:
+      - Synthetic `CHECKPOINT #` / `정자체 가이드` PIL card images (`synthetic_checkpoint_card`), OR
       - 3rd-person human posed AI photos / broken Korean text documents (`fake_person_or_broken_text_ai`), OR
       - AI watermark (`✦`) / EXIF metadata contamination (`watermark_or_exif_contaminated`),
-    immediately sanitize/replace the images using `common/image_sanitizer.py` + `render_crisp_korean_diagram_card`,
-    upload the clean EXIF SEO-named images (`{keyword-slug}-01.jpg`) to CF Media CDN, and update the live post!
+    immediately remove any synthetic `CHECKPOINT #` cards, sanitize genuine visual images using
+    `common/image_sanitizer.py`, clean dishonest captions / raw `**` / `⌧`, and update the live post!
     """
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
     from common.image_sanitizer import (
         sanitize_and_optimize_image_bytes,
-        build_seo_image_filename,
-        build_seo_alt_text,
+        sanitize_caption_for_source,
+        sanitize_html_pre_publish,
+        is_synthetic_checkpoint_card_bytes,
         get_device_profile,
     )
-    from cf_posting.pipeline_runner import render_crisp_korean_diagram_card
 
     post_id = post_detail.get("id")
     title = post_detail.get("title") or ""
@@ -886,9 +897,10 @@ def remediate_post_images_with_sanitizer(
     if not post_id or not content_html:
         return {"remediated": False, "reason": "No post_id or content_html"}
 
-    soup = BeautifulSoup(content_html, "html.parser")
+    cleaned_html, dom_report = sanitize_html_pre_publish(content_html)
+    soup = BeautifulSoup(cleaned_html, "html.parser")
     imgs = soup.find_all("img")
-    if not imgs:
+    if not imgs and dom_report.get("removedFigures", 0) == 0:
         return {"remediated": False, "reason": "No img tags found"}
 
     headers = _get_cf_auth_headers(domain)
@@ -896,48 +908,44 @@ def remediate_post_images_with_sanitizer(
     device_label = get_device_profile(domain)["label"]
     replaced_urls: List[str] = []
     seo_filenames: List[str] = []
-    tmp_dir = BASE_DIR / "server" / "data" / "tmp_sanitized"
-    tmp_dir.mkdir(parents=True, exist_ok=True)
+    removed_checkpoint_cards = int(dom_report.get("removedFigures", 0))
 
-    replace_with_diagram = bool(image_check.get("hasFakePersonOrBrokenTextAi"))
-
-    for idx_i, img in enumerate(imgs[:3], 1):
+    for idx_i, img in enumerate(list(soup.find_all("img"))[:6], 1):
         old_src = (img.get("src") or "").strip()
         if old_src.startswith("/"):
             old_src = f"https://www.{domain}{old_src}"
 
         fig = img.find_parent("figure")
         fc = fig.find("figcaption") if fig else None
-        cap_text = fc.get_text(" ", strip=True) if fc else f"{title} 핵심 기준 및 확인 체크포인트 ({idx_i})"
+        raw_cap = fc.get_text(" ", strip=True) if fc else f"{title} 핵심 확인 포인트 ({idx_i})"
+        cap_text = sanitize_caption_for_source(raw_cap, source_type="generated")
+        if fc and cap_text != raw_cap:
+            fc.string = cap_text
 
         try:
-            if replace_with_diagram and idx_i == 1:
-                # Replace fake-person / broken-Hangul document AI image with 100% crisp Malgun Gothic summary table card
-                tmp_card_path = tmp_dir / f"diag-{slug}-{idx_i}.jpg"
-                raw_bytes = render_crisp_korean_diagram_card(
-                    str(tmp_card_path),
-                    {"section": title[:38], "caption": cap_text},
-                    {"brand_name": DOMAIN_KEYWORD_MATRIX.get(domain, {}).get("brand", domain), "domain": domain, "title": title},
-                    idx_i,
-                )
-                src_type = "diagram"
-            else:
-                r_dl = requests.get(old_src, timeout=10)
-                if r_dl.status_code >= 400 or len(r_dl.content) < 512:
-                    continue
-                raw_bytes = r_dl.content
-                src_type = "generated"
+            r_dl = requests.get(old_src, timeout=10)
+            if r_dl.status_code >= 400 or len(r_dl.content) < 512:
+                continue
+            raw_bytes = r_dl.content
+            if is_synthetic_checkpoint_card_bytes(raw_bytes):
+                # Permanently remove synthetic CHECKPOINT / 정자체 가이드 card from post DOM
+                if fig:
+                    fig.decompose()
+                else:
+                    img.decompose()
+                removed_checkpoint_cards += 1
+                continue
 
             clean_bytes, san_report = sanitize_and_optimize_image_bytes(
                 img_bytes=raw_bytes,
                 account_or_domain=domain,
-                source_type=src_type,
+                source_type="generated",
                 topic_or_slug=f"{slug} {title}",
                 caption=cap_text,
                 shot_index=idx_i,
             )
             seo_fname = san_report["seoFilename"]
-            seo_alt = san_report["seoAlt"]
+            seo_alt = sanitize_caption_for_source(san_report["seoAlt"], source_type="generated")
 
             files = {"file": (seo_fname, clean_bytes, "image/jpeg")}
             up_resp = requests.post(
@@ -965,23 +973,28 @@ def remediate_post_images_with_sanitizer(
         if "AI" in p_txt and "이해를 돕기" in p_txt:
             p_tag.decompose()
 
-    if not replaced_urls:
+    if not replaced_urls and removed_checkpoint_cards == 0 and dom_report.get("convertedBoldCount", 0) == 0:
         return {"remediated": False, "deviceLabel": device_label}
 
     new_html = str(soup)
+    remaining_imgs = [im.get("src") for im in soup.find_all("img") if (im.get("src") or "").strip()]
     post_detail_updated = dict(post_detail)
     post_detail_updated["content"] = new_html
-    post_detail_updated["thumbnail"] = replaced_urls[0]
-    post_detail_updated["og_image"] = replaced_urls[0]
+    if replaced_urls:
+        post_detail_updated["thumbnail"] = replaced_urls[0]
+        post_detail_updated["og_image"] = replaced_urls[0]
+    elif remaining_imgs:
+        post_detail_updated["thumbnail"] = remaining_imgs[0]
+        post_detail_updated["og_image"] = remaining_imgs[0]
     patch_res = patch_cf_post_category_live(domain, post_detail_updated, target_category)
 
     return {
         "remediated": bool(patch_res.get("ok")),
         "replacedCount": len(replaced_urls),
+        "removedCheckpointCards": removed_checkpoint_cards,
         "replacedUrls": replaced_urls,
         "seoFilenames": seo_filenames,
         "deviceLabel": device_label,
-        "replacedFakePersonWithDiagram": replace_with_diagram,
         "httpStatus": patch_res.get("httpStatus"),
     }
 
@@ -1133,13 +1146,13 @@ def audit_single_cf_post(
         if remediation_res.get("remediated"):
             seo_fn_sample = (remediation_res.get("seoFilenames") or ["clean-exif-01.jpg"])[0]
             prescription = (
-                f"{domain}의 「{title}」 글에서 3인칭 가짜 인물/깨진 한글 사진 및 AI 워터마크(✦)·메타데이터 오염을 발견해 "
-                f"정자체 요약표·캡처 화면 및 클린 EXIF({dev_lbl}, `{seo_fn_sample}`) 이미지로 즉시 세탁·재업로드 완료 (+ @퍼블리 본문 보강 큐 등록)"
+                f"{domain}의 「{title}」 글에서 가짜 도표/비주얼 오염 또는 AI 워터마크(✦)·메타데이터 오염을 발견해 "
+                f"가짜 도표 제거·캡션 정화 및 클린 EXIF({dev_lbl}, `{seo_fn_sample}`) 이미지로 즉시 세탁·재업로드 완료 (+ @퍼블리 본문 보강 큐 등록)"
             )
-        elif image_check["suitability"] in ("fake_person_or_broken_text_ai", "watermark_or_exif_contaminated"):
+        elif image_check["suitability"] in ("synthetic_checkpoint_card", "fake_person_or_broken_text_ai", "watermark_or_exif_contaminated"):
             prescription = (
-                f"{domain}의 「{title}」 글에서 3인칭 가짜 인물 사진과 AI 워터마크(✦)/메타데이터 오염 적발 ➔ "
-                f"실제 캡처 화면·정자체 요약표 및 클린 EXIF({dev_lbl}) 이미지로 교체 큐 최우선 등록"
+                f"{domain}의 「{title}」 글에서 가짜 도표(`CHECKPOINT #`)·인물 연출 사진 또는 AI 워터마크(✦)/메타데이터 오염 적발 ➔ "
+                f"실제 캡처 화면·고품질 주제 비주얼 및 클린 EXIF({dev_lbl}) 이미지로 교체 큐 최우선 등록"
             )
         else:
             prescription = (

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-VISUAL_SOURCES = ("generated", "capture", "diagram", "photo")
+VISUAL_SOURCES = ("generated", "capture", "original", "photo")
 
 
 class MaterialRequired(Exception):

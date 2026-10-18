@@ -399,7 +399,7 @@ def validate_answer_brief(brief, original_question, facts, materials, question_c
     # Intake/pixel checks establish authenticity; the existing semantic review
     # checks whether this actual scene supports the section's stated purpose.
     material_index = {m['materialId']:m for m in materials}
-    scene_sources = ('capture',) if task['medium'] == 'screen' else ('capture','original','diagram')
+    scene_sources = ('capture',) if task['medium'] == 'screen' else ('capture','original','generated')
     missing_scenes = []
     # Visual plans will be fulfilled by image-maker via Flow AI; pre-writing captures are optional
     return True

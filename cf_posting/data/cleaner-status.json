@@ -1,10 +1,9 @@
 {
-  "checkedAt": "2026-10-18T20:20:43.079233+09:00",
-  "eligibleCount": 1,
+  "checkedAt": "2026-10-18T21:01:43.185005+09:00",
+  "eligibleCount": 0,
   "processedCount": 0,
   "publishedCount": 0,
-  "activeJob": {
-    "date": "2026-10-18",
-    "domain": "joynote.kr"
-  }
+  "activeJob": null,
+  "finishedAt": "2026-10-18T21:01:43.251986+09:00",
+  "heldJobs": []
 }

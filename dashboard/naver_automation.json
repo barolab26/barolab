@@ -2,7 +2,7 @@
   "date": "2026-10-18",
   "workDate": "2026-10-18",
   "publicationDate": "2026-10-18",
-  "checkedAt": "2026-10-18T20:22:36.981040+09:00",
+  "checkedAt": "2026-10-18T20:57:33.400803+09:00",
   "timezone": "Asia/Seoul",
   "startTime": "08:00",
   "startTimeMeaning": "당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인",
@@ -126,7 +126,7 @@
   ],
   "recovery": {
     "schema": "naver-recovery-plan-v1",
-    "checkedAt": "2026-10-18T20:23:01.071797+09:00",
+    "checkedAt": "2026-10-18T20:57:57.864302+09:00",
     "timezone": "Asia/Seoul",
     "items": [
       {
@@ -388,13 +388,13 @@
     "registered": true,
     "enabled": true,
     "state": "Running",
-    "nextRunAt": "2026-10-18T20:26:36.0000000+09:00",
-    "lastRunAt": "2026-10-18T20:21:37.0000000+09:00",
+    "nextRunAt": "2026-10-18T21:01:36.0000000+09:00",
+    "lastRunAt": "2026-10-18T20:56:37.0000000+09:00",
     "lastResult": 267009,
     "triggerEnabled": true,
     "taskName": "BaroLab-Naver-Daily",
-    "checkedAt": "2026-10-18T20:23:28.175579+09:00",
-    "attemptedAt": "2026-10-18T20:23:28.175579+09:00",
+    "checkedAt": "2026-10-18T20:58:25.322643+09:00",
+    "attemptedAt": "2026-10-18T20:58:25.322643+09:00",
     "sourceTimezone": "Asia/Seoul",
     "source": "Windows Task Scheduler read-only",
     "workflowMatches": true,
@@ -403,9 +403,9 @@
   },
   "publicVerification": {
     "status": "ok",
-    "checkedAt": "2026-10-18T20:22:36.082252+09:00",
+    "checkedAt": "2026-10-18T20:57:32.644572+09:00",
     "updated": 0,
-    "totalVerifiedEvidence": 47,
+    "totalVerifiedEvidence": 48,
     "errors": {}
   },
   "runner": {
@@ -417,7 +417,7 @@
     "activeScheduledSlot": null,
     "startedAt": "2026-10-18T00:17:10.414518+09:00",
     "lastHeartbeatAt": "2026-10-18T14:42:04.129801+09:00",
-    "observedAt": "2026-10-18T20:22:36.981040+09:00",
+    "observedAt": "2026-10-18T20:57:33.400803+09:00",
     "source": "pipeline OS lock and execution journal",
     "heartbeatMeaning": "actual journal stage update; monitor timestamp is not runner heartbeat"
   }

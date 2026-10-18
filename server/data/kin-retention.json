@@ -1,16 +1,58 @@
 {
-  "checkedAt": "2026-10-17T11:30:07.930751+00:00",
+  "checkedAt": "2026-10-18T11:30:15.031658+00:00",
   "scope": "up_to_100_initially_verified_pilot_and_trial_answers",
   "complete": true,
-  "initiallyVerified": 1,
-  "attemptedChecks": 1,
+  "initiallyVerified": 7,
+  "attemptedChecks": 7,
   "checks": [
+    {
+      "account": "stone0747",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=486320125&answerNo=2&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ==#answer3",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-18T11:30:13.369234+00:00"
+    },
+    {
+      "account": "adinfo0905",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495559634&answerNo=1&qb=6rCE7J2064yA7KeA6riJ6riI#answer3",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-18T11:30:13.573590+00:00"
+    },
+    {
+      "account": "adinfo0905",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=5010601&docId=463692705&answerNo=1&qb=7JWg7ZSM7JuM7LmYIOy2qeyghCDslYjrkKg=#answer2",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-18T11:30:13.971250+00:00"
+    },
+    {
+      "account": "stone0747",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=5010601&docId=482340466&answerNo=1&qb=7JWg7ZSM7JuM7LmYIOy2qeyghCDslYjrkKg=#answer3",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-18T11:30:14.259728+00:00"
+    },
+    {
+      "account": "adinfo0905",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=495595158&answerNo=1&qb=7ZmU64u07IiyIOyYiOyVvQ==#answer2",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-18T11:30:14.577143+00:00"
+    },
+    {
+      "account": "stone0747",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=4020201&docId=495470800#answer5",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-18T11:30:14.791026+00:00"
+    },
     {
       "account": "adinfo0905",
       "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632#answer4",
       "state": "unknown",
       "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-17T11:30:07.923229+00:00"
+      "checkedAt": "2026-10-18T11:30:14.995981+00:00"
     }
   ],
   "firstVerificationHistoryPreserved": true
