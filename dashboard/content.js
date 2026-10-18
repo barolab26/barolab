@@ -3,8 +3,16 @@
   'use strict';
   const $ = id => document.getElementById(id);
   if (!$('content-rows')) return;
-  const labels = {not_indexed:'미색인 확인', deep:'평균 100위 밖', opportunity:'평균 11~100위',
-    top:'평균 10위 이내', indexed_no_report:'색인 확인 · 실적 행 미확인', unknown:'색인·글별 실적 미확인'};
+  const PAGE_SIZE = 15;
+  const labels = {
+    all: '전체 공개 글',
+    not_indexed: '미색인 확인 · 원인 점검',
+    opportunity: '상승 후보 (11~50위·100위)',
+    top: '평균 10위 이내 · 유지',
+    deep: '평균 100위 밖 · 재검토',
+    indexed_no_report: '색인 확인 · 실적 미관측',
+    unknown: '개별 색인 검사 대기'
+  };
   const numbers = value => Number(value).toLocaleString('ko-KR');
   const decoded = value => { try { return decodeURI(value); } catch (_) { return value; } };
   const text = (parent, tag, value, className='') => {
@@ -18,17 +26,22 @@
   function render() {
     const selected = $('content-domain').value, bucket = $('content-bucket').value;
     const query = $('content-query').value.trim().toLocaleLowerCase();
-    for(const button of $('content-counts').querySelectorAll('button')) button.setAttribute('aria-pressed',String(button.dataset.bucket===bucket));
+    for(const button of $('content-counts').querySelectorAll('button')) {
+      const btnBucket = button.dataset.bucket;
+      const isPressed = btnBucket === bucket || (bucket === 'inspection_pending' && btnBucket === 'unknown');
+      button.setAttribute('aria-pressed', String(isPressed));
+      button.classList.toggle('active', isPressed);
+    }
     const rows = data.rows.filter(r => (selected === 'all' || r.domain === selected) &&
       (bucket === 'all' || (bucket === 'inspection_pending' ? r.index === 'unknown' : r.bucket === bucket)) && decoded(r.url).toLocaleLowerCase().includes(query));
     const order = {not_indexed:0,deep:1,opportunity:2,top:3,indexed_no_report:4,unknown:5};
     rows.sort((a,b)=>order[a.bucket]-order[b.bucket] || (b.search?.impressions || 0)-(a.search?.impressions || 0) || a.url.localeCompare(b.url));
-    const pages = Math.max(1, Math.ceil(rows.length/50));page=Math.min(page,pages-1);
-    $('content-result-count').textContent = `조건에 맞는 글 ${numbers(rows.length)}개 · 50개씩 표시`;
+    const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));page=Math.min(page,pages-1);
+    $('content-result-count').textContent = `조건에 맞는 글 ${numbers(rows.length)}개 · 페이지당 ${PAGE_SIZE}개 표시`;
     $('content-page').textContent = `${page+1} / ${pages}`;
     $('content-prev').disabled = page === 0;$('content-next').disabled = page === pages-1;
     const body = $('content-rows');body.replaceChildren();
-    for (const row of rows.slice(page*50,page*50+50)) {
+    for (const row of rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)) {
       const tr=document.createElement('tr'), title=document.createElement('td');
       const link=text(title,'a',decoded(new URL(row.url).pathname).slice(1) || row.domain);
       link.href=row.url;link.target='_blank';link.rel='noopener noreferrer';
@@ -55,14 +68,18 @@
     }
     if(!rows.length){const tr=document.createElement('tr');const td=text(tr,'td','조건에 맞는 글 없음');td.colSpan=4;body.appendChild(tr);}
   }
-  for(const id of ['content-domain','content-bucket','content-query']) $(id).addEventListener('input',()=>{page=0;render();});
+  for(const id of ['content-domain','content-bucket','content-query']) {
+    $(id).addEventListener('input',()=>{page=0;render();});
+    $(id).addEventListener('change',()=>{page=0;render();});
+  }
   $('content-prev').addEventListener('click',()=>{page--;render();});
   $('content-next').addEventListener('click',()=>{page++;render();});
   window.BaroLabContent = {render(next){
     data=next || {rows:[],counts:{}};
     const inspected=data.rows.filter(r=>r.index!=='unknown').length;
     const pending = Object.entries(data.inspectionPendingReasons || {}).map(([label,count])=>`${label} ${numbers(count)}개`).join(' · ');
-    $('content-coverage').textContent=`공개 글 ${numbers(data.inventoryTotal || 0)}개 · 현재 개별 색인 확인 ${numbers(inspected)}/${numbers(data.inventoryTotal || 0)}개 · ${pending} · 전체 목록 확인 ${data.inventoryDomains || 0}/${data.expectedDomains || 16}개 도메인 · 글별 검색 실적 ${data.pageReportDomains || 0}/${data.expectedDomains || 16}개 도메인. 미확인은 미색인 판정이 아닙니다.`;
+    $('content-coverage').textContent=`공개 글 ${numbers(data.inventoryTotal || 0)}개 · 개별 색인 확인 ${numbers(inspected)}/${numbers(data.inventoryTotal || 0)}개 · 도메인 ${data.inventoryDomains || 0}/${data.expectedDomains || 16}개`;
+    if (pending) $('content-coverage').title = `${pending} · 미확인은 미색인 판정이 아닙니다.`;
     const domain=$('content-domain'),previous=domain.value;domain.replaceChildren();
     const all=text(domain,'option','전체 CF 도메인');all.value='all';
     for(const name of [...new Set(data.rows.map(r=>r.domain))].sort()) text(domain,'option',name).value=name;
@@ -71,9 +88,16 @@
     for(const [key,label] of Object.entries(labels)){
       const button=text(cards,'button','');button.type='button';
       button.dataset.bucket=key;
-      text(button,'span',label);text(button,'strong',`${numbers(data.counts[key] || 0)}개`);
+      const countVal = key === 'all' ? (data.rows?.length || data.inventoryTotal || 0) : (data.counts[key] || 0);
+      text(button,'span',label);text(button,'strong',`${numbers(countVal)}개`);
       if(['top','opportunity','deep'].includes(key)) text(button,'span',`노출 10회 미만 ${numbers(data.rows.filter(r=>r.bucket===key&&r.search?.impressions<10).length)}개 포함`);
-      button.addEventListener('click',()=>{$('content-bucket').value=key;page=0;render();});
+      button.addEventListener('click',()=>{
+        const bucketSelect = $('content-bucket');
+        if (bucketSelect) {
+          bucketSelect.value = key;
+          bucketSelect.dispatchEvent(new Event('change'));
+        }
+      });
     }
     render();
   },failed(){ $('content-coverage').textContent='관리 목록 조회 실패 · 화면의 값은 이전 조회 결과입니다.'; }};

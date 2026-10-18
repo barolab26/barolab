@@ -2,9 +2,9 @@
   "schema": "metrics-runtime-v2",
   "runId": "9c1b5e2963b54f1bbd3f4373eb55ac28",
   "pid": 22476,
-  "status": "running",
+  "status": "completed",
   "startedAt": "2026-10-18T10:36:42.476909+00:00",
-  "checkedAt": "2026-10-18T10:41:10.337660+00:00",
+  "checkedAt": "2026-10-18T10:42:41.538141+00:00",
   "stages": [
     {
       "script": "dashboard/revenue.py",
@@ -30,21 +30,25 @@
     },
     {
       "script": "dashboard/metrics.py",
-      "status": "running",
+      "status": "completed",
       "startedAt": "2026-10-18T10:37:27.834560+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-18T10:14:30.930972+00:00",
+      "lastProcessSuccessAt": "2026-10-18T10:42:41.412305+00:00",
       "helperPid": 17504,
-      "elapsedSeconds": 222.4
+      "elapsedSeconds": 313.5,
+      "exitCode": 0,
+      "finishedAt": "2026-10-18T10:42:41.412321+00:00"
     }
   ],
   "budgetSeconds": 1500,
-  "lastProcessSuccessAt": "2026-10-18T10:14:31.135629+00:00",
+  "lastProcessSuccessAt": "2026-10-18T10:42:41.538127+00:00",
   "lastSuccessAt": null,
   "lastCollectionSuccessAt": null,
   "previousInterrupted": false,
   "previousStartedAt": "2026-10-18T10:06:41.968293+00:00",
   "successMeaning": "process_exit_zero_not_source_collection",
   "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
-  "currentStage": "dashboard/metrics.py"
+  "currentStage": null,
+  "finishedAt": "2026-10-18T10:42:41.538127+00:00",
+  "collectionStatus": "partial"
 }

@@ -438,8 +438,14 @@
       if(Number.isSafeInteger(owner.attempted)) queueParts.push(`최근 실행 시도 ${number(owner.attempted)}건 · 완료 ${number(owner.completed)}건${Number.isSafeInteger(owner.maxUrls)?` · 최근 회차 상한 ${number(owner.maxUrls)}건`:''}`);
       if(owner.nextRetryAt) queueParts.push(`다음 재시도 ${timeLabel(owner.nextRetryAt)}`);
       if(automation.status) queueParts.push(`수집기 ${{running:'검사 진행 중',collected:'수집 완료',completed:'실행 완료',partial:'일부 수집',busy:'기존 검사 진행 중',browser_busy:'다른 계정 작업 사용 중',backoff:'검사 제한 재시도 대기',error:'실행 오류',idle:'다음 실행 대기',scheduled:'예약됨'}[automation.status] || automation.status}`);
-      if(owner.reason) queueParts.push(owner.reason);
-      set('inspection-automation-status',queueParts.length ? `${queueParts.join(' · ')} · 상태 확인만 수행하며 색인 요청·발행은 하지 않습니다.` : '자동 검사 실행 이력 조회 중 · 미확인을 미색인으로 판정하지 않습니다.');
+      const autoStatusNode = document.getElementById('inspection-automation-status');
+      const fullAutoText = queueParts.length ? `${queueParts.join(' · ')} · 상태 확인만 수행하며 색인 요청·발행은 하지 않습니다.` : '자동 검사 실행 이력 조회 중';
+      if (autoStatusNode) {
+        autoStatusNode.title = fullAutoText;
+        autoStatusNode.textContent = Number.isSafeInteger(collection.currentInspected)
+          ? `ⓘ 자동 색인 점검 (${number(collection.currentInspected)} / ${number(collection.total)}건 확인)`
+          : 'ⓘ 자동 색인 점검 이력';
+      }
       const traffic = data.traffic || {};
       const reasons = [...new Set((data.sites || []).filter(r => r.site?.platform === 'cf').map(r => r.google?.reason).filter(Boolean))];
       set('metric-index-badge', index.complete ? '전체 확인' : index.inspected ? '일부 확인' : reasons.some(r => r.includes('403') || r.includes('권한')) ? '검사 권한 확인 필요' : '자동 확인 미연결');

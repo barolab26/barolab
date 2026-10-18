@@ -106,19 +106,33 @@
     const attributed = ga.status !== 'error' && !ga.stale && !report?.limited && !report?.sourceLimited && report?.sourceReconciled === true
       && attribution?.status === 'collected' && countKnown(attribution.qualifiedExternalSessions)
       && canonicalKeys.every(key => countKnown(attribution.canonicalExternalSessions?.[key]));
-    let attributionBox = $('traffic-qualified-sources');
-    if (!attributionBox && $('traffic-source-warning')) {
-      attributionBox = document.createElement('p'); attributionBox.id = 'traffic-qualified-sources';
-      attributionBox.className = 'traffic-note'; attributionBox.setAttribute('aria-live', 'polite');
-      $('traffic-source-warning').insertAdjacentElement('afterend', attributionBox);
-    }
-    const canonicalLabels = {naver_blog:'네이버 블로그',naver_kin:'지식인',naver_cafe:'카페',threads:'Threads'};
+    const canonicalLabels = {naver_blog:'네이버 블로그',naver_kin:'지식iN',naver_cafe:'카페',threads:'Threads'};
     const exclusionLabels = {local:'로컬',self:'자기 사이트',internal:'내부 출처'};
     const exclusionText = Object.entries(exclusionLabels).map(([key,label]) =>
-      `${label} ${attributed && countKnown(attribution.exclusions?.[key]) ? number(attribution.exclusions[key]) + '회' : '미확정'}`).join(' · ');
-    set('traffic-qualified-sources', `외부 원시 세션: ${report && !report.sourceLimited && report.sourceReconciled === true && countKnown(report.mix?.external) ? number(report.mix.external) + '회' : '미확정'} | 알려진 내부 출처 제외 후: ${attributed ? number(attribution.qualifiedExternalSessions) + '회' : '미확정'} | `
-      + Object.entries(canonicalLabels).map(([key,label]) => `${label} ${attributed ? number(attribution.canonicalExternalSessions[key]) + '회' : '미확정'}`).join(' · ')
-      + ` | 제외 내역: ${exclusionText} · 실제 사람 방문이나 매출 기여를 확인한 수치는 아닙니다.`);
+      `${label} ${attributed && countKnown(attribution.exclusions?.[key]) ? number(attribution.exclusions[key]) + '회' : '—'}`).join(' · ');
+    const qEl = $('traffic-qualified-sources');
+    if (qEl) {
+      qEl.textContent = `외부 유입(${selected}): ` + Object.entries(canonicalLabels).map(([key,label]) => `${label} ${attributed ? number(attribution.canonicalExternalSessions[key]) + '회' : '—'}`).join(' · ');
+      qEl.title = `외부 원시 세션: ${report && countKnown(report.mix?.external) ? number(report.mix.external) + '회' : '미확정'} | 내부 제외 후: ${attributed ? number(attribution.qualifiedExternalSessions) + '회' : '미확정'} | 제외(${exclusionText})`;
+    }
+    // Aggregate 16 CF domains external inbound for the Tab 2 right-column summary card
+    const extTotals = { naver_blog: 0, naver_kin: 0, naver_cafe: 0, threads: 0, rawExternal: 0, qualified: 0 };
+    for (const sRec of sites) {
+      const sRep = sRec.ga4?.periods?.[period === 'today' ? 'day' : period];
+      if (!sRep) continue;
+      if (countKnown(sRep.mix?.external)) extTotals.rawExternal += sRep.mix.external;
+      const sAttr = sRep.sourceAttribution;
+      if (sAttr?.status === 'collected') {
+        if (countKnown(sAttr.qualifiedExternalSessions)) extTotals.qualified += sAttr.qualifiedExternalSessions;
+        for (const k of canonicalKeys) {
+          if (countKnown(sAttr.canonicalExternalSessions?.[k])) extTotals[k] += sAttr.canonicalExternalSessions[k];
+        }
+      }
+    }
+    set('ext-inbound-kin', `${number(extTotals.naver_kin)}세션`);
+    set('ext-inbound-threads', `${number(extTotals.threads)}세션`);
+    set('ext-inbound-blog', `${number(extTotals.naver_blog)}세션`);
+    set('ext-inbound-total', `외부유입 총 ${number(extTotals.qualified || extTotals.rawExternal)}세션`);
     set('metric-bridge-label', `${selected} · 내부 출처 제외 네이버 세션`);
     const naverSessions = attributed ? ['naver_blog','naver_kin','naver_cafe'].reduce((sum,key) => sum + attribution.canonicalExternalSessions[key], 0) : null;
     set('metric-bridge-landings', naverSessions === null ? '미확정' : `${number(naverSessions)}회`);
@@ -216,26 +230,27 @@
       .sort((a,b) => b.clicks - a.clicks || b.impressions - a.impressions || a.position - b.position);
     set('traffic-keyword-status', report ? `${report.start} ~ ${report.end} · ${source.timezone} · ${source.source || ''} · ${report.partialPeriod ? '제공 가능한 기간만 집계 · ' : ''}${source.stale ? '이전 수집값 · ' : ''}${number(report.impressions)}회 노출 / ${number(report.clicks)}회 클릭 · 조건 ${queries.length}행${queries.length>100?' 중 상위 100행 표시':''}`
       : source.reason || (engine === 'bing' ? 'Bing 웹마스터 검색 보고서 미연결' : '검색 보고서 미연결'));
-    set('traffic-keyword-note', engine === 'google' ? '평균 게재순위는 고정 검색 순위가 아닙니다. 상위 검색어/URL만 제공되며 비공개 검색어는 제외됩니다. 검색 클릭과 GA4 방문자는 집계 기준이 다릅니다.'
-      : engine === 'naver' ? '네이버 검색 유입은 위 GA4에서 확인합니다. 서치어드바이저의 키워드/노출/클릭 보고서 연결이 필요하며, 고정 순위는 해당 보고서에서 제공하지 않습니다.'
-      : 'Bing 검색 유입은 GA4 출처 내역에서 확인할 수 있습니다. 검색어·노출·순위는 Bing 웹마스터 보고서 연결 후 표시합니다.');
+    const tipText = engine === 'google' ? '평균 게재순위는 고정 검색 순위가 아닙니다. 상위 검색어/URL만 제공되며 비공개 검색어는 제외됩니다.'
+      : engine === 'naver' ? '네이버 검색 유입은 위 GA4에서 확인합니다. 서치어드바이저의 키워드/노출/클릭 보고서 기준입니다.'
+      : 'Bing 웹마스터 보고서 연결 기준입니다.';
     if (portal) {
       const statusNames={partial:'일부 보고서',stale:'이전 확인 자료',collected:'보고서 확인',not_connected:'미연결',report_unavailable:'보고서 미제공',error:'조회 실패',backoff:'재시도 대기'};
       const checked=source.checkedAt ? new Date(source.checkedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '미확인';
-      const scope=engine==='naver' ? source.period?.label || '서치어드바이저 제공 기간 · 날짜 범위 미확정'
-        : `등록 속성 ${source.property || '미확인'} · API 제공 날짜 기준 (선택한 일/주/월과 다름)`;
-      const totals=engine==='naver' ? ` · 클릭 ${number(source.clicks)} · 노출 ${source.impressionsDisplay ? source.impressionsDisplay+' (반올림 표시)' : number(source.impressions)}` : '';
-      set('traffic-keyword-status',`${source.source || (engine==='naver'?'Naver Search Advisor':'Bing Webmaster')} · ${statusNames[source.status] || '미확인'}${source.stale?' · 수집 지연':''} · 원본 확인 ${checked} · ${scope}${totals} · 제공 검색어 ${source.queries?.length ?? '미확인'}행 / 조건 ${queries.length}행${queries.length>100?' 중 상위 100행 표시':''}`);
-      set('traffic-keyword-note',engine==='naver'
-        ? '검증한 UI의 최근 보고서·상위 행만 표시합니다. 자동 지속 수집 확인과 구분하며 전체 키워드가 아닙니다. 네이버 순위는 미제공이므로 순위 필터로 판단하지 않습니다.'
-        : '등록 속성의 과거 API 보고서·상위 행입니다. 평균 위치는 실시간 검색 순위가 아닙니다. 빈 응답·미수집은 미노출 또는 0을 뜻하지 않습니다.');
+      const scope=engine==='naver' ? source.period?.label || '서치어드바이저 제공 기간'
+        : `등록 속성 ${source.property || '미확인'}`;
+      const totals=engine==='naver' ? ` · 클릭 ${number(source.clicks)} · 노출 ${source.impressionsDisplay ? source.impressionsDisplay : number(source.impressions)}` : '';
+      set('traffic-keyword-status',`${source.source || (engine==='naver'?'Naver Search Advisor':'Bing Webmaster')} · ${statusNames[source.status] || '미확인'}${source.stale?' · 수집 지연':''} · 확인 ${checked} · ${scope}${totals} · 조건 ${queries.length}행${queries.length>100?' (상위 100행)':''}`);
     }
     const tracking=record.keywordTracking || {}, observations=tracking.observations || [];
     const latestDate=observations.map(q=>q.date).filter(Boolean).sort().at(-1);
     const observed=observations.filter(q=>q.date===latestDate && q.status==='observed' && typeof q.position==='number' && Number.isFinite(q.position));
-    const trackingTime=observations.map(q=>q.observedAt || q.checkedAt).filter(Boolean).sort().at(-1);
     const note=$('traffic-keyword-note');
-    if(note) note.textContent+=` · ${record.site.site_id} GSC 일평균 위치 추적: 대상 ${tracking.watchlist?.length ?? 0}개, 관측 ${observed.length}개 / 미관측 ${Math.max(0,(tracking.watchlist?.length ?? 0)-observed.length)}개 · 확인 ${trackingTime ? new Date(trackingTime).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '미확인'} · 실시간 SERP ${tracking.liveSerp?.status==='not_connected'?'미연결':'연결 상태 미확인'}`;
+    if(note) {
+      note.textContent = `${record.site.site_id} 관심 키워드 추적: 대상 ${tracking.watchlist?.length ?? 0}개 중 관측 ${observed.length}개`;
+      note.title = tipText;
+    }
+    const kwTip = $('traffic-keyword-tip');
+    if (kwTip) kwTip.title = tipText;
     for (const query of queries.slice(0,100)) {
       const row = document.createElement('tr'); const queryCell=cell(row, query.query);
       if(engine==='bing') {
@@ -257,10 +272,10 @@
       } catch (_) { cell(row,'주소 미확인'); }
       body.appendChild(row);
     }
-    if (!body.children.length) { const row=document.createElement('tr'); const node=cell(row, report ? '조건에 맞는 공개 검색어 없음 · 미관측을 미노출이나 0으로 확정하지 않습니다.' : source.reason || '검색어 보고서 미수집'); node.colSpan=6;body.appendChild(row); }
+    if (!body.children.length) { const row=document.createElement('tr'); const node=cell(row, report ? '조건에 맞는 공개 검색어 없음' : source.reason || '검색어 보고서 미수집'); node.colSpan=6;body.appendChild(row); }
   }
   function renderTrend(record) {
-    const target=$('traffic-trend'); target.replaceChildren();
+    const target=$('traffic-trend'); if(!target) return; target.replaceChildren();
     const points=record.ga4?.daily || [], max=Math.max(1,...points.map(p=>p.users));
     for (const point of points) {
       const bar=document.createElement('div');bar.className='traffic-trend-day';
@@ -277,16 +292,7 @@
   for(const id of ['traffic-rank-limit','traffic-min-impressions','traffic-query-filter','traffic-keyword-scope']) $(id)?.addEventListener('input',render);
   if($('traffic-rank-limit') && ['5','10','50','100','11-50'].includes(params.get('rank'))) $('traffic-rank-limit').value=params.get('rank');
   if($('traffic-keyword-scope') && params.get('scope')==='all') $('traffic-keyword-scope').value='all';
-  const sectionLinks=Array.from(document.querySelectorAll('.growth-tabs a'));
-  function markSection() {
-    const active=location.hash || '#growth-action-center';
-    for(const link of sectionLinks) {
-      if(link.getAttribute('href')===active) link.setAttribute('aria-current','location');
-      else link.removeAttribute('aria-current');
-    }
-  }
-  markSection();window.addEventListener('hashchange',markSection);
-  window.BaroLabTraffic = { coverage, render(next) {
+  window.BaroLabTraffic = { coverage, getData: () => data, render(next) {
     data=next;
     if ($('traffic-period')) $('traffic-period').value=period;
     if ($('traffic-engine')) $('traffic-engine').value=engine;
@@ -301,6 +307,7 @@
       select.value=selected;
     }
     render();
+    window.BaroLabTopKpi?.refresh();
   }, failed() {
     set('traffic-collected','보고서 조회 실패 · 화면에 남은 값은 이전 조회 결과입니다.');
     set('rank-source','보고서 조회 실패 · 아래 순위는 이전 조회 결과입니다.');

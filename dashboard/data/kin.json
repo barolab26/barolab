@@ -1,16 +1,27 @@
 {
   "schema": "naver-kin-pilot-v1",
-  "checkedAt": "2026-10-18T10:40:04.671813+00:00",
+  "checkedAt": "2026-10-18T10:50:04.515306+00:00",
   "accounts": [
     "adinfo0905",
     "stone0747"
   ],
   "counts": {
     "published_verified": 7,
-    "submitted_unverified": 2,
+    "submitted_unverified": 3,
     "discovered": 4
   },
   "recent": [
+    {
+      "account": "adinfo0905",
+      "state": "submitted_unverified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=31204&docId=490302353&answerNo=1&qb=64+E7J6Q6riwIOqzteuwqQ==",
+      "updated_at": "2026-10-18T10:47:30.691545+00:00",
+      "send_day": "2026-10-18",
+      "title": "도예 공방",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=31204&docId=490302353&answerNo=1&qb=64+E7J6Q6riwIOqzteuwqQ==",
+      "track": "track_a_latest",
+      "target_domain": "must-joy.com"
+    },
     {
       "account": "stone0747",
       "state": "published_verified",
@@ -152,7 +163,7 @@
     }
   ],
   "trackCounts": {
-    "track_a_latest": 3,
+    "track_a_latest": 4,
     "track_b_search_top": 6
   },
   "inboundSessions": null,
@@ -163,6 +174,7 @@
   "byAccount": {
     "adinfo0905": {
       "published_verified": 4,
+      "submitted_unverified": 1,
       "discovered": 4
     },
     "stone0747": {
@@ -174,15 +186,15 @@
   "accountBlockedReasons": {},
   "daily": {
     "date": "2026-10-18",
-    "attempted": 8,
+    "attempted": 9,
     "publishedVerified": 6,
     "remainingScheduled": 14,
-    "retryAttemptsToday": 2,
+    "retryAttemptsToday": 3,
     "globalCap": 20,
     "accountCap": 10,
     "byAccount": {
       "adinfo0905": {
-        "attempted": 3,
+        "attempted": 4,
         "publishedVerified": 3,
         "remainingScheduled": 7
       },
@@ -195,7 +207,7 @@
   },
   "measurement": {
     "schema": "naver-kin-measurement-v1",
-    "checkedAt": "2026-10-18T19:22:46.639089+09:00",
+    "checkedAt": "2026-10-18T19:47:31.628252+09:00",
     "source": "GA4 Data API",
     "timezone": "Asia/Seoul",
     "startDate": "2026-10-15",
@@ -257,9 +269,9 @@
     "dailyFunnel": [
       {
         "day": "2026-10-18",
-        "discovered": 10,
-        "drafted": 8,
-        "attempted": 8,
+        "discovered": 11,
+        "drafted": 9,
+        "attempted": 9,
         "published_verified": 6
       },
       {
@@ -325,13 +337,13 @@
   },
   "schedule": {
     "schema": "naver-kin-automation-state-v1",
-    "checkedAt": "2026-10-18T10:40:03.244954+00:00",
+    "checkedAt": "2026-10-18T10:50:03.020372+00:00",
     "startDate": "2026-10-15",
     "endDate": "2026-10-21",
     "enabled": true,
     "continuousMode": true,
     "mode": "alternating_interval",
-    "intervalMinutes": 19,
+    "intervalMinutes": 21,
     "intervalJitterMinutes": [
       18,
       22
@@ -344,10 +356,10 @@
     "measurementStatus": "not_attempted",
     "dryRun": false,
     "reason": "minimum_interval_not_elapsed",
-    "lastRunAt": "2026-10-18T19:22:51.191022+09:00",
-    "lastAccount": "stone0747",
-    "nextEligibleAt": "2026-10-18T19:41:51.191022+09:00",
-    "nextAccount": "adinfo0905",
+    "lastRunAt": "2026-10-18T19:47:35.280511+09:00",
+    "lastAccount": "adinfo0905",
+    "nextEligibleAt": "2026-10-18T20:08:35.280511+09:00",
+    "nextAccount": "stone0747",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
@@ -360,7 +372,7 @@
       "adinfo0905": 3,
       "stone0747": 3
     },
-    "retryAttemptsToday": 2,
+    "retryAttemptsToday": 3,
     "globalRemainingRuns": 14,
     "byAccountRemainingRuns": {
       "adinfo0905": 7,
@@ -368,15 +380,15 @@
     },
     "registeredTasks": {
       "status": "observed",
-      "checkedAt": "2026-10-18T10:40:04.548770+00:00",
+      "checkedAt": "2026-10-18T10:50:04.359064+00:00",
       "tasks": [
         {
           "taskName": "BaroLab-Kin-Seven-Day-Pilot",
           "registered": true,
           "enabled": true,
           "state": "Running",
-          "nextRunAt": "2026-10-18T19:45:00.0000000+09:00",
-          "lastRunAt": "2026-10-18T19:40:01.0000000+09:00",
+          "nextRunAt": "2026-10-18T19:55:00.0000000+09:00",
+          "lastRunAt": "2026-10-18T19:50:01.0000000+09:00",
           "lastResult": 267009,
           "actions": [
             {
@@ -440,13 +452,13 @@
     "scheduleDescription": "작업 종료 후 18~22분 지터(평균 20분) 계정 교대 · 개별 계정 40~45분 안전 텀 · 하루 20건(계정당 10건)",
     "lastRun": {
       "schema": "naver-kin-automation-state-v1",
-      "checkedAt": "2026-10-18T10:40:03.244954+00:00",
+      "checkedAt": "2026-10-18T10:50:03.020372+00:00",
       "startDate": "2026-10-15",
       "endDate": "2026-10-21",
       "enabled": true,
       "continuousMode": true,
       "mode": "alternating_interval",
-      "intervalMinutes": 19,
+      "intervalMinutes": 21,
       "intervalJitterMinutes": [
         18,
         22
@@ -459,10 +471,10 @@
       "measurementStatus": "not_attempted",
       "dryRun": false,
       "reason": "minimum_interval_not_elapsed",
-      "lastRunAt": "2026-10-18T19:22:51.191022+09:00",
-      "lastAccount": "stone0747",
-      "nextEligibleAt": "2026-10-18T19:41:51.191022+09:00",
-      "nextAccount": "adinfo0905",
+      "lastRunAt": "2026-10-18T19:47:35.280511+09:00",
+      "lastAccount": "adinfo0905",
+      "nextEligibleAt": "2026-10-18T20:08:35.280511+09:00",
+      "nextAccount": "stone0747",
       "activeRunId": null,
       "activeAccount": null,
       "activeStartedAt": null,
@@ -475,7 +487,7 @@
         "adinfo0905": 3,
         "stone0747": 3
       },
-      "retryAttemptsToday": 2,
+      "retryAttemptsToday": 3,
       "globalRemainingRuns": 14,
       "byAccountRemainingRuns": {
         "adinfo0905": 7,
@@ -483,15 +495,15 @@
       },
       "registeredTasks": {
         "status": "observed",
-        "checkedAt": "2026-10-18T10:40:04.548770+00:00",
+        "checkedAt": "2026-10-18T10:50:04.359064+00:00",
         "tasks": [
           {
             "taskName": "BaroLab-Kin-Seven-Day-Pilot",
             "registered": true,
             "enabled": true,
             "state": "Running",
-            "nextRunAt": "2026-10-18T19:45:00.0000000+09:00",
-            "lastRunAt": "2026-10-18T19:40:01.0000000+09:00",
+            "nextRunAt": "2026-10-18T19:55:00.0000000+09:00",
+            "lastRunAt": "2026-10-18T19:50:01.0000000+09:00",
             "lastResult": 267009,
             "actions": [
               {
@@ -518,9 +530,9 @@
         ]
       }
     },
-    "lastRunAt": "2026-10-18T19:22:51.191022+09:00",
-    "nextEligibleAt": "2026-10-18T19:41:51.191022+09:00",
-    "nextAccount": "adinfo0905",
+    "lastRunAt": "2026-10-18T19:47:35.280511+09:00",
+    "nextEligibleAt": "2026-10-18T20:08:35.280511+09:00",
+    "nextAccount": "stone0747",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
@@ -538,18 +550,18 @@
       "adinfo0905": 3,
       "stone0747": 3
     },
-    "retryAttemptsToday": 2,
-    "checkedAt": "2026-10-18T10:40:03.244954+00:00",
+    "retryAttemptsToday": 3,
+    "checkedAt": "2026-10-18T10:50:03.020372+00:00",
     "state": "waiting",
     "lastOperation": {
-      "account": "stone0747",
-      "state": "published_verified",
+      "account": "adinfo0905",
+      "state": "submitted_unverified",
       "reason": null,
-      "updatedAt": "2026-10-18T10:22:46.503902+00:00",
-      "questionId": "486320125",
-      "questionState": "published_verified",
+      "updatedAt": "2026-10-18T10:47:31.414487+00:00",
+      "questionId": "490302353",
+      "questionState": "submitted_unverified",
       "submissionAttempted": true,
-      "submitted": true
+      "submitted": null
     }
   }
 }

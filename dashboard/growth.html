@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>성장 대시보드 · BaroLab</title>
-<link rel="stylesheet" href="traffic.css">
-<link rel="stylesheet" href="growth-actions.css?v=20261014-growth-1">
+<link rel="stylesheet" href="traffic.css?v=20261018-spa-tabs1">
+<link rel="stylesheet" href="growth-actions.css?v=20261018-spa-tabs1">
 <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
 <link rel="stylesheet" href="signature_deck.css?v=20261018-deck-v3">
 <style>
@@ -12,20 +12,26 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 4px;
   }
   .growth-gauge-card {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #cbd5e1;
     border-radius: 12px;
-    padding: 10px 13px;
-    min-height: 94px;
-    max-height: 102px;
+    padding: 11px 14px;
+    min-height: 96px;
     display: flex;
     align-items: center;
     gap: 11px;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.85);
     overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .growth-gauge-card:hover {
+    transform: translateY(-1px);
+    border-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
   }
   .growth-gauge-card * {
     word-break: keep-all;
@@ -36,27 +42,27 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
   }
   .growth-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 800;
     color: #475569;
     white-space: nowrap;
   }
   .growth-card-pill {
-    padding: 1px 7px;
+    padding: 2px 8px;
     border-radius: 999px;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 800;
     white-space: nowrap;
   }
   .growth-card-headline {
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 900;
     color: #0f172a;
     letter-spacing: -0.03em;
@@ -73,18 +79,55 @@
     padding: 1px;
     overflow: hidden;
   }
-  .growth-seg-piece { height: 100%; border-radius: 2px; }
+  .growth-seg-piece { height: 100%; border-radius: 2px; transition: width 0.35s ease; }
   .growth-micro-legend {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 10.5px;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 700;
     color: #334155;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ext-inbound-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .ext-inbound-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    padding: 8px 10px;
+  }
+  .ext-inbound-box span {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .ext-inbound-box strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 900;
+    color: #0f172a;
+    margin-top: 2px;
+  }
+  .ext-inbound-box small {
+    display: block;
+    font-size: 10px;
+    color: #475569;
+    margin-top: 2px;
   }
   @media (max-width: 1280px) {
     .growth-deck-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 680px) {
+    .growth-deck-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -99,7 +142,7 @@
         <span>📈 성장 · 수익 분석 데크 (GSC · GA4 · 닥터 리모델링)</span>
         <span class="header-badge" id="metrics-refresh-status" role="status" aria-live="polite" style="background:rgba(16,185,129,0.18)!important;border-color:rgba(16,185,129,0.45)!important;color:#6ee7b7!important;">🟢 실시간 원천 연동</span>
       </h1>
-      <p>16개 CF 도메인 · 네이버 5계정 방문자 · 닥터 7대 정밀 검진(1,974건 무삭제 리모델링) · 애드센스/애드포스트 수익 원천</p>
+      <p>16개 CF 도메인 · 네이버 5계정 방문자 · 닥터 7대 정밀 검진 · 애드센스/애드포스트 수익 원천</p>
     </div>
     <div class="toolbar">
       <button class="btn-quick" id="btn-manual-refresh" type="button" style="cursor:pointer;">⚡ 통계 새로고침</button>
@@ -107,305 +150,690 @@
     </div>
   </header>
 
-  <!-- [BAROLAB DECK V3] 4-Card ARGO Precision Gauge Row for Growth & Revenue -->
-  <section class="growth-deck-grid" aria-label="성장 및 리모델링 정밀 계기판">
-    <article class="growth-gauge-card">
-      <div style="width:62px;height:62px;flex:0 0 62px;position:relative;">
-        <svg viewBox="0 0 68 68" style="width:62px;height:62px;">
-          <circle cx="34" cy="34" r="28.5" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-dasharray="1.4 3.57" />
-          <circle cx="34" cy="34" r="22.5" fill="none" stroke="#e2e8f0" stroke-width="5.2" />
-          <circle cx="34" cy="34" r="22.5" fill="none" stroke="#10b981" stroke-width="5.2" stroke-linecap="round" stroke-dasharray="141.4" stroke-dashoffset="0" transform="rotate(-90 34 34)" />
-          <polygon points="34,12 32.3,34 35.7,34" fill="#059669" transform="rotate(40 34 34)" />
-          <circle cx="34" cy="34" r="3.6" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
-        </svg>
+  <!-- 1. 최상단 고정 '4대 핵심 KPI 요약 바 (Top KPI Strip)' -->
+  <section class="growth-deck-grid top-kpi-strip" aria-label="4대 핵심 KPI 요약 바">
+    <!-- KPI 1: 오늘 / 이번 달 총수익 -->
+    <article class="growth-gauge-card" data-goto-tab="tab-revenue" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border-color:#334155;color:#f8fafc;" title="클릭 시 [탭 1: 수익 · 도메인 성적표]로 이동">
+      <div class="growth-card-body">
+        <div class="growth-card-top" style="color:#cbd5e1;">
+          <span>💰 오늘 / 이번 달 총수익</span>
+          <span class="growth-card-pill" id="kpi-rev-pct" style="background:rgba(16,185,129,0.22);color:#6ee7b7;border:1px solid rgba(16,185,129,0.45);">일 목표 $100</span>
+        </div>
+        <div class="growth-card-headline" id="kpi-rev-today" style="color:#f8fafc;">오늘 $0.04 · 이번 달 $3.93</div>
+        <div class="growth-seg-bar" style="background:rgba(255,255,255,0.14);">
+          <div class="growth-seg-piece" id="kpi-rev-bar" style="width:4%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
+        </div>
+        <div class="growth-micro-legend" id="kpi-rev-month" style="color:#94a3b8;">
+          <span>AdSense 실시간</span>
+          <span>일 목표 $100 달성 게이지</span>
+        </div>
       </div>
+    </article>
+
+    <!-- KPI 2: 전체 방문자 (CF 16 + 네이버 5) -->
+    <article class="growth-gauge-card" data-goto-tab="tab-traffic" title="클릭 시 [탭 2: 방문자 · 검색어 분석]으로 이동">
       <div class="growth-card-body">
         <div class="growth-card-top">
-          <span>🌐 CF 도메인 · GSC 연동</span>
-          <span class="growth-card-pill" style="background:#dcfce7;color:#047857;border:1px solid #6ee7b7;">16 / 16 활성</span>
+          <span>👥 전체 방문자 (CF 16 + 네이버 5)</span>
+          <span class="growth-card-pill" id="kpi-vis-pill" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;">GA4 + 카운터</span>
         </div>
-        <div class="growth-card-headline">CF 16개 도메인 · 28일 비교</div>
+        <div class="growth-card-headline" id="kpi-vis-headline">CF 7일 274명 · 네이버 오늘 집계 중</div>
         <div class="growth-seg-bar">
-          <div class="growth-seg-piece" style="width:75%;background:#10b981;"></div>
-          <div class="growth-seg-piece" style="width:25%;background:#3b82f6;"></div>
+          <div class="growth-seg-piece" id="kpi-vis-bar-cf" style="width:65%;background:#10b981;"></div>
+          <div class="growth-seg-piece" id="kpi-vis-bar-naver" style="width:35%;background:#3b82f6;"></div>
         </div>
         <div class="growth-micro-legend">
-          <span>🟢 정상 색인·노출</span>
-          <span>🔵 상승 후보 추적</span>
+          <span id="kpi-vis-cf">🌐 CF 7일/오늘 집계 중</span>
+          <span id="kpi-vis-naver">🟢 네이버 오늘/어제 집계 중</span>
         </div>
       </div>
     </article>
 
-    <article class="growth-gauge-card">
-      <div style="width:74px;height:54px;flex:0 0 74px;">
-        <svg viewBox="0 0 84 50" style="width:74px;height:46px;">
-          <path d="M 8 43 A 34 34 0 0 1 76 43" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-dasharray="1.5 3.15" />
-          <path d="M 13 43 A 29 29 0 0 1 71 43" fill="none" stroke="#e2e8f0" stroke-width="5.5" stroke-linecap="round" />
-          <path d="M 13 43 A 29 29 0 0 1 71 43" fill="none" stroke="#0ea5e9" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="91.1" stroke-dashoffset="22" />
-          <polygon points="42,15 40.2,43 43.8,43" fill="#0284c7" transform="rotate(35 42 43)" />
-          <circle cx="42" cy="43" r="3.8" fill="#0f172a" stroke="#0ea5e9" stroke-width="1.5" />
-        </svg>
-      </div>
+    <!-- KPI 3: 전체 색인 건강도 -->
+    <article class="growth-gauge-card" data-goto-tab="tab-content" title="클릭 시 [탭 3: 전체 글 색인 · 순위 관리]로 이동">
       <div class="growth-card-body">
         <div class="growth-card-top">
-          <span>🩺 닥터 7대 정밀 검진</span>
-          <span class="growth-card-pill" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;">무삭제 재생</span>
+          <span>🔍 전체 색인 건강도</span>
+          <span class="growth-card-pill" id="kpi-idx-pill" style="background:#dcfce7;color:#047857;border:1px solid #6ee7b7;">16 / 16 제출완료</span>
         </div>
-        <div class="growth-card-headline">전체 1,974건 · 일일 20건 할당</div>
+        <div class="growth-card-headline" id="kpi-idx-headline">색인 533 / 1,866건 (28.6%)</div>
         <div class="growth-seg-bar">
-          <div class="growth-seg-piece" style="width:45%;background:#10b981;"></div>
-          <div class="growth-seg-piece" style="width:35%;background:#3b82f6;"></div>
-          <div class="growth-seg-piece" style="width:20%;background:#f59e0b;"></div>
+          <div class="growth-seg-piece" id="kpi-idx-bar" style="width:29%;background:#10b981;"></div>
+          <div class="growth-seg-piece" id="kpi-idx-wait-bar" style="width:71%;background:#f59e0b;"></div>
         </div>
-        <div class="growth-micro-legend">
-          <span>🟢 A유지</span>
-          <span>🔵 B카테고리</span>
-          <span>🟡 C리모델링</span>
+        <div class="growth-micro-legend" id="kpi-idx-sub">
+          <span>🟢 색인 완료 확인</span>
+          <span>🟡 미색인·점검 대기</span>
         </div>
       </div>
     </article>
 
-    <article class="growth-gauge-card">
-      <div class="growth-card-body" style="gap:5px;">
-        <div class="growth-card-top">
-          <span>📊 채널별 트래픽 · 유입 파이프</span>
-          <span class="growth-card-pill" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">GA4 · 카운터</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <div style="display:grid;grid-template-columns:108px 1fr 48px;align-items:center;gap:6px;font-size:11px;font-weight:800;">
-            <span style="white-space:nowrap;">🌐 CF 16개 도메인</span>
-            <div class="growth-seg-bar"><div class="growth-seg-piece" style="width:88%;background:#10b981;"></div></div>
-            <span style="text-align:right;color:#047857;white-space:nowrap;">16채널</span>
-          </div>
-          <div style="display:grid;grid-template-columns:108px 1fr 48px;align-items:center;gap:6px;font-size:11px;font-weight:800;">
-            <span style="white-space:nowrap;">🟢 네이버 5계정</span>
-            <div class="growth-seg-bar"><div class="growth-seg-piece" style="width:72%;background:#3b82f6;"></div></div>
-            <span style="text-align:right;color:#1d4ed8;white-space:nowrap;">5계정</span>
-          </div>
-          <div style="display:grid;grid-template-columns:108px 1fr 48px;align-items:center;gap:6px;font-size:11px;font-weight:800;">
-            <span style="white-space:nowrap;">🚀 지식iN · 스레드</span>
-            <div class="growth-seg-bar"><div class="growth-seg-piece" style="width:65%;background:#8b5cf6;"></div></div>
-            <span style="text-align:right;color:#6d28d9;white-space:nowrap;">24슬롯</span>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="growth-gauge-card" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border-color:#334155;color:#f8fafc;">
+    <!-- KPI 4: 개선·리모델링 현황 -->
+    <article class="growth-gauge-card" data-goto-tab="tab-remodel" title="클릭 시 [탭 4: 개선 우선 글 · 리모델링 이력]으로 이동">
       <div class="growth-card-body">
-        <div class="growth-card-top" style="color:#94a3b8;">
-          <span>💰 통합 수익 원천 (KST)</span>
-          <span class="growth-card-pill" style="background:rgba(16,185,129,0.2);color:#6ee7b7;border:1px solid rgba(16,185,129,0.45);">원천 직결</span>
+        <div class="growth-card-top">
+          <span>🩺 개선·리모델링 현황</span>
+          <span class="growth-card-pill" id="kpi-rem-pill" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">상승 후보 추적</span>
         </div>
-        <div class="growth-card-headline" style="color:#f8fafc;">애드센스 · 애드포스트 · 제휴</div>
-        <div class="growth-seg-bar" style="background:rgba(255,255,255,0.12);">
-          <div class="growth-seg-piece" style="width:60%;background:#10b981;"></div>
-          <div class="growth-seg-piece" style="width:25%;background:#3b82f6;"></div>
-          <div class="growth-seg-piece" style="width:15%;background:#f59e0b;"></div>
+        <div class="growth-card-headline" id="kpi-rem-headline">상승 후보(11~50위) · 리모델링 가동</div>
+        <div class="growth-seg-bar">
+          <div class="growth-seg-piece" id="kpi-rem-bar" style="width:35%;background:linear-gradient(90deg,#0d9488,#2563eb);"></div>
         </div>
-        <div class="growth-micro-legend" style="color:#cbd5e1;">
-          <span>AdSense</span>
-          <span>AdPost</span>
-          <span>제휴마케팅</span>
+        <div class="growth-micro-legend" id="kpi-rem-sub">
+          <span>📈 11~50위 후보</span>
+          <span>🛠️ 자동·수동 개선 완료</span>
         </div>
       </div>
     </article>
   </section>
 
-  <nav class="growth-tabs" aria-label="성장 분석 섹션"><a href="#growth-action-center">성과 비교 · 개선 기록</a><a href="#content-management">기존 글 관리</a><a href="#domain-traffic">도메인·검색 분석</a><a href="#naver-traffic">네이버 방문자</a><a href="#growth-revenue">수익 분석</a></nav>
-  <section class="traffic-panel growth-action-panel" id="growth-action-center" aria-labelledby="growth-action-title">
-    <div class="traffic-head"><div><h2 id="growth-action-title">도메인 성과와 개선 기록</h2><p class="section-caption">같은 기간의 성과를 비교하고, 실제 수정 뒤 다시 확인하세요.</p></div><button type="button" class="btn-quick" id="growth-action-refresh">분석 새로고침</button></div>
-    <p class="revenue-meta" id="growth-comparison-period">28일 성과 비교 원천 확인 중</p>
-    <div class="growth-collection-health" id="growth-collection-health" role="status">지속 수집 상태 확인 중</div>
-    <div class="growth-action-summary" id="growth-action-summary"></div>
-    <div class="revenue-table-wrap"><table class="traffic-table"><thead><tr><th>도메인 · 비교 범위</th><th>노출<br>현재 / 이전</th><th>클릭<br>현재 / 이전</th><th>CTR<br>현재 / 이전</th><th>평균 순위<br>현재 / 이전</th><th>수익<br>현재 / 이전</th><th>성장 · 막힘</th></tr></thead><tbody id="growth-domain-comparison"></tbody></table></div>
-    <p class="revenue-note" id="growth-action-source">원천별 실제 기간·수집 범위를 확인합니다. 미수집을 0으로 계산하지 않습니다.</p>
-    <details class="growth-diagnosis" open><summary>변화의 근거와 다음 행동</summary><label class="growth-diagnosis-filter">진단할 도메인<select id="growth-diagnosis-domain"></select></label><div id="growth-diagnosis-content"></div></details>
-    <h3>근거가 있는 개선 우선 글</h3><div class="growth-priorities" id="growth-priorities"></div>
-    <h3>미색인 원인별 점검</h3><div class="growth-index-reasons" id="growth-index-reasons"></div>
-    <h3>공유 개선 기록</h3>
-    <form id="growth-action-form" class="growth-action-form">
-      <label>대상 도메인<select id="growth-record-domain" required></select></label>
-      <label>글 URL<input id="growth-record-url" type="url" required placeholder="https://www.example.com/article"></label>
-      <label>개선 내용<input id="growth-record-action" required maxlength="500" placeholder="추가할 답변·비교·근거 또는 해결할 색인 원인"></label>
-      <label>메모<textarea id="growth-record-note" maxlength="2000" placeholder="수정 전 근거와 확인할 내용을 남기세요."></textarea></label>
-      <button type="submit" class="btn-quick primary">개선 계획 기록</button><span id="growth-record-feedback" role="status" aria-live="polite"></span>
-    </form>
-    <p class="revenue-note">기록은 서버에 공유 저장합니다. 계획 → 진행 → 수정 완료 → 후속 성과 확인 순서로 관리하며, 이 화면은 글을 수정하거나 발행하지 않습니다. 후속 성과의 변화는 수정 효과를 단독으로 증명하지 않습니다.</p>
-    <div id="growth-action-records"></div>
-  </section>
-  <section class="traffic-panel growth-action-panel" id="auto-maintenance" aria-labelledby="maintenance-title">
-    <div class="traffic-head"><div><h2 id="maintenance-title">자동 콘텐츠 유지관리</h2><p class="section-caption">CF 기존 글 대상 · 조사 → 수정안 → 독립 검수 → 적용 → 공개 확인 → 후속 성과를 실제 기록으로 확인합니다.</p></div><button class="btn-quick" type="button" id="maintenance-refresh">상태 새로고침</button></div>
-    <p id="maintenance-status" class="revenue-meta" role="status">자동 운영 상태 조회 중</p><div id="maintenance-summary" class="growth-action-summary"></div><p id="maintenance-coverage" class="revenue-note"></p>
-    <form id="maintenance-policy-form" class="growth-action-form"><label>자동 점검 운영<input id="maintenance-enabled" type="checkbox">점검·조사 운영. 실제 수정은 검증된 적용 조건을 충족할 때 진행합니다.</label><label>회차당 작업 상한 · 현재 검증 범위 1건<input id="maintenance-max" type="number" min="1" max="1" step="1" required></label><label>같은 글 재작업 간격 · 시간<input id="maintenance-cooldown" type="number" min="672" max="2160" step="1" required></label><button type="submit" class="btn-quick primary">운영 설정 저장</button><span id="maintenance-policy-feedback" role="status" aria-live="polite"></span></form>
-    <p class="revenue-note">발행이 진행 중이면 유지관리 작업은 기다립니다. 근거 부족·가설만 있는 문제는 자동수정 대상에서 제외하며, 독립 검수 실패 또는 공개 확인 실패는 완료로 처리하지 않습니다.</p>
-    <h3>현재 작업과 대기 목록</h3><div id="maintenance-queue"></div><h3>변경·검수·공개 확인 영수증</h3><div id="maintenance-receipts"></div>
-  </section>
-  <section class="traffic-panel" id="doctor-remodeling-panel" aria-labelledby="doctor-remodel-title" style="border:2px solid #5eead4; background:linear-gradient(180deg,#ffffff 0%,#f0fdfa 100%); margin-bottom:20px;">
-    <div class="traffic-head">
-      <div>
-        <h2 id="doctor-remodel-title">🩺 기존 글 리모델링 게이지 (닥터 7대 정밀 검진 · 무삭제 재생 원장)</h2>
-        <p class="section-caption">일괄 삭제 페널티 없이 기존 글(1,974건)을 순찰하며 구버전 카테고리 즉시 재매핑(🔵B) 및 간접체험 리모델링(🟡C)을 수행합니다.</p>
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-quick primary" type="button" id="growth-btn-doctor-patrol" style="background:#0d9488; border-color:#0d9488; color:#fff;">🩺 5건 즉시 정밀 검진</button>
-        <a href="chat.html" class="overview-button">💬 회의실 수술 중계</a>
-      </div>
-    </div>
-    <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#0f172a; margin:8px 0 6px;">
-      <span id="growth-doctor-inv">전체 1,974건 중 0건 정밀 검진 완료</span>
-      <span id="growth-doctor-quota">오늘 리모델링 할당량: 0 / 20건 (0%)</span>
-    </div>
-    <div style="height:12px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin-bottom:10px;">
-      <div id="growth-doctor-bar" style="height:100%; width:10%; background:linear-gradient(90deg,#0d9488,#10b981,#2563eb); transition:width 0.4s;"></div>
-    </div>
-    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; font-size:12px; font-weight:800; text-align:center;">
-      <div style="padding:8px; border-radius:8px; background:#ecfdf5; border:1px solid #a7f3d0; color:#047857;" id="growth-doc-a">🟢 A등급 (정상 유지): 0건</div>
-      <div style="padding:8px; border-radius:8px; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8;" id="growth-doc-b">🔵 B등급 (카테고리 즉시 패치): 0건</div>
-      <div style="padding:8px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#b45309;" id="growth-doc-c">🟡 C등급 (@퍼블리 리모델링): 0건</div>
-      <div style="padding:8px; border-radius:8px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;" id="growth-doc-d">🔴 D등급 (안전 캡 보호): 0건</div>
-    </div>
-    <div class="revenue-table-wrap">
-      <table class="traffic-table">
-        <thead><tr><th>검진 도메인 · 브랜드</th><th>기존 글 제목</th><th>처방 등급</th><th>카테고리 재매핑</th><th>7대 정밀 처방 내역</th></tr></thead>
-        <tbody id="growth-doctor-rows"><tr><td colspan="5">닥터 검진 원장 조회 중...</td></tr></tbody>
-      </table>
-    </div>
-  </section>
-  <section class="traffic-panel" id="content-management" aria-labelledby="content-title">
-    <div class="traffic-head"><div><h2 id="content-title">기존 글 관리</h2><p class="section-caption">색인 점검부터 콘텐츠 보강까지, 상태별로 관리하세요.</p></div><a href="#domain-traffic" class="overview-button">검색어 분석</a></div>
-    <p class="revenue-meta" id="content-coverage">공개 글 목록과 색인·검색 실적 연결 중</p>
-    <p class="revenue-meta" id="inspection-automation-status">자동 색인 검사 실행 이력 조회 중</p>
-    <div class="content-grid" id="content-counts"></div>
-    <p class="revenue-note">색인 검사와 검색 실적을 구분합니다. 보고서에 없는 글을 미색인·노출 0으로 처리하지 않습니다. 순위는 최근 30일의 평균 게재순위이며, 검색 결과의 페이지 번호로 환산하지 않습니다.</p>
-    <div class="traffic-controls">
-      <label>도메인<select id="content-domain"><option value="all">전체 CF 도메인</option></select></label>
-      <label>관리 분류<select id="content-bucket"><option value="all">전체 글</option><option value="inspection_pending">개별 색인 미확인 · 검사 대기</option><option value="not_indexed">미색인 확인 · 원인 점검</option><option value="deep">평균 100위 밖 · 재검토</option><option value="opportunity">평균 11~100위 · 개선 후보</option><option value="top">평균 10위 이내 · 유지</option><option value="indexed_no_report">색인 확인 · 실적 행 미확인</option><option value="unknown">색인·글별 실적 미확인</option></select></label>
-      <label>URL 검색<input type="search" id="content-query" placeholder="주소 또는 글 주제"></label>
-    </div>
-    <p class="revenue-meta" id="content-result-count"></p>
-    <div class="revenue-table-wrap"><table class="traffic-table content-table" aria-label="CF 기존 글 관리 목록"><thead><tr><th>글 / 도메인</th><th>개별 색인 검사</th><th>최근 30일 검색 실적</th><th>다음 관리 작업</th></tr></thead><tbody id="content-rows"></tbody></table></div>
-    <div class="content-pagination"><button id="content-prev" type="button">이전</button><span id="content-page"></span><button id="content-next" type="button">다음</button></div>
-    <details><summary>상태별 처리 기준</summary><div class="content-guidance">
-      <p><strong>미색인:</strong> URL 검사 사유 → 접근·색인 설정 또는 내용·중복 점검 → 필요한 수정 → 재검사 순서로 처리합니다. 정상적인 대표 URL 제외는 별도로 판단합니다.</p>
-      <p><strong>깊은 순위:</strong> 노출된 검색어의 의도와 상위 글을 비교하고, 직접 확인한 정보·사례·비교·최신성을 보강합니다. 제목만 바꾸거나 분량만 늘리는 것을 개선으로 기록하지 않습니다.</p>
-      <p><strong>상승 후보:</strong> 노출이 반복되는 글부터 빠진 답변과 내부 링크를 보완하고, 수정 전후 같은 기간의 노출·클릭·방문을 비교합니다.</p>
-      <p><strong>미확인:</strong> 검사를 먼저 진행합니다. 색인 요청 접수는 색인 완료를 뜻하지 않으며, 글 삭제·통합은 콘텐츠 검토 후 결정합니다.</p>
-    </div></details>
-  </section>
-    <section class="traffic-panel" id="domain-traffic" aria-labelledby="traffic-title">
-      <div class="traffic-head"><div><h2 id="traffic-title">도메인별 방문자 · 유입 · 검색어</h2><p class="section-caption">기간별 방문자와 유입 경로를 비교하세요.</p></div><a href="index.html#revenue-title" class="overview-button">종합상황실 수익</a></div>
-      <p class="revenue-meta" id="traffic-connected">통계 원천 연결 확인 중</p>
-      <div class="traffic-controls">
-        <label>유입·검색어 비교 기간<select id="traffic-period"><option value="week">최근 7일 (어제까지)</option><option value="month" selected>최근 30일 (어제까지)</option><option value="day">하루 (어제)</option><option value="today">오늘 (집계 중)</option></select></label>
-        <label>상세 도메인<select id="traffic-domain"><option>조회 중</option></select></label>
-      </div>
-      <div class="revenue-table-wrap"><table class="traffic-table" aria-label="CF 도메인별 방문자와 유입 비교">
-        <thead><tr><th>도메인</th><th>하루 방문자<br>(어제)</th><th>7일 방문자<br>(어제까지)</th><th>30일 방문자<br>(어제까지)</th><th>검색 유입<br>(선택 기간)</th><th>외부 유입<br>(선택 기간)</th><th>Google 검색 노출<br>(확정 보고서)</th></tr></thead>
-        <tbody id="traffic-domains"></tbody>
-      </table></div>
-      <p class="revenue-note">방문자는 GA4가 측정한 기간 내 중복 제거 사용자 수입니다. 하루 방문자를 합쳐 7일·30일 방문자로 계산하지 않습니다. 유입 비중은 방문 횟수(세션) 기준이며, 네이버 검색과 블로그·카페 링크 유입을 구분합니다.</p>
-      <p class="revenue-meta" id="traffic-collected">수집 대기</p>
-      <details class="traffic-detail" open><summary id="traffic-domain-title" style="cursor:pointer;font-weight:700;">도메인 상세 분석</summary>
-        <p class="revenue-meta" id="traffic-range"></p>
-        <div class="traffic-stats"><div><span>방문자</span><strong id="traffic-users">미수집</strong></div><div><span>방문 횟수 (세션)</span><strong id="traffic-sessions">미수집</strong></div><div><span>페이지 조회</span><strong id="traffic-pageviews">미수집</strong></div></div>
-        <p class="revenue-note" id="traffic-source-warning"></p><div id="traffic-mix"></div>
-        <details><summary style="cursor:pointer;font-size:12px;margin:12px 0;">검색엔진·외부 사이트별 유입 내역</summary>
-          <div class="revenue-table-wrap"><table class="traffic-table"><thead><tr><th>출처</th><th>매체</th><th>분류</th><th>방문 횟수</th></tr></thead><tbody id="traffic-sources"></tbody></table></div>
-        </details>
-        <h3 style="font-size:14px;margin:18px 0 6px;">최근 30일 일별 방문자</h3><div id="traffic-trend" aria-label="일별 방문자 추이"></div>
-        <div class="traffic-controls"><label>검색어 보고서<select id="traffic-engine"><option value="google">Google 검색</option><option value="naver">네이버 검색</option><option value="bing">Bing 검색</option></select></label>
-          <label>검색어 범위<select id="traffic-keyword-scope"><option value="current">선택 도메인</option><option value="all">전체 CF 도메인</option></select></label>
-          <label>평균 게재순위<select id="traffic-rank-limit"><option value="0">전체</option><option value="5">5위 이내</option><option value="10">10위 이내</option><option value="50">50위 이내</option><option value="11-50">상승 후보 · 11~50위</option><option value="100">100위 이내</option></select></label>
-          <label>노출 표본<select id="traffic-min-impressions"><option value="0">전체 표본</option><option value="10">10회 이상</option><option value="30">30회 이상</option></select></label>
-          <label>검색어 필터<input id="traffic-query-filter" type="search" placeholder="검색어 입력" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;"></label>
-        </div>
-        <p class="revenue-meta" id="traffic-keyword-status"></p>
-        <div class="revenue-table-wrap"><table class="traffic-table" aria-label="검색어별 노출과 평균 게재순위"><thead><tr><th>검색어</th><th>클릭</th><th>노출</th><th>클릭률</th><th>평균 게재순위</th><th>검색에 노출된 글</th></tr></thead><tbody id="traffic-keywords"></tbody></table></div>
-        <p class="revenue-note" id="traffic-keyword-note"></p>
-      </details>
-    </section>
+  <!-- 2. 진짜 4탭 화면 전환 (SPA Tab View) 네비게이션 -->
+  <nav class="growth-tabs" role="tablist" aria-label="성장 분석 4대 탭">
+    <button type="button" role="tab" id="tabbtn-revenue" data-tab="tab-revenue" aria-controls="tab-revenue" aria-selected="true" class="active">💰 수익 · 도메인 성적표</button>
+    <button type="button" role="tab" id="tabbtn-traffic" data-tab="tab-traffic" aria-controls="tab-traffic" aria-selected="false">📈 방문자 · 검색어 분석</button>
+    <button type="button" role="tab" id="tabbtn-content" data-tab="tab-content" aria-controls="tab-content" aria-selected="false">🗂️ 전체 글 색인 · 순위 관리</button>
+    <button type="button" role="tab" id="tabbtn-remodel" data-tab="tab-remodel" aria-controls="tab-remodel" aria-selected="false">🩺 개선 우선 글 · 리모델링 이력</button>
+  </nav>
 
-  <section class="traffic-panel" id="naver-traffic" style="margin-top:20px;">
-    <div class="traffic-head"><h2>네이버 블로그 방문자</h2><a href="naver.html" class="overview-button">발행 운영 →</a></div>
-    <p class="revenue-note">로그인 없이 읽는 공개 방문자 카운터입니다. 오늘·어제와 최근 5일 일별 방문 누적을 표시하며, 여러 날짜·블로그에 걸친 중복 방문이 포함될 수 있습니다. 검색 순위는 별도 측정이 필요합니다.</p>
-    <div class="revenue-table-wrap"><table class="traffic-table"><thead><tr><th>블로그</th><th>오늘</th><th>어제</th><th>최근 5일 누적</th><th>수집 상태</th></tr></thead><tbody id="growth-naver-counters"></tbody></table></div>
-  </section>
-  <section class="revenue-panel" id="growth-revenue" aria-labelledby="revenue-title">
+  <!-- =====================================================================
+       [탭 1: 💰 수익 · 도메인 성적표] (기본 활성 탭)
+       ===================================================================== -->
+  <div class="growth-tab-pane active" id="tab-revenue" role="tabpanel" aria-labelledby="tabbtn-revenue">
+    <!-- 상단: 기간별 수익 비교 표 (#growth-revenue) -->
+    <section class="revenue-panel" id="growth-revenue" aria-labelledby="revenue-title">
       <div class="revenue-title">
-        <h2 id="revenue-title">수익 분석</h2>
-        <span class="pillar-badge badge-orange">원천 보고서 기준 · 예상 수익</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <h2 id="revenue-title">💰 기간별 수익 비교</h2>
+          <span class="info-tip-badge" title="확인된 수익만 표시합니다. 미연결 계정·업체는 합계에서 제외하며, 미수집·집계 중인 값을 0원으로 처리하지 않습니다. 정산 전 예상 수익은 변동될 수 있습니다.">ⓘ 기준 안내</span>
+          <span class="revenue-meta" id="revenue-period" style="margin:0;">이번 달 · 어제 · 오늘 · 한국 시간</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="revenue-meta" id="revenue-updated" style="margin:0;">수익 원천 수집 대기</span>
+          <span class="pillar-badge badge-orange">원천 보고서 기준 · 예상 수익</span>
+        </div>
       </div>
-      <p class="revenue-meta" id="revenue-period">이번 달 · 어제 · 오늘 · 한국 시간</p>
       <div class="revenue-table-wrap">
         <table class="revenue-table" aria-label="기간별 수익 비교">
           <thead><tr><th scope="col">수익 종류</th><th scope="col">이번 달 누적<br>(어제까지)</th><th scope="col">어제</th><th scope="col">오늘</th><th scope="col">이번 달 현재</th></tr></thead>
           <tbody id="revenue-overview"><tr><td colspan="5">수익 원천 조회 중</td></tr></tbody>
         </table>
       </div>
-      <p class="revenue-note">확인된 수익만 표시합니다. 미연결 계정·업체는 합계에서 제외하며, 미수집·집계 중인 값을 0원으로 처리하지 않습니다. 정산 전 예상 수익은 바뀔 수 있습니다.</p>
-      <p class="revenue-meta" id="revenue-updated">수익 원천 수집 대기</p>
-      <details><summary>이번 달 일별 내역</summary>
-        <div class="revenue-table-wrap"><table class="revenue-table" aria-label="이번 달 일별 수익">
-          <thead><tr><th scope="col">날짜</th><th scope="col">애드센스</th><th scope="col">애드포스트</th><th scope="col">제휴마케팅</th></tr></thead>
-          <tbody id="revenue-daily"></tbody>
-        </table></div>
-      </details>
-      <details><summary>계정·업체별 수집 범위와 연결 상태</summary><div id="revenue-sources"></div></details>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
+        <details style="flex:1 1 380px;"><summary>📅 이번 달 일별 상세 내역 펼치기</summary>
+          <div class="revenue-table-wrap"><table class="revenue-table" aria-label="이번 달 일별 수익">
+            <thead><tr><th scope="col">날짜</th><th scope="col">애드센스</th><th scope="col">애드포스트</th><th scope="col">제휴마케팅</th></tr></thead>
+            <tbody id="revenue-daily"></tbody>
+          </table></div>
+        </details>
+        <details style="flex:1 1 380px;"><summary>🔌 계정·업체별 수집 범위와 연결 상태 펼치기</summary><div id="revenue-sources"></div></details>
+      </div>
     </section>
 
+    <!-- 하단: 16개 CF 도메인 28일 성과·수익 한눈 비교표 (#growth-domain-comparison) -->
+    <section class="traffic-panel growth-action-panel" id="growth-action-center" aria-labelledby="growth-action-title">
+      <div class="traffic-head">
+        <div>
+          <h2 id="growth-action-title">
+            📊 16개 CF 도메인 28일 성과·수익 한눈 비교표
+            <span class="info-tip-badge" id="growth-action-source" title="원천별 실제 기간·수집 범위를 확인합니다. 미수집을 0으로 계산하지 않습니다.">ⓘ 기준 안내</span>
+          </h2>
+          <p class="section-caption" id="growth-comparison-period">28일 성과 비교 원천 확인 중</p>
+        </div>
+        <button type="button" class="btn-quick" id="growth-action-refresh">분석 새로고침</button>
+      </div>
+      <div class="growth-collection-health" id="growth-collection-health" role="status">지속 수집 상태 확인 중</div>
+      <div class="growth-action-summary" id="growth-action-summary"></div>
+      <div class="revenue-table-wrap">
+        <table class="traffic-table">
+          <thead><tr><th>도메인 · 비교 범위</th><th>노출<br>현재 / 이전</th><th>클릭<br>현재 / 이전</th><th>CTR<br>현재 / 이전</th><th>평균 순위<br>현재 / 이전</th><th>수익<br>현재 / 이전</th><th>성장 · 막힘</th></tr></thead>
+          <tbody id="growth-domain-comparison"></tbody>
+        </table>
+      </div>
+      <!-- 중요: open 속성을 제거해 기본 접힘 상태로 두고, 위 표에서 [변화 근거] 클릭 시에만 펼쳐짐 -->
+      <details class="growth-diagnosis">
+        <summary>🔎 변화의 근거와 다음 행동 (도메인별 [변화 근거] 클릭 시 자동 펼침)</summary>
+        <label class="growth-diagnosis-filter">진단할 도메인<select id="growth-diagnosis-domain"></select></label>
+        <div id="growth-diagnosis-content"></div>
+      </details>
+    </section>
+  </div>
+
+  <!-- =====================================================================
+       [탭 2: 📈 방문자 · 검색어 분석]
+       ===================================================================== -->
+  <div class="growth-tab-pane" id="tab-traffic" role="tabpanel" aria-labelledby="tabbtn-traffic" hidden>
+    <!-- 상단 2컬럼 그리드: 좌측 CF 16개 도메인 방문자 표 / 우측 네이버 5개 방문자 표 + 지식iN/Threads 외부유입 요약 카드 -->
+    <div class="traffic-two-col-grid">
+      <!-- 좌측: CF 16개 도메인 방문자 표 -->
+      <section class="traffic-panel" id="domain-traffic" aria-labelledby="traffic-title">
+        <div class="traffic-head">
+          <div>
+            <h2 id="traffic-title">
+              🌐 CF 16개 도메인 방문자 · 유입 비교
+              <span class="info-tip-badge" title="방문자는 GA4가 측정한 기간 내 중복 제거 사용자 수입니다. 하루 방문자를 합쳐 7일·30일 방문자로 계산하지 않습니다. 유입 비중은 방문 횟수(세션) 기준입니다.">ⓘ 기준 안내</span>
+            </h2>
+            <p class="section-caption" id="traffic-connected">통계 원천 연결 확인 중</p>
+          </div>
+          <span class="revenue-meta" id="traffic-collected" style="margin:0;">수집 대기</span>
+        </div>
+        <div class="traffic-controls">
+          <label>비교 기간<select id="traffic-period"><option value="week">최근 7일 (어제까지)</option><option value="month" selected>최근 30일 (어제까지)</option><option value="day">하루 (어제)</option><option value="today">오늘 (집계 중)</option></select></label>
+          <label>상세 분석 도메인<select id="traffic-domain"><option>조회 중</option></select></label>
+        </div>
+        <div class="revenue-table-wrap">
+          <table class="traffic-table" aria-label="CF 도메인별 방문자와 유입 비교">
+            <thead><tr><th>도메인</th><th>하루 방문자<br>(어제)</th><th>7일 방문자<br>(어제까지)</th><th>30일 방문자<br>(어제까지)</th><th>검색 유입<br>(선택 기간)</th><th>외부 유입<br>(선택 기간)</th><th>Google 검색 노출<br>(확정 보고서)</th></tr></thead>
+            <tbody id="traffic-domains"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 우측: 네이버 블로그 5개 방문자 표 + 지식iN / Threads 외부유입 요약 카드 -->
+      <div class="traffic-right-stack">
+        <section class="traffic-panel" id="naver-traffic">
+          <div class="traffic-head">
+            <h2>
+              🟢 네이버 블로그 5개 방문자
+              <span class="info-tip-badge" title="공개 방문자 카운터 기준입니다. 오늘·어제와 최근 5일 일별 방문 누적을 표시하며, 여러 날짜·블로그에 걸친 중복 방문이 포함될 수 있습니다.">ⓘ 기준 안내</span>
+            </h2>
+            <a href="naver.html" class="overview-button">발행 운영 →</a>
+          </div>
+          <div class="revenue-table-wrap">
+            <table class="traffic-table">
+              <thead><tr><th>블로그</th><th>오늘</th><th>어제</th><th>최근 5일 누적</th><th>수집 상태</th></tr></thead>
+              <tbody id="growth-naver-counters"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="traffic-panel" id="external-inbound-card" style="background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);border:1px solid #cbd5e1;">
+          <div class="traffic-head">
+            <div>
+              <h2>
+                🚀 지식iN · Threads · 네이버 브릿지 외부유입 요약
+                <span class="info-tip-badge" title="외부 유입 레퍼런스 링크는 애드센스 READY 승인 도메인(심사 중 healthcox.com 제외) 및 1순위 고단가 도메인(must-pick, baronote, justinfo, daynote, woorinote)으로 최우선 라우팅됩니다.">ⓘ 고단가 라우팅 기준</span>
+              </h2>
+              <p class="section-caption">애드센스 <strong>READY</strong> + 고단가(High-CPC) 5대 도메인 우선 타깃팅 적용 중</p>
+            </div>
+            <span class="growth-card-pill" id="ext-inbound-total" style="background:#ede9fe;color:#6d28d9;border:1px solid #c4b5fd;">외부유입 집계 중</span>
+          </div>
+          <div class="ext-inbound-grid">
+            <div class="ext-inbound-box">
+              <span>💡 지식iN 유입 세션</span>
+              <strong id="ext-inbound-kin">0세션</strong>
+              <small>일 목표 20건 (계정당 10건)</small>
+            </div>
+            <div class="ext-inbound-box">
+              <span>🧵 Threads 유입 세션</span>
+              <strong id="ext-inbound-threads">0세션</strong>
+              <small>일 목표 4건 (계정당 2건)</small>
+            </div>
+            <div class="ext-inbound-box">
+              <span>🟢 네이버 블로그 브릿지</span>
+              <strong id="ext-inbound-blog">0세션</strong>
+              <small>5계정 고단가 CF 브릿지</small>
+            </div>
+          </div>
+          <p class="revenue-meta" id="traffic-qualified-sources" style="margin:8px 0 0;font-size:11.5px;color:#475569;">도메인별 외부 유입 집계 확인 중</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- 하단: 검색어별 노출·클릭·평균 게재순위 표 (불필요한 중첩 <details> 제거) -->
+    <section class="traffic-panel">
+      <details class="traffic-detail" open style="border-top:0;margin-top:0;padding-top:0;">
+        <summary id="traffic-domain-title" style="cursor:pointer;font-weight:800;font-size:16px;color:#0f172a;">🔎 도메인 상세 유입 & 검색어별 노출·클릭·평균 게재순위</summary>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:8px 0;">
+          <span class="revenue-meta" id="traffic-range" style="margin:0;"></span>
+          <span class="revenue-meta" id="traffic-source-warning" style="margin:0;"></span>
+        </div>
+        <div class="traffic-stats">
+          <div><span>방문자 (중복 제거)</span><strong id="traffic-users">미수집</strong></div>
+          <div><span>방문 횟수 (세션)</span><strong id="traffic-sessions">미수집</strong></div>
+          <div><span>페이지 조회 (PV)</span><strong id="traffic-pageviews">미수집</strong></div>
+        </div>
+        <div id="traffic-mix"></div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin:12px 0;align-items:start;">
+          <div>
+            <h3 style="font-size:13.5px;margin:0 0 6px;color:#1e293b;">📈 최근 30일 일별 방문자 추이</h3>
+            <div id="traffic-trend" aria-label="일별 방문자 추이"></div>
+          </div>
+          <div>
+            <h3 style="font-size:13.5px;margin:0 0 6px;color:#1e293b;">🔗 검색엔진·외부 사이트별 유입 내역</h3>
+            <div class="revenue-table-wrap" style="max-height:145px;overflow-y:auto;margin:0;">
+              <table class="traffic-table" style="min-width:360px;">
+                <thead><tr><th>출처</th><th>매체</th><th>분류</th><th>방문 횟수</th></tr></thead>
+                <tbody id="traffic-sources"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0;padding-top:12px;margin-top:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <h3 style="font-size:15px;font-weight:800;color:#0f172a;margin:0;">
+              🎯 검색어별 노출 · 클릭 · 평균 게재순위
+              <span class="info-tip-badge" id="traffic-keyword-tip" title="평균 게재순위는 고정 검색 순위가 아닙니다. 상위 검색어/URL만 제공되며 비공개 검색어는 제외됩니다.">ⓘ 기준 안내</span>
+            </h3>
+            <span class="revenue-meta" id="traffic-keyword-note" style="margin:0;"></span>
+          </div>
+          <div class="traffic-controls">
+            <label>검색어 보고서<select id="traffic-engine"><option value="google">Google 검색</option><option value="naver">네이버 검색</option><option value="bing">Bing 검색</option></select></label>
+            <label>검색어 범위<select id="traffic-keyword-scope"><option value="current">선택 도메인</option><option value="all">전체 CF 도메인</option></select></label>
+            <label>평균 게재순위<select id="traffic-rank-limit"><option value="0">전체</option><option value="5">5위 이내</option><option value="10">10위 이내</option><option value="50">50위 이내</option><option value="11-50">상승 후보 · 11~50위</option><option value="100">100위 이내</option></select></label>
+            <label>노출 표본<select id="traffic-min-impressions"><option value="0">전체 표본</option><option value="10">10회 이상</option><option value="30">30회 이상</option></select></label>
+            <label>검색어 필터<input id="traffic-query-filter" type="search" placeholder="검색어 즉시 필터링"></label>
+          </div>
+          <p class="revenue-meta" id="traffic-keyword-status" style="margin:4px 0 8px;"></p>
+          <div class="revenue-table-wrap">
+            <table class="traffic-table" aria-label="검색어별 노출과 평균 게재순위">
+              <thead><tr><th>검색어</th><th>클릭</th><th>노출</th><th>클릭률</th><th>평균 게재순위</th><th>검색에 노출된 글</th></tr></thead>
+              <tbody id="traffic-keywords"></tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <!-- =====================================================================
+       [탭 3: 🗂️ 전체 글 색인 · 순위 관리 (#content-management)]
+       ===================================================================== -->
+  <div class="growth-tab-pane" id="tab-content" role="tabpanel" aria-labelledby="tabbtn-content" hidden>
+    <section class="traffic-panel" id="content-management" aria-labelledby="content-title">
+      <div class="traffic-head">
+        <div>
+          <h2 id="content-title">
+            🗂️ 전체 글 색인 · 순위 관리
+            <span class="info-tip-badge" title="색인 검사와 검색 실적을 구분합니다. 보고서에 없는 글을 미색인·노출 0으로 처리하지 않습니다. 순위는 최근 30일의 평균 게재순위이며, 상태 카드를 클릭하면 아래 목록이 즉시 필터링됩니다.">ⓘ 기준 안내</span>
+          </h2>
+          <p class="section-caption" id="content-coverage">공개 글 목록과 색인·검색 실적 연결 중</p>
+        </div>
+        <span class="info-tip-badge" id="inspection-automation-status" title="자동 색인 검사 실행 이력 조회 중">ⓘ 자동 색인 점검 이력</span>
+      </div>
+      <!-- 상태별 분류 카드 클릭 시 #content-bucket 자동 연동 -->
+      <div class="content-grid" id="content-counts"></div>
+      <div class="traffic-controls" style="justify-content:space-between;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;">
+          <label>도메인<select id="content-domain"><option value="all">전체 CF 도메인</option></select></label>
+          <label>관리 분류<select id="content-bucket"><option value="all">전체 공개 글</option><option value="not_indexed">미색인 확인 · 원인 점검</option><option value="opportunity">상승 후보 (11~50위·100위)</option><option value="top">평균 10위 이내 · 유지</option><option value="deep">평균 100위 밖 · 재검토</option><option value="indexed_no_report">색인 확인 · 실적 미관측</option><option value="unknown">개별 색인 검사 대기</option><option value="inspection_pending">개별 색인 미확인 · 검사 대기</option></select></label>
+          <label>URL · 주제 검색<input type="search" id="content-query" placeholder="주소 또는 글 슬러그 검색"></label>
+        </div>
+        <p class="revenue-meta" id="content-result-count" style="margin:0;font-weight:700;color:#1e3a8a;"></p>
+      </div>
+      <div class="revenue-table-wrap">
+        <table class="traffic-table content-table" aria-label="CF 기존 글 관리 목록">
+          <thead><tr><th>글 / 도메인</th><th>개별 색인 검사</th><th>최근 30일 검색 실적</th><th>다음 관리 작업</th></tr></thead>
+          <tbody id="content-rows"></tbody>
+        </table>
+      </div>
+      <div class="content-pagination">
+        <button id="content-prev" type="button">◀ 이전 15개</button>
+        <span id="content-page" style="font-weight:800;"></span>
+        <button id="content-next" type="button">다음 15개 ▶</button>
+      </div>
+      <details><summary>📋 상태별 처리 기준 안내</summary><div class="content-guidance">
+        <p><strong>미색인:</strong> URL 검사 사유 → 접근·색인 설정 또는 내용·중복 점검 → 필요한 수정 → 재검사 순서로 처리합니다.</p>
+        <p><strong>깊은 순위:</strong> 노출된 검색어의 의도와 상위 글을 비교하고, 직접 확인한 정보·사례·비교·최신성을 보강합니다.</p>
+        <p><strong>상승 후보:</strong> 노출이 반복되는 글부터 빠진 답변과 내부 링크를 보완하고, 수정 전후 같은 기간의 노출·클릭·방문을 비교합니다.</p>
+      </div></details>
+    </section>
+  </div>
+
+  <!-- =====================================================================
+       [탭 4: 🩺 개선 우선 글 · 리모델링 이력]
+       ===================================================================== -->
+  <div class="growth-tab-pane" id="tab-remodel" role="tabpanel" aria-labelledby="tabbtn-remodel" hidden>
+    <!-- 1. 근거가 있는 개선 우선 글 (9개 카드) + 미색인 원인별 점검 -->
+    <section class="traffic-panel growth-action-panel">
+      <div class="traffic-head">
+        <div>
+          <h2>🎯 근거가 있는 개선 우선 글 (Top 9) & 미색인 원인별 점검</h2>
+          <p class="section-caption">노출·클릭·순위 근거가 확인된 우선 보강 대상 글과 미색인 원인 그룹입니다.</p>
+        </div>
+        <button type="button" class="btn-quick" onclick="document.getElementById('manual-remodel-drawer').open = true; document.getElementById('manual-remodel-drawer').scrollIntoView({behavior:'smooth'});">➕ 수동 계획 / 운영 설정 열기</button>
+      </div>
+      <div class="growth-priorities" id="growth-priorities"></div>
+      <h3>🔍 미색인 원인별 점검</h3>
+      <div class="growth-index-reasons" id="growth-index-reasons"></div>
+    </section>
+
+    <!-- 2. 닥터 7대 정밀 검진 · 무삭제 재생 원장 -->
+    <section class="traffic-panel" id="doctor-remodeling-panel" aria-labelledby="doctor-remodel-title" style="border:2px solid #5eead4; background:linear-gradient(180deg,#ffffff 0%,#f0fdfa 100%);">
+      <div class="traffic-head">
+        <div>
+          <h2 id="doctor-remodel-title">🩺 기존 글 리모델링 게이지 (닥터 7대 정밀 검진 · 무삭제 재생 원장)</h2>
+          <p class="section-caption">일괄 삭제 페널티 없이 기존 글을 순찰하며 구버전 카테고리 즉시 재매핑(🔵B), 간접체험 리모델링(🟡C), 주제이탈 가십 격리(🔴D)를 수행합니다.</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-quick primary" type="button" id="growth-btn-doctor-patrol" style="background:#0d9488; border-color:#0d9488; color:#fff;">🩺 5건 즉시 정밀 검진</button>
+          <a href="chat.html" class="overview-button">💬 회의실 수술 중계</a>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#0f172a; margin:8px 0 6px;">
+        <span id="growth-doctor-inv">전체 공개 글 정밀 검진 조회 중</span>
+        <span id="growth-doctor-quota">오늘 리모델링 할당량: 0 / 20건 (0%)</span>
+      </div>
+      <div style="height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin-bottom:10px;">
+        <div id="growth-doctor-bar" style="height:100%; width:10%; background:linear-gradient(90deg,#0d9488,#10b981,#2563eb); transition:width 0.4s;"></div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; font-size:12px; font-weight:800; text-align:center;">
+        <div style="padding:7px; border-radius:8px; background:#ecfdf5; border:1px solid #a7f3d0; color:#047857;" id="growth-doc-a">🟢 A등급 (정상 유지): 0건</div>
+        <div style="padding:7px; border-radius:8px; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8;" id="growth-doc-b">🔵 B등급 (카테고리 패치): 0건</div>
+        <div style="padding:7px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#b45309;" id="growth-doc-c">🟡 C등급 (@퍼블리 리모델링): 0건</div>
+        <div style="padding:7px; border-radius:8px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;" id="growth-doc-d">🔴 D등급 (주제이탈 격리): 0건</div>
+      </div>
+      <div class="revenue-table-wrap">
+        <table class="traffic-table">
+          <thead><tr><th>검진 도메인 · 브랜드</th><th>기존 글 제목</th><th>처방 등급</th><th>카테고리 재매핑</th><th>7대 정밀 처방 내역</th></tr></thead>
+          <tbody id="growth-doctor-rows"><tr><td colspan="5">닥터 검진 원장 조회 중...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. 자동 콘텐츠 유지관리 (#auto-maintenance) & 공유 개선 기록 -->
+    <section class="traffic-panel growth-action-panel" id="auto-maintenance" aria-labelledby="maintenance-title">
+      <div class="traffic-head">
+        <div>
+          <h2 id="maintenance-title">
+            🛠️ 자동 콘텐츠 유지관리 & 공유 개선 이력
+            <span class="info-tip-badge" title="발행이 진행 중이면 유지관리 작업은 대기합니다. 근거 부족·가설만 있는 문제는 자동수정 대상에서 제외하며, 독립 검수 또는 공개 확인 실패는 완료로 처리하지 않습니다.">ⓘ 운영 기준</span>
+          </h2>
+          <p id="maintenance-status" class="section-caption" role="status">자동 운영 상태 조회 중</p>
+        </div>
+        <button class="btn-quick" type="button" id="maintenance-refresh">상태 새로고침</button>
+      </div>
+      <div id="maintenance-summary" class="growth-action-summary"></div>
+      <p id="maintenance-coverage" class="revenue-meta" style="margin:4px 0 8px;"></p>
+
+      <!-- 공간을 많이 차지하는 수동 입력 폼(#growth-action-form 및 #maintenance-policy-form)은 기본 접힘 <details> 안으로 수납 -->
+      <details class="compact-form-drawer" id="manual-remodel-drawer">
+        <summary>➕ 수동 개선 계획 등록 / 자동 운영 설정 변경</summary>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;padding-top:8px;">
+          <div>
+            <h4 style="margin:0 0 6px;font-size:13.5px;color:#0f172a;">📝 수동 개선 계획 등록</h4>
+            <form id="growth-action-form" class="growth-action-form">
+              <label>대상 도메인<select id="growth-record-domain" required></select></label>
+              <label>글 URL<input id="growth-record-url" type="url" required placeholder="https://www.example.com/article"></label>
+              <label>개선 내용<input id="growth-record-action" required maxlength="500" placeholder="추가할 답변·비교·근거 또는 해결할 색인 원인"></label>
+              <label>메모<textarea id="growth-record-note" maxlength="2000" placeholder="수정 전 근거와 확인할 내용을 남기세요."></textarea></label>
+              <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
+                <button type="submit" class="btn-quick primary">개선 계획 기록</button>
+                <span id="growth-record-feedback" role="status" aria-live="polite" style="font-size:12px;color:#047857;"></span>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h4 style="margin:0 0 6px;font-size:13.5px;color:#0f172a;">⚙️ 자동 점검·유지관리 정책 설정</h4>
+            <form id="maintenance-policy-form" class="growth-action-form">
+              <label style="grid-column:1/-1;flex-direction:row;align-items:center;gap:8px;">
+                <input id="maintenance-enabled" type="checkbox">
+                <span>자동 점검·조사 운영 (검증된 조건 충족 시 적용)</span>
+              </label>
+              <label>회차당 작업 상한 (건)<input id="maintenance-max" type="number" min="1" max="1" step="1" required></label>
+              <label>재작업 간격 (시간)<input id="maintenance-cooldown" type="number" min="672" max="2160" step="1" required></label>
+              <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;">
+                <button type="submit" class="btn-quick primary">운영 설정 저장</button>
+                <span id="maintenance-policy-feedback" role="status" aria-live="polite" style="font-size:12px;color:#047857;"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </details>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px;margin-top:10px;">
+        <div>
+          <h3>📋 공유 개선 기록</h3>
+          <div id="growth-action-records"></div>
+        </div>
+        <div>
+          <h3>⏳ 현재 자동 유지관리 대기 목록 & 변경 영수증</h3>
+          <div id="maintenance-queue"></div>
+          <div id="maintenance-receipts" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
 </main>
-<script src="traffic.js?v=20261016-kst-rollover"></script>
-<script src="content.js"></script>
-<script src="metrics.js?v=20261016-kst-rollover2"></script>
-<script src="growth-actions.js?v=20261016-kst-rollover2"></script>
+<script src="traffic.js?v=20261018-spa-tabs1"></script>
+<script src="content.js?v=20261018-spa-tabs1"></script>
+<script src="metrics.js?v=20261018-spa-tabs1"></script>
+<script src="growth-actions.js?v=20261018-spa-tabs1"></script>
 <script>
-async function loadGrowthDoctorPanel() {
-  try {
-    const res = await fetch('/api/auditor/status', { cache: 'no-store' });
-    if (!res.ok) return;
-    const doc = await res.json();
-    const gc = doc.gradeCounts || {};
-    const quotaPct = Math.min(100, Math.max(5, Number(doc.todayQuotaPct || 0)));
-    document.getElementById('growth-doctor-inv').textContent = `전체 ${(doc.totalInventory || 1974).toLocaleString('ko-KR')}건 중 ${doc.auditedCount || 0}건 정밀 검진 완료 (리모델링·패치 ${doc.remodeledCount || 0}건)`;
-    document.getElementById('growth-doctor-quota').textContent = `오늘 리모델링 할당량: ${doc.todayAudited || 0} / ${doc.dailyQuotaTarget || 20}건 (${quotaPct}%)`;
-    document.getElementById('growth-doctor-bar').style.width = `${quotaPct}%`;
-    document.getElementById('growth-doc-a').textContent = `🟢 A등급 (정상 유지): ${gc.A || 0}건`;
-    document.getElementById('growth-doc-b').textContent = `🔵 B등급 (카테고리 즉시 패치): ${gc.B || 0}건`;
-    document.getElementById('growth-doc-c').textContent = `🟡 C등급 (@퍼블리 리모델링): ${gc.C || 0}건`;
-    document.getElementById('growth-doc-d').textContent = `🔴 D등급 (안전 캡 보호): ${gc.D || 0}건`;
-    const tbody = document.getElementById('growth-doctor-rows');
-    const rows = doc.recentAudits || [];
-    if (tbody && rows.length) {
-      tbody.innerHTML = rows.map(r => {
-        const cCat = r.checklist?.['3_categoryRemap'] || {};
-        const catTxt = cCat.patched ? `${cCat.oldCategory} ➔ ${cCat.newCategory} (패치완료)` : (cCat.newCategory || cCat.oldCategory || '-');
-        return `<tr>
-          <td><strong>${r.domain}</strong><br><small style="color:#64748b;">${r.brandName || ''}</small></td>
-          <td><a href="${r.url}" target="_blank" rel="noopener" style="font-weight:700; color:#0f172a;">${r.title}</a></td>
-          <td><strong>${r.gradeBadge}</strong></td>
-          <td>${catTxt}</td>
-          <td style="font-size:12px;">${r.prescription}</td>
-        </tr>`;
-      }).join('');
+/* Real 4-Tab SPA Switching + Top KPI Strip Live Sync + Doctor Ledger */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const num = (v, d = 0) => v == null || !Number.isFinite(Number(v)) ? '0' : Number(v).toLocaleString('ko-KR', { maximumFractionDigits: d });
+
+  // 1. Real SPA Tab Switching
+  const TAB_IDS = ['tab-revenue', 'tab-traffic', 'tab-content', 'tab-remodel'];
+  const HASH_TO_TAB = {
+    '#tab-revenue': 'tab-revenue',
+    '#growth-revenue': 'tab-revenue',
+    '#growth-action-center': 'tab-revenue',
+    '#growth-domain-comparison': 'tab-revenue',
+    '#tab-traffic': 'tab-traffic',
+    '#domain-traffic': 'tab-traffic',
+    '#naver-traffic': 'tab-traffic',
+    '#traffic-keyword-status': 'tab-traffic',
+    '#tab-content': 'tab-content',
+    '#content-management': 'tab-content',
+    '#tab-remodel': 'tab-remodel',
+    '#auto-maintenance': 'tab-remodel',
+    '#doctor-remodeling-panel': 'tab-remodel'
+  };
+
+  function activateTab(tabId, updateHistory = false) {
+    if (!TAB_IDS.includes(tabId)) tabId = 'tab-revenue';
+    for (const id of TAB_IDS) {
+      const pane = $(id);
+      if (pane) {
+        const active = id === tabId;
+        pane.classList.toggle('active', active);
+        pane.hidden = !active;
+        pane.style.display = active ? 'flex' : 'none';
+      }
     }
-  } catch (_) {}
-}
-const gDocBtn = document.getElementById('growth-btn-doctor-patrol');
-if (gDocBtn) {
-  gDocBtn.addEventListener('click', async () => {
-    gDocBtn.disabled = true;
-    gDocBtn.textContent = '🩺 5건 검진 중...';
+    for (const btn of document.querySelectorAll('.growth-tabs button[data-tab]')) {
+      const active = btn.dataset.tab === tabId;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    }
+    if (updateHistory && history.replaceState) {
+      history.replaceState(null, '', `#${tabId}`);
+    }
+  }
+
+  for (const btn of document.querySelectorAll('.growth-tabs button[data-tab]')) {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab, true));
+  }
+  for (const card of document.querySelectorAll('.top-kpi-strip [data-goto-tab]')) {
+    card.addEventListener('click', () => activateTab(card.dataset.gotoTab, true));
+  }
+
+  function syncTabFromUrl() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('bucket')) return activateTab('tab-content');
+    if (params.get('rank') || params.get('scope') || params.get('domain')) return activateTab('tab-traffic');
+    if (params.get('diagnosis')) return activateTab('tab-revenue');
+    const mapped = HASH_TO_TAB[location.hash];
+    if (mapped) activateTab(mapped);
+  }
+  window.addEventListener('hashchange', syncTabFromUrl);
+  window.BaroLabGrowthTabs = { activateTab };
+  syncTabFromUrl();
+
+  // 2. Top KPI Strip Live Data Aggregator
+  let latestMetricsDoc = null;
+  let latestDoctorDoc = null;
+
+  function renderTopKpiStrip() {
+    // KPI 1: Revenue
+    const rev = latestMetricsDoc?.revenue || {};
+    const adsenseCat = (rev.categories || []).find(c => c.id === 'adsense');
+    const todayUsd = Number(adsenseCat?.periods?.today?.amounts?.USD ?? rev.totals?.today?.amounts?.USD ?? 0);
+    const monthUsd = Number(adsenseCat?.periods?.month?.amounts?.USD ?? rev.totals?.month?.amounts?.USD ?? 0);
+    const monthKrw = Number(rev.totals?.month?.amounts?.KRW ?? 0);
+    const goalUsd = 100;
+    const goalPct = Math.min(100, Math.max(2, (todayUsd / goalUsd) * 100));
+    if ($('kpi-rev-today')) {
+      $('kpi-rev-today').textContent = `오늘 $${todayUsd.toFixed(2)} · 이번 달 $${monthUsd.toFixed(2)}${monthKrw > 0 ? ` (+₩${num(monthKrw)})` : ''}`;
+    }
+    if ($('kpi-rev-pct')) {
+      $('kpi-rev-pct').textContent = `일 목표 $100 (${((todayUsd / goalUsd) * 100).toFixed(2)}%)`;
+    }
+    if ($('kpi-rev-bar')) {
+      $('kpi-rev-bar').style.width = `${goalPct}%`;
+    }
+    if ($('kpi-rev-month')) {
+      const readyCnt = 13;
+      $('kpi-rev-month').innerHTML = `<span>🟢 승인 ${readyCnt}도메인 직결</span><span>어제 $${Number(adsenseCat?.periods?.yesterday?.amounts?.USD ?? 0).toFixed(2)}</span>`;
+    }
+
+    // KPI 2: Visitors (CF 16 + Naver 5)
+    const ta = latestMetricsDoc?.trafficAnalysis || window.BaroLabTraffic?.getData() || {};
+    const cfSites = ta.sites || [];
+    const naverBlogs = ta.naverBlogs || [];
+    const kstToday = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+    const kstYesterday = new Date(Date.parse(kstToday + 'T00:00:00Z') - 86400000).toISOString().slice(0, 10);
+    let cfWeekUsers = 0, cfTodayUsers = 0, cfDayUsers = 0;
+    for (const s of cfSites) {
+      const p = s.ga4?.periods || {};
+      if (Number.isFinite(p.week?.users)) cfWeekUsers += p.week.users;
+      if (Number.isFinite(p.today?.users)) cfTodayUsers += p.today.users;
+      if (Number.isFinite(p.day?.users)) cfDayUsers += p.day.users;
+    }
+    let nvToday = 0, nvYesterday = 0;
+    for (const nb of naverBlogs) {
+      if (Number.isFinite(nb.days?.[kstToday])) nvToday += nb.days[kstToday];
+      if (Number.isFinite(nb.days?.[kstYesterday])) nvYesterday += nb.days[kstYesterday];
+    }
+    if ($('kpi-vis-headline')) {
+      $('kpi-vis-headline').textContent = `CF 7일 ${num(cfWeekUsers)}명 · 네이버 오늘 ${num(nvToday)}명`;
+    }
+    if ($('kpi-vis-cf')) {
+      $('kpi-vis-cf').textContent = `🌐 CF 7일 ${num(cfWeekUsers)}명 (오늘 ${num(cfTodayUsers)}명)`;
+    }
+    if ($('kpi-vis-naver')) {
+      $('kpi-vis-naver').textContent = `🟢 네이버 오늘 ${num(nvToday)}명 (어제 ${num(nvYesterday)}명)`;
+    }
+
+    // KPI 3: Indexing Health
+    const idx = latestMetricsDoc?.indexing || {};
+    const audit = latestMetricsDoc?.contentAudit || {};
+    const totalPosts = idx.inventoryTotal || audit.inventoryTotal || 1866;
+    const indexedCnt = idx.indexed ?? (audit.rows ? audit.rows.filter(r => r.index === 'indexed').length : 533);
+    const notIndexedCnt = audit.counts?.not_indexed ?? 0;
+    const pendingCnt = Math.max(0, totalPosts - indexedCnt - notIndexedCnt);
+    const idxRate = totalPosts > 0 ? ((indexedCnt / totalPosts) * 100).toFixed(1) : '0.0';
+    if ($('kpi-idx-headline')) {
+      $('kpi-idx-headline').textContent = `구글 색인 ${num(indexedCnt)} / ${num(totalPosts)}건 (${idxRate}%)`;
+    }
+    if ($('kpi-idx-bar')) {
+      $('kpi-idx-bar').style.width = `${Math.min(100, Math.max(5, Number(idxRate)))}%`;
+    }
+    if ($('kpi-idx-wait-bar')) {
+      $('kpi-idx-wait-bar').style.width = `${Math.max(0, 100 - Math.min(100, Math.max(5, Number(idxRate))))}%`;
+    }
+    if ($('kpi-idx-sub')) {
+      $('kpi-idx-sub').innerHTML = `<span>🟢 색인 ${num(indexedCnt)}건</span><span>🟠 미색인 ${num(notIndexedCnt)}건 · 대기 ${num(pendingCnt)}건</span>`;
+    }
+
+    // KPI 4: Improvement & Remodeling Status
+    const actData = window.BaroLabGrowthActions?.getData() || {};
+    const maintData = window.BaroLabGrowthActions?.getMaintenance() || {};
+    const oppCnt = audit.counts?.opportunity ?? (actData.priorities || []).length ?? 0;
+    const manualDone = (actData.records || []).filter(r => r.status === 'done').length;
+    const autoDone = (maintData.recentActions || []).filter(r => r.status === 'completed').length;
+    const docRemodeled = latestDoctorDoc?.remodeledCount ?? 0;
+    const docAudited = latestDoctorDoc?.auditedCount ?? 0;
+    const totalImproved = manualDone + autoDone + docRemodeled;
+    if ($('kpi-rem-headline')) {
+      $('kpi-rem-headline').textContent = `상승 후보 ${num(oppCnt)}건 · 개선 완료 ${num(totalImproved)}건`;
+    }
+    if ($('kpi-rem-sub')) {
+      $('kpi-rem-sub').innerHTML = `<span>🩺 검진 ${num(docAudited)}건</span><span>🛠️ 패치·개선 ${num(totalImproved)}건 완료</span>`;
+    }
+    if ($('kpi-rem-pill')) {
+      $('kpi-rem-pill').textContent = `후보 ${num(oppCnt)}건 · 완료 ${num(totalImproved)}건`;
+    }
+  }
+
+  async function syncTopKpiMetrics() {
     try {
-      await fetch('/api/auditor/patrol', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count: 5, broadcast: true }) });
-      await loadGrowthDoctorPanel();
-    } finally {
-      gDocBtn.disabled = false;
-      gDocBtn.textContent = '🩺 5건 즉시 정밀 검진';
-    }
+      const res = await fetch('/api/metrics', { cache: 'no-store' });
+      if (res.ok) {
+        latestMetricsDoc = await res.json();
+        renderTopKpiStrip();
+      }
+    } catch (_) {}
+  }
+
+  async function loadGrowthDoctorPanel() {
+    try {
+      const res = await fetch('/api/auditor/status', { cache: 'no-store' });
+      if (!res.ok) return;
+      const doc = await res.json();
+      latestDoctorDoc = doc;
+      const gc = doc.gradeCounts || {};
+      const quotaPct = Math.min(100, Math.max(5, Number(doc.todayQuotaPct || 0)));
+      if ($('growth-doctor-inv')) {
+        $('growth-doctor-inv').textContent = `전체 ${(doc.totalInventory || 1866).toLocaleString('ko-KR')}건 중 ${doc.auditedCount || 0}건 정밀 검진 완료 (리모델링·패치 ${doc.remodeledCount || 0}건)`;
+      }
+      if ($('growth-doctor-quota')) {
+        $('growth-doctor-quota').textContent = `오늘 리모델링 할당량: ${doc.todayAudited || 0} / ${doc.dailyQuotaTarget || 20}건 (${quotaPct}%)`;
+      }
+      if ($('growth-doctor-bar')) $('growth-doctor-bar').style.width = `${quotaPct}%`;
+      if ($('growth-doc-a')) $('growth-doc-a').textContent = `🟢 A등급 (정상 유지): ${gc.A || 0}건`;
+      if ($('growth-doc-b')) $('growth-doc-b').textContent = `🔵 B등급 (카테고리 패치): ${gc.B || 0}건`;
+      if ($('growth-doc-c')) $('growth-doc-c').textContent = `🟡 C등급 (@퍼블리 리모델링): ${gc.C || 0}건`;
+      if ($('growth-doc-d')) $('growth-doc-d').textContent = `🔴 D등급 (주제이탈 격리): ${gc.D || 0}건`;
+      const tbody = $('growth-doctor-rows');
+      const rows = doc.recentAudits || [];
+      if (tbody && rows.length) {
+        tbody.innerHTML = rows.map(r => {
+          const cCat = r.checklist?.['3_categoryRemap'] || {};
+          const catTxt = cCat.patched ? `${cCat.oldCategory} ➔ ${cCat.newCategory} (패치완료)` : (cCat.newCategory || cCat.oldCategory || '-');
+          return `<tr>
+            <td><strong>${r.domain}</strong><br><small style="color:#64748b;">${r.brandName || ''}</small></td>
+            <td><a href="${r.url}" target="_blank" rel="noopener" style="font-weight:700; color:#0f172a;">${r.title}</a></td>
+            <td><strong>${r.gradeBadge}</strong></td>
+            <td>${catTxt}</td>
+            <td style="font-size:12px;">${r.prescription}</td>
+          </tr>`;
+        }).join('');
+      }
+      renderTopKpiStrip();
+    } catch (_) {}
+  }
+
+  const gDocBtn = $('growth-btn-doctor-patrol');
+  if (gDocBtn) {
+    gDocBtn.addEventListener('click', async () => {
+      gDocBtn.disabled = true;
+      gDocBtn.textContent = '🩺 5건 검진 중...';
+      try {
+        await fetch('/api/auditor/patrol', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count: 5, broadcast: true }) });
+        await loadGrowthDoctorPanel();
+      } finally {
+        gDocBtn.disabled = false;
+        gDocBtn.textContent = '🩺 5건 즉시 정밀 검진';
+      }
+    });
+  }
+
+  window.BaroLabTopKpi = { refresh: renderTopKpiStrip };
+  syncTopKpiMetrics();
+  loadGrowthDoctorPanel();
+  $('btn-manual-refresh')?.addEventListener('click', () => {
+    syncTopKpiMetrics();
+    loadGrowthDoctorPanel();
   });
-}
-loadGrowthDoctorPanel();
+  setInterval(syncTopKpiMetrics, 60000);
+})();
 </script>
 </body>
 </html>

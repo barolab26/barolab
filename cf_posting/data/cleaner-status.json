@@ -1,10 +1,9 @@
 {
-  "checkedAt": "2026-10-18T19:30:43.641376+09:00",
-  "eligibleCount": 1,
+  "checkedAt": "2026-10-18T19:54:42.588977+09:00",
+  "eligibleCount": 0,
   "processedCount": 0,
   "publishedCount": 0,
-  "activeJob": {
-    "date": "2026-10-18",
-    "domain": "topnote.kr"
-  }
+  "activeJob": null,
+  "finishedAt": "2026-10-18T19:54:42.668793+09:00",
+  "heldJobs": []
 }
