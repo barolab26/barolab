@@ -10,9 +10,9 @@
   "emails": [
     "baro76650@gmail.com",
     "barolab26@gmail.com",
-    "mustb1206@gmail.com",
+    "mustbiz06@gmail.com",
     "daehun305@gmail.com",
-    "otxmlgi3@gmail.com",
+    "otxm1gi3@gmail.com",
     "tripmarvel0601@gmail.com",
     "soulcash193@gmail.com",
     "teulaebeulleo7@gmail.com",
@@ -24,37 +24,37 @@
   ],
   "emailCount": 13,
   "devicePlan": "삼성폰 3대(일반 3 + 보안폴더 3 = 6슬롯) + 가족폰 3대(일반/보안폴더 = 6~8슬롯) = 총 12~14개 계정",
-  "lastSavedAt": "2026-10-19T01:27:37+09:00",
-  "lastSyncedToPlayConsoleAt": "2026-10-19T01:27:37+09:00",
-  "syncStatus": "internal_lists_synced_11_of_13",
+  "lastSavedAt": "2026-10-19T01:34:47+09:00",
+  "lastSyncedToPlayConsoleAt": "2026-10-19T01:34:47+09:00",
+  "syncStatus": "internal_lists_synced_13_of_13",
   "lastAutomationReceipt": {
     "mode": "sync-testers",
-    "executedAt": "2026-10-19T01:27:37+09:00",
-    "browser": "SJ portable CDP 9226 (YoonLab 7752283694845461925 accessible; baro76650 CDP 9420 only reaches terminated BARO COMMS 7623106237980940931)",
+    "executedAt": "2026-10-19T01:34:47+09:00",
+    "browser": "SJ portable CDP 9226 (YoonLab 7752283694845461925)",
     "lists": {
       "하루말씀 내부 테스트": {
-        "usersAfterReload": 11,
+        "usersAfterReload": 13,
         "assignedTo": [
           "bible_app"
-        ]
+        ],
+        "alphaClosedTrackAttached": true
       },
       "BaroLab 생활 앱 내부 테스트": {
-        "usersAfterReload": 11,
+        "usersAfterReload": 13,
         "assignedTo": [
           "greeting",
           "magnifier",
           "shopping"
-        ]
+        ],
+        "alphaClosedTrackAttached": true
       }
     },
-    "acceptedCount": 11,
-    "rejected": [
-      "mustb1206@gmail.com",
-      "otxmlgi3@gmail.com"
-    ],
+    "acceptedCount": 13,
+    "rejected": [],
     "screenshots": [
-      "pc9226_haru_final.png",
-      "pc9226_daily_final.png"
+      "apps/qa/play-console-testers-13-verified.png",
+      "pc9226_haru3_final.png",
+      "pc9226_daily3_final.png"
     ]
   },
   "closedTrackPromoted": false,

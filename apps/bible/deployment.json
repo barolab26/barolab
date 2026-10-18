@@ -61,9 +61,21 @@
       "evidence": "apps/bible/qa/play-v4-internal-release.txt"
     },
     "internalTesters": {
-      "listedCount": 1,
+      "listedCount": 13,
       "emails": [
-        "baro76650@gmail.com"
+        "baro76650@gmail.com",
+        "barolab26@gmail.com",
+        "mustbiz06@gmail.com",
+        "daehun305@gmail.com",
+        "otxm1gi3@gmail.com",
+        "tripmarvel0601@gmail.com",
+        "soulcash193@gmail.com",
+        "teulaebeulleo7@gmail.com",
+        "moneymaster843@gmail.com",
+        "jglobal489@gmail.com",
+        "justincome82@gmail.com",
+        "moonsongbua495@gmail.com",
+        "sjorbit28@gmail.com"
       ],
       "joinUrl": "https://play.google.com/apps/internaltest/4700464139727332365",
       "joinUrlActive": true,

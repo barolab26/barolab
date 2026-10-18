@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional
 ROOT = Path(__file__).resolve().parent.parent
 DATA_TESTERS_PATH = ROOT / "data" / "app_testers.json"
 SERVER_DATA_TESTERS_PATH = ROOT / "server" / "data" / "app_testers.json"
+DASHBOARD_DATA_TESTERS_PATH = ROOT / "dashboard" / "data" / "app_testers.json"
 DAILY_DEPLOYMENT_PATH = ROOT / "apps" / "deployment.json"
 BIBLE_DEPLOYMENT_PATH = ROOT / "apps" / "bible" / "deployment.json"
 QA_DIR = ROOT / "apps" / "qa"
@@ -35,6 +36,7 @@ BARO76650_BROWSER_DIR = Path(r"C:\99_포터블브라우저\CentBrowserPortable_b
 BARO76650_START_BAT = BARO76650_BROWSER_DIR / "baro76650_start_cdp.bat"
 BARO76650_STOP_BAT = BARO76650_BROWSER_DIR / "baro76650_stop_cdp.bat"
 BARO76650_CDP_PORT = 9420
+SJ_CDP_PORT = 9226
 
 APPS_METADATA: Dict[str, Dict[str, Any]] = {
     "bible_app": {
@@ -206,6 +208,7 @@ def save_app_testers(doc: Dict[str, Any]) -> Dict[str, Any]:
     doc["lastSavedAt"] = now_kst_iso()
     save_json(DATA_TESTERS_PATH, doc)
     save_json(SERVER_DATA_TESTERS_PATH, doc)
+    save_json(DASHBOARD_DATA_TESTERS_PATH, doc)
     return doc
 
 
@@ -219,7 +222,9 @@ def is_port_open(port: int = BARO76650_CDP_PORT) -> bool:
 
 
 def ensure_baro76650_browser() -> Dict[str, Any]:
-    """Ensure the dedicated baro76650 portable browser (port 9420) is running using its official *_start_cdp.bat."""
+    """Ensure the Play Console browser is running (preferring SJ port 9226 where YoonLab 7752283694845461925 is authenticated, else baro76650 port 9420)."""
+    if is_port_open(SJ_CDP_PORT):
+        return {"ok": True, "port": SJ_CDP_PORT, "startedNow": False}
     if is_port_open(BARO76650_CDP_PORT):
         return {"ok": True, "port": BARO76650_CDP_PORT, "startedNow": False}
     if not BARO76650_START_BAT.is_file():
@@ -266,12 +271,14 @@ def run_sync_testers(raw_emails: Optional[Any] = None, execute_cdp: bool = True)
 
     if execute_cdp:
         br = ensure_baro76650_browser()
+        active_port = br.get("port", BARO76650_CDP_PORT)
+        cdp_receipt["cdpPort"] = active_port
         cdp_receipt["browserReady"] = br.get("ok", False)
         if br.get("ok"):
             try:
                 from playwright.sync_api import sync_playwright
                 with sync_playwright() as p:
-                    browser = p.chromium.connect_over_cdp(f"http://127.0.0.1:{BARO76650_CDP_PORT}", timeout=12000)
+                    browser = p.chromium.connect_over_cdp(f"http://127.0.0.1:{active_port}", timeout=12000)
                     context = browser.contexts[0] if browser.contexts else browser.new_context()
                     # Check existing Play Console tab (AGENTS.md rule: reuse existing tab first)
                     existing_page = None

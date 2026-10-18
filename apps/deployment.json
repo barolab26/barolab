@@ -63,7 +63,23 @@
       },
       "versionCode": 2,
       "testAdsOnly": true,
-      "internalTesterListVerifiedAt": "2026-10-14T19:12:25.741056+09:00"
+      "internalTesterListVerifiedAt": "2026-10-19T01:34:47+09:00",
+      "internalTesterListCount": 13,
+      "internalTesterEmails": [
+        "baro76650@gmail.com",
+        "barolab26@gmail.com",
+        "mustbiz06@gmail.com",
+        "daehun305@gmail.com",
+        "otxm1gi3@gmail.com",
+        "tripmarvel0601@gmail.com",
+        "soulcash193@gmail.com",
+        "teulaebeulleo7@gmail.com",
+        "moneymaster843@gmail.com",
+        "jglobal489@gmail.com",
+        "justincome82@gmail.com",
+        "moonsongbua495@gmail.com",
+        "sjorbit28@gmail.com"
+      ]
     },
     "magnifier": {
       "name": "큰글씨 돋보기",
@@ -127,7 +143,23 @@
       },
       "versionCode": 2,
       "testAdsOnly": true,
-      "internalTesterListVerifiedAt": "2026-10-14T19:16:54.207296+09:00"
+      "internalTesterListVerifiedAt": "2026-10-19T01:34:47+09:00",
+      "internalTesterListCount": 13,
+      "internalTesterEmails": [
+        "baro76650@gmail.com",
+        "barolab26@gmail.com",
+        "mustbiz06@gmail.com",
+        "daehun305@gmail.com",
+        "otxm1gi3@gmail.com",
+        "tripmarvel0601@gmail.com",
+        "soulcash193@gmail.com",
+        "teulaebeulleo7@gmail.com",
+        "moneymaster843@gmail.com",
+        "jglobal489@gmail.com",
+        "justincome82@gmail.com",
+        "moonsongbua495@gmail.com",
+        "sjorbit28@gmail.com"
+      ]
     },
     "shopping": {
       "name": "말로 장보기",
@@ -191,7 +223,23 @@
       },
       "versionCode": 2,
       "testAdsOnly": true,
-      "internalTesterListVerifiedAt": "2026-10-14T19:12:25.834784+09:00"
+      "internalTesterListVerifiedAt": "2026-10-19T01:34:47+09:00",
+      "internalTesterListCount": 13,
+      "internalTesterEmails": [
+        "baro76650@gmail.com",
+        "barolab26@gmail.com",
+        "mustbiz06@gmail.com",
+        "daehun305@gmail.com",
+        "otxm1gi3@gmail.com",
+        "tripmarvel0601@gmail.com",
+        "soulcash193@gmail.com",
+        "teulaebeulleo7@gmail.com",
+        "moneymaster843@gmail.com",
+        "jglobal489@gmail.com",
+        "justincome82@gmail.com",
+        "moonsongbua495@gmail.com",
+        "sjorbit28@gmail.com"
+      ]
     }
   },
   "updatedAt": "2026-10-14T10:17:11.433164+00:00",
