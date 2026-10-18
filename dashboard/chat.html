@@ -731,6 +731,9 @@
       </div>
       <div class="toolbar" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <span class="kst-clock-pill" id="chat-kst-clock" title="모든 에이전트 시스템 프롬프트에 실시간 주입되는 한국 표준시(KST)">🕐 KST 동기화 중...</span>
+        <button type="button" class="btn-patrol-trigger" id="btn-trigger-sre-briefing" style="background:#eff6ff; border-color:#2563eb; color:#1d4ed8;" title="자비스·패치·트레이스가 6대 전 프로젝트(CF·네이버·지식iN·Threads·리모델링·앱4종 AdMob) 상태와 병목을 즉시 감사해 회의실에 브리핑합니다">
+          🛡️ 6대 전 프로젝트 감사·브리핑
+        </button>
         <button type="button" class="btn-patrol-trigger" id="btn-trigger-doctor-patrol" title="닥터(Doctor)가 기존 발행 글 5건을 즉시 순찰·7대 검진·카테고리 자동 패치 후 회의실에 보고합니다">
           🩺 닥터 5건 즉시 검진·수술
         </button>
@@ -1611,6 +1614,27 @@
       sendMessage();
     }
   });
+
+  const btnSreBriefing = document.getElementById('btn-trigger-sre-briefing');
+  if (btnSreBriefing) {
+    btnSreBriefing.addEventListener('click', async () => {
+      btnSreBriefing.disabled = true;
+      btnSreBriefing.textContent = '🛡️ 6대 프로젝트 감사 중...';
+      pinnedUserRowId = null;
+      scrollLockStatusEl.textContent = '🛡️ 6대 전 프로젝트 정례 감사 브리핑 수신 중';
+      try {
+        await apiFetch('/api/project-health/run-audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ broadcast: true, runWatchdog: true }),
+        });
+        await loadRoom(true);
+      } finally {
+        btnSreBriefing.disabled = false;
+        btnSreBriefing.textContent = '🛡️ 6대 전 프로젝트 감사·브리핑';
+      }
+    });
+  }
 
   const btnDoctorPatrol = document.getElementById('btn-trigger-doctor-patrol');
   if (btnDoctorPatrol) {

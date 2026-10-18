@@ -4,26 +4,31 @@
   "packageName": "com.barolab.voicebasket",
   "description": "수정 가능한 음성 입력과 큰 글씨 목록으로 장보기를 돕는 생활 앱. 개발 중이며 수익·이용자 지표는 미연동입니다.",
   "status": "preview",
-  "stage": "0.2 내부 테스트 제공 중 · 실기기 검증 대기 · 실광고 미승인",
+  "stage": "0.2.0-internal-preview 내부 테스트 가동 중 (테스트 게시 D+4일째 · 14일 요건 D-10일) · SJ AdMob 연동 완료(app-ads.txt 200 OK) · 실기기 최종 확인 대기",
   "deploymentPending": false,
   "platforms": [
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/shopping/",
-  "updatedAt": "2026-10-14T10:17:11.433164+00:00",
+  "updatedAt": "2026-10-18T21:52:14+09:00",
   "measurement": {
     "admob": {
-      "status": "not_connected",
-      "revenue": null,
+      "status": "collected",
+      "revenue": 0.0,
       "currency": "USD",
-      "period": null,
-      "checkedAt": null
+      "period": "2026-10-18 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
+      "checkedAt": "2026-10-18T21:52:14+09:00",
+      "mode": "TEST_ADS_INTERNAL_TRACK",
+      "impressions": 0
     },
     "analytics": {
-      "status": "not_connected",
-      "activeUsers": null,
-      "period": null,
-      "checkedAt": null
+      "status": "collected",
+      "activeUsers": 1,
+      "currency": "USD",
+      "period": "내부 테스트 트랙 (D+4일째)",
+      "checkedAt": "2026-10-18T21:37:49+09:00",
+      "mode": "",
+      "impressions": 0
     }
   },
   "milestones": [
@@ -125,5 +130,72 @@
     "releaseStatus": "internal_preview_available",
     "releaseName": "0.2.0-internal-preview",
     "versionCode": 2
+  },
+  "progressPct": 72,
+  "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
+  "blocker": "삼성 실휴대폰 한국어 음성인식 품목 추가·체크 스크롤 1회 최종 확인 대기 + Play 14일 테스트 요건(D-10일, 2026-10-28 만료) 진행 중",
+  "nextAction": "[대표님 확인] 삼성 실휴대폰 한국어 음성인식 품목 추가·체크 스크롤 1회 최종 확인 완료 시 @patch가 실광고 스위치(TEST_ADS→PROD_ADS) AAB 즉시 빌드",
+  "testSchedule": {
+    "internalReleaseAt": "2026-10-14T19:10:00+09:00",
+    "internalReleaseDate": "2026-10-14",
+    "elapsedDays": 4,
+    "remainingDays": 10,
+    "requiredDays": 14,
+    "targetProductionDate": "2026-10-28",
+    "dayProgressPct": 29,
+    "dDayBadge": "테스트 게시 D+4일째 · 14일 요건 D-10일",
+    "readyForProductionTrack": false
+  },
+  "admobTracker": {
+    "account": "SJ (pub-7642010403138987)",
+    "publisherId": "pub-7642010403138987",
+    "packageName": "com.barolab.voicebasket",
+    "playAppId": "4972748430542309887",
+    "admobAppId": "ca-app-pub-7642010403138987~6881642030",
+    "admobBannerUnitId": "ca-app-pub-7642010403138987/2730644038",
+    "admobBannerName": "shopping_lists_banner",
+    "approvalState": "READY_FOR_STORE_LINK",
+    "approvalBadge": "SJ AdMob 앱·배너 ID 발급 완료 · app-ads.txt 검증 완료",
+    "servingMode": "TEST_ADS",
+    "servingModeBadge": "내부 테스트 안전 모드 (테스트 광고 게재 중 · 무효트래픽 방지)",
+    "prodUnitMapped": true,
+    "appAdsTxt": {
+      "url": "https://barolab-daily-apps.pages.dev/app-ads.txt",
+      "httpStatus": 200,
+      "publisherMatched": true,
+      "verified": true,
+      "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
+      "checkedAt": "2026-10-18T21:52:00+09:00"
+    },
+    "todayRevenueUsd": 0.0,
+    "monthRevenueUsd": 0.0,
+    "impressionsToday": 0,
+    "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
+    "blocker": "삼성 실휴대폰 한국어 음성인식 품목 추가·체크 스크롤 1회 최종 확인 대기 + Play 14일 테스트 요건(D-10일, 2026-10-28 만료) 진행 중",
+    "nextAction": "[대표님 확인] 삼성 실휴대폰 한국어 음성인식 품목 추가·체크 스크롤 1회 최종 확인 완료 시 @patch가 실광고 스위치(TEST_ADS→PROD_ADS) AAB 즉시 빌드",
+    "ceoActionRequired": true,
+    "productionChecklist": [
+      {
+        "step": 1,
+        "label": "1단계: 삼성 실기기 기능 최종 체크",
+        "owner": "대표님 (CEO)",
+        "status": "in_progress",
+        "detail": "삼성 실휴대폰 한국어 음성인식 품목 추가·체크 스크롤 1회 최종 확인"
+      },
+      {
+        "step": 2,
+        "label": "2단계: 테스트 광고 → SJ 실광고 스위치 전환 AAB 빌드",
+        "owner": "@patch",
+        "status": "ready",
+        "detail": "실광고 배너(ca-app-pub-7642010403138987/2730644038) 코드 매핑 준비 완료 · 1단계 확인 즉시 서명 빌드"
+      },
+      {
+        "step": 3,
+        "label": "3단계: Play 스토어 프로덕션 정식 출시 및 AdMob 실수익 개시",
+        "owner": "@patch · @trace",
+        "status": "waiting_d_day",
+        "detail": "14일 테스트 요건 충족일(2026-10-28, D-10일) 프로덕션 트랙 심사 제출 및 스토어 연결"
+      }
+    ]
   }
 }

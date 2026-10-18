@@ -329,6 +329,7 @@ def serve():
             return
         threading.Thread(target=serve_cf_retries, daemon=True, name='cf-retry-watcher').start()
         threading.Thread(target=serve_collection_watchdog, daemon=True, name='collection-health-watcher').start()
+        threading.Thread(target=serve_sre_system_watchdog, daemon=True, name='sre-system-watchdog').start()
         refreshed = 0
         while True:
             try:
@@ -363,9 +364,19 @@ def serve_collection_watchdog():
         time.sleep(60)
 
 
+def serve_sre_system_watchdog():
+    from common.system_watchdog import run_system_watchdog
+    while True:
+        try:
+            run_system_watchdog(trigger_source='windows-worker-10m', broadcast=True)
+        except Exception as exc:
+            print('SRE system watchdog error:', type(exc).__name__, flush=True)
+        time.sleep(600)
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--task', choices=('serve', 'cleaner', 'metrics', 'naver-monitor', 'naver-daily', 'maintenance'), default='serve')
+    parser.add_argument('--task', choices=('serve', 'cleaner', 'metrics', 'naver-monitor', 'naver-daily', 'maintenance', 'watchdog'), default='serve')
     parser.add_argument('--configure-naver-recovery', choices=('preview', 'apply'))
     args = parser.parse_args()
     if args.configure_naver_recovery:

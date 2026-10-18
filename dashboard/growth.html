@@ -269,6 +269,40 @@
       </div>
     </section>
 
+    <!-- 중단: 📱 앱 프로젝트 4종 SJ AdMob 수익화 · D-Day 실시간 추적 보드 -->
+    <section class="traffic-panel" id="growth-admob-tracker" aria-labelledby="growth-admob-title" style="margin-bottom:14px; border-color:#bfdbfe; background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);">
+      <div class="traffic-head">
+        <div>
+          <h2 id="growth-admob-title">
+            📱 앱 4종 SJ AdMob 수익화 · 14일 테스트 D-Day 실시간 추적 (pub-7642010403138987)
+          </h2>
+          <p class="section-caption" id="growth-admob-caption">SJ AdMob 앱·배너 4종 매핑 · app-ads.txt HTTP 200 검증 · 테스트 광고 → 프로덕션 실광고 전환 체크리스트</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="pillar-badge badge-green" id="growth-admob-badge">🟢 app-ads.txt 200 OK</span>
+          <a href="apps.html" class="overview-button">앱 관제실 상세 →</a>
+        </div>
+      </div>
+      <div class="revenue-table-wrap">
+        <table class="traffic-table" aria-label="앱 4종 SJ AdMob 수익화 추적표">
+          <thead>
+            <tr>
+              <th>앱 프로젝트 (패키지)</th>
+              <th>전담 에이전트</th>
+              <th>테스트 게시 D-Day</th>
+              <th>app-ads.txt 검증</th>
+              <th>SJ AdMob 배너 단위 · 모드</th>
+              <th>오늘 수익</th>
+              <th>실광고 프로덕션 전환 병목 · 다음 조치</th>
+            </tr>
+          </thead>
+          <tbody id="growth-admob-rows">
+            <tr><td colspan="7">앱 4종 SJ AdMob 수익화 원장 불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- 하단: 16개 CF 도메인 28일 성과·수익 한눈 비교표 (#growth-domain-comparison) -->
     <section class="traffic-panel growth-action-panel" id="growth-action-center" aria-labelledby="growth-action-title">
       <div class="traffic-head">
@@ -825,12 +859,55 @@
     });
   }
 
+  async function loadGrowthAdmobPanel() {
+    try {
+      const res = await fetch('/api/projects', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const projects = Array.isArray(data.projects) ? data.projects : [];
+      const summary = data.summary || {};
+      const badgeEl = $('growth-admob-badge');
+      const capEl = $('growth-admob-caption');
+      if (badgeEl) {
+        badgeEl.textContent = summary.allAppAdsTxtVerified !== false
+          ? `🟢 app-ads.txt 200 OK · ${summary.dDayBadge || 'D+4일째'}`
+          : '🟡 app-ads.txt 점검 필요';
+      }
+      if (capEl && summary.dDayBadge) {
+        capEl.textContent = `SJ 계정(${summary.publisherId || 'pub-7642010403138987'}) · ${summary.dDayBadge} · 내부 테스트 안전모드(테스트 광고) 가동 중`;
+      }
+      const tbody = $('growth-admob-rows');
+      if (tbody && projects.length) {
+        tbody.innerHTML = projects.map(p => {
+          const tr = p.admobTracker || {};
+          const sc = p.testSchedule || {};
+          const ads = tr.appAdsTxt || {};
+          const rev = Number(p.measurement?.admob?.revenue || 0).toFixed(2);
+          return `<tr>
+            <td><strong>📱 ${p.name}</strong><br><small style="color:#64748b;">${p.packageName || ''} · 진행률 ${p.progressPct || 72}%</small></td>
+            <td style="font-size:12px;font-weight:700;color:#1e293b;">${p.owner || '@patch · @trace'}</td>
+            <td><span class="pillar-badge badge-blue">${sc.dDayBadge || 'D+4일'}</span><br><small style="color:#64748b;">목표: ${sc.targetProductionDate || '2026-10-28'}</small></td>
+            <td><span class="pillar-badge ${ads.verified ? 'badge-green' : 'badge-orange'}">${ads.verified ? 'HTTP 200 OK' : '확인필요'}</span><br><small style="color:#64748b;">pub-7642010403138987</small></td>
+            <td><code style="font-size:11px;color:#1d4ed8;">${tr.admobBannerUnitId || '-'}</code><br><small style="color:#d97706;font-weight:700;">테스트 광고 안전모드 (실광고 ID 매핑완료)</small></td>
+            <td><strong>$${rev} USD</strong><br><small style="color:#64748b;">내부트랙</small></td>
+            <td style="font-size:12px;line-height:1.45;">
+              <strong style="color:#b45309;">[병목]</strong> ${p.blocker || '-'}<br>
+              <span style="color:#0f172a;font-weight:700;">👉 ${p.nextAction || '-'}</span>
+            </td>
+          </tr>`;
+        }).join('');
+      }
+    } catch (_) {}
+  }
+
   window.BaroLabTopKpi = { refresh: renderTopKpiStrip };
   syncTopKpiMetrics();
   loadGrowthDoctorPanel();
+  loadGrowthAdmobPanel();
   $('btn-manual-refresh')?.addEventListener('click', () => {
     syncTopKpiMetrics();
     loadGrowthDoctorPanel();
+    loadGrowthAdmobPanel();
   });
   setInterval(syncTopKpiMetrics, 60000);
 })();

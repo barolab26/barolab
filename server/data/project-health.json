@@ -1,0 +1,196 @@
+{
+  "schema": "barolab-project-health-v1",
+  "checkedAt": "2026-10-18T21:52:13+09:00",
+  "todayKst": "2026-10-18",
+  "fingerprint": "b7b69959593041e5",
+  "lastBroadcastDate": "2026-10-18",
+  "watchdog": {
+    "lastRunAt": "2026-10-18T21:47:32+09:00",
+    "status": "healthy",
+    "cdpOnline": 7,
+    "cdpTotal": 7
+  },
+  "summary": {
+    "totalProjects": 6,
+    "healthyCount": 5,
+    "ceoActionCount": 1
+  },
+  "ceoActionItems": [
+    {
+      "projectId": "mobile_apps",
+      "projectTitle": "앱 프로젝트 4종 출시 및 SJ AdMob 수익화",
+      "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
+      "badge": "🚨 대표님 실기기 확인 대기 · 테스트 게시 D+4일째 · 14일 요건 D-10일",
+      "blocker": "① Google Play 14일 비공개 테스트 필수 기간 진행 중 (테스트 게시 D+4일째 · 14일 요건 D-10일, 2026-10-28 충족) ② 정식 프로덕션 실광고(SJ AdMob) AAB 빌드 전 삼성 실기기 4종 최종 동작 1회 확인 대기",
+      "requiredAction": "[🚨 대표님 1회 확인 필요] 삼성 실휴대폰에서 앱 4종(성경말씀 스피커 듣기 / 안부 카드 공유 / 돋보기 카메라 조명 / 장보기 음성인식) 최종 체크 완료 시 → @patch가 즉시 테스트 광고를 SJ 실광고(pub-7642010403138987)로 스위치한 프로덕션 AAB 빌드 및 제출",
+      "linkUrl": "apps.html",
+      "checklist": [
+        "📱 오늘의 성경말씀: 오늘의 성경말씀(v4): 삼성 실휴대폰 실제 스피커 음성 듣기·정지 1회 확인",
+        "📱 오늘의 안부: 오늘의 안부(v2): 실휴대폰 카드 이름 입력·사진 저장·공유 1회 확인",
+        "📱 큰글씨 돋보기: 큰글씨 돋보기(v2): 삼성 실휴대폰 카메라 초점·조명(플래시)·정지 저장 1회 확인",
+        "📱 말로 장보기: 말로 장보기(v2): 삼성 실휴대폰 한국어 음성인식 품목 추가 1회 확인"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "cf_blog",
+      "icon": "⚡",
+      "title": "CF 블로그 16개 도메인",
+      "owner": "@publi (집필·발행) · @trace (색인·수익)",
+      "ownerAgentIds": [
+        "publi",
+        "trace"
+      ],
+      "status": "healthy",
+      "statusBadge": "🟢 정상 가동 (15/16편 · 94%)",
+      "progressText": "오늘 발행 15/16편 (94%) · 색인 555/1886건 (29.4%)",
+      "progressPct": 94,
+      "blocker": "healthcox.com 애드센스 외부 심사 대기(GETTING_READY) 및 미색인 잔여분(1331건) 순차 색인 중",
+      "nextAction": "[🤖 자동 조치] @publi 브릿지 유입을 승인 도메인(must-pick.com 등)으로 자동 우회 완료 · @trace 16개 도메인 사이트맵/IndexNow 일일 자동 제출 중",
+      "actionType": "auto",
+      "autoActionBadge": "[🤖 워치독 슬롯 순환 중]",
+      "ceoActionRequired": false,
+      "linkUrl": "cf.html"
+    },
+    {
+      "id": "naver_blog",
+      "icon": "🟢",
+      "title": "네이버 블로그 5개 계정 (오늘 7 + 내일 예약 7)",
+      "owner": "@publi (5계정 로테이션)",
+      "ownerAgentIds": [
+        "publi"
+      ],
+      "status": "healthy",
+      "statusBadge": "🟢 오늘 7/7편 완료",
+      "progressText": "오늘 달성 7/7편 (100%) · RSS 실발행 검증 완료",
+      "progressPct": 100,
+      "blocker": "계정당 4시간 안전 쿨타임 준수 대기 (스팸 필터링 방지 목적 정상 대기)",
+      "nextAction": "[🤖 자동 조치] @publi 5개 전용 포터블 브라우저(CDP 9230~9335) 쿨타임 해제 슬롯부터 순차 공개·내일 예약 발행 자동 집행",
+      "actionType": "auto",
+      "autoActionBadge": "[🟢 오늘 할당량 완수]",
+      "ceoActionRequired": false,
+      "linkUrl": "naver.html"
+    },
+    {
+      "id": "naver_kin",
+      "icon": "💡",
+      "title": "네이버 지식iN (일 목표 20건)",
+      "owner": "@publi (adinfo0905 · stone0747)",
+      "ownerAgentIds": [
+        "publi"
+      ],
+      "status": "healthy",
+      "statusBadge": "🟢 정상 가동 중 (8/20건)",
+      "progressText": "오늘 답변 검증 8/20건 (40%) · 계정별 4/10, 4/10",
+      "progressPct": 40,
+      "blocker": "지식iN 20분 안전 간격 타이머 및 질문 매칭 필터링 대기",
+      "nextAction": "[🤖 자동 조치] @publi adinfo0905(4/10)·stone0747(4/10) 20분 간격 자동 질문 탐색 및 실측 답변 등록 중",
+      "actionType": "auto",
+      "autoActionBadge": "[🤖 20분 간격 자동 가동]",
+      "ceoActionRequired": false,
+      "linkUrl": "kin.html"
+    },
+    {
+      "id": "threads",
+      "icon": "🧵",
+      "title": "Threads (@mustpickinfo · 일 4건)",
+      "owner": "@publi (@mustpickinfo)",
+      "ownerAgentIds": [
+        "publi"
+      ],
+      "status": "healthy",
+      "statusBadge": "🟢 정상 가동 중 (2/4건)",
+      "progressText": "오늘 발행 2/4건 (50%)",
+      "progressPct": 50,
+      "blocker": "일일 4슬롯(08:00 · 12:30 · 18:10 · 21:30) 스케줄 시간 대기",
+      "nextAction": "[🤖 자동 조치] @publi @mustpickinfo 계정 다음 예정 슬롯 원고 및 후속 댓글 링크 자동 게시",
+      "actionType": "auto",
+      "autoActionBadge": "[🤖 슬롯 스케줄 순항 중]",
+      "ceoActionRequired": false,
+      "linkUrl": "threads.html"
+    },
+    {
+      "id": "legacy_remodel",
+      "icon": "🩺",
+      "title": "기존 글 1,984건 리모델링 (일 20건)",
+      "owner": "@doctor (7대 검진) · @publi (본문 수선)",
+      "ownerAgentIds": [
+        "doctor",
+        "publi"
+      ],
+      "status": "healthy",
+      "statusBadge": "🟢 정상 순찰 중 (19/20건)",
+      "progressText": "오늘 검진 19/20건 (95%) · 누적 패치·리모델링 26건",
+      "progressPct": 95,
+      "blocker": "주제 이탈(D등급) 글 급격한 삭제 시 색인 충격 위험 → 일 1~2건 안전캡 격리 원칙 적용 중",
+      "nextAction": "[🤖 자동 조치] @doctor 가짜 도표(CHECKPOINT #) 영구 차단 완료 · 구버전 카테고리 자동 재매핑 및 11~50위 상승후보 리모델링 순차 집행 중",
+      "actionType": "auto",
+      "autoActionBadge": "[🟢 닥터 자동 순찰 중]",
+      "ceoActionRequired": false,
+      "linkUrl": "growth.html#tab-remodel"
+    },
+    {
+      "id": "mobile_apps",
+      "icon": "📱",
+      "title": "앱 프로젝트 4종 출시 및 SJ AdMob 수익화",
+      "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
+      "ownerAgentIds": [
+        "patch",
+        "trace"
+      ],
+      "status": "ceo_action_needed",
+      "statusBadge": "🚨 대표님 실기기 확인 대기 · 테스트 게시 D+4일째 · 14일 요건 D-10일",
+      "progressText": "4종 평균 72% · 테스트 게시 D+4일째 · 14일 요건 D-10일 · app-ads.txt 200 OK",
+      "progressPct": 72,
+      "blocker": "① Google Play 14일 비공개 테스트 필수 기간 진행 중 (테스트 게시 D+4일째 · 14일 요건 D-10일, 2026-10-28 충족) ② 정식 프로덕션 실광고(SJ AdMob) AAB 빌드 전 삼성 실기기 4종 최종 동작 1회 확인 대기",
+      "nextAction": "[🚨 대표님 1회 확인 필요] 삼성 실휴대폰에서 앱 4종(성경말씀 스피커 듣기 / 안부 카드 공유 / 돋보기 카메라 조명 / 장보기 음성인식) 최종 체크 완료 시 → @patch가 즉시 테스트 광고를 SJ 실광고(pub-7642010403138987)로 스위치한 프로덕션 AAB 빌드 및 제출",
+      "actionType": "ceo",
+      "autoActionBadge": "[🚨 대표님 실기기 1회 확인 필요]",
+      "ceoActionRequired": true,
+      "linkUrl": "apps.html",
+      "appDetails": [
+        {
+          "id": "bible_app",
+          "name": "오늘의 성경말씀",
+          "packageName": "com.barolab.harubible",
+          "progressPct": 72,
+          "dDayBadge": "테스트 게시 D+4일째 · 14일 요건 D-10일",
+          "admobBannerUnitId": "ca-app-pub-7642010403138987/9298253515",
+          "appAdsTxtVerified": true,
+          "ceoCheckItem": "오늘의 성경말씀(v4): 삼성 실휴대폰 실제 스피커 음성 듣기·정지 1회 확인"
+        },
+        {
+          "id": "greeting",
+          "name": "오늘의 안부",
+          "packageName": "com.barolab.morningcard",
+          "progressPct": 72,
+          "dDayBadge": "테스트 게시 D+4일째 · 14일 요건 D-10일",
+          "admobBannerUnitId": "ca-app-pub-7642010403138987/8940829169",
+          "appAdsTxtVerified": true,
+          "ceoCheckItem": "오늘의 안부(v2): 실휴대폰 카드 이름 입력·사진 저장·공유 1회 확인"
+        },
+        {
+          "id": "magnifier",
+          "name": "큰글씨 돋보기",
+          "packageName": "com.barolab.biglens",
+          "progressPct": 72,
+          "dDayBadge": "테스트 게시 D+4일째 · 14일 요건 D-10일",
+          "admobBannerUnitId": "ca-app-pub-7642010403138987/4744854277",
+          "appAdsTxtVerified": true,
+          "ceoCheckItem": "큰글씨 돋보기(v2): 삼성 실휴대폰 카메라 초점·조명(플래시)·정지 저장 1회 확인"
+        },
+        {
+          "id": "shopping",
+          "name": "말로 장보기",
+          "packageName": "com.barolab.voicebasket",
+          "progressPct": 72,
+          "dDayBadge": "테스트 게시 D+4일째 · 14일 요건 D-10일",
+          "admobBannerUnitId": "ca-app-pub-7642010403138987/2730644038",
+          "appAdsTxtVerified": true,
+          "ceoCheckItem": "말로 장보기(v2): 삼성 실휴대폰 한국어 음성인식 품목 추가 1회 확인"
+        }
+      ]
+    }
+  ]
+}

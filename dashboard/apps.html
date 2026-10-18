@@ -5,12 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>앱 프로젝트 관제 · BaroLab</title>
   <link rel="stylesheet" href="traffic.css">
-  <link rel="stylesheet" href="projects.css?v=20261017-apps-1">
+  <link rel="stylesheet" href="projects.css?v=20261018-admob-live">
   <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
   <link rel="stylesheet" href="signature_deck.css?v=20261017-sig-2">
   <script src="kin-summary.js?v=20261015-2" defer></script>
   <script src="threads-summary.js?v=20261015-5" defer></script>
-  <script src="signature_deck.js?v=20261017-sig-2" defer></script>
 </head>
 <body class="control-room apps-page">
 <a class="skip-link" href="#main-content">본문으로 이동</a>
@@ -31,6 +30,7 @@
           <div class="clock" id="live-clock">--:--:--</div>
           <div class="tz">KST (Asia/Seoul)</div>
         </div>
+        <button class="btn-quick" id="apps-audit-now" type="button" style="background:#2563eb; border-color:#1d4ed8; color:#fff;">🔍 AdMob·app-ads.txt 즉시 실측</button>
         <button class="btn-quick" id="apps-refresh" type="button">상태 새로고침</button>
       </div>
     </header>
@@ -101,7 +101,7 @@
   </main>
 </div>
 
-<script src="projects.js?v=20261017-apps-1" defer></script>
+<script src="projects.js?v=20261018-admob-live" defer></script>
 <script>
   function updateClock() {
     const now = new Date();

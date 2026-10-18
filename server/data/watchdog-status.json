@@ -1,0 +1,30 @@
+{
+  "schema": "barolab-system-watchdog-v1",
+  "triggerSource": "sre-init",
+  "startedAt": "2026-10-18T21:47:11+09:00",
+  "finishedAt": "2026-10-18T21:47:32+09:00",
+  "status": "healthy",
+  "server": {
+    "port8790": true,
+    "port8791": true,
+    "recovered": false,
+    "detail": "정상 가동 중"
+  },
+  "cdpBrowsers": {
+    "onlineCount": 7,
+    "totalRequired": 7,
+    "recoveredPorts": [
+      9336,
+      9226
+    ],
+    "failedPorts": []
+  },
+  "zombieRecoveries": [],
+  "missedSlotCatchups": [],
+  "projectHealthSummary": {
+    "totalProjects": 6,
+    "ceoActionCount": 1,
+    "autoRecoveringCount": 0
+  },
+  "broadcastedToChat": true
+}

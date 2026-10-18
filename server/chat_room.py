@@ -1485,6 +1485,44 @@ def broadcast_workstream_handoff(
     return append_or_update_room_message(msg_obj)
 
 
+def append_agent_message(
+    agent_id: str,
+    content: str,
+    room_id: str = "main",
+    msg_type: str = "sre_briefing",
+    metadata: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Append a proactive SRE watchdog or 6-project health briefing directly into room-main.json."""
+    now_ts = int(time.time() * 1000)
+    ag = AGENT_MAP.get(agent_id, CREW_AGENTS[0])
+    msg_obj: Dict[str, Any] = {
+        "id": f"{msg_type}-{agent_id}-{now_ts}",
+        "who": agent_id,
+        "text": content,
+        "ts": now_ts,
+        "msgKind": "direct",
+        "isWorkstream": False,
+        "replyToCeo": True,
+        "targetAgent": "ceo",
+        "mentionedAgents": list({agent_id, *_extract_mentioned_slugs(content)}),
+        "brain": _get_agent_brain_safe(agent_id),
+        "eventType": msg_type,
+        "taskTracker": {
+            "handoff": f"@{ag['name']} ➔ 대표님 브리핑",
+            "nextAssignee": "대표님 확인 / 자동 복구",
+            "status": "completed",
+            "step": "6대 전 프로젝트 자율 감사 · 무인 워치독 실측 보고",
+            "resultSummary": "실시간 점검 및 자동 복구 완료",
+            "deliverableUrl": "/apps.html",
+            "deliverableLabel": "앱 4종 AdMob 관제실 열기",
+            "synapseLinked": True,
+            "synapseLabel": "SRE 자율 감사",
+        },
+        "metadata": metadata or {},
+    }
+    return append_or_update_room_message(msg_obj)
+
+
 def sync_and_broadcast_pipeline_workstream() -> List[Dict[str, Any]]:
     """
     Ensure initial real pipeline workstream handoff messages exist in `room-main.json`

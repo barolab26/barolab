@@ -265,9 +265,45 @@ app.include_router(workflow_router)
 from memory_graph import memory_router
 from chat_room import chat_router
 from content_auditor import auditor_router
+from project_health import router as project_health_router, audit_all_projects_health
 app.include_router(memory_router)
 app.include_router(chat_router)
 app.include_router(auditor_router)
+app.include_router(project_health_router)
+
+
+@app.get("/api/watchdog/status")
+def api_watchdog_status():
+    return load_json(DATA_DIR / "watchdog-status.json", default={"status": "unknown"})
+
+
+@app.post("/api/watchdog/run-now")
+def api_watchdog_run_now():
+    if str(BASE_DIR) not in sys.path:
+        sys.path.insert(0, str(BASE_DIR))
+    from common import system_watchdog
+    return system_watchdog.run_system_watchdog(trigger_source="api-manual", broadcast=True)
+
+
+def _start_periodic_project_health_auditor():
+    import threading
+    import time
+
+    def _loop():
+        time.sleep(5)
+        while True:
+            try:
+                audit_all_projects_health(broadcast_if_changed=True, force_broadcast=False)
+            except Exception:
+                pass
+            time.sleep(1800)  # Every 30 minutes
+
+    t = threading.Thread(target=_loop, daemon=True, name="jarvis-30m-project-auditor")
+    t.start()
+
+
+_start_periodic_project_health_auditor()
+
 
 
 class ThreadsSmartGenerateRequest(BaseModel):
