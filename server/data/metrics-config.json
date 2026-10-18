@@ -208,9 +208,12 @@
       "gsc_api_verified_at": "2026-10-15T05:31:56.697406+00:00"
     },
     "nolplace.com": {
+      "indexnow_key": "ae0cbe65fe03acfed97ad566978b3da04c176debd2c0998d",
+      "indexnow_key_location": "https://www.nolplace.com/ae0cbe65fe03acfed97ad566978b3da04c176debd2c0998d.txt",
       "analytics_reader": "aaa10291028",
       "ga4_property": "556141438",
       "search_property": "https://www.nolplace.com/",
+      "gsc_property": "https://www.nolplace.com/",
       "gsc_api_verified_property": "https://www.nolplace.com/",
       "gsc_api_verified_reader": "aaa10291028",
       "gsc_api_verified_at": "2026-10-15T05:32:30.045423+00:00"

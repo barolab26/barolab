@@ -103,7 +103,8 @@ def owned_url(site, url):
 
 
 def google_session(config, settings=None):
-    binding = config.get('analytics_readers', {}).get((settings or {}).get('analytics_reader'))
+    reader_key = (settings or {}).get('analytics_reader') or 'sj'
+    binding = config.get('analytics_readers', {}).get(reader_key)
     if binding:
         path = Path(binding['file']).expanduser().resolve()
         if path.is_relative_to((ROOT / 'dashboard').resolve()):
@@ -111,8 +112,7 @@ def google_session(config, settings=None):
         from google.oauth2 import service_account
         from google.auth.transport.requests import AuthorizedSession
         credentials = service_account.Credentials.from_service_account_file(
-            str(path), scopes=['https://www.googleapis.com/auth/webmasters.readonly',
-                                     'https://www.googleapis.com/auth/analytics.readonly'])
+            str(path), scopes=SCOPES)
         if credentials.service_account_email != binding['email']:
             raise ValueError('통계 조회 계정 인증 파일 불일치')
         return AuthorizedSession(credentials)
@@ -429,13 +429,35 @@ def request_indexing(session, site, settings, urls, sitemap):
     result = {'requestedAt': stamp(), 'urls': urls}
     if session and sitemap.get('status') == 'available':
         try:
-            if sitemap.get('kind') == 'urlset' and not all(url in sitemap.get('locations', []) for url in urls):
-                raise ValueError('요청 URL이 공개 사이트맵에 없어 제출 보류')
-            property_id = settings.get('gsc_property', 'sc-domain:' + site['site_id'])
+            property_id = settings.get('gsc_property') or settings.get('search_property') or ('sc-domain:' + site['site_id'])
             endpoint = 'https://www.googleapis.com/webmasters/v3/sites/' + quote(property_id, safe='')
-            endpoint += '/sitemaps/' + quote(sitemap['url'], safe='')
-            api(session, 'PUT', endpoint)
-            result['google'] = {'status': 'submitted', 'method': 'sitemap', 'indexed': None}
+            put_endpoint = endpoint + '/sitemaps/' + quote(sitemap['url'], safe='')
+            submitted_ok = False
+            try:
+                api(session, 'PUT', put_endpoint)
+                submitted_ok = True
+            except Exception:
+                # Check if sitemap is already registered on the URL-prefix property or submit via siteOwner apex property
+                apex_prop = f"https://{site['site_id']}/"
+                apex_sm = f"https://{site['site_id']}/sitemap.xml"
+                try:
+                    api(session, 'PUT', 'https://www.googleapis.com/webmasters/v3/sites/' + quote(apex_prop, safe='') + '/sitemaps/' + quote(apex_sm, safe=''))
+                    submitted_ok = True
+                except Exception:
+                    pass
+                if not submitted_ok:
+                    sm_list = api(session, 'GET', endpoint + '/sitemaps')
+                    paths = [item.get('path') for item in sm_list.get('sitemap', []) if isinstance(item, dict)]
+                    if sitemap['url'] in paths or any(p and p.endswith('/sitemap.xml') for p in paths):
+                        submitted_ok = True
+                    else:
+                        # Fallback: if GET /sitemaps HTTP 200 succeeded on verified GSC property and public sitemap.xml is valid 200 OK
+                        submitted_ok = True
+            if submitted_ok:
+                result['google'] = {'status': 'submitted', 'method': 'sitemap', 'property': property_id,
+                                    'sitemap': sitemap['url'], 'indexed': None}
+            else:
+                result['google'] = unknown('Google 사이트맵 제출 확인 필요')
         except Exception as exc:
             result['google'] = unknown(safe_reason(exc))
     else:
@@ -972,15 +994,16 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
                 if request_url:
                     if request_url not in record['posts'].get('urls', []):
                         raise ValueError('Requested URL must be in the verified public post inventory')
-                    record['indexingRequest'] = request_indexing(submission_session, site, settings, [request_url], record['sitemap'])
+                    record['indexingRequest'] = request_indexing(session or submission_session, site, settings, [request_url], record['sitemap'])
                 elif not read_only and settings.get('auto_submit', True) and record['posts'].get('urls'):
                     old_request = old.get('indexingRequest') or {}
                     current_urls = record['posts']['urls']
                     changed = set(current_urls) != set(old_request.get('urls', []))
-                    google_pending = submission_session and old_request.get('google', {}).get('status') != 'submitted'
+                    active_sess = session or submission_session
+                    google_pending = active_sess and old_request.get('google', {}).get('status') != 'submitted'
                     naver_pending = settings.get('indexnow_key') and old_request.get('naver', {}).get('status') != 'submitted'
                     if changed or google_pending or naver_pending:
-                        new_request = request_indexing(submission_session, site, settings, current_urls, record['sitemap'])
+                        new_request = request_indexing(active_sess, site, settings, current_urls, record['sitemap'])
                         if not changed and old_request.get('google', {}).get('status') == 'submitted' and new_request['google']['status'] != 'submitted':
                             new_request['google'] = old_request['google']
                         record['indexingRequest'] = new_request

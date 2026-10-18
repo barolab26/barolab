@@ -1471,7 +1471,16 @@ ACCOUNT_MAP = {
         "stop_bat": r"C:\99_포터블브라우저\CentBrowserPotable_adinfo0905\adinfo0905_stop_cdp.bat",
         "topic": "직장인 연말정산 소득공제, 엑셀 무료 서식, 업무 생산성, 절세",
         "topic_slug": "year-end-tax",
-        "bridge_domains": ["www.maxnote.kr", "www.must-good.com", "www.justinfo.co.kr", "www.must-pick.com", "www.soulnote.kr"],
+        "bridge_domains": [
+            "www.must-pick.com",
+            "www.baronote.kr",
+            "www.justinfo.co.kr",
+            "www.daynote.kr",
+            "www.woorinote.kr",
+            "www.must-good.com",
+            "www.maxnote.kr",
+            "www.soulnote.kr",
+        ],
     },
     "stone0747": {
         "acc_id": "acc5",
@@ -1483,7 +1492,14 @@ ACCOUNT_MAP = {
         "stop_bat": r"C:\99_포터블브라우저\CentBrowserPotable_stone0747\stone0747_stop_cdp.bat",
         "topic": "정부 소상공인 정책자금, 지자체 지원금 마감속보, 생활세무 혜택",
         "topic_slug": "gov-subsidy",
-        "bridge_domains": ["www.must-pick.com", "www.must-good.com", "www.woorinote.kr", "www.justinfo.co.kr"],
+        "bridge_domains": [
+            "www.must-pick.com",
+            "www.baronote.kr",
+            "www.justinfo.co.kr",
+            "www.daynote.kr",
+            "www.woorinote.kr",
+            "www.must-good.com",
+        ],
     }
 }
 
@@ -2374,11 +2390,13 @@ def preview_inline_text(text):
 
 
 def bridge_hosts(account):
-    """ACCOUNT_MAP.bridge_domains is the only approved routing-pool authority."""
+    """ACCOUNT_MAP.bridge_domains is the only approved routing-pool authority (filtered to AdSense READY domains)."""
+    from common.channel_attribution import is_adsense_ready_url_or_domain
     hosts = account.get('bridge_domains', [])
     if not isinstance(hosts, (list, tuple)) or any(not isinstance(h, str) or not re.fullmatch(r'(?:www\.)?[a-z0-9-]+\.[a-z.]+', h) for h in hosts) or len(set(hosts)) != len(hosts):
         raise RuntimeError('Invalid approved bridge domain pool')
-    return tuple(hosts)
+    ready_hosts = [h for h in hosts if is_adsense_ready_url_or_domain(h)]
+    return tuple(ready_hosts or hosts)
 
 
 def is_bridge_account(account):
@@ -2685,6 +2703,7 @@ def bridge_policy_hash(account):
 
 def bridge_inventory(account, fetch_inventory=None, max_items=100, preferred_urls=None):
     """Bound metadata only; real page bodies are fetched only for selected candidates."""
+    from common.channel_attribution import domain_cpc_priority_rank
     if fetch_inventory is None:
         from cf_posting.pipeline_runner import published_inventory
         fetch_inventory = published_inventory
@@ -2697,23 +2716,27 @@ def bridge_inventory(account, fetch_inventory=None, max_items=100, preferred_url
         try:
             for row in fetch_inventory('https://' + host):
                 slug = row.get('slug')
-                if row.get('status') != 'published' or not isinstance(slug, str) or not slug or re.search(r'[\s?#\\]', slug) or slug.startswith('/') or any(p in ('.', '..', '') for p in slug.split('/')):
+                if (row.get('status') != 'published' or not isinstance(slug, str) or not slug
+                        or 'index-rescue-' in slug.lower()
+                        or re.search(r'[\s?#\\]', slug) or slug.startswith('/') or any(p in ('.', '..', '') for p in slug.split('/'))):
                     continue
                 entry = {k: row.get(k) for k in ('title', 'category', 'created_at')}
                 entry.update(url='https://' + host + '/' + slug, excerpt=str(row.get('excerpt') or '')[:500])
                 haystack = str(entry['title']) + ' ' + entry['excerpt']
+                cpc_tier, cpc_rank = domain_cpc_priority_rank(host)
                 entry['_queryOverlap'] = 3 * sum(term in haystack for term in terms) + sum(fragment in haystack for fragment in fragments)
+                entry['_cpcScore'] = (3 - min(3, cpc_tier)) * 10 - cpc_rank
                 rows.append(entry)
         except Exception as exc:
             failures.append({'host': host, 'issue': str(exc)[:300]})
     preferred_urls = set(preferred_urls or ())
     if preferred_urls - {row['url'] for row in rows}:
         raise RuntimeError('Preferred CF source is not an actual published article in the approved inventory')
-    rows.sort(key=lambda row: (row['url'] in preferred_urls, row['_queryOverlap'], str(row.get('created_at') or '')), reverse=True)
+    rows.sort(key=lambda row: (row['url'] in preferred_urls, row['_queryOverlap'], row.get('_cpcScore', 0), str(row.get('created_at') or '')), reverse=True)
     bounded, seen = [], set()
     for row in rows:
         if row['url'] not in seen:
-            seen.add(row['url']); row.pop('_queryOverlap'); bounded.append(row)
+            seen.add(row['url']); row.pop('_queryOverlap', None); row.pop('_cpcScore', None); bounded.append(row)
         if len(bounded) >= max_items:
             break
     if not bounded:

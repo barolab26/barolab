@@ -3,7 +3,7 @@
   "totalInventory": 1984,
   "dailyQuotaTarget": 20,
   "dailyDGradePerDomainCap": 2,
-  "updatedAt": "2026-10-18T16:00:23.231133+09:00",
+  "updatedAt": "2026-10-18T19:17:16.391382+09:00",
   "auditedPosts": {
     "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024": {
       "url": "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024",
@@ -957,24 +957,24 @@
       "postId": 299,
       "slug": "september-2026-new-drama-schedule",
       "title": "2026년 9월 신작 드라마 일정, 9월 9일 시작 5편 채널·OTT·몇부작",
-      "auditedAt": "2026-10-17T19:26:09.457094+09:00",
-      "auditDate": "2026-10-17",
+      "auditedAt": "2026-10-18T19:13:50.802335+09:00",
+      "auditDate": "2026-10-18",
       "grade": "D",
-      "gradeBadge": "🔴 D등급 (주제 이탈 · 안전 이관/Noindex 권고)",
-      "actionCode": "safe_migrate_or_noindex",
-      "prescription": "도메인 정체성(바로노트 핀테크랩)과 주제 불일치 ➔ 일괄 삭제 금지(검색 페널티 방지) · '머스트조이 방송·맛집(must-joy.com)' 이관 또는 Noindex 안전 처리 (오늘 baronote.kr 1/2건)",
-      "remodeled": false,
-      "remodelStatus": "safe_hold",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
       "checklist": {
         "1_render": {
           "httpStatus": 200,
           "renderOk": true,
           "adSlotPresent": true,
-          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+          "note": "비공개(draft) 격리 처리 완료"
         },
         "2_domainAlignment": {
           "aligned": false,
-          "alignmentLevel": "off_topic",
+          "alignmentLevel": "off_topic_gossip",
           "ownScore": 0,
           "bestCategory": "국민·기초연금",
           "currentCategory": "방송정보",
@@ -984,10 +984,10 @@
             "신용·카드혜택",
             "보험·절세전략"
           ],
-          "needsCategoryRemap": true,
+          "needsCategoryRemap": false,
           "recommendedDomain": "must-joy.com",
           "recommendedDomainBrand": "머스트조이 방송·맛집",
-          "reason": "현재 도메인(바로노트 핀테크랩) 주제 이탈 · '머스트조이 방송·맛집(must-joy.com)' 적합도(9점) 우세"
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
         },
         "3_categoryRemap": {
           "patched": false,
@@ -995,37 +995,21 @@
           "newCategory": "방송정보"
         },
         "4_imageSuitability": {
-          "totalImages": 4,
-          "brokenCount": 0,
-          "brokenUrls": [],
-          "needsRealCapture": false,
-          "hasAiDisclaimer": false,
-          "suitability": "good",
-          "issue": null,
-          "passed": true
+          "suitability": "quarantined",
+          "passed": false
         },
         "5_titleAndBodyQuality": {
-          "qualityScore": 100,
-          "charCount": 4584,
-          "h2Count": 17,
-          "tableCount": 1,
-          "isMechanicalTitle": false,
-          "hasConcreteNumbers": true,
-          "IndirectExperiencePassed": true,
-          "suggestedRemodelTitle": "2026년 9월 신작 드라마 일정, 9월 9일 시작 5편 채널·OTT·몇부작"
+          "qualityScore": 40,
+          "isMechanicalTitle": false
         },
         "6_indexAndPotential": {
-          "indexStatus": "not_indexed",
-          "performanceBucket": "unknown",
-          "impressions": 0,
-          "clicks": 0,
-          "position": null,
-          "coverageState": "URL is unknown to Google"
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
         },
         "7_finalGrade": {
           "grade": "D",
-          "gradeBadge": "🔴 D등급 (주제 이탈 · 안전 이관/Noindex 권고)",
-          "prescription": "도메인 정체성(바로노트 핀테크랩)과 주제 불일치 ➔ 일괄 삭제 금지(검색 페널티 방지) · '머스트조이 방송·맛집(must-joy.com)' 이관 또는 Noindex 안전 처리 (오늘 baronote.kr 1/2건)"
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
         }
       }
     },
@@ -2761,6 +2745,518 @@
           "prescription": "meganote.kr의 「한전 고효율 가전 환급 2026, 11개 품목 1등급·최대 30만원 신청서류 5종」 글에서 3인칭 가짜 인물/깨진 한글 사진 및 AI 워터마크(✦)·메타데이터 오염을 발견해 정자체 요약표·캡처 화면 및 클린 EXIF(iPhone 15, `kepco-energy-efficiency-appliance-tax-01.jpg`) 이미지로 즉시 세탁·재업로드 완료 (+ @퍼블리 본문 보강 큐 등록)"
         }
       }
+    },
+    "https://www.baronote.kr/gdragon-blonde-hair-unconventional-fashion": {
+      "url": "https://www.baronote.kr/gdragon-blonde-hair-unconventional-fashion",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 295,
+      "slug": "gdragon-blonde-hair-unconventional-fashion",
+      "title": "지드래곤 옐로 헤어와 패션, 20주년이 꺼낸 파격",
+      "auditedAt": "2026-10-18T19:13:58.014942+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "디지털정보",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "디지털정보",
+          "newCategory": "디지털정보"
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/kia-한승연-퓨처스-갭파워": {
+      "url": "https://www.baronote.kr/kia-한승연-퓨처스-갭파워",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 293,
+      "slug": "kia-한승연-퓨처스-갭파워",
+      "title": "KIA 한승연, 갭파워로 증명한 2026 퓨처스 장타력",
+      "auditedAt": "2026-10-18T19:14:00.511145+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "방송정보",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "방송정보",
+          "newCategory": "방송정보"
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/임지민-안면부-분쇄골절-수술": {
+      "url": "https://www.baronote.kr/임지민-안면부-분쇄골절-수술",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 292,
+      "slug": "임지민-안면부-분쇄골절-수술",
+      "title": "임지민 분쇄골절 수술 후 회복, 일반 골절과 다른 이유",
+      "auditedAt": "2026-10-18T19:14:02.816613+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "생활정보",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "생활정보",
+          "newCategory": "생활정보"
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/루치아나-바로소-프로듀서-변신": {
+      "url": "https://www.baronote.kr/루치아나-바로소-프로듀서-변신",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 289,
+      "slug": "루치아나-바로소-프로듀서-변신",
+      "title": "루치아나 바로소, 바텐더에서 프로듀서가 된 할리우드의 변신",
+      "auditedAt": "2026-10-18T19:14:03.371866+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "디지털정보",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "디지털정보",
+          "newCategory": "디지털정보"
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/오십한-연애-재방송-편성-가이드": {
+      "url": "https://www.baronote.kr/오십한-연애-재방송-편성-가이드",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 288,
+      "slug": "오십한-연애-재방송-편성-가이드",
+      "title": "오싹한 연애 재방송·편성표: tvN 방송시간과 OTT 다시보기 가이드",
+      "auditedAt": "2026-10-18T19:14:03.817726+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "방송정보",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "방송정보",
+          "newCategory": "방송정보"
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/KBS-월요-예능-편성표-변경-확인법-2026": {
+      "url": "https://www.baronote.kr/KBS-월요-예능-편성표-변경-확인법-2026",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 286,
+      "slug": "KBS-월요-예능-편성표-변경-확인법-2026",
+      "title": "KBS 월요 예능, 바뀌기 전에 먼저 점검하는 법",
+      "auditedAt": "2026-10-18T19:14:06.312469+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "",
+          "newCategory": ""
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/지상파-드라마-예능-편성표-변경-확인법": {
+      "url": "https://www.baronote.kr/지상파-드라마-예능-편성표-변경-확인법",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 285,
+      "slug": "지상파-드라마-예능-편성표-변경-확인법",
+      "title": "지상파 드라마·예능 편성표 변경 확인법: 본방 놓침을 줄이는 4단계 점검",
+      "auditedAt": "2026-10-18T19:14:06.937558+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "",
+          "newCategory": ""
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/argentina-world-cup-2026-preview": {
+      "url": "https://www.baronote.kr/argentina-world-cup-2026-preview",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 핀테크랩",
+      "platform": "cf",
+      "postId": 278,
+      "slug": "argentina-world-cup-2026-preview",
+      "title": "아르헨티나 월드컵｜2026 기준 핵심 확인 방법",
+      "auditedAt": "2026-10-18T19:14:07.416827+09:00",
+      "auditDate": "2026-10-18",
+      "grade": "D",
+      "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+      "actionCode": "quarantined_off_topic_gossip",
+      "prescription": "도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: must-joy.com)",
+      "remodeled": true,
+      "remodelStatus": "quarantined_private_noindex",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "비공개(draft) 격리 처리 완료"
+        },
+        "2_domainAlignment": {
+          "aligned": false,
+          "alignmentLevel": "off_topic_gossip",
+          "ownScore": 0,
+          "bestCategory": "국민·기초연금",
+          "currentCategory": "생활정보",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-joy.com",
+          "recommendedDomainBrand": "머스트조이 방송·맛집",
+          "reason": "도메인 전문 분야(연금·대출·신용·금융 계산)와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "생활정보",
+          "newCategory": "생활정보"
+        },
+        "4_imageSuitability": {
+          "suitability": "quarantined",
+          "passed": false
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 40,
+          "isMechanicalTitle": false
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "quarantined",
+          "performanceBucket": "quarantined"
+        },
+        "7_finalGrade": {
+          "grade": "D",
+          "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+          "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료"
+        }
+      }
     }
   },
   "dailyHistory": {
@@ -2776,11 +3272,11 @@
       }
     },
     "2026-10-18": {
-      "audited": 10,
+      "audited": 19,
       "remodeled": 8,
       "bPatched": 8,
       "cQueued": 8,
-      "dCapped": 2,
+      "dCapped": 11,
       "dByDomain": {
         "woorinote.kr": 1,
         "meganote.kr": 1

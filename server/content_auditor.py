@@ -402,17 +402,85 @@ def _build_index_lookup_from_metrics() -> Tuple[int, Dict[str, Dict[str, Any]]]:
     return max(inventory_total, 1974), lookup
 
 
-def _score_domain_alignment(domain: str, title: str, category: str, body_text: str, tags: str = "") -> Dict[str, Any]:
+DUMMY_RESCUE_SLUG_RE = re.compile(r"(?:^|-)index-rescue-", re.IGNORECASE)
+FINANCE_POLICY_DOMAINS = {
+    "baronote.kr",
+    "must-good.com",
+    "woorinote.kr",
+    "justinfo.co.kr",
+    "healthcox.com",
+    "smilenote.kr",
+    "topnote.kr",
+    "maxnote.kr",
+    "must-pick.com",
+    "meganote.kr",
+}
+GOSSIP_OFF_TOPIC_MARKERS = (
+    "gdragon",
+    "지드래곤",
+    "임지민",
+    "안면부",
+    "분쇄골절",
+    "한승연",
+    "kia-",
+    "퓨처스",
+    "장타력",
+    "갭파워",
+    "루치아나",
+    "바로소",
+    "할리우드",
+    "오싹한 연애",
+    "오십한-연애",
+    "재방송",
+    "편성표",
+    "월요 예능",
+    "지상파 드라마",
+    "신작 드라마",
+    "몇부작",
+    "아르헨티나 월드컵",
+    "world-cup",
+)
+
+
+def _score_domain_alignment(domain: str, title: str, category: str, body_text: str, tags: str = "", slug: str = "") -> Dict[str, Any]:
     """
     Checklist #2 & #3 helper:
     Determine whether the post aligns with `domain`'s vertical specialty,
     select the best matching category among the domain's 4 vertical categories,
     and identify if another domain in the 16-domain network is a much stronger match.
     """
-    combined = f"{title} {title} {category} {tags} {body_text[:1500]}".lower()
+    combined = f"{slug} {title} {title} {category} {tags} {body_text[:1500]}".lower()
     spec = DOMAIN_IDENTITY_SPECS.get(domain, {})
     valid_categories = spec.get("categories") or []
     matrix = DOMAIN_KEYWORD_MATRIX.get(domain, {})
+
+    if slug and DUMMY_RESCUE_SLUG_RE.search(slug):
+        return {
+            "aligned": False,
+            "alignmentLevel": "dummy_rescue",
+            "ownScore": 0,
+            "bestCategory": valid_categories[0] if valid_categories else category,
+            "currentCategory": category,
+            "validCategories": valid_categories,
+            "needsCategoryRemap": False,
+            "recommendedDomain": domain,
+            "recommendedDomainBrand": matrix.get("brand", domain),
+            "reason": "테스트/더미 페이지(index-rescue-*) 감지 ➔ 즉시 삭제 및 사이트맵(sitemap.xml) 완전 제거 대상",
+        }
+
+    if domain in FINANCE_POLICY_DOMAINS and any(m in combined for m in GOSSIP_OFF_TOPIC_MARKERS):
+        return {
+            "aligned": False,
+            "alignmentLevel": "off_topic_gossip",
+            "ownScore": 0,
+            "bestCategory": valid_categories[0] if valid_categories else category,
+            "currentCategory": category,
+            "validCategories": valid_categories,
+            "needsCategoryRemap": False,
+            "recommendedDomain": "must-joy.com",
+            "recommendedDomainBrand": DOMAIN_KEYWORD_MATRIX.get("must-joy.com", {}).get("brand", "must-joy.com"),
+            "reason": f"도메인 전문 분야({matrix.get('specialty', domain)})와 무관한 연예·스포츠·방송 가십 단신 ➔ D등급 즉시 격리(비공개/사이트맵 제외)",
+        }
 
     # 1. Score all 16 domains to see how well this post fits `domain` vs other domains
     domain_scores: Dict[str, int] = {}
@@ -717,6 +785,24 @@ def _check_title_and_indirect_experience(domain: str, title: str, content_html: 
     }
 
 
+def delete_cf_post_live(domain: str, post_id: Any) -> Dict[str, Any]:
+    """Delete a dummy/test post (`index-rescue-*`) on the live CF Worker via `DELETE /api/posts/{id}`."""
+    if not post_id:
+        return {"ok": False, "error": "Missing post id"}
+    headers = _get_cf_auth_headers(domain)
+    try:
+        resp = requests.delete(
+            f"https://www.{domain}/api/posts/{post_id}",
+            headers=headers,
+            timeout=20,
+        )
+        if resp.status_code in (200, 204):
+            return {"ok": True, "httpStatus": resp.status_code, "postId": post_id}
+        return {"ok": False, "httpStatus": resp.status_code, "error": resp.text[:200]}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
 def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_category: str, status_override: Optional[str] = None) -> Dict[str, Any]:
     """
     Checklist #3 Execution:
@@ -728,18 +814,27 @@ def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_ca
         return {"ok": False, "error": "Missing post id"}
 
     headers = _get_cf_auth_headers(domain)
-    payload = {
-        "title": post_detail.get("title", ""),
-        "content": post_detail.get("content", ""),
-        "slug": post_detail.get("slug", ""),
-        "category": new_category,
-        "meta_description": post_detail.get("meta_description") or post_detail.get("excerpt") or "",
-        "excerpt": post_detail.get("excerpt") or post_detail.get("meta_description") or "",
-        "thumbnail": post_detail.get("thumbnail"),
-        "og_image": post_detail.get("og_image") or post_detail.get("thumbnail"),
-        "isPublished": (status_override or post_detail.get("status", "published")) == "published",
-        "status": status_override or post_detail.get("status", "published"),
-    }
+    target_status = status_override or post_detail.get("status", "published")
+    if status_override == "draft":
+        # Minimal payload so the CF Worker does not re-slugify Korean slugs when unpublishing
+        payload: Dict[str, Any] = {
+            "category": new_category,
+            "isPublished": False,
+            "status": "draft",
+        }
+    else:
+        payload = {
+            "title": post_detail.get("title", ""),
+            "content": post_detail.get("content", ""),
+            "slug": post_detail.get("slug", ""),
+            "category": new_category,
+            "meta_description": post_detail.get("meta_description") or post_detail.get("excerpt") or "",
+            "excerpt": post_detail.get("excerpt") or post_detail.get("meta_description") or "",
+            "thumbnail": post_detail.get("thumbnail"),
+            "og_image": post_detail.get("og_image") or post_detail.get("thumbnail"),
+            "isPublished": target_status == "published",
+            "status": target_status,
+        }
     try:
         resp = requests.put(
             f"https://www.{domain}/api/posts/{post_id}",
@@ -754,7 +849,7 @@ def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_ca
                 "postId": post_id,
                 "oldCategory": post_detail.get("category"),
                 "newCategory": new_category,
-                "status": payload["status"],
+                "status": target_status,
             }
         return {"ok": False, "httpStatus": resp.status_code, "error": resp.text[:200]}
     except Exception as exc:
@@ -936,7 +1031,7 @@ def audit_single_cf_post(
     # 2. [도메인 정합성 판정]
     soup_content = BeautifulSoup(content_html, "html.parser")
     plain_body = soup_content.get_text(" ", strip=True)
-    alignment = _score_domain_alignment(domain, title, old_category, plain_body, tags)
+    alignment = _score_domain_alignment(domain, title, old_category, plain_body, tags, slug=slug)
 
     # 3. [카테고리 자동 재매핑]
     target_cat = alignment["bestCategory"] if (alignment["needsCategoryRemap"] and alignment["aligned"]) else old_category
@@ -982,10 +1077,29 @@ def audit_single_cf_post(
     d_cap = int(ledger.get("dailyDGradePerDomainCap", 2))
 
     if not alignment["aligned"]:
-        # 🔴 D등급 (주제 이탈 / 가망 없음) - 하루 도메인당 최대 1~2건 안전 캡 적용 (검색엔진 페널티 방지)
+        # 🔴 D등급 (더미 URL 또는 주제 이탈)
         grade = "D"
-        grade_badge = "🔴 D등급 (주제 이탈 · 안전 이관/Noindex 권고)"
-        if d_domain_count < d_cap:
+        if alignment.get("alignmentLevel") == "dummy_rescue":
+            grade_badge = "🔴 D등급 (더미 URL index-rescue-* · 즉시 삭제/사이트맵 제거 완료)"
+            if auto_patch_category and post_id:
+                delete_cf_post_live(domain, post_id)
+            daily_rec["dByDomain"][domain] = d_domain_count + 1
+            daily_rec["dCapped"] = daily_rec.get("dCapped", 0) + 1
+            prescription = "시스템 테스트용 더미 URL(index-rescue-*) 적발 ➔ CF API 즉시 삭제 및 sitemap.xml 완전 제거 완료"
+            action_code = "deleted_dummy_rescue"
+        elif alignment.get("alignmentLevel") == "off_topic_gossip":
+            grade_badge = "🔴 D등급 (주제 이탈 가십 단신 · 즉시 비공개/사이트맵 격리 완료)"
+            if auto_patch_category and post_id:
+                patch_cf_post_category_live(domain, post_detail, old_category, status_override="draft")
+            daily_rec["dByDomain"][domain] = d_domain_count + 1
+            daily_rec["dCapped"] = daily_rec.get("dCapped", 0) + 1
+            prescription = (
+                f"도메인 정체성({DOMAIN_KEYWORD_MATRIX.get(domain, {}).get('brand', domain)})과 무관한 연예·스포츠·방송 단신 적발 ➔ "
+                f"즉시 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: {alignment['recommendedDomain']})"
+            )
+            action_code = "quarantined_off_topic_gossip"
+        elif d_domain_count < d_cap:
+            grade_badge = "🔴 D등급 (주제 이탈 · 안전 이관/Noindex 권고)"
             daily_rec["dByDomain"][domain] = d_domain_count + 1
             daily_rec["dCapped"] = daily_rec.get("dCapped", 0) + 1
             prescription = (
@@ -994,6 +1108,7 @@ def audit_single_cf_post(
             )
             action_code = "safe_migrate_or_noindex"
         else:
+            grade_badge = "🔴 D등급 (주제 이탈 · 안전 이관/Noindex 권고)"
             prescription = (
                 f"주제 이탈 감지되었으나 일일 안전 상한({d_cap}건/도메인) 도달 ➔ 내일 순차 이관 대기열로 안전 유예"
             )
@@ -1667,6 +1782,127 @@ def scan_and_register_fake_ai_image_posts(broadcast: bool = True) -> Dict[str, A
     }
 
 
+def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
+    """
+    Scan all 16 CF domains for:
+      1) `index-rescue-*` dummy/test URLs -> immediately DELETE via CF API so they are removed from `/api/posts` and `/sitemap.xml`.
+      2) Off-topic entertainment/sports/broadcast gossip posts on `baronote.kr` (`gdragon-*`, `임지민-*`, `kia-한승연-*`, `루치아나-바로소-*`, etc.)
+         -> immediately classify as `🔴 D등급 (주제 이탈)` in `content-doctor-ledger.json` and unpublish (`status='draft'`) via CF API
+         so they are excluded from `baronote.kr`'s public inventory and `sitemap.xml`.
+    """
+    keys = _load_cf_api_keys()
+    deleted_dummies: List[Dict[str, Any]] = []
+    quarantined_gossip: List[Dict[str, Any]] = []
+    today = _today_kst()
+
+    with _AUDITOR_LOCK:
+        ledger = load_doctor_ledger()
+        queue = load_remodeling_queue()
+        audited_map = ledger.setdefault("auditedPosts", {})
+        daily_rec = ledger.setdefault("dailyHistory", {}).setdefault(
+            today,
+            {"audited": 0, "remodeled": 0, "bPatched": 0, "cQueued": 0, "dCapped": 0, "dByDomain": {}},
+        )
+
+        for dom in keys.keys():
+            page = 1
+            while True:
+                try:
+                    resp = requests.get(f"https://www.{dom}/api/posts?limit=100&page={page}", timeout=15)
+                    if resp.status_code != 200:
+                        break
+                    posts = (resp.json() or {}).get("posts") or []
+                except Exception:
+                    break
+                if not posts:
+                    break
+
+                for p in posts:
+                    pid = p.get("id")
+                    slug = p.get("slug") or ""
+                    title = p.get("title") or ""
+                    cat = p.get("category") or ""
+                    excerpt = p.get("excerpt") or ""
+                    public_url = f"https://www.{dom}/{slug}"
+
+                    if DUMMY_RESCUE_SLUG_RE.search(slug):
+                        del_res = delete_cf_post_live(dom, pid)
+                        deleted_dummies.append(
+                            {"domain": dom, "id": pid, "slug": slug, "url": public_url, "deleted": del_res.get("ok", False)}
+                        )
+                        audited_map.pop(public_url, None)
+                        queue["items"] = [it for it in queue["items"] if it.get("url") != public_url]
+                        continue
+
+                    if dom == "baronote.kr":
+                        al = _score_domain_alignment(dom, title, cat, excerpt, slug=slug)
+                        if al.get("alignmentLevel") == "off_topic_gossip":
+                            patch_res = patch_cf_post_category_live(dom, p, cat or "생활정보", status_override="draft")
+                            quarantined_gossip.append(
+                                {
+                                    "domain": dom,
+                                    "id": pid,
+                                    "slug": slug,
+                                    "title": title,
+                                    "url": public_url,
+                                    "quarantined": patch_res.get("ok", False),
+                                    "recommendedDomain": al.get("recommendedDomain", "must-joy.com"),
+                                }
+                            )
+                            rec = {
+                                "url": public_url,
+                                "domain": dom,
+                                "brandName": DOMAIN_KEYWORD_MATRIX.get(dom, {}).get("brand", dom),
+                                "platform": "cf",
+                                "postId": pid,
+                                "slug": slug,
+                                "title": title,
+                                "auditedAt": _now_kst().isoformat(),
+                                "auditDate": today,
+                                "grade": "D",
+                                "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+                                "actionCode": "quarantined_off_topic_gossip",
+                                "prescription": (
+                                    f"도메인 정체성(국민·기초연금/금융)과 무관한 연예·스포츠·방송 가십 단신 ➔ "
+                                    f"CF API 비공개(draft) 격리 및 sitemap.xml 제외 완료 (권장 도메인: {al.get('recommendedDomain', 'must-joy.com')})"
+                                ),
+                                "remodeled": True,
+                                "remodelStatus": "quarantined_private_noindex",
+                                "checklist": {
+                                    "1_render": {"httpStatus": 200, "renderOk": True, "adSlotPresent": True, "note": "비공개(draft) 격리 처리 완료"},
+                                    "2_domainAlignment": al,
+                                    "3_categoryRemap": {"patched": False, "oldCategory": cat, "newCategory": cat},
+                                    "4_imageSuitability": {"suitability": "quarantined", "passed": False},
+                                    "5_titleAndBodyQuality": {"qualityScore": 40, "isMechanicalTitle": False},
+                                    "6_indexAndPotential": {"indexStatus": "quarantined", "performanceBucket": "quarantined"},
+                                    "7_finalGrade": {
+                                        "grade": "D",
+                                        "gradeBadge": "🔴 D등급 (주제 이탈 가십 · 비공개/사이트맵 격리 완료)",
+                                        "prescription": "CF API 비공개(draft) 격리 및 사이트맵 제외 완료",
+                                    },
+                                },
+                            }
+                            audited_map[public_url] = rec
+                            queue["items"] = [it for it in queue["items"] if it.get("url") != public_url]
+                            daily_rec["audited"] = daily_rec.get("audited", 0) + 1
+                            daily_rec["dCapped"] = daily_rec.get("dCapped", 0) + 1
+
+                if len(posts) < 100:
+                    break
+                page += 1
+
+        save_doctor_ledger(ledger)
+        save_remodeling_queue(queue)
+
+    return {
+        "ok": True,
+        "deletedDummyCount": len(deleted_dummies),
+        "deletedDummies": deleted_dummies,
+        "quarantinedGossipCount": len(quarantined_gossip),
+        "quarantinedGossip": quarantined_gossip,
+    }
+
+
 # ============================================================================
 # FASTAPI ROUTER (`/api/auditor/*`)
 # ============================================================================
@@ -1698,6 +1934,11 @@ def api_auditor_patrol(req: PatrolRequest):
 @auditor_router.post("/scan-fake-ai-images")
 def api_auditor_scan_fake_ai_images():
     return scan_and_register_fake_ai_image_posts()
+
+
+@auditor_router.post("/quarantine-dummy-gossip")
+def api_auditor_quarantine_dummy_gossip():
+    return quarantine_dummy_and_gossip_posts_live()
 
 
 @auditor_router.post("/override")

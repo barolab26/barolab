@@ -9,19 +9,27 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
-from common.channel_attribution import build_attribution_receipt
+from common.channel_attribution import (
+    build_attribution_receipt,
+    is_adsense_ready_url_or_domain,
+    domain_cpc_priority_rank,
+)
 from common import codex_cli
 from naver_kin import browser, pipeline
 
 DEFAULT_CATALOG = [
+    {'url': 'https://www.must-pick.com/robot-vacuum-obstacle-avoidance-mop-drying-comparison',
+     'title': '로봇청소기 물걸레 열풍건조 및 장애물 회피 센서 스펙 비교 가이드',
+     'domain': 'must-pick.com',
+     'keywords': ['로봇청소기 열풍건조 비교', '로봇청소기 물걸레 추천', '로봇청소기 센서 비교']},
+    {'url': 'https://www.baronote.kr/national-pension-early-receipt-reduction-calculator',
+     'title': '국민연금 조기수령 나이와 평생 감액률, 76세 손익분기점 계산 및 온라인 신청 방법',
+     'domain': 'baronote.kr',
+     'keywords': ['국민연금 조기수령 감액률', '국민연금 조기수령 나이', '국민연금 조기노령연금 신청']},
     {'url': 'https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide',
      'title': '국립중앙박물관 예약 물품보관함 가방 보관 및 사진 촬영 규정 총정리',
      'domain': 'must-good.com',
      'keywords': ['국립중앙박물관 셀카봉', '국립중앙박물관 가방 보관', '국립중앙박물관 사진 촬영']},
-    {'url': 'https://www.must-good.com/washing-machine-drain-filter-cleaning',
-     'title': '세탁기 배수필터 청소 방법 및 잔수 제거 점검 순서 가이드',
-     'domain': 'must-good.com',
-     'keywords': ['배수필터 청소 방법', '배수필터 잔수 제거']},
 ]
 OFFICIAL_HOSTS = {
     'www.museum.go.kr', 'www.lge.co.kr', 'www.lg.com', 'www.samsungsvc.co.kr',
@@ -89,15 +97,19 @@ def get_today_used_domains(db=None, day=None):
 
 
 def load_dynamic_catalog(max_items=50, base_catalog=None, db=None, today=None):
-    """Dynamically load up to 50 recent verified posts across all 21 channels (16 CF + 5 Naver) with domain round-robin."""
+    """Dynamically load up to 50 recent verified posts across AdSense READY domains with High-CPC tier-1 priority."""
     raw_items = []
     seen_urls = set()
 
     def _add_entry(url, title='', keywords=None, body=None, published_at=''):
         if not isinstance(url, str) or not url.startswith('https://'):
             return
+        if 'index-rescue-' in url.lower():
+            return
         parsed = urlsplit(url)
         if parsed.netloc not in pipeline.HOSTS or parsed.query or parsed.fragment or not parsed.path or parsed.path == '/':
+            return
+        if not is_adsense_ready_url_or_domain(url):
             return
         if url in seen_urls:
             return
@@ -114,6 +126,7 @@ def load_dynamic_catalog(max_items=50, base_catalog=None, db=None, today=None):
             'domain': domain,
             'keywords': kw_list[:5],
             'published_at': str(published_at or ''),
+            'cpc_tier': domain_cpc_priority_rank(domain)[0],
         }
         if isinstance(body, str) and len(body.strip()) >= 250:
             entry['body'] = body.strip()[:45000]
@@ -231,15 +244,14 @@ def load_dynamic_catalog(max_items=50, base_catalog=None, db=None, today=None):
     for item in DEFAULT_CATALOG:
         _add_entry(item['url'], item.get('title', ''), item.get('keywords'))
 
-    # 5. Zero-Duplicate Domain Round-Robin ordering:
-    # Prioritize domains with 0 links today, and interleave across domains so consecutive items have distinct domains.
+    # 5. High-CPC Tier-1 (`must-pick.com`, `baronote.kr`, `justinfo.co.kr`, `daynote.kr`, `woorinote.kr`) + Zero-Duplicate Round-Robin ordering:
     used_today = get_today_used_domains(db=db, day=today)
     by_domain = {}
     for entry in raw_items:
         dom = entry.get('domain') or (urlsplit(entry['url']).hostname or '').lower().removeprefix('www.')
         by_domain.setdefault(dom, []).append(entry)
 
-    sorted_domains = sorted(by_domain.keys(), key=lambda d: (used_today.get(d, 0), d))
+    sorted_domains = sorted(by_domain.keys(), key=lambda d: (used_today.get(d, 0), domain_cpc_priority_rank(d), d))
     interleaved = []
     round_idx = 0
     while len(interleaved) < max_items:

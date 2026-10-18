@@ -10,7 +10,11 @@ import uuid
 import requests
 from bs4 import BeautifulSoup
 from common import codex_cli
-from common.channel_attribution import _canonical
+from common.channel_attribution import (
+    _canonical,
+    is_adsense_ready_url_or_domain,
+    domain_cpc_priority_rank,
+)
 from common.dashboard_jobs import write
 from . import config as settings, pipeline
 
@@ -102,28 +106,32 @@ def article_snapshot(url, official=False):
 
 
 def catalog(config, db_path=settings.DB):
-    """Verified CF manifests across all 16 CF blog domains; no prior submitted source reused."""
+    """Verified CF manifests across AdSense READY CF blog domains; prioritizes High-CPC tier-1 domains first."""
     with pipeline.connect(db_path) as db:
         used = {json.loads(x[0])['source']['url'] for x in db.execute('SELECT DISTINCT document FROM parts') if x[0]}
     found = []
     for row in config.get('articleCatalog', []):
-        if isinstance(row, dict) and row.get('url') not in used:
-            found.append(row)
+        if isinstance(row, dict):
+            u = row.get('url') or ''
+            if u and u not in used and 'index-rescue-' not in u.lower() and is_adsense_ready_url_or_domain(u):
+                found.append(row)
     files = sorted((settings.ROOT / 'cf_posting/output').glob('*/run-*/publication.json'), key=lambda p: p.stat().st_mtime, reverse=True)
     for path in files:
         try:
             data = json.loads(path.read_text(encoding='utf-8'))
             url = data.get('publicUrl', '')
             host = (urlsplit(url).hostname or '').lower()
-            if data.get('status') != 'verified' or host not in settings.HOSTS or url in used:
+            if (data.get('status') != 'verified' or host not in settings.HOSTS or url in used
+                    or 'index-rescue-' in url.lower() or not is_adsense_ready_url_or_domain(url)):
                 continue
             _canonical(url, settings.HOSTS)
             if not any(x['url'] == url for x in found):
                 found.append({'url': url, 'topic': data.get('category') or config.get('accountTopic')})
         except (OSError, ValueError):
             continue
-        if len(found) >= 40:
+        if len(found) >= 60:
             break
+    found.sort(key=lambda item: domain_cpc_priority_rank(item.get('url', '')))
     return found[:40]
 
 

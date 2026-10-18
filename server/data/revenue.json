@@ -28,7 +28,7 @@
             "2026-10-17": "0.09",
             "2026-10-18": "0.04"
           },
-          "checkedAt": "2026-10-18T09:06:47.557412+00:00",
+          "checkedAt": "2026-10-18T10:36:48.658493+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "조회 대상 15개 · 계정 등록 15개 · 수익 행 있는 날짜만 집계",
@@ -808,7 +808,7 @@
           "reportSource": "네이버 애드포스트 수입 보고서",
           "reportStart": "2026-10-01",
           "reportEnd": "2026-10-12",
-          "attemptedAt": "2026-10-18T09:06:47.914496+00:00"
+          "attemptedAt": "2026-10-18T10:36:49.017087+00:00"
         },
         {
           "id": "coupang",
@@ -825,7 +825,7 @@
             "2026-10-14": "0.0",
             "2026-10-17": "0.0"
           },
-          "checkedAt": "2026-10-18T09:06:48.024867+00:00",
+          "checkedAt": "2026-10-18T10:36:49.135949+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "계정 전체 · YouTube 등 포함 · 보고서 없는 날짜는 미확인",
@@ -887,7 +887,7 @@
           "currency": "USD",
           "scope": "nolplace.com · 가족 계정 별도 수집",
           "daily": {},
-          "checkedAt": "2026-10-18T09:06:48.024877+00:00",
+          "checkedAt": "2026-10-18T10:36:49.135963+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개",
@@ -909,7 +909,7 @@
           "currency": "KRW",
           "scope": "토스 쉐어링크",
           "daily": {},
-          "checkedAt": "2026-10-18T09:06:48.024901+00:00",
+          "checkedAt": "2026-10-18T10:36:49.135995+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "수익 보고서 미연결"
@@ -921,7 +921,7 @@
           "currency": "KRW",
           "scope": "Trip.com",
           "daily": {},
-          "checkedAt": "2026-10-18T09:06:48.024905+00:00",
+          "checkedAt": "2026-10-18T10:36:49.135999+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "수익 보고서 미연결"
@@ -933,17 +933,17 @@
           "currency": "KRW",
           "scope": "제휴알바",
           "daily": {},
-          "checkedAt": "2026-10-18T09:06:48.024908+00:00",
+          "checkedAt": "2026-10-18T10:36:49.136002+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "수익 보고서 미연결"
         }
       ],
-      "checkedAt": "2026-10-18T09:06:48.024910+00:00"
+      "checkedAt": "2026-10-18T10:36:49.136005+00:00"
     }
   },
   "schema": "dashboard-revenue-v1",
-  "checkedAt": "2026-10-18T09:06:48.024913+00:00",
+  "checkedAt": "2026-10-18T10:36:49.136009+00:00",
   "growth": {
     "schema": "dashboard-growth-revenue-v1",
     "windows": {

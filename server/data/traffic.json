@@ -1,6 +1,6 @@
 {
   "schema": "domain-traffic-v1",
-  "checkedAt": "2026-10-18T09:07:24.828672+00:00",
+  "checkedAt": "2026-10-18T10:37:26.886953+00:00",
   "naverSearchAccount": {
     "status": "connected",
     "checkedAt": "2026-10-15T05:14:40.187000+00:00",
@@ -24,10 +24,10 @@
         "url": "https://www.baronote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:50.339598+00:00",
+      "attemptedAt": "2026-10-18T10:36:51.646101+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:55.408558+00:00",
+        "checkedAt": "2026-10-18T10:36:57.447125+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -70,7 +70,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.780435+00:00"
+              "derivedAt": "2026-10-18T10:36:56.318176+00:00"
             },
             "naverExternal": 0
           },
@@ -169,7 +169,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.780458+00:00"
+              "derivedAt": "2026-10-18T10:36:56.318203+00:00"
             },
             "naverExternal": 0
           },
@@ -295,7 +295,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.780501+00:00"
+              "derivedAt": "2026-10-18T10:36:56.318247+00:00"
             },
             "naverExternal": 0
           },
@@ -520,7 +520,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.780524+00:00"
+              "derivedAt": "2026-10-18T10:36:56.318267+00:00"
             },
             "naverExternal": 0
           }
@@ -651,7 +651,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:55.408621+00:00",
+        "checkedAt": "2026-10-18T10:36:57.447197+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.baronote.kr/",
@@ -659,7 +659,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:56.159258+00:00",
+            "checkedAt": "2026-10-18T10:36:58.760383+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -673,7 +673,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:57.261164+00:00",
+            "checkedAt": "2026-10-18T10:36:59.631417+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -687,7 +687,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:58.115923+00:00",
+            "checkedAt": "2026-10-18T10:37:00.675145+00:00",
             "clicks": 0,
             "impressions": 1,
             "ctr": 0,
@@ -23307,10 +23307,10 @@
         "url": "https://www.daynote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:50.339859+00:00",
+      "attemptedAt": "2026-10-18T10:36:51.646404+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:53.579498+00:00",
+        "checkedAt": "2026-10-18T10:36:57.585002+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -23353,7 +23353,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:53.114066+00:00"
+              "derivedAt": "2026-10-18T10:36:56.400487+00:00"
             },
             "naverExternal": 0
           },
@@ -23482,7 +23482,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:53.114127+00:00"
+              "derivedAt": "2026-10-18T10:36:56.400512+00:00"
             },
             "naverExternal": 0
           },
@@ -23647,7 +23647,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:53.114182+00:00"
+              "derivedAt": "2026-10-18T10:36:56.400564+00:00"
             },
             "naverExternal": 0
           },
@@ -23848,7 +23848,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:53.114210+00:00"
+              "derivedAt": "2026-10-18T10:36:56.400593+00:00"
             },
             "naverExternal": 0
           }
@@ -23979,7 +23979,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:53.580029+00:00",
+        "checkedAt": "2026-10-18T10:36:57.585065+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.daynote.kr/",
@@ -23987,7 +23987,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:54.288512+00:00",
+            "checkedAt": "2026-10-18T10:36:58.445856+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -24001,7 +24001,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:54.689330+00:00",
+            "checkedAt": "2026-10-18T10:36:59.423639+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -24015,7 +24015,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:55.082650+00:00",
+            "checkedAt": "2026-10-18T10:36:59.996671+00:00",
             "clicks": 0,
             "impressions": 14,
             "ctr": 0,
@@ -49245,7 +49245,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680281+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718174+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -49267,10 +49267,10 @@
         "url": "https://www.healthcox.com/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:50.340019+00:00",
+      "attemptedAt": "2026-10-18T10:36:51.646552+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:56.545470+00:00",
+        "checkedAt": "2026-10-18T10:36:57.824804+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "523619765",
@@ -49278,17 +49278,46 @@
           "today": {
             "start": "2026-10-18",
             "end": "2026-10-18",
-            "users": 0,
-            "sessions": 0,
-            "pageViews": 0,
+            "users": 1,
+            "sessions": 1,
+            "pageViews": 1,
             "provisional": true,
             "limited": false,
-            "sources": [],
+            "sources": [
+              {
+                "channel": "Direct",
+                "source": "(direct)",
+                "medium": "(none)",
+                "kind": "direct",
+                "sessions": 1
+              },
+              {
+                "channel": "Organic Search",
+                "source": "m.search.naver.com",
+                "medium": "referral",
+                "kind": "search",
+                "sessions": 0
+              },
+              {
+                "channel": "Organic Search",
+                "source": "naver",
+                "medium": "organic",
+                "kind": "search",
+                "sessions": 0
+              },
+              {
+                "channel": "Referral",
+                "source": "192.168.45.190:8790",
+                "medium": "referral",
+                "kind": "external",
+                "sessions": 0
+              }
+            ],
             "pages": [],
             "mix": {
               "search": 0,
               "external": 0,
-              "direct": 0,
+              "direct": 1,
               "paid": 0,
               "other": 0
             },
@@ -49313,7 +49342,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:55.205894+00:00"
+              "derivedAt": "2026-10-18T10:36:56.698436+00:00"
             },
             "naverExternal": 0
           },
@@ -49403,7 +49432,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:55.205918+00:00"
+              "derivedAt": "2026-10-18T10:36:56.698489+00:00"
             },
             "naverExternal": 0
           },
@@ -49556,7 +49585,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:55.205960+00:00"
+              "derivedAt": "2026-10-18T10:36:56.698511+00:00"
             },
             "naverExternal": 0
           },
@@ -49745,7 +49774,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:55.206025+00:00"
+              "derivedAt": "2026-10-18T10:36:56.698529+00:00"
             },
             "naverExternal": 0
           }
@@ -49876,7 +49905,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:56.545530+00:00",
+        "checkedAt": "2026-10-18T10:36:57.824876+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.healthcox.com/",
@@ -49884,7 +49913,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:57.561751+00:00",
+            "checkedAt": "2026-10-18T10:36:58.937057+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -49898,7 +49927,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:57.978659+00:00",
+            "checkedAt": "2026-10-18T10:36:59.335375+00:00",
             "clicks": 0,
             "impressions": 6,
             "ctr": 0,
@@ -49912,7 +49941,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:58.392706+00:00",
+            "checkedAt": "2026-10-18T10:36:59.961963+00:00",
             "clicks": 0,
             "impressions": 40,
             "ctr": 0,
@@ -50404,7 +50433,7 @@
         "period": null,
         "periodScope": "provider_returned_dates; not an exact daily/7/28-day window",
         "complete": false,
-        "attemptedAt": "2026-10-18T09:07:24.669480+00:00",
+        "attemptedAt": "2026-10-18T10:37:26.706747+00:00",
         "status": "not_connected",
         "stale": false,
         "reasonCode": "BING_PROPERTY_UNVERIFIED",
@@ -50609,7 +50638,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680313+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718205+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -50629,7 +50658,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680317+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718210+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -50651,10 +50680,10 @@
         "url": "https://www.joynote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:50.340150+00:00",
+      "attemptedAt": "2026-10-18T10:36:51.646676+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:55.616971+00:00",
+        "checkedAt": "2026-10-18T10:36:55.615901+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -50697,7 +50726,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.313269+00:00"
+              "derivedAt": "2026-10-18T10:36:55.135169+00:00"
             },
             "naverExternal": 0
           },
@@ -50789,7 +50818,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.313291+00:00"
+              "derivedAt": "2026-10-18T10:36:55.135237+00:00"
             },
             "naverExternal": 0
           },
@@ -50899,7 +50928,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.313344+00:00"
+              "derivedAt": "2026-10-18T10:36:55.135300+00:00"
             },
             "naverExternal": 0
           },
@@ -51063,7 +51092,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:06:54.313369+00:00"
+              "derivedAt": "2026-10-18T10:36:55.135325+00:00"
             },
             "naverExternal": 0
           }
@@ -51170,7 +51199,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:06:55.617046+00:00",
+        "checkedAt": "2026-10-18T10:36:55.616460+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.joynote.kr/",
@@ -51178,7 +51207,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:56.711448+00:00",
+            "checkedAt": "2026-10-18T10:36:57.016477+00:00",
             "clicks": 0,
             "impressions": 1,
             "ctr": 0,
@@ -51192,7 +51221,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:57.109549+00:00",
+            "checkedAt": "2026-10-18T10:36:57.678186+00:00",
             "clicks": 0,
             "impressions": 3,
             "ctr": 0,
@@ -51206,7 +51235,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:06:57.487788+00:00",
+            "checkedAt": "2026-10-18T10:36:58.648918+00:00",
             "clicks": 0,
             "impressions": 27,
             "ctr": 0,
@@ -69712,7 +69741,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680335+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718228+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -69734,10 +69763,10 @@
         "url": "https://www.justinfo.co.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:55.902070+00:00",
+      "attemptedAt": "2026-10-18T10:36:59.536311+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:01.457195+00:00",
+        "checkedAt": "2026-10-18T10:37:05.485767+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -69745,16 +69774,55 @@
           "today": {
             "start": "2026-10-18",
             "end": "2026-10-18",
-            "users": 0,
-            "sessions": 0,
-            "pageViews": 0,
+            "users": 1,
+            "sessions": 1,
+            "pageViews": 1,
             "provisional": true,
             "limited": false,
-            "sources": [],
-            "pages": [],
+            "sources": [
+              {
+                "channel": "AI Assistant",
+                "source": "chatgpt.com",
+                "medium": "ai-assistant",
+                "kind": "external",
+                "sessions": 1
+              },
+              {
+                "channel": "Direct",
+                "source": "(direct)",
+                "medium": "(none)",
+                "kind": "direct",
+                "sessions": 0
+              },
+              {
+                "channel": "Organic Search",
+                "source": "m.search.naver.com",
+                "medium": "referral",
+                "kind": "search",
+                "sessions": 0
+              },
+              {
+                "channel": "Referral",
+                "source": "192.168.45.190:8790",
+                "medium": "referral",
+                "kind": "external",
+                "sessions": 0
+              }
+            ],
+            "pages": [
+              {
+                "domain": "justinfo.co.kr",
+                "path": "/한국은-처음이지-대장간-김해-가야대장간-위치",
+                "url": "https://www.justinfo.co.kr/한국은-처음이지-대장간-김해-가야대장간-위치",
+                "title": "한국은 처음이지 대장간, 김해 가야대장간 위치와 방문 전 확인사항",
+                "sessions": 1,
+                "pageViews": 1,
+                "users": 1
+              }
+            ],
             "mix": {
               "search": 0,
-              "external": 0,
+              "external": 1,
               "direct": 0,
               "paid": 0,
               "other": 0
@@ -69769,9 +69837,9 @@
                 "naver_kin": 0,
                 "naver_cafe": 0,
                 "threads": 0,
-                "other": 0
+                "other": 1
               },
-              "qualifiedExternalSessions": 0,
+              "qualifiedExternalSessions": 1,
               "excludedExternalSessions": 0,
               "exclusions": {
                 "local": 0,
@@ -69780,7 +69848,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:00.126517+00:00"
+              "derivedAt": "2026-10-18T10:37:04.323040+00:00"
             },
             "naverExternal": 0
           },
@@ -69806,6 +69874,13 @@
                 "medium": "referral",
                 "kind": "external",
                 "sessions": 1
+              },
+              {
+                "channel": "AI Assistant",
+                "source": "chatgpt.com",
+                "medium": "ai-assistant",
+                "kind": "external",
+                "sessions": 0
               },
               {
                 "channel": "Organic Search",
@@ -69872,7 +69947,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:00.126543+00:00"
+              "derivedAt": "2026-10-18T10:37:04.323115+00:00"
             },
             "naverExternal": 0
           },
@@ -69898,6 +69973,13 @@
                 "medium": "referral",
                 "kind": "external",
                 "sessions": 1
+              },
+              {
+                "channel": "AI Assistant",
+                "source": "chatgpt.com",
+                "medium": "ai-assistant",
+                "kind": "external",
+                "sessions": 0
               },
               {
                 "channel": "Organic Search",
@@ -70009,7 +70091,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:00.126592+00:00"
+              "derivedAt": "2026-10-18T10:37:04.323147+00:00"
             },
             "naverExternal": 0
           },
@@ -70042,6 +70124,13 @@
                 "medium": "referral",
                 "kind": "external",
                 "sessions": 1
+              },
+              {
+                "channel": "AI Assistant",
+                "source": "chatgpt.com",
+                "medium": "ai-assistant",
+                "kind": "external",
+                "sessions": 0
               }
             ],
             "pages": [
@@ -70299,7 +70388,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:00.126617+00:00"
+              "derivedAt": "2026-10-18T10:37:04.323172+00:00"
             },
             "naverExternal": 0
           }
@@ -70412,7 +70501,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:01.457250+00:00",
+        "checkedAt": "2026-10-18T10:37:05.485874+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.justinfo.co.kr/",
@@ -70420,7 +70509,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:02.190316+00:00",
+            "checkedAt": "2026-10-18T10:37:06.180653+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -70434,7 +70523,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:02.595357+00:00",
+            "checkedAt": "2026-10-18T10:37:06.835159+00:00",
             "clicks": 0,
             "impressions": 2,
             "ctr": 0,
@@ -70448,7 +70537,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:02.970525+00:00",
+            "checkedAt": "2026-10-18T10:37:07.472112+00:00",
             "clicks": 0,
             "impressions": 13,
             "ctr": 0,
@@ -75635,7 +75724,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680352+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718246+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -75674,10 +75763,10 @@
         "url": "https://www.maxnote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:58.334786+00:00",
+      "attemptedAt": "2026-10-18T10:37:00.880097+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:04.536965+00:00",
+        "checkedAt": "2026-10-18T10:37:06.009845+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -75749,7 +75838,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.293943+00:00"
+              "derivedAt": "2026-10-18T10:37:05.199872+00:00"
             },
             "naverExternal": 0
           },
@@ -75830,7 +75919,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.294024+00:00"
+              "derivedAt": "2026-10-18T10:37:05.199945+00:00"
             },
             "naverExternal": 0
           },
@@ -75965,7 +76054,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.294061+00:00"
+              "derivedAt": "2026-10-18T10:37:05.199975+00:00"
             },
             "naverExternal": 0
           },
@@ -76181,7 +76270,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.294092+00:00"
+              "derivedAt": "2026-10-18T10:37:05.200000+00:00"
             },
             "naverExternal": 0
           }
@@ -76288,7 +76377,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:04.537048+00:00",
+        "checkedAt": "2026-10-18T10:37:06.009916+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.maxnote.kr/",
@@ -76296,7 +76385,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:05.288775+00:00",
+            "checkedAt": "2026-10-18T10:37:06.731720+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -76310,7 +76399,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:05.750377+00:00",
+            "checkedAt": "2026-10-18T10:37:07.301094+00:00",
             "clicks": 0,
             "impressions": 11,
             "ctr": 0,
@@ -76324,7 +76413,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:06.156083+00:00",
+            "checkedAt": "2026-10-18T10:37:07.722214+00:00",
             "clicks": 0,
             "impressions": 24,
             "ctr": 0,
@@ -94592,7 +94681,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680368+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718263+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -94631,10 +94720,10 @@
         "url": "https://www.meganote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:58.999589+00:00",
+      "attemptedAt": "2026-10-18T10:37:01.540225+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:03.883618+00:00",
+        "checkedAt": "2026-10-18T10:37:07.481840+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -94720,7 +94809,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.272372+00:00"
+              "derivedAt": "2026-10-18T10:37:06.156235+00:00"
             },
             "naverExternal": 0
           },
@@ -94833,7 +94922,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.272445+00:00"
+              "derivedAt": "2026-10-18T10:37:06.156315+00:00"
             },
             "naverExternal": 0
           },
@@ -95054,7 +95143,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.272478+00:00"
+              "derivedAt": "2026-10-18T10:37:06.156347+00:00"
             },
             "naverExternal": 0
           },
@@ -95365,7 +95454,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:03.272504+00:00"
+              "derivedAt": "2026-10-18T10:37:06.156372+00:00"
             },
             "naverExternal": 0
           }
@@ -95490,7 +95579,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:03.883682+00:00",
+        "checkedAt": "2026-10-18T10:37:07.481906+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.meganote.kr/",
@@ -95498,7 +95587,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:04.853362+00:00",
+            "checkedAt": "2026-10-18T10:37:08.461070+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -95512,7 +95601,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:05.512610+00:00",
+            "checkedAt": "2026-10-18T10:37:08.875438+00:00",
             "clicks": 0,
             "impressions": 1,
             "ctr": 0,
@@ -95526,7 +95615,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:06.194106+00:00",
+            "checkedAt": "2026-10-18T10:37:09.502430+00:00",
             "clicks": 0,
             "impressions": 37,
             "ctr": 0,
@@ -125143,7 +125232,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680400+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718297+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -125163,7 +125252,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680403+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718301+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -125183,7 +125272,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680406+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718303+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -125256,10 +125345,10 @@
         "url": "https://www.must-good.com/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:06:59.818311+00:00",
+      "attemptedAt": "2026-10-18T10:37:02.201489+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:06.043453+00:00",
+        "checkedAt": "2026-10-18T10:37:06.895072+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -125369,7 +125458,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:05.380857+00:00"
+              "derivedAt": "2026-10-18T10:37:06.450217+00:00"
             },
             "naverExternal": 0
           },
@@ -125487,7 +125576,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:05.380954+00:00"
+              "derivedAt": "2026-10-18T10:37:06.450317+00:00"
             },
             "naverExternal": 0
           },
@@ -125686,7 +125775,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:05.381002+00:00"
+              "derivedAt": "2026-10-18T10:37:06.450364+00:00"
             },
             "naverExternal": 0
           },
@@ -126011,7 +126100,7 @@
               },
               "naverExternalSessions": 8,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:05.381044+00:00"
+              "derivedAt": "2026-10-18T10:37:06.450405+00:00"
             },
             "naverExternal": 8
           }
@@ -126136,7 +126225,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:06.043526+00:00",
+        "checkedAt": "2026-10-18T10:37:06.895142+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.must-good.com/",
@@ -126144,7 +126233,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:06.737527+00:00",
+            "checkedAt": "2026-10-18T10:37:07.905962+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -126158,7 +126247,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:07.366362+00:00",
+            "checkedAt": "2026-10-18T10:37:08.771118+00:00",
             "clicks": 4,
             "impressions": 173,
             "ctr": 0.023121387283236993,
@@ -126405,7 +126494,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:08.069829+00:00",
+            "checkedAt": "2026-10-18T10:37:09.776367+00:00",
             "clicks": 25,
             "impressions": 1338,
             "ctr": 0.01868460388639761,
@@ -132636,7 +132725,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680539+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718400+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132656,7 +132745,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680546+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718403+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132676,7 +132765,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680550+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718406+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132696,7 +132785,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680554+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718408+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132716,7 +132805,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680559+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718411+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132736,7 +132825,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680562+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718414+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132756,7 +132845,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680567+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718416+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132776,7 +132865,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680571+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718419+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132796,7 +132885,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680575+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718422+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -132816,7 +132905,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680579+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718425+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -133008,10 +133097,10 @@
         "url": "https://www.must-joy.com/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:03.598207+00:00",
+      "attemptedAt": "2026-10-18T10:37:08.299211+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:08.552898+00:00",
+        "checkedAt": "2026-10-18T10:37:11.318965+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -133054,7 +133143,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:08.136802+00:00"
+              "derivedAt": "2026-10-18T10:37:10.907691+00:00"
             },
             "naverExternal": 0
           },
@@ -133130,7 +133219,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:08.136825+00:00"
+              "derivedAt": "2026-10-18T10:37:10.907714+00:00"
             },
             "naverExternal": 0
           },
@@ -133242,7 +133331,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:08.136839+00:00"
+              "derivedAt": "2026-10-18T10:37:10.907725+00:00"
             },
             "naverExternal": 0
           },
@@ -133372,7 +133461,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:08.136849+00:00"
+              "derivedAt": "2026-10-18T10:37:10.907735+00:00"
             },
             "naverExternal": 0
           }
@@ -133425,7 +133514,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:08.552970+00:00",
+        "checkedAt": "2026-10-18T10:37:11.319019+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.must-joy.com/",
@@ -133433,7 +133522,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:09.361430+00:00",
+            "checkedAt": "2026-10-18T10:37:12.270306+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -133447,7 +133536,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:09.947884+00:00",
+            "checkedAt": "2026-10-18T10:37:13.080235+00:00",
             "clicks": 0,
             "impressions": 17,
             "ctr": 0,
@@ -133470,7 +133559,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:10.347801+00:00",
+            "checkedAt": "2026-10-18T10:37:13.674922+00:00",
             "clicks": 3,
             "impressions": 55,
             "ctr": 0.05454545454545454,
@@ -136589,7 +136678,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680688+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718485+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136609,7 +136698,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680695+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718488+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136629,7 +136718,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680700+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718490+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136649,7 +136738,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680704+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718493+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136669,7 +136758,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680709+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718495+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136689,7 +136778,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680712+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718498+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136709,7 +136798,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680715+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718500+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -136731,10 +136820,10 @@
         "url": "https://www.must-pick.com/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:06.787323+00:00",
+      "attemptedAt": "2026-10-18T10:37:08.947951+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:12.407074+00:00",
+        "checkedAt": "2026-10-18T10:37:12.868610+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "545137532",
@@ -136886,7 +136975,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:11.772602+00:00"
+              "derivedAt": "2026-10-18T10:37:12.361760+00:00"
             },
             "naverExternal": 0
           },
@@ -137055,7 +137144,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:11.772751+00:00"
+              "derivedAt": "2026-10-18T10:37:12.361933+00:00"
             },
             "naverExternal": 0
           },
@@ -137359,7 +137448,7 @@
               },
               "naverExternalSessions": 8,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:11.772846+00:00"
+              "derivedAt": "2026-10-18T10:37:12.362028+00:00"
             },
             "naverExternal": 8
           },
@@ -137726,7 +137815,7 @@
               },
               "naverExternalSessions": 43,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:11.772938+00:00"
+              "derivedAt": "2026-10-18T10:37:12.362106+00:00"
             },
             "naverExternal": 43
           }
@@ -137917,7 +138006,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:12.407139+00:00",
+        "checkedAt": "2026-10-18T10:37:12.868669+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "sc-domain:must-pick.com",
@@ -137925,7 +138014,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:13.301243+00:00",
+            "checkedAt": "2026-10-18T10:37:13.826649+00:00",
             "clicks": 0,
             "impressions": 4,
             "ctr": 0,
@@ -137939,7 +138028,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:13.689807+00:00",
+            "checkedAt": "2026-10-18T10:37:14.451464+00:00",
             "clicks": 0,
             "impressions": 12,
             "ctr": 0,
@@ -137962,7 +138051,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:14.109408+00:00",
+            "checkedAt": "2026-10-18T10:37:14.870529+00:00",
             "clicks": 0,
             "impressions": 94,
             "ctr": 0,
@@ -139311,7 +139400,7 @@
         "period": null,
         "periodScope": "provider_returned_dates; not an exact daily/7/28-day window",
         "complete": false,
-        "attemptedAt": "2026-10-18T09:07:24.676237+00:00",
+        "attemptedAt": "2026-10-18T10:37:26.713958+00:00",
         "status": "not_connected",
         "stale": false,
         "reasonCode": "BING_PROPERTY_UNVERIFIED",
@@ -139601,7 +139690,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680749+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718531+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -139621,7 +139710,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680752+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718534+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -139641,7 +139730,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680754+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718536+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -139663,10 +139752,10 @@
         "url": "https://www.nolplace.com/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:07.464313+00:00",
+      "attemptedAt": "2026-10-18T10:37:10.292562+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:13.188741+00:00",
+        "checkedAt": "2026-10-18T10:37:14.132891+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556141438",
@@ -139709,7 +139798,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:12.030664+00:00"
+              "derivedAt": "2026-10-18T10:37:13.694824+00:00"
             },
             "naverExternal": 0
           },
@@ -139797,7 +139886,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:12.030691+00:00"
+              "derivedAt": "2026-10-18T10:37:13.694846+00:00"
             },
             "naverExternal": 0
           },
@@ -139903,7 +139992,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:12.030762+00:00"
+              "derivedAt": "2026-10-18T10:37:13.694906+00:00"
             },
             "naverExternal": 0
           },
@@ -140081,7 +140170,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:12.030797+00:00"
+              "derivedAt": "2026-10-18T10:37:13.694936+00:00"
             },
             "naverExternal": 0
           }
@@ -140176,7 +140265,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:13.188811+00:00",
+        "checkedAt": "2026-10-18T10:37:14.132960+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.nolplace.com/",
@@ -140184,7 +140273,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:14.075996+00:00",
+            "checkedAt": "2026-10-18T10:37:15.081108+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -140198,7 +140287,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:14.641130+00:00",
+            "checkedAt": "2026-10-18T10:37:15.761366+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -140212,7 +140301,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:15.049323+00:00",
+            "checkedAt": "2026-10-18T10:37:16.150324+00:00",
             "clicks": 0,
             "impressions": 15,
             "ctr": 0,
@@ -140494,7 +140583,7 @@
         "period": null,
         "periodScope": "provider_returned_dates; not an exact daily/7/28-day window",
         "complete": false,
-        "attemptedAt": "2026-10-18T09:07:24.676248+00:00",
+        "attemptedAt": "2026-10-18T10:37:26.713970+00:00",
         "status": "not_connected",
         "stale": false,
         "reasonCode": "BING_PROPERTY_UNVERIFIED",
@@ -140614,7 +140703,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680770+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718552+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -140636,10 +140725,10 @@
         "url": "https://www.smilenote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:08.720970+00:00",
+      "attemptedAt": "2026-10-18T10:37:10.969176+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:14.313376+00:00",
+        "checkedAt": "2026-10-18T10:37:14.627135+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -140682,7 +140771,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:13.225962+00:00"
+              "derivedAt": "2026-10-18T10:37:13.290924+00:00"
             },
             "naverExternal": 0
           },
@@ -140724,7 +140813,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:13.225979+00:00"
+              "derivedAt": "2026-10-18T10:37:13.290944+00:00"
             },
             "naverExternal": 0
           },
@@ -140829,7 +140918,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:13.225988+00:00"
+              "derivedAt": "2026-10-18T10:37:13.290953+00:00"
             },
             "naverExternal": 0
           },
@@ -140970,7 +141059,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:13.225997+00:00"
+              "derivedAt": "2026-10-18T10:37:13.290961+00:00"
             },
             "naverExternal": 0
           }
@@ -141047,7 +141136,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:14.313433+00:00",
+        "checkedAt": "2026-10-18T10:37:14.627194+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.smilenote.kr/",
@@ -141055,7 +141144,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:15.250430+00:00",
+            "checkedAt": "2026-10-18T10:37:15.602335+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -141069,7 +141158,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:15.661461+00:00",
+            "checkedAt": "2026-10-18T10:37:16.464900+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -141083,7 +141172,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:16.264697+00:00",
+            "checkedAt": "2026-10-18T10:37:17.090494+00:00",
             "clicks": 0,
             "impressions": 1,
             "ctr": 0,
@@ -150415,10 +150504,10 @@
         "url": "https://www.soulnote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:10.979024+00:00",
+      "attemptedAt": "2026-10-18T10:37:14.399639+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:15.986676+00:00",
+        "checkedAt": "2026-10-18T10:37:19.007703+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -150461,7 +150550,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:14.898449+00:00"
+              "derivedAt": "2026-10-18T10:37:17.661357+00:00"
             },
             "naverExternal": 0
           },
@@ -150535,7 +150624,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:14.898472+00:00"
+              "derivedAt": "2026-10-18T10:37:17.661385+00:00"
             },
             "naverExternal": 0
           },
@@ -150654,7 +150743,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:14.898485+00:00"
+              "derivedAt": "2026-10-18T10:37:17.661400+00:00"
             },
             "naverExternal": 0
           },
@@ -150800,7 +150889,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:14.898495+00:00"
+              "derivedAt": "2026-10-18T10:37:17.661411+00:00"
             },
             "naverExternal": 0
           }
@@ -150883,7 +150972,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:15.986775+00:00",
+        "checkedAt": "2026-10-18T10:37:19.007766+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.soulnote.kr/",
@@ -150891,7 +150980,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:16.681384+00:00",
+            "checkedAt": "2026-10-18T10:37:19.951562+00:00",
             "clicks": 0,
             "impressions": 3,
             "ctr": 0,
@@ -150905,7 +150994,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:17.060099+00:00",
+            "checkedAt": "2026-10-18T10:37:20.540130+00:00",
             "clicks": 0,
             "impressions": 3,
             "ctr": 0,
@@ -150919,7 +151008,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:17.429923+00:00",
+            "checkedAt": "2026-10-18T10:37:21.181320+00:00",
             "clicks": 1,
             "impressions": 23,
             "ctr": 0.043478260869565216,
@@ -154834,7 +154923,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680813+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718595+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -154854,7 +154943,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680816+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718598+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -154874,7 +154963,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680818+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718601+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -154894,7 +154983,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680821+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718604+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -154916,10 +155005,10 @@
         "url": "https://www.topnote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:14.760378+00:00",
+      "attemptedAt": "2026-10-18T10:37:15.825730+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:20.271581+00:00",
+        "checkedAt": "2026-10-18T10:37:20.350257+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -154962,7 +155051,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.072013+00:00"
+              "derivedAt": "2026-10-18T10:37:19.859311+00:00"
             },
             "naverExternal": 0
           },
@@ -155068,7 +155157,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.072043+00:00"
+              "derivedAt": "2026-10-18T10:37:19.859344+00:00"
             },
             "naverExternal": 0
           },
@@ -155210,7 +155299,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.072090+00:00"
+              "derivedAt": "2026-10-18T10:37:19.859403+00:00"
             },
             "naverExternal": 0
           },
@@ -155460,7 +155549,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.072112+00:00"
+              "derivedAt": "2026-10-18T10:37:19.859439+00:00"
             },
             "naverExternal": 0
           }
@@ -155579,7 +155668,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:20.271648+00:00",
+        "checkedAt": "2026-10-18T10:37:20.350324+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.topnote.kr/",
@@ -155587,7 +155676,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:21.009121+00:00",
+            "checkedAt": "2026-10-18T10:37:21.285025+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -155601,7 +155690,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:21.396829+00:00",
+            "checkedAt": "2026-10-18T10:37:22.126545+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -155615,7 +155704,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:21.827966+00:00",
+            "checkedAt": "2026-10-18T10:37:22.902515+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -192831,10 +192920,10 @@
         "url": "https://www.tripmarvel.com/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:15.700502+00:00",
+      "attemptedAt": "2026-10-18T10:37:17.083821+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:20.789018+00:00",
+        "checkedAt": "2026-10-18T10:37:22.764843+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "494211832",
@@ -192913,16 +193002,16 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:20.306255+00:00"
+              "derivedAt": "2026-10-18T10:37:21.398586+00:00"
             },
             "naverExternal": 0
           },
           "day": {
             "start": "2026-10-17",
             "end": "2026-10-17",
-            "users": 5,
-            "sessions": 5,
-            "pageViews": 5,
+            "users": 6,
+            "sessions": 6,
+            "pageViews": 6,
             "provisional": true,
             "limited": false,
             "sources": [
@@ -192931,7 +193020,7 @@
                 "source": "(direct)",
                 "medium": "(none)",
                 "kind": "direct",
-                "sessions": 3
+                "sessions": 4
               },
               {
                 "channel": "AI Assistant",
@@ -192994,7 +193083,7 @@
             "mix": {
               "search": 1,
               "external": 1,
-              "direct": 3,
+              "direct": 4,
               "paid": 0,
               "other": 0
             },
@@ -193019,16 +193108,16 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:20.306325+00:00"
+              "derivedAt": "2026-10-18T10:37:21.398651+00:00"
             },
             "naverExternal": 0
           },
           "week": {
             "start": "2026-10-11",
             "end": "2026-10-17",
-            "users": 26,
-            "sessions": 26,
-            "pageViews": 34,
+            "users": 27,
+            "sessions": 27,
+            "pageViews": 35,
             "provisional": true,
             "limited": false,
             "sources": [
@@ -193037,7 +193126,7 @@
                 "source": "(direct)",
                 "medium": "(none)",
                 "kind": "direct",
-                "sessions": 21
+                "sessions": 22
               },
               {
                 "channel": "Organic Search",
@@ -193199,7 +193288,7 @@
             "mix": {
               "search": 4,
               "external": 1,
-              "direct": 21,
+              "direct": 22,
               "paid": 0,
               "other": 0
             },
@@ -193224,16 +193313,16 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:20.306360+00:00"
+              "derivedAt": "2026-10-18T10:37:21.398679+00:00"
             },
             "naverExternal": 0
           },
           "month": {
             "start": "2026-09-18",
             "end": "2026-10-17",
-            "users": 74,
-            "sessions": 78,
-            "pageViews": 84,
+            "users": 75,
+            "sessions": 79,
+            "pageViews": 85,
             "provisional": true,
             "limited": false,
             "sources": [
@@ -193242,7 +193331,7 @@
                 "source": "(direct)",
                 "medium": "(none)",
                 "kind": "direct",
-                "sessions": 63
+                "sessions": 64
               },
               {
                 "channel": "Organic Search",
@@ -193503,7 +193592,7 @@
             "mix": {
               "search": 11,
               "external": 3,
-              "direct": 63,
+              "direct": 64,
               "paid": 0,
               "other": 1
             },
@@ -193528,7 +193617,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:20.306389+00:00"
+              "derivedAt": "2026-10-18T10:37:21.398702+00:00"
             },
             "naverExternal": 0
           }
@@ -193644,16 +193733,16 @@
           },
           {
             "day": "2026-10-17",
-            "users": 5,
-            "sessions": 5,
-            "pageViews": 5
+            "users": 6,
+            "sessions": 6,
+            "pageViews": 6
           }
         ],
         "note": "측정된 사용자 · 기간 내 중복 제거 · 날짜/도메인별 사용자를 합산하지 않음"
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:20.789078+00:00",
+        "checkedAt": "2026-10-18T10:37:22.764914+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.tripmarvel.com/",
@@ -193661,7 +193750,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:21.484441+00:00",
+            "checkedAt": "2026-10-18T10:37:24.190168+00:00",
             "clicks": 0,
             "impressions": 0,
             "ctr": 0,
@@ -193675,7 +193764,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:22.123053+00:00",
+            "checkedAt": "2026-10-18T10:37:24.816750+00:00",
             "clicks": 0,
             "impressions": 10,
             "ctr": 0,
@@ -193689,7 +193778,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:22.502651+00:00",
+            "checkedAt": "2026-10-18T10:37:25.420578+00:00",
             "clicks": 0,
             "impressions": 44,
             "ctr": 0,
@@ -194536,7 +194625,7 @@
         "period": null,
         "periodScope": "provider_returned_dates; not an exact daily/7/28-day window",
         "complete": false,
-        "attemptedAt": "2026-10-18T09:07:24.679718+00:00",
+        "attemptedAt": "2026-10-18T10:37:26.717614+00:00",
         "status": "not_connected",
         "stale": false,
         "reasonCode": "BING_PROPERTY_UNVERIFIED",
@@ -194656,7 +194745,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680840+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718626+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -194678,10 +194767,10 @@
         "url": "https://www.woorinote.kr/",
         "platform": "cf"
       },
-      "attemptedAt": "2026-10-18T09:07:16.952044+00:00",
+      "attemptedAt": "2026-10-18T10:37:18.003163+00:00",
       "ga4": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:20.692042+00:00",
+        "checkedAt": "2026-10-18T10:37:20.657037+00:00",
         "timezone": "Asia/Seoul",
         "source": "GA4 Data API",
         "property": "556127526",
@@ -194724,7 +194813,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.506378+00:00"
+              "derivedAt": "2026-10-18T10:37:20.214971+00:00"
             },
             "naverExternal": 0
           },
@@ -194812,7 +194901,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.506402+00:00"
+              "derivedAt": "2026-10-18T10:37:20.215000+00:00"
             },
             "naverExternal": 0
           },
@@ -194927,7 +195016,7 @@
               },
               "naverExternalSessions": 0,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.506444+00:00"
+              "derivedAt": "2026-10-18T10:37:20.215056+00:00"
             },
             "naverExternal": 0
           },
@@ -195105,7 +195194,7 @@
               },
               "naverExternalSessions": 1,
               "qualificationMeaning": "known local/self/internal sources excluded; not verified human traffic or incremental conversions",
-              "derivedAt": "2026-10-18T09:07:19.506465+00:00"
+              "derivedAt": "2026-10-18T10:37:20.215083+00:00"
             },
             "naverExternal": 1
           }
@@ -195200,7 +195289,7 @@
       },
       "google": {
         "status": "collected",
-        "checkedAt": "2026-10-18T09:07:20.692112+00:00",
+        "checkedAt": "2026-10-18T10:37:20.657119+00:00",
         "timezone": "America/Los_Angeles",
         "source": "Google Search Console",
         "property": "https://www.woorinote.kr/",
@@ -195208,7 +195297,7 @@
           "day": {
             "start": "2026-10-15",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:21.617739+00:00",
+            "checkedAt": "2026-10-18T10:37:21.828238+00:00",
             "clicks": 0,
             "impressions": 1,
             "ctr": 0,
@@ -195222,7 +195311,7 @@
           "week": {
             "start": "2026-10-09",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:22.005939+00:00",
+            "checkedAt": "2026-10-18T10:37:22.215850+00:00",
             "clicks": 0,
             "impressions": 3,
             "ctr": 0,
@@ -195236,7 +195325,7 @@
           "month": {
             "start": "2026-09-16",
             "end": "2026-10-15",
-            "checkedAt": "2026-10-18T09:07:22.664739+00:00",
+            "checkedAt": "2026-10-18T10:37:23.041550+00:00",
             "clicks": 0,
             "impressions": 10,
             "ctr": 0,
@@ -200067,7 +200156,7 @@
             },
             "status": "unknown",
             "observedAt": null,
-            "checkedAt": "2026-10-18T09:07:24.680854+00:00",
+            "checkedAt": "2026-10-18T10:37:26.718641+00:00",
             "clicks": null,
             "impressions": null,
             "position": null,
@@ -200087,10 +200176,10 @@
   "growthActionCursor": {},
   "growthCollection": {
     "status": "completed",
-    "lastAttemptAt": "2026-10-18T09:06:50.071955+00:00",
+    "lastAttemptAt": "2026-10-18T10:36:51.233570+00:00",
     "lastSuccessAt": "2026-10-18T07:07:35.127305+00:00",
-    "finishedAt": "2026-10-18T09:07:24.647751+00:00",
-    "nextRunAt": "2026-10-18T18:36:49.852031+09:00",
+    "finishedAt": "2026-10-18T10:37:26.683263+00:00",
+    "nextRunAt": "2026-10-18T20:06:50.964935+09:00",
     "scheduleEstimate": true,
     "backlog": 0,
     "failures": 0,
@@ -200119,7 +200208,7 @@
       "timezone": "Asia/Seoul",
       "source": "네이버 공개 방문자 카운터",
       "date": "2026-10-18",
-      "checkedAt": "2026-10-18T09:07:24.690322+00:00",
+      "checkedAt": "2026-10-18T10:37:26.728969+00:00",
       "status": "collected",
       "days": {
         "2026-10-14": 5,
@@ -200138,14 +200227,14 @@
       "timezone": "Asia/Seoul",
       "source": "네이버 공개 방문자 카운터",
       "date": "2026-10-18",
-      "checkedAt": "2026-10-18T09:07:24.690789+00:00",
+      "checkedAt": "2026-10-18T10:37:26.729581+00:00",
       "status": "collected",
       "days": {
         "2026-10-14": 74,
         "2026-10-15": 104,
         "2026-10-16": 73,
         "2026-10-17": 44,
-        "2026-10-18": 50
+        "2026-10-18": 58
       }
     },
     "naver:mustpickinfo": {
@@ -200157,14 +200246,14 @@
       "timezone": "Asia/Seoul",
       "source": "네이버 공개 방문자 카운터",
       "date": "2026-10-18",
-      "checkedAt": "2026-10-18T09:07:24.690984+00:00",
+      "checkedAt": "2026-10-18T10:37:26.730131+00:00",
       "status": "collected",
       "days": {
         "2026-10-14": 8,
         "2026-10-15": 7,
         "2026-10-16": 2,
         "2026-10-17": 15,
-        "2026-10-18": 7
+        "2026-10-18": 8
       }
     },
     "naver:stone0747": {
@@ -200176,7 +200265,7 @@
       "timezone": "Asia/Seoul",
       "source": "네이버 공개 방문자 카운터",
       "date": "2026-10-18",
-      "checkedAt": "2026-10-18T09:07:24.750378+00:00",
+      "checkedAt": "2026-10-18T10:37:26.798968+00:00",
       "status": "collected",
       "days": {
         "2026-10-14": 7,
@@ -200195,16 +200284,16 @@
       "timezone": "Asia/Seoul",
       "source": "네이버 공개 방문자 카운터",
       "date": "2026-10-18",
-      "checkedAt": "2026-10-18T09:07:24.752423+00:00",
+      "checkedAt": "2026-10-18T10:37:26.799608+00:00",
       "status": "collected",
       "days": {
         "2026-10-14": 32,
         "2026-10-15": 36,
         "2026-10-16": 29,
         "2026-10-17": 25,
-        "2026-10-18": 17
+        "2026-10-18": 18
       }
     }
   },
-  "naverCheckedAt": "2026-10-18T09:07:24.828659+00:00"
+  "naverCheckedAt": "2026-10-18T10:37:26.886943+00:00"
 }

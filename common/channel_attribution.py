@@ -95,3 +95,119 @@ def build_attribution_receipt(canonical_url, *, source, account, work_date, publ
             'postToken': token, 'utmContent': content,
             'articleIdSha256': hashlib.sha256(article_id.encode('utf-8')).hexdigest(),
             'verificationScope': 'exact attribution derivation only; canonical article verified separately'}
+
+
+# ============================================================================
+# AdSense READY Filter & High-CPC Tier-1 Domain Priority (Shared across Kin / Threads / Naver Bridge)
+# ============================================================================
+from pathlib import Path
+
+HIGH_CPC_TIER1_DOMAINS = (
+    'must-pick.com',
+    'baronote.kr',
+    'justinfo.co.kr',
+    'daynote.kr',
+    'woorinote.kr',
+)
+HIGH_CPC_TIER2_DOMAINS = (
+    'must-good.com',
+    'meganote.kr',
+    'maxnote.kr',
+    'topnote.kr',
+    'smilenote.kr',
+)
+DEFAULT_ADSENSE_READY_CF_DOMAINS = frozenset({
+    'must-pick.com',
+    'baronote.kr',
+    'daynote.kr',
+    'joynote.kr',
+    'justinfo.co.kr',
+    'maxnote.kr',
+    'meganote.kr',
+    'must-good.com',
+    'must-joy.com',
+    'smilenote.kr',
+    'soulnote.kr',
+    'topnote.kr',
+    'woorinote.kr',
+    'nolplace.com',
+})
+DEFAULT_ADSENSE_PENDING_CF_DOMAINS = frozenset({
+    'healthcox.com',
+    'tripmarvel.com',
+})
+
+
+def get_adsense_ready_cf_domains(root_dir=None):
+    """
+    Return the set of CF domains approved for external bridge traffic (`siteStatus == 'READY'`),
+    explicitly excluding `GETTING_READY` (under AdSense review, e.g. `healthcox.com`) until approved.
+    """
+    base = Path(root_dir) if root_dir else Path(__file__).resolve().parent.parent
+    cfg_path = base / 'server' / 'data' / 'metrics-config.json'
+    ready = set()
+    pending = set(DEFAULT_ADSENSE_PENDING_CF_DOMAINS)
+    if cfg_path.is_file():
+        try:
+            cfg = json.loads(cfg_path.read_text(encoding='utf-8'))
+            for acc_cfg in (cfg.get('adsense_accounts') or {}).values():
+                if not isinstance(acc_cfg, dict):
+                    continue
+                for p_dom in (acc_cfg.get('pending_sites') or []):
+                    pending.add(str(p_dom).lower().removeprefix('www.'))
+                for dom, st in (acc_cfg.get('site_status') or {}).items():
+                    clean_dom = str(dom).lower().removeprefix('www.')
+                    if st == 'READY':
+                        ready.add(clean_dom)
+                        pending.discard(clean_dom)
+                    elif st in ('GETTING_READY', 'NEEDS_ATTENTION', 'REQUIRES_REVIEW'):
+                        pending.add(clean_dom)
+                        ready.discard(clean_dom)
+        except Exception:
+            pass
+    if not ready:
+        ready = set(DEFAULT_ADSENSE_READY_CF_DOMAINS) - pending
+    return frozenset(ready - pending)
+
+
+def is_adsense_ready_url_or_domain(url_or_domain, root_dir=None):
+    """
+    Return True if `url_or_domain` belongs to an AdSense `READY` CF domain (or owned Naver blog),
+    and False if it belongs to a `GETTING_READY` domain such as `healthcox.com`.
+    """
+    if not url_or_domain:
+        return False
+    raw = str(url_or_domain).strip().lower()
+    if raw.startswith('http://') or raw.startswith('https://'):
+        host = (urlsplit(raw).hostname or '').lower()
+    else:
+        host = raw.split('/')[0].lower()
+    clean_dom = host.removeprefix('www.')
+    if clean_dom in ('blog.naver.com', 'm.blog.naver.com'):
+        return True
+    ready_set = get_adsense_ready_cf_domains(root_dir=root_dir)
+    return clean_dom in ready_set
+
+
+def domain_cpc_priority_rank(url_or_domain):
+    """
+    Return priority tuple `(tier, rank)` where lower is higher priority:
+      - Tier 0: `must-pick.com`, `baronote.kr`, `justinfo.co.kr`, `daynote.kr`, `woorinote.kr` (High-CPC verified)
+      - Tier 1: `must-good.com`, `meganote.kr`, `maxnote.kr`, `topnote.kr`, `smilenote.kr`
+      - Tier 2: Other AdSense `READY` CF domains
+      - Tier 3: Owned Naver blogs / fallback
+    """
+    raw = str(url_or_domain or '').strip().lower()
+    if raw.startswith('http://') or raw.startswith('https://'):
+        host = (urlsplit(raw).hostname or '').lower()
+    else:
+        host = raw.split('/')[0].lower()
+    clean_dom = host.removeprefix('www.')
+    if clean_dom in HIGH_CPC_TIER1_DOMAINS:
+        return (0, HIGH_CPC_TIER1_DOMAINS.index(clean_dom))
+    if clean_dom in HIGH_CPC_TIER2_DOMAINS:
+        return (1, HIGH_CPC_TIER2_DOMAINS.index(clean_dom))
+    if clean_dom in ('blog.naver.com', 'm.blog.naver.com'):
+        return (3, 0)
+    return (2, 0)
+
