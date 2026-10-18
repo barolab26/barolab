@@ -1,45 +1,517 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LLM 설정 · BaroLab</title>
-<style>
-:root{--ink:#0f172a;--muted:#64748b;--blue:#0872ff;--line:#e2e8f0}
-*{box-sizing:border-box}
-body{margin:0;background:#f8fafc;color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif}
-/* Master Sidebar Standard (240px) */
-.sidebar{width:240px;background-color:#0f172a;color:#cbd5e1;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;user-select:none;box-shadow:2px 0 12px rgba(0,0,0,0.15)}
-.brand{height:64px;padding:0 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1e293b;box-sizing:border-box}
-.brand-badge{width:36px;height:36px;background:linear-gradient(135deg, #0872ff, #00d2ff);color:white;border-radius:9px;display:grid;place-items:center;font-weight:900;font-size:19px;box-shadow:0 2px 8px rgba(8, 114, 255, 0.4);flex-shrink:0}
-.brand-text strong{font-size:15px;color:#fff;display:block;line-height:1.2;letter-spacing:-0.3px}
-.brand-text span{font-size:11px;color:#94a3b8}
-.nav{padding:14px 10px;display:flex;flex-direction:column;gap:4px;flex:1;overflow-y:auto}
-.nav-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;padding:10px 10px 4px;letter-spacing:0.5px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.15s ease;cursor:pointer}
-.nav-item:hover{background:rgba(255, 255, 255, 0.06);color:#e2e8f0}
-.nav-item.active{background:#0872ff;color:#fff;font-weight:600;box-shadow:0 4px 12px rgba(8, 114, 255, 0.35)}
-.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.nav-item small{font-size:10px;color:inherit;opacity:0.8;display:block}
-.badge-count{margin-left:auto;font-size:10px;padding:2px 6px;border-radius:10px;background:rgba(255,255,255,0.15);font-weight:700}
-.sidebar-assistant{margin:10px;padding:12px;background:rgba(255, 255, 255, 0.04);border:1px solid rgba(255, 255, 255, 0.08);border-radius:8px;font-size:11px;line-height:1.45}
-.assistant-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;color:#38bdf8;font-weight:700}
-.assistant-quote{color:#94a3b8;margin:0}
-.sidebar-footer{padding:12px 18px;font-size:11px;color:#64748b;border-top:1px solid #1e293b;display:flex;justify-content:space-between}
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI 크루 두뇌 & LLM 설정 · BaroLab Master Hub</title>
+  <link rel="stylesheet" href="sidebar.css?v=20261018-brain-matrix">
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --blue: #2563eb;
+      --line: #e2e8f0;
+      --bg: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.55 'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+    }
+    body.control-room .layout {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      min-height: 100vh !important;
+      width: 100% !important;
+    }
+    main.settings-main {
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      max-width: 1420px;
+      margin: 0 !important;
+      padding: 20px 28px 48px !important;
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 22px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+    .eyebrow {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 2px 0 4px;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+    }
+    h2 {
+      font-size: 16.5px;
+      font-weight: 800;
+      margin: 0;
+      color: #0f172a;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-top: 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+    .matrix-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 16px;
+    }
+    .matrix-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-preset {
+      background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+      color: #1d4ed8;
+      border: 1px solid #93c5fd;
+      border-radius: 9px;
+      padding: 9px 15px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-preset:hover {
+      background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%);
+      border-color: #60a5fa;
+      transform: translateY(-1px);
+    }
+    button.primary {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border: 1px solid #1d4ed8;
+      border-radius: 9px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+      transition: all 0.15s ease;
+    }
+    button.primary:hover {
+      background: #1e40af;
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    .sub-section-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 6px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sub-section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+    .brain-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .brain-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 1180px) {
+      .brain-grid-6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .brain-grid-6, .brain-grid-4 { grid-template-columns: 1fr; }
+      main.settings-main { padding: 14px 14px 36px !important; }
+    }
+    .brain-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+    }
+    .brain-card:hover {
+      border-color: #cbd5e1;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    }
+    .brain-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .brain-agent-id {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+    .brain-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .brain-title-wrap {
+      min-width: 0;
+    }
+    .brain-title-wrap strong {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+    .brain-title-wrap span {
+      display: block;
+      font-size: 11.5px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brain-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .brain-live-badge.is-codex {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+    .brain-live-badge.is-flash {
+      background: #f5f3ff;
+      color: #6d28d9;
+      border-color: #ddd6fe;
+    }
+    .brain-controls {
+      display: grid;
+      grid-template-columns: 145px minmax(0, 1fr);
+      gap: 8px;
+    }
+    .brain-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      margin: 0 0 4px;
+    }
+    .brain-field select,
+    .brain-field input {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #0f172a;
+      margin: 0;
+    }
+    .brain-field select:focus,
+    .brain-field input:focus {
+      outline: 2px solid #93c5fd;
+      border-color: #2563eb;
+    }
+    .brain-rec-note {
+      font-size: 11px;
+      color: #64748b;
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .brain-rec-note code {
+      font-weight: 700;
+      color: #1e40af;
+      background: #dbeafe;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10.5px;
+    }
+    #brain-matrix-message {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 9px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    #brain-matrix-message.visible {
+      display: block;
+      background: #ecfdf5;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+    }
+    #brain-matrix-message.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+    }
+    .current {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 12px;
+      color: #334155;
+    }
+    input, select, button {
+      font: inherit;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+    }
+    input, select {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      background: #fff;
+      color: var(--ink);
+    }
+    .hint {
+      font-size: 11.5px;
+      margin-top: 5px;
+      color: var(--muted);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    button {
+      cursor: pointer;
+      background: #ffffff;
+      font-weight: 700;
+    }
+    #message {
+      white-space: pre-wrap;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 0 0;
+      min-height: 28px;
+      color: #065f46;
+    }
+    #message.error { color: #b91c1c; }
+    .note {
+      border-left: 3px solid #93c5fd;
+      padding-left: 12px;
+      margin-top: 14px;
+      font-size: 12.5px;
+    }
+    .hidden { display: none !important; }
+    a { color: var(--blue); text-decoration: none; font-weight: 700; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body class="control-room">
+<div class="layout">
+  <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
+  <script src="sidebar.js?v=20261018-no-rnd"></script>
 
-main{max-width:1120px;margin-left:240px;padding:40px}
-.eyebrow{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:2px}h1{font-size:28px;margin:5px 0 8px}h2{font-size:18px;margin:0 0 12px}p{margin:6px 0;color:var(--muted)}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:24px;margin-top:22px;box-shadow:0 2px 6px #0f172a05}.current{display:flex;gap:16px;align-items:center}.badge{background:#eff6ff;color:#0872ff;padding:6px 12px;border-radius:24px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}label{display:block;font-size:14px;font-weight:600;margin-top:18px}input,select,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:11px 13px}input,select{display:block;width:100%;margin-top:7px;background:#fff;color:var(--ink)}input:focus,select:focus{outline:2px solid #93c5fd;outline-offset:2px}.hint{font-size:12px;margin-top:6px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}button{cursor:pointer;background:white}button.primary{background:var(--blue);color:white;border-color:var(--blue)}button:disabled{opacity:.5;cursor:wait}#message{white-space:pre-wrap;font-size:14px;padding:12px 0;min-height:42px}#message.error{color:#b91c1c}.note{border-left:3px solid #93c5fd;padding-left:14px;margin-top:18px}.hidden{display:none}a{color:var(--blue)}
-@media(max-width:760px){.sidebar{position:static;width:auto;padding:18px}.sidebar .nav{display:none}main{margin:0;padding:22px 16px}.grid{grid-template-columns:1fr;gap:0}.card{padding:18px}.current{align-items:flex-start;flex-direction:column}}
-</style><link rel="stylesheet" href="sidebar.css?v=20261017-unified-1">
-</head><body>
-<aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
-<script src="sidebar.js?v=20261018-no-rnd"></script>
-<main><div class="eyebrow">WORKSPACE SETTINGS</div><h1>LLM 연결 설정</h1><p>API 연결을 보관하고 CF·네이버의 원고 기획에 사용할 모델을 선택합니다.</p>
-<section class="card"><h2>지식iN 전용 자동운영 설정</h2><p>전용 모델: <strong id="kin-settings-model">조회 중</strong></p><p>대상 계정: <strong id="kin-settings-accounts">조회 중</strong></p><p>지식iN은 별도 운영 설정의 모델로 답변 작성과 독립 검수를 수행합니다. 아래 CF·네이버 블로그 공용 모델을 변경해도 지식iN 전용 모델은 자동으로 바뀌지 않습니다.</p><p class="hint">두 계정의 로그인·브라우저는 블로그 작업과 공유하며, 지식iN은 계정 교대와 작업 종료 후 최소 60분 간격을 사용합니다. 이 화면은 전용 설정을 조회하며 자동운영 설정을 변경하지 않습니다. <a href="kin.html">지식iN 운영 상세 확인 →</a></p></section>
-<section class="card current"><span class="badge">공용 현재 사용</span><div><strong id="active">불러오는 중…</strong><p class="hint">아래 공용 설정 변경은 다음 CF·네이버 블로그 AI 생성 요청부터 적용됩니다. 이미 진행 중인 생성은 유지됩니다.</p></div></section>
-<section class="card"><h2>공급자와 모델</h2><form id="form" autocomplete="off"><div class="grid"><label>LLM 공급자<select id="provider" disabled><option value="legacy">기존 워크플로우 연결 유지</option><option value="gemini">Gemini API</option><option value="deepseek">DeepSeek API</option><option value="codex">Codex CLI · ChatGPT 구독</option><option value="openai">OpenAI API</option><option value="claude">Claude API</option><option value="agy">Antigravity AGY CLI (Argon)</option></select></label><label id="model-wrap">모델 ID<input id="model" list="agy-models-list" placeholder="사용 가능한 정확한 모델 ID (예: gemini-4-argon-high)" maxlength="120" spellcheck="false"><datalist id="agy-models-list"><option value="gemini-4-argon-high">Gemini 4 Argon (High)</option><option value="gemini-4-argon-medium">Gemini 4 Argon (Medium)</option><option value="gemini-4-argon-low">Gemini 4 Argon (Low)</option><option value="gemini-3.8-flash-high">Gemini 3.8 Flash (High)</option><option value="gemini-3.8-flash-medium">Gemini 3.8 Flash (Medium)</option><option value="gemini-3.8-flash-low">Gemini 3.8 Flash (Low)</option><option value="claude-opus-5-5-high">Claude Opus 5.5 (High)</option><option value="claude-sonnet-5-5-high">Claude Sonnet 5.5 (High)</option><option value="gpt-oss-120b-medium">GPT-OSS 120B (Medium)</option></datalist><p class="hint">계정에서 사용 가능한 모델 ID를 선택하거나 직접 입력하세요.</p></label><label id="agy-model-wrap" class="hidden">AGY 모델 (Argon 등)<select id="agy-model"></select><p id="agy-status" class="hint"></p></label><label id="codex-model-wrap" class="hidden">Codex 모델<select id="codex-model" disabled></select><p id="codex-status" class="hint"></p></label></div>
-<div id="key-wrap"><label>API 키<input id="api-key" type="password" autocomplete="new-password" placeholder="새 키를 입력하거나 비워 두어 기존 키 유지" maxlength="4096" spellcheck="false"></label><p id="key-status" class="hint"></p></div>
-<p id="agy-note" class="note hidden">Windows 작업 호스트에 설치된 Antigravity AGY CLI (<code>C:\Users\baro7\AppData\Local\agy\bin\agy.exe</code>)를 사용합니다. 별도 API 키가 필요 없으며 <strong>Gemini 4 Argon (High/Medium/Low)</strong> 등을 바로 선택해 사용할 수 있습니다.</p>
-<p id="codex-note" class="note hidden">Windows에 로그인한 Codex CLI의 ChatGPT 구독을 사용합니다. 모델은 해당 로그인 계정의 목록에서 선택하며, 별도 API 키는 필요하지 않습니다. 구독 사용량 한도가 적용됩니다.</p>
-<p id="legacy-note" class="note">기존 워크플로우의 인증과 모델 설정을 그대로 사용합니다.</p>
-<div class="actions"><button type="submit" id="save" disabled>연결 저장</button><button type="button" class="primary" id="activate" disabled>저장하고 사용</button><button type="button" id="test" disabled>저장된 연결 테스트</button></div>
-<p class="hint">연결 테스트는 짧은 실제 생성 요청 1회를 보내며 사용량·요금이 발생할 수 있습니다. 게시 작업은 실행하지 않습니다.</p><div id="message" role="status" aria-live="polite"></div></form></section>
-<section class="card"><h2>적용 범위와 키 보관</h2><p>CF·네이버의 AI 키워드 선정, 원고·이미지 프롬프트 생성에 적용합니다. 검색어 수집과 Flow 이미지 생성은 기존 방식을 유지합니다.</p><p>API 키는 암호화해 저장하며 화면에 다시 표시하지 않습니다. Codex 로그인 정보는 Windows 작업 호스트에 보관하고 NAS로 복사하지 않습니다.</p><p>Codex CLI 구독 사용량과 OpenAI·Claude API 요금은 별도입니다. 공급자 변경 시 자동으로 다른 연결에 재시도하지 않습니다.</p></section>
-</main><script src="/llm-settings.js?v=20261016-argon"></script></body></html>
+  <main class="settings-main">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow">AI CREW BRAIN &amp; LLM ARCHITECTURE</div>
+        <h1>🧠 6인 AI 크루 &amp; 채널별 개별 두뇌(Brain) 설정</h1>
+        <p>직원별·파이프라인별 역할 난이도와 속도에 맞춰 AGY CLI(Argon/Flash), Codex CLI(gpt-6.1-sol), 상용 API를 개별 배정하고 즉시 연동합니다.</p>
+      </div>
+      <div class="matrix-actions">
+        <a href="chat.html" class="btn-preset" style="text-decoration:none;">💬 실시간 회의실에서 장착 상태 확인 →</a>
+      </div>
+    </header>
+
+    <!-- 1. 최상단: 6인 AI 크루 + 4대 채널 파이프라인 두뇌 배정 매트릭스 -->
+    <section class="card" id="brain-matrix-section">
+      <div class="matrix-head">
+        <div>
+          <h2>⚡ 6인 AI 크루 두뇌 배정 매트릭스 (Individual Brain Matrix)</h2>
+          <p>회의실(<code>/api/chat</code>) 호출 및 백그라운드 파이프라인 실행 시 각 직원·채널에 지정된 전용 공급자와 모델로 즉시 구동됩니다.</p>
+        </div>
+        <div class="matrix-actions">
+          <button type="button" id="btn-apply-optimal-preset" class="btn-preset" title="자비스(Argon High), 퍼블리·패치(gpt-6.1-sol), 레이더(Argon Med), 닥터·트레이스(3.8 Flash Med)로 원클릭 배정 후 즉시 저장합니다">
+            ⚡ 최적 효율 프리셋 자동 배정
+          </button>
+          <button type="button" id="btn-save-agent-brains" class="primary">
+            💾 6인 크루·채널 두뇌 일괄 저장
+          </button>
+        </div>
+      </div>
+
+      <div id="brain-matrix-message" role="status" aria-live="polite"></div>
+
+      <div class="sub-section-label">👥 6인 전담 AI 크루 개별 두뇌 (회의실 &amp; 전담 도구 실행)</div>
+      <div class="brain-grid-6" id="crew-brain-grid"></div>
+
+      <div class="sub-section-label">🚀 4대 자동화 채널 파이프라인 전용 두뇌 (원고 집필 · 검수 · 답변)</div>
+      <div class="brain-grid-4" id="pipeline-brain-grid"></div>
+    </section>
+
+    <!-- 2. 지식iN 운영 연동 안내 및 공용 기본 공급자 / API 키 금고 -->
+    <section class="card current">
+      <span class="badge">공용 기본 연결</span>
+      <div>
+        <strong id="active">불러오는 중…</strong>
+        <p class="hint">개별 슬롯이 지정되지 않은 일반 워크플로우 요청에 사용되는 기본(Fallback) 공급자와 API 키 암호화 금고입니다.</p>
+      </div>
+      <div style="margin-left:auto; font-size:12.5px; color:#475569;">
+        지식iN 전용 모델: <strong id="kin-settings-model" style="color:#0f172a;">gpt-6.1-sol</strong> · 계정: <strong id="kin-settings-accounts" style="color:#0f172a;">adinfo0905, stone0747</strong>
+        (<a href="kin.html">지식iN 상세 →</a>)
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🔐 공급자별 기본 모델 및 API 키 암호화 보관소</h2>
+      <form id="form" autocomplete="off">
+        <div class="grid">
+          <label>LLM 공급자 선택
+            <select id="provider" disabled>
+              <option value="agy">Antigravity AGY CLI (Argon / Flash)</option>
+              <option value="codex">Codex CLI · ChatGPT 구독 (gpt-6.1-sol)</option>
+              <option value="gemini">Gemini API</option>
+              <option value="openai">OpenAI API</option>
+              <option value="claude">Claude API</option>
+              <option value="deepseek">DeepSeek API</option>
+              <option value="legacy">기존 워크플로우 연결 유지</option>
+            </select>
+          </label>
+          <label id="model-wrap">기본 모델 ID
+            <input id="model" list="agy-models-list" placeholder="사용 가능한 정확한 모델 ID (예: gemini-4-argon-high)" maxlength="120" spellcheck="false">
+            <datalist id="agy-models-list">
+              <option value="gemini-4-argon-high">Gemini 4 Argon (High)</option>
+              <option value="gemini-4-argon-medium">Gemini 4 Argon (Medium)</option>
+              <option value="gemini-4-argon-low">Gemini 4 Argon (Low)</option>
+              <option value="gemini-3.8-flash-high">Gemini 3.8 Flash (High)</option>
+              <option value="gemini-3.8-flash-medium">Gemini 3.8 Flash (Medium)</option>
+              <option value="gemini-3.8-flash-low">Gemini 3.8 Flash (Low)</option>
+              <option value="gpt-6.1-sol">GPT-6.1-Sol (High)</option>
+              <option value="claude-opus-5-5-high">Claude Opus 5.5 (High)</option>
+              <option value="claude-sonnet-5-5-high">Claude Sonnet 5.5 (High)</option>
+              <option value="gpt-oss-120b-medium">GPT-OSS 120B (Medium)</option>
+            </datalist>
+            <p class="hint">계정에서 사용 가능한 모델 ID를 선택하거나 직접 입력하세요.</p>
+          </label>
+          <label id="agy-model-wrap" class="hidden">AGY 모델 빠른 선택
+            <select id="agy-model"></select>
+            <p id="agy-status" class="hint"></p>
+          </label>
+          <label id="codex-model-wrap" class="hidden">Codex 모델 선택
+            <select id="codex-model" disabled></select>
+            <p id="codex-status" class="hint"></p>
+          </label>
+        </div>
+
+        <div id="key-wrap">
+          <label>API 키 (DPAPI / Fernet 암호화 저장)
+            <input id="api-key" type="password" autocomplete="new-password" placeholder="새 키를 입력하거나 비워 두어 기존 키 유지" maxlength="4096" spellcheck="false">
+          </label>
+          <p id="key-status" class="hint"></p>
+        </div>
+
+        <p id="agy-note" class="note hidden">Windows 작업 호스트에 설치된 Antigravity AGY CLI (<code>C:\Users\baro7\AppData\Local\agy\bin\agy.exe</code>)를 사용합니다. 별도 API 키가 필요 없으며 <strong>Gemini 4 Argon (High/Medium)</strong> 및 <strong>Gemini 3.8 Flash (Medium)</strong> 등을 바로 선택해 사용할 수 있습니다.</p>
+        <p id="codex-note" class="note hidden">Windows에 로그인한 Codex CLI의 ChatGPT 구독을 사용합니다. <strong>gpt-6.1-sol</strong>, <strong>gpt-5.4</strong> 등 구독 모델을 별도 API 키 없이 사용합니다.</p>
+        <p id="legacy-note" class="note hidden">기존 워크플로우의 인증과 모델 설정을 그대로 사용합니다.</p>
+
+        <div class="actions">
+          <button type="submit" id="save" disabled>연결 저장</button>
+          <button type="button" class="primary" id="activate" disabled>저장하고 기본 연결로 사용</button>
+          <button type="button" id="test" disabled>저장된 연결 테스트</button>
+        </div>
+        <p class="hint">연결 테스트는 짧은 실제 JSON 생성 요청 1회를 보내며, 게시 작업은 실행하지 않습니다.</p>
+        <div id="message" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+</div>
+<script src="/llm-settings.js?v=20261018-brain-matrix"></script>
+</body>
+</html>

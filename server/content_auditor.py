@@ -1615,11 +1615,11 @@ def broadcast_patrol_to_meeting_room(results: List[Dict[str, Any]], status_snaps
             if c_cat.get("patched")
             else f"`{c_cat.get('newCategory') or c_cat.get('oldCategory')}`"
         )
-        if c_img.get("suitability") in ("fake_person_or_broken_text_ai", "watermark_or_exif_contaminated"):
+        if c_img.get("suitability") in ("fake_person_or_broken_text_ai", "watermark_or_exif_contaminated", "synthetic_checkpoint_card"):
             lines_doctor.append(
                 f"**{idx}. [{r['domain']} · {r['brandName']}]** 「{r['title']}」\n"
                 f"   - 감식: **{r['gradeBadge']}** | 카테고리: {cat_str} | 색인 `{c_idx['indexStatus']}`\n"
-                f"   - 조치: **{r['domain']} 도메인의 「{r['title']}」 글에서 3인칭 가짜 인물/깨진 한글 사진과 AI 워터마크(✦)·메타데이터 오염을 발견해 실제 캡처·정자체 요약 화면 및 클린 EXIF({dev_lbl}{seo_note}) 이미지로 교체했습니다.**"
+                f"   - 조치: **{r['domain']} 도메인의 「{r['title']}」 글에서 불량 도표·가짜 인물 사진·메타데이터 오염을 제거하고 반응형 HTML 비교표 및 클린 EXIF({dev_lbl}{seo_note}) 이미지로 교체 완료했습니다. @퍼블리 후속 검수 바랍니다.**"
             )
         else:
             lines_doctor.append(
@@ -1629,7 +1629,7 @@ def broadcast_patrol_to_meeting_room(results: List[Dict[str, Any]], status_snaps
             )
 
     lines_publi = [
-        f"🤖 **[퍼블리 · 🔴 이미지 교체·세탁 및 🟡 C등급({len(c_targets)}건) 리모델링 큐 인수 완료]**",
+        f"🤖 **[퍼블리 · 🔴 이미지 세탁 및 🟡 C등급({len(c_targets)}건) 리모델링 큐 인수 완료]** (@닥터 인계 수신)",
         f"현재 일일 리모델링 할당량 **{audited_cnt}/{daily_target}건**(`🟢A {gc.get('A',0)} · 🔵B {gc.get('B',0)} · 🟡C {gc.get('C',0)} · 🔴D {gc.get('D',0)}`) 및 `common/image_sanitizer.py` 클린 EXIF 세탁 파이프라인이 동기화되었습니다.",
     ]
     for r in c_targets[:3]:
@@ -1638,23 +1638,27 @@ def broadcast_patrol_to_meeting_room(results: List[Dict[str, Any]], status_snaps
         lines_publi.append(f"- **[{r['domain']}]** 「{r['title']}」 ➔ **「{sug}」** ({img_iss})")
 
     turns = [
-        ("doctor", "닥터", "자비스", "\n".join(lines_doctor), f"기존 글 {len(results)}건 시각 검열 & 클린 EXIF 세탁 완료"),
-        ("publi", "퍼블리", "닥터", "\n".join(lines_publi), f"C등급 {len(c_targets)}건 리모델링 큐 인수 완료"),
+        ("doctor", "닥터", "자비스", "publi", "\n".join(lines_doctor), f"기존 글 {len(results)}건 시각 검열 & 클린 EXIF 세탁 완료"),
+        ("publi", "퍼블리", "닥터", "trace", "\n".join(lines_publi), f"C등급 {len(c_targets)}건 리모델링 큐 인수 완료"),
     ]
 
-    for idx, (who, name, prev_name, text, summary) in enumerate(turns):
+    for idx, (who, name, prev_name, target_slug, text, summary) in enumerate(turns):
         msg_obj = {
-            "id": f"msg-doctor-patrol-{now_ts}-{idx}",
+            "id": f"ws-doctor-patrol-{now_ts}-{idx}",
             "who": who,
             "text": text,
             "ts": now_ts + idx * 120,
+            "msgKind": "workstream",
+            "isWorkstream": True,
+            "replyToCeo": False,
+            "targetAgent": target_slug,
             "eventType": "content_doctor_patrol",
             "taskTracker": {
                 "handoff": f"@{prev_name} ➔ @{name}",
                 "status": "completed",
                 "step": summary,
                 "resultSummary": summary,
-                "deliverableUrl": "index.html#legacy-remodel-gauge-card",
+                "deliverableUrl": "growth.html#growth-remodel",
                 "deliverableLabel": "🩺 리모델링 게이지",
                 "synapseLinked": True,
                 "synapseLabel": "🧠 기억 그래프 연결",

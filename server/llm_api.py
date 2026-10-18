@@ -62,11 +62,24 @@ def get_settings():
 @router.post('/settings')
 async def set_settings(request: Request):
     raw = await request.body()
-    if len(raw) > 16384:
+    if len(raw) > 32768:
         return JSONResponse({'detail': '요청이 너무 큽니다.'}, status_code=413)
     try:
         import json
         return await run_in_threadpool(settings.save, json.loads(raw))
+    except (ValueError, TypeError) as e:
+        message = str(e) if isinstance(e, settings.SettingsError) else '잘못된 JSON 요청입니다.'
+        return JSONResponse({'detail': message}, status_code=400)
+
+
+@router.post('/agent-brains')
+async def set_agent_brains(request: Request):
+    raw = await request.body()
+    if len(raw) > 32768:
+        return JSONResponse({'detail': '요청이 너무 큽니다.'}, status_code=413)
+    try:
+        import json
+        return await run_in_threadpool(settings.save_agent_brains, json.loads(raw))
     except (ValueError, TypeError) as e:
         message = str(e) if isinstance(e, settings.SettingsError) else '잘못된 JSON 요청입니다.'
         return JSONResponse({'detail': message}, status_code=400)

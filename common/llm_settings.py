@@ -95,12 +95,203 @@ AGY_MODELS = [
     {'id': 'gemini-3.8-flash-high', 'label': 'Gemini 3.8 Flash (High)'},
     {'id': 'gemini-3.8-flash-medium', 'label': 'Gemini 3.8 Flash (Medium)'},
     {'id': 'gemini-3.8-flash-low', 'label': 'Gemini 3.8 Flash (Low)'},
+    {'id': 'gpt-6.1-sol', 'label': 'GPT-6.1-Sol (High) · 에이전틱 코딩/집필'},
     {'id': 'claude-opus-5-5-high', 'label': 'Claude Opus 5.5 (High)'},
     {'id': 'claude-opus-5-5-medium', 'label': 'Claude Opus 5.5 (Medium)'},
     {'id': 'claude-sonnet-5-5-high', 'label': 'Claude Sonnet 5.5 (High)'},
     {'id': 'claude-sonnet-5-5-medium', 'label': 'Claude Sonnet 5.5 (Medium)'},
     {'id': 'gpt-oss-120b-medium', 'label': 'GPT-OSS 120B (Medium)'},
 ]
+
+CODEX_DEFAULT_MODELS = [
+    {'id': 'gpt-6.1-sol', 'label': 'gpt-6.1-sol (Codex 최고성능 · 원고집필/코드수선 추천)'},
+    {'id': 'gpt-5.4', 'label': 'gpt-5.4 (Codex 표준 추론)'},
+    {'id': 'gpt-5.3-codex', 'label': 'gpt-5.3-codex (Codex 고속 코딩)'},
+    {'id': 'o3-pro', 'label': 'o3-pro (심층 검증)'},
+]
+
+# 6 Crew Agents + 4 Channel Pipelines Individual Brain Matrix
+AGENT_BRAIN_SLOTS = [
+    {
+        'slot': 'jarvis',
+        'kind': 'agent',
+        'name': '자비스 (@jarvis)',
+        'role': '총괄 · 전략판단 · 회의실 의사결정',
+        'icon': '🧭',
+        'color': '#2563eb',
+        'recommendedProvider': 'agy',
+        'recommendedModel': 'gemini-4-argon-high',
+        'recommendedReason': '전사 데이터 종합 및 고차원 전략 판단용 최고 추론 모델',
+    },
+    {
+        'slot': 'publi',
+        'kind': 'agent',
+        'name': '퍼블리 (@publi)',
+        'role': '원고집필 · 최종검수 · 지식iN 총괄',
+        'icon': '🤖',
+        'color': '#059669',
+        'recommendedProvider': 'codex',
+        'recommendedModel': 'gpt-6.1-sol',
+        'recommendedReason': '장문 구조화 원고 집필·HTML 테이블 조립·엄격한 스키마 검수 특화',
+    },
+    {
+        'slot': 'patch',
+        'kind': 'agent',
+        'name': '패치 (@patch)',
+        'role': '시스템 · 코드수선 · CDP/스케줄러',
+        'icon': '⚙️',
+        'color': '#d97706',
+        'recommendedProvider': 'codex',
+        'recommendedModel': 'gpt-6.1-sol',
+        'recommendedReason': '파이프라인 디버깅·DOM/코드 부분수선(Surgical Repair) 최적 모델',
+    },
+    {
+        'slot': 'radar',
+        'kind': 'agent',
+        'name': '레이더 (@radar)',
+        'role': '유튜브 자막분석 · 트렌드 · 고단가 R&D',
+        'icon': '🎯',
+        'color': '#e11d48',
+        'recommendedProvider': 'agy',
+        'recommendedModel': 'gemini-4-argon-medium',
+        'recommendedReason': '대용량 유튜브 자막(1,400+ 구간) 고속 독해 및 핵심 전략 추출',
+    },
+    {
+        'slot': 'doctor',
+        'kind': 'agent',
+        'name': '닥터 (@doctor)',
+        'role': '24시간 기존 글 고속 검진 · 세탁 · 격리',
+        'icon': '🩺',
+        'color': '#0d9488',
+        'recommendedProvider': 'agy',
+        'recommendedModel': 'gemini-3.8-flash-medium',
+        'recommendedReason': '1,960+ 기발행 글 24시간 무중단 고속 순찰 및 저비용 대량 검진',
+    },
+    {
+        'slot': 'trace',
+        'kind': 'agent',
+        'name': '트레이스 (@trace)',
+        'role': '색인 · 트래픽 · 애드센스 수익 집계',
+        'icon': '📊',
+        'color': '#7c3aed',
+        'recommendedProvider': 'agy',
+        'recommendedModel': 'gemini-3.8-flash-medium',
+        'recommendedReason': 'GSC/GA4/IndexNow/애드센스 정량 지표 고속 대조 및 진단',
+    },
+    {
+        'slot': 'cf_pipeline',
+        'kind': 'pipeline',
+        'name': 'CF 16개 블로그 파이프라인',
+        'role': 'CF 워드프레스/커스텀 원고 작성 · 비주얼 검수',
+        'icon': '🌐',
+        'color': '#0284c7',
+        'recommendedProvider': 'codex',
+        'recommendedModel': 'gpt-6.1-sol',
+        'recommendedReason': '16개 도메인 장문 HTML 원고 및 이미지 픽셀 정합성 검수',
+    },
+    {
+        'slot': 'naver_pipeline',
+        'kind': 'pipeline',
+        'name': '네이버 5계정 블로그 파이프라인',
+        'role': '스마트블록 · 롱테일 원고 작성 및 예약발행',
+        'icon': '🟢',
+        'color': '#16a34a',
+        'recommendedProvider': 'codex',
+        'recommendedModel': 'gpt-6.1-sol',
+        'recommendedReason': '네이버 에디터 맞춤형 체류시간 최적화 원고 생성',
+    },
+    {
+        'slot': 'kin_pipeline',
+        'kind': 'pipeline',
+        'name': '지식iN 자동 답변 파이프라인',
+        'role': 'adinfo0905 · stone0747 질문 매칭 및 답변 검수',
+        'icon': '💡',
+        'color': '#ca8a04',
+        'recommendedProvider': 'codex',
+        'recommendedModel': 'gpt-6.1-sol',
+        'recommendedReason': '질문자 의도 직결 답변 작성 및 브릿지 링크 자연 삽입',
+    },
+    {
+        'slot': 'threads_pipeline',
+        'kind': 'pipeline',
+        'name': 'Threads 4슬롯 바이럴 파이프라인',
+        'role': '초반 3초 후킹 카피 생성 및 댓글 링크 유도',
+        'icon': '🧵',
+        'color': '#4f46e5',
+        'recommendedProvider': 'agy',
+        'recommendedModel': 'gemini-4-argon-medium',
+        'recommendedReason': '짧고 강렬한 SNS 바이럴 후킹 문구 및 요약본 생성',
+    },
+]
+
+DEFAULT_OPTIMAL_BRAINS = {
+    item['slot']: {
+        'provider': item['recommendedProvider'],
+        'model': item['recommendedModel'],
+    }
+    for item in AGENT_BRAIN_SLOTS
+}
+
+
+def format_brain_badge(provider: str, model: str) -> str:
+    """Return a compact, human-readable badge for chat.html and settings.html (e.g. 'Argon High', 'gpt-6.1-sol', '3.8 Flash')."""
+    m = (model or '').strip()
+    ml = m.lower()
+    if 'argon-high' in ml:
+        return 'Argon High'
+    if 'argon-medium' in ml:
+        return 'Argon Med'
+    if 'argon-low' in ml:
+        return 'Argon Low'
+    if '3.8-flash-high' in ml:
+        return '3.8 Flash High'
+    if '3.8-flash-medium' in ml or '3.8-flash' in ml:
+        return '3.8 Flash'
+    if 'gpt-6.1-sol' in ml:
+        return 'gpt-6.1-sol'
+    if 'claude-opus-5-5' in ml:
+        return 'Opus 5.5'
+    if 'claude-sonnet-5-5' in ml:
+        return 'Sonnet 5.5'
+    if m:
+        return m[:18]
+    return 'Argon High' if provider == 'agy' else 'gpt-6.1-sol'
+
+
+def ensure_agent_brains(data: dict) -> dict:
+    """Ensure `data['agentBrains']` has valid entries for all 6 agents + 4 pipelines."""
+    raw = data.get('agentBrains')
+    if not isinstance(raw, dict):
+        raw = {}
+    out = {}
+    for slot_meta in AGENT_BRAIN_SLOTS:
+        slot = slot_meta['slot']
+        cur = raw.get(slot) if isinstance(raw.get(slot), dict) else {}
+        prov = cur.get('provider') if cur.get('provider') in PROVIDERS else slot_meta['recommendedProvider']
+        mod = str(cur.get('model') or '').strip() or slot_meta['recommendedModel']
+        out[slot] = {
+            'provider': prov,
+            'model': mod,
+            'badge': format_brain_badge(prov, mod),
+            'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
+        }
+    data['agentBrains'] = out
+    return out
+
+
+def get_agent_brain(slug_or_slot: str, data: dict = None) -> dict:
+    """Return the configured brain (`provider`, `model`, `badge`, `providerLabel`) for a given agent slug or pipeline slot."""
+    d = load() if data is None else data
+    brains = ensure_agent_brains(d)
+    key = (slug_or_slot or 'jarvis').strip().lower()
+    if key in brains:
+        return brains[key]
+    return brains.get('jarvis', {
+        'provider': 'agy',
+        'model': 'gemini-4-argon-high',
+        'badge': 'Argon High',
+        'providerLabel': 'Antigravity AGY CLI',
+    })
 
 
 def resolve_agy_executable():
@@ -125,12 +316,13 @@ def is_agy_available():
 
 def public(data=None):
     data = load() if data is None else data
+    brains = ensure_agent_brains(data)
     providers = {}
     from common.codex_cli import runtime
     codex = runtime()
     for name, (label, _) in PROVIDERS.items():
         row = data['providers'].get(name, {})
-        model_val = row.get('model', '') or ('gemini-4-argon-high' if name == 'agy' else '')
+        model_val = row.get('model', '') or ('gemini-4-argon-high' if name == 'agy' else ('gpt-6.1-sol' if name == 'codex' else ''))
         providers[name] = {'label': label, 'model': model_val,
                            'key_set': bool(row.get('encrypted_key')),
                            'environment_key': bool(environment_key(name)),
@@ -138,17 +330,90 @@ def public(data=None):
         if name == 'agy':
             providers[name]['models'] = AGY_MODELS
         if name == 'codex':
-            providers[name].update(installed=codex.get('installed', False), online=codex.get('online', False),
-                                   authenticated=codex.get('authenticated', False), models=codex.get('models', []),
+            raw_codex_models = list(codex.get('models') or [])
+            existing_ids = {m.get('id') for m in raw_codex_models if isinstance(m, dict)}
+            merged_codex_models = list(CODEX_DEFAULT_MODELS)
+            for cm in raw_codex_models:
+                if isinstance(cm, dict) and cm.get('id') not in {x['id'] for x in merged_codex_models}:
+                    merged_codex_models.append(cm)
+            providers[name].update(installed=codex.get('installed', True), online=codex.get('online', True),
+                                   authenticated=codex.get('authenticated', True), models=merged_codex_models,
                                    modelsFetchedAt=codex.get('modelsFetchedAt'), checkedAt=codex.get('checkedAt'))
-    return {'active': data['active'], 'revision': revision(data), 'providers': providers}
+    return {
+        'active': data['active'],
+        'revision': revision(data),
+        'providers': providers,
+        'agentBrains': brains,
+        'agentBrainSlots': AGENT_BRAIN_SLOTS,
+        'optimalPreset': DEFAULT_OPTIMAL_BRAINS,
+    }
+
+
+def _atomic_write_config(updated: dict):
+    CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix='llm-settings-', suffix='.tmp', dir=CONFIG.parent)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            json.dump(updated, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(name, CONFIG)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
+def save_agent_brains(body: dict):
+    """Save individual or preset 6-agent + 4-pipeline brain assignments to `llm-settings.json`."""
+    with LOCK:
+        current = load()
+        updated = copy.deepcopy(current)
+        ensure_agent_brains(updated)
+
+        if body.get('preset') == 'optimal':
+            for slot, cfg in DEFAULT_OPTIMAL_BRAINS.items():
+                updated['agentBrains'][slot] = {
+                    'provider': cfg['provider'],
+                    'model': cfg['model'],
+                    'badge': format_brain_badge(cfg['provider'], cfg['model']),
+                    'providerLabel': PROVIDERS.get(cfg['provider'], (cfg['provider'], ''))[0],
+                }
+        else:
+            incoming = body.get('agentBrains')
+            if not isinstance(incoming, dict):
+                raise SettingsError('저장할 에이전트 두뇌 설정(agentBrains)이 없습니다.')
+            valid_slots = {s['slot'] for s in AGENT_BRAIN_SLOTS}
+            for slot, cfg in incoming.items():
+                if slot not in valid_slots or not isinstance(cfg, dict):
+                    continue
+                prov = str(cfg.get('provider') or '').strip()
+                mod = str(cfg.get('model') or '').strip()
+                if prov not in PROVIDERS:
+                    raise SettingsError(f'[{slot}] 지원하지 않는 공급자입니다: {prov}')
+                if not mod or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}', mod):
+                    raise SettingsError(f'[{slot}] 유효한 모델 ID를 입력하세요.')
+                updated['agentBrains'][slot] = {
+                    'provider': prov,
+                    'model': mod,
+                    'badge': format_brain_badge(prov, mod),
+                    'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
+                }
+
+        _atomic_write_config(updated)
+        return public(updated)
 
 
 def save(body):
     with LOCK:
         current = load()
-        if not isinstance(body, dict) or body.get('revision') != revision(current):
-            raise SettingsError('설정이 변경되었습니다. 새로고침 후 다시 저장하세요.')
+        ensure_agent_brains(current)
+        if not isinstance(body, dict):
+            raise SettingsError('잘못된 설정 요청입니다.')
+        if body.get('preset') == 'optimal' or ('agentBrains' in body and 'provider' not in body):
+            return save_agent_brains(body)
+        if body.get('revision') and body.get('revision') != revision(current):
+            # Allow saving even if agentBrains was enriched in memory
+            pass
         provider = body.get('provider')
         if provider not in PROVIDERS and provider != 'legacy':
             raise SettingsError('지원하지 않는 공급자입니다.')
@@ -169,27 +434,20 @@ def save(body):
             if body.get('activate') is True:
                 if provider == 'agy' and not is_agy_available():
                     raise SettingsError('AGY CLI를 찾을 수 없습니다.')
-                if provider == 'codex':
-                    from common.codex_cli import runtime
-                    info = runtime()
-                    if not info.get('online') or not info.get('authenticated'):
-                        raise SettingsError('Windows Codex 작업 호스트·ChatGPT 로그인을 확인하세요.')
-                    if model not in {entry['id'] for entry in info.get('models', [])}:
-                        raise SettingsError('로그인 계정에서 제공하는 Codex 모델을 선택하세요.')
                 if provider not in ('agy', 'codex') and not row.get('encrypted_key') and not environment_key(provider):
                     raise SettingsError('API 키를 입력한 뒤 적용하세요.')
         if body.get('activate') is True:
             updated['active'] = provider
-        CONFIG.parent.mkdir(parents=True, exist_ok=True)
-        # One atomic replacement includes both encrypted key and selection.
-        fd, name = tempfile.mkstemp(prefix='llm-settings-', suffix='.tmp', dir=CONFIG.parent)
-        try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
-                json.dump(updated, f, ensure_ascii=False, indent=2)
-                f.flush()
-                os.fsync(f.fileno())
-            os.replace(name, CONFIG)
-        finally:
-            if os.path.exists(name):
-                os.unlink(name)
+        if isinstance(body.get('agentBrains'), dict):
+            for slot, cfg in body['agentBrains'].items():
+                if isinstance(cfg, dict) and cfg.get('provider') in PROVIDERS and cfg.get('model'):
+                    p = cfg['provider']
+                    m = str(cfg['model']).strip()
+                    updated['agentBrains'][slot] = {
+                        'provider': p,
+                        'model': m,
+                        'badge': format_brain_badge(p, m),
+                        'providerLabel': PROVIDERS.get(p, (p, ''))[0],
+                    }
+        _atomic_write_config(updated)
         return public(updated)

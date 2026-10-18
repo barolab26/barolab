@@ -3,7 +3,8 @@
   box-sizing: border-box !important;
 }
 body.control-room .layout,
-body.control-room:has(> #barolab-sidebar) {
+body.control-room:has(> #barolab-sidebar),
+body:has(> #barolab-sidebar) {
   display: flex !important;
   flex-direction: row !important;
   align-items: stretch !important;

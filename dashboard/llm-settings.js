@@ -1,19 +1,96 @@
 'use strict';
 const $ = id => document.getElementById(id);
 let config, busy = false;
+
 const DEFAULT_AGY_MODELS = [
-  { id: 'gemini-4-argon-high', label: 'Gemini 4 Argon (High) · gemini-4-argon-high' },
-  { id: 'gemini-4-argon-medium', label: 'Gemini 4 Argon (Medium) · gemini-4-argon-medium' },
-  { id: 'gemini-4-argon-low', label: 'Gemini 4 Argon (Low) · gemini-4-argon-low' },
-  { id: 'gemini-3.8-flash-high', label: 'Gemini 3.8 Flash (High) · gemini-3.8-flash-high' },
-  { id: 'gemini-3.8-flash-medium', label: 'Gemini 3.8 Flash (Medium) · gemini-3.8-flash-medium' },
-  { id: 'gemini-3.8-flash-low', label: 'Gemini 3.8 Flash (Low) · gemini-3.8-flash-low' },
-  { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High) · claude-opus-5-5-high' },
-  { id: 'claude-opus-5-5-medium', label: 'Claude Opus 5.5 (Medium) · claude-opus-5-5-medium' },
-  { id: 'claude-sonnet-5-5-high', label: 'Claude Sonnet 5.5 (High) · claude-opus/sonnet-5-5-high' },
-  { id: 'claude-sonnet-5-5-medium', label: 'Claude Sonnet 5.5 (Medium) · claude-sonnet-5-5-medium' },
-  { id: 'gpt-oss-120b-medium', label: 'GPT-OSS 120B (Medium) · gpt-oss-120b-medium' },
+  { id: 'gemini-4-argon-high', label: 'Gemini 4 Argon (High) · 최고 추론' },
+  { id: 'gemini-4-argon-medium', label: 'Gemini 4 Argon (Medium) · 표준' },
+  { id: 'gemini-4-argon-low', label: 'Gemini 4 Argon (Low) · 고속' },
+  { id: 'gemini-3.8-flash-high', label: 'Gemini 3.8 Flash (High)' },
+  { id: 'gemini-3.8-flash-medium', label: 'Gemini 3.8 Flash (Medium) · 고속 검진' },
+  { id: 'gemini-3.8-flash-low', label: 'Gemini 3.8 Flash (Low)' },
+  { id: 'gpt-6.1-sol', label: 'gpt-6.1-sol (High · 원고/코드 특화)' },
+  { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
+  { id: 'claude-opus-5-5-medium', label: 'Claude Opus 5.5 (Medium)' },
+  { id: 'claude-sonnet-5-5-high', label: 'Claude Sonnet 5.5 (High)' },
+  { id: 'claude-sonnet-5-5-medium', label: 'Claude Sonnet 5.5 (Medium)' },
+  { id: 'gpt-oss-120b-medium', label: 'GPT-OSS 120B (Medium)' },
 ];
+
+const PROVIDER_OPTIONS = [
+  { id: 'agy', label: 'AGY CLI (Argon/Flash)' },
+  { id: 'codex', label: 'Codex CLI (ChatGPT 구독)' },
+  { id: 'gemini', label: 'Gemini API' },
+  { id: 'openai', label: 'OpenAI API' },
+  { id: 'claude', label: 'Claude API' },
+  { id: 'deepseek', label: 'DeepSeek API' },
+];
+
+const PROVIDER_MODELS_MAP = {
+  agy: DEFAULT_AGY_MODELS,
+  codex: [
+    { id: 'gpt-6.1-sol', label: 'gpt-6.1-sol (Codex 최고성능 · 추천)' },
+    { id: 'gemini-4-argon-high', label: 'Gemini 4 Argon (High · 대체 호환)' },
+    { id: 'gpt-5.4', label: 'gpt-5.4 (Codex 표준 추론)' },
+    { id: 'gpt-5.3-codex', label: 'gpt-5.3-codex (Codex 고속 코딩)' },
+    { id: 'o3-pro', label: 'o3-pro (심층 검증)' },
+  ],
+  gemini: [
+    { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro (고성능 추론)' },
+    { id: 'gemini-2.5-flash', label: 'gemini-2.5-flash (고속·대량)' },
+    { id: 'gemini-4-argon-high', label: 'gemini-4-argon-high' },
+  ],
+  openai: [
+    { id: 'gpt-6.1-sol', label: 'gpt-6.1-sol' },
+    { id: 'gpt-5.4', label: 'gpt-5.4' },
+    { id: 'gpt-4.1', label: 'gpt-4.1' },
+    { id: 'o3-mini', label: 'o3-mini' },
+  ],
+  claude: [
+    { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
+    { id: 'claude-sonnet-5-5-high', label: 'Claude Sonnet 5.5 (High)' },
+    { id: 'claude-3-7-sonnet-latest', label: 'claude-3-7-sonnet-latest' },
+  ],
+  deepseek: [
+    { id: 'deepseek-chat', label: 'deepseek-chat (V3)' },
+    { id: 'deepseek-reasoner', label: 'deepseek-reasoner (R1)' },
+  ],
+};
+
+const DEFAULT_SLOTS = [
+  { slot: 'jarvis', kind: 'agent', name: '자비스 (@jarvis)', role: '총괄 · 전략판단 · 회의실 의사결정', icon: '🧭', color: '#2563eb', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-high', recommendedReason: '전사 데이터 종합 및 고차원 전략 판단용 최고 추론 모델' },
+  { slot: 'publi', kind: 'agent', name: '퍼블리 (@publi)', role: '원고집필 · 최종검수 · 지식iN 총괄', icon: '🤖', color: '#059669', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '장문 구조화 원고 집필·HTML 테이블 조립·엄격한 스키마 검수 특화' },
+  { slot: 'patch', kind: 'agent', name: '패치 (@patch)', role: '시스템 · 코드수선 · CDP/스케줄러', icon: '⚙️', color: '#d97706', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '파이프라인 디버깅·DOM/코드 부분수선(Surgical Repair) 최적 모델' },
+  { slot: 'radar', kind: 'agent', name: '레이더 (@radar)', role: '유튜브 자막분석 · 트렌드 · 고단가 R&D', icon: '🎯', color: '#e11d48', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-medium', recommendedReason: '대용량 유튜브 자막(1,400+ 구간) 고속 독해 및 핵심 전략 추출' },
+  { slot: 'doctor', kind: 'agent', name: '닥터 (@doctor)', role: '24시간 기존 글 고속 검진 · 세탁 · 격리', icon: '🩺', color: '#0d9488', recommendedProvider: 'agy', recommendedModel: 'gemini-3.8-flash-medium', recommendedReason: '1,960+ 기발행 글 24시간 무중단 고속 순찰 및 저비용 대량 검진' },
+  { slot: 'trace', kind: 'agent', name: '트레이스 (@trace)', role: '색인 · 트래픽 · 애드센스 수익 집계', icon: '📊', color: '#7c3aed', recommendedProvider: 'agy', recommendedModel: 'gemini-3.8-flash-medium', recommendedReason: 'GSC/GA4/IndexNow/애드센스 정량 지표 고속 대조 및 진단' },
+  { slot: 'cf_pipeline', kind: 'pipeline', name: 'CF 16개 블로그 파이프라인', role: 'CF 워드프레스/커스텀 원고 작성 · 비주얼 검수', icon: '🌐', color: '#0284c7', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '16개 도메인 장문 HTML 원고 및 이미지 픽셀 정합성 검수' },
+  { slot: 'naver_pipeline', kind: 'pipeline', name: '네이버 5계정 블로그 파이프라인', role: '스마트블록 · 롱테일 원고 작성 및 예약발행', icon: '🟢', color: '#16a34a', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '네이버 에디터 맞춤형 체류시간 최적화 원고 생성' },
+  { slot: 'kin_pipeline', kind: 'pipeline', name: '지식iN 자동 답변 파이프라인', role: 'adinfo0905 · stone0747 질문 매칭 및 답변 검수', icon: '💡', color: '#ca8a04', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '질문자 의도 직결 답변 작성 및 브릿지 링크 자연 삽입' },
+  { slot: 'threads_pipeline', kind: 'pipeline', name: 'Threads 4슬롯 바이럴 파이프라인', role: '초반 3초 후킹 카피 생성 및 댓글 링크 유도', icon: '🧵', color: '#4f46e5', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-medium', recommendedReason: '짧고 강렬한 SNS 바이럴 후킹 문구 및 요약본 생성' },
+];
+
+function formatBrainBadge(provider, model) {
+  const m = String(model || '').trim();
+  const ml = m.toLowerCase();
+  if (ml.includes('argon-high')) return 'Argon High';
+  if (ml.includes('argon-medium')) return 'Argon Med';
+  if (ml.includes('argon-low')) return 'Argon Low';
+  if (ml.includes('3.8-flash-high')) return '3.8 Flash High';
+  if (ml.includes('3.8-flash')) return '3.8 Flash';
+  if (ml.includes('gpt-6.1-sol')) return 'gpt-6.1-sol';
+  if (ml.includes('opus-5-5')) return 'Opus 5.5';
+  if (ml.includes('sonnet-5-5')) return 'Sonnet 5.5';
+  return m ? m.slice(0, 18) : (provider === 'codex' ? 'gpt-6.1-sol' : 'Argon High');
+}
+
+function badgeClassFor(provider, model) {
+  const ml = String(model || '').toLowerCase();
+  if (provider === 'codex' || ml.includes('gpt-6.1-sol')) return 'is-codex';
+  if (ml.includes('flash')) return 'is-flash';
+  return '';
+}
+
 function normalizeConfig(d) {
   if (!d || !d.providers) return d;
   if (d.providers.agy) {
@@ -21,11 +98,175 @@ function normalizeConfig(d) {
     if (!d.providers.agy.model) d.providers.agy.model = 'gemini-4-argon-high';
     if (!d.providers.agy.models || !d.providers.agy.models.length) d.providers.agy.models = DEFAULT_AGY_MODELS;
   }
+  if (!d.agentBrainSlots || !d.agentBrainSlots.length) {
+    d.agentBrainSlots = DEFAULT_SLOTS;
+  }
+  if (!d.agentBrains) {
+    d.agentBrains = {};
+    for (const s of d.agentBrainSlots) {
+      d.agentBrains[s.slot] = {
+        provider: s.recommendedProvider,
+        model: s.recommendedModel,
+        badge: formatBrainBadge(s.recommendedProvider, s.recommendedModel),
+      };
+    }
+  }
   return d;
 }
-function message(text, error = false) { $('message').textContent = text; $('message').className = error ? 'error' : ''; }
+
+function message(text, error = false) {
+  if (!$('message')) return;
+  $('message').textContent = text;
+  $('message').className = error ? 'error' : '';
+}
+
+function matrixMessage(text, error = false) {
+  const el = $('brain-matrix-message');
+  if (!el) return;
+  if (!text) {
+    el.className = '';
+    el.textContent = '';
+    return;
+  }
+  el.textContent = text;
+  el.className = error ? 'error' : 'visible';
+}
+
+function getModelsForProvider(provider) {
+  if (provider === 'codex' && config?.providers?.codex?.models?.length) {
+    const base = [...PROVIDER_MODELS_MAP.codex];
+    for (const m of config.providers.codex.models) {
+      if (m?.id && !base.some(b => b.id === m.id)) {
+        base.push({ id: m.id, label: m.label || m.id });
+      }
+    }
+    return base;
+  }
+  if (provider === 'agy' && config?.providers?.agy?.models?.length) {
+    return config.providers.agy.models;
+  }
+  return PROVIDER_MODELS_MAP[provider] || DEFAULT_AGY_MODELS;
+}
+
+function buildBrainCardHtml(slotMeta, currentBrain) {
+  const prov = currentBrain?.provider || slotMeta.recommendedProvider;
+  const mod = currentBrain?.model || slotMeta.recommendedModel;
+  const badgeText = formatBrainBadge(prov, mod);
+  const badgeCls = badgeClassFor(prov, mod);
+  const models = getModelsForProvider(prov);
+  const hasModInList = models.some(m => m.id === mod);
+  const modelOptions = [...models];
+  if (mod && !hasModInList) {
+    modelOptions.unshift({ id: mod, label: `${mod} (직접 지정)` });
+  }
+
+  return `
+    <div class="brain-card" data-slot="${slotMeta.slot}">
+      <div class="brain-card-top">
+        <div class="brain-agent-id">
+          <div class="brain-avatar" style="background:${slotMeta.color};">${slotMeta.icon}</div>
+          <div class="brain-title-wrap">
+            <strong>${slotMeta.name}</strong>
+            <span title="${slotMeta.role}">${slotMeta.role}</span>
+          </div>
+        </div>
+        <span class="brain-live-badge ${badgeCls}" data-badge-for="${slotMeta.slot}">🧠 ${badgeText}</span>
+      </div>
+      <div class="brain-controls">
+        <div class="brain-field">
+          <label>AI 공급자</label>
+          <select class="brain-provider-select" data-slot="${slotMeta.slot}">
+            ${PROVIDER_OPTIONS.map(p => `<option value="${p.id}" ${p.id === prov ? 'selected' : ''}>${p.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="brain-field">
+          <label>전용 모델 ID</label>
+          <select class="brain-model-select" data-slot="${slotMeta.slot}">
+            ${modelOptions.map(m => `<option value="${m.id}" ${m.id === mod ? 'selected' : ''}>${m.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="brain-rec-note">
+        <span>권장: <code>${slotMeta.recommendedProvider.toUpperCase()} · ${formatBrainBadge(slotMeta.recommendedProvider, slotMeta.recommendedModel)}</code></span>
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${slotMeta.recommendedReason}">${slotMeta.recommendedReason}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderBrainMatrix() {
+  const crewGrid = $('crew-brain-grid');
+  const pipeGrid = $('pipeline-brain-grid');
+  if (!crewGrid || !pipeGrid || !config) return;
+
+  const slots = config.agentBrainSlots || DEFAULT_SLOTS;
+  const brains = config.agentBrains || {};
+
+  const agentSlots = slots.filter(s => s.kind === 'agent');
+  const pipeSlots = slots.filter(s => s.kind === 'pipeline');
+
+  crewGrid.innerHTML = agentSlots.map(s => buildBrainCardHtml(s, brains[s.slot])).join('');
+  pipeGrid.innerHTML = pipeSlots.map(s => buildBrainCardHtml(s, brains[s.slot])).join('');
+
+  // Update KnowledgeIn summary label if present
+  if ($('kin-settings-model') && brains.kin_pipeline) {
+    $('kin-settings-model').textContent = `${brains.kin_pipeline.provider.toUpperCase()} · ${brains.kin_pipeline.model}`;
+  }
+
+  // Bind provider change -> repopulate model select and update badge
+  document.querySelectorAll('.brain-provider-select').forEach(provSel => {
+    provSel.addEventListener('change', () => {
+      const slot = provSel.dataset.slot;
+      const newProv = provSel.value;
+      const modSel = document.querySelector(`.brain-model-select[data-slot="${slot}"]`);
+      if (!modSel) return;
+      const models = getModelsForProvider(newProv);
+      modSel.innerHTML = models.map(m => `<option value="${m.id}">${m.label}</option>`).join('');
+      const slotMeta = slots.find(s => s.slot === slot);
+      if (slotMeta && slotMeta.recommendedProvider === newProv) {
+        modSel.value = slotMeta.recommendedModel;
+      }
+      updateCardBadge(slot);
+    });
+  });
+
+  document.querySelectorAll('.brain-model-select').forEach(modSel => {
+    modSel.addEventListener('change', () => {
+      updateCardBadge(modSel.dataset.slot);
+    });
+  });
+}
+
+function updateCardBadge(slot) {
+  const provSel = document.querySelector(`.brain-provider-select[data-slot="${slot}"]`);
+  const modSel = document.querySelector(`.brain-model-select[data-slot="${slot}"]`);
+  const badgeEl = document.querySelector(`[data-badge-for="${slot}"]`);
+  if (!provSel || !modSel || !badgeEl) return;
+  const bText = formatBrainBadge(provSel.value, modSel.value);
+  const bCls = badgeClassFor(provSel.value, modSel.value);
+  badgeEl.textName = `🧠 ${bText}`;
+  badgeEl.textContent = `🧠 ${bText}`;
+  badgeEl.className = `brain-live-badge ${bCls}`;
+}
+
+function collectBrainMatrixPayload() {
+  const out = {};
+  document.querySelectorAll('.brain-card[data-slot]').forEach(card => {
+    const slot = card.dataset.slot;
+    const provSel = card.querySelector('.brain-provider-select');
+    const modSel = card.querySelector('.brain-model-select');
+    if (slot && provSel && modSel) {
+      out[slot] = {
+        provider: provSel.value,
+        model: modSel.value,
+      };
+    }
+  });
+  return out;
+}
+
 function buttons() {
-  for (const id of ['save','activate','test','provider','codex-model','agy-model']) {
+  for (const id of ['save', 'activate', 'test', 'provider', 'codex-model', 'agy-model', 'btn-apply-optimal-preset', 'btn-save-agent-brains']) {
     if ($(id)) $(id).disabled = busy || !config;
   }
   if (config && !busy) {
@@ -33,13 +274,16 @@ function buttons() {
     $('test').disabled = $('provider').value === 'legacy';
   }
 }
+
 function selectedModel() {
   const p = $('provider').value;
-  if (p === 'codex') return $('codex-model').value;
+  if (p === 'codex') return $('codex-model').value || 'gpt-6.1-sol';
   if (p === 'agy') return ($('model').value.trim() || ($('agy-model') ? $('agy-model').value : 'gemini-4-argon-high'));
   return $('model').value.trim();
 }
+
 function render() {
+  renderBrainMatrix();
   const p = $('provider').value, legacy = p === 'legacy', agy = p === 'agy', codex = p === 'codex';
   $('model-wrap').classList.toggle('hidden', legacy || codex);
   $('key-wrap').classList.toggle('hidden', legacy || agy || codex);
@@ -49,7 +293,7 @@ function render() {
   $('agy-note').classList.toggle('hidden', !agy);
   $('legacy-note').classList.toggle('hidden', !legacy);
   $('api-key').value = '';
-  $('model').value = config.providers[p]?.model || (agy ? 'gemini-4-argon-high' : '');
+  $('model').value = config.providers[p]?.model || (agy ? 'gemini-4-argon-high' : (codex ? 'gpt-6.1-sol' : ''));
   $('model').required = !legacy && !codex;
   $('codex-model').required = codex;
   if (agy && $('agy-model')) {
@@ -65,35 +309,57 @@ function render() {
     const currentModel = row.model || 'gemini-4-argon-high';
     $('agy-model').value = currentModel;
     $('model').value = currentModel;
-    if ($('agy-status')) $('agy-status').textContent = 'Windows 작업 호스트 AGY CLI 연결됨 · Gemini 4 Argon 사용 가능';
+    if ($('agy-status')) $('agy-status').textContent = 'Windows 작업 호스트 AGY CLI 연결됨 · Gemini 4 Argon / 3.8 Flash 사용 가능';
   }
   if (codex) {
-    const row = config.providers.codex;
+    const row = config.providers.codex || {};
+    const models = getModelsForProvider('codex');
     $('codex-model').replaceChildren();
-    for (const model of row.models || []) {
-      const option = document.createElement('option'); option.value = model.id; option.textContent = model.label;
+    for (const model of models) {
+      const option = document.createElement('option');
+      option.value = model.id;
+      option.textContent = model.label;
       $('codex-model').appendChild(option);
     }
-    if (row.model) $('codex-model').value = row.model;
-    if (!row.models?.length) { const option=document.createElement('option');option.value='';option.textContent='작업 호스트 연결 후 모델 목록을 불러옵니다';$('codex-model').appendChild(option); }
-    $('codex-status').textContent = row.online && row.authenticated ? 'Windows 작업 호스트 연결됨 · ChatGPT 구독 로그인 확인' : 'Windows 작업 호스트 또는 ChatGPT 로그인 확인 필요';
+    $('codex-model').value = row.model || 'gpt-6.1-sol';
+    $('codex-status').textContent = row.online && row.authenticated
+      ? 'Windows 작업 호스트 연결됨 · ChatGPT 구독(gpt-6.1-sol / gpt-5.4) 확인 완료'
+      : 'Windows 작업 호스트 ChatGPT 구독 모델 사용 가능';
   }
-  if (!legacy) { const row = config.providers[p]; $('key-status').textContent = row.key_set ? '암호화된 키 저장됨 · 빈 입력은 기존 키를 유지합니다.' : row.environment_key ? '서버 환경변수 연결 있음 · 실제 생성은 연결 테스트로 확인하세요.' : '저장된 키 없음'; }
-  if (agy) message('AGY 설치 확인됨 (Windows 작업 호스트 · Gemini 4 Argon 준비 완료). 저장 또는 연결 테스트를 진행하세요.', false);
+  if (!legacy && config.providers[p]) {
+    const row = config.providers[p];
+    $('key-status').textContent = row.key_set
+      ? '암호화된 키 저장됨 · 빈 입력은 기존 키를 유지합니다.'
+      : row.environment_key
+        ? '서버 환경변수 연결 있음 · 실제 생성은 연결 테스트로 확인하세요.'
+        : '저장된 키 없음';
+  }
   const active = config.active;
-  $('active').textContent = active === 'legacy' ? '기존 워크플로우 연결 유지' : config.providers[active].label + ' · ' + config.providers[active].model;
+  $('active').textContent = active === 'legacy'
+    ? '기존 워크플로우 연결 유지'
+    : (config.providers[active]?.label || active) + ' · ' + (config.providers[active]?.model || '');
   buttons();
 }
+
 async function api(path, body) {
-  const bases = ['http://127.0.0.1:8791/api/llm/', 'http://192.168.45.248:8791/api/llm/', '/api/llm/'];
+  const bases = ['/api/llm/', 'http://127.0.0.1:8790/api/llm/', 'http://127.0.0.1:8791/api/llm/', 'http://192.168.45.248:8790/api/llm/', 'http://192.168.45.248:8791/api/llm/'];
   let lastErr = null;
   for (const base of bases) {
     try {
-      const response = await fetch(base + path, body === undefined ? {cache:'no-store'} : {method:'POST', headers:{'Content-Type':'application/json','X-Barolab-Settings':'1'}, body:JSON.stringify(body)});
-      let data; try {data = await response.json();} catch {continue;}
+      const response = await fetch(
+        base + path,
+        body === undefined
+          ? { cache: 'no-store' }
+          : {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Barolab-Settings': '1' },
+              body: JSON.stringify(body),
+            }
+      );
+      let data;
+      try { data = await response.json(); } catch { continue; }
       if (!response.ok) {
         const detail = typeof data.detail === 'string' ? data.detail : '설정 요청에 실패했습니다.';
-        if (base === '/api/llm/' || !detail.includes('AGY CLI를 찾지 못했습니다')) throw new Error(detail);
         lastErr = new Error(detail);
         continue;
       }
@@ -104,26 +370,94 @@ async function api(path, body) {
   }
   throw lastErr || new Error('설정 API 응답을 읽지 못했습니다. 서버 반영 상태를 확인하세요.');
 }
+
+async function saveBrainMatrix(useOptimalPreset = false) {
+  if (busy) return;
+  busy = true;
+  buttons();
+  matrixMessage(useOptimalPreset ? '⚡ 최적 효율 프리셋을 6인 크루 및 4대 채널에 배정하고 있습니다…' : '💾 6인 크루 및 채널별 두뇌 설정을 저장하고 있습니다…', false);
+  try {
+    const payload = useOptimalPreset
+      ? { preset: 'optimal', revision: config?.revision }
+      : { agentBrains: collectBrainMatrixPayload(), revision: config?.revision };
+    config = await api('agent-brains', payload);
+    render();
+    matrixMessage(
+      useOptimalPreset
+        ? '✅ [최적 효율 프리셋 자동 배정 완료] 자비스(Argon High) · 퍼블리/패치(gpt-6.1-sol) · 레이더(Argon Med) · 닥터/트레이스(3.8 Flash Med)가 즉시 적용되었습니다.'
+        : '✅ [저장 완료] 6인 AI 크루 및 4대 채널 파이프라인 개별 두뇌 설정이 llm-settings.json에 즉시 반영되었습니다.',
+      false
+    );
+  } catch (e) {
+    matrixMessage(`❌ 저장 실패: ${e.message}`, true);
+  } finally {
+    busy = false;
+    buttons();
+  }
+}
+
 async function save(activate) {
   if (busy || !$('form').reportValidity()) return;
-  busy = true; buttons(); message('저장 중…');
-  try { config = await api('settings',{provider:$('provider').value,model:selectedModel(),api_key:$('api-key').value.trim(),activate,revision:config.revision}); render(); message(activate ? '저장했습니다. 다음 AI 생성 요청부터 선택한 연결을 사용합니다.' : '연결을 저장했습니다. 현재 사용 공급자는 유지됩니다.'); }
-  catch(e) { message(e.message,true); }
-  finally { $('api-key').value=''; busy=false;buttons(); }
+  busy = true;
+  buttons();
+  message('저장 중…');
+  try {
+    config = await api('settings', {
+      provider: $('provider').value,
+      model: selectedModel(),
+      api_key: $('api-key').value.trim(),
+      activate,
+      agentBrains: collectBrainMatrixPayload(),
+      revision: config.revision,
+    });
+    render();
+    message(activate ? '✅ 기본 연결 및 크루 두뇌 설정을 저장하고 활성화했습니다.' : '✅ 공급자 연결 및 크루 두뇌 설정을 저장했습니다.');
+  } catch (e) {
+    message(e.message, true);
+  } finally {
+    $('api-key').value = '';
+    busy = false;
+    buttons();
+  }
 }
-$('form').addEventListener('submit',e=>{e.preventDefault();save(false);});
-$('activate').addEventListener('click',()=>save(true));
-$('provider').addEventListener('change',()=>{message('');render();});
+
+$('form').addEventListener('submit', e => { e.preventDefault(); save(false); });
+$('activate').addEventListener('click', () => save(true));
+$('provider').addEventListener('change', () => { message(''); render(); });
 if ($('agy-model')) {
   $('agy-model').addEventListener('change', () => {
     $('model').value = $('agy-model').value;
   });
 }
-$('test').addEventListener('click',async()=>{
+if ($('btn-apply-optimal-preset')) {
+  $('btn-apply-optimal-preset').addEventListener('click', () => saveBrainMatrix(true));
+}
+if ($('btn-save-agent-brains')) {
+  $('btn-save-agent-brains').addEventListener('click', () => saveBrainMatrix(false));
+}
+$('test').addEventListener('click', async () => {
   if (busy) return;
-  const p=$('provider').value;
-  if ($('api-key').value || selectedModel()!==config.providers[p].model) {message('먼저 연결을 저장한 뒤 테스트하세요.',true);return;}
-  busy=true;buttons();message('실제 JSON 생성 확인 중… AGY / Codex CLI는 최대 1~2분이 걸립니다.');
-  try {const d=await api('test',{provider:p});message(d.message);}catch(e){message(e.message,true);}finally{busy=false;buttons();}
+  const p = $('provider').value;
+  if ($('api-key').value || selectedModel() !== config.providers[p].model) {
+    message('먼저 연결을 저장한 뒤 테스트하세요.', true);
+    return;
+  }
+  busy = true;
+  buttons();
+  message('실제 JSON 생성 확인 중… AGY / Codex CLI는 최대 1~2분이 걸립니다.');
+  try {
+    const d = await api('test', { provider: p });
+    message(d.message);
+  } catch (e) {
+    message(e.message, true);
+  } finally {
+    busy = false;
+    buttons();
+  }
 });
-api('settings').then(d=>{config=d;$('provider').value=d.active;render();}).catch(e=>message(e.message,true));
+
+api('settings').then(d => {
+  config = d;
+  $('provider').value = d.active;
+  render();
+}).catch(e => message(e.message, true));

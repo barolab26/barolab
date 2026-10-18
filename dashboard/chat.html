@@ -106,13 +106,18 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 14px;
+      padding: 8px 12px;
       cursor: pointer;
       border-bottom: 1px solid #f1f5f9;
       transition: all 0.15s ease;
       position: relative;
+      border-left: 3px solid transparent;
     }
     .crew-card:hover { background: #f8fafc; }
+    .crew-card.active-filter {
+      background: #eff6ff;
+      border-left-color: #2563eb;
+    }
     .crew-card.is-typing {
       background: #eff6ff;
       border-left: 3px solid #2563eb;
@@ -133,14 +138,15 @@
       position: absolute;
       right: -2px;
       bottom: -2px;
-      width: 9px;
-      height: 9px;
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
       background: #10b981;
       border: 2px solid #ffffff;
+      transition: background 0.25s ease;
     }
     .crew-card.is-typing .crew-live-dot {
-      background: #f59e0b;
+      background: #f59e0b !important;
       animation: pulseDot 1s infinite ease-in-out;
     }
     @keyframes pulseDot {
@@ -148,19 +154,58 @@
       50% { transform: scale(1.35); opacity: 0.7; }
     }
     .crew-info { flex: 1; min-width: 0; }
-    .crew-info strong { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #0f172a; }
-    .crew-info small {
+    .crew-info strong {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12.5px;
+      color: #0f172a;
+      flex-wrap: wrap;
+    }
+    .crew-info small.crew-live-status {
       display: block;
       font-size: 11px;
-      color: #64748b;
+      color: #334155;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 1px;
+      margin-top: 2px;
     }
-    .crew-card.is-typing .crew-info small {
+    .crew-card.is-typing .crew-info small.crew-live-status {
       color: #1d4ed8;
-      font-weight: 700;
+      font-weight: 800;
+    }
+    .brain-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .crew-mention-mini {
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.12s;
+    }
+    .crew-mention-mini:hover {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: #1d4ed8;
     }
 
     .archive-list {
@@ -195,6 +240,134 @@
       position: relative;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
     }
+
+    /* Smart Filter Bar (Per-Agent Filter Tabs + CEO Direct Filter Toggle) */
+    .chat-smart-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .agent-filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .agent-filter-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+    .agent-filter-tab:hover {
+      border-color: #93c5fd;
+      color: #1e40af;
+      background: #eff6ff;
+    }
+    .agent-filter-tab.active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+    }
+    .agent-filter-tab .tab-cnt {
+      padding: 0 5px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      background: rgba(148, 163, 184, 0.22);
+      color: inherit;
+    }
+    .agent-filter-tab.active .tab-cnt {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+    }
+    .filter-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .ceo-direct-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .ceo-direct-toggle-btn:hover {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #1e40af;
+    }
+    .ceo-direct-toggle-btn.active {
+      background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+      border-color: #1d4ed8;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+    .ceo-toggle-pill {
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      background: #e2e8f0;
+      color: #475569;
+    }
+    .ceo-direct-toggle-btn.active .ceo-toggle-pill {
+      background: #ffffff;
+      color: #1d4ed8;
+    }
+    .msg-row.is-hidden-by-filter {
+      display: none !important;
+    }
+    .msg-row.workstream-row .msg-bubble {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-left: 3px solid #0ea5e9;
+    }
+    .workstream-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      border: 1px solid #7dd3fc;
+      color: #0369a1;
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+    .inline-mention-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 6px;
+      border-radius: 6px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-weight: 800;
+      font-size: 12.5px;
+    }
+
     .room-stream,
     .chat-messages {
       flex: 1 1 0%;
@@ -570,8 +743,8 @@
       <!-- Left Rail: 6 Crew Agents + Archived Meetings (Fixed height) -->
       <aside class="crew-rail">
         <div class="rail-section-title">
-          <span>6인 전담 AI 크루 (클릭 시 @멘션)</span>
-          <span style="font-size:10.5px; color:#10b981; font-weight:800;">● ONLINE</span>
+          <span>6인 전담 AI 크루 (클릭 시 필터 · @멘션)</span>
+          <span style="font-size:10.5px; color:#10b981; font-weight:800;">● 5초 실측</span>
         </div>
         <div id="crew-list"></div>
 
@@ -584,6 +757,46 @@
 
       <!-- Center: Messenger Chat Stream (Internal Scroll Only) -->
       <section class="room-panel">
+        <!-- Smart Filter Bar: Per-Agent Filter Tabs + CEO Direct Filter Toggle -->
+        <div class="chat-smart-filter-bar" id="chat-smart-filter-bar">
+          <div class="agent-filter-tabs" id="agent-filter-tabs" role="tablist" aria-label="직원별 대화 필터">
+            <button type="button" class="agent-filter-tab active" data-agent-filter="all">
+              <span>전체 크루</span>
+              <span class="tab-cnt" data-cnt-for="all">0</span>
+            </button>
+            <button type="button" class="agent-filter-tab" data-agent-filter="jarvis">
+              <span>🧭 @자비스</span>
+              <span class="tab-cnt" data-cnt-for="jarvis">0</span>
+            </button>
+            <button type="button" class="agent-filter-tab" data-agent-filter="publi">
+              <span>🤖 @퍼블리</span>
+              <span class="tab-cnt" data-cnt-for="publi">0</span>
+            </button>
+            <button type="button" class="agent-filter-tab" data-agent-filter="trace">
+              <span>📊 @트레이스</span>
+              <span class="tab-cnt" data-cnt-for="trace">0</span>
+            </button>
+            <button type="button" class="agent-filter-tab" data-agent-filter="patch">
+              <span>⚙️ @패치</span>
+              <span class="tab-cnt" data-cnt-for="patch">0</span>
+            </button>
+            <button type="button" class="agent-filter-tab" data-agent-filter="radar">
+              <span>🎯 @레이더</span>
+              <span class="tab-cnt" data-cnt-for="radar">0</span>
+            </button>
+            <button type="button" class="agent-filter-tab" data-agent-filter="doctor">
+              <span>🩺 @닥터</span>
+              <span class="tab-cnt" data-cnt-for="doctor">0</span>
+            </button>
+          </div>
+          <div class="filter-right-controls">
+            <button type="button" class="ceo-direct-toggle-btn" id="btn-ceo-only-filter" aria-pressed="false" title="에이전트끼리의 자율 업무 브리핑을 숨기고 대표님(윤대표-CEO)이 쓴 메시지와 그에 대한 직접 답변만 표시합니다">
+              <span>📌 내 지시·답변만 보기</span>
+              <span class="ceo-toggle-pill" id="ceo-only-pill">OFF</span>
+            </button>
+          </div>
+        </div>
+
         <div class="room-stream chat-messages" id="room-stream"></div>
 
         <!-- Real-Time Typing Indicator Bubble Zone -->
@@ -622,24 +835,36 @@
 <script>
 (() => {
   const AGENT_STYLE = {
-    jarvis: { name: '자비스', badge: '운영총괄', color: '#2563eb', short: 'J', icon: '🧭', title: '운영총괄 AI' },
-    doctor: { name: '닥터', badge: '콘텐츠감사', color: '#0d9488', short: 'D', icon: '🩺', title: '콘텐츠 감사·재생 전담' },
-    publi:  { name: '퍼블리', badge: '발행검수', color: '#059669', short: 'P', icon: '🤖', title: '블로그 발행·예약 검수 전문가' },
-    trace:  { name: '트레이스', badge: '성과분석', color: '#7c3aed', short: 'T', icon: '📊', title: '색인·트래픽·수익 분석 전문가' },
-    patch:  { name: '패치', badge: '자동화개발', color: '#d97706', short: 'C', icon: '⚙️', title: '대시보드·파이프라인 개발·유지보수' },
-    radar:  { name: '레이더', badge: '수익전략', color: '#e11d48', short: 'R', icon: '🎯', title: '트렌드·키워드·수익 허브 발굴' },
+    jarvis: { name: '자비스', badge: '운영총괄', color: '#2563eb', short: 'J', icon: '🧭', title: '운영총괄 AI', defaultBrain: 'Argon High' },
+    doctor: { name: '닥터', badge: '콘텐츠감사', color: '#0d9488', short: 'D', icon: '🩺', title: '콘텐츠 감사·재생 전담', defaultBrain: '3.8 Flash' },
+    publi:  { name: '퍼블리', badge: '발행검수', color: '#059669', short: 'P', icon: '🤖', title: '블로그 발행·예약 검수 전문가', defaultBrain: 'gpt-6.1-sol' },
+    trace:  { name: '트레이스', badge: '성과분석', color: '#7c3aed', short: 'T', icon: '📊', title: '색인·트래픽·수익 분석 전문가', defaultBrain: '3.8 Flash' },
+    patch:  { name: '패치', badge: '자동화개발', color: '#d97706', short: 'C', icon: '⚙️', title: '대시보드·파이프라인 개발·유지보수', defaultBrain: 'gpt-6.1-sol' },
+    radar:  { name: '레이더', badge: '수익전략', color: '#e11d48', short: 'R', icon: '🎯', title: '트렌드·키워드·수익 허브 발굴', defaultBrain: 'Argon Med' },
+  };
+
+  const ALIAS_TO_SLUG = {
+    jarvis: 'jarvis', '자비스': 'jarvis',
+    publi: 'publi', '퍼블리': 'publi',
+    trace: 'trace', '트레이스': 'trace',
+    patch: 'patch', '패치': 'patch',
+    radar: 'radar', '레이더': 'radar',
+    doctor: 'doctor', '닥터': 'doctor',
   };
 
   let resolvedApiBase = '';
   let lastEventSeq = 0;
   let sseSource = null;
   const activeTypingMap = new Map();
+  const agentBrainBadgeMap = new Map();
 
   // =========================================================================
-  // SPEC #2: Set-based Message ID Deduplication (`renderedMessageIds`)
-  // - Prevents any existing message.id from ever being appended twice!
+  // SPEC #2 & #3: Set-based Message ID Deduplication + Smart Filter State
   // =========================================================================
   const renderedMessageIds = new Set();
+  const messageStore = new Map();
+  let activeAgentFilter = 'all';
+  let ceoOnlyFilterActive = false;
 
   let pinnedUserRowId = null;
   let unreadBelowCount = 0;
@@ -652,12 +877,25 @@
     return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   }
 
+  function extractMentionsFromText(text) {
+    const out = new Set();
+    const raw = String(text || '');
+    const regex = /@(jarvis|publi|trace|patch|radar|doctor|자비스|퍼블리|트레이스|패치|레이더|닥터)/gi;
+    let match;
+    while ((match = regex.exec(raw)) !== null) {
+      const slug = ALIAS_TO_SLUG[match[1].toLowerCase()];
+      if (slug) out.add(slug);
+    }
+    return Array.from(out);
+  }
+
   function formatBodyText(text) {
     let safe = escapeHtml(text);
     safe = safe.replace(/\*\*(\[실행 완료:[^\]]+\])\*\*/g, '<span class="exec-tool-badge">⚡ $1</span>');
     safe = safe.replace(/(^|\n)(\[실행 완료:[^\]]+\])/g, '$1<span class="exec-tool-badge">⚡ $2</span>');
     safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     safe = safe.replace(/`([^`]+)`/g, '<code style="background:#f1f5f9; padding:1px 5px; border-radius:4px; font-size:12.5px; color:#0f172a;">$1</code>');
+    safe = safe.replace(/@(jarvis|publi|trace|patch|radar|doctor|자비스|퍼블리|트레이스|패치|레이더|닥터)/gi, '<span class="inline-mention-pill">@$1</span>');
     safe = safe.replace(/\[([^\]]+)\]\((?:&lt;)?(?:\/\/otns\/yoonlab\/10_Project\/BaroLab\/)?vault\/([^)&>]+)(?:&gt;)?\)/g,
       '<a href="memory.html?rel=$2" class="artifact-chip">📄 $1</a>');
     return safe;
@@ -737,6 +975,144 @@
       unreadBelowCount += 1;
       updateFloatingNewMsgButton();
     }
+  }
+
+  // =========================================================================
+  // SPEC #3: Smart Filter Engine (Per-Agent Filter + CEO Direct Filter)
+  // =========================================================================
+  function isMessageWorkstream(m) {
+    if (!m || m.who === 'user') return false;
+    const mid = String(m.id || '');
+    return Boolean(
+      m.isWorkstream === true ||
+      m.msgKind === 'workstream' ||
+      m.replyToCeo === false ||
+      mid.startsWith('ws-') ||
+      mid.startsWith('msg-doctor-patrol-') ||
+      m.eventType === 'pipeline_workstream' ||
+      m.eventType === 'content_doctor_patrol'
+    );
+  }
+
+  function doesMessageInvolveAgent(m, slug) {
+    if (!m || !slug || slug === 'all') return true;
+    if (m.who === slug) return true;
+    if (m.targetAgent === slug) return true;
+    if (Array.isArray(m.mentionedAgents) && m.mentionedAgents.includes(slug)) return true;
+    const mentions = extractMentionsFromText(m.text || '');
+    if (mentions.includes(slug)) return true;
+    if (m.taskTracker && m.taskTracker.handoff) {
+      const handoffMentions = extractMentionsFromText(m.taskTracker.handoff);
+      if (handoffMentions.includes(slug)) return true;
+    }
+    return false;
+  }
+
+  function doesMessageMatchFilters(m, agentFilter, ceoOnly) {
+    if (!m) return false;
+    const isWs = isMessageWorkstream(m);
+    if (ceoOnly && isWs) {
+      return false;
+    }
+    if (agentFilter && agentFilter !== 'all') {
+      if (doesMessageInvolveAgent(m, agentFilter)) return true;
+      // Also include user message if the immediately following agent reply was from `agentFilter`
+      if (m.who === 'user' && m._repliedBySlugs && m._repliedBySlugs.has(agentFilter)) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function recomputeUserReplyLinks() {
+    let lastUserMsg = null;
+    for (const m of messageStore.values()) {
+      if (m.who === 'user') {
+        m._repliedBySlugs = new Set(extractMentionsFromText(m.text || ''));
+        lastUserMsg = m;
+      } else if (lastUserMsg && !isMessageWorkstream(m)) {
+        lastUserMsg._repliedBySlugs.add(m.who);
+      }
+    }
+  }
+
+  function applyChatFilters() {
+    recomputeUserReplyLinks();
+
+    // Update counts on tabs
+    const counts = { all: 0, jarvis: 0, publi: 0, trace: 0, patch: 0, radar: 0, doctor: 0 };
+    for (const m of messageStore.values()) {
+      if (doesMessageMatchFilters(m, 'all', ceoOnlyFilterActive)) {
+        counts.all += 1;
+      }
+      for (const slug of ['jarvis', 'publi', 'trace', 'patch', 'radar', 'doctor']) {
+        if (doesMessageMatchFilters(m, slug, ceoOnlyFilterActive)) {
+          counts[slug] += 1;
+        }
+      }
+    }
+
+    document.querySelectorAll('.agent-filter-tab').forEach(tab => {
+      const slug = tab.dataset.agentFilter || 'all';
+      tab.classList.toggle('active', slug === activeAgentFilter);
+      const cntEl = tab.querySelector('[data-cnt-for]');
+      if (cntEl && typeof counts[slug] === 'number') {
+        cntEl.textContent = String(counts[slug]);
+      }
+    });
+
+    document.querySelectorAll('.crew-card').forEach(card => {
+      card.classList.toggle('active-filter', card.dataset.slug === activeAgentFilter);
+    });
+
+    const ceoBtn = document.getElementById('btn-ceo-only-filter');
+    const ceoPill = document.getElementById('ceo-only-pill');
+    if (ceoBtn) {
+      ceoBtn.classList.toggle('active', ceoOnlyFilterActive);
+      ceoBtn.setAttribute('aria-pressed', ceoOnlyFilterActive ? 'true' : 'false');
+    }
+    if (ceoPill) {
+      ceoPill.textContent = ceoOnlyFilterActive ? 'ON' : 'OFF';
+    }
+
+    streamEl.querySelectorAll('.msg-row[data-msg-id]').forEach(rowEl => {
+      const mid = rowEl.dataset.msgId;
+      const m = messageStore.get(mid);
+      const visible = m ? doesMessageMatchFilters(m, activeAgentFilter, ceoOnlyFilterActive) : true;
+      rowEl.classList.toggle('is-hidden-by-filter', !visible);
+    });
+  }
+
+  function setAgentFilter(slug) {
+    if (!slug || slug === 'all') {
+      activeAgentFilter = 'all';
+    } else {
+      activeAgentFilter = (activeAgentFilter === slug) ? 'all' : slug;
+    }
+    applyChatFilters();
+  }
+
+  function toggleCeoOnlyFilter() {
+    ceoOnlyFilterActive = !ceoOnlyFilterActive;
+    applyChatFilters();
+  }
+
+  document.querySelectorAll('.agent-filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.agentFilter || 'all';
+      if (target === 'all') {
+        activeAgentFilter = 'all';
+        applyChatFilters();
+      } else {
+        setAgentFilter(target);
+      }
+    });
+  });
+
+  const btnCeoOnly = document.getElementById('btn-ceo-only-filter');
+  if (btnCeoOnly) {
+    btnCeoOnly.addEventListener('click', toggleCeoOnlyFilter);
   }
 
   // =========================================================================
@@ -832,12 +1208,19 @@
     return false;
   }
 
+  function getAgentBrainBadge(m) {
+    if (m && m.brain && m.brain.badge) return m.brain.badge;
+    const slug = m ? m.who : '';
+    if (agentBrainBadgeMap.has(slug)) return agentBrainBadgeMap.get(slug);
+    return (AGENT_STYLE[slug] && AGENT_STYLE[slug].defaultBrain) || 'Argon High';
+  }
+
   function buildMessageRowHtml(m) {
     const mid = escapeHtml(m.id || `msg-${m.ts}-${m.who}`);
     if (m.who === 'user') {
       const isPinned = (pinnedUserRowId && pinnedUserRowId === (m.id || `msg-${m.ts}-${m.who}`));
       return `
-        <div class="msg-row user ${isPinned ? 'pinned-anchor' : ''}" data-msg-id="${mid}">
+        <div class="msg-row user ${isPinned ? 'pinned-anchor' : ''}" data-msg-id="${mid}" data-who="user" data-reply-to-ceo="true">
           <div class="crew-avatar" style="background:#0f172a;">윤</div>
           <div class="msg-col">
             <div class="msg-head" style="justify-content:flex-end;">
@@ -849,14 +1232,21 @@
         </div>
       `;
     }
-    const ag = AGENT_STYLE[m.who] || { name: m.who, badge: '크루', color: '#475569', short: 'A', icon: '🤖' };
+    const ag = AGENT_STYLE[m.who] || { name: m.who, badge: '크루', color: '#475569', short: 'A', icon: '🤖', defaultBrain: 'Argon High' };
+    const brainBadge = getAgentBrainBadge(m);
+    const isWs = isMessageWorkstream(m);
+    const wsTagHtml = isWs
+      ? `<span class="workstream-tag-pill">⚡ 실시간 업무 토스</span>`
+      : '';
     return `
-      <div class="msg-row" data-msg-id="${mid}" data-agent="${escapeHtml(m.who)}">
+      <div class="msg-row ${isWs ? 'workstream-row' : ''}" data-msg-id="${mid}" data-agent="${escapeHtml(m.who)}" data-is-workstream="${isWs ? 'true' : 'false'}" data-reply-to-ceo="${isWs ? 'false' : 'true'}">
         <div class="crew-avatar" style="background:${ag.color};">${ag.short}</div>
         <div class="msg-col">
           <div class="msg-head">
             <strong style="color:${ag.color};">${escapeHtml(ag.name)}</strong>
+            <span class="brain-chip" title="현재 배정된 에이전트 두뇌(Brain) 모델">🧠 ${escapeHtml(brainBadge)}</span>
             <span style="color:#64748b; font-weight:700;">${escapeHtml(ag.badge)}</span>
+            ${wsTagHtml}
             <span style="color:#94a3b8;">${formatTime(m.ts)}</span>
           </div>
           <div class="msg-bubble">${formatBodyText(m.text)}${buildStatusLineHtml(m)}</div>
@@ -869,6 +1259,7 @@
     if (isNoiseMessage(m)) return;
     const mid = String(m.id || `msg-${m.ts}-${m.who}`);
     m.id = mid;
+    messageStore.set(mid, m);
 
     if (m.who && m.who !== 'user') {
       activeTypingMap.delete(m.who);
@@ -886,6 +1277,7 @@
           if (newEl) existingEl.replaceWith(newEl);
         }
       }
+      applyChatFilters();
       return;
     }
 
@@ -896,8 +1288,9 @@
     const rowEl = temp.firstElementChild;
     if (!rowEl) return;
     streamEl.appendChild(rowEl);
+    applyChatFilters();
 
-    if (!options.initialLoad) {
+    if (!options.initialLoad && !rowEl.classList.contains('is-hidden-by-filter')) {
       handleSmartScrollOnNewMessage(rowEl, m.who === 'user', wasNearBottom);
     }
   }
@@ -912,7 +1305,7 @@
         if (statusTextEl) statusTextEl.textContent = tInfo.typingText || '응답 작성 중...';
       } else {
         card.classList.remove('is-typing');
-        if (statusTextEl) statusTextEl.textContent = card.dataset.defaultTitle || '';
+        if (statusTextEl) statusTextEl.textContent = card.dataset.liveStatus || card.dataset.defaultTitle || '';
       }
     });
 
@@ -939,25 +1332,82 @@
 
   function renderCrewList(agents) {
     const el = document.getElementById('crew-list');
-    el.innerHTML = agents.map(a => `
-      <div class="crew-card" data-mention="@${a.slug}" data-slug="${a.slug}" data-default-title="${escapeHtml(a.title)}">
-        <div class="crew-avatar" style="background:${a.color || '#2563eb'};">
-          ${a.name.slice(0, 1)}
-          <span class="crew-live-dot"></span>
+    el.innerHTML = agents.map(a => {
+      const bBadge = a.brainBadge || (a.brain && a.brain.badge) || (AGENT_STYLE[a.slug] && AGENT_STYLE[a.slug].defaultBrain) || 'Argon High';
+      agentBrainBadgeMap.set(a.slug, bBadge);
+      const liveStatus = a.liveTaskStatus || a.title || '';
+      const dotColor = a.liveDotColor || '#10b981';
+      const isFiltered = (activeAgentFilter === a.slug);
+      return `
+        <div class="crew-card ${isFiltered ? 'active-filter' : ''}" data-mention="@${a.slug}" data-slug="${a.slug}" data-default-title="${escapeHtml(a.title)}" data-live-status="${escapeHtml(liveStatus)}" title="클릭 시 @${a.slug} 대화·보고만 필터링 (다시 클릭 시 전체 보기)">
+          <div class="crew-avatar" style="background:${a.color || '#2563eb'};">
+            ${a.name.slice(0, 1)}
+            <span class="crew-live-dot" style="background:${dotColor};"></span>
+          </div>
+          <div class="crew-info">
+            <strong>
+              <span>${escapeHtml(a.name)}</span>
+              <span class="brain-chip" data-brain-for="${escapeHtml(a.slug)}">🧠 ${escapeHtml(bBadge)}</span>
+            </strong>
+            <small class="crew-live-status">${escapeHtml(liveStatus)}</small>
+          </div>
+          <button type="button" class="crew-mention-mini" data-insert-mention="@${a.slug}" title="입력창에 @${a.slug} 멘션 넣기">@${a.slug}</button>
         </div>
-        <div class="crew-info">
-          <strong>
-            <span>${escapeHtml(a.name)}</span>
-            <span style="font-size:11px; color:${a.color}; font-weight:800;">@${a.slug}</span>
-          </strong>
-          <small class="crew-live-status">${escapeHtml(a.title)}</small>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
     el.querySelectorAll('.crew-card').forEach(card => {
-      card.addEventListener('click', () => insertMention(card.dataset.mention));
+      card.addEventListener('click', e => {
+        const mentionBtn = e.target.closest('[data-insert-mention]');
+        if (mentionBtn) {
+          e.stopPropagation();
+          insertMention(mentionBtn.dataset.insertMention);
+          return;
+        }
+        setAgentFilter(card.dataset.slug);
+      });
     });
   }
+
+  function updateCrewLiveStatusInPlace(agents) {
+    if (!Array.isArray(agents)) return;
+    agents.forEach(a => {
+      const bBadge = a.brainBadge || (a.brain && a.brain.badge);
+      if (bBadge) agentBrainBadgeMap.set(a.slug, bBadge);
+      const card = document.querySelector(`.crew-card[data-slug="${CSS.escape(a.slug)}"]`);
+      if (!card) return;
+      const liveStatus = a.liveTaskStatus || a.title || '';
+      card.dataset.liveStatus = liveStatus;
+      if (!activeTypingMap.has(a.slug)) {
+        const stEl = card.querySelector('.crew-live-status');
+        if (stEl) stEl.textContent = liveStatus;
+      }
+      const dotEl = card.querySelector('.crew-live-dot');
+      if (dotEl && a.liveDotColor) {
+        dotEl.style.background = a.liveDotColor;
+      }
+      const brainEl = card.querySelector('[data-brain-for]');
+      if (brainEl && bBadge) {
+        brainEl.textContent = `🧠 ${bBadge}`;
+      }
+    });
+  }
+
+  async function pollLiveWorkstream() {
+    try {
+      const res = await apiFetch('/api/chat/live-workstream');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.kstNow) updateKstClockDisplay(data.kstNow);
+      if (Array.isArray(data.agents)) {
+        updateCrewLiveStatusInPlace(data.agents);
+      }
+      if (Array.isArray(data.newWorkstreamMessages) && data.newWorkstreamMessages.length) {
+        data.newWorkstreamMessages.forEach(m => upsertMessageToDom(m, { allowInPlaceUpdate: false }));
+      }
+    } catch (_) {}
+  }
+  setInterval(pollLiveWorkstream, 5000);
 
   function renderArchiveList(items) {
     document.getElementById('archive-count').textContent = items.length;
@@ -1032,7 +1482,9 @@
 
     streamEl.innerHTML = '';
     renderedMessageIds.clear();
+    messageStore.clear();
     (data.messages || []).forEach(m => upsertMessageToDom(m, { initialLoad: true }));
+    applyChatFilters();
 
     if (resetScrollToBottom) {
       streamEl.scrollTop = streamEl.scrollHeight;

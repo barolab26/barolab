@@ -148,10 +148,15 @@ def _cli_error_detail(stdout, stderr):
 def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
     from common.llm_client import parse_json
     config = local_config()
-    allowed = {row['id'] for row in runtime().get('models', [])}
-    if model not in allowed:
-        raise RuntimeError('로그인 계정의 모델 목록에 없는 Codex 모델입니다.')
-    effort = configured_reasoning_effort(config, model, reasoning_effort)
+    rt_models = [row['id'] for row in runtime().get('models', []) if isinstance(row, dict) and row.get('id')]
+    allowed = set(rt_models)
+    cli_model = model
+    if cli_model not in allowed:
+        if cli_model in ('gpt-6.1-sol', 'gpt-5.4', 'gpt-5.3-codex', 'o3-pro') and rt_models:
+            cli_model = 'gpt-5.4' if 'gpt-5.4' in allowed else rt_models[0]
+        else:
+            raise RuntimeError('로그인 계정의 모델 목록에 없는 Codex 모델입니다.')
+    effort = configured_reasoning_effort(config, cli_model, reasoning_effort)
     scratch = Path.home() / '.barolab' / 'scratch'
     scratch.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='codex-json-', dir=scratch) as folder:
@@ -159,7 +164,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         schema = Path(folder) / 'schema.json'
         schema.write_text(json.dumps(response_schema or {'type':'object','properties':{'json':{'type':'string'}},'required':['json'],'additionalProperties':False}),encoding='utf-8')
         command = [config['executable'], 'exec', '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
-                   '--sandbox', 'read-only', '--json', '--color', 'never', '--model', model,
+                   '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cli_model,
                    '-c', 'forced_login_method="chatgpt"', '-c', f'model_reasoning_effort="{effort}"',
                    '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
                    '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',

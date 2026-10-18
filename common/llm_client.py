@@ -169,8 +169,12 @@ def agy_generate(prompt, model, response_schema=None):
         raise RuntimeError('AGY가 완료된 JSON 응답을 반환하지 않았습니다.') from None
 
 
-def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None):
+def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None):
     config = settings.load()
+    if agent_slot and not provider and not model_override:
+        brain = settings.get_agent_brain(agent_slot, config)
+        provider = brain.get('provider') or config['active']
+        model_override = brain.get('model') or None
     provider = provider or config['active']
     model = model_override or config['providers'].get(provider, {}).get('model', '')
     if observer:
@@ -197,10 +201,13 @@ def _generate_json(prompt, provider=None, images=None, model_override=None, resp
     model = model_override or row.get('model', '')
     if not model and provider == 'agy':
         model = 'gemini-4-argon-high'
+    if not model and provider == 'codex':
+        model = 'gpt-6.1-sol'
     if not model:
         raise RuntimeError('모델 ID가 설정되지 않았습니다.')
     if provider == 'codex':
         from common.codex_cli import generate
+        # Map gpt-6.1-sol gracefully if local codex CLI requires an installed alias or pass directly
         return generate(prompt, model, images, response_schema, audit_directory=audit_directory,
                         reasoning_effort=reasoning_effort)
     if provider == 'agy':
