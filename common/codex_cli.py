@@ -145,7 +145,11 @@ def _cli_error_detail(stdout, stderr):
     return summary[:1600]
 
 
-def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
+from common.llm_client import memory_call
+
+
+@memory_call
+def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None, timeout_seconds=None):
     from common.llm_client import parse_json
     config = local_config()
     rt_models = [row['id'] for row in runtime().get('models', []) if isinstance(row, dict) and row.get('id')]
@@ -208,7 +212,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         try:
             result = subprocess.run(command, input='Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + prompt,
                 capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
-                env=environment(config), timeout=300, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                env=environment(config), timeout=300 if timeout_seconds is None else max(0.1, float(timeout_seconds)), creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         except subprocess.TimeoutExpired:
             if audit_folder is not None:
                 if Path(output).is_file():
@@ -244,10 +248,10 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             raise
 
 
-def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
+def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None, timeout_seconds=None):
     if os.name == 'nt':
         return generate_local(prompt, model, images, response_schema, audit_directory=audit_directory,
-                              reasoning_effort=reasoning_effort)
+                              reasoning_effort=reasoning_effort, **({"timeout_seconds": timeout_seconds} if timeout_seconds is not None else {}))
     if reasoning_effort is not None:
         raise RuntimeError('명시적 추론 강도 선택은 Windows 포스팅 작업에서 실행하세요.')
     info = runtime()
@@ -257,7 +261,7 @@ def generate(prompt, model, images=None, response_schema=None, audit_directory=N
     if prompt != 'Return JSON {"ok":true}.':
         raise RuntimeError('일반 원고 생성은 Windows 포스팅 작업에서 실행하세요.')
     job = jobs.enqueue('codex-test', {'model': model})
-    deadline = time.monotonic() + 330
+    deadline = time.monotonic() + (330 if timeout_seconds is None else max(0.1, float(timeout_seconds)))
     while time.monotonic() < deadline:
         state = jobs.load(job['id'])
         if state['status'] == 'succeeded':

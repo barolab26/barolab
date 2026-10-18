@@ -257,6 +257,10 @@ def adopt_recovered(part_id,recovery,db_path=settings.DB):
             if not recovery.get('platform_id') or not recovery.get('permalink'):raise ValueError('Observed API identity required')
             _update(db,part_id,'api_submitted','recovered_by_unique_readonly_match',platform_id=recovery['platform_id'],permalink=recovery['permalink'],published_at=actual.isoformat(),publication_time_basis='api_timestamp',evidence=json.dumps(recovery,ensure_ascii=False))
             db.commit()
+            from common.llm_client import memory_event
+            memory_event(f'threads:{part_id}:recovered:{recovery["platform_id"]}', 'pipeline_recovery_success',
+                         'Uncertain Threads submission recovered by unique authenticated API match; public-page verification is separate.',
+                         evidence={**recovery, 'verificationScope': 'authenticated_api_identity'}, review=True)
         except:db.rollback();raise
 
 def recover_unknown(config,db_path=settings.DB,adapter=None):

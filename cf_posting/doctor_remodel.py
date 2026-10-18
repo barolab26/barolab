@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import io
+import hashlib
 import json
 import os
 import re
@@ -486,6 +487,7 @@ def remodel_cf_post_by_url(
     # Verify live URL rendering immediately
     public_url = f"https://www.{domain}/{slug}"
     live_verified = False
+    live_content_matched = False
     live_remaining_imgs = 0
     live_has_dishonest_caption = False
     live_has_raw_markdown = False
@@ -502,6 +504,8 @@ def remodel_cf_post_by_url(
             )
             live_has_raw_markdown = ("**" in art.get_text()) or ("⌧" in art.get_text())
             live_verified = not live_has_dishonest_caption and not live_has_raw_markdown
+            expected_text = BeautifulSoup(final_content_html, "html.parser").get_text(" ", strip=True)
+            live_content_matched = bool(expected_text) and expected_text in art.get_text(" ", strip=True)
     except Exception:
         pass
 
@@ -531,6 +535,15 @@ def remodel_cf_post_by_url(
     except Exception:
         pass
 
+    from common.llm_client import memory_event
+    durable_success = bool(apply and republish and republish_ok and live_verified and live_content_matched)
+    memory_event('doctor:' + hashlib.sha256((public_url + final_content_html).encode()).hexdigest(),
+                 'doctor_republish_verified' if durable_success else 'doctor_remodel_attempt',
+                 'Repair was republished and its text observed publicly.' if durable_success else 'Repair attempt has no confirmed public replacement.',
+                 success=durable_success, review=durable_success,
+                 evidence={'url': public_url, 'httpStatus': republish_status, 'publicContentMatched': live_content_matched,
+                           'liveVerified': live_verified, 'removedFakeFiguresCount': len(removed_figures),
+                           'tablesInserted': tables_inserted, 'localFilesUpdated': local_files_updated})
     return {
         "ok": republish_ok,
         "url": public_url,

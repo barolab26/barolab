@@ -39,7 +39,7 @@ User Data/
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
-*. sqlite3-journal
+*.sqlite3-journal
 *.db
 *.db-shm
 *.db-wal

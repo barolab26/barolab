@@ -2061,6 +2061,9 @@ def run_accounts(account_keys, do_real_publish=True, override_strategy_id=None, 
                               workerId=RUN_OPTIONS.get('worker_id'),
                               **({'existingLogNo':revision['logNo'], 'revisionTarget':revision} if revision else {}),
                               recoveryContextSha256=context['sha256'], recoveryContext=context,
+                              **({'priorFailure': {'phase': previous['phase'], 'reason': previous.get('failureReason'),
+                                   'workerId': previous.get('workerId')}}
+                                 if previous.get('phase') in ('failed', 'material_required') else {}),
                               **({'manualRecovery': {**manual, 'previousWorkerId': previous.get('workerId'),
                                    'previousFailure': previous.get('failureReason')}} if manual else {}),
                               freshnessScope='preparation_time_only', publicationTimeFreshnessVerified=False)
@@ -4310,6 +4313,21 @@ def find_retry_handoff(account, slot):
         return None
 
 def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None):
+    from common.llm_client import memory_session, memory_event
+    session_id = f'naver:{account_key}:{time.time_ns()}'
+    with memory_session(session_id, 'naver'):
+        try:
+            result = _prepare_content(account_key, override_strategy_id, evidence_dir, publication_attempt, attribution_slot)
+        except Exception as exc:
+            memory_event(session_id + ':ended', 'pipeline_preparation_failed', 'Naver preparation failed; no publication inferred.',
+                         session_id=session_id, success=False, evidence={'errorType': type(exc).__name__})
+            raise
+        memory_event(session_id + ':ended', 'pipeline_preparation_ended', 'Naver preparation ended; reservation and public publication are separate.',
+                     session_id=session_id, evidence={'account': account_key})
+        return result
+
+
+def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None):
     acc = dict(ACCOUNT_MAP[account_key])
     materials_input = RUN_OPTIONS.get('materials_manifest')
     materials = load_material_manifest(materials_input, account_key, material_roots()) if materials_input else None
@@ -5770,6 +5788,7 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
         if is_bridge_account(acc):
             evidence['bridgeAttribution'] = attribution
         atomic_json(folder / 'reservation-evidence.json', evidence)
+        _record_reservation_memory(account_key, folder, evidence, attempt)
         if revision:
             atomic_json(folder / 'revision-evidence.json', {**evidence, 'revisionStatus':'verified_same_reservation',
                 'originalEvidenceUnchanged':sha(Path(revision['receiptPath'])) == revision['receiptSha256']})
@@ -5778,6 +5797,24 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
             record_strategy_success(account_key, idx, results_keyword(folder), article['title'])
         update_pipeline_status(acc, 6, '기존 예약 수정 완료 · 목록 재확인' if revision else '예약발행 완료 · 목록 재확인', 100,
             '같은 글 번호·예약 시각·새 본문 재확인' if revision else '실제 예약 목록 2회 확인 · 공개 전 예약 상태', status='done', topic=article['title'], reserve_time=when, strategy_id=strategy['id'], strategy_name=strategy['short_name'], verification={**verification, 'scheduledSlot': slot, 'publicationStatus': 'reserved', 'publicPublicationVerified': False})
+
+
+def _record_reservation_memory(account_key, folder, evidence, attempt):
+    # Only the durable post-submit receipt can establish reservation success.
+    if evidence.get('submissionStatus') != 'verified_reserved':
+        return
+    prior = attempt.get('priorFailure') or {}
+    recovering = prior.get('phase') in ('failed', 'material_required')
+    from common.llm_client import memory_event
+    memory_event(f'naver:{folder}:reservation-verified',
+                 'pipeline_recovery_success' if recovering else 'reservation_verified',
+                 'Naver reservation identity and body verified; it is not a public publication.',
+                 session_id=str(folder), review=recovering,
+                 evidence={'account': account_key, 'receipt': str(folder / 'reservation-evidence.json'),
+                           'publicationStatus': 'reserved', 'publicPublicationVerified': False,
+                           'scheduledAt': evidence.get('reserveTime'), 'documentSha256': evidence.get('documentSha256'),
+                           'publisherResponse': evidence.get('publisherResponse'), 'priorFailure': prior,
+                           'revision': evidence.get('mode') == 'revision'})
 
 
 def results_keyword(folder):

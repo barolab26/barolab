@@ -45,7 +45,8 @@ class AgyBypassTests(unittest.TestCase):
                     result = llm_client.generate_json('task', provider='agy' if entry == 'explicit' else None,
                                                       model_override='bad-agy', response_schema=schema)
                 self.assertEqual(result, {'ok': True})
-                self.assertEqual(self.generate.call_args.args[:2], ('task', 'gpt-6-luna'))
+                self.assertTrue(self.generate.call_args.args[0].endswith('task'))
+                self.assertEqual(self.generate.call_args.args[1], 'gpt-6-luna')
                 self.assertEqual(self.generate.call_args.args[3], schema)
 
     def test_observer_records_codex_and_actual_model(self):

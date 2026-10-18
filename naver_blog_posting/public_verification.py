@@ -402,6 +402,14 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     dash_verify_path.write_text(json.dumps(ledger_out, ensure_ascii=False, indent=2), encoding="utf-8")
     local_verify_path.parent.mkdir(parents=True, exist_ok=True)
     local_verify_path.write_text(json.dumps(ledger_out, ensure_ascii=False, indent=2), encoding="utf-8")
+    if updated_count:
+        from common.llm_client import memory_event
+        for item in merged_evidence:
+            # RSS proves the public item's presence, not the full body or image layout.
+            if item.get('publicUrl') and item.get('checkedAt') == now_iso:
+                memory_event('naver:rss:' + item['publicUrl'], 'public_rss_item_observed',
+                             'Public Naver RSS item matched account/title; full-body verification is separate.',
+                             evidence={k: item.get(k) for k in ('publicUrl', 'account', 'actualPublishedAt', 'checkedAt')})
 
     if ps:
         _save_pipeline_status(dash_ps_path, ps)

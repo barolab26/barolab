@@ -29,7 +29,7 @@
     /* BaroLab Deck v3: 4-Column ARGO Precision Instrument Row (96px Slim) */
     .vault-deck-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
       gap: 10px;
       margin-bottom: 12px;
     }
@@ -37,9 +37,8 @@
       .vault-deck-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     .vault-gauge-card {
-      height: 96px;
       min-height: 96px;
-      max-height: 96px;
+      height: auto;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
@@ -145,6 +144,11 @@
     .vault-card-pill.blue { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
     .vault-card-pill.amber { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
 
+    .vault-gauge-card.dark-card { flex-direction:column; align-items:stretch; gap:6px; }
+    .dark-card .vault-led-panel { padding:4px 7px; }
+    .dark-card .vault-led-cols { height:auto; font-size:11px; overflow-wrap:anywhere; }
+    .dark-card .vault-card-top { flex-wrap:wrap; }
+    .dark-card .vault-card-headline { white-space:normal; overflow:visible; }
     .vault-card-headline {
       font-size: 14.5px;
       font-weight: 900;
@@ -270,7 +274,7 @@
     .vault-bar-badge.b-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .vault-bar-badge.b-violet { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
 
-    /* Card 4: 14D VAULT LED Matrix + Focus Control */
+    /* Card 4: 그래프 응답 Matrix + Focus Control */
     .vault-led-panel {
       display: flex;
       flex-direction: column;
@@ -321,7 +325,7 @@
       display: grid;
       grid-template-columns: 1fr 400px;
       gap: 14px;
-      height: calc(100vh - 185px);
+      height: auto;
       min-height: 580px;
     }
     @media (max-width: 1200px) {
@@ -338,17 +342,25 @@
       min-height: 560px;
       box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
     }
+    .graph-viewport { position:relative; width:100%; min-height:480px; height:clamp(480px, calc(100vh - 320px), 760px); flex:none; }
     #memory-canvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       cursor: grab;
     }
+    .graph-status { position:absolute; top:100px; left:20px; right:20px; color:#e2e8f0; background:#172033; padding:12px; border-radius:8px; z-index:11; }
+    .doc-editor label { display:block; margin:10px 0; font-size:12px; font-weight:700; }
+    .doc-editor input, .doc-editor textarea, .doc-editor select { display:block; box-sizing:border-box; width:100%; margin-top:5px; padding:8px; border:1px solid #94a3b8; border-radius:6px; font:inherit; }
+    [hidden] { display:none !important; }
+    .graph-toolbar-top details { pointer-events:auto; width:100%; }
+    .doc-actions { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
     .graph-toolbar-top {
-      position: absolute;
-      top: 12px;
-      left: 14px;
-      right: 14px;
+      position: relative;
+      margin: 12px 14px 0;
+      flex:none;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -394,10 +406,10 @@
       color: #eff6ff;
       box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
     }
+    .graph-chips { flex-wrap:wrap; }
     .graph-hint {
-      position: absolute;
-      left: 16px;
-      bottom: 12px;
+      position: relative;
+      margin: 0 14px 8px;
       color: rgba(203, 213, 225, 0.85);
       font-size: 11.5px;
       pointer-events: none;
@@ -405,12 +417,12 @@
       border: 1px solid rgba(148, 163, 184, 0.2);
       padding: 4px 10px;
       border-radius: 6px;
-      white-space: nowrap;
+      white-space: normal;
     }
     .graph-legend {
-      position: absolute;
-      right: 16px;
-      bottom: 12px;
+      position: relative;
+      margin: 0 14px 12px;
+      flex-wrap:wrap;
       display: flex;
       gap: 12px;
       font-size: 11.5px;
@@ -545,22 +557,25 @@
     <header class="header">
       <div class="header-left">
         <h1>
-          <span>✦ BaroLab 시냅스 기억 그래프 · Clean Slate Vault</span>
-          <span class="header-badge" style="background:rgba(16,185,129,0.18)!important;border-color:rgba(16,185,129,0.45)!important;color:#6ee7b7!important;">🟢 고아 노드 0개 · 무결성 100%</span>
+          <span>✦ BaroLab 시냅스 기억 그래프 · Memory Vault</span>
+          <span id="graph-integrity-status" class="header-badge" style="background:rgba(16,185,129,0.18)!important;border-color:rgba(16,185,129,0.45)!important;color:#6ee7b7!important;">데이터 연결 대기</span>
         </h1>
-        <p>13대 코어 허브(AI 크루 5 · 운영 채널 4 · 핵심 스킬 4) · 4대 시냅스(출처·채널·스킬·성과) 자동 연결 아키텍처</p>
+        <p>코어 허브와 기억 문서의 실제 연결 · 출처·채널·스킬·성과 탐색</p>
       </div>
       <div class="toolbar">
-        <button type="button" id="btn-open-new-note" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)!important; border-color:#3b82f6!important; color:#fff!important; font-weight:800; cursor:pointer;">+ 새 지식 노드 등록</button>
+        <button type="button" id="btn-open-new-note" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)!important; border-color:#3b82f6!important; color:#fff!important; font-weight:800; cursor:pointer;">+ 지식 메모 등록</button>
         <button type="button" id="btn-sync-vault" style="cursor:pointer;">⚡ 시냅스 동기화</button>
       </div>
     </header>
+
+    <div id="graph-update-status" role="status" style="margin-bottom:4px;font-size:12px;color:#2563eb"></div>
+    <div id="memory-api-status" role="status" style="margin:0 0 10px;color:#64748b;font-size:12px;overflow-wrap:anywhere">사용 API: 연결 대기</div>
 
     <!-- [BAROLAB DECK V3] 4-Card ARGO Precision Tick-Mark & Needle Gauge Row -->
     <section class="vault-deck-grid" aria-label="시냅스 기억 그래프 정밀 계기판">
       <!-- [카드 1] 시냅스 무결성 & 코어 허브 게이지 (36-Tick Circular Needle Gauge + 3-Color Segment Bar) -->
       <article class="vault-gauge-card">
-        <div class="argo-circle-gauge" title="시냅스 연결 무결성 100% (36-Tick Precision Needle Gauge)">
+        <div class="argo-circle-gauge" title="조회된 그래프의 연결 노드 비율">
           <svg viewBox="0 0 68 68">
             <defs>
               <linearGradient id="vaultEmeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -570,32 +585,32 @@
             </defs>
             <!-- Outer 36 fine tick marks (circumference ~179.07 -> 1.4px tick + 3.57px gap = 4.97px * 36) -->
             <circle cx="34" cy="34" r="28.5" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-dasharray="1.4 3.57" />
-            <!-- Track & 100% Emerald Value Ring -->
+            <!-- Track & measured connected-node ratio -->
             <circle cx="34" cy="34" r="22.5" fill="none" stroke="#e2e8f0" stroke-width="5.2" />
-            <circle id="vault-integrity-ring" cx="34" cy="34" r="22.5" fill="none" stroke="url(#vaultEmeraldGrad)" stroke-width="5.2" stroke-linecap="round" stroke-dasharray="141.4" stroke-dashoffset="0" transform="rotate(-90 34 34)" />
-            <!-- Precision Gauge Needle pointing to 100% (Top / 45deg accent) -->
-            <g id="vault-integrity-needle" transform="rotate(42 34 34)">
+            <circle id="vault-integrity-ring" cx="34" cy="34" r="22.5" fill="none" stroke="url(#vaultEmeraldGrad)" stroke-width="5.2" stroke-linecap="round" stroke-dasharray="141.4" stroke-dashoffset="141.4" transform="rotate(-90 34 34)" />
+            <!-- Needle updated after graph response -->
+            <g id="vault-integrity-needle" transform="rotate(-90 34 34)">
               <polygon points="34,11 32.2,34 35.8,34" fill="#059669" />
             </g>
             <circle cx="34" cy="34" r="3.8" fill="#0f172a" stroke="#10b981" stroke-width="1.6" />
           </svg>
-          <div class="argo-circle-readout"><strong id="vault-integrity-pct">100%</strong></div>
+          <div class="argo-circle-readout"><strong id="vault-integrity-pct">—</strong></div>
         </div>
         <div class="vault-card-body">
           <div class="vault-card-top">
             <span>✦ 시냅스 무결성 · 코어 허브</span>
-            <span class="vault-card-pill emerald" id="stat-linked-desc">무결성 100%</span>
+            <span class="vault-card-pill emerald" id="stat-linked-desc">—</span>
           </div>
-          <div class="vault-card-headline" id="stat-total-docs">코어 허브 13 / 전체 19 노드</div>
+          <div class="vault-card-headline" id="stat-total-docs">—</div>
           <div class="argo-multi-seg-bar" title="코어 허브 / 지식 노드 / 고아 노드 비율">
-            <div class="argo-seg-piece" id="seg-core-hubs" style="width:68.4%; background:#10b981;"></div>
-            <div class="argo-seg-piece" id="seg-know-nodes" style="width:31.6%; background:#3b82f6;"></div>
+            <div class="argo-seg-piece" id="seg-core-hubs" style="width:0%; background:#10b981;"></div>
+            <div class="argo-seg-piece" id="seg-know-nodes" style="width:0%; background:#3b82f6;"></div>
             <div class="argo-seg-piece" id="seg-orphan-nodes" style="width:0%; background:#cbd5e1;"></div>
           </div>
           <div class="vault-micro-legend">
-            <span><i class="vault-dot" style="background:#10b981;"></i><b id="lbl-core-hubs">코어 허브 13</b></span>
-            <span><i class="vault-dot" style="background:#3b82f6;"></i><b id="lbl-know-nodes">지식 노드 6</b></span>
-            <span><i class="vault-dot" style="background:#94a3b8;"></i><b id="lbl-orphan-nodes">고아 노드 0</b></span>
+            <span><i class="vault-dot" style="background:#10b981;"></i><b id="lbl-core-hubs">—</b></span>
+            <span><i class="vault-dot" style="background:#3b82f6;"></i><b id="lbl-know-nodes">—</b></span>
+            <span><i class="vault-dot" style="background:#94a3b8;"></i><b id="lbl-orphan-nodes">—</b></span>
           </div>
         </div>
       </article>
@@ -616,27 +631,22 @@
             <!-- Semi-Circle Background Track -->
             <path d="M 13 43 A 29 29 0 0 1 71 43" fill="none" stroke="#e2e8f0" stroke-width="5.5" stroke-linecap="round" />
             <!-- Semi-Circle Active Fill Arc (length ~91.1) -->
-            <path id="vault-semi-arc" d="M 13 43 A 29 29 0 0 1 71 43" fill="none" stroke="url(#vaultSemiGrad)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="91.1" stroke-dashoffset="12" />
+            <path id="vault-semi-arc" d="M 13 43 A 29 29 0 0 1 71 43" fill="none" stroke="url(#vaultSemiGrad)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="91.1" stroke-dashoffset="91.1" />
             <!-- Rotating Speedometer Needle (0deg = straight up, -90deg = min, +90deg = max) -->
-            <g id="vault-density-needle" transform="rotate(52 42 43)">
+            <g id="vault-density-needle" transform="rotate(-85 42 43)">
               <polygon points="42,15 40.2,43 43.8,43" fill="#1d4ed8" />
             </g>
             <circle cx="42" cy="43" r="4" fill="#0f172a" stroke="#3b82f6" stroke-width="1.6" />
           </svg>
-          <div class="argo-semi-val" id="vault-density-readout">4.7 Edges/Node</div>
+          <div class="argo-semi-val" id="vault-density-readout">—</div>
         </div>
         <div class="vault-card-body">
           <div class="vault-card-top">
             <span>🔗 시냅스 엣지 (연결 밀도)</span>
-            <span class="vault-card-pill blue" id="vault-density-badge">밀도 118% 달성</span>
+            <span class="vault-card-pill blue" id="vault-density-badge">—</span>
           </div>
-          <div class="vault-card-headline" id="stat-total-edges">총 90개 시냅스 연결</div>
-          <div class="argo-multi-seg-bar" title="4대 시냅스 축(출처·채널·스킬·성과) 연결 비중">
-            <div class="argo-seg-piece" style="width:26%; background:#f59e0b;"></div>
-            <div class="argo-seg-piece" style="width:28%; background:#3b82f6;"></div>
-            <div class="argo-seg-piece" style="width:31%; background:#10b981;"></div>
-            <div class="argo-seg-piece" style="width:15%; background:#8b5cf6;"></div>
-          </div>
+          <div class="vault-card-headline" id="stat-total-edges">—</div>
+
           <div class="vault-micro-legend">
             <span><i class="vault-dot" style="background:#f59e0b;"></i>출처</span>
             <span><i class="vault-dot" style="background:#3b82f6;"></i>채널</span>
@@ -651,34 +661,34 @@
         <div class="vault-card-body" style="gap: 5px;">
           <div class="vault-card-top" style="margin-bottom: 1px;">
             <span>📊 수익 · 스킬 · 결정 지식 분포</span>
-            <span class="vault-card-pill amber" id="stat-revenue-hubs">지식 자산 10건</span>
+            <span class="vault-card-pill amber" id="stat-revenue-hubs">—</span>
           </div>
           <div class="vault-3bar-stack">
             <div class="vault-bar-row">
               <span class="vault-bar-lbl">🛠️ 학습된 스킬 (SKILL.md)</span>
-              <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-skill-fill" style="width:90%; background:linear-gradient(90deg,#10b981,#059669);"></div></div>
-              <span class="vault-bar-badge b-emerald" id="stat-skill-cnt">9건</span>
+              <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-skill-fill" style="width:0%; background:linear-gradient(90deg,#10b981,#059669);"></div></div>
+              <span class="vault-bar-badge b-emerald" id="stat-skill-cnt">—</span>
             </div>
             <div class="vault-bar-row">
               <span class="vault-bar-lbl">💰 수익·성과 인사이트</span>
-              <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-rev-fill" style="width:18%; background:linear-gradient(90deg,#3b82f6,#2563eb);"></div></div>
-              <span class="vault-bar-badge b-blue" id="stat-rev-cnt">1건</span>
+              <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-rev-fill" style="width:0%; background:linear-gradient(90deg,#3b82f6,#2563eb);"></div></div>
+              <span class="vault-bar-badge b-blue" id="stat-rev-cnt">—</span>
             </div>
             <div class="vault-bar-row">
               <span class="vault-bar-lbl">⚖️ 회의실 결정사항</span>
-              <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-meet-fill" style="width:6%; background:linear-gradient(90deg,#8b5cf6,#6d28d9);"></div></div>
-              <span class="vault-bar-badge b-violet" id="stat-meet-cnt">0건</span>
+              <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-meet-fill" style="width:0%; background:linear-gradient(90deg,#8b5cf6,#6d28d9);"></div></div>
+              <span class="vault-bar-badge b-violet" id="stat-meet-cnt">—</span>
             </div>
           </div>
         </div>
       </article>
 
-      <!-- [카드 4] 시냅스 성장 트렌드 (14D VAULT LED 도트 매트릭스 & 탐색 컨트롤) -->
+      <!-- [카드 4] 시냅스 성장 트렌드 (그래프 응답 도트 매트릭스 & 탐색 컨트롤) -->
       <article class="vault-gauge-card dark-card">
-        <div class="vault-led-panel" title="최근 14일 일별 신규 기억·스킬 시냅스 축적 추이">
+        <div class="vault-led-panel" title="마지막 그래프 응답 시각">
           <div class="vault-led-head">
-            <span>14D VAULT LED</span>
-            <span style="color:#10b981;">● LIVE</span>
+            <span>그래프 응답</span>
+            <span id="graph-data-state">연결 대기</span>
           </div>
           <div class="vault-led-cols" id="vault-led-cols"></div>
         </div>
@@ -687,7 +697,7 @@
             <span>🧭 시냅스 탐색 모드</span>
             <span class="vault-card-pill blue" id="stat-focus-badge" style="cursor:pointer; background:rgba(59,130,246,0.22); color:#93c5fd; border-color:rgba(96,165,250,0.45);" title="클릭 시 2-Hops 집중 탐색 토글">2-Hops 탐색</span>
           </div>
-          <div class="vault-card-headline" id="stat-visible-nodes" style="color:#f8fafc; font-size:14px;">전체 보기 · 19개 활성</div>
+          <div class="vault-card-headline" id="stat-visible-nodes" style="color:#f8fafc; font-size:14px;">—</div>
           <div class="vault-micro-legend" style="color:#cbd5e1; justify-content:space-between;">
             <span>더블클릭: 2-Hops 집중</span>
             <button type="button" id="btn-card-fit" style="padding:2px 7px; border-radius:5px; border:1px solid rgba(148,163,184,0.35); background:rgba(255,255,255,0.1); color:#f8fafc; font-size:10px; font-weight:800; cursor:pointer; white-space:nowrap;">🎯 화면 맞춤</button>
@@ -712,14 +722,18 @@
             <button type="button" class="graph-chip" data-cat="skill" id="chip-skill">🛠️ 학습된 스킬(SKILL.md)</button>
             <button type="button" class="graph-chip" data-cat="meeting" id="chip-meeting">💬 회의실 결정사항</button>
           </div>
+          <details style="margin-top:6px;background:#0f172a;color:#e2e8f0;border-radius:6px;padding:6px 9px"><summary id="graph-node-list-summary" style="cursor:pointer">키보드로 노드 탐색 · 연결 대기</summary><div id="graph-node-list" style="display:flex;flex-wrap:wrap;gap:5px;max-height:160px;overflow:auto;padding-top:8px"></div></details>
         </div>
-        <canvas id="memory-canvas"></canvas>
-        <div class="graph-hint">드래그: 이동/노드 고정 · 휠: 줌 · 클릭: 시냅스 명세 열람 · <strong>더블클릭: 2-hops 주변만 보기</strong> (고아 노드 0개 보장)</div>
+        <div class="graph-viewport" id="graph-viewport">
+        <canvas id="memory-canvas" role="img" aria-label="기억 그래프 연결 대기"></canvas>
+        <div id="graph-status" class="graph-status" role="status">기억 그래프를 불러오는 중입니다.</div>
+        </div>
+        <div class="graph-hint">드래그: 이동/노드 고정 · 휠: 줌 · 클릭: 시냅스 명세 열람 · <strong>더블클릭: 2-hops 주변만 보기</strong> (전체 보기: 모든 노드와 연결)</div>
         <div class="graph-legend">
-          <span><strong style="color:#fbbf24;">◆</strong> AI 크루 허브 (5)</span>
-          <span><strong style="color:#60a5fa;">✦</strong> 운영 채널·수익 허브 (4+)</span>
+          <span><strong style="color:#fbbf24;">✦</strong> 코어 허브 · AI 크루</span>
+          <span><strong style="color:#60a5fa;">✦</strong> 운영 채널·수익 허브</span>
           <span><strong style="color:#34d399;">✦</strong> 코어 스킬 허브 (SKILL.md)</span>
-          <span><strong style="color:#c084fc;">✦</strong> 회의실 결정사항</span>
+          <span><strong style="color:#c084fc;">◆</strong> 지식 · 기억 · 결정사항</span>
         </div>
       </div>
 
@@ -734,8 +748,27 @@
           <div id="doc-viewer">
             <h3 class="doc-title" id="doc-title">노드를 클릭하면 4대 시냅스 연결 구조와 원문이 표시됩니다</h3>
             <div class="doc-meta-row" id="doc-meta"></div>
+            <div id="doc-status" role="status"></div>
+            <button type="button" id="btn-restore-doc" class="graph-chip" hidden>방금 삭제한 노드 복구</button>
+            <div class="doc-actions" id="doc-actions" hidden>
+              <button type="button" class="graph-chip" id="btn-edit-doc">노드 편집</button>
+              <button type="button" class="graph-chip" id="btn-delete-doc">휴지통으로 이동</button>
+            </div>
+            <div id="delete-doc-confirmation" hidden style="padding:12px;border:1px solid #f59e0b;border-radius:8px;background:#fffbeb;color:#92400e">
+              <p id="delete-doc-target" style="margin:0 0 8px"></p>
+              <p style="font-size:12px;margin:0">이 노드의 연결도 그래프에서 제거됩니다. 삭제 후 복구할 수 있습니다.</p>
+              <div class="doc-actions"><button type="button" class="btn-quick" id="btn-confirm-delete-doc">휴지통 이동 확인</button><button type="button" class="btn-quick" id="btn-cancel-delete-doc">취소</button></div>
+            </div>
+            <form id="doc-editor" class="doc-editor" hidden>
+              <label>제목<input id="edit-doc-title" required></label>
+              <label>분류<input id="edit-doc-category" required></label>
+              <label>본문<textarea id="edit-doc-content" rows="12"></textarea></label>
+              <label>부모·연결 노드 (한 줄에 하나)<textarea id="edit-doc-links" rows="4"></textarea></label>
+              <div id="edit-parent-candidates" style="font-size:12px;color:#64748b"></div>
+              <div class="doc-actions"><button type="submit" class="btn-quick" id="btn-save-doc">변경 저장</button><button type="button" class="btn-quick" id="btn-cancel-doc">취소</button></div>
+            </form>
             <div id="doc-synapse-summary" style="display:none; margin-bottom:10px; padding:10px 12px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; font-size:12px; color:#1e3a8a; line-height:1.6;"></div>
-            <div class="doc-content-pre" id="doc-content">캔버스에서 코어 허브(✦/◆)나 지식 노드를 클릭해 보세요. 과거 폐기 프로젝트와 757개 고아 노드는 `server/data/legacy_argo_backup/`으로 완전 격리되었으며, 현재 그래프는 최소 2개 이상의 부모 허브와 연결된 순수 코어 지식만 표시합니다.</div>
+            <div class="doc-content-pre" id="doc-content">캔버스의 노드를 클릭하면 본문과 부모·역링크를 확인하고 편집할 수 있습니다. 전체 보기는 연결이 없는 노드도 포함합니다.</div>
             <div style="margin-top:12px;">
               <strong style="font-size:12px; color:#475569;">시냅스 부모/연결 허브 ([[아웃바운드]])</strong>
               <div id="doc-outbound" style="margin-top:4px;"></div>
@@ -760,13 +793,14 @@
 <!-- New Synapse Note Modal -->
 <div class="modal-backdrop" id="note-modal">
   <div class="modal-card">
-    <h3 style="margin:0 0 12px 0;">새 지식 노드 등록 (4대 시냅스 · 고아 노드 0개 원칙)</h3>
+    <h3 style="margin:0 0 8px 0;">일반 지식 메모 등록</h3>
+    <p style="font-size:12px;color:#64748b;margin:0 0 12px">이 화면은 지식 메모를 저장합니다. 실제 SKILL.md 파일은 그래프의 해당 파일 노드에서 열고 편집할 수 있습니다.</p>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
       <div>
         <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px;">지식 분류</label>
         <select id="new-note-category" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
-          <option value="skill">🛠️ 학습된 스킬 (SKILL.md)</option>
-          <option value="revenue">📈 수익 발생 기억 (Growth 검증)</option>
+          <option value="skill">🛠️ 스킬 관련 지식 메모</option>
+          <option value="revenue">📈 수익·성과 메모</option>
           <option value="meeting">💬 회의실 결정사항</option>
         </select>
       </div>
@@ -786,20 +820,27 @@
       <input type="text" id="new-note-title" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;" placeholder="예: CF 16개 도메인 애드센스 5대 슬롯 Viewability 최적화" />
     </div>
     <div style="margin-bottom:12px;">
-      <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px;">본문 (발행 성공 포스팅 · 채택된 개선점 · 검증된 수익 인사이트만 등록)</label>
-      <textarea id="new-note-content" rows="7" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit;" placeholder="저장 시 [출처 크루] + [적용 채널 허브] + [코어 스킬 허브] 최소 2개 이상의 부모 허브와 자동 연결됩니다."></textarea>
+      <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px;">본문 (10자 이상)</label>
+      <textarea id="new-note-content" rows="7" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit;" placeholder="기억할 내용과 근거를 적어 주세요. 연결할 문서는 [[문서명]]으로 적고 저장 후 연결을 편집할 수 있습니다."></textarea>
     </div>
+    <div id="new-note-status" role="status" style="font-size:12px;margin-bottom:8px"></div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button type="button" class="btn-quick" id="btn-close-modal">취소</button>
-      <button type="button" class="btn-quick" id="btn-save-note" style="background:#2563eb; color:#fff; border-color:#1d4ed8; font-weight:700;">시냅스 검증 및 등록</button>
+      <button type="button" class="btn-quick" id="btn-save-note" style="background:#2563eb; color:#fff; border-color:#1d4ed8; font-weight:700;">메모 저장</button>
     </div>
   </div>
 </div>
 
+<script src="memory_graph_view.js?v=20261019-2"></script>
 <script>
 (() => {
   const canvas = document.getElementById('memory-canvas');
   const ctx = canvas.getContext('2d');
+  const graphView = window.MemoryGraphView;
+  let currentDocument = null;
+  let pendingDeleteRel = null;
+  let graphRequest = 0;
+  let documentRequest = 0;
 
   let state = {
     rawNodes: [],
@@ -812,6 +853,7 @@
     showOrphans: false,
     revenueOnly: false,
     query: '',
+    categoryFilter: 'all',
     focusId: null,
     selectedRel: 'hubs/crew-jarvis.md',
     hoverIdx: null,
@@ -841,21 +883,19 @@
     ctx.closePath();
   }
 
-  function initVaultLedMatrix(totalNodes, totalEdges) {
-    const wrap = document.getElementById('vault-led-cols');
-    if (!wrap) return;
-    // 14-day vertical LED dot columns (5 rows per column, bottom-to-top)
-    const pattern = [2, 2, 3, 2, 3, 4, 3, 4, 3, 4, 5, 4, 5, 5];
-    wrap.innerHTML = pattern.map((litCount, colIdx) => {
-      const isRecent = colIdx >= 10;
-      const dots = [];
-      for (let row = 0; row < 5; row++) {
-        const isLit = row < litCount;
-        const cls = isLit ? (isRecent ? 'lit-emerald' : 'lit-blue') : '';
-        dots.push(`<span class="vault-led-dot ${cls}"></span>`);
-      }
-      return `<div class="vault-led-col">${dots.join('')}</div>`;
-    }).join('');
+  const metricIds = ['vault-integrity-pct', 'stat-linked-desc', 'stat-total-docs',
+    'lbl-core-hubs', 'lbl-know-nodes', 'lbl-orphan-nodes', 'vault-density-readout',
+    'vault-density-badge', 'stat-total-edges', 'stat-revenue-hubs', 'stat-skill-cnt',
+    'stat-rev-cnt', 'stat-meet-cnt', 'stat-visible-nodes', 'memory-sidebar-count'];
+  function showGraphUnavailable() {
+    metricIds.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '확인 불가'; });
+    document.getElementById('graph-integrity-status').textContent = '데이터 확인 불가';
+    document.getElementById('graph-data-state').textContent = '연결 실패';
+    canvas.setAttribute('aria-label', '기억 그래프 데이터 확인 불가');
+    document.getElementById('vault-led-cols').textContent = '응답을 확인할 수 없습니다.';
+    ['seg-core-hubs', 'seg-know-nodes', 'seg-orphan-nodes', 'bar-skill-fill', 'bar-rev-fill', 'bar-meet-fill'].forEach(id => { document.getElementById(id).style.width = '0%'; });
+    document.getElementById('vault-integrity-ring').setAttribute('stroke-dashoffset', '141.4');
+    document.getElementById('vault-semi-arc').setAttribute('stroke-dashoffset', '91.1');
   }
 
   // Seeded LCG background starfield (ARGO S(e,t,n) port)
@@ -885,11 +925,21 @@
     pathOrCtx.closePath();
   }
 
+  function drawNodePath(path, node, x, y, radius) {
+    if (graphView.nodeShape(node) === 'star') return drawStarPath(path, x, y, radius);
+    path.moveTo(x, y - radius);
+    path.lineTo(x + radius, y);
+    path.lineTo(x, y + radius);
+    path.lineTo(x - radius, y);
+    path.closePath();
+  }
+
   function nodeRadius(n) {
     return 2.4 + Math.log2(1 + (n.deg || 0)) * 1.25 + (n.type === 'agent' ? 2.0 : 0) + (n.isRevenueHub ? 0.8 : 0);
   }
 
-  function applyFocusSubgraph() {
+  function applyFocusSubgraph(preserveLayout = false) {
+    const priorPoints = new Map(state.nodes.map((node,index) => [node.id, state.pts[index]]));
     let nodes = state.rawNodes.slice();
     let edges = state.rawEdges.slice();
 
@@ -931,17 +981,29 @@
       }
     }
 
+    state.hoverIdx = null;
+    state.dragIdx = null;
     state.nodes = nodes;
     state.edges = edges;
+    canvas.setAttribute('data-node-count', String(nodes.length));
+    canvas.setAttribute('data-edge-count', String(edges.length));
+    canvas.setAttribute('aria-label', `기억 그래프: 노드 ${nodes.length}개, 연결 ${edges.length}개. 키보드로 노드 탐색 목록에서도 원문을 열 수 있습니다.`);
+    document.getElementById('graph-node-list-summary').textContent = `키보드로 노드 탐색 · ${nodes.length}개`;
+    document.getElementById('graph-node-list').innerHTML = nodes.map(n => `<button type="button" class="graph-chip" data-node-rel="${escapeHtml(n.rel || '')}">${escapeHtml(n.label)}</button>`).join('');
 
     // Wide golden-angle spiral initial placement with 1.45x horizontal aspect stretch to match wide canvas
     state.pts = nodes.map((n, i) => {
-      const angle = 2.39996 * i;
-      const dist = 76 * Math.sqrt(i + 1);
+      const prior = preserveLayout && priorPoints.get(n.id);
+      if (prior) return {...prior,index:i};
+      const slot = i % 2 === 0 ? Math.floor(i / 2) : nodes.length - 1 - Math.floor(i / 2);
+      const angle = 2.39996 * slot;
+      const dist = 76 * Math.sqrt(slot + 1);
       return {
         index: i,
         x: Math.cos(angle) * dist * 1.38,
         y: Math.sin(angle) * dist * 0.96,
+        anchorX: Math.cos(angle) * dist * 1.38,
+        anchorY: Math.sin(angle) * dist * 0.96,
         vx: 0,
         vy: 0,
         fx: null,
@@ -961,12 +1023,13 @@
       sortedIdx.filter(i => nodes[i].isRevenueHub || (nodes[i].deg || 0) >= 2).slice(0, 28)
     );
 
-    state.alpha = 1.0;
-    state.autoFit = true;
-
-    // Run 140 warm-up ticks so graph opens spaciously and completely settled
-    for (let k = 0; k < 140; k++) stepPhysics();
-    fitCamera(false);
+    if (!preserveLayout) {
+      state.alpha = 1.0;
+      state.autoFit = true;
+      // Settle the first layout; background refresh retains existing coordinates.
+      for (let k = 0; k < 140; k++) stepPhysics();
+      fitCamera(false);
+    }
     const visEl = document.getElementById('stat-visible-nodes');
     if (visEl) visEl.textContent = `${state.focusId ? '2-Hops 집중' : '전체 보기'} · ${nodes.length}개 활성`;
     const focBadge = document.getElementById('stat-focus-badge');
@@ -975,10 +1038,7 @@
     if (backBtn) backBtn.style.display = state.focusId ? 'inline-block' : 'none';
   }
 
-  // Upgraded Force-Directed Physics Engine:
-  // - Charge repulsion increased 10x (-290, distanceMax 950)
-  // - Link distance expanded to 148px (strength 0.36)
-  // - Explicit collision radius >= 66px (horizontal-aware so label capsules never overlap)
+  // Degree-normalized forces keep dense hubs and sparse memories readable together.
   function stepPhysics() {
     if (state.alpha < 0.004) return;
     const pts = state.pts;
@@ -989,8 +1049,8 @@
     // 1. Gentle anisotropic center gravity (keeps wide constellation centered)
     for (let i = 0; i < N; i++) {
       const p = pts[i];
-      p.vx += (0 - p.x) * 0.011 * alpha;
-      p.vy += (0 - p.y) * 0.015 * alpha;
+      p.vx += ((0 - p.x) * 0.008 + (p.anchorX - p.x) * 0.025) * alpha;
+      p.vy += ((0 - p.y) * 0.01 + (p.anchorY - p.y) * 0.025) * alpha;
     }
 
     // 2. Link spring force (linkDistance: 148px, strength: 0.36)
@@ -1000,8 +1060,11 @@
       let dx = (t.x + t.vx) - (s.x + s.vx);
       let dy = (t.y + t.vy) - (s.y + s.vy);
       let l = Math.sqrt(dx * dx + dy * dy) || 1;
-      const targetDist = 148;
-      l = ((l - targetDist) / l) * alpha * 0.36;
+      const targetDist = 230;
+      // Dense core hubs have many links: normalize their combined spring force
+      // so a connected clique cannot collapse beneath disconnected memories.
+      const degreeScale = Math.sqrt(Math.max(1, state.adj[si].length) * Math.max(1, state.adj[ti].length));
+      l = ((l - targetDist) / l) * alpha * 0.03 / degreeScale;
       dx *= l;
       dy *= l;
       t.vx -= dx * 0.5;
@@ -1021,7 +1084,7 @@
         let d2 = dx * dx + dy * dy;
         if (d2 > 902500) continue; // 950^2
         if (d2 < 16) d2 = 16;
-        const f = (-290 * alpha * stride) / d2;
+        const f = (-700 * alpha * stride) / d2;
         pi.vx += dx * f * 1.15;
         pi.vy += dy * f;
         pj.vx -= dx * f * 1.15;
@@ -1038,8 +1101,8 @@
           let dx = pj.x - pi.x;
           let dy = pj.y - pi.y;
           // Elliptical collision box to protect horizontal capsule labels from overlapping
-          const rx = 128;
-          const ry = 82;
+          const rx = 220;
+          const ry = 105;
           const nx = dx / rx;
           const ny = dy / ry;
           const nd2 = nx * nx + ny * ny;
@@ -1076,23 +1139,8 @@
 
   // Auto Fit-to-View with 15% canvas margin on all sides
   function fitCamera(animate = true) {
-    const W = canvas.clientWidth || 860;
-    const H = canvas.clientHeight || 580;
-    if (!state.pts.length) return;
-    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
-    for (const p of state.pts) {
-      if (p.x < minX) minX = p.x;
-      if (p.x > maxX) maxX = p.x;
-      if (p.y < minY) minY = p.y;
-      if (p.y > maxY) maxY = p.y;
-    }
-    const spanX = Math.max(maxX - minX, 180);
-    const spanY = Math.max(maxY - minY, 150);
-    // 15% margin on left/right/top/bottom -> usable area is 70%~72% of W and H
-    const s = Math.min((W * 0.72) / spanX, (H * 0.68) / spanY, 2.2);
-    state.targetCam.s = s;
-    state.targetCam.x = W / 2 - ((minX + maxX) / 2) * s;
-    state.targetCam.y = (H / 2 - 8) - ((minY + maxY) / 2) * s;
+    const size = graphView.canvasSize(canvas.clientWidth, canvas.clientHeight, window.devicePixelRatio);
+    state.targetCam = graphView.cameraFor(state.pts, size.width, size.height);
     if (!animate) {
       state.cam.s = state.targetCam.s;
       state.cam.x = state.targetCam.x;
@@ -1136,12 +1184,11 @@
       fitCamera(true);
     }
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const W = canvas.clientWidth || 860;
-    const H = canvas.clientHeight || 580;
-    if (canvas.width !== W * dpr || canvas.height !== H * dpr) {
-      canvas.width = W * dpr;
-      canvas.height = H * dpr;
+    const size = graphView.canvasSize(canvas.clientWidth, canvas.clientHeight, window.devicePixelRatio);
+    const { dpr, width: W, height: H } = size;
+    if (canvas.width !== size.pixelWidth || canvas.height !== size.pixelHeight) {
+      canvas.width = size.pixelWidth;
+      canvas.height = size.pixelHeight;
       state.stars = buildStarfield(W, H);
       fitCamera(false);
     }
@@ -1231,7 +1278,7 @@
       ctx.stroke(activePath);
     }
 
-    // Draw nodes (8-vertex 4-pointed star ✦ for docs/hubs, 45° diamond ◆ for agents)
+    // All core hubs use ✦; every other memory/knowledge node uses ◆.
     const scaleClamp = Math.min(Math.max(state.cam.s, 0.8), 1.35);
     const minorStarBatch = new Path2D();
     const specialNodes = [];
@@ -1247,7 +1294,7 @@
       if (n.type === 'agent' || state.hubSet.has(i) || i === focusIdx || (hoverIdx !== null && isHighlighted)) {
         specialNodes.push([i, sp, r, alphaNode]);
       } else {
-        drawStarPath(minorStarBatch, sp.x, sp.y, 1.35 * r);
+        drawNodePath(minorStarBatch, n, sp.x, sp.y, 1.35 * r);
       }
     }
 
@@ -1257,7 +1304,7 @@
     for (const [i, sp, r, alphaNode] of specialNodes) {
       const n = state.nodes[i];
       if (n.subGroup === 'crew' || n.type === 'agent') {
-        // Gold Aura + Rotated 45° Gold Diamond ◆ for AI Crew Hubs
+        // Preserve crew color while using the same core-hub glyph rule.
         const grad = ctx.createRadialGradient(sp.x, sp.y, 0.3 * r, sp.x, sp.y, 2.5 * r);
         grad.addColorStop(0, `rgba(251, 191, 36, ${0.32 * alphaNode})`);
         grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
@@ -1266,12 +1313,10 @@
         ctx.arc(sp.x, sp.y, 2.5 * r, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.save();
-        ctx.translate(sp.x, sp.y);
-        ctx.rotate(Math.PI / 4);
+        const glyph = new Path2D();
+        drawNodePath(glyph, n, sp.x, sp.y, 1.65 * r);
         ctx.fillStyle = `rgba(251, 191, 36, ${0.98 * alphaNode})`;
-        ctx.fillRect(-1.12 * r, -1.12 * r, 2.24 * r, 2.24 * r);
-        ctx.restore();
+        ctx.fill(glyph);
         continue;
       }
 
@@ -1321,7 +1366,7 @@
       }
 
       const star = new Path2D();
-      drawStarPath(star, sp.x, sp.y, r * (isHub ? 1.65 : 1.4));
+      drawNodePath(star, n, sp.x, sp.y, r * (isHub ? 1.65 : 1.4));
       ctx.fill(star);
     }
 
@@ -1386,9 +1431,10 @@
             : (n.category === 'skill'
               ? '코어 스킬(SKILL.md)'
               : (n.category === 'revenue' ? '수익 발생 기억' : '회의실 결정')));
+        const glyphLabel = graphView.nodeShape(n) === 'star' ? '✦' : '◆';
         const subStr = n.revenueUsd > 0
-          ? `✦ ${catTag} · 시냅스 ${n.deg} · $${n.revenueUsd}`
-          : `✦ ${catTag} · 시냅스 ${n.deg}`;
+          ? `${glyphLabel} ${catTag} · 시냅스 ${n.deg} · $${n.revenueUsd}`
+          : `${glyphLabel} ${catTag} · 시냅스 ${n.deg}`;
 
         ctx.font = '800 12.5px Pretendard, sans-serif';
         const w1 = ctx.measureText(titleStr).width;
@@ -1432,44 +1478,97 @@
     requestAnimationFrame(renderFrame);
   }
 
-  let resolvedApiBase = '';
-  async function apiFetch(path, options) {
-    if (resolvedApiBase) {
-      return fetch(resolvedApiBase + path, options);
+  let lastTrashId = null;
+  // Discover using read-only graph probes, then pin every document/mutation request
+  // to the same backend. A missing document or failed write must never fail over.
+  let resolvedApiBase = null;
+  let apiDiscovery = null;
+  let graphFingerprint = null;
+  let graphLoadCount = 0;
+  let activeWriteCount = 0;
+  let pollInFlight = false;
+  let pollTimer = null;
+  async function discoverMemoryApi() {
+    const configured = new URLSearchParams(location.search).get('memoryApi');
+    let candidates;
+    if (configured) {
+      const endpoint = new URL(configured, location.origin);
+      if (!['http:', 'https:'].includes(endpoint.protocol) ||
+          !['127.0.0.1', 'localhost', location.hostname].includes(endpoint.hostname) ||
+          endpoint.username || endpoint.password || endpoint.pathname !== '/' || endpoint.search || endpoint.hash) {
+        throw new Error('memoryApi에는 현재 서버 또는 로컬 API의 origin만 지정할 수 있습니다.');
+      }
+      // Explicit selection is authoritative; never silently write elsewhere.
+      candidates = [endpoint.origin];
+    } else {
+      // 8791 is a previous preview process. The final standalone API is 8792.
+      candidates = location.port === '8791' ? ['http://127.0.0.1:8792'] : ['', 'http://127.0.0.1:8792'];
     }
-    try {
-      const res = await fetch(path, options);
-      if (res.status !== 404) return res;
-    } catch (_) {}
-    for (const base of ['http://127.0.0.1:8791', 'http://192.168.45.248:8791']) {
+    candidates = [...new Set(candidates)];
+    const failures = [];
+    for (const base of candidates) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
       try {
-        const res = await fetch(base + path, options);
-        if (res.ok || res.status !== 404) {
-          resolvedApiBase = base;
-          return res;
-        }
-      } catch (_) {}
+        const response = await fetch(base + '/api/memory/graph?category=all&q=', {signal:controller.signal});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        graphView.normalizeGraph(await response.json());
+        resolvedApiBase = base;
+        const actualOrigin = base || location.origin;
+        canvas.setAttribute('data-api-base', actualOrigin);
+        document.getElementById('memory-api-status').textContent = `사용 API: ${actualOrigin}${base ? ' · 별도 서비스' : ' · 현재 페이지 서버'}`;
+        return base;
+      } catch (error) {
+        failures.push(`${base || '현재 서버'}: ${error.message}`);
+      } finally { clearTimeout(timeout); }
     }
-    return fetch(path, options);
+    document.getElementById('memory-api-status').textContent = '사용 API: 연결 실패';
+    throw new Error(`기억 API 연결 실패 (${failures.join('; ')})`);
+  }
+  async function apiFetch(path, options) {
+    if (resolvedApiBase === null) {
+      if (!apiDiscovery) apiDiscovery = discoverMemoryApi();
+      try { await apiDiscovery; }
+      finally { apiDiscovery = null; }
+    }
+    const isWrite = options && options.method && options.method !== 'GET';
+    if (isWrite) activeWriteCount++;
+    try { return await fetch(resolvedApiBase + path, options); }
+    finally { if (isWrite) activeWriteCount--; }
   }
 
-  async function loadGraphData() {
+  async function loadGraphData({background = false, suppliedData = null} = {}) {
+    graphLoadCount++;
+    const request = ++graphRequest;
+    const status = document.getElementById('graph-status');
+    try {
     const params = new URLSearchParams({
       category: state.categoryFilter || 'all',
       q: state.query,
     });
-    const res = await apiFetch(`/api/memory/graph?${params}`);
-    const data = await res.json();
-    state.rawNodes = data.nodes || [];
-    state.rawEdges = data.edges || [];
+    let data = suppliedData;
+    if (!data) {
+      const res = await apiFetch(`/api/memory/graph?${params}`);
+      if (!res.ok) throw new Error(`기억 API 응답 오류 (${res.status})`);
+      data = await res.json();
+    }
+    if (request !== graphRequest) return;
+    const graph = graphView.normalizeGraph(data);
+    graphFingerprint = graphView.graphRevision(data);
+    state.rawNodes = graph.nodes;
+    state.rawEdges = graph.edges;
 
-    const st = data.stats || {};
-    const total = st.total || 19;
-    const coreHubs = st.coreHubs || 13;
-    const isolated = st.isolated || 0;
-    const knowNodes = Math.max(0, total - coreHubs - isolated);
-    const links = st.links || 90;
-    const integrityPct = total > 0 ? Math.round(((total - isolated) / total) * 100) : 100;
+    const total = state.rawNodes.length;
+    const coreHubs = state.rawNodes.filter(n => n.isCoreHub).length;
+    const isolated = state.rawNodes.filter(n => n.deg === 0).length;
+    const connectedCore = state.rawNodes.filter(n => n.isCoreHub && n.deg > 0).length;
+    const knowNodes = total - coreHubs;
+    const connectedKnowledge = state.rawNodes.filter(n => !n.isCoreHub && n.deg > 0).length;
+    const links = state.rawEdges.length;
+    const integrityPct = total > 0 ? Math.round(((total - isolated) / total) * 100) : 0;
+    document.getElementById('graph-integrity-status').textContent = `고아 노드 ${isolated}개 · 연결 노드 ${integrityPct}%`;
+    document.getElementById('vault-integrity-ring').setAttribute('stroke-dashoffset', String(141.4 * (1 - integrityPct / 100)));
+    document.getElementById('vault-integrity-needle').setAttribute('transform', `rotate(${-90 + integrityPct * 1.8} 34 34)`);
 
     // Card 1: Synapse Integrity & Core Hubs
     const elTotalDocs = document.getElementById('stat-total-docs');
@@ -1479,8 +1578,8 @@
     const elIntPct = document.getElementById('vault-integrity-pct');
     if (elIntPct) elIntPct.textContent = `${integrityPct}%`;
 
-    const corePct = total > 0 ? ((coreHubs / total) * 100).toFixed(1) : 68.4;
-    const knowPct = total > 0 ? ((knowNodes / total) * 100).toFixed(1) : 31.6;
+    const corePct = total > 0 ? ((connectedCore / total) * 100).toFixed(1) : 0;
+    const knowPct = total > 0 ? ((connectedKnowledge / total) * 100).toFixed(1) : 0;
     const orphPct = total > 0 ? ((isolated / total) * 100).toFixed(1) : 0;
     const segCore = document.getElementById('seg-core-hubs');
     const segKnow = document.getElementById('seg-know-nodes');
@@ -1506,7 +1605,7 @@
     const elDensityBadge = document.getElementById('vault-density-badge');
     if (elDensityBadge) elDensityBadge.textContent = `밀도 ${densityPct}% 달성`;
 
-    const normDensity = Math.min(1, Math.max(0.1, parseFloat(edgesPerNode) / 6.0));
+    const normDensity = Math.min(1, Math.max(0, parseFloat(edgesPerNode) / 6.0));
     const semiArc = document.getElementById('vault-semi-arc');
     if (semiArc) semiArc.setAttribute('stroke-dashoffset', String((91.1 * (1 - normDensity)).toFixed(1)));
     const needle = document.getElementById('vault-density-needle');
@@ -1516,9 +1615,9 @@
     }
 
     // Card 3: 3-Bar Horizontal Distribution (Skill / Revenue / Meeting)
-    const skillCnt = st.skillNodes != null ? st.skillNodes : 9;
-    const revCnt = st.revenueMemories != null ? st.revenueMemories : 1;
-    const meetCnt = st.meetingDecisions != null ? st.meetingDecisions : 0;
+    const skillCnt = state.rawNodes.filter(n => n.sourceKind === 'project_skill').length;
+    const revCnt = state.rawNodes.filter(n => n.category === 'revenue' && !n.isCoreHub).length;
+    const meetCnt = state.rawNodes.filter(n => n.category === 'meeting' && !n.isCoreHub).length;
     const sumKnowledge = skillCnt + revCnt + meetCnt;
     const maxBarBase = Math.max(10, sumKnowledge);
 
@@ -1534,34 +1633,47 @@
     const barSkill = document.getElementById('bar-skill-fill');
     const barRev = document.getElementById('bar-rev-fill');
     const barMeet = document.getElementById('bar-meet-fill');
-    if (barSkill) barSkill.style.width = `${Math.max(8, Math.round((skillCnt / maxBarBase) * 100))}%`;
-    if (barRev) barRev.style.width = `${Math.max(revCnt > 0 ? 16 : 5, Math.round((revCnt / maxBarBase) * 100))}%`;
-    if (barMeet) barMeet.style.width = `${Math.max(meetCnt > 0 ? 14 : 5, Math.round((meetCnt / maxBarBase) * 100))}%`;
+    if (barSkill) barSkill.style.width = `${Math.round((skillCnt / maxBarBase) * 100)}%`;
+    if (barRev) barRev.style.width = `${Math.round((revCnt / maxBarBase) * 100)}%`;
+    if (barMeet) barMeet.style.width = `${Math.round((meetCnt / maxBarBase) * 100)}%`;
 
-    // Card 4: 14D Vault LED Matrix
-    initVaultLedMatrix(total, links);
+    // Current response timestamp; no synthetic history.
+    document.getElementById('graph-data-state').textContent = '응답 확인';
+    document.getElementById('vault-led-cols').textContent = new Date().toLocaleString('ko-KR');
 
     const badge = document.getElementById('memory-sidebar-count');
     if (badge) badge.textContent = total.toLocaleString();
 
     renderNoteLists(data.recentNotes || [], data.recentJournals || []);
-    applyFocusSubgraph();
+    applyFocusSubgraph(background);
+    status.hidden = state.nodes.length > 0;
+    status.textContent = state.nodes.length ? '' : '조건에 맞는 기억 노드가 없습니다. 전체 보기를 선택하세요.';
+    return true;
+    } catch (error) {
+      if (request !== graphRequest) return;
+      status.hidden = false;
+      status.textContent = `그래프를 불러오지 못했습니다: ${error.message}. 시냅스 동기화로 다시 시도할 수 있습니다.`;
+      showGraphUnavailable();
+      return false;
+    } finally { graphLoadCount--; }
   }
 
-  function categoryBadgeLabel(cat, sub) {
-    if (sub === 'crew') return '◆ AI 크루 허브';
+  function categoryBadgeLabel(cat, sub, sourceKind) {
+    if (sub === 'crew') return '✦ AI 크루 허브';
     if (sub === 'channel') return '✦ 운영 채널 허브';
-    if (cat === 'skill' || sub === 'skill') return '🛠️ 학습된 스킬(SKILL.md)';
+    if (sourceKind === 'project_skill') return '◆ 실제 스킬 파일(SKILL.md)';
+    if (sub === 'skill') return '✦ 코어 스킬 허브';
+    if (cat === 'skill') return '◆ 스킬 관련 지식 메모';
     if (cat === 'revenue') return '📈 수익 발생 기억';
     if (cat === 'meeting') return '💬 회의실 결정사항';
-    return '✦ 코어 허브';
+    return cat === 'core_hub' ? '✦ 코어 허브' : `기억 · ${cat || '미분류'}`;
   }
 
   function renderNoteLists(notes, journals) {
     const notesEl = document.getElementById('recent-notes-list');
     notesEl.innerHTML = notes.map(n => `
-      <div class="note-list-item" data-rel="${n.rel}">
-        <strong>${escapeHtml(categoryBadgeLabel(n.category, n.subGroup))} · ${escapeHtml(n.title)}</strong>
+      <div class="note-list-item" data-rel="${escapeHtml(n.rel)}">
+        <strong>${escapeHtml(categoryBadgeLabel(n.category, n.subGroup, n.sourceKind))} · ${escapeHtml(n.title)}</strong>
         <small>${escapeHtml(n.rel)} · 갱신 ${escapeHtml(n.updated || '-')} · 시냅스 연결 ${(n.links || []).length}개</small>
       </div>
     `).join('');
@@ -1574,7 +1686,7 @@
       journalsEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#64748b;">아직 채택된 회의실 결정사항 노드가 없습니다. 회의실에서 회의를 종료하면 4대 시냅스 규칙으로 자동 연결됩니다.</div>';
     } else {
       journalsEl.innerHTML = journals.map(j => `
-        <div class="note-list-item" data-rel="${j.rel}">
+        <div class="note-list-item" data-rel="${escapeHtml(j.rel)}">
           <strong>💬 ${escapeHtml(j.title)}</strong>
           <small>${escapeHtml(j.rel)} · ${escapeHtml(j.updated || '-')} · 시냅스 연결 ${(j.links || []).length}개</small>
         </div>
@@ -1591,6 +1703,17 @@
 
   async function inspectDocument(rel) {
     if (!rel) return;
+    if (!document.getElementById('doc-editor').hidden) {
+      document.getElementById('doc-status').textContent = '편집 내용을 저장하거나 취소한 뒤 다른 노드를 열어 주세요.';
+      return;
+    }
+    pendingDeleteRel = null;
+    document.getElementById('delete-doc-confirmation').hidden = true;
+    const request = ++documentRequest;
+    currentDocument = null;
+    document.getElementById('doc-actions').hidden = true;
+    document.getElementById('doc-editor').hidden = true;
+    document.getElementById('doc-status').textContent = '노드를 불러오는 중입니다.';
     state.selectedRel = rel;
     document.querySelectorAll('.inspector-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === 'doc'));
     document.getElementById('tab-doc').style.display = 'block';
@@ -1599,19 +1722,35 @@
 
     try {
       const res = await apiFetch(`/api/memory/doc?rel=${encodeURIComponent(rel)}`);
-      if (!res.ok) return;
+      if (!res.ok) throw new Error(`문서를 불러오지 못했습니다 (${res.status})`);
       const doc = await res.json();
-      const catLabel = categoryBadgeLabel(doc.category, doc.subGroup);
+      if (request !== documentRequest) return;
+      currentDocument = doc;
+      state.selectedRel = doc.rel;
+      const editNotice = doc.sourceKind === 'bounded_memory' && doc.deletable === false
+        ? '필수 파일 전체 삭제는 불가 · 항목은 원문 편집에서 삭제 가능'
+        : doc.sourceKind === 'sqlite_episode'
+          ? '세션 증거는 원본 보존을 위해 편집하거나 삭제할 수 없습니다.'
+          : (doc.readOnlyReason || '');
+      document.getElementById('doc-status').textContent = editNotice;
+      document.getElementById('doc-actions').hidden = false;
+      document.getElementById('btn-edit-doc').disabled = doc.editable === false;
+      document.getElementById('btn-delete-doc').disabled = doc.deletable === false;
+      document.getElementById('btn-delete-doc').title = doc.deletable === false ? (editNotice || '이 노드는 원본 보존을 위해 삭제할 수 없습니다.') : '복구 가능한 휴지통으로 이동';
+      document.getElementById('btn-edit-doc').title = doc.readOnlyReason || '';
+      const catLabel = categoryBadgeLabel(doc.category, doc.subGroup, doc.sourceKind);
       document.getElementById('doc-title').textContent = doc.title;
       document.getElementById('doc-meta').innerHTML = `
         <span class="badge-hub">${escapeHtml(catLabel)}</span>
         <span style="color:#64748b;">${escapeHtml(doc.rel)}</span>
         <span style="color:#64748b;">갱신: ${escapeHtml(doc.updated || '-')}</span>
+        ${doc.sourcePath ? `<span style="color:#64748b;">원본: ${escapeHtml(doc.sourcePath)}</span>` : ''}
         ${doc.revenueUsd > 0 ? `<span class="badge-hub" style="background:#dcfce7;color:#15803d;">검증 수익 $${doc.revenueUsd}</span>` : ''}
       `;
       const synBox = document.getElementById('doc-synapse-summary');
+      synBox.hidden = false;
       synBox.style.display = 'block';
-      synBox.innerHTML = `<strong>4대 시냅스 무결성 통과</strong> · 부모/연결 허브 <strong>${(doc.links || []).length}개</strong> · 역링크 <strong>${(doc.backlinks || []).length}개</strong> (고아 노드 0개 원칙 적용됨)`;
+      synBox.innerHTML = `<strong>저장된 시냅스 연결</strong> · 부모/연결 허브 <strong>${(doc.links || []).length}개</strong> · 역링크 <strong>${(doc.backlinks || []).length}개</strong> (현재 저장된 연결 기준)`;
       document.getElementById('doc-content').textContent = doc.content || '';
       const outEl = document.getElementById('doc-outbound');
       outEl.innerHTML = (doc.links || []).length
@@ -1629,9 +1768,125 @@
         p.addEventListener('click', () => inspectDocument(p.dataset.link));
       });
     } catch (e) {
-      console.error(e);
+      if (request === documentRequest) {
+        document.getElementById('doc-status').textContent = e.message;
+        document.getElementById('doc-content').textContent = '';
+        document.getElementById('doc-title').textContent = '문서 조회 실패';
+        document.getElementById('doc-meta').textContent = '';
+        document.getElementById('doc-outbound').textContent = '';
+        document.getElementById('doc-backlinks').textContent = '';
+        document.getElementById('doc-synapse-summary').style.display = 'none';
+      }
     }
   }
+
+  const docEditor = document.getElementById('doc-editor');
+  const docStatus = document.getElementById('doc-status');
+  document.getElementById('btn-edit-doc').addEventListener('click', () => {
+    if (!currentDocument || currentDocument.editable === false) return;
+    pendingDeleteRel = null;
+    document.getElementById('delete-doc-confirmation').hidden = true;
+    document.getElementById('edit-doc-title').value = currentDocument.title || '';
+    document.getElementById('edit-doc-category').value = currentDocument.category || '';
+    document.getElementById('edit-doc-content').value = currentDocument.content || '';
+    document.getElementById('edit-doc-links').value = (currentDocument.links || []).join('\n');
+    document.getElementById('edit-parent-candidates').textContent = '연결 가능: ' + (currentDocument.parentCandidates || []).map(n => typeof n === 'string' ? n : (n.rel || n.id || n.title)).join(', ');
+    docEditor.hidden = false;
+    document.getElementById('edit-doc-title').focus();
+  });
+  document.getElementById('btn-cancel-doc').addEventListener('click', () => { docEditor.hidden = true; });
+  async function mutateDocument(method, payload) {
+    const doc = currentDocument;
+    if (!doc || !doc.revision) throw new Error('문서를 다시 열고 변경해 주세요.');
+    const params = new URLSearchParams({rel: doc.rel});
+    if (method === 'DELETE') params.set('expected_revision', doc.revision);
+    const res = await apiFetch(`/api/memory/doc?${params}`, {
+      method, headers: {'Content-Type': 'application/json'},
+      ...(method === 'PATCH' ? {body: JSON.stringify({...payload, expectedRevision: doc.revision})} : {}),
+    });
+    const result = await res.json();
+    if (!res.ok || !result.ok) throw new Error(typeof result.detail === 'string' ? result.detail : `변경 실패 (${res.status}). 최신 문서를 다시 확인해 주세요.`);
+    return result;
+  }
+  docEditor.addEventListener('submit', async e => {
+    e.preventDefault();
+    const button = document.getElementById('btn-save-doc');
+    button.disabled = true;
+    try {
+      const rel = currentDocument.rel;
+      await mutateDocument('PATCH', {
+        title: document.getElementById('edit-doc-title').value.trim(),
+        category: document.getElementById('edit-doc-category').value.trim(),
+        content: document.getElementById('edit-doc-content').value,
+        links: document.getElementById('edit-doc-links').value.split('\n').map(s => s.trim()).filter(Boolean),
+      });
+      docEditor.hidden = true;
+      await loadGraphData();
+      await inspectDocument(rel);
+      docStatus.textContent = '변경사항이 저장되었습니다.';
+    } catch (error) { docStatus.textContent = error.message; }
+    finally { button.disabled = false; }
+  });
+  const deleteConfirmation = document.getElementById('delete-doc-confirmation');
+  document.getElementById('btn-delete-doc').addEventListener('click', () => {
+    if (!currentDocument || currentDocument.deletable === false) return;
+    if (!docEditor.hidden) {
+      docStatus.textContent = '편집 내용을 저장하거나 취소한 뒤 휴지통으로 이동해 주세요.';
+      return;
+    }
+    pendingDeleteRel = currentDocument.rel;
+    document.getElementById('delete-doc-target').textContent = `“${currentDocument.title}” 노드를 휴지통으로 이동할까요?`;
+    deleteConfirmation.hidden = false;
+    document.getElementById('btn-confirm-delete-doc').focus();
+  });
+  document.getElementById('btn-cancel-delete-doc').addEventListener('click', () => {
+    pendingDeleteRel = null;
+    deleteConfirmation.hidden = true;
+    document.getElementById('btn-delete-doc').focus();
+  });
+  document.getElementById('btn-confirm-delete-doc').addEventListener('click', async e => {
+    if (!currentDocument || currentDocument.rel !== pendingDeleteRel || currentDocument.deletable === false) return;
+    const button = e.currentTarget;
+    button.disabled = true;
+    document.getElementById('btn-cancel-delete-doc').disabled = true;
+    try {
+      const result = await mutateDocument('DELETE');
+      pendingDeleteRel = null;
+      deleteConfirmation.hidden = true;
+      lastTrashId = result.trashId;
+      document.getElementById('btn-restore-doc').hidden = !lastTrashId;
+      currentDocument = null;
+      state.selectedRel = null;
+      state.focusId = null;
+      docEditor.hidden = true;
+      document.getElementById('doc-actions').hidden = true;
+      document.getElementById('doc-title').textContent = '노드를 휴지통으로 이동했습니다';
+      document.getElementById('doc-content').textContent = '';
+      document.getElementById('doc-outbound').textContent = '';
+      document.getElementById('doc-backlinks').textContent = '';
+      document.getElementById('doc-synapse-summary').style.display = 'none';
+      docStatus.textContent = result.restorable ? '원문은 휴지통에 보관되어 복구할 수 있습니다.' : '삭제가 완료되었습니다.';
+      await loadGraphData();
+    } catch (error) { docStatus.textContent = error.message; }
+    finally { button.disabled = false; document.getElementById('btn-cancel-delete-doc').disabled = false; }
+  });
+
+  document.getElementById('btn-restore-doc').addEventListener('click', async event => {
+    if (!lastTrashId) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      const response = await apiFetch(`/api/memory/trash/${encodeURIComponent(lastTrashId)}/restore`, {method:'POST'});
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.detail || `복구 실패 (${response.status})`);
+      lastTrashId = null;
+      button.hidden = true;
+      await loadGraphData();
+      await inspectDocument(result.rel);
+      docStatus.textContent = '노드와 연결을 복구했습니다.';
+    } catch (error) { docStatus.textContent = error.message; }
+    finally { button.disabled = false; }
+  });
 
   // Canvas interactions (drag, pan, wheel zoom, click, double-click 2-hops)
   let downPos = null;
@@ -1702,11 +1957,10 @@
     const [mx, my] = getMousePos(e);
     const hit = hitTest(mx, my);
     if (hit !== null && state.nodes[hit]) {
-      state.focusId = state.nodes[hit].id;
+      const node = state.nodes[hit];
+      state.focusId = node.id;
       applyFocusSubgraph();
-      if (state.nodes[hit] && state.nodes[hit].rel) {
-        inspectDocument(state.nodes[hit].rel);
-      }
+      if (node.rel) inspectDocument(node.rel);
     }
   });
 
@@ -1730,8 +1984,7 @@
 
   // UI Controls
   document.getElementById('btn-back-all').addEventListener('click', () => {
-    state.focusId = null;
-    applyFocusSubgraph();
+    document.getElementById('chip-all').click();
   });
 
   document.getElementById('btn-reset-view').addEventListener('click', () => {
@@ -1766,6 +2019,7 @@
       const cat = chip.getAttribute('data-cat') || 'all';
       state.categoryFilter = cat;
       state.focusId = null;
+      if (cat === 'all') { state.query = ''; document.getElementById('graph-search').value = ''; }
       document.querySelectorAll('#synapse-filter-group .graph-chip[data-cat]').forEach(c => {
         c.classList.toggle('on', c === chip);
       });
@@ -1793,13 +2047,29 @@
     });
   });
 
+  document.getElementById('graph-node-list').addEventListener('click', event => {
+    const button = event.target.closest('[data-node-rel]');
+    if (button) inspectDocument(button.dataset.nodeRel);
+  });
+
   document.getElementById('btn-sync-vault').addEventListener('click', async () => {
     const btn = document.getElementById('btn-sync-vault');
     btn.textContent = '⚡ 동기화 중...';
-    await apiFetch('/api/memory/sync', { method: 'POST' });
-    await loadGraphData();
-    btn.textContent = '✅ 동기화 완료';
-    setTimeout(() => { btn.textContent = '⚡ 시냅스 동기화'; }, 2000);
+    btn.disabled = true;
+    try {
+      const response = await apiFetch('/api/memory/sync', { method: 'POST' });
+      if (!response.ok) throw new Error(`동기화 API 응답 오류 (${response.status})`);
+      if (!await loadGraphData()) throw new Error('그래프 응답을 확인하지 못했습니다.');
+      btn.textContent = '✅ 동기화 완료';
+    } catch (error) {
+      btn.textContent = '⚠ 동기화 실패 · 다시 시도';
+      const status = document.getElementById('graph-status');
+      status.hidden = false;
+      status.textContent = error.message;
+      showGraphUnavailable();
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   // Modal handlers
@@ -1811,29 +2081,87 @@
     const content = document.getElementById('new-note-content').value.trim();
     const category = document.getElementById('new-note-category').value;
     const sourceAgent = document.getElementById('new-note-agent').value;
-    if (!title) return alert('제목을 입력하세요.');
-    const res = await apiFetch('/api/memory/note', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, content, category, sourceAgent, merge: true, create: false }),
-    });
-    const out = await res.json();
-    if (out.ok) {
+    const status = document.getElementById('new-note-status');
+    if (!title || content.length < 10) {
+      status.textContent = '제목과 10자 이상의 본문을 입력하세요.';
+      return;
+    }
+    const button = document.getElementById('btn-save-note');
+    button.disabled = true;
+    status.textContent = '메모를 저장하는 중입니다.';
+    try {
+      const res = await apiFetch('/api/memory/note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content, category, sourceAgent }),
+      });
+      const out = await res.json();
+      if (!res.ok || !out.ok) throw new Error(out.detail || `메모 저장 실패 (${res.status})`);
       modal.classList.remove('open');
       document.getElementById('new-note-title').value = '';
       document.getElementById('new-note-content').value = '';
+      status.textContent = '';
       await loadGraphData();
-      inspectDocument(out.rel);
-    } else if (out.detail) {
-      alert(out.detail);
+      await inspectDocument(out.rel);
+    } catch (error) { status.textContent = error.message; }
+    finally { button.disabled = false; }
+  });
+
+  function hasOpenDraft() {
+    return !docEditor.hidden || !deleteConfirmation.hidden || modal.classList.contains('open');
+  }
+  function scheduleGraphPoll() {
+    if (pollTimer) clearTimeout(pollTimer);
+    pollTimer = setTimeout(pollGraphChanges, 4000);
+  }
+  async function pollGraphChanges() {
+    pollTimer = null;
+    if (document.hidden || pollInFlight || graphLoadCount || activeWriteCount) {
+      scheduleGraphPoll();
+      return;
     }
+    pollInFlight = true;
+    const requestAtStart = graphRequest;
+    const updateStatus = document.getElementById('graph-update-status');
+    try {
+      const params = new URLSearchParams({category:state.categoryFilter || 'all', q:state.query});
+      const response = await apiFetch(`/api/memory/graph?${params}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      graphView.normalizeGraph(data);
+      if (requestAtStart !== graphRequest || activeWriteCount) return;
+      if (graphView.graphRevision(data) === graphFingerprint) return;
+      if (hasOpenDraft()) {
+        updateStatus.textContent = '새로운 기억 변경이 있습니다. 편집 또는 메모 등록을 마치면 반영합니다.';
+        return;
+      }
+      const selectedRel = state.selectedRel;
+      if (await loadGraphData({background:true,suppliedData:data})) {
+        updateStatus.textContent = '새로운 기억과 연결을 반영했습니다.';
+        if (selectedRel && state.rawNodes.some(node=>node.rel===selectedRel)) await inspectDocument(selectedRel);
+      }
+    } catch (error) {
+      updateStatus.textContent = `자동 갱신을 확인하지 못했습니다 (${error.message}). 마지막 성공 응답을 표시합니다.`;
+    } finally {
+      pollInFlight = false;
+      scheduleGraphPoll();
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (pollTimer) clearTimeout(pollTimer);
+    pollTimer = null;
+    if (!document.hidden) scheduleGraphPoll();
   });
 
   // Check URL query ?rel=...
   const urlRel = new URLSearchParams(location.search).get('rel') || 'hubs/crew-jarvis.md';
-  loadGraphData().then(() => {
-    inspectDocument(urlRel);
-  });
+  loadGraphData().then(loaded => {
+    if (loaded) inspectDocument(urlRel);
+  }).finally(scheduleGraphPoll);
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => fitCamera(false)).observe(canvas.parentElement);
+  }
+  window.addEventListener('resize', () => fitCamera(false));
   requestAnimationFrame(renderFrame);
 })();
 </script>

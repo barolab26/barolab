@@ -1,40 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-BaroLab Clean-Slate Memory Graph Engine (`server/memory_graph.py`).
+"""Non-destructive BaroLab memory graph and source document API.
 
-Core Principles (Clean Slate + 0 Orphan Nodes Rule):
-1. Legacy Isolation (`server/data/legacy_argo_backup/`):
-   - All legacy ARGO `.index.sqlite`, `vault/` notes, and existing `memory_graph.sqlite3`
-     containing deprecated projects (`youtube-coupang`, `biz-down`, `new-item`, `kphotogi`, etc.)
-     and 757+ orphan nodes are safely backed up into `server/data/legacy_argo_backup/` and
-     completely excluded from graph loading.
-2. Clean Seed Hubs (13 Core Hubs, 0 Orphan Nodes):
-   - 5 AI Crew Hubs (`hub_cat='crew'`):
-     1) `자비스(총괄)` (`hubs/crew-jarvis.md`)
-     2) `패치(개발/스킬)` (`hubs/crew-patch.md`)
-     3) `퍼블리(발행/검수)` (`hubs/crew-publi.md`)
-     4) `트레이스(성과/수익)` (`hubs/crew-trace.md`)
-     5) `레이더(R&D발굴)` (`hubs/crew-radar.md`)
-   - 4 Operating Channel Hubs (`hub_cat='channel'`):
-     6) `네이버 블로그(5개 계정)` (`hubs/channel-naver-blog.md`)
-     7) `CF 블로그(16개 도메인)` (`hubs/channel-cf-blog.md`)
-     8) `네이버 지식iN` (`hubs/channel-naver-kin.md`)
-     9) `Threads` (`hubs/channel-threads.md`)
-   - 4 Core Skill Hubs (`hub_cat='skill'`):
-     10) `간접체험 4단계 집필법` (`skills/skill-indirect-experience.md`)
-     11) `SVG 캡처 가이드` (`skills/skill-svg-capture-guide.md`)
-     12) `부분 수선(In-Place Repair)` (`skills/skill-inplace-repair.md`)
-     13) `애드센스 고수익 배치` (`skills/skill-adsense-high-rpm.md`)
-3. '0 Orphan Nodes' 4-Synapse Rule (`resolve_synapse_parents` & `register_synapse_memory`):
-   - Every memory node MUST connect to at least 2 parent hubs across the 4 Synapse axes before it can enter the graph:
-     ① [출처 연결 (Source Crew)]: `@자비스`, `@패치`, `@퍼블리`, `@트레이스`, `@레이더`
-     ② [적용 채널/도메인 연결 (Channel)]: `네이버 블로그(5개 계정)`, `CF 블로그(16개 도메인)`, `네이버 지식iN`, `Threads`
-     ③ [스킬 연결 (Skill)]: `간접체험 4단계 집필법`, `SVG 캡처 가이드`, `부분 수선(In-Place Repair)`, `애드센스 고수익 배치`
-     ④ [성과(Growth) 게이트]: Temporary logs or failed attempts are rejected; only
-        (a) published quality posts (`published_post`),
-        (b) meeting room decisions (`meeting`),
-        (c) verified revenue/traffic insights from `growth.sqlite3` (`revenue`), or
-        (d) learned skills (`skill`) are promoted to memory nodes.
+Legacy vault documents remain intact. Project MEMORY/USER, procedural SKILL.md
+files and SQLite episode evidence are overlaid with explicit source links and
+review audit edges. Reads never reset, purge or reconnect stored documents.
 """
 
 from __future__ import annotations
@@ -48,10 +17,13 @@ import sqlite3
 import time
 from datetime import datetime
 from pathlib import Path
+from functools import wraps
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+from common.hermes_memory import _store as hermes_store, atomic_write, safe_path, file_lock, revision, MemoryConflict
+import uuid
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SERVER_DIR = Path(__file__).resolve().parent
@@ -466,11 +438,21 @@ def extract_doc_meta(rel: str, text: str, mtime_ms: int, size: int = 0) -> Dict[
     }
 
 
+class _ClosingConnection(sqlite3.Connection):
+    def __exit__(self, *args):
+        try:
+            return super().__exit__(*args)
+        finally:
+            self.close()
+
+
 def connect_db() -> sqlite3.Connection:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    db = sqlite3.connect(DB_PATH, timeout=15.0)
+    db = sqlite3.connect(DB_PATH, timeout=15.0, factory=_ClosingConnection)
     db.row_factory = sqlite3.Row
-    db.execute("PRAGMA journal_mode = WAL")
+    # Preserve the existing journal mode. Switching WAL -> DELETE on every read
+    # requires an exclusive lock and fails while an existing service is connected.
+    # New databases use SQLite's default DELETE journal without a mode change.
     db.executescript(
         """
         CREATE TABLE IF NOT EXISTS docs (
@@ -505,6 +487,7 @@ def connect_db() -> sqlite3.Connection:
         db.execute("ALTER TABLE docs ADD COLUMN sub_group TEXT NOT NULL DEFAULT ''")
     if "is_core_hub" not in cols:
         db.execute("ALTER TABLE docs ADD COLUMN is_core_hub INTEGER NOT NULL DEFAULT 0")
+    db.execute("CREATE TABLE IF NOT EXISTS memory_trash (trash_id TEXT PRIMARY KEY, rel TEXT NOT NULL, payload TEXT NOT NULL, deleted_at TEXT NOT NULL, restored_at TEXT)")
     return db
 
 
@@ -773,138 +756,45 @@ def promote_growth_insights_to_nodes(db: sqlite3.Connection) -> int:
 
 
 def reset_to_clean_slate(force: bool = False) -> Dict[str, Any]:
-    """
-    Initialize or reset `memory_graph.sqlite3` to the Clean Slate structure:
-    1. Isolate legacy ARGO files into `server/data/legacy_argo_backup/`.
-    2. Wipe legacy/orphan rows from `docs` and seed the 13 Core Hubs (5 AI Crew + 4 Channels + 4 Core Skills).
-    3. Promote verified `growth.sqlite3` revenue insight node with 4-Synapse links.
-    4. Guarantee 0 orphan nodes (`isolated == 0`).
-    """
-    with connect_db() as db:
-        ver_row = db.execute("SELECT v FROM meta WHERE k = 'clean_slate_version'").fetchone()
-        if ver_row and ver_row["v"] == CLEAN_SLATE_VERSION and not force:
-            # Purge any accidental orphan or deprecated node just in case
-            _enforce_zero_orphans_in_db(db)
-            return {"status": "already_clean", "version": CLEAN_SLATE_VERSION}
-
-    isolation_report = isolate_legacy_argo_data()
-
-    with connect_db() as db:
-        db.execute("BEGIN IMMEDIATE")
-        try:
-            db.execute("DELETE FROM docs")
-            now_ms = int(time.time() * 1000)
-            today_str = local_day(now_ms)
-
-            for hub in CLEAN_SEED_HUBS:
-                rel = hub["rel"]
-                disk_path = LOCAL_VAULT_DIR / rel
-                disk_path.parent.mkdir(parents=True, exist_ok=True)
-                full_md = (
-                    f"---\nupdated: {today_str}\ncategory: {hub['category']}\n---\n"
-                    f"{hub['body'].strip()}\n\n"
-                    f"## 연결된 허브\n"
-                    + "\n".join(f"- [[{lk}]]" for lk in hub["links"])
-                    + "\n"
-                )
-                disk_path.write_text(full_md, encoding="utf-8")
-
-                db.execute(
-                    """
-                    INSERT INTO docs (
-                        rel, kind, category, sub_group, title, links, updated, updated_exact,
-                        mtime_ms, size, body, revenue_usd, revenue_krw, sessions, is_revenue_hub, is_core_hub
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, 0.0, 0.0, 0, ?, ?)
-                    """,
-                    (
-                        rel,
-                        hub["kind"],
-                        hub["category"],
-                        hub["sub_group"],
-                        hub["title"],
-                        json.dumps(hub["links"], ensure_ascii=False),
-                        today_str,
-                        now_ms,
-                        len(full_md.encode("utf-8")),
-                        full_md,
-                        int(hub["is_revenue_hub"]),
-                        int(hub["is_core_hub"]),
-                    ),
-                )
-
-            promote_growth_insights_to_nodes(db)
-            _enforce_zero_orphans_in_db(db)
-
-            db.execute(
-                "INSERT OR REPLACE INTO meta (k, v) VALUES ('clean_slate_version', ?)",
-                (CLEAN_SLATE_VERSION,),
-            )
-            db.execute(
-                "INSERT OR REPLACE INTO meta (k, v) VALUES ('last_sync', ?)",
-                (datetime.now().isoformat(),),
-            )
-            db.commit()
-        except Exception:
-            db.rollback()
-            raise
-
-    return {
-        "status": "clean_seeded",
-        "version": CLEAN_SLATE_VERSION,
-        "isolation": isolation_report,
-    }
-
-
-def _enforce_zero_orphans_in_db(db: sqlite3.Connection) -> int:
-    """
-    Verify that every document in `docs`:
-    1. Does NOT match any deprecated legacy project (`youtube-coupang`, `biz-down`, `new-item`, `kphotogi`).
-    2. Has at least 2 valid parent hub links via the 4-Synapse Rule.
-    Returns the number of repaired/removed rows.
-    """
-    rows = db.execute("SELECT rel, title, body, links, category, is_core_hub FROM docs").fetchall()
-    valid_stems = {stem(r["rel"]) for r in rows}
-    repaired = 0
-    for r in rows:
-        rel = r["rel"]
-        title = r["title"]
-        if DEPRECATED_PROJECT_PATTERNS.search(f"{rel} {title}"):
-            db.execute("DELETE FROM docs WHERE rel = ?", (rel,))
-            repaired += 1
-            continue
-        try:
-            links = json.loads(r["links"] or "[]")
-        except Exception:
-            links = []
-        valid_links = [lk for lk in links if lk in valid_stems and lk != stem(rel)]
-        if len(valid_links) < 2:
-            synapse_links, _ = resolve_synapse_parents(title, r["body"] or "", category=r["category"])
-            for slk in synapse_links:
-                if slk in valid_stems and slk != stem(rel) and slk not in valid_links:
-                    valid_links.append(slk)
-            db.execute(
-                "UPDATE docs SET links = ? WHERE rel = ?",
-                (json.dumps(valid_links, ensure_ascii=False), rel),
-            )
-            repaired += 1
-    return repaired
+    """Compatibility entry point: initialize missing hubs without deleting any data."""
+    with file_lock(DATA_DIR / ".graph.lock"), connect_db() as db:
+        existing = {r[0] for r in db.execute("SELECT rel FROM docs")}
+        tombstones = {r[0] for r in db.execute("SELECT rel FROM memory_trash WHERE restored_at IS NULL")}
+        seeded = 0
+        for hub in CLEAN_SEED_HUBS:
+            rel = hub["rel"]
+            if rel in existing or rel in tombstones:
+                continue
+            path = safe_path(LOCAL_VAULT_DIR, rel)
+            if path.exists():
+                raw = path.read_text(encoding="utf-8")
+            else:
+                raw = hub["body"].strip() + "\n\n" + "\n".join(f"- [[{link}]]" for link in hub["links"]) + "\n"
+                atomic_write(path, raw)
+            meta = extract_doc_meta(rel, raw, path.stat().st_mtime_ns // 1000000, len(raw.encode("utf-8")))
+            db.execute("INSERT OR IGNORE INTO docs(rel,kind,category,sub_group,title,links,updated,mtime_ms,size,body,is_revenue_hub,is_core_hub) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                       (rel, hub["kind"], hub["category"], hub["sub_group"], meta["title"], json.dumps(meta["links"],ensure_ascii=False), meta["updated"], meta["mtime_ms"], meta["size"], raw, int(hub["is_revenue_hub"]), 1))
+            seeded += 1
+    return {"status": "initialized_preserving_existing", "seeded": seeded}
 
 
 def sync_argo_vault_and_growth(force: bool = False) -> Dict[str, Any]:
-    """
-    Clean-Slate Synchronization Entrypoint (replaces legacy ARGO import):
-    Never loads `.index.sqlite` or `ARGO_VAULT_DIR`. Ensures Clean Seed hubs and
-    `growth.sqlite3` verified revenue signals are up to date with 0 orphan nodes.
-    """
-    res = reset_to_clean_slate(force=False)
+    """Non-destructive explicit synchronization. Read APIs never rewrite documents."""
+    result = reset_to_clean_slate()
     with connect_db() as db:
-        promote_growth_insights_to_nodes(db)
-        _enforce_zero_orphans_in_db(db)
-        db.commit()
         count = db.execute("SELECT COUNT(*) FROM docs").fetchone()[0]
-    return {"status": res.get("status", "synced"), "synced_docs": count, "orphan_nodes": 0}
+    return {**result, "synced_docs": count}
 
 
+def _serialized_graph_write(function):
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        with file_lock(DATA_DIR / ".graph.lock"):
+            return function(*args, **kwargs)
+    return wrapped
+
+
+@_serialized_graph_write
 def register_synapse_memory(
     title: str,
     content: str,
@@ -918,10 +808,10 @@ def register_synapse_memory(
     rel_override: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Register a validated knowledge node under the 4-Synapse Rule ('0 Orphan Nodes' Principle).
+    Register a knowledge document without excluding unlinked records.
     - Rejects deprecated projects or empty/temporary failure logs.
-    - Automatically binds >= 2 parent hubs across [Source Crew, Operating Channel, Core Skill, Growth].
-    - Updates bidirectional backlinks on parent hubs.
+    - Retains the established source/channel/skill metadata resolver for note registration.
+    - Backlinks are derived from source links at read time.
     """
     clean_title = (title or "").strip()
     clean_body = (content or "").strip()
@@ -941,15 +831,13 @@ def register_synapse_memory(
         skill=skill,
         category=category,
     )
-    if len(parent_hubs) < 2:
-        raise ValueError("4대 연결 고리(Synapse Rule) 기준 미달: 최소 2개 이상의 부모 허브와 연결되어야 합니다.")
 
-    reset_to_clean_slate(force=False)
     now_ms = int(time.time() * 1000)
     today_str = local_day(now_ms)
 
     if rel_override:
-        rel = rel_override.replace("\\", "/").lstrip("/")
+        rel = rel_override.replace("\\", "/")
+        safe_path(LOCAL_VAULT_DIR, rel)
         if not rel.endswith(".md"):
             rel += ".md"
     else:
@@ -978,9 +866,11 @@ def register_synapse_memory(
         f"{synapse_footer}"
     )
 
-    disk_file = LOCAL_VAULT_DIR / rel
-    disk_file.parent.mkdir(parents=True, exist_ok=True)
-    disk_file.write_text(full_md, encoding="utf-8")
+    disk_file = safe_path(LOCAL_VAULT_DIR, rel)
+    with connect_db() as db:
+        if db.execute("SELECT 1 FROM memory_trash WHERE rel=? AND restored_at IS NULL", (rel,)).fetchone():
+            raise ValueError("Document is in trash; restore it explicitly before replacing")
+    atomic_write(disk_file, full_md)
 
     kind = "skill" if category == "skill" else ("journal" if category == "meeting" else "note")
     is_rev = 1 if (category == "revenue" or revenue_usd > 0 or revenue_krw > 0) else 0
@@ -1028,22 +918,20 @@ def register_synapse_memory(
 
 
 def load_all_docs() -> List[Dict[str, Any]]:
-    sync_argo_vault_and_growth(force=False)
     with connect_db() as db:
         rows = db.execute(
             "SELECT rel, kind, category, sub_group, title, links, updated, updated_exact, mtime_ms, size, "
-            "revenue_usd, revenue_krw, sessions, is_revenue_hub, is_core_hub FROM docs"
+            "revenue_usd, revenue_krw, sessions, is_revenue_hub, is_core_hub, body FROM docs"
         ).fetchall()
     result = []
     for r in rows:
         rel = r["rel"]
-        if DEPRECATED_PROJECT_PATTERNS.search(f"{rel} {r['title']}"):
-            continue
         try:
             links = json.loads(r["links"]) if r["links"] else []
         except Exception:
             links = []
         dir_prefix = rel.split("/")[0] if "/" in rel else "notes"
+        raw = read_doc_file(rel)
         result.append(
             {
                 "rel": rel,
@@ -1062,9 +950,12 @@ def load_all_docs() -> List[Dict[str, Any]]:
                 "sessions": int(r["sessions"] or 0),
                 "isRevenueHub": bool(r["is_revenue_hub"]),
                 "isCoreHub": bool(r["is_core_hub"]),
+                "revision": revision(raw if raw is not None else r["body"]),
+                "sourceKind": "vault_markdown" if raw is not None else "sqlite_document",
+                "sourcePath": str(LOCAL_VAULT_DIR / rel) if raw is not None else f"{DB_PATH}#docs/{rel}",
             }
         )
-    return result
+    return result + _hermes_documents()
 
 
 def build_graph_2d(
@@ -1074,10 +965,10 @@ def build_graph_2d(
     query: str = "",
 ) -> Dict[str, Any]:
     """
-    Build the 2D Synapse Graph with 0 Orphan Nodes guarantee.
+    Build the graph from every real document and valid explicit link.
     Supports category_filter in ('all', 'core_hub', 'revenue', 'skill', 'meeting').
     When a filter is active, matching nodes AND their connected parent hubs are kept so
-    0 orphan nodes ever appear on screen.
+    connected context remains available. Unlinked documents remain visible in all.
     """
     nodes: List[Dict[str, Any]] = []
     idx: Dict[str, int] = {}
@@ -1102,6 +993,12 @@ def build_graph_2d(
                 "sessions": d.get("sessions", 0),
                 "isRevenueHub": bool(d.get("isRevenueHub", False)),
                 "isCoreHub": bool(d.get("isCoreHub", False)),
+                "layer": d.get("layer", "semantic"),
+                "sourceKind": d.get("sourceKind", "vault_markdown"),
+                "sourcePath": d.get("sourcePath", str(LOCAL_VAULT_DIR / d["rel"])),
+                "readOnly": d.get("readOnly", False),
+                "revision": d.get("revision", ""),
+                "skillName": d.get("skillName", ""),
             }
         )
         by_base[node_id.split("/")[-1]] = node_id
@@ -1153,9 +1050,6 @@ def build_graph_2d(
     cat_clean = (category_filter or "all").strip().lower()
 
     def matches_filter(i: int, n: Dict[str, Any]) -> bool:
-        if deg[i] == 0:
-            # 0 Orphan Node Principle: never show an unlinked node
-            return False
         if cat_clean == "core_hub":
             if not (n.get("isCoreHub") or n.get("category") == "core_hub"):
                 return False
@@ -1203,11 +1097,12 @@ def build_graph_2d(
         "stats": {
             "total": len(nodes),
             "links": len(edges),
-            "linked": len(nodes),
-            "isolated": 0,
+            "linked": sum(1 for d in deg if d > 0),
+            "isolated": sum(1 for d in deg if d == 0),
             "coreHubs": cat_counts["core_hub"],
             "revenueMemories": cat_counts["revenue"],
             "skillNodes": cat_counts["skill"],
+            "proceduralSkills": sum(1 for n in nodes if n.get("sourceKind") == "project_skill"),
             "meetingDecisions": cat_counts["meeting"],
             "revenueHubs": sum(1 for n in nodes if n.get("isRevenueHub")),
         },
@@ -1215,14 +1110,8 @@ def build_graph_2d(
 
 
 def read_doc_file(rel: str) -> Optional[str]:
-    rel_norm = rel.replace("\\", "/").lstrip("/")
-    candidate = LOCAL_VAULT_DIR / rel_norm
-    if candidate.is_file():
-        try:
-            return candidate.read_text(encoding="utf-8", errors="replace")
-        except Exception:
-            pass
-    return None
+    candidate = safe_path(LOCAL_VAULT_DIR, rel)
+    return candidate.read_text(encoding="utf-8") if candidate.is_file() else None
 
 
 class SaveNoteRequest(BaseModel):
@@ -1272,57 +1161,11 @@ def get_memory_graph(
 
 
 @memory_router.get("/doc")
-def get_memory_doc(rel: str = Query(..., description="Relative vault path e.g. hubs/crew-jarvis.md")):
-    rel_clean = rel.replace("\\", "/").lstrip("/")
-    if not rel_clean.endswith(".md"):
-        rel_clean += ".md"
-    sync_argo_vault_and_growth(force=False)
-    with connect_db() as db:
-        row = db.execute("SELECT * FROM docs WHERE rel = ?", (rel_clean,)).fetchone()
-        if not row:
-            row = db.execute(
-                "SELECT * FROM docs WHERE rel LIKE ? OR title = ?",
-                (f"%/{stem(rel_clean).split('/')[-1]}.md", rel.replace(".md", "")),
-            ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail=f"기억 문서를 찾을 수 없습니다: {rel_clean}")
-
-        actual_rel = row["rel"]
-        text = read_doc_file(actual_rel) or row["body"] or f"# {row['title']}\n"
-        try:
-            outbound = json.loads(row["links"] or "[]")
-        except Exception:
-            outbound = []
-
-        target_stem = stem(actual_rel)
-        target_base = target_stem.split("/")[-1]
-        backlinks = []
-        for r in db.execute("SELECT rel, title, links, updated FROM docs WHERE rel != ?", (actual_rel,)):
-            try:
-                l_list = json.loads(r["links"] or "[]")
-            except Exception:
-                l_list = []
-            if target_stem in l_list or target_base in l_list or row["title"] in l_list:
-                backlinks.append({"rel": r["rel"], "title": r["title"], "updated": r["updated"]})
-
-    return {
-        "rel": actual_rel,
-        "kind": row["kind"],
-        "category": row["category"],
-        "subGroup": row["sub_group"],
-        "title": row["title"],
-        "updated": row["updated"],
-        "mtimeMs": row["mtime_ms"],
-        "size": row["size"],
-        "links": outbound,
-        "backlinks": backlinks[:50],
-        "content": text,
-        "revenueUsd": float(row["revenue_usd"] or 0.0),
-        "revenueKrw": float(row["revenue_krw"] or 0.0),
-        "sessions": int(row["sessions"] or 0),
-        "isRevenueHub": bool(row["is_revenue_hub"]),
-        "isCoreHub": bool(row["is_core_hub"]),
-    }
+def get_memory_doc(rel: str = Query(...)):
+    try:
+        return _read_document(rel)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
 
 
 @memory_router.post("/note")
@@ -1343,10 +1186,9 @@ def save_memory_note(req: SaveNoteRequest):
 
 @memory_router.post("/sync")
 def trigger_memory_sync(reset: bool = Query(False)):
-    if reset:
-        res = reset_to_clean_slate(force=True)
-    else:
-        res = sync_argo_vault_and_growth(force=True)
+    if reset is True:
+        raise HTTPException(409, "Destructive reset is disabled; use document trash/restore")
+    res = sync_argo_vault_and_growth(force=True)
     docs = load_all_docs()
     graph = build_graph_2d(docs, DEFAULT_AGENTS, category_filter="all")
     return {"ok": True, **res, "stats": graph["stats"]}
@@ -1367,8 +1209,278 @@ def get_boss_profile():
     return {"rel": BOSS_PROFILE_REL, "md": md, "items": items}
 
 
-# Ensure Clean Slate initialization on import
-try:
-    reset_to_clean_slate(force=False)
-except Exception as _init_err:
-    print(f"[memory_graph] Clean Slate init notice: {_init_err}", flush=True)
+def _hermes_documents():
+    docs = []
+    for target, filename, title in (("memory", "MEMORY.md", "핵심 기억 (MEMORY)"), ("user", "USER.md", "사용자 프로필 (USER)")):
+        item = hermes_store.bounded(target)
+        path = hermes_store.root / filename
+        docs.append({"rel": f"hermes/{filename}", "title": title, "kind": "memory", "category": "memory",
+                     "layer": "semantic" if target == "memory" else "profile", "links": re.findall(r"\[\[(.*?)\]\]",item["content"]), "isCoreHub": False,
+                     "updated": datetime.fromtimestamp(path.stat().st_mtime).isoformat(), "sourceKind": "bounded_memory",
+                     "sourcePath": str(path), "revision": item["revision"], "content": item["content"], "limit": item["limit"]})
+    for skill in hermes_store.skill_list():
+        path = hermes_store._skill_path(skill["name"])
+        body = hermes_store.skill_view(skill["name"])["content"]
+        docs.append({"rel": f"procedural/{skill['name']}/SKILL.md", "title": skill["title"], "kind": "skill", "category": "skill", "skillName": skill["name"],
+                     "layer": "procedural", "links": re.findall(r"\[\[(.*?)\]\]",body), "sourceKind": "project_skill", "sourcePath": str(path),
+                     "updated": datetime.fromtimestamp(path.stat().st_mtime).isoformat(), "mtimeMs": path.stat().st_mtime_ns//1000000,
+                     "revision": skill["revision"]})
+    with hermes_store.db() as db:
+        episodes = db.execute("SELECT * FROM episodes ORDER BY created_at").fetchall()
+        audits = db.execute("SELECT source,target FROM audit WHERE source LIKE 'review:%'").fetchall()
+    for item in episodes:
+        # Full event IDs remain data, never a filesystem path.
+        key = revision(item["event_id"])
+        targets = [r["target"] for r in audits if r["source"] == "review:" + item["event_id"]]
+        links = []
+        for target in targets:
+            if target in ("memory", "user"):
+                links.append("hermes/" + ("MEMORY" if target == "memory" else "USER"))
+            elif target.startswith("skill:"):
+                links.append("procedural/" + target.split(":",1)[1] + "/SKILL")
+        docs.append({"rel": f"episodes/{key}.md", "eventId": item["event_id"], "title": item["summary"][:100], "kind": "episode",
+                     "category": "meeting", "layer": "episodic", "links": list(dict.fromkeys(links)), "sourceKind": "sqlite_episode",
+                     "sourcePath": f"{hermes_store.db_path}#episodes/{item['event_id']}", "updated": item["created_at"], "readOnly": True,
+                     "revision": revision(json.dumps(dict(item),ensure_ascii=False,indent=2))})
+    return docs
+
+
+def _read_document(rel):
+    rel = str(rel).replace("\\", "/")
+    safe_path(LOCAL_VAULT_DIR, rel)
+    if rel.startswith(("hermes/", "procedural/", "episodes/")):
+        doc = next((d for d in _hermes_documents() if d["rel"] == rel), None)
+        if doc is None:
+            raise HTTPException(404, "Memory document not found")
+        if doc["sourceKind"] == "project_skill":
+            doc.update(hermes_store.skill_view(rel.split("/")[1]))
+        elif doc["sourceKind"] == "sqlite_episode":
+            with hermes_store.db() as db:
+                row = db.execute("SELECT * FROM episodes WHERE event_id=?", (doc["eventId"],)).fetchone()
+            doc["content"] = json.dumps(dict(row), ensure_ascii=False, indent=2)
+            doc["revision"] = revision(doc["content"])
+        all_docs = load_all_docs()
+        aliases = {rel,stem(rel),stem(rel).split("/")[-1],doc["title"]}
+        backlinks = [{"rel": d["rel"],"title":d["title"],"updated":d.get("updated","")} for d in all_docs if d["rel"] != rel and aliases.intersection(d.get("links",[]))]
+        candidates = [{"rel":d["rel"],"title":d["title"],"id":stem(d["rel"])} for d in all_docs if d["rel"] != rel]
+        doc.update({"editable": not doc.get("readOnly", False), "deletable": doc["sourceKind"] == "project_skill", "backlinks": backlinks, "parents": doc.get("links",[]), "parentCandidates": candidates, "readOnlyReason": "Immutable episode evidence" if doc.get("readOnly") else ""})
+        return doc
+    with connect_db() as db:
+        row = db.execute("SELECT * FROM docs WHERE rel=?", (rel,)).fetchone()
+        if row is None:
+            raise HTTPException(404, "Memory document not found")
+        rows = db.execute("SELECT rel,title,links,updated,is_core_hub FROM docs").fetchall()
+    path = safe_path(LOCAL_VAULT_DIR, rel)
+    raw = read_doc_file(rel)
+    content = raw if raw is not None else row["body"]
+    links = json.loads(row["links"] or "[]")
+    aliases = {stem(rel), stem(rel).split("/")[-1], row["title"], rel}
+    backlinks = [{"rel": r["rel"], "title": r["title"], "updated": r["updated"]} for r in rows if r["rel"] != rel and aliases.intersection(json.loads(r["links"] or "[]"))]
+    candidates = [{"rel": r["rel"], "title": r["title"], "id": stem(r["rel"])} for r in rows if r["rel"] != rel]
+    for extra in _hermes_documents():
+        candidates.append({"rel":extra["rel"],"title":extra["title"],"id":stem(extra["rel"])})
+        if aliases.intersection(extra.get("links",[])):
+            backlinks.append({"rel":extra["rel"],"title":extra["title"],"updated":extra.get("updated","")})
+    return {"rel": rel, "title": row["title"], "kind": row["kind"], "category": row["category"], "subGroup": row["sub_group"],
+            "content": content, "links": links, "parents": links, "backlinks": backlinks, "parentCandidates": candidates,
+            "revision": revision(content), "updated": row["updated"], "isCoreHub": bool(row["is_core_hub"]),
+            "sourceKind": "vault_markdown" if raw is not None else "sqlite_document", "sourcePath": str(path) if raw is not None else f"{DB_PATH}#docs/{rel}",
+            "readOnly": False, "editable": True, "deletable": True, "readOnlyReason": ""}
+
+
+class PatchMemoryDoc(BaseModel):
+    expectedRevision: str
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    links: Optional[List[str]] = None
+
+
+@memory_router.patch("/doc")
+def patch_memory_doc(req: PatchMemoryDoc, rel: str = Query(...)):
+    try:
+        lock = hermes_store.lock_path if rel.startswith(("hermes/", "procedural/")) else DATA_DIR / ".graph.lock"
+        with file_lock(lock):
+            current = _read_document(rel)
+            if not current["editable"]:
+                raise HTTPException(409, "This source is immutable")
+            if current["revision"] != req.expectedRevision:
+                raise HTTPException(409, "Document changed; reload before editing")
+            content = req.content if req.content is not None else current["content"]
+            title = req.title if req.title is not None else current["title"]
+            if not title.strip() or len(title) > 240 or len(content) > 1000000:
+                raise ValueError("Invalid document title or content size")
+            if rel.startswith("hermes/"):
+                limit = current["limit"]
+                if len(content) > limit:
+                    raise ValueError(f"Bounded memory exceeds {limit} characters; nothing was written")
+                path = hermes_store.root / rel.split("/")[1]
+                atomic_write(path, content)
+                hermes_store._audit("dashboard", "patch", rel, current["content"], content)
+            elif rel.startswith("procedural/"):
+                if not content.strip() or len(content) > 60000:
+                    raise ValueError("Skill must contain 1..60000 characters")
+                path = hermes_store._skill_path(rel.split("/")[1])
+                atomic_write(path, content)
+                hermes_store._audit("dashboard", "patch", rel, current["content"], content)
+            else:
+                links = req.links if req.links is not None else current["links"]
+                if not all(isinstance(link, str) and len(link) <= 300 for link in links):
+                    raise ValueError("Invalid links")
+                category = req.category or current["category"]
+                if category not in ("core_hub", "revenue", "skill", "meeting"):
+                    raise ValueError("Invalid category")
+                # Raw content is authoritative; metadata links also persist visibly in the source.
+                if req.title is not None and title != current["title"]:
+                    content = re.sub(r"^#\s+.+$", lambda _: "# " + title, content, count=1, flags=re.M) if re.search(r"^#\s+", content, re.M) else "# " + title + "\n\n" + content
+                if req.links is not None:
+                    content = re.sub(r"\[\[(.*?)\]\]", lambda m: m.group(0) if m.group(1).strip() in links else m.group(1), content)
+                    existing = set(re.findall(r"\[\[(.*?)\]\]", content))
+                    missing = [link for link in links if link not in existing]
+                    if missing:
+                        content += "\n\n## 연결\n" + "\n".join(f"- [[{link}]]" for link in missing) + "\n"
+                else:
+                    links = list(dict.fromkeys(re.findall(r"\[\[(.*?)\]\]", content)))
+                path = safe_path(LOCAL_VAULT_DIR, rel)
+                old_exists = path.exists()
+                try:
+                    with connect_db() as db:
+                        db.execute("BEGIN IMMEDIATE")
+                        atomic_write(path, content)
+                        db.execute("UPDATE docs SET title=?,category=?,links=?,body=?,updated=?,mtime_ms=?,size=? WHERE rel=?", (title, category, json.dumps(links, ensure_ascii=False), content, datetime.now().isoformat(), int(time.time()*1000), len(content.encode("utf-8")), rel))
+                except Exception:
+                    if old_exists:
+                        atomic_write(path, current["content"])
+                    elif path.exists():
+                        path.unlink()
+                    raise
+        return {"ok": True, "doc": _read_document(rel)}
+    except MemoryConflict as exc:
+        raise HTTPException(409, str(exc))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@memory_router.delete("/doc")
+def delete_memory_doc(rel: str = Query(...), expected_revision: str = Query(...)):
+    try:
+        with file_lock(DATA_DIR / ".graph.lock"):
+            current = _read_document(rel)
+            if not current["deletable"]:
+                raise HTTPException(409, "Protected source; use an exact content patch")
+            if current["revision"] != expected_revision:
+                raise HTTPException(409, "Document changed; reload before deleting")
+            trash_id = uuid.uuid4().hex
+            if rel.startswith("procedural/"):
+                path = hermes_store._skill_path(rel.split("/")[1])
+                with file_lock(hermes_store.lock_path), connect_db() as db:
+                    if revision(path.read_text(encoding="utf-8")) != expected_revision:
+                        raise HTTPException(409, "Skill changed; reload before deleting")
+                    payload = {"sourceKind": "project_skill", "content": current["content"], "name": rel.split("/")[1]}
+                    db.execute("INSERT INTO memory_trash VALUES(?,?,?,?,NULL)", (trash_id, rel, json.dumps(payload,ensure_ascii=False), datetime.now().isoformat()))
+                    # The full source is durably saved in the trash transaction first.
+                try:
+                    with file_lock(hermes_store.lock_path):
+                        if revision(path.read_text(encoding="utf-8")) != expected_revision:
+                            raise HTTPException(409, "Skill changed before deletion; reload")
+                        path.unlink()
+                except Exception:
+                    with connect_db() as db:
+                        db.execute("DELETE FROM memory_trash WHERE trash_id=?", (trash_id,))
+                    raise
+                return {"ok": True, "rel": rel, "trashId": trash_id, "removedEdges": 0, "restorable": True}
+            path = safe_path(LOCAL_VAULT_DIR, rel)
+            with connect_db() as db:
+                db.execute("BEGIN IMMEDIATE")
+                row = dict(db.execute("SELECT * FROM docs WHERE rel=?", (rel,)).fetchone())
+                payload = {"row": row, "content": current["content"], "hadFile": path.exists()}
+                db.execute("INSERT INTO memory_trash VALUES(?,?,?,?,NULL)", (trash_id, rel, json.dumps(payload, ensure_ascii=False), datetime.now().isoformat()))
+                db.execute("DELETE FROM docs WHERE rel=?", (rel,))
+            # Leave the source file intact as the recoverable original. The tombstone excludes it.
+        return {"ok": True, "rel": rel, "trashId": trash_id, "removedEdges": len(current["links"]) + len(current["backlinks"]), "restorable": True}
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@memory_router.get("/trash")
+def list_memory_trash():
+    with connect_db() as db:
+        return {"items": [dict(r) for r in db.execute("SELECT trash_id AS trashId,rel,deleted_at AS deletedAt FROM memory_trash WHERE restored_at IS NULL ORDER BY deleted_at DESC")]}
+
+
+@memory_router.post("/trash/{trash_id}/restore")
+def restore_memory_doc(trash_id: str):
+    with file_lock(DATA_DIR / ".graph.lock"), connect_db() as db:
+        item = db.execute("SELECT * FROM memory_trash WHERE trash_id=? AND restored_at IS NULL", (trash_id,)).fetchone()
+        if not item:
+            raise HTTPException(404, "Trash entry not found")
+        payload = json.loads(item["payload"])
+        if payload.get("sourceKind") == "project_skill":
+            path = hermes_store._skill_path(payload["name"])
+            with file_lock(hermes_store.lock_path):
+                if path.exists():
+                    raise HTTPException(409, "A skill already occupies this path")
+                atomic_write(path, payload["content"])
+            db.execute("UPDATE memory_trash SET restored_at=? WHERE trash_id=?", (datetime.now().isoformat(),trash_id))
+            return {"ok": True, "rel": item["rel"], "doc": _read_document(item["rel"])}
+        row = payload["row"]
+        if db.execute("SELECT 1 FROM docs WHERE rel=?", (row["rel"],)).fetchone():
+            raise HTTPException(409, "A document already occupies this path")
+        path = safe_path(LOCAL_VAULT_DIR, row["rel"])
+        if path.exists() and revision(path.read_text(encoding="utf-8")) != revision(payload["content"]):
+            raise HTTPException(409, "Original source changed while in trash")
+        if not path.exists() and payload["hadFile"]:
+            atomic_write(path, payload["content"])
+        columns = list(row)
+        db.execute(f"INSERT INTO docs({','.join(columns)}) VALUES({','.join('?' for _ in columns)})", [row[c] for c in columns])
+        db.execute("UPDATE memory_trash SET restored_at=? WHERE trash_id=?", (datetime.now().isoformat(), trash_id))
+    return {"ok": True, "rel": row["rel"], "doc": _read_document(row["rel"])}
+
+
+@memory_router.get("/sessions/search")
+def search_memory_sessions(q: str = Query(""), limit: int = Query(10)):
+    return {"results": hermes_store.session_search(q, limit)}
+
+
+@memory_router.get("/skills")
+def list_memory_skills():
+    return {"skills": hermes_store.skill_list()}
+
+
+@memory_router.get("/reviews")
+def list_memory_reviews():
+    with hermes_store.db() as db:
+        return {"reviews": [dict(r) for r in db.execute("SELECT * FROM reviews ORDER BY updated_at DESC LIMIT 50")]}
+
+
+class BoundedMemoryOperation(BaseModel):
+    target: str
+    action: str
+    text: str = ""
+    old_text: str = ""
+    expected_revision: str
+
+
+@memory_router.get("/bounded")
+def read_bounded_memory():
+    return {target: hermes_store.bounded(target) for target in ("memory", "user")}
+
+
+@memory_router.post("/bounded")
+def mutate_bounded_memory(req: BoundedMemoryOperation):
+    try:
+        return hermes_store.memory(**req.model_dump())
+    except MemoryConflict as exc:
+        raise HTTPException(409, str(exc))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@memory_router.get("/skill")
+def view_memory_skill(name: str = Query(...)):
+    try:
+        return hermes_store.skill_view(name)
+    except FileNotFoundError:
+        raise HTTPException(404, "Skill not found")
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))

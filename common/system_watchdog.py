@@ -564,6 +564,12 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
         save_json(WATCHDOG_STATUS_PATH, report)
     except Exception:
         pass
+    if cdp_res.get('recoveredPorts') or server_res.get('recovered'):
+        from common.llm_client import memory_event
+        memory_event('watchdog:' + started_at, 'infrastructure_repair',
+                     'Infrastructure probe recovered; this does not establish pipeline publication success.',
+                     evidence={'recoveredPorts': cdp_res.get('recoveredPorts', []),
+                               'serverRecovered': bool(server_res.get('recovered'))}, review=False)
     return report
 
 

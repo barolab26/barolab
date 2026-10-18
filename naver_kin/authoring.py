@@ -585,7 +585,7 @@ One optional owned link will be appended by code; write NO URLs yourself. Disclo
 Return question_id copied EXACTLY from the chosen question and article_url copied EXACTLY from its article.
 Aim for 380-900 Korean characters.'''
     draft, used_model = codex_cli.generate_local(policy + '\nEVIDENCE_JSON:\n' + json.dumps(inputs, ensure_ascii=False),
-                                                 model, response_schema=DRAFT_SCHEMA)
+                                                 model, response_schema=DRAFT_SCHEMA, memory_session_id=f'kin:{folder}')
     (folder / 'generation.json').write_text(json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8')
     qid, article_url = draft.get('question_id'), draft.get('article_url')
     if not qid or not article_url:
@@ -629,7 +629,7 @@ CRITICAL FOR `support` ARRAY: Provide 1 to 3 items in `support`. For each item:
 - `source_url`: MUST be the exact `url` from that `sources` entry.
 EVIDENCE_JSON:\n'''
     review, reviewer_model = codex_cli.generate_local(review_prompt + json.dumps(review_input, ensure_ascii=False),
-                                                      model, response_schema=REVIEW_SCHEMA)
+                                                      model, response_schema=REVIEW_SCHEMA, memory_session_id=f'kin:{folder}')
     (folder / 'review.json').write_text(json.dumps(review, ensure_ascii=False, indent=2), encoding='utf-8')
     if not _review_supported(review, text, official_docs):
         with pipeline.connect() as db:

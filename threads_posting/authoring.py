@@ -1,6 +1,7 @@
 """Public-source snapshots, Viral Hook Vault, 3-Version Persona Engine, and tool-free subscribed-model calls."""
 from datetime import datetime
 import hashlib
+import uuid
 import json
 from pathlib import Path
 import random
@@ -336,7 +337,7 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
                 '후속(followup)에는 최상단에 운영/대가성 고지 문구를 넣고 정확한 outbound_url을 1회 포함하세요(warmup 모드는 빈 문자열). 자료:\n'
                 + json.dumps(data, ensure_ascii=False)
             )
-            generated, model_used = codex_cli.generate_local(prompt, config['model'], response_schema=schema)
+            generated, model_used = codex_cli.generate_local(prompt, config['model'], response_schema=schema, memory_session_id='threads:' + uuid.uuid4().hex)
             for v_key, g_key, lbl, sc in (
                 ('friendly', 'friendly_main', '① 기본 친근형', 89),
                 ('hook', 'hook_main', '② 강렬한 어그로 후킹형', 95),

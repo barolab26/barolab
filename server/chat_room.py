@@ -286,16 +286,9 @@ def _get_agent_brain_safe(slug: str) -> Dict[str, Any]:
         from common.llm_settings import get_agent_brain
         return get_agent_brain(slug)
     except Exception:
-        fallback_badges = {
-            "jarvis": ("agy_cli", "AGY CLI", "gemini-4-argon-high", "Argon High"),
-            "publi": ("codex_cli", "Codex CLI", "gpt-6.1-sol", "gpt-6.1-sol"),
-            "patch": ("codex_cli", "Codex CLI", "gpt-6.1-sol", "gpt-6.1-sol"),
-            "radar": ("agy_cli", "AGY CLI", "gemini-4-argon-medium", "Argon Med"),
-            "doctor": ("agy_cli", "AGY CLI", "gemini-3.8-flash-medium", "3.8 Flash"),
-            "trace": ("agy_cli", "AGY CLI", "gemini-3.8-flash-medium", "3.8 Flash"),
-        }
-        prov, plabel, mod, bdg = fallback_badges.get(slug, ("agy_cli", "AGY CLI", "gemini-4-argon-high", "Argon High"))
-        return {"slot": slug, "provider": prov, "providerLabel": plabel, "model": mod, "badge": bdg}
+        return {"slot": slug, "provider": "codex", "providerLabel": "Codex CLI",
+                "model": "gpt-6.1-sol", "badge": "gpt-6.1-sol"}
+
 
 
 def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -775,70 +768,20 @@ def _call_chat_llm(
     timeout_sec: float = 9.0,
     agent_slug: Optional[str] = None,
 ) -> Optional[str]:
-    """Call FreeLLMAPI or configured agent brain for natural Korean crew responses."""
-    import urllib.request
+    """Use the configured active provider; FreeLLMAPI and AGY are disabled."""
+    from common.llm_client import generate_json
+    try:
+        response = generate_json(
+            system_prompt + '\n' + user_prompt + '\nReturn JSON {"reply": "your answer"}.',
+            agent_slot=agent_slug or "jarvis", timeout_seconds=timeout_sec,
+            response_schema={"type": "object", "properties": {"reply": {"type": "string"}},
+                             "required": ["reply"], "additionalProperties": False})
+        reply = response.get("reply")
+        return reply.strip() if isinstance(reply, str) and reply.strip() else None
+    except Exception as exc:
+        print(f"[chat_room] configured LLM unavailable ({type(exc).__name__})", flush=True)
+        return None
 
-    brain = _get_agent_brain_safe(agent_slug or "jarvis")
-    env_path = BASE_DIR / "cf_posting" / ".env"
-    api_key = ""
-    base_url = "http://127.0.0.1:3001/v1"
-    model = "auto"
-    if env_path.is_file():
-        try:
-            for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-                if "=" in line and not line.strip().startswith("#"):
-                    k, v = line.split("=", 1)
-                    k, v = k.strip(), v.strip().strip('"').strip("'")
-                    if k == "FREELLMAPI_API_KEY":
-                        api_key = v
-                    elif k == "FREELLMAPI_BASE_URL" and v:
-                        base_url = v
-                    elif k == "FREELLMAPI_MODEL" and v:
-                        model = v
-        except Exception:
-            pass
-
-    brain_header = (
-        f"[배정된 에이전트 두뇌(Brain): {brain.get('providerLabel', 'AGY CLI')} · "
-        f"{brain.get('model', 'gemini-4-argon-high')} ({brain.get('badge', 'Argon High')})]\n"
-    )
-    candidate_models = []
-    if brain.get("model") and brain["model"] != model:
-        candidate_models.append(str(brain["model"]))
-    if model not in candidate_models:
-        candidate_models.append(model)
-    if "auto" not in candidate_models:
-        candidate_models.append("auto")
-
-    headers = {"Content-Type": "application/json"}
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
-
-    for cand_model in candidate_models:
-        payload = json.dumps(
-            {
-                "model": cand_model,
-                "messages": [
-                    {"role": "system", "content": brain_header + system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "temperature": 0.45,
-            }
-        ).encode("utf-8")
-        req = urllib.request.Request(
-            f"{base_url.rstrip('/')}/chat/completions", data=payload, headers=headers, method="POST"
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
-                data = json.loads(resp.read().decode("utf-8", errors="replace"))
-                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-                content = re.sub(r"<think>[\s\S]*?</think>", "", str(content)).strip()
-                if content:
-                    return content
-        except Exception as e:
-            if cand_model == candidate_models[-1]:
-                print(f"[chat_room] LLM call fallback notice ({e})", flush=True)
-    return None
 
 
 import sys as _sys
@@ -1133,7 +1076,7 @@ def _synthesize_question_aware_fallback(
     prior_replies: Optional[List[Dict[str, Any]]] = None,
 ) -> str:
     """
-    Question-aware fallback used ONLY if FreeLLMAPI is unreachable.
+    Question-aware fallback used only if the configured provider is unavailable.
     Synthesizes a direct answer to `clean_q` from Step 1 tool outputs (`ingested_items` / `executed_tools`)
     and live ledger data — never returns static vending-machine templates or mechanical refusals.
     """
@@ -1554,7 +1497,7 @@ def get_crew_live_workstream_status() -> Tuple[List[Dict[str, Any]], Dict[str, D
         cached_agents = []
         for ag in _LIVE_WS_CACHE["agents"]:
             brain = _get_agent_brain_safe(ag["slug"])
-            cached_agents.append({**ag, "brain": brain, "brainBadge": brain.get("badge", "Argon High")})
+            cached_agents.append({**ag, "brain": brain, "brainBadge": brain.get("badge", "Codex")})
         return cached_agents, _LIVE_WS_CACHE["live_map"]
 
     sys_ctx = get_live_system_context()
@@ -1651,7 +1594,7 @@ def get_crew_live_workstream_status() -> Tuple[List[Dict[str, Any]], Dict[str, D
             {
                 **ag,
                 "brain": brain,
-                "brainBadge": brain.get("badge", "Argon High"),
+                "brainBadge": brain.get("badge", "Codex"),
                 "liveTaskStatus": st.get("liveTaskStatus") or ag["title"],
                 "liveDotColor": st.get("liveDotColor", "#10b981"),
                 "stateCode": st.get("stateCode", "active"),
@@ -2189,7 +2132,7 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
             "who": slug,
             "name": ag["name"],
             "badge": ag["badge"],
-            "brainBadge": brain.get("badge", "Argon High"),
+            "brainBadge": brain.get("badge", "Codex"),
             "color": ag["color"],
             "icon": ag["icon"],
             "typingText": task_info["typingText"],
@@ -2202,15 +2145,17 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
         yield f"event: typing\ndata: {json.dumps(typing_payload, ensure_ascii=False)}\n\n"
 
         t_start = time.time()
-        reply_text, artifacts, executed_tools = synthesize_agent_reply(
-            slug=slug,
-            user_text=text,
-            recalled=recalled,
-            sys_ctx=sys_ctx,
-            is_followup=(idx > 0),
-            prior_replies=turn_replies,
-            recent_history=prior_history,
-        )
+        from common.llm_client import memory_session
+        with memory_session(f"chat:{room.get('sid', 1)}", slug):
+            reply_text, artifacts, executed_tools = synthesize_agent_reply(
+                slug=slug,
+                user_text=text,
+                recalled=recalled,
+                sys_ctx=sys_ctx,
+                is_followup=(idx > 0),
+                prior_replies=turn_replies,
+                recent_history=prior_history,
+            )
         elapsed = time.time() - t_start
         if elapsed < 0.35:
             time.sleep(0.35 - elapsed)
@@ -2265,6 +2210,12 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
         turn_replies.append(completed_msg)
         if idx + 1 < len(speakers):
             time.sleep(0.2)
+
+    from common.llm_client import memory_event
+    memory_event(user_msg["id"], "chat_turn_ended", "CEO chat turn completed; execution receipts remain authoritative.",
+                 session_id=f"chat:{room.get('sid', 1)}",
+                 evidence={"speakers": speakers, "executionReceipts": [r for m in turn_replies for r in m.get("executionReceipts", [])]},
+                 messages=[{"role": "user", "content": text}] + [{"role": "assistant", "content": m["text"]} for m in turn_replies])
 
     yield f"event: done\ndata: {json.dumps({'ok': True, 'speakers': speakers}, ensure_ascii=False)}\n\n"
 
@@ -2406,6 +2357,13 @@ def end_meeting():
         "sid": int(room.get("sid", 1)) + 1,
     }
     save_room_data(new_room)
+    from common.llm_client import memory_event
+    # All CEO-ended conversations are reviewed; the reviewer promotes only actual corrections.
+    memory_event(f"chat:{room.get('sid', 1)}:ended", "ceo_correction_conversation_ended",
+                 "CEO ended the conversation; identify explicit corrections without inferring approval.",
+                 session_id=f"chat:{room.get('sid', 1)}", evidence={"archive": arch_file.name, "journal": rel},
+                 messages=[{"role": "user" if m.get("who") == "user" else "assistant", "content": str(m.get("text", ""))}
+                           for m in msgs if m.get("who") != "system"], review=True)
     return {"archived": True, "journal": rel, "archiveId": arch_file.name, "archivedMeetings": list_archived_meetings()}
 
 

@@ -298,6 +298,10 @@ def record_verification(db, qid, evidence):
         with db:
             db.execute("UPDATE questions SET state='published_verified',result=?,updated_at=? WHERE question_id=?",
                        (json.dumps(evidence, ensure_ascii=False), stamp(), qid))
+        from common.llm_client import memory_event
+        memory_event(f'kin:{qid}:{row["answer_id"]}', 'pipeline_publication_verified',
+                     'KnowledgeIn public answer identity, content hash and outbound URL verified.',
+                     evidence=evidence, session_id=f'kin:{qid}')
     return bool(verified)
 
 

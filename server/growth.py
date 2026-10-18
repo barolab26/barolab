@@ -189,6 +189,8 @@ def snapshot(path, site_id, days=7, end=None):
                 'daily_target': 100, 'daily_average': average,
                 'achievement_pct': average if average is not None else None,
                 'source_timezone': targets[0]['source_timezone'] if full else None}
+    for observation in result:
+        _record_metric_increase(site_id, observation)
     return {'site': site, 'sites': sites, 'days': days, 'end': end.isoformat(),
             'requested_timezone': 'Asia/Seoul', 'services': result, 'goal': goal,
             'queried_at': datetime.now(timezone.utc).isoformat()}
@@ -294,8 +296,43 @@ def action_records(path):
                 if candidate.get('status') in ('collected', 'complete'):
                     row['baseline'] = json.dumps(candidate, ensure_ascii=False)
                     db.execute('UPDATE improvement_actions SET baseline=? WHERE id=?', (row['baseline'], row['id']))
-            records.append(action_record(row))
+            item = action_record(row)
+            records.append(item)
+            _record_growth_observation(item)
         return records
+
+
+def _record_metric_increase(site_id, observation):
+    """Complete source periods establish observed growth, never causal efficacy."""
+    if observation.get('service') not in ('adsense', 'ga4', 'naver_blog'):
+        return
+    current, previous = observation.get('current') or {}, observation.get('previous') or {}
+    signature = ('currency', 'source_timezone', 'value_kind', 'revenue_scope')
+    values = (current.get('total'), previous.get('total'))
+    if (current.get('status') != 'complete' or previous.get('status') != 'complete'
+            or not all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) for v in values)
+            or values[0] <= values[1] or values[1] < 0
+            or not all(current.get(k) == previous.get(k) for k in signature)):
+        return
+    from common.llm_client import memory_event
+    memory_event(f"growth:{site_id}:{observation['service']}:{previous['start']}:{current['end']}",
+                 'growth_measured_increase', 'Complete comparable source periods show increased traffic or revenue; causation is unproved.',
+                 evidence={'siteId': site_id, 'service': observation['service'], 'metric': observation.get('metric'),
+                           'previous': previous, 'current': current, 'delta': values[0] - values[1],
+                           'causalProof': False}, review=True)
+
+
+def _record_growth_observation(item):
+    verification = item.get('verification') or {}
+    if (item.get('status') != 'done' or verification.get('status') != 'observed_change'
+            or not any(isinstance(verification.get(k), (int, float)) and verification[k] > 0
+                       for k in ('clicksDelta', 'impressionsDelta'))):
+        return
+    from common.llm_client import memory_event
+    memory_event(f"growth:{item['id']}:{(item.get('observation') or {}).get('end')}",
+                 'growth_measured_increase', 'Comparable source reports show an increase; causation is unproved.',
+                 evidence={'actionId': item['id'], 'url': item['url'], 'baseline': item['baseline'],
+                           'followup': item['followup'], 'verification': verification}, review=True)
 
 
 def action_text(value, name, maximum, required=False):

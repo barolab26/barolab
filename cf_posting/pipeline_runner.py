@@ -3790,7 +3790,8 @@ def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
         if not RUN_CONTEXT.get('artifactFolder'):
             raise ReviewRequired('이미지 모델 입력을 보존할 실행 산출물 폴더가 없습니다')
         audit['audit_directory'] = Path(RUN_CONTEXT['artifactFolder']) / 'model-audit' / RUN_CONTEXT['agent']
-    return generate_json(prompt, observer=observe_model, images=images, response_schema=schema, **audit)
+    return generate_json(prompt, observer=observe_model, images=images, response_schema=schema,
+                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), **audit)
 
 
 def validate_article(article):
@@ -4314,6 +4315,15 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
     validation.update(publication='verified', publicUrl=public_url, postId=post_id,
                       verifiedAt=datetime.datetime.now(datetime.timezone.utc).isoformat())
     validation_file.write_text(json.dumps(validation, ensure_ascii=False, indent=2), encoding='utf-8')
+    from common.llm_client import memory_event
+    recovered_run = bool(handoff.data.get('resume') or revision_post)
+    await asyncio.to_thread(memory_event, f'cf:{output_dir}:published',
+        'pipeline_recovery_success' if recovered_run else 'pipeline_publication_verified',
+        'CF content and public page verified after repair.' if recovered_run else 'CF content and public page verified.',
+        session_id=str(output_dir), review=recovered_run,
+        evidence={'channel': 'cf', 'publicUrl': public_url, 'postId': post_id,
+                  'publicPublicationVerified': True, 'validation': str(validation_file),
+                  'resume': handoff.data.get('resume'), 'revision': bool(revision_post)})
     if blog_info["activeBlogId"] not in completed_ids:
         completed_ids.append(blog_info["activeBlogId"])
     update_status(blog_info, completed_ids, 7, "발행 완료 (200 OK)", 100, f"독자 해결 과제 원고 + 검수 이미지 {len(generated_images)}장 + CF API {'기존 글 수정' if revision_post else '신규 글'}(ID: {post_id}) 정식 배포 완료 (HTTP 200 OK)", status="published")
