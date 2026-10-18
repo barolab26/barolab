@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-18T09:08:41.205942+00:00",
+  "checkedAt": "2026-10-18T09:28:42.230645+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -42,10 +42,96 @@
     "mainTrialCap": 56
   },
   "counts": {
-    "published_verified": 4,
-    "submitted_unknown": 2
+    "published_verified": 5,
+    "submitted_unknown": 3
   },
   "recent": [
+    {
+      "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
+      "part_id": "dff78e2118be4085b64ecff63ba758a2-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DeoWCrQHxDQ",
+      "updated_at": "2026-10-18T09:18:54.497169+00:00",
+      "publication_date": "2026-10-18",
+      "slot": "18:10",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "직장인 국민내일배움카드 발급 자격과 고용24 온라인 신청 및 자부담금 조회 순서 | 소울노트 라이프·책",
+      "mode": "affiliate",
+      "followup_delay_seconds": 173,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "직장 다니면 내일배움카드 못 받는 줄 알았어? 회사 규모랑 급여부터 봐요 👀\n\n① 대규모기업 재직자는 만 45세 미만이면서 월 임금 300만 원 이상이면 발급 제외 대상이에요. 다른 제외 요건도 확인해요.\n② 신청은 고용24에서! 재직자는 원칙적으로 구직 신청이 필요 없어요.\n③ 훈련비는 기본 5년간 300만 원 지원, 자부담은 유형·과정에 따라 0~55%라 과정 상세에서 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "퇴근 후 배울 거 찾고 있다면, 카드 신청이랑 수강 신청이 별개라는 거 알고 있었어?\n\n① 고용24에서 카드 발급을 신청하고, 심사를 거쳐 실물 카드를 받아요.\n② 원하는 훈련과정은 따로 신청해야 해요. 재직자는 원칙적으로 구직 신청이 필요 없고요.\n③ 자부담은 과정마다 달라요. 과정 상세의 ‘자비부담액 보기’에서 본인 유형을 골라 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+      "published_at": "2026-10-18T09:18:50+00:00",
+      "verified_at": "2026-10-18T09:18:54.497143+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
+      "part_id": "dff78e2118be4085b64ecff63ba758a2-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-18T09:24:08.438041+00:00",
+      "publication_date": "2026-10-18",
+      "slot": "18:10",
+      "outbound_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_1810_d8d3d8c0fb412e03",
+      "parent_platform_id": "17998602047823391",
+      "title": "직장인 국민내일배움카드 발급 자격과 고용24 온라인 신청 및 자부담금 조회 순서 | 소울노트 라이프·책",
+      "mode": "affiliate",
+      "followup_delay_seconds": 173,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "직장 다니면 내일배움카드 못 받는 줄 알았어? 회사 규모랑 급여부터 봐요 👀\n\n① 대규모기업 재직자는 만 45세 미만이면서 월 임금 300만 원 이상이면 발급 제외 대상이에요. 다른 제외 요건도 확인해요.\n② 신청은 고용24에서! 재직자는 원칙적으로 구직 신청이 필요 없어요.\n③ 훈련비는 기본 5년간 300만 원 지원, 자부담은 유형·과정에 따라 0~55%라 과정 상세에서 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "퇴근 후 배울 거 찾고 있다면, 카드 신청이랑 수강 신청이 별개라는 거 알고 있었어?\n\n① 고용24에서 카드 발급을 신청하고, 심사를 거쳐 실물 카드를 받아요.\n② 원하는 훈련과정은 따로 신청해야 해요. 재직자는 원칙적으로 구직 신청이 필요 없고요.\n③ 자부담은 과정마다 달라요. 과정 상세의 ‘자비부담액 보기’에서 본인 유형을 골라 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "[운영·대가성 고지] 제휴·홍보 목적의 외부 글 링크를 포함해요.\n직장인 발급 조건부터 고용24 신청, 과정별 자부담 조회 방법까지 살펴볼 수 있어요.\nhttps://www.soulnote.kr/workers-tomorrow-learning-card-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_1810_d8d3d8c0fb412e03\n최종 지원자격과 실제 자부담액은 신청 시점의 고용24 제도 안내와 과정 상세에서 확인해요.",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
     {
       "attempt_id": "61e09cb555154abbb5f17baac4bfaa57",
       "part_id": "61e09cb555154abbb5f17baac4bfaa57-0",
@@ -290,6 +376,118 @@
     }
   ],
   "pairedThreads": [
+    {
+      "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
+      "title": "직장인 국민내일배움카드 발급 자격과 고용24 온라인 신청 및 자부담금 조회 순서 | 소울노트 라이프·책",
+      "publication_date": "2026-10-18",
+      "slot": "18:10",
+      "mode": "affiliate",
+      "followup_delay_seconds": 173,
+      "source_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "직장 다니면 내일배움카드 못 받는 줄 알았어? 회사 규모랑 급여부터 봐요 👀\n\n① 대규모기업 재직자는 만 45세 미만이면서 월 임금 300만 원 이상이면 발급 제외 대상이에요. 다른 제외 요건도 확인해요.\n② 신청은 고용24에서! 재직자는 원칙적으로 구직 신청이 필요 없어요.\n③ 훈련비는 기본 5년간 300만 원 지원, 자부담은 유형·과정에 따라 0~55%라 과정 상세에서 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "퇴근 후 배울 거 찾고 있다면, 카드 신청이랑 수강 신청이 별개라는 거 알고 있었어?\n\n① 고용24에서 카드 발급을 신청하고, 심사를 거쳐 실물 카드를 받아요.\n② 원하는 훈련과정은 따로 신청해야 해요. 재직자는 원칙적으로 구직 신청이 필요 없고요.\n③ 자부담은 과정마다 달라요. 과정 상세의 ‘자비부담액 보기’에서 본인 유형을 골라 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
+        "part_id": "dff78e2118be4085b64ecff63ba758a2-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DeoWCrQHxDQ",
+        "updated_at": "2026-10-18T09:18:54.497169+00:00",
+        "publication_date": "2026-10-18",
+        "slot": "18:10",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "직장인 국민내일배움카드 발급 자격과 고용24 온라인 신청 및 자부담금 조회 순서 | 소울노트 라이프·책",
+        "mode": "affiliate",
+        "followup_delay_seconds": 173,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "직장 다니면 내일배움카드 못 받는 줄 알았어? 회사 규모랑 급여부터 봐요 👀\n\n① 대규모기업 재직자는 만 45세 미만이면서 월 임금 300만 원 이상이면 발급 제외 대상이에요. 다른 제외 요건도 확인해요.\n② 신청은 고용24에서! 재직자는 원칙적으로 구직 신청이 필요 없어요.\n③ 훈련비는 기본 5년간 300만 원 지원, 자부담은 유형·과정에 따라 0~55%라 과정 상세에서 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "퇴근 후 배울 거 찾고 있다면, 카드 신청이랑 수강 신청이 별개라는 거 알고 있었어?\n\n① 고용24에서 카드 발급을 신청하고, 심사를 거쳐 실물 카드를 받아요.\n② 원하는 훈련과정은 따로 신청해야 해요. 재직자는 원칙적으로 구직 신청이 필요 없고요.\n③ 자부담은 과정마다 달라요. 과정 상세의 ‘자비부담액 보기’에서 본인 유형을 골라 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+        "published_at": "2026-10-18T09:18:50+00:00",
+        "verified_at": "2026-10-18T09:18:54.497143+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
+        "part_id": "dff78e2118be4085b64ecff63ba758a2-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-18T09:24:08.438041+00:00",
+        "publication_date": "2026-10-18",
+        "slot": "18:10",
+        "outbound_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_1810_d8d3d8c0fb412e03",
+        "parent_platform_id": "17998602047823391",
+        "title": "직장인 국민내일배움카드 발급 자격과 고용24 온라인 신청 및 자부담금 조회 순서 | 소울노트 라이프·책",
+        "mode": "affiliate",
+        "followup_delay_seconds": 173,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "직장 다니면 내일배움카드 못 받는 줄 알았어? 회사 규모랑 급여부터 봐요 👀\n\n① 대규모기업 재직자는 만 45세 미만이면서 월 임금 300만 원 이상이면 발급 제외 대상이에요. 다른 제외 요건도 확인해요.\n② 신청은 고용24에서! 재직자는 원칙적으로 구직 신청이 필요 없어요.\n③ 훈련비는 기본 5년간 300만 원 지원, 자부담은 유형·과정에 따라 0~55%라 과정 상세에서 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "내일배움카드 있으면 수강료 전부 무료? 결제 전에 꼭 살펴봐 👀\n\n① 기본 지원은 5년간 300만 원이고, 추가 지원 요건을 충족하면 총 500만 원까지 가능해.\n② 자부담은 참여 유형과 과정에 따라 0~55%라 고용24 과정 상세에서 내 금액을 확인해야 해.\n③ 140시간 이상 과정은 수강 신청 전에 훈련 진단·상담을 받아야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "퇴근 후 배울 거 찾고 있다면, 카드 신청이랑 수강 신청이 별개라는 거 알고 있었어?\n\n① 고용24에서 카드 발급을 신청하고, 심사를 거쳐 실물 카드를 받아요.\n② 원하는 훈련과정은 따로 신청해야 해요. 재직자는 원칙적으로 구직 신청이 필요 없고요.\n③ 자부담은 과정마다 달라요. 과정 상세의 ‘자비부담액 보기’에서 본인 유형을 골라 확인해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "[운영·대가성 고지] 제휴·홍보 목적의 외부 글 링크를 포함해요.\n직장인 발급 조건부터 고용24 신청, 과정별 자부담 조회 방법까지 살펴볼 수 있어요.\nhttps://www.soulnote.kr/workers-tomorrow-learning-card-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_1810_d8d3d8c0fb412e03\n최종 지원자격과 실제 자부담액은 신청 시점의 고용24 제도 안내와 과정 상세에서 확인해요.",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
     {
       "attempt_id": "61e09cb555154abbb5f17baac4bfaa57",
       "title": "간이대지급금 신청 방법, 체불 확인서 발급부터 공단 청구와 14일 입금 확인까지 완벽 가이드 | 저스트인포 법률·행정",
@@ -677,16 +875,16 @@
   ],
   "automation": {
     "state": "waiting",
-    "nextEligibleAt": "2026-10-18T18:10:00+09:00",
-    "lastRunAt": "2026-10-18T09:08:40.851617+00:00",
+    "nextEligibleAt": "2026-10-18T21:30:00+09:00",
+    "lastRunAt": "2026-10-18T09:28:41.837364+00:00",
     "lastResult": "waiting",
     "issue": "no_due_slot",
     "scheduler": {
       "registered": true,
       "enabled": true,
       "state": "Running",
-      "checkedAt": "2026-10-18T09:08:39.372184+00:00",
-      "nextRunAt": "2026-10-18T18:13:37.0000000+09:00",
+      "checkedAt": "2026-10-18T09:28:39.302729+00:00",
+      "nextRunAt": "2026-10-18T18:33:37.0000000+09:00",
       "lastResult": 267009
     }
   },
@@ -869,12 +1067,12 @@
       {
         "kind": "followup",
         "state": "submitted_unknown",
-        "n": 1
+        "n": 2
       },
       {
         "kind": "main",
         "state": "published_verified",
-        "n": 2
+        "n": 3
       }
     ]
   },

@@ -2,7 +2,7 @@
   "date": "2026-10-18",
   "workDate": "2026-10-18",
   "publicationDate": "2026-10-18",
-  "checkedAt": "2026-10-18T18:07:33.526163+09:00",
+  "checkedAt": "2026-10-18T18:27:25.626502+09:00",
   "timezone": "Asia/Seoul",
   "startTime": "08:00",
   "startTimeMeaning": "당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인",
@@ -126,7 +126,7 @@
   ],
   "recovery": {
     "schema": "naver-recovery-plan-v1",
-    "checkedAt": "2026-10-18T18:07:55.819474+09:00",
+    "checkedAt": "2026-10-18T18:27:47.062178+09:00",
     "timezone": "Asia/Seoul",
     "items": [
       {
@@ -388,13 +388,13 @@
     "registered": true,
     "enabled": true,
     "state": "Running",
-    "nextRunAt": "2026-10-18T18:11:36.0000000+09:00",
-    "lastRunAt": "2026-10-18T18:06:37.0000000+09:00",
+    "nextRunAt": "2026-10-18T18:31:36.0000000+09:00",
+    "lastRunAt": "2026-10-18T18:26:37.0000000+09:00",
     "lastResult": 267009,
     "triggerEnabled": true,
     "taskName": "BaroLab-Naver-Daily",
-    "checkedAt": "2026-10-18T18:08:17.787350+09:00",
-    "attemptedAt": "2026-10-18T18:08:17.787350+09:00",
+    "checkedAt": "2026-10-18T18:28:08.998046+09:00",
+    "attemptedAt": "2026-10-18T18:28:08.998046+09:00",
     "sourceTimezone": "Asia/Seoul",
     "source": "Windows Task Scheduler read-only",
     "workflowMatches": true,
@@ -403,7 +403,7 @@
   },
   "publicVerification": {
     "status": "ok",
-    "checkedAt": "2026-10-18T18:07:32.709618+09:00",
+    "checkedAt": "2026-10-18T18:27:24.691799+09:00",
     "updated": 0,
     "totalVerifiedEvidence": 43,
     "errors": {}
@@ -417,7 +417,7 @@
     "activeScheduledSlot": null,
     "startedAt": "2026-10-18T00:17:10.414518+09:00",
     "lastHeartbeatAt": "2026-10-18T14:42:04.129801+09:00",
-    "observedAt": "2026-10-18T18:07:33.526163+09:00",
+    "observedAt": "2026-10-18T18:27:25.626502+09:00",
     "source": "pipeline OS lock and execution journal",
     "heartbeatMeaning": "actual journal stage update; monitor timestamp is not runner heartbeat"
   }

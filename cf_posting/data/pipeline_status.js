@@ -26,8 +26,8 @@ window.__PIPELINE_STATUS__ = {
   "stageName": "대기 중",
   "progressPct": 0,
   "detailMessage": "발행 기록 (11/16 완료)",
-  "updatedAt": "18:11:42",
-  "timestamp": 1792314702,
+  "updatedAt": "18:30:42",
+  "timestamp": 1792315842,
   "dailySchedule": [
     {
       "order": 1,

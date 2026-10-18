@@ -22,8 +22,9 @@
 
 ## 3. GitHub 실시간 자동 동기화 의무 규칙 (Mandatory GitHub Auto-Sync Rule)
 - **Git 계정 및 저장소 표준**:
-  - 커밋 작성자 설정: `git config user.name "barolab"`, `git config user.email "barolab26@gmail.com"`
-  - 원격 저장소 이름: **`barolab`** (`origin` → `main` 브랜치)
+  - GitHub 계정: **`barolab26`** (`barolab26@gmail.com`)
+  - 커밋 작성자 설정: `git config user.name "barolab26"`, `git config user.email "barolab26@gmail.com"`
+  - 원격 저장소: **`https://github.com/barolab26/barolab.git`** (`origin` → `main` 브랜치)
 - **작업 완료 직후 자동 Push 의무화**: 에이전트가 소스코드(`server/`, `dashboard/`, `common/`, 각 채널 파이프라인 등)나 설정/원장 파일을 수정한 모든 작업 완료 직후에는 반드시 아래 명령을 자동 실행하여 원격 저장소(`origin main`)와 실시간 동기화합니다:
   ```bash
   git add -A && git commit -m "auto-sync" && git push origin main
