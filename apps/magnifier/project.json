@@ -4,20 +4,20 @@
   "packageName": "com.barolab.biglens",
   "description": "작은 글씨를 확대하고 화면 정지·고대비·선택 저장을 돕는 생활 앱. 개발 중이며 기기별 카메라 검증과 배포를 준비합니다.",
   "status": "preview",
-  "stage": "0.2.0-internal-preview 내부 테스트 가동 중 (테스트 게시 D+4일째 · 14일 요건 D-10일) · SJ AdMob 연동 완료(app-ads.txt 200 OK) · 실기기 최종 확인 대기",
+  "stage": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
   "deploymentPending": false,
   "platforms": [
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/magnifier/",
-  "updatedAt": "2026-10-18T21:52:14+09:00",
+  "updatedAt": "2026-10-18T23:17:09+09:00",
   "measurement": {
     "admob": {
       "status": "collected",
       "revenue": 0.0,
       "currency": "USD",
       "period": "2026-10-18 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
-      "checkedAt": "2026-10-18T21:52:14+09:00",
+      "checkedAt": "2026-10-18T23:17:09+09:00",
       "mode": "TEST_ADS_INTERNAL_TRACK",
       "impressions": 0
     },
@@ -25,8 +25,8 @@
       "status": "collected",
       "activeUsers": 1,
       "currency": "USD",
-      "period": "내부 테스트 트랙 (D+4일째)",
-      "checkedAt": "2026-10-18T21:37:48+09:00",
+      "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
+      "checkedAt": "2026-10-18T23:17:09+09:00",
       "mode": "",
       "impressions": 0
     }
@@ -131,19 +131,30 @@
     "releaseName": "0.2.0-internal-preview",
     "versionCode": 2
   },
-  "progressPct": 72,
+  "progressPct": 57,
   "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-  "blocker": "삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기 + Play 14일 테스트 요건(D-10일, 2026-10-28 만료) 진행 중",
-  "nextAction": "[대표님 확인] 삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 완료 시 @patch가 실광고 스위치(TEST_ADS→PROD_ADS) AAB 즉시 빌드",
+  "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기",
+  "nextAction": "[1순위: 비공개 트랙 전환] Play Console에서 Google 그룹스(barolab-testers@googlegroups.com) 등록 후 내부 테스트 AAB를 비공개 테스트(Closed Track)로 승격 → 12명 Opt-in 완료 시 14일 카운트 시작 (가이드: apps/docs/closed-track-launch-guide.md)",
   "testSchedule": {
+    "internalTrack": "internal",
+    "internalTestersCount": 1,
     "internalReleaseAt": "2026-10-14T19:15:00+09:00",
     "internalReleaseDate": "2026-10-14",
-    "elapsedDays": 4,
-    "remainingDays": 10,
+    "closedTrackOpened": false,
+    "closedTestOptIns": 0,
+    "requiredClosedTesters": 12,
+    "countdownStarted": false,
+    "closedTestStartedAt": null,
+    "elapsedDays": 0,
+    "remainingDays": 14,
     "requiredDays": 14,
-    "targetProductionDate": "2026-10-28",
-    "dayProgressPct": 29,
-    "dDayBadge": "테스트 게시 D+4일째 · 14일 요건 D-10일",
+    "targetProductionDate": "미정 (12명 Opt-in 완료 후 +14일)",
+    "dayProgressPct": 0,
+    "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
+    "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
+    "dDayBadge": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
+    "testerGroupEmail": "barolab-testers@googlegroups.com",
+    "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
     "readyForProductionTrack": false
   },
   "admobTracker": {
@@ -165,36 +176,38 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-10-18T21:52:00+09:00"
+      "checkedAt": "2026-10-18T23:17:07+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
     "impressionsToday": 0,
+    "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
+    "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
     "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-    "blocker": "삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기 + Play 14일 테스트 요건(D-10일, 2026-10-28 만료) 진행 중",
-    "nextAction": "[대표님 확인] 삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 완료 시 @patch가 실광고 스위치(TEST_ADS→PROD_ADS) AAB 즉시 빌드",
+    "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 대기",
+    "nextAction": "[1순위: 비공개 트랙 전환] Play Console에서 Google 그룹스(barolab-testers@googlegroups.com) 등록 후 내부 테스트 AAB를 비공개 테스트(Closed Track)로 승격 → 12명 Opt-in 완료 시 14일 카운트 시작 (가이드: apps/docs/closed-track-launch-guide.md)",
     "ceoActionRequired": true,
     "productionChecklist": [
       {
         "step": 1,
-        "label": "1단계: 삼성 실기기 기능 최종 체크",
-        "owner": "대표님 (CEO)",
+        "label": "1단계: Google 그룹스 비공개 트랙 개설 & 12명 Opt-in (14일 카운트 시작 조건)",
+        "owner": "대표님 (Play Console 승격) · @patch (랜딩/그룹스 가이드)",
         "status": "in_progress",
-        "detail": "삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인"
+        "detail": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) · 그룹스: barolab-testers@googlegroups.com"
       },
       {
         "step": 2,
-        "label": "2단계: 테스트 광고 → SJ 실광고 스위치 전환 AAB 빌드",
-        "owner": "@patch",
+        "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
+        "owner": "대표님 (실기기) · @patch (AAB 빌드)",
         "status": "ready",
-        "detail": "실광고 배너(ca-app-pub-7642010403138987/4744854277) 코드 매핑 준비 완료 · 1단계 확인 즉시 서명 빌드"
+        "detail": "삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인 · 실광고 배너(ca-app-pub-7642010403138987/4744854277) 코드 매핑 준비 완료"
       },
       {
         "step": 3,
-        "label": "3단계: Play 스토어 프로덕션 정식 출시 및 AdMob 실수익 개시",
+        "label": "3단계: 12명 · 14일 비공개 테스트 완주 후 프로덕션 출시 및 AdMob 실수익 개시",
         "owner": "@patch · @trace",
         "status": "waiting_d_day",
-        "detail": "14일 테스트 요건 충족일(2026-10-28, D-10일) 프로덕션 트랙 심사 제출 및 스토어 연결"
+        "detail": "현재 14일 카운트다운 미시작 — 비공개 트랙 12명 Opt-in 달성 시점부터 14일 연속 유지 후 프로덕션 심사 제출"
       }
     ]
   }

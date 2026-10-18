@@ -285,21 +285,18 @@ def _audit_mobile_apps() -> Dict[str, Any]:
     inv = app_projects.inventory(ROOT, force_verify=False)
     projs = inv.get("projects") or []
     summary = inv.get("summary") or {}
-    avg_pct = int(summary.get("averageProgressPct") or 72)
-    d_day_badge = summary.get("dDayBadge") or "테스트 게시 D+4일째 · 14일 요건 D-10일"
+    avg_pct = int(summary.get("averageProgressPct") or 57)
+    current_track = summary.get("currentTrackLabel") or "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작"
+    closed_status = summary.get("closedTrackStatusLabel") or "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)"
     ads_ok = summary.get("allAppAdsTxtVerified", True)
 
-    sched = (projs[0].get("testSchedule") if projs else {}) or {}
-    target_date = sched.get("targetProductionDate", "2026-10-28")
-    rem_days = sched.get("remainingDays", 10)
-
     blocker = (
-        f"① Google Play 14일 비공개 테스트 필수 기간 진행 중 ({d_day_badge}, {target_date} 충족) "
-        f"② 정식 프로덕션 실광고(SJ AdMob) AAB 빌드 전 삼성 실기기 4종 최종 동작 1회 확인 대기"
+        f"현재 트랙: {current_track} | "
+        f"비공개 테스트 현황: {closed_status}"
     )
     next_action = (
-        f"[🚨 대표님 1회 확인 필요] 삼성 실휴대폰에서 앱 4종(성경말씀 스피커 듣기 / 안부 카드 공유 / 돋보기 카메라 조명 / 장보기 음성인식) "
-        f"최종 체크 완료 시 → @patch가 즉시 테스트 광고를 SJ 실광고(pub-7642010403138987)로 스위치한 프로덕션 AAB 빌드 및 제출"
+        f"[🚨 1순위 전환 필요] Play Console에서 Google 그룹스(barolab-testers@googlegroups.com)를 4개 앱 비공개 테스트 그룹으로 등록 후 "
+        f"내부 테스트 AAB를 비공개 테스트 트랙으로 승격(Promote) → 12명 Opt-in 완료 시 14일 카운트 시작 (가이드: apps/docs/closed-track-launch-guide.md)"
     )
 
     return {
@@ -309,13 +306,15 @@ def _audit_mobile_apps() -> Dict[str, Any]:
         "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
         "ownerAgentIds": ["patch", "trace"],
         "status": "ceo_action_needed",
-        "statusBadge": f"🚨 대표님 실기기 확인 대기 · {d_day_badge}",
-        "progressText": f"4종 평균 {avg_pct}% · {d_day_badge} · app-ads.txt {'200 OK' if ads_ok else '점검필요'}",
+        "statusBadge": current_track,
+        "currentTrackLabel": current_track,
+        "closedTrackStatusLabel": closed_status,
+        "progressText": f"4종 평균 {avg_pct}% · {closed_status} · app-ads.txt {'200 OK' if ads_ok else '점검필요'}",
         "progressPct": avg_pct,
         "blocker": blocker,
         "nextAction": next_action,
         "actionType": "ceo",
-        "autoActionBadge": "[🚨 대표님 실기기 1회 확인 필요]",
+        "autoActionBadge": "[⚠️ 비공개 트랙 개설 · 12명 Opt-in 대기]",
         "ceoActionRequired": True,
         "linkUrl": "apps.html",
         "appDetails": [
@@ -324,7 +323,9 @@ def _audit_mobile_apps() -> Dict[str, Any]:
                 "name": p.get("name"),
                 "packageName": p.get("packageName"),
                 "progressPct": p.get("progressPct"),
-                "dDayBadge": (p.get("testSchedule") or {}).get("dDayBadge"),
+                "currentTrackLabel": (p.get("testSchedule") or {}).get("currentTrackLabel", current_track),
+                "closedTrackStatusLabel": (p.get("testSchedule") or {}).get("closedTrackStatusLabel", closed_status),
+                "dDayBadge": (p.get("testSchedule") or {}).get("dDayBadge", current_track),
                 "admobBannerUnitId": (p.get("admobTracker") or {}).get("admobBannerUnitId"),
                 "appAdsTxtVerified": ((p.get("admobTracker") or {}).get("appAdsTxt") or {}).get("verified", True),
                 "ceoCheckItem": APP_CEO_SHORT.get(p.get("id"), "실기기 동작 확인"),

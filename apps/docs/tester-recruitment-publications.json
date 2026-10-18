@@ -1,0 +1,531 @@
+{
+  "schemaVersion": 1,
+  "campaign": "2026-10-14 Korean Android apps closed-test interest recruitment",
+  "scope": "Pre-recruitment only; current apps are internal releases. No closed-test 14-day start is claimed.",
+  "landing": {
+    "url": "https://barolab-daily-apps.pages.dev/testers/",
+    "deploymentId": "4c9ee0da-5a51-4ccb-9b3f-1fca73ff8396",
+    "deploymentEvidence": "daily_apps/docs/web-deployment-receipt.json",
+    "agentChecks": {
+      "httpStatus": 200,
+      "sourceSha256Matched": true,
+      "decodedMailtoCount": 4,
+      "mailRecipientsCorrect": true,
+      "mailtoSpaceEncoding": "%20",
+      "chromeVisualVerified": true
+    },
+    "rootIndependentHttpStatus": 200
+  },
+  "publications": [
+    {
+      "id": "threads-DeeQYE1Afpj",
+      "channel": "Threads",
+      "account": "@yoon_autolab",
+      "displayName": "윤랩자동화연구소",
+      "url": "https://www.threads.com/@yoon_autolab/post/DeeQYE1Afpj",
+      "status": "published_permalink_verified",
+      "submitCount": 1,
+      "textCharacterCountReported": 312,
+      "evidenceReporter": "root",
+      "profileRenderedBodyObserved": true,
+      "permalinkObserved": true,
+      "permalinkRevisitVerified": true,
+      "publishedAt": null,
+      "note": "총괄이 고유 링크 재방문과 본문 핵심 문구·신청 URL 일치를 확인했다. 응답자나 비공개 참여 실적은 별도다.",
+      "landingOutboundDecodedMatches": true,
+      "verificationScope": "Author authenticated browser session; root revisited permalink and verified three key body phrases and decoded landing destination",
+      "observedAt": "2026-10-14"
+    },
+    {
+      "id": "facebook-smartphone-forum-28860090700269704",
+      "channel": "Facebook",
+      "community": "스마트앱개발자포럼",
+      "url": "https://www.facebook.com/groups/smartphone.forum/posts/28860090700269704/",
+      "status": "published_permalink_verified",
+      "submitCount": 1,
+      "evidenceReporter": "root",
+      "feedRenderedBodyObserved": true,
+      "permalinkRevisitVerified": true,
+      "landingOutboundDecodedMatches": true,
+      "moderationPendingObserved": false,
+      "publishedAt": null,
+      "verificationScope": "Author authenticated browser session; group feed and permalink full body/application URL verified",
+      "note": "작성자 로그인 세션에서 확인한 범위다. 비로그인 공개 접근이나 모집 성과를 증명하지 않는다.",
+      "observedAt": "2026-10-14"
+    },
+    {
+      "id": "facebook-androidcode-pending-20261014",
+      "channel": "Facebook",
+      "community": "안드로이드개발",
+      "communityUrl": "https://www.facebook.com/groups/androidcode/",
+      "url": null,
+      "status": "pending_moderation",
+      "submitCount": 1,
+      "evidenceReporter": "root",
+      "permalinkRevisitVerified": false,
+      "publishedAt": null,
+      "observedStatusText": [
+        "게시물이 대기 중입니다",
+        "관리자 승인 대기 중입니다"
+      ],
+      "note": "관리자 승인 대기를 명시적으로 관찰했다. 게시 완료 수에 포함하지 않는다.",
+      "observedAt": "2026-10-14"
+    },
+    {
+      "id": "facebook-vibecoding-1607691431050199",
+      "channel": "Facebook",
+      "community": "바이브코딩",
+      "url": "https://www.facebook.com/groups/1183007433518603/posts/1607691431050199/",
+      "status": "published_permalink_verified",
+      "submitCount": 1,
+      "evidenceReporter": "root",
+      "permalinkRevisitVerified": true,
+      "ownFullBodyVerified": true,
+      "fourAppFeaturesVerified": true,
+      "preRecruitmentScopeVerified": true,
+      "landingDestinationVerified": true,
+      "moderationPendingObserved": false,
+      "verifiedAt": "2026-10-14T11:26:06.874853+00:00",
+      "ownBodySha256": "47bc58cbaeb57b6c6bd25645e4d0a54f8a75d9b4d40b6b5e98a2d4d214c66ab6",
+      "publishedAt": null,
+      "verificationScope": "Author authenticated browser session; own permalink full body and application URL verified",
+      "note": "공개 그룹 소개와 토론 허용을 확인한 후 맞춤 원고를 한 번 제출했다. 작성자 세션의 관찰이며 비로그인 열람·모집 성과를 증명하지 않는다.",
+      "observedAt": "2026-10-14"
+    }
+  ],
+  "unpublishedChannels": [
+    {
+      "channel": "Reddit",
+      "status": "not_posted_no_confirmed_account",
+      "reason": "확정 계정 없음 및 네트워크 보안 접근 제약. 게시하지 않았다.",
+      "observedAt": "2026-10-14",
+      "evidenceReporter": "root"
+    },
+    {
+      "channel": "AndroidPub",
+      "status": "not_posted_no_confirmed_account",
+      "reason": "읽기 전용 가입 폼에서 필수 아이디·비밀번호·복구 정보 요구를 확인했다. 가입·정보 제출은 하지 않았다.",
+      "observedAt": "2026-10-14",
+      "evidenceReporter": "root"
+    },
+    {
+      "channel": "NaverCafe",
+      "status": "not_posted_access_unknown",
+      "reason": "CDP initialization timeout",
+      "permission": "unknown",
+      "observedAt": "2026-10-14",
+      "evidenceReporter": "root"
+    },
+    {
+      "channel": "DaangnCafe",
+      "status": "not_posted_authentication_required",
+      "reason": "로그인·가입 버튼을 확인했고 쓰기 기능은 확인하지 못했다.",
+      "permission": "unknown",
+      "observedAt": "2026-10-14",
+      "evidenceReporter": "root"
+    },
+    {
+      "channel": "TwelveTesters",
+      "status": "not_posted_closed_link_not_ready",
+      "reason": "실제 비공개 참여 링크 미준비. 앱 기반 상호 테스트 조건은 별도 확인이 필요하다.",
+      "observedAt": "2026-10-14",
+      "evidenceReporter": "root"
+    },
+    {
+      "channel": "SwapTest",
+      "status": "not_posted_closed_link_not_ready",
+      "reason": "실제 비공개 참여 링크 미준비. 앱 기반 상호 테스트 조건은 별도 확인이 필요하다.",
+      "observedAt": "2026-10-14",
+      "evidenceReporter": "root"
+    }
+  ],
+  "measurement": {
+    "recruitmentApplications": null,
+    "registeredTesters": null,
+    "closedTestOptIns": null,
+    "feedbackReceived": null,
+    "note": "미수집 또는 미확인이다. 채널 조사 후보 수를 실제 게시 수나 테스터 수로 계산하지 않는다."
+  },
+  "counts": {
+    "verifiedPermalinks": 3,
+    "pendingModeration": 1,
+    "scope": "Own posts only; verified in author sessions. Pending moderation is excluded from verified publications."
+  },
+  "observedAt": "2026-10-14",
+  "engagementChecks": [
+    {
+      "checkId": "engagement-20261015-threads-01",
+      "publicationId": "threads-DeeQYE1Afpj",
+      "attemptedAt": "2026-10-15",
+      "recordedAt": "2026-10-15T02:08:30+00:00",
+      "observedAt": "2026-10-15",
+      "status": "verified",
+      "observer": "root",
+      "coverage": {
+        "authenticatedScope": "Author SNS browser session",
+        "commentSort": null,
+        "allCommentsLoaded": null,
+        "loadedCommentCount": null,
+        "repliesExpanded": null,
+        "reactionCounterVisible": null,
+        "limitations": [
+          "작성자 로그인 세션의 플랫폼 조회 수와 외부 답글·본인 답변을 확인한 범위다. 모든 외부 채널을 확인한 결과는 아니다."
+        ]
+      },
+      "metrics": {
+        "views": 89,
+        "viewsDefinition": "Platform displayed views, not unique people or tester applications",
+        "reactions": null,
+        "commentsCounter": 2,
+        "loadedComments": null,
+        "externalRepliesObserved": 1,
+        "newReciprocalRequests": 0,
+        "ownRepliesObserved": 1,
+        "commentsDefinition": "플랫폼 표시 2건은 외부 답글 1건과 본인 답변 1건이며 외부 참여자 2명이 아니다."
+      },
+      "interactions": [
+        {
+          "sourceInteractionKey": "eae89cbeb6b9fe0b1991cf84a4250ba94f48f936f2fb2e3b2fe96b600854b2c5",
+          "category": "usability_suggestion",
+          "summary": "실제 부모 세대 테스터를 포함하자는 사용성 제안이다. 구체적인 맞테스트 앱이나 설치 링크 제공은 아니다.",
+          "replyState": "replied_verified",
+          "replyEvidenceRef": "https://www.threads.com/@yoon_autolab/post/Def2oGAAQrp",
+          "reciprocalRequestId": null,
+          "draftOwner": "adaptive_blog_images",
+          "replyCharacterCountReported": 167,
+          "replySubmitCount": 1,
+          "replyRevisitVerified": true,
+          "replyParentThreadVerified": true,
+          "replySummary": "감사와 함께 본인 동의하에 부모 세대의 사용성 의견을 요청하는 취지다."
+        }
+      ]
+    },
+    {
+      "checkId": "engagement-20261015-facebook-smartphone-01",
+      "publicationId": "facebook-smartphone-forum-28860090700269704",
+      "attemptedAt": "2026-10-15",
+      "observedAt": "2026-10-15",
+      "status": "verified",
+      "observer": "root",
+      "coverage": {
+        "authenticatedScope": "본인 계정 로그인 완료 후 작성자 게시물 재방문",
+        "commentSort": null,
+        "allCommentsLoaded": true,
+        "loadedCommentCount": 0,
+        "repliesExpanded": null,
+        "reactionCounterVisible": false,
+        "limitations": [
+          "댓글 없음 문구를 관찰한 시점의 범위다. 반응 수 숫자는 표시되지 않았다."
+        ]
+      },
+      "metrics": {
+        "reactions": null,
+        "commentsCounter": 0,
+        "loadedComments": 0,
+        "newReciprocalRequests": 0
+      },
+      "explicitObservedText": "아직 댓글이 없습니다",
+      "interactions": []
+    },
+    {
+      "checkId": "engagement-20261015-facebook-vibecoding-01",
+      "publicationId": "facebook-vibecoding-1607691431050199",
+      "attemptedAt": "2026-10-15",
+      "observedAt": "2026-10-15",
+      "status": "partial",
+      "observer": "root",
+      "coverage": {
+        "authenticatedScope": "본인 계정 로그인 완료 후 작성자 게시물 재방문",
+        "commentSort": null,
+        "allCommentsLoaded": false,
+        "loadedCommentCount": null,
+        "repliesExpanded": null,
+        "reactionCounterVisible": null,
+        "limitations": [
+          "고유 링크 재로드와 화면에 관측된 14시간 타임스탬프 경로로 재진입해도 댓글 영역·카운터가 없었다.",
+          "본인 게시물 옵션에 댓글 기능 해제가 표시됐으나 설정을 바꾸지 않았고, 이 메뉴만으로 댓글이 꺼졌다고 판단하지 않았다."
+        ]
+      },
+      "metrics": {
+        "reactions": null,
+        "commentsCounter": null,
+        "loadedComments": null,
+        "newReciprocalRequests": null
+      },
+      "interactions": []
+    },
+    {
+      "checkId": "engagement-20261015-facebook-androidcode-01",
+      "publicationId": "facebook-androidcode-pending-20261014",
+      "attemptedAt": "2026-10-15",
+      "observedAt": "2026-10-15",
+      "status": "verified",
+      "observer": "root",
+      "moderationStatusObserved": "pending_moderation",
+      "coverage": {
+        "authenticatedScope": "본인의 /my_pending_content/ 화면",
+        "commentSort": null,
+        "allCommentsLoaded": null,
+        "loadedCommentCount": null,
+        "repliesExpanded": null,
+        "reactionCounterVisible": false,
+        "limitations": [
+          "제목과 대기 목록 한 건을 확인했다. 공개 댓글이나 공개 게시 완료를 확인한 것이 아니다."
+        ]
+      },
+      "explicitObservedText": "대기 중 · 1",
+      "ownPostTitle": "[실제 기기 테스트 품앗이 참여자 사전 모집]",
+      "metrics": {
+        "reactions": null,
+        "commentsCounter": null,
+        "loadedComments": null,
+        "newReciprocalRequests": null
+      },
+      "interactions": []
+    }
+  ],
+  "reciprocalRequests": [],
+  "managementPlan": {
+    "preparedOn": "2026-10-15",
+    "status": "registered_disabled_unverified",
+    "timezone": "Asia/Seoul",
+    "proposedLocalTimes": [
+      "10:00",
+      "19:00"
+    ],
+    "cadenceReason": "오전·저녁 두 회차로 댓글과 승인 대기를 확인하고 합의된 맞테스트 일정만 별도 처리한다. 새 알림이 실제 도착했을 때 추가 회차를 열 수 있다.",
+    "registeredAutomationId": "865f23a3-c593-4148-8cac-855f70a8e26a",
+    "lastSuccessfulEngagementCheckAt": null,
+    "preferredExecution": "Same-chat local Codex continuation remains unregistered. A separate Orca read-only recruitment probe is registered but disabled and unrun; browser/Gmail/provider/cost capabilities remain unverified.",
+    "requirements": [
+      "컴퓨터와 데스크톱 앱 실행 유지",
+      "UNC 프로젝트 접근",
+      "정확한 기존 SNS 브라우저 프로필 사용 가능",
+      "공유 브라우저 소유권·동시 실행 충돌 확인",
+      "첫 관측 회차 결과와 중복 방지 검증"
+    ],
+    "fallback": "현재 대화에서 수동 회차로 관리한다. 예약 기능이나 브라우저가 없는 회차는 blocked 또는 partial로 기록하고 완료로 간주하지 않는다.",
+    "observedExecutionEvidence": {
+      "windowsTaskNames": [
+        "BaroLab-CF-Cleaner",
+        "BaroLab-Dashboard-Worker",
+        "BaroLab-Metrics-Collector",
+        "BaroLab-Naver-Daily",
+        "BaroLab-Naver-Monitor"
+      ],
+      "windowsRecruitmentHandlerExists": false,
+      "codexLocalAutomationCount": 4,
+      "codexLocalAutomationsAllPaused": true,
+      "orcaAutomationCliExists": true,
+      "orcaAutomationCount": 2,
+      "orcaOrphanCount": 2,
+      "orcaHealthyRecruitmentRunVerified": false,
+      "observedBeforeRecruitmentRegistration": true,
+      "orcaAutomationCountScope": "Baseline before creating the separate disabled recruitment probe; not the current total",
+      "createdRecruitmentAutomationCount": 1
+    },
+    "officialSchedulingSource": "https://learn.chatgpt.com/docs/automations?surface=app",
+    "idempotency": "같은 publicationId와 댓글 고유 URL/ID의 해시를 sourceInteractionKey로 사용한다. 고유 식별자가 없으면 미확정 대기열로 두고 자동 재답변하지 않는다. 댓글 내용·이메일·사용자 이름을 중복 키에 직접 저장하지 않는다.",
+    "writeDiscipline": "기존 JSON을 최신 읽기 후 갱신한다. 회차 ID와 요청 ID는 유일해야 하며 실제 관측과 전송 검증은 따로 기록한다. 불확실한 전송은 다시 보내기 전에 원래 답글을 확인한다.",
+    "currentRound": {
+      "date": "2026-10-15",
+      "status": "completed_with_limitations",
+      "schedulerRegistered": true,
+      "browserOwner": "root",
+      "remaining": null,
+      "verifiedRepliesSent": 1,
+      "concreteReciprocalRequestsObserved": 0,
+      "requestCoverage": "확인 가능한 Threads 답글·스마트앱포럼 댓글·기록된 모집 메일 검색 범위에 한한다. 바이브코딩 등 전체 채널 요청 0건을 확정하지 않는다.",
+      "newInstallationsPerformed": 0,
+      "realAppUsageFeedbackPerformed": 0,
+      "schedulerEnabled": false,
+      "scheduleStatus": "registered_disabled_unverified"
+    },
+    "supportedCreationFinding": "공식 문서는 로컬 앱/같은 채팅 예약을 지원하지만 현재 도구에는 로컬 예약 생성·갱신이 노출되지 않았다. Page hosted와 Sites 전용 예약 도구는 해당 브라우저 회차의 실행 수단으로 검증되지 않았다. TOML 직접 편집은 수행하지 않았다.",
+    "deviceReadiness": {
+      "observedOn": "2026-10-15",
+      "evidenceReporter": "root via separate device-readiness agent",
+      "adbConnectedDeviceCount": 0,
+      "runningEmulatorCount": 0,
+      "avdPlayStoreEnabled": false,
+      "status": "physical_device_required_for_future_tests",
+      "limits": "이 회차에서 새 상대 앱 설치나 실사용 피드백을 수행하지 않았다. 기기 미연결은 사용자 소유 기기가 없다는 뜻이 아니다."
+    },
+    "replyDedupe": "재답변 전에 기존 replyEvidenceRef URL과 sourceInteractionKey를 확인한다. URL이 불확실하면 같은 대화에서 전송 여부를 먼저 확인한다.",
+    "schedulerEnabled": false,
+    "readOnly": true,
+    "lastRun": null,
+    "schedulerRegistration": {
+      "name": "BaroLab recruitment read-only check (DISABLED probe)",
+      "cron": "0 10,19 * * *",
+      "timezone": "Asia/Seoul",
+      "agentId": "codex",
+      "schedulerOwner": "local_host_service",
+      "workspaceMode": "existing",
+      "projectId": "repo:bd5c033e-fb4e-4fd2-b345-d7a5c4ef15b5",
+      "hostId": "local",
+      "projectHostSetupId": "bd5c033e-fb4e-4fd2-b345-d7a5c4ef15b5",
+      "path": "Y:/10_Project/BaroLab",
+      "observedOn": "2026-10-15",
+      "evidenceReporter": "root",
+      "showVerified": true,
+      "runs": [],
+      "backgroundBrowserAccessVerified": false,
+      "backgroundGmailAccessVerified": false,
+      "providerRoutingVerified": false,
+      "costVerified": false
+    }
+  },
+  "engagementRecordSchema": {
+    "engagementChecks": {
+      "required": [
+        "checkId",
+        "publicationId",
+        "attemptedAt",
+        "status",
+        "observer",
+        "coverage",
+        "metrics",
+        "interactions"
+      ],
+      "statusValues": [
+        "in_progress",
+        "verified",
+        "partial",
+        "blocked"
+      ],
+      "optionalFields": [
+        "observedAt",
+        "evidenceRef",
+        "blocker",
+        "moderationStatusObserved"
+      ],
+      "coverageFields": [
+        "authenticatedScope",
+        "commentSort",
+        "allCommentsLoaded",
+        "loadedCommentCount",
+        "repliesExpanded",
+        "reactionCounterVisible",
+        "limitations"
+      ],
+      "metricsFields": {
+        "reactions": "integer or null; only an explicit observed zero is 0",
+        "commentsCounter": "integer or null; distinguish platform counter from loaded rows",
+        "loadedComments": "integer or null",
+        "newRequests": "integer or null; only classify observed interactions"
+      },
+      "interactionFields": [
+        "sourceInteractionKey",
+        "category",
+        "replyState",
+        "replyEvidenceRef",
+        "reciprocalRequestId"
+      ],
+      "replyStateValues": [
+        "not_needed",
+        "draft_in_progress",
+        "drafted",
+        "sent_verified",
+        "send_unknown",
+        "blocked",
+        "replied_verified"
+      ],
+      "privacy": "저장소에 외부 댓글 원문·실명·프로필명·이메일을 저장하지 않는다. 답변에 필요한 연락은 원래 채널에서 확인하고 최소 요약만 둔다."
+    },
+    "reciprocalRequests": {
+      "required": [
+        "requestId",
+        "publicationId",
+        "sourceInteractionKey",
+        "state",
+        "firstObservedAt",
+        "history"
+      ],
+      "stateValues": [
+        "received",
+        "evaluating",
+        "awaiting_details",
+        "agreed",
+        "installed",
+        "feedback_sent",
+        "recheck_due",
+        "completed",
+        "declined",
+        "blocked"
+      ],
+      "appFields": [
+        "officialAppUrl",
+        "packageName",
+        "platform",
+        "language",
+        "requiredPermissions",
+        "costRequirement",
+        "installSourceVerifiedAt"
+      ],
+      "agreementFields": [
+        "ourSelectedApp",
+        "theirSelectedApp",
+        "agreedSchedule",
+        "agreedScope",
+        "agreementEvidenceRef"
+      ],
+      "evidenceFields": [
+        "installedAt",
+        "installedVersion",
+        "actualScenario",
+        "resultSummary",
+        "feedbackSentAt",
+        "feedbackEvidenceRef",
+        "nextCheckAt"
+      ],
+      "transitionRules": "개인 이메일·키·음성·사진 원문을 저장하지 않는다. agreed는 상대 앱과 실제 합의 범위·일정이 있어야 한다. installed/feedback_sent/completed는 해당 실제 증거가 필요하다. 내부 설치와 비공개 opt-in 및 14일 요건은 구분한다. 모든 요청은 history에 시각·이전/다음 상태·근거를 남긴다.",
+      "participationFields": [
+        "ourClosedOptInEvidenceRef",
+        "theirClosedOptInEvidenceRef",
+        "continuousParticipationStartObservedAt",
+        "continuousParticipationLastVerifiedAt",
+        "continuousParticipationVerificationScope"
+      ],
+      "evidenceSeparation": "상대 앱·합의 일정·실제 설치·실사용 피드백·비공개 연속 참여는 서로 독립 근거로 기록한다. 응답이나 설치만으로 14일 연속 참여를 확정하지 않는다."
+    }
+  },
+  "inboxChecks": [
+    {
+      "checkId": "inbox-20261015-recruitment-query-01",
+      "observedAt": "2026-10-15",
+      "recordedAt": "2026-10-15T02:08:30+00:00",
+      "observer": "root",
+      "status": "query_completed",
+      "accountProfileVerified": true,
+      "accountAlias": "public_support_mailbox",
+      "scope": {
+        "after": "2026/10/14",
+        "filter": "recruitment keywords",
+        "exactQuery": null,
+        "paginationRemaining": false
+      },
+      "matchingHits": 0,
+      "note": "조회 조건에 맞는 검색 결과가 0건이다. 전체 받은편지함이나 모든 신청 메일이 0건이라는 뜻은 아니다."
+    },
+    {
+      "checkId": "inbox-20261015-recruitment-subject-query-02",
+      "observedAt": "2026-10-15",
+      "observer": "root",
+      "status": "query_completed",
+      "accountProfileVerified": true,
+      "accountAlias": "public_support_mailbox",
+      "scope": {
+        "exactQuery": "in:anywhere after:2026/10/14 -in:sent {subject:테스트 subject:테스터 subject:품앗이 subject:참여 subject:신청 subject:tester subject:BaroLab}",
+        "paginationRemaining": false
+      },
+      "matchingHits": 0,
+      "note": "추가 제목 검색의 emails 배열은 비었고 next는 null이다. 전체 메일 0건 또는 모든 신청 0건을 뜻하지 않는다."
+    }
+  ],
+  "legacyEmailPreRecruitmentDeprecated": true,
+  "recruitmentMethod": "Google Groups (barolab-testers@googlegroups.com) 1-Click Join + Play Closed Testing Opt-in",
+  "testerGroupUrl": "https://groups.google.com/g/barolab-testers",
+  "testerGroupEmail": "barolab-testers@googlegroups.com",
+  "updatedAt": "2026-10-18T23:15:27+09:00"
+}

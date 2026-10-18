@@ -54,16 +54,17 @@
     }
 
     const previewCount = projects.filter(p => p.status === 'preview' || p.status === 'released').length;
-    const releasedCount = projects.filter(p => p.status === 'released').length;
     const firstSched = projects[0]?.testSchedule || {};
+    const curTrack = firstSched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
+    const closedStatus = firstSched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
     const relVal = document.getElementById('apps-kpi-release-val');
     if (relVal) {
-      relVal.innerHTML = firstSched.elapsedDays
+      relVal.innerHTML = firstSched.countdownStarted
         ? `D+${firstSched.elapsedDays}일째 <small style="font-size:13px; color:#2563eb;">(14일 요건 D-${firstSched.remainingDays}일)</small>`
-        : `${previewCount} <small style="font-size:14px; color:#64748b;">개 내부 배포</small>`;
+        : `0 / 12명 <small style="font-size:13px; color:#d97706;">(⚠️ 14일 카운트 미시작)</small>`;
     }
-    set('apps-kpi-release-badge', firstSched.dDayBadge || (releasedCount > 0 ? `정식 ${releasedCount}개` : '내부 테스트 단계'));
-    set('apps-kpi-release-desc', `게시일 ${firstSched.internalReleaseDate || '2026-10-14'} → 프로덕션 전환 목표일 ${firstSched.targetProductionDate || '2026-10-28'}`);
+    set('apps-kpi-release-badge', curTrack);
+    set('apps-kpi-release-desc', closedStatus);
 
     let verifiedMs = 0, inProgressMs = 0, waitingMs = 0;
     for (const p of projects) {
@@ -77,7 +78,7 @@
     const msVal = document.getElementById('apps-kpi-milestone-val');
     if (msVal) msVal.innerHTML = `${verifiedMs} <small style="font-size:14px; color:#64748b;">/ ${totalMs}건 검증</small>`;
     set('apps-kpi-milestone-badge', totalMs > 0 ? `${Math.round((verifiedMs / totalMs) * 100)}% 완료` : '집계 중');
-    set('apps-kpi-milestone-desc', `진행 중(실기기·동의) ${inProgressMs}건 · 프로덕션 대기 ${waitingMs}건`);
+    set('apps-kpi-milestone-desc', `진행 중(비공개 트랙·실기기) ${inProgressMs}건 · 프로덕션 대기 ${waitingMs}건`);
 
     const revBadge = document.getElementById('apps-kpi-revenue-badge');
     const revVal = document.getElementById('apps-kpi-revenue-val');
@@ -100,7 +101,7 @@
     if (!filterBar) return;
     filterBar.replaceChildren();
     const items = [{id: 'all', label: `전체 (${projects.length})`}].concat(
-      projects.map(p => ({id: p.id, label: `${p.name} (${p.progressPct || 72}%)`}))
+      projects.map(p => ({id: p.id, label: `${p.name} (${p.progressPct || 57}%)`}))
     );
     for (const item of items) {
       const btn = node('button', item.label, 'app-filter-btn' + (currentFilter === item.id ? ' active' : ''));
@@ -124,7 +125,9 @@
     renderFilterBar(data.projects);
 
     const sched = data.projects[0]?.testSchedule || {};
-    state.textContent = `${data.projects.length}/${data.expectedProjects || data.projects.length}개 앱 실시간 추적 중 · ${sched.dDayBadge || '내부 테스트 진행 중'} · SJ AdMob(pub-7642010403138987) 연동 완료`;
+    const curTrackTop = sched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
+    const closedTop = sched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
+    state.textContent = `현재 트랙: ${curTrackTop} | 비공개 테스트 현황: ${closedTop}`;
 
     const visibleProjects = currentFilter === 'all'
       ? data.projects
@@ -137,21 +140,24 @@
       const tCount = (project.milestones || []).length;
       const tracker = project.admobTracker || {};
       const tSched = project.testSchedule || {};
+      const curTrackLabel = tSched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
+      const closedStatusLabel = tSched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
 
       const badges = node('div', '', 'app-project-head-badges');
       badges.append(
-        node('span', `진행률 ${project.progressPct || 72}%`, 'pillar-badge badge-blue'),
+        node('span', `진행률 ${project.progressPct || 57}%`, 'pillar-badge badge-blue'),
         node('span', `마일스톤 ${vCount}/${tCount}건`, 'pillar-badge badge-green'),
-        node('span', tSched.dDayBadge || statuses[project.status] || '내부 테스트', 'pillar-badge badge-orange')
+        node('span', curTrackLabel, 'pillar-badge badge-orange')
       );
       heading.append(node('h3', `📱 ${project.name} (${project.packageName || ''})`), badges);
       card.append(heading, node('p', project.description, 'section-caption'));
 
-      // Owner & D-Day Strip
+      // Owner & Explicit Track Separation Strip
       const ownerStrip = node('div', '', 'app-owner-strip');
       ownerStrip.innerHTML = `
-        <span class="app-owner-tag">👤 전담 에이전트: <strong style="color:#2563eb;">${project.owner || '@patch · @trace'}</strong></span>
-        <span class="app-dday-pill">⏱️ ${tSched.dDayBadge || '테스트 진행 중'} (프로덕션 목표일: ${tSched.targetProductionDate || '2026-10-28'})</span>
+        <span class="app-owner-tag">👤 전담: <strong style="color:#2563eb;">${project.owner || '@patch · @trace'}</strong></span>
+        <span class="app-dday-pill" style="background:#fff7ed;border-color:#fed7aa;color:#c2410c;">현재 트랙: ${curTrackLabel}</span>
+        <span class="app-dday-pill">비공개 테스트 현황: ${closedStatusLabel}</span>
       `;
       card.append(ownerStrip);
 
@@ -159,8 +165,9 @@
       if (project.blocker || project.nextAction) {
         const blockerBox = node('div', '', 'app-blocker-box');
         blockerBox.innerHTML = `
-          <div><strong>🚧 현재 병목 (진짜 멈춘 원인):</strong> ${project.blocker || '확인 중'}</div>
-          <div class="next-act">👉 <strong>다음 필요 조치:</strong> ${project.nextAction || '실기기 확인 대기'}</div>
+          <div><strong>📌 현재 트랙:</strong> ${curTrackLabel}</div>
+          <div style="margin-top:3px;"><strong>📊 비공개 테스트 현황:</strong> ${closedStatusLabel}</div>
+          <div class="next-act">👉 <strong>다음 필요 조치:</strong> ${project.nextAction || '비공개 테스트 트랙 개설 및 12명 Opt-in'}</div>
         `;
         card.append(blockerBox);
       }

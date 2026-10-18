@@ -494,6 +494,24 @@ def broadcast_watchdog_events(
         return False
 
 
+def audit_and_guard_app_closed_test_truth() -> Dict[str, Any]:
+    """Ensure apps/*/project.json never claims a 14-day closed test countdown when internalTrack == 'internal' or closedTestOptIns < 12."""
+    try:
+        from server import projects as app_projects
+        sync_res = app_projects.sync_manifests_to_disk(ROOT, force_verify=False)
+        inv = app_projects.inventory(ROOT, force_verify=False)
+        summary = inv.get("summary") or {}
+        return {
+            "ok": True,
+            "updatedProjects": sync_res.get("updatedProjects", []),
+            "countdownStarted": bool(summary.get("countdownStarted", False)),
+            "currentTrackLabel": summary.get("currentTrackLabel", "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작"),
+            "closedTrackStatusLabel": summary.get("closedTrackStatusLabel", "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)"),
+        }
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)[:200]}
+
+
 def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = True) -> Dict[str, Any]:
     """Execute full SRE watchdog pass: Server -> CDP Browsers -> Zombie Locks -> Missed Slot Catch-up -> App/Project Audit."""
     started_at = now_kst_iso()
@@ -501,6 +519,7 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
     cdp_res = check_and_recover_cdp_browsers(auto_start=True)
     zombie_actions = clean_zombie_locks_and_recover(stale_minutes=15)
     catchup_actions = trigger_missed_slot_catchup()
+    app_track_truth = audit_and_guard_app_closed_test_truth()
 
     # Also refresh 4 mobile apps & 6-project health snapshot
     project_audit_summary = {}
@@ -513,9 +532,10 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
             "autoRecoveringCount": sum(
                 1 for p in (health_data.get("projects") or []) if p.get("status") == "auto_recovering"
             ),
+            "appTrackTruth": app_track_truth,
         }
     except Exception as exc:
-        project_audit_summary = {"error": str(exc)[:200]}
+        project_audit_summary = {"error": str(exc)[:200], "appTrackTruth": app_track_truth}
 
     broadcasted = False
     if broadcast:
@@ -536,6 +556,7 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
         },
         "zombieRecoveries": zombie_actions,
         "missedSlotCatchups": catchup_actions,
+        "appTrackTruth": app_track_truth,
         "projectHealthSummary": project_audit_summary,
         "broadcastedToChat": broadcasted,
     }

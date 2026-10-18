@@ -1951,7 +1951,7 @@
           <div class="bento-box-head">
             <h2 class="bento-box-title" style="font-size:12.5px;">
               <span>📱 앱 프로젝트 4종 출시 마일스톤 게이지</span>
-              <span class="bento-mini-chip" id="bento-apps-summary">개발 → 테스터 → 14일 D-Day → 출시</span>
+              <span class="bento-mini-chip" id="bento-apps-summary">현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작</span>
             </h2>
             <a class="bento-go-btn" href="apps.html">앱 관제실 →</a>
           </div>
@@ -1960,17 +1960,17 @@
             <a class="app-gauge-card" href="apps.html" id="app-card-greeting">
               <div class="app-gauge-top">
                 <span class="app-gauge-name">🟢 오늘의 안부</span>
-                <span class="app-gauge-pct" id="app-pct-greeting">75%</span>
+                <span class="app-gauge-pct" id="app-pct-greeting">57%</span>
               </div>
               <div class="app-step-segments" id="app-segs-greeting">
                 <span class="app-step-seg done"></span>
-                <span class="app-step-seg done"></span>
                 <span class="app-step-seg active"></span>
+                <span class="app-step-seg"></span>
                 <span class="app-step-seg"></span>
               </div>
               <div class="app-step-caption">
-                <span id="app-stage-greeting">14일 비공개 테스트 진행</span>
-                <span>출시 D-Day</span>
+                <span id="app-stage-greeting">내부 테스트(1명) · 비공개 0/12명 (⚠️ 14일 미시작)</span>
+                <span>출시 대기</span>
               </div>
             </a>
 
@@ -1978,17 +1978,17 @@
             <a class="app-gauge-card" href="apps.html" id="app-card-magnifier">
               <div class="app-gauge-top">
                 <span class="app-gauge-name">🟢 큰글씨 돋보기</span>
-                <span class="app-gauge-pct" id="app-pct-magnifier">75%</span>
+                <span class="app-gauge-pct" id="app-pct-magnifier">57%</span>
               </div>
               <div class="app-step-segments" id="app-segs-magnifier">
                 <span class="app-step-seg done"></span>
-                <span class="app-step-seg done"></span>
                 <span class="app-step-seg active"></span>
+                <span class="app-step-seg"></span>
                 <span class="app-step-seg"></span>
               </div>
               <div class="app-step-caption">
-                <span id="app-stage-magnifier">14일 비공개 테스트 진행</span>
-                <span>출시 D-Day</span>
+                <span id="app-stage-magnifier">내부 테스트(1명) · 비공개 0/12명 (⚠️ 14일 미시작)</span>
+                <span>출시 대기</span>
               </div>
             </a>
 
@@ -1996,17 +1996,17 @@
             <a class="app-gauge-card" href="apps.html" id="app-card-shopping">
               <div class="app-gauge-top">
                 <span class="app-gauge-name">🟢 말로 장보기</span>
-                <span class="app-gauge-pct" id="app-pct-shopping">75%</span>
+                <span class="app-gauge-pct" id="app-pct-shopping">57%</span>
               </div>
               <div class="app-step-segments" id="app-segs-shopping">
                 <span class="app-step-seg done"></span>
-                <span class="app-step-seg done"></span>
                 <span class="app-step-seg active"></span>
+                <span class="app-step-seg"></span>
                 <span class="app-step-seg"></span>
               </div>
               <div class="app-step-caption">
-                <span id="app-stage-shopping">14일 비공개 테스트 진행</span>
-                <span>출시 D-Day</span>
+                <span id="app-stage-shopping">내부 테스트(1명) · 비공개 0/12명 (⚠️ 14일 미시작)</span>
+                <span>출시 대기</span>
               </div>
             </a>
 
@@ -2014,17 +2014,17 @@
             <a class="app-gauge-card" href="apps.html" id="app-card-bible_app">
               <div class="app-gauge-top">
                 <span class="app-gauge-name">🟢 오늘의 성경말씀</span>
-                <span class="app-gauge-pct" id="app-pct-bible_app">75%</span>
+                <span class="app-gauge-pct" id="app-pct-bible_app">57%</span>
               </div>
               <div class="app-step-segments" id="app-segs-bible_app">
                 <span class="app-step-seg done"></span>
-                <span class="app-step-seg done"></span>
                 <span class="app-step-seg active"></span>
+                <span class="app-step-seg"></span>
                 <span class="app-step-seg"></span>
               </div>
               <div class="app-step-caption">
-                <span id="app-stage-bible_app">14일 비공개 테스트 진행</span>
-                <span>출시 D-Day</span>
+                <span id="app-stage-bible_app">내부 테스트(1명) · 비공개 0/12명 (⚠️ 14일 미시작)</span>
+                <span>출시 대기</span>
               </div>
             </a>
           </div>
@@ -2922,7 +2922,7 @@
       }
     } catch (_) {}
 
-    // 4-4. App Projects 4-Step Milestone Gauges + Live SJ AdMob & D-Day
+    // 4-4. App Projects 4-Step Milestone Gauges + Live SJ AdMob & Truthful Track Status
     try {
       const res = await fetch(`${API_BASE}/api/projects`, { cache: 'no-store' });
       if (res.ok) {
@@ -2930,24 +2930,26 @@
         const projects = Array.isArray(pData.projects) ? pData.projects : [];
         const summary = pData.summary || {};
         const appsSummaryEl = document.getElementById('bento-apps-summary');
-        if (appsSummaryEl && summary.dDayBadge) {
-          appsSummaryEl.textContent = `${summary.dDayBadge} · SJ AdMob 200 OK`;
+        const curTrackSummary = summary.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
+        if (appsSummaryEl) {
+          appsSummaryEl.textContent = `현재 트랙: ${curTrackSummary}`;
         }
         projects.forEach(p => {
           const ms = p.milestones || [];
           const vCnt = ms.filter(m => m.status === 'verified').length;
           const ipCnt = ms.filter(m => m.status === 'in_progress').length;
           const tCnt = Math.max(1, ms.length);
-          const pct = Number(p.progressPct) || (p.status === 'released' ? 100 : Math.min(95, Math.round(((vCnt + ipCnt * 0.5) / tCnt) * 100)));
-          const dDay = p.testSchedule?.dDayBadge || '테스트 진행';
+          const pct = Number(p.progressPct) || (p.status === 'released' ? 100 : Math.min(95, Math.round(((vCnt + ipCnt * 0.5) / tCnt) * 70)));
+          const tSched = p.testSchedule || {};
+          const closedLabel = tSched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
 
           const pctEl = document.getElementById(`app-pct-${p.id}`);
           const stageEl = document.getElementById(`app-stage-${p.id}`);
           const segsBox = document.getElementById(`app-segs-${p.id}`);
           if (pctEl) pctEl.textContent = `${pct}%`;
-          if (stageEl) stageEl.textContent = `${dDay} · SJ AdMob 연동`;
+          if (stageEl) stageEl.textContent = `비공개 테스트 현황: ${closedLabel}`;
           if (segsBox) {
-            const filledSteps = p.status === 'released' ? 4 : 3;
+            const filledSteps = p.status === 'released' ? 4 : (tSched.countdownStarted ? 2 : 1);
             segsBox.innerHTML = [1, 2, 3, 4].map(stepIdx => {
               const cls = stepIdx <= filledSteps ? 'done' : (stepIdx === filledSteps + 1 ? 'active' : '');
               return `<span class="app-step-seg ${cls}"></span>`;

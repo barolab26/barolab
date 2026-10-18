@@ -155,28 +155,171 @@ def verify_app_ads_txt(url: str, force: bool = False) -> Dict[str, Any]:
     return {k: v for k, v in res.items() if k != "_ts"}
 
 
-def compute_closed_test_schedule(internal_release_iso: str, required_days: int = 14) -> Dict[str, Any]:
-    """Calculate dynamic D+N elapsed days and D-M remaining days for Google Play 14-day test requirement."""
-    now = now_kst()
-    try:
-        start_dt = datetime.fromisoformat(internal_release_iso).astimezone(KST)
-    except Exception:
-        start_dt = datetime(2026, 10, 14, 19, 10, tzinfo=KST)
+def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]:
+    """Read ground-truth Play track & tester opt-in status from deployment.json and tester-recruitment-publications.json."""
+    internal_track = "internal"
+    internal_testers_count = 1
+    closed_track_opened = False
+    closed_test_opt_ins = 0
+    required_closed_testers = 12
+    required_closed_days = 14
+    closed_test_started_at: Optional[str] = None
 
-    elapsed_days = max(1, (now.date() - start_dt.date()).days)
-    remaining_days = max(0, required_days - elapsed_days)
-    target_release_date = (start_dt.date() + timedelta(days=required_days)).isoformat()
-    day_progress_pct = min(100, round((elapsed_days / required_days) * 100))
+    try:
+        if project_id == "bible_app":
+            dep_path = root / "apps" / "bible" / "deployment.json"
+            if dep_path.is_file():
+                dep = json.loads(dep_path.read_text(encoding="utf-8-sig"))
+                gp = dep.get("googlePlay") or {}
+                internal_testers_count = int((gp.get("internalTesters") or {}).get("listedCount") or 1)
+                required_closed_testers = int(gp.get("requiredClosedTesters") or 12)
+                required_closed_days = int(gp.get("requiredClosedTestDays") or 14)
+                closed_test_opt_ins = int(gp.get("optedInClosedTestersObserved") or 0)
+                closed_info = gp.get("closedTesting") or {}
+                closed_track_opened = bool(closed_info.get("trackOpened", False))
+                closed_test_started_at = closed_info.get("startedAt")
+                if gp.get("internalTrack"):
+                    internal_track = str(gp.get("internalTrack"))
+        else:
+            dep_path = root / "apps" / "deployment.json"
+            if dep_path.is_file():
+                dep = json.loads(dep_path.read_text(encoding="utf-8-sig"))
+                app_dep = (dep.get("apps") or {}).get(project_id) or {}
+                internal_track = str(app_dep.get("internalTrack") or "internal")
+                closed_info = app_dep.get("closedTesting") or {}
+                closed_track_opened = bool(closed_info.get("trackOpened", False))
+                closed_test_opt_ins = int(closed_info.get("optedInTesters") or 0)
+                closed_test_started_at = closed_info.get("startedAt")
+    except Exception:
+        pass
+
+    # Cross-check tester recruitment publications ledger
+    for rel_rec in ("apps/qa/tester-recruitment-publications.json", "apps/docs/tester-recruitment-publications.json"):
+        rec_path = root / rel_rec
+        if rec_path.is_file():
+            try:
+                rec = json.loads(rec_path.read_text(encoding="utf-8-sig"))
+                meas = rec.get("measurement") or {}
+                if isinstance(meas.get("closedTestOptIns"), int) and meas["closedTestOptIns"] > closed_test_opt_ins:
+                    closed_test_opt_ins = meas["closedTestOptIns"]
+            except Exception:
+                pass
 
     return {
-        "internalReleaseAt": start_dt.isoformat(timespec="seconds"),
-        "internalReleaseDate": start_dt.date().isoformat(),
+        "internalTrack": internal_track,
+        "internalTestersCount": internal_testers_count,
+        "closedTrackOpened": closed_track_opened,
+        "closedTestOptIns": closed_test_opt_ins,
+        "requiredClosedTesters": required_closed_testers,
+        "requiredClosedDays": required_closed_days,
+        "closedTestStartedAt": closed_test_started_at,
+        "testerGroupEmail": "barolab-testers@googlegroups.com",
+        "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
+    }
+
+
+def compute_closed_test_schedule(
+    internal_release_iso: str,
+    required_days: int = 14,
+    track_truth: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Calculate truthful Google Play 14-day closed test status.
+    CRITICAL RULE: If internalTrack == 'internal' or closedTestOptIns < 12, the 14-day countdown has NOT started.
+    Never report D+4 / D-10 based on the internal test release date.
+    """
+    truth = track_truth or {
+        "internalTrack": "internal",
+        "internalTestersCount": 1,
+        "closedTrackOpened": False,
+        "closedTestOptIns": 0,
+        "requiredClosedTesters": 12,
+        "requiredClosedDays": required_days,
+        "closedTestStartedAt": None,
+        "testerGroupEmail": "barolab-testers@googlegroups.com",
+        "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
+    }
+    now = now_kst()
+    try:
+        internal_dt = datetime.fromisoformat(internal_release_iso).astimezone(KST)
+    except Exception:
+        internal_dt = datetime(2026, 10, 14, 19, 10, tzinfo=KST)
+
+    internal_track = str(truth.get("internalTrack") or "internal")
+    internal_testers = int(truth.get("internalTestersCount") or 1)
+    closed_opened = bool(truth.get("closedTrackOpened", False))
+    opt_ins = int(truth.get("closedTestOptIns") or 0)
+    req_testers = int(truth.get("requiredClosedTesters") or 12)
+    req_days = int(truth.get("requiredClosedDays") or required_days)
+    closed_start_iso = truth.get("closedTestStartedAt")
+
+    countdown_can_run = (
+        internal_track != "internal"
+        and closed_opened
+        and opt_ins >= req_testers
+        and bool(closed_start_iso)
+    )
+
+    if not countdown_can_run:
+        current_track_label = f"내부 테스트 (테스터 {internal_testers}명) — ⚠️ 14일 카운트다운 미시작"
+        closed_status_label = (
+            f"{'비공개 트랙 개설됨' if closed_opened else '비공개 트랙 미개설'} · "
+            f"참여 테스터 {opt_ins} / {req_testers}명 (12명 Opt-in 완료 시 14일 카운트 시작)"
+        )
+        return {
+            "internalTrack": internal_track,
+            "internalTestersCount": internal_testers,
+            "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
+            "internalReleaseDate": internal_dt.date().isoformat(),
+            "closedTrackOpened": closed_opened,
+            "closedTestOptIns": opt_ins,
+            "requiredClosedTesters": req_testers,
+            "countdownStarted": False,
+            "closedTestStartedAt": None,
+            "elapsedDays": 0,
+            "remainingDays": req_days,
+            "requiredDays": req_days,
+            "targetProductionDate": "미정 (12명 Opt-in 완료 후 +14일)",
+            "dayProgressPct": 0,
+            "currentTrackLabel": current_track_label,
+            "closedTrackStatusLabel": closed_status_label,
+            "dDayBadge": current_track_label,
+            "testerGroupEmail": truth.get("testerGroupEmail", "barolab-testers@googlegroups.com"),
+            "testerLandingUrl": truth.get("testerLandingUrl", "https://barolab-daily-apps.pages.dev/testers/"),
+            "readyForProductionTrack": False,
+        }
+
+    closed_dt = datetime.fromisoformat(str(closed_start_iso)).astimezone(KST)
+    elapsed_days = max(1, (now.date() - closed_dt.date()).days)
+    remaining_days = max(0, req_days - elapsed_days)
+    target_release_date = (closed_dt.date() + timedelta(days=req_days)).isoformat()
+    day_progress_pct = min(100, round((elapsed_days / req_days) * 100))
+    current_track_label = f"비공개 테스트 가동 중 (테스터 {opt_ins}/{req_testers}명)"
+    closed_status_label = (
+        f"비공개 테스트 D+{elapsed_days}일째 · 14일 요건 D-{remaining_days}일 ({target_release_date} 충족)"
+        if remaining_days > 0
+        else f"비공개 테스트 14일 요건 충족 완료 (D+{elapsed_days}일)"
+    )
+
+    return {
+        "internalTrack": internal_track,
+        "internalTestersCount": internal_testers,
+        "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
+        "internalReleaseDate": internal_dt.date().isoformat(),
+        "closedTrackOpened": True,
+        "closedTestOptIns": opt_ins,
+        "requiredClosedTesters": req_testers,
+        "countdownStarted": True,
+        "closedTestStartedAt": closed_dt.isoformat(timespec="seconds"),
         "elapsedDays": elapsed_days,
         "remainingDays": remaining_days,
-        "requiredDays": required_days,
+        "requiredDays": req_days,
         "targetProductionDate": target_release_date,
         "dayProgressPct": day_progress_pct,
-        "dDayBadge": f"테스트 게시 D+{elapsed_days}일째 · 14일 요건 D-{remaining_days}일" if remaining_days > 0 else f"14일 요건 충족 완료 (D+{elapsed_days}일)",
+        "currentTrackLabel": current_track_label,
+        "closedTrackStatusLabel": closed_status_label,
+        "dDayBadge": closed_status_label,
+        "testerGroupEmail": truth.get("testerGroupEmail", "barolab-testers@googlegroups.com"),
+        "testerLandingUrl": truth.get("testerLandingUrl", "https://barolab-daily-apps.pages.dev/testers/"),
         "readyForProductionTrack": remaining_days == 0,
     }
 
@@ -207,8 +350,11 @@ def measurement(raw: Any, metric: str) -> Dict[str, Any]:
 def build_admob_tracker(project_id: str, schedule_info: Dict[str, Any], force_Verify: bool = False) -> Dict[str, Any]:
     meta = APP_MONETIZATION_CATALOG.get(project_id, {})
     ads_txt = verify_app_ads_txt(meta.get("appAdsTxtUrl", "https://barolab-daily-apps.pages.dev/app-ads.txt"), force=force_Verify)
-    rem_days = schedule_info.get("remainingDays", 10)
-    target_date = schedule_info.get("targetProductionDate", "2026-10-28")
+    current_track_label = schedule_info.get("currentTrackLabel", "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작")
+    closed_status_label = schedule_info.get(
+        "closedTrackStatusLabel",
+        "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
+    )
 
     return {
         "account": "SJ (pub-7642010403138987)",
@@ -227,31 +373,41 @@ def build_admob_tracker(project_id: str, schedule_info: Dict[str, Any], force_Ve
         "todayRevenueUsd": 0.0,
         "monthRevenueUsd": 0.0,
         "impressionsToday": 0,
+        "currentTrackLabel": current_track_label,
+        "closedTrackStatusLabel": closed_status_label,
         "owner": meta.get("owner", "@patch · @trace"),
-        "blocker": f"{meta.get('ceoCheckItem', '실기기 최종 확인')} 대기 + Play 14일 테스트 요건(D-{rem_days}일, {target_date} 만료) 진행 중",
-        "nextAction": f"[대표님 확인] {meta.get('ceoCheckItem', '실기기 1회 확인')} 완료 시 @patch가 실광고 스위치(TEST_ADS→PROD_ADS) AAB 즉시 빌드",
+        "blocker": (
+            f"현재 트랙: {current_track_label} | "
+            f"비공개 테스트 현황: {closed_status_label} | "
+            f"실기기 확인: {meta.get('ceoCheckItem', '실기기 최종 확인')} 대기"
+        ),
+        "nextAction": (
+            f"[1순위: 비공개 트랙 전환] Play Console에서 Google 그룹스(barolab-testers@googlegroups.com) 등록 후 "
+            f"내부 테스트 AAB를 비공개 테스트(Closed Track)로 승격 → 12명 Opt-in 완료 시 14일 카운트 시작 "
+            f"(가이드: apps/docs/closed-track-launch-guide.md)"
+        ),
         "ceoActionRequired": True,
         "productionChecklist": [
             {
                 "step": 1,
-                "label": "1단계: 삼성 실기기 기능 최종 체크",
-                "owner": "대표님 (CEO)",
+                "label": "1단계: Google 그룹스 비공개 트랙 개설 & 12명 Opt-in (14일 카운트 시작 조건)",
+                "owner": "대표님 (Play Console 승격) · @patch (랜딩/그룹스 가이드)",
                 "status": "in_progress",
-                "detail": meta.get("ceoCheckItem", "실기기 동작 확인"),
+                "detail": f"{closed_status_label} · 그룹스: barolab-testers@googlegroups.com",
             },
             {
                 "step": 2,
-                "label": "2단계: 테스트 광고 → SJ 실광고 스위치 전환 AAB 빌드",
-                "owner": "@patch",
+                "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
+                "owner": "대표님 (실기기) · @patch (AAB 빌드)",
                 "status": "ready",
-                "detail": f"실광고 배너({meta.get('admobBannerUnitId', '')}) 코드 매핑 준비 완료 · 1단계 확인 즉시 서명 빌드",
+                "detail": f"{meta.get('ceoCheckItem', '실기기 동작 확인')} · 실광고 배너({meta.get('admobBannerUnitId', '')}) 코드 매핑 준비 완료",
             },
             {
                 "step": 3,
-                "label": f"3단계: Play 스토어 프로덕션 정식 출시 및 AdMob 실수익 개시",
+                "label": "3단계: 12명 · 14일 비공개 테스트 완주 후 프로덕션 출시 및 AdMob 실수익 개시",
                 "owner": "@patch · @trace",
                 "status": "waiting_d_day",
-                "detail": f"14일 테스트 요건 충족일({target_date}, D-{rem_days}일) 프로덕션 트랙 심사 제출 및 스토어 연결",
+                "detail": "현재 14일 카운트다운 미시작 — 비공개 트랙 12명 Opt-in 달성 시점부터 14일 연속 유지 후 프로덕션 심사 제출",
             },
         ],
     }
@@ -286,18 +442,22 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             steps[-1]["status"] = status
 
         meta = APP_MONETIZATION_CATALOG.get(expected_id, {})
-        schedule_info = compute_closed_test_schedule(meta.get("internalReleaseAt", "2026-10-14T19:10:00+09:00"))
+        track_truth = _load_play_track_truth(expected_id, ROOT)
+        schedule_info = compute_closed_test_schedule(
+            meta.get("internalReleaseAt", "2026-10-14T19:10:00+09:00"),
+            track_truth=track_truth,
+        )
         admob_tracker = build_admob_tracker(expected_id, schedule_info, force_Verify=force_verify)
 
         verified_cnt = sum(1 for s in steps if s["status"] == "verified")
         in_prog_cnt = sum(1 for s in steps if s["status"] == "in_progress")
         total_cnt = max(1, len(steps))
         milestone_ratio = (verified_cnt + in_prog_cnt * 0.5) / total_cnt
-        # Combine milestone verification (70% weight) + 14-day test track progression (25% weight)
+        # Combine milestone verification (70% weight) + 14-day closed test track progression (30% weight, 0% until 12 opt-ins)
         dynamic_pct = (
             100
             if raw.get("status") == "released"
-            else min(95, max(72, round(milestone_ratio * 72 + (schedule_info["dayProgressPct"] / 100.0) * 23)))
+            else min(95, max(50, round(milestone_ratio * 70 + (schedule_info["dayProgressPct"] / 100.0) * 30)))
         )
 
         now_iso = now_kst_iso()
@@ -305,7 +465,6 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
 
         metrics = raw.get("measurement") if isinstance(raw.get("measurement"), dict) else {}
         admob_raw = dict(metrics.get("admob") or {})
-        # Ensure SJ AdMob connection is reflected as collected ($0.00 in internal test mode)
         admob_raw.update({
             "status": "collected",
             "revenue": float(admob_raw.get("revenue") or 0.0),
@@ -317,17 +476,16 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
         })
 
         analytics_raw = dict(metrics.get("analytics") or {})
-        if analytics_raw.get("status") != "collected":
-            analytics_raw.update({
-                "status": "collected",
-                "activeUsers": int(analytics_raw.get("activeUsers") or 1),
-                "period": f"내부 테스트 트랙 (D+{schedule_info['elapsedDays']}일째)",
-                "checkedAt": now_iso,
-            })
+        analytics_raw.update({
+            "status": "collected",
+            "activeUsers": int(schedule_info.get("internalTestersCount") or 1),
+            "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
+            "checkedAt": now_iso,
+        })
 
         dynamic_stage = (
-            f"{meta.get('versionName', 'v2')} 내부 테스트 가동 중 ({schedule_info['dDayBadge']}) · "
-            f"SJ AdMob 연동 완료(app-ads.txt 200 OK) · 실기기 최종 확인 대기"
+            f"현재 트랙: {schedule_info['currentTrackLabel']} | "
+            f"비공개 테스트 현황: {schedule_info['closedTrackStatusLabel']}"
         )
 
         project = {
@@ -413,6 +571,7 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
     avg_pct = round(sum(p.get("progressPct", 75) for p in projects) / len(projects)) if projects else 0
     all_ads_txt_ok = all(p.get("admobTracker", {}).get("appAdsTxt", {}).get("verified", False) for p in projects) if projects else False
 
+    first_sched = (projects[0].get("testSchedule") or {}) if projects else {}
     return {
         "status": status,
         "expectedProjects": len(PROJECT_REGISTRY),
@@ -423,7 +582,12 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
             "allAppAdsTxtVerified": all_ads_txt_ok,
             "servingMode": "TEST_ADS",
             "totalAdmobRevenueUsd": round(sum(float(p.get("measurement", {}).get("admob", {}).get("revenue") or 0.0) for p in projects), 2),
-            "dDayBadge": projects[0].get("testSchedule", {}).get("dDayBadge", "") if projects else "",
+            "countdownStarted": bool(first_sched.get("countdownStarted", False)),
+            "currentTrackLabel": first_sched.get("currentTrackLabel", "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작"),
+            "closedTrackStatusLabel": first_sched.get("closedTrackStatusLabel", "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)"),
+            "dDayBadge": first_sched.get("dDayBadge", "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작"),
+            "testerGroupEmail": first_sched.get("testerGroupEmail", "barolab-testers@googlegroups.com"),
+            "testerLandingUrl": first_sched.get("testerLandingUrl", "https://barolab-daily-apps.pages.dev/testers/"),
         },
         "projects": projects,
         "sources": sources,
