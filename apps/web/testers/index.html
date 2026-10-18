@@ -3,126 +3,102 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BaroLab Android 앱 4종 원클릭 비공개 테스트 참여 (Google 그룹스)</title>
+  <title>BaroLab 앱 4종 원클릭 설치 리모컨 (일반 · 보안폴더 겸용)</title>
   <link rel="stylesheet" href="/testers/testers.css">
 </head>
 <body>
   <main>
-    <div class="top-bar">
-      <a class="brand-link" href="https://barolab-daily-apps.pages.dev/">← BaroLab 생활 앱 홈</a>
-      <span class="track-badge">Google 그룹스 1회 가입 → 4개 앱 동시 테스트 권한 부여</span>
+    <div class="top-nav">
+      <a class="brand-pill" href="https://barolab-daily-apps.pages.dev/">← BaroLab 생활 앱</a>
+      <span class="mode-pill">📱 휴대폰 6대 (일반 + 보안폴더) 원클릭 리모컨</span>
     </div>
 
-    <header class="hero-header">
-      <h1>이메일 사전 신청 없이 10초 만에 참여하세요 —<br>Step 1 그룹 가입 후 Step 2에서 원하는 앱을 바로 설치할 수 있습니다.</h1>
-      <p class="hero-sub">Android 8.0 이상 스마트폰 · Google Play 스토어에 로그인된 계정으로 아래 2단계만 진행해 주세요. (14일 연속 설치 유지 권장)</p>
-    </header>
-
-    <!-- STEP 1: Google Groups 1-Click Join -->
-    <section class="step1-card" aria-labelledby="step1-title">
-      <div class="step1-info">
-        <span class="step-pill">STEP 1 · 필수 (최초 1회)</span>
-        <h2 id="step1-title">BaroLab 통합 테스터 Google 그룹스 1초 가입하기</h2>
-        <p>아래 버튼을 눌러 <code>barolab-testers@googlegroups.com</code> 그룹에서 <strong>[그룹 가입 (Join group)]</strong>을 클릭하면 앱 4종의 비공개 테스트 접근 권한이 즉시 활성화됩니다.</p>
-      </div>
-      <a class="btn-group-join" href="https://groups.google.com/g/barolab-testers" target="_blank" rel="noopener noreferrer">
-        👥 Step 1: 구글 그룹스 1초 가입하기 ↗
-      </a>
+    <section class="account-alert" aria-labelledby="account-check-heading">
+      <span class="account-alert-badge">⚡ 설치 전 필수 확인</span>
+      <h1 id="account-check-heading">현재 휴대폰 Play 스토어 로그인 계정을 확인하세요</h1>
+      <p>Play 스토어 우측 상단 프로필이 등록된 테스터 구글 계정인지 확인한 뒤, 아래 4개 버튼을 순서대로 터치하면 즉시 설치 화면으로 이동합니다.</p>
     </section>
 
-    <!-- STEP 2: 4 Apps Play Store Opt-in Grid -->
-    <section aria-labelledby="step2-title">
-      <div class="step2-header">
-        <h2 id="step2-title">📲 Step 2: 앱 4종 Play 스토어 비공개 테스트 참여(Opt-in) 및 설치</h2>
-        <span>Step 1 그룹 가입 후 아래 [비공개 테스트 참여(Opt-in)] 버튼을 눌러 테스터가 되기를 수락하세요.</span>
-      </div>
+    <section class="remote-grid" aria-label="앱 4종 원클릭 설치 버튼">
+      <!-- 1. 오늘의 성경말씀 -->
+      <article class="remote-card">
+        <div class="remote-card-head">
+          <div class="remote-title-wrap">
+            <h2 class="remote-title">1. 오늘의 성경말씀</h2>
+            <span class="remote-pkg">com.barolab.harubible</span>
+          </div>
+          <span class="remote-ver">v4 · 0.4.0</span>
+        </div>
+        <a class="btn-install-primary" href="https://play.google.com/apps/internaltest/4700464139727332365" target="_blank" rel="noopener noreferrer">
+          📲 1. 오늘의 성경말씀 설치하기
+        </a>
+        <div class="sub-links">
+          <a class="sub-link-btn closed" href="https://play.google.com/apps/testing/com.barolab.harubible" target="_blank" rel="noopener noreferrer">비공개 테스트 Opt-in ↗</a>
+          <a class="sub-link-btn" href="https://play.google.com/store/apps/details?id=com.barolab.harubible" target="_blank" rel="noopener noreferrer">Play 스토어 직통 ↗</a>
+          <a class="sub-link-btn" href="https://haru-malsseum.pages.dev/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        </div>
+      </article>
 
-      <div class="apps-grid-4">
-        <!-- App 1: 오늘의 안부 -->
-        <article class="app-card">
-          <div>
-            <div class="app-card-top">
-              <div>
-                <h3>1. 오늘의 안부</h3>
-                <div class="app-pkg">com.barolab.morningcard</div>
-              </div>
-              <span class="app-ver">v2 · 0.2.0</span>
-            </div>
-            <p class="app-desc">계절·요일 인사말 문구를 고쳐 사진·일러스트 배경 카드로 저장하고 카카오톡 등으로 간편하게 공유하는 앱</p>
+      <!-- 2. 오늘의 안부 -->
+      <article class="remote-card">
+        <div class="remote-card-head">
+          <div class="remote-title-wrap">
+            <h2 class="remote-title">2. 오늘의 안부</h2>
+            <span class="remote-pkg">com.barolab.morningcard</span>
           </div>
-          <div class="app-actions">
-            <a class="btn-optin" href="https://play.google.com/apps/testing/com.barolab.morningcard" target="_blank" rel="noopener noreferrer">✅ 비공개 테스트 참여(Opt-in) ↗</a>
-            <a class="btn-store" href="https://play.google.com/store/apps/details?id=com.barolab.morningcard" target="_blank" rel="noopener noreferrer">Play 스토어 ↗</a>
-            <a class="btn-info" href="https://barolab-daily-apps.pages.dev/greeting/">앱 소개</a>
-          </div>
-        </article>
+          <span class="remote-ver">v2 · 0.2.0</span>
+        </div>
+        <a class="btn-install-primary" href="https://play.google.com/apps/internaltest/4701400802151181455" target="_blank" rel="noopener noreferrer">
+          📲 2. 오늘의 안부 설치하기
+        </a>
+        <div class="sub-links">
+          <a class="sub-link-btn closed" href="https://play.google.com/apps/testing/com.barolab.morningcard" target="_blank" rel="noopener noreferrer">비공개 테스트 Opt-in ↗</a>
+          <a class="sub-link-btn" href="https://play.google.com/store/apps/details?id=com.barolab.morningcard" target="_blank" rel="noopener noreferrer">Play 스토어 직통 ↗</a>
+          <a class="sub-link-btn" href="https://barolab-daily-apps.pages.dev/greeting/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        </div>
+      </article>
 
-        <!-- App 2: 큰글씨 돋보기 -->
-        <article class="app-card">
-          <div>
-            <div class="app-card-top">
-              <div>
-                <h3>2. 큰글씨 돋보기</h3>
-                <div class="app-pkg">com.barolab.biglens</div>
-              </div>
-              <span class="app-ver">v2 · 0.2.0</span>
-            </div>
-            <p class="app-desc">약봉투·영수증 등 작은 글씨를 크게 확대하고 화면 정지(Freeze)·조명·고대비 모드로 편하게 읽는 돋보기 앱</p>
+      <!-- 3. 큰글씨 돋보기 -->
+      <article class="remote-card">
+        <div class="remote-card-head">
+          <div class="remote-title-wrap">
+            <h2 class="remote-title">3. 큰글씨 돋보기</h2>
+            <span class="remote-pkg">com.barolab.biglens</span>
           </div>
-          <div class="app-actions">
-            <a class="btn-optin" href="https://play.google.com/apps/testing/com.barolab.biglens" target="_blank" rel="noopener noreferrer">✅ 비공개 테스트 참여(Opt-in) ↗</a>
-            <a class="btn-store" href="https://play.google.com/store/apps/details?id=com.barolab.biglens" target="_blank" rel="noopener noreferrer">Play 스토어 ↗</a>
-            <a class="btn-info" href="https://barolab-daily-apps.pages.dev/magnifier/">앱 소개</a>
-          </div>
-        </article>
+          <span class="remote-ver">v2 · 0.2.0</span>
+        </div>
+        <a class="btn-install-primary" href="https://play.google.com/apps/internaltest/4701703053640983596" target="_blank" rel="noopener noreferrer">
+          📲 3. 큰글씨 돋보기 설치하기
+        </a>
+        <div class="sub-links">
+          <a class="sub-link-btn closed" href="https://play.google.com/apps/testing/com.barolab.biglens" target="_blank" rel="noopener noreferrer">비공개 테스트 Opt-in ↗</a>
+          <a class="sub-link-btn" href="https://play.google.com/store/apps/details?id=com.barolab.biglens" target="_blank" rel="noopener noreferrer">Play 스토어 직통 ↗</a>
+          <a class="sub-link-btn" href="https://barolab-daily-apps.pages.dev/magnifier/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        </div>
+      </article>
 
-        <!-- App 3: 말로 장보기 -->
-        <article class="app-card">
-          <div>
-            <div class="app-card-top">
-              <div>
-                <h3>3. 말로 장보기</h3>
-                <div class="app-pkg">com.barolab.voicebasket</div>
-              </div>
-              <span class="app-ver">v2 · 0.2.0</span>
-            </div>
-            <p class="app-desc">한국어 음성으로 말한 장보기 품목을 미리보고 수정해 추가하며, 구매 완료 체크와 지난 품목 재사용을 지원하는 앱</p>
+      <!-- 4. 말로 장보기 -->
+      <article class="remote-card">
+        <div class="remote-card-head">
+          <div class="remote-title-wrap">
+            <h2 class="remote-title">4. 말로 장보기</h2>
+            <span class="remote-pkg">com.barolab.voicebasket</span>
           </div>
-          <div class="app-actions">
-            <a class="btn-optin" href="https://play.google.com/apps/testing/com.barolab.voicebasket" target="_blank" rel="noopener noreferrer">✅ 비공개 테스트 참여(Opt-in) ↗</a>
-            <a class="btn-store" href="https://play.google.com/store/apps/details?id=com.barolab.voicebasket" target="_blank" rel="noopener noreferrer">Play 스토어 ↗</a>
-            <a class="btn-info" href="https://barolab-daily-apps.pages.dev/shopping/">앱 소개</a>
-          </div>
-        </article>
-
-        <!-- App 4: 오늘의 성경말씀 -->
-        <article class="app-card">
-          <div>
-            <div class="app-card-top">
-              <div>
-                <h3>4. 오늘의 성경말씀</h3>
-                <div class="app-pkg">com.barolab.harubible</div>
-              </div>
-              <span class="app-ver">v4 · 0.4.0</span>
-            </div>
-            <p class="app-desc">하루 한 구절 선정된 30개 성경 말씀을 큰 글씨로 읽고 오프라인 음성(TTS)으로 듣고 카드로 공유하는 앱</p>
-          </div>
-          <div class="app-actions">
-            <a class="btn-optin" href="https://play.google.com/apps/testing/com.barolab.harubible" target="_blank" rel="noopener noreferrer">✅ 비공개 테스트 참여(Opt-in) ↗</a>
-            <a class="btn-store" href="https://play.google.com/store/apps/details?id=com.barolab.harubible" target="_blank" rel="noopener noreferrer">Play 스토어 ↗</a>
-            <a class="btn-info" href="https://haru-malsseum.pages.dev/">앱 소개</a>
-          </div>
-        </article>
-      </div>
+          <span class="remote-ver">v2 · 0.2.0</span>
+        </div>
+        <a class="btn-install-primary" href="https://play.google.com/apps/internaltest/4701721871486482124" target="_blank" rel="noopener noreferrer">
+          📲 4. 말로 장보기 설치하기
+        </a>
+        <div class="sub-links">
+          <a class="sub-link-btn closed" href="https://play.google.com/apps/testing/com.barolab.voicebasket" target="_blank" rel="noopener noreferrer">비공개 테스트 Opt-in ↗</a>
+          <a class="sub-link-btn" href="https://play.google.com/store/apps/details?id=com.barolab.voicebasket" target="_blank" rel="noopener noreferrer">Play 스토어 직통 ↗</a>
+          <a class="sub-link-btn" href="https://barolab-daily-apps.pages.dev/shopping/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        </div>
+      </article>
     </section>
 
-    <footer class="footer-note">
-      <div>
-        <strong>안내:</strong> Step 1 그룹 가입 계정이 스마트폰 Google Play 로그인 계정과 일치해야 Step 2 참여 화면이 열립니다. (Google 테스트 광고 적용 · 정식 출시 전)
-      </div>
-      <div>
-        <a href="https://barolab-daily-apps.pages.dev/greeting/privacy">개인정보 처리방침</a>
-      </div>
+    <footer class="tip-box">
+      <div><strong>💡 삼성 보안폴더 2배속 팁:</strong> 일반 영역에서 4개 앱 설치 후, <strong>[보안폴더]</strong> 안의 인터넷/Play 스토어에 두 번째 구글 계정을 로그인하고 이 페이지(<code>barolab-daily-apps.pages.dev/testers/</code>)를 열면 폰 1대로 테스터 2명분이 즉시 채워집니다.</div>
     </footer>
   </main>
 </body>

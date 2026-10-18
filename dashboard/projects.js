@@ -114,6 +114,139 @@
     }
   }
 
+  async function verifyDevice(projectId, btnEl) {
+    if (btnEl) {
+      btnEl.disabled = true;
+      btnEl.textContent = '검증 반영 중...';
+    }
+    try {
+      const res = await fetch('/api/projects/verify-device', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({projectId, verified: true})
+      });
+      if (res.ok) {
+        render(await res.json());
+      }
+    } catch (_) {
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.textContent = '✅ 삼성 실기기 정상 동작 확인 완료';
+      }
+    }
+  }
+
+  function renderControlCenter(data) {
+    const projects = Array.isArray(data?.projects) ? data.projects : [];
+    const tc = data?.testersControlCenter || {};
+    const firstSched = projects[0]?.testSchedule || {};
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    // [Zone C] Real 14-Day Countdown Tracker
+    const regCount = tc.emailCount || firstSched.registeredTestersCount || 1;
+    const optIns = Number(firstSched.closedTestOptIns || tc.closedTestOptIns || 0);
+    const reqTesters = Number(firstSched.requiredClosedTesters || 12);
+    const reqDays = Number(firstSched.requiredDays || 14);
+    const countdownStarted = Boolean(firstSched.countdownStarted);
+
+    set('zc-internal-status', firstSched.currentTrackLabel || `내부 테스트 (테스터 ${firstSched.internalTestersCount || 1}명) — ⚠️ 14일 카운트다운 미시작`);
+    set('zc-internal-sub', `내부 테스트 배포일: ${firstSched.internalReleaseDate || '2026-10-14'} · 대시보드 등록 테스터: ${regCount}명 (내부 트랙은 14일 요건에 산입되지 않음)`);
+
+    if (countdownStarted) {
+      set('zc-closed-status', `🟢 비공개 테스트 가동 중 · Opt-in ${optIns} / ${reqTesters}명 (D+${firstSched.elapsedDays} / ${reqDays}일)`);
+      set('zc-closed-sub', `14일 요건 충족 예정일: ${firstSched.targetProductionDate} (D-${firstSched.remainingDays}일 남음)`);
+    } else {
+      const trackTxt = (firstSched.closedTrackOpened || tc.closedTrackPromoted) ? '비공개 트랙 개설 완료' : '비공개 트랙 승격 대기';
+      set('zc-closed-status', `${trackTxt} · 참여 테스터(Opt-in) ${optIns} / ${reqTesters}명 (D+0 / ${reqDays}일)`);
+      set('zc-closed-sub', `12명 이상 Opt-in 완료 시점(closedTestStartAt)부터 D+1 ~ D+14 실측 카운트다운이 시작됩니다.`);
+    }
+
+    const progBar = document.getElementById('zc-progress-bar');
+    if (progBar) {
+      const pct = countdownStarted
+        ? Math.min(100, Number(firstSched.dayProgressPct || 0))
+        : Math.min(90, Math.round((optIns / reqTesters) * 50));
+      progBar.style.width = `${pct}%`;
+    }
+    const optInput = document.getElementById('zc-optin-input');
+    if (optInput && document.activeElement !== optInput) {
+      optInput.value = String(optIns);
+    }
+
+    // [Zone A] 4-App Direct Install Cards + Physical Device 1-Time Check
+    const cardsBox = document.getElementById('direct-install-cards');
+    if (cardsBox) {
+      cardsBox.replaceChildren();
+      projects.forEach((p, idx) => {
+        const isVer = Boolean(p.deviceVerified);
+        const card = node('div', '', 'direct-app-card' + (isVer ? ' verified' : ''));
+        const top = node('div', '', 'direct-app-top');
+        top.innerHTML = `
+          <strong>${idx + 1}. ${p.name}</strong>
+          <span class="pillar-badge ${isVer ? 'badge-green' : 'badge-orange'}">${isVer ? '실기기 검증 완료' : '실기기 1회 확인 대기'}</span>
+        `;
+        const metaLine = node('div', `${p.packageName || ''} · v${p.versionCode || ''} (${p.versionName || ''})`, 'direct-app-meta');
+
+        const linkRow = node('div', '', 'direct-link-row');
+        const btnInt = node('a', '📲 내부 테스트 설치 ↗', 'direct-install-btn internal');
+        btnInt.href = p.internalJoinUrl || 'https://barolab-daily-apps.pages.dev/testers/';
+        btnInt.target = '_blank';
+        btnInt.rel = 'noopener noreferrer';
+
+        const btnClosed = node('a', '🔒 비공개 Opt-in ↗', 'direct-install-btn closed');
+        btnClosed.href = p.closedJoinUrl || `https://play.google.com/apps/testing/${p.packageName}`;
+        btnClosed.target = '_blank';
+        btnClosed.rel = 'noopener noreferrer';
+        linkRow.append(btnInt, btnClosed);
+
+        const checkUl = node('ul', '', 'direct-check-list');
+        const items = Array.isArray(p.deviceCheckItems) && p.deviceCheckItems.length
+          ? p.deviceCheckItems
+          : ['실휴대폰 앱 실행 및 주요 화면 동작 확인', '하단 AdMob 테스트 배너 표시 확인'];
+        for (const chkText of items) {
+          const li = node('li');
+          const lbl = node('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = isVer;
+          lbl.append(cb, document.createTextNode(' ' + chkText));
+          li.append(lbl);
+          checkUl.append(li);
+        }
+
+        const verBtn = node(
+          'button',
+          isVer ? `✅ 삼성 실기기 검증 완료 (${formatKST(p.deviceVerifiedAt)})` : '✅ 삼성 실기기 정상 동작 확인 완료',
+          'direct-verify-btn' + (isVer ? ' is-verified' : '')
+        );
+        verBtn.type = 'button';
+        verBtn.onclick = () => verifyDevice(p.id, verBtn);
+
+        card.append(top, metaLine, linkRow, checkUl, verBtn);
+        cardsBox.append(card);
+      });
+    }
+
+    // [Zone B] 14-Tester Emails & Play Console Sync
+    const badgeEl = document.getElementById('testers-count-badge');
+    if (badgeEl) {
+      badgeEl.textContent = `등록 ${regCount} / ${tc.targetTesterCount || 14}명`;
+      badgeEl.className = 'pillar-badge ' + (regCount >= 12 ? 'badge-green' : 'badge-orange');
+    }
+    const ta = document.getElementById('tester-emails-textarea');
+    if (ta && Array.isArray(tc.emails) && tc.emails.length && document.activeElement !== ta && !ta.dataset.userEdited) {
+      ta.value = tc.emails.join('\n');
+    }
+    const receiptEl = document.getElementById('tester-sync-receipt');
+    if (receiptEl) {
+      const lastSync = tc.lastSyncedToPlayConsoleAt ? formatKST(tc.lastSyncedToPlayConsoleAt) : '미실행';
+      receiptEl.innerHTML = `
+        <div><strong>저장 원장:</strong> <code>data/app_testers.json</code> (${regCount}개 계정) · <strong>CSV:</strong> <code>apps/qa/barolab-testers-14.csv</code></div>
+        <div><strong>최근 반자동 동기화:</strong> ${lastSync} · <strong>상태:</strong> ${tc.syncStatus || 'ready'}</div>
+      `;
+    }
+  }
+
   function render(data) {
     latestData = data;
     list.replaceChildren();
@@ -122,6 +255,7 @@
       return;
     }
     updateKPIs(data);
+    renderControlCenter(data);
     renderFilterBar(data.projects);
 
     const sched = data.projects[0]?.testSchedule || {};
@@ -298,7 +432,117 @@
     }
   }
 
+  const verifyAllBtn = document.getElementById('btn-verify-all-devices');
+  if (verifyAllBtn) {
+    verifyAllBtn.addEventListener('click', () => verifyDevice('all', verifyAllBtn));
+  }
+
+  const taEl = document.getElementById('tester-emails-textarea');
+  if (taEl) {
+    taEl.addEventListener('input', () => {
+      taEl.dataset.userEdited = '1';
+    });
+  }
+
+  const saveTestersBtn = document.getElementById('btn-save-sync-testers');
+  if (saveTestersBtn) {
+    saveTestersBtn.addEventListener('click', async () => {
+      const rawEmails = taEl ? taEl.value : '';
+      const execCdp = Boolean(document.getElementById('tester-execute-cdp')?.checked);
+      saveTestersBtn.disabled = true;
+      saveTestersBtn.textContent = '💾 명단 저장 및 Play Console 동기화 중...';
+      try {
+        const res = await fetch('/api/projects/testers', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({emails: rawEmails, executeCdp: execCdp})
+        });
+        if (res.ok) {
+          if (taEl) delete taEl.dataset.userEdited;
+          render(await res.json());
+          saveTestersBtn.textContent = '✅ 테스터 명단 저장 및 CSV/원장 반영 완료!';
+          setTimeout(() => {
+            saveTestersBtn.textContent = '💾 테스터 명단 저장 및 Play Console 반자동 등록 실행';
+          }, 2500);
+        }
+      } catch (_) {
+        saveTestersBtn.textContent = '💾 테스터 명단 저장 및 Play Console 반자동 등록 실행';
+      } finally {
+        saveTestersBtn.disabled = false;
+      }
+    });
+  }
+
+  const copyEmailsBtn = document.getElementById('btn-copy-comma-emails');
+  if (copyEmailsBtn) {
+    copyEmailsBtn.addEventListener('click', async () => {
+      const raw = taEl ? taEl.value : '';
+      const emails = raw.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+      const commaList = emails.join(', ');
+      try {
+        await navigator.clipboard.writeText(commaList);
+        copyEmailsBtn.textContent = `✅ ${emails.length}개 이메일 쉼표(,) 복사 완료!`;
+      } catch (_) {
+        copyEmailsBtn.textContent = '📋 복사 완료';
+      }
+      setTimeout(() => {
+        copyEmailsBtn.textContent = '📋 쉼표(,) 구분 명단 복사 (Play Console 붙여넣기용)';
+      }, 2200);
+    });
+  }
+
+  const promoteClosedBtn = document.getElementById('btn-promote-closed-track');
+  if (promoteClosedBtn) {
+    promoteClosedBtn.addEventListener('click', async () => {
+      const execCdp = Boolean(document.getElementById('tester-execute-cdp')?.checked);
+      promoteClosedBtn.disabled = true;
+      promoteClosedBtn.textContent = '🚀 비공개 트랙 승격 준비 및 링크 검증 중...';
+      try {
+        const res = await fetch('/api/projects/promote-closed', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({app: 'all', executeCdp: execCdp, closedTrackPromoted: true})
+        });
+        if (res.ok) {
+          render(await res.json());
+          promoteClosedBtn.textContent = '✅ 비공개 테스트(Alpha) 4종 승격 반영 완료!';
+          setTimeout(() => {
+            promoteClosedBtn.textContent = '🚀 비공개 테스트(Alpha) 4종 승격 실행';
+          }, 2500);
+        }
+      } catch (_) {
+        promoteClosedBtn.textContent = '🚀 비공개 테스트(Alpha) 4종 승격 실행';
+      } finally {
+        promoteClosedBtn.disabled = false;
+      }
+    });
+  }
+
+  const updateOptinsBtn = document.getElementById('btn-update-optins');
+  if (updateOptinsBtn) {
+    updateOptinsBtn.addEventListener('click', async () => {
+      const optInput = document.getElementById('zc-optin-input');
+      const count = Math.max(0, Math.min(30, parseInt(optInput?.value || '0', 10) || 0));
+      updateOptinsBtn.disabled = true;
+      updateOptinsBtn.textContent = '반영 중...';
+      try {
+        const res = await fetch('/api/projects/testers', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({closedTestOptIns: count, executeCdp: false})
+        });
+        if (res.ok) {
+          render(await res.json());
+        }
+      } catch (_) {} finally {
+        updateOptinsBtn.disabled = false;
+        updateOptinsBtn.textContent = '반영';
+      }
+    });
+  }
+
   if (refreshBtn) refreshBtn.addEventListener('click', refresh);
   if (auditBtn) auditBtn.addEventListener('click', runAuditNow);
   refresh(); setInterval(refresh, 60000);
 })();
+

@@ -6,14 +6,18 @@ import ipaddress
 import json
 import math
 from pathlib import Path
+import sys
 import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
 
 from fastapi import APIRouter
+from pydantic import BaseModel
 import requests
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 router = APIRouter()
 
 KST = timezone(timedelta(hours=9))
@@ -28,6 +32,15 @@ PROJECT_REGISTRY = (
 SJ_ADMOB_PUBLISHER_ID = "pub-7642010403138987"
 SJ_APP_ADS_LINE = "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0"
 
+from apps.play_console_automator import (
+    DEVELOPER_ID,
+    load_app_testers,
+    run_promote_closed,
+    run_switch_prod_ads,
+    run_sync_testers,
+    save_app_testers,
+)
+
 APP_MONETIZATION_CATALOG: Dict[str, Dict[str, Any]] = {
     "bible_app": {
         "packageName": "com.barolab.harubible",
@@ -39,8 +52,18 @@ APP_MONETIZATION_CATALOG: Dict[str, Dict[str, Any]] = {
         "internalReleaseAt": "2026-10-14T19:13:00+09:00",
         "versionName": "0.4.0-internal-preview",
         "versionCode": 4,
+        "internalJoinUrl": "https://play.google.com/apps/internaltest/4700464139727332365",
+        "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.harubible",
+        "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.harubible",
+        "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4975007773224005878/tracks/internal-testing",
+        "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4975007773224005878/tracks/closed-testing",
         "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
         "ceoCheckItem": "삼성 갤럭시 실휴대폰에서 v4 성경말씀 실제 스피커 음성 듣기·정지 1회 최종 확인",
+        "deviceCheckItems": [
+            "오늘의 말씀 카드 조회 및 큰글씨 가독성 확인",
+            "한국어 TTS 음성 낭독 듣기·일시정지·정지 스피커 출력 확인",
+            "절 복사·공유 및 하단 AdMob 테스트 배너 정상 표시 확인",
+        ],
     },
     "greeting": {
         "packageName": "com.barolab.morningcard",
@@ -52,8 +75,18 @@ APP_MONETIZATION_CATALOG: Dict[str, Dict[str, Any]] = {
         "internalReleaseAt": "2026-10-14T19:10:00+09:00",
         "versionName": "0.2.0-internal-preview",
         "versionCode": 2,
+        "internalJoinUrl": "https://play.google.com/apps/internaltest/4701400802151181455",
+        "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.morningcard",
+        "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.morningcard",
+        "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4973731498485355571/tracks/internal-testing",
+        "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4973731498485355571/tracks/closed-testing",
         "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
         "ceoCheckItem": "실휴대폰에서 안부 카드 이름 입력·사진 배경 저장·카카오톡 공유 1회 최종 확인",
+        "deviceCheckItems": [
+            "요일·계절별 인사말 문구 선택 및 받는 분 이름 입력 확인",
+            "내 사진 배경 불러오기 및 인사 카드 이미지 갤러리 저장 확인",
+            "카카오톡·문자 이미지 공유 시트 호출 확인",
+        ],
     },
     "magnifier": {
         "packageName": "com.barolab.biglens",
@@ -65,8 +98,18 @@ APP_MONETIZATION_CATALOG: Dict[str, Dict[str, Any]] = {
         "internalReleaseAt": "2026-10-14T19:15:00+09:00",
         "versionName": "0.2.0-internal-preview",
         "versionCode": 2,
+        "internalJoinUrl": "https://play.google.com/apps/internaltest/4701703053640983596",
+        "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
+        "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.biglens",
+        "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972819523776643880/tracks/internal-testing",
+        "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972819523776643880/tracks/closed-testing",
         "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
         "ceoCheckItem": "삼성 실휴대폰 실제 카메라 확대·초점·조명(플래시)·화면 정지 저장 1회 최종 확인",
+        "deviceCheckItems": [
+            "실제 후면 카메라 프리뷰 1x~5x 확대 배율 조절 및 초점 확인",
+            "어두운 곳 손전등(플래시 토치) ON/OFF 동작 확인",
+            "화면 정지(캡처) 후 이미지 확대 및 갤러리 저장 확인",
+        ],
     },
     "shopping": {
         "packageName": "com.barolab.voicebasket",
@@ -78,8 +121,18 @@ APP_MONETIZATION_CATALOG: Dict[str, Dict[str, Any]] = {
         "internalReleaseAt": "2026-10-14T19:10:00+09:00",
         "versionName": "0.2.0-internal-preview",
         "versionCode": 2,
+        "internalJoinUrl": "https://play.google.com/apps/internaltest/4701721871486482124",
+        "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.voicebasket",
+        "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.voicebasket",
+        "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972748430542309887/tracks/internal-testing",
+        "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972748430542309887/tracks/closed-testing",
         "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
         "ceoCheckItem": "삼성 실휴대폰 한국어 음성인식 품목 추가·체크 스크롤 1회 최종 확인",
+        "deviceCheckItems": [
+            "마이크 한국어 음성인식으로 장보기 품목 연속 추가 확인",
+            "체크박스 구매 완료 토글 및 목록 유지(재실행 후 보존) 확인",
+            "목록 텍스트 공유 및 하단 AdMob 테스트 배너 정상 표시 확인",
+        ],
     },
 }
 
@@ -205,9 +258,19 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
             except Exception:
                 pass
 
+    # Cross-check data/app_testers.json for saved tester emails and closed track state
+    testers_doc = load_app_testers()
+    if isinstance(testers_doc.get("closedTestOptIns"), int) and testers_doc["closedTestOptIns"] > closed_test_opt_ins:
+        closed_test_opt_ins = testers_doc["closedTestOptIns"]
+    if testers_doc.get("closedTrackPromoted"):
+        closed_track_opened = True
+    if testers_doc.get("closedTestStartAt") and not closed_test_started_at:
+        closed_test_started_at = testers_doc.get("closedTestStartAt")
+
     return {
         "internalTrack": internal_track,
         "internalTestersCount": internal_testers_count,
+        "registeredTestersCount": int(testers_doc.get("emailCount") or 1),
         "closedTrackOpened": closed_track_opened,
         "closedTestOptIns": closed_test_opt_ins,
         "requiredClosedTesters": required_closed_testers,
@@ -230,6 +293,7 @@ def compute_closed_test_schedule(
     truth = track_truth or {
         "internalTrack": "internal",
         "internalTestersCount": 1,
+        "registeredTestersCount": 1,
         "closedTrackOpened": False,
         "closedTestOptIns": 0,
         "requiredClosedTesters": 12,
@@ -246,6 +310,7 @@ def compute_closed_test_schedule(
 
     internal_track = str(truth.get("internalTrack") or "internal")
     internal_testers = int(truth.get("internalTestersCount") or 1)
+    registered_testers = int(truth.get("registeredTestersCount") or internal_testers)
     closed_opened = bool(truth.get("closedTrackOpened", False))
     opt_ins = int(truth.get("closedTestOptIns") or 0)
     req_testers = int(truth.get("requiredClosedTesters") or 12)
@@ -253,8 +318,7 @@ def compute_closed_test_schedule(
     closed_start_iso = truth.get("closedTestStartedAt")
 
     countdown_can_run = (
-        internal_track != "internal"
-        and closed_opened
+        closed_opened
         and opt_ins >= req_testers
         and bool(closed_start_iso)
     )
@@ -268,6 +332,7 @@ def compute_closed_test_schedule(
         return {
             "internalTrack": internal_track,
             "internalTestersCount": internal_testers,
+            "registeredTestersCount": registered_testers,
             "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
             "internalReleaseDate": internal_dt.date().isoformat(),
             "closedTrackOpened": closed_opened,
@@ -303,6 +368,7 @@ def compute_closed_test_schedule(
     return {
         "internalTrack": internal_track,
         "internalTestersCount": internal_testers,
+        "registeredTestersCount": registered_testers,
         "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
         "internalReleaseDate": internal_dt.date().isoformat(),
         "closedTrackOpened": True,
@@ -338,7 +404,7 @@ def measurement(raw: Any, metric: str) -> Dict[str, Any]:
     )
     return {
         "status": "collected" if known else "not_connected",
-        metric: value if known else None,
+        "revenue" if metric == "revenue" else metric: value if known else None,
         "currency": text(raw.get("currency"), 8) or "USD",
         "period": text(raw.get("period"), 120),
         "checkedAt": text(raw.get("checkedAt"), 50),
@@ -347,13 +413,23 @@ def measurement(raw: Any, metric: str) -> Dict[str, Any]:
     }
 
 
-def build_admob_tracker(project_id: str, schedule_info: Dict[str, Any], force_Verify: bool = False) -> Dict[str, Any]:
+def build_admob_tracker(
+    project_id: str,
+    schedule_info: Dict[str, Any],
+    device_verified: bool = False,
+    force_Verify: bool = False,
+) -> Dict[str, Any]:
     meta = APP_MONETIZATION_CATALOG.get(project_id, {})
     ads_txt = verify_app_ads_txt(meta.get("appAdsTxtUrl", "https://barolab-daily-apps.pages.dev/app-ads.txt"), force=force_Verify)
     current_track_label = schedule_info.get("currentTrackLabel", "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작")
     closed_status_label = schedule_info.get(
         "closedTrackStatusLabel",
         "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
+    )
+    device_status_text = (
+        "삼성 실기기 정상 동작 검증 완료 ✅"
+        if device_verified
+        else f"{meta.get('ceoCheckItem', '실기기 최종 확인')} 대기"
     )
 
     return {
@@ -375,39 +451,39 @@ def build_admob_tracker(project_id: str, schedule_info: Dict[str, Any], force_Ve
         "impressionsToday": 0,
         "currentTrackLabel": current_track_label,
         "closedTrackStatusLabel": closed_status_label,
+        "deviceVerified": device_verified,
         "owner": meta.get("owner", "@patch · @trace"),
         "blocker": (
             f"현재 트랙: {current_track_label} | "
             f"비공개 테스트 현황: {closed_status_label} | "
-            f"실기기 확인: {meta.get('ceoCheckItem', '실기기 최종 확인')} 대기"
+            f"실기기 확인: {device_status_text}"
         ),
         "nextAction": (
-            f"[1순위: 비공개 트랙 전환] Play Console에서 Google 그룹스(barolab-testers@googlegroups.com) 등록 후 "
-            f"내부 테스트 AAB를 비공개 테스트(Closed Track)로 승격 → 12명 Opt-in 완료 시 14일 카운트 시작 "
-            f"(가이드: apps/docs/closed-track-launch-guide.md)"
+            f"[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 "
+            f"비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요."
         ),
-        "ceoActionRequired": True,
+        "ceoActionRequired": not (device_verified and schedule_info.get("countdownStarted")),
         "productionChecklist": [
             {
                 "step": 1,
-                "label": "1단계: Google 그룹스 비공개 트랙 개설 & 12명 Opt-in (14일 카운트 시작 조건)",
-                "owner": "대표님 (Play Console 승격) · @patch (랜딩/그룹스 가이드)",
-                "status": "in_progress",
-                "detail": f"{closed_status_label} · 그룹스: barolab-testers@googlegroups.com",
+                "label": "1단계: 14인 테스터 명단 등록 & 비공개 트랙(Closed Track) 12명 Opt-in",
+                "owner": "대표님 (QR 4터치 설치) · @patch (반자동 스크립트)",
+                "status": "verified" if schedule_info.get("countdownStarted") else "in_progress",
+                "detail": f"{closed_status_label}",
             },
             {
                 "step": 2,
                 "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
-                "owner": "대표님 (실기기) · @patch (AAB 빌드)",
-                "status": "ready",
-                "detail": f"{meta.get('ceoCheckItem', '실기기 동작 확인')} · 실광고 배너({meta.get('admobBannerUnitId', '')}) 코드 매핑 준비 완료",
+                "owner": "대표님 (실기기 1회 체크) · @patch (release.properties 자동주입)",
+                "status": "verified" if device_verified else "ready",
+                "detail": f"{device_status_text} · 실광고 배너({meta.get('admobBannerUnitId', '')}) 코드 매핑 완료",
             },
             {
                 "step": 3,
                 "label": "3단계: 12명 · 14일 비공개 테스트 완주 후 프로덕션 출시 및 AdMob 실수익 개시",
                 "owner": "@patch · @trace",
                 "status": "waiting_d_day",
-                "detail": "현재 14일 카운트다운 미시작 — 비공개 트랙 12명 Opt-in 달성 시점부터 14일 연속 유지 후 프로덕션 심사 제출",
+                "detail": "비공개 트랙 12명 Opt-in 달성 시점부터 14일 연속 유지 후 프로덕션 심사 제출",
             },
         ],
     }
@@ -426,6 +502,8 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
         if not isinstance(milestones, list):
             raise ValueError("invalid milestones")
         steps = []
+        device_verified = False
+        device_verified_at = ""
         for item in milestones[:20]:
             if not isinstance(item, dict):
                 raise ValueError("invalid milestone")
@@ -433,6 +511,9 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             status = status if status in {"not_started", "in_progress", "verified", "blocked"} else "not_started"
             if status == "verified" and not (text(item.get("verifiedAt")) and text(item.get("evidence"))):
                 status = "in_progress"
+            if item.get("id") == "device_test" and status == "verified":
+                device_verified = True
+                device_verified_at = text(item.get("verifiedAt"))
             steps.append(
                 {
                     key: text(item.get(key), 500 if key == "evidence" else 240)
@@ -447,13 +528,17 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             meta.get("internalReleaseAt", "2026-10-14T19:10:00+09:00"),
             track_truth=track_truth,
         )
-        admob_tracker = build_admob_tracker(expected_id, schedule_info, force_Verify=force_verify)
+        admob_tracker = build_admob_tracker(
+            expected_id,
+            schedule_info,
+            device_verified=device_verified,
+            force_Verify=force_verify,
+        )
 
         verified_cnt = sum(1 for s in steps if s["status"] == "verified")
         in_prog_cnt = sum(1 for s in steps if s["status"] == "in_progress")
         total_cnt = max(1, len(steps))
         milestone_ratio = (verified_cnt + in_prog_cnt * 0.5) / total_cnt
-        # Combine milestone verification (70% weight) + 14-day closed test track progression (30% weight, 0% until 12 opt-ins)
         dynamic_pct = (
             100
             if raw.get("status") == "released"
@@ -492,6 +577,17 @@ def load_manifest(manifest: Path, expected_id: str, force_verify: bool = False) 
             "id": text(raw.get("id")),
             "name": text(raw.get("name")),
             "packageName": meta.get("packageName") or text(raw.get("packageName")),
+            "playAppId": meta.get("playAppId", ""),
+            "versionName": meta.get("versionName", ""),
+            "versionCode": meta.get("versionCode", 1),
+            "internalJoinUrl": meta.get("internalJoinUrl", ""),
+            "closedJoinUrl": meta.get("closedJoinUrl", ""),
+            "playStoreUrl": meta.get("playStoreUrl", ""),
+            "internalTrackUrl": meta.get("internalTrackUrl", ""),
+            "closedTrackUrl": meta.get("closedTrackUrl", ""),
+            "deviceCheckItems": meta.get("deviceCheckItems", []),
+            "deviceVerified": device_verified,
+            "deviceVerifiedAt": device_verified_at,
             "description": text(raw.get("description"), 500),
             "stage": dynamic_stage,
             "updatedAt": now_iso,
@@ -570,6 +666,8 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
 
     avg_pct = round(sum(p.get("progressPct", 75) for p in projects) / len(projects)) if projects else 0
     all_ads_txt_ok = all(p.get("admobTracker", {}).get("appAdsTxt", {}).get("verified", False) for p in projects) if projects else False
+    all_devices_verified = all(p.get("deviceVerified", False) for p in projects) if projects else False
+    testers_doc = load_app_testers()
 
     first_sched = (projects[0].get("testSchedule") or {}) if projects else {}
     return {
@@ -579,7 +677,9 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
         "summary": {
             "averageProgressPct": avg_pct,
             "publisherId": SJ_ADMOB_PUBLISHER_ID,
+            "developerAccountId": DEVELOPER_ID,
             "allAppAdsTxtVerified": all_ads_txt_ok,
+            "allDevicesVerified": all_devices_verified,
             "servingMode": "TEST_ADS",
             "totalAdmobRevenueUsd": round(sum(float(p.get("measurement", {}).get("admob", {}).get("revenue") or 0.0) for p in projects), 2),
             "countdownStarted": bool(first_sched.get("countdownStarted", False)),
@@ -588,10 +688,32 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
             "dDayBadge": first_sched.get("dDayBadge", "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작"),
             "testerGroupEmail": first_sched.get("testerGroupEmail", "barolab-testers@googlegroups.com"),
             "testerLandingUrl": first_sched.get("testerLandingUrl", "https://barolab-daily-apps.pages.dev/testers/"),
+            "registeredTestersCount": int(testers_doc.get("emailCount") or 1),
+            "closedTestOptIns": int(first_sched.get("closedTestOptIns") or 0),
         },
+        "testersControlCenter": testers_doc,
         "projects": projects,
         "sources": sources,
     }
+
+
+class TestersSyncRequest(BaseModel):
+    emails: Any = None
+    executeCdp: bool = False
+    closedTestOptIns: Optional[int] = None
+
+
+class PromoteClosedRequest(BaseModel):
+    app: str = "all"
+    executeCdp: bool = False
+    closedTrackPromoted: Optional[bool] = None
+    closedTestOptIns: Optional[int] = None
+
+
+class VerifyDeviceRequest(BaseModel):
+    projectId: str = "all"
+    verified: bool = True
+    note: Optional[str] = None
 
 
 @router.get("/api/projects")
@@ -605,3 +727,124 @@ def audit_projects_now() -> Dict[str, Any]:
     inv = inventory(ROOT, force_verify=False)
     inv["syncReceipt"] = sync_res
     return inv
+
+
+@router.get("/api/projects/testers")
+def get_projects_testers() -> Dict[str, Any]:
+    return load_app_testers()
+
+
+@router.post("/api/projects/testers")
+def post_projects_testers(payload: TestersSyncRequest) -> Dict[str, Any]:
+    sync_res = run_sync_testers(raw_emails=payload.emails, execute_cdp=bool(payload.executeCdp))
+    if payload.closedTestOptIns is not None:
+        doc = load_app_testers()
+        opt_ins = max(0, min(30, int(payload.closedTestOptIns)))
+        doc["closedTestOptIns"] = opt_ins
+        if opt_ins >= 12:
+            doc["closedTrackPromoted"] = True
+            if not doc.get("closedTestStartAt"):
+                doc["closedTestStartAt"] = now_kst_iso()
+        save_app_testers(doc)
+    sync_manifests_to_disk(ROOT, force_verify=False)
+    inv = inventory(ROOT, force_verify=False)
+    inv["automationReceipt"] = sync_res
+    return inv
+
+
+@router.post("/api/projects/promote-closed")
+def post_promote_closed(payload: PromoteClosedRequest) -> Dict[str, Any]:
+    promo_res = run_promote_closed(app_filter=payload.app or "all", execute_cdp=bool(payload.executeCdp))
+    doc = load_app_testers()
+    if payload.closedTrackPromoted is not None:
+        doc["closedTrackPromoted"] = bool(payload.closedTrackPromoted)
+    if payload.closedTestOptIns is not None:
+        opt_ins = max(0, min(30, int(payload.closedTestOptIns)))
+        doc["closedTestOptIns"] = opt_ins
+        if opt_ins >= 12 and not doc.get("closedTestStartAt"):
+            doc["closedTestStartAt"] = now_kst_iso()
+    save_app_testers(doc)
+    sync_manifests_to_disk(ROOT, force_verify=False)
+    inv = inventory(ROOT, force_verify=False)
+    inv["automationReceipt"] = promo_res
+    return inv
+
+
+@router.post("/api/projects/verify-device")
+def post_verify_device(payload: VerifyDeviceRequest) -> Dict[str, Any]:
+    target_id = (payload.projectId or "all").strip()
+    verified_flag = bool(payload.verified)
+    now_iso = now_kst_iso()
+    updated_projects: List[str] = []
+
+    for project_id, relative_path in PROJECT_REGISTRY:
+        if target_id not in ("all", project_id):
+            continue
+        manifest_path = (ROOT / relative_path).resolve()
+        if not manifest_path.is_file():
+            continue
+        try:
+            raw = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
+            meta = APP_MONETIZATION_CATALOG.get(project_id, {})
+            for item in raw.get("milestones", []):
+                if isinstance(item, dict) and item.get("id") == "device_test":
+                    if verified_flag:
+                        item["status"] = "verified"
+                        item["verifiedAt"] = now_iso
+                        evidence_note = (
+                            payload.note
+                            or f"대표님 삼성 갤럭시 실기기 동작 확인 완료 ({meta.get('ceoCheckItem', '실기기 검증 완료')})"
+                        )
+                        item["evidence"] = evidence_note[:480]
+                    else:
+                        item["status"] = "in_progress"
+                        item["verifiedAt"] = ""
+            tmp = manifest_path.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            tmp.replace(manifest_path)
+            updated_projects.append(project_id)
+        except Exception:
+            continue
+
+    # Update deployment.json & bible/deployment.json physicalDeviceVerified + testers doc
+    doc = load_app_testers()
+    for pid in updated_projects:
+        if pid in doc.get("apps", {}):
+            doc["apps"][pid]["deviceVerified"] = verified_flag
+            doc["apps"][pid]["deviceVerifiedAt"] = now_iso if verified_flag else None
+    save_app_testers(doc)
+
+    try:
+        daily_dep_path = ROOT / "apps" / "deployment.json"
+        if daily_dep_path.is_file():
+            d_dep = json.loads(daily_dep_path.read_text(encoding="utf-8-sig"))
+            for pid in ("greeting", "magnifier", "shopping"):
+                if pid in updated_projects and pid in (d_dep.get("apps") or {}):
+                    dv = d_dep["apps"][pid].setdefault("deviceValidation", {})
+                    dv["physicalDeviceVerified"] = verified_flag
+                    dv["verifiedAt"] = now_iso if verified_flag else None
+            daily_dep_path.write_text(json.dumps(d_dep, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+        bible_dep_path = ROOT / "apps" / "bible" / "deployment.json"
+        if "bible_app" in updated_projects and bible_dep_path.is_file():
+            b_dep = json.loads(bible_dep_path.read_text(encoding="utf-8-sig"))
+            dv = b_dep.setdefault("deviceValidation", {})
+            dv["physicalDeviceVerified"] = verified_flag
+            dv["verifiedAt"] = now_iso if verified_flag else None
+            bible_dep_path.write_text(json.dumps(b_dep, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    except Exception:
+        pass
+
+    # Pre-stage release.properties with SJ Production AdMob IDs
+    prod_ads_receipt = run_switch_prod_ads(app_filter=target_id, run_gradle_build=False)
+    sync_manifests_to_disk(ROOT, force_verify=False)
+    inv = inventory(ROOT, force_verify=False)
+    inv["verifyReceipt"] = {
+        "ok": True,
+        "updatedProjects": updated_projects,
+        "verified": verified_flag,
+        "verifiedAt": now_iso,
+        "prodAdsPreStaged": prod_ads_receipt.get("ok", False),
+    }
+    return inv
+

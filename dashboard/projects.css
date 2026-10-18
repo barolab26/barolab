@@ -38,3 +38,73 @@
 .app-filter-btn{padding:6px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#334155;font-size:12px;font-weight:700;cursor:pointer}
 .app-filter-btn.active{background:#0f172a;border-color:#0f172a;color:#fff}
 #app-project-list{display:grid;gap:16px}
+
+/* 📱 앱 4종 원클릭 설치 & 14인 테스터 반자동 컨트롤 센터 */
+.qr-control-center{border:2px solid #2563eb;background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);margin-bottom:20px}
+.qr-center-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* [구역 C] 진짜 14일 카운트다운 트래커 */
+.real-countdown-banner{display:grid;grid-template-columns:1.1fr 1.4fr .9fr;gap:12px;margin:14px 0 18px;padding:14px 16px;border-radius:12px;background:#0f172a;color:#f8fafc;border:1px solid #1e293b}
+@media(max-width:1100px){.real-countdown-banner{grid-template-columns:1fr}}
+.rc-col{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.rc-label{font-size:11px;font-weight:800;color:#93c5fd;text-transform:uppercase;letter-spacing:.03em}
+.rc-value{font-size:14px;font-weight:900;color:#fff;line-height:1.35}
+.rc-internal .rc-value{color:#fbbf24}
+.rc-closed .rc-value{color:#38bdf8}
+.rc-sub{font-size:11.5px;color:#cbd5e1;line-height:1.4}
+.rc-progress-wrap{height:8px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden;margin:3px 0}
+.rc-progress-bar{height:100%;background:linear-gradient(90deg,#2563eb,#10b981);border-radius:999px;transition:width .3s ease}
+.rc-optin-row{display:flex;align-items:center;gap:8px;margin-top:2px}
+.rc-optin-row input{width:64px;padding:6px 8px;border-radius:7px;border:1px solid #475569;background:#fff;color:#0f172a;font-size:13px;font-weight:800;text-align:center}
+
+/* [구역 A] & [구역 B] 2단 레이아웃 */
+.qr-zones-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start}
+@media(max-width:1180px){.qr-zones-grid{grid-template-columns:1fr}}
+.qr-zone-box{padding:16px 18px;border-radius:12px;background:#fff;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+.qr-zone-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e2e8f0}
+.qr-zone-head h3{margin:0;font-size:15.5px;font-weight:900;color:#0f172a}
+.qr-zone-desc{margin:0 0 10px;font-size:12.5px;color:#475569;line-height:1.5}
+
+.qr-hero-row{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:center;margin-bottom:14px;padding:12px;border-radius:10px;background:#f8fafc;border:1px solid #e2e8f0}
+@media(max-width:720px){.qr-hero-row{grid-template-columns:1fr}}
+.qr-img-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border-radius:10px;background:#fff;border:2px solid #2563eb;text-align:center}
+.qr-img-card img{width:170px;height:170px;display:block;border-radius:6px}
+.qr-img-caption strong{display:block;font-size:12px;font-weight:900;color:#0f172a}
+.qr-img-caption a{font-size:11px;font-weight:800;color:#2563eb;text-decoration:none}
+.qr-guide-title{font-size:13.5px;font-weight:900;color:#0f172a;margin-bottom:6px}
+.qr-guide-steps ol{margin:0;padding-left:18px;display:grid;gap:5px;font-size:12.5px;color:#334155;line-height:1.45}
+
+/* 앱 4종 직통 설치 & 실기기 1회 체크 카드 */
+.direct-install-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:780px){.direct-install-grid{grid-template-columns:1fr}}
+.direct-app-card{padding:12px 14px;border-radius:10px;background:#f8fafc;border:1px solid #cbd5e1;display:flex;flex-direction:column;gap:8px}
+.direct-app-card.verified{background:#f0fdf4;border-color:#86efac}
+.direct-app-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.direct-app-top strong{font-size:14px;font-weight:900;color:#0f172a}
+.direct-app-meta{font-size:11px;color:#475569;font-family:ui-monospace,Consolas,monospace}
+.direct-link-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.direct-install-btn{display:inline-flex;align-items:center;justify-content:center;padding:7px 9px;border-radius:7px;font-size:11.5px;font-weight:800;text-decoration:none;text-align:center;border:1px solid transparent;cursor:pointer}
+.direct-install-btn.internal{background:#2563eb;color:#fff;border-color:#1d4ed8}
+.direct-install-btn.closed{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd}
+.direct-check-list{list-style:none;padding:8px 10px;margin:0;border-radius:8px;background:#fff;border:1px solid #e2e8f0;display:grid;gap:4px;font-size:11.5px;color:#334155}
+.direct-check-list label{display:flex;align-items:flex-start;gap:6px;cursor:pointer;line-height:1.35}
+.direct-verify-btn{width:100%;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;border:1px solid #16a34a;background:#16a34a;color:#fff}
+.direct-verify-btn.is-verified{background:#dcfce7;color:#15803d;border-color:#86efac}
+
+/* [구역 B] 테스터 입력창 */
+.tester-emails-textarea{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid #94a3b8;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.5;color:#0f172a;background:#f8fafc;resize:vertical}
+.tester-emails-textarea:focus{outline:2px solid #2563eb;background:#fff}
+.tester-cdp-option{margin:8px 0 10px}
+.tester-btn-stack{display:grid;gap:8px}
+.tester-btn-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:640px){.tester-btn-row2{grid-template-columns:1fr}}
+.tester-action-btn{padding:10px 12px;border-radius:9px;font-size:12.5px;font-weight:800;cursor:pointer;border:1px solid transparent;text-align:center}
+.tester-action-btn.primary{background:#2563eb;color:#fff;border-color:#1d4ed8}
+.tester-action-btn.secondary{background:#f1f5f9;color:#0f172a;border-color:#cbd5e1}
+.tester-action-btn.accent{background:#0f172a;color:#fff;border-color:#0f172a}
+.tester-sync-receipt{margin-top:10px;padding:9px 11px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11.5px;color:#334155;line-height:1.45}
+.console-deep-links{margin-top:12px;padding-top:10px;border-top:1px dashed #cbd5e1}
+.console-links-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.console-links-grid a{padding:6px 9px;border-radius:7px;background:#f8fafc;border:1px solid #cbd5e1;font-size:11.5px;font-weight:700;color:#1d4ed8;text-decoration:none;text-align:center}
+.console-links-grid a:hover{background:#eff6ff;border-color:#93c5fd}
+

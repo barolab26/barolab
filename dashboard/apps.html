@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>앱 프로젝트 관제 · BaroLab</title>
   <link rel="stylesheet" href="traffic.css">
-  <link rel="stylesheet" href="projects.css?v=20261018-admob-live">
+  <link rel="stylesheet" href="projects.css?v=20261019-qr-center">
   <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
   <link rel="stylesheet" href="signature_deck.css?v=20261017-sig-2">
   <script src="kin-summary.js?v=20261015-2" defer></script>
@@ -22,7 +22,7 @@
     <header class="header">
       <div class="header-left">
         <h1><span>앱 프로젝트 관제실</span></h1>
-        <p>오늘의 성경말씀 · 인사말 · 돋보기 · 말로 장보기 — Android 생활 앱 개발·검증·출시 및 수익화 현황</p>
+        <p>오늘의 성경말씀 · 오늘의 안부 · 큰글씨 돋보기 · 말로 장보기 — Android 생활 앱 4종 원클릭 설치 · 14인 테스터 · SJ AdMob 수익화 관제</p>
         <p class="refresh-status" id="app-project-status" role="status" aria-live="polite">프로젝트 등록 정보 조회 중</p>
       </div>
       <div class="toolbar">
@@ -30,6 +30,7 @@
           <div class="clock" id="live-clock">--:--:--</div>
           <div class="tz">KST (Asia/Seoul)</div>
         </div>
+        <a class="btn-quick" href="https://barolab-daily-apps.pages.dev/testers/" target="_blank" rel="noopener noreferrer" style="background:#0f172a; border-color:#0f172a; color:#fff; text-decoration:none;">📱 모바일 4터치 리모컨 열기 ↗</a>
         <button class="btn-quick" id="apps-audit-now" type="button" style="background:#2563eb; border-color:#1d4ed8; color:#fff;">🔍 AdMob·app-ads.txt 즉시 실측</button>
         <button class="btn-quick" id="apps-refresh" type="button">상태 새로고침</button>
       </div>
@@ -81,6 +82,143 @@
       </div>
     </section>
 
+    <!-- [신설] 📱 앱 4종 원클릭 설치 & 14인 테스터 반자동 컨트롤 센터 -->
+    <section class="traffic-panel qr-control-center" id="qr-install-center" aria-labelledby="qr-center-title">
+      <div class="traffic-head">
+        <div>
+          <h2 id="qr-center-title">📱 앱 4종 원클릭 설치 &amp; 14인 테스터 반자동 컨트롤 센터</h2>
+          <p class="section-caption">개발자 계정: <strong>YoonLab (7752283694845461925 · baro76650@gmail.com)</strong> · 휴대폰 6대(삼성폰 3대 일반+보안폴더 + 가족폰 3대) · 구글 계정 14개 원클릭 설치 허브</p>
+        </div>
+        <div class="qr-center-actions">
+          <button class="btn-quick" id="btn-verify-all-devices" type="button" style="background:#16a34a; border-color:#15803d; color:#fff; font-weight:800;">✅ 삼성 실기기 4종 전체 정상 동작 일괄 확인</button>
+        </div>
+      </div>
+
+      <!-- [구역 C] 진짜 14일 카운트다운 트래커 (착시 제거) -->
+      <div class="real-countdown-banner" id="zone-c-tracker">
+        <div class="rc-col rc-internal">
+          <span class="rc-label">현재 활성 트랙 (Internal Testing)</span>
+          <strong class="rc-value" id="zc-internal-status">내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작</strong>
+          <span class="rc-sub" id="zc-internal-sub">내부 테스트 배포일: 2026-10-14 · 등록된 테스터 명단: 1명 (내부 트랙은 14일 요건에 산입되지 않음)</span>
+        </div>
+        <div class="rc-col rc-closed">
+          <span class="rc-label">Google Play 12명 × 14일 비공개 테스트 (Closed Track)</span>
+          <strong class="rc-value" id="zc-closed-status">비공개 트랙 미개설 · 참여 테스터 0 / 12명 (D+0 / 14일)</strong>
+          <div class="rc-progress-wrap">
+            <div class="rc-progress-bar" id="zc-progress-bar" style="width:0%"></div>
+          </div>
+          <span class="rc-sub" id="zc-closed-sub">비공개 트랙(Alpha)에서 12명 이상 Opt-in 완료 시 closedTestStartAt 기준 D+1 ~ D+14 실측 카운트다운 자동 가동</span>
+        </div>
+        <div class="rc-col rc-optin-ctrl">
+          <span class="rc-label">실제 휴대폰 Opt-in 완료 인원 반영</span>
+          <div class="rc-optin-row">
+            <input type="number" id="zc-optin-input" min="0" max="30" value="0" aria-label="비공개 테스트 Opt-in 완료 인원 수">
+            <span style="font-size:12px; font-weight:800; color:#334155;">/ 12명 이상</span>
+            <button type="button" class="btn-quick" id="btn-update-optins" style="background:#0f172a; color:#fff; border-color:#0f172a;">반영</button>
+          </div>
+          <span class="rc-sub">휴대폰 설치 완료 인원 입력 시 즉시 반영 (12명 도달 시 D+1 시작)</span>
+        </div>
+      </div>
+
+      <div class="qr-zones-grid">
+        <!-- [구역 A] 휴대폰 카메라 스캔용 대형 QR 코드 & 앱 4종 직통 설치 카드 -->
+        <div class="qr-zone-box" id="zone-a-qr">
+          <div class="qr-zone-head">
+            <h3>[구역 A] 휴대폰 카메라 스캔용 대형 QR &amp; 앱 4종 직통 설치 + 실기기 1회 체크</h3>
+            <span class="pillar-badge badge-blue">4터치 모바일 리모컨 연동</span>
+          </div>
+
+          <div class="qr-hero-row">
+            <div class="qr-img-card">
+              <img
+                id="testers-qr-img"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=https%3A%2F%2Fbarolab-daily-apps.pages.dev%2Ftesters%2F"
+                alt="모바일 4종 원클릭 설치 리모컨 QR 코드 (https://barolab-daily-apps.pages.dev/testers/)"
+                width="180"
+                height="180"
+              >
+              <div class="qr-img-caption">
+                <strong>📷 휴대폰 기본 카메라로 스캔</strong>
+                <a href="https://barolab-daily-apps.pages.dev/testers/" target="_blank" rel="noopener noreferrer">barolab-daily-apps.pages.dev/testers/ ↗</a>
+              </div>
+            </div>
+
+            <div class="qr-guide-steps">
+              <div class="qr-guide-title">⚡ 휴대폰 6대(일반+보안폴더) 4터치 초고속 설치 순서</div>
+              <ol>
+                <li>휴대폰(또는 삼성 보안폴더) <strong>Play 스토어 앱</strong> 우측 상단 프로필에서 테스트할 구글 계정으로 전환합니다.</li>
+                <li>왼쪽 <strong>대형 QR 코드</strong>를 휴대폰 카메라로 스캔하면 <strong>[앱 4종 원클릭 설치 리모컨]</strong> 화면이 열립니다.</li>
+                <li>화면에 있는 <strong>큼직한 버튼 4개(1. 성경말씀 · 2. 안부 · 3. 돋보기 · 4. 장보기)</strong>를 순서대로 터치해 <strong>[테스터 참여(Opt-in) → 설치]</strong>만 누르면 1계정당 1분 내 끝납니다.</li>
+                <li>대표님 메인 삼성폰에서는 아래 <strong>[실기기 1회 체크리스트]</strong> 확인 후 <strong>[✅ 삼성 실기기 정상 동작 확인 완료]</strong> 버튼을 눌러주세요.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="direct-install-grid" id="direct-install-cards">
+            <!-- JS renders the 4 apps' direct install + device verification cards here -->
+          </div>
+        </div>
+
+        <!-- [구역 B] 테스터 구글 계정(14~15개) 일괄 입력 및 반자동 Play Console 반영창 -->
+        <div class="qr-zone-box" id="zone-b-testers">
+          <div class="qr-zone-head">
+            <h3>[구역 B] 테스터 구글 계정(14~15개) 일괄 입력 &amp; Play Console 반자동 반영</h3>
+            <span class="pillar-badge badge-green" id="testers-count-badge">등록 1 / 14명</span>
+          </div>
+
+          <p class="qr-zone-desc">
+            보유하신 구글 계정 14~15개(<code>@gmail.com</code>)를 줄바꿈 또는 쉼표(<code>,</code>)로 붙여넣으세요.
+            저장 즉시 <code>data/app_testers.json</code> 및 Play Console 업로드용 CSV(<code>apps/qa/barolab-testers-14.csv</code>)에 반영됩니다.
+          </p>
+
+          <label for="tester-emails-textarea" class="sr-only" style="font-size:12px; font-weight:800; color:#1e293b; display:block; margin-bottom:6px;">
+            테스터 이메일 목록 (줄바꿈 또는 쉼표 구분 · 기본 명단명: <code>BaroLab 테스터 14인</code>)
+          </label>
+          <textarea
+            id="tester-emails-textarea"
+            class="tester-emails-textarea"
+            rows="9"
+            placeholder="baro76650@gmail.com&#10;tester02@gmail.com&#10;tester03@gmail.com&#10;..."
+          >baro76650@gmail.com</textarea>
+
+          <div class="tester-cdp-option">
+            <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#334155; cursor:pointer;">
+              <input type="checkbox" id="tester-execute-cdp">
+              Play Console 전용 포터블 브라우저(<code>baro76650</code> · 포트 <code>9420</code>) 함께 열기
+            </label>
+          </div>
+
+          <div class="tester-btn-stack">
+            <button type="button" class="tester-action-btn primary" id="btn-save-sync-testers">
+              💾 테스터 명단 저장 및 Play Console 반자동 등록 실행
+            </button>
+            <div class="tester-btn-row2">
+              <button type="button" class="tester-action-btn secondary" id="btn-copy-comma-emails">
+                📋 쉼표(,) 구분 명단 복사 (Play Console 붙여넣기용)
+              </button>
+              <button type="button" class="tester-action-btn accent" id="btn-promote-closed-track">
+                🚀 비공개 테스트(Alpha) 4종 승격 실행
+              </button>
+            </div>
+          </div>
+
+          <div class="tester-sync-receipt" id="tester-sync-receipt">
+            상태: <code>data/app_testers.json</code> 연동 대기 중
+          </div>
+
+          <div class="console-deep-links">
+            <div style="font-size:12px; font-weight:800; color:#0f172a; margin-bottom:6px;">🔗 Play Console 앱 4종 트랙 설정 직통 링크 (클릭 시 해당 페이지 바로 열기)</div>
+            <div class="console-links-grid">
+              <a href="https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/tracks/closed-testing" target="_blank" rel="noopener noreferrer">1. 성경말씀 비공개 트랙 ↗</a>
+              <a href="https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/tracks/closed-testing" target="_blank" rel="noopener noreferrer">2. 오늘의 안부 비공개 트랙 ↗</a>
+              <a href="https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/tracks/closed-testing" target="_blank" rel="noopener noreferrer">3. 큰글씨 돋보기 비공개 트랙 ↗</a>
+              <a href="https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/tracks/closed-testing" target="_blank" rel="noopener noreferrer">4. 말로 장보기 비공개 트랙 ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="traffic-panel" id="app-projects" aria-labelledby="app-project-title">
       <div class="traffic-head">
         <div>
@@ -101,7 +239,7 @@
   </main>
 </div>
 
-<script src="projects.js?v=20261018-admob-live" defer></script>
+<script src="projects.js?v=20261019-qr-center" defer></script>
 <script>
   function updateClock() {
     const now = new Date();
