@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AI 크루 두뇌 & LLM 설정 · BaroLab Master Hub</title>
-  <link rel="stylesheet" href="sidebar.css?v=20261018-brain-matrix">
+  <link rel="stylesheet" href="sidebar.css?v=20261018-one-screen">
   <style>
     :root {
       --ink: #0f172a;
@@ -19,7 +19,7 @@
       padding: 0;
       background: var(--bg);
       color: var(--ink);
-      font: 14px/1.55 'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+      font: 13.5px/1.4 'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
     }
     body.control-room .layout {
       display: flex !important;
@@ -31,100 +31,118 @@
     main.settings-main {
       flex: 1 1 0% !important;
       min-width: 0 !important;
-      max-width: 1420px;
+      max-width: 1460px;
       margin: 0 !important;
-      padding: 20px 28px 48px !important;
+      padding: 12px 22px 16px !important;
     }
     .page-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
       background: #ffffff;
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px 22px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+      border-radius: 12px;
+      padding: 10px 18px;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+    }
+    .header-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .eyebrow {
       color: var(--blue);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
-      letter-spacing: 1.6px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
     }
     h1 {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
-      margin: 2px 0 4px;
+      margin: 0;
       letter-spacing: -0.02em;
       color: #0f172a;
     }
     h2 {
-      font-size: 16.5px;
+      font-size: 15px;
       font-weight: 800;
       margin: 0;
       color: #0f172a;
     }
     p {
-      margin: 4px 0;
+      margin: 2px 0 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+    }
+    .cli-health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
     }
     .card {
       background: #ffffff;
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 20px 22px;
-      margin-top: 16px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+      border-radius: 12px;
+      padding: 12px 18px;
+      margin-top: 10px;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
     }
     .matrix-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
-      padding-bottom: 14px;
+      padding-bottom: 8px;
       border-bottom: 1px solid #f1f5f9;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
     .matrix-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .btn-preset {
       background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
       color: #1d4ed8;
       border: 1px solid #93c5fd;
-      border-radius: 9px;
-      padding: 9px 15px;
-      font-size: 13px;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
     .btn-preset:hover {
       background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%);
       border-color: #60a5fa;
-      transform: translateY(-1px);
     }
     button.primary {
       background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       color: #ffffff;
       border: 1px solid #1d4ed8;
-      border-radius: 9px;
-      padding: 9px 16px;
-      font-size: 13px;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 12.5px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22);
       transition: all 0.15s ease;
     }
     button.primary:hover {
@@ -135,12 +153,11 @@
       cursor: wait;
     }
     .sub-section-label {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 800;
       color: #334155;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin: 6px 0 10px;
+      letter-spacing: 0.02em;
+      margin: 4px 0 6px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -154,57 +171,56 @@
     .brain-grid-6 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     .brain-grid-4 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      gap: 8px;
     }
     @media (max-width: 1180px) {
       .brain-grid-6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 760px) {
       .brain-grid-6, .brain-grid-4 { grid-template-columns: 1fr; }
-      main.settings-main { padding: 14px 14px 36px !important; }
+      main.settings-main { padding: 10px 12px 24px !important; }
     }
     .brain-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 14px 16px;
+      border-radius: 10px;
+      padding: 8px 11px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
-      position: relative;
     }
     .brain-card:hover {
       border-color: #cbd5e1;
       background: #ffffff;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
     .brain-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
     .brain-agent-id {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 7px;
       min-width: 0;
     }
     .brain-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
       display: grid;
       place-items: center;
       color: #ffffff;
-      font-size: 16px;
+      font-size: 13.5px;
       font-weight: 800;
       flex-shrink: 0;
     }
@@ -213,14 +229,14 @@
     }
     .brain-title-wrap strong {
       display: block;
-      font-size: 13.5px;
+      font-size: 12.5px;
       font-weight: 800;
       color: #0f172a;
-      line-height: 1.25;
+      line-height: 1.2;
     }
     .brain-title-wrap span {
       display: block;
-      font-size: 11.5px;
+      font-size: 10.5px;
       color: #64748b;
       white-space: nowrap;
       overflow: hidden;
@@ -229,10 +245,10 @@
     .brain-live-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 3px 9px;
+      gap: 3px;
+      padding: 2px 7px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
       background: #eff6ff;
       color: #1d4ed8;
@@ -243,48 +259,46 @@
     .brain-live-badge.is-codex {
       background: #ecfdf5;
       color: #047857;
-      border-color: #a7f3d0;
+      border: 1px solid #a7f3d0;
     }
     .brain-live-badge.is-flash {
       background: #f5f3ff;
       color: #6d28d9;
-      border-color: #ddd6fe;
+      border: 1px solid #ddd6fe;
     }
     .brain-controls {
       display: grid;
-      grid-template-columns: 145px minmax(0, 1fr);
-      gap: 8px;
+      grid-template-columns: 132px minmax(0, 1fr);
+      gap: 6px;
     }
     .brain-field label {
       display: block;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: #475569;
-      margin: 0 0 4px;
+      margin: 0 0 2px;
     }
-    .brain-field select,
-    .brain-field input {
+    .brain-field select {
       width: 100%;
-      padding: 7px 10px;
-      font-size: 12.5px;
+      padding: 4px 7px;
+      font-size: 11.5px;
       font-weight: 600;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #ffffff;
       color: #0f172a;
       margin: 0;
     }
-    .brain-field select:focus,
-    .brain-field input:focus {
+    .brain-field select:focus {
       outline: 2px solid #93c5fd;
       border-color: #2563eb;
     }
     .brain-rec-note {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #64748b;
       background: #f1f5f9;
-      border-radius: 6px;
-      padding: 5px 8px;
+      border-radius: 5px;
+      padding: 3px 7px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -294,16 +308,17 @@
       font-weight: 700;
       color: #1e40af;
       background: #dbeafe;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-size: 10.5px;
+      padding: 0 4px;
+      border-radius: 3px;
+      font-size: 10px;
+      flex-shrink: 0;
     }
     #brain-matrix-message {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      padding: 10px 14px;
-      border-radius: 9px;
-      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
       display: none;
     }
     #brain-matrix-message.visible {
@@ -318,79 +333,98 @@
       border: 1px solid #fca5a5;
       color: #991b1b;
     }
-    .current {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .badge {
-      background: #eff6ff;
-      color: #2563eb;
-      padding: 5px 12px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 12px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      margin-top: 12px;
-      color: #334155;
-    }
-    input, select, button {
-      font: inherit;
+
+    /* Collapsible Paid API Key Vault at Bottom */
+    details.api-key-vault {
+      background: #ffffff;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 9px 12px;
+      border-radius: 10px;
+      margin-top: 8px;
+      padding: 8px 16px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
     }
-    input, select {
+    details.api-key-vault > summary {
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #334155;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    details.api-key-vault > summary::-webkit-details-marker {
+      display: none;
+    }
+    details.api-key-vault > summary::after {
+      content: "▼ 펼치기";
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    details.api-key-vault[open] > summary::after {
+      content: "▲ 접기";
+    }
+    .vault-body {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .vault-row {
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: end;
+    }
+    @media (max-width: 860px) {
+      .vault-row { grid-template-columns: 1fr; }
+    }
+    .vault-field label {
       display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 3px;
+    }
+    .vault-field select,
+    .vault-field input {
       width: 100%;
-      margin-top: 6px;
-      background: #fff;
-      color: var(--ink);
+      padding: 6px 10px;
+      font-size: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #ffffff;
+      color: #0f172a;
+    }
+    .btn-vault {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #f8fafc;
+      color: #0f172a;
+      cursor: pointer;
+      height: 31px;
+      white-space: nowrap;
+    }
+    .btn-vault:hover {
+      background: #e2e8f0;
     }
     .hint {
-      font-size: 11.5px;
-      margin-top: 5px;
+      font-size: 11px;
+      margin-top: 4px;
       color: var(--muted);
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-    button {
-      cursor: pointer;
-      background: #ffffff;
-      font-weight: 700;
     }
     #message {
       white-space: pre-wrap;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      padding: 8px 0 0;
-      min-height: 28px;
+      padding: 4px 0 0;
       color: #065f46;
     }
     #message.error { color: #b91c1c; }
-    .note {
-      border-left: 3px solid #93c5fd;
-      padding-left: 12px;
-      margin-top: 14px;
-      font-size: 12.5px;
-    }
-    .hidden { display: none !important; }
-    a { color: var(--blue); text-decoration: none; font-weight: 700; }
-    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body class="control-room">
@@ -401,21 +435,26 @@
   <main class="settings-main">
     <header class="page-header">
       <div>
-        <div class="eyebrow">AI CREW BRAIN &amp; LLM ARCHITECTURE</div>
-        <h1>🧠 6인 AI 크루 &amp; 채널별 개별 두뇌(Brain) 설정</h1>
-        <p>직원별·파이프라인별 역할 난이도와 속도에 맞춰 AGY CLI(Argon/Flash), Codex CLI(gpt-6.1-sol), 상용 API를 개별 배정하고 즉시 연동합니다.</p>
+        <div class="header-title-group">
+          <h1>🧠 6인 AI 크루 &amp; 4대 채널 개별 두뇌(Brain) 설정</h1>
+          <span class="eyebrow">10-SLOT UNIFIED BRAIN MATRIX</span>
+        </div>
+        <p>모든 에이전트·파이프라인의 모델 지정은 아래 10개 슬롯 매트릭스 한 곳에서만 통합 관리됩니다.</p>
       </div>
       <div class="matrix-actions">
+        <span class="cli-health-pill" id="cli-health-badge" title="Windows 작업 호스트 로컬 CLI 브릿지 실시간 연결 상태">
+          🟢 AGY CLI 정상 · 🟢 Codex CLI 정상
+        </span>
         <a href="chat.html" class="btn-preset" style="text-decoration:none;">💬 실시간 회의실에서 장착 상태 확인 →</a>
       </div>
     </header>
 
-    <!-- 1. 최상단: 6인 AI 크루 + 4대 채널 파이프라인 두뇌 배정 매트릭스 -->
+    <!-- 단일 통합: 6인 AI 크루(3×2) + 4대 채널 파이프라인(2×2) 두뇌 배정 매트릭스 -->
     <section class="card" id="brain-matrix-section">
       <div class="matrix-head">
         <div>
-          <h2>⚡ 6인 AI 크루 두뇌 배정 매트릭스 (Individual Brain Matrix)</h2>
-          <p>회의실(<code>/api/chat</code>) 호출 및 백그라운드 파이프라인 실행 시 각 직원·채널에 지정된 전용 공급자와 모델로 즉시 구동됩니다.</p>
+          <h2>⚡ 6인 AI 크루 &amp; 4대 자동화 채널 두뇌 배정 매트릭스 (총 10슬롯)</h2>
+          <p>회의실(<code>/api/chat</code>) 호출 및 백그라운드 파이프라인 실행 시 각 슬롯에 배정된 공급자·모델로 즉시 구동됩니다.</p>
         </div>
         <div class="matrix-actions">
           <button type="button" id="btn-apply-optimal-preset" class="btn-preset" title="자비스(Argon High), 퍼블리·패치(gpt-6.1-sol), 레이더(Argon Med), 닥터·트레이스(3.8 Flash Med)로 원클릭 배정 후 즉시 저장합니다">
@@ -429,89 +468,42 @@
 
       <div id="brain-matrix-message" role="status" aria-live="polite"></div>
 
-      <div class="sub-section-label">👥 6인 전담 AI 크루 개별 두뇌 (회의실 &amp; 전담 도구 실행)</div>
+      <div class="sub-section-label">👥 6인 전담 AI 크루 개별 두뇌 (3×2 · 회의실 &amp; 전담 도구 실행)</div>
       <div class="brain-grid-6" id="crew-brain-grid"></div>
 
-      <div class="sub-section-label">🚀 4대 자동화 채널 파이프라인 전용 두뇌 (원고 집필 · 검수 · 답변)</div>
+      <div class="sub-section-label">🚀 4대 자동화 채널 파이프라인 전용 두뇌 (2×2 · 원고 집필 · 검수 · 답변)</div>
       <div class="brain-grid-4" id="pipeline-brain-grid"></div>
     </section>
 
-    <!-- 2. 지식iN 운영 연동 안내 및 공용 기본 공급자 / API 키 금고 -->
-    <section class="card current">
-      <span class="badge">공용 기본 연결</span>
-      <div>
-        <strong id="active">불러오는 중…</strong>
-        <p class="hint">개별 슬롯이 지정되지 않은 일반 워크플로우 요청에 사용되는 기본(Fallback) 공급자와 API 키 암호화 금고입니다.</p>
+    <!-- 최하단 기본 접힘: 외부 유료 API 키 등록 및 연결 테스트 -->
+    <details class="api-key-vault" id="external-api-key-details">
+      <summary>🔑 외부 유료 API 키 등록 및 연결 테스트 (필요시 열기)</summary>
+      <div class="vault-body">
+        <form id="form" autocomplete="off">
+          <div class="vault-row">
+            <div class="vault-field">
+              <label for="provider">유료 API 공급자</label>
+              <select id="provider">
+                <option value="openai">OpenAI API</option>
+                <option value="claude">Claude API</option>
+                <option value="gemini">Gemini API</option>
+                <option value="deepseek">DeepSeek API</option>
+              </select>
+            </div>
+            <div class="vault-field">
+              <label for="api-key">API 키 (DPAPI / Fernet 암호화 보관소)</label>
+              <input id="api-key" type="password" autocomplete="new-password" placeholder="새 유료 API 키 입력 (비워 두면 기존 저장 키 유지)" maxlength="4096" spellcheck="false">
+            </div>
+            <button type="submit" id="save" class="btn-vault">🔑 API 키 저장</button>
+            <button type="button" id="test" class="btn-vault">⚡ 연결 테스트</button>
+          </div>
+          <p id="key-status" class="hint">AGY CLI 및 Codex CLI(ChatGPT 구독)는 별도 API 키 없이 상단 매트릭스에서 바로 사용할 수 있습니다.</p>
+          <div id="message" role="status" aria-live="polite"></div>
+        </form>
       </div>
-      <div style="margin-left:auto; font-size:12.5px; color:#475569;">
-        지식iN 전용 모델: <strong id="kin-settings-model" style="color:#0f172a;">gpt-6.1-sol</strong> · 계정: <strong id="kin-settings-accounts" style="color:#0f172a;">adinfo0905, stone0747</strong>
-        (<a href="kin.html">지식iN 상세 →</a>)
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>🔐 공급자별 기본 모델 및 API 키 암호화 보관소</h2>
-      <form id="form" autocomplete="off">
-        <div class="grid">
-          <label>LLM 공급자 선택
-            <select id="provider" disabled>
-              <option value="agy">Antigravity AGY CLI (Argon / Flash)</option>
-              <option value="codex">Codex CLI · ChatGPT 구독 (gpt-6.1-sol)</option>
-              <option value="gemini">Gemini API</option>
-              <option value="openai">OpenAI API</option>
-              <option value="claude">Claude API</option>
-              <option value="deepseek">DeepSeek API</option>
-              <option value="legacy">기존 워크플로우 연결 유지</option>
-            </select>
-          </label>
-          <label id="model-wrap">기본 모델 ID
-            <input id="model" list="agy-models-list" placeholder="사용 가능한 정확한 모델 ID (예: gemini-4-argon-high)" maxlength="120" spellcheck="false">
-            <datalist id="agy-models-list">
-              <option value="gemini-4-argon-high">Gemini 4 Argon (High)</option>
-              <option value="gemini-4-argon-medium">Gemini 4 Argon (Medium)</option>
-              <option value="gemini-4-argon-low">Gemini 4 Argon (Low)</option>
-              <option value="gemini-3.8-flash-high">Gemini 3.8 Flash (High)</option>
-              <option value="gemini-3.8-flash-medium">Gemini 3.8 Flash (Medium)</option>
-              <option value="gemini-3.8-flash-low">Gemini 3.8 Flash (Low)</option>
-              <option value="gpt-6.1-sol">GPT-6.1-Sol (High)</option>
-              <option value="claude-opus-5-5-high">Claude Opus 5.5 (High)</option>
-              <option value="claude-sonnet-5-5-high">Claude Sonnet 5.5 (High)</option>
-              <option value="gpt-oss-120b-medium">GPT-OSS 120B (Medium)</option>
-            </datalist>
-            <p class="hint">계정에서 사용 가능한 모델 ID를 선택하거나 직접 입력하세요.</p>
-          </label>
-          <label id="agy-model-wrap" class="hidden">AGY 모델 빠른 선택
-            <select id="agy-model"></select>
-            <p id="agy-status" class="hint"></p>
-          </label>
-          <label id="codex-model-wrap" class="hidden">Codex 모델 선택
-            <select id="codex-model" disabled></select>
-            <p id="codex-status" class="hint"></p>
-          </label>
-        </div>
-
-        <div id="key-wrap">
-          <label>API 키 (DPAPI / Fernet 암호화 저장)
-            <input id="api-key" type="password" autocomplete="new-password" placeholder="새 키를 입력하거나 비워 두어 기존 키 유지" maxlength="4096" spellcheck="false">
-          </label>
-          <p id="key-status" class="hint"></p>
-        </div>
-
-        <p id="agy-note" class="note hidden">Windows 작업 호스트에 설치된 Antigravity AGY CLI (<code>C:\Users\baro7\AppData\Local\agy\bin\agy.exe</code>)를 사용합니다. 별도 API 키가 필요 없으며 <strong>Gemini 4 Argon (High/Medium)</strong> 및 <strong>Gemini 3.8 Flash (Medium)</strong> 등을 바로 선택해 사용할 수 있습니다.</p>
-        <p id="codex-note" class="note hidden">Windows에 로그인한 Codex CLI의 ChatGPT 구독을 사용합니다. <strong>gpt-6.1-sol</strong>, <strong>gpt-5.4</strong> 등 구독 모델을 별도 API 키 없이 사용합니다.</p>
-        <p id="legacy-note" class="note hidden">기존 워크플로우의 인증과 모델 설정을 그대로 사용합니다.</p>
-
-        <div class="actions">
-          <button type="submit" id="save" disabled>연결 저장</button>
-          <button type="button" class="primary" id="activate" disabled>저장하고 기본 연결로 사용</button>
-          <button type="button" id="test" disabled>저장된 연결 테스트</button>
-        </div>
-        <p class="hint">연결 테스트는 짧은 실제 JSON 생성 요청 1회를 보내며, 게시 작업은 실행하지 않습니다.</p>
-        <div id="message" role="status" aria-live="polite"></div>
-      </form>
-    </section>
+    </details>
   </main>
 </div>
-<script src="/llm-settings.js?v=20261018-brain-matrix"></script>
+<script src="/llm-settings.js?v=20261018-one-screen"></script>
 </body>
 </html>

@@ -266,78 +266,36 @@ function collectBrainMatrixPayload() {
 }
 
 function buttons() {
-  for (const id of ['save', 'activate', 'test', 'provider', 'codex-model', 'agy-model', 'btn-apply-optimal-preset', 'btn-save-agent-brains']) {
+  for (const id of ['save', 'test', 'provider', 'btn-apply-optimal-preset', 'btn-save-agent-brains']) {
     if ($(id)) $(id).disabled = busy || !config;
-  }
-  if (config && !busy) {
-    $('save').disabled = $('provider').value === 'legacy';
-    $('test').disabled = $('provider').value === 'legacy';
   }
 }
 
 function selectedModel() {
-  const p = $('provider').value;
-  if (p === 'codex') return $('codex-model').value || 'gpt-6.1-sol';
-  if (p === 'agy') return ($('model').value.trim() || ($('agy-model') ? $('agy-model').value : 'gemini-4-argon-high'));
-  return $('model').value.trim();
+  const p = $('provider') ? $('provider').value : 'openai';
+  const row = config?.providers?.[p];
+  if (row && row.model) return row.model;
+  const fallback = PROVIDER_MODELS_MAP[p]?.[0]?.id;
+  return fallback || 'gpt-6.1-sol';
 }
 
 function render() {
   renderBrainMatrix();
-  const p = $('provider').value, legacy = p === 'legacy', agy = p === 'agy', codex = p === 'codex';
-  $('model-wrap').classList.toggle('hidden', legacy || codex);
-  $('key-wrap').classList.toggle('hidden', legacy || agy || codex);
-  $('codex-model-wrap').classList.toggle('hidden', !codex);
-  $('codex-note').classList.toggle('hidden', !codex);
-  if ($('agy-model-wrap')) $('agy-model-wrap').classList.toggle('hidden', !agy);
-  $('agy-note').classList.toggle('hidden', !agy);
-  $('legacy-note').classList.toggle('hidden', !legacy);
-  $('api-key').value = '';
-  $('model').value = config.providers[p]?.model || (agy ? 'gemini-4-argon-high' : (codex ? 'gpt-6.1-sol' : ''));
-  $('model').required = !legacy && !codex;
-  $('codex-model').required = codex;
-  if (agy && $('agy-model')) {
-    const row = config.providers.agy;
-    const models = (row.models && row.models.length) ? row.models : DEFAULT_AGY_MODELS;
-    $('agy-model').replaceChildren();
-    for (const model of models) {
-      const option = document.createElement('option');
-      option.value = model.id;
-      option.textContent = model.label;
-      $('agy-model').appendChild(option);
-    }
-    const currentModel = row.model || 'gemini-4-argon-high';
-    $('agy-model').value = currentModel;
-    $('model').value = currentModel;
-    if ($('agy-status')) $('agy-status').textContent = 'Windows 작업 호스트 AGY CLI 연결됨 · Gemini 4 Argon / 3.8 Flash 사용 가능';
+  if ($('cli-health-badge') && config?.providers) {
+    const agyOk = config.providers.agy?.installed !== false;
+    const codexOk = config.providers.codex?.installed !== false;
+    $('cli-health-badge').textContent = `${agyOk ? '🟢 AGY CLI 정상' : '🟡 AGY CLI 점검'} · ${codexOk ? '🟢 Codex CLI 정상' : '🟡 Codex CLI 점검'}`;
   }
-  if (codex) {
-    const row = config.providers.codex || {};
-    const models = getModelsForProvider('codex');
-    $('codex-model').replaceChildren();
-    for (const model of models) {
-      const option = document.createElement('option');
-      option.value = model.id;
-      option.textContent = model.label;
-      $('codex-model').appendChild(option);
-    }
-    $('codex-model').value = row.model || 'gpt-6.1-sol';
-    $('codex-status').textContent = row.online && row.authenticated
-      ? 'Windows 작업 호스트 연결됨 · ChatGPT 구독(gpt-6.1-sol / gpt-5.4) 확인 완료'
-      : 'Windows 작업 호스트 ChatGPT 구독 모델 사용 가능';
-  }
-  if (!legacy && config.providers[p]) {
-    const row = config.providers[p];
+  if ($('provider') && $('api-key') && $('key-status')) {
+    const p = $('provider').value || 'openai';
+    $('api-key').value = '';
+    const row = config?.providers?.[p] || {};
     $('key-status').textContent = row.key_set
       ? '암호화된 키 저장됨 · 빈 입력은 기존 키를 유지합니다.'
       : row.environment_key
         ? '서버 환경변수 연결 있음 · 실제 생성은 연결 테스트로 확인하세요.'
-        : '저장된 키 없음';
+        : '저장된 키 없음 (AGY CLI / Codex CLI 사용 시 불필요)';
   }
-  const active = config.active;
-  $('active').textContent = active === 'legacy'
-    ? '기존 워크플로우 연결 유지'
-    : (config.providers[active]?.label || active) + ' · ' + (config.providers[active]?.model || '');
   buttons();
 }
 
@@ -396,68 +354,68 @@ async function saveBrainMatrix(useOptimalPreset = false) {
   }
 }
 
-async function save(activate) {
-  if (busy || !$('form').reportValidity()) return;
+async function save() {
+  if (busy || !$('form') || !$('form').reportValidity()) return;
   busy = true;
   buttons();
-  message('저장 중…');
+  message('암호화 키 저장 중…');
   try {
+    const p = $('provider').value;
     config = await api('settings', {
-      provider: $('provider').value,
+      provider: p,
       model: selectedModel(),
       api_key: $('api-key').value.trim(),
-      activate,
+      activate: false,
       agentBrains: collectBrainMatrixPayload(),
       revision: config.revision,
     });
     render();
-    message(activate ? '✅ 기본 연결 및 크루 두뇌 설정을 저장하고 활성화했습니다.' : '✅ 공급자 연결 및 크루 두뇌 설정을 저장했습니다.');
+    message(`✅ ${p.toUpperCase()} API 암호화 키를 안전하게 저장했습니다.`);
   } catch (e) {
     message(e.message, true);
   } finally {
-    $('api-key').value = '';
+    if ($('api-key')) $('api-key').value = '';
     busy = false;
     buttons();
   }
 }
 
-$('form').addEventListener('submit', e => { e.preventDefault(); save(false); });
-$('activate').addEventListener('click', () => save(true));
-$('provider').addEventListener('change', () => { message(''); render(); });
-if ($('agy-model')) {
-  $('agy-model').addEventListener('change', () => {
-    $('model').value = $('agy-model').value;
-  });
-}
+if ($('form')) $('form').addEventListener('submit', e => { e.preventDefault(); save(); });
+if ($('provider')) $('provider').addEventListener('change', () => { message(''); render(); });
 if ($('btn-apply-optimal-preset')) {
   $('btn-apply-optimal-preset').addEventListener('click', () => saveBrainMatrix(true));
 }
 if ($('btn-save-agent-brains')) {
   $('btn-save-agent-brains').addEventListener('click', () => saveBrainMatrix(false));
 }
-$('test').addEventListener('click', async () => {
-  if (busy) return;
-  const p = $('provider').value;
-  if ($('api-key').value || selectedModel() !== config.providers[p].model) {
-    message('먼저 연결을 저장한 뒤 테스트하세요.', true);
-    return;
-  }
-  busy = true;
-  buttons();
-  message('실제 JSON 생성 확인 중… AGY / Codex CLI는 최대 1~2분이 걸립니다.');
-  try {
-    const d = await api('test', { provider: p });
-    message(d.message);
-  } catch (e) {
-    message(e.message, true);
-  } finally {
-    busy = false;
+if ($('test')) {
+  $('test').addEventListener('click', async () => {
+    if (busy) return;
+    const p = $('provider').value;
+    if ($('api-key') && $('api-key').value.trim()) {
+      message('먼저 [암호화 키 저장]을 누른 뒤 연결 테스트를 실행하세요.', true);
+      return;
+    }
+    busy = true;
     buttons();
-  }
-});
+    message('실제 API 연결 및 JSON 생성 확인 중…');
+    try {
+      const d = await api('test', { provider: p });
+      message(d.message);
+    } catch (e) {
+      message(e.message, true);
+    } finally {
+      busy = false;
+      buttons();
+    }
+  });
+}
 
 api('settings').then(d => {
   config = d;
-  $('provider').value = d.active;
+  if ($('provider')) {
+    const validPaid = ['openai', 'claude', 'gemini', 'deepseek'];
+    $('provider').value = validPaid.includes(d.active) ? d.active : 'openai';
+  }
   render();
-}).catch(e => message(e.message, true));
+}).catch(e => matrixMessage(`❌ 설정 로드 실패: ${e.message}`, true));
