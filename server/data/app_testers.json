@@ -18,26 +18,28 @@
     "teulaebeulleo7@gmail.com",
     "moneymaster843@gmail.com",
     "jglobal489@gmail.com",
-    "justincome82@gmail.com"
+    "justincome82@gmail.com",
+    "moonsongbua495@gmail.com",
+    "sjorbit28@gmail.com"
   ],
-  "emailCount": 11,
+  "emailCount": 13,
   "devicePlan": "삼성폰 3대(일반 3 + 보안폴더 3 = 6슬롯) + 가족폰 3대(일반/보안폴더 = 6~8슬롯) = 총 12~14개 계정",
-  "lastSavedAt": "2026-10-19T01:25:51+09:00",
-  "lastSyncedToPlayConsoleAt": "2026-10-19T01:20:04+09:00",
-  "syncStatus": "internal_lists_synced_9_of_11",
+  "lastSavedAt": "2026-10-19T01:27:37+09:00",
+  "lastSyncedToPlayConsoleAt": "2026-10-19T01:27:37+09:00",
+  "syncStatus": "internal_lists_synced_11_of_13",
   "lastAutomationReceipt": {
     "mode": "sync-testers",
-    "executedAt": "2026-10-19T01:20:04+09:00",
+    "executedAt": "2026-10-19T01:27:37+09:00",
     "browser": "SJ portable CDP 9226 (YoonLab 7752283694845461925 accessible; baro76650 CDP 9420 only reaches terminated BARO COMMS 7623106237980940931)",
     "lists": {
       "하루말씀 내부 테스트": {
-        "usersAfterReload": 9,
+        "usersAfterReload": 11,
         "assignedTo": [
           "bible_app"
         ]
       },
       "BaroLab 생활 앱 내부 테스트": {
-        "usersAfterReload": 9,
+        "usersAfterReload": 11,
         "assignedTo": [
           "greeting",
           "magnifier",
@@ -45,7 +47,7 @@
         ]
       }
     },
-    "acceptedCount": 9,
+    "acceptedCount": 11,
     "rejected": [
       "mustb1206@gmail.com",
       "otxmlgi3@gmail.com"
@@ -130,17 +132,6 @@
       "consoleBaseUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887",
       "internalTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/tracks/internal-testing",
       "closedTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/tracks/closed-testing"
-    }
-  },
-  "closedTrackSetup": {
-    "checkedAt": "2026-10-19T01:25:51+09:00",
-    "status": "testers_attached_no_release",
-    "note": "Alpha 트랙에 이메일 목록 연결 완료(새로고침 검증). 버전 없음·검토 미제출. 게시 개요 잠김: 콘텐츠 등급/데이터 보안 설문 등 대시보드 필수 단계 미완료.",
-    "tracks": {
-      "bible_app": "4699203747229924218",
-      "greeting": "4699442447711468691",
-      "magnifier": "4701097179127398061",
-      "shopping": "4699937692277090821"
     }
   }
 }
