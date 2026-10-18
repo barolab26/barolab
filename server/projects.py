@@ -32,14 +32,96 @@ PROJECT_REGISTRY = (
 SJ_ADMOB_PUBLISHER_ID = "pub-7642010403138987"
 SJ_APP_ADS_LINE = "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0"
 
-from apps.play_console_automator import (
-    DEVELOPER_ID,
-    load_app_testers,
-    run_promote_closed,
-    run_switch_prod_ads,
-    run_sync_testers,
-    save_app_testers,
-)
+import re as _re
+import threading
+
+try:
+    from apps.play_console_automator import (
+        DEVELOPER_ID,
+        load_app_testers,
+        normalize_emails,
+        run_promote_closed,
+        run_switch_prod_ads,
+        run_sync_testers,
+        save_app_testers,
+    )
+    AUTOMATOR_AVAILABLE = True
+except Exception:  # NAS image ships only server/*.py + common/*.py (no apps/ package)
+    AUTOMATOR_AVAILABLE = False
+    DEVELOPER_ID = "7752283694845461925"
+    _FALLBACK_TESTER_PATHS = (ROOT / "server" / "data" / "app_testers.json", ROOT / "data" / "app_testers.json")
+
+    def normalize_emails(raw_emails: Any) -> List[str]:
+        tokens: List[str] = []
+        if isinstance(raw_emails, str):
+            tokens = _re.split(r"[\s,;]+", raw_emails.strip())
+        elif isinstance(raw_emails, list):
+            for item in raw_emails:
+                if isinstance(item, str):
+                    tokens.extend(_re.split(r"[\s,;]+", item.strip()))
+        email_re = _re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+        out: List[str] = []
+        for tok in tokens:
+            clean = tok.strip().lower()
+            if clean and email_re.match(clean) and clean not in out:
+                out.append(clean)
+        if "baro76650@gmail.com" not in out:
+            out.insert(0, "baro76650@gmail.com")
+        return out[:30]
+
+    def load_app_testers() -> Dict[str, Any]:
+        for path in _FALLBACK_TESTER_PATHS:
+            try:
+                if path.is_file():
+                    doc = json.loads(path.read_text(encoding="utf-8-sig"))
+                    doc["emails"] = normalize_emails(doc.get("emails") or [])
+                    doc["emailCount"] = len(doc["emails"])
+                    doc.setdefault("targetTesterCount", 14)
+                    return doc
+            except Exception:
+                continue
+        return {"emails": ["baro76650@gmail.com"], "emailCount": 1, "targetTesterCount": 14, "syncStatus": "ready_for_input"}
+
+    def save_app_testers(doc: Dict[str, Any]) -> Dict[str, Any]:
+        doc["emails"] = normalize_emails(doc.get("emails") or [])
+        doc["emailCount"] = len(doc["emails"])
+        doc["lastSavedAt"] = datetime.now(KST).isoformat(timespec="seconds")
+        for path in _FALLBACK_TESTER_PATHS:
+            try:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                tmp = path.with_suffix(".json.tmp")
+                tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                tmp.replace(path)
+            except Exception:
+                continue
+        return doc
+
+    def _automator_unavailable(*_args: Any, **_kwargs: Any) -> Dict[str, Any]:
+        return {"ok": False, "error": "play_console_automator is Windows-only (not in NAS image)"}
+
+    run_promote_closed = run_switch_prod_ads = run_sync_testers = _automator_unavailable
+
+_CDP_JOB_LOCK = threading.Lock()
+
+
+def _start_background_cdp(job: str) -> bool:
+    """Run Play Console CDP work off the request thread. Never blocks the HTTP handler."""
+    if not AUTOMATOR_AVAILABLE or not _CDP_JOB_LOCK.acquire(blocking=False):
+        return False
+
+    def _runner() -> None:
+        try:
+            if job == "sync":
+                run_sync_testers(raw_emails=None, execute_cdp=True)
+            elif job == "promote":
+                run_promote_closed(app_filter="all", execute_cdp=True)
+        except Exception:
+            pass
+        finally:
+            _CDP_JOB_LOCK.release()
+
+    threading.Thread(target=_runner, name=f"play-console-{job}", daemon=True).start()
+    return True
 
 APP_MONETIZATION_CATALOG: Dict[str, Dict[str, Any]] = {
     "bible_app": {
@@ -736,38 +818,58 @@ def get_projects_testers() -> Dict[str, Any]:
 
 @router.post("/api/projects/testers")
 def post_projects_testers(payload: TestersSyncRequest) -> Dict[str, Any]:
-    sync_res = run_sync_testers(raw_emails=payload.emails, execute_cdp=bool(payload.executeCdp))
+    """Save tester emails + CSV and answer immediately. CDP work never runs on the request thread."""
+    doc = load_app_testers()
+    if payload.emails is not None:
+        doc["emails"] = normalize_emails(payload.emails)
+        doc["syncStatus"] = "saved_pending_play_console"
     if payload.closedTestOptIns is not None:
-        doc = load_app_testers()
         opt_ins = max(0, min(30, int(payload.closedTestOptIns)))
         doc["closedTestOptIns"] = opt_ins
-        if opt_ins >= 12:
-            doc["closedTrackPromoted"] = True
-            if not doc.get("closedTestStartAt"):
-                doc["closedTestStartAt"] = now_kst_iso()
-        save_app_testers(doc)
-    sync_manifests_to_disk(ROOT, force_verify=False)
-    inv = inventory(ROOT, force_verify=False)
-    inv["automationReceipt"] = sync_res
-    return inv
+        if opt_ins >= 12 and doc.get("closedTrackPromoted") and not doc.get("closedTestStartAt"):
+            doc["closedTestStartAt"] = now_kst_iso()
+    doc = save_app_testers(doc)
+
+    csv_written = False
+    for csv_path in (ROOT / "apps" / "qa" / "barolab-testers-14.csv", ROOT / "server" / "data" / "barolab-testers-14.csv"):
+        try:
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
+            csv_path.write_text("\n".join(doc["emails"]) + "\n", encoding="utf-8")
+            csv_written = True
+            break
+        except Exception:
+            continue
+
+    cdp_queued = _start_background_cdp("sync") if (payload.executeCdp and payload.emails is not None) else False
+    return {
+        "ok": True,
+        "savedCount": int(doc.get("emailCount") or len(doc.get("emails") or [])),
+        "emails": doc.get("emails") or [],
+        "csvWritten": csv_written,
+        "cdpQueued": cdp_queued,
+        "cdpNote": (
+            "Play Console 동기화를 백그라운드로 시작했습니다."
+            if cdp_queued
+            else "명단만 저장했습니다 (Play Console 반영은 Windows 워커/CDP 9420에서 별도 실행)."
+        ),
+        "testersControlCenter": doc,
+    }
 
 
 @router.post("/api/projects/promote-closed")
 def post_promote_closed(payload: PromoteClosedRequest) -> Dict[str, Any]:
-    promo_res = run_promote_closed(app_filter=payload.app or "all", execute_cdp=bool(payload.executeCdp))
+    """Queue a Play Console closed-track inspection. Track state is never set from the button press itself."""
+    cdp_queued = _start_background_cdp("promote") if payload.executeCdp else False
     doc = load_app_testers()
-    if payload.closedTrackPromoted is not None:
-        doc["closedTrackPromoted"] = bool(payload.closedTrackPromoted)
     if payload.closedTestOptIns is not None:
-        opt_ins = max(0, min(30, int(payload.closedTestOptIns)))
-        doc["closedTestOptIns"] = opt_ins
-        if opt_ins >= 12 and not doc.get("closedTestStartAt"):
-            doc["closedTestStartAt"] = now_kst_iso()
-    save_app_testers(doc)
-    sync_manifests_to_disk(ROOT, force_verify=False)
-    inv = inventory(ROOT, force_verify=False)
-    inv["automationReceipt"] = promo_res
-    return inv
+        doc["closedTestOptIns"] = max(0, min(30, int(payload.closedTestOptIns)))
+        doc = save_app_testers(doc)
+    return {
+        "ok": True,
+        "cdpQueued": cdp_queued,
+        "closedTrackPromoted": bool(doc.get("closedTrackPromoted")),
+        "testersControlCenter": doc,
+    }
 
 
 @router.post("/api/projects/verify-device")

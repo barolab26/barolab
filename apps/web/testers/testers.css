@@ -168,3 +168,4 @@ main {
 .tip-box strong {
   color: #0f172a;
 }
+.join-hint{margin:8px 2px 4px;font-size:13px;line-height:1.5;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px 10px;}

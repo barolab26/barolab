@@ -12,6 +12,40 @@
   const steps = {not_started:'대기', in_progress:'진행 중', verified:'검증 완료', blocked:'확인 필요'};
   let currentFilter = 'all';
   let latestData = null;
+  let staticTesters = null;
+
+  // Fallback catalog: the NAS image may predate versionCode/versionName/joinUrl fields in /api/projects.
+  const APP_CATALOG = {
+    bible_app: {packageName: 'com.barolab.harubible', versionCode: 4, versionName: '0.4.0-internal-preview',
+      internalJoinUrl: 'https://play.google.com/apps/internaltest/4700464139727332365',
+      closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.harubible'},
+    greeting: {packageName: 'com.barolab.morningcard', versionCode: 2, versionName: '0.2.0-internal-preview',
+      internalJoinUrl: 'https://play.google.com/apps/internaltest/4701400802151181455',
+      closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.morningcard'},
+    magnifier: {packageName: 'com.barolab.biglens', versionCode: 2, versionName: '0.2.0-internal-preview',
+      internalJoinUrl: 'https://play.google.com/apps/internaltest/4701703053640983596',
+      closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.biglens'},
+    shopping: {packageName: 'com.barolab.voicebasket', versionCode: 2, versionName: '0.2.0-internal-preview',
+      internalJoinUrl: 'https://play.google.com/apps/internaltest/4701721871486482124',
+      closedJoinUrl: 'https://play.google.com/apps/testing/com.barolab.voicebasket'}
+  };
+  function appMeta(p) {
+    const cat = APP_CATALOG[p?.id] || {};
+    return {
+      packageName: p?.packageName || cat.packageName || '',
+      versionCode: p?.versionCode || cat.versionCode || '',
+      versionName: p?.versionName || p?.releaseName || cat.versionName || '',
+      internalJoinUrl: p?.internalJoinUrl || cat.internalJoinUrl || 'https://barolab-daily-apps.pages.dev/testers/',
+      closedJoinUrl: p?.closedJoinUrl || cat.closedJoinUrl || ''
+    };
+  }
+
+  async function loadStaticTesters() {
+    try {
+      const r = await fetch('/data/app_testers.json', {cache: 'no-store'});
+      if (r.ok) staticTesters = await r.json();
+    } catch (_) {}
+  }
 
   function node(tag, value, className) {
     const el = document.createElement(tag);
@@ -138,7 +172,7 @@
 
   function renderControlCenter(data) {
     const projects = Array.isArray(data?.projects) ? data.projects : [];
-    const tc = data?.testersControlCenter || {};
+    const tc = (data?.testersControlCenter && data.testersControlCenter.emailCount) ? data.testersControlCenter : (staticTesters || data?.testersControlCenter || {});
     const firstSched = projects[0]?.testSchedule || {};
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
@@ -185,19 +219,22 @@
           <strong>${idx + 1}. ${p.name}</strong>
           <span class="pillar-badge ${isVer ? 'badge-green' : 'badge-orange'}">${isVer ? '실기기 검증 완료' : '실기기 1회 확인 대기'}</span>
         `;
-        const metaLine = node('div', `${p.packageName || ''} · v${p.versionCode || ''} (${p.versionName || ''})`, 'direct-app-meta');
+        const meta = appMeta(p);
+        const metaLine = node('div', `${meta.packageName} · v${meta.versionCode} (${meta.versionName})`, 'direct-app-meta');
 
         const linkRow = node('div', '', 'direct-link-row');
-        const btnInt = node('a', '📲 내부 테스트 설치 ↗', 'direct-install-btn internal');
-        btnInt.href = p.internalJoinUrl || 'https://barolab-daily-apps.pages.dev/testers/';
+        const btnInt = node('a', '📲 ① 테스트 참여하기 (내부 테스트) ↗', 'direct-install-btn internal');
+        btnInt.href = meta.internalJoinUrl;
         btnInt.target = '_blank';
         btnInt.rel = 'noopener noreferrer';
 
-        const btnClosed = node('a', '🔒 비공개 Opt-in ↗', 'direct-install-btn closed');
-        btnClosed.href = p.closedJoinUrl || `https://play.google.com/apps/testing/${p.packageName}`;
+        const btnClosed = node('a', '🔒 비공개 테스트 참여 (트랙 개설 후) ↗', 'direct-install-btn closed');
+        btnClosed.href = meta.closedJoinUrl || `https://play.google.com/apps/testing/${meta.packageName}`;
         btnClosed.target = '_blank';
         btnClosed.rel = 'noopener noreferrer';
         linkRow.append(btnInt, btnClosed);
+        const joinHint = node('div', '① 열리는 화면에서 [테스트 참여하기] → ② 그 화면의 [Google Play에서 다운로드]. 참여 전 스토어 직통 접속 시 404가 뜹니다.', 'direct-app-meta');
+        joinHint.style.color = '#b45309';
 
         const checkUl = node('ul', '', 'direct-check-list');
         const items = Array.isArray(p.deviceCheckItems) && p.deviceCheckItems.length
@@ -222,7 +259,7 @@
         verBtn.type = 'button';
         verBtn.onclick = () => verifyDevice(p.id, verBtn);
 
-        card.append(top, metaLine, linkRow, checkUl, verBtn);
+        card.append(top, metaLine, linkRow, joinHint, checkUl, verBtn);
         cardsBox.append(card);
       });
     }
@@ -406,7 +443,7 @@
 
   async function refresh() {
     try {
-      const res = await fetch('/api/projects', {cache:'no-store'});
+      const [res] = await Promise.all([fetch('/api/projects', {cache:'no-store'}), loadStaticTesters()]);
       if (!res.ok) throw new Error('projects unavailable');
       render(await res.json());
     } catch (_) {
@@ -444,31 +481,67 @@
     });
   }
 
+  const SAVE_LABEL = '💾 테스터 명단 저장 및 Play Console 반자동 등록 실행';
+
+  async function postJsonWithTimeout(url, body, ms = 10000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+      return await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body),
+        signal: ctrl.signal
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function applySavedTesters(saved) {
+    const n = Number(saved?.savedCount || saved?.testersControlCenter?.emailCount || 0);
+    if (saved?.testersControlCenter) staticTesters = saved.testersControlCenter;
+    const badgeEl = document.getElementById('testers-count-badge');
+    if (badgeEl) {
+      badgeEl.textContent = `등록 ${n} / 14명`;
+      badgeEl.className = 'pillar-badge ' + (n >= 12 ? 'badge-green' : 'badge-orange');
+    }
+    const receiptEl = document.getElementById('tester-sync-receipt');
+    if (receiptEl) {
+      receiptEl.innerHTML = `
+        <div><strong>저장 원장:</strong> <code>data/app_testers.json</code> (${n}개 계정) · <strong>CSV:</strong> <code>apps/qa/barolab-testers-14.csv</code></div>
+        <div><strong>Play Console:</strong> ${saved?.cdpNote || '명단 저장 완료'}</div>
+      `;
+    }
+    return n;
+  }
+
   const saveTestersBtn = document.getElementById('btn-save-sync-testers');
   if (saveTestersBtn) {
     saveTestersBtn.addEventListener('click', async () => {
       const rawEmails = taEl ? taEl.value : '';
       const execCdp = Boolean(document.getElementById('tester-execute-cdp')?.checked);
       saveTestersBtn.disabled = true;
-      saveTestersBtn.textContent = '💾 명단 저장 및 Play Console 동기화 중...';
+      saveTestersBtn.textContent = '💾 명단 저장 중...';
+      let finalText = SAVE_LABEL;
       try {
-        const res = await fetch('/api/projects/testers', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({emails: rawEmails, executeCdp: execCdp})
-        });
+        const res = await postJsonWithTimeout('/api/projects/testers', {emails: rawEmails, executeCdp: execCdp});
         if (res.ok) {
           if (taEl) delete taEl.dataset.userEdited;
-          render(await res.json());
-          saveTestersBtn.textContent = '✅ 테스터 명단 저장 및 CSV/원장 반영 완료!';
-          setTimeout(() => {
-            saveTestersBtn.textContent = '💾 테스터 명단 저장 및 Play Console 반자동 등록 실행';
-          }, 2500);
+          const n = applySavedTesters(await res.json());
+          finalText = `✅ 명단 저장 완료 (${n}명)`;
+          refresh();
+        } else if (res.status === 404 || res.status === 405) {
+          finalText = `⚠️ 저장 실패: NAS 서버 이미지 업데이트 필요 (HTTP ${res.status})`;
+        } else {
+          finalText = `⚠️ 저장 실패 (HTTP ${res.status}) · 다시 시도`;
         }
-      } catch (_) {
-        saveTestersBtn.textContent = '💾 테스터 명단 저장 및 Play Console 반자동 등록 실행';
+      } catch (err) {
+        finalText = err?.name === 'AbortError' ? '⚠️ 10초 응답 없음 · 다시 시도' : '⚠️ 서버 연결 실패 · 다시 시도';
       } finally {
         saveTestersBtn.disabled = false;
+        saveTestersBtn.textContent = finalText;
+        if (!finalText.startsWith('✅')) setTimeout(() => { saveTestersBtn.textContent = SAVE_LABEL; }, 6000);
       }
     });
   }
@@ -493,27 +566,29 @@
 
   const promoteClosedBtn = document.getElementById('btn-promote-closed-track');
   if (promoteClosedBtn) {
+    const PROMO_LABEL = '🚀 비공개 테스트(Alpha) 4종 승격 실행';
     promoteClosedBtn.addEventListener('click', async () => {
       const execCdp = Boolean(document.getElementById('tester-execute-cdp')?.checked);
       promoteClosedBtn.disabled = true;
-      promoteClosedBtn.textContent = '🚀 비공개 트랙 승격 준비 및 링크 검증 중...';
+      promoteClosedBtn.textContent = '🚀 Play Console 점검 요청 중...';
+      let finalText = PROMO_LABEL;
       try {
-        const res = await fetch('/api/projects/promote-closed', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({app: 'all', executeCdp: execCdp, closedTrackPromoted: true})
-        });
+        const res = await postJsonWithTimeout('/api/projects/promote-closed', {app: 'all', executeCdp: execCdp});
         if (res.ok) {
-          render(await res.json());
-          promoteClosedBtn.textContent = '✅ 비공개 테스트(Alpha) 4종 승격 반영 완료!';
-          setTimeout(() => {
-            promoteClosedBtn.textContent = '🚀 비공개 테스트(Alpha) 4종 승격 실행';
-          }, 2500);
+          const body = await res.json();
+          finalText = body.cdpQueued
+            ? '⏳ Play Console 점검을 백그라운드로 시작 (결과는 원장 갱신 후 표시)'
+            : '⚠️ 이 서버에서는 Play Console 자동화 불가 (Windows 워커 전용)';
+          refresh();
+        } else {
+          finalText = `⚠️ 요청 실패 (HTTP ${res.status})`;
         }
-      } catch (_) {
-        promoteClosedBtn.textContent = '🚀 비공개 테스트(Alpha) 4종 승격 실행';
+      } catch (err) {
+        finalText = err?.name === 'AbortError' ? '⚠️ 10초 응답 없음' : '⚠️ 서버 연결 실패';
       } finally {
         promoteClosedBtn.disabled = false;
+        promoteClosedBtn.textContent = finalText;
+        setTimeout(() => { promoteClosedBtn.textContent = PROMO_LABEL; }, 6000);
       }
     });
   }
@@ -526,14 +601,8 @@
       updateOptinsBtn.disabled = true;
       updateOptinsBtn.textContent = '반영 중...';
       try {
-        const res = await fetch('/api/projects/testers', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({closedTestOptIns: count, executeCdp: false})
-        });
-        if (res.ok) {
-          render(await res.json());
-        }
+        const res = await postJsonWithTimeout('/api/projects/testers', {closedTestOptIns: count, executeCdp: false});
+        if (res.ok) refresh();
       } catch (_) {} finally {
         updateOptinsBtn.disabled = false;
         updateOptinsBtn.textContent = '반영';
