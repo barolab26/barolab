@@ -99,7 +99,7 @@
       "closedTesting": {
         "completed": false,
         "scope": "필요한 비공개 테스트 요건 미완료",
-        "status": "review_submitted_automatic_checks_running",
+        "status": "review_in_progress",
         "reviewSubmitted": true,
         "reviewApproved": false,
         "participationUrl": "https://play.google.com/apps/testing/com.barolab.morningcard",
@@ -108,8 +108,8 @@
         "versionName": "0.3.0",
         "trackId": "4699442447711468691",
         "submitted": true,
-        "quickChecksPending": true,
-        "googleReviewConfirmed": false,
+        "quickChecksPending": false,
+        "googleReviewConfirmed": true,
         "trackActive": true,
         "countries": [
           "KR"
@@ -117,7 +117,7 @@
         "testerListSelected": true,
         "testerListCount": 13,
         "linkCopyEnabled": true,
-        "checkedAt": "2026-10-18T17:48:52.207Z",
+        "checkedAt": "2026-10-18T18:01:50.820Z",
         "evidence": "apps/qa/2026-10-19-play-console-status.json"
       },
       "versionCode": 3,
@@ -157,7 +157,7 @@
       "pendingRelease": {
         "versionCode": 3,
         "versionName": "0.3.0",
-        "status": "alpha_review_submitted_automatic_checks_running",
+        "status": "alpha_review_in_progress",
         "uploaded": true,
         "reviewSubmitted": true,
         "evidence": "apps/qa/2026-10-19-play-console-status.json"
@@ -309,7 +309,7 @@
       "closedTesting": {
         "completed": false,
         "scope": "필요한 비공개 테스트 요건 미완료",
-        "status": "review_submitted_automatic_checks_running",
+        "status": "review_in_progress",
         "reviewSubmitted": true,
         "reviewApproved": false,
         "participationUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
@@ -321,12 +321,12 @@
           "KR"
         ],
         "linkCopyEnabled": true,
-        "checkedAt": "2026-10-18T17:49:36.983Z",
+        "checkedAt": "2026-10-18T18:02:24.575Z",
         "versionCode": 3,
         "versionName": "0.3.0",
         "submitted": true,
-        "quickChecksPending": true,
-        "googleReviewConfirmed": false,
+        "quickChecksPending": false,
+        "googleReviewConfirmed": true,
         "trackActive": true,
         "evidence": "apps/qa/2026-10-19-play-console-status.json"
       },
@@ -367,7 +367,7 @@
       "pendingRelease": {
         "versionCode": 3,
         "versionName": "0.3.0",
-        "status": "alpha_review_submitted_automatic_checks_running",
+        "status": "alpha_review_in_progress",
         "uploaded": true,
         "reviewSubmitted": true,
         "evidence": "apps/qa/2026-10-19-play-console-status.json"
@@ -550,7 +550,7 @@
       "closedTesting": {
         "completed": false,
         "scope": "필요한 비공개 테스트 요건 미완료",
-        "status": "review_submitted_automatic_checks_running",
+        "status": "review_in_progress",
         "reviewSubmitted": true,
         "reviewApproved": false,
         "participationUrl": "https://play.google.com/apps/testing/com.barolab.voicebasket",
@@ -559,8 +559,8 @@
         "versionName": "0.3.0",
         "trackId": "4699937692277090821",
         "submitted": true,
-        "quickChecksPending": true,
-        "googleReviewConfirmed": false,
+        "quickChecksPending": false,
+        "googleReviewConfirmed": true,
         "trackActive": null,
         "countries": [
           "KR"
@@ -568,7 +568,7 @@
         "testerListSelected": true,
         "testerListCount": 13,
         "linkCopyEnabled": false,
-        "checkedAt": "2026-10-19T02:50:41.9258910+09:00",
+        "checkedAt": "2026-10-18T18:01:21.266Z",
         "evidence": "apps/qa/2026-10-19-play-console-status.json"
       },
       "versionCode": 3,
@@ -608,7 +608,7 @@
       "pendingRelease": {
         "versionCode": 3,
         "versionName": "0.3.0",
-        "status": "alpha_review_submitted_automatic_checks_running",
+        "status": "alpha_review_in_progress",
         "uploaded": true,
         "reviewSubmitted": true,
         "evidence": "apps/qa/2026-10-19-play-console-status.json"
@@ -676,10 +676,10 @@
   },
   "testerPortal": {
     "url": "https://barolab-daily-apps.pages.dev/testers/",
-    "deploymentUrl": "https://b273632d.barolab-daily-apps.pages.dev",
+    "deploymentUrl": "https://8719d978.barolab-daily-apps.pages.dev",
     "httpVerified": true,
     "byteIdentical": true,
-    "checkedAt": "2026-10-18T17:52:40.903514+00:00",
+    "checkedAt": "2026-10-18T18:03:24.273297+00:00",
     "alphaLinks": 4,
     "internalFallbackLinks": 4,
     "evidence": "apps/qa/2026-10-19-play-console-status.json"

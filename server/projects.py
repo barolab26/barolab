@@ -296,7 +296,9 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
     internal_testers_count = 1
     closed_track_opened = False
     closed_review_submitted = False
-    closed_test_opt_ins = 0
+    closed_test_opt_ins = None
+    closed_info = {}
+    internal_release = {}
     required_closed_testers = 12
     required_closed_days = 14
     closed_test_started_at: Optional[str] = None
@@ -310,9 +312,11 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
                 internal_testers_count = int((gp.get("internalTesters") or {}).get("listedCount") or 1)
                 required_closed_testers = int(gp.get("requiredClosedTesters") or 12)
                 required_closed_days = int(gp.get("requiredClosedTestDays") or 14)
-                closed_test_opt_ins = int(gp.get("optedInClosedTestersObserved") or 0)
+                observed = gp.get("optedInClosedTestersObserved")
+                closed_test_opt_ins = observed if type(observed) is int and observed >= 0 else None
+                internal_release = gp.get("internalRelease") or {}
                 closed_info = gp.get("closedTesting") or {}
-                closed_track_opened = bool(closed_info.get("trackOpened") or closed_info.get("trackActive"))
+                closed_track_opened = closed_info.get("trackOpened", closed_info.get("trackActive"))
                 closed_review_submitted = closed_info.get("reviewSubmitted") is True or closed_info.get("submitted") is True
                 closed_test_started_at = closed_info.get("startedAt")
                 if gp.get("internalTrack"):
@@ -325,9 +329,11 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
                 internal_track = str(app_dep.get("internalTrack") or "internal")
                 internal_testers_count = int(app_dep.get("internalTesterListCount") or 1)
                 closed_info = app_dep.get("closedTesting") or {}
-                closed_track_opened = bool(closed_info.get("trackOpened") or closed_info.get("trackActive"))
+                closed_track_opened = closed_info.get("trackOpened", closed_info.get("trackActive"))
                 closed_review_submitted = closed_info.get("reviewSubmitted") is True or closed_info.get("submitted") is True
-                closed_test_opt_ins = int(closed_info.get("optedInTesters") or 0)
+                observed = closed_info.get("optedInTesters")
+                closed_test_opt_ins = observed if type(observed) is int and observed >= 0 else None
+                internal_release = app_dep.get("internalRelease") or {}
                 closed_test_started_at = closed_info.get("startedAt")
     except Exception:
         pass
@@ -339,14 +345,14 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
             try:
                 rec = json.loads(rec_path.read_text(encoding="utf-8-sig"))
                 meas = rec.get("measurement") or {}
-                if isinstance(meas.get("closedTestOptIns"), int) and meas["closedTestOptIns"] > closed_test_opt_ins:
+                if meas.get("closedTestOptInsVerified") is True and type(meas.get("closedTestOptIns")) is int and meas["closedTestOptIns"] > (closed_test_opt_ins or 0):
                     closed_test_opt_ins = meas["closedTestOptIns"]
             except Exception:
                 pass
 
     # Cross-check data/app_testers.json for saved tester emails and closed track state
     testers_doc = load_app_testers()
-    if isinstance(testers_doc.get("closedTestOptIns"), int) and testers_doc["closedTestOptIns"] > closed_test_opt_ins:
+    if testers_doc.get("closedTestOptInsVerified") is True and type(testers_doc.get("closedTestOptIns")) is int and testers_doc["closedTestOptIns"] > (closed_test_opt_ins or 0):
         closed_test_opt_ins = testers_doc["closedTestOptIns"]
     if testers_doc.get("closedTrackPromoted"):
         closed_track_opened = True
@@ -359,6 +365,11 @@ def _load_play_track_truth(project_id: str, root: Path = ROOT) -> Dict[str, Any]
         "registeredTestersCount": int(testers_doc.get("emailCount") or 1),
         "closedTrackOpened": closed_track_opened,
         "closedReviewSubmitted": closed_review_submitted,
+        "closedReviewApproved": closed_info.get("reviewApproved") is True,
+        "closedTestOptInsVerified": closed_test_opt_ins is not None,
+        "internalReleaseAt": internal_release.get("releasedAt") or internal_release.get("publishedAtLocal"),
+        "internalVersionCode": internal_release.get("versionCode"),
+        "closedVersionCode": closed_info.get("versionCode"),
         "closedTestOptIns": closed_test_opt_ins,
         "requiredClosedTesters": required_closed_testers,
         "requiredClosedDays": required_closed_days,
@@ -391,7 +402,7 @@ def compute_closed_test_schedule(
     }
     now = now_kst()
     try:
-        internal_dt = datetime.fromisoformat(internal_release_iso).astimezone(KST)
+        internal_dt = datetime.fromisoformat(truth.get("internalReleaseAt") or internal_release_iso).astimezone(KST)
     except Exception:
         internal_dt = datetime(2026, 10, 14, 19, 10, tzinfo=KST)
 
@@ -400,31 +411,43 @@ def compute_closed_test_schedule(
     registered_testers = int(truth.get("registeredTestersCount") or internal_testers)
     closed_opened = bool(truth.get("closedTrackOpened", False))
     opt_ins = int(truth.get("closedTestOptIns") or 0)
+    opt_ins_verified = truth.get("closedTestOptInsVerified") is True
+    review_approved = truth.get("closedReviewApproved") is True
     req_testers = int(truth.get("requiredClosedTesters") or 12)
     req_days = int(truth.get("requiredClosedDays") or required_days)
     closed_start_iso = truth.get("closedTestStartedAt")
 
     countdown_can_run = (
         closed_opened
+        and opt_ins_verified
         and opt_ins >= req_testers
         and bool(closed_start_iso)
     )
 
     if not countdown_can_run:
         current_track_label = f"내부 테스트 (테스터 {internal_testers}명) — ⚠️ 14일 카운트다운 미시작"
+        participation = f"참여 테스터 {opt_ins} / {req_testers}명" if opt_ins_verified else "실제 참여 수 미확인"
         closed_status_label = (
-            f"{'비공개 트랙 개설됨' if closed_opened else '비공개 트랙 미개설'} · "
-            f"참여 테스터 {opt_ins} / {req_testers}명 (12명 Opt-in 완료 시 14일 카운트 시작)"
+            f"{'비공개 트랙 개설됨' if closed_opened else '비공개 트랙 상태 미확인'} · "
+            f"{participation} · 12명 실참여와 14일 연속 유지 필요"
         )
+        if truth.get("closedReviewSubmitted"):
+            internal_version = f" v{truth['internalVersionCode']}" if truth.get("internalVersionCode") else ""
+            closed_version = f" v{truth['closedVersionCode']}" if truth.get("closedVersionCode") else ""
+            review_label = "검토 승인" if review_approved else "검토 제출"
+            current_track_label = f"내부{internal_version} 제공 · Alpha{closed_version} {review_label}"
+            closed_status_label = f"Alpha{closed_version} {review_label} · 등록명단 {internal_testers}명 · {participation}"
         return {
             "internalTrack": internal_track,
             "internalTestersCount": internal_testers,
             "registeredTestersCount": registered_testers,
             "internalReleaseAt": internal_dt.isoformat(timespec="seconds"),
             "internalReleaseDate": internal_dt.date().isoformat(),
-            "closedTrackOpened": closed_opened,
+            "closedTrackOpened": truth.get("closedTrackOpened"),
             "closedReviewSubmitted": bool(truth.get("closedReviewSubmitted")),
-            "closedTestOptIns": opt_ins,
+            "closedReviewApproved": review_approved,
+            "closedTestOptInsVerified": opt_ins_verified,
+            "closedTestOptIns": opt_ins if opt_ins_verified else None,
             "requiredClosedTesters": req_testers,
             "countdownStarted": False,
             "closedTestStartedAt": None,
@@ -461,6 +484,8 @@ def compute_closed_test_schedule(
         "internalReleaseDate": internal_dt.date().isoformat(),
         "closedTrackOpened": True,
         "closedReviewSubmitted": bool(truth.get("closedReviewSubmitted")),
+        "closedReviewApproved": review_approved,
+        "closedTestOptInsVerified": opt_ins_verified,
         "closedTestOptIns": opt_ins,
         "requiredClosedTesters": req_testers,
         "countdownStarted": True,

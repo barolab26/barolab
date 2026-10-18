@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from projects import PROJECT_REGISTRY, inventory, load_manifest, _load_play_track_truth, compute_closed_test_schedule, build_admob_tracker
+from projects import PROJECT_REGISTRY, inventory, load_manifest, _load_play_track_truth, compute_closed_test_schedule, build_admob_tracker, sync_manifests_to_disk
 
 
 class ProjectInventoryTests(unittest.TestCase):
@@ -121,6 +121,48 @@ class ProjectInventoryTests(unittest.TestCase):
         self.assertIn('등록 명단 수는 참여 인원이 아니며', tracker['nextAction'])
         self.assertNotIn('승격을 실행', tracker['nextAction'])
         self.assertNotIn('14개 구글 계정', tracker['nextAction'])
+
+
+    def test_manifest_sync_preserves_release_and_unknown_participation(self):
+        releases = {'bible_app': (5, '02:30'), 'greeting': (3, '02:45'), 'magnifier': (3, '02:45'), 'shopping': (3, '02:47')}
+        apps = {}
+        for project_id, (version, time) in releases.items():
+            self.write(project_id, releaseBuild={'versionCode': version},
+                       testSchedule={'internalReleaseAt': '2026-10-14T19:10:00+09:00'})
+            closed = {'reviewSubmitted': True, 'reviewApproved': False,
+                      'trackActive': None if project_id == 'shopping' else True, 'versionCode': version}
+            release = {'versionCode': version, 'publishedAtLocal': f'2026-10-19T{time}:00+09:00'}
+            if project_id == 'bible_app':
+                release['releasedAt'] = release.pop('publishedAtLocal')
+                payload = {'googlePlay': {'internalRelease': release, 'closedTesting': closed,
+                           'internalTesters': {'listedCount': 13}, 'optedInClosedTestersObserved': None}}
+                (self.root / 'apps/bible/deployment.json').write_text(json.dumps(payload), encoding='utf-8')
+            else:
+                apps[project_id] = {'internalRelease': release, 'closedTesting': closed, 'internalTesterListCount': 13}
+        (self.root / 'apps/deployment.json').write_text(json.dumps({'apps': apps}), encoding='utf-8')
+        with patch('projects.ROOT', self.root), patch('projects.load_app_testers', return_value={'emailCount': 13, 'closedTestOptIns': 99}), patch('projects.verify_app_ads_txt', return_value={}):
+            for _ in range(2):
+                result = sync_manifests_to_disk(self.root)
+                self.assertEqual(len(result['updatedProjects']), 4)
+                for project_id, (_, time) in releases.items():
+                    raw = json.loads((self.root / dict(PROJECT_REGISTRY)[project_id]).read_text(encoding='utf-8'))
+                    schedule = raw['testSchedule']
+                    self.assertEqual(schedule['internalReleaseAt'], f'2026-10-19T{time}:00+09:00')
+                    self.assertTrue(schedule['closedReviewSubmitted'])
+                    self.assertFalse(schedule['closedReviewApproved'])
+                    self.assertFalse(schedule['closedTestOptInsVerified'])
+                    self.assertIsNone(schedule['closedTestOptIns'])
+                    self.assertFalse(schedule['countdownStarted'])
+                    self.assertEqual(schedule['registeredTestersCount'], 13)
+                    self.assertIn('실제 참여 수 미확인', schedule['closedTrackStatusLabel'])
+                    self.assertNotIn('0 / 12', raw['stage'])
+
+    def test_unverified_opt_in_count_cannot_start_countdown(self):
+        schedule = compute_closed_test_schedule('2026-10-19T02:45:00+09:00', track_truth={
+            'closedTrackOpened': True, 'closedTestOptIns': 13, 'closedTestOptInsVerified': False,
+            'closedTestStartedAt': '2026-10-19T00:00:00+09:00'})
+        self.assertFalse(schedule['countdownStarted'])
+        self.assertIsNone(schedule['closedTestOptIns'])
 
 
 if __name__ == '__main__':

@@ -4,29 +4,29 @@
   "packageName": "com.barolab.biglens",
   "description": "작은 글씨를 확대하고 화면 정지·고대비·선택 저장을 돕는 생활 앱. 개발 중이며 기기별 카메라 검증과 배포를 준비합니다.",
   "status": "preview",
-  "stage": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
+  "stage": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
   "deploymentPending": false,
   "platforms": [
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/magnifier/",
-  "updatedAt": "2026-10-18T17:51:45.471373+00:00",
+  "updatedAt": "2026-10-19T03:01:03+09:00",
   "measurement": {
     "admob": {
       "status": "collected",
       "revenue": 0.0,
       "currency": "USD",
       "period": "2026-10-19 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
-      "checkedAt": "2026-10-19T02:47:22+09:00",
+      "checkedAt": "2026-10-19T03:01:03+09:00",
       "mode": "TEST_ADS_INTERNAL_TRACK",
       "impressions": 0
     },
     "analytics": {
       "status": "collected",
-      "activeUsers": 1,
+      "activeUsers": 13,
       "currency": "USD",
       "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
-      "checkedAt": "2026-10-19T02:47:22+09:00",
+      "checkedAt": "2026-10-19T03:01:03+09:00",
       "mode": "",
       "impressions": 0
     }
@@ -140,8 +140,8 @@
   },
   "progressPct": 60,
   "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-  "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실기기 정상 동작 검증 완료 ✅",
-  "nextAction": "[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요.",
+  "blocker": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인 | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
+  "nextAction": "Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, 12명 이상 실참여와 14일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다.",
   "testSchedule": {
     "internalTrack": "internal",
     "internalTestersCount": 13,
@@ -149,7 +149,10 @@
     "internalReleaseAt": "2026-10-19T02:45:00+09:00",
     "internalReleaseDate": "2026-10-19",
     "closedTrackOpened": true,
-    "closedTestOptIns": 0,
+    "closedReviewSubmitted": true,
+    "closedReviewApproved": false,
+    "closedTestOptInsVerified": false,
+    "closedTestOptIns": null,
     "requiredClosedTesters": 12,
     "countdownStarted": false,
     "closedTestStartedAt": null,
@@ -158,15 +161,12 @@
     "requiredDays": 14,
     "targetProductionDate": "미정 (12명 Opt-in 완료 후 +14일)",
     "dayProgressPct": 0,
-    "currentTrackLabel": "내부 v3 제공 · Alpha v3 검토 중",
-    "closedTrackStatusLabel": "Alpha v3 검토 제출 · 대한민국 · 등록명단 13명 · 실제 참여 수 미확인",
-    "dDayBadge": "내부 v3 제공 · Alpha v3 검토 중",
+    "currentTrackLabel": "내부 v3 제공 · Alpha v3 검토 제출",
+    "closedTrackStatusLabel": "Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
+    "dDayBadge": "내부 v3 제공 · Alpha v3 검토 제출",
     "testerGroupEmail": "barolab-testers@googlegroups.com",
     "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
-    "readyForProductionTrack": false,
-    "closedReviewSubmitted": true,
-    "closedReviewApproved": false,
-    "closedTestOptInsVerified": false
+    "readyForProductionTrack": false
   },
   "admobTracker": {
     "account": "SJ (pub-7642010403138987)",
@@ -187,32 +187,36 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-10-19T02:47:22+09:00"
+      "checkedAt": "2026-10-19T03:01:02+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
     "impressionsToday": 0,
-    "currentTrackLabel": "내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작",
-    "closedTrackStatusLabel": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)",
+    "currentTrackLabel": "내부 v3 제공 · Alpha v3 검토 제출",
+    "closedTrackStatusLabel": "Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
     "deviceVerified": true,
+    "deviceVerifiedVersionCode": 2,
+    "latestBuildVersionCode": 3,
+    "latestBuildPhysicalDeviceVerified": false,
+    "deviceVerificationLabel": "삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
     "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-    "blocker": "현재 트랙: 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | 비공개 테스트 현황: 비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작) | 실기기 확인: 삼성 실기기 정상 동작 검증 완료 ✅",
-    "nextAction": "[1순위: 14인 테스터 등록 & 비공개 트랙 승격] 상단 컨트롤 센터에서 14개 구글 계정을 저장하고 비공개 테스트(Alpha) 승격을 실행한 뒤, QR 리모컨으로 4종 설치(Opt-in 12명 이상)를 완료하세요.",
+    "blocker": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인 | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
+    "nextAction": "Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, 12명 이상 실참여와 14일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다.",
     "ceoActionRequired": true,
     "productionChecklist": [
       {
         "step": 1,
-        "label": "1단계: 14인 테스터 명단 등록 & 비공개 트랙(Closed Track) 12명 Opt-in",
+        "label": "1단계: 테스터 명단 확인 · Alpha 실참여 12명 이상",
         "owner": "대표님 (QR 4터치 설치) · @patch (반자동 스크립트)",
         "status": "in_progress",
-        "detail": "비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)"
+        "detail": "Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
       },
       {
         "step": 2,
         "label": "2단계: 삼성 실기기 기능 최종 체크 & SJ 실광고 스위치 AAB 준비",
         "owner": "대표님 (실기기 1회 체크) · @patch (release.properties 자동주입)",
-        "status": "verified",
-        "detail": "삼성 실기기 정상 동작 검증 완료 ✅ · 실광고 배너(ca-app-pub-7642010403138987/4744854277) 코드 매핑 완료"
+        "status": "ready",
+        "detail": "삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증 · 실광고 배너(ca-app-pub-7642010403138987/4744854277) 코드 매핑 완료"
       },
       {
         "step": 3,
