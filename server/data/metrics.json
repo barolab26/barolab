@@ -1,6 +1,6 @@
 {
   "schema": "dashboard-metrics-v1",
-  "checkedAt": "2026-10-18T13:51:41.660034+00:00",
+  "checkedAt": "2026-10-19T00:54:01.644422+09:00",
   "sites": {
     "baronote.kr": {
       "site": {
@@ -8,9 +8,9 @@
         "url": "https://www.baronote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:53:41.531925+00:00",
+      "checkedAt": "2026-10-18T15:54:18.648815+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:51:52.277102+09:00",
+        "requestedAt": "2026-10-19T00:54:18.431988+09:00",
         "urls": [
           "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
           "https://www.baronote.kr/topic-1",
@@ -217,11 +217,12 @@
           "https://www.baronote.kr/2026-최신-전세자금대출-한도-계산기-꿀팁-5가지-2026년",
           "https://www.baronote.kr/부동산-규제지역-해제-현황-2026-지역별-5대-변화-총비교"
         ],
+        "unindexedUrlsSubmitted": 204,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:51:52.277102+09:00",
+          "submittedAt": "2026-10-19T00:54:18.431988+09:00",
           "indexed": null
         },
         "naver": {
@@ -229,7 +230,14 @@
           "method": "IndexNow",
           "httpStatus": 200,
           "submittedCount": 204,
-          "indexed": null
+          "unindexedCount": 204,
+          "submittedAt": "2026-10-19T00:53:39.238233+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://baronote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -649,7 +657,7 @@
         "total": 204,
         "complete": true,
         "source": "https://www.baronote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:39:30.116196+00:00"
+        "checkedAt": "2026-10-18T15:41:02.865430+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -863,7 +871,7 @@
           "https://www.baronote.kr/2026-최신-전세자금대출-한도-계산기-꿀팁-5가지-2026년",
           "https://www.baronote.kr/부동산-규제지역-해제-현황-2026-지역별-5대-변화-총비교"
         ],
-        "checkedAt": "2026-10-18T13:51:30.627944+00:00",
+        "checkedAt": "2026-10-18T15:53:34.255618+00:00",
         "source": "https://www.baronote.kr/sitemap.xml"
       },
       "google": {
@@ -871,17 +879,22 @@
         "source": "Google Search Console UI",
         "account": "sj",
         "indexed": 0,
-        "inspected": 136,
+        "inspected": 148,
         "inventoryTotal": 204,
         "complete": false,
-        "checkedAt": "2026-10-18T13:53:41.532082+00:00",
+        "checkedAt": "2026-10-18T15:41:28.450764+00:00",
+        "apiBudgetExhausted": false,
+        "apiAttemptedCount": 3,
+        "property": "https://www.baronote.kr/",
+        "propertyScopeVerified": true,
+        "reason": null,
         "urls": [
           {
             "url": "https://www.baronote.kr/trash-bag-price-regional-use-after-moving",
-            "checkedAt": "2026-10-16T22:10:04.607924+00:00",
-            "attemptAt": "2026-10-16T22:10:04.607924+00:00",
+            "checkedAt": "2026-10-18T14:41:38.311844+00:00",
+            "attemptAt": "2026-10-18T14:41:38.311844+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T22:10:04.607924+00:00",
+            "lastSuccessAt": "2026-10-18T14:41:38.311844+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -892,10 +905,10 @@
           },
           {
             "url": "https://www.baronote.kr/2026-government-subsidy-find",
-            "checkedAt": "2026-10-16T22:10:11.644018+00:00",
-            "attemptAt": "2026-10-16T22:10:11.644018+00:00",
+            "checkedAt": "2026-10-18T14:41:45.715039+00:00",
+            "attemptAt": "2026-10-18T14:41:45.715039+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T22:10:11.644018+00:00",
+            "lastSuccessAt": "2026-10-18T14:41:45.715039+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -906,10 +919,10 @@
           },
           {
             "url": "https://www.baronote.kr/telecom-membership-points-usage-convenience-store-guide",
-            "checkedAt": "2026-10-16T22:41:22.884969+00:00",
-            "attemptAt": "2026-10-16T22:41:22.884969+00:00",
+            "checkedAt": "2026-10-18T14:41:53.097333+00:00",
+            "attemptAt": "2026-10-18T14:41:53.097333+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T22:41:22.884969+00:00",
+            "lastSuccessAt": "2026-10-18T14:41:53.097333+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -920,10 +933,10 @@
           },
           {
             "url": "https://www.baronote.kr/2026-car-bond-refund-online-guide",
-            "checkedAt": "2026-10-16T22:41:29.886593+00:00",
-            "attemptAt": "2026-10-16T22:41:29.886593+00:00",
+            "checkedAt": "2026-10-18T15:11:38.131144+00:00",
+            "attemptAt": "2026-10-18T15:11:38.131144+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T22:41:29.886593+00:00",
+            "lastSuccessAt": "2026-10-18T15:11:38.131144+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -934,10 +947,10 @@
           },
           {
             "url": "https://www.baronote.kr/burned-pot-cleaning-baking-soda-vinegar-guide-2",
-            "checkedAt": "2026-10-16T22:41:36.889804+00:00",
-            "attemptAt": "2026-10-16T22:41:36.889804+00:00",
+            "checkedAt": "2026-10-18T15:11:45.620662+00:00",
+            "attemptAt": "2026-10-18T15:11:45.620662+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T22:41:36.889804+00:00",
+            "lastSuccessAt": "2026-10-18T15:11:45.620662+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -948,10 +961,10 @@
           },
           {
             "url": "https://www.baronote.kr/2026-card-point-integrated-inquiry-cashback-guide",
-            "checkedAt": "2026-10-16T23:12:41.775060+00:00",
-            "attemptAt": "2026-10-16T23:12:41.775060+00:00",
+            "checkedAt": "2026-10-18T15:11:53.325349+00:00",
+            "attemptAt": "2026-10-18T15:11:53.325349+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T23:12:41.775060+00:00",
+            "lastSuccessAt": "2026-10-18T15:11:53.325349+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -962,10 +975,10 @@
           },
           {
             "url": "https://www.baronote.kr/chrome-site-notification-block-permission-check",
-            "checkedAt": "2026-10-16T23:12:48.841138+00:00",
-            "attemptAt": "2026-10-16T23:12:48.841138+00:00",
+            "checkedAt": "2026-10-18T15:41:13.298809+00:00",
+            "attemptAt": "2026-10-18T15:41:13.298809+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T23:12:48.841138+00:00",
+            "lastSuccessAt": "2026-10-18T15:41:13.298809+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -990,10 +1003,10 @@
           },
           {
             "url": "https://www.baronote.kr/nhis-copayment-ceiling-refund-guide-2026",
-            "checkedAt": "2026-10-17T00:07:57.288406+00:00",
-            "attemptAt": "2026-10-17T00:07:57.288406+00:00",
+            "checkedAt": "2026-10-18T15:41:20.758403+00:00",
+            "attemptAt": "2026-10-18T15:41:20.758403+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:07:57.288406+00:00",
+            "lastSuccessAt": "2026-10-18T15:41:20.758403+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -1004,10 +1017,10 @@
           },
           {
             "url": "https://www.baronote.kr/korea-post-registered-mail-delivery-inquiry-guide",
-            "checkedAt": "2026-10-17T00:08:04.502795+00:00",
-            "attemptAt": "2026-10-17T00:08:04.502795+00:00",
+            "checkedAt": "2026-10-18T15:41:28.450747+00:00",
+            "attemptAt": "2026-10-18T15:41:28.450747+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:08:04.502795+00:00",
+            "lastSuccessAt": "2026-10-18T15:41:28.450747+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -3622,10 +3635,10 @@
           },
           {
             "url": "https://www.baronote.kr/kc인증번호-조회-구매전-확인법",
-            "checkedAt": "2026-10-16T21:38:50.985795+00:00",
-            "attemptAt": "2026-10-16T21:38:50.985795+00:00",
+            "checkedAt": "2026-10-18T14:11:10.830966+00:00",
+            "attemptAt": "2026-10-18T14:11:10.830966+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T21:38:50.985795+00:00",
+            "lastSuccessAt": "2026-10-18T14:11:10.830966+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -3636,10 +3649,10 @@
           },
           {
             "url": "https://www.baronote.kr/장기수선충당금-반환-이사정산-확인법",
-            "checkedAt": "2026-10-16T21:38:58.380490+00:00",
-            "attemptAt": "2026-10-16T21:38:58.380490+00:00",
+            "checkedAt": "2026-10-18T14:11:17.853942+00:00",
+            "attemptAt": "2026-10-18T14:11:17.853942+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T21:38:58.380490+00:00",
+            "lastSuccessAt": "2026-10-18T14:11:17.853942+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -3650,10 +3663,10 @@
           },
           {
             "url": "https://www.baronote.kr/2026-energy-voucher-usage-balance",
-            "checkedAt": "2026-10-16T22:09:57.533402+00:00",
-            "attemptAt": "2026-10-16T22:09:57.533402+00:00",
+            "checkedAt": "2026-10-18T14:11:25.052788+00:00",
+            "attemptAt": "2026-10-18T14:11:25.052788+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T22:09:57.533402+00:00",
+            "lastSuccessAt": "2026-10-18T14:11:25.052788+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -3722,9 +3735,25 @@
             "url": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
             "indexed": false,
             "checkedAt": "2026-10-18T13:53:41.532009+00:00",
-            "outcome": "requested"
+            "outcome": "requested",
+            "lastIndexed": false,
+            "lastSuccessAt": "2026-10-18T13:53:41.532009+00:00",
+            "attemptAt": "2026-10-18T13:53:41.532009+00:00",
+            "attemptStatus": "verified",
+            "source": "Google Search Console UI"
           }
-        ]
+        ],
+        "collection": {
+          "total": 204,
+          "currentInspected": 148,
+          "everInspected": 204,
+          "staleInspected": 56,
+          "failed": 0,
+          "unresolvedInspected": 0,
+          "neverAttempted": 0,
+          "neverInspected": 0,
+          "lastAttemptAt": "2026-10-18T15:41:28.450747+00:00"
+        }
       },
       "traffic": {
         "status": "collected",
@@ -3732,20 +3761,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.baronote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 19,
-        "pageViews": 20,
+        "sessions": 25,
+        "pageViews": 30,
         "naverReferralSessions": 10,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 3,
-            "pageViews": 3,
-            "users": 3
-          },
           {
             "day": "2026-10-11",
             "sessions": 3,
@@ -3781,9 +3804,15 @@
             "sessions": 2,
             "pageViews": 2,
             "users": 2
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 9,
+            "pageViews": 13,
+            "users": 9
           }
         ],
-        "checkedAt": "2026-10-18T13:39:53.844093+00:00",
+        "checkedAt": "2026-10-18T15:41:30.270969+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -3793,9 +3822,9 @@
         "url": "https://www.daynote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:54:21.049469+00:00",
+      "checkedAt": "2026-10-18T15:54:27.954725+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:51:57.859435+09:00",
+        "requestedAt": "2026-10-19T00:54:27.828014+09:00",
         "urls": [
           "https://www.daynote.kr/green-onion-fresh-storage-guide",
           "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
@@ -3885,19 +3914,27 @@
           "https://www.daynote.kr/스트레스-해소-취미-추천-5가지-2026년-당신의-마음을-치유할-방법",
           "https://www.daynote.kr/2026-나만의-시간-관리법-5가지로-워라밸-완성하기"
         ],
+        "unindexedUrlsSubmitted": 57,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:51:57.859435+09:00",
+          "submittedAt": "2026-10-19T00:54:27.828014+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 87,
-          "indexed": null
+          "submittedCount": 57,
+          "unindexedCount": 57,
+          "submittedAt": "2026-10-19T00:53:38.724092+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.daynote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -4083,7 +4120,7 @@
         "total": 87,
         "complete": true,
         "source": "https://www.daynote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:39:56.441761+00:00"
+        "checkedAt": "2026-10-18T15:41:32.739610+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -4180,25 +4217,30 @@
           "https://www.daynote.kr/스트레스-해소-취미-추천-5가지-2026년-당신의-마음을-치유할-방법",
           "https://www.daynote.kr/2026-나만의-시간-관리법-5가지로-워라밸-완성하기"
         ],
-        "checkedAt": "2026-10-18T13:51:32.514654+00:00",
+        "checkedAt": "2026-10-18T15:53:34.274778+00:00",
         "source": "https://www.daynote.kr/sitemap.xml"
       },
       "google": {
-        "status": "partial",
+        "status": "collected",
         "source": "Google Search Console UI",
         "account": "sj",
         "indexed": 30,
         "inspected": 87,
         "inventoryTotal": 87,
         "complete": true,
-        "checkedAt": "2026-10-18T13:54:21.049544+00:00",
+        "checkedAt": "2026-10-18T15:41:57.447816+00:00",
+        "apiBudgetExhausted": false,
+        "apiAttemptedCount": 3,
+        "property": "https://www.daynote.kr/",
+        "propertyScopeVerified": true,
+        "reason": null,
         "urls": [
           {
             "url": "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
-            "checkedAt": "2026-10-17T14:09:32.931622+00:00",
-            "attemptAt": "2026-10-17T14:09:32.931622+00:00",
+            "checkedAt": "2026-10-18T14:11:45.985021+00:00",
+            "attemptAt": "2026-10-18T14:11:45.985021+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:09:32.931622+00:00",
+            "lastSuccessAt": "2026-10-18T14:11:45.985021+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -4209,10 +4251,10 @@
           },
           {
             "url": "https://www.daynote.kr/washing-machine-detergent-drawer-cleaning-model-checklist",
-            "checkedAt": "2026-10-17T14:09:40.197646+00:00",
-            "attemptAt": "2026-10-17T14:09:40.197646+00:00",
+            "checkedAt": "2026-10-18T14:11:53.515286+00:00",
+            "attemptAt": "2026-10-18T14:11:53.515286+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:09:40.197646+00:00",
+            "lastSuccessAt": "2026-10-18T14:11:53.515286+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -4223,52 +4265,24 @@
           },
           {
             "url": "https://www.daynote.kr/bathroom-tile-mold-scale-removal-percarbonate-cleaning-guide",
-            "checkedAt": "2026-10-17T14:40:08.470381+00:00",
-            "attemptAt": "2026-10-17T14:40:08.470381+00:00",
+            "checkedAt": "2026-10-18T14:42:08.479103+00:00",
+            "attemptAt": "2026-10-18T14:42:08.479103+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:40:08.470381+00:00",
+            "lastSuccessAt": "2026-10-18T14:42:08.479103+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "Discovered - currently not indexed",
+            "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.daynote.kr/proper-recycling-sorting-rules-guide",
-            "checkedAt": "2026-10-17T14:40:16.007227+00:00",
-            "attemptAt": "2026-10-17T14:40:16.007227+00:00",
+            "checkedAt": "2026-10-18T14:42:15.501274+00:00",
+            "attemptAt": "2026-10-18T14:42:15.501274+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:40:16.007227+00:00",
-            "lastIndexed": false,
-            "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
-            "indexed": false,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null
-          },
-          {
-            "url": "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide",
-            "checkedAt": "2026-10-17T14:40:24.211979+00:00",
-            "attemptAt": "2026-10-17T14:40:24.211979+00:00",
-            "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:40:24.211979+00:00",
-            "lastIndexed": false,
-            "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
-            "indexed": false,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null
-          },
-          {
-            "url": "https://www.daynote.kr/google-drive-link-sharing-access-check",
-            "checkedAt": "2026-10-17T15:10:34.368095+00:00",
-            "attemptAt": "2026-10-17T15:10:34.368095+00:00",
-            "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:10:34.368095+00:00",
+            "lastSuccessAt": "2026-10-18T14:42:15.501274+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -4278,11 +4292,39 @@
             "googleCanonical": null
           },
           {
-            "url": "https://www.daynote.kr/clear-pet-bottle-separation-guide",
-            "checkedAt": "2026-10-17T15:10:42.315383+00:00",
-            "attemptAt": "2026-10-17T15:10:42.315383+00:00",
+            "url": "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide",
+            "checkedAt": "2026-10-18T14:42:22.895302+00:00",
+            "attemptAt": "2026-10-18T14:42:22.895302+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:10:42.315383+00:00",
+            "lastSuccessAt": "2026-10-18T14:42:22.895302+00:00",
+            "lastIndexed": false,
+            "source": "Google Search Console URL Inspection",
+            "verdict": "NEUTRAL",
+            "indexed": false,
+            "coverageState": "Discovered - currently not indexed",
+            "lastCrawlTime": null,
+            "googleCanonical": null
+          },
+          {
+            "url": "https://www.daynote.kr/google-drive-link-sharing-access-check",
+            "checkedAt": "2026-10-18T15:12:06.534971+00:00",
+            "attemptAt": "2026-10-18T15:12:06.534971+00:00",
+            "attemptStatus": "verified",
+            "lastSuccessAt": "2026-10-18T15:12:06.534971+00:00",
+            "lastIndexed": false,
+            "source": "Google Search Console URL Inspection",
+            "verdict": "NEUTRAL",
+            "indexed": false,
+            "coverageState": "URL is unknown to Google",
+            "lastCrawlTime": null,
+            "googleCanonical": null
+          },
+          {
+            "url": "https://www.daynote.kr/clear-pet-bottle-separation-guide",
+            "checkedAt": "2026-10-18T15:12:14.003786+00:00",
+            "attemptAt": "2026-10-18T15:12:14.003786+00:00",
+            "attemptStatus": "verified",
+            "lastSuccessAt": "2026-10-18T15:12:14.003786+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -4293,10 +4335,10 @@
           },
           {
             "url": "https://www.daynote.kr/good-driver-mileage-application-benefits",
-            "checkedAt": "2026-10-17T15:10:49.877714+00:00",
-            "attemptAt": "2026-10-17T15:10:49.877714+00:00",
+            "checkedAt": "2026-10-18T15:12:21.660762+00:00",
+            "attemptAt": "2026-10-18T15:12:21.660762+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:10:49.877714+00:00",
+            "lastSuccessAt": "2026-10-18T15:12:21.660762+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -4307,16 +4349,16 @@
           },
           {
             "url": "https://www.daynote.kr/digital-tourist-resident-card-guide",
-            "checkedAt": "2026-10-17T15:40:55.329184+00:00",
-            "attemptAt": "2026-10-17T15:40:55.329184+00:00",
+            "checkedAt": "2026-10-18T15:41:42.829347+00:00",
+            "attemptAt": "2026-10-18T15:41:42.829347+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:40:55.329184+00:00",
+            "lastSuccessAt": "2026-10-18T15:41:42.829347+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
             "indexed": true,
             "coverageState": "Submitted and indexed",
-            "lastCrawlTime": "2026-10-04T08:55:57Z",
+            "lastCrawlTime": "2026-10-17T19:53:32Z",
             "googleCanonical": "https://www.daynote.kr/digital-tourist-resident-card-guide"
           },
           {
@@ -4937,10 +4979,10 @@
           },
           {
             "url": "https://www.daynote.kr/morning-routine-making",
-            "checkedAt": "2026-10-17T15:41:10.849802+00:00",
-            "attemptAt": "2026-10-17T15:41:10.849802+00:00",
+            "checkedAt": "2026-10-18T15:41:57.447798+00:00",
+            "attemptAt": "2026-10-18T15:41:57.447798+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:41:10.849802+00:00",
+            "lastSuccessAt": "2026-10-18T15:41:57.447798+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -5119,10 +5161,10 @@
           },
           {
             "url": "https://www.daynote.kr/one-hour-daily-time-use-checklist",
-            "checkedAt": "2026-10-17T15:41:03.191546+00:00",
-            "attemptAt": "2026-10-17T15:41:03.191546+00:00",
+            "checkedAt": "2026-10-18T15:41:50.040697+00:00",
+            "attemptAt": "2026-10-18T15:41:50.040697+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:41:03.191546+00:00",
+            "lastSuccessAt": "2026-10-18T15:41:50.040697+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -5371,10 +5413,10 @@
           },
           {
             "url": "https://www.daynote.kr/window-frame-cleaning-dust-stains",
-            "checkedAt": "2026-10-17T14:09:25.597183+00:00",
-            "attemptAt": "2026-10-17T14:09:25.597183+00:00",
+            "checkedAt": "2026-10-18T14:11:38.474884+00:00",
+            "attemptAt": "2026-10-18T14:11:38.474884+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:09:25.597183+00:00",
+            "lastSuccessAt": "2026-10-18T14:11:38.474884+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -5401,9 +5443,25 @@
             "url": "https://www.daynote.kr/green-onion-fresh-storage-guide",
             "indexed": false,
             "checkedAt": "2026-10-18T13:54:21.049500+00:00",
-            "outcome": "requested"
+            "outcome": "requested",
+            "lastIndexed": false,
+            "lastSuccessAt": "2026-10-18T13:54:21.049500+00:00",
+            "attemptAt": "2026-10-18T13:54:21.049500+00:00",
+            "attemptStatus": "verified",
+            "source": "Google Search Console UI"
           }
-        ]
+        ],
+        "collection": {
+          "total": 87,
+          "currentInspected": 87,
+          "everInspected": 87,
+          "staleInspected": 0,
+          "failed": 0,
+          "unresolvedInspected": 0,
+          "neverAttempted": 0,
+          "neverInspected": 0,
+          "lastAttemptAt": "2026-10-18T15:41:57.447798+00:00"
+        }
       },
       "traffic": {
         "status": "collected",
@@ -5411,20 +5469,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.daynote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 40,
-        "pageViews": 42,
-        "naverReferralSessions": 28,
+        "sessions": 46,
+        "pageViews": 48,
+        "naverReferralSessions": 30,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 3,
-            "pageViews": 4,
-            "users": 3
-          },
           {
             "day": "2026-10-11",
             "sessions": 4,
@@ -5460,9 +5512,15 @@
             "sessions": 8,
             "pageViews": 8,
             "users": 8
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 9,
+            "pageViews": 10,
+            "users": 9
           }
         ],
-        "checkedAt": "2026-10-18T13:40:15.870767+00:00",
+        "checkedAt": "2026-10-18T15:41:58.903536+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -5472,9 +5530,9 @@
         "url": "https://www.healthcox.com/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:02.991192+00:00",
+      "checkedAt": "2026-10-18T15:54:38.794465+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:02.825353+09:00",
+        "requestedAt": "2026-10-19T00:54:38.621778+09:00",
         "urls": [
           "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
           "https://www.healthcox.com/topic-2",
@@ -5667,19 +5725,26 @@
           "https://www.healthcox.com/단백질-보충제-추천-2026년-기준-50대를-위한-단백질-보",
           "https://www.healthcox.com/관절-영양제-추천-2026년-내-몸에-맞는-선택-가이드"
         ],
+        "unindexedUrlsSubmitted": 98,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:02.825353+09:00",
+          "submittedAt": "2026-10-19T00:54:38.621778+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 190,
-          "indexed": null
+          "submittedCount": 98,
+          "unindexedCount": 98,
+          "submittedAt": "2026-10-19T00:53:40.986380+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": false,
+            "directCrawlSubmitted": 0
+          }
         }
       },
       "posts": {
@@ -6071,7 +6136,7 @@
         "total": 190,
         "complete": true,
         "source": "https://www.healthcox.com/api/posts",
-        "checkedAt": "2026-10-18T13:40:20.509339+00:00"
+        "checkedAt": "2026-10-18T15:42:04.775564+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -6271,22 +6336,22 @@
           "https://www.healthcox.com/단백질-보충제-추천-2026년-기준-50대를-위한-단백질-보",
           "https://www.healthcox.com/관절-영양제-추천-2026년-내-몸에-맞는-선택-가이드"
         ],
-        "checkedAt": "2026-10-18T13:51:30.511473+00:00",
+        "checkedAt": "2026-10-18T15:53:36.143843+00:00",
         "source": "https://www.healthcox.com/sitemap.xml"
       },
       "google": {
         "status": "partial",
-        "source": "Google Search Console URL Inspection",
-        "property": "https://www.healthcox.com/",
-        "indexed": 71,
-        "inspected": 141,
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "indexed": 73,
+        "inspected": 144,
         "inventoryTotal": 190,
         "complete": false,
-        "checkedAt": "2026-10-18T13:40:43.078127+00:00",
-        "propertyScopeVerified": true,
+        "checkedAt": "2026-10-18T15:42:29.499785+00:00",
         "apiBudgetExhausted": false,
         "apiAttemptedCount": 3,
-        "entries": {},
+        "property": "https://www.healthcox.com/",
+        "propertyScopeVerified": true,
         "reason": "ReadTimeout: 원천 연결 실패 (비밀정보 생략)",
         "urls": [
           {
@@ -8309,10 +8374,10 @@
           },
           {
             "url": "https://www.healthcox.com/여름철-건강-관리법-10가지-생존-꿀팁-2026년",
-            "checkedAt": "2026-10-16T23:38:06.579192+00:00",
-            "attemptAt": "2026-10-16T23:38:06.579192+00:00",
+            "checkedAt": "2026-10-18T14:12:13.588888+00:00",
+            "attemptAt": "2026-10-18T14:12:13.588888+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T23:38:06.579192+00:00",
+            "lastSuccessAt": "2026-10-18T14:12:13.588888+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -8323,10 +8388,10 @@
           },
           {
             "url": "https://www.healthcox.com/집에서-하는-홈트레이닝-루틴-10가지-헬스장-안-가도-되는-이유",
-            "checkedAt": "2026-10-16T23:38:13.607342+00:00",
-            "attemptAt": "2026-10-16T23:38:13.607342+00:00",
+            "checkedAt": "2026-10-18T14:12:17.549661+00:00",
+            "attemptAt": "2026-10-18T14:12:17.549661+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T23:38:13.607342+00:00",
+            "lastSuccessAt": "2026-10-18T14:12:17.549661+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -8337,10 +8402,10 @@
           },
           {
             "url": "https://www.healthcox.com/촉법소년-연령-하향-13세-소년범죄-통계부터-분석-2027",
-            "checkedAt": "2026-10-17T00:08:55.167921+00:00",
-            "attemptAt": "2026-10-17T00:08:55.167921+00:00",
+            "checkedAt": "2026-10-18T14:12:24.778067+00:00",
+            "attemptAt": "2026-10-18T14:12:24.778067+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:08:55.167921+00:00",
+            "lastSuccessAt": "2026-10-18T14:12:24.778067+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -8351,10 +8416,10 @@
           },
           {
             "url": "https://www.healthcox.com/제주-닥터부-소화기-질환-상담소-사소한-질문도-OK-2026",
-            "checkedAt": "2026-10-17T00:09:02.557043+00:00",
-            "attemptAt": "2026-10-17T00:09:02.557043+00:00",
+            "checkedAt": "2026-10-18T14:42:41.018940+00:00",
+            "attemptAt": "2026-10-18T14:42:41.018940+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:09:02.557043+00:00",
+            "lastSuccessAt": "2026-10-18T14:42:41.018940+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -8365,10 +8430,10 @@
           },
           {
             "url": "https://www.healthcox.com/종로구-1인-가구-고립-막는-선한-이웃-1촌-맺기-시작",
-            "checkedAt": "2026-10-17T00:09:09.766521+00:00",
-            "attemptAt": "2026-10-17T00:09:09.766521+00:00",
+            "checkedAt": "2026-10-18T14:42:48.426955+00:00",
+            "attemptAt": "2026-10-18T14:42:48.426955+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:09:09.766521+00:00",
+            "lastSuccessAt": "2026-10-18T14:42:48.426955+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -8379,10 +8444,10 @@
           },
           {
             "url": "https://www.healthcox.com/꿀잠-자는-법-7가지-꿀팁으로-수면-질-높여보세요",
-            "checkedAt": "2026-10-17T00:40:20.664898+00:00",
-            "attemptAt": "2026-10-17T00:40:20.664898+00:00",
+            "checkedAt": "2026-10-18T14:42:56.035153+00:00",
+            "attemptAt": "2026-10-18T14:42:56.035153+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:40:20.664898+00:00",
+            "lastSuccessAt": "2026-10-18T14:42:56.035153+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -8393,10 +8458,10 @@
           },
           {
             "url": "https://www.healthcox.com/우리-집-홈트족을-위한-층간소음-없는-운동법-BEST-7가지",
-            "checkedAt": "2026-10-17T00:40:27.781088+00:00",
-            "attemptAt": "2026-10-17T00:40:27.781088+00:00",
+            "checkedAt": "2026-10-18T15:12:42.259571+00:00",
+            "attemptAt": "2026-10-18T15:12:42.259571+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:40:27.781088+00:00",
+            "lastSuccessAt": "2026-10-18T15:12:42.259571+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -8407,10 +8472,10 @@
           },
           {
             "url": "https://www.healthcox.com/정부-지원금-신청-방법-놓치면-후회할-2026년-핵심-절차",
-            "checkedAt": "2026-10-17T00:40:35.177168+00:00",
-            "attemptAt": "2026-10-17T00:40:35.177168+00:00",
+            "checkedAt": "2026-10-18T15:12:50.049475+00:00",
+            "attemptAt": "2026-10-18T15:12:50.049475+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T00:40:35.177168+00:00",
+            "lastSuccessAt": "2026-10-18T15:12:50.049475+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -8421,10 +8486,10 @@
           },
           {
             "url": "https://www.healthcox.com/본인부담상한제-환급금-조회-2027년까지-3분-만에-확인하는-법",
-            "checkedAt": "2026-10-17T01:11:42.972940+00:00",
-            "attemptAt": "2026-10-17T01:11:42.972940+00:00",
+            "checkedAt": "2026-10-18T15:12:57.445300+00:00",
+            "attemptAt": "2026-10-18T15:12:57.445300+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T01:11:42.972940+00:00",
+            "lastSuccessAt": "2026-10-18T15:12:57.445300+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -8435,10 +8500,10 @@
           },
           {
             "url": "https://www.healthcox.com/정부-지원금-신청-방법-2027년엔-이렇게-하세요-꿀팁",
-            "checkedAt": "2026-10-17T01:11:50.362735+00:00",
-            "attemptAt": "2026-10-17T01:11:50.362735+00:00",
+            "checkedAt": "2026-10-18T15:42:14.287140+00:00",
+            "attemptAt": "2026-10-18T15:42:14.287140+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T01:11:50.362735+00:00",
+            "lastSuccessAt": "2026-10-18T15:42:14.287140+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -8449,10 +8514,10 @@
           },
           {
             "url": "https://www.healthcox.com/헬스장-준비물-완벽-체크리스트-첫날부터-운동-효과-UP-2",
-            "checkedAt": "2026-10-17T01:11:58.131768+00:00",
-            "attemptAt": "2026-10-17T01:11:58.131768+00:00",
+            "checkedAt": "2026-10-18T15:42:21.901539+00:00",
+            "attemptAt": "2026-10-18T15:42:21.901539+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T01:11:58.131768+00:00",
+            "lastSuccessAt": "2026-10-18T15:42:21.901539+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -8463,10 +8528,10 @@
           },
           {
             "url": "https://www.healthcox.com/home-training-mat-guide",
-            "checkedAt": "2026-10-17T02:07:38.789143+00:00",
-            "attemptAt": "2026-10-17T02:07:38.789143+00:00",
+            "checkedAt": "2026-10-18T15:42:29.499766+00:00",
+            "attemptAt": "2026-10-18T15:42:29.499766+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T02:07:38.789143+00:00",
+            "lastSuccessAt": "2026-10-18T15:42:29.499766+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -8924,20 +8989,6 @@
             "googleCanonical": null
           },
           {
-            "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
-            "checkedAt": "2026-10-18T08:38:31.762601+00:00",
-            "attemptAt": "2026-10-18T08:38:31.762601+00:00",
-            "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-18T08:38:31.762601+00:00",
-            "lastIndexed": false,
-            "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
-            "indexed": false,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null
-          },
-          {
             "url": "https://www.healthcox.com/겨울철-감기-예방-차-추천-5가지-직접-마셔본-효과-후",
             "checkedAt": "2026-10-18T10:38:16.849695+00:00",
             "attemptAt": "2026-10-18T10:38:16.849695+00:00",
@@ -8950,18 +9001,29 @@
             "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
+          },
+          {
+            "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+            "indexed": false,
+            "checkedAt": "2026-10-18T13:54:58.434366+00:00",
+            "outcome": "requested",
+            "lastIndexed": false,
+            "lastSuccessAt": "2026-10-18T13:54:58.434366+00:00",
+            "attemptAt": "2026-10-18T13:54:58.434366+00:00",
+            "attemptStatus": "verified",
+            "source": "Google Search Console UI"
           }
         ],
         "collection": {
           "total": 190,
-          "currentInspected": 141,
+          "currentInspected": 144,
           "everInspected": 190,
-          "staleInspected": 48,
+          "staleInspected": 45,
           "failed": 1,
           "unresolvedInspected": 1,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:40:43.078111+00:00"
+          "lastAttemptAt": "2026-10-18T15:42:29.499766+00:00"
         }
       },
       "traffic": {
@@ -8970,20 +9032,14 @@
         "source": "GA4 Data API",
         "property": "523619765",
         "hostname": "www.healthcox.com",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 27,
-        "pageViews": 29,
-        "naverReferralSessions": 20,
+        "sessions": 29,
+        "pageViews": 32,
+        "naverReferralSessions": 18,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 6,
-            "pageViews": 6,
-            "users": 6
-          },
           {
             "day": "2026-10-11",
             "sessions": 4,
@@ -9019,9 +9075,15 @@
             "sessions": 6,
             "pageViews": 6,
             "users": 6
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 8,
+            "pageViews": 9,
+            "users": 8
           }
         ],
-        "checkedAt": "2026-10-18T13:40:45.215867+00:00",
+        "checkedAt": "2026-10-18T15:42:30.986567+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/523619765:runReport"
       }
     },
@@ -9031,9 +9093,9 @@
         "url": "https://www.joynote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:07.946518+00:00",
+      "checkedAt": "2026-10-18T15:56:56.171993+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:07.716881+09:00",
+        "requestedAt": "2026-10-19T00:54:44.236868+09:00",
         "urls": [
           "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
           "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
@@ -9140,19 +9202,27 @@
           "https://www.joynote.kr/2026년-취미-추천-주말마다-새로운-나를-만드는-5가지-방법",
           "https://www.joynote.kr/2026년-요즘-뜨는-드라마-4가지-안-보면-후회각"
         ],
+        "unindexedUrlsSubmitted": 66,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:07.716881+09:00",
+          "submittedAt": "2026-10-19T00:54:44.236868+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 104,
-          "indexed": null
+          "submittedCount": 66,
+          "unindexedCount": 66,
+          "submittedAt": "2026-10-19T00:53:40.454902+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://joynote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -9372,7 +9442,7 @@
         "total": 104,
         "complete": true,
         "source": "https://www.joynote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:40:50.319102+00:00"
+        "checkedAt": "2026-10-18T15:37:31.229930+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -9486,23 +9556,18 @@
           "https://www.joynote.kr/2026년-취미-추천-주말마다-새로운-나를-만드는-5가지-방법",
           "https://www.joynote.kr/2026년-요즘-뜨는-드라마-4가지-안-보면-후회각"
         ],
-        "checkedAt": "2026-10-18T13:51:33.316538+00:00",
+        "checkedAt": "2026-10-18T15:53:34.289918+00:00",
         "source": "https://www.joynote.kr/sitemap.xml"
       },
       "google": {
-        "status": "collected",
-        "source": "Google URL Inspection (API / owner UI)",
-        "property": "https://www.joynote.kr/",
-        "indexed": 39,
-        "inspected": 104,
+        "status": "partial",
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "indexed": 36,
+        "inspected": 98,
         "inventoryTotal": 104,
-        "complete": true,
-        "checkedAt": "2026-10-18T13:41:14.680175+00:00",
-        "reason": null,
-        "propertyScopeVerified": true,
-        "apiBudgetExhausted": false,
-        "apiAttemptedCount": 3,
-        "entries": {},
+        "complete": false,
+        "checkedAt": "2026-10-18T15:56:56.172053+00:00",
         "urls": [
           {
             "url": "https://www.joynote.kr/dog-howling-alone-separation-anxiety",
@@ -10360,10 +10425,10 @@
           },
           {
             "url": "https://www.joynote.kr/지금-바로-여수-향일암-일출-코스-놓치면-1년-후회",
-            "checkedAt": "2026-10-17T14:10:32.000874+00:00",
-            "attemptAt": "2026-10-17T14:10:32.000874+00:00",
+            "checkedAt": "2026-10-18T14:12:44.455227+00:00",
+            "attemptAt": "2026-10-18T14:12:44.455227+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:10:32.000874+00:00",
+            "lastSuccessAt": "2026-10-18T14:12:44.455227+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -10374,10 +10439,10 @@
           },
           {
             "url": "https://www.joynote.kr/여수-향일암-일출-2027년-놓치면-후회할-명소-코스-필수",
-            "checkedAt": "2026-10-17T14:10:39.741598+00:00",
-            "attemptAt": "2026-10-17T14:10:39.741598+00:00",
+            "checkedAt": "2026-10-18T14:12:52.102085+00:00",
+            "attemptAt": "2026-10-18T14:12:52.102085+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:10:39.741598+00:00",
+            "lastSuccessAt": "2026-10-18T14:12:52.102085+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -10389,23 +10454,25 @@
           {
             "url": "https://www.joynote.kr/집에서-즐기는-취미-생활-당신에게-딱-맞는-5가지-추천-2026",
             "checkedAt": "2026-10-17T14:10:47.354285+00:00",
-            "attemptAt": "2026-10-17T14:10:47.354285+00:00",
-            "attemptStatus": "verified",
+            "attemptAt": "2026-10-18T14:12:56.706965+00:00",
+            "attemptStatus": "failed",
             "lastSuccessAt": "2026-10-17T14:10:47.354285+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
-            "indexed": false,
+            "indexed": null,
             "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
-            "googleCanonical": null
+            "googleCanonical": null,
+            "reason": "ReadTimeout: 원천 연결 실패 (비밀정보 생략)",
+            "retryAt": "2026-10-18T14:42:56.706965+00:00"
           },
           {
             "url": "https://www.joynote.kr/취미-시작하는-방법-설렘-가득한-첫걸음-떼기-찾기-안내-기준",
-            "checkedAt": "2026-10-17T14:41:13.877137+00:00",
-            "attemptAt": "2026-10-17T14:41:13.877137+00:00",
+            "checkedAt": "2026-10-18T14:43:08.143070+00:00",
+            "attemptAt": "2026-10-18T14:43:08.143070+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:41:13.877137+00:00",
+            "lastSuccessAt": "2026-10-18T14:43:08.143070+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -10417,23 +10484,25 @@
           {
             "url": "https://www.joynote.kr/집콕부터-액티비티까지-주말-취미-리스트-총정리-추천-안내-기준-3",
             "checkedAt": "2026-10-17T14:41:21.853978+00:00",
-            "attemptAt": "2026-10-17T14:41:21.853978+00:00",
-            "attemptStatus": "verified",
+            "attemptAt": "2026-10-18T14:43:10.019376+00:00",
+            "attemptStatus": "failed",
             "lastSuccessAt": "2026-10-17T14:41:21.853978+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
-            "indexed": true,
+            "indexed": null,
             "coverageState": "Submitted and indexed",
             "lastCrawlTime": "2026-09-08T03:29:49Z",
-            "googleCanonical": "https://www.joynote.kr/집콕부터-액티비티까지-주말-취미-리스트-총정리-추천-안내-기준-3"
+            "googleCanonical": "https://www.joynote.kr/집콕부터-액티비티까지-주말-취미-리스트-총정리-추천-안내-기준-3",
+            "reason": "ReadTimeout: 원천 연결 실패 (비밀정보 생략)",
+            "retryAt": "2026-10-18T15:13:10.019376+00:00"
           },
           {
             "url": "https://www.joynote.kr/5월-가정의-달-온-가족을-위한-최고의-활동-추천-가족-활동-안내-기준",
-            "checkedAt": "2026-10-17T14:41:30.311664+00:00",
-            "attemptAt": "2026-10-17T14:41:30.311664+00:00",
+            "checkedAt": "2026-10-18T15:37:39.261179+00:00",
+            "attemptAt": "2026-10-18T15:37:39.261179+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:41:30.311664+00:00",
+            "lastSuccessAt": "2026-10-18T15:37:39.261179+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -10444,10 +10513,10 @@
           },
           {
             "url": "https://www.joynote.kr/home-hobby-recommendation",
-            "checkedAt": "2026-10-17T15:11:39.699509+00:00",
-            "attemptAt": "2026-10-17T15:11:39.699509+00:00",
+            "checkedAt": "2026-10-18T15:37:46.700162+00:00",
+            "attemptAt": "2026-10-18T15:37:46.700162+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:11:39.699509+00:00",
+            "lastSuccessAt": "2026-10-18T15:37:46.700162+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -10458,10 +10527,10 @@
           },
           {
             "url": "https://www.joynote.kr/best-value-board-games",
-            "checkedAt": "2026-10-17T15:11:47.725751+00:00",
-            "attemptAt": "2026-10-17T15:11:47.725751+00:00",
+            "checkedAt": "2026-10-18T15:37:54.688165+00:00",
+            "attemptAt": "2026-10-18T15:37:54.688165+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:11:47.725751+00:00",
+            "lastSuccessAt": "2026-10-18T15:37:54.688165+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -10948,30 +11017,11 @@
           },
           {
             "url": "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
-            "checkedAt": "2026-10-18T11:42:27.398349+00:00",
-            "attemptAt": "2026-10-18T11:42:27.398349+00:00",
-            "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-18T11:42:27.398349+00:00",
-            "lastIndexed": false,
-            "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null
+            "checkedAt": "2026-10-18T15:56:56.172015+00:00",
+            "outcome": "requested"
           }
-        ],
-        "collection": {
-          "total": 104,
-          "currentInspected": 104,
-          "everInspected": 104,
-          "staleInspected": 0,
-          "failed": 0,
-          "unresolvedInspected": 0,
-          "neverAttempted": 0,
-          "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:41:14.680158+00:00"
-        }
+        ]
       },
       "traffic": {
         "status": "collected",
@@ -10979,20 +11029,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.joynote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 10,
-        "pageViews": 10,
-        "naverReferralSessions": 1,
+        "sessions": 15,
+        "pageViews": 18,
+        "naverReferralSessions": 2,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 1,
-            "pageViews": 1,
-            "users": 1
-          },
           {
             "day": "2026-10-11",
             "sessions": 3,
@@ -11028,9 +11072,15 @@
             "sessions": 0,
             "pageViews": 0,
             "users": 0
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 6,
+            "pageViews": 9,
+            "users": 4
           }
         ],
-        "checkedAt": "2026-10-18T13:41:17.173029+00:00",
+        "checkedAt": "2026-10-18T15:37:57.292119+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -11040,9 +11090,9 @@
         "url": "https://www.justinfo.co.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:12.944135+00:00",
+      "checkedAt": "2026-10-18T15:57:31.148366+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:12.778584+09:00",
+        "requestedAt": "2026-10-19T00:54:49.916632+09:00",
         "urls": [
           "https://www.justinfo.co.kr/topic-3",
           "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
@@ -11338,19 +11388,27 @@
           "https://www.justinfo.co.kr/p53991",
           "https://www.justinfo.co.kr/2026년-청년-적금-추천-가이드-연-6대-금리-놓치지-않는-법"
         ],
+        "unindexedUrlsSubmitted": 214,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:12.778584+09:00",
+          "submittedAt": "2026-10-19T00:54:49.916632+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 293,
-          "indexed": null
+          "submittedCount": 214,
+          "unindexedCount": 214,
+          "submittedAt": "2026-10-19T00:53:39.839600+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://justinfo.co.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -11948,7 +12006,7 @@
         "total": 293,
         "complete": true,
         "source": "https://www.justinfo.co.kr/api/posts",
-        "checkedAt": "2026-10-18T13:41:22.306682+00:00"
+        "checkedAt": "2026-10-18T15:38:02.072564+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -12251,23 +12309,18 @@
           "https://www.justinfo.co.kr/p53991",
           "https://www.justinfo.co.kr/2026년-청년-적금-추천-가이드-연-6대-금리-놓치지-않는-법"
         ],
-        "checkedAt": "2026-10-18T13:51:32.284068+00:00",
+        "checkedAt": "2026-10-18T15:53:34.336263+00:00",
         "source": "https://www.justinfo.co.kr/sitemap.xml"
       },
       "google": {
         "status": "partial",
-        "source": "Google URL Inspection (API / owner UI)",
-        "property": "https://www.justinfo.co.kr/",
-        "indexed": 43,
-        "inspected": 136,
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "indexed": 40,
+        "inspected": 127,
         "inventoryTotal": 293,
         "complete": false,
-        "checkedAt": "2026-10-18T13:41:47.062018+00:00",
-        "propertyScopeVerified": true,
-        "apiBudgetExhausted": false,
-        "apiAttemptedCount": 3,
-        "entries": {},
-        "reason": null,
+        "checkedAt": "2026-10-18T15:57:31.148514+00:00",
         "urls": [
           {
             "url": "https://www.justinfo.co.kr/loan-application-financial-phishing-check",
@@ -13923,10 +13976,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/2026-양도소득세-비과세-조건-정리-부동산-완벽-가이드-2",
-            "checkedAt": "2026-10-15T22:41:03.912406+00:00",
-            "attemptAt": "2026-10-15T22:41:03.912406+00:00",
+            "checkedAt": "2026-10-18T14:37:56.347829+00:00",
+            "attemptAt": "2026-10-18T14:37:56.347829+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-15T22:41:03.912406+00:00",
+            "lastSuccessAt": "2026-10-18T14:37:56.347829+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -13937,10 +13990,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/2026-최신-가업승계-세금-감면-방법-2026-2",
-            "checkedAt": "2026-10-15T23:12:19.828031+00:00",
-            "attemptAt": "2026-10-15T23:12:19.828031+00:00",
+            "checkedAt": "2026-10-18T14:38:03.483011+00:00",
+            "attemptAt": "2026-10-18T14:38:03.483011+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-15T23:12:19.828031+00:00",
+            "lastSuccessAt": "2026-10-18T14:38:03.483011+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -13951,10 +14004,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/2026-최신-다주택자-절세-방법-증여-매도-비교",
-            "checkedAt": "2026-10-15T23:12:27.261350+00:00",
-            "attemptAt": "2026-10-15T23:12:27.261350+00:00",
+            "checkedAt": "2026-10-18T14:38:10.550350+00:00",
+            "attemptAt": "2026-10-18T14:38:10.550350+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-15T23:12:27.261350+00:00",
+            "lastSuccessAt": "2026-10-18T14:38:10.550350+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -13965,24 +14018,24 @@
           },
           {
             "url": "https://www.justinfo.co.kr/p54979",
-            "checkedAt": "2026-10-15T23:12:34.688978+00:00",
-            "attemptAt": "2026-10-15T23:12:34.688978+00:00",
+            "checkedAt": "2026-10-18T15:07:49.346317+00:00",
+            "attemptAt": "2026-10-18T15:07:49.346317+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-15T23:12:34.688978+00:00",
+            "lastSuccessAt": "2026-10-18T15:07:49.346317+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "Discovered - currently not indexed",
+            "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.justinfo.co.kr/p54991",
-            "checkedAt": "2026-10-16T00:07:53.043125+00:00",
-            "attemptAt": "2026-10-16T00:07:53.043125+00:00",
+            "checkedAt": "2026-10-18T15:07:56.298217+00:00",
+            "attemptAt": "2026-10-18T15:07:56.298217+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T00:07:53.043125+00:00",
+            "lastSuccessAt": "2026-10-18T15:07:56.298217+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -13993,10 +14046,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/2026-최신-실손보험-건강보험-중복-청구-방법-및-주의사",
-            "checkedAt": "2026-10-16T00:08:00.486896+00:00",
-            "attemptAt": "2026-10-16T00:08:00.486896+00:00",
+            "checkedAt": "2026-10-18T15:08:03.793275+00:00",
+            "attemptAt": "2026-10-18T15:08:03.793275+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T00:08:00.486896+00:00",
+            "lastSuccessAt": "2026-10-18T15:08:03.793275+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -14007,10 +14060,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/2026-최신-다주택-처분-절세-방법-5가지-세금-낭비-없이-수",
-            "checkedAt": "2026-10-16T00:08:07.635824+00:00",
-            "attemptAt": "2026-10-16T00:08:07.635824+00:00",
+            "checkedAt": "2026-10-18T15:38:09.704717+00:00",
+            "attemptAt": "2026-10-18T15:38:09.704717+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T00:08:07.635824+00:00",
+            "lastSuccessAt": "2026-10-18T15:38:09.704717+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -14021,10 +14074,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/2026-최신-건강보험료-계산기-2026-직장가입자-보험료-자동",
-            "checkedAt": "2026-10-16T00:39:08.157834+00:00",
-            "attemptAt": "2026-10-16T00:39:08.157834+00:00",
+            "checkedAt": "2026-10-18T15:38:17.179328+00:00",
+            "attemptAt": "2026-10-18T15:38:17.179328+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T00:39:08.157834+00:00",
+            "lastSuccessAt": "2026-10-18T15:38:17.179328+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -14035,10 +14088,10 @@
           },
           {
             "url": "https://www.justinfo.co.kr/소상공인-창업자금-대출-비교-추천",
-            "checkedAt": "2026-10-16T00:39:15.199060+00:00",
-            "attemptAt": "2026-10-16T00:39:15.199060+00:00",
+            "checkedAt": "2026-10-18T15:38:24.300840+00:00",
+            "attemptAt": "2026-10-18T15:38:24.300840+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-16T00:39:15.199060+00:00",
+            "lastSuccessAt": "2026-10-18T15:38:24.300840+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -16344,20 +16397,6 @@
             "googleCanonical": null
           },
           {
-            "url": "https://www.justinfo.co.kr/topic-3",
-            "checkedAt": "2026-10-18T03:42:28.243436+00:00",
-            "attemptAt": "2026-10-18T03:42:28.243436+00:00",
-            "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-18T03:42:28.243436+00:00",
-            "lastIndexed": false,
-            "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
-            "indexed": false,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null
-          },
-          {
             "url": "https://www.justinfo.co.kr/주택-화재-보험-비교-견적-사이트-주택화재보험-비",
             "checkedAt": "2026-10-18T10:38:53.545317+00:00",
             "attemptAt": "2026-10-18T10:38:53.545317+00:00",
@@ -16370,19 +16409,14 @@
             "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
+          },
+          {
+            "url": "https://www.justinfo.co.kr/topic-3",
+            "indexed": false,
+            "checkedAt": "2026-10-18T15:57:31.148429+00:00",
+            "outcome": "requested"
           }
-        ],
-        "collection": {
-          "total": 293,
-          "currentInspected": 136,
-          "everInspected": 293,
-          "staleInspected": 157,
-          "failed": 0,
-          "unresolvedInspected": 0,
-          "neverAttempted": 0,
-          "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:41:47.061998+00:00"
-        }
+        ]
       },
       "traffic": {
         "status": "collected",
@@ -16390,20 +16424,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.justinfo.co.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 12,
-        "pageViews": 12,
+        "sessions": 18,
+        "pageViews": 22,
         "naverReferralSessions": 0,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 1,
-            "pageViews": 1,
-            "users": 1
-          },
           {
             "day": "2026-10-11",
             "sessions": 1,
@@ -16439,9 +16467,15 @@
             "sessions": 3,
             "pageViews": 3,
             "users": 3
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 7,
+            "pageViews": 11,
+            "users": 7
           }
         ],
-        "checkedAt": "2026-10-18T13:41:48.564999+00:00",
+        "checkedAt": "2026-10-18T15:38:26.661413+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -16451,9 +16485,9 @@
         "url": "https://www.maxnote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:17.818699+00:00",
+      "checkedAt": "2026-10-18T15:58:06.593970+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:17.709215+09:00",
+        "requestedAt": "2026-10-19T00:54:55.113601+09:00",
         "urls": [
           "https://www.maxnote.kr/excel-freeze-panes-row-column",
           "https://www.maxnote.kr/excel-find-remove-duplicate-values",
@@ -16549,19 +16583,27 @@
           "https://www.maxnote.kr/자기계발-습관-만들기-30일-만에-인생-바꾸는-비법-2026",
           "https://www.maxnote.kr/성공-마인드셋-키우기-2026년-당신을-바꿀-5가지-방법"
         ],
+        "unindexedUrlsSubmitted": 58,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:17.709215+09:00",
+          "submittedAt": "2026-10-19T00:54:55.113601+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 93,
-          "indexed": null
+          "submittedCount": 58,
+          "unindexedCount": 58,
+          "submittedAt": "2026-10-19T00:53:41.850660+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://maxnote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -16759,7 +16801,7 @@
         "total": 93,
         "complete": true,
         "source": "https://www.maxnote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:41:52.090478+00:00"
+        "checkedAt": "2026-10-18T15:38:27.352140+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -16862,23 +16904,18 @@
           "https://www.maxnote.kr/자기계발-습관-만들기-30일-만에-인생-바꾸는-비법-2026",
           "https://www.maxnote.kr/성공-마인드셋-키우기-2026년-당신을-바꿀-5가지-방법"
         ],
-        "checkedAt": "2026-10-18T13:51:30.504232+00:00",
+        "checkedAt": "2026-10-18T15:53:35.918943+00:00",
         "source": "https://www.maxnote.kr/sitemap.xml"
       },
       "google": {
-        "status": "collected",
-        "source": "Google URL Inspection (API / owner UI)",
-        "property": "https://www.maxnote.kr/",
-        "indexed": 35,
-        "inspected": 93,
+        "status": "partial",
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "indexed": 34,
+        "inspected": 92,
         "inventoryTotal": 93,
-        "complete": true,
-        "checkedAt": "2026-10-18T13:41:52.565242+00:00",
-        "reason": null,
-        "propertyScopeVerified": true,
-        "apiBudgetExhausted": false,
-        "apiAttemptedCount": 0,
-        "entries": {},
+        "complete": false,
+        "checkedAt": "2026-10-18T15:58:06.594032+00:00",
         "urls": [
           {
             "url": "https://www.maxnote.kr/computer-slow-temp-files-disk-cleanup",
@@ -17988,10 +18025,10 @@
           },
           {
             "url": "https://www.maxnote.kr/garmin-forerunner-165-price-review-music-265",
-            "checkedAt": "2026-10-17T14:11:48.007746+00:00",
-            "attemptAt": "2026-10-17T14:11:48.007746+00:00",
+            "checkedAt": "2026-10-18T14:38:25.438168+00:00",
+            "attemptAt": "2026-10-18T14:38:25.438168+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:11:48.007746+00:00",
+            "lastSuccessAt": "2026-10-18T14:38:25.438168+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -18002,10 +18039,10 @@
           },
           {
             "url": "https://www.maxnote.kr/richmond-bakery-gift-set",
-            "checkedAt": "2026-10-17T14:11:55.495933+00:00",
-            "attemptAt": "2026-10-17T14:11:55.495933+00:00",
+            "checkedAt": "2026-10-18T14:38:32.648942+00:00",
+            "attemptAt": "2026-10-18T14:38:32.648942+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:11:55.495933+00:00",
+            "lastSuccessAt": "2026-10-18T14:38:32.648942+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -18016,38 +18053,38 @@
           },
           {
             "url": "https://www.maxnote.kr/worldcup-2026-korea-mexico-kst-broadcast-checklist",
-            "checkedAt": "2026-10-17T14:42:21.150294+00:00",
-            "attemptAt": "2026-10-17T14:42:21.150294+00:00",
+            "checkedAt": "2026-10-18T15:08:14.714620+00:00",
+            "attemptAt": "2026-10-18T15:08:14.714620+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:42:21.150294+00:00",
+            "lastSuccessAt": "2026-10-18T15:08:14.714620+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.maxnote.kr/best-steam-iron-recommendation",
-            "checkedAt": "2026-10-17T14:42:28.390152+00:00",
-            "attemptAt": "2026-10-17T14:42:28.390152+00:00",
+            "checkedAt": "2026-10-18T15:08:21.907621+00:00",
+            "attemptAt": "2026-10-18T15:08:21.907621+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:42:28.390152+00:00",
+            "lastSuccessAt": "2026-10-18T15:08:21.907621+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.maxnote.kr/child-gift-tax-filing-method",
-            "checkedAt": "2026-10-17T14:42:36.241637+00:00",
-            "attemptAt": "2026-10-17T14:42:36.241637+00:00",
+            "checkedAt": "2026-10-18T15:08:28.994297+00:00",
+            "attemptAt": "2026-10-18T15:08:28.994297+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:42:36.241637+00:00",
+            "lastSuccessAt": "2026-10-18T15:08:28.994297+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -18058,10 +18095,10 @@
           },
           {
             "url": "https://www.maxnote.kr/2026-월드컵-일정-한국-북중미-fifa-북중미-기준",
-            "checkedAt": "2026-10-17T15:12:47.163689+00:00",
-            "attemptAt": "2026-10-17T15:12:47.163689+00:00",
+            "checkedAt": "2026-10-18T15:38:35.538676+00:00",
+            "attemptAt": "2026-10-18T15:38:35.538676+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:12:47.163689+00:00",
+            "lastSuccessAt": "2026-10-18T15:38:35.538676+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -18072,10 +18109,10 @@
           },
           {
             "url": "https://www.maxnote.kr/전입신고-인터넷",
-            "checkedAt": "2026-10-17T15:12:54.721607+00:00",
-            "attemptAt": "2026-10-17T15:12:54.721607+00:00",
+            "checkedAt": "2026-10-18T15:38:42.993510+00:00",
+            "attemptAt": "2026-10-18T15:38:42.993510+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:12:54.721607+00:00",
+            "lastSuccessAt": "2026-10-18T15:38:42.993510+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -18170,30 +18207,11 @@
           },
           {
             "url": "https://www.maxnote.kr/excel-freeze-panes-row-column",
-            "checkedAt": "2026-10-18T07:38:03.597149+00:00",
-            "attemptAt": "2026-10-18T07:38:03.597149+00:00",
-            "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-18T07:38:03.597149+00:00",
-            "lastIndexed": false,
-            "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "Discovered - currently not indexed",
-            "lastCrawlTime": null,
-            "googleCanonical": null
+            "checkedAt": "2026-10-18T15:58:06.593996+00:00",
+            "outcome": "requested"
           }
-        ],
-        "collection": {
-          "total": 93,
-          "currentInspected": 93,
-          "everInspected": 93,
-          "staleInspected": 0,
-          "failed": 0,
-          "unresolvedInspected": 0,
-          "neverAttempted": 0,
-          "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T12:38:59.957686+00:00"
-        }
+        ]
       },
       "traffic": {
         "status": "collected",
@@ -18201,20 +18219,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.maxnote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
         "sessions": 12,
-        "pageViews": 13,
+        "pageViews": 14,
         "naverReferralSessions": 1,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 1,
-            "pageViews": 1,
-            "users": 1
-          },
           {
             "day": "2026-10-11",
             "sessions": 2,
@@ -18250,9 +18262,15 @@
             "sessions": 4,
             "pageViews": 5,
             "users": 4
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 1,
+            "pageViews": 2,
+            "users": 1
           }
         ],
-        "checkedAt": "2026-10-18T13:41:55.241478+00:00",
+        "checkedAt": "2026-10-18T15:38:45.657225+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -18262,9 +18280,9 @@
         "url": "https://www.meganote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:22.779334+00:00",
+      "checkedAt": "2026-10-18T15:55:01.017859+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:22.638076+09:00",
+        "requestedAt": "2026-10-19T00:55:00.855672+09:00",
         "urls": [
           "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
           "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
@@ -18362,19 +18380,27 @@
           "https://www.meganote.kr/2026-가성비-태블릿-추천-3가지-모델만-사면-후회-없다",
           "https://www.meganote.kr/AI-기술-트렌드-2026-놓치면-후회할-7가지-변화-미리보기"
         ],
+        "unindexedUrlsSubmitted": 63,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:22.638076+09:00",
+          "submittedAt": "2026-10-19T00:55:00.855672+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 95,
-          "indexed": null
+          "submittedCount": 63,
+          "unindexedCount": 63,
+          "submittedAt": "2026-10-19T00:53:41.851417+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.meganote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -18576,7 +18602,7 @@
         "total": 95,
         "complete": true,
         "source": "https://www.meganote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:41:58.358260+00:00"
+        "checkedAt": "2026-10-18T15:38:49.233527+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -18681,7 +18707,7 @@
           "https://www.meganote.kr/2026-가성비-태블릿-추천-3가지-모델만-사면-후회-없다",
           "https://www.meganote.kr/AI-기술-트렌드-2026-놓치면-후회할-7가지-변화-미리보기"
         ],
-        "checkedAt": "2026-10-18T13:51:30.779284+00:00",
+        "checkedAt": "2026-10-18T15:53:35.954263+00:00",
         "source": "https://www.meganote.kr/sitemap.xml"
       },
       "google": {
@@ -18692,7 +18718,7 @@
         "inspected": 95,
         "inventoryTotal": 95,
         "complete": true,
-        "checkedAt": "2026-10-18T13:42:24.518346+00:00",
+        "checkedAt": "2026-10-18T15:39:11.423072+00:00",
         "apiBudgetExhausted": false,
         "apiAttemptedCount": 3,
         "propertyScopeVerified": true,
@@ -19751,10 +19777,10 @@
           },
           {
             "url": "https://www.meganote.kr/twitter-login-error-fix",
-            "checkedAt": "2026-10-17T14:12:11.555787+00:00",
-            "attemptAt": "2026-10-17T14:12:11.555787+00:00",
+            "checkedAt": "2026-10-18T14:38:47.823660+00:00",
+            "attemptAt": "2026-10-18T14:38:47.823660+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:12:11.555787+00:00",
+            "lastSuccessAt": "2026-10-18T14:38:47.823660+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -19765,24 +19791,24 @@
           },
           {
             "url": "https://www.meganote.kr/galaxy-storage-full-fix",
-            "checkedAt": "2026-10-17T14:12:18.839039+00:00",
-            "attemptAt": "2026-10-17T14:12:18.839039+00:00",
+            "checkedAt": "2026-10-18T14:38:55.023464+00:00",
+            "attemptAt": "2026-10-18T14:38:55.023464+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:12:18.839039+00:00",
+            "lastSuccessAt": "2026-10-18T14:38:55.023464+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "Discovered - currently not indexed",
+            "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.meganote.kr/2026-wbc-korea-schedule-broadcast",
-            "checkedAt": "2026-10-17T14:12:26.052481+00:00",
-            "attemptAt": "2026-10-17T14:12:26.052481+00:00",
+            "checkedAt": "2026-10-18T14:39:02.705483+00:00",
+            "attemptAt": "2026-10-18T14:39:02.705483+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:12:26.052481+00:00",
+            "lastSuccessAt": "2026-10-18T14:39:02.705483+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -19793,10 +19819,10 @@
           },
           {
             "url": "https://www.meganote.kr/laptop-screen-broken-check",
-            "checkedAt": "2026-10-17T14:42:59.228044+00:00",
-            "attemptAt": "2026-10-17T14:42:59.228044+00:00",
+            "checkedAt": "2026-10-18T15:08:48.423531+00:00",
+            "attemptAt": "2026-10-18T15:08:48.423531+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:42:59.228044+00:00",
+            "lastSuccessAt": "2026-10-18T15:08:48.423531+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -19821,10 +19847,10 @@
           },
           {
             "url": "https://www.meganote.kr/smartphone-security-settings",
-            "checkedAt": "2026-10-17T15:37:58.490847+00:00",
-            "attemptAt": "2026-10-17T15:37:58.490847+00:00",
+            "checkedAt": "2026-10-18T15:38:56.907877+00:00",
+            "attemptAt": "2026-10-18T15:38:56.907877+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:37:58.490847+00:00",
+            "lastSuccessAt": "2026-10-18T15:38:56.907877+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -19835,10 +19861,10 @@
           },
           {
             "url": "https://www.meganote.kr/kt-netflix-cancel",
-            "checkedAt": "2026-10-17T15:38:05.632391+00:00",
-            "attemptAt": "2026-10-17T15:38:05.632391+00:00",
+            "checkedAt": "2026-10-18T15:39:04.203392+00:00",
+            "attemptAt": "2026-10-18T15:39:04.203392+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:38:05.632391+00:00",
+            "lastSuccessAt": "2026-10-18T15:39:04.203392+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -19849,10 +19875,10 @@
           },
           {
             "url": "https://www.meganote.kr/hand-foot-mouth-symptoms-daycare-hospital-signs",
-            "checkedAt": "2026-10-17T15:38:13.124173+00:00",
-            "attemptAt": "2026-10-17T15:38:13.124173+00:00",
+            "checkedAt": "2026-10-18T15:39:11.423055+00:00",
+            "attemptAt": "2026-10-18T15:39:11.423055+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:38:13.124173+00:00",
+            "lastSuccessAt": "2026-10-18T15:39:11.423055+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -20003,15 +20029,15 @@
           },
           {
             "url": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
-            "checkedAt": "2026-10-17T14:42:51.721426+00:00",
-            "attemptAt": "2026-10-17T14:42:51.721426+00:00",
+            "checkedAt": "2026-10-18T15:08:41.031197+00:00",
+            "attemptAt": "2026-10-18T15:08:41.031197+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:42:51.721426+00:00",
+            "lastSuccessAt": "2026-10-18T15:08:41.031197+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
@@ -20039,7 +20065,7 @@
           "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:42:24.518330+00:00"
+          "lastAttemptAt": "2026-10-18T15:39:11.423055+00:00"
         }
       },
       "traffic": {
@@ -20048,20 +20074,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.meganote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 17,
-        "pageViews": 16,
-        "naverReferralSessions": 0,
+        "sessions": 25,
+        "pageViews": 25,
+        "naverReferralSessions": 3,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 1,
-            "pageViews": 1,
-            "users": 1
-          },
           {
             "day": "2026-10-11",
             "sessions": 1,
@@ -20097,9 +20117,15 @@
             "sessions": 1,
             "pageViews": 1,
             "users": 1
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 9,
+            "pageViews": 10,
+            "users": 8
           }
         ],
-        "checkedAt": "2026-10-18T13:42:26.419312+00:00",
+        "checkedAt": "2026-10-18T15:39:12.575674+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -20109,9 +20135,9 @@
         "url": "https://www.must-good.com/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:27.676536+00:00",
+      "checkedAt": "2026-10-18T15:55:06.176813+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:27.497023+09:00",
+        "requestedAt": "2026-10-19T00:55:06.038429+09:00",
         "urls": [
           "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
           "https://www.must-good.com/post",
@@ -20261,19 +20287,27 @@
           "https://www.must-good.com/인기-여름-디저트-맛집-2026-이걸-안-먹으면-후회할-걸",
           "https://www.must-good.com/2026-여름-휴가-국내-숨은-명소-5곳-추천-후회-없을-선택"
         ],
+        "unindexedUrlsSubmitted": 76,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:27.497023+09:00",
+          "submittedAt": "2026-10-19T00:55:06.038429+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 147,
-          "indexed": null
+          "submittedCount": 76,
+          "unindexedCount": 76,
+          "submittedAt": "2026-10-19T00:53:40.661203+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.must-good.com",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -20579,7 +20613,7 @@
         "total": 147,
         "complete": true,
         "source": "https://www.must-good.com/api/posts",
-        "checkedAt": "2026-10-18T13:42:31.120502+00:00"
+        "checkedAt": "2026-10-18T15:39:17.947224+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -20736,7 +20770,7 @@
           "https://www.must-good.com/인기-여름-디저트-맛집-2026-이걸-안-먹으면-후회할-걸",
           "https://www.must-good.com/2026-여름-휴가-국내-숨은-명소-5곳-추천-후회-없을-선택"
         ],
-        "checkedAt": "2026-10-18T13:51:30.570009+00:00",
+        "checkedAt": "2026-10-18T15:53:36.061919+00:00",
         "source": "https://www.must-good.com/sitemap.xml"
       },
       "google": {
@@ -20744,10 +20778,10 @@
         "source": "Google URL Inspection (API / owner UI)",
         "property": "https://www.must-good.com/",
         "indexed": 62,
-        "inspected": 128,
+        "inspected": 131,
         "inventoryTotal": 147,
         "complete": false,
-        "checkedAt": "2026-10-18T13:42:54.019963+00:00",
+        "checkedAt": "2026-10-18T15:39:42.746953+00:00",
         "apiBudgetExhausted": false,
         "apiAttemptedCount": 3,
         "propertyScopeVerified": true,
@@ -22338,10 +22372,10 @@
           },
           {
             "url": "https://www.must-good.com/bathroom-water-stain-removal",
-            "checkedAt": "2026-10-17T08:10:35.667688+00:00",
-            "attemptAt": "2026-10-17T08:10:35.667688+00:00",
+            "checkedAt": "2026-10-18T14:39:16.743241+00:00",
+            "attemptAt": "2026-10-18T14:39:16.743241+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T08:10:35.667688+00:00",
+            "lastSuccessAt": "2026-10-18T14:39:16.743241+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -22352,38 +22386,38 @@
           },
           {
             "url": "https://www.must-good.com/sink-drain-cleaning-method",
-            "checkedAt": "2026-10-17T08:10:43.095859+00:00",
-            "attemptAt": "2026-10-17T08:10:43.095859+00:00",
+            "checkedAt": "2026-10-18T14:39:23.990281+00:00",
+            "attemptAt": "2026-10-18T14:39:23.990281+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T08:10:43.095859+00:00",
-            "lastIndexed": true,
+            "lastSuccessAt": "2026-10-18T14:39:23.990281+00:00",
+            "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
-            "verdict": "PASS",
-            "indexed": true,
-            "coverageState": "Submitted and indexed",
+            "verdict": "NEUTRAL",
+            "indexed": false,
+            "coverageState": "Crawled - currently not indexed",
             "lastCrawlTime": "2026-09-27T16:48:36Z",
             "googleCanonical": "https://www.must-good.com/sink-drain-cleaning-method"
           },
           {
             "url": "https://www.must-good.com/house-cleaning-order",
-            "checkedAt": "2026-10-17T08:10:50.541136+00:00",
-            "attemptAt": "2026-10-17T08:10:50.541136+00:00",
+            "checkedAt": "2026-10-18T14:39:31.200504+00:00",
+            "attemptAt": "2026-10-18T14:39:31.200504+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T08:10:50.541136+00:00",
-            "lastIndexed": true,
+            "lastSuccessAt": "2026-10-18T14:39:31.200504+00:00",
+            "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
-            "verdict": "PASS",
-            "indexed": true,
-            "coverageState": "Submitted and indexed",
-            "lastCrawlTime": "2026-09-30T18:47:55Z",
-            "googleCanonical": "https://www.must-good.com/house-cleaning-order"
+            "verdict": "NEUTRAL",
+            "indexed": false,
+            "coverageState": "Duplicate, Google chose different canonical than user",
+            "lastCrawlTime": "2026-10-14T14:58:08Z",
+            "googleCanonical": "https://must-good.com/house-cleaning-order"
           },
           {
             "url": "https://www.must-good.com/ha-ru-10-bun-cheong-so-ru-tin",
-            "checkedAt": "2026-10-17T08:42:47.037871+00:00",
-            "attemptAt": "2026-10-17T08:42:47.037871+00:00",
+            "checkedAt": "2026-10-18T15:09:00.477103+00:00",
+            "attemptAt": "2026-10-18T15:09:00.477103+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T08:42:47.037871+00:00",
+            "lastSuccessAt": "2026-10-18T15:09:00.477103+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -22394,10 +22428,10 @@
           },
           {
             "url": "https://www.must-good.com/주방-기름때-청소-방법",
-            "checkedAt": "2026-10-17T08:42:54.237224+00:00",
-            "attemptAt": "2026-10-17T08:42:54.237224+00:00",
+            "checkedAt": "2026-10-18T15:09:08.152592+00:00",
+            "attemptAt": "2026-10-18T15:09:08.152592+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T08:42:54.237224+00:00",
+            "lastSuccessAt": "2026-10-18T15:09:08.152592+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -22408,24 +22442,24 @@
           },
           {
             "url": "https://www.must-good.com/하루-10분-청소-루틴",
-            "checkedAt": "2026-10-15T23:38:12.874319+00:00",
-            "attemptAt": "2026-10-17T08:42:58.010064+00:00",
-            "lastSuccessAt": "2026-10-15T23:38:12.874319+00:00",
-            "lastIndexed": false,
+            "checkedAt": "2026-10-18T15:09:15.649399+00:00",
+            "attemptAt": "2026-10-18T15:09:15.649399+00:00",
+            "attemptStatus": "verified",
+            "lastSuccessAt": "2026-10-18T15:09:15.649399+00:00",
+            "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
-            "indexed": null,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null,
-            "attemptStatus": "failed"
+            "verdict": "PASS",
+            "indexed": true,
+            "coverageState": "Submitted and indexed",
+            "lastCrawlTime": "2026-10-16T18:04:48Z",
+            "googleCanonical": "https://www.must-good.com/하루-10분-청소-루틴"
           },
           {
             "url": "https://www.must-good.com/생활-청소-체크리스트",
-            "checkedAt": "2026-10-17T09:39:11.631702+00:00",
-            "attemptAt": "2026-10-17T09:39:11.631702+00:00",
+            "checkedAt": "2026-10-18T15:39:27.975594+00:00",
+            "attemptAt": "2026-10-18T15:39:27.975594+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T09:39:11.631702+00:00",
+            "lastSuccessAt": "2026-10-18T15:39:27.975594+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -22436,10 +22470,10 @@
           },
           {
             "url": "https://www.must-good.com/aircon-filter-cleaning-smell-electricity",
-            "checkedAt": "2026-10-17T09:39:19.138637+00:00",
-            "attemptAt": "2026-10-17T09:39:19.138637+00:00",
+            "checkedAt": "2026-10-18T15:39:35.560731+00:00",
+            "attemptAt": "2026-10-18T15:39:35.560731+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T09:39:19.138637+00:00",
+            "lastSuccessAt": "2026-10-18T15:39:35.560731+00:00",
             "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
             "verdict": "PASS",
@@ -22450,17 +22484,17 @@
           },
           {
             "url": "https://www.must-good.com/생활-먼지-줄이는-습관",
-            "checkedAt": "2026-10-17T09:39:26.440365+00:00",
-            "attemptAt": "2026-10-17T09:39:26.440365+00:00",
+            "checkedAt": "2026-10-18T15:39:42.746934+00:00",
+            "attemptAt": "2026-10-18T15:39:42.746934+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T09:39:26.440365+00:00",
-            "lastIndexed": false,
+            "lastSuccessAt": "2026-10-18T15:39:42.746934+00:00",
+            "lastIndexed": true,
             "source": "Google Search Console URL Inspection",
-            "verdict": "NEUTRAL",
-            "indexed": false,
-            "coverageState": "URL is unknown to Google",
-            "lastCrawlTime": null,
-            "googleCanonical": null
+            "verdict": "PASS",
+            "indexed": true,
+            "coverageState": "Submitted and indexed",
+            "lastCrawlTime": "2026-10-17T21:22:10Z",
+            "googleCanonical": "https://www.must-good.com/생활-먼지-줄이는-습관"
           },
           {
             "url": "https://www.must-good.com/jangmachul-ppallae-naemsae-jeguhabob",
@@ -22815,14 +22849,14 @@
         ],
         "collection": {
           "total": 147,
-          "currentInspected": 128,
+          "currentInspected": 131,
           "everInspected": 147,
-          "staleInspected": 14,
-          "failed": 5,
-          "unresolvedInspected": 5,
+          "staleInspected": 12,
+          "failed": 4,
+          "unresolvedInspected": 4,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:42:54.019947+00:00"
+          "lastAttemptAt": "2026-10-18T15:39:42.746934+00:00"
         }
       },
       "traffic": {
@@ -22831,20 +22865,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.must-good.com",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 20,
-        "pageViews": 19,
+        "sessions": 21,
+        "pageViews": 21,
         "naverReferralSessions": 0,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 6,
-            "pageViews": 6,
-            "users": 6
-          },
           {
             "day": "2026-10-11",
             "sessions": 4,
@@ -22880,9 +22908,15 @@
             "sessions": 0,
             "pageViews": 0,
             "users": 0
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 7,
+            "pageViews": 8,
+            "users": 7
           }
         ],
-        "checkedAt": "2026-10-18T13:42:55.976814+00:00",
+        "checkedAt": "2026-10-18T15:39:43.813663+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -22892,9 +22926,9 @@
         "url": "https://www.must-joy.com/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:32.592993+00:00",
+      "checkedAt": "2026-10-18T15:55:11.274826+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:32.432941+09:00",
+        "requestedAt": "2026-10-19T00:55:11.091437+09:00",
         "urls": [
           "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
           "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
@@ -22972,19 +23006,27 @@
           "https://www.must-joy.com/결혼-예산-절약-꿀팁-10가지-이렇게만-하면-300만원-아껴요",
           "https://www.must-joy.com/2026년-스몰-웨딩-트렌드-예산-200만원으로-꿈꾼-나만의-특별한-결혼식"
         ],
+        "unindexedUrlsSubmitted": 38,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:32.432941+09:00",
+          "submittedAt": "2026-10-19T00:55:11.091437+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 75,
-          "indexed": null
+          "submittedCount": 38,
+          "unindexedCount": 38,
+          "submittedAt": "2026-10-19T00:53:55.132013+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.must-joy.com",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -23146,7 +23188,7 @@
         "total": 75,
         "complete": true,
         "source": "https://www.must-joy.com/api/posts",
-        "checkedAt": "2026-10-18T13:43:06.163808+00:00"
+        "checkedAt": "2026-10-18T15:39:46.424762+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -23231,7 +23273,7 @@
           "https://www.must-joy.com/결혼-예산-절약-꿀팁-10가지-이렇게만-하면-300만원-아껴요",
           "https://www.must-joy.com/2026년-스몰-웨딩-트렌드-예산-200만원으로-꿈꾼-나만의-특별한-결혼식"
         ],
-        "checkedAt": "2026-10-18T13:51:33.473887+00:00",
+        "checkedAt": "2026-10-18T15:53:39.003598+00:00",
         "source": "https://www.must-joy.com/sitemap.xml"
       },
       "google": {
@@ -23242,13 +23284,12 @@
         "inspected": 75,
         "inventoryTotal": 75,
         "complete": true,
-        "checkedAt": "2026-10-18T13:43:14.107401+00:00",
+        "checkedAt": "2026-10-18T15:39:50.145767+00:00",
         "reason": null,
-        "apiBudgetExhausted": true,
+        "apiBudgetExhausted": false,
         "apiAttemptedCount": 0,
         "propertyScopeVerified": true,
         "entries": {},
-        "apiAttemptStatus": "deferred_budget",
         "urls": [
           {
             "url": "https://www.must-joy.com/tent-camping-heater-ventilation-co-alarm",
@@ -23448,10 +23489,10 @@
           },
           {
             "url": "https://www.must-joy.com/gmarket-chuseok-bigsale-2026-coupon-guide",
-            "checkedAt": "2026-10-17T13:41:21.783419+00:00",
-            "attemptAt": "2026-10-17T13:41:21.783419+00:00",
+            "checkedAt": "2026-10-18T14:07:45.567937+00:00",
+            "attemptAt": "2026-10-18T14:07:45.567937+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:41:21.783419+00:00",
+            "lastSuccessAt": "2026-10-18T14:07:45.567937+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -24310,7 +24351,7 @@
           "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:12:07.405195+00:00"
+          "lastAttemptAt": "2026-10-18T14:07:45.567937+00:00"
         }
       },
       "traffic": {
@@ -24319,20 +24360,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.must-joy.com",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 3,
-        "pageViews": 6,
+        "sessions": 7,
+        "pageViews": 16,
         "naverReferralSessions": 0,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 0,
-            "pageViews": 0,
-            "users": 0
-          },
           {
             "day": "2026-10-11",
             "sessions": 1,
@@ -24368,9 +24403,15 @@
             "sessions": 0,
             "pageViews": 0,
             "users": 0
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 4,
+            "pageViews": 10,
+            "users": 2
           }
         ],
-        "checkedAt": "2026-10-18T13:43:15.929907+00:00",
+        "checkedAt": "2026-10-18T15:39:51.392093+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -24380,9 +24421,9 @@
         "url": "https://www.must-pick.com/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:37.557840+00:00",
+      "checkedAt": "2026-10-18T15:55:17.592399+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:37.401409+09:00",
+        "requestedAt": "2026-10-19T00:55:17.417109+09:00",
         "urls": [
           "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
           "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
@@ -24466,19 +24507,27 @@
           "https://www.must-pick.com/seoul-housing-support-for-newborn",
           "https://www.must-pick.com/2026-earned-income-tax-credit-eligibility"
         ],
+        "unindexedUrlsSubmitted": 20,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:37.401409+09:00",
+          "submittedAt": "2026-10-19T00:55:17.417109+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 81,
-          "indexed": null
+          "submittedCount": 20,
+          "unindexedCount": 20,
+          "submittedAt": "2026-10-19T00:53:44.617971+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.must-pick.com",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -24652,7 +24701,7 @@
         "total": 81,
         "complete": true,
         "source": "https://www.must-pick.com/api/posts",
-        "checkedAt": "2026-10-18T13:43:22.567344+00:00"
+        "checkedAt": "2026-10-18T15:39:52.376745+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -24743,7 +24792,7 @@
           "https://www.must-pick.com/seoul-housing-support-for-newborn",
           "https://www.must-pick.com/2026-earned-income-tax-credit-eligibility"
         ],
-        "checkedAt": "2026-10-18T13:51:32.411489+00:00",
+        "checkedAt": "2026-10-18T15:53:41.746969+00:00",
         "source": "https://www.must-pick.com/sitemap.xml"
       },
       "google": {
@@ -24754,13 +24803,12 @@
         "inspected": 81,
         "inventoryTotal": 81,
         "complete": true,
-        "checkedAt": "2026-10-18T13:43:25.000647+00:00",
+        "checkedAt": "2026-10-18T15:39:52.951477+00:00",
         "reason": null,
-        "apiBudgetExhausted": true,
+        "apiBudgetExhausted": false,
         "apiAttemptedCount": 0,
         "propertyScopeVerified": true,
         "entries": {},
-        "apiAttemptStatus": "deferred_budget",
         "urls": [
           {
             "url": "https://www.must-pick.com/usb-pd-pps-charger-specs-guide",
@@ -25422,15 +25470,15 @@
           },
           {
             "url": "https://www.must-pick.com/2026-minsaeng-support-application-region-check",
-            "checkedAt": "2026-10-17T13:41:36.348317+00:00",
-            "attemptAt": "2026-10-17T13:41:36.348317+00:00",
+            "checkedAt": "2026-10-18T14:08:05.607432+00:00",
+            "attemptAt": "2026-10-18T14:08:05.607432+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:41:36.348317+00:00",
+            "lastSuccessAt": "2026-10-18T14:08:05.607432+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
@@ -25906,7 +25954,7 @@
           "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:12:36.141010+00:00"
+          "lastAttemptAt": "2026-10-18T14:08:05.607432+00:00"
         }
       },
       "traffic": {
@@ -25915,20 +25963,14 @@
         "source": "GA4 Data API",
         "property": "545137532",
         "hostname": "www.must-pick.com",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 40,
+        "sessions": 41,
         "pageViews": 44,
-        "naverReferralSessions": 9,
+        "naverReferralSessions": 8,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 4,
-            "pageViews": 4,
-            "users": 3
-          },
           {
             "day": "2026-10-11",
             "sessions": 8,
@@ -25964,9 +26006,15 @@
             "sessions": 4,
             "pageViews": 4,
             "users": 4
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 5,
+            "pageViews": 4,
+            "users": 4
           }
         ],
-        "checkedAt": "2026-10-18T13:43:28.049047+00:00",
+        "checkedAt": "2026-10-18T15:39:55.047237+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/545137532:runReport"
       }
     },
@@ -25976,22 +26024,22 @@
         "url": "https://blog.naver.com/adinfo0905",
         "platform": "naver"
       },
-      "checkedAt": "2026-10-18T13:43:43.827709+00:00",
+      "checkedAt": "2026-10-18T15:42:31.357905+00:00",
       "indexingRequest": null,
       "posts": {
         "status": "not_collected",
         "reason": "네이버 공개 글 목록 수집 미연결",
-        "checkedAt": "2026-10-18T13:43:43.827722+00:00"
+        "checkedAt": "2026-10-18T15:42:31.357918+00:00"
       },
       "google": {
         "status": "not_collected",
         "reason": "네이버 블로그의 GSC 속성 접근 미확인",
-        "checkedAt": "2026-10-18T13:43:43.827724+00:00"
+        "checkedAt": "2026-10-18T15:42:31.357921+00:00"
       },
       "traffic": {
         "status": "not_collected",
         "reason": "네이버 블로그 통계 원천 보고서 미연결",
-        "checkedAt": "2026-10-18T13:43:43.827726+00:00"
+        "checkedAt": "2026-10-18T15:42:31.357922+00:00"
       }
     },
     "naver:mustinfo": {
@@ -26000,22 +26048,22 @@
         "url": "https://blog.naver.com/mustinfo",
         "platform": "naver"
       },
-      "checkedAt": "2026-10-18T13:43:44.126802+00:00",
+      "checkedAt": "2026-10-18T15:42:31.710549+00:00",
       "indexingRequest": null,
       "posts": {
         "status": "not_collected",
         "reason": "네이버 공개 글 목록 수집 미연결",
-        "checkedAt": "2026-10-18T13:43:44.126818+00:00"
+        "checkedAt": "2026-10-18T15:42:31.710566+00:00"
       },
       "google": {
         "status": "not_collected",
         "reason": "네이버 블로그의 GSC 속성 접근 미확인",
-        "checkedAt": "2026-10-18T13:43:44.126820+00:00"
+        "checkedAt": "2026-10-18T15:42:31.710569+00:00"
       },
       "traffic": {
         "status": "not_collected",
         "reason": "네이버 블로그 통계 원천 보고서 미연결",
-        "checkedAt": "2026-10-18T13:43:44.126822+00:00"
+        "checkedAt": "2026-10-18T15:42:31.710570+00:00"
       }
     },
     "naver:mustpickinfo": {
@@ -26024,22 +26072,22 @@
         "url": "https://blog.naver.com/mustpickinfo",
         "platform": "naver"
       },
-      "checkedAt": "2026-10-18T13:43:44.579717+00:00",
+      "checkedAt": "2026-10-18T15:42:32.073226+00:00",
       "indexingRequest": null,
       "posts": {
         "status": "not_collected",
         "reason": "네이버 공개 글 목록 수집 미연결",
-        "checkedAt": "2026-10-18T13:43:44.579732+00:00"
+        "checkedAt": "2026-10-18T15:42:32.073239+00:00"
       },
       "google": {
         "status": "not_collected",
         "reason": "네이버 블로그의 GSC 속성 접근 미확인",
-        "checkedAt": "2026-10-18T13:43:44.579735+00:00"
+        "checkedAt": "2026-10-18T15:42:32.073241+00:00"
       },
       "traffic": {
         "status": "not_collected",
         "reason": "네이버 블로그 통계 원천 보고서 미연결",
-        "checkedAt": "2026-10-18T13:43:44.579738+00:00"
+        "checkedAt": "2026-10-18T15:42:32.073242+00:00"
       }
     },
     "naver:stone0747": {
@@ -26048,22 +26096,22 @@
         "url": "https://blog.naver.com/stone0747",
         "platform": "naver"
       },
-      "checkedAt": "2026-10-18T13:43:44.930451+00:00",
+      "checkedAt": "2026-10-18T15:42:32.416400+00:00",
       "indexingRequest": null,
       "posts": {
         "status": "not_collected",
         "reason": "네이버 공개 글 목록 수집 미연결",
-        "checkedAt": "2026-10-18T13:43:44.930462+00:00"
+        "checkedAt": "2026-10-18T15:42:32.416411+00:00"
       },
       "google": {
         "status": "not_collected",
         "reason": "네이버 블로그의 GSC 속성 접근 미확인",
-        "checkedAt": "2026-10-18T13:43:44.930464+00:00"
+        "checkedAt": "2026-10-18T15:42:32.416413+00:00"
       },
       "traffic": {
         "status": "not_collected",
         "reason": "네이버 블로그 통계 원천 보고서 미연결",
-        "checkedAt": "2026-10-18T13:43:44.930465+00:00"
+        "checkedAt": "2026-10-18T15:42:32.416415+00:00"
       }
     },
     "naver:yoonviews": {
@@ -26072,22 +26120,22 @@
         "url": "https://blog.naver.com/yoonviews",
         "platform": "naver"
       },
-      "checkedAt": "2026-10-18T13:43:45.253469+00:00",
+      "checkedAt": "2026-10-18T15:42:32.803013+00:00",
       "indexingRequest": null,
       "posts": {
         "status": "not_collected",
         "reason": "네이버 공개 글 목록 수집 미연결",
-        "checkedAt": "2026-10-18T13:43:45.253480+00:00"
+        "checkedAt": "2026-10-18T15:42:32.803023+00:00"
       },
       "google": {
         "status": "not_collected",
         "reason": "네이버 블로그의 GSC 속성 접근 미확인",
-        "checkedAt": "2026-10-18T13:43:45.253482+00:00"
+        "checkedAt": "2026-10-18T15:42:32.803025+00:00"
       },
       "traffic": {
         "status": "not_collected",
         "reason": "네이버 블로그 통계 원천 보고서 미연결",
-        "checkedAt": "2026-10-18T13:43:45.253484+00:00"
+        "checkedAt": "2026-10-18T15:42:32.803026+00:00"
       }
     },
     "nolplace.com": {
@@ -26096,9 +26144,9 @@
         "url": "https://www.nolplace.com/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:51:41.660006+00:00",
+      "checkedAt": "2026-10-19T00:54:01.644422+09:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T13:51:32.973551+00:00",
+        "requestedAt": "2026-10-19T00:53:42.956532+09:00",
         "urls": [
           "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
           "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
@@ -26128,19 +26176,28 @@
           "https://www.nolplace.com/chabak-electric-blanket-powerbank-capacity-12v-carbon-mat-guide",
           "https://www.nolplace.com/camping-fan-heater-vs-kerosene-heater-600w-guide"
         ],
+        "unindexedUrlsSubmitted": 22,
         "google": {
           "status": "submitted",
           "method": "sitemap",
           "property": "https://www.nolplace.com/",
           "sitemap": "https://www.nolplace.com/sitemap.xml",
-          "indexed": null
+          "rss": "https://www.nolplace.com/rss.xml",
+          "submittedAt": "2026-10-19T00:53:42.956532+09:00",
+          "indexed": 5
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 27,
-          "indexed": null
+          "submittedCount": 22,
+          "unindexedCount": 22,
+          "submittedAt": "2026-10-19T00:53:42.956532+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": false,
+            "directCrawlSubmitted": 0
+          }
         }
       },
       "posts": {
@@ -26206,7 +26263,7 @@
         "total": 27,
         "complete": true,
         "source": "https://www.nolplace.com/api/posts",
-        "checkedAt": "2026-10-18T13:43:29.440045+00:00"
+        "checkedAt": "2026-10-18T15:39:55.666305+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -26243,7 +26300,7 @@
           "https://www.nolplace.com/chabak-electric-blanket-powerbank-capacity-12v-carbon-mat-guide",
           "https://www.nolplace.com/camping-fan-heater-vs-kerosene-heater-600w-guide"
         ],
-        "checkedAt": "2026-10-18T13:51:32.972679+00:00",
+        "checkedAt": "2026-10-18T15:53:40.129432+00:00",
         "source": "https://www.nolplace.com/sitemap.xml"
       },
       "google": {
@@ -26254,7 +26311,7 @@
         "inspected": 27,
         "inventoryTotal": 27,
         "complete": true,
-        "checkedAt": "2026-10-18T13:43:30.280682+00:00",
+        "checkedAt": "2026-10-18T15:39:56.095942+00:00",
         "reason": null,
         "apiBudgetExhausted": false,
         "apiAttemptedCount": 0,
@@ -26658,20 +26715,14 @@
         "source": "GA4 Data API",
         "property": "556141438",
         "hostname": "www.nolplace.com",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 6,
-        "pageViews": 5,
+        "sessions": 11,
+        "pageViews": 15,
         "naverReferralSessions": 0,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 0,
-            "pageViews": 0,
-            "users": 0
-          },
           {
             "day": "2026-10-11",
             "sessions": 1,
@@ -26707,9 +26758,15 @@
             "sessions": 1,
             "pageViews": 1,
             "users": 1
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 5,
+            "pageViews": 10,
+            "users": 3
           }
         ],
-        "checkedAt": "2026-10-18T13:43:33.114933+00:00",
+        "checkedAt": "2026-10-18T15:39:58.289626+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556141438:runReport"
       }
     },
@@ -26719,9 +26776,9 @@
         "url": "https://www.smilenote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:42.784511+00:00",
+      "checkedAt": "2026-10-18T15:55:33.213986+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:42.586164+09:00",
+        "requestedAt": "2026-10-19T00:55:32.974314+09:00",
         "urls": [
           "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
           "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
@@ -26805,11 +26862,12 @@
           "https://www.smilenote.kr/오늘의-유머-모음-2026-당신의-웃음-버튼을-누를-10가지-역대급",
           "https://www.smilenote.kr/반려동물-행동-교정-팁-2026-3가지-핵심으로-우리-강아지-행복-찾기"
         ],
+        "unindexedUrlsSubmitted": 81,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:42.586164+09:00",
+          "submittedAt": "2026-10-19T00:55:32.974314+09:00",
           "indexed": null
         },
         "naver": {
@@ -26817,7 +26875,13 @@
           "method": "IndexNow",
           "httpStatus": 200,
           "submittedCount": 81,
-          "indexed": null
+          "unindexedCount": 81,
+          "submittedAt": "2026-10-19T00:53:43.027380+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": false,
+            "directCrawlSubmitted": 0
+          }
         }
       },
       "posts": {
@@ -26991,7 +27055,7 @@
         "total": 81,
         "complete": true,
         "source": "https://www.smilenote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:43:40.016265+00:00"
+        "checkedAt": "2026-10-18T15:39:58.913489+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -27082,31 +27146,30 @@
           "https://www.smilenote.kr/오늘의-유머-모음-2026-당신의-웃음-버튼을-누를-10가지-역대급",
           "https://www.smilenote.kr/반려동물-행동-교정-팁-2026-3가지-핵심으로-우리-강아지-행복-찾기"
         ],
-        "checkedAt": "2026-10-18T13:51:34.550678+00:00",
+        "checkedAt": "2026-10-18T15:53:40.699945+00:00",
         "source": "https://www.smilenote.kr/sitemap.xml"
       },
       "google": {
-        "status": "partial",
+        "status": "collected",
         "source": "Google URL Inspection (API / owner UI)",
         "property": "https://www.smilenote.kr/",
         "indexed": 0,
-        "inspected": 80,
+        "inspected": 81,
         "inventoryTotal": 81,
-        "complete": false,
-        "checkedAt": "2026-10-18T13:43:40.868730+00:00",
-        "reason": "ReadTimeout: 원천 연결 실패 (비밀정보 생략)",
-        "apiBudgetExhausted": true,
-        "apiAttemptedCount": 0,
+        "complete": true,
+        "checkedAt": "2026-10-18T15:40:06.527285+00:00",
+        "reason": null,
+        "apiBudgetExhausted": false,
+        "apiAttemptedCount": 1,
         "propertyScopeVerified": true,
         "entries": {},
-        "apiAttemptStatus": "deferred_budget",
         "urls": [
           {
             "url": "https://www.smilenote.kr/health-information-ontology-portal",
-            "checkedAt": "2026-10-17T13:10:01.478361+00:00",
-            "attemptAt": "2026-10-17T13:10:01.478361+00:00",
+            "checkedAt": "2026-10-18T14:08:23.320913+00:00",
+            "attemptAt": "2026-10-18T14:08:23.320913+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:10:01.478361+00:00",
+            "lastSuccessAt": "2026-10-18T14:08:23.320913+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -27117,10 +27180,10 @@
           },
           {
             "url": "https://www.smilenote.kr/2026-2027-influenza-vaccination-schedule-eligibility",
-            "checkedAt": "2026-10-17T13:42:03.013596+00:00",
-            "attemptAt": "2026-10-17T13:42:03.013596+00:00",
+            "checkedAt": "2026-10-18T14:08:37.389526+00:00",
+            "attemptAt": "2026-10-18T14:08:37.389526+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:42:03.013596+00:00",
+            "lastSuccessAt": "2026-10-18T14:08:37.389526+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -27131,10 +27194,10 @@
           },
           {
             "url": "https://www.smilenote.kr/jang-geon-gang-microbiome-2026",
-            "checkedAt": "2026-10-17T13:42:10.435996+00:00",
-            "attemptAt": "2026-10-17T13:42:10.435996+00:00",
+            "checkedAt": "2026-10-18T14:40:00.624465+00:00",
+            "attemptAt": "2026-10-18T14:40:00.624465+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:42:10.435996+00:00",
+            "lastSuccessAt": "2026-10-18T14:40:00.624465+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -27145,10 +27208,10 @@
           },
           {
             "url": "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour",
-            "checkedAt": "2026-10-17T14:37:43.993002+00:00",
-            "attemptAt": "2026-10-17T14:37:43.993002+00:00",
+            "checkedAt": "2026-10-18T14:40:07.615241+00:00",
+            "attemptAt": "2026-10-18T14:40:07.615241+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:37:43.993002+00:00",
+            "lastSuccessAt": "2026-10-18T14:40:07.615241+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -27159,10 +27222,10 @@
           },
           {
             "url": "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits",
-            "checkedAt": "2026-10-17T14:37:58.386666+00:00",
-            "attemptAt": "2026-10-17T14:37:58.386666+00:00",
+            "checkedAt": "2026-10-18T15:09:50.976946+00:00",
+            "attemptAt": "2026-10-18T15:09:50.976946+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:37:58.386666+00:00",
+            "lastSuccessAt": "2026-10-18T15:09:50.976946+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -27173,10 +27236,10 @@
           },
           {
             "url": "https://www.smilenote.kr/excel-freeze-first-row-column-b2",
-            "checkedAt": "2026-10-17T15:08:35.035110+00:00",
-            "attemptAt": "2026-10-17T15:08:35.035110+00:00",
+            "checkedAt": "2026-10-18T15:09:58.292870+00:00",
+            "attemptAt": "2026-10-18T15:09:58.292870+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:08:35.035110+00:00",
+            "lastSuccessAt": "2026-10-18T15:09:58.292870+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -27929,10 +27992,10 @@
           },
           {
             "url": "https://www.smilenote.kr/happy-daily-habits-20260517",
-            "checkedAt": "2026-10-17T15:08:42.325884+00:00",
-            "attemptAt": "2026-10-17T15:08:42.325884+00:00",
+            "checkedAt": "2026-10-18T15:10:05.701447+00:00",
+            "attemptAt": "2026-10-18T15:10:05.701447+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:08:42.325884+00:00",
+            "lastSuccessAt": "2026-10-18T15:10:05.701447+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -28181,26 +28244,24 @@
           },
           {
             "url": "https://www.smilenote.kr/2026-flu-vaccination-pregnant-children-schedule",
-            "checkedAt": "2026-10-17T13:09:54.031562+00:00",
-            "attemptAt": "2026-10-18T13:12:58.224975+00:00",
-            "attemptStatus": "failed",
-            "lastSuccessAt": "2026-10-17T13:09:54.031562+00:00",
+            "checkedAt": "2026-10-18T15:40:06.527270+00:00",
+            "attemptAt": "2026-10-18T15:40:06.527270+00:00",
+            "attemptStatus": "verified",
+            "lastSuccessAt": "2026-10-18T15:40:06.527270+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
-            "indexed": null,
+            "indexed": false,
             "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
-            "googleCanonical": null,
-            "reason": "ReadTimeout: 원천 연결 실패 (비밀정보 생략)",
-            "retryAt": "2026-10-18T13:42:58.224975+00:00"
+            "googleCanonical": null
           },
           {
             "url": "https://www.smilenote.kr/kidney-stone-water-prevention",
-            "checkedAt": "2026-10-17T14:37:51.038873+00:00",
-            "attemptAt": "2026-10-17T14:37:51.038873+00:00",
+            "checkedAt": "2026-10-18T14:40:15.059600+00:00",
+            "attemptAt": "2026-10-18T14:40:15.059600+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:37:51.038873+00:00",
+            "lastSuccessAt": "2026-10-18T14:40:15.059600+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -28211,10 +28272,10 @@
           },
           {
             "url": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
-            "checkedAt": "2026-10-17T13:41:55.949192+00:00",
-            "attemptAt": "2026-10-17T13:41:55.949192+00:00",
+            "checkedAt": "2026-10-18T14:08:30.326684+00:00",
+            "attemptAt": "2026-10-18T14:08:30.326684+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:41:55.949192+00:00",
+            "lastSuccessAt": "2026-10-18T14:08:30.326684+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -28240,14 +28301,14 @@
         ],
         "collection": {
           "total": 81,
-          "currentInspected": 80,
+          "currentInspected": 81,
           "everInspected": 81,
           "staleInspected": 0,
-          "failed": 1,
-          "unresolvedInspected": 1,
+          "failed": 0,
+          "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:12:58.224975+00:00"
+          "lastAttemptAt": "2026-10-18T15:40:06.527270+00:00"
         }
       },
       "traffic": {
@@ -28256,20 +28317,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.smilenote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 11,
-        "pageViews": 11,
+        "sessions": 7,
+        "pageViews": 7,
         "naverReferralSessions": 0,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 4,
-            "pageViews": 4,
-            "users": 4
-          },
           {
             "day": "2026-10-11",
             "sessions": 2,
@@ -28305,9 +28360,15 @@
             "sessions": 2,
             "pageViews": 2,
             "users": 2
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 0,
+            "pageViews": 0,
+            "users": 0
           }
         ],
-        "checkedAt": "2026-10-18T13:43:43.561960+00:00",
+        "checkedAt": "2026-10-18T15:40:07.587166+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -28317,9 +28378,9 @@
         "url": "https://www.soulnote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:48.302068+00:00",
+      "checkedAt": "2026-10-18T15:55:50.639919+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:48.190231+09:00",
+        "requestedAt": "2026-10-19T00:55:50.328723+09:00",
         "urls": [
           "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
           "https://www.soulnote.kr/bullet-journal-migration-task-management",
@@ -28398,19 +28459,27 @@
           "https://www.soulnote.kr/2026년-스트레스-해소법-나를-위한-5가지-위로법",
           "https://www.soulnote.kr/2026년-불안감-해소-마음-편해지는-심리-연습-5가지"
         ],
+        "unindexedUrlsSubmitted": 40,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:48.190231+09:00",
+          "submittedAt": "2026-10-19T00:55:50.328723+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 76,
-          "indexed": null
+          "submittedCount": 40,
+          "unindexedCount": 40,
+          "submittedAt": "2026-10-19T00:53:46.775416+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://soulnote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -28574,7 +28643,7 @@
         "total": 76,
         "complete": true,
         "source": "https://www.soulnote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:37:32.067146+00:00"
+        "checkedAt": "2026-10-18T15:40:09.985770+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -28660,7 +28729,7 @@
           "https://www.soulnote.kr/2026년-스트레스-해소법-나를-위한-5가지-위로법",
           "https://www.soulnote.kr/2026년-불안감-해소-마음-편해지는-심리-연습-5가지"
         ],
-        "checkedAt": "2026-10-18T13:51:35.578327+00:00",
+        "checkedAt": "2026-10-18T15:53:40.916272+00:00",
         "source": "https://www.soulnote.kr/sitemap.xml"
       },
       "google": {
@@ -28671,10 +28740,10 @@
         "inspected": 76,
         "inventoryTotal": 76,
         "complete": true,
-        "checkedAt": "2026-10-18T13:37:54.936631+00:00",
+        "checkedAt": "2026-10-18T15:40:11.933873+00:00",
         "reason": null,
         "apiBudgetExhausted": false,
-        "apiAttemptedCount": 3,
+        "apiAttemptedCount": 0,
         "propertyScopeVerified": true,
         "entries": {},
         "urls": [
@@ -28792,15 +28861,15 @@
           },
           {
             "url": "https://www.soulnote.kr/online-passport-renewal-minors-eligibility",
-            "checkedAt": "2026-10-17T13:42:26.122223+00:00",
-            "attemptAt": "2026-10-17T13:42:26.122223+00:00",
+            "checkedAt": "2026-10-18T14:08:51.945180+00:00",
+            "attemptAt": "2026-10-18T14:08:51.945180+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:42:26.122223+00:00",
+            "lastSuccessAt": "2026-10-18T14:08:51.945180+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "Discovered - currently not indexed",
+            "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
@@ -29548,15 +29617,15 @@
           },
           {
             "url": "https://www.soulnote.kr/reading-note-template-recommendation",
-            "checkedAt": "2026-10-17T13:42:33.388886+00:00",
-            "attemptAt": "2026-10-17T13:42:33.388886+00:00",
+            "checkedAt": "2026-10-18T14:08:58.953393+00:00",
+            "attemptAt": "2026-10-18T14:08:58.953393+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:42:33.388886+00:00",
+            "lastSuccessAt": "2026-10-18T14:08:58.953393+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
@@ -29752,7 +29821,7 @@
           "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:37:54.936614+00:00"
+          "lastAttemptAt": "2026-10-18T14:08:58.953393+00:00"
         }
       },
       "traffic": {
@@ -29761,20 +29830,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.soulnote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
         "sessions": 11,
         "pageViews": 12,
-        "naverReferralSessions": 1,
+        "naverReferralSessions": 2,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 1,
-            "pageViews": 1,
-            "users": 1
-          },
           {
             "day": "2026-10-11",
             "sessions": 0,
@@ -29810,9 +29873,15 @@
             "sessions": 1,
             "pageViews": 1,
             "users": 1
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 1,
+            "pageViews": 1,
+            "users": 1
           }
         ],
-        "checkedAt": "2026-10-18T13:37:57.533376+00:00",
+        "checkedAt": "2026-10-18T15:40:13.999839+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -29822,9 +29891,9 @@
         "url": "https://www.topnote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:53.746122+00:00",
+      "checkedAt": "2026-10-18T15:56:05.206840+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:53.618800+09:00",
+        "requestedAt": "2026-10-19T00:56:05.073270+09:00",
         "urls": [
           "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
           "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
@@ -29903,11 +29972,12 @@
           "https://www.topnote.kr/놓치면-후회-2026년-IT-트렌드-핵심-5가지-분석",
           "https://www.topnote.kr/2026년-지금-가장-많이-쓰는-인기-앱-TOP-10-놓치면-후회"
         ],
+        "unindexedUrlsSubmitted": 76,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:53.618800+09:00",
+          "submittedAt": "2026-10-19T00:56:05.073270+09:00",
           "indexed": null
         },
         "naver": {
@@ -29915,7 +29985,14 @@
           "method": "IndexNow",
           "httpStatus": 200,
           "submittedCount": 76,
-          "indexed": null
+          "unindexedCount": 76,
+          "submittedAt": "2026-10-19T00:53:47.330648+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://topnote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -30079,7 +30156,7 @@
         "total": 76,
         "complete": true,
         "source": "https://www.topnote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:37:58.150478+00:00"
+        "checkedAt": "2026-10-18T15:40:17.145955+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -30165,7 +30242,7 @@
           "https://www.topnote.kr/놓치면-후회-2026년-IT-트렌드-핵심-5가지-분석",
           "https://www.topnote.kr/2026년-지금-가장-많이-쓰는-인기-앱-TOP-10-놓치면-후회"
         ],
-        "checkedAt": "2026-10-18T13:51:35.558733+00:00",
+        "checkedAt": "2026-10-18T15:53:41.326056+00:00",
         "source": "https://www.topnote.kr/sitemap.xml"
       },
       "google": {
@@ -30176,9 +30253,9 @@
         "inspected": 76,
         "inventoryTotal": 76,
         "complete": true,
-        "checkedAt": "2026-10-18T13:38:22.960158+00:00",
+        "checkedAt": "2026-10-18T15:40:19.060396+00:00",
         "apiBudgetExhausted": false,
-        "apiAttemptedCount": 3,
+        "apiAttemptedCount": 0,
         "propertyScopeVerified": true,
         "entries": {},
         "reason": null,
@@ -30213,10 +30290,10 @@
           },
           {
             "url": "https://www.topnote.kr/wifi-router-channel-speed-optimization-5ghz-settings",
-            "checkedAt": "2026-10-17T15:09:02.967835+00:00",
-            "attemptAt": "2026-10-17T15:09:02.967835+00:00",
+            "checkedAt": "2026-10-18T15:10:28.065296+00:00",
+            "attemptAt": "2026-10-18T15:10:28.065296+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:09:02.967835+00:00",
+            "lastSuccessAt": "2026-10-18T15:10:28.065296+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -30255,10 +30332,10 @@
           },
           {
             "url": "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2",
-            "checkedAt": "2026-10-17T13:42:53.331763+00:00",
-            "attemptAt": "2026-10-17T13:42:53.331763+00:00",
+            "checkedAt": "2026-10-18T14:09:26.385159+00:00",
+            "attemptAt": "2026-10-18T14:09:26.385159+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:42:53.331763+00:00",
+            "lastSuccessAt": "2026-10-18T14:09:26.385159+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -30269,10 +30346,10 @@
           },
           {
             "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide",
-            "checkedAt": "2026-10-17T13:43:00.729777+00:00",
-            "attemptAt": "2026-10-17T13:43:00.729777+00:00",
+            "checkedAt": "2026-10-18T14:09:33.657119+00:00",
+            "attemptAt": "2026-10-18T14:09:33.657119+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:43:00.729777+00:00",
+            "lastSuccessAt": "2026-10-18T14:09:33.657119+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -30283,10 +30360,10 @@
           },
           {
             "url": "https://www.topnote.kr/chrome-incognito-download-history-scope",
-            "checkedAt": "2026-10-17T14:38:20.245474+00:00",
-            "attemptAt": "2026-10-17T14:38:20.245474+00:00",
+            "checkedAt": "2026-10-18T14:40:32.387583+00:00",
+            "attemptAt": "2026-10-18T14:40:32.387583+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:38:20.245474+00:00",
+            "lastSuccessAt": "2026-10-18T14:40:32.387583+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -30675,10 +30752,10 @@
           },
           {
             "url": "https://www.topnote.kr/새벽-트렌드-2026-놓치면-후회할-5가지-혁신-기술",
-            "checkedAt": "2026-10-17T13:42:46.050711+00:00",
-            "attemptAt": "2026-10-17T13:42:46.050711+00:00",
+            "checkedAt": "2026-10-18T14:09:19.112808+00:00",
+            "attemptAt": "2026-10-18T14:09:19.112808+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T13:42:46.050711+00:00",
+            "lastSuccessAt": "2026-10-18T14:09:19.112808+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -30773,10 +30850,10 @@
           },
           {
             "url": "https://www.topnote.kr/초동시각-숏폼보다-게임이려면-2026년-3가지-핵심-전략",
-            "checkedAt": "2026-10-17T14:38:27.819545+00:00",
-            "attemptAt": "2026-10-17T14:38:27.819545+00:00",
+            "checkedAt": "2026-10-18T14:40:39.855569+00:00",
+            "attemptAt": "2026-10-18T14:40:39.855569+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:38:27.819545+00:00",
+            "lastSuccessAt": "2026-10-18T14:40:39.855569+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -30899,10 +30976,10 @@
           },
           {
             "url": "https://www.topnote.kr/사무실-의자-추천-비교-편안함과-효율성을-높이는-선택-가이드",
-            "checkedAt": "2026-10-17T15:09:09.991347+00:00",
-            "attemptAt": "2026-10-17T15:09:09.991347+00:00",
+            "checkedAt": "2026-10-18T15:10:35.071360+00:00",
+            "attemptAt": "2026-10-18T15:10:35.071360+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T15:09:09.991347+00:00",
+            "lastSuccessAt": "2026-10-18T15:10:35.071360+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -31109,10 +31186,10 @@
           },
           {
             "url": "https://www.topnote.kr/geunro-jangryeogeum-jigeubil-hwagin",
-            "checkedAt": "2026-10-17T14:38:35.215346+00:00",
-            "attemptAt": "2026-10-17T14:38:35.215346+00:00",
+            "checkedAt": "2026-10-18T14:40:47.004082+00:00",
+            "attemptAt": "2026-10-18T14:40:47.004082+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:38:35.215346+00:00",
+            "lastSuccessAt": "2026-10-18T14:40:47.004082+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -31257,7 +31334,7 @@
           "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:38:22.960142+00:00"
+          "lastAttemptAt": "2026-10-18T15:10:35.071360+00:00"
         }
       },
       "traffic": {
@@ -31266,20 +31343,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.topnote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 17,
-        "pageViews": 18,
-        "naverReferralSessions": 6,
+        "sessions": 24,
+        "pageViews": 28,
+        "naverReferralSessions": 7,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 4,
-            "pageViews": 4,
-            "users": 4
-          },
           {
             "day": "2026-10-11",
             "sessions": 3,
@@ -31315,9 +31386,15 @@
             "sessions": 1,
             "pageViews": 1,
             "users": 1
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 11,
+            "pageViews": 14,
+            "users": 11
           }
         ],
-        "checkedAt": "2026-10-18T13:38:24.189258+00:00",
+        "checkedAt": "2026-10-18T15:40:21.992637+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     },
@@ -31327,9 +31404,9 @@
         "url": "https://www.tripmarvel.com/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:52:59.894652+00:00",
+      "checkedAt": "2026-10-18T15:56:14.911565+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:52:59.781642+09:00",
+        "requestedAt": "2026-10-19T00:56:14.780890+09:00",
         "urls": [
           "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
           "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide",
@@ -31510,19 +31587,27 @@
           "https://www.tripmarvel.com/2026년-해외여행-보험-비교-직접-겪어보고-작성한-필수",
           "https://www.tripmarvel.com/캠핑-용품-추천-2026년-실전-경험-바탕의-필수-장비-가"
         ],
+        "unindexedUrlsSubmitted": 106,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:52:59.781642+09:00",
+          "submittedAt": "2026-10-19T00:56:14.780890+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 178,
-          "indexed": null
+          "submittedCount": 106,
+          "unindexedCount": 106,
+          "submittedAt": "2026-10-19T00:53:48.634845+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.tripmarvel.com",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -31890,7 +31975,7 @@
         "total": 178,
         "complete": true,
         "source": "https://www.tripmarvel.com/api/posts",
-        "checkedAt": "2026-10-18T13:38:29.192719+00:00"
+        "checkedAt": "2026-10-18T15:40:24.652427+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -32078,7 +32163,7 @@
           "https://www.tripmarvel.com/2026년-해외여행-보험-비교-직접-겪어보고-작성한-필수",
           "https://www.tripmarvel.com/캠핑-용품-추천-2026년-실전-경험-바탕의-필수-장비-가"
         ],
-        "checkedAt": "2026-10-18T13:51:33.985733+00:00",
+        "checkedAt": "2026-10-18T15:53:44.002123+00:00",
         "source": "https://www.tripmarvel.com/sitemap.xml"
       },
       "google": {
@@ -32086,10 +32171,10 @@
         "source": "Google Search Console URL Inspection",
         "property": "https://www.tripmarvel.com/",
         "indexed": 63,
-        "inspected": 137,
+        "inspected": 140,
         "inventoryTotal": 178,
         "complete": false,
-        "checkedAt": "2026-10-18T13:38:51.591379+00:00",
+        "checkedAt": "2026-10-18T15:40:50.894515+00:00",
         "apiBudgetExhausted": false,
         "apiAttemptedCount": 3,
         "propertyScopeVerified": true,
@@ -34130,94 +34215,94 @@
           },
           {
             "url": "https://www.tripmarvel.com/fukuoka-summer-family-course-guide",
-            "checkedAt": "2026-10-17T02:41:36.227784+00:00",
-            "attemptAt": "2026-10-17T02:41:36.227784+00:00",
+            "checkedAt": "2026-10-18T14:09:50.580873+00:00",
+            "attemptAt": "2026-10-18T14:09:50.580873+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T02:41:36.227784+00:00",
+            "lastSuccessAt": "2026-10-18T14:09:50.580873+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/baegun-valley-pocheon-parking-free-seat-safety",
-            "checkedAt": "2026-10-17T02:41:43.442692+00:00",
-            "attemptAt": "2026-10-17T02:41:43.442692+00:00",
+            "checkedAt": "2026-10-18T14:09:57.830952+00:00",
+            "attemptAt": "2026-10-18T14:09:57.830952+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T02:41:43.442692+00:00",
+            "lastSuccessAt": "2026-10-18T14:09:57.830952+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/siheung-wavepark-summer-entry-preparation",
-            "checkedAt": "2026-10-17T02:41:51.014704+00:00",
-            "attemptAt": "2026-10-17T02:41:51.014704+00:00",
+            "checkedAt": "2026-10-18T14:10:05.112418+00:00",
+            "attemptAt": "2026-10-18T14:10:05.112418+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T02:41:51.014704+00:00",
+            "lastSuccessAt": "2026-10-18T14:10:05.112418+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/mokpo-fireworks-haesangwshow-next-schedule-2026",
-            "checkedAt": "2026-10-17T03:11:19.408856+00:00",
-            "attemptAt": "2026-10-17T03:11:19.408856+00:00",
+            "checkedAt": "2026-10-18T14:41:01.465823+00:00",
+            "attemptAt": "2026-10-18T14:41:01.465823+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T03:11:19.408856+00:00",
+            "lastSuccessAt": "2026-10-18T14:41:01.465823+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/hadong-seiam-valley-parking-water-play-preparation",
-            "checkedAt": "2026-10-17T03:11:26.407743+00:00",
-            "attemptAt": "2026-10-17T03:11:26.407743+00:00",
+            "checkedAt": "2026-10-18T14:41:08.484156+00:00",
+            "attemptAt": "2026-10-18T14:41:08.484156+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T03:11:26.407743+00:00",
+            "lastSuccessAt": "2026-10-18T14:41:08.484156+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/shanghai-travel-3n4d-itinerary-stay-booking-2026",
-            "checkedAt": "2026-10-17T03:11:33.407691+00:00",
-            "attemptAt": "2026-10-17T03:11:33.407691+00:00",
+            "checkedAt": "2026-10-18T14:41:15.727218+00:00",
+            "attemptAt": "2026-10-18T14:41:15.727218+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T03:11:33.407691+00:00",
+            "lastSuccessAt": "2026-10-18T14:41:15.727218+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/hapcheon-ghost-park-2026-visit-guide",
-            "checkedAt": "2026-10-17T03:40:22.338974+00:00",
-            "attemptAt": "2026-10-17T03:40:22.338974+00:00",
+            "checkedAt": "2026-10-18T15:10:49.529218+00:00",
+            "attemptAt": "2026-10-18T15:10:49.529218+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T03:40:22.338974+00:00",
+            "lastSuccessAt": "2026-10-18T15:10:49.529218+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -34228,10 +34313,10 @@
           },
           {
             "url": "https://www.tripmarvel.com/gapyeong-villapuz-booking-extra-costs",
-            "checkedAt": "2026-10-17T03:40:29.604020+00:00",
-            "attemptAt": "2026-10-17T03:40:29.604020+00:00",
+            "checkedAt": "2026-10-18T15:10:56.975159+00:00",
+            "attemptAt": "2026-10-18T15:10:56.975159+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T03:40:29.604020+00:00",
+            "lastSuccessAt": "2026-10-18T15:10:56.975159+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -34242,24 +34327,24 @@
           },
           {
             "url": "https://www.tripmarvel.com/kumamoto-location-earthquake-travel-booking-check-2026",
-            "checkedAt": "2026-10-17T03:40:36.608655+00:00",
-            "attemptAt": "2026-10-17T03:40:36.608655+00:00",
+            "checkedAt": "2026-10-18T15:11:04.210095+00:00",
+            "attemptAt": "2026-10-18T15:11:04.210095+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T03:40:36.608655+00:00",
+            "lastSuccessAt": "2026-10-18T15:11:04.210095+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.tripmarvel.com/태풍-돌핀-예상경로-항공편-여행-확인법-2026",
-            "checkedAt": "2026-10-17T04:10:25.861737+00:00",
-            "attemptAt": "2026-10-17T04:10:25.861737+00:00",
+            "checkedAt": "2026-10-18T15:40:35.661426+00:00",
+            "attemptAt": "2026-10-18T15:40:35.661426+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T04:10:25.861737+00:00",
+            "lastSuccessAt": "2026-10-18T15:40:35.661426+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -34270,10 +34355,10 @@
           },
           {
             "url": "https://www.tripmarvel.com/chamakase-miwoosae-location-price-check",
-            "checkedAt": "2026-10-17T04:10:32.847188+00:00",
-            "attemptAt": "2026-10-17T04:10:32.847188+00:00",
+            "checkedAt": "2026-10-18T15:40:43.281481+00:00",
+            "attemptAt": "2026-10-18T15:40:43.281481+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T04:10:32.847188+00:00",
+            "lastSuccessAt": "2026-10-18T15:40:43.281481+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -34284,15 +34369,15 @@
           },
           {
             "url": "https://www.tripmarvel.com/sonocalm-gyeongju-family-pool-spa-booking",
-            "checkedAt": "2026-10-17T04:10:40.122686+00:00",
-            "attemptAt": "2026-10-17T04:10:40.122686+00:00",
+            "checkedAt": "2026-10-18T15:40:50.894495+00:00",
+            "attemptAt": "2026-10-18T15:40:50.894495+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T04:10:40.122686+00:00",
+            "lastSuccessAt": "2026-10-18T15:40:50.894495+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "URL is unknown to Google",
+            "coverageState": "Discovered - currently not indexed",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
@@ -34593,14 +34678,14 @@
         ],
         "collection": {
           "total": 178,
-          "currentInspected": 137,
+          "currentInspected": 140,
           "everInspected": 178,
-          "staleInspected": 40,
+          "staleInspected": 37,
           "failed": 1,
           "unresolvedInspected": 1,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:38:51.591358+00:00"
+          "lastAttemptAt": "2026-10-18T15:40:50.894495+00:00"
         }
       },
       "traffic": {
@@ -34609,20 +34694,14 @@
         "source": "GA4 Data API",
         "property": "494211832",
         "hostname": "www.tripmarvel.com",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 25,
-        "pageViews": 33,
+        "sessions": 27,
+        "pageViews": 35,
         "naverReferralSessions": 4,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 4,
-            "pageViews": 4,
-            "users": 4
-          },
           {
             "day": "2026-10-11",
             "sessions": 5,
@@ -34658,9 +34737,15 @@
             "sessions": 1,
             "pageViews": 1,
             "users": 1
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 6,
+            "pageViews": 6,
+            "users": 6
           }
         ],
-        "checkedAt": "2026-10-18T13:38:53.390230+00:00",
+        "checkedAt": "2026-10-18T15:40:53.597668+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/494211832:runReport"
       }
     },
@@ -34670,9 +34755,9 @@
         "url": "https://www.woorinote.kr/",
         "platform": "cf"
       },
-      "checkedAt": "2026-10-18T13:53:04.839647+00:00",
+      "checkedAt": "2026-10-18T15:56:20.973951+00:00",
       "indexingRequest": {
-        "requestedAt": "2026-10-18T22:53:04.682947+09:00",
+        "requestedAt": "2026-10-19T00:56:20.829960+09:00",
         "urls": [
           "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
           "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
@@ -34755,19 +34840,27 @@
           "https://www.woorinote.kr/2026년-어린이-안전-교육-우리-아이-첫걸음-필수-체크리스트",
           "https://www.woorinote.kr/육아휴직-급여-신청-2026년-최신-정보-놓치면-후회해요"
         ],
+        "unindexedUrlsSubmitted": 36,
         "google": {
           "status": "submitted",
           "method": "sitemap_ui",
           "account": "sj",
-          "submittedAt": "2026-10-18T22:53:04.682947+09:00",
+          "submittedAt": "2026-10-19T00:56:20.829960+09:00",
           "indexed": null
         },
         "naver": {
           "status": "submitted",
           "method": "IndexNow",
           "httpStatus": 200,
-          "submittedCount": 80,
-          "indexed": null
+          "submittedCount": 36,
+          "unindexedCount": 36,
+          "submittedAt": "2026-10-19T00:53:48.639832+09:00",
+          "indexed": null,
+          "searchAdvisorConsole": {
+            "verifiedInConsole": true,
+            "siteProperty": "https://www.woorinote.kr",
+            "directCrawlSubmitted": 5
+          }
         }
       },
       "posts": {
@@ -34939,7 +35032,7 @@
         "total": 80,
         "complete": true,
         "source": "https://www.woorinote.kr/api/posts",
-        "checkedAt": "2026-10-18T13:38:56.311935+00:00"
+        "checkedAt": "2026-10-18T15:40:54.466834+00:00"
       },
       "sitemap": {
         "status": "available",
@@ -35029,7 +35122,7 @@
           "https://www.woorinote.kr/2026년-어린이-안전-교육-우리-아이-첫걸음-필수-체크리스트",
           "https://www.woorinote.kr/육아휴직-급여-신청-2026년-최신-정보-놓치면-후회해요"
         ],
-        "checkedAt": "2026-10-18T13:51:33.927938+00:00",
+        "checkedAt": "2026-10-18T15:53:44.256420+00:00",
         "source": "https://www.woorinote.kr/sitemap.xml"
       },
       "google": {
@@ -35040,10 +35133,10 @@
         "inspected": 80,
         "inventoryTotal": 80,
         "complete": true,
-        "checkedAt": "2026-10-18T13:39:21.291640+00:00",
+        "checkedAt": "2026-10-18T15:40:56.445385+00:00",
         "reason": null,
         "apiBudgetExhausted": false,
-        "apiAttemptedCount": 3,
+        "apiAttemptedCount": 0,
         "propertyScopeVerified": true,
         "entries": {},
         "urls": [
@@ -35119,24 +35212,24 @@
           },
           {
             "url": "https://www.woorinote.kr/2026-youth-housing-dream-savings-account-guide",
-            "checkedAt": "2026-10-17T14:08:23.550975+00:00",
-            "attemptAt": "2026-10-17T14:08:23.550975+00:00",
+            "checkedAt": "2026-10-18T14:10:19.227140+00:00",
+            "attemptAt": "2026-10-18T14:10:19.227140+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:08:23.550975+00:00",
+            "lastSuccessAt": "2026-10-18T14:10:19.227140+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
             "indexed": false,
-            "coverageState": "Discovered - currently not indexed",
+            "coverageState": "URL is unknown to Google",
             "lastCrawlTime": null,
             "googleCanonical": null
           },
           {
             "url": "https://www.woorinote.kr/chrome-download-location-settings-and-history",
-            "checkedAt": "2026-10-17T14:08:30.659438+00:00",
-            "attemptAt": "2026-10-17T14:08:30.659438+00:00",
+            "checkedAt": "2026-10-18T14:10:26.518296+00:00",
+            "attemptAt": "2026-10-18T14:10:26.518296+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:08:30.659438+00:00",
+            "lastSuccessAt": "2026-10-18T14:10:26.518296+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -35147,10 +35240,10 @@
           },
           {
             "url": "https://www.woorinote.kr/gmail-undo-send-time-setting",
-            "checkedAt": "2026-10-17T14:08:38.003169+00:00",
-            "attemptAt": "2026-10-17T14:08:38.003169+00:00",
+            "checkedAt": "2026-10-18T14:10:33.797816+00:00",
+            "attemptAt": "2026-10-18T14:10:33.797816+00:00",
             "attemptStatus": "verified",
-            "lastSuccessAt": "2026-10-17T14:08:38.003169+00:00",
+            "lastSuccessAt": "2026-10-18T14:10:33.797816+00:00",
             "lastIndexed": false,
             "source": "Google Search Console URL Inspection",
             "verdict": "NEUTRAL",
@@ -36177,7 +36270,7 @@
           "unresolvedInspected": 0,
           "neverAttempted": 0,
           "neverInspected": 0,
-          "lastAttemptAt": "2026-10-18T13:39:21.291623+00:00"
+          "lastAttemptAt": "2026-10-18T14:10:33.797816+00:00"
         }
       },
       "traffic": {
@@ -36186,20 +36279,14 @@
         "source": "GA4 Data API",
         "property": "556127526",
         "hostname": "www.woorinote.kr",
-        "start": "2026-10-10",
-        "end": "2026-10-16",
+        "start": "2026-10-11",
+        "end": "2026-10-17",
         "timezone": "Asia/Seoul",
-        "sessions": 8,
-        "pageViews": 8,
+        "sessions": 9,
+        "pageViews": 9,
         "naverReferralSessions": 2,
         "referralScope": "sessionSource에 naver 포함; 계정별 브릿지 클릭수와 다름",
         "points": [
-          {
-            "day": "2026-10-10",
-            "sessions": 1,
-            "pageViews": 1,
-            "users": 1
-          },
           {
             "day": "2026-10-11",
             "sessions": 0,
@@ -36235,9 +36322,15 @@
             "sessions": 2,
             "pageViews": 2,
             "users": 2
+          },
+          {
+            "day": "2026-10-17",
+            "sessions": 2,
+            "pageViews": 2,
+            "users": 2
           }
         ],
-        "checkedAt": "2026-10-18T13:39:24.178360+00:00",
+        "checkedAt": "2026-10-18T15:40:59.064077+00:00",
         "sourceRef": "https://analyticsdata.googleapis.com/v1beta/properties/556127526:runReport"
       }
     }
@@ -36369,19 +36462,12 @@
     "status": "error",
     "checkedAt": "2026-10-15T05:09:40.406219+00:00",
     "apiCycle": {
-      "startedAt": "2026-10-18T13:37:29.732311+00:00",
+      "startedAt": "2026-10-18T15:37:26.600355+00:00",
       "budgetSeconds": 330,
       "perSiteLimit": 3,
-      "status": "partial_budget",
-      "nextDomain": "must-joy.com",
+      "status": "completed",
+      "nextDomain": "joynote.kr",
       "visitedDomains": [
-        "soulnote.kr",
-        "topnote.kr",
-        "tripmarvel.com",
-        "woorinote.kr",
-        "baronote.kr",
-        "daynote.kr",
-        "healthcox.com",
         "joynote.kr",
         "justinfo.co.kr",
         "maxnote.kr",
@@ -36390,18 +36476,29 @@
         "must-joy.com",
         "must-pick.com",
         "nolplace.com",
-        "smilenote.kr"
+        "smilenote.kr",
+        "soulnote.kr",
+        "topnote.kr",
+        "tripmarvel.com",
+        "woorinote.kr",
+        "baronote.kr",
+        "daynote.kr",
+        "healthcox.com"
       ],
-      "deferredDomains": [
-        "must-joy.com",
-        "must-pick.com",
-        "smilenote.kr"
-      ],
-      "finishedAt": "2026-10-18T13:43:45.578306+00:00"
+      "deferredDomains": [],
+      "finishedAt": "2026-10-18T15:42:33.115345+00:00"
     },
     "automaticUi": {
       "status": "skipped_api_verified",
       "attempted": 0
+    },
+    "lastAutoIndexerRun": {
+      "at": "2026-10-19T00:54:01.644422+09:00",
+      "domainsCount": 16,
+      "totalUnindexedSubmitted": 1327,
+      "totalUrlsSubmitted": 1255,
+      "searchAdvisorDirectCrawlAccount": "soultin@naver.com (CDP 9334)",
+      "searchAdvisorDirectCrawlSubmitted": 65
     }
   },
   "cleanupRepairVerifiedAt": "2026-10-15T06:05:35.327729+00:00"

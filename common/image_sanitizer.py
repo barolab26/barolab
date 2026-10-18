@@ -310,10 +310,10 @@ def crop_watermark_and_calibrate(
     clean_img = Image.frombytes("RGB", (w, h), src_rgb.tobytes())
 
     if is_generated and w >= 240 and h >= 180:
-        left = max(2, int(round(w * 0.014)))
-        top = max(2, int(round(h * 0.014)))
-        right = min(w - 2, int(round(w * (1.0 - 0.046))))
-        bottom = min(h - 2, int(round(h * (1.0 - 0.046))))
+        left = max(2, int(round(w * 0.018)))
+        top = max(2, int(round(h * 0.018)))
+        right = min(w - 2, int(round(w * (1.0 - 0.095))))
+        bottom = min(h - 2, int(round(h * (1.0 - 0.115))))
         if right > left + 100 and bottom > top + 100:
             cropped = clean_img.crop((left, top, right, bottom))
             clean_img = cropped.resize((w, h), Image.Resampling.LANCZOS)
@@ -497,6 +497,7 @@ DISHONEST_GENERATED_CAPTION_REPLACEMENTS: List[Tuple[str, str]] = [
     (r"(?<![가-힣])실사(?![가-힣])", "모습"),
     (r"정자체\s*가이드", "요약 안내"),
     (r"CHECKPOINT\s*#?\s*\d+", "핵심 포인트"),
+    (r"\(?\s*현장\s*체크포인트\s*안내\s*이미지\s*\d*\s*\)?", ""),
 ]
 
 
