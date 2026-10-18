@@ -1160,8 +1160,14 @@ def read_radar_data() -> Dict[str, Any]:
     }
 
 
-def format_radar_context_block() -> str:
+def format_radar_context_block(has_url: bool = False) -> str:
     d = read_radar_data()
+    if has_url:
+        return (
+            f"[레이더(@radar) 전용 실시간 채널 매핑 컨텍스트]\n"
+            f"- BaroLab 보유 채널: 16개 CF 버티컬 블로그(must-pick.com, baronote.kr, must-good.com, nolplace.com, topnote.kr, healthcox.com, tripmarvel.com, daynote.kr 등) + 5개 네이버 블로그(1호기 soultin 시니어브리프, 2호기 soul5373 머스트헬스뷰, 3호기 yoon_master 윤뷰스, 4호기 adinfo0905 직장인루틴, 5호기 stone0747 지원금속보) + 지식iN(일 20건) + Threads(일 4슬롯) + 앱 팩토리(apps.html)\n"
+            f"- 지침: URL이 주어졌으므로 기존 topic-scout-queue.json의 키워드(부모급여 등)는 절대 언급하지 말고, 오직 Step 1 도구(`extract_youtube_or_url`)가 추출한 실제 영상 자막 원문을 요약하고 BaroLab 채널 적용 전략 2~3가지를 제안할 것."
+        )
     rec_kw = (
         "\n".join(f"  · {k.get('keyword')} → 배정: {k.get('target')}" for k in d["recentScoutedKeywords"])
         if d["recentScoutedKeywords"]
@@ -1171,14 +1177,17 @@ def format_radar_context_block() -> str:
         f"[레이더(@radar) 전용 실시간 R&D·키워드 큐 조회값]\n"
         f"1. 유튜브/웹 자막 실측 분석 보고서 누적: {d['rndProposalsCount']}건\n"
         f"2. 현재 주제 큐(topic-scout-queue.json) 등록 키워드: {d['scoutQueueCount']}건\n"
-        f"{rec_kw}\n"
-        f"※ 주의: 현재 질문에 URL이 없을 때는 이전 유튜브 분석(예: 알파남 10일 만에 180만원 등)을 동문서답으로 읊지 말고 요청받은 키워드/전략만 답할 것!"
+        f"{rec_kw}"
     )
 
 
 def extract_youtube_or_url(url: str) -> Dict[str, Any]:
-    """Extract real transcript (`yt-dlp`) or webpage text from URL."""
-    from common.url_ingestor import build_radar_grounded_analysis, ingest_url
+    """Step 1 Tool: Extract real transcript (`yt-dlp`) or webpage text from URL and return full text + metadata."""
+    from common.url_ingestor import (
+        build_ingested_prompt_context,
+        build_radar_grounded_analysis,
+        ingest_url,
+    )
 
     ing = ingest_url(url)
     pid = os.getpid()
@@ -1189,19 +1198,29 @@ def extract_youtube_or_url(url: str) -> Dict[str, Any]:
             "pid": pid,
             "url": url,
             "ingested": ing,
+            "promptContext": build_ingested_prompt_context([ing]),
             "state": ing.get("error", "URL 추출 실패"),
             "badge": f"[실행 실패: 프로세스 PID {pid} / URL 자막·본문 추출 실패 ({ing.get('error', '')[:35]})]",
         }
     seg_cnt = int(ing.get("segmentCount") or 0)
     analysis = build_radar_grounded_analysis([ing], url)
+    prompt_ctx = build_ingested_prompt_context([ing])
     badge = f"[실행 완료: 프로세스 PID {pid} / URL 실측 추출 성공 (자막·본문 {seg_cnt}구간 검증)]"
     return {
         "ok": True,
         "tool": "extract_youtube_or_url",
         "pid": pid,
-        "url": url,
+        "url": ing.get("url") or url,
+        "videoId": ing.get("videoId", ""),
         "title": ing.get("title", ""),
+        "author": ing.get("author", ""),
+        "publishDate": ing.get("publishDate", ""),
         "segmentCount": seg_cnt,
+        "shortDescription": ing.get("shortDescription", ""),
+        "transcript": ing.get("transcript", ""),
+        "transcriptPlain": ing.get("transcriptPlain", ""),
+        "ingested": ing,
+        "promptContext": prompt_ctx,
         "analysis": analysis,
         "state": f"「{str(ing.get('title',''))[:28]}」 ({seg_cnt}구간 추출 완료)",
         "badge": badge,
@@ -1296,6 +1315,7 @@ def get_agent_live_context(slug: str, user_text: str = "") -> str:
         f"[시스템 실시간 한국 표준시(KST): {get_kst_now_str()}]\n"
         f"- 오늘 날짜는 {get_kst_now().strftime('%Y-%m-%d')}이며, 어제 날짜는 {(get_kst_now() - timedelta(days=1)).strftime('%Y-%m-%d')}, 내일 날짜는 {(get_kst_now() + timedelta(days=1)).strftime('%Y-%m-%d')}이다.\n"
     )
+    has_url = bool(re.search(r"https?://", user_text or ""))
     if slug == "publi":
         return clock_header + format_publi_context_block()
     if slug == "trace":
@@ -1305,7 +1325,7 @@ def get_agent_live_context(slug: str, user_text: str = "") -> str:
     if slug == "doctor":
         return clock_header + format_doctor_context_block()
     if slug == "radar":
-        return clock_header + format_radar_context_block()
+        return clock_header + format_radar_context_block(has_url=has_url)
     return clock_header + format_jarvis_context_block()
 
 
@@ -1342,8 +1362,10 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
 
 def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str, Any]]:
     """
-    Detect action/execution commands in `user_text` for `slug` and immediately execute
-    the corresponding real Python tool(s) in `agent_tools.py`.
+    Step 1 of the Tool-Calling Pipeline:
+    - If `user_text` contains a YouTube/web URL, execute `extract_youtube_or_url(url)` first so
+      the extracted title and full transcript/body text are returned to the caller.
+    - If `user_text` is an action/execution command, immediately execute the corresponding real Python tool(s).
     """
     clean = re.sub(r"@\S+", "", user_text or "").strip()
     lower = clean.lower()
@@ -1356,12 +1378,15 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
         )
     )
 
-    # URL extraction for @radar
-    urls = re.findall(r"https?://[^\s<>\"']+", clean)
+    urls = [u.rstrip(".,;:!?)") for u in re.findall(r"https?://[^\s<>\"']+", clean)]
+    if urls:
+        for u in urls[:2]:
+            executed.append(extract_youtube_or_url(u))
+        if slug == "radar":
+            return executed
+
     if slug == "radar":
-        if urls:
-            executed.append(extract_youtube_or_url(urls[0]))
-        elif is_action_intent or any(k in lower for k in ("키워드", "주제", "스카우트", "발굴", "추천")):
+        if is_action_intent or any(k in lower for k in ("키워드", "주제", "스카우트", "발굴", "추천")):
             cat = "정책·지원금" if "지원금" in lower or "정책" in lower else ("금융·연금" if "금융" in lower or "연금" in lower else "정책·금융·생활")
             executed.append(scout_high_value_keywords(cat))
         return executed
