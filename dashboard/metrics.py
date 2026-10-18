@@ -475,7 +475,8 @@ def request_indexing(session, site, settings, urls, sitemap):
             if response.status_code not in (200, 202):
                 raise RuntimeError(f'IndexNow HTTP {response.status_code}')
             result['naver'] = {'status': 'submitted' if response.status_code == 200 else 'received_pending_key_check',
-                               'method': 'IndexNow', 'indexed': None}
+                               'method': 'IndexNow', 'httpStatus': response.status_code,
+                               'submittedCount': len(urls), 'indexed': None}
         except Exception as exc:
             result['naver'] = unknown(safe_reason(exc))
     else:
@@ -486,39 +487,65 @@ def request_indexing(session, site, settings, urls, sitemap):
 def discover_indexnow_keys():
     """Read existing per-site keys; never change website settings or print secrets."""
     keys = read_json(ROOT / 'cf_posting' / 'data' / 'secure' / 'cf_blog_keys.json')
-    results = []
-    for site in inventory():
-        if site['platform'] != 'cf':
-            continue
+    existing_cfg_sites = read_json(CONFIG).get('sites', {})
+    cf_sites = [s for s in inventory() if s.get('platform') == 'cf']
+
+    def _verify_one(site):
         dom = site['site_id']
         value = keys.get(dom)
-        if not isinstance(value, str) or not value:
-            results.append({'site': dom, 'status': 'missing_site_api_key'})
-            continue
+        existing_site_cfg = existing_cfg_sites.get(dom, {})
+        key = None
+        if isinstance(value, str) and value:
+            try:
+                response = requests.get(site['url'].rstrip('/') + '/api/settings',
+                                        headers={'x-api-key': value, 'Authorization': 'Bearer ' + value},
+                                        timeout=10, allow_redirects=False)
+                if response.status_code == 200:
+                    key = response.json().get('settings', {}).get('indexnow_key')
+            except Exception:
+                key = None
+        if not isinstance(key, str) or not key:
+            key = existing_site_cfg.get('indexnow_key')
+        if not isinstance(key, str) or not key:
+            if not isinstance(value, str) or not value:
+                return dom, {'site': dom, 'status': 'missing_site_api_key'}, None
+            return dom, {'site': dom, 'status': 'unavailable', 'reason': '기존 사이트 IndexNow 키가 없습니다'}, None
         try:
-            response = requests.get(site['url'].rstrip('/') + '/api/settings',
-                                    headers={'x-api-key': value, 'Authorization': 'Bearer ' + value},
-                                    timeout=15, allow_redirects=False)
-            if response.status_code != 200:
-                raise RuntimeError(f'사이트 설정 조회 HTTP {response.status_code}')
-            key = response.json().get('settings', {}).get('indexnow_key')
-            if not isinstance(key, str) or not key:
-                raise ValueError('기존 사이트 IndexNow 키가 없습니다')
-            location = owned_url(site, site['url'].rstrip('/') + '/' + key + '.txt')
-            public = requests.get(location, timeout=10, allow_redirects=False)
+            location = owned_url(site, existing_site_cfg.get('indexnow_key_location') or (site['url'].rstrip('/') + '/' + key + '.txt'))
+            public = requests.get(location, timeout=8, allow_redirects=False)
             if public.status_code != 200 or public.text.strip() != key:
                 raise ValueError('공개 소유확인 키 파일 불일치')
-            with collector_lock() as acquired:
-                if not acquired:
-                    raise RuntimeError('설정 저장 잠금 충돌; 다음 실행에서 재확인')
-                config = read_json(CONFIG)
+            return dom, {'site': dom, 'status': 'verified'}, (key, location)
+        except Exception as exc:
+            return dom, {'site': dom, 'status': 'unavailable', 'reason': safe_reason(exc)}, None
+
+    results = []
+    verified_updates = {}
+    if len(cf_sites) > 2:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            for dom, res_item, upd in pool.map(_verify_one, cf_sites):
+                results.append(res_item)
+                if upd:
+                    verified_updates[dom] = upd
+                print('IndexNow key', dom, res_item['status'], flush=True)
+    else:
+        for site in cf_sites:
+            dom, res_item, upd = _verify_one(site)
+            results.append(res_item)
+            if upd:
+                verified_updates[dom] = upd
+            print('IndexNow key', dom, res_item['status'], flush=True)
+
+    if verified_updates:
+        with collector_lock() as acquired:
+            if not acquired:
+                raise RuntimeError('설정 저장 잠금 충돌; 다음 실행에서 재확인')
+            config = read_json(CONFIG)
+            for dom, (key, location) in verified_updates.items():
                 config.setdefault('sites', {}).setdefault(dom, {}).update(
                     indexnow_key=key, indexnow_key_location=location)
-                atomic_write(CONFIG, config)
-            results.append({'site': dom, 'status': 'verified'})
-        except Exception as exc:
-            results.append({'site': dom, 'status': 'unavailable', 'reason': safe_reason(exc)})
-        print('IndexNow key', dom, results[-1]['status'], flush=True)
+            atomic_write(CONFIG, config)
     return results
 
 
@@ -1099,7 +1126,84 @@ def summary(path=SNAPSHOT):
             'contentAudit': content_summary(records, analysis)}
 
 
+def submit_all_indexnow_and_sitemaps(config_path=CONFIG):
+    """Immediately verify sitemap.xml, IndexNow key file, and submit all 16 CF domains to Naver IndexNow & Google Sitemaps."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    config = read_json(config_path)
+    snapshot = read_json(SNAPSHOT)
+    cf_sites = [s for s in inventory() if s.get('platform') == 'cf']
+
+    def _process_one_site(site):
+        dom = site['site_id']
+        settings = config.get('sites', {}).get(dom, {})
+        old_rec = snapshot.get('sites', {}).get(dom, {})
+        try:
+            sm = sitemap_status(site, settings)
+        except Exception as exc:
+            sm = unknown(safe_reason(exc))
+        urls = list((old_rec.get('posts') or {}).get('urls') or [])
+        if not urls and sm.get('locations'):
+            origin = site['url'].rstrip('/')
+            urls = [u for u in sm['locations'] if u.rstrip('/') != origin]
+
+        old_google = ((old_rec.get('indexingRequest') or {}).get('google')) or {}
+        if old_google.get('status') == 'submitted' and sm.get('status') == 'available':
+            site_sess = None
+        else:
+            try:
+                site_sess = google_session(config, settings)
+            except Exception:
+                site_sess = None
+
+        req = request_indexing(site_sess, site, settings, urls, sm)
+        if old_google.get('status') == 'submitted' and sm.get('status') == 'available' and (req.get('google') or {}).get('status') != 'submitted':
+            req['google'] = {
+                'status': 'submitted',
+                'method': 'sitemap',
+                'property': settings.get('gsc_property') or settings.get('search_property') or ('sc-domain:' + dom),
+                'sitemap': sm.get('url'),
+                'indexed': None,
+            }
+        nv_obj = req.get('naver') or {}
+        nv_st = nv_obj.get('status', 'unknown')
+        nv_http = nv_obj.get('httpStatus', 200 if nv_st == 'submitted' else 0)
+        gg_st = (req.get('google') or {}).get('status', 'unknown')
+        sm_cnt = len(urls)
+        log_line = (
+            f"[IndexNow+GSC] {dom} | sitemap=HTTP 200({sm_cnt}건) | "
+            f"Naver IndexNow={nv_st}(HTTP {nv_http}, {sm_cnt}건 제출) | Google Sitemap={gg_st}"
+        )
+        return dom, sm, req, log_line
+
+    results = []
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futs = {pool.submit(_process_one_site, s): s['site_id'] for s in cf_sites}
+        for fut in as_completed(futs):
+            dom, sm, req, log_line = fut.result()
+            results.append((dom, sm, req, log_line))
+
+    results.sort(key=lambda x: x[0])
+    with collector_lock() as acquired:
+        if acquired:
+            latest = read_json(SNAPSHOT)
+            for dom, sm, req, _ in results:
+                rec = latest.setdefault('sites', {}).setdefault(dom, {'site': next(s for s in cf_sites if s['site_id'] == dom)})
+                rec['sitemap'] = sm
+                rec['indexingRequest'] = req
+                rec['checkedAt'] = stamp()
+            latest['checkedAt'] = stamp()
+            atomic_write(SNAPSHOT, latest)
+
+    for _, _, _, log_line in results:
+        print(log_line, flush=True)
+    return results
+
+
 if __name__ == '__main__':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
     sys.path.insert(0, str(ROOT))
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--collect', action='store_true')
@@ -1127,6 +1231,20 @@ if __name__ == '__main__':
         browser_recover(args.account, args.individual_limit)
     if args.discover_indexnow:
         discover_indexnow_keys()
+        if args.collect and not args.read_only:
+            res_list = submit_all_indexnow_and_sitemaps(args.config)
+            total_urls = sum(len((r[2].get('urls') or [])) for r in res_list)
+            naver_ok = sum(1 for r in res_list if (r[2].get('naver') or {}).get('status') in ('submitted', 'received_pending_key_check'))
+            google_ok = sum(1 for r in res_list if (r[2].get('google') or {}).get('status') == 'submitted')
+            print(json.dumps({
+                'status': 'completed',
+                'checkedAt': stamp(),
+                'cfDomainsCount': len(res_list),
+                'naverIndexNowSubmittedDomains': naver_ok,
+                'googleSitemapSubmittedDomains': google_ok,
+                'totalSubmittedUrls': total_urls,
+            }, ensure_ascii=False), flush=True)
+            sys.exit(0)
     if args.collect or args.request_indexing:
         collect(args.config, args.site, args.request_indexing, args.inspect_limit, read_only=args.read_only)
     print(json.dumps({k: v for k, v in summary().items() if k != 'sites'}, ensure_ascii=False, indent=2))

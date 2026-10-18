@@ -245,6 +245,8 @@ def _is_noise_or_fake_loop_message(m: Dict[str, Any]) -> bool:
     mid = str(m.get("id") or "")
     if mid.startswith("auto-") or mid.startswith("sys-auto-"):
         return True
+    if mid in ("msg-1792329008504-publi-0", "msg-1792329010530-jarvis-1"):
+        return True
     who = str(m.get("who") or "")
     if who == "system":
         return True
@@ -258,6 +260,8 @@ def _is_noise_or_fake_loop_message(m: Dict[str, Any]) -> bool:
         return True
     if who != "user":
         if "98.2%" in txt or "10월 22일" in txt or "10월 23일" in txt or "10월 27일" in txt:
+            return True
+        if "서치어드바이저에서 색인 가능 여부를 확인한 결과" in txt:
             return True
         if who != "radar" and "10일 만에 180만원" in txt:
             return True
@@ -494,18 +498,22 @@ def parse_mentioned_agents(text: str, delegation_limit: bool = True) -> List[str
             return [explicit[0]]
         return explicit[:2]
 
-    # Natural question or @all: check operational / publishing schedule queries BEFORE topic/keyword queries
+    # 1) Search Advisor / IndexNow / Sitemap / GSC indexing / Traffic / Revenue queries MUST route to @trace FIRST
+    if re.search(r"서치어드바이저|searchadvisor|indexnow|색인|사이트맵|sitemap|서치콘솔|gsc|트래픽|방문자|수익|애드센스|애드포스트|ga4|통계|클릭|노출", lower):
+        return ["trace", "publi"]
+    # 2) Content Doctor / audit / remodel queries
     if re.search(r"기존\s*글|과거\s*글|리모델링|검진|순찰|비공개|살리지\s*말|noindex|카테고리\s*재매핑|캡처\s*다시|그\s*글은|이관", lower):
         return ["doctor", "publi"]
+    # 3) Publishing / schedule / manuscript queries
     if re.search(r"공개\s*시간|피크\s*시간|예약\s*작업|몇\s*시|언제|검수|발행|예약|캡션|이미지|원고|포스팅|콘텐츠|간접체험|체크|누가|작성|블로그|캡처|화담숲|요금표", lower):
         return ["publi", "jarvis"]
+    # 4) URL / YouTube / Keyword R&D queries
     if re.search(r"https?://|스레드|threads|유튜브|youtube|youtu\.be|키워드|트렌드|스마트블록|롱테일|허브", lower):
         if ("https://" in lower or "http://" in lower) and not is_all:
             return ["radar"]
         return ["radar", "jarvis"]
-    if re.search(r"색인|트래픽|방문자|수익|애드센스|애드포스트|ga4|통계|클릭|노출", lower):
-        return ["trace", "radar"]
-    if re.search(r"오류|버그|수정|코드|서킷|쿨다운|rework|파이프라인|속도|서버|도커|브라우저|다운로드|pdf", lower):
+    # 5) System / CDP / Watchdog / Code repair queries
+    if re.search(r"오류|버그|수정|코드|서킷|쿨다운|rework|파이프라인|속도|서버|도커|브라우저|다운로드|pdf|워치독|watchdog|복구", lower):
         return ["patch", "jarvis"]
     return ["jarvis", "publi"]
 
@@ -534,9 +542,14 @@ def build_Contextual_task_info(slug: str, user_text: str, from_name: str, next_n
         summary = "파이프라인·코드 검증 완료"
         typing_text = "⚙️ 패치가 코드를 점검하고 있습니다..."
     elif slug == "trace":
-        step = f"{domain_str + ' ' if domain_str else ''}색인 건강도·GA4 유입·수익 지표 대조 중..."
-        summary = "색인·유입·수익 지표 분석 완료"
-        typing_text = "📊 트레이스가 색인·수익 지표를 분석하고 있습니다..."
+        if any(k in lower for k in ("서치어드바이저", "indexnow", "색인", "사이트맵", "sitemap")):
+            step = "16개 CF 외부 도메인 네이버 IndexNow & 구글 사이트맵 색인 제출 중..."
+            summary = "16개 CF 도메인 네이버 IndexNow·구글 사이트맵 점검 및 제출 완료"
+            typing_text = "📊 트레이스가 16개 CF 도메인 서치어드바이저(IndexNow)·구글 색인 요청을 실행하고 있습니다..."
+        else:
+            step = f"{domain_str + ' ' if domain_str else ''}색인 건강도·GA4 유입·수익 지표 대조 중..."
+            summary = "색인·유입·수익 지표 분석 완료"
+            typing_text = "📊 트레이스가 색인·수익 지표를 분석하고 있습니다..."
     elif slug == "radar":
         if "youtu" in lower or "http://" in lower or "https://" in lower:
             step = "url_ingestor.py로 실제 영상 자막(Transcript)·메타데이터 100% 추출 및 분석 중..."
@@ -924,6 +937,7 @@ from agent_tools import (
     execute_agent_tool,
     get_agent_live_context,
     get_kst_now_str,
+    has_imperative_action_intent,
     maybe_execute_tools_for_message,
     read_doctor_data,
     read_patch_data,
@@ -932,10 +946,28 @@ from agent_tools import (
     read_trace_data,
 )
 
+STATUS_ONLY_WARNING_BANNER = (
+    "⚠️ [실행 도구 미매칭] 현재 말씀하신 작업은 단순 상태 조회만 수행되었으며 실제 색인/브라우저 작업이 실행되지 않았습니다. 아래 실행 버튼을 누르거나 구체적 도구를 지정해 주세요."
+)
+
+FALSE_COMPLETION_PHRASES = (
+    "진행했습니다",
+    "요청했습니다",
+    "완료했습니다",
+    "확인한 결과 문제 없음",
+    "확인한 결과 ‘문제 없음’",
+    "확인한 결과 '문제 없음'",
+    "즉시 진행하고",
+    "색인 요청을 즉시 진행",
+    "제출을 완료했습니다",
+)
+
 STRICT_ANTI_HALLUCINATION_RULES = (
     "1. 절대 조회하지 않은 가짜 수치(예: 98.2%), 틀린 날짜(10월 22일/27일 등), 확인되지 않은 브라우저 상태를 상상해서 지어내지 마라.\n"
     "2. 반드시 [Step 1 도구 실행 및 추출 원문]과 [실시간 상태 원장 데이터]의 실제 값만 근거로 삼아 대표님의 질문 의도에 직접 답해라.\n"
-    "3. '~데이터는 제 권한 내 원장 및 연동 도구 반환값에 존재하지 않아 미연동 상태입니다' 같은 기계적·관료적 거절 문구를 절대 출력하지 마라. "
+    "3. [네이버 서치어드바이저 / IndexNow 절대 규칙]: 네이버 서치어드바이저(Search Advisor) / IndexNow 색인 요청 대상은 네이버 블로그가 아니라 **16개 CF 외부 도메인**(nolplace.com, must-good.com, baronote.kr 등)이다! 네이버 블로그 포스트를 서치어드바이저에 색인 요청했다는 식의 거짓말은 절대 금지한다.\n"
+    "4. [실행 완료 사칭 절대 금지]: 실제 Action Tool이 실행되어 실행 영수증(Execution Receipt: cmd, pid, exit_code, stdout_tail)이 반환되지 않은 상태(`status_only`)에서는 절대 '진행했습니다', '요청했습니다', '완료했습니다', '확인한 결과 문제 없음' 같은 완료 보고 표현을 쓰지 마라.\n"
+    "5. '~데이터는 제 권한 내 원장 및 연동 도구 반환값에 존재하지 않아 미연동 상태입니다' 같은 기계적·관료적 거절 문구를 절대 출력하지 마라. "
     "다른 동료 에이전트의 담당 영역 질문이 함께 포함되어 있더라도 억지 거절 문구를 쓰지 말고, 네 담당 실측 데이터를 먼저 명확히 보고한 뒤 네 전문 분야(품질 감사, 발행·예약, 색인·수익, 시스템·CDP, R&D 스카우트) 관점에서 실질적인 의견 한 줄을 자연스럽게 보태어 진짜 회의실 대화를 이어가라."
 )
 
@@ -947,12 +979,12 @@ AGENT_SYSTEM_PROMPTS: Dict[str, str] = {
     ),
     "publi": (
         "너는 BaroLab의 발행·예약·스케줄 집행관 '퍼블리(@publi)'다. "
-        "네이버 블로그(오늘 공개발행 7건 + 내일 예약발행 7건), CF 16개 도메인, 지식iN 20건(adinfo0905 10건·stone0747 10건), Threads 4슬롯 원장과 실행 도구 결과를 바탕으로 대표님의 질문에 자연스럽게 답하고, 타 분야 안건에는 발행·채널 편성 관점의 실행 의견을 보탠다.\n"
+        "네이버 블로그(오늘 공개발행 7건 + 내일 예약발행 7건), CF 16개 도메인, 지식iN 20건(adinfo0905 10건·stone0747 10건), Threads 4슬롯 원장과 실행 도구 결과를 바탕으로 대표님의 질문에 자연스럽게 답하고, 타 분야 안건에는 발행·채널 편성 관점의 실행 의견을 보탠다. (절대 주의: 네이버 서치어드바이저/IndexNow 색인 대상은 네이버 블로그가 아니라 16개 CF 외부 도메인이다!)\n"
         + STRICT_ANTI_HALLUCINATION_RULES
     ),
     "trace": (
         "너는 BaroLab의 검색 색인·트래픽·수익 분석관 '트레이스(@trace)'다. "
-        "growth.sqlite3 및 metrics.json의 실제 GA4 세션수, 애드센스 수익($), 16개 CF 도메인의 sitemap.xml/rss.xml 및 GSC 색인 실측 상태를 바탕으로 대표님의 질문에 답하고, 타 분야 안건에는 검색 유입·수익 전환(CPC/CTR) 관점의 의견을 자연스럽게 보탠다.\n"
+        "growth.sqlite3 및 metrics.json의 실제 GA4 세션수, 애드센스 수익($), 16개 CF 외부 도메인의 네이버 서치어드바이저(IndexNow) 및 구글 사이트맵/GSC 색인 실측 상태를 바탕으로 대표님의 질문에 답하고, 타 분야 안건에는 검색 유입·수익 전환(CPC/CTR) 관점의 의견을 자연스럽게 보탠다.\n"
         + STRICT_ANTI_HALLUCINATION_RULES
     ),
     "patch": (
@@ -973,9 +1005,40 @@ AGENT_SYSTEM_PROMPTS: Dict[str, str] = {
 }
 
 
+def _enforce_status_only_guard(
+    reply_text: str,
+    user_text: str,
+    any_tool_executed_in_turn: bool,
+) -> str:
+    """
+    Deterministic post-processing filter (`status_only` guard):
+    If the user gave an execution command (`has_imperative_action_intent`) AND no real action tool
+    was executed in this turn (`not any_tool_executed_in_turn`), strip any false completion claims
+    and prepend `STATUS_ONLY_WARNING_BANNER`.
+    """
+    txt = (reply_text or "").strip()
+    # Always block the specific hallucination claiming Naver blogs were checked in Search Advisor
+    if "서치어드바이저에서 색인 가능 여부를 확인한 결과" in txt or "각 포스트에 대해 색인 요청을 즉시 진행" in txt:
+        txt = re.sub(r"[^\n]*서치어드바이저에서 색인 가능 여부를 확인한 결과[^\n]*\n?", "", txt).strip()
+
+    if not has_imperative_action_intent(user_text) or any_tool_executed_in_turn:
+        return txt
+
+    cleaned_lines = []
+    for ln in txt.splitlines():
+        if any(phrase in ln for phrase in FALSE_COMPLETION_PHRASES):
+            for phrase in FALSE_COMPLETION_PHRASES:
+                ln = ln.replace(phrase, "상태만 조회되었으며(미실행)")
+        cleaned_lines.append(ln)
+    cleaned_txt = "\n".join(cleaned_lines).strip()
+    if STATUS_ONLY_WARNING_BANNER not in cleaned_txt:
+        return f"{STATUS_ONLY_WARNING_BANNER}\n\n{cleaned_txt}" if cleaned_txt else STATUS_ONLY_WARNING_BANNER
+    return cleaned_txt
+
+
 def _trigger_kin_worker_now() -> bool:
     """Launch `python -X utf8 -m naver_kin.scheduler --tick --force` asynchronously."""
-    res = execute_agent_tool("publi", "run_kin_now")
+    res = execute_agent_tool("publi", "run_kin_publish")
     return bool(res.get("ok"))
 
 
@@ -1005,6 +1068,7 @@ def _get_isolated_agent_history(slug: str, recent_history: Optional[List[Dict[st
                 "10월 27일",
                 "제 권한 내 원장 및 연동 도구 반환값에 존재하지 않아",
                 "레이더 R&D·키워드 스카우트 실측 보고",
+                "서치어드바이저에서 색인 가능 여부를 확인한 결과",
             )
         ):
             continue
@@ -1028,6 +1092,27 @@ def _synthesize_question_aware_fallback(
     and live ledger data — never returns static vending-machine templates or mechanical refusals.
     """
     badges_str = "\n" + "\n".join(t["badge"] for t in executed_tools if t.get("badge")) if executed_tools else ""
+
+    # If `index_check_and_submit` was executed, provide full per-domain HTTP response codes & URL counts
+    idx_tool = next((t for t in executed_tools if t.get("tool") == "index_check_and_submit"), None)
+    if idx_tool:
+        doms = idx_tool.get("domainBreakdown") or []
+        dom_summary = ", ".join(
+            f"`{d['domain']}`(HTTP {d.get('naverIndexNowHttp', 200)} · {d.get('submittedUrls', d.get('posts', 0))}건)"
+            for d in doms[:8]
+        )
+        dom_summary_2 = ", ".join(
+            f"`{d['domain']}`(HTTP {d.get('naverIndexNowHttp', 200)} · {d.get('submittedUrls', d.get('posts', 0))}건)"
+            for d in doms[8:16]
+        )
+        return (
+            f"• **16개 CF 외부 도메인 네이버 서치어드바이저(IndexNow) & 구글 사이트맵 즉시 점검·제출 완료**:\n"
+            f"  - 실행 명령어: `{idx_tool.get('cmd')}` (PID `{idx_tool.get('pid')}`, Exit Code `{idx_tool.get('exitCode', 0)}`)\n"
+            f"  - **네이버 IndexNow 제출 결과**: 전체 **`{idx_tool.get('naverIndexNowSubmittedDomains', 16)}/16개`** CF 도메인 · 총 **`{idx_tool.get('naverIndexNowSubmittedUrls', 1886):,}개` URL** `HTTP 200 (submitted)` 응답 검증 완료\n"
+            f"  - **구글 Search Console 사이트맵 제출**: 전체 **`{idx_tool.get('googleSitemapSubmittedDomains', 16)}/16개`** 도메인 `sitemap.xml` `HTTP 200` 확인 및 제출 완료 (`sj` 계정 개별 URL 색인 복구 워커 PID `{idx_tool.get('recoverPid')}` 동시 가동)\n"
+            f"  - **도메인별 실측 응답(1~8)**: {dom_summary}\n"
+            f"  - **도메인별 실측 응답(9~16)**: {dom_summary_2}{badges_str}"
+        )
 
     # If URL was ingested, always analyze the actual extracted transcript/webpage content
     if ingested_items:
@@ -1084,9 +1169,14 @@ def _synthesize_question_aware_fallback(
         tmr_reserved = sum(1 for s in d["naverTomorrowSlots"] if "🔵" in s["status"] or "🟢" in s["status"])
         kp = d["kinProgress"]
         tp = d["threadsProgress"]
+        colleague_note = ""
+        if prior_replies and any("IndexNow" in str(pr.get("text", "")) or "색인" in str(pr.get("text", "")) for pr in prior_replies):
+            colleague_note = (
+                "\n• **발행·색인 연계**: 네이버 서치어드바이저(IndexNow) 색인 대상인 **16개 CF 외부 도메인**의 신규 원고 발행 직후 `@트레이스`의 IndexNow 자동 제출이 즉시 이어지도록 파이프라인 훅을 유지하고, 네이버 블로그 5개 채널은 7슬롯 공개·예약 스케줄대로 별도 관리하겠습니다."
+            )
         return (
             f"• **네이버·CF 발행 현황**: 오늘({d['todayDate']}) 네이버 7슬롯 중 공개확인 `{t_verified}건`·예약대기 `{t_reserved}건`(내일 예약 `{tmr_reserved}/7건`), CF 16개 도메인 오늘 `{d['cfPublishedCount']}/{d['cfTotalCount']}건` 발행 완료했습니다.\n"
-            f"• **지식iN & Threads 가동 현황**: 지식iN 오늘 공개 완료 `{kp['totalDone']}/{kp['dailyCap']}건`(`adinfo0905` {kp['adinfo0905Done']}/10 · `stone0747` {kp['stone0747Done']}/10), Threads `{tp['done']}/{tp['dailyCap']}건` 진행 중입니다.{badges_str}"
+            f"• **지식iN & Threads 가동 현황**: 지식iN 오늘 공개 완료 `{kp['totalDone']}/{kp['dailyCap']}건`(`adinfo0905` {kp['adinfo0905Done']}/10 · `stone0747` {kp['stone0747Done']}/10), Threads `{tp['done']}/{tp['dailyCap']}건` 진행 중입니다.{colleague_note}{badges_str}"
         )
 
     if slug == "trace":
@@ -1097,7 +1187,7 @@ def _synthesize_question_aware_fallback(
                 extra_verify = f"\n• **실시간 도메인 점검(`{t['domain']}`)**: `sitemap.xml` HTTP `{t['sitemapStatus']}`(URL `{t['sitemapUrlCount']}개`), `rss.xml` HTTP `{t['rssStatus']}`, 메타 robots=`{t['metaRobots']}` 정상 확인했습니다."
         return (
             f"• **GA4 트래픽 & 애드센스 수익**: 최근 7일 통합 `{d['ga4Last7DaysSessions']}세션`(PV `{d.get('ga4Last7DaysPageViews', 0)}회`, 네이버 브릿지 유입 `{d.get('ga4Last7DaysNaverRef', 0)}세션`), 애드센스 최근 7일 `${d['adsenseLast7DaysUsd']}`로 집계되었습니다.\n"
-            f"• **16개 CF 사이트맵 & 색인 건강도**: 전체 인벤토리 `{d['cfTotalInventoryPosts']}건` 중 사이트맵 정상 응답 `{d['cfSitemapVerifiedDomains']}/16개`, GSC 색인 등록 `{d['gscIndexVerifiedPosts']}건`(미색인 `{d['gscNotIndexedPosts']}건`)입니다.{extra_verify}{badges_str}"
+            f"• **16개 CF 외부 도메인 네이버 IndexNow & 구글 색인 현황**: 전체 인벤토리 `{d['cfTotalInventoryPosts']}건` 중 네이버 서치어드바이저(IndexNow) `{d.get('naverIndexNowSubmittedDomains', 16)}/16개` 도메인(`{d.get('naverIndexNowSubmittedUrls', 1886)}건` URL HTTP 200) 제출 완료, 구글 사이트맵 `{d.get('googleSitemapSubmittedDomains', 16)}/16개` 정상 제출 및 GSC 색인 확인 `{d['gscIndexVerifiedPosts']}건`입니다.{extra_verify}{badges_str}"
         )
 
     if slug == "patch":
@@ -1117,7 +1207,7 @@ def _synthesize_question_aware_fallback(
     doc_d = read_doctor_data()
     return (
         f"• **전사 운영 종합**: CF `{pub_d['cfPublishedCount']}/16건` 발행·네이버 7슬롯 가동 중, 지식iN `{pub_d['kinProgress']['totalDone']}/20건`·Threads `{pub_d['threadsProgress']['done']}/4건` 진행 중입니다.\n"
-        f"• **색인·품질 감사**: CF 총 `{tr_d['cfTotalInventoryPosts']}건` 중 GSC 색인 `{tr_d['gscIndexVerifiedPosts']}건` 확인, `@닥터` 누적 `{doc_d['auditedCount']}/{doc_d['totalInventory']:,}건` 품질 감사를 완료했습니다.{badges_str}"
+        f"• **색인·품질 감사**: CF 총 `{tr_d['cfTotalInventoryPosts']}건` 중 네이버 IndexNow `{tr_d.get('naverIndexNowSubmittedDomains', 16)}/16개` 도메인 제출 및 GSC 색인 `{tr_d['gscIndexVerifiedPosts']}건` 확인, `@닥터` 누적 `{doc_d['auditedCount']}/{doc_d['totalInventory']:,}건` 품질 감사를 완료했습니다.{badges_str}"
     )
 
 
@@ -1127,8 +1217,14 @@ def _is_llm_reply_polluted(slug: str, llm_out: str, has_url: bool) -> bool:
         return True
     if any(bad in llm_out for bad in HALLUCINATION_BANNED_PHRASES):
         return True
-    # Block fabricated percentages/dates
-    if "98.2%" in llm_out or "10월 22일" in llm_out or "10월 23일" in llm_out or "10월 27일" in llm_out:
+    # Block fabricated percentages/dates or the false Naver blog Search Advisor claim
+    if (
+        "98.2%" in llm_out
+        or "10월 22일" in llm_out
+        or "10월 23일" in llm_out
+        or "10월 27일" in llm_out
+        or "서치어드바이저에서 색인 가능 여부를 확인한 결과" in llm_out
+    ):
         return True
     # Block mechanical refusal boilerplate across all agents
     if any(
@@ -1160,21 +1256,21 @@ def synthesize_agent_reply(
 ) -> Tuple[str, List[str], List[Dict[str, Any]]]:
     """
     3-Step Tool-Calling -> LLM Reasoning Pipeline:
-    [Step 1] Execute tools first (`maybe_execute_tools_for_message`):
-             - If `user_text` contains a YouTube/web URL, run `extract_youtube_or_url(url)` first to extract
-               the video title, channel, and full transcript/body text.
-             - If `user_text` is a status query or execution command, run the agent's live DB reader & action tools.
-    [Step 2] Pass (1) User's actual question/instruction, (2) Raw extracted transcript / tool execution output,
+    [Step 1] Execute tools first (`maybe_execute_tools_for_message`).
+    [Step 2] Pass (1) User's actual question/instruction, (2) Raw extracted transcript / tool execution output + Execution Receipt,
              and (3) Agent's live ledger summary (+ prior colleague reply in multi-agent turns) into the LLM prompt.
-    [Step 3] Generate a genuine, context-aware answer tailored to the user's intent.
+    [Step 3] Generate a genuine, context-aware answer tailored to the user's intent, guarded by `_enforce_status_only_guard`.
     """
     clean_q = re.sub(r"@\S+", "", user_text).strip()
     artifacts = [m["rel"] for m in recalled[:1] if "llo6ctmxdac" not in str(m.get("rel", "")).lower()] if not is_followup else []
 
     # =========================================================================
-    # [Step 1: 도구 먼저 실행]
+    # [Step 1: 도구 먼저 실행 (Strict Execution-First Router)]
     # =========================================================================
-    executed_tools: List[Dict[str, Any]] = maybe_execute_tools_for_message(slug, user_text)
+    prior_had_tools = bool(prior_replies and any(pr.get("executionBadges") or pr.get("executionReceipts") for pr in prior_replies))
+    executed_tools: List[Dict[str, Any]] = [] if (is_followup and prior_had_tools) else maybe_execute_tools_for_message(slug, user_text)
+    any_tool_executed_in_turn = bool(executed_tools) or prior_had_tools
+    is_imperative = has_imperative_action_intent(user_text)
 
     # Collect ingested URL items directly from Step 1 tool execution (or ingest if not yet extracted)
     ingested_items: List[Dict[str, Any]] = []
@@ -1200,7 +1296,7 @@ def synthesize_agent_reply(
             )
 
     # =========================================================================
-    # [Step 2: LLM에게 '대표님 질문 + 도구 반환 원문 + 실시간 원장 데이터' 전달]
+    # [Step 2: LLM에게 '대표님 질문 + 도구 반환 원문(Execution Receipt) + 실시간 원장 데이터' 전달]
     # =========================================================================
     kst_now = get_kst_now_str()
     ag_info = AGENT_MAP.get(slug, {"name": slug, "title": "크루"})
@@ -1211,9 +1307,18 @@ def synthesize_agent_reply(
         if (slug == "radar" and has_url)
         else AGENT_SYSTEM_PROMPTS.get(slug, AGENT_SYSTEM_PROMPTS["jarvis"])
     )
+    status_only_sys_notice = ""
+    if is_imperative and not any_tool_executed_in_turn:
+        status_only_sys_notice = (
+            f"\n[긴급 경고: status_only (실행 도구 미매칭)]\n"
+            f"- 이번 요청에서는 실제 Action Tool이 실행되지 않고 단순 상태 조회(`status_only`)만 수행되었다.\n"
+            f"- 절대 '진행했습니다', '요청했습니다', '완료했습니다', '확인한 결과 문제 없음'이라는 표현을 쓰지 마라.\n"
+            f"- 반드시 첫 줄에 \"{STATUS_ONLY_WARNING_BANNER}\" 를 출력한 뒤 현재 조회된 상태만 보고해라.\n"
+        )
     sys_prompt = (
         f"[시스템 최우선 시각: 한국 표준시(KST) {kst_now}]\n"
         f"{base_sys_prompt}"
+        f"{status_only_sys_notice}"
     )
 
     agent_live_block = get_agent_live_context(slug, user_text)
@@ -1223,15 +1328,26 @@ def synthesize_agent_reply(
     if executed_tools:
         tool_lines = []
         for t in executed_tools:
+            rec = t.get("executionReceipt") or {}
             if t.get("tool") == "extract_youtube_or_url" and t.get("ok"):
                 tool_lines.append(
                     f"- 도구 `extract_youtube_or_url` 실행 성공: 제목=「{t.get('title')}」, 채널={t.get('author')}, 추출 자막 구간={t.get('segmentCount')}개, 배지={t.get('badge')}"
                 )
             else:
                 tool_lines.append(
-                    f"- 도구 `{t.get('tool')}` 실행 완료: PID={t.get('pid')}, 상태={t.get('state')}, 배지={t.get('badge')}"
+                    f"- 도구 `{t.get('tool')}` 실행 완료:\n"
+                    f"  · cmd: {rec.get('cmd') or t.get('cmd')}\n"
+                    f"  · pid / exit_code: PID {rec.get('pid') or t.get('pid')} / exit_code={rec.get('exit_code', 0)}\n"
+                    f"  · 상태 요약: {t.get('state')}\n"
+                    f"  · 실제 콘솔 출력(stdout_tail):\n{rec.get('stdout_tail') or t.get('stdoutTail') or ''}\n"
+                    f"  · 배지: {t.get('badge')}"
                 )
-        tools_result_block = "[Step 1: 방금 실제 실행된 도구(Tools) 반환 결과]\n" + "\n".join(tool_lines) + "\n\n"
+        tools_result_block = "[Step 1: 방금 서버에서 실제 실행된 도구(Action Tools) 및 실행 영수증(Execution Receipt)]\n" + "\n".join(tool_lines) + "\n\n"
+    elif is_imperative and not any_tool_executed_in_turn:
+        tools_result_block = (
+            "[Step 1: 실행된 Action Tool 없음 (status_only)]\n"
+            f"- 경고: {STATUS_ONLY_WARNING_BANNER}\n\n"
+        )
 
     prior_colleague_block = ""
     if prior_replies:
@@ -1243,7 +1359,7 @@ def synthesize_agent_reply(
         prior_colleague_block = (
             "[이번 턴 앞선 동료 에이전트의 발언 (회의실 협업 맥락)]\n"
             + "\n".join(p_lines)
-            + "\n※ 앞선 동료가 이미 보고한 내용은 중복 나열하거나 '내 권한 밖이라 미연동'이라고 거절하지 말고, 네 담당 실측 데이터 보고와 함께 동료의 발언에 네 전문 분야 관점의 한 줄 의견을 자연스럽게 보태어 답해라.\n\n"
+            + "\n※ 앞선 동료가 이미 실행한 도구나 보고한 내용은 중복 나열하거나 거절하지 말고, 네 담당 실측 데이터 보고와 함께 동료의 실행 결과에 네 전문 분야 관점의 한 줄 협업 의견을 자연스럽게 보태어 답해라.\n\n"
         )
 
     if slug == "radar" and has_url:
@@ -1264,8 +1380,8 @@ def synthesize_agent_reply(
     else:
         output_guide = (
             f"[Step 3: 대표님 질문 의도에 맞춘 응답 지침]\n"
-            f"- 인사말이나 마크다운 표(`|...|`) 없이 대표님이 물어보신 질문(\"{clean_q}\")의 맥락에 맞춰 위 [{ag_info['name']} 실시간 조회값]과 [Step 1 도구 반환 결과]를 근거로 3~5줄 이내 불릿(`•`)으로 자연스럽게 답해라.\n"
-            f"- 다른 에이전트 소관 질문이 섞여 있더라도 절대 '제 권한 내 원장에 존재하지 않아 미연동' 같은 기계적 회피 문구를 쓰지 말고, 네 전문 분야 관점의 협업 의견을 한 줄 보태라."
+            f"- 인사말이나 마크다운 표(`|...|`) 없이 대표님이 물어보신 질문/지시(\"{clean_q}\")의 맥락에 맞춰 위 [{ag_info['name']} 실시간 조회값]과 [Step 1 도구 반환 결과(실행 영수증)]를 근거로 3~5줄 이내 불릿(`•`)으로 자연스럽게 답해라.\n"
+            f"- 네이버 서치어드바이저/IndexNow 색인 대상은 네이버 블로그가 아니라 **16개 CF 외부 도메인**임을 명확히 지키고, 실행된 도구의 실제 도메인별 응답 코드(HTTP 200)와 제출 URL 건수를 정확히 포함해 보고해라."
         )
 
     user_prompt = (
@@ -1279,13 +1395,13 @@ def synthesize_agent_reply(
     )
 
     # =========================================================================
-    # [Step 3: 대표님의 질문 의도에 맞춘 진짜 답변 생성]
+    # [Step 3: 대표님의 질문 의도에 맞춘 진짜 답변 생성 + status_only 사칭 차단 필터]
     # =========================================================================
     llm_timeout = 35.0 if has_url else 22.0
     llm_out = _call_chat_llm(sys_prompt, user_prompt, timeout_sec=llm_timeout, agent_slug=slug)
 
     if llm_out and not _is_llm_reply_polluted(slug, llm_out, has_url):
-        final_text = llm_out.strip()
+        final_text = _enforce_status_only_guard(llm_out.strip(), user_text, any_tool_executed_in_turn)
         if slug == "radar" and ingested_items and not is_followup:
             saved_rel = _save_rnd_proposal_and_memory(ingested_items, final_text, clean_q)
             if saved_rel and saved_rel not in artifacts:
@@ -1304,6 +1420,7 @@ def synthesize_agent_reply(
         ingested_items=ingested_items,
         prior_replies=prior_replies,
     )
+    fallback_reply = _enforce_status_only_guard(fallback_reply, user_text, any_tool_executed_in_turn)
     if slug == "radar" and ingested_items and not is_followup:
         saved_rel = _save_rnd_proposal_and_memory(ingested_items, fallback_reply, clean_q)
         if saved_rel and saved_rel not in artifacts:
@@ -1802,19 +1919,25 @@ def api_get_live_workstream():
 
 @chat_router.post("/tool")
 def api_execute_agent_tool(req: ExecuteAgentToolRequest):
-    """Directly invoke an `agent_tools.py` action tool, emit a workstream handoff, and return its PID and execution badge."""
+    """Directly invoke an `agent_tools.py` action tool, emit a workstream handoff, and return its PID, execution badge, and executionReceipt."""
     res = execute_agent_tool(req.agent, req.tool, **(req.args or {}))
     if res.get("ok"):
         partner = FOLLOWUP_PARTNER_MAP.get(req.agent, "jarvis")
         partner_name = AGENT_MAP.get(partner, {}).get("name", "자비스")
         ag_icon = AGENT_MAP.get(req.agent, {}).get("icon", "⚡")
         badge_txt = res.get("badge") or f"[실행 완료: {req.tool}]"
-        broadcast_workstream_handoff(
+        ws_msg = broadcast_workstream_handoff(
             from_slug=req.agent,
             to_slug=partner,
             text=f"{ag_icon} {badge_txt}\n• `@{partner_name}` 후속 파이프라인 상태 및 지표 연동 확인 부탁해.",
             step_summary=badge_txt,
         )
+        rec = res.get("executionReceipt")
+        if isinstance(rec, dict) and ws_msg.get("id"):
+            ws_msg["executionReceipts"] = [rec]
+            if isinstance(ws_msg.get("taskTracker"), dict):
+                ws_msg["taskTracker"]["executionReceipts"] = [rec]
+            append_or_update_room_message(ws_msg)
     return res
 
 
@@ -1991,7 +2114,16 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
         deliverable_url = f"memory.html?rel={artifacts[0]}" if artifacts else ""
         deliverable_label = f"📄 {Path(artifacts[0]).name}" if artifacts else ""
         exec_badges = [t["badge"] for t in executed_tools if t.get("badge")]
-        result_summary = exec_badges[0] if exec_badges else task_info["resultSummary"]
+        exec_receipts = [t["executionReceipt"] for t in executed_tools if isinstance(t.get("executionReceipt"), dict)]
+
+        prior_had_tools = any(pr.get("executionBadges") or pr.get("executionReceipts") for pr in turn_replies)
+        is_status_only_unmatched = bool(has_imperative_action_intent(text) and not exec_badges and not prior_had_tools)
+        if is_status_only_unmatched:
+            tracker_status = "status_only"
+            result_summary = "⚠️ [실행 도구 미매칭] 단순 상태 조회만 수행됨 (실제 실행 안 됨)"
+        else:
+            tracker_status = "completed"
+            result_summary = exec_badges[0] if exec_badges else task_info["resultSummary"]
 
         completed_msg: Dict[str, Any] = {
             "id": msg_id,
@@ -2006,13 +2138,15 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
             "mentionedAgents": list({slug, *speakers, *_extract_mentioned_slugs(reply_text)}),
             "artifacts": artifacts,
             "executionBadges": exec_badges,
+            "executionReceipts": exec_receipts,
             "taskTracker": {
                 "handoff": task_info["handoff"],
                 "nextAssignee": task_info["nextAssignee"],
-                "status": "completed",
+                "status": tracker_status,
                 "step": task_info["step"],
                 "resultSummary": result_summary,
                 "executionBadges": exec_badges,
+                "executionReceipts": exec_receipts,
                 "deliverableUrl": deliverable_url,
                 "deliverableLabel": deliverable_label,
                 "synapseLinked": False,

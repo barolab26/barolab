@@ -533,6 +533,75 @@
       line-height: 1.4;
       box-shadow: 0 1px 3px rgba(5, 150, 105, 0.1);
     }
+    .st-state.status_only {
+      color: #b45309;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-weight: 800;
+    }
+    .execution-receipt-box {
+      margin-top: 10px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+      font-size: 11.5px;
+      line-height: 1.45;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+    }
+    .execution-receipt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-bottom: 6px;
+      margin-bottom: 6px;
+      border-bottom: 1px dashed #334155;
+    }
+    .execution-receipt-title {
+      color: #34d399;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .execution-receipt-pid {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #38bdf8;
+      padding: 1px 7px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .execution-receipt-cmd {
+      color: #fde047;
+      font-weight: 700;
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+    .execution-receipt-stdout {
+      margin: 0;
+      padding: 7px 9px;
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 185px;
+      overflow-y: auto;
+    }
     .kst-clock-pill {
       display: inline-flex;
       align-items: center;
@@ -1119,8 +1188,35 @@
   }
 
   // =========================================================================
-  // SPEC #4: Sleek 1-Line Status Bar inside Message Bubble (No bulky gray box)
+  // SPEC #3 & #4: Execution Receipt Box + 1-Line Status Bar inside Message Bubble
   // =========================================================================
+  function buildExecutionReceiptBoxHtml(m) {
+    if (!m || m.who === 'user') return '';
+    const receipts = Array.isArray(m.executionReceipts) && m.executionReceipts.length
+      ? m.executionReceipts
+      : (m.taskTracker && Array.isArray(m.taskTracker.executionReceipts) ? m.taskTracker.executionReceipts : []);
+    if (!receipts.length) return '';
+
+    return receipts.map(rec => {
+      if (!rec || !rec.cmd) return '';
+      const cmd = escapeHtml(rec.cmd || '');
+      const pid = escapeHtml(String(rec.pid != null ? rec.pid : '-'));
+      const exitCode = escapeHtml(String(rec.exit_code != null ? rec.exit_code : 0));
+      const rawTail = Array.isArray(rec.stdout_tail) ? rec.stdout_tail.join('\n') : String(rec.stdout_tail || '');
+      const stdoutTail = escapeHtml(rawTail.trim() || '[콘솔 출력 없음]');
+      return `
+        <div class="execution-receipt-box" data-testid="execution-receipt-box">
+          <div class="execution-receipt-header">
+            <span class="execution-receipt-title">🧾 [실행 영수증 (Execution Receipt)] 서버 CLI 실측 검증</span>
+            <span class="execution-receipt-pid">PID: ${pid} · Exit Code: ${exitCode}</span>
+          </div>
+          <div class="execution-receipt-cmd">$ ${cmd}</div>
+          <pre class="execution-receipt-stdout">${stdoutTail}</pre>
+        </div>
+      `;
+    }).join('');
+  }
+
   function buildStatusLineHtml(m) {
     const tt = m.taskTracker;
     const artifacts = m.artifacts || [];
@@ -1138,6 +1234,8 @@
       stateText = `🔄 ${escapeHtml((tt && tt.step) || '처리 중...')}`;
     } else if (status === 'failed') {
       stateText = `🔴 ${escapeHtml(summary)}`;
+    } else if (status === 'status_only') {
+      stateText = `${escapeHtml(summary)}`;
     }
 
     const showMemorySaveBtn = (m.who === 'radar' || artifacts.length > 0 || (m.text && m.text.length >= 90));
@@ -1204,9 +1302,10 @@
     const txt = String(m.text || '');
     if (who === 'system') return true;
     if (mid.startsWith('auto-') || mid.startsWith('sys-')) return true;
+    if (mid === 'msg-1792329008504-publi-0' || mid === 'msg-1792329010530-jarvis-1') return true;
     if (m.capReached || m.round === 2) return true;
     if (txt.includes('반응 라운드') || txt.includes('순차 티키타카 협업 라인업') || txt.includes('2라운드 티키타카')) return true;
-    if (who !== 'user' && (txt.includes('98.2%') || txt.includes('10월 22일') || txt.includes('10월 23일') || txt.includes('10월 27일'))) return true;
+    if (who !== 'user' && (txt.includes('98.2%') || txt.includes('10월 22일') || txt.includes('10월 23일') || txt.includes('10월 27일') || txt.includes('서치어드바이저에서 색인 가능 여부를 확인한 결과'))) return true;
     if (who !== 'radar' && who !== 'user' && (txt.includes('10일 만에 180만원') || txt.includes('알파남'))) return true;
     return false;
   }
@@ -1252,7 +1351,7 @@
             ${wsTagHtml}
             <span style="color:#94a3b8;">${formatTime(m.ts)}</span>
           </div>
-          <div class="msg-bubble">${formatBodyText(m.text)}${buildStatusLineHtml(m)}</div>
+          <div class="msg-bubble">${formatBodyText(m.text)}${buildExecutionReceiptBoxHtml(m)}${buildStatusLineHtml(m)}</div>
         </div>
       </div>
     `;

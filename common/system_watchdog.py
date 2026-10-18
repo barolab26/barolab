@@ -608,6 +608,7 @@ def register_watchdog_scheduled_task() -> Dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="BaroLab Unmanned System Watchdog")
     parser.add_argument("--run", action="store_true", help="Run a full watchdog pass")
+    parser.add_argument("--heal-now", action="store_true", help="Immediate self-healing pass across ports, locks, slots, and apps")
     parser.add_argument("--register-task", action="store_true", help="Register Windows Scheduled Task")
     parser.add_argument("--source", default="cli", help="Trigger source label")
     args = parser.parse_args()
@@ -615,10 +616,11 @@ def main() -> int:
     if args.register_task:
         reg = register_watchdog_scheduled_task()
         print(json.dumps(reg, ensure_ascii=False, indent=2))
-        if not args.run:
+        if not (args.run or args.heal_now):
             return 0 if reg.get("ok") else 1
 
-    report = run_system_watchdog(trigger_source=args.source, broadcast=True)
+    src = "heal-now" if args.heal_now and args.source == "cli" else args.source
+    report = run_system_watchdog(trigger_source=src, broadcast=True)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 

@@ -5,7 +5,12 @@ import json
 from pathlib import Path
 import os
 import subprocess
-from . import config as settings,pipeline
+import sys
+try:
+    from . import config as settings,pipeline
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from threads_posting import config as settings,pipeline
 
 def current_slot(config,now,used_slots=()):
     past=[s for s in config['preferredTimes'] if s<=now.astimezone(pipeline.KST).strftime('%H:%M')]
