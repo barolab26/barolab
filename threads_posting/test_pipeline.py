@@ -152,6 +152,41 @@ if __name__=='__main__':unittest.main()
 
 class AuthoringPolicyTests(unittest.TestCase):
     """Pure policy checks: no files, model calls, network, or publication."""
+    def test_real_generator_signature_and_fallback_identity(self):
+        from . import authoring
+        from unittest.mock import MagicMock
+        fixture = LedgerTests(); fixture.day = '2026-10-19'
+        source = fixture.document()['source']
+        cfg = config.defaults(); cfg['model'] = 'gpt-6-luna'
+        def generated(prompt, model, response_schema=None):
+            return {'hook_main': '첫 번째 사실\n두 번째 사실\n세 번째 사실', 'followup': ''}, model
+        with patch.object(authoring, 'article_snapshot', return_value=source), patch.object(authoring, 'load_hook_templates', return_value=[]), patch.object(config, 'PRIVATE', MagicMock()), patch.object(authoring, 'write'), patch.object(pipeline, 'validate_document'), patch.object(authoring.codex_cli, 'refresh_runtime', return_value={'authenticated': True, 'models': [{'id': 'gpt-6-luna'}]}), patch.object(authoring.codex_cli, 'generate_local', side_effect=generated) as generate:
+            result = authoring.prepare(cfg, source['url'], fixture.day, '12:30', mode='cf_inbound')
+            self.assertEqual(result['document']['model'], 'gpt-6-luna')
+            self.assertNotIn('memory_session_id', generate.call_args.kwargs)
+            generate.side_effect = RuntimeError('test unavailable')
+            result = authoring.prepare(cfg, source['url'], fixture.day, '12:30', mode='cf_inbound')
+            self.assertEqual(result['document']['model'], 'template-fallback')
+            self.assertEqual('RuntimeError', result['document']['generation_error'])
+            def invalid_main(prompt, model, response_schema=None):
+                return {'hook_main': 'https://example.com', 'followup': ''}, model
+            generate.side_effect = invalid_main
+            result = authoring.prepare(cfg, source['url'], fixture.day, '12:30', mode='cf_inbound')
+            self.assertEqual(result['document']['model'], 'template-fallback')
+            self.assertEqual(result['document']['generation_provenance']['generated_model'], 'gpt-6-luna')
+            self.assertEqual(result['document']['generation_provenance']['accepted_model_variants'], [])
+            self.assertEqual(result['document']['generation_provenance']['selected_main_origin'], 'template')
+            def unsupported_affiliate(prompt, model, response_schema=None):
+                data = json.loads(prompt.split('자료:\n', 1)[1])
+                return {'hook_main': '첫 번째 사실\n두 번째 사실\n세 번째 사실', 'followup': '광고/제휴 링크입니다.\n' + data['outbound_url']}, model
+            generate.side_effect = unsupported_affiliate
+            result = authoring.prepare(cfg, source['url'], fixture.day, '12:30', mode='cf_inbound')
+            self.assertEqual(result['document']['model'], 'gpt-6-luna')
+            self.assertEqual(result['document']['generation_provenance']['followup_origin'], 'template')
+            self.assertNotIn('광고', result['document']['parts'][1]['text'])
+            self.assertNotIn('제휴', result['document']['parts'][1]['text'])
+            self.assertEqual(result['document']['parts'][1]['text'].count(result['document']['attribution']['outboundUrl']), 1)
+
     def test_all_sixteen_domains_without_adsense_gate(self):
         from . import authoring
         from unittest.mock import MagicMock

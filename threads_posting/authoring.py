@@ -301,7 +301,11 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
         hooks=hooks,
     )
 
-    model_used = config.get('model', 'gpt-6.1-sol')
+    model_used = 'template-fallback'
+    generation_error = None
+    generated_model = None
+    accepted_model_variants = set()
+    followup_origin = 'template'
     try:
         runtime = codex_cli.refresh_runtime()
         if runtime.get('authenticated') is True and config['model'] in {x['id'] for x in runtime.get('models', [])}:
@@ -328,10 +332,11 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
                 '딱딱한 전단지 문구("확인 순서를 정리했습니다") 금지. '
                 '본문은 전체 3~4줄만 작성하세요. 첫 줄은 후킹, 나머지 2~3줄은 원문의 핵심 팩트입니다. 별도 CTA 줄은 추가하지 마세요. '
                 '자료에 없는 숫자/사실 창작 금지. '
+                'cf_inbound는 직접 운영하는 블로그라는 고지만 쓰고 광고/제휴라고 주장하지 마세요. '
                 '후속(followup)에는 최상단에 운영/대가성 고지 문구를 넣고 정확한 outbound_url을 1회 포함하세요(warmup 모드는 빈 문자열). 자료:\n'
                 + json.dumps(data, ensure_ascii=False)
             )
-            generated, model_used = codex_cli.generate_local(prompt, config['model'], response_schema=schema, memory_session_id='threads:' + uuid.uuid4().hex)
+            generated, generated_model = codex_cli.generate_local(prompt, config['model'], response_schema=schema)
             for v_key, g_key, lbl, sc in (
                 ('friendly', 'friendly_main', '① 기본 친근형', 89),
                 ('hook', 'hook_main', '② 강렬한 어그로 후킹형', 95),
@@ -341,14 +346,18 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
                 if (cand and len(cand) <= 500 and 3 <= len(cand.splitlines()) <= 4
                         and not pipeline.contains_external_url(cand) and not any(p in cand for p in STIFF_FLYER_PATTERNS)):
                     variants[v_key] = {'label': lbl, 'text': cand, 'hook_score': sc}
+                    accepted_model_variants.add(v_key)
             if (mode != 'warmup' and isinstance(generated.get('followup'), str)
                     and len(generated['followup']) <= 500
-                    and generated['followup'].count(attr['outboundUrl']) == 1):
+                    and generated['followup'].count(attr['outboundUrl']) == 1
+                    and not (mode == 'cf_inbound' and any(word in generated['followup'] for word in ('광고', '제휴', '수수료')))):
                 default_followup = generated['followup']
-    except Exception:
-        pass
+                followup_origin = 'model'
+    except Exception as exc:
+        generation_error = type(exc).__name__
 
     chosen_key = selected_variant if selected_variant in variants else 'hook'
+    model_used = generated_model if chosen_key in accepted_model_variants else 'template-fallback'
     main_text = variants[chosen_key]['text']
     parts = [{'kind': 'main', 'text': main_text}]
     if mode != 'warmup' and default_followup:
@@ -375,6 +384,11 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
         'selected_variant': chosen_key,
         'parts': parts,
         'model': model_used,
+        'generation_error': generation_error,
+        'generation_provenance': {'requested_model': config.get('model'), 'generated_model': generated_model,
+                                  'accepted_model_variants': sorted(accepted_model_variants),
+                                  'selected_main_origin': 'model' if chosen_key in accepted_model_variants else 'template',
+                                  'followup_origin': followup_origin},
         'created_at': settings.stamp(),
     }
 
