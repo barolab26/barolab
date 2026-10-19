@@ -1,6 +1,6 @@
 {
   "directiveId": "2026-10-20T00:30:00+09:00",
-  "status": "failed",
+  "status": "running",
   "startedAt": "2026-10-20T00:32:10.698198+09:00",
   "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
   "directiveHistory": [
@@ -163,10 +163,10 @@
     },
     {
       "directiveId": "2026-10-20T00:30:00+09:00",
-      "status": "failed",
+      "status": "running",
       "startedAt": "2026-10-20T00:32:10.698198+09:00",
       "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00, not published. KIN source at 02:24 KST shows 3/20 published_verified, 17 remaining, with stone0747 blocked by operation_ReadTimeout; no quota reset was applied. Naver daily evidence remains 7/10 verified reservations as of 01:31 KST; latest dashboard verification is stale, so no newer public count is claimed.",
+      "summary": "CF queue recovery is waiting on the existing Windows cleaner catch-up process (PID 38996), which holds the pipeline lock. No overlapping stage-1 run was launched. The 16-item queue remains 5 prepared, 3 failed, and 8 waiting; no new CF publication is claimed. Threads remains queued for 08:00. KIN shows 3/20 published_verified and stone0747 blocked by operation_ReadTimeout; Naver evidence remains 7/10 reservations as of 01:31 KST.",
       "taskProgress": {
         "threadsQueue": [
           {
@@ -190,7 +190,7 @@
         "snapshotSync": "NAS snapshot schema validated; generatedAt=2026-10-19T17:22:21.248509+00:00; complete=True.",
         "dailyQuotas": "Verified against dated source records: Naver has 7 verified reservations for 2026-10-20 across 5 accounts against the 10-slot target; 0 public-verified today, so 3 slots remain unreserved. The public-verification status is current as of 01:31:38 KST. KIN config is globalDailyCap=20/accountDailyCap=10; dated dashboard count is 3 published_verified with 17 global remaining (adinfo0905=8, stone0747=9). Counters are date-scoped; no manual reset was applied."
       },
-      "updatedAt": "2026-10-20T02:29:53.924135+09:00",
+      "updatedAt": "2026-10-20T02:33:52.090845+09:00",
       "completedAt": null,
       "failureAt": "2026-10-20T02:28:06.626516+09:00",
       "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
@@ -247,19 +247,24 @@
           "baronote317Changed": false
         },
         "cfSchedule": {
-          "status": "failed",
+          "status": "blocked_by_active_worker",
           "date": "2026-10-20",
           "total": 16,
           "prepared": 5,
           "failed": 3,
           "waiting": 8,
           "interruptedDomain": "maxnote.kr",
-          "stage": 2,
-          "progressPct": 24,
-          "processId": 54568,
-          "processStopped": true,
+          "previousStage": 2,
+          "previousProgressPct": 24,
+          "activeWorkerPid": 38996,
+          "activeWorkerCommand": "cf_posting/pipeline_runner.py --catch-up-once",
+          "activeWorkerStartedAt": "2026-10-20T02:26:39+09:00",
+          "lockHeld": true,
+          "retryStarted": false,
+          "overlappingRunPrevented": true,
           "publicPublishing": false,
-          "reason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete."
+          "observedAt": "2026-10-20T02:33:52.090845+09:00",
+          "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it."
         },
         "quotas": {
           "naver": {
@@ -296,10 +301,33 @@
             "manualResetApplied": false
           }
         }
-      }
+      },
+      "attemptHistory": [
+        {
+          "attempt": 2,
+          "startedAt": "2026-10-20T02:32:16.272403+09:00",
+          "trigger": "retry waiting CF draft queue only",
+          "previousAttempt": {
+            "status": "failed",
+            "failureAt": "2026-10-20T02:28:06.626516+09:00",
+            "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
+            "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00, not published. KIN source at 02:24 KST shows 3/20 published_verified, 17 remaining, with stone0747 blocked by operation_ReadTimeout; no quota reset was applied. Naver daily evidence remains 7/10 verified reservations as of 01:31 KST; latest dashboard verification is stale, so no newer public count is claimed.",
+            "commitHash": "423db7a5ba740f64278a65ec80f0f84762ab259f"
+          }
+        },
+        {
+          "attempt": 2,
+          "observedAt": "2026-10-20T02:33:52.090845+09:00",
+          "status": "waiting_for_existing_scheduler",
+          "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
+          "activeWorkerPid": 38996
+        }
+      ],
+      "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
+      "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it."
     }
   ],
-  "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00, not published. KIN source at 02:24 KST shows 3/20 published_verified, 17 remaining, with stone0747 blocked by operation_ReadTimeout; no quota reset was applied. Naver daily evidence remains 7/10 verified reservations as of 01:31 KST; latest dashboard verification is stale, so no newer public count is claimed.",
+  "summary": "CF queue recovery is waiting on the existing Windows cleaner catch-up process (PID 38996), which holds the pipeline lock. No overlapping stage-1 run was launched. The 16-item queue remains 5 prepared, 3 failed, and 8 waiting; no new CF publication is claimed. Threads remains queued for 08:00. KIN shows 3/20 published_verified and stone0747 blocked by operation_ReadTimeout; Naver evidence remains 7/10 reservations as of 01:31 KST.",
   "changedFiles": [
     "cf_posting/data/daily_schedule.json",
     "server/data/codex_report.json",
@@ -353,19 +381,24 @@
       "baronote317Changed": false
     },
     "cfSchedule": {
-      "status": "failed",
+      "status": "blocked_by_active_worker",
       "date": "2026-10-20",
       "total": 16,
       "prepared": 5,
       "failed": 3,
       "waiting": 8,
       "interruptedDomain": "maxnote.kr",
-      "stage": 2,
-      "progressPct": 24,
-      "processId": 54568,
-      "processStopped": true,
+      "previousStage": 2,
+      "previousProgressPct": 24,
+      "activeWorkerPid": 38996,
+      "activeWorkerCommand": "cf_posting/pipeline_runner.py --catch-up-once",
+      "activeWorkerStartedAt": "2026-10-20T02:26:39+09:00",
+      "lockHeld": true,
+      "retryStarted": false,
+      "overlappingRunPrevented": true,
       "publicPublishing": false,
-      "reason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete."
+      "observedAt": "2026-10-20T02:33:52.090845+09:00",
+      "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it."
     },
     "quotas": {
       "naver": {
@@ -412,7 +445,30 @@
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   },
   "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T02:29:53.924135+09:00",
+  "updatedAt": "2026-10-20T02:33:52.090845+09:00",
   "failureAt": "2026-10-20T02:28:06.626516+09:00",
-  "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete."
+  "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
+  "attemptHistory": [
+    {
+      "attempt": 2,
+      "startedAt": "2026-10-20T02:32:16.272403+09:00",
+      "trigger": "retry waiting CF draft queue only",
+      "previousAttempt": {
+        "status": "failed",
+        "failureAt": "2026-10-20T02:28:06.626516+09:00",
+        "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
+        "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00, not published. KIN source at 02:24 KST shows 3/20 published_verified, 17 remaining, with stone0747 blocked by operation_ReadTimeout; no quota reset was applied. Naver daily evidence remains 7/10 verified reservations as of 01:31 KST; latest dashboard verification is stale, so no newer public count is claimed.",
+        "commitHash": "423db7a5ba740f64278a65ec80f0f84762ab259f"
+      }
+    },
+    {
+      "attempt": 2,
+      "observedAt": "2026-10-20T02:33:52.090845+09:00",
+      "status": "waiting_for_existing_scheduler",
+      "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
+      "activeWorkerPid": 38996
+    }
+  ],
+  "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
+  "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it."
 }
