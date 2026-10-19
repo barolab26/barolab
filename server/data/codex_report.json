@@ -166,7 +166,7 @@
       "status": "blocked",
       "startedAt": "2026-10-20T00:32:10.698198+09:00",
       "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Catch-up worker PID 35616 has remained active since 03:55:39 KST; pipeline_state is idle and queue is unchanged. No overlapping stage 1 run was started. Threads main/followup remain queued for 08:00. KIN reports 3 today verified and 1 submitted_unverified; Naver blog public-verification source remains dated 10/19. No quota reset was applied.",
+      "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Scheduled catch-up-once workers are active while pipeline_state remains idle and the queue is unchanged; no overlapping stage 1 run was started. Threads main/followup remain queued for 08:00. Naver public verification received 10/20 at 04:02:59 but has 0 posts dated 10/20; its reservation planner still reports source date 10/19, so today's reservation quota is unverified. KIN date-scoped cap is 20 with 3 published verified and 17 remaining; stone0747 run was active at 04:05. No quota reset was applied.",
       "taskProgress": {
         "threadsQueue": [
           {
@@ -184,13 +184,13 @@
             "slot": "08:00"
           }
         ],
-        "cfSchedule": "STALLED: prepare-only process PID 54568 (started 01:21:28 KST) and Playwright driver remain alive. maxnote.kr researcher is marked running at stage 2 (24%); pipeline_state status idle, last updated 02:09:37 KST, no change for over 15 minutes. Current totals 5 prepared, 2 failed, 1 processing; no public publication. No duplicate run started or process terminated.",
+        "cfSchedule": "STALLED: catch-up-once worker processes were observed active (PIDs 18744 and 55072 at 04:05 KST); pipeline_state remained idle (last update 04:00:04), schedule totals 8 waiting, 5 prepared, 3 failed, and scheduler logged repeated cleaner overlap skips. No separate stage 1 invocation was started.",
         "naverBlog": "7 verified reservations for 2026-10-20 found",
         "knowledgeIn": "active run 2026-10-20_e992cc2d1746_adinfo0905_0030; do not overlap",
         "snapshotSync": "NAS snapshot schema validated; generatedAt=2026-10-19T17:22:21.248509+00:00; complete=True.",
-        "dailyQuotas": "Verified against dated source records: Naver has 7 verified reservations for 2026-10-20 across 5 accounts against the 10-slot target; 0 public-verified today, so 3 slots remain unreserved. The public-verification status is current as of 01:31:38 KST. KIN config is globalDailyCap=20/accountDailyCap=10; dated dashboard count is 3 published_verified with 17 global remaining (adinfo0905=8, stone0747=9). Counters are date-scoped; no manual reset was applied."
+        "dailyQuotas": "Naver: automation-status source remains dated 2026-10-19 (7 planned slots); 2026-10-20 public-verification report received 04:02:59 contains 0 evidence records dated 2026-10-20. Current 10/20 reservation count is unverified; no reset. KIN: checked 04:05:01 for date 2026-10-20; cap 20 global/10 per account, attempted 4, published verified 3, 17 remaining; adinfo0905 has 2 verified and stone0747 has 1 verified. stone0747 run was active; no reset."
       },
-      "updatedAt": "2026-10-20T03:58:20.7275931+09:00",
+      "updatedAt": "2026-10-20T04:07:43.5501839+09:00",
       "completedAt": null,
       "failureAt": "2026-10-20T02:28:06.626516+09:00",
       "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
@@ -274,12 +274,13 @@
             "publicVerifiedToday": 0,
             "remainingReservations": 3,
             "evidenceAsOf": "2026-10-20T01:31:38+09:00",
-            "sourceFreshness": "stale_at_current_check",
-            "manualResetApplied": false
+            "sourceFreshness": "stale; 2026-10-19 planner source",
+            "manualResetApplied": false,
+            "publicVerificationReceivedAt": "2026-10-20T04:02:59.563303+09:00"
           },
           "kin": {
             "date": "2026-10-20",
-            "checkedAt": "2026-10-20T02:24:50+09:00",
+            "checkedAt": "2026-10-20T04:05:01.902507+09:00",
             "globalDailyCap": 20,
             "accountDailyCap": 10,
             "attempted": 4,
@@ -298,7 +299,9 @@
               }
             },
             "blockedReason": "stone0747: operation_ReadTimeout",
-            "manualResetApplied": false
+            "manualResetApplied": false,
+            "activeRunId": "2026-10-20_690ba44c85f2_stone0747_0405",
+            "activeAccount": "stone0747"
           }
         }
       },
@@ -326,10 +329,10 @@
       "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
       "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
       "blockedAt": "2026-10-20T03:41:33.42854+09:00",
-      "blockedReason": "Catch-up worker PID 35616 started at 03:55:39 KST and remained active for more than two minutes while pipeline_state stayed idle and CF queue stayed unchanged; repeated cleaner overlap skips continue. A separate stage 1 run was not started to avoid concurrent execution."
+      "blockedReason": "Scheduled CF catch-up-once processes are active and cleaner logs continue to report overlap skips, while pipeline_state is idle and CF schedule remains 8 waiting, 5 prepared, 3 failed. No stage 1 duplicate was started. Naver reservation plan is dated 10/19; current 10/20 public evidence contains zero posts for publicationDate 10/20, so rollover is unverified. KIN worker is running for stone0747; no overlapping run or manual quota reset."
     }
   ],
-  "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Catch-up worker PID 35616 has remained active since 03:55:39 KST; pipeline_state is idle and queue is unchanged. No overlapping stage 1 run was started. Threads main/followup remain queued for 08:00. KIN reports 3 today verified and 1 submitted_unverified; Naver blog public-verification source remains dated 10/19. No quota reset was applied.",
+  "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Scheduled catch-up-once workers are active while pipeline_state remains idle and the queue is unchanged; no overlapping stage 1 run was started. Threads main/followup remain queued for 08:00. Naver public verification received 10/20 at 04:02:59 but has 0 posts dated 10/20; its reservation planner still reports source date 10/19, so today's reservation quota is unverified. KIN date-scoped cap is 20 with 3 published verified and 17 remaining; stone0747 run was active at 04:05. No quota reset was applied.",
   "changedFiles": [
     "cf_posting/data/daily_schedule.json",
     "server/data/codex_report.json",
@@ -412,12 +415,13 @@
         "publicVerifiedToday": 0,
         "remainingReservations": 3,
         "evidenceAsOf": "2026-10-20T01:31:38+09:00",
-        "sourceFreshness": "stale_at_current_check",
-        "manualResetApplied": false
+        "sourceFreshness": "stale; 2026-10-19 planner source",
+        "manualResetApplied": false,
+        "publicVerificationReceivedAt": "2026-10-20T04:02:59.563303+09:00"
       },
       "kin": {
         "date": "2026-10-20",
-        "checkedAt": "2026-10-20T02:24:50+09:00",
+        "checkedAt": "2026-10-20T04:05:01.902507+09:00",
         "globalDailyCap": 20,
         "accountDailyCap": 10,
         "attempted": 4,
@@ -436,7 +440,9 @@
           }
         },
         "blockedReason": "stone0747: operation_ReadTimeout",
-        "manualResetApplied": false
+        "manualResetApplied": false,
+        "activeRunId": "2026-10-20_690ba44c85f2_stone0747_0405",
+        "activeAccount": "stone0747"
       }
     }
   },
@@ -449,7 +455,7 @@
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   },
   "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T03:58:20.7275931+09:00",
+  "updatedAt": "2026-10-20T04:07:43.5501839+09:00",
   "failureAt": "2026-10-20T02:28:06.626516+09:00",
   "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
   "attemptHistory": [
@@ -516,5 +522,5 @@
   "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
   "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
   "blockedAt": "2026-10-20T03:41:33.42854+09:00",
-  "blockedReason": "Catch-up worker PID 35616 started at 03:55:39 KST and remained active for more than two minutes while pipeline_state stayed idle and CF queue stayed unchanged; repeated cleaner overlap skips continue. A separate stage 1 run was not started to avoid concurrent execution."
+  "blockedReason": "Scheduled CF catch-up-once processes are active and cleaner logs continue to report overlap skips, while pipeline_state is idle and CF schedule remains 8 waiting, 5 prepared, 3 failed. No stage 1 duplicate was started. Naver reservation plan is dated 10/19; current 10/20 public evidence contains zero posts for publicationDate 10/20, so rollover is unverified. KIN worker is running for stone0747; no overlapping run or manual quota reset."
 }
