@@ -46,6 +46,18 @@ def parse_visible_history(rows, text, today, origin=None):
     return sorted(url for url, day in parsed if day == today)
 
 
+def history_url_key(url):
+    """Match Unicode paths to their UTF-8 escaped UI representation only.
+
+    Keep authority, path case, escaped separators, query and fragment semantics;
+    unquote() would wrongly equate /a%2Fb with /a/b.
+    """
+    parts = urlsplit(url)
+    path = quote(parts.path, safe="/%:@!$&'()*+,;=-._~")
+    path = re.sub(r'%[0-9a-fA-F]{2}', lambda match: match[0].upper(), path)
+    return parts.scheme, parts.netloc, path, parts.query, parts.fragment
+
+
 def paused_reason(text, url=''):
     if '프로그램을 이용한 자동등록을 방지' in text or re.search('captcha', text, re.I):
         return 'blocked_captcha'
@@ -97,7 +109,7 @@ def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
                 return reason
             rows = page.get_by_role('row').all_inner_texts()
             today_urls = parse_visible_history(rows, _text(page), ledger.now()[:10], origin)
-            if url in today_urls:
+            if any(history_url_key(url) == history_url_key(visible_url) for visible_url in today_urls):
                 ledger.complete_crawl(url, status='request_received', evidence={
                     'source': 'visible request-history row', 'url': url, 'dayKST': ledger.now()[:10]}, path=path)
                 return 'request_received'
