@@ -186,6 +186,7 @@ def complete_capture_guide(receipt_path, raster_path):
     with Image.open(raster_path) as image:
         if image.format not in ('JPEG','PNG','WEBP') or image.width != receipt['width'] or abs(image.height-receipt['height'])>1:
             raise ValueError('Guide render dimensions do not match its full document')
+        raster_width, raster_height = image.size
         image.verify()
     record=json.loads(Path(receipt['artifacts']['record']['path']).read_text(encoding='utf-8'))
     spec=json.loads(Path(receipt['artifacts']['spec']['path']).read_text(encoding='utf-8'))
@@ -193,7 +194,7 @@ def complete_capture_guide(receipt_path, raster_path):
     # content outside the guide crops. Keep them distinct from guide display.
     source_observation = {key: copy.deepcopy(record[key]) for key in (
         'action', 'expectedResult', 'observedResult', 'nextLocation', 'environment',
-        'captureMethod', 'capturedAt', 'sourceUrl', 'pixelObservation', 'observationFile'
+        'captureMethod', 'capturedAt', 'sourceUrl', 'pixelObservation', 'observationFile', 'width', 'height'
     ) if key in record}
     source_observation.update(scope='source_capture_only',
         sourceSha256=receipt['artifacts']['source']['sha256'],
@@ -208,6 +209,7 @@ def complete_capture_guide(receipt_path, raster_path):
     if 'pixelObservation' in record:
         record['pixelObservationScope']='Original source pixels only; the derived guide requires final actual-pixel review.'
     record.update(filename=raster_path.name,filePath=str(raster_path),sha256=_sha(raster_path),
+        width=raster_width,height=raster_height,
         originalPath=receipt['artifacts']['original']['path'],originalSha256=receipt['artifacts']['original']['sha256'],
         transformations=list(dict.fromkeys(record.get('transformations',[])+['annotate'])),
         captureGuide={**metadata,'sourceSha256':receipt['artifacts']['source']['sha256'],'targets':spec['targets'],'scope':spec['scope']})

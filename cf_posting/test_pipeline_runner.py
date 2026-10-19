@@ -18,6 +18,26 @@ from cf_posting.reader_task_contract import import_capture_assets
 
 
 class CaptureImportTests(unittest.TestCase):
+    def test_derived_guide_dimensions_match_pixels_and_pass_capture_import(self):
+        from common.capture_guide import prepare_capture_guide, complete_capture_guide
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);manifest,_=self.fixture(root);row=manifest['captures'][0]
+            spec={'version':1,'sourceSha256':row['sha256'],'title':'Test guide','scope':'Test image only',
+                  'contextCrop':[],'targets':[{'number':1,'kind':'check','box':[10,10,30,20],
+                                              'crop':[0,0,100,100],'caption':'Check fixture'}]}
+            receipt_path=prepare_capture_guide(row,spec,root/'guide')
+            receipt=json.loads(receipt_path.read_text(encoding='utf-8'))
+            raster=root/'guide'/'g1.png'
+            # Offline fixture validates metadata only; it is not a rendered/approved UI claim.
+            cv2.imwrite(str(raster),np.full((receipt['height'],receipt['width'],3),220,dtype=np.uint8))
+            derived=complete_capture_guide(receipt_path,raster)
+            self.assertEqual((derived['width'],derived['height']),(receipt['width'],receipt['height']))
+            self.assertEqual((derived['sourceObservation']['width'],derived['sourceObservation']['height']),(160,120))
+            self.assertTrue(derived['captureGuide']['visualReviewRequired'])
+            self.assertNotIn('approved',derived)
+            self.assertEqual(import_capture_assets({'articleSlug':'fixed-topic','captures':[derived]},
+                [derived],root/'stage4','fixed-topic'),[root/'stage4'/'g1.png'])
+
     def fixture(self, root):
         path = root/'source.png'
         cv2.imwrite(str(path), np.full((120, 160, 3), 170, dtype=np.uint8))
