@@ -1,9 +1,8 @@
 {
-  "directiveId": "2026-10-20T04:15:00+09:00",
+  "directiveId": "2026-10-20T06:16:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-20T04:20:07.823028+09:00",
-  "blockedAt": "2026-10-20T04:25:08.440503+09:00",
-  "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+  "startedAt": "2026-10-19T21:20:43.386688+00:00",
+  "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
   "directiveHistory": [
     {
       "directiveId": "2026-10-19T23:15:00+09:00",
@@ -397,7 +396,7 @@
         "snapshotSync": {
           "status": "localValidated",
           "schema": "barolab-live-snapshot-v1",
-          "generatedAt": "2026-10-19T19:23:05.536841+00:00",
+          "generatedAt": "2026-10-20T04:23:05.536841+09:00",
           "complete": true
         }
       },
@@ -410,82 +409,843 @@
         "server/data/codex_report.json"
       ],
       "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753"
+    },
+    {
+      "directiveId": "2026-10-20T04:30:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T04:33:00+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "summary": "부분 완료로 차단됨: CF catch-up-once PID 9500이 계속 실행 중이라 중복 재개 및 @doctor 20건 편집을 보류. SearchAdvisor 1회 점검은 auth_required로 제출 0건. Naver Blog --daily 1회는 기존 예약 증거 경로가 UNC 저장소를 가리켜 안전 경로 검사에서 거부됨(Submission evidence folder outside account output); 10/20 유효 예약은 7개만 확인되어 planner rollover 10개 완료를 입증할 수 없음. 지식iN은 04:25 RuntimeError 후 자동 04:40 회차에서 stone0747 답변 1건을 실제 공개 검증했으나 전체 지시는 미완료.",
+      "blockedAt": "2026-10-20T04:44:10+09:00",
+      "updatedAt": "2026-10-20T04:44:10+09:00",
+      "blockedReason": "부분 완료로 차단됨: CF catch-up-once PID 9500이 계속 실행 중이라 중복 재개 및 @doctor 20건 편집을 보류. SearchAdvisor 1회 점검은 auth_required로 제출 0건. Naver Blog --daily 1회는 기존 예약 증거 경로가 UNC 저장소를 가리켜 안전 경로 검사에서 거부됨(Submission evidence folder outside account output); 10/20 유효 예약은 7개만 확인되어 planner rollover 10개 완료를 입증할 수 없음. 지식iN은 04:25 RuntimeError 후 자동 04:40 회차에서 stone0747 답변 1건을 실제 공개 검증했으나 전체 지시는 미완료.",
+      "taskProgress": {
+        "directiveValidation": "최신 exact-name Drive 지시서 2026-10-20T04:30:00+09:00 확인",
+        "cfCleaner": {
+          "status": "blocked_waiting_for_existing_owner",
+          "activePid": 9500,
+          "command": "cf_posting/pipeline_runner.py --catch-up-once",
+          "queueCounts": {
+            "waiting": 8,
+            "prepared": 5,
+            "failed": 3
+          },
+          "pipelineState": "idle",
+          "duplicateRunStarted": false
+        },
+        "searchAdvisor": {
+          "status": "blocked_auth_required",
+          "attempted": true,
+          "submitted": 0,
+          "reason": "SearchAdvisor UI returned auth_required; no request submitted; no authentication bypass or retry."
+        },
+        "naverKin": {
+          "status": "recovered_by_scheduled_tick",
+          "failedTick": "2026-10-20_f6b3bb0c973a_stone0747_0425",
+          "failure": "RuntimeError: Dedicated browser process information is unavailable",
+          "recoveryRun": "2026-10-20_e9948687fa4e_stone0747_0440",
+          "publiclyVerified": 1,
+          "submitted": 1,
+          "manualRetry": false
+        },
+        "naverBlog": {
+          "status": "blocked_safety_path_validation",
+          "dailyPlanRunAttempted": true,
+          "result": "failed_before_plan",
+          "reason": "Submission evidence folder outside account output",
+          "verifiedReservationsFor2026_10_20": 7,
+          "targetItems": 10,
+          "duplicateRetry": false
+        },
+        "publicVerification": {
+          "status": "ok",
+          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "totalVerifiedEvidence": 58,
+          "updated": 0,
+          "errors": {}
+        },
+        "snapshotSync": {
+          "status": "drive_verified",
+          "schema": "barolab-live-snapshot-v1",
+          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "complete": false,
+          "bytes": 4649,
+          "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
+        },
+        "completionPing": {
+          "status": "not_sent",
+          "reason": "directive incomplete"
+        },
+        "urgentAlert": {
+          "status": "not_sent_app_unavailable",
+          "attempted": false,
+          "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+        }
+      },
+      "changedFiles": [
+        "server/data/codex_report.json",
+        "server/data/live_snapshot.json"
+      ],
+      "commitHash": null,
+      "completedAt": null,
+      "urgentAlert": {
+        "status": "not_sent_app_unavailable",
+        "attempted": false,
+        "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+      }
+    },
+    {
+      "directiveId": "2026-10-20T04:55:00+09:00",
+      "status": "blocked",
+      "checkedAt": "2026-10-19T19:57:28.353086+00:00",
+      "summary": "부분 완료: Naver 과거 외부 증거 경로는 계정별 unknown으로 보존하고 전체 recovery_plan 예외 중단을 수정, 검증 및 origin/main 푸시 완료. 10/20 설정된 예약은 7건 verified이며 10건 완료는 아님. CF PID 9500 종료 후 새 catch-up PID 18012 실행 중이므로 중복 실행/doctor 보류. SearchAdvisor soultin 로그인 확인 및 도메인별 50건 수정은 직전 사용자 작업 e544a63에 반영; 실제 제출 0건. Gemini 데스크톱 제어 도구 미지원으로 긴급 핑 미전송.",
+      "commitHash": "7ac6bf4"
+    },
+    {
+      "directiveId": "2026-10-20T05:06:00+09:00",
+      "status": "blocked",
+      "checkedAt": "2026-10-19T20:08:32.435969+00:00",
+      "summary": "05:06 부분 완료: SearchAdvisor baronote 실제 수집 접수 1건(05:06:29) 확인; 전체/상대 URL 접수 파서 수정·테스트·푸시 완료. 일괄 실행기 TimeoutError 및 CUA DOMSnapshot 타임아웃으로 추가 접수 미확인. 네이버 10/20 예약은 설정된 7/7 verified로 목표 완료 정정. CF catch-up은 내부 growth_doctor를 실행하며 별도 doctor 20 실행은 활성 workflow lock으로 거부됨; 중복/잠금 우회 없이 미완료 유지.",
+      "commitHash": "7ba136aa13c28c59fd7c6f33b30956413996e51f"
+    },
+    {
+      "directiveId": "2026-10-20T05:10:00+09:00",
+      "status": "blocked",
+      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "commitHash": "b16aadb38252c3e405c5c2e8f1da8816e19211e6",
+      "summary": "SearchAdvisor per-site bounded batch implemented and 5 new receipts verified. CF doctor continuation deferred by active workflow lock; full 20 doctor completions not verified.",
+      "changedFiles": [
+        "cf_posting/searchadvisor_ui.py"
+      ]
+    },
+    {
+      "directiveId": "2026-10-20T05:16:00+09:00",
+      "status": "completed",
+      "completedAt": "2026-10-19T20:25:27.946779+00:00",
+      "commitHash": "5bf19669e7b8058c5eabb7d417f719563705c82b",
+      "summary": "55 new SearchAdvisor receipts verified: five requested sites 10 each plus baronote 5. Doctor repaired and publicly verified 16 reciprocal-link pairs; total verified 20. One uncertain SearchAdvisor submission was not retried.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py"
+      ]
+    },
+    {
+      "directiveId": "2026-10-20T05:28:00+09:00",
+      "status": "blocked",
+      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "summary": "60 new SearchAdvisor receipts verified across six requested domains. maxnote draft reached image stage then failed: Flow project/editor unavailable (ProseMirror timeout). No additional prepared CF article verified.",
+      "changedFiles": []
+    },
+    {
+      "directiveId": "2026-10-20T05:38:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-19T20:37:48.198562+00:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "Dual indexing request/actual evidence columns and verified same-artifact Flow reuse implemented and tested; origin main verified. CF 11 prepared blocked: matching images unavailable; capture guide cannot manufacture source screenshots.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py",
+        "dashboard/content.py",
+        "dashboard/content.js",
+        "dashboard/growth.html",
+        "dashboard/metrics.py"
+      ],
+      "commitHash": "df6b74881fcbfa7b4492141a45dfa4a3683a4756",
+      "taskProgress": {
+        "directiveValidation": "최신 exact-name Drive 지시서 2026-10-20T04:30:00+09:00 확인",
+        "cfCleaner": {
+          "status": "blocked_waiting_for_existing_owner",
+          "activePid": 9500,
+          "command": "cf_posting/pipeline_runner.py --catch-up-once",
+          "queueCounts": {
+            "waiting": 8,
+            "prepared": 5,
+            "failed": 3
+          },
+          "pipelineState": "idle",
+          "duplicateRunStarted": false
+        },
+        "searchAdvisor": {
+          "status": "blocked_auth_required",
+          "attempted": true,
+          "submitted": 0,
+          "reason": "SearchAdvisor UI returned auth_required; no request submitted; no authentication bypass or retry."
+        },
+        "naverKin": {
+          "status": "recovered_by_scheduled_tick",
+          "failedTick": "2026-10-20_f6b3bb0c973a_stone0747_0425",
+          "failure": "RuntimeError: Dedicated browser process information is unavailable",
+          "recoveryRun": "2026-10-20_e9948687fa4e_stone0747_0440",
+          "publiclyVerified": 1,
+          "submitted": 1,
+          "manualRetry": false
+        },
+        "naverBlog": {
+          "status": "blocked_safety_path_validation",
+          "dailyPlanRunAttempted": true,
+          "result": "failed_before_plan",
+          "reason": "Submission evidence folder outside account output",
+          "verifiedReservationsFor2026_10_20": 7,
+          "targetItems": 10,
+          "duplicateRetry": false
+        },
+        "publicVerification": {
+          "status": "ok",
+          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "totalVerifiedEvidence": 58,
+          "updated": 0,
+          "errors": {}
+        },
+        "snapshotSync": {
+          "status": "drive_verified",
+          "schema": "barolab-live-snapshot-v1",
+          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "complete": false,
+          "bytes": 4649,
+          "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
+        },
+        "completionPing": {
+          "status": "not_sent",
+          "reason": "directive incomplete"
+        },
+        "urgentAlert": {
+          "status": "not_sent_app_unavailable",
+          "attempted": false,
+          "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+        }
+      },
+      "blockedReason": "부분 완료로 차단됨: CF catch-up-once PID 9500이 계속 실행 중이라 중복 재개 및 @doctor 20건 편집을 보류. SearchAdvisor 1회 점검은 auth_required로 제출 0건. Naver Blog --daily 1회는 기존 예약 증거 경로가 UNC 저장소를 가리켜 안전 경로 검사에서 거부됨(Submission evidence folder outside account output); 10/20 유효 예약은 7개만 확인되어 planner rollover 10개 완료를 입증할 수 없음. 지식iN은 04:25 RuntimeError 후 자동 04:40 회차에서 stone0747 답변 1건을 실제 공개 검증했으나 전체 지시는 미완료.",
+      "completionPing": {
+        "status": "not_sent",
+        "reason": "Directive is blocked/partial, not completed."
+      },
+      "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "urgentAlert": {
+        "status": "not_sent_app_unavailable",
+        "attempted": false,
+        "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+      },
+      "checkedAt": "2026-10-19T20:41:31.796830+00:00",
+      "geminiNotification": {
+        "directiveId": "2026-10-20T05:38:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-19T20:42:21.953689+00:00",
+        "kind": "blocked_result",
+        "evidence": "gemini-report-0538.png"
+      },
+      "naverReservationResult": {
+        "date": "2026-10-20",
+        "plannedSlots": 7,
+        "verifiedReservations": 7,
+        "status": "completed",
+        "publicPublication": "not_implied"
+      },
+      "searchadvisorResult": {
+        "status": "completed",
+        "newReceipts": 60,
+        "perSite": {
+          "nolplace.com": 10,
+          "maxnote.kr": 10,
+          "topnote.kr": 10,
+          "must-joy.com": 10,
+          "meganote.kr": 10,
+          "joynote.kr": 10
+        },
+        "indexed": null
+      },
+      "cfDoctorResult": {
+        "status": "completed",
+        "newReciprocalVerified": 16,
+        "totalVerified": 20,
+        "verifiedTitleOnly": 10,
+        "writeUnknown": 2
+      },
+      "tests": [
+        "60 live UI receipt confirmations",
+        "CF prepare-only execution failed at image stage"
+      ],
+      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "cfPreparationResult": {
+        "status": "blocked",
+        "newPrepared": 0,
+        "attempted": "maxnote.kr",
+        "lastStage": "image_generation",
+        "reason": "Flow project entry and div.ProseMirror timed out on dedicated barolab26 CDP 9440",
+        "computerUseSurfaceAvailable": false,
+        "title": "AI meeting notes privacy and summary verification"
+      },
+      "currentResult": {
+        "preparedNew": 0,
+        "targetPrepared": 11,
+        "codeTests": "passed",
+        "remoteCommitVerified": true,
+        "ui": "8 columns and populated rows verified; running server still uses prior backend until normal restart",
+        "naverActualIndex": "unknown; no per-URL verification source",
+        "fallback": "same-artifact hash/prompt/download evidence only; maxnote has prepared record but no image",
+        "blockingReason": "Task-matching actual captures or functioning dedicated Flow browser required",
+        "deployment": "backend restart pending"
+      }
+    },
+    {
+      "directiveId": "2026-10-20T05:44:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-19T20:43:11.082481+00:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "40 new SearchAdvisor receipts verified; bounded Naver index checker implemented/tested/pushed. CF prepared0; Flow not exposed to CUA. Safe backend reload unavailable.",
+      "changedFiles": [
+        "dashboard/content.py",
+        "dashboard/content.js",
+        "dashboard/metrics.py"
+      ],
+      "taskProgress": {
+        "directiveValidation": "최신 exact-name Drive 지시서 2026-10-20T04:30:00+09:00 확인",
+        "cfCleaner": {
+          "status": "blocked_waiting_for_existing_owner",
+          "activePid": 9500,
+          "command": "cf_posting/pipeline_runner.py --catch-up-once",
+          "queueCounts": {
+            "waiting": 8,
+            "prepared": 5,
+            "failed": 3
+          },
+          "pipelineState": "idle",
+          "duplicateRunStarted": false
+        },
+        "searchAdvisor": {
+          "status": "blocked_auth_required",
+          "attempted": true,
+          "submitted": 0,
+          "reason": "SearchAdvisor UI returned auth_required; no request submitted; no authentication bypass or retry."
+        },
+        "naverKin": {
+          "status": "recovered_by_scheduled_tick",
+          "failedTick": "2026-10-20_f6b3bb0c973a_stone0747_0425",
+          "failure": "RuntimeError: Dedicated browser process information is unavailable",
+          "recoveryRun": "2026-10-20_e9948687fa4e_stone0747_0440",
+          "publiclyVerified": 1,
+          "submitted": 1,
+          "manualRetry": false
+        },
+        "naverBlog": {
+          "status": "blocked_safety_path_validation",
+          "dailyPlanRunAttempted": true,
+          "result": "failed_before_plan",
+          "reason": "Submission evidence folder outside account output",
+          "verifiedReservationsFor2026_10_20": 7,
+          "targetItems": 10,
+          "duplicateRetry": false
+        },
+        "publicVerification": {
+          "status": "ok",
+          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "totalVerifiedEvidence": 58,
+          "updated": 0,
+          "errors": {}
+        },
+        "snapshotSync": {
+          "status": "drive_verified",
+          "schema": "barolab-live-snapshot-v1",
+          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "complete": false,
+          "bytes": 4649,
+          "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
+        },
+        "completionPing": {
+          "status": "not_sent",
+          "reason": "directive incomplete"
+        },
+        "urgentAlert": {
+          "status": "not_sent_app_unavailable",
+          "attempted": false,
+          "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+        }
+      },
+      "blockedReason": "부분 완료로 차단됨: CF catch-up-once PID 9500이 계속 실행 중이라 중복 재개 및 @doctor 20건 편집을 보류. SearchAdvisor 1회 점검은 auth_required로 제출 0건. Naver Blog --daily 1회는 기존 예약 증거 경로가 UNC 저장소를 가리켜 안전 경로 검사에서 거부됨(Submission evidence folder outside account output); 10/20 유효 예약은 7개만 확인되어 planner rollover 10개 완료를 입증할 수 없음. 지식iN은 04:25 RuntimeError 후 자동 04:40 회차에서 stone0747 답변 1건을 실제 공개 검증했으나 전체 지시는 미완료.",
+      "completionPing": {
+        "status": "not_sent",
+        "reason": "Directive is blocked/partial, not completed."
+      },
+      "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "urgentAlert": {
+        "status": "not_sent_app_unavailable",
+        "attempted": false,
+        "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+      },
+      "checkedAt": "2026-10-19T20:49:32.836155+00:00",
+      "geminiNotification": {
+        "directiveId": "2026-10-20T05:44:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-19T20:50:23.595569+00:00",
+        "kind": "blocked_result",
+        "evidence": "gemini-report-0544.png"
+      },
+      "naverReservationResult": {
+        "date": "2026-10-20",
+        "plannedSlots": 7,
+        "verifiedReservations": 7,
+        "status": "completed",
+        "publicPublication": "not_implied"
+      },
+      "searchadvisorResult": {
+        "status": "completed",
+        "newReceipts": 60,
+        "perSite": {
+          "nolplace.com": 10,
+          "maxnote.kr": 10,
+          "topnote.kr": 10,
+          "must-joy.com": 10,
+          "meganote.kr": 10,
+          "joynote.kr": 10
+        },
+        "indexed": null
+      },
+      "cfDoctorResult": {
+        "status": "completed",
+        "newReciprocalVerified": 16,
+        "totalVerified": 20,
+        "verifiedTitleOnly": 10,
+        "writeUnknown": 2
+      },
+      "tests": [
+        "60 live UI receipt confirmations",
+        "CF prepare-only execution failed at image stage"
+      ],
+      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "cfPreparationResult": {
+        "status": "blocked",
+        "newPrepared": 0,
+        "attempted": "maxnote.kr",
+        "lastStage": "image_generation",
+        "reason": "Flow project entry and div.ProseMirror timed out on dedicated barolab26 CDP 9440",
+        "computerUseSurfaceAvailable": false,
+        "title": "AI meeting notes privacy and summary verification"
+      },
+      "currentResult": {
+        "crawlRequests": {
+          "woorinote.kr": 10,
+          "smilenote.kr": 10,
+          "soulnote.kr": 10,
+          "tripmarvel.com": 10,
+          "total": 40,
+          "indexed": null
+        },
+        "cf": {
+          "newPrepared": 0,
+          "existingPrepared": 5,
+          "waiting": 8,
+          "failed": 3,
+          "reason": "Flow9440 listening but absent from Computer Use; task-matching images unavailable; preserved maxnote29hashes verified"
+        },
+        "naverIndexChecker": {
+          "automaticLimit": 3,
+          "liveProbes": 3,
+          "positiveObserved": 0,
+          "unknown": 3,
+          "tests": "passed"
+        },
+        "backend": "normal reload unavailable; running parent and child preserved",
+        "remoteCommitVerified": true
+      },
+      "commitHash": "f014e72121b45a279c7c65f3797c53fb0534ba7f"
+    },
+    {
+      "directiveId": "2026-10-20T05:45:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-19T20:51:12.431912+00:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "05:45 scope reconciled against05:44: all40 crawl requests already received; checker code already pushed. Flow remains absent from Computer Use; safe server reload unavailable.",
+      "changedFiles": [],
+      "taskProgress": {
+        "directiveValidation": "최신 exact-name Drive 지시서 2026-10-20T04:30:00+09:00 확인",
+        "cfCleaner": {
+          "status": "blocked_waiting_for_existing_owner",
+          "activePid": 9500,
+          "command": "cf_posting/pipeline_runner.py --catch-up-once",
+          "queueCounts": {
+            "waiting": 8,
+            "prepared": 5,
+            "failed": 3
+          },
+          "pipelineState": "idle",
+          "duplicateRunStarted": false
+        },
+        "searchAdvisor": {
+          "status": "blocked_auth_required",
+          "attempted": true,
+          "submitted": 0,
+          "reason": "SearchAdvisor UI returned auth_required; no request submitted; no authentication bypass or retry."
+        },
+        "naverKin": {
+          "status": "recovered_by_scheduled_tick",
+          "failedTick": "2026-10-20_f6b3bb0c973a_stone0747_0425",
+          "failure": "RuntimeError: Dedicated browser process information is unavailable",
+          "recoveryRun": "2026-10-20_e9948687fa4e_stone0747_0440",
+          "publiclyVerified": 1,
+          "submitted": 1,
+          "manualRetry": false
+        },
+        "naverBlog": {
+          "status": "blocked_safety_path_validation",
+          "dailyPlanRunAttempted": true,
+          "result": "failed_before_plan",
+          "reason": "Submission evidence folder outside account output",
+          "verifiedReservationsFor2026_10_20": 7,
+          "targetItems": 10,
+          "duplicateRetry": false
+        },
+        "publicVerification": {
+          "status": "ok",
+          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "totalVerifiedEvidence": 58,
+          "updated": 0,
+          "errors": {}
+        },
+        "snapshotSync": {
+          "status": "drive_verified",
+          "schema": "barolab-live-snapshot-v1",
+          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "complete": false,
+          "bytes": 4649,
+          "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
+        },
+        "completionPing": {
+          "status": "not_sent",
+          "reason": "directive incomplete"
+        },
+        "urgentAlert": {
+          "status": "not_sent_app_unavailable",
+          "attempted": false,
+          "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+        }
+      },
+      "blockedReason": "부분 완료로 차단됨: CF catch-up-once PID 9500이 계속 실행 중이라 중복 재개 및 @doctor 20건 편집을 보류. SearchAdvisor 1회 점검은 auth_required로 제출 0건. Naver Blog --daily 1회는 기존 예약 증거 경로가 UNC 저장소를 가리켜 안전 경로 검사에서 거부됨(Submission evidence folder outside account output); 10/20 유효 예약은 7개만 확인되어 planner rollover 10개 완료를 입증할 수 없음. 지식iN은 04:25 RuntimeError 후 자동 04:40 회차에서 stone0747 답변 1건을 실제 공개 검증했으나 전체 지시는 미완료.",
+      "completionPing": {
+        "status": "not_sent",
+        "reason": "Directive is blocked/partial, not completed."
+      },
+      "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "urgentAlert": {
+        "status": "not_sent_app_unavailable",
+        "attempted": false,
+        "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
+      },
+      "checkedAt": "2026-10-19T20:51:34.395184+00:00",
+      "geminiNotification": {
+        "directiveId": "2026-10-20T05:45:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-19T20:53:29.306614+00:00",
+        "kind": "blocked_result",
+        "evidence": "gemini-report-0545.png"
+      },
+      "naverReservationResult": {
+        "date": "2026-10-20",
+        "plannedSlots": 7,
+        "verifiedReservations": 7,
+        "status": "completed",
+        "publicPublication": "not_implied"
+      },
+      "searchadvisorResult": {
+        "status": "completed",
+        "newReceipts": 60,
+        "perSite": {
+          "nolplace.com": 10,
+          "maxnote.kr": 10,
+          "topnote.kr": 10,
+          "must-joy.com": 10,
+          "meganote.kr": 10,
+          "joynote.kr": 10
+        },
+        "indexed": null
+      },
+      "cfDoctorResult": {
+        "status": "completed",
+        "newReciprocalVerified": 16,
+        "totalVerified": 20,
+        "verifiedTitleOnly": 10,
+        "writeUnknown": 2
+      },
+      "tests": [
+        "60 live UI receipt confirmations",
+        "CF prepare-only execution failed at image stage"
+      ],
+      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "cfPreparationResult": {
+        "status": "blocked",
+        "newPrepared": 0,
+        "attempted": "maxnote.kr",
+        "lastStage": "image_generation",
+        "reason": "Flow project entry and div.ProseMirror timed out on dedicated barolab26 CDP 9440",
+        "computerUseSurfaceAvailable": false,
+        "title": "AI meeting notes privacy and summary verification"
+      },
+      "currentResult": {
+        "crawlRequests": {
+          "woorinote.kr": 10,
+          "smilenote.kr": 10,
+          "soulnote.kr": 10,
+          "tripmarvel.com": 10,
+          "total": 40,
+          "indexed": null
+        },
+        "cf": {
+          "newPrepared": 0,
+          "existingPrepared": 5,
+          "waiting": 8,
+          "failed": 3,
+          "reason": "Flow9440 listening but absent from Computer Use; task-matching images unavailable; preserved maxnote29hashes verified"
+        },
+        "naverIndexChecker": {
+          "automaticLimit": 3,
+          "liveProbes": 3,
+          "positiveObserved": 0,
+          "unknown": 3,
+          "tests": "passed"
+        },
+        "backend": "normal reload unavailable; running parent and child preserved",
+        "remoteCommitVerified": true,
+        "reconciledFromDirectiveId": "2026-10-20T05:44:00+09:00",
+        "duplicateCrawlRequestsSent": 0,
+        "flowCuaRechecked": "2026-10-20T05:51:00+09:00; browser not exposed"
+      },
+      "commitHash": "f014e72121b45a279c7c65f3797c53fb0534ba7f"
+    },
+    {
+      "directiveId": "2026-10-20T05:52:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-19T20:56:12.338079+00:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "60 new crawl receipts verified; NAS CF evidence deployed and UI verified 23 full/7 partial/2 unknown; Flow CUA recovered, new prepared 0 pending image plan re-review",
+      "changedFiles": [
+        "server/content_auditor.py",
+        "dashboard/content.py",
+        "dashboard/growth.html",
+        "cf_posting/pipeline_runner.py",
+        "cf_posting/searchadvisor_ui.py",
+        "server/DOCKER.md"
+      ],
+      "taskProgress": {
+        "searchAdvisor": {
+          "status": "completed",
+          "newReceipts": 60,
+          "perSite": {
+            "baronote.kr": 10,
+            "must-pick.com": 10,
+            "must-good.com": 10,
+            "daynote.kr": 10,
+            "healthcox.com": 10,
+            "justinfo.co.kr": 10
+          },
+          "newUnknown": 0,
+          "previousUnknownResolved": 1,
+          "lastConfirmedAt": "2026-10-20T06:07:55+09:00",
+          "indexed": null
+        },
+        "nas": {
+          "status": "deployed_verified",
+          "image": "barolab-dashboard:app-testers-20261019",
+          "mounts": 11,
+          "apiHttpStatus": 200,
+          "verified": 23,
+          "partial": 7,
+          "unknown": 2,
+          "uiVerified": true
+        },
+        "flow": {
+          "status": "blocked",
+          "newPrepared": 0,
+          "computerUseSurfaceAvailable": true,
+          "accountVerified": "barolab26@gmail.com",
+          "project": "60830101-45ee-4855-87f0-f93fc3078b67",
+          "reason": "Existing accepted maxnote image plan is decorative; safe image-plan re-review path required before replacement; source and acceptance hashes preserved",
+          "lockReleased": true
+        }
+      },
+      "completionPing": {
+        "status": "not_sent",
+        "reason": "directive partial"
+      },
+      "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "updatedAt": "2026-10-19T21:13:38.083229+00:00",
+      "urgentAlert": {
+        "directiveId": "2026-10-20T05:52:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-19T21:14:35.484612+00:00",
+        "channel": "existing BaroLab Gemini conversation via Computer Use",
+        "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0552.png"
+      },
+      "checkedAt": "2026-10-19T20:51:34.395184+00:00",
+      "geminiNotification": {
+        "directiveId": "2026-10-20T05:52:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-19T21:14:35.484612+00:00",
+        "channel": "existing BaroLab Gemini conversation via Computer Use",
+        "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0552.png"
+      },
+      "naverReservationResult": {
+        "date": "2026-10-20",
+        "plannedSlots": 7,
+        "verifiedReservations": 7,
+        "status": "completed",
+        "publicPublication": "not_implied"
+      },
+      "searchadvisorResult": {
+        "status": "completed",
+        "newReceipts": 60,
+        "perSite": {
+          "baronote.kr": 10,
+          "must-pick.com": 10,
+          "must-good.com": 10,
+          "daynote.kr": 10,
+          "healthcox.com": 10,
+          "justinfo.co.kr": 10
+        },
+        "newUnknown": 0,
+        "previousUnknownResolved": 1,
+        "lastConfirmedAt": "2026-10-20T06:07:55+09:00",
+        "indexed": null
+      },
+      "cfDoctorResult": {
+        "status": "source_verified",
+        "totalVerified": 23,
+        "verifiedTitleOnly": 7,
+        "writeUnknown": 2,
+        "newEditsThisRun": 0
+      },
+      "tests": [
+        "CF verification gates, KST date and priority fixtures passed",
+        "Unicode vs percent-encoded URL receipt identity regression passed",
+        "Python and dashboard JavaScript syntax checks passed",
+        "60 live SearchAdvisor receipts verified"
+      ],
+      "blockedAt": "2026-10-19T21:13:38.083229+00:00",
+      "cfPreparationResult": {
+        "status": "blocked",
+        "newPrepared": 0,
+        "computerUseSurfaceAvailable": true,
+        "accountVerified": "barolab26@gmail.com",
+        "project": "60830101-45ee-4855-87f0-f93fc3078b67",
+        "reason": "Existing accepted maxnote image plan is decorative; safe image-plan re-review path required before replacement; source and acceptance hashes preserved",
+        "lockReleased": true
+      },
+      "currentResult": {
+        "status": "partial",
+        "searchAdvisor": {
+          "status": "completed",
+          "newReceipts": 60,
+          "perSite": {
+            "baronote.kr": 10,
+            "must-pick.com": 10,
+            "must-good.com": 10,
+            "daynote.kr": 10,
+            "healthcox.com": 10,
+            "justinfo.co.kr": 10
+          },
+          "newUnknown": 0,
+          "previousUnknownResolved": 1,
+          "lastConfirmedAt": "2026-10-20T06:07:55+09:00",
+          "indexed": null
+        },
+        "nas": {
+          "status": "deployed_verified",
+          "image": "barolab-dashboard:app-testers-20261019",
+          "mounts": 11,
+          "apiHttpStatus": 200,
+          "verified": 23,
+          "partial": 7,
+          "unknown": 2,
+          "uiVerified": true
+        },
+        "flow": {
+          "status": "blocked",
+          "newPrepared": 0,
+          "computerUseSurfaceAvailable": true,
+          "accountVerified": "barolab26@gmail.com",
+          "project": "60830101-45ee-4855-87f0-f93fc3078b67",
+          "reason": "Existing accepted maxnote image plan is decorative; safe image-plan re-review path required before replacement; source and acceptance hashes preserved",
+          "lockReleased": true
+        }
+      },
+      "commitHash": "2af20bb806fa5c34f8cb540608fb044d9c006167",
+      "blockedReason": "CF remaining 11 not prepared: accepted maxnote decorative image plan needs safe independent re-review before replacement. Flow connection is now available.",
+      "driveSync": {
+        "status": "verified",
+        "files": 7,
+        "verifiedAt": "2026-10-19T21:14:35.484624+00:00"
+      }
     }
   ],
-  "summary": "INCOMPLETE: CF agent hard-timeout change passed its focused test, but the scheduled cleaner owner PID 2600 currently holds the cleaner lock, so no overlapping retry or 20-post remodel run was started. The queue remains 8 waiting, 5 prepared, 3 failed. Naver rollover/publication is not evidenced for 10/20; KIN stone0747 tick ended blocked with operation_RuntimeError before submission. SearchAdvisor reports history_unconfirmed with remaining=null and a hard daily limit of 50, so the requested 800/domain submissions were not attempted.",
+  "summary": "Image-plan re-review and normalization defects fixed/tested/pushed; 60 new crawl receipts verified. Two priority drafts completed normal Stage1-3, but independent image reviews rejected. New prepared=0, existing prepared=5; 11 unfinished. Not completed.",
   "changedFiles": [
-    "cf_posting/pipeline_runner.py",
-    "common/codex_cli.py",
-    "server/test_hermes_integration.py",
-    "server/data/live_snapshot.json",
-    "server/data/codex_report.json"
+    "cf_posting/pipeline_runner.py"
   ],
-  "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753",
   "taskProgress": {
-    "cfCleanerTimeoutAndOwnerCheck": {
-      "status": "partial",
-      "hardTimeoutSeconds": 600,
-      "test": "server.test_hermes_integration.MemoryIntegrationTests.test_chat_generation_timeout_reaches_api_and_codex_process passed",
-      "ownerPid": 2600,
-      "ownerStartedAt": "2026-10-20T04:20:40+09:00",
-      "pipelineState": "idle",
-      "queueCounts": {
-        "waiting": 8,
-        "failed": 3,
-        "prepared": 5
-      },
-      "retryStarted": false,
-      "reason": "Scheduled cleaner owner is active; overlapping invocation skipped.",
-      "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753"
-    },
-    "naverRolloverAndKinTimeout": {
-      "status": "blocked",
-      "plannerWorkDate": "2026-10-19",
-      "publicVerificationDate": "2026-10-20",
-      "publicEvidenceCount": 58,
-      "evidenceFor2026-10-20": 0,
-      "kinLastOperation": {
-        "state": "blocked",
-        "reason": "operation_RuntimeError",
-        "submissionAttempted": false,
-        "submitted": false
-      },
-      "quotaReset": false,
-      "reason": "No verified rollover plan or safe retry basis; do not duplicate scheduler tick."
-    },
-    "doctorRemodel20Posts": {
-      "status": "blocked",
-      "started": false,
-      "reason": "CF cleaner is the active owner of the same content-maintenance pipeline; no overlapping edit run."
-    },
-    "searchAdvisorUpTo800PerDomain": {
-      "status": "blocked",
-      "attempted": false,
-      "budget": {
-        "status": "history_unconfirmed",
-        "remaining": null,
-        "limit": 50
-      },
-      "reason": "Account-wide hard cap is 50/day and history is unconfirmed; no cap bypass or submission."
-    },
-    "geminiBlockedAlert": {
-      "status": "sent_verified",
-      "sentAt": "2026-10-20T04:28:23.969484+09:00",
-      "destination": "Gemini desktop / BaroLab project",
-      "text": "코덱스 긴급 보고: CF cleaner가 실행 중이라 중복 재개와 닥터 20건 일괄 수정은 보류했습니다. 지식iN은 제출 전 오류로 중단됐고, SearchAdvisor 800건 요청은 일일 한도(50건)와 확인되지 않은 잔여 예산 때문에 실행하지 않았습니다. 타임아웃 수정·테스트와 보고서/스냅샷 동기화는 완료했습니다.",
-      "evidence": "Exact message visible in BaroLab conversation after send; composer cleared and Gemini response started.",
-      "deduplicatedByDirectiveId": true
-    },
-    "snapshotSync": {
-      "status": "localValidated",
-      "schema": "barolab-live-snapshot-v1",
-      "generatedAt": "2026-10-19T19:23:05.536841+00:00",
-      "complete": true
-    }
+    "implementation": "Completed: normal image-plan review, provenance, bounded retries/clarification, validation failure retention, real anchor mapping, removal of decorative fallback; tested and pushed",
+    "searchAdvisor": "Completed: 60 new receipts verified, six domains x10; unknown0; actual indexing unknown",
+    "priorityDrafts": "Two normal Stage1-3 drafts preserved; both final image reviews rejected; no new prepared",
+    "remainingPreparation": "Existing three drafts blocked; six remaining waiting drafts not prepared"
   },
-  "blockedReason": "Execution limited to avoid concurrent edits/submissions: active scheduled CF cleaner lock/PID; Naver KIN operation failed before submission and rollover is not verified; SearchAdvisor safety ledger cannot confirm budget and enforced cap 50 is below requested 800 per domain.",
-  "completionPing": {
-    "status": "not_sent",
-    "reason": "Directive is blocked/partial, not completed."
-  }
+  "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+  "updatedAt": "2026-10-19T21:57:38.288747+00:00",
+  "checkedAt": "2026-10-19T21:57:38.288747+00:00",
+  "geminiNotification": {
+    "directiveId": "2026-10-20T06:16:00+09:00",
+    "status": "pending"
+  },
+  "tests": [
+    "Image-plan-only mutation preserves prose, sources and readerTask",
+    "Existing filenames/capture plans/reference integrity validated",
+    "Actual step.id/blockRef/h2 binding validated",
+    "Independent proposal/review and bounded clarification evidence retained",
+    "Rejected proposal/history/retry cap regression checks passed",
+    "External browser capture guard and Python syntax checks passed",
+    "Writer normalization no longer invents decorative plans or converts missing captures to generated images; real task/block references validated",
+    "Heading element, nested heading, and paragraph preceding-heading image bindings pass; incorrect index rejected"
+  ],
+  "currentResult": {
+    "status": "blocked",
+    "newCrawlReceipts": 60,
+    "newPrepared": 0,
+    "crawlDomains": {
+      "nolplace.com": 10,
+      "maxnote.kr": 10,
+      "topnote.kr": 10,
+      "must-joy.com": 10,
+      "meganote.kr": 10,
+      "joynote.kr": 10
+    },
+    "actualIndexingVerified": false,
+    "newDraftsStage3": 2,
+    "priorityDraftArtifacts": {
+      "must-pick.com": "cf_posting/output/dishwasher-white-residue-rinse-hard-water-checks/run-20261020-064311-412b4b",
+      "nolplace.com": "cf_posting/output/seoulland-family-ticket-discount-same-day-entry/run-20261020-064656-f7253e"
+    },
+    "existingPrepared": 5,
+    "unfinishedCount": 11,
+    "actualImagesGenerated": 0,
+    "layoutVerified": false,
+    "blockers": {
+      "maxnote.kr": "Mandatory guidance on human review use of submitted data missing from preserved prose",
+      "topnote.kr": "Actual Xbox Game Bar/settings/recording/save-path evidence required; diagrams cannot replace it",
+      "meganote.kr": "Proposed nonexistent filename 03.jpg; actual response recovered and rejection preserved",
+      "must-pick.com": "Unlabeled diagram insufficient to explain hardness/salt/rinse/detergent decisions; final independent review rejected",
+      "nolplace.com": "Visual plan insufficient for same-day ticket check and refund decision steps; final independent review rejected"
+    },
+    "notPreparedWaiting": [
+      "must-joy.com",
+      "joynote.kr",
+      "daynote.kr",
+      "woorinote.kr",
+      "soulnote.kr",
+      "tripmarvel.com"
+    ]
+  },
+  "commitHash": "b2cb9750ce286faf8ff95694f8e75afe83d3c365",
+  "driveSync": {
+    "status": "pending_final_upload",
+    "previousVerifiedAt": "2026-10-19T21:39:14.256Z",
+    "fileCount": 7
+  },
+  "blockedAt": "2026-10-19T21:57:38.288747+00:00",
+  "blockedReason": "Independent content/evidence/image-plan gates rejected five drafts. Preserved prose and retry limits; no image or layout approval, remaining six waiting drafts not prepared."
 }

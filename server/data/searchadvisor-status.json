@@ -579,9 +579,3396 @@
       }
     }
   },
-  "crawlRequests": [],
+  "crawlRequests": [
+    {
+      "url": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+      "reservedAt": "2026-10-20T05:06:26.142604+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:06:52.541503+09:00",
+      "evidence": {
+        "source": "CUA screenshot visible history row",
+        "registeredAtKST": "2026-10-20 05:06:29"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/topic-1",
+      "reservedAt": "2026-10-20T05:13:41.548391+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:13:46.751387+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/topic-1",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/2026-energy-voucher-usage-balance",
+      "reservedAt": "2026-10-20T05:13:48.062855+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:13:53.283767+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/2026-energy-voucher-usage-balance",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/trash-bag-price-regional-use-after-moving",
+      "reservedAt": "2026-10-20T05:13:55.126217+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:14:00.831282+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/trash-bag-price-regional-use-after-moving",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/2026-government-subsidy-find",
+      "reservedAt": "2026-10-20T05:14:02.220395+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:14:07.415814+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/2026-government-subsidy-find",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/telecom-membership-points-usage-convenience-store-guide",
+      "reservedAt": "2026-10-20T05:14:09.503220+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:14:14.722827+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/telecom-membership-points-usage-convenience-store-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+      "reservedAt": "2026-10-20T05:16:47.437857+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:16:52.648222+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+      "reservedAt": "2026-10-20T05:16:53.950940+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:16:59.167737+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/camping-chair-size-storage-seat-height",
+      "reservedAt": "2026-10-20T05:17:00.994518+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:06.214873+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/camping-chair-size-storage-seat-height",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/robot-vacuum-consumables-replacement-compatibility",
+      "reservedAt": "2026-10-20T05:17:08.027508+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:13.246849+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/robot-vacuum-consumables-replacement-compatibility",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/usb-pd-pps-charger-specs-guide",
+      "reservedAt": "2026-10-20T05:17:15.276546+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:20.464609+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/usb-pd-pps-charger-specs-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/robot-vacuum-direct-plumbing-installation-conditions",
+      "reservedAt": "2026-10-20T05:17:21.751450+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:26.948960+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/robot-vacuum-direct-plumbing-installation-conditions",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/robot-vacuum-cleaner-buying-guide-suction-mop-specs-comparison",
+      "reservedAt": "2026-10-20T05:17:28.274740+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:34.000419+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/robot-vacuum-cleaner-buying-guide-suction-mop-specs-comparison",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/2026-energy-efficiency-appliance-rebate-application-guide-2",
+      "reservedAt": "2026-10-20T05:17:35.799921+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:40.981953+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/2026-energy-efficiency-appliance-rebate-application-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/energy-efficient-home-appliances-refund-guide",
+      "reservedAt": "2026-10-20T05:17:42.324006+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:47.528582+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/energy-efficient-home-appliances-refund-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/emergency-welfare-livelihood-support-eligibility-financial-criteria",
+      "reservedAt": "2026-10-20T05:17:49.130785+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:17:54.332262+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/emergency-welfare-livelihood-support-eligibility-financial-criteria",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
+      "reservedAt": "2026-10-20T05:18:01.168459+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:06.368191+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/post",
+      "reservedAt": "2026-10-20T05:18:08.143512+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:13.360902+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/post",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/financial-sector-hacking-data-leak-response",
+      "reservedAt": "2026-10-20T05:18:15.161288+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:20.890143+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/financial-sector-hacking-data-leak-response",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/specific-financial-information-act-enforcement-review",
+      "reservedAt": "2026-10-20T05:18:22.354191+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:28.037016+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/specific-financial-information-act-enforcement-review",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/must-good-20261013-essential-guide",
+      "reservedAt": "2026-10-20T05:18:29.400782+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:34.593518+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/must-good-20261013-essential-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/2026-second-consumption-coupon-eligibility-application-deadline",
+      "reservedAt": "2026-10-20T05:18:35.878493+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:41.095035+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/2026-second-consumption-coupon-eligibility-application-deadline",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+      "reservedAt": "2026-10-20T05:18:42.880113+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:18:48.105630+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/최대-45-우대금리에-2대-대출-연계까지-2026-청년-주택드림-청약통장-가입-조건-및-전환-방법-총정리",
+      "reservedAt": "2026-10-20T05:18:50.123438+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:02:10.545406+09:00",
+      "evidence": {
+        "source": "reviewed visible request-history row; percent-decoded exact path",
+        "row": "9\t\n/%EC%B5%9C%EB%8C%80-45-%EC%9A%B0%EB%8C%80%EA%B8%88%EB%A6%AC%EC%97%90-2%EB%8C%80-%EB%8C%80%EC%B6%9C-%EC%97%B0%EA%B3%84%EA%B9%8C%EC%A7%80-2026-%EC%B2%AD%EB%85%84-%EC%A3%BC%ED%83%9D%EB%93%9C%EB%A6%BC-%EC%B2%AD%EC%95%BD%ED%86%B5%EC%9E%A5-%EA%B0%80%EC%9E%85-%EC%A1%B0%EA%B1%B4-%EB%B0%8F-%EC%A0%84%ED%99%98-%EB%B0%A9%EB%B2%95-%EC%B4%9D%EC%A0%95%EB%A6%AC\n\t26.10.20 05:18:49",
+        "previousStatus": "unknown",
+        "reviewReason": "encoded path confirmed without resubmission"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/green-onion-fresh-storage-guide",
+      "reservedAt": "2026-10-20T05:19:41.688220+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:19:46.914361+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/green-onion-fresh-storage-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
+      "reservedAt": "2026-10-20T05:19:48.686165+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:19:54.403340+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/window-frame-cleaning-dust-stains",
+      "reservedAt": "2026-10-20T05:19:56.016382+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:01.242943+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/window-frame-cleaning-dust-stains",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/washing-machine-laundry-odor-check",
+      "reservedAt": "2026-10-20T05:20:02.584809+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:07.806928+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/washing-machine-laundry-odor-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
+      "reservedAt": "2026-10-20T05:20:09.344410+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:15.089911+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/bathroom-tile-mold-scale-removal-percarbonate-cleaning-guide",
+      "reservedAt": "2026-10-20T05:20:17.184488+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:22.887942+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/bathroom-tile-mold-scale-removal-percarbonate-cleaning-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/proper-recycling-sorting-rules-guide",
+      "reservedAt": "2026-10-20T05:20:24.673526+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:29.883860+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/proper-recycling-sorting-rules-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide",
+      "reservedAt": "2026-10-20T05:20:31.662296+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:37.359406+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/google-drive-link-sharing-access-check",
+      "reservedAt": "2026-10-20T05:20:38.953303+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:44.176841+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/google-drive-link-sharing-access-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/clear-pet-bottle-separation-guide",
+      "reservedAt": "2026-10-20T05:20:45.516653+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:20:50.740232+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/clear-pet-bottle-separation-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+      "reservedAt": "2026-10-20T05:20:57.215687+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:02.912238+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/topic-2",
+      "reservedAt": "2026-10-20T05:21:04.687814+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:10.414485+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/topic-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/flu-symptoms-testing-antiviral-care-timing",
+      "reservedAt": "2026-10-20T05:21:12.245910+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:17.474904+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/flu-symptoms-testing-antiviral-care-timing",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/flu-vaccine-side-effects-fever-muscle-pain-care",
+      "reservedAt": "2026-10-20T05:21:19.298382+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:24.511874+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/flu-vaccine-side-effects-fever-muscle-pain-care",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/2026-flu-vaccination-eligibility-timing",
+      "reservedAt": "2026-10-20T05:21:25.942866+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:31.169853+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/2026-flu-vaccination-eligibility-timing",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/covid-flu-symptom-difference-testing-care-2026",
+      "reservedAt": "2026-10-20T05:21:32.990365+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:38.699322+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/covid-flu-symptom-difference-testing-care-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/turtle-neck-forward-head-posture-chin-tuck-exercise",
+      "reservedAt": "2026-10-20T05:21:40.069943+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:45.293467+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/turtle-neck-forward-head-posture-chin-tuck-exercise",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/lower-back-pain-core-glute-bridge-bed-exercise-routine",
+      "reservedAt": "2026-10-20T05:21:47.170327+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:52.390604+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/lower-back-pain-core-glute-bridge-bed-exercise-routine",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/forward-head-posture-correction-exercises",
+      "reservedAt": "2026-10-20T05:21:53.740707+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:21:58.972389+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/forward-head-posture-correction-exercises",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/forward-head-posture-correction-stretching-exercises",
+      "reservedAt": "2026-10-20T05:22:00.314719+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:05.542568+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/forward-head-posture-correction-stretching-exercises",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/topic-3",
+      "reservedAt": "2026-10-20T05:22:11.906676+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:17.125546+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/topic-3",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+      "reservedAt": "2026-10-20T05:22:18.668235+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:23.885024+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/unreported-crypto-site-block-user-checklist",
+      "reservedAt": "2026-10-20T05:22:25.731699+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:30.939974+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/unreported-crypto-site-block-user-checklist",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/loan-application-financial-phishing-check",
+      "reservedAt": "2026-10-20T05:22:32.296033+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:37.498518+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/loan-application-financial-phishing-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/2026-youth-future-savings-eligibility-guide",
+      "reservedAt": "2026-10-20T05:22:39.324989+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:44.537716+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/2026-youth-future-savings-eligibility-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/2026-subsidy-24-government-benefits-custom-inquiry-guide",
+      "reservedAt": "2026-10-20T05:22:46.338747+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:51.570833+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/2026-subsidy-24-government-benefits-custom-inquiry-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+      "reservedAt": "2026-10-20T05:22:53.171966+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:22:58.398574+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/2026-k-pass-transport-card-benefit-guide-2",
+      "reservedAt": "2026-10-20T05:23:00.197105+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:05.399258+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/2026-k-pass-transport-card-benefit-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/windows-snipping-tool-text-actions-share-check",
+      "reservedAt": "2026-10-20T05:23:06.784680+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:12.006027+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/windows-snipping-tool-text-actions-share-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/electronic-document-wallet-screenshot-retention-guide",
+      "reservedAt": "2026-10-20T05:23:13.429122+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:18.645246+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/electronic-document-wallet-screenshot-retention-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/2026-car-bond-refund-online-guide",
+      "reservedAt": "2026-10-20T05:23:28.923690+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:34.150645+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/2026-car-bond-refund-online-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/burned-pot-cleaning-baking-soda-vinegar-guide-2",
+      "reservedAt": "2026-10-20T05:23:35.982781+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:41.726391+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/burned-pot-cleaning-baking-soda-vinegar-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/2026-card-point-integrated-inquiry-cashback-guide",
+      "reservedAt": "2026-10-20T05:23:43.881447+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:49.630316+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/2026-card-point-integrated-inquiry-cashback-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/chrome-site-notification-block-permission-check",
+      "reservedAt": "2026-10-20T05:23:51.477456+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:23:56.693258+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/chrome-site-notification-block-permission-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/windows-11-screenshot-save-location-clipboard-check",
+      "reservedAt": "2026-10-20T05:23:58.443604+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:24:03.655726+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/windows-11-screenshot-save-location-clipboard-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/military-service-certificate-online-issuance-guide",
+      "reservedAt": "2026-10-20T05:24:37.566540+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:24:43.316035+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/military-service-certificate-online-issuance-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/driving-record-certificate-online-issuance-guide",
+      "reservedAt": "2026-10-20T05:24:45.155870+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:24:50.896236+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/driving-record-certificate-online-issuance-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024",
+      "reservedAt": "2026-10-20T05:24:52.333539+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:24:57.553998+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+      "reservedAt": "2026-10-20T05:27:45.092008+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:27:50.319254+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+      "reservedAt": "2026-10-20T05:27:52.150969+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:27:57.884098+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/silver-grass-festival-schedule-parking-shuttle",
+      "reservedAt": "2026-10-20T05:27:59.981816+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:05.172259+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/silver-grass-festival-schedule-parking-shuttle",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/autumn-foliage-spots-forecast-parking-reservation",
+      "reservedAt": "2026-10-20T05:28:07.046386+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:12.260328+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/autumn-foliage-spots-forecast-parking-reservation",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/seoul-suburbs-foliage-drive-glamping-courses",
+      "reservedAt": "2026-10-20T05:28:13.949256+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:19.150411+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/seoul-suburbs-foliage-drive-glamping-courses",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/2026-autumn-foliage-spots-parking-transit",
+      "reservedAt": "2026-10-20T05:28:20.588880+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:25.822870+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/2026-autumn-foliage-spots-parking-transit",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/2026-local-currency-hotplace-tips",
+      "reservedAt": "2026-10-20T05:28:27.635627+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:33.370267+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/2026-local-currency-hotplace-tips",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/2026-seoul-suburbs-large-bakery-cafes-best-5-parking-guide",
+      "reservedAt": "2026-10-20T05:28:35.182370+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:40.419549+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/2026-seoul-suburbs-large-bakery-cafes-best-5-parking-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide-2",
+      "reservedAt": "2026-10-20T05:28:42.349857+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:47.578228+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/seoul-night-view-drive-courses-recommendation",
+      "reservedAt": "2026-10-20T05:28:49.348328+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:28:54.564624+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/seoul-night-view-drive-courses-recommendation",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/excel-freeze-panes-row-column",
+      "reservedAt": "2026-10-20T05:29:01.699432+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:06.933964+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/excel-freeze-panes-row-column",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+      "reservedAt": "2026-10-20T05:29:08.461821+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:13.676398+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/windows-11-shortcuts-not-working",
+      "reservedAt": "2026-10-20T05:29:15.120829+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:20.815077+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/windows-11-shortcuts-not-working",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/computer-slow-temp-files-disk-cleanup",
+      "reservedAt": "2026-10-20T05:29:22.325099+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:27.554053+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/computer-slow-temp-files-disk-cleanup",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/excel-pivot-table-summary-refresh-guide",
+      "reservedAt": "2026-10-20T05:29:29.584911+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:34.782569+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/excel-pivot-table-summary-refresh-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/excel-xlookup-vlookup-practical-function-guide-shortcuts",
+      "reservedAt": "2026-10-20T05:29:37.154424+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:42.380329+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/excel-xlookup-vlookup-practical-function-guide-shortcuts",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+      "reservedAt": "2026-10-20T05:29:43.933067+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:49.141335+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-2",
+      "reservedAt": "2026-10-20T05:29:50.997318+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:29:56.206495+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide",
+      "reservedAt": "2026-10-20T05:29:58.472842+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:03.685193+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/windows-clipboard-pinned-history-clear-restart",
+      "reservedAt": "2026-10-20T05:30:05.245678+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:10.488318+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/windows-clipboard-pinned-history-clear-restart",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
+      "reservedAt": "2026-10-20T05:30:17.631723+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:23.359815+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
+      "reservedAt": "2026-10-20T05:30:25.224594+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:30.438917+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/bluetooth-earbud-one-side-no-sound-check",
+      "reservedAt": "2026-10-20T05:30:32.608403+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:37.839613+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/bluetooth-earbud-one-side-no-sound-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/iphone-18-latest-news-specs-upgrade",
+      "reservedAt": "2026-10-20T05:30:39.461416+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:44.698264+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/iphone-18-latest-news-specs-upgrade",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/iphone-update-battery-drain-heat-check",
+      "reservedAt": "2026-10-20T05:30:46.599180+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:51.814055+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/iphone-update-battery-drain-heat-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/usb-c-monitor-no-display-troubleshooting",
+      "reservedAt": "2026-10-20T05:30:53.869000+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:30:59.098822+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/usb-c-monitor-no-display-troubleshooting",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/wifi-router-channel-speed-optimization-5ghz-settings",
+      "reservedAt": "2026-10-20T05:31:01.099411+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:06.329387+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/wifi-router-channel-speed-optimization-5ghz-settings",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/smartphone-battery-lifespan-extending-charging-habits-guide",
+      "reservedAt": "2026-10-20T05:31:07.837259+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:13.556140+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/smartphone-battery-lifespan-extending-charging-habits-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide-2",
+      "reservedAt": "2026-10-20T05:31:15.049321+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:20.247991+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2",
+      "reservedAt": "2026-10-20T05:31:21.804916+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:27.498004+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+      "reservedAt": "2026-10-20T05:31:37.750401+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:42.965691+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+      "reservedAt": "2026-10-20T05:31:44.437149+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:49.657256+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/washing-machine-tub-cleaning-frequency",
+      "reservedAt": "2026-10-20T05:31:51.141724+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:31:56.370669+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/washing-machine-tub-cleaning-frequency",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/kimchi-fridge-food-storage-modes-containers",
+      "reservedAt": "2026-10-20T05:31:57.908762+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:03.653792+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/kimchi-fridge-food-storage-modes-containers",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/refrigerator-fridge-freezer-temperature-settings",
+      "reservedAt": "2026-10-20T05:32:05.097272+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:10.327885+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/refrigerator-fridge-freezer-temperature-settings",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/freezer-frost-causes-door-seal-check",
+      "reservedAt": "2026-10-20T05:32:11.788676+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:16.992758+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/freezer-frost-causes-door-seal-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/used-trade-scam-report-refund-response-2026",
+      "reservedAt": "2026-10-20T05:32:18.875713+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:24.081230+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/used-trade-scam-report-refund-response-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/online-used-trade-scam-prevention-2026",
+      "reservedAt": "2026-10-20T05:32:25.940310+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:31.155675+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/online-used-trade-scam-prevention-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/refrigerator-energy-saving-temperature-settings-organizing-tips",
+      "reservedAt": "2026-10-20T05:32:32.608010+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:37.831434+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/refrigerator-energy-saving-temperature-settings-organizing-tips",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+      "reservedAt": "2026-10-20T05:32:39.964026+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:45.679250+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
+      "reservedAt": "2026-10-20T05:32:52.729294+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:32:57.970935+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
+      "reservedAt": "2026-10-20T05:32:59.441954+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:04.658286+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/dog-separation-anxiety-signs-alone-training",
+      "reservedAt": "2026-10-20T05:33:06.122343+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:11.334120+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/dog-separation-anxiety-signs-alone-training",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/cat-vomiting-hairball-warning-signs-vet",
+      "reservedAt": "2026-10-20T05:33:13.218618+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:18.905365+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/cat-vomiting-hairball-warning-signs-vet",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/dog-walk-refusal-indoor-alternatives",
+      "reservedAt": "2026-10-20T05:33:20.394460+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:25.623394+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/dog-walk-refusal-indoor-alternatives",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/toxic-dangerous-foods-for-dogs-and-emergency-care-guide",
+      "reservedAt": "2026-10-20T05:33:27.054332+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:32.265864+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/toxic-dangerous-foods-for-dogs-and-emergency-care-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide",
+      "reservedAt": "2026-10-20T05:33:33.739672+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:38.968134+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/dog-molting-season-grooming-skin-care-guide",
+      "reservedAt": "2026-10-20T05:33:40.880119+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:46.111210+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/dog-molting-season-grooming-skin-care-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/chrome-memory-saver-exception-refresh-check",
+      "reservedAt": "2026-10-20T05:33:48.197881+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:33:53.411165+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/chrome-memory-saver-exception-refresh-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/chrome-site-notification-block-settings",
+      "reservedAt": "2026-10-20T05:33:54.810575+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:00.027577+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/chrome-site-notification-block-settings",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+      "reservedAt": "2026-10-20T05:34:17.000506+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:22.730053+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+      "reservedAt": "2026-10-20T05:34:24.149398+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:29.391756+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/autumn-foliage-campsite-reservation-deck-view",
+      "reservedAt": "2026-10-20T05:34:31.241458+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:36.457618+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/autumn-foliage-campsite-reservation-deck-view",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/autumn-camping-kerosene-heater-co-alarm-ventilation",
+      "reservedAt": "2026-10-20T05:34:37.875908+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:43.089885+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/autumn-camping-kerosene-heater-co-alarm-ventilation",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/seoul-nearby-autumn-festivals-day-trip-checklist-2026",
+      "reservedAt": "2026-10-20T05:34:45.197782+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:50.915407+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/seoul-nearby-autumn-festivals-day-trip-checklist-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/tent-camping-heater-ventilation-co-alarm",
+      "reservedAt": "2026-10-20T05:34:52.351245+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:34:57.569554+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/tent-camping-heater-ventilation-co-alarm",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/2026-seoul-autumn-outdoor-cultural-events",
+      "reservedAt": "2026-10-20T05:34:59.500224+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:35:04.721507+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/2026-seoul-autumn-outdoor-cultural-events",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/2026-korea-national-parks-autumn-foliage-peak-hiking-courses",
+      "reservedAt": "2026-10-20T05:35:06.144340+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:35:11.364454+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/2026-korea-national-parks-autumn-foliage-peak-hiking-courses",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/national-museum-of-korea-free-admission-guide",
+      "reservedAt": "2026-10-20T05:35:13.191820+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:35:18.414640+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/national-museum-of-korea-free-admission-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/2026-national-museum-free-admission-booking-guide",
+      "reservedAt": "2026-10-20T05:35:20.281290+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:35:25.510568+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/2026-national-museum-free-admission-booking-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+      "reservedAt": "2026-10-20T05:43:54.391642+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:43:59.627443+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+      "reservedAt": "2026-10-20T05:44:01.343791+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:07.087139+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/jeonse-loan-renewal-increase-rules",
+      "reservedAt": "2026-10-20T05:44:08.573821+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:13.800461+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/jeonse-loan-renewal-increase-rules",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/newlywed-didimdol-income-rate-eligibility",
+      "reservedAt": "2026-10-20T05:44:15.262604+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:20.487454+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/newlywed-didimdol-income-rate-eligibility",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/youth-future-savings-second-application-switch",
+      "reservedAt": "2026-10-20T05:44:21.961879+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:27.228137+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/youth-future-savings-second-application-switch",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/2026-jeonse-fraud-prevention-contract-checklist",
+      "reservedAt": "2026-10-20T05:44:28.709026+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:33.923205+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/2026-jeonse-fraud-prevention-contract-checklist",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/2026-rental-lease-registration-guide",
+      "reservedAt": "2026-10-20T05:44:35.445299+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:40.672310+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/2026-rental-lease-registration-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/hug-jeonse-deposit-guarantee-insurance-guide",
+      "reservedAt": "2026-10-20T05:44:42.109808+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:47.295480+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/hug-jeonse-deposit-guarantee-insurance-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/2026-youth-housing-dream-savings-account-guide",
+      "reservedAt": "2026-10-20T05:44:49.229660+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:44:54.433248+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/2026-youth-housing-dream-savings-account-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.woorinote.kr/chrome-download-location-settings-and-history",
+      "reservedAt": "2026-10-20T05:44:55.906261+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:01.124244+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.woorinote.kr/chrome-download-location-settings-and-history",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+      "reservedAt": "2026-10-20T05:45:17.381989+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:22.615689+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+      "reservedAt": "2026-10-20T05:45:24.131195+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:29.354002+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/kidney-stone-water-prevention",
+      "reservedAt": "2026-10-20T05:45:31.262562+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:36.492592+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/kidney-stone-water-prevention",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/2026-flu-vaccination-pregnant-children-schedule",
+      "reservedAt": "2026-10-20T05:45:37.986095+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:43.208371+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/2026-flu-vaccination-pregnant-children-schedule",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/health-information-ontology-portal",
+      "reservedAt": "2026-10-20T05:45:44.759207+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:50.004583+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/health-information-ontology-portal",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/2026-2027-influenza-vaccination-schedule-eligibility",
+      "reservedAt": "2026-10-20T05:45:51.984212+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:45:57.206432+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/2026-2027-influenza-vaccination-schedule-eligibility",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/jang-geon-gang-microbiome-2026",
+      "reservedAt": "2026-10-20T05:45:59.349896+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:04.578992+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/jang-geon-gang-microbiome-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour",
+      "reservedAt": "2026-10-20T05:46:06.847013+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:12.588628+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits",
+      "reservedAt": "2026-10-20T05:46:14.596111+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:19.812055+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.smilenote.kr/excel-freeze-first-row-column-b2",
+      "reservedAt": "2026-10-20T05:46:21.305449+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:26.539334+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.smilenote.kr/excel-freeze-first-row-column-b2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+      "reservedAt": "2026-10-20T05:46:36.437094+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:41.659603+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/bullet-journal-migration-task-management",
+      "reservedAt": "2026-10-20T05:46:43.148772+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:48.377802+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/bullet-journal-migration-task-management",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/execution-when-5-second-countdown-fails",
+      "reservedAt": "2026-10-20T05:46:49.869022+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:46:55.089324+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/execution-when-5-second-countdown-fails",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/focus-blocks-when-phone-notifications-stay-on",
+      "reservedAt": "2026-10-20T05:46:56.942185+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:02.169632+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/focus-blocks-when-phone-notifications-stay-on",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/small-first-action-to-start-tasks",
+      "reservedAt": "2026-10-20T05:47:03.913582+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:09.134107+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/small-first-action-to-start-tasks",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/reading-note-taking-method-2026",
+      "reservedAt": "2026-10-20T05:47:11.031213+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:16.241892+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/reading-note-taking-method-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/digital-minimalism-2026-practice-tips",
+      "reservedAt": "2026-10-20T05:47:18.147301+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:23.371274+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/digital-minimalism-2026-practice-tips",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/miracle-morning-15min-routine-habit-formation-principles",
+      "reservedAt": "2026-10-20T05:47:24.816631+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:30.016732+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/miracle-morning-15min-routine-habit-formation-principles",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/android-clear-cache-vs-app-data-guide",
+      "reservedAt": "2026-10-20T05:47:31.941006+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:37.157640+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/android-clear-cache-vs-app-data-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.soulnote.kr/college-graduation-certificate-gov-application-university-direct-guide",
+      "reservedAt": "2026-10-20T05:47:38.672225+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:47:43.890269+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.soulnote.kr/college-graduation-certificate-gov-application-university-direct-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+      "reservedAt": "2026-10-20T05:48:00.126124+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:05.354879+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+      "reservedAt": "2026-10-20T05:48:06.807828+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:12.019271+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide",
+      "reservedAt": "2026-10-20T05:48:13.903022+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:19.114012+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/naejangsan-autumn-foliage-trail-status-check",
+      "reservedAt": "2026-10-20T05:48:20.613292+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:25.827127+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/naejangsan-autumn-foliage-trail-status-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
+      "reservedAt": "2026-10-20T05:48:27.298107+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:33.046530+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery",
+      "reservedAt": "2026-10-20T05:48:34.524992+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:39.757117+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/national-park-trail-closure-check-2026",
+      "reservedAt": "2026-10-20T05:48:41.654380+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:46.886096+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/national-park-trail-closure-check-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/incheon-airport-easy-drop-eligibility-checklist",
+      "reservedAt": "2026-10-20T05:48:48.801118+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:48:54.023022+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/incheon-airport-easy-drop-eligibility-checklist",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/incheon-airport-smartpass-facial-recognition-registration-guide",
+      "reservedAt": "2026-10-20T05:48:56.000955+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:49:01.228909+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/incheon-airport-smartpass-facial-recognition-registration-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.tripmarvel.com/2026-overseas-travel-esim-purchase-installation-guide-2",
+      "reservedAt": "2026-10-20T05:49:03.160584+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:49:08.386877+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.tripmarvel.com/2026-overseas-travel-esim-purchase-installation-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/nhis-copayment-ceiling-refund-guide-2026",
+      "reservedAt": "2026-10-20T05:56:44.139896+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:56:49.366658+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/nhis-copayment-ceiling-refund-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/korea-post-registered-mail-delivery-inquiry-guide",
+      "reservedAt": "2026-10-20T05:56:50.898094+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:56:56.146205+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/korea-post-registered-mail-delivery-inquiry-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/nhis-dependent-registration-guide-90days",
+      "reservedAt": "2026-10-20T05:56:58.113408+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:03.318975+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/nhis-dependent-registration-guide-90days",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/incheon-airport-smartpass-registration-guide",
+      "reservedAt": "2026-10-20T05:57:05.466928+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:10.681566+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/incheon-airport-smartpass-registration-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/k-pass-refund-criteria-and-rates",
+      "reservedAt": "2026-10-20T05:57:12.079337+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:17.285764+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/k-pass-refund-criteria-and-rates",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/retirement-pension-in-kind-transfer-guide-2026",
+      "reservedAt": "2026-10-20T05:57:18.708186+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:23.948543+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/retirement-pension-in-kind-transfer-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/ev-charging-zone-penalty-reporting-2026",
+      "reservedAt": "2026-10-20T05:57:25.371217+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:30.594294+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/ev-charging-zone-penalty-reporting-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/bulky-waste-bbegi-app-guide-2026",
+      "reservedAt": "2026-10-20T05:57:32.021540+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:37.239883+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/bulky-waste-bbegi-app-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/msafer-identity-theft-protection-guide-2026",
+      "reservedAt": "2026-10-20T05:57:39.093516+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:44.838021+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/msafer-identity-theft-protection-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.baronote.kr/emart-chuseok-gift-reservation-2026",
+      "reservedAt": "2026-10-20T05:57:46.276065+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:57:51.485166+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.baronote.kr/emart-chuseok-gift-reservation-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/livelihood-benefit-youth-income-deduction-guide-2026",
+      "reservedAt": "2026-10-20T05:57:58.210374+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:03.434520+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/livelihood-benefit-youth-income-deduction-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/catastrophic-medical-expense-support-eligibility-apply",
+      "reservedAt": "2026-10-20T05:58:05.322521+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:10.536100+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/catastrophic-medical-expense-support-eligibility-apply",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/goheung-youth-marriage-support-2026-3200-check",
+      "reservedAt": "2026-10-20T05:58:11.938059+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:17.167833+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/goheung-youth-marriage-support-2026-3200-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/existing-housing-purchase-jeonse-support-2026",
+      "reservedAt": "2026-10-20T05:58:19.247909+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:24.479261+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/existing-housing-purchase-jeonse-support-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/newlywed-youth-jeonse-deposit-loan-interest-support-2026",
+      "reservedAt": "2026-10-20T05:58:26.346923+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:31.575909+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/newlywed-youth-jeonse-deposit-loan-interest-support-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/naengbangbi-support-application-energy-voucher-2026",
+      "reservedAt": "2026-10-20T05:58:33.025296+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:38.239191+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/naengbangbi-support-application-energy-voucher-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/sinsaeng-a-goyuga-support-application-objection-2026",
+      "reservedAt": "2026-10-20T05:58:40.016584+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:45.235470+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/sinsaeng-a-goyuga-support-application-objection-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/2026-minsaeng-support-application-region-check",
+      "reservedAt": "2026-10-20T05:58:46.727445+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:51.951309+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/2026-minsaeng-support-application-region-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/sokcho-support-application-2026-200000-how-to-use",
+      "reservedAt": "2026-10-20T05:58:53.798652+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:58:59.529250+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/sokcho-support-application-2026-200000-how-to-use",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-pick.com/goyuga-support-period-balance-usage-2026",
+      "reservedAt": "2026-10-20T05:59:01.366109+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:59:06.586391+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-pick.com/goyuga-support-period-balance-usage-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/waste-home-appliances-free-collection-guide-2026",
+      "reservedAt": "2026-10-20T05:59:12.333924+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T05:59:18.048973+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/waste-home-appliances-free-collection-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/감자-삶는-방법-냄비-압력솥-전자레인지-시간-비교",
+      "reservedAt": "2026-10-20T05:59:20.168997+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:00:42.567509+09:00",
+      "evidence": {
+        "source": "reviewed visible request-history row; percent-decoded exact path",
+        "row": "1\t\n/%EA%B0%90%EC%9E%90-%EC%82%B6%EB%8A%94-%EB%B0%A9%EB%B2%95-%EB%83%84%EB%B9%84-%EC%95%95%EB%A0%A5%EC%86%A5-%EC%A0%84%EC%9E%90%EB%A0%88%EC%9D%B8%EC%A7%80-%EC%8B%9C%EA%B0%84-%EB%B9%84%EA%B5%90\n\t26.10.20 05:59:19",
+        "previousStatus": "unknown",
+        "reviewReason": "encoded path confirmed without resubmission"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/korean-melon-benefits-calorie-check",
+      "reservedAt": "2026-10-20T06:01:02.710319+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:01:07.931711+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/korean-melon-benefits-calorie-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/kitchen-grease-cleaning-method-20260522",
+      "reservedAt": "2026-10-20T06:01:09.852795+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:01:15.069944+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/kitchen-grease-cleaning-method-20260522",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/생활-청소-체크리스트",
+      "reservedAt": "2026-10-20T06:01:17.042686+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:02:10.545479+09:00",
+      "evidence": {
+        "source": "reviewed visible request-history row; percent-decoded exact path",
+        "row": "1\t\n/%EC%83%9D%ED%99%9C-%EC%B2%AD%EC%86%8C-%EC%B2%B4%ED%81%AC%EB%A6%AC%EC%8A%A4%ED%8A%B8\n\t26.10.20 06:01:16",
+        "previousStatus": "unknown",
+        "reviewReason": "encoded path confirmed without resubmission"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/주방-기름때-청소-방법",
+      "reservedAt": "2026-10-20T06:03:43.773415+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:03:49.495897+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/주방-기름때-청소-방법",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/ha-ru-10-bun-cheong-so-ru-tin",
+      "reservedAt": "2026-10-20T06:03:50.886829+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:03:56.095241+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/ha-ru-10-bun-cheong-so-ru-tin",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/house-cleaning-order",
+      "reservedAt": "2026-10-20T06:03:57.499418+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:03.236712+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/house-cleaning-order",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/sink-drain-cleaning-method",
+      "reservedAt": "2026-10-20T06:04:04.649516+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:09.850848+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/sink-drain-cleaning-method",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-good.com/baking-soda-cleaning-tips-3",
+      "reservedAt": "2026-10-20T06:04:11.276042+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:16.499197+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-good.com/baking-soda-cleaning-tips-3",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/isac-2024-broadcast-schedule-wavve-guide",
+      "reservedAt": "2026-10-20T06:04:23.577544+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:28.803062+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/isac-2024-broadcast-schedule-wavve-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/eprivacy-clean-service-2026-guide-2",
+      "reservedAt": "2026-10-20T06:04:30.234229+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:35.449438+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/eprivacy-clean-service-2026-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/eprivacy-clean-service-2026-guide",
+      "reservedAt": "2026-10-20T06:04:36.833538+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:42.038896+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/eprivacy-clean-service-2026-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/property-tax-september-2026-payment-guide",
+      "reservedAt": "2026-10-20T06:04:43.518497+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:48.732758+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/property-tax-september-2026-payment-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/small-business-refinance-loan-2026-guide",
+      "reservedAt": "2026-10-20T06:04:50.132758+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:04:55.342965+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/small-business-refinance-loan-2026-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/namdo-market-chuseok-discount-coupon-2026",
+      "reservedAt": "2026-10-20T06:04:56.757917+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:01.998362+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/namdo-market-chuseok-discount-coupon-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/three-meals-a-day-light-broadcast-schedule-ott-guest",
+      "reservedAt": "2026-10-20T06:05:03.467439+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:08.695785+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/three-meals-a-day-light-broadcast-schedule-ott-guest",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/flu-vaccine-free-eligibility-schedule-2026",
+      "reservedAt": "2026-10-20T06:05:10.100562+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:15.842314+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/flu-vaccine-free-eligibility-schedule-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/2026-월드컵-일정-한국-북중미-fifa-북중미-기준",
+      "reservedAt": "2026-10-20T06:05:17.255571+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:22.472852+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/2026-월드컵-일정-한국-북중미-fifa-북중미-기준",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.daynote.kr/단비교육-윙크-채용-고객센터-영어-기준",
+      "reservedAt": "2026-10-20T06:05:23.918604+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:29.118496+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.daynote.kr/단비교육-윙크-채용-고객센터-영어-기준",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/how-to-reduce-sitting-time-exercise-plan-and-alarm-cadence",
+      "reservedAt": "2026-10-20T06:05:35.028745+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:40.741664+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/how-to-reduce-sitting-time-exercise-plan-and-alarm-cadence",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/how-to-read-nutrition-facts-label-100g-vs-total-package",
+      "reservedAt": "2026-10-20T06:05:42.206486+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:47.425837+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/how-to-read-nutrition-facts-label-100g-vs-total-package",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/health-screening-blood-pressure-fasting-glucose-results",
+      "reservedAt": "2026-10-20T06:05:49.049469+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:05:54.237498+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/health-screening-blood-pressure-fasting-glucose-results",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/copayment-ceiling-refund-excluded-bill-items",
+      "reservedAt": "2026-10-20T06:05:55.688122+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:00.912606+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/copayment-ceiling-refund-excluded-bill-items",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/teen-energy-drink-caffeine-label-guide",
+      "reservedAt": "2026-10-20T06:06:02.360331+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:07.559712+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/teen-energy-drink-caffeine-label-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/health-lifestyle-practice-support-guide",
+      "reservedAt": "2026-10-20T06:06:09.371755+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:14.588207+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/health-lifestyle-practice-support-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/smoking-cessation-treatment-support-guide",
+      "reservedAt": "2026-10-20T06:06:16.149009+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:21.374204+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/smoking-cessation-treatment-support-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/reverse-eating-order-blood-sugar-guide-2026",
+      "reservedAt": "2026-10-20T06:06:23.549422+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:29.252528+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/reverse-eating-order-blood-sugar-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/flu-free-vaccination-2026-schedule",
+      "reservedAt": "2026-10-20T06:06:30.838209+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:36.059249+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/flu-free-vaccination-2026-schedule",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.healthcox.com/inyoung-46kg-safe-weight-loss-standard",
+      "reservedAt": "2026-10-20T06:06:37.562640+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:42.793598+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.healthcox.com/inyoung-46kg-safe-weight-loss-standard",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/food-use-by-date-vs-sell-by-date-after-opening-guide",
+      "reservedAt": "2026-10-20T06:06:49.288498+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:06:54.520726+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/food-use-by-date-vs-sell-by-date-after-opening-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/sunshine-loan-youth-eligibility-limit-rate-2026",
+      "reservedAt": "2026-10-20T06:06:56.195965+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:01.426609+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/sunshine-loan-youth-eligibility-limit-rate-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/chuseok-fruit-storage-ethylene-guide-2026",
+      "reservedAt": "2026-10-20T06:07:02.960472+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:08.193077+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/chuseok-fruit-storage-ethylene-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/budget-phone-esim-self-activation-2026-guide",
+      "reservedAt": "2026-10-20T06:07:09.670091+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:14.903428+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/budget-phone-esim-self-activation-2026-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/2026-flu-shot-free-target-expansion-schedule",
+      "reservedAt": "2026-10-20T06:07:16.320337+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:21.508814+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/2026-flu-shot-free-target-expansion-schedule",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/써밋-클라비온-청약-분양가-입지",
+      "reservedAt": "2026-10-20T06:07:22.998215+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:28.231204+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/써밋-클라비온-청약-분양가-입지",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/overwatch-nexon-account-linking",
+      "reservedAt": "2026-10-20T06:07:29.725661+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:34.954114+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/overwatch-nexon-account-linking",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/자오즈민-안재형-꼬꼬무-233회-러브스토리-확인법",
+      "reservedAt": "2026-10-20T06:07:36.829211+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:42.059928+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/자오즈민-안재형-꼬꼬무-233회-러브스토리-확인법",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/그것이-알고-싶다-1497회-포천-교통사고-재심-확인법",
+      "reservedAt": "2026-10-20T06:07:43.471490+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:48.681748+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/그것이-알고-싶다-1497회-포천-교통사고-재심-확인법",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.justinfo.co.kr/리콜치약-제조번호-확인법-환불절차-2026",
+      "reservedAt": "2026-10-20T06:07:50.167680+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:07:55.397699+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.justinfo.co.kr/리콜치약-제조번호-확인법-환불절차-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide",
+      "reservedAt": "2026-10-20T06:21:18.026431+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:21:23.846320+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/national-park-campsite-waiting-reservation-check",
+      "reservedAt": "2026-10-20T06:21:25.758462+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:21:31.474748+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/national-park-campsite-waiting-reservation-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/beginner-camping-chair-capacity-packed-size-guide",
+      "reservedAt": "2026-10-20T06:21:32.873711+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:21:38.064675+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/beginner-camping-chair-capacity-packed-size-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/first-fall-autocamping-gear-checklist",
+      "reservedAt": "2026-10-20T06:21:39.974055+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:21:45.202125+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/first-fall-autocamping-gear-checklist",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/campsite-evacuation-route-fire-extinguisher-weather-alert-guide",
+      "reservedAt": "2026-10-20T06:21:46.880561+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:21:52.099449+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/campsite-evacuation-route-fire-extinguisher-weather-alert-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/gocamping-campsite-registration-inquiry-when-not-found",
+      "reservedAt": "2026-10-20T06:21:53.611481+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:21:58.802812+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/gocamping-campsite-registration-inquiry-when-not-found",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/camping-butane-gas-can-disposal-guide",
+      "reservedAt": "2026-10-20T06:22:00.235353+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:05.941364+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/camping-butane-gas-can-disposal-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/overseas-camping-gas-appliance-kc-certification-guide",
+      "reservedAt": "2026-10-20T06:22:07.808774+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:13.038804+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/overseas-camping-gas-appliance-kc-certification-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/chabak-trunk-discharge-carabiner-setting-2026",
+      "reservedAt": "2026-10-20T06:22:15.139947+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:20.869395+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/chabak-trunk-discharge-carabiner-setting-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.nolplace.com/camping-lantern-lumen-battery-specs-guide-2026",
+      "reservedAt": "2026-10-20T06:22:22.524603+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:27.747928+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.nolplace.com/camping-lantern-lumen-battery-specs-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/gmail-spam-block-unsubscribe-guide",
+      "reservedAt": "2026-10-20T06:22:34.328393+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:39.554804+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/gmail-spam-block-unsubscribe-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/mobile-id-card-qr-vs-ic-tag-guide",
+      "reservedAt": "2026-10-20T06:22:41.421060+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:46.653315+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/mobile-id-card-qr-vs-ic-tag-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/cpoint-energy-incentive-2026-guide",
+      "reservedAt": "2026-10-20T06:22:48.116083+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:22:53.333564+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/cpoint-energy-incentive-2026-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/emart-chuseok-gift-set-2026-preorder-guide",
+      "reservedAt": "2026-10-20T06:22:55.265808+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:00.476853+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/emart-chuseok-gift-set-2026-preorder-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md",
+      "reservedAt": "2026-10-20T06:23:02.379000+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:07.585355+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/iphone-16-preorder-release-price-guide",
+      "reservedAt": "2026-10-20T06:23:09.054671+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:14.288767+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/iphone-16-preorder-release-price-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/culinary-class-wars-netflix-schedule-guide",
+      "reservedAt": "2026-10-20T06:23:16.410975+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:21.651861+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/culinary-class-wars-netflix-schedule-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/youth-future-savings-2026-guide",
+      "reservedAt": "2026-10-20T06:23:23.298042+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:28.514227+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/youth-future-savings-2026-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/flu-vaccine-free-schedule-2026",
+      "reservedAt": "2026-10-20T06:23:29.963716+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:35.677985+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/flu-vaccine-free-schedule-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.maxnote.kr/kangminkyung-fall-fashion-wheela",
+      "reservedAt": "2026-10-20T06:23:37.103833+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:42.298444+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.maxnote.kr/kangminkyung-fall-fashion-wheela",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide",
+      "reservedAt": "2026-10-20T06:23:53.920716+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:23:59.140781+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/chrome-incognito-download-history-scope",
+      "reservedAt": "2026-10-20T06:24:01.007791+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:06.236336+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/chrome-incognito-download-history-scope",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/google-photos-archive-vs-delete-guide",
+      "reservedAt": "2026-10-20T06:24:08.086998+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:13.287953+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/google-photos-archive-vs-delete-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/incheon-airport-lost-property-vs-checked-baggage-guide",
+      "reservedAt": "2026-10-20T06:24:15.180962+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:20.413554+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/incheon-airport-lost-property-vs-checked-baggage-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/nongsingpum-voucher-application-guide-2026",
+      "reservedAt": "2026-10-20T06:24:22.048524+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:27.274811+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/nongsingpum-voucher-application-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/animal-registration-voluntary-report-2026",
+      "reservedAt": "2026-10-20T06:24:29.331886+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:35.074478+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/animal-registration-voluntary-report-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/smartchoice-telecom-refund-inquiry-guide-2026",
+      "reservedAt": "2026-10-20T06:24:36.945241+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:42.690202+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/smartchoice-telecom-refund-inquiry-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/hanaromart-chuseok-discount-guide-2026",
+      "reservedAt": "2026-10-20T06:24:44.140379+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:49.346353+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/hanaromart-chuseok-discount-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/things-that-come-after-love-coupangplay-2024",
+      "reservedAt": "2026-10-20T06:24:50.839520+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:24:56.065485+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/things-that-come-after-love-coupangplay-2024",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.topnote.kr/worker-living-stabilization-loan-2026",
+      "reservedAt": "2026-10-20T06:24:58.196101+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:03.892111+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.topnote.kr/worker-living-stabilization-loan-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/gmail-archive-vs-delete-inbox-guide",
+      "reservedAt": "2026-10-20T06:25:15.231909+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:20.477778+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/gmail-archive-vs-delete-inbox-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/korail-smartphone-ticket-return-before-after-departure",
+      "reservedAt": "2026-10-20T06:25:22.158887+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:27.389138+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/korail-smartphone-ticket-return-before-after-departure",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/safe-inheritance-onestop-service-2026-guide",
+      "reservedAt": "2026-10-20T06:25:28.776569+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:34.007503+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/safe-inheritance-onestop-service-2026-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/youth-housing-dream-subscription-account-2026",
+      "reservedAt": "2026-10-20T06:25:35.417040+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:40.650746+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/youth-housing-dream-subscription-account-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/good-driver-mileage-efine-application-2026",
+      "reservedAt": "2026-10-20T06:25:42.347092+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:47.580563+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/good-driver-mileage-efine-application-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/gmarket-chuseok-bigsale-2026-coupon-guide",
+      "reservedAt": "2026-10-20T06:25:49.016971+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:25:54.223015+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/gmarket-chuseok-bigsale-2026-coupon-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/iphone-call-recording-memo-ai-guide",
+      "reservedAt": "2026-10-20T06:25:55.659598+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:00.863366+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/iphone-call-recording-memo-ai-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/culinary-class-wars-netflix-release-schedule-judges",
+      "reservedAt": "2026-10-20T06:26:02.509881+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:07.687511+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/culinary-class-wars-netflix-release-schedule-judges",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/flu-vaccination-free-2026-schedule",
+      "reservedAt": "2026-10-20T06:26:09.567768+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:14.785622+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/flu-vaccination-free-2026-schedule",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.must-joy.com/injenia-ipo-2026",
+      "reservedAt": "2026-10-20T06:26:16.329732+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:21.555559+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.must-joy.com/injenia-ipo-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/smartphone-storage-space-cleanup-guide-2",
+      "reservedAt": "2026-10-20T06:26:28.581587+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:33.783957+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/smartphone-storage-space-cleanup-guide-2",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide",
+      "reservedAt": "2026-10-20T06:26:35.652373+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:40.876167+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/chrome-download-location-ask-save-check",
+      "reservedAt": "2026-10-20T06:26:42.269257+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:47.475647+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/chrome-download-location-ask-save-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/onedrive-stop-folder-backup-file-location-check",
+      "reservedAt": "2026-10-20T06:26:48.926692+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:26:54.139078+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/onedrive-stop-folder-backup-file-location-check",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/google-calendar-hide-unsubscribe-delete-guide",
+      "reservedAt": "2026-10-20T06:26:56.033404+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:01.250678+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/google-calendar-hide-unsubscribe-delete-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/incheon-airport-parking-fee-payment-kiosk-app-exit-guide",
+      "reservedAt": "2026-10-20T06:27:02.722857+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:07.932592+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/incheon-airport-parking-fee-payment-kiosk-app-exit-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/noiseinfo-neighbor-service-application-guide",
+      "reservedAt": "2026-10-20T06:27:10.085358+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:15.265525+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/noiseinfo-neighbor-service-application-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/kepco-energy-efficiency-appliance-refund-2026",
+      "reservedAt": "2026-10-20T06:27:16.712247+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:21.937882+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/kepco-energy-efficiency-appliance-refund-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/silson24-insurance-claim-guide-2026",
+      "reservedAt": "2026-10-20T06:27:23.367508+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:28.567531+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/silson24-insurance-claim-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.meganote.kr/doubt-mbc-drama-broadcast-info-ott-schedule",
+      "reservedAt": "2026-10-20T06:27:29.919364+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:35.147170+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.meganote.kr/doubt-mbc-drama-broadcast-info-ott-schedule",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/windows-11-storage-sense-downloads-onedrive-difference",
+      "reservedAt": "2026-10-20T06:27:41.374043+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:47.088318+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/windows-11-storage-sense-downloads-onedrive-difference",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/worker-vacation-support-application-guide",
+      "reservedAt": "2026-10-20T06:27:48.789331+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:27:54.013933+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/worker-vacation-support-application-guide",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/parent-allowance-benefits-application",
+      "reservedAt": "2026-10-20T06:27:55.451162+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:00.699047+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/parent-allowance-benefits-application",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/donotcall-telemarketing-block-2026",
+      "reservedAt": "2026-10-20T06:28:02.617187+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:07.844569+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/donotcall-telemarketing-block-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/three-meals-a-day-light-broadcast-schedule-episodes-ott",
+      "reservedAt": "2026-10-20T06:28:09.478703+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:14.708146+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/three-meals-a-day-light-broadcast-schedule-episodes-ott",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/three-meals-a-day-light-premiere-schedule-cast-2026",
+      "reservedAt": "2026-10-20T06:28:16.582343+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:21.795226+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/three-meals-a-day-light-premiere-schedule-cast-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/wrong-transfer-return-support-guide-2026",
+      "reservedAt": "2026-10-20T06:28:23.674118+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:28.900299+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/wrong-transfer-return-support-guide-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/influenza-vaccine-free-schedule-2026",
+      "reservedAt": "2026-10-20T06:28:30.552587+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:35.782088+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/influenza-vaccine-free-schedule-2026",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/대출모집인-등록번호-조회-확인법",
+      "reservedAt": "2026-10-20T06:28:37.246938+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:42.475786+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/대출모집인-등록번호-조회-확인법",
+        "dayKST": "2026-10-20"
+      }
+    },
+    {
+      "url": "https://www.joynote.kr/government-postpartum-care-cost",
+      "reservedAt": "2026-10-20T06:28:44.609894+09:00",
+      "status": "request_received",
+      "indexed": null,
+      "checkedAt": "2026-10-20T06:28:49.837881+09:00",
+      "evidence": {
+        "source": "visible request-history row",
+        "url": "https://www.joynote.kr/government-postpartum-care-cost",
+        "dayKST": "2026-10-20"
+      }
+    }
+  ],
   "dailyCap": 50,
-  "checkedAt": "2026-10-19T13:06:27.089327+09:00",
+  "checkedAt": "2026-10-20T06:28:49.837894+09:00",
   "crawlQueue": [
     {
       "url": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
@@ -14346,105 +17733,573 @@
     }
   ],
   "historyBaseline": {
-    "dayKST": "2026-10-19",
+    "dayKST": "2026-10-20",
     "scope": "entire_visible_account_site_list",
     "scopeSites": [
-      "https://baronote.kr",
-      "https://daynote.kr",
-      "https://joynote.kr",
-      "https://justinfo.co.kr",
-      "https://maxnote.kr",
-      "https://meganote.kr",
-      "https://must-good.com",
-      "https://must-joy.com",
-      "https://shopbest.co.kr",
-      "https://soulnote.kr",
-      "https://topnote.kr",
-      "https://woorinote.kr",
-      "https://www.baronote.kr",
-      "https://www.daynote.kr",
-      "https://www.healthcox.com",
-      "https://www.joynote.kr",
-      "https://www.justinfo.co.kr",
-      "https://www.maxnote.kr",
-      "https://www.meganote.kr",
-      "https://www.must-good.com",
-      "https://www.must-joy.com",
-      "https://www.must-pick.com",
-      "https://www.mustbiz.net",
-      "https://www.nolplace.com",
-      "https://www.smilenote.kr",
-      "https://www.soulnote.kr",
-      "https://www.topnote.kr",
-      "https://www.tripmarvel.com",
-      "https://www.woorinote.kr"
+      "https://www.joynote.kr"
     ],
     "complete": true,
     "observedUrls": [
-      "https://baronote.kr/2026-energy-voucher-usage-balance",
-      "https://baronote.kr/2026-government-subsidy-find",
-      "https://baronote.kr/national-pension-early-receipt-reduction-calculator",
-      "https://baronote.kr/topic-1",
-      "https://baronote.kr/trash-bag-price-regional-use-after-moving",
-      "https://justinfo.co.kr/2026-youth-future-savings-eligibility-guide",
-      "https://justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
-      "https://justinfo.co.kr/loan-application-financial-phishing-check",
-      "https://justinfo.co.kr/topic-3",
-      "https://justinfo.co.kr/unreported-crypto-site-block-user-checklist",
-      "https://soulnote.kr/bullet-journal-migration-task-management",
-      "https://soulnote.kr/execution-when-5-second-countdown-fails",
-      "https://soulnote.kr/focus-blocks-when-phone-notifications-stay-on",
-      "https://soulnote.kr/small-first-action-to-start-tasks",
-      "https://soulnote.kr/workers-tomorrow-learning-card-application-guide",
-      "https://topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
-      "https://topnote.kr/bluetooth-earbud-one-side-no-sound-check",
-      "https://topnote.kr/iphone-18-latest-news-specs-upgrade",
-      "https://topnote.kr/iphone-update-battery-drain-heat-check",
-      "https://topnote.kr/windows-11-startup-programs-disable-guide",
+      "https://www.baronote.kr/2026-car-bond-refund-online-guide",
+      "https://www.baronote.kr/2026-card-point-integrated-inquiry-cashback-guide",
+      "https://www.baronote.kr/2026-energy-voucher-usage-balance",
+      "https://www.baronote.kr/2026-government-subsidy-find",
+      "https://www.baronote.kr/bulky-waste-bbegi-app-guide-2026",
+      "https://www.baronote.kr/burned-pot-cleaning-baking-soda-vinegar-guide-2",
+      "https://www.baronote.kr/chrome-site-notification-block-permission-check",
+      "https://www.baronote.kr/ev-charging-zone-penalty-reporting-2026",
+      "https://www.baronote.kr/incheon-airport-smartpass-registration-guide",
+      "https://www.baronote.kr/k-pass-refund-criteria-and-rates",
+      "https://www.baronote.kr/korea-post-registered-mail-delivery-inquiry-guide",
+      "https://www.baronote.kr/msafer-identity-theft-protection-guide-2026",
+      "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+      "https://www.baronote.kr/nhis-copayment-ceiling-refund-guide-2026",
+      "https://www.baronote.kr/nhis-dependent-registration-guide-90days",
+      "https://www.baronote.kr/retirement-pension-in-kind-transfer-guide-2026",
+      "https://www.baronote.kr/telecom-membership-points-usage-convenience-store-guide",
+      "https://www.baronote.kr/topic-1",
+      "https://www.baronote.kr/trash-bag-price-regional-use-after-moving",
+      "https://www.baronote.kr/windows-11-screenshot-save-location-clipboard-check",
+      "https://www.daynote.kr/2026-%EC%9B%94%EB%93%9C%EC%BB%B5-%EC%9D%BC%EC%A0%95-%ED%95%9C%EA%B5%AD-%EB%B6%81%EC%A4%91%EB%AF%B8-fifa-%EB%B6%81%EC%A4%91%EB%AF%B8-%EA%B8%B0%EC%A4%80",
+      "https://www.daynote.kr/bathroom-tile-mold-scale-removal-percarbonate-cleaning-guide",
+      "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide",
+      "https://www.daynote.kr/clear-pet-bottle-separation-guide",
+      "https://www.daynote.kr/eprivacy-clean-service-2026-guide",
+      "https://www.daynote.kr/eprivacy-clean-service-2026-guide-2",
+      "https://www.daynote.kr/flu-vaccine-free-eligibility-schedule-2026",
+      "https://www.daynote.kr/google-drive-link-sharing-access-check",
+      "https://www.daynote.kr/green-onion-fresh-storage-guide",
+      "https://www.daynote.kr/isac-2024-broadcast-schedule-wavve-guide",
+      "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
+      "https://www.daynote.kr/namdo-market-chuseok-discount-coupon-2026",
+      "https://www.daynote.kr/proper-recycling-sorting-rules-guide",
+      "https://www.daynote.kr/property-tax-september-2026-payment-guide",
+      "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
+      "https://www.daynote.kr/small-business-refinance-loan-2026-guide",
+      "https://www.daynote.kr/three-meals-a-day-light-broadcast-schedule-ott-guest",
+      "https://www.daynote.kr/washing-machine-laundry-odor-check",
+      "https://www.daynote.kr/window-frame-cleaning-dust-stains",
+      "https://www.healthcox.com/2026-flu-vaccination-eligibility-timing",
+      "https://www.healthcox.com/copayment-ceiling-refund-excluded-bill-items",
+      "https://www.healthcox.com/covid-flu-symptom-difference-testing-care-2026",
+      "https://www.healthcox.com/flu-free-vaccination-2026-schedule",
+      "https://www.healthcox.com/flu-symptoms-testing-antiviral-care-timing",
+      "https://www.healthcox.com/flu-vaccine-side-effects-fever-muscle-pain-care",
+      "https://www.healthcox.com/forward-head-posture-correction-exercises",
+      "https://www.healthcox.com/forward-head-posture-correction-stretching-exercises",
+      "https://www.healthcox.com/health-lifestyle-practice-support-guide",
+      "https://www.healthcox.com/health-screening-blood-pressure-fasting-glucose-results",
+      "https://www.healthcox.com/how-to-read-nutrition-facts-label-100g-vs-total-package",
+      "https://www.healthcox.com/how-to-reduce-sitting-time-exercise-plan-and-alarm-cadence",
+      "https://www.healthcox.com/lower-back-pain-core-glute-bridge-bed-exercise-routine",
+      "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+      "https://www.healthcox.com/reverse-eating-order-blood-sugar-guide-2026",
+      "https://www.healthcox.com/smoking-cessation-treatment-support-guide",
+      "https://www.healthcox.com/teen-energy-drink-caffeine-label-guide",
+      "https://www.healthcox.com/topic-2",
+      "https://www.healthcox.com/turtle-neck-forward-head-posture-chin-tuck-exercise",
+      "https://www.joynote.kr/%EB%8C%80%EC%B6%9C%EB%AA%A8%EC%A7%91%EC%9D%B8-%EB%93%B1%EB%A1%9D%EB%B2%88%ED%98%B8-%EC%A1%B0%ED%9A%8C-%ED%99%95%EC%9D%B8%EB%B2%95",
+      "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
+      "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
+      "https://www.joynote.kr/cat-vomiting-hairball-warning-signs-vet",
+      "https://www.joynote.kr/chrome-memory-saver-exception-refresh-check",
+      "https://www.joynote.kr/chrome-site-notification-block-settings",
+      "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide",
+      "https://www.joynote.kr/dog-molting-season-grooming-skin-care-guide",
+      "https://www.joynote.kr/dog-separation-anxiety-signs-alone-training",
+      "https://www.joynote.kr/dog-walk-refusal-indoor-alternatives",
+      "https://www.joynote.kr/donotcall-telemarketing-block-2026",
+      "https://www.joynote.kr/influenza-vaccine-free-schedule-2026",
+      "https://www.joynote.kr/parent-allowance-benefits-application",
+      "https://www.joynote.kr/three-meals-a-day-light-broadcast-schedule-episodes-ott",
+      "https://www.joynote.kr/three-meals-a-day-light-premiere-schedule-cast-2026",
+      "https://www.joynote.kr/toxic-dangerous-foods-for-dogs-and-emergency-care-guide",
+      "https://www.joynote.kr/windows-11-storage-sense-downloads-onedrive-difference",
+      "https://www.joynote.kr/worker-vacation-support-application-guide",
+      "https://www.joynote.kr/wrong-transfer-return-support-guide-2026",
+      "https://www.justinfo.co.kr/%EA%B7%B8%EA%B2%83%EC%9D%B4-%EC%95%8C%EA%B3%A0-%EC%8B%B6%EB%8B%A4-1497%ED%9A%8C-%ED%8F%AC%EC%B2%9C-%EA%B5%90%ED%86%B5%EC%82%AC%EA%B3%A0-%EC%9E%AC%EC%8B%AC-%ED%99%95%EC%9D%B8%EB%B2%95",
+      "https://www.justinfo.co.kr/%EC%8D%A8%EB%B0%8B-%ED%81%B4%EB%9D%BC%EB%B9%84%EC%98%A8-%EC%B2%AD%EC%95%BD-%EB%B6%84%EC%96%91%EA%B0%80-%EC%9E%85%EC%A7%80",
+      "https://www.justinfo.co.kr/%EC%9E%90%EC%98%A4%EC%A6%88%EB%AF%BC-%EC%95%88%EC%9E%AC%ED%98%95-%EA%BC%AC%EA%BC%AC%EB%AC%B4-233%ED%9A%8C-%EB%9F%AC%EB%B8%8C%EC%8A%A4%ED%86%A0%EB%A6%AC-%ED%99%95%EC%9D%B8%EB%B2%95",
+      "https://www.justinfo.co.kr/2026-flu-shot-free-target-expansion-schedule",
+      "https://www.justinfo.co.kr/2026-k-pass-transport-card-benefit-guide-2",
+      "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+      "https://www.justinfo.co.kr/2026-subsidy-24-government-benefits-custom-inquiry-guide",
+      "https://www.justinfo.co.kr/2026-youth-future-savings-eligibility-guide",
+      "https://www.justinfo.co.kr/budget-phone-esim-self-activation-2026-guide",
+      "https://www.justinfo.co.kr/chuseok-fruit-storage-ethylene-guide-2026",
+      "https://www.justinfo.co.kr/electronic-document-wallet-screenshot-retention-guide",
+      "https://www.justinfo.co.kr/food-use-by-date-vs-sell-by-date-after-opening-guide",
+      "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+      "https://www.justinfo.co.kr/loan-application-financial-phishing-check",
+      "https://www.justinfo.co.kr/overwatch-nexon-account-linking",
+      "https://www.justinfo.co.kr/sunshine-loan-youth-eligibility-limit-rate-2026",
+      "https://www.justinfo.co.kr/topic-3",
+      "https://www.justinfo.co.kr/unreported-crypto-site-block-user-checklist",
+      "https://www.justinfo.co.kr/windows-snipping-tool-text-actions-share-check",
+      "https://www.maxnote.kr/computer-slow-temp-files-disk-cleanup",
+      "https://www.maxnote.kr/cpoint-energy-incentive-2026-guide",
+      "https://www.maxnote.kr/culinary-class-wars-netflix-schedule-guide",
+      "https://www.maxnote.kr/emart-chuseok-gift-set-2026-preorder-guide",
+      "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+      "https://www.maxnote.kr/excel-freeze-panes-row-column",
+      "https://www.maxnote.kr/excel-pivot-table-summary-refresh-guide",
+      "https://www.maxnote.kr/excel-xlookup-vlookup-practical-function-guide-shortcuts",
+      "https://www.maxnote.kr/flu-vaccine-free-schedule-2026",
+      "https://www.maxnote.kr/gmail-spam-block-unsubscribe-guide",
+      "https://www.maxnote.kr/iphone-16-preorder-release-price-guide",
+      "https://www.maxnote.kr/mobile-id-card-qr-vs-ic-tag-guide",
+      "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md",
+      "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide",
+      "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-2",
+      "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+      "https://www.maxnote.kr/windows-11-shortcuts-not-working",
+      "https://www.maxnote.kr/windows-clipboard-pinned-history-clear-restart",
+      "https://www.maxnote.kr/youth-future-savings-2026-guide",
+      "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide",
+      "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+      "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+      "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+      "https://www.meganote.kr/chrome-download-location-ask-save-check",
+      "https://www.meganote.kr/freezer-frost-causes-door-seal-check",
+      "https://www.meganote.kr/google-calendar-hide-unsubscribe-delete-guide",
+      "https://www.meganote.kr/incheon-airport-parking-fee-payment-kiosk-app-exit-guide",
+      "https://www.meganote.kr/kepco-energy-efficiency-appliance-refund-2026",
+      "https://www.meganote.kr/kimchi-fridge-food-storage-modes-containers",
+      "https://www.meganote.kr/noiseinfo-neighbor-service-application-guide",
+      "https://www.meganote.kr/onedrive-stop-folder-backup-file-location-check",
+      "https://www.meganote.kr/online-used-trade-scam-prevention-2026",
+      "https://www.meganote.kr/refrigerator-energy-saving-temperature-settings-organizing-tips",
+      "https://www.meganote.kr/refrigerator-fridge-freezer-temperature-settings",
+      "https://www.meganote.kr/smartphone-storage-space-cleanup-guide-2",
+      "https://www.meganote.kr/used-trade-scam-report-refund-response-2026",
+      "https://www.meganote.kr/washing-machine-tub-cleaning-frequency",
+      "https://www.must-good.com/%EA%B0%90%EC%9E%90-%EC%82%B6%EB%8A%94-%EB%B0%A9%EB%B2%95-%EB%83%84%EB%B9%84-%EC%95%95%EB%A0%A5%EC%86%A5-%EC%A0%84%EC%9E%90%EB%A0%88%EC%9D%B8%EC%A7%80-%EC%8B%9C%EA%B0%84-%EB%B9%84%EA%B5%90",
+      "https://www.must-good.com/%EC%83%9D%ED%99%9C-%EC%B2%AD%EC%86%8C-%EC%B2%B4%ED%81%AC%EB%A6%AC%EC%8A%A4%ED%8A%B8",
+      "https://www.must-good.com/%EC%A3%BC%EB%B0%A9-%EA%B8%B0%EB%A6%84%EB%95%8C-%EC%B2%AD%EC%86%8C-%EB%B0%A9%EB%B2%95",
+      "https://www.must-good.com/%EC%B5%9C%EB%8C%80-45-%EC%9A%B0%EB%8C%80%EA%B8%88%EB%A6%AC%EC%97%90-2%EB%8C%80-%EB%8C%80%EC%B6%9C-%EC%97%B0%EA%B3%84%EA%B9%8C%EC%A7%80-2026-%EC%B2%AD%EB%85%84-%EC%A3%BC%ED%83%9D%EB%93%9C%EB%A6%BC-%EC%B2%AD%EC%95%BD%ED%86%B5%EC%9E%A5-%EA%B0%80%EC%9E%85-%EC%A1%B0%EA%B1%B4-%EB%B0%8F-%EC%A0%84%ED%99%98-%EB%B0%A9%EB%B2%95-%EC%B4%9D%EC%A0%95%EB%A6%AC",
+      "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+      "https://www.must-good.com/2026-second-consumption-coupon-eligibility-application-deadline",
+      "https://www.must-good.com/driving-record-certificate-online-issuance-guide",
+      "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
+      "https://www.must-good.com/financial-sector-hacking-data-leak-response",
+      "https://www.must-good.com/ha-ru-10-bun-cheong-so-ru-tin",
+      "https://www.must-good.com/house-cleaning-order",
+      "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024",
+      "https://www.must-good.com/kitchen-grease-cleaning-method-20260522",
+      "https://www.must-good.com/korean-melon-benefits-calorie-check",
+      "https://www.must-good.com/military-service-certificate-online-issuance-guide",
+      "https://www.must-good.com/must-good-20261013-essential-guide",
+      "https://www.must-good.com/post",
+      "https://www.must-good.com/sink-drain-cleaning-method",
+      "https://www.must-good.com/specific-financial-information-act-enforcement-review",
+      "https://www.must-good.com/waste-home-appliances-free-collection-guide-2026",
+      "https://www.must-joy.com/2026-korea-national-parks-autumn-foliage-peak-hiking-courses",
+      "https://www.must-joy.com/2026-national-museum-free-admission-booking-guide",
+      "https://www.must-joy.com/2026-seoul-autumn-outdoor-cultural-events",
+      "https://www.must-joy.com/autumn-camping-kerosene-heater-co-alarm-ventilation",
+      "https://www.must-joy.com/autumn-foliage-campsite-reservation-deck-view",
+      "https://www.must-joy.com/culinary-class-wars-netflix-release-schedule-judges",
+      "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+      "https://www.must-joy.com/flu-vaccination-free-2026-schedule",
+      "https://www.must-joy.com/gmail-archive-vs-delete-inbox-guide",
+      "https://www.must-joy.com/gmarket-chuseok-bigsale-2026-coupon-guide",
+      "https://www.must-joy.com/good-driver-mileage-efine-application-2026",
+      "https://www.must-joy.com/iphone-call-recording-memo-ai-guide",
+      "https://www.must-joy.com/korail-smartphone-ticket-return-before-after-departure",
+      "https://www.must-joy.com/national-museum-of-korea-free-admission-guide",
+      "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+      "https://www.must-joy.com/safe-inheritance-onestop-service-2026-guide",
+      "https://www.must-joy.com/seoul-nearby-autumn-festivals-day-trip-checklist-2026",
+      "https://www.must-joy.com/tent-camping-heater-ventilation-co-alarm",
+      "https://www.must-joy.com/youth-housing-dream-subscription-account-2026",
+      "https://www.must-pick.com/2026-energy-efficiency-appliance-rebate-application-guide-2",
+      "https://www.must-pick.com/2026-minsaeng-support-application-region-check",
+      "https://www.must-pick.com/camping-chair-size-storage-seat-height",
+      "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+      "https://www.must-pick.com/catastrophic-medical-expense-support-eligibility-apply",
+      "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+      "https://www.must-pick.com/emergency-welfare-livelihood-support-eligibility-financial-criteria",
+      "https://www.must-pick.com/energy-efficient-home-appliances-refund-guide",
+      "https://www.must-pick.com/existing-housing-purchase-jeonse-support-2026",
+      "https://www.must-pick.com/goheung-youth-marriage-support-2026-3200-check",
+      "https://www.must-pick.com/livelihood-benefit-youth-income-deduction-guide-2026",
+      "https://www.must-pick.com/naengbangbi-support-application-energy-voucher-2026",
+      "https://www.must-pick.com/newlywed-youth-jeonse-deposit-loan-interest-support-2026",
+      "https://www.must-pick.com/robot-vacuum-cleaner-buying-guide-suction-mop-specs-comparison",
+      "https://www.must-pick.com/robot-vacuum-consumables-replacement-compatibility",
+      "https://www.must-pick.com/robot-vacuum-direct-plumbing-installation-conditions",
+      "https://www.must-pick.com/sinsaeng-a-goyuga-support-application-objection-2026",
+      "https://www.must-pick.com/sokcho-support-application-2026-200000-how-to-use",
+      "https://www.must-pick.com/usb-pd-pps-charger-specs-guide",
+      "https://www.nolplace.com/2026-autumn-foliage-spots-parking-transit",
+      "https://www.nolplace.com/2026-local-currency-hotplace-tips",
+      "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide",
+      "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide-2",
+      "https://www.nolplace.com/2026-seoul-suburbs-large-bakery-cafes-best-5-parking-guide",
+      "https://www.nolplace.com/autumn-foliage-spots-forecast-parking-reservation",
+      "https://www.nolplace.com/beginner-camping-chair-capacity-packed-size-guide",
+      "https://www.nolplace.com/camping-butane-gas-can-disposal-guide",
+      "https://www.nolplace.com/campsite-evacuation-route-fire-extinguisher-weather-alert-guide",
+      "https://www.nolplace.com/chabak-trunk-discharge-carabiner-setting-2026",
+      "https://www.nolplace.com/first-fall-autocamping-gear-checklist",
+      "https://www.nolplace.com/gocamping-campsite-registration-inquiry-when-not-found",
+      "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+      "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+      "https://www.nolplace.com/national-park-campsite-waiting-reservation-check",
+      "https://www.nolplace.com/overseas-camping-gas-appliance-kc-certification-guide",
+      "https://www.nolplace.com/seoul-night-view-drive-courses-recommendation",
+      "https://www.nolplace.com/seoul-suburbs-foliage-drive-glamping-courses",
+      "https://www.nolplace.com/silver-grass-festival-schedule-parking-shuttle",
+      "https://www.smilenote.kr/2026-2027-influenza-vaccination-schedule-eligibility",
+      "https://www.smilenote.kr/2026-flu-vaccination-pregnant-children-schedule",
+      "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour",
+      "https://www.smilenote.kr/health-information-ontology-portal",
+      "https://www.smilenote.kr/jang-geon-gang-microbiome-2026",
+      "https://www.smilenote.kr/kidney-stone-water-prevention",
+      "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+      "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+      "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits",
+      "https://www.soulnote.kr/android-clear-cache-vs-app-data-guide",
+      "https://www.soulnote.kr/bullet-journal-migration-task-management",
+      "https://www.soulnote.kr/digital-minimalism-2026-practice-tips",
+      "https://www.soulnote.kr/execution-when-5-second-countdown-fails",
+      "https://www.soulnote.kr/focus-blocks-when-phone-notifications-stay-on",
+      "https://www.soulnote.kr/miracle-morning-15min-routine-habit-formation-principles",
+      "https://www.soulnote.kr/reading-note-taking-method-2026",
+      "https://www.soulnote.kr/small-first-action-to-start-tasks",
+      "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+      "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide",
+      "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide-2",
+      "https://www.topnote.kr/animal-registration-voluntary-report-2026",
+      "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
+      "https://www.topnote.kr/bluetooth-earbud-one-side-no-sound-check",
+      "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2",
+      "https://www.topnote.kr/chrome-incognito-download-history-scope",
+      "https://www.topnote.kr/google-photos-archive-vs-delete-guide",
+      "https://www.topnote.kr/hanaromart-chuseok-discount-guide-2026",
+      "https://www.topnote.kr/incheon-airport-lost-property-vs-checked-baggage-guide",
+      "https://www.topnote.kr/iphone-18-latest-news-specs-upgrade",
+      "https://www.topnote.kr/iphone-update-battery-drain-heat-check",
+      "https://www.topnote.kr/nongsingpum-voucher-application-guide-2026",
+      "https://www.topnote.kr/smartchoice-telecom-refund-inquiry-guide-2026",
+      "https://www.topnote.kr/smartphone-battery-lifespan-extending-charging-habits-guide",
+      "https://www.topnote.kr/things-that-come-after-love-coupangplay-2024",
+      "https://www.topnote.kr/usb-c-monitor-no-display-troubleshooting",
+      "https://www.topnote.kr/wifi-router-channel-speed-optimization-5ghz-settings",
+      "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
+      "https://www.tripmarvel.com/incheon-airport-easy-drop-eligibility-checklist",
       "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
       "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery",
+      "https://www.tripmarvel.com/incheon-airport-smartpass-facial-recognition-registration-guide",
+      "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
       "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide",
       "https://www.tripmarvel.com/naejangsan-autumn-foliage-trail-status-check",
-      "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide"
+      "https://www.tripmarvel.com/national-park-trail-closure-check-2026",
+      "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+      "https://www.woorinote.kr/2026-jeonse-fraud-prevention-contract-checklist",
+      "https://www.woorinote.kr/2026-rental-lease-registration-guide",
+      "https://www.woorinote.kr/2026-youth-housing-dream-savings-account-guide",
+      "https://www.woorinote.kr/hug-jeonse-deposit-guarantee-insurance-guide",
+      "https://www.woorinote.kr/jeonse-loan-renewal-increase-rules",
+      "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+      "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+      "https://www.woorinote.kr/newlywed-didimdol-income-rate-eligibility",
+      "https://www.woorinote.kr/youth-future-savings-second-application-switch"
     ],
     "urlOccurrences": {
-      "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide": 2,
-      "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide": 2,
-      "https://www.tripmarvel.com/naejangsan-autumn-foliage-trail-status-check": 2,
-      "https://www.tripmarvel.com/incheon-airport-lost-passport-response": 2,
-      "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery": 2,
-      "https://soulnote.kr/execution-when-5-second-countdown-fails": 2,
-      "https://soulnote.kr/focus-blocks-when-phone-notifications-stay-on": 2,
-      "https://soulnote.kr/small-first-action-to-start-tasks": 2,
-      "https://soulnote.kr/workers-tomorrow-learning-card-application-guide": 2,
-      "https://soulnote.kr/bullet-journal-migration-task-management": 2,
-      "https://baronote.kr/trash-bag-price-regional-use-after-moving": 2,
-      "https://baronote.kr/2026-government-subsidy-find": 2,
-      "https://baronote.kr/national-pension-early-receipt-reduction-calculator": 2,
-      "https://baronote.kr/topic-1": 2,
-      "https://baronote.kr/2026-energy-voucher-usage-balance": 2,
-      "https://topnote.kr/windows-11-startup-programs-disable-guide": 2,
-      "https://topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot": 2,
-      "https://topnote.kr/bluetooth-earbud-one-side-no-sound-check": 2,
-      "https://topnote.kr/iphone-18-latest-news-specs-upgrade": 2,
-      "https://topnote.kr/iphone-update-battery-drain-heat-check": 2,
-      "https://justinfo.co.kr/topic-3": 2,
-      "https://justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application": 2,
-      "https://justinfo.co.kr/unreported-crypto-site-block-user-checklist": 2,
-      "https://justinfo.co.kr/loan-application-financial-phishing-check": 2,
-      "https://justinfo.co.kr/2026-youth-future-savings-eligibility-guide": 2
+      "https://www.joynote.kr/%EB%8C%80%EC%B6%9C%EB%AA%A8%EC%A7%91%EC%9D%B8-%EB%93%B1%EB%A1%9D%EB%B2%88%ED%98%B8-%EC%A1%B0%ED%9A%8C-%ED%99%95%EC%9D%B8%EB%B2%95": 1,
+      "https://www.joynote.kr/chrome-site-notification-block-settings": 1,
+      "https://www.joynote.kr/donotcall-telemarketing-block-2026": 1,
+      "https://www.joynote.kr/influenza-vaccine-free-schedule-2026": 1,
+      "https://www.joynote.kr/parent-allowance-benefits-application": 1,
+      "https://www.joynote.kr/three-meals-a-day-light-broadcast-schedule-episodes-ott": 1,
+      "https://www.joynote.kr/three-meals-a-day-light-premiere-schedule-cast-2026": 1,
+      "https://www.joynote.kr/windows-11-storage-sense-downloads-onedrive-difference": 1,
+      "https://www.joynote.kr/worker-vacation-support-application-guide": 1,
+      "https://www.joynote.kr/wrong-transfer-return-support-guide-2026": 1,
+      "https://www.joynote.kr/chrome-memory-saver-exception-refresh-check": 1,
+      "https://www.joynote.kr/dog-molting-season-grooming-skin-care-guide": 1,
+      "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide": 1,
+      "https://www.joynote.kr/toxic-dangerous-foods-for-dogs-and-emergency-care-guide": 1,
+      "https://www.joynote.kr/dog-walk-refusal-indoor-alternatives": 1,
+      "https://www.joynote.kr/cat-vomiting-hairball-warning-signs-vet": 1,
+      "https://www.joynote.kr/dog-separation-anxiety-signs-alone-training": 1,
+      "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care": 1,
+      "https://www.joynote.kr/cat-cystitis-early-symptoms-care": 1,
+      "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide": 1,
+      "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2": 1,
+      "https://www.meganote.kr/chrome-download-location-ask-save-check": 1,
+      "https://www.meganote.kr/google-calendar-hide-unsubscribe-delete-guide": 1,
+      "https://www.meganote.kr/incheon-airport-parking-fee-payment-kiosk-app-exit-guide": 1,
+      "https://www.meganote.kr/kepco-energy-efficiency-appliance-refund-2026": 1,
+      "https://www.meganote.kr/noiseinfo-neighbor-service-application-guide": 1,
+      "https://www.meganote.kr/onedrive-stop-folder-backup-file-location-check": 1,
+      "https://www.meganote.kr/refrigerator-energy-saving-temperature-settings-organizing-tips": 1,
+      "https://www.meganote.kr/smartphone-storage-space-cleanup-guide-2": 1,
+      "https://www.meganote.kr/online-used-trade-scam-prevention-2026": 1,
+      "https://www.meganote.kr/used-trade-scam-report-refund-response-2026": 1,
+      "https://www.meganote.kr/freezer-frost-causes-door-seal-check": 1,
+      "https://www.meganote.kr/refrigerator-fridge-freezer-temperature-settings": 1,
+      "https://www.meganote.kr/kimchi-fridge-food-storage-modes-containers": 1,
+      "https://www.meganote.kr/washing-machine-tub-cleaning-frequency": 1,
+      "https://www.meganote.kr/boiler-error-code-troubleshooting-check": 1,
+      "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty": 1,
+      "https://www.must-joy.com/2026-national-museum-free-admission-booking-guide": 1,
+      "https://www.must-joy.com/culinary-class-wars-netflix-release-schedule-judges": 1,
+      "https://www.must-joy.com/flu-vaccination-free-2026-schedule": 1,
+      "https://www.must-joy.com/gmail-archive-vs-delete-inbox-guide": 1,
+      "https://www.must-joy.com/gmarket-chuseok-bigsale-2026-coupon-guide": 1,
+      "https://www.must-joy.com/good-driver-mileage-efine-application-2026": 1,
+      "https://www.must-joy.com/iphone-call-recording-memo-ai-guide": 1,
+      "https://www.must-joy.com/korail-smartphone-ticket-return-before-after-departure": 1,
+      "https://www.must-joy.com/safe-inheritance-onestop-service-2026-guide": 1,
+      "https://www.must-joy.com/youth-housing-dream-subscription-account-2026": 1,
+      "https://www.must-joy.com/national-museum-of-korea-free-admission-guide": 1,
+      "https://www.must-joy.com/2026-korea-national-parks-autumn-foliage-peak-hiking-courses": 1,
+      "https://www.must-joy.com/2026-seoul-autumn-outdoor-cultural-events": 1,
+      "https://www.must-joy.com/tent-camping-heater-ventilation-co-alarm": 1,
+      "https://www.must-joy.com/seoul-nearby-autumn-festivals-day-trip-checklist-2026": 1,
+      "https://www.must-joy.com/autumn-camping-kerosene-heater-co-alarm-ventilation": 1,
+      "https://www.must-joy.com/autumn-foliage-campsite-reservation-deck-view": 1,
+      "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind": 1,
+      "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide": 1,
+      "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide": 1,
+      "https://www.topnote.kr/animal-registration-voluntary-report-2026": 1,
+      "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2": 1,
+      "https://www.topnote.kr/chrome-incognito-download-history-scope": 1,
+      "https://www.topnote.kr/google-photos-archive-vs-delete-guide": 1,
+      "https://www.topnote.kr/hanaromart-chuseok-discount-guide-2026": 1,
+      "https://www.topnote.kr/incheon-airport-lost-property-vs-checked-baggage-guide": 1,
+      "https://www.topnote.kr/nongsingpum-voucher-application-guide-2026": 1,
+      "https://www.topnote.kr/smartchoice-telecom-refund-inquiry-guide-2026": 1,
+      "https://www.topnote.kr/things-that-come-after-love-coupangplay-2024": 1,
+      "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide-2": 1,
+      "https://www.topnote.kr/smartphone-battery-lifespan-extending-charging-habits-guide": 1,
+      "https://www.topnote.kr/wifi-router-channel-speed-optimization-5ghz-settings": 1,
+      "https://www.topnote.kr/usb-c-monitor-no-display-troubleshooting": 1,
+      "https://www.topnote.kr/iphone-update-battery-drain-heat-check": 1,
+      "https://www.topnote.kr/iphone-18-latest-news-specs-upgrade": 1,
+      "https://www.topnote.kr/bluetooth-earbud-one-side-no-sound-check": 1,
+      "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot": 1,
+      "https://www.topnote.kr/windows-11-startup-programs-disable-guide": 1,
+      "https://www.maxnote.kr/cpoint-energy-incentive-2026-guide": 1,
+      "https://www.maxnote.kr/culinary-class-wars-netflix-schedule-guide": 1,
+      "https://www.maxnote.kr/emart-chuseok-gift-set-2026-preorder-guide": 1,
+      "https://www.maxnote.kr/flu-vaccine-free-schedule-2026": 1,
+      "https://www.maxnote.kr/gmail-spam-block-unsubscribe-guide": 1,
+      "https://www.maxnote.kr/iphone-16-preorder-release-price-guide": 1,
+      "https://www.maxnote.kr/mobile-id-card-qr-vs-ic-tag-guide": 1,
+      "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md": 1,
+      "https://www.maxnote.kr/windows-clipboard-pinned-history-clear-restart": 1,
+      "https://www.maxnote.kr/youth-future-savings-2026-guide": 1,
+      "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide": 1,
+      "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-2": 1,
+      "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3": 1,
+      "https://www.maxnote.kr/excel-xlookup-vlookup-practical-function-guide-shortcuts": 1,
+      "https://www.maxnote.kr/excel-pivot-table-summary-refresh-guide": 1,
+      "https://www.maxnote.kr/computer-slow-temp-files-disk-cleanup": 1,
+      "https://www.maxnote.kr/windows-11-shortcuts-not-working": 1,
+      "https://www.maxnote.kr/excel-find-remove-duplicate-values": 1,
+      "https://www.maxnote.kr/excel-freeze-panes-row-column": 1,
+      "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide": 1,
+      "https://www.nolplace.com/beginner-camping-chair-capacity-packed-size-guide": 1,
+      "https://www.nolplace.com/camping-butane-gas-can-disposal-guide": 1,
+      "https://www.nolplace.com/campsite-evacuation-route-fire-extinguisher-weather-alert-guide": 1,
+      "https://www.nolplace.com/chabak-trunk-discharge-carabiner-setting-2026": 1,
+      "https://www.nolplace.com/first-fall-autocamping-gear-checklist": 1,
+      "https://www.nolplace.com/gocamping-campsite-registration-inquiry-when-not-found": 1,
+      "https://www.nolplace.com/national-park-campsite-waiting-reservation-check": 1,
+      "https://www.nolplace.com/overseas-camping-gas-appliance-kc-certification-guide": 1,
+      "https://www.nolplace.com/seoul-night-view-drive-courses-recommendation": 1,
+      "https://www.nolplace.com/2026-seoul-night-view-spots-best-5-parking-guide-2": 1,
+      "https://www.nolplace.com/2026-seoul-suburbs-large-bakery-cafes-best-5-parking-guide": 1,
+      "https://www.nolplace.com/2026-local-currency-hotplace-tips": 1,
+      "https://www.nolplace.com/2026-autumn-foliage-spots-parking-transit": 1,
+      "https://www.nolplace.com/seoul-suburbs-foliage-drive-glamping-courses": 1,
+      "https://www.nolplace.com/autumn-foliage-spots-forecast-parking-reservation": 1,
+      "https://www.nolplace.com/silver-grass-festival-schedule-parking-shuttle": 1,
+      "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips": 1,
+      "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips": 1,
+      "https://www.justinfo.co.kr/%EA%B7%B8%EA%B2%83%EC%9D%B4-%EC%95%8C%EA%B3%A0-%EC%8B%B6%EB%8B%A4-1497%ED%9A%8C-%ED%8F%AC%EC%B2%9C-%EA%B5%90%ED%86%B5%EC%82%AC%EA%B3%A0-%EC%9E%AC%EC%8B%AC-%ED%99%95%EC%9D%B8%EB%B2%95": 1,
+      "https://www.justinfo.co.kr/%EC%8D%A8%EB%B0%8B-%ED%81%B4%EB%9D%BC%EB%B9%84%EC%98%A8-%EC%B2%AD%EC%95%BD-%EB%B6%84%EC%96%91%EA%B0%80-%EC%9E%85%EC%A7%80": 1,
+      "https://www.justinfo.co.kr/%EC%9E%90%EC%98%A4%EC%A6%88%EB%AF%BC-%EC%95%88%EC%9E%AC%ED%98%95-%EA%BC%AC%EA%BC%AC%EB%AC%B4-233%ED%9A%8C-%EB%9F%AC%EB%B8%8C%EC%8A%A4%ED%86%A0%EB%A6%AC-%ED%99%95%EC%9D%B8%EB%B2%95": 1,
+      "https://www.justinfo.co.kr/2026-flu-shot-free-target-expansion-schedule": 1,
+      "https://www.justinfo.co.kr/budget-phone-esim-self-activation-2026-guide": 1,
+      "https://www.justinfo.co.kr/chuseok-fruit-storage-ethylene-guide-2026": 1,
+      "https://www.justinfo.co.kr/electronic-document-wallet-screenshot-retention-guide": 1,
+      "https://www.justinfo.co.kr/food-use-by-date-vs-sell-by-date-after-opening-guide": 1,
+      "https://www.justinfo.co.kr/overwatch-nexon-account-linking": 1,
+      "https://www.justinfo.co.kr/sunshine-loan-youth-eligibility-limit-rate-2026": 1,
+      "https://www.justinfo.co.kr/windows-snipping-tool-text-actions-share-check": 1,
+      "https://www.justinfo.co.kr/2026-k-pass-transport-card-benefit-guide-2": 1,
+      "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2": 1,
+      "https://www.justinfo.co.kr/2026-subsidy-24-government-benefits-custom-inquiry-guide": 1,
+      "https://www.justinfo.co.kr/2026-youth-future-savings-eligibility-guide": 1,
+      "https://www.justinfo.co.kr/loan-application-financial-phishing-check": 1,
+      "https://www.justinfo.co.kr/unreported-crypto-site-block-user-checklist": 1,
+      "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application": 1,
+      "https://www.justinfo.co.kr/topic-3": 1,
+      "https://www.healthcox.com/copayment-ceiling-refund-excluded-bill-items": 1,
+      "https://www.healthcox.com/flu-free-vaccination-2026-schedule": 1,
+      "https://www.healthcox.com/forward-head-posture-correction-stretching-exercises": 1,
+      "https://www.healthcox.com/health-lifestyle-practice-support-guide": 1,
+      "https://www.healthcox.com/health-screening-blood-pressure-fasting-glucose-results": 1,
+      "https://www.healthcox.com/how-to-read-nutrition-facts-label-100g-vs-total-package": 1,
+      "https://www.healthcox.com/how-to-reduce-sitting-time-exercise-plan-and-alarm-cadence": 1,
+      "https://www.healthcox.com/reverse-eating-order-blood-sugar-guide-2026": 1,
+      "https://www.healthcox.com/smoking-cessation-treatment-support-guide": 1,
+      "https://www.healthcox.com/teen-energy-drink-caffeine-label-guide": 1,
+      "https://www.healthcox.com/forward-head-posture-correction-exercises": 1,
+      "https://www.healthcox.com/lower-back-pain-core-glute-bridge-bed-exercise-routine": 1,
+      "https://www.healthcox.com/turtle-neck-forward-head-posture-chin-tuck-exercise": 1,
+      "https://www.healthcox.com/covid-flu-symptom-difference-testing-care-2026": 1,
+      "https://www.healthcox.com/2026-flu-vaccination-eligibility-timing": 1,
+      "https://www.healthcox.com/flu-vaccine-side-effects-fever-muscle-pain-care": 1,
+      "https://www.healthcox.com/flu-symptoms-testing-antiviral-care-timing": 1,
+      "https://www.healthcox.com/topic-2": 1,
+      "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching": 1,
+      "https://www.daynote.kr/2026-%EC%9B%94%EB%93%9C%EC%BB%B5-%EC%9D%BC%EC%A0%95-%ED%95%9C%EA%B5%AD-%EB%B6%81%EC%A4%91%EB%AF%B8-fifa-%EB%B6%81%EC%A4%91%EB%AF%B8-%EA%B8%B0%EC%A4%80": 1,
+      "https://www.daynote.kr/clear-pet-bottle-separation-guide": 1,
+      "https://www.daynote.kr/eprivacy-clean-service-2026-guide": 1,
+      "https://www.daynote.kr/eprivacy-clean-service-2026-guide-2": 1,
+      "https://www.daynote.kr/flu-vaccine-free-eligibility-schedule-2026": 1,
+      "https://www.daynote.kr/isac-2024-broadcast-schedule-wavve-guide": 1,
+      "https://www.daynote.kr/namdo-market-chuseok-discount-coupon-2026": 1,
+      "https://www.daynote.kr/property-tax-september-2026-payment-guide": 1,
+      "https://www.daynote.kr/small-business-refinance-loan-2026-guide": 1,
+      "https://www.daynote.kr/three-meals-a-day-light-broadcast-schedule-ott-guest": 1,
+      "https://www.daynote.kr/google-drive-link-sharing-access-check": 1,
+      "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide": 1,
+      "https://www.daynote.kr/proper-recycling-sorting-rules-guide": 1,
+      "https://www.daynote.kr/bathroom-tile-mold-scale-removal-percarbonate-cleaning-guide": 1,
+      "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning": 1,
+      "https://www.daynote.kr/washing-machine-laundry-odor-check": 1,
+      "https://www.daynote.kr/window-frame-cleaning-dust-stains": 1,
+      "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide": 1,
+      "https://www.daynote.kr/green-onion-fresh-storage-guide": 1,
+      "https://www.must-good.com/%EA%B0%90%EC%9E%90-%EC%82%B6%EB%8A%94-%EB%B0%A9%EB%B2%95-%EB%83%84%EB%B9%84-%EC%95%95%EB%A0%A5%EC%86%A5-%EC%A0%84%EC%9E%90%EB%A0%88%EC%9D%B8%EC%A7%80-%EC%8B%9C%EA%B0%84-%EB%B9%84%EA%B5%90": 1,
+      "https://www.must-good.com/%EC%83%9D%ED%99%9C-%EC%B2%AD%EC%86%8C-%EC%B2%B4%ED%81%AC%EB%A6%AC%EC%8A%A4%ED%8A%B8": 1,
+      "https://www.must-good.com/%EC%A3%BC%EB%B0%A9-%EA%B8%B0%EB%A6%84%EB%95%8C-%EC%B2%AD%EC%86%8C-%EB%B0%A9%EB%B2%95": 1,
+      "https://www.must-good.com/ha-ru-10-bun-cheong-so-ru-tin": 1,
+      "https://www.must-good.com/house-cleaning-order": 1,
+      "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024": 1,
+      "https://www.must-good.com/kitchen-grease-cleaning-method-20260522": 1,
+      "https://www.must-good.com/korean-melon-benefits-calorie-check": 1,
+      "https://www.must-good.com/sink-drain-cleaning-method": 1,
+      "https://www.must-good.com/waste-home-appliances-free-collection-guide-2026": 1,
+      "https://www.must-good.com/driving-record-certificate-online-issuance-guide": 1,
+      "https://www.must-good.com/military-service-certificate-online-issuance-guide": 1,
+      "https://www.must-good.com/%EC%B5%9C%EB%8C%80-45-%EC%9A%B0%EB%8C%80%EA%B8%88%EB%A6%AC%EC%97%90-2%EB%8C%80-%EB%8C%80%EC%B6%9C-%EC%97%B0%EA%B3%84%EA%B9%8C%EC%A7%80-2026-%EC%B2%AD%EB%85%84-%EC%A3%BC%ED%83%9D%EB%93%9C%EB%A6%BC-%EC%B2%AD%EC%95%BD%ED%86%B5%EC%9E%A5-%EA%B0%80%EC%9E%85-%EC%A1%B0%EA%B1%B4-%EB%B0%8F-%EC%A0%84%ED%99%98-%EB%B0%A9%EB%B2%95-%EC%B4%9D%EC%A0%95%EB%A6%AC": 1,
+      "https://www.must-good.com/2026-earned-income-tax-credit-application-guide": 1,
+      "https://www.must-good.com/2026-second-consumption-coupon-eligibility-application-deadline": 1,
+      "https://www.must-good.com/must-good-20261013-essential-guide": 1,
+      "https://www.must-good.com/specific-financial-information-act-enforcement-review": 1,
+      "https://www.must-good.com/financial-sector-hacking-data-leak-response": 1,
+      "https://www.must-good.com/post": 1,
+      "https://www.must-pick.com/2026-minsaeng-support-application-region-check": 1,
+      "https://www.must-pick.com/catastrophic-medical-expense-support-eligibility-apply": 1,
+      "https://www.must-pick.com/emergency-welfare-livelihood-support-eligibility-financial-criteria": 1,
+      "https://www.must-pick.com/existing-housing-purchase-jeonse-support-2026": 1,
+      "https://www.must-pick.com/goheung-youth-marriage-support-2026-3200-check": 1,
+      "https://www.must-pick.com/livelihood-benefit-youth-income-deduction-guide-2026": 1,
+      "https://www.must-pick.com/naengbangbi-support-application-energy-voucher-2026": 1,
+      "https://www.must-pick.com/newlywed-youth-jeonse-deposit-loan-interest-support-2026": 1,
+      "https://www.must-pick.com/sinsaeng-a-goyuga-support-application-objection-2026": 1,
+      "https://www.must-pick.com/sokcho-support-application-2026-200000-how-to-use": 1,
+      "https://www.must-pick.com/energy-efficient-home-appliances-refund-guide": 1,
+      "https://www.must-pick.com/2026-energy-efficiency-appliance-rebate-application-guide-2": 1,
+      "https://www.must-pick.com/robot-vacuum-cleaner-buying-guide-suction-mop-specs-comparison": 1,
+      "https://www.must-pick.com/robot-vacuum-direct-plumbing-installation-conditions": 1,
+      "https://www.must-pick.com/usb-pd-pps-charger-specs-guide": 1,
+      "https://www.must-pick.com/robot-vacuum-consumables-replacement-compatibility": 1,
+      "https://www.must-pick.com/camping-chair-size-storage-seat-height": 1,
+      "https://www.must-pick.com/camping-heater-tent-size-safety-guide": 1,
+      "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide": 1,
+      "https://www.baronote.kr/bulky-waste-bbegi-app-guide-2026": 1,
+      "https://www.baronote.kr/ev-charging-zone-penalty-reporting-2026": 1,
+      "https://www.baronote.kr/incheon-airport-smartpass-registration-guide": 1,
+      "https://www.baronote.kr/k-pass-refund-criteria-and-rates": 1,
+      "https://www.baronote.kr/korea-post-registered-mail-delivery-inquiry-guide": 1,
+      "https://www.baronote.kr/msafer-identity-theft-protection-guide-2026": 1,
+      "https://www.baronote.kr/nhis-copayment-ceiling-refund-guide-2026": 1,
+      "https://www.baronote.kr/nhis-dependent-registration-guide-90days": 1,
+      "https://www.baronote.kr/retirement-pension-in-kind-transfer-guide-2026": 1,
+      "https://www.baronote.kr/windows-11-screenshot-save-location-clipboard-check": 1,
+      "https://www.baronote.kr/chrome-site-notification-block-permission-check": 1,
+      "https://www.baronote.kr/2026-card-point-integrated-inquiry-cashback-guide": 1,
+      "https://www.baronote.kr/burned-pot-cleaning-baking-soda-vinegar-guide-2": 1,
+      "https://www.baronote.kr/2026-car-bond-refund-online-guide": 1,
+      "https://www.baronote.kr/telecom-membership-points-usage-convenience-store-guide": 1,
+      "https://www.baronote.kr/2026-government-subsidy-find": 1,
+      "https://www.baronote.kr/trash-bag-price-regional-use-after-moving": 1,
+      "https://www.baronote.kr/2026-energy-voucher-usage-balance": 1,
+      "https://www.baronote.kr/topic-1": 1,
+      "https://www.tripmarvel.com/incheon-airport-easy-drop-eligibility-checklist": 1,
+      "https://www.tripmarvel.com/incheon-airport-lost-passport-response": 1,
+      "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery": 1,
+      "https://www.tripmarvel.com/incheon-airport-smartpass-facial-recognition-registration-guide": 1,
+      "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date": 1,
+      "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide": 1,
+      "https://www.tripmarvel.com/naejangsan-autumn-foliage-trail-status-check": 1,
+      "https://www.tripmarvel.com/national-park-trail-closure-check-2026": 1,
+      "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide": 1,
+      "https://www.soulnote.kr/android-clear-cache-vs-app-data-guide": 1,
+      "https://www.soulnote.kr/bullet-journal-migration-task-management": 1,
+      "https://www.soulnote.kr/digital-minimalism-2026-practice-tips": 1,
+      "https://www.soulnote.kr/execution-when-5-second-countdown-fails": 1,
+      "https://www.soulnote.kr/focus-blocks-when-phone-notifications-stay-on": 1,
+      "https://www.soulnote.kr/miracle-morning-15min-routine-habit-formation-principles": 1,
+      "https://www.soulnote.kr/reading-note-taking-method-2026": 1,
+      "https://www.soulnote.kr/small-first-action-to-start-tasks": 1,
+      "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide": 1,
+      "https://www.smilenote.kr/2026-2027-influenza-vaccination-schedule-eligibility": 1,
+      "https://www.smilenote.kr/2026-flu-vaccination-pregnant-children-schedule": 1,
+      "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour": 1,
+      "https://www.smilenote.kr/health-information-ontology-portal": 1,
+      "https://www.smilenote.kr/jang-geon-gang-microbiome-2026": 1,
+      "https://www.smilenote.kr/kidney-stone-water-prevention": 1,
+      "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules": 1,
+      "https://www.smilenote.kr/shingles-vaccine-senior-support-guide": 1,
+      "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits": 1,
+      "https://www.woorinote.kr/2026-jeonse-fraud-prevention-contract-checklist": 1,
+      "https://www.woorinote.kr/2026-rental-lease-registration-guide": 1,
+      "https://www.woorinote.kr/2026-youth-housing-dream-savings-account-guide": 1,
+      "https://www.woorinote.kr/hug-jeonse-deposit-guarantee-insurance-guide": 1,
+      "https://www.woorinote.kr/jeonse-loan-renewal-increase-rules": 1,
+      "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist": 1,
+      "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents": 1,
+      "https://www.woorinote.kr/newlywed-didimdol-income-rate-eligibility": 1,
+      "https://www.woorinote.kr/youth-future-savings-second-application-switch": 1,
+      "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide": 1,
+      "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator": 1
     },
-    "observedRequestCount": 50,
-    "externalCount": 50,
+    "observedRequestCount": 265,
+    "externalCount": 9,
     "evidence": {
-      "source": "actual visible SearchAdvisor account history; scratch/account-history-baseline.json",
-      "checkedAt": "2026-10-19T12:52:00.110172+09:00",
+      "source": "visible site history immediately before submission",
+      "checkedAt": "2026-10-20T06:28:44.573714+09:00",
       "siteListComplete": true,
-      "allHistoryPagesComplete": true,
-      "verifiedSiteCount": 29,
-      "unverifiedSiteCount": 2,
-      "eachHistoryRowsBelow50": true
+      "allHistoryPagesComplete": true
     },
-    "checkedAt": "2026-10-19T12:52:00.179851+09:00"
-  }
+    "checkedAt": "2026-10-20T06:28:44.578954+09:00",
+    "externalBySite": {
+      "https://www.baronote.kr": 0,
+      "https://www.must-pick.com": 0,
+      "https://www.must-good.com": 4,
+      "https://www.daynote.kr": 1,
+      "https://www.healthcox.com": 0,
+      "https://www.justinfo.co.kr": 3,
+      "https://www.nolplace.com": 0,
+      "https://www.maxnote.kr": 0,
+      "https://www.topnote.kr": 0,
+      "https://www.meganote.kr": 0,
+      "https://www.joynote.kr": 1,
+      "https://www.must-joy.com": 0,
+      "https://www.woorinote.kr": 0,
+      "https://www.smilenote.kr": 0,
+      "https://www.soulnote.kr": 0,
+      "https://www.tripmarvel.com": 0
+    }
+  },
+  "dailyCapScope": "site"
 }
