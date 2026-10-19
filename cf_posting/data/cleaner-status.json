@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-10-19T20:20:11.743365+09:00",
-  "eligibleCount": 9,
-  "processedCount": 10,
-  "publishedCount": 9,
+  "checkedAt": "2026-10-19T22:41:55.574434+09:00",
+  "eligibleCount": 0,
+  "processedCount": 0,
+  "publishedCount": 0,
   "activeJob": null,
-  "finishedAt": "2026-10-19T21:21:04.129051+09:00",
+  "finishedAt": "2026-10-19T22:41:56.402109+09:00",
   "heldJobs": [
     {
       "date": "2026-10-19",
