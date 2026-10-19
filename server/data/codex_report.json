@@ -1,23 +1,23 @@
 {
-  "directiveId": "2026-10-20T00:10:00+09:00",
-  "status": "completed",
-  "startedAt": "2026-10-19T15:08:11.132651+00:00",
+  "directiveId": "2026-10-20T00:30:00+09:00",
+  "status": "failed",
+  "startedAt": "2026-10-20T00:32:10.698198+09:00",
   "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
   "directiveHistory": [
     {
       "directiveId": "2026-10-19T23:15:00+09:00",
       "status": "completed",
-      "startedAt": "2026-10-19T14:32:02.650987+00:00",
+      "startedAt": "2026-10-19T23:32:02.650987+09:00",
       "lastCompletedDirectiveId": "2026-10-19T22:32:00+09:00",
       "summary": "Authentication verified HTTP 200 and original nolplace item 14 resumed through normal pipeline; publication not yet verified. Doctor baronote 37 and 91 reciprocal links publicly verified. Related tests and remote push verified.",
       "changedFiles": [],
-      "completedAt": "2026-10-19T14:51:18.487646+00:00",
+      "completedAt": "2026-10-19T23:51:18.487646+09:00",
       "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546"
     },
     {
       "directiveId": "2026-10-19T23:37:00+09:00",
       "status": "completed",
-      "startedAt": "2026-10-19T14:38:49.862952+00:00",
+      "startedAt": "2026-10-19T23:38:49.862952+09:00",
       "lastCompletedDirectiveId": "2026-10-19T23:37:00+09:00",
       "summary": "핑 테스트 완료",
       "changedFiles": [
@@ -34,7 +34,7 @@
         "server/test_collection_observability.py",
         "server/test_naver_worker_schedule.py"
       ],
-      "completedAt": "2026-10-19T14:48:31.103371+00:00",
+      "completedAt": "2026-10-19T23:48:31.103371+09:00",
       "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546",
       "results": {
         "naver": {
@@ -70,7 +70,7 @@
           "authentication": "existing admin-login fallback verified",
           "publicationStatus": "processing",
           "currentStage": 5,
-          "resumedAt": "2026-10-19T14:49:55.640413+00:00",
+          "resumedAt": "2026-10-19T23:49:55.640413+09:00",
           "scheduleItemId": 14,
           "publicPublicationVerified": false
         },
@@ -113,14 +113,14 @@
         },
         "metrics.json": {
           "size": 3545900,
-          "modifiedTime": "2026-10-19T14:49:32.370Z"
+          "modifiedTime": "2026-10-19T14:49:32.37Z"
         }
       }
     },
     {
       "directiveId": "2026-10-20T00:05:00+09:00",
       "status": "completed",
-      "startedAt": "2026-10-19T15:03:04.708193+00:00",
+      "startedAt": "2026-10-20T00:03:04.708193+09:00",
       "lastCompletedDirectiveId": "2026-10-20T00:05:00+09:00",
       "summary": "Threads model changed to gpt-6-luna; nolplace publication independently verified.",
       "changedFiles": [
@@ -128,7 +128,7 @@
         "cf_posting/data/daily_schedule.json",
         "server/data/live_snapshot.json"
       ],
-      "completedAt": "2026-10-19T15:04:31.313435+00:00",
+      "completedAt": "2026-10-20T00:04:31.313435+09:00",
       "commitHash": "37994538d7e90fe9cd17519c58350ef835b66264",
       "results": {
         "threads": {
@@ -157,19 +157,120 @@
         "status": "sent_verified",
         "destination": "Gemini desktop / BaroLab project",
         "text": "코덱스 작업 완료: Threads 모델 교체 및 nolplace 배포 검증 완료.",
-        "sentAt": "2026-10-19T15:05:58.206127+00:00",
+        "sentAt": "2026-10-20T00:05:58.206127+09:00",
         "evidence": "Exact user message visible in Gemini BaroLab conversation; response generation observed"
+      }
+    },
+    {
+      "directiveId": "2026-10-20T00:30:00+09:00",
+      "status": "failed",
+      "startedAt": "2026-10-20T00:32:10.698198+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00; Naver/KIN quota checks remain recorded, and no active run was reset or overlapped.",
+      "taskProgress": {
+        "threadsQueue": [
+          {
+            "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-1",
+            "kind": "followup",
+            "state": "queued",
+            "publication_date": "2026-10-20",
+            "slot": "08:00"
+          },
+          {
+            "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-0",
+            "kind": "main",
+            "state": "queued",
+            "publication_date": "2026-10-20",
+            "slot": "08:00"
+          }
+        ],
+        "cfSchedule": "STALLED: prepare-only process PID 54568 (started 01:21:28 KST) and Playwright driver remain alive. maxnote.kr researcher is marked running at stage 2 (24%); pipeline_state status idle, last updated 02:09:37 KST, no change for over 15 minutes. Current totals 5 prepared, 2 failed, 1 processing; no public publication. No duplicate run started or process terminated.",
+        "naverBlog": "7 verified reservations for 2026-10-20 found",
+        "knowledgeIn": "active run 2026-10-20_e992cc2d1746_adinfo0905_0030; do not overlap",
+        "snapshotSync": "NAS snapshot schema validated; generatedAt=2026-10-19T17:22:21.248509+00:00; complete=True.",
+        "dailyQuotas": "Verified against dated source records: Naver has 7 verified reservations for 2026-10-20 across 5 accounts against the 10-slot target; 0 public-verified today, so 3 slots remain unreserved. The public-verification status is current as of 01:31:38 KST. KIN config is globalDailyCap=20/accountDailyCap=10; dated dashboard count is 3 published_verified with 17 global remaining (adinfo0905=8, stone0747=9). Counters are date-scoped; no manual reset was applied."
+      },
+      "updatedAt": "2026-10-20T02:28:06.626516+09:00",
+      "completedAt": null,
+      "failureAt": "2026-10-20T02:28:06.626516+09:00",
+      "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
+      "commitHash": null,
+      "changedFiles": [
+        "cf_posting/data/daily_schedule.json",
+        "server/data/codex_report.json",
+        "server/data/live_snapshot.json"
+      ],
+      "results": {
+        "radar": {
+          "date": "2026-10-20",
+          "domains": 16,
+          "waitingSlots": 16,
+          "sourcePeriodStart": "2026-10-12",
+          "sourcePeriodEnd": "2026-10-18",
+          "revenueEvidenceComplete": false,
+          "priorPublishedArchivePreserved": true,
+          "newPublicationTriggered": false
+        },
+        "threads": {
+          "actualModel": "gpt-6-luna",
+          "actualGenerationCalls": 1,
+          "mainLines": 3,
+          "mainExternalUrls": 0,
+          "followupExactOutboundUrls": 1,
+          "queued": true,
+          "published": false,
+          "policyTestsPassed": 8,
+          "artifact": "server/data/threads-drafts/3f6f34fbc1e44ecdb534b2a84665b03c.json",
+          "editorialCorrection": "unsupported affiliate disclosure replaced with owned-blog disclosure; model main preserved",
+          "queueState": "queued",
+          "queuedSlot": "08:00"
+        },
+        "doctor": {
+          "status": "verified",
+          "domain": "must-good.com",
+          "targetPostId": 284,
+          "sourcePostId": 444,
+          "url": "https://www.must-good.com/2026년-주말-나들이-명소-서울-근교-당일치기-15곳-추천",
+          "sourceUrl": "https://www.must-good.com/2026-autumn-foliage-spots-guide",
+          "title": "2026 서울 근교 당일치기, 아이 동반 가족과 커플별 나들이 선택법",
+          "actualTitleChanged": true,
+          "periodStart": "2026-10-13",
+          "periodEnd": "2026-10-19",
+          "targetDomainTrafficComplete": true,
+          "sessions": 0,
+          "pageViews": 0,
+          "sourceBasis": "observed_gsc_pass",
+          "bothPublicHttpStatus": 200,
+          "reciprocalLinksVerified": true,
+          "additionalQuotaUsed": 0,
+          "existingTodayRecordRefined": true,
+          "baronote317Changed": false
+        },
+        "cfSchedule": {
+          "status": "failed",
+          "date": "2026-10-20",
+          "total": 16,
+          "prepared": 5,
+          "failed": 3,
+          "waiting": 8,
+          "interruptedDomain": "maxnote.kr",
+          "stage": 2,
+          "progressPct": 24,
+          "processId": 54568,
+          "processStopped": true,
+          "publicPublishing": false,
+          "reason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete."
+        }
       }
     }
   ],
-  "summary": "October 20 queue for 16 domains ready; real Luna smoke test passed; one Doctor title refinement and reciprocal links publicly verified.",
+  "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00; Naver/KIN quota checks remain recorded, and no active run was reset or overlapped.",
   "changedFiles": [
-    "threads_posting/authoring.py",
-    "threads_posting/test_pipeline.py",
     "cf_posting/data/daily_schedule.json",
-    "cf_posting/data/schedule_history/2026-10-19.json"
+    "server/data/codex_report.json",
+    "server/data/live_snapshot.json"
   ],
-  "commitHash": "90a9e91a2839bf31c27e527ac8275fc7dd66642c",
+  "commitHash": null,
   "results": {
     "radar": {
       "date": "2026-10-20",
@@ -187,11 +288,13 @@
       "mainLines": 3,
       "mainExternalUrls": 0,
       "followupExactOutboundUrls": 1,
-      "queued": false,
+      "queued": true,
       "published": false,
       "policyTestsPassed": 8,
       "artifact": "server/data/threads-drafts/3f6f34fbc1e44ecdb534b2a84665b03c.json",
-      "editorialCorrection": "unsupported affiliate disclosure replaced with owned-blog disclosure; model main preserved"
+      "editorialCorrection": "unsupported affiliate disclosure replaced with owned-blog disclosure; model main preserved",
+      "queueState": "queued",
+      "queuedSlot": "08:00"
     },
     "doctor": {
       "status": "verified",
@@ -213,14 +316,33 @@
       "additionalQuotaUsed": 0,
       "existingTodayRecordRefined": true,
       "baronote317Changed": false
+    },
+    "cfSchedule": {
+      "status": "failed",
+      "date": "2026-10-20",
+      "total": 16,
+      "prepared": 5,
+      "failed": 3,
+      "waiting": 8,
+      "interruptedDomain": "maxnote.kr",
+      "stage": 2,
+      "progressPct": 24,
+      "processId": 54568,
+      "processStopped": true,
+      "publicPublishing": false,
+      "reason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete."
     }
   },
-  "completedAt": "2026-10-19T15:26:45.963358+00:00",
+  "completedAt": null,
   "completionPing": {
     "status": "sent_verified",
     "text": "코덱스 작업 완료: 10/20 스케줄 수립 및 Threads 실생성 테스트 완료.",
     "destination": "Gemini desktop / BaroLab project",
-    "sentAt": "2026-10-19T15:28:25.509347+00:00",
+    "sentAt": "2026-10-20T00:28:25.509347+09:00",
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
-  }
+  },
+  "previousDirectiveId": "2026-10-20T00:10:00+09:00",
+  "updatedAt": "2026-10-20T02:28:06.626516+09:00",
+  "failureAt": "2026-10-20T02:28:06.626516+09:00",
+  "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete."
 }
