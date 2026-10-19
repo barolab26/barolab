@@ -1,9 +1,10 @@
 {
-  "checkedAt": "2026-10-18T21:01:43.185005+09:00",
-  "eligibleCount": 0,
+  "checkedAt": "2026-10-19T18:28:40.514234+09:00",
+  "eligibleCount": 5,
   "processedCount": 0,
   "publishedCount": 0,
-  "activeJob": null,
-  "finishedAt": "2026-10-18T21:01:43.251986+09:00",
-  "heldJobs": []
+  "activeJob": {
+    "date": "2026-10-19",
+    "domain": "maxnote.kr"
+  }
 }

@@ -1,8 +1,8 @@
 {
-  "date": "2026-10-18",
-  "workDate": "2026-10-18",
-  "publicationDate": "2026-10-18",
-  "checkedAt": "2026-10-18T20:57:33.400803+09:00",
+  "date": "2026-10-19",
+  "workDate": "2026-10-19",
+  "publicationDate": "2026-10-19",
+  "checkedAt": "2026-10-19T18:22:34.379322+09:00",
   "timezone": "Asia/Seoul",
   "startTime": "08:00",
   "startTimeMeaning": "당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인",
@@ -24,16 +24,16 @@
       "slots": [
         {
           "scheduledSlot": "19:30",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "카테고리 전문성·체류 트랙",
           "prepTime": "08:30",
           "status": "verified",
-          "expected": "2026-10-18 19:30 KST 공개 예정"
+          "expected": "2026-10-19 19:30 KST 공개 예정"
         }
       ],
       "preparationTime": "08:30",
-      "publicationDate": "2026-10-18",
-      "expected": "2026-10-18 19:30 KST 공개 예정"
+      "publicationDate": "2026-10-19",
+      "expected": "2026-10-19 19:30 KST 공개 예정"
     },
     {
       "account": "soul5373",
@@ -42,16 +42,16 @@
       "slots": [
         {
           "scheduledSlot": "20:00",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "카테고리 전문성·체류 트랙",
           "prepTime": "09:00",
           "status": "verified",
-          "expected": "2026-10-18 20:00 KST 공개 예정"
+          "expected": "2026-10-19 20:00 KST 공개 예정"
         }
       ],
       "preparationTime": "09:00",
-      "publicationDate": "2026-10-18",
-      "expected": "2026-10-18 20:00 KST 공개 예정"
+      "publicationDate": "2026-10-19",
+      "expected": "2026-10-19 20:00 KST 공개 예정"
     },
     {
       "account": "yoon_master",
@@ -60,16 +60,16 @@
       "slots": [
         {
           "scheduledSlot": "20:30",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "트렌드·롱테일 유입 트랙",
           "prepTime": "09:30",
           "status": "verified",
-          "expected": "2026-10-18 20:30 KST 공개 예정"
+          "expected": "2026-10-19 20:30 KST 공개 예정"
         }
       ],
       "preparationTime": "09:30",
-      "publicationDate": "2026-10-18",
-      "expected": "2026-10-18 20:30 KST 공개 예정"
+      "publicationDate": "2026-10-19",
+      "expected": "2026-10-19 20:30 KST 공개 예정"
     },
     {
       "account": "adinfo0905",
@@ -78,24 +78,24 @@
       "slots": [
         {
           "scheduledSlot": "11:00",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "CF 고단가 브리지 1차 트랙",
           "prepTime": "08:00",
           "status": "verified",
-          "expected": "2026-10-18 11:00 KST 공개 예정"
+          "expected": "2026-10-19 11:00 KST 공개 예정"
         },
         {
           "scheduledSlot": "19:00",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "CF 고단가 브리지 2차 트랙",
           "prepTime": "13:00",
           "status": "verified",
-          "expected": "2026-10-18 19:00 KST 공개 예정"
+          "expected": "2026-10-19 19:00 KST 공개 예정"
         }
       ],
       "preparationTime": "08:00",
-      "publicationDate": "2026-10-18",
-      "expected": "2026-10-18 11:00, 19:00 KST 공개 예정"
+      "publicationDate": "2026-10-19",
+      "expected": "2026-10-19 11:00, 19:00 KST 공개 예정"
     },
     {
       "account": "stone0747",
@@ -104,157 +104,31 @@
       "slots": [
         {
           "scheduledSlot": "11:00",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "CF 고단가 브리지 1차 트랙",
           "prepTime": "08:15",
           "status": "verified",
-          "expected": "2026-10-18 11:00 KST 공개 예정"
+          "expected": "2026-10-19 11:00 KST 공개 예정"
         },
         {
           "scheduledSlot": "19:00",
-          "publicationDate": "2026-10-18",
+          "publicationDate": "2026-10-19",
           "track": "CF 고단가 브리지 2차 트랙",
           "prepTime": "13:30",
           "status": "verified",
-          "expected": "2026-10-18 19:00 KST 공개 예정"
+          "expected": "2026-10-19 19:00 KST 공개 예정"
         }
       ],
       "preparationTime": "08:15",
-      "publicationDate": "2026-10-18",
-      "expected": "2026-10-18 11:00, 19:00 KST 공개 예정"
+      "publicationDate": "2026-10-19",
+      "expected": "2026-10-19 11:00, 19:00 KST 공개 예정"
     }
   ],
   "recovery": {
     "schema": "naver-recovery-plan-v1",
-    "checkedAt": "2026-10-18T20:57:57.864302+09:00",
+    "checkedAt": "2026-10-19T18:22:57.743321+09:00",
     "timezone": "Asia/Seoul",
     "items": [
-      {
-        "account": "adinfo0905",
-        "accId": "acc4",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "11:00",
-        "reserveTime": "2026-10-18 11:00",
-        "deadlineAt": "2026-10-18T10:45:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 1,
-        "recoveryContextSha256": "1e524875eb32c0358da7dc957406a4478be19d54acdd66453824f9839f63db84",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\adinfo0905\\근로소득공제-20261017-ab96961b69"
-      },
-      {
-        "account": "stone0747",
-        "accId": "acc5",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "11:00",
-        "reserveTime": "2026-10-18 11:00",
-        "deadlineAt": "2026-10-18T10:45:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 1,
-        "recoveryContextSha256": "7d356ad2e8be92dde4bba1201a996e66f6c4e80285a726b53bbf495e34aaf6a1",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\stone0747\\신용취약-소상공인-자금-20261018-849375a9cb"
-      },
-      {
-        "account": "adinfo0905",
-        "accId": "acc4",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "19:00",
-        "reserveTime": "2026-10-18 19:00",
-        "deadlineAt": "2026-10-18T18:45:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 1,
-        "recoveryContextSha256": "1e524875eb32c0358da7dc957406a4478be19d54acdd66453824f9839f63db84",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\adinfo0905\\주택청약-소득공제-20261017-19756343fd"
-      },
-      {
-        "account": "stone0747",
-        "accId": "acc5",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "19:00",
-        "reserveTime": "2026-10-18 19:00",
-        "deadlineAt": "2026-10-18T18:45:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 1,
-        "recoveryContextSha256": "7d356ad2e8be92dde4bba1201a996e66f6c4e80285a726b53bbf495e34aaf6a1",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\stone0747\\일시적경영애로자금-20261018-c1915398a8"
-      },
-      {
-        "account": "soultin",
-        "accId": "acc1",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "19:30",
-        "reserveTime": "2026-10-18 19:30",
-        "deadlineAt": "2026-10-18T19:15:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 6,
-        "recoveryContextSha256": "3fda0c7d5ac9e1f396506018c6b14622d0f910f27424a6b1d2d27cc8856fde75",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\soultin\\국민연금-퇴직연금-20261017-d5c2a45015"
-      },
-      {
-        "account": "soul5373",
-        "accId": "acc2",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "20:00",
-        "reserveTime": "2026-10-18 20:00",
-        "deadlineAt": "2026-10-18T19:45:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 5,
-        "recoveryContextSha256": "9b91fc42cf69268128abe517c3699a558d064ca1dceda7c512fae83b5c41309e",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\soul5373\\의자-스쿼트-20261017-a79d739da6"
-      },
-      {
-        "account": "yoon_master",
-        "accId": "acc3",
-        "publicationDate": "2026-10-18",
-        "scheduledSlot": "20:30",
-        "reserveTime": "2026-10-18 20:30",
-        "deadlineAt": "2026-10-18T20:15:00+09:00",
-        "status": "verified",
-        "reason": "실제 예약 근거 확인",
-        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
-        "automaticAttempts": 0,
-        "totalAutomaticAttempts": 5,
-        "recoveryContextSha256": "709eb4dac50b4ed9c4cf7f12fb8a2cab3fe8f75b4eba06316e24136bd3d5367f",
-        "contextChanged": true,
-        "lastFailure": null,
-        "failureCategory": null,
-        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\yoon_master\\경량패딩-20261018-012ae49986"
-      },
       {
         "account": "adinfo0905",
         "accId": "acc4",
@@ -380,6 +254,132 @@
         "lastFailure": null,
         "failureCategory": null,
         "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\yoon_master\\니트-가디건-20261018-895c070f6f"
+      },
+      {
+        "account": "adinfo0905",
+        "accId": "acc4",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "11:00",
+        "reserveTime": "2026-10-20 11:00",
+        "deadlineAt": "2026-10-20T10:45:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 1,
+        "recoveryContextSha256": "1e524875eb32c0358da7dc957406a4478be19d54acdd66453824f9839f63db84",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\adinfo0905\\문화비-공제-20261019-ab8223fd45"
+      },
+      {
+        "account": "stone0747",
+        "accId": "acc5",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "11:00",
+        "reserveTime": "2026-10-20 11:00",
+        "deadlineAt": "2026-10-20T10:45:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 1,
+        "recoveryContextSha256": "7d356ad2e8be92dde4bba1201a996e66f6c4e80285a726b53bbf495e34aaf6a1",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\stone0747\\소상공인-정책자금-20261019-86c1f87d55"
+      },
+      {
+        "account": "adinfo0905",
+        "accId": "acc4",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "19:00",
+        "reserveTime": "2026-10-20 19:00",
+        "deadlineAt": "2026-10-20T18:45:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 1,
+        "recoveryContextSha256": "1e524875eb32c0358da7dc957406a4478be19d54acdd66453824f9839f63db84",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\adinfo0905\\의료비-공제-20261019-cfb1add940"
+      },
+      {
+        "account": "stone0747",
+        "accId": "acc5",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "19:00",
+        "reserveTime": "2026-10-20 19:00",
+        "deadlineAt": "2026-10-20T18:45:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 2,
+        "recoveryContextSha256": "7d356ad2e8be92dde4bba1201a996e66f6c4e80285a726b53bbf495e34aaf6a1",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\stone0747\\정책자금-20261019-26e8b1e506"
+      },
+      {
+        "account": "soultin",
+        "accId": "acc1",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "19:30",
+        "reserveTime": "2026-10-20 19:30",
+        "deadlineAt": "2026-10-20T19:15:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 1,
+        "recoveryContextSha256": "3fda0c7d5ac9e1f396506018c6b14622d0f910f27424a6b1d2d27cc8856fde75",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\soultin\\국민연금-예상액-20261019-1fa2835c36"
+      },
+      {
+        "account": "soul5373",
+        "accId": "acc2",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "20:00",
+        "reserveTime": "2026-10-20 20:00",
+        "deadlineAt": "2026-10-20T19:45:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 1,
+        "recoveryContextSha256": "9b91fc42cf69268128abe517c3699a558d064ca1dceda7c512fae83b5c41309e",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\soul5373\\건강검진-20261019-8d2621b5a1"
+      },
+      {
+        "account": "yoon_master",
+        "accId": "acc3",
+        "publicationDate": "2026-10-20",
+        "scheduledSlot": "20:30",
+        "reserveTime": "2026-10-20 20:30",
+        "deadlineAt": "2026-10-20T20:15:00+09:00",
+        "status": "verified",
+        "reason": "실제 예약 근거 확인",
+        "nextAction": "공개 시각 이후 실제 공개 여부 확인",
+        "automaticAttempts": 0,
+        "totalAutomaticAttempts": 56,
+        "recoveryContextSha256": "709eb4dac50b4ed9c4cf7f12fb8a2cab3fe8f75b4eba06316e24136bd3d5367f",
+        "contextChanged": true,
+        "lastFailure": null,
+        "failureCategory": null,
+        "artifactFolder": "\\\\otns\\yoonlab\\10_Project\\BaroLab\\naver_blog_posting\\output\\yoon_master\\트렌치코트-20261019-87bb1f8db3"
       }
     ],
     "eligible": []
@@ -388,13 +388,13 @@
     "registered": true,
     "enabled": true,
     "state": "Running",
-    "nextRunAt": "2026-10-18T21:01:36.0000000+09:00",
-    "lastRunAt": "2026-10-18T20:56:37.0000000+09:00",
+    "nextRunAt": "2026-10-19T18:26:36.0000000+09:00",
+    "lastRunAt": "2026-10-19T18:21:37.0000000+09:00",
     "lastResult": 267009,
     "triggerEnabled": true,
     "taskName": "BaroLab-Naver-Daily",
-    "checkedAt": "2026-10-18T20:58:25.322643+09:00",
-    "attemptedAt": "2026-10-18T20:58:25.322643+09:00",
+    "checkedAt": "2026-10-19T18:23:24.264155+09:00",
+    "attemptedAt": "2026-10-19T18:23:24.264155+09:00",
     "sourceTimezone": "Asia/Seoul",
     "source": "Windows Task Scheduler read-only",
     "workflowMatches": true,
@@ -403,9 +403,9 @@
   },
   "publicVerification": {
     "status": "ok",
-    "checkedAt": "2026-10-18T20:57:32.644572+09:00",
+    "checkedAt": "2026-10-19T18:22:33.633358+09:00",
     "updated": 0,
-    "totalVerifiedEvidence": 48,
+    "totalVerifiedEvidence": 53,
     "errors": {}
   },
   "runner": {
@@ -415,9 +415,9 @@
     "activeAccount": null,
     "activePublicationDate": null,
     "activeScheduledSlot": null,
-    "startedAt": "2026-10-18T00:17:10.414518+09:00",
-    "lastHeartbeatAt": "2026-10-18T14:42:04.129801+09:00",
-    "observedAt": "2026-10-18T20:57:33.400803+09:00",
+    "startedAt": "2026-10-19T08:02:20.688721+09:00",
+    "lastHeartbeatAt": "2026-10-19T14:31:48.087277+09:00",
+    "observedAt": "2026-10-19T18:22:34.379322+09:00",
     "source": "pipeline OS lock and execution journal",
     "heartbeatMeaning": "actual journal stage update; monitor timestamp is not runner heartbeat"
   }

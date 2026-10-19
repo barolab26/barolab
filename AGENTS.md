@@ -20,12 +20,19 @@
 - **단일 통합 파이프라인 일원화**: 계정별로 스크립트를 복사-붙여넣기(`publish_1호.py`, `publish_2호.py` 등)하거나 원고를 하드코딩하지 않고, 계정 인자(`--account`)를 받는 단일 파이프라인 모듈로 구조를 단순하고 견고하게 유지합니다.
 
 
-## 3. GitHub 실시간 자동 동기화 의무 규칙 (Mandatory GitHub Auto-Sync Rule)
+## 3. GitHub 실시간 자동 동기화 및 로컬 표준 저장소 규칙 (Mandatory GitHub & Local Workspace Rule)
+- **로컬 표준 작업 경로 (Local GitHub Workspace)**:
+  - 모든 개발·자동화·스케줄러 실행의 기준 저장소는 **`C:\10_Project\BaroLab`** 입니다. (NAS 네트워크 드라이브 `Y:\10_Project\BaroLab` 또는 `\\otns\yoonlab\...` 직접 실행 금지)
+  - 다른 PC에서 환경을 세팅할 때는 아래 명령으로 클론 및 부트스트랩을 실행합니다:
+    ```powershell
+    git clone https://github.com/barolab26/barolab.git C:\10_Project\BaroLab
+    powershell -ExecutionPolicy Bypass -File C:\10_Project\BaroLab\setup_pc.ps1
+    ```
 - **Git 계정 및 저장소 표준**:
   - GitHub 계정: **`barolab26`** (`barolab26@gmail.com`)
   - 커밋 작성자 설정: `git config user.name "barolab26"`, `git config user.email "barolab26@gmail.com"`
   - 원격 저장소: **`https://github.com/barolab26/barolab.git`** (`origin` → `main` 브랜치)
-- **작업 완료 직후 자동 Push 의무화**: 에이전트가 소스코드(`server/`, `dashboard/`, `common/`, 각 채널 파이프라인 등)나 설정/원장 파일을 수정한 모든 작업 완료 직후에는 반드시 아래 명령을 자동 실행하여 원격 저장소(`origin main`)와 실시간 동기화합니다:
+- **작업 완료 직후 자동 Push 의무화**: 에이전트가 소스코드(`server/`, `dashboard/`, `common/`, 각 채널 파이프라인 등)나 설정/원장 파일을 수정한 모든 작업 완료 직후에는 반드시 아래 명령(또는 `.\sync_github.ps1`)을 자동 실행하여 원격 저장소(`origin main`)와 실시간 동기화합니다:
   ```bash
   git add -A && git commit -m "auto-sync" && git push origin main
   ```

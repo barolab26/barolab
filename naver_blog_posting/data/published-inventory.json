@@ -1,15 +1,27 @@
 {
   "accounts": {
     "mustinfo": {
-      "date": "2026-10-18",
+      "date": "2026-10-19",
       "inventory": {
         "source": "https://blog.naver.com/PostTitleListAsync.naver",
-        "collectedAt": "2026-10-18T09:05:44.010245+09:00",
-        "totalCount": 904,
+        "collectedAt": "2026-10-19T09:03:29.843256+09:00",
+        "totalCount": 906,
         "observedCount": 120,
         "complete": false,
         "recent60DaysComplete": true,
         "posts": [
+          {
+            "id": "224445070650",
+            "title": "5060 의자 스쿼트 자세와 시작량, 무릎 부담을 살피며 따라 하는 법",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/mustinfo/224445070650"
+          },
+          {
+            "id": "224445028097",
+            "title": "2026 국가건강검진 대상 조회와 연말 예약 일정 확인",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/mustinfo/224445028097"
+          },
           {
             "id": "224444605692",
             "title": "반월상연골판 손상 증상, 퇴행성 관절염과 헷갈릴 때 살필 점",
@@ -717,33 +729,33 @@
             "title": "배인규 사망 보도, 8월 6일 공식 발표 전 확인된 사실",
             "publishedDate": "2026-08-06",
             "url": "https://blog.naver.com/mustinfo/224370256273"
-          },
-          {
-            "id": "224369786522",
-            "title": "코르티스 마틴 국적, 한국·캐나다 이중국적 보도와 공식 프로필의 차이",
-            "publishedDate": "2026-08-06",
-            "url": "https://blog.naver.com/mustinfo/224369786522"
-          },
-          {
-            "id": "224369510371",
-            "title": "프로미스나인 콘서트 일반예매, 공식 페이지에서 먼저 대조할 것",
-            "publishedDate": "2026-08-06",
-            "url": "https://blog.naver.com/mustinfo/224369510371"
           }
         ],
         "error": null
       }
     },
     "stone0747": {
-      "date": "2026-10-18",
+      "date": "2026-10-19",
       "inventory": {
         "source": "https://blog.naver.com/PostTitleListAsync.naver",
-        "collectedAt": "2026-10-18T13:17:14.701410+09:00",
-        "totalCount": 237,
+        "collectedAt": "2026-10-19T08:16:38.472987+09:00",
+        "totalCount": 239,
         "observedCount": 90,
         "complete": false,
         "recent60DaysComplete": true,
         "posts": [
+          {
+            "id": "224445463966",
+            "title": "일시적경영애로자금 매출 증빙과 지역신보 보증 확인 순서",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/stone0747/224445463966"
+          },
+          {
+            "id": "224445445639",
+            "title": "신용취약 소상공인 직접대출, 839점 기준과 사전교육 확인 순서",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/stone0747/224445445639"
+          },
           {
             "id": "224444633747",
             "title": "소상공인 대환대출 신청 자격과 대상 채무 확인하기",
@@ -1271,33 +1283,39 @@
             "title": "카톡 업데이트 취소 괜히 몰랐네…다운그레이드까지 후기 대방출",
             "publishedDate": "2025-09-26",
             "url": "https://blog.naver.com/stone0747/224022733570"
-          },
-          {
-            "id": "224022293779",
-            "title": "양모모발증후군 주의해야 할 탈모 증상…내가 겪어보니 사실은",
-            "publishedDate": "2025-09-26",
-            "url": "https://blog.naver.com/stone0747/224022293779"
-          },
-          {
-            "id": "224021629673",
-            "title": "구순염 만성이라면? 착색·재발 막아낸 관리법 리뷰",
-            "publishedDate": "2025-09-25",
-            "url": "https://blog.naver.com/stone0747/224021629673"
           }
         ],
         "error": null
       }
     },
     "yoonviews": {
-      "date": "2026-10-18",
+      "date": "2026-10-19",
       "inventory": {
         "source": "https://blog.naver.com/PostTitleListAsync.naver",
-        "collectedAt": "2026-10-18T09:37:46.280163+09:00",
-        "totalCount": 769,
-        "observedCount": 60,
+        "collectedAt": "2026-10-19T14:29:15.176353+09:00",
+        "totalCount": 772,
+        "observedCount": 90,
         "complete": false,
         "recent60DaysComplete": true,
         "posts": [
+          {
+            "id": "224445345620",
+            "title": "5060 니트 가디건 기장과 단추 여밈, 체형별 선택 기준",
+            "publishedDate": "2026-10-19",
+            "url": "https://blog.naver.com/yoonviews/224445345620"
+          },
+          {
+            "id": "224445096845",
+            "title": "5060 경량패딩 데일리룩, 부해 보이지 않는 퀼팅 간격과 힙 커버 기장 고르는 법",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/yoonviews/224445096845"
+          },
+          {
+            "id": "224445042541",
+            "title": "5060 헤링본 재킷, 어깨 패드와 기장·색 조합을 고르는 기준",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/yoonviews/224445042541"
+          },
           {
             "id": "224444621331",
             "title": "5060 니트 베스트 레이어드, 복부와 목선에 맞춰 고르는 법",
@@ -1657,21 +1675,195 @@
             "title": "다이소 에어프라이어 용품 4가지, 청소 줄이는 선택 기준",
             "publishedDate": "2026-08-09",
             "url": "https://blog.naver.com/yoonviews/224372581792"
+          },
+          {
+            "id": "224372492560",
+            "title": "출산 육아 지원 2026, 출산용품까지 고르는 순서",
+            "publishedDate": "2026-08-09",
+            "url": "https://blog.naver.com/yoonviews/224372492560"
+          },
+          {
+            "id": "224370762930",
+            "title": "휴대용 유모차 비교, 출산 준비 때 확인할 기준 3가지",
+            "publishedDate": "2026-08-07",
+            "url": "https://blog.naver.com/yoonviews/224370762930"
+          },
+          {
+            "id": "224370593076",
+            "title": "박지성 유퀴즈 올드머니룩 니트 600만원, 비슷한 무드 고르는 기준",
+            "publishedDate": "2026-08-07",
+            "url": "https://blog.naver.com/yoonviews/224370593076"
+          },
+          {
+            "id": "224370277210",
+            "title": "올리브영 서바이벌 뷰티 여름 핸드크림 선물 비교",
+            "publishedDate": "2026-08-06",
+            "url": "https://blog.naver.com/yoonviews/224370277210"
+          },
+          {
+            "id": "224370099060",
+            "title": "주방·홈카페 방법, 작은 공간에 맞는 커피머신 비교 기준",
+            "publishedDate": "2026-08-06",
+            "url": "https://blog.naver.com/yoonviews/224370099060"
+          },
+          {
+            "id": "224369518446",
+            "title": "송혜교 일본 여행룩, 사복패션 화제 속 화이트 상의 고르는 기준",
+            "publishedDate": "2026-08-06",
+            "url": "https://blog.naver.com/yoonviews/224369518446"
+          },
+          {
+            "id": "224369260589",
+            "title": "전소미 LA 핫걸 여름 휴가룩 코디, 블루 원피스 수영복 고르는 기준",
+            "publishedDate": "2026-08-05",
+            "url": "https://blog.naver.com/yoonviews/224369260589"
+          },
+          {
+            "id": "224368828605",
+            "title": "송혜교 강동원 가방 품절 대란, 9만원대 제품과 구매 전 비교 기준",
+            "publishedDate": "2026-08-05",
+            "url": "https://blog.naver.com/yoonviews/224368828605"
+          },
+          {
+            "id": "224368465991",
+            "title": "안소희 반클리프 레드 목걸이 패션, 품번과 가격부터 구매 기준까지",
+            "publishedDate": "2026-08-05",
+            "url": "https://blog.naver.com/yoonviews/224368465991"
+          },
+          {
+            "id": "224368300953",
+            "title": "55세 김혜수, 신이 내린 비율 패션과 비슷한 트위드 재킷 고르는 기준",
+            "publishedDate": "2026-08-04",
+            "url": "https://blog.naver.com/yoonviews/224368300953"
+          },
+          {
+            "id": "224368033200",
+            "title": "디지털·가전 추천, 손목 부담과 구매 조건으로 고르는 무선청소기 비교",
+            "publishedDate": "2026-08-04",
+            "url": "https://blog.naver.com/yoonviews/224368033200"
+          },
+          {
+            "id": "224367061880",
+            "title": "이효리 사복 패션 온앤온 스커트 가격, 후보 모델과 코디 비교",
+            "publishedDate": "2026-08-03",
+            "url": "https://blog.naver.com/yoonviews/224367061880"
+          },
+          {
+            "id": "224367012094",
+            "title": "정은채 킨더살몬 블라우스 가격, 비슷한 모크넥 고르는 기준",
+            "publishedDate": "2026-08-03",
+            "url": "https://blog.naver.com/yoonviews/224367012094"
+          },
+          {
+            "id": "224366549866",
+            "title": "선풍기조끼 듀얼팬·배터리 구매 기준 2026, 용도별로 고르는 법",
+            "publishedDate": "2026-08-03",
+            "url": "https://blog.naver.com/yoonviews/224366549866"
+          },
+          {
+            "id": "224366267394",
+            "title": "구강유산균 M18 효능과 구매 기준, 제품 고를 때 확인할 6가지",
+            "publishedDate": "2026-08-03",
+            "url": "https://blog.naver.com/yoonviews/224366267394"
+          },
+          {
+            "id": "224365932456",
+            "title": "김고은 10만원대 블라우스 정체, 렉토 확인과 비슷한 스카프넥 비교",
+            "publishedDate": "2026-08-02",
+            "url": "https://blog.naver.com/yoonviews/224365932456"
+          },
+          {
+            "id": "224365708001",
+            "title": "리사 월드컵 176억 수익과 하객패션, 가격보다 먼저 확인할 것",
+            "publishedDate": "2026-08-02",
+            "url": "https://blog.naver.com/yoonviews/224365708001"
+          },
+          {
+            "id": "224361807027",
+            "title": "김혜수 55세 비현실 S라인 패션, 하늘색 원피스와 부츠 구매 기준",
+            "publishedDate": "2026-07-29",
+            "url": "https://blog.naver.com/yoonviews/224361807027"
+          },
+          {
+            "id": "224360980551",
+            "title": "르라보어나더13 향수, 호불호와 지속력보다 먼저 볼 구매 기준",
+            "publishedDate": "2026-07-28",
+            "url": "https://blog.naver.com/yoonviews/224360980551"
+          },
+          {
+            "id": "224360466730",
+            "title": "대장간칼 방송 화제, 수제칼 구매 전 비교 기준",
+            "publishedDate": "2026-07-28",
+            "url": "https://blog.naver.com/yoonviews/224360466730"
+          },
+          {
+            "id": "224359828338",
+            "title": "손나은 흰 티에 청바지 데일리룩, 비슷한 여름 기본티 고르는 기준",
+            "publishedDate": "2026-07-27",
+            "url": "https://blog.naver.com/yoonviews/224359828338"
+          },
+          {
+            "id": "224359638140",
+            "title": "문의 폭주 중인 제니 패션, 뮤비 무드를 여름 옷으로 고르는 법",
+            "publishedDate": "2026-07-27",
+            "url": "https://blog.naver.com/yoonviews/224359638140"
+          },
+          {
+            "id": "224359266057",
+            "title": "다이소 초파리 트랩 종류 비교, 주방과 화분에 맞는 선택법",
+            "publishedDate": "2026-07-27",
+            "url": "https://blog.naver.com/yoonviews/224359266057"
+          },
+          {
+            "id": "224358543210",
+            "title": "중복 음식 시즌, 강아지 간식 고르는 기준과 3가지 비교",
+            "publishedDate": "2026-07-26",
+            "url": "https://blog.naver.com/yoonviews/224358543210"
+          },
+          {
+            "id": "224358268762",
+            "title": "다비치 오브제 초코 2026 구매 전 확인할 점과 선물 체크리스트",
+            "publishedDate": "2026-07-26",
+            "url": "https://blog.naver.com/yoonviews/224358268762"
+          },
+          {
+            "id": "224358116702",
+            "title": "마늘참깨 후리가케 비교, 돈키호테 ごまにんにく 구매 전 체크포인트",
+            "publishedDate": "2026-07-26",
+            "url": "https://blog.naver.com/yoonviews/224358116702"
+          },
+          {
+            "id": "224357893422",
+            "title": "3M 네고왕 청소용품 할인, 막대걸레 구매 전 확인할 점",
+            "publishedDate": "2026-07-26",
+            "url": "https://blog.naver.com/yoonviews/224357893422"
           }
         ],
         "error": null
       }
     },
     "adinfo0905": {
-      "date": "2026-10-18",
+      "date": "2026-10-19",
       "inventory": {
         "source": "https://blog.naver.com/PostTitleListAsync.naver",
-        "collectedAt": "2026-10-18T08:02:19.284078+09:00",
-        "totalCount": 31,
-        "observedCount": 31,
+        "collectedAt": "2026-10-19T08:02:24.120057+09:00",
+        "totalCount": 33,
+        "observedCount": 33,
         "complete": true,
         "recent60DaysComplete": true,
         "posts": [
+          {
+            "id": "224444994571",
+            "title": "주택청약 소득공제 무주택확인서 제출기한과 준비 절차",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/adinfo0905/224444994571"
+          },
+          {
+            "id": "224444980165",
+            "title": "근로소득공제와 근로소득 세액공제 차이, 총급여별 계산법",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/adinfo0905/224444980165"
+          },
           {
             "id": "224444641640",
             "title": "신용카드 소득공제, 총급여 25% 전후 결제 전략",
@@ -1863,15 +2055,27 @@
       }
     },
     "mustpickinfo": {
-      "date": "2026-10-18",
+      "date": "2026-10-19",
       "inventory": {
         "source": "https://blog.naver.com/PostTitleListAsync.naver",
-        "collectedAt": "2026-10-18T08:41:55.181710+09:00",
-        "totalCount": 924,
+        "collectedAt": "2026-10-19T08:53:57.864866+09:00",
+        "totalCount": 926,
         "observedCount": 90,
         "complete": false,
         "recent60DaysComplete": true,
         "posts": [
+          {
+            "id": "224445056097",
+            "title": "은퇴 후 국민연금 개시 전, IRP 인출 계획을 세우는 순서",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/mustpickinfo/224445056097"
+          },
+          {
+            "id": "224445011309",
+            "title": "국민연금 안심통장, 첫 지급 전 등록 일정과 준비물 확인",
+            "publishedDate": "2026-10-18",
+            "url": "https://blog.naver.com/mustpickinfo/224445011309"
+          },
           {
             "id": "224444650408",
             "title": "국민연금 분할연금 조건, 이혼 후 나눌 수 있는 혼인기간부터 확인하세요",
@@ -2399,18 +2603,6 @@
             "title": "장기투자, 레버리지 ETF를 오래 보유하기 전에 먼저 볼 것",
             "publishedDate": "2026-08-03",
             "url": "https://blog.naver.com/mustpickinfo/224366891040"
-          },
-          {
-            "id": "224366191460",
-            "title": "인천 천사지원금 신청, 2026년에는 생일 뒤 120일과 첫 신청을 먼저 보세요",
-            "publishedDate": "2026-08-03",
-            "url": "https://blog.naver.com/mustpickinfo/224366191460"
-          },
-          {
-            "id": "224364694214",
-            "title": "기후동행카드 환급, 8월 31일까지 신청하고 입금일은 따로 확인하세요",
-            "publishedDate": "2026-08-01",
-            "url": "https://blog.naver.com/mustpickinfo/224364694214"
           }
         ],
         "error": null

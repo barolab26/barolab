@@ -1,8 +1,8 @@
 {
   "schema": "barolab-system-watchdog-v1",
-  "triggerSource": "sre-init",
-  "startedAt": "2026-10-18T21:47:11+09:00",
-  "finishedAt": "2026-10-18T21:47:32+09:00",
+  "triggerSource": "windows-worker-10m",
+  "startedAt": "2026-10-19T18:28:40+09:00",
+  "finishedAt": "2026-10-19T18:28:45+09:00",
   "status": "healthy",
   "server": {
     "port8790": true,
@@ -11,20 +11,41 @@
     "detail": "정상 가동 중"
   },
   "cdpBrowsers": {
-    "onlineCount": 7,
-    "totalRequired": 7,
-    "recoveredPorts": [
-      9336,
-      9226
-    ],
+    "onlineCount": 8,
+    "totalRequired": 8,
+    "recoveredPorts": [],
     "failedPorts": []
   },
   "zombieRecoveries": [],
   "missedSlotCatchups": [],
+  "appTrackTruth": {
+    "ok": true,
+    "updatedProjects": [
+      "bible_app",
+      "greeting",
+      "magnifier",
+      "shopping"
+    ],
+    "countdownStarted": false,
+    "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 제출",
+    "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
+  },
   "projectHealthSummary": {
     "totalProjects": 6,
     "ceoActionCount": 1,
-    "autoRecoveringCount": 0
+    "autoRecoveringCount": 0,
+    "appTrackTruth": {
+      "ok": true,
+      "updatedProjects": [
+        "bible_app",
+        "greeting",
+        "magnifier",
+        "shopping"
+      ],
+      "countdownStarted": false,
+      "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 제출",
+      "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
+    }
   },
-  "broadcastedToChat": true
+  "broadcastedToChat": false
 }

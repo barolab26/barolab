@@ -1361,6 +1361,316 @@
       "evidence": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n7\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nhttps://www.maxnote.kr/excel-freeze-panes-row-column\nURL 검사\n실제 URL 테스트\ninfo\nURL이 Google에 등록되어 있지 않음\n페이지의 색인이 생성되지 않았습니다. 색인이 생성되지 않은 페이지는 Google에 게시할 수 없습니다. 색인이 생성되지 않은 이유를 확인하려면 아래의 세부정보를 참고하세요. 자세히 알아보기\n크롤링된 페이지 보기\n페이지가 변경되었나요?\n색인 생성 요청\ninfo\n페이지 색인 생성\n페이지 색인이 생성되지 않음: 발견됨 - 현재 색인이 생성되지 않음\n\n검색\nSitemaps\n감지된 참조 사이트맵이 없습니다.\n참조 페이지\n감지된 페이지 없음\nURL이 현재 보고되지 않은 다른 출처에서 알려져 있을 수 있습니다.\n크롤링\n최근 크롤링\n해당사항 없음\n크롤링에 사용된 에이전트\n해당사항 없음\n크롤링 허용 여부\n해당사항 없음\n페이지 가져오기\n해당사항 없음\n색인 생성 허용 여부\n해당사항 없음\n색인생성\n사용자 선언 표준 URL\n해당사항 없음\nGoogle에서 선택한 표준 URL\n\n해당사항 없음\n자세히 알아보기\n보고서 열기\n개선사항과 환경\n색인이 생성된 URL만 개선할 수 있습니다.\ncheck_circle\n색인 생성 요청됨\nURL이 우선순위 크롤링 대기열에 추가되었습니다. 페이지를 여러 번 제출해도 대기열 위치나 우선순위가 변경되지 않습니다. 자세히 알아보기\n닫기",
       "account": "sj",
       "at": "2026-10-19T00:58:06.195264+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "baronote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 204,
+      "totalSubmitted": 204,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "smilenote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 81,
+      "totalSubmitted": 81,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "topnote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 76,
+      "totalSubmitted": 76,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "justinfo.co.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 250,
+      "totalSubmitted": 214,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "healthcox.com",
+      "outcome": "submitted",
+      "unindexedSubmitted": 115,
+      "totalSubmitted": 98,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "tripmarvel.com",
+      "outcome": "submitted",
+      "unindexedSubmitted": 115,
+      "totalSubmitted": 106,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-good.com",
+      "outcome": "submitted",
+      "unindexedSubmitted": 83,
+      "totalSubmitted": 76,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "joynote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 66,
+      "totalSubmitted": 66,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "meganote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 63,
+      "totalSubmitted": 63,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "maxnote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 58,
+      "totalSubmitted": 58,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "daynote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 57,
+      "totalSubmitted": 57,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "soulnote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 40,
+      "totalSubmitted": 40,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-joy.com",
+      "outcome": "submitted",
+      "unindexedSubmitted": 38,
+      "totalSubmitted": 38,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "woorinote.kr",
+      "outcome": "submitted",
+      "unindexedSubmitted": 36,
+      "totalSubmitted": 36,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "nolplace.com",
+      "outcome": "submitted",
+      "unindexedSubmitted": 22,
+      "totalSubmitted": 22,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-pick.com",
+      "outcome": "submitted",
+      "unindexedSubmitted": 20,
+      "totalSubmitted": 20,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-19T01:12:25.471558+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.baronote.kr/sitemap.xml",
+      "coveredPublicUrls": 204,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.baronote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t205\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n5\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.baronote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t205\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:12:40.494233+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.daynote.kr/sitemap.xml",
+      "coveredPublicUrls": 87,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.daynote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t88\t0\t\n/rss.xml\tRSS\t2026. 3. 30.\t2026. 4. 12.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n9\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.daynote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t88\t0\t\n/rss.xml\tRSS\t2026. 3. 30.\t2026. 4. 12.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:12:46.250470+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.healthcox.com/sitemap.xml",
+      "coveredPublicUrls": 190,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.healthcox.com/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t191\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 1행 중 1~1\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n3\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.healthcox.com/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t191\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 1행 중 1~1\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:12:52.117774+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.joynote.kr/sitemap.xml",
+      "coveredPublicUrls": 104,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.joynote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t105\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 4. 13.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n9\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.joynote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t105\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 4. 13.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:12:57.089086+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.justinfo.co.kr/sitemap.xml",
+      "coveredPublicUrls": 293,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.justinfo.co.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t294\t0\t\n/rss.xml\tRSS\t2026. 9. 10.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n11\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.justinfo.co.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t294\t0\t\n/rss.xml\tRSS\t2026. 9. 10.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:02.221627+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.maxnote.kr/sitemap.xml",
+      "coveredPublicUrls": 93,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.maxnote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t94\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 10. 15.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n7\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.maxnote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t94\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 10. 15.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:07.147964+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.meganote.kr/sitemap.xml",
+      "coveredPublicUrls": 95,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.meganote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t96\t0\t\n/rss.xml\tRSS\t2026. 9. 13.\t2026. 10. 15.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n9\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.meganote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t96\t0\t\n/rss.xml\tRSS\t2026. 9. 13.\t2026. 10. 15.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:12.046872+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.must-good.com/sitemap.xml",
+      "coveredPublicUrls": 147,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nkeyboard_arrow_down\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.must-good.com/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t148\t0\t\n/rss.xml\tRSS\t2026. 9. 13.\t2026. 10. 17.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n10\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nkeyboard_arrow_down\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.must-good.com/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t148\t0\t\n/rss.xml\tRSS\t2026. 9. 13.\t2026. 10. 17.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:16.911188+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.must-joy.com/sitemap.xml",
+      "coveredPublicUrls": 75,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.must-joy.com/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t76\t0\t\n/rss.xml\tRSS\t2026. 9. 14.\t2026. 10. 14.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n4\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.must-joy.com/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t76\t0\t\n/rss.xml\tRSS\t2026. 9. 14.\t2026. 10. 14.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:21.973079+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.must-pick.com/sitemap.xml",
+      "coveredPublicUrls": 81,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nkeyboard_arrow_down\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n쇼핑\nkeyboard_arrow_up\nlayers\n제품 스니펫\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\nlayers\n리뷰 스니펫\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.must-pick.com/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t82\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 1행 중 1~1\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n16\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nkeyboard_arrow_down\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n쇼핑\nkeyboard_arrow_up\nlayers\n제품 스니펫\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\nlayers\n리뷰 스니펫\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.must-pick.com/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t82\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 1행 중 1~1\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:27.111393+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.smilenote.kr/sitemap.xml",
+      "coveredPublicUrls": 81,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.smilenote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t82\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 9. 24.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n9\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.smilenote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t82\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 9. 24.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:32.274412+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.soulnote.kr/sitemap.xml",
+      "coveredPublicUrls": 76,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.soulnote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t77\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 10. 17.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n10\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.soulnote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t77\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 10. 17.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:37.812337+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.topnote.kr/sitemap.xml",
+      "coveredPublicUrls": 76,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.topnote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t77\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 9. 26.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n5\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.topnote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t77\t0\t\n/rss.xml\tRSS\t2026. 3. 22.\t2026. 9. 26.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:43.193318+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.tripmarvel.com/sitemap.xml",
+      "coveredPublicUrls": 178,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.tripmarvel.com/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t179\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 1행 중 1~1\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n3\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.tripmarvel.com/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t179\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 1행 중 1~1\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:48.584897+09:00"
+    },
+    {
+      "kind": "sitemap",
+      "outcome": "submitted",
+      "sitemap": "https://www.woorinote.kr/sitemap.xml",
+      "coveredPublicUrls": 80,
+      "before": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.woorinote.kr/\n사이트맵 URL 입력\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t81\t0\t\n/rss.xml\tRSS\t2026. 3. 29.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n",
+      "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n7\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.woorinote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t81\t0\t\n/rss.xml\tRSS\t2026. 3. 29.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
+      "account": "sj",
+      "at": "2026-10-19T01:13:53.886198+09:00"
     }
   ],
   "historicalLog": "Y:/70_개발프로젝트/auto-blog-cf/data/google-index-requests.json",

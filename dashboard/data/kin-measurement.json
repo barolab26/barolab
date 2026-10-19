@@ -1,10 +1,10 @@
 {
   "schema": "naver-kin-measurement-v1",
-  "checkedAt": "2026-10-18T21:02:02.059762+09:00",
+  "checkedAt": "2026-10-19T18:27:00.102012+09:00",
   "source": "GA4 Data API",
   "timezone": "Asia/Seoul",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-17",
+  "endDate": "2026-10-18",
   "trialStartDate": "2026-10-15",
   "trialEndDate": "2026-10-21",
   "finalCollectionDate": "2026-10-24",
@@ -20,7 +20,7 @@
   "causalityNote": "UTM 세션 귀속이며 실제 사람·증분 효과·수익 발생을 단독 증명하지 않습니다.",
   "sites": [
     {
-      "host": "www.must-good.com",
+      "host": "www.woorinote.kr",
       "status": "collected",
       "sessions": 0,
       "engagedSessions": 0,
@@ -33,6 +33,22 @@
         "dataLossFromOtherRow": null,
         "rowCount": 0,
         "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.must-good.com",
+      "status": "collected",
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 1,
+        "returnedRows": 1
       }
     },
     {
@@ -52,20 +68,43 @@
       }
     }
   ],
-  "sessions": 0,
-  "engagedSessions": 0,
-  "pageViews": 0,
+  "sessions": 1,
+  "engagedSessions": 1,
+  "pageViews": 1,
   "publisherRevenue": null,
   "revenueStatus": "unverified_publisher_link",
   "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
-  "rows": [],
-  "dailyFunnel": [
+  "rows": [
     {
       "day": "2026-10-18",
-      "discovered": 12,
-      "drafted": 11,
-      "attempted": 11,
-      "published_verified": 7
+      "host": "www.must-good.com",
+      "utmContent": "adinfo0905_20261015_1638_4b93d678c80eba71",
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
+      "mappingStatus": "ledger_matched",
+      "account": "adinfo0905",
+      "questionId": "486346632",
+      "state": "published_verified",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632#answer4",
+      "canonicalUrl": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
+      "sendDay": "2026-10-15"
+    }
+  ],
+  "dailyFunnel": [
+    {
+      "day": "2026-10-19",
+      "discovered": 27,
+      "drafted": 21,
+      "attempted": 21,
+      "published_verified": 15
+    },
+    {
+      "day": "2026-10-18",
+      "discovered": 23,
+      "drafted": 15,
+      "attempted": 15,
+      "published_verified": 10
     },
     {
       "day": "2026-10-17",
@@ -90,7 +129,7 @@
     }
   ],
   "funnelStartDate": "2026-10-15",
-  "funnelEndDate": "2026-10-18",
+  "funnelEndDate": "2026-10-19",
   "funnelTodayProvisional": true,
   "funnelPeriodKind": "trial",
   "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
@@ -125,6 +164,6 @@
       }
     ]
   },
-  "matchedSessions": 0,
+  "matchedSessions": 1,
   "unmatchedSessions": 0
 }

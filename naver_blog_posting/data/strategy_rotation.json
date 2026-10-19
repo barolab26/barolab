@@ -1,8 +1,8 @@
 {
   "soultin": {
-    "last_strategy_index": 2,
-    "last_strategy_name": "전략 3: '트렌드 하이재킹 × 에버그린 브릿지' (이슈 + 상시 정보 결합)",
-    "last_updated": "2026-10-18 09:36:21",
+    "last_strategy_index": 3,
+    "last_strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
+    "last_updated": "2026-10-19 09:02:03",
     "history": [
       {
         "date": "2026-10-11 14:41:25",
@@ -80,13 +80,20 @@
         "strategy_name": "전략 3: '트렌드 하이재킹 × 에버그린 브릿지' (이슈 + 상시 정보 결합)",
         "keyword": "국민연금 피부양자",
         "title": "국민연금 월 167만 원 넘을 때 피부양자 탈락 기준과 지역건보료 확인 순서"
+      },
+      {
+        "date": "2026-10-19 09:02:03",
+        "strategy_index": 3,
+        "strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
+        "keyword": "국민연금 예상액",
+        "title": "2027년 국민연금 예상액 조회와 가입내역 점검 순서"
       }
     ]
   },
   "soul5373": {
-    "last_strategy_index": 2,
-    "last_strategy_name": "전략 3: '트렌드 하이재킹 × 에버그린 브릿지' (이슈 + 상시 정보 결합)",
-    "last_updated": "2026-10-18 10:10:27",
+    "last_strategy_index": 3,
+    "last_strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
+    "last_updated": "2026-10-19 09:12:02",
     "history": [
       {
         "date": "2026-10-11",
@@ -192,13 +199,20 @@
         "strategy_name": "전략 3: '트렌드 하이재킹 × 에버그린 브릿지' (이슈 + 상시 정보 결합)",
         "keyword": "심뇌혈관질환",
         "title": "환절기 새벽 운동과 심뇌혈관질환, 혈압 기준·응급 대처 확인"
+      },
+      {
+        "date": "2026-10-19 09:12:02",
+        "strategy_index": 3,
+        "strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
+        "keyword": "건강검진",
+        "title": "2026 국가건강검진 연말 예약, 대상 조회와 기관 일정 확인"
       }
     ]
   },
   "yoon_master": {
-    "last_strategy_index": 1,
-    "last_strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
-    "last_updated": "2026-10-18 11:14:21",
+    "last_strategy_index": 2,
+    "last_strategy_name": "전략 3: '트렌드 하이재킹 × 에버그린 브릿지' (이슈 + 상시 정보 결합)",
+    "last_updated": "2026-10-19 14:31:49",
     "history": [
       {
         "date": "2026-10-11 20:04:48",
@@ -269,13 +283,20 @@
         "strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
         "keyword": "니트 가디건",
         "title": "5060 니트 가디건 기장과 단추 여밈, 체형별 선택 기준"
+      },
+      {
+        "date": "2026-10-19 14:31:49",
+        "strategy_index": 2,
+        "strategy_name": "전략 3: '트렌드 하이재킹 × 에버그린 브릿지' (이슈 + 상시 정보 결합)",
+        "keyword": "트렌치코트",
+        "title": "5060 10월 트렌치코트 코디, 이너와 편한 기장 고르는 기준"
       }
     ]
   },
   "adinfo0905": {
-    "last_strategy_index": 3,
-    "last_strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
-    "last_updated": "2026-10-18 08:40:17",
+    "last_strategy_index": 1,
+    "last_strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
+    "last_updated": "2026-10-19 08:38:30",
     "history": [
       {
         "date": "2026-10-11 22:58:16",
@@ -353,13 +374,27 @@
         "strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
         "keyword": "주택담보대출 소득공제",
         "title": "주택담보대출 이자 소득공제, 12월 31일 세대주 요건과 서류 준비"
+      },
+      {
+        "date": "2026-10-19 08:14:47",
+        "strategy_index": 0,
+        "strategy_name": "전략 1: '스마트블록 타이틀' 역추적 (네이버 AI 의도 가로채기)",
+        "keyword": "문화비 공제",
+        "title": "헬스장·수영장 문화비 소득공제, 등록 사업자와 결제 내역 확인 순서"
+      },
+      {
+        "date": "2026-10-19 08:38:30",
+        "strategy_index": 1,
+        "strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
+        "keyword": "의료비 공제",
+        "title": "연말정산 의료비 영수증 누락, 확인할 곳과 회사 제출 자료"
       }
     ]
   },
   "stone0747": {
-    "last_strategy_index": 3,
-    "last_strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
-    "last_updated": "2026-10-18 14:42:04",
+    "last_strategy_index": 1,
+    "last_strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
+    "last_updated": "2026-10-19 08:52:23",
     "history": [
       {
         "date": "2026-10-13 21:54:58",
@@ -458,6 +493,20 @@
         "strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
         "keyword": "소상공인 정책자금",
         "title": "소상공인 정책자금 대리대출 확인서 90일 유효기간과 지역신보 보증심사 준비"
+      },
+      {
+        "date": "2026-10-19 08:26:19",
+        "strategy_index": 0,
+        "strategy_name": "전략 1: '스마트블록 타이틀' 역추적 (네이버 AI 의도 가로채기)",
+        "keyword": "소상공인 정책자금",
+        "title": "홈플러스 피해 소상공인 정책자금 만기연장·상환유예 대상과 신청 경로"
+      },
+      {
+        "date": "2026-10-19 08:52:23",
+        "strategy_index": 1,
+        "strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
+        "keyword": "정책자금",
+        "title": "소상공인 정책자금 4분기 신청 후 상태 확인과 보완 요청 대응 순서"
       }
     ]
   }

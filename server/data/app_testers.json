@@ -290,8 +290,8 @@
   "consoleEvidence": {
     "bible_app": {
       "status": "collected",
-      "checkedAt": "2026-10-19T09:08:32.216080+00:00",
-      "lastAttemptAt": "2026-10-19T09:08:22.431144+00:00",
+      "checkedAt": "2026-10-19T09:23:33.472924+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
       "stale": false,
       "alpha": {
         "reviewStatus": "approved",
@@ -312,7 +312,7 @@
         {
           "page": "releases",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/releases/overview",
-          "checkedAt": "2026-10-19T09:08:32.216080+00:00",
+          "checkedAt": "2026-10-19T09:23:33.472924+00:00",
           "textSha256": "bb4f5888c9d5c4ddcf6b5e1f91b97352687756326a371f0e0225338e3bb22c59",
           "signals": {
             "alpha.latestRelease": "0.5.0 정식 광고 및 첫 화면 사용성 개선 | 5 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:01",
@@ -322,7 +322,7 @@
         {
           "page": "dashboard",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/app-dashboard",
-          "checkedAt": "2026-10-19T09:08:32.216080+00:00",
+          "checkedAt": "2026-10-19T09:23:33.472924+00:00",
           "textSha256": "55073e76bba00b046432852d8c04f92ad0734825c7762c1ce4972ee4c4933365",
           "signals": {
             "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
@@ -333,8 +333,8 @@
     },
     "greeting": {
       "status": "collected",
-      "checkedAt": "2026-10-19T09:08:40.295662+00:00",
-      "lastAttemptAt": "2026-10-19T09:08:22.431144+00:00",
+      "checkedAt": "2026-10-19T09:23:40.802305+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
       "stale": false,
       "alpha": {
         "reviewStatus": "approved",
@@ -355,8 +355,8 @@
         {
           "page": "releases",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/releases/overview",
-          "checkedAt": "2026-10-19T09:08:40.295662+00:00",
-          "textSha256": "01dcf5277ebfe5d4fda1fbf6f93731aa502afbbf99ae340a62f981fd04fe3ae9",
+          "checkedAt": "2026-10-19T09:23:40.802305+00:00",
+          "textSha256": "3a3ee2d9ae67168d0284aeb693f7d307919c55ae82a4167ede7246f0db466933",
           "signals": {
             "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:18",
             "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:45"
@@ -365,7 +365,7 @@
         {
           "page": "dashboard",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/app-dashboard",
-          "checkedAt": "2026-10-19T09:08:40.295662+00:00",
+          "checkedAt": "2026-10-19T09:23:40.802305+00:00",
           "textSha256": "c8b1d036597cb0619f332f1c391a421199ed8c263ffa6e2fbe29eb98f9254298",
           "signals": {
             "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
@@ -376,8 +376,8 @@
     },
     "magnifier": {
       "status": "collected",
-      "checkedAt": "2026-10-19T09:08:45.886619+00:00",
-      "lastAttemptAt": "2026-10-19T09:08:22.431144+00:00",
+      "checkedAt": "2026-10-19T09:23:49.390125+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
       "stale": false,
       "alpha": {
         "reviewStatus": "approved",
@@ -398,8 +398,8 @@
         {
           "page": "releases",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/releases/overview",
-          "checkedAt": "2026-10-19T09:08:45.886619+00:00",
-          "textSha256": "e4c176a9e668c364b26a3e9421924a67df7a11a88305c3ecdabbb379157f90c9",
+          "checkedAt": "2026-10-19T09:23:49.390125+00:00",
+          "textSha256": "17a3e1494f05b9c2d19b93a574eb1abbb8e35ee04620a464aee29bcdf8308cc1",
           "signals": {
             "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:11",
             "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:45"
@@ -408,8 +408,8 @@
         {
           "page": "dashboard",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/app-dashboard",
-          "checkedAt": "2026-10-19T09:08:45.886619+00:00",
-          "textSha256": "d8c3120ab6468ae587e0725dfb045ac79320e2ef15874c38675b904c40140a32",
+          "checkedAt": "2026-10-19T09:23:49.390125+00:00",
+          "textSha256": "6c95cf358869dd182dba026991574362ad363deb197e5ad2b18e6b015ccf0777",
           "signals": {
             "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
             "googleOptInCount": "현재 참여를 선택한 테스터 2명"
@@ -419,8 +419,8 @@
     },
     "shopping": {
       "status": "collected",
-      "checkedAt": "2026-10-19T09:08:52.185211+00:00",
-      "lastAttemptAt": "2026-10-19T09:08:22.431144+00:00",
+      "checkedAt": "2026-10-19T09:23:56.818429+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
       "stale": false,
       "alpha": {
         "reviewStatus": "approved",
@@ -441,8 +441,8 @@
         {
           "page": "releases",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/releases/overview",
-          "checkedAt": "2026-10-19T09:08:52.185211+00:00",
-          "textSha256": "60d1e6f8dab89224f855f45e598afbbf477b5be06cd2669bdc0f6cbd665323b3",
+          "checkedAt": "2026-10-19T09:23:56.818429+00:00",
+          "textSha256": "ccfbd11ae962510f9822836392d64d917d30a5587efe09851395b420411a5412",
           "signals": {
             "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:20",
             "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:47"
@@ -451,7 +451,7 @@
         {
           "page": "dashboard",
           "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/app-dashboard",
-          "checkedAt": "2026-10-19T09:08:52.185211+00:00",
+          "checkedAt": "2026-10-19T09:23:56.818429+00:00",
           "textSha256": "91fab0e68c4ba2339e46a2bf48db3b957edabdb6eae9492d6ba9de6fedec6c8e",
           "signals": {
             "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
@@ -461,6 +461,6 @@
       ]
     }
   },
-  "consoleEvidenceCheckedAt": "2026-10-19T09:08:52.185211+00:00",
+  "consoleEvidenceCheckedAt": "2026-10-19T09:23:56.818429+00:00",
   "consoleEvidenceSource": "server/data/play-console-status.json; verified rendered Play Console UI"
 }

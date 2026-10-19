@@ -1,13 +1,13 @@
 {
   "runtime": {
     "status": "waiting",
-    "stage": "audit",
-    "reason": "CF 발행 예정 시간 임박 · 신규 발행 우선",
-    "checkedAt": "2026-10-18T12:00:01.019560+00:00",
-    "lastAuditAt": "2026-10-18T12:00:00.822012+00:00",
-    "lastAuditCount": 3,
+    "stage": "idle",
+    "reason": "검증된 일일 수정·조사 상한 도달",
+    "checkedAt": "2026-10-19T06:57:43.184159+00:00",
+    "lastAuditAt": "2026-10-19T06:57:42.855108+00:00",
+    "lastAuditCount": 5,
     "auditCoverage": "rotating_never_then_oldest_domain_balanced",
-    "lastAuditStopReason": "CF 발행 예정 시간 임박 · 신규 발행 우선",
+    "lastAuditStopReason": "회차 시간 상한",
     "providerBackoff": {
       "provider": "shared_agent_router",
       "checkedAt": "2026-10-15T20:01:50.068755+00:00",
@@ -40,12 +40,12 @@
     },
     "nextRetryAt": "2026-10-15T20:31:50.074693+00:00",
     "providerStatus": "ready",
-    "lastLaunchedAt": "2026-10-18T11:59:47.869654+00:00",
+    "lastLaunchedAt": "2026-10-19T06:56:56.484117+00:00",
     "launcher": "existing_cf_cleaner_idle_hook",
-    "helperPid": 32480,
-    "lastAttemptAt": "2026-10-17T16:36:34.633643+00:00",
+    "helperPid": 49436,
+    "lastAttemptAt": "2026-10-18T16:35:33.557066+00:00",
     "activeJob": null,
-    "lastDomain": "tripmarvel.com",
+    "lastDomain": "justinfo.co.kr",
     "publishingPriorityWait": true
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-18T11:58:41.566901+00:00",
+  "checkedAt": "2026-10-19T09:24:12.249753+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -42,10 +42,311 @@
     "mainTrialCap": 56
   },
   "counts": {
-    "published_verified": 5,
-    "submitted_unknown": 3
+    "published_verified": 9,
+    "submitted_unknown": 6
   },
   "recent": [
+    {
+      "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
+      "part_id": "5becebb790be4f06a9fe6d06ba00b13e-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/Deq62sSHy5Q",
+      "updated_at": "2026-10-19T09:18:59.447714+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "18:10",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기 | 우리노트 법률·부동산칼럼",
+      "mode": "affiliate",
+      "followup_delay_seconds": 129,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "요즘 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 찾고 있던 사람 있으면 이 3가지만 먼저 챙겨봐!\n\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 88
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "내가 직접 비교해보고 핵심만 추린 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 3줄 요약 노트 📌\n\n• 포인트 1: 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n• 포인트 2: 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n• 포인트 3: 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+      "published_at": "2026-10-19T09:18:58+00:00",
+      "verified_at": "2026-10-19T09:18:59.447691+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
+      "part_id": "5becebb790be4f06a9fe6d06ba00b13e-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-19T09:24:11.699016+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "18:10",
+      "outbound_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1810_13720c74a68eb3dc",
+      "parent_platform_id": "18637756495019780",
+      "title": "월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기 | 우리노트 법률·부동산칼럼",
+      "mode": "affiliate",
+      "followup_delay_seconds": 129,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "요즘 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 찾고 있던 사람 있으면 이 3가지만 먼저 챙겨봐!\n\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 88
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "내가 직접 비교해보고 핵심만 추린 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 3줄 요약 노트 📌\n\n• 포인트 1: 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n• 포인트 2: 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n• 포인트 3: 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "이 포스팅은 제휴마케팅(쿠팡 파트너스/토스 쇼핑 등) 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.\n\n👉 바로 확인하기:\nhttps://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1810_13720c74a68eb3dc",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
+      "part_id": "0bde9bc007ef48f18a2eda92e204d67e-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DeqT8Gkn91N",
+      "updated_at": "2026-10-19T03:38:58.414915+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "12:30",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "임차권등기명령 신청 방법과 서류, 대항력 유지되는 이사 시점 확인 | 우리노트 법률·부동산칼럼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 132,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "보증금 아직 못 받았는데, 신청만 하고 이사하면 권리를 잃을 수 있어요.\n\n① 계약이 끝나고 보증금이 일부라도 남아 있으면 임차권등기명령을 신청할 수 있어요.\n② 신청이나 결정만으로는 부족해요. 등기사항증명서 을구에 본인 임차권등기가 기재됐는지 확인하고 이사·전출해요.\n③ 등기는 기존 권리를 지키는 절차예요. 보증금이 자동으로 돌아오는 건 아니에요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "이사 날짜는 다가오는데 보증금은 그대로라면, 결정문보다 먼저 볼 게 있어요.\n\n① 계약이 끝났고 보증금이 남았다면 계약서·초본·등기사항증명서·종료 증빙부터 챙겨요.\n② 신청은 임차주택 소재지 관할 법원에 해요. 전자소송이나 방문 접수가 가능해요.\n③ 이사·전출은 을구에 본인 임차권등기가 기재된 걸 확인한 뒤에 해요. 신청만으로는 부족해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+      "published_at": "2026-10-19T03:38:57+00:00",
+      "verified_at": "2026-10-19T03:38:58.414890+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
+      "part_id": "0bde9bc007ef48f18a2eda92e204d67e-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-19T03:44:12.051990+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "12:30",
+      "outbound_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1230_ae54a43825f60761",
+      "parent_platform_id": "18135424297676759",
+      "title": "임차권등기명령 신청 방법과 서류, 대항력 유지되는 이사 시점 확인 | 우리노트 법률·부동산칼럼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 132,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "보증금 아직 못 받았는데, 신청만 하고 이사하면 권리를 잃을 수 있어요.\n\n① 계약이 끝나고 보증금이 일부라도 남아 있으면 임차권등기명령을 신청할 수 있어요.\n② 신청이나 결정만으로는 부족해요. 등기사항증명서 을구에 본인 임차권등기가 기재됐는지 확인하고 이사·전출해요.\n③ 등기는 기존 권리를 지키는 절차예요. 보증금이 자동으로 돌아오는 건 아니에요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "이사 날짜는 다가오는데 보증금은 그대로라면, 결정문보다 먼저 볼 게 있어요.\n\n① 계약이 끝났고 보증금이 남았다면 계약서·초본·등기사항증명서·종료 증빙부터 챙겨요.\n② 신청은 임차주택 소재지 관할 법원에 해요. 전자소송이나 방문 접수가 가능해요.\n③ 이사·전출은 을구에 본인 임차권등기가 기재된 걸 확인한 뒤에 해요. 신청만으로는 부족해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "운영 안내: 외부 정보글로 연결되는 링크예요.\n신청 서류와 절차, 이사 전에 확인할 등기 내용을 더 살펴보고 싶다면 여기서 읽어봐요.\nhttps://www.woorinote.kr/leasehold-registration-order-procedure-checklist?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1230_ae54a43825f60761",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "20228544f6674b6ea506bba92f50f35f",
+      "part_id": "20228544f6674b6ea506bba92f50f35f-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/Dep1B9ok4pE",
+      "updated_at": "2026-10-18T23:08:54.467785+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "08:00",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "캠핑 난로 고르는 법: 텐트 크기별 열량 계산 공식과 일산화탄소 경보기 2중 설치 가이드 | 머스트픽 가전·환급 비교",
+      "mode": "warmup",
+      "followup_delay_seconds": 153,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "캠핑 난로, 텐트 바닥 크기만 보고 고르면 놓치는 게 있어요.\n\n① 가로×세로×높이로 체적을 구해요. 열량 계산은 장비 비교용 참고치예요.\n② 일산화탄소 경보기 위치는 제품 설명서를 우선하고, 경보기로 환기를 대신하면 안 돼요.\n③ 연소형 난로는 취침 전에 완전히 끄고, 설명서·캠핑장 규칙이 금지한 텐트 내부 사용은 피하세요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "경보기 켜놨으니 난로 켜고 자도 괜찮다? 그건 위험한 생각이야.\n\n① 환기와 경보기가 있어도 연소형 난로를 켜고 자는 게 안전해지진 않아.\n② 열량은 텐트 가로×세로×높이로 비교하되, 내부 사용 가능 여부는 설명서와 캠핑장 규칙부터 봐.\n③ 경보가 울리거나 두통·어지럼이 생기면 즉시 모두 밖으로 나가서 119에 신고해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "겨울 캠핑 난로 고를 때, 열량 숫자만 보면 중요한 걸 놓칠 수 있어요.\n\n① 텐트 체적으로 계산한 열량은 참고치예요. 바람·단열·환기에 따라 체감이 달라져요.\n② 경보기는 설명서 기준에 맞춰 설치하고, 출발 전 배터리와 시험 버튼을 확인해요.\n③ 취침 전 연소형 난로는 완전히 끄세요. 환기구를 열어도 켜둔 채 자는 건 안전하지 않아요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "경보기 켜놨으니 난로 켜고 자도 괜찮다? 그건 위험한 생각이야.\n\n① 환기와 경보기가 있어도 연소형 난로를 켜고 자는 게 안전해지진 않아.\n② 열량은 텐트 가로×세로×높이로 비교하되, 내부 사용 가능 여부는 설명서와 캠핑장 규칙부터 봐.\n③ 경보가 울리거나 두통·어지럼이 생기면 즉시 모두 밖으로 나가서 119에 신고해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+      "published_at": "2026-10-18T23:08:51+00:00",
+      "verified_at": "2026-10-18T23:08:54.467761+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
+      "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/Deos7qAH7Yk",
+      "updated_at": "2026-10-18T12:38:55.497297+00:00",
+      "publication_date": "2026-10-18",
+      "slot": "21:30",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "전월세 무타공 카운터탑 식기세척기 비교: 물탱크 vs 수전 연결 급수 방식과 세척력 검증 가이드 | 머스트픽 가전·환급 비교",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 168,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "무타공 식기세척기면 물만 붓고 쓰는 줄 알았어? 모델마다 달라 👀\n\n① 물탱크형은 직접 물을 채우고, 연결형은 제품·배관 호환 여부를 봐야 해.\n② 용량 표기만 보지 말고 우리 집 냄비가 바구니에 들어가는지 살펴봐.\n③ 배수 호스와 전원, 문 열릴 공간까지 구매 모델의 공식 안내와 맞춰봐.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "전월세라 식기세척기 포기하려던 사람, 급수 방식부터 살펴봐 👀\n\n① 배관 연결을 피하고 싶다면 물을 직접 붓는 물탱크형을 살펴볼 수 있어요.\n② 자동 급수가 편하겠다면 제품·배관 호환과 집주인이나 관리 규정부터 확인해요.\n③ 세척력은 크기만으로 단정하기 어려워요. 노즐·코스·식기 배치도 함께 봐요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+      "published_at": "2026-10-18T12:38:51+00:00",
+      "verified_at": "2026-10-18T12:38:55.497271+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
+      "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-18T12:44:20.054280+00:00",
+      "publication_date": "2026-10-18",
+      "slot": "21:30",
+      "outbound_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_2130_150985d1dd28e94f",
+      "parent_platform_id": "17924636301430152",
+      "title": "전월세 무타공 카운터탑 식기세척기 비교: 물탱크 vs 수전 연결 급수 방식과 세척력 검증 가이드 | 머스트픽 가전·환급 비교",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 168,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "무타공 식기세척기면 물만 붓고 쓰는 줄 알았어? 모델마다 달라 👀\n\n① 물탱크형은 직접 물을 채우고, 연결형은 제품·배관 호환 여부를 봐야 해.\n② 용량 표기만 보지 말고 우리 집 냄비가 바구니에 들어가는지 살펴봐.\n③ 배수 호스와 전원, 문 열릴 공간까지 구매 모델의 공식 안내와 맞춰봐.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "전월세라 식기세척기 포기하려던 사람, 급수 방식부터 살펴봐 👀\n\n① 배관 연결을 피하고 싶다면 물을 직접 붓는 물탱크형을 살펴볼 수 있어요.\n② 자동 급수가 편하겠다면 제품·배관 호환과 집주인이나 관리 규정부터 확인해요.\n③ 세척력은 크기만으로 단정하기 어려워요. 노즐·코스·식기 배치도 함께 봐요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "운영 고지: 머스트픽의 식기세척기 비교 콘텐츠로 연결되는 안내예요.\n급수 방식과 설치 공간을 비교할 때 참고해 봐요. 제공된 글은 비공식 자료라 구매 모델의 공식 설명서·설치 안내도 함께 확인해 주세요.\nhttps://www.must-pick.com/countertop-dishwasher-no-drilling-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_2130_150985d1dd28e94f",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
     {
       "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
       "part_id": "dff78e2118be4085b64ecff63ba758a2-0",
@@ -376,6 +677,412 @@
     }
   ],
   "pairedThreads": [
+    {
+      "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
+      "title": "월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기 | 우리노트 법률·부동산칼럼",
+      "publication_date": "2026-10-19",
+      "slot": "18:10",
+      "mode": "affiliate",
+      "followup_delay_seconds": 129,
+      "source_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "요즘 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 찾고 있던 사람 있으면 이 3가지만 먼저 챙겨봐!\n\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 88
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "내가 직접 비교해보고 핵심만 추린 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 3줄 요약 노트 📌\n\n• 포인트 1: 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n• 포인트 2: 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n• 포인트 3: 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
+        "part_id": "5becebb790be4f06a9fe6d06ba00b13e-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/Deq62sSHy5Q",
+        "updated_at": "2026-10-19T09:18:59.447714+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "18:10",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기 | 우리노트 법률·부동산칼럼",
+        "mode": "affiliate",
+        "followup_delay_seconds": 129,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "요즘 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 찾고 있던 사람 있으면 이 3가지만 먼저 챙겨봐!\n\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 88
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "내가 직접 비교해보고 핵심만 추린 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 3줄 요약 노트 📌\n\n• 포인트 1: 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n• 포인트 2: 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n• 포인트 3: 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+        "published_at": "2026-10-19T09:18:58+00:00",
+        "verified_at": "2026-10-19T09:18:59.447691+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
+        "part_id": "5becebb790be4f06a9fe6d06ba00b13e-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-19T09:24:11.699016+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "18:10",
+        "outbound_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1810_13720c74a68eb3dc",
+        "parent_platform_id": "18637756495019780",
+        "title": "월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기 | 우리노트 법률·부동산칼럼",
+        "mode": "affiliate",
+        "followup_delay_seconds": 129,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "요즘 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 찾고 있던 사람 있으면 이 3가지만 먼저 챙겨봐!\n\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 88
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "솔직히 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n① 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n② 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n③ 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "내가 직접 비교해보고 핵심만 추린 '월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기' 3줄 요약 노트 📌\n\n• 포인트 1: 원고 작성 보류: 세대주가 아닌 무주택 세대원도 일정 요건에서 공제 대상이 될 수 있다는 기본 답은 확인됩니다.\n• 포인트 2: 그러나 적용할 귀속연도의 최신 공식 소득·공제율·한도·주택·세대원 기준이 확정되지 않아 완성 원고로 제시하지 않습니다.\n• 포인트 3: 원고 확정 전에 필요한 공식 확인 신청할 귀속연도의 국세청 연말정산 안내와 현행 조세특례제한법·시행령에서 소득 기준,...\n\n오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "이 포스팅은 제휴마케팅(쿠팡 파트너스/토스 쇼핑 등) 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.\n\n👉 바로 확인하기:\nhttps://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1810_13720c74a68eb3dc",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
+      "title": "임차권등기명령 신청 방법과 서류, 대항력 유지되는 이사 시점 확인 | 우리노트 법률·부동산칼럼",
+      "publication_date": "2026-10-19",
+      "slot": "12:30",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 132,
+      "source_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "보증금 아직 못 받았는데, 신청만 하고 이사하면 권리를 잃을 수 있어요.\n\n① 계약이 끝나고 보증금이 일부라도 남아 있으면 임차권등기명령을 신청할 수 있어요.\n② 신청이나 결정만으로는 부족해요. 등기사항증명서 을구에 본인 임차권등기가 기재됐는지 확인하고 이사·전출해요.\n③ 등기는 기존 권리를 지키는 절차예요. 보증금이 자동으로 돌아오는 건 아니에요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "이사 날짜는 다가오는데 보증금은 그대로라면, 결정문보다 먼저 볼 게 있어요.\n\n① 계약이 끝났고 보증금이 남았다면 계약서·초본·등기사항증명서·종료 증빙부터 챙겨요.\n② 신청은 임차주택 소재지 관할 법원에 해요. 전자소송이나 방문 접수가 가능해요.\n③ 이사·전출은 을구에 본인 임차권등기가 기재된 걸 확인한 뒤에 해요. 신청만으로는 부족해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
+        "part_id": "0bde9bc007ef48f18a2eda92e204d67e-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DeqT8Gkn91N",
+        "updated_at": "2026-10-19T03:38:58.414915+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "12:30",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "임차권등기명령 신청 방법과 서류, 대항력 유지되는 이사 시점 확인 | 우리노트 법률·부동산칼럼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 132,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "보증금 아직 못 받았는데, 신청만 하고 이사하면 권리를 잃을 수 있어요.\n\n① 계약이 끝나고 보증금이 일부라도 남아 있으면 임차권등기명령을 신청할 수 있어요.\n② 신청이나 결정만으로는 부족해요. 등기사항증명서 을구에 본인 임차권등기가 기재됐는지 확인하고 이사·전출해요.\n③ 등기는 기존 권리를 지키는 절차예요. 보증금이 자동으로 돌아오는 건 아니에요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "이사 날짜는 다가오는데 보증금은 그대로라면, 결정문보다 먼저 볼 게 있어요.\n\n① 계약이 끝났고 보증금이 남았다면 계약서·초본·등기사항증명서·종료 증빙부터 챙겨요.\n② 신청은 임차주택 소재지 관할 법원에 해요. 전자소송이나 방문 접수가 가능해요.\n③ 이사·전출은 을구에 본인 임차권등기가 기재된 걸 확인한 뒤에 해요. 신청만으로는 부족해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+        "published_at": "2026-10-19T03:38:57+00:00",
+        "verified_at": "2026-10-19T03:38:58.414890+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
+        "part_id": "0bde9bc007ef48f18a2eda92e204d67e-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-19T03:44:12.051990+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "12:30",
+        "outbound_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1230_ae54a43825f60761",
+        "parent_platform_id": "18135424297676759",
+        "title": "임차권등기명령 신청 방법과 서류, 대항력 유지되는 이사 시점 확인 | 우리노트 법률·부동산칼럼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 132,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "보증금 아직 못 받았는데, 신청만 하고 이사하면 권리를 잃을 수 있어요.\n\n① 계약이 끝나고 보증금이 일부라도 남아 있으면 임차권등기명령을 신청할 수 있어요.\n② 신청이나 결정만으로는 부족해요. 등기사항증명서 을구에 본인 임차권등기가 기재됐는지 확인하고 이사·전출해요.\n③ 등기는 기존 권리를 지키는 절차예요. 보증금이 자동으로 돌아오는 건 아니에요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "법원 결정 나왔으니 이사해도 된다? 보증금 남았다면 여기서 멈춰야 해요.\n\n① 임차권등기명령은 계약 종료 후 보증금 전부나 일부를 못 받았을 때 신청해요.\n② 결정문을 받았어도 을구에 본인 임차권등기가 실제로 기재됐는지 확인한 뒤 이사·전출해야 해요.\n③ 등기 전에 집을 비우거나 주소를 옮기면 기존 대항력과 우선변제권을 잃을 수 있어요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "이사 날짜는 다가오는데 보증금은 그대로라면, 결정문보다 먼저 볼 게 있어요.\n\n① 계약이 끝났고 보증금이 남았다면 계약서·초본·등기사항증명서·종료 증빙부터 챙겨요.\n② 신청은 임차주택 소재지 관할 법원에 해요. 전자소송이나 방문 접수가 가능해요.\n③ 이사·전출은 을구에 본인 임차권등기가 기재된 걸 확인한 뒤에 해요. 신청만으로는 부족해요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "운영 안내: 외부 정보글로 연결되는 링크예요.\n신청 서류와 절차, 이사 전에 확인할 등기 내용을 더 살펴보고 싶다면 여기서 읽어봐요.\nhttps://www.woorinote.kr/leasehold-registration-order-procedure-checklist?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_1230_ae54a43825f60761",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "20228544f6674b6ea506bba92f50f35f",
+      "title": "캠핑 난로 고르는 법: 텐트 크기별 열량 계산 공식과 일산화탄소 경보기 2중 설치 가이드 | 머스트픽 가전·환급 비교",
+      "publication_date": "2026-10-19",
+      "slot": "08:00",
+      "mode": "warmup",
+      "followup_delay_seconds": 153,
+      "source_url": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "캠핑 난로, 텐트 바닥 크기만 보고 고르면 놓치는 게 있어요.\n\n① 가로×세로×높이로 체적을 구해요. 열량 계산은 장비 비교용 참고치예요.\n② 일산화탄소 경보기 위치는 제품 설명서를 우선하고, 경보기로 환기를 대신하면 안 돼요.\n③ 연소형 난로는 취침 전에 완전히 끄고, 설명서·캠핑장 규칙이 금지한 텐트 내부 사용은 피하세요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "경보기 켜놨으니 난로 켜고 자도 괜찮다? 그건 위험한 생각이야.\n\n① 환기와 경보기가 있어도 연소형 난로를 켜고 자는 게 안전해지진 않아.\n② 열량은 텐트 가로×세로×높이로 비교하되, 내부 사용 가능 여부는 설명서와 캠핑장 규칙부터 봐.\n③ 경보가 울리거나 두통·어지럼이 생기면 즉시 모두 밖으로 나가서 119에 신고해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "겨울 캠핑 난로 고를 때, 열량 숫자만 보면 중요한 걸 놓칠 수 있어요.\n\n① 텐트 체적으로 계산한 열량은 참고치예요. 바람·단열·환기에 따라 체감이 달라져요.\n② 경보기는 설명서 기준에 맞춰 설치하고, 출발 전 배터리와 시험 버튼을 확인해요.\n③ 취침 전 연소형 난로는 완전히 끄세요. 환기구를 열어도 켜둔 채 자는 건 안전하지 않아요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "20228544f6674b6ea506bba92f50f35f",
+        "part_id": "20228544f6674b6ea506bba92f50f35f-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/Dep1B9ok4pE",
+        "updated_at": "2026-10-18T23:08:54.467785+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "08:00",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "캠핑 난로 고르는 법: 텐트 크기별 열량 계산 공식과 일산화탄소 경보기 2중 설치 가이드 | 머스트픽 가전·환급 비교",
+        "mode": "warmup",
+        "followup_delay_seconds": 153,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "캠핑 난로, 텐트 바닥 크기만 보고 고르면 놓치는 게 있어요.\n\n① 가로×세로×높이로 체적을 구해요. 열량 계산은 장비 비교용 참고치예요.\n② 일산화탄소 경보기 위치는 제품 설명서를 우선하고, 경보기로 환기를 대신하면 안 돼요.\n③ 연소형 난로는 취침 전에 완전히 끄고, 설명서·캠핑장 규칙이 금지한 텐트 내부 사용은 피하세요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "경보기 켜놨으니 난로 켜고 자도 괜찮다? 그건 위험한 생각이야.\n\n① 환기와 경보기가 있어도 연소형 난로를 켜고 자는 게 안전해지진 않아.\n② 열량은 텐트 가로×세로×높이로 비교하되, 내부 사용 가능 여부는 설명서와 캠핑장 규칙부터 봐.\n③ 경보가 울리거나 두통·어지럼이 생기면 즉시 모두 밖으로 나가서 119에 신고해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "겨울 캠핑 난로 고를 때, 열량 숫자만 보면 중요한 걸 놓칠 수 있어요.\n\n① 텐트 체적으로 계산한 열량은 참고치예요. 바람·단열·환기에 따라 체감이 달라져요.\n② 경보기는 설명서 기준에 맞춰 설치하고, 출발 전 배터리와 시험 버튼을 확인해요.\n③ 취침 전 연소형 난로는 완전히 끄세요. 환기구를 열어도 켜둔 채 자는 건 안전하지 않아요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "경보기 켜놨으니 난로 켜고 자도 괜찮다? 그건 위험한 생각이야.\n\n① 환기와 경보기가 있어도 연소형 난로를 켜고 자는 게 안전해지진 않아.\n② 열량은 텐트 가로×세로×높이로 비교하되, 내부 사용 가능 여부는 설명서와 캠핑장 규칙부터 봐.\n③ 경보가 울리거나 두통·어지럼이 생기면 즉시 모두 밖으로 나가서 119에 신고해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+        "published_at": "2026-10-18T23:08:51+00:00",
+        "verified_at": "2026-10-18T23:08:54.467761+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
+      "title": "전월세 무타공 카운터탑 식기세척기 비교: 물탱크 vs 수전 연결 급수 방식과 세척력 검증 가이드 | 머스트픽 가전·환급 비교",
+      "publication_date": "2026-10-18",
+      "slot": "21:30",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 168,
+      "source_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "무타공 식기세척기면 물만 붓고 쓰는 줄 알았어? 모델마다 달라 👀\n\n① 물탱크형은 직접 물을 채우고, 연결형은 제품·배관 호환 여부를 봐야 해.\n② 용량 표기만 보지 말고 우리 집 냄비가 바구니에 들어가는지 살펴봐.\n③ 배수 호스와 전원, 문 열릴 공간까지 구매 모델의 공식 안내와 맞춰봐.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "전월세라 식기세척기 포기하려던 사람, 급수 방식부터 살펴봐 👀\n\n① 배관 연결을 피하고 싶다면 물을 직접 붓는 물탱크형을 살펴볼 수 있어요.\n② 자동 급수가 편하겠다면 제품·배관 호환과 집주인이나 관리 규정부터 확인해요.\n③ 세척력은 크기만으로 단정하기 어려워요. 노즐·코스·식기 배치도 함께 봐요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
+        "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/Deos7qAH7Yk",
+        "updated_at": "2026-10-18T12:38:55.497297+00:00",
+        "publication_date": "2026-10-18",
+        "slot": "21:30",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "전월세 무타공 카운터탑 식기세척기 비교: 물탱크 vs 수전 연결 급수 방식과 세척력 검증 가이드 | 머스트픽 가전·환급 비교",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 168,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "무타공 식기세척기면 물만 붓고 쓰는 줄 알았어? 모델마다 달라 👀\n\n① 물탱크형은 직접 물을 채우고, 연결형은 제품·배관 호환 여부를 봐야 해.\n② 용량 표기만 보지 말고 우리 집 냄비가 바구니에 들어가는지 살펴봐.\n③ 배수 호스와 전원, 문 열릴 공간까지 구매 모델의 공식 안내와 맞춰봐.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "전월세라 식기세척기 포기하려던 사람, 급수 방식부터 살펴봐 👀\n\n① 배관 연결을 피하고 싶다면 물을 직접 붓는 물탱크형을 살펴볼 수 있어요.\n② 자동 급수가 편하겠다면 제품·배관 호환과 집주인이나 관리 규정부터 확인해요.\n③ 세척력은 크기만으로 단정하기 어려워요. 노즐·코스·식기 배치도 함께 봐요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+        "published_at": "2026-10-18T12:38:51+00:00",
+        "verified_at": "2026-10-18T12:38:55.497271+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
+        "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-18T12:44:20.054280+00:00",
+        "publication_date": "2026-10-18",
+        "slot": "21:30",
+        "outbound_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_2130_150985d1dd28e94f",
+        "parent_platform_id": "17924636301430152",
+        "title": "전월세 무타공 카운터탑 식기세척기 비교: 물탱크 vs 수전 연결 급수 방식과 세척력 검증 가이드 | 머스트픽 가전·환급 비교",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 168,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "무타공 식기세척기면 물만 붓고 쓰는 줄 알았어? 모델마다 달라 👀\n\n① 물탱크형은 직접 물을 채우고, 연결형은 제품·배관 호환 여부를 봐야 해.\n② 용량 표기만 보지 말고 우리 집 냄비가 바구니에 들어가는지 살펴봐.\n③ 배수 호스와 전원, 문 열릴 공간까지 구매 모델의 공식 안내와 맞춰봐.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "‘무타공’만 보고 샀다가 배관 연결이 필요한 모델일 수도 있어.\n\n① 무타공은 상판을 뚫지 않는다는 뜻이야. 배관 없이 작동한다는 뜻은 아니고.\n② 물탱크형은 매번 물을 채워야 하고, 자동 급수는 제품 지원과 배관 호환이 필요해.\n③ 설치 자리뿐 아니라 문 열림 공간과 배수 호스 경로도 살펴봐야 해.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "전월세라 식기세척기 포기하려던 사람, 급수 방식부터 살펴봐 👀\n\n① 배관 연결을 피하고 싶다면 물을 직접 붓는 물탱크형을 살펴볼 수 있어요.\n② 자동 급수가 편하겠다면 제품·배관 호환과 집주인이나 관리 규정부터 확인해요.\n③ 세척력은 크기만으로 단정하기 어려워요. 노즐·코스·식기 배치도 함께 봐요.\n\n아래 첫 댓글(타래)에 남겨둘게 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "운영 고지: 머스트픽의 식기세척기 비교 콘텐츠로 연결되는 안내예요.\n급수 방식과 설치 공간을 비교할 때 참고해 봐요. 제공된 글은 비공식 자료라 구매 모델의 공식 설명서·설치 안내도 함께 확인해 주세요.\nhttps://www.must-pick.com/countertop-dishwasher-no-drilling-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261018_2130_150985d1dd28e94f",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
     {
       "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
       "title": "직장인 국민내일배움카드 발급 자격과 고용24 온라인 신청 및 자부담금 조회 순서 | 소울노트 라이프·책",
@@ -875,16 +1582,16 @@
   ],
   "automation": {
     "state": "waiting",
-    "nextEligibleAt": "2026-10-18T21:30:00+09:00",
-    "lastRunAt": "2026-10-18T11:58:41.195290+00:00",
-    "lastResult": "waiting",
-    "issue": "no_due_slot",
+    "nextEligibleAt": "2026-10-19T21:30:00+09:00",
+    "lastRunAt": "2026-10-19T09:24:12.041448+00:00",
+    "lastResult": "blocked",
+    "issue": "AdapterError",
     "scheduler": {
       "registered": true,
       "enabled": true,
       "state": "Running",
-      "checkedAt": "2026-10-18T11:58:39.593158+00:00",
-      "nextRunAt": "2026-10-18T21:03:37.0000000+09:00",
+      "checkedAt": "2026-10-19T09:23:39.585078+00:00",
+      "nextRunAt": "2026-10-19T18:28:37.0000000+09:00",
       "lastResult": 267009
     }
   },
@@ -892,12 +1599,12 @@
     "schema": "threads-measurement-v1",
     "status": "partial",
     "complete": false,
-    "collected_at": "2026-10-18T11:43:41.166230+00:00",
+    "collected_at": "2026-10-19T05:48:42.129275+00:00",
     "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
     "windows": {
       "24h": {
         "status": "partial",
-        "due_parts": 1,
+        "due_parts": 4,
         "captured_parts": 0
       },
       "72h": {
@@ -952,7 +1659,7 @@
               "provisional": true,
               "reason": "ga4_ValueError",
               "start_date": "2026-10-15",
-              "end_date": "2026-10-17"
+              "end_date": "2026-10-18"
             }
           },
           "72h": {
@@ -985,7 +1692,7 @@
               "provisional": true,
               "reason": "ga4_ValueError",
               "start_date": "2026-10-15",
-              "end_date": "2026-10-17"
+              "end_date": "2026-10-18"
             }
           }
         }
@@ -999,7 +1706,39 @@
         "topic": "unclassified",
         "published_at": "2026-10-17T12:38:53+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-18T17:43:41.829795+00:00",
+            "actual_age_hours": 29.08,
+            "capture_lag_hours": 5.08,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 9,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-18T17:43:46.278929+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "90932c6617524805b315740cc8a4cd44-0",
@@ -1010,7 +1749,39 @@
         "topic": "unclassified",
         "published_at": "2026-10-17T23:08:50+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-18T23:48:40.992895+00:00",
+            "actual_age_hours": 24.664,
+            "capture_lag_hours": 0.664,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 70,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-18T23:48:46.230078+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "61e09cb555154abbb5f17baac4bfaa57-0",
@@ -1021,7 +1792,39 @@
         "topic": "unclassified",
         "published_at": "2026-10-18T03:38:48+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-19T05:48:42.129275+00:00",
+            "actual_age_hours": 26.165,
+            "capture_lag_hours": 2.165,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 2,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-19T05:48:47.258976+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "dff78e2118be4085b64ecff63ba758a2-0",
@@ -1033,6 +1836,39 @@
         "published_at": "2026-10-18T09:18:50+00:00",
         "publication_time_basis": "api_timestamp",
         "snapshots": {}
+      },
+      {
+        "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-0",
+        "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
+        "platform_id": "17924636301430152",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/Deos7qAH7Yk",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-18T12:38:51+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "20228544f6674b6ea506bba92f50f35f-0",
+        "attempt_id": "20228544f6674b6ea506bba92f50f35f",
+        "platform_id": "17947057848357932",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/Dep1B9ok4pE",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-18T23:08:51+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "0bde9bc007ef48f18a2eda92e204d67e-0",
+        "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
+        "platform_id": "18135424297676759",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DeqT8Gkn91N",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-19T03:38:57+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
       }
     ],
     "account_metrics": {
@@ -1040,14 +1876,14 @@
       "clicks": 0,
       "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
       "requested_since": "2026-10-15T11:19:14.891210+00:00",
-      "requested_until": "2026-10-18T11:43:41.166230+00:00",
-      "collected_at": "2026-10-18T11:43:42.359299+00:00"
+      "requested_until": "2026-10-19T05:48:42.129275+00:00",
+      "collected_at": "2026-10-19T05:48:44.452924+00:00"
     },
     "revenue": null,
     "revenue_status": "publisher_attribution_unverified",
     "feedback": {
       "status": "insufficient_data",
-      "computedAt": "2026-10-18T11:43:41.166230+00:00",
+      "computedAt": "2026-10-19T05:48:42.129275+00:00",
       "checkpoint": null,
       "comparablePosts": 0,
       "evidence": [],
@@ -1060,7 +1896,7 @@
   },
   "feedback": {
     "status": "insufficient_data",
-    "computedAt": "2026-10-18T11:43:41.166230+00:00",
+    "computedAt": "2026-10-19T05:48:42.129275+00:00",
     "checkpoint": null,
     "comparablePosts": 0,
     "evidence": [],
@@ -1105,7 +1941,7 @@
     }
   },
   "today": {
-    "date": "2026-10-18",
+    "date": "2026-10-19",
     "timezone": "Asia/Seoul",
     "counts": [
       {
