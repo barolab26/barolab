@@ -1,5 +1,25 @@
 # NAS Dashboard Operations
 
+## CF doctor read-only status route deployment - 2026-10-20 KST
+
+DSM recreation returned Exit Code 0; NAS GET /api/auditor/status returned HTTP 200 and the growth remodel tab visibly showed 23 fully verified, 7 partial and 2 unknown URLs. DSM's current image is `barolab-dashboard:app-testers-20261019`; the older indexing-guard2 receipt below is historical. Keep this image, existing settings and eleven mounts unchanged. The temporary twelfth `content_auditor.py` mount was removed because the image lacks its `cf_posting.domain_themes` import dependency.
+
+Existing NAS files under `/volume1/yoonlab/10_Project/BaroLab` were updated without new modules or archive files: `dashboard/content.py` supplies `cf_doctor_evidence_summary`, and `dashboard/growth.html` distinguishes full public verification, title-only partial work, unknown outcomes and unavailable audit statistics. The existing `cf_posting/data` read-only mount supplies `daily_schedule.json`. Local source reference: `8c7ebec`.
+
+The NAS-mounted `server/main.py` received only this GET route immediately before `# Mount static sub-projects for pipeline status & output previews`:
+
+```python
+# Read-only CF doctor evidence; no auditor worker or write routes on NAS.
+@app.get("/api/auditor/status")
+def get_cf_doctor_status():
+    from content import cf_doctor_evidence_summary
+    return {"ok": True, "auditStatus": "not_collected", "auditedCount": None,
+            "todayAudited": None, "dailyQuotaTarget": None, "gradeCounts": {},
+            "cfDoctorEvidence": cf_doctor_evidence_summary()}
+```
+
+Do not replace NAS `main.py` wholesale with the Windows version: it also registers chat, memory and project-health components and starts additional health work. Do not register the full auditor router merely to expose this read-only summary. Original NAS main/source/compose bytes were retained in the current execution memory, not a durable backup file. Recreate only the existing `barolab-dashboard` service through its existing DSM project, then verify HTTP 200 and `cfDoctorEvidence` at the NAS `/api/auditor/status`; until that succeeds, this is preparation rather than a completed deployment. The current ledger fixture yielded 23 fully verified, 7 title-only partial and 2 unknown URLs; these are observed source counts, not fixed targets.
+
 ## Revenue and indexing guard deployment receipt - 2026-10-19 KST
 
 The existing NAS `barolab` project now runs one healthy container, `a775d525014d65e6a81cc4f1360d879ac915fed70db9bae5c742df906ccc32e0`, using `barolab-dashboard:indexing-guard2-20261019`. DSM verified the existing eleven mounts, 384 MB memory limit, port 8790 and `barolab_default` network. The shared compose changes only the image tag. `/api/status` and `/api/metrics` returned HTTP 200 after recreation; the updated revenue period completeness fields and dashboard were verified against the running service.
