@@ -1186,11 +1186,16 @@
     "remainingPreparation": "Existing three drafts blocked; six remaining waiting drafts not prepared"
   },
   "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-19T21:57:38.288747+00:00",
+  "updatedAt": "2026-10-19T21:58:53.420854+00:00",
   "checkedAt": "2026-10-19T21:57:38.288747+00:00",
   "geminiNotification": {
     "directiveId": "2026-10-20T06:16:00+09:00",
-    "status": "pending"
+    "status": "sent_verified",
+    "startedAt": "2026-10-19T21:58:21.783218+00:00",
+    "sentAt": "2026-10-19T21:58:53.420854+00:00",
+    "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0616.png",
+    "account": "barolab26@gmail.com",
+    "conversationUrl": "https://gemini.google.com/app/89e396b9e70f5c80"
   },
   "tests": [
     "Image-plan-only mutation preserves prose, sources and readerTask",
@@ -1242,10 +1247,11 @@
   },
   "commitHash": "b2cb9750ce286faf8ff95694f8e75afe83d3c365",
   "driveSync": {
-    "status": "pending_final_upload",
-    "previousVerifiedAt": "2026-10-19T21:39:14.256Z",
+    "status": "verified",
+    "verifiedAt": "2026-10-19T21:58:14.071Z",
     "fileCount": 7
   },
   "blockedAt": "2026-10-19T21:57:38.288747+00:00",
-  "blockedReason": "Independent content/evidence/image-plan gates rejected five drafts. Preserved prose and retry limits; no image or layout approval, remaining six waiting drafts not prepared."
+  "blockedReason": "Independent content/evidence/image-plan gates rejected five drafts. Preserved prose and retry limits; no image or layout approval, remaining six waiting drafts not prepared.",
+  "reportCommitHash": "2413464696c492210acfa89be839f4f7ff7b8d83"
 }
