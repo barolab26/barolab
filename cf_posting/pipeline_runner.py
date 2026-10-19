@@ -1430,11 +1430,104 @@ def resume_unpublished_draft(scheduled, domain, generate, progress, attribution)
         return None
     return revalidate_image_handoff(handoff, article, generate, progress, attribution)
 
+def validate_image_plan_revision(original, plans):
+    """Bound the edit to existing assets and preserve every reader-task reference."""
+    if not isinstance(plans, list) or not all(isinstance(p, dict) for p in plans):
+        raise ReviewRequired('imagePlans must be a list of objects')
+    old = {p['filename']: p for p in original.get('imagePlans', [])}
+    names = [p.get('filename') for p in plans]
+    if len(names) != len(set(names)) or any(n not in old for n in names):
+        raise ReviewRequired('Image plan revision may only retain existing unique filenames')
+    referenced = {name for step in original.get('readerTask', {}).get('steps', []) for name in step.get('imageFiles', [])}
+    if not referenced.issubset(set(names)):
+        raise ReviewRequired('Cannot remove an image referenced by the preserved reader task')
+    for plan in plans:
+        previous = old[plan['filename']]
+        if previous.get('source', 'generated') != 'generated':
+            if plan != previous:
+                raise ReviewRequired('Actual capture/original asset contracts cannot be replaced by generated diagrams')
+            continue
+        if plan.get('source') != 'generated' or plan.get('visualType') != 'concept_diagram':
+            raise ReviewRequired('Generated rework must be an explicitly labeled conceptual diagram')
+        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg', plan['filename']):
+            raise ReviewRequired('Unsafe image filename')
+        for key in ('stepId', 'sectionIndex'):
+            if plan.get(key) != previous.get(key):
+                raise ReviewRequired('Preserved step and section binding changed')
+        if not all(isinstance(plan.get(k), str) and plan[k].strip() for k in ('prompt', 'caption', 'alt')):
+            raise ReviewRequired('Diagram prompt/caption/alt missing')
+        if not any(label in plan['caption'] for label in ('개념도', '설명도', '예시')):
+            raise ReviewRequired('Diagram must be honestly labeled in its visible caption')
+    candidate = copy.deepcopy(original)
+    candidate['imagePlans'] = copy.deepcopy(plans)
+    return candidate
+
+
+def rework_image_plans(handoff, article, generate, progress, attribution):
+    """Independent bounded plan review; original accepted evidence stays in metadata."""
+    rows = handoff.check()
+    if len(rows) != 3 or (handoff.folder/'publication.json').exists():
+        raise ReviewRequired('Image plan rework requires an unpublished three-stage draft')
+    if handoff.data.get('imagePlanRework'):
+        raise ReviewRequired('Image plan rework already attempted; inspect saved evidence')
+    original = copy.deepcopy(article)
+    original_hash = digest(handoff.file('article.json'))
+    proposal_schema = {'type':'object','additionalProperties':False,'properties':{
+        'imagePlansJson':{'type':'string'},'reason':{'type':'string'}},'required':['imagePlansJson','reason']}
+    progress('writer', '본문·사실·출처 유지 · 독자 과제용 이미지 계획 재제안', handoff)
+    proposal = generate(agent_prompt('writer',
+        'Return imagePlansJson only as a JSON list. Preserve existing filenames, stepId and sectionIndex. '
+        'Do not alter any prose, claims, sources or readerTask. Replace decorative generated scenes with useful '
+        'source=generated, visualType=concept_diagram plans, explicitly captioned 개념도/예시. Never simulate actual '
+        'software UI, settings, results, or evidence. If actual UI is essential, explain the blocker; do not fabricate '
+        'a diagram as substitute. Unreferenced unnecessary plans may be removed; referenced plans must remain.',
+        {'article.json':original,'research.md':read_document(handoff.file('research.md'))}),response_schema=proposal_schema)
+    try:
+        candidate = validate_image_plan_revision(original, json.loads(proposal['imagePlansJson']))
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ReviewRequired('Malformed image plan proposal') from exc
+    proposal_model = copy.deepcopy(attribution())
+    checks = ('readerUtility','honestConceptualLabel','notFakeUI','noRequiredCaptureReplaced','stepsPreserved')
+    review_schema = {'type':'object','additionalProperties':False,'properties':{
+        **{k:{'type':'boolean'} for k in checks},'issues':{'type':'array','items':{'type':'string'}}},'required':[*checks,'issues']}
+    progress('writer', '별도 호출로 이미지 계획만 독립 재검수', handoff)
+    review = generate(agent_prompt('writer',
+        'Independently review only the proposed image plans against the unchanged article and research. '
+        'Reject decorative filler, fake UI, invented evidence and diagrams substituting for required real captures. '
+        'This is plan approval only: actual pixels and PC/mobile layout still require later independent review.',
+        {'originalArticle':original,'proposedArticle':candidate,'research.md':read_document(handoff.file('research.md'))}),response_schema=review_schema)
+    reviewer_model = copy.deepcopy(attribution())
+    if not all(m and m.get('status') == 'returned' and m.get('actualModel') for m in (proposal_model, reviewer_model)):
+        raise ReviewRequired('Image plan model provenance missing')
+    handoff.check()
+    if digest(handoff.file('article.json')) != original_hash:
+        raise ReviewRequired('Draft changed during image plan review')
+    previous_stages = copy.deepcopy(handoff.data['stages'])
+    handoff.data['imagePlanRework'] = {'status':'reviewed','checkedAt':stamp(),'originalArticle':original,
+        'originalArticleSha256':original_hash,'previousStages':previous_stages,
+        'proposal':proposal,'proposalModel':proposal_model,'independentReview':review,'reviewModel':reviewer_model,
+        'scope':'imagePlans only; pixels and layout not yet approved'}
+    if review.get('issues') or any(review.get(k) is not True for k in checks):
+        handoff.data['imagePlanRework']['status'] = 'rejected'
+        handoff.save()
+        raise ReviewRequired('Image plan independent review rejected: ' + str(review.get('issues')))
+    handoff.save()  # Persist original evidence before replacing the reviewed plan.
+    handoff.data['stages'] = previous_stages[:2]
+    handoff.save()
+    handoff.file('article.json').write_text(json.dumps(candidate,ensure_ascii=False,indent=2),encoding='utf-8')
+    handoff.accept('writer', previous_stages[2]['outputs'], reviewer_model)
+    handoff.data['imagePlanRework']['status'] = 'accepted'
+    handoff.save()
+    return candidate, handoff
+
+
 def rework_draft(folder, domain, categories, generate, progress, attribution):
     folder=Path(folder).resolve()
     article=json.loads((folder/'article.json').read_text(encoding='utf-8'))
     handoff=Handoff(folder,domain,article['topicSlug'])
     require_prewriting_handoff(handoff, article)
+    if os.environ.get('CF_IMAGE_PLAN_REWORK') == '1':
+        return rework_image_plans(handoff, article, generate, progress, attribution)
     if os.environ.get('CF_ASSET_REWORK')=='1':
         return revalidate_image_handoff(handoff,article,generate,progress,attribution)
     rows=handoff.check()
@@ -3654,6 +3747,13 @@ def enhance_prompt_for_korean_blog(prompt: str) -> str:
         'NO readable screens, NO watermark. Aspect ratio 16:9.'
     )
 
+def flow_image_prompt(plan):
+    if plan.get('visualType') == 'concept_diagram':
+        return ('Create an educational conceptual illustration, not an actual software screenshot or evidence. '
+                'Do not invent product UI or imply an observed result. ' + plan['prompt'])
+    return enhance_prompt_for_korean_blog(plan.get('prompt', ''))
+
+
 def reusable_flow_images(images_dir, plans):
     """Reuse only same-artifact bytes bound to the exact planned generation prompt.
 
@@ -3675,7 +3775,7 @@ def reusable_flow_images(images_dir, plans):
         target = images_dir/name
         if not target.is_file() or target.is_symlink() or target.resolve().parent != images_dir:
             continue
-        prompt_hash = hashlib.sha256(enhance_prompt_for_korean_blog(plan.get('prompt', '')).encode()).hexdigest()
+        prompt_hash = hashlib.sha256(flow_image_prompt(plan).encode()).hexdigest()
         matches = [r for r in records if isinstance(r, dict) and r.get('filename') == name]
         if len(matches) != 1:
             continue
@@ -3773,7 +3873,7 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
     for idx, plan in enumerate(plans, 1):
         filename = plan["filename"]
         target_path = os.path.join(images_dir, filename)
-        prompt = enhance_prompt_for_korean_blog(plan["prompt"])
+        prompt = flow_image_prompt(plan)
         
         detail_msg = f"포터블 브라우저(포트 {CDP_PORT}) Flow [{idx}/{len(plans)}] {filename} 고품질 주제 직관 비주얼 생성 및 다운로드 중..."
         if progress_callback:
