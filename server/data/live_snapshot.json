@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T03:42:49.406511+09:00",
+  "generatedAt": "2026-10-20T03:47:51.20583+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -45,14 +45,14 @@
     "cdp_observation_host": "192.168.45.248"
   },
   "metrics": {
-    "checkedAt": "2026-10-20T03:18:24.05493+09:00",
+    "checkedAt": "2026-10-20T03:43:41.147728+09:00",
     "siteCount": 21,
     "ga4": [
       {
         "domain": "baronote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:17:40.534095+09:00",
+        "checkedAt": "2026-10-20T03:39:40.691633+09:00",
         "sessions": 24,
         "pageViews": 27,
         "naverReferralSessions": 8
@@ -61,7 +61,7 @@
         "domain": "daynote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:11:46.23289+09:00",
+        "checkedAt": "2026-10-20T03:39:45.601588+09:00",
         "sessions": 49,
         "pageViews": 52,
         "naverReferralSessions": 29
@@ -70,7 +70,7 @@
         "domain": "healthcox.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:12:15.53466+09:00",
+        "checkedAt": "2026-10-20T03:40:10.588297+09:00",
         "sessions": 36,
         "pageViews": 41,
         "naverReferralSessions": 19
@@ -79,7 +79,7 @@
         "domain": "joynote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:12:45.044799+09:00",
+        "checkedAt": "2026-10-20T03:40:51.020563+09:00",
         "sessions": 14,
         "pageViews": 18,
         "naverReferralSessions": 1
@@ -88,7 +88,7 @@
         "domain": "justinfo.co.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:13:49.038941+09:00",
+        "checkedAt": "2026-10-20T03:41:16.998642+09:00",
         "sessions": 24,
         "pageViews": 35,
         "naverReferralSessions": 2
@@ -97,7 +97,7 @@
         "domain": "maxnote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:14:17.070061+09:00",
+        "checkedAt": "2026-10-20T03:41:43.655348+09:00",
         "sessions": 13,
         "pageViews": 15,
         "naverReferralSessions": 0
@@ -106,7 +106,7 @@
         "domain": "meganote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:14:43.878653+09:00",
+        "checkedAt": "2026-10-20T03:42:09.700223+09:00",
         "sessions": 28,
         "pageViews": 29,
         "naverReferralSessions": 3
@@ -115,7 +115,7 @@
         "domain": "must-good.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:15:14.691036+09:00",
+        "checkedAt": "2026-10-20T03:42:40.189956+09:00",
         "sessions": 22,
         "pageViews": 22,
         "naverReferralSessions": 1
@@ -124,7 +124,7 @@
         "domain": "must-joy.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:15:38.420767+09:00",
+        "checkedAt": "2026-10-20T03:42:43.743847+09:00",
         "sessions": 8,
         "pageViews": 17,
         "naverReferralSessions": 0
@@ -133,7 +133,7 @@
         "domain": "must-pick.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:16:00.690315+09:00",
+        "checkedAt": "2026-10-20T03:42:48.900241+09:00",
         "sessions": 39,
         "pageViews": 44,
         "naverReferralSessions": 7
@@ -142,7 +142,7 @@
         "domain": "nolplace.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:16:27.217117+09:00",
+        "checkedAt": "2026-10-20T03:42:52.139613+09:00",
         "sessions": 14,
         "pageViews": 18,
         "naverReferralSessions": 2
@@ -151,7 +151,7 @@
         "domain": "smilenote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:16:41.226249+09:00",
+        "checkedAt": "2026-10-20T03:42:57.230713+09:00",
         "sessions": 5,
         "pageViews": 5,
         "naverReferralSessions": 0
@@ -160,7 +160,7 @@
         "domain": "soulnote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:16:44.120282+09:00",
+        "checkedAt": "2026-10-20T03:43:01.746089+09:00",
         "sessions": 13,
         "pageViews": 14,
         "naverReferralSessions": 2
@@ -169,7 +169,7 @@
         "domain": "topnote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:16:58.986414+09:00",
+        "checkedAt": "2026-10-20T03:43:03.927389+09:00",
         "sessions": 22,
         "pageViews": 27,
         "naverReferralSessions": 4
@@ -178,7 +178,7 @@
         "domain": "tripmarvel.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:17:17.5506+09:00",
+        "checkedAt": "2026-10-20T03:43:40.320535+09:00",
         "sessions": 30,
         "pageViews": 39,
         "naverReferralSessions": 7
@@ -187,15 +187,15 @@
         "domain": "woorinote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T03:17:25.440213+09:00",
+        "checkedAt": "2026-10-20T03:39:14.594342+09:00",
         "sessions": 11,
         "pageViews": 12,
         "naverReferralSessions": 2
       }
     ],
     "indexing": {
-      "indexed": 534,
-      "inspected": 1487,
+      "indexed": 537,
+      "inspected": 1502,
       "inventoryTotal": 1914
     },
     "traffic": {
@@ -276,7 +276,7 @@
           "rows": 63
         },
         "automation_slots": {
-          "rows": 246
+          "rows": 247
         },
         "operating_cadence": {
           "rows": 1
