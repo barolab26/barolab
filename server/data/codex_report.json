@@ -15,7 +15,7 @@
       "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546"
     }
   ],
-  "summary": "Naver 5 accounts / 10 posts verified by RSS, HTTP 200 and 212/212 saved body paragraphs. KIN today 20 verified: one new submission plus three existing-answer verification recoveries. nolplace settings authentication verified HTTP 200. Doctor baronote 37 and 91 reciprocal links publicly verified.",
+  "summary": "핑 테스트 완료",
   "changedFiles": [
     "cf_posting/data/daily_schedule.json",
     "cf_posting/pipeline_runner.py",
