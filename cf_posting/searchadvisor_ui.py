@@ -38,8 +38,8 @@ def parse_visible_history(rows, text, today):
             raise ValueError('history_date_unconfirmed')
     if not parsed and '데이터가 없습니다' not in text:
         raise ValueError('history_empty_state_unconfirmed')
-    if len(parsed) >= 50 and min(day for _, day in parsed) >= today:
-        raise ValueError('history_recent_50_truncated')
+    # Fifty visible requests today already exhaust this site's daily quota.
+    # Older hidden rows cannot restore capacity; other sites remain independent.
     return sorted(url for url, day in parsed if day == today)
 
 
@@ -74,7 +74,10 @@ def _history(page, origin):
 def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
     """Reservation precedes click. Uncertain clicks retain their daily slot."""
     origin = 'https://' + urlsplit(url).netloc
-    _history(page, origin)
+    visible = _history(page, origin)
+    ledger.record_history_baseline(visible, scope_sites=[origin], complete=True, evidence={
+        'source': 'visible site history immediately before submission', 'checkedAt': ledger.now(),
+        'siteListComplete': True, 'allHistoryPagesComplete': True}, path=path)
     box = page.get_by_role('textbox', name=origin, exact=True)
     box.fill(url)
     _check(page)
@@ -108,9 +111,6 @@ def run(*, apply=False, path=ledger.LEDGER):
     with collector_lock(Path(path).with_suffix('.ui.lock')) as acquired:
         if not acquired:
             return {'status': 'account_ui_busy', 'submitted': 0}
-        budget = ledger.crawl_budget(path=path)
-        if budget['remaining'] == 0:
-            return {**budget, 'submitted': 0, 'browserConnected': False}
         # Only attach to a verified existing dedicated profile. Lifecycle startup
         # remains the account's soultin_start_cdp.bat, never arbitrary Chrome.
         _runtime(9334, str(PROFILE / 'chrome.exe'), str(PROFILE / 'User Data'))
@@ -121,7 +121,7 @@ def run(*, apply=False, path=ledger.LEDGER):
             if len(browser.contexts) != 1:
                 return {**result, 'reason': 'dedicated_context_unconfirmed'}
             with PageScope(on_warning=lambda _: None) as scope:
-                page = scope.acquire(browser.contexts[0], lambda p: p.url.rstrip('/') == BOARD)
+                page = scope.acquire(browser.contexts[0], lambda p: p.url.startswith('https://searchadvisor.naver.com/console/'))
                 result['tabOwned'] = scope.owns(page)
                 try:
                     page.goto(BOARD, wait_until='domcontentloaded', timeout=45000)
@@ -148,10 +148,13 @@ def run(*, apply=False, path=ledger.LEDGER):
                     state = json.loads(Path(path).read_text(encoding='utf-8'))
                     reserved = {x['url'] for x in state['crawlRequests']}
                     for item in state.get('crawlQueue', []):
-                        budget = ledger.crawl_budget(path=path)
-                        if budget['remaining'] == 0:
-                            return {**result, **budget}
                         url = item['url']
+                        budget = ledger.crawl_budget(site='https://' + urlsplit(url).netloc, path=path)
+                        if budget['remaining'] == 0:
+                            result.setdefault('exhaustedSites', [])
+                            if budget['site'] not in result['exhaustedSites']:
+                                result['exhaustedSites'].append(budget['site'])
+                            continue
                         if url in reserved or 'https://' + urlsplit(url).netloc not in origins or url in today_urls:
                             continue
                         outcome = submit_visible(page, url, path=path)

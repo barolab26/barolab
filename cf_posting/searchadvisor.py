@@ -87,10 +87,9 @@ def locked_ledger(path=LEDGER):
 
 
 def record_history_baseline(urls, *, scope_sites, complete, evidence, path=LEDGER):
-    """Account-wide visible history; never infer an empty history from missing UI.
+    """Visible histories for the inspected sites; missing UI is never empty history.
 
-    Caller must enumerate every site in the account's visible site list and all
-    today's history pages. External URLs exclude today's own ledger requests.
+    Caller must inspect today's history for every site in scope_sites. External URLs exclude today's own ledger requests.
     """
     if complete is not True or not scope_sites or not isinstance(evidence, dict) or not all(
             evidence.get(k) for k in ('source', 'checkedAt', 'siteListComplete', 'allHistoryPagesComplete')):
@@ -98,6 +97,8 @@ def record_history_baseline(urls, *, scope_sites, complete, evidence, path=LEDGE
     if not isinstance(urls, list) or any(not isinstance(u, str) or urlsplit(u).scheme not in ('http','https')
             or urlsplit(u).username or urlsplit(u).password for u in urls):
         raise ValueError('Visible public history URLs required')
+    if any(_origin(u) not in scope_sites for u in urls):
+        raise ValueError('History URL outside inspected sites')
     today = now()[:10]
     checked = datetime.fromisoformat(evidence['checkedAt'])
     if checked.tzinfo is None or checked.astimezone(KST).date() != datetime.now(KST).date():
@@ -116,6 +117,15 @@ def record_history_baseline(urls, *, scope_sites, complete, evidence, path=LEDGE
                     'observedRequestCount': sum(occurrences.values()), 'externalCount': max(external_count,
                         previous.get('externalCount', 0) if previous.get('dayKST') == today else 0),
                     'evidence': evidence, 'checkedAt': now()}
+        external_by_site = dict(previous.get('externalBySite', {})) if previous.get('dayKST') == today else {}
+        for site in scope_sites:
+            external_by_site[site] = sum(max(0, count - (1 if url in own else 0))
+                for url, count in occurrences.items() if _origin(url) == site)
+            if previous.get('dayKST') == today:
+                external_by_site[site] = max(external_by_site[site],
+                    previous.get('externalBySite', {}).get(site, 0))
+        baseline['externalBySite'] = external_by_site
+        state['dailyCapScope'] = 'site'
         state['historyBaseline'] = baseline
         return baseline
 
@@ -138,7 +148,7 @@ def reserve_crawl(url, *, external_today_count=0, path=LEDGER):
     """Reserve before UI submission; unknown outcomes consume the daily budget.
 
     Caller must inspect today's visible history first and pass requests already
-    submitted outside this ledger. Cap is conservative across this account.
+    submitted outside this ledger. The daily cap applies independently to each registered site.
     """
     if not canonical_candidate(url):
         raise ValueError("A configured public canonical URL is required")
@@ -147,8 +157,10 @@ def reserve_crawl(url, *, external_today_count=0, path=LEDGER):
     today = now()[:10]
     with locked_ledger(path) as state:
         baseline = state.get('historyBaseline', {})
-        if baseline.get('dayKST') != today or baseline.get('complete') is not True:
-            raise ValueError('Account-wide history unconfirmed; crawl submission paused')
+        site = _origin(url)
+        if (baseline.get('dayKST') != today or baseline.get('complete') is not True
+                or site not in baseline.get('externalBySite', {})):
+            raise ValueError('Site history unconfirmed; crawl submission paused')
         candidate = next((item for item in state.get("crawlQueue", []) if item["url"] == url), None)
         proof = (candidate or {}).get("publicValidation", {})
         if not proof.get("checkedAt") or not proof.get("source"):
@@ -163,24 +175,34 @@ def reserve_crawl(url, *, external_today_count=0, path=LEDGER):
             raise ValueError("URL already reserved or submitted; inspect before retrying")
         if url in baseline.get('observedUrls', []):
             raise ValueError('URL already in visible history; duplicate suppressed')
-        used = sum(item["reservedAt"][:10] == today for item in state["crawlRequests"])
-        external_today_count = max(external_today_count, baseline.get('externalCount', 0))
-        baseline['externalCount'] = external_today_count
+        used = sum(item["reservedAt"][:10] == today and _origin(item["url"]) == site
+                   for item in state["crawlRequests"])
+        external_today_count = max(external_today_count, baseline['externalBySite'][site])
+        baseline['externalBySite'][site] = external_today_count
         if used + external_today_count >= DAILY_CAP:
             raise ValueError("Daily SearchAdvisor crawl request cap reached")
         state["crawlRequests"].append({"url": url, "reservedAt": now(),
             "status": "reserved", "indexed": None})
 
 
-def crawl_budget(*, path=LEDGER):
+def _origin(url):
+    parsed = urlsplit(url)
+    return parsed.scheme + '://' + parsed.netloc
+
+
+def crawl_budget(*, site=None, path=LEDGER):
     state = json.loads(Path(path).read_text(encoding='utf-8')) if Path(path).exists() else {}
     baseline = state.get('historyBaseline', {})
-    if baseline.get('complete') is not True or baseline.get('dayKST') != now()[:10]:
-        return {'status': 'history_unconfirmed', 'remaining': None, 'limit': DAILY_CAP}
-    own = sum(x['reservedAt'][:10] == now()[:10] for x in state.get('crawlRequests', []))
-    used = own + baseline.get('externalCount', 0)
+    if site is None:
+        return {'status': 'site_required', 'remaining': None, 'limit': DAILY_CAP, 'scope': 'site'}
+    if (baseline.get('complete') is not True or baseline.get('dayKST') != now()[:10]
+            or site not in baseline.get('externalBySite', {})):
+        return {'status': 'history_unconfirmed', 'remaining': None, 'limit': DAILY_CAP, 'site': site}
+    own = sum(x['reservedAt'][:10] == now()[:10] and _origin(x['url']) == site
+              for x in state.get('crawlRequests', []))
+    used = own + baseline['externalBySite'][site]
     return {'status': 'daily_budget_exhausted' if used >= DAILY_CAP else 'available',
-            'used': used, 'remaining': max(0, DAILY_CAP-used), 'limit': DAILY_CAP}
+            'used': used, 'remaining': max(0, DAILY_CAP-used), 'limit': DAILY_CAP, 'site': site}
 
 
 def complete_crawl(url, *, status, evidence, path=LEDGER):
