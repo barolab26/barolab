@@ -4,6 +4,8 @@ description: cf_posting naver_blog_posting naver_kin threads_posting doctor_remo
 ---
 # 채널 실행과 결과 검증
 
+<!-- barolab-knowledge {"knowledge":{"kind":"verified_skill","reusable":true,"lesson":"채널별 공개 발행, 예약, 인증 API 관측, 검토 제출과 실제 승인 상태를 분리한다.","steps":["해당 채널의 기존 실행 및 검증 진입점을 확인한다.","실행 단위 스냅샷을 고정하고 원천 응답과 공개 결과를 구분한다.","확인된 범위의 증거만 원장에 기록하고 복구 결과를 재검증한다."],"sourceRef":"server/MEMORY_SERVICE.md","verification":{"passed":true,"evidence":"server/MEMORY_SERVICE.md","scope":"implementation_and_contract_tests_only","executionVerified":false,"tests":["server.test_hermes_memory.HermesMemoryTests.test_session_and_skill_frozen_across_scopes_and_instances","server.test_hermes_memory.HermesMemoryTests.test_review_all_operations_validated_before_writing","server.test_memory_promotion.PromotionGateTests.test_generic_success_and_event_labels_are_not_knowledge"]},"provenance":"curated_procedure","sourceAgent":"patch","channel":"hubs/channel-cf-blog","executionVerified":false,"implementationSources":["common/hermes_memory.py","cf_posting/pipeline_runner.py","naver_blog_posting/public_verification.py","naver_kin/pipeline.py","threads_posting/pipeline.py","cf_posting/doctor_remodel.py"],"curationScope":"Source and contract verification for user-requested initialization; not evidence that every channel procedure was executed successfully."}} -->
+
 출처: 2026-10-19 프로젝트 기억 초기화 요청과 아래 기존 실행·검증 진입점. 자동 학습 성과가 아니라 실제 구현을 근거로 초기화한 재사용 절차다.
 
 ## 공통
@@ -28,7 +30,7 @@ description: cf_posting naver_blog_posting naver_kin threads_posting doctor_remo
 앱 버전·AAB 해시·서명·실광고 설정·실기기 검증 버전을 구분한다. `apps/qa/2026-10-19-play-console-status.json`과 해당 릴리스 검증 보고서의 실제 증거를 대조한다. 내부 제공, Alpha 검토 제출, Google 검토 중, 승인, 참여 가능 여부를 각각 기록한다. 테스터 명단 수는 실제 참여 인원이 아니며 이전 빌드의 실기기 성공은 새 빌드의 성공이 아니다.
 
 ## 리뷰 반영
-성공 근거가 있는 사건이나 명시적인 사용자 교정만 검토한다. 새 사실이 없으면 skip한다. 기존 절차의 정확한 원문·revision을 확인한 뒤 필요한 문장만 patch하고, 불명확한 인과관계를 학습 사실로 확정하지 않는다.
+단순 성공·실패·준비·예약 상태는 검색용 사건 기록으로만 남긴다. 재사용 절차와 검증 증거, 완결된 실측 분석, 원문 근거가 있는 실제 회의 결정 중 구조화된 승격 조건을 충족한 경우만 검토한다. 새 사실이 없으면 skip한다. 기존 절차의 정확한 원문·revision을 확인한 뒤 필요한 문장만 patch하고, 불명확한 인과관계를 학습 사실로 확정하지 않는다.
 
 ## 명시적 적용 연결
 위 채널별 검증 절차의 적용 대상은 [[hubs/channel-cf-blog]], [[hubs/channel-naver-blog]], [[hubs/channel-naver-kin]], [[hubs/channel-threads]]이며 구현 보수 담당은 [[hubs/crew-patch]]다.

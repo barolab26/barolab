@@ -115,14 +115,16 @@ class HermesMemoryTests(unittest.TestCase):
         self.assertEqual(len(self.store.bounded("memory")["content"].split(ENTRY_DELIMITER)), 20)
 
     def _review(self, event_id, reviewer):
-        self.store.record_episode(event_id, "repair", "Verified API repair", {"response": 200})
+        self.store.record_episode(event_id, "verified_skill", "Verified API repair", {
+            "response": 200, "knowledge": {"kind": "verified_skill", "reusable": True,
+            "lesson": "Verify public content after repair", "steps": ["Read current source", "Verify the changed public response"],
+            "sourceRef": "qa/repair-verification.json", "verification": {"passed": True, "evidence": "qa/repair-verification.json"}}})
         self.store.enqueue_review(event_id, reviewer)
         deadline = time.monotonic() + 4
         while time.monotonic() < deadline:
             with self.store.db() as db:
-                row = db.execute("SELECT status FROM reviews WHERE event_id=?", (event_id,)).fetchone()
-                queue = db.execute("SELECT state FROM review_queue WHERE event_id=?", (event_id,)).fetchone()
-            if queue and queue[0] in ("done", "failed"):
+                row = db.execute("SELECT r.status,q.state FROM reviews r JOIN review_queue q USING(event_id) WHERE event_id=?", (event_id,)).fetchone()
+            if row and row[1] in ("done", "failed"):
                 return row[0]
             time.sleep(.01)
         self.fail("Review did not finish")
@@ -151,6 +153,16 @@ class HermesMemoryTests(unittest.TestCase):
 
 
 class GraphMemoryTests(unittest.TestCase):
+    @staticmethod
+    def skill_evidence():
+        return {"knowledge": {"kind": "verified_skill", "reusable": True,
+                "lesson": "Check actual CF response before accepting a repair", "steps": ["Inspect response", "Verify stored result"],
+                "verification": {"passed": True, "evidence": "tests/verified-response.json"},
+                "sourceRef": "tests/verified-response.json", "sourceAgent": "patch", "channel": "cf_blog"}}
+
+    def skill_content(self, title="Test skill"):
+        return f"# {title}\nVerified response procedure\n[[hubs/crew-patch]]\n[[hubs/channel-cf-blog]]\n<!-- barolab-knowledge {json.dumps(self.skill_evidence())} -->\n"
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
@@ -193,15 +205,13 @@ class GraphMemoryTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as conflict:
             graph.patch_memory_doc(graph.PatchMemoryDoc(content="stale", expectedRevision=doc["revision"]), rel)
         self.assertEqual(conflict.exception.status_code, 409)
-        deleted = graph.delete_memory_doc(rel, result["doc"]["revision"])
-        graph.sync_argo_vault_and_growth(True)
-        with self.assertRaises(HTTPException):
-            graph.get_memory_doc(rel)
-        graph.restore_memory_doc(deleted["trashId"])
+        with self.assertRaises(HTTPException) as protected:
+            graph.delete_memory_doc(rel, result["doc"]["revision"])
+        self.assertEqual(protected.exception.status_code, 409)
         self.assertEqual(graph.get_memory_doc(rel)["content"], updated)
 
     def test_trash_restore_no_sync_resurrection(self):
-        item = graph.register_synapse_memory("temporary test", "Verified API response evidence", category="meeting")
+        item = graph.register_synapse_memory("temporary test", "Verified API response evidence", category="skill", source_agent="patch", channel="cf_blog", evidence=self.skill_evidence())
         doc = graph.get_memory_doc(item["rel"])
         deleted = graph.delete_memory_doc(item["rel"], doc["revision"])
         self.assertTrue(Path(doc["sourcePath"]).exists())
@@ -220,7 +230,8 @@ class GraphMemoryTests(unittest.TestCase):
             graph.get_memory_doc("../secret.md")
 
     def test_procedural_skill_trash_restore_changes_actual_file(self):
-        graph.hermes_store.skill_manage("create", "test-skill", content="# Test skill\nreal original")
+        content = self.skill_content()
+        graph.hermes_store.skill_manage("create", "test-skill", content=content)
         rel = "procedural/test-skill/SKILL.md"
         doc = graph.get_memory_doc(rel)
         path = Path(doc["sourcePath"])
@@ -228,17 +239,18 @@ class GraphMemoryTests(unittest.TestCase):
         self.assertFalse(path.exists())
         self.assertNotIn(rel, [d["rel"] for d in graph.load_all_docs()])
         result = graph.restore_memory_doc(deleted["trashId"])
-        self.assertEqual(path.read_text(encoding="utf8"), "# Test skill\nreal original")
+        self.assertEqual(path.read_text(encoding="utf8"), content)
         self.assertEqual(result["doc"]["revision"], doc["revision"])
 
     def test_explicit_skill_edges_and_audit_links_are_real(self):
-        hub = graph.CLEAN_SEED_HUBS[0]["rel"].removesuffix(".md")
-        graph.hermes_store.skill_manage("create","linked",content=f"# Linked\nSee [[{hub}]]")
-        graph.hermes_store.record_episode("verified-repair","repair","actual verified repair",{"status":200})
+        hub = "hubs/crew-patch"
+        graph.hermes_store.skill_manage("create","linked",content=self.skill_content("Linked"))
+        graph.hermes_store.record_episode("verified-repair","verified_skill","actual verified CF repair procedure",self.skill_evidence())
         graph.hermes_store._audit("review:verified-repair","patch","skill:linked","before","after",{"status":200})
         docs = graph.load_all_docs()
         skill = graph.get_memory_doc("procedural/linked/SKILL.md")
-        self.assertEqual(skill["parents"],[hub])
+        self.assertIn(hub, skill["parents"])
+        self.assertIn("hubs/channel-cf-blog", skill["parents"])
         self.assertTrue(skill["updated"])
         self.assertEqual(len(skill["backlinks"]),1)
         self.assertTrue(any(d["rel"].startswith("episodes/") and "procedural/linked/SKILL" in d["links"] for d in docs))

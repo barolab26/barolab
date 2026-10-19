@@ -34,6 +34,42 @@ test('fractional DPI has stable integer backing size and fit keeps finite nodes 
   assert.equal(view.canvasSize(0,0,NaN).height,580);
 });
 
+test('measured collision envelopes separate coincident nodes and respect pinned positions',()=>{
+  const points=[{x:0,y:0,labelWidth:190,fx:0,fy:0},{x:0,y:0,labelWidth:170,fx:null,fy:null},{x:30,y:20,labelWidth:100,fx:null,fy:null}];
+  view.separatePoints(points,30);
+  assert.equal(points[0].x,0); assert.equal(points[0].y,0);
+  for(let i=0;i<points.length;i++) for(let j=i+1;j<points.length;j++) {
+    const a=points[i],b=points[j];
+    assert(Math.abs(a.x-b.x)>=(a.labelWidth+b.labelWidth)/2+27.9 || Math.abs(a.y-b.y)>=99.9);
+  }
+});
+
+test('screen labels protect core priority, never overlap, and return when zoom increases separation',()=>{
+  const make=zoom=>Array.from({length:8},(_,i)=>({index:i,x:20+i*22*zoom,y:80,width:90,height:20,priority:i===2?1000:0}));
+  const small=make(1),visible=view.visibleLabels(small,1000,300);
+  assert(visible.includes(2));
+  for(const i of visible)for(const j of visible)if(i<j)assert(!view.overlaps(small[i],small[j]));
+  const zoomed=view.visibleLabels(make(5),1000,300);
+  assert.equal(zoomed.length,8);
+  assert(zoomed.length>visible.length);
+  assert.equal(view.wrapLabel('긴 제목은 생략하지 않고 전부 표시합니다',70,s=>s.length*10).join(''),'긴 제목은 생략하지 않고 전부 표시합니다');
+});
+
+test('only explicit skill view filters sources; all view preserves every node and edge',()=>{
+  const graph=view.normalizeGraph({nodes:[{id:'real',sourceKind:'project_skill',category:'skill',knowledgeStatus:'curated_procedure'},{id:'legacy',category:'skill'},{id:'hub',isCoreHub:true},{id:'learned',category:'skill',verifiedKnowledge:true}],edges:[[0,1],[1,2],[0,2]]});
+  assert.equal(view.filterGraph(graph,'all'),graph);
+  assert.deepEqual(view.filterGraph(graph,'skill').nodes.map(n=>n.id),['real','hub','learned']);
+  assert.deepEqual(view.filterGraph(graph,'skill').edges,[[0,1]]);
+});
+
+test('quarantined records are disclosed without inventing an unknown zero',()=>{
+  assert.equal(view.quarantineLabel({quarantine:{count:10}}),'수집 제외 10개 · 원문 보존');
+  assert.equal(view.quarantineLabel({stats:{quarantined:0}}),'수집 제외 0개 · 원문 보존');
+  assert.equal(view.quarantineLabel({}),'수집 제외 수 확인 중');
+  assert(!view.isSkill({category:'skill',isCoreHub:true,verifiedKnowledge:true}));
+  assert.notEqual(view.graphRevision({...fixture,quarantine:{count:9}}),view.graphRevision({...fixture,quarantine:{count:10}}));
+});
+
 function pageHarness(graphResponse, overrideFetch, search='') {
   const elements = new Map(), calls = [], frames = [], labels = [], polls = [];
   let paintCount = 0;
@@ -90,6 +126,7 @@ test('real page script paints loaded graph, all resets search, and editor PATCH 
   assert.equal(page.element('vault-integrity-pct').textContent,'95%');
   page.frames.shift()();
   assert(page.paintCount()>30);
+  assert(Number(page.element('memory-canvas').attributes['data-label-count'])>=15,'normal-sized graph should keep most labels readable');
   page.element('graph-search').value='filtered';
   page.element('chip-all').click();
   await page.flush();
@@ -104,6 +141,20 @@ test('real page script paints loaded graph, all resets search, and editor PATCH 
   assert.equal(JSON.parse(patch.options.body).expectedRevision,'rev1');
   assert.equal(JSON.parse(patch.options.body).content,'Changed body');
   assert.match(page.element('doc-status').textContent,/저장되었습니다/);
+});
+
+test('mobile resize preserves all nodes, edges, keyboard navigation and explains label density',async()=>{
+  const crowded={nodes:Array.from({length:42},(_,i)=>({id:`m${i}`,rel:`notes/m${i}.md`,label:`Long knowledge title ${i}`,isCoreHub:i<13})),edges:Array.from({length:41},(_,i)=>[i,i+1])};
+  const page=pageHarness({ok:true,status:200,json:async()=>crowded});
+  await page.flush();
+  const canvas=page.element('memory-canvas');canvas.clientWidth=360;canvas.clientHeight=480;
+  page.frames.shift()();
+  assert.equal(canvas.attributes['data-node-count'],'42');
+  assert.equal(canvas.attributes['data-edge-count'],'41');
+  assert.equal((page.element('graph-node-list').innerHTML.match(/data-node-rel=/g)||[]).length,42);
+  assert(Number(canvas.attributes['data-label-count'])<42);
+  assert.match(page.element('graph-label-status').textContent,/노드 42개 모두 표시.*확대/);
+  assert.equal(canvas.width,450);
 });
 
 
@@ -131,6 +182,13 @@ test('revision conflict preserves unsaved draft and protected nodes cannot issue
   assert.equal(boundedPage.element('btn-edit-doc').disabled,false);
   assert.equal(boundedPage.element('btn-delete-doc').disabled,true);
   assert.match(boundedPage.element('doc-status').textContent,/항목은 원문 편집에서 삭제 가능/);
+  const corePage=pageHarness({ok:true,status:200,json:async()=>fixture},url=>url.includes('/doc?')?{ok:true,json:async()=>({rel:'hubs/crew-jarvis.md',title:'Core',revision:'rev1',isCoreHub:true,editable:true,deletable:true})}:null);
+  await corePage.flush();
+  assert.equal(corePage.element('btn-delete-doc').disabled,true);
+  assert.equal(corePage.element('btn-edit-doc').disabled,false);
+  assert.match(corePage.element('doc-status').textContent,/고정 코어 정체성/);
+  await corePage.element('btn-delete-doc').click();
+  assert(!corePage.calls.some(call=>call.options.method==='DELETE'));
 });
 
 test('inline delete requires confirmation, supports cancel, sends revision, and restores trash', async () => {
@@ -218,7 +276,7 @@ test('background polling applies changed nodes/edges without moving existing lay
   const initialDocs=docCalls();
   await page.polls.shift()();
   assert.equal(docCalls(),initialDocs,'unchanged graph must not reload the inspector');
-  graph={nodes:[...graph.nodes.map(n=>({...n,updated:'2026-10-19T12:00:00Z'})),{id:'new',rel:'notes/new.md',label:'New memory',revision:'r2',sourceKind:'project_skill',updated:'2026-10-19T12:00:00Z'}],edges:[...graph.edges,[19,20]]};
+  graph={nodes:[...graph.nodes.map(n=>({...n,updated:'2026-10-19T12:00:00Z'})),{id:'new',rel:'notes/new.md',label:'New memory',revision:'r2',sourceKind:'project_skill',category:'skill',knowledgeStatus:'curated_procedure',updated:'2026-10-19T12:00:00Z'}],edges:[...graph.edges,[19,20]]};
   await page.polls.shift()();
   assert.equal(page.element('memory-canvas').attributes['data-node-count'],'21');
   assert.equal(page.element('memory-canvas').attributes['data-edge-count'],'19');

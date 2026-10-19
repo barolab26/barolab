@@ -10,6 +10,7 @@ from contextlib import contextmanager, closing
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -23,6 +24,181 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENTRY_DELIMITER = "\n§\n"
 LIMITS = {"memory": 2200, "user": 1375}
 _THREAD_LOCK = threading.RLock()
+
+
+def _operational_source(summary="", source="", title="", source_path=""):
+    """Operational records remain searchable logs, never permanent knowledge."""
+    blocked = r"(?:ledger|circuit(?:[-_]breaker)?|model[-_]events?|scheduler|errors?|preparation|naver[-_]automation)"
+    forbidden_file = (r"(?:ledger\.jsonl?|(?:freellm[-_])?circuit(?:[-_]breaker)?\.json|"
+                      r"(?:.*[-_])?model[-_]events?\.jsonl?|scheduler\.log|(?:.*[-_])?errors?\.log|"
+                      r"preparation\.json|naver[-_]automation\.json)")
+    for value in (source, source_path):
+        path = str(value or "").lower().replace("\\", "/").split("?", 1)[0].split("#", 1)[0]
+        if re.fullmatch(forbidden_file, path.rsplit("/", 1)[-1]):
+            return "operational_source"
+    first_line = next((line for line in str(summary or "").splitlines() if line.strip()), "")
+    for value in (title, first_line):
+        heading = str(value or "").strip().lower().lstrip("# [")
+        if re.match(blocked + r"(?:$|[:\]]|[ _-]+(?:status|completed|failed|event|log|state|상태|완료)(?:$|[\s:._-]))", heading):
+            return "operational_title"
+        if re.match(r"(?:pipeline[_ -]preparation|llm[_ -]call|chat[_ -]turn|예약\s*완료|스케줄러\s*상태|단순\s*실패)", heading):
+            return "operational_status"
+        if re.match(r"(?:provider\s+return|naver\s+preparation|naver\s+reservation|knowledgein\s+publ|cf\s+content\s+and\s+p|timeouterror|http\s+500|status\s*:\s*invalid)", heading):
+            return "operational_status"
+    return None
+
+
+def memorization_decision(event_type, summary="", evidence=None, success=True, source="", *, title="", source_path=""):
+    """Pure, fail-closed promotion gate. This does not govern session-log storage.
+
+    Structured evidence must establish a reusable verified procedure, comparable
+    measurement, or an explicit user decision. A label or generic success is not
+    evidence. Metadata checks precede every allow path, including manual labels.
+    """
+    evidence = evidence if isinstance(evidence, dict) else {}
+    reason = _operational_source(summary, source, title, source_path) or _operational_source(title=event_type)
+    if reason:
+        return {"allowed": False, "reason": reason, "kind": None}
+    for key in ("source", "sourceRef", "sourcePath", "source_path", "path"):
+        reason = _operational_source(source_path=evidence.get(key, ""))
+        if reason:
+            return {"allowed": False, "reason": reason, "kind": None}
+    if _operational_source(title=evidence.get("title", "")):
+        return {"allowed": False, "reason": "operational_title", "kind": None}
+    if success is not True and success != 1:
+        return {"allowed": False, "reason": "unsuccessful_episode", "kind": None}
+    knowledge = evidence.get("knowledge", evidence)
+    if not isinstance(knowledge, dict):
+        return {"allowed": False, "reason": "structured_evidence_required", "kind": None}
+    for key in ("source", "sourceRef", "sourcePath", "source_path", "path"):
+        reason = _operational_source(source_path=knowledge.get(key, ""))
+        if reason:
+            return {"allowed": False, "reason": reason, "kind": None}
+    if _operational_source(title=knowledge.get("title", "")):
+        return {"allowed": False, "reason": "operational_title", "kind": None}
+    kind = knowledge.get("kind") or {"growth_measured_increase": "measured_insight",
+                                    "verified_skill": "verified_skill",
+                                    "meeting_decision": "meeting_decision"}.get(str(event_type))
+    snapshot = kind == "measured_snapshot" or knowledge.get("measurementType") == "measured_snapshot"
+    if kind == "measured_snapshot":
+        kind = "measured_insight"
+    ref = knowledge.get("sourceRef")
+    verification = knowledge.get("verification", {})
+    if isinstance(verification, dict) and _operational_source(source_path=verification.get("evidence", "")):
+        return {"allowed": False, "reason": "operational_source", "kind": None}
+    verified = (isinstance(verification, dict) and verification.get("passed") is True
+                and isinstance(verification.get("evidence"), str) and bool(verification["evidence"].strip()))
+    allowed = False
+    if kind == "verified_skill":
+        steps = knowledge.get("steps")
+        allowed = (knowledge.get("reusable") is True and verified and isinstance(ref, str) and bool(ref.strip())
+                   and isinstance(knowledge.get("lesson"), str) and bool(knowledge["lesson"].strip())
+                   and isinstance(steps, list) and bool(steps)
+                   and all(isinstance(s, str) and bool(s.strip()) for s in steps))
+    elif kind == "meeting_decision":
+        decision, quote = knowledge.get("decisionText"), knowledge.get("userQuote")
+        meeting_ref = str(ref or "").replace("\\", "/")
+        archive = evidence.get("archive", knowledge.get("archive", ""))
+        meeting_origin = (str(event_type) in ("meeting_decision", "chat_decision", "ceo_correction_conversation_ended")
+                          and (bool(re.match(r"^(?:meetings/|(?:server/data/|data/)?chats/\.archive/)", meeting_ref))
+                               or bool(re.fullmatch(r"_room-\d+\.json", str(archive)))
+                               and (meeting_ref == archive or meeting_ref == evidence.get("journal"))))
+        allowed = (meeting_origin and knowledge.get("userConfirmed") is True and isinstance(decision, str) and bool(decision.strip())
+                   and isinstance(quote, str) and decision.strip() in quote
+                   and isinstance(knowledge.get("sourceMessageId"), str) and bool(knowledge["sourceMessageId"].strip())
+                   and isinstance(ref, str) and bool(ref.strip()))
+        consensus = knowledge.get("consensus")
+        if not allowed and meeting_origin and isinstance(decision, str) and decision.strip() and isinstance(consensus, list) and len(consensus) >= 2:
+            valid_votes = [v for v in consensus if isinstance(v, dict) and v.get("agrees") is True
+                           and isinstance(v.get("participantId"), str) and v["participantId"].strip()
+                           and isinstance(v.get("sourceMessageId"), str) and v["sourceMessageId"].strip()
+                           and isinstance(v.get("quote"), str) and decision.strip() in v["quote"]]
+            allowed = (len(valid_votes) == len(consensus) and verified and isinstance(ref, str) and bool(ref.strip())
+                       and len({v["participantId"] for v in valid_votes}) == len(consensus)
+                       and len({v["sourceMessageId"] for v in valid_votes}) == len(consensus))
+    elif kind == "measured_insight":
+        def number(value):
+            try:
+                return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+            except (OverflowError, ValueError):
+                return False
+        previous, current = evidence.get("previous"), evidence.get("current")
+        if snapshot:
+            period = knowledge.get("period", {})
+            try:
+                valid_period = (datetime.strptime(period["start"], "%Y-%m-%d").date()
+                                <= datetime.strptime(period["end"], "%Y-%m-%d").date())
+            except (KeyError, TypeError, ValueError):
+                valid_period = False
+            numerator, denominator, value = (knowledge.get(k) for k in ("numerator", "denominator", "value"))
+            allowed = (verified and isinstance(ref, str) and bool(ref.strip()) and valid_period
+                       and knowledge.get("sourceStatus") == "complete"
+                       and isinstance(knowledge.get("domain"), str)
+                       and bool(re.fullmatch(r"(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}", knowledge["domain"]))
+                       and knowledge.get("metric") in ("rpm", "page_rpm", "impression_rpm")
+                       and knowledge.get("numeratorMetric") == "revenue"
+                       and knowledge.get("denominatorMetric") in ("pageviews", "impressions")
+                       and (knowledge["metric"] != "page_rpm" or knowledge["denominatorMetric"] == "pageviews")
+                       and (knowledge["metric"] != "impression_rpm" or knowledge["denominatorMetric"] == "impressions")
+                       and bool(knowledge.get("currency")) and bool(knowledge.get("sourceTimezone"))
+                       and isinstance(knowledge.get("analysis"), str) and bool(knowledge["analysis"].strip())
+                       and number(numerator) and number(denominator) and number(value)
+                       and numerator >= 0 and denominator > 0
+                       and math.isclose(value, numerator / denominator * 1000, rel_tol=1e-6, abs_tol=1e-6))
+        elif str(event_type) == "growth_measured_increase" and isinstance(previous, dict) and isinstance(current, dict):
+            signature = ("currency", "source_timezone", "value_kind", "revenue_scope")
+            try:
+                dates = [datetime.strptime(period[key], "%Y-%m-%d").date()
+                         for period in (previous, current) for key in ("start", "end")]
+                valid_periods = (dates[0] <= dates[1] < dates[2] <= dates[3]
+                                 and dates[1] - dates[0] == dates[3] - dates[2])
+            except (KeyError, TypeError, ValueError):
+                valid_periods = False
+            allowed = (previous.get("status") == current.get("status") == "complete"
+                       and number(previous.get("total")) and number(current.get("total"))
+                       and current["total"] > previous["total"] >= 0
+                       and all(previous.get(k) == current.get(k) for k in signature)
+                       and bool(previous.get("source_timezone")) and bool(previous.get("value_kind"))
+                       and valid_periods
+                       and evidence.get("service") in ("adsense", "ga4", "naver_blog")
+                       and isinstance(evidence.get("metric"), str) and bool(evidence["metric"].strip())
+                       and bool(evidence.get("siteId")))
+        else:
+            allowed = (verified and knowledge.get("comparable") is True and bool(knowledge.get("metric"))
+                       and isinstance(ref, str) and bool(ref.strip())
+                       and number(knowledge.get("baseline")) and number(knowledge.get("current")))
+    return {"allowed": bool(allowed), "reason": "verified_knowledge" if allowed else "structured_knowledge_evidence_required",
+            "kind": kind if allowed else None}
+
+
+def should_memorize(event_type, summary="", evidence=None, success=True, source="", *, title="", source_path=""):
+    return memorization_decision(event_type, summary, evidence, success, source, title=title, source_path=source_path)["allowed"]
+
+
+def _review_skill_document(name, content, episode):
+    """Resolve evidence-based parents before a reviewer can write any skill."""
+    from server.memory_graph import auto_link_synapses, validate_synapse_hubs
+    evidence = episode["evidence"]
+    knowledge = evidence.get("knowledge", evidence)
+    relation = auto_link_synapses(name, content, source_agent=knowledge.get("sourceAgent"),
+                                 channel=knowledge.get("channel"))
+    links = relation.get("links", [])
+    if not relation.get("crew") or not relation.get("channel"):
+        raise ValueError("Reviewed skill needs a verified owner and channel")
+    validate_synapse_hubs(relation)
+    # Model-supplied metadata is never its own evidence. Preserve only the
+    # episode's already-validated provenance and normalize parent references.
+    content = re.sub(r"<!--\s*barolab-knowledge\s+.*?\s*-->", "", content, flags=re.S).rstrip()
+    current_links = set(re.findall(r"\[\[([^\]|]+)(?:\|[^\]]+)?\]\]", content))
+    missing = [str(link).removesuffix(".md") for link in links
+               if str(link).removesuffix(".md") not in current_links]
+    if missing:
+        content += "\n\n" + " ".join("[[" + link + "]]" for link in missing)
+    provenance = {**evidence, "eventType": episode["event_type"], "sourceEventId": episode["event_id"]}
+    content += "\n\n<!-- barolab-knowledge " + json.dumps(provenance, ensure_ascii=False, separators=(",", ":")) + " -->\n"
+    if len(content) > 60000:
+        raise ValueError("Reviewed skill including provenance exceeds the size limit")
+    return content
 
 
 def utc_now():
@@ -386,8 +562,9 @@ class HermesMemory:
             episode = dict(row)
             episode["evidence"] = json.loads(episode["evidence"])
             episode["messages"] = json.loads(episode["messages"])
-            if not episode["success"] or not episode["evidence"]:
-                self._review_status(event_id, "skipped", {"reason": "Successful episode with evidence required"})
+            decision = memorization_decision(episode["event_type"], episode["summary"], episode["evidence"], episode["success"], source=event_id)
+            if not decision["allowed"]:
+                self._review_status(event_id, "skipped", decision)
                 return
             self._review_status(event_id, "running", {})
             payload = {"episode": episode, "memory": self.bounded("memory"), "user": self.bounded("user"), "skills": self.skill_list()}
@@ -399,11 +576,15 @@ class HermesMemory:
             memory_ops, skill_ops = plan.get("memory", []), plan.get("skills", [])
             if not isinstance(memory_ops, list) or not isinstance(skill_ops, list) or len(memory_ops) + len(skill_ops) > 8:
                 raise ValueError("Invalid or oversized review plan")
+            if skill_ops and decision["kind"] != "verified_skill":
+                raise ValueError("Procedural skill promotion needs verified reusable procedure evidence")
             # Validate the entire plan before any operation; all targets use a snapshot revision.
             for op in memory_ops:
                 if not isinstance(op, dict) or set(op) - {"target", "action", "text", "content", "old_text", "expected_revision"}:
                     raise ValueError("Invalid memory operation fields")
                 target = op.get("target")
+                if _operational_source(op.get("text", op.get("content", ""))):
+                    raise ValueError("Operational status cannot become permanent memory")
                 if target not in LIMITS or op.get("action") not in ("add", "patch"):
                     raise ValueError("Background review cannot remove memory")
                 if op.get("expected_revision") != payload[target]["revision"]:
@@ -413,6 +594,8 @@ class HermesMemory:
                 if not isinstance(op, dict) or set(op) - {"action", "name", "content", "old_text", "new_text", "expected_revision"} or op.get("action") not in ("create", "patch"):
                     raise ValueError("Invalid skill operation")
                 self._skill_path(op.get("name", ""))
+                if _operational_source(op.get("content", op.get("new_text", "")), title=op.get("name", "")):
+                    raise ValueError("Operational status cannot become a procedural skill")
                 if op["action"] == "patch" and not op.get("expected_revision"):
                     raise MemoryConflict("Review skill patch needs a revision")
             applied = []
@@ -447,6 +630,7 @@ class HermesMemory:
                         updated = current.replace(op["old_text"], op.get("new_text", ""), 1)
                     if not updated.strip() or len(updated) > 60000:
                         raise ValueError("Invalid skill content size")
+                    updated = _review_skill_document(op["name"], updated, episode)
                     stage(path, original, updated, op["action"], "skill:" + op["name"])
                 written = []
                 try:
@@ -511,8 +695,13 @@ class HermesMemory:
     def enqueue_review(self, event_id, reviewer=None):
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
-            if not db.execute("SELECT 1 FROM episodes WHERE event_id=?", (event_id,)).fetchone():
+            episode = db.execute("SELECT * FROM episodes WHERE event_id=?", (event_id,)).fetchone()
+            if not episode:
                 raise ValueError("Unknown episode")
+            decision = memorization_decision(episode["event_type"], episode["summary"], json.loads(episode["evidence"]), episode["success"], source=event_id)
+            if not decision["allowed"]:
+                db.execute("INSERT OR REPLACE INTO reviews VALUES(?,?,?,?)", (event_id, "skipped", json.dumps(decision), utc_now()))
+                return {"queued": False, **decision}
             prior = db.execute("SELECT state,attempts FROM review_queue WHERE event_id=?", (event_id,)).fetchone()
             retry = prior and prior["state"] == "failed" and prior["attempts"] < 3
             if prior and not retry:

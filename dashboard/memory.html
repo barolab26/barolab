@@ -124,13 +124,14 @@
     }
     .vault-card-top {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 6px;
       font-size: 10.5px;
       font-weight: 800;
       color: #64748b;
-      white-space: nowrap;
+      white-space: normal;
     }
     .vault-card-pill {
       padding: 1.5px 6px;
@@ -153,9 +154,8 @@
       font-size: 14.5px;
       font-weight: 900;
       color: #0f172a;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow-wrap: anywhere;
       letter-spacing: -0.02em;
       line-height: 1.2;
     }
@@ -191,13 +191,14 @@
 
     .vault-micro-legend {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 7px;
       font-size: 10px;
       font-weight: 800;
       color: #475569;
       white-space: nowrap;
-      overflow: hidden;
+      overflow: visible;
     }
     .vault-micro-legend span {
       display: inline-flex;
@@ -665,7 +666,7 @@
           </div>
           <div class="vault-3bar-stack">
             <div class="vault-bar-row">
-              <span class="vault-bar-lbl">🛠️ 학습된 스킬 (SKILL.md)</span>
+              <span class="vault-bar-lbl">🛠️ 검증된 스킬 · 운영 절차</span>
               <div class="vault-bar-track"><div class="vault-bar-fill" id="bar-skill-fill" style="width:0%; background:linear-gradient(90deg,#10b981,#059669);"></div></div>
               <span class="vault-bar-badge b-emerald" id="stat-skill-cnt">—</span>
             </div>
@@ -719,7 +720,7 @@
             <button type="button" class="graph-chip on" data-cat="all" id="chip-all">전체 보기</button>
             <button type="button" class="graph-chip" data-cat="core_hub" id="chip-core-hub">✦ 코어 허브</button>
             <button type="button" class="graph-chip" data-cat="revenue" id="chip-revenue">📈 수익 발생 기억</button>
-            <button type="button" class="graph-chip" data-cat="skill" id="chip-skill">🛠️ 학습된 스킬(SKILL.md)</button>
+            <button type="button" class="graph-chip" data-cat="skill" id="chip-skill">🛠️ 검증된 스킬 · 운영 절차</button>
             <button type="button" class="graph-chip" data-cat="meeting" id="chip-meeting">💬 회의실 결정사항</button>
           </div>
           <details style="margin-top:6px;background:#0f172a;color:#e2e8f0;border-radius:6px;padding:6px 9px"><summary id="graph-node-list-summary" style="cursor:pointer">키보드로 노드 탐색 · 연결 대기</summary><div id="graph-node-list" style="display:flex;flex-wrap:wrap;gap:5px;max-height:160px;overflow:auto;padding-top:8px"></div></details>
@@ -728,12 +729,12 @@
         <canvas id="memory-canvas" role="img" aria-label="기억 그래프 연결 대기"></canvas>
         <div id="graph-status" class="graph-status" role="status">기억 그래프를 불러오는 중입니다.</div>
         </div>
-        <div class="graph-hint">드래그: 이동/노드 고정 · 휠: 줌 · 클릭: 시냅스 명세 열람 · <strong>더블클릭: 2-hops 주변만 보기</strong> (전체 보기: 모든 노드와 연결)</div>
+        <div class="graph-hint"><span id="graph-quarantine-status">수집 제외 수 확인 중</span><br><span id="graph-label-status"></span> 드래그: 이동/노드 고정 · 휠: 줌 · 클릭: 시냅스 명세 열람 · <strong>더블클릭: 2-hops 주변만 보기</strong> (전체 보기: 모든 노드와 연결)</div>
         <div class="graph-legend">
-          <span><strong style="color:#fbbf24;">✦</strong> 코어 허브 · AI 크루</span>
-          <span><strong style="color:#60a5fa;">✦</strong> 운영 채널·수익 허브</span>
-          <span><strong style="color:#34d399;">✦</strong> 코어 스킬 허브 (SKILL.md)</span>
-          <span><strong style="color:#c084fc;">◆</strong> 지식 · 기억 · 결정사항</span>
+          <span><strong style="color:#fbbf24;">✦</strong> 코어 정체성 · AI 크루</span>
+          <span><strong style="color:#60a5fa;">✦</strong> 운영 채널</span>
+          <span><strong style="color:#34d399;">✦</strong> USER · MEMORY</span>
+          <span><strong style="color:#c084fc;">◆</strong> 검증된 지식 · 스킬 · 결정사항</span>
         </div>
       </div>
 
@@ -831,7 +832,7 @@
   </div>
 </div>
 
-<script src="memory_graph_view.js?v=20261019-2"></script>
+<script src="memory_graph_view.js?v=20261019-labels"></script>
 <script>
 (() => {
   const canvas = document.getElementById('memory-canvas');
@@ -993,13 +994,16 @@
 
     // Wide golden-angle spiral initial placement with 1.45x horizontal aspect stretch to match wide canvas
     state.pts = nodes.map((n, i) => {
+      ctx.font = `${n.isCoreHub ? 700 : 600} 11.5px Pretendard, sans-serif`;
+      const labelWidth = Math.ceil(ctx.measureText(truncateTitle(n.label,16)).width + 14);
       const prior = preserveLayout && priorPoints.get(n.id);
-      if (prior) return {...prior,index:i};
+      if (prior) return {...prior,index:i,labelWidth};
       const slot = i % 2 === 0 ? Math.floor(i / 2) : nodes.length - 1 - Math.floor(i / 2);
       const angle = 2.39996 * slot;
       const dist = 76 * Math.sqrt(slot + 1);
       return {
         index: i,
+        labelWidth,
         x: Math.cos(angle) * dist * 1.38,
         y: Math.sin(angle) * dist * 0.96,
         anchorX: Math.cos(angle) * dist * 1.38,
@@ -1053,7 +1057,7 @@
       p.vy += ((0 - p.y) * 0.01 + (p.anchorY - p.y) * 0.025) * alpha;
     }
 
-    // 2. Link spring force (linkDistance: 148px, strength: 0.36)
+    // Degree-normalized springs: 230 world pixels, strength 0.03.
     for (let e = 0; e < state.edges.length; e++) {
       const [si, ti] = state.edges[e];
       const s = pts[si], t = pts[ti];
@@ -1073,7 +1077,7 @@
       s.vy += dy * 0.5;
     }
 
-    // 3. Strong Many-body charge repulsion (-290, distanceMax 950)
+    // Many-body repulsion: charge -700, maximum distance 950 world pixels.
     const stride = N > 600 ? Math.ceil(N / 450) : 1;
     for (let i = 0; i < N; i++) {
       const pi = pts[i];
@@ -1089,32 +1093,6 @@
         pi.vy += dy * f;
         pj.vx -= dx * f * 1.15;
         pj.vy -= dy * f;
-      }
-    }
-
-    // 4. Explicit Collision Radius Enforcement (min 66px radius -> 132px center-to-center horizontal, 92px vertical)
-    for (let iter = 0; iter < 2; iter++) {
-      for (let i = 0; i < N; i++) {
-        const pi = pts[i];
-        for (let j = i + 1; j < N; j++) {
-          const pj = pts[j];
-          let dx = pj.x - pi.x;
-          let dy = pj.y - pi.y;
-          // Elliptical collision box to protect horizontal capsule labels from overlapping
-          const rx = 220;
-          const ry = 105;
-          const nx = dx / rx;
-          const ny = dy / ry;
-          const nd2 = nx * nx + ny * ny;
-          if (nd2 < 1.0) {
-            const nd = Math.sqrt(nd2) || 0.001;
-            const push = (1.0 - nd) * 0.52;
-            const px = (nx / nd) * rx * push;
-            const py = (ny / nd) * ry * push;
-            if (pi.fx === null) { pi.x -= px; pi.y -= py; }
-            if (pj.fx === null) { pj.x += px; pj.y += py; }
-          }
-        }
       }
     }
 
@@ -1134,6 +1112,7 @@
       }
     }
 
+    graphView.separatePoints(pts, 3);
     state.alpha *= (1 - 0.024);
   }
 
@@ -1375,15 +1354,37 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     let activeTooltipIdx = hoverIdx !== null ? hoverIdx : (focusIdx >= 0 ? focusIdx : selectedIdx);
+    const activeNode=state.nodes[activeTooltipIdx], activePoint=screenPts[activeTooltipIdx];
+    let tooltip=null;
+    if(activeNode && activePoint) {
+      const catTag=activeNode.isCoreHub?'코어 허브':activeNode.sourceKind==='project_skill'?'SKILL.md':activeNode.category==='meeting'?'회의실 결정':'지식 · 기억';
+      const subStr=`${graphView.nodeShape(activeNode)==='star'?'✦':'◆'} ${catTag} · 시냅스 ${activeNode.deg}`;
+      ctx.font='800 12.5px Pretendard, sans-serif';
+      const lines=graphView.wrapLabel(activeNode.label,Math.max(80,W-56),text=>ctx.measureText(text).width);
+      const w1=Math.max(...lines.map(text=>ctx.measureText(text).width));
+      ctx.font='600 10.5px Pretendard, sans-serif';
+      const width=Math.min(W-16,Math.ceil(Math.max(w1,ctx.measureText(subStr).width)+20)),height=lines.length*16+22;
+      tooltip={lines,subStr,width,height,x:Math.max(8,Math.min(W-width-8,activePoint.x-width/2)),y:Math.max(8,Math.min(H-height-8,activePoint.y+nodeRadius(activeNode)*scaleClamp*1.85+6))};
+    }
+    const labelBoxes=state.nodes.map((n,i)=>{
+      const sp=screenPts[i],width=state.pts[i].labelWidth;
+      return {index:i,x:Math.round(sp.x-width/2),y:Math.round(sp.y+nodeRadius(n)*scaleClamp*1.75+5),width,height:20,priority:n.isCoreHub?1000+(n.deg||0):(n.deg||0)};
+    }).filter(box=>box.index!==activeTooltipIdx);
+    const glyphBoxes=state.nodes.map((n,i)=>{const r=nodeRadius(n)*scaleClamp*1.65,sp=screenPts[i];return {x:sp.x-r,y:sp.y-r,width:r*2,height:r*2};});
+    const visibleLabels=new Set(graphView.visibleLabels(labelBoxes,W,H,[...glyphBoxes,...(tooltip?[tooltip]:[])]));
+    const labelCount=visibleLabels.size+(tooltip?1:0);
+    canvas.setAttribute('data-label-count',String(labelCount));
+    document.getElementById('graph-label-status').textContent=labelCount<state.nodes.length?`노드 ${state.nodes.length}개 모두 표시 · 겹침 방지 라벨 ${labelCount}개 · 확대하거나 노드를 선택하면 제목을 볼 수 있습니다.`:`노드·라벨 ${state.nodes.length}개 모두 표시.`;
+
 
     for (let i = 0; i < state.nodes.length; i++) {
-      if (i === activeTooltipIdx) continue; // Draw active tooltip on top at the end
+      if (!visibleLabels.has(i)) continue; // Only labels are culled; all graph nodes and edges remain.
       const n = state.nodes[i];
       const isNeighbor = neighborSet && neighborSet.has(i);
-      if (hoverIdx !== null && !isNeighbor && !state.hubSet.has(i)) continue;
+
 
       const sp = screenPts[i];
-      if (!sp || sp.x < 24 || sp.x > W - 24 || sp.y < 18 || sp.y > H - 24) continue;
+      if (!sp) continue;
 
       const r = nodeRadius(n) * scaleClamp;
       const shortLabel = truncateTitle(n.label, 16);
@@ -1422,30 +1423,7 @@
       const n = state.nodes[i];
       const sp = screenPts[i];
       if (sp) {
-        const r = nodeRadius(n) * scaleClamp;
-        const titleStr = truncateTitle(n.label, 22);
-        const catTag = n.subGroup === 'crew'
-          ? 'AI 크루 허브'
-          : (n.subGroup === 'channel'
-            ? '운영 채널 허브'
-            : (n.category === 'skill'
-              ? '코어 스킬(SKILL.md)'
-              : (n.category === 'revenue' ? '수익 발생 기억' : '회의실 결정')));
-        const glyphLabel = graphView.nodeShape(n) === 'star' ? '✦' : '◆';
-        const subStr = n.revenueUsd > 0
-          ? `${glyphLabel} ${catTag} · 시냅스 ${n.deg} · $${n.revenueUsd}`
-          : `${glyphLabel} ${catTag} · 시냅스 ${n.deg}`;
-
-        ctx.font = '800 12.5px Pretendard, sans-serif';
-        const w1 = ctx.measureText(titleStr).width;
-        ctx.font = '600 10.5px Pretendard, sans-serif';
-        const w2 = ctx.measureText(subStr).width;
-
-        const padX = 10;
-        const boxW = Math.ceil(Math.max(w1, w2) + padX * 2);
-        const boxH = 38;
-        const boxX = Math.max(8, Math.min(W - boxW - 8, Math.round(sp.x - boxW / 2)));
-        const boxY = Math.round(sp.y + r * 1.85 + 6);
+        const {width:boxW,height:boxH,x:boxX,y:boxY,lines,subStr}=tooltip;
 
         ctx.save();
         drawRoundRect(ctx, boxX, boxY, boxW, boxH, 7);
@@ -1465,11 +1443,11 @@
           : (n.category === 'skill' || n.subGroup === 'skill')
           ? '#6ee7b7'
           : '#93c5fd';
-        ctx.fillText(titleStr, boxX + boxW / 2, boxY + 12.5);
+        lines.forEach((line,index)=>ctx.fillText(line,boxX+boxW/2,boxY+12.5+index*16));
 
         ctx.font = '600 10.5px Pretendard, sans-serif';
         ctx.fillStyle = '#e2e8f0';
-        ctx.fillText(subStr, boxX + boxW / 2, boxY + 27.5);
+        ctx.fillText(subStr, boxX + boxW / 2, boxY + boxH - 10);
         ctx.restore();
       }
     }
@@ -1553,7 +1531,8 @@
       data = await res.json();
     }
     if (request !== graphRequest) return;
-    const graph = graphView.normalizeGraph(data);
+    const graph = graphView.filterGraph(graphView.normalizeGraph(data),state.categoryFilter);
+    document.getElementById('graph-quarantine-status').textContent=graphView.quarantineLabel(data);
     graphFingerprint = graphView.graphRevision(data);
     state.rawNodes = graph.nodes;
     state.rawEdges = graph.edges;
@@ -1615,7 +1594,7 @@
     }
 
     // Card 3: 3-Bar Horizontal Distribution (Skill / Revenue / Meeting)
-    const skillCnt = state.rawNodes.filter(n => n.sourceKind === 'project_skill').length;
+    const skillCnt = state.rawNodes.filter(graphView.isSkill).length;
     const revCnt = state.rawNodes.filter(n => n.category === 'revenue' && !n.isCoreHub).length;
     const meetCnt = state.rawNodes.filter(n => n.category === 'meeting' && !n.isCoreHub).length;
     const sumKnowledge = skillCnt + revCnt + meetCnt;
@@ -1662,7 +1641,8 @@
     if (sub === 'crew') return '✦ AI 크루 허브';
     if (sub === 'channel') return '✦ 운영 채널 허브';
     if (sourceKind === 'project_skill') return '◆ 실제 스킬 파일(SKILL.md)';
-    if (sub === 'skill') return '✦ 코어 스킬 허브';
+    if (sourceKind === 'bounded_memory') return '✦ USER · MEMORY';
+    if (sub === 'skill') return '◆ 스킬 관련 지식';
     if (cat === 'skill') return '◆ 스킬 관련 지식 메모';
     if (cat === 'revenue') return '📈 수익 발생 기억';
     if (cat === 'meeting') return '💬 회의실 결정사항';
@@ -1725,10 +1705,14 @@
       if (!res.ok) throw new Error(`문서를 불러오지 못했습니다 (${res.status})`);
       const doc = await res.json();
       if (request !== documentRequest) return;
+      // Fixed core identities remain protected even with an older API response.
+      if (doc.isCoreHub === true) doc.deletable = false;
       currentDocument = doc;
       state.selectedRel = doc.rel;
       const editNotice = doc.sourceKind === 'bounded_memory' && doc.deletable === false
         ? '필수 파일 전체 삭제는 불가 · 항목은 원문 편집에서 삭제 가능'
+        : doc.isCoreHub === true
+          ? '고정 코어 정체성은 삭제할 수 없습니다. 본문은 편집할 수 있습니다.'
         : doc.sourceKind === 'sqlite_episode'
           ? '세션 증거는 원본 보존을 위해 편집하거나 삭제할 수 없습니다.'
           : (doc.readOnlyReason || '');

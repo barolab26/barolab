@@ -811,12 +811,12 @@ def _save_rnd_proposal_and_memory(
     ingested_items: List[Dict[str, Any]],
     analysis_text: str,
     user_query: str = "",
-) -> str:
+) -> Optional[str]:
     """
     Automatically register Radar's verified YouTube/Web 3-tier analysis into:
     1) `memory_graph.sqlite3` (`memory.html`) via `register_synapse_memory`
     2) `server/data/rnd_proposals.json` (`rnd.html` R&D 결재함)
-    Returns the registered memory `rel` path.
+    Returns a real registered memory path, or None when promotion is rejected.
     """
     yt = next((it for it in ingested_items if it.get("ok")), ingested_items[0] if ingested_items else {})
     vid = yt.get("videoId") or "web"
@@ -841,9 +841,14 @@ def _save_rnd_proposal_and_memory(
             skill="indirect_experience,svg_capture_guide,adsense_high_rpm",
             rel_override=rel_override,
         )
-        saved_rel = reg.get("rel", rel_override)
+        saved_rel = reg["rel"]
+        promotion = {"status": "applied", "rel": saved_rel}
+    except ValueError as exc:
+        saved_rel = None
+        promotion = {"status": "skipped", "reason": str(exc)}
     except Exception:
-        saved_rel = rel_override
+        saved_rel = None
+        promotion = {"status": "skipped", "reason": "memory_registration_failed"}
 
     # Also save to R&D proposals ledger (`server/data/rnd_proposals.json`) for `rnd.html`
     rnd_file = DATA_DIR / "rnd_proposals.json"
@@ -870,6 +875,7 @@ def _save_rnd_proposal_and_memory(
         "agent": "radar",
         "agentName": "레이더 (@radar)",
         "memoryRel": saved_rel,
+        "memoryPromotion": promotion,
         "createdAt": now_iso,
         "keywords": [
             "1. 부여 낙화놀이 (사전예약·예매 방법·11월 일정·관람표·취소표)",
@@ -2334,21 +2340,31 @@ def end_meeting():
     md_body = "\n".join(lines)
     stem_name = f"{day}-회의록-{hm}"
     rel = f"journal/{stem_name}.md"
-    reg = register_synapse_memory(
-        title=f"{day} 회의실 결정사항 — {topic}",
-        content=md_body,
-        category="meeting",
-        source_agent=",".join(attendees) or "jarvis",
-        rel_override=rel,
-    )
-    rel = reg["rel"]
-
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     ts = int(time.time() * 1000)
     while (ARCHIVE_DIR / f"_room-{ts}.json").exists():
         ts += 1
     arch_file = ARCHIVE_DIR / f"_room-{ts}.json"
     arch_file.write_text(json.dumps(room, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # Archive is source history. Failure to promote it must neither discard the
+    # original conversation nor fabricate a permanent knowledge path.
+    try:
+        reg = register_synapse_memory(
+            title=f"{day} 회의실 결정사항 — {topic}",
+            content=md_body,
+            category="meeting",
+            source_agent=",".join(attendees),
+            rel_override=rel,
+        )
+        rel = reg["rel"]
+        promotion = {"status": "applied", "rel": rel}
+    except ValueError as exc:
+        rel = None
+        promotion = {"status": "skipped", "reason": str(exc)}
+    except Exception:
+        rel = None
+        promotion = {"status": "skipped", "reason": "memory_registration_failed"}
 
     new_room = {
         "messages": [],
@@ -2358,13 +2374,15 @@ def end_meeting():
     }
     save_room_data(new_room)
     from common.llm_client import memory_event
-    # All CEO-ended conversations are reviewed; the reviewer promotes only actual corrections.
+    # Ending a conversation preserves history; the strict gate still requires
+    # structured, quoted evidence before any permanent promotion or model call.
     memory_event(f"chat:{room.get('sid', 1)}:ended", "ceo_correction_conversation_ended",
                  "CEO ended the conversation; identify explicit corrections without inferring approval.",
                  session_id=f"chat:{room.get('sid', 1)}", evidence={"archive": arch_file.name, "journal": rel},
                  messages=[{"role": "user" if m.get("who") == "user" else "assistant", "content": str(m.get("text", ""))}
                            for m in msgs if m.get("who") != "system"], review=True)
-    return {"archived": True, "journal": rel, "archiveId": arch_file.name, "archivedMeetings": list_archived_meetings()}
+    return {"archived": True, "journal": rel, "archiveId": arch_file.name,
+            "memoryPromotion": promotion, "archivedMeetings": list_archived_meetings()}
 
 
 @chat_router.post("/new-meeting")
@@ -2472,13 +2490,16 @@ def save_chat_message_to_memory(req: SaveToMemoryRequest):
         slug_hash = hashlib.md5((req.messageId or body[:120]).encode("utf-8")).hexdigest()[:8]
         rel_override = f"notes/chat-{who}-{slug_hash}.md"
 
-    reg = register_synapse_memory(
-        title=note_title,
-        content=body,
-        category="skill" if who == "radar" else "meeting",
-        source_agent=who,
-        rel_override=rel_override,
-    )
+    try:
+        reg = register_synapse_memory(
+            title=note_title,
+            content=body,
+            category="skill" if who == "radar" else "meeting",
+            source_agent=who,
+            rel_override=rel_override,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
     saved_rel = reg["rel"]
 
     if target_msg is not None:
