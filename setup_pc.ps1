@@ -1,4 +1,4 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 <#
 .SYNOPSIS
   BaroLab GitHub Local Workspace Bootstrapper (C:\10_Project\BaroLab)
@@ -111,7 +111,8 @@ if (-not $SkipTaskScheduler) {
         @{ Name = "BaroLab-System-Watchdog";  Args = "-B -X utf8 `"$RepoRoot\common\system_watchdog.py`" --run --source task-scheduler" },
         @{ Name = "BaroLab-Kin-Seven-Day-Pilot";             Args = "-u -B -X utf8 `"$RepoRoot\naver_kin\scheduler.py`" --tick --scheduled" },
         @{ Name = "BaroLab-Kin-Seven-Day-Pilot-Measurement"; Args = "-u -B -X utf8 `"$RepoRoot\naver_kin\scheduler.py`" --measure --scheduled" },
-        @{ Name = "BaroLab-Threads-Pilot";    Args = "-m threads_posting.scheduler --tick" }
+        @{ Name = "BaroLab-Threads-Pilot";    Args = "-m threads_posting.scheduler --tick" },
+        @{ Name = "BaroLab-Memory-Service";   Args = "-B -X utf8 `"$RepoRoot\server\memory_service.py`" --port 8792" }
     )
 
     foreach ($td in $taskDefs) {
@@ -121,10 +122,17 @@ if (-not $SkipTaskScheduler) {
             Set-ScheduledTask -TaskName $td.Name -Action $action | Out-Null
             Enable-ScheduledTask -TaskName $td.Name | Out-Null
             Write-Host "  - 스케줄러 로컬 경로 전환 완료: $($td.Name) -> $RepoRoot" -ForegroundColor Green
+        } else {
+            try {
+                $action = New-ScheduledTaskAction -Execute $pythonwExe -Argument $td.Args -WorkingDirectory $RepoRoot
+                $trigger = New-ScheduledTaskTrigger -AtLogOn
+                Register-ScheduledTask -TaskName $td.Name -Action $action -Trigger $trigger -Description "BaroLab $($td.Name)" -ErrorAction SilentlyContinue | Out-Null
+                Write-Host "  - 신규 스케줄러 등록 완료: $($td.Name)" -ForegroundColor Green
+            } catch {}
         }
     }
 
-    foreach ($startName in @("BaroLab-Dashboard-Worker", "BaroLab-CF-Cleaner")) {
+    foreach ($startName in @("BaroLab-Dashboard-Worker", "BaroLab-CF-Cleaner", "BaroLab-Memory-Service")) {
         $st = Get-ScheduledTask -TaskName $startName -ErrorAction SilentlyContinue
         if ($st) {
             Start-ScheduledTask -TaskName $startName -ErrorAction SilentlyContinue

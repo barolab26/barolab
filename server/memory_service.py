@@ -18,7 +18,13 @@ def create_app(port=None):
     port = int(port or os.environ.get("BAROLAB_MEMORY_SERVICE_PORT", "8792"))
     # Import the same router as production; never import main.py, whose import
     # starts a periodic project-health worker.
-    from memory_graph import memory_router
+    from memory_graph import memory_router, reset_to_clean_slate, connect_db
+    try:
+        with connect_db() as db:
+            if db.execute("SELECT COUNT(*) FROM docs").fetchone()[0] == 0:
+                reset_to_clean_slate()
+    except Exception:
+        pass
     app = FastAPI(title='BaroLab local memory service')
     origins = [f'http://127.0.0.1:{port}', f'http://localhost:{port}',
                'http://127.0.0.1:8790', 'http://localhost:8790',

@@ -1006,6 +1006,13 @@ def load_all_docs(include_unqualified: bool = False) -> List[Dict[str, Any]]:
             "SELECT rel, kind, category, sub_group, title, links, updated, updated_exact, mtime_ms, size, "
             "revenue_usd, revenue_krw, sessions, is_revenue_hub, is_core_hub, body FROM docs"
         ).fetchall()
+    if not rows:
+        reset_to_clean_slate()
+        with connect_db() as db:
+            rows = db.execute(
+                "SELECT rel, kind, category, sub_group, title, links, updated, updated_exact, mtime_ms, size, "
+                "revenue_usd, revenue_krw, sessions, is_revenue_hub, is_core_hub, body FROM docs"
+            ).fetchall()
     result = []
     for r in rows:
         rel = r["rel"]
