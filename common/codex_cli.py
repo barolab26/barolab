@@ -145,6 +145,16 @@ def _cli_error_detail(stdout, stderr):
     return summary[:1600]
 
 
+def _prepare_cli_image(image_path: Path, folder: Path, index: int) -> Path:
+    """Create a 960x960 JPEG CLI copy without modifying the audited original."""
+    from PIL import Image, ImageOps
+    target = folder / f'cli_vision_{index}_{image_path.stem}.jpg'
+    with Image.open(image_path) as asset:
+        rgb = ImageOps.pad(asset.convert('RGB'), (960, 960), method=Image.Resampling.LANCZOS, color='white')
+        rgb.save(target, format='JPEG', quality=68, optimize=True)
+    return target
+
+
 from common.llm_client import memory_call
 
 
@@ -174,13 +184,15 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
                    '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
                    '-c', 'features.multi_agent=false', '--output-schema', str(schema), '--output-last-message', output, '-']
         image_arguments = []
-        for filename in images or []:
+        original_images = []
+        for index, filename in enumerate(images or [], 1):
             image = Path(filename).resolve()
             allowed_roots = (jobs.ROOT / 'cf_posting' / 'output',
                              jobs.ROOT / 'naver_blog_posting' / 'output', scratch)
             if not image.is_file() or image.suffix.lower() not in ('.jpg', '.jpeg', '.png') or not any(image.is_relative_to(root.resolve()) for root in allowed_roots):
                 raise RuntimeError('검증된 작업 산출물 이미지 경로가 아닙니다.')
-            image_arguments.extend(['--image', str(image)])
+            original_images.append(image)
+            image_arguments.extend(['--image', str(_prepare_cli_image(image, Path(folder), index))])
         command[2:2] = image_arguments
         audit_folder = None
         if audit_directory is not None:
@@ -193,11 +205,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             audit_folder = audit_root / call_id
             audit_folder.mkdir(parents=True, exist_ok=False)
             attached = []
-            # Read the actual command's --image arguments, never the full argv or environment.
-            for index, argument in enumerate(command):
-                if argument != '--image':
-                    continue
-                path = Path(command[index + 1])
+            for path in original_images:
                 with Image.open(path) as asset:
                     width, height = asset.size
                 attached.append({'imageIndex': len(attached) + 1, 'filename': path.name,
