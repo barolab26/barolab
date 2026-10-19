@@ -5323,10 +5323,14 @@ def _doctor_related(target, url, domain, evidence, metrics, now, post_cache):
             if 0 <= (now - published).total_seconds() <= 30 * 86400 and row.get('slug'):
                 basis = 'published_within_30_days' if row.get('published_at') else 'published_inventory_created_within_30_days'
                 options.append((2, 'https://www.' + domain + '/' + row['slug'], basis, row.get('title', '')))
+            elif (now - published).total_seconds() > 30 * 86400 and row.get('slug'):
+                # Older published articles remain eligible only after the same relevance checks.
+                options.append((3, 'https://www.' + domain + '/' + row['slug'],
+                                'older_published_inventory_related', row.get('title', '')))
         except (ValueError, TypeError):
             continue
     seen = set()
-    for tier in (0, 1, 2):
+    for tier in (0, 1, 2, 3):
         reads = 0
         ranked = sorted((row for row in options if row[0] == tier),
                         key=lambda row: len(target_terms & terms(row[3])), reverse=True)
@@ -5446,7 +5450,7 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
         if record.get('status') != 'verified_title_only' or record.get('relatedLinkRepair'):
             continue
         repair_domain = record.get('domain')
-        if link_attempts.get(repair_domain, 0) >= 2:
+        if link_attempts.get(repair_domain, 0) >= (max(0, int(limit)) if limit is not None else 2):
             continue
         link_attempts[repair_domain] = link_attempts.get(repair_domain, 0) + 1
         try:
