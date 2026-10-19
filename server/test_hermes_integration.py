@@ -202,8 +202,9 @@ class MemoryIntegrationTests(unittest.TestCase):
                 patch.object(codex_cli, 'environment', return_value={}), \
                 patch.object(codex_cli.subprocess, 'run', side_effect=subprocess.TimeoutExpired('mock', 9)) as run:
             with self.assertRaises(RuntimeError):
-                codex_cli.generate_local('task', 'test-model', timeout_seconds=9, _skip_memory=True)
-            self.assertEqual(run.call_args.kwargs['timeout'], 9)
+                codex_cli.generate_local('task', 'test-model', timeout_seconds=9)
+            self.assertLessEqual(run.call_args.kwargs['timeout'], 9)
+            self.assertGreater(run.call_args.kwargs['timeout'], 0)
         chat = (Path(__file__).parent / 'chat_room.py').read_text(encoding='utf-8')
         self.assertIn('timeout_seconds=timeout_sec', chat)
 

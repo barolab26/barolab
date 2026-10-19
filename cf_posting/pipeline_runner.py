@@ -3963,6 +3963,8 @@ def publish_post_to_cf(blog_info, uploaded_urls):
 
 GEMINI_API_KEY_FALLBACK = os.environ.get("GEMINI_API_KEY", "")
 
+AGENT_MODEL_TIMEOUT_SECONDS = 600
+
 
 
 
@@ -3995,8 +3997,10 @@ def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
         if not RUN_CONTEXT.get('artifactFolder'):
             raise ReviewRequired('이미지 모델 입력을 보존할 실행 산출물 폴더가 없습니다')
         audit['audit_directory'] = Path(RUN_CONTEXT['artifactFolder']) / 'model-audit' / RUN_CONTEXT['agent']
+    agent = RUN_CONTEXT.get('agent')
+    timeout_seconds = AGENT_MODEL_TIMEOUT_SECONDS if agent in Handoff.agents else None
     return generate_with_prompt_budget(prompt, provider, observer=observe_model, images=images, response_schema=schema,
-                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), **audit)
+                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), timeout_seconds=timeout_seconds, **audit)
 
 
 def validate_article(article):

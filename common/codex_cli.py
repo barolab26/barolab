@@ -191,7 +191,8 @@ def _fallback_candidates(config, primary_model, primary_effort, allowed):
     return candidates
 
 
-def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
+def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None,
+                   timeout_seconds=None):
     from common.llm_client import parse_json
     config = local_config()
     allowed = {row['id'] for row in runtime().get('models', [])}
@@ -203,6 +204,8 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
     if model not in allowed:
         raise RuntimeError('로그인 계정의 모델 목록에 없는 Codex 모델입니다.')
     effort = configured_reasoning_effort(config, model, reasoning_effort)
+    timeout_seconds = 300 if timeout_seconds is None else max(0.1, float(timeout_seconds))
+    deadline = time.monotonic() + timeout_seconds
     scratch = Path.home() / '.barolab' / 'scratch'
     scratch.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='codex-json-', dir=scratch) as folder:
@@ -249,6 +252,9 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         candidates = _fallback_candidates(config, model, effort, allowed)
         last_error = None
         for attempt_idx, (cand_model, cand_effort) in enumerate(candidates):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise RuntimeError('Codex CLI agent stage exceeded its hard timeout.') from last_error
             if Path(output).is_file():
                 try:
                     Path(output).unlink()
@@ -264,8 +270,14 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             try:
                 result = subprocess.run(command, input=full_input,
                     capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
-                    env=environment(config), timeout=300, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                    env=environment(config), timeout=remaining, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             except subprocess.TimeoutExpired:
+                if time.monotonic() >= deadline:
+                    if audit_folder is not None:
+                        if Path(output).is_file():
+                            (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
+                        (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
+                    raise RuntimeError('Codex CLI agent stage exceeded its hard timeout.') from None
                 if attempt_idx + 1 < len(candidates):
                     time.sleep(1.5)
                     continue
@@ -318,10 +330,11 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         raise last_error or RuntimeError('Codex CLI 생성 실패')
 
 
-def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
+def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None,
+             timeout_seconds=None):
     if os.name == 'nt':
         return generate_local(prompt, model, images, response_schema, audit_directory=audit_directory,
-                              reasoning_effort=reasoning_effort)
+                              reasoning_effort=reasoning_effort, timeout_seconds=timeout_seconds)
     if reasoning_effort is not None:
         raise RuntimeError('명시적 추론 강도 선택은 Windows 포스팅 작업에서 실행하세요.')
     info = runtime()

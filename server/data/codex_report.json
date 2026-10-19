@@ -1,7 +1,8 @@
 {
-  "directiveId": "2026-10-20T00:30:00+09:00",
+  "directiveId": "2026-10-20T04:15:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-20T00:32:10.698198+09:00",
+  "startedAt": "2026-10-20T04:20:07.823028+09:00",
+  "blockedAt": "2026-10-20T04:25:08.440503+09:00",
   "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
   "directiveHistory": [
     {
@@ -330,208 +331,151 @@
       "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
       "blockedAt": "2026-10-20T03:41:33.42854+09:00",
       "blockedReason": "Scheduled CF catch-up-once processes are active and cleaner logs continue to report overlap skips, while pipeline_state is idle and CF schedule remains 8 waiting, 5 prepared, 3 failed. No stage 1 duplicate was started. Naver reservation plan is dated 10/19; current 10/20 public evidence contains zero posts for publicationDate 10/20, so rollover is unverified. KIN worker is running for stone0747; no overlapping run or manual quota reset."
-    }
-  ],
-  "summary": "INCOMPLETE: CF queue remains 8 waiting, 5 prepared, 3 failed with no public posts; existing catch-up workers hold the cleaner and no duplicate stage 1 run was started. Threads main/follow-up for 3f6f34fb are queued at 08:00. Naver public evidence received at 04:09:21 KST has 0 posts dated 10/20 and planner source remains dated 10/19. KIN is current at 04:09:43 KST with 3 verified, 17 remaining and no active run; no quota reset was applied.",
-  "changedFiles": [
-    "cf_posting/data/daily_schedule.json",
-    "server/data/codex_report.json",
-    "server/data/live_snapshot.json"
-  ],
-  "commitHash": "423db7a5ba740f64278a65ec80f0f84762ab259f",
-  "results": {
-    "radar": {
-      "date": "2026-10-20",
-      "domains": 16,
-      "waitingSlots": 16,
-      "sourcePeriodStart": "2026-10-12",
-      "sourcePeriodEnd": "2026-10-18",
-      "revenueEvidenceComplete": false,
-      "priorPublishedArchivePreserved": true,
-      "newPublicationTriggered": false
     },
-    "threads": {
-      "queued": true,
-      "published": false,
-      "artifact": "server/data/threads-drafts/3f6f34fbc1e44ecdb534b2a84665b03c.json",
-      "publicationDate": "2026-10-20",
-      "queuedSlots": [
-        "08:00 main",
-        "08:00 followup"
-      ],
-      "evidence": "dashboard/data/threads.json recent rows show both parts queued"
-    },
-    "doctor": {
-      "status": "verified",
-      "domain": "must-good.com",
-      "targetPostId": 284,
-      "sourcePostId": 444,
-      "url": "https://www.must-good.com/2026년-주말-나들이-명소-서울-근교-당일치기-15곳-추천",
-      "sourceUrl": "https://www.must-good.com/2026-autumn-foliage-spots-guide",
-      "title": "2026 서울 근교 당일치기, 아이 동반 가족과 커플별 나들이 선택법",
-      "actualTitleChanged": true,
-      "periodStart": "2026-10-13",
-      "periodEnd": "2026-10-19",
-      "targetDomainTrafficComplete": true,
-      "sessions": 0,
-      "pageViews": 0,
-      "sourceBasis": "observed_gsc_pass",
-      "bothPublicHttpStatus": 200,
-      "reciprocalLinksVerified": true,
-      "additionalQuotaUsed": 0,
-      "existingTodayRecordRefined": true,
-      "baronote317Changed": false
-    },
-    "cfSchedule": {
-      "status": "waiting_for_existing_scheduler",
-      "date": "2026-10-20",
-      "total": 16,
-      "prepared": 5,
-      "failed": 3,
-      "waiting": 8,
-      "activeWorkerPids": [
-        55072,
-        50448
-      ],
-      "pipelineState": "idle",
-      "lockHeld": true,
-      "overlappingRunPrevented": true,
-      "publicPublishing": false,
-      "published": 0,
-      "observedAt": "2026-10-20T04:13:36.7100896+09:00",
-      "reason": "CF catch-up-once workers PID 55072 (04:05:51 KST) and PID 50448 (04:09:49 KST) are active; cleaner log still reports overlap skips, pipeline_state remains idle, and the queue remains 8 waiting, 5 prepared, 3 failed. No duplicate stage 1 run was started. Threads main and follow-up for 3f6f34fb are both queued for 10/20 08:00. Naver public verification was received at 04:09:21 KST with zero posts dated 10/20; the blog planner remains dated 10/19, so the blog rollover is unverified. KIN is current for 10/20 at 04:09:43 KST: 3 verified, 17 remaining, activeRun null; no manual reset or overlapping run.",
-      "cleanerLastCheckedAt": "2026-10-20T04:13:02+09:00"
-    },
-    "quotas": {
-      "naver": {
-        "date": "2026-10-20",
-        "verifiedReservations": 7,
-        "targetReservations": 10,
-        "publicVerifiedToday": 0,
-        "remainingReservations": 3,
-        "evidenceAsOf": "2026-10-20T01:31:38+09:00",
-        "sourceFreshness": "stale; 2026-10-19 planner source",
-        "manualResetApplied": false,
-        "publicVerificationReceivedAt": "2026-10-20T04:09:21.653021+09:00"
-      },
-      "kin": {
-        "date": "2026-10-20",
-        "checkedAt": "2026-10-20T04:09:43.571935+09:00",
-        "globalDailyCap": 20,
-        "accountDailyCap": 10,
-        "attempted": 4,
-        "publishedVerified": 3,
-        "remainingScheduled": 17,
-        "byAccount": {
-          "adinfo0905": {
-            "attempted": 2,
-            "publishedVerified": 2,
-            "remainingScheduled": 8
+    {
+      "directiveId": "2026-10-20T04:15:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T04:20:07.823028+09:00",
+      "blockedAt": "2026-10-20T04:25:08.440503+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
+      "summary": "INCOMPLETE: CF agent hard-timeout change passed its focused test, but the scheduled cleaner owner PID 2600 currently holds the cleaner lock, so no overlapping retry or 20-post remodel run was started. The queue remains 8 waiting, 5 prepared, 3 failed. Naver rollover/publication is not evidenced for 10/20; KIN stone0747 tick ended blocked with operation_RuntimeError before submission. SearchAdvisor reports history_unconfirmed with remaining=null and a hard daily limit of 50, so the requested 800/domain submissions were not attempted.",
+      "taskProgress": {
+        "cfCleanerTimeoutAndOwnerCheck": {
+          "status": "partial",
+          "hardTimeoutSeconds": 600,
+          "test": "server.test_hermes_integration.MemoryIntegrationTests.test_chat_generation_timeout_reaches_api_and_codex_process passed",
+          "ownerPid": 2600,
+          "ownerStartedAt": "2026-10-20T04:20:40+09:00",
+          "pipelineState": "idle",
+          "queueCounts": {
+            "waiting": 8,
+            "failed": 3,
+            "prepared": 5
           },
-          "stone0747": {
-            "attempted": 2,
-            "publishedVerified": 1,
-            "remainingScheduled": 9
-          }
+          "retryStarted": false,
+          "reason": "Scheduled cleaner owner is active; overlapping invocation skipped."
         },
-        "manualResetApplied": false,
-        "activeRunId": null,
-        "activeAccount": null
-      }
-    }
-  },
-  "completedAt": null,
-  "completionPing": {
-    "status": "sent_verified",
-    "text": "코덱스 작업 완료: 10/20 스케줄 수립 및 Threads 실생성 테스트 완료.",
-    "destination": "Gemini desktop / BaroLab project",
-    "sentAt": "2026-10-20T00:28:25.509347+09:00",
-    "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
-  },
-  "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T04:13:36.7100896+09:00",
-  "failureAt": "2026-10-20T02:28:06.626516+09:00",
-  "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
-  "attemptHistory": [
-    {
-      "attempt": 2,
-      "startedAt": "2026-10-20T02:32:16.272403+09:00",
-      "trigger": "retry waiting CF draft queue only",
-      "previousAttempt": {
-        "status": "failed",
-        "failureAt": "2026-10-20T02:28:06.626516+09:00",
-        "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
-        "summary": "CF prepare-only run failed partially: maxnote.kr researcher stalled at stage 2 (24%) for over one hour. The owned process was interrupted cleanly; 5 items prepared, 3 failed (including the interrupted item), 8 remain waiting. No CF post was published. Threads draft 3f6f34fb remains queued for 08:00, not published. KIN source at 02:24 KST shows 3/20 published_verified, 17 remaining, with stone0747 blocked by operation_ReadTimeout; no quota reset was applied. Naver daily evidence remains 7/10 verified reservations as of 01:31 KST; latest dashboard verification is stale, so no newer public count is claimed.",
-        "commitHash": "423db7a5ba740f64278a65ec80f0f84762ab259f"
-      }
-    },
-    {
-      "attempt": 2,
-      "observedAt": "2026-10-20T02:33:52.090845+09:00",
-      "status": "waiting_for_existing_scheduler",
-      "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
-      "activeWorkerPid": 38996
-    },
-    {
-      "attempt": 3,
-      "startedAt": "2026-10-20T02:41:56.5630255+09:00",
-      "trigger": "resume failed and waiting CF draft domains only",
-      "previousAttempt": "Worker PID 38996 exited; no publication was made; prepared items preserved.",
-      "status": "waiting_for_existing_scheduler",
-      "observedAt": "2026-10-20T02:42:34.3619657+09:00",
-      "reason": "All 11 direct prepare-only invocations were refused by cleaner_lock while scheduled worker PID 48348 was active; no retry pipeline started.",
-      "activeWorkerPid": 48348
-    },
-    {
-      "observedAt": "2026-10-20T03:08:15.7725505+09:00",
-      "status": "blocked_waiting_for_existing_worker",
-      "activeWorkerPid": 50156,
-      "reason": "CF cleaner log repeatedly reports already running. Catch-up worker PID 50156 is executing pipeline_runner.py --catch-up-once since 03:00:24 KST; no overlapping stage 1 run was started."
-    },
-    {
-      "observedAt": "2026-10-20T03:16:09.3043217+09:00",
-      "status": "blocked_waiting_for_existing_worker",
-      "activeWorkerPid": 47772,
-      "reason": "The scheduled CF catch-up runner PID 47772 is still active and scheduler.log continues to report overlapping cleaner invocations skipped. Queue remains unchanged; no safe stage 1 retry is available."
-    },
-    {
-      "observedAt": "2026-10-20T03:31:18.9100071+09:00",
-      "status": "blocked_waiting_for_existing_worker",
-      "activeWorkerPid": 55500,
-      "reason": "CF queue is unchanged; scheduled catch-up runner PID 55500 is active since 03:28:39 KST and scheduler.log continues to report cleaner overlap skips. Avoid a duplicate stage 1 run."
-    },
-    {
-      "observedAt": "2026-10-20T03:36:45.1058721+09:00",
-      "status": "blocked_waiting_for_existing_worker",
-      "activeWorkerPid": 18452,
-      "reason": "The latest catch-up-once worker PID 18452 remains active since 03:34:29 KST. Scheduler log continues reporting cleaner overlap skips; pipeline state is idle and the CF queue has not changed, so a second stage 1 run remains unsafe."
-    },
-    {
-      "observedAt": "2026-10-20T03:41:33.42854+09:00",
-      "status": "blocked_waiting_for_existing_worker",
-      "activeWorkerPid": 22848,
-      "reason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started."
-    },
-    {
-      "observedAt": "2026-10-20T04:13:36.7100896+09:00",
-      "status": "blocked_waiting_for_existing_worker",
-      "activeWorkerPids": [
-        55072,
-        50448
+        "naverRolloverAndKinTimeout": {
+          "status": "blocked",
+          "plannerWorkDate": "2026-10-19",
+          "publicVerificationDate": "2026-10-20",
+          "publicEvidenceCount": 58,
+          "evidenceFor2026-10-20": 0,
+          "kinLastOperation": {
+            "state": "blocked",
+            "reason": "operation_RuntimeError",
+            "submissionAttempted": false,
+            "submitted": false
+          },
+          "quotaReset": false,
+          "reason": "No verified rollover plan or safe retry basis; do not duplicate scheduler tick."
+        },
+        "doctorRemodel20Posts": {
+          "status": "blocked",
+          "started": false,
+          "reason": "CF cleaner is the active owner of the same content-maintenance pipeline; no overlapping edit run."
+        },
+        "searchAdvisorUpTo800PerDomain": {
+          "status": "blocked",
+          "attempted": false,
+          "budget": {
+            "status": "history_unconfirmed",
+            "remaining": null,
+            "limit": 50
+          },
+          "reason": "Account-wide hard cap is 50/day and history is unconfirmed; no cap bypass or submission."
+        },
+        "geminiBlockedAlert": {
+          "status": "pending_afterReportUploadVerification",
+          "deduplicatedByDirectiveId": true
+        },
+        "snapshotSync": {
+          "status": "localValidated",
+          "schema": "barolab-live-snapshot-v1",
+          "generatedAt": "2026-10-19T19:23:05.536841+00:00",
+          "complete": true
+        }
+      },
+      "blockedReason": "Execution limited to avoid concurrent edits/submissions: active scheduled CF cleaner lock/PID; Naver KIN operation failed before submission and rollover is not verified; SearchAdvisor safety ledger cannot confirm budget and enforced cap 50 is below requested 800 per domain.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py",
+        "common/codex_cli.py",
+        "server/test_hermes_integration.py",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
       ],
-      "cfQueue": "8 waiting, 5 prepared, 3 failed",
-      "threadsQueued": [
-        "3f6f34fbc1e44ecdb534b2a84665b03c-0",
-        "3f6f34fbc1e44ecdb534b2a84665b03c-1"
-      ],
-      "naverPublicVerifiedToday": 0,
-      "kinPublishedVerified": 3,
-      "kinRemaining": 17,
-      "reason": "CF catch-up-once workers PID 55072 (04:05:51 KST) and PID 50448 (04:09:49 KST) are active; cleaner log still reports overlap skips, pipeline_state remains idle, and the queue remains 8 waiting, 5 prepared, 3 failed. No duplicate stage 1 run was started. Threads main and follow-up for 3f6f34fb are both queued for 10/20 08:00. Naver public verification was received at 04:09:21 KST with zero posts dated 10/20; the blog planner remains dated 10/19, so the blog rollover is unverified. KIN is current for 10/20 at 04:09:43 KST: 3 verified, 17 remaining, activeRun null; no manual reset or overlapping run."
+      "commitHash": null
     }
   ],
-  "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
-  "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
-  "blockedAt": "2026-10-20T04:13:36.7100896+09:00",
-  "blockedReason": "CF catch-up-once workers PID 55072 (04:05:51 KST) and PID 50448 (04:09:49 KST) are active; cleaner log still reports overlap skips, pipeline_state remains idle, and the queue remains 8 waiting, 5 prepared, 3 failed. No duplicate stage 1 run was started. Threads main and follow-up for 3f6f34fb are both queued for 10/20 08:00. Naver public verification was received at 04:09:21 KST with zero posts dated 10/20; the blog planner remains dated 10/19, so the blog rollover is unverified. KIN is current for 10/20 at 04:09:43 KST: 3 verified, 17 remaining, activeRun null; no manual reset or overlapping run."
+  "summary": "INCOMPLETE: CF agent hard-timeout change passed its focused test, but the scheduled cleaner owner PID 2600 currently holds the cleaner lock, so no overlapping retry or 20-post remodel run was started. The queue remains 8 waiting, 5 prepared, 3 failed. Naver rollover/publication is not evidenced for 10/20; KIN stone0747 tick ended blocked with operation_RuntimeError before submission. SearchAdvisor reports history_unconfirmed with remaining=null and a hard daily limit of 50, so the requested 800/domain submissions were not attempted.",
+  "changedFiles": [
+    "cf_posting/pipeline_runner.py",
+    "common/codex_cli.py",
+    "server/test_hermes_integration.py",
+    "server/data/live_snapshot.json",
+    "server/data/codex_report.json"
+  ],
+  "commitHash": null,
+  "taskProgress": {
+    "cfCleanerTimeoutAndOwnerCheck": {
+      "status": "partial",
+      "hardTimeoutSeconds": 600,
+      "test": "server.test_hermes_integration.MemoryIntegrationTests.test_chat_generation_timeout_reaches_api_and_codex_process passed",
+      "ownerPid": 2600,
+      "ownerStartedAt": "2026-10-20T04:20:40+09:00",
+      "pipelineState": "idle",
+      "queueCounts": {
+        "waiting": 8,
+        "failed": 3,
+        "prepared": 5
+      },
+      "retryStarted": false,
+      "reason": "Scheduled cleaner owner is active; overlapping invocation skipped."
+    },
+    "naverRolloverAndKinTimeout": {
+      "status": "blocked",
+      "plannerWorkDate": "2026-10-19",
+      "publicVerificationDate": "2026-10-20",
+      "publicEvidenceCount": 58,
+      "evidenceFor2026-10-20": 0,
+      "kinLastOperation": {
+        "state": "blocked",
+        "reason": "operation_RuntimeError",
+        "submissionAttempted": false,
+        "submitted": false
+      },
+      "quotaReset": false,
+      "reason": "No verified rollover plan or safe retry basis; do not duplicate scheduler tick."
+    },
+    "doctorRemodel20Posts": {
+      "status": "blocked",
+      "started": false,
+      "reason": "CF cleaner is the active owner of the same content-maintenance pipeline; no overlapping edit run."
+    },
+    "searchAdvisorUpTo800PerDomain": {
+      "status": "blocked",
+      "attempted": false,
+      "budget": {
+        "status": "history_unconfirmed",
+        "remaining": null,
+        "limit": 50
+      },
+      "reason": "Account-wide hard cap is 50/day and history is unconfirmed; no cap bypass or submission."
+    },
+    "geminiBlockedAlert": {
+      "status": "pending_afterReportUploadVerification",
+      "deduplicatedByDirectiveId": true
+    },
+    "snapshotSync": {
+      "status": "localValidated",
+      "schema": "barolab-live-snapshot-v1",
+      "generatedAt": "2026-10-19T19:23:05.536841+00:00",
+      "complete": true
+    }
+  },
+  "blockedReason": "Execution limited to avoid concurrent edits/submissions: active scheduled CF cleaner lock/PID; Naver KIN operation failed before submission and rollover is not verified; SearchAdvisor safety ledger cannot confirm budget and enforced cap 50 is below requested 800 per domain.",
+  "completionPing": {
+    "status": "not_sent",
+    "reason": "Directive is blocked/partial, not completed."
+  }
 }
