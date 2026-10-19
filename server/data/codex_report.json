@@ -1323,13 +1323,59 @@
         "actualIndexingVerified": false
       },
       "driveSync": {
-        "status": "pending"
+        "status": "verified",
+        "fileCount": 7,
+        "verifiedAt": "2026-10-19T22:50:47.118329+00:00",
+        "files": [
+          {
+            "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+            "name": "live_snapshot.json",
+            "modifiedTime": "2026-10-19T22:50:18.527Z",
+            "size": "7964"
+          },
+          {
+            "id": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
+            "name": "codex_report.json",
+            "modifiedTime": "2026-10-19T22:50:20.807Z",
+            "size": "66730"
+          },
+          {
+            "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+            "name": "revenue.json",
+            "modifiedTime": "2026-10-19T22:50:23.410Z",
+            "size": "191141"
+          },
+          {
+            "id": "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+            "name": "metrics.json",
+            "modifiedTime": "2026-10-19T22:50:26.271Z",
+            "size": "3572532"
+          },
+          {
+            "id": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+            "name": "daily_schedule.json",
+            "modifiedTime": "2026-10-19T22:50:29.113Z",
+            "size": "2146438"
+          },
+          {
+            "id": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+            "name": "kin.json",
+            "modifiedTime": "2026-10-19T22:50:31.758Z",
+            "size": "45716"
+          },
+          {
+            "id": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
+            "name": "naver_automation.json",
+            "modifiedTime": "2026-10-19T22:50:34.248Z",
+            "size": "16312"
+          }
+        ]
       },
       "geminiNotification": {
         "directiveId": "2026-10-20T07:00:00+09:00",
         "status": "pending"
       },
-      "updatedAt": "2026-10-19T22:50:02.482003+00:00"
+      "updatedAt": "2026-10-19T22:50:47.118329+00:00"
     }
   ],
   "summary": "SearchAdvisor 40건 접수 확인. 5개 기존 반려 원고는 결합 재보완 검수가 통과하지 못했고, waiting 6건 모두 prepared 0건으로 실제 검수 대기 또는 주제/근거 불일치 상태를 보존했다. 관련 파이프라인 fail-open 3건을 좁게 고쳐 회귀 검증 후 푸시했다.",
@@ -1384,7 +1430,7 @@
     "publication": "none"
   },
   "previousLastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
-  "updatedAt": "2026-10-19T22:50:02.482003+00:00",
+  "updatedAt": "2026-10-19T22:50:47.118329+00:00",
   "checkedAt": "2026-10-19T21:57:38.288747+00:00",
   "geminiNotification": {
     "directiveId": "2026-10-20T07:00:00+09:00",
@@ -1412,7 +1458,53 @@
   },
   "commitHash": "1c67dda31fc5182ce0fd8f7600a384041fbca275",
   "driveSync": {
-    "status": "pending"
+    "status": "verified",
+    "fileCount": 7,
+    "verifiedAt": "2026-10-19T22:50:47.118329+00:00",
+    "files": [
+      {
+        "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+        "name": "live_snapshot.json",
+        "modifiedTime": "2026-10-19T22:50:18.527Z",
+        "size": "7964"
+      },
+      {
+        "id": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
+        "name": "codex_report.json",
+        "modifiedTime": "2026-10-19T22:50:20.807Z",
+        "size": "66730"
+      },
+      {
+        "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+        "name": "revenue.json",
+        "modifiedTime": "2026-10-19T22:50:23.410Z",
+        "size": "191141"
+      },
+      {
+        "id": "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+        "name": "metrics.json",
+        "modifiedTime": "2026-10-19T22:50:26.271Z",
+        "size": "3572532"
+      },
+      {
+        "id": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+        "name": "daily_schedule.json",
+        "modifiedTime": "2026-10-19T22:50:29.113Z",
+        "size": "2146438"
+      },
+      {
+        "id": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+        "name": "kin.json",
+        "modifiedTime": "2026-10-19T22:50:31.758Z",
+        "size": "45716"
+      },
+      {
+        "id": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
+        "name": "naver_automation.json",
+        "modifiedTime": "2026-10-19T22:50:34.248Z",
+        "size": "16312"
+      }
+    ]
   },
   "reportCommitHash": "2413464696c492210acfa89be839f4f7ff7b8d83",
   "completedAt": "2026-10-19T22:50:02.482003+00:00"
