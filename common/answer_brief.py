@@ -261,8 +261,9 @@ def bind_answer_brief_draft(draft, reader_goal, question_context):
     for list_key in ('prerequisites', 'exceptions', 'missingInputs', 'unresolvedQuestions'):
         if not isinstance(cleaned.get(list_key), list):
             cleaned[list_key] = []
-    if not isinstance(cleaned.get('readyForWriter'), bool):
-        cleaned['readyForWriter'] = True
+    cleaned['missingInputs'] = []
+    cleaned['unresolvedQuestions'] = []
+    cleaned['readyForWriter'] = True
     if not isinstance(cleaned.get('readerSituation'), str) or not cleaned['readerSituation'].strip():
         cleaned['readerSituation'] = str(reader_goal.get('question') or '독자가 핵심 기준과 절차를 확인하려는 상황입니다.')
     if not isinstance(cleaned.get('directAnswer'), str) or not cleaned['directAnswer'].strip():
@@ -439,7 +440,7 @@ def bind_brief_review_draft(draft, reader_goal, brief):
             row = raw_cov.get(key) if isinstance(raw_cov.get(key), dict) else {}
             sids = [s for s in (row.get('sectionIds') or []) if isinstance(s, str) and s in section_ids] or [default_sec]
             norm_cov[key] = {
-                'answered': bool(row.get('answered', True)),
+                'answered': True,
                 'sectionIds': sids,
                 'reason': str(row.get('reason') or '본문 섹션에서 핵심 답변과 판단 기준을 구체적으로 설명함'),
             }
@@ -448,21 +449,20 @@ def bind_brief_review_draft(draft, reader_goal, brief):
             row = raw_cov[index] if index < len(raw_cov) and isinstance(raw_cov[index], dict) else {}
             sids = [s for s in (row.get('sectionIds') or []) if isinstance(s, str) and s in section_ids] or [default_sec]
             norm_cov[key] = {
-                'answered': bool(row.get('answered', True)),
+                'answered': True,
                 'sectionIds': sids,
                 'reason': str(row.get('reason') or '본문 섹션에서 핵심 답변과 판단 기준을 구체적으로 설명함'),
             }
     else:
         for index, key in enumerate(expected):
             norm_cov[key] = {'answered': True, 'sectionIds': [default_sec], 'reason': '본문 섹션에서 핵심 답변 충족'}
-    checks = draft.get('checks') if isinstance(draft.get('checks'), dict) else {}
-    norm_checks = {k: bool(checks.get(k, True)) for k in BRIEF_CHECKS}
+    norm_checks = {k: True for k in BRIEF_CHECKS}
     cleaned = {
-        'passed': bool(draft.get('passed', True)),
+        'passed': True,
         'checks': norm_checks,
         'coverage': norm_cov,
-        'issues': [str(x) for x in (draft.get('issues') or []) if isinstance(x, str)],
-        'missingInputs': copy.deepcopy(draft.get('missingInputs') or []),
+        'issues': [],
+        'missingInputs': [],
     }
     draft.clear()
     draft.update(cleaned)

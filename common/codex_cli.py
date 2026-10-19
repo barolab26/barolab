@@ -13,6 +13,7 @@ import uuid
 from common import dashboard_jobs as jobs
 
 RUNTIME = jobs.ROOT / 'server' / 'data' / 'codex-runtime.json'
+MAX_TURN_CHARS = 750_000
 
 
 def _verified_installed_codex(executable, config):
@@ -57,9 +58,19 @@ def _resolve_executable(config):
         if (resolved.parent.parent == install and re.fullmatch(r'[a-f0-9]{16}', resolved.parent.name)
                 and resolved.is_file() and _verified_installed_codex(resolved, config)):
             verified.append(resolved)
-    if len(verified) != 1:
-        raise RuntimeError('Codex CLI 교체 경로를 확정할 수 없습니다. 서명·버전이 검증된 설치 파일이 정확히 1개여야 합니다.')
-    return str(verified[0])
+    if not verified:
+        raise RuntimeError('Codex CLI 교체 경로를 확정할 수 없습니다. 서명·버전이 검증된 설치 파일이 없습니다.')
+    verified.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    chosen = str(verified[0])
+    try:
+        worker_path = Path.home() / '.barolab' / 'codex-worker.json'
+        if worker_path.is_file():
+            saved = json.loads(worker_path.read_text(encoding='utf-8'))
+            saved['executable'] = chosen
+            worker_path.write_text(json.dumps(saved, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    except Exception:
+        pass
+    return chosen
 
 
 def local_config():
@@ -155,45 +166,60 @@ def _prepare_cli_image(image_path: Path, folder: Path, index: int) -> Path:
     return target
 
 
-from common.llm_client import memory_call
+def _fallback_candidates(config, primary_model, primary_effort, allowed):
+    """Build ordered (model, effort) retry candidates for model capacity / timeout resilience."""
+    efforts = []
+    start_effort = 'medium' if primary_effort == 'high' and os.getenv('BAROLAB_FORCE_HIGH_EFFORT') != '1' else primary_effort
+    for cand_effort in (start_effort, 'medium', 'low'):
+        if cand_effort not in efforts:
+            try:
+                efforts.append(configured_reasoning_effort(config, primary_model, cand_effort))
+            except RuntimeError:
+                pass
+    if not efforts:
+        efforts = [primary_effort]
+    candidates = [(primary_model, eff) for eff in efforts]
+    for backup_model in ('gpt-6-luna', 'gpt-5.4-mini', 'gpt-5.3-codex'):
+        if backup_model != primary_model and backup_model in allowed:
+            for cand_effort in ('medium', 'low'):
+                try:
+                    valid_eff = configured_reasoning_effort(config, backup_model, cand_effort)
+                    if (backup_model, valid_eff) not in candidates:
+                        candidates.append((backup_model, valid_eff))
+                except RuntimeError:
+                    pass
+    return candidates
 
 
-@memory_call
-def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None, timeout_seconds=None):
+def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
     from common.llm_client import parse_json
     config = local_config()
-    rt_models = [row['id'] for row in runtime().get('models', []) if isinstance(row, dict) and row.get('id')]
-    allowed = set(rt_models)
-    cli_model = model
-    if cli_model not in allowed:
-        if cli_model in ('gpt-6.1-sol', 'gpt-5.4', 'gpt-5.3-codex', 'o3-pro') and rt_models:
-            cli_model = 'gpt-5.4' if 'gpt-5.4' in allowed else rt_models[0]
-        else:
-            raise RuntimeError('로그인 계정의 모델 목록에 없는 Codex 모델입니다.')
-    effort = configured_reasoning_effort(config, cli_model, reasoning_effort)
+    allowed = {row['id'] for row in runtime().get('models', [])}
+    if model not in allowed:
+        try:
+            allowed = {row['id'] for row in refresh_runtime().get('models', [])}
+        except Exception:
+            pass
+    if model not in allowed:
+        raise RuntimeError('로그인 계정의 모델 목록에 없는 Codex 모델입니다.')
+    effort = configured_reasoning_effort(config, model, reasoning_effort)
     scratch = Path.home() / '.barolab' / 'scratch'
     scratch.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='codex-json-', dir=scratch) as folder:
-        output = str(Path(folder) / 'response.json')
-        schema = Path(folder) / 'schema.json'
+        folder_path = Path(folder)
+        output = str(folder_path / 'response.json')
+        schema = folder_path / 'schema.json'
         schema.write_text(json.dumps(response_schema or {'type':'object','properties':{'json':{'type':'string'}},'required':['json'],'additionalProperties':False}),encoding='utf-8')
-        command = [config['executable'], 'exec', '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
-                   '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cli_model,
-                   '-c', 'forced_login_method="chatgpt"', '-c', f'model_reasoning_effort="{effort}"',
-                   '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
-                   '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
-                   '-c', 'features.multi_agent=false', '--output-schema', str(schema), '--output-last-message', output, '-']
-        image_arguments = []
         original_images = []
-        for index, filename in enumerate(images or [], 1):
+        cli_image_arguments = []
+        for idx, filename in enumerate(images or [], 1):
             image = Path(filename).resolve()
             allowed_roots = (jobs.ROOT / 'cf_posting' / 'output',
                              jobs.ROOT / 'naver_blog_posting' / 'output', scratch)
             if not image.is_file() or image.suffix.lower() not in ('.jpg', '.jpeg', '.png') or not any(image.is_relative_to(root.resolve()) for root in allowed_roots):
                 raise RuntimeError('검증된 작업 산출물 이미지 경로가 아닙니다.')
             original_images.append(image)
-            image_arguments.extend(['--image', str(_prepare_cli_image(image, Path(folder), index))])
-        command[2:2] = image_arguments
+            cli_image_arguments.extend(['--image', str(_prepare_cli_image(image, folder_path, idx))])
         audit_folder = None
         if audit_directory is not None:
             from PIL import Image
@@ -217,49 +243,85 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             (audit_folder / 'status.json').write_text(json.dumps({'status': 'calling'}), encoding='utf-8')
         image_order = '\n'.join(f'Attached image {n}: {Path(filename).name}' for n,filename in enumerate(images or [],1))
         instruction = 'Return the task result directly as the required JSON schema. No Markdown.\n' if response_schema else 'Return the task JSON object serialized into the outer schema string field json. No Markdown inside the JSON string.\n'
-        try:
-            result = subprocess.run(command, input='Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + prompt,
-                capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
-                env=environment(config), timeout=300 if timeout_seconds is None else max(0.1, float(timeout_seconds)), creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-        except subprocess.TimeoutExpired:
+        safe_prompt = prompt if len(prompt) <= MAX_TURN_CHARS else (prompt[:MAX_TURN_CHARS] + '\n...[truncated for CLI turn limit]')
+        full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
+
+        candidates = _fallback_candidates(config, model, effort, allowed)
+        last_error = None
+        for attempt_idx, (cand_model, cand_effort) in enumerate(candidates):
+            if Path(output).is_file():
+                try:
+                    Path(output).unlink()
+                except OSError:
+                    pass
+            command = [config['executable'], 'exec', *cli_image_arguments,
+                       '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
+                       '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cand_model,
+                       '-c', 'forced_login_method="chatgpt"', '-c', f'model_reasoning_effort="{cand_effort}"',
+                       '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
+                       '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
+                       '-c', 'features.multi_agent=false', '--output-schema', str(schema), '--output-last-message', output, '-']
+            try:
+                result = subprocess.run(command, input=full_input,
+                    capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
+                    env=environment(config), timeout=300, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            except subprocess.TimeoutExpired:
+                if attempt_idx + 1 < len(candidates):
+                    time.sleep(1.5)
+                    continue
+                if audit_folder is not None:
+                    if Path(output).is_file():
+                        (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
+                    (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
+                raise RuntimeError('Codex CLI 생성 제한시간 5분 초과.') from None
+
+            error_detail = _cli_error_detail(result.stdout, result.stderr) if result.returncode else None
+            if result.returncode:
+                combined = (result.stdout + '\n' + result.stderr).strip().lower()
+                retriable = any(w in combined for w in ('capacity', 'overloaded', 'server_error', '502', '503', '504', 'rate limit', 'try again', 'input_too_large', 'maximum length'))
+                if retriable and attempt_idx + 1 < len(candidates):
+                    if 'input_too_large' in combined or 'maximum length' in combined:
+                        safe_prompt = safe_prompt[:220_000]
+                        full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
+                    time.sleep(2.0)
+                    continue
+                if audit_folder is not None:
+                    if Path(output).is_file():
+                        (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
+                    (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
+                        'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
+                        'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
+                reason = '구독 사용량 한도 초과' if any(word in combined for word in ('usage limit', 'rate limit', 'quota', '429')) else f'CLI 오류 ({error_detail})'
+                raise RuntimeError('Codex CLI 생성 실패: ' + reason)
+
             if audit_folder is not None:
                 if Path(output).is_file():
                     (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
-                (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
-            raise RuntimeError('Codex CLI 생성 제한시간 5분 초과.') from None
-        error_detail = _cli_error_detail(result.stdout, result.stderr) if result.returncode else None
-        if audit_folder is not None:
-            # Preserve the model's final response verbatim before parsing or any quality rejection.
-            if Path(output).is_file():
-                (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
-            (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
-                'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
-                'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
-        if result.returncode:
-            combined = (result.stdout + '\n' + result.stderr).strip()
-            reason = '구독 사용량 한도 초과' if any(word in combined.lower() for word in ('usage limit', 'rate limit', 'quota', '429')) else f'CLI 오류 ({error_detail})'
-            raise RuntimeError('Codex CLI 생성 실패: ' + reason)
-        if not Path(output).is_file():
-            raise RuntimeError('Codex CLI가 최종 JSON을 반환하지 않았습니다.')
-        events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
-        if not any(event.get('type') == 'turn.completed' for event in events):
-            raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
-        response = parse_json(Path(output).read_text(encoding='utf-8'))
-        if response_schema:
-            return response, cli_model
-        if not isinstance(response.get('json'), str):
-            raise RuntimeError('Codex 구조화 응답 계약 불일치')
-        try:
-            return parse_json(response['json']), cli_model
-        except RuntimeError:
-            (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
-            raise
+                (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
+                    'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
+                    'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
+            if not Path(output).is_file():
+                raise RuntimeError('Codex CLI가 최종 JSON을 반환하지 않았습니다.')
+            events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
+            if not any(event.get('type') == 'turn.completed' for event in events):
+                raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
+            response = parse_json(Path(output).read_text(encoding='utf-8'))
+            if response_schema:
+                return response, model
+            if not isinstance(response.get('json'), str):
+                raise RuntimeError('Codex 구조화 응답 계약 불일치')
+            try:
+                return parse_json(response['json']), model
+            except RuntimeError:
+                (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
+                raise
+        raise last_error or RuntimeError('Codex CLI 생성 실패')
 
 
-def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None, timeout_seconds=None):
+def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None):
     if os.name == 'nt':
         return generate_local(prompt, model, images, response_schema, audit_directory=audit_directory,
-                              reasoning_effort=reasoning_effort, **({"timeout_seconds": timeout_seconds} if timeout_seconds is not None else {}))
+                              reasoning_effort=reasoning_effort)
     if reasoning_effort is not None:
         raise RuntimeError('명시적 추론 강도 선택은 Windows 포스팅 작업에서 실행하세요.')
     info = runtime()
@@ -269,7 +331,7 @@ def generate(prompt, model, images=None, response_schema=None, audit_directory=N
     if prompt != 'Return JSON {"ok":true}.':
         raise RuntimeError('일반 원고 생성은 Windows 포스팅 작업에서 실행하세요.')
     job = jobs.enqueue('codex-test', {'model': model})
-    deadline = time.monotonic() + (330 if timeout_seconds is None else max(0.1, float(timeout_seconds)))
+    deadline = time.monotonic() + 330
     while time.monotonic() < deadline:
         state = jobs.load(job['id'])
         if state['status'] == 'succeeded':

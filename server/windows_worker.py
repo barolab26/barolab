@@ -315,6 +315,15 @@ def serve_cf_retries():
         time.sleep(1)
 
 
+def serve_cf_cleaner():
+    while True:
+        try:
+            run_task('cleaner')
+        except Exception as exc:
+            print('CF cleaner loop error:', type(exc).__name__, flush=True)
+        time.sleep(60)
+
+
 def serve():
     # Prevent repeated task starts from running the same CLI request twice.
     lock = Path.home() / '.barolab' / 'dashboard-worker.lock'
@@ -328,6 +337,7 @@ def serve():
         except OSError:
             return
         threading.Thread(target=serve_cf_retries, daemon=True, name='cf-retry-watcher').start()
+        threading.Thread(target=serve_cf_cleaner, daemon=True, name='cf-cleaner-loop').start()
         threading.Thread(target=serve_collection_watchdog, daemon=True, name='collection-health-watcher').start()
         threading.Thread(target=serve_sre_system_watchdog, daemon=True, name='sre-system-watchdog').start()
         refreshed = 0

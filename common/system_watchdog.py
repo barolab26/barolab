@@ -92,6 +92,15 @@ CDP_PORT_CATALOG: List[Dict[str, Any]] = [
         "required": True,
     },
     {
+        "id": "baro76650_cdp",
+        "port": 9420,
+        "name": "baro76650 (CF 블로그·Flow 생성)",
+        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_baro76650",
+        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_baro76650" / "baro76650_start_cdp.bat",
+        "windowSize": None,
+        "required": True,
+    },
+    {
         "id": "aaa10291028_cdp",
         "port": 9260,
         "name": "aaa10291028 (GSC·애드센스 보조)",
@@ -414,32 +423,32 @@ def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
     except Exception:
         pass
 
-    # 2. Check Windows Scheduled Tasks health (ensure BaroLab-Naver-Daily, BaroLab-Kin-Seven-Day-Pilot, BaroLab-Threads-Pilot are Enabled)
+    # 2. Check Windows Scheduled Tasks health (ensure BaroLab-Naver-Daily, BaroLab-Kin-Seven-Day-Pilot, BaroLab-Threads-Pilot, BaroLab-CF-Cleaner are Enabled)
     if os.name == "nt":
+        powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
         for task_name, channel, owner in [
-            (r"\BaroLab-Naver-Daily", "naver_blog", "@publi"),
-            (r"\BaroLab-Kin-Seven-Day-Pilot", "naver_kin", "@publi"),
-            (r"\BaroLab-Threads-Pilot", "threads", "@publi"),
-            (r"\BaroLab-CF-Cleaner", "cf_blog", "@publi"),
+            ("BaroLab-Naver-Daily", "naver_blog", "@publi"),
+            ("BaroLab-Kin-Seven-Day-Pilot", "naver_kin", "@publi"),
+            ("BaroLab-Threads-Pilot", "threads", "@publi"),
+            ("BaroLab-CF-Cleaner", "cf_blog", "@publi"),
         ]:
             try:
                 res = subprocess.run(
-                    ["schtasks", "/Query", "/TN", task_name, "/FO", "CSV", "/NH"],
+                    [
+                        str(powershell),
+                        "-NoProfile",
+                        "-NonInteractive",
+                        "-Command",
+                        f"$t = Get-ScheduledTask -TaskName '{task_name}' -ErrorAction SilentlyContinue; if ($t -and $t.State -eq 'Disabled') {{ Enable-ScheduledTask -TaskName '{task_name}' | Out-Null; Write-Output 'RE_ENABLED' }}",
+                    ],
                     capture_output=True,
                     text=True,
                     encoding="utf-8",
                     errors="replace",
-                    timeout=5,
+                    timeout=8,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 )
-                out = (res.stdout or "").strip()
-                if "Disabled" in out or "사용 안 함" in out:
-                    subprocess.run(
-                        ["schtasks", "/Change", "/TN", task_name, "/ENABLE"],
-                        capture_output=True,
-                        timeout=5,
-                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-                    )
+                if "RE_ENABLED" in (res.stdout or ""):
                     catchups.append({
                         "channel": channel,
                         "owner": owner,
