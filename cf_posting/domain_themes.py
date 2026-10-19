@@ -43,6 +43,8 @@ from bs4 import BeautifulSoup
 
 BASE_DIR = Path(__file__).resolve().parent
 THEMES_DIR = BASE_DIR / "themes"
+CARD_CSS = (THEMES_DIR / "tripmarvel.com.css").read_text(encoding="utf-8")
+CARD_CSS = CARD_CSS[CARD_CSS.index("/* BAROLAB_VERTICAL_CARDS_V3: home and category lists only. */"):].strip()
 SKILLS_UI_UX_DIR = BASE_DIR.parent / "skills" / "ui-ux-pro-max"
 DESIGN_SYSTEM_DIR = BASE_DIR / "design-system"
 
@@ -2451,7 +2453,6 @@ figure.post-image a[aria-label*="원본 화면 크게 보기"] img {{
   }}
 }}
 """
-    from cf_posting.card_layout import CARD_CSS
     return css.strip() + "\n\n" + CARD_CSS
 
 
@@ -3315,7 +3316,6 @@ def generate_design_preview_html() -> Path:
     preview_dir = BASE_DIR / "design-preview"
     preview_dir.mkdir(parents=True, exist_ok=True)
     target = preview_dir / "index.html"
-    from cf_posting.card_layout import CARD_CSS
     rows = []
     for domain, spec in DOMAIN_IDENTITY_SPECS.items():
         rows.append(

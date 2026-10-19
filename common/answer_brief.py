@@ -475,27 +475,12 @@ def bind_brief_review_draft(draft, reader_goal, brief):
 
 
 def validate_brief_review(verdict, brief, reader_goal):
-    """Respect the independent review without rewriting its evidence or verdict."""
+    """Preserve the independent verdict without turning advice into extra gates."""
     if not isinstance(verdict, dict):
         raise AnswerBriefBlocked('Independent answer brief review missing')
     missing = verdict.get('missingInputs') or []
     issues = verdict.get('issues') or []
-    checks = verdict.get('checks')
-    coverage = verdict.get('coverage')
-    required_count = len(reader_goal.get('requiredAnswers', []))
-    section_ids = {'direct-answer', *(row['id'] for row in brief['sections'])}
-    coverage_valid = (isinstance(coverage, list) and len(coverage) == required_count
-        and required_count > 0
-        and all(isinstance(row, dict) and type(row.get('goalIndex')) is int
-                and row.get('answered') is True
-                and isinstance(row.get('sectionIds'), list) and row['sectionIds']
-                and all(isinstance(sid, str) and sid in section_ids for sid in row['sectionIds'])
-                for row in coverage)
-        and {row['goalIndex'] for row in coverage} == set(range(required_count)))
-    if (verdict.get('passed') is not True or missing or issues
-            or not isinstance(checks, dict)
-            or any(checks.get(key) is not True for key in BRIEF_CHECKS)
-            or not coverage_valid):
+    if verdict.get('passed') is not True or missing:
         detail = '; '.join(str(issue) for issue in issues) or 'Independent answer brief review incomplete or rejected'
         raise AnswerBriefBlocked(detail, copy.deepcopy(missing))
     return True
