@@ -2585,10 +2585,21 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     seen_fnames = set()
     fname_map = {}
     has_materials = bool(research_data.get('materials'))
+    observed_materials = {row.get('materialId'): row for row in research_data.get('materials', [])
+                          if row.get('materialId') == row.get('filename')
+                          and row.get('pixelObservation', {}).get('usable') is True
+                          and row.get('observationFile')}
     for p_idx, p in enumerate(raw_plans):
         if not isinstance(p, dict):
             continue
         orig_fname = str(p.get('filename') or '')
+        actual_material = None
+        if p.get('source') in ('capture', 'original'):
+            actual_material = observed_materials.get(orig_fname)
+            if (not actual_material or actual_material.get('source') != p['source']
+                    or not Path(actual_material.get('filePath', '')).is_file()
+                    or digest(actual_material['filePath']) != actual_material.get('sha256')):
+                raise ReviewRequired('Writer capture must reference an observed, unchanged materialId')
         src_val = p.get('source') if (has_materials and p.get('source') in ('capture', 'generated', 'original')) else 'generated'
         role_val = p.get('role') if p.get('role') in ('action', 'result', 'explanation', 'comparison', 'context') else 'explanation'
         raw_cap = str(p.get('caption') or f"{article.get('mainKeyword', '핵심')} 단계별 확인 가이드 ({p_idx+1})").strip()
@@ -2596,7 +2607,9 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         raw_stem = os.path.splitext(orig_fname)[0]
         stem = re.sub(r'[^A-Za-z0-9_-]+', '-', raw_stem).strip('-_')[:60]
         is_generic = bool(re.match(r'^(?:photo|img|image|pic|scene|shot)[_\-]?\d*$', stem.lower()))
-        if not stem or not stem[0].isalnum() or is_generic:
+        if actual_material:
+            fname = actual_material['filename']
+        elif not stem or not stem[0].isalnum() or is_generic:
             fname = build_seo_image_filename(
                 topic_or_slug=f"{slug} {article.get('mainKeyword', '')}",
                 section_or_caption=cap_val,
@@ -2607,6 +2620,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         else:
             fname = f"{stem}.jpg"
         if fname.lower() in seen_fnames:
+            if actual_material:
+                raise ReviewRequired('Writer cannot rename a duplicate observed materialId')
             fname = f"{os.path.splitext(fname)[0]}-{p_idx+1:02d}.jpg"
         seen_fnames.add(fname.lower())
         if orig_fname:
@@ -2633,7 +2648,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             'sectionIndex': sec_idx,
             'source': src_val,
             'role': role_val,
-            'stepId': str(p.get('stepId') or f'step_{p_idx+1}'),
+            'stepId': actual_material['stepId'] if actual_material else str(p.get('stepId') or f'step_{p_idx+1}'),
             'anchorId': str(p.get('anchorId') or ''),
         })
     if not norm_plans and not (fixed and fixed.get('stylePhotoRepair')):
@@ -4476,6 +4491,12 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         for p_idx, p in enumerate(img_plans):
             n = str(p.get('filename', '') or '')
             orig_n = n
+            if p.get('source') in ('capture', 'original'):
+                if (not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.(?:png|jpg|jpeg|webp)", n, re.I)
+                        or n.lower() in seen_pnames):
+                    raise ReviewRequired('Capture filename must stay safe, unique and identical to its manifest')
+                seen_pnames.add(n.lower())
+                continue
             if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg", n) or n.lower() in seen_pnames:
                 raw_stem = os.path.splitext(n)[0]
                 stem = re.sub(r"[^A-Za-z0-9_-]+", "-", raw_stem).strip("-_")[:60]

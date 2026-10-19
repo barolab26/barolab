@@ -14,6 +14,125 @@ import cv2
 import numpy as np
 
 from cf_posting import pipeline_runner as p
+from cf_posting.reader_task_contract import import_capture_assets
+
+
+class CaptureImportTests(unittest.TestCase):
+    def fixture(self, root):
+        path = root/'source.png'
+        cv2.imwrite(str(path), np.full((120, 160, 3), 170, dtype=np.uint8))
+        row = {'filename':'source.png','filePath':str(path),'sha256':p.digest(path),
+               'source':'capture','sourceUrl':'https://www.nps.or.kr/public',
+               'stepId':'public-calculator','capturedAt':'2026-10-19T15:00:00+09:00',
+               'width':160,'height':120,'captureMethod':'cua_screenshot',
+               'action':'Read public calculator','observedResult':'Public page screenshot saved',
+               'observationLimits':'No authenticated application submitted'}
+        return {'articleSlug':'fixed-topic','captures':[row]}, [copy.deepcopy(row)]
+
+    def test_capture_import_and_verify_preserve_bytes_and_do_not_invent_observation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); manifest,plans=self.fixture(root); original=copy.deepcopy(manifest)
+            target=root/'imported'
+            with self.assertRaises(ValueError):
+                import_capture_assets(manifest,plans,target,'fixed-topic',verify_only=True)
+            self.assertFalse(target.exists())
+            paths=import_capture_assets(manifest,plans,target,'fixed-topic')
+            self.assertEqual(paths,[target/'source.png'])
+            self.assertEqual(paths[0].read_bytes(),(root/'source.png').read_bytes())
+            self.assertEqual(import_capture_assets(manifest,plans,target,'fixed-topic',True),paths)
+            self.assertEqual(manifest,original)
+            self.assertNotIn('usable',manifest['captures'][0])
+            self.assertNotIn('pixelObservation',manifest['captures'][0])
+
+    def test_capture_import_rejects_invalid_identity_evidence_and_escape_without_writes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); manifest,plans=self.fixture(root)
+            cases=[('sha256','0'*64),('width',999),('filePath',str(root/'missing.png')),
+                   ('filePath','relative.png'),('filename','../escape.png'),('stepId','other'),
+                   ('sourceUrl','file:///private'),('capturedAt','2026-10-19'),('observedResult','')]
+            for key,value in cases:
+                with self.subTest(key=key,value=value):
+                    changed=copy.deepcopy(manifest); changed['captures'][0][key]=value
+                    with self.assertRaises(ValueError):
+                        import_capture_assets(changed,plans,root/'blocked','fixed-topic')
+                    self.assertFalse((root/'blocked').exists())
+            with self.assertRaises(ValueError):
+                import_capture_assets(manifest,plans,root/'blocked','different-topic')
+            target=root/'existing';target.mkdir();(target/'source.png').write_bytes(b'preserved')
+            with self.assertRaises(ValueError):
+                import_capture_assets(manifest,plans,target,'fixed-topic')
+            self.assertEqual((target/'source.png').read_bytes(),b'preserved')
+
+    def test_real_observation_path_registers_only_model_accepted_material(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); manifest,_=self.fixture(root)
+            manifest_path=root/'manifest.json';manifest_path.write_text(json.dumps(manifest),encoding='utf-8')
+            run=root/'run';run.mkdir()
+            handoff=SimpleNamespace(folder=run,data={'slug':'fixed-topic'})
+            verdict={'filename':'source.png','stepId':'public-calculator','usable':False,
+                     'observedContent':'Unreadable sample pixels','reason':'Cannot read calculator labels',
+                     'focusNeed':'not_needed','focusReason':'Material rejected','focusTitle':'',
+                     'focusScope':'','focusContextCrop':None,'focusRegions':[]}
+            generate=Mock(return_value={'perImage':[verdict]})
+            packet=p.observe_prewriting_materials(handoff,'Original question',generate,lambda:{},manifest_path)
+            self.assertEqual(packet['materials'],[])
+            self.assertEqual(packet['rejectedMaterials'][0]['materialId'],'source.png')
+            self.assertFalse(packet['rejectedMaterials'][0]['pixelObservation']['usable'])
+            self.assertTrue(generate.call_args.kwargs['images'][0].is_file())
+            self.assertTrue((run/packet['rejectedMaterials'][0]['observationFile']).is_file())
+
+    def test_actual_writer_normalization_and_binding_preserve_observed_png_not_flow(self):
+        # Execute the real writer normalization block, without invoking earlier models.
+        import ast
+        import inspect
+        source=ast.parse(inspect.getsource(p.draft_agents)).body[0]
+        start=next(i for i,n in enumerate(source.body) if isinstance(n,ast.Assign)
+                   and any(isinstance(t,ast.Name) and t.id=='raw_plans' for t in n.targets))
+        end=next(i for i,n in enumerate(source.body[start:],start) if isinstance(n,ast.Expr)
+                 and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name)
+                 and n.value.func.id=='validate_article_brief_binding')
+        function=ast.parse('def normalize(article,research_data,kw,slug,fixed):\n return article').body[0]
+        function.body=copy.deepcopy(source.body[start:end+1])+function.body
+        module=ast.fix_missing_locations(ast.Module(body=[function],type_ignores=[]))
+        namespace=dict(vars(p));exec(compile(module,'actual-writer-normalization','exec'),namespace)
+        with tempfile.TemporaryDirectory() as temp:
+            manifest,_=self.fixture(Path(temp));row=manifest['captures'][0]
+            material={**row,'materialId':row['filename'],'pixelObservation':{'usable':True},
+                      'observationFile':'visual-reviews/actual-response.json'}
+            research={'materials':[material],'readerGoal':{'question':'Original question'},'facts':[],
+                      'questionContext':[],'answerBriefReview':{},'answerBrief':{
+                      'finalTitle':'Fixed title','readerTask':{'articleType':'how_to','medium':'screen',
+                      'question':'Original question','successCondition':'Read public result'},
+                      'sections':[{'materialIds':['source.png']}]}}
+            article={'title':'Fixed title','mainKeyword':'calculator','imagePlans':[
+                {'filename':'source.png','source':'capture','stepId':'model-incorrect-step','caption':'Public calculator'},
+                {'filename':'generated-landscape.png','source':'generated','caption':'Landscape'}]}
+            with patch.object(p,'validate_answer_brief'),patch.object(p,'validate_brief_review'):
+                result=namespace['normalize'](copy.deepcopy(article),research,{'mainKeyword':'calculator'},'fixed-topic',None)
+                plans=result['imagePlans']
+                self.assertEqual((plans[0]['filename'],plans[0]['source'],plans[0]['stepId']),
+                                 ('source.png','capture','public-calculator'))
+                self.assertEqual([x['filename'] for x in plans if x['source']=='generated'],['generated-landscape.jpg'])
+                # Run the later pre-stage-4 normalization too; PNG must survive both.
+                process=ast.parse(inspect.getsource(p.process_single_blog)).body[0]
+                later=next(n for n in ast.walk(process) if isinstance(n,ast.For)
+                           and isinstance(n.target,ast.Tuple)
+                           and [x.id for x in n.target.elts if isinstance(x,ast.Name)]==['p_idx','p']
+                           and isinstance(n.iter,ast.Call) and ast.unparse(n.iter)=='enumerate(img_plans)')
+                scope=dict(vars(p),img_plans=plans,seen_pnames=set(),fname_map={},plans_modified=False)
+                exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(later)],type_ignores=[])),
+                             'actual-pre-stage4-normalization','exec'),scope)
+                self.assertEqual(plans[0]['filename'],'source.png')
+                imported=import_capture_assets(manifest,plans,Path(temp)/'stage4','fixed-topic')
+                self.assertEqual(imported,[Path(temp)/'stage4'/'source.png'])
+                self.assertEqual(p.digest(imported[0]),row['sha256'])
+                self.assertEqual([x['filename'] for x in plans if x['source']=='generated'],['generated-landscape.jpg'])
+                for bad in ('missing.png','source.png'):
+                    broken=copy.deepcopy(article);broken['imagePlans'][0]['filename']=bad
+                    unverified=copy.deepcopy(research)
+                    if bad=='source.png':unverified['materials'][0]['pixelObservation']['usable']=False
+                    with self.assertRaises(p.ReviewRequired):
+                        namespace['normalize'](broken,unverified,{'mainKeyword':'calculator'},'fixed-topic',None)
 
 
 def rejected_layout():
