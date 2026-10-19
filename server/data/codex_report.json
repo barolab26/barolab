@@ -52,6 +52,8 @@
       "relatedPostId": 81
     }
   ],
-  "uploadStatus": "pending",
-  "cacheResolution": "Live Worker key _baro_v=20261019_postseo_v1; exact URLs purged; canonical public H1 verified"
+  "uploadStatus": "verified",
+  "cacheResolution": "Live Worker key _baro_v=20261019_postseo_v1; exact URLs purged; canonical public H1 verified",
+  "uploadVerifiedAt": "2026-10-19T13:48:14.965747+00:00",
+  "driveReportFileId": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR"
 }
