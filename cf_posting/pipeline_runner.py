@@ -5533,6 +5533,29 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
                 results.append(repaired)
         except (ValueError, KeyError, RuntimeError, requests.RequestException):
             reasons['link_reconciliation_unavailable'] = reasons.get('link_reconciliation_unavailable', 0) + 1
+    # Receipts only prioritize an independently observed negative inspection.
+    requested_urls = set()
+    for filename, key, statuses in [('searchadvisor-status.json', 'crawlRequests', {'request_received'}),
+                                    ('indexing-submissions.json', 'events', {'requested'})]:
+        try:
+            ledger = json.loads((BASE_DIR.parent / 'server/data' / filename).read_text(encoding='utf-8'))
+            requested_urls.update(row.get('url') for row in ledger.get(key, [])
+                                  if row.get('status') in statuses and (key != 'events' or row.get('provider') == 'gsc'))
+        except (OSError, ValueError):
+            pass
+    inspections = {}
+    for site in (sites.values() if isinstance(sites, dict) else sites):
+        for row in site.get('google', {}).get('urls', []):
+            try:
+                checked = datetime.datetime.fromisoformat(row['checkedAt'].replace('Z', '+00:00'))
+                if checked.tzinfo is not None and 0 <= (now - checked).total_seconds() <= 26 * 3600:
+                    inspections[row.get('url')] = row.get('indexed')
+            except (KeyError, ValueError, TypeError):
+                pass
+    def inspection_priority(page):
+        url = page.get('url')
+        observed = inspections.get(url)
+        return 0 if observed is False and url in requested_urls else 1 if observed is False else 2 if observed is True else 3
     def ordered_zero_pages():
         grouped = {}
         for page in evidence.get('zeroViewPages', []):
@@ -5553,6 +5576,7 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
                 pages.sort(key=lambda row: dates.get(_growth_url(row['url'])[1], '9999'))
                 cursor = int(schedule.get('doctorScanCursor', {}).get(domain, 0)) % max(1, len(pages))
                 pages = pages[cursor:] + pages[:cursor]
+                pages.sort(key=inspection_priority)
                 yield from pages
             except (ValueError, KeyError, RuntimeError, requests.RequestException) as exc:
                 reason = 'inventory_' + type(exc).__name__
