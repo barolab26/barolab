@@ -1493,26 +1493,26 @@
             <svg viewBox="0 0 96 76">
               <path class="argo-tick-ring" d="M 5 62 A 43 43 0 0 1 91 62"></path>
               <path class="argo-ring-bg" d="M 10 62 A 38 38 0 0 1 86 62" stroke-width="8.5" stroke-linecap="round"></path>
-              <path class="argo-ring-fg" id="arc-revenue-goal" d="M 10 62 A 38 38 0 0 1 86 62" stroke="url(#argoGradBlueEmerald)" stroke-width="8.5" stroke-dasharray="119.4" stroke-dashoffset="114"></path>
+              <path class="argo-ring-fg" id="arc-revenue-goal" d="M 10 62 A 38 38 0 0 1 86 62" stroke="url(#argoGradBlueEmerald)" stroke-width="8.5" stroke-dasharray="119.4" stroke-dashoffset="119.4"></path>
             </svg>
             <div class="argo-svg-center arc-center">
-              <span class="argo-pct-num" id="gauge-rev-pct">0.0%</span>
-              <span class="argo-pct-sub" id="metric-revenue-value">$0.00</span>
+              <span class="argo-pct-num" id="gauge-rev-pct">—</span>
+              <span class="argo-pct-sub" id="metric-revenue-value">—</span>
             </div>
           </div>
           <!-- Right: 3 Mini Horizontal Bars (AdSense / AdPost / Affiliate) -->
           <div class="argo-bars-col">
             <div class="argo-bar-row">
-              <div class="argo-bar-label-line"><span>애드센스 (CF 16)</span><strong id="val-rev-adsense">$0.00</strong></div>
-              <div class="argo-hbar-track"><div class="argo-hbar-fill fill-emerald" id="bar-rev-adsense" style="width:6%;"></div></div>
+              <div class="argo-bar-label-line"><span>애드센스 (CF 16)</span><strong id="val-rev-adsense">—</strong></div>
+              <div class="argo-hbar-track"><div class="argo-hbar-fill fill-emerald" id="bar-rev-adsense" style="width:0%;"></div></div>
             </div>
             <div class="argo-bar-row">
-              <div class="argo-bar-label-line"><span>애드포스트 (네이버)</span><strong id="val-rev-adpost">₩0</strong></div>
-              <div class="argo-hbar-track"><div class="argo-hbar-fill fill-blue" id="bar-rev-adpost" style="width:4%;"></div></div>
+              <div class="argo-bar-label-line"><span>애드포스트 (네이버)</span><strong id="val-rev-adpost">—</strong></div>
+              <div class="argo-hbar-track"><div class="argo-hbar-fill fill-blue" id="bar-rev-adpost" style="width:0%;"></div></div>
             </div>
             <div class="argo-bar-row">
-              <div class="argo-bar-label-line"><span>제휴 마케팅</span><strong id="val-rev-affiliate">₩0</strong></div>
-              <div class="argo-hbar-track"><div class="argo-hbar-fill fill-gold" id="bar-rev-affiliate" style="width:4%;"></div></div>
+              <div class="argo-bar-label-line"><span>제휴 마케팅</span><strong id="val-rev-affiliate">—</strong></div>
+              <div class="argo-hbar-track"><div class="argo-hbar-fill fill-gold" id="bar-rev-affiliate" style="width:0%;"></div></div>
             </div>
           </div>
         </div>
@@ -2246,7 +2246,7 @@
 <script src="naver_schedule.js?v=20261017-rss-verify"></script>
 <script src="history_manager.js?v=20261017-rss-verify"></script>
 <script src="traffic.js?v=20261016-kst-rollover"></script>
-<script src="metrics.js?v=20261016-kst-rollover2"></script>
+<script src="metrics.js?v=20261019-revenue-status"></script>
 <script src="growth-actions.js?v=20261016-kst-rollover2"></script>
 <script>
   // 0. Click-to-Work Modal Controller
@@ -2800,39 +2800,26 @@
         });
 
         // Big Gauge 1: Revenue Speedometer Arc ($100/day goal, arc length = 119.4)
-        const revCats = data.revenue?.categories || [];
-        const adsenseCat = revCats.find(c => c.id === 'adsense');
-        const adpostCat = revCats.find(c => c.id === 'adpost');
-        const affCat = revCats.find(c => c.id === 'affiliate');
-
-        const adsenseTodayUsd = Number(adsenseCat?.periods?.today?.amounts?.USD ?? adsenseCat?.periods?.yesterday?.amounts?.USD ?? 0);
-        const adpostTodayKrw = Number(adpostCat?.periods?.today?.amounts?.KRW ?? 0);
-        const affTodayKrw = Number(affCat?.periods?.today?.amounts?.KRW ?? 0);
-
-        const totalUsdEquiv = adsenseTodayUsd + ((adpostTodayKrw + affTodayKrw) / 1400);
-        const revGoalPct = Math.min(100, Math.round((totalUsdEquiv / 100) * 1000) / 10);
-
-        setRingGauge('arc-revenue-goal', 119.4, Math.max(3, revGoalPct));
-        const gaugeRevPct = document.getElementById('gauge-rev-pct');
-        if (gaugeRevPct) gaugeRevPct.textContent = `${revGoalPct.toFixed(1)}%`;
-
-        const valAdsense = document.getElementById('val-rev-adsense');
-        const barAdsense = document.getElementById('bar-rev-adsense');
-        if (valAdsense) valAdsense.textContent = `$${adsenseTodayUsd.toFixed(2)}`;
-        if (barAdsense) barAdsense.style.width = `${Math.max(5, Math.min(100, (adsenseTodayUsd / 100) * 100))}%`;
-
-        const valAdpost = document.getElementById('val-rev-adpost');
-        const barAdpost = document.getElementById('bar-rev-adpost');
-        if (valAdpost) valAdpost.textContent = adpostTodayKrw > 0 ? `₩${adpostTodayKrw.toLocaleString('ko-KR')}` : '집계 대기';
-        if (barAdpost) barAdpost.style.width = `${Math.max(4, Math.min(100, ((adpostTodayKrw / 1400) / 30) * 100))}%`;
-
-        const valAff = document.getElementById('val-rev-affiliate');
-        const barAff = document.getElementById('bar-rev-affiliate');
-        if (valAff) valAff.textContent = affTodayKrw > 0 ? `₩${affTodayKrw.toLocaleString('ko-KR')}` : '집계 대기';
-        if (barAff) barAff.style.width = `${Math.max(4, Math.min(100, ((affTodayKrw / 1400) / 30) * 100))}%`;
-
-        const goalPctEl = document.getElementById('kpi-revenue-goal-pct');
-        if (goalPctEl) goalPctEl.textContent = `일 목표 $100 중 $${totalUsdEquiv.toFixed(2)} (${revGoalPct.toFixed(1)}%)`;
+        const revenueView=window.BaroLabRevenue;
+        const revenue=data.revenue || {};
+        const adsensePeriod=revenueView.categoryPeriod(revenue,'adsense','today',today);
+        const adpostPeriod=revenueView.categoryPeriod(revenue,'adpost','today',today);
+        const affiliatePeriod=revenueView.categoryPeriod(revenue,'affiliate','today',today);
+        const totalPeriod=revenueView.categoryPeriod(revenue,null,'today',today);
+        const totalUsd=revenueView.currencyValue(totalPeriod,'USD');
+        const revGoalPct=totalUsd===null?null:Math.max(0,Math.min(100,totalUsd));
+        setRingGauge('arc-revenue-goal',119.4,revGoalPct ?? 0);
+        const gaugeRevPct=document.getElementById('gauge-rev-pct');
+        if(gaugeRevPct) gaugeRevPct.textContent=revGoalPct===null?'—':`${revGoalPct.toFixed(1)}%`;
+        for(const [name,period,currency,reference] of [['adsense',adsensePeriod,'USD',100],['adpost',adpostPeriod,'KRW',100000],['affiliate',affiliatePeriod,'KRW',100000]]) {
+          const value=document.getElementById(`val-rev-${name}`);
+          const bar=document.getElementById(`bar-rev-${name}`);
+          if(value) { value.textContent=revenueView.moneyText(period); value.title=revenueView.periodView(period).note; }
+          const amount=revenueView.currencyValue(period,currency);
+          if(bar) { bar.style.width=`${amount===null?0:Math.max(0,Math.min(100,amount/reference*100))}%`; bar.title=amount===null?'수익 미확인':`${currency} 확인분 · 표시 기준 ${reference}`; }
+        }
+        const goalPctEl=document.getElementById('kpi-revenue-goal-pct');
+        if(goalPctEl) goalPctEl.textContent=totalUsd===null?'일 목표 $100 · 오늘 USD 수익 미확인':`일 목표 $100 · USD 확인분 $${totalUsd.toFixed(2)} (${revGoalPct.toFixed(1)}%) · KRW 별도`;
 
         // Big Gauge 3: Search Indexing Health Multi-Donut (C = 207.35)
         const audit = data.contentAudit;

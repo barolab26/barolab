@@ -14,6 +14,7 @@ if hasattr(sys.stdout,"reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
 BASE_DIR=Path(__file__).resolve().parent
 PROJECT_ROOT=BASE_DIR.parent
 sys.path.insert(0,str(PROJECT_ROOT))
+from common.channel_attribution import PRIORITY_CF_DOMAINS, is_dummy_rescue_url
 if not MONITOR_ONLY:
     load_dotenv(BASE_DIR / ".env")
     load_dotenv(PROJECT_ROOT / "cf_posting" / ".env")
@@ -1472,12 +1473,12 @@ ACCOUNT_MAP = {
         "topic": "직장인 연말정산 소득공제, 엑셀 무료 서식, 업무 생산성, 절세",
         "topic_slug": "year-end-tax",
         "bridge_domains": [
+            "www.woorinote.kr",
+            "www.must-good.com",
             "www.must-pick.com",
             "www.baronote.kr",
             "www.justinfo.co.kr",
             "www.daynote.kr",
-            "www.woorinote.kr",
-            "www.must-good.com",
             "www.maxnote.kr",
             "www.soulnote.kr",
         ],
@@ -1493,12 +1494,12 @@ ACCOUNT_MAP = {
         "topic": "정부 소상공인 정책자금, 지자체 지원금 마감속보, 생활세무 혜택",
         "topic_slug": "gov-subsidy",
         "bridge_domains": [
+            "www.woorinote.kr",
+            "www.must-good.com",
             "www.must-pick.com",
             "www.baronote.kr",
             "www.justinfo.co.kr",
             "www.daynote.kr",
-            "www.woorinote.kr",
-            "www.must-good.com",
         ],
     }
 }
@@ -2701,7 +2702,7 @@ def require_writer_answer_plan(writer, brief):
 
 
 def bridge_policy_hash(account):
-    return hashlib.sha256(json.dumps({'version': 6, 'hosts': sorted(bridge_hosts(account))}, sort_keys=True).encode()).hexdigest()
+    return hashlib.sha256(json.dumps({'version': 7, 'hosts': sorted(bridge_hosts(account)), 'priority': PRIORITY_CF_DOMAINS}, sort_keys=True).encode()).hexdigest()
 
 
 def bridge_inventory(account, fetch_inventory=None, max_items=100, preferred_urls=None):
@@ -2720,7 +2721,7 @@ def bridge_inventory(account, fetch_inventory=None, max_items=100, preferred_url
             for row in fetch_inventory('https://' + host):
                 slug = row.get('slug')
                 if (row.get('status') != 'published' or not isinstance(slug, str) or not slug
-                        or 'index-rescue-' in slug.lower()
+                        or is_dummy_rescue_url(slug)
                         or re.search(r'[\s?#\\]', slug) or slug.startswith('/') or any(p in ('.', '..', '') for p in slug.split('/'))):
                     continue
                 entry = {k: row.get(k) for k in ('title', 'category', 'created_at')}

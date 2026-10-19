@@ -38,6 +38,8 @@ if str(BASE_DIR) not in sys.path:
 if str(BASE_DIR / "dashboard") not in sys.path:
     sys.path.insert(0, str(BASE_DIR / "dashboard"))
 
+from common.channel_attribution import is_dummy_rescue_url
+
 KST = ZoneInfo("Asia/Seoul")
 SERVER_DATA_DIR = BASE_DIR / "server" / "data"
 DASHBOARD_DATA_DIR = BASE_DIR / "dashboard" / "data"
@@ -114,19 +116,29 @@ def run_auto_indexing(
             sm = {"status": "error", "reason": str(exc)}
         rss_info = _check_rss_feed(dom)
 
-        all_urls: List[str] = list(((rec.get("posts") or {}).get("urls")) or [])
+        posts_info = rec.get("posts") or {}
+        all_urls: List[str] = list(posts_info.get("urls") or [])
+        inventory_complete = posts_info.get("complete") is True
         if not all_urls and sm.get("locations"):
             origin = site["url"].rstrip("/")
             all_urls = [u for u in sm["locations"] if u.rstrip("/") != origin]
+            inventory_complete = sm.get("status") == "available" and sm.get("kind") == "urlset"
+
+        excluded_urls = [u for u in all_urls if is_dummy_rescue_url(u)]
+        all_urls = [u for u in all_urls if not is_dummy_rescue_url(u)]
 
         # Identify indexed vs unindexed URLs
         google_info = rec.get("google") or {}
         g_url_rows = google_info.get("urls") or []
-        indexed_set = {r.get("url") for r in g_url_rows if r.get("indexed") is True and r.get("url")}
+        indexed_set = {r.get("url") for r in g_url_rows if r.get("indexed") is True
+                       and r.get("url") in all_urls and not is_dummy_rescue_url(r.get("url"))}
+        inspected_set = {r.get("url") for r in g_url_rows if isinstance(r.get("indexed"), bool)
+                         and r.get("url") in all_urls and not is_dummy_rescue_url(r.get("url"))}
+        inspection_complete = bool(all_urls) and set(all_urls) <= inspected_set
         unindexed_urls = [u for u in all_urls if u not in indexed_set]
-        indexed_count = int(google_info.get("indexed") or len(indexed_set))
-        total_count = int((rec.get("posts") or {}).get("total") or len(all_urls))
-        unindexed_count = max(0, total_count - indexed_count)
+        indexed_count = len(indexed_set) if inspection_complete and inventory_complete else None
+        total_count = len(all_urls) if inventory_complete else None
+        unindexed_count = total_count - indexed_count if inventory_complete and inspection_complete else None
 
         # 2) Submit to Naver IndexNow & Global IndexNow
         target_push_urls = unindexed_urls if unindexed_urls else all_urls
@@ -163,6 +175,9 @@ def run_auto_indexing(
         google_sub_status = "unknown"
         google_method = "sitemap"
         old_google_req = ((rec.get("indexingRequest") or {}).get("google")) or {}
+        previous_submission = old_google_req if old_google_req.get("status") == "submitted" else old_google_req.get("previousSubmission")
+        if isinstance(previous_submission, dict):
+            previous_submission = {k: v for k, v in previous_submission.items() if k != "previousSubmission"}
         if apply:
             site_sess = None
             try:
@@ -174,35 +189,40 @@ def run_auto_indexing(
             except Exception:
                 req_res = {}
             g_res = (req_res.get("google") or {})
-            if g_res.get("status") == "submitted" or old_google_req.get("status") == "submitted":
+            if g_res.get("status") == "held_dummy_sitemap":
+                google_sub_status = "held_dummy_sitemap"
+            elif g_res.get("status") == "submitted":
                 google_sub_status = "submitted"
-                google_method = g_res.get("method") or old_google_req.get("method") or "sitemap"
+                google_method = g_res.get("method") or "sitemap"
             else:
-                google_sub_status = g_res.get("status") or "submitted_sitemap"
+                google_sub_status = g_res.get("status") or "not_confirmed"
         else:
-            google_sub_status = old_google_req.get("status") or "pending"
+            google_sub_status = "not_attempted"
 
         now_ts = _now_kst_iso()
         updated_req = {
             "requestedAt": now_ts,
             "urls": all_urls,
-            "unindexedUrlsSubmitted": len(target_push_urls),
+            "excludedDummyCount": len(excluded_urls),
+            "excludedDummyUrls": excluded_urls,
+            "unindexedUrlsSubmitted": naver_submitted_cnt,
             "google": {
                 "status": "submitted" if google_sub_status in ("submitted", "submitted_sitemap") else google_sub_status,
                 "method": google_method,
                 "property": settings.get("gsc_property") or settings.get("search_property") or f"sc-domain:{dom}",
                 "sitemap": sm.get("url") or f"https://www.{dom}/sitemap.xml",
                 "rss": rss_info.get("url"),
-                "submittedAt": now_ts,
+                "submittedAt": now_ts if apply and google_sub_status == "submitted" else None,
+                "previousSubmission": previous_submission or None,
                 "indexed": indexed_count,
             },
             "naver": {
-                "status": "submitted" if naver_status == "submitted" else ((rec.get("indexingRequest") or {}).get("naver") or {}).get("status", naver_status),
+                "status": naver_status,
                 "method": "IndexNow",
-                "httpStatus": naver_http or 200,
-                "submittedCount": naver_submitted_cnt or len(target_push_urls),
+                "httpStatus": naver_http or None,
+                "submittedCount": naver_submitted_cnt,
                 "unindexedCount": len(unindexed_urls),
-                "submittedAt": now_ts,
+                "submittedAt": now_ts if naver_submitted_cnt else None,
                 "indexed": None,
             },
         }
@@ -210,9 +230,15 @@ def run_auto_indexing(
         return {
             "domain": dom,
             "totalPosts": total_count,
+            "excludedDummyCount": len(excluded_urls),
             "indexedCount": indexed_count,
             "unindexedCount": unindexed_count,
-            "isZeroIndexedPriority": indexed_count == 0,
+            "isZeroIndexedPriority": inventory_complete and inspection_complete and indexed_count == 0,
+            "eligibleCandidateCount": len(all_urls),
+            "knownIndexedUrlCount": len(indexed_set),
+            "inventoryComplete": inventory_complete,
+            "inspectionComplete": inspection_complete,
+            "countScope": "Filtered complete inventory and explicit URL inspection only; legacy aggregates are not reused",
             "sitemapStatus": sm.get("status", "unknown"),
             "sitemapUrlsCount": len(sm.get("locations") or all_urls),
             "rssStatus": rss_info.get("status", "unknown"),
@@ -224,7 +250,7 @@ def run_auto_indexing(
             "googleSearchConsole": {
                 "status": updated_req["google"]["status"],
                 "method": updated_req["google"]["method"],
-                "submittedUrls": len(target_push_urls),
+                "submittedUrls": len(target_push_urls) if apply and google_sub_status == "submitted" else 0,
             },
             "sampleUnindexedUrls": unindexed_urls[:5],
             "_sitemapObj": sm,
@@ -238,7 +264,7 @@ def run_auto_indexing(
             domain_reports.append(fut.result())
 
     # Sort with 0% indexed sites first, then by unindexedCount descending
-    domain_reports.sort(key=lambda r: (0 if r["isZeroIndexedPriority"] else 1, -r["unindexedCount"], r["domain"]))
+    domain_reports.sort(key=lambda r: (0 if r["isZeroIndexedPriority"] else 1, -(r["unindexedCount"] or 0), r["domain"]))
 
     # 4) Also submit unindexed URLs directly to Naver Search Advisor (`POST /api-console/request/crawl`) via CDP 9334 (`soultin@naver.com`)
     sa_direct_map: Dict[str, Dict[str, Any]] = {}
@@ -259,6 +285,8 @@ def run_auto_indexing(
                         samples = rep.get("sampleUnindexedUrls") or []
                         slugs = []
                         for u in samples[:10]:
+                            if is_dummy_rescue_url(u):
+                                continue
                             path_part = urlparse(u).path.lstrip("/")
                             if path_part:
                                 slugs.append(path_part)
@@ -331,7 +359,7 @@ def run_auto_indexing(
         latest.setdefault("inspectionAutomation", {})["lastAutoIndexerRun"] = {
             "at": now_stamp,
             "domainsCount": len(domain_reports),
-            "totalUnindexedSubmitted": sum(r["unindexedCount"] for r in domain_reports),
+            "totalUnindexedSubmitted": sum(r["naverIndexNow"]["submittedUrls"] for r in domain_reports),
             "totalUrlsSubmitted": sum(r["naverIndexNow"]["submittedUrls"] for r in domain_reports),
             "searchAdvisorDirectCrawlAccount": "soultin@naver.com (CDP 9334)",
             "searchAdvisorDirectCrawlSubmitted": sum(
@@ -372,9 +400,11 @@ def run_auto_indexing(
         clean_reports.append(c)
 
     zero_indexed_domains = [r["domain"] for r in clean_reports if r["isZeroIndexedPriority"]]
-    total_posts = sum(r["totalPosts"] for r in clean_reports)
-    total_indexed = sum(r["indexedCount"] for r in clean_reports)
-    total_unindexed = sum(r["unindexedCount"] for r in clean_reports)
+    def complete_total(field):
+        return sum(r[field] for r in clean_reports) if all(r[field] is not None for r in clean_reports) else None
+    total_posts = complete_total("totalPosts")
+    total_indexed = complete_total("indexedCount")
+    total_unindexed = complete_total("unindexedCount")
     total_submitted_urls = sum(r["naverIndexNow"]["submittedUrls"] for r in clean_reports)
     naver_ok_domains = sum(1 for r in clean_reports if r["naverIndexNow"]["status"] == "submitted")
     google_ok_domains = sum(1 for r in clean_reports if r["googleSearchConsole"]["status"] == "submitted")

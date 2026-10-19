@@ -2,6 +2,23 @@
 
 `ACCOUNT_MAP[account].bridge_domains` in `naver_blog_posting/pipeline_runner.py` is the single domain-pool authority. A pool permits consideration; it does not require rotation, a domain quota or promotion of every site. The three real-name accounts have empty pools and retain zero external links. Other domains in the CF portfolio are not enabled by the reporting source whitelist.
 
+The CEO traffic focus is `woorinote.kr`, `must-good.com`, then `must-pick.com`.
+The shared `common.channel_attribution.PRIORITY_CF_DOMAINS` provides this preference
+for the two Naver bridge accounts (`adinfo0905`, `stone0747`), KnowledgeIn, and
+the actual Threads module `threads_posting/config.py`. Other permitted domains
+remain eligible. Relevance, current AdSense approval, verified source content,
+and duplicate protections still apply; this order is not a measured RPM ranking.
+
+Reserved `index-rescue-*` path segments are rejected after case normalization and
+bounded URL decoding. Collector inventories, bridge candidates, final outbound
+attribution, CF publication, and indexing submission all apply this check.
+Query text alone does not make a normal article a dummy. Existing public posts
+are preserved. If a public sitemap still contains a reserved test URL, Google
+sitemap submission is held until the actual website source is corrected and
+deployed; filtering the local inventory does not modify that public sitemap.
+Counts derived from incomplete inventory or incomplete URL inspection remain
+unknown, and previously submitted states cannot override this hold.
+
 ## Reader question first
 
 Choose the reader question from actual demand and the account topic. Compare actual published article metadata in the approved pool. Candidate metadata is bounded to 100 entries using topic overlap and publication metadata; this is a search filter, not proof of quality, ranking, traffic or revenue. No domain receives a boost from a small traffic sample. Fetch the chosen article body, not hundreds of full bodies.

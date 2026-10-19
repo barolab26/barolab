@@ -41,14 +41,14 @@ class MeasurementTests(unittest.TestCase):
         self.assertEqual(value['startDate'], '2026-10-08')
 
     @patch.object(traffic, 'session')
-    @patch.object(traffic, 'ga_report', side_effect=[([], False), ([], True)])
+    @patch.object(traffic, 'ga_report', side_effect=[([], False), ([], True), ([], False)])
     def test_partial_does_not_turn_unknown_into_zero(self, report, session):
         value = self.run_collect()
         self.assertEqual(value['status'], 'partial')
         self.assertIsNone(value['sessions'])
 
     @patch.object(traffic, 'session')
-    @patch.object(traffic, 'ga_report', side_effect=[([(['20261001', 'fake'], [4, 2, 5])], False), ([], False)])
+    @patch.object(traffic, 'ga_report', side_effect=[([(['20261001', 'fake'], [4, 2, 5])], False), ([], False), ([], False)])
     def test_scope_mismatch_is_error(self, report, session):
         value = self.run_collect()
         self.assertEqual(value['sites'][0]['status'], 'collection_error')
@@ -61,7 +61,7 @@ class MeasurementTests(unittest.TestCase):
         self.assertEqual(value['sites'][0]['status'], 'not_connected')
 
     @patch.object(traffic, 'session')
-    @patch.object(traffic, 'ga_report', side_effect=[([(['20261014', 'not_in_ledger'], [3, 2, 4])], False), ([], False)])
+    @patch.object(traffic, 'ga_report', side_effect=[([(['20261014', 'not_in_ledger'], [3, 2, 4])], False), ([], False), ([], False)])
     def test_unmapped_sessions_stay_in_total(self, report, session):
         value = self.run_collect()
         self.assertEqual(value['sessions'], 3)

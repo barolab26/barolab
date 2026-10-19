@@ -159,12 +159,12 @@
           <span>💰 오늘 / 이번 달 총수익</span>
           <span class="growth-card-pill" id="kpi-rev-pct" style="background:rgba(16,185,129,0.22);color:#6ee7b7;border:1px solid rgba(16,185,129,0.45);">일 목표 $100</span>
         </div>
-        <div class="growth-card-headline" id="kpi-rev-today" style="color:#f8fafc;">오늘 $0.04 · 이번 달 $3.93</div>
+        <div class="growth-card-headline" id="kpi-rev-today" style="color:#f8fafc;">오늘 / 이번 달 보고서 확인 중</div>
         <div class="growth-seg-bar" style="background:rgba(255,255,255,0.14);">
-          <div class="growth-seg-piece" id="kpi-rev-bar" style="width:4%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
+          <div class="growth-seg-piece" id="kpi-rev-bar" style="width:0%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
         </div>
         <div class="growth-micro-legend" id="kpi-rev-month" style="color:#94a3b8;">
-          <span>AdSense 실시간</span>
+          <span>수익 보고서 확인 중</span>
           <span>일 목표 $100 달성 게이지</span>
         </div>
       </div>
@@ -633,7 +633,7 @@
 </main>
 <script src="traffic.js?v=20261018-spa-tabs1"></script>
 <script src="content.js?v=20261018-spa-tabs1"></script>
-<script src="metrics.js?v=20261018-spa-tabs1"></script>
+<script src="metrics.js?v=20261019-revenue-status"></script>
 <script src="growth-actions.js?v=20261018-spa-tabs1"></script>
 <script>
 /* Real 4-Tab SPA Switching + Top KPI Strip Live Sync + Doctor Ledger */
@@ -707,25 +707,17 @@
   function renderTopKpiStrip() {
     // KPI 1: Revenue
     const rev = latestMetricsDoc?.revenue || {};
-    const adsenseCat = (rev.categories || []).find(c => c.id === 'adsense');
-    const todayUsd = Number(adsenseCat?.periods?.today?.amounts?.USD ?? rev.totals?.today?.amounts?.USD ?? 0);
-    const monthUsd = Number(adsenseCat?.periods?.month?.amounts?.USD ?? rev.totals?.month?.amounts?.USD ?? 0);
-    const monthKrw = Number(rev.totals?.month?.amounts?.KRW ?? 0);
-    const goalUsd = 100;
-    const goalPct = Math.min(100, Math.max(2, (todayUsd / goalUsd) * 100));
-    if ($('kpi-rev-today')) {
-      $('kpi-rev-today').textContent = `오늘 $${todayUsd.toFixed(2)} · 이번 달 $${monthUsd.toFixed(2)}${monthKrw > 0 ? ` (+₩${num(monthKrw)})` : ''}`;
-    }
-    if ($('kpi-rev-pct')) {
-      $('kpi-rev-pct').textContent = `일 목표 $100 (${((todayUsd / goalUsd) * 100).toFixed(2)}%)`;
-    }
-    if ($('kpi-rev-bar')) {
-      $('kpi-rev-bar').style.width = `${goalPct}%`;
-    }
-    if ($('kpi-rev-month')) {
-      const readyCnt = 13;
-      $('kpi-rev-month').innerHTML = `<span>🟢 승인 ${readyCnt}도메인 직결</span><span>어제 $${Number(adsenseCat?.periods?.yesterday?.amounts?.USD ?? 0).toFixed(2)}</span>`;
-    }
+    const revenueView=window.BaroLabRevenue;
+    const day=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
+    const todayPeriod=revenueView.categoryPeriod(rev,null,'today',day);
+    const monthPeriod=revenueView.categoryPeriod(rev,null,'month',day);
+    const yesterdayPeriod=revenueView.categoryPeriod(rev,null,'yesterday',day);
+    const todayUsd=revenueView.currencyValue(todayPeriod,'USD');
+    const goalPct=todayUsd===null?null:Math.max(0,Math.min(100,todayUsd));
+    if ($('kpi-rev-today')) $('kpi-rev-today').textContent=`오늘 ${revenueView.moneyText(todayPeriod)} · 이번 달 ${revenueView.moneyText(monthPeriod)}`;
+    if ($('kpi-rev-pct')) $('kpi-rev-pct').textContent=goalPct===null?'일 목표 $100 · USD 미확인':`일 목표 $100 · USD 확인분 ${todayUsd.toFixed(2)}%`;
+    if ($('kpi-rev-bar')) $('kpi-rev-bar').style.width=`${goalPct ?? 0}%`;
+    if ($('kpi-rev-month')) $('kpi-rev-month').textContent=`원래 통화별 확인분 · 어제 ${revenueView.moneyText(yesterdayPeriod)}`;
 
     // KPI 2: Visitors (CF 16 + Naver 5)
     const ta = latestMetricsDoc?.trafficAnalysis || window.BaroLabTraffic?.getData() || {};

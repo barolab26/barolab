@@ -26,9 +26,10 @@
             "2026-10-15": "0.04",
             "2026-10-16": "0.06",
             "2026-10-17": "0.09",
-            "2026-10-18": "0.05"
+            "2026-10-18": "0.06",
+            "2026-10-19": "0.02"
           },
-          "checkedAt": "2026-10-18T11:36:47.955287+00:00",
+          "checkedAt": "2026-10-19T01:42:59.779335+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "조회 대상 15개 · 계정 등록 15개 · 수익 행 있는 날짜만 집계",
@@ -573,7 +574,7 @@
             {
               "date": "2026-10-18",
               "domain": "must-pick.com",
-              "amount": "0.03"
+              "amount": "0.04"
             },
             {
               "date": "2026-10-18",
@@ -581,9 +582,14 @@
               "amount": "0.02"
             },
             {
-              "date": "2026-10-18",
-              "domain": "woorinote.kr",
+              "date": "2026-10-19",
+              "domain": "baronote.kr",
               "amount": "0.00"
+            },
+            {
+              "date": "2026-10-19",
+              "domain": "must-pick.com",
+              "amount": "0.02"
             }
           ],
           "reportSource": "AdSense Management API v2 · DATE/DOMAIN_NAME",
@@ -622,7 +628,7 @@
             "tripmarvel.com"
           ],
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-18",
+          "reportEnd": "2026-10-19",
           "accountEmail": "sj@must.biz",
           "plannedDomains": [
             "must-pick.com",
@@ -647,7 +653,7 @@
           "category": "adpost",
           "label": "soul5373 · 애드포스트",
           "currency": "KRW",
-          "scope": "soul5373 계정의 블로그 미디어",
+          "scope": "soul5373 로그인으로 확인한 publisher 블로그 미디어",
           "daily": {
             "2026-10-01": "462",
             "2026-10-02": "0",
@@ -658,12 +664,22 @@
             "2026-10-07": "2",
             "2026-10-08": "0",
             "2026-10-09": "891",
-            "2026-10-10": "0"
+            "2026-10-10": "0",
+            "2026-10-11": "40",
+            "2026-10-12": "438",
+            "2026-10-13": "502",
+            "2026-10-14": "383",
+            "2026-10-15": "310",
+            "2026-10-16": "39",
+            "2026-10-17": "0",
+            "2026-10-18": "385"
           },
-          "checkedAt": "2026-10-11T19:06:45.754577+00:00",
+          "checkedAt": "2026-10-19T01:43:04.009098+00:00",
           "valueKind": "estimated",
-          "status": "error",
-          "reason": "soul5373 애드포스트 로그인 페이지 연결 필요",
+          "status": "collected",
+          "reason": "soul5373 로그인 · 실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
+          "browserPort": 9333,
+          "optional": false,
           "details": [
             {
               "date": "2026-10-01",
@@ -804,16 +820,225 @@
               "mediaId": 858828,
               "device": "모바일",
               "amount": "0"
+            },
+            {
+              "date": "2026-10-11",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "40"
+            },
+            {
+              "date": "2026-10-11",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-12",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "438"
+            },
+            {
+              "date": "2026-10-12",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-13",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "169"
+            },
+            {
+              "date": "2026-10-13",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "333"
+            },
+            {
+              "date": "2026-10-13",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-14",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "383"
+            },
+            {
+              "date": "2026-10-14",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-14",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-15",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "310"
+            },
+            {
+              "date": "2026-10-15",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-15",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-16",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "1"
+            },
+            {
+              "date": "2026-10-16",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "38"
+            },
+            {
+              "date": "2026-10-16",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-17",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-17",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-17",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-18",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "347"
+            },
+            {
+              "date": "2026-10-18",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "38"
+            },
+            {
+              "date": "2026-10-18",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
             }
           ],
           "pendingDates": [
-            "2026-10-11",
-            "2026-10-12"
+            "2026-10-19"
           ],
           "reportSource": "네이버 애드포스트 수입 보고서",
+          "publisherId": "1224849",
+          "publisherVerified": true,
+          "mediaAliases": [
+            "nblog.soultin",
+            "nblog.soultin.ch3",
+            "nblog.soultin.ch4",
+            "nblog.soultin.ch2",
+            "nblog.soul5373",
+            "nblog.soul5373.ch3",
+            "nblog.soul5373.ch4",
+            "nblog.soul5373.ch2",
+            "nblog.yoon_master",
+            "nblog.yoon_master.ch3",
+            "nblog.yoon_master.ch4",
+            "nblog.yoon_master.ch2"
+          ],
+          "account": "soul5373",
+          "tabOwnership": {
+            "ownedTemporary": true,
+            "reusedExisting": false
+          },
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-12",
-          "attemptedAt": "2026-10-18T11:36:48.309444+00:00"
+          "reportEnd": "2026-10-19",
+          "aggregationEligible": true,
+          "aggregationKey": "adpost-publisher-1224849"
+        },
+        {
+          "id": "adpost-soultin",
+          "category": "adpost",
+          "label": "soultin · 애드포스트",
+          "currency": "KRW",
+          "scope": "soultin 로그인으로 확인한 publisher 블로그 미디어",
+          "daily": {},
+          "checkedAt": "2026-10-19T01:42:56.088362+00:00",
+          "valueKind": "estimated",
+          "status": "not_enrolled",
+          "reason": "로그인 계정에 애드포스트 publisher 등록 없음",
+          "browserPort": 9334,
+          "optional": true,
+          "details": [],
+          "pendingDates": [],
+          "attemptedAt": "2026-10-19T01:43:05.048257+00:00"
+        },
+        {
+          "id": "adpost-yoon_master",
+          "category": "adpost",
+          "label": "yoon_master · 애드포스트",
+          "currency": "KRW",
+          "scope": "yoon_master 로그인으로 확인한 publisher 블로그 미디어",
+          "daily": {},
+          "checkedAt": "2026-10-19T01:42:56.088365+00:00",
+          "valueKind": "estimated",
+          "status": "not_enrolled",
+          "reason": "로그인 계정에 애드포스트 publisher 등록 없음",
+          "browserPort": 9335,
+          "optional": true,
+          "details": [],
+          "pendingDates": [],
+          "attemptedAt": "2026-10-19T01:43:05.810827+00:00"
         },
         {
           "id": "coupang",
@@ -828,12 +1053,23 @@
             "2026-10-10": "0.0",
             "2026-10-13": "0.0",
             "2026-10-14": "0.0",
-            "2026-10-17": "0.0"
+            "2026-10-17": "0.0",
+            "2026-10-01": "0",
+            "2026-10-02": "0",
+            "2026-10-03": "0",
+            "2026-10-04": "0",
+            "2026-10-06": "0",
+            "2026-10-08": "0",
+            "2026-10-11": "0",
+            "2026-10-12": "0",
+            "2026-10-15": "0",
+            "2026-10-16": "0",
+            "2026-10-18": "0"
           },
-          "checkedAt": "2026-10-18T11:36:48.407684+00:00",
+          "checkedAt": "2026-10-19T01:43:05.887519+00:00",
           "valueKind": "estimated",
           "status": "collected",
-          "reason": "계정 전체 · YouTube 등 포함 · 보고서 없는 날짜는 미확인",
+          "reason": "계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기",
           "details": [
             {
               "date": "2026-10-05",
@@ -881,9 +1117,26 @@
               "amount": "0.0"
             }
           ],
+          "pendingDates": [
+            "2026-10-19"
+          ],
+          "zeroActivityDates": [
+            "2026-10-01",
+            "2026-10-02",
+            "2026-10-03",
+            "2026-10-04",
+            "2026-10-06",
+            "2026-10-08",
+            "2026-10-11",
+            "2026-10-12",
+            "2026-10-15",
+            "2026-10-16",
+            "2026-10-18"
+          ],
+          "queryComplete": true,
           "reportSource": "쿠팡 파트너스 Open API · commission",
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-18"
+          "reportEnd": "2026-10-19"
         },
         {
           "id": "adsense-aaa10291028",
@@ -892,7 +1145,7 @@
           "currency": "USD",
           "scope": "nolplace.com · 가족 계정 별도 수집",
           "daily": {},
-          "checkedAt": "2026-10-18T11:36:48.407694+00:00",
+          "checkedAt": "2026-10-19T01:43:05.887538+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개",
@@ -913,11 +1166,181 @@
           "label": "토스 쉐어링크",
           "currency": "KRW",
           "scope": "토스 쉐어링크",
-          "daily": {},
-          "checkedAt": "2026-10-18T11:36:48.407718+00:00",
+          "daily": {
+            "2026-10-01": "0",
+            "2026-10-02": "0",
+            "2026-10-03": "0",
+            "2026-10-04": "0",
+            "2026-10-05": "0",
+            "2026-10-06": "0",
+            "2026-10-07": "0",
+            "2026-10-08": "0",
+            "2026-10-09": "0",
+            "2026-10-10": "0",
+            "2026-10-11": "0",
+            "2026-10-12": "0",
+            "2026-10-13": "0",
+            "2026-10-14": "0",
+            "2026-10-15": "0",
+            "2026-10-16": "0",
+            "2026-10-17": "0",
+            "2026-10-18": "0",
+            "2026-10-19": "0"
+          },
+          "checkedAt": "2026-10-19T01:43:06.938001+00:00",
           "valueKind": "estimated",
-          "status": "not_collected",
-          "reason": "수익 보고서 미연결"
+          "status": "collected",
+          "reason": "결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개",
+          "credentialPresence": {
+            "apiKey": true,
+            "apiSecret": true,
+            "login": true,
+            "affiliateIds": false
+          },
+          "configurationStatus": "configured",
+          "reportCapability": "api_report",
+          "details": [
+            {
+              "date": "2026-10-01",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-02",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-03",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-04",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-05",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-06",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-07",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-08",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-09",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-10",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-11",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-12",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-13",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-14",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-15",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-16",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-17",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-18",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-19",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            }
+          ],
+          "pendingDates": [],
+          "queryComplete": true,
+          "pagination": "summary_is_full_query_total",
+          "reportSource": "토스 쉐어링크 공식 Open API · performance.summary.expectedCommissionAmount",
+          "reportDocumentation": "https://sharelink-docs.toss.im/developers/open-api/api/performance",
+          "reportStart": "2026-10-01",
+          "reportEnd": "2026-10-19"
         },
         {
           "id": "trip",
@@ -926,10 +1349,18 @@
           "currency": "KRW",
           "scope": "Trip.com",
           "daily": {},
-          "checkedAt": "2026-10-18T11:36:48.407721+00:00",
+          "checkedAt": "2026-10-19T01:43:06.938014+00:00",
           "valueKind": "estimated",
-          "status": "not_collected",
-          "reason": "수익 보고서 미연결"
+          "status": "configured_no_report_api",
+          "reason": "AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인",
+          "credentialPresence": {
+            "apiKey": false,
+            "apiSecret": false,
+            "login": false,
+            "affiliateIds": true
+          },
+          "configurationStatus": "configured",
+          "reportCapability": "affiliate_tracking_only"
         },
         {
           "id": "replyalba",
@@ -937,18 +1368,75 @@
           "label": "제휴알바",
           "currency": "KRW",
           "scope": "제휴알바",
-          "daily": {},
-          "checkedAt": "2026-10-18T11:36:48.407724+00:00",
+          "daily": {
+            "2026-10-01": "0",
+            "2026-10-02": "0",
+            "2026-10-03": "0",
+            "2026-10-04": "0",
+            "2026-10-05": "0",
+            "2026-10-06": "0",
+            "2026-10-07": "0",
+            "2026-10-08": "0",
+            "2026-10-09": "0",
+            "2026-10-10": "0",
+            "2026-10-11": "0",
+            "2026-10-12": "0",
+            "2026-10-13": "0",
+            "2026-10-14": "0",
+            "2026-10-15": "0",
+            "2026-10-16": "0",
+            "2026-10-17": "0",
+            "2026-10-18": "0"
+          },
+          "checkedAt": "2026-10-19T01:43:08.358071+00:00",
           "valueKind": "estimated",
-          "status": "not_collected",
-          "reason": "수익 보고서 미연결"
+          "status": "collected",
+          "reason": "공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기",
+          "credentialPresence": {
+            "apiKey": false,
+            "apiSecret": false,
+            "login": true,
+            "affiliateIds": false
+          },
+          "configurationStatus": "configured",
+          "reportCapability": "authenticated_html_report",
+          "details": [],
+          "pendingDates": [
+            "2026-10-19"
+          ],
+          "zeroActivityDates": [
+            "2026-10-01",
+            "2026-10-02",
+            "2026-10-03",
+            "2026-10-04",
+            "2026-10-05",
+            "2026-10-06",
+            "2026-10-07",
+            "2026-10-08",
+            "2026-10-09",
+            "2026-10-10",
+            "2026-10-11",
+            "2026-10-12",
+            "2026-10-13",
+            "2026-10-14",
+            "2026-10-15",
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18"
+          ],
+          "queryComplete": true,
+          "pagesRead": 1,
+          "identityEvidence": "fresh_credential_login",
+          "reportSource": "쉐어알바 실적/수익 · 신청일자별 수익금",
+          "reportStart": "2026-10-01",
+          "reportEnd": "2026-10-19"
         }
       ],
-      "checkedAt": "2026-10-18T11:36:48.407726+00:00"
+      "checkedAt": "2026-10-19T01:43:08.358080+00:00"
     }
   },
   "schema": "dashboard-revenue-v1",
-  "checkedAt": "2026-10-18T11:36:48.407729+00:00",
+  "checkedAt": "2026-10-19T01:43:08.358085+00:00",
   "growth": {
     "schema": "dashboard-growth-revenue-v1",
     "windows": {
@@ -986,8 +1474,8 @@
           "healthcox.com",
           "tripmarvel.com"
         ],
-        "attemptedAt": "2026-10-18T07:06:48.943517+00:00",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "attemptedAt": "2026-10-18T19:36:48.952153+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "rows": [
           {
             "date": "2026-08-21",
@@ -5074,7 +5562,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "collected",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": null,
         "recent": {
           "start": "2026-09-18",
@@ -5115,7 +5603,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5156,7 +5644,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5197,7 +5685,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5238,7 +5726,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5279,7 +5767,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5320,7 +5808,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5361,7 +5849,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5402,7 +5890,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5443,7 +5931,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5484,7 +5972,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5525,7 +6013,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5566,7 +6054,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
           "start": "2026-09-18",
@@ -5607,7 +6095,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "account_only",
         "status": "partial_account_scope",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "SJ 전환 이전 계정 수익 미연결 · 전체 도메인 수익 비교 불가",
         "recent": {
           "start": "2026-09-18",
@@ -5648,7 +6136,7 @@
         "valueKind": "estimated",
         "sourceCoverage": "account_only",
         "status": "partial_account_scope",
-        "checkedAt": "2026-10-18T07:06:50.654454+00:00",
+        "checkedAt": "2026-10-18T19:36:50.622751+00:00",
         "reason": "SJ 전환 이전 계정 수익 미연결 · 전체 도메인 수익 비교 불가",
         "recent": {
           "start": "2026-09-18",
@@ -5711,7 +6199,7 @@
     },
     "timezone": "America/Los_Angeles",
     "currency": "USD",
-    "checkedAt": "2026-10-18T07:06:50.655080+00:00",
+    "checkedAt": "2026-10-18T19:36:50.623405+00:00",
     "status": "partial"
   }
 }

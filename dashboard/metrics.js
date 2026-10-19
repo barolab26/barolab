@@ -1,6 +1,47 @@
 /* Render collected evidence. Missing measurements stay unknown. */
-(function () {
+(function (root) {
   'use strict';
+  const revenueStatuses = {
+    collected:'보고서 확인', partial:'일부 보고서 확인', pending:'집계 대기',
+    configured_no_report_api:'설정됨 · 정산서 미확인', not_configured:'설정 미확인',
+    not_collected:'미수집', auth_required:'로그인 확인 필요',
+    not_enrolled:'가입·참여 확인 필요', duplicate_source:'중복 원천 · 합계 제외',
+    error:'조회 실패', not_applicable:'해당 없음', report_unavailable:'보고서 미제공'
+  };
+  const unobservedStatuses = new Set(['configured_no_report_api','not_configured','not_collected','auth_required','not_enrolled','duplicate_source','not_applicable','report_unavailable']);
+  function validAmounts(period) {
+    if (!period || unobservedStatuses.has(period.status)) return {};
+    return Object.fromEntries(Object.entries(period.amounts || {}).filter(([,value]) =>
+      (typeof value === 'number' || typeof value === 'string' && value.trim() !== '') && Number.isFinite(Number(value))).map(([currency,value])=>[currency,Number(value)]));
+  }
+  function periodView(period) {
+    const amounts=validAmounts(period), entries=Object.entries(amounts);
+    const status=period?.status || 'not_collected';
+    const statusLabel=revenueStatuses[status] || '상태 미확인';
+    const text=entries.length ? entries.map(([currency,value])=>new Intl.NumberFormat('ko-KR',{
+      style:'currency',currency,minimumFractionDigits:currency==='KRW'?0:2,maximumFractionDigits:currency==='KRW'?0:2
+    }).format(value)).join(' + ') : statusLabel;
+    const zero=entries.length>0 && entries.every(([,value])=>value===0);
+    return {text,amounts,status,statusLabel,hasAmount:entries.length>0,
+      note:[zero?(entries.every(([currency])=>currency==='KRW')?'보고서에서 0원 확인':'보고서에서 수익 0 확인'):entries.length?'확인분':'',period?.reason || '',status==='pending'?'집계 대기':status==='partial'?'일부 원천 확인':''].filter(Boolean).join(' · ')};
+  }
+  function currencyValue(period,currency) { return validAmounts(period)[currency] ?? null; }
+  function categoryPeriod(data,id,key,today) {
+    if (!data || data.today!==today) return null;
+    return id ? data.categories?.find(category=>category.id===id)?.periods?.[key] || null : data.totals?.[key] || null;
+  }
+  function sourceView(source) {
+    const statusLabel=revenueStatuses[source?.status] || '상태 미확인';
+    const configurationLabel=source?.configurationStatus==='configured'?'설정 확인':source?.configurationStatus==='missing'?'설정 미확인':'';
+    const capabilityLabel=({api_report:'수익 API',login_only:'로그인 보고서',authenticated_html_report:'로그인 리포트 연결',affiliate_tracking_only:'추적 ID만 설정',unverified:'보고서 연결 미확인'})[source?.reportCapability] || '';
+    const credentialNames={apiKey:'API 키',apiSecret:'API 시크릿',login:'로그인',affiliateIds:'제휴 추적 ID'};
+    const credentialLabel=Object.entries(source?.credentialPresence || {}).filter(([key,value])=>credentialNames[key] && typeof value==='boolean')
+      .map(([key,value])=>`${credentialNames[key]} ${value?'있음':'없음'}`).join(' · ');
+    return {statusLabel,configurationLabel,capabilityLabel,credentialLabel,accountLabel:source?.optional?'추가 계정':''};
+  }
+  const revenueApi={periodView,moneyText:period=>periodView(period).text,currencyValue,categoryPeriod,sourceView};
+  if (typeof module!=='undefined' && module.exports) { module.exports=revenueApi; return; }
+  root.BaroLabRevenue=revenueApi;
   const set = (id, value) => {
     const node = document.getElementById(id);
     if (node) node.textContent = value;
@@ -58,14 +99,7 @@
     if (node) node.title = `${todayDate} (KST) · 날짜가 일치하고 현재 확인된 원천만 합산`;
   }
 
-  const moneyText = period => {
-    const values = Object.entries(period?.amounts || {}).map(([currency, value]) =>
-      new Intl.NumberFormat('ko-KR', { style: 'currency', currency,
-        minimumFractionDigits: currency === 'KRW' ? 0 : 2,
-        maximumFractionDigits: currency === 'KRW' ? 0 : 2 }).format(Number(value)));
-    return values.length ? values.join(' + ') : period?.status === 'pending' ? '집계 중'
-      : period?.status === 'not_applicable' ? '해당 없음' : '미수집';
-  };
+  const moneyText = revenueApi.moneyText;
   const periodKeys = ['throughYesterday', 'yesterday', 'today', 'month'];
   function revenueRow(label, periods, note) {
     const row = document.createElement('tr');
@@ -81,9 +115,10 @@
     for (const key of periodKeys) {
       const cell = document.createElement('td');
       cell.textContent = moneyText(periods?.[key]);
-      if (Object.keys(periods?.[key]?.amounts || {}).length) {
+      const detail=periodView(periods?.[key]);
+      if (detail.note) {
         const small = document.createElement('small');
-        small.textContent = key === 'today' ? '예상 · 확인분' : '확인분';
+        small.textContent = detail.note;
         cell.appendChild(small);
       }
       row.appendChild(cell);
@@ -95,7 +130,7 @@
     const today = kstDay(), current = data.today === today;
     const yesterday = new Date(Date.parse(today+'T00:00:00Z')-86400000).toISOString().slice(0,10);
     set('metric-revenue-value', moneyText(current ? data.totals?.today : null));
-    set('metric-revenue-badge', !current ? '갱신 필요' : data.status === 'partial' ? '일부 원천 연결' : '원천 미연결');
+    set('metric-revenue-badge', !current ? '갱신 필요' : revenueStatuses[data.status] || '원천 미확인');
     set('metric-revenue-source', 'USD · KRW 원래 통화 기준');
     set('metric-revenue-growth', '예상 수익 · 확인분');
     set('revenue-period', `${today.slice(0,7)} · 어제 ${yesterday} · 오늘 ${today} · 한국 시간${current ? '' : ` · 자료 기준 ${data.today || '미확인'} · 갱신 필요`}`);
@@ -105,9 +140,9 @@
     if (table) {
       table.replaceChildren();
       for (const category of categories) {
-        const known = category.sources.filter(s => Object.keys(s.daily || {}).length);
+        const known = (category.sources || []).filter(s => Object.keys(s.daily || {}).length);
         const notes = known.map(s => `${s.label} · ${s.scope}${s.lastReportDay ? ` · ${s.lastReportDay}까지` : ''}${s.status === 'error' ? ' · 연결 실패, 이전 값' : s.stale ? ' · 수집 지연' : ''}`);
-        table.appendChild(revenueRow(category.label, current ? category.periods : null, notes.join(' / ') || '수익 보고서 미연결'));
+        table.appendChild(revenueRow(category.label, current ? category.periods : null, notes.join(' / ') || (category.sources || []).map(source=>`${source.label} · ${sourceView(source).statusLabel}`).join(' / ') || '수익 보고서 미수집'));
       }
       const total = revenueRow('확인된 수익 합계', current ? data.totals : null, '미연결 원천 제외 · 통화별 합계');
       total.className = 'revenue-total';
@@ -116,13 +151,14 @@
     const sources = document.getElementById('revenue-sources');
     if (sources) {
       sources.replaceChildren();
-      for (const category of categories) for (const source of category.sources) {
+      for (const category of categories) for (const source of (category.sources || [])) {
         const item = document.createElement('div');
         item.className = 'revenue-source';
         const title = document.createElement('strong');
-        title.textContent = `${source.label} · ${data.month || '기간 미확인'} 수집분 ${moneyText(source.periods?.month)}`;
+        const state=sourceView(source);
+        title.textContent = `${source.label}${state.accountLabel?' · '+state.accountLabel:''} · ${state.statusLabel} · ${data.month || '기간 미확인'} ${moneyText(source.periods?.month)}`;
         const note = document.createElement('p');
-        note.textContent = `${source.scope} · ${source.reason}${source.stale ? ' · 수집 지연' : ''}`;
+        note.textContent = [source.scope,source.reason,state.configurationLabel,state.capabilityLabel,state.credentialLabel,source.stale?'수집 지연':''].filter(Boolean).join(' · ');
         const time = document.createElement('small');
         time.textContent = source.checkedAt ? `확인 ${new Date(source.checkedAt).toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})}` : '수집 대기';
         item.append(title, note, time);
@@ -512,4 +548,4 @@
   window.addEventListener('focus',refreshDay);
   window.addEventListener('pageshow',refreshDay);
   document.addEventListener('visibilitychange',refreshDay);
-})();
+})(typeof window!=='undefined'?window:globalThis);

@@ -1,6 +1,6 @@
 services:
   barolab-dashboard:
-    image: barolab-dashboard:local
+    image: barolab-dashboard:indexing-guard2-20261019
     container_name: barolab-dashboard
     restart: unless-stopped
     ports:

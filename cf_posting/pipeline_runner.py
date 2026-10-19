@@ -25,6 +25,7 @@ sys.dont_write_bytecode = True
 # Root Project Directory Resolution
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR.parent))
+from common.channel_attribution import is_dummy_rescue_url
 from common.browser_session import connect_async
 from common.public_capture import acquire_public_captures, run_in_source_browser
 from common.capture_guide import (focus_region_fields, observed_focus_spec, prepare_capture_guide,
@@ -151,7 +152,8 @@ def published_inventory(base_url, get=None):
             for row in rows:
                 if row.get('id') not in seen:
                     seen.add(row['id'])
-                    posts.append({k: row.get(k) for k in ('id', 'title', 'slug', 'category', 'excerpt', 'created_at', 'status')})
+                    if not is_dummy_rescue_url(row.get('slug')):
+                        posts.append({k: row.get(k) for k in ('id', 'title', 'slug', 'category', 'excerpt', 'created_at', 'status')})
             if len(rows) < limit:
                 break
         except Exception as exc:
@@ -3688,6 +3690,8 @@ def publish_post_to_cf(blog_info, uploaded_urls):
     Handoff(folder,domain,article['topicSlug']).publication_gate(article,blog_info['category'])
 
     target_slug = blog_info.get("topicSlug") or f"post-{int(time.time())}"
+    if is_dummy_rescue_url(target_slug):
+        raise ReviewRequired("Reserved index-rescue 테스트 URL은 발행할 수 없습니다")
     target_title = blog_info.get("title") or "포스팅"
     if len(uploaded_urls) != len(article.get('imagePlans', [])) or not all(isinstance(u, str) and u.startswith("https://") for u in uploaded_urls):
         raise ValueError("Uploaded HTTPS image URLs must match the accepted visual plan")

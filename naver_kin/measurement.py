@@ -15,7 +15,8 @@ from common.dashboard_jobs import write
 from .pipeline import ROOT, DB, ACCOUNTS
 from .experiment import BASELINE_START, BASELINE_END, TRIAL_START, TRIAL_END, FINAL_COLLECTION
 
-HOSTS = ('www.must-good.com', 'www.must-pick.com')
+from common.channel_attribution import PRIORITY_CF_DOMAINS
+HOSTS = tuple('www.' + domain for domain in PRIORITY_CF_DOMAINS)
 
 PRIVATE = ROOT / 'server/data/kin-measurement.json'
 PUBLIC = ROOT / 'dashboard/data/kin-measurement.json'

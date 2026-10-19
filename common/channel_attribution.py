@@ -41,6 +41,8 @@ def _canonical(canonical_url, allowed_hosts):
             or '//' in parsed.path or re.search(r'%(?:2f|5c|2e)', parsed.path, re.I)
             or any(p in ('.', '..') for p in parsed.path.split('/'))):
         raise ValueError('Canonical destination must be an unambiguous article path')
+    if is_dummy_rescue_url(canonical_url):
+        raise ValueError("Reserved test URL cannot be used as an outbound article")
     return canonical_url
 
 
@@ -98,24 +100,29 @@ def build_attribution_receipt(canonical_url, *, source, account, work_date, publ
 
 
 # ============================================================================
-# AdSense READY Filter & High-CPC Tier-1 Domain Priority (Shared across Kin / Threads / Naver Bridge)
+# AdSense READY filter and explicit traffic focus (Kin / Threads / Naver Bridge)
 # ============================================================================
 from pathlib import Path
 
-HIGH_CPC_TIER1_DOMAINS = (
-    'must-pick.com',
-    'baronote.kr',
-    'justinfo.co.kr',
-    'daynote.kr',
-    'woorinote.kr',
-)
+# Explicit CEO traffic focus; this is not a claim of current measured RPM rank.
+PRIORITY_CF_DOMAINS = ('woorinote.kr', 'must-good.com', 'must-pick.com')
+HIGH_CPC_TIER1_DOMAINS = PRIORITY_CF_DOMAINS  # Compatibility name for existing callers.
 HIGH_CPC_TIER2_DOMAINS = (
-    'must-good.com',
-    'meganote.kr',
-    'maxnote.kr',
-    'topnote.kr',
-    'smilenote.kr',
+    'baronote.kr', 'justinfo.co.kr', 'daynote.kr', 'meganote.kr',
+    'maxnote.kr', 'topnote.kr', 'smilenote.kr',
 )
+
+
+def is_dummy_rescue_url(value):
+    """Match the reserved test slug prefix, after bounded URL decoding, not query text."""
+    from urllib.parse import unquote
+    raw = str(value or '').strip()
+    path = urlsplit(raw).path
+    for _ in range(2):
+        path = unquote(path)
+    return any(segment.casefold().startswith('index-rescue-') for segment in path.split('/'))
+
+
 DEFAULT_ADSENSE_READY_CF_DOMAINS = frozenset({
     'must-pick.com',
     'baronote.kr',
@@ -190,13 +197,7 @@ def is_adsense_ready_url_or_domain(url_or_domain, root_dir=None):
 
 
 def domain_cpc_priority_rank(url_or_domain):
-    """
-    Return priority tuple `(tier, rank)` where lower is higher priority:
-      - Tier 0: `must-pick.com`, `baronote.kr`, `justinfo.co.kr`, `daynote.kr`, `woorinote.kr` (High-CPC verified)
-      - Tier 1: `must-good.com`, `meganote.kr`, `maxnote.kr`, `topnote.kr`, `smilenote.kr`
-      - Tier 2: Other AdSense `READY` CF domains
-      - Tier 3: Owned Naver blogs / fallback
-    """
+    """Return the explicit traffic-focus tier; lower ranks first, not measured RPM."""
     raw = str(url_or_domain or '').strip().lower()
     if raw.startswith('http://') or raw.startswith('https://'):
         host = (urlsplit(raw).hostname or '').lower()

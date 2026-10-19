@@ -19,6 +19,9 @@ from zoneinfo import ZoneInfo
 import requests
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from common.channel_attribution import is_dummy_rescue_url
 DATA = ROOT / 'server' / 'data'
 CONFIG = DATA / 'metrics-config.json'
 SNAPSHOT = DATA / 'metrics.json'
@@ -138,23 +141,25 @@ def api(session, method, url, payload=None, timeout=25):
 
 def public_inventory(site):
     origin = site['url'].rstrip('/')
-    urls, titles = [], {}
+    urls, titles, excluded = [], {}, []
     # The CF API caps each page at 100. Paginate; do not call page one a total.
     for page in range(1, 31):
         result = api(requests, 'GET', f'{origin}/api/posts?limit=100&page={page}')
         posts = result.get('posts')
         if not isinstance(posts, list):
             raise ValueError('CF 글 목록 형식 불일치')
-        batch = [owned_url(site, origin + '/' + p['slug']) for p in posts if p.get('slug')]
+        excluded.extend(origin + '/' + p['slug'] for p in posts if p.get('slug') and is_dummy_rescue_url(p['slug']))
+        batch = [owned_url(site, origin + '/' + p['slug']) for p in posts if p.get('slug') and not is_dummy_rescue_url(p['slug'])]
         if set(batch) & set(urls):
             raise ValueError('CF 페이지 이동 결과 중복; 전체 목록 미확인')
         urls.extend(batch)
         for post in posts:
-            if post.get('slug') and isinstance(post.get('title'), str):
+            if post.get('slug') and not is_dummy_rescue_url(post['slug']) and isinstance(post.get('title'), str):
                 titles[origin + '/' + post['slug']] = post['title'][:500]
         if len(posts) < 100:
             return {'status': 'collected', 'urls': urls, 'titles': titles, 'total': len(urls),
-                    'complete': True, 'source': origin + '/api/posts', 'checkedAt': stamp()}
+                    'complete': True, 'source': origin + '/api/posts', 'checkedAt': stamp(),
+                    'excludedDummyCount': len(excluded), 'excludedDummyUrls': excluded}
     return {'status': 'partial', 'urls': urls, 'total': None, 'complete': False,
             'reason': '페이지 상한 도달', 'checkedAt': stamp()}
 
@@ -171,8 +176,12 @@ def sitemap_status(site, settings):
     locations = [n.text.strip() for n in root.iter() if n.tag.rsplit('}', 1)[-1] == 'loc' and n.text]
     if not locations:
         raise ValueError('사이트맵이 비어 있습니다')
-    return {'status': 'available', 'url': url, 'kind': kind, 'entries': len(locations),
-            'locations': locations,
+    excluded = [value for value in locations if is_dummy_rescue_url(value)]
+    eligible = [value for value in locations if not is_dummy_rescue_url(value)]
+    return {'status': 'available', 'url': url, 'kind': kind, 'entries': len(eligible),
+            'locations': eligible, 'rawEntries': len(locations),
+            'excludedDummyCount': len(excluded), 'excludedDummyUrls': excluded,
+            'publicSitemapFiltered': False,
             'checkedAt': stamp(), 'source': url}
 
 
@@ -425,9 +434,11 @@ def collect_traffic(session, site, settings):
 
 def request_indexing(session, site, settings, urls, sitemap):
     """Submit discovery hints; never represent an accepted request as indexed."""
-    urls = [owned_url(site, url) for url in urls]
-    result = {'requestedAt': stamp(), 'urls': urls}
-    if session and sitemap.get('status') == 'available':
+    excluded = [url for url in urls if is_dummy_rescue_url(url)]
+    urls = [owned_url(site, url) for url in urls if not is_dummy_rescue_url(url)]
+    sitemap_blocked = bool(sitemap.get('excludedDummyCount') or any(is_dummy_rescue_url(u) for u in sitemap.get('locations', [])))
+    result = {'requestedAt': stamp(), 'urls': urls, 'excludedDummyCount': len(excluded), 'excludedDummyUrls': excluded}
+    if session and sitemap.get('status') == 'available' and not sitemap_blocked:
         try:
             property_id = settings.get('gsc_property') or settings.get('search_property') or ('sc-domain:' + site['site_id'])
             endpoint = 'https://www.googleapis.com/webmasters/v3/sites/' + quote(property_id, safe='')
@@ -462,6 +473,8 @@ def request_indexing(session, site, settings, urls, sitemap):
             result['google'] = unknown(safe_reason(exc))
     else:
         result['google'] = unknown('Google 인증 또는 정상 사이트맵이 필요합니다')
+    if sitemap_blocked:
+        result['google'] = {'status': 'held_dummy_sitemap', 'reason': '공개 사이트맵에 테스트 URL이 남아 있어 제출을 보류합니다. 원본 수정·배포가 필요합니다.', 'indexed': None}
     key = settings.get('indexnow_key')
     if key and urls:
         try:
@@ -873,9 +886,12 @@ def _browser_recover(account_id, individual_limit=10):
             for site in sites:
                 dom = site['site_id']
                 record = snapshot.get('sites', {}).get(dom, {})
-                urls = record.get('posts', {}).get('urls', [])
+                urls = [u for u in record.get('posts', {}).get('urls', []) if not is_dummy_rescue_url(u)]
                 sitemap = record.get('sitemap', {})
                 if not urls or sitemap.get('status') != 'available':
+                    continue
+                if sitemap.get('excludedDummyCount') or any(is_dummy_rescue_url(u) for u in sitemap.get('locations', [])):
+                    save_event(dom, {'kind': 'sitemap', 'outcome': 'held_dummy_sitemap'})
                     continue
                 previous_request = record.get('indexingRequest') or {}
                 previous_google = previous_request.get('google', {})
@@ -1156,14 +1172,9 @@ def submit_all_indexnow_and_sitemaps(config_path=CONFIG):
                 site_sess = None
 
         req = request_indexing(site_sess, site, settings, urls, sm)
-        if old_google.get('status') == 'submitted' and sm.get('status') == 'available' and (req.get('google') or {}).get('status') != 'submitted':
-            req['google'] = {
-                'status': 'submitted',
-                'method': 'sitemap',
-                'property': settings.get('gsc_property') or settings.get('search_property') or ('sc-domain:' + dom),
-                'sitemap': sm.get('url'),
-                'indexed': None,
-            }
+        previous = old_google if old_google.get('status') == 'submitted' else old_google.get('previousSubmission')
+        if isinstance(previous, dict):
+            req.setdefault('google', {})['previousSubmission'] = {k: v for k, v in previous.items() if k != 'previousSubmission'}
         nv_obj = req.get('naver') or {}
         nv_st = nv_obj.get('status', 'unknown')
         nv_http = nv_obj.get('httpStatus', 200 if nv_st == 'submitted' else 0)
@@ -1171,7 +1182,7 @@ def submit_all_indexnow_and_sitemaps(config_path=CONFIG):
         sm_cnt = len(urls)
         log_line = (
             f"[IndexNow+GSC] {dom} | sitemap=HTTP 200({sm_cnt}건) | "
-            f"Naver IndexNow={nv_st}(HTTP {nv_http}, {sm_cnt}건 제출) | Google Sitemap={gg_st}"
+            f"Naver IndexNow={nv_st}(HTTP {nv_http}, {nv_obj.get('submittedCount', 0)}건 제출) | Google Sitemap={gg_st}"
         )
         return dom, sm, req, log_line
 

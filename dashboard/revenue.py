@@ -1,16 +1,21 @@
 """Monthly revenue evidence. Run --collect on the browser host; NAS only reads it.
 
-Money is kept in its original currency. Missing report days are never zero-filled.
+Money is kept in its original currency. Only complete, successful report ranges
+may establish zero activity for missing historical days.
 Credentials and snapshots live outside the public dashboard directory.
 """
 import argparse
 import hashlib
 import hmac
 import json
+import os
+import re
+import time
+import sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse, urljoin, parse_qs, urlunparse
 from zoneinfo import ZoneInfo
 
 import requests
@@ -21,6 +26,25 @@ KST = timezone(timedelta(hours=9))
 SNAPSHOT = DATA / 'revenue.json'
 CATEGORIES = [('adsense', '구글 애드센스'), ('adpost', '네이버 애드포스트'),
               ('affiliate', '제휴마케팅')]
+ADPOST_ACCOUNTS = (('soul5373', 9333), ('soultin', 9334), ('yoon_master', 9335))
+
+
+class RevenueSourceError(ValueError):
+    """Controlled, credential-free reason suitable for the public snapshot."""
+    def __init__(self, status, reason):
+        super().__init__(reason)
+        self.status = status
+
+
+def revenue_config():
+    from dotenv import dotenv_values
+    # Preserve project-specific NAVER_<account>_ID/PW keys, then allow explicit
+    # environment overrides. Neither keys' values nor authentication responses log.
+    cfg = dict(dotenv_values(ROOT / 'cf_posting' / '.env'))
+    allowed = ('COUPANG_', 'TOSS_', 'REPLYALBA_', 'TRIP_', 'NAVER_',
+               'SJ_GOOGLE_ADSENSE_', 'AAA10291028_GOOGLE_ADSENSE_')
+    cfg.update({k: v for k, v in os.environ.items() if k in cfg or k.startswith(allowed)})
+    return cfg
 
 
 def adsense_scope(email, domains, states):
@@ -415,27 +439,134 @@ def browser_json(page, url):
     return result['data']
 
 
-def adpost(start, end):
+def _adpost_identity(channels, publisher, account, configured_blog=None):
+    if not isinstance(channels, list):
+        raise RevenueSourceError('error', '애드포스트 미디어 목록 형식 불일치')
+    own = [c for c in channels if str(c.get('publisherId')) == str(publisher)]
+    if len(own) != len(channels):
+        raise RevenueSourceError('auth_required', '애드포스트 publisher 식별 불일치 · 로그인 계정 확인 필요')
+    blogs = [c for c in own if str(c.get('alias', '')).startswith('nblog.')]
+    if not blogs:
+        raise RevenueSourceError('not_enrolled', '로그인 계정의 등록된 블로그 미디어 없음')
+    expected = {f'nblog.{account}'}
+    if configured_blog:
+        parsed = urlparse(str(configured_blog))
+        blog_id = parsed.path.strip('/').split('/')[0] if parsed.hostname == 'blog.naver.com' else str(configured_blog).strip()
+        if re.fullmatch(r'[A-Za-z0-9_-]+', blog_id):
+            expected.add('nblog.' + blog_id)
+    if not any(c.get('alias') in expected for c in blogs):
+        raise RevenueSourceError('auth_required', '애드포스트 로그인 계정과 대상 블로그 미디어 불일치')
+    return blogs
+
+
+def _adpost_login(page, cfg, account):
+    host = urlparse(page.url).hostname
+    if host != 'nid.naver.com':
+        return False
+    username, password = cfg.get(f'NAVER_{account}_ID'), cfg.get(f'NAVER_{account}_PW')
+    if not username or not password:
+        raise RevenueSourceError('auth_required', '네이버 로그인 자격증명 미설정')
+    if page.locator('#id').count() != 1 or page.locator('#pw').count() != 1:
+        raise RevenueSourceError('auth_required', '네이버 추가 인증 또는 로그인 화면 확인 필요')
+    page.locator('#id').fill(username)
+    page.locator('#pw').fill(password)
+    button = page.get_by_role('button', name='로그인', exact=True)
+    if button.count() != 1:
+        raise RevenueSourceError('auth_required', '네이버 로그인 제출 버튼 확인 필요')
+    button.click()
+    try:
+        page.wait_for_url(lambda url: urlparse(str(url)).hostname == 'adpost.naver.com', timeout=15000)
+    except Exception:
+        # CAPTCHA/2FA is deliberately not automated or bypassed.
+        raise RevenueSourceError('auth_required', '네이버 CAPTCHA·2단계 인증 또는 로그인 확인 필요') from None
+    return True
+
+
+def _adpost_report(page, cfg, account, start, end):
+    page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
+    if _adpost_login(page, cfg, account):
+        page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
+    # /main does not request channels. Its observed /api/logins response is the
+    # account/publisher source of truth; fetch channels only after verifying it.
+    login = browser_json(page, '/api/logins')
+    if not isinstance(login, dict) or not login.get('isLoggedIn'):
+        links = page.locator('a[href*="nid.naver.com"]').all()
+        if len(links) == 1:
+            links[0].click()
+            _adpost_login(page, cfg, account)
+            page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
+            login = browser_json(page, '/api/logins')
+    if not isinstance(login, dict) or not login.get('isNaverLoggedIn'):
+        raise RevenueSourceError('auth_required', 'AdPost Naver authentication required')
+    expected = str(cfg.get(f'NAVER_{account}_ID') or account).split('@')[0].lower()
+    if str(login.get('naverId', '')).lower() != expected:
+        raise RevenueSourceError('auth_required', 'AdPost authenticated account mismatch')
+    publisher = str(login.get('publisherId', ''))
+    # The live NORMAL primary has isRegistered=false. That field cannot serve
+    # as enrollment truth; authenticated publisher and its real channels can.
+    if not login.get('isLoggedIn') and not login.get('publisherId'):
+        raise RevenueSourceError('not_enrolled', '로그인 계정에 애드포스트 publisher 등록 없음')
+    if not login.get('isLoggedIn') or not publisher.isdigit():
+        raise RevenueSourceError('auth_required', 'AdPost publisher authentication required')
+    channels = browser_json(page, f'/api/publishers/{publisher}/channels')
+    if not isinstance(channels, list) or any(str(c.get('publisherId')) != publisher for c in channels):
+        raise RevenueSourceError('auth_required', 'AdPost publisher/channel identity mismatch')
+    blogs = [c for c in channels if str(c.get('alias', '')).startswith('nblog.')]
+    if not blogs:
+        raise RevenueSourceError('not_enrolled', 'Authenticated AdPost publisher has no registered blog media')
+    query = urlencode({'startDate': start.strftime('%Y%m%d'), 'endDate': end.strftime('%Y%m%d'),
+                       'publisherId': publisher, 'clipRequired': 'true'})
+    rows = browser_json(page, '/api/report/revenue?' + query)
+    return rows, publisher, blogs
+
+
+def adpost(start, end, cfg=None, account='soul5373', port=9333):
     from playwright.sync_api import sync_playwright
-    publisher = 1224849
+    cfg = cfg if cfg is not None else revenue_config()
+    owned = False
     with sync_playwright() as p:
-        browser = p.chromium.connect_over_cdp('http://127.0.0.1:9333', timeout=10000)
-        page = next((page for page in browser.contexts[0].pages
-                     if page.url.startswith('https://adpost.naver.com/main')), None)
+        try:
+            browser = p.chromium.connect_over_cdp(f'http://127.0.0.1:{port}', timeout=10000)
+        except Exception:
+            # Only the existing account-specific lifecycle manager may start it.
+            if str(ROOT) not in sys.path:
+                sys.path.insert(0, str(ROOT))
+            from naver_blog_posting.pipeline_runner import ACCOUNT_MAP, start_browser
+            settings = ACCOUNT_MAP.get(account)
+            if not settings or int(settings.get('cdp_port', 0)) != port:
+                raise RevenueSourceError('error', '계정 전용 CDP 시작 배치 설정 없음') from None
+            start_browser(settings)
+            try:
+                browser = p.chromium.connect_over_cdp(f'http://127.0.0.1:{port}', timeout=10000)
+            except Exception:
+                raise RevenueSourceError('error', '계정 전용 시작 배치 실행 후 CDP 연결 실패') from None
+        context = browser.contexts[0]
+        page = next((tab for tab in context.pages if urlparse(tab.url).hostname == 'adpost.naver.com'
+                     and urlparse(tab.url).path.rstrip('/') in ('/main', '/report', '/report/revenue')), None)
         if page is None:
-            raise ValueError('soul5373 애드포스트 로그인 페이지 연결 필요')
-        channels = browser_json(page, f'/api/publishers/{publisher}/channels')
-        if not any(c.get('alias') == 'nblog.soul5373' and c.get('publisherId') == publisher for c in channels):
-            raise ValueError('애드포스트 로그인 계정 불일치')
-        query = urlencode({'startDate': start.strftime('%Y%m%d'), 'endDate': end.strftime('%Y%m%d'),
-                           'publisherId': publisher, 'clipRequired': 'true'})
-        rows = browser_json(page, '/api/report/revenue?' + query)
-        # Disconnect only; never close a user's CDP browser or existing tabs.
+            page, owned = context.new_page(), True
+        try:
+            rows, publisher, blogs = _adpost_report(page, cfg, account, start, end)
+        finally:
+            # Existing publication/editor/user tabs and the CDP browser stay open.
+            if owned:
+                page.close()
+    result = parse_adpost_rows(rows, start, end)
+    result.update(publisherId=str(publisher), publisherVerified=True,
+                  mediaAliases=[b['alias'] for b in blogs], account=account,
+                  tabOwnership={'ownedTemporary': owned, 'reusedExisting': not owned},
+                  reason=f'{account} 로그인 · 실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중')
+    return result
+
+
+def parse_adpost_rows(rows, start, end):
     if not isinstance(rows, list):
         raise ValueError('애드포스트 수입 보고서 형식 불일치')
     values, details, seen, pending = defaultdict(Decimal), [], set(), set()
     for row in rows:
         day = report_day(row['date'])
+        if not start.isoformat() <= day <= end.isoformat():
+            raise ValueError('애드포스트 조회 기간 밖의 수익 행')
         if row.get('mediaTypeName') != 'nblog':
             if not row.get('mediaTypeName'):
                 pending.add(day)  # Report placeholders contain zero; these are not observations.
@@ -453,11 +584,11 @@ def adpost(start, end):
         values.pop(day, None)
     return {'daily': {d: str(v) for d, v in values.items()}, 'details': details,
             'pendingDates': sorted(pending), 'status': 'collected',
-            'reason': 'soul5373 계정의 블로그 보고서 · 미집계 날짜는 집계 중',
+            'reason': '실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중',
             'reportSource': '네이버 애드포스트 수입 보고서'}
 
 
-def coupang(cfg, start, end):
+def coupang(cfg, start, end, now=None):
     path = '/v2/providers/affiliate_open_api/apis/openapi/v1/reports/commission'
     query = urlencode({'startDate': start.strftime('%Y%m%d'), 'endDate': end.strftime('%Y%m%d')})
     signed = datetime.now(timezone.utc).strftime('%y%m%dT%H%M%SZ')
@@ -468,9 +599,17 @@ def coupang(cfg, start, end):
                                      headers={'Authorization': auth}, timeout=25))
     if str(data.get('rCode')) != '0' or not isinstance(data.get('data'), list):
         raise ValueError('쿠팡 수수료 보고서 오류; 인증 또는 조회 기간 확인 필요')
+    # A successful report without continuation/truncation evidence covers the
+    # requested range. Do not invent zeros for an incomplete/paginated response.
+    if (data.get('hasNext') is True or data.get('hasNextPage') is True
+            or data.get('nextCursor') or data.get('nextPage') is not None
+            or data.get('truncated') is True):
+        raise RevenueSourceError('partial', '쿠팡 보고서 페이지 지속 또는 잘림 확인 필요 · 누락일 0원 처리 중단')
     values, details, seen = defaultdict(Decimal), [], set()
     for row in data['data']:
         day = report_day(row['date'])
+        if not start.isoformat() <= day <= end.isoformat():
+            raise ValueError('쿠팡 조회 기간 밖의 수익 행')
         key = (day, row.get('trackingCode'), row.get('subId', ''))
         if key in seen:
             raise ValueError('쿠팡 수수료 보고서 행 중복')
@@ -478,13 +617,245 @@ def coupang(cfg, start, end):
         value = money(row['commission'])  # GMV is sales volume, never revenue.
         values[day] += value
         details.append({'date': day, 'channel': row.get('subId') or '기본 채널', 'amount': str(value)})
+    today = (now or datetime.now(KST)).astimezone(KST).date()
+    zero_dates = []
+    for offset in range((end - start).days + 1):
+        day = start + timedelta(days=offset)
+        if day < today and day.isoformat() not in values:
+            values[day.isoformat()] = Decimal(0)
+            zero_dates.append(day.isoformat())
+    # Commission reports are D+1. Even a provider placeholder for today is not
+    # a completed current-day commission report.
+    pending = [today.isoformat()] if start <= today <= end else []
+    values.pop(today.isoformat(), None)
     return {'daily': {d: str(v) for d, v in values.items()}, 'details': details,
-            'status': 'collected', 'reason': '계정 전체 · YouTube 등 포함 · 보고서 없는 날짜는 미확인',
+            'pendingDates': pending, 'zeroActivityDates': zero_dates, 'queryComplete': True,
+            'status': 'collected', 'reason': '계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기',
             'reportSource': '쿠팡 파트너스 Open API · commission'}
 
 
+def affiliate_configuration(cfg, key):
+    fields = {
+        'toss': ('TOSS_ACCESS_KEY', 'TOSS_SECRET_KEY', 'TOSS_SHARE_LINK_ID', 'TOSS_SHARE_LINK_PW'),
+        'replyalba': ('', '', 'REPLYALBA_ID', 'REPLYALBA_PW'),
+        'trip': ('', '', '', ''),
+    }
+    access, secret, login, password = fields[key]
+    presence = {'apiKey': bool(cfg.get(access)), 'apiSecret': bool(cfg.get(secret)),
+                'login': bool(cfg.get(login) and cfg.get(password)),
+                'affiliateIds': bool(cfg.get('TRIP_AID') and cfg.get('TRIP_SID')) if key == 'trip' else False}
+    configured = any(presence.values())
+    capability = 'api_report' if key == 'toss' and presence['apiKey'] and presence['apiSecret'] else 'login_only' if presence['login'] else 'affiliate_tracking_only' if presence['affiliateIds'] else 'unverified'
+    return {'credentialPresence': presence, 'configurationStatus': 'configured' if configured else 'missing',
+            'reportCapability': capability, 'status': 'configured_no_report_api' if configured else 'not_configured',
+            'reason': '정산서 미확인 · 설정됨' if configured else '수익 보고서 인증 미설정'}
+
+
+def _toss_access_token(cfg, session, cache_path=None):
+    if not cfg.get('TOSS_ACCESS_KEY') or not cfg.get('TOSS_SECRET_KEY'):
+        raise RevenueSourceError('not_configured', '토스 쉐어링크 API Access/Secret 설정 필요')
+    cache_path = cache_path or DATA / 'secure' / 'toss-sharelink-token.json'
+    fingerprint = hashlib.sha256((cfg['TOSS_ACCESS_KEY'] + '\0' + cfg['TOSS_SECRET_KEY']).encode()).hexdigest()
+    cached = read_json(cache_path)
+    if cached.get('credentialFingerprint') == fingerprint and cached.get('expiresAt', 0) > time.time() + 60 and cached.get('accessToken'):
+        return cached['accessToken']
+    response = session.post('https://oauth2.cert.toss.im/token', data={
+        'grant_type': 'client_credentials', 'client_id': cfg['TOSS_ACCESS_KEY'],
+        'client_secret': cfg['TOSS_SECRET_KEY'], 'scope': 'sharelink:read'}, timeout=25)
+    if response.status_code in (400, 401, 403):
+        raise RevenueSourceError('auth_required', f'토스 쉐어링크 OAuth 인증 실패 HTTP {response.status_code} · 키 종류·스코프·등록 IP 확인 필요')
+    data = response_json(response)
+    if not data.get('access_token') or str(data.get('token_type', '')).lower() != 'bearer' or int(data.get('expires_in', 0)) <= 60:
+        raise RevenueSourceError('auth_required', '토스 OAuth 토큰 응답 검증 실패')
+    if 'scope' in data and 'sharelink:read' not in str(data['scope']).split():
+        raise RevenueSourceError('auth_required', '토스 토큰의 sharelink:read 권한 미확인')
+    atomic_write(cache_path, {'credentialFingerprint': fingerprint, 'accessToken': data['access_token'],
+                              'expiresAt': time.time() + int(data['expires_in'])})
+    return data['access_token']
+
+
+def parse_toss_performance(data, day):
+    if not isinstance(data, dict) or data.get('resultType') != 'SUCCESS' or not isinstance(data.get('success'), dict):
+        raise RevenueSourceError('auth_required' if isinstance(data, dict) and (data.get('error') or {}).get('errorCode') == 'SHARELINK_OPENAPI_ACCESS_DENIED' else 'error',
+                                 '토스 실적 보고서 성공 응답 미확인 · API 권한·등록 IP·조회 조건 확인 필요')
+    result = data['success']
+    if result.get('fromDate') != day or result.get('toDate') != day:
+        raise RevenueSourceError('error', '토스 실적 응답의 조회 날짜 불일치')
+    summary = result.get('summary')
+    if not isinstance(summary, dict) or 'expectedCommissionAmount' not in summary or not isinstance(result.get('items'), list):
+        raise RevenueSourceError('error', '토스 실적 보고서 열 또는 항목 형식 불일치')
+    value = money(summary['expectedCommissionAmount'])
+    return {'date': day, 'amount': str(value), 'confirmedAmount': str(money(summary['confirmedCommissionAmount'])) if 'confirmedCommissionAmount' in summary else None,
+            'lastUpdatedAt': summary.get('lastUpdatedAt'), 'detailPagesRemaining': bool(result.get('hasNext'))}
+
+
+def toss(cfg, start, end):
+    """Official Sharelink read API; summary is the full query total, not a page sum."""
+    daily, details = {}, []
+    with requests.Session() as session:
+        token = _toss_access_token(cfg, session)
+        for offset in range((end - start).days + 1):
+            day = (start + timedelta(days=offset)).isoformat()
+            response = session.get('https://sharelink.toss.im/openapi/performance',
+                                   headers={'Authorization': 'Bearer ' + token},
+                                   params={'fromDate': day, 'toDate': day, 'size': 50}, timeout=25)
+            if response.status_code in (401, 403):
+                raise RevenueSourceError('auth_required', f'토스 실적 조회 HTTP {response.status_code} · 토큰·스코프·등록 IP 확인 필요')
+            row = parse_toss_performance(response_json(response), day)
+            daily[day] = row['amount']
+            details.append(row)
+    return {'daily': daily, 'details': details, 'pendingDates': [], 'status': 'collected',
+            'valueKind': 'estimated', 'queryComplete': True, 'pagination': 'summary_is_full_query_total',
+            'reportCapability': 'api_report', 'reportSource': '토스 쉐어링크 공식 Open API · performance.summary.expectedCommissionAmount',
+            'reportDocumentation': 'https://sharelink-docs.toss.im/developers/open-api/api/performance',
+            'reason': '결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개'}
+
+
+def deduplicate_adpost_sources(sources):
+    seen = {}
+    candidates = [s for s in sources if s.get('category') == 'adpost']
+    # Prefer a newly verified source over an old cached copy of the same publisher.
+    for record in sorted(candidates, key=lambda r: r.get('status') != 'collected'):
+        publisher = record.get('publisherId')
+        if not publisher:
+            if record.get('daily') and any(s.get('publisherId') for s in candidates):
+                record.update(previousObservedDaily=record.get('daily') or record.get('previousObservedDaily', {}), daily={},
+                              aggregationEligible=False, aggregateExclusionReason='이전 수익의 publisher 미확인 · 중복 합산 방지')
+            continue
+        key = str(publisher)
+        if key in seen:
+            record.update(status='duplicate_source', aggregationEligible=False, duplicateOf=seen[key],
+                          previousObservedDaily=record.get('daily') or record.get('previousObservedDaily', {}), daily={},
+                          reason='동일 publisher의 계정 전체 보고서 · 중복 합산 제외')
+        else:
+            seen[key] = record['id']
+            record.update(aggregationEligible=True, aggregationKey='adpost-publisher-' + key)
+
+
+def _reply_url(base, link):
+    url = urljoin(base, link)
+    if urlparse(url).scheme != 'https' or urlparse(url).hostname not in (
+            'replyalba.co.kr', 'www.replyalba.co.kr', 'replyalba.com', 'www.replyalba.com'):
+        raise RevenueSourceError('auth_required', '쉐어알바 공식 도메인 밖 리다이렉트 차단')
+    return url
+
+
+def _reply_report_url(url, start, end):
+    parsed = urlparse(_reply_url(url, url))
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    query.update(sdate=[start.isoformat()], edate=[end.isoformat()])
+    return urlunparse(parsed._replace(query=urlencode(sorted(query.items()), doseq=True), fragment=''))
+
+
+def parse_reply_report(html, url, start, end):
+    """Parse the observed server-rendered partner report, never wallet balance."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, 'html.parser')
+    if not any('logout' in a.get('href', '').lower() or '로그아웃' in a.get_text()
+               for a in soup.select('a[href]')):
+        raise RevenueSourceError('auth_required', '쉐어알바 인증된 보고서 확인 실패')
+    for key, value in (('sdate', start.isoformat()), ('edate', end.isoformat())):
+        field = soup.select_one('input[name="' + key + '"]')
+        if field is None or field.get('value') != value:
+            raise RevenueSourceError('error', '쉐어알바 조회 기간 확인 실패')
+    tables = [t for t in soup.select('table') if
+              [re.sub(r'\s+', '', x.get_text()) for x in t.select('th')]
+              == ['번호', '광고명', '신청일자', '수익금', '보기']]
+    if len(tables) != 1:
+        raise RevenueSourceError('error', '쉐어알바 수익금/신청일자 보고서 형식 불일치')
+    rows = []
+    for tr in tables[0].select('tr'):
+        cells = tr.find_all('td', recursive=False)
+        if not cells:
+            continue
+        if len(cells) != 5:
+            raise RevenueSourceError('partial', '쉐어알바 보고서 행 형식 미확인')
+        values = [c.get_text(' ', strip=True) for c in cells]
+        match = re.search(r'\d{4}-\d{2}-\d{2}', values[2])
+        if not match or not start.isoformat() <= match.group() <= end.isoformat():
+            raise RevenueSourceError('error', '쉐어알바 보고서 신청일자 불일치')
+        amount = re.sub(r'[\s,원]', '', values[3])
+        if not re.fullmatch(r'-?\d+(?:\.\d+)?', amount):
+            raise RevenueSourceError('partial', '쉐어알바 수익금 숫자 미확인')
+        rows.append({'rowId': values[0], 'date': match.group(), 'amount': str(money(amount))})
+    pages = set()
+    for a in soup.select('a[href]'):
+        candidate = urljoin(url, a['href'])
+        parsed = urlparse(candidate)
+        if parsed.path == urlparse(url).path and any(
+                k.lower() in ('page', 'pageno', 'p', 'page_no') for k in parse_qs(parsed.query)):
+            pages.add(_reply_report_url(_reply_url(url, a['href']), start, end))
+    return rows, pages
+
+
+def replyalba(cfg, start, end, now=None):
+    from bs4 import BeautifulSoup
+    if not cfg.get('REPLYALBA_ID') or not cfg.get('REPLYALBA_PW'):
+        raise RevenueSourceError('not_configured', '쉐어알바 로그인 설정 없음')
+    values, details, seen = defaultdict(Decimal), [], set()
+    with requests.Session() as session:
+        configured = _reply_url('https://replyalba.co.kr/', cfg.get('REPLYALBA_URL') or 'https://replyalba.co.kr/')
+        login = session.get(_reply_url(configured, '/mobile/main/login.partner.php'), timeout=25)
+        login.raise_for_status()
+        _reply_url(login.url, login.url)
+        soup = BeautifulSoup(login.text, 'html.parser')
+        form = soup.select_one('#loginFrm')
+        # This endpoint must still be declared by the official login page.
+        if form is None or '../../proc/member.php' not in login.text:
+            raise RevenueSourceError('auth_required', '쉐어알바 공식 로그인 양식 변경')
+        payload = {i['name']: i.get('value', '') for i in form.select('input[name]')
+                   if i.get('type') == 'hidden' or i.get('type') == 'radio' and i.has_attr('checked')}
+        payload.update(id=cfg['REPLYALBA_ID'], pw=cfg['REPLYALBA_PW'])
+        response = session.post(_reply_url(login.url, '../../proc/member.php'), data=payload,
+                                headers={'Referer': login.url}, timeout=25)
+        result = response_json(response)
+        if result.get('res') is not True or not isinstance(result.get('url'), str):
+            raise RevenueSourceError('auth_required', '쉐어알바 로그인 실패 또는 추가 인증 필요')
+        landing = session.get(_reply_url(login.url, result['url']), timeout=25)
+        landing.raise_for_status()
+        _reply_url(landing.url, landing.url)
+        links = [a['href'] for a in BeautifulSoup(landing.text, 'html.parser').select('a[href]')
+                 if urlparse(urljoin(landing.url, a['href'])).path == '/mobile/partner/stat.php']
+        if not links:
+            raise RevenueSourceError('auth_required', '쉐어알바 로그인 후 실적 메뉴 미확인')
+        report_url = _reply_report_url(_reply_url(landing.url, links[0]), start, end)
+        queue, visited = [report_url], set()
+        while queue:
+            url = queue.pop(0)
+            if url in visited:
+                continue
+            if len(visited) >= 50:
+                raise RevenueSourceError('partial', '쉐어알바 전체 페이지 조회 제한 도달')
+            visited.add(url)
+            response = session.get(url, timeout=25)
+            response.raise_for_status()
+            _reply_url(response.url, response.url)
+            rows, pages = parse_reply_report(response.text, response.url, start, end)
+            for row in rows:
+                key = row['rowId']
+                if key in seen:
+                    continue
+                seen.add(key)
+                values[row['date']] += money(row['amount'])
+                details.append({k: row[k] for k in ('date', 'amount')})
+            queue.extend(sorted(pages - visited))
+    today = (now or datetime.now(KST)).astimezone(KST).date()
+    zero_dates = []
+    for n in range((end - start).days + 1):
+        day = start + timedelta(days=n)
+        if day < today and day.isoformat() not in values:
+            values[day.isoformat()] = Decimal(0)
+            zero_dates.append(day.isoformat())
+    values.pop(today.isoformat(), None)
+    return {'daily': {d: str(v) for d, v in values.items()}, 'details': details,
+            'pendingDates': [today.isoformat()] if start <= today <= end else [],
+            'zeroActivityDates': zero_dates, 'queryComplete': True, 'pagesRead': len(visited),
+            'status': 'collected', 'valueKind': 'estimated', 'identityEvidence': 'fresh_credential_login',
+            'reportCapability': 'authenticated_html_report', 'reportSource': '쉐어알바 실적/수익 · 신청일자별 수익금',
+            'reason': '공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기'}
+
+
 def collect(now=None):
-    from dotenv import dotenv_values
     now = now or datetime.now(KST)
     today, month = now.date(), now.strftime('%Y-%m')
     start = today.replace(day=1)
@@ -496,15 +867,17 @@ def collect(now=None):
         owned = accounts.get('sj', {}).get('sites', [])
         expected = sum(s['platform'] == 'cf' for s in inventory())
         sources = [source('adsense-sj', 'adsense', 'SJ · CF 애드센스', 'USD',
-                          f'SJ 수익 조회 대상 CF {len(owned)}/{expected}개 · 등록/승인 별도 확인', domains=owned),
-                   source('adpost-soul5373', 'adpost', 'soul5373 · 애드포스트', 'KRW',
-                          'soul5373 계정의 블로그 미디어'),
-                   source('coupang', 'affiliate', '쿠팡 파트너스', 'KRW', '쿠팡 계정 전체 · 모든 subId')]
-        cfg = dotenv_values(ROOT / 'cf_posting' / '.env')
+                          f'SJ 수익 조회 대상 CF {len(owned)}/{expected}개 · 등록/승인 별도 확인', domains=owned)]
+        sources += [source('adpost-' + account, 'adpost', account + ' · 애드포스트', 'KRW',
+                           account + ' 로그인으로 확인한 publisher 블로그 미디어', browserPort=port,
+                           optional=account != 'soul5373') for account, port in ADPOST_ACCOUNTS]
+        sources.append(source('coupang', 'affiliate', '쿠팡 파트너스', 'KRW', '쿠팡 계정 전체 · 모든 subId'))
+        cfg = revenue_config()
         previous = read_json(SNAPSHOT)
         old_sources = {s['id']: s for s in previous.get('months', {}).get(month, {}).get('sources', [])}
-        jobs = [lambda: adsense(cfg, start, today, owned, accounts.get('sj', {}).get('env_prefix', 'SJ_GOOGLE_ADSENSE')), lambda: adpost(start, today),
-                lambda: coupang(cfg, start, today)]
+        jobs = [lambda: adsense(cfg, start, today, owned, accounts.get('sj', {}).get('env_prefix', 'SJ_GOOGLE_ADSENSE'))]
+        jobs += [lambda account=account, port=port: adpost(start, today, cfg, account, port) for account, port in ADPOST_ACCOUNTS]
+        jobs.append(lambda: coupang(cfg, start, today, now=now))
         for record, job in zip(sources, jobs):
             try:
                 if record['id'] == 'adsense-sj' and not owned:
@@ -519,11 +892,12 @@ def collect(now=None):
                 # Exceptions can contain tokens/URLs. Persist only our controlled validation text.
                 reason = str(exc) if isinstance(exc, ValueError) and not isinstance(exc, json.JSONDecodeError) else '원천 연결 실패; 이전 수집값 유지'
                 old = old_sources.get(record['id'])
-                if old and old.get('daily'):
+                if old and (old.get('daily') or old.get('previousObservedDaily')):
                     record.update(old)
                 else:
                     record.update(daily={}, details=[], pendingDates=[])
-                record.update(status='error', reason=reason, attemptedAt=stamp())
+                record.update(status=getattr(exc, 'status', 'error'), reason=reason, attemptedAt=stamp())
+        deduplicate_adpost_sources(sources)
         family = accounts.get('aaa10291028', {})
         family_record = source('adsense-aaa10291028', 'adsense', '가족 aaa · 애드센스', 'USD', 'nolplace.com · 가족 계정 별도 수집', domains=family.get('sites', []))
         family_prefix = family.get('env_prefix', 'AAA10291028_GOOGLE_ADSENSE')
@@ -549,12 +923,25 @@ def collect(now=None):
                     record['scope'] = adsense_scope(account.get('email', 'sj@must.biz'), account.get('sites', []), states)
                     if absent and account.get('pending_reason'):
                         record['reason'] += ' · ' + account['pending_reason']
-        for key, label, reason in [('toss', '토스 쉐어링크', '수익 보고서 미연결'),
-                                   ('trip', 'Trip.com', '수익 보고서 미연결'),
-                                   ('replyalba', '제휴알바', '수익 보고서 미연결')]:
-            category = 'adsense' if key.startswith('adsense') else 'adpost' if key.startswith('adpost') else 'affiliate'
-            record = source(key, category, label, 'USD' if category == 'adsense' else 'KRW', label)
-            record['reason'] = reason
+        for key, label in [('toss', '토스 쉐어링크'), ('trip', 'Trip.com'), ('replyalba', '제휴알바')]:
+            record = source(key, 'affiliate', label, 'KRW', label)
+            record.update(affiliate_configuration(cfg, key))
+            if (key == 'toss' and record['reportCapability'] == 'api_report') or (key == 'replyalba' and record['credentialPresence']['login']):
+                try:
+                    result = toss(cfg, start, today) if key == 'toss' else replyalba(cfg, start, today, now=now)
+                    record.update(result, reportStart=start.isoformat(),
+                                  reportEnd=today.isoformat(), checkedAt=stamp())
+                except Exception as exc:
+                    old = old_sources.get(key)
+                    if old and old.get('daily'):
+                        record['lastSuccessful'] = {k: old.get(k) for k in ('daily', 'details', 'checkedAt', 'reportSource')}
+                        record.update(daily=old['daily'], details=old.get('details', []), checkedAt=old.get('checkedAt'))
+                    record.update(status=getattr(exc, 'status', 'error'), attemptedAt=stamp(),
+                                  reason=str(exc) if isinstance(exc, RevenueSourceError) else '토스 원천 연결 실패 · 확인된 이전 수익만 유지')
+            elif key == 'trip' and record['configurationStatus'] == 'configured':
+                record['reason'] = 'AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인'
+            elif key == 'replyalba' and record['configurationStatus'] == 'configured':
+                record['reason'] = '로그인 설정됨 · 정산서·공식 수익 보고 API 미확인'
             sources.append(record)
         previous.setdefault('months', {})[month] = {'sources': sources, 'checkedAt': stamp()}
         previous.update(schema='dashboard-revenue-v1', checkedAt=stamp())
@@ -569,6 +956,8 @@ def period(sources, start, end):
     dates = [(start + timedelta(days=n)).isoformat() for n in range((end - start).days + 1)]
     totals, observed, pending = defaultdict(Decimal), set(), False
     for record in sources:
+        if record.get('aggregationEligible') is False or record.get('status') == 'duplicate_source':
+            continue
         rows = record.get('daily', {})
         for day in dates:
             if day in rows:
@@ -576,10 +965,23 @@ def period(sources, start, end):
                 observed.add(day)
             if day in record.get('pendingDates', []):
                 pending = True
-    status = 'partial' if totals else 'pending' if pending else 'not_collected'
+    eligible = [s for s in sources if s.get('aggregationEligible') is not False and s.get('status') != 'duplicate_source']
+    completeness_sources = [s for s in eligible if not (s.get('optional') is True and s.get('status') == 'not_enrolled')]
+    complete = bool(completeness_sources) and all(all(day in s.get('daily', {}) for day in dates) and s.get('status') == 'collected' for s in completeness_sources)
+    status = ('collected' if complete else 'partial') if totals else 'pending' if pending else 'not_collected'
+    reason = None
+    if status == 'pending':
+        reason = 'D+1 보고서 집계 대기' if any(s.get('id') == 'coupang' and set(dates).intersection(s.get('pendingDates', [])) for s in eligible) else '원천 보고서 집계 대기'
+    elif not totals and eligible and all(s.get('status') == 'configured_no_report_api' for s in eligible):
+        status, reason = 'configured_no_report_api', '정산서 미확인 · 설정됨'
+    elif not totals and eligible and len(eligible) == 1 and eligible[0].get('status') in ('auth_required', 'not_enrolled', 'not_configured', 'error', 'partial'):
+        status, reason = eligible[0]['status'], eligible[0].get('reason')
+    elif not eligible and sources:
+        status, reason = 'duplicate_source', '동일 원천의 중복 합산 제외'
     return {'amounts': {c: str(v) for c, v in totals.items()}, 'status': status,
             'observedDays': len(observed), 'expectedDays': len(dates),
-            'start': start.isoformat(), 'end': end.isoformat(), 'estimated': True}
+            'start': start.isoformat(), 'end': end.isoformat(), 'estimated': True,
+            'complete': complete, 'reason': reason}
 
 
 def summary(path=SNAPSHOT, now=None):

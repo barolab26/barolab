@@ -428,7 +428,7 @@ def _build_index_lookup_from_metrics() -> Tuple[int, Dict[str, Dict[str, Any]]]:
     return max(inventory_total, 1974), lookup
 
 
-DUMMY_RESCUE_SLUG_RE = re.compile(r"(?:^|-)index-rescue-", re.IGNORECASE)
+from common.channel_attribution import is_dummy_rescue_url
 FINANCE_POLICY_DOMAINS = {
     "baronote.kr",
     "must-good.com",
@@ -480,7 +480,7 @@ def _score_domain_alignment(domain: str, title: str, category: str, body_text: s
     valid_categories = spec.get("categories") or []
     matrix = DOMAIN_KEYWORD_MATRIX.get(domain, {})
 
-    if slug and DUMMY_RESCUE_SLUG_RE.search(slug):
+    if slug and is_dummy_rescue_url(slug):
         return {
             "aligned": False,
             "alignmentLevel": "dummy_rescue",
@@ -491,7 +491,7 @@ def _score_domain_alignment(domain: str, title: str, category: str, body_text: s
             "needsCategoryRemap": False,
             "recommendedDomain": domain,
             "recommendedDomainBrand": matrix.get("brand", domain),
-            "reason": "테스트/더미 페이지(index-rescue-*) 감지 ➔ 즉시 삭제 및 사이트맵(sitemap.xml) 완전 제거 대상",
+            "reason": "테스트 URL은 색인 후보에서 제외합니다. 공개 원본은 보존하며 사이트맵 수정은 별도 배포가 필요합니다.",
         }
 
     if domain in FINANCE_POLICY_DOMAINS and any(m in combined for m in GOSSIP_OFF_TOPIC_MARKERS):
@@ -1119,13 +1119,11 @@ def audit_single_cf_post(
         # 🔴 D등급 (더미 URL 또는 주제 이탈)
         grade = "D"
         if alignment.get("alignmentLevel") == "dummy_rescue":
-            grade_badge = "🔴 D등급 (더미 URL index-rescue-* · 즉시 삭제/사이트맵 제거 완료)"
-            if auto_patch_category and post_id:
-                delete_cf_post_live(domain, post_id)
+            grade_badge = "🔴 D등급 (테스트 URL · 색인 후보 제외, 공개 원본 보존)"
             daily_rec["dByDomain"][domain] = d_domain_count + 1
             daily_rec["dCapped"] = daily_rec.get("dCapped", 0) + 1
-            prescription = "시스템 테스트용 더미 URL(index-rescue-*) 적발 ➔ CF API 즉시 삭제 및 sitemap.xml 완전 제거 완료"
-            action_code = "deleted_dummy_rescue"
+            prescription = "발행·색인 후보에서 제외합니다. 공개 글은 삭제하지 않으며 원본 사이트맵 수정은 별도 배포가 필요합니다."
+            action_code = "excluded_dummy_rescue"
         elif alignment.get("alignmentLevel") == "off_topic_gossip":
             grade_badge = "🔴 D등급 (주제 이탈 가십 단신 · 즉시 비공개/사이트맵 격리 완료)"
             if auto_patch_category and post_id:
@@ -1828,13 +1826,13 @@ def scan_and_register_fake_ai_image_posts(broadcast: bool = True) -> Dict[str, A
 def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
     """
     Scan all 16 CF domains for:
-      1) `index-rescue-*` dummy/test URLs -> immediately DELETE via CF API so they are removed from `/api/posts` and `/sitemap.xml`.
+      1) `index-rescue-*` test URLs -> exclude local repair/index candidates without deleting public posts.
       2) Off-topic entertainment/sports/broadcast gossip posts on `baronote.kr` (`gdragon-*`, `임지민-*`, `kia-한승연-*`, `루치아나-바로소-*`, etc.)
          -> immediately classify as `🔴 D등급 (주제 이탈)` in `content-doctor-ledger.json` and unpublish (`status='draft'`) via CF API
          so they are excluded from `baronote.kr`'s public inventory and `sitemap.xml`.
     """
     keys = _load_cf_api_keys()
-    deleted_dummies: List[Dict[str, Any]] = []
+    excluded_dummies: List[Dict[str, Any]] = []
     quarantined_gossip: List[Dict[str, Any]] = []
     today = _today_kst()
 
@@ -1868,10 +1866,9 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
                     excerpt = p.get("excerpt") or ""
                     public_url = f"https://www.{dom}/{slug}"
 
-                    if DUMMY_RESCUE_SLUG_RE.search(slug):
-                        del_res = delete_cf_post_live(dom, pid)
-                        deleted_dummies.append(
-                            {"domain": dom, "id": pid, "slug": slug, "url": public_url, "deleted": del_res.get("ok", False)}
+                    if is_dummy_rescue_url(slug):
+                        excluded_dummies.append(
+                            {"domain": dom, "id": pid, "slug": slug, "url": public_url, "deleted": False, "excludedFromCandidates": True, "publicSitemapChanged": False}
                         )
                         audited_map.pop(public_url, None)
                         queue["items"] = [it for it in queue["items"] if it.get("url") != public_url]
@@ -1939,8 +1936,10 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
 
     return {
         "ok": True,
-        "deletedDummyCount": len(deleted_dummies),
-        "deletedDummies": deleted_dummies,
+        "deletedDummyCount": 0,
+        "deletedDummies": [],
+        "excludedDummyCount": len(excluded_dummies),
+        "excludedDummies": excluded_dummies,
         "quarantinedGossipCount": len(quarantined_gossip),
         "quarantinedGossip": quarantined_gossip,
     }

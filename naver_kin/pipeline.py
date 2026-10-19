@@ -9,15 +9,13 @@ import re
 import sqlite3
 from urllib.parse import parse_qs, urlsplit
 
-from common.channel_attribution import build_attribution_receipt, validate_outbound_url
+from common.channel_attribution import build_attribution_receipt, validate_outbound_url, PRIORITY_CF_DOMAINS, is_dummy_rescue_url
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / 'server/data/kin.sqlite3'
 PUBLIC = ROOT / 'dashboard/data/kin.json'
 ACCOUNTS = ('adinfo0905', 'stone0747')
-CF_BASE_DOMAINS = (
-    'must-good.com',
-    'must-pick.com',
+CF_BASE_DOMAINS = PRIORITY_CF_DOMAINS + (
     'baronote.kr',
     'justinfo.co.kr',
     'topnote.kr',
@@ -27,7 +25,6 @@ CF_BASE_DOMAINS = (
     'maxnote.kr',
     'must-joy.com',
     'tripmarvel.com',
-    'woorinote.kr',
     'daynote.kr',
     'nolplace.com',
     'soulnote.kr',
@@ -106,7 +103,7 @@ def article_snapshot(url, fallback_body=None):
     from html.parser import HTMLParser
     import requests
     p = urlsplit(url)
-    if (p.scheme != 'https' or p.netloc not in HOSTS or p.query or p.fragment
+    if (is_dummy_rescue_url(url) or p.scheme != 'https' or p.netloc not in HOSTS or p.query or p.fragment
             or not p.path or p.path == '/' or '\\' in url or any(ord(c) < 33 for c in url)):
         raise ValueError('Clean article on an approved owned host required')
     # Also apply the attribution library's stricter canonical validation.

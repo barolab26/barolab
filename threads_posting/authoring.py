@@ -11,6 +11,7 @@ import uuid
 import requests
 from bs4 import BeautifulSoup
 from common import codex_cli
+from common.channel_attribution import is_dummy_rescue_url
 from common.channel_attribution import (
     _canonical,
     is_adsense_ready_url_or_domain,
@@ -107,14 +108,14 @@ def article_snapshot(url, official=False):
 
 
 def catalog(config, db_path=settings.DB):
-    """Verified CF manifests across AdSense READY CF blog domains; prioritizes High-CPC tier-1 domains first."""
+    """Verified CF manifests across AdSense READY CF blog domains; prioritizes the explicit three-domain traffic focus."""
     with pipeline.connect(db_path) as db:
         used = {json.loads(x[0])['source']['url'] for x in db.execute('SELECT DISTINCT document FROM parts') if x[0]}
     found = []
     for row in config.get('articleCatalog', []):
         if isinstance(row, dict):
             u = row.get('url') or ''
-            if u and u not in used and 'index-rescue-' not in u.lower() and is_adsense_ready_url_or_domain(u):
+            if u and u not in used and not is_dummy_rescue_url(u) and is_adsense_ready_url_or_domain(u):
                 found.append(row)
     files = sorted((settings.ROOT / 'cf_posting/output').glob('*/run-*/publication.json'), key=lambda p: p.stat().st_mtime, reverse=True)
     for path in files:
@@ -123,7 +124,7 @@ def catalog(config, db_path=settings.DB):
             url = data.get('publicUrl', '')
             host = (urlsplit(url).hostname or '').lower()
             if (data.get('status') != 'verified' or host not in settings.HOSTS or url in used
-                    or 'index-rescue-' in url.lower() or not is_adsense_ready_url_or_domain(url)):
+                    or is_dummy_rescue_url(url) or not is_adsense_ready_url_or_domain(url)):
                 continue
             _canonical(url, settings.HOSTS)
             if not any(x['url'] == url for x in found):

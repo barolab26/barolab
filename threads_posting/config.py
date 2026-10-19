@@ -4,16 +4,16 @@ from pathlib import Path
 import re
 
 from common.dashboard_jobs import write
+from common.channel_attribution import PRIORITY_CF_DOMAINS
 
 ROOT = Path(__file__).resolve().parents[1]
 PRIVATE = ROOT / 'server/data'
 CONFIG = PRIVATE / 'threads-automation.json'
 DB = PRIVATE / 'threads.sqlite3'
 PUBLIC = ROOT / 'dashboard/data/threads.json'
-CF_DOMAINS_16 = (
-    'must-good.com', 'baronote.kr', 'justinfo.co.kr', 'topnote.kr',
+CF_DOMAINS_16 = PRIORITY_CF_DOMAINS + ( 'baronote.kr', 'justinfo.co.kr', 'topnote.kr',
     'meganote.kr', 'smilenote.kr', 'healthcox.com', 'maxnote.kr',
-    'must-joy.com', 'tripmarvel.com', 'must-pick.com', 'woorinote.kr',
+    'must-joy.com', 'tripmarvel.com',
     'daynote.kr', 'nolplace.com', 'soulnote.kr', 'joynote.kr',
 )
 HOSTS = tuple(

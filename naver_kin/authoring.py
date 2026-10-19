@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
+from common.channel_attribution import is_dummy_rescue_url
 from common.channel_attribution import (
     build_attribution_receipt,
     is_adsense_ready_url_or_domain,
@@ -104,7 +105,7 @@ def load_dynamic_catalog(max_items=50, base_catalog=None, db=None, today=None):
     def _add_entry(url, title='', keywords=None, body=None, published_at=''):
         if not isinstance(url, str) or not url.startswith('https://'):
             return
-        if 'index-rescue-' in url.lower():
+        if is_dummy_rescue_url(url):
             return
         parsed = urlsplit(url)
         if parsed.netloc not in pipeline.HOSTS or parsed.query or parsed.fragment or not parsed.path or parsed.path == '/':
@@ -244,7 +245,7 @@ def load_dynamic_catalog(max_items=50, base_catalog=None, db=None, today=None):
     for item in DEFAULT_CATALOG:
         _add_entry(item['url'], item.get('title', ''), item.get('keywords'))
 
-    # 5. High-CPC Tier-1 (`must-pick.com`, `baronote.kr`, `justinfo.co.kr`, `daynote.kr`, `woorinote.kr`) + Zero-Duplicate Round-Robin ordering:
+    # 5. Explicit traffic-focus tier within duplicate-aware round-robin ordering:
     used_today = get_today_used_domains(db=db, day=today)
     by_domain = {}
     for entry in raw_items:
