@@ -1500,11 +1500,11 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
     proposal_model = copy.deepcopy(attribution())
     checks = ('readerUtility','honestConceptualLabel','notFakeUI','noRequiredCaptureReplaced','stepsPreserved')
     review_schema = {'type':'object','additionalProperties':False,'properties':{
-        **{k:{'type':'boolean'} for k in checks},'issues':{'type':'array','items':{'type':'string'}}},'required':[*checks,'issues']}
+        **{k:{'type':'boolean'} for k in checks},'issues':{'type':'array','items':{'type':'string'}},'notes':{'type':'array','items':{'type':'string'}}},'required':[*checks,'issues','notes']}
     progress('writer', '별도 호출로 이미지 계획만 독립 재검수', handoff)
     review = generate(agent_prompt('writer',
         'Independently review only the proposed image plans against the unchanged article and research. '
-        'Reject decorative filler, fake UI, invented evidence and diagrams substituting for required real captures. '
+        'Put actual plan defects only in issues; put positive observations and later-stage requirements in notes. Reject decorative filler, fake UI, invented evidence and diagrams substituting for required real captures. '
         'Plan anchorId must equal actual readerTask step.blockRef and takes placement precedence; sectionIndex is zero-based h2 index, not section index. This is plan approval only: actual pixels and PC/mobile layout still require later independent review.',
         {'originalArticle':original,'proposedArticle':candidate,'research.md':read_document(handoff.file('research.md'))}),response_schema=review_schema)
     reviewer_model = copy.deepcopy(attribution())
@@ -1533,11 +1533,68 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
     return candidate, handoff
 
 
+def clarify_image_plan_review(handoff, article, generate, progress, attribution):
+    """One explicit clarification of the saved second proposal, never a new proposal."""
+    rows = handoff.check()
+    attempt = handoff.data.get('imagePlanRework', {})
+    checks = ('readerUtility','honestConceptualLabel','notFakeUI','noRequiredCaptureReplaced','stepsPreserved')
+    previous = attempt.get('independentReview', {})
+    if (len(rows) != 3 or (handoff.folder/'publication.json').exists()
+            or attempt.get('status') != 'rejected' or len(handoff.data.get('imagePlanReworkHistory', [])) != 1
+            or attempt.get('clarification') or not previous.get('issues')
+            or any(previous.get(k) is not True for k in checks)):
+        raise ReviewRequired('Clarification requires one unclarified ambiguous second review')
+    if article != attempt.get('originalArticle') or digest(handoff.file('article.json')) != attempt.get('originalArticleSha256'):
+        raise ReviewRequired('Saved clarification proposal no longer matches the original draft')
+    candidate = validate_image_plan_revision(article, json.loads(attempt['proposal']['imagePlansJson']))
+    schema = {'type':'object','additionalProperties':False,'properties':{
+        'approved':{'type':'boolean'}, **{k:{'type':'boolean'} for k in checks},
+        'blockingIssues':{'type':'array','items':{'type':'string'}},
+        'notes':{'type':'array','items':{'type':'string'}}},'required':['approved',*checks,'blockingIssues','notes']}
+    attempt['clarification'] = {'status':'running','startedAt':stamp(),
+        'proposalSha256':hashlib.sha256(attempt['proposal']['imagePlansJson'].encode()).hexdigest()}
+    handoff.save()  # A failed/ambiguous invocation cannot silently be repeated.
+    progress('writer', '동일 이미지 계획의 모호한 검수 판정 1회 명료화', handoff)
+    result = generate(agent_prompt('writer',
+        'Independently adjudicate this exact saved proposal; do not propose or edit anything. '
+        'The previous response passed all plan checks but included notes in issues. Explicitly approve only if '
+        'there are no actual plan blockers. Put real defects in blockingIssues and positive observations or '
+        'later pixel/layout review requirements in notes. Pixels are not part of this plan-only stage. '
+        'Actual UI capture requirements must never be replaced by invented diagrams. anchorId binds to '
+        'readerTask.blockRef; sectionIndex is the zero-based h2 index, not section index. Approval does not '
+        'approve actual image pixels or assembled layout.',
+        {'originalArticle':article,'proposedArticle':candidate,'originalReview':previous,
+         'research.md':read_document(handoff.file('research.md'))}), response_schema=schema)
+    model = copy.deepcopy(attribution())
+    attempt['clarification'].update(status='returned',completedAt=stamp(),response=result,model=model)
+    handoff.save()
+    if (result.get('approved') is not True or result.get('blockingIssues') != []
+            or any(result.get(k) is not True for k in checks)
+            or not model or model.get('status') != 'returned' or not model.get('actualModel')):
+        attempt['clarification']['status'] = 'rejected'
+        handoff.save()
+        raise ReviewRequired('Image plan clarification did not explicitly approve: ' + str(result.get('blockingIssues')))
+    handoff.check()
+    if digest(handoff.file('article.json')) != attempt['originalArticleSha256']:
+        raise ReviewRequired('Draft changed during clarification')
+    outputs = list(rows[2]['outputs'])
+    handoff.data['stages'] = copy.deepcopy(rows[:2])
+    handoff.save()
+    handoff.file('article.json').write_text(json.dumps(candidate,ensure_ascii=False,indent=2),encoding='utf-8')
+    handoff.accept('writer', outputs, model)
+    attempt.update(status='accepted',acceptedBy='explicit_independent_clarification')
+    attempt['clarification']['status'] = 'accepted'
+    handoff.save()
+    return candidate, handoff
+
+
 def rework_draft(folder, domain, categories, generate, progress, attribution):
     folder=Path(folder).resolve()
     article=json.loads((folder/'article.json').read_text(encoding='utf-8'))
     handoff=Handoff(folder,domain,article['topicSlug'])
     require_prewriting_handoff(handoff, article)
+    if os.environ.get('CF_IMAGE_PLAN_CLARIFY') == '1':
+        return clarify_image_plan_review(handoff, article, generate, progress, attribution)
     if os.environ.get('CF_IMAGE_PLAN_REWORK') == '1':
         return rework_image_plans(handoff, article, generate, progress, attribution)
     if os.environ.get('CF_ASSET_REWORK')=='1':
