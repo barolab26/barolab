@@ -6,11 +6,13 @@
   "directiveHistory": [
     {
       "directiveId": "2026-10-19T23:15:00+09:00",
-      "status": "running",
+      "status": "completed",
       "startedAt": "2026-10-19T14:32:02.650987+00:00",
       "lastCompletedDirectiveId": "2026-10-19T22:32:00+09:00",
-      "summary": "Doctor 37 reciprocal links repaired and publicly verified; nolplace authentication verified HTTP 200; original single-item publication resume waiting on existing worker lock.",
-      "changedFiles": []
+      "summary": "Authentication verified HTTP 200 and original nolplace item 14 resumed through normal pipeline; publication not yet verified. Doctor baronote 37 and 91 reciprocal links publicly verified. Related tests and remote push verified.",
+      "changedFiles": [],
+      "completedAt": "2026-10-19T14:51:18.487646+00:00",
+      "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546"
     }
   ],
   "summary": "Naver 5 accounts / 10 posts verified by RSS, HTTP 200 and 212/212 saved body paragraphs. KIN today 20 verified: one new submission plus three existing-answer verification recoveries. nolplace settings authentication verified HTTP 200. Doctor baronote 37 and 91 reciprocal links publicly verified.",
@@ -62,7 +64,11 @@
       "settingsHttpStatus": 200,
       "categoryCount": 4,
       "authentication": "existing admin-login fallback verified",
-      "publicationStatus": "not_started_waiting_existing_worker_lock"
+      "publicationStatus": "processing",
+      "currentStage": 1,
+      "resumedAt": "2026-10-19T14:49:55.640413+00:00",
+      "scheduleItemId": 14,
+      "publicPublicationVerified": false
     },
     "doctor": {
       "domain": "baronote.kr",
@@ -96,6 +102,14 @@
     "daily_schedule.json": {
       "size": 1753055,
       "modifiedTime": "2026-10-19T14:46:37.548Z"
+    },
+    "revenue.json": {
+      "size": 189673,
+      "modifiedTime": "2026-10-19T14:49:23.907Z"
+    },
+    "metrics.json": {
+      "size": 3545900,
+      "modifiedTime": "2026-10-19T14:49:32.370Z"
     }
   }
 }

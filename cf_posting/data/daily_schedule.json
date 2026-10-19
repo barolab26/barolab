@@ -11250,30 +11250,41 @@
       "summary": "가평, 양평, 포천 등 서울에서 1시간 거리로 불멍과 단풍을 동시에 즐기는 온수풀 구비 감성 럭셔리 글램핑장과 주말 드라이브 코스 가이드.",
       "slug": "2026-autumn-glamping-spots-seoul-suburbs-drive-guide",
       "scheduledTime": "20:20",
-      "status": "review_required",
+      "status": "processing",
       "publicUrl": "https://www.nolplace.com/2026-autumn-glamping-spots-seoul-suburbs-drive-guide",
       "completedAt": null,
-      "attemptCount": 1,
-      "retryable": false,
-      "lastError": "ReviewRequired: nolplace.com 설정 조회 인증 HTTP 401: 해당 사이트 관리자 설정 필요",
-      "detailMessage": "ReviewRequired: nolplace.com 설정 조회 인증 HTTP 401: 해당 사이트 관리자 설정 필요",
-      "totalAttempts": 1,
-      "attemptStartedAt": "2026-10-19T21:13:36.812091+09:00",
+      "attemptCount": 2,
+      "retryable": true,
+      "detailMessage": "검색 의도 및 고트래픽 신규 키워드 기획",
+      "totalAttempts": 2,
+      "attemptStartedAt": "2026-10-19T23:49:55.793690+09:00",
       "stageTimes": {
-        "1": "2026-10-19T12:13:38.211594+00:00"
+        "1": "2026-10-19T14:49:56.685520+00:00"
       },
-      "currentModel": null,
+      "currentModel": {
+        "at": "2026-10-19T14:51:15.628951+00:00",
+        "provider": "codex",
+        "requestedModel": "gpt-6-luna",
+        "actualModel": "gpt-6-luna",
+        "status": "returned",
+        "attempt": 2,
+        "httpStatus": null,
+        "reason": null,
+        "agent": "keyword-selector",
+        "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+      },
       "currentStage": 1,
-      "stageName": "키워드·주제선정 검수 대기",
-      "progressPct": 10,
+      "stageName": "키워드·주제선정",
+      "progressPct": 12,
       "browserRuntime": {
-        "pid": 50332,
+        "pid": 10324,
         "profile": "C:\\99_포터블브라우저\\CentBrowserPortable_baro76650\\User Data",
         "port": 9420,
         "browser": "Chrome/134.0.6998.136",
-        "tabs": 1,
+        "tabs": 4,
         "recoveredTabs": 0,
-        "checkedAt": "2026-10-19T12:13:41.240520+00:00"
+        "checkedAt": "2026-10-19T14:49:58.851068+00:00"
       },
       "lastErrorAt": "2026-10-19T21:13:36.812091+09:00",
       "lastExitCode": 1,
@@ -11288,6 +11299,126 @@
           "exitCode": 1,
           "elapsedSeconds": 7.4,
           "model": null
+        }
+      ],
+      "authRecovery": {
+        "checkedAt": "2026-10-19T14:49:55.640413+00:00",
+        "settingsStatus": 200,
+        "method": "existing_admin_login_fallback",
+        "previousError": "ReviewRequired: nolplace.com 설정 조회 인증 HTTP 401: 해당 사이트 관리자 설정 필요",
+        "duplicateChecked": true
+      },
+      "handoffs": [
+        {
+          "agent": "keyword-selector",
+          "status": "running",
+          "detail": "검색 의도 및 고트래픽 신규 키워드 기획"
+        }
+      ],
+      "modelHistory": [
+        {
+          "at": "2026-10-19T14:50:04.006068+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:50:18.486310+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:50:23.113677+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:50:44.877026+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:50:45.271052+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:50:59.862989+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:51:00.412805+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T14:51:15.628951+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 2,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
         }
       ]
     },
