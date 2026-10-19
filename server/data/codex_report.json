@@ -390,15 +390,15 @@
       "interruptedDomain": "maxnote.kr",
       "previousStage": 2,
       "previousProgressPct": 24,
-      "activeWorkerPid": 54472,
+      "activeWorkerPid": 45684,
       "activeWorkerCommand": "cf_posting/pipeline_runner.py --catch-up-once",
       "activeWorkerStartedAt": "2026-10-20T02:26:39+09:00",
       "lockHeld": true,
       "retryStarted": false,
       "overlappingRunPrevented": true,
       "publicPublishing": false,
-      "observedAt": "2026-10-20T02:51:17.8653791+09:00",
-      "reason": "Scheduled catch-up worker PID 54472 holds cleaner.lock; no direct prepare-only run can start without overlap."
+      "observedAt": "2026-10-20T02:56:04.4022370+09:00",
+      "reason": "Scheduled catch-up worker PID 45684 holds cleaner.lock; direct draft work remains blocked."
     },
     "quotas": {
       "naver": {
@@ -445,7 +445,7 @@
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   },
   "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T02:51:17.8653791+09:00",
+  "updatedAt": "2026-10-20T02:56:04.4022370+09:00",
   "failureAt": "2026-10-20T02:28:06.626516+09:00",
   "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
   "attemptHistory": [

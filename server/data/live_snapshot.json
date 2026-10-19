@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T02:47:32.373789+09:00",
+  "generatedAt": "2026-10-20T02:52:33.691845+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -45,14 +45,14 @@
     "cdp_observation_host": "192.168.45.248"
   },
   "metrics": {
-    "checkedAt": "2026-10-20T02:42:39.520478+09:00",
+    "checkedAt": "2026-10-20T02:46:44.964485+09:00",
     "siteCount": 21,
     "ga4": [
       {
         "domain": "baronote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:16:30.11669+09:00",
+        "checkedAt": "2026-10-20T02:45:53.208781+09:00",
         "sessions": 24,
         "pageViews": 27,
         "naverReferralSessions": 8
@@ -61,7 +61,7 @@
         "domain": "daynote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:16:52.431874+09:00",
+        "checkedAt": "2026-10-20T02:45:57.51704+09:00",
         "sessions": 49,
         "pageViews": 52,
         "naverReferralSessions": 29
@@ -70,7 +70,7 @@
         "domain": "healthcox.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:17:25.172872+09:00",
+        "checkedAt": "2026-10-20T02:46:06.350726+09:00",
         "sessions": 36,
         "pageViews": 41,
         "naverReferralSessions": 19
@@ -79,7 +79,7 @@
         "domain": "joynote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:17:40.932315+09:00",
+        "checkedAt": "2026-10-20T02:46:13.743912+09:00",
         "sessions": 14,
         "pageViews": 18,
         "naverReferralSessions": 1
@@ -133,7 +133,7 @@
         "domain": "must-pick.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:12:41.287953+09:00",
+        "checkedAt": "2026-10-20T02:43:08.582704+09:00",
         "sessions": 39,
         "pageViews": 44,
         "naverReferralSessions": 7
@@ -142,7 +142,7 @@
         "domain": "nolplace.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:12:51.030334+09:00",
+        "checkedAt": "2026-10-20T02:43:41.700699+09:00",
         "sessions": 14,
         "pageViews": 18,
         "naverReferralSessions": 2
@@ -151,7 +151,7 @@
         "domain": "smilenote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:13:22.29231+09:00",
+        "checkedAt": "2026-10-20T02:44:06.705957+09:00",
         "sessions": 5,
         "pageViews": 5,
         "naverReferralSessions": 0
@@ -160,7 +160,7 @@
         "domain": "soulnote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:14:00.37765+09:00",
+        "checkedAt": "2026-10-20T02:44:33.464953+09:00",
         "sessions": 13,
         "pageViews": 14,
         "naverReferralSessions": 2
@@ -169,7 +169,7 @@
         "domain": "topnote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:14:37.054321+09:00",
+        "checkedAt": "2026-10-20T02:45:02.476729+09:00",
         "sessions": 22,
         "pageViews": 27,
         "naverReferralSessions": 4
@@ -178,7 +178,7 @@
         "domain": "tripmarvel.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:15:37.862024+09:00",
+        "checkedAt": "2026-10-20T02:45:32.881974+09:00",
         "sessions": 30,
         "pageViews": 39,
         "naverReferralSessions": 7
@@ -187,15 +187,15 @@
         "domain": "woorinote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:15:57.142994+09:00",
+        "checkedAt": "2026-10-20T02:45:39.38263+09:00",
         "sessions": 11,
         "pageViews": 12,
         "naverReferralSessions": 2
       }
     ],
     "indexing": {
-      "indexed": 537,
-      "inspected": 1497,
+      "indexed": 539,
+      "inspected": 1503,
       "inventoryTotal": 1914
     },
     "traffic": {
@@ -266,14 +266,14 @@
       "status": "collected",
       "tables": {
         "questions": {
-          "rows": 44,
+          "rows": 45,
           "todayStates": {
             "published_verified": 3,
             "submitted_unverified": 1
           }
         },
         "discoveries": {
-          "rows": 62
+          "rows": 63
         },
         "automation_slots": {
           "rows": 236
