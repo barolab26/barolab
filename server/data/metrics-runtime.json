@@ -1,49 +1,49 @@
 {
   "schema": "metrics-runtime-v2",
-  "runId": "16c5d8a71065442dab4aa9b6d711b6e2",
-  "pid": 42600,
+  "runId": "2cbdc544022140dcbd0a6cb1fea10368",
+  "pid": 41708,
   "status": "running",
-  "startedAt": "2026-10-19T10:06:39.990092+00:00",
-  "checkedAt": "2026-10-19T10:09:53.682671+00:00",
+  "startedAt": "2026-10-19T12:36:40.023212+00:00",
+  "checkedAt": "2026-10-19T12:40:31.550589+00:00",
   "stages": [
     {
       "script": "dashboard/revenue.py",
       "status": "completed",
-      "startedAt": "2026-10-19T10:06:39.991016+00:00",
+      "startedAt": "2026-10-19T12:36:40.024604+00:00",
       "timeoutSeconds": 180,
-      "lastProcessSuccessAt": "2026-10-19T10:07:04.516074+00:00",
-      "helperPid": 56912,
-      "elapsedSeconds": 24.5,
+      "lastProcessSuccessAt": "2026-10-19T12:37:10.471087+00:00",
+      "helperPid": 29640,
+      "elapsedSeconds": 30.4,
       "exitCode": 0,
-      "finishedAt": "2026-10-19T10:07:04.516090+00:00"
+      "finishedAt": "2026-10-19T12:37:10.471100+00:00"
     },
     {
       "script": "dashboard/traffic.py",
       "status": "completed",
-      "startedAt": "2026-10-19T10:07:04.546655+00:00",
+      "startedAt": "2026-10-19T12:37:10.501623+00:00",
       "timeoutSeconds": 840,
-      "lastProcessSuccessAt": "2026-10-19T10:07:33.462968+00:00",
-      "helperPid": 40032,
-      "elapsedSeconds": 28.9,
+      "lastProcessSuccessAt": "2026-10-19T12:37:41.312213+00:00",
+      "helperPid": 36368,
+      "elapsedSeconds": 30.8,
       "exitCode": 0,
-      "finishedAt": "2026-10-19T10:07:33.462982+00:00"
+      "finishedAt": "2026-10-19T12:37:41.312224+00:00"
     },
     {
       "script": "dashboard/metrics.py",
       "status": "running",
-      "startedAt": "2026-10-19T10:07:33.533123+00:00",
+      "startedAt": "2026-10-19T12:37:41.391539+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-19T09:44:06.100894+00:00",
-      "helperPid": 56308,
-      "elapsedSeconds": 140.1
+      "lastProcessSuccessAt": "2026-10-19T12:13:31.198654+00:00",
+      "helperPid": 44700,
+      "elapsedSeconds": 170.2
     }
   ],
   "budgetSeconds": 1500,
-  "lastProcessSuccessAt": "2026-10-19T09:44:06.144928+00:00",
+  "lastProcessSuccessAt": "2026-10-19T12:13:31.238407+00:00",
   "lastSuccessAt": null,
   "lastCollectionSuccessAt": null,
   "previousInterrupted": false,
-  "previousStartedAt": "2026-10-19T09:36:39.969318+00:00",
+  "previousStartedAt": "2026-10-19T12:06:40.011396+00:00",
   "successMeaning": "process_exit_zero_not_source_collection",
   "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
   "currentStage": "dashboard/metrics.py"

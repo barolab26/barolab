@@ -1,0 +1,318 @@
+{
+    "schema":  "barolab-live-snapshot-v1",
+    "generatedAt":  "2026-10-19T12:39:48.564056+00:00",
+    "date":  "2026-10-19",
+    "refreshSeconds":  300,
+    "complete":  true,
+    "errors":  {
+
+               },
+    "system":  {
+                   "status":  "online",
+                   "server_port":  8790,
+                   "cdp_browsers":  {
+                                        "soultin_cdp":  {
+                                                            "port":  9334,
+                                                            "name":  "soultin (mustpickinfo)",
+                                                            "open":  true,
+                                                            "observation":  "host-monitor"
+                                                        },
+                                        "soul5373_cdp":  {
+                                                             "port":  9333,
+                                                             "name":  "soul5373 (mustinfo)",
+                                                             "open":  true,
+                                                             "observation":  "host-monitor"
+                                                         },
+                                        "yoon_master_cdp":  {
+                                                                "port":  9335,
+                                                                "name":  "yoon_master (yoonviews)",
+                                                                "open":  true,
+                                                                "observation":  "host-monitor"
+                                                            },
+                                        "adinfo0905_cdp":  {
+                                                               "port":  9231,
+                                                               "name":  "adinfo0905 (CF ë¸ë¦¿ì§)",
+                                                               "open":  true,
+                                                               "observation":  "host-monitor"
+                                                           },
+                                        "stone0747_cdp":  {
+                                                              "port":  9230,
+                                                              "name":  "stone0747 (CF ë¸ë¦¿ì§)",
+                                                              "open":  true,
+                                                              "observation":  "host-monitor"
+                                                          }
+                                    },
+                   "cdp_online_count":  5,
+                   "cdp_total_count":  5,
+                   "cdp_observation_host":  "192.168.45.248"
+               },
+    "metrics":  {
+                    "checkedAt":  "2026-10-19T12:13:30.657961+00:00",
+                    "siteCount":  21,
+                    "ga4":  [
+                                {
+                                    "domain":  "baronote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:10:16.701320+00:00",
+                                    "sessions":  25,
+                                    "pageViews":  30,
+                                    "naverReferralSessions":  10
+                                },
+                                {
+                                    "domain":  "daynote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:10:39.724334+00:00",
+                                    "sessions":  46,
+                                    "pageViews":  48,
+                                    "naverReferralSessions":  30
+                                },
+                                {
+                                    "domain":  "healthcox.com",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:11:12.637818+00:00",
+                                    "sessions":  29,
+                                    "pageViews":  32,
+                                    "naverReferralSessions":  18
+                                },
+                                {
+                                    "domain":  "joynote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:11:30.105620+00:00",
+                                    "sessions":  15,
+                                    "pageViews":  18,
+                                    "naverReferralSessions":  2
+                                },
+                                {
+                                    "domain":  "justinfo.co.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:12:00.273238+00:00",
+                                    "sessions":  18,
+                                    "pageViews":  22,
+                                    "naverReferralSessions":  0
+                                },
+                                {
+                                    "domain":  "maxnote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:12:32.517245+00:00",
+                                    "sessions":  12,
+                                    "pageViews":  14,
+                                    "naverReferralSessions":  1
+                                },
+                                {
+                                    "domain":  "meganote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:13:00.983015+00:00",
+                                    "sessions":  25,
+                                    "pageViews":  25,
+                                    "naverReferralSessions":  3
+                                },
+                                {
+                                    "domain":  "must-good.com",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:13:10.825465+00:00",
+                                    "sessions":  21,
+                                    "pageViews":  21,
+                                    "naverReferralSessions":  0
+                                },
+                                {
+                                    "domain":  "must-joy.com",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:13:18.938292+00:00",
+                                    "sessions":  7,
+                                    "pageViews":  16,
+                                    "naverReferralSessions":  0
+                                },
+                                {
+                                    "domain":  "must-pick.com",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:13:26.950176+00:00",
+                                    "sessions":  41,
+                                    "pageViews":  44,
+                                    "naverReferralSessions":  8
+                                },
+                                {
+                                    "domain":  "nolplace.com",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:13:30.162376+00:00",
+                                    "sessions":  11,
+                                    "pageViews":  15,
+                                    "naverReferralSessions":  0
+                                },
+                                {
+                                    "domain":  "smilenote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:07:59.020742+00:00",
+                                    "sessions":  7,
+                                    "pageViews":  7,
+                                    "naverReferralSessions":  0
+                                },
+                                {
+                                    "domain":  "soulnote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:08:12.323311+00:00",
+                                    "sessions":  11,
+                                    "pageViews":  12,
+                                    "naverReferralSessions":  2
+                                },
+                                {
+                                    "domain":  "topnote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:08:40.653214+00:00",
+                                    "sessions":  24,
+                                    "pageViews":  28,
+                                    "naverReferralSessions":  7
+                                },
+                                {
+                                    "domain":  "tripmarvel.com",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:09:14.739024+00:00",
+                                    "sessions":  27,
+                                    "pageViews":  35,
+                                    "naverReferralSessions":  4
+                                },
+                                {
+                                    "domain":  "woorinote.kr",
+                                    "start":  "2026-10-11",
+                                    "end":  "2026-10-17",
+                                    "checkedAt":  "2026-10-19T12:09:42.272529+00:00",
+                                    "sessions":  9,
+                                    "pageViews":  9,
+                                    "naverReferralSessions":  2
+                                }
+                            ],
+                    "indexing":  {
+                                     "indexed":  539,
+                                     "inspected":  1523,
+                                     "inventoryTotal":  1908
+                                 },
+                    "traffic":  {
+                                    "sessions":  328,
+                                    "pageViews":  376,
+                                    "connectedSites":  16,
+                                    "expectedSites":  16
+                                },
+                    "fresh":  true
+                },
+    "publications":  {
+                         "date":  "2026-10-19",
+                         "cf":  {
+                                    "sourceDate":  "2026-10-19",
+                                    "status":  "current",
+                                    "published":  15
+                                },
+                         "naver":  {
+                                       "sourceDate":  "2026-10-19",
+                                       "status":  "current",
+                                       "publishedVerified":  10
+                                   },
+                         "kin":  {
+                                     "status":  "collected",
+                                     "states":  {
+                                                    "published_verified":  15,
+                                                    "submitted_unverified":  7
+                                                }
+                                 },
+                         "threads":  {
+                                         "status":  "collected",
+                                         "states":  {
+                                                        "published_verified":  3,
+                                                        "queued":  2,
+                                                        "submitted_unknown":  2
+                                                    },
+                                         "byKind":  {
+                                                        "followup":  3,
+                                                        "main":  4
+                                                    }
+                                     }
+                     },
+    "databases":  {
+                      "growth.sqlite3":  {
+                                             "file":  "growth.sqlite3",
+                                             "status":  "collected",
+                                             "tables":  {
+                                                            "sites":  {
+                                                                          "rows":  21
+                                                                      },
+                                                            "connections":  {
+                                                                                "rows":  59
+                                                                            },
+                                                            "daily_metrics":  {
+                                                                                  "rows":  0
+                                                                              },
+                                                            "improvement_actions":  {
+                                                                                        "rows":  0
+                                                                                    },
+                                                            "maintenance_jobs":  {
+                                                                                     "rows":  1995
+                                                                                 },
+                                                            "maintenance_attempts":  {
+                                                                                         "rows":  25
+                                                                                     }
+                                                        }
+                                         },
+                      "kin.sqlite3":  {
+                                          "file":  "kin.sqlite3",
+                                          "status":  "collected",
+                                          "tables":  {
+                                                         "questions":  {
+                                                                           "rows":  38,
+                                                                           "todayStates":  {
+                                                                                               "published_verified":  15,
+                                                                                               "submitted_unverified":  7
+                                                                                           }
+                                                                       },
+                                                         "discoveries":  {
+                                                                             "rows":  54
+                                                                         },
+                                                         "automation_slots":  {
+                                                                                  "rows":  211
+                                                                              },
+                                                         "operating_cadence":  {
+                                                                                   "rows":  1
+                                                                               }
+                                                     }
+                                      },
+                      "threads.sqlite3":  {
+                                              "file":  "threads.sqlite3",
+                                              "status":  "collected",
+                                              "tables":  {
+                                                             "parts":  {
+                                                                           "rows":  17,
+                                                                           "todayStates":  {
+                                                                                               "published_verified":  3,
+                                                                                               "queued":  2,
+                                                                                               "submitted_unknown":  2
+                                                                                           },
+                                                                           "todayByKind":  {
+                                                                                               "followup":  3,
+                                                                                               "main":  4
+                                                                                           }
+                                                                       },
+                                                             "events":  {
+                                                                            "rows":  40
+                                                                        },
+                                                             "authoring_slots":  {
+                                                                                     "rows":  13,
+                                                                                     "todayStates":  {
+                                                                                                         "queued":  4
+                                                                                                     }
+                                                                                 }
+                                                         }
+                                          }
+                  }
+}
