@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T02:42:31.015439+09:00",
+  "generatedAt": "2026-10-20T02:47:32.373789+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -45,7 +45,7 @@
     "cdp_observation_host": "192.168.45.248"
   },
   "metrics": {
-    "checkedAt": "2026-10-20T02:41:48.93628+09:00",
+    "checkedAt": "2026-10-20T02:42:39.520478+09:00",
     "siteCount": 21,
     "ga4": [
       {
@@ -115,7 +115,7 @@
         "domain": "must-good.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:18:15.048437+09:00",
+        "checkedAt": "2026-10-20T02:42:22.316432+09:00",
         "sessions": 22,
         "pageViews": 22,
         "naverReferralSessions": 1
@@ -124,7 +124,7 @@
         "domain": "must-joy.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:18:30.390619+09:00",
+        "checkedAt": "2026-10-20T02:42:39.489724+09:00",
         "sessions": 8,
         "pageViews": 17,
         "naverReferralSessions": 0
@@ -194,8 +194,8 @@
       }
     ],
     "indexing": {
-      "indexed": 536,
-      "inspected": 1494,
+      "indexed": 537,
+      "inspected": 1497,
       "inventoryTotal": 1914
     },
     "traffic": {
@@ -276,7 +276,7 @@
           "rows": 62
         },
         "automation_slots": {
-          "rows": 235
+          "rows": 236
         },
         "operating_cadence": {
           "rows": 1
