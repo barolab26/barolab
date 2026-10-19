@@ -1,8 +1,8 @@
 {
-  "directiveId": "2026-10-20T00:05:00+09:00",
+  "directiveId": "2026-10-20T00:10:00+09:00",
   "status": "completed",
-  "startedAt": "2026-10-19T15:03:04.708193+00:00",
-  "lastCompletedDirectiveId": "2026-10-20T00:05:00+09:00",
+  "startedAt": "2026-10-19T15:08:11.132651+00:00",
+  "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
   "directiveHistory": [
     {
       "directiveId": "2026-10-19T23:15:00+09:00",
@@ -116,44 +116,111 @@
           "modifiedTime": "2026-10-19T14:49:32.370Z"
         }
       }
+    },
+    {
+      "directiveId": "2026-10-20T00:05:00+09:00",
+      "status": "completed",
+      "startedAt": "2026-10-19T15:03:04.708193+00:00",
+      "lastCompletedDirectiveId": "2026-10-20T00:05:00+09:00",
+      "summary": "Threads model changed to gpt-6-luna; nolplace publication independently verified.",
+      "changedFiles": [
+        "server/data/threads-automation.json",
+        "cf_posting/data/daily_schedule.json",
+        "server/data/live_snapshot.json"
+      ],
+      "completedAt": "2026-10-19T15:04:31.313435+00:00",
+      "commitHash": "37994538d7e90fe9cd17519c58350ef835b66264",
+      "results": {
+        "threads": {
+          "model": "gpt-6-luna",
+          "configurationConsumerVerified": true,
+          "relatedTestsPassed": 7,
+          "pendingParts": 0,
+          "todayAuthoringSlots": 0,
+          "unverifiedFollowupsPreserved": 7,
+          "generationOrPublishingTriggered": false,
+          "liveModelGenerationTested": false
+        },
+        "nolplace": {
+          "scheduleDate": "2026-10-19",
+          "scheduleItemId": 14,
+          "status": "published",
+          "stage": 7,
+          "postId": 41,
+          "publishedAt": "2026-10-19T23:59:46+09:00",
+          "httpStatus": 200,
+          "publicH1Matches": true,
+          "publicUrl": "https://www.nolplace.com/seoul-pop-up-store-family-reservation-queue-entry-guide"
+        }
+      },
+      "completionPing": {
+        "status": "sent_verified",
+        "destination": "Gemini desktop / BaroLab project",
+        "text": "코덱스 작업 완료: Threads 모델 교체 및 nolplace 배포 검증 완료.",
+        "sentAt": "2026-10-19T15:05:58.206127+00:00",
+        "evidence": "Exact user message visible in Gemini BaroLab conversation; response generation observed"
+      }
     }
   ],
-  "summary": "Threads model changed to gpt-6-luna; nolplace publication independently verified.",
+  "summary": "October 20 queue for 16 domains ready; real Luna smoke test passed; one Doctor title refinement and reciprocal links publicly verified.",
   "changedFiles": [
-    "server/data/threads-automation.json",
+    "threads_posting/authoring.py",
+    "threads_posting/test_pipeline.py",
     "cf_posting/data/daily_schedule.json",
-    "server/data/live_snapshot.json"
+    "cf_posting/data/schedule_history/2026-10-19.json"
   ],
-  "completedAt": "2026-10-19T15:04:31.313435+00:00",
-  "commitHash": "37994538d7e90fe9cd17519c58350ef835b66264",
+  "commitHash": "90a9e91a2839bf31c27e527ac8275fc7dd66642c",
   "results": {
-    "threads": {
-      "model": "gpt-6-luna",
-      "configurationConsumerVerified": true,
-      "relatedTestsPassed": 7,
-      "pendingParts": 0,
-      "todayAuthoringSlots": 0,
-      "unverifiedFollowupsPreserved": 7,
-      "generationOrPublishingTriggered": false,
-      "liveModelGenerationTested": false
+    "radar": {
+      "date": "2026-10-20",
+      "domains": 16,
+      "waitingSlots": 16,
+      "sourcePeriodStart": "2026-10-12",
+      "sourcePeriodEnd": "2026-10-18",
+      "revenueEvidenceComplete": false,
+      "priorPublishedArchivePreserved": true,
+      "newPublicationTriggered": false
     },
-    "nolplace": {
-      "scheduleDate": "2026-10-19",
-      "scheduleItemId": 14,
-      "status": "published",
-      "stage": 7,
-      "postId": 41,
-      "publishedAt": "2026-10-19T23:59:46+09:00",
-      "httpStatus": 200,
-      "publicH1Matches": true,
-      "publicUrl": "https://www.nolplace.com/seoul-pop-up-store-family-reservation-queue-entry-guide"
+    "threads": {
+      "actualModel": "gpt-6-luna",
+      "actualGenerationCalls": 1,
+      "mainLines": 3,
+      "mainExternalUrls": 0,
+      "followupExactOutboundUrls": 1,
+      "queued": false,
+      "published": false,
+      "policyTestsPassed": 8,
+      "artifact": "server/data/threads-drafts/3f6f34fbc1e44ecdb534b2a84665b03c.json",
+      "editorialCorrection": "unsupported affiliate disclosure replaced with owned-blog disclosure; model main preserved"
+    },
+    "doctor": {
+      "status": "verified",
+      "domain": "must-good.com",
+      "targetPostId": 284,
+      "sourcePostId": 444,
+      "url": "https://www.must-good.com/2026년-주말-나들이-명소-서울-근교-당일치기-15곳-추천",
+      "sourceUrl": "https://www.must-good.com/2026-autumn-foliage-spots-guide",
+      "title": "2026 서울 근교 당일치기, 아이 동반 가족과 커플별 나들이 선택법",
+      "actualTitleChanged": true,
+      "periodStart": "2026-10-13",
+      "periodEnd": "2026-10-19",
+      "targetDomainTrafficComplete": true,
+      "sessions": 0,
+      "pageViews": 0,
+      "sourceBasis": "observed_gsc_pass",
+      "bothPublicHttpStatus": 200,
+      "reciprocalLinksVerified": true,
+      "additionalQuotaUsed": 0,
+      "existingTodayRecordRefined": true,
+      "baronote317Changed": false
     }
   },
+  "completedAt": "2026-10-19T15:26:45.963358+00:00",
   "completionPing": {
     "status": "sent_verified",
+    "text": "코덱스 작업 완료: 10/20 스케줄 수립 및 Threads 실생성 테스트 완료.",
     "destination": "Gemini desktop / BaroLab project",
-    "text": "코덱스 작업 완료: Threads 모델 교체 및 nolplace 배포 검증 완료.",
-    "sentAt": "2026-10-19T15:05:58.206127+00:00",
-    "evidence": "Exact user message visible in Gemini BaroLab conversation; response generation observed"
+    "sentAt": "2026-10-19T15:28:25.509347+00:00",
+    "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   }
 }
