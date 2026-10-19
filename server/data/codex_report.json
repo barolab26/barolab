@@ -1,0 +1,57 @@
+{
+  "directiveId": "2026-10-19T22:32:00+09:00",
+  "status": "completed",
+  "startedAt": "2026-10-19T13:36:08.889456+00:00",
+  "lastCompletedDirectiveId": "2026-10-19T22:32:00+09:00",
+  "directiveFileId": "1XijewNeDo1PoCn6bufHY4RwA0FE7lUM4",
+  "summary": "Doctor 제목+H2 이어붙이기 제거; 원문 기반 32~48자 단일 제목과 mojibake/이모지 정규화. 기존 4개 글과 관련 링크 2곳을 재배포하고 API/공개 페이지 검증 완료. 회귀 테스트 74개 통과 및 origin/main 푸시 확인.",
+  "changedFiles": [
+    "cf_posting/pipeline_runner.py",
+    "server/test_collection_observability.py",
+    "cf_posting/data/daily_schedule.json",
+    "server/data/codex_report.json"
+  ],
+  "updatedAt": "2026-10-19T13:42:17.978281+00:00",
+  "tests": {
+    "command": "python -B -m unittest dashboard.test_revenue_collectors server.test_collection_observability server.test_radar_scout -q",
+    "passed": 74
+  },
+  "completedAt": "2026-10-19T13:47:07.811775+00:00",
+  "commitHash": "95551622053fde79f2fe11947dd80e96853e4dbf",
+  "repairs": [
+    {
+      "domain": "baronote.kr",
+      "postId": 37,
+      "title": "2026 부동산 규제지역 해제 확인과 대출·전매제한 변경 기준",
+      "url": "https://www.baronote.kr/부동산-규제지역-해제-현황-2026-지역별-5대-변화-총비교",
+      "status": "verified",
+      "relatedPostId": null
+    },
+    {
+      "domain": "baronote.kr",
+      "postId": 40,
+      "title": "2026 전세자금대출 한도 계산, 소득·신용·부채 확인하는 방법",
+      "url": "https://www.baronote.kr/2026-최신-전세자금대출-한도-계산기-꿀팁-5가지-2026년",
+      "status": "verified",
+      "relatedPostId": 82
+    },
+    {
+      "domain": "daynote.kr",
+      "postId": 62,
+      "title": "2026 시간 관리법 5가지, 우선순위 설정부터 워라밸 실천까지",
+      "url": "https://www.daynote.kr/2026-나만의-시간-관리법-5가지로-워라밸-완성하기",
+      "status": "verified",
+      "relatedPostId": null
+    },
+    {
+      "domain": "daynote.kr",
+      "postId": 63,
+      "title": "2026 스트레스 해소 취미 5가지, 운동·명상부터 창작활동까지",
+      "url": "https://www.daynote.kr/스트레스-해소-취미-추천-5가지-2026년-당신의-마음을-치유할-방법",
+      "status": "verified",
+      "relatedPostId": 81
+    }
+  ],
+  "uploadStatus": "pending",
+  "cacheResolution": "Live Worker key _baro_v=20261019_postseo_v1; exact URLs purged; canonical public H1 verified"
+}
