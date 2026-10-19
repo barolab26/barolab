@@ -2343,6 +2343,25 @@ def require_prewriting_handoff(handoff, article):
     raise ReviewRequired('새 글의 사전 해결 계획·독립 검수 누락: 원래 질문부터 재기획 필요')
 
 
+def validate_writer_image_links(article):
+    """Never invent missing visuals or references during writer normalization."""
+    plans = article.get('imagePlans', [])
+    steps = article.get('readerTask', {}).get('steps', [])
+    by_step = {s.get('id'): s for s in steps if isinstance(s, dict)}
+    names = {p.get('filename') for p in plans}
+    soup = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
+    for step in steps:
+        if any(name not in names for name in step.get('imageFiles', [])):
+            raise ReviewRequired('Writer task references a missing image plan')
+    for plan in plans:
+        step = by_step.get(plan.get('stepId'))
+        anchor = str(plan.get('anchorId') or '').lstrip('#')
+        if not step or not anchor or anchor != str(step.get('blockRef') or '').lstrip('#'):
+            raise ReviewRequired('Writer image plan must reference an actual task step and block')
+        if soup.find(id=anchor) is None:
+            raise ReviewRequired('Writer image plan block is absent from the actual body')
+
+
 async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
     progress('keyword-selector', '검색 의도 및 고트래픽 신규 키워드 기획')
     style_repair = bool(fixed and fixed.get('stylePhotoRepair'))
@@ -2592,7 +2611,11 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         if not isinstance(p, dict):
             continue
         orig_fname = str(p.get('filename') or '')
-        src_val = p.get('source') if (has_materials and p.get('source') in ('capture', 'generated', 'original')) else 'generated'
+        src_val = p.get('source')
+        if src_val not in ('capture', 'generated', 'original'):
+            raise ReviewRequired('Writer image plan has no explicit source')
+        if src_val in ('capture', 'original') and not has_materials:
+            raise ReviewRequired('Writer capture plan has no acquired source material')
         role_val = p.get('role') if p.get('role') in ('action', 'result', 'explanation', 'comparison', 'context') else 'explanation'
         raw_cap = str(p.get('caption') or f"{article.get('mainKeyword', '핵심')} 단계별 확인 가이드 ({p_idx+1})").strip()
         cap_val = sanitize_caption_for_source(raw_cap, source_type=src_val)
@@ -2618,7 +2641,9 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             sec_idx = max(0, int(p.get('sectionIndex', p_idx)))
         except (TypeError, ValueError):
             sec_idx = p_idx
-        prompt_val = str(p.get('prompt') or f"Photorealistic direct subject visual scene representing {article.get('mainKeyword', slug)} ({cap_val}), realistic environment and facility detail, natural daylight, 16:9, no people, no human faces, no text, no watermark").strip()
+        prompt_val = str(p.get('prompt') or '').strip()
+        if src_val == 'generated' and not prompt_val:
+            raise ReviewRequired('Writer generated image plan requires its own reviewed prompt')
         alt_val = sanitize_caption_for_source(
             str(p.get('alt') or build_seo_alt_text(
                 topic_title=article.get('title', ''),
@@ -2636,31 +2661,10 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             'sectionIndex': sec_idx,
             'source': src_val,
             'role': role_val,
-            'stepId': str(p.get('stepId') or f'step_{p_idx+1}'),
+            **({'visualType': p['visualType']} if p.get('visualType') else {}),
+            'stepId': str(p.get('stepId') or ''),
             'anchorId': str(p.get('anchorId') or ''),
         })
-    if not norm_plans and not (fixed and fixed.get('stylePhotoRepair')):
-        for p_idx in range(2):
-            src_val = 'generated'
-            cap_val = sanitize_caption_for_source(f"{kw.get('mainKeyword', '핵심 주제')} 주요 확인 포인트 ({p_idx+1})", source_type=src_val)
-            fname = build_seo_image_filename(
-                topic_or_slug=f"{slug} {kw.get('mainKeyword', '')}",
-                section_or_caption=cap_val,
-                source_type=src_val,
-                shot_index=p_idx + 1,
-                ext='.jpg',
-            )
-            norm_plans.append({
-                'filename': fname,
-                'prompt': f"Photorealistic direct visual scene of {kw.get('mainKeyword', slug)}, realistic subject environment and architectural or equipment detail, natural daylight, 16:9, no people, no human faces, no text, no watermark ({p_idx+1})",
-                'caption': cap_val,
-                'alt': build_seo_alt_text(topic_title=article.get('title', ''), caption=cap_val, source_type=src_val, shot_index=p_idx + 1),
-                'sectionIndex': p_idx,
-                'source': src_val,
-                'role': 'comparison' if p_idx == 0 else 'explanation',
-                'stepId': f'step_{p_idx+1}',
-                'anchorId': '',
-            })
     article['imagePlans'] = norm_plans
     if isinstance(article.get('readerTask'), dict) and isinstance(article['readerTask'].get('steps'), list):
         for st in article['readerTask']['steps']:
@@ -2668,6 +2672,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 st['imageFiles'] = [fname_map.get(str(fn), str(fn)) for fn in st['imageFiles']]
     if not isinstance(article.get('readerValue'), list) or not article['readerValue']:
         article['readerValue'] = [{'kind': 'practical_guide', 'description': f"{kw.get('mainKeyword', slug)} 핵심 기준 및 단계별 해결 방법 정리", 'blockRefs': []}]
+    validate_writer_image_links(article)
     validate_article_brief_binding(article, research_data)
     validate_article(article)
     (folder / 'article.json').write_text(json.dumps(article, ensure_ascii=False, indent=2), encoding='utf-8')
