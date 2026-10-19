@@ -1,8 +1,8 @@
 {
-  "directiveId": "2026-10-19T23:37:00+09:00",
+  "directiveId": "2026-10-20T00:05:00+09:00",
   "status": "completed",
-  "startedAt": "2026-10-19T14:38:49.862952+00:00",
-  "lastCompletedDirectiveId": "2026-10-19T23:37:00+09:00",
+  "startedAt": "2026-10-19T15:03:04.708193+00:00",
+  "lastCompletedDirectiveId": "2026-10-20T00:05:00+09:00",
   "directiveHistory": [
     {
       "directiveId": "2026-10-19T23:15:00+09:00",
@@ -13,103 +13,147 @@
       "changedFiles": [],
       "completedAt": "2026-10-19T14:51:18.487646+00:00",
       "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546"
+    },
+    {
+      "directiveId": "2026-10-19T23:37:00+09:00",
+      "status": "completed",
+      "startedAt": "2026-10-19T14:38:49.862952+00:00",
+      "lastCompletedDirectiveId": "2026-10-19T23:37:00+09:00",
+      "summary": "핑 테스트 완료",
+      "changedFiles": [
+        "cf_posting/data/daily_schedule.json",
+        "cf_posting/pipeline_runner.py",
+        "dashboard/data/kin.json",
+        "dashboard/naver_automation.json",
+        "dashboard/naver_public_verification.json",
+        "naver_blog_posting/public_verification.py",
+        "naver_kin/browser.py",
+        "naver_kin/pipeline.py",
+        "naver_kin/test_browser.py",
+        "naver_kin/test_pipeline.py",
+        "server/test_collection_observability.py",
+        "server/test_naver_worker_schedule.py"
+      ],
+      "completedAt": "2026-10-19T14:48:31.103371+00:00",
+      "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546",
+      "results": {
+        "naver": {
+          "accounts": 5,
+          "posts": 10,
+          "matchedParagraphs": 212,
+          "expectedParagraphs": 212,
+          "verifiedAt": "2026-10-19T23:41:18+09:00",
+          "downstreamMonitorWarning": "Post-verification classifier rejected old NAS artifact path; restriction preserved"
+        },
+        "kin": {
+          "todayPublishedVerified": 20,
+          "remaining": 0,
+          "newSubmissions": 1,
+          "recoveredExistingSubmissions": 3,
+          "cdpReadyPorts": [
+            9230,
+            9231,
+            9333,
+            9334,
+            9335
+          ],
+          "publicUrls": [
+            "https://kin.naver.com/qna/detail.naver?docId=492662135&answerNo=31#answer31",
+            "https://kin.naver.com/qna/detail.naver?docId=494089138&answerNo=13#answer13",
+            "https://kin.naver.com/qna/detail.naver?docId=482408760&answerNo=9#answer9",
+            "https://kin.naver.com/qna/detail.naver?docId=490364096&answerNo=6#answer6"
+          ]
+        },
+        "nolplace": {
+          "settingsHttpStatus": 200,
+          "categoryCount": 4,
+          "authentication": "existing admin-login fallback verified",
+          "publicationStatus": "processing",
+          "currentStage": 5,
+          "resumedAt": "2026-10-19T14:49:55.640413+00:00",
+          "scheduleItemId": 14,
+          "publicPublicationVerified": false
+        },
+        "doctor": {
+          "domain": "baronote.kr",
+          "targetPostId": 37,
+          "sourcePostId": 91,
+          "status": "verified",
+          "titlesUnchanged": true
+        }
+      },
+      "tests": {
+        "relatedPassed": 113,
+        "baselineKnownFailures": 6,
+        "baselineCommit": "26448d2220d5beb8b0ffb7f10c3ee6d17e7c4574",
+        "baselineFailureScope": "KIN legacy submission-attempt cap and next-day time expectations; identical failures on baseline; no guard bypass"
+      },
+      "driveFiles": {
+        "naver_automation.json": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
+        "kin.json": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+        "daily_schedule.json": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+        "codex_report.json": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR"
+      },
+      "snapshotUploadVerification": {
+        "naver_automation.json": {
+          "size": 30799,
+          "modifiedTime": "2026-10-19T14:42:59.373Z"
+        },
+        "kin.json": {
+          "size": 46253,
+          "modifiedTime": "2026-10-19T14:45:52.423Z"
+        },
+        "daily_schedule.json": {
+          "size": 1753055,
+          "modifiedTime": "2026-10-19T14:46:37.548Z"
+        },
+        "revenue.json": {
+          "size": 189673,
+          "modifiedTime": "2026-10-19T14:49:23.907Z"
+        },
+        "metrics.json": {
+          "size": 3545900,
+          "modifiedTime": "2026-10-19T14:49:32.370Z"
+        }
+      }
     }
   ],
-  "summary": "핑 테스트 완료",
+  "summary": "Threads model changed to gpt-6-luna; nolplace publication independently verified.",
   "changedFiles": [
+    "server/data/threads-automation.json",
     "cf_posting/data/daily_schedule.json",
-    "cf_posting/pipeline_runner.py",
-    "dashboard/data/kin.json",
-    "dashboard/naver_automation.json",
-    "dashboard/naver_public_verification.json",
-    "naver_blog_posting/public_verification.py",
-    "naver_kin/browser.py",
-    "naver_kin/pipeline.py",
-    "naver_kin/test_browser.py",
-    "naver_kin/test_pipeline.py",
-    "server/test_collection_observability.py",
-    "server/test_naver_worker_schedule.py"
+    "server/data/live_snapshot.json"
   ],
-  "completedAt": "2026-10-19T14:48:31.103371+00:00",
-  "commitHash": "e5e0cd81daffb95389f870f189a77a7de00a8546",
+  "completedAt": "2026-10-19T15:04:31.313435+00:00",
+  "commitHash": "37994538d7e90fe9cd17519c58350ef835b66264",
   "results": {
-    "naver": {
-      "accounts": 5,
-      "posts": 10,
-      "matchedParagraphs": 212,
-      "expectedParagraphs": 212,
-      "verifiedAt": "2026-10-19T23:41:18+09:00",
-      "downstreamMonitorWarning": "Post-verification classifier rejected old NAS artifact path; restriction preserved"
-    },
-    "kin": {
-      "todayPublishedVerified": 20,
-      "remaining": 0,
-      "newSubmissions": 1,
-      "recoveredExistingSubmissions": 3,
-      "cdpReadyPorts": [
-        9230,
-        9231,
-        9333,
-        9334,
-        9335
-      ],
-      "publicUrls": [
-        "https://kin.naver.com/qna/detail.naver?docId=492662135&answerNo=31#answer31",
-        "https://kin.naver.com/qna/detail.naver?docId=494089138&answerNo=13#answer13",
-        "https://kin.naver.com/qna/detail.naver?docId=482408760&answerNo=9#answer9",
-        "https://kin.naver.com/qna/detail.naver?docId=490364096&answerNo=6#answer6"
-      ]
+    "threads": {
+      "model": "gpt-6-luna",
+      "configurationConsumerVerified": true,
+      "relatedTestsPassed": 7,
+      "pendingParts": 0,
+      "todayAuthoringSlots": 0,
+      "unverifiedFollowupsPreserved": 7,
+      "generationOrPublishingTriggered": false,
+      "liveModelGenerationTested": false
     },
     "nolplace": {
-      "settingsHttpStatus": 200,
-      "categoryCount": 4,
-      "authentication": "existing admin-login fallback verified",
-      "publicationStatus": "processing",
-      "currentStage": 5,
-      "resumedAt": "2026-10-19T14:49:55.640413+00:00",
+      "scheduleDate": "2026-10-19",
       "scheduleItemId": 14,
-      "publicPublicationVerified": false
-    },
-    "doctor": {
-      "domain": "baronote.kr",
-      "targetPostId": 37,
-      "sourcePostId": 91,
-      "status": "verified",
-      "titlesUnchanged": true
+      "status": "published",
+      "stage": 7,
+      "postId": 41,
+      "publishedAt": "2026-10-19T23:59:46+09:00",
+      "httpStatus": 200,
+      "publicH1Matches": true,
+      "publicUrl": "https://www.nolplace.com/seoul-pop-up-store-family-reservation-queue-entry-guide"
     }
   },
-  "tests": {
-    "relatedPassed": 113,
-    "baselineKnownFailures": 6,
-    "baselineCommit": "26448d2220d5beb8b0ffb7f10c3ee6d17e7c4574",
-    "baselineFailureScope": "KIN legacy submission-attempt cap and next-day time expectations; identical failures on baseline; no guard bypass"
-  },
-  "driveFiles": {
-    "naver_automation.json": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
-    "kin.json": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
-    "daily_schedule.json": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
-    "codex_report.json": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR"
-  },
-  "snapshotUploadVerification": {
-    "naver_automation.json": {
-      "size": 30799,
-      "modifiedTime": "2026-10-19T14:42:59.373Z"
-    },
-    "kin.json": {
-      "size": 46253,
-      "modifiedTime": "2026-10-19T14:45:52.423Z"
-    },
-    "daily_schedule.json": {
-      "size": 1753055,
-      "modifiedTime": "2026-10-19T14:46:37.548Z"
-    },
-    "revenue.json": {
-      "size": 189673,
-      "modifiedTime": "2026-10-19T14:49:23.907Z"
-    },
-    "metrics.json": {
-      "size": 3545900,
-      "modifiedTime": "2026-10-19T14:49:32.370Z"
-    }
+  "completionPing": {
+    "status": "sent_verified",
+    "destination": "Gemini desktop / BaroLab project",
+    "text": "코덱스 작업 완료: Threads 모델 교체 및 nolplace 배포 검증 완료.",
+    "sentAt": "2026-10-19T15:05:58.206127+00:00",
+    "evidence": "Exact user message visible in Gemini BaroLab conversation; response generation observed"
   }
 }
