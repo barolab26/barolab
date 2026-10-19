@@ -228,3 +228,69 @@ class EvidenceTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class LiveSnapshotTests(unittest.TestCase):
+    """Exercise aggregate helpers without importing workers or creating files."""
+    def helpers(self, documents=None):
+        import ast
+        import sqlite3
+        import threading
+        source = (Path(__file__).parent / 'main.py').read_text(encoding='utf-8')
+        tree = ast.parse(source)
+        names = {'_snapshot_database', '_snapshot_publications', '_snapshot_metric_summary'}
+        tree.body = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name in names]
+        env = {'sqlite3': sqlite3, 'closing': __import__('contextlib').closing, 'datetime': datetime, 'timezone': timezone, 'timedelta': timedelta,
+               'CF_DIR': Path('/cf'), 'NAVER_DIR': Path('/naver'),
+               'load_json': lambda path, default: (documents or {}).get(str(path).replace('\\', '/'), default)}
+        exec(compile(tree, 'snapshot-helpers', 'exec'), env)
+        return env
+
+    def test_metrics_only_exports_whitelisted_aggregates(self):
+        fn = self.helpers()['_snapshot_metric_summary']
+        result = fn({'sites': [{'site': {'site_id': 'example.test'}, 'credential': 'DO_NOT_EXPORT',
+                  'traffic': {'status': 'collected', 'sessions': 0, 'document': 'DO_NOT_EXPORT'}}],
+                  'secret': 'DO_NOT_EXPORT', 'indexing': {'indexed': 2, 'token': 'DO_NOT_EXPORT'}})
+        self.assertEqual(result['ga4'][0]['sessions'], 0)
+        self.assertNotIn('DO_NOT_EXPORT', json.dumps(result))
+
+    def test_old_schedule_and_unverified_naver_are_not_today(self):
+        docs = {'/cf/data/daily_schedule.json': {'date': '2026-10-18', 'items': [{'status': 'published', 'publicUrl': 'https://example.test/a'}]},
+                '/naver/data/public-verification.json': {'publicationDate': '2026-10-19', 'evidence': [
+                    {'publishedAt': '2026-10-18T14:30:00+00:00', 'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/a/1'},
+                    {'publishedAt': '2026-10-18T15:30:00+00:00', 'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/a/2'},
+                    {'publishedAt': '2026-10-19T12:00:00+09:00', 'publicPublicationVerified': False, 'publicUrl': 'https://blog.naver.com/a/3'}]}}
+        result = self.helpers(docs)['_snapshot_publications']('2026-10-19')
+        self.assertIsNone(result['cf']['published'])
+        self.assertEqual(result['naver']['publishedVerified'], 1)
+
+    def test_sqlite_reads_only_and_counts_today_without_documents(self):
+        import sqlite3
+        from unittest.mock import MagicMock, patch
+        db = sqlite3.connect(':memory:')
+        self.addCleanup(db.close)
+        db.execute('CREATE TABLE questions(state TEXT,send_day TEXT,document TEXT)')
+        db.executemany('INSERT INTO questions VALUES(?,?,?)', [('published_verified', '2026-10-19', 'PRIVATE'), ('published_verified', '2026-10-18', 'PRIVATE')])
+        db.commit()
+        file = MagicMock()
+        file.name = 'kin.sqlite3'
+        file.is_file.return_value = True
+        file.resolve.return_value.as_uri.return_value = 'file:///existing/kin.sqlite3'
+        env = self.helpers()
+        with patch.object(env['sqlite3'], 'connect', return_value=db) as connect:
+            result = env['_snapshot_database'](file, ('questions',), '2026-10-19')
+        self.assertTrue(connect.call_args.args[0].endswith('?mode=ro'))
+        self.assertEqual(result['tables']['questions']['rows'], 2)
+        self.assertEqual(result['tables']['questions']['todayStates']['published_verified'], 1)
+        self.assertNotIn('PRIVATE', json.dumps(result))
+        with self.assertRaises(sqlite3.ProgrammingError):
+            db.execute('SELECT 1')
+
+    def test_missing_database_stays_missing(self):
+        from unittest.mock import MagicMock
+        file = MagicMock()
+        file.name = 'missing.sqlite3'
+        file.is_file.return_value = False
+        result = self.helpers()['_snapshot_database'](file, ('parts',), '2026-10-19')
+        self.assertEqual(result['status'], 'missing')
+        self.assertEqual(result['tables'], {})

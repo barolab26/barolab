@@ -12,6 +12,12 @@ BaroLab Master Control Server (통합 관제 서버)
 import os
 import json
 import socket
+import asyncio
+import sqlite3
+import threading
+import logging
+from datetime import datetime, timezone, timedelta
+from contextlib import closing
 import sys
 from pathlib import Path
 from typing import Dict, Any, List
@@ -121,7 +127,7 @@ def get_system_status():
             observed = observation.get('ports', {}).get(str(port['port']))
             port['open'] = observed if fresh and type(observed) is bool else None
             port['observation'] = 'host-monitor' if port['open'] is not None else 'unknown'
-    
+
     online_count = sum(1 for p in ports.values() if p["open"])
     return {
         "status": "online",
@@ -132,6 +138,176 @@ def get_system_status():
         "cdp_total_count": len(ports),
         "cdp_observation_host": cdp_host
     }
+
+# Read-only, aggregate-only export for external monitoring. Never export DB documents.
+LIVE_SNAPSHOT_LOCK = threading.Lock()
+LIVE_SNAPSHOT_INTERVAL = 300
+LIVE_SNAPSHOT_TABLES = {
+    'growth.sqlite3': ('sites', 'connections', 'daily_metrics', 'improvement_actions', 'maintenance_jobs', 'maintenance_attempts'),
+    'kin.sqlite3': ('questions', 'discoveries', 'automation_slots', 'operating_cadence'),
+    'threads.sqlite3': ('parts', 'events', 'authoring_slots'),
+}
+
+
+def _snapshot_database(path, tables, today):
+    result = {'file': path.name, 'status': 'missing', 'tables': {}}
+    if not path.is_file():
+        return result
+    try:
+        with closing(sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True, timeout=2)) as db:
+            db.execute('PRAGMA query_only=ON')
+            db.execute('BEGIN')
+            available = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            for table in tables:
+                if table not in available:
+                    continue
+                item = {'rows': db.execute(f'SELECT COUNT(*) FROM "{table}"').fetchone()[0]}
+                columns = {r[1] for r in db.execute(f'PRAGMA table_info("{table}")')}
+                day_column = {'questions': 'send_day', 'parts': 'publication_date', 'automation_slots': 'day', 'authoring_slots': 'day'}.get(table)
+                if day_column in columns and 'state' in columns:
+                    states = db.execute(f'SELECT state, COUNT(*) FROM "{table}" WHERE "{day_column}"=? GROUP BY state', (today,)).fetchall()
+                    allowed = {'published_verified', 'submitted_unverified', 'published', 'pending', 'blocked', 'failed', 'ready', 'draft', 'approved', 'completed', 'running', 'skipped', 'done', 'retry_wait', 'sending_intent', 'submitted_unknown', 'api_submitted', 'queued', 'drafted', 'validated', 'rejected', 'submit_intent', 'manual_review'}
+                    counts = {}
+                    for state, count in states:
+                        key = state if state in allowed else 'other'
+                        counts[key] = counts.get(key, 0) + count
+                    item['todayStates'] = counts
+                    if table == 'parts' and 'kind' in columns:
+                        item['todayByKind'] = {kind: count for kind, count in db.execute(
+                            "SELECT kind, COUNT(*) FROM parts WHERE publication_date=? AND kind IN ('main', 'followup') GROUP BY kind", (today,))}
+                result['tables'][table] = item
+        result['status'] = 'collected' if len(result['tables']) == len(tables) else 'partial'
+    except (sqlite3.Error, OSError) as exc:
+        result['status'] = 'error'
+        result['errorType'] = type(exc).__name__
+    return result
+
+
+def _snapshot_publications(today):
+    from urllib.parse import urlsplit
+    def valid_url(value):
+        parsed = urlsplit(str(value or ''))
+        return parsed.scheme in ('http', 'https') and bool(parsed.hostname)
+    schedule = load_json(CF_DIR / 'data/daily_schedule.json', {})
+    cf_current = schedule.get('date') == today
+    cf_urls = {row['publicUrl'] for row in schedule.get('items', [])
+               if cf_current and row.get('status') in ('published', 'done') and valid_url(row.get('publicUrl'))}
+    verification = load_json(NAVER_DIR / 'data/public-verification.json', {})
+    naver_urls = set()
+    for row in verification.get('evidence', []):
+        try:
+            published = datetime.fromisoformat(row.get('publishedAt', '').replace('Z', '+00:00'))
+            if published.tzinfo is None:
+                continue
+            day = published.astimezone(timezone(timedelta(hours=9))).date().isoformat()
+        except (ValueError, TypeError):
+            continue
+        if day == today and row.get('publicPublicationVerified') is True and valid_url(row.get('publicUrl')):
+            naver_urls.add(row['publicUrl'])
+    return {'date': today, 'cf': {'sourceDate': schedule.get('date'), 'status': 'current' if cf_current else 'stale_or_missing',
+                                 'published': len(cf_urls) if cf_current else None},
+            'naver': {'sourceDate': verification.get('publicationDate'),
+                      'status': 'current' if verification.get('publicationDate') == today else 'stale_or_missing',
+                      'publishedVerified': len(naver_urls) if verification.get('publicationDate') == today else None}}
+
+
+def _snapshot_metric_summary(data):
+    def numbers(source, keys):
+        return {key: value for key in keys if isinstance((value := source.get(key)), (int, float)) and not isinstance(value, bool)}
+    sites = data.get('sites', [])
+    sites = list(sites.values()) if isinstance(sites, dict) else sites
+    ga4 = []
+    for row in sites:
+        traffic = row.get('traffic', {})
+        if traffic.get('status') != 'collected':
+            continue
+        ga4.append({'domain': row.get('site', {}).get('site_id'), 'start': traffic.get('start'), 'end': traffic.get('end'),
+                    'checkedAt': traffic.get('checkedAt'), **numbers(traffic, ('sessions', 'pageViews', 'naverReferralSessions'))})
+    return {'checkedAt': data.get('checkedAt'), 'siteCount': len(sites), 'ga4': ga4,
+            'indexing': numbers(data.get('indexing', {}), ('indexed', 'inspected', 'inventoryTotal')),
+            'traffic': numbers(data.get('traffic', {}), ('sessions', 'pageViews', 'connectedSites', 'expectedSites'))}
+
+
+def refresh_live_snapshot():
+    from common.dashboard_jobs import write
+    with LIVE_SNAPSHOT_LOCK:
+        now = datetime.now(timezone.utc)
+        today = now.astimezone(timezone(timedelta(hours=9))).date().isoformat()
+        snapshot = {'schema': 'barolab-live-snapshot-v1', 'generatedAt': now.isoformat(), 'date': today,
+                    'refreshSeconds': LIVE_SNAPSHOT_INTERVAL, 'complete': True, 'errors': {}}
+        for key, builder in [('system', get_system_status), ('metrics', lambda: _snapshot_metric_summary(metrics_summary())),
+                             ('publications', lambda: _snapshot_publications(today))]:
+            try:
+                snapshot[key] = builder()
+            except Exception as exc:
+                snapshot[key] = None
+                snapshot['errors'][key] = type(exc).__name__
+                snapshot['complete'] = False
+        snapshot['databases'] = {name: _snapshot_database(DATA_DIR / name, tables, today)
+                                 for name, tables in LIVE_SNAPSHOT_TABLES.items()}
+        legacy = DATA_DIR / 'threads/ledger.db'
+        if legacy.is_file():
+            snapshot['databases']['threads/ledger.db'] = _snapshot_database(legacy, LIVE_SNAPSHOT_TABLES['threads.sqlite3'], today)
+        if any(db['status'] != 'collected' for db in snapshot['databases'].values()):
+            snapshot['complete'] = False
+        for channel, database, table in [('kin', 'kin.sqlite3', 'questions'), ('threads', 'threads.sqlite3', 'parts')]:
+            if snapshot.get('publications') is not None:
+                db = snapshot['databases'][database]
+                snapshot['publications'][channel] = {'status': db['status'], 'states': db['tables'].get(table, {}).get('todayStates')}
+                if channel == 'threads':
+                    snapshot['publications'][channel]['byKind'] = db['tables'].get(table, {}).get('todayByKind')
+        publications = snapshot.get('publications') or {}
+        if any(publications.get(channel, {}).get('status') != 'current' for channel in ('cf', 'naver')):
+            snapshot['complete'] = False
+        metrics = snapshot.get('metrics') or {}
+        try:
+            metrics_age = (now - datetime.fromisoformat(metrics['checkedAt'].replace('Z', '+00:00'))).total_seconds()
+            metrics['fresh'] = 0 <= metrics_age <= 26 * 3600
+        except (KeyError, TypeError, ValueError):
+            metrics['fresh'] = False
+        if not metrics['fresh'] or metrics.get('siteCount', 0) == 0 or any(
+                port.get('open') is None for port in (snapshot.get('system') or {}).get('cdp_browsers', {}).values()):
+            snapshot['complete'] = False
+        write(DATA_DIR / 'live_snapshot.json', snapshot)
+        return snapshot
+
+
+@app.get('/api/live-snapshot')
+def get_live_snapshot():
+    snapshot = load_json(DATA_DIR / 'live_snapshot.json', {})
+    try:
+        age = (datetime.now(timezone.utc) - datetime.fromisoformat(snapshot['generatedAt'])).total_seconds()
+        if 0 <= age < LIVE_SNAPSHOT_INTERVAL:
+            return snapshot
+    except (KeyError, ValueError, TypeError):
+        pass
+    return refresh_live_snapshot()
+
+
+async def _live_snapshot_loop():
+    while True:
+        try:
+            await asyncio.to_thread(refresh_live_snapshot)
+        except Exception:
+            logging.getLogger(__name__).exception('Live snapshot refresh failed; previous file retained')
+        await asyncio.sleep(LIVE_SNAPSHOT_INTERVAL)
+
+
+@app.on_event('startup')
+async def _start_live_snapshot():
+    app.state.live_snapshot_task = asyncio.create_task(_live_snapshot_loop())
+
+
+@app.on_event('shutdown')
+async def _stop_live_snapshot():
+    task = getattr(app.state, 'live_snapshot_task', None)
+    if task:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
 
 @app.get("/api/todos")
 def get_todos():
@@ -160,16 +336,16 @@ def toggle_todo(req: ToggleTodoRequest):
             item["completed"] = not item.get("completed", False)
             updated_item = item
             break
-    
+
     if not updated_item:
         raise HTTPException(status_code=404, detail="Item not found")
-        
+
     save_json(DATA_DIR / "todos.json", todos)
-    
+
     total = len(todos)
     done = sum(1 for t in todos if t.get("completed", False))
     pct = round((done / total * 100) if total > 0 else 0)
-    
+
     return {
         "success": True,
         "updated": updated_item,
@@ -221,13 +397,13 @@ def get_naver_overview():
         "current_strategy": "스마트블록 역추적",
         "next_strategy": "자동완성·질문 롱테일"
     })
-    
+
     strategies = [
         {"id": 0, "name": "스마트블록 역추적", "desc": "AiRSEARCH 블록 의도 가로채기", "target": "soultin, stone0747"},
         {"id": 1, "name": "자동완성·질문 롱테일", "desc": "체류시간 극대화 & 질문형 어미(실패이유, 차이)", "target": "yoon_master, adinfo0905"},
         {"id": 2, "name": "트렌드×에버그린 브릿지", "desc": "실시간 화제 이슈 + 상시 정보 결합", "target": "soul5373"}
     ]
-    
+
     # Check recent outputs
     outputs_dir = NAVER_DIR / "output"
     recent_outputs = []
@@ -240,7 +416,7 @@ def get_naver_overview():
                     "has_final": has_final,
                     "mtime": d.stat().st_mtime
                 })
-    
+
     return {
         "rotation": rotation,
         "strategies": strategies,
@@ -252,18 +428,18 @@ def rotate_strategy():
     """3대 전략 로테이션 다음 턴 교대"""
     state = load_json(DATA_DIR / "state.json", default={})
     rotation = state.get("strategy_rotation", {})
-    
+
     strategies = ["스마트블록 역추적", "자동완성·질문 롱테일", "트렌드×에버그린 브릿지"]
     curr_idx = (rotation.get("current_index", 0) + 1) % len(strategies)
     next_idx = (curr_idx + 1) % len(strategies)
-    
+
     rotation["current_index"] = curr_idx
     rotation["current_strategy"] = strategies[curr_idx]
     rotation["next_strategy"] = strategies[next_idx]
-    
+
     state["strategy_rotation"] = rotation
     save_json(DATA_DIR / "state.json", state)
-    
+
     return {
         "success": True,
         "rotation": rotation

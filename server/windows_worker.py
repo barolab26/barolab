@@ -384,6 +384,78 @@ def serve_sre_system_watchdog():
         time.sleep(600)
 
 
+def mirror_worker_state():
+    """Publish Windows-owned observations and consistent ledgers to NAS; never growth DB/settings."""
+    import sqlite3
+    from contextlib import closing
+    from common.dashboard_jobs import atomic_text
+    from dashboard.metrics import collector_lock
+    nas = Path(os.environ.get('BAROLAB_NAS_ROOT', r'\\otns\yoonlab\10_Project\BaroLab'))
+    if os.name != 'nt' or not (nas / 'server/data').is_dir():
+        return {'state': 'unavailable', 'files': [], 'errors': []}
+    report = {'state': 'synced', 'files': [], 'errors': []}
+    snapshots = (
+        'server/data/browser-status.json', 'server/data/metrics.json', 'server/data/traffic.json',
+        'server/data/revenue.json', 'server/data/collection-health.json',
+        'server/data/kin-automation-state.json', 'server/data/kin-measurement.json',
+        'server/data/threads-measurement.json',
+        'dashboard/data/kin.json', 'dashboard/data/kin-measurement.json',
+        'dashboard/data/threads.json', 'dashboard/data/threads-measurement.json',
+        'dashboard/data/collection-health.json', 'dashboard/data/metrics.json',
+        'cf_posting/data/daily_schedule.json', 'naver_blog_posting/data/public-verification.json',
+    )
+    with collector_lock(ROOT / 'server/data/nas-mirror.lock') as acquired:
+        if not acquired:
+            return {'state': 'busy', 'files': [], 'errors': []}
+        for relative in (*snapshots, 'server/data/kin.sqlite3', 'server/data/threads.sqlite3'):
+            source, destination = ROOT / relative, nas / relative
+            if not source.is_file() or not destination.parent.is_dir():
+                continue
+            temporary = None
+            try:
+                modified = source.stat().st_mtime
+                if relative.endswith('.sqlite3'):
+                    wal = Path(str(source) + '-wal')
+                    if wal.is_file():
+                        modified = max(modified, wal.stat().st_mtime)
+                if destination.is_file() and destination.stat().st_mtime >= modified:
+                    continue
+                if relative.endswith('.sqlite3'):
+                    # Only the Windows workers write these ledgers; NAS exposes read-only summaries.
+                    # SQLite backup includes committed WAL pages; never copy a running DB file.
+                    if any(Path(str(destination) + suffix).exists() for suffix in ('-wal', '-journal')):
+                        raise RuntimeError('NAS ledger has an active journal; mirror refused')
+                    temporary = destination.with_name(destination.name + '.' + uuid.uuid4().hex + '.tmp')
+                    deadline = time.monotonic() + 20
+                    def check_progress(status, remaining, total):
+                        if time.monotonic() > deadline:
+                            raise TimeoutError('SQLite backup deadline')
+                    with closing(sqlite3.connect(source.resolve().as_uri() + '?mode=ro', uri=True, timeout=2)) as src:
+                        with closing(sqlite3.connect(str(temporary), timeout=2)) as dst:
+                            src.backup(dst, pages=128, progress=check_progress, sleep=0.1)
+                            dst.execute('PRAGMA journal_mode=DELETE')
+                            if dst.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
+                                raise RuntimeError('SQLite backup integrity failed')
+                    os.replace(temporary, destination)
+                else:
+                    content = source.read_text(encoding='utf-8-sig')
+                    json.loads(content)
+                    atomic_text(destination, content)
+                os.utime(destination, (modified, modified))
+                report['files'].append(relative)
+            except Exception as exc:
+                report['errors'].append({'file': relative, 'error': type(exc).__name__})
+            finally:
+                if temporary is not None:
+                    try:
+                        temporary.unlink(missing_ok=True)
+                    except OSError:
+                        report['errors'].append({'file': relative, 'error': 'temporary_cleanup_failed'})
+        if report['errors']:
+            report['state'] = 'partial'
+    return report
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--task', choices=('serve', 'cleaner', 'metrics', 'naver-monitor', 'naver-daily', 'maintenance', 'watchdog'), default='serve')
@@ -403,6 +475,12 @@ def main():
             import traceback
             traceback.print_exc()
             return 1
+        finally:
+            if args.task in ('naver-monitor', 'metrics'):
+                try:
+                    print('[nas-mirror] ' + json.dumps(mirror_worker_state()), flush=True)
+                except Exception as exc:
+                    print('[nas-mirror] failed: ' + type(exc).__name__, flush=True)
 
 
 if __name__ == '__main__':

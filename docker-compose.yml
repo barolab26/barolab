@@ -14,6 +14,7 @@ services:
     secrets:
       - barolab_config_key
     volumes:
+      - "${BAROLAB_ROOT:-/volume1/yoonlab/10_Project/BaroLab}/server/main.py:/app/server/main.py:ro"
       - "${BAROLAB_ROOT:-/volume1/yoonlab/10_Project/BaroLab}/dashboard:/app/dashboard:ro"
       - "${BAROLAB_ROOT:-/volume1/yoonlab/10_Project/BaroLab}/apps/bible/project.json:/app/apps/bible/project.json:ro"
       - "${BAROLAB_ROOT:-/volume1/yoonlab/10_Project/BaroLab}/apps/shopping/project.json:/app/apps/shopping/project.json:ro"

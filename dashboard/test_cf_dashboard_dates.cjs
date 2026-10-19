@@ -116,3 +116,30 @@ function test(name,fn) {return Promise.resolve().then(fn).then(()=>{checks++;con
   });
   console.log(`${checks} CF dashboard date regressions passed`);
 })().catch(error=>{console.error(error);process.exitCode=1;});
+
+// Overview: one central board per channel and GA4 sessions retain their source date.
+{
+  const overview = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  for (const id of ['bento-cf-grid-16', 'bento-naver-grid-5', 'overview-kin-title', 'overview-threads', 'app-projects-gauge-card']) {
+    assert.equal(overview.split(`id="${id}"`).length - 1, 1, `single overview board: ${id}`);
+  }
+  for (const match of overview.matchAll(/<script>([\s\S]*?)<\/script>/g)) new vm.Script(match[1]);
+  const start = overview.indexOf('let latestVisitorMap =');
+  const end = overview.indexOf('let latestCfPublishedMap =', start);
+  const context = vm.createContext({Date, console});
+  vm.runInContext(overview.slice(start, end), context);
+  const run = code => vm.runInContext(code, context);
+  run(`bindCFSessionMetrics({sites:[{site:{site_id:'www.example.test'},traffic:{status:'collected',sessions:25,points:[{day:'2026-10-17',sessions:9},{day:'2026-10-16',sessions:2}]}}]}, '2026-10-19')`);
+  assert.equal(run("latestVisitorMap.cf['example.test']"), 9);
+  assert.equal(run("latestVisitorMap.cfDate['example.test']"), '2026-10-17');
+  assert.equal(run("cfSessionLabel('example.test')"), '10-17 9회');
+  run(`bindCFSessionMetrics({sites:[{site:{site_id:'example.test'},traffic:{status:'collected',points:[{day:'2026-10-17',sessions:0}]}}]}, '2026-10-19')`);
+  assert.equal(run("latestVisitorMap.cf['example.test']"), 0);
+  run(`bindCFSessionMetrics({sites:[]}, '2026-10-20')`);
+  assert.equal(run("cfSessionLabel('example.test')"), 'GA4 미수집');
+  run(`bindCFSessionMetrics({trafficAnalysis:{today:'2026-10-19',sites:[{site:{site_id:'example.test'},ga4:{status:'collected',periods:{today:{sessions:7,users:3}}}}]}}, '2026-10-19')`);
+  assert.equal(run("latestVisitorMap.cf['example.test']"), 7);
+  run(`bindCFSessionMetrics({trafficAnalysis:{today:'2026-10-18',sites:[{site:{site_id:'example.test'},ga4:{periods:{today:{sessions:7}}}}]}}, '2026-10-19')`);
+  assert.equal(run("latestVisitorMap.cf['example.test']"), undefined);
+  console.log('PASS overview unique boards and dated GA4 sessions');
+}

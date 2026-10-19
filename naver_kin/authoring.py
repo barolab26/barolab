@@ -12,7 +12,6 @@ from bs4 import BeautifulSoup
 from common.channel_attribution import is_dummy_rescue_url
 from common.channel_attribution import (
     build_attribution_receipt,
-    is_adsense_ready_url_or_domain,
     domain_cpc_priority_rank,
 )
 from common import codex_cli
@@ -109,8 +108,6 @@ def load_dynamic_catalog(max_items=50, base_catalog=None, db=None, today=None):
             return
         parsed = urlsplit(url)
         if parsed.netloc not in pipeline.HOSTS or parsed.query or parsed.fragment or not parsed.path or parsed.path == '/':
-            return
-        if not is_adsense_ready_url_or_domain(url):
             return
         if url in seen_urls:
             return
@@ -586,7 +583,7 @@ One optional owned link will be appended by code; write NO URLs yourself. Disclo
 Return question_id copied EXACTLY from the chosen question and article_url copied EXACTLY from its article.
 Aim for 380-900 Korean characters.'''
     draft, used_model = codex_cli.generate_local(policy + '\nEVIDENCE_JSON:\n' + json.dumps(inputs, ensure_ascii=False),
-                                                 model, response_schema=DRAFT_SCHEMA, memory_session_id=f'kin:{folder}')
+                                                 model, response_schema=DRAFT_SCHEMA)
     (folder / 'generation.json').write_text(json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8')
     qid, article_url = draft.get('question_id'), draft.get('article_url')
     if not qid or not article_url:
@@ -630,7 +627,7 @@ CRITICAL FOR `support` ARRAY: Provide 1 to 3 items in `support`. For each item:
 - `source_url`: MUST be the exact `url` from that `sources` entry.
 EVIDENCE_JSON:\n'''
     review, reviewer_model = codex_cli.generate_local(review_prompt + json.dumps(review_input, ensure_ascii=False),
-                                                      model, response_schema=REVIEW_SCHEMA, memory_session_id=f'kin:{folder}')
+                                                      model, response_schema=REVIEW_SCHEMA)
     (folder / 'review.json').write_text(json.dumps(review, ensure_ascii=False, indent=2), encoding='utf-8')
     if not _review_supported(review, text, official_docs):
         with pipeline.connect() as db:

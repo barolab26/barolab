@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone,timedelta
 import hashlib
 import json
+import re
 import sqlite3
 import uuid
 from zoneinfo import ZoneInfo
@@ -47,12 +48,16 @@ def receipt(account,url,day,slot,content_id,allowed_hosts=None):
     return build_attribution_receipt(url,source='threads',account=account,work_date=day,
       publication_date=day,slot=slot,article_id=content_id,allowed_hosts=allowed_hosts or settings.HOSTS)
 
+def contains_external_url(text):
+    return bool(re.search(r'(?i)(?:https?://|www\.|(?<![\w@])[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|kr|io|co|gov|edu)(?:[/:?#]|\b))', text))
+
+
 def validate_document(doc,config):
     if doc.get('schema')!='threads-document-v1' or doc.get('account_key')!=config.get('account_key'):
         raise ValueError('Document account/schema mismatch')
     mode=doc.get('mode','cf_inbound')
-    if mode not in ('warmup','cf_inbound','affiliate'):
-        raise ValueError('Invalid Threads document mode')
+    if mode not in ('cf_inbound','affiliate'):
+        raise ValueError('A main + followup link pair is required; regenerate legacy warmup drafts')
     source=doc.get('source',{})
     if not source.get('body') or hashlib.sha256(source['body'].encode()).hexdigest()!=source.get('body_sha256'):
         raise ValueError('Source snapshot hash mismatch')
@@ -68,13 +73,12 @@ def validate_document(doc,config):
         if p.get('kind')!=('main' if i==0 else 'followup') or not isinstance(p.get('text'),str) or not 1<=len(p['text'])<=500:
             raise ValueError('Invalid Threads part')
     main_text=parts[0]['text']
-    if 'http://' in main_text or 'https://' in main_text:
+    if contains_external_url(main_text):
         raise ValueError('Zero links in main post required: main text must not contain http/https URLs')
+    if not 3 <= len(main_text.splitlines()) <= 4:
+        raise ValueError('Main summary must contain exactly 3 or 4 lines')
     attr=doc.get('attribution')
-    if mode=='warmup':
-        if len(parts)!=1 or attr is not None:
-            raise ValueError('Warmup post must have exactly 1 main part and no attribution link')
-    elif mode=='affiliate':
+    if mode=='affiliate':
         if len(parts)!=2 or not isinstance(attr,dict) or not attr.get('outboundUrl'):
             raise ValueError('Affiliate post requires main + followup with affiliate outboundUrl')
         outbound=attr['outboundUrl']

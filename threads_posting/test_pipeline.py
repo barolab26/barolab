@@ -17,7 +17,7 @@ class LedgerTests(unittest.TestCase):
     def document(self,id='one',slot='00:00',mode='cf_inbound'):
         source={'url':'https://www.must-pick.com/example','body':'Observed public source','body_sha256':hashlib.sha256(b'Observed public source').hexdigest()}
         attr=None if mode=='warmup' else pipeline.receipt('mustpickinfo',source['url'],self.day,slot,id)
-        parts=[{'kind':'main','text':'솔직히 이거 몰라서 그냥 지나치면 손해거든! 확인 순서 3줄 요약 👇'}]
+        parts=[{'kind':'main','text':'먼저 확인할 핵심 정보\n확인 순서 첫 단계\n세부 조건과 절차를 확인해요'}]
         if mode!='warmup':
             parts.append({'kind':'followup','text':'제가 직접 정리·운영하는 블로그에 상세 가이드를 정리했습니다.\n'+attr['outboundUrl']})
         d={'schema':'threads-document-v1','content_id':id,'account_key':'mustpickinfo','publication_date':self.day,'slot':slot,'mode':mode,'followup_delay_seconds':120,'title':'Example','source':source,'attribution':attr,'parts':parts}
@@ -34,12 +34,12 @@ class LedgerTests(unittest.TestCase):
         d['review']['binding']=pipeline.binding(d)
         with self.assertRaisesRegex(ValueError,'Zero links in main post required'):
             pipeline.validate_document(d,self.c)
-    def test_warmup_mode_allows_zero_outbound_links(self):
+    def test_legacy_warmup_without_followup_is_blocked(self):
         d=self.document(id='warm1',slot='08:00',mode='warmup')
         self.assertEqual(len(d['parts']),1)
         self.assertIsNone(d['attribution'])
-        pipeline.validate_document(d,self.c)
-        pipeline.import_document(d,self.c,self.db)
+        with self.assertRaisesRegex(ValueError, r'main \+ followup link pair'):
+            pipeline.validate_document(d,self.c)
     def test_future_slot_blocks(self):
         d=self.document(slot='23:59');pipeline.import_document(d,self.c,self.db)
         with pipeline.connect(self.db) as db:
@@ -148,3 +148,89 @@ class LedgerTests(unittest.TestCase):
         with pipeline.connect(self.db) as db:self.assertEqual(db.execute("SELECT state FROM parts WHERE part_id='one-1'").fetchone()[0],'api_submitted')
 
 if __name__=='__main__':unittest.main()
+
+
+class AuthoringPolicyTests(unittest.TestCase):
+    """Pure policy checks: no files, model calls, network, or publication."""
+    def test_all_sixteen_domains_without_adsense_gate(self):
+        from . import authoring
+        from unittest.mock import MagicMock
+        db = MagicMock()
+        db.execute.return_value = []
+        root = MagicMock()
+        (root / 'cf_posting/output').glob.return_value = []
+        rows = [{'url': 'https://' + domain + '/latest-article'} for domain in config.CF_DOMAINS_16]
+        with patch.object(pipeline, 'connect') as connect, patch.object(config, 'ROOT', root):
+            connect.return_value.__enter__.return_value = db
+            result = authoring.catalog({'articleCatalog': rows})
+        self.assertEqual(len(result), 16)
+        self.assertEqual({row['url'] for row in result}, {row['url'] for row in rows})
+
+    def test_four_line_variants_and_exact_reply_link(self):
+        from . import authoring
+        url = 'https://baronote.kr/latest-article?utm_source=threads'
+        variants, followup = authoring._build_3_variants(
+            '생활 정보', '첫 번째 조건과 신청 절차를 확인합니다. 두 번째 조건과 상세 내역을 확인합니다. 세 번째 조건과 주의사항을 확인합니다.', outbound_url=url)
+        for variant in variants.values():
+            self.assertEqual(len(variant['text'].splitlines()), 4)
+            self.assertFalse(pipeline.contains_external_url(variant['text']))
+        self.assertEqual(followup.count(url), 1)
+
+    def test_bare_and_uppercase_urls_blocked(self):
+        for text in ('HTTPS://example.com/a', 'www.example.com', 'example.kr/a'):
+            self.assertTrue(pipeline.contains_external_url(text))
+
+    def test_pair_and_line_count_validation(self):
+        fixture = LedgerTests()
+        fixture.day = '2026-10-19'
+        doc = fixture.document()
+        pipeline.validate_document(doc, config.defaults())
+        for text in ('한 줄뿐', '첫 줄\n둘째 줄\n셋째 줄\n넷째 줄\n다섯째 줄'):
+            bad = copy.deepcopy(doc)
+            bad['parts'][0]['text'] = text
+            with self.assertRaisesRegex(ValueError, '3 or 4 lines'):
+                pipeline.validate_document(bad, config.defaults())
+        bad = copy.deepcopy(doc)
+        bad['parts'] = bad['parts'][:1]
+        with self.assertRaisesRegex(ValueError, 'exact attributed link in followup'):
+            pipeline.validate_document(bad, config.defaults())
+
+    def test_catalog_recent_domain_rotates_after_unused(self):
+        from . import authoring
+        from unittest.mock import MagicMock
+        db = MagicMock()
+        db.execute.return_value = [(json.dumps({'source': {'url': 'https://must-pick.com/used'}}),)]
+        root = MagicMock()
+        (root / 'cf_posting/output').glob.return_value = []
+        rows = [{'url': 'https://must-pick.com/new'}, {'url': 'https://baronote.kr/new'},
+                {'url': 'https://must-pick.com/older'}]
+        with patch.object(pipeline, 'connect') as connect, patch.object(config, 'ROOT', root):
+            connect.return_value.__enter__.return_value = db
+            result = authoring.catalog({'articleCatalog': rows})
+        self.assertEqual(result[0]['url'], 'https://baronote.kr/new')
+        self.assertEqual(result[1]['url'], 'https://must-pick.com/new')
+
+    def test_no_official_links_still_queues_article_pair_mode(self):
+        from . import authoring
+        from unittest.mock import MagicMock
+        private = MagicMock()
+        (private / 'threads-evaluations.json').read_text.side_effect = OSError()
+        candidate = {'url': 'https://baronote.kr/new'}
+        snapshot = {'url': candidate['url'], 'body_sha256': 'hash'}
+        with patch.object(config, 'PRIVATE', private), patch.object(authoring, 'catalog', return_value=[candidate]), \
+                patch.object(authoring, 'article_snapshot', return_value=snapshot), \
+                patch.object(authoring, 'official_links', return_value=[]), \
+                patch.object(authoring, 'prepare', return_value={'approved': True, 'reason': 'ok', 'document': {'content_id': 'test'}}) as prepare, \
+                patch.object(authoring, 'write'), patch.object(pipeline, 'import_document'):
+            legacy = config.defaults()
+            legacy['slotModes']['08:00'] = 'warmup'
+            result = authoring.prepare_next(legacy, '2026-10-19', '08:00')
+        self.assertEqual(result['state'], 'queued')
+        self.assertEqual(prepare.call_args.args[4], [])
+        self.assertEqual(prepare.call_args.kwargs['mode'], 'cf_inbound')
+
+    def test_legacy_main_only_cannot_pass_send_validation(self):
+        fixture = LedgerTests()
+        fixture.day = '2026-10-19'
+        with self.assertRaisesRegex(ValueError, 'pair is required'):
+            pipeline.validate_document(fixture.document(mode='warmup'), config.defaults())

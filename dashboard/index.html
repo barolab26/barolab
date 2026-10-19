@@ -403,14 +403,14 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      height: 100%;
+      min-width: 0;
     }
     .bento-col-right {
       grid-column: span 5;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      height: 100%;
+      min-width: 0;
     }
     #legacy-remodel-gauge-card,
     #app-projects-gauge-card,
@@ -431,10 +431,10 @@
     }
     .bento-box-head {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      flex-wrap: nowrap;
     }
     .bento-box-title {
       display: flex;
@@ -573,6 +573,7 @@
     }
     .cf-tile-row1 {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 4px;
@@ -2369,7 +2370,48 @@
     acc5: { name: 'stone0747', blogId: 'stone0747', title: '지원금속보', target: 2, type: 'BRIDGE', cooldownHours: 4 }
   };
 
-  let latestVisitorMap = { cf: {}, cfWeek: {}, naver: {} };
+  let latestVisitorMap = { cf: {}, cfWeek: {}, cfDate: {}, naver: {} };
+
+  // The metrics API exposes metrics.json records as sites[].traffic.
+  // Keep the report date: a recent confirmed day is never today's visitors.
+  function bindCFSessionMetrics(data, today) {
+    latestVisitorMap.cf = {};
+    latestVisitorMap.cfWeek = {};
+    latestVisitorMap.cfDate = {};
+    const rows = Array.isArray(data.sites) ? data.sites : Object.values(data.sites || {});
+    rows.forEach(row => {
+      const domain = String(row.site?.site_id || '').replace(/^www\./, '');
+      const traffic = row.traffic || {};
+      if (!domain || traffic.status !== 'collected') return;
+      const points = (traffic.points || []).filter(point =>
+        /^\d{4}-\d{2}-\d{2}$/.test(point.day || '') && point.day <= today &&
+        Number.isSafeInteger(point.sessions) && point.sessions >= 0
+      ).sort((a, b) => b.day.localeCompare(a.day));
+      if (points.length) {
+        latestVisitorMap.cf[domain] = points[0].sessions;
+        latestVisitorMap.cfDate[domain] = points[0].day;
+      }
+      if (Number.isSafeInteger(traffic.sessions)) latestVisitorMap.cfWeek[domain] = traffic.sessions;
+    });
+    // Prefer a current-day GA4 report when available, without relabeling stale reports.
+    if (data.trafficAnalysis?.today === today) {
+      (data.trafficAnalysis.sites || []).forEach(row => {
+        const domain = String(row.site?.site_id || '').replace(/^www\./, '');
+        const sessions = row.ga4?.periods?.today?.sessions;
+        if (domain && !row.ga4?.stale && row.ga4?.status !== 'error' && Number.isSafeInteger(sessions) && sessions >= 0) {
+          latestVisitorMap.cf[domain] = sessions;
+          latestVisitorMap.cfDate[domain] = today;
+        }
+      });
+    }
+  }
+
+  function cfSessionLabel(domain) {
+    const value = latestVisitorMap.cf[domain];
+    const date = latestVisitorMap.cfDate[domain];
+    const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+    return value == null ? 'GA4 미수집' : `${date === today ? '오늘' : date.slice(5)} ${value}회`;
+  }
   let latestCfPublishedMap = {};
   let latestNaverQuotaMap = {};
 
@@ -2388,7 +2430,7 @@
     const item = CF_DOMAINS_16.find(d => d.domain === domain) || { domain, label: domain };
     const pub = latestCfPublishedMap[domain];
     const uv = latestVisitorMap.cf[domain];
-    const uvStr = uv != null ? `오늘 방문 ${uv}명` : 'GA4 수집 중';
+    const uvStr = `GA4 세션 · ${cfSessionLabel(domain)}`;
 
     if (pub) {
       window.openWorkPreviewModal({
@@ -2485,9 +2527,9 @@
       const isAct = activeDomain === item.domain;
       const uv = latestVisitorMap.cf[item.domain];
       const weekUv = latestVisitorMap.cfWeek[item.domain] || 0;
-      const uvText = uv != null ? `${uv}명` : '-';
+      const uvText = cfSessionLabel(item.domain);
       // Per-domain weekly traffic goal gauge (target 100 weekly UV baseline)
-      const trafficGoalPct = Math.min(100, Math.max(pub ? 35 : 8, Math.round(((weekUv || (uv || 0) * 5) / 100) * 100)));
+      const trafficGoalPct = Math.min(100, Math.max(0, weekUv));
       let stClass = '';
       let dot = '🟡';
       let statusTip = '대기 중 (클릭 시 상세 파이프라인 확인)';
@@ -2504,7 +2546,7 @@
       }
 
       return `
-        <a class="cf-mini-tile ${stClass}" href="${href}" onclick="window.handleCfTileClick(event, '${item.domain}')" title="[${item.domain}] ${statusTip} · 오늘 ${uvText}">
+        <a class="cf-mini-tile ${stClass}" href="${href}" onclick="window.handleCfTileClick(event, '${item.domain}')" title="[${item.domain}] ${statusTip} · GA4 세션 ${uvText}">
           <div class="cf-tile-row1">
             <span class="cf-tile-left">
               <span class="cf-tile-dot">${dot}</span>
@@ -2781,13 +2823,7 @@
         const analysis = data.trafficAnalysis || {};
         const today = window.BaroLabHistory ? window.BaroLabHistory.getKSTDateString() : new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 
-        (analysis.sites || []).forEach(r => {
-          const dom = r.site?.site_id;
-          const users = r.ga4?.periods?.today?.users;
-          const weekUsers = r.ga4?.periods?.week?.users;
-          if (dom && Number.isSafeInteger(users)) latestVisitorMap.cf[dom] = users;
-          if (dom && Number.isSafeInteger(weekUsers)) latestVisitorMap.cfWeek[dom] = weekUsers;
-        });
+        bindCFSessionMetrics(data, today);
 
         (analysis.naverBlogs || []).forEach(r => {
           const rawId = String(r.site?.site_id || '').replace(/^naver:/, '');

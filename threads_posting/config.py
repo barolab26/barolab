@@ -32,7 +32,7 @@ AFFILIATE_HOSTS = (
 )
 ALL_OUTBOUND_HOSTS = HOSTS + AFFILIATE_HOSTS
 SLOT_MODES_DEFAULT = {
-    '08:00': 'warmup',
+    '08:00': 'cf_inbound',
     '12:30': 'cf_inbound',
     '18:10': 'affiliate',
     '21:30': 'cf_inbound',

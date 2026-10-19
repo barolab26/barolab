@@ -318,10 +318,19 @@ def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
 
     required_items = [v for v in results.values() if v.get("required", True)]
     online_required = sum(1 for v in required_items if v.get("open"))
+    # Keep the NAS monitor contract; loopback is not the Windows host identity.
+    host_address = 'unknown'
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as route:
+            route.connect((os.getenv('BAROLAB_NAS_HOST', '192.168.45.190'), 445))
+            host_address = route.getsockname()[0]
+    except OSError:
+        pass
     browser_snapshot = {
         "checkedAt": datetime.now(timezone.utc).isoformat(),
         "kstCheckedAt": now_kst_iso(),
-        "host": "127.0.0.1",
+        "host": host_address,
+        "ports": {str(value['port']): value['open'] for value in results.values()},
         "browsers": results,
         "onlineCount": online_required,
         "totalRequired": len(required_items),
@@ -682,6 +691,14 @@ def sync_data_to_nas() -> Dict[str, Any]:
     if not nas_root.exists() or ROOT.drive.lower() != 'c:':
         return {"synced": False, "reason": "NAS path inaccessible or not on local C:"}
     synced_files = []
+    # NAS settings, commands, credentials and its live_snapshot are server-owned.
+    # Only Windows observation files may cross this mirror; never deploy source.
+    worker_observations = {
+        'browser-status.json', 'watchdog-status.json', 'metrics.json', 'traffic.json',
+        'revenue.json', 'collection-health.json', 'collection-watchdog.json',
+        'metrics-runtime.json', 'kin-automation-state.json', 'kin-measurement.json',
+        'threads-measurement.json', 'cf-retry-runtime.json', 'codex-runtime.json',
+    }
     try:
         import shutil
         for folder in ("cf_posting/data", "server/data"):
@@ -691,6 +708,8 @@ def sync_data_to_nas() -> Dict[str, Any]:
                 continue
             dst_dir.mkdir(parents=True, exist_ok=True)
             for file_path in src_dir.glob("*.json"):
+                if folder == 'server/data' and file_path.name not in worker_observations:
+                    continue
                 dst_file = dst_dir / file_path.name
                 if not dst_file.exists() or file_path.stat().st_mtime > dst_file.stat().st_mtime:
                     try:
@@ -699,6 +718,8 @@ def sync_data_to_nas() -> Dict[str, Any]:
                     except Exception:
                         pass
             for file_path in src_dir.glob("*.js"):
+                if folder == 'server/data':
+                    continue
                 dst_file = dst_dir / file_path.name
                 if not dst_file.exists() or file_path.stat().st_mtime > dst_file.stat().st_mtime:
                     try:

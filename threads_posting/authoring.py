@@ -14,8 +14,6 @@ from common import codex_cli
 from common.channel_attribution import is_dummy_rescue_url
 from common.channel_attribution import (
     _canonical,
-    is_adsense_ready_url_or_domain,
-    domain_cpc_priority_rank,
 )
 from common.dashboard_jobs import write
 from . import config as settings, pipeline
@@ -108,33 +106,50 @@ def article_snapshot(url, official=False):
 
 
 def catalog(config, db_path=settings.DB):
-    """Verified CF manifests across AdSense READY CF blog domains; prioritizes the explicit three-domain traffic focus."""
+    """Newest verified articles, rotating least recently used domains first."""
     with pipeline.connect(db_path) as db:
-        used = {json.loads(x[0])['source']['url'] for x in db.execute('SELECT DISTINCT document FROM parts') if x[0]}
-    found = []
-    for row in config.get('articleCatalog', []):
-        if isinstance(row, dict):
-            u = row.get('url') or ''
-            if u and u not in used and not is_dummy_rescue_url(u) and is_adsense_ready_url_or_domain(u):
-                found.append(row)
-    files = sorted((settings.ROOT / 'cf_posting/output').glob('*/run-*/publication.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+        documents = [json.loads(row[0]) for row in db.execute(
+            "SELECT document FROM parts WHERE kind='main' ORDER BY created_at DESC") if row[0]]
+    used = {doc['source']['url'] for doc in documents}
+    recent_hosts = []
+    for doc in documents:
+        host = (urlsplit(doc['source']['url']).hostname or '').removeprefix('www.')
+        if host not in recent_hosts:
+            recent_hosts.append(host)
+    found = {}
+    files = sorted((settings.ROOT / 'cf_posting/output').glob('*/run-*/publication.json'),
+                   key=lambda p: p.stat().st_mtime, reverse=True)
+    rows = []
     for path in files:
         try:
             data = json.loads(path.read_text(encoding='utf-8'))
-            url = data.get('publicUrl', '')
-            host = (urlsplit(url).hostname or '').lower()
-            if (data.get('status') != 'verified' or host not in settings.HOSTS or url in used
-                    or is_dummy_rescue_url(url) or not is_adsense_ready_url_or_domain(url)):
-                continue
-            _canonical(url, settings.HOSTS)
-            if not any(x['url'] == url for x in found):
-                found.append({'url': url, 'topic': data.get('category') or config.get('accountTopic')})
+            if data.get('status') == 'verified':
+                rows.append({'url': data.get('publicUrl', ''),
+                             'topic': data.get('category') or config.get('accountTopic')})
         except (OSError, ValueError):
             continue
-        if len(found) >= 60:
-            break
-    found.sort(key=lambda item: domain_cpc_priority_rank(item.get('url', '')))
-    return found[:40]
+    rows.extend(row for row in config.get('articleCatalog', []) if isinstance(row, dict))
+    for row in rows:
+        url = row.get('url') or ''
+        if not url or url in used or is_dummy_rescue_url(url):
+            continue
+        try:
+            _canonical(url, settings.HOSTS)
+        except ValueError:
+            continue
+        host = (urlsplit(url).hostname or '').removeprefix('www.')
+        bucket = found.setdefault(host, [])
+        if not any(item['url'] == url for item in bucket):
+            bucket.append(row)
+    domains = sorted(found, key=lambda host: (
+        -(recent_hosts.index(host) if host in recent_hosts else len(recent_hosts)), host))
+    result = []
+    while domains and len(result) < 40:
+        for host in domains:
+            if found[host]:
+                result.append(found[host].pop(0))
+        domains = [host for host in domains if found[host]]
+    return result[:40]
 
 
 def official_links(url):
@@ -157,9 +172,10 @@ def official_links(url):
 
 def _slot_mode(config, slot, explicit_mode=None):
     if explicit_mode in ('warmup', 'cf_inbound', 'affiliate'):
-        return explicit_mode
+        return 'cf_inbound' if explicit_mode == 'warmup' else explicit_mode
     slot_modes = config.get('slotModes') or settings.SLOT_MODES_DEFAULT
-    return slot_modes.get(slot, 'cf_inbound')
+    mode = slot_modes.get(slot, 'cf_inbound')
+    return 'cf_inbound' if mode == 'warmup' else mode
 
 
 def _build_3_variants(title, body_text, mode='cf_inbound', outbound_url=None, hooks=None):
@@ -199,36 +215,13 @@ def _build_3_variants(title, body_text, mode='cf_inbound', outbound_url=None, ho
             'persona': {'label': '③ 내 페르소나 맞춤형', 'text': v_persona[:480], 'hook_score': 91},
         }, ''
 
-    teaser = '자세한 신청 경로랑 한눈에 보는 정리표는 아래 첫 댓글(타래)에 남겨둘게 👇'
-    if mode == 'affiliate':
-        teaser = '오늘 기준 할인 들어간 실물 좌표랑 상세 스펙은 아래 첫 댓글(타래)에 남겨둘게 👇'
-
-    v_friendly = (
-        f"요즘 '{clean_title}' 찾고 있던 사람 있으면 이 3가지만 먼저 챙겨봐!\n\n"
-        f"① {pts[0]}\n"
-        f"② {pts[1]}\n"
-        f"③ {pts[2]}\n\n"
-        f"{teaser}"
-    )
-    v_hook = (
-        f"솔직히 '{clean_title}' 이거 몰라서 그냥 지나치면 진짜 손해거든...\n\n"
-        f"딱 10초만 투자해서 핵심 3줄만 먼저 봐봐:\n"
-        f"① {pts[0]}\n"
-        f"② {pts[1]}\n"
-        f"③ {pts[2]}\n\n"
-        f"{teaser}"
-    )
-    v_persona = (
-        f"내가 직접 비교해보고 핵심만 추린 '{clean_title}' 3줄 요약 노트 📌\n\n"
-        f"• 포인트 1: {pts[0]}\n"
-        f"• 포인트 2: {pts[1]}\n"
-        f"• 포인트 3: {pts[2]}\n\n"
-        f"{teaser}"
-    )
+    v_friendly = f"'{clean_title[:100]}' 볼 때 먼저 확인할 3가지\n① {pts[0]}\n② {pts[1]}\n③ {pts[2]}"
+    v_hook = f"'{clean_title[:100]}' 궁금했다면 이 3가지만 확인해봐\n① {pts[0]}\n② {pts[1]}\n③ {pts[2]}"
+    v_persona = f"'{clean_title[:100]}' 핵심 요약 노트 📌\n• {pts[0]}\n• {pts[1]}\n• {pts[2]}"
 
     # Ensure zero URLs inside main variants
     for k_txt in (v_friendly, v_hook, v_persona):
-        if 'http://' in k_txt or 'https://' in k_txt:
+        if pipeline.contains_external_url(k_txt):
             raise ValueError('Main post variant must not contain URLs')
 
     if mode == 'affiliate':
@@ -258,7 +251,7 @@ def prepare_next(config, day, slot, db_path=settings.DB):
             source = article_snapshot(candidate['url'])
         except Exception:
             continue
-        key = pipeline.digest({'url': source['url'], 'hash': source['body_sha256'], 'model': config['model'], 'mode': mode, 'policy': 'threads-source-review-v2'})
+        key = pipeline.digest({'url': source['url'], 'hash': source['body_sha256'], 'model': config['model'], 'mode': mode, 'policy': 'threads-source-review-v3-four-line-all-domains'})
         if key in evaluations:
             continue
         try:
@@ -273,11 +266,11 @@ def prepare_next(config, day, slot, db_path=settings.DB):
             if result['approved']:
                 pipeline.import_document(result['document'], config, db_path)
                 return {'state': 'queued', 'attempt_id': result['document']['content_id'], 'mode': mode}
-            return {'state': 'skipped', 'reason': 'independent_review_rejected'}
+            continue
         except (ValueError, requests.RequestException, RuntimeError) as exc:
             evaluations[key] = {'reason': type(exc).__name__, 'checked_at': settings.stamp()}
             write(path, evaluations)
-            return {'state': 'skipped', 'reason': 'source_or_model_unavailable'}
+            continue
     return {'state': 'skipped', 'reason': 'no_new_supported_candidate'}
 
 
@@ -333,7 +326,7 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
                 '스레드(Threads) 구어체·친근한 반말/해요체 3줄 요약 문법으로 3가지 버전(friendly_main, hook_main, persona_main)을 작성하세요. '
                 '절대 본문(main)에는 URL(http/https)을 넣지 마세요(본문 링크 0개 원칙). '
                 '딱딱한 전단지 문구("확인 순서를 정리했습니다") 금지. '
-                '첫 줄에 호기심/손실회피 후킹을 넣고, 핵심 팩트 3줄 요약 후 마지막 줄에 "아래 첫 댓글(타래)에 남겨둘게 👇"를 넣으세요. '
+                '본문은 전체 3~4줄만 작성하세요. 첫 줄은 후킹, 나머지 2~3줄은 원문의 핵심 팩트입니다. 별도 CTA 줄은 추가하지 마세요. '
                 '자료에 없는 숫자/사실 창작 금지. '
                 '후속(followup)에는 최상단에 운영/대가성 고지 문구를 넣고 정확한 outbound_url을 1회 포함하세요(warmup 모드는 빈 문자열). 자료:\n'
                 + json.dumps(data, ensure_ascii=False)
@@ -345,10 +338,13 @@ def prepare(config, url, day, slot, official_urls=(), db_path=settings.DB, *, mo
                 ('persona', 'persona_main', '③ 내 페르소나 맞춤형', 92),
             ):
                 cand = (generated.get(g_key) or '').strip()
-                if cand and 'http://' not in cand and 'https://' not in cand and not any(p in cand for p in STIFF_FLYER_PATTERNS):
-                    variants[v_key] = {'label': lbl, 'text': cand[:490], 'hook_score': sc}
-            if mode != 'warmup' and generated.get('followup') and attr['outboundUrl'] in generated['followup']:
-                default_followup = generated['followup'][:495]
+                if (cand and len(cand) <= 500 and 3 <= len(cand.splitlines()) <= 4
+                        and not pipeline.contains_external_url(cand) and not any(p in cand for p in STIFF_FLYER_PATTERNS)):
+                    variants[v_key] = {'label': lbl, 'text': cand, 'hook_score': sc}
+            if (mode != 'warmup' and isinstance(generated.get('followup'), str)
+                    and len(generated['followup']) <= 500
+                    and generated['followup'].count(attr['outboundUrl']) == 1):
+                default_followup = generated['followup']
     except Exception:
         pass
 

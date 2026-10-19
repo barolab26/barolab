@@ -42,7 +42,7 @@ class AuthoringEvidenceTests(unittest.TestCase):
             authoring.DEFAULT_CATALOG))
 
     def test_specific_source_coverage_beats_generic_queue_question(self):
-        entry = authoring.DEFAULT_CATALOG[0]
+        entry = next(item for item in authoring.DEFAULT_CATALOG if item['domain'] == 'must-good.com')
         direct = {'title': '국립중앙박물관 관람 규정', 'body': '물품 보관함과 사진 촬영 규정이 궁금합니다.'}
         generic = {'title': '국립중앙박물관 대기', 'body': '대기 줄은 얼마나 길까요?'}
         self.assertGreater(authoring._relevance_score(direct, entry), authoring._relevance_score(generic, entry))
@@ -70,6 +70,59 @@ class AuthoringEvidenceTests(unittest.TestCase):
                            authoring._relevance_score(q_rent, custom[0], used_domains_today={'baronote.kr': 2}))
         self.assertEqual(authoring.select_discovery_track('2026-10-17_adinfo0905_0910'), 'track_a_latest')
         self.assertEqual(authoring.select_discovery_track('2026-10-17_stone0747_0911'), 'track_b_search_top')
+
+    def test_generation_call_keywords_match_authenticated_adapter(self):
+        import ast
+        import inspect
+        tree = ast.parse(inspect.getsource(authoring))
+        signature = inspect.signature(authoring.codex_cli.generate_local)
+        for call in ast.walk(tree):
+            if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == 'generate_local':
+                signature.bind('prompt', 'model', **{kw.arg: None for kw in call.keywords})
+
+    def test_all_sixteen_cf_domains_allowed(self):
+        from naver_kin import pipeline
+        self.assertEqual(len(set(pipeline.CF_BASE_DOMAINS)), 16)
+        for domain in pipeline.CF_BASE_DOMAINS:
+            self.assertIn(domain, pipeline.HOSTS)
+            self.assertIn('www.' + domain, pipeline.HOSTS)
+
+    @patch('common.system_watchdog.save_json')
+    @patch('common.system_watchdog.socket.socket')
+    @patch('common.system_watchdog.is_port_open', return_value=True)
+    def test_watchdog_retains_nas_monitor_contract(self, port_open, socket, save):
+        from common.system_watchdog import check_and_recover_cdp_browsers
+        socket.return_value.__enter__.return_value.getsockname.return_value = ('192.168.45.248', 1)
+        observed = check_and_recover_cdp_browsers(auto_start=False)
+        self.assertEqual(observed['host'], '192.168.45.248')
+        self.assertTrue(all(observed['ports'][str(port)] for port in (9230, 9231, 9333, 9334, 9335)))
+        self.assertTrue(observed['checkedAt'])
+
+    @patch('requests.get')
+    @patch('naver_kin.scheduler.subprocess.Popen')
+    @patch('common.system_watchdog.is_port_open', return_value=True)
+    def test_scheduler_reuses_all_five_running_browsers(self, port_open, launch, get):
+        from naver_kin.scheduler import ensure_naver_browsers
+        get.return_value.status_code = 200
+        get.return_value.json.return_value = {'webSocketDebuggerUrl': 'ws://127.0.0.1/devtools/browser/test'}
+        rows = ensure_naver_browsers()
+        self.assertEqual({row['port'] for row in rows}, {9230, 9231, 9333, 9334, 9335})
+        self.assertTrue(all(row['ready'] and not row['started'] for row in rows))
+        launch.assert_not_called()
+
+    @patch('requests.get')
+    @patch('naver_kin.scheduler.subprocess.Popen')
+    @patch('common.system_watchdog.is_port_open', side_effect=lambda port: port != 9230)
+    def test_scheduler_starts_only_missing_account_through_batch(self, port_open, launch, get):
+        from naver_kin.scheduler import ensure_naver_browsers
+        get.return_value.status_code = 200
+        get.return_value.json.return_value = {'webSocketDebuggerUrl': 'ws://127.0.0.1/devtools/browser/test'}
+        with patch('pathlib.Path.is_file', return_value=True), patch('naver_kin.scheduler.os.name', 'nt'):
+            rows = ensure_naver_browsers()
+        launch.assert_called_once()
+        self.assertEqual(launch.call_args.args[0][:3], ['cmd.exe', '/d', '/c'])
+        self.assertTrue(launch.call_args.args[0][3].endswith('stone0747_start_cdp.bat'))
+        self.assertEqual([row['port'] for row in rows if row['started']], [9230])
 
 
 if __name__ == '__main__':

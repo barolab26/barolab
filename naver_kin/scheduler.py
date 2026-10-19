@@ -28,6 +28,38 @@ def now_kst():
     return datetime.now(KST)
 
 
+def ensure_naver_browsers():
+    """Reuse live CDP sessions; start closed ports only through account launchers."""
+    import requests
+    import time
+    from common.system_watchdog import CDP_PORT_CATALOG, is_port_open
+    result = []
+    for item in CDP_PORT_CATALOG:
+        port = int(item['port'])
+        if port not in (9230, 9231, 9333, 9334, 9335):
+            continue
+        started = False
+        if not is_port_open(port) and os.name == 'nt' and item['launcher'].is_file():
+            subprocess.Popen(['cmd.exe', '/d', '/c', str(item['launcher'])],
+                             cwd=str(item['folder']), stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL,
+                             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            started = True
+        ready = False
+        for attempt in range(15 if started else 1):
+            try:
+                response = requests.get(f'http://127.0.0.1:{port}/json/version', timeout=2)
+                ready = response.status_code == 200 and bool(response.json().get('webSocketDebuggerUrl'))
+            except (requests.RequestException, ValueError):
+                pass
+            if ready:
+                break
+            if started and attempt < 14:
+                time.sleep(1)
+        result.append({'port': port, 'ready': ready, 'started': started})
+    return result
+
+
 def _cooldown_minutes(config, anchor_iso=None):
     jitter = config.get('intervalJitterMinutes')
     if isinstance(jitter, (list, tuple)) and len(jitter) == 2:
@@ -283,6 +315,7 @@ def tick(config, now=None, dry_run=False, force=False):
         return result
     with file_lock(ROOT/'server/data/kin-scheduler.lock') as ready:
         if not ready:return {'state':'already_running','checkedAt':p.stamp()}
+        result['browsers'] = ensure_naver_browsers()
         db=p.connect();initialize_cadence(db);run_id=None
         prev_cadence=db.execute('SELECT last_completed_at,last_account FROM operating_cadence WHERE id=1').fetchone()
         state='idle';qid=None
