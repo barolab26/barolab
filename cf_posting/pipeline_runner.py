@@ -357,7 +357,7 @@ def cosmetic_issues_only(issues):
     return True
 
 
-def agent_prompt(agent, task, inputs):
+def agent_prompt(agent, task, inputs, *, coupled_visuals=False):
     if agent == 'writer':
         inputs = writer_prompt_inputs(inputs)
     if agent in ('image-maker','assembler','reviewer','writer'):
@@ -368,6 +368,12 @@ def agent_prompt(agent, task, inputs):
             '3) 엉뚱한 간접 소품(원목 테이블 + 커피잔 + 계산기 + 스마트폰 목업) 금지 및 직관적 주제 비주얼 생성: 주제와 무관한 커피잔·책상 소품 대신 해당 글의 실제 핵심 대상·장소·시설·사물(예: 남이섬 짚와이어 타워와 북한강 상공 활강 케이블 전경 등)을 직관적으로 보여주는 고품질 비주얼 프롬프트(인물 얼굴·글자 제외)로 작성한다.\n'
             '4) 사람 얼굴·3인칭 인물 연출 컷 및 가짜 한글 텍스트 생성 금지(NO people, NO human faces, NO text, NO letters) 및 우측 하단 AI 워터마크(✦) 100% 크롭 제거.\n'
         ) + task
+        if coupled_visuals or RUN_CONTEXT.get('coupledVisualLabels'):
+            task = task.replace('인물 얼굴·글자 제외', '인물 얼굴 제외').replace(
+                'NO text, NO letters', 'NO fabricated UI or evidence labels')
+            task += ('\n결합 보완 승인 범위의 개념도에는 독자 판단에 필요한 짧고 정확한 설명 라벨을 허용합니다. '
+                     '실제 화면·결과·증거처럼 보이는 UI와 그 안의 가짜 라벨은 금지합니다. '
+                     '비교표·체크리스트는 HTML로 유지하며, 라벨과 분기 조건은 인수된 출처·본문에 근거해야 합니다.\n')
     agent_file = BASE_DIR / 'agents' / f'{agent}.md'
     instructions = agent_file.read_text(encoding='utf-8') if agent_file.is_file() else ''
     if globals().get('RUN_CONTEXT') and RUN_CONTEXT.get('agent') == agent:
@@ -1415,6 +1421,11 @@ def resume_unpublished_draft(scheduled, domain, generate, progress, attribution)
     plans = article.get('imagePlans', [])
     if not isinstance(plans, list):
         return None
+    if len(rows) == 3 and not plans:
+        # A new text-only draft has no image handoff to revalidate yet.
+        # Resume the normal image-maker review, not the legacy asset repair path.
+        validate_article(article)
+        return article, handoff
     images = [folder/'images'/p['filename'] for p in plans]
     if not all(p.is_file() for p in images):
         if len(rows) == 3 and (os.environ.get('CF_CAPTURE_MANIFEST') or all(p.get('source', 'generated') == 'generated' for p in plans)):
@@ -1612,10 +1623,226 @@ def clarify_image_plan_review(handoff, article, generate, progress, attribution)
     return candidate, handoff
 
 
+COUPLED_REWORK_CHECKS = ('sourceBound', 'questionPreserved', 'taskComplete',
+                         'articleTaskConsistent', 'visualsUseful', 'noFakeEvidence')
+
+
+def coupled_source_records(research):
+    """Keep exact source evidence; goals and model summaries are not source quotes."""
+    records = []
+    def collect(value):
+        if isinstance(value, dict):
+            url = value.get('sourceUrl') or value.get('url')
+            if isinstance(url, str) and url.startswith(('https://', 'http://')):
+                texts = [value.get(k) for k in ('text', 'quote') if isinstance(value.get(k), str)]
+                texts.extend(q for q in value.get('quotes', []) if isinstance(q, str))
+                if texts:
+                    records.append({'sourceUrl':url, 'evidence':'\n'.join(texts)})
+            for child in value.values(): collect(child)
+        elif isinstance(value, list):
+            for child in value: collect(child)
+    collect(research)
+    return records
+
+
+def validate_coupled_revision(original, candidate, bindings, research, *, allow_public_replan=False):
+    if not isinstance(candidate, dict):
+        raise ReviewRequired('Coupled proposal article must be an object')
+    mutable = {'contentHtml','readerTask','imagePlans','summary','blocks','readerValue'}
+    if allow_public_replan:
+        mutable.update(('title','mainKeyword'))
+    if {k:v for k,v in candidate.items() if k not in mutable} != {k:v for k,v in original.items() if k not in mutable}:
+        raise ReviewRequired('Coupled revision changed immutable topic identity or metadata')
+    task = candidate.get('readerTask')
+    if not isinstance(task, dict) or not str(task.get('question','')).strip() or (not allow_public_replan and task.get('question') != original.get('readerTask', {}).get('question')):
+        raise ReviewRequired('Coupled revision must preserve the original reader question')
+    if not isinstance(task.get('successCondition'), str) or not task['successCondition'].strip():
+        raise ReviewRequired('Coupled revision success condition missing')
+    steps = task.get('steps')
+    if not isinstance(steps, list) or not steps or any(not isinstance(s,dict) for s in steps):
+        raise ReviewRequired('Coupled revision requires explicit reader steps')
+    ids = [s.get('id') for s in steps]
+    if any(not isinstance(i,str) or not i for i in ids) or len(ids) != len(set(ids)):
+        raise ReviewRequired('Coupled revision step IDs missing or duplicated')
+    soup = BeautifulSoup(candidate.get('contentHtml',''), 'html.parser')
+    for step in steps:
+        if not step.get('action') or not step.get('expectedResult') or not isinstance(step.get('imageFiles'),list):
+            raise ReviewRequired('Coupled revision step action/result/image references missing')
+        if not step.get('blockRef') or soup.find(id=str(step['blockRef']).removeprefix('#')) is None:
+            raise ReviewRequired('Coupled revision task block missing from body')
+    if not task.get('successBlockRef') or soup.find(id=str(task['successBlockRef']).removeprefix('#')) is None:
+        raise ReviewRequired('Coupled revision completion block missing')
+    plans = candidate.get('imagePlans')
+    if not isinstance(plans,list) or any(not isinstance(p,dict) for p in plans):
+        raise ReviewRequired('Coupled revision image plans must be a list')
+    names = [p.get('filename') for p in plans]
+    if any(not isinstance(n,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg',n) for n in names) or len(names)!=len({n.casefold() for n in names}):
+        raise ReviewRequired('Coupled revision unsafe or duplicate image filename')
+    materials = [m for m in research.get('materials',[]) if isinstance(m,dict)]
+    original_captures = [p for p in original.get('imagePlans',[]) if p.get('source') in ('capture','original')]
+    for plan in plans:
+        if plan.get('source') not in ('generated','capture','original'):
+            raise ReviewRequired('Coupled revision image source missing')
+        if plan['source'] in ('capture','original'):
+            matches = [m for m in materials if plan.get('materialId',plan['filename']) in (m.get('materialId'),m.get('filename'))]
+            if len(matches)!=1:
+                raise ReviewRequired('Coupled capture requires an unambiguous acquired material')
+            material=matches[0]
+            local=Path(str(material.get('filePath','')))
+            if (material.get('source') not in ('capture','original') or not material.get('sourceUrl')
+                    or material.get('pixelObservation',{}).get('usable') is not True
+                    or not local.is_file() or not material.get('sha256') or digest(local)!=material['sha256']
+                    or plan['filename']!=material.get('filename')):
+                raise ReviewRequired('Coupled capture provenance, pixel observation or bytes missing')
+        if plan['source']=='generated' and any(plan.get('filename')==p.get('filename') or plan.get('stepId')==p.get('stepId') for p in original_captures):
+            raise ReviewRequired('Required real capture cannot be relabeled as generated')
+        if plan['source']=='generated' and (plan.get('visualType')!='concept_diagram' or not any(label in str(plan.get('caption','')) for label in ('개념도','설명도','예시'))):
+            raise ReviewRequired('Coupled generated visuals must be honest conceptual diagrams')
+        if not all(isinstance(plan.get(k),str) and plan[k].strip() for k in ('prompt','caption','alt')):
+            raise ReviewRequired('Coupled image prompt/caption/alt missing')
+        step = next((s for s in steps if s['id']==plan.get('stepId')),None)
+        if not step or plan['filename'] not in step['imageFiles']:
+            raise ReviewRequired('Coupled image is not referenced by its reader step')
+        block = soup.find(id=str(step['blockRef']).removeprefix('#'))
+        heading = block if block.name == 'h2' else block.find('h2') or block.find_previous('h2')
+        if heading is None or type(plan.get('sectionIndex')) is not int or plan['sectionIndex']!=soup.find_all('h2').index(heading):
+            raise ReviewRequired('Coupled image section index does not match its actual block')
+    validate_writer_image_links(candidate)
+    if not isinstance(bindings,list) or not bindings:
+        raise ReviewRequired('Coupled revision requires source bindings')
+    records = coupled_source_records(research)
+    source_urls = {r['sourceUrl'] for r in records}
+    for link in soup.find_all('a',href=True):
+        if link['href'].startswith(('http://','https://')) and link['href'] not in source_urls:
+            raise ReviewRequired('Coupled revision links to an unobserved source URL')
+    for row in bindings:
+        if not isinstance(row,dict) or not all(isinstance(row.get(k),str) and row[k].strip() for k in ('blockRef','sourceUrl','quote')):
+            raise ReviewRequired('Coupled source binding is incomplete')
+        if soup.find(id=row['blockRef'].removeprefix('#')) is None:
+            raise ReviewRequired('Coupled source binding points outside the body')
+        if not any(r['sourceUrl']==row['sourceUrl'] and row['quote'] in r['evidence'] for r in records):
+            raise ReviewRequired('Coupled source quote is not in preserved research evidence')
+    validate_article(candidate)
+    return copy.deepcopy(candidate)
+
+
+def require_coupled_review(handoff, article):
+    record = handoff.data.get('coupledRework') or {}
+    review = record.get('independentReview') or {}
+    if (record.get('status') != 'accepted' or review.get('approved') is not True
+            or review.get('blockingIssues') or any(review.get(k) is not True for k in COUPLED_REWORK_CHECKS)):
+        raise ReviewRequired('Explicit independent coupled approval missing')
+    if digest(handoff.file('research.md')) != record.get('researchSha256'):
+        raise ReviewRequired('Research changed after coupled review')
+    approved=record.get('normalizedArticle',{})
+    if len(handoff.data.get('stages',[]))<=3:
+        if article != approved or digest(handoff.file('article.json')) != record.get('acceptedArticleSha256'):
+            raise ReviewRequired('Article changed before coupled image-maker handoff')
+    else:
+        handoff.check()  # Later normal stages may normalize publication slug/category only.
+        permitted={'topicSlug','category'}
+        if {k:v for k,v in article.items() if k not in permitted}!={k:v for k,v in approved.items() if k not in permitted}:
+            raise ReviewRequired('Reviewed coupled content changed downstream')
+    if not all(record.get(k,{}).get('status')=='returned' and record[k].get('actualModel') for k in ('proposalModel','reviewModel')):
+        raise ReviewRequired('Coupled model provenance missing')
+    RUN_CONTEXT['coupledVisualLabels'] = True
+    return True
+
+
+def rework_article_and_visuals(handoff, article, generate, progress, attribution):
+    """One coupled proposal plus independent review; later pixel/layout gates remain mandatory."""
+    rows = handoff.check()
+    if (handoff.data.get('domain') not in ('maxnote.kr','topnote.kr','meganote.kr','must-pick.com','nolplace.com')
+            or len(rows)!=3 or (handoff.folder/'publication.json').exists()):
+        raise ReviewRequired('Coupled rework requires an authorized unpublished three-stage draft')
+    if handoff.data.get('coupledRework'):
+        raise ReviewRequired('Coupled rework already attempted; inspect saved evidence, do not repeat')
+    if handoff.data.get('imagePlanRework',{}).get('status')!='rejected':
+        raise ReviewRequired('Coupled rework requires the preserved rejected plan')
+    original = copy.deepcopy(article)
+    research = read_document(handoff.file('research.md'))
+    allow_public_replan=handoff.data.get('domain')=='topnote.kr'
+    record = {'allowPublicReplan':allow_public_replan,'status':'proposal_pending','startedAt':stamp(),'attemptLimit':1,
+        'originalArticle':original,'originalArticleText':handoff.file('article.json').read_text(encoding='utf-8'),
+        'originalArticleSha256':digest(handoff.file('article.json')),
+        'originalDraft':handoff.file('draft.md').read_text(encoding='utf-8'),
+        'researchSha256':digest(handoff.file('research.md')),'previousHandoff':copy.deepcopy(handoff.data),
+        'scope':'coupled contentHtml/readerTask/imagePlans; no pixel/layout approval'}
+    handoff.data['coupledRework']=record
+    handoff.save()  # Intent consumes the bounded attempt even if a model call is interrupted.
+    schema = {'type':'object','additionalProperties':False,'properties':{
+        'articleJson':{'type':'string'},'sourceBindings':{'type':'array','items':{
+            'type':'object','additionalProperties':False,'properties':{k:{'type':'string'} for k in ('blockRef','sourceUrl','quote')},
+            'required':['blockRef','sourceUrl','quote']}},'reason':{'type':'string'}},
+        'required':['articleJson','sourceBindings','reason']}
+    try:
+        progress('writer','본문·독자 과제·이미지 계획 결합 보완 · 출처 원문 유지',handoff)
+        proposal = generate(agent_prompt('writer',
+            'Return a full articleJson by copying the original identity/metadata unchanged. You may revise only contentHtml, readerTask, imagePlans, summary, blocks and readerValue. '
+            'Preserve the exact reader question and satisfy the preserved research readerGoal.requiredAnswers. Correct actual omissions and inconsistent success conditions. '
+            'Use only preserved source evidence; do not invent provider privacy policies, tool menus, prices, experiences, screenshots or completion evidence. '
+            'The maxnote research goal asks checking whether input is used for human review: include this as a pre-input verification question, never an unsupported claim that a specific provider currently does so. '
+            'New safe JPG names and actual step/block mappings are allowed. Use useful clearly captioned conceptual diagrams with readable labels where needed, or no image if it adds no value. '
+            'Never replace required real menu/result captures with invented UI or decorative photos. Acquired real captures alone may be marked capture/original. '
+            'SourceBindings must point to actual body block IDs and exact quote substrings at their preserved source URLs. Explicitly retain unknown limitations and a useful next action.',
+            {'originalArticle':original,'research':research,'preservedSourceEvidence':coupled_source_records(research),
+             'previousRejection':handoff.data.get('imagePlanRework'),
+             'authorizedPublicReplan':('Topnote only: if indispensable Game Bar captures are unavailable, replan to a useful public-verifiable Windows topic supported by the preserved evidence. Only this case may revise title/mainKeyword/reader question; keep topicSlug and all provenance unchanged. Do not claim actual task execution or replace capture proof with generated images.' if allow_public_replan else False)},coupled_visuals=True),response_schema=schema)
+        record.update(rawProposal=proposal,proposalModel=copy.deepcopy(attribution()),status='proposal_returned')
+        handoff.save()
+        candidate = validate_coupled_revision(original,json.loads(proposal['articleJson']),proposal['sourceBindings'],research,allow_public_replan=allow_public_replan)
+        record.update(normalizedArticle=candidate,status='review_pending')
+        handoff.save()
+        review_schema={'type':'object','additionalProperties':False,'properties':{
+            'approved':{'type':'boolean'},**{k:{'type':'boolean'} for k in COUPLED_REWORK_CHECKS},
+            'blockingIssues':{'type':'array','items':{'type':'string'}},'notes':{'type':'array','items':{'type':'string'}}},
+            'required':['approved',*COUPLED_REWORK_CHECKS,'blockingIssues','notes']}
+        progress('writer','독립 호출로 사실·본문·독자 과제·시각자료 필요성 재검수',handoff)
+        review=generate(agent_prompt('writer',
+            'Independently approve or reject the coupled revision. Check every factual statement against preserved sources, all required answers against research readerGoal, '
+            'task success against actual body, and fit-for-task image plans. Checking a privacy condition is not evidence of any provider current policy. '
+            'A plan need not illustrate every step; reject filler, unclear unlabeled diagrams, fake UI, missing indispensable captures, unsupported claims or unresolved required answers. '
+            'A source binding is evidence location, not automatic proof of entailment. Put only actual blockers in blockingIssues; observations in notes. '
+            'Explicit approval is manuscript/plan approval only; actual image pixels and full PC/mobile layout must be independently reviewed later.',
+            {'originalArticle':original,'proposedArticle':candidate,'sourceBindings':proposal['sourceBindings'],
+             'research':research,'preservedSourceEvidence':coupled_source_records(research),
+             'authorizedPublicReplan':allow_public_replan,
+             'questionCheck':('For Topnote only, questionPreserved means the authorized public-verifiable Windows replan is genuinely supported by preserved sources and useful without unacquired Game Bar captures. Reject a renamed topic whose answer is not sourced.' if allow_public_replan else 'Exact original question must be preserved.')},coupled_visuals=True),response_schema=review_schema)
+        record.update(independentReview=review,reviewModel=copy.deepcopy(attribution()),status='review_returned')
+        handoff.save()
+        if not all(record[k].get('status')=='returned' and record[k].get('actualModel') for k in ('proposalModel','reviewModel')):
+            raise ReviewRequired('Coupled rework actual model provenance missing')
+        if review.get('approved') is not True or review.get('blockingIssues') or any(review.get(k) is not True for k in COUPLED_REWORK_CHECKS):
+            raise ReviewRequired('Coupled independent review rejected: '+str(review.get('blockingIssues')))
+        handoff.check()
+        if digest(handoff.file('article.json'))!=record['originalArticleSha256'] or digest(handoff.file('research.md'))!=record['researchSha256']:
+            raise ReviewRequired('Accepted inputs changed during coupled review')
+    except Exception as exc:
+        record.update(status='rejected',failedAt=stamp(),error={'type':type(exc).__name__,'message':str(exc)})
+        handoff.save()
+        if isinstance(exc, ReviewRequired):
+            raise
+        raise ReviewRequired('Coupled proposal/review failed: '+type(exc).__name__+': '+str(exc)) from exc
+    record['status']='applying'
+    handoff.save()
+    previous_stages=copy.deepcopy(handoff.data['stages'])
+    handoff.data['stages']=previous_stages[:2]
+    handoff.save()
+    handoff.file('article.json').write_text(json.dumps(candidate,ensure_ascii=False,indent=2),encoding='utf-8')
+    handoff.file('draft.md').write_text(f"# {candidate['title']}\n\n{candidate['contentHtml']}",encoding='utf-8')
+    handoff.accept('writer',previous_stages[2]['outputs'],record['reviewModel'])
+    record.update(status='accepted',acceptedAt=stamp(),acceptedArticleSha256=digest(handoff.file('article.json')))
+    handoff.save()
+    require_coupled_review(handoff, candidate)
+    return candidate,handoff
+
+
 def rework_draft(folder, domain, categories, generate, progress, attribution):
     folder=Path(folder).resolve()
     article=json.loads((folder/'article.json').read_text(encoding='utf-8'))
     handoff=Handoff(folder,domain,article['topicSlug'])
+    if os.environ.get('CF_COUPLED_REWORK') == '1':
+        return rework_article_and_visuals(handoff, article, generate, progress, attribution)
     require_prewriting_handoff(handoff, article)
     if os.environ.get('CF_IMAGE_PLAN_CLARIFY') == '1':
         return clarify_image_plan_review(handoff, article, generate, progress, attribution)
@@ -2052,13 +2279,6 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         if len(observed) != len(clean):
             reject('Demand evidence is incomplete')
         eligible = [i for i, e in enumerate(observed) if e.get('eligible') is True and e.get('volume', {}).get('monthlyLowerBound') is not None and (not require_current_issue or e.get('currentIssue') is True)]
-        if not eligible and observed:
-            # Fallback: allow any candidate with non-zero demand or fallback to index 0 on round 2
-            eligible = [i for i, e in enumerate(observed) if e.get('volume', {}).get('monthlyLowerBound') is not None]
-            if not eligible and selection_round == 2:
-                eligible = [0]
-                if not observed[0].get('issueSignals'):
-                    observed[0]['issueSignals'] = ['ongoingDemand']
         selection_rounds.append({'proposed': clean, 'observed': evidence})
         if eligible:
             break
@@ -2090,7 +2310,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
     bridge_inventory = context.get('bridgeInventory', [])
     plan_properties['bridgeUrl']['enum'] = [row['url'] for row in bridge_inventory] if bridge_inventory else ['']
     plan_schema = {'type': 'object', 'properties': plan_properties, 'required': list(plan_properties), 'additionalProperties': False}
-    draft = model(json.dumps({'task': 'Select only an eligible global candidate index and produce the final keyword plan. Copy mainKeyword exactly from candidates[selectedCandidateIndex].mainKeyword; do not shorten, paraphrase, or use a different candidate keyword. Preserve that candidate bridgeUrl when supplied. topicSlug MUST be a descriptive English hyphenated SEO slug (never topic-1). All explanation text must be Korean. Cite only URLs actually in supplied evidence. Primary source URLs are candidates for the host to fetch and are not yet verified facts.',
+    draft = model(json.dumps({'task': 'Select only an eligible global candidate index and produce the final keyword plan. Copy mainKeyword, title and topicSlug exactly from candidates[selectedCandidateIndex]; do not shorten, paraphrase, or mix candidates. Keep questions and angle within that same candidate question. Preserve that candidate bridgeUrl when supplied. topicSlug MUST be a descriptive English hyphenated SEO slug (never topic-1). All explanation text must be Korean. Cite only URLs actually in supplied evidence. Primary source URLs are candidates for the host to fetch and are not yet verified facts.',
         'instruction': instruction, 'context': context, 'publishedCatalog': catalog,
         'candidates': clean, 'eligibleGlobalIndices': eligible, 'actualDemandEvidence': evidence,
         'whyNowAllowedKinds': allowed_kinds, 'whyNowAllowedExactUrls': sorted(set(allowed_urls)),
@@ -2101,9 +2321,11 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
             'competitivePlan': '구체적인 비교 우위', 'differentiation': '', 'sourceUrls': [], 'keywordsMd': ''}}, ensure_ascii=False), plan_schema)
     idx = draft.get('selectedCandidateIndex')
     if isinstance(idx, bool) or not isinstance(idx, int) or idx not in eligible:
-        idx = eligible[0]
-        draft['selectedCandidateIndex'] = idx
+        raise ReviewRequired('Invalid selected candidate index; no fallback or writer handoff: ' + json.dumps(draft, ensure_ascii=False))
     chosen = clean[idx]
+    for field in ('mainKeyword', 'title', 'topicSlug'):
+        if draft.get(field) != chosen.get(field):
+            raise ReviewRequired('Selected candidate identity mismatch (' + field + '); no writer handoff: ' + json.dumps({'candidate': chosen, 'plan': draft}, ensure_ascii=False))
     if bridge_inventory and draft.get('bridgeUrl') != chosen.get('bridgeUrl'):
         draft['bridgeUrl'] = chosen.get('bridgeUrl', '')
     if _norm(draft.get('mainKeyword')) != _norm(chosen['mainKeyword']):
@@ -2158,8 +2380,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
             revised_context = {**context, 'selectionCycle': cycle + 1,
                 'rejectedSelections': context.get('rejectedSelections', []) + [{'plan': draft, 'actualDuplicationReview': review}]}
             return select_keyword_with_demand(instruction, revised_context, generate, fixed=fixed, require_current_issue=require_current_issue)
-        review['passed'] = True
-        review['matchingPostIds'] = []
+        raise ReviewRequired('Independent duplication review rejected; no automatic acceptance: ' + json.dumps({'previousRejections': context.get('rejectedSelections', []), 'actualDuplicationReview': review, 'plan': draft}, ensure_ascii=False))
     slug = topic if topic and fixed.get('mode') != 'editorial_seed' else (draft.get('topicSlug') or chosen.get('topicSlug'))
     if not isinstance(slug, str) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or re.fullmatch(r'topic-\d+(?:-\d+)*', slug):
         digest_hex = hashlib.sha256(str(chosen['mainKeyword']).encode('utf-8')).hexdigest()[:8]
@@ -2342,6 +2563,8 @@ def validate_article_brief_binding(article, research):
 
 
 def require_prewriting_handoff(handoff, article):
+    if handoff.data.get('coupledRework'):
+        return require_coupled_review(handoff, article)
     research = read_document(handoff.file('research.md'))
     if research.get('answerBrief'):
         return validate_article_brief_binding(article, research)
@@ -4407,6 +4630,7 @@ def current_attribution():
 
 async def process_single_blog(domain, completed_ids, flow_page, prepare_only=False):
     RUN_CONTEXT.update(domain=domain)
+    RUN_CONTEXT.pop('coupledVisualLabels', None)
     RUN_CONTEXT.pop('revisionPostId', None)
     RUN_CONTEXT.pop('repairOriginalVisibleLength', None)
     RUN_CONTEXT.pop('stylePhotoRepair', None)
