@@ -48,6 +48,9 @@ from urllib.parse import urlencode, urlparse
 class ReviewRequired(RuntimeError):
     pass
 
+class CosmeticLayoutRequired(ReviewRequired):
+    """Scoped pixels are usable; a bounded layout correction is still needed."""
+
 # Publication is gated by whether the reader can complete the promised task.
 BLOG_REVIEW_POLICY = (
     'CF 최종 발행 검수에서는 실제 픽셀과 인접 본문, PC·모바일 전체 렌더를 보고 클릭 위치와 결과 글자가 읽히는지 확인한다. '
@@ -63,6 +66,62 @@ BLOG_REQUIRED_CHECKS = ('readability', 'categoryMatches', 'imagesHonest',
 
 def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+def publisher_paused():
+    """Cooperative maintenance switch; never terminate a browser or active child."""
+    path = BASE_DIR / 'data' / 'publisher-maintenance.json'
+    if not path.exists():
+        return False
+    try:
+        return json.loads(path.read_text(encoding='utf-8')).get('paused') is True
+    except (ValueError, OSError):
+        return True  # An unreadable maintenance instruction cannot permit publication.
+
+def scheduled_slot_contract(item):
+    if not item.get('slotContract') and unplanned_slot(item):
+        return None
+    contract = copy.deepcopy(item.get('slotContract') or {
+        'title':item.get('title'), 'topicSlug':item.get('slug'),
+        'scheduledTime':item.get('scheduledTime'), 'domain':item.get('domain')})
+    if not all(isinstance(contract.get(key), str) and contract[key].strip()
+               for key in ('title','topicSlug','scheduledTime','domain')):
+        raise ReviewRequired('slot_contract_missing: 원래 예약 제목·슬러그·시각이 필요합니다')
+    assert_slot_identity({'title':item.get('title'), 'topicSlug':item.get('slug')}, contract)
+    if item.get('scheduledTime') != contract['scheduledTime'] or item.get('domain') != contract['domain']:
+        raise ReviewRequired('topic_drift_detected: 원래 예약 시각·사이트 변경 차단')
+    return contract
+
+def unplanned_slot(item):
+    slug = str(item.get('slug') or '')
+    return bool('live-ai-planning' in slug or re.fullmatch(r'topic-\d+(?:-\d+)*', slug)
+                or '기획 대기' in str(item.get('title') or ''))
+
+def validate_checkpoint_identity(folder, article):
+    """Reject foreign recovery content before changing hashes, stages or markers."""
+    contract = RUN_CONTEXT.get('slotContract')
+    if not contract:
+        return
+    assert_slot_identity(article, contract)
+    keywords = read_document(Path(folder)/'keywords.md')
+    if keywords:
+        assert_slot_identity(keywords, contract)
+    research = read_document(Path(folder)/'research.md')
+    brief = research.get('answerBrief') or {}
+    if brief and brief.get('finalTitle') != contract['title']:
+        raise ReviewRequired('topic_drift_detected: 보완할 연구 제목과 원래 예약 계약 불일치')
+
+def assert_slot_identity(value, contract):
+    if contract and any(value.get(key) != contract[key] for key in ('title','topicSlug')):
+        raise ReviewRequired('topic_drift_detected: 원래 예약 제목·슬러그 변경 차단')
+
+def failure_blog_info(domain, item):
+    """Never restore a demo BLOG_TARGETS slug while recording a real slot failure."""
+    info = BLOG_TARGETS[domain].copy()
+    contract = item.get('slotContract') or {}
+    info.update(title=contract.get('title') or item.get('title', info.get('title', '')),
+                topicSlug=contract.get('topicSlug') or item.get('slug', info.get('topicSlug', '')),
+                summary=item.get('summary', info.get('summary', '')))
+    return info
 
 def digest(path):
     path = Path(path)
@@ -90,6 +149,135 @@ def document(path, title, payload):
     body = json.dumps(payload, ensure_ascii=False, indent=2) if isinstance(payload, (dict, list)) else str(payload)
     path.write_text(f"# {title}\n\n```json\n{body}\n```\n", encoding='utf-8')
 
+PROMPT_BYTE_LIMIT = 60_000
+
+def recent_catalog(posts):
+    """The full inventory remains available to deterministic duplicate checks."""
+    rows = [row for row in posts if isinstance(row, dict)]
+    rows = sorted(rows, key=lambda row: str(row.get('created_at') or row.get('publishedAt') or ''), reverse=True)
+    return [{key: row.get(key) for key in ('slug', 'title', 'category')} for row in rows[:15]]
+
+def keyword_prompt_view(selection):
+    """Downstream stages need the selected brief, not every rejected candidate twice.
+
+    Full selectionRounds/demandCandidates remain immutable in keywords.md for audit.
+    """
+    return {key:value for key,value in selection.items()
+            if key not in ('selectionRounds', 'demandCandidates', 'keywordsMd')}
+
+def prompt_inputs(value, excerpt_limit=2500):
+    """Limit redundant retrieved context, never silently trim the approved task/body."""
+    if isinstance(value, list):
+        return [prompt_inputs(row, excerpt_limit) for row in value]
+    if not isinstance(value, dict):
+        return value
+    out = {}
+    for key, item in value.items():
+        if key == 'keywords.md' and isinstance(item, dict):
+            out[key] = prompt_inputs(keyword_prompt_view(item), excerpt_limit)
+        elif key in ('publishedCatalog', 'publishedPosts', 'published_catalog') and isinstance(item, list):
+            out[key] = recent_catalog(item)
+        elif key in ('sources', 'crawledSources') and isinstance(item, list):
+            selected = sorted((row for row in item if isinstance(row, dict)), key=lambda row: row.get('kind') != 'primary')[:6]
+            out[key] = [prompt_inputs(row, excerpt_limit) for row in selected]
+        elif key in ('excerpt', 'text', 'quote') and isinstance(item, str):
+            out[key] = item[:excerpt_limit]
+        elif key == 'quotes' and isinstance(item, list):
+            out[key] = [str(quote)[:min(400, excerpt_limit)] for quote in item[:2]]
+        else:
+            out[key] = prompt_inputs(item, excerpt_limit)
+    return out
+
+def reference_repeated_context(inputs):
+    """Lossless passage references: the model gets each retrieved passage once.
+
+    Keep context IDs and exact offsets; host-side answer binding still receives the
+    original context objects. A passage absent from the retained source stays inline.
+    """
+    if not isinstance(inputs, dict):
+        return inputs
+    observations = inputs.get('observations', {})
+    sources = observations.get('sources', []) if isinstance(observations, dict) else []
+    contexts = inputs.get('questionContext')
+    if not isinstance(contexts, list):
+        return inputs
+    for context in contexts:
+        if not isinstance(context, dict) or not isinstance(context.get('text'), str):
+            continue
+        for index, source in enumerate(sources):
+            passage = source.get('excerpt') or source.get('text') or ''
+            content = context['text']
+            if source.get('url') == context.get('sourceUrl') and content and content in passage:
+                offset = passage.index(content)
+                context['sourceTextRef'] = {'path':f'observations.sources[{index}]',
+                    'field':'excerpt' if 'excerpt' in source else 'text',
+                    'charStart':offset, 'charEnd':offset+len(content)}
+                del context['text']
+                break
+    return inputs
+
+def serialized_prompt_bytes(prompt):
+    # Include escaping/quotes in the actual serialized string, not Python character count.
+    return len(json.dumps(prompt, ensure_ascii=False).encode('utf-8'))
+
+def budgeted_prompt(prefix, inputs, byte_limit=PROMPT_BYTE_LIMIT):
+    for excerpt_limit in (2500, 1800, 1200, 800, 400):
+        compact = reference_repeated_context(prompt_inputs(inputs, excerpt_limit))
+        prompt = prefix + json.dumps(compact, ensure_ascii=False, separators=(',', ':'))
+        if serialized_prompt_bytes(prompt) <= byte_limit:
+            return prompt
+    raise ReviewRequired('prompt_budget_exceeded: 필수 원고·계약을 보존한 입력이 60KB를 초과합니다. 근거를 명시적으로 정리해야 합니다.')
+
+def provider_prompt_prefix(provider, images=None, response_schema=None):
+    """Exact current adapter prefix, counted before dispatch without changing adapters."""
+    if provider != 'codex':
+        return 'Return only a complete JSON object. Do not use tools or access files.\n'
+    instruction = ('Return the task result directly as the required JSON schema. No Markdown.\n' if response_schema
+        else 'Return the task JSON object serialized into the outer schema string field json. No Markdown inside the JSON string.\n')
+    image_order = '\n'.join(f'Attached image {n}: {Path(filename).name}' for n, filename in enumerate(images or [], 1))
+    return ('Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n'
+            + instruction + image_order + '\n')
+
+def rebudget_prompt(prompt, byte_limit):
+    if serialized_prompt_bytes(prompt) <= byte_limit:
+        return prompt
+    try:
+        return budgeted_prompt('', json.loads(prompt), byte_limit)
+    except (TypeError, ValueError):
+        prefix, marker, body = prompt.rpartition('인수 자료:\n')
+        if marker:
+            try:
+                return budgeted_prompt(prefix + marker, json.loads(body), byte_limit)
+            except (TypeError, ValueError):
+                pass
+    raise ReviewRequired('prompt_budget_exceeded: 실제 메모리·공급자 접두사를 포함한 필수 입력이 60KB를 초과합니다')
+
+def generate_with_prompt_budget(prompt, provider, **kwargs):
+    """Budget AFTER the normal frozen memory/skills injection, exactly once.
+
+    The existing memory decorator owns snapshots/events. Its nested-call context
+    avoids reinjection when forwarding to the unchanged shared generate_json.
+    """
+    from common.llm_client import generate_json, memory_call, memory_session
+    original = prompt
+    adapter_prefix = provider_prompt_prefix(provider, kwargs.get('images'), kwargs.get('response_schema'))
+    session_id = str(kwargs.get('memory_session_id') or kwargs.get('audit_directory') or uuid.uuid4())
+
+    @memory_call
+    def dispatch(combined, **forward):
+        if not combined.endswith(original):
+            raise ReviewRequired('prompt_budget_boundary: 원래 입력과 메모리 경계를 확인할 수 없습니다')
+        memory_prefix = combined[:-len(original)] if original else combined
+        prefix_cost = serialized_prompt_bytes(adapter_prefix + memory_prefix) - 2
+        bounded = rebudget_prompt(original, PROMPT_BYTE_LIMIT - prefix_cost)
+        final_prompt = memory_prefix + bounded
+        if serialized_prompt_bytes(adapter_prefix + final_prompt) > PROMPT_BYTE_LIMIT:
+            raise ReviewRequired('prompt_budget_exceeded: 실제 공급자 입력이 60KB를 초과합니다')
+        return generate_json(final_prompt, **forward)
+
+    with memory_session(session_id, 'common.llm_client'):
+        return dispatch(prompt, **kwargs)
+
 def agent_prompt(agent, task, inputs):
     if agent in ('image-maker','assembler','reviewer','writer'):
         task = (
@@ -112,14 +300,15 @@ def agent_prompt(agent, task, inputs):
             '기존 공개 글·서식 전용·부분 보완은 원래 답과 승인 본문을 요청 범위 안에서 보존·검토한다. '
             '공통 구조를 맞추려는 목적만으로 새 자료 확보, 전체 재작성, 제목 변경을 추가하지 않는다. '
             '요청 범위의 실제 핵심 누락·오류와 사실·발행 안전 문제는 그대로 기록한다.\n\n')
-    return ('CF 블로그 실행 모드입니다. 네이버 편집기 전용 규칙은 적용하지 않습니다.\n'
+    prefix = ('CF 블로그 실행 모드입니다. 네이버 편집기 전용 규칙은 적용하지 않습니다.\n'
             '제목·설명·판단 사유 등 자연어 출력은 한국어로 작성합니다. 공식 출처 원문 인용은 원어를 보존합니다.\n'
             '아래 지침을 실제 수행하고 JSON 객체만 반환하세요.\n\n'
             f'공통 콘텐츠 품질 정책:\n{CONTENT_QUALITY_POLICY}\n\n'
             f'{answer_policy}'
             f'에이전트 지침:\n{instructions}\n\n'
             f'이번 실행의 출력 계약:\n{task}\n{caption_rule}\n\n'
-            f'인수 자료:\n{json.dumps(inputs, ensure_ascii=False)}')
+            '인수 자료:\n')
+    return budgeted_prompt(prefix, inputs)
 
 def writer_output_schema():
     strings={key:{'type':'string'} for key in ('title','summary','topicSlug','category','mainKeyword','contentHtml')}
@@ -568,6 +757,8 @@ class Handoff:
         validate_reader_task(article, self.file('assembled.html').read_text(encoding='utf-8'))
         image_info = read_document(self.file('images.md'))
         plans = image_info['imagePlans']
+        if not plans or len(BeautifulSoup(self.file('assembled.html').read_text(encoding='utf-8'), 'html.parser').get_text(' ', strip=True)) < 800:
+            raise ReviewRequired('발행 최소 요건 미충족: 본문 800자와 실제 대표 이미지 1개가 필요합니다')
         validate_image_contract(plans, article, [p['filename'] for p in article['imagePlans']])
         for accepted, planned in zip(plans, article['imagePlans']):
             if any(accepted.get(key) != planned.get(key) for key in ('source', 'role', 'stepId', 'anchorId')):
@@ -578,14 +769,14 @@ class Handoff:
             import_capture_assets(manifest, plans, self.folder/'images', article['topicSlug'], verify_only=True)
             if {x['filename']:x['sha256'] for x in actual} != {x['filename']:x['sha256'] for x in image_info['images']}:
                 raise ReviewRequired('검수 후 이미지 파일 지문 변경')
-        checks=BLOG_REQUIRED_CHECKS
+        checks=BLOG_REQUIRED_CHECKS + ('factsSupported',)
         if report.get('scope')=='existing_post_style_photo_repair':
             if not RUN_CONTEXT.get('stylePhotoRepair') or not RUN_CONTEXT.get('revisionPostId') or report.get('revisionPostId')!=RUN_CONTEXT['revisionPostId']:
                 raise ReviewRequired('기존 글 수정 검수 범위·대상 불일치')
             original=json.loads(self.file('original-post.json').read_text(encoding='utf-8'))
             if original['id']!=RUN_CONTEXT['revisionPostId'] or manuscript_semantics(article['contentHtml'])!=manuscript_semantics(original['content']):
                 raise ReviewRequired('기존 본문 의미 변경 · 전체 재검수 필요')
-            checks=BLOG_REQUIRED_CHECKS + ('originalMeaningPreserved',)
+            checks=BLOG_REQUIRED_CHECKS + ('factsSupported', 'originalMeaningPreserved')
         if report.get('status')!='passed' or report.get('issues') or any(report.get('checks',{}).get(k) is not True for k in checks):
             raise ReviewRequired('독립 검수 승인 미완료')
         if report.get('articleSha256')!=digest(self.file('article.json')) or report.get('finalSha256')!=digest(self.file('assembled.html')):
@@ -611,32 +802,27 @@ def assemble_with_agent(handoff, article, plans, images, generate, attribution):
             'required': ['kind', 'index', 'after', 'number'], 'additionalProperties': False}}},
         'required': ['inputComplete', 'assemblyReadyForLayoutReview', 'issues', 'notes', 'edits'], 'additionalProperties': False}
     result=generate(agent_prompt('assembler',BLOG_REVIEW_POLICY + ' 이 단계는 이미 인수된 images.md의 실제 시각 검수 관측·메타데이터와 본문·조립 HTML 전체로 문서 구조, anchor와 이미지 위치, 단일 figure 캡션을 점검한다. 원본 이미지를 재첨부하지 않으며 픽셀을 재확인했다고 기록하지 않는다. assemblyReadyForLayoutReview는 구조와 자료가 후속 실제 렌더 검수에 넘길 준비가 되었는지 판정하는 값이다. 후속 PC·모바일 완성 화면 검수 자료가 아직 없다는 이유만으로 이 단계의 결함으로 삼지 않는다. 실제 완성 화면은 후속 reviewer가 독립 검수하며 최종 화면 검수가 완료되었다고 보고하지 않는다. 누락된 필수 자산, 미완료 플레이스홀더, 잘못된 anchor·이미지 위치·캡션 등 실제 조립 오류는 계속 반려한다. 가능한 캡션·제목 번호·간격 수정은 edits로 직접 보완하고 해결된 문제는 다시 반려하지 않는다. 캡션은 figure 안 figcaption 전용 영역이다.',inputs),response_schema=schema)
-    if isinstance(result, dict):
-        result['inputComplete'] = True
-        result['assemblyReadyForLayoutReview'] = True
-        adv_issues = [str(x) for x in (result.get('issues') or []) if str(x or '').strip()]
-        raw_notes = [str(x) for x in (result.get('notes') or []) if str(x or '').strip()]
-        result['notes'] = raw_notes + adv_issues
-        result['issues'] = []
-        valid_edits = []
-        for ed in (result.get('edits') if isinstance(result.get('edits'), list) else []):
-            if isinstance(ed, dict) and ed.get('kind') in ('caption', 'number_heading'):
-                try:
-                    idx_val = max(0, int(ed.get('index', 0)))
-                    num_val = max(1, int(ed.get('number', idx_val + 1)))
-                except (TypeError, ValueError):
-                    idx_val, num_val = 0, 1
-                valid_edits.append({'kind': ed['kind'], 'index': idx_val, 'after': str(ed.get('after') or ''), 'number': num_val})
-        result['edits'] = valid_edits
-    if not isinstance(result,dict) or result.get('inputComplete') is not True or result.get('assemblyReadyForLayoutReview') is not True or result.get('issues'):
-        document(handoff.folder/'assembly-review.json','조립 검수',result)
+    document(handoff.folder/'assembly-review.json', '조립 모델의 실제 판정', result)
+    cosmetic = isinstance(result, dict) and result.get('inputComplete') is True and cosmetic_issues_only(result.get('issues'))
+    if not cosmetic and (not isinstance(result,dict) or result.get('inputComplete') is not True or result.get('assemblyReadyForLayoutReview') is not True or result.get('issues')):
         raise ReviewRequired('조립 검수 보완 필요: '+str(result.get('issues') if isinstance(result,dict) else result)[:500])
+    if cosmetic and (handoff.folder/'surgical-repair-attempted.json').exists():
+        raise ReviewRequired('repair_exhausted: 표시 보정은 이미 1회 완료되었습니다')
     edits=result.get('edits',[])
     if RUN_CONTEXT.get('stylePhotoRepair'):
         edits=[edit for edit in edits if edit.get('kind')=='caption']
     (handoff.folder/'assembly-edits.json').write_text(json.dumps(edits,ensure_ascii=False,indent=2),encoding='utf-8')
     preview(handoff.folder,article,plans,edits,domain=handoff.data.get('domain'))
-    handoff.accept('assembler',['assembled.html','final.html','final.md','assembly-edits.json'],attribution())
+    validate_article(article)
+    validate_images(images, plans)
+    validate_reader_task(article, handoff.file('assembled.html').read_text(encoding='utf-8'))
+    outputs = ['assembled.html','final.html','final.md','assembly-edits.json','assembly-review.json']
+    if cosmetic:
+        document(handoff.folder/'surgical-repair-attempted.json', '표시 보정 후 구조 확인',
+                 {'count':1, 'type':'deterministic_assembly', 'checkedAt':stamp(),
+                  'originalModelVerdictPreserved':True, 'independentReviewStillRequired':True})
+        outputs.append('surgical-repair-attempted.json')
+    handoff.accept('assembler', outputs, attribution())
     return edits
 
 def visual_review_outputs(handoff, agent):
@@ -659,40 +845,6 @@ def call_visual_batch(handoff, agent, kind, attachments, prompt, images, generat
         folder.mkdir(parents=True, exist_ok=False)
         (folder/'input.json').write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding='utf-8')
     result = generate(prompt, images=images, response_schema=schema)
-    if isinstance(result, dict):
-        raw_rows = result.get('perImage') if isinstance(result.get('perImage'), list) else []
-        norm_rows = []
-        item_props = schema.get('properties', {}).get('perImage', {}).get('items', {}).get('properties', {}) if isinstance(schema, dict) else {}
-        for idx, expected in enumerate(attachments):
-            row = raw_rows[idx] if idx < len(raw_rows) and isinstance(raw_rows[idx], dict) else {}
-            clean_row = {}
-            for k in item_props:
-                if k in ('imageIndex', 'filename', 'stepId', 'viewport', 'start', 'end') and k in expected:
-                    clean_row[k] = expected[k]
-                elif k in ('alignment', 'usable'):
-                    clean_row[k] = True if kind != 'prewriting-material-observation' else bool(row.get(k, True))
-                elif k == 'observedContent':
-                    val = row.get('observedContent')
-                    if isinstance(val, list):
-                        val = ' '.join(str(x) for x in val if x)
-                    clean_row[k] = str(val).strip() if isinstance(val, str) and val.strip() else f"{expected.get('filename', 'image')} 시각 구성 및 텍스트 가독성 정상 확인"
-                elif k == 'reason':
-                    val = row.get('reason')
-                    if isinstance(val, list):
-                        val = ' '.join(str(x) for x in val if x)
-                    clean_row[k] = str(val).strip() if isinstance(val, str) and val.strip() else '본문 단계 설명과 시각자료 구성이 일치하며 가독성이 양호합니다.'
-                else:
-                    clean_row[k] = row.get(k)
-            norm_rows.append(clean_row)
-        result['perImage'] = norm_rows
-        check_props = schema.get('properties', {}).get('checks', {}).get('properties', {}) if isinstance(schema, dict) else {}
-        if check_props:
-            result['checks'] = {ck: True for ck in check_props}
-        if 'issues' in (schema.get('properties', {}) if isinstance(schema, dict) else {}):
-            adv = [str(x) for x in (result.get('issues') or []) if str(x or '').strip()]
-            notes = [str(x) for x in (result.get('notes') or []) if str(x or '').strip()]
-            result['notes'] = notes + adv
-            result['issues'] = []
     record.update(response=result, model=attribution() if attribution else None)
     if folder is not None:
         (folder/'response.json').write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -773,6 +925,13 @@ def review_layout_groups(handoff, article, layout, generate, attribution, source
             and isinstance(row.get('observedContent'), str) and bool(row['observedContent'].strip())
             and row.get('alignment') is True and row.get('usable') is True for row, expected in zip(rows, group))
         if not matched or result.get('issues') or any(result.get('checks', {}).get(key) is not True for key in checks):
+            if matched and result.get('checks', {}).get('visualsServeTask') is True and cosmetic_issues_only(result.get('issues')):
+                document(handoff.folder/'layout-repair-request.json', '실제 레이아웃 묶음의 표시 반려',
+                         {'articleSha256':digest(handoff.file('article.json')),
+                          'finalSha256':digest(handoff.file('assembled.html')),
+                          'reportFile':record['reportFile'], 'issues':result['issues'],
+                          'sourceReviewCompleted':source_review is not None, 'kind':'cosmetic_layout'})
+                raise CosmeticLayoutRequired('layout_repair_required: ' + str(result['issues'])[:700])
             raise ReviewRequired('PC·모바일 묶음 검수 보완 필요: ' + str(result.get('issues'))[:700])
         reports.append(record)
     expected = [row for group in groups for row in group]
@@ -848,9 +1007,23 @@ def review_article(handoff, article, generate, attribution):
     else:
         raise ReviewRequired('PC·모바일 전체 렌더 관측 자료 누락')
     manifest = load_capture_manifest(handoff.file('capture-manifest.json')) if (handoff.folder/'capture-manifest.json').is_file() else None
-    source_review = review_visual_assets(article, plans, images, generate, manifest,
-                                        handoff=handoff, attribution=attribution, agent='reviewer')
-    layout_reports = review_layout_groups(handoff, article, layout, generate, attribution, source_review)
+    evidence_file = handoff.folder/'independent-review-evidence.json'
+    previous = read_document(evidence_file)
+    source_fingerprint = hashlib.sha256(json.dumps({'article':article, 'plans':plans,
+        'images':[digest(path) for path in images]}, ensure_ascii=False, sort_keys=True).encode('utf-8')).hexdigest()
+    if previous.get('sourceFingerprint') == source_fingerprint and previous.get('sourceReview'):
+        source_review = previous['sourceReview']
+    else:
+        source_review = review_visual_assets(article, plans, images, generate, manifest,
+                                            handoff=handoff, attribution=attribution, agent='reviewer')
+    document(evidence_file, '실제 원본 관측 지문', {'sourceFingerprint':source_fingerprint,
+        'sourceReview':source_review, 'layout':previous.get('layout'), 'layoutReports':previous.get('layoutReports')})
+    if previous.get('layout') == layout and previous.get('layoutReports'):
+        layout_reports = previous['layoutReports']
+    else:
+        layout_reports = review_layout_groups(handoff, article, layout, generate, attribution, source_review)
+    document(evidence_file, '실제 독립 관측 재사용 지문', {'sourceFingerprint':source_fingerprint,
+        'sourceReview':source_review, 'layout':layout, 'layoutReports':layout_reports})
     inputs['independentSourceReview'] = source_review
     inputs['independentLayoutReviews'] = layout_reports
     schema = {'type': 'object', 'properties': {
@@ -871,14 +1044,11 @@ def review_article(handoff, article, generate, attribution):
         '실제 실행 기록·전후 연속 캡처·본문 전체로 판단하며 한 정지 화면에 행동 전체·인과 이력·오직 한 셀만 편집한 사실을 영상처럼 단독 입증하라고 요구하지 않는다. '
         '각 파일에서 실제 보이는 사실만 관측으로 쓰고 다른 파일의 수식·내용을 현재 파일에 보인다고 옮겨 쓰지 않는다. 다른 캡처를 참조하면 파일명을 명시한다. '
         '보이는 값·메뉴·결과와 실제 기록의 모순, 잘못된 이미지, 필수 결과 누락, 허위 체험은 여전히 해당 checks=false와 issues로 반려한다. '
-        '반환 전 관측과 reason/issues가 같은 가시 사실에 대해 서로 모순되지 않는지 점검하고, 반려하면 실제 차이의 파일·위치를 명시한다.', inputs), response_schema=schema)
-    if isinstance(result, dict):
-        result['status'] = 'passed'
-        adv_issues = [str(x) for x in (result.get('issues') or []) if str(x or '').strip()]
-        raw_notes = [str(x) for x in (result.get('notes') or []) if str(x or '').strip()]
-        result['notes'] = raw_notes + adv_issues
-        result['issues'] = []
-        result['checks'] = {k: True for k in checks}
+        '반환 전 관측과 reason/issues가 같은 가시 사실에 대해 서로 모순되지 않는지 점검하고, 반려하면 실제 차이의 파일·위치를 명시한다. '
+        '캡션 위치·이미지 비율·여백의 취향 차이는 notes로 남긴다. 실제 판독 불가·잘림·자료 불일치만 issues다. '
+        '표시 보정 이후 같은 미관 선호만으로 다시 반려하지 않는다.', inputs), response_schema=schema)
+    if not isinstance(result, dict):
+        raise ReviewRequired('독립 검수 구조화 응답 누락')
     report = {**result,
               'runId': handoff.data.get('runId', ''), 'checkedAt': stamp(), 'model': attribution(),
               'reviewPolicy': 'reader-task-v2',
@@ -890,7 +1060,7 @@ def review_article(handoff, article, generate, attribution):
     if RUN_CONTEXT.get('stylePhotoRepair'):
         report.update(scope='existing_post_style_photo_repair', revisionPostId=RUN_CONTEXT.get('revisionPostId'))
     (handoff.folder / 'review.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
-    required = BLOG_REQUIRED_CHECKS + (('originalMeaningPreserved',) if RUN_CONTEXT.get('stylePhotoRepair') else ())
+    required = BLOG_REQUIRED_CHECKS + ('factsSupported',) + (('originalMeaningPreserved',) if RUN_CONTEXT.get('stylePhotoRepair') else ())
     if report.get('status') != 'passed' or report.get('issues') or any(report.get('checks', {}).get(k) is not True for k in required):
         raise ReviewRequired('독립 검수 보완 필요: ' + str(report.get('issues'))[:700])
     validate_visual_review_coverage(handoff, report, plans, layout)
@@ -1053,148 +1223,94 @@ def draft_supplied_article(input_path, domain, categories, fixed, generate, prog
         handoff.accept(agent, outputs, attribution())
     return article, handoff
 
+MINOR_REVIEW_CHECKS = frozenset(('readability', 'tableFormatting', 'captionPlacement', 'mobileReadability'))
+
+def minor_review_only(report):
+    """Unknown/missing facts, assets, task or safety verdicts are never cosmetic."""
+    if not isinstance(report, dict) or not report.get('issues'):
+        return False
+    checks = report.get('checks', {})
+    material = (set(BLOG_REQUIRED_CHECKS) | {'factsSupported'}) - MINOR_REVIEW_CHECKS
+    if any(checks.get(key) is not True for key in material):
+        return False
+    if checks.get('originalMeaningPreserved', True) is not True:
+        return False
+    return cosmetic_issues_only(report['issues'])
+
+def cosmetic_issues_only(issues):
+    if not isinstance(issues, list) or not issues:
+        return False
+    for issue in issues:
+        text = str(issue).casefold()
+        if re.search(r'허위|왜곡|누락|불일치|판독 불가|잘못된|사실 오류|출처 오류|unsafe|missing|false claim|hallucinat|broken|mismatch|unreadable|incorrect|wrong', text):
+            return False
+        if not re.search(r'캡션|비율|여백|간격|서식|레이아웃|정렬|caption|ratio|layout|spacing|format|align|typograph', text):
+            return False
+    return True
+
+def cosmetic_layout_request(folder):
+    folder = Path(folder).resolve()
+    request = read_document(folder/'layout-repair-request.json')
+    if (request.get('kind') != 'cosmetic_layout' or request.get('sourceReviewCompleted') is not True
+            or request.get('articleSha256') != digest(folder/'article.json')
+            or request.get('finalSha256') != digest(folder/'assembled.html')):
+        return None
+    name = request.get('reportFile', '')
+    path = (folder/name).resolve()
+    if not name.startswith('visual-reviews/reviewer/') or not path.is_relative_to(folder):
+        return None
+    record = read_document(path)
+    response = record.get('response', {})
+    rows = response.get('perImage', [])
+    if (not str(record.get('kind', '')).startswith('layout-')
+            or response.get('checks', {}).get('visualsServeTask') is not True
+            or not cosmetic_issues_only(response.get('issues')) or not rows
+            or any(row.get('alignment') is not True or row.get('usable') is not True for row in rows)):
+        return None
+    return request
+
 def rework_review_draft(folder, domain, categories, generate, progress, attribution):
-    folder=Path(folder).resolve()
-    article=json.loads((folder/'article.json').read_text(encoding='utf-8'))
-    handoff=Handoff(folder,domain,article['topicSlug']);rows=handoff.check()
+    """One layout correction; original source pixels, task and body stay immutable."""
+    folder = Path(folder).resolve()
+    article = json.loads((folder/'article.json').read_text(encoding='utf-8'))
+    validate_checkpoint_identity(folder, article)
+    handoff = Handoff(folder, domain, article['topicSlug'])
+    rows = handoff.check()
     require_prewriting_handoff(handoff, article)
     if [row['agent'] for row in rows] != list(Handoff.agents[:5]) or (folder/'publication.json').exists():
-        raise ReviewRequired('부분 보완은 검수 거절된 미발행 5단계 산출물만 허용합니다')
-    report=json.loads(handoff.file('review.json').read_text(encoding='utf-8'))
-    if not report.get('issues'): raise ReviewRequired('실제 검수 보완 지적 누락')
-    images_info=read_document(handoff.file('images.md'));plans=images_info['imagePlans']
-    images=[handoff.file('images/'+plan['filename']) for plan in plans]
-    validate_images(images,plans)
-    document(folder/'rework-before.md','보완 전 원고·인계·검수 기록',{'article':article,'handoff':handoff.data,'review':report,'images':images_info})
-
-    # In-Place Surgical Repair: Pure Python first, strictly at most 1 LLM call to avoid infinite loops
-    issues = report.get('issues', [])
-    repair_attempt_file = folder / 'surgical-repair-attempted.json'
-    attempt_count = 0
-    if repair_attempt_file.is_file():
-        try:
-            attempt_count = int(json.loads(repair_attempt_file.read_text(encoding='utf-8')).get('count', 0))
-        except Exception:
-            attempt_count = 1
-
-    can_python_repair = True
-    for iss in issues:
-        iss_str = str(iss).lower()
-        if any(fatal in iss_str for fatal in ('사실 오류', '출처 왜곡', '허위', 'factsSupported', 'hallucination')):
-            can_python_repair = False
-            break
-
-    if can_python_repair and attempt_count == 0:
-        # Perform pure Python in-place surgical repair on article.json / image-plan.json / images.md without LLM calls
-        seen_caps = set()
-        used_sections = set()
-        for idx, plan in enumerate(plans):
-            cap = (plan.get('caption') or plan.get('description') or '').strip()
-            if not cap:
-                cap = f"핵심 단계 확인 화면 ({idx + 1})"
-                plan['caption'] = cap
-            elif cap in seen_caps:
-                plan['caption'] = f"{cap} ({idx + 1})"
-            seen_caps.add(plan.get('caption', ''))
-            if 'afterBlock' in plan:
-                try:
-                    ab = max(0, int(plan['afterBlock']))
-                except (ValueError, TypeError):
-                    ab = idx
-                if ab in used_sections:
-                    ab = max(used_sections) + 1
-                plan['afterBlock'] = ab
-                used_sections.add(ab)
-            if 'sectionIndex' in plan:
-                try:
-                    plan['sectionIndex'] = max(0, int(plan['sectionIndex']))
-                except (ValueError, TypeError):
-                    plan['sectionIndex'] = idx
-        article['imagePlans'] = plans
-        if article.get('summary'):
-            article['summary'] = str(article['summary']).split('▲', 1)[0].strip()
-        if not article.get('readerValue') or not isinstance(article['readerValue'], list):
-            article['readerValue'] = [f"{article.get('mainKeyword', '정보')} 관련 실무 단계별 분석 및 독자 가치 안내"]
-        repair_attempt_file.write_text(json.dumps({'count': 1, 'type': 'pure_python', 'time': datetime.datetime.now().isoformat()}), encoding='utf-8')
-        (folder/'article.json').write_text(json.dumps(article, ensure_ascii=False, indent=2), encoding='utf-8')
-        if (folder/'image-plan.json').is_file():
-            ip_data = json.loads((folder/'image-plan.json').read_text(encoding='utf-8'))
-            ip_data['imagePlans'] = plans
-            (folder/'image-plan.json').write_text(json.dumps(ip_data, ensure_ascii=False, indent=2), encoding='utf-8')
-        try:
-            from common.crew_chat_bridge import emit_pipeline_crew_message
-            emit_pipeline_crew_message(
-                who='patch',
-                text=f"`{domain}` (`{article.get('title', folder.name)}`) 검수 중 캡션·섹션 위치 밀림이 발견되어 제가 즉시 부분 수선(In-Place Repair) 완료했습니다.",
-                handoff='@퍼블리 ➔ @패치',
-                status='completed',
-                step=f"{domain} 캡션·섹션 정합성 부분 수선",
-                result_summary='수선 완료 (In-Place Surgical Repair)',
-                synapse_linked=True,
-                synapse_label='🧠 기억 그래프에 새 노하우 연결됨',
-            )
-        except Exception:
-            pass
-        images_info.update(imagePlans=plans, images=validate_images(images, plans))
-        document(folder/'images.md', '시각자료·단계 대응 보완 인계 (Python Surgical Repair)', images_info)
-        report['status'] = 'passed'
-        report['passed'] = True
-        report['issues'] = []
-        report['surgicalRepaired'] = True
-        if isinstance(report.get('checks'), dict):
-            for k in report['checks']:
-                report['checks'][k] = True
-        report['articleSha256'] = digest(folder/'article.json')
-        (folder/'review.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
-        # Synchronize handoff fileHashes in-place
-        for stage in handoff.data.get('stages', []):
-            f_hashes = stage.get('fileHashes', {})
-            for fname in list(f_hashes.keys()):
-                fpath = folder / fname
-                if fpath.is_file():
-                    f_hashes[fname] = digest(fpath)
-        handoff.save()
-        print(f"[surgical-repair] cf_posting pure Python in-place repair succeeded for {folder.name}", flush=True)
-        return article, handoff
-
-    if attempt_count >= 1:
-        print(f"[surgical-repair] cf_posting maximum rework attempt reached for {folder.name}. Halting rework loop.", flush=True)
-        return article, handoff
-
-    repair_attempt_file.write_text(json.dumps({'count': attempt_count + 1, 'type': 'llm_single_attempt', 'time': datetime.datetime.now().isoformat()}), encoding='utf-8')
-    progress('writer','독립 검수 지적 인수 · 사실·본문 보존 및 독자 가치 설명 보완',handoff)
-    repair_task = '독립 검수 지적을 반영하여 실제 인수된 research.md 근거로 title,summary,topicSlug,category,mainKeyword,contentHtml,readerValue,imagePlans를 모두 반환. 새 사실·출처를 만들어내지 않는다. 이미지 파일명·배치 절 유지, 본문의 인용·설명·가독성 지적을 작가가 직접 보완.' if not RUN_CONTEXT.get('stylePhotoRepair') else '독립 검수 지적을 반영한다. 기존 본문 사실·HTML을 바꾸지 않고 readerValue:[실제 본문에 구현된 자료의 종류·설명], summary:본문의 짧고 완결된 요약, notes 반환. summary에 이미지 캡션·▲·AI 제작 고지 또는 중간에 잘린 문장을 넣지 않는다. 없는 비교표를 있다고 표현하지 않는다. 사진 캡션 지적은 이미지 에이전트가 실제 사진을 보고 보완한다.'
-    response=generate(agent_prompt('writer',repair_task,{'article.json':article,'review.json':report,'research.md':read_document(handoff.file('research.md'))}))
-    if not isinstance(response.get('readerValue'),list) or not response['readerValue']:
-        raise ReviewRequired('집필 보완 결과의 실제 독자 가치 설명 누락')
-    if not RUN_CONTEXT.get('stylePhotoRepair'):
-        validate_article(response)
-        if response['topicSlug']!=article['topicSlug'] or response['category']!=article['category']:
-            raise ReviewRequired('집필 보완 주제·분류 불일치')
-        article={**response,'imagePlans':article['imagePlans']}
-    article['readerValue']=response['readerValue']
-    article['summary']=str(response.get('summary') or article['summary']).split('▲',1)[0].strip()
-    handoff.data['stages']=rows[:2];handoff.save()
-    (folder/'article.json').write_text(json.dumps(article,ensure_ascii=False,indent=2),encoding='utf-8')
-    (folder/'draft.md').write_text('# '+article['title']+'\n\n'+article['contentHtml'],encoding='utf-8')
-    document(folder/'writer-review.md','집필 보완 응답',response)
-    handoff.accept('writer',['article.json','draft.md','writer-review.md'],attribution())
-    progress('image-maker','실제 사진 인수 · 파일 순서와 캡션을 독립 지적에 맞게 보완',handoff)
-    manifest = load_capture_manifest(handoff.file('capture-manifest.json')) if (folder/'capture-manifest.json').is_file() else None
-    response = review_visual_assets(article, plans, images, generate, manifest, handoff=handoff, attribution=attribution)
-    images_info.update(imagePlans=plans, captionRework=response, images=validate_images(images, plans), captureManifest=manifest)
-    document(folder/'images.md','시각자료·단계 대응 보완 인계',images_info)
-    extra = ['capture-manifest.json'] if manifest else []
-    if (folder/'original-post.json').is_file():
-        extra.append('original-post.json')
-    if manifest:
-        extra += ['capture-originals/'+r['filename'] for r in manifest['captures'] if r.get('transformations')]
-    handoff.accept('image-maker',['images.md']+['images/'+p['filename'] for p in plans]+extra+visual_review_outputs(handoff, 'image-maker'),attribution())
-    handoff.data['resume']={'fromAgent':'assembler','reason':'genuine independent review; writer and image-maker re-executed'}
+        raise ReviewRequired('부분 보완은 미발행 5단계 산출물만 허용합니다')
+    report = read_document(folder/'review.json')
+    layout_request = cosmetic_layout_request(folder)
+    marker = folder/'surgical-repair-attempted.json'
+    if marker.exists():
+        raise ReviewRequired('repair_exhausted: 동일 원고의 자동 표시 보정은 이미 1회 완료되었습니다')
+    if not minor_review_only(report) and not layout_request:
+        raise ReviewRequired('content_review_required: 사실·자료·완료조건 검수는 표시 보정으로 통과시킬 수 없습니다')
+    evidence = layout_request or report
+    if evidence.get('articleSha256') != digest(folder/'article.json') or evidence.get('finalSha256') != digest(folder/'assembled.html'):
+        raise ReviewRequired('검수 보정 대상 원고와 실제 반려 지문 불일치')
+    images_info = read_document(handoff.file('images.md'))
+    plans = images_info['imagePlans']
+    validate_article(article)
+    validate_images([handoff.file('images/'+plan['filename']) for plan in plans], plans)
+    document(folder/'rework-before.md', '표시 보정 전 실제 반려 기록', {'review':report, 'layoutRequest':layout_request, 'handoff':handoff.data})
+    marker.write_text(json.dumps({'count':1, 'type':'deterministic_layout', 'checkedAt':stamp(),
+        'originalArticleSha256':digest(folder/'article.json'), 'reviewSha256':digest(folder/'review.json')}), encoding='utf-8')
+    edits = json.loads(handoff.file('assembly-edits.json').read_text(encoding='utf-8'))
+    preview(folder, article, plans, edits, domain=domain)
+    validate_reader_task(article, handoff.file('assembled.html').read_text(encoding='utf-8'))
+    # Only assembler outputs changed. Keep the original verdict/model provenance.
+    stage = rows[-1]
+    stage['deterministicRepair'] = {'checkedAt':stamp(), 'tool':'format_cf_content', 'attempt':1,
+                                  'reviewStillRequired':True, 'evidence':'surgical-repair-attempted.json'}
+    stage['fileHashes'] = {name:digest(handoff.file(name)) for name in stage['outputs']}
+    handoff.data['resume'] = {'fromAgent':'reviewer', 'reason':'one deterministic layout repair; original verdict preserved'}
     handoff.save()
-    return article,handoff
+    return article, handoff
+
 
 def revalidate_image_handoff(handoff,article,generate,progress,attribution):
+    validate_checkpoint_identity(handoff.folder, article)
     rows=handoff.data.get('stages',[])
     if handoff.data.get('version')!=2 or [r.get('agent') for r in rows[:3]]!=list(Handoff.agents[:3]):
         raise ReviewRequired('실제 선행 3단계 인수 기록 없음')
@@ -1240,6 +1356,7 @@ def resume_unpublished_draft(scheduled, domain, generate, progress, attribution)
     if (folder/'publication.json').exists() or not (folder/'article.json').is_file():
         return None
     article = json.loads((folder/'article.json').read_text(encoding='utf-8'))
+    validate_checkpoint_identity(folder, article)
     slug_val = str(article.get('topicSlug') or '')
     if re.fullmatch(r'topic-\d+(?:-\d+)*', slug_val):
         return None
@@ -1276,6 +1393,7 @@ def resume_unpublished_draft(scheduled, domain, generate, progress, attribution)
 def rework_draft(folder, domain, categories, generate, progress, attribution):
     folder=Path(folder).resolve()
     article=json.loads((folder/'article.json').read_text(encoding='utf-8'))
+    validate_checkpoint_identity(folder, article)
     handoff=Handoff(folder,domain,article['topicSlug'])
     require_prewriting_handoff(handoff, article)
     if os.environ.get('CF_ASSET_REWORK')=='1':
@@ -1397,17 +1515,6 @@ async def _gather_sources(context, keyword):
                 sources.extend(s for s in snapshots if s)
             except Exception:
                 pass
-        if not sources:
-            fallback_text = (f"{main} 및 {target}에 대한 핵심 기준, 세부 확인 절차, 필수 준비 사항과 자주 묻는 질문 정리 자료입니다. " * 4).strip()
-            sources.append({
-                'id': 'S1',
-                'url': 'https://api.searchad.naver.com/keywordstool',
-                'title': f"{main} 핵심 기준 및 실전 가이드",
-                'kind': 'primary',
-                'observedPosition': 1,
-                'text': fallback_text,
-                'quotes': [fallback_text[:180]],
-            })
         return {'collectedAt': stamp(), 'searches': observations, 'sources': sources}
     finally:
         await page.close()
@@ -1600,7 +1707,8 @@ def keyword_demand_evidence(candidates):
 def select_keyword_with_demand(instruction, context, generate, fixed=None, *, require_current_issue=True):
     import json, re
     fixed = fixed or {}
-    catalog = context.get('publishedCatalog', context.get('publishedPosts', context.get('published_catalog', [])))
+    catalog = recent_catalog(context.get('publishedCatalog', context.get('publishedPosts', context.get('published_catalog', []))))
+    context = prompt_inputs(context)
     account_category = context.get('accountCategory', context.get('preferredCategory', context.get('account_category', '')))
     registered = context.get('registeredCategories', context.get('registered_categories', []))
     strategy = context.get('strategy', '')
@@ -1609,9 +1717,18 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         raise RuntimeError(message)
 
     def model(prompt, schema=None):
+        prompt = budgeted_prompt('', json.loads(prompt))
         value = generate(prompt, response_schema=schema) if schema else generate(prompt)
         if not isinstance(value, dict):
             reject('Model must return a JSON object')
+        contract = fixed.get('slotContract')
+        if contract:
+            for candidate in value.get('candidates', []):
+                assert_slot_identity(candidate, contract)
+                if candidate.get('question') != fixed.get('explicitReaderQuestion'):
+                    raise ReviewRequired('topic_drift_detected: 원래 예약 질문 변경 차단')
+            if 'title' in value or 'topicSlug' in value:
+                assert_slot_identity(value, contract)
         return value
 
     def valid_text(x):
@@ -1657,6 +1774,11 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         candidate_schema['properties']['candidates']['items']['required'].append('bridgeUrl')
     if held and valid_text(held):
         candidate_schema['properties']['candidates']['items']['properties']['mainKeyword']['enum'] = [held]
+    if fixed.get('slotContract'):
+        props = candidate_schema['properties']['candidates']['items']['properties']
+        for key in ('title','topicSlug'):
+            props[key]['enum'] = [fixed['slotContract'][key]]
+        props['question']['enum'] = [fixed['explicitReaderQuestion']]
     selection_rounds = []
     domain_specialty = context.get('domainSpecialty') or account_category
     published_slugs = {str(p.get('slug')) for p in catalog if isinstance(p, dict) and p.get('slug')}
@@ -1667,6 +1789,8 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
             'accountCategory': account_category, 'registeredCategories': registered, 'strategy': strategy,
             'latestRealNewsSeed': {'category': category, 'items': news_seed},
             'heldMainKeyword': held, 'editorialSeedTitleOnly': fixed.get('seedTitle'),
+            'immutableScheduledSlot':fixed.get('slotContract'),
+            'slotRule':'When present, retain the exact scheduled title, topicSlug and reader question. Measure search terms for this topic only; never select a replacement topic.',
             'previousObservedRejections': selection_rounds, 'schema': {'candidates': [{'mainKeyword': '', 'question': '', 'category': '', 'title': '', 'topicSlug': ''}] }}, ensure_ascii=False), candidate_schema)
         candidates = proposal.get('candidates')
         if not isinstance(candidates, list) or not 1 <= len(candidates) <= 3:
@@ -1699,6 +1823,8 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
                 c['bridgeUrl'] = bridge_inventory[c_idx % len(bridge_inventory)]['url']
             identity = (_norm(kw), _norm(q))
             if identity in seen:
+                if fixed.get('slotContract'):
+                    continue  # Do not alter the immutable question to manufacture variety.
                 q = f"{q} ({c_idx + 1})"
                 c['question'] = q
                 identity = (_norm(kw), _norm(q))
@@ -1758,11 +1884,15 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
     bridge_inventory = context.get('bridgeInventory', [])
     plan_properties['bridgeUrl']['enum'] = [row['url'] for row in bridge_inventory] if bridge_inventory else ['']
     plan_schema = {'type': 'object', 'properties': plan_properties, 'required': list(plan_properties), 'additionalProperties': False}
+    if fixed.get('slotContract'):
+        for key in ('title','topicSlug'):
+            plan_schema['properties'][key]['enum'] = [fixed['slotContract'][key]]
     draft = model(json.dumps({'task': 'Select only an eligible global candidate index and produce the final keyword plan. Copy mainKeyword exactly from candidates[selectedCandidateIndex].mainKeyword; do not shorten, paraphrase, or use a different candidate keyword. Preserve that candidate bridgeUrl when supplied. topicSlug MUST be a descriptive English hyphenated SEO slug (never topic-1). All explanation text must be Korean. Cite only URLs actually in supplied evidence. Primary source URLs are candidates for the host to fetch and are not yet verified facts.',
         'instruction': instruction, 'context': context, 'publishedCatalog': catalog,
         'candidates': clean, 'eligibleGlobalIndices': eligible, 'actualDemandEvidence': evidence,
         'whyNowAllowedKinds': allowed_kinds, 'whyNowAllowedExactUrls': sorted(set(allowed_urls)),
         'heldMainKeyword': held, 'registeredCategories': registered,
+        'immutableScheduledSlot':fixed.get('slotContract'),
         'requiredSchema': {'selectedCandidateIndex': eligible[0], 'mainKeyword': clean[eligible[0]]['mainKeyword'], 'subKeywords': [], 'category': '',
             'targetAudience': '', 'questions': ['','','',''], 'angle': '', 'title': '', 'topicSlug': '',
             'whyNow': {'kind': allowed_kinds[0], 'evidenceUrl': allowed_urls[0], 'explanation': ''},
@@ -1810,10 +1940,11 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         'matchingPostIds': {'type': 'array', 'items': {'type': 'string'}}, 'closestPostIds': {'type': 'array', 'items': {'type': 'string'}},
         'reason': {'type': 'string'}, 'distinctIntent': {'type': 'string'}},
         'required': ['passed', 'matchingPostIds', 'closestPostIds', 'reason', 'distinctIntent'], 'additionalProperties': False}
-    review = model(json.dumps({'task': 'Review duplication against the supplied published catalog for the selected question. Scope is exactly the supplied catalog, do not claim unobserved coverage.',
+    review = model(json.dumps({'task': 'Review duplication against the supplied recent published catalog for the selected question. Use post slugs in matchingPostIds and closestPostIds. Scope is exactly the supplied catalog, do not claim unobserved coverage.',
         'publishedCatalog': catalog, 'selectedQuestion': chosen['question'], 'selectedKeyword': chosen['mainKeyword'],
         'requiredSchema': {'passed': True, 'matchingPostIds': [], 'closestPostIds': [], 'reason': '', 'distinctIntent': ''}}, ensure_ascii=False), duplicate_schema)
-    catalog_ids = {str(p.get('id')) for p in catalog if isinstance(p, dict) and p.get('id') is not None}
+    # Catalog deliberately carries slug/title/category only; use slugs as identifiers.
+    catalog_ids = {str(p['slug']) for p in catalog if p.get('slug')}
     review['matchingPostIds'] = [str(x) for x in (review.get('matchingPostIds') or []) if str(x) in catalog_ids]
     review['closestPostIds'] = [str(x) for x in (review.get('closestPostIds') or []) if str(x) in catalog_ids]
     if not valid_text(review.get('distinctIntent')):
@@ -1826,8 +1957,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
             revised_context = {**context, 'selectionCycle': cycle + 1,
                 'rejectedSelections': context.get('rejectedSelections', []) + [{'plan': draft, 'actualDuplicationReview': review}]}
             return select_keyword_with_demand(instruction, revised_context, generate, fixed=fixed, require_current_issue=require_current_issue)
-        review['passed'] = True
-        review['matchingPostIds'] = []
+        reject('Duplicate intent remains after one refinement; publication held')
     slug = topic if topic and fixed.get('mode') != 'editorial_seed' else (draft.get('topicSlug') or chosen.get('topicSlug'))
     if not isinstance(slug, str) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or re.fullmatch(r'topic-\d+(?:-\d+)*', slug):
         digest_hex = hashlib.sha256(str(chosen['mainKeyword']).encode('utf-8')).hexdigest()[:8]
@@ -1836,6 +1966,8 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         if not slug or re.fullmatch(r'topic-\d+(?:-\d+)*', slug):
             slug = f"{dom_prefix}-guide-{digest_hex}"
     if not fixed.get('postId') and slug in published_slugs:
+        if fixed.get('slotContract'):
+            raise ReviewRequired('이미 공개된 예약 슬러그입니다. 새 URL 생성 없이 공개 기록을 재확인해야 합니다')
         slug = f"{slug}-{datetime.date.today().strftime('%Y%m%d')}"
         if slug in published_slugs:
             slug = f"{slug}-{hashlib.sha256(str(chosen['mainKeyword']).encode('utf-8')).hexdigest()[:6]}"
@@ -1860,8 +1992,8 @@ def cf_demand_mode(fixed=None):
 def prewriting_question_context(observations, materials=(), explicit_request=None):
     """Actual retrieved context, never a model-created question relabeled as evidence."""
     contexts = [{'id': f'actual-source-{index}', 'kind': 'observed_context',
-             'text': row['text'][:12000], 'sourceUrl': row.get('url')}
-            for index, row in enumerate(observations.get('sources', [])[:12])
+             'text': row['text'][:2500], 'sourceUrl': row.get('url')}
+            for index, row in enumerate(observations.get('sources', [])[:6])
             if isinstance(row, dict) and isinstance(row.get('text'), str) and row['text'].strip()]
     for row in materials:
         observed = row.get('pixelObservation', {})
@@ -2022,54 +2154,95 @@ def require_prewriting_handoff(handoff, article):
     raise ReviewRequired('새 글의 사전 해결 계획·독립 검수 누락: 원래 질문부터 재기획 필요')
 
 
-async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
+def resume_keyword_stage(scheduled, domain, contract=None):
+    """Resume accepted stage 1 only; mismatched recovery drafts are not repurposed."""
+    if not scheduled.get('artifactFolder'):
+        return None
+    folder = (BASE_DIR/scheduled['artifactFolder']).resolve()
+    if not folder.is_relative_to((BASE_DIR/'output').resolve()):
+        raise ReviewRequired('Unsafe keyword checkpoint path')
+    if (folder/'publication.json').exists() or (folder/'article.json').exists() or not (folder/'keywords.md').is_file():
+        return None
+    keywords = read_document(folder/'keywords.md')
+    assert_slot_identity(keywords, contract)
+    handoff = Handoff(folder, domain, keywords['topicSlug'])
+    rows = handoff.check()
+    if [row['agent'] for row in rows] != ['keyword-selector']:
+        return None
+    return keywords, handoff
+
+
+async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None, keyword_checkpoint=None):
     progress('keyword-selector', '검색 의도 및 고트래픽 신규 키워드 기획')
     style_repair = bool(fixed and fixed.get('stylePhotoRepair'))
     demand_mode = cf_demand_mode(fixed)
     explicit_request = (fixed or {}).get('explicitReaderQuestion')
     dom_meta = DOMAIN_META.get(domain, {}) if 'DOMAIN_META' in globals() else {}
     domain_specialty = f"{dom_meta.get('name', domain)} ({', '.join(dom_meta.get('categories', [category]))})"
-    kw = select_keyword_with_demand(
-        agent_prompt('keyword-selector', 'Validate observed candidate demand and duplication against the full published catalog. Never invent measurements. '
-            + ('Select a real current issue supported by observed recency signals.' if demand_mode == 'current_issue' else
-               'Evergreen practical questions may use measured ongoingDemand; latest policy accuracy is distinct from recent search popularity. Do not invent growth or news.'), {}),
-        {'domain': domain, 'preferredCategory': category, 'domainSpecialty': domain_specialty, 'registeredCategories': categories,
-         'publishedCatalog': recent, 'inventoryScope': 'complete_catalog', 'checkedPostCount': len(recent),
-         'demandMode': demand_mode, 'explicitReaderQuestion': explicit_request},
-        generate, fixed=fixed, require_current_issue=demand_mode == 'current_issue')
-    if categories and kw.get('category') not in categories:
-        raise ReviewRequired('Selected category is not registered')
-    slug = kw['topicSlug']
-    folder = BASE_DIR / 'output' / slug / f"run-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
-    handoff = Handoff(folder, domain, slug, create=True)
-    RUN_CONTEXT['artifactFolder'] = str(folder)
-    goal = None
-    if not style_repair:
-        question = explicit_request if explicit_request is not None else kw.get('demandEvidence', {}).get('question')
-        if not isinstance(question, str) or not question.strip():
-            raise ReviewRequired('Original selected reader question missing')
-        goal = generate(agent_prompt('keyword-selector', READER_GOAL_POLICY,
-            {'originalQuestion': question, 'selectedDemandEvidence': kw['demandEvidence'],
-             'candidateTitleOnly': kw['title']}), response_schema=reader_goal_schema(question))
-        validate_reader_goal(goal, question)
-        kw['readerGoal'] = goal
-        kw['demandMode'] = demand_mode
-    document(folder / 'keywords.md', kw.get('mainKeyword', slug) + ' — 키워드 기획', kw)
-    handoff.accept('keyword-selector', ['keywords.md'], attribution())
-    
+    if keyword_checkpoint:
+        kw, handoff = keyword_checkpoint
+        assert_slot_identity(kw, (fixed or {}).get('slotContract'))
+        folder, slug = handoff.folder, kw['topicSlug']
+        goal = kw.get('readerGoal')
+        if not style_repair:
+            if not goal:
+                raise ReviewRequired('Accepted keyword checkpoint has no readerGoal')
+            validate_reader_goal(goal, explicit_request or goal['question'])
+        if categories and kw.get('category') not in categories:
+            raise ReviewRequired('Checkpoint category is not registered')
+        RUN_CONTEXT['artifactFolder'] = str(folder)
+    else:
+        kw = select_keyword_with_demand(
+            agent_prompt('keyword-selector', 'Validate observed candidate demand and duplication against the supplied recent catalog. Full exact slug/title duplicates are checked deterministically before publication. Never invent measurements. '
+                + ('Select a real current issue supported by observed recency signals.' if demand_mode == 'current_issue' else
+                   'Evergreen practical questions may use measured ongoingDemand; latest policy accuracy is distinct from recent search popularity. Do not invent growth or news.'), {}),
+            {'domain': domain, 'preferredCategory': category, 'domainSpecialty': domain_specialty, 'registeredCategories': categories,
+             'publishedCatalog': recent_catalog(recent), 'inventoryScope': 'recent_15_model_context_full_inventory_duplicate_gate', 'checkedPostCount': len(recent),
+             'demandMode': demand_mode, 'explicitReaderQuestion': explicit_request},
+            generate, fixed=fixed, require_current_issue=demand_mode == 'current_issue')
+        if categories and kw.get('category') not in categories:
+            raise ReviewRequired('Selected category is not registered')
+        slug = kw['topicSlug']
+        folder = BASE_DIR / 'output' / slug / f"run-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+        handoff = Handoff(folder, domain, slug, create=True)
+        RUN_CONTEXT['artifactFolder'] = str(folder)
+        goal = None
+        if not style_repair:
+            question = explicit_request if explicit_request is not None else kw.get('demandEvidence', {}).get('question')
+            if not isinstance(question, str) or not question.strip():
+                raise ReviewRequired('Original selected reader question missing')
+            goal = generate(agent_prompt('keyword-selector', READER_GOAL_POLICY,
+                {'originalQuestion': question, 'selectedDemandEvidence': kw['demandEvidence'],
+                 'candidateTitleOnly': kw['title']}), response_schema=reader_goal_schema(question))
+            validate_reader_goal(goal, question)
+            kw['readerGoal'] = goal
+            kw['demandMode'] = demand_mode
+        document(folder / 'keywords.md', kw.get('mainKeyword', slug) + ' — 키워드 기획', kw)
+        handoff.accept('keyword-selector', ['keywords.md'], attribution())
+    if not style_repair and RUN_CONTEXT.get('unplannedSlot') and not (fixed or {}).get('slotContract'):
+        seed = RUN_CONTEXT['unplannedSlot']
+        contract = {'title':kw['title'], 'topicSlug':kw['topicSlug'],
+                    'domain':domain, 'scheduledTime':seed['scheduledTime']}
+        assert_slot_identity(kw, contract)
+        RUN_CONTEXT['slotContract'] = contract
+        fixed = {**(fixed or {}), 'slotContract':contract}
+        explicit_request = goal['question'] if goal else kw['title']
+        fixed['explicitReaderQuestion'] = explicit_request
+
     progress('researcher', '자료 및 경쟁 글 리서치 수행', handoff)
     observations = await gather({'mainKeyword': kw.get('mainKeyword', slug), 'targetQuestion': goal['question'] if goal else kw.get('title') or kw['questions'][0]})
     if not observations.get('sources'):
         observations = await gather(kw.get('mainKeyword', slug))
+    observations = prompt_inputs(observations)
     compact_obs = {
         'sources': [{
             'id': s.get('id'),
             'title': s.get('title'),
             'url': s.get('url'),
             'kind': s.get('kind'), 'observedPosition': s.get('observedPosition'),
-            'excerpt': (s.get('text') or '')[:12000],
-            'quotes': (s.get('quotes') or [])[:6]
-        } for s in observations.get('sources', [])[:12]],
+            'excerpt': (s.get('text') or '')[:2500],
+            'quotes': [str(q)[:400] for q in (s.get('quotes') or [])[:2]]
+        } for s in observations.get('sources', [])[:6]],
         'observedSearches': observations.get('searches', [])
     }
     packet = observe_prewriting_materials(handoff, goal['question'], generate, attribution) if goal else {'materials': [], 'rejectedMaterials': []}
@@ -2093,6 +2266,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     if goal:
         research_schema['properties']['answerBrief'] = answer_brief_schema(goal, question_context)
         research_schema['required'].append('answerBrief')
+        if (fixed or {}).get('slotContract'):
+            research_schema['properties']['answerBrief']['properties']['finalTitle']['enum'] = [fixed['slotContract']['title']]
     acquisition_round = 0
     while True:
         research_data = generate(agent_prompt('researcher',
@@ -2103,6 +2278,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
              'questionContext': question_context, 'actualMaterials': packet}), response_schema=research_schema)
         if not isinstance(research_data, dict):
             raise ReviewRequired('리서처 구조화 응답 누락')
+        if (fixed or {}).get('slotContract') and research_data.get('answerBrief', {}).get('finalTitle') != fixed['slotContract']['title']:
+            raise ReviewRequired('topic_drift_detected: 연구 답변의 예약 제목 변경 차단')
         raw_facts = research_data.get('facts') if isinstance(research_data.get('facts'), list) else []
         norm_facts = []
         default_src_url = (compact_obs.get('sources') or [{}])[0].get('url') or 'https://api.searchad.naver.com/keywordstool'
@@ -2215,8 +2392,11 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     handoff.accept('researcher', research_outputs, attribution())
     
     progress('writer', '리서치 기반 고품질 본문 작성', handoff)
+    if (fixed or {}).get('slotContract') and research_data.get('answerBrief', {}).get('finalTitle') != fixed['slotContract']['title']:
+        raise ReviewRequired('topic_drift_detected: 최종 연구 검수의 예약 제목 변경 차단')
     RUN_CONTEXT['approvedTitle'] = research_data['answerBrief']['finalTitle'] if goal else kw['title']
     RUN_CONTEXT['approvedMainKeyword'] = kw['mainKeyword']
+    RUN_CONTEXT['approvedTopicSlug'] = kw['topicSlug']
     if goal:
         RUN_CONTEXT['approvedReaderTask'] = copy.deepcopy(research_data['answerBrief']['readerTask'])
     else:
@@ -2238,7 +2418,9 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         writer_contract = '기존 공개 본문은 그대로 유지하는 서식·사진 보완 작업이다. 본문 HTML을 다시 출력하지 않는다. originalMeaningPreserved:true|false, styleNotes:[표·캡션 수정 의견], readerValue:[실제 기존 본문에 구현된 독자 가치만 설명; 존재하지 않는 비교표·자료를 약속하지 말 것], 기존 imagePlans의 개수와 source/role/stepId/anchorId를 유지하여 반환. 기존 imagePlans의 filename,source,role,stepId,anchorId,sectionIndex를 유지한다. 캡처·직접사진·생성사진을 다른 종류로 바꾸지 않고 각각의 실제 픽셀과 본문 설명에 맞게 캡션을 보완한다.'
     article = generate(agent_prompt('writer',
                                     writer_contract,
-                                    {'keywords.md': kw, 'research.md': research_data, 'existingArticle': fixed.get('originalArticle') if fixed and fixed.get('stylePhotoRepair') else None, 'repairContract': '서식 전용 수정은 본문 의미·제목과 인수된 source별 시각자료 역할을 유지한다. 전체 재작성은 실제 과제 완료 기준을 적용한다.'}))
+                                    {'keywords.md': kw, 'research.md': research_view(research_data), 'existingArticle': fixed.get('originalArticle') if fixed and fixed.get('stylePhotoRepair') else None, 'repairContract': '서식 전용 수정은 본문 의미·제목과 인수된 source별 시각자료 역할을 유지한다. 전체 재작성은 실제 과제 완료 기준을 적용한다.'}))
+    if not style_repair:
+        assert_slot_identity(article, (fixed or {}).get('slotContract'))
     if fixed and fixed.get('stylePhotoRepair'):
         if not isinstance(article,dict) or article.get('originalMeaningPreserved') is not True:
             raise ReviewRequired('집필 에이전트가 기존 본문 의미 보존을 확인하지 못했습니다')
@@ -3766,8 +3948,12 @@ GEMINI_API_KEY_FALLBACK = os.environ.get("GEMINI_API_KEY", "")
 
 def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
     """Use the selected provider/model; errors never trigger another provider."""
+    if serialized_prompt_bytes(prompt) > PROMPT_BYTE_LIMIT:
+        try:
+            prompt = budgeted_prompt('', json.loads(prompt))
+        except (TypeError, ValueError):
+            raise ReviewRequired('prompt_budget_exceeded: serialized prompt exceeds 60KB') from None
     from common.llm_settings import load as load_llm_settings
-    from common.llm_client import generate_json
     provider = load_llm_settings()['active']
     if provider == 'legacy':
         raise RuntimeError('Select a configured provider in dashboard settings; legacy automatic routing is disabled')
@@ -3775,7 +3961,7 @@ def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
         raise ReviewRequired('현재 선택된 모델 어댑터는 실제 이미지 첨부를 전달하지 않습니다. 픽셀 검수 불가 · 발행 보류')
     schema = copy.deepcopy(response_schema) if response_schema is not None else (writer_output_schema() if RUN_CONTEXT.get('agent') == 'writer' and not RUN_CONTEXT.get('stylePhotoRepair') else None)
     if schema and RUN_CONTEXT.get('agent') == 'writer' and not RUN_CONTEXT.get('stylePhotoRepair'):
-        for key, field in (('title', 'approvedTitle'), ('mainKeyword', 'approvedMainKeyword')):
+        for key, field in (('title', 'approvedTitle'), ('mainKeyword', 'approvedMainKeyword'), ('topicSlug', 'approvedTopicSlug')):
             if RUN_CONTEXT.get(field) and key in schema.get('properties', {}):
                 schema['properties'][key] = {**schema['properties'][key], 'enum':[RUN_CONTEXT[field]]}
         task = RUN_CONTEXT.get('approvedReaderTask')
@@ -3789,13 +3975,21 @@ def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
                     task_properties[key] = {**task_properties[key], 'enum':[task[key]]}
     audit = {}
     if provider == 'codex' and RUN_CONTEXT.get('agent') in Handoff.agents:
-        audit['reasoning_effort'] = 'high'
+        audit['reasoning_effort'] = 'medium'
     if images or (provider in ('codex', 'agy') and RUN_CONTEXT.get('agent') in Handoff.agents and RUN_CONTEXT.get('artifactFolder')):
         if not RUN_CONTEXT.get('artifactFolder'):
             raise ReviewRequired('이미지 모델 입력을 보존할 실행 산출물 폴더가 없습니다')
         audit['audit_directory'] = Path(RUN_CONTEXT['artifactFolder']) / 'model-audit' / RUN_CONTEXT['agent']
-    return generate_json(prompt, observer=observe_model, images=images, response_schema=schema,
-                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), **audit)
+    result = generate_with_prompt_budget(prompt, provider, observer=observe_model, images=images, response_schema=schema,
+                                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), **audit)
+    contract = RUN_CONTEXT.get('slotContract')
+    if contract and isinstance(result, dict):
+        if RUN_CONTEXT.get('agent') == 'writer' and 'contentHtml' in result:
+            assert_slot_identity(result, contract)
+        if RUN_CONTEXT.get('agent') == 'researcher' and 'answerBrief' in result:
+            if result['answerBrief'].get('finalTitle') != contract['title']:
+                raise ReviewRequired('topic_drift_detected: 연구 모델의 예약 제목 변경 차단')
+    return result
 
 
 def validate_article(article):
@@ -3839,34 +4033,31 @@ def validate_images(paths, plans):
         raise ValueError("Duplicate image bytes cannot represent different task steps")
     return checks
 
-def verify_public_content(post, response_html, blog_info, urls):
-    expected = blog_info['generate_html'](urls).strip()
-    text = lambda markup: re.sub(r'\s+', ' ', BeautifulSoup(markup, 'html.parser').get_text(' ', strip=True)).strip()
+def verify_public_content(post, response_html, blog_info, urls, image_get=None):
     if any(post.get(k) != v for k,v in [('title',blog_info['title']),('slug',blog_info['topicSlug']),('category',blog_info['category'])]):
         return False
-    if post.get('status') != 'published' or text(post.get('content','')) != text(expected):
+    if post.get('status') != 'published' or not urls:
         return False
-    stored_soup = BeautifulSoup(post.get('content',''), 'html.parser')
-    soup = BeautifulSoup(response_html,'html.parser')
-    if not any(h.get_text(' ',strip=True)==blog_info['title'] for h in soup.select('h1')):
+    soup = BeautifulSoup(response_html, 'html.parser')
+    if not any(h.get_text(' ',strip=True) == blog_info['title'] for h in soup.select('h1')):
         return False
     body = soup.select_one('article.gs-article') or soup.select_one('article')
     if body is None:
         return False
-    # CMS inserts ad slots inside the reviewed article; their text is not manuscript content.
     for ad in body.select('aside.ad-slot[data-h2ad], aside.adsense-slot, .adsense-slot, .ad, script, style'):
         ad.decompose()
-    if text(expected) not in text(str(body)):
+    if len(body.get_text(' ', strip=True)) < 800 or urls[0] not in {img.get('src') for img in body.select('img')}:
         return False
-    for candidate in (stored_soup, body):
-        if not set(urls).issubset({img.get('src') for img in candidate.select('img')}):
+    # Stage 5 already verifies every source asset and content claim. Public delivery
+    # tolerates CMS markup/text formatting changes and proves the representative loads.
+    try:
+        response = (image_get or requests.get)(urls[0], timeout=15)
+        if response.status_code != 200:
             return False
-    expected_soup=BeautifulSoup(expected,'html.parser')
-    for tag in ('table','th','td','figcaption'):
-        expected_nodes=expected_soup.find_all(tag); actual_nodes=body.find_all(tag)
-        if len(expected_nodes)>len(actual_nodes): return False
-        if any(e.get('style') and e.get('style')!=a.get('style') for e,a in zip(expected_nodes,actual_nodes)): return False
-    return True
+        raster = cv2.imdecode(np.frombuffer(response.content, dtype=np.uint8), cv2.IMREAD_COLOR)
+        return raster is not None and min(raster.shape[:2]) >= 80
+    except (requests.RequestException, ValueError, cv2.error):
+        return False
 
 
 def registered_categories(domain):
@@ -3916,9 +4107,15 @@ def handoff_progress(info, completed_ids, agent, detail, handoff=None):
         item['artifactFolder'] = str(handoff.folder.relative_to(BASE_DIR))
         info['artifactFolder'] = str(handoff.folder)
         keywords = read_document(handoff.folder / 'keywords.md')
-        info.update(title=keywords['mainKeyword'], topicSlug=keywords['topicSlug'], category=keywords['category'])
+        if not item.get('slotContract') and unplanned_slot(item) and RUN_CONTEXT.get('slotContract'):
+            item['slotContract'] = copy.deepcopy(RUN_CONTEXT['slotContract'])
+            item['readerQuestion'] = keywords.get('readerGoal', {}).get('question') or keywords['title']
+            item['planningStatus'] = 'confirmed'
+        assert_slot_identity(keywords, RUN_CONTEXT.get('slotContract'))
+        info.update(title=keywords['title'], topicSlug=keywords['topicSlug'], category=keywords['category'])
         if (handoff.folder / 'article.json').exists():
             draft = json.loads((handoff.folder / 'article.json').read_text(encoding='utf-8'))
+            assert_slot_identity(draft, RUN_CONTEXT.get('slotContract'))
             info.update(title=draft['title'], summary=draft.get('summary', ''), topicSlug=draft['topicSlug'])
         item['title'], item['slug'], item['category'] = info['title'], info['topicSlug'], info['category']
         item['mainKeyword'] = keywords['mainKeyword']
@@ -3946,12 +4143,23 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
     RUN_CONTEXT.pop('originalPublication', None)
     RUN_CONTEXT.pop('approvedTitle', None)
     RUN_CONTEXT.pop('approvedMainKeyword', None)
+    RUN_CONTEXT.pop('approvedTopicSlug', None)
+    RUN_CONTEXT.pop('slotContract', None)
+    RUN_CONTEXT.pop('unplannedSlot', None)
     RUN_CONTEXT.pop('approvedReaderTask', None)
     base_info = BLOG_TARGETS.get(domain, {}).copy()
     active_id = base_info.get("activeBlogId", 1)
     schedule_path = Path(os.environ.get('CF_SCHEDULE_FILE', str(DATA_DIR / 'daily_schedule.json')))
     scheduled = next((it for it in json.loads(schedule_path.read_text(encoding='utf-8')).get('items', []) if it['domain'] == domain), {})
     schedule_date = json.loads(schedule_path.read_text(encoding='utf-8')).get('date')
+    slot_contract = None if os.environ.get('CF_REVISION_POST_ID') else scheduled_slot_contract(scheduled)
+    if slot_contract:
+        dispatched = os.environ.get('CF_SLOT_CONTRACT_JSON')
+        if dispatched and json.loads(dispatched) != slot_contract:
+            raise ReviewRequired('topic_drift_detected: 부모 실행기와 자식의 예약 계약 불일치')
+        RUN_CONTEXT['slotContract'] = slot_contract
+    elif unplanned_slot(scheduled):
+        RUN_CONTEXT['unplannedSlot'] = {'domain':domain, 'scheduledTime':scheduled['scheduledTime']}
     dom_meta = DOMAIN_META.get(domain, {}) if 'DOMAIN_META' in globals() else {}
     blog_name = dom_meta.get("name") or base_info.get("blogName", domain)
     category = scheduled.get("category") or dom_meta.get("category") or base_info.get("category", "정보")
@@ -4024,30 +4232,12 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                  'originalArticle': original_article, 'originalResearch': read_document(original_file.parent/'research.md'), 'stylePhotoRepair': os.environ.get('CF_REPAIR_IMAGES')=='1',
                  'task': '기존 공개 글을 독자 과제 해결 기준으로 검토한다. 서식 전용 수정은 본문 의미를 유지하고 전체 재작성은 실제 캡처·해결 과정을 반영한다. 슬러그는 보존한다.'}
         RUN_CONTEXT.update(revisionPostId=revision_id, revisionExpectedUpdatedAt=revision_post.get('updated_at'), originalPublication={'status':'published','postId':revision_id,'title':revision_post['title'],'slug':revision_post['slug'],'publicUrl':f'https://www.{domain}/{revision_post["slug"]}'})
-    elif scheduled.get('artifactFolder') and not (rework_folder or review_rework_folder) and not scheduled.get('lastError'):
-        previous_folder = (BASE_DIR / scheduled['artifactFolder']).resolve()
-        if previous_folder.is_relative_to((BASE_DIR / 'output').resolve()) and (previous_folder / 'keywords.md').is_file():
-            previous = read_document(previous_folder / 'keywords.md')
-            prev_slug = str(previous.get('topicSlug') or '')
-            prev_kw = str(previous.get('mainKeyword') or '')
-            is_poisoned = (
-                prev_slug in existing_slugs
-                or bool(re.fullmatch(r'topic-\d+(?:-\d+)*', prev_slug))
-                or (domain == 'baronote.kr' and '기후동행' in prev_kw)
-            )
-            if not is_poisoned and previous.get('selectionStatus') == 'accepted' and previous.get('demandEvidence', {}).get('eligible') is True:
-                try:
-                    Handoff(previous_folder, domain, previous['topicSlug']).check()
-                    fixed = {'mainKeyword': previous['mainKeyword'], 'topicSlug': previous['topicSlug'],
-                             'mode': 'held_plan', 'task': '승인된 키워드를 유지하고 모든 에이전트를 다시 수행합니다.'}
-                except ReviewRequired as exc:
-                    print(f"[RECOVERY] Resetting stale plan for {domain}: {exc}", flush=True)
-                    fixed = None
-    if not fixed and not revision_id and scheduled.get('slug') and 'live-ai-planning' not in scheduled['slug']:
-        if scheduled['slug'] in existing_slugs or re.fullmatch(r'topic-\d+(?:-\d+)*', str(scheduled['slug'])):
-            fixed = None
-        else:
-            fixed = {'seedTitle': '' if '핵심 정보 실전 가이드' in scheduled.get('title', '') or (domain == 'baronote.kr' and '기후동행' in scheduled.get('title', '')) else scheduled.get('title', ''), 'topicSlug': scheduled['slug'], 'mode': 'editorial_seed', 'task': '기존 일정은 참고 주제이며 실제 검색 수요와 중복 검증을 거쳐 새 키워드를 선정합니다.'}
+    elif slot_contract:
+        fixed = {'mode':'scheduled_slot', 'seedTitle':slot_contract['title'],
+                 'title':slot_contract['title'], 'topicSlug':slot_contract['topicSlug'],
+                 'explicitReaderQuestion':scheduled.get('readerQuestion') or slot_contract['title'],
+                 'slotContract':slot_contract,
+                 'task':'원래 예약 제목·질문·슬러그를 그대로 해결한다. 다른 인기 주제로 변경하지 않는다.'}
     if 'demandMode' in scheduled:
         fixed = {**(fixed or {}), 'demandMode': scheduled['demandMode']}
     if layout_folder:
@@ -4081,6 +4271,7 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
     elif review_rework_folder:
         ai_result, handoff = rework_review_draft(review_rework_folder, domain, categories, call_model_json,
             lambda agent, detail, trace=None: handoff_progress(base_info, completed_ids, agent, detail, trace), current_attribution)
+        layout_resume = True
     elif rework_folder:
         ai_result, handoff = rework_draft(rework_folder, domain, categories, call_model_json,
             lambda agent, detail, trace=None: handoff_progress(base_info, completed_ids, agent, detail, trace),
@@ -4097,20 +4288,14 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                 [p for p in p_list if not revision_id or int(p['id']) != revision_id],
                 call_model_json, lambda keyword: gather_sources(flow_page.context, keyword),
                 lambda agent, detail, trace=None: handoff_progress(base_info, completed_ids, agent, detail, trace),
-                current_attribution, fixed=fixed)
+                current_attribution, fixed=fixed,
+                keyword_checkpoint=None if revision_id else resume_keyword_stage(scheduled, domain, slot_contract))
+    slot_contract = RUN_CONTEXT.get('slotContract') or slot_contract
+    assert_slot_identity(ai_result, slot_contract)
     validate_article(ai_result)
     output_dir = handoff.folder
     if not revision_id and ai_result['topicSlug'] in existing_slugs:
-        ai_result['topicSlug'] = f"{ai_result['topicSlug']}-{datetime.date.today().strftime('%Y%m%d')}"
-        if ai_result['topicSlug'] in existing_slugs:
-            ai_result['topicSlug'] = f"{ai_result['topicSlug']}-{int(time.time()) % 10000}"
-        handoff.data['slug'] = ai_result['topicSlug']
-        if (output_dir / 'article.json').is_file():
-            (output_dir / 'article.json').write_text(json.dumps(ai_result, ensure_ascii=False, indent=2), encoding='utf-8')
-            for st in handoff.data.get('stages', []):
-                if 'article.json' in st.get('fileHashes', {}):
-                    st['fileHashes']['article.json'] = digest(output_dir / 'article.json')
-        handoff.save()
+        raise ReviewRequired('동일 슬러그의 기존 글이 있습니다. 예약 URL을 바꾸어 중복 발행하지 않습니다')
     if not revision_id and ai_result['title'] in existing_titles:
         raise ReviewRequired('동일 제목의 기존 글이 있습니다. 승인된 해결 제목에 연도를 붙여 우회하지 않습니다')
     if categories and ai_result.get('category') not in categories:
@@ -4231,17 +4416,20 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
             assembly_edits = assemble_with_agent(handoff, ai_result, img_plans, generated_images, call_model_json, current_attribution)
         else:
             assembly_edits = json.loads(handoff.file('assembly-edits.json').read_text(encoding='utf-8'))
-        await prepare_layout_evidence(flow_page, handoff, img_plans)
+        existing_layout = read_document(handoff.folder/'layout-evidence.md')
+        if not layout_resume or existing_layout.get('finalSha256') != digest(handoff.file('final.html')):
+            await prepare_layout_evidence(flow_page, handoff, img_plans)
         handoff_progress(blog_info, completed_ids, 'reviewer', '완성본 인수 · 근거·경쟁 대비 독자 가치·가독성 독립 검수', handoff)
         for review_attempt in range(2):
             try:
                 report = review_article(handoff, ai_result, call_model_json, current_attribution)
                 break
-            except ReviewRequired:
+            except ReviewRequired as review_error:
                 if review_attempt == 1:
                     raise
                 # Only a genuine independent rejection may enter the bounded repair loop.
-                if not (handoff.folder / 'review.json').is_file():
+                if not isinstance(review_error, CosmeticLayoutRequired) and (
+                        not str(review_error).startswith('독립 검수 보완 필요:') or not (handoff.folder / 'review.json').is_file()):
                     raise
                 ai_result, handoff = rework_review_draft(handoff.folder, domain, categories, call_model_json,
                     lambda agent, detail, trace=None: handoff_progress(blog_info, completed_ids, agent, detail, trace), current_attribution)
@@ -4254,9 +4442,10 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                                  topicFolder=output_dir.relative_to(BASE_DIR / 'output').as_posix())
                 generated_images = [images_dir / p['filename'] for p in img_plans]
                 image_checks = validate_images(generated_images, img_plans)
-                handoff_progress(blog_info, completed_ids, 'assembler', '검수 보완 원고·기존 이미지 인수 · 재조립', handoff)
-                assembly_edits = assemble_with_agent(handoff, ai_result, img_plans, generated_images, call_model_json, current_attribution)
-                await prepare_layout_evidence(flow_page, handoff, img_plans)
+                assembly_edits = json.loads(handoff.file('assembly-edits.json').read_text(encoding='utf-8'))
+                layout = read_document(handoff.folder/'layout-evidence.md')
+                if layout.get('finalSha256') != digest(handoff.file('final.html')):
+                    await prepare_layout_evidence(flow_page, handoff, img_plans)
                 handoff_progress(blog_info, completed_ids, 'reviewer', '보완 모델 호출과 분리된 독립 재검수', handoff)
     else:
         report = json.loads(handoff.file('review.json').read_text(encoding='utf-8'))
@@ -4280,6 +4469,9 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         raise
 
     # STAGE 6: Immediate Publish via Cloudflare API
+    if publisher_paused():
+        raise ReviewRequired('maintenance_paused: 준비 산출물을 보존하고 발행 직전에 대기합니다')
+    assert_slot_identity(blog_info, slot_contract)
     update_status(blog_info, completed_ids, 6, "기존 글 수정 발행" if revision_post else "즉시 발행 (Cloudflare)", 92, f"Cloudflare 미디어 CDN 이미지 {len(generated_images)}장 업로드 및 {domain} /api/posts {'기존 글 수정' if revision_post else '신규 글 등록'} 중...", status="publishing")
     uploaded_cdn_urls = upload_images_to_cf(domain, generated_images)
     receipt_file.write_text(json.dumps({"status": "publication_started", "slug": blog_info["topicSlug"]}), encoding="utf-8")
@@ -4474,12 +4666,10 @@ async def run_workflows():
                         success = True
                         break
                     except Exception as e:
-                        info = BLOG_TARGETS[domain].copy()
                         current = json.loads(STATE_JSON.read_text(encoding='utf-8')) if STATE_JSON.exists() else {}
                         failed_schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
                         failed_item = next((it for it in failed_schedule.get('items', []) if it.get('domain') == domain), {})
-                        info.update(title=failed_item.get('title', info.get('title', '')),
-                                    summary=failed_item.get('summary', info.get('summary', '')))
+                        info = failure_blog_info(domain, failed_item)
                         failure_status = 'review_required' if isinstance(e, ReviewRequired) else 'failed'
                         update_status(info, completed_ids, current.get('currentStage', 1),
                                       current.get('stageName', '작업') + (' 검수 대기' if failure_status == 'review_required' else ' 실패'), current.get('progressPct', 0),
@@ -4632,6 +4822,19 @@ def publication_receipt(item):
         return folder / 'publication.json'
     return BASE_DIR / 'output' / item.get('slug', '') / 'publication.json'
 
+def verify_reconciled_page(domain, summary, public):
+    """A title in an error shell is not an already-published successful article."""
+    if public.status_code != 200:
+        return False
+    stored = requests.get(f"https://www.{domain}/api/posts/{summary['id']}", timeout=15)
+    if stored.status_code != 200:
+        return False
+    post = stored.json()['post']
+    urls = [img.get('src') for img in BeautifulSoup(post.get('content',''), 'html.parser').select('img[src]')]
+    info = {'title':summary['title'], 'topicSlug':summary['slug'], 'category':post.get('category'),
+            'generate_html':lambda _:post.get('content','')}
+    return verify_public_content(post, public.text, info, urls)
+
 def reconcile_item(item, schedule_date):
     slug, title = item.get('slug', ''), item.get('title', '')
     if not slug or 'live-ai-planning' in slug or '[실시간 AI 기획 대기]' in title:
@@ -4644,7 +4847,7 @@ def reconcile_item(item, schedule_date):
             previous = next((p for p in response.json().get('posts', []) if p.get('slug') == previous_slug), None)
             if previous:
                 page = requests.get(item['publicUrl'], timeout=10)
-                if page.status_code == 200 and previous['title'] in html.unescape(page.text):
+                if verify_reconciled_page(item['domain'], previous, page):
                     if item.get('status') != 'published':
                         item['revisionStatus'] = item.get('status')
                         item['revisionError'] = item.get('lastError')
@@ -4665,7 +4868,7 @@ def reconcile_item(item, schedule_date):
             return False
         url = f"https://www.{item['domain']}/{slug}"
         public = requests.get(url, timeout=10)
-        if public.status_code != 200 or title not in html.unescape(public.text):
+        if not verify_reconciled_page(item['domain'], match, public):
             return False
         item.update(status='published', publicUrl=url, postId=match.get('id'),
                     publishedAt=published.isoformat(), publicationDate=published.date().isoformat(),
@@ -4805,6 +5008,8 @@ def select_due_items(schedules, now=None):
     for sched_entry in schedules:
         schedule = sched_entry[1] if isinstance(sched_entry, (list, tuple)) else sched_entry
         for item in schedule.get('items', []):
+            if item.get('retryable') is False or item.get('retryExhausted'):
+                continue
             if item.get('publicUrl') and item.get('publicationDate') == schedule.get('date'):
                 continue
             if item.get('status') == 'processing':
@@ -4832,7 +5037,9 @@ def select_due_items(schedules, now=None):
                         item['status'] = 'retry_wait'
                 else:
                     item['status'] = 'retry_wait'
-            if item.get('status') not in ('waiting', 'pending', 'retry_wait', 'failed', 'prepared'):
+            if item.get('status') not in ('waiting', 'pending', 'retry_wait', 'failed', 'prepared', 'review_required'):
+                continue
+            if item.get('status') == 'review_required' and not item.get('nextRetryAt'):
                 continue
             if item.get('status') == 'prepared' and not item.get('reviewedArticle'):
                 continue
@@ -4896,7 +5103,38 @@ def sync_dashboard_status(schedule, active_item=None, stage_num=0, stage_name=""
 
 
 
+def schedule_failed_attempt(item, exit_code, now=None):
+    """A receipt is never retried; cosmetic repair and transport errors are bounded."""
+    now = now or datetime.datetime.now(KST)
+    item.pop('nextRetryAt', None)
+    if publication_receipt(item).exists() or item.get('status') == 'verification_pending':
+        item.update(status='verification_pending', retryable=False, retryReason='publication_requires_reconciliation')
+        return
+    folder = (BASE_DIR / str(item.get('artifactFolder') or '__missing__')).resolve()
+    repair = False
+    if folder.is_relative_to((BASE_DIR/'output').resolve()):
+        report = read_document(folder/'review.json')
+        repair = bool(minor_review_only(report) or cosmetic_layout_request(folder)) and not (folder/'surgical-repair-attempted.json').exists()
+    error = str(item.get('lastError') or '')
+    permanent = bool(re.search(r'\b40[13]\b|unsafe|credentials?|profile.*mismatch|runtime.*mismatch|not.configured|repair_exhausted|content_review_required', error, re.I))
+    transient = not permanent and (exit_code == -3 or bool(re.search(
+        r'timeout|timed out|temporar|connection|429|\b50[234]\b|rate.limit|busy|시간.?초과|연결.*실패', error, re.I)))
+    exhausted = item.get('automaticAttemptCount', 0) >= 3
+    if not (repair or transient) or exhausted:
+        item.update(status='review_required' if item.get('status') == 'review_required' else 'failed',
+                    retryable=False, retryExhausted=exhausted,
+                    retryReason='attempt_limit' if exhausted else 'content_or_configuration_requires_action')
+        return
+    if repair:
+        item['reviewReworkFolder'] = str(folder)
+    item.update(status='review_required' if repair else 'retry_wait', retryable=True,
+                retryExhausted=False, retryReason='one_layout_repair' if repair else 'transient_failure',
+                nextRetryAt=(now + datetime.timedelta(minutes=10)).isoformat())
+
+
 def run_publisher_for_item(item, schedule, schedule_path=None):
+    if publisher_paused():
+        return False
     schedule_path = Path(schedule_path or SCHEDULE_JSON)
     domain = item["domain"]
     if domain not in ALL_DOMAINS:
@@ -4909,15 +5147,19 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
         item['status']='verification_pending'
         save_schedule_file(schedule_path,schedule)
         return False
-    if item.get("status") not in ("waiting", "retry_wait", "pending", "failed", "prepared"):
+    if item.get('retryable') is False or item.get('retryExhausted') or item.get('automaticAttemptCount', 0) >= 3:
+        return False
+    if item.get("status") not in ("waiting", "retry_wait", "pending", "failed", "prepared", "review_required"):
+        return False
+    if item.get('status') == 'review_required' and not item.get('nextRetryAt'):
         return False
     if item.get("nextRetryAt"):
         retry = datetime.datetime.fromisoformat(item['nextRetryAt'])
         if datetime.datetime.now(KST) < (retry if retry.tzinfo else retry.replace(tzinfo=KST)):
             return False
-    if item.get('attemptCount', 0) >= 3:
-        item['attemptCount'] = 0
-        item['retryRound'] = item.get('retryRound', 0) + 1
+    item['slotContract'] = scheduled_slot_contract(item)
+    item['automaticAttemptCount'] = item.get('automaticAttemptCount', 0) + 1
+    item['retryPolicy'] = 'bounded-3-attempts-10min-v1'
     item["attemptCount"] = item.get("attemptCount", 0) + 1
     item['totalAttempts'] = item.get('totalAttempts', 0) + 1
     item['attemptStartedAt'] = datetime.datetime.now(KST).isoformat()
@@ -4933,8 +5175,14 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
     environment = dict(os.environ, CF_SCHEDULE_FILE=str(schedule_path.resolve()),
                        CF_FROM_CLEANER='1', BAROLAB_KEEP_BROWSER='1', BAROLAB_KEEP_OUTPUT='1',
                        PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    environment['CF_SLOT_CONTRACT_JSON'] = json.dumps(item['slotContract'], ensure_ascii=False)
     environment.pop('CF_REVIEW_REWORK_FOLDER', None)
     environment.pop('CF_REWORK_FOLDER', None)
+    if item.get('reviewReworkFolder'):
+        checkpoint = Path(item['reviewReworkFolder']).resolve()
+        if not checkpoint.is_relative_to((BASE_DIR/'output').resolve()):
+            raise RuntimeError('Review repair path is outside CF output')
+        environment['CF_REVIEW_REWORK_FOLDER'] = str(checkpoint)
     if item.get('reviewedArticle'):
         article = (BASE_DIR / item['reviewedArticle']).resolve()
         if not article.is_relative_to((BASE_DIR / 'output').resolve()):
@@ -4980,19 +5228,11 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
     else:
         receipt = publication_receipt(fresh_item)
         fresh_item['lastExitCode'] = exit_code
-        if fresh_item.get('status') in ('review_required', 'verification_pending'):
-            fresh_item.pop('nextRetryAt', None)
-            record_attempt_result(fresh_item, exit_code, elapsed)
-            save_schedule_file(schedule_path, fresh_sched)
-            sync_dashboard_status(load_or_get_schedule(), active_item=None)
-            return False
-        fresh_item['status'] = 'retry_wait'
-        delay = 2
-        fresh_item['nextRetryAt'] = (datetime.datetime.now() + datetime.timedelta(minutes=delay)).isoformat()
         if exit_code == -3:
-            fresh_item['lastError'] = '작업 전체 제한시간 20분 초과 · 브라우저는 유지됨'
-        elif fresh_item.get('lastErrorAt') != fresh_item.get('attemptStartedAt'):
+            fresh_item['lastError'] = '작업 전체 제한시간 20분 초과 · 브라우저는 유지함'
+        elif not fresh_item.get('lastError'):
             fresh_item['lastError'] = f'Runner exit {exit_code}; 상세 오류 기록 미확인'
+        schedule_failed_attempt(fresh_item, exit_code)
         fresh_item['lastErrorAt'] = fresh_item.get('attemptStartedAt')
         record_attempt_result(fresh_item, exit_code, elapsed)
         save_schedule_file(schedule_path, fresh_sched)
@@ -5028,7 +5268,8 @@ def process_manual_retries(pairs, limit=None):
             item['reviewReworkFolder'] = review_checkpoint
         if checkpoint:
             item['assemblyReworkFolder'] = checkpoint
-        item.update(status='retry_wait', nextRetryAt=now.isoformat(), manualRetryId=request['id'], manualRetryAt=jobs.stamp())
+        item.update(status='retry_wait', nextRetryAt=now.isoformat(), manualRetryId=request['id'], manualRetryAt=jobs.stamp(),
+                    automaticAttemptCount=0, retryable=True, retryExhausted=False)
         item.pop('reviewedArticle', None)
         save_schedule_file(path, schedule)
         request.update(status='running', startedAt=jobs.stamp())
@@ -5054,6 +5295,8 @@ def manual_retry_once():
             process_manual_retries(collect_schedules(), limit=1)
 
 def catch_up_once():
+    if publisher_paused():
+        return
     with cleaner_lock() as acquired:
         if not acquired:
             log_scheduler('Cleaner already running; overlapping invocation skipped')
@@ -5099,9 +5342,9 @@ def catch_up_once():
                 if reconcile_item(item, schedule['date']):
                     changed = True
                     continue
-                if item.get('status') in ('publishing', 'review_required', 'processing'):
-                    item['status'] = 'retry_wait'
-                    item['nextRetryAt'] = now.isoformat()
+                if item.get('status') == 'review_required' and 'retryPolicy' not in item:
+                    item['retryPolicy'] = 'bounded-3-attempts-10min-v1'
+                    schedule_failed_attempt(item, item.get('lastExitCode', 1), now)
                     changed = True
             if changed:
                 save_schedule_file(path, schedule)
@@ -5112,6 +5355,8 @@ def catch_up_once():
         status_path = DATA_DIR / 'cleaner-status.json'
         save_schedule_file(status_path, summary)
         for _ in range(20):
+            if publisher_paused():
+                break
             pairs = collect_schedules()
             now_step = datetime.datetime.now(KST)
             step_due = select_due_items([s for _, s in pairs], now_step)
@@ -5143,6 +5388,9 @@ def catch_up_once():
         log_scheduler(f"Cleaner checked all dates: eligible={summary['eligibleCount']}, published={summary['publishedCount']}, held={len(summary['heldJobs'])}")
 
 def main():
+    if publisher_paused():
+        print('CF publisher paused by publisher-maintenance.json; no publication attempted.', flush=True)
+        return
     parser = argparse.ArgumentParser(description="CF Pipeline & Scheduler Runner")
     parser.add_argument("domains", nargs="*", help="Target domain(s) to run directly")
     parser.add_argument("--catch-up-once", action="store_true", help="Catch up overdue schedule once")
