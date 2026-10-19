@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, AsyncMock, patch
 
 import cv2
 import numpy as np
@@ -558,6 +558,65 @@ class FinalAdapterBudgetTests(unittest.TestCase):
             self.assertEqual(event.call_count,1)
             self.assertEqual(adapter.call_args.args[2],images)
             self.assertEqual(adapter.call_args.args[4],schema)
+
+
+class FlowPendingTests(unittest.TestCase):
+    def test_lost_click_acknowledgement_keeps_write_ahead_hold(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            images=Path(tmp);plan={'filename':'scene.jpg','prompt':'safe subject','source':'generated'}
+            actual=p.enhance_prompt_for_korean_blog(plan['prompt'])
+            tile=SimpleNamespace(count=AsyncMock(return_value=1),get_attribute=AsyncMock(return_value='old-image'))
+            tile.first=tile
+            editor=SimpleNamespace(inner_text=AsyncMock(return_value=actual))
+            button=SimpleNamespace(count=AsyncMock(return_value=1),is_enabled=AsyncMock(return_value=True),
+                                   bounding_box=AsyncMock(return_value={'x':0,'y':0,'width':100,'height':40}))
+            button.first=button
+            journal=images/'flow-generation.json'
+            async def send(method,params=None):
+                if method=='Target.getTargetInfo':return {'targetInfo':{'targetId':'owned-test'}}
+                if method=='Browser.getWindowForTarget':return {'windowId':1}
+                if method=='Input.dispatchMouseEvent':
+                    record=json.loads(journal.read_text(encoding='utf-8'))[0]
+                    self.assertEqual(record['status'],'unconfirmed')
+                    self.assertIn('submissionAttemptedAt',record)
+                    self.assertNotIn('submittedAt',record)
+                    raise RuntimeError('Lost click response; outcome unknown')
+                return {}
+            client=SimpleNamespace(send=send)
+            page=SimpleNamespace(bring_to_front=AsyncMock(),context=SimpleNamespace(new_cdp_session=AsyncMock(return_value=client)),
+                keyboard=SimpleNamespace(press=AsyncMock()),wait_for_timeout=AsyncMock(),evaluate=AsyncMock(),
+                locator=lambda selector:editor if selector=='div.ProseMirror' else button if selector.startswith('button') else tile)
+            with self.assertRaisesRegex(RuntimeError,'Lost click'):
+                asyncio.run(p._generate_flow_images(page,{'imagePlans':[plan]},[],str(images),progress_callback=Mock()))
+            before=journal.read_bytes();page.bring_to_front.reset_mock()
+            with self.assertRaisesRegex(p.ReviewRequired,'flow_generation_pending'):
+                asyncio.run(p._generate_flow_images(page,{'imagePlans':[plan]},[],str(images)))
+            page.bring_to_front.assert_not_called();self.assertEqual(journal.read_bytes(),before)
+
+    def test_unconfirmed_journal_blocks_duplicate_and_downloaded_reuse_preserves_shared_channel(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp); folder=base/'output'/'original'/'run'; images=folder/'images';images.mkdir(parents=True)
+            plan={'filename':'scene.jpg','prompt':'Actual subject illustration','source':'generated'}
+            journal=images/'flow-generation.json'; record={'filename':'scene.jpg','status':'unconfirmed','promptSha256':'original-proof','submittedAt':'2026-10-19T05:23:25Z'}
+            journal.write_text(json.dumps([record]),encoding='utf-8'); original=journal.read_bytes(); page=Mock()
+            with self.assertRaisesRegex(p.ReviewRequired,'flow_generation_pending'):
+                asyncio.run(p._generate_flow_images(page,{'imagePlans':[plan]},[],str(images)))
+            page.assert_not_called(); self.assertEqual(page.mock_calls,[]);self.assertEqual(journal.read_bytes(),original)
+            item={'artifactFolder':'output/original/run','lastError':'Flow timed out','automaticAttemptCount':1,'nextRetryAt':'old'}
+            with patch.object(p,'BASE_DIR',base):p.schedule_failed_attempt(item,-3)
+            self.assertFalse(item['retryable']);self.assertEqual(item['retryReason'],'flow_generation_pending');self.assertNotIn('nextRetryAt',item)
+            _,raw=cv2.imencode('.jpg',np.random.default_rng(42).integers(0,255,(256,256,3),dtype=np.uint8))
+            target=images/'scene.jpg'; target.write_bytes(raw.tobytes())
+            record.update(status='downloaded',promptSha256=p.hashlib.sha256(p.enhance_prompt_for_korean_blog(plan['prompt']).encode()).hexdigest(),sha256=p.digest(target))
+            journal.write_text(json.dumps([record]),encoding='utf-8'); completed=journal.read_bytes()
+            # Naver calls this same shared generator: a verified existing asset
+            # remains usable, with no browser work and no forged new receipt.
+            paths=asyncio.run(p._generate_flow_images(page,{'imagePlans':[plan],'category':'naver-account'},[],str(images)))
+            self.assertEqual(paths,[str(target)]);self.assertEqual(page.mock_calls,[]);self.assertEqual(journal.read_bytes(),completed)
+            changed={**plan,'prompt':'different request'}
+            with self.assertRaisesRegex(p.ReviewRequired,'flow_generation_pending'):
+                asyncio.run(p._generate_flow_images(page,{'imagePlans':[changed]},[],str(images)))
+            self.assertEqual(journal.read_bytes(),completed)
 
 
 class PublicVerificationTests(unittest.TestCase):

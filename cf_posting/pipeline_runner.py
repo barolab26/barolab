@@ -3789,8 +3789,15 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
     print("\n--- [STAGE 3] Google Flow Image Generation in Portable Browser ---", flush=True)
     generated_paths = []
     plans = blog_info["imagePlans"]
-    generation_evidence = []
     evidence_file = Path(images_dir) / 'flow-generation.json'
+    try:
+        generation_evidence = json.loads(evidence_file.read_text(encoding='utf-8')) if evidence_file.is_file() else []
+        if not isinstance(generation_evidence,list) or any(not isinstance(row,dict) for row in generation_evidence):
+            raise ValueError('Invalid journal shape')
+    except (ValueError,OSError) as exc:
+        raise ReviewRequired('flow_generation_pending: 기존 생성 기록 확인 불가 · 새 요청 보류') from exc
+    if any(row.get('status') in ('submitted','unconfirmed') for row in generation_evidence):
+        raise ReviewRequired('flow_generation_pending: 이전 Flow 요청 결과 미확인 · 기존 기록을 보존하고 자동 재제출하지 않습니다')
     if not plans:
         return []
     seen_flow_names = set()
@@ -3813,18 +3820,27 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
         raise ValueError("Safe unique JPG image filenames required before Flow")
 
     client = None
-    if flow_page is not None:
-        # Flow's render loop may pause in a background tab even when CDP responds.
-        await flow_page.bring_to_front()
-        client = await flow_page.context.new_cdp_session(flow_page)
-        target = await client.send('Target.getTargetInfo')
-        window = await client.send('Browser.getWindowForTarget', {'targetId':target['targetInfo']['targetId']})
-        await client.send('Browser.setWindowBounds', {'windowId':window['windowId'],'bounds':{'windowState':'normal'}})
     
     for idx, plan in enumerate(plans, 1):
         filename = plan["filename"]
         target_path = os.path.join(images_dir, filename)
         prompt = enhance_prompt_for_korean_blog(plan["prompt"])
+        previous = [row for row in generation_evidence if row.get('filename') == filename and row.get('status') == 'downloaded']
+        if previous:
+            saved = previous[-1]
+            if (saved.get('promptSha256') != hashlib.sha256(prompt.encode()).hexdigest()
+                    or saved.get('sha256') != digest(target_path) or not Path(target_path).is_file()):
+                raise ReviewRequired('flow_generation_pending: 기존 생성 이미지의 요청·파일 지문 불일치 · 덮어쓰기 보류')
+            validate_images([Path(target_path)], [plan])
+            generated_paths.append(target_path)
+            continue
+        if client is None and flow_page is not None:
+            # Foreground only when a genuinely new request is needed.
+            await flow_page.bring_to_front()
+            client = await flow_page.context.new_cdp_session(flow_page)
+            target = await client.send('Target.getTargetInfo')
+            window = await client.send('Browser.getWindowForTarget', {'targetId':target['targetInfo']['targetId']})
+            await client.send('Browser.setWindowBounds', {'windowId':window['windowId'],'bounds':{'windowState':'normal'}})
         
         detail_msg = f"포터블 브라우저(포트 9420) Flow [{idx}/{len(plans)}] {filename} 고품질 주제 직관 비주얼 생성 및 다운로드 중..."
         if progress_callback:
@@ -3871,6 +3887,10 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
             print("      Clicking '생성 시작'...", flush=True)
             box = await gen_btn.bounding_box()
             if not box: raise RuntimeError('Flow 생성 버튼의 실제 클릭 위치 없음')
+            # Write-ahead: a crash or lost acknowledgement after the click must
+            # never leave a safely-retryable "prepared" record behind.
+            generation.update(status='unconfirmed', submissionAttemptedAt=stamp())
+            save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
             # Trusted pointer input triggers Flow's normal submission and risk checks.
             await client.send('Input.dispatchMouseEvent', {'type':'mousePressed','x':box['x']+box['width']/2,'y':box['y']+box['height']/2,'button':'left','clickCount':1})
             await client.send('Input.dispatchMouseEvent', {'type':'mouseReleased','x':box['x']+box['width']/2,'y':box['y']+box['height']/2,'button':'left','clickCount':1})
@@ -5227,6 +5247,20 @@ def schedule_failed_attempt(item, exit_code, now=None):
     item.pop('nextRetryAt', None)
     if publication_receipt(item).exists() or item.get('status') == 'verification_pending':
         item.update(status='verification_pending', retryable=False, retryReason='publication_requires_reconciliation')
+        return
+    error = str(item.get('lastError') or '')
+    folder = (BASE_DIR / str(item.get('artifactFolder') or '__missing__')).resolve()
+    pending_flow = False
+    if folder.is_relative_to((BASE_DIR/'output').resolve()):
+        journal = folder/'images/flow-generation.json'
+        if journal.is_file():
+            try:
+                records=json.loads(journal.read_text(encoding='utf-8'))
+                pending_flow=any(isinstance(row,dict) and row.get('status') in ('submitted','unconfirmed') for row in records)
+            except (ValueError,OSError,TypeError):
+                pending_flow=True
+    if pending_flow or 'flow_generation_pending' in error:
+        item.update(status='review_required', retryable=False, retryReason='flow_generation_pending')
         return
     folder = (BASE_DIR / str(item.get('artifactFolder') or '__missing__')).resolve()
     repair = False
