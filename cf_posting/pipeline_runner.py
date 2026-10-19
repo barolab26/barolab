@@ -2255,10 +2255,15 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 def save_plan(name, value):
                     (planning_audit/name).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')
                 def review_plan(current, attempt):
+                    basis = current.get('questionBasis', {})
+                    review_context = [dict(row) for row in question_context if row.get('id') == basis.get('contextId')]
+                    for row in review_context:
+                        if row.get('text') == basis.get('quote'):
+                            row.pop('text'); row['textRef'] = 'answerBrief.questionBasis.quote'
                     raw = generate(agent_prompt('researcher',
                         '독립 계획 검수다. 원고를 쓰기 전에 원래 requiredAnswers 각각이 실제 계획 내용으로 해결되는지 '
                         '확인한다. 작성자 자기평가를 승인으로 취급하지 말고 direct-answer 또는 정확한 section id로 답 위치를 연결한다.',
-                        {'readerGoal':goal,'questionContext':question_context,'facts':research_data['facts'],
+                        {'readerGoal':goal,'questionContext':review_context,'facts':research_data['facts'],
                          'materials':packet,'answerBrief':current}),response_schema=brief_review_schema(goal,current))
                     save_plan('review-' + str(attempt) + '-raw.json',raw)
                     bound = bind_brief_review_draft(raw,goal,current)
