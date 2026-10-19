@@ -2508,10 +2508,12 @@ SCHEDULE_JSON = DATA_DIR / "daily_schedule.json"
 KEYS_FILE = DATA_DIR / "secure" / "cf_blog_keys.json"
 
 # Designated Portable Browser Settings
-BROWSER_EXE = r"C:\99_포터블브라우저\CentBrowserPortable_baro76650\chrome.exe"
-BROWSER_USER_DATA = r"C:\99_포터블브라우저\CentBrowserPortable_baro76650\User Data"
-CDP_PORT = 9420
+BROWSER_EXE = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\chrome.exe"
+BROWSER_USER_DATA = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\User Data"
+CDP_PORT = 9440
 CDP_URL = f"http://127.0.0.1:{CDP_PORT}"
+BROWSER_START_BAT = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\barolab26_start_cdp.bat"
+BROWSER_STOP_BAT = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\barolab26_stop_cdp.bat"
 FLOW_URL = "https://flow.google.com"
 RUN_CONTEXT = {}
 
@@ -3557,7 +3559,7 @@ def ensure_portable_browser_ready():
         pass
 
     print("[BROWSER] Launching portable CentBrowser via start_cdp.bat...", flush=True)
-    start_bat = r"C:\99_포터블브라우저\CentBrowserPortable_baro76650\baro76650_start_cdp.bat"
+    start_bat = BROWSER_START_BAT
     if os.path.exists(start_bat):
         subprocess.Popen(["cmd.exe", "/c", start_bat], cwd=os.path.dirname(start_bat), creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
     else:
@@ -3579,7 +3581,7 @@ def stop_portable_browser():
     if os.environ.get("BAROLAB_CLOSE_BROWSER_ON_EXIT") != "1" or os.environ.get("BAROLAB_KEEP_BROWSER") == "1":
         print("[BROWSER] Login session retained; browser remains open", flush=True)
         return
-    stop_bat = r"C:\99_포터블브라우저\CentBrowserPortable_baro76650\baro76650_stop_cdp.bat"
+    stop_bat = BROWSER_STOP_BAT
     if os.path.exists(stop_bat):
         print(f"\n[브라우저 라이프사이클] 전용 종료 배치 실행: {stop_bat}", flush=True)
         try:
@@ -3708,7 +3710,7 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
         target_path = os.path.join(images_dir, filename)
         prompt = enhance_prompt_for_korean_blog(plan["prompt"])
         
-        detail_msg = f"포터블 브라우저(포트 9420) Flow [{idx}/{len(plans)}] {filename} 고품질 주제 직관 비주얼 생성 및 다운로드 중..."
+        detail_msg = f"포터블 브라우저(포트 {CDP_PORT}) Flow [{idx}/{len(plans)}] {filename} 고품질 주제 직관 비주얼 생성 및 다운로드 중..."
         if progress_callback:
             progress_callback(idx, len(plans), detail_msg)
         else:
