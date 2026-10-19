@@ -1387,6 +1387,7 @@ def get_memory_graph(
         reverse=True,
     )[:30]
     return {
+        "contractVersion": "memory-knowledge-gate-v1",
         **graph,
         "agents": DEFAULT_AGENTS,
         "coreHubs": core_hub_list,

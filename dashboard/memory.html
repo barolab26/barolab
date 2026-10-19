@@ -551,7 +551,7 @@
 <body class="control-room">
 <div class="layout">
   <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
-  <script src="sidebar.js?v=20261018-no-rnd"></script>
+  <script src="sidebar.js?v=20261019-memory-owner"></script>
 
   <main class="main-wrap" id="main-content">
     <!-- Unified Dark Cockpit Header (BaroLab Deck v3) -->
@@ -832,7 +832,7 @@
   </div>
 </div>
 
-<script src="memory_graph_view.js?v=20261019-labels"></script>
+<script src="memory_graph_view.js?v=20261019-gate-v1"></script>
 <script>
 (() => {
   const canvas = document.getElementById('memory-canvas');
@@ -1479,8 +1479,9 @@
       // Explicit selection is authoritative; never silently write elsewhere.
       candidates = [endpoint.origin];
     } else {
-      // 8791 is a previous preview process. The final standalone API is 8792.
-      candidates = location.port === '8791' ? ['http://127.0.0.1:8792'] : ['', 'http://127.0.0.1:8792'];
+      // Known legacy dashboard/preview servers can mutate old graph rows on GET.
+      // The user-designated memory service is 8792: never probe 8790/8791 first.
+      candidates = ['8790','8791'].includes(location.port) ? ['http://127.0.0.1:8792'] : ['', 'http://127.0.0.1:8792'];
     }
     candidates = [...new Set(candidates)];
     const failures = [];
@@ -1490,7 +1491,7 @@
       try {
         const response = await fetch(base + '/api/memory/graph?category=all&q=', {signal:controller.signal});
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        graphView.normalizeGraph(await response.json());
+        graphView.assertContract(await response.json());
         resolvedApiBase = base;
         const actualOrigin = base || location.origin;
         canvas.setAttribute('data-api-base', actualOrigin);
@@ -1531,7 +1532,7 @@
       data = await res.json();
     }
     if (request !== graphRequest) return;
-    const graph = graphView.filterGraph(graphView.normalizeGraph(data),state.categoryFilter);
+    const graph = graphView.filterGraph(graphView.assertContract(data),state.categoryFilter);
     document.getElementById('graph-quarantine-status').textContent=graphView.quarantineLabel(data);
     graphFingerprint = graphView.graphRevision(data);
     state.rawNodes = graph.nodes;
@@ -2112,7 +2113,7 @@
       const response = await apiFetch(`/api/memory/graph?${params}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      graphView.normalizeGraph(data);
+      graphView.assertContract(data);
       if (requestAtStart !== graphRequest || activeWriteCount) return;
       if (graphView.graphRevision(data) === graphFingerprint) return;
       if (hasOpenDraft()) {

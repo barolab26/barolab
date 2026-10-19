@@ -1,5 +1,12 @@
 (function (root) {
   'use strict';
+  const contractVersion='memory-knowledge-gate-v1';
+  function assertContract(data) {
+    if(data?.contractVersion!==contractVersion || !Number.isSafeInteger(data?.quarantine?.count) || data.quarantine.count<0) {
+      throw new Error('검증 게이트 API 계약 버전이 일치하지 않습니다.');
+    }
+    return normalizeGraph(data);
+  }
   function normalizeGraph(data) {
     if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) throw new Error('그래프 응답 형식이 올바르지 않습니다.');
     const nodes = data.nodes.map((node, index) => ({ ...node, id: node.id || node.rel || String(index), label: node.label || node.title || node.rel || String(index), deg: 0 }));
@@ -75,7 +82,7 @@
     lines.push(line);return lines;
   }
   function nodeShape(node) { return node.isCoreHub === true ? 'star' : 'diamond'; }
-  const api = { normalizeGraph, canvasSize, cameraFor, nodeShape, graphRevision, overlaps, visibleLabels, separatePoints, filterGraph, wrapLabel, isSkill, quarantineLabel };
+  const api = { normalizeGraph, canvasSize, cameraFor, nodeShape, graphRevision, overlaps, visibleLabels, separatePoints, filterGraph, wrapLabel, isSkill, quarantineLabel, assertContract, contractVersion };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MemoryGraphView = api;
 })(typeof window !== 'undefined' ? window : globalThis);

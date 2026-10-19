@@ -21,6 +21,7 @@ def create_app(port=None):
     from memory_graph import memory_router
     app = FastAPI(title='BaroLab local memory service')
     origins = [f'http://127.0.0.1:{port}', f'http://localhost:{port}',
+               'http://127.0.0.1:8790', 'http://localhost:8790',
                'http://192.168.45.190:8790', 'http://otns:8790']
     app.add_middleware(CORSMiddleware, allow_origins=origins,
                        allow_methods=['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],

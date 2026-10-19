@@ -109,6 +109,8 @@ class MemoryGraphGateTests(unittest.TestCase):
 
     def test_core_identity_set_is_six_crew_five_channels_and_two_bounded_files(self):
         actual = graph.get_memory_graph(category="all", revenue_only=False, q="")
+        self.assertEqual(actual["contractVersion"], "memory-knowledge-gate-v1")
+        self.assertIsInstance(actual["quarantine"]["count"], int)
         expected = {f"hubs/crew-{name}.md" for name in ("jarvis", "patch", "publi", "trace", "radar", "doctor")}
         expected |= {f"hubs/channel-{name}.md" for name in ("cf-blog", "naver-blog", "naver-kin", "threads", "apps")}
         expected |= {"hermes/USER.md", "hermes/MEMORY.md"}
@@ -181,6 +183,26 @@ class MemoryGraphGateTests(unittest.TestCase):
         all_docs = graph.load_all_docs(include_unqualified=True)
         self.assertEqual(sum(bool(d.get("isCoreHub")) for d in graph.get_memory_graph()["nodes"]), 13)
         self.assertFalse(any(d.get("eventId") == "operational" for d in all_docs))
+
+
+class MemoryServiceCorsTests(unittest.TestCase):
+    def test_only_trusted_dashboard_origins_can_read_and_preflight(self):
+        from fastapi.testclient import TestClient
+        from server.memory_service import create_app
+        with TestClient(create_app(8792)) as client:
+            for origin in ("http://127.0.0.1:8790", "http://localhost:8790", "http://192.168.45.190:8790"):
+                with self.subTest(origin=origin):
+                    response = client.get("/api/status", headers={"Origin": origin})
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.headers.get("Access-Control-Allow-Origin"), origin)
+                    self.assertNotIn("Access-Control-Allow-Credentials", response.headers)
+                    preflight = client.options("/api/memory/graph", headers={"Origin": origin, "Access-Control-Request-Method": "GET"})
+                    self.assertEqual(preflight.status_code, 200)
+                    self.assertEqual(preflight.headers.get("Access-Control-Allow-Origin"), origin)
+            for method in ("GET", "OPTIONS"):
+                response = client.request(method, "/api/status", headers={"Origin": "https://untrusted.example", "Access-Control-Request-Method": "GET"})
+                self.assertEqual(response.status_code, 403)
+                self.assertNotIn("Access-Control-Allow-Origin", response.headers)
 
 
 if __name__ == "__main__":

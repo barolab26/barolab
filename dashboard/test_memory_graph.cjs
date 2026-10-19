@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const view = require('./memory_graph_view.js');
 
 const fixture = {
+  contractVersion:'memory-knowledge-gate-v1', quarantine:{count:0},
   nodes: Array.from({length: 20}, (_, i) => ({id: `n${i}`, rel: `notes/n${i}.md`, label: `Node ${i}`, isCoreHub: i < 13})),
   edges: Array.from({length: 18}, (_, i) => [i, i + 1]),
 };
@@ -70,7 +71,7 @@ test('quarantined records are disclosed without inventing an unknown zero',()=>{
   assert.notEqual(view.graphRevision({...fixture,quarantine:{count:9}}),view.graphRevision({...fixture,quarantine:{count:10}}));
 });
 
-function pageHarness(graphResponse, overrideFetch, search='') {
+function pageHarness(graphResponse, overrideFetch, search='', port='8790') {
   const elements = new Map(), calls = [], frames = [], labels = [], polls = [];
   let paintCount = 0;
   const context = new Proxy({fillText:(text,x,y)=>{labels.push({text,x,y});paintCount++;},measureText: t => ({width:String(t).length*7}),createRadialGradient: () => ({addColorStop(){}})}, {get(target,key){return target[key] || (() => {paintCount++;});}, set(target,key,value){target[key]=value;return true;}});
@@ -84,7 +85,7 @@ function pageHarness(graphResponse, overrideFetch, search='') {
   const chips = ['all','skill'].map(cat => {const e=element(`chip-${cat}`);e.getAttribute=()=>cat;return e;});
   const sandbox = {console, URL, URLSearchParams, AbortController, MemoryGraphView:view, devicePixelRatio:1.25,
     document:{hidden:false,addEventListener(){},getElementById:element,querySelectorAll: selector=>selector.includes('data-cat')?chips:[]},
-    location:{protocol:'http:',hostname:'example.test',origin:'http://example.test:8790',port:'8790',search},
+    location:{protocol:'http:',hostname:'example.test',origin:`http://example.test:${port}`,port,search},
     requestAnimationFrame: fn => frames.push(fn), addEventListener(){},ResizeObserver:class{observe(){}},
     Path2D:class{moveTo(){}lineTo(){}closePath(){}},
     setTimeout:(fn,delay)=>delay===4000?(polls.push(fn),polls.length):setTimeout(fn,delay), clearTimeout, confirm:()=>true, alert(){},
@@ -144,7 +145,7 @@ test('real page script paints loaded graph, all resets search, and editor PATCH 
 });
 
 test('mobile resize preserves all nodes, edges, keyboard navigation and explains label density',async()=>{
-  const crowded={nodes:Array.from({length:42},(_,i)=>({id:`m${i}`,rel:`notes/m${i}.md`,label:`Long knowledge title ${i}`,isCoreHub:i<13})),edges:Array.from({length:41},(_,i)=>[i,i+1])};
+  const crowded={...fixture,nodes:Array.from({length:42},(_,i)=>({id:`m${i}`,rel:`notes/m${i}.md`,label:`Long knowledge title ${i}`,isCoreHub:i<13})),edges:Array.from({length:41},(_,i)=>[i,i+1])};
   const page=pageHarness({ok:true,status:200,json:async()=>crowded});
   await page.flush();
   const canvas=page.element('memory-canvas');canvas.clientWidth=360;canvas.clientHeight=480;
@@ -239,7 +240,7 @@ test('dense hub clique stays spread across the canvas alongside disconnected mem
   const nodes=Array.from({length:25},(_,i)=>({id:`dense${i}`,rel:`notes/dense${i}.md`,label:`Dense ${i}`,isCoreHub:i<13}));
   const edges=[];
   for(let i=0;i<16;i++) for(let j=i+1;j<16;j++) edges.push([i,j]);
-  const page=pageHarness({ok:true,status:200,json:async()=>({nodes,edges})});
+  const page=pageHarness({ok:true,status:200,json:async()=>({...fixture,nodes,edges})});
   await page.flush();
   for(let i=0;i<60;i++) page.frames.shift()();
   const labels=page.labels.slice(-25).filter(p=>/^Dense (?:[0-9]|1[0-5])$/.test(p.text));
@@ -259,6 +260,60 @@ test('explicit API origin is displayed and failure cannot silently select a diff
   assert.match(page.element('graph-status').textContent,/503/);
 });
 
+test('HTTP 200 legacy API is rejected before any counts or writes; strict backend stays pinned',async()=>{
+  const legacy={nodes:fixture.nodes.slice(0,11),edges:[],stats:{total:24,coreHubs:11}};
+  const page=pageHarness({ok:true,status:200,json:async()=>legacy},(url,options)=>{
+    if(url.startsWith('http://127.0.0.1:8792') && url.includes('/graph')) return {ok:true,status:200,json:async()=>fixture};
+  },'', '8080');
+  await page.flush();
+  assert.equal(page.element('memory-canvas').attributes['data-api-base'],'http://127.0.0.1:8792');
+  assert.equal(page.element('memory-canvas').attributes['data-node-count'],'20');
+  assert.match(page.element('stat-total-docs').textContent,/코어 허브 13/);
+  page.element('btn-edit-doc').click();
+  await page.element('doc-editor').handlers.submit({preventDefault(){}});
+  await page.element('btn-delete-doc').click();
+  await page.element('btn-confirm-delete-doc').click();
+  const nonProbe=page.calls.filter(call=>!call.url.includes('/graph'));
+  assert(nonProbe.some(call=>call.options.method==='PATCH'));
+  assert(nonProbe.some(call=>call.options.method==='DELETE'));
+  assert(nonProbe.every(call=>call.url.startsWith('http://127.0.0.1:8792')));
+  const rejected=pageHarness({ok:true,status:200,json:async()=>legacy},null,'?memoryApi=http%3A%2F%2Fexample.test%3A8790');
+  await rejected.flush();
+  assert.equal(rejected.element('stat-visible-nodes').textContent,'확인 불가');
+  assert.equal(rejected.element('vault-integrity-pct').textContent,'확인 불가');
+  assert.match(rejected.element('graph-status').textContent,/계약 버전/);
+  assert(!rejected.calls.some(call=>call.url.includes('/doc?')||call.options.method));
+  assert(rejected.calls.every(call=>call.url.startsWith('http://example.test:8790')));
+  assert.throws(()=>view.assertContract({...fixture,quarantine:undefined}),/계약 버전/);
+});
+
+test('known legacy dashboard ports never probe their graph endpoint, even if the pinned service fails',async()=>{
+  for(const port of ['8790','8791']) {
+    const page=pageHarness({ok:true,status:200,json:async()=>fixture},null,'',port);
+    await page.flush();
+    assert.equal(page.element('memory-sidebar-count').textContent,'20');
+    assert(page.calls.every(call=>call.url.startsWith('http://127.0.0.1:8792')));
+    const unavailable=pageHarness({ok:false,status:503,json:async()=>({})},null,'',port);
+    await unavailable.flush();
+    assert(unavailable.calls.every(call=>call.url.startsWith('http://127.0.0.1:8792')));
+    assert.equal(unavailable.element('memory-sidebar-count').textContent,'확인 불가');
+  }
+});
+
+test('shared sidebar leaves memory-page count and graph requests to the validated page',async()=>{
+  const elements=new Map(),calls=[];
+  const element=id=>{if(!elements.has(id))elements.set(id,{textContent:id==='memory-sidebar-count'?'24':'',querySelectorAll:()=>[]});return elements.get(id);};
+  const sandbox={URL,Date,location:{pathname:'/memory.html',href:'http://localhost:8790/memory.html',hash:''},document:{getElementById:element},addEventListener(){},
+    fetch:async url=>{calls.push(url);return {ok:true,json:async()=>({projects:[],nodes:Array(24).fill({})})};}};
+  sandbox.window=sandbox;
+  vm.runInNewContext(fs.readFileSync(__dirname+'/sidebar.js','utf8'),sandbox);
+  assert.equal(element('memory-sidebar-count').textContent,'—');
+  element('memory-sidebar-count').textContent='14'; // Accepted memory-page graph owns this value.
+  await new Promise(resolve=>setImmediate(resolve));
+  assert(!calls.some(url=>url.includes('/memory/graph')));
+  assert.equal(element('memory-sidebar-count').textContent,'14');
+});
+
 test('core-hub glyph is always a star and knowledge stays a diamond regardless of degree or crew styling', () => {
   assert.equal(view.nodeShape({isCoreHub:true,subGroup:'crew',type:'agent'}),'star');
   assert.equal(view.nodeShape({isCoreHub:true,category:'skill'}),'star');
@@ -276,7 +331,7 @@ test('background polling applies changed nodes/edges without moving existing lay
   const initialDocs=docCalls();
   await page.polls.shift()();
   assert.equal(docCalls(),initialDocs,'unchanged graph must not reload the inspector');
-  graph={nodes:[...graph.nodes.map(n=>({...n,updated:'2026-10-19T12:00:00Z'})),{id:'new',rel:'notes/new.md',label:'New memory',revision:'r2',sourceKind:'project_skill',category:'skill',knowledgeStatus:'curated_procedure',updated:'2026-10-19T12:00:00Z'}],edges:[...graph.edges,[19,20]]};
+  graph={...graph,nodes:[...graph.nodes.map(n=>({...n,updated:'2026-10-19T12:00:00Z'})),{id:'new',rel:'notes/new.md',label:'New memory',revision:'r2',sourceKind:'project_skill',category:'skill',knowledgeStatus:'curated_procedure',updated:'2026-10-19T12:00:00Z'}],edges:[...graph.edges,[19,20]]};
   await page.polls.shift()();
   assert.equal(page.element('memory-canvas').attributes['data-node-count'],'21');
   assert.equal(page.element('memory-canvas').attributes['data-edge-count'],'19');
@@ -287,7 +342,7 @@ test('background polling applies changed nodes/edges without moving existing lay
   assert(Math.abs(before.x-after.x)<0.1 && Math.abs(before.y-after.y)<0.1,'background update must preserve existing screen positions');
   page.element('btn-edit-doc').click();
   page.element('edit-doc-content').value='Unsaved local draft';
-  graph={nodes:[...graph.nodes,{id:'later',rel:'notes/later.md',label:'Later memory'}],edges:graph.edges};
+  graph={...graph,nodes:[...graph.nodes,{id:'later',rel:'notes/later.md',label:'Later memory'}],edges:graph.edges};
   await page.polls.shift()();
   assert.equal(page.element('memory-canvas').attributes['data-node-count'],'21');
   assert.equal(page.element('edit-doc-content').value,'Unsaved local draft');
@@ -296,7 +351,7 @@ test('background polling applies changed nodes/edges without moving existing lay
   await page.polls.shift()();
   assert.equal(page.element('memory-canvas').attributes['data-node-count'],'22');
   page.element('btn-open-new-note').click();
-  graph={nodes:[...graph.nodes,{id:'modal',rel:'notes/modal.md',label:'Modal memory'}],edges:graph.edges};
+  graph={...graph,nodes:[...graph.nodes,{id:'modal',rel:'notes/modal.md',label:'Modal memory'}],edges:graph.edges};
   await page.polls.shift()();
   assert.equal(page.element('memory-canvas').attributes['data-node-count'],'22');
   page.element('btn-close-modal').click();

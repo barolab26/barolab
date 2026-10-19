@@ -81,8 +81,15 @@
   // Ensure every page shows the exact same live sidebar badges even without page-specific summary scripts
   async function syncSharedSidebarBadges() {
     if (typeof fetch !== 'function') return;
-    // 1. Memory Graph count
-    try {
+    // The memory page owns its badge through the validated, pinned API.
+    // Avoid an extra legacy-origin graph GET (and a stale count overwriting it).
+    const memoryPage = location.pathname.split('/').pop() === 'memory.html';
+    if (memoryPage) {
+      const memBadge = document.getElementById('memory-sidebar-count');
+      if (memBadge) memBadge.textContent = '—';
+    }
+    // 1. Memory Graph count on other pages
+    if (!memoryPage) try {
       const res = await fetch('/api/memory/graph', { cache: 'no-store' });
       if (res && res.ok) {
         const data = await res.json();
