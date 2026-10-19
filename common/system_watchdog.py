@@ -170,6 +170,28 @@ def is_pid_alive(pid: Optional[int]) -> bool:
         return False
 
 
+def is_process_running_match(pattern: str) -> bool:
+    if os.name == "nt":
+        try:
+            res = subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    f"@((Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {{ $_.CommandLine -match '{pattern}' }})).Count",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            count = int((res.stdout or "0").strip())
+            return count > 0
+        except Exception:
+            return False
+    return False
+
+
 def parse_iso_age_seconds(iso_str: Optional[str]) -> Optional[float]:
     if not iso_str or not isinstance(iso_str, str):
         return None
@@ -224,43 +246,66 @@ def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
         port = int(item["port"])
         open_now = is_port_open(port)
         was_recovered = False
-        if not open_now and auto_start and item.get("required", True) and CDP_SCRIPT_PATH.exists() and item["folder"].exists():
-            cmd = [
-                str(powershell),
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                str(CDP_SCRIPT_PATH),
-                "-Action",
-                "Start",
-                "-BrowserFolder",
-                str(item["folder"]),
-                "-Port",
-                str(port),
-                "-Launcher",
-                str(item["launcher"]),
-            ]
-            if item.get("windowSize"):
-                cmd.extend(["-WindowSize", str(item["windowSize"])])
-            if item.get("proxy"):
-                cmd.extend(["-Proxy", str(item["proxy"])])
-            try:
-                subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                    timeout=20,
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-                )
-                time.sleep(1.0)
-                open_now = is_port_open(port)
-                if open_now:
-                    was_recovered = True
-                    recovered_ports.append(port)
-                else:
+        if not open_now and auto_start and item.get("required", True):
+            launcher_path = Path(item["launcher"]) if item.get("launcher") else None
+            folder_path = Path(item["folder"]) if item.get("folder") else None
+            if launcher_path and launcher_path.exists():
+                try:
+                    subprocess.run(
+                        ["cmd.exe", "/c", str(launcher_path)],
+                        cwd=str(launcher_path.parent),
+                        capture_output=True,
+                        timeout=15,
+                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                    )
+                    time.sleep(2.0)
+                    open_now = is_port_open(port)
+                    if open_now:
+                        was_recovered = True
+                        recovered_ports.append(port)
+                    else:
+                        failed_ports.append(port)
+                except Exception:
+                    failed_ports.append(port)
+            elif CDP_SCRIPT_PATH.exists() and folder_path and folder_path.exists():
+                cmd = [
+                    str(powershell),
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(CDP_SCRIPT_PATH),
+                    "-Action",
+                    "Start",
+                    "-BrowserFolder",
+                    str(folder_path),
+                    "-Port",
+                    str(port),
+                    "-Launcher",
+                    str(launcher_path or ""),
+                ]
+                if item.get("windowSize"):
+                    cmd.extend(["-WindowSize", str(item["windowSize"])])
+                if item.get("proxy"):
+                    cmd.extend(["-Proxy", str(item["proxy"])])
+                try:
+                    subprocess.run(
+                        cmd,
+                        capture_output=True,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        timeout=20,
+                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                    )
+                    time.sleep(1.0)
+                    open_now = is_port_open(port)
+                    if open_now:
+                        was_recovered = True
+                        recovered_ports.append(port)
+                    else:
+                        failed_ports.append(port)
+                except Exception:
                     failed_ports.append(port)
             except Exception:
                 failed_ports.append(port)
@@ -318,14 +363,28 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
     cf_state_path = ROOT / "cf_posting" / "data" / "pipeline_state.json"
     cf_state = load_json(cf_state_path, default={})
     if isinstance(cf_state, dict) and cf_state.get("status") in ("running", "processing"):
-        pid = cf_state.get("pid")
+        pid = cf_state.get("pid") or cf_state.get("helperPid")
+        if not pid and isinstance(cf_state.get("browserRuntime"), dict):
+            pid = cf_state["browserRuntime"].get("pid")
         age = parse_iso_age_seconds(cf_state.get("updatedAt") or cf_state.get("startedAt"))
+        if age is None and cf_state.get("timestamp"):
+            try:
+                age = time.time() - float(cf_state["timestamp"])
+            except Exception:
+                pass
+        if age is None and cf_state_path.exists():
+            age = time.time() - cf_state_path.stat().st_mtime
+
+        worker_alive = is_process_running_match("pipeline_runner.py")
         pid_dead = bool(pid and not is_pid_alive(int(pid)))
-        is_stale = bool(age is not None and age > stale_seconds)
+        is_stale = bool((age is not None and age > stale_seconds) or (not worker_alive))
         if pid_dead or is_stale:
             cf_state["status"] = "idle"
             cf_state["recoveredAt"] = now_kst_iso()
-            cf_state["recoveryReason"] = "PID 종료 감지" if pid_dead else f"{int((age or 0) // 60)}분 무응답 좀비 상태 복구"
+            cf_state["recoveryReason"] = (
+                "작업 프로세스 미실행 감지" if not worker_alive
+                else ("PID 종료 감지" if pid_dead else f"{int((age or 0) // 60)}분 무응답 좀비 상태 복구")
+            )
             save_json(cf_state_path, cf_state)
             try:
                 subprocess.Popen(
@@ -457,6 +516,35 @@ def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
                     })
             except Exception:
                 pass
+
+    # 3. CF blog overdue slot auto catch-up
+    try:
+        cf_sched_path = ROOT / "cf_posting" / "data" / "daily_schedule.json"
+        if cf_sched_path.exists():
+            cf_sched = load_json(cf_sched_path, default={})
+            items = cf_sched.get("items", [])
+            overdue_items = [
+                it for it in items
+                if it.get("status") in ("waiting", "retry_wait", "failed")
+                and it.get("scheduledTime", "99:99") <= now.strftime("%H:%M")
+            ]
+            python_exe = str(Path(sys.executable).with_name("python.exe"))
+            if overdue_items and not is_process_running_match("pipeline_runner.py"):
+                subprocess.Popen(
+                    [python_exe, "-u", "-B", "-X", "utf8", str(ROOT / "cf_posting" / "pipeline_runner.py"), "--catch-up-once"],
+                    cwd=str(ROOT),
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                catchups.append({
+                    "channel": "cf_blog",
+                    "owner": "@publi",
+                    "action": f"CF 블로그 지연 슬롯 {len(overdue_items)}건 감지 및 자동 캐치업 기동",
+                    "detail": f"대기/재시도 {len(overdue_items)}건 자동 발행 프로세스 실행",
+                })
+    except Exception:
+        pass
 
     return catchups
 

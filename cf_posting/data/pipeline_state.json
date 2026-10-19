@@ -1,5 +1,5 @@
 {
-  "activeBlogId": 8,
+  "activeBlogId": 13,
   "completedBlogIds": [
     10,
     6,
@@ -7,26 +7,38 @@
     9,
     2
   ],
-  "domain": "maxnote.kr",
-  "activeDomain": "maxnote.kr",
-  "blogName": "맥스노트",
-  "category": "생산성도구",
-  "title": "컴퓨터 느려졌을 때 C드라이브 용량 50GB 확보하는 임시 파일 청소법",
-  "summary": "저장소 센스(Storage Sense) 자동 활성화, 이전 윈도우 설치본(Windows.old), 숨은 캐시 파일 정리로 C드라이브 용량을 획기적으로 비우는 법.",
+  "domain": "daynote.kr",
+  "activeDomain": "daynote.kr",
+  "blogName": "데이노트 살림백과",
+  "category": "살림정보",
+  "title": "욕실 타일 곰팡이와 물때 10분 만에 박멸하는 과탄산소다 청소 비법",
+  "summary": "독한 락스 냄새 없이 친환경 과탄산소다와 주방세제 황금 비율 배합으로 줄눈 곰팡이와 수전 물때를 말끔히 지우는 안전하고 빠른 욕실 청소 실전 꿀팁.",
   "currentStage": 1,
-  "stageName": "기존 브라우저 확인",
-  "progressPct": 2,
-  "detailMessage": "baro76650 실행정보·프로필·CDP 9420 및 기존 탭 응답 확인 중",
+  "stageName": "키워드·주제선정",
+  "progressPct": 12,
+  "detailMessage": "검색 의도 및 고트래픽 신규 키워드 기획",
   "status": "processing",
-  "updatedAt": "18:29:04",
-  "timestamp": 1792402144,
-  "attemptCount": 1,
-  "totalAttempts": 2,
+  "updatedAt": "20:21:47",
+  "timestamp": 1792408907,
+  "attemptCount": 2,
+  "totalAttempts": 3,
   "lastError": null,
-  "currentModel": null,
+  "currentModel": {
+    "at": "2026-10-19T11:21:47.528955+00:00",
+    "provider": "codex",
+    "requestedModel": "gpt-6-luna",
+    "actualModel": null,
+    "status": "calling",
+    "attempt": 3,
+    "httpStatus": null,
+    "reason": null,
+    "agent": "keyword-selector",
+    "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+    "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+  },
   "modelHistory": [
     {
-      "at": "2026-10-19T06:04:05.014643+00:00",
+      "at": "2026-10-19T06:02:22.449430+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": null,
@@ -39,7 +51,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:13.070643+00:00",
+      "at": "2026-10-19T06:02:31.550865+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": "gpt-6-luna",
@@ -52,7 +64,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:16.794027+00:00",
+      "at": "2026-10-19T06:02:35.013770+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": null,
@@ -65,7 +77,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:34.909440+00:00",
+      "at": "2026-10-19T06:02:53.361165+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": "gpt-6-luna",
@@ -78,7 +90,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:36.317447+00:00",
+      "at": "2026-10-19T06:02:54.741244+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": null,
@@ -91,7 +103,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:44.314893+00:00",
+      "at": "2026-10-19T06:03:05.603941+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": "gpt-6-luna",
@@ -104,7 +116,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:46.009295+00:00",
+      "at": "2026-10-19T06:03:07.580396+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": null,
@@ -117,7 +129,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:54.321647+00:00",
+      "at": "2026-10-19T06:03:15.632337+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": "gpt-6-luna",
@@ -130,7 +142,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:04:56.094695+00:00",
+      "at": "2026-10-19T06:03:17.596255+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": null,
@@ -143,7 +155,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:05:15.042836+00:00",
+      "at": "2026-10-19T06:03:32.734961+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": "gpt-6-luna",
@@ -156,7 +168,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:05:16.593028+00:00",
+      "at": "2026-10-19T06:03:34.345736+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": null,
@@ -169,7 +181,7 @@
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     },
     {
-      "at": "2026-10-19T06:05:31.868998+00:00",
+      "at": "2026-10-19T06:03:43.101158+00:00",
       "provider": "codex",
       "requestedModel": "gpt-6-luna",
       "actualModel": "gpt-6-luna",
@@ -179,20 +191,163 @@
       "reason": null,
       "agent": "keyword-selector",
       "instructionSha256": "630248b3b18fa366b5c0dc4be5f20c05af8ec4c2bab8947d912a01443d890c94",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:20:49.641186+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": null,
+      "status": "calling",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:20:59.071115+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": "gpt-6-luna",
+      "status": "returned",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:03.629307+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": null,
+      "status": "calling",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:11.186757+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": "gpt-6-luna",
+      "status": "returned",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:15.588076+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": null,
+      "status": "calling",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:23.616931+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": "gpt-6-luna",
+      "status": "returned",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:28.793885+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": null,
+      "status": "calling",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:42.242475+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": "gpt-6-luna",
+      "status": "returned",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:42.312138+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": null,
+      "status": "calling",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:47.427294+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": "gpt-6-luna",
+      "status": "returned",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+      "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+    },
+    {
+      "at": "2026-10-19T11:21:47.528955+00:00",
+      "provider": "codex",
+      "requestedModel": "gpt-6-luna",
+      "actualModel": null,
+      "status": "calling",
+      "attempt": 3,
+      "httpStatus": null,
+      "reason": null,
+      "agent": "keyword-selector",
+      "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
       "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
     }
   ],
   "stageTimes": {
-    "1": "2026-10-19T09:29:04.025204+00:00"
+    "1": "2026-10-19T11:20:36.084159+00:00"
   },
   "browserRuntime": {
-    "pid": 10324,
+    "pid": 50332,
     "profile": "C:\\99_포터블브라우저\\CentBrowserPortable_baro76650\\User Data",
     "port": 9420,
     "browser": "Chrome/134.0.6998.136",
-    "tabs": 4,
+    "tabs": 1,
     "recoveredTabs": 0,
-    "checkedAt": "2026-10-19T06:03:48.751078+00:00"
+    "checkedAt": "2026-10-19T11:20:38.402565+00:00"
   },
   "handoffs": [
     {
@@ -5155,7 +5310,7 @@
       "summary": "독한 락스 냄새 없이 친환경 과탄산소다와 주방세제 황금 비율 배합으로 줄눈 곰팡이와 수전 물때를 말끔히 지우는 안전하고 빠른 욕실 청소 실전 꿀팁.",
       "slug": "bathroom-tile-mold-water-stain-removal-baking-soda-guide",
       "scheduledTime": "13:40",
-      "status": "retry_wait",
+      "status": "processing",
       "publicUrl": "https://www.daynote.kr/bathroom-tile-mold-water-stain-removal-baking-soda-guide",
       "completedAt": null,
       "slotContract": {
@@ -5166,25 +5321,37 @@
       },
       "automaticAttemptCount": 1,
       "retryPolicy": "bounded-3-attempts-10min-v1",
-      "attemptCount": 1,
-      "totalAttempts": 2,
-      "attemptStartedAt": "2026-10-19T18:28:09.442179+09:00",
+      "attemptCount": 2,
+      "totalAttempts": 3,
+      "attemptStartedAt": "2026-10-19T20:20:34.810405+09:00",
       "stageTimes": {
-        "1": "2026-10-19T09:28:12.312822+00:00"
+        "1": "2026-10-19T11:20:36.084159+00:00"
       },
-      "currentModel": null,
-      "detailMessage": "baro76650 PID 10324 · CDP 9420 · 기존 4개 탭 재사용",
+      "currentModel": {
+        "at": "2026-10-19T11:21:47.528955+00:00",
+        "provider": "codex",
+        "requestedModel": "gpt-6-luna",
+        "actualModel": null,
+        "status": "calling",
+        "attempt": 3,
+        "httpStatus": null,
+        "reason": null,
+        "agent": "keyword-selector",
+        "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+      },
+      "detailMessage": "검색 의도 및 고트래픽 신규 키워드 기획",
       "currentStage": 1,
-      "stageName": "기존 브라우저 연결 완료",
-      "progressPct": 5,
+      "stageName": "키워드·주제선정",
+      "progressPct": 12,
       "browserRuntime": {
-        "pid": 10324,
+        "pid": 50332,
         "profile": "C:\\99_포터블브라우저\\CentBrowserPortable_baro76650\\User Data",
         "port": 9420,
         "browser": "Chrome/134.0.6998.136",
-        "tabs": 4,
+        "tabs": 1,
         "recoveredTabs": 0,
-        "checkedAt": "2026-10-19T09:28:14.340815+00:00"
+        "checkedAt": "2026-10-19T11:20:38.402565+00:00"
       },
       "handoffs": [
         {
@@ -5349,6 +5516,149 @@
           "agent": "keyword-selector",
           "instructionSha256": "630248b3b18fa366b5c0dc4be5f20c05af8ec4c2bab8947d912a01443d890c94",
           "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:20:49.641186+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:20:59.071115+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:03.629307+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:11.186757+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:15.588076+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:23.616931+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:28.793885+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:42.242475+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:42.312138+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:47.427294+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": "gpt-6-luna",
+          "status": "returned",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
+        },
+        {
+          "at": "2026-10-19T11:21:47.528955+00:00",
+          "provider": "codex",
+          "requestedModel": "gpt-6-luna",
+          "actualModel": null,
+          "status": "calling",
+          "attempt": 3,
+          "httpStatus": null,
+          "reason": null,
+          "agent": "keyword-selector",
+          "instructionSha256": "8534e79efc69432f9d5221dad920ff0601a793d2c36ca01cd2401684cf97569c",
+          "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
         }
       ],
       "lastError": null,
@@ -5381,8 +5691,7 @@
             "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
           }
         }
-      ],
-      "nextRetryAt": "2026-10-19T18:31:40.514234+09:00"
+      ]
     },
     {
       "order": 7,
@@ -5396,7 +5705,7 @@
       "summary": "저장소 센스(Storage Sense) 자동 활성화, 이전 윈도우 설치본(Windows.old), 숨은 캐시 파일 정리로 C드라이브 용량을 획기적으로 비우는 법.",
       "slug": "windows-11-cleanup-temp-files-storage-sense-settings",
       "scheduledTime": "14:30",
-      "status": "processing",
+      "status": "retry_wait",
       "publicUrl": "https://www.maxnote.kr/windows-11-cleanup-temp-files-storage-sense-settings",
       "completedAt": null,
       "slotContract": {
@@ -5592,7 +5901,7 @@
           "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
         }
       ],
-      "lastError": null,
+      "lastError": "이전 중단 세션 복구",
       "lastErrorAt": "2026-10-19T15:03:44.748127+09:00",
       "lastExitCode": 1,
       "retryable": true,
@@ -5622,7 +5931,8 @@
             "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
           }
         }
-      ]
+      ],
+      "nextRetryAt": "2026-10-19T18:31:40+09:00"
     },
     {
       "order": 8,

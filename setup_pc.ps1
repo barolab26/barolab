@@ -54,7 +54,43 @@ foreach ($rel in $runtimeDirs) {
         New-Item -ItemType Directory -Force -Path $full | Out-Null
     }
 }
-Write-Host "[2/5] 필수 런타임 디렉토리 구조 생성 완료" -ForegroundColor Green
+
+# 2-B. 포터블 브라우저 경로(C:\99_포터블브라우저) 및 전용 배치 확인·자동 연결
+if (-not (Test-Path "C:\99_포터블브라우저")) {
+    if (Test-Path "C:\portable_brawser") {
+        cmd /c mklink /J "C:\99_포터블브라우저" "C:\portable_brawser" | Out-Null
+        Write-Host "  - C:\99_포터블브라우저 교차점 연결 완료 (from C:\portable_brawser)" -ForegroundColor Cyan
+    } elseif (Test-Path "\\otns\yoonlab\99_포터블브라우저") {
+        cmd /c mklink /J "C:\99_포터블브라우저" "\\otns\yoonlab\99_포터블브라우저" | Out-Null
+        Write-Host "  - C:\99_포터블브라우저 교차점 연결 완료 (from NAS)" -ForegroundColor Cyan
+    }
+}
+if ((Test-Path "C:\99_포터블브라우저\CentBrowserPotable_baro76650") -and -not (Test-Path "C:\99_포터블브라우저\CentBrowserPortable_baro76650")) {
+    cmd /c mklink /J "C:\99_포터블브라우저\CentBrowserPortable_baro76650" "C:\99_포터블브라우저\CentBrowserPotable_baro76650" | Out-Null
+}
+
+# 2-C. NAS로부터 누락된 시크릿 키 자동 동기화 (접근 가능한 경우)
+$nasSecureCf = "\\otns\yoonlab\10_Project\BaroLab\cf_posting\data\secure"
+$localSecureCf = Join-Path $RepoRoot "cf_posting\data\secure"
+if ((Test-Path $nasSecureCf) -and -not (Test-Path (Join-Path $localSecureCf "cf_blog_keys.json"))) {
+    Copy-Item "$nasSecureCf\*" $localSecureCf -Force -ErrorAction SilentlyContinue
+    Write-Host "  - NAS 시크릿 키(cf_blog_keys.json) 로컬 복사 완료" -ForegroundColor Cyan
+}
+
+# 2-D. Codex CLI 로컬 설정(~/.barolab/codex-worker.json) 자동 구성
+$barolabDir = Join-Path $env:USERPROFILE ".barolab"
+if (-not (Test-Path $barolabDir)) { New-Item -ItemType Directory -Force -Path $barolabDir | Out-Null }
+$codexWorkerJson = Join-Path $barolabDir "codex-worker.json"
+if (-not (Test-Path $codexWorkerJson)) {
+    $codexExe = Get-ChildItem "$env:LOCALAPPDATA\OpenAI\Codex\bin\*\codex.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName -First 1
+    $codexHome = Join-Path $env:USERPROFILE ".codex"
+    if ($codexExe -and (Test-Path $codexHome)) {
+        @{ home = $codexHome; executable = $codexExe } | ConvertTo-Json | Set-Content $codexWorkerJson -Encoding UTF8
+        Write-Host "  - Codex 작업 호스트 설정 생성 완료: $codexWorkerJson" -ForegroundColor Cyan
+    }
+}
+
+Write-Host "[2/5] 필수 런타임 디렉토리 및 브라우저/키 설정 완료" -ForegroundColor Green
 
 # 3. Python / Pythonw 실행 파일 자동 탐색
 $pythonExe = $null
@@ -138,7 +174,21 @@ if (-not $SkipTaskScheduler) {
             Start-ScheduledTask -TaskName $startName -ErrorAction SilentlyContinue
         }
     }
-    Write-Host "[5/5] Windows 작업 스케줄러 로컬($RepoRoot) 전환 및 재기동 완료" -ForegroundColor Green
+
+    # 5-B. 관리자 권한 없는 일반 사용자 환경에서도 재부팅 후 자동 기동되도록 Windows 시작프로그램(Startup) 스크립트 항상 등록
+    $startupDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
+    if (Test-Path $startupDir) {
+        $cfSchedulerCmd = Join-Path $startupDir "BaroLab-CF-Scheduler-Boot.cmd"
+        $cfContent = "@echo off`r`nstart `"`" `"$pythonwExe`" -B -X utf8 `"$RepoRoot\cf_posting\pipeline_runner.py`" --scheduler`r`n"
+        Set-Content -Path $cfSchedulerCmd -Value $cfContent -Encoding ASCII
+        
+        $watchdogCmd = Join-Path $startupDir "BaroLab-System-Watchdog-Boot.cmd"
+        $wdContent = "@echo off`r`nstart `"`" `"$pythonwExe`" -B -X utf8 `"$RepoRoot\common\system_watchdog.py`" --run --source logon-startup`r`n"
+        Set-Content -Path $watchdogCmd -Value $wdContent -Encoding ASCII
+        Write-Host "  - Windows 사용자 시작프로그램(Startup) 자동 기동 스크립트 등록 완료" -ForegroundColor Green
+    }
+
+    Write-Host "[5/5] Windows 작업 스케줄러/시작프로그램 로컬($RepoRoot) 전환 및 등록 완료" -ForegroundColor Green
 }
 
 Write-Host "======================================================================" -ForegroundColor Cyan

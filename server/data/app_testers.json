@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {
   "schema": "barolab-app-testers-v1",
   "listName": "BaroLab 테스터 14인",
@@ -527,3 +528,471 @@
   "consoleEvidenceSource": "server/data/play-console-status.json; verified rendered Play Console UI",
   "lastOptInCheckAt": "2026-10-19T19:09:12+09:00"
 }
+=======
+{
+  "schema": "barolab-app-testers-v1",
+  "listName": "BaroLab 테스터 14인",
+  "developerAccountId": "7752283694845461925",
+  "developerAccountName": "YoonLab",
+  "ownerEmail": "baro76650@gmail.com",
+  "requiredClosedTesters": 12,
+  "requiredClosedDays": 14,
+  "targetTesterCount": 14,
+  "emails": [
+    "baro76650@gmail.com",
+    "barolab26@gmail.com",
+    "mustbiz06@gmail.com",
+    "daehun305@gmail.com",
+    "otxm1gi3@gmail.com",
+    "tripmarvel0601@gmail.com",
+    "soulcash193@gmail.com",
+    "teulaebeulleo7@gmail.com",
+    "moneymaster843@gmail.com",
+    "jglobal489@gmail.com",
+    "justincome82@gmail.com",
+    "moonsongbua495@gmail.com",
+    "sjorbit28@gmail.com"
+  ],
+  "emailCount": 13,
+  "devicePlan": "삼성폰 3대(일반 3 + 보안폴더 3 = 6슬롯) + 가족폰 3대(일반/보안폴더 = 6~8슬롯) = 총 12~14개 계정",
+  "lastSavedAt": "2026-10-19T13:23:58.904090+09:00",
+  "lastSyncedToPlayConsoleAt": "2026-10-19T01:34:47+09:00",
+  "syncStatus": "internal_lists_synced_13_of_13",
+  "lastAutomationReceipt": {
+    "mode": "sync-testers",
+    "executedAt": "2026-10-19T01:34:47+09:00",
+    "browser": "SJ portable CDP 9226 (YoonLab 7752283694845461925)",
+    "lists": {
+      "하루말씀 내부 테스트": {
+        "usersAfterReload": 13,
+        "assignedTo": [
+          "bible_app"
+        ],
+        "alphaClosedTrackAttached": true
+      },
+      "BaroLab 생활 앱 내부 테스트": {
+        "usersAfterReload": 13,
+        "assignedTo": [
+          "greeting",
+          "magnifier",
+          "shopping"
+        ],
+        "alphaClosedTrackAttached": true
+      }
+    },
+    "acceptedCount": 13,
+    "rejected": [],
+    "screenshots": [
+      "apps/qa/play-console-testers-13-verified.png",
+      "pc9226_haru3_final.png",
+      "pc9226_daily3_final.png"
+    ]
+  },
+  "closedTrackPromoted": false,
+  "closedTestStartAt": null,
+  "closedTestOptIns": 0,
+  "apps": {
+    "bible_app": {
+      "id": "bible_app",
+      "name": "오늘의 성경말씀",
+      "packageName": "com.barolab.harubible",
+      "playAppId": "4975007773224005878",
+      "version": "v4 (0.4.0-internal-preview)",
+      "versionCode": 4,
+      "nextProdVersionCode": 5,
+      "nextProdVersionName": "0.5.0",
+      "internalJoinUrl": "https://play.google.com/apps/internaltest/4700464139727332365",
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.harubible",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.harubible",
+      "admobAppId": "ca-app-pub-7642010403138987~3426234878",
+      "admobBannerUnitId": "ca-app-pub-7642010403138987/9298253515",
+      "consoleBaseUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878",
+      "internalTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/tracks/internal-testing",
+      "closedTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/tracks/closed-testing"
+    },
+    "greeting": {
+      "id": "greeting",
+      "name": "오늘의 안부",
+      "packageName": "com.barolab.morningcard",
+      "playAppId": "4973731498485355571",
+      "version": "v2 (0.2.0-internal-preview)",
+      "versionCode": 2,
+      "nextProdVersionCode": 3,
+      "nextProdVersionName": "0.3.0",
+      "internalJoinUrl": "https://play.google.com/apps/internaltest/4701400802151181455",
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.morningcard",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.morningcard",
+      "admobAppId": "ca-app-pub-7642010403138987~7847239341",
+      "admobBannerUnitId": "ca-app-pub-7642010403138987/8940829169",
+      "consoleBaseUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571",
+      "internalTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/tracks/internal-testing",
+      "closedTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/tracks/closed-testing"
+    },
+    "magnifier": {
+      "id": "magnifier",
+      "name": "큰글씨 돋보기",
+      "packageName": "com.barolab.biglens",
+      "playAppId": "4972819523776643880",
+      "version": "v2 (0.2.0-internal-preview)",
+      "versionCode": 2,
+      "nextProdVersionCode": 3,
+      "nextProdVersionName": "0.3.0",
+      "internalJoinUrl": "https://play.google.com/apps/internaltest/4701703053640983596",
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.biglens",
+      "admobAppId": "ca-app-pub-7642010403138987~5789333475",
+      "admobBannerUnitId": "ca-app-pub-7642010403138987/4744854277",
+      "consoleBaseUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880",
+      "internalTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/tracks/internal-testing",
+      "closedTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/tracks/closed-testing"
+    },
+    "shopping": {
+      "id": "shopping",
+      "name": "말로 장보기",
+      "packageName": "com.barolab.voicebasket",
+      "playAppId": "4972748430542309887",
+      "version": "v2 (0.2.0-internal-preview)",
+      "versionCode": 2,
+      "nextProdVersionCode": 3,
+      "nextProdVersionName": "0.3.0",
+      "internalJoinUrl": "https://play.google.com/apps/internaltest/4701721871486482124",
+      "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.voicebasket",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.barolab.voicebasket",
+      "admobAppId": "ca-app-pub-7642010403138987~6881642030",
+      "admobBannerUnitId": "ca-app-pub-7642010403138987/2730644038",
+      "consoleBaseUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887",
+      "internalTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/tracks/internal-testing",
+      "closedTrackUrl": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/tracks/closed-testing"
+    }
+  },
+  "accounts": [
+    {
+      "id": "tester-cb57b6b4c2139802",
+      "slot": 1,
+      "email": "baro76650@gmail.com",
+      "installed": true,
+      "installedAt": "2026-10-19T13:17:07.428760+09:00",
+      "installationScope": "all_four_apps",
+      "installationSource": "user_explicit_initial_confirmation"
+    },
+    {
+      "id": "tester-ac06f95732f9a657",
+      "slot": 2,
+      "email": "barolab26@gmail.com",
+      "installed": true,
+      "installedAt": "2026-10-19T13:23:58.904090+09:00",
+      "installationScope": "all_four_apps",
+      "installationSource": "user_checkbox_confirmation"
+    },
+    {
+      "id": "tester-6af41968ad4ab2b3",
+      "slot": 3,
+      "email": "mustbiz06@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-f7d94d97551ec3ea",
+      "slot": 4,
+      "email": "daehun305@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-2cdf01d6e4526b24",
+      "slot": 5,
+      "email": "otxm1gi3@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-bcb36ed36133be8a",
+      "slot": 6,
+      "email": "tripmarvel0601@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-9227fdfcd687e4fe",
+      "slot": 7,
+      "email": "soulcash193@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-9795b734d0a9441d",
+      "slot": 8,
+      "email": "teulaebeulleo7@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-98c8bc8f50d2fd09",
+      "slot": 9,
+      "email": "moneymaster843@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-39c98bcd77b6977e",
+      "slot": 10,
+      "email": "jglobal489@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-b773f27accbe1e0e",
+      "slot": 11,
+      "email": "justincome82@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-6109fa3d2180d2e3",
+      "slot": 12,
+      "email": "moonsongbua495@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    },
+    {
+      "id": "tester-a31e7bf1988d1a33",
+      "slot": 13,
+      "email": "sjorbit28@gmail.com",
+      "installed": false,
+      "installedAt": null,
+      "installationScope": "all_four_apps",
+      "installationSource": null
+    }
+  ],
+  "nextAccountSlot": 14,
+  "contractVersion": "tester-installations-v1",
+  "revision": 3,
+  "installationInitializedAt": "2026-10-19T13:17:07.428760+09:00",
+  "installationHistory": [
+    {
+      "accountId": "tester-ac06f95732f9a657",
+      "installed": false,
+      "at": "2026-10-19T13:23:51.149472+09:00",
+      "previousInstalledAt": "2026-10-19T13:17:07.428760+09:00",
+      "scope": "all_four_apps"
+    },
+    {
+      "accountId": "tester-ac06f95732f9a657",
+      "installed": true,
+      "at": "2026-10-19T13:23:58.904090+09:00",
+      "previousInstalledAt": null,
+      "scope": "all_four_apps"
+    }
+  ],
+  "localTracking": {
+    "installedCount": 2,
+    "requiredCount": 12,
+    "requiredDays": 14,
+    "startedAt": null,
+    "dayNumber": 0,
+    "elapsedDays": 0,
+    "completionAt": null,
+    "status": "waiting_for_12",
+    "scope": "manual_installation_confirmation",
+    "timezone": "Asia/Seoul",
+    "googleQualificationVerified": false,
+    "history": []
+  },
+  "consoleEvidence": {
+    "bible_app": {
+      "status": "collected",
+      "checkedAt": "2026-10-19T09:23:33.472924+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
+      "stale": false,
+      "alpha": {
+        "reviewStatus": "approved",
+        "trackActive": true,
+        "released": true,
+        "versionCode": 5,
+        "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
+      },
+      "internal": {
+        "released": true,
+        "versionCode": 5,
+        "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
+      },
+      "googleOptInCount": 2,
+      "googleInstallCount": null,
+      "continuousTestDays": null,
+      "evidence": [
+        {
+          "page": "releases",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/releases/overview",
+          "checkedAt": "2026-10-19T09:23:33.472924+00:00",
+          "textSha256": "bb4f5888c9d5c4ddcf6b5e1f91b97352687756326a371f0e0225338e3bb22c59",
+          "signals": {
+            "alpha.latestRelease": "0.5.0 정식 광고 및 첫 화면 사용성 개선 | 5 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:01",
+            "internal.latestRelease": "0.5.0 정식 광고 및 첫 화면 사용성 개선 | 5 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:30"
+          }
+        },
+        {
+          "page": "dashboard",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/app-dashboard",
+          "checkedAt": "2026-10-19T09:23:33.472924+00:00",
+          "textSha256": "55073e76bba00b046432852d8c04f92ad0734825c7762c1ce4972ee4c4933365",
+          "signals": {
+            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
+            "googleOptInCount": "현재 참여를 선택한 테스터 2명"
+          }
+        }
+      ]
+    },
+    "greeting": {
+      "status": "collected",
+      "checkedAt": "2026-10-19T09:23:40.802305+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
+      "stale": false,
+      "alpha": {
+        "reviewStatus": "approved",
+        "trackActive": true,
+        "released": true,
+        "versionCode": 3,
+        "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
+      },
+      "internal": {
+        "released": true,
+        "versionCode": 3,
+        "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
+      },
+      "googleOptInCount": 1,
+      "googleInstallCount": null,
+      "continuousTestDays": null,
+      "evidence": [
+        {
+          "page": "releases",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/releases/overview",
+          "checkedAt": "2026-10-19T09:23:40.802305+00:00",
+          "textSha256": "3a3ee2d9ae67168d0284aeb693f7d307919c55ae82a4167ede7246f0db466933",
+          "signals": {
+            "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:18",
+            "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:45"
+          }
+        },
+        {
+          "page": "dashboard",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/app-dashboard",
+          "checkedAt": "2026-10-19T09:23:40.802305+00:00",
+          "textSha256": "c8b1d036597cb0619f332f1c391a421199ed8c263ffa6e2fbe29eb98f9254298",
+          "signals": {
+            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
+            "googleOptInCount": "현재 참여를 선택한 테스터 1명"
+          }
+        }
+      ]
+    },
+    "magnifier": {
+      "status": "collected",
+      "checkedAt": "2026-10-19T09:23:49.390125+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
+      "stale": false,
+      "alpha": {
+        "reviewStatus": "approved",
+        "trackActive": true,
+        "released": true,
+        "versionCode": 3,
+        "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
+      },
+      "internal": {
+        "released": true,
+        "versionCode": 3,
+        "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
+      },
+      "googleOptInCount": 2,
+      "googleInstallCount": null,
+      "continuousTestDays": null,
+      "evidence": [
+        {
+          "page": "releases",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/releases/overview",
+          "checkedAt": "2026-10-19T09:23:49.390125+00:00",
+          "textSha256": "17a3e1494f05b9c2d19b93a574eb1abbb8e35ee04620a464aee29bcdf8308cc1",
+          "signals": {
+            "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:11",
+            "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:45"
+          }
+        },
+        {
+          "page": "dashboard",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/app-dashboard",
+          "checkedAt": "2026-10-19T09:23:49.390125+00:00",
+          "textSha256": "6c95cf358869dd182dba026991574362ad363deb197e5ad2b18e6b015ccf0777",
+          "signals": {
+            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
+            "googleOptInCount": "현재 참여를 선택한 테스터 2명"
+          }
+        }
+      ]
+    },
+    "shopping": {
+      "status": "collected",
+      "checkedAt": "2026-10-19T09:23:56.818429+00:00",
+      "lastAttemptAt": "2026-10-19T09:23:22.673881+00:00",
+      "stale": false,
+      "alpha": {
+        "reviewStatus": "approved",
+        "trackActive": true,
+        "released": true,
+        "versionCode": 3,
+        "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
+      },
+      "internal": {
+        "released": true,
+        "versionCode": 3,
+        "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
+      },
+      "googleOptInCount": 2,
+      "googleInstallCount": null,
+      "continuousTestDays": null,
+      "evidence": [
+        {
+          "page": "releases",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/releases/overview",
+          "checkedAt": "2026-10-19T09:23:56.818429+00:00",
+          "textSha256": "ccfbd11ae962510f9822836392d64d917d30a5587efe09851395b420411a5412",
+          "signals": {
+            "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:20",
+            "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:47"
+          }
+        },
+        {
+          "page": "dashboard",
+          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/app-dashboard",
+          "checkedAt": "2026-10-19T09:23:56.818429+00:00",
+          "textSha256": "91fab0e68c4ba2339e46a2bf48db3b957edabdb6eae9492d6ba9de6fedec6c8e",
+          "signals": {
+            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
+            "googleOptInCount": "현재 참여를 선택한 테스터 2명"
+          }
+        }
+      ]
+    }
+  },
+  "consoleEvidenceCheckedAt": "2026-10-19T09:23:56.818429+00:00",
+  "consoleEvidenceSource": "server/data/play-console-status.json; verified rendered Play Console UI"
+}
+>>>>>>> Stashed changes
