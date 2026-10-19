@@ -1451,9 +1451,16 @@ def validate_image_plan_revision(original, plans):
             raise ReviewRequired('Generated rework must be an explicitly labeled conceptual diagram')
         if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg', plan['filename']):
             raise ReviewRequired('Unsafe image filename')
-        for key in ('stepId', 'sectionIndex'):
-            if plan.get(key) != previous.get(key):
-                raise ReviewRequired('Preserved step and section binding changed')
+        steps = {step.get('id'): step for step in original.get('readerTask', {}).get('steps', [])}
+        step = steps.get(plan.get('stepId'))
+        if not step or str(plan.get('anchorId', '')).removeprefix('#') != str(step.get('blockRef', '')).removeprefix('#'):
+            raise ReviewRequired('Image must bind to an actual unchanged reader step and blockRef')
+        soup = BeautifulSoup(original.get('contentHtml', ''), 'html.parser')
+        block = soup.find(id=str(step.get('blockRef', '')).removeprefix('#'))
+        heading = block.find('h2') if block else None
+        headings = soup.find_all('h2')
+        if heading is None or type(plan.get('sectionIndex')) is not int or plan['sectionIndex'] != headings.index(heading):
+            raise ReviewRequired('Image sectionIndex must match the actual h2 position for its blockRef')
         if not all(isinstance(plan.get(k), str) and plan[k].strip() for k in ('prompt', 'caption', 'alt')):
             raise ReviewRequired('Diagram prompt/caption/alt missing')
         if not any(label in plan['caption'] for label in ('개념도', '설명도', '예시')):
@@ -1468,20 +1475,24 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
     rows = handoff.check()
     if len(rows) != 3 or (handoff.folder/'publication.json').exists():
         raise ReviewRequired('Image plan rework requires an unpublished three-stage draft')
-    if handoff.data.get('imagePlanRework'):
-        raise ReviewRequired('Image plan rework already attempted; inspect saved evidence')
+    previous_attempt = handoff.data.get('imagePlanRework')
+    history = copy.deepcopy(handoff.data.get('imagePlanReworkHistory', []))
+    if previous_attempt:
+        if previous_attempt.get('status') != 'rejected' or len(history) >= 1:
+            raise ReviewRequired('Image plan rework exhausted or already accepted; inspect saved evidence')
+        history.append(copy.deepcopy(previous_attempt))
     original = copy.deepcopy(article)
     original_hash = digest(handoff.file('article.json'))
     proposal_schema = {'type':'object','additionalProperties':False,'properties':{
         'imagePlansJson':{'type':'string'},'reason':{'type':'string'}},'required':['imagePlansJson','reason']}
     progress('writer', '본문·사실·출처 유지 · 독자 과제용 이미지 계획 재제안', handoff)
     proposal = generate(agent_prompt('writer',
-        'Return imagePlansJson only as a JSON list. Preserve existing filenames, stepId and sectionIndex. '
-        'Do not alter any prose, claims, sources or readerTask. Replace decorative generated scenes with useful '
+        'Return imagePlansJson only as a JSON list. Preserve existing filenames. Bind each plan to an actual readerTask step.id, '
+        'set anchorId to that step.blockRef, and sectionIndex to its zero-based h2 index (not section index). Correct legacy mismatches. Do not alter any prose, claims, sources or readerTask. Replace decorative generated scenes with useful '
         'source=generated, visualType=concept_diagram plans, explicitly captioned 개념도/예시. Never simulate actual '
         'software UI, settings, results, or evidence. If actual UI is essential, explain the blocker; do not fabricate '
         'a diagram as substitute. Unreferenced unnecessary plans may be removed; referenced plans must remain.',
-        {'article.json':original,'research.md':read_document(handoff.file('research.md'))}),response_schema=proposal_schema)
+        {'article.json':original,'previousRejection':previous_attempt.get('independentReview') if previous_attempt else None,'research.md':read_document(handoff.file('research.md'))}),response_schema=proposal_schema)
     try:
         candidate = validate_image_plan_revision(original, json.loads(proposal['imagePlansJson']))
     except (KeyError, TypeError, ValueError) as exc:
@@ -1494,7 +1505,7 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
     review = generate(agent_prompt('writer',
         'Independently review only the proposed image plans against the unchanged article and research. '
         'Reject decorative filler, fake UI, invented evidence and diagrams substituting for required real captures. '
-        'This is plan approval only: actual pixels and PC/mobile layout still require later independent review.',
+        'Plan anchorId must equal actual readerTask step.blockRef and takes placement precedence; sectionIndex is zero-based h2 index, not section index. This is plan approval only: actual pixels and PC/mobile layout still require later independent review.',
         {'originalArticle':original,'proposedArticle':candidate,'research.md':read_document(handoff.file('research.md'))}),response_schema=review_schema)
     reviewer_model = copy.deepcopy(attribution())
     if not all(m and m.get('status') == 'returned' and m.get('actualModel') for m in (proposal_model, reviewer_model)):
@@ -1503,6 +1514,7 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
     if digest(handoff.file('article.json')) != original_hash:
         raise ReviewRequired('Draft changed during image plan review')
     previous_stages = copy.deepcopy(handoff.data['stages'])
+    handoff.data['imagePlanReworkHistory'] = history
     handoff.data['imagePlanRework'] = {'status':'reviewed','checkedAt':stamp(),'originalArticle':original,
         'originalArticleSha256':original_hash,'previousStages':previous_stages,
         'proposal':proposal,'proposalModel':proposal_model,'independentReview':review,'reviewModel':reviewer_model,
