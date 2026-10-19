@@ -31,6 +31,24 @@ CF_DIR = BASE_DIR / "cf_posting"
 
 app = FastAPI(title="BaroLab Master Hub Server", version="1.0.0")
 
+
+@app.on_event("startup")
+def _start_play_console_observer():
+    try:
+        from server.play_console_collector import start_periodic_refresh
+        start_periodic_refresh()
+    except Exception:
+        pass  # Read-only collection must never prevent the dashboard from starting.
+
+
+@app.on_event("shutdown")
+def _stop_play_console_observer():
+    try:
+        from server.play_console_collector import stop_periodic_refresh
+        stop_periodic_refresh()
+    except Exception:
+        pass
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -164,52 +164,19 @@ def normalize_emails(raw_emails: Any) -> List[str]:
 
 
 def load_app_testers() -> Dict[str, Any]:
-    doc = load_json(DATA_TESTERS_PATH, default=None)
-    if not doc:
-        doc = load_json(SERVER_DATA_TESTERS_PATH, default={})
-    emails = normalize_emails(doc.get("emails") or ["baro76650@gmail.com"])
-    apps_block = {}
-    saved_apps = doc.get("apps") if isinstance(doc.get("apps"), dict) else {}
+    """Shared canonical store preserves local tracking and unrecognized fields."""
+    from common.app_testers_store import load_app_testers as load_shared
+    doc = load_shared()
+    apps = doc.setdefault("apps", {})
     for app_id, meta in APPS_METADATA.items():
-        merged = dict(meta)
-        if isinstance(saved_apps.get(app_id), dict):
-            for k in ("internalJoinUrl", "closedJoinUrl", "closedTrackPromoted", "deviceVerified", "deviceVerifiedAt"):
-                if saved_apps[app_id].get(k) is not None:
-                    merged[k] = saved_apps[app_id][k]
-        apps_block[app_id] = merged
-
-    result = {
-        "schema": "barolab-app-testers-v1",
-        "listName": doc.get("listName") or TESTER_LIST_NAME,
-        "developerAccountId": DEVELOPER_ID,
-        "developerAccountName": "YoonLab",
-        "ownerEmail": "baro76650@gmail.com",
-        "requiredClosedTesters": 12,
-        "requiredClosedDays": 14,
-        "targetTesterCount": 14,
-        "emails": emails,
-        "emailCount": len(emails),
-        "devicePlan": doc.get("devicePlan") or "삼성폰 3대(일반 3 + 보안폴더 3 = 6슬롯) + 가족폰 3대(일반/보안폴더 = 6~8슬롯) = 총 12~14개 계정",
-        "lastSavedAt": doc.get("lastSavedAt") or now_kst_iso(),
-        "lastSyncedToPlayConsoleAt": doc.get("lastSyncedToPlayConsoleAt"),
-        "syncStatus": doc.get("syncStatus") or "ready_for_input",
-        "lastAutomationReceipt": doc.get("lastAutomationReceipt"),
-        "closedTrackPromoted": bool(doc.get("closedTrackPromoted", False)),
-        "closedTestStartAt": doc.get("closedTestStartAt"),
-        "closedTestOptIns": int(doc.get("closedTestOptIns") or 0),
-        "apps": apps_block,
-    }
-    return result
+        saved = apps.get(app_id) if isinstance(apps.get(app_id), dict) else {}
+        apps[app_id] = {**meta, **saved}
+    return doc
 
 
 def save_app_testers(doc: Dict[str, Any]) -> Dict[str, Any]:
-    doc["emails"] = normalize_emails(doc.get("emails") or ["baro76650@gmail.com"])
-    doc["emailCount"] = len(doc["emails"])
-    doc["lastSavedAt"] = now_kst_iso()
-    save_json(DATA_TESTERS_PATH, doc)
-    save_json(SERVER_DATA_TESTERS_PATH, doc)
-    save_json(DASHBOARD_DATA_TESTERS_PATH, doc)
-    return doc
+    from common.app_testers_store import save_app_testers as save_shared
+    return save_shared(doc)
 
 
 def is_port_open(port: int = BARO76650_CDP_PORT) -> bool:

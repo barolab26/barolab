@@ -108,3 +108,26 @@
 .console-links-grid a{padding:6px 9px;border-radius:7px;background:#f8fafc;border:1px solid #cbd5e1;font-size:11.5px;font-weight:700;color:#1d4ed8;text-decoration:none;text-align:center}
 .console-links-grid a:hover{background:#eff6ff;border-color:#93c5fd}
 
+.tester-installation-list{display:grid;gap:7px;margin:12px 0}
+.rc-internal #local-install-status{font-size:16px;line-height:1.5}
+.tester-installation-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 11px;border:1px solid #cbd5e1;border-radius:9px;background:#f8fafc}
+.tester-installation-row.installed{background:#f0fdf4;border-color:#86efac}
+.tester-installation-identity{display:grid;gap:3px;min-width:0}
+.tester-installation-identity strong{font-size:12px;color:#0f172a}
+.tester-installation-identity span{font-size:12px;color:#334155;overflow-wrap:anywhere}
+.tester-installation-identity small{font-size:10px;color:#64748b}
+.tester-installation-toggle{padding:8px 10px;border:1px solid #94a3b8;border-radius:7px;background:#fff;color:#334155;font-size:11px;font-weight:800;cursor:pointer;min-height:38px}
+.tester-installation-toggle[aria-pressed="true"]{background:#dcfce7;border-color:#16a34a;color:#166534}
+.tester-installation-toggle:disabled{cursor:wait;opacity:.65}
+.tester-installation-toggle:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+.tester-roster-edit{margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px}
+.tester-roster-edit summary{cursor:pointer;font-size:12px;font-weight:800;margin-bottom:10px;color:#334155}
+.play-console-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.play-console-card{padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;min-width:0}
+.play-console-card h4{margin:0 0 9px;font-size:14px;color:#0f172a}
+.play-console-card p{margin:5px 0;font-size:12px;line-height:1.5;color:#334155}
+.play-console-card small{display:block;font-size:10px;line-height:1.5;color:#64748b;overflow-wrap:anywhere}
+.play-console-card .play-console-warning{color:#b45309;margin-top:5px}
+@media(max-width:1100px){.play-console-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.play-console-grid{grid-template-columns:1fr}.tester-installation-row{grid-template-columns:minmax(0,1fr)}.tester-installation-toggle{justify-self:start}}
+

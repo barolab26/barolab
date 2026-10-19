@@ -1,6 +1,10 @@
 /* App projects & SJ AdMob 3-Pillar Monetization Live Tracker */
 (function () {
   'use strict';
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {installationState, playAppState, playPortfolioState, playDisplayLabels, installationSlot, saveInstallation};
+  }
+  if (typeof document === 'undefined') return;
   const list = document.getElementById('app-project-list');
   const state = document.getElementById('app-project-status');
   const filterBar = document.getElementById('app-filter-bar');
@@ -13,6 +17,100 @@
   let currentFilter = 'all';
   let latestData = null;
   let staticTesters = null;
+  let installationDoc = null;
+  let installationError = '';
+  let installationBusy = false;
+  let projectsRefreshBusy = false;
+  let installationRequestSeq = 0;
+
+  function installationSlot(account, index) {
+    if (typeof account.slotLabel === 'string' && account.slotLabel) return account.slotLabel;
+    if (typeof account.slot === 'string' && account.slot && !/^\d+$/.test(account.slot)) return account.slot;
+    const slot = Number(account.slot);
+    const position = Number.isInteger(slot) && slot >= 1 && slot <= 13 ? slot - 1 : index;
+    return position < 12 ? `폰${Math.floor(position / 2) + 1}-${position % 2 ? '보안폴더' : '일반'}` : `예비${position + 1}`;
+  }
+
+  function installationState(doc) {
+    const available = Array.isArray(doc?.accounts) && doc.accounts.every(a => typeof a.id === 'string' && a.id && typeof a.email === 'string' && typeof a.installed === 'boolean')
+      && new Set(doc.accounts.map(a => a.id)).size === doc.accounts.length
+      && Number.isInteger(doc?.revision) && doc.revision >= 0 && !!doc?.localTracking;
+    if (!available) return {available: false, count: null, day: null, required: 12, requiredDays: 14};
+    const count = doc.accounts.filter(a => a.installed === true).length;
+    const required = doc.localTracking.requiredCount || 12;
+    const requiredDays = doc.localTracking.requiredDays || 14;
+    const started = count >= required && !!doc.localTracking.startedAt;
+    const rawDay = doc.localTracking.dayNumber;
+    return {available, count, required, requiredDays, started,
+      day: started && Number.isInteger(rawDay) ? Math.max(1, Math.min(requiredDays, rawDay)) : 0,
+      startedAt: started ? doc.localTracking.startedAt : null,
+      completionAt: doc.localTracking.completionAt || null,
+      googleQualificationVerified: false};
+  }
+
+  function playAppState(app = {}, top = {}) {
+    const observedNumber = value => Number.isInteger(value) && value >= 0 ? value : null;
+    const labels = {in_review: '검토 중', approved: '검토 승인 확인', rejected: '거부됨', not_submitted: '미제출', unknown: '미확인'};
+    return {
+      review: labels[app.alpha?.reviewStatus] || '미확인',
+      alphaReleased: app.alpha?.released === true ? '출시됨' : app.alpha?.released === false ? '미출시' : '출시 여부 미확인',
+      alphaActive: app.alpha?.trackActive === true ? '트랙 활성' : app.alpha?.trackActive === false ? '트랙 비활성' : '트랙 활성 여부 미확인',
+      internalReleased: app.internal?.released === true ? '배포됨' : app.internal?.released === false ? '미배포' : '배포 여부 미확인',
+      alphaVersion: observedNumber(app.alpha?.versionCode), internalVersion: observedNumber(app.internal?.versionCode),
+      optedIn: observedNumber(app.googleOptInCount), installs: observedNumber(app.googleInstallCount),
+      days: observedNumber(app.continuousTestDays), checkedAt: app.checkedAt || top.checkedAt || null,
+      stale: app.stale === true || top.stale === true,
+      error: app.error || top.error || null
+    };
+  }
+
+  function playPortfolioState(top = {}) {
+    const ids = ['bible_app', 'greeting', 'magnifier', 'shopping'];
+    const apps = ids.map(id => top.apps?.[id] || {});
+    return {
+      alphaReleased: apps.filter(a => a.alpha?.released === true).length,
+      alphaObserved: apps.filter(a => typeof a.alpha?.released === 'boolean').length,
+      internalReleased: apps.filter(a => a.internal?.released === true).length,
+      optIns: apps.map(a => playAppState(a, top).optedIn)
+    };
+  }
+
+  function playDisplayLabels(app, top) {
+    const view = playAppState(app, top);
+    const count = view.optedIn === null ? '미확인' : `${view.optedIn}명`;
+    const days = view.days === null ? '미확인' : `${view.days}일`;
+    let nextAction = 'Console의 Alpha 출시·참여 상태 확인';
+    if (app?.alpha?.released === true) {
+      nextAction = view.optedIn === null ? 'Console 실제 참여 수 확인'
+        : view.optedIn < 12 ? `이 앱 Alpha에 ${12 - view.optedIn}명 추가 참여 확인 필요`
+        : 'Google의 연속 14일 참여 관측 확인';
+    }
+    return {
+      track: `Alpha ${view.alphaReleased} · 내부 ${view.internalReleased}`,
+      detail: `${view.review} · Google 참여 ${count} · 연속 기간 ${days}${view.stale ? ' · 이전 관측값' : ''}`,
+      nextAction
+    };
+  }
+
+  async function saveInstallation(id, installed, revision, fetcher = fetch) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const response = await fetcher('/api/projects/testers/accounts/' + encodeURIComponent(id), {
+        method: 'PATCH', headers: {'Content-Type': 'application/json'}, signal: ctrl.signal,
+        body: JSON.stringify({installed, expectedRevision: revision})
+      });
+      if (!response.ok) {
+        const error = new Error(response.status === 409 ? 'conflict' : 'save_failed');
+        error.status = response.status; throw error;
+      }
+      const body = await response.json();
+      if (!installationState(body.testersControlCenter).available) throw new Error('invalid_installation_response');
+      return body.testersControlCenter;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
 
   // Fallback catalog: the NAS image may predate versionCode/versionName/joinUrl fields in /api/projects.
   const APP_CATALOG = {
@@ -74,13 +172,15 @@
       closedJoinUrl: p?.closedJoinUrl || cat.closedJoinUrl || '',
       internalAvailableVersionCode: p?.internalAvailableVersionCode || cat.internalAvailableVersionCode || '',
       verifiedDeviceVersionCode: p?.deviceVerifiedVersionCode || p?.verifiedVersionCode || cat.verifiedDeviceVersionCode || '',
-      closedReviewStatus: p?.closedReviewStatus || cat.closedReviewStatus || '상태 미확인'
+      closedReviewStatus: installationDoc?.playConsoleStatus?.apps?.[p?.id]
+        ? playAppState(installationDoc.playConsoleStatus.apps[p.id], installationDoc.playConsoleStatus).review
+        : 'Console 상태 미확인'
     };
   }
 
-  async function loadStaticTesters() {
+  async function loadStaticTesters(signal) {
     try {
-      const r = await fetch('/data/app_testers.json', {cache: 'no-store'});
+      const r = await fetch('/data/app_testers.json', {cache: 'no-store', signal});
       if (r.ok) staticTesters = await r.json();
     } catch (_) {}
   }
@@ -107,6 +207,124 @@
     }) + ' KST';
   }
 
+  async function loadInstallation() {
+    if (installationBusy) return;
+    const sequence = ++installationRequestSeq;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const response = await fetch('/api/projects/testers', {cache: 'no-store', signal: ctrl.signal});
+      if (!response.ok) throw new Error('unavailable');
+      const doc = await response.json();
+      if (doc.contractVersion !== 'tester-installations-v1' || !installationState(doc).available) throw new Error('old_schema');
+      if (sequence !== installationRequestSeq || installationBusy) return;
+      installationDoc = doc; installationError = '';
+    } catch (_) {
+      if (sequence !== installationRequestSeq || installationBusy) return;
+      installationError = '설치 확인 원장 연결 실패 · 상태 새로고침 후 다시 시도하세요.';
+    } finally {
+      clearTimeout(timer);
+    }
+    renderInstallation();
+    renderPlayConsole();
+  }
+
+  function renderInstallation(focusId) {
+    const box = document.getElementById('tester-installation-list');
+    if (!box) return;
+    const currentFocus = focusId || document.activeElement?.dataset?.installationId;
+    const view = installationState(installationDoc);
+    const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    if (!view.available) {
+      set('local-install-status', '설치 확인 수 미확인');
+      set('local-install-day', '자체 설치 추적 대기');
+      set('installation-save-status', installationError || '설치 확인 원장 연결 중');
+      box.replaceChildren(node('p', '계정별 설치 확인표를 불러오는 중입니다.', 'qr-zone-desc'));
+      return;
+    }
+    set('local-install-status', `현재 ${view.count}/${view.required} 설치 완료 · ${view.count < view.required ? `${view.required - view.count}계정 추가 설치 / Alpha 참여 확인 필요` : 'Alpha 참여 확인 필요'}`);
+    set('local-install-sub', `등록 ${installationDoc.accounts.length}계정 · 4종 설치 사용자 확인값입니다. Google Opt-in 인원과 별도입니다.`);
+    set('local-install-day', view.started ? `자체 설치 추적 D+${view.day} / ${view.requiredDays}` : '자체 설치 추적 대기 · 12계정 확인 필요');
+    set('local-install-timing', view.started
+      ? `자체 시작 ${formatKST(view.startedAt)} · ${view.completionAt ? '14일 경과 예정 ' + formatKST(view.completionAt) : 'Google 연속 기간과 별도 기록'}`
+      : '아직 자체 시작일이 없습니다. Google의 연속 14일은 별도 Console 근거로 확인합니다.');
+    const progress = document.getElementById('local-install-progress');
+    if (progress) progress.style.width = `${view.started ? Math.min(100, view.day / view.requiredDays * 100) : 0}%`;
+    if (installationBusy) return;
+    box.replaceChildren();
+    installationDoc.accounts.forEach((account, index) => {
+      const row = node('div', '', 'tester-installation-row' + (account.installed === true ? ' installed' : ''));
+      const identity = node('div', '', 'tester-installation-identity');
+      identity.append(node('strong', installationSlot(account, index)), node('span', account.email));
+      if (account.installedAt) identity.append(node('small', `확인 ${formatKST(account.installedAt)}`));
+      const button = node('button', account.installed === true ? '✓ 4종 설치 완료' : '4종 설치 완료', 'tester-installation-toggle');
+      button.type = 'button'; button.dataset.installationId = account.id;
+      button.setAttribute('aria-pressed', String(account.installed === true));
+      button.setAttribute('aria-label', `${installationSlot(account, index)} ${account.email} 4종 설치 완료`);
+      button.disabled = !!installationError;
+      button.onclick = async () => {
+        if (installationBusy) return;
+        installationBusy = true; ++installationRequestSeq;
+        box.querySelectorAll('button').forEach(el => { el.disabled = true; });
+        button.setAttribute('aria-busy', 'true'); button.textContent = '저장 중…';
+        set('installation-save-status', '설치 확인 상태를 저장하는 중입니다.');
+        let message;
+        try {
+          installationDoc = await saveInstallation(account.id, account.installed !== true, installationDoc.revision);
+          installationError = ''; message = '설치 확인을 저장했습니다. Google 참여 실측 값은 변경되지 않습니다.';
+        } catch (error) {
+          if (error.status === 409) {
+            installationBusy = false; await loadInstallation();
+            message = installationError
+              ? '다른 화면에서 변경되었고 최신 조회도 실패했습니다. 새로고침 후 다시 선택하세요.'
+              : '다른 화면에서 변경되어 최신 상태를 불러왔습니다. 확인 후 다시 선택하세요.';
+          } else message = '저장 결과를 확인하지 못해 이전 표시를 유지합니다. 새로고침으로 확인 후 다시 시도하세요.';
+        } finally {
+          installationBusy = false; renderInstallation(account.id); renderPlayConsole();
+          set('installation-save-status', message);
+        }
+      };
+      row.append(identity, button); box.append(row);
+    });
+    set('installation-save-status', installationError || '체크는 4종 설치에 대한 사용자 확인입니다. 해제도 즉시 저장됩니다.');
+    if (currentFocus) Array.from(box.querySelectorAll('button')).find(el => el.dataset.installationId === currentFocus)?.focus({preventScroll: true});
+  }
+
+  function renderPlayConsole() {
+    const box = document.getElementById('play-console-cards');
+    if (!box) return;
+    const top = installationDoc?.playConsoleStatus || {};
+    const apps = top.apps || {};
+    const names = {bible_app: '성경말씀', greeting: '오늘의 안부', magnifier: '큰글씨 돋보기', shopping: '말로 장보기'};
+    const freshness = document.getElementById('play-console-freshness');
+    if (freshness) freshness.textContent = installationError ? '연결 실패 · 이전 관측값' : top.stale ? '이전 관측값 · 최신 확인 필요' : top.checkedAt ? `관측 ${formatKST(top.checkedAt)}` : 'Console 실측 미확인';
+    box.replaceChildren();
+    for (const [id, name] of Object.entries(names)) {
+      const view = playAppState(apps[id], top);
+      const card = node('article', '', 'play-console-card');
+      card.append(node('h4', name));
+      card.append(node('p', `Alpha: ${view.review} · ${view.alphaReleased} · ${view.alphaActive}${view.alphaVersion !== null ? ' · v' + view.alphaVersion : ''}`, 'play-console-track'));
+      card.append(node('p', `내부: ${view.internalReleased}${view.internalVersion !== null ? ' · v' + view.internalVersion : ''}`, 'play-console-track'));
+      const display = (value, unit) => value === null ? '미확인' : `${value}${unit}`;
+      card.append(node('p', `Google 참여 ${display(view.optedIn, '명')} · 설치 ${display(view.installs, '명')}`, 'play-console-counts'));
+      if (view.optedIn !== null && view.optedIn < 12) card.append(node('p', `Console 참여 12명까지 ${12 - view.optedIn}명 추가 확인 필요`, 'play-console-counts'));
+      card.append(node('p', `Google 연속 테스트 ${display(view.days, '일')} / 14일`, 'play-console-counts'));
+      card.append(node('small', view.checkedAt ? `관측 ${formatKST(view.checkedAt)}` : '아직 Console 관측 근거가 없습니다.'));
+      if (view.stale || installationError) card.append(node('small', '이전 관측값입니다. 최신 상태 확인이 필요합니다.', 'play-console-warning'));
+      if (view.error) card.append(node('small', `수집 확인 필요: ${typeof view.error === 'string' ? view.error : view.error.message || view.error.code || '수집 오류'}`, 'play-console-warning'));
+      box.append(card);
+    }
+    const google = document.getElementById('zc-closed-status');
+    if (google) google.textContent = 'Google 참여·연속 기간은 아래 4종 Console 실측으로 확인';
+    const portfolio = playPortfolioState(top);
+    const value = document.getElementById('apps-kpi-release-val');
+    const badge = document.getElementById('apps-kpi-release-badge');
+    const desc = document.getElementById('apps-kpi-release-desc');
+    if (value) value.textContent = portfolio.alphaObserved ? `Alpha 출시 확인 ${portfolio.alphaReleased}/4` : 'Alpha 출시 미확인';
+    if (badge) badge.textContent = top.stale || installationError ? '이전 관측값' : 'Console 실측';
+    if (desc) desc.textContent = `Google 참여: 성경 ${portfolio.optIns[0] ?? '미확인'} · 안부 ${portfolio.optIns[1] ?? '미확인'} · 돋보기 ${portfolio.optIns[2] ?? '미확인'} · 장보기 ${portfolio.optIns[3] ?? '미확인'}명 · 내부 배포 확인 ${portfolio.internalReleased}/4`;
+  }
+
   function metric(raw, key, unit) {
     if (raw?.status !== 'collected' || !Number.isFinite(raw[key]) || !raw.period || !raw.checkedAt) return '미연동 · 미수집';
     return `${raw[key].toLocaleString('ko-KR')}${unit} · ${raw.period}`;
@@ -125,18 +343,7 @@
       set('apps-kpi-total-desc', projects.map(p => `${p.name}(${p.progressPct || 72}%)`).join(' · '));
     }
 
-    const previewCount = projects.filter(p => p.status === 'preview' || p.status === 'released').length;
-    const firstSched = projects[0]?.testSchedule || {};
-    const curTrack = firstSched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
-    const closedStatus = firstSched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
-    const relVal = document.getElementById('apps-kpi-release-val');
-    if (relVal) {
-      relVal.innerHTML = firstSched.countdownStarted
-        ? `D+${firstSched.elapsedDays}일째 <small style="font-size:13px; color:#2563eb;">(14일 요건 D-${firstSched.remainingDays}일)</small>`
-        : `${firstSched.closedTestOptInsVerified === false ? '참여 수 미확인' : `${firstSched.closedTestOptIns || 0} / 12명`} <small style="font-size:13px; color:#d97706;">(14일 요건 미완료)</small>`;
-    }
-    set('apps-kpi-release-badge', curTrack);
-    set('apps-kpi-release-desc', closedStatus);
+    renderPlayConsole();
 
     let verifiedMs = 0, inProgressMs = 0, waitingMs = 0;
     for (const p of projects) {
@@ -210,41 +417,11 @@
 
   function renderControlCenter(data) {
     const projects = Array.isArray(data?.projects) ? data.projects : [];
-    const tc = (data?.testersControlCenter && data.testersControlCenter.emailCount) ? data.testersControlCenter : (staticTesters || data?.testersControlCenter || {});
+    const tc = installationDoc || ((data?.testersControlCenter && data.testersControlCenter.emailCount) ? data.testersControlCenter : (staticTesters || data?.testersControlCenter || {}));
     const firstSched = projects[0]?.testSchedule || {};
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-    // [Zone C] Real 14-Day Countdown Tracker
-    const regCount = tc.emailCount || firstSched.registeredTestersCount || 1;
-    const optIns = Number(firstSched.closedTestOptIns || tc.closedTestOptIns || 0);
-    const optInsLabel = firstSched.closedTestOptInsVerified === false ? '미확인' : String(optIns);
-    const reqTesters = Number(firstSched.requiredClosedTesters || 12);
-    const reqDays = Number(firstSched.requiredDays || 14);
-    const countdownStarted = Boolean(firstSched.countdownStarted);
-
-    set('zc-internal-status', firstSched.currentTrackLabel || `내부 테스트 (테스터 ${firstSched.internalTestersCount || 1}명) — ⚠️ 14일 카운트다운 미시작`);
-    set('zc-internal-sub', `내부 테스트 배포일: ${firstSched.internalReleaseDate || '2026-10-14'} · 대시보드 등록 테스터: ${regCount}명 (내부 트랙은 14일 요건에 산입되지 않음)`);
-
-    if (countdownStarted) {
-      set('zc-closed-status', `🟢 비공개 테스트 가동 중 · Opt-in ${optIns} / ${reqTesters}명 (D+${firstSched.elapsedDays} / ${reqDays}일)`);
-      set('zc-closed-sub', `14일 요건 충족 예정일: ${firstSched.targetProductionDate} (D-${firstSched.remainingDays}일 남음)`);
-    } else {
-      const trackTxt = firstSched.closedReviewSubmitted && !firstSched.closedReviewApproved ? 'Alpha 검토 중' : ((firstSched.closedTrackOpened || tc.closedTrackPromoted) ? '비공개 트랙 개설 완료' : '비공개 트랙 승격 대기');
-      set('zc-closed-status', `${trackTxt} · 참여 테스터(Opt-in) ${optInsLabel} / ${reqTesters}명 (D+0 / ${reqDays}일)`);
-      set('zc-closed-sub', `등록명단 수와 실제 참여 수는 다릅니다. 최소 12명이 최근 14일 동안 연속 참여한 증거를 확인해야 합니다.`);
-    }
-
-    const progBar = document.getElementById('zc-progress-bar');
-    if (progBar) {
-      const pct = countdownStarted
-        ? Math.min(100, Number(firstSched.dayProgressPct || 0))
-        : Math.min(90, Math.round((optIns / reqTesters) * 50));
-      progBar.style.width = `${pct}%`;
-    }
-    const optInput = document.getElementById('zc-optin-input');
-    if (optInput && document.activeElement !== optInput) {
-      optInput.value = String(optIns);
-    }
+    const regCount = Array.isArray(tc.accounts) ? tc.accounts.length : (tc.emailCount || firstSched.registeredTestersCount || 0);
+    renderInstallation();
+    renderPlayConsole();
 
     // [Zone A] 4-App Direct Install Cards + Physical Device 1-Time Check
     const cardsBox = document.getElementById('direct-install-cards');
@@ -308,7 +485,7 @@
     // [Zone B] 14-Tester Emails & Play Console Sync
     const badgeEl = document.getElementById('testers-count-badge');
     if (badgeEl) {
-      badgeEl.textContent = `등록 ${regCount} / ${tc.targetTesterCount || 14}명`;
+      badgeEl.textContent = `등록 ${regCount}계정`;
       badgeEl.className = 'pillar-badge ' + (regCount >= 12 ? 'badge-green' : 'badge-orange');
     }
     const ta = document.getElementById('tester-emails-textarea');
@@ -319,7 +496,7 @@
     if (receiptEl) {
       const lastSync = tc.lastSyncedToPlayConsoleAt ? formatKST(tc.lastSyncedToPlayConsoleAt) : '미실행';
       receiptEl.innerHTML = `
-        <div><strong>저장 원장:</strong> <code>data/app_testers.json</code> (${regCount}개 계정) · <strong>CSV:</strong> <code>apps/qa/barolab-testers-14.csv</code></div>
+        <div><strong>저장된 명단:</strong> ${regCount}개 계정 · 실제 설치·참여 실측과 별도</div>
         <div><strong>최근 반자동 동기화:</strong> ${lastSync} · <strong>상태:</strong> ${tc.syncStatus || 'ready'}</div>
       `;
     }
@@ -337,11 +514,9 @@
     renderControlCenter(data);
     renderFilterBar(data.projects);
 
-    const sched = data.projects[0]?.testSchedule || {};
-    const curTrackTop = sched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
-    const closedTop = sched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
-    const fallbackAt = data.projects.find(p => p.releaseLedgerFallbackAt)?.releaseLedgerFallbackAt;
-    state.textContent = `현재 트랙: ${curTrackTop} | 비공개 테스트 현황: ${closedTop}${fallbackAt ? ` | 배포 원장 기준 ${formatKST(fallbackAt)} (API에 최신 필드 없음)` : ''}`;
+    const installation = installationState(installationDoc);
+    const observedAt = installationDoc?.playConsoleStatus?.checkedAt;
+    state.textContent = `자체 설치 확인 ${installation.available ? `${installation.count}/${installation.required}` : '미확인'} · Console ${observedAt ? formatKST(observedAt) + ' 관측' : '실측 미확인'} · 30초마다 상태 갱신`;
 
     const visibleProjects = currentFilter === 'all'
       ? data.projects
@@ -353,9 +528,10 @@
       const vCount = (project.milestones || []).filter(m => m.status === 'verified').length;
       const tCount = (project.milestones || []).length;
       const tracker = project.admobTracker || {};
-      const tSched = project.testSchedule || {};
-      const curTrackLabel = tSched.currentTrackLabel || '내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작';
-      const closedStatusLabel = tSched.closedTrackStatusLabel || '비공개 트랙 미개설 · 참여 테스터 0 / 12명 (12명 Opt-in 완료 시 14일 카운트 시작)';
+      const currentConsole = installationDoc?.playConsoleStatus || {};
+      const labels = playDisplayLabels(currentConsole.apps?.[project.id], currentConsole);
+      const curTrackLabel = labels.track;
+      const closedStatusLabel = labels.detail;
 
       const badges = node('div', '', 'app-project-head-badges');
       badges.append(
@@ -381,7 +557,7 @@
         blockerBox.innerHTML = `
           <div><strong>📌 현재 트랙:</strong> ${curTrackLabel}</div>
           <div style="margin-top:3px;"><strong>📊 비공개 테스트 현황:</strong> ${closedStatusLabel}</div>
-          <div class="next-act">👉 <strong>다음 필요 조치:</strong> ${project.nextAction || '비공개 테스트 트랙 개설 및 12명 Opt-in'}</div>
+          <div class="next-act">👉 <strong>다음 필요 조치:</strong> ${labels.nextAction}</div>
         `;
         card.append(blockerBox);
       }
@@ -485,12 +661,19 @@
   }
 
   async function refresh() {
+    if (projectsRefreshBusy) return;
+    projectsRefreshBusy = true;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
     try {
-      const [res] = await Promise.all([fetch('/api/projects', {cache:'no-store'}), loadStaticTesters()]);
+      const [res] = await Promise.all([fetch('/api/projects', {cache:'no-store', signal: ctrl.signal}), loadStaticTesters(ctrl.signal), loadInstallation()]);
       if (!res.ok) throw new Error('projects unavailable');
       render(await res.json());
     } catch (_) {
-      list.replaceChildren(); state.textContent = '프로젝트 정보 조회 불가 · 수익과 이용자 수 미확인';
+      state.textContent = '프로젝트 정보 조회 실패 · 표시된 값은 이전 관측일 수 있습니다.';
+    } finally {
+      clearTimeout(timer);
+      projectsRefreshBusy = false;
     }
   }
 
@@ -546,13 +729,13 @@
     if (saved?.testersControlCenter) staticTesters = saved.testersControlCenter;
     const badgeEl = document.getElementById('testers-count-badge');
     if (badgeEl) {
-      badgeEl.textContent = `등록 ${n} / 14명`;
+      badgeEl.textContent = `등록 ${n}계정`;
       badgeEl.className = 'pillar-badge ' + (n >= 12 ? 'badge-green' : 'badge-orange');
     }
     const receiptEl = document.getElementById('tester-sync-receipt');
     if (receiptEl) {
       receiptEl.innerHTML = `
-        <div><strong>저장 원장:</strong> <code>data/app_testers.json</code> (${n}개 계정) · <strong>CSV:</strong> <code>apps/qa/barolab-testers-14.csv</code></div>
+        <div><strong>저장된 명단:</strong> ${n}개 계정</div>
         <div><strong>Play Console:</strong> ${saved?.cdpNote || '명단 저장 완료'}</div>
       `;
     }
@@ -636,25 +819,8 @@
     });
   }
 
-  const updateOptinsBtn = document.getElementById('btn-update-optins');
-  if (updateOptinsBtn) {
-    updateOptinsBtn.addEventListener('click', async () => {
-      const optInput = document.getElementById('zc-optin-input');
-      const count = Math.max(0, Math.min(30, parseInt(optInput?.value || '0', 10) || 0));
-      updateOptinsBtn.disabled = true;
-      updateOptinsBtn.textContent = '반영 중...';
-      try {
-        const res = await postJsonWithTimeout('/api/projects/testers', {closedTestOptIns: count, executeCdp: false});
-        if (res.ok) refresh();
-      } catch (_) {} finally {
-        updateOptinsBtn.disabled = false;
-        updateOptinsBtn.textContent = '반영';
-      }
-    });
-  }
-
   if (refreshBtn) refreshBtn.addEventListener('click', refresh);
   if (auditBtn) auditBtn.addEventListener('click', runAuditNow);
-  refresh(); setInterval(refresh, 60000);
+  refresh(); setInterval(refresh, 30000);
 })();
 

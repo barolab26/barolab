@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>앱 프로젝트 관제 · BaroLab</title>
   <link rel="stylesheet" href="traffic.css">
-  <link rel="stylesheet" href="projects.css?v=20261019-qr-center">
+  <link rel="stylesheet" href="projects.css?v=20261019-install-tracker">
   <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
   <link rel="stylesheet" href="signature_deck.css?v=20261017-sig-2">
   <script src="kin-summary.js?v=20261015-2" defer></script>
@@ -22,7 +22,7 @@
     <header class="header">
       <div class="header-left">
         <h1><span>앱 프로젝트 관제실</span></h1>
-        <p>오늘의 성경말씀 · 오늘의 안부 · 큰글씨 돋보기 · 말로 장보기 — Android 생활 앱 4종 원클릭 설치 · 14인 테스터 · SJ AdMob 수익화 관제</p>
+        <p>오늘의 성경말씀 · 오늘의 안부 · 큰글씨 돋보기 · 말로 장보기 — 4종 설치 확인 · 13계정 관리 · Google Play 실측</p>
         <p class="refresh-status" id="app-project-status" role="status" aria-live="polite">프로젝트 등록 정보 조회 중</p>
       </div>
       <div class="toolbar">
@@ -86,8 +86,8 @@
     <section class="traffic-panel qr-control-center" id="qr-install-center" aria-labelledby="qr-center-title">
       <div class="traffic-head">
         <div>
-          <h2 id="qr-center-title">📱 앱 4종 원클릭 설치 &amp; 14인 테스터 반자동 컨트롤 센터</h2>
-          <p class="section-caption">개발자 계정: <strong>YoonLab (7752283694845461925 · baro76650@gmail.com)</strong> · 휴대폰 6대(삼성폰 3대 일반+보안폴더 + 가족폰 3대) · 구글 계정 14개 원클릭 설치 허브</p>
+          <h2 id="qr-center-title">📱 앱 4종 설치 확인 &amp; Play Console 배포 현황</h2>
+          <p class="section-caption">휴대폰 6대의 일반·보안폴더 12슬롯 + 예비 계정 1개 · 설치 확인과 Google Play 참여 실측을 구분합니다.</p>
         </div>
         <div class="qr-center-actions">
           <button class="btn-quick" id="btn-verify-all-devices" type="button" style="background:#16a34a; border-color:#15803d; color:#fff; font-weight:800;">✅ 삼성 실기기 4종 전체 정상 동작 일괄 확인</button>
@@ -97,28 +97,30 @@
       <!-- [구역 C] 진짜 14일 카운트다운 트래커 (착시 제거) -->
       <div class="real-countdown-banner" id="zone-c-tracker">
         <div class="rc-col rc-internal">
-          <span class="rc-label">현재 활성 트랙 (Internal Testing)</span>
-          <strong class="rc-value" id="zc-internal-status">내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작</strong>
-          <span class="rc-sub" id="zc-internal-sub">내부 테스트 배포일: 2026-10-14 · 등록된 테스터 명단: 1명 (내부 트랙은 14일 요건에 산입되지 않음)</span>
+          <span class="rc-label">자체 설치 확인 · 계정별 4종 설치</span>
+          <strong class="rc-value" id="local-install-status">설치 확인 원장 조회 중</strong>
+          <span class="rc-sub" id="local-install-sub">계정별 확인표에 기록한 설치 상태입니다. Google Play Opt-in 수가 아닙니다.</span>
         </div>
         <div class="rc-col rc-closed">
-          <span class="rc-label">Google Play 12명 × 14일 비공개 테스트 (Closed Track)</span>
-          <strong class="rc-value" id="zc-closed-status">비공개 트랙 미개설 · 참여 테스터 0 / 12명 (D+0 / 14일)</strong>
+          <span class="rc-label">자체 설치 추적 · Google 연속 기간과 별도</span>
+          <strong class="rc-value" id="local-install-day">설치 확인 원장 조회 중</strong>
           <div class="rc-progress-wrap">
-            <div class="rc-progress-bar" id="zc-progress-bar" style="width:0%"></div>
+            <div class="rc-progress-bar" id="local-install-progress" style="width:0%"></div>
           </div>
-          <span class="rc-sub" id="zc-closed-sub">비공개 트랙(Alpha)에서 12명 이상 Opt-in 완료 시 closedTestStartAt 기준 D+1 ~ D+14 실측 카운트다운 자동 가동</span>
+          <span class="rc-sub" id="local-install-timing">12계정 설치 확인 도달 후 자체 기록을 시작합니다.</span>
         </div>
         <div class="rc-col rc-optin-ctrl">
-          <span class="rc-label">실제 휴대폰 Opt-in 완료 인원 반영</span>
-          <div class="rc-optin-row">
-            <input type="number" id="zc-optin-input" min="0" max="30" value="0" aria-label="비공개 테스트 Opt-in 완료 인원 수">
-            <span style="font-size:12px; font-weight:800; color:#334155;">/ 12명 이상</span>
-            <button type="button" class="btn-quick" id="btn-update-optins" style="background:#0f172a; color:#fff; border-color:#0f172a;">반영</button>
-          </div>
-          <span class="rc-sub">휴대폰 설치 완료 인원 입력 시 즉시 반영 (12명 도달 시 D+1 시작)</span>
+          <span class="rc-label">Google Play 비공개 테스트 실측</span>
+          <strong class="rc-value" id="zc-closed-status">Console 참여·연속 기간 확인 중</strong>
+          <span class="rc-sub" id="zc-closed-sub">Google의 14일 요건은 각 앱 Alpha에 최소 12명이 연속 참여한 기간으로 확인합니다. 자체 설치 체크로 공식 기간이 시작되거나 충족되지 않습니다.</span>
         </div>
       </div>
+
+      <div class="qr-zone-head">
+        <h3>앱별 Play Console 배포 단계</h3>
+        <span class="pillar-badge badge-blue" id="play-console-freshness">상태 조회 중</span>
+      </div>
+      <div class="play-console-grid" id="play-console-cards" aria-live="polite"></div>
 
       <div class="qr-zones-grid">
         <!-- [구역 A] 휴대폰 카메라 스캔용 대형 QR 코드 & 앱 4종 직통 설치 카드 -->
@@ -162,17 +164,23 @@
         <!-- [구역 B] 테스터 구글 계정(14~15개) 일괄 입력 및 반자동 Play Console 반영창 -->
         <div class="qr-zone-box" id="zone-b-testers">
           <div class="qr-zone-head">
-            <h3>[구역 B] 테스터 구글 계정(14~15개) 일괄 입력 &amp; Play Console 반자동 반영</h3>
-            <span class="pillar-badge badge-green" id="testers-count-badge">등록 1 / 14명</span>
+            <h3>[구역 B] 계정별 4종 설치 확인</h3>
+            <span class="pillar-badge badge-blue" id="testers-count-badge">계정 조회 중</span>
           </div>
 
+          <p class="qr-zone-desc">각 계정에서 4개 앱을 모두 설치한 뒤 체크하세요. 예비 계정을 포함한 자체 설치 기록이며 Console 참여 여부와는 별개입니다.</p>
+          <div id="tester-installation-list" class="tester-installation-list"></div>
+          <p id="installation-save-status" class="qr-zone-desc" role="status" aria-live="polite">설치 확인 원장 연결 중</p>
+
+          <details class="tester-roster-edit">
+          <summary>등록 이메일 명단 관리</summary>
+
           <p class="qr-zone-desc">
-            보유하신 구글 계정 14~15개(<code>@gmail.com</code>)를 줄바꿈 또는 쉼표(<code>,</code>)로 붙여넣으세요.
-            저장 즉시 <code>data/app_testers.json</code> 및 Play Console 업로드용 CSV(<code>apps/qa/barolab-testers-14.csv</code>)에 반영됩니다.
+            계정 명단을 줄바꿈 또는 쉼표로 입력할 수 있습니다. 명단 저장은 실제 설치나 Google 참여 확인을 대신하지 않습니다.
           </p>
 
           <label for="tester-emails-textarea" class="sr-only" style="font-size:12px; font-weight:800; color:#1e293b; display:block; margin-bottom:6px;">
-            테스터 이메일 목록 (줄바꿈 또는 쉼표 구분 · 기본 명단명: <code>BaroLab 테스터 14인</code>)
+            테스터 이메일 목록 (줄바꿈 또는 쉼표 구분)
           </label>
           <textarea
             id="tester-emails-textarea"
@@ -203,8 +211,9 @@
           </div>
 
           <div class="tester-sync-receipt" id="tester-sync-receipt">
-            상태: <code>data/app_testers.json</code> 연동 대기 중
+            명단 저장 상태 확인 중
           </div>
+          </details>
 
           <div class="console-deep-links">
             <div style="font-size:12px; font-weight:800; color:#0f172a; margin-bottom:6px;">🔗 Play Console 앱 4종 트랙 설정 직통 링크 (클릭 시 해당 페이지 바로 열기)</div>
@@ -239,7 +248,7 @@
   </main>
 </div>
 
-<script src="projects.js?v=20261019-qr-center" defer></script>
+<script src="projects.js?v=20261019-install-tracker" defer></script>
 <script>
   function updateClock() {
     const now = new Date();

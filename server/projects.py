@@ -11,14 +11,16 @@ import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, StrictBool, StrictInt
 import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 router = APIRouter()
+from common.app_testers_store import (load_app_testers, save_app_testers, normalize_emails,
+                                     patch_installation, RevisionConflict)
 
 KST = timezone(timedelta(hours=9))
 
@@ -38,64 +40,14 @@ import threading
 try:
     from apps.play_console_automator import (
         DEVELOPER_ID,
-        load_app_testers,
-        normalize_emails,
         run_promote_closed,
         run_switch_prod_ads,
         run_sync_testers,
-        save_app_testers,
     )
     AUTOMATOR_AVAILABLE = True
 except Exception:  # NAS image ships only server/*.py + common/*.py (no apps/ package)
     AUTOMATOR_AVAILABLE = False
     DEVELOPER_ID = "7752283694845461925"
-    _FALLBACK_TESTER_PATHS = (ROOT / "server" / "data" / "app_testers.json", ROOT / "data" / "app_testers.json")
-
-    def normalize_emails(raw_emails: Any) -> List[str]:
-        tokens: List[str] = []
-        if isinstance(raw_emails, str):
-            tokens = _re.split(r"[\s,;]+", raw_emails.strip())
-        elif isinstance(raw_emails, list):
-            for item in raw_emails:
-                if isinstance(item, str):
-                    tokens.extend(_re.split(r"[\s,;]+", item.strip()))
-        email_re = _re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
-        out: List[str] = []
-        for tok in tokens:
-            clean = tok.strip().lower()
-            if clean and email_re.match(clean) and clean not in out:
-                out.append(clean)
-        if "baro76650@gmail.com" not in out:
-            out.insert(0, "baro76650@gmail.com")
-        return out[:30]
-
-    def load_app_testers() -> Dict[str, Any]:
-        for path in _FALLBACK_TESTER_PATHS:
-            try:
-                if path.is_file():
-                    doc = json.loads(path.read_text(encoding="utf-8-sig"))
-                    doc["emails"] = normalize_emails(doc.get("emails") or [])
-                    doc["emailCount"] = len(doc["emails"])
-                    doc.setdefault("targetTesterCount", 14)
-                    return doc
-            except Exception:
-                continue
-        return {"emails": ["baro76650@gmail.com"], "emailCount": 1, "targetTesterCount": 14, "syncStatus": "ready_for_input"}
-
-    def save_app_testers(doc: Dict[str, Any]) -> Dict[str, Any]:
-        doc["emails"] = normalize_emails(doc.get("emails") or [])
-        doc["emailCount"] = len(doc["emails"])
-        doc["lastSavedAt"] = datetime.now(KST).isoformat(timespec="seconds")
-        for path in _FALLBACK_TESTER_PATHS:
-            try:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                tmp = path.with_suffix(".json.tmp")
-                tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-                tmp.replace(path)
-            except Exception:
-                continue
-        return doc
-
     def _automator_unavailable(*_args: Any, **_kwargs: Any) -> Dict[str, Any]:
         return {"ok": False, "error": "play_console_automator is Windows-only (not in NAS image)"}
 
@@ -815,7 +767,7 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
     avg_pct = round(sum(p.get("progressPct", 75) for p in projects) / len(projects)) if projects else 0
     all_ads_txt_ok = all(p.get("admobTracker", {}).get("appAdsTxt", {}).get("verified", False) for p in projects) if projects else False
     all_devices_verified = all(p.get("deviceVerified", False) for p in projects) if projects else False
-    testers_doc = load_app_testers()
+    testers_doc = tester_control_center()
 
     first_sched = (projects[0].get("testSchedule") or {}) if projects else {}
     return {
@@ -837,7 +789,8 @@ def inventory(root: Path = ROOT, force_verify: bool = False) -> Dict[str, Any]:
             "testerGroupEmail": first_sched.get("testerGroupEmail", "barolab-testers@googlegroups.com"),
             "testerLandingUrl": first_sched.get("testerLandingUrl", "https://barolab-daily-apps.pages.dev/testers/"),
             "registeredTestersCount": int(testers_doc.get("emailCount") or 1),
-            "closedTestOptIns": int(first_sched.get("closedTestOptIns") or 0),
+            "closedTestOptIns": first_sched.get("closedTestOptIns") if first_sched.get("closedTestOptInsVerified") else None,
+            "localInstalledTestersCount": testers_doc.get('localTracking', {}).get('installedCount'),
         },
         "testersControlCenter": testers_doc,
         "projects": projects,
@@ -864,6 +817,27 @@ class VerifyDeviceRequest(BaseModel):
     note: Optional[str] = None
 
 
+class TesterInstallationPatch(BaseModel):
+    installed: StrictBool
+    expectedRevision: Optional[StrictInt] = None
+
+
+def tester_control_center(doc=None):
+    result = dict(doc if doc is not None else load_app_testers())
+    try:
+        try:
+            from .play_console_collector import get_console_status
+        except ImportError:
+            from play_console_collector import get_console_status
+        console = get_console_status(trigger_refresh=True)
+    except Exception as exc:
+        console = {'status': 'unknown', 'checkedAt': None, 'stale': True,
+                   'error': type(exc).__name__, 'apps': {}}
+    result['playConsoleStatus'] = console
+    result['consoleEvidence'] = console.get('apps', {})
+    return result
+
+
 @router.get("/api/projects")
 def get_projects() -> Dict[str, Any]:
     return inventory()
@@ -879,21 +853,31 @@ def audit_projects_now() -> Dict[str, Any]:
 
 @router.get("/api/projects/testers")
 def get_projects_testers() -> Dict[str, Any]:
-    return load_app_testers()
+    return tester_control_center()
+
+
+@router.patch('/api/projects/testers/accounts/{account_id}')
+def patch_project_tester(account_id: str, payload: TesterInstallationPatch) -> Dict[str, Any]:
+    try:
+        doc = patch_installation(account_id, payload.installed, expected_revision=payload.expectedRevision)
+    except RevisionConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail='Unknown tester account') from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {'ok': True, 'testersControlCenter': tester_control_center(doc)}
 
 
 @router.post("/api/projects/testers")
 def post_projects_testers(payload: TestersSyncRequest) -> Dict[str, Any]:
     """Save tester emails + CSV and answer immediately. CDP work never runs on the request thread."""
+    if payload.closedTestOptIns is not None:
+        raise HTTPException(status_code=400, detail='Google opt-in counts require Play Console evidence; use the separate installation checkbox')
     doc = load_app_testers()
     if payload.emails is not None:
         doc["emails"] = normalize_emails(payload.emails)
         doc["syncStatus"] = "saved_pending_play_console"
-    if payload.closedTestOptIns is not None:
-        opt_ins = max(0, min(30, int(payload.closedTestOptIns)))
-        doc["closedTestOptIns"] = opt_ins
-        if opt_ins >= 12 and doc.get("closedTrackPromoted") and not doc.get("closedTestStartAt"):
-            doc["closedTestStartAt"] = now_kst_iso()
     doc = save_app_testers(doc)
 
     csv_written = False
@@ -925,11 +909,10 @@ def post_projects_testers(payload: TestersSyncRequest) -> Dict[str, Any]:
 @router.post("/api/projects/promote-closed")
 def post_promote_closed(payload: PromoteClosedRequest) -> Dict[str, Any]:
     """Queue a Play Console closed-track inspection. Track state is never set from the button press itself."""
+    if payload.closedTestOptIns is not None:
+        raise HTTPException(status_code=400, detail='Google opt-in counts cannot be set by a manual installation action')
     cdp_queued = _start_background_cdp("promote") if payload.executeCdp else False
     doc = load_app_testers()
-    if payload.closedTestOptIns is not None:
-        doc["closedTestOptIns"] = max(0, min(30, int(payload.closedTestOptIns)))
-        doc = save_app_testers(doc)
     return {
         "ok": True,
         "cdpQueued": cdp_queued,
