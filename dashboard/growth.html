@@ -777,13 +777,13 @@
     const manualDone = (actData.records || []).filter(r => r.status === 'done').length;
     const autoDone = (maintData.recentActions || []).filter(r => r.status === 'completed').length;
     const docRemodeled = latestDoctorDoc?.cfDoctorEvidence?.verified ?? null;
-    const docAudited = latestDoctorDoc?.auditedCount ?? 0;
+    const docAudited = latestDoctorDoc?.auditedCount ?? null;
     const totalImproved = docRemodeled === null ? '미확인' : num(manualDone + autoDone + docRemodeled); // Action records may share a URL.
     if ($('kpi-rem-headline')) {
       $('kpi-rem-headline').textContent = `상승 후보 ${num(oppCnt)}건 · 개선 기록 ${totalImproved}`;
     }
     if ($('kpi-rem-sub')) {
-      $('kpi-rem-sub').innerHTML = `<span>🩺 검진 ${num(docAudited)}건</span><span>🛠️ 개선 기록 ${totalImproved} · 중복 URL 포함 가능</span>`;
+      $('kpi-rem-sub').innerHTML = `<span>🩺 검진 ${docAudited === null ? '미확인' : num(docAudited)+'건'}</span><span>🛠️ 개선 기록 ${totalImproved} · 중복 URL 포함 가능</span>`;
     }
     if ($('kpi-rem-pill')) {
       $('kpi-rem-pill').textContent = `후보 ${num(oppCnt)}건 · 개선 기록 ${totalImproved}`;
@@ -809,16 +809,16 @@
       const gc = doc.gradeCounts || {};
       const quotaPct = Math.min(100, Math.max(0, Number(doc.todayQuotaPct || 0)));
       if ($('growth-doctor-inv')) {
-        $('growth-doctor-inv').textContent = `감사 등급 분류 ${doc.auditedCount || 0}건 · CF 공개 검증 완료 ${doc.cfDoctorEvidence?.verified ?? '미확인'}건 · 제목만 보완 ${doc.cfDoctorEvidence?.partial ?? '미확인'}건 · 결과 미확정 ${doc.cfDoctorEvidence?.unknown ?? '미확인'}건`;
+        $('growth-doctor-inv').textContent = `감사 등급 분류 ${doc.auditedCount ?? '미확인'} · CF 공개 검증 완료 ${doc.cfDoctorEvidence?.verified ?? '미확인'}건 · 제목만 보완 ${doc.cfDoctorEvidence?.partial ?? '미확인'}건 · 결과 미확정 ${doc.cfDoctorEvidence?.unknown ?? '미확인'}건`;
       }
       if ($('growth-doctor-quota')) {
-        $('growth-doctor-quota').textContent = `오늘 감사 ${doc.todayAudited || 0} / ${doc.dailyQuotaTarget || 20}건 · 오늘 CF 공개 검증 완료 ${doc.cfDoctorEvidence?.todayVerified ?? '미확인'}건`;
+        $('growth-doctor-quota').textContent = `오늘 감사 ${doc.todayAudited ?? '미확인'} / ${doc.dailyQuotaTarget ?? '미확인'} · 오늘 CF 공개 검증 완료 ${doc.cfDoctorEvidence?.todayVerified ?? '미확인'}건`;
       }
       if ($('growth-doctor-bar')) $('growth-doctor-bar').style.width = `${quotaPct}%`;
-      if ($('growth-doc-a')) $('growth-doc-a').textContent = `🟢 A등급 (정상 유지): ${gc.A || 0}건`;
-      if ($('growth-doc-b')) $('growth-doc-b').textContent = `🔵 B등급 (카테고리 패치): ${gc.B || 0}건`;
-      if ($('growth-doc-c')) $('growth-doc-c').textContent = `🟡 C등급 (@퍼블리 리모델링): ${gc.C || 0}건`;
-      if ($('growth-doc-d')) $('growth-doc-d').textContent = `🔴 D등급 (주제이탈 격리): ${gc.D || 0}건`;
+      if ($('growth-doc-a')) $('growth-doc-a').textContent = `🟢 A등급 (정상 유지): ${gc.A ?? '미확인'}건`;
+      if ($('growth-doc-b')) $('growth-doc-b').textContent = `🔵 B등급 (카테고리 패치): ${gc.B ?? '미확인'}건`;
+      if ($('growth-doc-c')) $('growth-doc-c').textContent = `🟡 C등급 (@퍼블리 리모델링): ${gc.C ?? '미확인'}건`;
+      if ($('growth-doc-d')) $('growth-doc-d').textContent = `🔴 D등급 (주제이탈 격리): ${gc.D ?? '미확인'}건`;
       const tbody = $('growth-doctor-rows');
       const rows = doc.recentAudits || [];
       if (doc.cfDoctorEvidence?.rows?.length && tbody) {

@@ -1,5 +1,8 @@
 """Join existing public URLs with separate index and search evidence; no publishing."""
 import math
+import json
+from pathlib import Path
+from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta, timezone
 from urllib.parse import unquote, urlsplit
 
@@ -155,3 +158,33 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
             'expectedDomains': analysis.get('expectedDomains', 16), 'pageReportDomains': len(source_domains),
             'checkedAt': now.isoformat(), 'scope': 'Google · CF 공개 글 목록 · 최근 30일 페이지 실적',
             'note': '검색 실적과 현재 색인 검사는 별개입니다. 보고서 행 없음은 미색인·노출 0을 뜻하지 않습니다.'}
+
+
+def cf_doctor_evidence_summary(schedule=None, today=None):
+    """Current source ledger, unique URLs, public verification distinct from grades."""
+    if schedule is None:
+        try:
+            schedule = json.loads((Path(__file__).resolve().parent.parent / 'cf_posting/data/daily_schedule.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            return {'status': 'unavailable', 'verified': None, 'partial': None, 'unknown': None, 'rows': []}
+    today = today or datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
+    latest = {}
+    for row in schedule.get('doctorRuns', []):
+        if row.get('url'):
+            latest[row['url']] = row
+    rows = []
+    for row in latest.values():
+        full = (row.get('status') == 'verified' and bool(row.get('verifiedAt'))
+                and row.get('relatedLinkStatus') == 'verified' and row.get('reciprocalLinkStatus') == 'verified')
+        status = 'verified' if full else 'partial' if row.get('status') == 'verified_title_only' else 'unknown'
+        at = (row.get('relatedLinkRepair') or {}).get('verifiedAt') or row.get('verifiedAt') or row.get('checkedAt')
+        try:
+            day = datetime.fromisoformat(at.replace('Z', '+00:00')).astimezone(ZoneInfo('Asia/Seoul')).date().isoformat()
+        except (TypeError, ValueError, AttributeError):
+            day = None
+        rows.append({'url': row['url'], 'domain': row.get('domain'), 'status': status,
+                     'sourceStatus': row.get('status'), 'verifiedAt': at, 'today': day == today})
+    return {'status': 'observed', 'source': 'cf_posting/data/daily_schedule.json doctorRuns',
+            **{key: sum(r['status'] == key for r in rows) for key in ('verified', 'partial', 'unknown')},
+            'todayVerified': sum(r['status'] == 'verified' and r['today'] for r in rows),
+            'rows': sorted(rows, key=lambda r: r['verifiedAt'] or '', reverse=True)}

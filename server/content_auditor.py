@@ -1533,33 +1533,8 @@ def apply_user_override(command_text: str, target_hint: Optional[str] = None) ->
 
 
 def cf_doctor_evidence_summary(schedule=None, today=None):
-    """Current source ledger, unique URLs, public verification distinct from grades."""
-    if schedule is None:
-        try:
-            schedule = json.loads((CF_DIR / 'data/daily_schedule.json').read_text(encoding='utf-8'))
-        except (OSError, ValueError):
-            return {'status': 'unavailable', 'verified': None, 'partial': None, 'unknown': None, 'rows': []}
-    today = today or _today_kst()
-    latest = {}
-    for row in schedule.get('doctorRuns', []):
-        if row.get('url'):
-            latest[row['url']] = row
-    rows = []
-    for row in latest.values():
-        full = (row.get('status') == 'verified' and bool(row.get('verifiedAt'))
-                and row.get('relatedLinkStatus') == 'verified' and row.get('reciprocalLinkStatus') == 'verified')
-        status = 'verified' if full else 'partial' if row.get('status') == 'verified_title_only' else 'unknown'
-        at = (row.get('relatedLinkRepair') or {}).get('verifiedAt') or row.get('verifiedAt') or row.get('checkedAt')
-        try:
-            day = datetime.datetime.fromisoformat(at.replace('Z', '+00:00')).astimezone(KST).date().isoformat()
-        except (TypeError, ValueError, AttributeError):
-            day = None
-        rows.append({'url': row['url'], 'domain': row.get('domain'), 'status': status,
-                     'sourceStatus': row.get('status'), 'verifiedAt': at, 'today': day == today})
-    return {'status': 'observed', 'source': 'cf_posting/data/daily_schedule.json doctorRuns',
-            **{key: sum(r['status'] == key for r in rows) for key in ('verified', 'partial', 'unknown')},
-            'todayVerified': sum(r['status'] == 'verified' and r['today'] for r in rows),
-            'rows': sorted(rows, key=lambda r: r['verifiedAt'] or '', reverse=True)}
+    from dashboard.content import cf_doctor_evidence_summary as evidence_summary
+    return evidence_summary(schedule, today)
 
 
 def get_auditor_status() -> Dict[str, Any]:
