@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T03:12:39.94747+09:00",
+  "generatedAt": "2026-10-20T03:17:41.233819+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -45,7 +45,7 @@
     "cdp_observation_host": "192.168.45.248"
   },
   "metrics": {
-    "checkedAt": "2026-10-20T02:46:44.964485+09:00",
+    "checkedAt": "2026-10-20T03:12:45.081121+09:00",
     "siteCount": 21,
     "ga4": [
       {
@@ -61,7 +61,7 @@
         "domain": "daynote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:45:57.51704+09:00",
+        "checkedAt": "2026-10-20T03:11:46.23289+09:00",
         "sessions": 49,
         "pageViews": 52,
         "naverReferralSessions": 29
@@ -70,7 +70,7 @@
         "domain": "healthcox.com",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:46:06.350726+09:00",
+        "checkedAt": "2026-10-20T03:12:15.53466+09:00",
         "sessions": 36,
         "pageViews": 41,
         "naverReferralSessions": 19
@@ -79,7 +79,7 @@
         "domain": "joynote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:46:13.743912+09:00",
+        "checkedAt": "2026-10-20T03:12:45.044799+09:00",
         "sessions": 14,
         "pageViews": 18,
         "naverReferralSessions": 1
@@ -194,8 +194,8 @@
       }
     ],
     "indexing": {
-      "indexed": 534,
-      "inspected": 1487,
+      "indexed": 535,
+      "inspected": 1490,
       "inventoryTotal": 1914
     },
     "traffic": {
@@ -276,7 +276,7 @@
           "rows": 63
         },
         "automation_slots": {
-          "rows": 240
+          "rows": 241
         },
         "operating_cadence": {
           "rows": 1
