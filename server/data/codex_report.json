@@ -404,7 +404,7 @@
         "server/data/live_snapshot.json",
         "server/data/codex_report.json"
       ],
-      "commitHash": null
+      "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753"
     }
   ],
   "summary": "INCOMPLETE: CF agent hard-timeout change passed its focused test, but the scheduled cleaner owner PID 2600 currently holds the cleaner lock, so no overlapping retry or 20-post remodel run was started. The queue remains 8 waiting, 5 prepared, 3 failed. Naver rollover/publication is not evidenced for 10/20; KIN stone0747 tick ended blocked with operation_RuntimeError before submission. SearchAdvisor reports history_unconfirmed with remaining=null and a hard daily limit of 50, so the requested 800/domain submissions were not attempted.",
@@ -415,7 +415,7 @@
     "server/data/live_snapshot.json",
     "server/data/codex_report.json"
   ],
-  "commitHash": null,
+  "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753",
   "taskProgress": {
     "cfCleanerTimeoutAndOwnerCheck": {
       "status": "partial",
@@ -430,7 +430,8 @@
         "prepared": 5
       },
       "retryStarted": false,
-      "reason": "Scheduled cleaner owner is active; overlapping invocation skipped."
+      "reason": "Scheduled cleaner owner is active; overlapping invocation skipped.",
+      "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753"
     },
     "naverRolloverAndKinTimeout": {
       "status": "blocked",
