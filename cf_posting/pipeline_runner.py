@@ -5133,21 +5133,88 @@ def _doctor_index_evidence(url, now, metrics, history):
     return None
 
 
+def _doctor_normalize_text(value):
+    """Repair only recognizable UTF-8 mojibake runs, then remove emoji glyphs."""
+    def repair(match):
+        text = match.group()
+        if not re.search('[\u00c2\u00c3\u00e2\u00f0][\u0080-\u00bf\u0152\u0153\u0160\u0161\u0178\u017d\u017e\u0192\u02c6\u02dc\u2010-\u203a\u20ac\u2122]', text):
+            return text
+        try:
+            raw = b''.join(ch.encode('cp1252') if not 0x80 <= ord(ch) <= 0x9f
+                           else ch.encode('latin1') for ch in text)
+            return raw.decode('utf-8')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # Unrecoverable fragments are removed, never propagated into a title.
+            return re.sub(r'[\u00c2\u00c3\u00e2\u00f0][\u0080-\u00bf\u0152\u0153\u0160\u0161\u0178\u017d\u017e\u0192\u02c6\u02dc\u2010-\u203a\u20ac\u2122]+', '', text)
+    value = str(value)
+    for _ in range(3):
+        repaired = re.sub(r'[\u0080-\u00ff\u0152\u0153\u0160\u0161\u0178\u017d\u017e\u0192\u02c6\u02dc\u2010-\u203a\u20ac\u2122]+', repair, value)
+        if repaired == value:
+            break
+        value = repaired
+    value = re.sub(r'[0-9#*]\ufe0f?\u20e3', '', value)
+    value = re.sub(r'[\U0001f000-\U0001faff\u2600-\u27bf\u2300-\u23ff\u200d\ufe0e\ufe0f\u20e3\ufffd]', '', value)
+    return unicodedata.normalize('NFC', value)
+
+
+def _doctor_clean_content(content):
+    soup = BeautifulSoup(content, 'html.parser')
+    from bs4 import Comment
+    def clean_json(value):
+        if isinstance(value, list):
+            return [clean_json(item) for item in value]
+        if isinstance(value, dict):
+            return {key: (_doctor_normalize_text(item) if key in ('headline', 'name', 'description', 'articleBody', 'text')
+                          and isinstance(item, str) else clean_json(item)) for key, item in value.items()}
+        return value
+    for script in soup.select('script[type="application/ld+json"]'):
+        try:
+            data = json.loads(script.string or '')
+            cleaned = clean_json(data)
+            if cleaned != data:
+                script.string = json.dumps(cleaned, ensure_ascii=False).replace('</', '<\\/')
+        except (ValueError, TypeError):
+            pass
+    for node in list(soup.find_all(string=True)):
+        if isinstance(node, Comment) or node.parent.name in ('script', 'style'):
+            continue
+        cleaned = _doctor_normalize_text(node)
+        if cleaned != str(node):
+            node.replace_with(cleaned)
+    for node in soup.find_all(True):
+        for attr in ('alt', 'title'):
+            if attr in node.attrs:
+                node[attr] = _doctor_normalize_text(node[attr])
+    return str(soup)
+
+
 def _doctor_rewrite(post):
-    # Reuse exact source wording; never invent products, model IDs, errors, or factual claims.
-    soup = BeautifulSoup(post['content'], 'html.parser')
-    title = post['title'].strip()
-    heading = next((h.get_text(' ', strip=True) for h in soup.select('h2,h3')
-                    if len(h.get_text(' ', strip=True)) >= 8 and h.get_text(' ', strip=True) not in title), None)
-    if not heading:
-        raise ValueError('No source-grounded specific heading')
-    rewritten = title + ' — ' + heading
-    if len(rewritten) > 140:
-        raise ValueError('Source-grounded title too long')
-    content = post['content']
-    if soup.find('h1'):
-        content = re.sub(r'(<h1\b[^>]*>).*?(</h1>)', lambda m: m[1] + html.escape(rewritten) + m[2], content, count=1, flags=re.I | re.S)
-    return rewritten, content
+    # Select one source-grounded headline, never append the first H2 to the title.
+    content = _doctor_clean_content(post['content'])
+    soup = BeautifulSoup(content, 'html.parser')
+    title = re.sub(r'\s+', ' ', _doctor_normalize_text(post['title'])).strip()
+    for heading in soup.select('h2,h3'):
+        suffix = ' — ' + re.sub(r'\s+', ' ', heading.get_text(' ', strip=True)).strip()
+        if title.endswith(suffix):
+            title = title[:-len(suffix)].strip()
+            break
+    title = re.sub(r'\[(?:\d{4}\s*)?최신\]\s*', '', title)
+    title = re.sub(r'\s*\((\d{4})년\)', lambda m: '' if m[1] in title[:m.start()] else m[0], title)
+    title = title.replace('꿀팁', '확인 사항').replace('총비교', '비교')
+    title = re.sub(r'\s+', ' ', title.replace('—', ',')).strip(' ,')
+    candidates = [title]
+    terms = set(re.findall(r'[가-힣A-Za-z0-9]{2,}', title))
+    for heading in soup.select('h2,h3'):
+        text = re.sub(r'\s+', ' ', heading.get_text(' ', strip=True)).strip()
+        if sum(term in text for term in terms) >= 2:
+            candidates.append(text)
+    rewritten = next((text for text in candidates if 32 <= len(text) <= 48 and '—' not in text), None)
+    if not rewritten or len(terms) < 3:
+        raise ValueError('Insufficient source wording for a 32-48 character title')
+    for heading in soup.select('h1'):
+        heading.clear()
+        heading.append(rewritten)
+    return rewritten, str(soup)
 
 
 def _doctor_put(domain, original, changes):
@@ -5170,6 +5237,8 @@ def _doctor_put(domain, original, changes):
         raise RuntimeError('API readback mismatch')
     public = requests.get(f"https://www.{domain}/{original['slug']}", timeout=15, allow_redirects=False)
     public.raise_for_status()
+    # Published HTML is UTF-8; requests may guess Latin-1 from a text/html header.
+    public.encoding = 'utf-8'
     rendered = BeautifulSoup(public.text, 'html.parser')
     if 'title' in changes:
         if not any(h.get_text(' ', strip=True) == changes['title'] for h in rendered.select('h1')):

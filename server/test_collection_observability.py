@@ -312,6 +312,34 @@ class GrowthMutationGuards(unittest.TestCase):
         self.assertTrue(all(row['status'] == 'published' for row in items))
         self.assertTrue(all(row['revenueVerified'] is False for row in schedule['radarQueue']))
 
+    def test_doctor_repairs_mojibake_and_preserves_markup_urls(self):
+        from cf_posting.pipeline_runner import _doctor_normalize_text, _doctor_clean_content, BeautifulSoup
+        self.assertEqual(_doctor_normalize_text('조건 ðŸ¤” ðŸ“Œ 📌'), '조건   ')
+        self.assertEqual(_doctor_normalize_text('확인 ' + '📌'.encode('utf-8').decode('latin1')), '확인 ')
+        self.assertEqual(_doctor_normalize_text('확인 ðŸ 안내'), '확인  안내')
+        self.assertEqual(_doctor_normalize_text('café â€“ 안내'), 'café – 안내')
+        self.assertEqual(_doctor_normalize_text('café château São'), 'café château São')
+        source = '<p title="안내 📌">한글 ðŸ¤” <a href="/📌?x=1&amp;y=2">신청 📌</a></p><script>const icon="📌";</script><script type="application/ld+json">{"headline":"안내 📌","url":"/📌"}</script>'
+        cleaned = BeautifulSoup(_doctor_clean_content(source), 'html.parser')
+        self.assertEqual(cleaned.a['href'], '/📌?x=1&y=2')
+        self.assertEqual(cleaned.p['title'], '안내 ')
+        self.assertNotIn('ð', cleaned.p.get_text())
+        self.assertNotIn('📌', cleaned.p.get_text())
+        self.assertIn('📌', cleaned.script.string)
+        self.assertEqual(json.loads(cleaned.select_one('script[type="application/ld+json"]').string), {'headline': '안내 ', 'url': '/📌'})
+
+    def test_doctor_single_bounded_title_and_all_h1(self):
+        from cf_posting.pipeline_runner import _doctor_rewrite, BeautifulSoup
+        original = '[2026 최신] 전세자금대출 한도 계산기 꿀팁 5가지 (2026년) — 2026년 전세자금대출, 소득별로 나에게 맞는 한도는 얼마일까? ðŸ¤”'
+        title, content = _doctor_rewrite({'title': original, 'content': '<h1>old</h1><h1>old</h1><h2>2026년 전세자금대출, 소득별로 나에게 맞는 한도는 얼마일까? ðŸ¤”</h2><p>서류 📌</p>'})
+        self.assertTrue(32 <= len(title) <= 48, title)
+        self.assertNotIn('—', title)
+        self.assertNotIn('ð', title + content)
+        self.assertNotIn('📌', content)
+        self.assertTrue(all(h.get_text() == title for h in BeautifulSoup(content, 'html.parser').select('h1')))
+        with self.assertRaises(ValueError):
+            _doctor_rewrite({'title': '안내', 'content': '<h2>자료</h2>'})
+
     def test_doctor_publication_age_fallback_requires_measured_zero(self):
         from cf_posting import pipeline_runner as runner
         from unittest.mock import patch, MagicMock
@@ -323,7 +351,9 @@ class GrowthMutationGuards(unittest.TestCase):
                     'complete': True, 'sessions': 0, 'pageViews': 0}], 'highTrafficPages': []}
         history = MagicMock(); history.glob.return_value = []
         with patch.object(runner, 'HISTORY_DIR', history), patch.object(runner, 'published_inventory', return_value=[post]), \
-                patch.object(runner, '_growth_post', return_value=post), patch.object(runner, '_doctor_put') as put:
+                patch.object(runner, '_growth_post', return_value=post), \
+                patch.object(runner, '_doctor_rewrite', return_value=('지원금 신청 조건과 거절 시 필요한 서류를 확인하는 방법 안내', post['content'])), \
+                patch.object(runner, '_doctor_put') as put:
             result = runner.growth_doctor({'date': '2026-10-19'}, now, evidence, metrics={}, apply=False)
             self.assertEqual(result['candidates'][0]['eligibilityBasis'], 'published_7_days_complete_ga4_zero')
             self.assertFalse(result['candidates'][0]['indexingVerifiedForSevenDays'])
