@@ -1726,6 +1726,17 @@ def validate_coupled_revision(original, candidate, bindings, research, *, allow_
     return copy.deepcopy(candidate)
 
 
+def parse_coupled_article_json(value):
+    """Decode the first JSON object from a writer string and retain any tail for audit."""
+    if not isinstance(value, str) or not value.strip():
+        raise ReviewRequired('Coupled articleJson must be a non-empty JSON string')
+    text = value.lstrip()
+    candidate, end = json.JSONDecoder().raw_decode(text)
+    if not isinstance(candidate, dict):
+        raise ReviewRequired('Coupled articleJson JSON prefix must be an object')
+    return candidate, text[end:]
+
+
 def require_coupled_review(handoff, article):
     record = handoff.data.get('coupledRework') or {}
     review = record.get('independentReview') or {}
@@ -1755,42 +1766,65 @@ def rework_article_and_visuals(handoff, article, generate, progress, attribution
     if (handoff.data.get('domain') not in ('maxnote.kr','topnote.kr','meganote.kr','must-pick.com','nolplace.com')
             or len(rows)!=3 or (handoff.folder/'publication.json').exists()):
         raise ReviewRequired('Coupled rework requires an authorized unpublished three-stage draft')
-    if handoff.data.get('coupledRework'):
+    previous = handoff.data.get('coupledRework') or {}
+    recover_saved_json = (
+        handoff.data.get('domain') in ('nolplace.com', 'meganote.kr')
+        and previous.get('status') == 'rejected'
+        and previous.get('error', {}).get('type') == 'JSONDecodeError'
+        and 'Extra data' in previous.get('error', {}).get('message', '')
+        and isinstance(previous.get('rawProposal'), dict)
+        and previous.get('jsonRecoveryAttempted') is not True
+    )
+    if previous and not recover_saved_json:
         raise ReviewRequired('Coupled rework already attempted; inspect saved evidence, do not repeat')
     if handoff.data.get('imagePlanRework',{}).get('status')!='rejected':
         raise ReviewRequired('Coupled rework requires the preserved rejected plan')
-    original = copy.deepcopy(article)
+    original = copy.deepcopy(previous.get('originalArticle') if recover_saved_json else article)
     research = read_document(handoff.file('research.md'))
     allow_public_replan=handoff.data.get('domain')=='topnote.kr'
-    record = {'allowPublicReplan':allow_public_replan,'status':'proposal_pending','startedAt':stamp(),'attemptLimit':1,
+    record = previous if recover_saved_json else {'allowPublicReplan':allow_public_replan,'status':'proposal_pending','startedAt':stamp(),'attemptLimit':1,
         'originalArticle':original,'originalArticleText':handoff.file('article.json').read_text(encoding='utf-8'),
         'originalArticleSha256':digest(handoff.file('article.json')),
         'originalDraft':handoff.file('draft.md').read_text(encoding='utf-8'),
         'researchSha256':digest(handoff.file('research.md')),'previousHandoff':copy.deepcopy(handoff.data),
         'scope':'coupled contentHtml/readerTask/imagePlans; no pixel/layout approval'}
-    handoff.data['coupledRework']=record
-    handoff.save()  # Intent consumes the bounded attempt even if a model call is interrupted.
+    record['allowPublicReplan']=allow_public_replan
+    if recover_saved_json:
+        record.update(status='json_recovery_running',jsonRecoveryAttempted=True,jsonRecoveryStartedAt=stamp())
+        proposal=copy.deepcopy(record['rawProposal'])
+        handoff.data['coupledRework']=record
+        handoff.save()  # Consume the single safe recovery before parsing or review.
+    else:
+        handoff.data['coupledRework']=record
+        handoff.save()  # Intent consumes the bounded attempt even if a model call is interrupted.
     schema = {'type':'object','additionalProperties':False,'properties':{
         'articleJson':{'type':'string'},'sourceBindings':{'type':'array','items':{
             'type':'object','additionalProperties':False,'properties':{k:{'type':'string'} for k in ('blockRef','sourceUrl','quote')},
             'required':['blockRef','sourceUrl','quote']}},'reason':{'type':'string'}},
         'required':['articleJson','sourceBindings','reason']}
     try:
-        progress('writer','본문·독자 과제·이미지 계획 결합 보완 · 출처 원문 유지',handoff)
-        proposal = generate(agent_prompt('writer',
-            'Return a full articleJson by copying the original identity/metadata unchanged. You may revise only contentHtml, readerTask, imagePlans, summary, blocks and readerValue. '
-            'Preserve the exact reader question and satisfy the preserved research readerGoal.requiredAnswers. Correct actual omissions and inconsistent success conditions. '
-            'Use only preserved source evidence; do not invent provider privacy policies, tool menus, prices, experiences, screenshots or completion evidence. '
-            'The maxnote research goal asks checking whether input is used for human review: include this as a pre-input verification question, never an unsupported claim that a specific provider currently does so. '
-            'New safe JPG names and actual step/block mappings are allowed. Use useful clearly captioned conceptual diagrams with readable labels where needed, or no image if it adds no value. '
-            'Never replace required real menu/result captures with invented UI or decorative photos. Acquired real captures alone may be marked capture/original. '
-            'SourceBindings must point to actual body block IDs and exact quote substrings at their preserved source URLs. Explicitly retain unknown limitations and a useful next action.',
-            {'originalArticle':original,'research':research,'preservedSourceEvidence':coupled_source_records(research),
-             'previousRejection':handoff.data.get('imagePlanRework'),
-             'authorizedPublicReplan':('Topnote only: if indispensable Game Bar captures are unavailable, replan to a useful public-verifiable Windows topic supported by the preserved evidence. Only this case may revise title/mainKeyword/reader question; keep topicSlug and all provenance unchanged. Do not claim actual task execution or replace capture proof with generated images.' if allow_public_replan else False)},coupled_visuals=True),response_schema=schema)
-        record.update(rawProposal=proposal,proposalModel=copy.deepcopy(attribution()),status='proposal_returned')
-        handoff.save()
-        candidate = validate_coupled_revision(original,json.loads(proposal['articleJson']),proposal['sourceBindings'],research,allow_public_replan=allow_public_replan)
+        if not recover_saved_json:
+            progress('writer','본문·독자 과제·이미지 계획 결합 보완 · 출처 원문 유지',handoff)
+            proposal = generate(agent_prompt('writer',
+                'Return a full articleJson by copying the original identity/metadata unchanged. You may revise only contentHtml, readerTask, imagePlans, summary, blocks and readerValue. '
+                'Preserve the exact reader question and satisfy the preserved research readerGoal.requiredAnswers. Correct actual omissions and inconsistent success conditions. '
+                'Use only preserved source evidence; do not invent provider privacy policies, tool menus, prices, experiences, screenshots or completion evidence. '
+                'The maxnote research goal asks checking whether input is used for human review: include this as a pre-input verification question, never an unsupported claim that a specific provider currently does so. '
+                'New safe JPG names and actual step/block mappings are allowed. Use useful clearly captioned conceptual diagrams with readable labels where needed, or no image if it adds no value. '
+                'Never replace required real menu/result captures with invented UI or decorative photos. Acquired real captures alone may be marked capture/original. '
+                'SourceBindings must point to actual body block IDs and exact quote substrings at their preserved source URLs. Explicitly retain unknown limitations and a useful next action.',
+                {'originalArticle':original,'research':research,'preservedSourceEvidence':coupled_source_records(research),
+                 'previousRejection':handoff.data.get('imagePlanRework'),
+                 'authorizedPublicReplan':('Topnote only: if indispensable Game Bar captures are unavailable, replan to a useful public-verifiable Windows topic supported by the preserved evidence. Only this case may revise title/mainKeyword/reader question; keep topicSlug and all provenance unchanged. Do not claim actual task execution or replace capture proof with generated images.' if allow_public_replan else False)},coupled_visuals=True),response_schema=schema)
+            record.update(rawProposal=proposal,proposalModel=copy.deepcopy(attribution()),status='proposal_returned')
+            handoff.save()
+        parsed, trailing = parse_coupled_article_json(proposal.get('articleJson'))
+        if recover_saved_json:
+            record.update(jsonRecovery={'parser':'JSONDecoder.raw_decode','trailingCharacters':len(trailing),
+                'trailingSha256':hashlib.sha256(trailing.encode('utf-8')).hexdigest() if trailing else None,
+                'recoveredAt':stamp()},status='proposal_returned')
+            handoff.save()
+        candidate = validate_coupled_revision(original,parsed,proposal['sourceBindings'],research,allow_public_replan=allow_public_replan)
         record.update(normalizedArticle=candidate,status='review_pending')
         handoff.save()
         review_schema={'type':'object','additionalProperties':False,'properties':{

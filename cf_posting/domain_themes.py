@@ -2503,7 +2503,7 @@ def build_final_preview_html(domain: str, title: str, assembled_html: str) -> st
         f'<aside class="sidebar"></aside>'
         f'<main class="main"><div class="wrap" style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:32px 28px;">'
         f'<h1>{safe_title}</h1>'
-        f'<div class="meta">{safe_cat} · 2026-10-18 · 약 5분</div>'
+        f'<div class="meta">{safe_cat}</div>'
         f'<aside class="ad ad-slot adsense-slot adsense-slot--hero-below" data-h2ad="1" data-slot-type="hero-below" aria-label="제목 직하단 반응형 디스플레이 광고"></aside>'
         f'<article class="gs-article content">{body_with_mid_ad}</article>'
         f'<aside class="ad ad-slot adsense-slot adsense-slot--multiplex-bottom" data-h2ad="1" data-slot-type="multiplex-bottom" aria-label="본문 결론 직후 멀티플렉스 추천 광고"></aside>'
@@ -2622,7 +2622,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
     var metaTxt = metaEl ? (metaEl.textContent || '') : '';
     var parts = metaTxt.split(/\\s+·\\s+/).map(function(s){{ return s.trim(); }}).filter(Boolean);
     var cat = parts[0] || (CFG.categories && CFG.categories[0]) || CFG.category;
-    var dateStr = parts[1] || '2026-10-18';
+    var dateStr = /^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(parts[1] || '') ? parts[1] : '';
     var readTime = parts[2] || '약 5분';
     return {{
       h1: h1,
@@ -2709,7 +2709,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
         var byline = document.createElement('div');
         byline.className = 'wt-byline-bar';
         byline.innerHTML =
-          '<div><span class="wt-byline-tag">[이슈기획]</span><strong>' + CFG.editorName + ' 기자</strong> · 입력 ' + info.dateStr + ' 09:30 · 카테고리: ' + info.cat + '</div>' +
+          '<div><span class="wt-byline-tag">[이슈기획]</span><strong>' + CFG.editorName + ' 기자</strong> · 카테고리: ' + info.cat + '</div>' +
           '<div class="wt-fontsize-btns">' +
           '<button type="button" id="wtFontMinus" title="글자 작게">가-</button>' +
           '<button type="button" id="wtFontPlus" title="글자 크게">가+</button>' +
@@ -2807,7 +2807,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
           '<div class="albup-profile-left">' +
           '<div class="albup-avatar">' + (isBurgundy ? '🧾' : '⚖️') + '</div>' +
           '<div><strong style="font-size:15px;color:var(--txt);display:block;">' + CFG.expertName + '</strong>' +
-          '<span style="font-size:12.5px;color:var(--muted);">' + CFG.expertRole + ' · 작성일 ' + info.dateStr + ' · ⏱️ 예상 독서시간 ' + info.readTime + '</span></div></div>' +
+          '<span style="font-size:12.5px;color:var(--muted);">' + CFG.expertRole + ' · ⏱️ 예상 독서시간 ' + info.readTime + '</span></div></div>' +
           '<span class="albup-stamp-badge">' + CFG.expertBadge + '</span>' +
           '</div>' +
           '<div class="albup-summary-3line">' +
@@ -2902,7 +2902,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
         heroCard.innerHTML =
           '<span class="toss-step-chip">' + info.cat + ' · TOSS FEED BRIEF</span>' +
           '<h1 style="margin:0 0 10px;font-size:1.75rem;color:#191F28;">' + info.title + '</h1>' +
-          '<div style="font-size:13px;color:#6B7684;">업데이트 ' + info.dateStr + ' · ' + info.readTime + ' 만에 술술 읽히는 카드형 가이드</div>';
+          '<div style="font-size:13px;color:#6B7684;">' + info.readTime + ' 만에 술술 읽히는 카드형 가이드</div>';
         if (info.h1) info.h1.remove();
         if (info.metaEl) info.metaEl.remove();
         wrap.insertBefore(heroCard, wrap.firstChild);
@@ -3070,7 +3070,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
         '<span class="lp-cover-kicker">MAGAZINE COVER STORY · ' + info.cat + '</span>' +
         '<h1>' + info.title + '</h1>' +
         '<div style="font-size:14px;color:rgba(255,255,255,0.92);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' +
-        '<span>🧭 에디토리얼 코스 가이드</span><span>·</span><span>📅 ' + info.dateStr + '</span><span>·</span><span>⏱️ 읽는 시간 ' + info.readTime + '</span></div>' +
+        '<span>🧭 에디토리얼 코스 가이드</span><span>·</span><span>⏱️ 읽는 시간 ' + info.readTime + '</span></div>' +
         '</div>';
       layout.parentNode.insertBefore(cover, layout);
       if (info.h1) info.h1.style.display = 'none';
@@ -3230,7 +3230,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
         speech.innerHTML =
           '<div style="width:44px;height:44px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">' + CFG.h2IconBadge + '</div>' +
           '<div><strong style="font-size:13.5px;color:var(--pri);display:block;margin-bottom:4px;">에디터의 큐레이션 노트 (Editor&apos;s Note)</strong>' +
-          '<span style="font-size:13.5px;color:var(--txt);line-height:1.6;">오늘 소개하는 <strong>' + info.cat + '</strong> 가이드는 실제 이용자와 큐레이터가 직접 확인한 핵심 포인트만 담았습니다.</span></div>';
+          '<span style="font-size:13.5px;color:var(--txt);line-height:1.6;">오늘 소개하는 <strong>' + info.cat + '</strong> 가이드는 본문에 정리한 내용을 바탕으로 핵심 정보를 안내합니다.</span></div>';
         contentEl.insertBefore(speech, contentEl.firstChild);
 
         Array.from(contentEl.querySelectorAll('h2')).forEach(function(h){{
