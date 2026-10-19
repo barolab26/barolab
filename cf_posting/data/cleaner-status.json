@@ -1,10 +1,10 @@
 {
   "checkedAt": "2026-10-19T20:20:11.743365+09:00",
   "eligibleCount": 9,
-  "processedCount": 0,
-  "publishedCount": 0,
+  "processedCount": 4,
+  "publishedCount": 4,
   "activeJob": {
     "date": "2026-10-19",
-    "domain": "daynote.kr"
+    "domain": "woorinote.kr"
   }
 }
