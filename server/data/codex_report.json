@@ -166,7 +166,7 @@
       "status": "blocked",
       "startedAt": "2026-10-20T00:32:10.698198+09:00",
       "lastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, and 0 publicly published. Catch-up runner PID 18452 is active since 03:34:29 KST; overlapping stage 1 work was not launched. Threads main/followup remain queued for 08:00. KIN snapshot reports 3 today verified and 1 submitted_unverified; Naver blog automation is still dated 10/19, so its 10/20 rollover is unverified. No manual quota reset was applied.",
+      "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Existing catch-up worker PID 22848 is active since 03:40:39 KST, so another stage 1 run was not started. Threads main/followup remain queued for 08:00. KIN reports 3 today verified and 1 submitted_unverified; Naver blog automation source is dated 10/19, leaving 10/20 rollover unverified. No quota reset was applied.",
       "taskProgress": {
         "threadsQueue": [
           {
@@ -190,7 +190,7 @@
         "snapshotSync": "NAS snapshot schema validated; generatedAt=2026-10-19T17:22:21.248509+00:00; complete=True.",
         "dailyQuotas": "Verified against dated source records: Naver has 7 verified reservations for 2026-10-20 across 5 accounts against the 10-slot target; 0 public-verified today, so 3 slots remain unreserved. The public-verification status is current as of 01:31:38 KST. KIN config is globalDailyCap=20/accountDailyCap=10; dated dashboard count is 3 published_verified with 17 global remaining (adinfo0905=8, stone0747=9). Counters are date-scoped; no manual reset was applied."
       },
-      "updatedAt": "2026-10-20T03:36:45.1058721+09:00",
+      "updatedAt": "2026-10-20T03:41:33.4285400+09:00",
       "completedAt": null,
       "failureAt": "2026-10-20T02:28:06.626516+09:00",
       "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
@@ -325,11 +325,11 @@
       ],
       "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
       "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
-      "blockedAt": "2026-10-20T03:36:45.1058721+09:00",
-      "blockedReason": "The latest catch-up-once worker PID 18452 remains active since 03:34:29 KST. Scheduler log continues reporting cleaner overlap skips; pipeline state is idle and the CF queue has not changed, so a second stage 1 run remains unsafe."
+      "blockedAt": "2026-10-20T03:41:33.4285400+09:00",
+      "blockedReason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started."
     }
   ],
-  "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, and 0 publicly published. Catch-up runner PID 18452 is active since 03:34:29 KST; overlapping stage 1 work was not launched. Threads main/followup remain queued for 08:00. KIN snapshot reports 3 today verified and 1 submitted_unverified; Naver blog automation is still dated 10/19, so its 10/20 rollover is unverified. No manual quota reset was applied.",
+  "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Existing catch-up worker PID 22848 is active since 03:40:39 KST, so another stage 1 run was not started. Threads main/followup remain queued for 08:00. KIN reports 3 today verified and 1 submitted_unverified; Naver blog automation source is dated 10/19, leaving 10/20 rollover unverified. No quota reset was applied.",
   "changedFiles": [
     "cf_posting/data/daily_schedule.json",
     "server/data/codex_report.json",
@@ -392,15 +392,15 @@
       "interruptedDomain": "maxnote.kr",
       "previousStage": 2,
       "previousProgressPct": 24,
-      "activeWorkerPid": 18452,
+      "activeWorkerPid": 22848,
       "activeWorkerCommand": "cf_posting/pipeline_runner.py --catch-up-once",
-      "activeWorkerStartedAt": "2026-10-20T03:34:29.997972+09:00",
+      "activeWorkerStartedAt": "2026-10-20T03:40:39.743572+09:00",
       "lockHeld": true,
       "retryStarted": false,
       "overlappingRunPrevented": true,
       "publicPublishing": false,
-      "observedAt": "2026-10-20T03:36:45.1058721+09:00",
-      "reason": "The latest catch-up-once worker PID 18452 remains active since 03:34:29 KST. Scheduler log continues reporting cleaner overlap skips; pipeline state is idle and the CF queue has not changed, so a second stage 1 run remains unsafe.",
+      "observedAt": "2026-10-20T03:41:33.4285400+09:00",
+      "reason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started.",
       "published": 0,
       "cleanerLastCheckedAt": "2026-10-20T03:01:19.549361+09:00"
     },
@@ -449,7 +449,7 @@
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   },
   "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T03:36:45.1058721+09:00",
+  "updatedAt": "2026-10-20T03:41:33.4285400+09:00",
   "failureAt": "2026-10-20T02:28:06.626516+09:00",
   "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
   "attemptHistory": [
@@ -505,10 +505,16 @@
       "status": "blocked_waiting_for_existing_worker",
       "activeWorkerPid": 18452,
       "reason": "The latest catch-up-once worker PID 18452 remains active since 03:34:29 KST. Scheduler log continues reporting cleaner overlap skips; pipeline state is idle and the CF queue has not changed, so a second stage 1 run remains unsafe."
+    },
+    {
+      "observedAt": "2026-10-20T03:41:33.4285400+09:00",
+      "status": "blocked_waiting_for_existing_worker",
+      "activeWorkerPid": 22848,
+      "reason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started."
     }
   ],
   "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
   "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
-  "blockedAt": "2026-10-20T03:36:45.1058721+09:00",
-  "blockedReason": "The latest catch-up-once worker PID 18452 remains active since 03:34:29 KST. Scheduler log continues reporting cleaner overlap skips; pipeline state is idle and the CF queue has not changed, so a second stage 1 run remains unsafe."
+  "blockedAt": "2026-10-20T03:41:33.4285400+09:00",
+  "blockedReason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started."
 }
