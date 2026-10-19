@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-19",
+  "checkedAt": "2026-10-19T05:38:40.826812+00:00",
+  "scope": "four initially failed slots only; original eleven reservation times preserved",
+  "status": "blocked_pending_browser_recovery",
+  "newPublicationsVerified": 0,
+  "targets": [
+    {
+      "domain": "smilenote.kr",
+      "originalTitle": "2026 스마일노트 시니어웰니스 시니어건강·운동 핵심 정보 실전 가이드",
+      "originalSlug": "smilenote-20261019-essential-guide",
+      "scheduledTime": "10:20",
+      "status": "review_required",
+      "reason": "flow_generation_pending",
+      "retryable": false,
+      "nextRetryAt": null,
+      "newPublicationVerified": false,
+      "existingArticleUrls": []
+    },
+    {
+      "domain": "joynote.kr",
+      "originalTitle": "반려견 분리불안 증상 자가진단 및 5단계 안심 훈련법",
+      "originalSlug": "dog-separation-anxiety-training-signs-guide",
+      "scheduledTime": "11:10",
+      "status": "retry_wait",
+      "reason": "cdp_connection_timeout",
+      "retryable": true,
+      "nextRetryAt": "2026-10-19T14:38:30.236522+09:00",
+      "newPublicationVerified": false,
+      "existingArticleUrls": []
+    },
+    {
+      "domain": "must-joy.com",
+      "originalTitle": "감성 가을 캠핑 필수 준비물! 등유 난로 일산화탄소 경보기 안전 가이드",
+      "originalSlug": "autumn-camping-gear-essential-heater-safety-guide",
+      "scheduledTime": "12:00",
+      "status": "review_required",
+      "reason": "duplicate_prevented",
+      "retryable": false,
+      "nextRetryAt": null,
+      "newPublicationVerified": false,
+      "existingArticleUrls": [
+        "https://www.must-joy.com/autumn-camping-kerosene-heater-co-alarm-ventilation",
+        "https://www.must-joy.com/tent-camping-heater-ventilation-co-alarm"
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "originalTitle": "국민연금 조기노령연금 감액률 계산과 소득있는 업무 정지 기준 총정리",
+      "originalSlug": "national-pension-early-receipt-reduction-rate-guide",
+      "scheduledTime": "12:50",
+      "status": "retry_wait",
+      "reason": "cdp_connection_timeout",
+      "retryable": true,
+      "nextRetryAt": "2026-10-19T14:39:10.483917+09:00",
+      "newPublicationVerified": false,
+      "existingArticleUrls": []
+    }
+  ],
+  "futureReservations": {
+    "count": 11,
+    "originalTitleSlugTimePreserved": true,
+    "earlyPublicationRequested": false
+  },
+  "previousPublished": {
+    "domain": "tripmarvel.com",
+    "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+    "unchanged": true
+  },
+  "scheduler": {
+    "task": "BaroLab-CF-Cleaner",
+    "enabledRestored": true,
+    "cooperativeGatePaused": true,
+    "effectivePublishingPaused": true,
+    "resumeCondition": "User resolves unknown-owner empty browser tab; one authorized read-only CDP connection succeeds; supervisor releases cooperative gate. Keep duplicate_prevented and flow_generation_pending slots excluded; resume remaining eligible retries and already-due original reservations without advancing future times.",
+    "reservationDelayReason": "Global cooperative gate currently pauses all CF publication while browser connection and unconfirmed generation are unresolved."
+  },
+  "promptBudgetActual": {
+    "smilenoteKeywordBytes": 35659,
+    "smilenoteResearcherBytes": 56003,
+    "smilenoteWriterBytes": 58944,
+    "limitBytes": 60000
+  },
+  "browser": {
+    "account": "baro76650",
+    "cdpPort": 9420,
+    "emptyTabObserved": true,
+    "emptyTabOwnedByAgent": null,
+    "otherChannelWorkPreserved": true,
+    "emptyTabOwnership": "unknown"
+  },
+  "validation": {
+    "pipelineTestsPassed": 33,
+    "layoutTestsPassed": 19,
+    "testEvidence": "C pipeline and B layout results reviewed by supervisor",
+    "layoutDeployment": {
+      "domains": 16,
+      "verifiedPublicUrls": 80,
+      "evidenceLedger": "server/data/cf-card-layout-deployment.json"
+    },
+    "protectedFiles": {
+      "common/llm_client.py": {
+        "sha256": "0bf00120729d63e8c3a4386e46b61a66fed168075b93ab79750911af0c23dff4",
+        "unchanged": true
+      },
+      "dashboard/settings.html": {
+        "sha256": "1d79f192b2bc97a4d1f52b9fc7eb703555b519b504f5f10cb10c96d26effc599",
+        "unchanged": true
+      }
+    }
+  }
+}
