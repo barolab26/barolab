@@ -353,7 +353,8 @@
             "prepared": 5
           },
           "retryStarted": false,
-          "reason": "Scheduled cleaner owner is active; overlapping invocation skipped."
+          "reason": "Scheduled cleaner owner is active; overlapping invocation skipped.",
+          "commitHash": "0c7714a1197664db307c172db54a5acfd4e76753"
         },
         "naverRolloverAndKinTimeout": {
           "status": "blocked",
@@ -386,7 +387,11 @@
           "reason": "Account-wide hard cap is 50/day and history is unconfirmed; no cap bypass or submission."
         },
         "geminiBlockedAlert": {
-          "status": "pending_afterReportUploadVerification",
+          "status": "sent_verified",
+          "sentAt": "2026-10-20T04:28:23.969484+09:00",
+          "destination": "Gemini desktop / BaroLab project",
+          "text": "코덱스 긴급 보고: CF cleaner가 실행 중이라 중복 재개와 닥터 20건 일괄 수정은 보류했습니다. 지식iN은 제출 전 오류로 중단됐고, SearchAdvisor 800건 요청은 일일 한도(50건)와 확인되지 않은 잔여 예산 때문에 실행하지 않았습니다. 타임아웃 수정·테스트와 보고서/스냅샷 동기화는 완료했습니다.",
+          "evidence": "Exact message visible in BaroLab conversation after send; composer cleared and Gemini response started.",
           "deduplicatedByDirectiveId": true
         },
         "snapshotSync": {
@@ -464,7 +469,11 @@
       "reason": "Account-wide hard cap is 50/day and history is unconfirmed; no cap bypass or submission."
     },
     "geminiBlockedAlert": {
-      "status": "pending_afterReportUploadVerification",
+      "status": "sent_verified",
+      "sentAt": "2026-10-20T04:28:23.969484+09:00",
+      "destination": "Gemini desktop / BaroLab project",
+      "text": "코덱스 긴급 보고: CF cleaner가 실행 중이라 중복 재개와 닥터 20건 일괄 수정은 보류했습니다. 지식iN은 제출 전 오류로 중단됐고, SearchAdvisor 800건 요청은 일일 한도(50건)와 확인되지 않은 잔여 예산 때문에 실행하지 않았습니다. 타임아웃 수정·테스트와 보고서/스냅샷 동기화는 완료했습니다.",
+      "evidence": "Exact message visible in BaroLab conversation after send; composer cleared and Gemini response started.",
       "deduplicatedByDirectiveId": true
     },
     "snapshotSync": {
