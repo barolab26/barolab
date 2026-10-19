@@ -1868,7 +1868,10 @@ def attempt_has_submission_evidence(attempt, base=BASE):
         return False
     folder = Path(attempt['artifactFolder']).resolve()
     if not folder.is_relative_to((base / 'output' / attempt['account']).resolve()):
-        raise RuntimeError('Submission evidence folder outside account output')
+        # Legacy/foreign paths are uninspectable evidence, not proof that no
+        # submission happened. Keep this account blocked without aborting the
+        # recovery plan for every other account. Never read outside its output.
+        return True
     receipt_path = folder / 'reservation-evidence.json'
     if not receipt_path.exists():
         return False
