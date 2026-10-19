@@ -1457,7 +1457,7 @@ def validate_image_plan_revision(original, plans):
             raise ReviewRequired('Image must bind to an actual unchanged reader step and blockRef')
         soup = BeautifulSoup(original.get('contentHtml', ''), 'html.parser')
         block = soup.find(id=str(step.get('blockRef', '')).removeprefix('#'))
-        heading = block.find('h2') if block else None
+        heading = (block if block.name == 'h2' else block.find('h2') or block.find_previous('h2')) if block else None
         headings = soup.find_all('h2')
         if heading is None or type(plan.get('sectionIndex')) is not int or plan['sectionIndex'] != headings.index(heading):
             raise ReviewRequired('Image sectionIndex must match the actual h2 position for its blockRef')
@@ -1485,6 +1485,15 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
     original_hash = digest(handoff.file('article.json'))
     proposal_schema = {'type':'object','additionalProperties':False,'properties':{
         'imagePlansJson':{'type':'string'},'reason':{'type':'string'}},'required':['imagePlansJson','reason']}
+    soup = BeautifulSoup(original.get('contentHtml', ''), 'html.parser')
+    headings = soup.find_all('h2')
+    bindings = []
+    for step in original.get('readerTask', {}).get('steps', []):
+        anchor = str(step.get('blockRef', '')).removeprefix('#')
+        block = soup.find(id=anchor)
+        heading = (block if block.name == 'h2' else block.find('h2') or block.find_previous('h2')) if block else None
+        if heading is not None:
+            bindings.append({'stepId':step['id'],'anchorId':anchor,'sectionIndex':headings.index(heading)})
     progress('writer', '본문·사실·출처 유지 · 독자 과제용 이미지 계획 재제안', handoff)
     proposal = generate(agent_prompt('writer',
         'Return imagePlansJson only as a JSON list. Preserve existing filenames. Bind each plan to an actual readerTask step.id, '
@@ -1492,7 +1501,9 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
         'source=generated, visualType=concept_diagram plans, explicitly captioned 개념도/예시. Never simulate actual '
         'software UI, settings, results, or evidence. If actual UI is essential, explain the blocker; do not fabricate '
         'a diagram as substitute. Unreferenced unnecessary plans may be removed; referenced plans must remain.',
-        {'article.json':original,'previousRejection':previous_attempt.get('independentReview') if previous_attempt else None,'research.md':read_document(handoff.file('research.md'))}),response_schema=proposal_schema)
+        {'article.json':original,'allowedFilenames':[p['filename'] for p in original.get('imagePlans', [])],
+         'actualBindings':bindings,'previousRejection':(previous_attempt.get('independentReview') or previous_attempt.get('validationError')) if previous_attempt else None,
+         'research.md':read_document(handoff.file('research.md'))}),response_schema=proposal_schema)
     proposal_model = copy.deepcopy(attribution())
     handoff.check()
     if digest(handoff.file('article.json')) != original_hash:
