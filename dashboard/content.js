@@ -63,6 +63,7 @@
       const naver=document.createElement('td');
       text(naver,'strong',row.naverIndex==='indexed'?'색인 확인':row.naverIndex==='not_indexed'?'미색인 확인':'미확인');
       text(naver,'small',row.naverInspectionAt?new Date(row.naverInspectionAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'개별 URL 색인 검사 근거 없음');tr.appendChild(naver);
+      if(row.naverIndex!=='indexed' && row.naverInspectionAt) text(naver,'small','색인 확인 근거 부족 · 미색인 판정 아님');
       requestCell(row.googleRequest);
       const index=document.createElement('td');
       text(index,'strong',row.index==='indexed'?'색인 확인':row.index==='not_indexed'?'미색인 확인':'미확인',row.index==='not_indexed'?'content-warning':'');

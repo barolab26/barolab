@@ -88,6 +88,7 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
         inventory_current = fresh(posts.get('checkedAt'), now, 26)
         if inventory_current and posts.get('complete'):
             inventory_domains.append(domain)
+        naver_inspections = {url_key(r.get('url'), domain): r for r in record.get('naverInspection', {}).get('urls', [])}
         inspections = {url_key(r.get('url'), domain): r for r in record.get('google', {}).get('urls', [])}
         source = traffic.get(domain, {}).get('google', {})
         report = source.get('periods', {}).get('month', {})
@@ -107,6 +108,11 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
                 continue
             seen.add(key)
             evidence = inspections.get(key, {})
+            naver_evidence = naver_inspections.get(key, {})
+            naver_index = ('indexed' if naver_evidence.get('indexed') is True
+                           and naver_evidence.get('source') == 'Naver public exact URL search'
+                           and url_key(naver_evidence.get('matchedUrl'), domain) == key
+                           and fresh(naver_evidence.get('checkedAt'), now, 26) else 'unknown')
             index = 'unknown'
             if fresh(evidence.get('checkedAt'), now, 26):
                 index = 'indexed' if evidence.get('indexed') is True else 'not_indexed' if evidence.get('indexed') is False else 'unknown'
@@ -129,10 +135,10 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
                          'naverRequest': naver_receipts.get(key, {'status': 'unknown'}),
                          'googleRequest': google_receipts.get(key, {'status': 'unknown'}),
                          'indexNowRequest': protocol_receipts.get(key, {'status': 'unknown'}),
-                         # No per-URL Naver index inspection source is collected yet.
-                         # Site registration, crawl receipts and IndexNow cannot fill this field.
-                         'naverIndex': 'unknown', 'naverInspectionAt': None,
-                         'dualIndexed': None, 'dualIndexStatus': 'unknown',
+                         'naverIndex': naver_index, 'naverInspectionAt': naver_evidence.get('checkedAt'),
+                         'naverInspectionReason': naver_evidence.get('reason'),
+                         'dualIndexed': True if naver_index == index == 'indexed' else None,
+                         'dualIndexStatus': 'indexed' if naver_index == index == 'indexed' else 'unknown',
                          'inspectionPendingReason': pending_reason,
                          'inspectionAttemptAt': evidence.get('attemptAt'),
                          'coverageState': evidence.get('coverageState'), 'googleCanonical': evidence.get('googleCanonical'),

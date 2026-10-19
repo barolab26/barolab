@@ -1099,6 +1099,8 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
                         record['indexingRequest'] = {**old_request, **new_request}
                         if 'daum' in saved:
                             record['daum'] = saved['daum']
+                        if 'naverInspection' in saved:
+                            record['naverInspection'] = saved['naverInspection']
                         latest.update(schema='dashboard-metrics-v1', checkedAt=stamp(), inventorySites=sites)
                         latest.setdefault('inspectionAutomation', {})['apiCycle'] = dict(cycle)
                         latest.setdefault('sites', {})[site['site_id']] = record
@@ -1122,7 +1124,76 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
             if ui_result:
                 latest['inspectionAutomation']['automaticUi'] = ui_result
             atomic_write(SNAPSHOT, latest)
+        # Read-only, bounded exact-URL checks reuse the existing collection schedule.
+        collect_naver_inspections(site_id, limit=3)
         return read_json(SNAPSHOT)
+
+
+def inspect_naver_public_url(url, client=requests):
+    """Positive exact-URL public search evidence; absence never proves exclusion."""
+    from bs4 import BeautifulSoup
+    from content import url_key
+    domain = (urlparse(url).hostname or '').removeprefix('www.')
+    key = url_key(url, domain)
+    if key is None:
+        raise ValueError('invalid_public_url')
+    query = 'https://search.naver.com/search.naver?where=web&query=' + quote('"' + url + '"', safe='')
+    result = {'url': url, 'indexed': None, 'checkedAt': stamp(),
+              'source': 'Naver public exact URL search', 'queryUrl': query}
+    try:
+        response = client.get(query, timeout=20)
+        if response.status_code != 200:
+            return dict(result, reason='http_' + str(response.status_code))
+        if urlparse(response.url).hostname != 'search.naver.com':
+            return dict(result, reason='unexpected_redirect')
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Exact direct target anchors inside result containers only; never query echoes.
+        for container in soup.select('.title_area, .total_tit, .title_link, .link_tit, .api_txt_lines.total_tit'):
+            links = [container] if container.name == 'a' else container.select('a[href]')
+            for link in links:
+                href = link.get('href', '')
+                if url_key(href, domain) == key:
+                    return dict(result, indexed=True, matchedUrl=href,
+                                resultTitle=link.get_text(' ', strip=True)[:300], reason='exact_result_observed')
+        return dict(result, reason='exact_result_not_observed')
+    except requests.RequestException as exc:
+        return dict(result, reason=type(exc).__name__)
+
+
+def collect_naver_inspections(site_id=None, limit=3):
+    """Bounded read-only search; merge only per-URL evidence under collector lock."""
+    if not 1 <= limit <= 5:
+        raise ValueError('naver_inspection_limit_1_to_5')
+    from content import fresh
+    document = read_json(SNAPSHOT)
+    targets = []
+    now = datetime.now(timezone.utc)
+    for domain, record in document.get('sites', {}).items():
+        if record.get('site', {}).get('platform') != 'cf' or (site_id and domain != site_id):
+            continue
+        old = {row.get('url'): row for row in record.get('naverInspection', {}).get('urls', [])}
+        for url in record.get('posts', {}).get('urls', []):
+            if fresh(old.get(url, {}).get('checkedAt'), now, 26):
+                continue
+            targets.append((old.get(url, {}).get('checkedAt') or '', domain, url))
+    results = []
+    for _, domain, url in sorted(targets)[:limit]:
+        results.append((domain, inspect_naver_public_url(url)))
+        time.sleep(1)
+    with collector_lock() as acquired:
+        if not acquired:
+            return {'status': 'blocked', 'reason': 'metrics_collector_active', 'persisted': 0}
+        latest = read_json(SNAPSHOT)
+        for domain, result in results:
+            record = latest.get('sites', {}).get(domain)
+            if record is None:
+                continue
+            evidence = record.setdefault('naverInspection', {})
+            rows = {r['url']: r for r in evidence.get('urls', [])}
+            rows[result['url']] = result
+            evidence.update(urls=list(rows.values()), checkedAt=stamp(), source='Naver public exact URL search')
+        atomic_write(SNAPSHOT, latest)
+    return {'status': 'observed', 'results': [r for _, r in results], 'persisted': len(results)}
 
 
 def searchadvisor_registration(site, ledger=None):
@@ -1273,6 +1344,7 @@ if __name__ == '__main__':
     sys.path.insert(0, str(ROOT))
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--collect', action='store_true')
+    parser.add_argument('--inspect-naver', action='store_true')
     parser.add_argument('--read-only', action='store_true', help='Collect evidence without sitemap or IndexNow submissions')
     parser.add_argument('--config', type=Path, default=CONFIG)
     parser.add_argument('--site')
@@ -1291,6 +1363,9 @@ if __name__ == '__main__':
         parser.error('--inspect-limit must be 1..50')
     if not 0 <= args.individual_limit <= 10:
         parser.error('--individual-limit must be 0..10')
+    if args.inspect_naver:
+        print(json.dumps(collect_naver_inspections(args.site, min(args.inspect_limit, 5)), ensure_ascii=False))
+        sys.exit(0)
     if args.recover_indexing:
         if not args.account:
             parser.error('--recover-indexing requires --account')
