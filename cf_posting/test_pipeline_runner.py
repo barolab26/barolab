@@ -372,6 +372,43 @@ class SlotIdentityTests(unittest.TestCase):
         self.item={'domain':'joynote.kr','title':'원래 분리불안 질문','slug':'original-topic','scheduledTime':'11:10'}
         self.contract=p.scheduled_slot_contract(self.item)
 
+    def test_research_title_enum_does_not_alias_answer_sections_or_source_ids(self):
+        class CapturedSchema(Exception):pass
+        seen={}
+        goal={'question':self.item['title'],'successCondition':'실제 조건과 절차를 이해한다','requiredAnswers':['정확한 설명']}
+        kw={'title':self.item['title'],'topicSlug':self.item['slug'],'category':'반려동물',
+            'mainKeyword':'분리불안','readerGoal':goal}
+        async def gather(_):
+            return {'sources':[{'id':'S1','url':'https://official.example/source','kind':'primary','text':'관찰된 실제 사실과 조건 설명'}]}
+        def generate(prompt,response_schema=None):
+            seen['schema']=response_schema
+            raise CapturedSchema()
+        with tempfile.TemporaryDirectory() as tmp,patch.dict(p.RUN_CONTEXT,{'slotContract':self.contract},clear=True), \
+             patch.object(p,'observe_prewriting_materials',return_value={'materials':[],'rejectedMaterials':[]}), \
+             patch.object(p,'annotate_prewriting_materials',new=AsyncMock(return_value={'materials':[],'rejectedMaterials':[]})):
+            with self.assertRaises(CapturedSchema):
+                asyncio.run(p.draft_agents('joynote.kr','반려동물',['반려동물'],[],generate,gather,Mock(),Mock(),
+                    fixed={'slotContract':self.contract,'explicitReaderQuestion':self.item['title']},
+                    keyword_checkpoint=(kw,SimpleNamespace(folder=Path(tmp)))))
+        schema=seen['schema'];brief=schema['properties']['answerBrief']['properties']
+        self.assertEqual(brief['finalTitle']['enum'],[self.item['title']])
+        paths=[]
+        def walk(node,path=()):
+            if isinstance(node,dict):
+                if node.get('enum')==[self.item['title']]:paths.append(path)
+                for key,value in node.items():walk(value,path+(key,))
+            elif isinstance(node,list):
+                for index,value in enumerate(node):walk(value,path+(index,))
+        walk(schema)
+        self.assertEqual(paths,[('properties','answerBrief','properties','finalTitle')])
+        section=brief['sections']['items']['properties']
+        for field in ('id','purpose','content','captionFocus'):
+            self.assertEqual(section[field],{'type':'string'})
+        for field in ('factIds','materialIds'):
+            self.assertEqual(section[field]['items'],{'type':'string'})
+        self.assertEqual(brief['directAnswer'],{'type':'string'})
+        self.assertEqual(schema['properties']['facts']['items']['properties']['claim'],{'type':'string'})
+
     def test_planner_enum_and_runtime_reject_topic_drift(self):
         seen=[]
         def generate(prompt,response_schema=None):

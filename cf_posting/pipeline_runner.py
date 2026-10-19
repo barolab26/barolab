@@ -2404,7 +2404,11 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         research_schema['properties']['answerBrief'] = answer_brief_schema(goal, question_context)
         research_schema['required'].append('answerBrief')
         if (fixed or {}).get('slotContract'):
-            research_schema['properties']['answerBrief']['properties']['finalTitle']['enum'] = [fixed['slotContract']['title']]
+            properties = research_schema['properties']['answerBrief']['properties']
+            # answer_brief_schema shares its base string dictionary across many
+            # fields. Replace only this node; in-place enum mutation would force
+            # the title into the answer, every section and even fact/material IDs.
+            properties['finalTitle'] = {**properties['finalTitle'], 'enum':[fixed['slotContract']['title']]}
     acquisition_round = 0
     while True:
         research_data = generate(agent_prompt('researcher',
