@@ -1192,7 +1192,9 @@ def summary(path=SNAPSHOT):
                         'complete': compatible and full_inventory and len(traffic) == len(expected),
                         'period': next(iter(periods)) if compatible else None},
             'revenue': revenue_summary(), 'trafficAnalysis': analysis, 'growthAnalysis': growth,
-            'contentAudit': content_summary(records, analysis)}
+            'contentAudit': content_summary(records, analysis,
+                naver_requests=read_json(DATA / 'searchadvisor-status.json').get('crawlRequests', []),
+                google_requests=read_json(DATA / 'indexing-submissions.json').get('events', []))}
 
 
 def submit_all_indexnow_and_sitemaps(config_path=CONFIG):

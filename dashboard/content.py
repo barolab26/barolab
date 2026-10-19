@@ -49,7 +49,30 @@ def next_action(index, performance, evidence):
     return '개별 색인 검사 필요', '미색인으로 분류하지 않습니다. 개별 URL 검사와 페이지별 검색 실적 수집이 먼저 필요합니다.'
 
 
-def summary(records, analysis, now=None):
+def request_lookup(rows, domain, provider=None):
+    """Index exact URL receipts once; batch protocol receipts remain separate."""
+    result = {}
+    for row in rows:
+        if provider is not None and row.get('provider') != provider:
+            continue
+        at = row.get('completedAt') or row.get('checkedAt') or row.get('at') or row.get('reservedAt')
+        try:
+            timestamp = datetime.fromisoformat(at).timestamp()
+        except (TypeError, ValueError):
+            continue
+        for url in [row.get('url')] + (row.get('urls') or []):
+            key = url_key(url, domain)
+            if key is not None and timestamp >= result.get(key, {}).get('_timestamp', float('-inf')):
+                result[key] = {'status': row.get('status', 'unknown'), 'at': at, '_timestamp': timestamp}
+    return result
+
+
+def request_evidence(rows, url, domain, provider=None):
+    key = url_key(url, domain)
+    return request_lookup(rows, domain, provider).get(key, {'status': 'unknown', 'at': None})
+
+
+def summary(records, analysis, now=None, naver_requests=None, google_requests=None):
     now = now or datetime.now(timezone.utc)
     traffic = {r['site']['site_id']: r for r in analysis.get('sites', [])}
     rows, source_domains, inventory_domains = [], [], []
@@ -59,6 +82,9 @@ def summary(records, analysis, now=None):
         if site.get('platform') != 'cf':
             continue
         domain, posts = site['site_id'], record.get('posts', {})
+        naver_receipts = request_lookup(naver_requests or [], domain)
+        google_receipts = request_lookup(google_requests or [], domain, 'gsc')
+        protocol_receipts = request_lookup(google_requests or [], domain, 'indexnow_naver')
         inventory_current = fresh(posts.get('checkedAt'), now, 26)
         if inventory_current and posts.get('complete'):
             inventory_domains.append(domain)
@@ -100,6 +126,13 @@ def summary(records, analysis, now=None):
             action, explanation = next_action(index, performance, evidence)
             rows.append({'domain': domain, 'url': url, 'index': index, 'inspectionAt': evidence.get('checkedAt'),
                          'inspectionStale': success_stale,
+                         'naverRequest': naver_receipts.get(key, {'status': 'unknown'}),
+                         'googleRequest': google_receipts.get(key, {'status': 'unknown'}),
+                         'indexNowRequest': protocol_receipts.get(key, {'status': 'unknown'}),
+                         # No per-URL Naver index inspection source is collected yet.
+                         # Site registration, crawl receipts and IndexNow cannot fill this field.
+                         'naverIndex': 'unknown', 'naverInspectionAt': None,
+                         'dualIndexed': None, 'dualIndexStatus': 'unknown',
                          'inspectionPendingReason': pending_reason,
                          'inspectionAttemptAt': evidence.get('attemptAt'),
                          'coverageState': evidence.get('coverageState'), 'googleCanonical': evidence.get('googleCanonical'),

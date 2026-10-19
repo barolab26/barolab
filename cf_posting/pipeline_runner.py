@@ -3654,6 +3654,64 @@ def enhance_prompt_for_korean_blog(prompt: str) -> str:
         'NO readable screens, NO watermark. Aspect ratio 16:9.'
     )
 
+def reusable_flow_images(images_dir, plans):
+    """Reuse only same-artifact bytes bound to the exact planned generation prompt.
+
+    This is provenance validation, not visual approval. Independent image and
+    whole-document review still runs after reuse.
+    """
+    images_dir = Path(images_dir).resolve()
+    try:
+        records = json.loads((images_dir/'flow-generation.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return []
+    if not isinstance(records, list):
+        return []
+    reusable = []
+    for plan in plans:
+        name = str(plan.get('filename', ''))
+        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg', name):
+            continue
+        target = images_dir/name
+        if not target.is_file() or target.is_symlink() or target.resolve().parent != images_dir:
+            continue
+        prompt_hash = hashlib.sha256(enhance_prompt_for_korean_blog(plan.get('prompt', '')).encode()).hexdigest()
+        matches = [r for r in records if isinstance(r, dict) and r.get('filename') == name]
+        if len(matches) != 1:
+            continue
+        record = matches[0]
+        if (record.get('status') != 'downloaded' or record.get('promptSha256') != prompt_hash
+                or not record.get('sha256') or record['sha256'] != digest(target)):
+            continue
+        try:
+            validate_images([target], [plan])
+        except (ReviewRequired, ValueError, OSError):
+            continue
+        reusable.append(name)
+    return reusable
+
+
+def record_flow_capture_required(output_dir, article, plans, reason):
+    """Preserve the draft and emit actionable needs, never manufacture UI evidence."""
+    output_dir = Path(output_dir)
+    path = output_dir/'capture-request.json'
+    try:
+        request = json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {}
+    except (OSError, ValueError):
+        request = {}
+    if not isinstance(request, dict):
+        request = {}
+    request.update(status='capture_required', topicSlug=article.get('topicSlug'),
+        title=article.get('title'), checkedAt=stamp(), reason=reason,
+        articleSha256=digest(output_dir/'article.json'),
+        preservedDraft=str(output_dir/'article.json'),
+        requiredAssets=[{k: p.get(k) for k in ('filename', 'source', 'stepId', 'anchorId', 'caption', 'prompt')} for p in plans],
+        nextAction='Recover the dedicated Flow browser and resume this existing draft, or acquire task-matching actual captures with source/step evidence. Do not substitute unrelated photos, fabricated UI, or decorative diagrams. Image and layout reviewers must approve before prepared.',
+        independentReviewRequired=True, prepared=False)
+    path.write_text(json.dumps(request, ensure_ascii=False, indent=2), encoding='utf-8')
+    return path
+
+
 async def generate_flow_images_in_browser(flow_page, blog_info, completed_ids, images_dir, progress_callback=None):
     from common.browser_session import flow_generation_lock
     async with flow_generation_lock():
@@ -3687,6 +3745,13 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
     if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg", n) for n in names) or len(set(n.lower() for n in names)) != len(names):
         raise ValueError("Safe unique JPG image filenames required before Flow")
 
+    # Keep provenance for already reused assets while generating only missing plans.
+    try:
+        prior_evidence = json.loads(evidence_file.read_text(encoding='utf-8'))
+        if isinstance(prior_evidence, list):
+            generation_evidence = [r for r in prior_evidence if isinstance(r, dict) and r.get('filename') not in names]
+    except (OSError, ValueError):
+        pass
     client = None
     if flow_page is not None:
         # Flow's render loop may pause in a background tab even when CDP responds.
@@ -4404,9 +4469,6 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
             (output_dir/'capture-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
             extra_outputs.append('capture-manifest.json')
         if generated_plans:
-            if flow_page is None:
-                request = write_capture_request(output_dir, ai_result)
-                raise ReviewRequired('capture_required: 외부 브라우저 모드는 생성사진을 자동 제작하지 않습니다: ' + str(request))
             reuse = bool(revision_post and (RUN_CONTEXT.get('stylePhotoRepair') or os.environ.get('CF_REUSE_VERIFIED_IMAGES') == '1'))
             if reuse:
                 original_by_name = {p['filename']: p for p in original_article['imagePlans']}
@@ -4418,7 +4480,19 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                     validate_images([original_path], [old_plan])
                     shutil.copy2(original_path, images_dir/plan['filename'])
             else:
-                await generate_flow_images_in_browser(flow_page, {**blog_info, 'imagePlans': generated_plans}, completed_ids, images_dir)
+                reusable = reusable_flow_images(images_dir, generated_plans)
+                pending_plans = [p for p in generated_plans if p['filename'] not in reusable]
+                if pending_plans and flow_page is None:
+                    request = record_flow_capture_required(output_dir, ai_result, pending_plans, 'flow_browser_unavailable')
+                    raise ReviewRequired('capture_required: ' + str(request))
+                if pending_plans:
+                    try:
+                        await generate_flow_images_in_browser(flow_page, {**blog_info, 'imagePlans': pending_plans}, completed_ids, images_dir)
+                    except Exception as exc:
+                        if 'Timeout' not in type(exc).__name__:
+                            raise
+                        request = record_flow_capture_required(output_dir, ai_result, pending_plans, 'flow_timeout:' + type(exc).__name__)
+                        raise ReviewRequired('capture_required: Flow timed out; existing draft preserved: ' + str(request)) from exc
         image_checks = validate_images(generated_images, img_plans)
         visual_review = review_visual_assets(ai_result, img_plans, generated_images, call_model_json, manifest,
                                             handoff=handoff, attribution=current_attribution)

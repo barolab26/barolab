@@ -46,6 +46,24 @@
       const link=text(title,'a',decoded(new URL(row.url).pathname).slice(1) || row.domain);
       link.href=row.url;link.target='_blank';link.rel='noopener noreferrer';
       text(title,'small',`${row.domain}${row.inventoryStale?' · 글 목록 재확인 필요':''}`);tr.appendChild(title);
+      const requestCell = (request) => {
+        const cell=document.createElement('td'), status=request?.status || 'unknown';
+        const names={requested:'요청 접수',request_received:'수집 요청 접수',reserved:'제출 결과 미확인',unknown:'미확인',failed:'요청 실패',blocked:'요청 보류'};
+        text(cell,'strong',names[status] || '접수 미확인');
+        if(request?.at) text(cell,'small',new Date(request.at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}));
+        text(cell,'small','요청 접수는 색인 완료가 아닙니다');tr.appendChild(cell);return cell;
+      };
+      const naverRequest=requestCell(row.naverRequest);
+      const protocol=row.indexNowRequest;
+      if(protocol && protocol.status!=='unknown') {
+        const accepted=['ping_accepted','accepted_pending_key_check'].includes(protocol.status);
+        text(naverRequest,'small',`IndexNow 프로토콜: ${accepted?'접수':'접수 미확인'} · 서치어드바이저 접수와 별도`);
+        if(protocol.at) text(naverRequest,'small',new Date(protocol.at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}));
+      }
+      const naver=document.createElement('td');
+      text(naver,'strong',row.naverIndex==='indexed'?'색인 확인':row.naverIndex==='not_indexed'?'미색인 확인':'미확인');
+      text(naver,'small',row.naverInspectionAt?new Date(row.naverInspectionAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'개별 URL 색인 검사 근거 없음');tr.appendChild(naver);
+      requestCell(row.googleRequest);
       const index=document.createElement('td');
       text(index,'strong',row.index==='indexed'?'색인 확인':row.index==='not_indexed'?'미색인 확인':'미확인',row.index==='not_indexed'?'content-warning':'');
       if(row.inspectionAt) text(index,'small',`${row.inspectionStale?'이전 검사: ':'검사: '}${new Date(row.inspectionAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})}`);
@@ -55,6 +73,9 @@
       if(row.googleCanonical) text(index,'small',`Google 대표 URL: ${row.googleCanonical}`);
       if(row.requestOutcome==='requested') text(index,'small','색인 요청 접수 · 완료 미확인');
       tr.appendChild(index);
+      const dual=document.createElement('td');
+      const both=row.index==='indexed' && row.naverIndex==='indexed';
+      text(dual,'strong',both?'양사 색인 확인':'양사 확인 대기',both?'status-badge':'');tr.appendChild(dual);
       const performance=document.createElement('td');
       if(row.search){
         const s=row.search;
@@ -66,7 +87,7 @@
       tr.appendChild(performance);
       const action=document.createElement('td');text(action,'strong',row.action);text(action,'small',row.explanation);tr.appendChild(action);body.appendChild(tr);
     }
-    if(!rows.length){const tr=document.createElement('tr');const td=text(tr,'td','조건에 맞는 글 없음');td.colSpan=4;body.appendChild(tr);}
+    if(!rows.length){const tr=document.createElement('tr');const td=text(tr,'td','조건에 맞는 글 없음');td.colSpan=8;body.appendChild(tr);}
   }
   for(const id of ['content-domain','content-bucket','content-query']) {
     $(id).addEventListener('input',()=>{page=0;render();});
