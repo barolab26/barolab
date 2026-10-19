@@ -1,0 +1,1439 @@
+{
+  "schemaVersion": 1,
+  "revision": "20261019_vertical_cards_v3",
+  "checkedAt": "2026-10-19T04:51:57.991834+00:00",
+  "status": "public_html_verified",
+  "domainCount": 16,
+  "normalPublicPageCount": 80,
+  "publicPassedCount": 80,
+  "verificationScope": "HTTP 200, exact final CSS, single owned style, every home/category card thumbnail and full-width body DOM; browser geometry tested separately on Tripmarvel and Mustpick",
+  "tests": {
+    "cardLayoutAndExistingSeo": 19,
+    "passed": 19,
+    "mustpickActualRendererAndClientScriptSyntax": true
+  },
+  "contentWrites": 0,
+  "indexingSubmissions": 0,
+  "modelCalls": 0,
+  "protectedFiles": {
+    "common/llm_client.py": "0bf00120729d63e8c3a4386e46b61a66fed168075b93ab79750911af0c23dff4",
+    "dashboard/settings.html": "1d79f192b2bc97a4d1f52b9fc7eb703555b519b504f5f10cb10c96d26effc599"
+  },
+  "notes": [
+    "Initial stale edge responses were retained as unverified until normal URLs returned the final revision.",
+    "Existing ads, scripts and verification tags were preserved; no ad nodes were modified.",
+    "Mustpick featured cards and incremental cards share the same layout; missing images retain neutral placeholders."
+  ],
+  "sites": [
+    {
+      "domain": "must-good.com",
+      "worker": "mustgood",
+      "route": {
+        "verified": true,
+        "route": "www.must-good.com/*",
+        "worker": "mustgood"
+      },
+      "deployedAt": "2026-10-19T04:49:15.931349+00:00",
+      "originalHeadSha256": "bbe0759cc63dabe61e7d1207db08397c51dcc5c3ed4d374cf702680b618a9b50",
+      "finalHeadSha256": "2a5cd3148f3d6e38a7104169662ecf8e996c00b1bfc9907ac0d0bc96b5480dcc",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "publicVerification": {
+        "domain": "must-good.com",
+        "checkedAt": "2026-10-19T04:50:07.725461+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.must-good.com/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "bce4fd8b893754abd8931a7ebc1ced780f1b7a89c68ce1483e519d67aa9e49eb",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-good.com/?cat=%EC%A0%95%EB%B6%80%EC%A7%80%EC%9B%90%EA%B8%88%EC%86%8D%EB%B3%B4",
+            "httpStatus": 200,
+            "cardCount": 2,
+            "imageCount": 2,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "92e909b0261addfeff2374d94c0ecdc3e9c33af4dd671c35526741f5729a53f1",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-good.com/?cat=%EC%B2%AD%EB%85%84%C2%B7%EC%9E%A5%EB%85%84%EB%B3%B5%EC%A7%80",
+            "httpStatus": 200,
+            "cardCount": 3,
+            "imageCount": 3,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "1093c28e2efba61cf314743ffda3cc7c912b8320e0cb38e69cf8ab7255c1b80e",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-good.com/?cat=%EB%AF%BC%EC%9B%90%C2%B7%ED%96%89%EC%A0%95%EA%B8%B0%ED%9A%8D",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "0ff4ba6377bfea38490d0a1910f91e9706d72d467b48dd83ba6055f3edfe1d15",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-good.com/?cat=%EC%84%B8%EA%B8%88%C2%B7%ED%99%98%EA%B8%89%EC%9D%B4%EC%8A%88",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "2fc445d74d899cbdc314fe3fde6a8565d71a0f3f4365dc5e9eb642c1b90ea3c7",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "baronote.kr",
+      "worker": "baronote",
+      "route": {
+        "verified": true,
+        "route": "www.baronote.kr",
+        "worker": "baronote"
+      },
+      "deployedAt": "2026-10-19T04:49:17.512782+00:00",
+      "originalHeadSha256": "5aad75aabe38c1c8a28388839510ac55ff20b6e8ec82b7c7c51cc74b49a796cb",
+      "finalHeadSha256": "a41f4945b157304e533cca87f6e0061df5658b7b1c8fb2f6c6af0c87d33a9d9d",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "fefbcead05d764121ac2aea86d65016ae9372d7b37de0938869f933e4539ff00",
+      "publicVerification": {
+        "domain": "baronote.kr",
+        "checkedAt": "2026-10-19T04:51:33.033419+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.baronote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4d6216c048c71116c82936baa793b666e6d6a43c68f6c1a79b41232b8d213570",
+            "passed": true
+          },
+          {
+            "url": "https://www.baronote.kr/?cat=%EA%B5%AD%EB%AF%BC%C2%B7%EA%B8%B0%EC%B4%88%EC%97%B0%EA%B8%88",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "d9e3dc3f796b2e31d926e2982fc5b54fd2a319dc4f294f5651f63257ad7fb575",
+            "passed": true
+          },
+          {
+            "url": "https://www.baronote.kr/?cat=%EB%8C%80%EC%B6%9C%C2%B7%EA%B8%88%EB%A6%AC%EB%B9%84%EA%B5%90",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "5df3c95ed5714a7fd919fe69756a974d303368ceae93a45a28fa4f8d1b0bfa5d",
+            "passed": true
+          },
+          {
+            "url": "https://www.baronote.kr/?cat=%EC%8B%A0%EC%9A%A9%C2%B7%EC%B9%B4%EB%93%9C%ED%98%9C%ED%83%9D",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "e74a27400aa8af77a70fd2f894640a3e390e208e26805f9220f363f2c49ee799",
+            "passed": true
+          },
+          {
+            "url": "https://www.baronote.kr/?cat=%EB%B3%B4%ED%97%98%C2%B7%EC%A0%88%EC%84%B8%EC%A0%84%EB%9E%B5",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "de54ed22f0cf64a339bc519d72126adcc101b7414c21edc73a7a4bf7d4918620",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "worker": "justinfo",
+      "route": {
+        "verified": true,
+        "route": "www.justinfo.co.kr/*",
+        "worker": "justinfo"
+      },
+      "deployedAt": "2026-10-19T04:49:15.488299+00:00",
+      "originalHeadSha256": "d440a1aa10edd39c7c424e9555f33ee3bb74ec2f50bf6411f1e98bef73f91ca9",
+      "finalHeadSha256": "aab97e623d85482091ee3279d8f3207a6ebf44e5ff129a76a59f9f54d200120f",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "4fbe95d797363f338e2491168718d3d8b7672d981606c6e09764b1b8d1219043",
+      "publicVerification": {
+        "domain": "justinfo.co.kr",
+        "checkedAt": "2026-10-19T04:50:07.448612+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.justinfo.co.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "9040eba1d294df5be956695578549360a6b2385ed7a4947b7921321fb7ed76f3",
+            "passed": true
+          },
+          {
+            "url": "https://www.justinfo.co.kr/?cat=%EC%84%B8%EB%AC%B4%C2%B7%EC%A0%88%EC%84%B8%EC%B9%BC%EB%9F%BC",
+            "httpStatus": 200,
+            "cardCount": 2,
+            "imageCount": 2,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "6be51b4a372f5fb3e3cda16efda53d0513acc0d2ef088ab6f15aa17edb821649",
+            "passed": true
+          },
+          {
+            "url": "https://www.justinfo.co.kr/?cat=%EA%B7%BC%EB%A1%9C%C2%B7%EC%8B%A4%EC%97%85%EA%B8%89%EC%97%AC%EB%85%B8%EB%AC%B4",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "2d1dc2b14928fc384e91b7336e0c9e08b7235230a936ae7fd268eb8047bd462a",
+            "passed": true
+          },
+          {
+            "url": "https://www.justinfo.co.kr/?cat=%EC%86%8C%EB%B9%84%EC%9E%90%ED%99%98%EB%B6%88%C2%B7%EB%B6%84%EC%9F%81",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "102ad2e954248b48c8f7af149e41856a9304e73f3a4c04461b66b166b173f2b1",
+            "passed": true
+          },
+          {
+            "url": "https://www.justinfo.co.kr/?cat=%EC%83%9D%ED%99%9C%EB%B2%95%EB%A5%A0%C2%B7%EA%B3%BC%ED%83%9C%EB%A3%8C",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4881de4613dbb64617790775740a9b2cae79f2acc6dec5f819764b055e2c9091",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "topnote.kr",
+      "worker": "topnote",
+      "route": {
+        "verified": true,
+        "route": "www.topnote.kr",
+        "worker": "topnote"
+      },
+      "deployedAt": "2026-10-19T04:49:20.668079+00:00",
+      "originalHeadSha256": "27da83ccdec26d63d750ed1a04c43c0bd62e53ce1b0ced9a85a42af882f0fc00",
+      "finalHeadSha256": "aa19a854a7e1dfd25e3e7866a27c3b3a876105add65839b958bcf7792570ce94",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "publicVerification": {
+        "domain": "topnote.kr",
+        "checkedAt": "2026-10-19T04:50:06.654854+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.topnote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "91304fa183db9d90f38fc74c0978a764e2b80062bea812d538ad0673d681a923",
+            "passed": true
+          },
+          {
+            "url": "https://www.topnote.kr/?cat=%EC%9C%88%EB%8F%84%EC%9A%B0%C2%B7%EB%A7%A5%20%EC%84%A4%EC%A0%95",
+            "httpStatus": 200,
+            "cardCount": 2,
+            "imageCount": 2,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "32879bd6f9257c2218b83b74a69551805c7ec1ec5a3184ca027ba0478aa079b3",
+            "passed": true
+          },
+          {
+            "url": "https://www.topnote.kr/?cat=%EC%8A%A4%EB%A7%88%ED%8A%B8%ED%8F%B0%C2%B7%ED%86%B5%EC%8B%A0",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "99b933d6937f63d5a7b93f0274f8250f839e1d1fdbced9a39baa8cc0fd2aad9f",
+            "passed": true
+          },
+          {
+            "url": "https://www.topnote.kr/?cat=%EA%B5%AC%EA%B8%80%C2%B7%EC%98%A4%ED%94%BC%EC%8A%A4%ED%8C%81",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "38ecabd28f1be3afe85d93993c0806412abdccbe5643c77e7ae27e1c398d4525",
+            "passed": true
+          },
+          {
+            "url": "https://www.topnote.kr/?cat=%EB%B3%B4%EC%95%88%C2%B7%EA%B3%84%EC%A0%95%EB%B3%B5%EA%B5%AC",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4a19f7734d1faeebcefdd5b03e067974d28b6a75d48a4f5f1761ebbc74a9dfee",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "meganote.kr",
+      "worker": "meganote",
+      "route": {
+        "verified": true,
+        "route": "www.meganote.kr/*",
+        "worker": "meganote"
+      },
+      "deployedAt": "2026-10-19T04:49:23.711336+00:00",
+      "originalHeadSha256": "5f1ea47d92164e78da9215ec3f910c2b798deef71a42c702636a1ea18b00728f",
+      "finalHeadSha256": "09ab199b08578740398ab2e1b3a43639cc5147d03775c3a778912e9fa3a173df",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "b3f7c82f8ffdc10f44c0463426a0a857b05ac0fe14b29600f4fa57d5e2d8f096",
+      "publicVerification": {
+        "domain": "meganote.kr",
+        "checkedAt": "2026-10-19T04:50:09.420388+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.meganote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "9f3e2de3d41a1f35c02d3413b1fc02920d0ecff9f30c6806039d1daff76c5663",
+            "passed": true
+          },
+          {
+            "url": "https://www.meganote.kr/?cat=%EB%B6%80%EB%8F%99%EC%82%B0%C2%B7%EC%B2%AD%EC%95%BD%ED%94%BC%EB%93%9C",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "2f19942f1e20fedea64dbf9dc746281f6afe245ae7b9efb4d2a0f81db639c63b",
+            "passed": true
+          },
+          {
+            "url": "https://www.meganote.kr/?cat=%EC%9E%90%EB%8F%99%EC%B0%A8%C2%B7%EC%A0%84%EA%B8%B0%EC%B0%A8%EB%B3%B4%EC%A1%B0%EA%B8%88",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "6ab95679bcd9d22302d6ba734af081af6c9851bb97317242740d1628a90c5cfe",
+            "passed": true
+          },
+          {
+            "url": "https://www.meganote.kr/?cat=%EB%8B%A4%EC%9D%B4%EB%A0%89%ED%8A%B8%EB%B3%B4%ED%97%98%C2%B7%ED%8A%B9%EC%95%BD",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "c016be12bd6bece4292812d626a28035155c6813b091d0c2bbe0897bcaeeaf78",
+            "passed": true
+          },
+          {
+            "url": "https://www.meganote.kr/?cat=%EC%83%9D%ED%99%9C%EA%B8%88%EC%9C%B5%C2%B7%EC%A0%88%EC%95%BD%ED%8C%81",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "28966df39c2d48c0a951ce6b0cc5fcd0f9e02f3dcf6282e8fc1b8624c13b4b9e",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "smilenote.kr",
+      "worker": "smilenote",
+      "route": {
+        "verified": true,
+        "route": "www.smilenote.kr",
+        "worker": "smilenote"
+      },
+      "deployedAt": "2026-10-19T04:49:22.627254+00:00",
+      "originalHeadSha256": "fce51c205ba61dfc3ebf697e1eecd90489c77f4fc8712e589185f48db44bd744",
+      "finalHeadSha256": "08a80573089ede4720703922b2e428049f7c42d1e26c8d16efd7f3ce091a097b",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "publicVerification": {
+        "domain": "smilenote.kr",
+        "checkedAt": "2026-10-19T04:50:11.191565+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.smilenote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "57f9bec3fa7c6dd645267482b7f74c656c9b936d062e9e8e4fb9510083871b09",
+            "passed": true
+          },
+          {
+            "url": "https://www.smilenote.kr/?cat=%EC%97%B0%EA%B8%88%C2%B7%EC%9D%80%ED%87%B4%EC%84%A4%EA%B3%84",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "36142fb2b72b94faea5e5d5699c91d180fb924d02c79ef28f4beeccd981193cf",
+            "passed": true
+          },
+          {
+            "url": "https://www.smilenote.kr/?cat=%EC%8B%9C%EB%8B%88%EC%96%B4%ED%98%9C%ED%83%9D%C2%B7%EC%9A%B0%EB%8C%80",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4d8f30c3c14ed16f1c5cfcc5d503c4eb985cf285d1f6ccf391737f8b757dc2f8",
+            "passed": true
+          },
+          {
+            "url": "https://www.smilenote.kr/?cat=%EC%A4%91%EC%9E%A5%EB%85%84%EA%B1%B4%EA%B0%95%C2%B7%EC%9A%B4%EB%8F%99",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "e44d0310bd6f1e146fda3a8bee4f6bcdcf7076caf56188aeb2636745d8848cbc",
+            "passed": true
+          },
+          {
+            "url": "https://www.smilenote.kr/?cat=%EB%B3%B4%EC%A1%B0%EA%B8%B0%EA%B8%B0%C2%B7%EB%8F%8C%EB%B4%84%EC%A7%80%EC%9B%90",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "104e09838c6af23eb71d279eceef7b7daf210f854e162442e19f98433f5fd151",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "healthcox.com",
+      "worker": "healthcox",
+      "route": {
+        "verified": true,
+        "route": "www.healthcox.com/*",
+        "worker": "healthcox"
+      },
+      "deployedAt": "2026-10-19T04:49:27.735539+00:00",
+      "originalHeadSha256": "72a99476173a88729511cc8e279fe66352fc01119981482930c544f96cd650d3",
+      "finalHeadSha256": "0b85dd42ea47bc047435a9a6425f4d684b60fbacf58d3fcea918e2e21e2e6c84",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "d132cecd4245ae0bc0ef27812fb665bbe3c6e33b7fd0396a017c55cfc9319ad1",
+      "publicVerification": {
+        "domain": "healthcox.com",
+        "checkedAt": "2026-10-19T04:51:33.265432+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.healthcox.com/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "c388a2ed0644259cf961b6b3c694bbf16ae4c3989c6ebda03aeba16b10373688",
+            "passed": true
+          },
+          {
+            "url": "https://www.healthcox.com/?cat=%EA%B4%80%EC%A0%88%C2%B7%ED%86%B5%EC%A6%9D%EC%BC%80%EC%96%B4",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "e5dc67201899247990425e637ceee1581dd7aa4271e6767371cf624826b2efdc",
+            "passed": true
+          },
+          {
+            "url": "https://www.healthcox.com/?cat=%EA%B5%AD%EA%B0%80%EA%B1%B4%EA%B0%95%EA%B2%80%EC%A7%84",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "741901765e1441d6511399fb48cae9dfd85062f916b6748cb768fdcb2ae7ec86",
+            "passed": true
+          },
+          {
+            "url": "https://www.healthcox.com/?cat=%EB%A7%8C%EC%84%B1%EC%A7%88%ED%99%98%C2%B7%ED%98%88%EA%B4%80",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "711bdd7e8cd36a5f8f583ad39eb655808768d40d637bbd5aa74205b9db5b7af3",
+            "passed": true
+          },
+          {
+            "url": "https://www.healthcox.com/?cat=%EC%88%98%EB%A9%B4%C2%B7%EC%98%81%EC%96%91%EC%9D%98%ED%95%99",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "80f2881a225c96ef4abca1cc59a3b5ff67d7012841e5fdd22f1cb57c79ab3aa6",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "maxnote.kr",
+      "worker": "maxnote",
+      "route": {
+        "verified": true,
+        "route": "www.maxnote.kr",
+        "worker": "maxnote"
+      },
+      "deployedAt": "2026-10-19T04:49:28.092192+00:00",
+      "originalHeadSha256": "729339c796866cb37d269777cee1859cf9caa6c851460d84a5a2498d44751fd7",
+      "finalHeadSha256": "7deb23c0c35cab4ab19ac7e0ef5ded8c47b51e8e460d4fd1647f07f1b64e953e",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "771ebb66a1dd07c85be3a840eae4e20cf974088c434b6bb71ccdaaf0cb5f0496",
+      "publicVerification": {
+        "domain": "maxnote.kr",
+        "checkedAt": "2026-10-19T04:50:10.426673+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.maxnote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "1feccd1c0e29cf0879df98b1500b1516608ca21693578fe94e2a1aaca847a1e0",
+            "passed": true
+          },
+          {
+            "url": "https://www.maxnote.kr/?cat=AI%ED%88%B4%20%EC%8B%A4%EC%A0%84%EA%B0%80%EC%9D%B4%EB%93%9C",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4e8c11bbdb00089a1652a867cb388b352fb0b0bce5b87b11c4ced4dbcd16d272",
+            "passed": true
+          },
+          {
+            "url": "https://www.maxnote.kr/?cat=%EC%97%85%EB%AC%B4%EC%9E%90%EB%8F%99%ED%99%94%C2%B7%EB%85%B8%EC%85%98",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "6793cdf1fc51fef277f2f34a1c4480a4550da120b46857d4af034995fe265edf",
+            "passed": true
+          },
+          {
+            "url": "https://www.maxnote.kr/?cat=%ED%81%AC%EB%A6%AC%EC%97%90%EC%9D%B4%ED%84%B0%EB%8F%84%EA%B5%AC",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "666d89e79e2e6d52851d4e4ea2b7e1b473c6ca24670eff090a529949c0128f97",
+            "passed": true
+          },
+          {
+            "url": "https://www.maxnote.kr/?cat=IT%ED%8A%B8%EB%A0%8C%EB%93%9C%EB%B6%84%EC%84%9D",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "d8239751ed4646a04687fc3dd2fc06e2bca60bf4429bc43c0196ef8616ee0497",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "must-joy.com",
+      "worker": "mustjoy",
+      "route": {
+        "verified": true,
+        "route": "www.must-joy.com/*",
+        "worker": "mustjoy"
+      },
+      "deployedAt": "2026-10-19T04:49:33.175895+00:00",
+      "originalHeadSha256": "8b7a0d2baa8b86960dd7d60c13008d99560f613760c6fcb3d307df8da72e336e",
+      "finalHeadSha256": "a7352166766964c3c7d9001a3581c403673f1a66de04897c2ee33526504b5e23",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "c4fab76c7a8a995467899ebc1eb2a3133313d6d42ef956aa7f9abe1ea91dda7f",
+      "publicVerification": {
+        "domain": "must-joy.com",
+        "checkedAt": "2026-10-19T04:50:13.994173+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.must-joy.com/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "c9e5134408ba315130a73a2727cdd682d33862d52428bb2924cf3ad065482e45",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-joy.com/?cat=%EB%A1%9C%EC%BB%AC%EB%A7%9B%EC%A7%91%C2%B7%EC%9B%A8%EC%9D%B4%ED%8C%85",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4893f07882c2634bf2d3754ebd31a8e1b59bc610f1eb771efb83330ed4ec09f3",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-joy.com/?cat=%EA%B0%90%EC%84%B1%EC%B9%B4%ED%8E%98%C2%B7%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "dad4ae0ef3d6017f25fb733b80a632d703f0ccfba3846a142ee0e0920220c18c",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-joy.com/?cat=%EB%AC%B8%ED%99%94%C2%B7%EC%A0%84%EC%8B%9C%EB%A6%AC%EB%B7%B0",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "0d5dffba2ea0e8d01a6bdf86672d19effd3f270c9ed4377c5a46983c22d937d7",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-joy.com/?cat=%ED%8A%B9%EC%82%B0%EB%AC%BC%C2%B7%EB%AF%B8%EC%8B%9D%EA%B0%80%EC%9D%B4%EB%93%9C",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "d64bd57789c0dfdb02a99df7e9801768388c31bc481740a3f6f1f7f43cbe1e2a",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "tripmarvel.com",
+      "worker": "tripmarvel",
+      "route": {
+        "verified": true,
+        "route": "www.tripmarvel.com/*",
+        "worker": "tripmarvel"
+      },
+      "deployedAt": "2026-10-19T04:49:33.175631+00:00",
+      "originalHeadSha256": "6bb6ba51de77b6b4b1e98f5d043f71d1b67539d698e587452ea9932ab190c43c",
+      "finalHeadSha256": "bef9dc980a551d87a68a56cabfd2da225c310c4ce1b184250698a8fc067818fe",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "7299d83acaf1c05f1cf7504bfe8e2f49db65d6b6d1d0e2f011dc0c6ec2f7aa3a",
+      "publicVerification": {
+        "domain": "tripmarvel.com",
+        "checkedAt": "2026-10-19T04:50:10.963883+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.tripmarvel.com/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "3b9fb9596e73e9e6bda3f211872c797a49269069e0f2fc9b106ffb14dd75a4c8",
+            "passed": true
+          },
+          {
+            "url": "https://www.tripmarvel.com/?cat=%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%C2%B7%EC%88%98%EB%AA%A9%EC%9B%90",
+            "httpStatus": 200,
+            "cardCount": 2,
+            "imageCount": 1,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "a63bc2797e184be3d230176184129d4eafaeb775d1b143a692073517563630b0",
+            "passed": true
+          },
+          {
+            "url": "https://www.tripmarvel.com/?cat=%ED%95%B4%EC%99%B8%EC%97%AC%ED%96%89%C2%B7%ED%8C%A8%EC%8A%A4",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "b44875af280e7a334cb66bcae7e3071380957ba6123b3d7eeb1d42d6df6c2b56",
+            "passed": true
+          },
+          {
+            "url": "https://www.tripmarvel.com/?cat=%ED%95%AD%EA%B3%B5%C2%B7%EC%88%99%EC%86%8C%EC%98%88%EC%95%BD%ED%8C%81",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "111a8e8d950f1068cee30ef371d96b6debf6b90be6169dd85a2eb19a9e98ea4d",
+            "passed": true
+          },
+          {
+            "url": "https://www.tripmarvel.com/?cat=%EC%8B%9C%EC%A6%8C%EC%B6%95%EC%A0%9C%C2%B7%EC%BD%94%EC%8A%A4",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "5368e97a8971df414a007513526f9ee1c75a892c3a3f0f9c86df3f8a7d25b003",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "must-pick.com",
+      "worker": "mustpick",
+      "route": {
+        "verified": true,
+        "route": "www.must-pick.com/",
+        "worker": "mustpick"
+      },
+      "deployedAt": "2026-10-19T04:48:44.433683+00:00",
+      "originalHeadSha256": "cec90fb841c6b719982def1203cde4fd433eff957e30c88cbf45c6c0b606eed0",
+      "finalHeadSha256": "5099429eaecb79c234b174fb0649ff2bb126e9ae93fd3bb3e89ac1b5e93bdb9b",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": true,
+      "workerFinalSha256": "2fe531910ab580fb6514081a8e87ecdbd97ee140d3fb0d7d273dea094763690c",
+      "publicVerification": {
+        "domain": "must-pick.com",
+        "checkedAt": "2026-10-19T04:50:14.694122+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.must-pick.com/",
+            "httpStatus": 200,
+            "cardCount": 87,
+            "imageCount": 83,
+            "emptyImageCount": 4,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "e89d674bf40dbbafc80c6a58822005092c6560c586fd16ccbb59b881f3120f32",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-pick.com/?cat=%EB%8C%80%ED%98%95%C2%B7%EC%A3%BC%EB%B0%A9%EA%B0%80%EC%A0%84",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "86a2730e33f97166f3ea34812a9dea0da73ae35e3a677f69bba26d0acfad7f30",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-pick.com/?cat=%EC%83%9D%ED%99%9C%C2%B7%EA%B3%84%EC%A0%88%EA%B0%80%EC%A0%84",
+            "httpStatus": 200,
+            "cardCount": 0,
+            "imageCount": 0,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "5f95464eb04589ef85d020ca74c4b51c6945c56c422eccfab3929c20d98cf386",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-pick.com/?cat=%EB%94%94%EC%A7%80%ED%84%B8%C2%B7%EA%B8%B0%EC%96%B4%EA%B0%80%EC%9D%B4%EB%93%9C",
+            "httpStatus": 200,
+            "cardCount": 0,
+            "imageCount": 0,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "74f9668111e9bfe947d8e24f27b64e249efebe474616b0c65a56913875d8200f",
+            "passed": true
+          },
+          {
+            "url": "https://www.must-pick.com/?cat=A%2FS%C2%B7%EC%88%98%EB%A6%AC%EB%B9%84%EC%9A%A9",
+            "httpStatus": 200,
+            "cardCount": 0,
+            "imageCount": 0,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "0a5cd6ce5169ed41a35ffc2e0783c0bab98cf9fc15bcc07ba0e13fb5d63ae888",
+            "passed": true
+          }
+        ]
+      },
+      "workerOriginalSha256": "e2a08d55067accd5497cf45c92a8dcef83d306f20bc569d42881272b3cf57537",
+      "workerChangeScope": "renderHomePage SSR and incremental cards; cache version; other source unchanged"
+    },
+    {
+      "domain": "woorinote.kr",
+      "worker": "woorinote",
+      "route": {
+        "verified": true,
+        "route": "www.woorinote.kr/*",
+        "worker": "woorinote"
+      },
+      "deployedAt": "2026-10-19T04:49:40.740329+00:00",
+      "originalHeadSha256": "cf5a7f503083fe93a2d3611b6521ddd9d14f22a3de10e250e8f4ec4313a3d2e4",
+      "finalHeadSha256": "b3874645202a8b701e678c8d7c014a5c0093b3c32b7abcd9f6a55734cf68690e",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "publicVerification": {
+        "domain": "woorinote.kr",
+        "checkedAt": "2026-10-19T04:50:15.235058+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.woorinote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "8c9765414d01aa024f5d332869df8e83950bdcaa04e5b923e29b406485e46548",
+            "passed": true
+          },
+          {
+            "url": "https://www.woorinote.kr/?cat=%EC%B2%AD%EC%95%BD%C2%B7%EB%B6%84%EC%96%91%EC%9E%90%EB%AC%B8",
+            "httpStatus": 200,
+            "cardCount": 2,
+            "imageCount": 2,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "72d842a94b954cb1a6f7d72bbb0f23f6ee3c0a9da1f2cac90afee250276bab64",
+            "passed": true
+          },
+          {
+            "url": "https://www.woorinote.kr/?cat=%EC%A0%84%EC%9B%94%EC%84%B8%C2%B7%EA%B3%84%EC%95%BD%EB%B2%95%EB%A5%A0",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "61cccadd46b13fef4a57a41cce554475fe19d049f1c18e0a4e605300789d34b0",
+            "passed": true
+          },
+          {
+            "url": "https://www.woorinote.kr/?cat=%EC%A3%BC%EA%B1%B0%EB%B3%B5%EC%A7%80%C2%B7%EB%8C%80%EC%B6%9C",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "3a8147cf2bf6e42919d035d899bfba41c02748c94516b9444733dfe88fb44249",
+            "passed": true
+          },
+          {
+            "url": "https://www.woorinote.kr/?cat=%EB%B6%80%EB%8F%99%EC%82%B0%EB%93%B1%EA%B8%B0%C2%B7%EC%84%B8%EB%B2%95",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 11,
+            "emptyImageCount": 1,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4f8cc2084a237b83c4b8a352e192da57aed184a3591af6d3f41d5867c2586013",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "daynote.kr",
+      "worker": "daynote",
+      "route": {
+        "verified": true,
+        "route": "www.daynote.kr/*",
+        "worker": "daynote"
+      },
+      "deployedAt": "2026-10-19T04:49:40.221735+00:00",
+      "originalHeadSha256": "4fad230de25e2fa8bc0a2361cf0d9a80048009133a509a062c34e83d5f0d4c2c",
+      "finalHeadSha256": "839b528d531939b81eaa6f36c29ebb234d2d2d9a7398da06b56c58a980efa8d4",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "c4fab76c7a8a995467899ebc1eb2a3133313d6d42ef956aa7f9abe1ea91dda7f",
+      "publicVerification": {
+        "domain": "daynote.kr",
+        "checkedAt": "2026-10-19T04:50:13.985567+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.daynote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "e61a1d899571c5ca62a757a66d4227508c3272222fdaa29c056ff2fc8f6374ea",
+            "passed": true
+          },
+          {
+            "url": "https://www.daynote.kr/?cat=%EC%83%9D%ED%99%9C%C2%B7%EC%82%B4%EB%A6%BC%EC%86%8D%EB%B3%B4",
+            "httpStatus": 200,
+            "cardCount": 2,
+            "imageCount": 2,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "eca419e99f0d93a2ce66556acc5a2a3e3f6c419e7be7d0cba0cbd90e90cc6949",
+            "passed": true
+          },
+          {
+            "url": "https://www.daynote.kr/?cat=%EB%AC%BC%EA%B0%80%C2%B7%EC%A0%88%EC%95%BD%EC%9D%B4%EC%8A%88",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "ba085f21f64bea8bb3562aecaf685bf6e0e1cef5d8643f92eb01f91a350c92ce",
+            "passed": true
+          },
+          {
+            "url": "https://www.daynote.kr/?cat=%EC%A3%BC%EB%B0%A9%C2%B7%EB%A6%AC%EB%B9%99%EA%B8%B0%ED%9A%8D",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "9534f0fb0dcdd8e906cd532bbd4dd0045e84490ea6eda01ab5e8bf504ca9607d",
+            "passed": true
+          },
+          {
+            "url": "https://www.daynote.kr/?cat=%ED%8A%B8%EB%A0%8C%EB%93%9C%ED%8C%A9%ED%8A%B8%EC%B2%B4%ED%81%AC",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "1a0c8fd153b306d4eb9b616f5a94ab434c4b3474b6ce5de6dc76d84dc7e25fd3",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "nolplace.com",
+      "worker": "panda-01",
+      "route": {
+        "verified": true,
+        "route": "www.nolplace.com/*",
+        "worker": "panda-01"
+      },
+      "deployedAt": "2026-10-19T04:49:36.891123+00:00",
+      "originalHeadSha256": "5baa815af4a54a90c6b4c62b45a8223b4403d0c0ecb117773b48c4ff54fda573",
+      "finalHeadSha256": "4b6cb7f00bec8b776a5e6753091ae3bf45d69ae08bbc924480f817a2d7b48d49",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "dfe161e56193680f195624e7c22e2e51b5e0ec57d990adf93942573490a3c134",
+      "publicVerification": {
+        "domain": "nolplace.com",
+        "checkedAt": "2026-10-19T04:51:32.905711+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.nolplace.com/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "1dee44376852dee9c542bc6fbf1b31c034ad457cd6811d5363247dd9ef19a294",
+            "passed": true
+          },
+          {
+            "url": "https://www.nolplace.com/?cat=%EC%88%98%EB%AA%A9%EC%9B%90%C2%B7%ED%85%8C%EB%A7%88%ED%8C%8C%ED%81%AC",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4a8ecd10603fd1433b8f35f11c493441493ee552e14fa128427061e3730f4b4a",
+            "passed": true
+          },
+          {
+            "url": "https://www.nolplace.com/?cat=%EC%95%84%EC%9D%B4%EC%99%80%EA%B0%80%EB%B3%BC%EB%A7%8C%ED%95%9C%EA%B3%B3",
+            "httpStatus": 200,
+            "cardCount": 0,
+            "imageCount": 0,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "3f29d8ff4b075bff4bb67b4a243116426efa648fad34a207c2e8e2381d2cd71e",
+            "passed": true
+          },
+          {
+            "url": "https://www.nolplace.com/?cat=%EC%A0%84%EC%8B%9C%C2%B7%ED%8C%9D%EC%97%85%C2%B7%EA%B3%B5%EC%97%B0",
+            "httpStatus": 200,
+            "cardCount": 0,
+            "imageCount": 0,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "03f1fb57196fcc9f9cd06cf558e720afc502adce2e5f75ce61543f554f582c61",
+            "passed": true
+          },
+          {
+            "url": "https://www.nolplace.com/?cat=%EC%A3%BC%EC%B0%A8%C2%B7%EC%98%88%EB%A7%A4%EA%BF%80%ED%8C%81",
+            "httpStatus": 200,
+            "cardCount": 0,
+            "imageCount": 0,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "cb112aa420bea2e390cf53114bbd195ad685af8ea76a5c596b6fc14e643758af",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "soulnote.kr",
+      "worker": "soulnote",
+      "route": {
+        "verified": true,
+        "route": "www.soulnote.kr",
+        "worker": "soulnote"
+      },
+      "deployedAt": "2026-10-19T04:49:45.006774+00:00",
+      "originalHeadSha256": "b053168c1d527b5b35d2c3cdfc1ef3cc7d6c2057f9a2010cff52ef47528a6e57",
+      "finalHeadSha256": "12e678e60d2faad392ca45729f92ee16b1f92047eee207a0e9cf9e56fb42eff3",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "publicVerification": {
+        "domain": "soulnote.kr",
+        "checkedAt": "2026-10-19T04:51:34.747051+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.soulnote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "ccd6e38de5ed01566ed84756ac9ebc92f3c881054272b3fa421b90ade4965b74",
+            "passed": true
+          },
+          {
+            "url": "https://www.soulnote.kr/?cat=%EB%82%B4%EC%9D%BC%EB%B0%B0%EC%9B%80%EC%B9%B4%EB%93%9C%C2%B7%EA%B5%AD%EB%B9%84",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "3cf0f10bb8ceb9c9d539bee7d85e588e3344d4199e9f7838ac66c076bf388a93",
+            "passed": true
+          },
+          {
+            "url": "https://www.soulnote.kr/?cat=%EC%9C%A0%EB%A7%9D%EA%B5%AD%EA%B0%80%EC%9E%90%EA%B2%A9%EC%A6%9D",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "79362ee1b8eabba5ab873e31e6cd19d2918d6bb95e7471da7b12a30b786c8277",
+            "passed": true
+          },
+          {
+            "url": "https://www.soulnote.kr/?cat=%EC%8B%9C%ED%97%98%EC%9D%BC%EC%A0%95%C2%B7%EA%B8%B0%EC%B6%9C%ED%8C%81",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "f8de2f3fc621e5858b9373a362c9b2b1af535479a7c814e3ab0e77f41ae44c0f",
+            "passed": true
+          },
+          {
+            "url": "https://www.soulnote.kr/?cat=%EC%9D%B4%EC%A7%81%C2%B7%EC%BB%A4%EB%A6%AC%EC%96%B4%EC%84%A4%EA%B3%84",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "84f7fb0f198b1ef82f30e9e22dec0d16e4dd309c988b6dee456601c7fe9ebd77",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "domain": "joynote.kr",
+      "worker": "joynote",
+      "route": {
+        "verified": true,
+        "route": "www.joynote.kr",
+        "worker": "joynote"
+      },
+      "deployedAt": "2026-10-19T04:49:47.080868+00:00",
+      "originalHeadSha256": "f21f14e6895b5f3a5dbc485ae43df89762225aa64e612858e7837c056947c761",
+      "finalHeadSha256": "3d6654ba804313adbd14142e4691843ea808561d89b48ad5bee2de7c75d8b9c8",
+      "existingHeadPreserved": true,
+      "otherSettingsPreserved": true,
+      "workerChangedInTask": false,
+      "workerFinalSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "publicVerification": {
+        "domain": "joynote.kr",
+        "checkedAt": "2026-10-19T04:50:19.293009+00:00",
+        "passed": true,
+        "pages": [
+          {
+            "url": "https://www.joynote.kr/",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "ad040e3e701f92a9d005553d1753d7b2633e3a05e35e657b18ab4b3a2337fe24",
+            "passed": true
+          },
+          {
+            "url": "https://www.joynote.kr/?cat=%EA%B0%95%EC%95%84%EC%A7%80%C2%B7%EA%B3%A0%EC%96%91%EC%9D%B4%EA%B1%B4%EA%B0%95",
+            "httpStatus": 200,
+            "cardCount": 1,
+            "imageCount": 1,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "9e0c7532bea00d8cd09f28b7cce7cdb70d30a73ed97f2c212cec4f00b016bd52",
+            "passed": true
+          },
+          {
+            "url": "https://www.joynote.kr/?cat=%ED%8E%AB%EB%B3%B4%ED%97%98%C2%B7%EC%A7%84%EB%A3%8C%EB%B9%84%EB%B9%84%EA%B5%90",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "31c189e197bc177299ad43d586fcb0cdd06b0be1e755f20100f8e8df9502c5bc",
+            "passed": true
+          },
+          {
+            "url": "https://www.joynote.kr/?cat=%EB%B0%98%EB%A0%A4%EB%8F%99%EB%AC%BC%EB%8F%99%EB%B0%98%EC%9E%A5%EC%86%8C",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "ccdd63f0d60c9dd1eea169cb2e308cbb81eebc9748ffa32f1045fcf9ab955945",
+            "passed": true
+          },
+          {
+            "url": "https://www.joynote.kr/?cat=%EB%B0%98%EB%A0%A4%EC%8B%9D%EB%AC%BC%C2%B7%ED%99%88%EA%B0%80%EB%93%9C%EB%8B%9D",
+            "httpStatus": 200,
+            "cardCount": 12,
+            "imageCount": 12,
+            "emptyImageCount": 0,
+            "ownedStyleCount": 1,
+            "cssExact": true,
+            "cardStructureValid": true,
+            "postGridPresent": true,
+            "htmlSha256": "4063f09cede189f8b6da4009525728e2bc5c65e3b3c40561eabc7060cb1dbbbc",
+            "passed": true
+          }
+        ]
+      }
+    }
+  ]
+}

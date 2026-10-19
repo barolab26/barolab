@@ -2451,7 +2451,8 @@ figure.post-image a[aria-label*="원본 화면 크게 보기"] img {{
   }}
 }}
 """
-    return css.strip()
+    from cf_posting.card_layout import CARD_CSS
+    return css.strip() + "\n\n" + CARD_CSS
 
 
 def build_final_preview_html(domain: str, title: str, assembled_html: str) -> str:
@@ -3314,6 +3315,7 @@ def generate_design_preview_html() -> Path:
     preview_dir = BASE_DIR / "design-preview"
     preview_dir.mkdir(parents=True, exist_ok=True)
     target = preview_dir / "index.html"
+    from cf_posting.card_layout import CARD_CSS
     rows = []
     for domain, spec in DOMAIN_IDENTITY_SPECS.items():
         rows.append(
@@ -3321,10 +3323,22 @@ def generate_design_preview_html() -> Path:
             f"<strong>{html.escape(spec['name'])} ({domain})</strong> — <code>{spec['shellFamily']} / {spec['shellVariant']}</code><br/>"
             f"<small>{html.escape(spec['archetypeLabel'])}</small></div>"
         )
+    cards = "".join(
+        f'<article class="card{(" no-image" if i == 2 else "")}"><a class="card-link" href="https://www.{domain}/">'
+        f'<div class="thumb"><div class="thumb-empty" style="background:{spec["colors"]["primary"]}"></div></div>'
+        f'<div class="card-body"><h3>{html.escape(spec["name"])} — 세로형 카드 제목 두 줄 미리보기</h3>'
+        '<p class="excerpt">이미지 아래 본문이 카드 너비 전체를 사용합니다. 제목은 최대 두 줄, 요약은 최대 세 줄을 표시하며 화면 폭에 따라 세 열, 두 열, 한 열로 전환됩니다. 이 문장은 줄 제한을 확인하기 위한 미리보기 설명입니다.</p>'
+        f'<div class="meta">{domain} · 레이아웃 미리보기</div></div></a></article>'
+        for i, (domain, spec) in enumerate(DOMAIN_IDENTITY_SPECS.items())
+    )
     target.write_text(
-        "<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>16 CF Domains 8 Architectures</title></head>"
-        "<body style='background:#0f172a;color:#f8fafc;font-family:sans-serif;padding:24px;'>"
-        "<h1>16개 CF 블로그 8대 독립 레이아웃 아키텍처 매핑</h1>" + "".join(rows) + "</body></html>",
+        "<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>16 CF 카드 레이아웃 미리보기</title><style>body{background:#f4f6f8;color:#17212b;font-family:system-ui;margin:0}"
+        ".card{background:#fff;border:1px solid #dbe1e8;border-radius:12px}.card-link{color:inherit;text-decoration:none}"
+        ".excerpt,.meta{color:#526170}header,details{max-width:1072px;margin:24px auto;padding:0 24px}</style><style>" + CARD_CSS + "</style></head>"
+        "<body><header><h1>16개 CF 블로그 카드 미리보기</h1><p>1024px 이상 3열 · 640–1023px 2열 · 640px 미만 1열. 이미지 16:9, 본문 전체 너비.</p></header>"
+        '<div class="layout"><main class="main-area"><section id="postGrid" class="grid">' + cards + '</section></main></div>'
+        '<details><summary>기존 도메인별 디자인 구성</summary>' + "".join(rows) + "</details></body></html>",
         encoding="utf-8",
     )
     return target
