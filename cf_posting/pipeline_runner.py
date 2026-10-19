@@ -4943,9 +4943,15 @@ def _growth_url(value):
     return domain, parsed.path.strip('/')
 
 
-def _growth_post(url):
+def _growth_post(url, cache=None):
     domain, slug = _growth_url(url)
-    posts = published_inventory('https://www.' + domain)
+    cache = cache if cache is not None else {}
+    if url in cache:
+        return copy.deepcopy(cache[url])
+    inventory_key = 'inventory:' + domain
+    if inventory_key not in cache:
+        cache[inventory_key] = published_inventory('https://www.' + domain)
+    posts = cache[inventory_key]
     match = next((p for p in posts if p.get('slug') == slug), None)
     if not match or not match.get('id'):
         raise ValueError('Published article identity missing')
@@ -4954,11 +4960,34 @@ def _growth_post(url):
     post = response.json()['post']
     if post.get('slug') != slug or post.get('status') != 'published' or not post.get('content'):
         raise ValueError('Published article content missing')
+    cache[url] = copy.deepcopy(post)
     return post
 
 
-def growth_radar(schedule=None, now=None, evidence=None, target_domain=None):
-    """Queue source-grounded long tails from verified page-revenue winners only."""
+def _radar_specific(keyword):
+    return bool(re.search(r'(?i)(?:[a-z]+[- ]?\d+[a-z0-9-]*|\b\d{3}\b|\d+(?:원|만원|%|GB|MB|개월|세|단계)|오류\s*(?:코드\s*)?[a-z0-9]+)', keyword)
+                or re.search(r'(?:미만|이하|이상|초과|않을 때|안 될 때|없는 경우|실패할 때|신청 전|구매 전|갱신 전|예약 전|거절|복구|환불|반환|비교)', keyword))
+
+
+def _radar_cold_source(domain):
+    """Fetch one existing public article as grounding; no keyword/model facts are invented."""
+    response = requests.get(f'https://www.{domain}/api/posts', params={'page': 1, 'limit': 10}, timeout=12, allow_redirects=False)
+    response.raise_for_status()
+    posts = response.json().get('posts', [])
+    for post in posts:
+        if not post.get('id') or not post.get('slug') or post.get('status', 'published') != 'published':
+            continue
+        if not post.get('content'):
+            detail = requests.get(f"https://www.{domain}/api/posts/{post['id']}", timeout=12, allow_redirects=False)
+            detail.raise_for_status()
+            post = detail.json()['post']
+        if post.get('content') and post.get('title'):
+            return {**post, 'url': f"https://www.{domain}/{post['slug']}"}
+    return None
+
+
+def growth_radar(schedule=None, now=None, evidence=None, target_domain=None, source_posts=None):
+    """Revenue -> measured traffic -> explicitly unverified cold-start research queue."""
     schedule = schedule if schedule is not None else json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
     evidence = evidence if evidence is not None else _growth_evidence(now)
     queue = schedule.setdefault('radarQueue', [])
@@ -4969,33 +4998,88 @@ def growth_radar(schedule=None, now=None, evidence=None, target_domain=None):
             previous_keywords.update(row.get('keyword') for row in json.loads(archived.read_text(encoding='utf-8')).get('radarQueue', []))
         except (OSError, ValueError):
             continue
-    if evidence.get('complete') is True:
-        for winner in evidence.get('revenueWinners', []):
+    candidates = evidence.get('radarCandidates')
+    if candidates is None:
+        candidates = evidence.get('revenueWinners', []) if evidence.get('complete') else []
+        candidates = candidates or evidence.get('highTrafficPages', [])
+    cold_domains = {row['domain']: row for row in evidence.get('coldStartDomains', [])}
+    domains = [target_domain] if target_domain else list(ALL_DOMAINS)
+    for domain in domains:
+        if any(row.get('domain') == domain and row.get('status') in ('queued', 'scheduled') for row in queue):
+            continue
+        choices = [row for row in candidates if row.get('domain') == domain or (urlparse(row.get('url', '')).hostname or '').removeprefix('www.') == domain]
+        choices.sort(key=lambda row: 0 if row.get('selectionBasis') == 'adsense_revenue' or row.get('revenueVerified') is True else 1)
+        post = None; winner = {}; basis = 'cold_start'
+        for candidate in choices[:2]:
             try:
-                domain, _ = _growth_url(winner['url'])
-                if target_domain and domain != target_domain:
-                    continue
-                post = _growth_post(winner['url'])
-                soup = BeautifulSoup(post['content'], 'html.parser')
-                headings = [h.get_text(' ', strip=True) for h in soup.select('h2,h3')]
-                for heading in headings:
-                    if len(heading) < 8 or len(heading.split()) < 2 or heading in ('자주 묻는 질문', '마무리 정리', '결론 및 요약'):
-                        continue
-                    keyword = post['title'].strip() + ' — ' + heading
-                    # Specific observed model/error/numeric condition; generic headings are not long tails.
-                    if not (re.search(r'(?i)(?:[a-z]+[- ]?\d+[a-z0-9-]*|\b\d{3}\b|\d+(?:원|만원|%|GB|MB|개월|세|단계)|오류\s*(?:코드\s*)?[a-z0-9]+)', keyword)
-                            or re.search(r'(?:미만|이하|이상|초과|않을 때|안 될 때|없는 경우|실패할 때)', heading)):
-                        continue
-                    if len(keyword) > 140 or keyword in previous_keywords:
-                        continue
-                    row = {'domain': domain, 'keyword': keyword, 'sourceUrl': winner['url'],
-                           'sourceTitle': post['title'], 'sourceHeading': heading, 'status': 'queued',
-                           'estimatedRevenue': winner.get('estimatedRevenue'), 'currency': winner.get('currency'),
-                           'evidenceStart': evidence.get('start'), 'evidenceEnd': evidence.get('end'), 'createdAt': stamp()}
-                    queue.append(row); added.append(row)
+                _growth_url(candidate['url'])
+                post = (source_posts or {}).get(domain) if source_posts is not None else _growth_post(candidate['url'])
+                if post:
+                    post = {**post, 'url': candidate['url']}
+                    winner = candidate
+                    basis = candidate.get('selectionBasis') or ('adsense_revenue' if candidate.get('estimatedRevenue') is not None else 'ga4_sessions')
                     break
-            except (ValueError, KeyError, requests.RequestException):
+            except (ValueError, KeyError, RuntimeError, requests.RequestException):
                 continue
+        if post is None:
+            try:
+                post = (source_posts or {}).get(domain) if source_posts is not None else _radar_cold_source(domain)
+            except (ValueError, KeyError, RuntimeError, requests.RequestException):
+                post = None
+        proposals = []
+        if post:
+            for heading in BeautifulSoup(post.get('content', ''), 'html.parser').select('h2,h3'):
+                heading = heading.get_text(' ', strip=True)
+                if len(heading) < 8 or len(heading.split()) < 2 or heading in ('자주 묻는 질문', '마무리 정리', '결론 및 요약'):
+                    continue
+                keyword = post['title'].strip() + ' — ' + heading
+                if _radar_specific(keyword):
+                    proposals.append((keyword, heading, True))
+        # Retain the actual observed target/model/problem before asking a narrower research question.
+        if post:
+            topic = post['title'].strip()
+            if re.search('보험|대출|금리|연금', topic):
+                question = '가입·변경 전 비용과 적용 제외 조건 확인'
+            elif re.search('지원|수당|장려금|보조금|신청', topic):
+                question = '신청 전 대상·제출 서류와 제외 조건 확인'
+            elif re.search('윈도우|설정|계정|오류|AI|ChatGPT|Wi-Fi|연결', topic, re.I):
+                question = '설정 변경 전 적용 환경과 복구 절차 확인'
+            elif re.search('여행|숙소|항공|예약|공연|전시', topic):
+                question = '예약 전 취소·환불 조건과 추가 비용 확인'
+            else:
+                question = '이용 전 적용 조건과 주의사항 확인'
+            proposals.append((topic + ' — ' + question, question, True))
+        else:
+            try:
+                pool = json.loads(TOPIC_POOL_JSON.read_text(encoding='utf-8'))
+                for seed in pool.get(domain, []):
+                    if isinstance(seed.get('title'), str) and seed['title'].strip():
+                        proposals.append((seed['title'].strip() + ' — 적용 조건과 근거 확인', seed['title'].strip(), False))
+            except (OSError, ValueError):
+                pass
+        # A cold-start question is a research request, never a claim of measured CPC or article facts.
+        categories = DOMAIN_META[domain].get('categories') or [DOMAIN_META[domain]['category']]
+        categories = sorted(categories, key=lambda category: 0 if re.search('보험|대출|금리|세금|환급|예약|가전|구매', category) else 1)
+        for category in categories:
+            for question in ('비교 전 비용·적용 대상·제외 조건 확인', '신청·구매 전 필수 서류와 취소·환불 조건 확인', '이용이 거절됐을 때 원인 확인과 대체 절차 조사'):
+                proposals.append((category + ' — ' + question, category, False))
+        for keyword, heading, grounded in proposals:
+            if len(keyword) > 140 or keyword in previous_keywords or (post and keyword == post.get('title')):
+                continue
+            chosen_basis = basis if grounded else 'cold_start'
+            revenue_verified = chosen_basis == 'adsense_revenue' and winner.get('estimatedRevenue') is not None
+            row = {'domain': domain, 'keyword': keyword, 'sourceUrl': post.get('url') if post and grounded else None,
+                   'sourceTitle': post.get('title') if post and grounded else DOMAIN_META[domain]['name'],
+                   'sourceHeading': heading, 'status': 'queued', 'executionState': 'next_available_slot',
+                   'queuedDate': schedule['date'], 'selectionBasis': chosen_basis,
+                   'revenueVerified': revenue_verified, 'cpcVerified': False,
+                   'sourceFactsVerified': bool(grounded), 'researchRequired': True,
+                   'evidenceState': cold_domains.get(domain, {}).get('evidenceState', 'missing') if chosen_basis == 'cold_start' else 'measured',
+                   'estimatedRevenue': winner.get('estimatedRevenue') if revenue_verified else None,
+                   'currency': winner.get('currency') if revenue_verified else None,
+                   'evidenceStart': evidence.get('start'), 'evidenceEnd': evidence.get('end'), 'createdAt': stamp()}
+            queue.append(row); added.append(row); previous_keywords.add(keyword)
+            break
     scheduled = 0
     for row in queue:
         if row.get('status') != 'queued':
@@ -5003,11 +5087,15 @@ def growth_radar(schedule=None, now=None, evidence=None, target_domain=None):
         item = next((it for it in schedule.get('items', []) if it.get('domain') == row['domain']
                      and it.get('status') == 'waiting' and not it.get('attemptCount') and not it.get('growthKeyword')), None)
         if item is not None:
-            row.update(status='scheduled', scheduledDate=schedule['date'])
+            row.update(status='scheduled', scheduledDate=schedule['date'], executionState='scheduled_waiting_slot')
             item['growthKeyword'] = dict(row)
             scheduled += 1
-    result = {'checkedAt': stamp(), 'status': 'queued' if added else 'no_verified_candidate',
-              'complete': evidence.get('complete') is True, 'added': len(added), 'scheduled': scheduled,
+    covered = {row.get('domain') for row in queue if row.get('status') in ('queued', 'scheduled')}
+    result = {'checkedAt': stamp(), 'status': 'queued_today' if added else 'queue_preserved',
+              'complete': all(domain in covered for domain in domains), 'revenueEvidenceComplete': evidence.get('complete') is True,
+              'added': len(added), 'scheduled': scheduled, 'coveredDomains': len(covered.intersection(domains)),
+              'domainCount': len(domains), 'publicationScope': 'next_available_existing_slot',
+              'selectionCounts': {basis: sum(row.get('selectionBasis') == basis for row in queue) for basis in ('adsense_revenue', 'ga4_sessions', 'gsc_clicks', 'cold_start')},
               'pendingQueue': sum(row.get('status') == 'queued' for row in queue), 'reasonCodes': evidence.get('reasonCodes', [])}
     schedule['radar'] = result
     save_schedule(schedule)
@@ -5120,11 +5208,37 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
         counts[run.get('domain')] = counts.get(run.get('domain'), 0) + 1
     results = []
     reasons = {}
+    post_cache = {}
+    inspected = {}
     traffic_complete = evidence.get('coverage', {}).get('trafficComplete', evidence.get('complete')) is True
     complete_domains = set(evidence.get('coverage', {}).get('completeTrafficDomains', []))
     if not traffic_complete and not complete_domains:
         return {'status': 'insufficient_evidence', 'complete': False, 'candidates': [], 'reasonCodes': evidence.get('reasonCodes', [])}
-    for page in evidence.get('zeroViewPages', []):
+    def ordered_zero_pages():
+        grouped = {}
+        for page in evidence.get('zeroViewPages', []):
+            try:
+                domain, _ = _growth_url(page.get('url'))
+            except (ValueError, TypeError):
+                continue
+            if target_domain and domain != target_domain:
+                continue
+            grouped.setdefault(domain, []).append(page)
+        for domain, pages in grouped.items():
+            try:
+                inventory_key = 'inventory:' + domain
+                post_cache[inventory_key] = published_inventory('https://www.' + domain)
+                dates = {row.get('slug'): row.get('published_at') or row.get('created_at') or '9999'
+                         for row in post_cache[inventory_key]}
+                # Inspect old articles first; a recent first page must not starve older eligible URLs.
+                pages.sort(key=lambda row: dates.get(_growth_url(row['url'])[1], '9999'))
+                cursor = int(schedule.get('doctorScanCursor', {}).get(domain, 0)) % max(1, len(pages))
+                pages = pages[cursor:] + pages[:cursor]
+                yield from pages
+            except (ValueError, KeyError, RuntimeError, requests.RequestException) as exc:
+                reason = 'inventory_' + type(exc).__name__
+                reasons[reason] = reasons.get(reason, 0) + 1
+    for page in ordered_zero_pages():
         if limit is not None and len(results) >= max(0, int(limit)):
             break
         try:
@@ -5135,11 +5249,12 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
                 continue
             if page.get('complete') is not True or page.get('pageViews') != 0 or page.get('sessions') != 0 or url in seen or counts.get(domain, 0) >= 2:
                 continue
-            indexed = _doctor_index_evidence(url, now, metrics, index_history)
-            if not indexed:
-                reasons['gsc_pass_age_unknown_or_under_7_days'] = reasons.get('gsc_pass_age_unknown_or_under_7_days', 0) + 1
+            if inspected.get(domain, 0) >= 6:
+                reasons['domain_read_budget'] = reasons.get('domain_read_budget', 0) + 1
                 continue
-            target = _growth_post(url)
+            inspected[domain] = inspected.get(domain, 0) + 1
+            indexed = _doctor_index_evidence(url, now, metrics, index_history)
+            target = _growth_post(url, post_cache)
             published = datetime.datetime.fromisoformat((target.get('published_at') or target.get('created_at') or '').replace('Z', '+00:00'))
             if published.tzinfo is None:
                 # CF /api/posts uses SQLite UTC timestamps, matching reconcile_item().
@@ -5149,19 +5264,32 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
             title, content = _doctor_rewrite(target)
             tokens = {t for t in re.findall(r'[가-힣A-Za-z0-9]+', target['title']) if len(t) >= 3}
             related = None
+            related_url = None
+            related_reads = 0
             for row in evidence.get('highTrafficPages', []):
                 if row.get('url') == url or _growth_url(row.get('url'))[0] != domain or row.get('sessions', 0) <= 0:
                     continue
-                candidate = _growth_post(row['url'])
+                if related_reads >= 8:
+                    break
+                related_reads += 1
+                try:
+                    candidate = _growth_post(row['url'], post_cache)
+                except (ValueError, KeyError, RuntimeError, requests.RequestException):
+                    reasons['related_source_unavailable'] = reasons.get('related_source_unavailable', 0) + 1
+                    continue
                 other = {t for t in re.findall(r'[가-힣A-Za-z0-9]+', candidate['title']) if len(t) >= 3}
                 if len(tokens & other) >= 2 and url not in candidate['content']:
                     related = candidate
+                    related_url = row['url']
                     break
             if related is None:
-                continue
-            linked = related['content'] + '<p data-barolab-doctor="related">함께 확인하기: <a href="' + html.escape(url, quote=True) + '">' + html.escape(title) + '</a></p>'
-            record = {'url': url, 'domain': domain, 'title': title, 'sourcePostId': related['id'],
+                reasons['no_related_high_traffic_candidate'] = reasons.get('no_related_high_traffic_candidate', 0) + 1
+            linked = (related['content'] if related else '') + '<p data-barolab-doctor="related">함께 확인하기: <a href="' + html.escape(url, quote=True) + '">' + html.escape(title) + '</a></p>'
+            record = {'url': url, 'domain': domain, 'title': title, 'sourcePostId': related['id'] if related else None,
+                      'relatedLinkStatus': 'planned' if related else 'no_related_high_traffic_candidate',
                       'status': 'preview', 'checkedAt': now.isoformat(), 'googleIndex': indexed,
+                      'eligibilityBasis': 'gsc_pass_7_days' if indexed else 'published_7_days_complete_ga4_zero',
+                      'indexingVerifiedForSevenDays': indexed is not None,
                       'evidenceStart': evidence.get('start'), 'evidenceEnd': evidence.get('end')}
             results.append(record); counts[domain] = counts.get(domain, 0) + 1
             if not apply:
@@ -5171,20 +5299,34 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
             save_schedule(schedule)  # Original bodies and intent durable before any external write.
             try:
                 _doctor_put(domain, target, {'title': title, 'content': content})
+                post_cache.pop(url, None)
                 record['status'] = 'target_verified'; save_schedule(schedule)
-                public = _doctor_put(domain, related, {'content': linked})
-                if not BeautifulSoup(public, 'html.parser').find('a', href=url):
-                    raise RuntimeError('Public related-link verification failed')
-                record.update(status='verified', verifiedAt=stamp())
+                if related is not None:
+                    public = _doctor_put(domain, related, {'content': linked})
+                    post_cache.pop(related_url, None)
+                    if not BeautifulSoup(public, 'html.parser').find('a', href=url):
+                        raise RuntimeError('Public related-link verification failed')
+                    record.update(status='verified', relatedLinkStatus='verified', verifiedAt=stamp())
+                else:
+                    record.update(status='verified_title_only', verifiedAt=stamp())
             except Exception as exc:
                 record.update(status='write_unknown', errorType=type(exc).__name__)
             save_schedule(schedule)
-        except (ValueError, KeyError, OSError, requests.RequestException):
+        except (ValueError, KeyError, OSError, RuntimeError, requests.RequestException) as exc:
+            reason = 'candidate_' + type(exc).__name__
+            reasons[reason] = reasons.get(reason, 0) + 1
             continue
+    if apply and inspected:
+        cursor = schedule.setdefault('doctorScanCursor', {})
+        for domain, count in inspected.items():
+            cursor[domain] = int(cursor.get(domain, 0)) + count
+        save_schedule(schedule)
     unknown = sum(row.get('status') == 'write_unknown' for row in results)
     verified = sum(row.get('status') == 'verified' for row in results)
-    status = ('partial' if unknown else 'applied' if verified else 'no_eligible_candidate') if apply else 'preview'
-    return {'status': status, 'complete': unknown == 0, 'verifiedCount': verified, 'unknownCount': unknown,
+    title_only = sum(row.get('status') == 'verified_title_only' for row in results)
+    status = ('partial' if unknown or title_only else 'applied' if verified else 'no_eligible_candidate') if apply else 'preview'
+    return {'status': status, 'complete': unknown == 0 and title_only == 0, 'verifiedCount': verified,
+            'verifiedTitleCount': verified + title_only, 'titleOnlyCount': title_only, 'unknownCount': unknown,
             'candidates': results, 'reasonCounts': reasons}
 
 
@@ -5232,6 +5374,7 @@ def generate_daily_schedule():
             previous = json.loads(archived.read_text(encoding='utf-8'))
             schedule['radarQueue'] = [row for row in previous.get('radarQueue', []) if row.get('status') == 'queued']
             schedule['doctorIndexHistory'] = previous.get('doctorIndexHistory', {})
+            schedule['doctorScanCursor'] = previous.get('doctorScanCursor', {})
             schedule['growthAutomationEnabled'] = previous.get('growthAutomationEnabled', True)
             break
         except (OSError, ValueError):

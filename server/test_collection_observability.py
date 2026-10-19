@@ -297,6 +297,40 @@ class LiveSnapshotTests(unittest.TestCase):
 
 
 class GrowthMutationGuards(unittest.TestCase):
+    def test_radar_fills_sixteen_queues_without_resetting_published_slots(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch, MagicMock
+        items = [{'domain': domain, 'status': 'published', 'postId': i} for i, domain in enumerate(runner.ALL_DOMAINS)]
+        schedule = {'date': '2026-10-19', 'items': items}
+        sources = {domain: {'title': f'{domain} Windows 11 복구 조건', 'content': '<h2>오류가 발생했을 때 복구 순서</h2>'} for domain in runner.ALL_DOMAINS}
+        history = MagicMock(); history.glob.return_value = []
+        with patch.object(runner, 'HISTORY_DIR', history), patch.object(runner, 'save_schedule'):
+            result = runner.growth_radar(schedule, evidence={'complete': False, 'radarCandidates': []}, source_posts=sources)
+            again = runner.growth_radar(schedule, evidence={'complete': False, 'radarCandidates': []}, source_posts=sources)
+        self.assertEqual(result['coveredDomains'], 16)
+        self.assertEqual(again['added'], 0)
+        self.assertTrue(all(row['status'] == 'published' for row in items))
+        self.assertTrue(all(row['revenueVerified'] is False for row in schedule['radarQueue']))
+
+    def test_doctor_publication_age_fallback_requires_measured_zero(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch, MagicMock
+        now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        url = 'https://www.baronote.kr/old-article'
+        post = {'id': 1, 'slug': 'old-article', 'title': '지원금 신청 조건', 'published_at': '2026-10-01T12:00:00+00:00',
+                'content': '<h2>신청이 거절됐을 때 확인할 서류</h2>'}
+        evidence = {'coverage': {'trafficComplete': True}, 'zeroViewPages': [{'domain': 'baronote.kr', 'url': url,
+                    'complete': True, 'sessions': 0, 'pageViews': 0}], 'highTrafficPages': []}
+        history = MagicMock(); history.glob.return_value = []
+        with patch.object(runner, 'HISTORY_DIR', history), patch.object(runner, 'published_inventory', return_value=[post]), \
+                patch.object(runner, '_growth_post', return_value=post), patch.object(runner, '_doctor_put') as put:
+            result = runner.growth_doctor({'date': '2026-10-19'}, now, evidence, metrics={}, apply=False)
+            self.assertEqual(result['candidates'][0]['eligibilityBasis'], 'published_7_days_complete_ga4_zero')
+            self.assertFalse(result['candidates'][0]['indexingVerifiedForSevenDays'])
+            evidence['zeroViewPages'][0]['complete'] = False
+            self.assertEqual(runner.growth_doctor({'date': '2026-10-19'}, now, evidence, metrics={}, apply=False)['candidates'], [])
+            put.assert_not_called()
+
     def test_gsc_pass_age_not_editorial_review_or_crawl_age(self):
         from cf_posting.pipeline_runner import _doctor_index_evidence
         now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
@@ -411,3 +445,53 @@ class PagePerformanceTests(unittest.TestCase):
         result = self.evaluate(self.now, metrics, revenue)
         self.assertEqual(result['zeroViewPages'], [])
         self.assertEqual(result['highTrafficPages'], [])
+
+    def test_radar_revenue_precedes_traffic_without_invented_earnings(self):
+        metrics, revenue = self.fixture(20)
+        result = self.evaluate(self.now, metrics, revenue, traffic_source={}, domains=['example.test'])
+        self.assertEqual(len(result['radarCandidates']), 2)
+        self.assertTrue(all(row['selectionBasis'] == 'adsense_revenue' and row['revenueVerified'] for row in result['radarCandidates']))
+        result = self.evaluate(self.now, metrics, {}, traffic_source={}, domains=['example.test'])
+        self.assertEqual(result['radarMode'], 'traffic')
+        self.assertEqual(len(result['radarCandidates']), 2)
+        self.assertTrue(all(row['estimatedRevenue'] is None and not row['revenueVerified'] for row in result['radarCandidates']))
+        for row in revenue['pagePerformance']['pages']:
+            row['estimatedRevenue'] = 0
+        result = self.evaluate(self.now, metrics, revenue, traffic_source={}, domains=['example.test'])
+        self.assertEqual(result['radarCandidates'][0]['selectionBasis'], 'ga4_sessions')
+
+    def test_radar_gsc_exact_week_fallback_never_substitutes_28_days(self):
+        self.fixture()
+        report = {'start': '2026-10-10', 'end': '2026-10-16', 'checkedAt': self.now.isoformat(),
+                  'queries': [{'page': 'https://example.test/search', 'clicks': 3}]}
+        source = {'sites': {'example.test': {'google': {'status': 'collected', 'periods': {'week': report}}}}}
+        result = self.evaluate(self.now, {}, {}, traffic_source=source, domains=['example.test'])
+        row = result['radarCandidates'][0]
+        self.assertEqual(row['selectionBasis'], 'gsc_clicks')
+        self.assertEqual(row['start'], '2026-10-10')
+        self.assertFalse(row['revenueVerified'])
+        report['start'] = '2026-09-19'
+        result = self.evaluate(self.now, {}, {}, traffic_source=source, domains=['example.test'])
+        self.assertEqual(result['radarCandidates'], [])
+        self.assertEqual(result['coldStartDomains'][0]['evidenceState'], 'missing')
+
+    def test_cold_start_distinguishes_exhaustive_zero_from_missing(self):
+        metrics, revenue = self.fixture(0)
+        report = metrics['pagePerformance']
+        report['sites'] = [{**{key: report[key] for key in ('start', 'end', 'timezone', 'checkedAt')},
+                            'domain': 'zero.test', 'complete': True, 'fullEnumeration': True}]
+        result = self.evaluate(self.now, metrics, {}, traffic_source={}, domains=['zero.test', 'missing.test'])
+        states = {row['domain']: row['evidenceState'] for row in result['coldStartDomains']}
+        self.assertEqual(states, {'zero.test': 'measured_zero', 'missing.test': 'missing'})
+        self.assertEqual(len(result['domainCoverage']), 2)
+
+    def test_radar_verified_positive_revenue_does_not_require_ga4(self):
+        metrics, revenue = self.fixture(2)
+        result = self.evaluate(self.now, {}, revenue, traffic_source={}, domains=['example.test'])
+        self.assertEqual(result['revenueWinners'], [])  # Legacy strict joined report remains unchanged.
+        self.assertEqual(result['radarCandidates'][0]['selectionBasis'], 'adsense_revenue')
+        self.assertTrue(result['radarCandidates'][0]['revenueVerified'])
+        self.assertIsNone(result['radarCandidates'][0]['sessions'])
+        revenue['pagePerformance']['pages'][0]['currency'] = 'KRW'
+        result = self.evaluate(self.now, {}, revenue, traffic_source={}, domains=['example.test'])
+        self.assertEqual(result['radarCandidates'], [])

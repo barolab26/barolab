@@ -200,7 +200,7 @@ def snapshot(path, site_id, days=7, end=None):
             'queried_at': datetime.now(timezone.utc).isoformat()}
 
 
-def page_performance_evidence(now=None, metrics=None, revenue=None):
+def page_performance_evidence(now=None, metrics=None, revenue=None, traffic_source=None, domains=None):
     """Join exact completed seven-day page reports; never apportion domain earnings."""
     now = now or datetime.now(timezone.utc)
     end = now.astimezone(ZoneInfo('Asia/Seoul')).date() - timedelta(days=1)
@@ -212,6 +212,7 @@ def page_performance_evidence(now=None, metrics=None, revenue=None):
             return {}
     metrics = read('metrics.json') if metrics is None else metrics
     revenue = read('revenue.json') if revenue is None else revenue
+    traffic_source = read('traffic.json') if traffic_source is None else traffic_source
     result = {'schema': 'page-performance-feedback-v1', 'checkedAt': now.isoformat(),
               'start': start.isoformat(), 'end': end.isoformat(), 'timezone': 'Asia/Seoul',
               'status': 'not_collected', 'complete': False, 'reasonCodes': [],
@@ -270,6 +271,9 @@ def page_performance_evidence(now=None, metrics=None, revenue=None):
         return mapped, duplicate
     pages, traffic_duplicate = rows(traffic, ('sessions', 'pageViews'))
     money, revenue_duplicate = rows(earnings, ('estimatedRevenue',))
+    if any(row.get('currency', currency) != currency for row in money.values()):
+        revenue_valid = False
+        result['reasonCodes'].append('mixed_revenue_currency')
     if traffic_duplicate or revenue_duplicate:
         result['reasonCodes'].append('duplicate_canonical_page_rows')
         traffic_valid = revenue_valid = False
@@ -343,6 +347,89 @@ def page_performance_evidence(now=None, metrics=None, revenue=None):
                           'completeTrafficDomains': sorted(valid_domains),
                           'exhaustiveTrafficDomains': sorted(domain for domain, report in domain_reports.items()
                                                              if report.get('fullEnumeration') is True)}
+    # Radar can learn from measured acquisition before monetization is connected.
+    # Ranking remains per-domain and names its evidence; revenueWinners stays strict.
+    if domains is None:
+        domains = list(read('metrics-config.json').get('sites', {}))
+        if not domains:
+            domains = sorted({row.get('site', {}).get('site_id') for row in
+                (metrics.get('sites', {}).values() if isinstance(metrics.get('sites'), dict) else metrics.get('sites', []))
+                if row.get('site', {}).get('platform') == 'cf'})
+    domains = sorted(set(domains or valid_domains))
+    source_sites = traffic_source.get('sites', {})
+    source_sites = source_sites if isinstance(source_sites, dict) else {row.get('site', {}).get('site_id'): row for row in source_sites}
+    result.update(radarCandidates=[], coldStartDomains=[], domainCoverage=[])
+    for domain in domains:
+        measured = [row for row in result['highTrafficPages'] if row['domain'] == domain]
+        paid = [row for row in result['revenueWinners'] if row['domain'] == domain]
+        # Full positive domain earnings may qualify even when another domain is missing.
+        income_sites = earnings.get('sites', [])
+        income_sites = list(income_sites.values()) if isinstance(income_sites, dict) else income_sites
+        income_domain = next((row for row in income_sites if row.get('domain') == domain), {})
+        income_report = {**earnings, **income_domain, 'status': income_domain.get('status', earnings.get('status', 'collected'))}
+        domain_revenue_valid = (not revenue_duplicate and
+            earnings.get('source') in ('AdSense Management API v2', 'AdSense Management API v2 PAGE_URL') and
+            currency in ('USD', 'KRW') and valid_report(income_report, 'domain_revenue', False))
+        if domain_revenue_valid:
+            domain_money = [(identity, row) for identity, row in money.items()
+                            if identity[0] == domain and row['estimatedRevenue'] > 0]
+            if any(row.get('currency', currency) != currency for _, row in domain_money):
+                paid = []
+                result['reasonCodes'].append('mixed_revenue_currency:' + domain)
+            else:
+                paid = [{'domain': domain, 'url': row['url'], 'title': row.get('title', ''),
+                         'sessions': pages.get(identity, {}).get('sessions') if domain in valid_domains else None,
+                         'pageViews': pages.get(identity, {}).get('pageViews') if domain in valid_domains else None,
+                         'estimatedRevenue': row['estimatedRevenue'], 'currency': currency,
+                         'start': str(start), 'end': str(end), 'complete': True,
+                         'revenueSource': earnings['source']} for identity, row in domain_money]
+        candidates, basis = paid, 'adsense_revenue'
+        if not candidates:
+            candidates, basis = measured, 'ga4_sessions'
+        if not candidates:
+            google = source_sites.get(domain, {}).get('google', {})
+            report = google.get('periods', {}).get('week', {})
+            try:
+                report_start, report_end = date.fromisoformat(report['start']), date.fromisoformat(report['end'])
+                expected_end = now.astimezone(ZoneInfo('America/Los_Angeles')).date() - timedelta(days=3)
+                collected = datetime.fromisoformat((report.get('checkedAt') or google['checkedAt']).replace('Z', '+00:00'))
+                gsc_valid = (report_end == expected_end and (report_end - report_start).days == 6 and
+                    0 <= (now - collected).total_seconds() <= 26 * 3600 and
+                    google.get('status') in ('collected', 'partial') and not google.get('stale') and
+                    not report.get('partialPeriod'))
+            except (ValueError, KeyError, TypeError):
+                gsc_valid = False
+            if gsc_valid:
+                observed = {}
+                for row in report.get('pages') or report.get('queries', []):
+                    address = row.get('page') or row.get('url')
+                    identity = key({'domain': domain, 'url': address})
+                    if identity and number(row.get('clicks')) and row['clicks'] > 0:
+                        entry = observed.setdefault(identity, {'domain': domain, 'url': address, 'title': '',
+                            'sessions': None, 'pageViews': None, 'clicks': 0, 'start': report['start'], 'end': report['end'],
+                            'timezone': 'America/Los_Angeles', 'complete': False,
+                            'rankingScope': 'observed_page_rows_not_all_site_pages'})
+                        entry['clicks'] += row['clicks']
+                candidates = list(observed.values())
+                basis = 'gsc_clicks'
+        if candidates:
+            metric = {'adsense_revenue': 'estimatedRevenue', 'ga4_sessions': 'sessions', 'gsc_clicks': 'clicks'}[basis]
+            candidates.sort(key=lambda row: (-row[metric], row['url']))
+            selected = candidates[:max(1, math.ceil(len(candidates) * 0.1))]
+            result['radarCandidates'].extend({**row, 'selectionBasis': basis,
+                'estimatedRevenue': row.get('estimatedRevenue') if basis == 'adsense_revenue' else None,
+                'revenueVerified': basis == 'adsense_revenue', 'eligibleDomainPageCount': len(candidates),
+                'rankingScope': row.get('rankingScope', 'domain_positive_pages')} for row in selected)
+            result['domainCoverage'].append({'domain': domain, 'mode': 'revenue' if basis == 'adsense_revenue' else 'traffic',
+                'selectionBasis': basis, 'selectedPages': len(selected), 'revenueVerified': basis == 'adsense_revenue'})
+        else:
+            state = 'measured_zero' if domain in result['coverage']['exhaustiveTrafficDomains'] else 'missing'
+            cold = {'domain': domain, 'mode': 'cold_start', 'evidenceState': state,
+                    'revenueVerified': False, 'reason': 'no_positive_measured_traffic' if state == 'measured_zero' else 'traffic_unavailable_or_incomplete'}
+            result['coldStartDomains'].append(cold)
+            result['domainCoverage'].append(cold)
+    result['radarMode'] = ('revenue' if any(row['revenueVerified'] for row in result['radarCandidates']) else
+                           'traffic' if result['radarCandidates'] else 'cold_start')
     return result
 
 
