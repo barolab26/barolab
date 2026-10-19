@@ -1,7 +1,7 @@
 {
   "directiveId": "2026-10-20T07:00:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-19T22:04:46.501184+00:00",
+  "startedAt": "2026-10-20T07:04:46.501184+09:00",
   "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
   "directiveHistory": [
     {
@@ -459,7 +459,7 @@
         },
         "publicVerification": {
           "status": "ok",
-          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "checkedAt": "2026-10-20T04:42:23.37539+09:00",
           "totalVerifiedEvidence": 58,
           "updated": 0,
           "errors": {}
@@ -467,7 +467,7 @@
         "snapshotSync": {
           "status": "drive_verified",
           "schema": "barolab-live-snapshot-v1",
-          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "generatedAt": "2026-10-20T04:38:10.936237+09:00",
           "complete": false,
           "bytes": 4649,
           "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
@@ -497,21 +497,21 @@
     {
       "directiveId": "2026-10-20T04:55:00+09:00",
       "status": "blocked",
-      "checkedAt": "2026-10-19T19:57:28.353086+00:00",
+      "checkedAt": "2026-10-20T04:57:28.353086+09:00",
       "summary": "부분 완료: Naver 과거 외부 증거 경로는 계정별 unknown으로 보존하고 전체 recovery_plan 예외 중단을 수정, 검증 및 origin/main 푸시 완료. 10/20 설정된 예약은 7건 verified이며 10건 완료는 아님. CF PID 9500 종료 후 새 catch-up PID 18012 실행 중이므로 중복 실행/doctor 보류. SearchAdvisor soultin 로그인 확인 및 도메인별 50건 수정은 직전 사용자 작업 e544a63에 반영; 실제 제출 0건. Gemini 데스크톱 제어 도구 미지원으로 긴급 핑 미전송.",
       "commitHash": "7ac6bf4"
     },
     {
       "directiveId": "2026-10-20T05:06:00+09:00",
       "status": "blocked",
-      "checkedAt": "2026-10-19T20:08:32.435969+00:00",
+      "checkedAt": "2026-10-20T05:08:32.435969+09:00",
       "summary": "05:06 부분 완료: SearchAdvisor baronote 실제 수집 접수 1건(05:06:29) 확인; 전체/상대 URL 접수 파서 수정·테스트·푸시 완료. 일괄 실행기 TimeoutError 및 CUA DOMSnapshot 타임아웃으로 추가 접수 미확인. 네이버 10/20 예약은 설정된 7/7 verified로 목표 완료 정정. CF catch-up은 내부 growth_doctor를 실행하며 별도 doctor 20 실행은 활성 workflow lock으로 거부됨; 중복/잠금 우회 없이 미완료 유지.",
       "commitHash": "7ba136aa13c28c59fd7c6f33b30956413996e51f"
     },
     {
       "directiveId": "2026-10-20T05:10:00+09:00",
       "status": "blocked",
-      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "updatedAt": "2026-10-20T05:14:37.93799+09:00",
       "commitHash": "b16aadb38252c3e405c5c2e8f1da8816e19211e6",
       "summary": "SearchAdvisor per-site bounded batch implemented and 5 new receipts verified. CF doctor continuation deferred by active workflow lock; full 20 doctor completions not verified.",
       "changedFiles": [
@@ -521,7 +521,7 @@
     {
       "directiveId": "2026-10-20T05:16:00+09:00",
       "status": "completed",
-      "completedAt": "2026-10-19T20:25:27.946779+00:00",
+      "completedAt": "2026-10-20T05:25:27.946779+09:00",
       "commitHash": "5bf19669e7b8058c5eabb7d417f719563705c82b",
       "summary": "55 new SearchAdvisor receipts verified: five requested sites 10 each plus baronote 5. Doctor repaired and publicly verified 16 reciprocal-link pairs; total verified 20. One uncertain SearchAdvisor submission was not retried.",
       "changedFiles": [
@@ -531,14 +531,14 @@
     {
       "directiveId": "2026-10-20T05:28:00+09:00",
       "status": "blocked",
-      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "blockedAt": "2026-10-20T05:36:03.100447+09:00",
       "summary": "60 new SearchAdvisor receipts verified across six requested domains. maxnote draft reached image stage then failed: Flow project/editor unavailable (ProseMirror timeout). No additional prepared CF article verified.",
       "changedFiles": []
     },
     {
       "directiveId": "2026-10-20T05:38:00+09:00",
       "status": "blocked",
-      "startedAt": "2026-10-19T20:37:48.198562+00:00",
+      "startedAt": "2026-10-20T05:37:48.198562+09:00",
       "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
       "summary": "Dual indexing request/actual evidence columns and verified same-artifact Flow reuse implemented and tested; origin main verified. CF 11 prepared blocked: matching images unavailable; capture guide cannot manufacture source screenshots.",
       "changedFiles": [
@@ -589,7 +589,7 @@
         },
         "publicVerification": {
           "status": "ok",
-          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "checkedAt": "2026-10-20T04:42:23.37539+09:00",
           "totalVerifiedEvidence": 58,
           "updated": 0,
           "errors": {}
@@ -597,7 +597,7 @@
         "snapshotSync": {
           "status": "drive_verified",
           "schema": "barolab-live-snapshot-v1",
-          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "generatedAt": "2026-10-20T04:38:10.936237+09:00",
           "complete": false,
           "bytes": 4649,
           "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
@@ -618,17 +618,17 @@
         "reason": "Directive is blocked/partial, not completed."
       },
       "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "updatedAt": "2026-10-20T05:14:37.93799+09:00",
       "urgentAlert": {
         "status": "not_sent_app_unavailable",
         "attempted": false,
         "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
       },
-      "checkedAt": "2026-10-19T20:41:31.796830+00:00",
+      "checkedAt": "2026-10-20T05:41:31.79683+09:00",
       "geminiNotification": {
         "directiveId": "2026-10-20T05:38:00+09:00",
         "status": "sent_verified",
-        "sentAt": "2026-10-19T20:42:21.953689+00:00",
+        "sentAt": "2026-10-20T05:42:21.953689+09:00",
         "kind": "blocked_result",
         "evidence": "gemini-report-0538.png"
       },
@@ -663,7 +663,7 @@
         "60 live UI receipt confirmations",
         "CF prepare-only execution failed at image stage"
       ],
-      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "blockedAt": "2026-10-20T05:36:03.100447+09:00",
       "cfPreparationResult": {
         "status": "blocked",
         "newPrepared": 0,
@@ -688,7 +688,7 @@
     {
       "directiveId": "2026-10-20T05:44:00+09:00",
       "status": "blocked",
-      "startedAt": "2026-10-19T20:43:11.082481+00:00",
+      "startedAt": "2026-10-20T05:43:11.082481+09:00",
       "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
       "summary": "40 new SearchAdvisor receipts verified; bounded Naver index checker implemented/tested/pushed. CF prepared0; Flow not exposed to CUA. Safe backend reload unavailable.",
       "changedFiles": [
@@ -736,7 +736,7 @@
         },
         "publicVerification": {
           "status": "ok",
-          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "checkedAt": "2026-10-20T04:42:23.37539+09:00",
           "totalVerifiedEvidence": 58,
           "updated": 0,
           "errors": {}
@@ -744,7 +744,7 @@
         "snapshotSync": {
           "status": "drive_verified",
           "schema": "barolab-live-snapshot-v1",
-          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "generatedAt": "2026-10-20T04:38:10.936237+09:00",
           "complete": false,
           "bytes": 4649,
           "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
@@ -765,17 +765,17 @@
         "reason": "Directive is blocked/partial, not completed."
       },
       "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "updatedAt": "2026-10-20T05:14:37.93799+09:00",
       "urgentAlert": {
         "status": "not_sent_app_unavailable",
         "attempted": false,
         "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
       },
-      "checkedAt": "2026-10-19T20:49:32.836155+00:00",
+      "checkedAt": "2026-10-20T05:49:32.836155+09:00",
       "geminiNotification": {
         "directiveId": "2026-10-20T05:44:00+09:00",
         "status": "sent_verified",
-        "sentAt": "2026-10-19T20:50:23.595569+00:00",
+        "sentAt": "2026-10-20T05:50:23.595569+09:00",
         "kind": "blocked_result",
         "evidence": "gemini-report-0544.png"
       },
@@ -810,7 +810,7 @@
         "60 live UI receipt confirmations",
         "CF prepare-only execution failed at image stage"
       ],
-      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "blockedAt": "2026-10-20T05:36:03.100447+09:00",
       "cfPreparationResult": {
         "status": "blocked",
         "newPrepared": 0,
@@ -851,7 +851,7 @@
     {
       "directiveId": "2026-10-20T05:45:00+09:00",
       "status": "blocked",
-      "startedAt": "2026-10-19T20:51:12.431912+00:00",
+      "startedAt": "2026-10-20T05:51:12.431912+09:00",
       "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
       "summary": "05:45 scope reconciled against05:44: all40 crawl requests already received; checker code already pushed. Flow remains absent from Computer Use; safe server reload unavailable.",
       "changedFiles": [],
@@ -895,7 +895,7 @@
         },
         "publicVerification": {
           "status": "ok",
-          "checkedAt": "2026-10-20T04:42:23.375390+09:00",
+          "checkedAt": "2026-10-20T04:42:23.37539+09:00",
           "totalVerifiedEvidence": 58,
           "updated": 0,
           "errors": {}
@@ -903,7 +903,7 @@
         "snapshotSync": {
           "status": "drive_verified",
           "schema": "barolab-live-snapshot-v1",
-          "generatedAt": "2026-10-19T19:38:10.936237+00:00",
+          "generatedAt": "2026-10-20T04:38:10.936237+09:00",
           "complete": false,
           "bytes": 4649,
           "driveId": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo"
@@ -924,17 +924,17 @@
         "reason": "Directive is blocked/partial, not completed."
       },
       "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "updatedAt": "2026-10-19T20:14:37.937990+00:00",
+      "updatedAt": "2026-10-20T05:14:37.93799+09:00",
       "urgentAlert": {
         "status": "not_sent_app_unavailable",
         "attempted": false,
         "reason": "Computer Use inventory exposes no native Gemini app/window; user said Gemini is a desktop app, so no browser or other chat was substituted. Requires user action."
       },
-      "checkedAt": "2026-10-19T20:51:34.395184+00:00",
+      "checkedAt": "2026-10-20T05:51:34.395184+09:00",
       "geminiNotification": {
         "directiveId": "2026-10-20T05:45:00+09:00",
         "status": "sent_verified",
-        "sentAt": "2026-10-19T20:53:29.306614+00:00",
+        "sentAt": "2026-10-20T05:53:29.306614+09:00",
         "kind": "blocked_result",
         "evidence": "gemini-report-0545.png"
       },
@@ -969,7 +969,7 @@
         "60 live UI receipt confirmations",
         "CF prepare-only execution failed at image stage"
       ],
-      "blockedAt": "2026-10-19T20:36:03.100447+00:00",
+      "blockedAt": "2026-10-20T05:36:03.100447+09:00",
       "cfPreparationResult": {
         "status": "blocked",
         "newPrepared": 0,
@@ -1013,7 +1013,7 @@
     {
       "directiveId": "2026-10-20T05:52:00+09:00",
       "status": "blocked",
-      "startedAt": "2026-10-19T20:56:12.338079+00:00",
+      "startedAt": "2026-10-20T05:56:12.338079+09:00",
       "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
       "summary": "60 new crawl receipts verified; NAS CF evidence deployed and UI verified 23 full/7 partial/2 unknown; Flow CUA recovered, new prepared 0 pending image plan re-review",
       "changedFiles": [
@@ -1066,19 +1066,19 @@
         "reason": "directive partial"
       },
       "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-      "updatedAt": "2026-10-19T21:13:38.083229+00:00",
+      "updatedAt": "2026-10-20T06:13:38.083229+09:00",
       "urgentAlert": {
         "directiveId": "2026-10-20T05:52:00+09:00",
         "status": "sent_verified",
-        "sentAt": "2026-10-19T21:14:35.484612+00:00",
+        "sentAt": "2026-10-20T06:14:35.484612+09:00",
         "channel": "existing BaroLab Gemini conversation via Computer Use",
         "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0552.png"
       },
-      "checkedAt": "2026-10-19T20:51:34.395184+00:00",
+      "checkedAt": "2026-10-20T05:51:34.395184+09:00",
       "geminiNotification": {
         "directiveId": "2026-10-20T05:52:00+09:00",
         "status": "sent_verified",
-        "sentAt": "2026-10-19T21:14:35.484612+00:00",
+        "sentAt": "2026-10-20T06:14:35.484612+09:00",
         "channel": "existing BaroLab Gemini conversation via Computer Use",
         "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0552.png"
       },
@@ -1118,7 +1118,7 @@
         "Python and dashboard JavaScript syntax checks passed",
         "60 live SearchAdvisor receipts verified"
       ],
-      "blockedAt": "2026-10-19T21:13:38.083229+00:00",
+      "blockedAt": "2026-10-20T06:13:38.083229+09:00",
       "cfPreparationResult": {
         "status": "blocked",
         "newPrepared": 0,
@@ -1171,14 +1171,14 @@
       "driveSync": {
         "status": "verified",
         "files": 7,
-        "verifiedAt": "2026-10-19T21:14:35.484624+00:00"
+        "verifiedAt": "2026-10-20T06:14:35.484624+09:00"
       }
     },
     {
       "directiveId": "2026-10-20T06:16:00+09:00",
       "status": "blocked",
-      "startedAt": "2026-10-19T21:20:43.386688+00:00",
-      "blockedAt": "2026-10-19T21:57:38.288747+00:00",
+      "startedAt": "2026-10-20T06:20:43.386688+09:00",
+      "blockedAt": "2026-10-20T06:57:38.288747+09:00",
       "summary": "Image-plan re-review and normalization defects fixed/tested/pushed; 60 new crawl receipts verified. Two priority drafts completed normal Stage1-3, but independent image reviews rejected. New prepared=0, existing prepared=5; 11 unfinished. Not completed.",
       "blockedReason": "Independent content/evidence/image-plan gates rejected five drafts. Preserved prose and retry limits; no image or layout approval, remaining six waiting drafts not prepared.",
       "commitHash": "b2cb9750ce286faf8ff95694f8e75afe83d3c365",
@@ -1237,8 +1237,8 @@
       "geminiNotification": {
         "directiveId": "2026-10-20T06:16:00+09:00",
         "status": "sent_verified",
-        "startedAt": "2026-10-19T21:58:21.783218+00:00",
-        "sentAt": "2026-10-19T21:58:53.420854+00:00",
+        "startedAt": "2026-10-20T06:58:21.783218+09:00",
+        "sentAt": "2026-10-20T06:58:53.420854+09:00",
         "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0616.png",
         "account": "barolab26@gmail.com",
         "conversationUrl": "https://gemini.google.com/app/89e396b9e70f5c80"
@@ -1246,8 +1246,8 @@
     },
     {
       "directiveId": "2026-10-20T07:00:00+09:00",
-      "startedAt": "2026-10-19T22:04:46.501184+00:00",
-      "completedAt": "2026-10-19T22:50:02.482003+00:00",
+      "startedAt": "2026-10-20T07:04:46.501184+09:00",
+      "completedAt": "2026-10-20T07:50:02.482003+09:00",
       "status": "blocked",
       "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
       "summary": "SearchAdvisor 40건 접수 확인. 5개 기존 반려 원고는 결합 재보완 검수가 통과하지 못했고, waiting 6건 모두 prepared 0건으로 실제 검수 대기 또는 주제/근거 불일치 상태를 보존했다. 관련 파이프라인 fail-open 3건을 좁게 고쳐 회귀 검증 후 푸시했다.",
@@ -1325,7 +1325,7 @@
       "driveSync": {
         "status": "verified",
         "fileCount": 7,
-        "verifiedAt": "2026-10-19T22:50:47.118329+00:00",
+        "verifiedAt": "2026-10-20T07:50:47.118329+09:00",
         "files": [
           {
             "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
@@ -1342,7 +1342,7 @@
           {
             "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
             "name": "revenue.json",
-            "modifiedTime": "2026-10-19T22:50:23.410Z",
+            "modifiedTime": "2026-10-19T22:50:23.41Z",
             "size": "191141"
           },
           {
@@ -1375,7 +1375,7 @@
         "directiveId": "2026-10-20T07:00:00+09:00",
         "status": "pending"
       },
-      "updatedAt": "2026-10-19T22:50:47.118329+00:00"
+      "updatedAt": "2026-10-20T07:50:47.118329+09:00"
     }
   ],
   "summary": "SearchAdvisor 40건 접수 확인. 5개 기존 반려 원고는 결합 재보완 검수가 통과하지 못했고, waiting 6건 모두 prepared 0건으로 실제 검수 대기 또는 주제/근거 불일치 상태를 보존했다. 관련 파이프라인 fail-open 3건을 좁게 고쳐 회귀 검증 후 푸시했다.",
@@ -1430,11 +1430,15 @@
     "publication": "none"
   },
   "previousLastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
-  "updatedAt": "2026-10-19T22:50:47.118329+00:00",
-  "checkedAt": "2026-10-19T21:57:38.288747+00:00",
+  "updatedAt": "2026-10-19T22:52:01Z",
+  "checkedAt": "2026-10-20T06:57:38.288747+09:00",
   "geminiNotification": {
     "directiveId": "2026-10-20T07:00:00+09:00",
-    "status": "pending"
+    "status": "sent_verified",
+    "sentAt": "2026-10-19T22:52:01Z",
+    "account": "barolab26@gmail.com",
+    "conversation": "BaroLab 프로젝트",
+    "message": "코덱스 긴급 보고: 5개 우선 원고가 검수에서 반려됐고 대기 원고 6개도 준비 0건이며 게시된 항목이 없습니다. 블로킹 발생. 지시 필요."
   },
   "tests": {
     "passed": [
@@ -1460,7 +1464,7 @@
   "driveSync": {
     "status": "verified",
     "fileCount": 7,
-    "verifiedAt": "2026-10-19T22:50:47.118329+00:00",
+    "verifiedAt": "2026-10-20T07:50:47.118329+09:00",
     "files": [
       {
         "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
@@ -1477,7 +1481,7 @@
       {
         "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
         "name": "revenue.json",
-        "modifiedTime": "2026-10-19T22:50:23.410Z",
+        "modifiedTime": "2026-10-19T22:50:23.41Z",
         "size": "191141"
       },
       {
@@ -1507,5 +1511,5 @@
     ]
   },
   "reportCommitHash": "2413464696c492210acfa89be839f4f7ff7b8d83",
-  "completedAt": "2026-10-19T22:50:02.482003+00:00"
+  "completedAt": "2026-10-20T07:50:02.482003+09:00"
 }
