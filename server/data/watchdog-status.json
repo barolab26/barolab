@@ -1,8 +1,8 @@
 {
   "schema": "barolab-system-watchdog-v1",
   "triggerSource": "windows-worker-10m",
-  "startedAt": "2026-10-19T18:28:40+09:00",
-  "finishedAt": "2026-10-19T18:28:45+09:00",
+  "startedAt": "2026-10-19T19:08:56+09:00",
+  "finishedAt": "2026-10-19T19:09:00+09:00",
   "status": "healthy",
   "server": {
     "port8790": true,

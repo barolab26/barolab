@@ -43,6 +43,9 @@ try:
         run_promote_closed,
         run_switch_prod_ads,
         run_sync_testers,
+        run_attach_closed_testers,
+        run_auto_optin_accounts,
+        launch_portable_profile,
     )
     AUTOMATOR_AVAILABLE = True
 except Exception:  # NAS image ships only server/*.py + common/*.py (no apps/ package)
@@ -51,7 +54,7 @@ except Exception:  # NAS image ships only server/*.py + common/*.py (no apps/ pa
     def _automator_unavailable(*_args: Any, **_kwargs: Any) -> Dict[str, Any]:
         return {"ok": False, "error": "play_console_automator is Windows-only (not in NAS image)"}
 
-    run_promote_closed = run_switch_prod_ads = run_sync_testers = _automator_unavailable
+    run_promote_closed = run_switch_prod_ads = run_sync_testers = run_attach_closed_testers = run_auto_optin_accounts = launch_portable_profile = _automator_unavailable
 
 _CDP_JOB_LOCK = threading.Lock()
 
@@ -919,6 +922,42 @@ def post_promote_closed(payload: PromoteClosedRequest) -> Dict[str, Any]:
         "closedTrackPromoted": bool(doc.get("closedTrackPromoted")),
         "testersControlCenter": doc,
     }
+
+
+class AutoOptinPayload(BaseModel):
+    accountId: Optional[str] = None
+    email: Optional[str] = None
+    executeCdp: bool = True
+
+
+class LaunchBrowserPayload(BaseModel):
+    accountId: Optional[str] = None
+    email: Optional[str] = None
+
+
+@router.post("/api/projects/attach-closed-testers")
+def post_attach_closed_testers(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Check both tester email lists on Play Console Closed Testing (Alpha track) for all 4 apps."""
+    res = run_attach_closed_testers(app_filter="all", execute_cdp=True)
+    return {"ok": True, "result": res, "testersControlCenter": tester_control_center()}
+
+
+@router.post("/api/projects/testers/auto-optin")
+def post_auto_optin(payload: Optional[AutoOptinPayload] = None) -> Dict[str, Any]:
+    target = "all"
+    if payload:
+        target = payload.email or payload.accountId or "all"
+    res = run_auto_optin_accounts(account_filter=target)
+    return {"ok": True, "result": res, "testersControlCenter": tester_control_center()}
+
+
+@router.post("/api/projects/testers/launch-browser")
+def post_launch_browser(payload: LaunchBrowserPayload) -> Dict[str, Any]:
+    target = payload.email or payload.accountId or ""
+    if not target:
+        raise HTTPException(status_code=400, detail="accountId or email required")
+    res = launch_portable_profile(account_email_or_id=target)
+    return {"ok": res.get("ok", False), "result": res, "testersControlCenter": tester_control_center()}
 
 
 @router.post("/api/projects/verify-device")

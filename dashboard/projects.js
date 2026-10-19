@@ -253,11 +253,62 @@
     if (installationBusy) return;
     box.replaceChildren();
     installationDoc.accounts.forEach((account, index) => {
-      const row = node('div', '', 'tester-installation-row' + (account.installed === true ? ' installed' : ''));
+      const isOptedIn = (account.optInStatus === 'opted_in' || account.installed === true);
+      const isNotLoggedIn = (account.optInStatus === 'not_logged_in');
+      const row = node('div', '', 'tester-installation-row' + (isOptedIn ? ' installed' : ''));
       const identity = node('div', '', 'tester-installation-identity');
-      identity.append(node('strong', installationSlot(account, index)), node('span', account.email));
+
+      const titleWrap = node('div', '', 'tester-title-wrap');
+      titleWrap.style.cssText = 'display:flex; align-items:center; flex-wrap:wrap; gap:8px;';
+      titleWrap.append(node('strong', installationSlot(account, index)), node('span', account.email));
+
+      const badgeNode = node('span', isOptedIn ? '● 참여완료' : (isNotLoggedIn ? '⚠️ 로그인 필요' : '○ 대기'), 'tester-badge');
+      badgeNode.style.cssText = isOptedIn
+        ? 'background:#ecfdf5; color:#059669; border:1px solid #10b981; font-weight:800; font-size:11px; padding:2px 8px; border-radius:10px;'
+        : (isNotLoggedIn
+          ? 'background:#fffbeb; color:#d97706; border:1px solid #f59e0b; font-weight:800; font-size:11px; padding:2px 8px; border-radius:10px;'
+          : 'background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; font-weight:600; font-size:11px; padding:2px 8px; border-radius:10px;');
+      titleWrap.append(badgeNode);
+      identity.append(titleWrap);
+
       if (account.installedAt) identity.append(node('small', `확인 ${formatKST(account.installedAt)}`));
-      const button = node('button', account.installed === true ? '✓ 4종 설치 완료' : '4종 설치 완료', 'tester-installation-toggle');
+
+      const actionsWrap = node('div', '', 'tester-actions-wrap');
+      actionsWrap.style.cssText = 'display:flex; align-items:center; gap:6px;';
+
+      const autoBtn = node('button', isOptedIn ? '🔄 재검증' : '⚡ 자동 참여 실행', 'tester-auto-optin-btn');
+      autoBtn.type = 'button';
+      autoBtn.style.cssText = isOptedIn
+        ? 'background:#f8fafc; border:1px solid #cbd5e1; color:#475569; font-size:11px; font-weight:700; padding:6px 10px; border-radius:7px; cursor:pointer; min-height:38px;'
+        : 'background:#7c3aed; border:1px solid #6d28d9; color:#fff; font-size:11px; font-weight:800; padding:6px 10px; border-radius:7px; cursor:pointer; min-height:38px;';
+      autoBtn.onclick = async () => {
+        autoBtn.disabled = true; autoBtn.textContent = '참여 중…';
+        set('installation-save-status', `${account.email} 전용 브라우저 접속 및 비공개 테스트 자동 참여(Opt-in) 실행 중…`);
+        try {
+          const resp = await fetch('/api/projects/testers/auto-optin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: account.email, accountId: account.id})
+          });
+          const json = await resp.json();
+          const acctRes = json?.result?.results?.[account.email] || {};
+          if (acctRes.optInStatus === 'opted_in') {
+            set('installation-save-status', `✅ ${account.email} 4개 앱 비공개 테스트 웹 참여(Opt-in) 성공 완료!`);
+          } else if (acctRes.loginStatus === 'not_logged_in') {
+            set('installation-save-status', `⚠️ ${account.email} 전용 브라우저가 열렸습니다. 구글 로그인 후 [자동 참여 실행]을 다시 눌러주세요.`);
+          } else {
+            set('installation-save-status', acctRes.message || '결과를 확인했습니다.');
+          }
+        } catch (e) {
+          set('installation-save-status', `실행 오류: ${e.message}`);
+        } finally {
+          await loadInstallation();
+          renderInstallation(account.id);
+          renderPlayConsole();
+        }
+      };
+
+      const button = node('button', account.installed === true ? '✓ 설치 완료' : '설치 체크', 'tester-installation-toggle');
       button.type = 'button'; button.dataset.installationId = account.id;
       button.setAttribute('aria-pressed', String(account.installed === true));
       button.setAttribute('aria-label', `${installationSlot(account, index)} ${account.email} 4종 설치 완료`);
@@ -284,7 +335,10 @@
           set('installation-save-status', message);
         }
       };
-      row.append(identity, button); box.append(row);
+
+      actionsWrap.append(autoBtn, button);
+      row.append(identity, actionsWrap);
+      box.append(row);
     });
     set('installation-save-status', installationError || '체크는 4종 설치에 대한 사용자 확인입니다. 해제도 즉시 저장됩니다.');
     if (currentFocus) Array.from(box.querySelectorAll('button')).find(el => el.dataset.installationId === currentFocus)?.focus({preventScroll: true});
@@ -815,6 +869,58 @@
         promoteClosedBtn.disabled = false;
         promoteClosedBtn.textContent = finalText;
         setTimeout(() => { promoteClosedBtn.textContent = PROMO_LABEL; }, 6000);
+      }
+    });
+  }
+
+  const attachClosedBtn = document.getElementById('btn-attach-closed-testers');
+  if (attachClosedBtn) {
+    const ATTACH_LABEL = '⚡ Play Console Alpha 테스터 2개 목록 즉시 저장 & 활성화';
+    attachClosedBtn.addEventListener('click', async () => {
+      attachClosedBtn.disabled = true;
+      attachClosedBtn.textContent = '⚡ Play Console Alpha 테스터 목록 동기화 중…';
+      const setStatus = (msg) => { const el = document.getElementById('installation-save-status'); if (el) el.textContent = msg; };
+      setStatus('Play Console Alpha 트랙에 2개 테스터 목록(13명)을 동기화하고 저장하는 중입니다…');
+      try {
+        const resp = await fetch('/api/projects/attach-closed-testers', {method: 'POST'});
+        const data = await resp.json();
+        setStatus('✅ Play Console 비공개 테스트 Alpha 트랙 4종 테스터 목록(13명) 체크 및 저장 완료!');
+        await loadInstallation();
+        renderInstallation();
+        renderPlayConsole();
+      } catch (err) {
+        setStatus(`동기화 실패: ${err.message}`);
+      } finally {
+        attachClosedBtn.disabled = false;
+        attachClosedBtn.textContent = ATTACH_LABEL;
+      }
+    });
+  }
+
+  const autoOptinAllBtn = document.getElementById('btn-auto-optin-all');
+  if (autoOptinAllBtn) {
+    const OPTIN_ALL_LABEL = '🚀 워커 PC 전체 계정 순회 비공개 테스트 자동 참여 실행';
+    autoOptinAllBtn.addEventListener('click', async () => {
+      autoOptinAllBtn.disabled = true;
+      autoOptinAllBtn.textContent = '🚀 전체 프로필 순회 참여 중…';
+      const setStatus = (msg) => { const el = document.getElementById('installation-save-status'); if (el) el.textContent = msg; };
+      setStatus('워커 PC 내 13개 포터블 브라우저 프로필을 순회하며 비공개 테스트 참여(Opt-in)를 진행 중입니다…');
+      try {
+        const resp = await fetch('/api/projects/testers/auto-optin', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        });
+        const data = await resp.json();
+        setStatus('✅ 전체 계정 순회 참여 처리를 완료했습니다.');
+        await loadInstallation();
+        renderInstallation();
+        renderPlayConsole();
+      } catch (err) {
+        setStatus(`순회 실패: ${err.message}`);
+      } finally {
+        autoOptinAllBtn.disabled = false;
+        autoOptinAllBtn.textContent = OPTIN_ALL_LABEL;
       }
     });
   }

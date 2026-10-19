@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-19T09:24:12.249753+00:00",
+  "checkedAt": "2026-10-19T10:08:39.641424+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -1583,15 +1583,15 @@
   "automation": {
     "state": "waiting",
     "nextEligibleAt": "2026-10-19T21:30:00+09:00",
-    "lastRunAt": "2026-10-19T09:24:12.041448+00:00",
-    "lastResult": "blocked",
-    "issue": "AdapterError",
+    "lastRunAt": "2026-10-19T10:08:39.595046+00:00",
+    "lastResult": "waiting",
+    "issue": "no_due_slot",
     "scheduler": {
       "registered": true,
       "enabled": true,
       "state": "Running",
-      "checkedAt": "2026-10-19T09:23:39.585078+00:00",
-      "nextRunAt": "2026-10-19T18:28:37.0000000+09:00",
+      "checkedAt": "2026-10-19T10:08:38.715830+00:00",
+      "nextRunAt": "2026-10-19T19:13:37.0000000+09:00",
       "lastResult": 267009
     }
   },

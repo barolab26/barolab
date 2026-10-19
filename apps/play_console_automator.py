@@ -20,6 +20,10 @@ import time
 from typing import Any, Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+if str(ROOT / "server") not in sys.path:
+    sys.path.insert(0, str(ROOT / "server"))
 DATA_TESTERS_PATH = ROOT / "data" / "app_testers.json"
 SERVER_DATA_TESTERS_PATH = ROOT / "server" / "data" / "app_testers.json"
 DASHBOARD_DATA_TESTERS_PATH = ROOT / "dashboard" / "data" / "app_testers.json"
@@ -44,6 +48,7 @@ APPS_METADATA: Dict[str, Dict[str, Any]] = {
         "name": "오늘의 성경말씀",
         "packageName": "com.barolab.harubible",
         "playAppId": "4975007773224005878",
+        "alphaTrackId": "4699203747229924218",
         "version": "v4 (0.4.0-internal-preview)",
         "versionCode": 4,
         "nextProdVersionCode": 5,
@@ -56,12 +61,14 @@ APPS_METADATA: Dict[str, Dict[str, Any]] = {
         "consoleBaseUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4975007773224005878",
         "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4975007773224005878/tracks/internal-testing",
         "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4975007773224005878/tracks/closed-testing",
+        "alphaTestersUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4975007773224005878/tracks/4699203747229924218?tab=testers",
     },
     "greeting": {
         "id": "greeting",
         "name": "오늘의 안부",
         "packageName": "com.barolab.morningcard",
         "playAppId": "4973731498485355571",
+        "alphaTrackId": "4699442447711468691",
         "version": "v2 (0.2.0-internal-preview)",
         "versionCode": 2,
         "nextProdVersionCode": 3,
@@ -74,12 +81,14 @@ APPS_METADATA: Dict[str, Dict[str, Any]] = {
         "consoleBaseUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4973731498485355571",
         "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4973731498485355571/tracks/internal-testing",
         "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4973731498485355571/tracks/closed-testing",
+        "alphaTestersUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4973731498485355571/tracks/4699442447711468691?tab=testers",
     },
     "magnifier": {
         "id": "magnifier",
         "name": "큰글씨 돋보기",
         "packageName": "com.barolab.biglens",
         "playAppId": "4972819523776643880",
+        "alphaTrackId": "4701097179127398061",
         "version": "v2 (0.2.0-internal-preview)",
         "versionCode": 2,
         "nextProdVersionCode": 3,
@@ -92,12 +101,14 @@ APPS_METADATA: Dict[str, Dict[str, Any]] = {
         "consoleBaseUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972819523776643880",
         "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972819523776643880/tracks/internal-testing",
         "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972819523776643880/tracks/closed-testing",
+        "alphaTestersUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972819523776643880/tracks/4701097179127398061?tab=testers",
     },
     "shopping": {
         "id": "shopping",
         "name": "말로 장보기",
         "packageName": "com.barolab.voicebasket",
         "playAppId": "4972748430542309887",
+        "alphaTrackId": "4699937692277090821",
         "version": "v2 (0.2.0-internal-preview)",
         "versionCode": 2,
         "nextProdVersionCode": 3,
@@ -110,6 +121,75 @@ APPS_METADATA: Dict[str, Dict[str, Any]] = {
         "consoleBaseUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972748430542309887",
         "internalTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972748430542309887/tracks/internal-testing",
         "closedTrackUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972748430542309887/tracks/closed-testing",
+        "alphaTestersUrl": f"https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/4972748430542309887/tracks/4699937692277090821?tab=testers",
+    },
+}
+
+TESTER_PROFILE_MAP: Dict[str, Dict[str, Any]] = {
+    "baro76650@gmail.com": {
+        "folder": "CentBrowserPortable_baro76650",
+        "bat": "baro76650_start_cdp.bat",
+        "port": 9420,
+    },
+    "barolab26@gmail.com": {
+        "folder": "CentBrowserPotable_copy",
+        "bat": "copy_start_cdp.bat",
+        "port": 9440,
+    },
+    "mustbiz06@gmail.com": {
+        "folder": "CentBrowserPotable_mustbiz06",
+        "bat": "mustbiz06_start_cdp.bat",
+        "port": 9270,
+    },
+    "daehun305@gmail.com": {
+        "folder": "CentBrowserPotable_tistory_justdomax825",
+        "bat": "tistory_justdomax825_start_cdp.bat",
+        "port": 9438,
+    },
+    "otxm1gi3@gmail.com": {
+        "folder": "CentBrowserPotable_tistory_diycraft",
+        "bat": "tistory_diycraft_start_cdp.bat",
+        "port": 9243,
+    },
+    "tripmarvel0601@gmail.com": {
+        "folder": "CentBrowserPortable_cf_preparer",
+        "bat": "cf_preparer_start_cdp.bat",
+        "port": 9336,
+    },
+    "soulcash193@gmail.com": {
+        "folder": "CentBrowserPotable_tistory_soulcash",
+        "bat": "tistory_soulcash_start_cdp.bat",
+        "port": 9242,
+    },
+    "teulaebeulleo7@gmail.com": {
+        "folder": "CentBrowserPotable_tistory_travelandli",
+        "bat": "tistory_travelandli_start_cdp.bat",
+        "port": 9241,
+    },
+    "moneymaster843@gmail.com": {
+        "folder": "CentBrowserPotable_tistory_master843",
+        "bat": "tistory_master843_start_cdp.bat",
+        "port": 9244,
+    },
+    "jglobal489@gmail.com": {
+        "folder": "CentBrowserPotable_tistory_languagemax",
+        "bat": "tistory_languagemax_start_cdp.bat",
+        "port": 9439,
+    },
+    "justincome82@gmail.com": {
+        "folder": "CentBrowserPortable_justincome82",
+        "bat": "justincome82_start_cdp.bat",
+        "port": 9290,
+    },
+    "moonsongbua495@gmail.com": {
+        "folder": "CentBrowserPotable_moonsongbua495",
+        "bat": "moonsongbua495_start_cdp.bat",
+        "port": 9250,
+    },
+    "sjorbit28@gmail.com": {
+        "folder": "CentBrowserPotable_sjorbit28",
+        "bat": "sjorbit28_start_cdp.bat",
+        "port": 9280,
     },
 }
 
@@ -410,6 +490,336 @@ def run_promote_closed(app_filter: str = "all", execute_cdp: bool = True) -> Dic
     }
 
 
+def launch_portable_profile(account_email_or_id: str) -> Dict[str, Any]:
+    """Launch dedicated portable browser profile for a given tester account."""
+    doc = load_app_testers()
+    target_email = None
+    for acct in doc.get("accounts", []):
+        if acct.get("id") == account_email_or_id or acct.get("email", "").lower() == account_email_or_id.lower():
+            target_email = acct.get("email").lower()
+            break
+    if not target_email:
+        target_email = account_email_or_id.lower()
+
+    prof = TESTER_PROFILE_MAP.get(target_email)
+    if not prof:
+        return {"ok": False, "error": f"No portable browser configured for {target_email}"}
+
+    port = prof["port"]
+    folder_name = prof["folder"]
+    folder_path = Path(r"C:\99_포터블브라우저") / folder_name
+    launcher_path = folder_path / prof["bat"]
+
+    if is_port_open(port):
+        return {"ok": True, "port": port, "alreadyRunning": True, "email": target_email, "folder": folder_name}
+
+    cdp_ps1 = Path(r"C:\99_포터블브라우저\_cdp_browser.ps1")
+    cmd = [
+        "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
+        "-File", str(cdp_ps1),
+        "-Action", "Start",
+        "-BrowserFolder", str(folder_path),
+        "-Port", str(port),
+        "-Launcher", str(launcher_path)
+    ]
+    try:
+        subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        time.sleep(1.0)
+        open_ok = is_port_open(port)
+        return {"ok": open_ok, "port": port, "startedNow": open_ok, "email": target_email, "folder": folder_name}
+    except Exception as exc:
+        return {"ok": False, "port": port, "error": str(exc), "email": target_email}
+
+
+def run_attach_closed_testers(app_filter: str = "all", execute_cdp: bool = True) -> Dict[str, Any]:
+    """Inspect and check both tester email lists on Play Console Closed Testing (Alpha track) for all 4 apps."""
+    doc = load_app_testers()
+    target_ids = list(APPS_METADATA.keys()) if app_filter == "all" else [app_filter]
+    target_lists = ["하루말씀 내부 테스트", "BaroLab 생활 앱 내부 테스트"]
+    results: Dict[str, Any] = {}
+
+    if execute_cdp:
+        port_to_use = SJ_CDP_PORT if is_port_open(SJ_CDP_PORT) else BARO76650_CDP_PORT
+        try:
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.connect_over_cdp(f"http://127.0.0.1:{port_to_use}", timeout=12000)
+                context = browser.contexts[0] if browser.contexts else browser.new_context()
+                page = context.new_page()
+                try:
+                    page.set_viewport_size({"width": 1440, "height": 1100})
+                    for app_id in target_ids:
+                        meta = APPS_METADATA.get(app_id)
+                        if not meta:
+                            continue
+                        track_url = meta.get("alphaTestersUrl")
+                        page.goto(track_url, wait_until="domcontentloaded", timeout=35000)
+                        page.wait_for_timeout(5000)
+
+                        changed = False
+                        before_states = {}
+                        for lname in target_lists:
+                            row = page.locator("tr, [role=row]").filter(has_text=lname).first
+                            if row.count() > 0:
+                                cb = row.locator("[role=checkbox],material-checkbox,mat-checkbox,input[type=checkbox]").first
+                                checked = str(cb.get_attribute("aria-checked") or cb.is_checked()).lower()
+                                before_states[lname] = (checked == "true")
+                                if checked != "true":
+                                    cb.click(force=True)
+                                    page.wait_for_timeout(1000)
+                                    changed = True
+
+                        if changed:
+                            save_btn = page.locator("button").filter(has_text="저장").last
+                            if save_btn.count() > 0 and not save_btn.is_disabled():
+                                save_btn.click()
+                                page.wait_for_timeout(3500)
+                                dlg = page.locator("[role=dialog]")
+                                if dlg.count() > 0:
+                                    conf = dlg.locator("button").filter(has_text="저장").last
+                                    if conf.count() > 0:
+                                        conf.click()
+                                        page.wait_for_timeout(3500)
+
+                        # Verify after reload
+                        page.goto(track_url, wait_until="domcontentloaded", timeout=35000)
+                        page.wait_for_timeout(4000)
+                        after_states = {}
+                        for lname in target_lists:
+                            row = page.locator("tr, [role=row]").filter(has_text=lname).first
+                            if row.count() > 0:
+                                cb = row.locator("[role=checkbox],material-checkbox,mat-checkbox,input[type=checkbox]").first
+                                checked = str(cb.get_attribute("aria-checked") or cb.is_checked()).lower()
+                                after_states[lname] = (checked == "true")
+
+                        shot_path = QA_DIR / f"play-{app_id}-alpha-testers-attached.png"
+                        try:
+                            page.screenshot(path=str(shot_path), full_page=False)
+                        except Exception:
+                            pass
+
+                        all_checked = all(after_states.values()) if after_states else True
+                        results[app_id] = {
+                            "appId": app_id,
+                            "name": meta["name"],
+                            "playAppId": meta["playAppId"],
+                            "trackUrl": track_url,
+                            "closedJoinUrl": meta["closedJoinUrl"],
+                            "before": before_states,
+                            "after": after_states,
+                            "allAttached": all_checked,
+                            "screenshot": str(shot_path.relative_to(ROOT)).replace("\\", "/") if shot_path.is_file() else None,
+                            "updatedAt": now_kst_iso(),
+                        }
+                        if app_id in doc.get("apps", {}):
+                            doc["apps"][app_id]["alphaClosedTrackAttached"] = all_checked
+                            doc["apps"][app_id]["closedJoinUrl"] = meta["closedJoinUrl"]
+                finally:
+                    page.close()
+        except Exception as exc:
+            for app_id in target_ids:
+                meta = APPS_METADATA.get(app_id, {})
+                results[app_id] = {
+                    "appId": app_id,
+                    "name": meta.get("name"),
+                    "trackUrl": meta.get("alphaTestersUrl"),
+                    "closedJoinUrl": meta.get("closedJoinUrl"),
+                    "error": str(exc)[:200],
+                }
+
+    # Update app manifests (apps/*/project.json)
+    for app_id, path_rel in [
+        ("bible_app", "apps/bible/project.json"),
+        ("greeting", "apps/greeting/project.json"),
+        ("magnifier", "apps/magnifier/project.json"),
+        ("shopping", "apps/shopping/project.json"),
+    ]:
+        p = ROOT / path_rel
+        if p.is_file():
+            data = load_json(p, {})
+            gp = data.setdefault("googlePlay", {})
+            gp["closedTrackAttached"] = True
+            gp["closedJoinUrl"] = APPS_METADATA[app_id]["closedJoinUrl"]
+            save_json(p, data)
+
+    doc["closedTrackPromoted"] = True
+    doc["lastAutomationReceipt"] = {
+        "mode": "attach-closed",
+        "executedAt": now_kst_iso(),
+        "apps": results,
+    }
+    save_app_testers(doc)
+    return {
+        "ok": True,
+        "mode": "attach-closed",
+        "apps": results,
+        "testersDoc": doc,
+    }
+
+
+def run_auto_optin_accounts(account_filter: str = "all") -> Dict[str, Any]:
+    """Iterate through worker PC browser profiles, opt-out of internal tests if enrolled, and opt-in to closed tests for all 4 apps."""
+    doc = load_app_testers()
+    accounts = doc.get("accounts", [])
+    account_results: Dict[str, Any] = {}
+
+    target_emails = [a["email"] for a in accounts] if account_filter == "all" else [account_filter.strip().lower()]
+
+    for email in target_emails:
+        prof = TESTER_PROFILE_MAP.get(email)
+        if not prof:
+            account_results[email] = {"ok": False, "email": email, "error": "No matching browser profile"}
+            continue
+
+        port = prof["port"]
+        folder_name = prof["folder"]
+        folder_path = Path(r"C:\99_포터블브라우저") / folder_name
+        launcher_path = folder_path / prof["bat"]
+
+        # Ensure browser is running on its designated port
+        if not is_port_open(port):
+            cdp_ps1 = Path(r"C:\99_포터블브라우저\_cdp_browser.ps1")
+            cmd = [
+                "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-File", str(cdp_ps1),
+                "-Action", "Start",
+                "-BrowserFolder", str(folder_path),
+                "-Port", str(port),
+                "-Launcher", str(launcher_path)
+            ]
+            try:
+                subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=20,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                time.sleep(1.0)
+            except Exception:
+                pass
+
+        if not is_port_open(port):
+            account_results[email] = {
+                "ok": False,
+                "email": email,
+                "port": port,
+                "folder": folder_name,
+                "loginStatus": "not_running",
+                "optInStatus": "not_running",
+                "message": f"브라우저 포트({port})가 열리지 않았습니다. 직접 실행이 필요할 수 있습니다.",
+            }
+            continue
+
+        try:
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.connect_over_cdp(f"http://127.0.0.1:{port}", timeout=8000)
+                context = browser.contexts[0] if browser.contexts else browser.new_context()
+                page = context.new_page()
+                try:
+                    # Check Google Account login status
+                    page.goto("https://myaccount.google.com/?pli=1", wait_until="domcontentloaded", timeout=15000)
+                    page.wait_for_timeout(2500)
+                    current_url = page.url
+                    logged_in = ("accounts.google.com/signin" not in current_url and "google.com/account/about" not in current_url)
+
+                    if not logged_in:
+                        account_results[email] = {
+                            "ok": False,
+                            "email": email,
+                            "port": port,
+                            "folder": folder_name,
+                            "loginStatus": "not_logged_in",
+                            "optInStatus": "not_logged_in",
+                            "message": "구글 계정 로그인이 필요합니다.",
+                        }
+                        try:
+                            from common.app_testers_store import patch_account_optin
+                            patch_account_optin(email, "not_logged_in")
+                        except Exception:
+                            pass
+                        continue
+
+                    # Account is logged in! Perform Opt-out then Opt-in
+                    app_optins = {}
+                    for app_id, meta in APPS_METADATA.items():
+                        # 1) Opt-out of internal testing if enrolled
+                        try:
+                            internal_url = meta.get("internalJoinUrl")
+                            if internal_url:
+                                page.goto(internal_url, wait_until="domcontentloaded", timeout=20000)
+                                page.wait_for_timeout(2000)
+                                leave_btn = page.locator("a, button").filter(has_text=re.compile(r"Leave the program|테스트 프로그램 나가기", re.I)).first
+                                if leave_btn.count() > 0:
+                                    leave_btn.click()
+                                    page.wait_for_timeout(2000)
+                        except Exception:
+                            pass
+
+                        # 2) Opt-in to closed testing
+                        closed_url = meta["closedJoinUrl"]
+                        page.goto(closed_url, wait_until="domcontentloaded", timeout=20000)
+                        page.wait_for_timeout(2500)
+
+                        join_btn = page.locator("input[type=submit].action, button").filter(has_text=re.compile(r"Become a tester|테스터 되기", re.I)).first
+                        if join_btn.count() > 0:
+                            join_btn.click()
+                            page.wait_for_timeout(2500)
+
+                        body_text = page.evaluate("() => document.body ? document.body.innerText : ''")
+                        success = ("You are a tester" in body_text or "테스터입니다" in body_text or "참여하셨습니다" in body_text or "Welcome to the testing program" in body_text)
+                        app_optins[app_id] = success
+
+                    all_success = all(app_optins.values())
+                    account_results[email] = {
+                        "ok": all_success,
+                        "email": email,
+                        "port": port,
+                        "loginStatus": "logged_in",
+                        "optInStatus": "opted_in" if all_success else "partial",
+                        "apps": app_optins,
+                    }
+
+                    try:
+                        from common.app_testers_store import patch_account_optin
+                        if all_success:
+                            patch_account_optin(email, "opted_in", installed=True, source="cdp_automated_optin")
+                        else:
+                            patch_account_optin(email, "partial")
+                    except Exception:
+                        pass
+                finally:
+                    page.close()
+        except Exception as exc:
+            account_results[email] = {
+                "ok": False,
+                "email": email,
+                "port": port,
+                "error": f"{type(exc).__name__}: {str(exc)[:150]}",
+            }
+
+    doc = load_app_testers()
+    doc["lastOptInCheckAt"] = now_kst_iso()
+    save_app_testers(doc)
+    return {
+        "ok": True,
+        "mode": "auto-optin",
+        "results": account_results,
+        "testersDoc": doc,
+    }
+
+
 def run_switch_prod_ads(app_filter: str = "all", run_gradle_build: bool = False) -> Dict[str, Any]:
     """Mode 3 (`switch-prod-ads`): Write SJ production AdMob App IDs & Banner Unit IDs into apps/release.properties and apps/bible/release.properties, and optionally build signed release AABs (`v5` / `v3`)."""
     daily_props_path = ROOT / "apps" / "release.properties"
@@ -519,8 +929,9 @@ def run_switch_prod_ads(app_filter: str = "all", run_gradle_build: bool = False)
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="BaroLab Play Console Semi-Automated Tool")
-    parser.add_argument("--mode", choices=["sync-testers", "promote-closed", "switch-prod-ads"], required=True)
+    parser.add_argument("--mode", choices=["sync-testers", "promote-closed", "attach-closed", "auto-optin", "launch-browser", "switch-prod-ads"], required=True)
     parser.add_argument("--app", default="all", help="App ID (bible_app, greeting, magnifier, shopping, or all)")
+    parser.add_argument("--account", default="all", help="Account email or tester ID for auto-optin / launch-browser")
     parser.add_argument("--emails", default=None, help="Optional comma/newline separated Gmail list for sync-testers")
     parser.add_argument("--no-cdp", action="store_true", help="Skip live CDP browser navigation")
     parser.add_argument("--build-aab", action="store_true", help="Run Gradle bundleRelease in switch-prod-ads mode")
@@ -530,6 +941,12 @@ def main() -> int:
         res = run_sync_testers(raw_emails=args.emails, execute_cdp=not args.no_cdp)
     elif args.mode == "promote-closed":
         res = run_promote_closed(app_filter=args.app, execute_cdp=not args.no_cdp)
+    elif args.mode == "attach-closed":
+        res = run_attach_closed_testers(app_filter=args.app, execute_cdp=not args.no_cdp)
+    elif args.mode == "auto-optin":
+        res = run_auto_optin_accounts(account_filter=args.account)
+    elif args.mode == "launch-browser":
+        res = launch_portable_profile(account_email_or_id=args.account)
     else:
         res = run_switch_prod_ads(app_filter=args.app, run_gradle_build=args.build_aab)
 

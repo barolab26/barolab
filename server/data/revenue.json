@@ -29,7 +29,7 @@
             "2026-10-18": "0.06",
             "2026-10-19": "0.04"
           },
-          "checkedAt": "2026-10-19T09:06:48.401481+00:00",
+          "checkedAt": "2026-10-19T10:06:44.455635+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "조회 대상 15개 · 계정 등록 15개 · 수익 행 있는 날짜만 집계",
@@ -689,7 +689,7 @@
             "2026-10-17": "0",
             "2026-10-18": "385"
           },
-          "checkedAt": "2026-10-19T09:06:51.672040+00:00",
+          "checkedAt": "2026-10-19T10:06:51.704336+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "soul5373 로그인 · 실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
@@ -1028,7 +1028,7 @@
           "currency": "KRW",
           "scope": "soultin 로그인으로 확인한 publisher 블로그 미디어",
           "daily": {},
-          "checkedAt": "2026-10-19T09:06:44.303521+00:00",
+          "checkedAt": "2026-10-19T10:06:40.159548+00:00",
           "valueKind": "estimated",
           "status": "not_enrolled",
           "reason": "로그인 계정에 애드포스트 publisher 등록 없음",
@@ -1036,7 +1036,7 @@
           "optional": true,
           "details": [],
           "pendingDates": [],
-          "attemptedAt": "2026-10-19T09:06:56.012750+00:00"
+          "attemptedAt": "2026-10-19T10:06:57.273619+00:00"
         },
         {
           "id": "adpost-yoon_master",
@@ -1045,7 +1045,7 @@
           "currency": "KRW",
           "scope": "yoon_master 로그인으로 확인한 publisher 블로그 미디어",
           "daily": {},
-          "checkedAt": "2026-10-19T09:06:44.303525+00:00",
+          "checkedAt": "2026-10-19T10:06:40.159551+00:00",
           "valueKind": "estimated",
           "status": "not_enrolled",
           "reason": "로그인 계정에 애드포스트 publisher 등록 없음",
@@ -1053,7 +1053,7 @@
           "optional": true,
           "details": [],
           "pendingDates": [],
-          "attemptedAt": "2026-10-19T09:07:00.684039+00:00"
+          "attemptedAt": "2026-10-19T10:07:01.844428+00:00"
         },
         {
           "id": "coupang",
@@ -1081,7 +1081,7 @@
             "2026-10-16": "0",
             "2026-10-18": "0"
           },
-          "checkedAt": "2026-10-19T09:07:00.798170+00:00",
+          "checkedAt": "2026-10-19T10:07:02.039208+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기",
@@ -1160,7 +1160,7 @@
           "currency": "USD",
           "scope": "nolplace.com · 가족 계정 별도 수집",
           "daily": {},
-          "checkedAt": "2026-10-19T09:07:00.798188+00:00",
+          "checkedAt": "2026-10-19T10:07:02.039227+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개",
@@ -1202,7 +1202,7 @@
             "2026-10-18": "0",
             "2026-10-19": "0"
           },
-          "checkedAt": "2026-10-19T09:07:01.902443+00:00",
+          "checkedAt": "2026-10-19T10:07:03.419731+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개",
@@ -1364,7 +1364,7 @@
           "currency": "KRW",
           "scope": "Trip.com",
           "daily": {},
-          "checkedAt": "2026-10-19T09:07:01.902454+00:00",
+          "checkedAt": "2026-10-19T10:07:03.419741+00:00",
           "valueKind": "estimated",
           "status": "configured_no_report_api",
           "reason": "AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인",
@@ -1403,7 +1403,7 @@
             "2026-10-17": "0",
             "2026-10-18": "0"
           },
-          "checkedAt": "2026-10-19T09:07:03.501727+00:00",
+          "checkedAt": "2026-10-19T10:07:04.451849+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기",
@@ -1447,11 +1447,11 @@
           "reportEnd": "2026-10-19"
         }
       ],
-      "checkedAt": "2026-10-19T09:07:03.501737+00:00"
+      "checkedAt": "2026-10-19T10:07:04.451859+00:00"
     }
   },
   "schema": "dashboard-revenue-v1",
-  "checkedAt": "2026-10-19T09:07:03.501741+00:00",
+  "checkedAt": "2026-10-19T10:07:04.451863+00:00",
   "growth": {
     "schema": "dashboard-growth-revenue-v1",
     "windows": {

@@ -225,6 +225,28 @@ def patch_installation(account_id, installed, *, expected_revision=None, now=Non
         return doc
 
 
+def patch_account_optin(email_or_id, opt_in_status, *, installed=None, source="cdp_automated_optin", now=None):
+    with _locked():
+        when = _now(now)
+        doc = _prepare(_read(), when)
+        target = str(email_or_id).lower()
+        row = next((x for x in doc['accounts'] if x.get('id') == email_or_id or x.get('email', '').lower() == target), None)
+        if row is None:
+            raise KeyError(f'Unknown tester account: {email_or_id}')
+        row['optInStatus'] = opt_in_status
+        if installed is not None:
+            row['installed'] = installed
+            if installed:
+                row['installedAt'] = when.isoformat()
+                row['optedInAt'] = when.isoformat()
+                row['installationSource'] = source
+        _tracking(doc, when)
+        doc['revision'] += 1
+        doc['lastSavedAt'] = when.isoformat()
+        _write(doc)
+        return doc
+
+
 def save_console_evidence(snapshot):
     """Collector-only merge; successful per-app observations never change installs."""
     allowed_apps = {'bible_app', 'greeting', 'magnifier', 'shopping'}

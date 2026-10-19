@@ -1,11 +1,11 @@
 {
   "schema": "barolab-project-health-v1",
-  "checkedAt": "2026-10-19T18:28:44+09:00",
+  "checkedAt": "2026-10-19T19:09:00+09:00",
   "todayKst": "2026-10-19",
-  "fingerprint": "ee62c230d6cc1fee",
+  "fingerprint": "110435c13c4131dc",
   "lastBroadcastDate": "2026-10-19",
   "watchdog": {
-    "lastRunAt": "2026-10-19T18:27:16+09:00",
+    "lastRunAt": "2026-10-19T19:07:06+09:00",
     "status": "healthy",
     "cdpOnline": 8,
     "cdpTotal": 8
@@ -43,9 +43,9 @@
         "trace"
       ],
       "status": "healthy",
-      "statusBadge": "🟢 정상 가동 (5/16편 · 31%)",
-      "progressText": "오늘 발행 5/16편 (31%) · 색인 555/1886건 (29.4%)",
-      "progressPct": 31,
+      "statusBadge": "🟢 정상 가동 (11/16편 · 69%)",
+      "progressText": "오늘 발행 11/16편 (69%) · 색인 555/1886건 (29.4%)",
+      "progressPct": 69,
       "blocker": "healthcox.com 애드센스 외부 심사 대기(GETTING_READY) 및 미색인 잔여분(1331건) 순차 색인 중",
       "nextAction": "[🤖 자동 조치] @publi 브릿지 유입을 승인 도메인(must-pick.com 등)으로 자동 우회 완료 · @trace 16개 도메인 사이트맵/IndexNow 일일 자동 제출 중",
       "actionType": "auto",
@@ -62,13 +62,13 @@
         "publi"
       ],
       "status": "healthy",
-      "statusBadge": "🟢 정상 가동 (5/7편)",
-      "progressText": "오늘 달성 5/7편 (71%) · RSS 실발행 검증 완료",
-      "progressPct": 71,
+      "statusBadge": "🟢 오늘 7/7편 완료",
+      "progressText": "오늘 달성 7/7편 (100%) · RSS 실발행 검증 완료",
+      "progressPct": 100,
       "blocker": "계정당 4시간 안전 쿨타임 준수 대기 (스팸 필터링 방지 목적 정상 대기)",
       "nextAction": "[🤖 자동 조치] @publi 5개 전용 포터블 브라우저(CDP 9230~9335) 쿨타임 해제 슬롯부터 순차 공개·내일 예약 발행 자동 집행",
       "actionType": "auto",
-      "autoActionBadge": "[🤖 자동 복구·순환 중]",
+      "autoActionBadge": "[🟢 오늘 할당량 완수]",
       "ceoActionRequired": false,
       "linkUrl": "naver.html"
     },

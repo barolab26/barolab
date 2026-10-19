@@ -10,14 +10,14 @@
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/magnifier/",
-  "updatedAt": "2026-10-19T18:28:44+09:00",
+  "updatedAt": "2026-10-19T19:09:00+09:00",
   "measurement": {
     "admob": {
       "status": "collected",
       "revenue": 0.0,
       "currency": "USD",
       "period": "2026-10-19 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
-      "checkedAt": "2026-10-19T18:28:44+09:00",
+      "checkedAt": "2026-10-19T19:09:00+09:00",
       "mode": "TEST_ADS_INTERNAL_TRACK",
       "impressions": 0
     },
@@ -26,7 +26,7 @@
       "activeUsers": 13,
       "currency": "USD",
       "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
-      "checkedAt": "2026-10-19T18:28:44+09:00",
+      "checkedAt": "2026-10-19T19:09:00+09:00",
       "mode": "",
       "impressions": 0
     }
@@ -136,7 +136,8 @@
     "closedReviewSubmitted": true,
     "internalJoinUrl": "https://play.google.com/apps/internaltest/4701703053640983596",
     "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.biglens",
-    "playEvidence": "apps/qa/2026-10-19-play-console-status.json"
+    "playEvidence": "apps/qa/2026-10-19-play-console-status.json",
+    "closedTrackAttached": true
   },
   "progressPct": 60,
   "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
@@ -187,7 +188,7 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-10-19T18:28:44+09:00"
+      "checkedAt": "2026-10-19T19:09:00+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
