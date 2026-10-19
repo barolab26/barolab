@@ -21,7 +21,8 @@ if not MONITOR_ONLY:
     from common import codex_cli, dashboard_jobs as jobs
 
 METRICS_STAGE_LIMITS = {'dashboard/revenue.py': 180, 'dashboard/traffic.py': 840,
-                        'dashboard/metrics.py': 480}
+                        'dashboard/metrics.py': 480, 'naver_kin.measurement': 480,
+                        'threads_posting': 480}
 
 
 def _naver_recovery_schedule_script(apply=False):
@@ -153,7 +154,8 @@ def run_metrics(python, commands):
             jobs.write(runtime_path, runtime)
             process, started = None, time.monotonic()
             try:
-                process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', str(ROOT / script), argument],
+                target = ['-m', script] if script in ('naver_kin.measurement', 'threads_posting') else [str(ROOT / script)]
+                process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', *target, *([argument] if argument else [])],
                     cwd=str(ROOT), stdout=sys.stdout, stderr=sys.stderr,
                     env=dict(os.environ, PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
                     creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
@@ -206,6 +208,13 @@ def run_metrics(python, commands):
                                  'reasonCode': 'process_' + stage['status']})
             runtime['checkedAt'] = jobs.stamp()
             jobs.write(runtime_path, runtime)
+        try:
+            from server.growth import refresh_performance_feedback
+            feedback = refresh_performance_feedback()
+            runtime['pagePerformance'] = {key: feedback.get(key) for key in ('status', 'complete', 'start', 'end', 'reasonCodes')}
+        except Exception as exc:
+            runtime['pagePerformance'] = {'status': 'error', 'complete': False, 'reason': type(exc).__name__}
+            code = max(code, 1)
         runtime.update(status='completed' if code == 0 else 'partial_failure', finishedAt=jobs.stamp(),
                        checkedAt=jobs.stamp(), currentStage=None)
         if code == 0:
@@ -249,7 +258,8 @@ def run_task(task):
     commands = {
         'cleaner': [('cf_posting/pipeline_runner.py', '--catch-up-once')],
         'cf-retry': [('cf_posting/pipeline_runner.py', '--manual-retry-once')],
-        'metrics': [('dashboard/revenue.py', '--collect'), ('dashboard/traffic.py', '--collect'), ('dashboard/metrics.py', '--collect')],
+        'metrics': [('dashboard/revenue.py', '--collect'), ('dashboard/traffic.py', '--collect'), ('dashboard/metrics.py', '--collect'),
+                    ('naver_kin.measurement', ''), ('threads_posting', 'measure')],
         'naver-monitor': [('naver_blog_posting/pipeline_runner.py', '--monitor')],
         'naver-daily': [('naver_blog_posting/pipeline_runner.py', '--catch-up')],
     }
@@ -340,6 +350,7 @@ def serve():
         threading.Thread(target=serve_cf_cleaner, daemon=True, name='cf-cleaner-loop').start()
         threading.Thread(target=serve_collection_watchdog, daemon=True, name='collection-health-watcher').start()
         threading.Thread(target=serve_sre_system_watchdog, daemon=True, name='sre-system-watchdog').start()
+        threading.Thread(target=serve_growth_actions, daemon=True, name='growth-action-worker').start()
         refreshed = 0
         while True:
             try:
@@ -361,6 +372,75 @@ def serve():
             except Exception as exc:
                 print(type(exc).__name__, str(exc)[:200], flush=True)
             time.sleep(2)
+
+
+def serve_growth_actions():
+    """Consume local and NAS requests; uncertain running jobs are never replayed."""
+    from dashboard.metrics import collector_lock
+    directories = [ROOT / 'server/data/control-jobs',
+                   Path(os.environ.get('BAROLAB_NAS_ROOT', r'\\otns\yoonlab\10_Project\BaroLab')) / 'server/data/control-jobs']
+    while True:
+        for directory in dict.fromkeys(directories):
+            if not directory.is_dir():
+                continue
+            for job_path in directory.glob('*.json'):
+                job = None
+                try:
+                    job = json.loads(job_path.read_text(encoding='utf-8'))
+                    if job.get('kind') not in ('growth-radar', 'growth-doctor') or job.get('status') != 'pending':
+                        continue
+                    with collector_lock(job_path.with_suffix('.lock')) as acquired:
+                        if not acquired:
+                            continue
+                        job = json.loads(job_path.read_text(encoding='utf-8'))
+                        if job.get('status') != 'pending':
+                            continue
+                        payload = job.get('payload') or {}
+                        command = [sys.executable, '-B', '-X', 'utf8', str(ROOT / 'cf_posting/pipeline_runner.py'),
+                                   '--' + job['kind']]
+                        if job['kind'] == 'growth-doctor':
+                            from naver_kin.pipeline import CF_BASE_DOMAINS
+                            domain = payload.get('domain') or ''
+                            if domain and domain not in CF_BASE_DOMAINS:
+                                raise ValueError('Unapproved growth domain')
+                            if domain:
+                                command.extend(['--growth-domain', domain])
+                            command.extend(['--growth-limit', str(max(1, min(int(payload.get('limit', 5)), 10)))])
+                            if payload.get('apply') is True:
+                                command.append('--apply-growth')
+                        job.update(status='running', startedAt=jobs.stamp(), workerPid=os.getpid())
+                        jobs.write(job_path, job)
+                        process = subprocess.run(command, cwd=str(ROOT), capture_output=True, text=True,
+                                                 encoding='utf-8', errors='replace', timeout=1800,
+                                                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                        output = (process.stdout or '').strip()
+                        result = None
+                        decoder = json.JSONDecoder()
+                        for offset, char in enumerate(output):
+                            if char != '{':
+                                continue
+                            try:
+                                parsed, end = decoder.raw_decode(output[offset:])
+                                if not output[offset + end:].strip():
+                                    result = parsed
+                                    break
+                            except ValueError:
+                                continue
+                        job.update(status='succeeded' if process.returncode == 0 and result is not None else 'failed',
+                                   finishedAt=jobs.stamp(), exitCode=process.returncode, result=result,
+                                   outputTail=(output or process.stderr or '')[-3000:])
+                        jobs.write(job_path, job)
+                except Exception as exc:
+                    # A timeout can follow a remote mutation; never auto-requeue it.
+                    try:
+                        if not isinstance(job, dict):
+                            continue
+                        job.update(status='interrupted_unknown' if isinstance(exc, subprocess.TimeoutExpired) else 'failed',
+                                   finishedAt=jobs.stamp(), error=type(exc).__name__)
+                        jobs.write(job_path, job)
+                    except Exception:
+                        pass
+        time.sleep(5)
 
 
 def serve_collection_watchdog():

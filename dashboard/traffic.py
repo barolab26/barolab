@@ -239,6 +239,28 @@ def collect_ga_pages(client, property_id, base, domain, ranges):
     }, page_limited
 
 
+def collect_growth_pages(client, property_id, base, domain, now):
+    """Exact completed KST week, without top-N or page-title session double counts."""
+    end = now.astimezone(ZoneInfo('Asia/Seoul')).date() - timedelta(days=1)
+    start = end - timedelta(days=6)
+    rows, limited = ga_report(client, property_id, {
+        **base, 'dateRanges': [{'startDate': start.isoformat(), 'endDate': end.isoformat()}],
+        'dimensions': [{'name': 'pagePath'}],
+        'metrics': [{'name': 'sessions'}, {'name': 'screenPageViews'}], 'limit': 100000}, ['pagePath'])
+    pages, seen = [], set()
+    for (path,), (sessions, views) in rows:
+        if not is_article_path(path):
+            continue
+        if path in seen:
+            raise ValueError('GA4 page duplicate')
+        seen.add(path)
+        pages.append({'domain': domain, 'url': f'https://www.{domain}{path}',
+                      'sessions': sessions, 'pageViews': views})
+    return {'start': start.isoformat(), 'end': end.isoformat(), 'timezone': 'Asia/Seoul',
+            'checkedAt': stamp(), 'complete': not limited, 'status': 'partial' if limited else 'collected',
+            'source': 'GA4 Data API', 'fullEnumeration': not limited, 'pages': pages}
+
+
 def collect_ga(site, settings, readers, now):
     domain = site['site_id']
     ranges = periods(now, 'Asia/Seoul')
@@ -283,6 +305,11 @@ def collect_ga(site, settings, readers, now):
             report['sourceReconciled'] = sum(report['mix'].values()) == report['sessions']
             report['sourceAttribution'] = aggregate_source_attribution(report, domain, derived_at=stamp())
             report['naverExternal'] = report['sourceAttribution']['naverExternalSessions']
+        try:
+            growth_pages = collect_growth_pages(client, settings['ga4_property'], base, domain, now)
+        except Exception:
+            growth_pages = {'complete': False, 'status': 'not_collected', 'pages': [],
+                            'attemptedAt': stamp(), 'reason': 'Exact seven-day page report unavailable'}
         daily_rows, daily_limited = ga_report(client, settings['ga4_property'],
             {**base, 'dateRanges': [ranges[-1]], 'dimensions': [{'name': 'date'}],
              'metrics': [{'name': m} for m in METRICS]}, ['date'])
@@ -291,6 +318,7 @@ def collect_ga(site, settings, readers, now):
     return {'status': 'partial' if limited or source_limited or daily_limited else 'collected',
             'checkedAt': stamp(), 'timezone': 'Asia/Seoul', 'source': 'GA4 Data API',
             'property': settings['ga4_property'], 'periods': reports, 'daily': sorted(daily, key=lambda r: r['day']),
+            'pagePerformance': growth_pages,
             'note': '측정된 사용자 · 기간 내 중복 제거 · 날짜/도메인별 사용자를 합산하지 않음'}
 
 
@@ -1374,6 +1402,23 @@ def collect():
                 record.get('google', {}), old.get('sites', {}).get(domain, {}).get('keywordTracking', {}), now)
         output.update(naverBlogs=collect_naver_visitors(), naverCheckedAt=stamp())
         output['checkedAt'] = stamp()
+        end = now.date() - timedelta(days=1)
+        page_sites, page_rows = [], []
+        for domain, record in output['sites'].items():
+            ga = record.get('ga4', {})
+            evidence = ga.get('pagePerformance', {})
+            valid = (ga.get('status') != 'error' and not ga.get('stale')
+                     and evidence.get('complete') is True
+                     and evidence.get('start') == (end - timedelta(days=6)).isoformat()
+                     and evidence.get('end') == end.isoformat())
+            page_sites.append({**{k: v for k, v in evidence.items() if k != 'pages'},
+                               'domain': domain, 'complete': valid})
+            if valid:
+                page_rows.extend(evidence.get('pages', []))
+        output['pagePerformance'] = {'start': (end - timedelta(days=6)).isoformat(),
+            'end': end.isoformat(), 'timezone': 'Asia/Seoul', 'checkedAt': stamp(),
+            'complete': bool(page_sites) and all(s['complete'] for s in page_sites),
+            'source': 'GA4 Data API', 'sites': page_sites, 'pages': page_rows}
         atomic_write(SNAPSHOT, output)
     return summary()
 

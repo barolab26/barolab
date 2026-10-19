@@ -19,6 +19,9 @@ class RadarTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.scout = RadarScout(self.tmp.name)
+        self.enqueue = patch('common.dashboard_jobs.enqueue', return_value={
+            'id': 'a' * 32, 'kind': 'growth-radar', 'status': 'pending'}).start()
+        self.addCleanup(patch.stopall)
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -45,7 +48,11 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(state["result"]["trackA"], [])
             return {"postedInternally": True, "messageIds": ["verified-message"]}
         result = self.scout.run_claimed(self.scout.claim("test"), publisher, failed)
-        self.assertEqual(result["status"], "no_verified_candidates")
+        self.assertEqual(result["status"], "growth_action_queued")
+        self.assertEqual(result['sourceStatus'], 'no_verified_candidates')
+        self.assertEqual(result['growthAction']['status'], 'pending')
+        self.assertFalse(result['publishedExternally'])
+        self.enqueue.assert_called_once()
         self.assertEqual(result["trackA"], [])
         self.assertEqual(self.scout.latest()["latest"]["status"], "completed")
 
@@ -92,6 +99,23 @@ class RadarTests(unittest.TestCase):
 
 
 class MasterSkillTests(unittest.TestCase):
+    def test_doctor_dispatch_is_pending_not_fake_completed(self):
+        from unittest.mock import Mock
+        tree = ast.parse(Path('server/agent_tools.py').read_text(encoding='utf-8'))
+        fn = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'run_doctor_audit')
+        scope = {'Any': __import__('typing').Any, 'Dict': __import__('typing').Dict,
+                 'CF_16_DOMAINS': ['must-good.com']}
+        exec(compile(ast.Module(body=[fn], type_ignores=[]), 'doctor-dispatch-test', 'exec'), scope)
+        with patch('common.dashboard_jobs.enqueue', return_value={
+                'id': 'b' * 32, 'kind': 'growth-doctor', 'status': 'pending'}) as enqueue:
+            result = scope['run_doctor_audit'](target='must-good.com', limit=50)
+        self.assertEqual(result['state'], 'queued')
+        self.assertIsNone(result['exitCode'])
+        self.assertFalse(result['verified'])
+        self.assertEqual(enqueue.call_args.args[1]['limit'], 10)
+        self.assertEqual(enqueue.call_args.args[1]['domain'], 'must-good.com')
+        self.assertTrue(enqueue.call_args.args[1]['apply'])
+
     def test_canonical_root_dedup_freeze_patch_and_default_compatibility(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)

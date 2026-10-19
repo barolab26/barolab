@@ -62,10 +62,10 @@ def pending(kind):
 
 
 def enqueue(kind, payload):
-    if kind not in ('codex-test', 'cf-retry'):
+    if kind not in ('codex-test', 'cf-retry', 'growth-radar', 'growth-doctor'):
         raise ValueError('지원하지 않는 작업입니다.')
     with LOCK:
-        if kind == 'cf-retry':
+        if kind in ('cf-retry', 'growth-radar', 'growth-doctor'):
             for job in pending(kind):
                 if job['payload'] == payload:
                     return job

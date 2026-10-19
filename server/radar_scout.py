@@ -1,4 +1,4 @@
-"""Evidence-first Radar scouting. Read-only sources; internal chat proposals only.
+"""Evidence-first Radar scouting and durable Windows growth-queue dispatch.
 
 The durable claim is shared by HTTP, natural-language tools and the KST loop.
 Missed slots are not replayed. A proposal is never a publication or revenue result.
@@ -230,6 +230,15 @@ class RadarScout:
         result = dict(row) if row else {}
         if result.get("result"):
             result["result"] = json.loads(result["result"])
+            action = result['result'].get('growthAction') or {}
+            if action.get('id'):
+                from common import dashboard_jobs
+                try:
+                    observed = dashboard_jobs.load(action['id'])
+                    result['result']['growthAction'] = dashboard_jobs.public(observed)
+                    result['result']['growthActionResult'] = observed.get('result')
+                except (OSError, ValueError):
+                    result['result']['growthActionObservation'] = 'unavailable'
         return {"enabled": self.enabled(), "scheduleKst": ["09:00", "14:00", "20:00"], "catchup": False, "latest": result}
 
     def run_claimed(self, claim, publisher=None, fetcher=fetch_source):
@@ -240,12 +249,19 @@ class RadarScout:
             with ThreadPoolExecutor(max_workers=4, thread_name_prefix="radar-source") as pool:
                 receipts = list(pool.map(fetcher, SOURCES))
             track_a, track_b = build_proposals(receipts)
+            # External trends are supplementary. The Windows worker derives the
+            # actionable queue from verified local page-performance evidence.
+            from common import dashboard_jobs
+            growth_job = dashboard_jobs.enqueue('growth-radar', {'requestedBy': 'radar', 'runId': run_id})
             result = {"runId": run_id, "slot": claim["slot"], "checkedAt": now_iso(), "sources": receipts,
                       "trackA": track_a, "trackB": track_b, "priorityDomains": list(PRIORITY_DOMAINS),
                       "historicalUserRpm": {"woorinote.kr": 6.33, "must-good.com": 6.28, "must-pick.com": 3.93},
                       "rpmNote": "사용자 제공 과거 값; 기간/통화/현재 순위 미검증. 키워드 RPM으로 대입 금지",
                       "marketing": [s for s in receipts if s["track"] == "marketing"],
-                      "status": "collected" if track_a or track_b else "no_verified_candidates", "publishedExternally": False}
+                      "status": "growth_action_queued", "publishedExternally": False,
+                      "growthAction": dashboard_jobs.public(growth_job),
+                      "growthActionNote": "Windows 실행 대기. 큐 등록·원고 생성·발행·수익 성과는 작업 결과로 별도 확인합니다.",
+                      "sourceStatus": "collected" if track_a or track_b else "no_verified_candidates"}
             # Save the evidence before chat side effects. Stable message IDs make replay idempotent.
             with closing(self.db()) as db, db:
                 db.execute("UPDATE runs SET result=? WHERE run_id=?", (json.dumps(result, ensure_ascii=False), run_id))

@@ -139,6 +139,70 @@ def adsense(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE'):
             'reason': f'조회 대상 {len(sites)}개 · 계정 등록 {sum(d in registered for d in sites)}개 · 수익 행 있는 날짜만 집계'}
 
 
+def adsense_page_performance(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE'):
+    """Measured AdSense PAGE_URL earnings; never allocate domain totals to pages."""
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import AuthorizedSession
+    account = cfg[prefix + '_ACCOUNT_ID']
+    creds = Credentials(token=None, refresh_token=cfg[prefix + '_REFRESH_TOKEN'],
+                        token_uri='https://oauth2.googleapis.com/token',
+                        client_id=cfg[prefix + '_CLIENT_ID'], client_secret=cfg[prefix + '_CLIENT_SECRET'])
+    params = {'dateRange': 'CUSTOM', 'dimensions': ['PAGE_URL'],
+              'metrics': ['ESTIMATED_EARNINGS'], 'currencyCode': 'USD',
+              'reportingTimeZone': 'ACCOUNT_TIME_ZONE', 'limit': 100000}
+    for key, day in [('startDate', start), ('endDate', end)]:
+        params.update({key + '.year': day.year, key + '.month': day.month, key + '.day': day.day})
+    with AuthorizedSession(creds) as client:
+        base = 'https://adsense.googleapis.com/v2/' + account
+        meta = response_json(client.get(base, timeout=25))
+        if meta.get('timeZone', {}).get('id') != 'Asia/Seoul' or meta.get('state') != 'READY':
+            raise ValueError('AdSense account timezone/state mismatch')
+        data = response_json(client.get(base + '/reports:generate', params=params, timeout=30))
+    headers = data.get('headers', [])
+    if ([h.get('name') for h in headers] != ['PAGE_URL', 'ESTIMATED_EARNINGS']
+            or headers[-1].get('currencyCode') != 'USD'):
+        raise ValueError('AdSense page report columns/currency mismatch')
+    if int(data.get('totalMatchedRows', -1)) != len(data.get('rows', [])) or data.get('warnings'):
+        raise ValueError('AdSense page report incomplete')
+    pages, seen = [], set()
+    for row in data.get('rows', []):
+        url, amount = [c.get('value') for c in row['cells']]
+        parsed = urlparse(url)
+        domain = (parsed.hostname or '').lower().removeprefix('www.')
+        if domain not in sites or parsed.scheme not in ('http', 'https') or parsed.path in ('', '/'):
+            continue
+        # Query-bearing URLs can denote distinct content: do not merge their earnings.
+        if parsed.query or parsed.fragment or parsed.username or parsed.password:
+            continue
+        canonical = 'https://www.' + domain + parsed.path
+        if canonical in seen:
+            raise ValueError('AdSense canonical page duplicate')
+        seen.add(canonical)
+        pages.append({'domain': domain, 'url': canonical, 'estimatedRevenue': float(money(amount))})
+    return pages
+
+
+def collect_page_revenue(cfg, accounts, now):
+    end = now.astimezone(KST).date() - timedelta(days=1)
+    start = end - timedelta(days=6)
+    pages, sites = [], []
+    for account_key, account in accounts.items():
+        domains = account.get('sites', [])
+        if not domains:
+            continue
+        prefix = account.get('env_prefix', 'SJ_GOOGLE_ADSENSE' if account_key == 'sj' else 'AAA10291028_GOOGLE_ADSENSE')
+        try:
+            rows = adsense_page_performance(cfg, start, end, domains, prefix)
+            pages.extend(rows)
+            sites.extend({'domain': d, 'complete': True, 'status': 'collected'} for d in domains)
+        except Exception:
+            sites.extend({'domain': d, 'complete': False, 'status': 'not_collected',
+                          'reason': 'AdSense PAGE_URL report unavailable; no page revenue inferred'} for d in domains)
+    return {'start': start.isoformat(), 'end': end.isoformat(), 'timezone': 'Asia/Seoul',
+            'checkedAt': stamp(), 'currency': 'USD', 'source': 'AdSense Management API v2', 'dimension': 'PAGE_URL',
+            'complete': bool(sites) and all(s['complete'] for s in sites), 'pages': pages, 'sites': sites}
+
+
 def growth_windows(now=None):
     """Two complete, equal Google reporting periods, excluding three recent days."""
     now = now or datetime.now(timezone.utc)
@@ -945,6 +1009,7 @@ def collect(now=None):
             sources.append(record)
         previous.setdefault('months', {})[month] = {'sources': sources, 'checkedAt': stamp()}
         previous.update(schema='dashboard-revenue-v1', checkedAt=stamp())
+        previous['pagePerformance'] = collect_page_revenue(cfg, accounts, now)
         atomic_write(SNAPSHOT, previous)
     collect_growth_revenue()
     return summary(now=now)

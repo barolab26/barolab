@@ -294,3 +294,120 @@ class LiveSnapshotTests(unittest.TestCase):
         result = self.helpers()['_snapshot_database'](file, ('parts',), '2026-10-19')
         self.assertEqual(result['status'], 'missing')
         self.assertEqual(result['tables'], {})
+
+
+class GrowthMutationGuards(unittest.TestCase):
+    def test_gsc_pass_age_not_editorial_review_or_crawl_age(self):
+        from cf_posting.pipeline_runner import _doctor_index_evidence
+        now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        url = 'https://www.baronote.kr/example'
+        row = {'url': url, 'verdict': 'PASS', 'indexed': True, 'attemptStatus': 'verified',
+               'source': 'Google Search Console URL Inspection', 'checkedAt': '2026-10-19T10:00:00+00:00',
+               'lastCrawlTime': '2026-09-01T00:00:00+00:00'}
+        metrics = {'sites': [{'google': {'urls': [row]}}]}
+        history = {}
+        self.assertIsNone(_doctor_index_evidence(url, now, metrics, history))
+        history[url]['firstPassAt'] = '2026-10-10T10:00:00+00:00'
+        self.assertIsNotNone(_doctor_index_evidence(url, now, metrics, history))
+        row['verdict'] = 'NEUTRAL'
+        self.assertIsNone(_doctor_index_evidence(url, now, metrics, history))
+        self.assertNotIn(url, history)
+
+    def test_drive_hook_maps_existing_channel_files_without_new_modules(self):
+        from server import growth
+        from contextlib import contextmanager
+        from unittest.mock import patch
+        @contextmanager
+        def locked(*args):
+            yield True
+        with patch('dashboard.metrics.collector_lock', locked), patch.object(Path, 'read_text', return_value='{}'), \
+                patch('common.dashboard_jobs.write'), patch.object(growth, 'page_performance_evidence', return_value={}), \
+                patch.dict(growth.os.environ, {'BAROLAB_GOOGLE_DRIVE_ROOT': 'G:/My Drive'}), \
+                patch.object(Path, 'mkdir'), patch.object(growth.shutil, 'copy2') as copy:
+            growth.refresh_performance_feedback()
+        self.assertEqual(copy.call_count, 4)
+        self.assertEqual(copy.call_args_list[2].args[0], growth.ROOT / 'dashboard/data/kin.json')
+        self.assertEqual(copy.call_args_list[3].args[1], Path('G:/My Drive/BaroLab/server/data/threads.json'))
+
+
+class PagePerformanceTests(unittest.TestCase):
+    def fixture(self, count=20):
+        from server.growth import page_performance_evidence
+        self.evaluate = page_performance_evidence
+        self.now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        header = {'start': '2026-10-12', 'end': '2026-10-18', 'timezone': 'Asia/Seoul',
+                  'checkedAt': self.now.isoformat(), 'complete': True, 'status': 'collected'}
+        visits = [{ 'domain': 'example.test', 'url': f'https://www.example.test/p{i}', 'title': f'Page {i}', 'sessions': i+1, 'pageViews': i+2} for i in range(count)]
+        earnings = [{'domain': 'example.test', 'url': f'https://example.test/p{i}', 'estimatedRevenue': (i+1)/100} for i in range(count)]
+        return {'pagePerformance': {**header, 'pages': visits}}, {'pagePerformance': {**header, 'currency': 'USD', 'source': 'AdSense Management API v2', 'pages': earnings}}
+
+    def test_exact_completed_week_top_tenth_joins_page_not_domain(self):
+        metrics, revenue = self.fixture()
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertTrue(result['complete'])
+        self.assertEqual(len(result['revenueWinners']), 2)
+        self.assertEqual(result['revenueWinners'][0]['estimatedRevenue'], .20)
+        self.assertEqual(result['coverage']['joinedPages'], 20)
+
+    def test_domain_earnings_cannot_become_page_revenue(self):
+        metrics, _ = self.fixture()
+        result = self.evaluate(self.now, metrics, {'months': {'2026-10': {'sources': [{'daily': {'2026-10-18': '90'}}]}}})
+        self.assertFalse(result['complete'])
+        self.assertEqual(result['revenueWinners'], [])
+        self.assertEqual(len(result['highTrafficPages']), 20)
+
+    def test_partial_or_old_window_cannot_rank(self):
+        for change in ({'complete': False}, {'end': '2026-10-17'}, {'checkedAt': '2026-10-15T12:00:00+00:00'}):
+            metrics, revenue = self.fixture()
+            revenue['pagePerformance'].update(change)
+            result = self.evaluate(self.now, metrics, revenue)
+            self.assertFalse(result['complete'])
+            self.assertEqual(result['revenueWinners'], [])
+
+    def test_zero_requires_exhaustive_domain_report_and_complete_inventory(self):
+        metrics, revenue = self.fixture(1)
+        metrics['sites'] = {'example.test': {'site': {'site_id': 'example.test'}, 'posts': {'complete': True, 'urls': ['https://example.test/missing']}}}
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertEqual(result['zeroViewPages'], [])
+        metrics['pagePerformance']['sites'] = [{'domain': 'example.test', 'complete': True, 'fullEnumeration': True}]
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertEqual(result['zeroViewPages'][0]['sessions'], 0)
+        self.assertIn('exhaustive', result['zeroViewPages'][0]['zeroBasis'])
+
+    def test_zero_income_and_unjoined_page_are_excluded(self):
+        metrics, revenue = self.fixture(2)
+        revenue['pagePerformance']['pages'][0]['estimatedRevenue'] = 0
+        revenue['pagePerformance']['pages'][1]['url'] = 'https://example.test/unmatched'
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertTrue(result['complete'])
+        self.assertEqual(result['revenueWinners'], [])
+        self.assertIn('no_positive_joined_page_revenue', result['reasonCodes'])
+
+    def test_duplicate_canonical_pages_do_not_double_count(self):
+        metrics, revenue = self.fixture(1)
+        metrics['pagePerformance']['pages'].append(dict(metrics['pagePerformance']['pages'][0]))
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertFalse(result['complete'])
+        self.assertEqual(result['revenueWinners'], [])
+
+    def test_partial_global_report_preserves_complete_domain_doctor_evidence(self):
+        metrics, revenue = self.fixture(2)
+        report = metrics['pagePerformance']
+        domain = {key: report[key] for key in ('start', 'end', 'timezone', 'checkedAt')}
+        report.update(complete=False, status='partial', sites=[
+            {**domain, 'domain': 'example.test', 'complete': True, 'status': 'collected', 'fullEnumeration': True},
+            {**domain, 'domain': 'missing.test', 'complete': False, 'status': 'error', 'fullEnumeration': False}])
+        report['pages'].append({'domain': 'missing.test', 'url': 'https://missing.test/untrusted', 'sessions': 100, 'pageViews': 100})
+        metrics['sites'] = {'example.test': {'site': {'site_id': 'example.test'}, 'posts': {'complete': True, 'urls': ['https://example.test/zero']}}}
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertFalse(result['complete'])
+        self.assertFalse(result['coverage']['trafficComplete'])
+        self.assertEqual(result['revenueWinners'], [])
+        self.assertEqual(len(result['highTrafficPages']), 2)
+        self.assertEqual(result['zeroViewPages'][0]['url'], 'https://example.test/zero')
+        self.assertTrue(result['zeroViewPages'][0]['complete'])
+        self.assertEqual(result['coverage']['completeTrafficDomains'], ['example.test'])
+        report['sites'][0]['end'] = '2026-10-17'
+        result = self.evaluate(self.now, metrics, revenue)
+        self.assertEqual(result['zeroViewPages'], [])
+        self.assertEqual(result['highTrafficPages'], [])

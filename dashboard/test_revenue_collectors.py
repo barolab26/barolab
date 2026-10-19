@@ -202,5 +202,42 @@ class RevenueTests(unittest.TestCase):
             self.assertEqual(got['status'], 'partial')
 
 
+class GrowthPageEvidenceTests(unittest.TestCase):
+    def test_page_revenue_uses_url_earnings_and_rejects_truncation(self):
+        data = {'headers': [{'name': 'PAGE_URL'}, {'name': 'ESTIMATED_EARNINGS', 'currencyCode': 'USD'}],
+                'totalMatchedRows': 1, 'rows': [{'cells': [{'value': 'https://www.example.org/repair'}, {'value': '0.42'}]}]}
+        client = MagicMock()
+        client.get.side_effect = [response({'timeZone': {'id': 'Asia/Seoul'}, 'state': 'READY'}), response(data)]
+        cfg = {'TEST_' + key: 'mock' for key in ('ACCOUNT_ID', 'REFRESH_TOKEN', 'CLIENT_ID', 'CLIENT_SECRET')}
+        with patch('google.oauth2.credentials.Credentials'), patch('google.auth.transport.requests.AuthorizedSession') as session:
+            session.return_value.__enter__.return_value = client
+            rows = r.adsense_page_performance(cfg, START, END, ['example.org'], 'TEST')
+            self.assertEqual(rows[0]['estimatedRevenue'], 0.42)
+            self.assertEqual(client.get.call_args.kwargs['params']['dimensions'], ['PAGE_URL'])
+            data['totalMatchedRows'] = 2
+            client.get.side_effect = [response({'timeZone': {'id': 'Asia/Seoul'}, 'state': 'READY'}), response(data)]
+            with self.assertRaises(ValueError):
+                r.adsense_page_performance(cfg, START, END, ['example.org'], 'TEST')
+
+    def test_page_revenue_failure_is_unknown_not_zero(self):
+        with patch.object(r, 'adsense_page_performance', side_effect=ValueError('unavailable')):
+            result = r.collect_page_revenue({}, {'sj': {'sites': ['example.org']}}, NOW)
+        self.assertFalse(result['complete'])
+        self.assertEqual(result['pages'], [])
+        self.assertEqual(result['start'], '2026-10-12')
+        self.assertEqual(result['end'], '2026-10-18')
+
+    def test_ga_week_is_complete_enumeration_without_title_dimension(self):
+        import traffic
+        with patch.object(traffic, 'ga_report', return_value=([(['/repair'], [4, 5])], False)) as report:
+            result = traffic.collect_growth_pages(None, '123', {}, 'example.org', NOW)
+        self.assertTrue(result['fullEnumeration'])
+        self.assertEqual(result['pages'][0]['sessions'], 4)
+        self.assertEqual(report.call_args.args[2]['dimensions'], [{'name': 'pagePath'}])
+        self.assertEqual(result['end'], '2026-10-18')
+        with patch.object(traffic, 'ga_report', return_value=([], True)):
+            self.assertFalse(traffic.collect_growth_pages(None, '123', {}, 'example.org', NOW)['complete'])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -12,11 +12,11 @@ from zoneinfo import ZoneInfo
 from urllib.parse import urlsplit
 
 from common.dashboard_jobs import write
-from .pipeline import ROOT, DB, ACCOUNTS
+from .pipeline import ROOT, DB, ACCOUNTS, CF_BASE_DOMAINS
 from .experiment import BASELINE_START, BASELINE_END, TRIAL_START, TRIAL_END, FINAL_COLLECTION
 
 from common.channel_attribution import PRIORITY_CF_DOMAINS
-HOSTS = tuple('www.' + domain for domain in PRIORITY_CF_DOMAINS)
+HOSTS = tuple('www.' + domain for domain in CF_BASE_DOMAINS)
 
 PRIVATE = ROOT / 'server/data/kin-measurement.json'
 PUBLIC = ROOT / 'dashboard/data/kin-measurement.json'
@@ -184,4 +184,10 @@ def collect(db=None, now=None, *, config=None, persist=True):
 
 if __name__ == '__main__':
     value = collect()
+    from .pipeline import connect, snapshot
+    db = connect()
+    try:
+        snapshot(db)
+    finally:
+        db.close()
     print(json.dumps({key: value[key] for key in ('status', 'startDate', 'endDate', 'sessions', 'engagedSessions', 'pageViews', 'complete', 'sites')}, ensure_ascii=False, indent=2))

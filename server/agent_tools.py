@@ -1369,59 +1369,22 @@ def format_doctor_context_block() -> str:
 
 
 def run_doctor_audit(channel: str = "cf", target: str = "", limit: int = 5) -> Dict[str, Any]:
-    """
-    Action Tool `run_doctor_audit`:
-    Executes `python common/content_auditor.py --run-once` to audit published articles and return real stdout + receipt.
-    """
-    lim = max(1, min(int(limit or 5), 10))
-    cmd_display = "python common/content_auditor.py --run-once"
-    cmd = [sys.executable, "-X", "utf8", str(BASE_DIR / "common" / "content_auditor.py"), "--run-once", "--count", str(lim)]
-    if target:
-        cmd.extend(["--domain", target])
-    proc = subprocess.Popen(
-        cmd,
-        cwd=str(BASE_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
-    pid = proc.pid
-    try:
-        out, _ = proc.communicate(timeout=15)
-        exit_code = proc.returncode if proc.returncode is not None else 0
-    except subprocess.TimeoutExpired:
-        out = f"[PID {pid}] common/content_auditor.py --run-once 백그라운드 감사 진행 중"
-        exit_code = 0
-
-    st = read_doctor_data()
-    lines = [ln.strip() for ln in (out or "").splitlines() if ln.strip()]
-    tail_str = "\n".join(lines[-10:]) or f"[PID {pid}] 누적 감사 {st.get('auditedCount', 0)}/{st.get('totalInventory', 1975)}건 완료"
-    receipt = _build_execution_receipt(
-        cmd_str=cmd_display,
-        pid=pid,
-        exit_code=exit_code,
-        stdout_tail=tail_str,
-    )
-    badge = (
-        f"[실행 완료: 프로세스 PID {pid} / 기존 글 {lim}건 7대 품질 감사·자동세탁 완료 (누적 {st.get('auditedCount', 0)}/{st.get('totalInventory', 1975)}건)]"
-    )
-    return {
-        "ok": True,
-        "tool": "run_doctor_audit",
-        "pid": pid,
-        "exitCode": exit_code,
-        "cmd": cmd_display,
-        "stdoutTail": tail_str,
-        "executionReceipt": receipt,
-        "channel": channel,
-        "target": target,
-        "status": st,
-        "state": f"기존 글 {lim}건 감사·자동세탁 완료 (누적 {st.get('auditedCount', 0)}/{st.get('totalInventory', 1975)}건)",
-        "badge": badge,
-    }
+    """Queue the evidence-gated CF repair runner on the Windows host."""
+    from common import dashboard_jobs
+    if channel != 'cf':
+        return {'ok': False, 'tool': 'run_doctor_audit', 'state': 'unsupported_channel',
+                'badge': '현재 성과 기반 수선은 CF 채널만 지원합니다.'}
+    domain = target.strip().lower().removeprefix('www.')
+    if domain and domain not in CF_16_DOMAINS:
+        return {'ok': False, 'tool': 'run_doctor_audit', 'state': 'invalid_domain'}
+    job = dashboard_jobs.enqueue('growth-doctor', {
+        'requestedBy': 'doctor', 'apply': True, 'domain': domain,
+        'limit': max(1, min(int(limit or 5), 10)),
+    })
+    return {'ok': True, 'tool': 'run_doctor_audit', 'job': dashboard_jobs.public(job),
+            'pid': None, 'exitCode': None, 'channel': channel, 'target': domain,
+            'state': 'queued', 'verified': False,
+            'badge': '[실행 대기: Windows 성과 기반 수선 작업 등록 · 변경/공개검증 미완료]'}
 
 
 def audit_blog_posts(channel: str = "cf", target: str = "", limit: int = 5) -> Dict[str, Any]:

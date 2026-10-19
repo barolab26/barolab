@@ -3,6 +3,8 @@ import argparse
 import json
 import math
 import os
+import shutil
+import sys
 import ipaddress
 import sqlite3
 import uuid
@@ -16,6 +18,8 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 DEFAULT_DB = ROOT / 'server' / 'data' / 'growth.sqlite3'
 METRICS = {'ga4': 'sessions', 'naver_blog': 'visitors', 'adsense': 'revenue',
            'naver_adpost': 'revenue', 'affiliate': 'revenue'}
@@ -196,6 +200,179 @@ def snapshot(path, site_id, days=7, end=None):
             'queried_at': datetime.now(timezone.utc).isoformat()}
 
 
+def page_performance_evidence(now=None, metrics=None, revenue=None):
+    """Join exact completed seven-day page reports; never apportion domain earnings."""
+    now = now or datetime.now(timezone.utc)
+    end = now.astimezone(ZoneInfo('Asia/Seoul')).date() - timedelta(days=1)
+    start = end - timedelta(days=6)
+    def read(name):
+        try:
+            return json.loads((ROOT / 'server/data' / name).read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            return {}
+    metrics = read('metrics.json') if metrics is None else metrics
+    revenue = read('revenue.json') if revenue is None else revenue
+    result = {'schema': 'page-performance-feedback-v1', 'checkedAt': now.isoformat(),
+              'start': start.isoformat(), 'end': end.isoformat(), 'timezone': 'Asia/Seoul',
+              'status': 'not_collected', 'complete': False, 'reasonCodes': [],
+              'revenueWinners': [], 'zeroViewPages': [], 'highTrafficPages': [],
+              'revenueSource': 'AdSense Management API v2', 'revenueMetric': 'ESTIMATED_EARNINGS',
+              'selection': 'top_10_percent_of_positive_revenue_and_positive_session_pages'}
+    traffic = metrics.get('pagePerformance') or {}
+    earnings = revenue.get('pagePerformance') or {}
+    def valid_report(report, kind, record_reasons=True):
+        reasons = []
+        if report.get('start') != str(start) or report.get('end') != str(end) or report.get('timezone') != 'Asia/Seoul':
+            reasons.append(kind + '_period_mismatch_or_missing')
+        try:
+            age = (now - datetime.fromisoformat(report['checkedAt'].replace('Z', '+00:00'))).total_seconds()
+            if not 0 <= age <= 26 * 3600:
+                reasons.append(kind + '_stale')
+        except (KeyError, TypeError, ValueError):
+            reasons.append(kind + '_timestamp_missing')
+        if report.get('complete') is not True or report.get('status', 'collected') != 'collected':
+            reasons.append(kind + '_partial_or_missing')
+        if record_reasons:
+            result['reasonCodes'].extend(reasons)
+        return not reasons
+    traffic_valid = valid_report(traffic, 'traffic')
+    revenue_valid = valid_report(earnings, 'revenue')
+    if earnings.get('source') not in ('AdSense Management API v2', 'AdSense Management API v2 PAGE_URL'):
+        revenue_valid = False
+        result['reasonCodes'].append('page_adsense_revenue_unverified')
+    currency = earnings.get('currency')
+    if currency not in ('USD', 'KRW'):
+        revenue_valid = False
+        result['reasonCodes'].append('revenue_currency_unknown')
+    def key(row):
+        try:
+            value = urlsplit(row.get('url', ''))
+            host = (value.hostname or '').lower().removeprefix('www.')
+            domain = str(row.get('domain') or host).lower().removeprefix('www.')
+            if value.scheme not in ('http', 'https') or not host or host != domain or value.path in ('', '/') or value.query or value.fragment:
+                return None
+            return (host, value.path.rstrip('/'))
+        except (ValueError, TypeError):
+            return None
+    def number(value):
+        return type(value) in (int, float) and math.isfinite(value) and value >= 0
+    def rows(report, fields):
+        mapped = {}
+        duplicate = False
+        for row in report.get('pages', []):
+            identity = key(row)
+            if identity is None or not all(number(row.get(field)) for field in fields):
+                continue
+            if identity in mapped:
+                duplicate = True
+                continue
+            mapped[identity] = row
+        return mapped, duplicate
+    pages, traffic_duplicate = rows(traffic, ('sessions', 'pageViews'))
+    money, revenue_duplicate = rows(earnings, ('estimatedRevenue',))
+    if traffic_duplicate or revenue_duplicate:
+        result['reasonCodes'].append('duplicate_canonical_page_rows')
+        traffic_valid = revenue_valid = False
+    site_reports = traffic.get('sites', [])
+    site_reports = list(site_reports.values()) if isinstance(site_reports, dict) else site_reports
+    domain_reports = {}
+    for site in site_reports:
+        domain = str(site.get('domain', '')).removeprefix('www.')
+        # A globally complete legacy report may supply missing shared metadata.
+        # Partial reports require each domain's own dated collection evidence.
+        report = {**traffic, **site} if traffic_valid else site
+        if (domain and not traffic_duplicate and valid_report(report, 'traffic_domain', False)
+                and (traffic_valid or report.get('fullEnumeration') is True)):
+            domain_reports[domain] = report
+    valid_domains = set(domain_reports)
+    if traffic_valid:
+        valid_domains.update(identity[0] for identity in pages)
+    if valid_domains:
+        for identity, row in pages.items():
+            if identity[0] not in valid_domains:
+                continue
+            item = {'domain': identity[0], 'url': row['url'], 'title': row.get('title', ''),
+                    'sessions': row['sessions'], 'pageViews': row['pageViews'],
+                    'start': str(start), 'end': str(end), 'complete': True}
+            if row['pageViews'] == 0 and row['sessions'] == 0:
+                result['zeroViewPages'].append(item)
+            if row['sessions'] > 0:
+                result['highTrafficPages'].append(item)
+        result['highTrafficPages'].sort(key=lambda row: (-row['sessions'], row['url']))
+        # Only an explicitly exhaustive, complete report permits missing-row zero.
+        # The runner must still require PASS evidence and publication age >= 7 days.
+        exhaustive = {domain for domain, report in domain_reports.items()
+                      if report.get('fullEnumeration') is True}
+        inventory = metrics.get('sites', {})
+        inventory = list(inventory.values()) if isinstance(inventory, dict) else inventory
+        for record in inventory:
+            domain = str(record.get('site', {}).get('site_id', '')).removeprefix('www.')
+            if domain not in exhaustive or record.get('posts', {}).get('complete') is not True:
+                continue
+            for url in record.get('posts', {}).get('urls', []):
+                identity = key({'domain': domain, 'url': url})
+                if identity and identity not in pages:
+                    pages[identity] = {'sessions': 0, 'pageViews': 0, 'url': url}
+                    result['zeroViewPages'].append({'domain': domain, 'url': url, 'title': '',
+                        'sessions': 0, 'pageViews': 0, 'start': str(start), 'end': str(end),
+                        'complete': True, 'zeroBasis': 'complete_inventory_joined_to_exhaustive_ga4_report'})
+    if traffic_valid and revenue_valid:
+        eligible = []
+        for identity in pages.keys() & money.keys():
+            visits, income = pages[identity], money[identity]
+            if visits['sessions'] <= 0 or income['estimatedRevenue'] <= 0:
+                continue
+            if income.get('currency', currency) != currency:
+                result['reasonCodes'].append('mixed_revenue_currency')
+                return result
+            eligible.append({'domain': identity[0], 'url': visits['url'], 'title': visits.get('title', ''),
+                             'sessions': visits['sessions'], 'pageViews': visits['pageViews'],
+                             'estimatedRevenue': income['estimatedRevenue'], 'currency': currency,
+                             'start': str(start), 'end': str(end), 'complete': True,
+                             'revenueSource': earnings['source']})
+        eligible.sort(key=lambda row: (-row['estimatedRevenue'], -row['sessions'], row['url']))
+        result.update(complete=True, status='collected', eligiblePageCount=len(eligible),
+                      revenueWinners=eligible[:math.ceil(len(eligible) * 0.1)])
+        if not eligible:
+            result['reasonCodes'].append('no_positive_joined_page_revenue')
+    elif traffic_valid or revenue_valid or valid_domains:
+        result['status'] = 'partial'
+    result['coverage'] = {'trafficPages': len(pages), 'revenuePages': len(money),
+                          'joinedPages': len(pages.keys() & money.keys()),
+                          'trafficComplete': traffic_valid, 'revenueComplete': revenue_valid,
+                          'completeTrafficDomains': sorted(valid_domains),
+                          'exhaustiveTrafficDomains': sorted(domain for domain, report in domain_reports.items()
+                                                             if report.get('fullEnumeration') is True)}
+    return result
+
+
+def refresh_performance_feedback():
+    """Copy the measured page report to metrics after collection and publish feedback."""
+    from common.dashboard_jobs import write
+    from dashboard.metrics import collector_lock
+    folder = ROOT / 'server/data'
+    with collector_lock(folder / 'metrics.lock') as acquired:
+        if not acquired:
+            return {'status': 'busy', 'complete': False}
+        def read(name):
+            try:
+                return json.loads((folder / name).read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                return {}
+        metrics, traffic, revenue = read('metrics.json'), read('traffic.json'), read('revenue.json')
+        # Preserve source timestamps and missingness; never upgrade cached data to fresh.
+        metrics['pagePerformance'] = traffic.get('pagePerformance') or {'status': 'not_collected', 'complete': False, 'pages': []}
+        evidence = page_performance_evidence(metrics=metrics, revenue=revenue)
+        metrics['performanceFeedback'] = evidence
+        write(folder / 'metrics.json', metrics)
+        drive = os.environ.get('BAROLAB_GOOGLE_DRIVE_ROOT')
+        if drive:
+            target = Path(drive) / 'BaroLab/server/data'; target.mkdir(parents=True, exist_ok=True)
+            for name in ('revenue.json', 'metrics.json', 'kin.json', 'threads.json'):
+                shutil.copy2((folder if name in ('revenue.json', 'metrics.json') else ROOT / 'dashboard/data') / name, target / name)
+        return evidence
+
+
 def action_analysis():
     import sys
     dashboard = str(ROOT / 'dashboard')
@@ -354,6 +531,10 @@ def diagnosis_snapshot(domain, url):
 def make_router(path=DEFAULT_DB):
     router = APIRouter()
 
+    @router.get('/api/growth/page-performance')
+    def get_page_performance():
+        return page_performance_evidence()
+
     @router.get('/api/growth/sites')
     def get_sites():
         with connect(path) as db:
@@ -494,11 +675,14 @@ if __name__ == '__main__':
     parser.add_argument('--inventory', type=Path)
     parser.add_argument('--import-daily', type=Path)
     parser.add_argument('--serve', action='store_true')
+    parser.add_argument('--refresh-performance', action='store_true')
     parser.add_argument('--port', type=int, default=8791)
     args = parser.parse_args()
     for filename, importer in ((args.inventory, import_inventory), (args.import_daily, import_daily)):
         if filename:
             importer(args.db, json.loads(filename.read_text(encoding='utf-8-sig')))
+    if args.refresh_performance:
+        print(json.dumps(refresh_performance_feedback(), ensure_ascii=False))
     if args.serve:
         import uvicorn
         uvicorn.run(preview_app(args.db), host='127.0.0.1', port=args.port)

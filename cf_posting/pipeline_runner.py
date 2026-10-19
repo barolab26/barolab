@@ -4246,6 +4246,9 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
             fixed = None
         else:
             fixed = {'seedTitle': '' if '핵심 정보 실전 가이드' in scheduled.get('title', '') or (domain == 'baronote.kr' and '기후동행' in scheduled.get('title', '')) else scheduled.get('title', ''), 'topicSlug': scheduled['slug'], 'mode': 'editorial_seed', 'task': '기존 일정은 참고 주제이며 실제 검색 수요와 중복 검증을 거쳐 새 키워드를 선정합니다.'}
+    if scheduled.get('growthKeyword') and not revision_id:
+        fixed = {**(fixed or {}), 'seedTitle': scheduled['growthKeyword']['keyword'],
+                 'growthEvidence': scheduled['growthKeyword'], 'mode': 'editorial_seed'}
     if 'demandMode' in scheduled:
         fixed = {**(fixed or {}), 'demandMode': scheduled['demandMode']}
     if layout_folder:
@@ -4926,6 +4929,265 @@ def get_topic_for_domain(domain):
         "summary": f"{name} 독자를 위한 2026년 최신 {cat} 핵심 혜택과 유용한 절차를 알기 쉽게 총정리한 정보 가이드."
     }
 
+def _growth_evidence(now=None):
+    from server.growth import page_performance_evidence
+    return page_performance_evidence(now=now)
+
+
+def _growth_url(value):
+    parsed = urlparse(value or '')
+    domain = (parsed.hostname or '').removeprefix('www.')
+    if (parsed.scheme != 'https' or domain not in ALL_DOMAINS or parsed.username or parsed.password
+            or parsed.port or parsed.query or parsed.fragment or parsed.path in ('', '/') or is_dummy_rescue_url(value)):
+        raise ValueError('Verified CF article URL required')
+    return domain, parsed.path.strip('/')
+
+
+def _growth_post(url):
+    domain, slug = _growth_url(url)
+    posts = published_inventory('https://www.' + domain)
+    match = next((p for p in posts if p.get('slug') == slug), None)
+    if not match or not match.get('id'):
+        raise ValueError('Published article identity missing')
+    response = requests.get(f"https://www.{domain}/api/posts/{match['id']}", timeout=15, allow_redirects=False)
+    response.raise_for_status()
+    post = response.json()['post']
+    if post.get('slug') != slug or post.get('status') != 'published' or not post.get('content'):
+        raise ValueError('Published article content missing')
+    return post
+
+
+def growth_radar(schedule=None, now=None, evidence=None, target_domain=None):
+    """Queue source-grounded long tails from verified page-revenue winners only."""
+    schedule = schedule if schedule is not None else json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+    evidence = evidence if evidence is not None else _growth_evidence(now)
+    queue = schedule.setdefault('radarQueue', [])
+    added = []
+    previous_keywords = {row.get('keyword') for row in queue}
+    for archived in HISTORY_DIR.glob('????-??-??.json'):
+        try:
+            previous_keywords.update(row.get('keyword') for row in json.loads(archived.read_text(encoding='utf-8')).get('radarQueue', []))
+        except (OSError, ValueError):
+            continue
+    if evidence.get('complete') is True:
+        for winner in evidence.get('revenueWinners', []):
+            try:
+                domain, _ = _growth_url(winner['url'])
+                if target_domain and domain != target_domain:
+                    continue
+                post = _growth_post(winner['url'])
+                soup = BeautifulSoup(post['content'], 'html.parser')
+                headings = [h.get_text(' ', strip=True) for h in soup.select('h2,h3')]
+                for heading in headings:
+                    if len(heading) < 8 or len(heading.split()) < 2 or heading in ('자주 묻는 질문', '마무리 정리', '결론 및 요약'):
+                        continue
+                    keyword = post['title'].strip() + ' — ' + heading
+                    # Specific observed model/error/numeric condition; generic headings are not long tails.
+                    if not (re.search(r'(?i)(?:[a-z]+[- ]?\d+[a-z0-9-]*|\b\d{3}\b|\d+(?:원|만원|%|GB|MB|개월|세|단계)|오류\s*(?:코드\s*)?[a-z0-9]+)', keyword)
+                            or re.search(r'(?:미만|이하|이상|초과|않을 때|안 될 때|없는 경우|실패할 때)', heading)):
+                        continue
+                    if len(keyword) > 140 or keyword in previous_keywords:
+                        continue
+                    row = {'domain': domain, 'keyword': keyword, 'sourceUrl': winner['url'],
+                           'sourceTitle': post['title'], 'sourceHeading': heading, 'status': 'queued',
+                           'estimatedRevenue': winner.get('estimatedRevenue'), 'currency': winner.get('currency'),
+                           'evidenceStart': evidence.get('start'), 'evidenceEnd': evidence.get('end'), 'createdAt': stamp()}
+                    queue.append(row); added.append(row)
+                    break
+            except (ValueError, KeyError, requests.RequestException):
+                continue
+    scheduled = 0
+    for row in queue:
+        if row.get('status') != 'queued':
+            continue
+        item = next((it for it in schedule.get('items', []) if it.get('domain') == row['domain']
+                     and it.get('status') == 'waiting' and not it.get('attemptCount') and not it.get('growthKeyword')), None)
+        if item is not None:
+            row.update(status='scheduled', scheduledDate=schedule['date'])
+            item['growthKeyword'] = dict(row)
+            scheduled += 1
+    result = {'checkedAt': stamp(), 'status': 'queued' if added else 'no_verified_candidate',
+              'complete': evidence.get('complete') is True, 'added': len(added), 'scheduled': scheduled,
+              'pendingQueue': sum(row.get('status') == 'queued' for row in queue), 'reasonCodes': evidence.get('reasonCodes', [])}
+    schedule['radar'] = result
+    save_schedule(schedule)
+    return result
+
+
+def _doctor_index_evidence(url, now, metrics, history):
+    """Only observed GSC PASS age qualifies; editorial PASS is a separate guard."""
+    records = metrics.get('sites', {})
+    records = list(records.values()) if isinstance(records, dict) else records
+    for site in records:
+        for row in site.get('google', {}).get('urls', []):
+            if row.get('url') != url:
+                continue
+            if (row.get('verdict') != 'PASS' or row.get('indexed') is not True
+                    or row.get('attemptStatus') != 'verified'
+                    or row.get('source') not in ('Google Search Console URL Inspection', 'Google Search Console UI')):
+                history.pop(url, None)
+                return None
+            try:
+                checked = datetime.datetime.fromisoformat(row['checkedAt'].replace('Z', '+00:00'))
+                first_text = row.get('firstObservedPassAt') or row.get('firstPassAt') or row['checkedAt']
+                first = datetime.datetime.fromisoformat(first_text.replace('Z', '+00:00'))
+                old = history.get(url, {})
+                if old.get('verdict') == 'PASS' and old.get('firstPassAt'):
+                    previous = datetime.datetime.fromisoformat(old['firstPassAt'].replace('Z', '+00:00'))
+                    first = min(first, previous)
+                if checked.tzinfo is None or first.tzinfo is None or not first <= checked <= now:
+                    return None
+                history[url] = {'verdict': 'PASS', 'firstPassAt': first.isoformat(),
+                                'checkedAt': checked.isoformat(), 'source': row['source']}
+                return dict(history[url]) if (now - first).total_seconds() >= 7 * 86400 else None
+            except (ValueError, KeyError, TypeError):
+                return None
+    return None
+
+
+def _doctor_rewrite(post):
+    # Reuse exact source wording; never invent products, model IDs, errors, or factual claims.
+    soup = BeautifulSoup(post['content'], 'html.parser')
+    title = post['title'].strip()
+    heading = next((h.get_text(' ', strip=True) for h in soup.select('h2,h3')
+                    if len(h.get_text(' ', strip=True)) >= 8 and h.get_text(' ', strip=True) not in title), None)
+    if not heading:
+        raise ValueError('No source-grounded specific heading')
+    rewritten = title + ' — ' + heading
+    if len(rewritten) > 140:
+        raise ValueError('Source-grounded title too long')
+    content = post['content']
+    if soup.find('h1'):
+        content = re.sub(r'(<h1\b[^>]*>).*?(</h1>)', lambda m: m[1] + html.escape(rewritten) + m[2], content, count=1, flags=re.I | re.S)
+    return rewritten, content
+
+
+def _doctor_put(domain, original, changes):
+    api = f"https://www.{domain}/api/posts/{original['id']}"
+    latest = requests.get(api, timeout=15, allow_redirects=False)
+    latest.raise_for_status()
+    if any(latest.json()['post'].get(k) != original.get(k) for k in ('slug', 'title', 'content', 'updated_at')):
+        raise ValueError('Concurrent edit detected')
+    key = get_api_key(domain)
+    payload = {k: original[k] for k in ('title', 'content', 'slug', 'category', 'meta_description', 'excerpt', 'thumbnail', 'og_image', 'status') if k in original}
+    payload.update(changes)
+    payload['isPublished'] = True
+    response = requests.put(api, headers={'x-api-key': key, 'Authorization': 'Bearer ' + key},
+                            json=payload, timeout=30, allow_redirects=False)
+    response.raise_for_status()
+    fetched = requests.get(api, timeout=15, allow_redirects=False)
+    fetched.raise_for_status()
+    verified = fetched.json()['post']
+    if verified.get('slug') != original['slug'] or any(verified.get(k) != value for k, value in changes.items()):
+        raise RuntimeError('API readback mismatch')
+    public = requests.get(f"https://www.{domain}/{original['slug']}", timeout=15, allow_redirects=False)
+    public.raise_for_status()
+    rendered = BeautifulSoup(public.text, 'html.parser')
+    if 'title' in changes:
+        if not any(h.get_text(' ', strip=True) == changes['title'] for h in rendered.select('h1')):
+            raise RuntimeError('Public H1 verification failed')
+        page_title = rendered.title.get_text(' ', strip=True) if rendered.title else ''
+        if not (page_title == changes['title'] or any(page_title.startswith(changes['title'] + separator) for separator in (' | ', ' - ', ' – ', ' — '))):
+            raise RuntimeError('Public title verification failed')
+    return public.text
+
+
+def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_domain=None, limit=None, metrics=None):
+    """Bounded repair, durable original/intent, never retry an uncertain write."""
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    schedule = schedule if schedule is not None else json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+    evidence = evidence if evidence is not None else _growth_evidence(now)
+    if metrics is None:
+        metrics = json.loads((BASE_DIR.parent / 'server/data/metrics.json').read_text(encoding='utf-8'))
+    index_history = schedule.setdefault('doctorIndexHistory', {})
+    before_history = json.dumps(index_history, sort_keys=True)
+    sites = metrics.get('sites', {})
+    for site in (sites.values() if isinstance(sites, dict) else sites):
+        for row in site.get('google', {}).get('urls', []):
+            if row.get('url'):
+                _doctor_index_evidence(row['url'], now, {'sites': [{'google': {'urls': [row]}}]}, index_history)
+    if apply and json.dumps(index_history, sort_keys=True) != before_history:
+        save_schedule(schedule)
+    runs = schedule.setdefault('doctorRuns', [])
+    seen = {row.get('url') for row in runs}
+    for archived in HISTORY_DIR.glob('????-??-??.json'):
+        try:
+            seen.update(row.get('url') for row in json.loads(archived.read_text(encoding='utf-8')).get('doctorRuns', []))
+        except (OSError, ValueError):
+            continue
+    counts = {}
+    for run in runs:
+        counts[run.get('domain')] = counts.get(run.get('domain'), 0) + 1
+    results = []
+    reasons = {}
+    traffic_complete = evidence.get('coverage', {}).get('trafficComplete', evidence.get('complete')) is True
+    complete_domains = set(evidence.get('coverage', {}).get('completeTrafficDomains', []))
+    if not traffic_complete and not complete_domains:
+        return {'status': 'insufficient_evidence', 'complete': False, 'candidates': [], 'reasonCodes': evidence.get('reasonCodes', [])}
+    for page in evidence.get('zeroViewPages', []):
+        if limit is not None and len(results) >= max(0, int(limit)):
+            break
+        try:
+            url = page['url']; domain, _ = _growth_url(url)
+            if target_domain and domain != target_domain:
+                continue
+            if not traffic_complete and domain not in complete_domains:
+                continue
+            if page.get('complete') is not True or page.get('pageViews') != 0 or page.get('sessions') != 0 or url in seen or counts.get(domain, 0) >= 2:
+                continue
+            indexed = _doctor_index_evidence(url, now, metrics, index_history)
+            if not indexed:
+                reasons['gsc_pass_age_unknown_or_under_7_days'] = reasons.get('gsc_pass_age_unknown_or_under_7_days', 0) + 1
+                continue
+            target = _growth_post(url)
+            published = datetime.datetime.fromisoformat((target.get('published_at') or target.get('created_at') or '').replace('Z', '+00:00'))
+            if published.tzinfo is None:
+                # CF /api/posts uses SQLite UTC timestamps, matching reconcile_item().
+                published = published.replace(tzinfo=datetime.timezone.utc)
+            if (now - published).total_seconds() < 7 * 86400:
+                continue
+            title, content = _doctor_rewrite(target)
+            tokens = {t for t in re.findall(r'[가-힣A-Za-z0-9]+', target['title']) if len(t) >= 3}
+            related = None
+            for row in evidence.get('highTrafficPages', []):
+                if row.get('url') == url or _growth_url(row.get('url'))[0] != domain or row.get('sessions', 0) <= 0:
+                    continue
+                candidate = _growth_post(row['url'])
+                other = {t for t in re.findall(r'[가-힣A-Za-z0-9]+', candidate['title']) if len(t) >= 3}
+                if len(tokens & other) >= 2 and url not in candidate['content']:
+                    related = candidate
+                    break
+            if related is None:
+                continue
+            linked = related['content'] + '<p data-barolab-doctor="related">함께 확인하기: <a href="' + html.escape(url, quote=True) + '">' + html.escape(title) + '</a></p>'
+            record = {'url': url, 'domain': domain, 'title': title, 'sourcePostId': related['id'],
+                      'status': 'preview', 'checkedAt': now.isoformat(), 'googleIndex': indexed,
+                      'evidenceStart': evidence.get('start'), 'evidenceEnd': evidence.get('end')}
+            results.append(record); counts[domain] = counts.get(domain, 0) + 1
+            if not apply:
+                continue
+            record.update(status='write_intent', originalTarget=target, originalSource=related)
+            runs.append(record); seen.add(url)
+            save_schedule(schedule)  # Original bodies and intent durable before any external write.
+            try:
+                _doctor_put(domain, target, {'title': title, 'content': content})
+                record['status'] = 'target_verified'; save_schedule(schedule)
+                public = _doctor_put(domain, related, {'content': linked})
+                if not BeautifulSoup(public, 'html.parser').find('a', href=url):
+                    raise RuntimeError('Public related-link verification failed')
+                record.update(status='verified', verifiedAt=stamp())
+            except Exception as exc:
+                record.update(status='write_unknown', errorType=type(exc).__name__)
+            save_schedule(schedule)
+        except (ValueError, KeyError, OSError, requests.RequestException):
+            continue
+    unknown = sum(row.get('status') == 'write_unknown' for row in results)
+    verified = sum(row.get('status') == 'verified' for row in results)
+    status = ('partial' if unknown else 'applied' if verified else 'no_eligible_candidate') if apply else 'preview'
+    return {'status': status, 'complete': unknown == 0, 'verifiedCount': verified, 'unknownCount': unknown,
+            'candidates': results, 'reasonCounts': reasons}
+
+
 def generate_daily_schedule():
     now = datetime.datetime.now()
     today_str = now.strftime("%Y-%m-%d")
@@ -4964,7 +5226,22 @@ def generate_daily_schedule():
         "total": len(items),
         "items": items
     }
+    # Carry pending candidates and observed PASS history into tomorrow's real waiting slots.
+    for archived in sorted(HISTORY_DIR.glob('????-??-??.json'), reverse=True):
+        try:
+            previous = json.loads(archived.read_text(encoding='utf-8'))
+            schedule['radarQueue'] = [row for row in previous.get('radarQueue', []) if row.get('status') == 'queued']
+            schedule['doctorIndexHistory'] = previous.get('doctorIndexHistory', {})
+            schedule['growthAutomationEnabled'] = previous.get('growthAutomationEnabled', True)
+            break
+        except (OSError, ValueError):
+            continue
     save_schedule(schedule)
+    try:
+        growth_radar(schedule)
+    except Exception as exc:
+        schedule['radar'] = {'status': 'error', 'errorType': type(exc).__name__}
+        save_schedule(schedule)
     sync_dashboard_status(schedule)
     return schedule
 
@@ -5279,6 +5556,12 @@ def catch_up_once():
             log_scheduler('Cleaner already running; overlapping invocation skipped')
             return
         pairs = collect_schedules()
+        current = pairs[0][1]
+        if current.get('growthAutomationEnabled', True) is True:
+            try:
+                growth_doctor(current, apply=True)
+            except Exception as exc:
+                log_scheduler('Growth doctor held: ' + type(exc).__name__)
         for path, schedule in pairs:
             if schedule.get('executionState') == 'stopped':
                 schedule['executionState'] = 'idle'
@@ -5369,7 +5652,19 @@ def main():
     parser.add_argument("--scheduler", action="store_true", help="Run 60s scheduler loop")
     parser.add_argument("--retry-browser-failures", action="store_true", help="Queue retry after browser recovery")
     parser.add_argument("--prepare-only", action="store_true", help="Prepare articles without publishing")
+    parser.add_argument('--growth-radar', action='store_true')
+    parser.add_argument('--growth-doctor', action='store_true')
+    parser.add_argument('--apply-growth', action='store_true')
+    parser.add_argument('--growth-domain', choices=ALL_DOMAINS)
+    parser.add_argument('--growth-limit', type=int, default=None)
     args, unknown = parser.parse_known_args()
+    if args.growth_radar or args.growth_doctor:
+        with cleaner_lock() as acquired:
+            if not acquired:
+                raise RuntimeError('CF workflow active; growth update deferred')
+            result = growth_doctor(apply=args.apply_growth, target_domain=args.growth_domain, limit=args.growth_limit) if args.growth_doctor else growth_radar(target_domain=args.growth_domain)
+            print(json.dumps(result, ensure_ascii=False))
+        return
 
     if args.catch_up_once:
         catch_up_once()
