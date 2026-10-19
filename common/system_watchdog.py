@@ -307,8 +307,6 @@ def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
                         failed_ports.append(port)
                 except Exception:
                     failed_ports.append(port)
-            except Exception:
-                failed_ports.append(port)
 
         results[item["id"]] = {
             "port": port,
@@ -661,6 +659,14 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
         save_json(WATCHDOG_STATUS_PATH, report)
     except Exception:
         pass
+
+    # Mirror real-time state files to NAS directory so NAS dashboard stays 100% updated
+    try:
+        nas_sync = sync_data_to_nas()
+        report["nasDashboardSync"] = nas_sync
+    except Exception:
+        pass
+
     if cdp_res.get('recoveredPorts') or server_res.get('recovered'):
         from common.llm_client import memory_event
         memory_event('watchdog:' + started_at, 'infrastructure_repair',
@@ -668,6 +674,41 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
                      evidence={'recoveredPorts': cdp_res.get('recoveredPorts', []),
                                'serverRecovered': bool(server_res.get('recovered'))}, review=False)
     return report
+
+
+def sync_data_to_nas() -> Dict[str, Any]:
+    """Mirror real-time local state files to NAS directory so the NAS dashboard stays up to date."""
+    nas_root = Path(r"\\otns\yoonlab\10_Project\BaroLab")
+    if not nas_root.exists() or ROOT.drive.lower() != 'c:':
+        return {"synced": False, "reason": "NAS path inaccessible or not on local C:"}
+    synced_files = []
+    try:
+        import shutil
+        for folder in ("cf_posting/data", "server/data"):
+            src_dir = ROOT / folder
+            dst_dir = nas_root / folder
+            if not src_dir.exists():
+                continue
+            dst_dir.mkdir(parents=True, exist_ok=True)
+            for file_path in src_dir.glob("*.json"):
+                dst_file = dst_dir / file_path.name
+                if not dst_file.exists() or file_path.stat().st_mtime > dst_file.stat().st_mtime:
+                    try:
+                        shutil.copy2(file_path, dst_file)
+                        synced_files.append(f"{folder}/{file_path.name}")
+                    except Exception:
+                        pass
+            for file_path in src_dir.glob("*.js"):
+                dst_file = dst_dir / file_path.name
+                if not dst_file.exists() or file_path.stat().st_mtime > dst_file.stat().st_mtime:
+                    try:
+                        shutil.copy2(file_path, dst_file)
+                        synced_files.append(f"{folder}/{file_path.name}")
+                    except Exception:
+                        pass
+        return {"synced": True, "count": len(synced_files), "files": synced_files}
+    except Exception as exc:
+        return {"synced": False, "error": str(exc)}
 
 
 def register_watchdog_scheduled_task() -> Dict[str, Any]:

@@ -2537,6 +2537,28 @@ def save_live(path, content):
         except OSError:
             pass
 
+    # Mirror to NAS dashboard directory if accessible
+    try:
+        nas_root = Path(r"\\otns\yoonlab\10_Project\BaroLab")
+        if nas_root.exists() and path.is_absolute():
+            base_resolved = BASE_DIR.resolve()
+            path_resolved = path.resolve()
+            if str(path_resolved).lower().startswith(str(base_resolved).lower()):
+                rel = path_resolved.relative_to(base_resolved)
+                nas_dest = nas_root / rel
+                nas_dest.parent.mkdir(parents=True, exist_ok=True)
+                nas_tmp = nas_dest.with_name(f".{nas_dest.name}.{uuid.uuid4().hex}.tmp")
+                nas_tmp.write_text(content, encoding='utf-8')
+                for attempt in range(3):
+                    try:
+                        os.replace(nas_tmp, nas_dest)
+                        break
+                    except Exception:
+                        time.sleep(0.05)
+                nas_tmp.unlink(missing_ok=True)
+    except Exception:
+        pass
+
 
 def safe_failure(exc):
     message = str(exc).split('Call log:')[0].strip()

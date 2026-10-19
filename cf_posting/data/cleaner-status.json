@@ -1,10 +1,10 @@
 {
   "checkedAt": "2026-10-19T20:20:11.743365+09:00",
   "eligibleCount": 9,
-  "processedCount": 4,
-  "publishedCount": 4,
+  "processedCount": 5,
+  "publishedCount": 5,
   "activeJob": {
     "date": "2026-10-19",
-    "domain": "woorinote.kr"
+    "domain": "topnote.kr"
   }
 }
