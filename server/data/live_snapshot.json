@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T02:32:24.1577+09:00",
+  "generatedAt": "2026-10-20T02:42:31.015439+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -45,7 +45,7 @@
     "cdp_observation_host": "192.168.45.248"
   },
   "metrics": {
-    "checkedAt": "2026-10-20T02:18:33.431984+09:00",
+    "checkedAt": "2026-10-20T02:41:48.93628+09:00",
     "siteCount": 21,
     "ga4": [
       {
@@ -88,7 +88,7 @@
         "domain": "justinfo.co.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:17:53.213209+09:00",
+        "checkedAt": "2026-10-20T02:40:52.767121+09:00",
         "sessions": 24,
         "pageViews": 35,
         "naverReferralSessions": 2
@@ -97,7 +97,7 @@
         "domain": "maxnote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:17:59.363022+09:00",
+        "checkedAt": "2026-10-20T02:41:24.984614+09:00",
         "sessions": 13,
         "pageViews": 15,
         "naverReferralSessions": 0
@@ -106,7 +106,7 @@
         "domain": "meganote.kr",
         "start": "2026-10-12",
         "end": "2026-10-18",
-        "checkedAt": "2026-10-20T02:18:06.166769+09:00",
+        "checkedAt": "2026-10-20T02:41:48.10871+09:00",
         "sessions": 28,
         "pageViews": 29,
         "naverReferralSessions": 3
@@ -194,8 +194,8 @@
       }
     ],
     "indexing": {
-      "indexed": 537,
-      "inspected": 1507,
+      "indexed": 536,
+      "inspected": 1494,
       "inventoryTotal": 1914
     },
     "traffic": {
@@ -276,7 +276,7 @@
           "rows": 62
         },
         "automation_slots": {
-          "rows": 233
+          "rows": 235
         },
         "operating_cadence": {
           "rows": 1

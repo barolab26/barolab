@@ -381,7 +381,7 @@
       "baronote317Changed": false
     },
     "cfSchedule": {
-      "status": "blocked_by_active_worker",
+      "status": "waiting_for_existing_scheduler",
       "date": "2026-10-20",
       "total": 16,
       "prepared": 5,
@@ -390,15 +390,15 @@
       "interruptedDomain": "maxnote.kr",
       "previousStage": 2,
       "previousProgressPct": 24,
-      "activeWorkerPid": 38996,
+      "activeWorkerPid": 48348,
       "activeWorkerCommand": "cf_posting/pipeline_runner.py --catch-up-once",
       "activeWorkerStartedAt": "2026-10-20T02:26:39+09:00",
       "lockHeld": true,
       "retryStarted": false,
       "overlappingRunPrevented": true,
       "publicPublishing": false,
-      "observedAt": "2026-10-20T02:33:52.090845+09:00",
-      "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it."
+      "observedAt": "2026-10-20T02:42:34.3619657+09:00",
+      "reason": "Retry commands for failed/waiting domains were all rejected by cleaner_lock because scheduled worker PID 48348 restarted and owns the lock; no domain run or publication started."
     },
     "quotas": {
       "naver": {
@@ -445,7 +445,7 @@
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   },
   "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T02:33:52.090845+09:00",
+  "updatedAt": "2026-10-20T02:42:34.3619657+09:00",
   "failureAt": "2026-10-20T02:28:06.626516+09:00",
   "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
   "attemptHistory": [
@@ -467,6 +467,16 @@
       "status": "waiting_for_existing_scheduler",
       "reason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
       "activeWorkerPid": 38996
+    },
+    {
+      "attempt": 3,
+      "startedAt": "2026-10-20T02:41:56.5630255+09:00",
+      "trigger": "resume failed and waiting CF draft domains only",
+      "previousAttempt": "Worker PID 38996 exited; no publication was made; prepared items preserved.",
+      "status": "waiting_for_existing_scheduler",
+      "observedAt": "2026-10-20T02:42:34.3619657+09:00",
+      "reason": "All 11 direct prepare-only invocations were refused by cleaner_lock while scheduled worker PID 48348 was active; no retry pipeline started.",
+      "activeWorkerPid": 48348
     }
   ],
   "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
