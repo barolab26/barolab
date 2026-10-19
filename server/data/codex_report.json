@@ -332,7 +332,7 @@
       "blockedReason": "Scheduled CF catch-up-once processes are active and cleaner logs continue to report overlap skips, while pipeline_state is idle and CF schedule remains 8 waiting, 5 prepared, 3 failed. No stage 1 duplicate was started. Naver reservation plan is dated 10/19; current 10/20 public evidence contains zero posts for publicationDate 10/20, so rollover is unverified. KIN worker is running for stone0747; no overlapping run or manual quota reset."
     }
   ],
-  "summary": "INCOMPLETE: 10/20 CF queue remains 8 waiting, 5 prepared, 3 failed, with 0 publicly published. Scheduled catch-up-once workers are active while pipeline_state remains idle and the queue is unchanged; no overlapping stage 1 run was started. Threads main/followup remain queued for 08:00. Naver public verification received 10/20 at 04:02:59 but has 0 posts dated 10/20; its reservation planner still reports source date 10/19, so today's reservation quota is unverified. KIN date-scoped cap is 20 with 3 published verified and 17 remaining; stone0747 run was active at 04:05. No quota reset was applied.",
+  "summary": "INCOMPLETE: CF queue remains 8 waiting, 5 prepared, 3 failed with no public posts; existing catch-up workers hold the cleaner and no duplicate stage 1 run was started. Threads main/follow-up for 3f6f34fb are queued at 08:00. Naver public evidence received at 04:09:21 KST has 0 posts dated 10/20 and planner source remains dated 10/19. KIN is current at 04:09:43 KST with 3 verified, 17 remaining and no active run; no quota reset was applied.",
   "changedFiles": [
     "cf_posting/data/daily_schedule.json",
     "server/data/codex_report.json",
@@ -351,18 +351,15 @@
       "newPublicationTriggered": false
     },
     "threads": {
-      "actualModel": "gpt-6-luna",
-      "actualGenerationCalls": 1,
-      "mainLines": 3,
-      "mainExternalUrls": 0,
-      "followupExactOutboundUrls": 1,
       "queued": true,
       "published": false,
-      "policyTestsPassed": 8,
       "artifact": "server/data/threads-drafts/3f6f34fbc1e44ecdb534b2a84665b03c.json",
-      "editorialCorrection": "unsupported affiliate disclosure replaced with owned-blog disclosure; model main preserved",
-      "queueState": "queued",
-      "queuedSlot": "08:00"
+      "publicationDate": "2026-10-20",
+      "queuedSlots": [
+        "08:00 main",
+        "08:00 followup"
+      ],
+      "evidence": "dashboard/data/threads.json recent rows show both parts queued"
     },
     "doctor": {
       "status": "verified",
@@ -392,20 +389,18 @@
       "prepared": 5,
       "failed": 3,
       "waiting": 8,
-      "interruptedDomain": "maxnote.kr",
-      "previousStage": 2,
-      "previousProgressPct": 24,
-      "activeWorkerPid": 22848,
-      "activeWorkerCommand": "cf_posting/pipeline_runner.py --catch-up-once",
-      "activeWorkerStartedAt": "2026-10-20T03:40:39.743572+09:00",
+      "activeWorkerPids": [
+        55072,
+        50448
+      ],
+      "pipelineState": "idle",
       "lockHeld": true,
-      "retryStarted": false,
       "overlappingRunPrevented": true,
       "publicPublishing": false,
-      "observedAt": "2026-10-20T03:41:33.42854+09:00",
-      "reason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started.",
       "published": 0,
-      "cleanerLastCheckedAt": "2026-10-20T03:01:19.549361+09:00"
+      "observedAt": "2026-10-20T04:13:36.7100896+09:00",
+      "reason": "CF catch-up-once workers PID 55072 (04:05:51 KST) and PID 50448 (04:09:49 KST) are active; cleaner log still reports overlap skips, pipeline_state remains idle, and the queue remains 8 waiting, 5 prepared, 3 failed. No duplicate stage 1 run was started. Threads main and follow-up for 3f6f34fb are both queued for 10/20 08:00. Naver public verification was received at 04:09:21 KST with zero posts dated 10/20; the blog planner remains dated 10/19, so the blog rollover is unverified. KIN is current for 10/20 at 04:09:43 KST: 3 verified, 17 remaining, activeRun null; no manual reset or overlapping run.",
+      "cleanerLastCheckedAt": "2026-10-20T04:13:02+09:00"
     },
     "quotas": {
       "naver": {
@@ -417,11 +412,11 @@
         "evidenceAsOf": "2026-10-20T01:31:38+09:00",
         "sourceFreshness": "stale; 2026-10-19 planner source",
         "manualResetApplied": false,
-        "publicVerificationReceivedAt": "2026-10-20T04:02:59.563303+09:00"
+        "publicVerificationReceivedAt": "2026-10-20T04:09:21.653021+09:00"
       },
       "kin": {
         "date": "2026-10-20",
-        "checkedAt": "2026-10-20T04:05:01.902507+09:00",
+        "checkedAt": "2026-10-20T04:09:43.571935+09:00",
         "globalDailyCap": 20,
         "accountDailyCap": 10,
         "attempted": 4,
@@ -439,10 +434,9 @@
             "remainingScheduled": 9
           }
         },
-        "blockedReason": "stone0747: operation_ReadTimeout",
         "manualResetApplied": false,
-        "activeRunId": "2026-10-20_690ba44c85f2_stone0747_0405",
-        "activeAccount": "stone0747"
+        "activeRunId": null,
+        "activeAccount": null
       }
     }
   },
@@ -455,7 +449,7 @@
     "evidence": "Exact message visible as user turn in Gemini BaroLab; response generation observed"
   },
   "previousDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-20T04:07:43.5501839+09:00",
+  "updatedAt": "2026-10-20T04:13:36.7100896+09:00",
   "failureAt": "2026-10-20T02:28:06.626516+09:00",
   "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
   "attemptHistory": [
@@ -517,10 +511,27 @@
       "status": "blocked_waiting_for_existing_worker",
       "activeWorkerPid": 22848,
       "reason": "Catch-up worker PID 22848 started at 03:40:39 KST and the scheduler reports repeated overlapping-cleaner skips. CF queue remains unchanged; no separate stage 1 invocation was started."
+    },
+    {
+      "observedAt": "2026-10-20T04:13:36.7100896+09:00",
+      "status": "blocked_waiting_for_existing_worker",
+      "activeWorkerPids": [
+        55072,
+        50448
+      ],
+      "cfQueue": "8 waiting, 5 prepared, 3 failed",
+      "threadsQueued": [
+        "3f6f34fbc1e44ecdb534b2a84665b03c-0",
+        "3f6f34fbc1e44ecdb534b2a84665b03c-1"
+      ],
+      "naverPublicVerifiedToday": 0,
+      "kinPublishedVerified": 3,
+      "kinRemaining": 17,
+      "reason": "CF catch-up-once workers PID 55072 (04:05:51 KST) and PID 50448 (04:09:49 KST) are active; cleaner log still reports overlap skips, pipeline_state remains idle, and the queue remains 8 waiting, 5 prepared, 3 failed. No duplicate stage 1 run was started. Threads main and follow-up for 3f6f34fb are both queued for 10/20 08:00. Naver public verification was received at 04:09:21 KST with zero posts dated 10/20; the blog planner remains dated 10/19, so the blog rollover is unverified. KIN is current for 10/20 at 04:09:43 KST: 3 verified, 17 remaining, activeRun null; no manual reset or overlapping run."
     }
   ],
   "retryStartedAt": "2026-10-20T02:32:16.272403+09:00",
   "retryWaitReason": "A direct prepare-only retry was rejected by cleaner_lock because the Windows scheduled cleaner process 38996 owns the lock; do not overlap it.",
-  "blockedAt": "2026-10-20T03:41:33.42854+09:00",
-  "blockedReason": "Scheduled CF catch-up-once processes are active and cleaner logs continue to report overlap skips, while pipeline_state is idle and CF schedule remains 8 waiting, 5 prepared, 3 failed. No stage 1 duplicate was started. Naver reservation plan is dated 10/19; current 10/20 public evidence contains zero posts for publicationDate 10/20, so rollover is unverified. KIN worker is running for stone0747; no overlapping run or manual quota reset."
+  "blockedAt": "2026-10-20T04:13:36.7100896+09:00",
+  "blockedReason": "CF catch-up-once workers PID 55072 (04:05:51 KST) and PID 50448 (04:09:49 KST) are active; cleaner log still reports overlap skips, pipeline_state remains idle, and the queue remains 8 waiting, 5 prepared, 3 failed. No duplicate stage 1 run was started. Threads main and follow-up for 3f6f34fb are both queued for 10/20 08:00. Naver public verification was received at 04:09:21 KST with zero posts dated 10/20; the blog planner remains dated 10/19, so the blog rollover is unverified. KIN is current for 10/20 at 04:09:43 KST: 3 verified, 17 remaining, activeRun null; no manual reset or overlapping run."
 }
