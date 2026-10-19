@@ -80,6 +80,51 @@ def _check_rss_feed(domain: str) -> Dict[str, Any]:
     return {"status": "unavailable", "httpStatus": 404, "url": f"https://www.{domain}/rss.xml"}
 
 
+def _validate_candidates(site, urls):
+    """Reuse at most one hour of actual public evidence, otherwise recheck HTTP."""
+    from dashboard.indexing_submissions import validate_public_url
+    report = _read_json(SERVER_DATA_DIR / 'indexing-discovery-latest.json', {})
+    domain = next((r for r in report.get('domains', []) if r.get('domain') == site['site_id']), {})
+    known = {r['url']: r for r in domain.get('validations', [])}
+    output = []
+    for url in urls:
+        row = known.get(url, {})
+        try:
+            checked = datetime.datetime.fromisoformat(row['checkedAt'])
+            fresh = datetime.timedelta(0) <= datetime.datetime.now(datetime.timezone.utc)-checked < datetime.timedelta(hours=1)
+        except (ValueError, KeyError, TypeError):
+            fresh = False
+        if not fresh or row.get('valid') is not True or row.get('canonical') != url:
+            row = validate_public_url(site, url)
+        output.append(row)
+    return output
+
+
+def _queue_searchadvisor_candidates(domain_reports):
+    from cf_posting.searchadvisor import queue_crawl_candidates
+    candidates = [u for rep in domain_reports for u in rep['_validatedCandidates']]
+    validation_path = SERVER_DATA_DIR / 'searchadvisor-public-validation.json'
+    _atomic_write_json(validation_path, {"checkedAt": _now_kst_iso(),
+        "domains": [{"domain": rep['domain'], "validations": rep['_publicValidations']} for rep in domain_reports]})
+    return queue_crawl_candidates(candidates, evidence={
+        "checkedAt": _now_kst_iso(), "source": str(validation_path),
+        "scope": "public inventory, HTTP 200, exact www canonical, no noindex; indexing unconfirmed"})
+
+
+def _consume_searchadvisor_queue(config, *, apply):
+    """Single in-process consumer; no hidden subprocess or private API fallback."""
+    policy = config.get('searchadvisor', {})
+    if not apply or policy.get('request_authorized') is not True or policy.get('account') != 'soultin':
+        return {'status': 'explicit_ui_authorization_required', 'submitted': 0, 'started': False}
+    if policy.get('mode') != 'authorized_visible_ui':
+        return {'status': 'explicit_ui_authorization_required', 'submitted': 0, 'started': False}
+    from cf_posting.searchadvisor_ui import run
+    try:
+        return run(apply=True)
+    except Exception as exc:
+        return {'status': 'consumer_unavailable', 'submitted': 0, 'errorType': type(exc).__name__}
+
+
 def run_auto_indexing(
     target_domain: Optional[str] = None,
     apply: bool = True,
@@ -140,36 +185,22 @@ def run_auto_indexing(
         total_count = len(all_urls) if inventory_complete else None
         unindexed_count = total_count - indexed_count if inventory_complete and inspection_complete else None
 
-        # 2) Submit to Naver IndexNow & Global IndexNow
-        target_push_urls = unindexed_urls if unindexed_urls else all_urls
-        naver_status = "skipped"
-        naver_http = 0
-        naver_submitted_cnt = 0
-        indexnow_key = settings.get("indexnow_key")
-        if apply and indexnow_key and target_push_urls:
-            key_url = settings.get("indexnow_key_location") or f"https://www.{dom}/{indexnow_key}.txt"
-            payload = {
-                "host": f"www.{dom}",
-                "key": indexnow_key,
-                "keyLocation": key_url,
-                "urlList": target_push_urls,
-            }
+        # Discovery receipts are independent of registration, crawling, or indexing.
+        from dashboard.indexing_submissions import submit_indexnow, canonical_url
+        target_push_urls = []
+        for candidate in unindexed_urls:
             try:
-                r_nv = requests.post("https://searchadvisor.naver.com/indexnow", json=payload, timeout=20)
-                naver_http = r_nv.status_code
-                if r_nv.status_code in (200, 202):
-                    naver_status = "submitted"
-                    naver_submitted_cnt = len(target_push_urls)
-                else:
-                    naver_status = f"http_{r_nv.status_code}"
-            except Exception as exc:
-                naver_status = f"error:{type(exc).__name__}"
-
-            # Also ping Bing/Global IndexNow endpoint
-            try:
-                requests.post("https://api.indexnow.org/indexnow", json=payload, timeout=12)
-            except Exception:
-                pass
+                target_push_urls.append(canonical_url(site, candidate))
+            except ValueError:
+                continue
+        validations = _validate_candidates(site, target_push_urls) if apply else []
+        if apply:
+            target_push_urls = [row['url'] for row in validations if row.get('valid') is True]
+        indexnow_results = submit_indexnow(site, settings, target_push_urls) if apply else {}
+        naver_result = indexnow_results.get("naver", {})
+        naver_status = naver_result.get("status", "not_attempted")
+        naver_http = naver_result.get("httpStatus")
+        naver_submitted_cnt = naver_result.get("submittedCount", 0)
 
         # 3) Submit/verify Google Search Console Sitemap & unindexed URLs
         google_sub_status = "unknown"
@@ -185,7 +216,7 @@ def run_auto_indexing(
             except Exception:
                 site_sess = None
             try:
-                req_res = dm.request_indexing(site_sess, site, settings, all_urls, sm)
+                req_res = dm.request_indexing(site_sess, site, settings, [], sm, indexnow=False)
             except Exception:
                 req_res = {}
             g_res = (req_res.get("google") or {})
@@ -205,7 +236,8 @@ def run_auto_indexing(
             "urls": all_urls,
             "excludedDummyCount": len(excluded_urls),
             "excludedDummyUrls": excluded_urls,
-            "unindexedUrlsSubmitted": naver_submitted_cnt,
+            "unconfirmedUrlsPinged": naver_submitted_cnt,
+            "indexnow": indexnow_results,
             "google": {
                 "status": "submitted" if google_sub_status in ("submitted", "submitted_sitemap") else google_sub_status,
                 "method": google_method,
@@ -221,7 +253,8 @@ def run_auto_indexing(
                 "method": "IndexNow",
                 "httpStatus": naver_http or None,
                 "submittedCount": naver_submitted_cnt,
-                "unindexedCount": len(unindexed_urls),
+                "unconfirmedCandidateCount": len(unindexed_urls),
+                "registered": None, "crawled": None,
                 "submittedAt": now_ts if naver_submitted_cnt else None,
                 "indexed": None,
             },
@@ -250,11 +283,14 @@ def run_auto_indexing(
             "googleSearchConsole": {
                 "status": updated_req["google"]["status"],
                 "method": updated_req["google"]["method"],
-                "submittedUrls": len(target_push_urls) if apply and google_sub_status == "submitted" else 0,
+                "submittedUrls": 0,
+                "discoveryHintUrlCount": len(all_urls) if google_sub_status == "submitted" else 0,
             },
             "sampleUnindexedUrls": unindexed_urls[:5],
             "_sitemapObj": sm,
             "_indexingRequestObj": updated_req,
+            "_validatedCandidates": target_push_urls if apply else [],
+            "_publicValidations": validations,
         }
 
     domain_reports: List[Dict[str, Any]] = []
@@ -266,81 +302,13 @@ def run_auto_indexing(
     # Sort with 0% indexed sites first, then by unindexedCount descending
     domain_reports.sort(key=lambda r: (0 if r["isZeroIndexedPriority"] else 1, -(r["unindexedCount"] or 0), r["domain"]))
 
-    # 4) Also submit unindexed URLs directly to Naver Search Advisor (`POST /api-console/request/crawl`) via CDP 9334 (`soultin@naver.com`)
+    # Direct Search Advisor browser operations require an explicit UI workflow.
+    # An IndexNow receipt never establishes console ownership or crawl completion.
     sa_direct_map: Dict[str, Dict[str, Any]] = {}
+    searchadvisor_queue = {"status": "not_attempted", "queued": 0}
     if apply:
-        try:
-            from playwright.sync_api import sync_playwright
-
-            with sync_playwright() as p:
-                b = p.chromium.connect_over_cdp("http://127.0.0.1:9334", timeout=4000)
-                ctx = b.contexts[0]
-                page = ctx.new_page()
-                try:
-                    page.goto("https://searchadvisor.naver.com/console/board", wait_until="domcontentloaded", timeout=12000)
-                    page.wait_for_timeout(1500)
-                    payload_reqs = []
-                    for rep in domain_reports:
-                        dom = rep["domain"]
-                        samples = rep.get("sampleUnindexedUrls") or []
-                        slugs = []
-                        for u in samples[:10]:
-                            if is_dummy_rescue_url(u):
-                                continue
-                            path_part = urlparse(u).path.lstrip("/")
-                            if path_part:
-                                slugs.append(path_part)
-                        payload_reqs.append({"domain": dom, "slugs": slugs})
-
-                    sa_res = page.evaluate(
-                        """async (items) => {
-                        const st = window.__NUXT__ && window.__NUXT__.state ? window.__NUXT__.state : {};
-                        const csrf = st.csrfToken || '';
-                        const enc = (st.authUser && st.authUser.enc_id) ? st.authUser.enc_id : '';
-                        if (!csrf || !enc) return {ok: false, reason: 'no_csrf_or_enc'};
-                        const lr = await fetch('/api-board/list/' + enc);
-                        const ld = await lr.json();
-                        const verifiedSet = new Set(((ld && ld.items) || []).filter(x => x.verified).map(x => x.site));
-                        const out = {};
-                        for (const item of items) {
-                            const dom = item.domain;
-                            const candSites = ['https://www.' + dom, 'https://' + dom].filter(s => verifiedSet.has(s));
-                            if (!candSites.length) {
-                                out[dom] = {verifiedInConsole: false, directCrawlSubmitted: 0};
-                                continue;
-                            }
-                            const targetSite = candSites[0];
-                            let okCnt = 0;
-                            for (const slug of (item.slugs || []).slice(0, 5)) {
-                                try {
-                                    const cr = await fetch('/api-console/request/crawl', {
-                                        method: 'POST',
-                                        headers: {'Content-Type': 'application/json'},
-                                        body: JSON.stringify({
-                                            user_enc_id: enc,
-                                            site: targetSite,
-                                            document: slug,
-                                            _csrf: csrf
-                                        })
-                                    });
-                                    if (cr.status === 200) okCnt++;
-                                } catch (e) {}
-                            }
-                            out[dom] = {verifiedInConsole: true, siteProperty: targetSite, directCrawlSubmitted: okCnt};
-                        }
-                        return {ok: true, account: 'soultin@naver.com', results: out};
-                    }""",
-                        payload_reqs,
-                    )
-                    if isinstance(sa_res, dict) and isinstance(sa_res.get("results"), dict):
-                        sa_direct_map = sa_res["results"]
-                finally:
-                    try:
-                        page.close()
-                    except Exception:
-                        pass
-        except Exception:
-            sa_direct_map = {}
+        searchadvisor_queue = _queue_searchadvisor_candidates(domain_reports)
+        searchadvisor_queue['consumer'] = _consume_searchadvisor_queue(config, apply=True)
 
     now_stamp = _now_kst_iso()
     if apply:
@@ -353,7 +321,7 @@ def run_auto_indexing(
                 rep["_indexingRequestObj"]["naver"]["searchAdvisorConsole"] = sa_info
             site_rec = latest.setdefault("sites", {}).setdefault(dom, {})
             site_rec["sitemap"] = rep["_sitemapObj"]
-            site_rec["indexingRequest"] = rep["_indexingRequestObj"]
+            site_rec["indexingRequest"] = {**(site_rec.get("indexingRequest") or {}), **rep["_indexingRequestObj"]}
             site_rec["checkedAt"] = now_stamp
         latest["checkedAt"] = now_stamp
         latest.setdefault("inspectionAutomation", {})["lastAutoIndexerRun"] = {
@@ -361,10 +329,9 @@ def run_auto_indexing(
             "domainsCount": len(domain_reports),
             "totalUnindexedSubmitted": sum(r["naverIndexNow"]["submittedUrls"] for r in domain_reports),
             "totalUrlsSubmitted": sum(r["naverIndexNow"]["submittedUrls"] for r in domain_reports),
-            "searchAdvisorDirectCrawlAccount": "soultin@naver.com (CDP 9334)",
-            "searchAdvisorDirectCrawlSubmitted": sum(
-                int((sa_direct_map.get(r["domain"]) or {}).get("directCrawlSubmitted", 0)) for r in domain_reports
-            ),
+            "searchAdvisorDirectCrawlAccount": config.get('searchadvisor', {}).get('account'),
+            "searchAdvisorDirectCrawlSubmitted": searchadvisor_queue.get('consumer', {}).get('submitted', 0),
+            "searchAdvisorConsumer": searchadvisor_queue.get('consumer'),
         }
         _atomic_write_json(METRICS_PATH, latest)
 
@@ -382,7 +349,7 @@ def run_auto_indexing(
                 {
                     "kind": "auto_indexer_batch",
                     "domain": rep["domain"],
-                    "outcome": "submitted",
+                    "outcome": rep["naverIndexNow"]["status"],
                     "unindexedSubmitted": rep["unindexedCount"],
                     "totalSubmitted": rep["naverIndexNow"]["submittedUrls"],
                     "naverHttp": rep["naverIndexNow"]["httpStatus"],
@@ -406,7 +373,7 @@ def run_auto_indexing(
     total_indexed = complete_total("indexedCount")
     total_unindexed = complete_total("unindexedCount")
     total_submitted_urls = sum(r["naverIndexNow"]["submittedUrls"] for r in clean_reports)
-    naver_ok_domains = sum(1 for r in clean_reports if r["naverIndexNow"]["status"] == "submitted")
+    naver_ok_domains = sum(1 for r in clean_reports if r["naverIndexNow"]["status"] == "ping_accepted")
     google_ok_domains = sum(1 for r in clean_reports if r["googleSearchConsole"]["status"] == "submitted")
 
     return {
@@ -420,6 +387,7 @@ def run_auto_indexing(
         "totalSubmittedUrls": total_submitted_urls,
         "naverIndexNowSuccessDomains": naver_ok_domains,
         "googleSitemapSuccessDomains": google_ok_domains,
+        "searchAdvisorCrawl": searchadvisor_queue,
         "domains": clean_reports,
     }
 

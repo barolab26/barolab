@@ -1,0 +1,379 @@
+{
+  "checkedAt": "2026-10-19T04:01:50.779946+00:00",
+  "domains": [
+    {
+      "domain": "healthcox.com",
+      "property": "https://www.healthcox.com/",
+      "dns": {
+        "domain": "healthcox.com",
+        "type": "CNAME",
+        "target": "verify.bing.com",
+        "proxied": false,
+        "action": "created",
+        "recordId": "fa922cf89f002218d9296e27964e0418",
+        "zoneVerified": true,
+        "accountVerified": true,
+        "checkedAt": "2026-10-19T03:59:24.314210+00:00"
+      },
+      "verification": {
+        "status": "request_unconfirmed",
+        "verified": false
+      },
+      "getUserSitesVerified": true,
+      "verifiedAt": "2026-10-19T04:01:00.803447+00:00",
+      "followup": {
+        "domain": "healthcox.com",
+        "beforeRetryVerified": true,
+        "getUserSitesVerified": true,
+        "checkedAt": "2026-10-19T04:01:00.803447+00:00"
+      },
+      "registration": {
+        "status": "added",
+        "httpStatus": 200,
+        "verified": false
+      },
+      "submission": {
+        "id": "506bb7cd91684a55bb0f9339175d2198",
+        "runId": "bing-ownership-completion-20261019",
+        "provider": "bing_url_batch",
+        "domain": "healthcox.com",
+        "at": "2026-10-19T04:01:40.176105+00:00",
+        "status": "submission_accepted",
+        "submittedCount": 10,
+        "indexed": null,
+        "registered": null,
+        "crawled": null,
+        "reason": null,
+        "httpStatus": 200,
+        "quotaBefore": {
+          "DailyQuota": 10,
+          "MonthlyQuota": 130
+        },
+        "property": "https://www.healthcox.com/",
+        "method": "SubmitUrlBatch",
+        "completedAt": "2026-10-19T04:01:42.810137+00:00"
+      },
+      "indexed": null
+    },
+    {
+      "domain": "must-pick.com",
+      "property": "https://www.must-pick.com/",
+      "dns": {
+        "domain": "must-pick.com",
+        "type": "CNAME",
+        "target": "verify.bing.com",
+        "proxied": false,
+        "action": "created",
+        "recordId": "dbba81f35ba0bf0b6d32d40a246857e7",
+        "zoneVerified": true,
+        "accountVerified": true,
+        "checkedAt": "2026-10-19T03:59:26.495379+00:00"
+      },
+      "verification": {
+        "status": "verified",
+        "httpStatus": 200,
+        "verified": true
+      },
+      "getUserSitesVerified": true,
+      "verifiedAt": "2026-10-19T04:00:19.128385+00:00",
+      "registration": {
+        "status": "already_registered",
+        "verified": false
+      },
+      "submission": {
+        "id": "489f94930c0d445a9c5fa3f326a10f3c",
+        "runId": "bing-ownership-completion-20261019",
+        "provider": "bing_url_batch",
+        "domain": "must-pick.com",
+        "at": "2026-10-19T04:01:42.963132+00:00",
+        "status": "submission_accepted",
+        "submittedCount": 10,
+        "indexed": null,
+        "registered": null,
+        "crawled": null,
+        "reason": null,
+        "httpStatus": 200,
+        "quotaBefore": {
+          "DailyQuota": 10,
+          "MonthlyQuota": 130
+        },
+        "property": "https://www.must-pick.com/",
+        "method": "SubmitUrlBatch",
+        "completedAt": "2026-10-19T04:01:44.991298+00:00"
+      },
+      "indexed": null
+    },
+    {
+      "domain": "nolplace.com",
+      "property": "https://www.nolplace.com/",
+      "dns": {
+        "domain": "nolplace.com",
+        "type": "CNAME",
+        "target": "verify.bing.com",
+        "proxied": false,
+        "action": "created",
+        "recordId": "48de90e67ced686a7a806d047fbfbe2d",
+        "zoneVerified": true,
+        "accountVerified": true,
+        "checkedAt": "2026-10-19T03:59:28.729741+00:00"
+      },
+      "verification": {
+        "status": "verified",
+        "httpStatus": 200,
+        "verified": true
+      },
+      "getUserSitesVerified": true,
+      "verifiedAt": "2026-10-19T04:00:22.921397+00:00",
+      "registration": {
+        "status": "added",
+        "httpStatus": 200,
+        "verified": false
+      },
+      "submission": {
+        "id": "3b70391637164834bfa5f00cd139b9c2",
+        "runId": "bing-ownership-completion-20261019",
+        "provider": "bing_url_batch",
+        "domain": "nolplace.com",
+        "at": "2026-10-19T04:01:45.074983+00:00",
+        "status": "submission_accepted",
+        "submittedCount": 22,
+        "indexed": null,
+        "registered": null,
+        "crawled": null,
+        "reason": null,
+        "httpStatus": 200,
+        "quotaBefore": {
+          "DailyQuota": 10000,
+          "MonthlyQuota": 130000
+        },
+        "property": "https://www.nolplace.com/",
+        "method": "SubmitUrlBatch",
+        "completedAt": "2026-10-19T04:01:46.980053+00:00"
+      },
+      "indexed": null
+    },
+    {
+      "domain": "tripmarvel.com",
+      "property": "https://www.tripmarvel.com/",
+      "dns": {
+        "domain": "tripmarvel.com",
+        "type": "CNAME",
+        "target": "verify.bing.com",
+        "proxied": false,
+        "action": "created",
+        "recordId": "eb6c28d7319b0ae71088be151f870434",
+        "zoneVerified": true,
+        "accountVerified": true,
+        "checkedAt": "2026-10-19T03:59:30.882605+00:00"
+      },
+      "verification": {
+        "status": "verified",
+        "httpStatus": 200,
+        "verified": true
+      },
+      "getUserSitesVerified": true,
+      "verifiedAt": "2026-10-19T04:00:45.506021+00:00",
+      "registration": {
+        "status": "added",
+        "httpStatus": 200,
+        "verified": false
+      },
+      "submission": {
+        "id": "6fe5905809554e2f9da274fe98b6aaa5",
+        "runId": "bing-ownership-completion-20261019",
+        "provider": "bing_url_batch",
+        "domain": "tripmarvel.com",
+        "at": "2026-10-19T04:01:47.081369+00:00",
+        "status": "submission_accepted",
+        "submittedCount": 100,
+        "indexed": null,
+        "registered": null,
+        "crawled": null,
+        "reason": null,
+        "httpStatus": 200,
+        "quotaBefore": {
+          "DailyQuota": 100,
+          "MonthlyQuota": 1300
+        },
+        "property": "https://www.tripmarvel.com/",
+        "method": "SubmitUrlBatch",
+        "completedAt": "2026-10-19T04:01:50.645379+00:00"
+      },
+      "indexed": null
+    }
+  ],
+  "schemaVersion": 1,
+  "runId": "bing-ownership-completion-20261019",
+  "method": "Bing JSON AddSite / DNS CNAME / VerifySite / GetUserSites / SubmitUrlBatch",
+  "source": "official_api_and_cloudflare_zone_readback",
+  "workerCodeChanged": false,
+  "existingDnsChangedOrDeleted": false,
+  "indexNowResubmitted": false,
+  "quotaCheckedAt": "2026-10-19T04:02:32.821176+00:00",
+  "portfolioSummary": {
+    "domains": 16,
+    "validatedCandidates": 1251,
+    "acceptedUniqueUrls": 1097,
+    "remainingUrls": 154,
+    "duplicateAcceptedUrls": 0,
+    "domainResults": [
+      {
+        "domain": "baronote.kr",
+        "validatedCandidateCount": 204,
+        "acceptedUniqueCount": 204,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "daynote.kr",
+        "validatedCandidateCount": 57,
+        "acceptedUniqueCount": 57,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "healthcox.com",
+        "validatedCandidateCount": 99,
+        "acceptedUniqueCount": 10,
+        "remainingCount": 89,
+        "remainingReason": "daily_quota_exhausted",
+        "quotaAfter": {
+          "DailyQuota": 0,
+          "MonthlyQuota": 120
+        },
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "joynote.kr",
+        "validatedCandidateCount": 63,
+        "acceptedUniqueCount": 63,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "justinfo.co.kr",
+        "validatedCandidateCount": 212,
+        "acceptedUniqueCount": 212,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "maxnote.kr",
+        "validatedCandidateCount": 57,
+        "acceptedUniqueCount": 10,
+        "remainingCount": 47,
+        "remainingReason": "daily_quota_exhausted",
+        "quotaAfter": {
+          "DailyQuota": 0,
+          "MonthlyQuota": 120
+        },
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "meganote.kr",
+        "validatedCandidateCount": 63,
+        "acceptedUniqueCount": 63,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "must-good.com",
+        "validatedCandidateCount": 75,
+        "acceptedUniqueCount": 75,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "must-joy.com",
+        "validatedCandidateCount": 38,
+        "acceptedUniqueCount": 38,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "must-pick.com",
+        "validatedCandidateCount": 20,
+        "acceptedUniqueCount": 10,
+        "remainingCount": 10,
+        "remainingReason": "daily_quota_exhausted",
+        "quotaAfter": {
+          "DailyQuota": 0,
+          "MonthlyQuota": 120
+        },
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "nolplace.com",
+        "validatedCandidateCount": 22,
+        "acceptedUniqueCount": 22,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "smilenote.kr",
+        "validatedCandidateCount": 81,
+        "acceptedUniqueCount": 81,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "soulnote.kr",
+        "validatedCandidateCount": 40,
+        "acceptedUniqueCount": 40,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "topnote.kr",
+        "validatedCandidateCount": 76,
+        "acceptedUniqueCount": 76,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "tripmarvel.com",
+        "validatedCandidateCount": 108,
+        "acceptedUniqueCount": 100,
+        "remainingCount": 8,
+        "remainingReason": "daily_quota_exhausted",
+        "quotaAfter": {
+          "DailyQuota": 0,
+          "MonthlyQuota": 1200
+        },
+        "duplicateAcceptedCount": 0
+      },
+      {
+        "domain": "woorinote.kr",
+        "validatedCandidateCount": 36,
+        "acceptedUniqueCount": 36,
+        "remainingCount": 0,
+        "remainingReason": null,
+        "quotaAfter": null,
+        "duplicateAcceptedCount": 0
+      }
+    ],
+    "remainingAction": "Existing scheduled collector may submit remaining URLs after provider quota resets; accepted URLs stay deduplicated."
+  }
+}

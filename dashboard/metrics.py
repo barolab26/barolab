@@ -432,10 +432,11 @@ def collect_traffic(session, site, settings):
             'points': points, 'checkedAt': stamp(), 'sourceRef': url}
 
 
-def request_indexing(session, site, settings, urls, sitemap):
+def request_indexing(session, site, settings, urls, sitemap, *, indexnow=True):
     """Submit discovery hints; never represent an accepted request as indexed."""
+    from dashboard.indexing_submissions import canonical_url
     excluded = [url for url in urls if is_dummy_rescue_url(url)]
-    urls = [owned_url(site, url) for url in urls if not is_dummy_rescue_url(url)]
+    urls = [canonical_url(site, url) for url in urls if not is_dummy_rescue_url(url)]
     sitemap_blocked = bool(sitemap.get('excludedDummyCount') or any(is_dummy_rescue_url(u) for u in sitemap.get('locations', [])))
     result = {'requestedAt': stamp(), 'urls': urls, 'excludedDummyCount': len(excluded), 'excludedDummyUrls': excluded}
     if session and sitemap.get('status') == 'available' and not sitemap_blocked:
@@ -448,22 +449,11 @@ def request_indexing(session, site, settings, urls, sitemap):
                 api(session, 'PUT', put_endpoint)
                 submitted_ok = True
             except Exception:
-                # Check if sitemap is already registered on the URL-prefix property or submit via siteOwner apex property
-                apex_prop = f"https://{site['site_id']}/"
-                apex_sm = f"https://{site['site_id']}/sitemap.xml"
-                try:
-                    api(session, 'PUT', 'https://www.googleapis.com/webmasters/v3/sites/' + quote(apex_prop, safe='') + '/sitemaps/' + quote(apex_sm, safe=''))
-                    submitted_ok = True
-                except Exception:
-                    pass
-                if not submitted_ok:
-                    sm_list = api(session, 'GET', endpoint + '/sitemaps')
-                    paths = [item.get('path') for item in sm_list.get('sitemap', []) if isinstance(item, dict)]
-                    if sitemap['url'] in paths or any(p and p.endswith('/sitemap.xml') for p in paths):
-                        submitted_ok = True
-                    else:
-                        # Fallback: if GET /sitemaps HTTP 200 succeeded on verified GSC property and public sitemap.xml is valid 200 OK
-                        submitted_ok = True
+                # Only the exact canonical sitemap on this property is evidence.
+                # A successful empty list or another host's sitemap proves nothing.
+                sm_list = api(session, 'GET', endpoint + '/sitemaps')
+                paths = [item.get('path') for item in sm_list.get('sitemap', []) if isinstance(item, dict)]
+                submitted_ok = sitemap['url'] in paths
             if submitted_ok:
                 result['google'] = {'status': 'submitted', 'method': 'sitemap', 'property': property_id,
                                     'sitemap': sitemap['url'], 'indexed': None}
@@ -475,25 +465,9 @@ def request_indexing(session, site, settings, urls, sitemap):
         result['google'] = unknown('Google 인증 또는 정상 사이트맵이 필요합니다')
     if sitemap_blocked:
         result['google'] = {'status': 'held_dummy_sitemap', 'reason': '공개 사이트맵에 테스트 URL이 남아 있어 제출을 보류합니다. 원본 수정·배포가 필요합니다.', 'indexed': None}
-    key = settings.get('indexnow_key')
-    if key and urls:
-        try:
-            key_url = owned_url(site, settings.get('indexnow_key_location', site['url'].rstrip('/') + '/' + key + '.txt'))
-            response = requests.get(key_url, timeout=10, allow_redirects=False)
-            if response.status_code != 200 or response.text.strip() != key:
-                raise ValueError('IndexNow 소유확인 키 파일 미검증')
-            response = requests.post('https://searchadvisor.naver.com/indexnow', json={
-                'host': urlparse(site['url']).hostname, 'key': key, 'keyLocation': key_url,
-                'urlList': urls}, timeout=20)
-            if response.status_code not in (200, 202):
-                raise RuntimeError(f'IndexNow HTTP {response.status_code}')
-            result['naver'] = {'status': 'submitted' if response.status_code == 200 else 'received_pending_key_check',
-                               'method': 'IndexNow', 'httpStatus': response.status_code,
-                               'submittedCount': len(urls), 'indexed': None}
-        except Exception as exc:
-            result['naver'] = unknown(safe_reason(exc))
-    else:
-        result['naver'] = unknown('IndexNow 키 미설정; 네이버 블로그 URL은 소유 도메인이 아니므로 지원하지 않습니다')
+    if indexnow:
+        from dashboard.indexing_submissions import submit_indexnow
+        result['naver'] = submit_indexnow(site, settings, urls, providers=('naver',), client=requests)['naver']
     return result
 
 
@@ -614,12 +588,26 @@ def parse_browser_inspection(text, url):
             'lastCrawlTimeDisplay': value_after('최근 크롤링')}
 
 
-def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=False):
-    """Bounded owner-browser URL inspection only. Never submit sitemaps or request indexing."""
-    sites = browser_fallback_sites(sites, config, manual=manual)
+def authorized_gsc_request_mode(config, manual=False, requested=None):
+    options = config.get('url_inspection', {})
+    authorized = (options.get('mode') == 'authorized_request_owner_ui'
+                  and options.get('request_indexing_authorized') is True
+                  and bool(options.get('request_indexing_accounts')))
+    if requested is True and not (manual or authorized):
+        raise ValueError('Indexing requests require explicit authorization')
+    return authorized if requested is None else requested is True
+
+
+def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=False, request_mode=None):
+    """Read-only default; explicitly authorized scheduled/manual requests share quota."""
+    request_mode = authorized_gsc_request_mode(config, manual, request_mode)
+    options = config.get('url_inspection', {})
+    from dashboard.indexing_submissions import gsc_budget
+    if request_mode and not any(gsc_budget(a)['remaining'] for a in options.get('request_indexing_accounts', options.get('browser_accounts', []))):
+        return {'status': 'daily_budget_exhausted', 'attempted': 0, 'completed': 0, 'requestMode': True}
+    sites = browser_fallback_sites(sites, config, manual=manual or request_mode)
     if not sites:
         return {'status': 'skipped_api_verified', 'attempted': 0}
-    options = config.get('url_inspection', {})
     enabled = options.get('browser_accounts', [])
     limit = min(36, max(0, int(limit if limit is not None else options.get('ui_limit', 10))))
     seconds = min(420, max(15, int(seconds if seconds is not None else options.get('ui_budget_seconds', 180))))
@@ -662,10 +650,11 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                              'nextRetryAt':shared.get('nextRetryAt'),'attempted':0,'completed':0})
             continue
         account = config.get('gsc_accounts', {}).get(account_id, {})
+        account_request_mode = request_mode and (manual or account_id in options.get('request_indexing_accounts', []))
         allowed = [site for site in sites if site.get('platform') == 'cf' and site['site_id'] in account.get('sites', [])]
         document = read_json(SNAPSHOT)
         # Only permission/unconfigured API properties need the owner UI fallback.
-        allowed = [site for site in allowed if manual or (
+        allowed = [site for site in allowed if manual or account_request_mode or (
             document.get('sites', {}).get(site['site_id'], {}).get('google', {}).get('apiReason')
             or '403' in (document.get('sites', {}).get(site['site_id'], {}).get('google', {}).get('reason') or ''))]
         if not allowed:
@@ -715,12 +704,20 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                             raise ValueError('전용 색인 계정 로그인이 일치하지 않습니다')
                         empty_visits = 0
                         while progress['attempted'] < limit and time.monotonic() - started < seconds - 5:
+                            request_budget = gsc_budget(account_id) if account_request_mode else None
+                            if request_budget and request_budget['remaining'] == 0:
+                                progress['status'] = 'daily_budget_exhausted'
+                                break
                             index = progress['cursor']
                             site = allowed[index]
                             progress['cursor'] = (index + 1) % len(allowed)
                             current = read_json(SNAPSHOT).get('sites', {}).get(site['site_id'], {})
                             posts, previous = current.get('posts', {}), current.get('google', {})
                             urls = inspection_targets(posts, previous, 1, ui=True) if posts.get('status') in ('collected', 'partial') else []
+                            if account_request_mode:
+                                missing = {r['url'] for r in previous.get('urls', []) if r.get('indexed') is False}
+                                urls = [u for u in posts.get('urls', []) if u in missing and u not in request_budget['recentUrls']
+                                        and not is_dummy_rescue_url(u)][:1]
                             if not urls:
                                 empty_visits += 1
                                 if empty_visits >= len(allowed):
@@ -764,6 +761,11 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                                        'attemptStatus': 'verified', 'lastIndexed': proof['indexed'], 'lastSuccessAt': checked_at}
                                 progress['completed'] += 1
                                 mark_success(account_id)
+                                if account_request_mode and proof['indexed'] is False:
+                                    row['indexingRequest'] = request_inspected_url(page, account_id, site, url, row)
+                                    if row['indexingRequest']['status'] in ('quota_exceeded', 'request_unconfirmed'):
+                                        progress.update(status='backoff', reason=row['indexingRequest']['status'],
+                                            nextRetryAt=(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat())
                             except Exception as exc:
                                 reason = safe_reason(exc)
                                 row = failed_inspection(url, row, reason)
@@ -793,6 +795,34 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
             save(account_id, progress)
 
 
+def request_inspected_url(page, account_id, site, url, proof):
+    """Bounded authorized UI operation; no live test, reclick, or CAPTCHA bypass."""
+    from dashboard.indexing_submissions import reserve_gsc_request, complete_gsc_request, observe_gsc_pending
+    text = page.locator('body').inner_text()
+    if any(value in text for value in ('색인 생성 요청됨', '색인 생성이 요청됨', 'Indexing requested')):
+        return observe_gsc_pending(account_id, site, url, {'source': 'Google Search Console UI', 'pending': True})
+    reservation = reserve_gsc_request(account_id, site, url, authorized=True, evidence=proof)
+    if reservation['status'] != 'reserved':
+        return reservation
+    outcome = 'request_unconfirmed'
+    try:
+        page.get_by_text('색인 생성 요청', exact=True).filter(visible=True).first.click(timeout=8000)
+        deadline = time.monotonic() + 180
+        while time.monotonic() < deadline:
+            text = page.locator('body').inner_text()
+            if any(value in text for value in ('색인 생성 요청됨', '색인 생성이 요청됨', 'Indexing requested')):
+                outcome = 'requested'; break
+            if any(value in text for value in ('할당량 초과', '일일 할당량', '요청 한도', 'Quota exceeded')):
+                outcome = 'quota_exceeded'; break
+            if any(value in text.lower() for value in ('captcha', 'unusual traffic', '자동화된 쿼리')):
+                break
+            page.wait_for_timeout(500)
+    except Exception:
+        pass
+    return complete_gsc_request(reservation['id'], outcome,
+        evidence={'source': 'Google Search Console UI', 'url': url, 'outcome': outcome})
+
+
 def _browser_recover(account_id, individual_limit=10):
     """Use only the configured account's existing browser; retain its session."""
     from playwright.sync_api import sync_playwright
@@ -809,8 +839,8 @@ def _browser_recover(account_id, individual_limit=10):
     successes.update((e.get('url'), e.get('requestedAt')) for e in legacy
                      if e.get('account') == account_id and e.get('outcome') in ('requested', 'already_pending')
                      and e.get('requestedAt', '').startswith(today))
-    used = len(successes)
-    remaining = max(0, min(individual_limit, 10) - used)
+    from dashboard.indexing_submissions import gsc_budget, canonical_url
+    remaining = min(individual_limit, gsc_budget(account_id)['remaining'])
     snapshot = read_json(SNAPSHOT)
     sites = [s for s in inventory() if s['site_id'] in account['sites']]
 
@@ -924,7 +954,8 @@ def _browser_recover(account_id, individual_limit=10):
                           and e.get('requestedAt', '') >= (datetime.now(ZoneInfo('Asia/Seoul')) - timedelta(days=7)).isoformat())
             candidates = [(site, url) for i in range(10) for site in sites
                           for url in snapshot['sites'][site['site_id']].get('posts', {}).get('urls', [])[i:i+1]
-                          if url not in recent]
+                          if url not in recent and not is_dummy_rescue_url(url)
+                          and urlparse(url).hostname == urlparse(site['url']).hostname]
             for site, url in candidates:
                 if remaining <= 0:
                     break
@@ -944,17 +975,14 @@ def _browser_recover(account_id, individual_limit=10):
                         if '색인 생성이 요청됨' in text or '색인 생성 요청됨' in text:
                             outcome = 'pending'
                         else:
-                            button = page.get_by_text('색인 생성 요청', exact=True).filter(visible=True).first
-                            button.click(timeout=8000)
-                            text = wait_text(page, ['색인 생성 요청됨', '색인 생성이 요청됨', '할당량 초과', '일일 할당량', '요청 한도'], 180)
-                            if '색인 생성 요청됨' in text or '색인 생성이 요청됨' in text:
-                                outcome = 'requested'
-                                remaining -= 1
-                            elif any(phrase in text for phrase in ['할당량 초과', '일일 할당량', '요청 한도']):
-                                outcome = 'quota_exceeded'
+                            canonical_url(site, url)
+                            proof = {'url': url, **parse_browser_inspection(text, url),
+                                     'source': 'Google Search Console UI', 'checkedAt': stamp()}
+                            request_result = request_inspected_url(page, account_id, site, url, proof)
+                            outcome = request_result['status']
+                            remaining = min(remaining, gsc_budget(account_id)['remaining'])
+                            if outcome in ('quota_exceeded', 'daily_budget_exhausted'):
                                 remaining = 0
-                            else:
-                                outcome = 'request_unconfirmed'
                     save_event(site['site_id'], {'kind': 'url', 'url': url, 'outcome': outcome,
                                                'indexed': True if outcome == 'indexed' else False if missing else None,
                                                'evidence': text[-2000:]})
@@ -1007,8 +1035,8 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
                 google_error = None
             except Exception as exc:
                 session, google_error = None, safe_reason(exc)
-            record = {'site': site, 'checkedAt': stamp()}
             old = previous.get('sites', {}).get(site['site_id'], {})
+            record = {**old, 'site': site, 'checkedAt': stamp()}
             record['indexingRequest'] = old.get('indexingRequest')
             if site['platform'] != 'cf':
                 record.update(posts=unknown('네이버 공개 글 목록 수집 미연결'),
@@ -1037,19 +1065,20 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
                 if request_url:
                     if request_url not in record['posts'].get('urls', []):
                         raise ValueError('Requested URL must be in the verified public post inventory')
-                    record['indexingRequest'] = request_indexing(session or submission_session, site, settings, [request_url], record['sitemap'])
+                    record['indexingRequest'] = {**(old.get('indexingRequest') or {}),
+                        **request_indexing(session or submission_session, site, settings, [request_url], record['sitemap'])}
                 elif not read_only and settings.get('auto_submit', True) and record['posts'].get('urls'):
                     old_request = old.get('indexingRequest') or {}
                     current_urls = record['posts']['urls']
                     changed = set(current_urls) != set(old_request.get('urls', []))
                     active_sess = session or submission_session
                     google_pending = active_sess and old_request.get('google', {}).get('status') != 'submitted'
-                    naver_pending = settings.get('indexnow_key') and old_request.get('naver', {}).get('status') != 'submitted'
+                    naver_pending = settings.get('indexnow_key') and old_request.get('naver', {}).get('status') not in ('ping_accepted', 'accepted_pending_key_check', 'submitted')
                     if changed or google_pending or naver_pending:
                         new_request = request_indexing(active_sess, site, settings, current_urls, record['sitemap'])
-                        if not changed and old_request.get('google', {}).get('status') == 'submitted' and new_request['google']['status'] != 'submitted':
-                            new_request['google'] = old_request['google']
-                        record['indexingRequest'] = new_request
+                        if old_request.get('google', {}).get('status') == 'submitted' and new_request['google']['status'] != 'submitted':
+                            new_request['google']['previousSubmission'] = old_request['google']
+                        record['indexingRequest'] = {**old_request, **new_request}
                 cycle['visitedDomains'].append(site['site_id'])
                 if record['google'].get('apiBudgetExhausted'):
                     cycle['deferredDomains'].append(site['site_id'])
@@ -1066,8 +1095,10 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
                         new_request = record.get('indexingRequest') or {}
                         if set(new_request.get('urls', [])) == set(old_request.get('urls', [])):
                             if old_request.get('google', {}).get('status') == 'submitted' and new_request.get('google', {}).get('status') != 'submitted':
-                                new_request['google'] = old_request['google']
-                                record['indexingRequest'] = new_request
+                                new_request.setdefault('google', {})['previousSubmission'] = old_request['google']
+                        record['indexingRequest'] = {**old_request, **new_request}
+                        if 'daum' in saved:
+                            record['daum'] = saved['daum']
                         latest.update(schema='dashboard-metrics-v1', checkedAt=stamp(), inventorySites=sites)
                         latest.setdefault('inspectionAutomation', {})['apiCycle'] = dict(cycle)
                         latest.setdefault('sites', {})[site['site_id']] = record
@@ -1078,7 +1109,11 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
             else:
                 raise RuntimeError('수집 결과 저장 잠금 대기 초과')
         cycle.update(status='partial_budget' if first_deferred else 'completed', finishedAt=stamp())
-        ui_result = collect_browser_inspections(config, [site for site in sites if not site_id or site['site_id'] == site_id])
+        ui_result = collect_browser_inspections(config, [site for site in sites if not site_id or site['site_id'] == site_id],
+                                                request_mode=False if read_only else None)
+        if not read_only:
+            from dashboard.indexing_submissions import record_gsc_queue_cycle
+            record_gsc_queue_cycle([s['site_id'] for s in sites if not site_id or s['site_id'] == site_id], ui_result)
         with collector_lock() as write_lock:
             if not write_lock:
                 raise RuntimeError('API 검사 회차 저장 잠금 대기 초과')
@@ -1088,6 +1123,23 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
                 latest['inspectionAutomation']['automaticUi'] = ui_result
             atomic_write(SNAPSHOT, latest)
         return read_json(SNAPSHOT)
+
+
+def searchadvisor_registration(site, ledger=None):
+    """Read the exact canonical property's UI evidence, never IndexNow receipts."""
+    state = read_json(ledger or DATA / 'searchadvisor-status.json')
+    observed = state.get('sites', {}).get(site.get('site_id'), {})
+    exact = observed.get('site', '').rstrip('/') == site.get('url', '').rstrip('/')
+    registration = observed.get('registration') or {}
+    ownership = observed.get('ownership') or {}
+    verified = (exact and registration.get('status') == 'registered' and ownership.get('status') == 'verified'
+                and bool(registration.get('evidence')) and bool(ownership.get('evidence')))
+    return {'status': 'registered_verified' if verified else 'unconfirmed',
+            'registered': True if verified else None, 'ownershipVerified': True if verified else None,
+            'property': site.get('url'), 'source': 'SearchAdvisor visible UI ledger',
+            'checkedAt': ownership.get('checkedAt') if verified else None,
+            'sitemap': observed.get('sitemap') if exact else None,
+            'rss': observed.get('rss') if exact else None, 'indexed': None}
 
 
 def summary(path=SNAPSHOT):
@@ -1106,6 +1158,7 @@ def summary(path=SNAPSHOT):
             record['traffic'] = unknown('수집 이력이 오래되어 재확인 필요')
         if record.get('site', {}).get('platform') == 'cf':
             record['google'] = inspection_summary(record.get('posts', {}), record.get('google', {}))
+            record['searchAdvisor'] = searchadvisor_registration(record['site'])
     cf = [r for r in records if r['site']['platform'] == 'cf']
     expected = [s for s in document.get('inventorySites', []) if s['platform'] == 'cf']
     full_inventory = bool(expected) and {r['site']['site_id'] for r in cf} == {s['site_id'] for s in expected}
@@ -1245,13 +1298,13 @@ if __name__ == '__main__':
         if args.collect and not args.read_only:
             res_list = submit_all_indexnow_and_sitemaps(args.config)
             total_urls = sum(len((r[2].get('urls') or [])) for r in res_list)
-            naver_ok = sum(1 for r in res_list if (r[2].get('naver') or {}).get('status') in ('submitted', 'received_pending_key_check'))
+            naver_ok = sum(1 for r in res_list if (r[2].get('naver') or {}).get('status') in ('ping_accepted', 'accepted_pending_key_check'))
             google_ok = sum(1 for r in res_list if (r[2].get('google') or {}).get('status') == 'submitted')
             print(json.dumps({
                 'status': 'completed',
                 'checkedAt': stamp(),
                 'cfDomainsCount': len(res_list),
-                'naverIndexNowSubmittedDomains': naver_ok,
+                'naverIndexNowPingAcceptedDomains': naver_ok,
                 'googleSitemapSubmittedDomains': google_ok,
                 'totalSubmittedUrls': total_urls,
             }, ensure_ascii=False), flush=True)

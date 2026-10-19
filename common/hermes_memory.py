@@ -266,9 +266,13 @@ class MemoryConflict(ValueError):
 
 
 class HermesMemory:
-    def __init__(self, root: Path | str | None = None, skills_root: Path | str | None = None):
+    def __init__(self, root: Path | str | None = None, skills_root: Path | str | None = None, project_skills_root: Path | str | None = None):
         self.root = Path(root) if root is not None else Path(os.environ.get("BAROLAB_MEMORY_DIR", str(PROJECT_ROOT / "data" / "memories")))
         self.skills_root = Path(skills_root) if skills_root is not None else Path(os.environ.get("BAROLAB_SKILLS_DIR", str(self.root.parent / "skills")))
+        # Only the approved repository root joins the production catalog. Temp
+        # stores remain isolated unless a test explicitly supplies another root.
+        self.project_skills_root = (Path(project_skills_root) if project_skills_root is not None else
+                                   PROJECT_ROOT / "skills" if root is None and skills_root is None else None)
         self.db_path = self.root / "state.sqlite3"
         self.lock_path = self.root / ".memory.lock"
         self._initialized = False
@@ -415,12 +419,21 @@ class HermesMemory:
     def skill_list(self):
         self.initialize()
         result = []
-        for path in sorted(self.skills_root.glob("*/SKILL.md")):
-            safe_path(self.skills_root, path.relative_to(self.skills_root).as_posix())
+        paths = {}
+        # The explicit repository procedure wins a name collision; one body is
+        # indexed, viewed, frozen and edited, never a stale duplicate or shim.
+        for root in (self.skills_root, self.project_skills_root):
+            if root is None:
+                continue
+            for candidate in sorted(root.glob("*/SKILL.md")):
+                path = safe_path(root, candidate.relative_to(root).as_posix())
+                if re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}", candidate.parent.name):
+                    paths[candidate.parent.name] = path
+        for name, path in sorted(paths.items()):
             raw = path.read_text(encoding="utf-8")
             title = re.search(r"^#\s+(.+)$", raw, re.M)
             description = re.search(r"^description:\s*(.+)$", raw, re.M)
-            result.append({"name": path.parent.name, "title": title.group(1) if title else path.parent.name,
+            result.append({"name": name, "title": title.group(1) if title else name,
                            "description": description.group(1).strip('"\'') if description else next((x.strip() for x in raw.splitlines() if x.strip() and not x.startswith(("#", "---", "name:"))), "")[:240],
                            "revision": revision(raw)})
         return result
@@ -428,6 +441,10 @@ class HermesMemory:
     def _skill_path(self, name):
         if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}", name):
             raise ValueError("Invalid skill name")
+        if self.project_skills_root is not None:
+            candidate = safe_path(self.project_skills_root, f"{name}/SKILL.md")
+            if candidate.is_file() or candidate.parent.is_dir():
+                return candidate
         return safe_path(self.skills_root, f"{name}/SKILL.md")
 
     def skill_view(self, name):
@@ -513,6 +530,8 @@ class HermesMemory:
         for skill in skills:
             hay = f"{skill['name']} {skill['title']} {skill['description']}".lower()
             score = sum(1 for t in terms if len(t) > 1 and t in hay)
+            if skill["name"].lower() in terms:
+                score += 10000  # Explicitly requested procedure precedes fuzzy topics.
             if score:
                 ranked.append((score, skill["name"]))
         selected = []

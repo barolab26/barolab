@@ -69,7 +69,9 @@ class BridgeIndexingTests(unittest.TestCase):
         good = site['url'] + 'normal'
         bad = site['url'] + '%69NDEX-RESCUE-test?utm_source=test'
         sitemap = {'status': 'available', 'url': site['url'] + 'sitemap.xml', 'locations': [good, bad]}
-        with patch.object(metrics, 'api') as google, \
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch('dashboard.indexing_submissions.LEDGER', Path(temporary)/'ledger.json'), \
+                patch.object(metrics, 'api') as google, \
                 patch.object(metrics.requests, 'get', return_value=SimpleNamespace(status_code=200, text='test-only')), \
                 patch.object(metrics.requests, 'post', return_value=SimpleNamespace(status_code=200)) as post:
             result = metrics.request_indexing(object(), site, {'indexnow_key': 'test-only'}, [good, bad], sitemap)
@@ -159,10 +161,11 @@ class BridgeIndexingTests(unittest.TestCase):
         namespace.update(config={}, snapshot={'sites': {'must-good.com': record}}, apply=True,
                          dm=SimpleNamespace(sitemap_status=lambda *a: {'status': 'available', 'locations': [good]},
                                             google_session=lambda *a: object(),
-                                            request_indexing=lambda *a: {'google': {'status': 'not_collected'}}),
+                                            request_indexing=lambda *a, **kw: {'google': {'status': 'not_collected'}}),
                          _check_rss_feed=lambda *a: {})
+        namespace['_validate_candidates'] = lambda site, urls: [{'url':url,'valid':True} for url in urls]
         exec(compile(ast.Module(body=[process], type_ignores=[]), '<indexer-domain>', 'exec'), namespace)
-        result = namespace['_process_domain']({'site_id': 'must-good.com', 'url': 'https://www.must-good.com/'})
+        result = namespace['_process_domain']({'site_id': 'must-good.com', 'url': 'https://www.must-good.com/', 'platform': 'cf'})
         google = result['_indexingRequestObj']['google']
         self.assertEqual(google['status'], 'not_collected')
         self.assertIsNone(google['submittedAt'])

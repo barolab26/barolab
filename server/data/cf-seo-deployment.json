@@ -1,0 +1,1102 @@
+{
+  "checkedAt": "2026-10-19T03:44:20.261434+00:00",
+  "status": "verified",
+  "domainsVerified": 16,
+  "publicPagesSampled": 32,
+  "scope": "All current and future posts using each live SSR renderer; 2 published URLs per domain checked, not every indexed article fetched",
+  "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+  "articleSchema": "Existing BlogPosting retained; current post fields; no duplicate Article schema",
+  "faqPolicy": "Existing conditional FAQ derived from actual faq-q/faq-a content retained; no rich-result benefit claimed",
+  "sourcePatchModule": "cf_posting/seo_templates.py",
+  "sharedSourceChange": "baro-income/workers/_shared/src/index.js: one post robots meta tag added",
+  "routeCorrections": {
+    "must-pick.com": "mustpick",
+    "nolplace.com": "panda-01 (separate existing account, worker.js)"
+  },
+  "wrongMappingRollback": [
+    {
+      "worker": "shopbest",
+      "status": "rolled_back_verified",
+      "sha256": "6bf499cfefc42c4fc1380f6053cc3057fb98287406dcf260f1c768872e20078b"
+    },
+    {
+      "worker": "incomethemax",
+      "status": "rolled_back_verified",
+      "sha256": "e0c2481c57854b69309883e5386f9eb2ec560ff5cb05e3de5246c03679a92332"
+    }
+  ],
+  "domains": [
+    {
+      "domain": "must-good.com",
+      "worker": "mustgood",
+      "beforeSha256": "e5dc28386b03581afd3928270accca8f7bbad2922b16ba34af62e89a06ad80e9",
+      "afterSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:06.412542+00:00",
+      "publicVerification": {
+        "domain": "must-good.com",
+        "checkedAt": "2026-10-19T03:26:44.071094+00:00",
+        "pages": [
+          {
+            "url": "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
+            "status": 200,
+            "finalUrl": "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
+            "canonical": "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 13:32:18",
+            "dateModified": "2026-10-18 13:32:18",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.must-good.com/post",
+            "status": 200,
+            "finalUrl": "https://www.must-good.com/post",
+            "canonical": "https://www.must-good.com/post",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 10:05:45",
+            "dateModified": "2026-10-18 11:58:47",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.must-good.com/*",
+          "worker": "mustgood"
+        },
+        "liveSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:45.813781+00:00"
+      }
+    },
+    {
+      "domain": "baronote.kr",
+      "worker": "baronote",
+      "beforeSha256": "800c92cb59c3852450b4f3c9b5c3271d9dce874d51b46fada7bbe7919ced8521",
+      "afterSha256": "fefbcead05d764121ac2aea86d65016ae9372d7b37de0938869f933e4539ff00",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:08.459166+00:00",
+      "publicVerification": {
+        "domain": "baronote.kr",
+        "checkedAt": "2026-10-19T03:26:49.177468+00:00",
+        "pages": [
+          {
+            "url": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+            "status": 200,
+            "finalUrl": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+            "canonical": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 08:01:17",
+            "dateModified": "2026-10-18 11:50:10",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.baronote.kr/topic-1",
+            "status": 200,
+            "finalUrl": "https://www.baronote.kr/topic-1",
+            "canonical": "https://www.baronote.kr/topic-1",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 08:19:38",
+            "dateModified": "2026-10-17 08:19:38",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.baronote.kr",
+          "worker": "baronote"
+        },
+        "liveSha256": "fefbcead05d764121ac2aea86d65016ae9372d7b37de0938869f933e4539ff00",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:46.092245+00:00"
+      }
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "worker": "justinfo",
+      "beforeSha256": "0b704146a6e09c117556dc8b52c292b9e18cd7349bc6e7c4c941fa2d07babab5",
+      "afterSha256": "4fbe95d797363f338e2491168718d3d8b7672d981606c6e09764b1b8d1219043",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:09.991305+00:00",
+      "publicVerification": {
+        "domain": "justinfo.co.kr",
+        "checkedAt": "2026-10-19T03:26:45.733653+00:00",
+        "pages": [
+          {
+            "url": "https://www.justinfo.co.kr/topic-3",
+            "status": 200,
+            "finalUrl": "https://www.justinfo.co.kr/topic-3",
+            "canonical": "https://www.justinfo.co.kr/topic-3",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 02:29:50",
+            "dateModified": "2026-10-18 11:49:28",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+            "status": 200,
+            "finalUrl": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+            "canonical": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 05:47:34",
+            "dateModified": "2026-10-17 05:47:34",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.justinfo.co.kr/*",
+          "worker": "justinfo"
+        },
+        "liveSha256": "4fbe95d797363f338e2491168718d3d8b7672d981606c6e09764b1b8d1219043",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "plain_text",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:45.821694+00:00"
+      }
+    },
+    {
+      "domain": "topnote.kr",
+      "worker": "topnote",
+      "beforeSha256": "e5dc28386b03581afd3928270accca8f7bbad2922b16ba34af62e89a06ad80e9",
+      "afterSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:11.719557+00:00",
+      "publicVerification": {
+        "domain": "topnote.kr",
+        "checkedAt": "2026-10-19T03:26:41.989249+00:00",
+        "pages": [
+          {
+            "url": "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
+            "status": 200,
+            "finalUrl": "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
+            "canonical": "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 10:46:02",
+            "dateModified": "2026-10-18 11:49:16",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
+            "status": 200,
+            "finalUrl": "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
+            "canonical": "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 06:37:19",
+            "dateModified": "2026-10-17 06:37:19",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.topnote.kr",
+          "worker": "topnote"
+        },
+        "liveSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:46.066260+00:00"
+      }
+    },
+    {
+      "domain": "meganote.kr",
+      "worker": "meganote",
+      "beforeSha256": "d6ce2f04be1d81c94e3e0607965be0f3750d8f36603720f983ec064551fa0cb4",
+      "afterSha256": "b3f7c82f8ffdc10f44c0463426a0a857b05ac0fe14b29600f4fa57d5e2d8f096",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:13.592087+00:00",
+      "publicVerification": {
+        "domain": "meganote.kr",
+        "checkedAt": "2026-10-19T03:26:44.641914+00:00",
+        "pages": [
+          {
+            "url": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+            "status": 200,
+            "finalUrl": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+            "canonical": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 04:17:04",
+            "dateModified": "2026-10-18 11:50:47",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+            "status": 200,
+            "finalUrl": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+            "canonical": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 14:17:46",
+            "dateModified": "2026-10-17 14:17:46",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.meganote.kr/*",
+          "worker": "meganote"
+        },
+        "liveSha256": "b3f7c82f8ffdc10f44c0463426a0a857b05ac0fe14b29600f4fa57d5e2d8f096",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:47.431699+00:00"
+      }
+    },
+    {
+      "domain": "smilenote.kr",
+      "worker": "smilenote",
+      "beforeSha256": "e5dc28386b03581afd3928270accca8f7bbad2922b16ba34af62e89a06ad80e9",
+      "afterSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:15.361710+00:00",
+      "publicVerification": {
+        "domain": "smilenote.kr",
+        "checkedAt": "2026-10-19T03:26:46.545870+00:00",
+        "pages": [
+          {
+            "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+            "status": 200,
+            "finalUrl": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+            "canonical": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 12:29:40",
+            "dateModified": "2026-10-18 12:29:40",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+            "status": 200,
+            "finalUrl": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+            "canonical": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 13:22:18",
+            "dateModified": "2026-10-18 11:49:34",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.smilenote.kr",
+          "worker": "smilenote"
+        },
+        "liveSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:47.633350+00:00"
+      }
+    },
+    {
+      "domain": "healthcox.com",
+      "worker": "healthcox",
+      "beforeSha256": "4d068872b6a5f78fb25e04fba923ab15c70456ccba393b9cbf1edb2211462851",
+      "afterSha256": "d132cecd4245ae0bc0ef27812fb665bbe3c6e33b7fd0396a017c55cfc9319ad1",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:16.889437+00:00",
+      "publicVerification": {
+        "domain": "healthcox.com",
+        "checkedAt": "2026-10-19T03:26:52.548192+00:00",
+        "pages": [
+          {
+            "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+            "status": 200,
+            "finalUrl": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+            "canonical": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 08:09:19",
+            "dateModified": "2026-10-18 11:50:02",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.healthcox.com/topic-2",
+            "status": 200,
+            "finalUrl": "https://www.healthcox.com/topic-2",
+            "canonical": "https://www.healthcox.com/topic-2",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 08:43:01",
+            "dateModified": "2026-10-17 08:43:01",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.healthcox.com/*",
+          "worker": "healthcox"
+        },
+        "liveSha256": "d132cecd4245ae0bc0ef27812fb665bbe3c6e33b7fd0396a017c55cfc9319ad1",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "plain_text",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:47.770693+00:00"
+      }
+    },
+    {
+      "domain": "maxnote.kr",
+      "worker": "maxnote",
+      "beforeSha256": "7eb23a225b314d6a9a555f26d07168237fa730d53f3386e066bbec0399bf31aa",
+      "afterSha256": "771ebb66a1dd07c85be3a840eae4e20cf974088c434b6bb71ccdaaf0cb5f0496",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:18.291321+00:00",
+      "publicVerification": {
+        "domain": "maxnote.kr",
+        "checkedAt": "2026-10-19T03:26:50.534345+00:00",
+        "pages": [
+          {
+            "url": "https://www.maxnote.kr/excel-freeze-panes-row-column",
+            "status": 200,
+            "finalUrl": "https://www.maxnote.kr/excel-freeze-panes-row-column",
+            "canonical": "https://www.maxnote.kr/excel-freeze-panes-row-column",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 07:09:10",
+            "dateModified": "2026-10-18 11:58:57",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+            "status": 200,
+            "finalUrl": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+            "canonical": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 09:07:58",
+            "dateModified": "2026-10-17 09:07:58",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.maxnote.kr",
+          "worker": "maxnote"
+        },
+        "liveSha256": "771ebb66a1dd07c85be3a840eae4e20cf974088c434b6bb71ccdaaf0cb5f0496",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:47.958972+00:00"
+      }
+    },
+    {
+      "domain": "must-joy.com",
+      "worker": "mustjoy",
+      "beforeSha256": "a8b75a1c7bbcb2bcdd23159a5aea218e7168a7cf418f63ee1bcb9d1e9c79da3b",
+      "afterSha256": "c4fab76c7a8a995467899ebc1eb2a3133313d6d42ef956aa7f9abe1ea91dda7f",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:19.707891+00:00",
+      "publicVerification": {
+        "domain": "must-joy.com",
+        "checkedAt": "2026-10-19T03:26:47.678519+00:00",
+        "pages": [
+          {
+            "url": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+            "status": 200,
+            "finalUrl": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+            "canonical": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 00:46:38",
+            "dateModified": "2026-10-18 11:49:57",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+            "status": 200,
+            "finalUrl": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+            "canonical": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 03:33:28",
+            "dateModified": "2026-10-17 03:33:28",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.must-joy.com/*",
+          "worker": "mustjoy"
+        },
+        "liveSha256": "c4fab76c7a8a995467899ebc1eb2a3133313d6d42ef956aa7f9abe1ea91dda7f",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:49.112166+00:00"
+      }
+    },
+    {
+      "domain": "tripmarvel.com",
+      "worker": "tripmarvel",
+      "beforeSha256": "6567f3c4be6abc0ff5c5a87ec429233f6b8cb7b108776526225063158c365ff0",
+      "afterSha256": "7299d83acaf1c05f1cf7504bfe8e2f49db65d6b6d1d0e2f011dc0c6ec2f7aa3a",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:21.437892+00:00",
+      "publicVerification": {
+        "domain": "tripmarvel.com",
+        "checkedAt": "2026-10-19T03:26:48.555464+00:00",
+        "pages": [
+          {
+            "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+            "status": 200,
+            "finalUrl": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+            "canonical": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-19 00:46:01",
+            "dateModified": "2026-10-19 00:46:01",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+            "status": 200,
+            "finalUrl": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+            "canonical": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 08:24:04",
+            "dateModified": "2026-10-18 11:49:42",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.tripmarvel.com/*",
+          "worker": "tripmarvel"
+        },
+        "liveSha256": "7299d83acaf1c05f1cf7504bfe8e2f49db65d6b6d1d0e2f011dc0c6ec2f7aa3a",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "plain_text",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:49.333704+00:00"
+      }
+    },
+    {
+      "domain": "must-pick.com",
+      "worker": "mustpick",
+      "beforeSha256": "ee6fc7c2da8a2282ba9280d7e2dbbe211112f7e4e812024dd41f29885078db8f",
+      "afterSha256": "e2a08d55067accd5497cf45c92a8dcef83d306f20bc569d42881272b3cf57537",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:23.735144+00:00",
+      "route": {
+        "verified": true,
+        "route": "www.must-pick.com/",
+        "worker": "mustpick"
+      },
+      "moduleName": "index.js",
+      "publicVerification": {
+        "domain": "must-pick.com",
+        "checkedAt": "2026-10-19T03:43:58.263112+00:00",
+        "pages": [
+          {
+            "url": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+            "status": 200,
+            "finalUrl": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+            "canonical": "https://www.must-pick.com/countertop-dishwasher-no-drilling-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 05:00:55",
+            "dateModified": "2026-10-18 11:50:31",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+            "status": 200,
+            "finalUrl": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+            "canonical": "https://www.must-pick.com/camping-heater-tent-size-safety-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 04:35:13",
+            "dateModified": "2026-10-18 11:59:10",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.must-pick.com/",
+          "worker": "mustpick"
+        },
+        "liveSha256": "e2a08d55067accd5497cf45c92a8dcef83d306f20bc569d42881272b3cf57537",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:49.498357+00:00"
+      }
+    },
+    {
+      "domain": "woorinote.kr",
+      "worker": "woorinote",
+      "beforeSha256": "e5dc28386b03581afd3928270accca8f7bbad2922b16ba34af62e89a06ad80e9",
+      "afterSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:25.370315+00:00",
+      "publicVerification": {
+        "domain": "woorinote.kr",
+        "checkedAt": "2026-10-19T03:26:56.654608+00:00",
+        "pages": [
+          {
+            "url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+            "status": 200,
+            "finalUrl": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+            "canonical": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 09:56:46",
+            "dateModified": "2026-10-18 11:50:17",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+            "status": 200,
+            "finalUrl": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+            "canonical": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 03:28:25",
+            "dateModified": "2026-10-17 03:28:25",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.woorinote.kr/*",
+          "worker": "woorinote"
+        },
+        "liveSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:49.634515+00:00"
+      }
+    },
+    {
+      "domain": "daynote.kr",
+      "worker": "daynote",
+      "beforeSha256": "a8b75a1c7bbcb2bcdd23159a5aea218e7168a7cf418f63ee1bcb9d1e9c79da3b",
+      "afterSha256": "c4fab76c7a8a995467899ebc1eb2a3133313d6d42ef956aa7f9abe1ea91dda7f",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:27.145626+00:00",
+      "publicVerification": {
+        "domain": "daynote.kr",
+        "checkedAt": "2026-10-19T03:26:58.134553+00:00",
+        "pages": [
+          {
+            "url": "https://www.daynote.kr/green-onion-fresh-storage-guide",
+            "status": 200,
+            "finalUrl": "https://www.daynote.kr/green-onion-fresh-storage-guide",
+            "canonical": "https://www.daynote.kr/green-onion-fresh-storage-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 01:34:14",
+            "dateModified": "2026-10-18 11:50:26",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
+            "status": 200,
+            "finalUrl": "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
+            "canonical": "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 07:32:53",
+            "dateModified": "2026-10-17 07:32:53",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.daynote.kr/*",
+          "worker": "daynote"
+        },
+        "liveSha256": "c4fab76c7a8a995467899ebc1eb2a3133313d6d42ef956aa7f9abe1ea91dda7f",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:50.980179+00:00"
+      }
+    },
+    {
+      "domain": "nolplace.com",
+      "worker": "panda-01",
+      "beforeSha256": "4cb54f9665d23979ea48022fb20dfad682e58df1e9f1cfb96dda30f6f6df23ec",
+      "afterSha256": "dfe161e56193680f195624e7c22e2e51b5e0ec57d990adf93942573490a3c134",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:28.737262+00:00",
+      "route": {
+        "verified": true,
+        "route": "www.nolplace.com/*",
+        "worker": "panda-01"
+      },
+      "moduleName": "worker.js",
+      "publicVerification": {
+        "domain": "nolplace.com",
+        "checkedAt": "2026-10-19T03:43:58.790534+00:00",
+        "pages": [
+          {
+            "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+            "status": 200,
+            "finalUrl": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+            "canonical": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 05:50:55",
+            "dateModified": "2026-10-18 15:55:10",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+            "status": 200,
+            "finalUrl": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+            "canonical": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 03:52:01",
+            "dateModified": "2026-10-17 07:51:44",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.nolplace.com/*",
+          "worker": "panda-01"
+        },
+        "liveSha256": "dfe161e56193680f195624e7c22e2e51b5e0ec57d990adf93942573490a3c134",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "plain_text",
+          "r2_bucket"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:51.058160+00:00"
+      }
+    },
+    {
+      "domain": "soulnote.kr",
+      "worker": "soulnote",
+      "beforeSha256": "e5dc28386b03581afd3928270accca8f7bbad2922b16ba34af62e89a06ad80e9",
+      "afterSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:30.311890+00:00",
+      "publicVerification": {
+        "domain": "soulnote.kr",
+        "checkedAt": "2026-10-19T03:26:53.428014+00:00",
+        "pages": [
+          {
+            "url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+            "status": 200,
+            "finalUrl": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+            "canonical": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 09:06:04",
+            "dateModified": "2026-10-18 11:57:45",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.soulnote.kr/bullet-journal-migration-task-management",
+            "status": 200,
+            "finalUrl": "https://www.soulnote.kr/bullet-journal-migration-task-management",
+            "canonical": "https://www.soulnote.kr/bullet-journal-migration-task-management",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 04:27:47",
+            "dateModified": "2026-10-17 04:27:47",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.soulnote.kr",
+          "worker": "soulnote"
+        },
+        "liveSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:51.379775+00:00"
+      }
+    },
+    {
+      "domain": "joynote.kr",
+      "worker": "joynote",
+      "beforeSha256": "e5dc28386b03581afd3928270accca8f7bbad2922b16ba34af62e89a06ad80e9",
+      "afterSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+      "status": "deployed",
+      "revision": "20261019_postseo_v1",
+      "checkedAt": "2026-10-19T03:24:32.105196+00:00",
+      "publicVerification": {
+        "domain": "joynote.kr",
+        "checkedAt": "2026-10-19T03:26:57.366567+00:00",
+        "pages": [
+          {
+            "url": "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
+            "status": 200,
+            "finalUrl": "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
+            "canonical": "https://www.joynote.kr/cat-cystitis-early-symptoms-care",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-18 11:37:55",
+            "dateModified": "2026-10-18 11:50:40",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          },
+          {
+            "url": "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
+            "status": 200,
+            "finalUrl": "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
+            "canonical": "https://www.joynote.kr/cat-chin-acne-cleaning-bowl-care",
+            "robots": "index,follow,max-image-preview:large,max-snippet:-1",
+            "schemaType": "BlogPosting",
+            "schemaParseErrors": 0,
+            "headlinePresent": true,
+            "datePublished": "2026-10-17 03:44:41",
+            "dateModified": "2026-10-17 03:44:41",
+            "authorPresent": true,
+            "publisherPresent": true,
+            "faqCount": 0,
+            "faqGrounded": true,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "liveDeploymentVerification": {
+        "route": {
+          "verified": true,
+          "route": "www.joynote.kr",
+          "worker": "joynote"
+        },
+        "liveSha256": "a60fa517819d87c1a0e6eb3411a23ecd6aa5663193cb6428a3f4148cc3070abb",
+        "liveHashVerified": true,
+        "bindingTypes": [
+          "d1",
+          "r2_bucket",
+          "secret_text"
+        ],
+        "compatibilityDate": "2025-10-01",
+        "checkedAt": "2026-10-19T03:48:58.098455+00:00"
+      }
+    }
+  ],
+  "liveDeploymentVerified": 16
+}

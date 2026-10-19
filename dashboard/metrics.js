@@ -50,7 +50,45 @@
   const kstDay = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
   const kstTime = value => new Date(value).toLocaleString('ko-KR', {timeZone:'Asia/Seoul',hour12:false});
   const labels = { collected: '수집됨', partial: '일부 확인', not_collected: '미연결 / 미확인',
-    submitted: '요청 접수', received_pending_key_check: '키 확인 대기' };
+    submitted: '요청 접수', received_pending_key_check: '키 확인 대기',
+    ping_accepted:'IndexNow 알림 접수 · 색인 미확인', accepted_pending_key_check:'알림 수신 · 키 검증 대기',
+    submission_accepted:'URL 제출 접수 · 색인 미확인', rejected:'제출 거절',
+    property_unverified:'등록 속성 소유 확인 필요', duplicate_suppressed:'중복 제출 생략',
+    submission_unconfirmed:'제출 결과 미확인' };
+
+  function daumActions(record) {
+    const box=document.createElement('div'), link=document.createElement('a');
+    link.href='https://register.search.daum.net/index.daum'; link.target='_blank';link.rel='noopener noreferrer';
+    link.textContent='Daum 등록·조회'; box.appendChild(link);
+    const state=record.daum || {}, note=document.createElement('span');
+    note.textContent=state.status==='not_registered_confirmed_http_key'
+      ? ' · HTTP 주소 미등록 확인 / HTTPS 미확인'
+      : state.registrationVerified===true ? ' · 등록 확인' : state.registrationVerified===false ? ' · 미등록 확인' : ' · 등록 여부 미확인';
+    box.appendChild(note);
+    const address=document.createElement('input');address.readOnly=true;address.value=record.site.url;
+    address.setAttribute('aria-label',record.site.site_id+' 등록 조회 주소');address.style.cssText='max-width:260px;width:100%;margin:5px 4px 0 0;';
+    box.appendChild(address);
+    const copy=document.createElement('button');copy.type='button';copy.textContent='주소 복사';
+    copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(address.value);copy.textContent='복사됨';}
+      catch(_){address.focus();address.select();copy.textContent='주소 선택됨 · Ctrl+C';}});
+    box.appendChild(copy);return box;
+  }
+
+  function renderDaumRegistration(records) {
+    const container=document.getElementById('content-management');if(!container)return;
+    let panel=document.getElementById('daum-registration-links');
+    if(!panel){panel=document.createElement('details');panel.id='daum-registration-links';container.appendChild(panel);}
+    panel.replaceChildren();const summary=document.createElement('summary');
+    const sites=(records||[]).filter(r=>r.site?.platform==='cf');
+    let naver=document.getElementById('naver-registration-status');
+    if(!naver){naver=document.createElement('p');naver.id='naver-registration-status';container.prepend(naver);}
+    const verified=sites.filter(r=>r.searchAdvisor?.registered===true&&r.searchAdvisor?.ownershipVerified===true).length;
+    naver.textContent=`네이버 www 등록·소유 확인 ${verified}/${sites.length}개 · 실제 색인 미확인`;
+    summary.textContent=`Daum 등록·조회 · ${sites.length}개 도메인`;panel.appendChild(summary);
+    const explanation=document.createElement('p');explanation.textContent='공식 등록 화면에서 주소를 조회할 수 있습니다. 검색 결과 관측과 사이트 등록 상태는 별개이며, 신청과 동의는 자동 제출하지 않습니다.';panel.appendChild(explanation);
+    for(const record of sites){const item=document.createElement('div');item.style.cssText='padding:8px 0;border-top:1px solid #e2e8f0;';
+      const domain=document.createElement('strong');domain.textContent=record.site.site_id;item.appendChild(domain);item.appendChild(daumActions(record));panel.appendChild(item);}
+  }
 
   function renderSummaryCards(analysis) {
     const platform = document.body.dataset.summaryPlatform;
@@ -513,7 +551,7 @@
             : record.traffic?.sessions == null ? record.traffic?.reason || '트래픽 미확인' : `${number(record.traffic.sessions)} 세션 · ${record.traffic.start} ~ ${record.traffic.end}`;
           const cells = [record.site.site_id,
             google.inspected ? `${number(google.indexed)} / ${number(google.inspected)} URL 확인` : (google.reason || '색인 미확인'),
-            [['Google', request.google], ['네이버', request.naver]].filter(([, r]) => r)
+            [['Google', request.google], ['네이버', request.naver], ['Bing', request.bing]].filter(([, r]) => r)
               .map(([name, r]) => `${name}: ${labels[r.status] || r.status}`).join(' · ') || '요청 이력 없음',
             trafficText];
           for (const value of cells) {
@@ -522,9 +560,17 @@
             cell.textContent = value;
             row.appendChild(cell);
           }
+          if(record.site.platform==='cf'){
+            const naver=document.createElement('div');
+            naver.textContent=record.searchAdvisor?.status==='registered_verified'
+              ? '네이버 www 등록·소유 확인 · 색인 미확인' : '네이버 www 등록 상태 미확인';
+            row.firstElementChild.appendChild(naver);
+            row.firstElementChild.appendChild(daumActions(record));
+          }
           table.appendChild(row);
         }
       }
+      renderDaumRegistration(data.sites || []);
       window.BaroLabTraffic?.render(data.trafficAnalysis || {});
     } catch (_) {
       set('metrics-refresh-status','통계 조회 실패 · 이전 조회 결과는 재확인이 필요합니다');

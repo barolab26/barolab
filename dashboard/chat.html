@@ -806,6 +806,7 @@
         <button type="button" class="btn-patrol-trigger" id="btn-trigger-doctor-patrol" title="닥터(Doctor)가 기존 발행 글 5건을 즉시 순찰·7대 검진·카테고리 자동 패치 후 회의실에 보고합니다">
           🩺 닥터 5건 즉시 검진·수술
         </button>
+        <button type="button" class="btn-quick" id="btn-radar-scout" title="원천 자료를 수집하고 내부 채팅에 제안합니다. 외부 발행은 하지 않습니다.">🔍 레이더 즉시 스카우팅 출동</button>
         <button class="btn-quick" id="btn-new-meeting" style="cursor:pointer;" title="현재 회의를 진행 중으로 보관하고 새 회의 시작">새 회의 (보관)</button>
         <button class="btn-quick" id="btn-end-meeting" style="background:#0f172a; color:#fff; border-color:#0f172a; font-weight:700; cursor:pointer;" title="회의록을 기억 그래프(memory_graph.py)에 시냅스로 연결하고 회의 종료">회의 마치기 (시냅스 적재)</button>
       </div>
@@ -882,7 +883,7 @@
         <div class="composer-area">
           <div class="mention-bar">
             <div class="mention-pills-left">
-              <button type="button" class="mention-pill" data-mention="@radar">@radar 레이더(전략·유튜브검증)</button>
+              <button type="button" class="mention-pill" data-mention="@radar">@radar 레이더(신사업·마케팅·트렌드)</button>
               <button type="button" class="mention-pill" data-mention="@jarvis">@jarvis 자비스(총괄)</button>
               <button type="button" class="mention-pill" data-mention="@doctor" style="border-color:#99f6e4; background:#f0fdfa; color:#0f766e;">@doctor 닥터(감사·리모델링)</button>
               <button type="button" class="mention-pill" data-mention="@publi">@publi 퍼블리(검수)</button>
@@ -895,7 +896,7 @@
             </div>
           </div>
           <div class="composer-row">
-            <textarea id="chat-input" class="composer-input" rows="2" placeholder="@레이더 유튜브 링크 분석, @닥터 &quot;그 글은 비공개해&quot; 등 지시를 입력하세요 (Enter 전송)"></textarea>
+            <textarea id="chat-input" class="composer-input" rows="2" placeholder="@레이더 &quot;요즘 돈 되는 사업 아이템/마케팅 기법 찾아와&quot;, @트레이스 &quot;4대 검색엔진 색인 현황 점검해&quot;"></textarea>
             <button type="button" class="btn-send" id="btn-send">발언 전송</button>
           </div>
         </div>
@@ -912,7 +913,7 @@
     publi:  { name: '퍼블리', badge: '발행검수', color: '#059669', short: 'P', icon: '🤖', title: '블로그 발행·예약 검수 전문가', defaultBrain: 'gpt-6.1-sol' },
     trace:  { name: '트레이스', badge: '성과분석', color: '#7c3aed', short: 'T', icon: '📊', title: '색인·트래픽·수익 분석 전문가', defaultBrain: '3.8 Flash' },
     patch:  { name: '패치', badge: '자동화개발', color: '#d97706', short: 'C', icon: '⚙️', title: '대시보드·파이프라인 개발·유지보수', defaultBrain: 'gpt-6.1-sol' },
-    radar:  { name: '레이더', badge: '수익전략', color: '#e11d48', short: 'R', icon: '🎯', title: '트렌드·키워드·수익 허브 발굴', defaultBrain: 'Argon Med' },
+    radar:  { name: '레이더', badge: '수익전략', color: '#e11d48', short: 'R', icon: '🎯', title: '신사업 아이템 · 마케팅 기법 · 트렌드 자율 발굴', defaultBrain: 'Argon Med' },
   };
 
   const ALIAS_TO_SLUG = {
@@ -1734,6 +1735,21 @@
       }
     });
   }
+
+  document.getElementById('btn-radar-scout').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      const response = await apiFetch('/api/chat/radar/scout', { method: 'POST' });
+      const out = await response.json();
+      if (!response.ok || !out.ok) throw new Error(out.detail || '스카우팅 API 실행 실패');
+      scrollLockStatusEl.textContent = out.started ? '🔍 실제 자료 수집 시작 · 채팅 보고 대기' : '🔍 기존 실행 진행 중 또는 중복 실행 방지';
+    } catch (error) {
+      scrollLockStatusEl.textContent = '스카우팅 미실행: ' + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
 
   const btnDoctorPatrol = document.getElementById('btn-trigger-doctor-patrol');
   if (btnDoctorPatrol) {

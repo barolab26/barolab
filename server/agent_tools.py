@@ -863,128 +863,59 @@ def format_trace_context_block() -> str:
 
 
 def run_auto_indexer(domain: str = "all") -> Dict[str, Any]:
-    """
-    Action Tool `run_auto_indexer`:
-    Executes `python -m common.auto_indexer --all --apply` (or `--domain <domain> --apply`)
-    to verify sitemap.xml & rss.xml, push unindexed URLs via Naver IndexNow & Google Sitemaps,
-    and update `server/data/metrics.json`.
-    """
+    """Run the authorized HTTP submission worker; never infer indexing success."""
     dom = (domain or "all").strip().lower()
-    flag_args = ["--all", "--apply"] if dom in ("all", "") else ["--domain", dom, "--apply"]
-    cmd_display = f"python -m common.auto_indexer {' '.join(flag_args)}"
-    cmd = [sys.executable, "-X", "utf8", "-m", "common.auto_indexer", *flag_args]
-    proc = subprocess.Popen(
-        cmd,
-        cwd=str(BASE_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
-    pid = proc.pid
+    if dom != "all" and dom not in CF_16_DOMAINS:
+        raise ValueError("Unknown CF domain")
+    flags = ["--all", "--apply"] if dom == "all" else ["--domain", dom, "--apply"]
+    command = [sys.executable, "-X", "utf8", "-m", "common.auto_indexer", *flags]
+    display = "python -m common.auto_indexer " + " ".join(flags)
+    proc = subprocess.Popen(command, cwd=str(BASE_DIR), stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
+                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     try:
-        out_str, _ = proc.communicate(timeout=45)
-        exit_code = proc.returncode if proc.returncode is not None else 0
+        output, _ = proc.communicate(timeout=45)
+        exit_code = proc.returncode
     except subprocess.TimeoutExpired:
-        out_str = f"[PID {pid}] python -m common.auto_indexer {' '.join(flag_args)} 백그라운드 실행 중"
-        exit_code = 0
-
-    parsed_res: Dict[str, Any] = {}
+        # Keep draining the pipe so the child can complete and persist its ledger.
+        import threading
+        threading.Thread(target=proc.communicate, daemon=True, name="indexer-output-drain").start()
+        output, exit_code = "요청 프로세스 실행 중. 최종 제출 결과와 색인은 아직 확인되지 않음", None
+    parsed = {}
     try:
-        idx_brace = (out_str or "").find("{")
-        if idx_brace >= 0:
-            parsed_res = json.loads(out_str[idx_brace:])
-    except Exception:
-        parsed_res = {}
-
-    dom_cnt = int(parsed_res.get("domainsProcessed") or 16)
-    unindexed_cnt = int(parsed_res.get("totalUnindexedPosts") or 1331)
-    submitted_cnt = int(parsed_res.get("totalSubmittedUrls") or 1256)
-    zero_doms = parsed_res.get("zeroIndexedPriorityDomains") or ["baronote.kr", "smilenote.kr", "topnote.kr"]
-    dom_rows = parsed_res.get("domains") or []
-
-    summary_lines = [
-        f"[AutoIndexer] {dom_cnt}개 CF 도메인 미색인 URL 자동 색인 제출 완료 (미색인 {unindexed_cnt}건 중 {submitted_cnt}건 즉시 푸시 · HTTP 200)",
-        f"[0% 미색인 최우선 타겟] {', '.join(zero_doms)} (baronote.kr 204건, smilenote.kr 81건, topnote.kr 76건, nolplace.com 22건 포함)",
-    ]
-    for r in dom_rows[:16]:
-        summary_lines.append(
-            f"  · {r.get('domain')}: 전체 {r.get('totalPosts')}건 (기색인 {r.get('indexedCount')} / 미색인 {r.get('unindexedCount')}) "
-            f"➔ Naver IndexNow HTTP {r.get('naverIndexNow', {}).get('httpStatus', 200)} ({r.get('naverIndexNow', {}).get('submittedUrls', 0)}건 제출) "
-            f"| Google Sitemap={r.get('googleSearchConsole', {}).get('status', 'submitted')} | RSS={r.get('rssStatus', 'available')}"
-        )
-    tail_str = "\n".join(summary_lines)
-    receipt = _build_execution_receipt(
-        cmd_str=cmd_display,
-        pid=pid,
-        exit_code=exit_code,
-        stdout_tail=tail_str,
-    )
-    badge = (
-        f"[실행 완료: 프로세스 PID {pid} / {dom_cnt}개 CF 도메인 미색인 URL {submitted_cnt}건 자동 색인 요청 완료 "
-        f"(baronote 204건·smilenote 81건·topnote 76건·nolplace 22건 포함 HTTP 200)]"
-    )
-    return {
-        "ok": exit_code == 0,
-        "tool": "run_auto_indexer",
-        "pid": pid,
-        "exitCode": exit_code,
-        "cmd": cmd_display,
-        "stdoutTail": tail_str,
-        "executionReceipt": receipt,
-        "domainsProcessed": dom_cnt,
-        "zeroIndexedPriorityDomains": zero_doms,
-        "totalUnindexedPosts": unindexed_cnt,
-        "totalSubmittedUrls": submitted_cnt,
-        "domains": dom_rows,
-        "state": f"{dom_cnt}개 CF 도메인 미색인 URL {submitted_cnt}건 네이버 IndexNow(HTTP 200) & 구글 사이트맵/RSS 자동 제출 완료",
-        "badge": badge,
-    }
+        first = output.find("{")
+        if first >= 0:
+            parsed = json.JSONDecoder().raw_decode(output[first:])[0]
+        if not isinstance(parsed, dict):
+            parsed = {}
+    except (ValueError, TypeError):
+        parsed = {}
+    state = "실행 중; 제출 결과 미확인" if exit_code is None else "프로세스 종료; provider별 제출 원장 확인 필요. 색인 완료 아님" if exit_code == 0 else "요청 프로세스 실패"
+    receipt = _build_execution_receipt(cmd_str=display, pid=proc.pid, exit_code=exit_code, stdout_tail=output[-2500:])
+    return {"ok": exit_code in (None, 0), "tool": "run_auto_indexer", "pid": proc.pid,
+            "exitCode": exit_code, "running": exit_code is None, "cmd": display,
+            "stdoutTail": output[-2500:], "executionReceipt": receipt, "providerResults": parsed,
+            "domainsProcessed": parsed.get("domainsProcessed"), "totalUnindexedPosts": parsed.get("totalUnindexedPosts"),
+            "totalSubmittedUrls": parsed.get("totalSubmittedUrls"), "domains": parsed.get("domains", []),
+            "state": state, "badge": "[" + state + "]"}
 
 
 def index_check_and_submit(account: str = "sj") -> Dict[str, Any]:
-    """
-    Action Tool `index_check_and_submit`:
-    Executes `python -m common.auto_indexer --all --apply` + `python dashboard/metrics.py --discover-indexnow --collect`
-    and triggers `python dashboard/metrics.py --recover-indexing --account sj` for the 16 CF external domains.
-    """
-    auto_res = run_auto_indexer("all")
-    acc = (account or "sj").strip() or "sj"
-    cmd_recover = [
-        sys.executable,
-        "-X",
-        "utf8",
-        str(DASHBOARD_DIR / "metrics.py"),
-        "--recover-indexing",
-        "--account",
-        acc,
-        "--individual-limit",
-        "3",
-    ]
-    proc_recover = subprocess.Popen(
-        cmd_recover,
-        cwd=str(BASE_DIR),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
-    pid_recover = proc_recover.pid
-    pid_main = auto_res.get("pid")
-    cmd_display = f"python -m common.auto_indexer --all --apply && python dashboard/metrics.py --recover-indexing --account {acc}"
-    tail_str = auto_res.get("stdoutTail", "") + f"\n[GSC Browser Recovery] PID {pid_recover} started (--account {acc})"
-    receipt = _build_execution_receipt(
-        cmd_str=cmd_display,
-        pid=f"{pid_main}, {pid_recover}",
-        exit_code=0,
-        stdout_tail=tail_str,
-    )
-    auto_res["cmd"] = cmd_display
-    auto_res["recoverPid"] = pid_recover
-    auto_res["executionReceipt"] = receipt
-    auto_res["tool"] = "index_check_and_submit"
-    return auto_res
+    """Submit HTTP work and queue GSC for the existing authorized collector."""
+    result = run_auto_indexer("all")
+    result["tool"] = "index_check_and_submit"
+    try:
+        from dashboard.indexing_submissions import enqueue_gsc_request
+        gsc = enqueue_gsc_request("all", requested_by="agent_tools:" + account)
+    except Exception as exc:
+        gsc = {"queued": False, "started": False, "status": "queue_unavailable",
+               "errorType": type(exc).__name__}
+    result["gscQueue"] = gsc
+    result["browserRecovery"] = {"started": False, "status": gsc.get("status", "queue_unavailable"),
+                                 "reason": "GSC는 기존 승인된 수집기가 큐를 처리하며 별도 브라우저를 기동하지 않음"}
+    result["searchAdvisor"] = {"started": False, "status": "separate_ui_workflow_required"}
+    result["indexingVerified"] = False
+    return result
 
 
 def verify_domain_index(domain: str) -> Dict[str, Any]:
@@ -1652,7 +1583,9 @@ HIGH_VALUE_KEYWORD_POOL: Dict[str, List[Dict[str, str]]] = {
 
 def read_radar_data() -> Dict[str, Any]:
     rnd_proposals = _read_json(DATA_DIR / "rnd_proposals.json", [])
-    scout_queue = _read_json(DATA_DIR / "topic-scout-queue.json", [])
+    from radar_scout import SCOUT
+    scout_status = SCOUT.latest()
+    scout_queue = (scout_status.get("latest", {}).get("result") or {}).get("trackA", [])
     if not isinstance(rnd_proposals, list):
         rnd_proposals = []
     if not isinstance(scout_queue, list):
@@ -1665,6 +1598,7 @@ def read_radar_data() -> Dict[str, Any]:
         ],
         "scoutQueueCount": len(scout_queue),
         "recentScoutedKeywords": scout_queue[:5],
+        "scoutStatus": scout_status,
     }
 
 
@@ -1684,7 +1618,7 @@ def format_radar_context_block(has_url: bool = False) -> str:
     return (
         f"[레이더(@radar) 전용 실시간 R&D·키워드 큐 조회값]\n"
         f"1. 유튜브/웹 자막 실측 분석 보고서 누적: {d['rndProposalsCount']}건\n"
-        f"2. 현재 주제 큐(topic-scout-queue.json) 등록 키워드: {d['scoutQueueCount']}건\n"
+        f"2. 실제 Radar 소스 수집 원장의 후보: {d['scoutQueueCount']}건 (빈집·고단가 미검증)\n"
         f"{rec_kw}"
     )
 
@@ -1753,55 +1687,15 @@ def extract_youtube_or_url(url: str) -> Dict[str, Any]:
 
 
 def scout_high_value_keywords(category: str = "정책·금융·생활") -> Dict[str, Any]:
-    """Discover high-CPC gap keywords and register them into `server/data/topic-scout-queue.json`."""
-    cat = (category or "정책·금융·생활").strip()
-    selected: List[Dict[str, str]] = []
-    for k, items in HIGH_VALUE_KEYWORD_POOL.items():
-        if any(tok in cat for tok in k.split("·")):
-            selected.extend(items)
-    if not selected:
-        for items in HIGH_VALUE_KEYWORD_POOL.values():
-            selected.extend(items[:2])
-
-    now_iso = get_kst_now().strftime("%Y-%m-%d %H:%M:%S")
-    queue_file = DATA_DIR / "topic-scout-queue.json"
-    existing = _read_json(queue_file, [])
-    if not isinstance(existing, list):
-        existing = []
-
-    existing_kws = {x.get("keyword") for x in existing if isinstance(x, dict)}
-    added = []
-    for item in selected[:5]:
-        entry = {
-            "keyword": item["keyword"],
-            "target": item["target"],
-            "category": cat,
-            "scoutedAt": now_iso,
-            "status": "queued",
-        }
-        added.append(entry)
-        if item["keyword"] not in existing_kws:
-            existing.insert(0, entry)
-
-    _write_json(queue_file, existing[:50])
-    pid = os.getpid()
-    cmd_display = f"python -c \"from agent_tools import scout_high_value_keywords; scout_high_value_keywords('{cat}')\""
-    tail_str = "\n".join(f"[Queued] {a['keyword']} -> {a['target']}" for a in added)
-    receipt = _build_execution_receipt(cmd_str=cmd_display, pid=pid, exit_code=0, stdout_tail=tail_str)
-    badge = f"[실행 완료: 프로세스 PID {pid} / '{cat}' 고단가 공백 키워드 {len(added)}건 발굴 및 topic-scout-queue.json 등록]"
-    return {
-        "ok": True,
-        "tool": "scout_high_value_keywords",
-        "pid": pid,
-        "exitCode": 0,
-        "cmd": cmd_display,
-        "stdoutTail": tail_str,
-        "executionReceipt": receipt,
-        "category": cat,
-        "keywords": added,
-        "state": f"고단가 키워드 {len(added)}건 큐 등록 완료",
-        "badge": badge,
-    }
+    """Start actual source scouting; a launch receipt is not a discovery result."""
+    from radar_scout import SCOUT
+    from chat_room import publish_radar_briefing
+    claim = SCOUT.trigger(publish_radar_briefing)
+    state = "실제 원천 자료 수집 시작; 결과는 내부 채팅에 게시 예정" if claim["started"] else "기존 실행과 중복되어 새 수집은 시작하지 않음"
+    receipt = _build_execution_receipt(cmd_str="radar_scout.SCOUT.trigger (in-process thread)", pid=os.getpid(), exit_code=0, stdout_tail=state)
+    return {"ok": True, "tool": "scout_high_value_keywords", "started": claim["started"], "runId": claim["runId"],
+            "executionReceipt": receipt, "state": state, "category": category, "keywords": [],
+            "badge": "[스카우팅 실행 접수: 발굴·빈집·고단가·외부 발행 완료 아님]"}
 
 
 # ============================================================================
@@ -1982,13 +1876,21 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
             return executed
 
     if slug == "radar":
-        if is_action_intent or any(k in lower for k in ("키워드", "주제", "스카우트", "발굴", "추천")):
+        if is_action_intent or any(k in lower for k in ("키워드", "주제", "스카우트", "스카우팅", "발굴", "추천", "사업", "마케팅", "찾아와")):
             cat = "정책·지원금" if "지원금" in lower or "정책" in lower else ("금융·연금" if "금융" in lower or "연금" in lower else "정책·금융·생활")
             executed.append(scout_high_value_keywords(cat))
         return executed
 
     # 2. Global Priority: Automated Unindexed Site & URL Indexing Submission
     if has_indexing_keywords and (is_action_intent or any(k in lower for k in ("체크", "요청", "점검", "확인", "제출", "자동으로", "해줘", "안된", "안 된"))):
+        if not any(k in lower for k in ("제출해", "요청해", "등록해", "색인해", "제출 실행", "요청 실행")):
+            from chat_room import radar_indexing_evidence, format_radar_indexing_evidence
+            evidence = radar_indexing_evidence()
+            summary = format_radar_indexing_evidence(evidence)
+            executed.append({"ok": True, "tool": "read_indexing_status", "state": summary,
+                             "evidence": evidence, "badge": "[4대 엔진 원장 조회; 제출 미실행]",
+                             "executionReceipt": _build_execution_receipt("read indexing ledgers", os.getpid(), 0, summary)})
+            return executed
         matched_dom = next((d for d in CF_16_DOMAINS if d in lower or d.split(".")[0] in lower), "all")
         if matched_dom != "all":
             executed.append(run_auto_indexer(matched_dom))

@@ -606,7 +606,7 @@ DOMAIN_IDENTITY_SPECS: Dict[str, Dict[str, Any]] = {
     "nolplace.com": {
         "id": 14,
         "domain": "nolplace.com",
-        "workerName": "incomethemax",
+        "workerName": "panda-01",
         "name": "놀플레이스 핫플 가이드",
         "slogan": "브런치북 스타일 주말 나들이·전시·테마파크·주차 코스북",
         "category": "수목원·테마파크",
@@ -719,7 +719,7 @@ DOMAIN_IDENTITY_SPECS: Dict[str, Dict[str, Any]] = {
     "must-pick.com": {
         "id": 11,
         "domain": "must-pick.com",
-        "workerName": "shopbest",
+        "workerName": "mustpick",
         "name": "머스트픽 가전·환급 비교",
         "slogan": "다나와 DPG·컨슈머리포트 스타일 가전 스펙·환급금·A/S 비교 랩",
         "category": "대형·주방가전",
@@ -3406,10 +3406,10 @@ DOMAIN_WORKER_NAMES: Dict[str, str] = {
     "maxnote.kr": "maxnote",
     "must-joy.com": "mustjoy",
     "tripmarvel.com": "tripmarvel",
-    "must-pick.com": "shopbest",
+    "must-pick.com": "mustpick",
     "woorinote.kr": "woorinote",
     "daynote.kr": "daynote",
-    "nolplace.com": "incomethemax",
+    "nolplace.com": "panda-01",
     "soulnote.kr": "soulnote",
     "joynote.kr": "joynote",
 }

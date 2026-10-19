@@ -279,7 +279,27 @@
     "cdp": 9334,
     "status": "ui_verified_manual_import",
     "reason": "정상 계정 UI 확인 · 보고서 7개 수동 검증 · www 미등록 9개 · 자동 지속 UI 수집 미검증",
-    "loginAccount": "mustpickinfo"
+    "loginAccount": "mustpickinfo",
+    "registeredCanonicalDomains": [
+      "baronote.kr",
+      "daynote.kr",
+      "healthcox.com",
+      "joynote.kr",
+      "justinfo.co.kr",
+      "maxnote.kr",
+      "meganote.kr",
+      "must-good.com",
+      "must-joy.com",
+      "must-pick.com",
+      "nolplace.com",
+      "smilenote.kr",
+      "soulnote.kr",
+      "topnote.kr",
+      "tripmarvel.com",
+      "woorinote.kr"
+    ],
+    "registrationSource": "server/data/searchadvisor-status.json",
+    "registrationCheckedAt": "2026-10-19T12:49:29.335368+09:00"
   },
   "adsense_accounts": {
     "sj": {
@@ -362,10 +382,24 @@
     "ui_budget_seconds": 420,
     "refresh_hours": 24,
     "fresh_hours": 26,
-    "mode": "read_only_owner_ui"
+    "mode": "authorized_request_owner_ui",
+    "request_indexing_authorized": true,
+    "request_indexing_accounts": [
+      "sj"
+    ],
+    "request_authorization": "User explicit request: inspect missing URLs and request indexing, daily budget 10",
+    "request_authorizedAt": "2026-10-19T03:44:54.050964+00:00"
   },
   "bing_search": {
     "account": "sj",
     "api_key_file": "C:\\Users\\baro7\\.barolab\\credentials\\bing-sj-api-key.txt"
+  },
+  "searchadvisor": {
+    "mode": "authorized_visible_ui",
+    "request_authorized": true,
+    "account": "soultin",
+    "daily_cap": 50,
+    "authorization": "User requested controlled visible SearchAdvisor requests; account-wide history baseline and CAPTCHA stop required",
+    "authorizedAt": "2026-10-19T03:54:49.356357+00:00"
   }
 }

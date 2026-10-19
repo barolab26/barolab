@@ -19,7 +19,10 @@ from xml.etree import ElementTree
 
 import requests
 
-from metrics import DATA, CONFIG, inventory, read_json, atomic_write, collector_lock, stamp, search_property
+try:
+    from .metrics import DATA, CONFIG, inventory, read_json, atomic_write, collector_lock, stamp, search_property
+except ImportError:
+    from metrics import DATA, CONFIG, inventory, read_json, atomic_write, collector_lock, stamp, search_property
 
 SNAPSHOT = DATA / 'traffic.json'
 METRICS = ['totalUsers', 'sessions', 'screenPageViews']
@@ -745,6 +748,165 @@ def bing_sites(credentials, client=requests):
     # The API also returns verification tokens. Never retain the raw response.
     return [{'url': row['Url'], 'verified': row.get('IsVerified') is True}
             for row in rows if isinstance(row, dict) and isinstance(row.get('Url'), str)], None
+
+
+def _configured_bing_site(site_url):
+    allowed = {s['url'] for s in inventory() if s.get('platform') == 'cf'}
+    if site_url not in allowed or not site_url.startswith('https://www.'):
+        raise ValueError('BING_SITE_OUTSIDE_CANONICAL_CF_INVENTORY')
+
+
+def bing_site_registration(method, site_url, credentials, *, authorized=False, client=requests):
+    """Explicitly authorized AddSite/VerifySite only; never general API dispatch."""
+    if not authorized:
+        raise ValueError('BING_SITE_REGISTRATION_AUTHORIZATION_REQUIRED')
+    if method not in ('AddSite', 'VerifySite'):
+        raise ValueError('BING_SITE_REGISTRATION_METHOD_NOT_ALLOWED')
+    _configured_bing_site(site_url)
+    params, headers = {}, {}
+    if credentials.get('token'):
+        headers['Authorization'] = 'Bearer ' + credentials['token']
+    elif credentials.get('key'):
+        params['apikey'] = credentials['key']
+    else:
+        return {'status': 'credential_missing', 'verified': False}
+    try:
+        response = client.post('https://ssl.bing.com/webmaster/api.svc/json/' + method,
+            params=params, headers=headers, json={'siteUrl': site_url}, timeout=25,
+            allow_redirects=False)
+        if response.status_code != 200:
+            return {'status': 'request_rejected', 'httpStatus': response.status_code, 'verified': False}
+        payload = response.json()
+        if not isinstance(payload, dict) or 'd' not in payload:
+            return {'status': 'invalid_response', 'verified': False}
+        value = payload['d']
+        if method == 'AddSite':
+            return {'status': 'added' if value is None else 'invalid_response',
+                    'httpStatus': 200, 'verified': False}
+        if type(value) is not bool:
+            return {'status': 'invalid_response', 'verified': False}
+        return {'status': 'verified' if value else 'verification_pending',
+                'httpStatus': 200, 'verified': value}
+    except Exception:
+        return {'status': 'request_unconfirmed', 'verified': False}
+
+
+def bing_verification_material(site_url, credentials, client=requests):
+    """Return only one configured site's codes IN MEMORY; caller must not log/save."""
+    _configured_bing_site(site_url)
+    rows, error = bing_request('GetUserSites', None, credentials, client)
+    if error:
+        return None, error
+    row = next((r for r in rows if isinstance(r, dict) and r.get('Url') == site_url), None)
+    if row is None:
+        return None, 'BING_SITE_NOT_REGISTERED'
+    return {'verified': row.get('IsVerified') is True,
+            'authenticationCode': row.get('AuthenticationCode'),
+            'dnsVerificationCode': row.get('DnsVerificationCode')}, None
+
+
+def ensure_bing_verification_cname(domain, dns_name, zone_id, headers, *, authorized=False, client=requests):
+    """Add or reuse the one Bing proof CNAME; never edit/delete another record."""
+    if not authorized:
+        raise ValueError('BING_DNS_AUTHORIZATION_REQUIRED')
+    _configured_bing_site('https://www.' + domain + '/')
+    name = str(dns_name or '').lower().rstrip('.')
+    if not re.fullmatch(r'[a-f0-9]{16,64}\.' + re.escape(domain), name):
+        raise ValueError('BING_DNS_PROOF_OUTSIDE_EXACT_DOMAIN')
+    endpoint = 'https://api.cloudflare.com/client/v4/zones/' + zone_id
+    def checked(response):
+        if response.status_code != 200:
+            raise RuntimeError('CF_DNS_HTTP_' + str(response.status_code))
+        body = response.json()
+        if body.get('success') is not True:
+            raise RuntimeError('CF_DNS_OPERATION_UNCONFIRMED')
+        return body['result']
+    zone = checked(client.get(endpoint, headers=headers, timeout=25, allow_redirects=False))
+    if zone.get('name') != domain or zone.get('status') != 'active' or not zone.get('account', {}).get('id'):
+        raise ValueError('CF_DNS_ZONE_OR_ACCOUNT_MISMATCH')
+    records = checked(client.get(endpoint + '/dns_records', params={'name': name},
+                                 headers=headers, timeout=25, allow_redirects=False))
+    def matches(record):
+        return (record.get('name', '').lower().rstrip('.') == name and record.get('type') == 'CNAME'
+                and record.get('content', '').lower().rstrip('.') == 'verify.bing.com'
+                and record.get('proxied') is False)
+    if records:
+        if not all(matches(record) for record in records):
+            raise ValueError('CF_DNS_EXISTING_RECORD_CONFLICT')
+        record, action = records[0], 'reused'
+    else:
+        record = checked(client.post(endpoint + '/dns_records', headers=headers,
+            json={'type': 'CNAME', 'name': name, 'content': 'verify.bing.com', 'ttl': 300, 'proxied': False},
+            timeout=25, allow_redirects=False))
+        if not matches(record) or not record.get('id'):
+            raise RuntimeError('CF_DNS_CREATED_RECORD_UNCONFIRMED')
+        action = 'created'
+    confirmed = checked(client.get(endpoint + '/dns_records/' + record['id'], headers=headers,
+                                   timeout=25, allow_redirects=False))
+    if not matches(confirmed):
+        raise RuntimeError('CF_DNS_READBACK_MISMATCH')
+    return {'domain': domain, 'type': 'CNAME', 'target': 'verify.bing.com', 'proxied': False,
+            'action': action, 'recordId': record['id'], 'zoneVerified': True, 'accountVerified': True}
+
+
+def bing_submission_request(method, site_url, credentials, urls=None, client=requests):
+    """Only the documented quota GET and SubmitUrlBatch POST are writable here.
+
+    No response text, request URL, token or credential is included in failures.
+    Submit receipt is not evidence that a URL was crawled or indexed.
+    """
+    if method not in ('GetUrlSubmissionQuota', 'SubmitUrlBatch'):
+        raise ValueError('BING_SUBMISSION_METHOD_NOT_ALLOWED')
+    if method == 'SubmitUrlBatch' and (not isinstance(urls, list) or not 1 <= len(urls) <= 500):
+        raise ValueError('BING_BATCH_SIZE_INVALID')
+    params, headers = {}, {}
+    if credentials.get('token'):
+        headers['Authorization'] = 'Bearer ' + credentials['token']
+    elif credentials.get('key'):
+        params['apikey'] = credentials['key']
+    else:
+        return None, 'BING_CREDENTIAL_MISSING'
+    endpoint = 'https://ssl.bing.com/webmaster/api.svc/json/' + method
+    try:
+        if method == 'GetUrlSubmissionQuota':
+            response = client.get(endpoint, params={**params, 'siteUrl': site_url}, headers=headers,
+                                  timeout=25, allow_redirects=False)
+        else:
+            response = client.post(endpoint, params=params, headers=headers,
+                json={'siteUrl': site_url, 'urlList': urls}, timeout=25, allow_redirects=False)
+        if response.status_code != 200:
+            return None, 'BING_HTTP_' + str(response.status_code)
+        payload = response.json()
+        if not isinstance(payload, dict) or 'd' not in payload:
+            return None, 'BING_RESPONSE_INVALID'
+        if method == 'SubmitUrlBatch':
+            return ({'accepted': True, 'httpStatus': 200}, None) if payload['d'] is None else (None, 'BING_RESPONSE_INVALID')
+        quota = payload['d']
+        if not isinstance(quota, dict) or any(type(quota.get(k)) is not int or quota[k] < 0
+                                            for k in ('DailyQuota', 'MonthlyQuota')):
+            return None, 'BING_QUOTA_INVALID'
+        return {k: quota[k] for k in ('DailyQuota', 'MonthlyQuota')}, None
+    except Exception:
+        return None, 'BING_TRANSPORT_OR_JSON_ERROR'
+
+
+def bing_credentials(config):
+    """Read private configured credentials without copying secrets into state."""
+    options = config.get('bing_search', {})
+    def read_private(filename):
+        if not filename:
+            return None
+        path = Path(filename).expanduser().resolve()
+        if not path.is_relative_to((Path.home() / '.barolab' / 'credentials').resolve()):
+            raise ValueError('BING_CREDENTIAL_FILE_NOT_PRIVATE')
+        value = path.read_text(encoding='utf-8-sig').strip()
+        if not value or '\n' in value or '\r' in value:
+            raise ValueError('BING_CREDENTIAL_FILE_INVALID')
+        return value
+    return {'key': options.get('api_key') or os.environ.get(options.get('api_key_env', 'BING_WEBMASTER_API_KEY'))
+                   or read_private(options.get('api_key_file')),
+            'token': options.get('access_token') or os.environ.get(options.get('access_token_env', 'BING_WEBMASTER_ACCESS_TOKEN'))
+                     or read_private(options.get('access_token_file'))}
 
 
 def bing_rows(rows, queries=False):
