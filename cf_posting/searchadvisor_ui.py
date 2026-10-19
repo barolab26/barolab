@@ -55,7 +55,7 @@ def paused_reason(text, url=''):
 
 
 def _text(page):
-    return page.locator('body').inner_text(timeout=15000)
+    return page.locator('body').inner_text(timeout=60000)
 
 
 def _check(page):
@@ -66,8 +66,9 @@ def _check(page):
 
 def _history(page, origin):
     page.goto('https://searchadvisor.naver.com/console/site/request/crawl?site=' + quote(origin, safe=''),
-              wait_until='domcontentloaded', timeout=45000)
-    page.get_by_text('수집 요청 내역', exact=True).wait_for(timeout=20000)
+              wait_until='domcontentloaded', timeout=90000)
+    page.get_by_role('textbox').first.wait_for(state='visible', timeout=60000)
+    page.wait_for_function("() => [...document.querySelectorAll('tr')].some(r => /\\d{2}\\.\\d{2}\\.\\d{2}/.test(r.innerText)) || document.body.innerText.includes('데이터가 없습니다')", timeout=60000)
     _check(page)
     text = _text(page)
     rows = page.get_by_role('row').all_inner_texts()
@@ -81,12 +82,12 @@ def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
     ledger.record_history_baseline(visible, scope_sites=[origin], complete=True, evidence={
         'source': 'visible site history immediately before submission', 'checkedAt': ledger.now(),
         'siteListComplete': True, 'allHistoryPagesComplete': True}, path=path)
-    box = page.get_by_role('textbox', name=origin, exact=True)
+    box = page.get_by_role('textbox').first
     box.fill(url)
     _check(page)
     ledger.reserve_crawl(url, path=path)
     try:
-        page.get_by_role('button', name='확인', exact=True).click(timeout=15000)
+        page.get_by_role('button', name='확인', exact=True).click(timeout=60000)
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             reason = paused_reason(_text(page), page.url)
@@ -108,7 +109,9 @@ def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
         return 'unknown'
 
 
-def run(*, apply=False, path=ledger.LEDGER):
+def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5):
+    if not 1 <= batch_size <= 10:
+        raise ValueError('batch_size_out_of_range')
     if not apply:
         return {'status': 'explicit_apply_required', 'submitted': 0}
     with collector_lock(Path(path).with_suffix('.ui.lock')) as acquired:
@@ -127,7 +130,8 @@ def run(*, apply=False, path=ledger.LEDGER):
                 page = scope.acquire(browser.contexts[0], lambda p: p.url.startswith('https://searchadvisor.naver.com/console/'))
                 result['tabOwned'] = scope.owns(page)
                 try:
-                    page.goto(BOARD, wait_until='domcontentloaded', timeout=45000)
+                    page.goto(BOARD, wait_until='domcontentloaded', timeout=90000)
+                    page.get_by_text('사이트 목록', exact=False).first.wait_for(timeout=60000)
                     _check(page)
                     text = _text(page)
                     origins = sorted(set(s.strip().rstrip('/') for s in
@@ -142,17 +146,29 @@ def run(*, apply=False, path=ledger.LEDGER):
                             or not all_sites or len(all_sites) >= 100 or has_more
                             or not set(origins) <= {x.rstrip('/') for x in all_sites}):
                         raise ValueError('entire_account_site_list_unconfirmed')
-                    today_urls = []
-                    for origin in origins:
-                        today_urls.extend(_history(page, origin))
-                    ledger.record_history_baseline(today_urls, scope_sites=origins, complete=True, evidence={
-                        'source': 'visible account board and every site history', 'checkedAt': ledger.now(),
-                        'siteListComplete': True, 'allHistoryPagesComplete': True}, path=path)
                     state = json.loads(Path(path).read_text(encoding='utf-8'))
+                    candidates = [x['url'] for x in state.get('crawlQueue', [])
+                                  if x['url'] not in {r['url'] for r in state['crawlRequests']}]
+                    selected = domain.rstrip('/') if domain else next(
+                        ('https://' + urlsplit(u).netloc for u in candidates
+                         if 'https://' + urlsplit(u).netloc in origins), None)
+                    if selected not in origins:
+                        raise ValueError('selected_site_unconfirmed')
+                    result['site'] = selected
+                    result['batchSize'] = batch_size
+                    result['stage'] = 'site_history'
+                    today_urls = _history(page, selected)
+                    ledger.record_history_baseline(today_urls, scope_sites=[selected], complete=True, evidence={
+                        'source': 'visible account board and selected site history', 'checkedAt': ledger.now(),
+                        'siteListComplete': True, 'allHistoryPagesComplete': True}, path=path)
                     reserved = {x['url'] for x in state['crawlRequests']}
                     for item in state.get('crawlQueue', []):
                         url = item['url']
-                        budget = ledger.crawl_budget(site='https://' + urlsplit(url).netloc, path=path)
+                        if 'https://' + urlsplit(url).netloc != selected:
+                            continue
+                        if result['submitted'] >= batch_size:
+                            break
+                        budget = ledger.crawl_budget(site=selected, path=path)
                         if budget['remaining'] == 0:
                             result.setdefault('exhaustedSites', [])
                             if budget['site'] not in result['exhaustedSites']:
@@ -160,6 +176,7 @@ def run(*, apply=False, path=ledger.LEDGER):
                             continue
                         if url in reserved or 'https://' + urlsplit(url).netloc not in origins or url in today_urls:
                             continue
+                        result['stage'] = 'submit'
                         outcome = submit_visible(page, url, path=path)
                         if outcome != 'request_received':
                             scope.retain(page, 'Submission started; CAPTCHA or result needs review')
@@ -168,11 +185,7 @@ def run(*, apply=False, path=ledger.LEDGER):
                     result['status'] = 'completed'
                 except ValueError as exc:
                     # Controlled symbolic reasons only, never raw page/credentials.
-                    budget = ledger.crawl_budget(path=path)
-                    if budget['remaining'] == 0:
-                        result.update(budget)
-                    else:
-                        result['reason'] = str(exc) if re.fullmatch(r'[a-z_]+', str(exc)) else 'ledger_gate_paused'
+                    result['reason'] = str(exc) if re.fullmatch(r'[a-z_]+', str(exc)) else 'ledger_gate_paused'
                 except Exception as exc:
                     result['reason'] = type(exc).__name__
         return result
@@ -181,4 +194,7 @@ def run(*, apply=False, path=ledger.LEDGER):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apply', action='store_true')
-    print(json.dumps(run(apply=parser.parse_args().apply), ensure_ascii=False))
+    parser.add_argument('--domain')
+    parser.add_argument('--batch-size', type=int, default=5, choices=range(1, 11))
+    args = parser.parse_args()
+    print(json.dumps(run(apply=args.apply, domain=args.domain, batch_size=args.batch_size), ensure_ascii=False))
