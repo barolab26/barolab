@@ -3,7 +3,7 @@
   "enabled": true,
   "account_key": "mustpickinfo",
   "accountConfirmed": true,
-  "model": "gpt-6.1-sol",
+  "model": "gpt-6-luna",
   "provider": "authenticated-codex-subscription",
   "trialDays": 14,
   "continuousMode": true,
