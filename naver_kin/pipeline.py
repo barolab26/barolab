@@ -292,9 +292,17 @@ def record_verification(db, qid, evidence):
                 and evidence.get('answer_text_sha256') == hashlib.sha256(document['answer_text'].encode()).hexdigest()
                 and evidence.get('outbound_url') == document['attribution']['outboundUrl'])
     if verified:
+        verified_url = evidence.get('answer_url')
+        if verified_url and (question_id(urlsplit(verified_url)._replace(fragment='').geturl()) != qid
+                             or urlsplit(verified_url).fragment != 'answer' + row['answer_id']
+                             or parse_qs(urlsplit(verified_url).query).get('answerNo') != [row['answer_id']]):
+            raise ValueError('Verified answer URL question mismatch')
+        if verified_url and verified_url != row['answer_url']:
+            evidence = {**evidence, 'previous_answer_url': row['answer_url'],
+                        'urlCorrectionReason': 'answerNo aligned to existing ledger answer_id; no resubmission'}
         with db:
-            db.execute("UPDATE questions SET state='published_verified',result=?,updated_at=? WHERE question_id=?",
-                       (json.dumps(evidence, ensure_ascii=False), stamp(), qid))
+            db.execute("UPDATE questions SET state='published_verified',result=?,updated_at=?,answer_url=COALESCE(?,answer_url) WHERE question_id=?",
+                       (json.dumps(evidence, ensure_ascii=False), stamp(), verified_url, qid))
         from common.llm_client import memory_event
         memory_event(f'kin:{qid}:{row["answer_id"]}', 'pipeline_publication_verified',
                      'KnowledgeIn public answer identity, content hash and outbound URL verified.',

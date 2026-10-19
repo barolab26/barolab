@@ -299,6 +299,8 @@ def _parse_question_ownership(html, account, identifier):
         if marker != control:
             return {**result, 'answer_ids': own, 'reason': 'ownership_markers_disagree'}
     result['answer_ids'] = own
+    # Positive ownership survives pagination; absence still requires every answer.
+    result['verified_owned_answer_ids'] = own
     if len(nodes) != total:
         return {**result, 'reason': 'question_answers_partially_loaded'}
     return {**result, 'known': True, 'complete': True, 'reason': 'complete_authenticated_question'}
@@ -454,7 +456,7 @@ def publish(account, question_url, answer_text, before_submit=None):
             return {"answer_url": question_url, "answer_id": None,
                     "reason": "submitted_unverified: answer not uniquely identified"}
         aid = matches[0]["id"].split("_", 1)[1]
-        return {"answer_url": question_url.split("#")[0] + "#answer" + aid, "answer_id": aid}
+        return {"answer_url": exact_answer_url(question_url, aid), "answer_id": aid}
 
 
 def _type_paragraphs(keyboard, text):
@@ -468,6 +470,17 @@ def _normalized(text):
     return re.sub(r"\s+", " ", text.replace("\u200b", "")).strip()
 
 
+def exact_answer_url(url, answer_id):
+    """Select the actual answer page, not the question's old answerNo pagination."""
+    question_id(url)
+    if not str(answer_id or '').isdigit():
+        raise ValueError('Exact numeric answer ID required')
+    parsed = urlsplit(url)
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    query['answerNo'] = [str(answer_id)]
+    return parsed._replace(query=urlencode(query, doseq=True), fragment='answer' + str(answer_id)).geturl()
+
+
 def verify_public(account, answer_url, expected_text, outbound_url, answer_id=None):
     """Anonymous HTTP evidence only; masked identities never prove an exact account."""
     account_config(account)
@@ -476,6 +489,9 @@ def verify_public(account, answer_url, expected_text, outbound_url, answer_id=No
                 "verified": False, "public": False, "outbound_url": outbound_url,
                 "answer_text_sha256": hashlib.sha256(expected_text.encode("utf-8")).hexdigest(),
                 "checked_at": datetime.now(timezone.utc).isoformat()}
+    if answer_id and str(answer_id).isdigit():
+        answer_url = exact_answer_url(answer_url, answer_id)
+        evidence['answer_url'] = answer_url
     response = requests.get(answer_url, timeout=20, allow_redirects=False,
                             headers={"User-Agent": "Mozilla/5.0"})
     if response.status_code != 200:
@@ -499,12 +515,11 @@ def verify_public(account, answer_url, expected_text, outbound_url, answer_id=No
         try:
             with session(account) as page:
                 ownership = _question_ownership(page, account, answer_url)
-                identity_proven = (ownership['known'] and ownership['complete']
-                                   and str(answer_id) in ownership['answer_ids'])
+                identity_proven = str(answer_id) in ownership.get('verified_owned_answer_ids', [])
         except Exception as exc:
             return {**evidence, 'reason': 'public body/link matched; ownership inventory unavailable: ' + str(exc)}
         if not identity_proven:
             return {**evidence, "reason": "public body/link matched; exact author identity unavailable"}
-        evidence['ownership_evidence'] = 'authenticated exact-account current-question _myAnswer and owner controls; complete answer count'
+        evidence['ownership_evidence'] = 'authenticated exact-account current-question _myAnswer and owner controls; exact answer ID'
     return {**evidence, "account": account, "verified": True,
             "reason": "anonymous answer body/link matched; exact account ownership separately verified"}

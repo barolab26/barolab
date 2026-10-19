@@ -30,6 +30,14 @@ class BrowserEvidenceTests(unittest.TestCase):
         self.assertFalse(result['known'])
         self.assertFalse(result['complete'])
 
+    def test_partial_page_proves_positive_ownership_but_not_absence(self):
+        result = browser._parse_question_ownership(self.ownership_html(total=100, loaded=5, own=2), 'stone0747', '486320125')
+        self.assertFalse(result['known'])
+        self.assertFalse(result['complete'])
+        self.assertEqual(result['verified_owned_answer_ids'], ['2'])
+        mismatch = self.ownership_html(total=100, loaded=5, own=2).replace(' _myAnswer', '')
+        self.assertFalse(browser._parse_question_ownership(mismatch, 'stone0747', '486320125').get('verified_owned_answer_ids'))
+
     def test_existing_own_answer_matches_exact_account_and_number(self):
         result = browser._parse_question_ownership(self.ownership_html(own=2), 'stone0747', '486320125')
         self.assertTrue(result['known'])
@@ -78,6 +86,21 @@ class BrowserEvidenceTests(unittest.TestCase):
         self.assertTrue(evidence['public'])
         self.assertFalse(evidence['verified'])
         self.assertIsNone(evidence['account'])
+
+    def test_exact_answer_url_replaces_stale_pagination(self):
+        from urllib.parse import parse_qs, urlsplit
+        url = browser.exact_answer_url('https://kin.naver.com/qna/detail.naver?dirId=601&docId=123&answerNo=27#answer31', '31')
+        self.assertEqual(parse_qs(urlsplit(url).query)['answerNo'], ['31'])
+        self.assertEqual(parse_qs(urlsplit(url).query)['docId'], ['123'])
+        self.assertEqual(urlsplit(url).fragment, 'answer31')
+
+    @patch('naver_kin.browser.requests.get')
+    def test_verify_requests_exact_answer_page(self, get):
+        get.return_value = Mock(status_code=200, text='<div id="answer_31"><div class="profile_card"><a href="/profile?userId=adinfo0905">owner</a></div><p>Reviewed answer</p><a href="https://www.must-good.com/x">link</a></div>')
+        result = browser.verify_public('adinfo0905', 'https://kin.naver.com/qna/detail.naver?docId=123&answerNo=27#answer31', 'Reviewed answer', 'https://www.must-good.com/x', '31')
+        self.assertTrue(result['verified'])
+        self.assertIn('answerNo=31', get.call_args.args[0])
+        self.assertEqual(result['answer_url'], get.call_args.args[0])
 
     def test_existing_editor_draft_preserved(self):
         page = Mock()

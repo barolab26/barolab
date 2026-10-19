@@ -1,6 +1,7 @@
 """Automatic Naver Blog Public Publication Verification Worker (RSS + Ledger Reconciler)."""
 
 import json
+import hashlib
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -116,6 +117,54 @@ def _load_pipeline_status(js_path: Path):
     return json.loads(m.group(1))
 
 
+def verify_public_body(public_url, artifact_folder=None):
+    """Compare actual public paragraphs with the existing saved reservation document."""
+    from bs4 import BeautifulSoup
+    result = {'publicBodyMatched': None, 'bodyParagraphsMatch': None, 'matchedParagraphs': 0,
+              'substantiveParagraphs': 0, 'tagsVerified': None, 'bodyVerificationStatus': 'unknown'}
+    try:
+        public = requests.get(public_url, timeout=12)
+        result['publicHttpStatus'] = public.status_code
+        public.raise_for_status()
+        mobile_url = public_url.replace('https://blog.naver.com/', 'https://m.blog.naver.com/')
+        mobile = requests.get(mobile_url, timeout=12); mobile.raise_for_status()
+        soup = BeautifulSoup(mobile.content, 'html.parser')
+        paragraphs = [p.get_text('', strip=True) for p in soup.select('.se-main-container .se-text-paragraph')]
+        public_text = _norm_alnum(' '.join(paragraphs))
+        result['publicBodySha256'] = hashlib.sha256(public_text.encode('utf-8')).hexdigest() if public_text else None
+        if not artifact_folder:
+            result['bodyVerificationReason'] = 'saved_document_unavailable'
+            return result
+        path = Path(artifact_folder) / 'reserved-server-document.json'
+        saved = json.loads(path.read_text(encoding='utf-8'))['document']
+        wanted = []
+        def collect(value):
+            if isinstance(value, dict):
+                if isinstance(value.get('nodes'), list):
+                    text = ''.join(str(n.get('value', '')) for n in value['nodes'] if isinstance(n, dict))
+                    if len(_norm_alnum(text)) >= 10 and not text.lstrip().startswith('#'):
+                        wanted.append(_norm_alnum(text))
+                else:
+                    for key, child in value.items():
+                        if key != 'title':
+                            collect(child)
+            elif isinstance(value, list):
+                for child in value:
+                    collect(child)
+        collect(saved.get('components', []))
+        matched = sum(text in public_text for text in wanted)
+        valid = len(wanted) >= 3 and bool(public_text)
+        result.update(substantiveParagraphs=len(wanted), matchedParagraphs=matched,
+                      savedParagraphsIncludingHashtags=None, hashtagsExcludedFromBodyMatch=True,
+                      bodyVerificationSource='live mobile body vs existing reserved-server-document.json',
+                      bodyVerificationStatus=('matched' if matched == len(wanted) else 'mismatch') if valid else 'unknown',
+                      publicBodyMatched=(matched == len(wanted)) if valid else None,
+                      bodyParagraphsMatch=(matched == len(wanted)) if valid else None)
+    except (OSError, ValueError, KeyError, TypeError, requests.RequestException) as exc:
+        result['bodyVerificationReason'] = type(exc).__name__
+    return result
+
+
 def _save_pipeline_status(js_path: Path, data: dict):
     js_path.parent.mkdir(parents=True, exist_ok=True)
     payload = "window.__NAVER_PIPELINE_STATUS__ = " + json.dumps(data, ensure_ascii=False, indent=2) + ";\n"
@@ -175,6 +224,23 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     ps = _load_pipeline_status(dash_ps_path) or _load_pipeline_status(local_ps_path) or {}
 
     updated_count = 0
+    try:
+        attempts = json.loads((base_dir / 'data' / 'automation-journal.json').read_text(encoding='utf-8')).get('attempts', [])
+    except (OSError, ValueError):
+        attempts = []
+    artifacts = {a.get('publicUrl'): a.get('artifactFolder') for a in attempts if a.get('publicUrl') and a.get('artifactFolder')}
+    body_evidence = {}
+    def body_for(rss_item):
+        url = rss_item['publicUrl']
+        if url not in body_evidence:
+            expected_account = next((name for name, meta in accounts.items()
+                                     if meta['blog_id'] == rss_item.get('blogId')), None)
+            folder = artifacts.get(url) or next((a.get('artifactFolder') for a in attempts
+                if expected_account is not None and a.get('account') == expected_account
+                and _titles_match(a.get('topic'), rss_item.get('title'))
+                and a.get('publicationDate') == rss_item.get('publicationDate')), None)
+            body_evidence[url] = verify_public_body(url, folder)
+        return body_evidence[url]
 
     def _make_evidence_row(acc_name, blog_id, topic, reserve_time, rss_item, pub_date):
         eff_reserve = reserve_time or rss_item.get("reserveTime") or f"{pub_date} 11:00"
@@ -186,39 +252,31 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             "title": topic or rss_item["title"],
             "reserveTime": eff_reserve,
             "publicUrl": rss_item["publicUrl"],
-            "publishedAt": reserve_iso,
+            "publishedAt": rss_item.get("publishedAt"),
             "checkedAt": now_iso,
             "reportReceivedAt": now_iso,
             "observationTimePrecision": f"automatic RSS verification at {now_iso}",
-            "publicBodyMatched": True,
-            "bodyParagraphsMatch": True,
-            "matchedParagraphs": 10,
-            "substantiveParagraphs": 10,
-            "savedParagraphsIncludingHashtags": 11,
-            "hashtagsExcludedFromBodyMatch": True,
-            "tagsVerified": True,
-            "publicBodySha256": None,
+            **body_for(rss_item),
             "verificationSource": "naver-rss-auto-worker: live RSS feed exact title/account verified",
             "evidenceCollector": "naver_blog_posting.public_verification.reconcile",
-            "verified": True,
-            "publicPublicationVerified": True,
+            "verified": body_for(rss_item).get("publicHttpStatus") == 200,
+            "publicPublicationVerified": body_for(rss_item).get("publicHttpStatus") == 200,
             "publicationDate": pub_date,
             "actualPublishedAt": rss_item.get("publishedAt") or reserve_iso,
         }
 
     def _promote_slot_dict(slot_obj, rss_item, eff_reserve):
+        if body_for(rss_item).get("publicHttpStatus") != 200:
+            return
         reserve_iso = eff_reserve.replace(" ", "T") + ":00+09:00" if re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$", eff_reserve) else (rss_item.get("publishedAt") or now_iso)
         slot_obj["status"] = "done"
         slot_obj["publicationStatus"] = "verified_public"
         slot_obj["state"] = "verified_public"
         slot_obj["publicPublicationVerified"] = True
         slot_obj["publicUrl"] = rss_item["publicUrl"]
-        slot_obj["publishedAt"] = reserve_iso
+        slot_obj["publishedAt"] = rss_item.get("publishedAt")
         slot_obj["publicVerifiedAt"] = now_iso
-        slot_obj["publicBodyMatched"] = True
-        slot_obj["bodyParagraphsMatch"] = True
-        slot_obj["matchedParagraphs"] = 10
-        slot_obj["substantiveParagraphs"] = 10
+        slot_obj.update(body_for(rss_item))
 
     # Walk completedByDate and completedAccounts in pipeline_status.js
     completed_by_date = ps.get("completedByDate") or {}
@@ -246,7 +304,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                         continue
                     s_topic = slot_val.get("topic") or record.get("topic")
                     s_reserve = slot_val.get("reserveTime") or record.get("reserveTime") or f"{pub_date} {slot_key}"
-                    matched_rss = next((r for r in rss_items if _titles_match(r["title"], s_topic)), None)
+                    matched_rss = next((r for r in rss_items if r.get("publicationDate") == pub_date and _titles_match(r["title"], s_topic)), None)
                     if matched_rss:
                         was_verified = slot_val.get("publicPublicationVerified") is True and bool(slot_val.get("publicUrl"))
                         _promote_slot_dict(slot_val, matched_rss, s_reserve)
@@ -262,7 +320,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             r_topic = record.get("topic")
             r_reserve = record.get("reserveTime")
             if r_topic:
-                matched_rss = next((r for r in rss_items if _titles_match(r["title"], r_topic)), None)
+                matched_rss = next((r for r in rss_items if r.get("publicationDate") == pub_date and _titles_match(r["title"], r_topic)), None)
                 if matched_rss:
                     was_verified = record.get("publicPublicationVerified") is True and bool(record.get("publicUrl"))
                     _promote_slot_dict(record, matched_rss, r_reserve or f"{pub_date} {record.get('scheduledSlot', '11:00')}")
@@ -289,7 +347,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                     continue
                 s_topic = slot_val.get("topic") or record.get("topic")
                 s_reserve = slot_val.get("reserveTime") or record.get("reserveTime") or f"{pub_date} {slot_key}"
-                matched_rss = next((r for r in rss_items if _titles_match(r["title"], s_topic)), None)
+                matched_rss = next((r for r in rss_items if r.get("publicationDate") == pub_date and _titles_match(r["title"], s_topic)), None)
                 if matched_rss:
                     _promote_slot_dict(slot_val, matched_rss, s_reserve)
                     ev_row = _make_evidence_row(acc_name, blog_id, s_topic, s_reserve, matched_rss, pub_date)
@@ -299,7 +357,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
         r_topic = record.get("topic")
         r_reserve = record.get("reserveTime")
         if r_topic:
-            matched_rss = next((r for r in rss_items if _titles_match(r["title"], r_topic)), None)
+            matched_rss = next((r for r in rss_items if r.get("publicationDate") == pub_date and _titles_match(r["title"], r_topic)), None)
             if matched_rss:
                 _promote_slot_dict(record, matched_rss, r_reserve or f"{pub_date} {record.get('scheduledSlot', '11:00')}")
 
@@ -314,7 +372,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                 if isinstance(slot_val, dict):
                     s_topic = slot_val.get("topic") or ps.get("topic")
                     s_reserve = slot_val.get("reserveTime") or ps.get("reserveTime") or f"{top_date} {slot_key}"
-                    matched_rss = next((r for r in rss_items if _titles_match(r["title"], s_topic)), None)
+                    matched_rss = next((r for r in rss_items if r.get("publicationDate") == top_date and _titles_match(r["title"], s_topic)), None)
                     if matched_rss:
                         _promote_slot_dict(slot_val, matched_rss, s_reserve)
                         if _titles_match(ps.get("topic"), s_topic):
@@ -346,15 +404,15 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             rss_items = rss_by_account.get(acc_name) or []
             if not a_topic or not rss_items:
                 continue
-            matched_rss = next((r for r in rss_items if _titles_match(r["title"], a_topic)), None)
+            matched_rss = next((r for r in rss_items if r.get("publicationDate") == pub_date and _titles_match(r["title"], a_topic)), None)
             if matched_rss:
                 was_verified = attempt.get("publicPublicationVerified") is True and bool(attempt.get("publicUrl"))
                 _promote_slot_dict(attempt, matched_rss, a_reserve or f"{pub_date} {slot_key}")
                 ev_row = _make_evidence_row(acc_name, blog_id, a_topic, a_reserve or f"{pub_date} {slot_key}", matched_rss, pub_date)
                 evidence_by_url[matched_rss["publicUrl"]] = ev_row
+                journal_dirty = True
                 if not was_verified:
                     updated_count += 1
-                    journal_dirty = True
                 # Ensure pipeline_status completedByDate also reflects this public promotion
                 if isinstance(ps, dict):
                     cbd = ps.setdefault("completedByDate", {})

@@ -340,6 +340,130 @@ class GrowthMutationGuards(unittest.TestCase):
         with self.assertRaises(ValueError):
             _doctor_rewrite({'title': '안내', 'content': '<h2>자료</h2>'})
 
+    def test_doctor_related_fallback_priority_and_truthful_basis(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch
+        now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        target = {'title': '부동산 규제지역 해제 조건'}
+        base = 'https://www.baronote.kr/'
+        posts = {base + name: {'id': index, 'title': '부동산 규제지역 대출 조건', 'content': '<p>내용</p>'}
+                 for index, name in enumerate(('traffic', 'indexed', 'recent'))}
+        recent = {'slug': 'recent', 'title': posts[base + 'recent']['title'], 'published_at': '2026-10-18T00:00:00Z'}
+        evidence = {'highTrafficPages': [{'url': base + 'traffic', 'sessions': 3}]}
+        index_row = {'url': base + 'indexed', 'verdict': 'PASS', 'indexed': True, 'attemptStatus': 'verified',
+                     'source': 'Google Search Console URL Inspection'}
+        metrics = {'sites': [{'google': {'urls': [index_row]}}]}
+        with patch.object(runner, '_growth_post', side_effect=lambda url, cache: posts[url]):
+            for expected in ('measured_ga4_traffic', 'observed_gsc_pass', 'published_within_30_days'):
+                result = runner._doctor_related(target, base + 'target', 'baronote.kr', evidence, metrics, now,
+                                                {'inventory:baronote.kr': [recent]})
+                self.assertEqual(result[2], expected)
+                if evidence['highTrafficPages']:
+                    evidence['highTrafficPages'] = []
+                else:
+                    index_row['verdict'] = 'NEUTRAL'
+
+    def test_doctor_related_rejects_unrelated_foreign_and_old_fallback(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch
+        now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        evidence = {'highTrafficPages': [{'url': 'https://www.daynote.kr/foreign', 'sessions': 100}]}
+        old = {'slug': 'old', 'title': '부동산 규제지역', 'published_at': '2026-08-01T00:00:00Z'}
+        with patch.object(runner, '_growth_post') as fetch:
+            result = runner._doctor_related({'title': '부동산 규제지역 해제'}, 'https://www.baronote.kr/target',
+                'baronote.kr', evidence, {}, now, {'inventory:baronote.kr': [old]})
+            self.assertEqual(result, (None, None, None))
+            fetch.assert_not_called()
+
+    def test_doctor_related_lending_body_evidence_and_created_inventory(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch
+        now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        target = {'title': '부동산 규제지역 해제', 'content': '<h2>대출 한도</h2><p>DSR과 부채 기준</p>'}
+        source = {'title': '직장인 신용 상품 비교', 'content': '<p>대출한도는 부채와 DSR을 확인합니다.</p>'}
+        cache = {'inventory:baronote.kr': [{'slug': 'credit', 'title': source['title'], 'created_at': '2026-10-18 00:00:00'}]}
+        with patch.object(runner, '_growth_post', return_value=source):
+            result = runner._doctor_related(target, 'https://www.baronote.kr/target', 'baronote.kr', {}, {}, now, cache)
+            self.assertEqual(result[2], 'published_inventory_created_within_30_days_body_relevance')
+            source['content'] = '<p>여행지 숙소 예약 방법과 확인 사항</p>'
+            self.assertEqual(runner._doctor_related(target, 'https://www.baronote.kr/target', 'baronote.kr', {}, {}, now, cache), (None, None, None))
+
+    def test_doctor_reciprocal_link_is_idempotent_and_clean(self):
+        from cf_posting.pipeline_runner import _doctor_link, BeautifulSoup
+        url = 'https://www.baronote.kr/source'
+        once = _doctor_link('<p>본문</p>', url, '관련 글 📌')
+        twice = _doctor_link(once, url, '관련 글 정정')
+        links = BeautifulSoup(twice, 'html.parser').find_all('a', href=url)
+        self.assertEqual(len(links), 1)
+        self.assertEqual(links[0].get_text(), '관련 글 정정')
+        natural = _doctor_link('<p><a href="' + url + '">직접 작성한 설명</a></p>', url, '새 제목')
+        self.assertEqual(BeautifulSoup(natural, 'html.parser').a.get_text(), '직접 작성한 설명')
+
+    def test_doctor_missing_links_reconcile_without_title_write_or_repeat(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch
+        now = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
+        url = 'https://www.baronote.kr/target'; source_url = 'https://www.baronote.kr/source'
+        target = {'id': 37, 'title': '기존 제목 유지', 'content': '<p>본문</p>'}
+        source = {'id': 82, 'title': '관련 제목', 'content': '<p>자료</p>'}
+        record = {'url': url, 'domain': 'baronote.kr', 'status': 'verified_title_only'}
+        schedule = {'doctorRuns': [record]}
+        with patch.object(runner, '_growth_post', return_value=target), \
+                patch.object(runner, '_doctor_related', return_value=(source, source_url, 'observed_gsc_pass')), \
+                patch.object(runner, 'save_schedule'), \
+                patch.object(runner, '_doctor_put', side_effect=lambda domain, post, changes: changes['content']) as put:
+            result = runner._doctor_reconcile_links(schedule, record, {}, {}, now, {}, True)
+            self.assertEqual(result['status'], 'verified')
+            self.assertEqual(put.call_count, 2)
+            self.assertTrue(all(set(call.args[2]) == {'content'} for call in put.call_args_list))
+            self.assertIsNone(runner._doctor_reconcile_links(schedule, record, {}, {}, now, {}, True))
+            self.assertEqual(put.call_count, 2)
+            record.update(status='verified_title_only', relatedLinkRepair={'status': 'write_unknown'})
+            self.assertIsNone(runner._doctor_reconcile_links(schedule, record, {}, {}, now, {}, True))
+
+    def test_doctor_public_stale_cache_purged_once_without_second_put(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch, MagicMock
+        original = {'id': 1, 'slug': 'target', 'title': 'old', 'content': '<p>old</p>'}
+        content = '<p data-barolab-doctor="related"><a href="https://www.baronote.kr/source">관련 글</a></p>'
+        def response(post=None, text=''):
+            obj = MagicMock(); obj.json.return_value = {'post': post}; obj.text = text
+            return obj
+        readbacks = [response(original), response({**original, 'content': content}),
+                     response(text='<p>stale</p>'), response(text=content)]
+        with patch.object(runner.requests, 'get', side_effect=readbacks), \
+                patch.object(runner.requests, 'put') as put, patch.object(runner, 'get_api_key', return_value='test'), \
+                patch.object(runner, '_doctor_purge_public') as purge:
+            self.assertEqual(runner._doctor_put('baronote.kr', original, {'content': content}), content)
+            put.assert_called_once()
+            purge.assert_called_once_with('baronote.kr', 'https://www.baronote.kr/target')
+
+    def test_doctor_cache_purge_uses_live_key_and_exact_urls_only(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch, MagicMock
+        zone = MagicMock(); zone.json.return_value = {'success': True, 'result': {'name': 'baronote.kr', 'account': {'id': 'account'}}}
+        script = MagicMock(); script.text = 'const key = url + "?_baro_v=current_version";'
+        purged = MagicMock(); purged.json.return_value = {'success': True}
+        with patch('common.content_maintenance.cache_binding', return_value=('zone', {})), \
+                patch.object(runner.requests, 'get', side_effect=[zone, script]), \
+                patch.object(runner.requests, 'post', return_value=purged) as post:
+            runner._doctor_purge_public('baronote.kr', 'https://www.baronote.kr/target')
+            self.assertEqual(post.call_args.kwargs['json'], {'files': ['https://www.baronote.kr/target',
+                'https://www.baronote.kr/target?_baro_v=current_version']})
+
+    def test_doctor_cache_purge_rejects_wrong_zone_or_ambiguous_worker_key(self):
+        from cf_posting import pipeline_runner as runner
+        from unittest.mock import patch, MagicMock
+        for zone_name, script_text in [('daynote.kr', '_baro_v=one'), ('baronote.kr', '_baro_v=one _baro_v=two')]:
+            zone = MagicMock(); zone.json.return_value = {'success': True, 'result': {'name': zone_name, 'account': {'id': 'account'}}}
+            script = MagicMock(); script.text = script_text
+            with patch('common.content_maintenance.cache_binding', return_value=('zone', {})), \
+                    patch.object(runner.requests, 'get', side_effect=[zone, script]), \
+                    patch.object(runner.requests, 'post') as post:
+                with self.assertRaises(RuntimeError):
+                    runner._doctor_purge_public('baronote.kr', 'https://www.baronote.kr/target')
+                post.assert_not_called()
+
     def test_doctor_publication_age_fallback_requires_measured_zero(self):
         from cf_posting import pipeline_runner as runner
         from unittest.mock import patch, MagicMock

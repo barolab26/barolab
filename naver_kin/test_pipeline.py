@@ -109,7 +109,13 @@ class LedgerTests(unittest.TestCase):
         self.assertFalse(p.record_verification(self.db,qid,evidence))
         evidence['public']=True;evidence['answer_id']='456'
         self.assertFalse(p.record_verification(self.db,qid,evidence))
-        evidence['answer_id']='123';self.assertTrue(p.record_verification(self.db,qid,evidence))
+        evidence['answer_id']='123'
+        old_url=doc['question']['question_url']+'#answer_123'
+        evidence['answer_url']=doc['question']['question_url']+'&answerNo=123#answer123'
+        self.assertTrue(p.record_verification(self.db,qid,evidence))
+        row=self.db.execute('SELECT answer_url,result FROM questions WHERE question_id=?',(qid,)).fetchone()
+        self.assertEqual(row['answer_url'],evidence['answer_url'])
+        self.assertEqual(json.loads(row['result'])['previous_answer_url'],old_url)
 
     def test_account_url_and_article_tampering_rejected(self):
         with self.assertRaises(ValueError):p.account_key('soultin')

@@ -5217,6 +5217,32 @@ def _doctor_rewrite(post):
     return rewritten, str(soup)
 
 
+def _doctor_purge_public(domain, url):
+    """Invalidate only the updated article and its actual deployed Worker cache key."""
+    from common.content_maintenance import cache_binding
+    from cf_posting.domain_themes import DOMAIN_WORKER_NAMES
+    zone, headers = cache_binding(domain)
+    response = requests.get(f'https://api.cloudflare.com/client/v4/zones/{zone}', headers=headers, timeout=15)
+    response.raise_for_status()
+    info = response.json()
+    if not info.get('success') or info['result'].get('name') != domain:
+        raise RuntimeError('Exact cache zone verification failed')
+    account = info['result']['account']['id']
+    worker = DOMAIN_WORKER_NAMES[domain]
+    response = requests.get(f'https://api.cloudflare.com/client/v4/accounts/{account}/workers/scripts/{worker}',
+                            headers=headers, timeout=20)
+    response.raise_for_status()
+    versions = set(re.findall(r'_baro_v=[A-Za-z0-9_]+', response.text))
+    if len(versions) != 1:
+        raise RuntimeError('Deployed article cache key is ambiguous')
+    canonical = requests.Request('GET', url).prepare().url
+    response = requests.post(f'https://api.cloudflare.com/client/v4/zones/{zone}/purge_cache',
+                             headers=headers, json={'files': [canonical, canonical + '?' + next(iter(versions))]}, timeout=20)
+    response.raise_for_status()
+    if response.json().get('success') is not True:
+        raise RuntimeError('Exact article cache purge failed')
+
+
 def _doctor_put(domain, original, changes):
     api = f"https://www.{domain}/api/posts/{original['id']}"
     latest = requests.get(api, timeout=15, allow_redirects=False)
@@ -5235,18 +5261,140 @@ def _doctor_put(domain, original, changes):
     verified = fetched.json()['post']
     if verified.get('slug') != original['slug'] or any(verified.get(k) != value for k, value in changes.items()):
         raise RuntimeError('API readback mismatch')
-    public = requests.get(f"https://www.{domain}/{original['slug']}", timeout=15, allow_redirects=False)
-    public.raise_for_status()
-    # Published HTML is UTF-8; requests may guess Latin-1 from a text/html header.
-    public.encoding = 'utf-8'
-    rendered = BeautifulSoup(public.text, 'html.parser')
-    if 'title' in changes:
-        if not any(h.get_text(' ', strip=True) == changes['title'] for h in rendered.select('h1')):
-            raise RuntimeError('Public H1 verification failed')
+    public_url = f"https://www.{domain}/{original['slug']}"
+    expected_links = BeautifulSoup(changes.get('content', ''), 'html.parser').select('[data-barolab-doctor="related"] a[href]')
+    for attempt in range(2):
+        public = requests.get(public_url, timeout=15, allow_redirects=False)
+        public.raise_for_status()
+        # Published HTML is UTF-8; requests may guess Latin-1 from a text/html header.
+        public.encoding = 'utf-8'
+        rendered = BeautifulSoup(public.text, 'html.parser')
         page_title = rendered.title.get_text(' ', strip=True) if rendered.title else ''
-        if not (page_title == changes['title'] or any(page_title.startswith(changes['title'] + separator) for separator in (' | ', ' - ', ' – ', ' — '))):
-            raise RuntimeError('Public title verification failed')
-    return public.text
+        title_ok = ('title' not in changes or
+                    (any(h.get_text(' ', strip=True) == changes['title'] for h in rendered.select('h1'))
+                     and (page_title == changes['title'] or any(page_title.startswith(changes['title'] + separator)
+                          for separator in (' | ', ' - ', ' – ', ' — ')))))
+        links_ok = all(any(link.get_text(' ', strip=True) == expected.get_text(' ', strip=True)
+                           for link in rendered.find_all('a', href=expected['href'])) for expected in expected_links)
+        if title_ok and links_ok:
+            return public.text
+        if attempt == 0:
+            _doctor_purge_public(domain, public_url)
+    raise RuntimeError('Public title or related-link verification failed after exact cache purge')
+
+
+def _doctor_related(target, url, domain, evidence, metrics, now, post_cache):
+    """Rank real same-domain related articles; fallback never implies measured traffic."""
+    def terms(title):
+        stop = {'확인', '방법', '안내', '최신', '정리', '핵심', '비교', '가지', '꿀팁', '기준'}
+        return {word for word in re.findall(r'[가-힣A-Za-z]{2,}', _doctor_normalize_text(title))
+                if word not in stop}
+    target_terms = terms(target['title'])
+    def lending_concepts(post):
+        text = re.sub(r'\s+', '', BeautifulSoup(post.get('content', ''), 'html.parser').get_text(' ', strip=True)).lower()
+        # Concrete lending concepts permit related articles with different headline wording.
+        return {concept for concept in ('대출한도', '부채', '금리', 'dsr', 'ltv', 'dti', '보증금', '상환능력', '신용점수') if concept in text}
+    target_concepts = lending_concepts(target)
+    options = []
+    for row in evidence.get('highTrafficPages', []):
+        if row.get('sessions', 0) > 0:
+            options.append((0, row.get('url'), 'measured_ga4_traffic', row.get('title', '')))
+    sites = metrics.get('sites', {})
+    for site in (sites.values() if isinstance(sites, dict) else sites):
+        for row in site.get('google', {}).get('urls', []):
+            if (row.get('verdict') == 'PASS' and row.get('indexed') is True
+                    and row.get('attemptStatus') == 'verified'
+                    and row.get('source') in ('Google Search Console URL Inspection', 'Google Search Console UI')):
+                options.append((1, row.get('url'), 'observed_gsc_pass', row.get('title', '')))
+    inventory_key = 'inventory:' + domain
+    if inventory_key not in post_cache:
+        post_cache[inventory_key] = published_inventory('https://www.' + domain)
+    for row in post_cache[inventory_key]:
+        try:
+            published = datetime.datetime.fromisoformat((row.get('published_at') or row.get('created_at') or '').replace('Z', '+00:00'))
+            if published.tzinfo is None:
+                published = published.replace(tzinfo=datetime.timezone.utc)
+            if 0 <= (now - published).total_seconds() <= 30 * 86400 and row.get('slug'):
+                basis = 'published_within_30_days' if row.get('published_at') else 'published_inventory_created_within_30_days'
+                options.append((2, 'https://www.' + domain + '/' + row['slug'], basis, row.get('title', '')))
+        except (ValueError, TypeError):
+            continue
+    seen = set()
+    for tier in (0, 1, 2):
+        reads = 0
+        ranked = sorted((row for row in options if row[0] == tier),
+                        key=lambda row: len(target_terms & terms(row[3])), reverse=True)
+        for _, candidate_url, basis, _ in ranked:
+            try:
+                candidate_domain, candidate_slug = _growth_url(candidate_url)
+                if candidate_domain != domain or candidate_slug == _growth_url(url)[1] or candidate_url in seen:
+                    continue
+                if reads >= 8:
+                    break
+                seen.add(candidate_url); reads += 1
+                candidate = _growth_post(candidate_url, post_cache)
+                if len(target_terms & terms(candidate['title'])) >= 2:
+                    return candidate, candidate_url, basis
+                if len(target_concepts & lending_concepts(candidate)) >= 2:
+                    return candidate, candidate_url, basis + '_body_relevance'
+            except (ValueError, KeyError, TypeError, RuntimeError, requests.RequestException):
+                continue
+    return None, None, None
+
+
+def _doctor_link(content, url, title):
+    """Add one related link or refresh its label without duplicating an existing link."""
+    soup = BeautifulSoup(_doctor_clean_content(content), 'html.parser')
+    matches = soup.find_all('a', href=url)
+    if matches:
+        for link in matches:
+            if link.find_parent(attrs={'data-barolab-doctor': 'related'}):
+                link.clear(); link.append(_doctor_normalize_text(title))
+    else:
+        box = soup.new_tag('p', attrs={'data-barolab-doctor': 'related'})
+        box.append('함께 확인하기: ')
+        link = soup.new_tag('a', href=url); link.append(_doctor_normalize_text(title))
+        box.append(link); soup.append(box)
+    return str(soup)
+
+
+def _doctor_reconcile_links(schedule, record, evidence, metrics, now, post_cache, apply=False):
+    """Finish a verified title-only repair once; uncertain link writes need inspection."""
+    if record.get('status') != 'verified_title_only' or record.get('relatedLinkRepair'):
+        return None
+    url = record['url']; domain, _ = _growth_url(url)
+    target = _growth_post(url, post_cache)
+    source, source_url, basis = _doctor_related(target, url, domain, evidence, metrics, now, post_cache)
+    if source is None:
+        return None
+    target_content = _doctor_link(target['content'], source_url, source['title'])
+    source_content = _doctor_link(source['content'], url, target['title'])
+    repair = {'status': 'preview', 'checkedAt': now.isoformat(), 'sourcePostId': source['id'],
+              'sourceUrl': source_url, 'selectionBasis': basis, 'titleUnchanged': True}
+    if not apply:
+        return {'url': url, 'domain': domain, 'status': 'preview', 'relatedLinkRepair': repair}
+    repair.update(status='write_intent', originalTarget=target, originalSource=source)
+    record['relatedLinkRepair'] = repair
+    save_schedule(schedule)
+    try:
+        # No title field is sent. Durable intent blocks retries after an ambiguous PUT.
+        target_public = _doctor_put(domain, target, {'content': target_content})
+        if not BeautifulSoup(target_public, 'html.parser').find('a', href=source_url):
+            raise RuntimeError('Public reciprocal-link verification failed')
+        repair['status'] = 'target_verified'; save_schedule(schedule)
+        source_public = _doctor_put(domain, source, {'content': source_content})
+        if not BeautifulSoup(source_public, 'html.parser').find('a', href=url):
+            raise RuntimeError('Public related-link verification failed')
+        repair.update(status='verified', verifiedAt=stamp())
+        record.update(status='verified', relatedLinkStatus='verified', reciprocalLinkStatus='verified',
+                      relatedSelectionBasis=basis, relatedSourceUrl=source_url, sourcePostId=source['id'])
+    except Exception as exc:
+        repair.update(status='write_unknown', errorType=type(exc).__name__)
+        record['status'] = 'write_unknown'
+    finally:
+        post_cache.pop(url, None); post_cache.pop(source_url, None)
+        save_schedule(schedule)
+    return record
 
 
 def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_domain=None, limit=None, metrics=None):
@@ -5283,6 +5431,24 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
     complete_domains = set(evidence.get('coverage', {}).get('completeTrafficDomains', []))
     if not traffic_complete and not complete_domains:
         return {'status': 'insufficient_evidence', 'complete': False, 'candidates': [], 'reasonCodes': evidence.get('reasonCodes', [])}
+    link_attempts = {}
+    for record in runs:
+        if target_domain and record.get('domain') != target_domain:
+            continue
+        if limit is not None and len(results) >= max(0, int(limit)):
+            break
+        if record.get('status') != 'verified_title_only' or record.get('relatedLinkRepair'):
+            continue
+        repair_domain = record.get('domain')
+        if link_attempts.get(repair_domain, 0) >= 2:
+            continue
+        link_attempts[repair_domain] = link_attempts.get(repair_domain, 0) + 1
+        try:
+            repaired = _doctor_reconcile_links(schedule, record, evidence, metrics, now, post_cache, apply)
+            if repaired is not None:
+                results.append(repaired)
+        except (ValueError, KeyError, RuntimeError, requests.RequestException):
+            reasons['link_reconciliation_unavailable'] = reasons.get('link_reconciliation_unavailable', 0) + 1
     def ordered_zero_pages():
         grouped = {}
         for page in evidence.get('zeroViewPages', []):
@@ -5331,31 +5497,16 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
             if (now - published).total_seconds() < 7 * 86400:
                 continue
             title, content = _doctor_rewrite(target)
-            tokens = {t for t in re.findall(r'[가-힣A-Za-z0-9]+', target['title']) if len(t) >= 3}
-            related = None
-            related_url = None
-            related_reads = 0
-            for row in evidence.get('highTrafficPages', []):
-                if row.get('url') == url or _growth_url(row.get('url'))[0] != domain or row.get('sessions', 0) <= 0:
-                    continue
-                if related_reads >= 8:
-                    break
-                related_reads += 1
-                try:
-                    candidate = _growth_post(row['url'], post_cache)
-                except (ValueError, KeyError, RuntimeError, requests.RequestException):
-                    reasons['related_source_unavailable'] = reasons.get('related_source_unavailable', 0) + 1
-                    continue
-                other = {t for t in re.findall(r'[가-힣A-Za-z0-9]+', candidate['title']) if len(t) >= 3}
-                if len(tokens & other) >= 2 and url not in candidate['content']:
-                    related = candidate
-                    related_url = row['url']
-                    break
+            related, related_url, related_basis = _doctor_related(target, url, domain, evidence, metrics, now, post_cache)
             if related is None:
-                reasons['no_related_high_traffic_candidate'] = reasons.get('no_related_high_traffic_candidate', 0) + 1
-            linked = (related['content'] if related else '') + '<p data-barolab-doctor="related">함께 확인하기: <a href="' + html.escape(url, quote=True) + '">' + html.escape(title) + '</a></p>'
+                reasons['no_related_candidate_after_fallback'] = reasons.get('no_related_candidate_after_fallback', 0) + 1
+            linked = _doctor_link(related['content'], url, title) if related else None
+            if related:
+                content = _doctor_link(content, related_url, related['title'])
             record = {'url': url, 'domain': domain, 'title': title, 'sourcePostId': related['id'] if related else None,
-                      'relatedLinkStatus': 'planned' if related else 'no_related_high_traffic_candidate',
+                      'relatedLinkStatus': 'planned' if related else 'no_related_candidate_after_fallback',
+                      'relatedSelectionBasis': related_basis, 'relatedSourceUrl': related_url,
+                      'reciprocalLinkStatus': 'planned' if related else 'unavailable',
                       'status': 'preview', 'checkedAt': now.isoformat(), 'googleIndex': indexed,
                       'eligibilityBasis': 'gsc_pass_7_days' if indexed else 'published_7_days_complete_ga4_zero',
                       'indexingVerifiedForSevenDays': indexed is not None,
@@ -5367,7 +5518,9 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
             runs.append(record); seen.add(url)
             save_schedule(schedule)  # Original bodies and intent durable before any external write.
             try:
-                _doctor_put(domain, target, {'title': title, 'content': content})
+                target_public = _doctor_put(domain, target, {'title': title, 'content': content})
+                if related and not BeautifulSoup(target_public, 'html.parser').find('a', href=related_url):
+                    raise RuntimeError('Public reciprocal-link verification failed')
                 post_cache.pop(url, None)
                 record['status'] = 'target_verified'; save_schedule(schedule)
                 if related is not None:
@@ -5375,7 +5528,7 @@ def growth_doctor(schedule=None, now=None, evidence=None, apply=False, target_do
                     post_cache.pop(related_url, None)
                     if not BeautifulSoup(public, 'html.parser').find('a', href=url):
                         raise RuntimeError('Public related-link verification failed')
-                    record.update(status='verified', relatedLinkStatus='verified', verifiedAt=stamp())
+                    record.update(status='verified', relatedLinkStatus='verified', reciprocalLinkStatus='verified', verifiedAt=stamp())
                 else:
                     record.update(status='verified_title_only', verifiedAt=stamp())
             except Exception as exc:

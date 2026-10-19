@@ -33,7 +33,35 @@
       ],
       "preparationTime": "08:30",
       "publicationDate": "2026-10-19",
-      "expected": "2026-10-19 19:30 KST 공개 예정"
+      "expected": "2026-10-19 19:30 KST 공개 예정",
+      "publicEvidence": {
+        "account": "soultin",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "국민연금 연기연금, 증액과 세금·건강보험료를 함께 따지는 기준",
+            "publicUrl": "https://blog.naver.com/mustpickinfo/224445266096",
+            "actualPublishedAt": "2026-10-19T11:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 22,
+            "substantiveParagraphs": 22,
+            "publicBodySha256": "2cf2f61849b4efef849d2b944eb62d63253bee02c38c3371e58f4b0861c5614d"
+          },
+          {
+            "title": "국민연금 월 167만 원 넘을 때 피부양자 탈락 기준과 지역건보료 확인 순서",
+            "publicUrl": "https://blog.naver.com/mustpickinfo/224445283525",
+            "actualPublishedAt": "2026-10-19T19:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 21,
+            "substantiveParagraphs": 21,
+            "publicBodySha256": "72d5fc5b85825f475265899d78ccfb535b0861761dff61a80f9a8132696056b8"
+          }
+        ]
+      }
     },
     {
       "account": "soul5373",
@@ -51,7 +79,35 @@
       ],
       "preparationTime": "09:00",
       "publicationDate": "2026-10-19",
-      "expected": "2026-10-19 20:00 KST 공개 예정"
+      "expected": "2026-10-19 20:00 KST 공개 예정",
+      "publicEvidence": {
+        "account": "soul5373",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "낙상 예방, 실내 미끄럼 방지와 안전한 하산 보행법 핵심 수칙",
+            "publicUrl": "https://blog.naver.com/mustinfo/224445274707",
+            "actualPublishedAt": "2026-10-19T12:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 16,
+            "substantiveParagraphs": 16,
+            "publicBodySha256": "9ddaa0be3af74d04957732ee32b708c1c4d0124f2962ef13e6f24483c6fab4fb"
+          },
+          {
+            "title": "환절기 새벽 운동과 심뇌혈관질환, 혈압 기준·응급 대처 확인",
+            "publicUrl": "https://blog.naver.com/mustinfo/224445303733",
+            "actualPublishedAt": "2026-10-19T20:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 23,
+            "substantiveParagraphs": 23,
+            "publicBodySha256": "d160884dc85415d2c257ffdbf1da6905398d06d6137720e349022d1aa327c141"
+          }
+        ]
+      }
     },
     {
       "account": "yoon_master",
@@ -69,7 +125,35 @@
       ],
       "preparationTime": "09:30",
       "publicationDate": "2026-10-19",
-      "expected": "2026-10-19 20:30 KST 공개 예정"
+      "expected": "2026-10-19 20:30 KST 공개 예정",
+      "publicEvidence": {
+        "account": "yoon_master",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "5060 니트 가디건 기장과 단추 여밈, 체형별 선택 기준",
+            "publicUrl": "https://blog.naver.com/yoonviews/224445345620",
+            "actualPublishedAt": "2026-10-19T12:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 21,
+            "substantiveParagraphs": 21,
+            "publicBodySha256": "3810f378a1a21429d7b9210285e4144472d14973f3c6d3ad9df5bf96d8526a34"
+          },
+          {
+            "title": "5060 가을 셔츠 롱원피스 기장과 벨트, 지금 자료로는 기준 확정이 어려워요",
+            "publicUrl": "https://blog.naver.com/yoonviews/224445327040",
+            "actualPublishedAt": "2026-10-19T20:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 15,
+            "substantiveParagraphs": 15,
+            "publicBodySha256": "406779120b79d426607b5ab607e95e85836fd779cbb6231beb1b32ccb6ef759e"
+          }
+        ]
+      }
     },
     {
       "account": "adinfo0905",
@@ -95,7 +179,35 @@
       ],
       "preparationTime": "08:00",
       "publicationDate": "2026-10-19",
-      "expected": "2026-10-19 11:00, 19:00 KST 공개 예정"
+      "expected": "2026-10-19 11:00, 19:00 KST 공개 예정",
+      "publicEvidence": {
+        "account": "adinfo0905",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "월세 세액공제 전입일·주소 대조와 제출 서류 확인 순서",
+            "publicUrl": "https://blog.naver.com/adinfo0905/224445246586",
+            "actualPublishedAt": "2026-10-19T11:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 20,
+            "substantiveParagraphs": 20,
+            "publicBodySha256": "3062d366c135993800cd6bb792311213ff2efc5ad69305f483a7648f6952a019"
+          },
+          {
+            "title": "주택담보대출 이자 소득공제, 12월 31일 세대주 요건과 서류 준비",
+            "publicUrl": "https://blog.naver.com/adinfo0905/224445254528",
+            "actualPublishedAt": "2026-10-19T18:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 25,
+            "substantiveParagraphs": 25,
+            "publicBodySha256": "8595aef2f5b7a67be07f699baaf27057e41eae9e017b3c0a3b96dca989a5c0fc"
+          }
+        ]
+      }
     },
     {
       "account": "stone0747",
@@ -121,7 +233,35 @@
       ],
       "preparationTime": "08:15",
       "publicationDate": "2026-10-19",
-      "expected": "2026-10-19 11:00, 19:00 KST 공개 예정"
+      "expected": "2026-10-19 11:00, 19:00 KST 공개 예정",
+      "publicEvidence": {
+        "account": "stone0747",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "2026 소상공인 경영안정 바우처 25만 원 지원 기준과 사용처 확인 순서",
+            "publicUrl": "https://blog.naver.com/stone0747/224445477738",
+            "actualPublishedAt": "2026-10-19T11:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 27,
+            "substantiveParagraphs": 27,
+            "publicBodySha256": "736b4373cb3e646d24adb1efd43058a95787b579365ba80e734a549c66417dd9"
+          },
+          {
+            "title": "소상공인 정책자금 대리대출 확인서 90일 유효기간과 지역신보 보증심사 준비",
+            "publicUrl": "https://blog.naver.com/stone0747/224445494615",
+            "actualPublishedAt": "2026-10-19T19:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 22,
+            "substantiveParagraphs": 22,
+            "publicBodySha256": "dcbe3365bb7d81f008bcc04510e200d2241cf5e54f80c63cfee8c12492e3e77c"
+          }
+        ]
+      }
     }
   ],
   "recovery": {
@@ -420,5 +560,158 @@
     "observedAt": "2026-10-19T18:22:34.379322+09:00",
     "source": "pipeline OS lock and execution journal",
     "heartbeatMeaning": "actual journal stage update; monitor timestamp is not runner heartbeat"
+  },
+  "manualPublicVerification": {
+    "checkedAt": "2026-10-19T23:41:18.635043+09:00",
+    "publicationDate": "2026-10-19",
+    "status": "verified_public",
+    "verifiedAccountCount": 5,
+    "verifiedPostCount": 10,
+    "bodyMatchVerified": true,
+    "tagsVerified": null,
+    "verificationSource": "live RSS + canonical HTTP200 + mobilebody vs saved reservationdocument",
+    "monitorClassificationStatus": "blocked_existing_artifact_path_outside_local_account_output",
+    "accounts": [
+      {
+        "account": "adinfo0905",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "월세 세액공제 전입일·주소 대조와 제출 서류 확인 순서",
+            "publicUrl": "https://blog.naver.com/adinfo0905/224445246586",
+            "actualPublishedAt": "2026-10-19T11:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 20,
+            "substantiveParagraphs": 20,
+            "publicBodySha256": "3062d366c135993800cd6bb792311213ff2efc5ad69305f483a7648f6952a019"
+          },
+          {
+            "title": "주택담보대출 이자 소득공제, 12월 31일 세대주 요건과 서류 준비",
+            "publicUrl": "https://blog.naver.com/adinfo0905/224445254528",
+            "actualPublishedAt": "2026-10-19T18:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 25,
+            "substantiveParagraphs": 25,
+            "publicBodySha256": "8595aef2f5b7a67be07f699baaf27057e41eae9e017b3c0a3b96dca989a5c0fc"
+          }
+        ]
+      },
+      {
+        "account": "soul5373",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "낙상 예방, 실내 미끄럼 방지와 안전한 하산 보행법 핵심 수칙",
+            "publicUrl": "https://blog.naver.com/mustinfo/224445274707",
+            "actualPublishedAt": "2026-10-19T12:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 16,
+            "substantiveParagraphs": 16,
+            "publicBodySha256": "9ddaa0be3af74d04957732ee32b708c1c4d0124f2962ef13e6f24483c6fab4fb"
+          },
+          {
+            "title": "환절기 새벽 운동과 심뇌혈관질환, 혈압 기준·응급 대처 확인",
+            "publicUrl": "https://blog.naver.com/mustinfo/224445303733",
+            "actualPublishedAt": "2026-10-19T20:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 23,
+            "substantiveParagraphs": 23,
+            "publicBodySha256": "d160884dc85415d2c257ffdbf1da6905398d06d6137720e349022d1aa327c141"
+          }
+        ]
+      },
+      {
+        "account": "soultin",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "국민연금 연기연금, 증액과 세금·건강보험료를 함께 따지는 기준",
+            "publicUrl": "https://blog.naver.com/mustpickinfo/224445266096",
+            "actualPublishedAt": "2026-10-19T11:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 22,
+            "substantiveParagraphs": 22,
+            "publicBodySha256": "2cf2f61849b4efef849d2b944eb62d63253bee02c38c3371e58f4b0861c5614d"
+          },
+          {
+            "title": "국민연금 월 167만 원 넘을 때 피부양자 탈락 기준과 지역건보료 확인 순서",
+            "publicUrl": "https://blog.naver.com/mustpickinfo/224445283525",
+            "actualPublishedAt": "2026-10-19T19:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 21,
+            "substantiveParagraphs": 21,
+            "publicBodySha256": "72d5fc5b85825f475265899d78ccfb535b0861761dff61a80f9a8132696056b8"
+          }
+        ]
+      },
+      {
+        "account": "stone0747",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "2026 소상공인 경영안정 바우처 25만 원 지원 기준과 사용처 확인 순서",
+            "publicUrl": "https://blog.naver.com/stone0747/224445477738",
+            "actualPublishedAt": "2026-10-19T11:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 27,
+            "substantiveParagraphs": 27,
+            "publicBodySha256": "736b4373cb3e646d24adb1efd43058a95787b579365ba80e734a549c66417dd9"
+          },
+          {
+            "title": "소상공인 정책자금 대리대출 확인서 90일 유효기간과 지역신보 보증심사 준비",
+            "publicUrl": "https://blog.naver.com/stone0747/224445494615",
+            "actualPublishedAt": "2026-10-19T19:00:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 22,
+            "substantiveParagraphs": 22,
+            "publicBodySha256": "dcbe3365bb7d81f008bcc04510e200d2241cf5e54f80c63cfee8c12492e3e77c"
+          }
+        ]
+      },
+      {
+        "account": "yoon_master",
+        "status": "verified_public",
+        "posts": [
+          {
+            "title": "5060 니트 가디건 기장과 단추 여밈, 체형별 선택 기준",
+            "publicUrl": "https://blog.naver.com/yoonviews/224445345620",
+            "actualPublishedAt": "2026-10-19T12:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 21,
+            "substantiveParagraphs": 21,
+            "publicBodySha256": "3810f378a1a21429d7b9210285e4144472d14973f3c6d3ad9df5bf96d8526a34"
+          },
+          {
+            "title": "5060 가을 셔츠 롱원피스 기장과 벨트, 지금 자료로는 기준 확정이 어려워요",
+            "publicUrl": "https://blog.naver.com/yoonviews/224445327040",
+            "actualPublishedAt": "2026-10-19T20:30:00+09:00",
+            "checkedAt": "2026-10-19T23:40:42.815211+09:00",
+            "publicHttpStatus": 200,
+            "publicBodyMatched": true,
+            "matchedParagraphs": 15,
+            "substantiveParagraphs": 15,
+            "publicBodySha256": "406779120b79d426607b5ab607e95e85836fd779cbb6231beb1b32ccb6ef759e"
+          }
+        ]
+      }
+    ]
   }
 }

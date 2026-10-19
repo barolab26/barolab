@@ -8,6 +8,32 @@ from server import windows_worker as worker
 
 
 class NaverRecoveryScheduleTests(unittest.TestCase):
+    def test_public_body_match_counts_observed_paragraphs_not_rss_defaults(self):
+        from naver_blog_posting.public_verification import verify_public_body
+        from unittest.mock import MagicMock
+        paragraphs = ['첫 번째 실제 원고 문장은 충분히 길게 작성합니다', '두 번째 실제 원고 내용도 서로 다릅니다', '세 번째 신청 서류 준비 방법을 확인합니다']
+        document = {'document': {'components': [{'paragraphs': [{'nodes': [{'value': text}]} for text in paragraphs]}]}}
+        response = MagicMock(); response.status_code = 200
+        response.content = ('<div class="se-main-container">' + ''.join('<p class="se-text-paragraph">' + p + '</p>' for p in paragraphs) + '</div>').encode('utf-8')
+        with patch('naver_blog_posting.public_verification.requests.get', return_value=response), \
+                patch('pathlib.Path.read_text', return_value=json.dumps(document)):
+            report = verify_public_body('https://blog.naver.com/example/123', 'existing')
+            self.assertTrue(report['publicBodyMatched'])
+            self.assertEqual(report['matchedParagraphs'], 3)
+            self.assertIsNone(report['tagsVerified'])
+            response.content = b'<div class="se-main-container"></div>'
+            self.assertIsNone(verify_public_body('https://blog.naver.com/example/123', 'existing')['publicBodyMatched'])
+
+    def test_rss_public_url_without_saved_document_does_not_claim_body_match(self):
+        from naver_blog_posting.public_verification import verify_public_body
+        from unittest.mock import MagicMock
+        response = MagicMock(); response.status_code = 200; response.content = b'<html></html>'
+        with patch('naver_blog_posting.public_verification.requests.get', return_value=response):
+            result = verify_public_body('https://blog.naver.com/example/123')
+            self.assertIsNone(result['publicBodyMatched'])
+            self.assertEqual(result['matchedParagraphs'], 0)
+            self.assertEqual(result['bodyVerificationStatus'], 'unknown')
+
     def test_existing_daily_action_routes_to_bounded_catch_up(self):
         with patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as run:
             self.assertEqual(worker.run_task('naver-daily'), 0)
