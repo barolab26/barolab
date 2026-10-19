@@ -22,6 +22,12 @@ def rejected_layout():
 
 
 class PromptTests(unittest.TestCase):
+    def test_nps_official_host_is_primary_without_trusting_other_or_kr_hosts(self):
+        for url in ('https://nps.or.kr/','https://www.nps.or.kr/','https://minwon.nps.or.kr/'):
+            self.assertTrue(p.primary_url(url))
+        for url in ('https://notnps.or.kr/','https://nps.or.kr.example.com/','https://unverified.or.kr/'):
+            self.assertFalse(p.primary_url(url))
+
     def test_source_reduction_preserves_primary_identity_and_context_mapping(self):
         inputs={'readerGoal':{'question':'원질문'},'keywords.md':{'title':'확정 제목','topicSlug':'fixed'},
                 'observations':{'sources':[{'url':f'https://example.test/{i}','kind':'primary' if i>=3 else 'competitor','excerpt':'근거'} for i in range(6)]},
@@ -492,6 +498,36 @@ class SlotIdentityTests(unittest.TestCase):
 
 
 class FinalAdapterBudgetTests(unittest.TestCase):
+    def test_writer_uses_complete_research_once_without_selection_market_history(self):
+        import common
+        from common import llm_client
+        goal={'question':'원래 계산 질문','requiredAnswers':['계산식과 예시','소득 조건과 예외','실제 확인 방법']}
+        research={'facts':[{'id':f'F{i}','claim':'확인된 조건과 적용 범위 '*15,'sourceUrl':f'https://official.example/{i}',
+                           'quote':'실제 원문 '*40} for i in range(4)],
+                  'answers':[{'question':question,'answer':'근거에 맞는 직접 답과 중간 계산 '*30} for question in goal['requiredAnswers']],
+                  'outline':['핵심 답','계산','조건','확인'],'readerGoal':goal,
+                  'answerBrief':{'readyForWriter':True,'finalTitle':'고정 제목','directAnswer':'근거에 맞는 완성된 답',
+                      'sections':[{'id':f's{i}','content':'조건과 이유, 계산의 중간값과 단위를 설명합니다. '*45,'factIds':[f'F{i}']} for i in range(4)],
+                      'completionCheck':'실제 값과 조건을 대조','missingInputs':[]},
+                  'materials':[],'answerBriefReview':{'passed':True,'checks':{'directAnswerComplete':True},'issues':[]}}
+        keyword={'title':'고정 제목','topicSlug':'fixed-slot','category':'정보','mainKeyword':'계산','sourceUrls':['https://official.example/0'],
+                 'readerGoal':goal,'demandEvidence':{'observed':'실제 선택 단계 검색 수요 '*800},'whyNow':'선택 사유 '*600,
+                 'duplicationReview':{'reason':'기획 중복 검토 '*600},'selectionRounds':[{'history':'후보 이력 '*800}]}
+        original=copy.deepcopy(research);inputs={'keywords.md':keyword,'research.md':research}
+        projected=p.writer_prompt_inputs(inputs)
+        self.assertEqual(projected['research.md'],original);self.assertIn('demandEvidence',keyword)
+        self.assertNotIn('demandEvidence',projected['keywords.md']);self.assertNotIn('readerGoal',projected['keywords.md'])
+        memory=SimpleNamespace(frozen_session_context=Mock(return_value='M'*3800),skill_context=Mock(return_value='S'*21400))
+        prompt=p.agent_prompt('writer','승인된 답의 사실·본문·계산·원래 제목을 그대로 구현한다.',inputs)
+        with patch.object(common,'hermes_memory',memory,create=True),patch.dict('sys.modules',{'common.hermes_memory':memory}), \
+             patch.object(llm_client,'memory_event'),patch.object(llm_client.settings,'load',return_value={'active':'codex','providers':{'codex':{'model':'fixture'}}}), \
+             patch.object(llm_client,'_enabled_route',return_value=('codex',None)),patch.object(llm_client,'_generate_json',return_value=({'ok':True},'fixture')) as adapter:
+            p.generate_with_prompt_budget(prompt,'codex',response_schema=p.writer_output_schema(),memory_session_id='offline-complete-writer')
+        final=adapter.call_args.args[0]
+        self.assertLessEqual(p.serialized_prompt_bytes(p.provider_prompt_prefix('codex',response_schema=p.writer_output_schema())+final),60000)
+        sent=json.loads(final.rpartition('인수 자료:\n')[2]);self.assertEqual(sent['research.md'],original)
+        self.assertEqual(sent['keywords.md']['title'],'고정 제목');self.assertEqual(sent['keywords.md']['topicSlug'],'fixed-slot')
+
     def test_only_visible_context_ids_are_allowed_by_schema_and_result(self):
         client=SimpleNamespace(memory_call=lambda f:f,memory_session=lambda *a:nullcontext(),
                                generate_json=Mock(return_value={'answerBrief':{'questionBasis':{'contextId':'removed'}}}))

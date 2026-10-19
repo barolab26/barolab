@@ -187,6 +187,21 @@ def keyword_prompt_view(selection):
     return {key:value for key,value in selection.items()
             if key not in ('selectionRounds', 'demandCandidates', 'keywordsMd')}
 
+def writer_prompt_inputs(inputs):
+    """The accepted research is the writing authority, not the selection debate.
+
+    All facts, source quotes, answers, goal, brief and review stay in research.md.
+    Full selection/demand/duplicate evidence stays in immutable keywords.md/audit.
+    """
+    result = copy.deepcopy(inputs)
+    keyword = result.get('keywords.md') if isinstance(result,dict) else None
+    research = result.get('research.md') if isinstance(result,dict) else None
+    if isinstance(keyword,dict) and isinstance(research,dict) and isinstance(research.get('answerBrief'),dict):
+        result['keywords.md'] = {key:keyword[key] for key in
+            ('title','topicSlug','category','mainKeyword','targetAudience','sourceUrls') if key in keyword}
+        result['keywordEvidenceScope'] = 'Identity and source URLs from accepted selection. Writing uses the complete facts, answers, readerGoal and answerBrief below; selection-market diagnostics remain in the original keywords.md audit.'
+    return result
+
 def prompt_inputs(value, excerpt_limit=2500):
     """Limit redundant retrieved context, never silently trim the approved task/body."""
     if isinstance(value, list):
@@ -392,6 +407,9 @@ def generate_with_prompt_budget(prompt, provider, **kwargs):
         return dispatch(prompt, **kwargs)
 
 def agent_prompt(agent, task, inputs):
+    raw_inputs = inputs
+    if agent == 'writer':
+        inputs = writer_prompt_inputs(inputs)
     if agent in ('image-maker','assembler','reviewer','writer'):
         task = (
             '[절대 강제: 가짜 도표(CHECKPOINT # / 정자체 가이드) 영구 금지 & 비주얼 품질 4대 원칙]\n'
@@ -421,7 +439,8 @@ def agent_prompt(agent, task, inputs):
             f'에이전트 지침:\n{instructions}\n\n'
             f'이번 실행의 출력 계약:\n{task}\n{caption_rule}\n\n'
             '인수 자료:\n')
-    save_prompt_audit('builder-input', {'agent':agent,'prefix':prefix,'inputs':inputs,
+    save_prompt_audit('builder-input', {'agent':agent,'prefix':prefix,'inputs':raw_inputs,
+        'projectedInputs':inputs,
         'prefixBytes':serialized_prompt_bytes(prefix),
         'fieldBytes':{key:len(json.dumps(value,ensure_ascii=False,default=str).encode('utf-8')) for key,value in inputs.items()},
         'fullPolicySha256':hashlib.sha256(ANSWER_BRIEF_POLICY.encode('utf-8')).hexdigest(),
@@ -1524,7 +1543,7 @@ def rework_draft(folder, domain, categories, generate, progress, attribution):
     return article,handoff
 
 
-PRIMARY_HOSTS = ('gov.kr', 'go.kr', 'korea.kr', 'edu', 'ac.kr', 'support.google.com',
+PRIMARY_HOSTS = ('gov.kr', 'go.kr', 'korea.kr', 'nps.or.kr', 'edu', 'ac.kr', 'support.google.com',
                  'developers.google.com', 'learn.microsoft.com', 'support.microsoft.com',
                  'support.apple.com', 'samsung.com', 'nhis.or.kr', 'korail.com',
                  'asus.com', 'dell.com', 'support.hp.com', 'support.lenovo.com', 'blogs.windows.com')
