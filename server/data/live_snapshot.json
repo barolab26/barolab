@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T03:52:52.701209+09:00",
+  "generatedAt": "2026-10-20T03:57:54.376854+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -276,7 +276,7 @@
           "rows": 63
         },
         "automation_slots": {
-          "rows": 248
+          "rows": 250
         },
         "operating_cadence": {
           "rows": 1
