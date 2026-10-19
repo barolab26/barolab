@@ -2491,7 +2491,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 document(folder / 'research.md', kw.get('mainKeyword', slug) + ' — 사전 해결 계획', research_data)
             except AnswerBriefBlocked as exc:
                 captured = None
-                if not acquisition_round:
+                if not acquisition_round and os.environ.get('CF_EXTERNAL_BROWSER') != '1':
                     captured = await acquire_public_captures(folder,exc.missing_inputs,research_data['answerBrief'],
                         research_data['facts'],observations.get('sources',[]),primary_url,CDP_URL,BROWSER_EXE,BROWSER_USER_DATA)
                 if not captured:
