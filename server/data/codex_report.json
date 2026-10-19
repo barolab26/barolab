@@ -65,7 +65,7 @@
       "categoryCount": 4,
       "authentication": "existing admin-login fallback verified",
       "publicationStatus": "processing",
-      "currentStage": 1,
+      "currentStage": 2,
       "resumedAt": "2026-10-19T14:49:55.640413+00:00",
       "scheduleItemId": 14,
       "publicPublicationVerified": false
