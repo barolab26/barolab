@@ -1493,11 +1493,24 @@ def rework_image_plans(handoff, article, generate, progress, attribution):
         'software UI, settings, results, or evidence. If actual UI is essential, explain the blocker; do not fabricate '
         'a diagram as substitute. Unreferenced unnecessary plans may be removed; referenced plans must remain.',
         {'article.json':original,'previousRejection':previous_attempt.get('independentReview') if previous_attempt else None,'research.md':read_document(handoff.file('research.md'))}),response_schema=proposal_schema)
+    proposal_model = copy.deepcopy(attribution())
+    handoff.check()
+    if digest(handoff.file('article.json')) != original_hash:
+        raise ReviewRequired('Draft changed during image plan proposal')
+    handoff.data['imagePlanReworkHistory'] = history
+    handoff.data['imagePlanRework'] = {'status':'validation_pending','checkedAt':stamp(),
+        'originalArticle':original,'originalArticleSha256':original_hash,
+        'previousStages':copy.deepcopy(handoff.data['stages']),
+        'proposal':proposal,'proposalModel':proposal_model,
+        'scope':'imagePlans only; pixels and layout not yet approved'}
+    handoff.save()
     try:
         candidate = validate_image_plan_revision(original, json.loads(proposal['imagePlansJson']))
-    except (KeyError, TypeError, ValueError) as exc:
-        raise ReviewRequired('Malformed image plan proposal') from exc
-    proposal_model = copy.deepcopy(attribution())
+    except (KeyError, TypeError, ValueError, ReviewRequired) as exc:
+        handoff.data['imagePlanRework'].update(status='rejected',
+            validationError={'type':type(exc).__name__,'message':str(exc)})
+        handoff.save()
+        raise ReviewRequired('Image plan proposal validation rejected: ' + str(exc)) from exc
     checks = ('readerUtility','honestConceptualLabel','notFakeUI','noRequiredCaptureReplaced','stepsPreserved')
     review_schema = {'type':'object','additionalProperties':False,'properties':{
         **{k:{'type':'boolean'} for k in checks},'issues':{'type':'array','items':{'type':'string'}},'notes':{'type':'array','items':{'type':'string'}}},'required':[*checks,'issues','notes']}
