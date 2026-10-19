@@ -1,7 +1,7 @@
 {
-  "directiveId": "2026-10-20T06:16:00+09:00",
+  "directiveId": "2026-10-20T07:00:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-19T21:20:43.386688+00:00",
+  "startedAt": "2026-10-19T22:04:46.501184+00:00",
   "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
   "directiveHistory": [
     {
@@ -1173,85 +1173,247 @@
         "files": 7,
         "verifiedAt": "2026-10-19T21:14:35.484624+00:00"
       }
+    },
+    {
+      "directiveId": "2026-10-20T06:16:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-19T21:20:43.386688+00:00",
+      "blockedAt": "2026-10-19T21:57:38.288747+00:00",
+      "summary": "Image-plan re-review and normalization defects fixed/tested/pushed; 60 new crawl receipts verified. Two priority drafts completed normal Stage1-3, but independent image reviews rejected. New prepared=0, existing prepared=5; 11 unfinished. Not completed.",
+      "blockedReason": "Independent content/evidence/image-plan gates rejected five drafts. Preserved prose and retry limits; no image or layout approval, remaining six waiting drafts not prepared.",
+      "commitHash": "b2cb9750ce286faf8ff95694f8e75afe83d3c365",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py"
+      ],
+      "taskProgress": {
+        "implementation": "Completed: normal image-plan review, provenance, bounded retries/clarification, validation failure retention, real anchor mapping, removal of decorative fallback; tested and pushed",
+        "searchAdvisor": "Completed: 60 new receipts verified, six domains x10; unknown0; actual indexing unknown",
+        "priorityDrafts": "Two normal Stage1-3 drafts preserved; both final image reviews rejected; no new prepared",
+        "remainingPreparation": "Existing three drafts blocked; six remaining waiting drafts not prepared"
+      },
+      "currentResult": {
+        "status": "blocked",
+        "newCrawlReceipts": 60,
+        "newPrepared": 0,
+        "crawlDomains": {
+          "nolplace.com": 10,
+          "maxnote.kr": 10,
+          "topnote.kr": 10,
+          "must-joy.com": 10,
+          "meganote.kr": 10,
+          "joynote.kr": 10
+        },
+        "actualIndexingVerified": false,
+        "newDraftsStage3": 2,
+        "priorityDraftArtifacts": {
+          "must-pick.com": "cf_posting/output/dishwasher-white-residue-rinse-hard-water-checks/run-20261020-064311-412b4b",
+          "nolplace.com": "cf_posting/output/seoulland-family-ticket-discount-same-day-entry/run-20261020-064656-f7253e"
+        },
+        "existingPrepared": 5,
+        "unfinishedCount": 11,
+        "actualImagesGenerated": 0,
+        "layoutVerified": false,
+        "blockers": {
+          "maxnote.kr": "Mandatory guidance on human review use of submitted data missing from preserved prose",
+          "topnote.kr": "Actual Xbox Game Bar/settings/recording/save-path evidence required; diagrams cannot replace it",
+          "meganote.kr": "Proposed nonexistent filename 03.jpg; actual response recovered and rejection preserved",
+          "must-pick.com": "Unlabeled diagram insufficient to explain hardness/salt/rinse/detergent decisions; final independent review rejected",
+          "nolplace.com": "Visual plan insufficient for same-day ticket check and refund decision steps; final independent review rejected"
+        },
+        "notPreparedWaiting": [
+          "must-joy.com",
+          "joynote.kr",
+          "daynote.kr",
+          "woorinote.kr",
+          "soulnote.kr",
+          "tripmarvel.com"
+        ]
+      },
+      "driveSync": {
+        "status": "verified",
+        "verifiedAt": "2026-10-19T21:58:14.071Z",
+        "fileCount": 7
+      },
+      "geminiNotification": {
+        "directiveId": "2026-10-20T06:16:00+09:00",
+        "status": "sent_verified",
+        "startedAt": "2026-10-19T21:58:21.783218+00:00",
+        "sentAt": "2026-10-19T21:58:53.420854+00:00",
+        "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0616.png",
+        "account": "barolab26@gmail.com",
+        "conversationUrl": "https://gemini.google.com/app/89e396b9e70f5c80"
+      }
+    },
+    {
+      "directiveId": "2026-10-20T07:00:00+09:00",
+      "startedAt": "2026-10-19T22:04:46.501184+00:00",
+      "completedAt": "2026-10-19T22:50:02.482003+00:00",
+      "status": "blocked",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "SearchAdvisor 40건 접수 확인. 5개 기존 반려 원고는 결합 재보완 검수가 통과하지 못했고, waiting 6건 모두 prepared 0건으로 실제 검수 대기 또는 주제/근거 불일치 상태를 보존했다. 관련 파이프라인 fail-open 3건을 좁게 고쳐 회귀 검증 후 푸시했다.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py",
+        "server/data/searchadvisor-status.json",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "taskProgress": {
+        "coupledRework": {
+          "attempted": 5,
+          "prepared": 0,
+          "status": "blocked",
+          "domains": {
+            "maxnote.kr": "독립 검수 반려: human-review 확인 질문과 보존 answerBrief/근거 충돌",
+            "topnote.kr": "구조 반려: 허용되지 않은 top-level completionCheck 추가",
+            "meganote.kr": "proposal articleJson Extra data 파싱 실패; 원문/해시 보존",
+            "must-pick.com": "독립 검수 반려: 원래 해결 조건/자료 연결 부족",
+            "nolplace.com": "proposal articleJson Extra data 파싱 실패; 원문/해시 보존"
+          }
+        },
+        "remainingWaiting": {
+          "requested": 6,
+          "prepared": 0,
+          "status": "review_required",
+          "runs": {
+            "must-joy.com": "Stage3; 제목/slug와 지역 막걸리 readerTask 불일치",
+            "joynote.kr": "Stage5; PC/모바일 전체 화면 검수 대기. 조립본의 고정 날짜/근거 없는 직접검수 문구 검증 안 됨",
+            "daynote.kr": "Stage3; 생성 동작 사진은 실제 세척 증거가 아니므로 반려 보존",
+            "woorinote.kr": "Stage3; 청약 제목과 생애최초 취득세 readerTask 불일치",
+            "soulnote.kr": "Stage5; PC/모바일 전체 화면 검수 대기",
+            "tripmarvel.com": "Stage5; PC/모바일 전체 화면 검수 대기"
+          }
+        },
+        "searchAdvisor": {
+          "submitted": 40,
+          "domains": {
+            "woorinote.kr": 10,
+            "smilenote.kr": 10,
+            "soulnote.kr": 10,
+            "tripmarvel.com": 10
+          },
+          "status": "request_received",
+          "unknown": 0,
+          "actualIndexingVerified": false
+        },
+        "flowLauncher": {
+          "path": "C:\\99_포터블브라우저\\CentBrowserPotable_barolab26\\barolab26_start_cdp.bat",
+          "alreadyConfiguredInHead": true
+        },
+        "publication": "none"
+      },
+      "tests": {
+        "passed": [
+          "inline AST function regression: coupled acceptance/rejection, original preservation and capture hash guard",
+          "inline AST function regression: invalid candidate index and cross-candidate title/slug/keyword mismatch reject before writer",
+          "inline AST function regression: duplicate-review rejection cannot auto-pass",
+          "inline AST function regression: unknown/under-threshold demand rejects after bounded proposals",
+          "inline AST function regression: empty-plan Stage3 resumes normal Stage4",
+          "python -m py_compile cf_posting/pipeline_runner.py",
+          "JSON parse validation of all seven sync files",
+          "git -c core.whitespace=cr-at-eol diff --check for code changes"
+        ],
+        "baselineKnownFailures": []
+      },
+      "commitHash": "1c67dda31fc5182ce0fd8f7600a384041fbca275",
+      "currentResult": {
+        "status": "blocked",
+        "newPrepared": 0,
+        "published": 0,
+        "newSearchAdvisorReceipts": 40,
+        "actualIndexingVerified": false
+      },
+      "driveSync": {
+        "status": "pending"
+      },
+      "geminiNotification": {
+        "directiveId": "2026-10-20T07:00:00+09:00",
+        "status": "pending"
+      },
+      "updatedAt": "2026-10-19T22:50:02.482003+00:00"
     }
   ],
-  "summary": "Image-plan re-review and normalization defects fixed/tested/pushed; 60 new crawl receipts verified. Two priority drafts completed normal Stage1-3, but independent image reviews rejected. New prepared=0, existing prepared=5; 11 unfinished. Not completed.",
+  "summary": "SearchAdvisor 40건 접수 확인. 5개 기존 반려 원고는 결합 재보완 검수가 통과하지 못했고, waiting 6건 모두 prepared 0건으로 실제 검수 대기 또는 주제/근거 불일치 상태를 보존했다. 관련 파이프라인 fail-open 3건을 좁게 고쳐 회귀 검증 후 푸시했다.",
   "changedFiles": [
-    "cf_posting/pipeline_runner.py"
+    "cf_posting/pipeline_runner.py",
+    "server/data/searchadvisor-status.json",
+    "server/data/live_snapshot.json",
+    "server/data/codex_report.json"
   ],
   "taskProgress": {
-    "implementation": "Completed: normal image-plan review, provenance, bounded retries/clarification, validation failure retention, real anchor mapping, removal of decorative fallback; tested and pushed",
-    "searchAdvisor": "Completed: 60 new receipts verified, six domains x10; unknown0; actual indexing unknown",
-    "priorityDrafts": "Two normal Stage1-3 drafts preserved; both final image reviews rejected; no new prepared",
-    "remainingPreparation": "Existing three drafts blocked; six remaining waiting drafts not prepared"
+    "coupledRework": {
+      "attempted": 5,
+      "prepared": 0,
+      "status": "blocked",
+      "domains": {
+        "maxnote.kr": "독립 검수 반려: human-review 확인 질문과 보존 answerBrief/근거 충돌",
+        "topnote.kr": "구조 반려: 허용되지 않은 top-level completionCheck 추가",
+        "meganote.kr": "proposal articleJson Extra data 파싱 실패; 원문/해시 보존",
+        "must-pick.com": "독립 검수 반려: 원래 해결 조건/자료 연결 부족",
+        "nolplace.com": "proposal articleJson Extra data 파싱 실패; 원문/해시 보존"
+      }
+    },
+    "remainingWaiting": {
+      "requested": 6,
+      "prepared": 0,
+      "status": "review_required",
+      "runs": {
+        "must-joy.com": "Stage3; 제목/slug와 지역 막걸리 readerTask 불일치",
+        "joynote.kr": "Stage5; PC/모바일 전체 화면 검수 대기. 조립본의 고정 날짜/근거 없는 직접검수 문구 검증 안 됨",
+        "daynote.kr": "Stage3; 생성 동작 사진은 실제 세척 증거가 아니므로 반려 보존",
+        "woorinote.kr": "Stage3; 청약 제목과 생애최초 취득세 readerTask 불일치",
+        "soulnote.kr": "Stage5; PC/모바일 전체 화면 검수 대기",
+        "tripmarvel.com": "Stage5; PC/모바일 전체 화면 검수 대기"
+      }
+    },
+    "searchAdvisor": {
+      "submitted": 40,
+      "domains": {
+        "woorinote.kr": 10,
+        "smilenote.kr": 10,
+        "soulnote.kr": 10,
+        "tripmarvel.com": 10
+      },
+      "status": "request_received",
+      "unknown": 0,
+      "actualIndexingVerified": false
+    },
+    "flowLauncher": {
+      "path": "C:\\99_포터블브라우저\\CentBrowserPotable_barolab26\\barolab26_start_cdp.bat",
+      "alreadyConfiguredInHead": true
+    },
+    "publication": "none"
   },
-  "previousLastCompletedDirectiveId": "2026-10-20T00:10:00+09:00",
-  "updatedAt": "2026-10-19T21:58:53.420854+00:00",
+  "previousLastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+  "updatedAt": "2026-10-19T22:50:02.482003+00:00",
   "checkedAt": "2026-10-19T21:57:38.288747+00:00",
   "geminiNotification": {
-    "directiveId": "2026-10-20T06:16:00+09:00",
-    "status": "sent_verified",
-    "startedAt": "2026-10-19T21:58:21.783218+00:00",
-    "sentAt": "2026-10-19T21:58:53.420854+00:00",
-    "screenshot": "C:/Users/baro7/.codex/visualizations/gemini-report-0616.png",
-    "account": "barolab26@gmail.com",
-    "conversationUrl": "https://gemini.google.com/app/89e396b9e70f5c80"
+    "directiveId": "2026-10-20T07:00:00+09:00",
+    "status": "pending"
   },
-  "tests": [
-    "Image-plan-only mutation preserves prose, sources and readerTask",
-    "Existing filenames/capture plans/reference integrity validated",
-    "Actual step.id/blockRef/h2 binding validated",
-    "Independent proposal/review and bounded clarification evidence retained",
-    "Rejected proposal/history/retry cap regression checks passed",
-    "External browser capture guard and Python syntax checks passed",
-    "Writer normalization no longer invents decorative plans or converts missing captures to generated images; real task/block references validated",
-    "Heading element, nested heading, and paragraph preceding-heading image bindings pass; incorrect index rejected"
-  ],
+  "tests": {
+    "passed": [
+      "inline AST function regression: coupled acceptance/rejection, original preservation and capture hash guard",
+      "inline AST function regression: invalid candidate index and cross-candidate title/slug/keyword mismatch reject before writer",
+      "inline AST function regression: duplicate-review rejection cannot auto-pass",
+      "inline AST function regression: unknown/under-threshold demand rejects after bounded proposals",
+      "inline AST function regression: empty-plan Stage3 resumes normal Stage4",
+      "python -m py_compile cf_posting/pipeline_runner.py",
+      "JSON parse validation of all seven sync files",
+      "git -c core.whitespace=cr-at-eol diff --check for code changes"
+    ],
+    "baselineKnownFailures": []
+  },
   "currentResult": {
     "status": "blocked",
-    "newCrawlReceipts": 60,
     "newPrepared": 0,
-    "crawlDomains": {
-      "nolplace.com": 10,
-      "maxnote.kr": 10,
-      "topnote.kr": 10,
-      "must-joy.com": 10,
-      "meganote.kr": 10,
-      "joynote.kr": 10
-    },
-    "actualIndexingVerified": false,
-    "newDraftsStage3": 2,
-    "priorityDraftArtifacts": {
-      "must-pick.com": "cf_posting/output/dishwasher-white-residue-rinse-hard-water-checks/run-20261020-064311-412b4b",
-      "nolplace.com": "cf_posting/output/seoulland-family-ticket-discount-same-day-entry/run-20261020-064656-f7253e"
-    },
-    "existingPrepared": 5,
-    "unfinishedCount": 11,
-    "actualImagesGenerated": 0,
-    "layoutVerified": false,
-    "blockers": {
-      "maxnote.kr": "Mandatory guidance on human review use of submitted data missing from preserved prose",
-      "topnote.kr": "Actual Xbox Game Bar/settings/recording/save-path evidence required; diagrams cannot replace it",
-      "meganote.kr": "Proposed nonexistent filename 03.jpg; actual response recovered and rejection preserved",
-      "must-pick.com": "Unlabeled diagram insufficient to explain hardness/salt/rinse/detergent decisions; final independent review rejected",
-      "nolplace.com": "Visual plan insufficient for same-day ticket check and refund decision steps; final independent review rejected"
-    },
-    "notPreparedWaiting": [
-      "must-joy.com",
-      "joynote.kr",
-      "daynote.kr",
-      "woorinote.kr",
-      "soulnote.kr",
-      "tripmarvel.com"
-    ]
+    "published": 0,
+    "newSearchAdvisorReceipts": 40,
+    "actualIndexingVerified": false
   },
-  "commitHash": "b2cb9750ce286faf8ff95694f8e75afe83d3c365",
+  "commitHash": "1c67dda31fc5182ce0fd8f7600a384041fbca275",
   "driveSync": {
-    "status": "verified",
-    "verifiedAt": "2026-10-19T21:58:14.071Z",
-    "fileCount": 7
+    "status": "pending"
   },
-  "blockedAt": "2026-10-19T21:57:38.288747+00:00",
-  "blockedReason": "Independent content/evidence/image-plan gates rejected five drafts. Preserved prose and retry limits; no image or layout approval, remaining six waiting drafts not prepared.",
-  "reportCommitHash": "2413464696c492210acfa89be839f4f7ff7b8d83"
+  "reportCommitHash": "2413464696c492210acfa89be839f4f7ff7b8d83",
+  "completedAt": "2026-10-19T22:50:02.482003+00:00"
 }
