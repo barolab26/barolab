@@ -22,6 +22,51 @@ def rejected_layout():
 
 
 class PromptTests(unittest.TestCase):
+    def test_source_reduction_preserves_primary_identity_and_context_mapping(self):
+        inputs={'readerGoal':{'question':'원질문'},'keywords.md':{'title':'확정 제목','topicSlug':'fixed'},
+                'observations':{'sources':[{'url':f'https://example.test/{i}','kind':'primary' if i>=3 else 'competitor','excerpt':'근거'} for i in range(6)]},
+                'questionContext':[{'id':str(i),'kind':'observed_context','sourceUrl':f'https://example.test/{i}',
+                    'sourceTextRef':{'path':f'observations.sources[{i}]','field':'excerpt','charStart':0,'charEnd':2}} for i in range(6)]}
+        inputs['questionContext'].append({'id':'request','kind':'explicit_request','text':'원질문'})
+        original=copy.deepcopy(inputs); result=p.select_prompt_sources(inputs,4)
+        self.assertEqual([x['url'] for x in result['observations']['sources']],
+                         [f'https://example.test/{i}' for i in [3,4,5,0]])
+        self.assertEqual({x['id'] for x in result['questionContext']},{'3','4','5','0','request'})
+        for ctx in result['questionContext'][:-1]:
+            index=int(ctx['sourceTextRef']['path'].split('[')[1].split(']')[0])
+            self.assertEqual(result['observations']['sources'][index]['url'],ctx['sourceUrl'])
+        self.assertEqual(inputs,original)
+
+    def test_search_projection_and_rebudget_keep_references_valid(self):
+        source={'url':'https://example.test/kept','excerpt':'근거'*1250,'kind':'primary','content':'긴원문'*4000}
+        goal={'question':'변경 금지 질문'}
+        inputs={'readerGoal':goal,'keywords.md':{'readerGoal':goal,'title':'고정 제목'},
+                'observations':{'sources':[source], 'observedSearches':[
+                    {'query':'실제 검색','results':[{'url':source['url'],'title':'선택문서','position':1,'content':'중복'*40000},
+                    {'url':'https://example.test/rejected','content':'후보'*40000}]}]},
+                'questionContext':[{'id':'one','kind':'observed_context','text':source['excerpt'],'sourceUrl':source['url']},
+                                   {'kind':'explicit_request','text':'원질문'*1000}]}
+        original=copy.deepcopy(inputs)
+        first=p.reference_repeated_context(p.prompt_inputs(inputs))
+        second=p.reference_repeated_context(p.prompt_inputs(first,400))
+        self.assertEqual(second['keywords.md']['readerGoalRef'],'readerGoal')
+        self.assertEqual(len(second['observations']['observedSearches'][0]['results']),1)
+        self.assertNotIn('content',second['observations']['observedSearches'][0]['results'][0])
+        self.assertEqual(len(second['observations']['sources'][0]['content']),400)
+        self.assertEqual(second['questionContext'][0]['sourceTextRef']['charEnd'],400)
+        self.assertEqual(second['questionContext'][1]['text'],original['questionContext'][1]['text'])
+        self.assertEqual(inputs,original)
+
+    def test_failed_budget_preserves_private_builder_inputs_without_printing_them(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp); folder=base/'output'/'original-slot'/'run'
+            with patch.object(p,'BASE_DIR',base),patch.dict(p.RUN_CONTEXT,{'artifactFolder':str(folder),'agent':'researcher'},clear=True):
+                with self.assertRaisesRegex(p.ReviewRequired,'prompt_budget_exceeded'):
+                    p.agent_prompt('researcher','고정 계약',{'contentHtml':'불변 본문'*20000})
+            packet=json.loads((folder/'model-audit/researcher/prompt-budget/builder-input.json').read_text(encoding='utf-8'))
+            self.assertEqual(packet['inputs']['contentHtml'],'불변 본문'*20000)
+            self.assertGreater(packet['fieldBytes']['contentHtml'],60000)
+
     def test_production_sized_keyword_history_is_projected_without_losing_selected_sources(self):
         # Mirrors the failed 37KB markdown/28KB JSON packet: selection history was
         # included twice even though the chosen evidence and goal were already present.
@@ -447,6 +492,44 @@ class SlotIdentityTests(unittest.TestCase):
 
 
 class FinalAdapterBudgetTests(unittest.TestCase):
+    def test_only_visible_context_ids_are_allowed_by_schema_and_result(self):
+        client=SimpleNamespace(memory_call=lambda f:f,memory_session=lambda *a:nullcontext(),
+                               generate_json=Mock(return_value={'answerBrief':{'questionBasis':{'contextId':'removed'}}}))
+        schema={'type':'object','properties':{'answerBrief':{'type':'object','properties':{
+            'questionBasis':{'type':'object','properties':{'contextId':{'type':'string','enum':['kept','removed']}}}}}}}
+        prompt=p.agent_prompt('researcher','보이는 근거만 선택',{'questionContext':[{'id':'kept','kind':'explicit_request','text':'원질문'}]})
+        with patch.dict('sys.modules',{'common.llm_client':client}):
+            with self.assertRaisesRegex(p.ReviewRequired,'excluded'):
+                p.generate_with_prompt_budget(prompt,'codex',response_schema=schema)
+        sent=client.generate_json.call_args.kwargs['response_schema']
+        self.assertEqual(sent['properties']['answerBrief']['properties']['questionBasis']['properties']['contextId']['enum'],['kept'])
+        self.assertEqual(schema['properties']['answerBrief']['properties']['questionBasis']['properties']['contextId']['enum'],['kept','removed'])
+
+    def test_large_real_world_shapes_with_maximum_saved_skill_pair(self):
+        import common
+        from common import llm_client
+        # Real failed run: snapshot 3,752 bytes; largest frozen skill pair 23,657.
+        # Retain slightly more than each measured size, with actual decorator.
+        memory=SimpleNamespace(frozen_session_context=Mock(return_value='M'*3800),
+                               skill_context=Mock(return_value='S'*24000))
+        goal={'question':'원래 질문','requiredAnswers':['정확한 요구사항 '*20]*4}
+        kw={'title':'고정 예약 제목','topicSlug':'fixed-slot','readerGoal':goal,
+            'demandEvidence':{'question':'원래 질문','observed':'확인된 선택 근거 '*160},
+            'sourceUrls':[f'https://example.test/{i}' for i in range(12)]}
+        sources=[{'url':f'https://example.test/{i}','kind':'primary','excerpt':'공식 실제 근거 '*400} for i in range(6)]
+        inputs={'keywords.md':kw,'readerGoal':goal,'observations':{'sources':sources},
+                'questionContext':[{'id':str(i),'kind':'observed_context','text':s['excerpt'],'sourceUrl':s['url']} for i,s in enumerate(sources)]}
+        for agent in ('researcher','writer'):
+            prompt=p.agent_prompt(agent,'원래 제목과 원질문을 보존한다.',inputs)
+            with patch.object(common,'hermes_memory',memory,create=True),patch.dict('sys.modules',{'common.hermes_memory':memory}), \
+                 patch.object(llm_client,'memory_event'),patch.object(llm_client.settings,'load',return_value={'active':'codex','providers':{'codex':{'model':'fixture'}}}), \
+                 patch.object(llm_client,'_enabled_route',return_value=('codex',None)),patch.object(llm_client,'_generate_json',return_value=({'ok':True},'fixture')) as adapter:
+                p.generate_with_prompt_budget(prompt,'codex',response_schema={'type':'object'},memory_session_id='offline-max-pair')
+            final=p.provider_prompt_prefix('codex',response_schema={'type':'object'})+adapter.call_args.args[0]
+            self.assertLessEqual(p.serialized_prompt_bytes(final),60000)
+            self.assertIn('M'*3800,final); self.assertIn('S'*24000,final)
+            self.assertIn('fixed-slot',final);self.assertIn('https://example.test/5',final)
+
     def test_real_memory_decorator_injects_once_and_final_provider_text_is_bounded(self):
         import common
         from common import llm_client
