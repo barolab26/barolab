@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T02:52:33.691845+09:00",
+  "generatedAt": "2026-10-20T02:57:35.408519+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": true,
@@ -195,7 +195,7 @@
     ],
     "indexing": {
       "indexed": 539,
-      "inspected": 1503,
+      "inspected": 1502,
       "inventoryTotal": 1914
     },
     "traffic": {
@@ -266,7 +266,7 @@
       "status": "collected",
       "tables": {
         "questions": {
-          "rows": 45,
+          "rows": 44,
           "todayStates": {
             "published_verified": 3,
             "submitted_unverified": 1
@@ -276,7 +276,7 @@
           "rows": 63
         },
         "automation_slots": {
-          "rows": 236
+          "rows": 237
         },
         "operating_cadence": {
           "rows": 1
