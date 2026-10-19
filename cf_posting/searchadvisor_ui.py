@@ -22,11 +22,14 @@ BOARD = 'https://searchadvisor.naver.com/console/board'
 PROFILE = Path('C:/99_포터블브라우저/CentBrowserPotable_soultin')
 
 
-def parse_visible_history(rows, text, today):
+def parse_visible_history(rows, text, today, origin=None):
     """Recent-50 UI proves completeness only if its lower boundary is older."""
     parsed = []
     for row in rows:
         urls = re.findall(r'https?://[^\s<>]+', row)
+        if not urls and origin:
+            paths = re.findall(r'(?<!\S)/[^\s<>]+', row)
+            urls = [origin.rstrip('/') + path for path in paths]
         date = re.search(r'(?<!\d)(20\d{2}|\d{2})[.\-/](\d{1,2})[.\-/](\d{1,2})(?!\d)', row)
         if urls and date:
             # Actual SearchAdvisor uses YY.MM.DD (e.g. 26.10.19).
@@ -68,7 +71,7 @@ def _history(page, origin):
     _check(page)
     text = _text(page)
     rows = page.get_by_role('row').all_inner_texts()
-    return parse_visible_history(rows, text, ledger.now()[:10])
+    return parse_visible_history(rows, text, ledger.now()[:10], origin)
 
 
 def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
@@ -92,7 +95,7 @@ def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
                     evidence={'source': 'visible UI', 'reason': reason}, path=path)
                 return reason
             rows = page.get_by_role('row').all_inner_texts()
-            today_urls = parse_visible_history(rows, _text(page), ledger.now()[:10])
+            today_urls = parse_visible_history(rows, _text(page), ledger.now()[:10], origin)
             if url in today_urls:
                 ledger.complete_crawl(url, status='request_received', evidence={
                     'source': 'visible request-history row', 'url': url, 'dayKST': ledger.now()[:10]}, path=path)
