@@ -194,7 +194,7 @@
       "completedAt": null,
       "failureAt": "2026-10-20T02:28:06.626516+09:00",
       "failureReason": "The prepare-only process made no progress after 02:09:37 KST and its researcher worker remained unresolved for over one hour; the process was cleanly interrupted at 02:26 KST. The scheduled 01:00 pipeline therefore did not complete.",
-      "commitHash": null,
+      "commitHash": "423db7a5ba740f64278a65ec80f0f84762ab259f",
       "changedFiles": [
         "cf_posting/data/daily_schedule.json",
         "server/data/codex_report.json",
@@ -270,7 +270,7 @@
     "server/data/codex_report.json",
     "server/data/live_snapshot.json"
   ],
-  "commitHash": null,
+  "commitHash": "423db7a5ba740f64278a65ec80f0f84762ab259f",
   "results": {
     "radar": {
       "date": "2026-10-20",
