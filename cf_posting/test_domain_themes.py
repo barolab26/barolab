@@ -262,5 +262,124 @@ class MobileNewsHeaderTests(unittest.TestCase):
                     self.assertNotIn(selector, mobile)
 
 
+@unittest.skipUnless(shutil.which("node"), "Node is needed for JavaScript execution")
+class PublishedArticleLinkTests(unittest.TestCase):
+    def execute(self, payload):
+        enhancer = BeautifulSoup(
+            build_live_cf_head_injection("must-good.com", ""), "html.parser"
+        ).find_all("script")[-1].string
+        functions = enhancer[
+            enhancer.index("/* BAROLAB_PUBLISHED_ARTICLE_LINKS_V1 */"):
+            enhancer.index("  function cleanHeadingText")
+        ]
+        payload.update(functions=functions, enhancer=enhancer)
+        harness = r"""
+const vm = require('node:vm');
+const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
+new vm.Script(input.enhancer);
+const calls = [];
+const containers = (input.containers || []).map(attrs => ({
+  attrs, innerHTML: '', textContent: '',
+  getAttribute(key) { return this.attrs[key] || null; },
+  hasAttribute(key) { return key in this.attrs; },
+  setAttribute(key, value) { this.attrs[key] = value; }
+}));
+const context = {
+  CFG: {h2IconBadge: '✨'}, window: {location: {pathname: input.path || '/current'}},
+  document: {querySelectorAll: () => containers},
+  fetch: async (url, options) => {
+    calls.push({url, options});
+    if (input.networkError) throw new Error('offline');
+    return {ok: true, json: async () => input.response};
+  }
+};
+vm.createContext(context);
+vm.runInContext(input.functions, context);
+(async () => {
+  await context.hydratePublishedArticleLists();
+  await context.hydratePublishedArticleLists();
+  process.stdout.write(JSON.stringify({calls, containers}));
+})().catch(error => { process.stderr.write(String(error)); process.exitCode = 1; });
+"""
+        result = subprocess.run(
+            [shutil.which("node"), "-e", harness], input=json.dumps(payload),
+            encoding="utf-8", capture_output=True, check=True,
+        )
+        return json.loads(result.stdout)
+
+    def response(self, posts):
+        return {"success": True, "sort": "views", "posts": posts}
+
+    def test_renders_real_safe_links_and_escapes_titles_in_every_list_style(self):
+        title = '<img src=x onerror="bad()"> Actual & "title"'
+        posts = [
+            {"status": "published", "slug": "current", "title": "Current"},
+            {"status": "published", "slug": "real-guide", "title": title, "category": "<svg>"},
+            {"status": "scheduled", "slug": "already-due", "title": "Public due scheduled"},
+        ]
+        result = self.execute({
+            "response": self.response(posts),
+            "containers": [
+                {"data-published-article-list": kind, "data-article-category": "Guide"}
+                for kind in ("top10", "columns", "docs", "health", "cards")
+            ],
+        })
+        for container in result["containers"]:
+            kind = container["attrs"]["data-published-article-list"]
+            soup = BeautifulSoup(container["innerHTML"], "html.parser")
+            self.assertIsNone(soup.find("img"))
+            self.assertIsNone(soup.find("svg"))
+            self.assertEqual(soup.select_one('a[href="/real-guide"]').get_text(strip=True).count(title), 1)
+            hrefs = [a["href"] for a in soup.find_all("a")]
+            self.assertIn("/already-due", hrefs)
+            self.assertEqual("/current" in hrefs, kind == "top10")
+            self.assertTrue(all(h.startswith("/") and not any(c in h for c in "?#") for h in hrefs))
+        self.assertEqual(len(result["calls"]), 2)  # Shared global list plus the docs category.
+        self.assertTrue(all(c["options"] == {"credentials": "omit"} for c in result["calls"]))
+
+    def test_invalid_missing_external_slugs_and_nonpublic_rows_are_excluded(self):
+        posts = [
+            {"status": "published", "slug": slug, "title": "Invalid"}
+            for slug in ("", None, "../evil", "//evil.test", "https://evil.test", "foo?q=x", "foo#bar", "..")
+        ] + [
+            {"status": "draft", "slug": "draft", "title": "Draft"},
+            {"status": "published", "slug": "valid", "title": ""},
+        ]
+        result = self.execute({
+            "response": self.response(posts), "containers": [{"data-published-article-list": "top10"}],
+        })
+        self.assertEqual(result["containers"][0]["innerHTML"], "")
+        self.assertEqual(result["containers"][0]["attrs"]["data-article-load-state"], "empty")
+
+    def test_api_failure_or_unsupported_sort_has_no_fabricated_fallback(self):
+        for data in (
+            {"networkError": True},
+            {"response": {"success": True, "sort": "recent", "posts": []}},
+            {"response": {"success": True, "sort": "views", "posts": None}},
+        ):
+            result = self.execute({
+                **data, "containers": [{"data-published-article-list": "top10"}],
+            })
+            self.assertEqual(result["containers"][0]["innerHTML"], "")
+            self.assertEqual(result["containers"][0]["attrs"]["data-article-load-state"], "error")
+
+    def test_category_tree_requests_are_bounded_encoded_and_deduplicated(self):
+        category = "윈도우·맥 설정"
+        result = self.execute({
+            "response": self.response([]),
+            "containers": [
+                {"data-published-article-list": "docs", "data-article-category": cat}
+                for cat in ("", category, category)
+            ],
+        })
+        self.assertEqual(len(result["calls"]), 2)
+        self.assertIn("limit=1", result["calls"][0]["url"])
+        self.assertIn("limit=2", result["calls"][1]["url"])
+        from urllib.parse import parse_qs, urlsplit
+        self.assertEqual(parse_qs(urlsplit(result["calls"][1]["url"]).query)["cat"], [category])
+        absent = self.execute({"response": self.response([]), "containers": []})
+        self.assertEqual(absent["calls"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

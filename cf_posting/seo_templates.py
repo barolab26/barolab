@@ -17,6 +17,35 @@ ROBOTS = "index,follow,max-image-preview:large,max-snippet:-1"
 REVISION = "20261019_postseo_v1"
 
 
+def patch_public_post_sort(source: str) -> str:
+    """Add explicit popularity ordering to the existing public listing only."""
+    start_marker = '  if (method === "GET" && path === "/api/posts") {'
+    end_marker = '  if (method === "POST" && path === "/api/posts") {'
+    if source.count(start_marker) != 1 or source.count(end_marker) != 1:
+        raise ValueError("Post-list route changed; review before patching")
+    start = source.index(start_marker)
+    end = source.index(end_marker, start)
+    section = source[start:end]
+    status_line = '    const status = String(url.searchParams.get("status") || "published");'
+    sort_line = '    const sort = status === "published" && url.searchParams.get("sort") === "views" ? "views" : "recent";'
+    old_order = '      sql += " ORDER BY COALESCE(publish_at, created_at) DESC LIMIT ? OFFSET ?";'
+    new_order = ('      sql += sort === "views"\n'
+                 '        ? " ORDER BY views DESC, id DESC LIMIT ? OFFSET ?"\n'
+                 '        : " ORDER BY COALESCE(publish_at, created_at) DESC LIMIT ? OFFSET ?";')
+    old_response = '    return json({ success: true, posts: rows.results || [], page, limit });'
+    new_response = '    return json({ success: true, posts: rows.results || [], page, limit, sort });'
+    if sort_line in section:
+        # Reject partial/different patches instead of silently declaring support.
+        if any(section.count(item) != 1 for item in (status_line, sort_line, new_order, new_response)):
+            raise ValueError("Unexpected existing post-sort patch")
+        return source
+    if any(section.count(item) != 1 for item in (status_line, old_order, old_response)):
+        raise ValueError("Post-list query changed; review before patching")
+    section = section.replace(status_line, status_line + "\n" + sort_line, 1)
+    section = section.replace(old_order, new_order, 1).replace(old_response, new_response, 1)
+    return source[:start] + section + source[end:]
+
+
 def patch_post_template(source: str) -> str:
     start = source.index("function renderPostPage(")
     end_marker = '__name(renderPostPage, "renderPostPage");'

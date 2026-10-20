@@ -73,6 +73,108 @@ MOBILE_HEADER_CSS = """
   .wt-header-main input { min-width: 0; }
 }
 """.strip()
+PUBLISHED_ARTICLE_LIST_JS = r"""
+  /* BAROLAB_PUBLISHED_ARTICLE_LINKS_V1 */
+  function articleEscape(value) {
+    return String(value || '').replace(/[&<>"']/g, function(ch) {
+      return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[ch];
+    });
+  }
+
+  function publicArticleRows(data) {
+    if (!data || data.success !== true || data.sort !== 'views' || !Array.isArray(data.posts)) {
+      throw new Error('Published popularity response unavailable');
+    }
+    var seen = new Set();
+    return data.posts.slice(0, 10).filter(function(post) {
+      // The public published endpoint also includes scheduled posts that are already due.
+      if (!post || ['published', 'scheduled'].indexOf(post.status) < 0 ||
+          typeof post.title !== 'string' || !post.title.trim() ||
+          typeof post.slug !== 'string' || !post.slug ||
+          /[\/\\?#:\s]/.test(post.slug) || post.slug === '.' || post.slug === '..' ||
+          seen.has(post.slug)) return false;
+      try { encodeURIComponent(post.slug); } catch (_) { return false; }
+      seen.add(post.slug);
+      return true;
+    }).map(function(post) {
+      return {title: post.title, href: '/' + encodeURIComponent(post.slug), category: post.category || ''};
+    });
+  }
+
+  function renderPublishedArticleList(container, posts) {
+    var kind = container.getAttribute('data-published-article-list');
+    var limit = kind === 'cards' ? 3 : (kind === 'top10' ? 10 :
+      (kind === 'docs' ? (container.getAttribute('data-article-category') ? 2 : 1) : 4));
+    var rows = posts.filter(function(post) {
+      return kind === 'top10' || post.href !== window.location.pathname;
+    }).slice(0, limit);
+    if (!rows.length) {
+      container.textContent = '표시할 다른 공개 글이 없습니다.';
+      container.setAttribute('data-article-load-state', 'empty');
+      return;
+    }
+    container.innerHTML = rows.map(function(post, idx) {
+      var title = articleEscape(post.title), href = articleEscape(post.href);
+      if (kind === 'top10') {
+        return '<li class="wt-top10-item"><span class="wt-rank-num' + (idx < 3 ? ' top3' : '') + '">' +
+          (idx + 1) + '</span><a href="' + href +
+          '" style="color:#0F172A;text-decoration:none;font-weight:700;">' + title + '</a></li>';
+      }
+      if (kind === 'docs') {
+        return '<a class="msdocs-tree-item" href="' + href + '">📄 ' + title + '</a>';
+      }
+      if (kind === 'cards') {
+        return '<a class="th-mag-card" href="' + href + '">' +
+          '<div style="aspect-ratio:4/3;background:linear-gradient(135deg, var(--pri) 0%, var(--sec) 100%);color:#fff;padding:16px;display:flex;flex-direction:column;justify-content:space-between;">' +
+          '<span style="font-size:11px;font-weight:800;background:rgba(0,0,0,0.28);padding:3px 9px;border-radius:999px;width:fit-content;">' +
+          articleEscape(CFG.h2IconBadge) + ' ' + articleEscape(post.category) + '</span>' +
+          '<strong style="font-size:14px;line-height:1.35;">' + title + '</strong></div>' +
+          '<div style="padding:12px 14px;font-size:12px;color:var(--muted);font-weight:700;display:flex;justify-content:space-between;">' +
+          '<span>CURATION #' + (idx + 1) + '</span><span style="color:var(--pri);">보러가기 →</span></div></a>';
+      }
+      var style = kind === 'health' ?
+        'color:#134E4A;text-decoration:none;font-weight:700;padding-bottom:8px;border-bottom:1px dashed #CCFBF1;' :
+        'color:var(--txt);text-decoration:none;';
+      return '<a href="' + href + '" style="' + style + '">• ' + title + ' →</a>';
+    }).join('');
+    container.setAttribute('data-article-load-state', 'loaded');
+  }
+
+  function hydratePublishedArticleLists() {
+    var containers = Array.from(document.querySelectorAll('[data-published-article-list]')).filter(function(el) {
+      if (el.hasAttribute('data-article-list-bound')) return false;
+      el.setAttribute('data-article-list-bound', '1');
+      return true;
+    });
+    if (!containers.length) return;
+    var groups = new Map();
+    containers.forEach(function(el) {
+      var isDocs = el.getAttribute('data-published-article-list') === 'docs';
+      var category = el.getAttribute('data-article-category') || '';
+      var url = '/api/posts?status=published&sort=views&limit=' + (isDocs ? (category ? 2 : 1) : 10) + '&page=1';
+      if (isDocs && category) url += '&cat=' + encodeURIComponent(category);
+      if (!groups.has(url)) groups.set(url, []);
+      groups.get(url).push(el);
+    });
+    return Promise.all(Array.from(groups).map(function(group) {
+      return fetch(group[0], {credentials: 'omit'})
+        .then(function(response) {
+          if (!response.ok) throw new Error('Published article request failed');
+          return response.json();
+        })
+        .then(publicArticleRows)
+        .then(function(posts) {
+          group[1].forEach(function(el) { renderPublishedArticleList(el, posts); });
+        })
+        .catch(function() {
+          group[1].forEach(function(el) {
+            el.textContent = '공개 글 목록을 불러오지 못했습니다.';
+            el.setAttribute('data-article-load-state', 'error');
+          });
+        });
+    }));
+  }
+""".strip()
 SKILLS_UI_UX_DIR = BASE_DIR.parent / "skills" / "ui-ux-pro-max"
 DESIGN_SYSTEM_DIR = BASE_DIR / "design-system"
 
@@ -126,18 +228,6 @@ DOMAIN_IDENTITY_SPECS: Dict[str, Dict[str, Any]] = {
             "[속보] 장바구니 생활물가 절약 핵심 수칙… 주부 90%가 놓치는 보관·관리법 공개",
             "[이슈기획] 전기·수도·가스 공과금 아끼는 계절별 살림 체크리스트 집중 분석",
             "[화제] \"한 달 내내 싱싱하게\" 식재료 무름 방지 냉장·냉동 황금 공식",
-        ],
-        "top10Articles": [
-            "식재료 신선도 3배 늘리는 냉장·냉동 소분 보관 핵심 공식",
-            "세탁기 쉰내·배수구 악취 단번에 잡는 과탄산소다 활용법",
-            "매달 빠져나가는 공과금·관리비 즉시 환급·할인받는 체크리스트",
-            "욕실 물때·창틀 묵은 먼지 10분 만에 끝내는 호텔식 청소 루틴",
-            "제철 채소·과일 무르지 않게 고르는 법과 1주일 식단 구성",
-            "에어프라이어·전자레인지 기름때 손쉽게 제거하는 천연 세제 조합",
-            "옷장 곰팡이·습기 완벽 차단하는 계절별 의류 수납 가이드",
-            "주방 싱크대 수전 광택 살리는 치약·구연산 3단계 코팅 팁",
-            "냉동실 성에 방지 및 전기요금 아끼는 적정 용량 배치 요령",
-            "배달 용기·플라스틱 김치 국물 색배임 지우는 햇빛·베이킹소다 비법",
         ],
         "colors": {
             "primary": "#E11D48",
@@ -198,18 +288,6 @@ DOMAIN_IDENTITY_SPECS: Dict[str, Dict[str, Any]] = {
             "[정책속보] 2026 정부지원금·민생 바우처 신청 대상 확대… 미신청 시 소멸 주의",
             "[단독기획] 정부24·복지로 온라인 민원 증명서 수수료 0원 즉시 발급 가이드",
             "[세제브리핑] 국세청·건보공단 미수령 환급금 통합 조회 및 계좌 입금 일정",
-        ],
-        "top10Articles": [
-            "2026년 정부24·복지로 맞춤형 보조금 자격 조회 및 신청 절차 총정리",
-            "건강보험료 본인부담상한제 환급금 조회 및 온라인 지급 신청 방법",
-            "주민등록등본·가족관계증명서 인터넷 무료 발급 및 PDF 저장 팁",
-            "청년·중장년 구직촉진수당 및 국민취업지원제도 1·2유형 자격 비교",
-            "국세청 홈택스 종합소득세·근로장려금 기한 후 신청 및 수령액 계산",
-            "소상공인 정책자금 대환대출 및 이자 환급 지원 대상 확인 리스트",
-            "에너지바우처·도시가스 요금 경감 대상자 온라인 신청 구비서류",
-            "부모급여·아동수당·첫만남이용권 중복 수급 기준 및 신청 시기",
-            "기초생활수급자·차상위계층 선정 기준 중위소득 인상분 상세 분석",
-            "지방세 세목별 과세증명서·납세증명서 모바일 즉시 발급 가이드",
         ],
         "colors": {
             "primary": "#0B3B8C",
@@ -2616,7 +2694,6 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
             "publisherName": spec.get("publisherName", "김정훈"),
             "youthOfficer": spec.get("youthOfficer", "이서연"),
             "headlines": spec.get("headlines", []),
-            "top10Articles": spec.get("top10Articles", []),
             "expertName": spec.get("expertName", "수석 자문 에디터"),
             "expertRole": spec.get("expertRole", "법률·세무·제도 실무 리서치 센터"),
             "expertBadge": spec.get("expertBadge", "✓ 공식 기관 기준 검수필"),
@@ -2634,6 +2711,8 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
     enhancer_js = f"""
 (function(){{
   var CFG = {shell_config_json};
+
+{PUBLISHED_ARTICLE_LIST_JS}
 
   function cleanHeadingText(str) {{
     return (str || '').replace(/^\\s*#+\\s*/, '').replace(/^\\d+\\.\\s+/, '').trim();
@@ -2749,18 +2828,12 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
     layout.setAttribute('data-arch-layout', '1');
     layout.querySelectorAll(':scope > .sidebar').forEach(function(s){{ s.remove(); }});
 
-    var top10List = (CFG.top10Articles || []).slice(0, 10).map(function(title, idx){{
-      var rankCls = idx < 3 ? 'wt-rank-num top3' : 'wt-rank-num';
-      return '<li class="wt-top10-item"><span class="' + rankCls + '">' + (idx + 1) + '</span>' +
-        '<a href="/?q=' + encodeURIComponent(title.split(' ')[0]) + '" style="color:#0F172A;text-decoration:none;font-weight:700;">' + title + '</a></li>';
-    }}).join('');
-
     var rankingCol = document.createElement('aside');
     rankingCol.className = 'wt-ranking-col';
     rankingCol.innerHTML =
       '<div class="wt-top10-box">' +
-      '<div class="wt-top10-header"><h4>🔥 실시간 많이 본 기사 TOP 10</h4><span style="font-size:11px;color:#E11D48;font-weight:800;">LIVE</span></div>' +
-      '<ol class="wt-top10-list">' + top10List + '</ol>' +
+      '<div class="wt-top10-header"><h4>🔥 많이 본 기사 TOP 10</h4><span style="font-size:11px;color:#E11D48;font-weight:800;">조회수순</span></div>' +
+      '<ol class="wt-top10-list" data-published-article-list="top10">공개 글을 불러오는 중입니다.</ol>' +
       '</div>' + buildStickyAdSlotHtml();
 
     if (!isHome) {{
@@ -2899,8 +2972,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
             '<details class="albup-faq-item"><summary><span>Q3. 대리인 신청이나 사후 이의신청 절차도 가능한가요?</span><span>▼</span></summary>' +
             '<div class="albup-faq-ans">A. 위임장과 신분증 지참 시 대리 접수가 가능하며, 결과 통보일로부터 30~90일 이내에 공식 이의신청 절차를 진행할 수 있습니다.</div></details>' +
             '<div class="albup-more-columns"><strong style="display:block;font-size:14px;color:var(--pri);margin-bottom:8px;">📚 다른 전문가 칼럼 더보기</strong>' +
-            '<div style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;">' +
-            (CFG.categories || []).map(function(c){{ return '<a href="/?cat=' + encodeURIComponent(c) + '" style="color:var(--txt);text-decoration:none;">• [' + c + '] 2026 최신 법령·제도 개정 기준 및 실무 체크리스트 →</a>'; }}).join('') +
+            '<div style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;" data-published-article-list="columns">공개 글을 불러오는 중입니다.' +
             '</div></div>';
           contentEl.insertAdjacentElement('afterend', faqBox);
         }}
@@ -3041,11 +3113,10 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
     /* Left Folder Tree Sidebar */
     var treeSidebar = document.createElement('aside');
     treeSidebar.className = 'msdocs-tree-sidebar';
-    var treeHtml = cats.map(function(c, idx){{
+    var treeHtml = cats.map(function(c){{
       return '<div class="msdocs-tree-group">' +
-        '<div class="msdocs-tree-folder">📂 ' + c.label + '</div>' +
-        '<a class="msdocs-tree-item' + (c.active ? ' active' : '') + '" href="' + c.href + '">📄 ' + c.label + ' 표준 매뉴얼</a>' +
-        (idx > 0 ? '<a class="msdocs-tree-item" href="' + c.href + '">📄 트러블슈팅 &amp; 단축키</a>' : '') +
+        '<a class="msdocs-tree-folder" href="' + c.href + '" style="color:inherit;text-decoration:none;">📂 ' + c.label + '</a>' +
+        '<div data-published-article-list="docs" data-article-category="' + articleEscape(c.href === '/' ? '' : c.label) + '">공개 글을 불러오는 중입니다.</div>' +
         '</div>';
     }}).join('');
     treeSidebar.innerHTML =
@@ -3207,8 +3278,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
       medSide.innerHTML =
         '<div style="background:#FFFFFF;border:1px solid #99F6E4;border-top:3px solid #0F766E;border-radius:10px;padding:18px;">' +
         '<h4 style="margin:0 0 12px;font-size:14.5px;color:#0F766E;">🏥 진료과·건강 칼럼 추천</h4>' +
-        '<div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">' +
-        (CFG.categories || []).map(function(c){{ return '<a href="/?cat=' + encodeURIComponent(c) + '" style="color:#134E4A;text-decoration:none;font-weight:700;padding-bottom:8px;border-bottom:1px dashed #CCFBF1;">• [' + c + '] 증상별 자가진단 및 예방 수칙 →</a>'; }}).join('') +
+        '<div style="display:flex;flex-direction:column;gap:10px;font-size:13px;" data-published-article-list="health">공개 글을 불러오는 중입니다.' +
         '</div></div>' + buildStickyAdSlotHtml();
       layout.appendChild(medSide);
     }}
@@ -3301,16 +3371,9 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
 
         var relGrid = document.createElement('section');
         relGrid.className = 'th-related-3col-wrap';
-        var cards = (CFG.categories || []).slice(0, 3).map(function(catName, idx){{
-          return '<a class="th-mag-card" href="/?cat=' + encodeURIComponent(catName) + '">' +
-            '<div style="aspect-ratio:4/3;background:linear-gradient(135deg, var(--pri) 0%, var(--sec) 100%);color:#fff;padding:16px;display:flex;flex-direction:column;justify-content:space-between;">' +
-            '<span style="font-size:11px;font-weight:800;background:rgba(0,0,0,0.28);padding:3px 9px;border-radius:999px;width:fit-content;">' + CFG.h2IconBadge + ' ' + catName + '</span>' +
-            '<strong style="font-size:14px;line-height:1.35;">' + catName + ' 에디터 추천 베스트 가이드 모아보기</strong></div>' +
-            '<div style="padding:12px 14px;font-size:12px;color:var(--muted);font-weight:700;display:flex;justify-content:space-between;"><span>CURATION #' + (idx + 1) + '</span><span style="color:var(--pri);">보러가기 →</span></div></a>';
-        }}).join('');
         relGrid.innerHTML =
           '<h3 style="margin:0;font-size:16px;color:var(--pri);">' + CFG.h2IconBadge + ' 함께 읽으면 좋은 큐레이션 매거진 (3열 포토 그리드)</h3>' +
-          '<div class="th-related-3col-grid">' + cards + '</div>';
+          '<div class="th-related-3col-grid" data-published-article-list="cards">공개 글을 불러오는 중입니다.</div>';
         contentEl.insertAdjacentElement('afterend', relGrid);
       }}
     }}
@@ -3351,6 +3414,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
     else applyArch8Todayhouse(cats, isHome);
 
     enhanceCommonAdsAndCaptures(isHome);
+    hydratePublishedArticleLists();
   }}
 
   if (document.readyState === 'loading') {{
