@@ -1,7 +1,7 @@
 {
-  "directiveId": "2026-10-20T07:53:00+09:00",
+  "directiveId": "2026-10-20T10:50:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-19T22:59:30.1968514+00:00",
+  "startedAt": "2026-10-20T01:50:26.932Z",
   "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
   "directiveHistory": [
     {
@@ -1380,7 +1380,7 @@
     {
       "directiveId": "2026-10-20T07:53:00+09:00",
       "status": "blocked",
-      "startedAt": "2026-10-19T22:59:30.1968514+00:00",
+      "startedAt": "2026-10-20T07:59:30.1968514+09:00",
       "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
       "summary": "부분 처리 후 블로킹. nolplace/meganote 저장 JSON 복구는 파싱을 통과했으나 독립 근거·이미지 검수에서 반려되어 준비 상태로 올리지 않았다. joynote/soulnote/tripmarvel은 PC·모바일 전체 화면 캡처와 6개 역할 인계/최종 검수를 통과해 준비 상태로 확인했다(발행 안 함). 근거 정렬 6개 도메인은 기존 readerGoal/answerBrief·주제 정체성과의 충돌 및 인계 누락으로 안전한 완료 불가.",
       "changedFiles": [
@@ -1453,7 +1453,7 @@
       },
       "driveSync": {
         "status": "verified",
-        "verifiedAt": "2026-10-19T23:23:51.767174+00:00",
+        "verifiedAt": "2026-10-20T08:23:51.767174+09:00",
         "fileCount": 7,
         "fileIds": [
           "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
@@ -1467,102 +1467,727 @@
         "verification": "Existing file IDs, names, application/json MIME types, parent folder and modifiedTime confirmed; final report readback metadata matched the in-place update."
       },
       "geminiNotification": {
-        "status": "pending"
+        "sentAt": "2026-10-19T23:32:12.547528Z",
+        "status": "sent_verified",
+        "evidence": "Exact message is visible in the existing BaroLab project conversation under the authenticated 바로연구소 account.",
+        "directiveId": "2026-10-20T07:53:00+09:00",
+        "reason": "directive blocked; user authorized urgent Gemini report",
+        "text": "코덱스 긴급 보고: 저장 JSON 복구 2건이 독립 근거·이미지 검수에서 반려됐고, 근거 정렬 6건은 완료하지 못했습니다. joynote.kr·soulnote.kr·tripmarvel.com 3건만 준비 상태이며 외부 발행은 없습니다. 블로킹 발생. 지시 필요.",
+        "destination": "Gemini / BaroLab project conversation"
       },
-      "updatedAt": "2026-10-19T23:23:51.767174+00:00"
+      "updatedAt": "2026-10-19T23:32:12.547528Z"
+    },
+    {
+      "directiveId": "2026-10-20T08:34:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T08:39:31.784834+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "Blocked: the scheduled CF catch-up runner repeatedly acquires cleaner.lock, so the requested eight prepare-only runs cannot start without overlapping an active workflow. Earlier run folders remain preserved; publication none.",
+      "changedFiles": [
+        "cf_posting/data/daily_schedule.json",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "taskProgress": {
+        "phase": "blocked_on_overlap_guard",
+        "archiveStage1And2": {
+          "status": "completed",
+          "domains": [
+            "must-pick.com",
+            "topnote.kr",
+            "must-joy.com",
+            "woorinote.kr"
+          ],
+          "oldRunFolders": "preserved under supersededArchives; source directories untouched"
+        },
+        "pipelineRuns": {
+          "status": "not_started",
+          "orderedDomains": [
+            "must-pick.com",
+            "nolplace.com",
+            "maxnote.kr",
+            "topnote.kr",
+            "must-joy.com",
+            "meganote.kr",
+            "daynote.kr",
+            "woorinote.kr"
+          ],
+          "failedAttempt": {
+            "at": "2026-10-20T08:48:50.863423+09:00",
+            "domain": "must-pick.com",
+            "mode": "prepare-only",
+            "status": "blocked_before_start",
+            "reason": "The second prepare-only attempt for must-pick.com was rejected by the existing overlap guard because scheduled pipeline_runner.py --catch-up-once PID 2356 started at 2026-10-20T08:47:39+09:00 and holds cleaner.lock. No requested domain pipeline run started."
+          }
+        },
+        "stage3Corrections": {
+          "status": "not_started",
+          "domains": [
+            "nolplace.com",
+            "maxnote.kr",
+            "meganote.kr",
+            "daynote.kr"
+          ]
+        },
+        "publication": "none",
+        "blocker": "The second prepare-only attempt for must-pick.com was rejected by the existing overlap guard because scheduled pipeline_runner.py --catch-up-once PID 2356 started at 2026-10-20T08:47:39+09:00 and holds cleaner.lock. No requested domain pipeline run started."
+      },
+      "blockedAt": "2026-10-20T08:48:50.863423+09:00",
+      "currentResult": {
+        "status": "blocked",
+        "preparedSites": [],
+        "notPreparedSites": [
+          "must-pick.com",
+          "nolplace.com",
+          "maxnote.kr",
+          "topnote.kr",
+          "must-joy.com",
+          "meganote.kr",
+          "daynote.kr",
+          "woorinote.kr"
+        ],
+        "blockers": [
+          "The second prepare-only attempt for must-pick.com was rejected by the existing overlap guard because scheduled pipeline_runner.py --catch-up-once PID 2356 started at 2026-10-20T08:47:39+09:00 and holds cleaner.lock. No requested domain pipeline run started."
+        ],
+        "publication": "none"
+      },
+      "driveSync": {
+        "status": "verified",
+        "verifiedAt": "2026-10-19T23:49:43.487484Z",
+        "fileCount": 7,
+        "fileIds": [
+          "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+          "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
+          "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+          "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+          "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+          "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+          "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI"
+        ],
+        "files": [
+          {
+            "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+            "name": "live_snapshot.json",
+            "modifiedTime": "2026-10-19T23:49:04.409Z",
+            "size": "7954",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+            "name": "revenue.json",
+            "modifiedTime": "2026-10-19T23:49:07.479Z",
+            "size": "191141",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+            "name": "metrics.json",
+            "modifiedTime": "2026-10-19T23:49:11.302Z",
+            "size": "3576449",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+            "name": "daily_schedule.json",
+            "modifiedTime": "2026-10-19T23:49:19.555Z",
+            "size": "2252832",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+            "name": "kin.json",
+            "modifiedTime": "2026-10-19T23:49:14.197Z",
+            "size": "48413",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
+            "name": "naver_automation.json",
+            "modifiedTime": "2026-10-19T23:49:23.583Z",
+            "size": "16312",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
+            "name": "codex_report.json",
+            "mimeType": "application/json"
+          }
+        ],
+        "verification": "All seven existing JSON file IDs were updated in place and their IDs, names, application/json MIME types, root parents and modified times were confirmed. The final report readback also confirmed its ID, name, MIME type, parent and size; self-referential report metadata is omitted from the embedded file list."
+      },
+      "updatedAt": "2026-10-20T08:49:43.519417+09:00",
+      "geminiNotification": {
+        "directiveId": "2026-10-20T08:34:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-19T23:46:37.410904Z",
+        "reason": "directive blocked; user authorized urgent Gemini report",
+        "text": "코덱스 긴급 보고: 08:34 지시(2026-10-20T08:34:00+09:00)는 다른 CF 파이프라인이 cleaner.lock을 보유 중이라 겹침 방지로 실행되지 않았고, 요청한 8개 도메인 준비 작업은 미실행입니다. 블로킹 발생. 지시 필요.",
+        "destination": "Gemini / BaroLab project conversation",
+        "evidence": "The exact message is visible in the existing BaroLab project chat under 바로연구소 (barolab26@gmail.com); composer cleared after send."
+      },
+      "resumedAt": "2026-10-20T08:47:39.122792+09:00",
+      "resumeAttempts": [
+        {
+          "resumedAt": "2026-10-20T08:47:39.122792+09:00",
+          "reason": "The prior catch-up runner exited and cleaner.lock is readable; pipeline state is idle. Previous blocked notification is retained and will not be resent."
+        }
+      ],
+      "pipelineAttempts": [
+        {
+          "at": "2026-10-20T08:48:50.863423+09:00",
+          "domain": "must-pick.com",
+          "mode": "prepare-only",
+          "status": "blocked_before_start",
+          "reason": "The second prepare-only attempt for must-pick.com was rejected by the existing overlap guard because scheduled pipeline_runner.py --catch-up-once PID 2356 started at 2026-10-20T08:47:39+09:00 and holds cleaner.lock. No requested domain pipeline run started."
+        }
+      ]
+    },
+    {
+      "directiveId": "2026-10-20T08:48:00+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "startedAt": "2026-10-20T08:54:18.335225+09:00",
+      "status": "blocked",
+      "summary": "BLOCKED, PARTIAL: cleaner-lock wait-and-acquire and reviewedArticle binding were implemented, smoke-tested, committed, pushed and remote-verified at 97d24913e514f674730c29823271d7cb39ba05e4. Group A has four new prepared articles with publication_gate checks and reviewedArticle bindings. Group B cannot safely proceed: nolplace/maxnote/meganote each have a consumed coupled-rework attempt rejected by independent review, and daynote lacks completed six-agent handoff evidence. No review gate was bypassed and nothing was published by these prepare-only runs.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py",
+        "cf_posting/data/daily_schedule.json",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "taskProgress": {
+        "codePatch": {
+          "status": "completed_partial",
+          "commitHash": "97d24913e514f674730c29823271d7cb39ba05e4",
+          "tests": [
+            "python -m py_compile cf_posting/pipeline_runner.py",
+            "doctor_verified_today threshold and KST rollover smoke tests",
+            "cleaner_lock cross-process wait-and-acquire smoke test",
+            "git diff --check with CRLF-aware whitespace setting"
+          ],
+          "remoteVerified": true
+        },
+        "archiveStage1And2": {
+          "status": "completed",
+          "domains": [
+            "must-pick.com",
+            "topnote.kr",
+            "must-joy.com",
+            "woorinote.kr"
+          ],
+          "oldRunFolders": "preserved; new run folders used"
+        },
+        "preparedArticles": [
+          {
+            "domain": "must-pick.com",
+            "status": "prepared",
+            "artifactFolder": "output\\washing-machine-laundry-odor-cleaning-checks\\run-20261020-085732-42d438",
+            "reviewedArticle": "output\\washing-machine-laundry-odor-cleaning-checks\\run-20261020-085732-42d438\\article.json"
+          },
+          {
+            "domain": "topnote.kr",
+            "status": "prepared",
+            "artifactFolder": "output\\windows-11-screen-recording-capture-tool\\run-20261020-090212-79fafd",
+            "reviewedArticle": "output\\windows-11-screen-recording-capture-tool\\run-20261020-090212-79fafd\\article.json"
+          },
+          {
+            "domain": "must-joy.com",
+            "status": "prepared",
+            "artifactFolder": "output\\outskirts-cafe-parking-alternatives\\run-20261020-090736-72375f",
+            "reviewedArticle": "output\\outskirts-cafe-parking-alternatives\\run-20261020-090736-72375f\\article.json"
+          },
+          {
+            "domain": "woorinote.kr",
+            "status": "prepared",
+            "artifactFolder": "output\\unsold-housing-subscription-eligibility-and-application\\run-20261020-091237-ba1e0a",
+            "reviewedArticle": "output\\unsold-housing-subscription-eligibility-and-application\\run-20261020-091237-ba1e0a\\article.json"
+          }
+        ],
+        "stage3Corrections": [
+          {
+            "domain": "nolplace.com",
+            "status": "blocked",
+            "reason": "Coupled rework was already attempted and rejected; pipeline prevents repeating the bounded proposal/review."
+          },
+          {
+            "domain": "maxnote.kr",
+            "status": "blocked",
+            "reason": "Coupled rework was already attempted and independent review rejected the proposal for unsupported human-review conditions and answerBrief mismatch."
+          },
+          {
+            "domain": "meganote.kr",
+            "status": "blocked",
+            "reason": "Coupled rework was already attempted and rejected for generated visuals not being honest conceptual diagrams."
+          },
+          {
+            "domain": "daynote.kr",
+            "status": "blocked",
+            "reason": "Required six-agent handoff is incomplete; no safe Stage 3-6 continuation is available."
+          }
+        ],
+        "publication": "prepare-only; no external publication invoked",
+        "blocker": "Three group-B artifacts have a consumed rejected coupled rework attempt; daynote lacks the required completed six-agent handoff. Existing safety/review guards prevent a safe retry without creating a new supported run or explicit recovery path."
+      },
+      "pipelineAttempts": [],
+      "blockedAt": "2026-10-20T00:23:15.697322Z",
+      "commitHash": "97d24913e514f674730c29823271d7cb39ba05e4",
+      "driveSyncStatus": "verified",
+      "geminiNotification": {
+        "directiveId": "2026-10-20T08:48:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-20T00:26:00.851944Z",
+        "reason": "Directive blocked; user approved one Computer Use notification.",
+        "text": "코덱스 긴급 보고: 08:48 지시 중 Stage 3 보완 4건은 기존 독립 검수 거부 또는 6개 에이전트 인수 미완료로 안전한 재시도 경로가 없어 blocked입니다. 그룹 A 4개 준비본과 코드 패치·테스트·푸시, Drive 7개 파일 동기화는 완료했습니다. 지시 필요.",
+        "destination": "Gemini desktop / BaroLab 프로젝트",
+        "evidence": "The exact message is visible in the existing Gemini BaroLab project conversation for 바로연구소; the composer cleared and Gemini response generation started.",
+        "deduplicatedByDirectiveId": true
+      }
+    },
+    {
+      "directiveId": "2026-10-20T08:48:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T08:54:18.335225+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "BLOCKED, PARTIAL: cleaner-lock wait-and-acquire and reviewedArticle binding were implemented, smoke-tested, committed, pushed and remote-verified at 97d24913e514f674730c29823271d7cb39ba05e4. Group A has four new prepared articles with publication_gate checks and reviewedArticle bindings. Group B cannot safely proceed: nolplace/maxnote/meganote each have a consumed coupled-rework attempt rejected by independent review, and daynote lacks completed six-agent handoff evidence. No review gate was bypassed and nothing was published by these prepare-only runs.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py",
+        "cf_posting/data/daily_schedule.json",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "commitHash": "97d24913e514f674730c29823271d7cb39ba05e4",
+      "blockedAt": "2026-10-20T00:23:15.697322Z",
+      "driveSync": {
+        "status": "verified",
+        "verifiedAt": "2026-10-20T00:26:00.851944Z",
+        "fileCount": 7,
+        "fileIds": [
+          "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+          "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
+          "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+          "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+          "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+          "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+          "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI"
+        ],
+        "files": [
+          {
+            "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+            "name": "live_snapshot.json",
+            "size": 4884,
+            "modifiedTime": "2026-10-20T00:23:29.62Z",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+            "name": "revenue.json",
+            "size": 191131,
+            "modifiedTime": "2026-10-20T00:23:34.694Z",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+            "name": "metrics.json",
+            "size": 3576492,
+            "modifiedTime": "2026-10-20T00:23:42.038Z",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+            "name": "daily_schedule.json",
+            "size": 2344740,
+            "modifiedTime": "2026-10-20T00:23:49.073Z",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+            "name": "kin.json",
+            "size": 45256,
+            "modifiedTime": "2026-10-20T00:23:57Z",
+            "mimeType": "application/json"
+          },
+          {
+            "id": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
+            "name": "naver_automation.json",
+            "size": 16764,
+            "modifiedTime": "2026-10-20T00:24:04.587Z",
+            "mimeType": "application/json"
+          }
+        ],
+        "verification": "All seven existing Drive JSON IDs were updated in place. Source files passed JSON validation and metadata readback confirmed ID, name, application/json MIME type, root parent, size and modifiedTime; the final codex_report.json update is followed by its own metadata readback."
+      },
+      "geminiNotification": {
+        "directiveId": "2026-10-20T08:48:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-20T00:26:00.851944Z",
+        "reason": "Directive blocked; user approved one Computer Use notification.",
+        "text": "코덱스 긴급 보고: 08:48 지시 중 Stage 3 보완 4건은 기존 독립 검수 거부 또는 6개 에이전트 인수 미완료로 안전한 재시도 경로가 없어 blocked입니다. 그룹 A 4개 준비본과 코드 패치·테스트·푸시, Drive 7개 파일 동기화는 완료했습니다. 지시 필요.",
+        "destination": "Gemini desktop / BaroLab 프로젝트",
+        "evidence": "The exact message is visible in the existing Gemini BaroLab project conversation for 바로연구소; the composer cleared and Gemini response generation started.",
+        "deduplicatedByDirectiveId": true
+      }
+    },
+    {
+      "directiveId": "2026-10-20T09:30:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T09:27:30+09:00",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "BLOCKED: Must-pick was not publicly published by its 09:30 slot: the public posts API returned HTTP 200 with no matching slug/title, schedule still has status=prepared with no publicUrl/postId, and attemptCount=5 without nextRetryAt is excluded by select_due_items. Four clean Stage 1-6 runs were withheld because two CF catch-up-once processes (PIDs 10904 and 23540, started 09:13 and 09:15 KST) remain alive while pipeline_state is stale at idle since 09:19; the shared schedule/process state cannot be safely modified concurrently. No external publication was triggered.",
+      "changedFiles": [
+        "server/data/codex_report.json",
+        "server/data/live_snapshot.json"
+      ],
+      "blockedAt": "2026-10-20T09:32:52+09:00",
+      "taskProgress": {
+        "mustPick": {
+          "status": "not_published",
+          "scheduledTime": "09:30",
+          "apiHttpStatus": 200,
+          "matchingPublicPosts": 0,
+          "scheduleStatus": "prepared",
+          "attemptCount": 5,
+          "nextRetryAt": null,
+          "excludedByAttemptCap": true
+        },
+        "remainingDomains": {
+          "status": "blocked_before_start",
+          "domains": [
+            "nolplace.com",
+            "maxnote.kr",
+            "meganote.kr",
+            "daynote.kr"
+          ],
+          "reason": "two existing catch-up-once processes remain alive; pipeline state is stale and any schedule/run-folder edits could overlap"
+        },
+        "publication": "none initiated by this run"
+      },
+      "geminiNotification": {
+        "directiveId": "2026-10-20T09:30:00+09:00",
+        "status": "sent_verified",
+        "sentAt": "2026-10-20T00:35:26.4503582Z",
+        "reason": "Blocked; one user-authorized Computer Use notification.",
+        "text": "코덱스 긴급 보고: 09:30 지시의 must-pick.com 발행은 공개 API에서 해당 글이 확인되지 않아 미완료입니다. 나머지 4개 도메인은 실행 중인 CF 프로세스 2개와 오래된 상태 때문에 중복 실행 위험이 있어 보류했습니다. 블로킹 발생. 지시 필요.",
+        "destination": "Gemini desktop / BaroLab 프로젝트",
+        "evidence": "Verified visually in the existing BaroLab project conversation for 바로연구소: the exact sent message is visible as a user message and the composer is clear.",
+        "deduplicatedByDirectiveId": true
+      },
+      "driveSyncStatus": "verified",
+      "updatedAt": "2026-10-20T00:35:54.5947395Z"
+    },
+    {
+      "directiveId": "2026-10-20T09:36:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T00:37:43.6884829Z",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "blockedAt": "2026-10-20T01:36:01Z",
+      "error": "Repeated TargetClosedError during meganote assembler layout capture; daynote remains unrun. The designated browser start request was rejected by tool policy, and Computer Use did not expose the Gemini desktop app.",
+      "changedFiles": [
+        "cf_posting/data/daily_schedule.json",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "currentResult": {
+        "status": "blocked",
+        "completed": false
+      },
+      "taskProgress": {
+        "processCleanup": {
+          "status": "completed",
+          "terminatedPids": [
+            10904,
+            23540
+          ],
+          "pipelineState": "idle verified before publication"
+        },
+        "mustPick": {
+          "status": "published_verified",
+          "scheduledTime": "09:30",
+          "postId": 308,
+          "slug": "washing-machine-laundry-odor-cleaning-checks",
+          "publicUrl": "https://www.must-pick.com/washing-machine-laundry-odor-cleaning-checks",
+          "publicApiHttp": 200,
+          "publicPageHttp": 200,
+          "titleMatched": true,
+          "verifiedAt": "2026-10-20T09:41:51+09:00",
+          "attemptCount": 1,
+          "totalAttempts": 6
+        },
+        "priorBadRunsArchived": {
+          "status": "completed",
+          "domains": [
+            "nolplace.com",
+            "maxnote.kr",
+            "meganote.kr",
+            "daynote.kr"
+          ],
+          "foldersPreserved": true
+        },
+        "freshRuns": {
+          "nolplace.com": {
+            "status": "published_verified_by_reconciliation",
+            "postId": 42,
+            "publicUrl": "https://www.nolplace.com/hwadamsup-autumn-admission-monorail-booking-cancellation-tips",
+            "publicApiHttp": 200,
+            "publicPageHttp": 200,
+            "titleMatched": true,
+            "note": "The scheduled catch-up automatically published the prepared item at its due time. A verification_pending receipt was reconciled from the public API and page."
+          },
+          "maxnote.kr": {
+            "status": "prepared_verified",
+            "artifactFolder": "output/ai-meeting-notes-sensitive-data-privacy-check/run-20261020-095348-c17a6a",
+            "sixHandoffsAccepted": true,
+            "publicationGate": "passed"
+          },
+          "meganote.kr": {
+            "status": "failed",
+            "artifactFolder": "output/tire-pressure-warning-check-reset/run-20261020-103225-f0034d",
+            "error": "TargetClosedError: BrowserContext.new_page: Target page, context or browser has been closed"
+          },
+          "daynote.kr": {
+            "status": "not_started",
+            "scheduleStatus": "waiting"
+          }
+        },
+        "queue": {
+          "total": 16,
+          "prepared": 12,
+          "published": 2,
+          "failed": 1,
+          "waiting": 1,
+          "targetReached": false
+        },
+        "browser": {
+          "configuredStartBat": "C:\\99_포터블브라우저\\CentBrowserPotable_barolab26\\barolab26_start_cdp.bat",
+          "cdpPort": 9440,
+          "state": "CDP target closed during repeated layout capture",
+          "launchAttempt": "rejected by tool policy"
+        },
+        "geminiReport": {
+          "status": "not_sent",
+          "reason": "Computer Use app inventory had no Gemini desktop app/window; the only Chrome tab was the unrelated soultin launch-info page."
+        }
+      },
+      "updatedAt": "2026-10-20T00:44:35.3239183Z",
+      "summary": "Blocked: must-pick is verified, maxnote is prepared, and the nolplace scheduled catch-up published and was reconciled; meganote failed on a closed CDP target and daynote was not started. Only 12/16 items are prepared."
+    },
+    {
+      "directiveId": "2026-10-20T10:50:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T01:50:26.932Z",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "WSL2 audit completed: only the stopped docker-desktop WSL2 distro is available; no Python, Windows project mount, or Chromium/Chrome was found. WSLg display variables are set. The already-published must-pick post (ID 308) is live and was not duplicated; pipeline state is idle and prior catch-up PIDs are absent. Blocked on unavailable Gemini desktop for the required chat report.",
+      "taskProgress": {
+        "wslAudit": {
+          "status": "completed_with_prerequisite_gaps",
+          "defaultDistro": "docker-desktop (WSL 2)",
+          "distroStateAtCheck": "Stopped",
+          "uname": "Linux R9 6.18.33.2-microsoft-standard-WSL2 x86_64",
+          "python3": "missing",
+          "windowsProjectMount": "missing at /mnt/c/10_Project/BaroLab",
+          "memory": "15.2 GiB total, 14.6 GiB available",
+          "rootDisk": "124.8 MiB total, 53.9 MiB available",
+          "display": ":0",
+          "waylandDisplay": "wayland-0",
+          "chromeOrChromium": "not found",
+          "venv": "unavailable because python3 is missing",
+          "setupPlan": ["Provision a general-purpose Ubuntu WSL2 distro", "Install python3 and python3-venv", "Confirm /mnt/c/10_Project/BaroLab access", "Install or expose Chromium and verify WSLg", "Then validate the Ego Lite runtime without adding a repo script unless separately requested"]
+        },
+        "pipeline": {
+          "status": "idle",
+          "activeJob": null,
+          "priorCatchupPids10904and23540": "not running"
+        },
+        "mustPick": {
+          "status": "already_published_verified_no_duplicate_retry",
+          "postId": 308,
+          "publicUrl": "https://www.must-pick.com/washing-machine-laundry-odor-cleaning-checks",
+          "httpStatus": 200,
+          "attemptCount": 1
+        },
+        "schedule": {
+          "nolplace.com": "published",
+          "maxnote.kr": "prepared; scheduled 11:10 KST"
+        },
+        "geminiReport": {
+          "status": "not_sent",
+          "reason": "Computer Use inventory has no Gemini app/window or existing BaroLab conversation."
+        }
+      },
+      "changedFiles": ["server/data/live_snapshot.json", "server/data/codex_report.json"],
+      "updatedAt": "2026-10-20T01:50:26.932Z"
     }
   ],
-  "summary": "부분 처리 후 블로킹. nolplace/meganote 저장 JSON 복구는 파싱을 통과했으나 독립 근거·이미지 검수에서 반려되어 준비 상태로 올리지 않았다. joynote/soulnote/tripmarvel은 PC·모바일 전체 화면 캡처와 6개 역할 인계/최종 검수를 통과해 준비 상태로 확인했다(발행 안 함). 근거 정렬 6개 도메인은 기존 readerGoal/answerBrief·주제 정체성과의 충돌 및 인계 누락으로 안전한 완료 불가.",
+  "summary": "WSL2 environment audit completed with missing prerequisites; must-pick post 308 is already publicly verified, so it was not republished. Pipeline is idle and old catch-up PIDs are absent. Overall blocked because Computer Use exposes no Gemini app/conversation for the required report.",
   "changedFiles": [
-    "cf_posting/pipeline_runner.py",
-    "cf_posting/domain_themes.py",
+    "server/data/live_snapshot.json",
     "server/data/codex_report.json"
   ],
   "taskProgress": {
-    "savedArticleRecovery": {
-      "status": "blocked_after_recovery",
-      "sites": {
-        "nolplace.com": "JSON Extra data 복구 및 파싱 통과; 취소/변경 수수료·기한 근거가 부족해 독립 검수 반려",
-        "meganote.kr": "JSON Extra data 복구 및 파싱 통과; conceptual-diagram contract 위반으로 이미지 검수 반려"
-      }
+    "processCleanup": {
+      "status": "completed",
+      "terminatedPids": [
+        10904,
+        23540
+      ],
+      "pipelineState": "idle verified before publication"
     },
-    "layoutAndFinalReview": {
-      "status": "prepared",
-      "sites": {
-        "joynote.kr": "6개 역할 인계·독립 최종 검수 완료; 수정된 템플릿으로 PC 4장/모바일 7장 저장",
-        "soulnote.kr": "6개 역할 인계·독립 최종 검수 완료; PC 4장/모바일 7장 저장",
-        "tripmarvel.com": "6개 역할 인계·독립 최종 검수 완료; PC 4장/모바일 7장 저장"
-      },
-      "publication": "none"
+    "mustPick": {
+      "status": "published_verified",
+      "scheduledTime": "09:30",
+      "postId": 308,
+      "slug": "washing-machine-laundry-odor-cleaning-checks",
+      "publicUrl": "https://www.must-pick.com/washing-machine-laundry-odor-cleaning-checks",
+      "publicApiHttp": 200,
+      "publicPageHttp": 200,
+      "titleMatched": true,
+      "verifiedAt": "2026-10-20T09:41:51+09:00",
+      "attemptCount": 1,
+      "totalAttempts": 6
     },
-    "evidenceAlignment": {
-      "status": "blocked",
-      "sites": {
-        "must-pick.com": "readerGoal 필수 답변과 근거 불일치; 독립 검수 반려",
-        "maxnote.kr": "요청된 human-review 확인이 answerBrief의 근거와 불일치",
-        "topnote.kr": "불변 topic identity/metadata 변경으로 독립 검수 반려",
-        "must-joy.com": "6개 역할 인계 미완료",
-        "daynote.kr": "6개 역할 인계 미완료",
-        "woorinote.kr": "6개 역할 인계 미완료"
-      }
+    "priorBadRunsArchived": {
+      "status": "completed",
+      "domains": [
+        "nolplace.com",
+        "maxnote.kr",
+        "meganote.kr",
+        "daynote.kr"
+      ],
+      "foldersPreserved": true
+    },
+    "freshRunResults": {
+      "nolplace.com": "published_verified_by_reconciliation (post 42; catch-up published at due time)",
+      "maxnote.kr": "prepared_verified",
+      "meganote.kr": "failed: TargetClosedError during assembler layout capture",
+      "daynote.kr": "not_started: waiting"
+    },
+    "queue": {
+      "total": 16,
+      "prepared": 12,
+      "published": 2,
+      "failed": 1,
+      "waiting": 1,
+      "targetReached": false
+    },
+    "browser": {
+      "configuredStartBat": "C:\\99_포터블브라우저\\CentBrowserPotable_barolab26\\barolab26_start_cdp.bat",
+      "cdpPort": 9440,
+      "state": "CDP target closed during repeated layout capture",
+      "launchAttempt": "rejected by tool policy"
+    },
+    "geminiReport": {
+      "status": "not_sent",
+      "reason": "Computer Use app inventory had no Gemini desktop app/window."
     }
   },
   "previousLastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
-  "updatedAt": "2026-10-19T23:23:51.767174+00:00",
-  "checkedAt": "2026-10-20T06:57:38.288747+09:00",
+  "blockedAt": "2026-10-20T01:53:15Z",
+  "updatedAt": "2026-10-20T01:53:15Z",
+  "error": "WSL audit found no general-purpose distro, Python/venv, Windows project mount, or Chromium/Chrome; no install was authorized by the audit-only task. Must-pick was already publicly published and was not duplicated. The required Gemini report could not be sent because Computer Use exposed no Gemini app/window.",
+  "checkedAt": "2026-10-20T10:53:15+09:00",
   "geminiNotification": {
-    "directiveId": "2026-10-20T07:53:00+09:00",
-    "status": "pending",
-    "reason": "directive blocked; user authorized urgent Gemini report"
+    "directiveId": "2026-10-20T10:50:00+09:00",
+    "status": "not_sent",
+    "reason": "Computer Use had no Gemini desktop window or matching BaroLab conversation available."
   },
   "tests": {
-    "status": "passed",
+    "status": "audit_checks_passed",
     "checks": [
-      "python -m py_compile cf_posting/pipeline_runner.py cf_posting/domain_themes.py",
-      "JSON raw_decode regression assertions",
-      "Joynote preview asserts no fixed date/direct-review claim",
-      "6-role final-review receipts and PC/mobile screenshot counts verified"
-    ]
+      "WSL2 distro/state, uname, mount, memory, disk, display, browser and venv prerequisites checked",
+      "Must-pick public page returned HTTP 200 with the expected title",
+      "Seven local sync JSON files parsed successfully",
+      "git diff --check passed for this directive's changed files"
+    ],
+    "codeTests": "not_applicable_no_code_changes"
   },
   "currentResult": {
     "status": "blocked",
-    "preparedSites": [
-      "joynote.kr",
-      "soulnote.kr",
-      "tripmarvel.com"
-    ],
-    "notPreparedSites": [
-      "nolplace.com",
-      "meganote.kr",
-      "must-pick.com",
-      "maxnote.kr",
-      "topnote.kr",
-      "must-joy.com",
-      "daynote.kr",
-      "woorinote.kr"
-    ],
-    "blockers": [
-      "2 recovered saved proposals rejected by independent evidence/image review",
-      "6 requested evidence-alignment tasks remain blocked by mismatched preserved research goals, immutable topic metadata, or incomplete role handoffs"
-    ],
-    "publication": "none"
+    "auditComplete": true,
+    "wslReadyForEgoLite": false,
+    "blockingPrerequisites": ["general-purpose WSL distro", "python3/python3-venv", "/mnt/c/10_Project/BaroLab mount", "Chromium/Chrome"],
+    "mustPickAlreadyPublished": true,
+    "mustPickRepublishAttempted": false,
+    "geminiReportSent": false
   },
-  "commitHash": "1c8dea9a56434e7a556f08b427bae9aedb0378ab",
+  "commitHash": null,
   "driveSync": {
     "status": "verified",
-    "verifiedAt": "2026-10-19T23:23:51.767174+00:00",
+    "verifiedAt": "2026-10-20T01:54:43.614Z",
     "fileCount": 7,
     "fileIds": [
       "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+      "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
       "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
       "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
       "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
       "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
-      "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
-      "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR"
+      "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI"
     ],
-    "verification": "Existing file IDs, names, application/json MIME types, parent folder and modifiedTime confirmed; final report readback metadata matched the in-place update."
+    "files": [
+      {
+        "id": "12JL0LO8wUqPqeGUCigrdrsyU6mJS9BDo",
+        "name": "live_snapshot.json",
+        "size": 4886,
+        "modifiedTime": "2026-10-20T01:54:43.614Z",
+        "mimeType": "application/json"
+      },
+      {
+        "id": "1OjGMFjACHqDb3L1iiEFQR1ceFxXaKdat",
+        "name": "revenue.json",
+        "size": 191283,
+        "modifiedTime": "2026-10-20T01:52:57.515Z",
+        "mimeType": "application/json"
+      },
+      {
+        "id": "1-6Nle43BOhWvVHfl-5hwGF42bpnoBRNy",
+        "name": "metrics.json",
+        "size": 3576354,
+        "modifiedTime": "2026-10-20T01:53:01.346Z",
+        "mimeType": "application/json"
+      },
+      {
+        "id": "1bdC0ZjAw-MnCG9l5owXVfFpQ8revps2T",
+        "name": "daily_schedule.json",
+        "size": 2373837,
+        "modifiedTime": "2026-10-20T01:53:05.106Z",
+        "mimeType": "application/json"
+      },
+      {
+        "id": "1hOOvFKOOAOoqYoenV6aIDEzdUpMgWZqc",
+        "name": "kin.json",
+        "size": 47737,
+        "modifiedTime": "2026-10-20T01:53:12.651Z",
+        "mimeType": "application/json"
+      },
+      {
+        "id": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
+        "name": "naver_automation.json",
+        "size": 16319,
+        "modifiedTime": "2026-10-20T01:53:09.210Z",
+        "mimeType": "application/json"
+      },
+      {
+        "id": "1pjltTi-y3MoiMUqBADeqVDguY6_WZZfR",
+        "name": "codex_report.json",
+        "mimeType": "application/json"
+      }
+    ],
+    "verification": "All seven existing JSON Drive IDs were updated in place. Metadata readback confirmed their IDs, filenames, application/json MIME types, root parent, sizes and modified times. The latest NAS snapshot (complete=false) and final codex_report.json upload were verified by readback."
   },
-  "reportCommitHash": "2413464696c492210acfa89be839f4f7ff7b8d83",
-  "blockedAt": "2026-10-20T08:22:37.586668+09:00"
+  "reportCommitHash": null,
+  "resumeAttempts": [
+    {
+      "resumedAt": "2026-10-20T08:47:39.122792+09:00",
+      "reason": "The prior catch-up runner exited and cleaner.lock is readable; pipeline state is idle. Previous blocked notification is retained and will not be resent."
+    }
+  ],
+  "resumedAt": "2026-10-20T08:47:39.122792+09:00",
+  "pipelineAttempts": [
+    {
+      "at": "2026-10-20T08:48:50.863423+09:00",
+      "domain": "must-pick.com",
+      "mode": "prepare-only",
+      "status": "blocked_before_start",
+      "reason": "The second prepare-only attempt for must-pick.com was rejected by the existing overlap guard because scheduled pipeline_runner.py --catch-up-once PID 2356 started at 2026-10-20T08:47:39+09:00 and holds cleaner.lock. No requested domain pipeline run started."
+    }
+  ],
+  "driveSyncStatus": "pending"
 }
