@@ -2,7 +2,7 @@
   "date": "2026-10-20",
   "workDate": "2026-10-20",
   "publicationDate": "2026-10-20",
-  "checkedAt": "2026-10-20T13:42:39.029857+09:00",
+  "checkedAt": "2026-10-20T13:55:18.404895+09:00",
   "timezone": "Asia/Seoul",
   "startTime": "08:00",
   "startTimeMeaning": "당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인",
@@ -126,7 +126,7 @@
   ],
   "recovery": {
     "schema": "naver-recovery-plan-v1",
-    "checkedAt": "2026-10-20T13:42:39.206290+09:00",
+    "checkedAt": "2026-10-20T13:55:18.628800+09:00",
     "timezone": "Asia/Seoul",
     "items": [
       {
@@ -391,7 +391,7 @@
     "state": "Unknown",
     "status": "unknown",
     "checkedAt": "2026-10-20T12:50:13.711021+09:00",
-    "attemptedAt": "2026-10-20T13:42:39.859499+09:00",
+    "attemptedAt": "2026-10-20T13:55:19.311709+09:00",
     "sourceTimezone": "Asia/Seoul",
     "reason": "Windows 작업 조회 실패 · 미등록 또는 비활성으로 판정하지 않음",
     "lastSuccessful": {
@@ -425,7 +425,7 @@
     "activeScheduledSlot": null,
     "startedAt": null,
     "lastHeartbeatAt": null,
-    "observedAt": "2026-10-20T13:42:39.029857+09:00",
+    "observedAt": "2026-10-20T13:55:18.404895+09:00",
     "source": "pipeline OS lock and execution journal",
     "heartbeatMeaning": "actual journal stage update; monitor timestamp is not runner heartbeat"
   }

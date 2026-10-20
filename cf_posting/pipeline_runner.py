@@ -3957,7 +3957,8 @@ def update_status(blog_info, completed_ids, stage: int, stage_name: str, pct: in
                             else:
                                 it['revision']['lastError'] = None
                         if it.get('artifactFolder'):
-                            folder = (BASE_DIR / it['artifactFolder']).resolve()
+                            norm_art = str(it['artifactFolder']).replace('\\', '/')
+                            folder = (BASE_DIR / norm_art).resolve()
                             it['artifactAvailability'] = 'present' if folder.is_relative_to((BASE_DIR / 'output').resolve()) and folder.is_dir() else 'missing'
                 data['completedBlogIds'] = [it['id'] for it in items if it.get('status') == 'published']
                 data['executionState'] = 'running' if status in ('processing', 'publishing') else 'idle'
@@ -5423,7 +5424,8 @@ def record_attempt_result(item, exit_code, elapsed):
 
 def publication_receipt(item):
     if item.get('artifactFolder'):
-        folder = (BASE_DIR / item['artifactFolder']).resolve()
+        norm_art = str(item['artifactFolder']).replace('\\', '/')
+        folder = (BASE_DIR / norm_art).resolve()
         if not folder.is_relative_to((BASE_DIR / 'output').resolve()):
             raise ValueError('Unsafe artifact folder')
         return folder / 'publication.json'
@@ -6370,7 +6372,8 @@ def schedule_failed_attempt(item, exit_code, now=None):
     if publication_receipt(item).exists() or item.get('status') == 'verification_pending':
         item.update(status='verification_pending', retryable=False)
         return
-    folder = (BASE_DIR / str(item.get('artifactFolder') or '__missing__')).resolve()
+    norm_art = str(item.get('artifactFolder') or '__missing__').replace('\\', '/')
+    folder = (BASE_DIR / norm_art).resolve()
     repair = (folder.is_relative_to((BASE_DIR/'output').resolve())
               and minor_review_only(read_document(folder/'review.json'))
               and not (folder/'surgical-repair-attempted.json').exists())
@@ -6430,7 +6433,8 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
     if item.get('reviewReworkFolder'):
         environment['CF_REVIEW_REWORK_FOLDER'] = item['reviewReworkFolder']
     if item.get('reviewedArticle'):
-        article = (BASE_DIR / item['reviewedArticle']).resolve()
+        norm_art = str(item['reviewedArticle']).replace('\\', '/')
+        article = (BASE_DIR / norm_art).resolve()
         if not article.is_relative_to((BASE_DIR / 'output').resolve()):
             raise RuntimeError('Reviewed article path is outside CF output')
         environment['CF_ARTICLE_FILE'] = str(article)
@@ -6566,7 +6570,8 @@ def bind_prepared_reviewed_articles(schedule):
         relative_folder = item.get('artifactFolder')
         if not relative_folder:
             continue
-        folder = (BASE_DIR / relative_folder).resolve()
+        norm_rel = str(relative_folder).replace('\\', '/')
+        folder = (BASE_DIR / norm_rel).resolve()
         if not folder.is_relative_to((BASE_DIR / 'output').resolve()):
             continue
         article_path = folder / 'article.json'

@@ -1,8 +1,8 @@
 {
   "schema": "barolab-project-health-v1",
-  "checkedAt": "2026-10-20T13:43:03+09:00",
+  "checkedAt": "2026-10-20T13:55:48+09:00",
   "todayKst": "2026-10-20",
-  "fingerprint": "4343e162fc7ef692",
+  "fingerprint": "1a3438d409fd7f5b",
   "lastBroadcastDate": "2026-10-20",
   "watchdog": {
     "lastRunAt": "2026-10-20T10:28:10+09:00",
@@ -43,9 +43,9 @@
         "trace"
       ],
       "status": "healthy",
-      "statusBadge": "🟢 정상 가동 (5/16편 · 31%)",
-      "progressText": "오늘 발행 5/16편 (31%) · 색인 555/1886건 (29.4%)",
-      "progressPct": 31,
+      "statusBadge": "🟢 정상 가동 (6/16편 · 38%)",
+      "progressText": "오늘 발행 6/16편 (38%) · 색인 555/1886건 (29.4%)",
+      "progressPct": 38,
       "blocker": "healthcox.com 애드센스 외부 심사 대기(GETTING_READY) 및 미색인 잔여분(1331건) 순차 색인 중",
       "nextAction": "[🤖 자동 조치] @publi 브릿지 유입을 승인 도메인(must-pick.com 등)으로 자동 우회 완료 · @trace 16개 도메인 사이트맵/IndexNow 일일 자동 제출 중",
       "actionType": "auto",

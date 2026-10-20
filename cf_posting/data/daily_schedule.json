@@ -5034,7 +5034,7 @@
       "icon": "Y",
       "category": "감성카페·베이커리",
       "scheduledTime": "13:40",
-      "status": "prepared",
+      "status": "published",
       "growthKeyword": {
         "domain": "must-joy.com",
         "keyword": "가을 단풍 캠핑장 예약 팁, 데크 뷰 확인과 취소표 알림 설정 순서 — 설정 변경 전 적용 환경과 복구 절차 확인",
@@ -5057,15 +5057,14 @@
         "createdAt": "2026-10-19T22:14:20.018908+09:00",
         "scheduledDate": "2026-10-20"
       },
-      "totalAttempts": 2,
-      "attemptCount": 2,
-      "attemptStartedAt": "2026-10-20T09:06:17.117632+09:00",
+      "totalAttempts": 3,
+      "attemptCount": 3,
+      "attemptStartedAt": "2026-10-20T13:54:03.485992+09:00",
       "stageTimes": {
-        "1": "2026-10-20T09:06:17.406459+09:00",
-        "2": "2026-10-20T09:07:54.795437+09:00",
-        "3": "2026-10-20T09:08:45.285614+09:00",
-        "4": "2026-10-20T09:09:05.413912+09:00",
-        "5": "2026-10-20T09:09:20.253975+09:00"
+        "1": "2026-10-20T04:54:03.980438+00:00",
+        "5": "2026-10-20T04:54:22.532277+00:00",
+        "6": "2026-10-20T04:54:26.998831+00:00",
+        "7": "2026-10-20T04:54:41.867898+00:00"
       },
       "workflowMode": "publication",
       "modelHistory": [
@@ -5788,43 +5787,31 @@
           }
         }
       ],
-      "currentStage": 5,
-      "progressPct": 85,
-      "stageName": "준비본 검수 대기",
-      "detailMessage": "6개 에이전트 인계·검수 완료. 외부 발행은 실행하지 않은 준비본",
-      "currentModel": {
-        "at": "2026-10-20T09:11:19.816102+09:00",
-        "provider": "codex",
-        "requestedModel": "gpt-6-luna",
-        "actualModel": "gpt-6-luna",
-        "status": "returned",
-        "attempt": 2,
-        "httpStatus": null,
-        "reason": null,
-        "agent": "reviewer",
-        "instructionSha256": "8acbb1055fcda00456cd773a96d12261355ce16fb8171e7bf389c1cab672e942",
-        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
-      },
+      "currentStage": 7,
+      "progressPct": 100,
+      "stageName": "발행 완료 (200 OK)",
+      "detailMessage": "독자 해결 과제 원고 + 검수 이미지 0장 + CF API 신규 글(ID: 88) 정식 배포 완료 (HTTP 200 OK)",
+      "currentModel": null,
       "browserRuntime": {
-        "pid": 30240,
-        "profile": "C:\\99_포터블브라우저\\CentBrowserPotable_barolab26\\User Data",
+        "pid": 0,
+        "profile": "C:\\99_Portable_Braowser\\CentBrowserPotable_barolab26\\User Data",
         "port": 9440,
-        "browser": "Chrome/134.0.6998.136",
-        "tabs": 2,
+        "browser": "Chrome/155.0.8059.84",
+        "tabs": 1,
         "recoveredTabs": 0,
-        "checkedAt": "2026-10-20T09:06:21.223237+09:00"
+        "checkedAt": "2026-10-20T04:54:04.272531+00:00"
       },
       "handoffs": [
         {
           "agent": "keyword-selector",
           "status": "accepted",
-          "acceptedAt": "2026-10-20T09:07:54.532525+09:00",
+          "acceptedAt": "2026-10-20T00:07:54.532525+00:00",
           "inputs": [],
           "outputs": [
             "keywords.md"
           ],
           "model": {
-            "at": "2026-10-20T09:07:54.16902+09:00",
+            "at": "2026-10-20T00:07:54.169020+00:00",
             "provider": "codex",
             "requestedModel": "gpt-6-luna",
             "actualModel": "gpt-6-luna",
@@ -5840,7 +5827,7 @@
         {
           "agent": "researcher",
           "status": "accepted",
-          "acceptedAt": "2026-10-20T09:08:44.991754+09:00",
+          "acceptedAt": "2026-10-20T00:08:44.991754+00:00",
           "inputs": [
             "keywords.md"
           ],
@@ -5859,7 +5846,7 @@
             "planning-reviews/review-0.json"
           ],
           "model": {
-            "at": "2026-10-20T09:08:44.504997+09:00",
+            "at": "2026-10-20T00:08:44.504997+00:00",
             "provider": "codex",
             "requestedModel": "gpt-6-luna",
             "actualModel": "gpt-6-luna",
@@ -5875,7 +5862,7 @@
         {
           "agent": "writer",
           "status": "accepted",
-          "acceptedAt": "2026-10-20T09:09:05.129097+09:00",
+          "acceptedAt": "2026-10-20T00:09:05.129097+00:00",
           "inputs": [
             "keywords.md",
             "research.md",
@@ -5896,7 +5883,7 @@
             "draft.md"
           ],
           "model": {
-            "at": "2026-10-20T09:09:04.689386+09:00",
+            "at": "2026-10-20T00:09:04.689386+00:00",
             "provider": "codex",
             "requestedModel": "gpt-6-luna",
             "actualModel": "gpt-6-luna",
@@ -5912,7 +5899,7 @@
         {
           "agent": "image-maker",
           "status": "accepted",
-          "acceptedAt": "2026-10-20T09:09:19.964332+09:00",
+          "acceptedAt": "2026-10-20T00:09:19.964332+00:00",
           "inputs": [
             "keywords.md",
             "research.md",
@@ -5940,7 +5927,7 @@
             "visual-reviews/image-maker/1a4132c87ce9411193c43b3abff3c302/response.json"
           ],
           "model": {
-            "at": "2026-10-20T09:09:19.574079+09:00",
+            "at": "2026-10-20T00:09:19.574079+00:00",
             "provider": "codex",
             "requestedModel": "gpt-6-luna",
             "actualModel": "gpt-6-luna",
@@ -5956,7 +5943,7 @@
         {
           "agent": "assembler",
           "status": "accepted",
-          "acceptedAt": "2026-10-20T09:09:34.599796+09:00",
+          "acceptedAt": "2026-10-20T00:09:34.599796+00:00",
           "inputs": [
             "keywords.md",
             "research.md",
@@ -5988,7 +5975,7 @@
             "assembly-edits.json"
           ],
           "model": {
-            "at": "2026-10-20T09:09:34.166939+09:00",
+            "at": "2026-10-20T00:09:34.166939+00:00",
             "provider": "codex",
             "requestedModel": "gpt-6-luna",
             "actualModel": "gpt-6-luna",
@@ -6004,7 +5991,7 @@
         {
           "agent": "reviewer",
           "status": "accepted",
-          "acceptedAt": "2026-10-20T09:11:20.291531+09:00",
+          "acceptedAt": "2026-10-20T00:11:20.291531+00:00",
           "inputs": [
             "keywords.md",
             "research.md",
@@ -6082,7 +6069,7 @@
             "visual-reviews/reviewer/cc2d99fc70d1417ebad9a3988ebe601c/response.json"
           ],
           "model": {
-            "at": "2026-10-20T09:11:19.816102+09:00",
+            "at": "2026-10-20T00:11:19.816102+00:00",
             "provider": "codex",
             "requestedModel": "gpt-6-luna",
             "actualModel": "gpt-6-luna",
@@ -6096,7 +6083,7 @@
           }
         }
       ],
-      "artifactFolder": "output\\outskirts-cafe-parking-alternatives\\run-20261020-090736-72375f",
+      "artifactFolder": "output/outskirts-cafe-parking-alternatives/run-20261020-090736-72375f",
       "title": "외곽 감성 카페 방문 전 주차장 위치와 만차 시 대안 확인하는 법",
       "slug": "outskirts-cafe-parking-alternatives",
       "summary": "방문할 카페의 공식 주차 안내와 이용 조건을 확인하고, 만차에 대비해 합법적인 대체 주차장과 안전한 보행 경로를 미리 살펴보는 방법을 정리했습니다. 공개된 주차 대수는 도착 순간의 빈자리를 보장하지 않으므로 방문 시각에 맞춘 문의와 재확인도 필요합니다.",
@@ -6124,8 +6111,26 @@
             "instructionSha256": "8acbb1055fcda00456cd773a96d12261355ce16fb8171e7bf389c1cab672e942",
             "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1"
           }
+        },
+        {
+          "attempt": 3,
+          "startedAt": "2026-10-20T13:54:03.485992+09:00",
+          "endedAt": "2026-10-20T13:54:49.045424+09:00",
+          "status": "published",
+          "error": null,
+          "stage": "발행 완료 (200 OK)",
+          "exitCode": 0,
+          "elapsedSeconds": 45.5,
+          "model": null
         }
-      ]
+      ],
+      "lastError": null,
+      "publicUrl": "https://www.must-joy.com/outskirts-cafe-parking-alternatives",
+      "postId": 88,
+      "completedAt": "13:54:45",
+      "publishedAt": "2026-10-20T04:54:45.834557+00:00",
+      "sourcePublishedAt": "2026-10-20T04:54:45.834557+00:00",
+      "publicationDate": "2026-10-20"
     },
     {
       "order": 7,

@@ -10,14 +10,14 @@
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/greeting/",
-  "updatedAt": "2026-10-20T13:43:03+09:00",
+  "updatedAt": "2026-10-20T13:55:48+09:00",
   "measurement": {
     "admob": {
       "status": "collected",
       "revenue": 0.0,
       "currency": "USD",
       "period": "2026-10-20 KST 실시간 (SJ AdMob 연동 완료 · 내부 테스트 광고 모드)",
-      "checkedAt": "2026-10-20T13:43:03+09:00",
+      "checkedAt": "2026-10-20T13:55:48+09:00",
       "mode": "TEST_ADS_INTERNAL_TRACK",
       "impressions": 0
     },
@@ -26,7 +26,7 @@
       "activeUsers": 13,
       "currency": "USD",
       "period": "내부 테스트 트랙 (테스터 1명 · 비공개 14일 미시작)",
-      "checkedAt": "2026-10-20T13:43:03+09:00",
+      "checkedAt": "2026-10-20T13:55:48+09:00",
       "mode": "",
       "impressions": 0
     }
@@ -188,7 +188,7 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-10-20T13:36:01+09:00"
+      "checkedAt": "2026-10-20T13:51:03+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
