@@ -48,3 +48,34 @@ systemctl --user list-timers barolab-metrics.timer
 journalctl --user -u barolab-metrics.service -n 30 --no-pager
 curl --fail http://127.0.0.1:8790/api/live-snapshot
 ```
+
+## Manual Naver account login
+
+Install private per-account Ubuntu launchers:
+
+```sh
+~/.venvs/barolab/bin/python3 /mnt/c/10_Project/BaroLab/common/ubuntu_naver_browser.py --install
+~/.barolab/browsers/soultin/soultin_start_cdp.sh
+```
+
+Replace `soultin` in both path components for the other accounts.
+The launcher reads `ACCOUNT_MAP` directly and verifies the Chrome executable,
+profile, process ID and loopback listener before reusing an existing window.
+Repeated starts preserve existing tabs. New windows open the ordinary Naver
+login page; the user signs in manually. No passwords or publications are handled.
+The launcher labels the initial handoff window title with the account and blog
+ID using `wmctrl`, and new Chrome profiles have an account-specific visible
+profile name. Navigation can update the window title.
+
+| Account | Blog ID | CDP port |
+| --- | --- | --- |
+| soultin | mustpickinfo | 9334 |
+| soul5373 | mustinfo | 9333 |
+| yoon_master | yoonviews | 9335 |
+| adinfo0905 | adinfo0905 | 9231 |
+| stone0747 | stone0747 | 9230 |
+
+Profiles live outside Git at `~/.config/cdp_naver_<account>` with mode 700.
+The existing soultin profile is retained in place. Launch scripts, logs and
+receipts live at `~/.barolab/browsers/<account>`. GUI display defaults to `:10`;
+set `BAROLAB_DISPLAY` only when the Ubuntu desktop uses another display.
