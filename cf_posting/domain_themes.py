@@ -45,6 +45,34 @@ BASE_DIR = Path(__file__).resolve().parent
 THEMES_DIR = BASE_DIR / "themes"
 CARD_CSS = (THEMES_DIR / "tripmarvel.com.css").read_text(encoding="utf-8")
 CARD_CSS = CARD_CSS[CARD_CSS.index("/* BAROLAB_VERTICAL_CARDS_V3: home and category lists only. */"):].strip()
+SIDEBAR_LIST_CSS = """
+/* BAROLAB_SIDEBAR_LIST_LAYOUT_V1: preserve desktop sidebar columns after shared card styles. */
+@media (min-width: 1061px) {
+  html body[data-shell-family="arch1-wikitree"][data-domain] .layout:has(#postGrid),
+  html body[data-shell-family="arch4-mslearn"][data-domain] .layout:has(#postGrid) {
+    display: grid !important;
+  }
+}
+""".strip()
+MOBILE_HEADER_CSS = """
+/* BAROLAB_MOBILE_NEWS_HEADER_V1: keep branding and controls within narrow screens. */
+@media (max-width: 760px) {
+  .wt-header-main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+  .wt-header-main > .wt-brand-center {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .wt-header-main > :first-child { grid-column: 1; grid-row: 2; min-width: 0; }
+  .wt-header-main > form { grid-column: 2; grid-row: 2; min-width: 0; }
+  .wt-header-main .wt-brand-logo { white-space: nowrap; font-size: clamp(1.4rem, 7vw, 2rem); }
+  .wt-header-main form > div { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .wt-header-main input { min-width: 0; }
+}
+""".strip()
 SKILLS_UI_UX_DIR = BASE_DIR.parent / "skills" / "ui-ux-pro-max"
 DESIGN_SYSTEM_DIR = BASE_DIR / "design-system"
 
@@ -2453,7 +2481,7 @@ figure.post-image a[aria-label*="원본 화면 크게 보기"] img {{
   }}
 }}
 """
-    return css.strip() + "\n\n" + CARD_CSS
+    return css.strip() + "\n\n" + CARD_CSS + "\n\n" + SIDEBAR_LIST_CSS + "\n\n" + MOBILE_HEADER_CSS
 
 
 def build_final_preview_html(domain: str, title: str, assembled_html: str) -> str:
@@ -2513,6 +2541,38 @@ def build_final_preview_html(domain: str, title: str, assembled_html: str) -> st
         f'© {safe_name} ({spec["domain"]})</footer>'
         f'</body></html>'
     )
+
+
+def defer_ad_push_until_layout_ready(ad_html: str) -> str:
+    """Keep the ad snippet intact, requesting its ad after the head's DOM transformer."""
+    marker = "/* BAROLAB_AD_LAYOUT_READY_V1 */"
+    if not ad_html:
+        return ad_html
+    script_pattern = r"(<script\b[^>]*>)(.*?)(</script\s*>)"
+    push_pattern = (
+        r"\s*\(\s*adsbygoogle\s*=\s*window\.adsbygoogle\s*\|\|\s*\[\s*\]\s*\)"
+        r"\s*\.push\(\s*\{\s*\}\s*\)\s*;\s*"
+    )
+
+    def defer(match: re.Match) -> str:
+        if marker in match[2] or "adsbygoogle" not in match[2] or ".push" not in match[2]:
+            return match[0]
+        if not re.fullmatch(push_pattern, match[2]):
+            raise ValueError("Unsupported AdSense push snippet; original settings preserved")
+        return (
+            match[1] + "\n" + marker + "\n(function(){\n"
+            "  function requestAd() {" + match[2] + "}\n"
+            "  if (document.readyState === 'loading') {\n"
+            "    document.addEventListener('DOMContentLoaded', requestAd, {once: true});\n"
+            "  } else {\n"
+            "    requestAd();\n"
+            "  }\n})();\n" + match[3]
+        )
+
+    remaining = re.sub(script_pattern, "", ad_html, flags=re.IGNORECASE | re.DOTALL)
+    if "adsbygoogle" in remaining and ".push" in remaining:
+        raise ValueError("Malformed AdSense script; original settings preserved")
+    return re.sub(script_pattern, defer, ad_html, flags=re.IGNORECASE | re.DOTALL)
 
 
 def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid_html: str = "") -> str:
@@ -3390,6 +3450,10 @@ def sync_all_live_cf_domains() -> Dict[str, Any]:
                 "font_family": spec["typography"]["cfFontFamily"],
                 "adsense_code": new_head,
             }
+            if spec["shellFamily"] in ("arch1-wikitree", "arch4-mslearn"):
+                for key in ("ad_top_html", "ad_mid_html", "ad_bottom_html"):
+                    if key in current_settings:
+                        payload[key] = defer_ad_push_until_layout_ready(current_settings[key])
             put_resp = requests.put(
                 f"https://www.{domain}/api/settings",
                 headers={**headers, "Content-Type": "application/json"},
