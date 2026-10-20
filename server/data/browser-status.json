@@ -1,74 +1,11 @@
 {
-  "checkedAt": "2026-10-19T11:56:21.799829+00:00",
-  "kstCheckedAt": "2026-10-19T20:56:21+09:00",
-  "host": "127.0.0.1",
-  "browsers": {
-    "stone0747_cdp": {
-      "port": 9230,
-      "name": "stone0747 (CF 브릿지·지식iN)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "adinfo0905_cdp": {
-      "port": 9231,
-      "name": "adinfo0905 (CF 브릿지·지식iN)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "soul5373_cdp": {
-      "port": 9333,
-      "name": "soul5373 (mustinfo)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "soultin_cdp": {
-      "port": 9334,
-      "name": "soultin (mustpickinfo)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "yoon_master_cdp": {
-      "port": 9335,
-      "name": "yoon_master (yoonviews)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "cf_preparer_cdp": {
-      "port": 9336,
-      "name": "cf_preparer (CF 준비·Flow)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "sj_cdp": {
-      "port": 9226,
-      "name": "sj (서치어드바이저·스레드·AdMob)",
-      "open": false,
-      "recovered": false,
-      "required": true
-    },
-    "baro76650_cdp": {
-      "port": 9420,
-      "name": "baro76650 (CF 블로그·Flow 생성)",
-      "open": true,
-      "recovered": false,
-      "required": true
-    },
-    "aaa10291028_cdp": {
-      "port": 9260,
-      "name": "aaa10291028 (GSC·애드센스 보조)",
-      "open": false,
-      "recovered": false,
-      "required": false
-    }
-  },
-  "onlineCount": 1,
-  "totalRequired": 8,
-  "recoveredPorts": [],
-  "failedPorts": []
+  "checkedAt": "2026-10-20T12:50:16.897862+09:00",
+  "host": "192.168.45.248",
+  "ports": {
+    "9334": false,
+    "9333": false,
+    "9335": false,
+    "9231": false,
+    "9230": false
+  }
 }

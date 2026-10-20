@@ -1,15 +1,9 @@
 {
-  "checkedAt": "2026-10-19T22:41:55.574434+09:00",
+  "checkedAt": "2026-10-20T13:38:09.010383+09:00",
   "eligibleCount": 0,
   "processedCount": 0,
   "publishedCount": 0,
   "activeJob": null,
-  "finishedAt": "2026-10-19T22:41:56.402109+09:00",
-  "heldJobs": [
-    {
-      "date": "2026-10-19",
-      "domain": "nolplace.com",
-      "status": "review_required"
-    }
-  ]
+  "finishedAt": "2026-10-20T13:38:09.037910+09:00",
+  "heldJobs": []
 }

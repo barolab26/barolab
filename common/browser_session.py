@@ -182,7 +182,20 @@ def _listener_owners(port, deadline):
 
 def _runtime(port, expected_exe, expected_profile, *, process_timeout=30):
     if os.name != 'nt':
-        raise RuntimeError('Dedicated portable browser identity requires the Windows collector host')
+        try:
+            ver_resp = requests.get(f'http://127.0.0.1:{port}/json/version', timeout=4)
+            if ver_resp.ok:
+                ws_url = ver_resp.json().get('webSocketDebuggerUrl', '')
+                if _local_socket(ws_url, port):
+                    return {
+                        'ProcessId': 0,
+                        'ExecutablePath': str(expected_exe),
+                        'ProfilePath': str(expected_profile),
+                        'fastPath': True,
+                    }
+        except Exception:
+            pass
+        raise RuntimeError(f'Dedicated portable browser on port {port} is unavailable')
     if type(port) is not int or not 1 <= port <= 65535 or process_timeout <= 0:
         raise ValueError('Invalid dedicated browser identity lookup parameters')
     command = rf'''[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()

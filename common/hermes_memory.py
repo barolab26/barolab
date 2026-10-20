@@ -267,7 +267,8 @@ class MemoryConflict(ValueError):
 
 class HermesMemory:
     def __init__(self, root: Path | str | None = None, skills_root: Path | str | None = None, project_skills_root: Path | str | None = None):
-        self.root = Path(root) if root is not None else Path(os.environ.get("BAROLAB_MEMORY_DIR", str(PROJECT_ROOT / "data" / "memories")))
+        default_mem = (Path.home() / ".barolab" / "memories") if os.name != "nt" else (PROJECT_ROOT / "data" / "memories")
+        self.root = Path(root) if root is not None else Path(os.environ.get("BAROLAB_MEMORY_DIR", str(default_mem)))
         self.skills_root = Path(skills_root) if skills_root is not None else Path(os.environ.get("BAROLAB_SKILLS_DIR", str(self.root.parent / "skills")))
         # Only the approved repository root joins the production catalog. Temp
         # stores remain isolated unless a test explicitly supplies another root.
@@ -678,12 +679,15 @@ class HermesMemory:
     def _review_loop(self):
         while not self._closed.is_set():
             self._wake.clear()
-            with self.db() as db:
-                db.execute("BEGIN IMMEDIATE")
-                item = db.execute("SELECT event_id FROM review_queue WHERE state='queued' OR (state='running' AND lease_until<?) ORDER BY updated_at LIMIT 1", (time.time(),)).fetchone()
-                if item:
-                    event_id = item["event_id"]
-                    db.execute("UPDATE review_queue SET state='running',lease_until=?,attempts=attempts+1,updated_at=? WHERE event_id=?", (time.time()+1800,utc_now(),event_id))
+            item = None
+            try:
+                with self.db() as db:
+                    item = db.execute("SELECT event_id FROM review_queue WHERE state='queued' OR (state='running' AND lease_until<?) ORDER BY updated_at LIMIT 1", (time.time(),)).fetchone()
+                    if item:
+                        event_id = item["event_id"]
+                        db.execute("UPDATE review_queue SET state='running',lease_until=?,attempts=attempts+1,updated_at=? WHERE event_id=?", (time.time()+1800,utc_now(),event_id))
+            except Exception:
+                item = None
             if not item:
                 self._wake.wait(timeout=60)
                 continue

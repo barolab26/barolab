@@ -1,33 +1,61 @@
 {
   "schema": "barolab-system-watchdog-v1",
-  "triggerSource": "cli",
-  "startedAt": "2026-10-19T20:56:11+09:00",
-  "finishedAt": "2026-10-19T20:56:33+09:00",
-  "status": "healthy",
+  "triggerSource": "task-scheduler",
+  "startedAt": "2026-10-20T10:27:01+09:00",
+  "finishedAt": "2026-10-20T10:28:10+09:00",
+  "status": "degraded",
   "server": {
-    "port8790": false,
+    "port8790": true,
     "port8791": false,
     "recovered": false,
-    "detail": "8790 서버 기동 시도 완료"
+    "detail": "정상 가동 중"
   },
   "cdpBrowsers": {
-    "onlineCount": 1,
+    "onlineCount": 6,
     "totalRequired": 8,
-    "recoveredPorts": [],
-    "failedPorts": []
+    "recoveredPorts": [
+      9231,
+      9333,
+      9335,
+      9336,
+      9226,
+      9420
+    ],
+    "failedPorts": [
+      9230,
+      9334
+    ]
   },
   "zombieRecoveries": [],
   "missedSlotCatchups": [],
   "appTrackTruth": {
-    "ok": false,
-    "error": "Expecting value: line 1 column 1 (char 0)"
+    "ok": true,
+    "updatedProjects": [
+      "bible_app",
+      "greeting",
+      "magnifier",
+      "shopping"
+    ],
+    "countdownStarted": false,
+    "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 제출",
+    "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
   },
   "projectHealthSummary": {
-    "error": "Expecting value: line 1 column 1 (char 0)",
+    "totalProjects": 6,
+    "ceoActionCount": 1,
+    "autoRecoveringCount": 0,
     "appTrackTruth": {
-      "ok": false,
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "ok": true,
+      "updatedProjects": [
+        "bible_app",
+        "greeting",
+        "magnifier",
+        "shopping"
+      ],
+      "countdownStarted": false,
+      "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 제출",
+      "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
     }
   },
-  "broadcastedToChat": false
+  "broadcastedToChat": true
 }

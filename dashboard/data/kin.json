@@ -1,16 +1,207 @@
 {
   "schema": "naver-kin-pilot-v1",
-  "checkedAt": "2026-10-19T14:45:02.415014+00:00",
+  "checkedAt": "2026-10-20T01:35:26.388281+00:00",
   "accounts": [
     "adinfo0905",
     "stone0747"
   ],
   "counts": {
-    "published_verified": 31,
-    "submitted_unverified": 9,
-    "discovered": 19
+    "published_verified": 41,
+    "submitted_unverified": 10,
+    "discovered": 25
   },
   "recent": [
+    {
+      "account": "adinfo0905",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495619450&answerNo=4&qb=7Iuk7JeF6riJ7Jes#answer4",
+      "updated_at": "2026-10-20T01:31:57.977706+00:00",
+      "send_day": "2026-10-20",
+      "title": "퇴사 전 요청 서류",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495619450&answerNo=2&qb=7Iuk7JeF6riJ7Jes",
+      "track": "track_b_search_top",
+      "target_domain": "justinfo.co.kr"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T23:11:18.753421+00:00",
+      "title": "냉장고 냄새",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=8020208&docId=491841468&answerNo=5&qb=64OJ7J6l6rOgIOuDhOyDiA==",
+      "track": "track_b_search_top",
+      "target_domain": ""
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T22:56:13.416038+00:00",
+      "title": "계약만료 퇴사인데 사직서에 개인사정으로 작성하래요",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495618373&answerNo=1&qb=7Iuk7JeF6riJ7Jes",
+      "track": "track_a_latest",
+      "target_domain": ""
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T22:46:12.509311+00:00",
+      "title": "전기차 보조금, 지자체별로 차이가 큰가요?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=1122&docId=494604466&answerNo=5&qb=7KCE6riw7LCoIOuztOyhsOq4iA==",
+      "track": "track_a_latest",
+      "target_domain": ""
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T22:41:00.424492+00:00",
+      "title": "르세라핌 팝업스토어...",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=1060110&docId=495468982&answerNo=1&qb=7Yyd7JeF7Iqk7Yag7Ja0",
+      "track": "track_b_search_top",
+      "target_domain": ""
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=50502&docId=490959317&answerNo=6&qb=6rOg6rWs66eIIOuztOq0gA%3D%3D#answer6",
+      "updated_at": "2026-10-19T22:21:09.657159+00:00",
+      "send_day": "2026-10-20",
+      "title": "고구마 보관 방법?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50502&docId=490959317&answerNo=4&qb=6rOg6rWs66eIIOuztOq0gA==",
+      "track": "track_a_latest",
+      "target_domain": "daynote.kr"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T21:51:10.169493+00:00",
+      "title": "에어프라이어 고구마맛탕, 보관 방법이나 남은 음식 처리는 어떻게 하나요?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50502&docId=495609450&answerNo=3&qb=6rOg6rWs66eIIOuztOq0gA==",
+      "track": "track_a_latest",
+      "target_domain": ""
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617417&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer3",
+      "updated_at": "2026-10-19T21:21:00.337345+00:00",
+      "send_day": "2026-10-20",
+      "title": "실업급여 관련 궁금합니다",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617417&answerNo=2&qb=7Iuk7JeF6riJ7Jes",
+      "track": "track_a_latest",
+      "target_domain": "justinfo.co.kr"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=40607&docId=495457589&answerNo=2&qb=7KCE6riw7LCoIOuztOyhsOq4iA%3D%3D#answer2",
+      "updated_at": "2026-10-19T21:01:35.069593+00:00",
+      "send_day": "2026-10-20",
+      "title": "영업사원 전기차 보조금 신청 실수",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=40607&docId=495457589&answerNo=1&qb=7KCE6riw7LCoIOuztOyhsOq4iA==",
+      "track": "track_b_search_top",
+      "target_domain": "meganote.kr"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T20:56:06.469829+00:00",
+      "title": "청약저축에서 주택청약종합저축으로 갈아타기, 손해 없을까요?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=40203&docId=495335445&answerNo=10&qb=7LKt7JW96rCA7KCQ",
+      "track": "track_a_latest",
+      "target_domain": ""
+    },
+    {
+      "account": "adinfo0905",
+      "state": "discovered",
+      "answer_url": null,
+      "updated_at": "2026-10-19T20:50:50.097926+00:00",
+      "title": "미세스 그린애플 팝업스토어",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50206&docId=495245493&answerNo=1&qb=7Yyd7JeF7Iqk7Yag7Ja0",
+      "track": "track_b_search_top",
+      "target_domain": ""
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=406&docId=495447337&answerNo=6&qb=7J6Q6rKp7KadIOy2lOyynA%3D%3D#answer6",
+      "updated_at": "2026-10-19T20:26:13.812264+00:00",
+      "send_day": "2026-10-20",
+      "title": "짧게 준비해서 딸 수 있는 자격증 추천해주세요!",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=406&docId=495447337&answerNo=3&qb=7J6Q6rKp7KadIOy2lOyynA==",
+      "track": "track_a_latest",
+      "target_domain": "soulnote.kr"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=90107&docId=302394190&answerNo=2&qb=7ISc7Jq4IOq3vOq1kCDsiJjrqqnsm5A%3D#answer2",
+      "updated_at": "2026-10-19T20:06:10.440959+00:00",
+      "send_day": "2026-10-20",
+      "title": "서울 근교의 수목원 찾다가 파주 벽초...",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=90107&docId=302394190&answerNo=1&qb=7ISc7Jq4IOq3vOq1kCDsiJjrqqnsm5A=",
+      "track": "track_b_search_top",
+      "target_domain": "nolplace.com"
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617634&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer3",
+      "updated_at": "2026-10-19T19:41:05.192731+00:00",
+      "send_day": "2026-10-20",
+      "title": "알바 실업급여 수령여부",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617634&answerNo=2&qb=7Iuk7JeF6riJ7Jes",
+      "track": "track_a_latest",
+      "target_domain": "justinfo.co.kr"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=377172589&answerNo=20&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer20",
+      "updated_at": "2026-10-19T16:21:47.684008+00:00",
+      "send_day": "2026-10-20",
+      "title": "국민연금 예상 수령액 나이 몇살에 받나요?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=377172589&answerNo=19&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=",
+      "track": "track_b_search_top",
+      "target_domain": "baronote.kr"
+    },
+    {
+      "account": "stone0747",
+      "state": "submitted_unverified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=70106&docId=495613675&answerNo=1&qb=66y066aOIO2GteymnQ==",
+      "updated_at": "2026-10-19T15:56:30.747033+00:00",
+      "send_day": "2026-10-20",
+      "title": "무릎 통증 연골연화증 슬개골대퇴통증증후군",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=70106&docId=495613675&answerNo=1&qb=66y066aOIO2GteymnQ==",
+      "track": "track_a_latest",
+      "target_domain": "healthcox.com"
+    },
+    {
+      "account": "adinfo0905",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=493559041&answerNo=3&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer3",
+      "updated_at": "2026-10-19T15:31:33.680785+00:00",
+      "send_day": "2026-10-20",
+      "title": "하이얼 냉장고 물받이 악취 및 분리",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=493559041&answerNo=2&qb=64OJ7J6l6rOgIOuDhOyDiA==",
+      "track": "track_b_search_top",
+      "target_domain": "must-pick.com"
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=8110104&docId=495595974&answerNo=5&qb=7KCE6riw7LCoIOuztOyhsOq4iA%3D%3D#answer5",
+      "updated_at": "2026-10-19T15:07:33.352857+00:00",
+      "send_day": "2026-10-20",
+      "title": "테슬라 모델Y 색상 옵션도 전기차 보조금 차량가격에 포함되나요?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=8110104&docId=495595974&answerNo=4&qb=7KCE6riw7LCoIOuztOyhsOq4iA==",
+      "track": "track_a_latest",
+      "target_domain": "meganote.kr"
+    },
     {
       "account": "adinfo0905",
       "state": "published_verified",
@@ -87,16 +278,6 @@
       "target_domain": ""
     },
     {
-      "account": "adinfo0905",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-19T12:51:44.727560+00:00",
-      "title": "하이얼 냉장고 물받이 악취 및 분리",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=493559041&answerNo=2&qb=64OJ7J6l6rOgIOuDhOyDiA==",
-      "track": "track_b_search_top",
-      "target_domain": ""
-    },
-    {
       "account": "stone0747",
       "state": "submitted_unverified",
       "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=2&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=#answer7",
@@ -150,188 +331,11 @@
       "question_url": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=495609086&answerNo=2&qb=7IS47YOB6riwIO2GteyEuOyymQ==",
       "track": "track_a_latest",
       "target_domain": "meganote.kr"
-    },
-    {
-      "account": "stone0747",
-      "state": "submitted_unverified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=494194300&answerNo=11&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguQ==",
-      "updated_at": "2026-10-19T05:28:02.334775+00:00",
-      "send_day": "2026-10-19",
-      "title": "국민연금 조기 수령, 정말 이득일까요?",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=494194300&answerNo=11&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguQ==",
-      "track": "track_a_latest",
-      "target_domain": "baronote.kr"
-    },
-    {
-      "account": "adinfo0905",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=30312&docId=495402586&answerNo=1&qb=66y47ZmU64iE66as7Lm065Oc#answer4",
-      "updated_at": "2026-10-19T05:02:46.883146+00:00",
-      "send_day": "2026-10-19",
-      "title": "문화누리카드 영화예매!!!!",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=30312&docId=495402586&answerNo=1&qb=66y47ZmU64iE66as7Lm065Oc",
-      "track": "track_b_search_top",
-      "target_domain": "baronote.kr"
-    },
-    {
-      "account": "stone0747",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=70113&docId=491264788&answerNo=3&qb=6rOg7JaR7J20IOuwqeq0keyXvA==#answer4",
-      "updated_at": "2026-10-19T02:37:39.015822+00:00",
-      "send_day": "2026-10-19",
-      "title": "고양이 방광염",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=70113&docId=491264788&answerNo=3&qb=6rOg7JaR7J20IOuwqeq0keyXvA==",
-      "track": "track_a_latest",
-      "target_domain": "joynote.kr"
-    },
-    {
-      "account": "stone0747",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=441982579&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
-      "updated_at": "2026-10-19T01:37:57.169538+00:00",
-      "send_day": "2026-10-19",
-      "title": "입문용 파크골프채 추천 부탁드려요",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=441982579&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==",
-      "track": "track_a_latest",
-      "target_domain": "smilenote.kr"
-    },
-    {
-      "account": "adinfo0905",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=8080101&docId=392385676&answerNo=4&qb=67aI66Cb7KCA64SQ#answer5",
-      "updated_at": "2026-10-19T01:12:37.458523+00:00",
-      "send_day": "2026-10-19",
-      "title": "다이어리, 불렛저널, 플래너",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=8080101&docId=392385676&answerNo=4&qb=67aI66Cb7KCA64SQ",
-      "track": "track_b_search_top",
-      "target_domain": "soulnote.kr"
-    },
-    {
-      "account": "adinfo0905",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-19T00:17:25.890461+00:00",
-      "title": "국민연금 조기수령, 손해 아닐까요?",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=493412037&answerNo=17&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguQ==",
-      "track": "track_a_latest",
-      "target_domain": ""
-    },
-    {
-      "account": "adinfo0905",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T23:42:23.168272+00:00",
-      "title": "대파크림치즈베이글 보관법",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50502&docId=491215413&answerNo=1&qb=64yA7YyMIOuztOq0gOuylQ==",
-      "track": "track_b_search_top",
-      "target_domain": ""
-    },
-    {
-      "account": "adinfo0905",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T23:27:22.174880+00:00",
-      "title": "보일러가 망가지면...",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495580861&answerNo=3&qb=67O07J2865+sIOyXkOufrOy9lOuTnA==",
-      "track": "track_a_latest",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T23:12:21.945762+00:00",
-      "title": "프리랜서도 월세 세액공제 적용 대상인지",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=60105&docId=495529988&answerNo=1&qb=7JuU7IS4IOyEuOyVoeqzteygnA==",
-      "track": "track_b_search_top",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T23:07:08.145750+00:00",
-      "title": "싱크대 배수구망 청소 문의",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=80901&docId=493326345&answerNo=2&qb=7Iux7YGs64yAIOuwsOyImOq1rCDssq3show=",
-      "track": "track_a_latest",
-      "target_domain": ""
-    },
-    {
-      "account": "adinfo0905",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T22:46:55.732317+00:00",
-      "title": "부모님 세대분리 되어있는데 에너지바우처 세대원 조건 되나요?",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100103&docId=494959870&answerNo=24&qb=7JeQ64SI7KeA67CU7Jqw7LKY",
-      "track": "track_a_latest",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T22:17:11.371838+00:00",
-      "title": "2026년도 문화누리카드 지원금액 기초수급자 생계급여액",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100101&docId=490112504&answerNo=16&qb=66y47ZmU64iE66as7Lm065Oc",
-      "track": "track_a_latest",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T22:02:25.952622+00:00",
-      "title": "파크골프 입문 파크골프 학과 입학 장비선택 도와주세요",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=492133554&answerNo=5&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==",
-      "track": "track_b_search_top",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T21:52:12.706173+00:00",
-      "title": "도자기 공방 하고싶어요",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=31204&docId=495260737&answerNo=1&qb=64+E7J6Q6riwIOqzteuwqQ==",
-      "track": "track_b_search_top",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "discovered",
-      "answer_url": null,
-      "updated_at": "2026-10-18T21:46:52.715731+00:00",
-      "title": "에너지 바우처 자동으로 갱신되나요?",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=40609&docId=494089113&answerNo=9&qb=7JeQ64SI7KeA67CU7Jqw7LKY",
-      "track": "track_a_latest",
-      "target_domain": ""
-    },
-    {
-      "account": "stone0747",
-      "state": "submitted_unverified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495380744&answerNo=8&qb=6rWt66+864K07J2867Cw7JuA7Lm065Oc#answer13",
-      "updated_at": "2026-10-18T19:57:09.306398+00:00",
-      "send_day": "2026-10-19",
-      "title": "국민내일배움카드",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495380744&answerNo=8&qb=6rWt66+864K07J2867Cw7JuA7Lm065Oc",
-      "track": "track_a_latest",
-      "target_domain": "soulnote.kr"
-    },
-    {
-      "account": "stone0747",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=80511&docId=495099187&answerNo=1&qb=6rOg7JaR7J20IOuwqeq0keyXvA==#answer3",
-      "updated_at": "2026-10-18T19:07:29.607686+00:00",
-      "send_day": "2026-10-19",
-      "title": "고양이 방광염",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=80511&docId=495099187&answerNo=1&qb=6rOg7JaR7J20IOuwqeq0keyXvA==",
-      "track": "track_a_latest",
-      "target_domain": "joynote.kr"
     }
   ],
   "trackCounts": {
-    "track_a_latest": 19,
-    "track_b_search_top": 11
+    "track_a_latest": 17,
+    "track_b_search_top": 13
   },
   "inboundSessions": null,
   "attributedRevenue": null,
@@ -340,45 +344,45 @@
   "blockedReason": null,
   "byAccount": {
     "adinfo0905": {
-      "published_verified": 15,
+      "published_verified": 20,
       "submitted_unverified": 2,
-      "discovered": 13
+      "discovered": 19
     },
     "stone0747": {
-      "published_verified": 16,
-      "submitted_unverified": 7,
+      "published_verified": 21,
+      "submitted_unverified": 8,
       "discovered": 6
     }
   },
   "accountBlockedReasons": {},
   "daily": {
-    "date": "2026-10-19",
-    "attempted": 24,
-    "publishedVerified": 20,
-    "remainingScheduled": 0,
-    "retryAttemptsToday": 4,
+    "date": "2026-10-20",
+    "attempted": 11,
+    "publishedVerified": 10,
+    "remainingScheduled": 10,
+    "retryAttemptsToday": 1,
     "globalCap": 20,
     "accountCap": 10,
     "byAccount": {
       "adinfo0905": {
-        "attempted": 10,
-        "publishedVerified": 10,
-        "remainingScheduled": 0
+        "attempted": 5,
+        "publishedVerified": 5,
+        "remainingScheduled": 5
       },
       "stone0747": {
-        "attempted": 14,
-        "publishedVerified": 10,
-        "remainingScheduled": 0
+        "attempted": 6,
+        "publishedVerified": 5,
+        "remainingScheduled": 5
       }
     }
   },
   "measurement": {
     "schema": "naver-kin-measurement-v1",
-    "checkedAt": "2026-10-19T14:43:35.480318+00:00",
+    "checkedAt": "2026-10-20T10:32:00.097749+09:00",
     "source": "GA4 Data API",
     "timezone": "Asia/Seoul",
     "startDate": "2026-10-15",
-    "endDate": "2026-10-18",
+    "endDate": "2026-10-19",
     "trialStartDate": "2026-10-15",
     "trialEndDate": "2026-10-21",
     "finalCollectionDate": "2026-10-24",
@@ -508,17 +512,17 @@
       {
         "host": "www.smilenote.kr",
         "status": "collected",
-        "sessions": 0,
+        "sessions": 1,
         "engagedSessions": 0,
-        "pageViews": 0,
+        "pageViews": 1,
         "reportMetadata": {
           "timeZone": "Asia/Seoul",
           "currencyCode": "USD",
           "subjectToThresholding": null,
           "samplingMetadatas": null,
           "dataLossFromOtherRow": null,
-          "rowCount": 0,
-          "returnedRows": 0
+          "rowCount": 1,
+          "returnedRows": 1
         }
       },
       {
@@ -650,9 +654,9 @@
         }
       }
     ],
-    "sessions": 3,
+    "sessions": 4,
     "engagedSessions": 2,
-    "pageViews": 3,
+    "pageViews": 4,
     "publisherRevenue": null,
     "revenueStatus": "unverified_publisher_link",
     "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
@@ -673,6 +677,21 @@
         "sendDay": "2026-10-15"
       },
       {
+        "day": "2026-10-19",
+        "host": "www.smilenote.kr",
+        "utmContent": "stone0747_20261019_1035_3150e80db559f2d7",
+        "sessions": 1,
+        "engagedSessions": 0,
+        "pageViews": 1,
+        "mappingStatus": "ledger_matched",
+        "account": "stone0747",
+        "questionId": "441982579",
+        "state": "published_verified",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=441982579&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
+        "canonicalUrl": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+        "sendDay": "2026-10-19"
+      },
+      {
         "day": "2026-10-18",
         "host": "www.nolplace.com",
         "utmContent": "adinfo0905_20261018_1452_fa80addfceb17ba7",
@@ -690,11 +709,18 @@
     ],
     "dailyFunnel": [
       {
+        "day": "2026-10-20",
+        "discovered": 17,
+        "drafted": 11,
+        "attempted": 11,
+        "published_verified": 10
+      },
+      {
         "day": "2026-10-19",
         "discovered": 33,
         "drafted": 24,
         "attempted": 24,
-        "published_verified": 16
+        "published_verified": 20
       },
       {
         "day": "2026-10-18",
@@ -726,7 +752,7 @@
       }
     ],
     "funnelStartDate": "2026-10-15",
-    "funnelEndDate": "2026-10-19",
+    "funnelEndDate": "2026-10-20",
     "funnelTodayProvisional": true,
     "funnelPeriodKind": "trial",
     "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
@@ -761,18 +787,18 @@
         }
       ]
     },
-    "matchedSessions": 3,
+    "matchedSessions": 4,
     "unmatchedSessions": 0
   },
   "schedule": {
     "schema": "naver-kin-automation-state-v1",
-    "checkedAt": "2026-10-19T14:45:01.198547+00:00",
+    "checkedAt": "2026-10-20T01:35:01.589530+00:00",
     "startDate": "2026-10-15",
     "endDate": "2026-10-21",
     "enabled": true,
     "continuousMode": true,
     "mode": "alternating_interval",
-    "intervalMinutes": 19,
+    "intervalMinutes": 21,
     "intervalJitterMinutes": [
       18,
       22
@@ -788,63 +814,63 @@
       {
         "port": 9230,
         "ready": true,
-        "started": false
+        "started": true
       },
       {
         "port": 9231,
         "ready": true,
-        "started": false
+        "started": true
       },
       {
         "port": 9333,
         "ready": true,
-        "started": false
+        "started": true
       },
       {
         "port": 9334,
         "ready": true,
-        "started": false
+        "started": true
       },
       {
         "port": 9335,
         "ready": true,
-        "started": false
+        "started": true
       }
     ],
     "reason": "minimum_interval_not_elapsed",
-    "lastRunAt": "2026-10-19T23:40:16.426052+09:00",
+    "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
     "lastAccount": "adinfo0905",
-    "nextEligibleAt": "2026-10-20T00:00:00+09:00",
+    "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
     "nextAccount": "stone0747",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
-    "cadenceState": "daily_limit_or_account_unavailable",
+    "cadenceState": "waiting",
     "operationCounts": {
-      "adinfo0905": 10,
-      "stone0747": 10
+      "adinfo0905": 5,
+      "stone0747": 5
     },
     "submissionCounts": {
-      "adinfo0905": 10,
-      "stone0747": 10
+      "adinfo0905": 5,
+      "stone0747": 5
     },
-    "retryAttemptsToday": 4,
-    "globalRemainingRuns": 0,
+    "retryAttemptsToday": 1,
+    "globalRemainingRuns": 10,
     "byAccountRemainingRuns": {
-      "adinfo0905": 0,
-      "stone0747": 0
+      "adinfo0905": 5,
+      "stone0747": 5
     },
     "registeredTasks": {
       "status": "observed",
-      "checkedAt": "2026-10-19T14:45:02.408351+00:00",
+      "checkedAt": "2026-10-20T01:35:26.380410+00:00",
       "tasks": [
         {
           "taskName": "BaroLab-Kin-Seven-Day-Pilot",
           "registered": true,
           "enabled": true,
           "state": "Running",
-          "nextRunAt": "2026-10-19T23:50:00.0000000+09:00",
-          "lastRunAt": "2026-10-19T23:45:01.0000000+09:00",
+          "nextRunAt": "2026-10-20T10:40:00.0000000+09:00",
+          "lastRunAt": "2026-10-20T10:35:01.0000000+09:00",
           "lastResult": 267009,
           "actions": [
             {
@@ -1083,13 +1109,13 @@
     "scheduleDescription": "작업 종료 후 18~22분 지터(평균 20분) 계정 교대 · 개별 계정 40~45분 안전 텀 · 하루 20건(계정당 10건)",
     "lastRun": {
       "schema": "naver-kin-automation-state-v1",
-      "checkedAt": "2026-10-19T14:45:01.198547+00:00",
+      "checkedAt": "2026-10-20T01:35:01.589530+00:00",
       "startDate": "2026-10-15",
       "endDate": "2026-10-21",
       "enabled": true,
       "continuousMode": true,
       "mode": "alternating_interval",
-      "intervalMinutes": 19,
+      "intervalMinutes": 21,
       "intervalJitterMinutes": [
         18,
         22
@@ -1105,63 +1131,63 @@
         {
           "port": 9230,
           "ready": true,
-          "started": false
+          "started": true
         },
         {
           "port": 9231,
           "ready": true,
-          "started": false
+          "started": true
         },
         {
           "port": 9333,
           "ready": true,
-          "started": false
+          "started": true
         },
         {
           "port": 9334,
           "ready": true,
-          "started": false
+          "started": true
         },
         {
           "port": 9335,
           "ready": true,
-          "started": false
+          "started": true
         }
       ],
       "reason": "minimum_interval_not_elapsed",
-      "lastRunAt": "2026-10-19T23:40:16.426052+09:00",
+      "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
       "lastAccount": "adinfo0905",
-      "nextEligibleAt": "2026-10-20T00:00:00+09:00",
+      "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
       "nextAccount": "stone0747",
       "activeRunId": null,
       "activeAccount": null,
       "activeStartedAt": null,
-      "cadenceState": "daily_limit_or_account_unavailable",
+      "cadenceState": "waiting",
       "operationCounts": {
-        "adinfo0905": 10,
-        "stone0747": 10
+        "adinfo0905": 5,
+        "stone0747": 5
       },
       "submissionCounts": {
-        "adinfo0905": 10,
-        "stone0747": 10
+        "adinfo0905": 5,
+        "stone0747": 5
       },
-      "retryAttemptsToday": 4,
-      "globalRemainingRuns": 0,
+      "retryAttemptsToday": 1,
+      "globalRemainingRuns": 10,
       "byAccountRemainingRuns": {
-        "adinfo0905": 0,
-        "stone0747": 0
+        "adinfo0905": 5,
+        "stone0747": 5
       },
       "registeredTasks": {
         "status": "observed",
-        "checkedAt": "2026-10-19T14:45:02.408351+00:00",
+        "checkedAt": "2026-10-20T01:35:26.380410+00:00",
         "tasks": [
           {
             "taskName": "BaroLab-Kin-Seven-Day-Pilot",
             "registered": true,
             "enabled": true,
             "state": "Running",
-            "nextRunAt": "2026-10-19T23:50:00.0000000+09:00",
-            "lastRunAt": "2026-10-19T23:45:01.0000000+09:00",
+            "nextRunAt": "2026-10-20T10:40:00.0000000+09:00",
+            "lastRunAt": "2026-10-20T10:35:01.0000000+09:00",
             "lastResult": 267009,
             "actions": [
               {
@@ -1188,35 +1214,35 @@
         ]
       }
     },
-    "lastRunAt": "2026-10-19T23:40:16.426052+09:00",
-    "nextEligibleAt": "2026-10-20T00:00:00+09:00",
+    "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
+    "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
     "nextAccount": "stone0747",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
-    "cadenceState": "daily_limit_or_account_unavailable",
-    "globalRemainingRuns": 0,
+    "cadenceState": "waiting",
+    "globalRemainingRuns": 10,
     "byAccountRemainingRuns": {
-      "adinfo0905": 0,
-      "stone0747": 0
+      "adinfo0905": 5,
+      "stone0747": 5
     },
     "operationCounts": {
-      "adinfo0905": 10,
-      "stone0747": 10
+      "adinfo0905": 5,
+      "stone0747": 5
     },
     "submissionCounts": {
-      "adinfo0905": 10,
-      "stone0747": 10
+      "adinfo0905": 5,
+      "stone0747": 5
     },
-    "retryAttemptsToday": 4,
-    "checkedAt": "2026-10-19T14:45:01.198547+00:00",
+    "retryAttemptsToday": 1,
+    "checkedAt": "2026-10-20T01:35:01.589530+00:00",
     "state": "waiting",
     "lastOperation": {
       "account": "adinfo0905",
-      "state": "submitted_unverified",
+      "state": "published_verified",
       "reason": null,
-      "updatedAt": "2026-10-19T14:39:57.002190+00:00",
-      "questionId": "490364096",
+      "updatedAt": "2026-10-20T01:32:00.074056+00:00",
+      "questionId": "495619450",
       "questionState": "published_verified",
       "submissionAttempted": true,
       "submitted": true

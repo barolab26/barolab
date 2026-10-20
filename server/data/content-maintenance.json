@@ -1,13 +1,13 @@
 {
   "runtime": {
     "status": "waiting",
-    "stage": "idle",
-    "reason": "검증된 일일 수정·조사 상한 도달",
-    "checkedAt": "2026-10-19T06:57:43.184159+00:00",
-    "lastAuditAt": "2026-10-19T06:57:42.855108+00:00",
-    "lastAuditCount": 5,
+    "stage": "audit",
+    "reason": "CF 신규 발행 실행 중 · 발행 우선",
+    "checkedAt": "2026-10-20T00:01:12.136148+00:00",
+    "lastAuditAt": "2026-10-20T00:01:12.120133+00:00",
+    "lastAuditCount": 3,
     "auditCoverage": "rotating_never_then_oldest_domain_balanced",
-    "lastAuditStopReason": "회차 시간 상한",
+    "lastAuditStopReason": "CF 신규 발행 실행 중 · 발행 우선",
     "providerBackoff": {
       "provider": "shared_agent_router",
       "checkedAt": "2026-10-15T20:01:50.068755+00:00",
@@ -40,10 +40,10 @@
     },
     "nextRetryAt": "2026-10-15T20:31:50.074693+00:00",
     "providerStatus": "ready",
-    "lastLaunchedAt": "2026-10-19T06:56:56.484117+00:00",
+    "lastLaunchedAt": "2026-10-20T00:00:59.445836+00:00",
     "launcher": "existing_cf_cleaner_idle_hook",
-    "helperPid": 49436,
-    "lastAttemptAt": "2026-10-18T16:35:33.557066+00:00",
+    "helperPid": 19232,
+    "lastAttemptAt": "2026-10-19T17:48:58.107601+00:00",
     "activeJob": null,
     "lastDomain": "justinfo.co.kr",
     "publishingPriorityWait": true

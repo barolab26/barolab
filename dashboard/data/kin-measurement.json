@@ -1,10 +1,10 @@
 {
   "schema": "naver-kin-measurement-v1",
-  "checkedAt": "2026-10-19T19:06:04.127650+09:00",
+  "checkedAt": "2026-10-20T10:32:00.097749+09:00",
   "source": "GA4 Data API",
   "timezone": "Asia/Seoul",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-18",
+  "endDate": "2026-10-19",
   "trialStartDate": "2026-10-15",
   "trialEndDate": "2026-10-21",
   "finalCollectionDate": "2026-10-24",
@@ -66,11 +66,219 @@
         "rowCount": 0,
         "returnedRows": 0
       }
+    },
+    {
+      "host": "www.baronote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.justinfo.co.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.topnote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.meganote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.smilenote.kr",
+      "status": "collected",
+      "sessions": 1,
+      "engagedSessions": 0,
+      "pageViews": 1,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 1,
+        "returnedRows": 1
+      }
+    },
+    {
+      "host": "www.healthcox.com",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.maxnote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.must-joy.com",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.tripmarvel.com",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.daynote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.nolplace.com",
+      "status": "collected",
+      "sessions": 2,
+      "engagedSessions": 1,
+      "pageViews": 2,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 1,
+        "returnedRows": 1
+      }
+    },
+    {
+      "host": "www.soulnote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
+    },
+    {
+      "host": "www.joynote.kr",
+      "status": "collected",
+      "sessions": 0,
+      "engagedSessions": 0,
+      "pageViews": 0,
+      "reportMetadata": {
+        "timeZone": "Asia/Seoul",
+        "currencyCode": "USD",
+        "subjectToThresholding": null,
+        "samplingMetadatas": null,
+        "dataLossFromOtherRow": null,
+        "rowCount": 0,
+        "returnedRows": 0
+      }
     }
   ],
-  "sessions": 1,
-  "engagedSessions": 1,
-  "pageViews": 1,
+  "sessions": 4,
+  "engagedSessions": 2,
+  "pageViews": 4,
   "publisherRevenue": null,
   "revenueStatus": "unverified_publisher_link",
   "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
@@ -89,15 +297,52 @@
       "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632#answer4",
       "canonicalUrl": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
       "sendDay": "2026-10-15"
+    },
+    {
+      "day": "2026-10-19",
+      "host": "www.smilenote.kr",
+      "utmContent": "stone0747_20261019_1035_3150e80db559f2d7",
+      "sessions": 1,
+      "engagedSessions": 0,
+      "pageViews": 1,
+      "mappingStatus": "ledger_matched",
+      "account": "stone0747",
+      "questionId": "441982579",
+      "state": "published_verified",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=441982579&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
+      "canonicalUrl": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+      "sendDay": "2026-10-19"
+    },
+    {
+      "day": "2026-10-18",
+      "host": "www.nolplace.com",
+      "utmContent": "adinfo0905_20261018_1452_fa80addfceb17ba7",
+      "sessions": 2,
+      "engagedSessions": 1,
+      "pageViews": 2,
+      "mappingStatus": "ledger_matched",
+      "account": "adinfo0905",
+      "questionId": "495595158",
+      "state": "published_verified",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=495595158&answerNo=1&qb=7ZmU64u07IiyIOyYiOyVvQ==#answer2",
+      "canonicalUrl": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+      "sendDay": "2026-10-18"
     }
   ],
   "dailyFunnel": [
     {
+      "day": "2026-10-20",
+      "discovered": 17,
+      "drafted": 11,
+      "attempted": 11,
+      "published_verified": 10
+    },
+    {
       "day": "2026-10-19",
-      "discovered": 27,
-      "drafted": 21,
-      "attempted": 21,
-      "published_verified": 15
+      "discovered": 33,
+      "drafted": 24,
+      "attempted": 24,
+      "published_verified": 20
     },
     {
       "day": "2026-10-18",
@@ -129,7 +374,7 @@
     }
   ],
   "funnelStartDate": "2026-10-15",
-  "funnelEndDate": "2026-10-19",
+  "funnelEndDate": "2026-10-20",
   "funnelTodayProvisional": true,
   "funnelPeriodKind": "trial",
   "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
@@ -164,6 +409,6 @@
       }
     ]
   },
-  "matchedSessions": 1,
+  "matchedSessions": 4,
   "unmatchedSessions": 0
 }

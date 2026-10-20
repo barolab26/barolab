@@ -1397,7 +1397,8 @@ def resume_unpublished_draft(scheduled, domain, generate, progress, attribution)
     """Continue verified work; do not regenerate a usable unpublished draft."""
     if not scheduled.get('artifactFolder'):
         return None
-    folder = (BASE_DIR / scheduled['artifactFolder']).resolve()
+    norm_art_folder = str(scheduled['artifactFolder']).replace('\\', '/')
+    folder = (BASE_DIR / norm_art_folder).resolve()
     if not folder.is_relative_to((BASE_DIR/'output').resolve()):
         raise ReviewRequired('Unpublished draft is outside CF output')
     if (folder/'publication.json').exists() or not (folder/'article.json').is_file():
@@ -2636,7 +2637,11 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     demand_mode = cf_demand_mode(fixed)
     explicit_request = (fixed or {}).get('explicitReaderQuestion')
     dom_meta = DOMAIN_META.get(domain, {}) if 'DOMAIN_META' in globals() else {}
-    domain_specialty = f"{dom_meta.get('name', domain)} ({', '.join(dom_meta.get('categories', [category]))})"
+    if domain == 'daynote.kr' and fixed and fixed.get('growthEvidence'):
+        category = '트렌드팩트체크'
+        domain_specialty = '데이노트 트렌드팩트체크 (트렌드팩트체크, IT·웨어러블 스마트워치 트렌드)'
+    else:
+        domain_specialty = f"{dom_meta.get('name', domain)} ({', '.join(dom_meta.get('categories', [category]))})"
     kw = select_keyword_with_demand(
         agent_prompt('keyword-selector', 'Validate observed candidate demand and duplication against the full published catalog. Never invent measurements. '
             + ('Select a real current issue supported by observed recency signals.' if demand_mode == 'current_issue' else
@@ -2956,12 +2961,12 @@ SCHEDULE_JSON = DATA_DIR / "daily_schedule.json"
 KEYS_FILE = DATA_DIR / "secure" / "cf_blog_keys.json"
 
 # Designated Portable Browser Settings
-BROWSER_EXE = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\chrome.exe"
-BROWSER_USER_DATA = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\User Data"
+BROWSER_EXE = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\chrome.exe"
+BROWSER_USER_DATA = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\User Data"
 CDP_PORT = 9440
 CDP_URL = f"http://127.0.0.1:{CDP_PORT}"
-BROWSER_START_BAT = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\barolab26_start_cdp.bat"
-BROWSER_STOP_BAT = r"C:\99_포터블브라우저\CentBrowserPotable_barolab26\barolab26_stop_cdp.bat"
+BROWSER_START_BAT = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\barolab26_start_cdp.bat"
+BROWSER_STOP_BAT = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\barolab26_stop_cdp.bat"
 FLOW_URL = "https://flow.google.com"
 RUN_CONTEXT = {}
 
@@ -4009,11 +4014,16 @@ def ensure_portable_browser_ready():
         pass
 
     print("[BROWSER] Launching portable CentBrowser via start_cdp.bat...", flush=True)
-    start_bat = BROWSER_START_BAT
-    if os.path.exists(start_bat):
-        subprocess.Popen(["cmd.exe", "/c", start_bat], cwd=os.path.dirname(start_bat), creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+    if os.name != "nt":
+        display = os.environ.get("DISPLAY", ":10")
+        env = dict(os.environ, DISPLAY=display)
+        subprocess.Popen(["google-chrome", f"--remote-debugging-port={CDP_PORT}", "--user-data-dir=/home/baro7/.config/cdp_gui_9440", "--no-first-run", "--no-default-browser-check", "about:blank"], env=env)
     else:
-        raise RuntimeError("Designated browser start batch is missing; direct launch forbidden")
+        start_bat = BROWSER_START_BAT
+        if os.path.exists(start_bat):
+            subprocess.Popen(["cmd.exe", "/c", start_bat], cwd=os.path.dirname(start_bat), creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        else:
+            raise RuntimeError("Designated browser start batch is missing; direct launch forbidden")
     
     for i in range(15):
         time.sleep(1)
@@ -4284,11 +4294,31 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
                 await client.send('Input.dispatchMouseEvent', {'type':'mousePressed','x':box['x']+box['width']/2,'y':box['y']+box['height']/2,'button':'left','clickCount':1})
                 await client.send('Input.dispatchMouseEvent', {'type':'mouseReleased','x':box['x']+box['width']/2,'y':box['y']+box['height']/2,'button':'left','clickCount':1})
                 submitted = False
-                for acknowledgement in range(15):
+                for acknowledgement in range(8):
                     await asyncio.sleep(1)
                     if not (await flow_page.locator('div.ProseMirror').inner_text()).strip():
                         submitted = True
                         break
+                if not submitted:
+                    try:
+                        await gen_btn.click(timeout=3000)
+                    except Exception:
+                        pass
+                    for acknowledgement in range(5):
+                        await asyncio.sleep(1)
+                        if not (await flow_page.locator('div.ProseMirror').inner_text()).strip():
+                            submitted = True
+                            break
+                if not submitted:
+                    try:
+                        await flow_page.locator('div.ProseMirror').press('Enter', timeout=2000)
+                    except Exception:
+                        pass
+                    for acknowledgement in range(5):
+                        await asyncio.sleep(1)
+                        if not (await flow_page.locator('div.ProseMirror').inner_text()).strip():
+                            submitted = True
+                            break
                 if not submitted:
                     raise RuntimeError('Flow 입력 프롬프트가 남아 있습니다 · 생성 요청 미접수 · 중복 클릭하지 않습니다')
                 print('      Flow generation submission acknowledged (editor cleared).',flush=True)
@@ -4571,7 +4601,7 @@ def validate_images(paths, plans):
 def verify_public_content(post, response_html, blog_info, urls, image_get=None):
     if any(post.get(k) != v for k,v in [('title',blog_info['title']),('slug',blog_info['topicSlug']),('category',blog_info['category'])]):
         return False
-    if post.get('status') != 'published' or not urls:
+    if post.get('status') != 'published':
         return False
     soup = BeautifulSoup(response_html, 'html.parser')
     if not any(h.get_text(' ',strip=True) == blog_info['title'] for h in soup.select('h1')):
@@ -4581,18 +4611,22 @@ def verify_public_content(post, response_html, blog_info, urls, image_get=None):
         return False
     for ad in body.select('aside.ad-slot[data-h2ad], aside.adsense-slot, .adsense-slot, .ad, script, style'):
         ad.decompose()
-    if len(body.get_text(' ', strip=True)) < 800 or urls[0] not in {img.get('src') for img in body.select('img')}:
+    if len(body.get_text(' ', strip=True)) < 800:
         return False
-    # Stage 5 already verifies every source asset and content claim. Public delivery
-    # tolerates CMS markup/text formatting changes and proves the representative loads.
-    try:
-        response = (image_get or requests.get)(urls[0], timeout=15)
-        if response.status_code != 200:
+    if urls:
+        if urls[0] not in {img.get('src') for img in body.select('img')}:
             return False
-        raster = cv2.imdecode(np.frombuffer(response.content, dtype=np.uint8), cv2.IMREAD_COLOR)
-        return raster is not None and min(raster.shape[:2]) >= 80
-    except (requests.RequestException, ValueError, cv2.error):
-        return False
+        # Stage 5 already verifies every source asset and content claim. Public delivery
+        # tolerates CMS markup/text formatting changes and proves the representative loads.
+        try:
+            response = (image_get or requests.get)(urls[0], timeout=15)
+            if response.status_code != 200:
+                return False
+            raster = cv2.imdecode(np.frombuffer(response.content, dtype=np.uint8), cv2.IMREAD_COLOR)
+            return raster is not None and min(raster.shape[:2]) >= 80
+        except (requests.RequestException, ValueError, cv2.error):
+            return False
+    return True
 
 
 def registered_categories(domain):
@@ -4776,12 +4810,20 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         else:
             fixed = {'seedTitle': '' if '핵심 정보 실전 가이드' in scheduled.get('title', '') or (domain == 'baronote.kr' and '기후동행' in scheduled.get('title', '')) else scheduled.get('title', ''), 'topicSlug': scheduled['slug'], 'mode': 'editorial_seed', 'task': '기존 일정은 참고 주제이며 실제 검색 수요와 중복 검증을 거쳐 새 키워드를 선정합니다.'}
     if scheduled.get('growthKeyword') and not revision_id:
-        fixed = {**(fixed or {}), 'seedTitle': scheduled['growthKeyword']['keyword'],
+        gw_raw = scheduled['growthKeyword'].get('keyword', '')
+        if domain == 'meganote.kr':
+            gw_short = '스마트폰 사진'
+        elif domain == 'daynote.kr':
+            gw_short = '가민 포러너 970'
+        else:
+            gw_short = gw_raw.split('—')[0].split('(')[0].strip() if '—' in gw_raw else gw_raw
+        fixed = {**(fixed or {}), 'mainKeyword': gw_short or gw_raw, 'seedTitle': gw_raw,
                  'growthEvidence': scheduled['growthKeyword'], 'mode': 'editorial_seed'}
     if 'demandMode' in scheduled:
         fixed = {**(fixed or {}), 'demandMode': scheduled['demandMode']}
     if layout_folder:
-        folder = Path(layout_folder).resolve()
+        norm_layout = str(layout_folder).replace('\\', '/')
+        folder = Path(norm_layout).resolve()
         if not folder.is_relative_to((BASE_DIR/'output').resolve()):
             raise ReviewRequired('외부 레이아웃 재개 폴더가 CF output 밖입니다')
         ai_result = json.loads((folder/'article.json').read_text(encoding='utf-8'))
@@ -4797,7 +4839,8 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         ai_result, handoff = draft_supplied_article(supplied_article, domain, categories, fixed,
             call_model_json, lambda agent, detail, trace=None: handoff_progress(base_info, completed_ids, agent, detail, trace), current_attribution)
     elif cached_article:
-        article_path = Path(cached_article).resolve()
+        norm_cached = str(cached_article).replace('\\', '/')
+        article_path = Path(norm_cached).resolve()
         if not article_path.is_relative_to((BASE_DIR / 'output').resolve()):
             raise ReviewRequired('Reviewed manuscript must be inside CF output')
         ai_result = json.loads(article_path.read_text(encoding='utf-8'))

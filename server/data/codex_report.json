@@ -1,7 +1,7 @@
 {
-  "directiveId": "2026-10-20T11:28:00+09:00",
+  "directiveId": "2026-10-20T12:18:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-20T02:33:46.3865248Z",
+  "startedAt": "2026-10-20T03:26:26.4467810Z",
   "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
   "directiveHistory": [
     {
@@ -2093,78 +2093,165 @@
       ],
       "updatedAt": "2026-10-20T02:35:53.8950493Z",
       "blockedAt": "2026-10-20T02:35:53.8950493Z"
+    },
+    {
+      "directiveId": "2026-10-20T12:18:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T03:26:26.4467810Z",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "BLOCKED: maxnote (11:10, post 221) and baronote (12:00, post 323) were independently verified published. meganote (14:30) preparation attempt was recorded prepared once but its latest execution failed because the designated portable browser requires the Windows collector host; no artifact remains in the active slot. daynote (16:10) completed prepare-only Stage 1-5 but selected an unrelated topic, so its seed was restored and the item is held as review_required. Stage 6 was not run for either slot. The requested Ubuntu/EGO LITE runtime was not launched or installed because the WSL distro lacks pip/ensurepip and no approved runtime source is available. The fixed browser-root configuration was updated to C:\\99_Portable_Braowser and its dedicated start/stop batch files were verified present. The CF dashboard is visible in the in-app browser. The exact urgent message was sent once and verified in the existing BaroLab Gemini conversation under barolab26@gmail.com. NAS snapshot schema is valid, complete=false was preserved, and generatedAt was less than 10 minutes old.",
+      "changedFiles": [
+        "cf_posting/pipeline_runner.py",
+        "cf_posting/data/daily_schedule.json",
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "blockedAt": "2026-10-20T12:54:30+09:00",
+      "taskProgress": {
+        "verification": {
+          "driveProfile": "barolab26@gmail.com",
+          "snapshotSchema": "barolab-live-snapshot-v1",
+          "snapshotGeneratedAt": "2026-10-20T12:52:50.386441+09:00",
+          "snapshotAgeMinutesAtValidation": 1.08,
+          "snapshotComplete": false
+        },
+        "publication": {
+          "maxnote.kr": {
+            "slot": "11:10",
+            "status": "published_verified",
+            "postId": 221,
+            "httpStatus": 200,
+            "publicUrl": "https://www.maxnote.kr/ai-meeting-notes-sensitive-data-privacy-check"
+          },
+          "baronote.kr": {
+            "slot": "12:00",
+            "status": "published_verified",
+            "postId": 323,
+            "httpStatus": 200,
+            "publicUrl": "https://www.baronote.kr/basic-pension-couple-benefit-reduction"
+          }
+        },
+        "preparation": {
+          "meganote.kr": {
+            "slot": "14:30",
+            "status": "failed",
+            "reason": "RuntimeError: Dedicated portable browser identity requires the Windows collector host",
+            "publicationTriggered": false,
+            "recovery": "no retry; active artifact absent"
+          },
+          "daynote.kr": {
+            "slot": "16:10",
+            "status": "review_required",
+            "stages": "1-5 only",
+            "reason": "generated topic did not match growthKeyword; seed retained and held from publication",
+            "publicationTriggered": false
+          }
+        },
+        "runtime": {
+          "ubuntuEgoLite": "not started",
+          "reason": "WSL environment lacks pip/ensurepip; Ego Lite package/runtime source unavailable. No packages, OS settings, or schedulers changed.",
+          "stage6": "not run"
+        },
+        "browser": {
+          "portableRoot": "C:\\99_Portable_Braowser",
+          "dedicatedStartStopBatchesPresent": true,
+          "dashboardVisibleUrl": "http://localhost:8790/cf.html?domain=meganote.kr"
+        },
+        "geminiNotification": {
+          "status": "sent_verified",
+          "destination": "Gemini desktop / BaroLab 프로젝트",
+          "account": "barolab26@gmail.com",
+          "text": "코덱스 긴급 보고: meganote.kr·daynote.kr의 Stage 1–5 준비가 지정 성장 키워드 대신 다른 주제로 생성되어 발행 전 보류했습니다. 블로킹 발생. 지시 필요.",
+          "evidence": "Exact message visible as a new user message; composer cleared; sent once."
+        }
+      },
+      "geminiNotification": {
+        "status": "sent_verified",
+        "destination": "Gemini desktop / BaroLab 프로젝트",
+        "account": "barolab26@gmail.com",
+        "text": "코덱스 긴급 보고: meganote.kr·daynote.kr의 Stage 1–5 준비가 지정 성장 키워드 대신 다른 주제로 생성되어 발행 전 보류했습니다. 블로킹 발생. 지시 필요.",
+        "evidence": "Exact message visible as a new user message; composer cleared; sent once."
+      },
+      "driveSyncStatus": "pending_upload_and_readback",
+      "updatedAt": "2026-10-20T12:54:30+09:00"
     }
   ],
-  "summary": "Blocked: WSL audit found Python 3.14.4 but no pip/ensurepip, and no Ego Lite runtime/package source to install safely. The meganote and daynote schedules conflict with their slugs/topics and lack reviewedArticle evidence; prepare-only stops before Stage 6, while Stage 6 publishes. No pipeline run or external publication was triggered. The validated incomplete NAS snapshot and fixed Drive JSON files were synchronized.",
+  "summary": "BLOCKED: maxnote (11:10, post 221) and baronote (12:00, post 323) were independently verified published. meganote (14:30) preparation attempt was recorded prepared once but its latest execution failed because the designated portable browser requires the Windows collector host; no artifact remains in the active slot. daynote (16:10) completed prepare-only Stage 1-5 but selected an unrelated topic, so its seed was restored and the item is held as review_required. Stage 6 was not run for either slot. The requested Ubuntu/EGO LITE runtime was not launched or installed because the WSL distro lacks pip/ensurepip and no approved runtime source is available. The fixed browser-root configuration was updated to C:\\99_Portable_Braowser and its dedicated start/stop batch files were verified present. The CF dashboard is visible in the in-app browser. The exact urgent message was sent once and verified in the existing BaroLab Gemini conversation under barolab26@gmail.com. NAS snapshot schema is valid, complete=false was preserved, and generatedAt was less than 10 minutes old.",
   "changedFiles": [
+    "cf_posting/pipeline_runner.py",
+    "cf_posting/data/daily_schedule.json",
     "server/data/live_snapshot.json",
     "server/data/codex_report.json"
   ],
   "taskProgress": {
-    "wslAudit": {
-      "venvModule": "present",
-      "changesMade": "none",
-      "ensurepip": "missing",
-      "distro": "Ubuntu WSL2",
-      "python3": "3.14.4",
-      "projectMount": "/mnt/c/10_Project/BaroLab verified",
-      "user": "baro7",
-      "egoLite": "not found",
-      "setupPlan": [
-        "Do not modify WSL packages until the required runtime source is identified and approved.",
-        "Install python3-pip and python3-venv through the Ubuntu package manager only when authorized.",
-        "Create an isolated environment under /home/baro7/.venvs after resolving the Ego Lite/Agentic Loop package source.",
-        "Verify pinned runtime versions and GUI invocation before declaring readiness."
-      ],
-      "pip": "missing",
-      "status": "completed_with_prerequisite_gaps"
+    "verification": {
+      "driveProfile": "barolab26@gmail.com",
+      "snapshotSchema": "barolab-live-snapshot-v1",
+      "snapshotGeneratedAt": "2026-10-20T12:52:50.386441+09:00",
+      "snapshotAgeMinutesAtValidation": 1.08,
+      "snapshotComplete": false
     },
-    "slots": {
-      "daynote": {
-        "issue": "washed-lettuce slug conflicts with burnt-pot summary and Garmin growth keyword; prior artifacts lack reviewer validation/reviewedArticle evidence",
-        "queueStatus": "waiting",
-        "scheduled": "2026-10-20 16:10 KST",
-        "action": "no retry or publication"
+    "publication": {
+      "maxnote.kr": {
+        "slot": "11:10",
+        "status": "published_verified",
+        "postId": 221,
+        "httpStatus": 200,
+        "publicUrl": "https://www.maxnote.kr/ai-meeting-notes-sensitive-data-privacy-check"
       },
-      "status": "blocked_for_safety",
-      "meganote": {
-        "existingArtifact": "run-20261020-103225-f0034d",
-        "issue": "tire-pressure article conflicts with scheduled waste-sorting slug and smartphone-photo-organizing keyword; missing reviewer validation/reviewedArticle evidence",
-        "queueStatus": "failed",
-        "scheduled": "2026-10-20 14:30 KST",
-        "action": "no retry or publication"
+      "baronote.kr": {
+        "slot": "12:00",
+        "status": "published_verified",
+        "postId": 323,
+        "httpStatus": 200,
+        "publicUrl": "https://www.baronote.kr/basic-pension-couple-benefit-reduction"
+      }
+    },
+    "preparation": {
+      "meganote.kr": {
+        "slot": "14:30",
+        "status": "failed",
+        "reason": "RuntimeError: Dedicated portable browser identity requires the Windows collector host",
+        "publicationTriggered": false,
+        "recovery": "no retry; active artifact absent"
       },
-      "stage6": "pipeline source inspection shows Stage 6 publishes; prepare-only exits before Stage 6",
-      "queueTarget": "not reached; no slots were run"
+      "daynote.kr": {
+        "slot": "16:10",
+        "status": "review_required",
+        "stages": "1-5 only",
+        "reason": "generated topic did not match growthKeyword; seed retained and held from publication",
+        "publicationTriggered": false
+      }
+    },
+    "runtime": {
+      "ubuntuEgoLite": "not started",
+      "reason": "WSL environment lacks pip/ensurepip; Ego Lite package/runtime source unavailable. No packages, OS settings, or schedulers changed.",
+      "stage6": "not run"
+    },
+    "browser": {
+      "portableRoot": "C:\\99_Portable_Braowser",
+      "dedicatedStartStopBatchesPresent": true,
+      "dashboardVisibleUrl": "http://localhost:8790/cf.html?domain=meganote.kr"
     },
     "geminiNotification": {
-      "status": "not_sent",
-      "reason": "Computer Use returned no available apps or tabs; could not verify the authorized BaroLab conversation and account."
-    },
-    "validation": {
-      "nasFreshWithinMinutes": 10,
-      "status": "passed",
-      "nasSchema": "barolab-live-snapshot-v1",
-      "jsonFiles": [
-        "server/data/live_snapshot.json",
-        "server/data/revenue.json",
-        "server/data/metrics.json",
-        "cf_posting/data/daily_schedule.json",
-        "dashboard/data/kin.json",
-        "dashboard/naver_automation.json",
-        "server/data/codex_report.json"
-      ],
-      "nasComplete": false
+      "status": "sent_verified",
+      "destination": "Gemini desktop / BaroLab 프로젝트",
+      "account": "barolab26@gmail.com",
+      "text": "코덱스 긴급 보고: meganote.kr·daynote.kr의 Stage 1–5 준비가 지정 성장 키워드 대신 다른 주제로 생성되어 발행 전 보류했습니다. 블로킹 발생. 지시 필요.",
+      "evidence": "Exact message visible as a new user message; composer cleared; sent once."
     }
   },
   "previousLastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
-  "blockedAt": "2026-10-20T02:35:48.7606417Z",
-  "updatedAt": "2026-10-20T02:35:53.8950493Z",
-  "error": "Blocked: mismatched meganote/daynote schedule metadata and missing reviewedArticle artifacts; Stage 6 publishes and the authorized Gemini conversation is unavailable in Computer Use.",
+  "blockedAt": "2026-10-20T12:54:30+09:00",
+  "updatedAt": "2026-10-20T12:54:30+09:00",
+  "error": "meganote requires the Windows collector host; daynote Stage 1-5 produced an off-keyword draft. Both remain unpublished; user direction is needed before retrying or changing the runtime architecture.",
   "checkedAt": "2026-10-20T10:53:15+09:00",
   "geminiNotification": {
-    "status": "not_sent",
-    "reason": "Computer Use returned no available apps or tabs; could not verify the authorized BaroLab conversation and account."
+    "status": "sent_verified",
+    "destination": "Gemini desktop / BaroLab 프로젝트",
+    "account": "barolab26@gmail.com",
+    "text": "코덱스 긴급 보고: meganote.kr·daynote.kr의 Stage 1–5 준비가 지정 성장 키워드 대신 다른 주제로 생성되어 발행 전 보류했습니다. 블로킹 발생. 지시 필요.",
+    "evidence": "Exact message visible as a new user message; composer cleared; sent once."
   },
   "tests": {
     "status": "passed",
@@ -2176,8 +2263,13 @@
   },
   "currentResult": {
     "status": "blocked",
-    "completed": false,
-    "reason": "Blocked: mismatched meganote/daynote schedule metadata and missing reviewedArticle artifacts; Stage 6 publishes and the authorized Gemini conversation is unavailable in Computer Use."
+    "blockedReason": "meganote requires the Windows collector host; daynote Stage 1-5 produced an off-keyword draft. Both remain unpublished; user direction is needed before retrying or changing the runtime architecture.",
+    "publishedVerified": 2,
+    "remainingSlots": {
+      "meganote.kr": "failed, unpublished",
+      "daynote.kr": "review_required, unpublished"
+    },
+    "browserDashboardVisible": true
   },
   "commitHash": "002260acaa5a056e1c91416aa38be5887537a99f",
   "driveSync": {
@@ -2261,5 +2353,5 @@
       "reason": "The second prepare-only attempt for must-pick.com was rejected by the existing overlap guard because scheduled pipeline_runner.py --catch-up-once PID 2356 started at 2026-10-20T08:47:39+09:00 and holds cleaner.lock. No requested domain pipeline run started."
     }
   ],
-  "driveSyncStatus": "pending"
+  "driveSyncStatus": "pending_upload_and_readback"
 }

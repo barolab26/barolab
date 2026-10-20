@@ -620,7 +620,7 @@ def run_system_watchdog(trigger_source: str = "scheduled", broadcast: bool = Tru
     """Execute full SRE watchdog pass: Server -> CDP Browsers -> Zombie Locks -> Missed Slot Catch-up -> App/Project Audit."""
     started_at = now_kst_iso()
     server_res = check_and_recover_server()
-    cdp_res = check_and_recover_cdp_browsers(auto_start=True)
+    cdp_res = check_and_recover_cdp_browsers(auto_start=False)
     zombie_actions = clean_zombie_locks_and_recover(stale_minutes=15)
     catchup_actions = trigger_missed_slot_catchup()
     app_track_truth = audit_and_guard_app_closed_test_truth()

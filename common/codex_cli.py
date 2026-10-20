@@ -15,6 +15,38 @@ from common import dashboard_jobs as jobs
 RUNTIME = jobs.ROOT / 'server' / 'data' / 'codex-runtime.json'
 MAX_TURN_CHARS = 750_000
 
+def is_wsl() -> bool:
+    if os.name == 'posix':
+        try:
+            with open('/proc/version', 'r') as f:
+                return 'microsoft' in f.read().lower()
+        except Exception:
+            pass
+    return False
+
+
+def to_wsl_path(path):
+    if not path:
+        return path
+    p = str(path)
+    if re.match(r'^[a-zA-Z]:[\\/]', p):
+        drive = p[0].lower()
+        rest = p[2:].replace('\\', '/').lstrip('/')
+        return f'/mnt/{drive}/{rest}'
+    return p
+
+
+def to_win_path(path):
+    if not path:
+        return path
+    p = str(path)
+    if p.startswith('/mnt/'):
+        parts = p[5:].split('/', 1)
+        drive = parts[0].upper()
+        rest = parts[1].replace('/', '\\') if len(parts) > 1 else ''
+        return f'{drive}:\\{rest}'
+    return p
+
 
 def _verified_installed_codex(executable, config):
     """Inspect the signature before running a replacement's version command."""
@@ -75,12 +107,22 @@ def _resolve_executable(config):
 
 def local_config():
     path = Path.home() / '.barolab' / 'codex-worker.json'
+    if is_wsl() and not path.is_file():
+        alt = Path('/mnt/c/Users/baro7/.barolab/codex-worker.json')
+        if alt.is_file():
+            path = alt
     if not path.is_file():
         raise RuntimeError('Windows Codex 작업 호스트 설정이 없습니다.')
     config = json.loads(path.read_text(encoding='utf-8'))
-    if not Path(config['home']).is_dir():
-        raise RuntimeError('Codex CLI 설치·로그인 경로를 확인하세요.')
-    config['executable'] = _resolve_executable(config)
+    if is_wsl():
+        config['wsl_executable'] = to_wsl_path(config['executable'])
+        config['wsl_home'] = to_wsl_path(config['home'])
+        if not Path(config['wsl_home']).is_dir():
+            raise RuntimeError('Codex CLI 설치·로그인 경로를 확인하세요.')
+    else:
+        if not Path(config['home']).is_dir():
+            raise RuntimeError('Codex CLI 설치·로그인 경로를 확인하세요.')
+        config['executable'] = _resolve_executable(config)
     return config
 
 
@@ -93,11 +135,14 @@ def environment(config):
 
 def refresh_runtime():
     config = local_config()
-    response = subprocess.run([config['executable'], 'login', 'status'], env=environment(config),
+    exe = config.get('wsl_executable') or config['executable']
+    cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
+    response = subprocess.run([exe, 'login', 'status'], env=environment(config),
         capture_output=True, text=True, encoding='utf-8', timeout=15,
-        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+        creationflags=cflags)
     authenticated = response.returncode == 0 and 'ChatGPT' in response.stdout + response.stderr
-    cache = Path(config['home']) / 'models_cache.json'
+    home_dir = Path(config['wsl_home']) if (is_wsl() and 'wsl_home' in config) else Path(config['home'])
+    cache = home_dir / 'models_cache.json'
     data = json.loads(cache.read_text(encoding='utf-8')) if cache.is_file() else {}
     models = [{'id': row['slug'], 'label': row.get('display_name', row['slug'])}
               for row in data.get('models', []) if row.get('visibility') == 'list']
@@ -123,7 +168,8 @@ def configured_reasoning_effort(config, model, requested):
     if requested not in ('none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'):
         raise RuntimeError('지원하지 않는 reasoning_effort 요청값입니다.')
     try:
-        cache = json.loads((Path(config['home'])/'models_cache.json').read_text(encoding='utf-8'))
+        home_dir = Path(config['wsl_home']) if (is_wsl() and 'wsl_home' in config) else Path(config['home'])
+        cache = json.loads((home_dir/'models_cache.json').read_text(encoding='utf-8'))
         row = next(row for row in cache.get('models', []) if row.get('slug') == model)
         supported = {item['effort'] for item in row.get('supported_reasoning_levels', [])}
     except (OSError, ValueError, KeyError, TypeError, StopIteration):
@@ -206,7 +252,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
     effort = configured_reasoning_effort(config, model, reasoning_effort)
     timeout_seconds = 300 if timeout_seconds is None else max(0.1, float(timeout_seconds))
     deadline = time.monotonic() + timeout_seconds
-    scratch = Path.home() / '.barolab' / 'scratch'
+    scratch = Path('/mnt/c/Users/baro7/.barolab/scratch') if is_wsl() else (Path.home() / '.barolab' / 'scratch')
     scratch.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='codex-json-', dir=scratch) as folder:
         folder_path = Path(folder)
@@ -222,7 +268,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             if not image.is_file() or image.suffix.lower() not in ('.jpg', '.jpeg', '.png') or not any(image.is_relative_to(root.resolve()) for root in allowed_roots):
                 raise RuntimeError('검증된 작업 산출물 이미지 경로가 아닙니다.')
             original_images.append(image)
-            cli_image_arguments.extend(['--image', str(_prepare_cli_image(image, folder_path, idx))])
+            cli_image_arguments.extend(['--image', to_win_path(_prepare_cli_image(image, folder_path, idx))])
         audit_folder = None
         if audit_directory is not None:
             from PIL import Image
@@ -260,17 +306,21 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
                     Path(output).unlink()
                 except OSError:
                     pass
-            command = [config['executable'], 'exec', *cli_image_arguments,
+            exe = config.get('wsl_executable') or config['executable']
+            cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
+            schema_arg = to_win_path(schema)
+            output_arg = to_win_path(output)
+            command = [exe, 'exec', *cli_image_arguments,
                        '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
                        '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cand_model,
                        '-c', 'forced_login_method="chatgpt"', '-c', f'model_reasoning_effort="{cand_effort}"',
                        '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
                        '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
-                       '-c', 'features.multi_agent=false', '--output-schema', str(schema), '--output-last-message', output, '-']
+                       '-c', 'features.multi_agent=false', '--output-schema', schema_arg, '--output-last-message', output_arg, '-']
             try:
                 result = subprocess.run(command, input=full_input,
                     capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
-                    env=environment(config), timeout=remaining, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                    env=environment(config), timeout=remaining, creationflags=cflags)
             except subprocess.TimeoutExpired:
                 if time.monotonic() >= deadline:
                     if audit_folder is not None:
@@ -332,7 +382,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
 
 def generate(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None,
              timeout_seconds=None):
-    if os.name == 'nt':
+    if os.name == 'nt' or is_wsl():
         return generate_local(prompt, model, images, response_schema, audit_directory=audit_directory,
                               reasoning_effort=reasoning_effort, timeout_seconds=timeout_seconds)
     if reasoning_effort is not None:

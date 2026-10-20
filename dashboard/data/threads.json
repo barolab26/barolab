@@ -1,11 +1,11 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-19T10:08:39.641424+00:00",
+  "checkedAt": "2026-10-20T01:33:40.062544+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
     "accountConfirmed": true,
-    "model": "gpt-6.1-sol",
+    "model": "gpt-6-luna",
     "provider": "authenticated-codex-subscription",
     "trialDays": 14,
     "continuousMode": true,
@@ -42,10 +42,182 @@
     "mainTrialCap": 56
   },
   "counts": {
-    "published_verified": 9,
-    "submitted_unknown": 6
+    "published_verified": 11,
+    "submitted_unknown": 8
   },
   "recent": [
+    {
+      "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
+      "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DesZPndk_wc",
+      "updated_at": "2026-10-19T23:03:49.493509+00:00",
+      "publication_date": "2026-10-20",
+      "slot": "08:00",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "윈도우 11 클립보드 기록 켜기: 복사한 항목 확인하고 다시 붙여넣는 방법 | 탑노트 IT·가전 매뉴얼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 114,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "복사한 문장, 다시 찾느라 헤맨 적 있지?\n설정에서 시스템 > 클립보드로 가서 기록을 켜면 돼.\n붙여넣을 곳에 커서를 두고 Windows 키+V를 누르면, 복사한 항목 중 골라 넣을 수 있어.",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "문장 옮기다 이전에 복사한 내용이 필요할 때 있잖아.\n윈도우 11 설정 > 시스템 > 클립보드에서 기록을 켜면 돼.\n새로 복사한 다음 Windows 키+V를 눌러 목록에서 골라 붙여넣으면 끝!",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
+      "published_at": "2026-10-19T23:03:45+00:00",
+      "verified_at": "2026-10-19T23:03:49.493485+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
+      "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-19T23:09:06.486958+00:00",
+      "publication_date": "2026-10-20",
+      "slot": "08:00",
+      "outbound_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261020_0800_268f876c3681d47d",
+      "parent_platform_id": "18121386773515557",
+      "title": "윈도우 11 클립보드 기록 켜기: 복사한 항목 확인하고 다시 붙여넣는 방법 | 탑노트 IT·가전 매뉴얼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 114,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "복사한 문장, 다시 찾느라 헤맨 적 있지?\n설정에서 시스템 > 클립보드로 가서 기록을 켜면 돼.\n붙여넣을 곳에 커서를 두고 Windows 키+V를 누르면, 복사한 항목 중 골라 넣을 수 있어.",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "문장 옮기다 이전에 복사한 내용이 필요할 때 있잖아.\n윈도우 11 설정 > 시스템 > 클립보드에서 기록을 켜면 돼.\n새로 복사한 다음 Windows 키+V를 눌러 목록에서 골라 붙여넣으면 끝!",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "제가 직접 정리하고 운영하는 블로그의 상세 가이드입니다.\nhttps://www.topnote.kr/windows-11-clipboard-history-enable-and-use?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261020_0800_268f876c3681d47d",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
+      "part_id": "598437aad8cb426bbf88c20aaedf4ea3-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DerRukIH6ca",
+      "updated_at": "2026-10-19T12:38:51.266226+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "21:30",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지 | 맥스노트 엑셀·업무자동화 위키",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 139,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 볼 때 먼저 확인할 3가지\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 88
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 핵심 요약 노트 📌\n• 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n• 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n• 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
+      "published_at": "2026-10-19T12:38:51+00:00",
+      "verified_at": "2026-10-19T12:38:51.266203+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
+      "part_id": "598437aad8cb426bbf88c20aaedf4ea3-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-19T12:44:07.817201+00:00",
+      "publication_date": "2026-10-19",
+      "slot": "21:30",
+      "outbound_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_2130_85c3214f5902ccea",
+      "parent_platform_id": "18466200322136941",
+      "title": "ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지 | 맥스노트 엑셀·업무자동화 위키",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 139,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 볼 때 먼저 확인할 3가지\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 88
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 핵심 요약 노트 📌\n• 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n• 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n• 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "제가 직접 정리·운영하는 블로그에 전체 체크리스트와 상세 가이드를 정리해 두었습니다.\n\n👉 상세 가이드 보러가기:\nhttps://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_2130_85c3214f5902ccea",
+      "review": {
+        "status": "approved",
+        "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+      },
+      "source_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
     {
       "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
       "part_id": "5becebb790be4f06a9fe6d06ba00b13e-0",
@@ -677,6 +849,230 @@
     }
   ],
   "pairedThreads": [
+    {
+      "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
+      "title": "윈도우 11 클립보드 기록 켜기: 복사한 항목 확인하고 다시 붙여넣는 방법 | 탑노트 IT·가전 매뉴얼",
+      "publication_date": "2026-10-20",
+      "slot": "08:00",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 114,
+      "source_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "복사한 문장, 다시 찾느라 헤맨 적 있지?\n설정에서 시스템 > 클립보드로 가서 기록을 켜면 돼.\n붙여넣을 곳에 커서를 두고 Windows 키+V를 누르면, 복사한 항목 중 골라 넣을 수 있어.",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "문장 옮기다 이전에 복사한 내용이 필요할 때 있잖아.\n윈도우 11 설정 > 시스템 > 클립보드에서 기록을 켜면 돼.\n새로 복사한 다음 Windows 키+V를 눌러 목록에서 골라 붙여넣으면 끝!",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
+        "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DesZPndk_wc",
+        "updated_at": "2026-10-19T23:03:49.493509+00:00",
+        "publication_date": "2026-10-20",
+        "slot": "08:00",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "윈도우 11 클립보드 기록 켜기: 복사한 항목 확인하고 다시 붙여넣는 방법 | 탑노트 IT·가전 매뉴얼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 114,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "복사한 문장, 다시 찾느라 헤맨 적 있지?\n설정에서 시스템 > 클립보드로 가서 기록을 켜면 돼.\n붙여넣을 곳에 커서를 두고 Windows 키+V를 누르면, 복사한 항목 중 골라 넣을 수 있어.",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "문장 옮기다 이전에 복사한 내용이 필요할 때 있잖아.\n윈도우 11 설정 > 시스템 > 클립보드에서 기록을 켜면 돼.\n새로 복사한 다음 Windows 키+V를 눌러 목록에서 골라 붙여넣으면 끝!",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
+        "published_at": "2026-10-19T23:03:45+00:00",
+        "verified_at": "2026-10-19T23:03:49.493485+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
+        "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-19T23:09:06.486958+00:00",
+        "publication_date": "2026-10-20",
+        "slot": "08:00",
+        "outbound_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261020_0800_268f876c3681d47d",
+        "parent_platform_id": "18121386773515557",
+        "title": "윈도우 11 클립보드 기록 켜기: 복사한 항목 확인하고 다시 붙여넣는 방법 | 탑노트 IT·가전 매뉴얼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 114,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "복사한 문장, 다시 찾느라 헤맨 적 있지?\n설정에서 시스템 > 클립보드로 가서 기록을 켜면 돼.\n붙여넣을 곳에 커서를 두고 Windows 키+V를 누르면, 복사한 항목 중 골라 넣을 수 있어.",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "복사한 내용 덮어써도 다시 꺼낼 수 있어!\n클립보드 기록을 켠 뒤 복사한 항목이 목록에 쌓여.\nWindows 키+V를 누르고 원하는 항목을 고르면 커서 위치에 붙여넣어져.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "문장 옮기다 이전에 복사한 내용이 필요할 때 있잖아.\n윈도우 11 설정 > 시스템 > 클립보드에서 기록을 켜면 돼.\n새로 복사한 다음 Windows 키+V를 눌러 목록에서 골라 붙여넣으면 끝!",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "제가 직접 정리하고 운영하는 블로그의 상세 가이드입니다.\nhttps://www.topnote.kr/windows-11-clipboard-history-enable-and-use?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261020_0800_268f876c3681d47d",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
+      "title": "ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지 | 맥스노트 엑셀·업무자동화 위키",
+      "publication_date": "2026-10-19",
+      "slot": "21:30",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 139,
+      "source_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 볼 때 먼저 확인할 3가지\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 88
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 핵심 요약 노트 📌\n• 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n• 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n• 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
+        "part_id": "598437aad8cb426bbf88c20aaedf4ea3-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DerRukIH6ca",
+        "updated_at": "2026-10-19T12:38:51.266226+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "21:30",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지 | 맥스노트 엑셀·업무자동화 위키",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 139,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 볼 때 먼저 확인할 3가지\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+            "hook_score": 88
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 핵심 요약 노트 📌\n• 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n• 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n• 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
+        "published_at": "2026-10-19T12:38:51+00:00",
+        "verified_at": "2026-10-19T12:38:51.266203+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
+        "part_id": "598437aad8cb426bbf88c20aaedf4ea3-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-19T12:44:07.817201+00:00",
+        "publication_date": "2026-10-19",
+        "slot": "21:30",
+        "outbound_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_2130_85c3214f5902ccea",
+        "parent_platform_id": "18466200322136941",
+        "title": "ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지 | 맥스노트 엑셀·업무자동화 위키",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 139,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 볼 때 먼저 확인할 3가지\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+            "hook_score": 88
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 궁금했다면 이 3가지만 확인해봐\n① 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n② 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n③ 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "'ChatGPT로 회의록 요약하고 할 일 목록 만들기: 프롬프트부터 결과 검수까지' 핵심 요약 노트 📌\n• 회의 메모나 전사문을 준비해 민감정보를 줄인 다음, 핵심 논의·확정 결정·미결 사항·할 일을 분리해 요청하세요.\n• 작업·담당자·기한·근거 발언을 받되, 원문에 없는 값은 ‘미정’ 또는 ‘확인 필요’로 남깁니다.\n• 결과를 원문과 대조해 오류를 고치고 수정본까지 다시 확인한 뒤 공유하면 됩니다.",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "제가 직접 정리·운영하는 블로그에 전체 체크리스트와 상세 가이드를 정리해 두었습니다.\n\n👉 상세 가이드 보러가기:\nhttps://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261019_2130_85c3214f5902ccea",
+        "review": {
+          "status": "approved",
+          "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과"
+        },
+        "source_url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
     {
       "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
       "title": "월세 세액공제, 세대주가 아니어도 받을 수 있을까? 조건 확인하기 | 우리노트 법률·부동산칼럼",
@@ -1582,16 +1978,16 @@
   ],
   "automation": {
     "state": "waiting",
-    "nextEligibleAt": "2026-10-19T21:30:00+09:00",
-    "lastRunAt": "2026-10-19T10:08:39.595046+00:00",
+    "nextEligibleAt": "2026-10-20T12:30:00+09:00",
+    "lastRunAt": "2026-10-20T01:33:40.020353+00:00",
     "lastResult": "waiting",
     "issue": "no_due_slot",
     "scheduler": {
       "registered": true,
       "enabled": true,
       "state": "Running",
-      "checkedAt": "2026-10-19T10:08:38.715830+00:00",
-      "nextRunAt": "2026-10-19T19:13:37.0000000+09:00",
+      "checkedAt": "2026-10-20T01:33:38.601847+00:00",
+      "nextRunAt": "2026-10-20T10:38:37.0000000+09:00",
       "lastResult": 267009
     }
   },
@@ -1599,12 +1995,12 @@
     "schema": "threads-measurement-v1",
     "status": "partial",
     "complete": false,
-    "collected_at": "2026-10-19T05:48:42.129275+00:00",
+    "collected_at": "2026-10-19T23:43:33.423621+00:00",
     "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
     "windows": {
       "24h": {
         "status": "partial",
-        "due_parts": 4,
+        "due_parts": 7,
         "captured_parts": 0
       },
       "72h": {
@@ -1659,7 +2055,7 @@
               "provisional": true,
               "reason": "ga4_ValueError",
               "start_date": "2026-10-15",
-              "end_date": "2026-10-18"
+              "end_date": "2026-10-19"
             }
           },
           "72h": {
@@ -1692,7 +2088,7 @@
               "provisional": true,
               "reason": "ga4_ValueError",
               "start_date": "2026-10-15",
-              "end_date": "2026-10-18"
+              "end_date": "2026-10-19"
             }
           }
         }
@@ -1835,7 +2231,39 @@
         "topic": "unclassified",
         "published_at": "2026-10-18T09:18:50+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-19T11:53:39.721980+00:00",
+            "actual_age_hours": 26.58,
+            "capture_lag_hours": 2.58,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 37,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-19T11:53:44.200883+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-0",
@@ -1846,7 +2274,39 @@
         "topic": "unclassified",
         "published_at": "2026-10-18T12:38:51+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-19T13:14:25.585599+00:00",
+            "actual_age_hours": 24.593,
+            "capture_lag_hours": 0.593,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 21,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-19T13:14:29.933293+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "20228544f6674b6ea506bba92f50f35f-0",
@@ -1857,7 +2317,39 @@
         "topic": "unclassified",
         "published_at": "2026-10-18T23:08:51+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-19T23:13:41.313871+00:00",
+            "actual_age_hours": 24.081,
+            "capture_lag_hours": 0.081,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 17,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-19T23:13:45.330307+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "0bde9bc007ef48f18a2eda92e204d67e-0",
@@ -1869,6 +2361,39 @@
         "published_at": "2026-10-19T03:38:57+00:00",
         "publication_time_basis": "api_timestamp",
         "snapshots": {}
+      },
+      {
+        "part_id": "5becebb790be4f06a9fe6d06ba00b13e-0",
+        "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
+        "platform_id": "18637756495019780",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/Deq62sSHy5Q",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-19T09:18:58+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "598437aad8cb426bbf88c20aaedf4ea3-0",
+        "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
+        "platform_id": "18466200322136941",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DerRukIH6ca",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-19T12:38:51+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-0",
+        "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
+        "platform_id": "18121386773515557",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DesZPndk_wc",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-19T23:03:45+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
       }
     ],
     "account_metrics": {
@@ -1876,14 +2401,14 @@
       "clicks": 0,
       "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
       "requested_since": "2026-10-15T11:19:14.891210+00:00",
-      "requested_until": "2026-10-19T05:48:42.129275+00:00",
-      "collected_at": "2026-10-19T05:48:44.452924+00:00"
+      "requested_until": "2026-10-19T23:43:33.423621+00:00",
+      "collected_at": "2026-10-19T23:43:34.671153+00:00"
     },
     "revenue": null,
     "revenue_status": "publisher_attribution_unverified",
     "feedback": {
       "status": "insufficient_data",
-      "computedAt": "2026-10-19T05:48:42.129275+00:00",
+      "computedAt": "2026-10-19T23:43:33.423621+00:00",
       "checkpoint": null,
       "comparablePosts": 0,
       "evidence": [],
@@ -1896,7 +2421,7 @@
   },
   "feedback": {
     "status": "insufficient_data",
-    "computedAt": "2026-10-19T05:48:42.129275+00:00",
+    "computedAt": "2026-10-19T23:43:33.423621+00:00",
     "checkpoint": null,
     "comparablePosts": 0,
     "evidence": [],
@@ -1941,18 +2466,18 @@
     }
   },
   "today": {
-    "date": "2026-10-19",
+    "date": "2026-10-20",
     "timezone": "Asia/Seoul",
     "counts": [
       {
         "kind": "followup",
         "state": "submitted_unknown",
-        "n": 2
+        "n": 1
       },
       {
         "kind": "main",
         "state": "published_verified",
-        "n": 3
+        "n": 1
       }
     ]
   },
