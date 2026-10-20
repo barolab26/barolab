@@ -400,6 +400,25 @@ class BrowserEvidenceTests(unittest.TestCase):
         self.assertEqual(result, [{'question_id': '23456'}])
         self.assertEqual(result.skipped[0]['reason'], 'question_unavailable')
 
+    @patch('naver_kin.browser._read')
+    @patch('naver_kin.browser.session')
+    def test_excluded_questions_do_not_consume_discovery_read_budget(self, session, read):
+        page = Mock()
+        page.locator.return_value.evaluate_all.return_value = [
+            'https://kin.naver.com/qna/detail.naver?docId=12345',
+            'https://kin.naver.com/qna/detail.naver?docId=23456',
+            'https://kin.naver.com/qna/detail.naver?docId=34567']
+        @contextmanager
+        def opened(account):
+            yield page
+        session.side_effect = opened
+        read.return_value = {'question_id': '34567', 'title': 'matching question'}
+        result = browser.discover('adinfo0905', ['precise topic'], limit=1,
+                                  exclude_question_ids={'12345', '23456'})
+        read.assert_called_once_with(page, 'https://kin.naver.com/qna/detail.naver?docId=34567')
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['search_query'], 'precise topic')
+
     @patch('naver_kin.browser.requests.get')
     def test_exact_utm_url_required(self, get):
         get.return_value = Mock(status_code=200, text='''<div id="answer_1"><p>Reviewed answer</p>

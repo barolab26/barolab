@@ -357,7 +357,7 @@ def read_question(account, url):
         return _read(page, url)
 
 
-def discover(account, keywords, limit=10, sort='none', page_number=1, include_latest=False, track=None):
+def discover(account, keywords, limit=10, sort='none', page_number=1, include_latest=False, track=None, exclude_question_ids=()):
     # Observed NAVER links: none=accuracy (Track B), date=latest (Track A), vcount=recommendation.
     if track == 'track_a_latest' and sort == 'none':
         sort = 'date'
@@ -367,7 +367,7 @@ def discover(account, keywords, limit=10, sort='none', page_number=1, include_la
         raise ValueError('Unsupported observed KnowledgeIn search sort')
     if not isinstance(page_number, int) or not 1 <= page_number <= 3:
         raise ValueError('Bounded search page must be between 1 and 3')
-    results, seen = DiscoveryResults(), set()
+    results, seen = DiscoveryResults(), set(exclude_question_ids)
     with session(account) as page:
         groups = []
         searches = []
@@ -385,12 +385,12 @@ def discover(account, keywords, limit=10, sort='none', page_number=1, include_la
             page.goto("https://kin.naver.com/search/list.naver?" + urlencode(
                 {"query": keyword, "section": "qna", "sort": ordering, 'page': page_number}), wait_until="domcontentloaded", timeout=25000)
             hrefs = page.locator("._searchListTitleAnchor").evaluate_all("es=>es.map(e=>e.href)")
-            groups.append([(href, ordering) for href in hrefs])
+            groups.append([(href, ordering, keyword) for href in hrefs])
         # Round robin gives each configured topic & track a chance within the bounded limit.
         links = [group[i] for i in range(max((len(g) for g in groups), default=0))
                  for group in groups if len(group) > i]
         for item_link in links:
-            url, ordering = item_link if isinstance(item_link, tuple) else (item_link, sort)
+            url, ordering, keyword = item_link
             identifier = question_id(url)
             if identifier in seen:
                 continue
@@ -398,6 +398,7 @@ def discover(account, keywords, limit=10, sort='none', page_number=1, include_la
             try:
                 item = _read(page, url)
                 if isinstance(item, dict) and 'title' in item:
+                    item.setdefault('search_query', keyword)
                     item.setdefault('search_sort', ordering)
                     item.setdefault('track', track or ('track_a_latest' if ordering == 'date' else 'track_b_search_top'))
                 results.append(item)

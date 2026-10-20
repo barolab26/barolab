@@ -7,6 +7,13 @@ from naver_kin import authoring
 
 
 class AuthoringEvidenceTests(unittest.TestCase):
+    def test_discovery_refines_existing_topic_without_selecting_long_unrelated_phrase(self):
+        entry = {'keywords': ['윈도우 업데이트', '윈도우 업데이트 재부팅', '윈도우 반복될']}
+        self.assertEqual(authoring._primary_discovery_keyword(entry), '윈도우 업데이트 재부팅')
+        self.assertEqual(authoring._primary_discovery_keyword({'keywords':
+            ['카페 주차', '외곽 감성 카페', '카페 주차 방법']}), '카페 주차')
+        self.assertIsNone(authoring._primary_discovery_keyword({'keywords': []}))
+
     def test_actual_old_arboretum_question_rejects_other_institution_sources(self):
         question = {'title': '아침고요수목원 예약질문',
                     'body': '내일 아침고요수목원 방문 예정입니다. 코로나 때문에 예약해야 하나요?',

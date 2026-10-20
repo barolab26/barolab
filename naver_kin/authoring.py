@@ -472,6 +472,18 @@ def _relevance_score(question, entry, used_domains_today=None):
     return score
 
 
+def _primary_discovery_keyword(entry):
+    keywords = entry.get('keywords', [])
+    if not keywords:
+        return None
+    primary = keywords[0]
+    tokens = set(primary.split())
+    # Refine the existing topic only; a longer unrelated title phrase is not a refinement.
+    return next((phrase for phrase in keywords[1:]
+                 if tokens < set(phrase.split())
+                 and set(phrase.split()) - tokens - GENERIC_STOPWORDS), primary)
+
+
 def generate_for_slot(account, slot_id, model, article_catalog=None):
     """Return reviewed document or explicit skip; no ledger or publishing mutation."""
     pipeline.account_key(account)
@@ -513,10 +525,9 @@ def generate_for_slot(account, slot_id, model, article_catalog=None):
     # Pick 1 primary keyword per article first so all 8 search queries cover distinct domains/topics
     keywords = []
     for item in catalogue:
-        for kw in item.get('keywords', []):
-            if kw not in keywords:
-                keywords.append(kw)
-                break
+        kw = _primary_discovery_keyword(item)
+        if kw and kw not in keywords:
+            keywords.append(kw)
     for item in catalogue:
         for kw in item.get('keywords', []):
             if kw not in keywords and len(keywords) < 8:
@@ -536,7 +547,8 @@ def generate_for_slot(account, slot_id, model, article_catalog=None):
             'SELECT question_id FROM authoring_evaluations WHERE source_hash=?', (source_hash,))}
     search_page = min(3, 1 + len(rejected) // 6)
     discovered = browser.discover(account, keywords, limit=18, page_number=search_page,
-                                  include_latest=True, track=target_track)
+                                  include_latest=True, track=target_track,
+                                  exclude_question_ids=reserved | rejected)
     candidates = [q for q in discovered if q['question_id'] not in reserved and not q.get('image_urls')
                   and not q.get('requires_visual_evidence')
                   and q.get('answer_button_present', True) and _related_question(q, catalogue)
