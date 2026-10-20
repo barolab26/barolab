@@ -13,6 +13,7 @@ import time
 from urllib.parse import urlsplit, urlencode
 
 import requests
+from common.codex_cli import is_wsl, to_wsl_path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_ACCOUNT = 'mustpickinfo'
@@ -50,6 +51,8 @@ def _token(config):
     value = os.environ.get(env)
     filename = options.get('token_file')
     if not value and filename:
+        if is_wsl():
+            filename = to_wsl_path(filename)
         path = Path(filename).expanduser().resolve()
         if any(path.is_relative_to((ROOT / directory).resolve()) for directory in ('dashboard','cf_posting','naver_blog_posting')):
             raise AdapterError('public_token_reference_forbidden')

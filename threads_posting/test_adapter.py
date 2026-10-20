@@ -21,6 +21,35 @@ class AdapterTests(unittest.TestCase):
 
     def tearDown(self):self.env.stop()
 
+    def test_wsl_windows_token_reference_uses_existing_mount(self):
+        with tempfile.TemporaryDirectory() as directory:
+            token = Path(directory) / 'token.json'
+            token.write_text('{"access_token":"fixture-token"}', encoding='utf-8')
+            filename = r'C:\Users\example\.barolab\secrets\threads.json'
+            with patch.dict(os.environ, {}, clear=True), \
+                    patch.object(a, 'is_wsl', return_value=True), \
+                    patch.object(a, 'to_wsl_path', return_value=str(token)) as convert:
+                self.assertEqual(a._token({'api': {'token_file': filename}}), 'fixture-token')
+                convert.assert_called_once_with(filename)
+
+    def test_missing_wsl_token_fails_without_network(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.dict(os.environ, {}, clear=True), \
+                patch.object(a, 'is_wsl', return_value=True), \
+                patch.object(a, 'to_wsl_path', return_value=str(Path(directory) / 'missing.json')), \
+                patch.object(a.requests, 'request') as request:
+            result = a.connection_status({'api': {'token_file': r'C:\missing.json'}})
+            self.assertEqual(result['reason'], 'needs_connection')
+            request.assert_not_called()
+
+    def test_native_host_never_maps_windows_token_reference(self):
+        with patch.dict(os.environ, {}, clear=True), \
+                patch.object(a, 'is_wsl', return_value=False), \
+                patch.object(a, 'to_wsl_path') as convert:
+            with self.assertRaises(a.AdapterError):
+                a._token({'api': {'token_file': r'C:\missing-test-token.json'}})
+            convert.assert_not_called()
+
     def sequence(self):
         return [response({'id':'123','username':'mustpickinfo'}),
                 response({'data':[{'quota_usage':0,'config':{'quota_total':250},'reply_quota_usage':0,'reply_config':{'quota_total':1000}}]}),
