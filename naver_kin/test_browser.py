@@ -211,6 +211,26 @@ class BrowserEvidenceTests(unittest.TestCase):
                 browser.publish('adinfo0905','https://kin.naver.com/qna/detail.naver?docId=123','answer',Mock())
         recent.assert_not_called();page.locator.assert_not_called()
 
+    def test_editor_processing_timeout_prevents_durable_submit_and_click(self):
+        page=Mock();nodes=Mock();nodes.all_inner_texts.return_value=[]
+        page.locator.return_value=nodes
+        page.wait_for_function.side_effect=TimeoutError('editor still processing')
+        @contextmanager
+        def session(_):yield page
+        before=Mock()
+        with patch.object(browser,'session',session),patch.object(browser,'_read'), \
+                patch.object(browser,'_question_ownership',return_value={'known':True,'complete':True,'answer_ids':[]}), \
+                patch.object(browser,'_check_service_state'),patch.object(browser,'_type_paragraphs'):
+            with self.assertRaises(TimeoutError):
+                browser.publish('adinfo0905','https://kin.naver.com/qna/detail.naver?docId=123','reviewed answer',before)
+        before.assert_not_called()
+        self.assertNotIn('#answerRegisterButton',[call.args[0] for call in page.locator.call_args_list])
+        expression=page.wait_for_function.call_args.args[0]
+        self.assertIn("getEditor?.('kinpc001')",expression)
+        self.assertIn('isDocumentProcessing() === false',expression)
+        self.assertIn('isEmptyDocumentContent() === false',expression)
+        self.assertEqual(page.wait_for_function.call_args.kwargs['timeout'],30000)
+
     def test_publish_requires_durable_callback_before_browser(self):
         with self.assertRaises(ValueError):
             browser.publish('adinfo0905', 'https://kin.naver.com/qna/detail.naver?docId=123', 'answer')

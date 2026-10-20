@@ -252,6 +252,24 @@ class SchedulerTests(unittest.TestCase):
     def test_dry_run_does_not_consume_rounds_or_generate(self):
         with patch('naver_kin.authoring.generate_for_slot') as generate:self.s.tick(self.config,self.now,dry_run=True);generate.assert_not_called()
         self.assertEqual(self.db.execute('SELECT COUNT(*) FROM automation_slots').fetchone()[0],0)
+    def test_measurement_preserves_publishing_round_and_actual_config(self):
+        config={**self.config,'intervalMinutes':20,'intervalJitterMinutes':[18,22],'continuousMode':True}
+        previous={'schema':'naver-kin-automation-state-v1','checkedAt':'original-round-time',
+                  'state':'completed_cycle','runs':[{'state':'submitted_unverified','account':'stone0747'}]}
+        self.s.STATE.write_text(json.dumps(previous),encoding='utf-8')
+        with patch('naver_kin.measurement.collect',return_value={
+                'status':'collected','complete':True,'checkedAt':'new-measurement-time'}):
+            self.s.measure(config,self.now)
+        result=json.loads(self.s.STATE.read_text(encoding='utf-8'))
+        for key in ('state','runs','checkedAt'):
+            self.assertEqual(result[key],previous[key])
+        self.assertEqual(result['intervalMinutes'],20)
+        self.assertEqual(result['globalDailyCap'],20)
+        self.assertEqual(result['accountDailyCap'],10)
+        self.assertTrue(result['continuousMode'])
+        self.assertEqual(result['measurementCheckedAt'],'new-measurement-time')
+        self.assertEqual(result['registeredTasks'],{'status':'test'})
+        self.assertIsNone(result['activeRunId'])
     def test_bootstrap_legacy_timestamp_is_used_only_once(self):
         self.db.execute('DELETE FROM operating_cadence');self.db.commit()
         doc=document();qid=p.import_draft(self.db,doc)

@@ -489,11 +489,20 @@ def measure(config, now=None):
         retention={'checkedAt':p.stamp(),'scope':'up_to_100_initially_verified_pilot_and_trial_answers','complete':total<=100 and attempted==len(rows),
                    'initiallyVerified':total,'attemptedChecks':attempted,'checks':checks,'firstVerificationHistoryPreserved':True}
         write(ROOT/'server/data/kin-retention.json',retention)
-        state={'schema':'naver-kin-automation-state-v1','checkedAt':p.stamp(),'state':'measurement_cycle_completed',
-               'startDate':config['startDate'],'endDate':config['endDate'],'measurementEndDate':config['measurementEndDate'],
-               'enabled':config['enabled'],'mode':'alternating_interval','intervalMinutes':60,'pollMinutes':5,'globalDailyCap':10,'accountDailyCap':5,
-               'registeredTasks':observe_tasks(),'retention':retention,
-               'measurementStatus':measurement.get('status','unknown'),'measurementComplete':measurement.get('complete',False)}
+        state=json.loads(STATE.read_text(encoding='utf-8')) if STATE.is_file() else {
+            'schema':'naver-kin-automation-state-v1','state':'not_run','runs':[]}
+        # Measurement is separate from the last publishing round; preserve its
+        # state, checkedAt, runs and completion timestamps.
+        state.update({key:config.get(key) for key in (
+            'startDate','endDate','measurementEndDate','enabled','continuousMode','mode',
+            'intervalMinutes','intervalJitterMinutes','pollMinutes','globalDailyCap','accountDailyCap',
+            'operationDailyCap','operationAccountDailyCap')})
+        state.update(registeredTasks=observe_tasks(), retention=retention,
+                     measurementCheckedAt=measurement.get('checkedAt') or p.stamp(),
+                     measurementStatus=measurement.get('status','unknown'),
+                     measurementComplete=measurement.get('complete',False))
+        if db.execute("SELECT 1 FROM sqlite_master WHERE name='operating_cadence'").fetchone():
+            state.update(cadence_status(db,config,now))
         write(STATE,state);p.snapshot(db)
         return {'state':'measurement_cycle_completed','measurementStatus':measurement.get('status','unknown'),
                 'measurementComplete':measurement.get('complete',False),'measurement':measurement,'retention':retention}

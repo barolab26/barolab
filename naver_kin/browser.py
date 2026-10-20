@@ -406,6 +406,17 @@ def discover(account, keywords, limit=10, sort='none', page_number=1, include_la
     return results
 
 
+def wait_for_editor_ready(page):
+    """Use the same observed SmartEditor guards as NAVER's registration handler."""
+    page.wait_for_function("""() => {
+        const editor = window.SmartEditor?.getEditor?.('kinpc001');
+        if (!editor || typeof editor.isDocumentProcessing !== 'function'
+                || typeof editor.isEmptyDocumentContent !== 'function')
+            throw new Error('Observed KnowledgeIn SmartEditor readiness API unavailable');
+        return editor.isDocumentProcessing() === false && editor.isEmptyDocumentContent() === false;
+    }""", timeout=30000)
+
+
 def publish(account, question_url, answer_text, before_submit=None):
     if not callable(before_submit):
         raise ValueError("Durable before_submit callback is required")
@@ -428,7 +439,7 @@ def publish(account, question_url, answer_text, before_submit=None):
         # Observed SmartEditor strips embedded newlines from insert_text. Real
         # Enter keystrokes preserve reviewed paragraph boundaries and autolink.
         _type_paragraphs(page.keyboard, answer_text)
-        page.wait_for_timeout(1500)
+        wait_for_editor_ready(page)
         rendered = "\n".join(page.locator(".se-canvas .se-text-paragraph").all_inner_texts())
         if _normalized(rendered) != _normalized(answer_text):
             raise RuntimeError("Editor did not retain the reviewed answer exactly")
