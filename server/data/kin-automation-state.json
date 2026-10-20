@@ -1,6 +1,6 @@
 {
   "schema": "naver-kin-automation-state-v1",
-  "checkedAt": "2026-10-20T01:35:01.589530+00:00",
+  "checkedAt": "2026-10-20T18:23:28.097426+00:00",
   "startDate": "2026-10-15",
   "endDate": "2026-10-21",
   "enabled": true,
@@ -14,93 +14,85 @@
   "pollMinutes": 5,
   "globalDailyCap": 20,
   "accountDailyCap": 10,
-  "runs": [],
-  "state": "waiting",
-  "measurementStatus": "not_attempted",
+  "runs": [
+    {
+      "runId": "2026-10-21_84785092754d_adinfo0905_0323",
+      "account": "adinfo0905",
+      "state": "skipped",
+      "reason": "model_skipped_no_good_match",
+      "discovered": 18
+    }
+  ],
+  "state": "completed_cycle",
+  "measurementStatus": "collected",
   "dryRun": false,
   "browsers": [
     {
-      "port": 9230,
-      "ready": true,
-      "started": true
-    },
-    {
+      "account": "adinfo0905",
       "port": 9231,
       "ready": true,
-      "started": true
+      "started": false
     },
     {
-      "port": 9333,
+      "account": "stone0747",
+      "port": 9230,
       "ready": true,
-      "started": true
-    },
-    {
-      "port": 9334,
-      "ready": true,
-      "started": true
-    },
-    {
-      "port": 9335,
-      "ready": true,
-      "started": true
+      "started": false
     }
   ],
-  "reason": "minimum_interval_not_elapsed",
-  "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
+  "runId": "2026-10-21_84785092754d_adinfo0905_0323",
+  "account": "adinfo0905",
+  "lastRunAt": "2026-10-21T03:24:50.684601+09:00",
   "lastAccount": "adinfo0905",
-  "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
+  "nextEligibleAt": "2026-10-21T03:45:50.684601+09:00",
   "nextAccount": "stone0747",
   "activeRunId": null,
   "activeAccount": null,
   "activeStartedAt": null,
   "cadenceState": "waiting",
   "operationCounts": {
-    "adinfo0905": 5,
-    "stone0747": 5
+    "adinfo0905": 1,
+    "stone0747": 1
   },
   "submissionCounts": {
-    "adinfo0905": 5,
-    "stone0747": 5
+    "adinfo0905": 0,
+    "stone0747": 1
   },
   "retryAttemptsToday": 1,
-  "globalRemainingRuns": 10,
+  "globalRemainingRuns": 18,
   "byAccountRemainingRuns": {
-    "adinfo0905": 5,
-    "stone0747": 5
+    "adinfo0905": 9,
+    "stone0747": 9
   },
+  "measurementComplete": true,
   "registeredTasks": {
     "status": "observed",
-    "checkedAt": "2026-10-20T01:35:26.380410+00:00",
+    "platform": "systemd-user",
+    "checkedAt": "2026-10-20T18:26:13.907682+00:00",
     "tasks": [
       {
-        "taskName": "BaroLab-Kin-Seven-Day-Pilot",
+        "taskName": "barolab-kin.timer",
+        "service": "barolab-kin.service",
         "registered": true,
         "enabled": true,
-        "state": "Running",
-        "nextRunAt": "2026-10-20T10:40:00.0000000+09:00",
-        "lastRunAt": "2026-10-20T10:35:01.0000000+09:00",
-        "lastResult": 267009,
-        "actions": [
-          {
-            "Execute": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe",
-            "Arguments": "-u -B -X utf8 \"C:\\10_Project\\BaroLab\\naver_kin\\scheduler.py\" --tick --scheduled"
-          }
-        ]
+        "workflowMatches": true,
+        "state": "Ready",
+        "nextRunAt": "Wed 2026-10-21 03:30:00 KST",
+        "lastRunAt": "",
+        "lastResult": "success",
+        "lastExitStatus": "0"
       },
       {
-        "taskName": "BaroLab-Kin-Seven-Day-Pilot-Measurement",
+        "taskName": "barolab-kin-measurement.timer",
+        "service": "barolab-kin-measurement.service",
         "registered": true,
         "enabled": true,
+        "workflowMatches": true,
         "state": "Ready",
-        "nextRunAt": "2026-10-20T20:30:00.0000000+09:00",
-        "lastRunAt": "2026-10-19T20:30:01.0000000+09:00",
-        "lastResult": 0,
-        "actions": [
-          {
-            "Execute": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe",
-            "Arguments": "-u -B -X utf8 \"C:\\10_Project\\BaroLab\\naver_kin\\scheduler.py\" --measure --scheduled"
-          }
-        ]
+        "nextRunAt": "Wed 2026-10-21 20:30:00 KST",
+        "lastRunAt": "",
+        "lastResult": "success",
+        "lastExitStatus": "0"
       }
     ]
   }

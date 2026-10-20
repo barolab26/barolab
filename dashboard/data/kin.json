@@ -1,16 +1,60 @@
 {
   "schema": "naver-kin-pilot-v1",
-  "checkedAt": "2026-10-20T01:35:26.388281+00:00",
+  "checkedAt": "2026-10-20T18:26:14.047827+00:00",
   "accounts": [
     "adinfo0905",
     "stone0747"
   ],
   "counts": {
-    "published_verified": 41,
-    "submitted_unverified": 10,
+    "published_verified": 44,
+    "submitted_unverified": 8,
     "discovered": 25
   },
   "recent": [
+    {
+      "account": "stone0747",
+      "state": "submitted_unverified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=90104&docId=377525429&answerNo=1&qb=7IiY66qp7JuQIOyYiOyVvQ==",
+      "updated_at": "2026-10-20T18:00:39.228729+00:00",
+      "send_day": "2026-10-21",
+      "title": "아침고요수목원 예약질문",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=90104&docId=377525429&answerNo=1&qb=7IiY66qp7JuQIOyYiOyVvQ==",
+      "track": "track_b_search_top",
+      "target_domain": "tripmarvel.com"
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=7&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer7",
+      "updated_at": "2026-10-20T17:58:38.647718+00:00",
+      "send_day": "2026-10-19",
+      "title": "국민연금조기신청",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=2&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=",
+      "track": "track_a_latest",
+      "target_domain": "baronote.kr"
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495380744&answerNo=13&qb=6rWt66+864K07J2867Cw7JuA7Lm065Oc#answer13",
+      "updated_at": "2026-10-20T17:58:38.593830+00:00",
+      "send_day": "2026-10-19",
+      "title": "국민내일배움카드",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495380744&answerNo=8&qb=6rWt66+864K07J2867Cw7JuA7Lm065Oc",
+      "track": "track_a_latest",
+      "target_domain": "soulnote.kr"
+    },
+    {
+      "account": "stone0747",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=337679852&answerNo=8&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV#answer8",
+      "updated_at": "2026-10-20T17:58:36.786974+00:00",
+      "send_day": "2026-10-19",
+      "title": "세탁기청소방법",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=337679852&answerNo=7&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV",
+      "track": "track_a_latest",
+      "target_domain": "must-good.com"
+    },
     {
       "account": "adinfo0905",
       "state": "published_verified",
@@ -278,28 +322,6 @@
       "target_domain": ""
     },
     {
-      "account": "stone0747",
-      "state": "submitted_unverified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=2&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=#answer7",
-      "updated_at": "2026-10-19T12:25:21.081477+00:00",
-      "send_day": "2026-10-19",
-      "title": "국민연금조기신청",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=2&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=",
-      "track": "track_a_latest",
-      "target_domain": "baronote.kr"
-    },
-    {
-      "account": "stone0747",
-      "state": "submitted_unverified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=337679852&answerNo=7&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV#answer8",
-      "updated_at": "2026-10-19T07:59:08.466378+00:00",
-      "send_day": "2026-10-19",
-      "title": "세탁기청소방법",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=337679852&answerNo=7&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV",
-      "track": "track_a_latest",
-      "target_domain": "must-good.com"
-    },
-    {
       "account": "adinfo0905",
       "state": "published_verified",
       "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=8080103&docId=488359443&answerNo=1&qb=7Iux7YGs64yAIOuwsOyImOq1rCDssq3show=#answer5",
@@ -309,28 +331,6 @@
       "question_url": "https://kin.naver.com/qna/detail.naver?dirId=8080103&docId=488359443&answerNo=1&qb=7Iux7YGs64yAIOuwsOyImOq1rCDssq3show=",
       "track": "track_b_search_top",
       "target_domain": "daynote.kr"
-    },
-    {
-      "account": "stone0747",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=100508&docId=495529695&answerNo=1&qb=7Lqg7ZWRIOuCnOuhnA==#answer4",
-      "updated_at": "2026-10-19T07:07:43.132323+00:00",
-      "send_day": "2026-10-19",
-      "title": "화목난로와 오븐, 겨울 캠핑에서 써보신 분?",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=100508&docId=495529695&answerNo=1&qb=7Lqg7ZWRIOuCnOuhnA==",
-      "track": "track_a_latest",
-      "target_domain": "must-pick.com"
-    },
-    {
-      "account": "stone0747",
-      "state": "published_verified",
-      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=495609086&answerNo=2&qb=7IS47YOB6riwIO2GteyEuOyymQ==#answer4",
-      "updated_at": "2026-10-19T06:17:35.013751+00:00",
-      "send_day": "2026-10-19",
-      "title": "세탁기 이물질",
-      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=495609086&answerNo=2&qb=7IS47YOB6riwIO2GteyEuOyymQ==",
-      "track": "track_a_latest",
-      "target_domain": "meganote.kr"
     }
   ],
   "trackCounts": {
@@ -349,40 +349,40 @@
       "discovered": 19
     },
     "stone0747": {
-      "published_verified": 21,
-      "submitted_unverified": 8,
+      "published_verified": 24,
+      "submitted_unverified": 6,
       "discovered": 6
     }
   },
   "accountBlockedReasons": {},
   "daily": {
-    "date": "2026-10-20",
-    "attempted": 11,
-    "publishedVerified": 10,
-    "remainingScheduled": 10,
+    "date": "2026-10-21",
+    "attempted": 1,
+    "publishedVerified": 0,
+    "remainingScheduled": 19,
     "retryAttemptsToday": 1,
     "globalCap": 20,
     "accountCap": 10,
     "byAccount": {
       "adinfo0905": {
-        "attempted": 5,
-        "publishedVerified": 5,
-        "remainingScheduled": 5
+        "attempted": 0,
+        "publishedVerified": 0,
+        "remainingScheduled": 10
       },
       "stone0747": {
-        "attempted": 6,
-        "publishedVerified": 5,
-        "remainingScheduled": 5
+        "attempted": 1,
+        "publishedVerified": 0,
+        "remainingScheduled": 9
       }
     }
   },
   "measurement": {
     "schema": "naver-kin-measurement-v1",
-    "checkedAt": "2026-10-20T10:32:00.097749+09:00",
+    "checkedAt": "2026-10-21T03:24:27.819794+09:00",
     "source": "GA4 Data API",
     "timezone": "Asia/Seoul",
     "startDate": "2026-10-15",
-    "endDate": "2026-10-19",
+    "endDate": "2026-10-20",
     "trialStartDate": "2026-10-15",
     "trialEndDate": "2026-10-21",
     "finalCollectionDate": "2026-10-24",
@@ -416,17 +416,17 @@
       {
         "host": "www.must-good.com",
         "status": "collected",
-        "sessions": 1,
+        "sessions": 2,
         "engagedSessions": 1,
-        "pageViews": 1,
+        "pageViews": 2,
         "reportMetadata": {
           "timeZone": "Asia/Seoul",
           "currencyCode": "USD",
           "subjectToThresholding": null,
           "samplingMetadatas": null,
           "dataLossFromOtherRow": null,
-          "rowCount": 1,
-          "returnedRows": 1
+          "rowCount": 2,
+          "returnedRows": 2
         }
       },
       {
@@ -512,7 +512,7 @@
       {
         "host": "www.smilenote.kr",
         "status": "collected",
-        "sessions": 1,
+        "sessions": 2,
         "engagedSessions": 0,
         "pageViews": 1,
         "reportMetadata": {
@@ -654,9 +654,9 @@
         }
       }
     ],
-    "sessions": 4,
+    "sessions": 6,
     "engagedSessions": 2,
-    "pageViews": 4,
+    "pageViews": 5,
     "publisherRevenue": null,
     "revenueStatus": "unverified_publisher_link",
     "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
@@ -678,9 +678,24 @@
       },
       {
         "day": "2026-10-19",
+        "host": "www.must-good.com",
+        "utmContent": "adinfo0905_20261015_1638_4b93d678c80eba71",
+        "sessions": 1,
+        "engagedSessions": 0,
+        "pageViews": 1,
+        "mappingStatus": "ledger_matched",
+        "account": "adinfo0905",
+        "questionId": "486346632",
+        "state": "published_verified",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632#answer4",
+        "canonicalUrl": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
+        "sendDay": "2026-10-15"
+      },
+      {
+        "day": "2026-10-19",
         "host": "www.smilenote.kr",
         "utmContent": "stone0747_20261019_1035_3150e80db559f2d7",
-        "sessions": 1,
+        "sessions": 2,
         "engagedSessions": 0,
         "pageViews": 1,
         "mappingStatus": "ledger_matched",
@@ -709,6 +724,13 @@
     ],
     "dailyFunnel": [
       {
+        "day": "2026-10-21",
+        "discovered": 1,
+        "drafted": 1,
+        "attempted": 1,
+        "published_verified": 0
+      },
+      {
         "day": "2026-10-20",
         "discovered": 17,
         "drafted": 11,
@@ -720,7 +742,7 @@
         "discovered": 33,
         "drafted": 24,
         "attempted": 24,
-        "published_verified": 20
+        "published_verified": 23
       },
       {
         "day": "2026-10-18",
@@ -752,7 +774,7 @@
       }
     ],
     "funnelStartDate": "2026-10-15",
-    "funnelEndDate": "2026-10-20",
+    "funnelEndDate": "2026-10-21",
     "funnelTodayProvisional": true,
     "funnelPeriodKind": "trial",
     "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
@@ -787,12 +809,12 @@
         }
       ]
     },
-    "matchedSessions": 4,
+    "matchedSessions": 6,
     "unmatchedSessions": 0
   },
   "schedule": {
     "schema": "naver-kin-automation-state-v1",
-    "checkedAt": "2026-10-20T01:35:01.589530+00:00",
+    "checkedAt": "2026-10-20T18:23:28.097426+00:00",
     "startDate": "2026-10-15",
     "endDate": "2026-10-21",
     "enabled": true,
@@ -806,93 +828,85 @@
     "pollMinutes": 5,
     "globalDailyCap": 20,
     "accountDailyCap": 10,
-    "runs": [],
-    "state": "waiting",
-    "measurementStatus": "not_attempted",
+    "runs": [
+      {
+        "runId": "2026-10-21_84785092754d_adinfo0905_0323",
+        "account": "adinfo0905",
+        "state": "skipped",
+        "reason": "model_skipped_no_good_match",
+        "discovered": 18
+      }
+    ],
+    "state": "completed_cycle",
+    "measurementStatus": "collected",
     "dryRun": false,
     "browsers": [
       {
-        "port": 9230,
-        "ready": true,
-        "started": true
-      },
-      {
+        "account": "adinfo0905",
         "port": 9231,
         "ready": true,
-        "started": true
+        "started": false
       },
       {
-        "port": 9333,
+        "account": "stone0747",
+        "port": 9230,
         "ready": true,
-        "started": true
-      },
-      {
-        "port": 9334,
-        "ready": true,
-        "started": true
-      },
-      {
-        "port": 9335,
-        "ready": true,
-        "started": true
+        "started": false
       }
     ],
-    "reason": "minimum_interval_not_elapsed",
-    "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
+    "runId": "2026-10-21_84785092754d_adinfo0905_0323",
+    "account": "adinfo0905",
+    "lastRunAt": "2026-10-21T03:24:50.684601+09:00",
     "lastAccount": "adinfo0905",
-    "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
+    "nextEligibleAt": "2026-10-21T03:45:50.684601+09:00",
     "nextAccount": "stone0747",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
     "cadenceState": "waiting",
     "operationCounts": {
-      "adinfo0905": 5,
-      "stone0747": 5
+      "adinfo0905": 1,
+      "stone0747": 1
     },
     "submissionCounts": {
-      "adinfo0905": 5,
-      "stone0747": 5
+      "adinfo0905": 0,
+      "stone0747": 1
     },
     "retryAttemptsToday": 1,
-    "globalRemainingRuns": 10,
+    "globalRemainingRuns": 18,
     "byAccountRemainingRuns": {
-      "adinfo0905": 5,
-      "stone0747": 5
+      "adinfo0905": 9,
+      "stone0747": 9
     },
+    "measurementComplete": true,
     "registeredTasks": {
       "status": "observed",
-      "checkedAt": "2026-10-20T01:35:26.380410+00:00",
+      "platform": "systemd-user",
+      "checkedAt": "2026-10-20T18:26:13.907682+00:00",
       "tasks": [
         {
-          "taskName": "BaroLab-Kin-Seven-Day-Pilot",
+          "taskName": "barolab-kin.timer",
+          "service": "barolab-kin.service",
           "registered": true,
           "enabled": true,
-          "state": "Running",
-          "nextRunAt": "2026-10-20T10:40:00.0000000+09:00",
-          "lastRunAt": "2026-10-20T10:35:01.0000000+09:00",
-          "lastResult": 267009,
-          "actions": [
-            {
-              "Execute": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe",
-              "Arguments": "-u -B -X utf8 \"C:\\10_Project\\BaroLab\\naver_kin\\scheduler.py\" --tick --scheduled"
-            }
-          ]
+          "workflowMatches": true,
+          "state": "Ready",
+          "nextRunAt": "Wed 2026-10-21 03:30:00 KST",
+          "lastRunAt": "",
+          "lastResult": "success",
+          "lastExitStatus": "0"
         },
         {
-          "taskName": "BaroLab-Kin-Seven-Day-Pilot-Measurement",
+          "taskName": "barolab-kin-measurement.timer",
+          "service": "barolab-kin-measurement.service",
           "registered": true,
           "enabled": true,
+          "workflowMatches": true,
           "state": "Ready",
-          "nextRunAt": "2026-10-20T20:30:00.0000000+09:00",
-          "lastRunAt": "2026-10-19T20:30:01.0000000+09:00",
-          "lastResult": 0,
-          "actions": [
-            {
-              "Execute": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe",
-              "Arguments": "-u -B -X utf8 \"C:\\10_Project\\BaroLab\\naver_kin\\scheduler.py\" --measure --scheduled"
-            }
-          ]
+          "nextRunAt": "Wed 2026-10-21 20:30:00 KST",
+          "lastRunAt": "",
+          "lastResult": "success",
+          "lastExitStatus": "0"
         }
       ]
     }
@@ -1109,7 +1123,7 @@
     "scheduleDescription": "작업 종료 후 18~22분 지터(평균 20분) 계정 교대 · 개별 계정 40~45분 안전 텀 · 하루 20건(계정당 10건)",
     "lastRun": {
       "schema": "naver-kin-automation-state-v1",
-      "checkedAt": "2026-10-20T01:35:01.589530+00:00",
+      "checkedAt": "2026-10-20T18:23:28.097426+00:00",
       "startDate": "2026-10-15",
       "endDate": "2026-10-21",
       "enabled": true,
@@ -1123,129 +1137,121 @@
       "pollMinutes": 5,
       "globalDailyCap": 20,
       "accountDailyCap": 10,
-      "runs": [],
-      "state": "waiting",
-      "measurementStatus": "not_attempted",
+      "runs": [
+        {
+          "runId": "2026-10-21_84785092754d_adinfo0905_0323",
+          "account": "adinfo0905",
+          "state": "skipped",
+          "reason": "model_skipped_no_good_match",
+          "discovered": 18
+        }
+      ],
+      "state": "completed_cycle",
+      "measurementStatus": "collected",
       "dryRun": false,
       "browsers": [
         {
-          "port": 9230,
-          "ready": true,
-          "started": true
-        },
-        {
+          "account": "adinfo0905",
           "port": 9231,
           "ready": true,
-          "started": true
+          "started": false
         },
         {
-          "port": 9333,
+          "account": "stone0747",
+          "port": 9230,
           "ready": true,
-          "started": true
-        },
-        {
-          "port": 9334,
-          "ready": true,
-          "started": true
-        },
-        {
-          "port": 9335,
-          "ready": true,
-          "started": true
+          "started": false
         }
       ],
-      "reason": "minimum_interval_not_elapsed",
-      "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
+      "runId": "2026-10-21_84785092754d_adinfo0905_0323",
+      "account": "adinfo0905",
+      "lastRunAt": "2026-10-21T03:24:50.684601+09:00",
       "lastAccount": "adinfo0905",
-      "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
+      "nextEligibleAt": "2026-10-21T03:45:50.684601+09:00",
       "nextAccount": "stone0747",
       "activeRunId": null,
       "activeAccount": null,
       "activeStartedAt": null,
       "cadenceState": "waiting",
       "operationCounts": {
-        "adinfo0905": 5,
-        "stone0747": 5
+        "adinfo0905": 1,
+        "stone0747": 1
       },
       "submissionCounts": {
-        "adinfo0905": 5,
-        "stone0747": 5
+        "adinfo0905": 0,
+        "stone0747": 1
       },
       "retryAttemptsToday": 1,
-      "globalRemainingRuns": 10,
+      "globalRemainingRuns": 18,
       "byAccountRemainingRuns": {
-        "adinfo0905": 5,
-        "stone0747": 5
+        "adinfo0905": 9,
+        "stone0747": 9
       },
+      "measurementComplete": true,
       "registeredTasks": {
         "status": "observed",
-        "checkedAt": "2026-10-20T01:35:26.380410+00:00",
+        "platform": "systemd-user",
+        "checkedAt": "2026-10-20T18:26:13.907682+00:00",
         "tasks": [
           {
-            "taskName": "BaroLab-Kin-Seven-Day-Pilot",
+            "taskName": "barolab-kin.timer",
+            "service": "barolab-kin.service",
             "registered": true,
             "enabled": true,
-            "state": "Running",
-            "nextRunAt": "2026-10-20T10:40:00.0000000+09:00",
-            "lastRunAt": "2026-10-20T10:35:01.0000000+09:00",
-            "lastResult": 267009,
-            "actions": [
-              {
-                "Execute": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe",
-                "Arguments": "-u -B -X utf8 \"C:\\10_Project\\BaroLab\\naver_kin\\scheduler.py\" --tick --scheduled"
-              }
-            ]
+            "workflowMatches": true,
+            "state": "Ready",
+            "nextRunAt": "Wed 2026-10-21 03:30:00 KST",
+            "lastRunAt": "",
+            "lastResult": "success",
+            "lastExitStatus": "0"
           },
           {
-            "taskName": "BaroLab-Kin-Seven-Day-Pilot-Measurement",
+            "taskName": "barolab-kin-measurement.timer",
+            "service": "barolab-kin-measurement.service",
             "registered": true,
             "enabled": true,
+            "workflowMatches": true,
             "state": "Ready",
-            "nextRunAt": "2026-10-20T20:30:00.0000000+09:00",
-            "lastRunAt": "2026-10-19T20:30:01.0000000+09:00",
-            "lastResult": 0,
-            "actions": [
-              {
-                "Execute": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe",
-                "Arguments": "-u -B -X utf8 \"C:\\10_Project\\BaroLab\\naver_kin\\scheduler.py\" --measure --scheduled"
-              }
-            ]
+            "nextRunAt": "Wed 2026-10-21 20:30:00 KST",
+            "lastRunAt": "",
+            "lastResult": "success",
+            "lastExitStatus": "0"
           }
         ]
       }
     },
-    "lastRunAt": "2026-10-20T10:32:24.898974+09:00",
-    "nextEligibleAt": "2026-10-20T10:53:24.898974+09:00",
+    "lastRunAt": "2026-10-21T03:24:50.684601+09:00",
+    "nextEligibleAt": "2026-10-21T03:45:50.684601+09:00",
     "nextAccount": "stone0747",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
     "cadenceState": "waiting",
-    "globalRemainingRuns": 10,
+    "globalRemainingRuns": 18,
     "byAccountRemainingRuns": {
-      "adinfo0905": 5,
-      "stone0747": 5
+      "adinfo0905": 9,
+      "stone0747": 9
     },
     "operationCounts": {
-      "adinfo0905": 5,
-      "stone0747": 5
+      "adinfo0905": 1,
+      "stone0747": 1
     },
     "submissionCounts": {
-      "adinfo0905": 5,
-      "stone0747": 5
+      "adinfo0905": 0,
+      "stone0747": 1
     },
     "retryAttemptsToday": 1,
-    "checkedAt": "2026-10-20T01:35:01.589530+00:00",
-    "state": "waiting",
+    "checkedAt": "2026-10-20T18:23:28.097426+00:00",
+    "state": "completed_cycle",
     "lastOperation": {
       "account": "adinfo0905",
-      "state": "published_verified",
-      "reason": null,
-      "updatedAt": "2026-10-20T01:32:00.074056+00:00",
-      "questionId": "495619450",
-      "questionState": "published_verified",
-      "submissionAttempted": true,
-      "submitted": true
+      "state": "skipped",
+      "reason": "model_skipped_no_good_match",
+      "updatedAt": "2026-10-20T18:24:27.792209+00:00",
+      "questionId": null,
+      "questionState": null,
+      "submissionAttempted": false,
+      "submitted": false
     }
   }
 }
