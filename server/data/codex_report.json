@@ -1,7 +1,7 @@
 {
-  "directiveId": "2026-10-20T10:50:00+09:00",
+  "directiveId": "2026-10-20T11:28:00+09:00",
   "status": "blocked",
-  "startedAt": "2026-10-20T01:50:26.932Z",
+  "startedAt": "2026-10-20T02:33:46.3865248Z",
   "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
   "directiveHistory": [
     {
@@ -1989,7 +1989,13 @@
           "waylandDisplay": "wayland-0",
           "chromeOrChromium": "not found",
           "venv": "unavailable because python3 is missing",
-          "setupPlan": ["Provision a general-purpose Ubuntu WSL2 distro", "Install python3 and python3-venv", "Confirm /mnt/c/10_Project/BaroLab access", "Install or expose Chromium and verify WSLg", "Then validate the Ego Lite runtime without adding a repo script unless separately requested"]
+          "setupPlan": [
+            "Provision a general-purpose Ubuntu WSL2 distro",
+            "Install python3 and python3-venv",
+            "Confirm /mnt/c/10_Project/BaroLab access",
+            "Install or expose Chromium and verify WSLg",
+            "Then validate the Ego Lite runtime without adding a repo script unless separately requested"
+          ]
         },
         "pipeline": {
           "status": "idle",
@@ -2012,102 +2018,168 @@
           "reason": "Computer Use inventory has no Gemini app/window or existing BaroLab conversation."
         }
       },
-      "changedFiles": ["server/data/live_snapshot.json", "server/data/codex_report.json"],
+      "changedFiles": [
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
       "updatedAt": "2026-10-20T01:50:26.932Z"
+    },
+    {
+      "directiveId": "2026-10-20T11:28:00+09:00",
+      "status": "blocked",
+      "startedAt": "2026-10-20T02:33:46.3865248Z",
+      "lastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
+      "summary": "Blocked: WSL audit found Python 3.14.4 but no pip/ensurepip, and no Ego Lite runtime/package source to install safely. The meganote and daynote schedules conflict with their slugs/topics and lack reviewedArticle evidence; prepare-only stops before Stage 6, while Stage 6 publishes. No pipeline run or external publication was triggered. The validated incomplete NAS snapshot and fixed Drive JSON files were synchronized.",
+      "taskProgress": {
+        "wslAudit": {
+          "venvModule": "present",
+          "changesMade": "none",
+          "ensurepip": "missing",
+          "distro": "Ubuntu WSL2",
+          "python3": "3.14.4",
+          "projectMount": "/mnt/c/10_Project/BaroLab verified",
+          "user": "baro7",
+          "egoLite": "not found",
+          "setupPlan": [
+            "Do not modify WSL packages until the required runtime source is identified and approved.",
+            "Install python3-pip and python3-venv through the Ubuntu package manager only when authorized.",
+            "Create an isolated environment under /home/baro7/.venvs after resolving the Ego Lite/Agentic Loop package source.",
+            "Verify pinned runtime versions and GUI invocation before declaring readiness."
+          ],
+          "pip": "missing",
+          "status": "completed_with_prerequisite_gaps"
+        },
+        "slots": {
+          "daynote": {
+            "issue": "washed-lettuce slug conflicts with burnt-pot summary and Garmin growth keyword; prior artifacts lack reviewer validation/reviewedArticle evidence",
+            "queueStatus": "waiting",
+            "scheduled": "2026-10-20 16:10 KST",
+            "action": "no retry or publication"
+          },
+          "status": "blocked_for_safety",
+          "meganote": {
+            "existingArtifact": "run-20261020-103225-f0034d",
+            "issue": "tire-pressure article conflicts with scheduled waste-sorting slug and smartphone-photo-organizing keyword; missing reviewer validation/reviewedArticle evidence",
+            "queueStatus": "failed",
+            "scheduled": "2026-10-20 14:30 KST",
+            "action": "no retry or publication"
+          },
+          "stage6": "pipeline source inspection shows Stage 6 publishes; prepare-only exits before Stage 6",
+          "queueTarget": "not reached; no slots were run"
+        },
+        "geminiNotification": {
+          "status": "not_sent",
+          "reason": "Computer Use returned no available apps or tabs; could not verify the authorized BaroLab conversation and account."
+        },
+        "validation": {
+          "nasFreshWithinMinutes": 10,
+          "status": "passed",
+          "nasSchema": "barolab-live-snapshot-v1",
+          "jsonFiles": [
+            "server/data/live_snapshot.json",
+            "server/data/revenue.json",
+            "server/data/metrics.json",
+            "cf_posting/data/daily_schedule.json",
+            "dashboard/data/kin.json",
+            "dashboard/naver_automation.json",
+            "server/data/codex_report.json"
+          ],
+          "nasComplete": false
+        }
+      },
+      "changedFiles": [
+        "server/data/live_snapshot.json",
+        "server/data/codex_report.json"
+      ],
+      "updatedAt": "2026-10-20T02:35:53.8950493Z",
+      "blockedAt": "2026-10-20T02:35:53.8950493Z"
     }
   ],
-  "summary": "WSL2 environment audit completed with missing prerequisites; must-pick post 308 is already publicly verified, so it was not republished. Pipeline is idle and old catch-up PIDs are absent. Overall blocked because Computer Use exposes no Gemini app/conversation for the required report.",
+  "summary": "Blocked: WSL audit found Python 3.14.4 but no pip/ensurepip, and no Ego Lite runtime/package source to install safely. The meganote and daynote schedules conflict with their slugs/topics and lack reviewedArticle evidence; prepare-only stops before Stage 6, while Stage 6 publishes. No pipeline run or external publication was triggered. The validated incomplete NAS snapshot and fixed Drive JSON files were synchronized.",
   "changedFiles": [
     "server/data/live_snapshot.json",
     "server/data/codex_report.json"
   ],
   "taskProgress": {
-    "processCleanup": {
-      "status": "completed",
-      "terminatedPids": [
-        10904,
-        23540
+    "wslAudit": {
+      "venvModule": "present",
+      "changesMade": "none",
+      "ensurepip": "missing",
+      "distro": "Ubuntu WSL2",
+      "python3": "3.14.4",
+      "projectMount": "/mnt/c/10_Project/BaroLab verified",
+      "user": "baro7",
+      "egoLite": "not found",
+      "setupPlan": [
+        "Do not modify WSL packages until the required runtime source is identified and approved.",
+        "Install python3-pip and python3-venv through the Ubuntu package manager only when authorized.",
+        "Create an isolated environment under /home/baro7/.venvs after resolving the Ego Lite/Agentic Loop package source.",
+        "Verify pinned runtime versions and GUI invocation before declaring readiness."
       ],
-      "pipelineState": "idle verified before publication"
+      "pip": "missing",
+      "status": "completed_with_prerequisite_gaps"
     },
-    "mustPick": {
-      "status": "published_verified",
-      "scheduledTime": "09:30",
-      "postId": 308,
-      "slug": "washing-machine-laundry-odor-cleaning-checks",
-      "publicUrl": "https://www.must-pick.com/washing-machine-laundry-odor-cleaning-checks",
-      "publicApiHttp": 200,
-      "publicPageHttp": 200,
-      "titleMatched": true,
-      "verifiedAt": "2026-10-20T09:41:51+09:00",
-      "attemptCount": 1,
-      "totalAttempts": 6
+    "slots": {
+      "daynote": {
+        "issue": "washed-lettuce slug conflicts with burnt-pot summary and Garmin growth keyword; prior artifacts lack reviewer validation/reviewedArticle evidence",
+        "queueStatus": "waiting",
+        "scheduled": "2026-10-20 16:10 KST",
+        "action": "no retry or publication"
+      },
+      "status": "blocked_for_safety",
+      "meganote": {
+        "existingArtifact": "run-20261020-103225-f0034d",
+        "issue": "tire-pressure article conflicts with scheduled waste-sorting slug and smartphone-photo-organizing keyword; missing reviewer validation/reviewedArticle evidence",
+        "queueStatus": "failed",
+        "scheduled": "2026-10-20 14:30 KST",
+        "action": "no retry or publication"
+      },
+      "stage6": "pipeline source inspection shows Stage 6 publishes; prepare-only exits before Stage 6",
+      "queueTarget": "not reached; no slots were run"
     },
-    "priorBadRunsArchived": {
-      "status": "completed",
-      "domains": [
-        "nolplace.com",
-        "maxnote.kr",
-        "meganote.kr",
-        "daynote.kr"
-      ],
-      "foldersPreserved": true
-    },
-    "freshRunResults": {
-      "nolplace.com": "published_verified_by_reconciliation (post 42; catch-up published at due time)",
-      "maxnote.kr": "prepared_verified",
-      "meganote.kr": "failed: TargetClosedError during assembler layout capture",
-      "daynote.kr": "not_started: waiting"
-    },
-    "queue": {
-      "total": 16,
-      "prepared": 12,
-      "published": 2,
-      "failed": 1,
-      "waiting": 1,
-      "targetReached": false
-    },
-    "browser": {
-      "configuredStartBat": "C:\\99_포터블브라우저\\CentBrowserPotable_barolab26\\barolab26_start_cdp.bat",
-      "cdpPort": 9440,
-      "state": "CDP target closed during repeated layout capture",
-      "launchAttempt": "rejected by tool policy"
-    },
-    "geminiReport": {
+    "geminiNotification": {
       "status": "not_sent",
-      "reason": "Computer Use app inventory had no Gemini desktop app/window."
+      "reason": "Computer Use returned no available apps or tabs; could not verify the authorized BaroLab conversation and account."
+    },
+    "validation": {
+      "nasFreshWithinMinutes": 10,
+      "status": "passed",
+      "nasSchema": "barolab-live-snapshot-v1",
+      "jsonFiles": [
+        "server/data/live_snapshot.json",
+        "server/data/revenue.json",
+        "server/data/metrics.json",
+        "cf_posting/data/daily_schedule.json",
+        "dashboard/data/kin.json",
+        "dashboard/naver_automation.json",
+        "server/data/codex_report.json"
+      ],
+      "nasComplete": false
     }
   },
   "previousLastCompletedDirectiveId": "2026-10-20T05:16:00+09:00",
-  "blockedAt": "2026-10-20T01:53:15Z",
-  "updatedAt": "2026-10-20T01:53:15Z",
-  "error": "WSL audit found no general-purpose distro, Python/venv, Windows project mount, or Chromium/Chrome; no install was authorized by the audit-only task. Must-pick was already publicly published and was not duplicated. The required Gemini report could not be sent because Computer Use exposed no Gemini app/window.",
+  "blockedAt": "2026-10-20T02:35:48.7606417Z",
+  "updatedAt": "2026-10-20T02:35:53.8950493Z",
+  "error": "Blocked: mismatched meganote/daynote schedule metadata and missing reviewedArticle artifacts; Stage 6 publishes and the authorized Gemini conversation is unavailable in Computer Use.",
   "checkedAt": "2026-10-20T10:53:15+09:00",
   "geminiNotification": {
-    "directiveId": "2026-10-20T10:50:00+09:00",
     "status": "not_sent",
-    "reason": "Computer Use had no Gemini desktop window or matching BaroLab conversation available."
+    "reason": "Computer Use returned no available apps or tabs; could not verify the authorized BaroLab conversation and account."
   },
   "tests": {
-    "status": "audit_checks_passed",
+    "status": "passed",
     "checks": [
-      "WSL2 distro/state, uname, mount, memory, disk, display, browser and venv prerequisites checked",
-      "Must-pick public page returned HTTP 200 with the expected title",
-      "Seven local sync JSON files parsed successfully",
-      "git diff --check passed for this directive's changed files"
-    ],
-    "codeTests": "not_applicable_no_code_changes"
+      "Validated live snapshot schema, freshness, and complete:false preservation",
+      "Parsed all seven JSON files successfully",
+      "Confirmed no Naver pipeline process running; read-only schedule/asset audit completed"
+    ]
   },
   "currentResult": {
     "status": "blocked",
-    "auditComplete": true,
-    "wslReadyForEgoLite": false,
-    "blockingPrerequisites": ["general-purpose WSL distro", "python3/python3-venv", "/mnt/c/10_Project/BaroLab mount", "Chromium/Chrome"],
-    "mustPickAlreadyPublished": true,
-    "mustPickRepublishAttempted": false,
-    "geminiReportSent": false
+    "completed": false,
+    "reason": "Blocked: mismatched meganote/daynote schedule metadata and missing reviewedArticle artifacts; Stage 6 publishes and the authorized Gemini conversation is unavailable in Computer Use."
   },
-  "commitHash": null,
+  "commitHash": "002260acaa5a056e1c91416aa38be5887537a99f",
   "driveSync": {
     "status": "verified",
     "verifiedAt": "2026-10-20T01:54:43.614Z",
@@ -2161,7 +2233,7 @@
         "id": "1TlunLHM7g8bXmb-ekM_t_jbD_bM466mI",
         "name": "naver_automation.json",
         "size": 16319,
-        "modifiedTime": "2026-10-20T01:53:09.210Z",
+        "modifiedTime": "2026-10-20T01:53:09.21Z",
         "mimeType": "application/json"
       },
       {
@@ -2172,7 +2244,7 @@
     ],
     "verification": "All seven existing JSON Drive IDs were updated in place. Metadata readback confirmed their IDs, filenames, application/json MIME types, root parent, sizes and modified times. The latest NAS snapshot (complete=false) and final codex_report.json upload were verified by readback."
   },
-  "reportCommitHash": null,
+  "reportCommitHash": "002260acaa5a056e1c91416aa38be5887537a99f",
   "resumeAttempts": [
     {
       "resumedAt": "2026-10-20T08:47:39.122792+09:00",
