@@ -313,6 +313,11 @@ def account_gate(account, base=BASE, now=None, scheduled_slot=None, publication_
     # An unresolved external mutation or interrupted worker survives every date.
     resolved = resolved_failure_indexes(attempts)
     proof_cache = {} if proof_cache is None else proof_cache
+    from naver_blog_posting.account_reconciliation import read_current_reconciliation, failure_identity
+    reconciliation_key = ('historical-reconciliation', account, day)
+    if reconciliation_key not in proof_cache:
+        proof_cache[reconciliation_key] = read_current_reconciliation(base, account, attempts, day, now)
+    isolated_failures, actual_reservations = proof_cache[reconciliation_key]
     for index, attempt in enumerate(attempts):
         if attempt['phase'] in ('submitting', 'unknown'):
             return 'unknown'
@@ -322,7 +327,7 @@ def account_gate(account, base=BASE, now=None, scheduled_slot=None, publication_
                    attempt.get('publicationDate'), attempt.get('startedAt'))
             if key not in proof_cache:
                 proof_cache[key] = attempt_has_submission_evidence(attempt, base)
-            if proof_cache[key]:
+            if proof_cache[key] and failure_identity(attempt) not in isolated_failures:
                 return 'unknown'
     if attempts and attempts[-1]['phase'] == 'started':
         return 'unknown'
@@ -338,6 +343,16 @@ def account_gate(account, base=BASE, now=None, scheduled_slot=None, publication_
         slot = entry.get('scheduledSlot') or entry.get('reserveTime', '')[-5:]
         return _slot_matches(account, slot, scheduled_slot)
     relevant = [a for a in attempts if matches(a)]
+    entries = state_entries(account, base)
+    for reservation in actual_reservations:
+        if reservation['reserveTime'][:10] != day or (scheduled_slot and reservation['reserveTime'][-5:] != scheduled_slot):
+            continue
+        known = [a for a in relevant if a.get('phase') == 'verified' and a.get('verificationSource')]
+        known += [e for e in entries if matches(e) and e.get('status') == 'done' and verified(e)]
+        if not any(row.get('reserveTime') == reservation['reserveTime']
+                   and normalized_title(row.get('topic') or row.get('title') or '') == normalized_title(reservation['title'])
+                   for row in known):
+            return 'unknown'
     if any(a['phase'] == 'verified' and a.get('topic') and a.get('reserveTime')
            and a.get('verificationSource') for a in relevant):
         return 'verified'
@@ -349,7 +364,6 @@ def account_gate(account, base=BASE, now=None, scheduled_slot=None, publication_
         retry_after = relevant[-1].get('retryAfter')
         if retry_after and now < datetime.fromisoformat(retry_after):
             return 'retry_wait'
-    entries = state_entries(account, base)
     done = [e for e in entries if matches(e) and e.get('status') == 'done']
     if any(verified(e) for e in done):
         return 'verified'
@@ -1044,6 +1058,12 @@ def require_revision_options(frame, target):
     frame.get_by_role('button', name='발행 설정 닫기', exact=True).click()
 
 
+def require_no_explicit_submission_failure(reply, http_status):
+    """Ambiguous replies need independent proof; explicit server failure stays unknown."""
+    if not 200 <= http_status < 300 or (isinstance(reply, dict) and reply.get('isSuccess') is False):
+        raise RuntimeError('Server rejected reservation submission; result unknown, do not retry automatically')
+
+
 def require_revision_response(reply, target, http_status):
     result = reply.get('result') if isinstance(reply, dict) else None
     url = result.get('redirectUrl', '') if isinstance(result, dict) else ''
@@ -1273,6 +1293,25 @@ def scheduled_worker_result(item, worker_id, gate, exit_code, stop, base=BASE):
         'nextAction':action, 'exitCode':exit_code, 'stopReason':stop}
 
 
+def refresh_ubuntu_daily_account(account, worker_id=None):
+    """Only the explicit Ubuntu EGO catch-up route enables live reconciliation."""
+    if os.name == 'nt' or os.environ.get('BAROLAB_UBUNTU_NAVER_CATCH_UP') != '1':
+        return
+    command = [sys.executable, '-m', 'naver_blog_posting.account_reconciliation',
+               '--account', account, '--refresh']
+    if worker_id:
+        command += ['--worker-id', worker_id]
+    subprocess.run(command, cwd=str(PROJECT_ROOT), check=True, shell=False)
+
+
+def renew_ubuntu_daily_before_submission(account):
+    if os.name != 'nt' and os.environ.get('BAROLAB_UBUNTU_NAVER_CATCH_UP') == '1':
+        worker_id = RUN_OPTIONS.get('worker_id')
+        if not worker_id:
+            raise RuntimeError('Ubuntu daily submission requires its exact active worker identity')
+        refresh_ubuntu_daily_account(account, worker_id)
+
+
 def run_scheduled_worker(item, mode, base=BASE):
     """Bound idle and total work without interrupting healthy multi-stage progress."""
     worker_id = uuid.uuid4().hex
@@ -1304,6 +1343,9 @@ def run_scheduled_worker(item, mode, base=BASE):
             command += ['--manual-recovery-fix', fix['path']]
     try:
         command += recovery_inputs(item, base)
+        if os.name != 'nt' and os.environ.get('BAROLAB_UBUNTU_NAVER_CATCH_UP') == '1':
+            refresh_ubuntu_daily_account(item['account'])
+            command.append('--visible')
         if mode == 'revision':
             command += ['--revision-receipt', item['revisionReceipt'], '--existing-log-no', item['existingLogNo'],
                         '--materials-manifest', item['revisionMaterials']]
@@ -1383,6 +1425,9 @@ def scheduled_batch(mode, base=BASE):
             for _ in range(sum(map(len, DAILY_SLOTS.values())) * 2):
                 if now_kst().date() != initial_day or time.monotonic() - batch_started >= 2 * 3600:
                     break
+                if os.name != 'nt' and os.environ.get('BAROLAB_UBUNTU_NAVER_CATCH_UP') == '1':
+                    for account in DAILY_SLOTS:
+                        refresh_ubuntu_daily_account(account)
                 plan = recovery_plan(base)
                 same_day_str = initial_day.isoformat()
                 next_day_str = (initial_day + timedelta(days=1)).isoformat()
@@ -1560,6 +1605,9 @@ ACCOUNT_MAP = {
 
 def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, detail_message, status="processing", reserve_time=None, topic=None, strategy_id=None, strategy_name=None, verification=None):
     """대시보드 실시간 상태 파일(data/pipeline_status.js 및 dashboard/pipeline_status.js) 갱신"""
+    if os.environ.get('BAROLAB_VISIBLE_WORKFLOW') == '1' and os.name != 'nt' and status == 'processing':
+        from common.ubuntu_naver_browser import focus_workflow_window
+        focus_workflow_window(9440 if stage_num == 4 else account_info['cdp_port'])
     now = datetime.now(timezone(timedelta(hours=9)))
     now_str = now.strftime("%H:%M:%S")
     work_date_str = now.strftime("%Y-%m-%d")
@@ -3703,18 +3751,7 @@ def collect_evidence(account, seed):
         if len(samples) == 3:
             break
     if not samples:
-        fallback_txt = str(serp.get('text') or seed)
-        if len(fallback_txt) < 120:
-            fallback_txt = (fallback_txt + ' ' + seed + ' 핵심 기준 및 확인 방법 안내. ') * 4
-        samples.append({
-            **competitors[0],
-            'excerpt': {
-                'url': competitors[0]['url'],
-                'text': fallback_txt[:4000],
-                'collectedAt': serp.get('collectedAt') or now_kst().isoformat(),
-                'bodySha256': hashlib.sha256(fallback_txt[:4000].encode('utf-8')).hexdigest(),
-            },
-        })
+        raise RuntimeError('Actual competitor article bodies unavailable; search snippets cannot replace article evidence')
     inventory = public_post_inventory(account)
     titles = [row['title'] for row in inventory['posts']]
     if not titles or inventory.get('recent60DaysComplete') is not True:
@@ -3860,6 +3897,34 @@ def collect_primary_sources(selected, proposed, *, allow_empty=False):
     return sources, failures
 
 
+def selected_keyword_evidence(account_key, query, packet=None):
+    """Reuse only fresh exact-query visible article observations with intact bodies."""
+    valid = (isinstance(packet, dict) and packet.get('account') == account_key
+             and packet.get('query') == query and packet.get('serp')
+             and packet.get('recentTitles') and packet.get('recent60DaysComplete') is True
+             and isinstance(packet.get('competitors'), list) and bool(packet['competitors']))
+    if valid:
+        for row in packet['competitors']:
+            try:
+                excerpt = row['excerpt']
+                text = excerpt['text']
+                observed = datetime.fromisoformat(excerpt['collectedAt'])
+                age = now_kst() - observed
+                url = row['url'].replace('https://m.blog.naver.com/', 'https://blog.naver.com/')
+                body_url = excerpt['url'].replace('https://m.blog.naver.com/', 'https://blog.naver.com/')
+                if (excerpt.get('collectionMethod') != 'visible_browser_article'
+                        or not isinstance(text, str) or len(text.strip()) < 120
+                        or excerpt['bodySha256'] != hashlib.sha256(text.encode('utf-8')).hexdigest()
+                        or url != body_url or not re.fullmatch(r'https://blog\.naver\.com/[^/?]+/\d+', url)
+                        or not timedelta(0) <= age <= timedelta(hours=24)):
+                    valid = False
+                    break
+            except (AttributeError, KeyError, TypeError, ValueError):
+                valid = False
+                break
+    return packet if valid else collect_evidence(ACCOUNT_MAP[account_key], query)
+
+
 def source_browser_paths():
     if os.name != 'nt':
         from cf_posting.pipeline_runner import CDP_URL, BROWSER_EXE, BROWSER_USER_DATA
@@ -4002,6 +4067,16 @@ def visible_block_paragraphs(text, tags):
     return text.split('\n')
 
 
+def rendered_block_paragraphs(block, tags):
+    """Expose checklist semantics without rewriting the approved article."""
+    lines = visible_block_paragraphs(block['text'], tags)
+    if block['kind'] != 'checklist':
+        return lines
+    return [line if not line.strip() or line.lstrip().startswith('#')
+            or re.match(r'^\s*(?:[\u2022\u25a1\u2610*+-]|\d+[.)])\s+', line)
+            else '\u2022 ' + line for line in lines]
+
+
 def render_preview(article, plans, folder):
     validate_image_plans(plans, article['blocks'])
     reject_duplicate_caption_blocks(article, plans)
@@ -4016,8 +4091,8 @@ def render_preview(article, plans, folder):
         layout_css = ''
     for i, block in enumerate(article['blocks']):
         tag = 'h2' if block['kind'] == 'heading' else 'p'
-        lines = visible_block_paragraphs(block['text'], article['tags'])
-        preview_paragraphs = [block['text']] if lines == block['text'].split('\n') else ['\n'.join(lines[:-2]), lines[-1]]
+        lines = rendered_block_paragraphs(block, article['tags'])
+        preview_paragraphs = lines if block['kind'] == 'checklist' else [block['text']] if lines == block['text'].split('\n') else ['\n'.join(lines[:-2]), lines[-1]]
         for line in preview_paragraphs:
             if line:
                 parts.append('<' + tag + '>' + preview_inline_text(line) + '</' + tag + '>')
@@ -4100,10 +4175,101 @@ def agent_output_schema(role, source_urls=None):
 
     raise ValueError("Unknown agent role: " + str(role))
 
+def complete_image_alt(plan, caption, source):
+    """Keep the complete description and any explicit generated-example qualification."""
+    from common.image_sanitizer import sanitize_caption_for_source
+    return sanitize_caption_for_source(str(plan.get('alt') or caption).strip(), source_type=source)
+
+
 def content_inputs_sha256():
     value = {key: RUN_OPTIONS.get(key) for key in ('topic_seed', 'main_keyword', 'materials_manifest', 'evidence_dir')}
     value['bridge_source_urls'] = sorted(set(RUN_OPTIONS.get('bridge_source_urls') or []))
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False).encode('utf-8')).hexdigest()
+
+
+def validate_prepared_context(account_key, folder, *, slot=None, publication_date=None,
+                              override_strategy_id=None, complete=True):
+    """Validate an explicit preparation without generating or changing accepted artifacts."""
+    folder = Path(folder).resolve()
+    root = (BASE_DIR / 'output' / account_key).resolve()
+    if account_key not in ACCOUNT_MAP or folder == root or not folder.is_relative_to(root) or not folder.is_dir():
+        raise RuntimeError('Prepared folder must belong to this account')
+    if (folder / 'reservation-evidence.json').exists():
+        raise RuntimeError('Prepared folder already has durable submission evidence')
+    for row in read_journal()['attempts']:
+        if row.get('account') != account_key:
+            continue
+        if row.get('artifactFolder') and Path(row['artifactFolder']).resolve() == folder:
+            if row.get('phase') in ('started', 'submitting', 'unknown', 'verified') or attempt_has_submission_evidence(row):
+                raise RuntimeError('Prepared folder belongs to an active or uncertain submission')
+    handoff = AgentHandoff(folder, account_key)
+    rows = handoff.check(complete=complete)
+    if not complete and len(rows) < 3:
+        raise RuntimeError('Prepared review requires accepted researcher and writer artifacts')
+    if handoff.data.get('requestedContentInputsSha256') != content_inputs_sha256():
+        raise RuntimeError('Prepared content inputs differ from this invocation')
+    context = json.loads(handoff.file('preparation-context.json').read_text(encoding='utf-8-sig'))
+    expected_day = publication_day(publication_date or RUN_OPTIONS.get('publication_date'))
+    expected_slot = slot or DAILY_SLOTS[account_key][0]
+    if (context.get('schema') != 'naver-preparation-context-v1' or context.get('account') != account_key
+            or context.get('publicationDate') != expected_day or context.get('scheduledSlot') != expected_slot
+            or context.get('strategyOverride') != override_strategy_id):
+        raise RuntimeError('Prepared account/date/slot/strategy context changed')
+    original = context['runOptions']
+    original_inputs = {key: original.get(key) for key in ('topic_seed', 'main_keyword', 'materials_manifest', 'evidence_dir')}
+    original_inputs['bridge_source_urls'] = sorted(set(original.get('bridge_source_urls') or []))
+    original_hash = hashlib.sha256(json.dumps(original_inputs, sort_keys=True, ensure_ascii=False).encode('utf-8')).hexdigest()
+    if original_hash != content_inputs_sha256():
+        raise RuntimeError('Original preparation invocation inputs do not match')
+    if (context.get('topicSeed') != RUN_OPTIONS.get('topic_seed')
+            or context.get('mainKeyword') != RUN_OPTIONS.get('main_keyword')
+            or context.get('evidenceDir') != RUN_OPTIONS.get('evidence_dir')):
+        raise RuntimeError('Prepared question/query/source context changed')
+    selected = json.loads(handoff.file('keyword-selector.json').read_text(encoding='utf-8'))
+    if RUN_OPTIONS.get('topic_seed') and selected_reader_question(selected) != RUN_OPTIONS['topic_seed']:
+        raise RuntimeError('Prepared reader question differs from the requested question')
+    if complete:
+        require_content_handoff(folder, account_key)
+        idx = context.get('strategyIndex')
+        if type(idx) is not int or not 0 <= idx < len(STRATEGIES) or STRATEGIES[idx]['id'] != context.get('selectedStrategyId'):
+            raise RuntimeError('Prepared strategy observation is missing or changed')
+    return handoff, context
+
+
+def load_prepared_content(account_key, folder, override_strategy_id=None, slot=None, publication_date=None):
+    handoff, context = validate_prepared_context(account_key, folder, slot=slot,
+        publication_date=publication_date, override_strategy_id=override_strategy_id)
+    acc = dict(ACCOUNT_MAP[account_key], topic_slug=handoff.folder.name)
+    if RUN_OPTIONS.get('topic_seed'):
+        acc['topic'] = RUN_OPTIONS['topic_seed']
+    article = json.loads(handoff.file('article.json').read_text(encoding='utf-8'))
+    from naver_blog_posting.account_reconciliation import collect_full_public_inventory
+    catalog_path = collect_full_public_inventory(BASE_DIR, account_key)
+    catalog = json.loads(catalog_path.read_text(encoding='utf-8'))['accounts'][account_key]
+    if any(normalized_title(row['title']) == normalized_title(article['title']) for row in catalog['posts']):
+        raise RuntimeError('Prepared title already exists in the live-validated public inventory')
+    plans = json.loads(handoff.file('image-plan.json').read_text(encoding='utf-8'))['imagePlans']
+    idx = context['strategyIndex']
+    return acc, handoff.folder, article, plans, STRATEGIES[idx], idx
+
+
+def record_preparation_context(folder, account_key, strategy, idx, override_strategy_id,
+                               publication_attempt, attribution_slot):
+    path = Path(folder) / 'preparation-context.json'
+    context = json.loads(path.read_text(encoding='utf-8-sig')) if path.exists() else {
+        'schema': 'naver-preparation-context-v1', 'account': account_key,
+        'publicationDate': publication_day(RUN_OPTIONS.get('publication_date')),
+        'scheduledSlot': attribution_slot or DAILY_SLOTS[account_key][0],
+        'topicSeed': RUN_OPTIONS.get('topic_seed'), 'mainKeyword': RUN_OPTIONS.get('main_keyword'),
+        'evidenceDir': RUN_OPTIONS.get('evidence_dir'), 'strategyOverride': override_strategy_id,
+        'publicationAttempt': publication_attempt,
+        'runOptions': {key: RUN_OPTIONS.get(key) for key in ('topic_seed', 'main_keyword',
+            'materials_manifest', 'evidence_dir', 'bridge_source_urls', 'publication_date')},
+        'source': 'Actual prepare_content invocation', 'createdAt': now_kst().isoformat()}
+    if 'selectedStrategyId' not in context:
+        context.update(selectedStrategyId=strategy['id'], strategyIndex=idx,
+                       strategyObservedAt=now_kst().isoformat())
+        atomic_json(path, context)
 
 
 def _surgical_repair_naver(folder, findings):
@@ -4192,12 +4358,41 @@ def find_retry_handoff(account, slot):
             print('[content-handoff] ' + str(exc), flush=True)
         return None
 
-def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None):
+
+def require_review_invalidation(handoff):
+    if len(handoff.check()) != 3:
+        raise RuntimeError('Visual re-review requires exactly the original three accepted stages')
+    audit = json.loads((handoff.folder/'review-invalidation.json').read_text(encoding='utf-8'))
+    if audit.get('reason') != 'stub visual review invalidated; fresh actual pixels required':
+        raise RuntimeError('Visual review invalidation audit missing')
+    backup = (handoff.folder / audit.get('backupDirectory', '')).resolve()
+    if backup == handoff.folder or not backup.is_relative_to(handoff.folder):
+        raise RuntimeError('Unsafe visual review backup directory')
+    hashes = audit.get('backupHashes')
+    if not isinstance(hashes, dict) or not {'handoff.json', 'image-maker.json', 'image-plan.json', 'assembler.json'} <= set(hashes):
+        raise RuntimeError('Original failed-stage backup incomplete')
+    for name, digest in hashes.items():
+        original = (backup/name).resolve()
+        if not original.is_relative_to(backup) or not original.is_file() or sha(original) != digest:
+            raise RuntimeError('Original visual review backup changed')
+    for name in ('image-maker.json', 'image-plan.json'):
+        if sha(handoff.folder/name) != hashes[name]:
+            raise RuntimeError('Original visual plan changed before re-review')
+    plans = json.loads((handoff.folder/'reused-photo-source.json').read_text(encoding='utf-8'))['imagePlans']
+    if plans != json.loads((backup/'image-plan.json').read_text(encoding='utf-8'))['imagePlans']:
+        raise RuntimeError('Reused visual plan differs from audited original')
+    for plan in plans:
+        name = 'images/' + plan['filename']
+        if name not in hashes or sha(handoff.file(name)) != hashes[name]:
+            raise RuntimeError('Original visual image changed before re-review')
+
+
+def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None, review_folder=None):
     from common.llm_client import memory_session, memory_event
     session_id = f'naver:{account_key}:{time.time_ns()}'
     with memory_session(session_id, 'naver'):
         try:
-            result = _prepare_content(account_key, override_strategy_id, evidence_dir, publication_attempt, attribution_slot)
+            result = _prepare_content(account_key, override_strategy_id, evidence_dir, publication_attempt, attribution_slot, review_folder)
         except Exception as exc:
             memory_event(session_id + ':ended', 'pipeline_preparation_failed', 'Naver preparation failed; no publication inferred.',
                          session_id=session_id, success=False, evidence={'errorType': type(exc).__name__})
@@ -4207,7 +4402,7 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
         return result
 
 
-def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None):
+def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None, review_folder=None):
     acc = dict(ACCOUNT_MAP[account_key])
     materials_input = RUN_OPTIONS.get('materials_manifest')
     materials = load_material_manifest(materials_input, account_key, material_roots()) if materials_input else None
@@ -4218,6 +4413,14 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
     strategy, idx, history = get_strategy_for_account(account_key, override_strategy_id)
     active_attempt = next((a for a in reversed(read_journal()['attempts']) if a['account'] == account_key), {})
     reusable = find_retry_handoff(account_key, active_attempt.get('scheduledSlot')) if publication_attempt and not RUN_OPTIONS.get('revision_target') and RUN_OPTIONS.get('allow_retry_handoff', True) else None
+    if review_folder is not None:
+        if publication_attempt:
+            raise RuntimeError('Visual re-review cannot submit content')
+        review_handoff, _ = validate_prepared_context(account_key, review_folder,
+            slot=attribution_slot, publication_date=RUN_OPTIONS.get('publication_date'),
+            override_strategy_id=override_strategy_id, complete=False)
+        require_review_invalidation(review_handoff)
+        reusable = (review_handoff.folder, review_handoff)
     if reusable and (topic_seed or override_strategy_id is not None):
         prior_evidence = json.loads(reusable[1].file('keyword-evidence.json').read_text(encoding='utf-8'))
         if (topic_seed and prior_evidence.get('requestedTopicSeed') != topic_seed) or (override_strategy_id is not None and reusable[1].data.get('requestedStrategyId') != override_strategy_id):
@@ -4251,6 +4454,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             evidence['requestedTopicSeed'] = topic_seed
         atomic_json(folder / 'keyword-evidence.json', evidence)
     acc['topic_slug'] = folder.name
+    record_preparation_context(folder, account_key, strategy, idx, override_strategy_id,
+                               publication_attempt, attribution_slot)
     if materials and not handoff.data['stages'][2:]:
         handoff.data['materialsManifestSha256'] = materials['manifestSha256']
         atomic_json(handoff.path, handoff.data)
@@ -4458,6 +4663,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             context['readerQuestion'] = result['readerQuestion']
             context['readerGoal'] = result['readerGoal']
             context['demandEvidence'] = result['demandEvidence']
+        elif review_folder is not None and role == 'image-maker':
+            result = json.loads((folder/'image-maker.json').read_text(encoding='utf-8'))
         else:
             schema = agent_output_schema(role, [s['url'] for s in context.get('sources', [])])
             if role == 'researcher':
@@ -4615,7 +4822,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             handoff.path = folder / 'handoff.json'
             if publication_attempt:
                 write_attempt(account_key, 'started', start_new=False, artifactFolder=str(folder))
-            selected = collect_evidence(acc, result['mainKeyword'])
+            selected = selected_keyword_evidence(account_key, result['mainKeyword'], evidence if evidence_dir else None)
             atomic_json(folder / 'selected-evidence.json', selected)
             enriched_urls = [source['url'] for source in evidence.get('sourceEnrichment', {}).get('sources', [])
                              if isinstance(source, dict) and source.get('url') and source.get('text')
@@ -4769,10 +4976,11 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             if (folder/'writer-format-normalization.json').is_file():
                 outputs.append('writer-format-normalization.json')
         elif role == 'image-maker':
-            plans = result.get('imagePlans', [])
+            plans = (json.loads(json.dumps(reused_photos['imagePlans'])) if review_folder is not None
+                     else result.get('imagePlans', []))
             if not isinstance(plans, list):
                 plans = []
-            from common.image_sanitizer import build_seo_image_filename, build_seo_alt_text, sanitize_image_file
+            from common.image_sanitizer import build_seo_image_filename, sanitize_image_file
             w_blocks = results['writer']['blocks']
             writer_title = results['writer']['title']
             main_kw = results.get('keyword-selector', {}).get('mainKeyword', '')
@@ -4811,7 +5019,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                         'stepId': f'step_{idx_num}',
                         'prompt': f"Photorealistic direct subject visual scene representing {main_kw} ({writer_title}), realistic environment and facility or object detail, natural daylight, 16:9, no people, no human faces, no text, no watermark",
                         'caption': cap_str,
-                        'alt': build_seo_alt_text(topic_title=writer_title, caption=cap_str, source_type=src_type, shot_index=idx_num),
+                        'alt': cap_str,
                         'afterBlock': blk_idx,
                         'purpose': f"본문 {idx_num}번째 핵심 구간의 판단 기준과 확인 순서를 직관적으로 안내합니다.",
                         'viewpoint': '주제 대상을 직관적으로 보여주는 무인 현장/사물 스냅샷',
@@ -4822,7 +5030,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 result['selectionReason'] = '독자의 직관적 이해와 간접체험을 위해 핵심 구간별 주제 직관 시각자료를 배치합니다.'
             valid_mat_ids = {str(m.get('materialId') or m.get('filename') or '') for m in (materials or []) if isinstance(m, dict)} - {''}
             used_slots, seen_caps, seen_fnames = set(), set(), set()
-            for p_idx, p in enumerate(plans):
+            # Audited final plans are already normalized; re-review must not rewrite them.
+            for p_idx, p in enumerate(plans if review_folder is None else []):
                 mat_id = str(p.get('materialId') or '').strip()
                 if mat_id not in valid_mat_ids:
                     mat_id = ''
@@ -4873,15 +5082,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 if cap in seen_caps:
                     cap = f"{cap} ({p_idx + 1})"
                 p['caption'] = cap
-                p['alt'] = sanitize_caption_for_source(
-                    str(p.get('alt') or build_seo_alt_text(
-                        topic_title=writer_title,
-                        caption=cap,
-                        source_type=src_val,
-                        shot_index=p_idx + 1,
-                    )).strip(),
-                    source_type=src_val,
-                )
+                p['alt'] = complete_image_alt(p, cap, src_val)
                 seen_caps.add(cap)
                 for k, default_val in (
                     ('purpose', '독자의 핵심 판단 및 확인 절차를 돕는 시각 안내'),
@@ -4890,6 +5091,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 ):
                     if not isinstance(p.get(k), str) or not p[k].strip():
                         p[k] = default_val
+            if review_folder is not None and plans != reused_photos['imagePlans']:
+                raise RuntimeError('Original image plan changed; explicit image regeneration required')
             validate_image_plans(plans, w_blocks)
             image_dir = folder / 'images'; image_dir.mkdir(exist_ok=True)
             bind_material_plans(plans, materials, folder)
@@ -4928,19 +5131,21 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                     photo.unlink(missing_ok=True)
                     print(f"[image-maker] Removed synthetic CHECKPOINT card {p['filename']}", flush=True)
                     continue
-                # Run 4-Step Image Sanitizer: strip AI metadata, crop watermark (if generated), and inject account smartphone EXIF
-                try:
-                    sanitize_image_file(
-                        file_path=photo,
-                        account_or_domain=account_key,
-                        source_type=p.get('source', 'generated'),
-                        topic_or_slug=f"{main_kw} {writer_title}",
-                        caption=p.get('caption', ''),
-                        shot_index=i + 1,
-                        rename_to_seo=False,
-                    )
-                except Exception as san_err:
-                    print(f"[image_sanitizer] Notice for {photo.name}: {san_err}", flush=True)
+                # Fresh review must inspect the preserved bytes, not re-encode accepted inputs.
+                if review_folder is None:
+                    # Run 4-Step Image Sanitizer: strip AI metadata, crop watermark (if generated), and inject account smartphone EXIF
+                    try:
+                        sanitize_image_file(
+                            file_path=photo,
+                            account_or_domain=account_key,
+                            source_type=p.get('source', 'generated'),
+                            topic_or_slug=f"{main_kw} {writer_title}",
+                            caption=p.get('caption', ''),
+                            shot_index=i + 1,
+                            rename_to_seo=False,
+                        )
+                    except Exception as san_err:
+                        print(f"[image_sanitizer] Notice for {photo.name}: {san_err}", flush=True)
                 with Image.open(photo) as image:
                     image.verify()
                 outputs.append('images/' + p['filename'])
@@ -4995,7 +5200,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             result['articleSha256'] = sha(folder / 'article.json')
             result['reviewPolicy'] = 'reader-completion-v2'
             result['contentQualitySha256'] = content_quality_sha256()
-            result['imageReviewFiles'] = []
+            result['imageReviewFiles'] = [str(Path(row['file']).relative_to(folder.resolve())).replace('\\', '/')
+                for row in inputs['independentImageObservations']]
             atomic_json(folder / 'review.json', result)
             outputs += ['review.json']
             outputs += [str(path.relative_to(folder)).replace('\\', '/') for base in ('visual-reviews/reviewer', 'model-audit/reviewer')
@@ -5116,7 +5322,7 @@ def native_document(document, article, plans):
             for _ in range(gap):
                 paragraphs.append({'id': ident(), 'nodes': native_text_nodes('', {'fontSizeCode': 'fs' + str(profile['bodySize']), '@ctype': 'nodeStyle'}, ident),
                                    'style': {'lineHeight': profile['lineHeight'], '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'})
-        for line in visible_block_paragraphs(block['text'], article['tags']):
+        for line in rendered_block_paragraphs(block, article['tags']):
             style = {'fontColor': '#222222', 'fontFamily': 'nanumgothic', 'fontSizeCode': 'fs16', '@ctype': 'nodeStyle'}
             if block['kind'] == 'heading':
                 style.update(fontColor='#235144', fontSizeCode='fs19', bold=True)
@@ -5204,6 +5410,8 @@ def acquire_naver_editor(context, pages, blog_id):
 
 
 def prepare_editor(page, frame, article, plans, folder):
+    if os.environ.get('BAROLAB_VISIBLE_WORKFLOW') == '1':
+        page.bring_to_front()
     for n, plan in enumerate(plans, 1):
         with page.expect_file_chooser(timeout=10000) as chooser:
             frame.locator('button[data-name="image"][data-group="documentToolbar"]').click()
@@ -5262,6 +5470,8 @@ def select_reservation_date(frame, target):
 
 
 def configure_reservation(page, frame, reserve_time, tags, category=None, folder=None):
+    if os.environ.get('BAROLAB_VISIBLE_WORKFLOW') == '1':
+        page.bring_to_front()
     target = datetime.strptime(reserve_time, '%Y-%m-%d %H:%M').replace(tzinfo=KST)
     if target < now_kst() + timedelta(minutes=30):
         raise RuntimeError('Future KST reservation at least 30 minutes ahead required')
@@ -5504,13 +5714,32 @@ def collect_existing_reservations(context, account, folder=None):
         probe.close()
 
 
-def check_existing_reservations(context, account):
-    """Allow other verified slots; observe existing reservations gracefully without crashing."""
-    try:
-        return collect_existing_reservations(context, account)
-    except Exception as exc:
-        print(f"[check_existing_reservations] Non-blocking warning: {exc}", flush=True)
-        return {"reservations": [], "reservationCount": 0}
+def check_existing_reservations(context, account, *, title, reserve_time, revision=None, folder=None):
+    """Fail closed on missing evidence, occupied times, and duplicate titles."""
+    from naver_blog_posting.account_reconciliation import validated_reservation_rows
+    observation = collect_existing_reservations(context, account, folder)
+    rows = validated_reservation_rows(observation, account['blog_id'], now_kst())
+    if rows is None:
+        raise RuntimeError('Fresh complete reservation inventory could not be validated')
+    if folder:
+        atomic_json(Path(folder) / 'pre-submission-reservation-inventory.json', observation)
+    original = None
+    if revision:
+        original = load_revision_target(account['account_key'], revision['receiptPath'], revision['logNo'])
+        if any(original.get(key) != revision.get(key) for key in
+               ('account', 'blogId', 'logNo', 'title', 'reserveTime', 'documentSha256',
+                'receiptSha256', 'savedDocumentSha256')):
+            raise RuntimeError('Revision identity changed before duplicate check')
+        if original['reserveTime'] != reserve_time:
+            raise RuntimeError('Revision cannot change the verified reservation time')
+    for row in rows:
+        if original and row['title'] == original['title'] and row['reserveTime'] == original['reserveTime']:
+            continue
+        if row['reserveTime'] == reserve_time or normalized_title(row['title']) == normalized_title(title):
+            raise RuntimeError('Actual reservation already occupies this time or title')
+    if original and not any(row['title'] == original['title'] and row['reserveTime'] == original['reserveTime'] for row in rows):
+        raise RuntimeError('Exact verified revision reservation disappeared')
+    return observation
 
 
 def collect_reservation_inventory(account_key, output_dir=None):
@@ -5562,7 +5791,17 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
             require_revision_options(frame, revision)
         atomic_json(proof_folder/'revision-target.json', revision)
         write_attempt(account_key, 'started', start_new=False, revisionPreflight=str(proof_folder))
-    acc, folder, article, plans, strategy, idx = prepare_content(account_key, override_strategy_id, RUN_OPTIONS.get('evidence_dir'), publication_attempt=do_real_publish, attribution_slot=slot or DAILY_SLOTS[account_key][0])
+    if RUN_OPTIONS.get('prepared_dir'):
+        if revision:
+            raise RuntimeError('Explicit prepared content cannot replace a revision workflow')
+        acc, folder, article, plans, strategy, idx = load_prepared_content(
+            account_key, RUN_OPTIONS['prepared_dir'], override_strategy_id,
+            slot or DAILY_SLOTS[account_key][0], publication_date)
+        if do_real_publish:
+            write_attempt(account_key, 'started', start_new=False, artifactFolder=str(folder),
+                          preparedHandoffSha256=sha(folder / 'handoff.json'))
+    else:
+        acc, folder, article, plans, strategy, idx = prepare_content(account_key, override_strategy_id, RUN_OPTIONS.get('evidence_dir'), publication_attempt=do_real_publish, attribution_slot=slot or DAILY_SLOTS[account_key][0])
     acc['account_key'] = account_key
     if revision:
         if any(normalized_title(row['title']) == normalized_title(article['title']) for row in reserved_title_inventory(account_key, revision_target=revision)):
@@ -5601,7 +5840,7 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
                             if node.get('link', {}).get('@ctype') == 'urlLink']
             from urllib.parse import unquote
             if [unquote(u) for u in native_links] != [unquote(attribution['outboundUrl'])]:
-                print(f"[bridge-link] Warning: Bridge link difference observed: native={native_links} vs target={attribution['outboundUrl']}. Proceeding.", flush=True)
+                raise RuntimeError('Native bridge link differs from approved outbound URL')
         captures = capture_native_review(page, frame, folder, account_key, article['title'], when)
         options = configure_reservation(page, frame, when, article['tags'], article.get('category'), folder)
         review_native_layout(page, frame, folder, account_key, article, when, captures, options)
@@ -5612,7 +5851,9 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
             pages.retain(page, 'Explicit prepared handoff for ' + account_key + ' · ' + str(folder))
             update_pipeline_status(acc, 6, '예약 준비 완료 · 미제출', 95, '최종 제출하지 않음; 브라우저와 산출물 유지', status='prepared', topic=article['title'], reserve_time=when)
             return
-        check_existing_reservations(context, acc)
+        renew_ubuntu_daily_before_submission(account_key)
+        check_existing_reservations(context, acc, title=article['title'], reserve_time=when,
+                                    revision=revision, folder=folder)
         if revision:
             # Reject concurrent user edits rather than replacing a changed server body.
             verify_reservation(context, acc, revision['title'], when,
@@ -5650,9 +5891,12 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
             reply = response.json()
         except (ValueError, json.JSONDecodeError):
             reply = {'format': 'non_json'}
+        if not isinstance(reply, dict):
+            reply = {'format': 'non_object_json'}
         evidence['publisherResponse'] = {'httpStatus': response.status, 'receivedAt': now_kst().isoformat(),
             'summary': {k: reply.get(k) for k in ('isSuccess', 'result', 'error', 'message', 'code') if k in reply}}
         atomic_json(folder/'reservation-evidence.json', evidence)
+        require_no_explicit_submission_failure(reply, response.status)
         if revision:
             require_revision_response(reply, revision, response.status)
         verification = verify_reservation(context, acc, article['title'], when, expected_hash=evidence['documentSha256'], folder=folder,
@@ -5711,6 +5955,7 @@ if __name__ == '__main__':
     parser.add_argument('--publication-date', help='Explicit intended public date YYYY-MM-DD KST; daily uses same-day by default')
     parser.add_argument('--reserve-time',help='24-hour HH:MM or YYYY-MM-DD HH:MM, KST')
     parser.add_argument('--evidence-dir',help='Account-specific collected keyword-evidence.json directory')
+    parser.add_argument('--prepared-dir',help='Reuse a fully verified account-bound prepared handoff')
     parser.add_argument('--topic-seed',help='Explicit reader question for real keyword collection; all publication checks remain required')
     parser.add_argument('--main-keyword',help='Measured base query only; actual demand collection and the specific reader question remain required')
     parser.add_argument('--bridge-source-url',action='append',help='Prioritize an existing published approved CF article; actual body and all eligibility checks still required')
@@ -5722,7 +5967,10 @@ if __name__ == '__main__':
     parser.add_argument('--manual-recovery-reason',help=argparse.SUPPRESS)
     parser.add_argument('--manual-recovery-fix',action='append',help=argparse.SUPPRESS)
     parser.add_argument('--dry-run',action='store_true',help='Validate explicit materials only; no model, browser, editor or publication')
+    parser.add_argument('--visible', action='store_true', help='Show the existing account/Flow windows during this authorized workflow')
     args=parser.parse_args()
+    if args.visible:
+        os.environ['BAROLAB_VISIBLE_WORKFLOW'] = '1'
     if (args.daily or args.catch_up) and args.publication_date:
         parser.error("Scheduled scans determine publication dates; use --account with --publication-date")
     if args.materials_manifest and not args.account:
@@ -5735,7 +5983,7 @@ if __name__ == '__main__':
         parser.error('Revision requires one account, original receipt, existing log number and actual materials')
     if args.worker_mode == 'revision' and not (args.revision_receipt and args.worker_id):
         parser.error('Revision child requires its explicit target and worker identity')
-    RUN_OPTIONS.update(reserve_time=args.reserve_time,evidence_dir=args.evidence_dir,publication_date=args.publication_date,topic_seed=args.topic_seed,main_keyword=args.main_keyword,strategy_id=args.strategy,bridge_source_urls=args.bridge_source_url,materials_manifest=args.materials_manifest,worker_mode=args.worker_mode,worker_id=args.worker_id,manual_recovery_reason=args.manual_recovery_reason,manual_recovery_fix=args.manual_recovery_fix)
+    RUN_OPTIONS.update(prepared_dir=args.prepared_dir,reserve_time=args.reserve_time,evidence_dir=args.evidence_dir,publication_date=args.publication_date,topic_seed=args.topic_seed,main_keyword=args.main_keyword,strategy_id=args.strategy,bridge_source_urls=args.bridge_source_url,materials_manifest=args.materials_manifest,worker_mode=args.worker_mode,worker_id=args.worker_id,manual_recovery_reason=args.manual_recovery_reason,manual_recovery_fix=args.manual_recovery_fix)
     if args.revision_receipt and args.worker_id:
         if args.worker_mode != 'revision':
             parser.error('Revision cannot use a new-publication worker mode')

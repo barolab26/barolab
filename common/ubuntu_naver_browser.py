@@ -89,6 +89,25 @@ def ensure_account(port):
     return pid
 
 
+def focus_workflow_window(port):
+    """Focus only the verified existing workflow browser; never start or navigate."""
+    from common.browser_session import _runtime
+    if port == 9440:
+        executable, profile = Path("/opt/google/chrome/chrome"), Path.home() / ".config/cdp_gui_9440"
+    else:
+        executable, profile, _ = account_paths(port)
+    pid = _runtime(port, str(executable), str(profile))["ProcessId"]
+    environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
+    windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True,
+                             text=True, check=True, timeout=5)
+    for line in windows.stdout.splitlines():
+        fields = line.split(None, 4)
+        if len(fields) >= 3 and fields[2] == str(pid):
+            subprocess.run(["wmctrl", "-ia", fields[0]], env=environment, check=True, timeout=5)
+            return
+    raise RuntimeError(f"Verified browser window is not visible on DISPLAY for port {port}")
+
+
 def install(home=Path.home()):
     runtime = home / ".barolab/browsers"
     for account, config in accounts().items():

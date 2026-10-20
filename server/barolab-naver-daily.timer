@@ -1,0 +1,10 @@
+[Unit]
+Description=Check existing Naver publication slots with the bounded coordinator
+
+[Timer]
+OnCalendar=*-*-* 08..23:00/15:00
+Persistent=false
+Unit=barolab-naver-daily.service
+
+[Install]
+WantedBy=timers.target

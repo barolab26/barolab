@@ -37,9 +37,14 @@ class NaverRecoveryScheduleTests(unittest.TestCase):
             self.assertEqual(result['bodyVerificationStatus'], 'unknown')
 
     def test_existing_daily_action_routes_to_bounded_catch_up(self):
-        with patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as run:
+        with patch.object(worker, 'os', SimpleNamespace(name='nt', environ=os.environ)), patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as run:
             self.assertEqual(worker.run_task('naver-daily'), 0)
         self.assertEqual(run.call_args.args[0][-1], '--catch-up')
+
+    def test_ubuntu_daily_action_uses_ego_singleton_entry(self):
+        with patch.object(worker, 'os', SimpleNamespace(name='posix', environ=os.environ)), patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as run:
+            self.assertEqual(worker.run_task('naver-daily'), 0)
+        self.assertEqual(run.call_args.args[0][-2:], [str(worker.ROOT / 'ego_lite_runner.py'), '--naver-catch-up'])
 
     def call(self, apply=False, response=None):
         receipt = response or dict(applied=apply, actionVerified=True)

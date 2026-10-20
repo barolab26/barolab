@@ -21,7 +21,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from common.gemini_chat_controller import send_gemini_message_sync
+from common.gemini_chat_controller import send_gemini_message_sync as _real_send_gemini_message_sync
+
+def send_gemini_message_sync(msg: str, reason: str = "") -> bool:
+    # A local workflow event does not authorize sending a message to an external chat.
+    return False
+
+
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
@@ -186,12 +192,79 @@ def main_loop():
         time.sleep(interval)
 
 
-if __name__ == "__main__":
+def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=None,
+                      main_keyword=None, evidence_dir=None, prepared_dir=None):
+    """Route a local explicit request through the existing reviewed Naver runner."""
+    from common.ubuntu_naver_browser import accounts
+    if account not in accounts():
+        raise ValueError("Unknown Naver account")
+    command = [sys.executable, str(ROOT / "naver_blog_posting/pipeline_runner.py"),
+               "--account", account, "--visible"]
+    for flag, value in (("--slot", slot), ("--publication-date", publication_date),
+                        ("--topic-seed", topic_seed), ("--main-keyword", main_keyword),
+                        ("--evidence-dir", evidence_dir), ("--prepared-dir", prepared_dir)):
+        if value is not None:
+            command.extend([flag, str(value)])
+    environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
+    refreshed = subprocess.run([sys.executable, "-m", "naver_blog_posting.account_reconciliation",
+                                "--account", account, "--refresh"],
+                               cwd=str(ROOT), env=environment, shell=False)
+    if refreshed.returncode:
+        return refreshed.returncode
+    return subprocess.run(command, cwd=str(ROOT), env=environment, shell=False).returncode
+
+
+def run_visible_naver_catch_up(*, dry_run=False):
+    """Reuse the bounded scheduler; a dry run only reads the existing plan."""
+    if dry_run:
+        from naver_blog_posting.pipeline_runner import recovery_plan
+        print(json.dumps(recovery_plan(), ensure_ascii=False))
+        return 0
+    environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"),
+                       BAROLAB_UBUNTU_NAVER_CATCH_UP="1")
+    return subprocess.run([sys.executable, str(ROOT / "naver_blog_posting/pipeline_runner.py"),
+                           "--catch-up", "--visible"], cwd=str(ROOT),
+                          env=environment, shell=False).returncode
+
+
+def main(argv=None):
+    import argparse
+    from common.ubuntu_naver_browser import accounts
+    parser = argparse.ArgumentParser(description="EGO daemon or explicit visible Naver workflow")
+    naver_mode = parser.add_mutually_exclusive_group()
+    naver_mode.add_argument("--naver-account", choices=tuple(accounts()))
+    naver_mode.add_argument("--naver-catch-up", action="store_true")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--slot")
+    parser.add_argument("--publication-date")
+    parser.add_argument("--topic-seed")
+    parser.add_argument("--main-keyword")
+    parser.add_argument("--evidence-dir", type=Path)
+    parser.add_argument("--prepared-dir", type=Path)
+    args = parser.parse_args(argv)
+    if args.dry_run and not args.naver_catch_up:
+        parser.error("--dry-run requires --naver-catch-up")
+    if not args.naver_account and any((args.slot, args.publication_date, args.topic_seed,
+                                      args.main_keyword, args.evidence_dir, args.prepared_dir)):
+        parser.error("Naver arguments require --naver-account")
     from dashboard.metrics import collector_lock
     lock_path = Path("/home/baro7/.barolab/ego-lite.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with collector_lock(lock_path) as acquired:
         if acquired:
+            if args.naver_catch_up:
+                return run_visible_naver_catch_up(dry_run=args.dry_run)
+            if args.naver_account:
+                return run_visible_naver(args.naver_account, slot=args.slot,
+                                         publication_date=args.publication_date, topic_seed=args.topic_seed,
+                                         main_keyword=args.main_keyword, evidence_dir=args.evidence_dir,
+                                         prepared_dir=args.prepared_dir)
             main_loop()
         else:
             print("EGO LITE is already running.", flush=True)
+            return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

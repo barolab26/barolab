@@ -1,0 +1,12 @@
+[Unit]
+Description=BaroLab bounded visible Naver catch-up through EGO
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=PYTHONUNBUFFERED=1
+Environment=BAROLAB_DISPLAY=:10
+ExecStart=%h/.venvs/barolab/bin/python3 server/windows_worker.py --task naver-daily
+TimeoutStartSec=3h
+UMask=0077

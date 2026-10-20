@@ -263,6 +263,8 @@ def run_task(task):
         'naver-monitor': [('naver_blog_posting/pipeline_runner.py', '--monitor')],
         'naver-daily': [('naver_blog_posting/pipeline_runner.py', '--catch-up')],
     }
+    if task == 'naver-daily' and os.name != 'nt':
+        commands[task] = [('ego_lite_runner.py', '--naver-catch-up')]
     if task == 'metrics':
         return run_metrics(python, commands[task])
     code = 0

@@ -103,6 +103,53 @@ shared browser, not the signed-in Google account; Flow login and generation
 still require their own checks. The CF start/stop lifecycle is unchanged.
 Windows keeps its existing Naver source-browser account `baro76650` on port 9420.
 
+## Visible authorized Naver runs
+
+Use the existing runner with `--visible` alongside its normal account, slot and
+publication-date arguments. This opts the run and its child workers into
+`BAROLAB_VISIBLE_WORKFLOW=1`; all existing locks, evidence checks, reviews and
+duplicate safeguards still apply. Stage updates focus the verified account
+window, image work focuses the shared Flow window, and editor preparation and
+reservation options bring the working tab to the front. No extra browser or
+parallel publishing implementation is created. The flag does not turn a dry run
+into a submission or authorize bypassing blocked account state.
+
+Research collected via HTTP is still HTTP evidence, even during a visible run.
+Account-bound observations can enter through `--evidence-dir`; visible screenshots
+alone do not establish a competitor article's body. If actual competitor bodies
+cannot be fetched, collection stops instead of labeling search snippets as an
+article excerpt.
+An explicitly supplied packet is reused after keyword selection only when its
+account and query match exactly, recent-title coverage is complete, and every
+competitor body has a matching URL, SHA-256, visible-browser collection marker
+and observation time within 24 hours. Changed queries or unverifiable packets
+use actual collection again. This is evidence freshness, not a ranking guarantee.
+
+EGO does not execute external response commands. Local events do not automatically send
+Gemini messages. Authorized Naver work uses the canonical runner above; merely
+seeing an action in a model response is not a local task request. Keep the EGO
+service stopped during a supervised visible run to avoid its independent CF and
+maintenance loops competing for the shared desktop.
+
+EGO also provides a local explicit entry point:
+
+```sh
+~/.venvs/barolab/bin/python3 /mnt/c/10_Project/BaroLab/ego_lite_runner.py \
+  --naver-account yoon_master --slot 09:00 --publication-date YYYY-MM-DD \
+  --main-keyword "measured query" --topic-seed "reader question" \
+  --evidence-dir /private/observed-evidence
+```
+
+Supply the intended date and original slot. This acquires EGO's singleton lock
+and invokes the same Naver runner with `--visible`; it can submit a reservation
+only after all existing gates pass. It is an explicitly authorized local action,
+not a Gemini response command. Existing prepared handoffs are reused only through
+the runner's normal input/hash and review validation. With no arguments EGO keeps
+its original daemon mode; do not start that daemon alongside the supervised run.
+`barolab-ego.service` must be inactive for this local entry because both modes
+share EGO's singleton lock. This restores supervised visible execution; it does
+not restore unattended Naver scheduling or make external model directives trusted.
+
 Recovery status on 2026-10-21: all five account profiles were checked, but login
 sessions can expire and must be checked again before submission. The daily
 publishing timer `barolab-naver-daily.timer` remains uninstalled; monitor and
@@ -115,3 +162,65 @@ path is read through `artifact_paths.py` only after a migration manifest and its
 copied evidence hashes validate; incomplete copies and missing historical
 evidence remain unknown. Journal paths and submission flags are preserved.
 Restore and reconcile missing evidence before enabling daily publishing.
+
+Historical failed attempts can be isolated from a new future slot without
+changing their journal status using `python -m naver_blog_posting.account_reconciliation
+--account <account> --preflight-file <private-proof.json> --inventory-file
+<private-public-inventory.json>` (run as one command). The preflight must come
+from an actual authenticated account and two independent, complete
+reservation observations. The command validates a complete public inventory
+hash and checks its current first page before issuing a private receipt.
+It refuses an active publisher and expires ten minutes after the oldest fresh
+observation; copying a timestamp forward cannot refresh evidence. Unknown,
+submitting, current-day and changed failures remain blocked. Candidate titles
+and the actual reservation list still require the pipeline's duplicate checks.
+One renewal during a running job requires `--worker-id <exact-id>`, genuinely
+new account/reservation observations, an unchanged historical failure set, and
+proof that this worker started within the original idle receipt's lifetime.
+The renewal applies only to that worker's account and target day and expires
+again after ten minutes; it cannot be renewed repeatedly. Refresh immediately
+before the existing submission checks for a long generation run.
+Complete nonempty reservation lists are accepted only when both independent
+modern-editor counts equal the distinct title/time rows and both legacy-editor
+counts are zero. An occupied target time stays blocked unless the same exact
+title/time already has verified local evidence. A different future slot can be
+planned; final submission rechecks the live list and rejects either a matching
+time or matching normalized title. A failed list observation blocks submission.
+The repeatable live collector is `python -m naver_blog_posting.account_reconciliation
+--account <account> --refresh`. It reuses the approved account launcher/profile,
+checks signed-in account and blog ownership, performs the existing two-pass
+reservation observation, and collects or head-validates the full public catalog.
+Only its temporary tabs are closed. For the one permitted active-job renewal,
+add the exact `--worker-id`; coordinate this immediately before submission.
+This command prepares evidence only and does not generate content or submit it.
+This capability does not itself enable the daily timer.
+
+The explicit EGO Naver entry runs this fresh reconciliation before launching the
+canonical pipeline and stops if it fails. `--prepared-dir <account-output-folder>`
+forwards an existing handoff to the canonical validator; it does not bypass review
+or change the requested content fingerprint. The daemon must remain inactive while
+using this singleton-protected local entry. This is not automatic daily recovery.
+
+Visual approvals now include actual decoded image bytes, their SHA256, the exact
+image plan hash, and an independent pixel-review verdict. Missing or changed
+evidence blocks handoff; rejected verdicts remain in the review JSON. External
+material imports and planning-failure reclassification remain explicitly blocked
+until their verification contracts are implemented.
+
+The daily unit and timer in this directory are source templates only: they have
+not been installed or enabled. On Ubuntu, `windows_worker.py --task naver-daily`
+routes through `ego_lite_runner.py --naver-catch-up` and EGO's singleton lock into
+the existing bounded coordinator. It refreshes actual account evidence before
+planning and again before each selected worker, and uses the visible workflow.
+Before submission it performs the existing single active-worker renewal using
+the exact worker identity; failure or missing identity stops submission. The
+original idle proof must still have been valid at worker start. There is no TTL
+extension without new observations and no repeated renewal lease.
+The seven existing daily slots remain unchanged; this adds no publication quota
+and does not execute missed slots at shifted times. The EGO daemon must be stopped
+and the approved desktop/profile sessions available before this entry can run.
+`ego_lite_runner.py --naver-catch-up --dry-run` only reads the current recovery plan;
+it does not refresh evidence, open a browser, generate content or submit anything.
+An expired receipt can block a new attempt even while previously verified
+reservation evidence remains stored. Timer activation requires a separate
+operational decision after representative publication verification.
