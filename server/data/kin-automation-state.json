@@ -1,12 +1,12 @@
 {
   "schema": "naver-kin-automation-state-v1",
-  "checkedAt": "2026-10-20T18:23:28.097426+00:00",
+  "checkedAt": "2026-10-20T23:03:29.890967+00:00",
   "startDate": "2026-10-15",
   "endDate": "2026-10-21",
   "enabled": true,
   "continuousMode": true,
   "mode": "alternating_interval",
-  "intervalMinutes": 21,
+  "intervalMinutes": 18,
   "intervalJitterMinutes": [
     18,
     22
@@ -14,17 +14,9 @@
   "pollMinutes": 5,
   "globalDailyCap": 20,
   "accountDailyCap": 10,
-  "runs": [
-    {
-      "runId": "2026-10-21_84785092754d_adinfo0905_0323",
-      "account": "adinfo0905",
-      "state": "skipped",
-      "reason": "model_skipped_no_good_match",
-      "discovered": 18
-    }
-  ],
-  "state": "completed_cycle",
-  "measurementStatus": "collected",
+  "runs": [],
+  "state": "waiting",
+  "measurementStatus": "not_attempted",
   "dryRun": false,
   "browsers": [
     {
@@ -40,35 +32,33 @@
       "started": false
     }
   ],
-  "runId": "2026-10-21_84785092754d_adinfo0905_0323",
-  "account": "adinfo0905",
-  "lastRunAt": "2026-10-21T03:24:50.684601+09:00",
-  "lastAccount": "adinfo0905",
-  "nextEligibleAt": "2026-10-21T03:45:50.684601+09:00",
-  "nextAccount": "stone0747",
+  "reason": "minimum_interval_not_elapsed",
+  "lastRunAt": "2026-10-21T08:02:42.802227+09:00",
+  "lastAccount": "stone0747",
+  "nextEligibleAt": "2026-10-21T08:20:42.802227+09:00",
+  "nextAccount": "adinfo0905",
   "activeRunId": null,
   "activeAccount": null,
   "activeStartedAt": null,
   "cadenceState": "waiting",
   "operationCounts": {
-    "adinfo0905": 1,
-    "stone0747": 1
+    "adinfo0905": 6,
+    "stone0747": 7
   },
   "submissionCounts": {
     "adinfo0905": 0,
-    "stone0747": 1
+    "stone0747": 2
   },
   "retryAttemptsToday": 1,
-  "globalRemainingRuns": 18,
+  "globalRemainingRuns": 7,
   "byAccountRemainingRuns": {
-    "adinfo0905": 9,
-    "stone0747": 9
+    "adinfo0905": 4,
+    "stone0747": 3
   },
-  "measurementComplete": true,
   "registeredTasks": {
     "status": "observed",
     "platform": "systemd-user",
-    "checkedAt": "2026-10-20T18:26:13.907682+00:00",
+    "checkedAt": "2026-10-20T23:03:51.122447+00:00",
     "tasks": [
       {
         "taskName": "barolab-kin.timer",
@@ -77,8 +67,8 @@
         "enabled": true,
         "workflowMatches": true,
         "state": "Ready",
-        "nextRunAt": "Wed 2026-10-21 03:30:00 KST",
-        "lastRunAt": "",
+        "nextRunAt": "Wed 2026-10-21 08:05:00 KST",
+        "lastRunAt": "Wed 2026-10-21 08:03:29 KST",
         "lastResult": "success",
         "lastExitStatus": "0"
       },

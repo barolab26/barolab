@@ -156,12 +156,13 @@ class BrowserEvidenceTests(unittest.TestCase):
         self.assertEqual(result['answer_id'],'123')
         button.click.assert_called_once()
         self.assertEqual(page.remove_listener.call_count,2)
-        self.assertEqual(result['submissionObservation']['responses'],[{'path':'/ajax/detail/registerAnswerForSmartEditorOne.naver','status':200,'questionBound':True,'contentType':'application/json','resultCodes':{'isSuccess':True}}])
+        self.assertEqual(result['submissionObservation']['responses'],[{'path':'/ajax/detail/registerAnswerForSmartEditorOne.naver','status':200,'questionBound':True,'contentType':'application/json','resultCodes':{'isSuccess':True},'decodeStatus':'unsupported_response_shape'}])
         self.assertNotIn('private',json.dumps(result))
 
     def test_response_candidate_requires_single_exact_question_and_stays_unverified(self):
         for doc_id, count, expected in (('123',1,'456'),('999',1,None),('123',2,None),
-                                         ('malformed',1,None),('non_json',1,None),('unbound',1,None)):
+                                         ('malformed',1,None),('non_json',1,None),('unbound',1,None),
+                                         ('array',1,None),('html',1,None)):
             with self.subTest(doc_id=doc_id,count=count):
                 page=Mock();button=Mock();button.count.return_value=1;button.is_enabled.return_value=True
                 nodes=Mock();nodes.all_inner_texts.return_value=[]
@@ -176,6 +177,10 @@ class BrowserEvidenceTests(unittest.TestCase):
                     response.json=lambda:{'isSuccess':True,'result':'unexpected string'}
                 elif doc_id == 'non_json':
                     response.json=Mock(side_effect=ValueError('private malformed body'))
+                elif doc_id == 'array':
+                    response.json=lambda:['private unexpected payload']
+                elif doc_id == 'html':
+                    response.headers={'content-type':'text/html'}
                 elif doc_id == 'unbound':
                     response.request=SimpleNamespace(method='POST')
                 def clicked(**kwargs):
@@ -194,6 +199,9 @@ class BrowserEvidenceTests(unittest.TestCase):
                 self.assertEqual(result['submissionObservation']['responses'][0]['status'],200)
                 if doc_id == 'unbound':
                     self.assertFalse(result['submissionObservation']['responses'][0]['questionBound'])
+                expected_decode = {'malformed':'unsupported_response_shape', 'array':'unsupported_response_shape',
+                                   'non_json':'json_decode_failed', 'html':'non_json_content_type'}.get(doc_id)
+                self.assertEqual(result['submissionObservation']['responses'][0].get('decodeStatus'), expected_decode)
                 self.assertNotIn('private',json.dumps(result))
                 self.assertIn('submitted_unverified',result['reason'])
                 button.click.assert_called_once()

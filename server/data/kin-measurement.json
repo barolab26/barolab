@@ -1,6 +1,6 @@
 {
   "schema": "naver-kin-measurement-v1",
-  "checkedAt": "2026-10-21T03:24:27.819794+09:00",
+  "checkedAt": "2026-10-21T08:02:20.394943+09:00",
   "source": "GA4 Data API",
   "timezone": "Asia/Seoul",
   "startDate": "2026-10-15",
@@ -348,9 +348,9 @@
     {
       "day": "2026-10-21",
       "discovered": 1,
-      "drafted": 1,
-      "attempted": 1,
-      "published_verified": 0
+      "drafted": 2,
+      "attempted": 2,
+      "published_verified": 1
     },
     {
       "day": "2026-10-20",

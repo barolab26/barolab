@@ -492,7 +492,12 @@ def publish(account, question_url, answer_text, before_submit=None):
                     pass
                 # Never retain query strings, request bodies, or arbitrary response text.
                 if 'json' in row['contentType']:
-                    value = response.json()
+                    try:
+                        value = response.json()
+                    except Exception:
+                        row['decodeStatus'] = 'json_decode_failed'
+                        return
+                    row['decodeStatus'] = 'unsupported_response_shape'
                     if isinstance(value, dict):
                         codes = {key: item for key, item in value.items()
                                  if key in ('isSuccess', 'success', 'code', 'resultCode')
@@ -504,6 +509,10 @@ def publish(account, question_url, answer_text, before_submit=None):
                         answer = inner.get('answerNo') if isinstance(inner, dict) else None
                         if value.get('isSuccess') is True and str(answer or '').isdigit():
                             row['answerId'] = str(answer)
+                        if value.get('isSuccess') is False or row.get('answerId'):
+                            row.pop('decodeStatus', None)
+                else:
+                    row['decodeStatus'] = 'non_json_content_type'
             except Exception:
                 pass
         page.on('response', observed_response)
