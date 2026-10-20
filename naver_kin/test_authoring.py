@@ -14,6 +14,59 @@ class AuthoringEvidenceTests(unittest.TestCase):
             ['카페 주차', '외곽 감성 카페', '카페 주차 방법']}), '카페 주차')
         self.assertIsNone(authoring._primary_discovery_keyword({'keywords': []}))
 
+    def test_explicit_question_seed_keeps_exact_article_and_existing_gates(self):
+        from contextlib import ExitStack
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        import json
+        connect = authoring.pipeline.connect
+        entry = {'url': 'https://www.must-good.com/museum', 'keywords': ['박물관 사진'], 'domain': 'must-good.com'}
+        other = {'url': 'https://www.must-good.com/other', 'keywords': ['다른 주제']}
+        question = {'question_id': '12345', 'question_url': 'https://kin.naver.com/qna/detail.naver?docId=12345',
+                    'title': '박물관 사진', 'body': '사진 촬영 가능한가요?'}
+        with TemporaryDirectory() as folder, ExitStack() as stack:
+            dbpath = Path(folder) / 'test.sqlite3'
+            stack.enter_context(patch.object(authoring.pipeline, 'ROOT', Path(folder)))
+            def opened():
+                db = connect(dbpath)
+                stack.callback(db.close)
+                return db
+            stack.enter_context(patch.object(authoring.pipeline, 'connect', side_effect=opened))
+            stack.enter_context(patch.object(authoring, 'selected_model', return_value='selected'))
+            stack.enter_context(patch.object(authoring.codex_cli, 'refresh_runtime', return_value={'authenticated': True}))
+            stack.enter_context(patch.object(authoring, 'get_today_used_domains', return_value={}))
+            stack.enter_context(patch.object(authoring, 'select_discovery_track', return_value='track_b_search_top'))
+            stack.enter_context(patch.object(authoring, 'load_dynamic_catalog', return_value=[other, entry]))
+            snapshot = stack.enter_context(patch.object(authoring.pipeline, 'article_snapshot', return_value={
+                'url': entry['url'], 'body_sha256': 'hash', 'body': '박물관 사진 촬영 안내'}))
+            stack.enter_context(patch.object(authoring, '_sources', return_value=[{'url': entry['url'], 'body': '박물관 사진 촬영 안내'}]))
+            discover = stack.enter_context(patch.object(authoring.browser, 'discover'))
+            read = stack.enter_context(patch.object(authoring.browser, 'read_question', side_effect=lambda *args: dict(question)))
+            generate = stack.enter_context(patch.object(authoring.codex_cli, 'generate_local', return_value=(
+                {'question_id': '', 'article_url': '', 'reason': 'no_good_match'}, 'selected')))
+            result = authoring.generate_for_slot('adinfo0905', '2026-10-21_adinfo0905_0910', 'selected',
+                article_catalog=[entry], question_urls=[question['question_url'], question['question_url']+'&page=1'])
+            self.assertIsNone(result['document'])
+            self.assertEqual(result['reason'], 'model_skipped_no_good_match')
+            read.assert_called_once(); discover.assert_not_called()
+            snapshot.assert_called_once_with(entry['url'], fallback_body=None)
+            sources = json.loads((Path(result['artifact_dir']) / 'sources.json').read_text(encoding='utf-8'))
+            self.assertEqual([a['url'] for a in sources['articles']], [entry['url']])
+            self.assertEqual(sources['questions'][0]['discovery_method'], 'explicit_question_url')
+            read.reset_mock(); generate.reset_mock()
+            again = authoring.generate_for_slot('adinfo0905', '2026-10-21_adinfo0905_0910', 'selected',
+                article_catalog=[entry], question_urls=[question['question_url']])
+            self.assertIsNone(again['document'])
+            read.assert_not_called(); generate.assert_not_called()
+
+    def test_explicit_question_input_rejects_empty_invalid_and_missing_catalog(self):
+        for urls, catalog in [([], [{}]), (['https://evil.test/?docId=12345'], [{}]),
+                              (['https://kin.naver.com/qna/detail.naver?docId=12345'] * 5, [{}]),
+                              (['https://kin.naver.com/qna/detail.naver?docId=12345'], None)]:
+            with self.subTest(urls=urls), self.assertRaises(ValueError):
+                authoring.generate_for_slot('adinfo0905', '2026-10-21_adinfo0905_0910', 'selected',
+                                             article_catalog=catalog, question_urls=urls)
+
     def test_actual_old_arboretum_question_rejects_other_institution_sources(self):
         question = {'title': '아침고요수목원 예약질문',
                     'body': '내일 아침고요수목원 방문 예정입니다. 코로나 때문에 예약해야 하나요?',

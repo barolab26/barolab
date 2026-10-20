@@ -484,9 +484,14 @@ def _primary_discovery_keyword(entry):
                  and set(phrase.split()) - tokens - GENERIC_STOPWORDS), primary)
 
 
-def generate_for_slot(account, slot_id, model, article_catalog=None):
+def generate_for_slot(account, slot_id, model, article_catalog=None, question_urls=None):
     """Return reviewed document or explicit skip; no ledger or publishing mutation."""
     pipeline.account_key(account)
+    if question_urls is not None:
+        if not isinstance(question_urls, (list, tuple)) or not 1 <= len(question_urls) <= 4 or not article_catalog:
+            raise ValueError('Explicit questions require 1 to 4 URLs and an exact article catalogue')
+        for url in question_urls:
+            browser.question_id(url)
     if model != selected_model():
         raise ValueError('Model must match explicit KnowledgeIn subscription configuration')
     info = codex_cli.refresh_runtime()
@@ -500,12 +505,17 @@ def generate_for_slot(account, slot_id, model, article_catalog=None):
         catalogue = load_dynamic_catalog(max_items=50, base_catalog=article_catalog)
     else:
         catalogue = load_dynamic_catalog(max_items=50)
+    if question_urls is not None:
+        selected_urls = {item['url'] for item in article_catalog}
+        catalogue = [item for item in catalogue if item['url'] in selected_urls]
+        if {item['url'] for item in catalogue} != selected_urls:
+            raise ValueError('Explicit article seed was not accepted by the verified catalogue')
     if not 1 <= len(catalogue) <= 50:
         raise ValueError('Article catalogue must contain 1 to 50 verified owned entries')
 
     # Rotate working slice across the 21-channel catalog so a single domain never monopolizes discovery
     slot_seed = sum(ord(c) for c in str(slot_id)) % max(1, len(catalogue))
-    rotated_catalogue = catalogue[slot_seed:] + catalogue[:slot_seed]
+    rotated_catalogue = catalogue if question_urls is not None else catalogue[slot_seed:] + catalogue[:slot_seed]
     working_catalogue = rotated_catalogue[:10]
     articles = []
     valid_catalogue = []
@@ -546,9 +556,23 @@ def generate_for_slot(account, slot_id, model, article_catalog=None):
         rejected = {row[0] for row in db.execute(
             'SELECT question_id FROM authoring_evaluations WHERE source_hash=?', (source_hash,))}
     search_page = min(3, 1 + len(rejected) // 6)
-    discovered = browser.discover(account, keywords, limit=18, page_number=search_page,
-                                  include_latest=True, track=target_track,
-                                  exclude_question_ids=reserved | rejected)
+    if question_urls is None:
+        discovered = browser.discover(account, keywords, limit=18, page_number=search_page,
+                                      include_latest=True, track=target_track,
+                                      exclude_question_ids=reserved | rejected)
+    else:
+        discovered = browser.DiscoveryResults()
+        excluded = reserved | rejected
+        for url in question_urls:
+            identifier = browser.question_id(url)
+            if identifier in excluded:
+                continue
+            excluded.add(identifier)
+            question = browser.read_question(account, url)
+            if question['question_id'] != identifier:
+                raise ValueError('Explicit question changed identity')
+            question['discovery_method'] = 'explicit_question_url'
+            discovered.append(question)
     candidates = [q for q in discovered if q['question_id'] not in reserved and not q.get('image_urls')
                   and not q.get('requires_visual_evidence')
                   and q.get('answer_button_present', True) and _related_question(q, catalogue)
