@@ -43,6 +43,14 @@ class DiscoveryResults(list):
         self.skipped = []
 
 
+def _check_protection_message(message):
+    if any(word in message for word in ('보호조치', '보안문자', '자동입력 방지', 'CAPTCHA')):
+        raise AccountProtectionError('Visible NAVER protection challenge; manual resolution required')
+    compact = re.sub(r'\s+', '', message)
+    if any(word in compact for word in ('계정이제한', '아이디가제한', '글쓰기제한', '답변활동제한')):
+        raise AccountProtectionError('Visible NAVER account writing restriction; manual resolution required')
+
+
 def _check_service_state(page):
     if urlsplit(page.url).hostname == 'nid.naver.com':
         raise LoginRequiredError('NAVER redirected to authentication; no automatic login')
@@ -54,11 +62,7 @@ def _check_service_state(page):
             message = dialog.inner_text().strip()
             if not message:
                 continue
-            if any(word in message for word in ('보호조치', '보안문자', '자동입력 방지', 'CAPTCHA')):
-                raise AccountProtectionError('Visible NAVER protection challenge; manual resolution required')
-            compact = re.sub(r'\s+', '', message)
-            if any(word in compact for word in ('계정이제한', '아이디가제한', '글쓰기제한', '답변활동제한')):
-                raise AccountProtectionError('Visible NAVER account writing restriction; manual resolution required')
+            _check_protection_message(message)
             if selector in ('#notAnswerableLayer', '#deferredExpertLayer'):
                 raise QuestionUnavailableError('Visible question/field-specific answer restriction; skip question')
 
@@ -456,9 +460,16 @@ def publish(account, question_url, answer_text, before_submit=None):
         responses, dialogs = [], []
         def observed_dialog(dialog):
             message = str(dialog.message)
+            protection_reason = None
+            try:
+                _check_protection_message(message)
+            except AccountProtectionError as exc:
+                protection_reason = str(exc)
             message = re.sub(r'https?://[^\s]+|[\w.+-]+@[\w.-]+|(?<!\d)01[016789][ -]?\d{3,4}[ -]?\d{4}(?!\d)', '[redacted]', message)
             message = re.sub(r'(?i)(token|secret|password|authorization|cookie)\s*[:=][^\r\n]*', r'\1=[redacted]', message)
             dialogs.append({'type': dialog.type, 'message': message[:500]})
+            if protection_reason:
+                dialogs[-1]['protectionReason'] = protection_reason
             del dialogs[:-5]
             # Dismiss alerts as Playwright normally does; never approve a confirmation.
             dialog.dismiss()
@@ -502,6 +513,9 @@ def publish(account, question_url, answer_text, before_submit=None):
             button.click(timeout=12000)
             for _ in range(30):
                 page.wait_for_timeout(500)
+                protection = next((row['protectionReason'] for row in dialogs if row.get('protectionReason')), None)
+                if protection:
+                    raise AccountProtectionError(protection)
                 if dialogs or any(row.get('status', 0) >= 400 or row.get('resultCodes', {}).get('isSuccess') is False for row in responses):
                     break
                 candidates = [row for row in responses if row.get('questionBound') is True

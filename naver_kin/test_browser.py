@@ -105,6 +105,37 @@ class BrowserEvidenceTests(unittest.TestCase):
         self.assertNotIn('private',json.dumps(result))
         self.assertNotIn('user@example.com',json.dumps(result))
 
+    def test_explicit_protection_alert_halts_after_one_click(self):
+        page = Mock()
+        nodes = Mock(); nodes.all_inner_texts.return_value = []
+        paragraphs = Mock(); paragraphs.all_inner_texts.return_value = ['reviewed answer']
+        button = Mock(); button.count.return_value = 1; button.is_enabled.return_value = True
+        button.is_visible.return_value = True
+        def locate(selector):
+            if selector == '#answerRegisterButton': return button
+            if selector == '.se-canvas .se-text-paragraph .__se-node': return nodes
+            if selector == '.se-canvas .se-text-paragraph': return paragraphs
+            return Mock()
+        page.locator.side_effect = locate
+        page.content.return_value = '<html>Submission result is not yet observable</html>'
+        dialog=Mock();dialog.type='alert';dialog.message='계정이 제한되었습니다. CAPTCHA 보호조치'
+        button.click.side_effect=lambda **kwargs: next(call.args[1] for call in page.on.call_args_list if call.args[0]=='dialog')(dialog)
+        @contextmanager
+        def session(_): yield page
+        before = Mock()
+        with patch.object(browser, 'session', session), patch.object(browser, '_question_ownership', return_value={
+                'answer_ids': [], 'known': True, 'complete': True}), patch.object(browser, '_read'), \
+                patch.object(browser, '_check_service_state'), patch.object(browser, '_type_paragraphs'):
+            with self.assertRaises(browser.AccountProtectionError) as caught:
+                browser.publish('adinfo0905', 'https://kin.naver.com/qna/detail.naver?docId=123',
+                                'reviewed answer', before_submit=before)
+        before.assert_called_once()
+        button.click.assert_called_once_with(timeout=12000)
+        diagnostic = caught.exception.submission_observation
+        self.assertIn('protectionReason', diagnostic['dialogs'][0])
+        dialog.dismiss.assert_called_once(); dialog.accept.assert_not_called()
+        self.assertEqual(page.remove_listener.call_count, 2)
+
     def test_delayed_exact_owned_answer_is_observed_without_another_click(self):
         page=Mock(); button=Mock(); button.count.return_value=1;button.is_enabled.return_value=True
         nodes=Mock();nodes.all_inner_texts.return_value=[]
