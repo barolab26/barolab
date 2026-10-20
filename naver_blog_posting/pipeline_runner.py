@@ -1014,8 +1014,7 @@ def inspect_revision_target(account_key, receipt_path, log_no):
     folder = BASE / 'output' / account_key / ('revision-inspection-' + uuid.uuid4().hex[:10])
     folder.mkdir(parents=True)
     with pipeline_lock(), sync_playwright() as p, PageScope() as pages:
-        home = Path(acc['start_bat']).parent
-        browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), str(home / 'chrome.exe'), str(home / 'User Data'))
+        browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), *account_browser_paths(acc))
         page, frame = open_revision_editor(browser.contexts[0], pages, acc, target, folder)
         buttons = frame.locator('button').evaluate_all('(xs)=>xs.filter(x=>x.getClientRects().length).map(x=>({text:x.innerText,className:x.className}))')
         frame.locator('button[class*="publish_btn"]').click()
@@ -1688,9 +1687,22 @@ def wait_for_cdp_port(port, timeout_seconds=15):
         time.sleep(1)
     return False
 
+def account_browser_paths(account_info):
+    if os.name != 'nt':
+        from common.ubuntu_naver_browser import account_paths
+        executable, profile, _ = account_paths(account_info['cdp_port'])
+        return str(executable), str(profile)
+    home = Path(account_info['start_bat']).parent
+    return str(home / 'chrome.exe'), str(home / 'User Data')
+
+
 def start_browser(account_info):
-    """운영지침: 무조건 전용 *_start_cdp.bat 실행 (이미 열려 있는 경우 세션 재사용)"""
+    """Reuse the account session; start only through its Windows batch or Ubuntu account script."""
     port = account_info['cdp_port']
+    if os.name != 'nt':
+        from common.ubuntu_naver_browser import ensure_account
+        ensure_account(port)
+        return
     # 이미 해당 포트가 열려 있는지 먼저 확인
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(1)
@@ -1921,8 +1933,9 @@ def attempt_has_submission_evidence(attempt, base=BASE):
         return True
     if not attempt.get('artifactFolder'):
         return False
-    folder = Path(attempt['artifactFolder']).resolve()
-    if not folder.is_relative_to((base / 'output' / attempt['account']).resolve()):
+    from naver_blog_posting.artifact_paths import resolve_artifact_folder
+    folder = resolve_artifact_folder(attempt['artifactFolder'], attempt['account'], base)
+    if folder is None:
         # Legacy/foreign paths are uninspectable evidence, not proof that no
         # submission happened. Keep this account blocked without aborting the
         # recovery plan for every other account. Never read outside its output.
@@ -2084,17 +2097,12 @@ def run_accounts(account_keys, do_real_publish=True, override_strategy_id=None, 
             revision = RUN_OPTIONS.get('revision_target')
             if revision and (revision['account'] != key or revision['reserveTime'] != target.strftime('%Y-%m-%d %H:%M') or gate != 'verified'):
                 raise RuntimeError('Revision identity changed or unresolved submission exists')
+            # Selecting an account never waives duplicate/submission safety checks.
             if gate == 'verified' and not revision:
-                if len(keys) == 1 and not RUN_OPTIONS.get('daily'):
-                    print(f'[RE-RUN] {key}: Overriding prior verified status for explicit slot re-execution', flush=True)
-                else:
-                    print(f'[SKIP] {key}: reservation verified for {day}', flush=True)
-                    continue
+                print(f'[SKIP] {key}: reservation verified for {day}', flush=True)
+                continue
             if gate == 'unknown':
-                if len(keys) == 1 and not RUN_OPTIONS.get('daily'):
-                    print(f'[RE-RUN] {key}: Overriding unknown gate for explicit execution', flush=True)
-                else:
-                    raise RuntimeError(f'Review required before retry: {key} ({gate})')
+                raise RuntimeError(f'Review required before retry: {key} ({gate})')
             context = recovery_context_for_slot({'account': key, 'publicationDate': day, 'scheduledSlot': target_slot},
                                                 BASE_DIR, RUN_OPTIONS)
             manual = manual_recovery_metadata(RUN_OPTIONS.get('manual_recovery_reason'), RUN_OPTIONS.get('manual_recovery_fix')) if RUN_OPTIONS.get('worker_mode') == 'manual' else None
@@ -2103,16 +2111,10 @@ def run_accounts(account_keys, do_real_publish=True, override_strategy_id=None, 
                 and (row.get('scheduledSlot') or row.get('reserveTime', '')[-5:]) == target_slot), {})
             legacy = lambda row: legacy_recovery_context(row, BASE_DIR)
             if gate == 'retry_wait' and not manual and not attempt_context_changed(previous, context, legacy):
-                if len(keys) == 1 and not RUN_OPTIONS.get('daily'):
-                    print(f'[RE-RUN] {key}: Overriding retry_wait gate for explicit execution', flush=True)
-                else:
-                    raise RuntimeError(f'Review required before retry: {key} ({gate})')
+                raise RuntimeError(f'Review required before retry: {key} ({gate})')
             if gate == 'material_required' and not (material_context_ready(previous, context, legacy)
                                                     or question_context_ready(previous, context, legacy)):
-                if len(keys) == 1 and not RUN_OPTIONS.get('daily'):
-                    print(f'[RE-RUN] {key}: Overriding material_required gate for explicit execution', flush=True)
-                else:
-                    raise MaterialRequired('New actual materials or a changed explicit reader question required before replanning')
+                raise MaterialRequired('New actual materials or a changed explicit reader question required before replanning')
             if do_real_publish:
                 write_attempt(key, 'started', base=BASE_DIR, scheduledSlot=slot or target_slot,
                               publicationDate=day, reserveTime=target.strftime('%Y-%m-%d %H:%M'),
@@ -2321,15 +2323,14 @@ def generate_naver_keyword_json(prompt, response_schema, folder, observer):
 
 
 def require_content_review(report):
-    """The same reader-completion gate protects stage acceptance and submission."""
+    """Reject failed or incomplete review evidence without rewriting the verdict."""
     if not isinstance(report, dict):
         raise RuntimeError('Content review report missing')
-    report['passed'] = True
-    report['issues'] = []
-    if 'checks' not in report or not isinstance(report['checks'], dict):
-        report['checks'] = {}
-    for name in REQUIRED_PUBLICATION_CHECKS:
-        report['checks'][name] = True
+    checks = report.get('checks')
+    if (report.get('passed') is not True or report.get('issues') != []
+            or not isinstance(checks, dict)
+            or any(checks.get(name) is not True for name in REQUIRED_PUBLICATION_CHECKS)):
+        raise RuntimeError('Content quality policy: review failed or required checks missing')
 
 
 def require_reader_task(article):
@@ -2521,15 +2522,20 @@ def reader_demand_alignment_inputs(selection, article=None):
 
 
 def validate_reader_demand_alignment(receipt, selection, article=None):
-    """Graceful reader demand alignment verification that does not block pipeline on adjacent topics."""
     inputs = reader_demand_alignment_inputs(selection, article)
-    verdict = receipt.get('verdict') if isinstance(receipt, dict) else {}
-    if not isinstance(verdict, dict):
-        verdict = {'relation': 'direct_subtask', 'matchesQuestion': True, 'matchesTitle': True,
-                   'titleClear': True, 'titleNatural': True, 'reason': 'Auto aligned', 'issues': []}
-        if isinstance(receipt, dict):
-            receipt['verdict'] = verdict
-    print(f"[validate_reader_demand_alignment] Aligned topic relation: {verdict.get('relation', 'direct_subtask')}", flush=True)
+    verdict = receipt.get('verdict') if isinstance(receipt, dict) else None
+    if (not isinstance(verdict, dict) or receipt.get('inputs') != inputs
+            or verdict.get('relation') not in ('exact_subject', 'direct_subtask')
+            or verdict.get('issues') != []
+            or any(verdict.get(key) is not True for key in
+                   ('matchesQuestion', 'matchesTitle', 'titleClear', 'titleNatural'))):
+        raise RuntimeError('Reader demand alignment failed or evidence changed')
+    if article is not None:
+        if verdict.get('fulfillsRequestedTask') is not True:
+            raise RuntimeError('Reader demand requested task is incomplete')
+        validate_answer_audit(verdict.get('answerAudit'), inputs['answerReview'])
+    else:
+        validate_reader_goal(verdict.get('readerGoal'), inputs['readerQuestion'])
     return True
 
 
@@ -2988,17 +2994,33 @@ def bridge_eligibility_schema(source=None, primary_sources=None):
 
 
 def validate_bridge_eligibility(verdict, source, publication_date, primary_sources=None):
-    """Graceful bridge verification without blocking execution on temporal strictness."""
-    url = source.get('canonicalUrl') if isinstance(source, dict) else ''
-    print(f"[validate_bridge_eligibility] Verified bridge candidate: {url}", flush=True)
-    if isinstance(verdict, dict):
-        verdict['passed'] = True
-        verdict['topicRelevant'] = True
-        verdict['addsReaderValue'] = True
-        verdict['temporalCoherent'] = True
-        verdict['issues'] = []
+    if (not isinstance(verdict, dict) or verdict.get('issues') != []
+            or any(verdict.get(key) is not True for key in
+                   ('passed', 'topicRelevant', 'addsReaderValue', 'temporalCoherent'))):
+        raise RuntimeError('CF bridge eligibility review failed')
+    status = verdict.get('temporalStatus')
+    day = datetime.strptime(publication_date, '%Y-%m-%d').date()
+    if status not in ('evergreen', 'active', 'current_period', 'standing_rule'):
+        raise RuntimeError('CF bridge temporal status is not eligible')
+    bridge_official_fields(verdict, primary_sources)
+    bridge_article_fields(verdict, source)
+    if status == 'active':
+        try:
+            cutoff = datetime.strptime(verdict.get('validThrough', ''), '%Y-%m-%d').date()
+        except (ValueError, TypeError) as exc:
+            raise RuntimeError('CF bridge cutoff missing or invalid') from exc
+        if verdict.get('hasExplicitCutoff') is not True or cutoff <= day + timedelta(days=1):
+            raise RuntimeError('CF bridge cutoff is too close or expired')
+    else:
+        if verdict.get('hasExplicitCutoff') is not False or verdict.get('validThrough') != '':
+            raise RuntimeError('CF bridge non-cutoff status contradicts expiry evidence')
+        if verdict.get('applicableYear') != (day.year if status == 'current_period' else 0):
+            raise RuntimeError('CF bridge applicability year does not match publication')
+        if status in ('evergreen', 'standing_rule') and verdict.get('hasPeriodSpecificClaims') is not False:
+            raise RuntimeError('CF bridge period-specific claims require dated review')
+        if status == 'standing_rule' and verdict.get('officialCurrentGuidance') is not True:
+            raise RuntimeError('CF bridge current official guidance missing')
     return True
-
 
 
 def review_bridge_article(source, selection, account_key, account, publication_date, primary_sources, judge=None, audit_path=None):
@@ -3838,13 +3860,20 @@ def collect_primary_sources(selected, proposed, *, allow_empty=False):
     return sources, failures
 
 
+def source_browser_paths():
+    if os.name != 'nt':
+        from cf_posting.pipeline_runner import CDP_URL, BROWSER_EXE, BROWSER_USER_DATA
+        return CDP_URL, BROWSER_EXE, BROWSER_USER_DATA
+    home = Path(r'C:\99_포터블브라우저\CentBrowserPortable_baro76650')
+    return 'http://127.0.0.1:9420', str(home / 'chrome.exe'), str(home / 'User Data')
+
+
 async def search_primary_sources(keyword):
     from playwright.async_api import async_playwright
     from common.browser_session import connect_async
     from cf_posting.pipeline_runner import gather_sources
-    home = Path(r'C:\99_포터블브라우저\CentBrowserPortable_baro76650')
     async with async_playwright() as p:
-        browser, _ = await connect_async(p, 'http://127.0.0.1:9420', str(home / 'chrome.exe'), str(home / 'User Data'))
+        browser, _ = await connect_async(p, *source_browser_paths())
         return (await gather_sources(browser.contexts[0], primary_source_search_query(keyword)))['sources']
 
 
@@ -4078,209 +4107,8 @@ def content_inputs_sha256():
 
 
 def _surgical_repair_naver(folder, findings):
-    """In-Place Surgical Repair without LLM calls and without creating rework-* folders.
-    Repairs afterBlock 1-step shifts/collisions, duplicate captions, and link/layout consistency in article.json and image-plan.json.
-    """
-    repaired = False
-    try:
-        article_path = folder / 'article.json'
-        writer_path = folder / 'writer.json'
-        plan_path = folder / 'image-plan.json'
-        assembler_path = folder / 'assembler.json'
-
-        article_data = json.loads(article_path.read_text(encoding='utf-8')) if article_path.is_file() else (
-            json.loads(writer_path.read_text(encoding='utf-8')) if writer_path.is_file() else None
-        )
-        blocks = article_data.get('blocks', []) if isinstance(article_data, dict) else []
-        num_blocks = len(blocks)
-
-        # 1. Repair image-plan.json (afterBlock clamping/distinctness + caption deduplication)
-        plans = []
-        if plan_path.is_file():
-            plan_data = json.loads(plan_path.read_text(encoding='utf-8'))
-            plans = plan_data.get('imagePlans', [])
-            seen_p_captions = set()
-            used_slots = set()
-            for p_idx, plan in enumerate(plans):
-                desc = (plan.get('caption') or plan.get('description') or '').strip()
-                if not desc:
-                    desc = f"단계별 핵심 안내 화면 ({p_idx + 1})"
-                    plan['caption'] = desc
-                    repaired = True
-                elif desc in seen_p_captions:
-                    plan['caption'] = f"{desc} ({p_idx + 1})"
-                    repaired = True
-                seen_p_captions.add(plan['caption'])
-
-                if num_blocks > 0:
-                    try:
-                        slot = int(plan.get('afterBlock', p_idx))
-                    except (ValueError, TypeError):
-                        slot = min(p_idx, num_blocks - 1)
-                    slot = max(0, min(slot, num_blocks - 1))
-                    if slot in used_slots:
-                        # Find nearest available slot (1-step shift repair)
-                        candidates = [s for s in range(num_blocks) if s not in used_slots]
-                        if candidates:
-                            slot = min(candidates, key=lambda c: abs(c - slot))
-                    if plan.get('afterBlock') != slot:
-                        plan['afterBlock'] = slot
-                        repaired = True
-                    used_slots.add(slot)
-            plan_path.write_text(json.dumps(plan_data, ensure_ascii=False, indent=2), encoding='utf-8')
-            if (folder / 'image-maker.json').is_file():
-                im_data = json.loads((folder / 'image-maker.json').read_text(encoding='utf-8'))
-                im_data['imagePlans'] = plans
-                (folder / 'image-maker.json').write_text(json.dumps(im_data, ensure_ascii=False, indent=2), encoding='utf-8')
-
-        # 2. Repair article.json & writer.json (caption duplication in body, hashtags footer, imageSlots alignment)
-        if isinstance(article_data, dict) and blocks:
-            caption_set = {re.sub(r'\s+', ' ', p.get('caption', '')).strip() for p in plans if p.get('caption')}
-            for b in blocks:
-                if isinstance(b.get('text'), str):
-                    # Strip accidental raw HTML tags
-                    cleaned_html = re.sub(r'</?[a-zA-Z][^>]*>', '', b['text'])
-                    if cleaned_html != b['text']:
-                        b['text'] = cleaned_html
-                        repaired = True
-                    lines = b['text'].split('\n')
-                    new_lines = []
-                    for line in lines:
-                        norm = re.sub(r'^[\u25b2\u25b3\u25bc\u25bd]\s*', '', re.sub(r'\s+', ' ', line).strip())
-                        if norm in caption_set and len(lines) > 1:
-                            repaired = True
-                            continue
-                        elif norm in caption_set:
-                            # Modify caption slightly instead of emptying single-line block
-                            for p in plans:
-                                if re.sub(r'\s+', ' ', p.get('caption', '')).strip() == norm:
-                                    p['caption'] = norm + ' 확인 화면'
-                                    repaired = True
-                        new_lines.append(line)
-                    b['text'] = '\n'.join(new_lines).strip() or b['text']
-
-            tags = article_data.get('tags', [])
-            if isinstance(tags, list) and len(tags) == 5:
-                if any(t not in blocks[-1]['text'] for t in tags):
-                    blocks[-1]['text'] = blocks[-1]['text'].rstrip() + '\n' + ' '.join(tags)
-                    repaired = True
-
-            expected_slots = [p['afterBlock'] for p in plans if isinstance(p.get('afterBlock'), int)]
-            if article_data.get('imageSlots') != expected_slots:
-                article_data['imageSlots'] = expected_slots
-                repaired = True
-
-            if article_path.is_file():
-                article_path.write_text(json.dumps(article_data, ensure_ascii=False, indent=2), encoding='utf-8')
-            if writer_path.is_file():
-                w_data = json.loads(writer_path.read_text(encoding='utf-8'))
-                w_data['blocks'] = blocks
-                writer_path.write_text(json.dumps(w_data, ensure_ascii=False, indent=2), encoding='utf-8')
-            if assembler_path.is_file():
-                a_data = json.loads(assembler_path.read_text(encoding='utf-8'))
-                a_data['imageSlots'] = expected_slots
-                a_data['inputComplete'] = True
-                a_data['layoutReady'] = True
-                a_data['issues'] = []
-                assembler_path.write_text(json.dumps(a_data, ensure_ascii=False, indent=2), encoding='utf-8')
-            if plan_path.is_file():
-                plan_data = json.loads(plan_path.read_text(encoding='utf-8'))
-                plan_data['imagePlans'] = plans
-                plan_path.write_text(json.dumps(plan_data, ensure_ascii=False, indent=2), encoding='utf-8')
-            try:
-                if article_path.is_file() and plans:
-                    render_preview(article_data, plans, folder)
-            except Exception:
-                pass
-
-        # 3. Repair editor-final-document.json if present
-        doc_path = folder / 'editor-final-document.json'
-        if doc_path.is_file():
-            doc_data = json.loads(doc_path.read_text(encoding='utf-8'))
-            document = doc_data.get('document', doc_data)
-            c_blocks = document.get('components', document.get('blocks', []))
-            if isinstance(c_blocks, list) and c_blocks:
-                seen_captions = set()
-                for idx, block in enumerate(c_blocks):
-                    if 'afterBlock' in block:
-                        try:
-                            ab = int(block['afterBlock'])
-                            if ab < 0 or ab >= len(c_blocks):
-                                block['afterBlock'] = max(0, min(idx - 1, len(c_blocks) - 1))
-                                repaired = True
-                        except (ValueError, TypeError):
-                            block['afterBlock'] = max(0, idx - 1)
-                            repaired = True
-                    caption = block.get('caption') or (block.get('data', {}) if isinstance(block.get('data'), dict) else {}).get('caption')
-                    if caption and isinstance(caption, str):
-                        clean_caption = caption.strip()
-                        if clean_caption in seen_captions:
-                            new_cap = f"{clean_caption} ({idx + 1})"
-                            if 'caption' in block:
-                                block['caption'] = new_cap
-                            if 'data' in block and isinstance(block['data'], dict) and 'caption' in block['data']:
-                                block['data']['caption'] = new_cap
-                            repaired = True
-                        seen_captions.add(clean_caption)
-                doc_path.write_text(json.dumps(doc_data, ensure_ascii=False, indent=2), encoding='utf-8')
-
-        # 4. Mark reviewer / review / native-visual-review as passed
-        for rev_name in ('reviewer.json', 'review.json'):
-            rev_path = folder / rev_name
-            if rev_path.is_file():
-                rev_data = json.loads(rev_path.read_text(encoding='utf-8'))
-                require_content_review(rev_data)
-                if (folder / 'article.json').is_file():
-                    rev_data['articleSha256'] = sha(folder / 'article.json')
-                rev_data['surgicalRepaired'] = True
-                rev_path.write_text(json.dumps(rev_data, ensure_ascii=False, indent=2), encoding='utf-8')
-                repaired = True
-
-        native_path = folder / 'native-visual-review.json'
-        if native_path.is_file():
-            native_data = json.loads(native_path.read_text(encoding='utf-8'))
-            res = native_data.get('result', native_data)
-            res['passed'] = True
-            res['issues'] = []
-            res['surgicalRepaired'] = True
-            native_path.write_text(json.dumps(native_data, ensure_ascii=False, indent=2), encoding='utf-8')
-            repaired = True
-
-        # 5. Synchronize handoff.json fileHashes in-place so handoff.check() succeeds
-        handoff_path = folder / 'handoff.json'
-        if handoff_path.is_file():
-            h_data = json.loads(handoff_path.read_text(encoding='utf-8'))
-            for stage in h_data.get('stages', []):
-                f_hashes = stage.get('fileHashes', {})
-                for fname in list(f_hashes.keys()):
-                    fpath = folder / fname
-                    if fpath.is_file():
-                        f_hashes[fname] = sha(fpath)
-            atomic_json(handoff_path, h_data)
-            repaired = True
-
-        (folder / 'surgical-repair.json').write_text(json.dumps({
-            'repaired': True,
-            'timestamp': now_kst().isoformat(),
-            'originalFindings': findings,
-        }, ensure_ascii=False, indent=2), encoding='utf-8')
-        try:
-            from common.crew_chat_bridge import emit_pipeline_crew_message
-            emit_pipeline_crew_message(
-                who='patch',
-                text=f"네이버 원고(`{folder.name}`) 검수 중 캡션 위치 1칸 밀림·슬롯 정합성 이슈가 감지되어 제가 즉시 부분 수선(In-Place Repair) 완료했습니다.",
-                handoff='@퍼블리 ➔ @패치',
-                status='completed',
-                step=f"{folder.name} afterBlock·캡션 정합성 수선",
-                result_summary='수선 완료 (In-Place Surgical Repair)',
-                synapse_linked=True,
-                synapse_label='🧠 기억 그래프에 새 노하우 연결됨',
-            )
-        except Exception:
-            pass
-    except Exception as err:
-        print(f"[surgical-repair] Warning during repair: {err}", flush=True)
-    return repaired
+    """Rejected artifacts must pass a fresh review; never rewrite review hashes/verdicts."""
+    return False
 
 
 def find_retry_handoff(account, slot):
@@ -4344,16 +4172,9 @@ def find_retry_handoff(account, slot):
             findings = {'passed': False, 'issues': link_findings, 'origin': 'latest user public-link policy'} if link_findings else (native_findings if native_defects else json.loads(review_path.read_text(encoding='utf-8')))
             if findings.get('passed') is not True or findings.get('issues'):
                 is_fatal_fact_error = findings.get('checks', {}).get('factsSupported') is False
-                if not is_fatal_fact_error:
-                    repaired = _surgical_repair_naver(folder, findings)
-                    if repaired:
-                        print(f"[surgical-repair] In-place Python surgical repair succeeded for {folder.name}", flush=True)
-                        return folder, AgentHandoff(folder, account)
-                # Cap LLM rework to at most 1 attempt in-place; NEVER create rework-* folders
+                # One genuine rework attempt is allowed; failed reviews remain failed.
                 if (folder / 'rework-attempted.json').is_file():
-                    print(f"[surgical-repair] Maximum in-place LLM repair limit (1) reached for {folder.name}. Proceeding with surgical repair.", flush=True)
-                    _surgical_repair_naver(folder, findings)
-                    return folder, AgentHandoff(folder, account)
+                    return None
                 try:
                     (folder / 'rework-attempted.json').write_text(json.dumps({'attemptedAt': now_kst().isoformat(), 'mode': 'in_place_single_llm'}), encoding='utf-8')
                 except Exception:
@@ -4764,8 +4585,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             raise RuntimeError('Agent response missing: ' + role)
         atomic_json(folder / (role + '.json'), result)
         if result.get('issues'):
-            print(f"[prepare_content] Notice: Agent {role} reported issues: {result['issues']}. Continuing assembly.", flush=True)
-            result['issues'] = []
+            raise RuntimeError('Agent review issues remain: ' + role + ': ' + str(result['issues']))
         outputs = [role + '.json', role + '-model-events.json']
         if role == 'reviewer':
             outputs += [path.name for path in sorted(folder.glob('reviewer-raw-response-*.json'))]
@@ -5147,10 +4967,10 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             outputs += ['image-plan.json', 'images.md']
         elif role == 'assembler':
             writer = results['writer']
-            result['inputComplete'] = True
-            result['layoutReady'] = True
-            result['imageSlots'] = [p['afterBlock'] for p in plans]
-            result['issues'] = []
+            if (result.get('inputComplete') is not True or result.get('layoutReady') is not True
+                    or result.get('issues') != []
+                    or result.get('imageSlots') != [p['afterBlock'] for p in plans]):
+                raise RuntimeError('Assembler inputs, layout or image slots failed review')
             article = {key: writer[key] for key in ('title', 'tags', 'blocks', 'readerTask')}
             article.update(mainKeyword=results['keyword-selector']['mainKeyword'], imageSlots=result['imageSlots'],
                            layoutProfile={'account': account_key, 'soulSha256': soul['sha256']})
@@ -5192,12 +5012,11 @@ async def generate_photos(plans, image_dir, account, title):
     from playwright.async_api import async_playwright
     from common.browser_session import connect_async
     from cf_posting.pipeline_runner import generate_flow_images_in_browser, ensure_portable_browser_ready
-    home = Path(r'C:\99_포터블브라우저\CentBrowserPortable_baro76650')
     def progress(index, total, message):
         update_pipeline_status(account, 4, 'image-maker · 실제 사진 생성', 55 + int(20 * index / max(1, total)), message, topic=title)
     ensure_portable_browser_ready()
     async with async_playwright() as p:
-        browser, _ = await connect_async(p, 'http://127.0.0.1:9420', str(home / 'chrome.exe'), str(home / 'User Data'))
+        browser, _ = await connect_async(p, *source_browser_paths())
         context = browser.contexts[0]
         flow_page = next((x for x in context.pages if 'flow.google.com/project/' in x.url), None)
         if not flow_page:
@@ -5499,12 +5318,11 @@ def review_native_layout(page, frame, folder, account, article, reserve_time, re
     prompt += '\nReadability acceptance requires visible separation of semantic paragraphs, clear heading hierarchy and the selected account visual profile. A wall of text or missing promised gaps is a readability defect, not a minor stylistic preference. Verify photo captions are not repeated as body photo descriptions, even when paraphrased. soul.md controls editorial identity over older generic style defaults, without changing factual evidence or publication safeguards.\nReview body layout only. Reservation radio/date/time and search visibility were checked by the host against actual UI fields. They are not expected in body-only screenshots. If no expected category is specified, record category uncertainty in notes; reject only a clearly wrong category in issues. Do not repeat source or bridge URL verification already completed by preceding agents.'
     result = generate_content_json(prompt, role='native-layout', observer=observe, images=[str(folder / n) for n in receipt['screenshots'] if '-whole' not in n], response_schema=schema)
     atomic_json(folder / 'native-visual-review.json', {'result': result, 'modelEvents': events, 'soulSha256': soul['sha256'], 'visualProfile': profile})
-    if result.get('issues'):
-        print(f"[review_native_layout] Notice: layout feedback: {result['issues']}", flush=True)
-    result['passed'] = True
-    result['issues'] = []
-    result['pcWholeDocumentVisualReview'] = True
-    result['mobileWholeDocumentVisualReview'] = True
+    if (not isinstance(result, dict) or result.get('issues') != []
+            or any(result.get(key) is not True for key in
+                   ('passed', 'pcWholeDocumentVisualReview', 'mobileWholeDocumentVisualReview'))
+            or (options.get('category') and result.get('categoryMatches') is not True)):
+        raise RuntimeError('Native layout review failed or whole-document evidence missing')
     receipt.update({k: result[k] for k in ('pcWholeDocumentVisualReview', 'mobileWholeDocumentVisualReview')})
     receipt.update(reviewStatus='passed', reviewedAt=now_kst().isoformat(), visualReviewSource='actual reviewer model response', screenshotHashes={n: sha(folder / n) for n in receipt['screenshots']})
     atomic_json(folder / 'pre-reservation-review.json', receipt)
@@ -5713,9 +5531,8 @@ def collect_reservation_inventory(account_key, output_dir=None):
         folder.mkdir(parents=True, exist_ok=False)
         try:
             with sync_playwright() as playwright:
-                home = Path(account['start_bat']).parent
                 browser = connect_sync(playwright, 'http://127.0.0.1:' + str(account['cdp_port']),
-                                       str(home / 'chrome.exe'), str(home / 'User Data'))
+                                       *account_browser_paths(account))
                 if len(browser.contexts) != 1:
                     raise RuntimeError('Dedicated account browser context is ambiguous')
                 observation = collect_existing_reservations(browser.contexts[0], account, folder)
@@ -5740,8 +5557,7 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
         proof_folder = BASE_DIR / 'output' / account_key / ('revision-target-' + uuid.uuid4().hex[:10])
         proof_folder.mkdir(parents=True)
         with sync_playwright() as p, PageScope() as pages:
-            home = Path(acc['start_bat']).parent
-            browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), str(home / 'chrome.exe'), str(home / 'User Data'))
+            browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), *account_browser_paths(acc))
             page, frame = open_revision_editor(browser.contexts[0], pages, acc, revision, proof_folder)
             require_revision_options(frame, revision)
         atomic_json(proof_folder/'revision-target.json', revision)
@@ -5761,8 +5577,7 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
     if not read_agent_instruction('reserved-publisher.md').strip():
         raise RuntimeError('Reserved publisher instructions missing')
     with sync_playwright() as p, PageScope() as pages:
-        home = Path(acc['start_bat']).parent
-        browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), str(home / 'chrome.exe'), str(home / 'User Data'))
+        browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), *account_browser_paths(acc))
         context = browser.contexts[0]
         if revision:
             page, frame = open_revision_editor(context, pages, acc, revision, folder)

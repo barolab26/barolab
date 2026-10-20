@@ -182,6 +182,19 @@ def _listener_owners(port, deadline):
 
 def _runtime(port, expected_exe, expected_profile, *, process_timeout=30):
     if os.name != 'nt':
+        if port in (9334, 9333, 9335, 9231, 9230, 9440):
+            from common.ubuntu_naver_browser import account_paths, process_identity, listener_owner
+            if port == 9440:
+                executable, profile = Path('/opt/google/chrome/chrome'), Path.home() / '.config/cdp_gui_9440'
+            else:
+                executable, profile, _ = account_paths(port)
+            if Path(expected_exe) != executable or Path(expected_profile) != profile:
+                raise RuntimeError('Dedicated Ubuntu account paths do not match the expected browser/profile')
+            pid = process_identity(port, profile)
+            if pid is None:
+                raise RuntimeError(f'Dedicated Ubuntu account process missing on port {port}')
+            listener_owner(port, pid)
+            return {'ProcessId': pid, 'ExecutablePath': str(executable), 'ProfilePath': str(profile)}
         try:
             ver_resp = requests.get(f'http://127.0.0.1:{port}/json/version', timeout=4)
             if ver_resp.ok:

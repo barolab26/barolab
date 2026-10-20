@@ -1,6 +1,8 @@
 """Offline checks for the existing-task recovery configurator; no task mutations."""
 import json
+import os
 import subprocess
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -41,7 +43,7 @@ class NaverRecoveryScheduleTests(unittest.TestCase):
 
     def call(self, apply=False, response=None):
         receipt = response or dict(applied=apply, actionVerified=True)
-        with patch.object(worker.os, 'name', 'nt'), patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, json.dumps(receipt), '')) as run:
+        with patch.object(worker, 'os', SimpleNamespace(name='nt', environ=os.environ)), patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, json.dumps(receipt), '')) as run:
             result = worker.configure_naver_recovery_schedule(apply=apply)
         return result, run.call_args
 
@@ -73,7 +75,7 @@ class NaverRecoveryScheduleTests(unittest.TestCase):
         self.assertIn('configuration refused', script)
 
     def test_provider_error_is_not_success(self):
-        with patch.object(worker.os, 'name', 'nt'), patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1, '', 'wrong action')), self.assertRaisesRegex(RuntimeError, 'configuration failed'):
+        with patch.object(worker, 'os', SimpleNamespace(name='nt', environ=os.environ)), patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1, '', 'wrong action')), self.assertRaisesRegex(RuntimeError, 'configuration failed'):
             worker.configure_naver_recovery_schedule()
 
     def test_missing_or_wrong_receipt_is_not_success(self):

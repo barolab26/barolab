@@ -239,6 +239,8 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                 if expected_account is not None and a.get('account') == expected_account
                 and _titles_match(a.get('topic'), rss_item.get('title'))
                 and a.get('publicationDate') == rss_item.get('publicationDate')), None)
+            from naver_blog_posting.artifact_paths import resolve_artifact_folder
+            folder = resolve_artifact_folder(folder, expected_account, base_dir)
             body_evidence[url] = verify_public_body(url, folder)
         return body_evidence[url]
 

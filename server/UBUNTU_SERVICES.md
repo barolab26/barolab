@@ -79,3 +79,39 @@ Profiles live outside Git at `~/.config/cdp_naver_<account>` with mode 700.
 The existing soultin profile is retained in place. Launch scripts, logs and
 receipts live at `~/.barolab/browsers/<account>`. GUI display defaults to `:10`;
 set `BAROLAB_DISPLAY` only when the Ubuntu desktop uses another display.
+
+The Naver posting runner now resolves those same Ubuntu profiles for reservation
+inventory, revision inspection and publication connections. KnowledgeIn reuses
+the same verified adinfo0905 and stone0747 profiles. Before a Naver connection,
+the process must match `/opt/google/chrome/chrome`, the exact account profile and
+CDP port; `ss` must confirm that process owns the loopback-only listener. An open
+HTTP port alone is not accepted as account identity.
+
+If the account process is missing, the runner invokes only its installed
+`<account>_start_cdp.sh` and verifies ownership again. A missing launcher, wrong
+profile or unexpected listener stops the attempt without terminating a browser
+or replacing profile data. Existing verified sessions skip the launcher and keep
+their tabs. This does not verify Naver login or publication: those remain separate
+pipeline checks. No automatic browser stop was added.
+
+On Ubuntu, Naver research and image generation share the CF browser endpoint and runtime
+paths instead of connecting to the obsolete separate port 9420. On this Ubuntu
+host that endpoint is loopback port 9440, with executable
+`/opt/google/chrome/chrome` and profile `~/.config/cdp_gui_9440`. Its process and
+listener are verified before connecting. This mapping identifies the existing
+shared browser, not the signed-in Google account; Flow login and generation
+still require their own checks. The CF start/stop lifecycle is unchanged.
+Windows keeps its existing Naver source-browser account `baro76650` on port 9420.
+
+Recovery status on 2026-10-21: all five account profiles were checked, but login
+sessions can expire and must be checked again before submission. The daily
+publishing timer `barolab-naver-daily.timer` remains uninstalled; monitor and
+metrics timers do not authorize or perform daily publishing. An empty reservation
+list is distinct from verified public publication.
+
+Private migrated evidence is stored in the ignored
+`naver_blog_posting/output/<account>/<artifact>/` directories. A known legacy
+path is read through `artifact_paths.py` only after a migration manifest and its
+copied evidence hashes validate; incomplete copies and missing historical
+evidence remain unknown. Journal paths and submission flags are preserved.
+Restore and reconcile missing evidence before enabling daily publishing.

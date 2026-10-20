@@ -3,13 +3,147 @@ import unittest
 import io
 import json
 import shlex
+import asyncio
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock, MagicMock, AsyncMock
+from types import SimpleNamespace
 
 from common import ubuntu_naver_browser as browser
 
 
 class UbuntuNaverBrowserTests(unittest.TestCase):
+    def test_naver_search_and_images_connect_to_same_cf_browser(self):
+        from naver_blog_posting import pipeline_runner
+        from common import browser_session
+        runtime = SimpleNamespace(CDP_URL="http://127.0.0.1:9440",
+                                  BROWSER_EXE="/opt/google/chrome/chrome",
+                                  BROWSER_USER_DATA="/existing/shared/profile",
+                                  gather_sources=AsyncMock(),
+                                  generate_flow_images_in_browser=AsyncMock(),
+                                  ensure_portable_browser_ready=Mock())
+        class StopBeforeBrowserInteraction(Exception):
+            pass
+        with patch.dict("sys.modules", {"cf_posting.pipeline_runner": runtime}), \
+                patch.object(pipeline_runner, "os", SimpleNamespace(name="posix")), \
+                patch("playwright.async_api.async_playwright", return_value=MagicMock()), \
+                patch.object(browser_session, "connect_async",
+                             new=AsyncMock(side_effect=StopBeforeBrowserInteraction)) as connect:
+            for coroutine in (pipeline_runner.search_primary_sources("example"),
+                              pipeline_runner.generate_photos([], Path("/unused"), "soultin", "example")):
+                with self.assertRaises(StopBeforeBrowserInteraction):
+                    asyncio.run(coroutine)
+                self.assertEqual(connect.call_args.args[1:],
+                                 (runtime.CDP_URL, runtime.BROWSER_EXE, runtime.BROWSER_USER_DATA))
+            runtime.ensure_portable_browser_ready.assert_called_once()
+
+    def test_windows_source_browser_keeps_original_account_and_port(self):
+        from naver_blog_posting import pipeline_runner
+        with patch.object(pipeline_runner, "os", SimpleNamespace(name="nt")):
+            endpoint, executable, profile = pipeline_runner.source_browser_paths()
+        home = Path(r'C:\99_포터블브라우저\CentBrowserPortable_baro76650')
+        self.assertEqual(endpoint, "http://127.0.0.1:9420")
+        self.assertEqual(executable, str(home / "chrome.exe"))
+        self.assertEqual(profile, str(home / "User Data"))
+
+    def test_shared_flow_runtime_verifies_actual_linux_profile(self):
+        from common import browser_session
+        profile = Path.home() / ".config/cdp_gui_9440"
+        with patch.object(browser_session, "os", SimpleNamespace(name="posix")), \
+                patch.object(browser, "process_identity", return_value=456) as identity, \
+                patch.object(browser, "listener_owner") as listener:
+            result = browser_session._runtime(9440, "/opt/google/chrome/chrome", str(profile))
+            self.assertEqual(result["ProcessId"], 456)
+            identity.assert_called_once_with(9440, profile)
+            listener.assert_called_once_with(9440, 456)
+
+    def test_naver_pipeline_routes_linux_to_account_launcher(self):
+        from naver_blog_posting import pipeline_runner
+        with patch.object(pipeline_runner, "os", SimpleNamespace(name="posix")), \
+                patch.object(browser, "ensure_account") as ensure, \
+                patch.object(pipeline_runner.subprocess, "Popen") as popen:
+            account = pipeline_runner.ACCOUNT_MAP["soultin"]
+            pipeline_runner.start_browser(account)
+            ensure.assert_called_once_with(9334)
+            popen.assert_not_called()
+            executable, profile, _ = browser.account_paths(9334)
+            self.assertEqual(pipeline_runner.account_browser_paths(account), (str(executable), str(profile)))
+
+    def test_kin_linux_account_uses_verified_naver_profile(self):
+        from naver_kin import browser as kin_browser
+        with patch.object(kin_browser, "os", SimpleNamespace(name="posix")):
+            config = kin_browser.account_config("stone0747")
+            executable, profile, _ = browser.account_paths(9230)
+            self.assertEqual((config["exe"], config["profile"]), (str(executable), str(profile)))
+
+    def test_ensure_reuses_verified_process_without_launch(self):
+        with patch.object(browser, "process_identity", return_value=123), \
+                patch.object(browser, "listener_owner") as owner, \
+                patch.object(browser.subprocess, "run") as run:
+            self.assertEqual(browser.ensure_account(9334), 123)
+            owner.assert_called_once_with(9334, 123)
+            run.assert_not_called()
+
+    def test_ensure_starts_only_dedicated_script_and_rechecks_owner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            with patch.object(Path, "home", return_value=home):
+                _, _, script = browser.account_paths(9334)
+                script.parent.mkdir(parents=True)
+                script.write_text("#!/bin/sh\n")
+                with patch.object(browser, "process_identity", side_effect=[None, 123]), \
+                        patch.object(browser, "listener_owner") as owner, \
+                        patch.object(browser.subprocess, "run") as run:
+                    self.assertEqual(browser.ensure_account(9334), 123)
+                    self.assertEqual(run.call_args.args[0], [str(script)])
+                    owner.assert_called_once_with(9334, 123)
+
+    def test_ensure_missing_script_never_launches(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(Path, "home", return_value=Path(directory)), \
+                patch.object(browser, "process_identity", return_value=None), \
+                patch.object(browser.subprocess, "run") as run:
+            with self.assertRaisesRegex(RuntimeError, "launcher missing"):
+                browser.ensure_account(9334)
+            run.assert_not_called()
+
+    def test_unknown_account_port_never_launches(self):
+        with patch.object(browser.subprocess, "run") as run:
+            with self.assertRaisesRegex(ValueError, "Unknown Naver account port"):
+                browser.ensure_account(9999)
+            run.assert_not_called()
+
+    def test_existing_unrelated_listener_never_triggers_relaunch(self):
+        with patch.object(browser, "process_identity", return_value=123), \
+                patch.object(browser, "listener_owner", side_effect=RuntimeError("wrong listener")), \
+                patch.object(browser.subprocess, "run") as run:
+            with self.assertRaisesRegex(RuntimeError, "wrong listener"):
+                browser.ensure_account(9334)
+            run.assert_not_called()
+
+    def test_session_requires_real_account_identity(self):
+        from common import browser_session
+        executable, profile, _ = browser.account_paths(9334)
+        with patch.object(browser_session, "os", SimpleNamespace(name="posix")), \
+                patch.object(browser, "process_identity", return_value=123), \
+                patch.object(browser, "listener_owner") as owner:
+            result = browser_session._runtime(9334, str(executable), str(profile))
+            self.assertEqual(result["ProcessId"], 123)
+            owner.assert_called_once_with(9334, 123)
+            with self.assertRaisesRegex(RuntimeError, "paths do not match"):
+                browser_session._runtime(9334, str(executable), "/other/profile")
+            with self.assertRaisesRegex(RuntimeError, "paths do not match"):
+                browser_session._runtime(9334, "/other/chrome", str(profile))
+
+    def test_session_missing_process_cannot_use_http_fast_path(self):
+        from common import browser_session
+        executable, profile, _ = browser.account_paths(9334)
+        with patch.object(browser_session, "os", SimpleNamespace(name="posix")), \
+                patch.object(browser, "process_identity", return_value=None), \
+                patch.object(browser_session.requests, "get") as get:
+            with self.assertRaisesRegex(RuntimeError, "process missing"):
+                browser_session._runtime(9334, str(executable), str(profile))
+            get.assert_not_called()
+
     def test_account_map_matches_expected_ports(self):
         self.assertEqual({key: value["cdp_port"] for key, value in browser.accounts().items()},
                          {"soultin": 9334, "soul5373": 9333, "yoon_master": 9335,

@@ -1,6 +1,8 @@
 """Evidence gates are offline: never submit an answer during a test."""
 import unittest
 import json
+import os
+from types import SimpleNamespace
 from unittest.mock import patch, Mock
 from contextlib import contextmanager
 
@@ -137,6 +139,7 @@ class BrowserEvidenceTests(unittest.TestCase):
         connection.close.assert_called_once()
 
     @patch('common.browser_session.subprocess.run')
+    @patch('common.browser_session.os', SimpleNamespace(name='nt', environ=os.environ, path=os.path))
     def test_process_validation_uses_default_thirty_and_accepts_explicit_timeout(self, run):
         expected = {'ProcessId': 123, 'ExecutablePath': 'C:/expected/chrome.exe',
                     'ProfilePath': 'C:/expected/User Data'}

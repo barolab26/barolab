@@ -2963,6 +2963,9 @@ KEYS_FILE = DATA_DIR / "secure" / "cf_blog_keys.json"
 # Designated Portable Browser Settings
 BROWSER_EXE = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\chrome.exe"
 BROWSER_USER_DATA = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\User Data"
+if os.name != "nt":
+    BROWSER_EXE = "/opt/google/chrome/chrome"
+    BROWSER_USER_DATA = str(Path.home() / ".config/cdp_gui_9440")
 CDP_PORT = 9440
 CDP_URL = f"http://127.0.0.1:{CDP_PORT}"
 BROWSER_START_BAT = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\barolab26_start_cdp.bat"

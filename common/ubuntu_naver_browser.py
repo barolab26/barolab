@@ -65,6 +65,30 @@ def listener_owner(port, pid):
         raise RuntimeError(f"CDP port {port} is not loopback-only")
 
 
+def account_paths(port):
+    account = next((key for key, value in accounts().items() if value["cdp_port"] == port), None)
+    if account is None:
+        raise ValueError("Unknown Naver account port")
+    home = Path.home()
+    return (Path("/opt/google/chrome/chrome"), home / ".config" / f"cdp_naver_{account}",
+            home / ".barolab/browsers" / account / f"{account}_start_cdp.sh")
+
+
+def ensure_account(port):
+    """Reuse the verified account, or invoke only its installed start script."""
+    _, profile, script = account_paths(port)
+    pid = process_identity(port, profile)
+    if pid is None:
+        if not script.is_file():
+            raise RuntimeError(f"Dedicated Ubuntu account launcher missing: {script}")
+        subprocess.run([str(script)], check=True, timeout=35, stdout=subprocess.DEVNULL)
+        pid = process_identity(port, profile)
+    if pid is None:
+        raise RuntimeError(f"Dedicated Ubuntu account process missing on port {port}")
+    listener_owner(port, pid)
+    return pid
+
+
 def install(home=Path.home()):
     runtime = home / ".barolab/browsers"
     for account, config in accounts().items():
