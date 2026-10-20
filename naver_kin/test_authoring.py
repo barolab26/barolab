@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -6,6 +7,41 @@ from naver_kin import authoring
 
 
 class AuthoringEvidenceTests(unittest.TestCase):
+    def test_actual_old_arboretum_question_rejects_other_institution_sources(self):
+        question = {'title': '아침고요수목원 예약질문',
+                    'body': '내일 아침고요수목원 방문 예정입니다. 코로나 때문에 예약해야 하나요?',
+                    'existing_answers': ['2021.01.01. 공식 홈페이지에 문의하세요.']}
+        sources = [{'body': '구체적인 예약·입장 규칙은 국립수목원 안내에 한정됩니다.'}]
+        self.assertEqual(authoring.source_fit_issue(question, sources),
+                         'explicit_question_target_not_supported_by_sources')
+        sources[0]['body'] += ' 아침고요수목원이라는 이름도 언급합니다.'
+        self.assertEqual(authoring.source_fit_issue(question, sources),
+                         'historical_time_sensitive_question_requires_original_period_evidence')
+
+    def test_old_evergreen_same_entity_is_allowed_but_other_model_is_not(self):
+        question = {'title': '국립중앙박물관 가방 보관', 'body': '물품보관함 사용 방법이 궁금합니다.',
+                    'existing_answers': ['2021.01.01. 보관함을 이용하세요.']}
+        self.assertIsNone(authoring.source_fit_issue(question, [{'body': '국립중앙박물관 물품보관함 사용 방법'}]))
+        self.assertEqual(authoring.source_fit_issue({'title': 'WF24 모델 필터', 'body': '청소 방법'},
+                         [{'body': 'WF21 모델 필터 청소'}]), 'explicit_question_target_not_supported_by_sources')
+
+    def test_historical_policy_requires_period_evidence(self):
+        question = {'title': '2021년 지원금 신청 조건', 'body': ''}
+        self.assertEqual(authoring.source_fit_issue(question, [{'body': '2026년 지원금 조건'}]),
+                         'question_period_not_supported_by_sources')
+        self.assertIsNone(authoring.source_fit_issue(question, [{'body': '2021년 당시 지원금 신청 조건'}]))
+
+    def test_source_quotes_alone_do_not_approve_irrelevant_or_unanswered_questions(self):
+        answer = 'An exact supported sentence about another institution.'
+        sources = [{'url': 'https://official.test', 'body': answer}]
+        review = {key: True for key in authoring.REVIEW_FLAGS}
+        review['support'] = [{'claim': answer, 'quote': answer, 'source_url': sources[0]['url']}]
+        for flag in ('same_target_supported', 'time_scope_supported', 'question_resolved'):
+            bad = {**review, flag: False}
+            self.assertFalse(authoring._review_supported(bad, answer, sources))
+            bad.pop(flag)
+            self.assertFalse(authoring._review_supported(bad, answer, sources))
+
     def setUp(self):
         self.review = {key: True for key in authoring.REVIEW_FLAGS}
         self.review['support'] = [{'claim': 'Use the official locker.',
@@ -105,7 +141,8 @@ class AuthoringEvidenceTests(unittest.TestCase):
         from naver_kin.scheduler import ensure_naver_browsers
         get.return_value.status_code = 200
         get.return_value.json.return_value = {'webSocketDebuggerUrl': 'ws://127.0.0.1/devtools/browser/test'}
-        rows = ensure_naver_browsers()
+        with patch('naver_kin.scheduler.os', SimpleNamespace(name='nt')):
+            rows = ensure_naver_browsers()
         self.assertEqual({row['port'] for row in rows}, {9230, 9231, 9333, 9334, 9335})
         self.assertTrue(all(row['ready'] and not row['started'] for row in rows))
         launch.assert_not_called()

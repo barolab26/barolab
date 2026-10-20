@@ -61,7 +61,7 @@ class MeasurementTests(unittest.TestCase):
         self.assertEqual(value['sites'][0]['status'], 'not_connected')
 
     @patch.object(traffic, 'session')
-    @patch.object(traffic, 'ga_report', side_effect=[([(['20261014', 'not_in_ledger'], [3, 2, 4])], False), ([], False), ([], False)])
+    @patch.object(traffic, 'ga_report', side_effect=[([(['20261014', 'not_in_ledger'], [3, 2, 4])], False)] + [([], False)] * (len(measurement.HOSTS) - 1))
     def test_unmapped_sessions_stay_in_total(self, report, session):
         value = self.run_collect()
         self.assertEqual(value['sessions'], 3)

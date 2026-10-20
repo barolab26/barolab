@@ -1,16 +1,23 @@
 # KnowledgeIn alternating-account experiment
 
-The user-approved trial now runs **2026-10-15 through 2026-10-21 KST**.
-Read-only measurement continues through **2026-10-24**. The two authorized accounts
+The original trial dates were **2026-10-15 through 2026-10-21 KST**, with
+measurement through October 24. The existing configuration now has
+`continuousMode: true`; this migration preserves that value rather than extending
+or restarting the trial. Read `server/data/kin-automation.json` for the actual
+enable setting, interval and caps. The two authorized accounts
 are `adinfo0905` and `stone0747`; their existing dedicated CDP browsers must already
-be running. The scheduler never starts or stops browsers automatically. Closed
-browsers block that operating round rather than triggering a direct Chrome launch.
+be authenticated. On Ubuntu, only these two existing profiles are verified and
+reused. A closed browser blocks the check; open it beforehand with its dedicated
+account launcher. A scheduler service never starts Chrome, so its cgroup cleanup
+cannot terminate a browser it created. Never replace this with an ad hoc command.
 
 ## Completion-based cadence
 
-Windows checks conditions every five minutes. This does **not** mean publishing
-every five minutes. After one genuine operating round finishes, the entire system
-waits at least 60 minutes before starting the next account. Accounts alternate;
+The scheduler checks conditions every five minutes. This does **not** mean
+publishing every five minutes. After a genuine operating round completes, the
+configured interval/jitter applies (currently 20 minutes with 18–22 minute jitter);
+the final submission contract also enforces a minimum 15-minute completion gap.
+Accounts alternate;
 a suspended account or exhausted account cap is skipped in favor of an available
 account. The global cooldown survives midnight and process restarts.
 
@@ -20,11 +27,12 @@ rejections, no suitable questions, and connection/login errors still finish a ro
 and start its cooldown. A no-op condition check does not change the cooldown,
 account turn, or operating budget and does not query GA4.
 
-Submission limits remain **ten attempts globally and five per account per KST day**.
-There is an additional model-usage budget of **ten operating rounds globally and
-five per account daily**, including unsuccessful/rejected rounds. The existing
+The existing configuration permits at most **20 submission attempts globally and
+10 per account per KST day**, including uncertain submissions. The separate
+model-usage budget is **20 operating rounds globally and 10 per account daily**,
+including unsuccessful/rejected rounds. The existing
 manual pilot publication counts toward today's operating and submission limits.
-Thus ten is an upper limit, not a promise of ten successful answers.
+These are upper limits, not promises of successful answers.
 
 Private SQLite `operating_cadence` holds the last completion, last account, and one
 durable in-flight reservation. Reservation, account selection and operating caps
@@ -36,7 +44,7 @@ the same reservation cannot bypass the interval. Question IDs remain globally un
 The initial completion anchor is taken once from the latest genuine recorded
 publication; no-post authoring exercises are excluded. Later verification refreshes
 do not change that anchor. If a process dies mid-round, the next owner marks it
-interrupted/unknown and waits another hour from recovery. Previously uncertain
+interrupted/unknown and applies the configured cooldown from recovery. Previously uncertain
 submissions are never automatically reposted. There is no burst catch-up.
 
 The model is explicitly `gpt-6.1-sol` in this KnowledgeIn-only configuration, using
@@ -47,7 +55,34 @@ separate evidence review and deterministic URL/source/account binding checks. Ex
 manual drafts are preserved. Only the selected question is claimed; search counts may
 contain repeats and are not represented as unique selected questions.
 
-## Windows tasks and operations
+Selection may return `no_good_match`; it must not force an answer from a related
+institution or product. Explicit target names/model IDs and historical
+time-sensitive contexts are checked before writing and after selection. These
+bounded checks do not replace the independent review's required exact-target,
+time-scope and question-resolution judgments. Old evergreen questions may qualify.
+A sourced disclaimer or generic checklist that leaves the actual question
+unanswered fails review, as does an unverified promise of screenshots or tables.
+
+## Ubuntu user services
+
+`python -m naver_kin.scheduler --register` installs the four owned systemd user
+units disabled. It never enables or starts them and never changes configuration
+caps, trial dates or continuous mode. The tick timer checks every five minutes;
+the measurement timer runs at **20:30 Asia/Seoul**, independent of host timezone.
+Both call the existing scheduler with the current virtual-environment Python.
+They require the existing `:10` desktop and authenticated dedicated profiles.
+User lingering keeps the scheduler available but does not create a GUI session.
+
+`--status` reports actual systemd timer and linked-service states; a failed
+service remains failed even when its timer is active. Saved Windows task status
+is historical evidence and is not merged into this observation.
+`--tick --dry-run` reads the existing SQLite ledger without schema writes, model
+calls, browser launches, operating claims or answer submission. An exact
+account/blog lock still protects a real round from overlapping browser work.
+The two timers remain disabled until uncertain submissions are reconciled,
+the safety checks pass, and one supervised eligible round has completed.
+
+## Historical Windows tasks and operations
 
 `python -m naver_kin.scheduler --configure --model gpt-6.1-sol --start-date 2026-10-15`
 prepares a disabled configuration. After supervisor implementation review,

@@ -54,6 +54,23 @@ class LedgerTests(unittest.TestCase):
         qid=p.import_draft(self.db,document());p.begin_send(self.db,qid,'adinfo0905')
         with self.assertRaises(ValueError):p.begin_send(self.db,qid,'adinfo0905')
 
+    def test_later_verification_keeps_original_submission_day_and_manual_budget(self):
+        from naver_kin import scheduler
+        doc=document(); qid=p.import_draft(self.db,doc)
+        p.begin_send(self.db,qid,'adinfo0905')
+        original_day=self.db.execute('SELECT send_day FROM questions WHERE question_id=?',(qid,)).fetchone()[0]
+        p.finish_send(self.db,qid,{'answer_id':'123'})
+        evidence={'verified':True,'public':True,'account':'adinfo0905','question_id':qid,'answer_id':'123',
+                  'answer_text_sha256':hashlib.sha256(doc['answer_text'].encode()).hexdigest(),
+                  'outbound_url':doc['attribution']['outboundUrl']}
+        with patch.object(p,'stamp',return_value='2099-01-01T00:00:00+00:00'), patch('common.llm_client.memory_event'):
+            self.assertTrue(p.record_verification(self.db,qid,evidence))
+        scheduler.initialize_cadence(self.db)
+        self.assertEqual(scheduler.submission_counts(self.db,original_day)['adinfo0905'],1)
+        self.assertEqual(scheduler.operation_counts(self.db,original_day)['adinfo0905'],1)
+        self.assertEqual(sum(scheduler.submission_counts(self.db,'2099-01-01').values()),0)
+        self.assertEqual(self.db.execute('SELECT send_day FROM questions WHERE question_id=?',(qid,)).fetchone()[0],original_day)
+
     def test_supervisor_binding_rejects_edited_answer(self):
         doc=document();doc['answer_text']+=' Added unreviewed advice.'
         qid=p.import_draft(self.db,doc)
@@ -152,11 +169,12 @@ class SchedulerTests(unittest.TestCase):
           'mode':'alternating_interval','intervalMinutes':60,'pollMinutes':5,
           'operationDailyCap':20,'operationAccountDailyCap':10,'articleCatalog':[]}
         original=p.connect
-        self.patches=[patch.object(s,'ROOT',self.root),patch.object(p,'ROOT',self.root),
+        self.patches=[patch.object(s,'ROOT',self.root),patch.object(p,'ROOT',self.root),patch.object(p,'DB',self.path),
           patch.object(s,'STATE',self.root/'state.json'),patch.object(s,'now_kst',side_effect=lambda:self.now),
           patch.object(p,'connect',side_effect=lambda:original(self.path)),patch.object(p,'snapshot',return_value={}),
           patch.object(p,'enforce_trial_window'),patch.object(s,'observe_tasks',return_value={'status':'test'}),
-          patch('naver_kin.measurement.collect',return_value={})]
+          patch('naver_kin.measurement.collect',return_value={}),
+          patch.object(s,'ensure_naver_browsers',return_value=[])]
         for item in self.patches:item.start()
         s.initialize_cadence(self.db)
     def tearDown(self):
@@ -183,6 +201,18 @@ class SchedulerTests(unittest.TestCase):
         recovered=self.s.reserve_run(self.db,self.config,self.now+timedelta(minutes=10))
         self.assertEqual(recovered['state'],'recovered_wait')
         self.assertEqual(self.s.reserve_run(self.db,self.config,self.now+timedelta(minutes=69))['state'],'waiting')
+    def test_existing_draft_failure_preserves_original_and_does_not_generate_replacement(self):
+        qid=p.import_draft(self.db,document())
+        original=dict(self.db.execute('SELECT * FROM questions WHERE question_id=?',(qid,)).fetchone())
+        with patch.object(p,'main',side_effect=ValueError('stale source')), \
+                patch('naver_kin.authoring.generate_for_slot') as generate:
+            result=self.s.tick(self.config,self.now)
+        generate.assert_not_called()
+        retained=dict(self.db.execute('SELECT * FROM questions WHERE question_id=?',(qid,)).fetchone())
+        self.assertEqual(retained,original)
+        self.assertEqual(result['runs'][0]['state'],'blocked')
+        self.assertEqual(self.db.execute('SELECT question_id FROM automation_slots').fetchone()[0],qid)
+
     def test_rejected_review_is_skipped_without_consuming_submission_quota(self):
         with patch('naver_kin.authoring.generate_for_slot',return_value={'document':None,'reason':'review_rejected','discovered':[{}]*12}):
             result=self.s.tick(self.config,self.now)
@@ -190,7 +220,9 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(self.db.execute('SELECT COUNT(*) FROM discoveries').fetchone()[0],0)
         status=self.s.cadence_status(self.db,self.config,self.now)
         self.assertEqual(status['nextAccount'],'stone0747')
-        self.assertEqual(status['globalRemainingRuns'],20)
+        self.assertEqual(status['globalRemainingRuns'],19)
+        self.assertEqual(sum(status['submissionCounts'].values()),0)
+        self.assertEqual(sum(status['operationCounts'].values()),1)
         with patch('naver_kin.authoring.generate_for_slot') as generate:self.s.tick(self.config,self.now+timedelta(minutes=5));generate.assert_not_called()
     def test_operating_round_cap_for_submitted_slots(self):
         cfg = {**self.config, 'intervalMinutes': 35}

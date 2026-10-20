@@ -201,6 +201,7 @@ def session(account):
     with account_lock(account), sync_playwright() as playwright, awake_browser(playwright, config) as browser:
         ctx = browser.contexts[0]
         pages = ctx.pages
+        owned = False
         kin = [p for p in pages if urlsplit(p.url).hostname == "kin.naver.com" and not _has_editor_draft(p)]
         if kin:
             page = kin[0]
@@ -212,23 +213,29 @@ def session(account):
             if page is None:
                 # Open a dedicated KnowledgeIn tab while preserving all existing user tabs (including any open editor drafts) untouched
                 page = ctx.new_page()
-        page.bring_to_front()
-        page.set_default_timeout(12000)
-        preserve_editor(page)
-        page.goto("https://kin.naver.com/", wait_until="domcontentloaded", timeout=25000)
-        _check_service_state(page)
-        identity = page.locator(".my_service .user_id")
-        if identity.count() != 1 or identity.inner_text().strip() != account:
-            raise LoginRequiredError("Logged-in KnowledgeIn identity does not match authorized account")
-        yield page
-        # Only disconnect Playwright. browser.close() would close the user's browser.
+                owned = True
+        try:
+            page.bring_to_front()
+            page.set_default_timeout(12000)
+            preserve_editor(page)
+            page.goto("https://kin.naver.com/", wait_until="domcontentloaded", timeout=25000)
+            _check_service_state(page)
+            identity = page.locator(".my_service .user_id")
+            if identity.count() != 1 or identity.inner_text().strip() != account:
+                raise LoginRequiredError("Logged-in KnowledgeIn identity does not match authorized account")
+            yield page
+        finally:
+            if (owned and not getattr(page, '_barolab_kin_submission_pending', False)
+                    and not _has_editor_draft(page)):
+                page.close()
+            # Reused tabs and any pending submission/editor are deliberately preserved.
 
 
 def _has_editor_draft(page):
     try:
         return any(text.strip() for text in page.locator('.se-canvas .__se-node').all_inner_texts())
     except Exception:
-        return False
+        return True
 
 
 def preserve_editor(page):
@@ -407,12 +414,7 @@ def publish(account, question_url, answer_text, before_submit=None):
         if ownership['answer_ids']:
             raise RuntimeError('Account already has an answer on this question')
         if not ownership['known'] or not ownership['complete']:
-            if ownership.get('reason') == 'question_answers_partially_loaded':
-                recent_map = _own_answer_map(page, max_pages=3)
-                if question_id(question_url) in recent_map:
-                    raise RuntimeError('Account already has an answer on this question')
-            else:
-                raise RuntimeError('Current-question ownership is unknown: ' + ownership['reason'])
+            raise RuntimeError('Current-question ownership is incomplete; absence from recent history cannot authorize submission')
         _read(page, question_url)
         page.locator("._answerWriteButton").first.click()
         _check_service_state(page)
@@ -439,28 +441,102 @@ def publish(account, question_url, answer_text, before_submit=None):
         if button.count() != 1 or not button.is_enabled():
             raise RuntimeError("Registration is unavailable")
         before_submit()
-        # Any exception from this point is an uncertain submission; caller must not retry.
-        button.click(timeout=12000)
-        page.wait_for_timeout(2500)
+        page._barolab_kin_submission_pending = True
+        responses, dialogs = [], []
+        def observed_dialog(dialog):
+            message = str(dialog.message)
+            message = re.sub(r'https?://[^\s]+|[\w.+-]+@[\w.-]+|(?<!\d)01[016789][ -]?\d{3,4}[ -]?\d{4}(?!\d)', '[redacted]', message)
+            message = re.sub(r'(?i)(token|secret|password|authorization|cookie)\s*[:=][^\r\n]*', r'\1=[redacted]', message)
+            dialogs.append({'type': dialog.type, 'message': message[:500]})
+            del dialogs[:-5]
+            # Dismiss alerts as Playwright normally does; never approve a confirmation.
+            dialog.dismiss()
+        def observed_response(response):
+            try:
+                parsed = urlsplit(response.url)
+                if (parsed.hostname != 'kin.naver.com' or parsed.path != '/ajax/detail/registerAnswerForSmartEditorOne.naver'
+                        or response.request.method != 'POST'):
+                    return
+                row = {'path': parsed.path, 'status': response.status, 'questionBound': False,
+                       'contentType': response.headers.get('content-type', '').split(';')[0][:80]}
+                responses.append(row)
+                del responses[:-20]
+                request = response.request
+                try:
+                    row['questionBound'] = (request.frame.page == page
+                        and parse_qs(request.post_data or '').get('docId') == [question_id(question_url)])
+                except Exception:
+                    pass
+                # Never retain query strings, request bodies, or arbitrary response text.
+                if 'json' in row['contentType']:
+                    value = response.json()
+                    if isinstance(value, dict):
+                        codes = {key: item for key, item in value.items()
+                                 if key in ('isSuccess', 'success', 'code', 'resultCode')
+                                 and (type(item) in (bool, int) or item in ('S', 'F', 'SUCCESS', 'FAIL', 'ERROR', 'OK'))}
+                        if codes:
+                            row['resultCodes'] = codes
+                        outer = value.get('result')
+                        inner = outer.get('result') if isinstance(outer, dict) else None
+                        answer = inner.get('answerNo') if isinstance(inner, dict) else None
+                        if value.get('isSuccess') is True and str(answer or '').isdigit():
+                            row['answerId'] = str(answer)
+            except Exception:
+                pass
+        page.on('response', observed_response)
+        page.on('dialog', observed_dialog)
+        observation_error = None
         try:
-            if button.count() == 1 and button.is_visible():
-                button.click(timeout=8000)
-                page.wait_for_timeout(3000)
-        except Exception:
-            pass
-        _check_service_state(page)
-        soup = BeautifulSoup(page.content(), "html.parser")
-        matches = [node for node in soup.select(".answerArea[id^=answer_]")
-                   if _normalized(answer_text) in _normalized(node.get_text("\n"))]
-        if len(matches) != 1:
-            first_line = _normalized(answer_text.split("\n")[0])
-            matches = [node for node in soup.select(".answerArea._myAnswer[id^=answer_]")
-                       if first_line and first_line in _normalized(node.get_text("\n"))]
-        if len(matches) != 1:
-            return {"answer_url": question_url, "answer_id": None,
-                    "reason": "submitted_unverified: answer not uniquely identified"}
-        aid = matches[0]["id"].split("_", 1)[1]
-        return {"answer_url": exact_answer_url(question_url, aid), "answer_id": aid}
+            # Only this one click may mutate the server; subsequent work only observes.
+            button.click(timeout=12000)
+            for _ in range(30):
+                page.wait_for_timeout(500)
+                if dialogs or any(row.get('status', 0) >= 400 or row.get('resultCodes', {}).get('isSuccess') is False for row in responses):
+                    break
+                candidates = [row for row in responses if row.get('questionBound') is True
+                              and 200 <= row.get('status', 0) < 300
+                              and row.get('resultCodes', {}).get('isSuccess') is True and row.get('answerId')]
+                if len(responses) == 1 and len(candidates) == 1:
+                    aid = candidates[0]['answerId']
+                    return {'answer_url': exact_answer_url(question_url, aid), 'answer_id': aid,
+                            'reason': 'submitted_unverified: exact request response candidate requires public verification',
+                            'submissionObservation': {'responses': responses, 'dialogs': dialogs,
+                                                      'exactOwnedBodyMatched': False, 'responseCandidateOnly': True}}
+                _check_service_state(page)
+                content = page.content()
+                owned = _parse_question_ownership(content, account, question_id(question_url))
+                owned_ids = set(owned.get('verified_owned_answer_ids', []))
+                soup = BeautifulSoup(content, 'html.parser')
+                matches = [node for node in soup.select('.answerArea[id^=answer_]')
+                           if node['id'].split('_', 1)[1] in owned_ids
+                           and _normalized(answer_text) in _normalized(node.get_text('\n'))
+                           and (not any(row.get('answerId') for row in responses)
+                                or node['id'].split('_', 1)[1] in {row.get('answerId') for row in responses})]
+                if len(matches) == 1:
+                    aid = matches[0]['id'].split('_', 1)[1]
+                    return {'answer_url': exact_answer_url(question_url, aid), 'answer_id': aid,
+                            'submissionObservation': {'responses': responses, 'dialogs': dialogs, 'exactOwnedBodyMatched': True}}
+            reason = 'submitted_unverified: exact owned answer not observed within 15 seconds'
+        except Exception as exc:
+            observation_error = exc
+            reason = 'submitted_unverified: observation failed (' + type(exc).__name__ + ')'
+        finally:
+            page.remove_listener('response', observed_response)
+            page.remove_listener('dialog', observed_dialog)
+        diagnostic = {'responses': responses, 'dialogs': dialogs, 'exactOwnedBodyMatched': False}
+        try:
+            diagnostic.update(registerVisible=button.count() == 1 and button.is_visible(),
+                              registerEnabled=button.count() == 1 and button.is_enabled(),
+                              editorPresent=page.locator('.se-canvas').count() > 0,
+                              visibleAlert=page.locator('[role="alert"]:visible, .error_message:visible').count() > 0,
+                              visibleDialog=page.locator('[role="dialog"]:visible, .se-popup:visible').count() > 0)
+        except Exception as exc:
+            diagnostic['inspectionErrorType'] = type(exc).__name__
+        if observation_error is not None:
+            observation_error.submission_observation = diagnostic
+            raise observation_error
+        return {'answer_url': question_url, 'answer_id': None, 'reason': reason,
+                'submissionObservation': diagnostic}
 
 
 def _type_paragraphs(keyboard, text):

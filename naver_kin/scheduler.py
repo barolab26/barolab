@@ -30,6 +30,19 @@ def now_kst():
 
 def ensure_naver_browsers():
     """Reuse live CDP sessions; start closed ports only through account launchers."""
+    if os.name != 'nt':
+        from common.ubuntu_naver_browser import accounts, account_paths, process_identity, listener_owner
+        result = []
+        for account in p.ACCOUNTS:
+            port = accounts()[account]['cdp_port']
+            _, profile, _ = account_paths(port)
+            pid = process_identity(port, profile)
+            if not pid:
+                raise RuntimeError('Dedicated logged-in browser is closed: ' + account +
+                                   '; open it with the approved account launcher before scheduling')
+            listener_owner(port, pid)
+            result.append({'account': account, 'port': port, 'ready': True, 'started': False})
+        return result
     import requests
     import time
     from common.system_watchdog import CDP_PORT_CATALOG, is_port_open
@@ -173,15 +186,22 @@ def initialize_cadence(db):
 
 def submission_counts(db, day):
     result={account:0 for account in p.ACCOUNTS}
-    for row in db.execute("SELECT account,COUNT(*) n FROM questions WHERE send_day=? AND state='published_verified' GROUP BY account",(day,)):
+    for row in db.execute("SELECT account,COUNT(*) n FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified') GROUP BY account",(day,)):
         if row['account'] in result:
             result[row['account']]+=row['n']
     return result
 
 
 def operation_counts(db, day):
-    """Count only actual published_verified answers so failed, unverified, or interrupted attempts never deduct daily quota (20)."""
-    return submission_counts(db, day)
+    """Every reserved round consumes model budget, even without a successful submission."""
+    counts = {account: 0 for account in p.ACCOUNTS}
+    for row in db.execute("SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? GROUP BY account", (day,)):
+        if row['account'] in counts:
+            counts[row['account']] += row['n']
+    for row in db.execute("SELECT q.account,COUNT(*) n FROM questions q WHERE q.send_day=? AND q.state IN ('publishing','submitted_unverified','published_verified') AND NOT EXISTS (SELECT 1 FROM automation_slots s WHERE s.question_id=q.question_id) GROUP BY q.account", (day,)):
+        if row['account'] in counts:
+            counts[row['account']] += row['n']
+    return counts
 
 
 def retry_counts(db, day):
@@ -197,10 +217,12 @@ def cadence_status(db, config, now=None):
     now=now or now_kst();row=db.execute('SELECT * FROM operating_cadence WHERE id=1').fetchone()
     day=now.astimezone(KST).date().isoformat()
     sub_counts=submission_counts(db,day)
-    counts= dict(sub_counts)
+    counts=operation_counts(db,day)
     retries=retry_counts(db,day)
     global_cap=int(config.get('globalDailyCap',p.GLOBAL_DAILY_CAP))
     account_cap=int(config.get('accountDailyCap',p.ACCOUNT_DAILY_CAP))
+    operation_cap=int(config.get('operationDailyCap') or global_cap)
+    operation_account_cap=int(config.get('operationAccountDailyCap') or account_cap)
     cooldown_min=_cooldown_minutes(config, row['last_completed_at'])
     next_at=(datetime.fromisoformat(row['last_completed_at'])+timedelta(minutes=cooldown_min)).isoformat() if row['last_completed_at'] else now.isoformat()
     first=p.ACCOUNTS[1] if row['last_account']==p.ACCOUNTS[0] else p.ACCOUNTS[0]
@@ -211,16 +233,16 @@ def cadence_status(db, config, now=None):
         if halted and db.execute('SELECT 1 FROM automation_halts WHERE account=?',(account,)).fetchone():continue
         if _is_account_blog_busy(account):continue
         sends=sub_counts.get(account,0)
-        if counts[account]<account_cap and sends<account_cap:next_account=account;break
+        if counts[account]<operation_account_cap and sends<account_cap:next_account=account;break
     if next_account is None:
         # Fallback if one account was busy with blog: check without blog busy filter so nextAccount is still reported
         for account in order:
             halted=db.execute("SELECT 1 FROM sqlite_master WHERE name='automation_halts'").fetchone()
             if halted and db.execute('SELECT 1 FROM automation_halts WHERE account=?',(account,)).fetchone():continue
             sends=sub_counts.get(account,0)
-            if counts[account]<account_cap and sends<account_cap:next_account=account;break
+            if counts[account]<operation_account_cap and sends<account_cap:next_account=account;break
     cadence_state='waiting'
-    if sum(sub_counts.values())>=global_cap or next_account is None:
+    if sum(sub_counts.values())>=global_cap or sum(counts.values())>=operation_cap or next_account is None:
         tomorrow=(now.astimezone(KST)+timedelta(days=1)).replace(hour=0,minute=0,second=0,microsecond=0)
         next_at=max(datetime.fromisoformat(next_at),tomorrow).isoformat()
         cadence_state='daily_limit_or_account_unavailable'
@@ -242,8 +264,8 @@ def cadence_status(db, config, now=None):
             'activeStartedAt':row['active_started_at'],'cadenceState':cadence_state,
             'operationCounts':counts,'submissionCounts':sub_counts,
             'retryAttemptsToday':retries,
-            'globalRemainingRuns':max(0,global_cap-sum(sub_counts.values())),
-            'byAccountRemainingRuns':{account:max(0,account_cap-sub_counts[account]) for account in p.ACCOUNTS}}
+            'globalRemainingRuns':max(0,min(global_cap-sum(sub_counts.values()),operation_cap-sum(counts.values()))),
+            'byAccountRemainingRuns':{account:max(0,min(account_cap-sub_counts[account],operation_account_cap-counts[account])) for account in p.ACCOUNTS}}
 
 
 def reserve_run(db, config, now=None, force=False):
@@ -257,7 +279,7 @@ def reserve_run(db, config, now=None, force=False):
             db.execute('UPDATE operating_cadence SET last_completed_at=?,last_account=active_account,active_run_id=NULL,active_account=NULL,active_started_at=NULL WHERE id=1',(now.isoformat(),))
             db.commit();return {'state':'recovered_wait','reason':'interrupted_run_requires_new_cooldown'}
         if force:
-            latest_sub = db.execute("SELECT account,updated_at FROM questions WHERE send_day IS NOT NULL AND state='published_verified' ORDER BY updated_at DESC LIMIT 1").fetchone()
+            latest_sub = db.execute("SELECT account,updated_at FROM questions WHERE send_day IS NOT NULL AND state IN ('publishing','submitted_unverified','published_verified') ORDER BY updated_at DESC LIMIT 1").fetchone()
             anchor_ts = latest_sub['updated_at'] if latest_sub else None
             anchor_acc = latest_sub['account'] if latest_sub else None
             if anchor_ts and now < datetime.fromisoformat(anchor_ts) + timedelta(minutes=15):
@@ -274,7 +296,7 @@ def reserve_run(db, config, now=None, force=False):
         elif not force and now<datetime.fromisoformat(status['nextEligibleAt']):reason='minimum_interval_not_elapsed'
         elif status['globalRemainingRuns']<=0 or not status['nextAccount']:reason='daily_operating_cap_or_account_unavailable'
         elif _is_account_blog_busy(status['nextAccount']):reason=f"account_blog_running:{status['nextAccount']}"
-        elif db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state='published_verified'",(day,)).fetchone()[0]>=global_cap:reason='daily_submission_cap'
+        elif db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')",(day,)).fetchone()[0]>=global_cap:reason='daily_submission_cap'
         if reason:
             db.rollback();return {'state':'waiting','reason':reason,**status}
         import uuid
@@ -306,11 +328,13 @@ def tick(config, now=None, dry_run=False, force=False):
             'state':'idle','measurementStatus':'not_attempted','dryRun':dry_run}
     if dry_run:
         # Real ledger is observed read-only; no fake future operating timestamps are persisted.
-        db=p.connect()
+        db=sqlite3.connect(Path(p.DB).resolve().as_uri()+'?mode=ro',uri=True)
+        db.row_factory=sqlite3.Row
         try:
             if db.execute("SELECT 1 FROM sqlite_master WHERE name='operating_cadence'").fetchone():
                 result.update(cadence_status(db,config,now))
             result['state']='dry_run'
+            result['registeredTasks']=observe_tasks()
         finally:db.close()
         return result
     with file_lock(ROOT/'server/data/kin-scheduler.lock') as ready:
@@ -345,12 +369,8 @@ def tick(config, now=None, dry_run=False, force=False):
                         except Exception:
                             row_st = db.execute('SELECT state FROM questions WHERE question_id=?', (qid,)).fetchone()
                             if row_st and row_st['state'] == 'drafted':
-                                with db:
-                                    db.execute("DELETE FROM questions WHERE question_id=? AND state='drafted'", (qid,))
-                                qid = None
-                                existing_draft = None
-                            else:
-                                raise
+                                raise RuntimeError('Existing reviewed draft failed validation; preserved for review, no replacement generated')
+                            raise
                     if not existing_draft:
                         from naver_kin.authoring import generate_for_slot
                         with p.account_lock(account):
@@ -413,7 +433,9 @@ def tick(config, now=None, dry_run=False, force=False):
 
 
 def observe_tasks():
-    if os.name!='nt':return {'status':'unavailable','checkedAt':p.stamp()}
+    if os.name!='nt':
+        from naver_kin.ubuntu_scheduler import observe
+        return observe(ROOT, p.stamp)
     script="""$ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false)
 $rows=@(foreach($name in @('BaroLab-Kin-Seven-Day-Pilot','BaroLab-Kin-Seven-Day-Pilot-Measurement')){
@@ -481,7 +503,11 @@ def measure(config, now=None):
 def register(config):
     """Register only after implementation/configuration review. Never replace unrelated tasks."""
     validate_config(config)
-    if os.name!='nt':raise RuntimeError('Windows task registration requires the worker host')
+    if os.name!='nt':
+        from naver_kin.ubuntu_scheduler import install_disabled
+        result = install_disabled(ROOT, Path(sys.executable).absolute())
+        result['registeredTasks'] = observe_tasks()
+        return result
     def quote(value):return "'"+str(value).replace("'","''")+"'"
     script=Path(__file__).resolve()
     if script.drive.upper()=='Y:':

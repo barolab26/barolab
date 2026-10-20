@@ -73,6 +73,144 @@ class BrowserEvidenceTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 browser.question_id(url)
 
+    def test_visible_register_button_after_submission_is_never_clicked_twice(self):
+        page = Mock()
+        nodes = Mock(); nodes.all_inner_texts.return_value = []
+        paragraphs = Mock(); paragraphs.all_inner_texts.return_value = ['reviewed answer']
+        button = Mock(); button.count.return_value = 1; button.is_enabled.return_value = True
+        button.is_visible.return_value = True
+        def locate(selector):
+            if selector == '#answerRegisterButton': return button
+            if selector == '.se-canvas .se-text-paragraph .__se-node': return nodes
+            if selector == '.se-canvas .se-text-paragraph': return paragraphs
+            return Mock()
+        page.locator.side_effect = locate
+        page.content.return_value = '<html>Submission result is not yet observable</html>'
+        dialog=Mock();dialog.type='confirm';dialog.message='Wait for processing user@example.com\nAuthorization: Bearer privateBearer\npassword="private quoted value"'
+        button.click.side_effect=lambda **kwargs: next(call.args[1] for call in page.on.call_args_list if call.args[0]=='dialog')(dialog)
+        @contextmanager
+        def session(_): yield page
+        before = Mock()
+        with patch.object(browser, 'session', session), patch.object(browser, '_question_ownership', return_value={
+                'answer_ids': [], 'known': True, 'complete': True}), patch.object(browser, '_read'), \
+                patch.object(browser, '_check_service_state'), patch.object(browser, '_type_paragraphs'):
+            result = browser.publish('adinfo0905', 'https://kin.naver.com/qna/detail.naver?docId=123',
+                                     'reviewed answer', before_submit=before)
+        before.assert_called_once()
+        button.click.assert_called_once_with(timeout=12000)
+        self.assertIsNone(result['answer_id'])
+        self.assertIn('submitted_unverified', result['reason'])
+        dialog.dismiss.assert_called_once();dialog.accept.assert_not_called()
+        self.assertEqual(result['submissionObservation']['dialogs'][0]['type'],'confirm')
+        self.assertNotIn('private',json.dumps(result))
+        self.assertNotIn('user@example.com',json.dumps(result))
+
+    def test_delayed_exact_owned_answer_is_observed_without_another_click(self):
+        page=Mock(); button=Mock(); button.count.return_value=1;button.is_enabled.return_value=True
+        nodes=Mock();nodes.all_inner_texts.return_value=[]
+        paragraphs=Mock();paragraphs.all_inner_texts.return_value=['reviewed answer']
+        page.locator.side_effect=lambda selector: button if selector=='#answerRegisterButton' else nodes if selector=='.se-canvas .se-text-paragraph .__se-node' else paragraphs if selector=='.se-canvas .se-text-paragraph' else Mock()
+        page.content.side_effect=['<html>pending</html>', '<div class="answerArea _myAnswer" id="answer_123">reviewed answer</div>']
+        response=SimpleNamespace(url='https://kin.naver.com/ajax/detail/registerAnswerForSmartEditorOne.naver?token=private',status=200,
+            request=SimpleNamespace(method='POST',frame=SimpleNamespace(page=page),post_data='docId=123&token=private'), headers={'content-type':'application/json; charset=utf-8'},
+            json=lambda:{'isSuccess':True,'token':'private','message':'private'})
+        button.click.side_effect=lambda **kwargs: next(call.args[1] for call in page.on.call_args_list if call.args[0]=='response')(response)
+        @contextmanager
+        def session(_): yield page
+        with patch.object(browser,'session',session), patch.object(browser,'_read'), \
+                patch.object(browser,'_question_ownership',return_value={'known':True,'complete':True,'answer_ids':[]}), \
+                patch.object(browser,'_parse_question_ownership',side_effect=[{'verified_owned_answer_ids':[]},{'verified_owned_answer_ids':['123']}]), \
+                patch.object(browser,'_check_service_state'), patch.object(browser,'_type_paragraphs'):
+            result=browser.publish('adinfo0905','https://kin.naver.com/qna/detail.naver?docId=123','reviewed answer',Mock())
+        self.assertEqual(result['answer_id'],'123')
+        button.click.assert_called_once()
+        self.assertEqual(page.remove_listener.call_count,2)
+        self.assertEqual(result['submissionObservation']['responses'],[{'path':'/ajax/detail/registerAnswerForSmartEditorOne.naver','status':200,'questionBound':True,'contentType':'application/json','resultCodes':{'isSuccess':True}}])
+        self.assertNotIn('private',json.dumps(result))
+
+    def test_response_candidate_requires_single_exact_question_and_stays_unverified(self):
+        for doc_id, count, expected in (('123',1,'456'),('999',1,None),('123',2,None),
+                                         ('malformed',1,None),('non_json',1,None),('unbound',1,None)):
+            with self.subTest(doc_id=doc_id,count=count):
+                page=Mock();button=Mock();button.count.return_value=1;button.is_enabled.return_value=True
+                nodes=Mock();nodes.all_inner_texts.return_value=[]
+                paragraphs=Mock();paragraphs.all_inner_texts.return_value=['reviewed answer']
+                page.locator.side_effect=lambda selector: button if selector=='#answerRegisterButton' else nodes if selector=='.se-canvas .se-text-paragraph .__se-node' else paragraphs if selector=='.se-canvas .se-text-paragraph' else Mock()
+                page.content.return_value='<html>old DOM without the new answer</html>'
+                response=SimpleNamespace(url='https://kin.naver.com/ajax/detail/registerAnswerForSmartEditorOne.naver',
+                    status=200,headers={'content-type':'application/json'},
+                    request=SimpleNamespace(method='POST',frame=SimpleNamespace(page=page),post_data='docId='+doc_id+'&token=private'),
+                    json=lambda:{'isSuccess':True,'result':{'result':{'answerNo':456}}})
+                if doc_id == 'malformed':
+                    response.json=lambda:{'isSuccess':True,'result':'unexpected string'}
+                elif doc_id == 'non_json':
+                    response.json=Mock(side_effect=ValueError('private malformed body'))
+                elif doc_id == 'unbound':
+                    response.request=SimpleNamespace(method='POST')
+                def clicked(**kwargs):
+                    observer=next(call.args[1] for call in page.on.call_args_list if call.args[0]=='response')
+                    for _ in range(count):observer(response)
+                button.click.side_effect=clicked
+                @contextmanager
+                def session(_):yield page
+                with patch.object(browser,'session',session),patch.object(browser,'_read'), \
+                        patch.object(browser,'_question_ownership',return_value={'known':True,'complete':True,'answer_ids':[]}), \
+                        patch.object(browser,'_parse_question_ownership',return_value={'verified_owned_answer_ids':[]}), \
+                        patch.object(browser,'_check_service_state'),patch.object(browser,'_type_paragraphs'):
+                    result=browser.publish('adinfo0905','https://kin.naver.com/qna/detail.naver?docId=123','reviewed answer',Mock())
+                self.assertEqual(result['answer_id'],expected)
+                self.assertEqual(len(result['submissionObservation']['responses']),count)
+                self.assertEqual(result['submissionObservation']['responses'][0]['status'],200)
+                if doc_id == 'unbound':
+                    self.assertFalse(result['submissionObservation']['responses'][0]['questionBound'])
+                self.assertNotIn('private',json.dumps(result))
+                self.assertIn('submitted_unverified',result['reason'])
+                button.click.assert_called_once()
+                if expected:
+                    self.assertTrue(result['submissionObservation']['responseCandidateOnly'])
+                    self.assertFalse(result['submissionObservation']['exactOwnedBodyMatched'])
+                    self.assertNotIn('verified',result)
+
+    def test_session_closes_only_owned_safe_tabs(self):
+        from unittest.mock import MagicMock
+        for reused, pending, draft in ((False,False,False),(True,False,False),(False,True,False),(False,False,True)):
+            with self.subTest(reused=reused,pending=pending,draft=draft):
+                page=Mock();page.url='https://kin.naver.com/';page._barolab_kin_submission_pending=False
+                page.has_draft=False
+                identity=Mock();identity.count.return_value=1;identity.inner_text.return_value='adinfo0905'
+                page.locator.return_value=identity
+                context=SimpleNamespace(pages=[page] if reused else [],new_page=Mock(return_value=page))
+                @contextmanager
+                def awake(*args):yield SimpleNamespace(contexts=[context])
+                @contextmanager
+                def locked(*args):yield
+                with patch('playwright.sync_api.sync_playwright',return_value=MagicMock()), \
+                        patch.object(browser,'awake_browser',awake),patch.object(browser,'account_lock',locked), \
+                        patch.object(browser,'_check_account_blog_not_busy'),patch.object(browser,'_check_service_state'), \
+                        patch.object(browser,'_has_editor_draft',side_effect=lambda current:current.has_draft):
+                    with browser.session('adinfo0905') as selected:
+                        self.assertIs(selected,page)
+                        selected._barolab_kin_submission_pending=pending
+                        selected.has_draft=draft
+                self.assertEqual(page.close.call_count,int(not reused and not pending and not draft))
+
+    def test_unreadable_editor_is_preserved(self):
+        page=Mock();page.locator.side_effect=RuntimeError('unavailable document')
+        self.assertTrue(browser._has_editor_draft(page))
+        with self.assertRaisesRegex(RuntimeError,'Existing KnowledgeIn editor draft'):
+            browser.preserve_editor(page)
+
+    def test_partial_ownership_cannot_authorize_submission_from_recent_history(self):
+        page=Mock()
+        @contextmanager
+        def session(_): yield page
+        with patch.object(browser,'session',session), patch.object(browser,'_question_ownership',return_value={
+                'known':False,'complete':False,'answer_ids':[],'reason':'question_answers_partially_loaded'}), \
+                patch.object(browser,'_own_answer_map') as recent:
+            with self.assertRaisesRegex(RuntimeError,'incomplete'):
+                browser.publish('adinfo0905','https://kin.naver.com/qna/detail.naver?docId=123','answer',Mock())
+        recent.assert_not_called();page.locator.assert_not_called()
+
     def test_publish_requires_durable_callback_before_browser(self):
         with self.assertRaises(ValueError):
             browser.publish('adinfo0905', 'https://kin.naver.com/qna/detail.naver?docId=123', 'answer')
