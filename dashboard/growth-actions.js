@@ -40,6 +40,38 @@
     for(const issue of research.issues||[]){element(parent,'p',`${issueLabels[issue.kind]||'문제 분류 확인 중'} · ${issue.confidence==='observed'?'원천 관측':'가설 · 자동수정 근거 제외'}`);for(const e of (issue.evidence||[]).slice(0,2))if(e.quote)element(parent,'blockquote',e.quote.slice(0,300));}
     for(const unknown of research.unknowns||[])element(parent,'small',`미확인: ${unknown}`);
   }
+  function renderAutonomy(summary,p,r) {
+    const growth=maintenanceData.growth||{},goal=growth.goal||{},ego=r.egoStatus||{},selection=r.jevSelection||{};
+    const card=(title,value,detail)=>{const node=element(summary,'div','','growth-action-card');element(node,'span',title);element(node,'strong',value);element(node,'p',detail);return node;};
+    const sourceLabels={success:'수집 확인',partial:'일부 수집',partial_failure:'일부 수집 실패',failed:'수집 실패',failure:'수집 실패',unknown:'수집 미확인'};
+    const egoLabel=ego.status==='completed'?'최근 회차 처리 종료':ego.status==='already_running'?'기존 회차 실행 중':maintenanceStatuses[ego.status]||'실행 기록 미확인';
+    const egoCard=card('EGO LITE · 최근 실행 결과',egoLabel,`최근 회차 ${timeLabel(r.egoLastCycleAt)} · 원천 자료 ${sourceLabels[ego.sourceStatus]||'수집 미확인'}`);
+    if(ego.reason)element(egoCard,'small',ego.reason);
+    if(ego.nextCycleAt)element(egoCard,'small',`다음 회차 ${timeLabel(ego.nextCycleAt)}`);
+    const selectionLabels={ok:selection.selected?'후보 선별 완료':'통과 후보 대기',no_fresh_candidates:'새 원천 자료 대기',not_configured:'연결 설정 미확인',invalid_input:'입력 검증 실패',api_error:'API 오류 · 적용 차단',invalid_response:'응답 검증 실패 · 적용 차단'};
+    const jevMode=p.jevEnabled===true?'사용':p.jevEnabled===false?'꺼짐':'설정 미확인';
+    const reviewed=[...(maintenanceData.queue||[]),...(maintenanceData.recentActions||[])].filter(item=>item.jevReview).sort((a,b)=>(Date.parse(b.jevReview.checkedAt)||0)-(Date.parse(a.jevReview.checkedAt)||0))[0];
+    const review=reviewed?.jevReview;
+    const reviewLabel=review?.status==='ok'?({pass:'통과',review:'보류 · 독립 재검수 필요',reject:'반려 · 적용 차단'}[review.decision]||'미확인'):review?'검수 호출 실패 · 적용 차단':'검수 기록 미확인';
+    const jevCard=card('JEV · 후보 선별·검수',`${jevMode} · ${selectionLabels[selection.status]||'선별 기록 미확인'}`,`최근 선별 ${timeLabel(selection.checkedAt)} · 최근 검수 ${reviewLabel}`);
+    if(review?.status==='ok'&&review.decision==='review'&&reviewed?.jevEscalation?.status==='passed')element(jevCard,'small','보류된 수정안의 독립 재검수 통과');
+    element(jevCard,'small','JEV 판단은 수익 예측이나 공개 수정 허가가 아닙니다.');
+    const measured=goal.currency==='USD'&&['achieved','in_progress'].includes(goal.status)&&typeof goal.daily_average==='number'&&Number.isFinite(goal.daily_average);
+    const target=typeof goal.daily_target==='number'&&Number.isFinite(goal.daily_target)?goal.daily_target:100;
+    const goalCard=card('일수익 목표 · 30일 일평균',`현재 ${measured?`USD ${number(goal.daily_average,2)}`:'미확인'} / 목표 USD ${number(target,2)}`,`${period(goal)} · 전체 등록 CF 사이트`);
+    element(goalCard,'small',measured?(goal.status==='achieved'?'30일 일평균 목표 기준 충족':'목표 진행 중'):(goal.reason||'동일 기준의 전체 사이트 30일 USD 수익 미수집'));
+    const experiments=Array.isArray(growth.experiments)?growth.experiments:null;
+    const observing=(experiments||[]).filter(item=>item.verification?.status==='observing').length;
+    const experimentCard=card('개선 실험 · 후속 관측',experiments?experiments.length?`관측 중 ${number(observing)}건 · 전체 ${number(experiments.length)}건`:'등록 실험 없음':'실험 기록 미확인','공개 반영과 수익 달성은 별개 · 개선의 인과효과 미입증');
+    for(const item of (experiments||[]).slice(0,3)){
+      const experiment=item.experiment||{},observation=item.observation||experiment.measurement||{};
+      const label={observing:'관측 중',awaiting_evidence:'관측 기간 종료 · 자료 대기',observed_change:'전후 관측값 확보 · 효과 미입증'}[item.verification?.status]||'관측 상태 미확인';
+      link(element(experimentCard,'p'),item.url,item.domain||item.url);
+      element(experimentCard,'small',`${label} · ${period(observation)} (${observation.sourceTimezone||'원천 시간대 미확인'})`);
+      element(experimentCard,'small',`검증 예정 ${timeLabel(experiment.measurementDueAt)} · 페이지 수익 효과 미확인`);
+    }
+    if(experiments?.length>3)element(experimentCard,'small',`최근 3건 표시 · 전체 ${number(experiments.length)}건`);
+  }
   function renderMaintenance() {
     const state=$('maintenance-status');if(!state)return;const p=maintenanceData.policy||{},r=maintenanceData.runtime||{},queue=maintenanceData.queue||[],c=maintenanceData.coverage||{};
     const runtimeLabel=r.status==='completed'?'최근 회차 처리 종료':maintenanceStatuses[r.status]||'실행 상태 미확인';
@@ -49,7 +81,7 @@
     const readinessLabels={disabled:'자동수정 꺼짐',awaiting_canary:'검수된 첫 수정 후보 대기',first_canary:'검수된 첫 기존 글 자동 검증',ready:'자동수정 가능',daily_limit:'일일 수정 상한 대기',publishing_wait:'발행 우선 · 수정 대기',reconciliation_wait:'이전 수정 결과 확인 대기'};
     const writeLabel=readinessLabels[readiness.status]||(readiness.canApply===true?'자동수정 가능':readiness.canApply===false?'자동수정 대기':'자동수정 가능 여부 미확인');
     state.textContent=`${enabled} · ${writeLabel}${readiness.reason?` · ${readiness.reason}`:''} · ${runtimeLabel}${r.stage?` · 현재 단계 ${stageLabels[r.stage]||'단계 확인 중'}`:''}${r.reason?` · ${r.reason}`:''}`;
-    const summary=$('maintenance-summary');if(summary){summary.replaceChildren();for(const [title,value,detail] of [['실제 작업 상태',runtimeLabel,`최근 시도 ${timeLabel(r.lastAttemptAt)} · 최근 점검 ${timeLabel(r.lastAuditAt)}`],['대기·검토 목록',pendingTotal==null?'범위 미확인':`${number(pendingTotal)}건`,`표시 ${queue.length}건${r.nextRetryAt?` · 재시도 ${timeLabel(r.nextRetryAt)}`:''}`],['운영 상한',p.maxPerCycle==null?'미확인':`회차당 ${number(p.maxPerCycle)}건`,`${p.maxUpdatesPerDay==null?'일일 상한 미확인':`일 ${number(p.maxUpdatesPerDay)}건`} · ${number(p.cooldownHours)}h 간격`]]){const card=element(summary,'div','','growth-action-card');element(card,'span',title);element(card,'strong',value);element(card,'p',detail);}}
+    const summary=$('maintenance-summary');if(summary){summary.replaceChildren();for(const [title,value,detail] of [['실제 작업 상태',runtimeLabel,`최근 시도 ${timeLabel(r.lastAttemptAt)} · 최근 점검 ${timeLabel(r.lastAuditAt)}`],['대기·검토 목록',pendingTotal==null?'범위 미확인':`${number(pendingTotal)}건`,`표시 ${queue.length}건${r.nextRetryAt?` · 재시도 ${timeLabel(r.nextRetryAt)}`:''}`],['운영 상한',p.maxPerCycle==null?'미확인':`회차당 ${number(p.maxPerCycle)}건`,`${p.maxUpdatesPerDay==null?'일일 상한 미확인':`일 ${number(p.maxUpdatesPerDay)}건`} · ${number(p.cooldownHours)}h 간격`]]){const card=element(summary,'div','','growth-action-card');element(card,'span',title);element(card,'strong',value);element(card,'p',detail);}renderAutonomy(summary,p,r);}
     const covEl=$('maintenance-coverage');if(covEl){covEl.textContent=Number.isSafeInteger(c.known)?`등록 ${number(c.known)}건 · 점검 ${number(c.basicAudited??c.audited)}건 · 미평가 ${number(c.neverAudited)}건 · 심층검토 ${number(c.deepReviewed)}건`:(c.reason||'근거 수집 범위 확인 중');}
     const form=$('maintenance-policy-form');if(form&&!policyDirty&&!form.contains(document.activeElement)){$('maintenance-enabled').checked=p.enabled===true;$('maintenance-enabled').disabled=typeof p.enabled!=='boolean';$('maintenance-max').value=p.maxPerCycle??'';$('maintenance-cooldown').value=p.cooldownHours??'';}
     const parent=$('maintenance-queue');if(parent){parent.replaceChildren();for(const item of queue){const card=element(parent,'article','','growth-record');element(card,'small',item.domain||'도메인 미확인');link(element(card,'h4'),item.url,maintenanceIssue(item));element(card,'p',`${maintenanceStatuses[item.status]||'상태 확인 중'}${item.stage?` · ${stageLabels[item.stage]||'단계 확인 중'}`:''} · ${item.reason||''}`);for(const e of (Array.isArray(item.evidence)?item.evidence:(item.evidence?.issues||[]).flatMap(issue=>issue.evidence||[]).concat(item.issue?.evidence||[])).slice(0,2)){if(e.quote)element(card,'blockquote',e.quote.slice(0,220));}maintenanceEvidence(card,item);if(item.nextRetryAt)element(card,'small',`재시도 ${timeLabel(item.nextRetryAt)}`);}if(!queue.length)element(parent,'p','현재 대기 목록이 없습니다.','growth-empty');}

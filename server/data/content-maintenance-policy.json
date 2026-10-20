@@ -9,5 +9,6 @@
   "auditIntervalMinutes": 2,
   "auditBatchSize": 10,
   "auditBudgetSeconds": 40,
-  "updatedAt": "2026-10-13T19:46:16.344738+00:00"
+  "jevEnabled": true,
+  "updatedAt": "2026-10-20T12:30:18.325316+00:00"
 }

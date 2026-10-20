@@ -220,8 +220,8 @@ def parse_growth_report(data, sites, start, end):
     if [h.get('name') for h in headers] != names or headers[2].get('currencyCode') != 'USD':
         raise ValueError('growth revenue report columns/currency mismatch')
     rows = data.get('rows', [])
-    if int(data.get('totalMatchedRows', 0)) != len(rows):
-        raise ValueError('growth revenue report truncated')
+    if int(data.get('totalMatchedRows', 0)) != len(rows) or data.get('warnings'):
+        raise ValueError('growth revenue report incomplete')
     result, seen = [], set()
     for row in rows:
         cells = [c.get('value') for c in row.get('cells', [])]
@@ -284,9 +284,46 @@ def growth_domain_period(rows, window, complete=True):
                 noRows=not observed)
 
 
+def growth_cache_hours(result):
+    failed = result.get('dailyImport', {}).get('status') == 'error'
+    return 0.5 if failed or any(s.get('status') == 'error' for s in result.get('sources', {}).values()) else 12
+
+
+def import_growth_daily(result):
+    """Import observed dates only; account reports do not prove arbitrage exclusion."""
+    from server.growth import import_daily
+    allowed = {s['site_id'] for s in inventory() if s['platform'] == 'cf'}
+    amounts, owners = defaultdict(Decimal), {}
+    for account, source in result.get('sources', {}).items():
+        if source.get('status') != 'collected':
+            continue
+        for row in source.get('rows', []):
+            domain, day = row['domain'], row['date']
+            if domain not in allowed or domain not in source.get('domains', []):
+                continue
+            key = (domain, day)
+            if key in owners and owners[key] != account:
+                raise ValueError('multiple AdSense accounts for one domain/date')
+            owners[key] = account
+            amounts[key] += money(row['revenue'])
+    rows = []
+    for (domain, day), amount in sorted(amounts.items()):
+        account = owners[(domain, day)]
+        source = result['sources'][account]
+        migrated = domain in ('healthcox.com', 'tripmarvel.com') and account == 'sj'
+        rows.append({'site_id': domain, 'service': 'adsense', 'metric': 'revenue',
+                     'day': day, 'value': float(amount), 'currency': 'USD',
+                     'source_timezone': 'America/Los_Angeles',
+                     'source_ref': f'AdSense Management API v2 DATE/DOMAIN_CODE · {account}',
+                     'collected_at': source['checkedAt'],
+                     'complete': not migrated or day >= '2026-10-13',
+                     'value_kind': 'estimated', 'revenue_scope': 'unknown'})
+    count = import_daily(DATA / 'growth.sqlite3', {'schema_version': 'growth-daily-v1', 'rows': rows}) if rows else 0
+    return {'status': 'imported', 'rows': count, 'checkedAt': stamp(), 'revenueScope': 'unknown'}
+
+
 def collect_growth_revenue(start=None, end=None, force=False, windows=None):
     """Read-only AdSense growth evidence; no missing credentials become zero."""
-    from dotenv import dotenv_values
     if isinstance(start, dict):
         windows = start
     elif start and end:
@@ -311,9 +348,9 @@ def collect_growth_revenue(start=None, end=None, force=False, windows=None):
         old = document.get('growth', {})
         if not force and old.get('windows') == windows and old.get('status') in ('collected', 'partial'):
             checked = datetime.fromisoformat(old.get('checkedAt', '2000-01-01T00:00:00+00:00'))
-            if datetime.now(timezone.utc) - checked < timedelta(hours=12):
+            if timedelta(0) <= datetime.now(timezone.utc) - checked < timedelta(hours=growth_cache_hours(old)):
                 return old
-        cfg = dotenv_values(ROOT / 'cf_posting' / '.env')
+        cfg = revenue_config()
         accounts = read_json(CONFIG).get('adsense_accounts', {})
         sources, domains = {}, {}
         for account_key, config in accounts.items():
@@ -367,6 +404,11 @@ def collect_growth_revenue(start=None, end=None, force=False, windows=None):
                         evidence = previous_domain if previous_domain.get('checkedAt') else previous_domain.get('lastSuccessful')
                         if evidence:
                             domains[domain]['lastSuccessful'] = evidence
+        try:
+            result['dailyImport'] = import_growth_daily(result)
+        except Exception:
+            result['dailyImport'] = {'status': 'error', 'attemptedAt': stamp(),
+                                     'reason': 'Local daily import failed; source evidence retained'}
         document['growth'] = result
         atomic_write(SNAPSHOT, document)
         return result
@@ -406,20 +448,20 @@ def growth_revenue_summary(periods, path=SNAPSHOT):
         retry = None
         if growth.get('checkedAt'):
             try:
-                retry = (datetime.fromisoformat(growth['checkedAt']) + timedelta(hours=12)).isoformat()
+                retry = (datetime.fromisoformat(growth['checkedAt']) + timedelta(hours=growth_cache_hours(growth))).isoformat()
             except ValueError:
                 pass
         health[key] = {'status': record.get('status', 'not_collected'),
                        'lastAttemptAt': record.get('attemptedAt'), 'lastSuccessAt': checked,
                        'nextRetryAt': retry if record.get('status') != 'not_connected' else None,
-                       'cacheHours': 12, 'rows': len(successful.get('rows', [])),
+                       'cacheHours': growth_cache_hours(growth), 'rows': len(successful.get('rows', [])),
                        'domains': len(record.get('domains', [])),
                        'sourceTimezone': record.get('timezone', 'America/Los_Angeles'),
                        'reason': record.get('reason'), 'windowsMatch': valid}
     return {'status': growth.get('status', 'not_collected') if valid else 'period_mismatch',
             'checkedAt': growth.get('checkedAt'), 'domains': domains,
             'sourceTimezone': 'America/Los_Angeles', 'valueKind': 'estimated',
-            'collection': {'accounts': health, 'cacheHours': 12, 'periodsMatch': valid}}
+            'collection': {'accounts': health, 'cacheHours': growth_cache_hours(growth), 'periodsMatch': valid}}
 
 
 def collection_health(collection, now=None):

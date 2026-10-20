@@ -25,7 +25,10 @@ BACKUPS = DATA / 'maintenance-backups'
 DEFAULT_POLICY = {'enabled': False, 'maxPerCycle': 1, 'maxUpdatesPerDay': 1,
                   'maxResearchPerDay': 4, 'cooldownHours': 672,
                   'cycleIntervalMinutes': 30, 'publishingLookaheadMinutes': 10,
-                  'auditIntervalMinutes': 2, 'auditBatchSize': 10, 'auditBudgetSeconds': 40}
+                  'auditIntervalMinutes': 2, 'auditBatchSize': 10, 'auditBudgetSeconds': 40,
+                  'jevEnabled': False}
+REVIEW_CHECKS = ('factsSupported', 'originalMeaningPreserved', 'searchIntentImproved',
+                'mediaPreserved', 'noFabricatedExperience', 'newClaimsComplete', 'changedClaimsPrimarySupported')
 
 
 def now():
@@ -90,6 +93,22 @@ def state():
     return {**raw, 'policy': {**DEFAULT_POLICY, **authoritative}, 'runtime': raw.get('runtime', {})}
 
 
+def operation_enabled():
+    return state()['policy']['enabled'] and not (Path.home() / 'EGO_EXEC_DISABLED').exists()
+
+
+def cooldown_active(job, policy=None, moment=None):
+    if not job.get('completed_at'):
+        return False
+    moment = moment or now()
+    policy = policy or state()['policy']
+    completed = datetime.fromisoformat(job['completed_at'].replace('Z', '+00:00'))
+    pacific = ZoneInfo('America/Los_Angeles')
+    # The source's final follow-up day must finish before another change.
+    return (moment - completed < timedelta(hours=policy['cooldownHours'])
+            or moment.astimezone(pacific).date() <= completed.astimezone(pacific).date() + timedelta(days=28))
+
+
 def runtime(**fields):
     latest = state()
     latest['runtime'].update(fields, checkedAt=stamp())
@@ -98,10 +117,11 @@ def runtime(**fields):
 
 
 def policy_update(payload):
-    if set(payload) - {'enabled', 'maxPerCycle', 'cooldownHours'}:
+    if set(payload) - {'enabled', 'jevEnabled', 'maxPerCycle', 'cooldownHours'}:
         raise ValueError('지원하지 않는 운영 정책 항목입니다.')
-    if 'enabled' in payload and type(payload['enabled']) is not bool:
-        raise ValueError('enabled must be boolean')
+    for key in ('enabled', 'jevEnabled'):
+        if key in payload and type(payload[key]) is not bool:
+            raise ValueError(key + ' must be boolean')
     if 'maxPerCycle' in payload and (type(payload['maxPerCycle']) is not int or payload['maxPerCycle'] != 1):
         raise ValueError('현재 검증된 회차 상한은 1개입니다.')
     if 'cooldownHours' in payload and (type(payload['cooldownHours']) is not int or not 672 <= payload['cooldownHours'] <= 2160):
@@ -149,6 +169,9 @@ def public_job(row):
             'nextRetryAt': item['next_retry_at'], 'lastAttemptAt': item['last_attempt_at'],
             'completedAt': item['completed_at'], 'actionId': item['action_id'],
             'review': proof.get('review'), 'publicVerification': proof.get('publicVerification'),
+            'jevSelection': proof.get('jevSelection'), 'jevReview': proof.get('jevReview'),
+            'jevEscalation': proof.get('jevEscalation'),
+            'experiment': proof.get('experiment'),
             'researchEvidence': proof.get('evidence'),
             'hashes': proof.get('hashes'), 'diffText': proof.get('diffText', '')[:4000],
             'evidence': json.loads(item.get('audit_json') or '{}'), 'lastAuditAt': item.get('audit_at'),
@@ -173,7 +196,16 @@ def public_summary():
             'audited': audited, 'neverAudited': sum(counts.values()) - audited, 'oldestAuditAt': oldest, 'byStatus': counts,
             'basicAudited': audited, 'deepReviewed': deep, 'deepReviewPending': sum(counts.values()) - deep,
             'reason': '기본점검은 구조·접근 확인 · 사실·답변 완전성 확인과 별도 · 미평가 글을 문제로 판정하지 않음'},
-            'queue': queue, 'recentActions': recent}
+            'queue': queue, 'recentActions': recent, 'growth': raw.get('growth')}
+
+
+def refresh_growth_state():
+    from server.growth import autonomy_summary
+    latest = state()
+    latest['growth'] = autonomy_summary(DB, now())
+    latest.pop('policy', None)
+    atomic(STATE, latest)
+    return latest['growth']
 
 
 def canary_verified():
@@ -189,7 +221,7 @@ def canary_verified():
 def write_readiness():
     policy = state()['policy']
     status, reason = 'ready', '검증된 기존 URL 수정 가능 · 글별 검수·해시·발행 우선 조건은 적용 직전 재확인'
-    if not policy['enabled']:
+    if not operation_enabled():
         status, reason = 'disabled', '자동 운영 비활성'
     else:
         start, end = day_bounds()
@@ -340,7 +372,7 @@ def cache_binding(domain):
 
 def purge_exact(domain, url, slug, binding):
     import requests
-    if not state()['policy']['enabled']:
+    if not operation_enabled():
         raise ValueError('자동 운영 중지 상태')
     zone, headers = binding
     urls = list(dict.fromkeys([url, f'https://www.{domain}/posts/{slug}', f'https://{domain}/{slug}']))
@@ -422,7 +454,7 @@ def audit_batch():
             if changed_source and job['status'] not in ('processing', 'applying'):
                 preserve = False
             if job['status'] == 'completed' and job.get('completed_at'):
-                preserve = now() - datetime.fromisoformat(job['completed_at']) < timedelta(hours=policy['cooldownHours'])
+                preserve = cooldown_active(job, policy)
             with database() as db:
                 if changed_source:
                     db.execute('UPDATE maintenance_jobs SET deep_review_at=NULL,deep_json=? WHERE id=?',
@@ -451,7 +483,95 @@ def save_job(job_id, **fields):
         db.execute('UPDATE maintenance_jobs SET ' + ','.join(k + '=?' for k in fields) + ' WHERE id=?', (*fields.values(), job_id))
 
 
-def prepare_job(job, inspect_only=False, limits=None):
+def choose_growth_job(jobs):
+    from common.jev import choose_candidates
+    from server.growth import maintenance_candidates
+    candidates = maintenance_candidates(jobs, moment=now())
+    result = choose_candidates(candidates) if candidates else {'status': 'no_fresh_candidates', 'ranking': []}
+    eligible = {c['id']: c for c in candidates}
+    selected = next((entry for entry in result.get('ranking', [])
+                     if result.get('status') == 'ok' and entry.get('candidateId') in eligible
+                     and entry.get('score', 0) >= 0.65 and entry.get('evidenceSupport', 0) >= 0.6), None)
+    receipt = {**result, 'checkedAt': stamp(), 'candidateCount': len(candidates),
+               'thresholds': {'score': 0.65, 'evidenceSupport': 0.6},
+               'selected': eligible[selected['candidateId']] if selected else None}
+    runtime(jevSelection=receipt, lastAttemptAt=stamp())
+    if not selected:
+        return None
+    job = next(job for job in jobs if job['id'] == selected['candidateId'])
+    proof = json.loads(job.get('proof') or '{}')
+    proof['jevSelection'] = receipt
+    save_job(job['id'], proof=json.dumps(proof, ensure_ascii=False))
+    return {**job, 'proof': json.dumps(proof, ensure_ascii=False)}
+
+
+def validate_jev_receipt(job, original, draft, receipt):
+    selection, review = receipt.get('jevSelection') or {}, receipt.get('jevReview') or {}
+    selected = selection.get('selected') or {}
+    if (selection.get('status') != 'ok' or selected.get('id') != job['id']
+            or selected.get('domain') != job['domain'] or selected.get('url') != job['url']
+            or review.get('status') != 'ok' or review.get('decision') not in ('pass', 'review')
+            or review.get('originalSha256') != digest(original) or review.get('draftSha256') != digest(draft)
+            or review.get('evidenceSha256') != digest(receipt.get('evidence') or {})):
+        raise ValueError('JEV 후보 선별·수정안 검수 영수증 또는 해시 미확인 · 적용 차단')
+    if review['decision'] == 'review':
+        escalation = receipt.get('jevEscalation') or {}
+        if (escalation.get('status') != 'passed' or escalation.get('issues')
+                or any(escalation.get('checks', {}).get(key) is not True for key in REVIEW_CHECKS)
+                or escalation.get('reviewer') != 'independent_reasoning_reviewer'
+                or escalation.get('jevReviewSha256') != digest(review)
+                or any(escalation.get(key) != review[key] for key in ('originalSha256', 'draftSha256', 'evidenceSha256'))):
+            raise ValueError('JEV 불확실성 후 독립 재검수 근거 미확인 · 적용 차단')
+    try:
+        source_at = datetime.fromisoformat(selected['evidence']['checkedAt'].replace('Z', '+00:00'))
+        review_at = datetime.fromisoformat(review['checkedAt'].replace('Z', '+00:00'))
+        if not timedelta(0) <= now() - source_at <= timedelta(hours=26) or not timedelta(0) <= now() - review_at <= timedelta(hours=24):
+            raise ValueError('stale')
+        if review['decision'] == 'review':
+            escalated_at = datetime.fromisoformat(escalation['checkedAt'].replace('Z', '+00:00'))
+            if escalated_at < review_at or not timedelta(0) <= now() - escalated_at <= timedelta(hours=24):
+                raise ValueError('stale escalation')
+    except (KeyError, TypeError, ValueError):
+        raise ValueError('JEV 선별 원천 또는 검수 날짜 미확인·만료 · 재선별 필요') from None
+
+
+def escalate_jev_review(original, draft, evidence, jev_review):
+    """One bounded reasoning review after uncertainty; never override rejection."""
+    if jev_review.get('status') != 'ok' or jev_review.get('decision') != 'review':
+        raise ValueError('JEV review 결정만 독립 재검수 가능')
+    from common.content_improvement import article_payload, model_json, original_text
+    original_view, draft_view = article_payload(original), draft
+    unchanged = {}
+    body = original.get('content') or original.get('contentHtml') or ''
+    if body and body == draft.get('contentHtml'):
+        original_view = {k: v for k, v in original_view.items() if k not in ('content', 'contentHtml')}
+        original_view['bodyText'] = original_text(body)
+        draft_view = {k: v for k, v in draft.items() if k != 'contentHtml'}
+        unchanged = {'bodyAndEmbeddedMediaBytesEqual': True, 'sha256': hashlib.sha256(body.encode('utf-8')).hexdigest(),
+                     'projection': 'unchanged HTML body represented once as complete reader text; no text truncation'}
+    decision, metadata = model_json(
+        'reviewer',
+        'JEV의 불확실성 후 독립 재검수. 이전 reviewer 승인을 따르지 말고 원문·수정안·원천 근거와 '
+        'JEV 점수를 직접 대조한다. {status:passed|changes_required,issues:[문자열],notes:[문자열],'
+        'checks:{factsSupported,originalMeaningPreserved,searchIntentImproved,mediaPreserved,'
+        'noFabricatedExperience,newClaimsComplete,changedClaimsPrimarySupported}} 반환. '
+        '7개 checks 모두 실제 근거로 확인되고 issues가 없을 때만 passed. JEV 확률은 사실·허가가 아니다. '
+        'searchIntentImproved는 발행 전 편집 검수 항목이다: 실제 관측 검색어 또는 명시된 독자 과제와 '
+        '수정 제목·본문의 답이 맞으며 독자가 대상과 답을 찾기 쉬워졌는지 원문과 비교해 판단한다. '
+        '아직 측정할 수 없는 향후 CTR·순위·트래픽·수익 상승의 입증을 이 항목의 통과 조건으로 삼지 않는다. '
+        '검색어 표본이 적으면 대표·지배 검색 의도 또는 기존 CTR 저하의 원인이라고 추론하지 않는다. '
+        '단순히 관련 단어를 넣었다는 이유나 JEV 점수만으로 통과시키지 말고, 실제 편집상 개선이 없거나 '
+        '제목이 본문·1차 원천보다 넓은 답을 약속하면 changes_required로 판정한다. '
+        '변경되지 않은 본문·미디어는 재생성하지 않는다. 수익이나 검색 상승을 보장하지 않는다.',
+        {'original': original_view, 'draft': draft_view, 'evidence': evidence,
+         'verifiedUnchanged': unchanged, 'jevReview': jev_review}, time.monotonic() + 180)
+    return {**decision, 'reviewer': 'independent_reasoning_reviewer', 'checkedAt': stamp(),
+            'originalSha256': digest(original), 'draftSha256': digest(draft), 'evidenceSha256': digest(evidence),
+            'jevReviewSha256': digest(jev_review), 'reviewContractVersion': 'editorial-intent-v1',
+            'modelReceipt': metadata}
+
+
+def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     from common.content_improvement import prepare_improvement
     sys.path.insert(0, str(ROOT / 'dashboard'))
     import growth_analysis
@@ -461,12 +581,18 @@ def prepare_job(job, inspect_only=False, limits=None):
     atomic(folder / 'original.json', original)
     report = growth_analysis.summary()
     diagnostic = next((r for r in report.get('diagnosis', {}).get('domains', []) if r['domain'] == job['domain']), None)
+    selection = json.loads(job.get('proof') or '{}').get('jevSelection')
     def observe(event, detail=None):
+        if not operation_enabled():
+            raise ValueError('자동 운영 중지 상태')
         if idle_reason():
             raise ValueError('발행 또는 통계 수집 우선 · 준비 작업 양보')
         runtime(status='running', stage=event.get('stage', 'research') if isinstance(event, dict) else str(event), activeJob=job['id'])
-    proposal = prepare_improvement(job['domain'], job['url'], original, diagnosis=diagnostic,
-                                   limits={**(limits or {}), 'seconds': 300, 'forceResearch': inspect_only or (limits or {}).get('forceResearch') is True, 'inspectOnly': inspect_only}, observer=observe)
+    if proposal is None:
+        proposal = prepare_improvement(job['domain'], job['url'], original, diagnosis=diagnostic,
+                                       limits={**(limits or {}), 'seconds': 300,
+                                               'forceResearch': inspect_only or bool(selection) or (limits or {}).get('forceResearch') is True,
+                                               'inspectOnly': inspect_only}, observer=observe)
     if not proposal.get('providerFailure') and any(
             any(a.get('status')=='ok' for a in receipt.get('routingAttempts',[]))
             for receipt in proposal.get('stageReceipts',[])):
@@ -498,11 +624,33 @@ def prepare_job(job, inspect_only=False, limits=None):
                'stageReceipts': proposal.get('stageReceipts', []), 'diffText': diff,
                'diagnosisSnapshot': {'capturedAt': stamp(), 'sourceCheckedAt': report.get('checkedAt'),
                                      'domain': job['domain'], 'url': job['url'], 'diagnosis': diagnostic, 'causalProof': False}}
+    receipt['jevSelection'] = selection
     from server.growth import action_evidence
     end = now().astimezone(ZoneInfo('America/Los_Angeles')).date() - timedelta(days=3)
     receipt['planningBaseline'] = action_evidence(job['domain'], job['url'], (end - timedelta(days=27)).isoformat(), end.isoformat())
-    atomic(folder / 'receipt.json', receipt)
     outcome = 'ready' if proposal.get('status') == 'ready' else proposal.get('status', 'blocked')
+    if state()['policy']['jevEnabled'] and outcome == 'ready':
+        from common.jev import review_revision
+        revision = {'title': draft.get('title'), 'content': draft.get('contentHtml'),
+                    'excerpt': draft.get('summary'), 'description': draft.get('metaDescription')}
+        receipt['jevReview'] = {**review_revision(original, revision, proposal.get('evidence') or {}),
+                                'checkedAt': stamp(), 'originalSha256': digest(original), 'draftSha256': digest(draft),
+                                'evidenceSha256': digest(proposal.get('evidence') or {})}
+        if receipt['jevReview'].get('status') == 'ok' and receipt['jevReview'].get('decision') == 'review':
+            try:
+                observe('jev_escalation')
+                receipt['jevEscalation'] = escalate_jev_review(original, draft, receipt['evidence'] or {}, receipt['jevReview'])
+            except Exception:
+                receipt['jevEscalation'] = {'status': 'unavailable', 'checkedAt': stamp()}
+        try:
+            validate_jev_receipt(job, original, draft, receipt)
+        except ValueError:
+            unavailable = receipt['jevReview'].get('status') != 'ok' or (receipt.get('jevEscalation') or {}).get('status') == 'unavailable'
+            outcome = 'retry_wait' if unavailable else 'blocked'
+            if unavailable:
+                save_job(job['id'], next_retry_at=(now() + timedelta(hours=1)).isoformat())
+            proposal = {**proposal, 'reason': 'JEV 근거·의도 검수 미통과 또는 공급자 미확인 · 원격 수정 보류'}
+    atomic(folder / 'receipt.json', receipt)
     provider_failure = proposal.get('providerFailure')
     if provider_failure:
         pause = provider_failure.get('nextRetryAt') or (now() + timedelta(hours=1)).isoformat()
@@ -579,16 +727,19 @@ def _apply_job(job_id, canary=False):
     if original.get('publish_at'):
         raise ValueError('기존 API가 예약 발행 시각을 보존하지 못하므로 해당 글 자동 수정 보류')
     if (proposal.get('status') != 'ready' or review.get('status') != 'passed' or review.get('rulesPassed') is not True
+            or review.get('issues') or any(review.get('checks', {}).get(key) is not True for key in REVIEW_CHECKS)
             or proposal.get('originalSha256') != digest(original) or proposal.get('draftSha256') != digest(draft)
             or review.get('draftSha256') != digest(draft) or receipt.get('hashes', {}).get('originalSha256') != digest(original)):
         raise ValueError('원본·수정안 해시 또는 독립 검수 영수증 불일치 · 적용 차단')
-    if not state()['policy']['enabled']:
+    if state()['policy']['jevEnabled']:
+        validate_jev_receipt(job, original, draft, receipt)
+    if not operation_enabled():
         raise ValueError('자동 운영 중지 상태')
     if not canary and not canary_verified():
         raise ValueError('최초 기존 글은 검증 canary 회차로 처리해야 합니다.')
     if job['status'] != 'ready' or idle_reason():
         raise ValueError('검수 완료 상태 또는 발행 우선 조건 미충족')
-    if job.get('completed_at') and now() - datetime.fromisoformat(job['completed_at']) < timedelta(hours=state()['policy']['cooldownHours']):
+    if cooldown_active(job):
         raise ValueError('이전 실제 수정의 28일 관측 기간 · 재수정 보류')
     binding = cache_binding(job['domain'])
     with ExitStack() as stack:
@@ -626,14 +777,14 @@ def _apply_job(job_id, canary=False):
                              'expectedVersionSha256': version_digest(expected), 'expected': expected,
                              'checkedAt': stamp(), 'canary': bool(canary), 'writerScope': 'shared_managed_writer_locks; remote API has no atomic CAS'}
         atomic(folder / 'receipt.json', receipt)
-        if not state()['policy']['enabled']:
+        if not operation_enabled():
             receipt['intent']['cancelledAt'] = stamp()
             atomic(folder / 'receipt.json', receipt)
             save_job(job_id, status='ready', stage='apply', apply_attempt_at=None, reason='자동 운영 중지 · 원격 수정 요청 전 취소')
             raise ValueError('자동 운영 중지 상태')
         applied = False
         try:
-            if not state()['policy']['enabled']:
+            if not operation_enabled():
                 raise ValueError('자동 운영 중지 상태')
             response = requests.put(endpoint, json=payload, headers=headers, timeout=(3, 8), allow_redirects=False)
             response.raise_for_status()
@@ -642,7 +793,7 @@ def _apply_job(job_id, canary=False):
             if not verify_public(job['domain'], job['url'], expected):
                 raise ValueError('공개 URL·제목·본문 검증 불일치')
         except Exception:
-            if not state()['policy']['enabled']:
+            if not operation_enabled():
                 save_job(job_id, status='applying', stage='verify', next_retry_at=(now() + timedelta(minutes=30)).isoformat(), reason='자동 운영 중지 · 반영 조회만 가능하며 캐시·롤백 쓰기는 재활성화까지 보류')
                 atomic(folder / 'receipt.json', receipt)
                 raise ValueError('자동 운영 중지 상태') from None
@@ -653,7 +804,7 @@ def _apply_job(job_id, canary=False):
             unchanged = version_digest(latest) == version_digest(original)
             if changed:
                 rollback = {k: original.get(k) for k in payload}
-                if not state()['policy']['enabled']:
+                if not operation_enabled():
                     raise ValueError('자동 운영 중지 상태')
                 restored = requests.put(endpoint, json=rollback, headers=headers, timeout=(3, 8), allow_redirects=False)
                 restored.raise_for_status()
@@ -670,26 +821,50 @@ def _apply_job(job_id, canary=False):
     receipt['publicVerification'] = {'status': 'verified', 'url': job['url'], 'checkedAt': stamp(),
                                      'postId': original['id'], 'title': expected['title'], 'contentSha256': hashlib.sha256(expected['content'].encode('utf-8')).hexdigest()}
     receipt['canary'] = bool(canary)
+    action_id = register_completed_action(job, receipt)
     atomic(folder / 'receipt.json', receipt)
     archive_receipt(job_id, receipt)
-    action_id = register_completed_action(job, receipt)
     save_job(job_id, status='completed', stage='monitor', completed_at=stamp(), action_id=action_id,
              proof=json.dumps(receipt, ensure_ascii=False), content_sha256=version_digest(expected), reason='동일 기존 URL 수정·공개 확인 완료')
     runtime(status='completed', stage='monitor', lastSuccessAt=stamp(), activeJob=None)
+    refresh_growth_state()
     return public_summary()
 
 
 def register_completed_action(job, receipt):
     from server.growth import connect, action_evidence, diagnosis_snapshot
-    day = now().astimezone(ZoneInfo('Asia/Seoul')).date()
+    implemented = (receipt.get('intent') or {}).get('checkedAt') or receipt['publicVerification']['checkedAt']
+    implemented_at = datetime.fromisoformat(implemented.replace('Z', '+00:00'))
+    day = implemented_at.astimezone(ZoneInfo('America/Los_Angeles')).date()
+    completed_day = implemented_at.astimezone(ZoneInfo('Asia/Seoul')).date()
     baseline = action_evidence(job['domain'], job['url'], (day - timedelta(days=28)).isoformat(), (day - timedelta(days=1)).isoformat())
     planning = receipt.get('planningBaseline') or {'status': 'not_collected', 'reason': '계획 당시 정확한 원천 미수집'}
+    # Freeze the actual pre-change source window; never relabel a lagged report.
+    if baseline.get('status') != 'collected' and planning.get('status') == 'collected':
+        try:
+            begin, end = (datetime.fromisoformat(planning[k]).date() for k in ('start', 'end'))
+            if (end - begin).days == 27 and end < day:
+                baseline = {**planning, 'windowPolicy': 'latest_completed_source_window_before_implementation'}
+        except (ValueError, TypeError, KeyError):
+            pass
+    receipt['experiment'] = {
+        'status': 'implemented', 'performanceStatus': 'observing', 'implementedAt': implemented,
+        'measurementDate': day.isoformat(), 'measurementTimezone': 'America/Los_Angeles',
+        'goal': {'dailyUsd': 100, 'averagingDays': 30, 'scope': 'all_registered_cf_sites'},
+        'baseline': baseline, 'followupStart': (day + timedelta(days=1)).isoformat(),
+        'followupEnd': (day + timedelta(days=28)).isoformat(),
+        'measurementDueAt': datetime.combine(day + timedelta(days=31), datetime.min.time(),
+                                             tzinfo=ZoneInfo('America/Los_Angeles')).isoformat(),
+        'causalProof': False, 'revenueOutcome': {'status': 'unknown', 'amountUsd': None},
+        'jevSelection': receipt.get('jevSelection'), 'jevReview': receipt.get('jevReview'),
+        'jevEscalation': receipt.get('jevEscalation')}
     captured = receipt.get('diagnosisSnapshot') or diagnosis_snapshot(job['domain'], job['url'])
     captured['maintenance'] = {'jobId': job['id'], 'actor': 'maintenance', 'hashes': receipt['hashes'], 'publicVerification': receipt['publicVerification']}
+    captured['experiment'] = receipt['experiment']
     identifier = hashlib.sha256((job['id'] + ':' + receipt['hashes']['draftSha256']).encode('utf-8')).hexdigest()[:32]
     with connect(DB) as db:
         db.execute('INSERT OR IGNORE INTO improvement_actions (id,domain,url,action,note,status,created_at,updated_at,completed_at,planning_baseline,baseline,diagnosis_snapshot) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-                   (identifier, job['domain'], job['url'], '기존 콘텐츠 자동 개선', '독립 검수·원본 백업·동일 URL 공개 확인 완료', 'done', stamp(), stamp(), day.isoformat(),
+                   (identifier, job['domain'], job['url'], '기존 콘텐츠 자동 개선', '독립 검수·원본 백업·동일 URL 공개 확인 완료', 'done', stamp(), stamp(), completed_day.isoformat(),
                     json.dumps(planning, ensure_ascii=False), json.dumps(baseline, ensure_ascii=False), json.dumps(captured, ensure_ascii=False)))
         existing = db.execute('SELECT domain,url,status,diagnosis_snapshot FROM improvement_actions WHERE id=?', (identifier,)).fetchone()
         if (existing['domain'] != job['domain'] or existing['url'] != job['url'] or existing['status'] != 'done'
@@ -741,8 +916,9 @@ def recover_jobs():
                     raise ValueError('현재 공개 내용 확인 대기')
                 receipt['canary'] = bool(intent.get('canary'))
                 receipt['publicVerification'] = {'status': 'verified', 'url': job['url'], 'postId': original['id'], 'checkedAt': stamp(), 'recoveredInterruptedApply': True}
-                atomic(folder / 'receipt.json', receipt)
                 identifier = job['action_id'] or register_completed_action(job, receipt)
+                atomic(folder / 'receipt.json', receipt)
+                archive_receipt(job['id'], receipt)
                 save_job(job['id'], status='completed', stage='monitor', completed_at=stamp(), action_id=identifier,
                          proof=json.dumps(receipt, ensure_ascii=False), reason='중단된 적용의 실제 동일 URL 반영 확인 완료')
             elif version_digest(actual) == version_digest(original):
@@ -761,8 +937,9 @@ def run_once(force_prepare=False):
             return {'status': 'already_running'}
         sync_inventory()
         recover_jobs()
+        refresh_growth_state()
         config = state()
-        if not config['policy']['enabled'] and not force_prepare:
+        if (Path.home() / 'EGO_EXEC_DISABLED').exists() or (not operation_enabled() and not force_prepare):
             runtime(status='paused', stage='idle', reason='자동 점검 운영 비활성')
             return public_summary()
         wait = idle_reason()
@@ -804,8 +981,15 @@ def run_once(force_prepare=False):
             if not ready_rows and attempted >= config['policy']['maxResearchPerDay']:
                 runtime(status='waiting', stage='idle', reason='검증된 일일 수정·조사 상한 도달')
                 return public_summary()
-            rows = ready_rows or [dict(r) for r in db.execute("SELECT * FROM maintenance_jobs WHERE status IN ('issues_found','retry_wait') AND (next_retry_at IS NULL OR next_retry_at<=?) ORDER BY attempts,updated_at,id", (stamp(),))]
-            inspect_only = not ready_rows and deep_used == 0 and (attempted >= config['policy']['maxResearchPerDay'] - 1 or not rows or used >= config['policy']['maxUpdatesPerDay'])
+            if config['policy']['jevEnabled']:
+                cutoff = (now() - timedelta(hours=config['policy']['cooldownHours'])).isoformat()
+                rows = ready_rows or [dict(r) for r in db.execute(
+                    """SELECT * FROM maintenance_jobs WHERE status IN ('issues_found','retry_wait','queued','audit_checked','inconclusive')
+                    AND (next_retry_at IS NULL OR next_retry_at<=?) AND (completed_at IS NULL OR completed_at<=?)
+                    ORDER BY attempts,updated_at,id""", (stamp(), cutoff))]
+            else:
+                rows = ready_rows or [dict(r) for r in db.execute("SELECT * FROM maintenance_jobs WHERE status IN ('issues_found','retry_wait') AND (next_retry_at IS NULL OR next_retry_at<=?) ORDER BY attempts,updated_at,id", (stamp(),))]
+            inspect_only = not config['policy']['jevEnabled'] and not ready_rows and deep_used == 0 and (attempted >= config['policy']['maxResearchPerDay'] - 1 or not rows or used >= config['policy']['maxUpdatesPerDay'])
             if inspect_only:
                 rows = [dict(r) for r in db.execute("SELECT * FROM maintenance_jobs WHERE status IN ('audit_checked','inconclusive','no_change') ORDER BY deep_review_at IS NOT NULL,deep_review_at,audit_at,id")]
             elif used >= config['policy']['maxUpdatesPerDay']:
@@ -814,13 +998,24 @@ def run_once(force_prepare=False):
             if not rows:
                 runtime(status='idle', stage='idle', reason='처리 가능한 기존 글 없음')
                 return public_summary()
-            last_domain = config['runtime'].get('lastDomain')
-            job = next((r for r in rows if r['domain'] != last_domain), rows[0])
-            if job['status'] != 'ready':
-                window=preparation_window()
-                if not window['available']:
-                    runtime(status='waiting',stage='research',reason=window['reason'],nextRetryAt=window['nextRetryAt'],preparationWindow=window)
+        last_domain = config['runtime'].get('lastDomain')
+        rows = [row for row in rows if not cooldown_active(row, config['policy'])]
+        if not rows:
+            runtime(status='waiting', stage='monitor', reason='기존 글의 마지막 Pacific 관측일까지 재수정 보류')
+            return public_summary()
+        job = next((r for r in rows if r['domain'] != last_domain), rows[0])
+        if job['status'] != 'ready':
+            window=preparation_window()
+            if not window['available']:
+                runtime(status='waiting',stage='research',reason=window['reason'],nextRetryAt=window['nextRetryAt'],preparationWindow=window)
+                return public_summary()
+            if config['policy']['jevEnabled']:
+                job = choose_growth_job(rows)
+                if job is None:
+                    runtime(status='waiting', stage='selection', activeJob=None,
+                            reason='새 원천 자료 또는 JEV 선별 통과 후보 대기 · 기존 글 유지')
                     return public_summary()
+            with database() as db:
                 db.execute('INSERT INTO maintenance_attempts VALUES (?,?,?,?)', (uuid.uuid4().hex, job['id'], stamp(), 'deep_review' if inspect_only else 'research'))
         runtime(status='running', stage='research', lastAttemptAt=stamp(), activeJob=job['id'], lastDomain=job['domain'], reason=None)
         save_job(job['id'], attempts=job['attempts'] + 1, last_attempt_at=stamp(),
@@ -830,7 +1025,8 @@ def run_once(force_prepare=False):
             result = prepare_job(job, inspect_only) if job['status'] != 'ready' else 'ready'
             if result == 'ready' and not force_prepare:
                 return _apply_job(job['id'], canary=not canary_verified())
-            runtime(status='prepared' if result == 'ready' else 'completed', stage='review', activeJob=None, reason='검수 결과 기록 · 적용 전 조건 재확인')
+            runtime(status={'ready': 'prepared', 'blocked': 'blocked', 'retry_wait': 'waiting'}.get(result, 'completed'),
+                    stage='review', activeJob=None, reason='검수 결과 기록 · 적용 전 조건 재확인')
         except Exception as exc:
             reason = str(exc) if type(exc) is ValueError else '유지보수 원천 또는 엔진 실행 실패 · 키·원문 오류 응답은 공개하지 않음'
             with database() as db:

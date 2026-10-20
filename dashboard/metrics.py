@@ -9,7 +9,7 @@ import os
 import sqlite3
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote, urlparse
@@ -90,7 +90,7 @@ def collector_lock(path=None):
 
 def inventory():
     # Reuse the existing channel inventory rather than maintain another list.
-    with sqlite3.connect(DATA / 'growth.sqlite3') as db:
+    with closing(sqlite3.connect(DATA / 'growth.sqlite3')) as db:
         db.row_factory = sqlite3.Row
         return [dict(r) for r in db.execute('SELECT site_id,url,platform FROM sites ORDER BY site_id')]
 

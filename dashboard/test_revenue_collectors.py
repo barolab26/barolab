@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import contextmanager
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -237,6 +237,81 @@ class GrowthPageEvidenceTests(unittest.TestCase):
         self.assertEqual(result['end'], '2026-10-18')
         with patch.object(traffic, 'ga_report', return_value=([], True)):
             self.assertFalse(traffic.collect_growth_pages(None, '123', {}, 'example.org', NOW)['complete'])
+
+
+class GrowthRevenueTests(unittest.TestCase):
+    def test_failed_source_retries_after_thirty_minutes_using_effective_config(self):
+        windows = r.growth_windows()
+        cfg = {'TEST_' + key: 'mock' for key in ('ACCOUNT_ID', 'REFRESH_TOKEN', 'CLIENT_ID', 'CLIENT_SECRET')}
+        accounts = {'sj': {'sites': ['example.org'], 'env_prefix': 'TEST'}}
+        for age, expected_calls in ((10, 0), (31, 1)):
+            with self.subTest(age=age), tempfile.TemporaryDirectory() as tmp:
+                data = Path(tmp)
+                cached = {'windows': windows, 'status': 'partial',
+                          'checkedAt': (datetime.now(timezone.utc) - timedelta(minutes=age)).isoformat(),
+                          'sources': {'sj': {'status': 'error'}}}
+                snapshot = data / 'revenue.json'
+                snapshot.write_text(json.dumps({'growth': cached}), encoding='utf-8')
+                config = data / 'metrics-config.json'
+                config.write_text(json.dumps({'adsense_accounts': accounts}), encoding='utf-8')
+                with patch.object(r, 'DATA', data), patch.object(r, 'SNAPSHOT', snapshot), \
+                        patch.object(r, 'CONFIG', config), patch.object(r, 'revenue_config', return_value=cfg), \
+                        patch.object(r, 'adsense_growth', return_value=[]) as fetch, \
+                        patch.object(r, 'import_growth_daily', return_value={'status': 'imported', 'rows': 0}):
+                    got = r.collect_growth_revenue()
+                self.assertEqual(fetch.call_count, expected_calls)
+                if expected_calls:
+                    self.assertEqual(fetch.call_args.args[0], cfg)
+                    self.assertEqual(got['sources']['sj']['status'], 'collected')
+                else:
+                    self.assertEqual(got, cached)
+
+    def test_observed_host_rows_import_without_missing_days_or_scope_assumptions(self):
+        from server import growth
+        with tempfile.TemporaryDirectory() as tmp:
+            data = Path(tmp)
+            db_path = data / 'growth.sqlite3'
+            with growth.connect(db_path) as db:
+                db.executemany('INSERT INTO sites VALUES (?,?,?,?)',
+                               [(domain, 'https://' + domain, 'cf', 'test')
+                                for domain in ('example.org', 'healthcox.com')])
+            source = {'status': 'collected', 'checkedAt': '2026-10-19T12:00:00+00:00',
+                      'domains': ['example.org', 'healthcox.com', 'unregistered.org'],
+                      'rows': [{'domain': 'example.org', 'host': 'www.example.org',
+                                'date': '2026-10-12', 'revenue': '0.01'},
+                               {'domain': 'example.org', 'host': 'example.org',
+                                'date': '2026-10-12', 'revenue': '0.02'},
+                               {'domain': 'example.org', 'host': 'example.org',
+                                'date': '2026-10-14', 'revenue': '0'},
+                               {'domain': 'healthcox.com', 'host': 'healthcox.com',
+                                'date': '2026-10-12', 'revenue': '0.04'},
+                               {'domain': 'healthcox.com', 'host': 'healthcox.com',
+                                'date': '2026-10-13', 'revenue': '0.05'},
+                               {'domain': 'unregistered.org', 'host': 'unregistered.org',
+                                'date': '2026-10-12', 'revenue': '100'}]}
+            result = {'sources': {'sj': source}}
+            with patch.object(r, 'DATA', data), patch('metrics.DATA', data):
+                got = r.import_growth_daily(result)
+                r.import_growth_daily(result)
+            self.assertEqual(got['rows'], 4)
+            with growth.connect(db_path) as db:
+                rows = [dict(row) for row in db.execute('SELECT * FROM daily_metrics ORDER BY site_id,day')]
+                self.assertEqual(growth.revenue_goal(db, date(2026, 10, 18))['status'], 'unknown')
+            self.assertEqual(len(rows), 4)
+            self.assertEqual(rows[0]['value'], 0.03)
+            self.assertEqual(rows[1]['value'], 0)
+            self.assertEqual([row['complete'] for row in rows], [1, 1, 0, 1])
+            self.assertEqual({row['revenue_scope'] for row in rows}, {'unknown'})
+            self.assertEqual({row['source_timezone'] for row in rows}, {'America/Los_Angeles'})
+            self.assertEqual({row['currency'] for row in rows}, {'USD'})
+            self.assertFalse(any(row['site_id'] == 'example.org' and row['day'] == '2026-10-13' for row in rows))
+
+    def test_warning_report_is_not_complete_evidence(self):
+        data = {'headers': [{'name': 'DATE'}, {'name': 'DOMAIN_CODE'},
+                            {'name': 'ESTIMATED_EARNINGS', 'currencyCode': 'USD'}, {'name': 'PAGE_VIEWS'}],
+                'rows': [], 'totalMatchedRows': 0, 'warnings': ['DATA_DELAYED']}
+        with self.assertRaises(ValueError):
+            r.parse_growth_report(data, ['example.org'], '2026-10-01', '2026-10-18')
 
 
 if __name__ == '__main__':

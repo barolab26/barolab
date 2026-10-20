@@ -37,7 +37,7 @@ ISSUE_KINDS={'title_intent_mismatch','missing_direct_answer','unsupported_claim'
              'access_or_noindex','readability_structure'}
 SAFE_TAGS={'p','h1','h2','h3','h4','ul','ol','li','strong','b','em','i','u','a','blockquote',
            'table','thead','tbody','tfoot','tr','th','td','figure','figcaption','img','br','div',
-           'span','code','pre','hr','details','summary','section'}
+           'span','code','pre','hr','details','summary','section','article'}
 HIGH_STAKES=re.compile(r'대출|금리|투자|보험|환급|지원금|세금|의료|질환|복용|약물|치료|전기배선|화재|가스|연금|계약|법률')
 
 
@@ -362,8 +362,9 @@ def model_json(role,task,payload,deadline,model_override=None):
              '이번 JSON 계약에 없는 answerBrief나 원고 필드를 요구하거나 생성하지 않는다. '
              '요청 범위의 실제 핵심 누락·오류와 사실·발행 안전 문제는 그대로 기록한다.\n'
             +'참고 역할 지침:\n'+compact_policy(policy, 900)+'\n이번 계약(이번 범위가 우선):\n'+task+'\n자료:\n'+json.dumps(payload,ensure_ascii=False))
-    # Match the previous router's input bound without loading its disabled AGY/FreeLLM routes.
-    if len(prompt)>16000:
+    # Review needs both complete versions and source evidence; keep a bounded, non-truncated input.
+    input_limit = 48000 if role == 'reviewer' else 16000
+    if len(prompt)>input_limit:
         raise ValueError('공유 편집 입력 상한 초과 · 원문을 자르지 않고 수동 분할 검토 대기')
     attempts=[]
     started=time.monotonic()
@@ -376,7 +377,8 @@ def model_json(role,task,payload,deadline,model_override=None):
         attempts.append(entry)
         metadata.update(provider=provider,requestedModel=model)
     try:
-        result=generate_json(prompt,provider='codex',observer=observe)
+        result=generate_json(prompt,provider='codex',observer=observe,
+                             timeout_seconds=max(0.1, deadline-time.monotonic()))
     except Exception:
         consec_fails=int(prior_routing.get('consecutiveFailures',0))+1
         failure={**metadata,'httpStatus':None,'errorCode':'enabled_provider_unavailable',

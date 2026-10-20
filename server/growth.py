@@ -56,6 +56,8 @@ def connect(path):
     action_columns = {r[1] for r in db.execute('PRAGMA table_info(improvement_actions)')}
     if 'diagnosis_snapshot' not in action_columns:
         db.execute('ALTER TABLE improvement_actions ADD COLUMN diagnosis_snapshot TEXT')
+    if 'observation_snapshot' not in action_columns:
+        db.execute('ALTER TABLE improvement_actions ADD COLUMN observation_snapshot TEXT')
     try:
         db.execute("CREATE UNIQUE INDEX IF NOT EXISTS improvement_actions_active ON improvement_actions(domain,url,action) WHERE status!='done'")
     except sqlite3.IntegrityError:
@@ -153,6 +155,23 @@ def series(db, site_id, service, end, days):
             'collected_at': max((p['collected_at'] for p in points if p['collected_at']), default=None)}
 
 
+def revenue_goal(db, end):
+    eligible = db.execute("SELECT site_id FROM sites WHERE platform='cf' ORDER BY site_id").fetchall()
+    targets = [series(db, s['site_id'], 'adsense', end, 30) for s in eligible]
+    ready = [t for t in targets if t['total'] is not None and t['currency'] == 'USD'
+             and t['revenue_scope'] == 'excludes_arbitrage']
+    full = bool(targets) and len(ready) == len(targets)
+    full = full and len({(t['source_timezone'], t['value_kind']) for t in targets}) == 1
+    average = sum(t['total'] for t in targets) / 30 if full else None
+    return {'scope': '등록 CF 도메인 전체', 'site_count': len(eligible), 'complete_sites': len(ready),
+            'start': dates(end, 30)[0], 'end': end.isoformat(), 'currency': 'USD',
+            'daily_target': 100, 'daily_average': average,
+            'achievement_pct': average if average is not None else None,
+            'status': ('achieved' if average >= 100 else 'in_progress') if full else 'unknown',
+            'source_timezone': targets[0]['source_timezone'] if full else None,
+            'reason': None if full else '전체 등록 사이트의 동일 기준 30일 USD 수익 미수집'}
+
+
 def snapshot(path, site_id, days=7, end=None):
     if days not in (7, 28):
         raise ValueError('days must be 7 or 28')
@@ -179,20 +198,7 @@ def snapshot(path, site_id, days=7, end=None):
                 'reason': '사이트별 원천 보고서와 서비스 귀속 미확인', 'checked_at': None}
             result.append({'service': service, 'metric': METRICS[service], 'current': current,
                            'previous': previous, 'growth_pct': growth, 'connection': connection})
-        # Company goal: all listed CF sites must have complete, compatible USD data.
-        eligible = [s for s in sites if s['platform'] == 'cf']
-        targets = [series(db, s['site_id'], 'adsense', end, 30) for s in eligible]
-        ready = [t for t in targets if t['total'] is not None and t['currency'] == 'USD'
-                 and t['revenue_scope'] == 'excludes_arbitrage']
-        full = bool(targets) and len(ready) == len(targets)
-        full = full and len({(t['source_timezone'], t['value_kind']) for t in targets}) == 1
-        average = sum(t['total'] for t in targets) / 30 if full else None
-        goal = {'scope': '등록 CF 도메인 전체', 'site_count': len(eligible),
-                'complete_sites': len(ready),
-                'start': dates(end, 30)[0], 'end': end.isoformat(), 'currency': 'USD',
-                'daily_target': 100, 'daily_average': average,
-                'achievement_pct': average if average is not None else None,
-                'source_timezone': targets[0]['source_timezone'] if full else None}
+        goal = revenue_goal(db, end)
     for observation in result:
         _record_metric_increase(site_id, observation)
     return {'site': site, 'sites': sites, 'days': days, 'end': end.isoformat(),
@@ -297,7 +303,8 @@ def page_performance_evidence(now=None, metrics=None, revenue=None, traffic_sour
                 continue
             item = {'domain': identity[0], 'url': row['url'], 'title': row.get('title', ''),
                     'sessions': row['sessions'], 'pageViews': row['pageViews'],
-                    'start': str(start), 'end': str(end), 'complete': True}
+                    'start': str(start), 'end': str(end), 'complete': True,
+                    'checkedAt': (domain_reports.get(identity[0]) or traffic).get('checkedAt')}
             if row['pageViews'] == 0 and row['sessions'] == 0:
                 result['zeroViewPages'].append(item)
             if row['sessions'] > 0:
@@ -477,6 +484,105 @@ def action_evidence(domain, url, start, end):
                 'reason': '정확한 기간의 원천 데이터 미수집 · 다른 기간 값으로 대체하지 않음'}
 
 
+def maintenance_candidates(jobs, limit=5, moment=None):
+    """Shortlist observed opportunities before paying for semantic ranking."""
+    moment = moment or datetime.now(timezone.utc)
+    analysis = action_analysis()
+    windows = analysis.periods(moment)
+    traffic = analysis.read_json(analysis.DATA / 'traffic.json')
+    metrics = analysis.read_json(analysis.DATA / 'metrics.json')
+    titles = {url: title for site in metrics.get('sites', {}).values()
+              for url, title in site.get('posts', {}).get('titles', {}).items()}
+    def identity(url):
+        parsed = urlsplit(url)
+        return ((parsed.hostname or '').removeprefix('www.'), parsed.path.rstrip('/'))
+    by_url = {identity(job['url']): job for job in jobs}
+    candidates = {}
+    for domain, source in traffic.get('sites', {}).items():
+        google = source.get('google', {})
+        report = google.get('periods', {}).get('current28', {})
+        if not analysis.report_valid(report, windows['current'], moment) or report.get('pagesStatus') != 'collected':
+            continue
+        for page in report.get('pages', []):
+            job = by_url.get(identity(page.get('page', '')))
+            position = page.get('position')
+            if (not job or job['domain'] != domain or not analysis.measured_row(page)
+                    or page['impressions'] < 10 or type(position) not in (int, float)
+                    or not math.isfinite(position) or not 1 <= position <= 30):
+                continue
+            queries = [q['query'] for q in report.get('queries', [])
+                       if q.get('query') and identity(q.get('page', '')) == identity(job['url'])]
+            evidence = {'source': 'Google Search Console', 'start': report['start'], 'end': report['end'],
+                        'checkedAt': report['checkedAt'], 'timezone': windows['searchTimezone'],
+                        'maxAgeHours': 26, 'scope': 'observed_page_rows_not_all_pages',
+                        **{k: page.get(k) for k in ('impressions', 'clicks', 'ctr', 'position')},
+                        'revenueVerified': False, 'causalProof': False}
+            candidates[job['id']] = {
+                'id': job['id'], 'domain': domain, 'url': job['url'],
+                'title': titles.get(job['url']) or titles.get(page['page']) or job['url'],
+                'query': ' | '.join(queries[:3]),
+                'issue': '실측 검색 노출이 있는 기존 글의 검색 의도·제목·답변 완전성 개선 후보; 개선 효과는 아직 미검증',
+                'evidence': evidence}
+    feedback = page_performance_evidence(now=moment, metrics=metrics, traffic_source=traffic)
+    for page in feedback['highTrafficPages']:
+        job = by_url.get(identity(page['url']))
+        if not job or job['id'] in candidates:
+            continue
+        candidates[job['id']] = {
+            'id': job['id'], 'domain': job['domain'], 'url': job['url'],
+            'title': page.get('title') or titles.get(job['url']) or job['url'], 'query': '',
+            'issue': '실측 방문이 있는 기존 글의 답변 완전성 점검 후보; 개선 효과는 아직 미검증',
+            'evidence': {**page, 'source': 'GA4', 'checkedAt': page.get('checkedAt'),
+                         'timezone': 'Asia/Seoul', 'revenueVerified': False, 'causalProof': False}}
+    return sorted(candidates.values(), key=lambda c: (-c['evidence'].get('impressions', 0),
+                  -c['evidence'].get('sessions', 0), c['url']))[:min(5, max(0, limit))]
+
+
+def autonomy_goal(db, moment):
+    # Match the daily importer; never roll back to an older profitable window.
+    end = moment.astimezone(ZoneInfo('America/Los_Angeles')).date() - timedelta(days=3)
+    goal = revenue_goal(db, end)
+    endpoints = db.execute("""SELECT d.complete,d.value,d.collected_at,d.source_timezone
+        FROM sites s LEFT JOIN daily_metrics d ON d.site_id=s.site_id AND d.service='adsense'
+        AND d.metric='revenue' AND d.day=? WHERE s.platform='cf'""", (end.isoformat(),)).fetchall()
+    fresh_sites = 0
+    for row in endpoints:
+        try:
+            collected = datetime.fromisoformat(row['collected_at'].replace('Z', '+00:00'))
+            if (row['complete'] == 1 and row['value'] is not None
+                    and row['source_timezone'] == 'America/Los_Angeles'
+                    and timedelta(0) <= moment - collected <= timedelta(hours=26)):
+                fresh_sites += 1
+        except (AttributeError, TypeError, ValueError):
+            pass
+    fresh = bool(endpoints) and fresh_sites == len(endpoints)
+    goal.update(periodBasis='collector_pacific_completed_dates',
+                expectedSourceDataThrough=end.isoformat(), sourceDataThrough=end.isoformat() if fresh else None,
+                reportingLagDays=3, freshness={'status': 'fresh' if fresh else 'unconfirmed',
+                'freshSites': fresh_sites, 'requiredSites': len(endpoints), 'maxAgeHours': 26})
+    if not fresh:
+        goal.update(status='unknown', daily_average=None, achievement_pct=None,
+                    reason=' · '.join(filter(None, [goal['reason'],
+                        '최신 완료 원천일의 전체 사이트 수집 신선도 미확인 · 오래된 기간으로 대체하지 않음'])))
+    return goal
+
+
+def autonomy_summary(path=DEFAULT_DB, moment=None):
+    moment = moment or datetime.now(timezone.utc)
+    with connect(path) as db:
+        goal = autonomy_goal(db, moment)
+        actions = []
+        for row in db.execute('SELECT * FROM improvement_actions WHERE completed_at IS NOT NULL ORDER BY updated_at DESC LIMIT 50').fetchall():
+            item = action_record(row, moment)
+            if item['verification']['status'] == 'observed_change' and not row['observation_snapshot']:
+                db.execute('UPDATE improvement_actions SET observation_snapshot=? WHERE id=?',
+                           (json.dumps({'followup': item['followup'], 'checkedAt': moment.isoformat()}, ensure_ascii=False), row['id']))
+            actions.append(item)
+    experiments = [item for item in actions if item.get('experiment')]
+    return {'checkedAt': moment.isoformat(), 'goal': goal, 'experiments': experiments,
+            'note': '공개 반영 완료는 수익 달성 아님 · 비교 가능한 관측 자료가 확보될 때까지 성과 미확인'}
+
+
 def action_guard(request):
     from llm_api import trusted_settings_client
     host = request.url.hostname
@@ -512,6 +618,11 @@ def action_target(db, domain, url):
     return domain, url
 
 
+def measurement_date(row):
+    experiment = json.loads(row.get('diagnosis_snapshot') or '{}').get('experiment') or {}
+    return date.fromisoformat(experiment.get('measurementDate') or row['completed_at'])
+
+
 def action_record(row, now=None):
     row = dict(row)
     now = now or datetime.now(timezone.utc)
@@ -523,8 +634,10 @@ def action_record(row, now=None):
             'followup': None, 'observation': None,
             'diagnosisSnapshot': json.loads(row['diagnosis_snapshot']) if row.get('diagnosis_snapshot') else None,
             'verification': {'status': 'not_completed', 'causalProof': False}}
+    experiment = (item.get('diagnosisSnapshot') or {}).get('experiment')
     if row['completed_at']:
-        completed = date.fromisoformat(row['completed_at'])
+        completed = measurement_date(row)
+        source_dated = bool((experiment or {}).get('measurementDate'))
         start, end = completed + timedelta(days=1), completed + timedelta(days=28)
         through = now.astimezone(ZoneInfo('America/Los_Angeles')).date() - timedelta(days=3)
         ready = end <= through
@@ -532,10 +645,17 @@ def action_record(row, now=None):
                                'start': start.isoformat(), 'end': end.isoformat(),
                                'availableThrough': through.isoformat(),
                                'completionTimezone': 'Asia/Seoul', 'sourceTimezone': 'America/Los_Angeles',
-                               'reason': 'KST 완료일을 기준 날짜로 사용 · Pacific 보고서의 당일 제외 전후 28일 · 시각별 인과관계 판정 아님 · Google 보고 지연 3일 반영'}
+                               'measurementDate': completed.isoformat(),
+                               'measurementTimezone': 'America/Los_Angeles' if source_dated else 'Asia/Seoul',
+                               'reason': ('실제 변경 시각의 Pacific 날짜를 기준으로 변경 당일 제외 전후 28일' if source_dated else
+                                          '시각 미기록 기존 작업은 KST 완료일을 기준 날짜로 사용') +
+                                         ' · 시각별 인과관계 판정 아님 · Google 보고 지연 3일 반영'}
         item['followup'] = action_evidence(row['domain'], row['url'], start.isoformat(), end.isoformat()) if ready else {
             'status': 'observing', 'start': start.isoformat(), 'end': end.isoformat(),
             'reason': '관측 기간이 끝나지 않아 성과를 판정하지 않음'}
+        saved = json.loads(row.get('observation_snapshot') or '{}').get('followup') or {}
+        if saved.get('status') == 'collected' and saved.get('start') == start.isoformat() and saved.get('end') == end.isoformat():
+            item['followup'] = saved
         before, after = item['baseline'] or {}, item['followup']
         comparable = all(p.get('status') == 'collected' and all(p.get(k) is not None for k in ('clicks', 'impressions', 'ctr', 'position')) for p in (before, after))
         item['verification'] = {'status': 'observed_change' if comparable else ('awaiting_evidence' if ready else 'observing'),
@@ -543,7 +663,13 @@ def action_record(row, now=None):
                                 'impressionsDelta': after['impressions'] - before['impressions'] if comparable else None,
                                 'ctrPoints': (after['ctr'] - before['ctr']) * 100 if comparable else None,
                                 'positionChange': before['position'] - after['position'] if comparable else None,
-                                'reason': '완료 전후 정확한 28일 관측 변화 · 개선의 인과효과를 입증하지 않음' if comparable else '정확한 전후 보고서가 모두 확보될 때까지 미확인'}
+                                'reason': '고정된 사전 28일·완료 후 28일 원천 관측 변화 · 개선의 인과효과를 입증하지 않음' if comparable else '정확한 전후 보고서가 모두 확보될 때까지 미확인'}
+    if experiment:
+        item['experiment'] = {**experiment, 'measurement': item['observation'],
+                              'performanceStatus': item['verification']['status'],
+                              'observedChange': item['verification'], 'causalProof': False,
+                              'revenueOutcome': {'status': 'unknown', 'amountUsd': None,
+                                  'reason': '동일 URL·전후 관측기간의 페이지별 AdSense 수익 근거 미수집; 검색 증가를 수익으로 환산하지 않음'}}
     return item
 
 
@@ -554,7 +680,7 @@ def action_records(path):
             row = dict(original)
             old = json.loads(row['baseline']) if row['baseline'] else {}
             if row['completed_at'] and old.get('status') not in ('collected', 'complete'):
-                day = date.fromisoformat(row['completed_at'])
+                day = measurement_date(row)
                 candidate = action_evidence(row['domain'], row['url'], (day - timedelta(days=28)).isoformat(),
                                             (day - timedelta(days=1)).isoformat())
                 if candidate.get('status') in ('collected', 'complete'):

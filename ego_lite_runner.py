@@ -124,6 +124,8 @@ def check_and_report_publications(last_published_orders: set) -> set:
 
 def main_loop():
     ensure_display()
+    from common.ego_growth import start_worker
+    start_worker()
     log("==================================================================", "35")
     log("   EGO LITE AUTONOMOUS ORCHESTRATOR ACTIVE (WSL2 XFCE GUI)       ", "32")
     log("   Display: " + os.environ.get("DISPLAY", ":10") + " | Host: Ubuntu WSL2", "35")
@@ -185,4 +187,11 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    main_loop()
+    from dashboard.metrics import collector_lock
+    lock_path = Path("/home/baro7/.barolab/ego-lite.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with collector_lock(lock_path) as acquired:
+        if acquired:
+            main_loop()
+        else:
+            print("EGO LITE is already running.", flush=True)
