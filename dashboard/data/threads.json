@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-20T01:33:40.062544+00:00",
+  "checkedAt": "2026-10-20T15:06:08.436065+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -35,7 +35,7 @@
     "apiConnected": true,
     "connection": {
       "status": "ready",
-      "checkedAt": "2026-10-15T11:19:13.963621+00:00",
+      "checkedAt": "2026-10-20T15:06:07.329157+00:00",
       "reason": null
     },
     "endsAt": "2026-10-29T11:19:14.891210+00:00",
@@ -1978,7 +1978,7 @@
   ],
   "automation": {
     "state": "waiting",
-    "nextEligibleAt": "2026-10-20T12:30:00+09:00",
+    "nextEligibleAt": "2026-10-21T08:00:00+09:00",
     "lastRunAt": "2026-10-20T01:33:40.020353+00:00",
     "lastResult": "waiting",
     "issue": "no_due_slot",
@@ -2434,7 +2434,7 @@
   "revenue": null,
   "connection": {
     "status": "ready",
-    "checkedAt": "2026-10-15T11:19:13.963621+00:00",
+    "checkedAt": "2026-10-20T15:06:07.329157+00:00",
     "reason": null,
     "connected": true,
     "account_verified": true,
@@ -2454,32 +2454,21 @@
     "quotaStatus": "verified",
     "quota": {
       "posts": {
-        "usage": 0,
+        "usage": 1,
         "limit": 250,
-        "remaining": 250
+        "remaining": 249
       },
       "replies": {
-        "usage": 0,
+        "usage": 1,
         "limit": 1000,
-        "remaining": 1000
+        "remaining": 999
       }
     }
   },
   "today": {
-    "date": "2026-10-20",
+    "date": "2026-10-21",
     "timezone": "Asia/Seoul",
-    "counts": [
-      {
-        "kind": "followup",
-        "state": "submitted_unknown",
-        "n": 1
-      },
-      {
-        "kind": "main",
-        "state": "published_verified",
-        "n": 1
-      }
-    ]
+    "counts": []
   },
   "countsScope": "all_time_parts_not_today",
   "countsComplete": true

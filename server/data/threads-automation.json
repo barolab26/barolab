@@ -8,6 +8,7 @@
   "trialDays": 14,
   "continuousMode": true,
   "activatedAt": "2026-10-15T11:19:14.891210+00:00",
+  "endsAt": "2026-10-29T11:19:14.891210+00:00",
   "startDate": "2026-10-15",
   "endDate": "2026-10-29",
   "timezone": "Asia/Seoul",
@@ -52,7 +53,7 @@
     "account_key": "mustpickinfo",
     "status": "ready",
     "reason": null,
-    "checked_at": "2026-10-15T11:19:13.963621+00:00",
+    "checked_at": "2026-10-20T15:06:07.329157+00:00",
     "ready": true,
     "publishReady": true,
     "requiredScopes": [
@@ -78,18 +79,17 @@
     "quotaStatus": "verified",
     "quota": {
       "posts": {
-        "usage": 0,
+        "usage": 1,
         "limit": 250,
-        "remaining": 250
+        "remaining": 249
       },
       "replies": {
-        "usage": 0,
+        "usage": 1,
         "limit": 1000,
-        "remaining": 1000
+        "remaining": 999
       }
     },
     "readinessIssues": []
   },
-  "activationApproved": true,
-  "endsAt": "2026-10-29T11:19:14.891210+00:00"
+  "activationApproved": true
 }
