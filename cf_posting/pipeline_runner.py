@@ -3918,6 +3918,8 @@ def update_status(blog_info, completed_ids, stage: int, stage_name: str, pct: in
                         if status in ('failed', 'review_required', 'verification_pending'):
                             it['lastError'] = detail
                             it['lastErrorAt'] = it.get('attemptStartedAt')
+                        if status == 'prepared' and blog_info.get('reviewedArticle'):
+                            it['reviewedArticle'] = blog_info['reviewedArticle']
                         stage_times = it.setdefault('stageTimes', {})
                         stage_times.setdefault(str(stage), datetime.datetime.now(datetime.timezone.utc).isoformat())
                         for field in ('attemptCount', 'totalAttempts', 'retryRound', 'nextRetryAt', 'lastError',
@@ -5002,6 +5004,15 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
 
     handoff_progress(blog_info, completed_ids, 'reviewer', '필수 에이전트 6개 인계·최종 검수 완료', handoff)
     if prepare_only:
+        handoff = Handoff(output_dir, domain, ai_result['topicSlug'])
+        try:
+            handoff.publication_gate(ai_result, blog_info['category'])
+            if blog_info['category'] not in registered_categories(domain):
+                raise ReviewRequired('준비본 최종 검수에서 사이트 메뉴 분류를 확인할 수 없습니다')
+        except ReviewRequired as exc:
+            update_status(blog_info, completed_ids, 5, '최종 검수 보류', 85, str(exc), status='review_required')
+            raise
+        blog_info['reviewedArticle'] = str((output_dir / 'article.json').relative_to(BASE_DIR))
         update_status(blog_info, completed_ids, 5, "준비본 검수 대기", 85,
                       "6개 에이전트 인계·검수 완료. 외부 발행은 실행하지 않은 준비본", status="prepared")
         return output_dir
@@ -5324,7 +5335,7 @@ def save_schedule(schedule):
         log_scheduler(f"Failed to save schedule: {e}")
 
 @contextmanager
-def cleaner_lock(path=None):
+def cleaner_lock(path=None, wait_seconds=0, poll_interval=5):
     path = Path(path or DATA_DIR / 'cleaner.lock')
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('a+b') as handle:
@@ -5332,17 +5343,23 @@ def cleaner_lock(path=None):
             handle.write(b'0')
             handle.flush()
         acquired = False
-        try:
-            handle.seek(0)
-            if os.name == 'nt':
-                import msvcrt
-                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
-            else:
-                import fcntl
-                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            acquired = True
-        except OSError:
-            pass
+        deadline = time.monotonic() + max(0, float(wait_seconds))
+        while True:
+            try:
+                handle.seek(0)
+                if os.name == 'nt':
+                    import msvcrt
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                acquired = True
+                break
+            except OSError:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                time.sleep(min(max(0.1, float(poll_interval)), remaining))
         try:
             yield acquired
         finally:
@@ -6475,9 +6492,53 @@ def manual_retry_once():
     from common import dashboard_jobs as jobs
     if not jobs.pending('cf-retry'):
         return
-    with cleaner_lock() as acquired:
+    with cleaner_lock(wait_seconds=240, poll_interval=5) as acquired:
         if acquired:
             process_manual_retries(collect_schedules(), limit=1)
+
+def doctor_verified_today(schedule, now=None, target=20):
+    now = now or datetime.datetime.now(KST)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=KST)
+    today = now.astimezone(KST).date()
+    verified = 0
+    for row in schedule.get('doctorRuns', []):
+        if row.get('status') != 'verified' or not row.get('verifiedAt'):
+            continue
+        try:
+            checked = datetime.datetime.fromisoformat(str(row['verifiedAt']).replace('Z', '+00:00'))
+            if checked.tzinfo is None:
+                checked = checked.replace(tzinfo=KST)
+            if checked.astimezone(KST).date() == today:
+                verified += 1
+        except (TypeError, ValueError):
+            continue
+    return verified >= max(0, int(target))
+
+def bind_prepared_reviewed_articles(schedule):
+    changed = False
+    for item in schedule.get('items', []):
+        if item.get('status') != 'prepared' or item.get('reviewedArticle'):
+            continue
+        relative_folder = item.get('artifactFolder')
+        if not relative_folder:
+            continue
+        folder = (BASE_DIR / relative_folder).resolve()
+        if not folder.is_relative_to((BASE_DIR / 'output').resolve()):
+            continue
+        article_path = folder / 'article.json'
+        if not article_path.is_file():
+            continue
+        try:
+            article = json.loads(article_path.read_text(encoding='utf-8'))
+            validate_article(article)
+            handoff = Handoff(folder, item.get('domain'), article.get('topicSlug'))
+            handoff.publication_gate(article, item.get('category') or article.get('category'))
+        except (OSError, ValueError, KeyError, TypeError, ReviewRequired):
+            continue
+        item['reviewedArticle'] = str(article_path.relative_to(BASE_DIR))
+        changed = True
+    return changed
 
 def catch_up_once():
     with cleaner_lock() as acquired:
@@ -6486,11 +6547,15 @@ def catch_up_once():
             return
         pairs = collect_schedules()
         current = pairs[0][1]
-        if current.get('growthAutomationEnabled', True) is True:
+        if bind_prepared_reviewed_articles(current):
+            save_schedule(current)
+        if current.get('growthAutomationEnabled', True) is True and not doctor_verified_today(current):
             try:
                 growth_doctor(current, apply=True)
             except Exception as exc:
                 log_scheduler('Growth doctor held: ' + type(exc).__name__)
+        elif current.get('growthAutomationEnabled', True) is True:
+            log_scheduler('Growth doctor skipped; today verified target already reached')
         for path, schedule in pairs:
             if schedule.get('executionState') == 'stopped':
                 schedule['executionState'] = 'idle'
@@ -6588,7 +6653,7 @@ def main():
     parser.add_argument('--growth-limit', type=int, default=None)
     args, unknown = parser.parse_known_args()
     if args.growth_radar or args.growth_doctor:
-        with cleaner_lock() as acquired:
+        with cleaner_lock(wait_seconds=240, poll_interval=5) as acquired:
             if not acquired:
                 raise RuntimeError('CF workflow active; growth update deferred')
             result = growth_doctor(apply=args.apply_growth, target_domain=args.growth_domain, limit=args.growth_limit) if args.growth_doctor else growth_radar(target_domain=args.growth_domain)
@@ -6620,7 +6685,7 @@ def main():
     async def _execute():
         if os.environ.get('CF_FROM_CLEANER') == '1':
             return await run_workflows()
-        with cleaner_lock() as acquired:
+        with cleaner_lock(wait_seconds=240, poll_interval=5) as acquired:
             if not acquired:
                 raise RuntimeError('Another CF workflow is running; overlapping publication blocked')
             return await run_workflows()
