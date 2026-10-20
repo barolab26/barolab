@@ -1,6 +1,6 @@
 {
   "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T12:05:40.52665+09:00",
+  "generatedAt": "2026-10-20T12:10:55.049952+09:00",
   "date": "2026-10-20",
   "refreshSeconds": 300,
   "complete": false,
@@ -194,8 +194,8 @@
       }
     ],
     "indexing": {
-      "indexed": 507,
-      "inspected": 1414,
+      "indexed": 492,
+      "inspected": 1393,
       "inventoryTotal": 1914
     },
     "traffic": {
