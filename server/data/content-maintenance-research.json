@@ -2258,34 +2258,38 @@
     "scope": "네이버 검색 표본 · Google 순위 근거 아님"
   },
   "provider:shared-routing": {
-    "provider": "shared_agent_router",
-    "checkedAt": "2026-10-15T20:01:50.068755+00:00",
+    "provider": "codex",
+    "checkedAt": "2026-10-20T13:11:37.165062+00:00",
     "routingAttempts": [
       {
-        "provider": "freellm",
-        "requested_model": "auto",
+        "provider": "codex",
+        "requested_model": "gpt-6-luna",
         "returned_model": "unknown",
-        "status": "failed",
+        "status": "calling",
         "attempt": 1,
-        "latency_ms": 2069
+        "latency_ms": 2397
       },
       {
-        "provider": "agy",
-        "requested_model": "gemini-3.8-flash-medium",
-        "returned_model": "unknown",
-        "status": "failed",
+        "provider": "codex",
+        "requested_model": "gpt-6-luna",
+        "returned_model": "gpt-6-luna",
+        "status": "returned",
         "attempt": 1,
-        "latency_ms": 65103
+        "latency_ms": 9848
       }
     ],
-    "elapsedMs": 67605,
-    "instructionSha256": "c8b45395f6463b64a3011d7d3a6923998aaf782f20fdc80286cb4cbfc0068925",
-    "contentQualitySha256": "ae8d7b4b8ebd3c19c79c94aa3776153d287b5c0d6b1304ea7225ed9aa30f2978",
-    "promptSha256": "cafda1775f92505e2872e6063453fcb8a632efbb7a2cc96abe6fd6de2f41b7d6",
-    "requestedModel": "auto",
-    "httpStatus": null,
-    "errorCode": "shared_routing_unavailable",
-    "nextRetryAt": "2026-10-15T20:31:50.074693+00:00"
+    "instructionSha256": "8acbb1055fcda00456cd773a96d12261355ce16fb8171e7bf389c1cab672e942",
+    "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+    "promptSha256": "495294806265b2dbece669b4cd06ff28613b300b833cde7ef171697b4f07287c",
+    "requestedModel": "gpt-6-luna",
+    "elapsedMs": 9870,
+    "returnedModel": "gpt-6-luna",
+    "model": "gpt-6-luna",
+    "candidateRef": ".agent-routing/candidates/13314af50365d5d07ee754d647c04c8866e63d75d443e6e6cf4ea965d0ee0381.json",
+    "candidateSha256": "13314af50365d5d07ee754d647c04c8866e63d75d443e6e6cf4ea965d0ee0381",
+    "status": "ready",
+    "lastSuccessAt": "2026-10-20T13:11:47.046418+00:00",
+    "nextRetryAt": null
   },
   "page:https://www.koreansalaryman.com/": {
     "url": "https://www.koreansalaryman.com/",

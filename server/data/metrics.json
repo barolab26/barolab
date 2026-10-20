@@ -43513,7 +43513,7 @@
     "start": "2026-10-13",
     "end": "2026-10-19",
     "timezone": "Asia/Seoul",
-    "checkedAt": "2026-10-19T23:37:30.579215+00:00",
+    "checkedAt": "2026-10-20T12:29:14.185015+00:00",
     "complete": true,
     "source": "GA4 Data API",
     "sites": [
@@ -43521,7 +43521,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:36:58.610087+00:00",
+        "checkedAt": "2026-10-20T12:28:27.715084+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43532,7 +43532,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:36:58.671021+00:00",
+        "checkedAt": "2026-10-20T12:28:26.969097+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43543,7 +43543,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:36:59.318429+00:00",
+        "checkedAt": "2026-10-20T12:28:27.691599+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43554,7 +43554,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:00.898403+00:00",
+        "checkedAt": "2026-10-20T12:28:27.521063+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43565,7 +43565,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:06.899789+00:00",
+        "checkedAt": "2026-10-20T12:28:37.246842+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43576,7 +43576,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:07.820872+00:00",
+        "checkedAt": "2026-10-20T12:28:40.689899+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43587,7 +43587,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:06.765550+00:00",
+        "checkedAt": "2026-10-20T12:28:40.155764+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43598,7 +43598,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:11.841695+00:00",
+        "checkedAt": "2026-10-20T12:28:41.854090+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43609,7 +43609,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:12.983503+00:00",
+        "checkedAt": "2026-10-20T12:28:51.495583+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43620,7 +43620,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:16.254232+00:00",
+        "checkedAt": "2026-10-20T12:28:54.305215+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43631,7 +43631,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:14.936820+00:00",
+        "checkedAt": "2026-10-20T12:28:53.122220+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43642,7 +43642,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:19.023443+00:00",
+        "checkedAt": "2026-10-20T12:28:55.325031+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43653,7 +43653,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:19.910608+00:00",
+        "checkedAt": "2026-10-20T12:29:05.413438+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43664,7 +43664,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:21.600092+00:00",
+        "checkedAt": "2026-10-20T12:29:04.428451+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43675,7 +43675,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:24.815778+00:00",
+        "checkedAt": "2026-10-20T12:29:08.009784+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43686,7 +43686,7 @@
         "start": "2026-10-13",
         "end": "2026-10-19",
         "timezone": "Asia/Seoul",
-        "checkedAt": "2026-10-19T23:37:27.721100+00:00",
+        "checkedAt": "2026-10-20T12:29:06.939397+00:00",
         "complete": true,
         "status": "collected",
         "source": "GA4 Data API",
@@ -43698,8 +43698,8 @@
       {
         "domain": "baronote.kr",
         "url": "https://www.baronote.kr/universe-club-cancel",
-        "sessions": 7,
-        "pageViews": 7
+        "sessions": 9,
+        "pageViews": 8
       },
       {
         "domain": "baronote.kr",
@@ -43716,6 +43716,12 @@
       {
         "domain": "baronote.kr",
         "url": "https://www.baronote.kr/2026-최신-환율-전망-2026-하반기-달러-1350원대-목표-전문가-4가지-핵심-시나리오",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
+        "domain": "baronote.kr",
+        "url": "https://www.baronote.kr/basic-pension-national-pension-reduction-check",
         "sessions": 1,
         "pageViews": 1
       },
@@ -43746,8 +43752,8 @@
       {
         "domain": "daynote.kr",
         "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
-        "sessions": 21,
-        "pageViews": 23
+        "sessions": 22,
+        "pageViews": 24
       },
       {
         "domain": "daynote.kr",
@@ -43772,6 +43778,12 @@
         "url": "https://www.daynote.kr/green-onion-fresh-storage-guide",
         "sessions": 1,
         "pageViews": 2
+      },
+      {
+        "domain": "daynote.kr",
+        "url": "https://www.daynote.kr/kimchi-storage-without-kimchi-fridge",
+        "sessions": 1,
+        "pageViews": 1
       },
       {
         "domain": "daynote.kr",
@@ -43836,6 +43848,12 @@
       {
         "domain": "healthcox.com",
         "url": "https://www.healthcox.com/dumbbell-storage-tips",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
+        "domain": "healthcox.com",
+        "url": "https://www.healthcox.com/rhinitis-nasal-irrigation-saline-guide-2026",
         "sessions": 1,
         "pageViews": 1
       },
@@ -43967,6 +43985,12 @@
       },
       {
         "domain": "maxnote.kr",
+        "url": "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
+        "domain": "maxnote.kr",
         "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
         "sessions": 1,
         "pageViews": 1
@@ -44039,6 +44063,12 @@
       },
       {
         "domain": "meganote.kr",
+        "url": "https://www.meganote.kr/smartphone-security-settings",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
+        "domain": "meganote.kr",
         "url": "https://www.meganote.kr/washing-machine-tub-cleaning-frequency",
         "sessions": 1,
         "pageViews": 1
@@ -44054,6 +44084,12 @@
         "url": "https://www.meganote.kr/중소기업-기술보호-보안솔루션-추천-비교-top-5-2026년",
         "sessions": 1,
         "pageViews": 1
+      },
+      {
+        "domain": "must-good.com",
+        "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
+        "sessions": 2,
+        "pageViews": 2
       },
       {
         "domain": "must-good.com",
@@ -44087,6 +44123,12 @@
       },
       {
         "domain": "must-good.com",
+        "url": "https://www.must-good.com/energy-voucher-eligibility-exclusion-check",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
+        "domain": "must-good.com",
         "url": "https://www.must-good.com/health-insurance-refund-check",
         "sessions": 1,
         "pageViews": 1
@@ -44094,12 +44136,6 @@
       {
         "domain": "must-good.com",
         "url": "https://www.must-good.com/jangmachul-ppallae-naemsae-jeguhabob",
-        "sessions": 1,
-        "pageViews": 1
-      },
-      {
-        "domain": "must-good.com",
-        "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
         "sessions": 1,
         "pageViews": 1
       },
@@ -44268,8 +44304,8 @@
       {
         "domain": "nolplace.com",
         "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
-        "sessions": 2,
-        "pageViews": 2
+        "sessions": 3,
+        "pageViews": 3
       },
       {
         "domain": "nolplace.com",
@@ -44286,7 +44322,7 @@
       {
         "domain": "smilenote.kr",
         "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
-        "sessions": 2,
+        "sessions": 3,
         "pageViews": 2
       },
       {
@@ -44332,6 +44368,12 @@
         "pageViews": 1
       },
       {
+        "domain": "soulnote.kr",
+        "url": "https://www.soulnote.kr/현금영수증-자진발급-등록-홈택스-확인법",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
         "domain": "topnote.kr",
         "url": "https://www.topnote.kr/2026년-지금-가장-많이-쓰는-인기-앱-TOP-10-놓치면-후회",
         "sessions": 2,
@@ -44369,6 +44411,12 @@
       },
       {
         "domain": "tripmarvel.com",
+        "url": "https://www.tripmarvel.com/day-trip-packing-essentials",
+        "sessions": 2,
+        "pageViews": 2
+      },
+      {
+        "domain": "tripmarvel.com",
         "url": "https://www.tripmarvel.com/gyeongbokgung-night-viewing-reservation-guide-2026",
         "sessions": 2,
         "pageViews": 2
@@ -44381,19 +44429,25 @@
       },
       {
         "domain": "tripmarvel.com",
+        "url": "https://www.tripmarvel.com//checkout/",
+        "sessions": 1,
+        "pageViews": 1
+      },
+      {
+        "domain": "tripmarvel.com",
         "url": "https://www.tripmarvel.com/chamakase-miwoosae-location-price-check",
         "sessions": 1,
         "pageViews": 1
       },
       {
         "domain": "tripmarvel.com",
-        "url": "https://www.tripmarvel.com/day-trip-packing-essentials",
+        "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
         "sessions": 1,
         "pageViews": 1
       },
       {
         "domain": "tripmarvel.com",
-        "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
+        "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
         "sessions": 1,
         "pageViews": 1
       },
@@ -44479,7 +44533,7 @@
   },
   "performanceFeedback": {
     "schema": "page-performance-feedback-v1",
-    "checkedAt": "2026-10-19T23:43:37.465627+00:00",
+    "checkedAt": "2026-10-20T12:29:14.803249+00:00",
     "start": "2026-10-13",
     "end": "2026-10-19",
     "timezone": "Asia/Seoul",
@@ -44490,17 +44544,6 @@
     ],
     "revenueWinners": [],
     "zeroViewPages": [
-      {
-        "domain": "baronote.kr",
-        "url": "https://www.baronote.kr/basic-pension-national-pension-reduction-check",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
       {
         "domain": "baronote.kr",
         "url": "https://www.baronote.kr/2026-energy-voucher-usage-balance",
@@ -46659,17 +46702,6 @@
       },
       {
         "domain": "daynote.kr",
-        "url": "https://www.daynote.kr/kimchi-storage-without-kimchi-fridge",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "daynote.kr",
         "url": "https://www.daynote.kr/sweet-potato-long-term-storage",
         "title": "",
         "sessions": 0,
@@ -47760,17 +47792,6 @@
       {
         "domain": "healthcox.com",
         "url": "https://www.healthcox.com/greek-yogurt-diet-nutrition-guide-2026",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "healthcox.com",
-        "url": "https://www.healthcox.com/rhinitis-nasal-irrigation-saline-guide-2026",
         "title": "",
         "sessions": 0,
         "pageViews": 0,
@@ -54007,17 +54028,6 @@
       },
       {
         "domain": "maxnote.kr",
-        "url": "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "maxnote.kr",
         "url": "https://www.maxnote.kr/culinary-class-wars-netflix-schedule-guide",
         "title": "",
         "sessions": 0,
@@ -55206,17 +55216,6 @@
       },
       {
         "domain": "meganote.kr",
-        "url": "https://www.meganote.kr/smartphone-security-settings",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "meganote.kr",
         "url": "https://www.meganote.kr/galaxy-battery-protection-checklist",
         "title": "",
         "sessions": 0,
@@ -55713,17 +55712,6 @@
       {
         "domain": "meganote.kr",
         "url": "https://www.meganote.kr/AI-기술-트렌드-2026-놓치면-후회할-7가지-변화-미리보기",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "must-good.com",
-        "url": "https://www.must-good.com/energy-voucher-eligibility-exclusion-check",
         "title": "",
         "sessions": 0,
         "pageViews": 0,
@@ -60255,17 +60243,6 @@
       },
       {
         "domain": "soulnote.kr",
-        "url": "https://www.soulnote.kr/현금영수증-자진발급-등록-홈택스-확인법",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "soulnote.kr",
         "url": "https://www.soulnote.kr/하이패스-미납통행료-조회-납부방법",
         "title": "",
         "sessions": 0,
@@ -61521,17 +61498,6 @@
       {
         "domain": "topnote.kr",
         "url": "https://www.topnote.kr/놓치면-후회-2026년-IT-트렌드-핵심-5가지-분석",
-        "title": "",
-        "sessions": 0,
-        "pageViews": 0,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "zeroBasis": "complete_inventory_joined_to_exhaustive_ga4_report"
-      },
-      {
-        "domain": "tripmarvel.com",
-        "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
         "title": "",
         "sessions": 0,
         "pageViews": 0,
@@ -64208,8 +64174,18 @@
         "domain": "daynote.kr",
         "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
         "title": "",
-        "sessions": 21,
-        "pageViews": 23,
+        "sessions": 22,
+        "pageViews": 24,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "baronote.kr",
+        "url": "https://www.baronote.kr/universe-club-cancel",
+        "title": "",
+        "sessions": 9,
+        "pageViews": 8,
         "start": "2026-10-13",
         "end": "2026-10-19",
         "complete": true
@@ -64220,16 +64196,6 @@
         "title": "",
         "sessions": 9,
         "pageViews": 9,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true
-      },
-      {
-        "domain": "baronote.kr",
-        "url": "https://www.baronote.kr/universe-club-cancel",
-        "title": "",
-        "sessions": 7,
-        "pageViews": 7,
         "start": "2026-10-13",
         "end": "2026-10-19",
         "complete": true
@@ -64325,6 +64291,26 @@
         "complete": true
       },
       {
+        "domain": "nolplace.com",
+        "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+        "title": "",
+        "sessions": 3,
+        "pageViews": 3,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "smilenote.kr",
+        "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+        "title": "",
+        "sessions": 3,
+        "pageViews": 2,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
         "domain": "healthcox.com",
         "url": "https://www.healthcox.com/topic-2",
         "title": "",
@@ -64406,6 +64392,16 @@
       },
       {
         "domain": "must-good.com",
+        "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
+        "title": "",
+        "sessions": 2,
+        "pageViews": 2,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "must-good.com",
         "url": "https://www.must-good.com/post",
         "title": "",
         "sessions": 2,
@@ -64437,26 +64433,6 @@
       {
         "domain": "must-pick.com",
         "url": "https://www.must-pick.com/property-tax-september-2026-payment-guide",
-        "title": "",
-        "sessions": 2,
-        "pageViews": 2,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true
-      },
-      {
-        "domain": "nolplace.com",
-        "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
-        "title": "",
-        "sessions": 2,
-        "pageViews": 2,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true
-      },
-      {
-        "domain": "smilenote.kr",
-        "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
         "title": "",
         "sessions": 2,
         "pageViews": 2,
@@ -64497,6 +64473,16 @@
       {
         "domain": "topnote.kr",
         "url": "https://www.topnote.kr/life-master-1031-nowon-kal-guksu",
+        "title": "",
+        "sessions": 2,
+        "pageViews": 2,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "tripmarvel.com",
+        "url": "https://www.tripmarvel.com/day-trip-packing-essentials",
         "title": "",
         "sessions": 2,
         "pageViews": 2,
@@ -64576,6 +64562,16 @@
       },
       {
         "domain": "baronote.kr",
+        "url": "https://www.baronote.kr/basic-pension-national-pension-reduction-check",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "baronote.kr",
         "url": "https://www.baronote.kr/korea-post-registered-mail-delivery-inquiry-guide",
         "title": "",
         "sessions": 1,
@@ -64646,6 +64642,16 @@
       },
       {
         "domain": "daynote.kr",
+        "url": "https://www.daynote.kr/kimchi-storage-without-kimchi-fridge",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "daynote.kr",
         "url": "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
         "title": "",
         "sessions": 1,
@@ -64697,6 +64703,16 @@
       {
         "domain": "healthcox.com",
         "url": "https://www.healthcox.com/dumbbell-storage-tips",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "healthcox.com",
+        "url": "https://www.healthcox.com/rhinitis-nasal-irrigation-saline-guide-2026",
         "title": "",
         "sessions": 1,
         "pageViews": 1,
@@ -64856,6 +64872,16 @@
       },
       {
         "domain": "maxnote.kr",
+        "url": "https://www.maxnote.kr/starbucks-autumn-promotion-2026-peanuts-md",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "maxnote.kr",
         "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
         "title": "",
         "sessions": 1,
@@ -64966,6 +64992,16 @@
       },
       {
         "domain": "meganote.kr",
+        "url": "https://www.meganote.kr/smartphone-security-settings",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "meganote.kr",
         "url": "https://www.meganote.kr/washing-machine-tub-cleaning-frequency",
         "title": "",
         "sessions": 1,
@@ -65036,6 +65072,16 @@
       },
       {
         "domain": "must-good.com",
+        "url": "https://www.must-good.com/energy-voucher-eligibility-exclusion-check",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "must-good.com",
         "url": "https://www.must-good.com/health-insurance-refund-check",
         "title": "",
         "sessions": 1,
@@ -65047,16 +65093,6 @@
       {
         "domain": "must-good.com",
         "url": "https://www.must-good.com/jangmachul-ppallae-naemsae-jeguhabob",
-        "title": "",
-        "sessions": 1,
-        "pageViews": 1,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true
-      },
-      {
-        "domain": "must-good.com",
-        "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
         "title": "",
         "sessions": 1,
         "pageViews": 1,
@@ -65335,6 +65371,16 @@
         "complete": true
       },
       {
+        "domain": "soulnote.kr",
+        "url": "https://www.soulnote.kr/현금영수증-자진발급-등록-홈택스-확인법",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
         "domain": "topnote.kr",
         "url": "https://www.topnote.kr/chrome-incognito-download-history-scope",
         "title": "",
@@ -65366,6 +65412,16 @@
       },
       {
         "domain": "tripmarvel.com",
+        "url": "https://www.tripmarvel.com//checkout/",
+        "title": "",
+        "sessions": 1,
+        "pageViews": 1,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true
+      },
+      {
+        "domain": "tripmarvel.com",
         "url": "https://www.tripmarvel.com/chamakase-miwoosae-location-price-check",
         "title": "",
         "sessions": 1,
@@ -65376,7 +65432,7 @@
       },
       {
         "domain": "tripmarvel.com",
-        "url": "https://www.tripmarvel.com/day-trip-packing-essentials",
+        "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
         "title": "",
         "sessions": 1,
         "pageViews": 1,
@@ -65386,7 +65442,7 @@
       },
       {
         "domain": "tripmarvel.com",
-        "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
+        "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
         "title": "",
         "sessions": 1,
         "pageViews": 1,
@@ -65509,7 +65565,7 @@
     "revenueMetric": "ESTIMATED_EARNINGS",
     "selection": "top_10_percent_of_positive_revenue_and_positive_session_pages",
     "coverage": {
-      "trafficPages": 1922,
+      "trafficPages": 1923,
       "revenuePages": 0,
       "joinedPages": 0,
       "trafficComplete": true,
@@ -65556,30 +65612,30 @@
         "domain": "baronote.kr",
         "url": "https://www.baronote.kr/universe-club-cancel",
         "title": "",
-        "sessions": 7,
-        "pageViews": 7,
+        "sessions": 9,
+        "pageViews": 8,
         "start": "2026-10-13",
         "end": "2026-10-19",
         "complete": true,
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 8,
+        "eligibleDomainPageCount": 9,
         "rankingScope": "domain_positive_pages"
       },
       {
         "domain": "daynote.kr",
         "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
         "title": "",
-        "sessions": 21,
-        "pageViews": 23,
+        "sessions": 22,
+        "pageViews": 24,
         "start": "2026-10-13",
         "end": "2026-10-19",
         "complete": true,
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 8,
+        "eligibleDomainPageCount": 9,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65594,7 +65650,7 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 8,
+        "eligibleDomainPageCount": 9,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65654,7 +65710,7 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 6,
+        "eligibleDomainPageCount": 7,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65669,7 +65725,7 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 14,
+        "eligibleDomainPageCount": 15,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65684,7 +65740,22 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 14,
+        "eligibleDomainPageCount": 15,
+        "rankingScope": "domain_positive_pages"
+      },
+      {
+        "domain": "must-good.com",
+        "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
+        "title": "",
+        "sessions": 2,
+        "pageViews": 2,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true,
+        "selectionBasis": "ga4_sessions",
+        "estimatedRevenue": null,
+        "revenueVerified": false,
+        "eligibleDomainPageCount": 12,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65699,22 +65770,7 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 11,
-        "rankingScope": "domain_positive_pages"
-      },
-      {
-        "domain": "must-good.com",
-        "url": "https://www.must-good.com/2026년-강남역-한식-맛집-TOP-10-후회-없는-선택은",
-        "title": "",
-        "sessions": 1,
-        "pageViews": 1,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "selectionBasis": "ga4_sessions",
-        "estimatedRevenue": null,
-        "revenueVerified": false,
-        "eligibleDomainPageCount": 11,
+        "eligibleDomainPageCount": 12,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65781,7 +65837,7 @@
         "domain": "smilenote.kr",
         "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
         "title": "",
-        "sessions": 2,
+        "sessions": 3,
         "pageViews": 2,
         "start": "2026-10-13",
         "end": "2026-10-19",
@@ -65804,7 +65860,7 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 4,
+        "eligibleDomainPageCount": 5,
         "rankingScope": "domain_positive_pages"
       },
       {
@@ -65824,6 +65880,21 @@
       },
       {
         "domain": "tripmarvel.com",
+        "url": "https://www.tripmarvel.com/day-trip-packing-essentials",
+        "title": "",
+        "sessions": 2,
+        "pageViews": 2,
+        "start": "2026-10-13",
+        "end": "2026-10-19",
+        "complete": true,
+        "selectionBasis": "ga4_sessions",
+        "estimatedRevenue": null,
+        "revenueVerified": false,
+        "eligibleDomainPageCount": 16,
+        "rankingScope": "domain_positive_pages"
+      },
+      {
+        "domain": "tripmarvel.com",
         "url": "https://www.tripmarvel.com/gyeongbokgung-night-viewing-reservation-guide-2026",
         "title": "",
         "sessions": 2,
@@ -65834,22 +65905,7 @@
         "selectionBasis": "ga4_sessions",
         "estimatedRevenue": null,
         "revenueVerified": false,
-        "eligibleDomainPageCount": 14,
-        "rankingScope": "domain_positive_pages"
-      },
-      {
-        "domain": "tripmarvel.com",
-        "url": "https://www.tripmarvel.com/travel-packing-tips",
-        "title": "",
-        "sessions": 2,
-        "pageViews": 2,
-        "start": "2026-10-13",
-        "end": "2026-10-19",
-        "complete": true,
-        "selectionBasis": "ga4_sessions",
-        "estimatedRevenue": null,
-        "revenueVerified": false,
-        "eligibleDomainPageCount": 14,
+        "eligibleDomainPageCount": 16,
         "rankingScope": "domain_positive_pages"
       },
       {

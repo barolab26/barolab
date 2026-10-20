@@ -52,9 +52,8 @@
     const jevMode=p.jevEnabled===true?'사용':p.jevEnabled===false?'꺼짐':'설정 미확인';
     const reviewed=[...(maintenanceData.queue||[]),...(maintenanceData.recentActions||[])].filter(item=>item.jevReview).sort((a,b)=>(Date.parse(b.jevReview.checkedAt)||0)-(Date.parse(a.jevReview.checkedAt)||0))[0];
     const review=reviewed?.jevReview;
-    const reviewLabel=review?.status==='ok'?({pass:'통과',review:'보류 · 독립 재검수 필요',reject:'반려 · 적용 차단'}[review.decision]||'미확인'):review?'검수 호출 실패 · 적용 차단':'검수 기록 미확인';
+    const reviewLabel=review?.status==='ok'?({pass:'통과',review:reviewed?.jevEscalation?.status==='passed'?'독립 재검수 통과':'보류 · 독립 재검수 필요',reject:'반려 · 적용 차단'}[review.decision]||'미확인'):review?'검수 호출 실패 · 적용 차단':'검수 기록 미확인';
     const jevCard=card('JEV · 후보 선별·검수',`${jevMode} · ${selectionLabels[selection.status]||'선별 기록 미확인'}`,`최근 선별 ${timeLabel(selection.checkedAt)} · 최근 검수 ${reviewLabel}`);
-    if(review?.status==='ok'&&review.decision==='review'&&reviewed?.jevEscalation?.status==='passed')element(jevCard,'small','보류된 수정안의 독립 재검수 통과');
     element(jevCard,'small','JEV 판단은 수익 예측이나 공개 수정 허가가 아닙니다.');
     const measured=goal.currency==='USD'&&['achieved','in_progress'].includes(goal.status)&&typeof goal.daily_average==='number'&&Number.isFinite(goal.daily_average);
     const target=typeof goal.daily_target==='number'&&Number.isFinite(goal.daily_target)?goal.daily_target:100;

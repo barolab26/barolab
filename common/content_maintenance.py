@@ -370,12 +370,40 @@ def cache_binding(domain):
     raise ValueError('해당 도메인 정확한 캐시 무효화 권한 미확인 · 적용 전 보류')
 
 
+def deployed_cache_urls(domain, urls, binding):
+    """Resolve exact article URLs against the live Worker's versioned cache key."""
+    import requests
+    from cf_posting.domain_themes import DOMAIN_WORKER_NAMES
+    if not urls or any(not valid_url(domain, url) for url in urls):
+        raise ValueError('Exact article cache URLs required')
+    zone, headers = binding
+    response = requests.get(f'https://api.cloudflare.com/client/v4/zones/{zone}',
+                            headers=headers, timeout=(3, 5), allow_redirects=False)
+    response.raise_for_status()
+    info = response.json()
+    if not info.get('success') or info['result'].get('name') != domain:
+        raise RuntimeError('Exact cache zone verification failed')
+    account = info['result']['account']['id']
+    worker = DOMAIN_WORKER_NAMES[domain]
+    response = requests.get(f'https://api.cloudflare.com/client/v4/accounts/{account}/workers/scripts/{worker}',
+                            headers=headers, timeout=(3, 5), allow_redirects=False)
+    response.raise_for_status()
+    versions = set(re.findall(r'_baro_v=[A-Za-z0-9_]+', response.text))
+    if len(versions) != 1:
+        raise RuntimeError('Deployed article cache key is ambiguous')
+    version = next(iter(versions))
+    canonical = [requests.Request('GET', url).prepare().url for url in urls]
+    return list(dict.fromkeys(value for url in canonical for value in (url, url + '?' + version)))
+
+
 def purge_exact(domain, url, slug, binding):
     import requests
     if not operation_enabled():
         raise ValueError('자동 운영 중지 상태')
     zone, headers = binding
-    urls = list(dict.fromkeys([url, f'https://www.{domain}/posts/{slug}', f'https://{domain}/{slug}']))
+    urls = deployed_cache_urls(domain, [url, f'https://www.{domain}/posts/{slug}', f'https://{domain}/{slug}'], binding)
+    if not operation_enabled():
+        raise ValueError('자동 운영 중지 상태')
     response = requests.post(f'https://api.cloudflare.com/client/v4/zones/{zone}/purge_cache',
                              json={'files': urls}, headers=headers, timeout=(3, 5), allow_redirects=False)
     if response.status_code != 200 or not response.json().get('success'):

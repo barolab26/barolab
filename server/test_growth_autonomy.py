@@ -408,6 +408,31 @@ class MaintenanceReceiptTests(unittest.TestCase):
                 maintenance.purge_exact('example.com', self.job['url'], 'museum', ('zone', {}))
             post.assert_not_called()
 
+    def test_cache_purge_includes_live_worker_keys_and_honors_stop_after_lookup(self):
+        zone = Mock()
+        zone.json.return_value = {'success': True, 'result': {
+            'name': 'must-good.com', 'account': {'id': 'account'}}}
+        script = Mock()
+        script.text = 'const key = url + "?_baro_v=deployed_revision";'
+        purged = Mock(status_code=200)
+        purged.json.return_value = {'success': True}
+        base_urls = ['https://www.must-good.com/museum',
+                     'https://www.must-good.com/posts/museum', 'https://must-good.com/museum']
+        expected = [value for url in base_urls for value in (url, url + '?_baro_v=deployed_revision')]
+        for allowed in (True, False):
+            with self.subTest(enabled_after_lookup=allowed), \
+                    patch.object(maintenance, 'operation_enabled', side_effect=[True, allowed]), \
+                    patch('requests.get', side_effect=[zone, script]), \
+                    patch('requests.post', return_value=purged) as post:
+                if allowed:
+                    receipt = maintenance.purge_exact('must-good.com', base_urls[0], 'museum', ('zone', {}))
+                    self.assertEqual(post.call_args.kwargs['json'], {'files': expected})
+                    self.assertEqual(receipt['urls'], expected)
+                else:
+                    with self.assertRaisesRegex(ValueError, '자동 운영 중지 상태'):
+                        maintenance.purge_exact('must-good.com', base_urls[0], 'museum', ('zone', {}))
+                    post.assert_not_called()
+
     def test_kill_switch_during_research_stops_next_stage(self):
         maintenance.atomic(maintenance.POLICY, {'enabled': True})
         def researching(*args, observer, **kwargs):

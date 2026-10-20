@@ -5817,25 +5817,12 @@ def _doctor_rewrite(post):
 
 def _doctor_purge_public(domain, url):
     """Invalidate only the updated article and its actual deployed Worker cache key."""
-    from common.content_maintenance import cache_binding
-    from cf_posting.domain_themes import DOMAIN_WORKER_NAMES
-    zone, headers = cache_binding(domain)
-    response = requests.get(f'https://api.cloudflare.com/client/v4/zones/{zone}', headers=headers, timeout=15)
-    response.raise_for_status()
-    info = response.json()
-    if not info.get('success') or info['result'].get('name') != domain:
-        raise RuntimeError('Exact cache zone verification failed')
-    account = info['result']['account']['id']
-    worker = DOMAIN_WORKER_NAMES[domain]
-    response = requests.get(f'https://api.cloudflare.com/client/v4/accounts/{account}/workers/scripts/{worker}',
-                            headers=headers, timeout=20)
-    response.raise_for_status()
-    versions = set(re.findall(r'_baro_v=[A-Za-z0-9_]+', response.text))
-    if len(versions) != 1:
-        raise RuntimeError('Deployed article cache key is ambiguous')
-    canonical = requests.Request('GET', url).prepare().url
+    from common.content_maintenance import cache_binding, deployed_cache_urls
+    binding = cache_binding(domain)
+    zone, headers = binding
+    urls = deployed_cache_urls(domain, [url], binding)
     response = requests.post(f'https://api.cloudflare.com/client/v4/zones/{zone}/purge_cache',
-                             headers=headers, json={'files': [canonical, canonical + '?' + next(iter(versions))]}, timeout=20)
+                             headers=headers, json={'files': urls}, timeout=20)
     response.raise_for_status()
     if response.json().get('success') is not True:
         raise RuntimeError('Exact article cache purge failed')

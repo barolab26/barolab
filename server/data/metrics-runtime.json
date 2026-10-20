@@ -1,37 +1,52 @@
 {
   "schema": "metrics-runtime-v2",
-  "runId": "8aa0850d80dd4f8d87e7302543fa26d7",
-  "pid": 30524,
-  "status": "running",
-  "startedAt": "2026-10-20T01:36:40.311746+00:00",
-  "checkedAt": "2026-10-20T01:37:24.328776+00:00",
+  "runId": "fe3adaec26f14aa18b6a290f491467fe",
+  "pid": 248019,
+  "status": "completed",
+  "startedAt": "2026-10-20T12:27:40.818047+00:00",
+  "checkedAt": "2026-10-20T12:29:14.939937+00:00",
   "stages": [
     {
       "script": "dashboard/revenue.py",
       "status": "completed",
-      "startedAt": "2026-10-20T01:36:40.312852+00:00",
+      "startedAt": "2026-10-20T12:27:40.821090+00:00",
       "timeoutSeconds": 180,
-      "lastProcessSuccessAt": "2026-10-20T01:37:23.836573+00:00",
-      "helperPid": 22924,
-      "elapsedSeconds": 43.5,
+      "lastProcessSuccessAt": "2026-10-20T12:28:22.106716+00:00",
+      "helperPid": 248076,
+      "elapsedSeconds": 41.3,
       "exitCode": 0,
-      "finishedAt": "2026-10-20T01:37:23.836588+00:00"
+      "finishedAt": "2026-10-20T12:28:22.106738+00:00"
     },
     {
       "script": "dashboard/traffic.py",
-      "status": "running",
-      "startedAt": "2026-10-20T01:37:24.329940+00:00",
+      "status": "completed",
+      "startedAt": "2026-10-20T12:28:22.150232+00:00",
       "timeoutSeconds": 840,
-      "lastProcessSuccessAt": "2026-10-20T00:43:59.146448+00:00"
+      "lastProcessSuccessAt": "2026-10-20T12:29:14.442235+00:00",
+      "helperPid": 248367,
+      "elapsedSeconds": 52.3,
+      "exitCode": 0,
+      "finishedAt": "2026-10-20T12:29:14.442253+00:00"
     }
   ],
   "budgetSeconds": 2460,
-  "lastProcessSuccessAt": "2026-10-19T23:43:37.553621+00:00",
+  "lastProcessSuccessAt": "2026-10-20T12:29:14.939918+00:00",
   "lastSuccessAt": null,
   "lastCollectionSuccessAt": null,
-  "previousInterrupted": true,
-  "previousStartedAt": "2026-10-20T00:38:07.780370+00:00",
+  "previousInterrupted": false,
+  "previousStartedAt": "2026-10-20T12:25:42.997921+00:00",
   "successMeaning": "process_exit_zero_not_source_collection",
   "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
-  "currentStage": "dashboard/traffic.py"
+  "currentStage": null,
+  "pagePerformance": {
+    "status": "partial",
+    "complete": false,
+    "start": "2026-10-13",
+    "end": "2026-10-19",
+    "reasonCodes": [
+      "revenue_partial_or_missing"
+    ]
+  },
+  "finishedAt": "2026-10-20T12:29:14.939918+00:00",
+  "collectionStatus": "partial"
 }
