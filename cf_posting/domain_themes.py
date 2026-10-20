@@ -151,7 +151,7 @@ PUBLISHED_ARTICLE_LIST_JS = r"""
     containers.forEach(function(el) {
       var isDocs = el.getAttribute('data-published-article-list') === 'docs';
       var category = el.getAttribute('data-article-category') || '';
-      var url = '/api/posts?status=published&sort=views&limit=' + (isDocs ? (category ? 2 : 1) : 10) + '&page=1';
+      var url = '/api/posts?status=published&sort=views&limit=' + (isDocs ? (category ? 3 : 2) : 10) + '&page=1';
       if (isDocs && category) url += '&cat=' + encodeURIComponent(category);
       if (!groups.has(url)) groups.set(url, []);
       groups.get(url).push(el);

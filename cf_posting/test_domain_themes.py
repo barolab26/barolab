@@ -290,7 +290,11 @@ const context = {
   fetch: async (url, options) => {
     calls.push({url, options});
     if (input.networkError) throw new Error('offline');
-    return {ok: true, json: async () => input.response};
+    return {ok: true, json: async () => {
+      if (!input.response || !Array.isArray(input.response.posts)) return input.response;
+      const limit = Number(new URL(url, 'https://example.test').searchParams.get('limit'));
+      return {...input.response, posts: input.response.posts.slice(0, limit)};
+    }};
   }
 };
 vm.createContext(context);
@@ -363,6 +367,23 @@ vm.runInContext(input.functions, context);
             self.assertEqual(result["containers"][0]["innerHTML"], "")
             self.assertEqual(result["containers"][0]["attrs"]["data-article-load-state"], "error")
 
+    def test_docs_keep_display_counts_when_current_article_ranks_first(self):
+        posts = [
+            {"status": "published", "slug": slug, "title": slug}
+            for slug in ("current", "other-one", "other-two", "other-three")
+        ]
+        result = self.execute({
+            "response": self.response(posts),
+            "containers": [
+                {"data-published-article-list": "docs", "data-article-category": category}
+                for category in ("", "Guide")
+            ],
+        })
+        for container, expected in zip(result["containers"], (["/other-one"], ["/other-one", "/other-two"])):
+            soup = BeautifulSoup(container["innerHTML"], "html.parser")
+            self.assertEqual([a["href"] for a in soup.find_all("a")], expected)
+            self.assertEqual(container["attrs"]["data-article-load-state"], "loaded")
+
     def test_category_tree_requests_are_bounded_encoded_and_deduplicated(self):
         category = "윈도우·맥 설정"
         result = self.execute({
@@ -373,8 +394,8 @@ vm.runInContext(input.functions, context);
             ],
         })
         self.assertEqual(len(result["calls"]), 2)
-        self.assertIn("limit=1", result["calls"][0]["url"])
-        self.assertIn("limit=2", result["calls"][1]["url"])
+        self.assertIn("limit=2", result["calls"][0]["url"])
+        self.assertIn("limit=3", result["calls"][1]["url"])
         from urllib.parse import parse_qs, urlsplit
         self.assertEqual(parse_qs(urlsplit(result["calls"][1]["url"]).query)["cat"], [category])
         absent = self.execute({"response": self.response([]), "containers": []})
