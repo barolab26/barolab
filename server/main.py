@@ -480,6 +480,8 @@ def api_watchdog_run_now():
 
 
 def _start_periodic_project_health_auditor():
+    if os.environ.get("BAROLAB_DISABLE_BACKGROUND") == "1":
+        return
     import threading
     import time
 
@@ -487,7 +489,10 @@ def _start_periodic_project_health_auditor():
         time.sleep(5)
         while True:
             try:
-                audit_all_projects_health(broadcast_if_changed=True, force_broadcast=False)
+                audit_all_projects_health(
+                    broadcast_if_changed=os.environ.get("BAROLAB_HEALTH_BROADCAST", "1") != "0",
+                    force_broadcast=False,
+                )
             except Exception:
                 pass
             time.sleep(1800)  # Every 30 minutes

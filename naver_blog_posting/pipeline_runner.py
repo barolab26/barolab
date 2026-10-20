@@ -679,9 +679,64 @@ def monitor(base=BASE, now=None):
         return _monitor_unlocked(base, now)
 
 
+def observe_systemd_daily_scheduler(previous=None, query=None):
+    """Observe the daily timer and its actual command, never infer publication."""
+    unit = 'barolab-naver-daily.timer'
+    attempted = now_kst().isoformat()
+    common = {'taskName': unit, 'source': 'systemd user timer read-only',
+              'sourceTimezone': 'Asia/Seoul', 'attemptedAt': attempted}
+    def show(name):
+        command = ['systemctl', '--user', 'show', name, '--no-pager',
+                   '--property=LoadState,ActiveState,UnitFileState,Unit,NextElapseUSecRealtime,LastTriggerUSec,ExecStart,Result,ExecMainStatus']
+        result = query(command) if query else subprocess.run(
+            command, capture_output=True, encoding='utf-8', errors='replace', timeout=12)
+        if result.returncode:
+            raise RuntimeError('systemd query failed')
+        values = dict(line.split('=', 1) for line in result.stdout.splitlines() if '=' in line)
+        if values.get('LoadState') not in ('loaded', 'not-found', 'masked', 'error'):
+            raise ValueError('systemd result malformed')
+        return values
+    try:
+        timer = show(unit)
+        registered = timer['LoadState'] != 'not-found'
+        service = show(timer['Unit']) if registered and timer.get('Unit') else {}
+        command = service.get('ExecStart', '')
+        matches = (service.get('LoadState') == 'loaded' and
+                   str(PROJECT_ROOT / 'server/windows_worker.py') in command and
+                   bool(re.search(r'--task\s+naver-daily(?:\s|;|$)', command)))
+        active = timer.get('ActiveState') == 'active'
+        enabled = timer.get('UnitFileState') in ('enabled', 'enabled-runtime')
+        service_failed = (service.get('ActiveState') == 'failed' or
+                          service.get('Result', '') not in ('', 'success') or
+                          service.get('ExecMainStatus', '') not in ('', '0'))
+        state = ('Missing' if not registered else 'Failed' if timer.get('ActiveState') == 'failed'
+                 or timer['LoadState'] in ('masked', 'error') or service_failed else 'Active' if active else 'Inactive')
+        return dict(common, checkedAt=attempted, registered=registered, enabled=enabled,
+                    state=state, status='observed', workflowMatches=matches,
+                    nextRunAt=timer.get('NextElapseUSecRealtime') or None,
+                    lastRunAt=timer.get('LastTriggerUSec') or None,
+                    lastResult=service.get('Result') or None,
+                    lastExitCode=service.get('ExecMainStatus') or None,
+                    reason=('Ubuntu 일일 예약 타이머 미등록 확인' if not registered else
+                            '일일 파이프라인 서비스 실행 실패 · 다음 예약과 별도 복구 필요' if service_failed else
+                            '등록된 타이머의 실행 명령이 일일 파이프라인과 일치하지 않음' if not matches else
+                            '타이머 등록·활성 확인 · 실제 글 발행 성공과는 별도' if active and enabled else
+                            '타이머 등록됨 · 비활성 또는 자동 시작 미설정'))
+    except (ValueError, OSError, RuntimeError, subprocess.SubprocessError):
+        previous = previous or {}
+        successful = previous if previous.get('source') == common['source'] and previous.get('status') == 'observed' else previous.get('lastSuccessful', {})
+        if successful.get('source') != common['source']:
+            successful = {}
+        return dict(common, registered=None, enabled=None, state='Unknown', status='unknown',
+                    checkedAt=successful.get('checkedAt'), lastSuccessful=successful,
+                    reason='Ubuntu systemd 조회 실패 · 미등록 또는 비활성으로 판정하지 않음')
+
+
 def observe_daily_scheduler(previous=None, query=None):
-    """Read the intended Windows task; source errors are never 'unregistered'."""
+    """Read the platform's intended daily task; query errors remain unknown."""
     previous = previous or {}
+    if os.name != 'nt' and query is None:
+        return observe_systemd_daily_scheduler(previous)
     task_name = 'BaroLab-Naver-Daily'
     attempted = now_kst().isoformat()
     script = r'''

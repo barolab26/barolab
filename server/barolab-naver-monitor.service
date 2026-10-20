@@ -1,0 +1,11 @@
+[Unit]
+Description=BaroLab Naver reservation and public evidence monitor
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.venvs/barolab/bin/python3 server/windows_worker.py --task naver-monitor
+TimeoutStartSec=240
+UMask=0077

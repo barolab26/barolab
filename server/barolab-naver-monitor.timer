@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh BaroLab Naver evidence every five minutes
+
+[Timer]
+OnStartupSec=60
+OnUnitInactiveSec=5min
+Unit=barolab-naver-monitor.service
+
+[Install]
+WantedBy=timers.target

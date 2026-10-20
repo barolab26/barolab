@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh BaroLab read-only metrics every hour
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=120
+Persistent=true
+Unit=barolab-metrics.service
+
+[Install]
+WantedBy=timers.target

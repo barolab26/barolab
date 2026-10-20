@@ -243,8 +243,8 @@ def run_metrics(python, commands):
 
 
 def run_task(task):
+    python = str(Path(sys.executable).with_name('python.exe')) if os.name == 'nt' else sys.executable
     if task == 'maintenance':
-        python = str(Path(sys.executable).with_name('python.exe'))
         try:
             result = subprocess.run([python, '-u', '-B', '-X', 'utf8', '-m', 'common.content_maintenance'],
                 cwd=str(ROOT), stdout=sys.stdout, stderr=sys.stderr, timeout=580,
@@ -263,7 +263,6 @@ def run_task(task):
         'naver-monitor': [('naver_blog_posting/pipeline_runner.py', '--monitor')],
         'naver-daily': [('naver_blog_posting/pipeline_runner.py', '--catch-up')],
     }
-    python = str(Path(sys.executable).with_name('python.exe'))
     if task == 'metrics':
         return run_metrics(python, commands[task])
     code = 0
@@ -336,15 +335,11 @@ def serve_cf_cleaner():
 
 def serve():
     # Prevent repeated task starts from running the same CLI request twice.
+    from dashboard.metrics import collector_lock
     lock = Path.home() / '.barolab' / 'dashboard-worker.lock'
-    with lock.open('a+b') as handle:
-        import msvcrt
-        if handle.tell() == 0:
-            handle.write(b'0'); handle.flush()
-        handle.seek(0)
-        try:
-            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
-        except OSError:
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    with collector_lock(lock) as acquired:
+        if not acquired:
             return
         threading.Thread(target=serve_cf_retries, daemon=True, name='cf-retry-watcher').start()
         threading.Thread(target=serve_cf_cleaner, daemon=True, name='cf-cleaner-loop').start()
