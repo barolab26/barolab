@@ -4183,6 +4183,59 @@ def record_flow_capture_required(output_dir, article, plans, reason):
     return path
 
 
+async def wait_flow_submit_ready(page, prompt, generation, persist, timeout=30):
+    deadline = time.monotonic() + timeout
+    while True:
+        editor = page.locator('div.ProseMirror')
+        button = page.locator("button[aria-label='생성 시작']:visible, button.generate-icon-button:visible").first
+        state = {'promptMatches': (await editor.inner_text()).strip() == prompt.strip(),
+                 'buttonVisible': bool(await button.count()) and await button.is_visible()}
+        state['buttonEnabled'] = state['buttonVisible'] and await button.is_enabled()
+        generation['readiness'] = state
+        if state['promptMatches'] and state['buttonEnabled']:
+            persist()
+            return button
+        if time.monotonic() >= deadline:
+            generation.update(status='not_submitted', readinessTimedOut=True)
+            persist()
+            raise RuntimeError('Flow readiness timed out before submission')
+        await asyncio.sleep(0.25)
+
+
+async def submit_flow_once(page, client, button, generation, persist):
+    box = await button.bounding_box()
+    if not box:
+        raise RuntimeError('Flow 생성 버튼의 실제 클릭 위치 없음')
+    generation.update(status='submission_started', submissionStartedAt=stamp())
+    persist()  # A crash or ambiguous response must never permit another submission.
+    try:
+        for event in ('mousePressed', 'mouseReleased'):
+            await client.send('Input.dispatchMouseEvent', {'type': event,
+                'x': box['x'] + box['width']/2, 'y': box['y'] + box['height']/2,
+                'button': 'left', 'clickCount': 1})
+        for _ in range(18):
+            await asyncio.sleep(1)
+            if not (await page.locator('div.ProseMirror').inner_text()).strip():
+                generation.update(status='submitted', submittedAt=stamp())
+                persist()
+                return
+    except Exception:
+        generation.update(status='unconfirmed', lastCheckedAt=stamp())
+        persist()
+        raise
+    generation.update(status='unconfirmed', lastCheckedAt=stamp())
+    persist()
+    raise RuntimeError('Flow submission unconfirmed; no repeat click or Enter')
+
+
+def require_flow_reentry_safe(prior, names):
+    for row in prior:
+        if isinstance(row, dict) and row.get('filename') in names and (
+                row.get('submissionStartedAt') or row.get('submittedAt') or
+                row.get('status') in {'submission_started', 'submitted', 'unconfirmed', 'downloaded'}):
+            raise RuntimeError('Flow prior submission requires reconciliation; generation will not repeat')
+
+
 async def generate_flow_images_in_browser(flow_page, blog_info, completed_ids, images_dir, progress_callback=None):
     from common.browser_session import flow_generation_lock
     async with flow_generation_lock():
@@ -4220,8 +4273,9 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
     try:
         prior_evidence = json.loads(evidence_file.read_text(encoding='utf-8'))
         if isinstance(prior_evidence, list):
+            require_flow_reentry_safe(prior_evidence, names)
             generation_evidence = [r for r in prior_evidence if isinstance(r, dict) and r.get('filename') not in names]
-    except (OSError, ValueError):
+    except FileNotFoundError:
         pass
     client = None
     if flow_page is not None:
@@ -4260,7 +4314,7 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
                       'initialImage': None, 'preparedAt': stamp(), 'status': 'prepared'}
         generation_evidence.append(generation)
         
-        for flow_try in range(2):
+        for flow_try in range(1):
             await flow_page.keyboard.press("Escape")
             await flow_page.wait_for_timeout(400)
             
@@ -4272,7 +4326,7 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
                     initial_first_src = await initial_first_tile.get_attribute("src")
                 except Exception:
                     pass
-            print(f"      Initial tile count: {existing_tiles} (try {flow_try + 1}/2)", flush=True)
+            print(f"      Initial tile count: {existing_tiles} (attempt {flow_try + 1}/1)", flush=True)
             generation['initialImage'] = initial_first_src
             save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
             
@@ -4286,51 +4340,16 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
                 }
             }""", prompt)
             await flow_page.wait_for_timeout(800)
-            actual_prompt = await flow_page.locator('div.ProseMirror').inner_text()
-            if actual_prompt.strip() != prompt.strip():
-                raise RuntimeError('Flow 편집기 프롬프트 입력 불일치')
             
-            gen_btn = flow_page.locator("button[aria-label='생성 시작']:visible, button.generate-icon-button:visible").first
-            if await gen_btn.count() and await gen_btn.is_enabled():
-                print("      Clicking '생성 시작'...", flush=True)
-                box = await gen_btn.bounding_box()
-                if not box: raise RuntimeError('Flow 생성 버튼의 실제 클릭 위치 없음')
-                await client.send('Input.dispatchMouseEvent', {'type':'mousePressed','x':box['x']+box['width']/2,'y':box['y']+box['height']/2,'button':'left','clickCount':1})
-                await client.send('Input.dispatchMouseEvent', {'type':'mouseReleased','x':box['x']+box['width']/2,'y':box['y']+box['height']/2,'button':'left','clickCount':1})
-                submitted = False
-                for acknowledgement in range(8):
-                    await asyncio.sleep(1)
-                    if not (await flow_page.locator('div.ProseMirror').inner_text()).strip():
-                        submitted = True
-                        break
-                if not submitted:
-                    try:
-                        await gen_btn.click(timeout=3000)
-                    except Exception:
-                        pass
-                    for acknowledgement in range(5):
-                        await asyncio.sleep(1)
-                        if not (await flow_page.locator('div.ProseMirror').inner_text()).strip():
-                            submitted = True
-                            break
-                if not submitted:
-                    try:
-                        await flow_page.locator('div.ProseMirror').press('Enter', timeout=2000)
-                    except Exception:
-                        pass
-                    for acknowledgement in range(5):
-                        await asyncio.sleep(1)
-                        if not (await flow_page.locator('div.ProseMirror').inner_text()).strip():
-                            submitted = True
-                            break
-                if not submitted:
-                    raise RuntimeError('Flow 입력 프롬프트가 남아 있습니다 · 생성 요청 미접수 · 중복 클릭하지 않습니다')
-                print('      Flow generation submission acknowledged (editor cleared).',flush=True)
-                generation.update(status='submitted', submittedAt=stamp())
-                save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
-            else:
-                raise RuntimeError('Flow 생성 버튼이 보이지 않거나 비활성 상태입니다. 기존 이미지를 사용하지 않고 보류합니다')
-                
+            persist = lambda: save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
+            try:
+                gen_btn = await wait_flow_submit_ready(flow_page, prompt, generation, persist)
+            except Exception:
+                generation.setdefault('readinessError', 'observation_failed')
+                persist()
+                raise
+            await submit_flow_once(flow_page, client, gen_btn, generation, persist)
+
             print("      Waiting for image generation to complete (approx 35~45s)...", flush=True)
             start_wait = time.time()
             need_reload_retry = False
@@ -4351,23 +4370,15 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
                     print(f"      Image generated! (New tile count: {cur_tiles}, src updated)", flush=True)
                     break
                 
-                # Detect immediate Flow reCAPTCHA / error card so we reload & retry instead of hanging 180s
+                # Stop on an error card without retrying an already submitted generation.
                 err_cards = await flow_page.locator(".error-message-text").count()
                 if err_cards > 0 and (time.time() - start_wait) > 6:
-                    print("      [Flow Recovery] Error tile detected on Flow; reloading tab to refresh reCAPTCHA...", flush=True)
+                    print("      [Flow Recovery] Error tile detected after submission; preserving unconfirmed result.", flush=True)
                     need_reload_retry = True
                     break
                     
             if fresh_image:
                 break
-            if need_reload_retry and flow_try == 0:
-                try:
-                    await flow_page.reload(wait_until="domcontentloaded")
-                    await flow_page.wait_for_timeout(5000)
-                except Exception as _rl_exc:
-                    print(f"      [Flow Recovery] Reload warning: {_rl_exc}", flush=True)
-                continue
-                
         if not fresh_image:
             generation.update(status='unconfirmed', lastCheckedAt=stamp())
             save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
