@@ -1,3 +1,4 @@
+import copy
 import ast
 import json
 import datetime
@@ -255,5 +256,54 @@ class HandoffPolicyIntegrityTests(unittest.TestCase):
    if optional:data['stages'][0].pop('instructionSha256')
    obj=Mock(data=data,agents=['keyword-selector']);obj.file.side_effect=Path
    self.assertEqual(len(ns['check'](obj)),1);obj.save.assert_not_called()
+
+class AnswerBriefVerdictTests(unittest.TestCase):
+ def setUp(self):
+  from common import answer_brief as ab
+  self.ab=ab
+  self.goal={'question':'Question','successCondition':'Answer','requiredAnswers':['First']}
+  self.brief={'sections':[{'id':'s1'}]}
+  self.raw={'passed':True,'checks':dict.fromkeys(ab.BRIEF_CHECKS,True),'coverage':{'goal_0':{'answered':True,'sectionIds':['s1'],'reason':'Observed answer'}},'issues':[],'missingInputs':[]}
+ def test_actual_pass_and_raw_identity_preserved(self):
+  before=copy.deepcopy(self.raw)
+  bound=self.ab.bind_brief_review_draft(self.raw,self.goal,self.brief)
+  self.assertEqual(self.raw,before)
+  self.assertEqual(bound['coverage'][0]['goalIndex'],0)
+  self.assertTrue(self.ab.validate_brief_review(bound,self.brief,self.goal))
+ def test_rejection_false_checks_coverage_and_issues_never_promoted(self):
+  for kind in ('passed','checks','coverage','issues','missingInputs'):
+   raw=copy.deepcopy(self.raw)
+   if kind=='passed':raw['passed']=False
+   elif kind=='checks':raw['checks'][self.ab.BRIEF_CHECKS[0]]=False
+   elif kind=='coverage':raw['coverage']['goal_0']['answered']=False
+   elif kind=='issues':raw['issues']=['Actual gap']
+   else:raw[kind]=[{'kind':'source_fact','description':'Missing source','reason':'Cannot answer','acquisitionAction':'Read source'}]
+   before=copy.deepcopy(raw)
+   bound=self.ab.bind_brief_review_draft(raw,self.goal,self.brief)
+   with self.assertRaises(self.ab.AnswerBriefBlocked):self.ab.validate_brief_review(bound,self.brief,self.goal)
+   self.assertEqual(raw,before)
+ def test_missing_or_wrong_identity_is_not_filled(self):
+  for kind in ('absent','list','goal','section','observation','check'):
+   raw=copy.deepcopy(self.raw)
+   if kind=='absent':raw.pop('coverage')
+   elif kind=='list':raw['coverage']=[]
+   elif kind=='goal':raw['coverage']={'goal_7':raw['coverage']['goal_0']}
+   elif kind=='section':raw['coverage']['goal_0']['sectionIds']=['invented']
+   elif kind=='observation':raw['coverage']['goal_0']['reason']=''
+   else:raw['checks'].pop(self.ab.BRIEF_CHECKS[0])
+   before=copy.deepcopy(raw)
+   with self.assertRaises(RuntimeError):self.ab.bind_brief_review_draft(raw,self.goal,self.brief)
+   self.assertEqual(raw,before)
+ def test_planner_gaps_and_context_selection_are_preserved(self):
+  contexts=self.ab.prepare_question_context([{'id':'ctx','kind':'explicit_request','text':'Question'}])
+  raw={'questionBasis':{'contextId':contexts[0]['id']},'readyForWriter':False,'missingInputs':[{'kind':'source_fact','description':'Source','reason':'Missing','acquisitionAction':'Read'}],'unresolvedQuestions':['Unanswered']}
+  before=copy.deepcopy(raw)
+  bound=self.ab.bind_answer_brief_draft(raw,self.goal,contexts)
+  self.assertEqual(raw,before)
+  for key in ('readyForWriter','missingInputs','unresolvedQuestions'):self.assertEqual(bound[key],raw[key])
+  for bad in ({'questionBasis':{'contextId':'wrong'}},{'questionContextIds':['wrong']}):
+   draft={**raw,**bad}
+   if 'questionContextIds' in bad:draft.pop('questionBasis')
+   with self.assertRaises(RuntimeError):self.ab.bind_answer_brief_draft(draft,self.goal,contexts)
 
 if __name__=='__main__':unittest.main()

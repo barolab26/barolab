@@ -62,3 +62,41 @@ class GrowthSeedTests(unittest.TestCase):
         self.assertFalse(evidence['candidates'][0]['eligible'])
 
 if __name__=='__main__':unittest.main()
+
+
+class PromptContextIdentityTests(unittest.TestCase):
+    def test_invalid_source_context_rejected_without_mutating_response(self):
+        import json,copy,uuid
+        from contextlib import nullcontext
+        node=next(n for n in ast.parse(SOURCE).body if isinstance(n,ast.FunctionDef) and n.name=='generate_with_prompt_budget')
+        ns={'json':json,'copy':copy,'uuid':uuid,'provider_prompt_prefix':lambda *a:'','serialized_prompt_bytes':lambda s:len(s),'rebudget_prompt':lambda p,b:p,'PROMPT_BYTE_LIMIT':100000,'ReviewRequired':RuntimeError}
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'actual-prompt-boundary','exec'),ns)
+        result={'answerBrief':{'questionBasis':{'contextId':'wrong','quote':'original'}}}
+        original=copy.deepcopy(result)
+        with patch('common.llm_client.generate_json',return_value=result),patch('common.llm_client.memory_call',side_effect=lambda f:f),patch('common.llm_client.memory_session',side_effect=lambda *a:nullcontext()):
+            with self.assertRaisesRegex(RuntimeError,'no identity substitution'):ns['generate_with_prompt_budget'](json.dumps({'questionContext':[{'id':'real'}]}),'codex')
+        self.assertEqual(result,original)
+
+
+class RepairedStageObservationTests(unittest.TestCase):
+    def test_real_keyword_stage_acceptance_not_legacy_slug_or_later_stages(self):
+        import json,hashlib,tempfile,copy
+        node=next(n for n in ast.parse(SOURCE).body if isinstance(n,ast.FunctionDef) and n.name=='observe_repaired_keyword_stage')
+        with tempfile.TemporaryDirectory() as temp:
+            base=Path(temp);folder=base/'output'/'actual-topic'/'run';folder.mkdir(parents=True)
+            keywords={'topicSlug':'actual-topic','mainKeyword':'arboretum booking'}
+            (folder/'keywords.md').write_text(json.dumps(keywords),encoding='utf-8')
+            row={'agent':'keyword-selector','status':'accepted','inputs':[],'inputHashes':{},'model':{'status':'returned','actualModel':'observed'},'acceptedAt':'2026-10-21T14:59:00+09:00','fileHashes':{'keywords.md':hashlib.sha256((folder/'keywords.md').read_bytes()).hexdigest()}}
+            data={'domain':'tripmarvel.com','slug':'actual-topic','runId':'a'*32,'stages':[row,{'agent':'researcher','status':'invalid'}]}
+            path=folder/'handoff.json';path.write_text(json.dumps(data),encoding='utf-8')
+            ns={'BASE_DIR':base,'re':re,'json':json,'datetime':datetime,'hashlib':hashlib,'read_document':lambda path:json.loads(path.read_text())}
+            exec(compile(ast.Module(body=[node],type_ignores=[]),'actual-stage-observer','exec'),ns)
+            item={'domain':'tripmarvel.com','slug':'legacy-placeholder','artifactFolder':'output/actual-topic/run','attemptStartedAt':'2026-10-21T14:58:00+09:00','repairContinuationUsed':{'taskId':'task','approvedQuery':'arboretum booking'}}
+            result=ns['observe_repaired_keyword_stage'](item,'task');self.assertTrue(result['failureStagePassed']);self.assertIn('only',result['scope'])
+            for mutation in ('domain','query','earlier','bytes'):
+                current=copy.deepcopy(item)
+                if mutation=='domain':current['domain']='other.com'
+                if mutation=='query':current['repairContinuationUsed']['approvedQuery']='hotel'
+                if mutation=='earlier':current['attemptStartedAt']='2026-10-21T15:00:00+09:00'
+                if mutation=='bytes':(folder/'keywords.md').write_text(json.dumps({**keywords,'extra':True}),encoding='utf-8')
+                with self.assertRaises(ValueError):ns['observe_repaired_keyword_stage'](current,'task')

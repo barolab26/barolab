@@ -40,13 +40,17 @@ def record_failed_event(event):
     return row
 
 
-def _proof(path, expected):
+def _artifact_bytes(path, expected):
     path=Path(path)
     if path.is_symlink() or not path.is_file() or path.stat().st_size>100000:
         raise ValueError('Invalid repair evidence')
     raw=path.read_bytes()
     if _sha(raw)!=expected: raise ValueError('Repair evidence changed')
-    return json.loads(raw)
+    return raw
+
+
+def _proof(path, expected):
+    return json.loads(_artifact_bytes(path, expected))
 
 
 def run_known_repair(task_id, evidence_path, evidence_sha256, *, handler, resume, review_approval_path=None, review_approval_sha256=None):
@@ -184,7 +188,7 @@ def run_known_repair(task_id, evidence_path, evidence_sha256, *, handler, resume
         resume_request=report('jarvis','requested','repair-resume','one guarded runner resume',target='cf-pipeline',parent=review_result)
         result=resume(task_id,proof,repaired)
         outcome='resume_returned'
-        if result.get('returncode') not in (None,0) or result.get('status') in ('held','failed','unknown'):
+        if result.get('returncode') not in (None,0) or result.get('status') in ('held','failed','unknown','review_required'):
             outcome='resume_held'
         elif result.get('status') in ('started','running'):
             outcome='resume_started'
@@ -194,12 +198,16 @@ def run_known_repair(task_id, evidence_path, evidence_sha256, *, handler, resume
             if (verified.get('taskId')==task_id and verified.get('failureType')==KNOWN_FAILURE
                     and verified.get('failureStagePassed') is True and artifacts):
                 for artifact in artifacts:
-                    _proof(artifact['path'],artifact['sha256'])
-                outcome='resume_verified'
+                    _artifact_bytes(artifact['path'],artifact['sha256'])
+                row['failureStageVerified']=True
+                if outcome=='resume_returned':
+                    outcome='resume_verified'
         row.update(status=outcome,resumeResult=result)
         write(path,row)
-        safe_status=result.get('status') if result.get('status') in ('started','running','held','failed','unknown','completed','published','verified') else 'unknown'
+        safe_status=result.get('status') if result.get('status') in ('started','running','held','failed','unknown','review_required','completed','published','verified') else 'unknown'
         safe_stage=result.get('currentStage') if result.get('currentStage') in ('keyword-selector','researcher','writer','image-maker','assembler','reviewer','publishing','done') else 'unknown'
+        if type(result.get('currentStage')) is int and 1 <= result['currentStage'] <= 6:
+            safe_stage=result['currentStage']
         code=result.get('returncode') if type(result.get('returncode')) is int else 'unknown'
         report('cf-pipeline','completed' if outcome!='resume_held' else 'failed','repair-resume',f'{outcome}; runner={safe_status}; stage={safe_stage}; exit={code}; public verification separate',parent=resume_request)
         return row

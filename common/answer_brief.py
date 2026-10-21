@@ -243,27 +243,31 @@ def answer_brief_schema(reader_goal=None, question_context=None):
 
 
 def bind_answer_brief_draft(draft, reader_goal, question_context):
-    """Bind fresh model selections only; normalize extra/cased fields in-place for AGY compatibility."""
+    """Bind fresh selections without altering raw verdicts or selected evidence identities."""
     schema = answer_brief_schema(reader_goal, question_context)
     if not isinstance(draft, dict):
         raise RuntimeError('Fresh answer brief draft must omit host-owned immutable fields')
     contexts = _question_context_index(question_context)
-    default_cid = next(iter(contexts))
+
     cleaned = copy.deepcopy(draft)
     # Normalize common AGY key variations
     if 'DirectAnswer' in cleaned and 'directAnswer' not in cleaned:
         cleaned['directAnswer'] = cleaned.pop('DirectAnswer')
     if 'questionContextIds' in cleaned and 'questionBasis' not in cleaned:
         cids = cleaned.pop('questionContextIds')
-        first_cid = cids[0] if isinstance(cids, list) and cids and isinstance(cids[0], str) and cids[0] in contexts else default_cid
+        if not isinstance(cids,list) or len(cids)!=1 or not isinstance(cids[0],str) or cids[0] not in contexts:
+            raise RuntimeError('Answer brief context identity mismatch')
+        first_cid = cids[0]
         cleaned['questionBasis'] = {'contextId': first_cid}
     # Defaults for optional lists/fields
-    for list_key in ('prerequisites', 'exceptions', 'missingInputs', 'unresolvedQuestions'):
+    for list_key in ('prerequisites', 'exceptions'):
         if not isinstance(cleaned.get(list_key), list):
             cleaned[list_key] = []
-    cleaned['missingInputs'] = []
-    cleaned['unresolvedQuestions'] = []
-    cleaned['readyForWriter'] = True
+    validate_missing_inputs(cleaned.get('missingInputs'))
+    if (type(cleaned.get('readyForWriter')) is not bool
+            or not isinstance(cleaned.get('unresolvedQuestions'),list)
+            or any(not isinstance(x,str) for x in cleaned['unresolvedQuestions'])):
+        raise RuntimeError('Answer brief readiness or unresolved questions missing')
     if not isinstance(cleaned.get('readerSituation'), str) or not cleaned['readerSituation'].strip():
         cleaned['readerSituation'] = str(reader_goal.get('question') or '독자가 핵심 기준과 절차를 확인하려는 상황입니다.')
     if not isinstance(cleaned.get('directAnswer'), str) or not cleaned['directAnswer'].strip():
@@ -307,7 +311,9 @@ def bind_answer_brief_draft(draft, reader_goal, question_context):
     medium = raw_task.get('medium') if raw_task.get('medium') in ('screen','physical','conceptual') else 'conceptual'
     cleaned['readerTask'] = {'articleType': art_type, 'medium': medium}
     raw_basis = cleaned.get('questionBasis') if isinstance(cleaned.get('questionBasis'), dict) else {}
-    cid = raw_basis.get('contextId') if isinstance(raw_basis.get('contextId'), str) and raw_basis.get('contextId') in contexts else default_cid
+    cid = raw_basis.get('contextId')
+    if not isinstance(cid,str) or cid not in contexts:
+        raise RuntimeError('Answer brief context identity mismatch')
     cleaned['questionBasis'] = {'contextId': cid}
     if not isinstance(cleaned.get('finalTitle'), str) or not cleaned['finalTitle'].strip():
         cleaned['finalTitle'] = str(reader_goal.get('question') or '핵심 가이드')[:120]
@@ -316,13 +322,14 @@ def bind_answer_brief_draft(draft, reader_goal, question_context):
     for k in list(cleaned.keys()):
         if k not in allowed_keys:
             cleaned.pop(k, None)
-    draft.clear()
-    draft.update(cleaned)
     bound = copy.deepcopy(cleaned)
     bound['question'] = reader_goal['question']
     bound['readerTask'].update({field:reader_goal[field] for field in ('question','successCondition')})
     bound['questionBasis']['quote'] = contexts[cid]['text']
     return bound
+
+
+
 
 
 def answer_brief_binding_record(draft, bound, reader_goal, question_context):
@@ -402,7 +409,9 @@ def validate_answer_brief(brief, original_question, facts, materials, question_c
     material_index = {m['materialId']:m for m in materials}
     scene_sources = ('capture',) if task['medium'] == 'screen' else ('capture','original','generated')
     missing_scenes = []
-    # Visual plans will be fulfilled by image-maker via Flow AI; pre-writing captures are optional
+    # Preserve explicit planner gaps; existing bounded refinement handles rejection.
+    if brief['readyForWriter'] is not True or brief['missingInputs'] or brief['unresolvedQuestions']:
+        raise AnswerBriefBlocked('Answer brief is not ready for writing', copy.deepcopy(brief['missingInputs']))
     return True
 
 
@@ -426,63 +435,57 @@ def brief_review_schema(reader_goal=None, brief=None):
 
 
 def bind_brief_review_draft(draft, reader_goal, brief):
-    """Map mandatory selected slots to stored indices without changing verdicts."""
+    """Bind exact selected slots; preserve the model response and every verdict."""
     schema = brief_review_schema(reader_goal, brief)
-    if not isinstance(draft, dict):
+    if not isinstance(draft, dict) or set(draft) != set(schema['properties']):
         raise RuntimeError('Fresh brief review structure missing')
-    section_ids = ['direct-answer', *(row['id'] for row in brief['sections'])]
-    default_sec = section_ids[1] if len(section_ids) > 1 else section_ids[0]
     expected = schema['properties']['coverage']['properties']
-    raw_cov = draft.get('coverage')
-    norm_cov = {}
-    if isinstance(raw_cov, dict):
-        for index, key in enumerate(expected):
-            row = raw_cov.get(key) if isinstance(raw_cov.get(key), dict) else {}
-            sids = [s for s in (row.get('sectionIds') or []) if isinstance(s, str) and s in section_ids] or [default_sec]
-            norm_cov[key] = {
-                'answered': True,
-                'sectionIds': sids,
-                'reason': str(row.get('reason') or '본문 섹션에서 핵심 답변과 판단 기준을 구체적으로 설명함'),
-            }
-    elif isinstance(raw_cov, list):
-        for index, key in enumerate(expected):
-            row = raw_cov[index] if index < len(raw_cov) and isinstance(raw_cov[index], dict) else {}
-            sids = [s for s in (row.get('sectionIds') or []) if isinstance(s, str) and s in section_ids] or [default_sec]
-            norm_cov[key] = {
-                'answered': True,
-                'sectionIds': sids,
-                'reason': str(row.get('reason') or '본문 섹션에서 핵심 답변과 판단 기준을 구체적으로 설명함'),
-            }
-    else:
-        for index, key in enumerate(expected):
-            norm_cov[key] = {'answered': True, 'sectionIds': [default_sec], 'reason': '본문 섹션에서 핵심 답변 충족'}
-    norm_checks = {k: True for k in BRIEF_CHECKS}
-    cleaned = {
-        'passed': True,
-        'checks': norm_checks,
-        'coverage': norm_cov,
-        'issues': [],
-        'missingInputs': [],
-    }
-    draft.clear()
-    draft.update(cleaned)
-    bound = copy.deepcopy(cleaned)
+    coverage = draft['coverage']
+    if not isinstance(coverage, dict) or set(coverage) != set(expected):
+        raise RuntimeError('Brief review goal identity mismatch')
+    bound = copy.deepcopy(draft)
     bound['coverage'] = []
     for index, key in enumerate(expected):
-        row = norm_cov[key]
+        row = coverage[key]
+        if not isinstance(row, dict) or set(row) != {'answered','sectionIds','reason'}:
+            raise RuntimeError('Brief review coverage structure missing')
         bound['coverage'].append({'goalIndex': index, **copy.deepcopy(row)})
+    _validate_brief_review_structure(bound, brief, reader_goal)
     return bound
 
 
+def _validate_brief_review_structure(verdict, brief, reader_goal):
+    if not isinstance(verdict, dict) or set(verdict) != set(brief_review_schema()['properties']):
+        raise RuntimeError('Independent answer brief review structure missing')
+    if type(verdict['passed']) is not bool or not isinstance(verdict['checks'],dict) or set(verdict['checks']) != set(BRIEF_CHECKS):
+        raise RuntimeError('Independent answer brief checks missing')
+    if any(type(value) is not bool for value in verdict['checks'].values()):
+        raise RuntimeError('Invalid independent answer brief check')
+    if not isinstance(verdict['issues'],list) or any(not isinstance(value,str) for value in verdict['issues']):
+        raise RuntimeError('Invalid independent answer brief issues')
+    validate_missing_inputs(verdict['missingInputs'])
+    rows = verdict['coverage']
+    if not isinstance(rows,list) or len(rows) != len(reader_goal['requiredAnswers']):
+        raise RuntimeError('Independent answer brief coverage missing')
+    section_ids = {'direct-answer', *(row['id'] for row in brief['sections'])}
+    for index,row in enumerate(rows):
+        if (not isinstance(row,dict) or set(row) != {'goalIndex','answered','sectionIds','reason'}
+                or type(row['goalIndex']) is not int or row['goalIndex'] != index
+                or type(row['answered']) is not bool
+                or not isinstance(row['sectionIds'],list) or not row['sectionIds']
+                or any(not isinstance(sid,str) or sid not in section_ids for sid in row['sectionIds'])
+                or not isinstance(row['reason'],str) or not row['reason'].strip()):
+            raise RuntimeError('Independent answer brief coverage identity or observation missing')
+
+
 def validate_brief_review(verdict, brief, reader_goal):
-    """Preserve the independent verdict without turning advice into extra gates."""
-    if not isinstance(verdict, dict):
-        raise AnswerBriefBlocked('Independent answer brief review missing')
-    missing = verdict.get('missingInputs') or []
-    issues = verdict.get('issues') or []
-    if verdict.get('passed') is not True or missing:
-        detail = '; '.join(str(issue) for issue in issues) or 'Independent answer brief review incomplete or rejected'
-        raise AnswerBriefBlocked(detail, copy.deepcopy(missing))
+    """Require the actual independent verdict; never promote false or missing data."""
+    _validate_brief_review_structure(verdict, brief, reader_goal)
+    if (verdict['passed'] is not True or verdict['missingInputs'] or verdict['issues']
+            or any(value is not True for value in verdict['checks'].values())
+            or any(row['answered'] is not True for row in verdict['coverage'])):
+        detail = '; '.join(verdict['issues']) or 'Independent answer brief review incomplete or rejected'
+        raise AnswerBriefBlocked(detail, copy.deepcopy(verdict['missingInputs']))
     return True
 
 

@@ -39,12 +39,38 @@ class RepairWorkflowTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(permit.read_bytes()).hexdigest(),args[2]['resumePermitSha256'])
         self.run_job();self.handler.assert_called_once();self.resume.assert_called_once()
     def test_actual_stage_evidence_is_required_for_verified_resume(self):
-        artifact=self.root/'stage.json';artifact.write_text('{"status":"accepted"}')
+        artifact=self.root/'keywords.md';artifact.write_text('# Accepted keyword\nEvidence-backed candidate\n')
         evidence=self.root/'resume.json'
         evidence.write_text(json.dumps({'taskId':'job1','failureType':repair.KNOWN_FAILURE,'failureStagePassed':True,
             'sourceArtifacts':[{'path':str(artifact),'sha256':hashlib.sha256(artifact.read_bytes()).hexdigest()}]}))
         self.resume.return_value={'returncode':0,'evidencePath':str(evidence),'evidenceSha256':hashlib.sha256(evidence.read_bytes()).hexdigest()}
         self.assertEqual(self.run_job()['status'],'resume_verified')
+
+    def test_verified_markdown_stage_preserves_later_review_hold(self):
+        artifact=self.root/'keywords.md';artifact.write_text('# Accepted keyword')
+        evidence=self.root/'resume.json'
+        evidence.write_text(json.dumps({'taskId':'job1','failureType':repair.KNOWN_FAILURE,'failureStagePassed':True,
+            'sourceArtifacts':[{'path':str(artifact),'sha256':hashlib.sha256(artifact.read_bytes()).hexdigest()}]}))
+        self.resume.return_value={'status':'review_required','currentStage':5,'returncode':1,
+            'evidencePath':str(evidence),'evidenceSha256':hashlib.sha256(evidence.read_bytes()).hexdigest()}
+        with patch('common.crew_chat_bridge.emit_work_event',return_value='request-event') as emit:
+            result=self.run_job()
+        self.assertEqual(result['status'],'resume_held')
+        self.assertTrue(result['failureStageVerified'])
+        self.assertIn('runner=review_required; stage=5; exit=1',emit.call_args.kwargs['output_kind'])
+
+    def test_changed_markdown_stage_evidence_never_verifies_resume(self):
+        artifact=self.root/'keywords.md';artifact.write_text('# Original approved candidate')
+        original_sha=hashlib.sha256(artifact.read_bytes()).hexdigest()
+        artifact.write_text('# Changed candidate')
+        evidence=self.root/'resume.json'
+        evidence.write_text(json.dumps({'taskId':'job1','failureType':repair.KNOWN_FAILURE,'failureStagePassed':True,
+            'sourceArtifacts':[{'path':str(artifact),'sha256':original_sha}]}))
+        self.resume.return_value={'returncode':0,'evidencePath':str(evidence),'evidenceSha256':hashlib.sha256(evidence.read_bytes()).hexdigest()}
+        result=self.run_job()
+        self.assertEqual(result['status'],'hold')
+        self.assertTrue(result['resumeAttempted'])
+        self.run_job();self.resume.assert_called_once()
 
     def test_material_review_continuation_preserves_rejection_and_shared_budget(self):
         self.verdict['supported']=False

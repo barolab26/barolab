@@ -327,7 +327,7 @@ def generate_with_prompt_budget(prompt, provider, **kwargs):
             brief=result.get('answerBrief',result)
             basis=brief.get('questionBasis') if isinstance(brief,dict) else None
             if isinstance(basis,dict) and basis.get('contextId') not in allowed_contexts:
-                basis['contextId'] = sorted(allowed_contexts)[0]
+                raise ReviewRequired('questionBasis.contextId is not in the retained source context; no identity substitution')
         return result
 
     with memory_session(session_id, 'common.llm_client'):
@@ -6853,6 +6853,37 @@ def validate_editorial_seed_repair(task_id, proof, *, query_binding=None):
             'evidenceSha256': hashlib.sha256(path.read_bytes()).hexdigest()}
 
 
+def observe_repaired_keyword_stage(current, task_id):
+    """Observe only the original failed stage, never certify downstream approval."""
+    metadata = current.get('repairContinuationUsed', {})
+    if metadata.get('taskId') != task_id or not metadata.get('approvedQuery'):
+        raise ValueError('Repair task binding missing')
+    folder = (BASE_DIR / str(current['artifactFolder']).replace('\\','/')).resolve()
+    if not folder.is_relative_to((BASE_DIR/'output').resolve()): raise ValueError('Artifact outside output')
+    path=folder/'handoff.json'; raw=path.read_bytes(); data=json.loads(raw)
+    keywords=read_document(folder/'keywords.md')
+    if data.get('domain') != current['domain'] or data.get('slug') != keywords.get('topicSlug') or folder.parent.name != keywords.get('topicSlug'):
+        raise ValueError('Artifact domain or topic ownership mismatch')
+    if not re.fullmatch(r'[a-f0-9]{32}',str(data.get('runId',''))): raise ValueError('Actual run identity missing')
+    if keywords.get('mainKeyword') != metadata['approvedQuery']: raise ValueError('Approved query changed')
+    rows=data.get('stages',[])
+    if not rows:raise ValueError('No observed stage')
+    row=rows[0]
+    if row.get('agent')!='keyword-selector' or row.get('status')!='accepted' or row.get('inputs')!=[] or row.get('inputHashes')!={}:
+        raise ValueError('Original stage acceptance missing')
+    if row.get('model',{}).get('status')!='returned' or not row.get('model',{}).get('actualModel'):raise ValueError('Actual stage response missing')
+    if datetime.datetime.fromisoformat(row['acceptedAt']) < datetime.datetime.fromisoformat(current['attemptStartedAt']):raise ValueError('Artifact belongs to an earlier attempt')
+    if 'keywords.md' not in row.get('fileHashes',{}):raise ValueError('Keyword evidence missing')
+    artifacts=[]
+    for name,expected in row['fileHashes'].items():
+        source=(folder/name).resolve()
+        if not source.is_relative_to(folder):raise ValueError('Stage evidence outside run')
+        actual=hashlib.sha256(source.read_bytes()).hexdigest()
+        if actual!=expected:raise ValueError('Stage evidence changed')
+        artifacts.append({'path':str(source),'sha256':actual})
+    return {'runId':data['runId'],'topicSlug':data['slug'],'failureStagePassed':True,'sourceArtifacts':[{'path':str(path),'sha256':hashlib.sha256(raw).hexdigest()},*artifacts],'scope':'keyword-selector only; subsequent approvals are not certified'}
+
+
 def resume_editorial_seed_repair(task_id, proof, repaired):
     from common.repair_workflow import ROOT
     permit_path = Path(repaired['resumePermitPath'])
@@ -6902,15 +6933,11 @@ def resume_editorial_seed_repair(task_id, proof, repaired):
         stage_passed = False
         artifacts = []
         if current.get('artifactFolder'):
-            folder = (BASE_DIR / str(current['artifactFolder']).replace('\\', '/')).resolve()
-            if folder.is_relative_to((BASE_DIR / 'output').resolve()):
-                try:
-                    handoff = Handoff(folder, current['domain'], current['slug'])
-                    accepted = handoff.check()
-                    stage_passed = bool(accepted and accepted[0]['agent'] == 'keyword-selector')
-                    artifacts = [{'path': str(handoff.path), 'sha256': hashlib.sha256(handoff.path.read_bytes()).hexdigest()}]
-                except (OSError, ValueError, KeyError, ReviewRequired):
-                    stage_passed = False
+            try:
+                observed = observe_repaired_keyword_stage(current, task_id)
+                stage_passed, artifacts = observed['failureStagePassed'], observed['sourceArtifacts']
+            except (OSError, ValueError, KeyError, ReviewRequired):
+                stage_passed = False
         evidence = {'taskId': task_id, 'failureType': proof['failureType'], 'failureStagePassed': stage_passed, 'sourceArtifacts': artifacts,
                     'published': published, 'domain': current['domain'], 'status': current.get('status'),
                     'currentStage': current.get('currentStage'), 'attemptCount': current.get('attemptCount'),
