@@ -193,7 +193,7 @@ def main_loop():
 
 
 def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=None,
-                      main_keyword=None, evidence_dir=None, prepared_dir=None):
+                      main_keyword=None, evidence_dir=None, prepared_dir=None, strategy=None, materials_manifest=None):
     """Route a local explicit request through the existing reviewed Naver runner."""
     from common.ubuntu_naver_browser import accounts
     if account not in accounts():
@@ -202,7 +202,8 @@ def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=N
                "--account", account, "--visible"]
     for flag, value in (("--slot", slot), ("--publication-date", publication_date),
                         ("--topic-seed", topic_seed), ("--main-keyword", main_keyword),
-                        ("--evidence-dir", evidence_dir), ("--prepared-dir", prepared_dir)):
+                        ("--evidence-dir", evidence_dir), ("--prepared-dir", prepared_dir),
+                        ("--strategy", strategy), ("--materials-manifest", materials_manifest)):
         if value is not None:
             command.extend([flag, str(value)])
     environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
@@ -241,11 +242,14 @@ def main(argv=None):
     parser.add_argument("--main-keyword")
     parser.add_argument("--evidence-dir", type=Path)
     parser.add_argument("--prepared-dir", type=Path)
+    parser.add_argument("--strategy", type=int, choices=[1, 2, 3, 4])
+    parser.add_argument("--materials-manifest", type=Path)
     args = parser.parse_args(argv)
     if args.dry_run and not args.naver_catch_up:
         parser.error("--dry-run requires --naver-catch-up")
     if not args.naver_account and any((args.slot, args.publication_date, args.topic_seed,
-                                      args.main_keyword, args.evidence_dir, args.prepared_dir)):
+                                      args.main_keyword, args.evidence_dir, args.prepared_dir,
+                                      args.strategy, args.materials_manifest)):
         parser.error("Naver arguments require --naver-account")
     from dashboard.metrics import collector_lock
     lock_path = Path("/home/baro7/.barolab/ego-lite.lock")
@@ -258,7 +262,8 @@ def main(argv=None):
                 return run_visible_naver(args.naver_account, slot=args.slot,
                                          publication_date=args.publication_date, topic_seed=args.topic_seed,
                                          main_keyword=args.main_keyword, evidence_dir=args.evidence_dir,
-                                         prepared_dir=args.prepared_dir)
+                                         prepared_dir=args.prepared_dir, strategy=args.strategy,
+                                         materials_manifest=args.materials_manifest)
             main_loop()
         else:
             print("EGO LITE is already running.", flush=True)

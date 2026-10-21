@@ -8,27 +8,157 @@ VISUAL_SOURCES = ("generated", "capture", "original", "photo")
 class MaterialRequired(RuntimeError):
     pass
 
-def load_material_manifest(path=None, account=None, roots=None):
-    if path:
-        raise MaterialRequired("External material import requires a verified manifest implementation")
-    return {}
+def _inside(path, roots):
+    path = Path(path).resolve()
+    return any(path.is_relative_to(Path(root).resolve()) for root in roots)
 
-def import_materials(packet=None, *args, **kwargs):
-    if packet:
-        raise MaterialRequired("External material import is not verified")
-    return {}
+
+def _capture_packet(packet, account=None, roots=None):
+    from datetime import datetime, timezone
+    from urllib.parse import urlsplit, parse_qs
+    import re
+    if not isinstance(packet, dict) or packet.get("version") != 1:
+        raise MaterialRequired("Unsupported capture manifest")
+    owner = packet.get("account")
+    if not isinstance(owner, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", owner) or (account and owner != account):
+        raise MaterialRequired("Capture account mismatch")
+    if not str(packet.get("readerQuestion") or "").strip():
+        raise MaterialRequired("Capture reader question required")
+    rows = packet.get("materials")
+    if not isinstance(rows, list) or not rows or len(rows) > 12:
+        raise MaterialRequired("Bounded capture list required")
+    seen = set()
+    filenames = set()
+    for row in rows:
+        if not isinstance(row, dict) or row.get("source") != "capture":
+            raise MaterialRequired("Only verified official captures are supported")
+        mid, name = row.get("materialId", ""), row.get("filename", "")
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", mid) or mid in seen:
+            raise MaterialRequired("Unique capture materialId required")
+        seen.add(mid)
+        if not re.fullmatch(r"[A-Za-z0-9_-]+\.(png|jpg|jpeg)", name):
+            raise MaterialRequired("Unsafe capture filename")
+        if name.lower() in filenames or not re.fullmatch(r"[A-Za-z0-9_-]+", str(row.get('stepId', ''))):
+            raise MaterialRequired("Unique filenames and explicit stepId required")
+        filenames.add(name.lower())
+        path = Path(row.get("filePath", ""))
+        if not path.is_absolute() or (roots and not _inside(path, [Path(r) / owner for r in roots])):
+            raise MaterialRequired("Capture path outside account roots")
+        try:
+            actual = _image_hash(path)
+            from PIL import Image
+            with Image.open(path) as image:
+                expected_format = 'PNG' if name.endswith('.png') else 'JPEG'
+                if image.format != expected_format:
+                    raise ValueError('Capture encoding must match PNG/JPEG filename')
+        except (OSError, ValueError) as exc:
+            raise MaterialRequired("Capture image cannot be decoded") from exc
+        if row.get("sha256") != actual:
+            raise MaterialRequired("Capture bytes changed")
+        url = urlsplit(str(row.get("sourceUrl") or ""))
+        host = (url.hostname or "").lower()
+        if (url.scheme != "https" or url.username or url.password or url.port not in (None, 443)
+                or not (host.endswith(".go.kr") or host in ("nhis.or.kr", "www.nhis.or.kr", "longtermcare.or.kr", "www.longtermcare.or.kr"))
+                or any(re.search(r"token|password|secret|credential|session", k, re.I) for k in parse_qs(url.query))):
+            raise MaterialRequired("Public official source URL required")
+        try:
+            captured = datetime.fromisoformat(row.get("capturedAt", "").replace("Z", "+00:00"))
+            if captured.tzinfo is None or captured > datetime.now(timezone.utc):
+                raise ValueError("Invalid capture time")
+        except (TypeError, ValueError) as exc:
+            raise MaterialRequired("Observed capture timestamp required") from exc
+        if row.get("sensitiveDataAbsent") is not True or not str(row.get("observation") or "").strip():
+            raise MaterialRequired("Capture observation and privacy declaration required")
+    expected = _digest({k: v for k, v in packet.items() if k != "manifestSha256"})
+    if packet.get("manifestSha256") not in (None, expected):
+        raise MaterialRequired("Capture manifest changed")
+    return {**packet, "manifestSha256": expected}
+
+
+def load_material_manifest(path=None, account=None, roots=None):
+    if not path:
+        return {}
+    try:
+        source = Path(path)
+        if not roots or not account or not _inside(source, [Path(r) / account for r in roots]):
+            raise MaterialRequired("Manifest outside account roots")
+        packet = json.loads(source.read_text(encoding="utf-8-sig"))
+        return _capture_packet(packet, account, roots)
+    except (OSError, ValueError, TypeError) as exc:
+        raise MaterialRequired("Invalid capture manifest") from exc
+
+
+def _copy_exact(source, destination, expected):
+    source, destination = Path(source), Path(destination)
+    if destination.is_symlink():
+        raise MaterialRequired("Capture destination is a symlink")
+    if _image_hash(source) != expected:
+        raise MaterialRequired("Capture changed before copying")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        if _image_hash(destination) != expected:
+            raise MaterialRequired("Existing capture destination differs")
+    else:
+        with destination.open("xb") as stream:
+            stream.write(source.read_bytes())
+    if _image_hash(destination) != expected:
+        raise MaterialRequired("Capture copy hash mismatch")
+
+
+def import_materials(packet=None, folder=None):
+    if not packet:
+        return {}
+    from copy import deepcopy
+    packet = deepcopy(_capture_packet(packet))
+    folder = Path(folder).resolve()
+    if (folder / 'materials-manifest.json').is_symlink():
+        raise MaterialRequired("Capture manifest destination is a symlink")
+    if packet['account'] not in folder.parts:
+        raise MaterialRequired("Capture destination account mismatch")
+    for row in packet['materials']:
+        target = folder / 'materials' / row['filename']
+        if not _inside(target, [folder]):
+            raise MaterialRequired("Capture destination escaped run")
+        _copy_exact(row['filePath'], target, row['sha256'])
+        row['filePath'] = str(target.resolve())
+    packet.pop('manifestSha256', None)
+    packet = _capture_packet(packet)
+    (folder / 'materials-manifest.json').write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding='utf-8')
+    return packet
+
 
 def material_context(packet=None):
-    return packet or {}
+    if not packet:
+        return {}
+    return {**packet, 'materials': [{k: v for k, v in row.items() if k != 'filePath'} for row in packet['materials']]}
+
 
 def bind_material_plans(plans=None, packet=None, folder=None):
     plans = plans or []
-    if any(p.get("materialId") or p.get("source") != "generated" for p in plans):
-        raise MaterialRequired("Capture/original plans require verified external materials")
+    records = {row['materialId']: row for row in _capture_packet(packet)['materials']} if packet else {}
+    for plan in plans:
+        if plan.get('source') == 'generated' and not plan.get('materialId'):
+            continue
+        row = records.get(plan.get('materialId'))
+        if not row or any(plan.get(k) != row.get(k) for k in ('source', 'filename', 'stepId')):
+            raise MaterialRequired("Capture plan must bind exact supplied material")
+        if folder:
+            target = Path(folder) / 'images' / row['filename']
+            if not _inside(target, [folder]):
+                raise MaterialRequired("Capture plan destination escaped run")
+            _copy_exact(row['filePath'], target, row['sha256'])
     return plans
+
 
 def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def visual_prompt(plan, generated_default):
+    """A captured source is copied, never described as a generation request."""
+    if plan.get('materialId') or plan.get('source') != 'generated':
+        return ''
+    return str(plan.get('prompt') or '').strip() or generated_default
 
 def _image_hash(path):
     path = Path(path)
@@ -52,11 +182,15 @@ def review_visual_groups(plans, paths, judge, context, directory, prefix, plan_f
     records = []
     for index, (plan, path) in enumerate(zip(plans, paths)):
         digest = _image_hash(path)
-        request = ("Inspect the attached actual image pixels against this publication plan and article. "
+        request = ("Inspect the attached actual image pixels against THIS image's publication plan. "
+            "The article is context, not a requirement for one image to depict every article section. "
+            "Use publicationPlans to identify which claims belong to other images. Do not reject this image "
+            "solely because a different image's assigned subject is absent. Still reject every unsupported "
+            "claim in THIS image's caption, purpose, placement or observations, and contradictions with the article. "
             "Describe what is visible. Reject misleading captions, topic mismatch, fabricated screenshot/"
-            "firsthand claims, unreadable necessary details, and unsupported observations. Generated examples "
+            "firsthand claims, unreadable necessary details, and unsupported observations. For official captures, reject any visible personal data, account identity, authentication information, fabricated UI, or claims not visible in the supplied pixels. A source URL, timestamp or privacy declaration alone never proves the pixels are authentic or safe. Generated examples "
             "are allowed when honestly labeled. Separate optional aesthetic preferences and perfectly identical composition from substantive reader claims; uncertainty whether an illustrative figure is a mannequin or a person alone is not rejection evidence when no real-photography or firsthand-wear claim is made. Still reject visible failures of claimed solid color, subject type, hem/sock exposure, or caption promises. Return passed only when no substantive issues remain.\n" +
-            json.dumps({"plan": plan, "context": context}, ensure_ascii=False))
+            json.dumps({"imageIndex": index, "plan": plan, "publicationPlans": plans, "context": context}, ensure_ascii=False))
         verdict = judge(request, [str(Path(path).resolve())], schema)
         destination = directory / f"{prefix}_{index}.json"
         destination.write_text(json.dumps({"version": 1, "status": "rejected", "imageSha256": digest,
@@ -90,7 +224,11 @@ def verify_visual_records(plans, paths, records, source_observations=False):
             raise ValueError("Visual review does not approve these exact image bytes and plan")
     return True
 
-async def annotate_observed_materials(packet=None, *args, **kwargs):
-    if packet:
-        raise MaterialRequired("External material annotation is not verified")
-    return {}
+async def annotate_observed_materials(packet=None, observations=None, *args, **kwargs):
+    if not packet:
+        return {}
+    packet = _capture_packet(packet)
+    rows = packet['materials']
+    verify_visual_records(rows, [row['filePath'] for row in rows], observations, source_observations=True)
+    # Preserve the reviewed row/bytes exactly; no generated overlays or rewritten UI.
+    return packet

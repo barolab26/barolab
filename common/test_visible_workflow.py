@@ -69,6 +69,21 @@ class VisibleWorkflowTests(unittest.TestCase):
             self.assertFalse(run.call_args.kwargs["shell"])
             self.assertEqual(run.call_args.kwargs["cwd"], str(ego.ROOT))
 
+    def test_prepared_materials_and_strategy_forward_exactly_without_shell(self):
+        with patch.object(ego.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)) as run:
+            self.assertEqual(ego.run_visible_naver("soultin", prepared_dir="/private/prepared folder",
+                             strategy=2, materials_manifest="/private/official screens.json"), 0)
+            command = run.call_args.args[0]
+            self.assertEqual(command[-6:], ["--prepared-dir", "/private/prepared folder",
+                             "--strategy", "2", "--materials-manifest", "/private/official screens.json"])
+            self.assertFalse(run.call_args.kwargs["shell"])
+        with patch.object(ego, "run_visible_naver") as launch:
+            with self.assertRaises(SystemExit):
+                ego.main(["--naver-account", "soultin", "--strategy", "5"])
+            with self.assertRaises(SystemExit):
+                ego.main(["--materials-manifest", "/private/official screens.json"])
+            launch.assert_not_called()
+
     def test_failed_refresh_does_not_launch_pipeline(self):
         with patch.object(ego.subprocess, "run", return_value=subprocess.CompletedProcess([], 9)) as run:
             self.assertEqual(ego.run_visible_naver("yoon_master"), 9)
