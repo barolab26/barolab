@@ -720,7 +720,7 @@ def import_external_layout(handoff, plans, manifest_path=None):
                           'articleImageCount': len(plans), 'tiles': saved}
     for source, target in copies:
         if source != target:
-            shutil.copy2(source, target)
+            shutil.copyfile(source, target)
     document(handoff.folder/'layout-evidence.md', '외부 CUA PC·모바일 전체 렌더 관측', {
         'finalSha256': expected, 'captureMethod': data['captureMethod'], 'capturedAt': data['capturedAt'],
         'screenshots': [target.name for _, target in copies], 'coverage': coverage})
@@ -2668,6 +2668,38 @@ def validate_writer_image_links(article):
             raise ReviewRequired('Writer image plan block is absent from the actual body')
 
 
+def source_fact_bootstrap_state(original, domain):
+    """Only an exact pre-model keyword-copy interruption can complete initialization."""
+    original=Path(original).resolve();child=original/'source-fact-continuation'
+    claim=original/'source-fact-continuation.json'
+    try:
+        saved=json.loads(claim.read_text(encoding='utf-8'))
+        parent=json.loads((original/'handoff.json').read_text(encoding='utf-8'))
+        if set(p.name for p in child.iterdir()) != {'handoff.json','keywords.md'}:
+            return None
+        if any(p.is_symlink() for p in child.iterdir()) or child.is_symlink():return None
+        if (saved.get('originalRunId')!=parent['runId'] or parent.get('domain')!=domain
+            or Path(saved['continuationFolder']).resolve()!=child
+            or saved.get('publicationAttempted') is not False or saved.get('attemptLimit')!=1):return None
+        names=('handoff.json','keywords.md','research.md','prewriter-acquisition-request.json')
+        if saved.get('originalHashes')!={name:digest(original/name) for name in names}:return None
+        if digest(child/'keywords.md')!=saved['originalHashes']['keywords.md']:return None
+        handoff=Handoff(child,domain,parent['slug'])
+        if handoff.check() or (original/'source-fact-bootstrap-recovery.json').exists():return None
+        return {'claimSha256':digest(claim),'childHandoffSha256':digest(child/'handoff.json'),
+                'keywordSha256':digest(child/'keywords.md'),'originalRunId':parent['runId']}
+    except (OSError,ValueError,KeyError,TypeError,ReviewRequired):
+        return None
+
+
+def source_fact_schedule_eligible(item, folder):
+    if not item or publication_may_be_inflight(item):return False
+    if item.get('status')=='review_required':return True
+    return (item.get('status')=='failed' and str(item.get('lastError','')).startswith('PermissionError:')
+            and 'keywords.md' in str(item.get('lastError',''))
+            and source_fact_bootstrap_state(folder,item.get('domain')) is not None)
+
+
 def open_source_fact_continuation(folder, domain, recent):
     """Reuse one verified keyword handoff in a child folder; preserve all failed artifacts."""
     original=Path(folder).resolve()
@@ -2693,7 +2725,7 @@ def open_source_fact_continuation(folder, domain, recent):
     schedule=json.loads((DATA_DIR/'daily_schedule.json').read_text(encoding='utf-8'))
     item=next((x for x in schedule.get('items',[]) if x.get('domain')==domain),None)
     baseline=RUN_CONTEXT.get('sourceFactScheduleItem', item)
-    if not item or not baseline or baseline.get('status')!='review_required' or publication_may_be_inflight(item) or publication_may_be_inflight(baseline):
+    if not source_fact_schedule_eligible(baseline,original) or publication_may_be_inflight(item):
         raise ReviewRequired('Source continuation schedule state is not safe')
     if any(item.get(key)!=baseline.get(key) for key in ('domain','artifactFolder','attemptCount','totalAttempts')):
         raise ReviewRequired('Source continuation task changed after preflight')
@@ -2707,12 +2739,24 @@ def open_source_fact_continuation(folder, domain, recent):
     hashes={name:digest(original/name) for name in ('handoff.json','keywords.md','research.md','prewriter-acquisition-request.json')}
     claim=original/'source-fact-continuation.json'
     child=original/'source-fact-continuation'
-    with claim.open('x',encoding='utf-8') as stream:
-        json.dump({'schemaVersion':1,'originalRunId':data['runId'],'originalHashes':hashes,
-                   'continuationFolder':str(child),'publicationAttempted':False,'attemptLimit':1,
-                   'attemptCountUnchanged':item.get('attemptCount'),'claimedAt':stamp()},stream)
-    handoff=Handoff(child,domain,data['slug'],create=True)
-    shutil.copy2(original/'keywords.md',child/'keywords.md')
+    if claim.exists():
+        recovery=source_fact_bootstrap_state(original,domain)
+        if recovery is None:
+            raise FileExistsError('Source continuation already claimed; not a recoverable bootstrap')
+        with (original/'source-fact-bootstrap-recovery.json').open('x',encoding='utf-8') as stream:
+            json.dump({**recovery,'reason':'Complete pre-model metadata-copy interruption',
+                       'recoveryLimit':1,'claimedAt':stamp()},stream)
+        handoff=Handoff(child,domain,data['slug'])
+    else:
+        with claim.open('x',encoding='utf-8') as stream:
+            json.dump({'schemaVersion':1,'originalRunId':data['runId'],'originalHashes':hashes,
+                       'continuationFolder':str(child),'publicationAttempted':False,'attemptLimit':1,
+                       'attemptCountUnchanged':item.get('attemptCount'),'claimedAt':stamp()},stream)
+        handoff=Handoff(child,domain,data['slug'],create=True)
+    if not (child/'keywords.md').exists() or digest(child/'keywords.md')!=hashes['keywords.md']:
+        shutil.copyfile(original/'keywords.md',child/'keywords.md')
+    if digest(child/'keywords.md')!=hashes['keywords.md']:
+        raise ReviewRequired('Keyword bytes changed during source continuation initialization')
     handoff.data['stages']=copy.deepcopy(data['stages'])
     handoff.data['sourceFactContinuation']={'originalRunId':data['runId'],'claimSha256':digest(claim),'originalFolder':str(original)}
     handoff.save();handoff.check()
@@ -2925,7 +2969,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                     record_prewrite_block(handoff, goal, exc)
                 acquisition = folder/'public-source-acquisition'
                 for filename in ('answer-brief-binding.json','planning-refinement.json','prewriting-materials.json','research.md'):
-                    if (folder/filename).is_file():shutil.copy2(folder/filename,acquisition/('before-'+filename))
+                    if (folder/filename).is_file():shutil.copyfile(folder/filename,acquisition/('before-'+filename))
                 combined = packet['materials'] + captured
                 if len({row['filename'] for row in combined}) != len(combined):
                     raise ReviewRequired('Acquired material filename conflicts with existing evidence')
@@ -5145,7 +5189,7 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                     original_dir = output_dir / 'capture-originals'
                     original_dir.mkdir(exist_ok=True)
                     original_path = original_dir / record['filename']
-                    shutil.copy2(record['originalPath'], original_path)
+                    shutil.copyfile(record['originalPath'], original_path)
                     record['originalPath'] = str(original_path)
                     extra_outputs.append('capture-originals/' + record['filename'])
             (output_dir/'capture-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -5160,7 +5204,7 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                         raise ReviewRequired('기존 생성사진을 다른 역할의 화면으로 재사용할 수 없습니다')
                     original_path = original_file.parent/'images'/plan['filename']
                     validate_images([original_path], [old_plan])
-                    shutil.copy2(original_path, images_dir/plan['filename'])
+                    shutil.copyfile(original_path, images_dir/plan['filename'])
             else:
                 reusable = reusable_flow_images(images_dir, generated_plans)
                 pending_plans = [p for p in generated_plans if p['filename'] not in reusable]
@@ -5364,7 +5408,7 @@ async def run_workflows():
         return
     if os.environ.get('CF_SOURCE_FACT_FOLDER'):
         source_item=next((item for item in items if item.get('domain')==targets_to_run[0]),None)
-        if len(targets_to_run)!=1 or not source_item or source_item.get('status')!='review_required' or publication_may_be_inflight(source_item):
+        if len(targets_to_run)!=1 or not source_fact_schedule_eligible(source_item,os.environ['CF_SOURCE_FACT_FOLDER']):
             raise ReviewRequired('Source continuation requires one unsubmitted review-required task')
         RUN_CONTEXT['sourceFactScheduleItem']=copy.deepcopy(source_item)
     if manual_tracking:

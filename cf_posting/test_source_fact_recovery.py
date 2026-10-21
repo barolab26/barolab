@@ -77,6 +77,34 @@ class SourceContinuationTests(unittest.TestCase):
         for name,raw in before.items():self.assertEqual((self.folder/name).read_bytes(),raw)
         self.assertEqual(json.loads((self.base/'data'/'daily_schedule.json').read_text())['items'][0]['attemptCount'],3)
         with self.assertRaises(FileExistsError):r.open_source_fact_continuation(self.folder,'healthcox.com',[])
+    def test_copy_metadata_failure_can_complete_same_claim_once(self):
+        actual_copy=shutil.copyfile
+        def old_copy_failure(source,target):
+            actual_copy(source,target)
+            raise PermissionError('keywords.md metadata denied')
+        with patch.object(r.shutil,'copyfile',side_effect=old_copy_failure):
+            with self.assertRaises(PermissionError):r.open_source_fact_continuation(self.folder,'healthcox.com',[])
+        claim=(self.folder/'source-fact-continuation.json').read_bytes()
+        self.item.update(status='failed',lastError='PermissionError: keywords.md metadata denied');self.save_schedule()
+        with patch.object(r.shutil,'copyfile') as copying:
+            h,*_=r.open_source_fact_continuation(self.folder,'healthcox.com',[])
+        copying.assert_not_called()
+        self.assertEqual(len(h.check()),1)
+        self.assertEqual((self.folder/'source-fact-continuation.json').read_bytes(),claim)
+        self.assertTrue((self.folder/'source-fact-bootstrap-recovery.json').exists())
+        with self.assertRaises((r.ReviewRequired,FileExistsError)):
+            r.open_source_fact_continuation(self.folder,'healthcox.com',[])
+
+    def test_bootstrap_with_external_stage_evidence_cannot_resume(self):
+        actual_copy=shutil.copyfile
+        def interrupted(source,target):
+            actual_copy(source,target)
+            raise PermissionError('keywords.md')
+        with patch.object(r.shutil,'copyfile',side_effect=interrupted):
+            with self.assertRaises(PermissionError):r.open_source_fact_continuation(self.folder,'healthcox.com',[])
+        (self.folder/'source-fact-continuation'/'model-audit').mkdir()
+        self.assertIsNone(r.source_fact_bootstrap_state(self.folder,'healthcox.com'))
+
     def test_duplicate_or_unknown_submission_never_claims(self):
         with self.assertRaises(r.ReviewRequired):r.open_source_fact_continuation(self.folder,'healthcox.com',[{'slug':'same-question'}])
         self.item['submissionStarted']=True;self.save_schedule()
