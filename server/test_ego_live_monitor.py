@@ -44,6 +44,44 @@ class MonitorTests(unittest.TestCase):
             self.assertEqual(hud.request_rows(Path(d))[0]['taskId'],'actual')
             self.assertEqual(p.read_text(),'bad')
 
+    def test_fresh_collection_does_not_refresh_old_source(self):
+        now=datetime.datetime(2026,10,21,12,tzinfo=hud.KST)
+        row={'title':'네이버','status':'stale','source':{'fresh':False,'sourceDate':'2026-10-20',
+             'sourceCheckedAt':'2026-10-20T12:00:00+09:00'}}
+        text='\n'.join(hud.render_lines({'observedAt':now.timestamp(),'projects':[row]},[],now=now))
+        self.assertIn('자료 다시 읽은 시각',text)
+        self.assertIn('원천 오래됨 / 미확인',text)
+        self.assertIn('86400초 전',text)
+        self.assertIn('업무 실행 및 원천 데이터 갱신을 의미하지 않음',text)
+
+    def test_old_active_request_remains_in_activity_below_recent_completed(self):
+        now=datetime.datetime.now(hud.KST)
+        rows=[{'taskId':str(i),'status':'completed','createdAt':100+i} for i in range(5)]
+        rows.append({'taskId':'active','status':'acknowledged','claimedAt':now.timestamp(),
+            'actions':[{'agent':'patch','tool':'read_agent_status'}],
+            'latestAction':{'kind':'staff_model','agent':'patch','state':'calling','observedAt':now.timestamp()}})
+        text='\n'.join(hud.render_lines({},rows,now=now,activity={'cf':{'state':'idle','stage':None,'lastActionAt':None},'coverage':'CF·네이버 연결'}))
+        self.assertIn('④ EGO 현재 활동',text)
+        self.assertIn('패치 답변 모델 호출 중',text)
+        self.assertIn('CF 파이프라인: 대기',text)
+        self.assertIn('시각 미관측',text)
+
+    def test_request_reader_does_not_drop_older_active_rows(self):
+        import json
+        with tempfile.TemporaryDirectory() as d:
+            for i in range(6):
+                (Path(d)/f'{i}.json').write_text(json.dumps({'taskId':str(i),'createdAt':i,'status':'acknowledged' if i==0 else 'completed'}))
+            self.assertEqual(len(hud.request_rows(Path(d))),6)
+            self.assertEqual(hud.request_rows(Path(d))[-1]['status'],'acknowledged')
+
+    def test_old_running_or_nonfinite_timestamp_does_not_claim_current_execution(self):
+        now=datetime.datetime.now(hud.KST)
+        rows=[{'status':'acknowledged','latestAction':{'kind':'staff_model','state':'calling','agent':'patch','observedAt':now.timestamp()-121}}]
+        text='\n'.join(hud.render_lines({},rows,now=now))
+        self.assertIn('현재 지속 여부 미확인',text)
+        for value in (float('nan'),float('inf')):
+            self.assertEqual(hud.time_label(value,now),'시각 미관측')
+
     def test_default_ego_only_delegates_monitor(self):
         import ego_lite_runner as ego
         with patch.object(hud,'main',return_value=0) as monitor, patch.object(ego,'run_cf_catch_up') as cf:

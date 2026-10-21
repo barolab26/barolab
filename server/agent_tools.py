@@ -1946,7 +1946,11 @@ def process_staff_request_once():
                 phase='progress', stage=action['tool'], parent_request_id=parent, message_kind='host_ack',
                 output_kind='지시를 접수했고 운영 상태 확인을 시작했습니다.' if action['tool'] == 'read_agent_status' else '지시를 접수했고 등록된 오류의 수리 검증을 시작했습니다.')
             from common.ego_executor import execute_staff_action
-            result = execute_staff_action(action, task_id=row['taskId'], request_id=row['requestId'])
+            def save_execution(receipt):
+                row['currentExecution'] = receipt
+                row['executionObservedAt'] = time.time()
+                write(path, row)
+            result = execute_staff_action(action, task_id=row['taskId'], request_id=row['requestId'], observer=save_execution)
             row['results'].append({'agent': action['agent'], 'tool': action['tool'], 'result': result})
             write(path, row)
             digest = hashlib.sha256(json.dumps(result, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
@@ -1960,6 +1964,11 @@ def process_staff_request_once():
             try:
                 def save_route(route):
                     row['results'][-1]['staffRoute'] = route
+                    events = route.get('events') or []
+                    if events:
+                        event = events[-1]
+                        row['latestAction'] = {'kind': 'staff_model', 'agent': action['agent'],
+                                               'state': event.get('state', 'unknown'), 'observedAt': time.time()}
                     write(path, row)
                 response = staff_tool_reply(action['agent'], row['taskId'],
                     {**action,'hostInstruction':staff_instruction(action)}, result, audit=save_route)
