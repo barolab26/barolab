@@ -1,5 +1,4 @@
 """One Naver runner: actual agent handoffs, native formatting, reviewed reservations and monitoring."""
-from common.ego_telemetry import action as ego_action, async_action as ego_async_action, export_environment
 
 import os, sys, time, json, hashlib, socket, argparse, subprocess, shutil
 if __name__ == '__main__' and '--monitor' in sys.argv:print('[naver-monitor] runner_import_begin',flush=True)
@@ -15,6 +14,7 @@ if hasattr(sys.stdout,"reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
 BASE_DIR=Path(__file__).resolve().parent
 PROJECT_ROOT=BASE_DIR.parent
 sys.path.insert(0,str(PROJECT_ROOT))
+from common.ego_telemetry import action as ego_action, async_action as ego_async_action, export_environment
 from common.channel_attribution import PRIORITY_CF_DOMAINS, is_dummy_rescue_url
 if not MONITOR_ONLY:
     load_dotenv(BASE_DIR / ".env")
