@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import logging
 
 
-def execute_staff_action(action, *, task_id, request_id, observer=None):
+def execute_staff_action(action, *, task_id, request_id, observer=None, requester='jarvis', parent_request_id='unknown'):
     from server.agent_tools import validate_staff_actions, execute_agent_tool
 
     checked = validate_staff_actions([action])[0]
@@ -21,7 +21,10 @@ def execute_staff_action(action, *, task_id, request_id, observer=None):
                 logging.getLogger(__name__).warning('Ego execution telemetry unavailable: %s', type(exc).__name__)
     notify()
     try:
-        result = execute_agent_tool(checked['agent'], checked['tool'], **checked['args'])
+        from common.ego_telemetry import execution_context
+        with execution_context(task_id=task_id, request_id=request_id, requester=requester,
+                               actor=checked['agent'], tool=checked['tool'], parent_request_id=parent_request_id, source='staff_queue'):
+            result = execute_agent_tool(checked['agent'], checked['tool'], **checked['args'])
         if not isinstance(result, dict):
             raise ValueError('Registered tool returned no structured receipt')
     except Exception as exc:

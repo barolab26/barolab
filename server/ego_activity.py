@@ -1,5 +1,8 @@
 """Read-only, bounded stage observations; never replay historical browser actions."""
 import json
+import hashlib
+import re
+import math
 import os
 import time
 from datetime import datetime, timezone, timedelta
@@ -64,7 +67,7 @@ def read_activity(root=ROOT, now=None):
     root = Path(root)
     now = time.time() if now is None else now
     result = {'observedAt': datetime.fromtimestamp(now, timezone.utc).isoformat(),
-              'coverage': '등록 파이프라인 단계만 관측 · 직접 실행/모든 마우스·키 입력은 미지원'}
+              'coverage': '연결된 자동화 입력·단계 관측 · 사용자 수동 입력/미연결 외부 앱은 수집하지 않음'}
     for channel, base, lock in [('cf', root/'cf_posting', 'cleaner.lock'),
                                 ('naver', root/'naver_blog_posting', 'pipeline-run.lock')]:
         row = {'state': 'unknown', 'stage': None, 'lastActionAt': None,
@@ -109,3 +112,50 @@ def read_activity(root=ROOT, now=None):
         except (OSError, ValueError, KeyError, TypeError, IndexError) as exc:
             row['errorType'] = type(exc).__name__
     return result
+
+
+def read_input_activity(directory=None, now=None):
+    """Reproject only bounded host action fields; no input text or arbitrary labels."""
+    from common.ego_telemetry import DIRECTORY, ACTIONS, TARGETS
+    directory = Path(directory) if directory is not None else DIRECTORY
+    now = time.time() if now is None else now
+    rows = []
+    candidates = sorted(directory.glob('*.json'), key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)[:64]
+    for path in candidates:
+        try:
+            if path.is_symlink() or path.stat().st_size > 100000:
+                continue
+            doc = read_json(path); context = doc['context']; pid = doc['processId']
+            if not isinstance(context,dict) or type(pid) is not int or pid <= 0:
+                continue
+            allowed = ('taskId','requestId','requester','actor','project','parentRequestId','source','tool')
+            if set(context)-set(allowed) or any(not isinstance(v,str) or not re.fullmatch(r'[A-Za-z0-9_:.-]{1,180}',v) for v in context.values()):
+                continue
+            key = hashlib.sha256((context['taskId']+':'+str(pid)).encode()).hexdigest()
+            if path.name != key+'.json':
+                continue
+            events = []
+            for event in doc.get('recent', [])[-16:]:
+                if not isinstance(event,dict) or event.get('action') not in ACTIONS or event.get('target') not in TARGETS or event.get('phase') not in ('before','after','failed'):
+                    continue
+                if not re.fullmatch(r'[0-9a-f]{32}',str(event.get('actionId',''))):
+                    continue
+                at = stamp(event.get('at'))
+                if not math.isfinite(at) or at > now:
+                    continue
+                row = {k:event[k] for k in ('actionId','action','target','phase','at')}
+                if type(event.get('count')) is int and 0 <= event['count'] <= 1000000:
+                    row['count'] = event['count']
+                events.append(row)
+            if not events:
+                continue
+            latest = events[-1]; age = now-stamp(latest['at'])
+            rows.append({'context':context,'latest':latest,'recent':events[-3:],
+                         'fresh':0 <= age <= 120, 'processObserved':os.name=='posix' and Path('/proc',str(pid)).exists()})
+        except (OSError,ValueError,TypeError,KeyError,IndexError):
+            continue
+    rows = sorted(rows,key=lambda r:(r['fresh'] and r['latest']['phase']=='before',stamp(r['latest']['at'])),reverse=True)
+    if rows:
+        rows[0]['additionalRecords'] = max(0,len(rows)-1)
+        rows[0]['scanLimited'] = len(candidates)==64
+    return rows[:3]

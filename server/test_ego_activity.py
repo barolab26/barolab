@@ -57,6 +57,30 @@ class ActivityTests(unittest.TestCase):
                 self.write(base/'daily_schedule.json',{'date':datetime.fromtimestamp(self.now,timezone(timedelta(hours=9))).date().isoformat(),'items':[{'domain':'a','status':status}]})
                 self.assertEqual(a.read_activity(self.root,self.now)['cf']['state'],expected)
 
+    def test_input_projection_rejects_wrong_identity_and_private_fields(self):
+        import hashlib
+        context={'taskId':'actual-task','requestId':'request','requester':'user','actor':'codex','project':'naver_search','source':'direct'}
+        event={'actionId':'a'*32,'action':'type','target':'naver-search-query','phase':'after','at':datetime.fromtimestamp(self.now-1,timezone.utc).isoformat(),'count':7,'typedText':'PRIVATE'}
+        payload={'context':context,'processId':12345,'latest':event,'recent':[event]}
+        folder=self.root/'telemetry';key=hashlib.sha256(b'actual-task:12345').hexdigest()
+        self.write(folder/(key+'.json'),payload)
+        rows=a.read_input_activity(folder,self.now)
+        self.assertEqual(len(rows),1);self.assertEqual(rows[0]['latest']['count'],7)
+        self.assertNotIn('PRIVATE',json.dumps(rows))
+        (folder/(key+'.json')).rename(folder/('b'*64+'.json'))
+        self.assertEqual(a.read_input_activity(folder,self.now),[])
+
+    def test_unknown_input_target_and_old_input_not_live(self):
+        import hashlib
+        folder=self.root/'telemetry';key=hashlib.sha256(b'task:123').hexdigest()
+        event={'actionId':'a'*32,'action':'click','target':'naver-search','phase':'before','at':datetime.fromtimestamp(self.now-300,timezone.utc).isoformat()}
+        payload={'context':{'taskId':'task','source':'direct'},'processId':123,'recent':[event]}
+        self.write(folder/(key+'.json'),payload)
+        self.assertFalse(a.read_input_activity(folder,self.now)[0]['fresh'])
+        event['target']='secret-url'
+        self.write(folder/(key+'.json'),payload)
+        self.assertEqual(a.read_input_activity(folder,self.now),[])
+
     @unittest.skipUnless(os.name=='posix','Linux passive lock registry')
     def test_passive_lock_registry_detects_child_without_claim(self):
         path=self.root/'lock';path.write_bytes(b'0')

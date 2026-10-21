@@ -1,10 +1,37 @@
 import hashlib
 import unittest
-from unittest.mock import Mock
-from naver_blog_posting.visible_research import ranked_posts, validate_capture_request, public_page
+from unittest.mock import Mock, patch
+from contextlib import nullcontext
+from naver_blog_posting.visible_research import ranked_posts, validate_capture_request, public_page, search_public_query
 
 
 class ResearchEvidenceTests(unittest.TestCase):
+    def test_public_search_uses_actual_keys_and_restores_existing_tab(self):
+        original='https://blog.naver.com/mustpickinfo'
+        page=Mock(url=original)
+        page.is_closed.return_value=False
+        page.locator.return_value.inner_text.return_value='Public result'
+        page.goto.side_effect=lambda url, **kw: setattr(page,'url',url)
+        with patch('common.ego_telemetry.action',side_effect=lambda *a,**kw:nullcontext()) as observed:
+            result=search_public_query(page,'시니어브리프')
+        self.assertTrue(result['queryMatched'])
+        page.keyboard.type.assert_called_once_with('시니어브리프',delay=100)
+        self.assertEqual(page.goto.call_args.args,(original,))
+        self.assertIn(('type','naver-search-query'),[c.args for c in observed.call_args_list])
+        page.close.assert_not_called()
+
+    def test_editor_tab_is_never_navigated_and_search_failure_restores(self):
+        page=Mock(url='https://blog.naver.com/PostWriteForm.naver')
+        with self.assertRaises(ValueError):search_public_query(page,'test')
+        page.goto.assert_not_called()
+        original='https://blog.naver.com/mustpickinfo';page.url=original
+        page.is_closed.return_value=False
+        page.goto.side_effect=lambda url,**kw:setattr(page,'url',url)
+        page.keyboard.type.side_effect=RuntimeError('input failed')
+        with patch('common.ego_telemetry.action',side_effect=lambda *a,**kw:nullcontext()):
+            with self.assertRaisesRegex(RuntimeError,'input failed'):search_public_query(page,'test')
+        self.assertEqual(page.goto.call_args.args,(original,))
+
     def test_reused_public_tab_never_navigated_or_closed(self):
         page = Mock(url='https://example.com/article')
         context = Mock(pages=[page])

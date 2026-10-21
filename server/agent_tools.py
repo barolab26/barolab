@@ -421,7 +421,7 @@ def run_naver_publish(account_id: str = "", target_date: str = "") -> Dict[str, 
         desc = "네이버 미완료 슬롯 캐치업(--catch-up) 실행"
 
     d = read_publi_data()
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.DEVNULL,
@@ -479,7 +479,7 @@ def run_cf_publish(domain: str = "", use_scheduler: bool = False) -> Dict[str, A
         desc = "CF 도메인 전체 지연분 캐치업(--catch-up-once)"
 
     d = read_publi_data()
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.DEVNULL,
@@ -532,7 +532,7 @@ def run_kin_publish(account_id: Optional[str] = None) -> Dict[str, Any]:
 
     cmd_str = "python naver_kin/scheduler.py --tick --force"
     cmd = [sys.executable, "-X", "utf8", str(BASE_DIR / "naver_kin" / "scheduler.py"), "--tick", "--force"]
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.DEVNULL,
@@ -578,7 +578,7 @@ def run_threads_publish(slot_id: Optional[str] = None) -> Dict[str, Any]:
     slot_label = (slot_id or "due").strip()
     cmd_str = "python threads_posting/scheduler.py --tick"
     cmd = [sys.executable, "-X", "utf8", str(BASE_DIR / "threads_posting" / "scheduler.py"), "--tick"]
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.PIPE,
@@ -870,7 +870,7 @@ def run_auto_indexer(domain: str = "all") -> Dict[str, Any]:
     flags = ["--all", "--apply"] if dom == "all" else ["--domain", dom, "--apply"]
     command = [sys.executable, "-X", "utf8", "-m", "common.auto_indexer", *flags]
     display = "python -m common.auto_indexer " + " ".join(flags)
-    proc = subprocess.Popen(command, cwd=str(BASE_DIR), stdout=subprocess.PIPE,
+    proc = _ego_popen(command, cwd=str(BASE_DIR), stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
                             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     try:
@@ -1002,7 +1002,7 @@ def sync_growth_metrics() -> Dict[str, Any]:
     """Launch `python dashboard/metrics.py --collect` in background to sync GA4/GSC/sitemap metrics."""
     cmd_display = "python dashboard/metrics.py --collect"
     cmd = [sys.executable, "-X", "utf8", str(DASHBOARD_DIR / "metrics.py"), "--collect"]
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.DEVNULL,
@@ -1143,7 +1143,7 @@ def run_watchdog_heal() -> Dict[str, Any]:
     """
     cmd_display = "python common/system_watchdog.py --heal-now"
     cmd = [sys.executable, "-X", "utf8", str(BASE_DIR / "common" / "system_watchdog.py"), "--heal-now"]
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.PIPE,
@@ -1231,7 +1231,7 @@ def restart_browser_cdp(port: int) -> Dict[str, Any]:
         except Exception:
             pass
 
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         ["cmd.exe", "/c", str(start_bat)],
         cwd=str(folder),
         stdout=subprocess.DEVNULL,
@@ -1288,7 +1288,7 @@ def fix_scheduler_task(task_name: str = "BaroLab-Kin-Seven-Day-Pilot") -> Dict[s
         f"LastRunTime=if($i.LastRunTime){{$i.LastRunTime.ToString('yyyy-MM-dd HH:mm:ss')}}else{{''}}; "
         f"NextRunTime=if($i.NextRunTime){{$i.NextRunTime.ToString('yyyy-MM-dd HH:mm:ss')}}else{{''}} }} | ConvertTo-Json -Compress"
     )
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         ["powershell", "-NoProfile", "-Command", ps_cmd],
         cwd=str(BASE_DIR),
         stdout=subprocess.PIPE,
@@ -1421,7 +1421,7 @@ def run_doctor_remodel_url(url: str) -> Dict[str, Any]:
     target_url = (url or "").strip()
     cmd_display = f'python -m cf_posting.doctor_remodel --url "{target_url}" --apply --republish'
     cmd = [sys.executable, "-X", "utf8", "-m", "cf_posting.doctor_remodel", "--url", target_url, "--apply", "--republish"]
-    proc = subprocess.Popen(
+    proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
         stdout=subprocess.PIPE,
@@ -1751,7 +1751,7 @@ def enqueue_staff_request(request_id, actions):
             if old['actions'] != actions:
                 raise ValueError('Request ID conflict')
             return old
-        row = {'requestId': request_id, 'taskId': 'staff:' + key, 'status': 'queued',
+        row = {'requestId': request_id, 'taskId': 'staff:' + key, 'status': 'queued', 'requester': 'jarvis',
                'createdAt': time.time(), 'actions': actions, 'results': [], 'requests': [],
                'instructions':[staff_instruction(action) for action in actions]}
         write(path, row)
@@ -1950,7 +1950,8 @@ def process_staff_request_once():
                 row['currentExecution'] = receipt
                 row['executionObservedAt'] = time.time()
                 write(path, row)
-            result = execute_staff_action(action, task_id=row['taskId'], request_id=row['requestId'], observer=save_execution)
+            result = execute_staff_action(action, task_id=row['taskId'], request_id=row['requestId'], observer=save_execution,
+                                          requester=row.get('requester', 'jarvis'), parent_request_id=parent or 'unknown')
             row['results'].append({'agent': action['agent'], 'tool': action['tool'], 'result': result})
             write(path, row)
             digest = hashlib.sha256(json.dumps(result, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
@@ -2102,7 +2103,7 @@ def repair_cf_known_failure(domain: str, evidencePath=None, evidenceSha256=None)
     log_path = Path.home() / '.barolab' / 'scratch' / 'cf-known-repair.log'
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open('a', encoding='utf-8') as output:
-        process = subprocess.Popen(command, cwd=BASE_DIR, stdout=output, stderr=subprocess.STDOUT,
+        process = _ego_popen(command, cwd=BASE_DIR, stdout=output, stderr=subprocess.STDOUT,
                                    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
     _STAFF_CHILDREN[process.pid] = process
     return {"ok": True, "tool": "repair_cf_known_failure", "status": "running", "pid": process.pid, **identity,
@@ -2149,7 +2150,40 @@ def _route_patch_message(text: str) -> List[Dict[str, Any]]:
              "data": read_patch_data(), "productionApplied": False}]
 
 
+def _ego_popen(*args, **kwargs):
+    from common.ego_telemetry import export_environment
+    kwargs['env'] = export_environment(kwargs.get('env'))
+    return subprocess.Popen(*args, **kwargs)
+
+
 def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
+    from common.ego_telemetry import execution_context, action, current_context
+    import uuid
+    actor = slug if slug in STAFF_ROLES else 'unknown'
+    fields = {'actor': actor}
+    projects = {
+        'read_agent_status':'all_projects', 'repair_cf_known_failure':'cf_blog',
+        'run_cf_publish':'cf_blog', 'run_cf_domain':'cf_blog',
+        'run_naver_publish':'naver_blog', 'run_naver_slot':'naver_blog',
+        'run_kin_publish':'naver_kin', 'run_kin_now':'naver_kin',
+        'run_threads_publish':'threads', 'run_threads_now':'threads',
+        'run_doctor_remodel_url':'content_maintenance', 'run_doctor_audit':'content_maintenance',
+        'audit_blog_posts':'content_maintenance', 'quarantine_or_fix_post':'content_maintenance',
+        'index_check_and_submit':'indexing', 'run_auto_indexer':'indexing', 'verify_domain_index':'indexing',
+        'sync_growth_metrics':'metrics', 'run_watchdog_heal':'project', 'restart_browser_cdp':'project',
+        'fix_scheduler_task':'project', 'propose_coding_job':'project', 'read_coding_job_status':'project',
+        'extract_youtube_or_url':'research', 'scout_high_value_keywords':'research',
+        'dispatch_multi_agent_action':'all_projects',
+    }
+    fields['tool'] = tool_name if tool_name in projects else 'unknown'
+    fields['project'] = projects.get(tool_name, 'unknown')
+    if current_context().get('taskId') == 'direct:' + str(os.getpid()):
+        fields['task_id'] = 'direct:' + uuid.uuid4().hex
+    with execution_context(**fields), action('tool', 'registered-tool'):
+        return _execute_agent_tool(slug, tool_name, **kwargs)
+
+
+def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     """Directly invoke one of the registered agent tools by name."""
     if tool_name == "read_agent_status":
         readers = {'publi': read_publi_data, 'trace': read_trace_data, 'patch': read_patch_data,
@@ -2263,20 +2297,20 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
     # 1. Highest Priority: Specific CF Post URL + Remodel / Repair / Delete / Republish Intent
     if cf_post_urls and (has_remodel_keywords or is_action_intent):
         for cf_u in cf_post_urls[:2]:
-            executed.append(run_doctor_remodel_url(cf_u))
+            executed.append(execute_agent_tool(slug, "run_doctor_remodel_url", url=cf_u))
         return executed
 
     # Non-CF URLs (e.g. YouTube or external web articles for @radar)
     if urls and not cf_post_urls:
         for u in urls[:2]:
-            executed.append(extract_youtube_or_url(u))
+            executed.append(execute_agent_tool(slug, "extract_youtube_or_url", url=u))
         if slug == "radar":
             return executed
 
     if slug == "radar":
         if is_action_intent or any(k in lower for k in ("키워드", "주제", "스카우트", "스카우팅", "발굴", "추천", "사업", "마케팅", "찾아와")):
             cat = "정책·지원금" if "지원금" in lower or "정책" in lower else ("금융·연금" if "금융" in lower or "연금" in lower else "정책·금융·생활")
-            executed.append(scout_high_value_keywords(cat))
+            executed.append(execute_agent_tool(slug, "scout_high_value_keywords", category=cat))
         return executed
 
     # 2. Global Priority: Automated Unindexed Site & URL Indexing Submission
@@ -2291,9 +2325,9 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
             return executed
         matched_dom = next((d for d in CF_16_DOMAINS if d in lower or d.split(".")[0] in lower), "all")
         if matched_dom != "all":
-            executed.append(run_auto_indexer(matched_dom))
+            executed.append(execute_agent_tool(slug, "run_auto_indexer", domain=matched_dom))
         else:
-            executed.append(index_check_and_submit("sj"))
+            executed.append(execute_agent_tool(slug, "index_check_and_submit", account="sj"))
         return executed
 
     if not is_action_intent:
@@ -2303,40 +2337,40 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
     is_recovery_order = any(k in lower for k in ("멈춘", "복구", "살려", "다시 돌려", "워치독", "watchdog", "자가복구"))
     if slug == "publi":
         if is_recovery_order:
-            executed.append(run_watchdog_heal())
+            executed.append(execute_agent_tool(slug, "run_watchdog_heal"))
         if any(k in lower for k in ("지식인", "지식in", "kin")):
             acc = "adinfo0905" if "adinfo" in lower else ("stone0747" if "stone" in lower else None)
-            executed.append(run_kin_publish(acc))
+            executed.append(execute_agent_tool(slug, "run_kin_publish", account_id=acc))
         if any(k in lower for k in ("네이버", "블로그", "soultin", "soul5373", "yoon_master")) and not has_indexing_keywords or (
             any(k in lower for k in ("adinfo0905", "stone0747")) and "지식" not in lower
         ):
             acc = next((a for a in ("soultin", "soul5373", "yoon_master", "adinfo0905", "stone0747") if a in lower), "")
             t_date = "2026-10-18" if "오늘" in lower else ("2026-10-19" if "내일" in lower else "")
-            executed.append(run_naver_publish(acc, t_date))
+            executed.append(execute_agent_tool(slug, "run_naver_publish", account_id=acc, target_date=t_date))
         if any(k in lower for k in ("cf", "클라우드플레어", "도메인")) or any(d in lower for d in CF_16_DOMAINS):
             dom = next((d for d in CF_16_DOMAINS if d in lower), "")
-            executed.append(run_cf_publish(dom))
+            executed.append(execute_agent_tool(slug, "run_cf_publish", domain=dom))
         if any(k in lower for k in ("스레드", "threads")):
-            executed.append(run_threads_publish())
+            executed.append(execute_agent_tool(slug, "run_threads_publish"))
 
     elif slug == "trace":
         matched_dom = next((d for d in CF_16_DOMAINS if d in lower or d.split(".")[0] in lower), "")
         if has_indexing_keywords:
-            executed.append(index_check_and_submit("sj"))
+            executed.append(execute_agent_tool(slug, "index_check_and_submit", account="sj"))
         elif matched_dom:
-            executed.append(verify_domain_index(matched_dom))
+            executed.append(execute_agent_tool(slug, "verify_domain_index", domain=matched_dom))
         if any(k in lower for k in ("동기화", "수집", "집계", "ga4", "트래픽", "수익", "갱신")):
-            executed.append(sync_growth_metrics())
+            executed.append(execute_agent_tool(slug, "sync_growth_metrics"))
 
     elif slug == "doctor":
         if cf_post_urls:
             for cf_u in cf_post_urls[:2]:
-                executed.append(run_doctor_remodel_url(cf_u))
+                executed.append(execute_agent_tool(slug, "run_doctor_remodel_url", url=cf_u))
         elif any(k in lower for k in ("비공개", "격리", "quarantine", "삭제하지")):
-            executed.append(quarantine_or_fix_post(clean, "private"))
+            executed.append(execute_agent_tool(slug, "quarantine_or_fix_post", post_id=clean, action="private"))
         else:
             dom = next((d for d in CF_16_DOMAINS if d in lower), "")
-            executed.append(run_doctor_audit("cf", dom, 5))
+            executed.append(execute_agent_tool(slug, "run_doctor_audit", channel="cf", target=dom, limit=5))
 
     elif slug == "jarvis":
         sub_actions: List[Dict[str, Any]] = []
@@ -2363,7 +2397,7 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
         if any(k in lower for k in ("감사", "검진", "닥터")) and not cf_post_urls:
             sub_actions.append({"agent": "doctor", "tool": "run_doctor_audit", "args": {"limit": 5}})
         if sub_actions:
-            executed.append(dispatch_multi_agent_action(sub_actions))
+            executed.append(execute_agent_tool(slug, "dispatch_multi_agent_action", actions=sub_actions))
 
     return executed
 

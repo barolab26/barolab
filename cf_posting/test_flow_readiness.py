@@ -10,10 +10,15 @@ from unittest.mock import AsyncMock, patch
 source = Path(__file__).with_name('pipeline_runner.py').read_text(encoding='utf-8')
 names = {'ensure_flow_single_output', 'wait_flow_submit_ready', 'submit_flow_once', 'require_flow_reentry_safe'}
 module = ast.Module(body=[node for node in ast.parse(source).body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name in names], type_ignores=[])
-namespace = {'asyncio': asyncio, 'time': time, 're': re, 'stamp': lambda: 'observed-now'}
+from common.ego_telemetry import async_action
+namespace = {'ego_async_action': async_action, 'asyncio': asyncio, 'time': time, 're': re, 'stamp': lambda: 'observed-now'}
 exec(compile(module, 'flow-production-helpers', 'exec'), namespace)
 
 class FlowReadinessTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.telemetry = patch("common.ego_telemetry._record").start()
+        self.addCleanup(patch.stopall)
+
     def page(self, texts, enabled=True):
         class Locator:
             first = None
@@ -41,6 +46,9 @@ class FlowReadinessTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([c.args[1]['type'] for c in client.send.call_args_list], ['mousePressed', 'mouseReleased'])
         self.assertEqual(saves[-2]['status'], 'submission_started')
         self.assertEqual(row['status'], 'submitted')
+        self.assertEqual([c.args[3] for c in self.telemetry.call_args_list], ['before','after'])
+        self.assertEqual(self.telemetry.call_args_list[0].args[:2], ('click','flow-generate'))
+        self.assertEqual(self.telemetry.call_args_list[0].args[4], self.telemetry.call_args_list[1].args[4])
 
     async def test_timeout_or_observation_error_never_submits(self):
         for texts, enabled in [(['wrong'], True), (['prompt'], False), ([RuntimeError('observation')], True)]:

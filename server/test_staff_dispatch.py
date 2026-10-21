@@ -187,7 +187,7 @@ class StaffDispatchTests(unittest.TestCase):
         spawn=Mock(return_value=types.SimpleNamespace(pid=123))
         scope={**self.scope,'Path':Path,'Dict':dict,'Any':object,'_read_json':lambda *a:schedule,
             'get_kst_now':lambda:datetime(2026,10,21),'sys':types.SimpleNamespace(executable='python'),
-            'subprocess':types.SimpleNamespace(Popen=spawn,STDOUT=-2,CREATE_NO_WINDOW=0)}
+            '_ego_popen':spawn, 'subprocess':types.SimpleNamespace(Popen=spawn,STDOUT=-2,CREATE_NO_WINDOW=0)}
         exec(compile(ast.Module(body=[node],type_ignores=[]),'<repair-tool>','exec'),scope)
         with patch.dict('sys.modules',{'cf_posting.pipeline_runner':module}),patch.object(Path,'home',return_value=root):
             path.write_bytes(raw+b' ')

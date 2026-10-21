@@ -1,4 +1,5 @@
 """Write an approved article through visible SmartEditor keyboard/toolbar actions."""
+from common.ego_telemetry import action as ego_action, async_action as ego_async_action
 import json
 import hashlib
 import re
@@ -81,8 +82,10 @@ def verify_visible_content(document, title, blocks, plans, decorations=()):
 
 
 def _option(frame, name, option):
-    frame.locator(f'button[data-name="{name}"][data-group="propertyToolbar"]').click()
-    frame.locator(option).click()
+    with ego_action('click', 'naver-toolbar'):
+        frame.locator(f'button[data-name="{name}"][data-group="propertyToolbar"]').click()
+    with ego_action('click', 'naver-toolbar'):
+        frame.locator(option).click()
 
 
 def _style(frame, profile, heading):
@@ -90,15 +93,28 @@ def _style(frame, profile, heading):
     size = profile['headingSize'] if heading else profile['bodySize']
     _option(frame, 'font-size', f'.se-toolbar-option-font-size-code-fs{size}-button')
     _option(frame, 'line-height', f'.se-toolbar-option-line-height-{round(profile["lineHeight"] * 100)}-button')
-    frame.locator('button[data-name="font-color"][data-group="propertyToolbar"]').click()
-    frame.locator('button.se-color-palette:visible:not(:disabled)').filter(has_text=re.compile('^' + re.escape(profile['headingColor'] if heading else profile['textColor']) + '$', re.I)).first.click()
+    with ego_action('click', 'naver-toolbar'):
+        frame.locator('button[data-name="font-color"][data-group="propertyToolbar"]').click()
+    with ego_action('click', 'naver-toolbar'):
+        frame.locator('button.se-color-palette:visible:not(:disabled)').filter(has_text=re.compile('^' + re.escape(profile['headingColor'] if heading else profile['textColor']) + '$', re.I)).first.click()
     bold = frame.locator('button[data-name="bold"][data-group="propertyToolbar"]')
     selected = 'se-is-selected' in (bold.get_attribute('class') or '').split()
     if selected != heading:
-        bold.click()
+        with ego_action('click', 'naver-toolbar'):
+            bold.click()
 
 
 def write_visible_editor(page, frame, title, blocks, plans, folder, profile):
+    from common.ego_telemetry import current_context, execution_context
+    context = current_context()
+    fields = {'project': 'naver_blog', 'actor': 'publi'}
+    if context.get('source') == 'direct':
+        fields['task_id'] = 'naver:' + hashlib.sha256(str(Path(folder).resolve()).encode()).hexdigest()[:24]
+    with execution_context(**fields):
+        return _write_visible_editor(page, frame, title, blocks, plans, folder, profile)
+
+
+def _write_visible_editor(page, frame, title, blocks, plans, folder, profile):
     """No editor mutation APIs, clipboard, fill, or whole-document insertion."""
     folder = Path(folder)
     decorations, decoration_hash = load_decoration_plan(folder, len(blocks))
@@ -110,69 +126,99 @@ def write_visible_editor(page, frame, title, blocks, plans, folder, profile):
         print('[visible-editor] ' + stage + ' ' + json.dumps(details), flush=True)
     page.bring_to_front()
     record('start')
-    frame.locator('.se-component.se-documentTitle .se-title-text').first.click()
-    page.keyboard.type(title, delay=25)
+    with ego_action('click', 'naver-title'):
+        frame.locator('.se-component.se-documentTitle .se-title-text').first.click()
+    with ego_action('type', 'naver-title', count=len(title)):
+        page.keyboard.type(title, delay=25)
     record('title', characters=len(title))
-    frame.locator('.se-component.se-text .se-module-text').first.click()
+    with ego_action('click', 'naver-body'):
+        frame.locator('.se-component.se-text .se-module-text').first.click()
     uploaded = 0
     for index, block in enumerate(blocks):
         if index:
             previous_heading = blocks[index - 1]['kind'] == 'heading'
             gap = profile['headingGapLines'] if block['kind'] == 'heading' or previous_heading else profile['paragraphGapLines']
             for _ in range(gap):
-                page.keyboard.press('Enter')
+                with ego_action('press', 'naver-editor-key'):
+                    page.keyboard.press('Enter')
         _style(frame, profile, block['kind'] == 'heading')
         for segments in block['paragraphs']:
             for part in segments:
-                page.keyboard.type(part['text'], delay=25)
+                with ego_action('type', 'naver-body', count=len(part['text'])):
+                    page.keyboard.type(part['text'], delay=25)
                 if 'url' in part:
                     for _ in part['text']:
-                        page.keyboard.press('Shift+ArrowLeft')
-                    frame.locator('button[data-name="text-link"]').click()
+                        with ego_action('press', 'naver-editor-key'):
+                            page.keyboard.press('Shift+ArrowLeft')
+                    with ego_action('click', 'naver-link'):
+                        frame.locator('button[data-name="text-link"]').click()
                     field = frame.locator('input.se-custom-layer-link-input')
-                    field.click()
-                    page.keyboard.press('Control+A')
-                    page.keyboard.type(part['url'], delay=25)
-                    frame.locator('button.se-custom-layer-link-apply-button').click()
+                    with ego_action('click', 'naver-link'):
+                        field.click()
+                    with ego_action('press', 'naver-editor-key'):
+                        page.keyboard.press('Control+A')
+                    with ego_action('type', 'naver-link', count=len(part['url'])):
+                        page.keyboard.type(part['url'], delay=25)
+                    with ego_action('click', 'naver-link'):
+                        frame.locator('button.se-custom-layer-link-apply-button').click()
                     frame.wait_for_function("part=>SmartEditor.getEditor('blogpc001').getDocumentData().document.components.some(c=>c['@ctype']==='text' && (c.value||[]).some(p=>(p.nodes||[]).some(n=>n.value===part.text && n.link?.url===part.url)))", arg=part, timeout=10000)
                     # The toolbar keeps focus after applying; restore it with actual UI actions.
-                    frame.locator('.se-component.se-text .se-module-text').last.click()
-                    page.keyboard.press('End')
-                    page.keyboard.press('ArrowRight')
-            page.keyboard.press('Enter')
+                    with ego_action('click', 'naver-body'):
+                        frame.locator('.se-component.se-text .se-module-text').last.click()
+                    with ego_action('press', 'naver-editor-key'):
+                        page.keyboard.press('End')
+                    with ego_action('press', 'naver-editor-key'):
+                        page.keyboard.press('ArrowRight')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('Enter')
         record('block', index=index, kind=block['kind'])
         for plan in plans:
             if plan['afterBlock'] != index:
                 continue
             with page.expect_file_chooser(timeout=10000) as chooser:
-                frame.locator('button[data-name="image"][data-group="documentToolbar"]').click()
-            chooser.value.set_files(str(folder / 'images' / plan['filename']))
+                with ego_action('click', 'naver-image'):
+                    frame.locator('button[data-name="image"][data-group="documentToolbar"]').click()
+            with ego_action('upload', 'naver-image'):
+                chooser.value.set_files(str(folder / 'images' / plan['filename']))
             page.wait_for_timeout(700)
             individual = frame.get_by_text('개별사진', exact=True)
             if individual.count() and individual.first.is_visible():
-                individual.first.click()
-                frame.locator('.se-popup-button-confirm').click()
+                with ego_action('click', 'naver-image'):
+                    individual.first.click()
+                with ego_action('click', 'naver-editor'):
+                    frame.locator('.se-popup-button-confirm').click()
             uploaded += 1
             frame.wait_for_function("n=>SmartEditor.getEditor('blogpc001').getDocumentData().document.components.filter(c=>c['@ctype']==='image').length===n", arg=uploaded, timeout=30000)
             frame.wait_for_function(r"n=>{const img=document.querySelectorAll('.se-component.se-image img')[n-1];return img && img.complete && img.naturalWidth>0 && /^https:\/\/[^/]*pstatic\.net\//.test(img.src)}", arg=uploaded, timeout=30000)
-            frame.locator('.se-component.se-image img.se-image-resource').nth(uploaded - 1).click()
+            with ego_action('click', 'naver-image'):
+                frame.locator('.se-component.se-image img.se-image-resource').nth(uploaded - 1).click()
             caption = frame.locator('.se-component.se-image .se-caption.se-module-text').nth(uploaded - 1)
             caption.wait_for(state='visible')
-            caption.click()
-            page.keyboard.type(plan['caption'], delay=25)
+            with ego_action('click', 'naver-caption'):
+                caption.click()
+            with ego_action('type', 'naver-caption', count=len(plan['caption'])):
+                page.keyboard.type(plan['caption'], delay=25)
             record('image', afterBlock=index, filename=plan['filename'])
-            page.keyboard.press('ArrowDown')
-            page.keyboard.press('End')
-            page.keyboard.press('Enter')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('ArrowDown')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('End')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('Enter')
         for decoration in decorations:
             if decoration['afterBlock'] != index:
                 continue
-            frame.locator('button[data-name="sticker"][data-group="documentToolbar"]').click()
-            frame.get_by_role('button', name='motion2d_01-19', exact=True).click()
+            with ego_action('click', 'naver-sticker'):
+                frame.locator('button[data-name="sticker"][data-group="documentToolbar"]').click()
+            with ego_action('click', 'naver-sticker'):
+                frame.get_by_role('button', name='motion2d_01-19', exact=True).click()
             frame.wait_for_function("()=>SmartEditor.getEditor('blogpc001').getDocumentData().document.components.filter(c=>c['@ctype']==='sticker' && c.packCode==='motion2d_01' && c.seq===19).length===1", timeout=10000)
-            page.keyboard.press('ArrowDown')
-            page.keyboard.press('End')
-            page.keyboard.press('Enter')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('ArrowDown')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('End')
+            with ego_action('press', 'naver-editor-key'):
+                page.keyboard.press('Enter')
             record('sticker', afterBlock=index, packCode='motion2d_01', seq=19)
     # SmartEditor may commit the last keyboard event asynchronously. Read only; never retype.
     for observation in range(11):

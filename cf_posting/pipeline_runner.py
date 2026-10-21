@@ -25,6 +25,7 @@ sys.dont_write_bytecode = True
 # Root Project Directory Resolution
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR.parent))
+from common.ego_telemetry import action as ego_action, async_action as ego_async_action
 from common.channel_attribution import is_dummy_rescue_url
 from common.browser_session import connect_async
 from common.public_capture import acquire_public_captures, run_in_source_browser
@@ -1942,7 +1943,8 @@ async def _gather_sources(context, keyword):
         queries = list(dict.fromkeys([target, main, main + ' 공식 가이드']))
         for query_idx, query in enumerate(queries):
             try:
-                await page.goto('https://www.google.com/search?' + urlencode({'q': query, 'hl': 'ko', 'gl': 'kr'}), wait_until='domcontentloaded', timeout=15000)
+                async with ego_async_action('navigate', 'search-results'):
+                    await page.goto('https://www.google.com/search?' + urlencode({'q': query, 'hl': 'ko', 'gl': 'kr'}), wait_until='domcontentloaded', timeout=15000)
                 await page.wait_for_timeout(1000)
                 rows = await page.locator('#search h3').evaluate_all('''nodes => nodes.map(n=>({title:n.innerText,url:n.closest('a')?.href})).filter(r=>r.url&&r.url.startsWith('https://')&&!r.url.includes('google.com/search')).slice(0,8).map((r,i)=>({...r,position:i+1}))''')
                 observations.append({'query': query, 'results': rows})
@@ -2010,7 +2012,8 @@ async def rendered_source_snapshot(context, row, index):
 
     try:
         await page.route('**/*', _route_guard)
-        response = await page.goto(target_url, wait_until='domcontentloaded', timeout=18000)
+        async with ego_async_action('navigate', 'official-source'):
+            response = await page.goto(target_url, wait_until='domcontentloaded', timeout=18000)
         if response and response.status >= 400:
             return None
         if response and 'attachment' in (response.headers.get('content-disposition') or '').lower():
@@ -4161,7 +4164,8 @@ async def ensure_flow_single_output(page):
         settings = page.locator("button[aria-label='설정']").filter(has_text=re.compile(r'^\s*tune\s*$'))
         if await settings.count() != 1:
             raise RuntimeError('Unique Flow image settings control required before submission')
-        await settings.click(timeout=5000)
+        async with ego_async_action('click', 'flow-settings'):
+            await settings.click(timeout=5000)
     try:
         await section.wait_for(state='visible', timeout=5000)
         if await section.count() != 1:
@@ -4170,7 +4174,8 @@ async def ensure_flow_single_output(page):
         if await single.count() != 1:
             raise RuntimeError('Flow single-image option missing')
         if await single.get_attribute('aria-checked') != 'true':
-            await single.click(timeout=5000)
+            async with ego_async_action('click', 'flow-single-output'):
+                await single.click(timeout=5000)
         for _ in range(20):
             states = {count: await section.get_by_role('radio', name=f'x{count}', exact=True).get_attribute('aria-checked')
                       for count in (1,2,3,4)}
@@ -4179,7 +4184,8 @@ async def ensure_flow_single_output(page):
             await asyncio.sleep(0.1)
         raise RuntimeError('Flow did not confirm exactly one image per request')
     finally:
-        await page.keyboard.press('Escape')
+        async with ego_async_action('press', 'flow-dismiss'):
+            await page.keyboard.press('Escape')
 
 
 async def wait_flow_submit_ready(page, prompt, generation, persist, timeout=30):
@@ -4210,10 +4216,11 @@ async def submit_flow_once(page, client, button, generation, persist):
     generation.update(status='submission_started', submissionStartedAt=stamp())
     persist()  # A crash or ambiguous response must never permit another submission.
     try:
-        for event in ('mousePressed', 'mouseReleased'):
-            await client.send('Input.dispatchMouseEvent', {'type': event,
-                'x': box['x'] + box['width']/2, 'y': box['y'] + box['height']/2,
-                'button': 'left', 'clickCount': 1})
+        async with ego_async_action('click', 'flow-generate'):
+            for event in ('mousePressed', 'mouseReleased'):
+                await client.send('Input.dispatchMouseEvent', {'type': event,
+                    'x': box['x'] + box['width']/2, 'y': box['y'] + box['height']/2,
+                    'button': 'left', 'clickCount': 1})
         for _ in range(18):
             await asyncio.sleep(1)
             if not (await page.locator('div.ProseMirror').inner_text()).strip():
@@ -4316,7 +4323,8 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
         generation_evidence.append(generation)
         
         for flow_try in range(1):
-            await flow_page.keyboard.press("Escape")
+            async with ego_async_action('press', 'flow-dismiss'):
+                await flow_page.keyboard.press("Escape")
             await flow_page.wait_for_timeout(400)
             generation['outputCount'] = await ensure_flow_single_output(flow_page)
             generation['outputCountVerifiedAt'] = stamp()
@@ -4334,15 +4342,16 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
             generation['initialImage'] = initial_first_src
             save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
             
-            await flow_page.evaluate("""(text) => {
-                const el = document.querySelector('div.ProseMirror');
-                if (el) {
-                    el.focus();
-                    document.execCommand('selectAll', false, null);
-                    document.execCommand('delete', false, null);
-                    document.execCommand('insertText', false, text);
-                }
-            }""", prompt)
+            async with ego_async_action('insert_text', 'flow-prompt', count=len(prompt)):
+                await flow_page.evaluate("""(text) => {
+                    const el = document.querySelector('div.ProseMirror');
+                    if (el) {
+                        el.focus();
+                        document.execCommand('selectAll', false, null);
+                        document.execCommand('delete', false, null);
+                        document.execCommand('insertText', false, text);
+                    }
+                }""", prompt)
             await flow_page.wait_for_timeout(800)
             
             persist = lambda: save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
@@ -4394,7 +4403,8 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
         src = await latest_tile.get_attribute("src")
         print(f"      Downloading tile src: {src[:60]}...", flush=True)
         
-        resp = await flow_page.request.get(src)
+        async with ego_async_action('download', 'flow-image'):
+            resp = await flow_page.request.get(src)
         if not resp.ok:
             raise RuntimeError(f"Flow image download HTTP {resp.status}")
         raw_img_bytes = await resp.body()
@@ -4438,7 +4448,8 @@ def upload_images_to_cf(domain, image_paths):
         print(f"Uploading {fname} to Cloudflare Media CDN ({domain})...", flush=True)
         with open(p, "rb") as f:
             files = {"file": (fname, f, mimetypes.guess_type(fname)[0] or "application/octet-stream")}
-            resp = requests.post(f"https://www.{domain}/api/media/upload", headers=headers, files=files, timeout=30)
+            with ego_action('api_request', 'cf-image-upload'):
+                resp = requests.post(f"https://www.{domain}/api/media/upload", headers=headers, files=files, timeout=30)
             if resp.status_code in [200, 201]:
                 data = resp.json()
                 media_url = data.get("media", {}).get("url") or data.get("url")
@@ -4519,7 +4530,8 @@ def publish_post_to_cf(blog_info, uploaded_urls):
             raise ReviewRequired('기존 공개 글 원본 백업 누락')
         resp = requests.put(f'https://www.{domain}/api/posts/{post_id}', headers=headers, json=payload, timeout=30)
     else:
-        resp = requests.post(f"https://www.{domain}/api/posts", headers=headers, json=payload, timeout=30)
+        with ego_action('api_request', 'cf-post-submit'):
+            resp = requests.post(f"https://www.{domain}/api/posts", headers=headers, json=payload, timeout=30)
     if resp.status_code in [200, 201]:
         data = resp.json()
         post_id = data.get("post", {}).get("id") or data.get("id")
@@ -5269,7 +5281,8 @@ async def run_workflows():
                     break
         if not flow_page:
             flow_page = await context.new_page()
-            await flow_page.goto("https://flow.google.com")
+            async with ego_async_action('navigate', 'flow-home'):
+                await flow_page.goto("https://flow.google.com")
             await flow_page.wait_for_timeout(3000)
             
         if "/project/" not in flow_page.url:
@@ -5277,11 +5290,13 @@ async def run_workflows():
             try:
                 btn = flow_page.get_by_role("button", name="새 프로젝트")
                 if await btn.count() > 0:
-                    await btn.click()
+                    async with ego_async_action('click', 'flow-new-project'):
+                        await btn.click()
                 else:
                     first_tile = flow_page.locator("img[alt]").first
                     if await first_tile.count() > 0:
-                        await first_tile.click()
+                        async with ego_async_action('click', 'flow-project-tile'):
+                            await first_tile.click()
                 await flow_page.wait_for_timeout(4000)
             except Exception as pe:
                 print(f"[FLOW SETUP WARNING] Could not auto-enter project: {pe}", flush=True)

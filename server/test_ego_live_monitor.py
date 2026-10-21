@@ -86,6 +86,30 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(hud.state_text('registered_idle'),'등록 파이프라인 실행 없음')
         self.assertEqual(hud.state_text('active_unobserved'),'실행 잠금 확인 · 단계 미관측')
 
+    def test_direct_input_shows_real_actor_not_project_staff(self):
+        now=datetime.datetime.now(hud.KST)
+        row={'context':{'source':'direct','requester':'user','actor':'codex','project':'naver_search'},
+             'latest':{'action':'type','target':'naver-search-query','phase':'before','at':now.isoformat(),'count':6},'fresh':True,'processObserved':True}
+        text='\n'.join(hud.render_lines({},[],now=now,inputs=[row]))
+        self.assertIn('사용자 → [Codex(실행 검증)]',text)
+        self.assertIn('검색어 입력란 타이핑 · 6자 — 입력 시작 관측',text)
+        self.assertNotIn('자비스',text)
+        self.assertIn('\033[',hud.color_line('  [네이버 검색 검증] 사용자 → [Codex(실행 검증)]'))
+        row['context']={'source':'staff_queue','requester':'jarvis','actor':'patch','taskId':'unmatched','requestId':'wrong'}
+        text='\n'.join(hud.render_lines({},[],now=now,inputs=[row]))
+        self.assertIn('지시 연결 미확인',text)
+
+    def test_korean_width_height_and_staff_colors(self):
+        clipped=hud.clip_cells('한글'*40,20)
+        import unicodedata
+        self.assertLessEqual(sum(2 if unicodedata.east_asian_width(c) in ('W','F') else 1 for c in clipped),20)
+        projects=[{'title':'프로젝트'+str(i),'source':{}} for i in range(20)]
+        lines=hud.render_lines({'projects':projects},[],now=datetime.datetime.now(hud.KST),rows=45)
+        self.assertLessEqual(len(lines),44)
+        self.assertIn('추가 기록 있음',lines[-1])
+        self.assertNotEqual(hud.color_line('[자비스]'),hud.color_line('[패치]'))
+        self.assertIn('94m',hud.color_line('  CF 블로그'))
+
     def test_default_ego_only_delegates_monitor(self):
         import ego_lite_runner as ego
         with patch.object(hud,'main',return_value=0) as monitor, patch.object(ego,'run_cf_catch_up') as cf:

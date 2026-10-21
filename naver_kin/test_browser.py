@@ -1,3 +1,5 @@
+from pathlib import Path
+import tempfile
 """Evidence gates are offline: never submit an answer during a test."""
 import unittest
 import json
@@ -11,6 +13,35 @@ from common import browser_session
 
 
 class BrowserEvidenceTests(unittest.TestCase):
+    def setUp(self):
+        from common import ego_telemetry
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        guard = patch.object(ego_telemetry, 'DIRECTORY', Path(temporary.name))
+        guard.start(); self.addCleanup(guard.stop)
+
+    def test_input_telemetry_records_count_not_private_text(self):
+        from common import ego_telemetry
+        keyboard = Mock()
+        private = 'private-input-sentinel'
+        browser._type_paragraphs(keyboard, private)
+        rows = list(ego_telemetry.DIRECTORY.glob('*.json'))
+        self.assertEqual(len(rows), 1)
+        raw = rows[0].read_text(encoding='utf-8')
+        self.assertNotIn(private, raw)
+        events = json.loads(raw)['recent']
+        self.assertTrue(any(e['action']=='type' and e['count']==len(private) for e in events))
+        self.assertEqual(keyboard.insert_text.call_args.args, (private,))
+
+    def test_input_failure_preserves_exception_and_failed_event(self):
+        from common import ego_telemetry
+        keyboard = Mock(); keyboard.insert_text.side_effect = RuntimeError('private error')
+        with self.assertRaisesRegex(RuntimeError, 'private error'):
+            browser._type_paragraphs(keyboard, 'secret input')
+        raw = next(ego_telemetry.DIRECTORY.glob('*.json')).read_text(encoding='utf-8')
+        self.assertEqual(json.loads(raw)['latest']['phase'], 'failed')
+        self.assertNotIn('secret input', raw); self.assertNotIn('private error', raw)
+
     def ownership_html(self, account='stone0747', total=2, loaded=2, own=None, logged_in=True):
         cards = ''.join('<div id="answer_'+str(n)+'" class="answerArea'+(' _myAnswer' if n==own else '')+'">'
                         + ('<a id="optModify'+str(n)+'">수정</a><a id="optDelete'+str(n)+'">삭제</a>' if n==own else '')

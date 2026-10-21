@@ -3,6 +3,7 @@
 Selectors observed 2026-10-15. Never starts/stops a browser and never retries a
 registration click. The caller owns durable duplicate and draft review checks.
 """
+from common.ego_telemetry import action as ego_action, async_action as ego_async_action
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
@@ -423,6 +424,16 @@ def wait_for_editor_ready(page):
 
 
 def publish(account, question_url, answer_text, before_submit=None):
+    import hashlib
+    from common.ego_telemetry import current_context, execution_context
+    fields = {'actor': 'publi', 'project': 'naver_kin'}
+    if current_context().get('source') == 'direct':
+        fields['task_id'] = 'kin:' + hashlib.sha256(question_url.encode()).hexdigest()[:24]
+    with execution_context(**fields):
+        return _publish(account, question_url, answer_text, before_submit)
+
+
+def _publish(account, question_url, answer_text, before_submit=None):
     if not callable(before_submit):
         raise ValueError("Durable before_submit callback is required")
     with session(account) as page:
@@ -432,7 +443,8 @@ def publish(account, question_url, answer_text, before_submit=None):
         if not ownership['known'] or not ownership['complete']:
             raise RuntimeError('Current-question ownership is incomplete; absence from recent history cannot authorize submission')
         _read(page, question_url)
-        page.locator("._answerWriteButton").first.click()
+        with ego_action('click', 'kin-editor'):
+            page.locator("._answerWriteButton").first.click()
         _check_service_state(page)
         editor = page.locator(".se-canvas .se-text-paragraph").first
         editor.wait_for(state="visible")
@@ -440,7 +452,8 @@ def publish(account, question_url, answer_text, before_submit=None):
         nodes = page.locator(".se-canvas .se-text-paragraph .__se-node")
         if any(text.strip() for text in nodes.all_inner_texts()):
             raise RuntimeError("Existing editor text requires manual review")
-        editor.click()
+        with ego_action('click', 'kin-editor'):
+            editor.click()
         # Observed SmartEditor strips embedded newlines from insert_text. Real
         # Enter keystrokes preserve reviewed paragraph boundaries and autolink.
         _type_paragraphs(page.keyboard, answer_text)
@@ -520,7 +533,8 @@ def publish(account, question_url, answer_text, before_submit=None):
         observation_error = None
         try:
             # Only this one click may mutate the server; subsequent work only observes.
-            button.click(timeout=12000)
+            with ego_action('click', 'kin-submit'):
+                button.click(timeout=12000)
             for _ in range(30):
                 page.wait_for_timeout(500)
                 protection = next((row['protectionReason'] for row in dialogs if row.get('protectionReason')), None)
@@ -577,8 +591,10 @@ def publish(account, question_url, answer_text, before_submit=None):
 def _type_paragraphs(keyboard, text):
     for line in text.split('\n'):
         if line:
-            keyboard.insert_text(line)
-        keyboard.press('Enter')
+            with ego_action('type', 'kin-answer', count=len(line)):
+                keyboard.insert_text(line)
+        with ego_action('press', 'kin-editor-key'):
+            keyboard.press('Enter')
 
 
 def _normalized(text):

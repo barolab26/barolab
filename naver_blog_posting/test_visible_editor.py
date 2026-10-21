@@ -14,6 +14,13 @@ def paragraph(text, link=None):
 
 
 class VisibleEditorTests(unittest.TestCase):
+    def setUp(self):
+        from common import ego_telemetry
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        guard = patch.object(ego_telemetry, 'DIRECTORY', Path(temporary.name))
+        guard.start(); self.addCleanup(guard.stop)
+
     def test_ordered_content_links_and_image_captions_must_match(self):
         blocks = [{'kind': 'heading', 'paragraphs': [[{'text': '제목'}]]},
                   {'kind': 'source', 'paragraphs': [[{'text': '공식 근거', 'url': 'https://example.org/source'}]]}]

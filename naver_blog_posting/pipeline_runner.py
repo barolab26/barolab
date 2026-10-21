@@ -1,4 +1,5 @@
 """One Naver runner: actual agent handoffs, native formatting, reviewed reservations and monitoring."""
+from common.ego_telemetry import action as ego_action, async_action as ego_async_action, export_environment
 
 import os, sys, time, json, hashlib, socket, argparse, subprocess, shutil
 if __name__ == '__main__' and '--monitor' in sys.argv:print('[naver-monitor] runner_import_begin',flush=True)
@@ -933,7 +934,8 @@ def verify_reservation(context, account_info, title, reserve_time, expected_hash
             try:
                 cancel_btn = frame.query_selector('.se-popup-button-cancel')
                 if cancel_btn:
-                    cancel_btn.click()
+                    with ego_action('click', 'naver-editor'):
+                        cancel_btn.click()
                     page.wait_for_timeout(1000)
             except Exception:
                 pass
@@ -946,7 +948,8 @@ def verify_reservation(context, account_info, title, reserve_time, expected_hash
             opener.wait_for(state='visible', timeout=15000)
             if opener.count() != 1:
                 raise RuntimeError('Reservation list entry not unique')
-            opener.click()
+            with ego_action('click', 'naver-editor'):
+                opener.click()
             frame.get_by_text('예약 발행 글', exact=True).wait_for(state='visible', timeout=15000)
             deadline = time.monotonic() + 15
             while not reservation_in_text(frame.locator('body').first.inner_text(), title, reserve_time):
@@ -956,7 +959,8 @@ def verify_reservation(context, account_info, title, reserve_time, expected_hash
             if folder:
                 page.screenshot(path=str(folder / f'reservation-list-pass-{pass_no+1}.png'))
         if expected_hash:
-            frame.get_by_text(title, exact=True).click()
+            with ego_action('click', 'naver-editor'):
+                frame.get_by_text(title, exact=True).click()
             frame.wait_for_function("t=>{try{return SmartEditor.getEditor('blogpc001').getDocumentData().document.components[0].title.flatMap(p=>p.nodes.map(n=>n.value||'')).join('')===t}catch(e){return false}}",arg=title,timeout=15000)
             saved=frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
             if folder: atomic_json(folder / 'reserved-server-document.json',saved)
@@ -1003,14 +1007,16 @@ def open_revision_editor(context, pages, account, target, folder):
     opener.wait_for(state='visible', timeout=15000)
     if opener.count() != 1:
         raise RuntimeError('Revision reservation list entry is not unique')
-    opener.click()
+    with ego_action('click', 'naver-editor'):
+        opener.click()
     frame.get_by_text('예약 발행 글', exact=True).wait_for(state='visible', timeout=15000)
     deadline = time.monotonic() + 15
     while not reservation_in_text(frame.locator('body').first.inner_text(), target['title'], target['reserveTime']):
         if time.monotonic() > deadline:
             raise RuntimeError('Exact revision title/time disappeared')
         page.wait_for_timeout(250)
-    frame.get_by_text(target['title'], exact=True).click()
+    with ego_action('click', 'naver-editor'):
+        frame.get_by_text(target['title'], exact=True).click()
     frame.wait_for_function("n=>{try{return String(SmartEditor.getEditor('blogpc001').getDocumentData().documentId)===n}catch(e){return false}}", arg=target['logNo'], timeout=15000)
     document = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
     if editor_review_hash(document) != target['documentSha256']:
@@ -1031,7 +1037,8 @@ def inspect_revision_target(account_key, receipt_path, log_no):
         browser = connect_sync(p, 'http://127.0.0.1:' + str(acc['cdp_port']), *account_browser_paths(acc))
         page, frame = open_revision_editor(browser.contexts[0], pages, acc, target, folder)
         buttons = frame.locator('button').evaluate_all('(xs)=>xs.filter(x=>x.getClientRects().length).map(x=>({text:x.innerText,className:x.className}))')
-        frame.locator('button[class*="publish_btn"]').click()
+        with ego_action('click', 'naver-editor'):
+            frame.locator('button[class*="publish_btn"]').click()
         frame.locator('#tag-input').wait_for(state='visible', timeout=15000)
         observed = {'reserved':frame.locator('#radio_time2').is_checked(),
             'date':frame.locator('input[class*="date"]').input_value(),
@@ -1047,7 +1054,8 @@ def inspect_revision_target(account_key, receipt_path, log_no):
 def require_revision_options(frame, target):
     """Read the existing UI schedule before any document replacement."""
     if not frame.locator('#tag-input').is_visible():
-        frame.locator('button[class*="publish_btn"]').click()
+        with ego_action('click', 'naver-editor'):
+            frame.locator('button[class*="publish_btn"]').click()
         frame.locator('#tag-input').wait_for(state='visible', timeout=15000)
     expected = datetime.strptime(target['reserveTime'], '%Y-%m-%d %H:%M')
     if (not frame.locator('#radio_time2').is_checked() or frame.locator('#radio_time1').is_checked()
@@ -1055,7 +1063,8 @@ def require_revision_options(frame, target):
             or frame.locator('select[class*="hour_option"]').input_value() != str(expected.hour)
             or frame.locator('select[class*="minute_option"]').input_value() != f'{expected.minute:02d}'):
         raise RuntimeError('Existing reservation schedule changed; revision blocked')
-    frame.get_by_role('button', name='발행 설정 닫기', exact=True).click()
+    with ego_action('click', 'naver-editor'):
+        frame.get_by_role('button', name='발행 설정 닫기', exact=True).click()
 
 
 def require_no_explicit_submission_failure(reply, http_status):
@@ -1301,7 +1310,7 @@ def refresh_ubuntu_daily_account(account, worker_id=None):
                '--account', account, '--refresh']
     if worker_id:
         command += ['--worker-id', worker_id]
-    subprocess.run(command, cwd=str(PROJECT_ROOT), check=True, shell=False)
+    subprocess.run(command, cwd=str(PROJECT_ROOT), check=True, shell=False, env=export_environment())
 
 
 def renew_ubuntu_daily_before_submission(account):
@@ -1357,7 +1366,7 @@ def run_scheduled_worker(item, mode, base=BASE):
     stop = None
     try:
         process = subprocess.Popen(command, cwd=str(BASE_DIR), stdout=None, stderr=subprocess.STDOUT,
-            env=dict(os.environ, PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
+            env=dict(export_environment(), PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         return launch_failure(exc, 'other')
@@ -6476,11 +6485,13 @@ async def generate_photos(plans, image_dir, account, title):
             try:
                 btn = flow_page.get_by_role('button', name='새 프로젝트')
                 if await btn.count() > 0:
-                    await btn.click()
+                    async with ego_async_action('click', 'naver-editor'):
+                        await btn.click()
                 else:
                     first_tile = flow_page.locator('img[alt]').first
                     if await first_tile.count() > 0:
-                        await first_tile.click()
+                        async with ego_async_action('click', 'naver-editor'):
+                            await first_tile.click()
                 await flow_page.wait_for_timeout(4000)
             except Exception as pe:
                 print(f"[generate_photos] Flow project entry warning: {pe}", flush=True)
@@ -6490,7 +6501,9 @@ async def generate_photos(plans, image_dir, account, title):
 def capture_native_review(page, frame, folder, account, title, reserve_time):
     f=frame
     page.set_viewport_size({'width':1440,'height':1000})
-    if f.locator('.se-sidebar-close-button').count(): f.locator('.se-sidebar-close-button').first.evaluate('(b)=>b.click()')
+    if f.locator('.se-sidebar-close-button').count():
+        with ego_action('click', 'naver-editor'):
+            f.locator('.se-sidebar-close-button').first.evaluate('(b)=>b.click()')
     image_count=f.locator('.se-component.se-image img').count()
     for i in range(image_count):
         img=f.locator('.se-component.se-image img').nth(i);img.scroll_into_view_if_needed(timeout=5000)
@@ -6499,7 +6512,9 @@ def capture_native_review(page, frame, folder, account, title, reserve_time):
     for mode,label in [('PC 화면','pc'),('모바일 화면','mobile')]:
         for n in range(4):
             if mode in f.locator('.__mode-button').inner_text():break
-            f.locator('.__mode-button').evaluate('(b)=>b.click()');page.wait_for_timeout(250)
+            with ego_action('click', 'naver-editor'):
+                f.locator('.__mode-button').evaluate('(b)=>b.click()')
+            page.wait_for_timeout(250)
         assert mode in f.locator('.__mode-button').inner_text()
         scroll=f.locator('.se-content');scroll.evaluate('(e)=>e.scrollTop=0');page.wait_for_timeout(350)
         info=scroll.evaluate('(e)=>({height:e.clientHeight,total:e.scrollHeight,width:e.clientWidth})')
@@ -6648,7 +6663,8 @@ def acquire_naver_editor(context, pages, blog_id):
     if pages.owns(page):
         cancel = frame.locator('.se-popup-button-cancel')
         if cancel.count() and cancel.first.is_visible():
-            cancel.first.click()
+            with ego_action('click', 'naver-editor'):
+                cancel.first.click()
     frame.wait_for_function("()=>typeof SmartEditor!=='undefined' && SmartEditor.getEditor('blogpc001')", timeout=15000)
     if not pages.owns(page) and not reusable_empty_naver_editor(page, blog_id):
         raise RuntimeError('Borrowed editor changed after inspection; existing draft preserved')
@@ -6676,13 +6692,17 @@ def prepare_editor(page, frame, article, plans, folder):
         return write_visible_editor(page, frame, article['title'], blocks, plans, folder, profile)
     for n, plan in enumerate(plans, 1):
         with page.expect_file_chooser(timeout=10000) as chooser:
-            frame.locator('button[data-name="image"][data-group="documentToolbar"]').click()
-        chooser.value.set_files(str(folder / 'images' / plan['filename']))
+            with ego_action('click', 'naver-editor'):
+                frame.locator('button[data-name="image"][data-group="documentToolbar"]').click()
+        with ego_action('upload', 'naver-editor'):
+            chooser.value.set_files(str(folder / 'images' / plan['filename']))
         page.wait_for_timeout(700)
         individual = frame.get_by_text('개별사진', exact=True)
         if individual.count() and individual.first.is_visible():
-            individual.first.click()
-            frame.locator('.se-popup-button-confirm').click()
+            with ego_action('click', 'naver-editor'):
+                individual.first.click()
+            with ego_action('click', 'naver-editor'):
+                frame.locator('.se-popup-button-confirm').click()
         frame.wait_for_function("n=>SmartEditor.getEditor('blogpc001').getDocumentData().document.components.filter(c=>c['@ctype']==='image').length===n", arg=n, timeout=30000)
         frame.wait_for_function("n=>{const img=document.querySelectorAll('.se-component.se-image img')[n-1];return img && img.complete && img.naturalWidth>0 && /^https:\\/\\/[^/]*pstatic\\.net\\//.test(img.src)}", arg=n, timeout=30000)
         page.wait_for_timeout(400)
@@ -6691,8 +6711,10 @@ def prepare_editor(page, frame, article, plans, folder):
     frame.evaluate("d=>SmartEditor.getEditor('blogpc001').setDocumentData(d)", document)
     page.wait_for_timeout(700)
     first_text = frame.locator('.se-component.se-text .__se-node').first
-    first_text.click(timeout=5000)
-    first_text.press('Home')
+    with ego_action('click', 'naver-editor'):
+        first_text.click(timeout=5000)
+    with ego_action('press', 'naver-editor'):
+        first_text.press('Home')
     return document
 
 
@@ -6701,7 +6723,8 @@ def select_reservation_date(frame, target):
     field = frame.locator('input[class*="date"]')
     expected = target.strftime('%Y%m%d')
     if re.sub(r'\D', '', field.input_value()) != expected:
-        field.click()
+        with ego_action('click', 'naver-editor'):
+            field.click()
         calendar = frame.locator('.ui-datepicker:visible')
         calendar.wait_for(state='visible')
         for _ in range(12):
@@ -6714,7 +6737,8 @@ def select_reservation_date(frame, target):
             nav = calendar.locator('.ui-datepicker-next' if current < wanted else '.ui-datepicker-prev')
             if 'ui-state-disabled' in (nav.get_attribute('class') or ''):
                 raise RuntimeError('Target reservation month is unavailable')
-            nav.click()
+            with ego_action('click', 'naver-editor'):
+                nav.click()
         else:
             raise RuntimeError('Target reservation month exceeds bounded navigation')
         # Match the visible year/month before selecting a numbered day.
@@ -6723,7 +6747,8 @@ def select_reservation_date(frame, target):
         day = calendar.locator('td:not(.ui-state-disabled) > button').filter(has_text=re.compile(r'^' + str(target.day) + r'$'))
         if day.count() != 1:
             raise RuntimeError('Target reservation day is unavailable or ambiguous')
-        day.click()
+        with ego_action('click', 'naver-editor'):
+            day.click()
     actual = field.input_value()
     if re.sub(r'\D', '', actual) != expected:
         raise RuntimeError('Actual reservation date mismatch')
@@ -6738,19 +6763,23 @@ def configure_reservation(page, frame, reserve_time, tags, category=None, folder
     if target < now_kst() + timedelta(minutes=30):
         raise RuntimeError('Future KST reservation at least 30 minutes ahead required')
     if not frame.locator('#tag-input').is_visible():
-        frame.locator('button[class*="publish_btn"]').click()
+        with ego_action('click', 'naver-editor'):
+            frame.locator('button[class*="publish_btn"]').click()
         frame.locator('#tag-input').wait_for(state='visible')
     for tag in tags:
         name = tag.lstrip('#')
         actual = frame.locator('[id^="tag-item-"]').evaluate_all('(xs)=>xs.map(x=>x.getAttribute("aria-label"))')
         if name not in actual:
-            frame.locator('#tag-input').fill(name)
-            frame.locator('#tag-input').press('Enter')
+            with ego_action('type', 'naver-editor', count=len(name)):
+                frame.locator('#tag-input').fill(name)
+            with ego_action('press', 'naver-editor'):
+                frame.locator('#tag-input').press('Enter')
     actual = frame.locator('[id^="tag-item-"]').evaluate_all('(xs)=>xs.map(x=>x.getAttribute("aria-label"))')
     if not all(t.lstrip('#') in actual for t in tags):
         raise RuntimeError('Native tag metadata does not match body footer')
     if not frame.locator('#radio_time2').is_checked():
-        frame.locator('label[for=radio_time2]').click()
+        with ego_action('click', 'naver-editor'):
+            frame.locator('label[for=radio_time2]').click()
     date_evidence = select_reservation_date(frame, target)
     frame.locator('select[class*="hour_option"]').select_option(str(target.hour))
     frame.locator('select[class*="minute_option"]').select_option(f'{target.minute:02d}')
@@ -6887,7 +6916,8 @@ def collect_existing_reservations(context, account, folder=None):
             frame = probe.frame(name='mainFrame') or probe
             cancel = frame.locator('.se-popup-button-cancel')
             if cancel.count() and cancel.first.is_visible():
-                cancel.first.click()
+                with ego_action('click', 'naver-editor'):
+                    cancel.first.click()
             identity = urlparse(frame.url)
             query = parse_qs(identity.query)
             if identity.hostname != 'blog.naver.com' or not (
@@ -6930,7 +6960,8 @@ def collect_existing_reservations(context, account, folder=None):
                                        'requestMethod': 'GET', 'requestQuery': count_source['requestQuery']})
             rows = []
             if count:
-                opener.click()
+                with ego_action('click', 'naver-editor'):
+                    opener.click()
                 frame.get_by_text('예약 발행 글', exact=True).wait_for(state='visible', timeout=15000)
                 deadline = time.monotonic() + 15
                 while True:
@@ -7161,7 +7192,8 @@ def _run_pipeline(account_key, do_real_publish=True, override_strategy_id=None, 
         pages.retain(page, 'Submission result requires verification for ' + account_key + ' · ' + str(folder))
         with page.expect_response(lambda response: urlparse(response.url).hostname == 'blog.naver.com' and
                                   urlparse(response.url).path in ('/RabbitWrite.naver', '/RabbitUpdate.naver'), timeout=30000) as sent:
-            frame.locator('button[class*="confirm_btn"]').click(timeout=10000)
+            with ego_action('click', 'naver-editor'):
+                frame.locator('button[class*="confirm_btn"]').click(timeout=10000)
         response = sent.value
         try:
             reply = response.json()

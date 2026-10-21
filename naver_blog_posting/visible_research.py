@@ -16,6 +16,44 @@ def _sha(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 
+def search_public_query(page, query):
+    """Use a caller-owned public tab, then restore it; never visit an editor."""
+    from common.ego_telemetry import action
+    if not isinstance(query, str) or not query.strip() or len(query) > 100 or any(ord(c) < 32 for c in query):
+        raise ValueError('A bounded public search query is required')
+    original = page.url
+    parsed = urlsplit(original)
+    allowed = (parsed.scheme == 'https' and (
+        parsed.hostname == 'www.naver.com' and parsed.path == '/'
+        or parsed.hostname == 'search.naver.com' and parsed.path == '/search.naver'
+        or parsed.hostname == 'blog.naver.com' and re.fullmatch(r'/[A-Za-z0-9_-]+/?', parsed.path)))
+    if not allowed:
+        raise ValueError('Only an existing public home/search tab may be reused')
+    try:
+        with action('navigate', 'naver-search'):
+            page.goto('https://www.naver.com/', wait_until='domcontentloaded', timeout=30000)
+        field = page.locator('input#query[name="query"][type="search"]')
+        field.wait_for(state='visible', timeout=15000)
+        with action('click', 'naver-search-query'):
+            field.click()
+        with action('press', 'naver-search-query'):
+            page.keyboard.press('Control+A')
+        with action('type', 'naver-search-query', count=len(query)):
+            page.keyboard.type(query, delay=100)
+        with action('press', 'naver-search-submit'):
+            page.keyboard.press('Enter')
+        page.wait_for_url(lambda url: urlsplit(str(url)).hostname == 'search.naver.com'
+                          and parse_qs(urlsplit(str(url)).query).get('query') == [query], timeout=30000)
+        page.locator('#main_pack').wait_for(state='visible', timeout=15000)
+        return {'queryMatched': True, 'resultHost': 'search.naver.com', 'observedAt': _now(),
+                'resultTextSha256': _sha(page.locator('#main_pack').inner_text()),
+                'mode': 'public-search-keyboard', 'owned': False}
+    finally:
+        if not page.is_closed() and page.url != original:
+            with action('navigate', 'naver-search'):
+                page.goto(original, wait_until='domcontentloaded', timeout=30000)
+
+
 @contextmanager
 def research_browser(account):
     from playwright.sync_api import sync_playwright

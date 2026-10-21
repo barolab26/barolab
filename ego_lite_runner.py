@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
+from common.ego_telemetry import export_environment
 
 
 def send_gemini_message_sync(msg: str, reason: str = "") -> bool:
@@ -148,7 +149,7 @@ def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=N
                         ("--reserve-time", reserve_time)):
         if value is not None:
             command.extend([flag, str(value)])
-    environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
+    environment = dict(export_environment(), DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
     if prepare_only:
         # A preparation fixture must not mutate the publication reconciliation ledger.
         return subprocess.run(command, cwd=str(ROOT), env=environment, shell=False).returncode
@@ -166,7 +167,7 @@ def run_visible_naver_catch_up(*, dry_run=False):
         from naver_blog_posting.pipeline_runner import recovery_plan
         print(json.dumps(recovery_plan(), ensure_ascii=False))
         return 0
-    environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"),
+    environment = dict(export_environment(), DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"),
                        BAROLAB_UBUNTU_NAVER_CATCH_UP="1")
     return subprocess.run([sys.executable, str(ROOT / "naver_blog_posting/pipeline_runner.py"),
                            "--catch-up", "--visible"], cwd=str(ROOT),
