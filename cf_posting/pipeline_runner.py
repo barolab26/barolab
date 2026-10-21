@@ -5168,8 +5168,8 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         receipt_file.replace(output_dir/'publication-before-explicit-revision.json')
     if receipt_file.exists():
         raise ReviewRequired('Existing publication receipt requires reconciliation; no automatic repost')
-    img_plans = read_document(handoff.file('images.md'))['imagePlans'] if handoff.data.get('resume',{}).get('fromAgent')=='assembler' else ai_result['imagePlans']
-    if not cached_complete and not (layout_resume or handoff.data.get('resume', {}).get('fromAgent') == 'assembler'):
+    img_plans = read_document(handoff.file('images.md'))['imagePlans'] if handoff.data.get('resume',{}).get('fromAgent') in ('assembler','reviewer') else ai_result['imagePlans']
+    if not cached_complete and not (layout_resume or handoff.data.get('resume', {}).get('fromAgent') in ('assembler','reviewer')):
         seen_pnames = set()
         fname_map = {}
         plans_modified = False
@@ -5208,7 +5208,8 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
                  'category': ai_result['category'], 'topicFolder': output_dir.relative_to(BASE_DIR / 'output').as_posix(),
                  'topicSlug': ai_result['topicSlug'], 'title': ai_result['title'], 'summary': ai_result['summary'],
                  'imagePlans': img_plans, 'artifactFolder': str(output_dir)}
-    assembly_resume = layout_resume or handoff.data.get('resume', {}).get('fromAgent') == 'assembler'
+    reviewer_resume = handoff.data.get('resume', {}).get('fromAgent') == 'reviewer'
+    assembly_resume = layout_resume or handoff.data.get('resume', {}).get('fromAgent') in ('assembler','reviewer')
     assembly_edits = json.loads(handoff.file('assembly-edits.json').read_text(encoding='utf-8')) if cached_complete and (output_dir / 'assembly-edits.json').exists() else []
     blog_info['generate_html'] = lambda urls: assemble(ai_result, urls, img_plans, assembly_edits, domain=domain)
     generated_images = [images_dir / plan['filename'] for plan in img_plans]
@@ -5282,7 +5283,7 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         image_checks = validate_images(generated_images, img_plans)
     if not cached_complete:
         handoff_progress(blog_info, completed_ids, 'assembler', '기획·조사·초안·실제 이미지 인수 · 최종 HTML/Markdown 조립', handoff)
-        if not layout_resume:
+        if not (layout_resume or reviewer_resume):
             assembly_edits = assemble_with_agent(handoff, ai_result, img_plans, generated_images, call_model_json, current_attribution)
         else:
             assembly_edits = json.loads(handoff.file('assembly-edits.json').read_text(encoding='utf-8'))

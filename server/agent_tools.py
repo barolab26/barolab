@@ -1711,7 +1711,7 @@ def validate_staff_actions(actions):
             raise ValueError('Invalid recipient')
         if tool == 'read_agent_status' and not args:
             pass
-        elif tool == 'run_cf_domain' and agent == 'publi' and set(args) == {'domain','source_sha256','artifact_sha256','review_sha256'} and args.get('domain') == 'soulnote.kr' and all(isinstance(args[k],str) and re.fullmatch(r'[0-9a-f]{64}',args[k]) for k in ('source_sha256','artifact_sha256','review_sha256')):
+        elif tool == 'run_cf_domain' and agent == 'publi' and set(args) in ({'domain','source_sha256','artifact_sha256','review_sha256'},{'domain','source_sha256','artifact_sha256','review_sha256','revision_mode','revision_sha256'}) and args.get('revision_mode','review') in ('review','asset_revalidation') and args.get('domain') == 'soulnote.kr' and all(isinstance(args[k],str) and re.fullmatch(r'[0-9a-f]{64}',args[k]) for k in ('source_sha256','artifact_sha256','review_sha256')):
             pass
         elif tool == 'prepare_cf_source_fact' and agent == 'publi' and set(args) == {'source_sha256','request_sha256'} and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
             pass
@@ -2122,11 +2122,11 @@ def repair_cf_known_failure(domain: str, evidencePath=None, evidenceSha256=None)
             "state": "등록된 오류의 검증·독립 검수를 시작했습니다. 재개와 게시 결과는 아직 확인되지 않았습니다."}
 
 
-def review_cf_existing(domain, source_sha256, artifact_sha256, review_sha256):
+def review_cf_existing(domain, source_sha256, artifact_sha256, review_sha256, revision_mode="review", revision_sha256=None):
     """Bounded existing article review; fixed CLI, no free path or publish switch."""
     import hashlib
     from common.ego_telemetry import export_environment
-    if domain != 'soulnote.kr':
+    if domain != 'soulnote.kr' or revision_mode not in ('review','asset_revalidation'):
         return {'ok':False,'status':'held','reason':'unsupported_review_domain'}
     sources = ['cf_posting/pipeline_runner.py','cf_posting/domain_themes.py']
     actual_source = hashlib.sha256(json.dumps({name:hashlib.sha256((BASE_DIR/name).read_bytes()).hexdigest()
@@ -2141,10 +2141,53 @@ def review_cf_existing(domain, source_sha256, artifact_sha256, review_sha256):
             or hashlib.sha256((folder/'article.json').read_bytes()).hexdigest() != artifact_sha256
             or hashlib.sha256((folder/'review.json').read_bytes()).hexdigest() != review_sha256):
         return {'ok':False,'status':'held','tool':'run_cf_domain','reason':'review_evidence_changed'}
+    from cf_posting.pipeline_runner import Handoff
+    handoff = Handoff(folder, domain, folder.parent.name)
+    if revision_mode == 'asset_revalidation':
+        revision_files = {name:(folder/name).read_bytes() for name in ('handoff.json','images.md','photo-review.md')}
+        revision_hashes = {name:hashlib.sha256(data).hexdigest() for name,data in revision_files.items()}
+        actual_revision = hashlib.sha256(json.dumps(revision_hashes,sort_keys=True).encode()).hexdigest()
+        if actual_revision != revision_sha256:
+            return {'ok':False,'status':'held','reason':'revision_evidence_changed'}
+        revision_backup = Path.home()/'.barolab/scratch/soulnote-crew-review/revision-before'/actual_revision
+        revision_backup.mkdir(parents=True,exist_ok=True)
+        for name,data in revision_files.items():
+            dest = revision_backup/name
+            if not dest.exists():
+                with dest.open('xb') as saved: saved.write(data)
+            if hashlib.sha256(dest.read_bytes()).hexdigest() != revision_hashes[name]:
+                raise ValueError('Revision backup mismatch')
+        if (folder/'publication.json').exists():
+            return {'ok':False,'status':'held','reason':'publication_evidence_present'}
+        for stage in handoff.data.get('stages',[]):
+            for name,expected in stage.get('fileHashes',{}).items():
+                if name not in ('images.md','photo-review.md') and hashlib.sha256(handoff.file(name).read_bytes()).hexdigest() != expected:
+                    raise ValueError('Unrelated accepted artifact changed')
+        handoff.data = {**handoff.data,'stages':handoff.data.get('stages',[])[:3]}
+        if len(handoff.data['stages']) != 3:
+            raise ValueError('First three accepted stages required')
+    stages = handoff.check()
+    backup = Path.home()/'.barolab/scratch/soulnote-crew-review/approved-bytes'
+    backup.mkdir(parents=True,exist_ok=True)
+    for stage in stages:
+        for name, expected in stage['fileHashes'].items():
+            data = handoff.file(name).read_bytes()
+            if hashlib.sha256(data).hexdigest() != expected:
+                raise ValueError('Approved bytes changed during backup')
+            dest = backup / expected
+            if not dest.exists():
+                with dest.open('xb') as saved:
+                    saved.write(data)
+            if hashlib.sha256(dest.read_bytes()).hexdigest() != expected:
+                raise ValueError('Approved backup hash mismatch')
     environment = export_environment()
-    for key in ('CF_ARTICLE_FILE','CF_ARTICLE_INPUT_FILE','CF_REWORK_FOLDER','CF_LAYOUT_REVIEW_FOLDER','CF_REVISION_POST_ID','CF_FROM_CLEANER'):
+    for key in ('CF_ARTICLE_FILE','CF_ARTICLE_INPUT_FILE','CF_REWORK_FOLDER','CF_LAYOUT_REVIEW_FOLDER','CF_REVISION_POST_ID','CF_FROM_CLEANER','CF_REVIEW_REWORK_FOLDER','CF_ASSET_REWORK','CF_COUPLED_REWORK','CF_IMAGE_PLAN_CLARIFY','CF_IMAGE_PLAN_REWORK'):
         environment.pop(key,None)
-    environment['CF_REVIEW_REWORK_FOLDER'] = str(folder)
+    if revision_mode == 'asset_revalidation':
+        environment['CF_REWORK_FOLDER'] = str(folder)
+        environment['CF_ASSET_REWORK'] = '1'
+    else:
+        environment['CF_REVIEW_REWORK_FOLDER'] = str(folder)
     log = Path.home()/'.barolab/scratch/soulnote-crew-review/prepare.log'
     log.parent.mkdir(parents=True,exist_ok=True)
     with log.open('ab') as output:
@@ -2314,7 +2357,7 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
             return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
         return {'ok': True, 'status': 'observed', 'tool': tool_name, 'data': readers[slug]()}
     if tool_name == "run_cf_domain" and "source_sha256" in kwargs:
-        if slug != "publi" or set(kwargs) != {"domain","source_sha256","artifact_sha256","review_sha256"}:
+        if slug != "publi" or set(kwargs) not in ({"domain","source_sha256","artifact_sha256","review_sha256"},{"domain","source_sha256","artifact_sha256","review_sha256","revision_mode","revision_sha256"}):
             return {"ok":False,"status":"forbidden","tool":tool_name}
         return review_cf_existing(**kwargs)
     if tool_name == "prepare_cf_source_fact":

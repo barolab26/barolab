@@ -35,6 +35,38 @@ class StaffDispatchTests(unittest.TestCase):
         self.scope['staff_tool_reply'] = Mock(return_value={'reply':'대기 2건을 확인했으며 수리는 실행하지 않았습니다.',
             'route':{'events':[{'actualModel':'configured-model'}]}})
 
+    def test_review_preserves_checked_approved_bytes_before_process(self):
+        import sys, subprocess
+        tree=ast.parse(Path(__file__).with_name('agent_tools.py').read_text(encoding='utf-8'))
+        node=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='review_cf_existing')
+        root=Path(self.temp.name); relative='output/national-certification-exam-schedule-registration-checklist/run-20261021-161201-409636'
+        folder=root/'cf_posting'/relative; folder.mkdir(parents=True)
+        for name in ('article.json','review.json','images.md'): (folder/name).write_bytes(b'approved')
+        names=['cf_posting/pipeline_runner.py','cf_posting/domain_themes.py']
+        for name in names:(root/name).write_bytes(b'# source')
+        digest=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
+        source=hashlib.sha256(json.dumps({n:digest(root/n) for n in names},sort_keys=True).encode()).hexdigest()
+        handoff=Mock(); handoff.check.return_value=[{'fileHashes':{'images.md':digest(folder/'images.md')}}]
+        handoff.file.side_effect=lambda name:folder/name
+        process=Mock();process.pid=123;process.wait.return_value=0
+        def start(*args,**kwargs):
+            self.assertTrue((root/'.barolab/scratch/soulnote-crew-review/approved-bytes'/digest(folder/'images.md')).exists())
+            self.assertIn('--prepare-only',args[0]);return process
+        scope={'BASE_DIR':root,'Path':Path,'json':json,'sys':sys,'subprocess':subprocess,'_ego_popen':start,
+               'get_kst_now':datetime.now,'_read_json':lambda *a:{'date':datetime.now().date().isoformat(),'items':[{'domain':'soulnote.kr','status':'review_required','artifactFolder':relative}]}}
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'<review>','exec'),scope)
+        with patch.object(Path,'home',return_value=root),patch('cf_posting.pipeline_runner.Handoff',return_value=handoff):
+            result=scope['review_cf_existing']('soulnote.kr',source,digest(folder/'article.json'),digest(folder/'review.json'))
+        self.assertFalse(result['publicationAttempted']);handoff.check.assert_called_once()
+        self.assertEqual((folder/'images.md').read_bytes(),b'approved')
+        (folder/'handoff.json').write_bytes(b'original handoff');(folder/'photo-review.md').write_bytes(b'changed review')
+        handoff.data={'stages':[{'fileHashes':{'article.json':digest(folder/'article.json')}} for _ in range(3)]}
+        revision=hashlib.sha256(json.dumps({n:digest(folder/n) for n in ('handoff.json','images.md','photo-review.md')},sort_keys=True).encode()).hexdigest()
+        with patch.object(Path,'home',return_value=root),patch('cf_posting.pipeline_runner.Handoff',return_value=handoff):
+            revised=scope['review_cf_existing']('soulnote.kr',source,digest(folder/'article.json'),digest(folder/'review.json'),'asset_revalidation',revision)
+        self.assertFalse(revised['publicationAttempted'])
+        self.assertEqual((root/'.barolab/scratch/soulnote-crew-review/revision-before'/revision/'handoff.json').read_bytes(),b'original handoff')
+
     def test_prepare_selects_only_bound_same_goal_request(self):
         import sys, subprocess
         tree = ast.parse(Path(__file__).with_name('agent_tools.py').read_text(encoding='utf-8'))
