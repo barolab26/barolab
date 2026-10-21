@@ -146,6 +146,13 @@ class ReasonDisplayTests(unittest.TestCase):
             with self.subTest(reason=reason),self.assertRaises(ValueError): m.public_reason(reason)
 
 class FeedbackTests(unittest.TestCase):
+    def setUp(self):
+        from common import repair_workflow
+        temporary=tempfile.TemporaryDirectory();self.addCleanup(temporary.cleanup)
+        guard=patch.object(repair_workflow,'ROOT',Path(temporary.name));guard.start();self.addCleanup(guard.stop)
+        prepare=patch.object(repair_workflow,'prepare_project_recovery',return_value={'status':'ready'})
+        self.prepare=prepare.start();self.addCleanup(prepare.stop)
+
     def test_unresolved_host_cannot_be_model_promoted_and_replayed(self):
         from server import agent_tools
         with tempfile.TemporaryDirectory() as td, patch.object(m, 'INCIDENTS', Path(td)/'incidents'), patch.object(agent_tools, 'STAFF_REQUEST_DIR', Path(td)/'staff'):
@@ -181,7 +188,32 @@ class FeedbackTests(unittest.TestCase):
                 self.assertEqual(model.call_count,1)
                 self.assertEqual(emit.call_args.kwargs['output_kind'], '수리는 보류 상태입니다. 패치는 부족한 검증 근거를 확인해야 합니다.')
                 self.assertEqual(emit.call_args.kwargs['message_kind'], 'staff_reply')
+                self.prepare.assert_called_once()
                 self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['feedback']['reason'], emit.call_args.kwargs['output_kind'])
+
+# Plain unittest runs must never publish fixture events or diagnose them in production.
+def setUpModule():
+    import tempfile
+    from pathlib import Path
+    from unittest.mock import patch
+    from common import repair_workflow
+    global _isolated_crew_temp, _isolated_crew_patches
+    _isolated_crew_temp = tempfile.TemporaryDirectory()
+    root = Path(_isolated_crew_temp.name)
+    _isolated_crew_patches = [
+        patch('common.crew_chat_bridge._deliver', return_value=True),
+        patch('common.crew_chat_bridge.OUTBOX_DIR', root / 'outbox'),
+        patch.object(repair_workflow, 'ROOT', root / 'repairs'),
+    ]
+    for guard in _isolated_crew_patches:
+        guard.start()
+
+
+def tearDownModule():
+    for guard in reversed(_isolated_crew_patches):
+        guard.stop()
+    _isolated_crew_temp.cleanup()
+
 
 if __name__ == '__main__':
     unittest.main()

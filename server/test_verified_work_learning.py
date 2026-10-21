@@ -36,6 +36,44 @@ class VerifiedWorkTests(unittest.TestCase):
     def proof(self):
         return h.write_verified_work_receipt(self.root/'receipt.json', **self.kw)
 
+    def test_recovery_requires_actual_original_work_beyond_code_and_tests(self):
+        def save(name,value):
+            path=self.root/name;path.write_text(json.dumps(value),encoding='utf-8')
+            return {'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+        original=self.proof()
+        candidate=save('candidate.json',{'changes':[{'path':'example.py','content':'fixed'}]})
+        manifest=save('manifest.json',{'files':['example.py'],'sourceHashes':{'example.py':'before'}})
+        validation=save('validation.json',{'status':'isolated_verified','candidateSha256':candidate['sha256'],
+            'manifestSha256':manifest['sha256'],'reviewSha256':'pre-review',
+            'sandbox':{'enforced':True},'results':[{'returncode':0,'summary':{'executed':3}}]})
+        review=save('final-review.json',{'candidateSha256':candidate['sha256'],
+            'manifestSha256':manifest['sha256'],'validationSha256':validation['sha256'],
+            'verdict':{k:True for k in ('fixSupported','scopeRespected','gatesPreserved','testsRelevant','safeToApply')},
+            'route':{'state':'returned','actualModel':'configured-model'}})
+        application=save('application.json',{'status':'applied','productionApplied':True,'candidateSha256':candidate['sha256'],
+            'reviewSha256':'pre-review','finalReviewSha256':review['sha256'],'validationSha256':validation['sha256'],
+            'before':{'example.py':'before'}})
+        controller=save('controller.json',{'taskId':'task','planSha256':'plan','plan':{'failure':[{'status':'failed'}]},
+            'resumeAttempted':True,'application':{'evidenceSha256':application['sha256']},
+            'resumeResult':{'ok':True,'verifiedWorkProof':original}})
+        bound={'type':'project_recovery_completion_v1','taskId':'task','planSha256':'plan',
+            'candidateSha256':candidate['sha256'],'candidate':candidate,'manifest':manifest,'application':application,
+            'validation':validation,'finalReview':review,'controller':controller,
+            'originalWork':{'path':original['sourceRef'],'sha256':original['sourceSha256']}}
+        completion=save('completion.json',bound)
+        receipt={'schemaVersion':1,'type':'verified_work_receipt_v1','channel':'project','outcome':'recovery_verified',
+            'sourceAgent':'patch','evidenceText':'The exact repaired task was independently verified.',
+            'artifactHashes':[candidate,manifest,application,validation,review,controller,bound['originalWork'],completion],
+            'verification':{'scope':'recovery_verified','checks':[{'type':kind,'passed':True,'evidenceRef':completion['path']}
+                for kind in ('source_diff','tests_passed','original_task_verified')]}}
+        h.validate_work_receipt(receipt)
+        receipt['artifactHashes']=[item for item in receipt['artifactHashes'] if item!=bound['originalWork']]
+        with self.assertRaises(ValueError):h.validate_work_receipt(receipt)
+        # Original graph-repair proof still requires its unchanged database checks.
+        invalid=json.loads(Path(original['sourceRef']).read_bytes())
+        invalid['verification']['checks']=[c for c in invalid['verification']['checks'] if c['type']!='read_only_state']
+        with self.assertRaises(ValueError):h.validate_work_receipt(invalid)
+
     def process(self, verdict=None):
         reviewer = llm._memory_review
         with patch.object(self.store,'enqueue_review',side_effect=lambda eid, cb: self.store._run_review(eid, cb)):
@@ -223,5 +261,29 @@ class VerifiedWorkTests(unittest.TestCase):
         self.assertEqual(row['actualPromptSha256'],h.revision('provider header '+actual[0]))
         self.assertEqual(row['episodeRefs'][0]['eventId'],'learned:trace')
         self.assertIsNone(provider('review',_skip_memory=True))
+
+# Plain unittest runs must never publish fixture events or diagnose them in production.
+def setUpModule():
+    import tempfile
+    from pathlib import Path
+    from unittest.mock import patch
+    from common import repair_workflow
+    global _isolated_crew_temp, _isolated_crew_patches
+    _isolated_crew_temp = tempfile.TemporaryDirectory()
+    root = Path(_isolated_crew_temp.name)
+    _isolated_crew_patches = [
+        patch('common.crew_chat_bridge._deliver', return_value=True),
+        patch('common.crew_chat_bridge.OUTBOX_DIR', root / 'outbox'),
+        patch.object(repair_workflow, 'ROOT', root / 'repairs'),
+    ]
+    for guard in _isolated_crew_patches:
+        guard.start()
+
+
+def tearDownModule():
+    for guard in reversed(_isolated_crew_patches):
+        guard.stop()
+    _isolated_crew_temp.cleanup()
+
 
 if __name__=='__main__':unittest.main()

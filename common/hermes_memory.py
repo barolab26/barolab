@@ -24,8 +24,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENTRY_DELIMITER = "\n§\n"
 LIMITS = {"memory": 2200, "user": 1375}
 WORK_CHANNELS = {'project', 'naver_blog', 'cf_blog', 'naver_kin', 'threads'}
-WORK_OUTCOMES = {'maintenance_verified', 'reservation_verified', 'public_verified', 'public_answer_verified', 'public_thread_verified'}
-WORK_CHECKS = {'source_diff', 'http_response', 'read_only_state', 'tests_passed', 'public_identity', 'public_content', 'reservation_identity', 'reservation_content'}
+WORK_OUTCOMES = {'maintenance_verified', 'recovery_verified', 'reservation_verified', 'public_verified', 'public_answer_verified', 'public_thread_verified'}
+WORK_CHECKS = {'source_diff', 'http_response', 'read_only_state', 'tests_passed', 'original_task_verified', 'public_identity', 'public_content', 'reservation_identity', 'reservation_content'}
 LEARNING_POLICY_REVISION = 'observed-procedure-v2'
 LEARNING_PARSER_REVISION = 'optional-record-v1'
 _THREAD_LOCK = threading.RLock()
@@ -54,7 +54,7 @@ def validate_work_receipt(receipt):
     verification = receipt.get('verification', {})
     if verification.get('scope') != receipt['outcome']:
         raise ValueError('Work outcome scope mismatch')
-    expected_channel = {'maintenance_verified':'project','reservation_verified':'naver_blog',
+    expected_channel = {'maintenance_verified':'project','recovery_verified':'project','reservation_verified':'naver_blog',
                         'public_verified':'cf_blog','public_answer_verified':'naver_kin',
                         'public_thread_verified':'threads'}[receipt['outcome']]
     if receipt['channel'] != expected_channel:
@@ -82,7 +82,54 @@ def validate_work_receipt(receipt):
         raise ValueError('Host checks lack exact artifact evidence')
     types = {c['type'] for c in checks}
     outcome = receipt['outcome']
-    if outcome == 'maintenance_verified':
+    if outcome == 'recovery_verified':
+        if not {'source_diff','tests_passed','original_task_verified'} <= types:
+            raise ValueError('Recovery checks missing')
+        bindings=[d for d in documents if isinstance(d,dict) and d.get('type')=='project_recovery_completion_v1']
+        if len(bindings)!=1:raise ValueError('Exact recovery completion required')
+        bound=bindings[0]
+        def linked(key):
+            ref=bound.get(key) or {}
+            if actual.get(str(Path(ref.get('path','')).resolve()))!=ref.get('sha256') or not ref.get('sha256'):
+                raise ValueError('Recovery artifact binding missing')
+            return json.loads(Path(ref['path']).read_bytes())
+        application,validation,review=linked('application'),linked('validation'),linked('finalReview')
+        manifest=linked('manifest')
+        candidate=bound.get('candidateSha256')
+        if (not candidate or application.get('status')!='applied' or application.get('productionApplied') is not True
+                or application.get('candidateSha256')!=candidate or validation.get('candidateSha256')!=candidate
+                or validation.get('status')!='isolated_verified' or validation.get('sandbox',{}).get('enforced') is not True
+                or not validation.get('results') or any(r.get('returncode')!=0 or r.get('summary',{}).get('executed',0)<=0 for r in validation['results'])
+                or review.get('candidateSha256')!=candidate
+                or any(review.get('verdict',{}).get(k) is not True for k in ('fixSupported','scopeRespected','gatesPreserved','testsRelevant','safeToApply'))
+                or review.get('route',{}).get('state')!='returned' or not review.get('route',{}).get('actualModel')
+                or validation.get('manifestSha256')!=bound['manifest']['sha256']
+                or review.get('manifestSha256')!=bound['manifest']['sha256']
+                or review.get('validationSha256')!=bound['validation']['sha256']
+                or application.get('validationSha256')!=bound['validation']['sha256']
+                or application.get('finalReviewSha256')!=bound['finalReview']['sha256']
+                or application.get('reviewSha256')!=validation.get('reviewSha256')
+                or not application.get('reviewSha256')
+                or application.get('before')!=manifest.get('sourceHashes')):
+            raise ValueError('Recovery code/test/independent review not verified')
+        candidate_document=linked('candidate')
+        if bound['candidate']['sha256']!=candidate or not candidate_document.get('changes'):
+            raise ValueError('Actual repair candidate missing')
+        if any(change.get('path') not in manifest.get('files',[]) for change in candidate_document['changes']):
+            raise ValueError('Recovery candidate outside verified manifest')
+        ledger=linked('controller')
+        if (ledger.get('taskId')!=bound.get('taskId') or ledger.get('planSha256')!=bound.get('planSha256')
+                or not ledger.get('plan',{}).get('failure')
+                or ledger.get('resumeAttempted') is not True or ledger.get('resumeResult',{}).get('ok') is not True
+                or ledger.get('application',{}).get('evidenceSha256')!=bound['application']['sha256']):
+            raise ValueError('Original task resume is not bound to repair')
+        work=linked('originalWork')
+        if work.get('outcome')=='recovery_verified':raise ValueError('Recursive recovery proof is prohibited')
+        validate_work_receipt(work)
+        proof=ledger.get('resumeResult',{}).get('verifiedWorkProof') or {}
+        if proof.get('sourceSha256')!=bound['originalWork']['sha256'] or str(Path(proof.get('sourceRef','')).resolve())!=str(Path(bound['originalWork']['path']).resolve()):
+            raise ValueError('Original verified work belongs to another result')
+    elif outcome == 'maintenance_verified':
         if not {'source_diff', 'http_response', 'read_only_state'} <= types:
             raise ValueError('Maintenance checks missing')
         proofs = [d for d in documents if isinstance(d,dict) and d.get('http',{}).get('status') == 200

@@ -48,6 +48,22 @@ class MemoryIntegrationTests(unittest.TestCase):
             configured_provider('task')
         self.assertIn('Later reviewer update', prompts[2])
 
+    def test_read_only_memory_injects_and_traces_without_recording_episode(self):
+        self.store.memory('memory','add',text='Verified bounded procedure')
+        seen=[]
+        @llm_client.memory_call
+        def provider(prompt):
+            seen.append(prompt)
+            llm_client.memory_event('must-not-record','task','Operational reply')
+            return llm_client.record_provider_memory_delivery(prompt,'codex','fixture',status='completed')
+        with patch.object(hermes_memory,'record_episode') as record:
+            trace=provider('관련 작업 점검',memory_read_only=True,memory_session_id='incident-one')
+            self.assertIn('Verified bounded procedure',seen[0])
+            self.assertTrue(trace['memoryPrefixPresent'])
+            self.assertEqual(trace['sessionId'],'incident-one')
+            record.assert_not_called()
+        self.assertFalse(llm_client._memory_read_only.get())
+
     def test_reviewer_skip_propagates_and_never_records_recursive_episode(self):
         @llm_client.memory_call
         def nested(prompt):
@@ -255,6 +271,30 @@ class MemoryIntegrationTests(unittest.TestCase):
             self.assertFalse(response.json()['schedulersStarted'])
             self.assertEqual(response.headers['access-control-allow-origin'], 'http://192.168.45.190:8790')
             self.assertEqual(client.get('/api/status', headers={'Origin': 'https://untrusted.invalid'}).status_code, 403)
+
+
+# Plain unittest runs must never publish fixture events or diagnose them in production.
+def setUpModule():
+    import tempfile
+    from pathlib import Path
+    from unittest.mock import patch
+    from common import repair_workflow
+    global _isolated_crew_temp, _isolated_crew_patches
+    _isolated_crew_temp = tempfile.TemporaryDirectory()
+    root = Path(_isolated_crew_temp.name)
+    _isolated_crew_patches = [
+        patch('common.crew_chat_bridge._deliver', return_value=True),
+        patch('common.crew_chat_bridge.OUTBOX_DIR', root / 'outbox'),
+        patch.object(repair_workflow, 'ROOT', root / 'repairs'),
+    ]
+    for guard in _isolated_crew_patches:
+        guard.start()
+
+
+def tearDownModule():
+    for guard in reversed(_isolated_crew_patches):
+        guard.stop()
+    _isolated_crew_temp.cleanup()
 
 
 if __name__ == '__main__':

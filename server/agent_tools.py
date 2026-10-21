@@ -18,6 +18,7 @@ Eliminates agent hallucinations by providing:
 from __future__ import annotations
 
 import json
+import contextvars
 import os
 import re
 import socket
@@ -442,7 +443,7 @@ def run_naver_publish(account_id: str = "", target_date: str = "") -> Dict[str, 
         exit_code="0 (background running)",
         stdout_tail=stdout_tail,
     )
-    badge = f"[실행 완료: 프로세스 PID {proc.pid} / {desc} 가동]"
+    badge = f"[실행 시작: 프로세스 PID {proc.pid} / 종료·발행 결과 미확인]"
     return {
         "ok": True,
         "tool": "run_naver_publish",
@@ -496,16 +497,20 @@ def run_cf_publish(domain: str = "", use_scheduler: bool = False) -> Dict[str, A
         "tool": "run_cf_publish",
         "cmd": cmd_str,
         "pid": proc.pid,
-        "exit_code": "0 (background running)",
+        "exit_code": None,
+        "status": "running",
+        "receiptPath": getattr(proc, "ego_receipt_path", None),
         "stdout_tail": stdout_tail,
     }
-    badge = f"[실행 완료: 프로세스 PID {proc.pid} / {desc} 가동]"
+    badge = f"[실행 시작: 프로세스 PID {proc.pid} / 종료·발행 결과 미확인]"
     return {
         "ok": True,
         "tool": "run_cf_publish",
         "pid": proc.pid,
         "cmd": cmd_str,
-        "exit_code": 0,
+        "exit_code": None,
+        "status": "running",
+        "publicationVerified": False,
         "stdout_tail": stdout_tail,
         "executionReceipt": receipt,
         "domain": dom or "catch-up-once",
@@ -551,7 +556,9 @@ def run_kin_publish(account_id: Optional[str] = None) -> Dict[str, Any]:
         "tool": "run_kin_publish",
         "cmd": cmd_str,
         "pid": proc.pid,
-        "exit_code": "0 (background running)",
+        "exit_code": None,
+        "status": "running",
+        "receiptPath": getattr(proc, "ego_receipt_path", None),
         "stdout_tail": stdout_tail,
     }
     badge = f"[실행 완료: 프로세스 PID {proc.pid} / 지식iN ({target_label}) 1사이클 즉시 실행]"
@@ -1711,6 +1718,10 @@ def validate_staff_actions(actions):
             raise ValueError('Invalid recipient')
         if tool == 'read_agent_status' and not args:
             pass
+        elif tool == 'advance_project_recovery' and set(args) == {'task_id','plan_sha256'}:
+            from common.repair_workflow import recovery_expected_actor
+            if recovery_expected_actor(args['task_id'], args['plan_sha256']) != agent:
+                raise ValueError('Recovery stage is not assigned to this recipient')
         elif tool == 'run_cf_domain' and agent == 'publi' and set(args) in ({'domain','source_sha256','artifact_sha256','review_sha256'},{'domain','source_sha256','artifact_sha256','review_sha256','revision_mode','revision_sha256'}) and args.get('revision_mode','review') in ('review','asset_revalidation') and args.get('domain') == 'soulnote.kr' and all(isinstance(args[k],str) and re.fullmatch(r'[0-9a-f]{64}',args[k]) for k in ('source_sha256','artifact_sha256','review_sha256')):
             pass
         elif tool == 'prepare_cf_source_fact' and agent == 'publi' and set(args) == {'source_sha256','request_sha256'} and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
@@ -1733,6 +1744,8 @@ def staff_instruction(action):
     name = names[action['agent']]
     if action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
+    elif action['tool'] == 'advance_project_recovery':
+        text = f'@{name}, 승인된 복구 계획에서 현재 배정된 한 단계만 실행하고 실제 결과를 보고해 주세요. 검수나 실행 결과가 불명확하면 재개하지 않습니다.'
     elif action['tool'] == 'run_cf_domain':
         text = '@퍼블리, 현재 준비된 글의 분류 표시를 수정한 화면으로 기존 원고를 재검수해 주세요. 승인 원고와 이미지를 보존하고 준비 검수까지만 진행하며 발행하지 않습니다.'
     elif action['tool'] == 'prepare_cf_source_fact':
@@ -1803,7 +1816,7 @@ def staff_tool_reply(agent, task_id, action, result, audit=None, *, stage='staff
         'personal data, shell commands or further tool requests. Return JSON reply only.\n' +
         json.dumps({'action':action,'actualToolResult':result},ensure_ascii=False)[:12000],
         provider=provider, model_override=model, observer=observe, timeout_seconds=45,
-        _skip_memory=True, crew_actor=agent,
+        memory_read_only=True, memory_session_id=task_id, crew_actor=agent,
         crew_actor_label={'jarvis':'자비스','publi':'퍼블리','patch':'패치','trace':'트레이스','radar':'레이더','doctor':'닥터'}[agent],
         crew_stage=stage, crew_task_id=task_id,
         response_schema={'type':'object','properties':{'reply':{'type':'string','minLength':1,'maxLength':120}},
@@ -2315,10 +2328,116 @@ def _route_patch_message(text: str) -> List[Dict[str, Any]]:
              "data": read_patch_data(), "productionApplied": False}]
 
 
+_EGO_REGISTERED_ACTION = contextvars.ContextVar('ego_registered_action', default=None)
+EGO_PROCESS_DIR = Path.home() / '.barolab' / 'process-receipts'
+
+
 def _ego_popen(*args, **kwargs):
-    from common.ego_telemetry import export_environment
+    """Keep actual child termination separate from publication success."""
+    import threading
+    import uuid
+    from common.ego_telemetry import export_environment, current_context
+    import hashlib
     kwargs['env'] = export_environment(kwargs.get('env'))
-    return subprocess.Popen(*args, **kwargs)
+    folder = EGO_PROCESS_DIR / uuid.uuid4().hex
+    folder.mkdir(parents=True, exist_ok=False, mode=0o700)
+    folder.chmod(0o700)
+    receipt_path = folder / 'receipt.json'
+    captured = []
+    for stream in ('stdout', 'stderr'):
+        if kwargs.get(stream) == subprocess.DEVNULL:
+            kwargs[stream] = subprocess.PIPE
+            captured.append(stream)
+    receipt = {'status': 'starting', 'startedAt': datetime.now(KST).isoformat(),
+               'exitCode': None, 'publicationVerified': False,
+               'context': current_context(), 'action': _EGO_REGISTERED_ACTION.get()}
+    request_id = receipt['context'].get('requestId', '')
+    original = STAFF_REQUEST_DIR / (hashlib.sha256(request_id.encode()).hexdigest() + '.json')
+    if request_id and original.is_file():
+        raw = original.read_bytes()
+        row = json.loads(raw)
+        if row.get('requestId') == request_id and row.get('taskId') == receipt['context'].get('taskId'):
+            request_copy = folder / 'request.json'
+            request_copy.write_bytes(raw)
+            request_copy.chmod(0o600)
+            receipt['originalTaskRef'] = {'requestId': request_id, 'taskId': row['taskId'],
+                                          'requestSha256': hashlib.sha256(raw).hexdigest()}
+
+    def save():
+        temporary = receipt_path.with_suffix('.tmp')
+        temporary.write_text(json.dumps(receipt, ensure_ascii=False), encoding='utf-8')
+        temporary.chmod(0o600)
+        temporary.replace(receipt_path)
+
+    save()
+    try:
+        proc = subprocess.Popen(*args, **kwargs)
+    except Exception as exc:
+        receipt.update(status='launch_failed', errorType=type(exc).__name__,
+                       finishedAt=datetime.now(KST).isoformat())
+        save()
+        raise
+    proc.ego_receipt_path = str(receipt_path)
+    receipt.update(status='running', pid=proc.pid)
+    try:
+        save()
+    except OSError as exc:
+        receipt['observationError'] = type(exc).__name__
+
+    def drain(stream):
+        saved = 0
+        try:
+            with (folder / (stream + '.log')).open('wb') as output:
+                (folder / (stream + '.log')).chmod(0o600)
+                pipe = getattr(proc, stream)
+                while True:
+                    chunk = (pipe.read1(8192) if hasattr(pipe, 'read1') else pipe.read(8192))
+                    if not chunk:
+                        break
+                    if isinstance(chunk, str):
+                        chunk = chunk.encode('utf-8', errors='replace')
+                    portion = chunk[:max(0, 1048576 - saved)]
+                    output.write(portion)
+                    output.flush()
+                    saved += len(portion)
+        except Exception as exc:
+            receipt[stream + 'CaptureError'] = type(exc).__name__
+            # Keep draining even when disk capture fails; never block the child.
+            try:
+                while getattr(proc, stream).read(8192):
+                    pass
+            except Exception:
+                pass
+        finally:
+            pipe = getattr(proc, stream, None)
+            if pipe is not None:
+                pipe.close()
+
+    readers = [threading.Thread(target=drain, args=(stream,), daemon=False)
+               for stream in captured]
+    for reader in readers:
+        reader.start()
+
+    def finish():
+        try:
+            code = proc.wait()
+            for reader in readers:
+                reader.join()
+            receipt.update(status='exited' if code == 0 else 'failed', exitCode=code,
+                           finishedAt=datetime.now(KST).isoformat())
+            save()
+        except Exception as exc:
+            receipt.update(status='unknown', errorType=type(exc).__name__)
+            try:
+                save()
+            except OSError:
+                pass  # Never repeat the child because observing its result failed.
+
+    # A short-lived caller must not discard the observer while its child runs.
+    observer = threading.Thread(target=finish, daemon=False)
+    proc.ego_observer = observer
+    observer.start()
+    return proc
 
 
 def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
@@ -2338,18 +2457,32 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         'sync_growth_metrics':'metrics', 'run_watchdog_heal':'project', 'restart_browser_cdp':'project',
         'fix_scheduler_task':'project', 'propose_coding_job':'project', 'read_coding_job_status':'project',
         'extract_youtube_or_url':'research', 'scout_high_value_keywords':'research',
-        'dispatch_multi_agent_action':'all_projects',
+        'dispatch_multi_agent_action':'all_projects', 'advance_project_recovery':'project',
     }
     fields['tool'] = tool_name if tool_name in projects else 'unknown'
     fields['project'] = projects.get(tool_name, 'unknown')
     if current_context().get('taskId') == 'direct:' + str(os.getpid()):
         fields['task_id'] = 'direct:' + uuid.uuid4().hex
-    with execution_context(**fields), action('tool', 'registered-tool'):
-        return _execute_agent_tool(slug, tool_name, **kwargs)
+    safe_args = {key: value for key, value in kwargs.items()
+                 if key in {'domain','account','source_sha256','artifact_sha256','review_sha256',
+                            'request_sha256','revision_mode','revision_sha256','task_id','plan_sha256'}
+                 and isinstance(value, str) and re.fullmatch(r'[A-Za-z0-9_.:-]{1,180}', value)}
+    token = _EGO_REGISTERED_ACTION.set({'agent': actor, 'tool': fields['tool'], 'args': safe_args,
+                                      'argumentsComplete': len(safe_args) == len(kwargs)})
+    try:
+        with execution_context(**fields), action('tool', 'registered-tool'):
+            return _execute_agent_tool(slug, tool_name, **kwargs)
+    finally:
+        _EGO_REGISTERED_ACTION.reset(token)
 
 
 def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     """Directly invoke one of the registered agent tools by name."""
+    if tool_name == 'advance_project_recovery':
+        from common.repair_workflow import recovery_expected_actor, advance_project_recovery
+        if set(kwargs) != {'task_id','plan_sha256'} or recovery_expected_actor(kwargs['task_id'], kwargs['plan_sha256']) != slug:
+            return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
+        return advance_project_recovery(kwargs['task_id'], kwargs['plan_sha256'], actor=slug)
     if tool_name == "read_agent_status":
         readers = {'publi': read_publi_data, 'trace': read_trace_data, 'patch': read_patch_data,
                    'doctor': read_doctor_data, 'radar': read_radar_data, 'jarvis': format_jarvis_context_block}

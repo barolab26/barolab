@@ -7,6 +7,193 @@ from unittest.mock import Mock, patch
 from common import repair_workflow as repair
 
 
+class ProjectRecoveryTests(unittest.TestCase):
+    """All models, crew events and operations are isolated from live workers."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
+        self.patchers=[patch.object(repair,'ROOT',self.root/'ledger'),
+            patch('common.crew_chat_bridge.emit_work_event',return_value='test-event')]
+        for item in self.patchers:item.start()
+        self.addCleanup(self.temp.cleanup)
+        for item in self.patchers:self.addCleanup(item.stop)
+        self.source=self.root/'source.json';self.source.write_text('{"items":[]}')
+        self.request=self.root/'request.json';self.request.write_text('{"status":"failed","results":[]}')
+        self.plan={'sourcePath':str(self.source),'originalRequestPath':str(self.request),
+            'originalRequestSha256':repair._sha(self.request.read_bytes()),
+            'projectRoot':str(self.root),'failure':[],
+            'action':{'agent':'publi','tool':'prepare_cf_source_fact','args':{}},
+            'sourceSnapshot':{'lastError':'Observed error'}}
+        self.digest=repair._sha(json.dumps(self.plan,sort_keys=True,ensure_ascii=False).encode())
+        self.path=repair._recovery_path('incident-1')
+        self.path.parent.mkdir(parents=True)
+        self.row={'type':'project_recovery_v1','taskId':'incident-1','plan':self.plan,
+            'planSha256':self.digest,'step':'discover','status':'ready','steps':{},'resumeAttempted':False}
+        repair.write(self.path,self.row)
+
+    def call(self,actor):
+        return repair.advance_project_recovery('incident-1',self.digest,actor=actor)
+
+    def set_step(self,step,**extra):
+        row=json.loads(self.path.read_bytes());row.update(step=step,status='ready',**extra)
+        repair.write(self.path,row)
+
+    def test_exact_actor_plan_and_single_phase_claim(self):
+        with self.assertRaises(ValueError):self.call('jarvis')
+        with self.assertRaises(ValueError):repair.advance_project_recovery('incident-1','0'*64,actor='patch')
+        with patch.object(repair,'_discover_recovery',return_value={'files':[],'testFiles':[]}) as discover:
+            self.assertEqual(self.call('patch')['nextStep'],'classify')
+            with self.assertRaises(ValueError):self.call('patch')
+            discover.assert_called_once()
+
+    def test_sandbox_and_final_review_are_required_before_apply(self):
+        self.set_step('test',job={'jobDir':'fixture','candidateSha256':'a'},review={'reviewSha256':'pre'})
+        with patch('common.coding_job.validate_coding_job',return_value={'status':'isolated_verified','sandbox':{'enforced':False}}) as validate:
+            self.assertEqual(self.call('doctor')['recoveryStatus'],'held')
+            self.assertEqual(validate.call_args.kwargs,{'sandbox':True,'review_sha256':'pre'})
+        self.assertFalse(json.loads(self.path.read_bytes())['resumeAttempted'])
+
+    def test_unknown_submission_does_not_resume_or_learn(self):
+        self.source.write_text('{"items":[{"status":"unknown","submittedAt":"actual-time"}]}')
+        self.set_step('resume')
+        with patch('common.ego_executor.execute_staff_action') as execute,patch('common.llm_client.record_verified_work') as learn:
+            self.assertEqual(self.call('publi')['recoveryStatus'],'held')
+            execute.assert_not_called();learn.assert_not_called()
+
+    def test_returned_operation_without_verified_proof_never_learns(self):
+        self.set_step('resume')
+        with patch('common.ego_executor.execute_staff_action',return_value={'ok':True,'status':'completed'}) as execute:
+            self.assertEqual(self.call('publi')['nextStep'],'verify')
+            execute.assert_called_once()
+        with patch('common.llm_client.record_verified_work') as learn:
+            self.assertEqual(self.call('jarvis')['recoveryStatus'],'awaiting_verified_work')
+            learn.assert_not_called()
+        with self.assertRaises(ValueError):self.call('publi')
+
+    def test_changed_original_request_blocks_resume(self):
+        self.set_step('resume');self.request.write_text('{"status":"completed"}')
+        with patch('common.ego_executor.execute_staff_action') as execute:
+            self.assertEqual(self.call('publi')['recoveryStatus'],'held')
+            execute.assert_not_called()
+
+    def test_busy_mutation_preserves_candidate_without_consuming_phase(self):
+        from contextlib import contextmanager
+        @contextmanager
+        def busy(_):
+            raise repair.RecoveryBusy('busy')
+            yield
+        self.set_step('apply',job={'candidateSha256':'same-candidate'})
+        with patch.object(repair,'_recovery_mutation_locks',busy),patch('common.coding_job.apply_coding_job') as apply:
+            result=self.call('patch')
+            apply.assert_not_called()
+        row=json.loads(self.path.read_bytes())
+        self.assertEqual(result['recoveryStatus'],'ready')
+        self.assertEqual(row['job']['candidateSha256'],'same-candidate')
+        self.assertNotIn('apply',row['steps'])
+        self.assertFalse(row['resumeAttempted'])
+
+    def test_unknown_project_cannot_gain_registered_mutation_lock(self):
+        self.row['plan']['project']='mobile_apps'
+        self.row['discovered']={'files':['apps/example.py']}
+        with self.assertRaises(ValueError), repair._recovery_mutation_locks(self.row):
+            pass
+
+    def test_original_execution_lookup_uses_immutable_snapshot_and_exact_action(self):
+        from server import agent_tools
+        staff=self.root/'staff';staff.mkdir()
+        receipts=self.root/'processes';folder=receipts/'actual-host-id';folder.mkdir(parents=True)
+        action={'agent':'publi','tool':'run_cf_domain','args':{'domain':'soulnote.kr',
+            'source_sha256':'a'*64,'artifact_sha256':'b'*64,'review_sha256':'c'*64}}
+        original={'requestId':'original','taskId':'staff:original','status':'processing','actions':[action]}
+        snapshot=folder/'request.json';snapshot.write_text(json.dumps(original))
+        snapshot_sha=repair._sha(snapshot.read_bytes())
+        original['status']='failed'
+        current=staff/(repair._sha(b'original')+'.json');current.write_text(json.dumps(original))
+        inspected=staff/'inspection.json';inspected.write_text(json.dumps({'actions':[{'agent':'patch','tool':'read_agent_status','args':{}}]}))
+        receipt={'status':'failed','action':{**action,'argumentsComplete':True},
+            'context':{'taskId':'staff:original'},'originalTaskRef':{'requestId':'original','taskId':'staff:original','requestSha256':snapshot_sha}}
+        (folder/'receipt.json').write_text(json.dumps(receipt))
+        incident={'observation':{'failures':[{'identity':'soulnote.kr'}]}}
+        with patch.object(agent_tools,'EGO_PROCESS_DIR',receipts),patch.object(agent_tools,'STAFF_REQUEST_DIR',staff):
+            selected,evidence=repair._original_recovery_request(incident,inspected)
+            self.assertEqual(selected,current)
+            self.assertEqual(evidence['originalTaskRef']['requestSha256'],snapshot_sha)
+            snapshot.write_text('{"changed":true}')
+            self.assertEqual(repair._original_recovery_request(incident,inspected),(inspected,None))
+
+    def test_dispatch_phase_request_is_idempotent_and_uses_expected_staff(self):
+        with patch('server.agent_tools.enqueue_staff_request',return_value={'requestId':'queued'}) as enqueue:
+            self.assertTrue(repair.dispatch_project_recovery_once())
+            self.assertFalse(repair.dispatch_project_recovery_once())
+            self.assertEqual(enqueue.call_args.args[1],[{'agent':'patch','tool':'advance_project_recovery',
+                'args':{'task_id':'incident-1','plan_sha256':self.digest}}])
+
+    def test_running_child_is_observed_until_terminal_without_reexecution(self):
+        from server import agent_tools
+        directory=self.root/'processes';folder=directory/'actual-child';folder.mkdir(parents=True)
+        receipt={'status':'running','pid':123,'startedAt':'actual-start',
+            'context':{'taskId':'incident-1','requestId':'recovery:'+self.digest},
+            'action':{**self.plan['action'],'argumentsComplete':True}}
+        receipt_path=folder/'receipt.json';receipt_path.write_text(json.dumps(receipt))
+        self.set_step('resume')
+        with patch.object(agent_tools,'EGO_PROCESS_DIR',directory),patch('common.ego_executor.execute_staff_action',return_value={'ok':True,'status':'running','receiptPath':str(receipt_path)}) as execute:
+            self.assertEqual(self.call('publi')['recoveryStatus'],'awaiting_completion')
+            receipt.update(status='exited',exitCode=0,finishedAt='actual-end');receipt_path.write_text(json.dumps(receipt))
+            self.assertTrue(repair.dispatch_project_recovery_once())
+            row=json.loads(self.path.read_bytes())
+            self.assertEqual((row['status'],row['step']),('ready','verify'))
+            self.assertTrue(row['resumeAttempted']);execute.assert_called_once()
+        with patch('common.llm_client.record_verified_work') as learn:
+            self.assertEqual(self.call('jarvis')['recoveryStatus'],'awaiting_verified_work')
+            learn.assert_not_called()
+
+    def test_actual_rejection_allows_one_new_candidate_not_business_retry(self):
+        job=self.root/'job';job.mkdir()
+        rejection={'route':{'state':'returned'},'verdict':{'scopeRespected':False,'reason':'Unrelated change'}}
+        (job/'review.json').write_text(json.dumps(rejection))
+        self.set_step('review',job={'jobDir':str(job),'candidateSha256':'candidate'})
+        with patch('common.coding_job.review_coding_job',side_effect=ValueError('rejected')):
+            result=self.call('jarvis')
+            self.assertEqual(result['nextStep'],'propose')
+            row=json.loads(self.path.read_bytes())
+            self.assertEqual(row['candidateRevision'],2);self.assertFalse(row['resumeAttempted'])
+            self.set_step('review')
+            self.assertEqual(self.call('jarvis')['recoveryStatus'],'held')
+
+    def test_original_work_lookup_never_selects_another_or_older_success(self):
+        from common.hermes_memory import write_verified_work_receipt
+        folder=self.root/'cf_posting/output/exact-slug/run';folder.mkdir(parents=True)
+        publication=folder/'publication.json';validation=folder/'validation.json'
+        publication.write_text(json.dumps({'status':'verified','postId':9,'publicUrl':'https://example.com/exact-slug'}))
+        validation.write_text(json.dumps({'publication':'verified','postId':9,'publicUrl':'https://example.com/exact-slug','verifiedAt':'actual-time'}))
+        proof=write_verified_work_receipt(folder/'work-learning-receipt.json',work_type='verified_work_receipt_v1',
+            channel='cf_blog',outcome='public_verified',scope='public_verified',source_agent='publi',
+            evidence_text='Exact original article identity and public content verified.',
+            artifacts=[{'path':str(p),'sha256':repair._sha(p.read_bytes())} for p in (publication,validation)],
+            checks=[{'type':k,'passed':True,'evidenceRef':str(p)} for k,p in [('public_identity',publication),('public_content',validation)]])
+        row={'plan':{'project':'cf_blog','projectRoot':str(self.root),'action':{'args':{'domain':'example.com'}},
+            'sourceSnapshot':{'items':[{'domain':'example.com','slug':'exact-slug','artifactFolder':'output/exact-slug/run'}]}},
+            'steps':{'resume':{'startedAt':0}}}
+        self.assertEqual(repair._find_recovery_work(row),proof)
+        row['steps']['resume']['startedAt']=repair.time.time()+1
+        self.assertIsNone(repair._find_recovery_work(row))
+        row['steps']['resume']['startedAt']=0
+        row['plan']['sourceSnapshot']['items'][0]['slug']='another-slug'
+        with self.assertRaises(ValueError):repair._find_recovery_work(row)
+
+    def test_discovery_binds_real_import_context_and_policy_without_model_paths(self):
+        (self.root/'main.py').write_text('import dependency\nPOLICY="policy.md"\n')
+        (self.root/'dependency.py').write_text('VALUE=1\n')
+        (self.root/'policy.md').write_text('Keep actual factual checks.\n')
+        (self.root/'test_main.py').write_text('import main\nimport unittest\n')
+        self.row['plan']['sourceSnapshot']={'lastError':'Traceback (most recent call last):\n  File "'+str(self.root/'main.py')+'", line 1\nValueError: actual failure'}
+        found=repair._discover_recovery(self.row)
+        self.assertEqual(found['files'],['main.py'])
+        self.assertEqual(found['testFiles'],['test_main.py'])
+        self.assertIn('dependency.py',found['contextFiles'])
+        self.assertIn('policy.md',found['policyFiles'])
+        self.assertEqual(found['fileHashes']['dependency.py'],repair._sha((self.root/'dependency.py').read_bytes()))
+
+
 class RepairWorkflowTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
@@ -223,5 +410,29 @@ class RepairWorkflowTests(unittest.TestCase):
         try:self.assertIsNone(repair.record_failed_event(event))
         finally:repair._active.reset(token)
         self.handler.assert_not_called()
+
+# Plain unittest runs must never publish fixture events or diagnose them in production.
+def setUpModule():
+    import tempfile
+    from pathlib import Path
+    from unittest.mock import patch
+    from common import repair_workflow
+    global _isolated_crew_temp, _isolated_crew_patches
+    _isolated_crew_temp = tempfile.TemporaryDirectory()
+    root = Path(_isolated_crew_temp.name)
+    _isolated_crew_patches = [
+        patch('common.crew_chat_bridge._deliver', return_value=True),
+        patch('common.crew_chat_bridge.OUTBOX_DIR', root / 'outbox'),
+        patch.object(repair_workflow, 'ROOT', root / 'repairs'),
+    ]
+    for guard in _isolated_crew_patches:
+        guard.start()
+
+
+def tearDownModule():
+    for guard in reversed(_isolated_crew_patches):
+        guard.stop()
+    _isolated_crew_temp.cleanup()
+
 
 if __name__=='__main__':unittest.main()

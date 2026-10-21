@@ -15,6 +15,7 @@ from common import llm_settings as settings
 _memory_session = ContextVar('barolab_memory_session', default=None)
 _memory_call_active = ContextVar('barolab_memory_call_active', default=False)
 _memory_skip = ContextVar('barolab_memory_skip', default=False)
+_memory_read_only = ContextVar('barolab_memory_read_only', default=False)
 _memory_delivery = ContextVar('barolab_memory_delivery', default=None)
 
 
@@ -89,7 +90,7 @@ def _memory_review(payload):
 def memory_event(event_id, event_type, summary, *, evidence=None, success=True,
                  session_id='', messages=None, review=False):
     """Persist evidence locally; review is queued and never runs on the caller thread."""
-    if _memory_skip.get():
+    if _memory_skip.get() or _memory_read_only.get():
         return None
     try:
         from common import hermes_memory
@@ -108,6 +109,7 @@ def memory_call(function):
     @functools.wraps(function)
     def wrapped(prompt, *args, **kwargs):
         explicit_session = kwargs.pop('memory_session_id', None)
+        read_only = kwargs.pop('memory_read_only', False) or _memory_read_only.get()
         skip = kwargs.pop('_skip_memory', False) or _memory_skip.get()
         if skip or _memory_call_active.get() or prompt == 'Return JSON {"ok":true}.':
             token = _memory_skip.set(skip)
@@ -137,6 +139,7 @@ def memory_call(function):
         except Exception as exc:
             logging.getLogger(__name__).warning('Memory context unavailable: %s', type(exc).__name__)
         token = _memory_call_active.set(True)
+        read_token = _memory_read_only.set(read_only)
         delivery = _memory_delivery.set({'eventId':event_id,'sessionId':session_id,'trace':trace,'prefix':prefix} if prefix else None)
         try:
             result = function(prompt, *args, **kwargs)
@@ -147,8 +150,10 @@ def memory_call(function):
         finally:
             _memory_call_active.reset(token)
             _memory_delivery.reset(delivery)
+            _memory_read_only.reset(read_token)
         response = result[0] if isinstance(result, tuple) else result
-        memory_event(event_id, 'llm_call_completed', 'Provider returned a structured response; task outcome is separate.',
+        if not read_only:
+            memory_event(event_id, 'llm_call_completed', 'Provider returned a structured response; task outcome is separate.',
                      session_id=session_id, evidence={'agent': scope, 'memoryTrace':trace},
                      messages=[{'role': 'user', 'content': str(original)[:6000]},
                                {'role': 'assistant', 'content': json.dumps(response, ensure_ascii=False)[:6000]}])

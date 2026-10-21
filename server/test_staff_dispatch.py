@@ -340,3 +340,61 @@ class StaffDispatchTests(unittest.TestCase):
 
 
 if __name__ == '__main__': unittest.main()
+
+
+class ProcessReceiptTests(unittest.TestCase):
+    def test_actual_exit_and_bounded_private_output(self):
+        import subprocess
+        import sys
+        from server import agent_tools as tools
+        with tempfile.TemporaryDirectory() as tmp, patch.object(tools, 'EGO_PROCESS_DIR', Path(tmp)):
+            for code in (0, 7):
+                proc = tools._ego_popen([sys.executable, '-c',
+                    'import sys; sys.stdout.write("x"*1100000); sys.exit(' + str(code) + ')'],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                proc.ego_observer.join(timeout=15)
+                self.assertFalse(proc.ego_observer.is_alive())
+                receipt = json.loads(Path(proc.ego_receipt_path).read_text())
+                self.assertEqual(receipt['exitCode'], code)
+                self.assertFalse(receipt['publicationVerified'])
+                self.assertEqual(receipt['status'], 'exited' if code == 0 else 'failed')
+                self.assertEqual(Path(proc.ego_receipt_path).with_name('stdout.log').stat().st_size, 1048576)
+
+    def test_launch_failure_is_recorded_without_retry(self):
+        from server import agent_tools as tools
+        with tempfile.TemporaryDirectory() as tmp, patch.object(tools, 'EGO_PROCESS_DIR', Path(tmp)), \
+             patch.object(tools.subprocess, 'Popen', side_effect=OSError('fixture')) as launch:
+            with self.assertRaises(OSError):
+                tools._ego_popen(['fixed-missing-executable'])
+            launch.assert_called_once()
+            receipt = json.loads(next(Path(tmp).glob('*/receipt.json')).read_text())
+            self.assertEqual(receipt['status'], 'launch_failed')
+            self.assertIsNone(receipt['exitCode'])
+            self.assertFalse(receipt['publicationVerified'])
+
+    def test_start_is_not_completion(self):
+        from server import agent_tools as tools
+        process = Mock(pid=123, ego_receipt_path='private-receipt')
+        data = {'cfPendingItems': [], 'cfScheduleDate':'2026-10-21', 'cfPublishedCount':0, 'cfTotalCount':1}
+        with patch.object(tools, '_ego_popen', return_value=process), patch.object(tools, 'read_publi_data', return_value=data):
+            result = tools.run_cf_publish(domain=tools.CF_16_DOMAINS[0])
+        self.assertIsNone(result['exit_code'])
+        self.assertEqual(result['status'], 'running')
+        self.assertFalse(result['publicationVerified'])
+        self.assertNotIn('실행 완료', result['badge'])
+
+
+class RecoveryDispatchTests(unittest.TestCase):
+    def test_exact_host_assigned_stage_only(self):
+        from server import agent_tools as tools
+        action = {'agent':'patch','tool':'advance_project_recovery',
+                  'args':{'task_id':'fixture-task','plan_sha256':'a'*64}}
+        with patch('common.repair_workflow.recovery_expected_actor', return_value='patch'), \
+             patch('common.repair_workflow.advance_project_recovery', return_value={'status':'held'}) as advance:
+            self.assertEqual(tools.validate_staff_actions([action]), [action])
+            self.assertEqual(tools._execute_agent_tool('patch', action['tool'], **action['args'])['status'], 'held')
+            advance.assert_called_once_with('fixture-task', 'a'*64, actor='patch')
+            action['agent'] = 'publi'
+            with self.assertRaises(ValueError):
+                tools.validate_staff_actions([action])
+            self.assertEqual(tools._execute_agent_tool('publi', action['tool'], **action['args'])['status'], 'forbidden')

@@ -133,7 +133,7 @@ def _triage(project, task_id, row, path):
         'Stale data is not proof of failed publishing. A quality hold is not permission to retry. '
         'Only repair_known_cf for an explicitly host-eligible listed domain may request the existing guarded repair workflow; it does not approve resumption or publication. Never select repair for quality holds or unknown submissions. Otherwise inspect or hold with domain empty. No arbitrary commands or restart.\n'
         + json.dumps({'observation':project,'hostEligibleRepairCandidates':candidates}, ensure_ascii=False), provider=provider, model_override=model,
-        response_schema=schema, observer=observe, _skip_memory=True,
+        response_schema=schema, observer=observe, memory_read_only=True, memory_session_id=task_id,
         timeout_seconds=120, crew_actor='jarvis', crew_actor_label='자비스', crew_stage='project-incident-triage', crew_task_id=task_id)
     if result.get('decision') not in ('inspect', 'repair_known_cf', 'hold') or not result.get('reason'):
         raise ValueError('Invalid triage decision')
@@ -231,6 +231,11 @@ def process_project_monitor_once():
 
 
 def process_project_feedback_once():
+    from common.repair_workflow import dispatch_project_recovery_once, prepare_project_recovery
+    # The existing supervisor consumes one next phase; no additional worker or
+    # model-generated command loop is introduced.
+    if dispatch_project_recovery_once():
+        return True
     from server.agent_tools import STAFF_REQUEST_DIR
     from common import llm_settings
     from common.llm_client import generate_json
@@ -274,7 +279,7 @@ def process_project_feedback_once():
                 'observed_resolved is allowed only if fresh host observation no longer reports the incident. '
                 'reason은 한국어 완결문 1~2개, 공백 포함 160자 이내로 작성하세요. 자신의 판단과 근거, 담당 직원과 아직 필요한 확인을 실제 근거 범위에서 간결히 말하세요. 직원을 언급할 때는 @자비스/@퍼블리/@패치/@닥터/@레이더/@트레이스 호칭을 사용하세요. 개인정보·경로·URL·비밀값은 쓰지 마세요. '
                 'No further actions, retries, publishing, or repair commands.\n'+json.dumps({'staff':safe_result,'current':current},ensure_ascii=False),
-                provider=provider,model_override=model,observer=observe,timeout_seconds=90,_skip_memory=True,
+                provider=provider,model_override=model,observer=observe,timeout_seconds=90,memory_read_only=True,memory_session_id=result['taskId'],
                 crew_actor='jarvis',crew_actor_label='자비스',crew_stage='project-result-review',crew_task_id=result['taskId'],
                 response_schema={'type':'object','properties':{'decision':{'type':'string','enum':['observed_resolved','needs_attention','unknown']},
                     'reason':{'type':'string','minLength':1,'maxLength':160}},'required':['decision','reason'],'additionalProperties':False})
@@ -301,6 +306,13 @@ def process_project_feedback_once():
             row['feedbackEventId']=emit_work_event(actor='jarvis',actor_label='자비스',task_id=result['taskId'],phase='completed',
                 stage='project-result-reviewed',parent_request_id=replies[-1].get('responseEventId','') if replies else '',
                 evidence_id=row['staffResultSha256'],model=actual_model, **display)
+
+            if verdict['decision']=='needs_attention':
+                # Save the actual independent verdict before binding it. Discovery
+                # runs even when only an inspection task exists; that cannot grant
+                # permission to invent a publication/resume command.
+                save_json(path,row)
+                row['recovery']=prepare_project_recovery(path,request_path)
 
         except Exception as exc:
             row['status']='feedback_hold';row['feedbackErrorType']=type(exc).__name__
