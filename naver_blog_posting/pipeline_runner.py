@@ -3531,6 +3531,17 @@ def require_content_handoff(folder, account):
         packet = load_material_manifest(handoff.file('materials-manifest.json'), account, material_roots())
         visuals = [row for row in packet['materials'] if row['source'] in VISUAL_SOURCES]
         verify_visual_records(visuals, [row['filePath'] for row in visuals], json.loads(handoff.file('material-observations.json').read_text(encoding='utf-8')), source_observations=True)
+    if (handoff.folder/'supplemental-visual-materials.json').is_file():
+        image_stage=next(row for row in handoff.data['stages'] if row['agent']=='image-maker')
+        if not {'supplemental-visual-materials.json','source-capture-repair.json'} <= set(image_stage['fileHashes']):
+            raise RuntimeError('Supplemental visual material was not accepted in the image stage')
+        supplemental=load_material_manifest(handoff.file('supplemental-visual-materials.json'),account,material_roots())
+        verified_context=publication_visual_context(handoff.folder,article,supplemental,json.loads(handoff.file('sources.json').read_text(encoding='utf-8')))
+        if (not supplemental['materials'] or any(row.get('source')!='capture' for row in supplemental['materials'])
+                or {row['materialId'] for row in supplemental['materials']} !=
+                {row['materialId'] for row in verified_context.get('hostVerifiedCaptureProvenance',[])}):
+            raise RuntimeError('Every supplemental capture requires verified acquisition provenance')
+        packet={**supplemental,'materials':(packet or {}).get('materials',[])+supplemental['materials']}
     image_result = json.loads(handoff.file('image-maker.json').read_text(encoding='utf-8'))
     require_generation_materials(article, image_result, folder, packet)
     bind_material_plans(image_plan, packet)
@@ -4251,7 +4262,7 @@ def render_preview(article, plans, folder):
     (folder / 'final.md').write_text('\n\n'.join(md), encoding='utf-8')
 
 
-def agent_output_schema(role, source_urls=None, comparison_urls=None):
+def agent_output_schema(role, source_urls=None, comparison_urls=None, image_slots=None):
     """Build strict JSON Schema contracts for agent handoffs."""
     def obj(properties, required=None):
         return {"type": "object", "properties": properties,
@@ -4314,9 +4325,12 @@ def agent_output_schema(role, source_urls=None, comparison_urls=None):
         return obj({"selectionReason": string(), "requiredMaterials": array(material), "imagePlans": array(plan, minimum=0, maximum=12)})
 
     if role == "assembler":
-        return obj({"inputComplete": boolean(), "layoutReady": boolean(),
+        schema = obj({"inputComplete": boolean(), "layoutReady": boolean(),
                     "issues": array(string()), "notes": array(string()), "imageSlots": array(integer(minimum=0), minimum=0),
                     "decorationPlan": obj({"stickers": array(obj({"afterBlock": integer(minimum=0)}), maximum=1)})})
+        if image_slots is not None:
+            schema['properties']['imageSlots']['enum'] = [list(image_slots)]
+        return schema
 
     if role == "reviewer":
         checks = REVIEW_CHECKS
@@ -5544,7 +5558,27 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             slot=attribution_slot, publication_date=RUN_OPTIONS.get('publication_date'),
             override_strategy_id=override_strategy_id, complete=False)
         acquisition_resume = RUN_OPTIONS.get('_visual_acquisition_resume')
-        if (review_handoff.folder/'source-capture-repair.json').is_file():
+        if len(review_handoff.check()) == 4:
+            resume_receipt=review_handoff.folder/'assembly-contract-resume.json'
+            if resume_receipt.exists():raise RuntimeError('Assembly contract resume was already attempted')
+            saved_plans=json.loads(review_handoff.file('image-plan.json').read_text(encoding='utf-8'))['imagePlans']
+            groups=json.loads(review_handoff.file('photo-review.json').read_text(encoding='utf-8'))['groups']
+            verify_visual_records(saved_plans,[review_handoff.file('images/'+p['filename']) for p in saved_plans],groups)
+            assembly=json.loads(review_handoff.file('assembler.json').read_text(encoding='utf-8'))
+            model_events=json.loads(review_handoff.file('assembler-model-events.json').read_text(encoding='utf-8'))
+            if (assembly.get('inputComplete') is not True or assembly.get('layoutReady') is not True
+                    or assembly.get('issues') != [] or assembly.get('imageSlots') == [p['afterBlock'] for p in saved_plans]
+                    or not any(event.get('state')=='returned' and event.get('actual_model') for event in model_events)):
+                raise RuntimeError('Only an actual assembler slot-contract mismatch can resume here')
+            backup=review_handoff.folder/('assembly-contract-backup-'+uuid.uuid4().hex[:10]);backup.mkdir()
+            hashes={}
+            for name in ('handoff.json','assembler.json','assembler-model-events.json','image-plan.json','photo-review.json'):
+                shutil.copyfile(review_handoff.file(name),backup/name);hashes[name]=sha(backup/name)
+                if hashes[name]!=sha(review_handoff.file(name)):raise RuntimeError('Assembly mismatch backup changed')
+            atomic_json(resume_receipt,{'reason':'bind assembly output schema to already approved image positions',
+                'acceptedStages':copy.deepcopy(review_handoff.data['stages']),'backupDirectory':backup.name,'backupHashes':hashes,
+                'approvedSlots':[p['afterBlock'] for p in saved_plans],'submissionAuthorized':False,'newCorrectionBudget':False})
+        elif (review_handoff.folder/'source-capture-repair.json').is_file():
             require_capture_repair_audit(review_handoff)
         elif acquisition_resume:
             require_visual_acquisition_resume(review_handoff, acquisition_resume)
@@ -5836,7 +5870,10 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             result = json.loads((folder/'image-maker.json').read_text(encoding='utf-8'))
         else:
             comparison_urls = [row['url'] for row in inputs['selectedEvidence']['competitors']] if role == 'researcher' else None
-            schema = agent_output_schema(role, [s['url'] for s in context.get('sources', [])], comparison_urls)
+            schema = agent_output_schema(role, [s['url'] for s in context.get('sources', [])], comparison_urls,
+                [p['afterBlock'] for p in plans] if role == 'assembler' else None)
+            if role == 'assembler':
+                prompt += '\nImage placement was chosen dynamically by image-maker and independently reviewed. Return the exact approved imageSlots from the schema; do not relocate images. Optional placement suggestions belong in notes; substantive placement defects require issues and layoutReady=false. This does not require acceptance.'
             if role == 'image-maker':
                 prompt, schema = supplied_capture_image_contract(prompt, schema, materials, results['writer']['readerTask']['requiredMaterialIds'])
             if role == 'researcher':
@@ -6329,6 +6366,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 'actualImageObservations':image_reviews}, ensure_ascii=False, indent=2), encoding='utf-8')
             outputs += ['image-plan.json', 'images.md']
         elif role == 'assembler':
+            if (folder/'assembly-contract-resume.json').is_file():outputs.append('assembly-contract-resume.json')
             writer = results['writer']
             if (result.get('inputComplete') is not True or result.get('layoutReady') is not True
                     or result.get('issues') != []

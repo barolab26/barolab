@@ -99,6 +99,52 @@ class SourceCaptureRepairTests(unittest.TestCase):
                 r.rereview_corrected_visual_preparation('soultin',self.folder)
             prepare.assert_not_called()
 
+    def test_assembler_schema_binds_reviewed_positions_including_zero_images(self):
+        for slots in ([2,4,8],[]):
+            schema=r.agent_output_schema('assembler',image_slots=slots)
+            self.assertEqual(schema['properties']['imageSlots']['enum'],[slots])
+        self.assertNotEqual(r.agent_output_schema('assembler',image_slots=[2,4,8])['properties']['imageSlots']['enum'],[[2,5,8]])
+
+    def final_validation_fixture(self, approved=True, changed_bytes=False, missing_provenance=False):
+        from contextlib import ExitStack
+        self.write('article.json',{'title':'Original approved title','blocks':[{'kind':'paragraph','text':'Actual approved answer body'}]})
+        self.write('review.json',{'articleSha256':r.sha(self.folder/'article.json')})
+        self.write('writer-demand-alignment.json',{})
+        selection={'readerQuestion':'What is the actual age?'};self.write('keyword-selector.json',selection)
+        body='Official exact age table';source={'url':'https://www.mohw.go.kr/menu.es?mid=a10714010200','text':body,'bodySha256':hashlib.sha256(body.encode()).hexdigest()}
+        self.write('sources.json',[source])
+        row={'materialId':'official','stepId':'age','source':'capture','filename':'example.jpg',
+            'filePath':str(self.folder/'images/example.jpg'),'sha256':'0'*64 if changed_bytes else r.sha(self.folder/'images/example.jpg'),
+            'sourceUrl':source['url'],'sourceBodySha256':source['bodySha256'],'capturedAt':'2026-10-21T00:00:00+00:00',
+            'sensitiveDataAbsent':True,'observation':body,'observedText':body}
+        if missing_provenance:row.pop('sourceBodySha256')
+        self.write('supplemental-visual-materials.json',{'version':1,'account':'soultin','readerQuestion':selection['readerQuestion'],'materials':[row]})
+        image_stage={'agent':'image-maker','fileHashes':{'source-capture-repair.json':'audit'}}
+        if approved:image_stage['fileHashes']['supplemental-visual-materials.json']='accepted packet'
+        handoff=types.SimpleNamespace(folder=self.folder,data={'stages':[image_stage]},check=lambda **kwargs:None,file=lambda name:self.folder/name)
+        stack=ExitStack()
+        stack.enter_context(patch.object(r,'AgentHandoff',return_value=handoff))
+        stack.enter_context(patch.object(r,'material_roots',return_value=[Path(self.tmp.name)/'output']))
+        for name in ('require_content_review','require_answer_plan_handoff','validate_answer_audit','validate_reader_demand_alignment'):
+            stack.enter_context(patch.object(r,name))
+        stack.enter_context(patch.object(r,'require_reader_demand_handoff',return_value=selection))
+        self.addCleanup(stack.close)
+
+    def test_final_publication_validation_rejects_unaccepted_supplement(self):
+        self.final_validation_fixture(approved=False)
+        with self.assertRaisesRegex(RuntimeError,'not accepted'):
+            r.require_content_handoff(self.folder,'soultin')
+
+    def test_final_publication_validation_rejects_changed_capture_bytes(self):
+        self.final_validation_fixture(changed_bytes=True)
+        with self.assertRaisesRegex(r.MaterialRequired,'bytes changed'):
+            r.require_content_handoff(self.folder,'soultin')
+
+    def test_final_publication_validation_rejects_missing_source_provenance(self):
+        self.final_validation_fixture(missing_provenance=True)
+        with self.assertRaisesRegex(RuntimeError,'Every supplemental capture'):
+            r.require_content_handoff(self.folder,'soultin')
+
     def test_saved_entry_uses_same_shared_repair_and_restores_options(self):
         context={'publicationAttempt':False,'runOptions':{'publication_date':'2026-10-22'}};self.write('preparation-context.json',context)
         from contextlib import nullcontext
