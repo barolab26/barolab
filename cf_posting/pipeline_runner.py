@@ -647,7 +647,7 @@ def preview(folder, article, plans, edits=None, domain=None):
             active_domain = 'must-good.com'
     assembled = assemble(article, ['images/' + p['filename'] for p in plans], plans, edits, domain=active_domain)
     (folder / 'assembled.html').write_text(assembled, encoding='utf-8')
-    final_doc = build_final_preview_html(active_domain, article.get('title', ''), assembled)
+    final_doc = build_final_preview_html(active_domain, article.get('title', ''), assembled, article_category=article['category'])
     (folder / 'final.html').write_text(final_doc, encoding='utf-8')
     (folder / 'final.md').write_text(f"# {article.get('title', '')}\n\n{assembled}", encoding='utf-8')
 
@@ -1283,6 +1283,22 @@ def draft_supplied_article(input_path, domain, categories, fixed, generate, prog
         handoff.accept(agent, outputs, attribution())
     return article, handoff
 
+def category_preview_only(report, article, categories, final_html):
+    """Only a verified shell-label mismatch; no article/category or verdict edits."""
+    checks = report.get('checks', {})
+    if report.get('status') != 'rejected' or not report.get('issues') or checks.get('categoryMatches') is not False:
+        return False
+    if any(checks.get(key) is not True for key in (*BLOG_REQUIRED_CHECKS, 'factsSupported') if key != 'categoryMatches'):
+        return False
+    category = article.get('category')
+    if category not in categories:
+        return False
+    if any(not re.search(r'분류|카테고리|category', str(issue), re.I) for issue in report['issues']):
+        return False
+    labels = BeautifulSoup(final_html, 'html.parser').select('.meta')
+    return len(labels) == 1 and labels[0].get_text(strip=True) != category
+
+
 def rework_review_draft(folder, domain, categories, generate, progress, attribution, layout_report=None):
     """One layout correction; original source pixels, task and body stay immutable."""
     folder = Path(folder).resolve()
@@ -1296,7 +1312,8 @@ def rework_review_draft(folder, domain, categories, generate, progress, attribut
     marker = folder/'surgical-repair-attempted.json'
     if marker.exists():
         raise ReviewRequired('repair_exhausted: 동일 원고의 자동 표시 보정은 이미 1회 완료되었습니다')
-    if not minor_review_only(report) and not (layout_report and cosmetic_issues_only(layout_report.get('issues'))):
+    category_repair = not layout_report and category_preview_only(report, article, categories, handoff.file('final.html').read_text(encoding='utf-8'))
+    if not category_repair and not minor_review_only(report) and not (layout_report and cosmetic_issues_only(layout_report.get('issues'))):
         raise ReviewRequired('content_review_required: 사실·자료·완료조건 검수는 표시 보정으로 통과시킬 수 없습니다')
     evidence = report
     if not layout_report and (evidence.get('articleSha256') != digest(folder/'article.json') or evidence.get('finalSha256') != digest(folder/'assembled.html')):
@@ -1929,12 +1946,18 @@ async def gather_sources(context, keyword):
         return await _gather_sources(context, keyword)
 
 
+def round_robin_sources(groups):
+    return [group[index] for index in range(max((len(g) for g in groups),default=0))
+            for group in groups if index < len(group)]
+
+
 async def _gather_sources(context, keyword):
     from common.browser_session import deny_downloads_async
     from common.public_capture import fetch_url_cached, is_blocked_download_url, is_pdf_or_download_trigger_url
     page = await context.new_page()
     await deny_downloads_async(page)
     sources = []
+    source_groups = []
     observations = []
     seen = set()
     try:
@@ -1968,9 +1991,12 @@ async def _gather_sources(context, keyword):
                         rendered = await rendered_source_snapshot(context, row, query_idx*10+i+1)
                         if rendered:
                             snapshots[i] = rendered
-                sources.extend(s for s in snapshots if s)
+                source_groups.append([{**source, 'searchQueryIndex':query_idx, 'searchQuery':query}
+                                      for source in snapshots if source])
             except Exception:
                 pass
+        # Distribute fetched bodies across actual queries before downstream caps.
+        sources = round_robin_sources(source_groups)
         return {'collectedAt': stamp(), 'searches': observations, 'sources': sources}
     finally:
         await page.close()
@@ -2562,6 +2588,8 @@ async def acquire_missing_source_facts(folder, missing, goal, generate, gather):
         if not isinstance(query,str) or not query.strip() or len(query)>280 or any(ord(c)<32 for c in query):
             raise ReviewRequired('Source acquisition query invalid')
         hosts.add(row['officialHost'])
+        query=re.sub(r'(?i)\bsite:[^\s]+', '', query).strip()
+        if not query:raise ReviewRequired('Source acquisition query has no subject')
         queries.append(query+' site:'+row['officialHost'])
     observed=await gather({'mainKeyword':goal['question'],'targetQuestion':goal['question'],'sourceQueries':queries})
     accepted=[]
@@ -2736,6 +2764,19 @@ def open_source_fact_continuation(folder, domain, recent):
         raise ReviewRequired('Source continuation not the current failed run')
     if schedule.get('date')!=datetime.datetime.now(KST).date().isoformat():
         raise ReviewRequired('Source continuation is not today')
+    depth=1
+    lineage=data.get('sourceFactContinuation')
+    if lineage:
+        parent=Path(lineage['originalFolder']).resolve()
+        if not parent.is_relative_to((BASE_DIR/'output').resolve()) or original.parent!=parent:
+            raise ReviewRequired('Source continuation parent binding mismatch')
+        parent_data=json.loads((parent/'handoff.json').read_text(encoding='utf-8'))
+        parent_claim=parent/'source-fact-continuation.json'
+        if (parent_data.get('sourceFactContinuation') or parent_data['runId']!=lineage.get('originalRunId')
+            or digest(parent_claim)!=lineage.get('claimSha256')
+            or digest(parent/'prewriter-acquisition-request.json')==digest(original/'prewriter-acquisition-request.json')):
+            raise ReviewRequired('Only one distinct follow-up source request may continue')
+        depth=2
     hashes={name:digest(original/name) for name in ('handoff.json','keywords.md','research.md','prewriter-acquisition-request.json')}
     claim=original/'source-fact-continuation.json'
     child=original/'source-fact-continuation'
@@ -2758,7 +2799,7 @@ def open_source_fact_continuation(folder, domain, recent):
     if digest(child/'keywords.md')!=hashes['keywords.md']:
         raise ReviewRequired('Keyword bytes changed during source continuation initialization')
     handoff.data['stages']=copy.deepcopy(data['stages'])
-    handoff.data['sourceFactContinuation']={'originalRunId':data['runId'],'claimSha256':digest(claim),'originalFolder':str(original)}
+    handoff.data['sourceFactContinuation']={'originalRunId':data['runId'],'claimSha256':digest(claim),'originalFolder':str(original),'depth':depth}
     handoff.save();handoff.check()
     return handoff,kw,goal,research,request
 
@@ -2850,6 +2891,12 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     if goal:
         research_schema['properties']['answerBrief'] = answer_brief_schema(goal, question_context)
         research_schema['required'].append('answerBrief')
+    catalog_evidence = {'scope':'full published inventory fetched by host', 'checkedPostCount':len(recent),
+        'catalogSha256':hashlib.sha256(json.dumps(recent,sort_keys=True,ensure_ascii=False).encode()).hexdigest(),
+        'exactSlugMatches':sum(row.get('slug')==slug for row in recent),
+        'exactTitleMatches':sum(row.get('title')==kw.get('title') for row in recent),
+        'semanticDuplicateJudgment':'not established by exact identity checks',
+        'publishedTitles':[{'slug':row.get('slug'),'title':row.get('title')} for row in recent]}
     acquisition_round = 1 if continuation else 0
     while True:
         research_data = generate(agent_prompt('researcher',
@@ -2857,7 +2904,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             'answerBrief가 요구된 호출은 실제 독자가 읽을 설명과 행동·계산·확인 결과를 먼저 완성한다. '
             '조사 노트나 개요로 대신하거나 빠진 풀이를 writer에게 넘기지 않는다. 개수를 채우지 않는다. ',
             {'keywords.md': kw, 'observations': compact_obs, 'readerGoal': goal,
-             'questionContext': question_context, 'actualMaterials': packet}), response_schema=research_schema)
+             'questionContext': question_context, 'actualMaterials': packet,
+             'hostPublishedCatalogEvidence':catalog_evidence}), response_schema=research_schema)
         if not isinstance(research_data, dict):
             raise ReviewRequired('리서처 구조화 응답 누락')
         raw_facts = research_data.get('facts') if isinstance(research_data.get('facts'), list) else []
@@ -2924,7 +2972,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                         '확인한다. 작성자 자기평가를 승인으로 취급하지 말고 direct-answer 또는 정확한 section id로 답 위치를 연결한다.',
                         {'readerGoal':goal,'questionContext':review_context,'facts':research_data['facts'],
                          'materials':packet,'answerBrief':current,
-                         'acquiredOfficialSourceBodies':acquired_sources,
+                         'acquiredOfficialSourceBodies':acquired_sources,'hostPublishedCatalogEvidence':catalog_evidence,
                          'sourceContract':'Check medical requiredAnswers against these actual bodies, not generated facts alone. Missing support must remain blocked.'}),response_schema=brief_review_schema(goal,current))
                     save_plan('review-' + str(attempt) + '-raw.json',raw)
                     bound = bind_brief_review_draft(raw,goal,current)

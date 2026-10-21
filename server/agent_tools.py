@@ -1711,9 +1711,11 @@ def validate_staff_actions(actions):
             raise ValueError('Invalid recipient')
         if tool == 'read_agent_status' and not args:
             pass
+        elif tool == 'run_cf_domain' and agent == 'publi' and set(args) == {'domain','source_sha256','artifact_sha256','review_sha256'} and args.get('domain') == 'soulnote.kr' and all(isinstance(args[k],str) and re.fullmatch(r'[0-9a-f]{64}',args[k]) for k in ('source_sha256','artifact_sha256','review_sha256')):
+            pass
         elif tool == 'prepare_cf_source_fact' and agent == 'publi' and set(args) == {'source_sha256','request_sha256'} and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
             pass
-        elif tool == 'verify_cf_source_fact_fix' and agent == 'patch' and set(args) == {'source_sha256'} and isinstance(args['source_sha256'], str) and re.fullmatch(r'[0-9a-f]{64}', args['source_sha256']):
+        elif tool == 'verify_cf_source_fact_fix' and agent == 'patch' and set(args) in ({'source_sha256'},{'source_sha256','renderer_sha256'}) and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
             pass
         elif tool == 'repair_cf_known_failure' and agent == 'patch' and set(args) in ({'domain'}, {'domain','evidencePath','evidenceSha256'}) and args['domain'] in CF_16_DOMAINS:
             pass  # The registered repair tool retains its own typed-failure/permit gates.
@@ -1731,6 +1733,8 @@ def staff_instruction(action):
     name = names[action['agent']]
     if action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
+    elif action['tool'] == 'run_cf_domain':
+        text = '@퍼블리, 현재 준비된 글의 분류 표시를 수정한 화면으로 기존 원고를 재검수해 주세요. 승인 원고와 이미지를 보존하고 준비 검수까지만 진행하며 발행하지 않습니다.'
     elif action['tool'] == 'prepare_cf_source_fact':
         text = '@퍼블리, 지정된 실패 작업의 공식 근거를 확보하고 같은 질문의 원고를 준비·검수해 주세요. 기존 1회 재개 제한을 지키며 이번 명령은 발행하지 않습니다.'
     elif action['tool'] == 'verify_cf_source_fact_fix':
@@ -2118,15 +2122,62 @@ def repair_cf_known_failure(domain: str, evidencePath=None, evidenceSha256=None)
             "state": "등록된 오류의 검증·독립 검수를 시작했습니다. 재개와 게시 결과는 아직 확인되지 않았습니다."}
 
 
+def review_cf_existing(domain, source_sha256, artifact_sha256, review_sha256):
+    """Bounded existing article review; fixed CLI, no free path or publish switch."""
+    import hashlib
+    from common.ego_telemetry import export_environment
+    if domain != 'soulnote.kr':
+        return {'ok':False,'status':'held','reason':'unsupported_review_domain'}
+    sources = ['cf_posting/pipeline_runner.py','cf_posting/domain_themes.py']
+    actual_source = hashlib.sha256(json.dumps({name:hashlib.sha256((BASE_DIR/name).read_bytes()).hexdigest()
+        for name in sources},sort_keys=True).encode()).hexdigest()
+    schedule = _read_json(BASE_DIR/'cf_posting/data/daily_schedule.json',{})
+    item = next((row for row in schedule.get('items',[]) if row.get('domain') == domain),{})
+    relative = 'output/national-certification-exam-schedule-registration-checklist/run-20261021-161201-409636'
+    folder = BASE_DIR/'cf_posting'/relative
+    if (actual_source != source_sha256 or item.get('artifactFolder') != relative
+            or schedule.get('date') != get_kst_now().date().isoformat() or item.get('status') != 'review_required'
+            or folder.is_symlink() or any((folder/name).is_symlink() for name in ('article.json','review.json'))
+            or hashlib.sha256((folder/'article.json').read_bytes()).hexdigest() != artifact_sha256
+            or hashlib.sha256((folder/'review.json').read_bytes()).hexdigest() != review_sha256):
+        return {'ok':False,'status':'held','tool':'run_cf_domain','reason':'review_evidence_changed'}
+    environment = export_environment()
+    for key in ('CF_ARTICLE_FILE','CF_ARTICLE_INPUT_FILE','CF_REWORK_FOLDER','CF_LAYOUT_REVIEW_FOLDER','CF_REVISION_POST_ID','CF_FROM_CLEANER'):
+        environment.pop(key,None)
+    environment['CF_REVIEW_REWORK_FOLDER'] = str(folder)
+    log = Path.home()/'.barolab/scratch/soulnote-crew-review/prepare.log'
+    log.parent.mkdir(parents=True,exist_ok=True)
+    with log.open('ab') as output:
+        child = _ego_popen([sys.executable,'-u',str(BASE_DIR/'cf_posting/pipeline_runner.py'),domain,'--prepare-only'],
+            cwd=BASE_DIR,env=environment,stdout=output,stderr=subprocess.STDOUT)
+        code = child.wait()
+    return {'ok':code == 0,'status':'returned' if code == 0 else 'failed','tool':'run_cf_domain',
+            'pid':child.pid,'exitCode':code,'sourceSha256':actual_source,'artifactSha256':artifact_sha256,
+            'reviewSha256':review_sha256,'outputSha256':hashlib.sha256(log.read_bytes()).hexdigest(),
+            'publicationAttempted':False,'publicSuccessInferred':False}
+
+
 def prepare_cf_source_fact(source_sha256, request_sha256):
     """One source-bound existing preparation; no caller command or path is accepted."""
     import hashlib
     source = BASE_DIR / 'cf_posting/pipeline_runner.py'
-    folder = BASE_DIR / 'cf_posting/output/wrist-pain-when-bending-or-bearing-weight/run-20261021-171212-82b832'
-    request = folder / 'prewriter-acquisition-request.json'
-    if (hashlib.sha256(source.read_bytes()).hexdigest() != source_sha256
-            or hashlib.sha256(request.read_bytes()).hexdigest() != request_sha256):
+    original = BASE_DIR / 'cf_posting/output/wrist-pain-when-bending-or-bearing-weight/run-20261021-171212-82b832'
+    if original.is_symlink():
+        return {'ok':False,'tool':'prepare_cf_source_fact','status':'held','reason':'invalid_artifact_root'}
+    candidates = [original, original / 'source-fact-continuation']
+    matched = [folder for folder in candidates if not folder.is_symlink()
+               and (folder / 'prewriter-acquisition-request.json').is_file()
+               and not (folder / 'prewriter-acquisition-request.json').is_symlink()
+               and hashlib.sha256((folder / 'prewriter-acquisition-request.json').read_bytes()).hexdigest() == request_sha256]
+    if hashlib.sha256(source.read_bytes()).hexdigest() != source_sha256 or len(matched) != 1:
         return {'ok':False,'tool':'prepare_cf_source_fact','status':'held','reason':'evidence_changed'}
+    folder = matched[0]
+    original_request = json.loads((original / 'prewriter-acquisition-request.json').read_text(encoding='utf-8'))
+    selected = json.loads((folder / 'prewriter-acquisition-request.json').read_text(encoding='utf-8'))
+    if (not selected.get('readerGoal') or selected['readerGoal'] != original_request.get('readerGoal')
+            or selected.get('articleSlug') != original_request.get('articleSlug')):
+        return {'ok':False,'tool':'prepare_cf_source_fact','status':'held','reason':'reader_goal_changed'}
+    # The existing CLI rechecks today's domain/artifact, unknown/public evidence and one-use claim.
     log = Path.home() / '.barolab/scratch/healthcox-crew-dispatch/prepare.log'
     log.parent.mkdir(parents=True,exist_ok=True)
     with log.open('ab') as output:
@@ -2140,20 +2191,31 @@ def prepare_cf_source_fact(source_sha256, request_sha256):
             'publicationAttempted':False,'publicSuccessInferred':False}
 
 
-def verify_cf_source_fact_fix(source_sha256):
+def verify_cf_source_fact_fix(source_sha256, renderer_sha256=None):
     """Fixed regression execution only; never accepts commands or publication args."""
     import hashlib
     source = BASE_DIR / 'cf_posting/pipeline_runner.py'
     actual = hashlib.sha256(source.read_bytes()).hexdigest()
     if actual != source_sha256:
         return {'ok':False,'status':'held','tool':'verify_cf_source_fact_fix','reason':'source_changed'}
+    renderer = BASE_DIR / 'cf_posting/domain_themes.py'
+    if renderer_sha256 is not None and hashlib.sha256(renderer.read_bytes()).hexdigest() != renderer_sha256:
+        return {'ok':False,'status':'held','tool':'verify_cf_source_fact_fix','reason':'renderer_changed'}
+    modules = ['cf_posting.test_source_fact_recovery']
+    if renderer_sha256 is not None:
+        modules.append('cf_posting.test_category_preview')
+    extra_test = BASE_DIR / 'cf_posting/test_category_preview.py'
+    extra_sha = hashlib.sha256(extra_test.read_bytes()).hexdigest() if renderer_sha256 is not None else None
     test_source = BASE_DIR / 'cf_posting/test_source_fact_recovery.py'
     test_sha = hashlib.sha256(test_source.read_bytes()).hexdigest()
     from common.ego_telemetry import export_environment
-    result = subprocess.run([sys.executable, '-m', 'unittest', 'cf_posting.test_source_fact_recovery'],
+    result = subprocess.run([sys.executable, '-m', 'unittest', *modules],
         cwd=BASE_DIR, env=export_environment(), capture_output=True, timeout=180)
     stable = hashlib.sha256(source.read_bytes()).hexdigest() == actual
     test_stable = hashlib.sha256(test_source.read_bytes()).hexdigest() == test_sha
+    if renderer_sha256 is not None:
+        stable = stable and hashlib.sha256(renderer.read_bytes()).hexdigest() == renderer_sha256
+        test_stable = test_stable and hashlib.sha256(extra_test.read_bytes()).hexdigest() == extra_sha
     output = (result.stdout + result.stderr).decode('utf-8', errors='replace')
     counts = re.findall(r'^Ran (\d+) tests? in ', output, re.MULTILINE)
     tests_run = int(counts[-1]) if counts else 0
@@ -2165,6 +2227,7 @@ def verify_cf_source_fact_fix(source_sha256):
             'tool':'verify_cf_source_fact_fix','sourceSha256':actual,'sourceUnchanged':stable,
             'testModule':'cf_posting.test_source_fact_recovery','exitCode':result.returncode,
             'testSha256':test_sha,'testUnchanged':test_stable,'testsRun':tests_run,'skipped':skipped,
+            'rendererSha256':renderer_sha256,'categoryTestSha256':extra_sha,'testModules':modules,
             'outputSha256':hashlib.sha256(result.stdout + result.stderr).hexdigest(),
             'productionApplied':False,'publicationAttempted':False}
 
@@ -2250,14 +2313,18 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
         if slug not in readers or kwargs:
             return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
         return {'ok': True, 'status': 'observed', 'tool': tool_name, 'data': readers[slug]()}
+    if tool_name == "run_cf_domain" and "source_sha256" in kwargs:
+        if slug != "publi" or set(kwargs) != {"domain","source_sha256","artifact_sha256","review_sha256"}:
+            return {"ok":False,"status":"forbidden","tool":tool_name}
+        return review_cf_existing(**kwargs)
     if tool_name == "prepare_cf_source_fact":
         if slug != "publi" or set(kwargs) != {"source_sha256","request_sha256"}:
             return {"ok":False,"status":"forbidden","tool":tool_name}
         return prepare_cf_source_fact(**kwargs)
     if tool_name == "verify_cf_source_fact_fix":
-        if slug != "patch" or set(kwargs) != {"source_sha256"}:
+        if slug != "patch" or set(kwargs) not in ({"source_sha256"},{"source_sha256","renderer_sha256"}):
             return {"ok":False,"status":"forbidden","tool":tool_name}
-        return verify_cf_source_fact_fix(kwargs["source_sha256"])
+        return verify_cf_source_fact_fix(**kwargs)
     if tool_name == "repair_cf_known_failure":
         if slug != "patch": return {"ok": False, "tool": tool_name, "status": "forbidden"}
         return repair_cf_known_failure(kwargs.get('domain', ''),kwargs.get('evidencePath'),kwargs.get('evidenceSha256'))

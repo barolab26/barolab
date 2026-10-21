@@ -33,6 +33,14 @@ class SourceFactAcquisitionTests(unittest.TestCase):
         self.gather.return_value={'sources':[{'url':self.source['url'],'snippet':'fake summary'},
                                            {**self.source,'url':'https://example.com/'}]}
         self.assertIsNone(self.run_call())
+    def test_queries_have_one_host_and_groups_share_capacity(self):
+        self.model.return_value={'queries':[{'query':'site:nhs.uk wrist pain site:example.com','officialHost':'nhs.uk'}]}
+        self.run_call()
+        query=self.gather.call_args.args[0]['sourceQueries'][0]
+        self.assertEqual(query.count('site:'),1)
+        self.assertNotIn('example.com',query)
+        self.assertEqual(r.round_robin_sources([['a1','a2','a3','a4'],['b1','b2','b3'],[]])[:6],['a1','b1','a2','b2','a3','b3'])
+
     def test_hash_mismatch_fails_closed(self):
         self.gather.return_value={'sources':[{**self.source,'bodySha256':'0'*64}]}
         with self.assertRaises(r.ReviewRequired):self.run_call()
@@ -110,6 +118,18 @@ class SourceContinuationTests(unittest.TestCase):
         self.item['submissionStarted']=True;self.save_schedule()
         with self.assertRaises(r.ReviewRequired):r.open_source_fact_continuation(self.folder,'healthcox.com',[])
         self.assertFalse((self.folder/'source-fact-continuation.json').exists())
+    def test_new_request_followup_once_preserves_lineage(self):
+        first,*_=r.open_source_fact_continuation(self.folder,'healthcox.com',[])
+        def fail_again(h,reason):
+            r.document(h.folder/'research.md','Research',{'readerGoal':self.goal,'observations':{'sources':[]}})
+            (h.folder/'prewriter-acquisition-request.json').write_text(json.dumps({'status':'answer_inputs_required','readerGoal':self.goal,'missingInputs':[{'kind':'source_fact','reason':reason}]}),encoding='utf-8')
+            self.item.update(artifactFolder=str(h.folder),status='review_required');self.save_schedule()
+        fail_again(first,'new missing criteria')
+        second,*_=r.open_source_fact_continuation(first.folder,'healthcox.com',[])
+        self.assertEqual(second.data['sourceFactContinuation']['depth'],2)
+        fail_again(second,'another reason cannot reset budget')
+        with self.assertRaises(r.ReviewRequired):r.open_source_fact_continuation(second.folder,'healthcox.com',[])
+
     def test_changed_approved_keyword_rejected(self):
         with (self.folder/'keywords.md').open('a',encoding='utf-8') as stream:stream.write('modified')
         with self.assertRaises(r.ReviewRequired):r.open_source_fact_continuation(self.folder,'healthcox.com',[])

@@ -35,6 +35,31 @@ class StaffDispatchTests(unittest.TestCase):
         self.scope['staff_tool_reply'] = Mock(return_value={'reply':'대기 2건을 확인했으며 수리는 실행하지 않았습니다.',
             'route':{'events':[{'actualModel':'configured-model'}]}})
 
+    def test_prepare_selects_only_bound_same_goal_request(self):
+        import sys, subprocess
+        tree = ast.parse(Path(__file__).with_name('agent_tools.py').read_text(encoding='utf-8'))
+        node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'prepare_cf_source_fact')
+        root = Path(self.temp.name)
+        source = root / 'cf_posting/pipeline_runner.py'; source.parent.mkdir(); source.write_text('# fixed')
+        original = root / 'cf_posting/output/wrist-pain-when-bending-or-bearing-weight/run-20261021-171212-82b832'
+        child = original / 'source-fact-continuation'; child.mkdir(parents=True)
+        original.joinpath('prewriter-acquisition-request.json').write_text(json.dumps({'readerGoal':{'question':'fixed'},'articleSlug':'fixed'}))
+        request = child / 'prewriter-acquisition-request.json'
+        request.write_text(json.dumps({'readerGoal':{'question':'fixed'},'articleSlug':'fixed','missingInputs':['new']}))
+        process = Mock(); process.pid=123; process.wait.return_value=0; popen=Mock(return_value=process)
+        scope={'BASE_DIR':root,'Path':Path,'json':json,'sys':sys,'subprocess':subprocess,'_ego_popen':popen}
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'<prepare>','exec'),scope)
+        digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+        with patch.object(Path,'home',return_value=root):
+            result=scope['prepare_cf_source_fact'](digest(source),digest(request))
+            self.assertFalse(result['publicationAttempted'])
+            self.assertEqual(popen.call_args.args[0][-1],str(child))
+            self.assertIn('--prepare-only',popen.call_args.args[0])
+            popen.reset_mock(); request.write_text(json.dumps({'readerGoal':{'question':'changed'},'articleSlug':'fixed'}))
+            self.assertEqual(scope['prepare_cf_source_fact'](digest(source),digest(request))['status'],'held')
+            popen.assert_not_called()
+            self.assertEqual(scope['prepare_cf_source_fact'](digest(source),'0'*64)['status'],'held')
+
     def test_fixed_cf_verification_preserves_nonzero_and_checks_source(self):
         import subprocess, sys
         tree = ast.parse(Path(__file__).with_name('agent_tools.py').read_text(encoding='utf-8'))
@@ -55,6 +80,13 @@ class StaffDispatchTests(unittest.TestCase):
         run.return_value.stderr = b'Ran 2 tests in 0.1s\n\nOK\n'
         self.assertTrue(verify(hashlib.sha256(source.read_bytes()).hexdigest())['ok'])
         self.assertEqual(run.call_args.args[0][1:],['-m','unittest','cf_posting.test_source_fact_recovery'])
+        renderer=source.with_name('domain_themes.py'); renderer.write_text('# renderer')
+        source.with_name('test_category_preview.py').write_text('# fixed category tests')
+        checked=verify(hashlib.sha256(source.read_bytes()).hexdigest(),hashlib.sha256(renderer.read_bytes()).hexdigest())
+        self.assertTrue(checked['ok'])
+        self.assertEqual(checked['testModules'],['cf_posting.test_source_fact_recovery','cf_posting.test_category_preview'])
+        self.assertEqual(run.call_args.args[0][-1],'cf_posting.test_category_preview')
+        self.assertEqual(verify(hashlib.sha256(source.read_bytes()).hexdigest(),'0'*64)['status'],'held')
 
     def test_fixed_cf_verification_is_patch_only_and_has_no_arbitrary_command(self):
         action = {'agent':'patch','tool':'verify_cf_source_fact_fix','args':{'source_sha256':'a'*64}}

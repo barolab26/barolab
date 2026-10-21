@@ -2562,7 +2562,7 @@ figure.post-image a[aria-label*="원본 화면 크게 보기"] img {{
     return css.strip() + "\n\n" + CARD_CSS + "\n\n" + SIDEBAR_LIST_CSS + "\n\n" + MOBILE_HEADER_CSS
 
 
-def build_final_preview_html(domain: str, title: str, assembled_html: str) -> str:
+def build_final_preview_html(domain: str, title: str, assembled_html: str, article_category=None) -> str:
     """
     Build the standalone `final.html` preview document for a domain while preserving 100% of
     `assembled_html` text/headings/tables/images inside `<article class="gs-article content">`
@@ -2595,7 +2595,9 @@ def build_final_preview_html(domain: str, title: str, assembled_html: str) -> st
     body_with_mid_ad = str(soup)
     safe_title = html.escape(title or "")
     safe_name = html.escape(spec["name"])
-    safe_cat = html.escape(spec["category"])
+    if article_category is not None and article_category not in spec["categories"]:
+        raise ValueError("Preview article category is not registered")
+    safe_cat = html.escape(article_category if article_category is not None else spec["category"])
     head_inj = build_live_cf_head_injection(domain, "")
 
     return (
