@@ -36,18 +36,18 @@ class CaptureMaterialTests(unittest.TestCase):
         prompt = r.ROLE_SCHEMAS['image-maker']
         actual, bound = r.supplied_capture_image_contract(prompt, schema,
             {'materials': [{'materialId': 'documents', 'source': 'capture'},
-                           {'materialId': 'eligibility', 'source': 'capture'}]})
+                           {'materialId': 'eligibility', 'source': 'capture'}]}, ['documents','eligibility'])
         plans = bound['properties']['imagePlans']
         self.assertEqual((plans['minItems'], plans['maxItems']), (2, 2))
         self.assertEqual(plans['items']['properties']['materialId']['enum'], ['documents', 'eligibility'])
         self.assertEqual(plans['items']['properties']['source']['enum'], ['capture'])
         self.assertNotIn('at least 3', actual)
-        self.assertIn('each materialId exactly once', actual)
+        self.assertIn('at most once', actual)
         self.assertEqual(schema, original)
         normal_prompt, normal_schema = r.supplied_capture_image_contract(prompt, schema, None)
         self.assertEqual(normal_prompt, prompt)
         self.assertEqual((normal_schema['properties']['imagePlans']['minItems'],
-                          normal_schema['properties']['imagePlans']['maxItems']), (3, 5))
+                          normal_schema['properties']['imagePlans']['maxItems']), (0, 12))
 
     def test_two_capture_model_output_stays_two_through_host_padding_and_validation(self):
         from naver_blog_posting import pipeline_runner as r
@@ -74,7 +74,7 @@ class CaptureMaterialTests(unittest.TestCase):
         self.assertEqual(len(plans), 2)
         self.assertEqual(len(list((run/'images').iterdir())), 2)
         generated = r.pad_generated_image_plans([], None, blocks, 'keyword', 'title')
-        self.assertEqual(len(generated), 3)
+        self.assertEqual(generated, [])
         self.assertTrue(all(plan['source'] == 'generated' for plan in generated))
 
     def test_assembly_receives_hash_checked_pixels_and_kst_dates_without_claiming_direct_view(self):

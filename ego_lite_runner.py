@@ -193,13 +193,18 @@ def main_loop():
 
 
 def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=None,
-                      main_keyword=None, evidence_dir=None, prepared_dir=None, strategy=None, materials_manifest=None, reserve_time=None):
+                      main_keyword=None, evidence_dir=None, prepared_dir=None, strategy=None, materials_manifest=None, reserve_time=None,
+                      prepare_only=False):
     """Route a local explicit request through the existing reviewed Naver runner."""
     from common.ubuntu_naver_browser import accounts
     if account not in accounts():
         raise ValueError("Unknown Naver account")
     command = [sys.executable, str(ROOT / "naver_blog_posting/pipeline_runner.py"),
                "--account", account, "--visible"]
+    if prepare_only:
+        if prepared_dir is not None:
+            raise ValueError("Preparation-only creates new artifacts, not a submission from prepared-dir")
+        command.append("--prepare-only")
     for flag, value in (("--slot", slot), ("--publication-date", publication_date),
                         ("--topic-seed", topic_seed), ("--main-keyword", main_keyword),
                         ("--evidence-dir", evidence_dir), ("--prepared-dir", prepared_dir),
@@ -208,6 +213,9 @@ def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=N
         if value is not None:
             command.extend([flag, str(value)])
     environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
+    if prepare_only:
+        # A preparation fixture must not mutate the publication reconciliation ledger.
+        return subprocess.run(command, cwd=str(ROOT), env=environment, shell=False).returncode
     refreshed = subprocess.run([sys.executable, "-m", "naver_blog_posting.account_reconciliation",
                                 "--account", account, "--refresh"],
                                cwd=str(ROOT), env=environment, shell=False)
@@ -237,6 +245,7 @@ def main(argv=None):
     naver_mode.add_argument("--naver-account", choices=tuple(accounts()))
     naver_mode.add_argument("--naver-catch-up", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--slot")
     parser.add_argument("--reserve-time")
     parser.add_argument("--publication-date")
@@ -249,6 +258,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.dry_run and not args.naver_catch_up:
         parser.error("--dry-run requires --naver-catch-up")
+    if args.prepare_only and not args.naver_account:
+        parser.error("--prepare-only requires --naver-account")
     if not args.naver_account and any((args.slot, args.publication_date, args.topic_seed,
                                       args.main_keyword, args.evidence_dir, args.prepared_dir,
                                       args.strategy, args.materials_manifest, args.reserve_time)):
@@ -265,7 +276,8 @@ def main(argv=None):
                                          publication_date=args.publication_date, topic_seed=args.topic_seed,
                                          main_keyword=args.main_keyword, evidence_dir=args.evidence_dir,
                                          prepared_dir=args.prepared_dir, strategy=args.strategy,
-                                         materials_manifest=args.materials_manifest, reserve_time=args.reserve_time)
+                                         materials_manifest=args.materials_manifest, reserve_time=args.reserve_time,
+                                         prepare_only=args.prepare_only)
             main_loop()
         else:
             print("EGO LITE is already running.", flush=True)

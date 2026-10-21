@@ -15,6 +15,18 @@ import ego_lite_runner as ego
 
 
 class VisibleWorkflowTests(unittest.TestCase):
+    def test_preparation_only_skips_publication_reconciliation(self):
+        with patch.object(ego.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as run:
+            self.assertEqual(ego.run_visible_naver('soultin', prepare_only=True), 0)
+        self.assertEqual(run.call_count, 1)
+        self.assertIn('--prepare-only', run.call_args.args[0])
+        self.assertIn('--visible', run.call_args.args[0])
+        self.assertNotIn('--refresh', run.call_args.args[0])
+        with patch.object(ego.subprocess, 'run') as run:
+            with self.assertRaises(ValueError):
+                ego.run_visible_naver('soultin', prepare_only=True, prepared_dir='/prior/publication')
+            run.assert_not_called()
+
     def test_catch_up_dry_run_only_reads_existing_plan(self):
         with patch.object(runner, 'recovery_plan', return_value={'eligible': []}) as plan, \
                 patch.object(ego.subprocess, 'run') as run, patch('builtins.print'):
@@ -98,7 +110,7 @@ class VisibleWorkflowTests(unittest.TestCase):
                                     publication_date='2026-10-21', allow_custom=True)
         self.assertEqual(target.strftime('%Y-%m-%d %H:%M'), '2026-10-21 11:00')
         with self.assertRaisesRegex(ValueError, 'Unknown publication slot'):
-            runner.slot_target('soultin', '11:00', now=now, publication_date='2026-10-21')
+            runner.slot_target('soultin', '11:15', now=now, publication_date='2026-10-21')
 
     def test_failed_refresh_does_not_launch_pipeline(self):
         with patch.object(ego.subprocess, "run", return_value=subprocess.CompletedProcess([], 9)) as run:
@@ -115,12 +127,13 @@ class VisibleWorkflowTests(unittest.TestCase):
     def test_exact_fresh_visible_packet_reused_but_changed_or_unverifiable_fetches(self):
         body = "Actual observed competitor article body. " * 8
         packet = {"account": "yoon_master", "query": "loafers socks", "serp": {"text": "results"},
+                  "searchSurface":"naver_blog", "sort":"relevance", "observedAt":runner.now_kst().isoformat(),
                   "recentTitles": ["prior"], "recent60DaysComplete": True,
-                  "competitors": [{"url": "https://blog.naver.com/example/123",
-                    "excerpt": {"url": "https://m.blog.naver.com/example/123", "text": body,
+                  "competitors": [{"url": f"https://blog.naver.com/example/{123+i}", "observedRank":i+1,
+                    "excerpt": {"url": f"https://m.blog.naver.com/example/{123+i}", "text": body,
                                 "bodySha256": hashlib.sha256(body.encode()).hexdigest(),
                                 "collectionMethod": "visible_browser_article",
-                                "collectedAt": runner.now_kst().isoformat()}}]}
+                                "collectedAt": runner.now_kst().isoformat()}} for i in range(3)]}
         with patch.object(runner, "collect_evidence", return_value={"actual": "fetch"}) as collect:
             self.assertIs(runner.selected_keyword_evidence("yoon_master", "loafers socks", packet), packet)
             collect.assert_not_called()
@@ -155,12 +168,13 @@ class VisibleWorkflowTests(unittest.TestCase):
             send.assert_not_called()
 
     def test_failed_competitor_bodies_cannot_promote_search_snippet(self):
-        soup = BeautifulSoup('<a href="https://blog.naver.com/other/123">Competitor</a>', "html.parser")
-        with patch.object(runner, "evidence_text",
-                          side_effect=[({"text": "Search snippet"}, soup), RuntimeError("body unavailable")]), \
+        with patch('naver_blog_posting.visible_research.collect_blog_evidence', return_value={
+                'query':'actual query','searchSurface':'naver_blog','sort':'relevance',
+                'observedAt':runner.now_kst().isoformat(),'competitors':[]}) as collect, \
                 patch.object(runner, "public_post_inventory") as inventory:
-            with self.assertRaisesRegex(RuntimeError, "snippets cannot replace"):
+            with self.assertRaisesRegex(RuntimeError, "All three observed"):
                 runner.collect_evidence(runner.ACCOUNT_MAP["soultin"], "actual query")
+            collect.assert_called_once_with('soultin','actual query')
             inventory.assert_not_called()
 
     def test_visible_focus_targets_only_verified_process_window(self):

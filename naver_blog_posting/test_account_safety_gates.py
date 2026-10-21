@@ -44,6 +44,20 @@ class AccountSafetyGateTests(unittest.TestCase):
         self.execute.assert_called_once_with("soul5373", True, None, slot="20:00", publication_date="2026-10-21")
         self.write.assert_called_once()
 
+    def test_direct_entry_binds_stable_local_worker_before_pipeline(self):
+        self.run_gate('eligible')
+        worker = self.options['worker_id']
+        self.assertTrue(worker.startswith('local-'))
+        self.assertEqual(self.write.call_args.kwargs['workerId'], worker)
+        self.assertIs(self.write.call_args.kwargs['submissionStarted'], False)
+        self.run_gate('eligible')
+        self.assertEqual(self.options['worker_id'], worker)
+
+    def test_scheduled_worker_identity_is_preserved(self):
+        self.options['worker_id'] = 'scheduled-exact-worker'
+        self.run_gate('eligible')
+        self.assertEqual(self.write.call_args.kwargs['workerId'], 'scheduled-exact-worker')
+
     def test_retry_wait_without_new_evidence_cannot_execute(self):
         with self.assertRaisesRegex(RuntimeError, "retry_wait"):
             self.run_gate("retry_wait")
