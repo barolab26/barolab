@@ -11,6 +11,8 @@ class ProjectMonitorTests(unittest.TestCase):
     def setUp(self):
         guard = patch.object(m, 'known_cf_candidates', return_value=[])
         guard.start(); self.addCleanup(guard.stop)
+        report = patch.object(m, 'report_project_incident_once', return_value={'status': 'mocked'})
+        report.start(); self.addCleanup(report.stop)
 
     def test_missing_or_stale_source_never_claims_success(self):
         with tempfile.TemporaryDirectory() as td, patch.object(h, 'ROOT', Path(td)):
@@ -101,6 +103,117 @@ class ProjectMonitorTests(unittest.TestCase):
             with patch.object(m, 'observed_projects', return_value=rows), patch.object(m, '_triage', return_value={'decision':'hold','reason':'stale'}):
                 self.assertTrue(m.process_project_monitor_once()); self.assertTrue(m.process_project_monitor_once())
                 self.assertEqual(len(list(m.INCIDENTS.glob('*.json'))), 2)
+
+class QuotaReportTests(unittest.TestCase):
+    now = datetime(2026, 10, 21, 12, tzinfo=h.KST)
+
+    def test_cf_due_future_verified_and_missing_assignments(self):
+        doc = {'date': '2026-10-21', 'items': [
+            {'domain': 'a', 'scheduledTime': '11:00', 'status': 'published', 'publicUrl': 'https://a.example/post'},
+            {'domain': 'b', 'scheduledTime': '11:30', 'status': 'reserved'},
+            {'domain': 'c', 'scheduledTime': '13:00', 'status': 'waiting'}]}
+        with patch.object(h, 'schedule_constants', return_value={'ALL_DOMAINS': ['a', 'b', 'c']}):
+            q = h.publication_quota('cf_blog', doc, self.now, True)
+            self.assertEqual((q['due'], q['verified'], q['missing']), (2, 1, 1))
+            self.assertEqual(q['missingSlots'], ['b'])
+            self.assertEqual(h.publication_quota('cf_blog', doc, self.now, False)['status'], 'unknown')
+            self.assertEqual(h.publication_quota('cf_blog', dict(doc, date='2026-10-20'), self.now, True)['status'], 'unknown')
+            doc['items'].pop()
+            self.assertEqual(h.publication_quota('cf_blog', doc, self.now, True)['reason'], 'incomplete_schedule')
+
+    def test_naver_reserved_is_not_public_and_old_proof_is_unknown(self):
+        policy = {'DAILY_SLOTS': {'acc': ('11:00', '19:00')}, 'LEGACY_SINGLE_SLOTS': {}, 'LEGACY_SLOT_ALIASES': {}}
+        proof = {'checkedAt': self.now.isoformat(), 'evidence': [
+            {'account': 'acc', 'reserveTime': '2026-10-21 11:00', 'verified': True,
+             'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/blog/123', 'status': 'reserved'}]}
+        with patch.object(h, 'schedule_constants', return_value=policy), patch.object(h, 'load_json', return_value=proof):
+            self.assertEqual(h.publication_quota('naver_blog', {}, self.now, True)['missing'], 1)
+            proof['evidence'][0].pop('status')  # Canonical verifier records have no pipeline status.
+            self.assertEqual(h.publication_quota('naver_blog', {}, self.now, True)['verified'], 1)
+            proof['checkedAt'] = '2026-10-20T12:00:00+09:00'
+            self.assertEqual(h.publication_quota('naver_blog', {}, self.now, True)['status'], 'unknown')
+
+    def test_threads_invalid_source_and_unverified_are_not_success(self):
+        doc = {'configuration': {'enabled': True, 'preferredTimes': ['08:00', '18:00']},
+               'today': {'date': '2026-10-21', 'counts': []}, 'countsComplete': True,
+               'recent': [{'kind': 'main', 'publication_date': '2026-10-21', 'slot': '08:00',
+                           'state': 'submitted_unknown', 'permalink': 'https://threads.net/a'}]}
+        self.assertEqual(h.publication_quota('threads', doc, self.now, True)['missing'], 1)
+        for field, value in [('configuration', []), ('today', {'date': '2026-10-21', 'counts': [None]})]:
+            self.assertEqual(h.publication_quota('threads', dict(doc, **{field: value}), self.now, True)['status'], 'unknown')
+
+    def test_report_jev_outage_deduplicates_without_triage(self):
+        project = {'id': 'cf_blog', 'status': 'attention', 'counts': {'failed': 1},
+                   'quota': {'status': 'observed', 'date': '2026-10-21', 'due': 2, 'verified': 1, 'missing': 1, 'missingSlots': ['a']}}
+        with tempfile.TemporaryDirectory() as td, patch.object(m, 'STATE', Path(td)/'state.json'), \
+                patch('common.jev.classify_incident', return_value={'status': 'api_error'}) as jev, \
+                patch('common.crew_chat_bridge.emit_pipeline_crew_message', side_effect=lambda *a, **kw: kw['msg_id']) as emit, \
+                patch.object(m, '_triage') as triage:
+            result = m.report_project_incident_once(project)
+            self.assertEqual(result['status'], 'accepted_or_queued')
+            self.assertEqual(m.report_project_incident_once(project)['status'], 'already_reported_or_claimed')
+            self.assertEqual((jev.call_count, emit.call_count), (1, 1)); triage.assert_not_called()
+            self.assertEqual(emit.call_args.args[0], 'ego-lite')
+            self.assertIn('@자비스', emit.call_args.args[1])
+            self.assertIn('JEV 분류 미확인', emit.call_args.args[1])
+            receipt = json.loads(Path(result['receiptPath']).read_text(encoding='utf-8'))
+            self.assertFalse(receipt['roomDeliveryVerified'])
+            changed = dict(project, quota=dict(project['quota'], missingSlots=['a', 'b']))
+            self.assertNotEqual(m.incident_key(project), m.incident_key(changed))
+
+    def test_failed_delivery_not_labeled_sent(self):
+        with tempfile.TemporaryDirectory() as td, patch.object(m, 'STATE', Path(td)/'state.json'), \
+                patch('common.jev.classify_incident', return_value={'status': 'api_error'}) as jev, \
+                patch('common.crew_chat_bridge.emit_pipeline_crew_message', return_value=None) as emit:
+            self.assertEqual(m.report_project_incident_once({'id': 'threads', 'status': 'stale'})['status'], 'delivery_failed')
+            emit.side_effect = lambda *a, **kw: kw['msg_id']
+            self.assertEqual(m.report_project_incident_once({'id': 'threads', 'status': 'stale'})['status'], 'accepted_or_queued')
+            self.assertEqual(jev.call_count, 1)
+            self.assertEqual(emit.call_args_list[0].kwargs['msg_id'], emit.call_args_list[1].kwargs['msg_id'])
+
+    def test_kin_actual_attempt_not_fresh_snapshot_establishes_liveness(self):
+        import sqlite3
+        with tempfile.TemporaryDirectory() as td, patch.object(h, 'ROOT', Path(td)):
+            path = Path(td)/'server/data/kin.sqlite3'; path.parent.mkdir(parents=True)
+            db = sqlite3.connect(path)
+            self.addCleanup(db.close)
+            db.execute('CREATE TABLE automation_slots(state TEXT,updated_at TEXT)')
+            db.execute("INSERT INTO automation_slots VALUES ('skipped','2026-10-21T10:00:00+09:00')"); db.commit()
+            doc = {'enabled': True, 'continuousMode': True, 'checkedAt': self.now.isoformat(),
+                   'lastRunAt': '2026-10-21T10:00:00+09:00', 'intervalMinutes': 20,
+                   'nextEligibleAt': '2026-10-21T10:20:00+09:00'}
+            self.assertEqual(h.kin_activity(doc, self.now)['status'], 'overdue')
+            self.assertEqual(h.kin_activity(doc, self.now)['expectedAt'], '2026-10-21T11:15:00+09:00')
+            db.execute("UPDATE automation_slots SET updated_at='2026-10-21T11:30:00+09:00'"); db.commit()
+            self.assertEqual(h.kin_activity(doc, self.now)['status'], 'recent')
+            self.assertEqual(h.kin_activity(doc, self.now)['lastOutcome'], 'skipped')
+            held = dict(doc, cadenceState='daily_limit_or_account_unavailable', globalRemainingRuns=0, nextEligibleAt='2026-10-22T00:00:00+09:00')
+            self.assertEqual(h.kin_activity(held, self.now)['status'], 'held')
+            self.assertEqual(h.kin_activity(dict(held, globalRemainingRuns=5), self.now)['status'], 'blocked')
+            self.assertEqual(h.kin_activity(dict(held, cadenceState='accounts_suspended'), self.now)['status'], 'blocked')
+            db.execute("UPDATE automation_slots SET updated_at='2026-10-20T11:30:00+09:00'"); db.commit()
+            old = dict(held, checkedAt='2026-10-20T12:00:00+09:00', lastRunAt='2026-10-20T10:00:00+09:00')
+            self.assertEqual(h.kin_activity(old, self.now)['status'], 'overdue')
+            db.close()
+
+    def test_kin_missing_evidence_is_unknown_and_active_run_stalls(self):
+        import sqlite3
+        with tempfile.TemporaryDirectory() as td, patch.object(h, 'ROOT', Path(td)):
+            doc = {'enabled': True, 'checkedAt': self.now.isoformat(), 'activeRunId': 'actual',
+                   'activeStartedAt': '2026-10-21T10:00:00+09:00'}
+            self.assertEqual(h.kin_activity(doc, self.now)['status'], 'unknown')
+            path = Path(td)/'server/data/kin.sqlite3'; path.parent.mkdir(parents=True)
+            db = sqlite3.connect(path); db.execute('CREATE TABLE automation_slots(state TEXT,updated_at TEXT)'); db.commit(); db.close()
+            self.assertEqual(h.kin_activity(doc, self.now)['status'], 'stalled')
+
+    def test_jev_receives_only_bounded_fields(self):
+        from common import jev
+        with patch.object(jev, '_ask', return_value={'status': 'api_error'}) as ask:
+            result = jev.classify_incident({'status': 'stale', 'source': {'path': 'private'},
+                       'counts': {'failed': 1, 'secret': 'private'}, 'quota': {'missing': 2, 'missingSlots': ['private']}})
+            self.assertNotIn('private', json.dumps(ask.call_args.args))
+            self.assertEqual(result['priority'], 'unclassified')
+
 
 class KnownCandidateTests(unittest.TestCase):
     def test_actual_typed_gate_excludes_quality_submission_and_consumed_budget(self):

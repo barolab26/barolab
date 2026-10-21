@@ -134,6 +134,31 @@ def _ask(state, questions):
     return receipt
 
 
+def classify_incident(observation):
+    """Advisory severity only: host rules retain detection and reporting authority."""
+    # Allowlist counters and enums; never send source text, URLs, paths or errors.
+    state = {'status': observation.get('status') if observation.get('status') in
+             ('attention', 'stale', 'unknown') else 'unknown'}
+    state['counts'] = {k: v for k, v in (observation.get('counts') or {}).items()
+                       if k in ('failed', 'error', 'review_required', 'unknown')
+                       and type(v) is int and 0 <= v <= 10000}
+    quota = observation.get('quota') or {}
+    state['quota'] = {k: v for k, v in quota.items()
+                      if k in ('due', 'verified', 'missing') and type(v) is int and 0 <= v <= 10000}
+    activity = observation.get('activity') or {}
+    state['activity'] = activity.get('status') if activity.get('status') in ('overdue', 'stalled', 'blocked', 'recent', 'held', 'unknown') else 'unknown'
+    receipt = _ask(state, {'urgency': {'type': 'score',
+        'instructions': 'Rate the urgency of this observed publishing dashboard incident for the operations supervisor. Stale data means collection uncertainty, not proof of publication failure. A quota missing count means due slots lack verified publication evidence. Never authorize retries or publication.',
+        'criteria': ['Routine review of incomplete or stale observation.',
+                     'Timely review of overdue publication evidence or isolated errors.',
+                     'Urgent review of multiple observed failures or substantial overdue work.']}})
+    receipt['priority'] = 'unclassified'
+    if receipt['status'] == 'ok':
+        score = receipt['answers']['urgency']['score']
+        receipt['priority'] = ('routine', 'attention', 'urgent')[min(2, int(score + .5))]
+    return receipt
+
+
 def choose_candidates(candidates):
     """Rank <=10 supplied observed candidates; scores never predict revenue."""
     failure = _failure('invalid_input', 'Candidates need unique ids and bounded observed evidence')

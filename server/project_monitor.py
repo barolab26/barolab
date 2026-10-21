@@ -17,7 +17,84 @@ def incident_key(project):
     meaningful = {k: project.get(k) for k in ('id', 'status', 'observedState')}
     meaningful['failureCounts'] = {k:v for k,v in (project.get('counts') or {}).items() if k in ('failed','error','review_required','unknown')}
     meaningful['failures'] = sorted(project.get('failures') or [], key=lambda x: json.dumps(x, sort_keys=True))
+    quota = project.get('quota') or {}
+    if quota.get('status') == 'observed':
+        meaningful['quota'] = {k: quota.get(k) for k in ('date', 'missingSlots')}
+    if project.get('activity'):
+        meaningful['activity'] = {k: project['activity'].get(k) for k in ('status', 'lastAttemptAt', 'reason')}
     return hashlib.sha256(json.dumps(meaningful, sort_keys=True).encode()).hexdigest()
+
+
+def report_project_incident_once(project):
+    """Report only; this entry never invokes Jarvis, dispatches work or publishes."""
+    from common.jev import classify_incident
+    from common.crew_chat_bridge import emit_pipeline_crew_message
+    if project.get('status') not in ('attention', 'stale', 'unknown'):
+        return {'status': 'not_needed'}
+    fingerprint = incident_key(project)
+    directory = STATE.parent / 'reports'
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / (fingerprint + '.json')
+    row = {'status': 'claimed', 'fingerprint': fingerprint, 'observedAt': time.time(),
+           'messageId': 'ego-incident-' + fingerprint, 'observation': project}
+    retry = False
+    try:
+        with path.open('x', encoding='utf-8') as f:
+            json.dump(row, f, ensure_ascii=False)
+    except FileExistsError:
+        row = json.loads(path.read_text(encoding='utf-8'))
+        if (row.get('status') == 'accepted_or_queued' or
+                row.get('status') == 'claimed' and time.time() - row.get('observedAt', 0) < 180):
+            return {'status': 'already_reported_or_claimed', 'receiptPath': str(path)}
+        # Retry delivery with the same event ID; never pay for another classification.
+        retry = True
+    try:
+        try:
+            verdict = (row.get('classification') or {'status': 'interrupted', 'priority': 'unclassified'}) if retry else classify_incident(project)
+        except Exception as exc:
+            verdict = {'status': 'api_error', 'priority': 'unclassified', 'errorType': type(exc).__name__}
+        row['classification'] = verdict
+        title = {'cf_blog': 'CF 블로그', 'naver_blog': '네이버 블로그', 'naver_kin': '지식iN',
+                 'threads': 'Threads', 'legacy_remodel': '콘텐츠 유지보수', 'mobile_apps': '앱 프로젝트'}.get(project.get('id'), '프로젝트')
+        lines = [f'@자비스 **[EGO LITE 이상 보고 · {title}]**',
+                 '호스트 원천 관측: ' + {'attention': '확인 필요', 'stale': '자료 갱신 지연', 'unknown': '상태 미확인'}[project['status']]]
+        quota = project.get('quota') or {}
+        if quota.get('status') == 'observed':
+            lines.append(f"도래 할당량 {quota['due']}건 / 공개 확인 {quota['verified']}건 / 공개 근거 미확인 {quota['missing']}건.")
+        counts = project.get('counts') or {}
+        errors = sum(v for k, v in counts.items() if k in ('failed', 'error', 'review_required', 'unknown') and type(v) is int and v >= 0)
+        if errors:
+            lines.append(f'원장 오류·검수대기·미확인 항목 {errors}건.')
+        activity = project.get('activity') or {}
+        if activity:
+            label = {'overdue': '예상 주기 이후 작업 실행 근거 없음', 'stalled': '실행 장기 정체',
+                     'recent': '최근 작업 시도 확인 (발행 성공과 별개)', 'held': '스케줄러 명시적 보류',
+                     'blocked': '계정·작업 진행 차단', 'unknown': '작업 실행 근거 미확인'}.get(activity.get('status'), '미확인')
+            lines.append('지식iN 활동: ' + label + '.')
+            if activity.get('lastAttemptAt'):
+                lines.append('최근 시도 ' + activity['lastAttemptAt'] + ' / 확인 기한 ' + activity['expectedAt'] + '.')
+            if activity.get('lastOutcome') == 'skipped':
+                lines.append('직전 작업은 실행 후 건너뜀입니다. 미실행으로 집계하지 않습니다.')
+            if activity.get('status') in ('held', 'blocked'):
+                lines.append('보류 사유: ' + str(activity.get('reason')) + '.')
+        if verdict.get('status') == 'ok':
+            priority = {'routine': '일반', 'attention': '확인 필요', 'urgent': '긴급'}.get(verdict.get('priority'), '미분류')
+            lines.append('JEV 참고 우선순위: ' + priority + ' (모델 판단이며 확정 원인 아님).')
+        else:
+            lines.append('JEV 분류 미확인: 호스트 관측만 보고합니다.')
+        lines.append('공개 근거 미확인은 발행 실패 확정이 아닙니다. 담당자의 원장 확인이 필요하며 이 보고는 재시도·발행 승인이 아닙니다.')
+        row['message'] = '\n'.join(lines)
+        save_json(path, row)
+        receipt = emit_pipeline_crew_message('ego-lite', row['message'], handoff='jarvis',
+            status='needs_attention', step='dashboard-incident-report',
+            result_summary='원천 관측 확인 요청', msg_id=row['messageId'])
+        row['status'] = 'accepted_or_queued' if receipt == row['messageId'] else 'delivery_failed'
+        # A bridge receipt includes durable outbox acceptance, not verified room readback.
+        row['roomDeliveryVerified'] = False
+    except Exception as exc:
+        row.update(status='report_failed', errorType=type(exc).__name__)
+    save_json(path, row)
+    return {'status': row['status'], 'messageId': row['messageId'], 'receiptPath': str(path)}
 
 
 
@@ -190,6 +267,7 @@ def process_project_monitor_once():
     for project in projects:
         if project['status'] not in ('attention', 'stale', 'unknown'):
             continue
+        report_project_incident_once(project)
         fingerprint = incident_key(project)
         if fingerprint in state.get('upgradeBaseline', []):
             continue

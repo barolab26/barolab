@@ -64,6 +64,184 @@ SOURCES = (
 )
 
 
+def schedule_constants(relative, names):
+    """Read scheduler literal policy without importing modules that load secrets or write."""
+    import ast
+    tree = ast.parse((Path(__file__).resolve().parent.parent / relative).read_text(encoding='utf-8-sig'))
+    return {node.targets[0].id: ast.literal_eval(node.value) for node in tree.body
+            if isinstance(node, ast.Assign) and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name) and node.targets[0].id in names}
+
+
+def publication_quota(key, doc, now, fresh):
+    try:
+        return _publication_quota(key, doc, now, fresh)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, SyntaxError):
+        return {'status': 'unknown', 'date': now.date().isoformat(), 'due': None,
+                'verified': None, 'missing': None, 'reason': 'invalid_or_unavailable_quota_source'}
+
+
+def _publication_quota(key, doc, now, fresh):
+    """Due slots lacking public evidence; never equate absence with failed submission."""
+    from urllib.parse import urlsplit
+    import re
+    day = now.date().isoformat()
+    unknown = {'status': 'unknown', 'date': day, 'due': None, 'verified': None, 'missing': None}
+    if not fresh:
+        return unknown
+    def url_ok(value, naver=False):
+        try:
+            u = urlsplit(str(value or ''))
+            return u.scheme in ('http', 'https') and bool(u.hostname) and not u.username and not u.password and (
+                not naver or u.scheme == 'https' and u.hostname in ('blog.naver.com', 'm.blog.naver.com')
+                and bool(re.fullmatch(r'/[A-Za-z0-9_-]+/\d+/?', u.path)))
+        except ValueError:
+            return False
+    def due(slot):
+        return bool(re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', str(slot or ''))) and slot <= now.strftime('%H:%M')
+    expected, completed = set(), set()
+    if key == 'cf_blog':
+        if doc.get('date') != day or not isinstance(doc.get('items'), list) or not doc['items']:
+            return unknown
+        domains = schedule_constants('cf_posting/pipeline_runner.py', ('ALL_DOMAINS',))['ALL_DOMAINS']
+        if {r.get('domain') for r in doc['items'] if isinstance(r, dict)} != set(domains):
+            return {**unknown, 'reason': 'incomplete_schedule'}
+        for row in doc['items']:
+            if not isinstance(row, dict) or not row.get('domain') or not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', str(row.get('scheduledTime') or '')):
+                return unknown
+            identity = row['domain']
+            if due(row['scheduledTime']):
+                expected.add(identity)
+                if row.get('status') == 'published' and url_ok(row.get('publicUrl')):
+                    completed.add(identity)
+    elif key == 'naver_blog':
+        policy = schedule_constants('naver_blog_posting/pipeline_runner.py',
+                                    ('DAILY_SLOTS', 'LEGACY_SLOT_ALIASES', 'LEGACY_SINGLE_SLOTS'))
+        DAILY_SLOTS = policy['DAILY_SLOTS']
+        def slot_matches(account, candidate, target):
+            return (candidate == target or candidate in policy['LEGACY_SLOT_ALIASES'].get(account, {}).get(target, ())
+                    or len(DAILY_SLOTS[account]) == 1 and candidate in policy['LEGACY_SINGLE_SLOTS'].get(account, ()))
+        evidence = load_json(ROOT / 'dashboard/naver_public_verification.json')
+        stamp = evidence.get('checkedAt') or evidence.get('reportReceivedAt')
+        try:
+            age = (now - datetime.fromisoformat(str(stamp).replace('Z', '+00:00'))).total_seconds()
+        except (ValueError, TypeError):
+            return unknown
+        if not 0 <= age <= 7200 or not isinstance(evidence.get('evidence'), list):
+            return unknown
+        used_urls = set()
+        for account, slots in DAILY_SLOTS.items():
+            for slot in slots:
+                if not due(slot):
+                    continue
+                identity = account + ':' + slot
+                expected.add(identity)
+                for row in evidence['evidence']:
+                    if not isinstance(row, dict):
+                        continue
+                    publication_day = row.get('publicationDate') or str(row.get('reserveTime') or '')[:10]
+                    if (row.get('account') == account and publication_day == day
+                            and slot_matches(account, row.get('scheduledSlot') or str(row.get('reserveTime') or '')[-5:], slot)
+                            and row.get('status', 'done') == 'done' and row.get('publicPublicationVerified') is True
+                            and row.get('verified') is True and url_ok(row.get('publicUrl'), True)
+                            and row['publicUrl'] not in used_urls):
+                        completed.add(identity); used_urls.add(row['publicUrl']); break
+    elif key == 'threads':
+        config = doc.get('configuration')
+        today = doc.get('today')
+        if not isinstance(config, dict) or not isinstance(today, dict):
+            return unknown
+        if config.get('enabled') is not True:
+            return {**unknown, 'status': 'disabled'}
+        if today.get('date') != day or doc.get('countsComplete') is not True:
+            return unknown
+        slots = config.get('preferredTimes')
+        if not isinstance(slots, list) or not slots or any(not isinstance(s, str) or not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', s) for s in slots):
+            return unknown
+        expected = {slot for slot in slots if due(slot)}
+        # recent may be truncated: use exact today aggregate only when every due slot
+        # has evidence; otherwise report unavailable attribution, not invented failures.
+        for row in doc.get('recent') or []:
+            if (isinstance(row, dict) and row.get('publication_date') == day and row.get('kind') == 'main'
+                    and row.get('state') == 'published_verified' and url_ok(row.get('permalink'))
+                    and row.get('slot') in expected):
+                completed.add(row['slot'])
+        total = sum(r.get('n', 0) for r in today.get('counts', []) if r.get('kind') == 'main' and r.get('state') == 'published_verified')
+        if total > len(completed):
+            return unknown
+    else:
+        return {**unknown, 'status': 'not_scheduled'}
+    return {'status': 'observed', 'date': day, 'due': len(expected), 'verified': len(completed),
+            'missing': len(expected - completed), 'missingSlots': sorted(expected - completed)}
+
+
+def kin_activity(doc, now):
+    try:
+        return _kin_activity(doc, now)
+    except (TypeError, ValueError, AttributeError, OverflowError):
+        return {'status': 'unknown', 'reason': 'invalid_activity_source'}
+
+
+def _kin_activity(doc, now):
+    """Actual attempts, including no-candidate outcomes, establish hourly liveness."""
+    import sqlite3
+    from contextlib import closing
+    def parse(value):
+        try:
+            dt = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+            return dt if dt.tzinfo is not None else None
+        except (ValueError, TypeError):
+            return None
+    unknown = {'status': 'unknown', 'reason': 'activity_evidence_unavailable'}
+    checked = parse(doc.get('checkedAt'))
+    today = now.date().isoformat()
+    current = checked is not None and checked.astimezone(KST).date() == now.date() and 0 <= (now - checked).total_seconds() <= 7200
+    if current and doc.get('enabled') is False:
+        return {'status': 'held', 'reason': 'automation_disabled'}
+    if current and not doc.get('continuousMode') and isinstance(doc.get('endDate'), str) and today > doc['endDate']:
+        return {'status': 'held', 'reason': 'outside_publication_window'}
+    if current and doc.get('cadenceState') in ('daily_limit_or_account_unavailable', 'accounts_suspended', 'experiment_completed'):
+        held = doc['cadenceState'] == 'experiment_completed' or (
+            doc['cadenceState'] == 'daily_limit_or_account_unavailable' and doc.get('globalRemainingRuns') == 0)
+        return {'status': 'held' if held else 'blocked', 'reason': doc['cadenceState']}
+    if doc.get('enabled') is not True:
+        return unknown
+    latest = parse(doc.get('lastRunAt'))
+    outcome = 'completed'
+    db_path = ROOT / 'server/data/kin.sqlite3'
+    try:
+        if not db_path.is_file():
+            return unknown
+        with closing(sqlite3.connect(db_path.resolve().as_uri() + '?mode=ro', uri=True, timeout=1)) as db:
+            row = db.execute('SELECT state,updated_at FROM automation_slots ORDER BY julianday(updated_at) DESC LIMIT 1').fetchone()
+        if row:
+            actual = parse(row[1])
+            if actual and (latest is None or actual >= latest):
+                latest, outcome = actual, row[0]
+    except (sqlite3.Error, OSError, ValueError):
+        return unknown
+    active = parse(doc.get('activeStartedAt')) if doc.get('activeRunId') else None
+    if active and (latest is None or active > latest):
+        latest, outcome = active, 'running'
+    if latest is None or latest > now:
+        return unknown
+    interval = doc.get('intervalMinutes', 60)
+    jitter = doc.get('intervalJitterMinutes') or []
+    if not isinstance(jitter, list):
+        return unknown
+    minutes = max([60] + [v for v in [interval, *jitter] if type(v) in (int, float) and 0 < v <= 1440])
+    expected = latest + timedelta(minutes=minutes + 15)
+    eligible = parse(doc.get('nextEligibleAt'))
+    # A stale prior-day hold cannot indefinitely move today's inactivity deadline.
+    if current and eligible and eligible.astimezone(KST).date() == now.date():
+        expected = max(expected, eligible + timedelta(minutes=15))
+    status = ('stalled' if active else 'overdue') if now > expected else 'recent'
+    return {'status': status, 'lastAttemptAt': latest.astimezone(KST).isoformat(),
+            'expectedAt': expected.astimezone(KST).isoformat(),
+            'lastOutcome': outcome if outcome in ('skipped', 'blocked', 'running', 'started', 'published_verified', 'submitted_unverified', 'completed') else 'observed',
+            'reason': 'no_recent_attempt' if status == 'overdue' else 'active_run_stalled' if status == 'stalled' else 'attempt_observed'}
+
+
 def observed_projects():
     now = now_kst()
     result = []
@@ -136,7 +314,17 @@ def observed_projects():
         state = str(doc.get('state') or runtime.get('status') or 'unknown')
         failed = sum(counts.get(k, 0) for k in ('failed', 'error', 'review_required', 'unknown'))
         status = 'unknown' if error_type or not raw or age is None else 'stale' if not fresh else 'attention' if failed or state in ('failed', 'error', 'unknown') else 'observed'
-        result.append({'id': key, 'icon': '•', 'title': title, 'owner': '@' + owner,
+        quota = publication_quota(key, doc, now, fresh and age is not None and not error_type)
+        activity = kin_activity(doc, now) if key == 'naver_kin' else None
+        if activity and activity['status'] in ('overdue', 'stalled', 'blocked'):
+            status = 'attention'
+        elif activity and activity['status'] == 'unknown' and status == 'observed':
+            status = 'unknown'
+        if quota.get('missing') and status == 'observed':
+            status = 'attention'
+        elif quota.get('status') == 'unknown' and key in ('cf_blog', 'naver_blog', 'threads') and status == 'observed':
+            status = 'unknown'
+        result.append({'id': key, 'icon': '•', 'title': title, 'owner': '@' + owner, 'quota': quota, 'activity': activity,
             'ownerAgentIds': [owner], 'status': status, 'statusBadge': status,
             'progressText': json.dumps(counts, ensure_ascii=False) if counts else '관측 상태: ' + state,
             'progressPct': 0, 'counts': counts, 'failures': failures, 'verifiedPublicCount': public_count,
