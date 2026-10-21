@@ -5014,6 +5014,105 @@ def reselect_failed_preparation(account, folder):
         RUN_OPTIONS.clear();RUN_OPTIONS.update(saved)
 
 
+def validate_completed_flow_assets(folder, plans, rows, hashes=None):
+    from cf_posting.pipeline_runner import flow_image_prompt
+    root = (Path(folder)/'images').resolve()
+    if not plans or len({p.get('filename') for p in plans}) != len(plans):
+        raise RuntimeError('Unique completed generated plans required')
+    verified = {}
+    for plan in plans:
+        name = plan.get('filename', '')
+        path = (root/name).resolve()
+        if (not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\.jpg', name)
+                or not path.is_relative_to(root) or plan.get('source') != 'generated'
+                or plan.get('materialId') or not path.is_file()):
+            raise RuntimeError('Completed visual asset is missing or unsafe')
+        matching = [r for r in rows if r.get('filename') == name]
+        if len(matching) != 1:
+            raise RuntimeError('Exactly one Flow receipt per completed asset required')
+        row = matching[0]
+        digest = hashlib.sha256(flow_image_prompt(plan).encode()).hexdigest()
+        if (row.get('status') != 'downloaded' or not row.get('submittedAt')
+                or not row.get('completedAt') or row.get('promptSha256') != digest
+                or not re.fullmatch(r'[a-f0-9]{64}', str(row.get('sha256', '')))):
+            raise RuntimeError('Flow completion or exact normalized prompt is unproven')
+        with Image.open(path) as image:
+            if min(image.size) < 256:
+                raise RuntimeError('Completed visual image is too small')
+            image.verify()
+        actual = sha(path)
+        if hashes is not None and hashes.get('images/'+name) != actual:
+            raise RuntimeError('Completed visual asset bytes changed')
+        verified[name] = {'currentFileSha256': actual, 'downloadSha256': row['sha256'],
+            'postprocessingChangedBytes': actual != row['sha256'], 'promptSha256': digest}
+    return verified
+
+
+def resume_completed_visual_assets(account, folder):
+    """Preparation-only recovery after acquisition; never adopt a publication attempt."""
+    folder = Path(folder).resolve()
+    root = (BASE_DIR/'output'/account).resolve()
+    if account not in ACCOUNT_MAP or folder == root or not folder.is_relative_to(root):
+        raise RuntimeError('Visual recovery folder must belong to this account')
+    context = json.loads((folder/'preparation-context.json').read_text(encoding='utf-8'))
+    if context.get('publicationAttempt') is not False:
+        raise RuntimeError('Visual recovery cannot adopt production submission state')
+    saved = dict(RUN_OPTIONS)
+    try:
+        RUN_OPTIONS.clear(); RUN_OPTIONS.update(context['runOptions'])
+        with pipeline_lock():
+            handoff, _ = validate_prepared_context(account, folder, slot=context['scheduledSlot'],
+                publication_date=context['publicationDate'], override_strategy_id=context['strategyOverride'], complete=False)
+            if len(handoff.check()) != 3 or (folder/'image-plan.json').exists():
+                raise RuntimeError('Acquisition recovery requires exactly three accepted stages and no final image plan')
+            result = json.loads((folder/'image-maker.json').read_text(encoding='utf-8'))
+            events = json.loads((folder/'image-maker-model-events.json').read_text(encoding='utf-8'))
+            if not any(e.get('state') == 'returned' and e.get('actual_model') for e in events):
+                raise RuntimeError('Actual image-maker return event required')
+            rows = json.loads((folder/'images'/'flow-generation.json').read_text(encoding='utf-8'))
+            verified = validate_completed_flow_assets(folder, result['imagePlans'], rows)
+            names = {'handoff.json', 'writer.json', 'preparation-context.json', 'image-maker.json',
+                'image-maker-model-events.json', 'images/flow-generation.json'}
+            names.update('images/'+name for name in verified)
+            for stage in handoff.data['stages']:
+                names.update(stage.get('fileHashes', {}).keys())
+            backup = folder/('visual-acquisition-backup-'+uuid.uuid4().hex[:10]); backup.mkdir()
+            hashes = {}
+            for name in sorted(names):
+                source = (folder/name).resolve()
+                if not source.is_relative_to(folder) or not source.is_file():
+                    raise RuntimeError('Unsafe acquisition evidence file')
+                target = backup/name; target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
+                hashes[name] = sha(source)
+                if sha(target) != hashes[name]: raise RuntimeError('Acquisition backup changed')
+            audit = {'reason':'completed missing visual assets; fresh actual pixels required',
+                'backupDirectory':backup.name, 'backupHashes':hashes, 'assets':verified,
+                'acceptedStages':copy.deepcopy(handoff.data['stages']), 'submissionAuthorized':False,
+                'provenanceScope':'Snapshot at resume acceptance; original saved model result and returned event, not an independent historical response copy',
+                'snapshotAt':now_kst().isoformat()}
+            atomic_json(folder/'visual-acquisition-resume.json', audit)
+            RUN_OPTIONS['_visual_acquisition_resume'] = {'folder':str(folder), 'audit':audit}
+            return _prepare_content(account, context['strategyOverride'], context.get('evidenceDir'),
+                False, context['scheduledSlot'], review_folder=str(folder))
+    finally:
+        RUN_OPTIONS.clear(); RUN_OPTIONS.update(saved)
+
+
+def require_visual_acquisition_resume(handoff, scope):
+    if scope.get('folder') != str(handoff.folder.resolve()):
+        raise RuntimeError('Visual acquisition scope differs')
+    audit = scope['audit']
+    if handoff.data['stages'] != audit['acceptedStages'] or len(handoff.check()) != 3:
+        raise RuntimeError('Accepted preparation stages changed')
+    for name, digest in audit['backupHashes'].items():
+        current = (handoff.folder/name).resolve()
+        backup = (handoff.folder/audit['backupDirectory']/name).resolve()
+        if (not current.is_relative_to(handoff.folder) or not backup.is_relative_to(handoff.folder)
+                or sha(current) != digest or sha(backup) != digest):
+            raise RuntimeError('Visual acquisition evidence changed')
+
+
 def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None, review_folder=None):
     from common.llm_client import memory_session, memory_event
     session_id = f'naver:{account_key}:{time.time_ns()}'
@@ -5057,7 +5156,11 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
         review_handoff, _ = validate_prepared_context(account_key, review_folder,
             slot=attribution_slot, publication_date=RUN_OPTIONS.get('publication_date'),
             override_strategy_id=override_strategy_id, complete=False)
-        require_review_invalidation(review_handoff)
+        acquisition_resume = RUN_OPTIONS.get('_visual_acquisition_resume')
+        if acquisition_resume:
+            require_visual_acquisition_resume(review_handoff, acquisition_resume)
+        else:
+            require_review_invalidation(review_handoff)
         if materials is not None:
             materials = reviewed_run_materials(review_handoff, materials, account_key)
         reusable = (review_handoff.folder, review_handoff)
@@ -5175,6 +5278,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
         context['previousReviewFindings'] = json.loads((folder/'previous-rejection.json').read_text(encoding='utf-8'))
         context['repairContract'] = 'Address the actual independent findings with source-supported research/writing; preserve keyword/title intent and annotate uncertainty. Never force reviewer acceptance.'
     reused_photos = json.loads((folder/'reused-photo-source.json').read_text(encoding='utf-8')) if (folder/'reused-photo-source.json').is_file() else None
+    completed_visual_resume = RUN_OPTIONS.get('_visual_acquisition_resume') if review_folder is not None else None
     preserve_review_photos = review_folder is not None and reused_photos is not None
     if reused_photos:
         context['originalPhotoPlans'] = reused_photos['imagePlans']
@@ -5327,7 +5431,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             context['readerQuestion'] = result['readerQuestion']
             context['readerGoal'] = result['readerGoal']
             context['demandEvidence'] = result['demandEvidence']
-        elif preserve_review_photos and role == 'image-maker':
+        elif (preserve_review_photos or completed_visual_resume) and role == 'image-maker':
             result = json.loads((folder/'image-maker.json').read_text(encoding='utf-8'))
         else:
             comparison_urls = [row['url'] for row in inputs['selectedEvidence']['competitors']] if role == 'researcher' else None
@@ -5726,6 +5830,9 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             if preserve_review_photos and plans != reused_photos['imagePlans']:
                 raise RuntimeError('Original image plan changed; explicit image regeneration required')
             validate_image_plans(plans, w_blocks)
+            if completed_visual_resume:
+                rows = json.loads((folder/'images'/'flow-generation.json').read_text(encoding='utf-8'))
+                validate_completed_flow_assets(folder, plans, rows, completed_visual_resume['audit']['backupHashes'])
             required_visuals = set(results['writer']['readerTask']['requiredMaterialIds'])
             actual_visuals = [p['materialId'] for p in plans if p.get('materialId')]
             if not required_visuals <= set(actual_visuals) or len(actual_visuals) != len(set(actual_visuals)):
@@ -5739,7 +5846,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                         raise MaterialRequired('Verified capture missing or changed; generation cannot replace it')
                     continue
                 # If an existing file on disk is a synthetic CHECKPOINT card, delete it so Flow generates a real visual
-                if photo.is_file() and photo.stat().st_size > 0:
+                if not completed_visual_resume and photo.is_file() and photo.stat().st_size > 0:
                     try:
                         if is_synthetic_checkpoint_card_bytes(photo.read_bytes()):
                             photo.unlink()
@@ -5754,6 +5861,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 p for p in plans
                 if not (image_dir / p['filename']).is_file() or not (image_dir / p['filename']).stat().st_size
             ]
+            if completed_visual_resume and generated_plans:
+                raise RuntimeError('Completed visual recovery cannot regenerate missing assets')
             if generated_plans:
                 try:
                     asyncio.run(generate_photos(generated_plans, image_dir, acc, writer_title))
@@ -5769,11 +5878,13 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                     print(f"[image-maker] Skipping missing image {p['filename']} (Fake CHECKPOINT card synthesis is permanently banned)", flush=True)
                     continue
                 if not p.get('materialId') and is_synthetic_checkpoint_card_bytes(photo.read_bytes()):
+                    if completed_visual_resume:
+                        raise RuntimeError('Completed visual recovery rejected synthetic asset')
                     photo.unlink(missing_ok=True)
                     print(f"[image-maker] Removed synthetic CHECKPOINT card {p['filename']}", flush=True)
                     continue
                 # Fresh review must inspect the preserved bytes, not re-encode accepted inputs.
-                if not preserve_review_photos and not p.get('materialId'):
+                if not preserve_review_photos and not completed_visual_resume and not p.get('materialId'):
                     # Run 4-Step Image Sanitizer: strip AI metadata, crop watermark (if generated), and inject account smartphone EXIF
                     try:
                         sanitize_image_file(
