@@ -216,14 +216,14 @@ test('inline delete requires confirmation, supports cancel, sends revision, and 
   assert.match(page.element('doc-status').textContent,/복구했습니다/);
 });
 
-test('NAS missing route discovers loopback once and never retries writes or missing docs on another backend', async () => {
+test('explicit standalone API stays pinned for reads and failed writes', async () => {
   const page=pageHarness({ok:false,status:404,json:async()=>({detail:'Not Found'})}, (url,options) => {
     if (url.startsWith('http://127.0.0.1:8792') && url.includes('/graph')) return {ok:true,status:200,json:async()=>fixture};
     if (url.startsWith('http://127.0.0.1:8792') && url.includes('/doc?')) {
       if (options.method==='PATCH') return {ok:false,status:503,json:async()=>({detail:'backend write unavailable'})};
       return {ok:true,json:async()=>({rel:'notes/n0.md',title:'Original',content:'Body',revision:'rev1',editable:true,deletable:true})};
     }
-  });
+  }, '?memoryApi=http%3A%2F%2F127.0.0.1%3A8792');
   await page.flush();
   assert.equal(page.element('memory-canvas').attributes['data-api-base'],'http://127.0.0.1:8792');
   assert.match(page.element('stat-visible-nodes').textContent,/20개 활성/);
@@ -264,7 +264,7 @@ test('HTTP 200 legacy API is rejected before any counts or writes; strict backen
   const legacy={nodes:fixture.nodes.slice(0,11),edges:[],stats:{total:24,coreHubs:11}};
   const page=pageHarness({ok:true,status:200,json:async()=>legacy},(url,options)=>{
     if(url.startsWith('http://127.0.0.1:8792') && url.includes('/graph')) return {ok:true,status:200,json:async()=>fixture};
-  },'', '8080');
+  },'?memoryApi=http%3A%2F%2F127.0.0.1%3A8792', '8080');
   await page.flush();
   assert.equal(page.element('memory-canvas').attributes['data-api-base'],'http://127.0.0.1:8792');
   assert.equal(page.element('memory-canvas').attributes['data-node-count'],'20');
@@ -287,15 +287,16 @@ test('HTTP 200 legacy API is rejected before any counts or writes; strict backen
   assert.throws(()=>view.assertContract({...fixture,quarantine:undefined}),/계약 버전/);
 });
 
-test('known legacy dashboard ports never probe their graph endpoint, even if the pinned service fails',async()=>{
+test('dashboard uses same-origin only; unavailable API never falls back to viewer loopback',async()=>{
   for(const port of ['8790','8791']) {
     const page=pageHarness({ok:true,status:200,json:async()=>fixture},null,'',port);
     await page.flush();
     assert.equal(page.element('memory-sidebar-count').textContent,'20');
-    assert(page.calls.every(call=>call.url.startsWith('http://127.0.0.1:8792')));
+    assert.equal(page.element('memory-canvas').attributes['data-api-base'],`http://example.test:${port}`);
+    assert(page.calls.every(call=>call.url.startsWith('/api/memory/')));
     const unavailable=pageHarness({ok:false,status:503,json:async()=>({})},null,'',port);
     await unavailable.flush();
-    assert(unavailable.calls.every(call=>call.url.startsWith('http://127.0.0.1:8792')));
+    assert(unavailable.calls.every(call=>call.url.startsWith('/api/memory/')));
     assert.equal(unavailable.element('memory-sidebar-count').textContent,'확인 불가');
   }
 });

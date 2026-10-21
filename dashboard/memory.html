@@ -1479,9 +1479,10 @@
       // Explicit selection is authoritative; never silently write elsewhere.
       candidates = [endpoint.origin];
     } else {
-      // Known legacy dashboard/preview servers can mutate old graph rows on GET.
-      // The user-designated memory service is 8792: never probe 8790/8791 first.
-      candidates = ['8790','8791'].includes(location.port) ? ['http://127.0.0.1:8792'] : ['', 'http://127.0.0.1:8792'];
+      // The dashboard owns its API. Loopback would target the viewer's computer
+      // on remote Ubuntu access; a standalone service requires explicit memoryApi.
+      // Never silently switch to another service/database after a failed probe.
+      candidates = [''];
     }
     candidates = [...new Set(candidates)];
     const failures = [];
