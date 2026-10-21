@@ -11,6 +11,7 @@ import time
 import uuid
 
 from common import dashboard_jobs as jobs
+from common.llm_client import memory_call
 
 RUNTIME = jobs.ROOT / 'server' / 'data' / 'codex-runtime.json'
 MAX_TURN_CHARS = 750_000
@@ -237,6 +238,7 @@ def _fallback_candidates(config, primary_model, primary_effort, allowed):
     return candidates
 
 
+@memory_call
 def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None,
                    timeout_seconds=None):
     from common.llm_client import parse_json

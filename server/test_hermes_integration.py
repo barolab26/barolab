@@ -125,6 +125,36 @@ class MemoryIntegrationTests(unittest.TestCase):
         self.assertTrue(hasattr(codex_cli.generate_local, '__wrapped__'))
         self.assertTrue(hasattr(llm_client.generate_json, '__wrapped__'))
 
+    def test_actual_direct_cli_injects_once_and_skip_reviewer_does_not_record(self):
+        from common import codex_cli
+        self.store.memory('memory', 'add', text='Verified test-only rule')
+        captured = []
+        def run(command, **kwargs):
+            captured.append(kwargs)
+            output = Path(command[command.index('--output-last-message') + 1])
+            output.write_text(json.dumps({'json': '{"ok": true}'}), encoding='utf-8')
+            return SimpleNamespace(returncode=0, stdout='{"type":"turn.completed"}', stderr='')
+        with patch.object(codex_cli, 'local_config', return_value={'executable':'never-executed','home':self.temp.name}), \
+                patch.object(codex_cli, 'runtime', return_value={'models':[{'id':'test-model'}]}), \
+                patch.object(codex_cli, 'environment', return_value={}), \
+                patch.object(codex_cli, 'is_wsl', return_value=False), \
+                patch.object(codex_cli.Path, 'home', return_value=Path(self.temp.name)), \
+                patch.object(codex_cli, '_fallback_candidates', return_value=[('test-model','low')]), \
+                patch.object(codex_cli.subprocess, 'run', side_effect=run):
+            with llm_client.memory_session('direct-real-entry', 'kin'):
+                self.assertEqual(codex_cli.generate_local('direct task', 'test-model', timeout_seconds=9)[0], {'ok':True})
+            @llm_client.memory_call
+            def outer(prompt):
+                return codex_cli.generate_local(prompt, 'test-model', timeout_seconds=9)
+            outer('nested task', memory_session_id='outer-real-entry')
+            outer('review-only', _skip_memory=True)
+        self.assertEqual([x['input'].count('<project-memory>') for x in captured], [1,1,0])
+        self.assertIn('Verified test-only rule', captured[0]['input'])
+        self.assertTrue(all(0 < x['timeout'] <= 9 for x in captured))
+        with self.store.db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM episodes').fetchone()[0], 2)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM review_queue').fetchone()[0], 0)
+
     def test_doctor_reviews_only_successful_republish_with_matching_public_text(self):
         from cf_posting import doctor_remodel as doctor
         with patch.object(doctor, 'parse_cf_post_url', return_value=('example.org', 'post')), \

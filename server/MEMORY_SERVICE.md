@@ -79,3 +79,39 @@ restored with its original text and edges, then moved to trash again for cleanup
 The final graph viewport and inline deletion confirmation passed frontend checks.
 Temporary verification notes, screenshots, database files and runtime snapshots
 are excluded from the source commit.
+
+
+## Operational evidence audit (2026-10-21)
+
+This read-only audit distinguishes implemented paths, stored records, and actual
+reuse. It does not replace the historical 2026-10-19 acceptance results above.
+
+- Runtime episodes and frozen session snapshots are accumulating. Existing curated
+  MEMORY/USER text and matching skill bodies have a context-injection path. A stored
+  snapshot alone does not prove that a particular provider call received or used it.
+- No recent operational evidence establishes automatic promotion of the latest
+  CF/Naver/KnowledgeIn work into reusable knowledge and its subsequent application.
+  The latest observed applied review was the 2026-10-19 dashboard repair; the graph
+  currently exposes one skill. Counts and graph visibility are not learning outcomes.
+- Automatic retrieval of relevant past episodes is not connected to the generation
+  path. Frozen curated context and skill matching must not be described as automatic
+  retrieval and reuse of the complete work history.
+- Actual recent CF/Naver model-audit requests record call IDs, models and attachment
+  hashes, but not the injected memory/skill hashes or a session-to-provider prompt
+  receipt. Runtime LLM episodes retain the original pre-injection prompt, not the
+  complete provider input. Exact evidence of which memory revision reached which
+  call is therefore missing; successful model output does not fill that gap.
+- KnowledgeIn and Threads direct `generate_local` calls bypassed the memory boundary.
+  That connection is now corrected and tested with a mocked actual subprocess and
+  an isolated temporary memory store. Related tests passed on Windows (18) and
+  Ubuntu (17; one pre-existing missing `httpx[http2]` dependency prevented a test).
+  Four resolution-suite failures were reproduced on HEAD and are separate baseline
+  issues. Actual reuse during a new operational task remains unverified; publication
+  episodes recorded separately do not prove authoring/reviewer context injection.
+
+Audit sources include existing output/model-audit request/status files, private
+KnowledgeIn sources/generation artifacts, and read-only runtime-memory records.
+No synthetic production episodes, private Codex memory edits, database writes or
+new publication were performed for this audit. Follow-up acceptance should connect
+an evidenced work lesson, its approved revision, a later frozen snapshot, and the
+actual provider request by IDs/hashes without exposing private prompt content.
