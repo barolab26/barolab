@@ -23384,6 +23384,40 @@
       "documentSha256": "19c6078ce1252457d59c1d3ff503b5ed1f234aa5d62c0c8a6d5b23565df78378",
       "submissionStatus": "verified_reserved",
       "publicPublicationVerified": false
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-21",
+      "startedAt": "2026-10-21T21:05:23.106350+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 11:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-4d19fd2c4f004252be78f2e769c28bd4",
+      "recoveryContextSha256": "813e9037bacaebde04d42abc07e77c14813b779f48c676d8489010a02e293b3a",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "813e9037bacaebde04d42abc07e77c14813b779f48c676d8489010a02e293b3a"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "material_required",
+      "updatedAt": "2026-10-21T21:06:45.776013+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/20261021-88dd7ba4ba",
+      "failureReason": "Keyword intent requires new evidence; title-only correction is not applicable",
+      "preSubmissionFailure": true,
+      "retryAfter": null
     }
   ]
 }
