@@ -7,6 +7,11 @@ from common import crew_chat_bridge as bridge
 
 
 class CrewLifecycleTests(unittest.TestCase):
+    def setUp(self):
+        self.intake=patch('common.repair_workflow.record_failed_event',return_value=None)
+        self.intake.start()
+        self.addCleanup(self.intake.stop)
+
     def test_nested_and_skip_memory_calls_have_one_pair_without_content(self):
         from common.llm_client import memory_call
         @memory_call

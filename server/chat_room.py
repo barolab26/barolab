@@ -297,6 +297,26 @@ def _extract_mentioned_slugs(text: str) -> List[str]:
     return found
 
 
+def normalize_staff_calls(text):
+    """Mark explicit staff requests for display; mentions do not dispatch work."""
+    protected = re.compile(r'(```[\s\S]*?```|`[^`\n]*`|https?://[^\s]+|\[[^\]]*\]\([^)]*\))')
+    names = r'(?:자비스|패치|퍼블리|트레이스|레이더|닥터|jarvis|patch|publi|trace|radar|doctor)'
+    call = re.compile(r'(?<![@\w])(' + names + r')(?=(?:님)?(?:에게|[,:：\s]))', re.I)
+    request = re.compile(r'(?:해주세요|해\s*주세요|하세요|해\s*줘|하라|바랍니다|부탁(?:합니다|해요|드립니다)?|요청합니다|요청드립니다|맡아\s*주세요)')
+    pieces = protected.split(str(text or ''))
+    for i in range(0,len(pieces),2):
+        part=pieces[i]
+        def mark(match):
+            rest=part[match.end():].split('\n',1)[0][:180]
+            if re.match(r'\s+(?:결과|보고|답변|발언|의견)(?:을|를|에|은|는|이|가|\s)',rest):
+                return match.group(1)
+            # Past-tense reports and ordinary descriptions remain plain names.
+            sentence=re.split(r'[.!?。]',rest,maxsplit=1)[0]
+            return '@'+match.group(1) if request.search(sentence) else match.group(1)
+        pieces[i]=call.sub(mark,part)
+    return ''.join(pieces)
+
+
 def _get_agent_brain_safe(slug: str) -> Dict[str, Any]:
     try:
         from common.llm_settings import get_agent_brain
@@ -982,6 +1002,7 @@ STRICT_ANTI_HALLUCINATION_RULES = (
 AGENT_SYSTEM_PROMPTS: Dict[str, str] = {
     "jarvis": (
         "너는 BaroLab의 총괄 디렉터 '자비스(@jarvis)'다. "
+        "직원에게 현재 업무를 요청하는 문장은 @패치·@퍼블리처럼 호출 대상 앞에 @를 붙인다. 단순 과거 보고·일반 언급은 호출로 만들지 않는다. 멘션 문구 자체는 실제 요청 전달이나 실행 증거가 아니다. "
         "5명 직원(퍼블리·트레이스·패치·닥터·레이더)의 실시간 상태 요약본과 앞선 동료의 보고를 종합해, 대표님의 질문 맥락에 맞춰 핵심 결론과 즉시 실행 방향(PID, 채널 배정, 우선순위)을 자연스러운 한국어로 명쾌하게 브리핑한다.\n"
         + STRICT_ANTI_HALLUCINATION_RULES
     ),
@@ -2409,6 +2430,8 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
                 recent_history=prior_history,
             )
         elapsed = time.time() - t_start
+        if slug == 'jarvis':
+            reply_text = normalize_staff_calls(reply_text)
         if elapsed < 0.35:
             time.sleep(0.35 - elapsed)
 

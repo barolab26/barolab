@@ -116,6 +116,14 @@ assert.ok(sseSource.url.includes('since_seq=4'));
 assert.equal(getAgentBrainBadge({who:'unscoped'}),'모델 미관측');
 const row=buildStatusLineHtml({who:'unscoped',taskId:'<task>',requestedTo:'patch',parentRequestId:'req'});
 assert.ok(!row.includes('✅'));assert.ok(row.includes('&lt;task>'));assert.ok(row.includes('req'));
+for(const [slug,label] of Object.entries({jarvis:'자비스',patch:'패치',publi:'퍼블리',trace:'트레이스',radar:'레이더',doctor:'닥터'})) {
+  const message={who:'unscoped',requestedTo:slug};
+  assert.ok(buildStatusLineHtml(message).includes('요청 대상: @'+label));
+  assert.equal(message.requestedTo,slug);
+}
+for(const target of ['cf-pipeline','configured-model-runner']) {
+  assert.ok(buildStatusLineHtml({who:'unscoped',requestedTo:target}).includes('요청 대상: '+target));
+}
 assert.equal(isNoiseMessage({who:'system',id:'sys-new',text:'10월 22일 실제 작업',eventType:'crew_work_event',taskId:'t',eventId:'e'}),false);
 assert.equal(isNoiseMessage({who:'system',id:'sys-legacy',text:'legacy'}),true);
 const original=[{id:'done',parentRequestId:'request',ts:20},{id:'request',ts:10}];

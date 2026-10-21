@@ -2217,6 +2217,12 @@ def run_accounts(account_keys, do_real_publish=True, override_strategy_id=None, 
                         update_pipeline_status(ACCOUNT_MAP[key], 6, '예약 확인 필요' if phase == 'unknown' else
                                                ('기획 보완 필요' if category == 'planning_required' else '실행 실패'),
                                                0, f'{type(exc).__name__}: {str(exc)[:400]} · 후속 계정 중단', status=phase)
+                        if category != 'planning_required':
+                            from common.host_failure import report_host_failure
+                            committed = next(a for a in reversed(read_journal(BASE_DIR)['attempts']) if a['account'] == key)
+                            report_host_failure(actor='naver-pipeline', task_key=f"naver:{key}:{day}:{target_slot}",
+                                state='submission_unknown' if phase == 'unknown' else 'host_execution_failed',
+                                evidence_ref=BASE_DIR/'data/automation-journal.json',source_record=committed,error_type=type(exc).__name__)
                 raise
             finally:
                 if do_real_publish:

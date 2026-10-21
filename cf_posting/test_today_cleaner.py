@@ -18,7 +18,7 @@ class TodayCleanerTests(unittest.TestCase):
                   load_or_get_schedule=Mock(return_value=schedule), log_scheduler=Mock(),
                   publication_receipt=lambda item: Mock(is_file=lambda: item.get('receipt', False), exists=lambda: item.get('receipt', False)),
                   DATA_DIR=Path('unused'), SCHEDULE_JSON=schedule_path,
-                  save_schedule_file=Mock(), sync_dashboard_status=Mock(),
+                  save_schedule_file=Mock(), sync_dashboard_status=Mock(), repair_failed_schedule_item=Mock(),
                   reconcile_item=Mock(return_value=False), run_publisher_for_item=Mock(return_value=False))
         exec(compile(module, 'production-today-cleaner', 'exec'), ns)
         return ns

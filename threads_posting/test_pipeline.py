@@ -9,6 +9,7 @@ from . import config,pipeline,scheduler
 
 class LedgerTests(unittest.TestCase):
     def setUp(self):
+        failure = patch('common.host_failure.report_host_failure'); failure.start(); self.addCleanup(failure.stop)
         events = patch('threads_posting.pipeline._emit_crew_state')
         events.start(); self.addCleanup(events.stop)
         learning = patch('common.llm_client.record_verified_work', return_value={'status':'test_only'})

@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 def main():
     from common.hermes_memory import _store
     from common.llm_client import process_verified_work_once
+    from common.repair_workflow import process_repair_diagnosis_once
 
     stopped = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
@@ -21,7 +22,8 @@ def main():
         while not stopped.is_set():
             # Restart a consumer that exited; SQLite leases retain ownership.
             _store.resume_reviews()
-            if not process_verified_work_once():
+            diagnosed = process_repair_diagnosis_once()
+            if not process_verified_work_once() and not diagnosed:
                 stopped.wait(30)
     finally:
         _store.close()

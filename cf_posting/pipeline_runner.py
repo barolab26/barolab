@@ -795,22 +795,21 @@ class Handoff:
         rows=self.data.get('stages',[])
         policy_hash=content_quality_sha256()
         if self.data.get('contentQualitySha256') != policy_hash:
-            self.data['contentQualitySha256'] = policy_hash
-            self.save()
+            raise ReviewRequired('공통 콘텐츠 정책 변경 · 기존 승인 보존, 재검수 필요')
         if self.data.get('version')!=2 or [r.get('agent') for r in rows] != list(self.agents[:len(rows)]):
             raise ReviewRequired('에이전트 순서·검증 계약 불일치 · 처음부터 재실행 필요')
         prior_names = []
         for row in rows:
             if row.get('contentQualitySha256') != policy_hash:
-                row['contentQualitySha256'] = policy_hash
+                raise ReviewRequired('에이전트 인수 당시 콘텐츠 정책 변경 · 재검수 필요')
             if row.get('status')!='accepted' or not row.get('fileHashes'):
                 raise ReviewRequired('에이전트 산출물 인수 증거 누락')
             if row.get('inputs') != prior_names or row.get('inputHashes') != {name: digest(self.file(name)) for name in prior_names}:
                 raise ReviewRequired('선행 에이전트 산출물 인수 누락 또는 변경: ' + row['agent'])
             for name,value in row['fileHashes'].items():
                 if digest(self.file(name))!=value: raise ReviewRequired('승인 후 산출물 변경: '+name)
-            if row.get('instructionSha256'):
-                row['instructionSha256'] = digest(BASE_DIR/'agents'/f"{row['agent']}.md")
+            if row.get('instructionSha256') and row['instructionSha256'] != digest(BASE_DIR/'agents'/f"{row['agent']}.md"):
+                raise ReviewRequired('에이전트 지침 변경 · 기존 승인 보존, 재검수 필요')
             if row.get('model',{}).get('status')!='returned': raise ReviewRequired('실제 모델 응답 인수 누락')
             prior_names.extend(row['outputs'])
         if complete and len(rows)!=6: raise ReviewRequired('6개 에이전트 인계 미완료')
@@ -889,13 +888,6 @@ def assemble_with_agent(handoff, article, plans, images, generate, attribution):
             'required': ['kind', 'index', 'after', 'number'], 'additionalProperties': False}}},
         'required': ['inputComplete', 'assemblyReadyForLayoutReview', 'issues', 'notes', 'edits'], 'additionalProperties': False}
     result=generate(agent_prompt('assembler',BLOG_REVIEW_POLICY + ' 이 단계는 이미 인수된 images.md의 실제 시각 검수 관측·메타데이터와 본문·조립 HTML 전체로 문서 구조, anchor와 이미지 위치, 단일 figure 캡션을 점검한다. 원본 이미지를 재첨부하지 않으며 픽셀을 재확인했다고 기록하지 않는다. assemblyReadyForLayoutReview는 구조와 자료가 후속 실제 렌더 검수에 넘길 준비가 되었는지 판정하는 값이다. 후속 PC·모바일 완성 화면 검수 자료가 아직 없다는 이유만으로 이 단계의 결함으로 삼지 않는다. 실제 완성 화면은 후속 reviewer가 독립 검수하며 최종 화면 검수가 완료되었다고 보고하지 않는다. 누락된 필수 자산, 미완료 플레이스홀더, 잘못된 anchor·이미지 위치·캡션 등 실제 조립 오류는 계속 반려한다. 가능한 캡션·제목 번호·간격 수정은 edits로 직접 보완하고 해결된 문제는 다시 반려하지 않는다. 캡션은 figure 안 figcaption 전용 영역이다.',inputs),response_schema=schema)
-    if isinstance(result, dict):
-        old_issues = result.get('issues') if isinstance(result.get('issues'), list) else []
-        old_notes = result.get('notes') if isinstance(result.get('notes'), list) else []
-        result['notes'] = old_notes + [str(x) for x in old_issues if x]
-        result['issues'] = []
-        result['inputComplete'] = True
-        result['assemblyReadyForLayoutReview'] = True
     cosmetic = isinstance(result,dict) and result.get('inputComplete') is True and cosmetic_issues_only(result.get('issues')) and bool(result.get('edits'))
     if cosmetic and (handoff.folder/'surgical-repair-attempted.json').exists():
         raise ReviewRequired('repair_exhausted: 표시 보정은 이미 1회 완료되었습니다')
@@ -933,35 +925,6 @@ def call_visual_batch(handoff, agent, kind, attachments, prompt, images, generat
         folder.mkdir(parents=True, exist_ok=False)
         (folder/'input.json').write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding='utf-8')
     result = generate(prompt, images=images, response_schema=schema)
-    if isinstance(result, dict):
-        if 'issues' in result or (isinstance(schema, dict) and 'issues' in schema.get('properties', {})):
-            result['issues'] = []
-        schema_props = schema.get('properties', {}) if isinstance(schema, dict) else {}
-        if isinstance(schema_props.get('checks'), dict):
-            chk_keys = list(schema_props['checks'].get('properties', {}).keys())
-            result['checks'] = {k: True for k in chk_keys}
-        if isinstance(schema_props.get('perImage'), dict):
-            item_props = schema_props['perImage'].get('items', {}).get('properties', {})
-            raw_rows = result.get('perImage') if isinstance(result.get('perImage'), list) else []
-            norm_rows = []
-            for idx, expected in enumerate(attachments):
-                r_obj = raw_rows[idx] if idx < len(raw_rows) and isinstance(raw_rows[idx], dict) else {}
-                new_r = dict(r_obj)
-                for id_key in ('imageIndex', 'filename', 'stepId', 'viewport', 'start', 'end'):
-                    if id_key in item_props and id_key in expected:
-                        new_r[id_key] = expected[id_key]
-                if 'observedContent' in item_props:
-                    obs_txt = str(new_r.get('observedContent') or '').strip()
-                    new_r['observedContent'] = obs_txt or f"{expected.get('filename', 'image')} 시각 구성 및 본문 설명 정합성 확인 완료"
-                if 'reason' in item_props:
-                    rsn_txt = str(new_r.get('reason') or '').strip()
-                    new_r['reason'] = rsn_txt or '본문 단계 및 캡션 설명과 시각자료 구성이 부합함'
-                if 'alignment' in item_props:
-                    new_r['alignment'] = True
-                if 'usable' in item_props:
-                    new_r['usable'] = True
-                norm_rows.append(new_r)
-            result['perImage'] = norm_rows
     record.update(response=result, model=attribution() if attribution else None)
     if folder is not None:
         (folder/'response.json').write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -1146,9 +1109,6 @@ def review_article(handoff, article, generate, attribution):
     if not isinstance(result, dict):
         raise ReviewRequired('독립 검수 응답 형식 오류')
     required = BLOG_REQUIRED_CHECKS + ('factsSupported',) + (('originalMeaningPreserved',) if RUN_CONTEXT.get('stylePhotoRepair') else ())
-    result['status'] = 'passed'
-    result['issues'] = []
-    result['checks'] = {k: True for k in required}
     report = {**result,
               'runId': handoff.data.get('runId', ''), 'checkedAt': stamp(), 'model': attribution(),
               'reviewPolicy': 'reader-task-v2',
@@ -2192,6 +2152,15 @@ def keyword_demand_evidence(candidates):
         out['candidates'].append({'mainKeyword': kw, 'question': cand.get('question', ''), 'volume': vol, 'trend': trend, 'news': news,
             'eligible': bool(eligible), 'currentIssue': current, 'issueSignals': signals, 'reason': '; '.join(reasons) or 'demand and issue criteria met'})
     return out
+
+def growth_editorial_seed(fixed, growth):
+    """A discovered article heading is editorial context, not an exact search query."""
+    result = dict(fixed or {})
+    result.update(seedTitle=str(growth.get('keyword') or ''), growthEvidence=growth)
+    # Preserve an explicitly fixed/previously approved keyword; never pin a growth title.
+    result.setdefault('mode', 'editorial_seed')
+    return result
+
 
 def select_keyword_with_demand(instruction, context, generate, fixed=None, *, require_current_issue=True):
     import json, re
@@ -4864,15 +4833,9 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         else:
             fixed = {'seedTitle': '' if '핵심 정보 실전 가이드' in scheduled.get('title', '') or (domain == 'baronote.kr' and '기후동행' in scheduled.get('title', '')) else scheduled.get('title', ''), 'topicSlug': scheduled['slug'], 'mode': 'editorial_seed', 'task': '기존 일정은 참고 주제이며 실제 검색 수요와 중복 검증을 거쳐 새 키워드를 선정합니다.'}
     if scheduled.get('growthKeyword') and not revision_id:
-        gw_raw = scheduled['growthKeyword'].get('keyword', '')
-        if domain == 'meganote.kr':
-            gw_short = '스마트폰 사진'
-        elif domain == 'daynote.kr':
-            gw_short = '가민 포러너 970'
-        else:
-            gw_short = gw_raw.split('—')[0].split('(')[0].strip() if '—' in gw_raw else gw_raw
-        fixed = {**(fixed or {}), 'mainKeyword': gw_short or gw_raw, 'seedTitle': gw_raw,
-                 'growthEvidence': scheduled['growthKeyword'], 'mode': 'editorial_seed'}
+        fixed = growth_editorial_seed(fixed, scheduled['growthKeyword'])
+    if scheduled.get('repairContinuationUsed', {}).get('approvedQuery') and not revision_id:
+        fixed = {**(fixed or {}), 'mainKeyword': approved_repair_query(scheduled)}
     if 'demandMode' in scheduled:
         fixed = {**(fixed or {}), 'demandMode': scheduled['demandMode']}
     if layout_folder:
@@ -5449,9 +5412,22 @@ def save_schedule(schedule):
     except Exception as e:
         log_scheduler(f"Failed to save schedule: {e}")
 
+import threading as _cleaner_threading
+import asyncio as _cleaner_asyncio
+_CLEANER_OWNERS = _cleaner_threading.local()
+
 @contextmanager
 def cleaner_lock(path=None, wait_seconds=0, poll_interval=5):
-    path = Path(path or DATA_DIR / 'cleaner.lock')
+    path = Path(path or DATA_DIR / 'cleaner.lock').resolve()
+    try:
+        task = _cleaner_asyncio.current_task()
+    except RuntimeError:
+        task = None
+    identity = (os.getpid(), _cleaner_threading.get_ident(), task, path)
+    owner = getattr(_CLEANER_OWNERS, 'owner', None)
+    if owner and owner[:4] == identity and not owner[4].closed:
+        yield True
+        return
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('a+b') as handle:
         if handle.tell() == 0:
@@ -5475,10 +5451,14 @@ def cleaner_lock(path=None, wait_seconds=0, poll_interval=5):
                 if remaining <= 0:
                     break
                 time.sleep(min(max(0.1, float(poll_interval)), remaining))
+        previous_owner = getattr(_CLEANER_OWNERS, 'owner', None)
+        if acquired:
+            _CLEANER_OWNERS.owner = (*identity, handle)
         try:
             yield acquired
         finally:
             if acquired:
+                _CLEANER_OWNERS.owner = previous_owner
                 handle.seek(0)
                 if os.name == 'nt':
                     msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
@@ -6457,7 +6437,10 @@ def schedule_failed_attempt(item, exit_code, now=None):
                     nextRetryAt=(now + datetime.timedelta(minutes=3)).isoformat())
 
 
-def run_publisher_for_item(item, schedule, schedule_path=None):
+_REPAIR_AUTHORIZATION = object()
+
+
+def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_authorization=None):
     schedule_path = Path(schedule_path or SCHEDULE_JSON)
     domain = item["domain"]
     if domain not in ALL_DOMAINS:
@@ -6478,7 +6461,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
         retry = datetime.datetime.fromisoformat(item['nextRetryAt'])
         if datetime.datetime.now(KST) < (retry if retry.tzinfo else retry.replace(tzinfo=KST)):
             return False
-    if item.get('retryable') is False or item.get('attemptCount', 0) >= 3:
+    if (item.get('retryable') is False or item.get('attemptCount', 0) >= 3) and _repair_authorization is not _REPAIR_AUTHORIZATION:
         return False
     item["attemptCount"] = item.get("attemptCount", 0) + 1
     item['totalAttempts'] = item.get('totalAttempts', 0) + 1
@@ -6565,6 +6548,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
         fresh_item['lastErrorAt'] = fresh_item.get('attemptStartedAt')
         record_attempt_result(fresh_item, exit_code, elapsed)
         save_schedule_file(schedule_path, fresh_sched)
+        report_cf_host_failure(fresh_item, fresh_sched, schedule_path)
         sync_dashboard_status(load_or_get_schedule(), active_item=None)
         return False
 
@@ -6667,6 +6651,303 @@ def bind_prepared_reviewed_articles(schedule):
         changed = True
     return changed
 
+def report_cf_host_failure(item, schedule, schedule_path):
+    error = str(item.get('lastError') or '')
+    if editorial_seed_failure(item): return  # The typed controller owns this request chain.
+    if not error or any(value in error for value in ('No eligible demand candidate', 'MaterialRequired',
+            'ReviewRequired', 'content_review_required', 'reader task', 'quality review')):
+        return
+    from common.host_failure import report_host_failure
+    report_host_failure(actor='cf-pipeline', task_key='cf:' + schedule['date'] + ':' + item['domain'],
+                        state=item.get('status', 'failed'), evidence_ref=str(schedule_path),
+                        source_record=item, error_type=error.split(':', 1)[0][:80])
+
+
+def editorial_seed_failure(item):
+    raw = str((item.get('growthKeyword') or {}).get('keyword') or '')
+    pinned = raw.split('—')[0].strip()
+    error = str(item.get('lastError') or '')
+    return bool(item.get('status') == 'failed' and item.get('currentStage') == 1
+                and len(pinned) > 20 and pinned in error
+                and 'No eligible demand candidate:' in error and 'unknown=HTTP 400' in error
+                and not item.get('repairContinuationUsed') and not publication_may_be_inflight(item))
+
+
+def _item_digest(item):
+    return hashlib.sha256(json.dumps(item, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+
+
+def _repair_preflight(schedule, item, proof):
+    if schedule['date'] != datetime.datetime.now(KST).date().isoformat() or schedule['date'] != proof['date']:
+        raise ValueError('Repair date changed')
+    if _item_digest(item) != proof['itemSha256'] or not editorial_seed_failure(item):
+        raise ValueError('Failure changed or submission may exist')
+    if reconcile_item(item, schedule['date'], strict=True):
+        raise ValueError('Already public; repair submission forbidden')
+    public_count = 0
+    for page in range(1, 21):
+        response = requests.get(f"https://www.{item['domain']}/api/posts", params={'limit': 50, 'page': page}, timeout=15)
+        response.raise_for_status()
+        posts = response.json().get('posts')
+        if not isinstance(posts, list): raise ValueError('Public inventory unavailable')
+        public_count += len(posts)
+        if any(row.get('slug') == item.get('slug') or row.get('title') == item.get('title') for row in posts):
+            raise ValueError('Public duplicate found; repair submission forbidden')
+        if len(posts) < 50: break
+    else:
+        raise ValueError('Public inventory pagination incomplete')
+    return {'checkedAt': datetime.datetime.now(KST).isoformat(), 'publicCount': public_count,
+            'exactMatches': 0, 'submissionStarted': False, 'publicationReceiptExists': False,
+            'cleanerLockAcquired': True, 'itemSha256': _item_digest(item),
+            'scheduleSha256': hashlib.sha256(SCHEDULE_JSON.read_bytes()).hexdigest()}
+
+
+def verify_repair_query_binding(repaired, reviewed_inputs):
+    if not isinstance(reviewed_inputs, dict): raise ValueError('Missing reviewed query binding')
+    evidence_path = Path(repaired['evidencePath'])
+    raw = evidence_path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != repaired['evidenceSha256']: raise ValueError('Repair evidence changed')
+    evidence = json.loads(raw)
+    for key in ('approvedQuery','queryEvidenceSha256','intentEvidenceSha256'):
+        if not reviewed_inputs.get(key) or evidence.get(key) != reviewed_inputs[key]: raise ValueError('Reviewed query binding changed')
+    records = {}
+    for kind in ('query','intent'):
+        path = Path(evidence[kind+'EvidencePath'])
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != reviewed_inputs[kind+'EvidenceSha256']: raise ValueError('Query proof changed')
+        records[kind] = json.loads(raw)
+    query = records['query']; intent = records['intent']
+    if intent.get('queryEvidenceSha256') != reviewed_inputs['queryEvidenceSha256']: raise ValueError('Intent evidence binding changed')
+    index = next((i for i,row in enumerate(query['candidates']) if row['mainKeyword'] == reviewed_inputs['approvedQuery']),None)
+    if index is None or not any(row.get('index')==index and row.get('sameIntent') is True for row in intent['verdict']['judgments']): raise ValueError('Query is not approved for original intent')
+    if query['measurements']['candidates'][index].get('eligible') is not True: raise ValueError('Query demand was not eligible')
+    return {**reviewed_inputs,'repairEvidencePath':str(evidence_path),'repairEvidenceSha256':repaired['evidenceSha256']}
+
+
+def approved_repair_query(scheduled):
+    from common.repair_workflow import ROOT
+    metadata = scheduled['repairContinuationUsed']
+    path = Path(metadata['permitPath'])
+    if path.resolve().parent != ROOT.resolve(): raise ValueError('Repair permit outside controller root')
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != metadata['permitSha256']: raise ValueError('Repair permit changed')
+    permit = json.loads(raw)
+    if permit.get('taskId') != metadata['taskId'] or permit.get('repairRevision') != hashlib.sha256(Path(__file__).read_bytes()).hexdigest(): raise ValueError('Repair permit identity changed')
+    binding = verify_repair_query_binding({'evidencePath':metadata['repairEvidencePath'],'evidenceSha256':metadata['repairEvidenceSha256']},permit.get('reviewedInputs'))
+    if binding['approvedQuery'] != metadata['approvedQuery']: raise ValueError('Repair query changed')
+    return binding['approvedQuery']
+
+
+def prepare_repair_query(proof, *, cached_candidates=None, cached_measurements=None):
+    """Measure short queries and independently bind one to the original editorial task."""
+    from common.llm_client import generate_json
+    directory = Path(proof['repairDirectory'])
+    def immutable(name, value):
+        raw = json.dumps(value, ensure_ascii=False, sort_keys=True).encode('utf-8')
+        digest = hashlib.sha256(raw).hexdigest()
+        path = directory / (name + '-' + digest + '.json')
+        if not path.exists():
+            with path.open('xb') as stream: stream.write(raw)
+        if path.read_bytes() != raw: raise ValueError('Immutable query evidence changed')
+        return str(path), digest
+    with cleaner_lock() as acquired:
+        if not acquired: raise RuntimeError('CF cleaner active; query diagnosis held')
+        schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+        item = next(row for row in schedule['items'] if row['domain'] == proof['domain'])
+        if _item_digest(item) != proof['itemSha256'] or not editorial_seed_failure(item):
+            raise ValueError('Original repair task changed')
+    if cached_candidates is not None or cached_measurements is not None:
+        if cached_candidates is None or cached_measurements is None: raise ValueError('Incomplete query observation')
+        candidates = json.loads(Path(cached_candidates).read_text(encoding='utf-8'))[0]['candidates']
+        measurements = json.loads(Path(cached_measurements).read_text(encoding='utf-8'))[0]
+        origin = {str(path): hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in (cached_candidates,cached_measurements)}
+    else:
+        schema = {'type':'object','properties':{'candidates':{'type':'array','minItems':3,'maxItems':3,'items':{'type':'object','properties':{'mainKeyword':{'type':'string'},'question':{'type':'string'}},'required':['mainKeyword','question'],'additionalProperties':False}}},'required':['candidates'],'additionalProperties':False}
+        proposal = generate_json(json.dumps({'task':'Propose exactly three SHORT measured search queries for the SAME original editorial task. Do not broaden to other travel topics. No metrics or invented facts.','editorialSeed':proof['editorialSeed']},ensure_ascii=False),provider='codex',response_schema=schema,timeout_seconds=240)
+        candidates = proposal['candidates']
+        measurements = keyword_demand_evidence(candidates)
+        origin = {}
+    observed = measurements.get('candidates',[])
+    timestamp = datetime.datetime.fromisoformat(measurements['collectedAt'])
+    if timestamp.tzinfo is None: raise ValueError('Demand observation missing timezone')
+    age = (datetime.datetime.now(KST) - timestamp).total_seconds()
+    if not 0 <= age <= 3600: raise ValueError('Demand observation stale')
+    if len(candidates) != len(observed) or not candidates or len(candidates)>3: raise ValueError('Candidate observation count mismatch')
+    for candidate, metric in zip(candidates,observed):
+        if candidate['mainKeyword'] != metric.get('mainKeyword'): raise ValueError('Candidate measurement identity mismatch')
+    query_path,query_sha = immutable('repair-query-observation',{'taskId':proof['taskId'],'itemSha256':proof['itemSha256'],'editorialSeed':proof['editorialSeed'],'candidates':candidates,'measurements':measurements,'originArtifactHashes':origin})
+    row_schema={'type':'object','properties':{'index':{'type':'integer','enum':list(range(len(candidates)))},'sameIntent':{'type':'boolean'},'reason':{'type':'string'}},'required':['index','sameIntent','reason'],'additionalProperties':False}
+    schema={'type':'object','properties':{'judgments':{'type':'array','minItems':len(candidates),'maxItems':len(candidates),'items':row_schema}},'required':['judgments'],'additionalProperties':False}
+    verdict=generate_json(json.dumps({'task':'Independently judge each listed candidate against the ORIGINAL editorial task. Return only index, sameIntent boolean and concrete seed-based reason. Shared broad category is insufficient. Do not generate or change any query. Demand size must not influence sameIntent.','editorialSeed':proof['editorialSeed'],'candidates':candidates},ensure_ascii=False),provider='codex',response_schema=schema,timeout_seconds=240)
+    judgments=verdict.get('judgments',[])
+    if sorted(row.get('index') for row in judgments)!=list(range(len(candidates))): raise ValueError('Incomplete intent verdict')
+    intent_path,intent_sha=immutable('repair-query-intent',{'taskId':proof['taskId'],'queryEvidenceSha256':query_sha,'verdict':verdict})
+    allowed=[row['index'] for row in judgments if row.get('sameIntent') is True and observed[row['index']].get('eligible') is True and observed[row['index']].get('volume',{}).get('status')=='ok' and (item.get('demandMode','evergreen') != 'current_issue' or observed[row['index']].get('currentIssue') is True)]
+    if not allowed: raise ValueError('No measured candidate preserves original task intent')
+    chosen=min(allowed)
+    return {'approvedQuery':candidates[chosen]['mainKeyword'],'queryEvidencePath':query_path,'queryEvidenceSha256':query_sha,'intentEvidencePath':intent_path,'intentEvidenceSha256':intent_sha}
+
+
+def repair_quality_gate_evidence():
+    """Fixed host allowlist; no model-directed file reads or claimed unchanged flags."""
+    import ast, difflib
+    current = Path(__file__).read_text(encoding='utf-8')
+    baseline = subprocess.run(['git','show','HEAD:cf_posting/pipeline_runner.py'],cwd=BASE_DIR.parent,capture_output=True,text=True,encoding='utf-8',check=True).stdout
+    commit = subprocess.run(['git','rev-parse','HEAD'],cwd=BASE_DIR.parent,capture_output=True,text=True,check=True).stdout.strip()
+    names = {'require_prewriting_handoff','validate_article','validate_images','review_article','review_visual_assets','validate_visual_review_coverage','assemble_with_agent','call_visual_batch'}
+    def collect(source):
+        tree=ast.parse(source);result={}
+        for node in tree.body:
+            if isinstance(node,ast.FunctionDef) and node.name in names: result[node.name]=node
+            if isinstance(node,ast.ClassDef) and node.name=='Handoff':
+                for child in node.body:
+                    if isinstance(child,ast.FunctionDef) and child.name in ('check','publication_gate'):result['Handoff.'+child.name]=child
+        return result
+    old,new=collect(baseline),collect(current)
+    if set(old)!=set(new) or len(new)!=10:raise ValueError('Quality gate allowlist incomplete')
+    hashes={name:{'headAstSha256':hashlib.sha256(ast.dump(old[name],include_attributes=False).encode()).hexdigest(),'currentAstSha256':hashlib.sha256(ast.dump(node,include_attributes=False).encode()).hexdigest(),'unchanged':ast.dump(old[name],include_attributes=False)==ast.dump(node,include_attributes=False)} for name,node in new.items()}
+    start=current.index('    # Technical structure/image checks alone never authorize publication.')
+    end=current.index('    # STAGE 6:',start)
+    return {'baseCommit':commit,'comparison':'Python AST without source locations','functions':hashes,'actualSources':{name:ast.get_source_segment(current,node) for name,node in new.items()},'changedFunctionDiffs':{name:''.join(difflib.unified_diff(ast.get_source_segment(baseline,old[name]).splitlines(True),ast.get_source_segment(current,node).splitlines(True),fromfile='HEAD/'+name,tofile='current/'+name)) for name,node in new.items() if not hashes[name]['unchanged']},'publicationCallsite':current[start:end]}
+
+
+def validate_editorial_seed_repair(task_id, proof, *, query_binding=None):
+    """Fixed host regression only; no model-provided command or source mutation."""
+    import inspect
+    revision = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    result = subprocess.run([sys.executable, '-m', 'unittest',
+        'cf_posting.test_growth_seed', 'cf_posting.test_today_cleaner', 'cf_posting.test_repair_guards', '-v'], cwd=BASE_DIR.parent,
+        capture_output=True, text=True, timeout=60)
+    passed = result.returncode == 0 and bool(re.search(r'Ran [1-9][0-9]* tests', result.stderr)) and 'skipped=' not in result.stderr
+    with cleaner_lock() as acquired:
+        if not acquired: raise RuntimeError('CF cleaner active; repair review held')
+        schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+        item = next(row for row in schedule['items'] if row['domain'] == proof['domain'])
+        preflight = _repair_preflight(schedule, item, proof)
+    query_binding = query_binding or prepare_repair_query(proof)
+    source = Path(__file__).read_text(encoding='utf-8')
+    callsite = source.index("    if scheduled.get('growthKeyword') and not revision_id:")
+    evidence = {'taskId': task_id, 'testsPassed': passed, 'repairRevision': revision, **query_binding,
+                'qualityGateEvidence': repair_quality_gate_evidence(),
+                'correctionContract': 'editorial-seed-v1: growth title is context, not a pinned query; existing explicit keyword remains fixed',
+                'callsite': source[callsite:callsite + 850],
+                'originalFailure': {'itemSha256': proof['itemSha256'], 'observedError': proof.get('observedError'), 'editorialSeed': proof['editorialSeed']},
+                'guardSource': {fn.__name__: inspect.getsource(fn) for fn in
+                                (keyword_demand_evidence, publication_may_be_inflight, _repair_preflight, resume_editorial_seed_repair,
+                                 prepare_repair_query, verify_repair_query_binding, approved_repair_query, cleaner_lock, repair_failed_schedule_item)},
+                'testScope': 'Controlled host regression is not real demand success. Public preflight is actual HTTP observation.',
+                'regressionSource': {name: (BASE_DIR / name).read_text(encoding='utf-8-sig') for name in
+                                     ('test_growth_seed.py', 'test_today_cleaner.py', 'test_repair_guards.py')},
+                'actualPreReviewPreflight': preflight,
+                'actualSource': inspect.getsource(growth_editorial_seed),
+                'testOutput': (result.stdout + result.stderr)[-8000:],
+                'correction': 'Growth title remains editorial seed; measured query is independently selected.',
+                'preservedGuards': ['demand threshold', 'explicit approved keyword', 'publication evidence', 'duplicate verification', 'attempt history']}
+    payload = json.dumps(evidence, ensure_ascii=False, sort_keys=True).encode('utf-8')
+    path = Path(proof['repairDirectory']) / ('validation-' + hashlib.sha256(payload).hexdigest() + '.json')
+    if not path.exists():
+        with path.open('xb') as output: output.write(payload)
+    if path.read_bytes() != payload: raise ValueError('Existing validation evidence changed')
+    return {'status': 'validated' if passed else 'validation_failed', 'testsPassed': passed,
+            'repairRevision': revision, 'evidencePath': str(path),
+            'evidenceSha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
+def resume_editorial_seed_repair(task_id, proof, repaired):
+    from common.repair_workflow import ROOT
+    permit_path = Path(repaired['resumePermitPath'])
+    base_fingerprint = hashlib.sha256((task_id + '|' + proof['failureType']).encode()).hexdigest()
+    fingerprint = permit_path.name.removesuffix('.permit.json')
+    if fingerprint not in (base_fingerprint, *(hashlib.sha256((base_fingerprint + '|' + rev).encode()).hexdigest() for rev in ('review-v2','review-v3','review-v4'))):
+        raise ValueError('Unsupported review revision')
+    if permit_path.resolve() != (ROOT / (fingerprint + '.permit.json')).resolve():
+        raise ValueError('Repair permit outside controller root')
+    raw = permit_path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != repaired['resumePermitSha256']:
+        raise ValueError('Repair permit changed')
+    permit = json.loads(raw)
+    controller = json.loads((ROOT / (fingerprint + '.json')).read_text(encoding='utf-8'))
+    budget = json.loads((ROOT / (base_fingerprint + '.resume.json')).read_text(encoding='utf-8'))
+    if budget.get('taskId') != task_id or budget.get('controllerFingerprint') != fingerprint:
+        raise ValueError('Resume budget does not match permit')
+    if controller.get('status') != 'resuming' or controller.get('resumeAttempted') is not True:
+        raise ValueError('Controller has not authorized this resume')
+    if fingerprint != base_fingerprint:
+        revision_number = next(number for number in (2,3,4) if fingerprint == hashlib.sha256((base_fingerprint + '|review-v' + str(number)).encode()).hexdigest())
+        expected_previous = base_fingerprint if revision_number == 2 else hashlib.sha256((base_fingerprint + '|review-v' + str(revision_number-1)).encode()).hexdigest()
+        old = ROOT / (expected_previous + '.json')
+        if controller.get('previousFingerprint') != expected_previous or hashlib.sha256(old.read_bytes()).hexdigest() != controller.get('oldReviewSha256'):
+            raise ValueError('Original rejected review changed')
+    if (permit.get('failureEvidenceSha256') != controller.get('failureEvidenceSha256')
+            or permit.get('repairEvidenceSha256') != repaired.get('evidenceSha256')):
+        raise ValueError('Repair proof binding changed')
+    if (permit.get('taskId') != task_id or permit.get('repairRevision') != hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+            or permit.get('resumeLimit') != 1 or not all(permit.get('verdict', {}).get(k) is True for k in ('supported','gatesPreserved','sameTask','safeToResume'))):
+        raise ValueError('Unapproved repair permit')
+    with cleaner_lock() as acquired:
+        if not acquired: raise RuntimeError('CF cleaner active; repair held')
+        schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+        item = next(row for row in schedule['items'] if row['domain'] == proof['domain'])
+        preflight = _repair_preflight(schedule, item, proof)
+        reviewed_query = verify_repair_query_binding(repaired, permit.get('reviewedInputs')) if fingerprint in (hashlib.sha256((base_fingerprint + '|review-v' + str(number)).encode()).hexdigest() for number in (3,4)) else {}
+        save_schedule_file(Path(proof['repairDirectory']) / 'resume-preflight.json', preflight)
+        # Separate one-use continuation; never reset the historical attempt count.
+        item['repairContinuationUsed'] = {'taskId': task_id, 'permitSha256': repaired['resumePermitSha256'],
+                                          'previousAttemptCount': item.get('attemptCount', 0), **reviewed_query,
+                                          'permitPath': str(permit_path)}
+        save_schedule_file(SCHEDULE_JSON, schedule)
+        published = run_publisher_for_item(item, schedule, SCHEDULE_JSON, _repair_authorization=_REPAIR_AUTHORIZATION)
+        latest = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+        current = next(row for row in latest['items'] if row['domain'] == proof['domain'])
+        stage_passed = False
+        artifacts = []
+        if current.get('artifactFolder'):
+            folder = (BASE_DIR / str(current['artifactFolder']).replace('\\', '/')).resolve()
+            if folder.is_relative_to((BASE_DIR / 'output').resolve()):
+                try:
+                    handoff = Handoff(folder, current['domain'], current['slug'])
+                    accepted = handoff.check()
+                    stage_passed = bool(accepted and accepted[0]['agent'] == 'keyword-selector')
+                    artifacts = [{'path': str(handoff.path), 'sha256': hashlib.sha256(handoff.path.read_bytes()).hexdigest()}]
+                except (OSError, ValueError, KeyError, ReviewRequired):
+                    stage_passed = False
+        evidence = {'taskId': task_id, 'failureType': proof['failureType'], 'failureStagePassed': stage_passed, 'sourceArtifacts': artifacts,
+                    'published': published, 'domain': current['domain'], 'status': current.get('status'),
+                    'currentStage': current.get('currentStage'), 'attemptCount': current.get('attemptCount'),
+                    'publicUrl': current.get('publicUrl'), 'lastError': current.get('lastError'),
+                    'scheduleSha256': hashlib.sha256(SCHEDULE_JSON.read_bytes()).hexdigest()}
+        path = Path(proof['repairDirectory']) / 'resume-result.json'
+        save_schedule_file(path, evidence)
+        return {**evidence, 'returncode': current.get('lastExitCode'), 'started': True,
+                'evidencePath': str(path), 'evidenceSha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
+def repair_failed_schedule_item(domain):
+    """Host-only known-failure route; no general retries or arbitrary repair commands."""
+    from common.repair_workflow import run_known_repair
+    with cleaner_lock() as acquired:
+        if not acquired: return {'status': 'busy'}
+        schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+        item = next(row for row in schedule['items'] if row['domain'] == domain)
+        if schedule['date'] != datetime.datetime.now(KST).date().isoformat() or not editorial_seed_failure(item):
+            return {'status': 'not_applicable'}
+        task_id = 'cf-repair:' + schedule['date'] + ':' + domain
+        directory = Path.home() / '.barolab' / 'memories' / 'work-evidence' / hashlib.sha256(task_id.encode()).hexdigest()
+        directory.mkdir(parents=True, exist_ok=True)
+        evidence = directory / 'failure.json'
+        if not evidence.exists():
+            proof = {'failureType': 'editorial_seed_pinned_as_keyword', 'taskId': task_id,
+                     'date': schedule['date'], 'domain': domain, 'stage': 'keyword-selector',
+                     'status': 'failed', 'submissionStarted': False, 'itemSha256': _item_digest(item),
+                     'observedError': item['lastError'], 'editorialSeed': item['growthKeyword']['keyword'],
+                     'attemptCount': item.get('attemptCount'), 'repairDirectory': str(directory),
+                     'diagnosis': 'Legacy growth-title input was forced into fixed mainKeyword; actual SearchAd returned HTTP 400.'}
+            save_schedule_file(evidence, proof)
+        # Keep the real OS claim across independent review and its one-use resume.
+        return run_known_repair(task_id, str(evidence), hashlib.sha256(evidence.read_bytes()).hexdigest(),
+                                handler=validate_editorial_seed_repair, resume=resume_editorial_seed_repair)
+
+
 def catch_up_today_once():
     """Run at most one current-KST-date job; never consume recovery queues."""
     with cleaner_lock() as acquired:
@@ -6707,6 +6988,8 @@ def catch_up_today_once():
             save_schedule_file(status_path, summary)
             latest = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
             sync_dashboard_status(latest)
+    if due:
+        repair_failed_schedule_item(item['domain'])
 
 
 def catch_up_once():
@@ -6810,6 +7093,7 @@ def catch_up_once():
 def main():
     parser = argparse.ArgumentParser(description="CF Pipeline & Scheduler Runner")
     parser.add_argument("domains", nargs="*", help="Target domain(s) to run directly")
+    parser.add_argument("--repair-failed-domain", choices=ALL_DOMAINS, help="One guarded known-failure repair; never reset retry history")
     parser.add_argument("--catch-up-today-once", action="store_true", help="Process at most one due job today without growth or recovery queues")
     parser.add_argument("--catch-up-once", action="store_true", help="Catch up overdue schedule once")
     parser.add_argument("--manual-retry-once", action="store_true", help="Process queued manual retry once")
@@ -6822,6 +7106,9 @@ def main():
     parser.add_argument('--growth-domain', choices=ALL_DOMAINS)
     parser.add_argument('--growth-limit', type=int, default=None)
     args, unknown = parser.parse_known_args()
+    if args.repair_failed_domain:
+        print(json.dumps(repair_failed_schedule_item(args.repair_failed_domain), ensure_ascii=False))
+        return
     if args.growth_radar or args.growth_doctor:
         with cleaner_lock(wait_seconds=240, poll_interval=5) as acquired:
             if not acquired:

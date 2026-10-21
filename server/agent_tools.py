@@ -1766,6 +1766,25 @@ def get_agent_live_context(slug: str, user_text: str = "") -> str:
     return clock_header + format_jarvis_context_block()
 
 
+def repair_cf_known_failure(domain: str) -> Dict[str, Any]:
+    if domain not in CF_16_DOMAINS:
+        return {"ok": False, "tool": "repair_cf_known_failure", "status": "needs_input"}
+    from cf_posting.pipeline_runner import editorial_seed_failure
+    schedule = _read_json(BASE_DIR / 'cf_posting' / 'data' / 'daily_schedule.json', {})
+    item = next((row for row in schedule.get('items', []) if row.get('domain') == domain), {})
+    if not editorial_seed_failure(item):
+        return {"ok": False, "tool": "repair_cf_known_failure", "status": "not_applicable",
+                "state": "등록된 사전제출 코드 오류와 일치하지 않아 재개하지 않았습니다."}
+    command = [sys.executable, '-u', str(BASE_DIR / 'cf_posting' / 'pipeline_runner.py'), '--repair-failed-domain', domain]
+    log_path = Path.home() / '.barolab' / 'scratch' / 'cf-known-repair.log'
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open('a', encoding='utf-8') as output:
+        process = subprocess.Popen(command, cwd=BASE_DIR, stdout=output, stderr=subprocess.STDOUT,
+                                   creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    return {"ok": True, "tool": "repair_cf_known_failure", "status": "running", "pid": process.pid,
+            "state": "등록된 오류의 검증·독립 검수를 시작했습니다. 재개와 게시 결과는 아직 확인되지 않았습니다."}
+
+
 def propose_patch_code(files: List[str], test_files: List[str], objective: str) -> Dict[str, Any]:
     if not files or not test_files:
         return {"ok": False, "tool": "propose_coding_job", "status": "needs_input",
@@ -1808,6 +1827,9 @@ def _route_patch_message(text: str) -> List[Dict[str, Any]]:
 
 def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     """Directly invoke one of the registered agent tools by name."""
+    if tool_name == "repair_cf_known_failure":
+        if slug != "patch": return {"ok": False, "tool": tool_name, "status": "forbidden"}
+        return repair_cf_known_failure(kwargs.get('domain', ''))
     if tool_name in ("propose_coding_job", "read_coding_job_status"):
         if slug != "patch":
             return {"ok": False, "tool": tool_name, "status": "forbidden"}

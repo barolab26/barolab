@@ -294,6 +294,16 @@ def finish_send(db, qid, result):
                    (result.get('answer_url'), answer_id, json.dumps(result, ensure_ascii=False), stamp(), qid))
     if changed.rowcount:
         _emit_crew_state(qid, 'submitted_unverified')
+        if not answer_id:
+            _report_host_failure(db,qid,'submission_unknown')
+
+
+def _report_host_failure(db, qid, state, error_type=''):
+    from common.host_failure import report_host_failure
+    row = db.execute('SELECT * FROM questions WHERE question_id=?',(qid,)).fetchone()
+    if row:
+        report_host_failure(actor='kin-pipeline',task_key='kin:'+str(qid),state=state,
+            evidence_ref=db.execute('PRAGMA database_list').fetchone()[2],source_record=dict(row),error_type=error_type)
 
 
 def record_verification(db, qid, evidence):
@@ -356,6 +366,8 @@ def record_verification(db, qid, evidence):
         except Exception as exc:
             import logging
             logging.getLogger(__name__).warning('work-learning kin:%s:%s learning_error=%s; publication remains verified', qid, row['answer_id'], type(exc).__name__)
+    if not verified:
+        _report_host_failure(db,qid,'public_verification_unresolved')
     return bool(verified)
 
 
@@ -576,6 +588,12 @@ def main(argv=None):
             with db:
                 db.execute('INSERT OR REPLACE INTO runtime VALUES (?,?,?)',
                            (args.account,'Operation blocked ('+type(exc).__name__+'); inspect private worker output',stamp()))
+            if isinstance(exc,(OSError,RuntimeError,TimeoutError)):
+                from common.host_failure import report_host_failure
+                observed = db.execute('SELECT * FROM runtime WHERE account=?',(args.account,)).fetchone()
+                report_host_failure(actor='kin-pipeline',task_key='kin-host:'+str(args.account)+':'+str(args.run_id or args.verify or args.question_id or 'operation'),
+                    state='host_execution_failed',evidence_ref=db.execute('PRAGMA database_list').fetchone()[2],
+                    source_record=dict(observed) if observed else {},error_type=type(exc).__name__)
         raise
     finally:
         snapshot(db); db.close()

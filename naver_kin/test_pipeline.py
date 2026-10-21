@@ -30,6 +30,7 @@ def document(account='adinfo0905', qid='123456789'):
 
 class LedgerTests(unittest.TestCase):
     def setUp(self):
+        failure = patch('common.host_failure.report_host_failure'); failure.start(); self.addCleanup(failure.stop)
         events = patch('naver_kin.pipeline._emit_crew_state')
         events.start(); self.addCleanup(events.stop)
         learning = patch('common.llm_client.record_verified_work', return_value={'status':'test_only'})
@@ -57,6 +58,20 @@ class LedgerTests(unittest.TestCase):
     def test_crash_in_publishing_never_reposts(self):
         qid=p.import_draft(self.db,document());p.begin_send(self.db,qid,'adinfo0905')
         with self.assertRaises(ValueError):p.begin_send(self.db,qid,'adinfo0905')
+
+    def test_unknown_submission_requests_diagnosis_without_resend_or_state_change(self):
+        qid=p.import_draft(self.db,document());p.begin_send(self.db,qid,'adinfo0905')
+        with patch('common.host_failure.report_host_failure') as report:
+            p.finish_send(self.db,qid,{'reason':'uncertain'})
+        self.assertEqual(report.call_args.kwargs['state'],'submission_unknown')
+        self.assertEqual(self.db.execute('SELECT state FROM questions').fetchone()[0],'submitted_unverified')
+        with self.assertRaises(ValueError):p.begin_send(self.db,qid,'adinfo0905')
+
+    def test_normal_submission_wait_is_not_a_host_failure(self):
+        qid=p.import_draft(self.db,document());p.begin_send(self.db,qid,'adinfo0905')
+        with patch('common.host_failure.report_host_failure') as report:
+            p.finish_send(self.db,qid,{'answer_id':'123'})
+        report.assert_not_called()
 
     def test_later_verification_keeps_original_submission_day_and_manual_budget(self):
         from naver_kin import scheduler
@@ -163,6 +178,7 @@ class LedgerTests(unittest.TestCase):
 
 class SchedulerTests(unittest.TestCase):
     def setUp(self):
+        failure = patch('common.host_failure.report_host_failure'); failure.start(); self.addCleanup(failure.stop)
         events = patch('naver_kin.pipeline._emit_crew_state')
         events.start(); self.addCleanup(events.stop)
         from naver_kin import scheduler as s

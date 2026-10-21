@@ -1261,7 +1261,9 @@
     const memoryBtnHtml = showMemorySaveBtn
       ? `<button type="button" class="btn-inline-memory-save ${isSynapseSaved ? 'is-saved' : ''}" data-save-msg-id="${escapeHtml(m.id || '')}" data-save-who="${escapeHtml(m.who || 'radar')}" title="이 분석 내용을 기억 그래프(memory.html)에 시냅스 노드로 즉시 저장합니다">${isSynapseSaved ? '[✦ 기억 그래프에 반영됨]' : '[✦ 기억 그래프에 반영]'}</button>`
       : '';
-    const linkage = [['작업', m.taskId], ['요청 대상', m.requestedTo], ['상위 요청', m.parentRequestId], ['반환 유형', m.outputKind], ['근거', m.evidenceId]]
+    const recipientNames = { jarvis: '자비스', patch: '패치', publi: '퍼블리', trace: '트레이스', radar: '레이더', doctor: '닥터' };
+    const recipientLabel = Object.hasOwn(recipientNames, m.requestedTo) ? `@${recipientNames[m.requestedTo]}` : m.requestedTo;
+    const linkage = [['작업', m.taskId], ['요청 대상', recipientLabel], ['상위 요청', m.parentRequestId], ['반환 유형', m.outputKind], ['근거', m.evidenceId]]
       .filter(([, value]) => value).map(([label, value]) => `<span>${escapeHtml(label)}: ${escapeHtml(String(value))}</span>`).join('');
 
     return `

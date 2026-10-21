@@ -215,7 +215,18 @@ def _update(db,part_id,state,reason=None,**fields):
     # Production connections use autocommit. Never announce an uncommitted
     # transition if a caller explicitly opened a transaction.
     if not db.in_transaction and previous and previous['state'] != state:
-        _emit_crew_state(part_id, state)
+        if state == 'submitted_unknown':
+            _report_host_failure(db,part_id,'submission_unknown')
+        else:
+            _emit_crew_state(part_id, state)
+
+
+def _report_host_failure(db, part_id, state, error_type=''):
+    from common.host_failure import report_host_failure
+    row = db.execute('SELECT * FROM parts WHERE part_id=?',(part_id,)).fetchone()
+    if row:
+        report_host_failure(actor='threads-pipeline',task_key='threads:'+str(part_id),state=state,
+            evidence_ref=db.execute('PRAGMA database_list').fetchone()[2],source_record=dict(row),error_type=error_type)
 
 
 def _emit_crew_state(part_id, state):
@@ -269,17 +280,22 @@ def _publish(part_id,config,db_path=settings.DB,adapter=None,config_loader=None)
             if not result.get('platform_id'):raise RuntimeError('publish_result_unknown')
             submitted_at=settings.stamp()
             _update(db,part_id,'api_submitted',result.get('reason'),platform_id=result['platform_id'],permalink=result.get('permalink'),api_submitted_at=submitted_at,published_at=result.get('published_at'),publication_time_basis='api_timestamp' if result.get('published_at') else 'unknown')
-        except Exception:
+        except Exception as exc:
             if committed:_update(db,part_id,'submitted_unknown','publish_outcome_unknown')
+            else:_report_host_failure(db,part_id,'host_execution_failed',type(exc).__name__)
             raise
         try:evidence=adapter.verify_public(config,part,result)
-        except Exception:
-            _update(db,part_id,'api_submitted','public_verification_pending');return {'part_id':part_id,'state':'api_submitted','platform_id':result['platform_id'],'permalink':result.get('permalink')}
+        except Exception as exc:
+            _update(db,part_id,'api_submitted','public_verification_pending')
+            _report_host_failure(db,part_id,'public_verification_unresolved',type(exc).__name__)
+            return {'part_id':part_id,'state':'api_submitted','platform_id':result['platform_id'],'permalink':result.get('permalink')}
         valid=(evidence.get('verified') is True and evidence.get('public') is True and evidence.get('account_key')==part['account_key'] and evidence.get('platform_id')==result['platform_id'] and evidence.get('text_sha256')==part['text_sha256'] and evidence.get('outbound_url')==part['outbound_url'])
         if valid:
             _update(db,part_id,'published_verified',verified_at=settings.stamp(),published_at=evidence.get('published_at') or result.get('published_at'),publication_time_basis='api_timestamp' if evidence.get('published_at') or result.get('published_at') else 'unknown',evidence=json.dumps(evidence,ensure_ascii=False))
             _record_public_work(db_path, {**part, 'platform_id':result['platform_id'], 'permalink':result.get('permalink')}, evidence)
-        else:_update(db,part_id,'api_submitted','public_verification_pending',evidence=json.dumps(evidence,ensure_ascii=False))
+        else:
+            _update(db,part_id,'api_submitted','public_verification_pending',evidence=json.dumps(evidence,ensure_ascii=False))
+            _report_host_failure(db,part_id,'public_verification_unresolved')
         return {'part_id':part_id,'state':'published_verified' if valid else 'api_submitted','platform_id':result['platform_id'],'permalink':result.get('permalink')}
 
 def reconcile(config,db_path=settings.DB,adapter=None):

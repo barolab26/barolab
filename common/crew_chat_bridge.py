@@ -105,6 +105,13 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
         'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
                        'handoff':'','synapseLinked':False}}
     _deliver(payload)
+    if phase == 'failed':
+        try:
+            from common.repair_workflow import record_failed_event
+            record_failed_event(payload)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error('Repair intake unavailable: %s',type(exc).__name__)
     return event_id
 
 
