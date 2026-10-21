@@ -82,6 +82,10 @@ class MonitorTests(unittest.TestCase):
         for value in (float('nan'),float('inf')):
             self.assertEqual(hud.time_label(value,now),'시각 미관측')
 
+    def test_pipeline_observation_states_are_korean_and_scoped(self):
+        self.assertEqual(hud.state_text('registered_idle'),'등록 파이프라인 실행 없음')
+        self.assertEqual(hud.state_text('active_unobserved'),'실행 잠금 확인 · 단계 미관측')
+
     def test_default_ego_only_delegates_monitor(self):
         import ego_lite_runner as ego
         with patch.object(hud,'main',return_value=0) as monitor, patch.object(ego,'run_cf_catch_up') as cf:

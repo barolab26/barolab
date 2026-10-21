@@ -105,7 +105,7 @@ STATES = {'queued':'요청 대기','acknowledged':'접수','running':'실행 중
           'awaiting_completion':'결과 대기','completed':'요청 처리 완료','held':'보류','failed':'실패',
           'unknown':'미관측','review_required':'검수 대기','stale':'지난 자료','observed':'관측됨',
           'attention':'확인 필요','published':'공개됨','reserved':'예약됨','scheduled':'예약됨',
-          'idle':'대기', 'active':'실행 중', 'active_unobserved':'실행 점유 · 세부 동작 미관측', 'disconnected':'미연결', 'waiting':'대기','prepared':'준비됨','retry_wait':'재시도 대기','done':'처리됨'}
+          'idle':'대기', 'active':'실행 중', 'registered_idle':'등록 파이프라인 실행 없음', 'active_unobserved':'실행 잠금 확인 · 단계 미관측', 'disconnected':'미연결', 'waiting':'대기','prepared':'준비됨','retry_wait':'재시도 대기','done':'처리됨'}
 
 
 def state_text(value):
