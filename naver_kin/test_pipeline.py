@@ -30,6 +30,8 @@ def document(account='adinfo0905', qid='123456789'):
 
 class LedgerTests(unittest.TestCase):
     def setUp(self):
+        events = patch('naver_kin.pipeline._emit_crew_state')
+        events.start(); self.addCleanup(events.stop)
         learning = patch('common.llm_client.record_verified_work', return_value={'status':'test_only'})
         learning.start(); self.addCleanup(learning.stop)
         self.folder=tempfile.TemporaryDirectory()
@@ -161,6 +163,8 @@ class LedgerTests(unittest.TestCase):
 
 class SchedulerTests(unittest.TestCase):
     def setUp(self):
+        events = patch('naver_kin.pipeline._emit_crew_state')
+        events.start(); self.addCleanup(events.stop)
         from naver_kin import scheduler as s
         from naver_kin.experiment import TRIAL_START,TRIAL_END,FINAL_COLLECTION
         self.s=s;self.folder=tempfile.TemporaryDirectory();self.root=Path(self.folder.name)

@@ -20,6 +20,9 @@ import shutil
 import sqlite3
 import threading
 import time
+import uuid
+import hashlib
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
@@ -195,6 +198,13 @@ class RoomEventBus:
 
 
 EVENT_BUS = RoomEventBus()
+EVENT_EPOCH = uuid.uuid4().hex
+
+
+def room_event_resume(since_seq, since_epoch, current_seq, current_epoch):
+    reset = bool((since_epoch and since_epoch != current_epoch) or since_seq > current_seq)
+    return {'seq': current_seq if reset else max(0, since_seq),
+            'epoch': current_epoch, 'reset': reset}
 
 
 def ensure_chat_migrated() -> Dict[str, Any]:
@@ -242,6 +252,12 @@ def _is_noise_or_fake_loop_message(m: Dict[str, Any]) -> bool:
     """Filter out fake autonomous loop messages, system round banners, capReached notices, and legacy hallucinated messages."""
     if not isinstance(m, dict):
         return True
+    if m.get('eventType') == 'crew_work_event':
+        try:
+            project_work_event(m)
+            return False
+        except ValueError:
+            return True
     mid = str(m.get("id") or "")
     if mid.startswith("auto-") or mid.startswith("sys-auto-"):
         return True
@@ -293,6 +309,8 @@ def _get_agent_brain_safe(slug: str) -> Dict[str, Any]:
 
 def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Ensure every message has a stable `id`, `brain`, `replyToCeo`, `isWorkstream`, and `taskTracker` metadata."""
+    if m.get('eventType') == 'crew_work_event':
+        return project_work_event(m)
     if not m.get("id"):
         m["id"] = f"msg-{m.get('ts', idx)}-{m.get('who', 'sys')}-{idx}"
     who = m.get("who")
@@ -1693,6 +1711,7 @@ def sync_and_broadcast_pipeline_workstream() -> List[Dict[str, Any]]:
     Ensure initial real pipeline workstream handoff messages exist in `room-main.json`
     and emit new handoff messages whenever real pipeline ledgers advance.
     """
+    drain_work_event_outbox()
     now_mono = time.time()
     if now_mono - _LIVE_WS_CACHE.get("sync_ts", 0.0) < 4.0:
         return []
@@ -2054,6 +2073,103 @@ def api_get_agent_live_context(slug: str):
     }
 
 
+def project_work_event(payload):
+    """Rebuild display text from bounded lifecycle metadata, never supplied prose."""
+    if not isinstance(payload, dict) or payload.get('eventType') != 'crew_work_event':
+        raise ValueError('Unsupported work event')
+    phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
+    if payload.get('phase') not in phases:
+        raise ValueError('Unknown lifecycle phase')
+    event_id = payload.get('eventId', '')
+    if not isinstance(event_id, str) or not re.fullmatch(r'crew-[a-f0-9]{32}', event_id) or payload.get('id') != event_id:
+        raise ValueError('Invalid event identity')
+    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage')
+    clean = {}
+    for key in fields:
+        value = payload.get(key, '')
+        if not isinstance(value, str) or len(value) > 160 or any(ord(c) < 32 for c in value):
+            raise ValueError('Invalid metadata')
+        if re.search(r'(?i)https?://|[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:authorization|bearer|password|secret|cookie|api[_ -]?key|access[_ -]?token)\s*[:= ]', value):
+            raise ValueError('Sensitive metadata prohibited')
+        clean[key] = value
+    if not clean['taskId'] or not clean['who']:
+        raise ValueError('Task and observed actor required')
+    ts = payload.get('ts')
+    if not isinstance(ts, int) or isinstance(ts, bool) or ts <= 0:
+        raise ValueError('Observed timestamp required')
+    phase = payload['phase']
+    summary = f"{clean['stage'] or '작업'}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다."
+    return {**clean, 'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
+            'phase':phase,'ts':ts,'text':summary,'autonomous':True,'msgKind':'workstream',
+            'isWorkstream':True,'replyToCeo':False,
+            'brain':{'badge':clean['model'] or '모델 미관측'},
+            'taskTracker':{'status':'failed' if phase == 'failed' else 'status_only',
+                           'step':summary,'resultSummary':summary,'synapseLinked':False}}
+
+
+def receive_work_event(payload):
+    message = project_work_event(payload)
+    with _ROOM_LOCK:
+        existing = next((m for m in load_room_data().get('messages', []) if m.get('id') == message['id']), None)
+        if existing:
+            if project_work_event(existing) != message:
+                raise ValueError('Conflicting existing event; preserve original')
+            return {'ok':True, 'eventId':message['id'], 'duplicate':True}
+        append_or_update_room_message(message)
+    return {'ok':True, 'eventId':message['id'], 'duplicate':False}
+
+
+_OUTBOX_OFFSET = 0
+_OUTBOX_LAST_SCAN = 0.0
+
+
+def drain_work_event_outbox():
+    """Bounded rotating scan; invalid files stay preserved without starving later files."""
+    global _OUTBOX_OFFSET, _OUTBOX_LAST_SCAN
+    with _ROOM_LOCK:
+        if time.monotonic() - _OUTBOX_LAST_SCAN < 3:
+            return
+        _OUTBOX_LAST_SCAN = time.monotonic()
+        outbox = CHATS_DIR/'crew-outbox'
+        files = sorted(outbox.glob('*.json')) + sorted((outbox/'legacy').glob('*.json'))
+        if not files:
+            return
+        start = _OUTBOX_OFFSET % len(files)
+        scanned = 0
+        for path in (files[start:] + files[:start])[:100]:
+            scanned += 1
+            try:
+                if path.is_symlink() or path.stat().st_size > 80_000:
+                    raise ValueError('Invalid outbox file')
+                raw = path.read_bytes()
+                payload = json.loads(raw)
+                event_id = payload.get('id') if isinstance(payload, dict) else None
+                if not isinstance(event_id, str) or path.stem != hashlib.sha256(event_id.encode()).hexdigest():
+                    raise ValueError('Outbox identity mismatch')
+                if path.parent == outbox/'legacy':
+                    if payload.get('eventType') == 'crew_work_event':
+                        raise ValueError('Canonical events cannot use legacy admission')
+                    existing = next((m for m in load_room_data().get('messages', []) if m.get('id') == event_id), None)
+                    if not existing or any(existing.get(k) != v for k,v in payload.items()):
+                        receive_pipeline_autonomous_event(payload)
+                else:
+                    receive_work_event(payload)
+                if path.read_bytes() == raw:
+                    path.unlink()
+            except (OSError, ValueError, TypeError, HTTPException) as exc:
+                if scanned <= 3:
+                    logging.getLogger(__name__).warning('Crew outbox retained: %s', type(exc).__name__)
+        _OUTBOX_OFFSET = start + scanned
+
+
+@chat_router.post('/work-event')
+def api_receive_work_event(payload: Dict[str, Any]):
+    try:
+        return receive_work_event(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 @chat_router.get("/live-workstream")
 def api_get_live_workstream():
     """
@@ -2112,6 +2228,7 @@ def get_chat_room():
         "eventSeq": EVENT_BUS.current_seq,
         "activeTyping": list(EVENT_BUS.active_typing.values()),
         "sid": room.get("sid", 1),
+        "eventEpoch": EVENT_EPOCH,
         "agents": enriched_agents,
         "liveStatuses": live_map,
         "archivedMeetings": archived,
@@ -2137,12 +2254,13 @@ def poll_chat_events(since_seq: int = Query(0)):
 
 
 @chat_router.get("/events")
-async def stream_room_events(since_seq: int = Query(0)):
+async def stream_room_events(since_seq: int = Query(0), since_epoch: str = Query("")):
     """Server-Sent Events (SSE) stream for live typing indicators and new messages."""
 
     async def event_generator():
-        last_seq = since_seq if since_seq > 0 else EVENT_BUS.current_seq
-        yield f"event: connected\ndata: {json.dumps({'seq': last_seq, 'autonomousEnabled': AUTONOMOUS_WORKER.is_enabled()}, ensure_ascii=False)}\n\n"
+        resume = room_event_resume(since_seq, since_epoch, EVENT_BUS.current_seq, EVENT_EPOCH)
+        last_seq = resume['seq']
+        yield f"event: connected\ndata: {json.dumps({**resume, 'autonomousEnabled': AUTONOMOUS_WORKER.is_enabled()}, ensure_ascii=False)}\n\n"
         heartbeat_counter = 0
         while True:
             cur_seq, evts, _ = EVENT_BUS.get_since(last_seq)
@@ -2150,7 +2268,7 @@ async def stream_room_events(since_seq: int = Query(0)):
                 for ev in evts:
                     last_seq = max(last_seq, ev["seq"])
                     payload_str = json.dumps(ev["data"], ensure_ascii=False)
-                    yield f"event: {ev['event']}\ndata: {payload_str}\n\n"
+                    yield f"id: {EVENT_EPOCH}:{ev['seq']}\nevent: {ev['event']}\ndata: {payload_str}\n\n"
             else:
                 heartbeat_counter += 1
                 if heartbeat_counter % 25 == 0:

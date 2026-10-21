@@ -40,6 +40,18 @@ GLOBAL_DAILY_CAP = 20
 ACCOUNT_DAILY_CAP = 10
 
 
+def _emit_crew_state(qid, state):
+    """Report committed state, never equate an attempted send with publication."""
+    try:
+        from common.crew_chat_bridge import emit_work_event
+        phase = 'completed' if state == 'published_verified' else 'progress'
+        emit_work_event(actor='kin_pipeline', actor_label='지식인 실행기',
+                        task_id='kin:' + str(qid), phase=phase, stage=state,
+                        evidence_id='kin:' + str(qid), output_kind='ledger_state')
+    except Exception:
+        pass  # Chat delivery cannot affect the publication ledger.
+
+
 def stamp():
     return datetime.now(timezone.utc).isoformat()
 
@@ -268,6 +280,7 @@ def begin_send(db, qid, account, cap=GLOBAL_DAILY_CAP, run_id=None):
         db.execute("UPDATE questions SET state='publishing',review_hash=?,send_day=?,updated_at=? WHERE question_id=?",
                    (draft_binding(document), day, stamp(), qid))
         db.commit()
+        _emit_crew_state(qid, 'publishing')
         return document
     except Exception:
         db.rollback(); raise
@@ -277,8 +290,10 @@ def finish_send(db, qid, result):
     answer_id = result.get('answer_id')
     answer_id = str(answer_id) if answer_id is not None else None
     with db:
-        db.execute("UPDATE questions SET state='submitted_unverified',answer_url=?,answer_id=?,result=?,updated_at=? WHERE question_id=? AND state='publishing'",
+        changed = db.execute("UPDATE questions SET state='submitted_unverified',answer_url=?,answer_id=?,result=?,updated_at=? WHERE question_id=? AND state='publishing'",
                    (result.get('answer_url'), answer_id, json.dumps(result, ensure_ascii=False), stamp(), qid))
+    if changed.rowcount:
+        _emit_crew_state(qid, 'submitted_unverified')
 
 
 def record_verification(db, qid, evidence):
@@ -304,6 +319,8 @@ def record_verification(db, qid, evidence):
             db.execute("UPDATE questions SET state='published_verified',result=?,updated_at=?,answer_url=COALESCE(?,answer_url) WHERE question_id=?",
                        (json.dumps(evidence, ensure_ascii=False), stamp(), verified_url, qid))
         from common.llm_client import memory_event
+        if row['state'] != 'published_verified':
+            _emit_crew_state(qid, 'published_verified')
         memory_event(f'kin:{qid}:{row["answer_id"]}', 'pipeline_publication_verified',
                      'KnowledgeIn public answer identity, content hash and outbound URL verified.',
                      evidence=evidence, session_id=f'kin:{qid}')

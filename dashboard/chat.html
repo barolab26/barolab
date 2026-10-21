@@ -461,6 +461,20 @@
       text-overflow: ellipsis;
     }
     .msg-status-line .st-state.processing { color: #b45309; }
+    .msg-status-line:has(.st-linkage) {
+      flex-wrap: wrap;
+      white-space: normal;
+      overflow: visible;
+    }
+    .msg-status-line .st-linkage {
+      display: grid;
+      flex: 1 1 100%;
+      min-width: 0;
+      gap: 3px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     .msg-status-line .st-state.completed { color: #059669; }
     .msg-status-line .st-state.failed { color: #dc2626; }
     .msg-status-line .st-link {
@@ -927,6 +941,8 @@
 
   let resolvedApiBase = '';
   let lastEventSeq = 0;
+  let eventEpoch = '';
+  let eventReconnectTimer = null;
   let sseSource = null;
   const activeTypingMap = new Map();
   const agentBrainBadgeMap = new Map();
@@ -1071,6 +1087,7 @@
     if (!m || !slug || slug === 'all') return true;
     if (m.who === slug) return true;
     if (m.targetAgent === slug) return true;
+    if (m.requestedTo === slug) return true;
     if (Array.isArray(m.mentionedAgents) && m.mentionedAgents.includes(slug)) return true;
     const mentions = extractMentionsFromText(m.text || '');
     if (mentions.includes(slug)) return true;
@@ -1100,7 +1117,7 @@
 
   function recomputeUserReplyLinks() {
     let lastUserMsg = null;
-    for (const m of messageStore.values()) {
+    for (const m of chronologicalMessages(messageStore.values())) {
       if (m.who === 'user') {
         m._repliedBySlugs = new Set(extractMentionsFromText(m.text || ''));
         lastUserMsg = m;
@@ -1224,13 +1241,14 @@
     if (!tt && !artifacts.length && m.who === 'user') return '';
 
     const handoff = (tt && tt.handoff) ? tt.handoff : '';
-    const status = (tt && tt.status) || 'completed';
-    const summary = (tt && (tt.resultSummary || tt.step)) || '응답 완료';
+    const status = (tt && tt.status) || 'status_only';
+    const summary = (tt && (tt.resultSummary || tt.step)) || '결과 상태 미관측';
     const deliverableUrl = (tt && tt.deliverableUrl) || (artifacts.length ? `memory.html?rel=${encodeURIComponent(artifacts[0])}` : '');
     const deliverableLabel = (tt && tt.deliverableLabel) || (artifacts.length ? String(artifacts[0]).split('/').pop() : '');
     const isSynapseSaved = Boolean((tt && tt.synapseLinked) || m.synapseSaved);
 
-    let stateText = `✅ ${escapeHtml(summary)}`;
+    let stateText = escapeHtml(summary);
+    if (status === 'completed') stateText = `✅ ${escapeHtml(summary)}`;
     if (status === 'processing') {
       stateText = `🔄 ${escapeHtml((tt && tt.step) || '처리 중...')}`;
     } else if (status === 'failed') {
@@ -1243,11 +1261,14 @@
     const memoryBtnHtml = showMemorySaveBtn
       ? `<button type="button" class="btn-inline-memory-save ${isSynapseSaved ? 'is-saved' : ''}" data-save-msg-id="${escapeHtml(m.id || '')}" data-save-who="${escapeHtml(m.who || 'radar')}" title="이 분석 내용을 기억 그래프(memory.html)에 시냅스 노드로 즉시 저장합니다">${isSynapseSaved ? '[✦ 기억 그래프에 반영됨]' : '[✦ 기억 그래프에 반영]'}</button>`
       : '';
+    const linkage = [['작업', m.taskId], ['요청 대상', m.requestedTo], ['상위 요청', m.parentRequestId], ['반환 유형', m.outputKind], ['근거', m.evidenceId]]
+      .filter(([, value]) => value).map(([label, value]) => `<span>${escapeHtml(label)}: ${escapeHtml(String(value))}</span>`).join('');
 
     return `
       <div class="msg-status-line" data-tracker-for="${escapeHtml(m.id || '')}">
         ${handoff ? `<span class="st-handoff">📋 ${escapeHtml(handoff)}</span><span>·</span>` : ''}
         <span class="st-state ${escapeHtml(status)}">${stateText}</span>
+        ${linkage ? `<span class="st-linkage">${linkage}</span>` : ''}
         <span class="msg-status-actions">
           ${deliverableUrl ? `<a class="st-link" href="${escapeHtml(deliverableUrl)}">🔗 ${escapeHtml(deliverableLabel || '상세')}</a>` : ''}
           ${memoryBtnHtml}
@@ -1298,6 +1319,7 @@
 
   function isNoiseMessage(m) {
     if (!m || !m.text) return true;
+    if (m.eventType === 'crew_work_event' && m.taskId && m.eventId) return false;
     const mid = String(m.id || '');
     const who = String(m.who || '');
     const txt = String(m.text || '');
@@ -1315,7 +1337,7 @@
     if (m && m.brain && m.brain.badge) return m.brain.badge;
     const slug = m ? m.who : '';
     if (agentBrainBadgeMap.has(slug)) return agentBrainBadgeMap.get(slug);
-    return (AGENT_STYLE[slug] && AGENT_STYLE[slug].defaultBrain) || 'Argon High';
+    return (AGENT_STYLE[slug] && AGENT_STYLE[slug].defaultBrain) || '모델 미관측';
   }
 
   function buildMessageRowHtml(m) {
@@ -1335,7 +1357,7 @@
         </div>
       `;
     }
-    const ag = AGENT_STYLE[m.who] || { name: m.who, badge: '크루', color: '#475569', short: 'A', icon: '🤖', defaultBrain: 'Argon High' };
+    const ag = AGENT_STYLE[m.who] || { name: m.actorLabel || ((!m.who || ['common','unscoped','system'].includes(m.who)) ? '공통 작업 (담당 미지정)' : m.who), badge: '관측 기록', color: '#475569', short: '·', icon: '📋', defaultBrain: '모델 미관측' };
     const brainBadge = getAgentBrainBadge(m);
     const isWs = isMessageWorkstream(m);
     const wsTagHtml = isWs
@@ -1380,6 +1402,7 @@
           if (newEl) existingEl.replaceWith(newEl);
         }
       }
+      if (!options.initialLoad) sortVisibleMessages();
       applyChatFilters();
       return;
     }
@@ -1391,10 +1414,37 @@
     const rowEl = temp.firstElementChild;
     if (!rowEl) return;
     streamEl.appendChild(rowEl);
+    if (!options.initialLoad) sortVisibleMessages();
     applyChatFilters();
 
     if (!options.initialLoad && !rowEl.classList.contains('is-hidden-by-filter')) {
       handleSmartScrollOnNewMessage(rowEl, m.who === 'user', wasNearBottom);
+    }
+  }
+
+  function chronologicalMessages(messages) {
+    const sorted = [...messages].sort((a, b) => (Number(a.ts) || 0) - (Number(b.ts) || 0));
+    // Equal timestamps retain arrival order except for an explicit request edge.
+    // A bounded pass also leaves malformed/cyclic references unable to loop.
+    for (let pass = 0; pass < sorted.length; pass++) {
+      let changed = false;
+      for (let i = 0; i < sorted.length; i++) {
+        const parent = sorted[i].parentRequestId;
+        const j = parent ? sorted.findIndex(m => (m.eventId || m.id) === parent) : -1;
+        if (j > i && Number(sorted[j].ts) === Number(sorted[i].ts) && !sorted[j].parentRequestId) {
+          sorted.splice(i, 0, sorted.splice(j, 1)[0]);
+          changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+    return sorted;
+  }
+
+  function sortVisibleMessages() {
+    for (const message of chronologicalMessages(messageStore.values())) {
+      const row = streamEl.querySelector(`[data-msg-id="${CSS.escape(message.id)}"]`);
+      if (row) streamEl.appendChild(row);
     }
   }
 
@@ -1580,13 +1630,14 @@
     renderCrewList(data.agents || []);
     renderArchiveList(data.archivedMeetings || []);
     if (typeof data.eventSeq === 'number') {
-      lastEventSeq = Math.max(lastEventSeq, data.eventSeq);
+      lastEventSeq = data.eventSeq;
     }
+    eventEpoch = data.eventEpoch || '';
 
     streamEl.innerHTML = '';
     renderedMessageIds.clear();
     messageStore.clear();
-    (data.messages || []).forEach(m => upsertMessageToDom(m, { initialLoad: true }));
+    chronologicalMessages(data.messages || []).forEach(m => upsertMessageToDom(m, { initialLoad: true }));
     applyChatFilters();
 
     if (resetScrollToBottom) {
@@ -1596,13 +1647,38 @@
   }
 
   function connectEventStream() {
+    clearTimeout(eventReconnectTimer);
     if (sseSource) {
       try { sseSource.close(); } catch (_) {}
     }
     const base = resolvedApiBase || '';
     try {
-      sseSource = new EventSource(`${base}/api/chat/events?since_seq=${lastEventSeq}`);
+      sseSource = new EventSource(`${base}/api/chat/events?since_seq=${lastEventSeq}&since_epoch=${encodeURIComponent(eventEpoch)}`);
+      const rememberCursor = e => {
+        const parts = String(e.lastEventId || '').split(':');
+        if (parts.length === 2 && parts[0] === eventEpoch && Number.isSafeInteger(Number(parts[1]))) {
+          lastEventSeq = Math.max(lastEventSeq, Number(parts[1]));
+        }
+      };
+      sseSource.addEventListener('connected', e => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.reset || (eventEpoch && data.epoch !== eventEpoch)) {
+            sseSource.close();
+            loadRoom(false).catch(() => { eventReconnectTimer = setTimeout(connectEventStream, 3000); });
+            return;
+          }
+          eventEpoch = data.epoch || eventEpoch;
+          lastEventSeq = Number.isSafeInteger(data.seq) ? data.seq : lastEventSeq;
+        } catch (_) {}
+      });
+      sseSource.onerror = () => {
+        sseSource.close();
+        clearTimeout(eventReconnectTimer);
+        eventReconnectTimer = setTimeout(connectEventStream, 3000);
+      };
       sseSource.addEventListener('typing', e => {
+        rememberCursor(e);
         try {
           const d = JSON.parse(e.data);
           if (d && d.who) {
@@ -1613,12 +1689,14 @@
         } catch (_) {}
       });
       sseSource.addEventListener('message', e => {
+        rememberCursor(e);
         try {
           const msg = JSON.parse(e.data);
           upsertMessageToDom(msg, { allowInPlaceUpdate: false });
         } catch (_) {}
       });
       sseSource.addEventListener('task_update', e => {
+        rememberCursor(e);
         try {
           const msg = JSON.parse(e.data);
           upsertMessageToDom(msg, { allowInPlaceUpdate: true });

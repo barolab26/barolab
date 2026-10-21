@@ -832,6 +832,8 @@ class Handoff:
                      'instructionSha256':model.get('instructionSha256') or instruction_hash,'inputs':inputs,'inputHashes':{name:digest(self.file(name)) for name in inputs},
                      'outputs':list(outputs),'fileHashes':{name:digest(self.file(name)) for name in outputs}})
         self.save()
+        from common.crew_chat_bridge import emit_work_event, work_task_id
+        emit_work_event(actor='cf-'+agent, actor_label='CF '+agent, task_id=work_task_id(self.folder), phase='completed', stage='handoff-accepted', evidence_id=hashlib.sha256(json.dumps(rows[-1]['fileHashes'],sort_keys=True).encode()).hexdigest(), output_kind=f'{len(outputs)} artifacts accepted: '+', '.join(Path(n).name for n in outputs))
     def publication_gate(self,article,category):
         self.check(complete=True)
         require_prewriting_handoff(self, article)
@@ -4599,10 +4601,14 @@ def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
         if not RUN_CONTEXT.get('artifactFolder'):
             raise ReviewRequired('이미지 모델 입력을 보존할 실행 산출물 폴더가 없습니다')
         audit['audit_directory'] = Path(RUN_CONTEXT['artifactFolder']) / 'model-audit' / RUN_CONTEXT['agent']
+    from common.crew_chat_bridge import work_task_id
     agent = RUN_CONTEXT.get('agent')
     timeout_seconds = AGENT_MODEL_TIMEOUT_SECONDS if agent in Handoff.agents else None
     return generate_with_prompt_budget(prompt, provider, observer=observe_model, images=images, response_schema=schema,
-                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), timeout_seconds=timeout_seconds, **audit)
+                         memory_session_id=RUN_CONTEXT.get('artifactFolder'), timeout_seconds=timeout_seconds,
+                         crew_task_id=work_task_id(RUN_CONTEXT['artifactFolder']) if RUN_CONTEXT.get('artifactFolder') else None,
+                         crew_stage=agent or 'model-call', crew_actor='cf-'+agent if agent else 'common-runner',
+                         crew_actor_label='CF '+agent if agent else 'Common runner', **audit)
 
 
 def validate_article(article):

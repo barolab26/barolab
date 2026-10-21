@@ -204,12 +204,30 @@ def begin_send(db,part_id,config,now=None,expected=None):
             db.execute('UPDATE parts SET parent_platform_id=? WHERE part_id=?',(parent['platform_id'],part_id))
         db.execute("UPDATE parts SET state='sending_intent',updated_at=? WHERE part_id=?",(now.isoformat(),part_id))
         db.execute('INSERT INTO events(part_id,state,at) VALUES(?,?,?)',(part_id,'sending_intent',now.isoformat()));db.commit()
+        _emit_crew_state(part_id, 'sending_intent')
     except:db.rollback();raise
 
 def _update(db,part_id,state,reason=None,**fields):
+    previous = db.execute('SELECT state FROM parts WHERE part_id=?', (part_id,)).fetchone()
     fields.update(state=state,reason=reason,updated_at=settings.stamp())
     db.execute('UPDATE parts SET '+','.join(k+'=?' for k in fields)+' WHERE part_id=?',(*fields.values(),part_id))
     db.execute('INSERT INTO events(part_id,state,at,reason) VALUES(?,?,?,?)',(part_id,state,settings.stamp(),reason))
+    # Production connections use autocommit. Never announce an uncommitted
+    # transition if a caller explicitly opened a transaction.
+    if not db.in_transaction and previous and previous['state'] != state:
+        _emit_crew_state(part_id, state)
+
+
+def _emit_crew_state(part_id, state):
+    try:
+        from common.crew_chat_bridge import emit_work_event
+        phase = ('completed' if state == 'published_verified' else
+                 'failed' if state == 'submitted_unknown' else 'progress')
+        emit_work_event(actor='threads_pipeline', actor_label='Threads 실행기',
+                        task_id='threads:' + str(part_id), phase=phase, stage=state,
+                        evidence_id='threads:' + str(part_id), output_kind='ledger_state')
+    except Exception:
+        pass
 
 def publish(part_id,config,db_path=settings.DB,adapter=None,config_loader=None):
     from .scheduler import lock

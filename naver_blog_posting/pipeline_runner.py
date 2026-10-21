@@ -2343,7 +2343,9 @@ def generate_content_json(prompt, role, observer=None, **kwargs):
     def observe(selected_provider, model, state, **event):
         if observer:
             observer(selected_provider, model, state, **{**event, 'reasoningEffortRequested': effort})
-    return generate_json(prompt, observer=observe, **options)
+    from common.crew_chat_bridge import work_task_id
+    options.setdefault('crew_task_id', work_task_id(options['audit_directory']) if options.get('audit_directory') else None)
+    return generate_json(prompt, observer=observe, crew_stage=role, crew_actor='naver-'+role, crew_actor_label='Naver '+role, **options)
 
 
 def normalize_naver_selection_slugs(value):
@@ -3464,6 +3466,8 @@ class AgentHandoff:
                      **({'contentQualitySha256': self.data['contentQualitySha256']} if 'contentQualitySha256' in self.data else {}),
                      'fileHashes': {name: sha(self.file(name)) for name in outputs}, 'modelEvents': events})
         atomic_json(self.path, self.data)
+        from common.crew_chat_bridge import emit_work_event, work_task_id
+        emit_work_event(actor='naver-'+agent, actor_label='Naver '+agent, task_id=work_task_id(self.folder), phase='completed', stage='handoff-accepted', evidence_id=hashlib.sha256(json.dumps(rows[-1]['fileHashes'],sort_keys=True).encode()).hexdigest(), output_kind=f'{len(outputs)} artifacts accepted: '+', '.join(Path(n).name for n in outputs))
 
 
 def publication_hold_for_writer(folder, account, base=BASE_DIR):
@@ -5916,7 +5920,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                     schema['properties']['readerTask']['properties'][field]['enum'] = [value]
                 schema['properties']['mainKeyword']['enum'] = [results['keyword-selector']['mainKeyword']]
                 schema['properties']['tags']['items']['pattern'] = r'^#[\w가-힣]+$'
-            result = generate_content_json(prompt, role=role, observer=observe, images=image_files, response_schema=schema)
+            from common.crew_chat_bridge import work_task_id
+            result = generate_content_json(prompt, role=role, observer=observe, images=image_files, response_schema=schema, crew_task_id=work_task_id(folder))
             if role == 'reviewer':
                 atomic_json(folder/('reviewer-raw-response-' + uuid.uuid4().hex + '.json'),result)
                 result = {**result,'answerAudit':canonicalize_answer_audit(result.get('answerAudit'),inputs['titleAnswerInputs'])}
