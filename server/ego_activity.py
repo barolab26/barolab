@@ -150,7 +150,11 @@ def read_input_activity(directory=None, now=None):
             if not events:
                 continue
             latest = events[-1]; age = now-stamp(latest['at'])
-            rows.append({'context':context,'latest':latest,'recent':events[-3:],
+            distinct = {}
+            for event in events:
+                distinct[event['actionId']] = event
+            recent = sorted(distinct.values(),key=lambda e: stamp(e['at']))[-4:]
+            rows.append({'context':context,'latest':latest,'recent':recent,
                          'fresh':0 <= age <= 120, 'processObserved':os.name=='posix' and Path('/proc',str(pid)).exists()})
         except (OSError,ValueError,TypeError,KeyError,IndexError):
             continue

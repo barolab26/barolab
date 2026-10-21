@@ -10,6 +10,7 @@ import time
 import uuid
 from contextlib import contextmanager, asynccontextmanager
 from datetime import datetime, timezone
+from functools import wraps
 from pathlib import Path
 
 ENV_KEY = 'BAROLAB_EGO_CONTEXT'
@@ -25,7 +26,11 @@ TARGETS = {'registered-tool','naver-editor','naver-title','naver-body','naver-to
            'kin-submit','kin-editor-key','search-results','official-source','flow-home','flow-settings',
            'flow-single-output','flow-new-project','flow-project-tile','flow-generate','flow-dismiss',
            'flow-prompt','flow-image','cf-image-upload','cf-post-submit',
-           'naver-search','naver-search-query','naver-search-submit'}
+           'naver-search','naver-search-query','naver-search-submit',
+           'threads-scheduler','threads-publish','threads-api-read','threads-api-write',
+           'threads-reconcile','threads-recovery','threads-measurement','threads-authoring',
+           'metrics-collection','revenue-collection','traffic-collection','maintenance-audit',
+           'maintenance-prepare','maintenance-apply','maintenance-run','metrics-browser','metrics-auth'}
 
 
 def current_context():
@@ -118,3 +123,19 @@ def action(name, target, count=None):
 async def async_action(name, target, count=None):
     with action(name, target, count):
         yield
+
+
+def observed_operation(project, target, *, requester='unknown'):
+    """Observe a synchronous registered entry without changing its execution policy."""
+    def decorate(function):
+        @wraps(function)
+        def wrapped(*args, **kwargs):
+            current = current_context()
+            fields = {'project': project}
+            if current.get('taskId') == 'direct:' + str(os.getpid()):
+                fields = {'task_id':'direct:' + uuid.uuid4().hex, 'project':project,
+                          'requester':requester, 'actor':'unknown', 'source':'direct'}
+            with execution_context(**fields), action('tool', target):
+                return function(*args, **kwargs)
+        return wrapped
+    return decorate

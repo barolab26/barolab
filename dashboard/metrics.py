@@ -29,6 +29,9 @@ SCOPES = ['https://www.googleapis.com/auth/webmasters',
           'https://www.googleapis.com/auth/analytics.readonly']
 
 
+from common.ego_telemetry import observed_operation, action as ego_action
+
+
 def read_json(path, default=None):
     if not Path(path).exists():
         return {} if default is None else default
@@ -382,6 +385,7 @@ def inspect_urls(session, site, settings, posts, previous, limit, deadline=None)
                                       'urls': list(known.values())})
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_traffic(session, site, settings):
     property_id = str(settings.get('ga4_property', ''))
     if not property_id.isdigit():
@@ -598,6 +602,7 @@ def authorized_gsc_request_mode(config, manual=False, requested=None):
     return authorized if requested is None else requested is True
 
 
+@observed_operation('metrics', 'metrics-collection')
 def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=False, request_mode=None):
     """Read-only default; explicitly authorized scheduled/manual requests share quota."""
     request_mode = authorized_gsc_request_mode(config, manual, request_mode)
@@ -693,10 +698,12 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                     try:
                         page.set_default_timeout(5000)
                         if account.get('expected_ip'):
-                            page.goto('https://api.ipify.org?format=json', wait_until='domcontentloaded', timeout=15000)
+                            with ego_action('navigate', 'metrics-browser'):
+                                page.goto('https://api.ipify.org?format=json', wait_until='domcontentloaded', timeout=15000)
                             if json.loads(page.locator('body').inner_text())['ip'] != account['expected_ip']:
                                 raise ValueError('색인 계정의 전용 출구 IP가 일치하지 않습니다')
-                        response=page.goto('https://search.google.com/search-console', wait_until='domcontentloaded', timeout=15000)
+                        with ego_action('navigate', 'metrics-browser'):
+                            response=page.goto('https://search.google.com/search-console', wait_until='domcontentloaded', timeout=15000)
                         check_response(account_id,response)
                         check_text(account_id,page.locator('body').inner_text())
                         identities = page.locator('a[aria-label]').evaluate_all("els=>els.map(e=>e.getAttribute('aria-label'))")
@@ -730,14 +737,17 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                             row = inspection_rows(previous, posts).get(url, {})
                             try:
                                 property_url = site['url'].rstrip('/') + '/'
-                                response=page.goto('https://search.google.com/search-console?resource_id=' + quote(property_url, safe=''),
-                                          wait_until='domcontentloaded', timeout=min(15000, int((seconds - (time.monotonic() - started)) * 1000)))
+                                with ego_action('navigate', 'metrics-browser'):
+                                    response=page.goto('https://search.google.com/search-console?resource_id=' + quote(property_url, safe=''),
+                                              wait_until='domcontentloaded', timeout=min(15000, int((seconds - (time.monotonic() - started)) * 1000)))
                                 check_response(account_id,response)
                                 check_text(account_id,page.locator('body').inner_text())
                                 box = page.locator('input[aria-label*="URL 검사"]').first
                                 box.wait_for(state='visible', timeout=5000)
-                                box.fill(url)
-                                box.press('Enter')
+                                with ego_action('type', 'metrics-browser'):
+                                    box.fill(url)
+                                with ego_action('press', 'metrics-browser'):
+                                    box.press('Enter')
                                 deadline = min(started + seconds, time.monotonic() + 35)
                                 proof = None
                                 while time.monotonic() < deadline:
@@ -806,7 +816,8 @@ def request_inspected_url(page, account_id, site, url, proof):
         return reservation
     outcome = 'request_unconfirmed'
     try:
-        page.get_by_text('색인 생성 요청', exact=True).filter(visible=True).first.click(timeout=8000)
+        with ego_action('click', 'metrics-browser'):
+            page.get_by_text('색인 생성 요청', exact=True).filter(visible=True).first.click(timeout=8000)
         deadline = time.monotonic() + 180
         while time.monotonic() < deadline:
             text = page.locator('body').inner_text()
@@ -903,11 +914,13 @@ def _browser_recover(account_id, individual_limit=10):
         page = browser.contexts[0].new_page()
         try:
             if account.get('expected_ip'):
-                page.goto('https://api.ipify.org?format=json', wait_until='domcontentloaded', timeout=30000)
+                with ego_action('navigate', 'metrics-browser'):
+                    page.goto('https://api.ipify.org?format=json', wait_until='domcontentloaded', timeout=30000)
                 actual_ip = json.loads(page.locator('body').first.inner_text())['ip']
                 if actual_ip != account['expected_ip']:
                     raise RuntimeError('색인 계정의 전용 출구 IP가 일치하지 않습니다')
-            page.goto('https://search.google.com/search-console', wait_until='domcontentloaded')
+            with ego_action('navigate', 'metrics-browser'):
+                page.goto('https://search.google.com/search-console', wait_until='domcontentloaded')
             page.wait_for_timeout(1000)
             identities = page.locator('a[aria-label]').evaluate_all("els=>els.map(e=>e.getAttribute('aria-label'))")
             if not any(account['email'] in (identity or '') for identity in identities):
@@ -935,12 +948,15 @@ def _browser_recover(account_id, individual_limit=10):
                 property_url = site['url'].rstrip('/') + '/'
                 target = 'https://search.google.com/search-console/sitemaps?resource_id=' + quote(property_url, safe='')
                 try:
-                    page.goto(target, wait_until='domcontentloaded', timeout=45000)
+                    with ego_action('navigate', 'metrics-browser'):
+                        page.goto(target, wait_until='domcontentloaded', timeout=45000)
                     box = page.get_by_role('textbox', name='사이트맵 URL 입력', exact=True)
                     box.wait_for(state='visible', timeout=10000)
                     before = page.locator('body').first.inner_text()
-                    box.fill(urlparse(sitemap['url']).path.lstrip('/'))
-                    page.get_by_role('button', name='제출', exact=True).click()
+                    with ego_action('type', 'metrics-browser'):
+                        box.fill(urlparse(sitemap['url']).path.lstrip('/'))
+                    with ego_action('click', 'metrics-browser'):
+                        page.get_by_role('button', name='제출', exact=True).click()
                     text = wait_text(page, ['사이트맵이 제출됨', '사이트맵을 가져올 수 없음', '잘못된 사이트맵'], 45)
                     outcome = 'submitted' if '사이트맵이 제출됨' in text else 'submission_unconfirmed'
                     save_event(dom, {'kind': 'sitemap', 'outcome': outcome, 'sitemap': sitemap['url'],
@@ -960,11 +976,14 @@ def _browser_recover(account_id, individual_limit=10):
                 if remaining <= 0:
                     break
                 try:
-                    page.goto('https://search.google.com/search-console?resource_id=' + quote(site['url'].rstrip('/') + '/', safe=''), wait_until='domcontentloaded')
+                    with ego_action('navigate', 'metrics-browser'):
+                        page.goto('https://search.google.com/search-console?resource_id=' + quote(site['url'].rstrip('/') + '/', safe=''), wait_until='domcontentloaded')
                     box = page.locator('input[aria-label*="URL 검사"]').first
                     box.wait_for(state='visible', timeout=10000)
-                    box.fill(url)
-                    box.press('Enter')
+                    with ego_action('type', 'metrics-browser'):
+                        box.fill(url)
+                    with ego_action('press', 'metrics-browser'):
+                        box.press('Enter')
                     text = wait_text(page, ['URL이 Google에 등록되어 있음', 'URL이 Google에 등록되어 있지 않음',
                                             'URL is on Google', 'URL is not on Google'], 90)
                     indexed = ('URL이 Google에 등록되어 있음' in text or 'URL is on Google' in text)
@@ -996,6 +1015,7 @@ def _browser_recover(account_id, individual_limit=10):
     return read_json(DATA / 'indexing-recovery.json')
 
 
+@observed_operation('metrics', 'metrics-collection')
 def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_only=False):
     if read_only and request_url:
         raise ValueError('Read-only collection cannot submit indexing requests')
@@ -1160,6 +1180,7 @@ def inspect_naver_public_url(url, client=requests):
         return dict(result, reason=type(exc).__name__)
 
 
+@observed_operation('metrics', 'metrics-collection')
 def collect_naver_inspections(site_id=None, limit=3):
     """Bounded read-only search; merge only per-URL evidence under collector lock."""
     if not 1 <= limit <= 5:

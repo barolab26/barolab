@@ -79,6 +79,11 @@ class Client:
             raise AdapterError('invalid_official_api_base')
 
     def request(self, method, endpoint, params=None, *, stage='read'):
+        from common.ego_telemetry import action
+        with action('api_request', 'threads-api-read' if method == 'GET' else 'threads-api-write'):
+            return self._request(method, endpoint, params, stage=stage)
+
+    def _request(self, method, endpoint, params=None, *, stage='read'):
         if not re.fullmatch(r'(?:me|\d+)(?:/(?:threads|threads_publish|threads_publishing_limit|threads_insights|insights))?', endpoint) and not (endpoint=='debug_token' and method=='GET'):
             raise AdapterError('invalid_api_endpoint', stage=stage)
         try:

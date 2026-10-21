@@ -38,6 +38,16 @@ class TelemetryTests(unittest.TestCase):
             self.assertEqual(t.current_context()['source'],'direct')
             self.assertTrue(t.current_context()['taskId'].startswith('direct:'))
 
+    def test_nested_operation_preserves_request_but_scopes_project(self):
+        @t.observed_operation('threads','threads-scheduler')
+        def operation(): return t.current_context()
+        with t.execution_context(task_id='staff:parent',requester='jarvis',actor='publi',project='metrics'):
+            value=operation()
+            self.assertEqual(value['project'],'threads')
+            self.assertEqual(value['taskId'],'staff:parent')
+            self.assertEqual(value['requester'],'jarvis')
+            self.assertEqual(t.current_context()['project'],'metrics')
+
     def test_export_preserves_environment_and_rejects_untrusted_shape(self):
         with t.execution_context(task_id='staff:two',request_id='r',requester='jarvis'):
             env=t.export_environment({'DISPLAY':':10'})

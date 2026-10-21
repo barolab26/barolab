@@ -21,7 +21,7 @@ def observe_task(db_path=settings.DB):
     command="$t=Get-ScheduledTask -TaskName 'BaroLab-Threads-Pilot' -ErrorAction Stop; $i=Get-ScheduledTaskInfo -TaskName 'BaroLab-Threads-Pilot' -ErrorAction Stop; @{registered=$true;enabled=[bool]$t.Settings.Enabled;state=$t.State.ToString();nextRunAt=$i.NextRunTime.ToString('o');lastResult=$i.LastTaskResult}|ConvertTo-Json -Compress"
     value={'registered':None,'enabled':None,'state':'unverified','checkedAt':settings.stamp(),'nextRunAt':None,'lastResult':None}
     try:
-        result=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',command],capture_output=True,text=True,encoding='utf-8',timeout=15,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        result=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',command],capture_output=True,text=True,encoding='utf-8',timeout=15,env=export_environment(),creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
         if result.returncode==0:value.update(json.loads(result.stdout))
     except (OSError,ValueError,subprocess.TimeoutExpired):pass
     with pipeline.connect(db_path) as db:db.execute('INSERT OR REPLACE INTO runtime VALUES(?,?)',('scheduler',json.dumps(value)))
@@ -44,19 +44,26 @@ def lock(path=None):
         else:fcntl.flock(handle.fileno(),fcntl.LOCK_UN)
         handle.close()
 
+from common.ego_telemetry import observed_operation, action as ego_action, export_environment
+
+
+@observed_operation('threads', 'threads-scheduler', requester='scheduler')
 def tick(config_path=settings.CONFIG,db_path=settings.DB,output=settings.PUBLIC):
     with lock():
         config=settings.load(config_path)
         if not config.get('enabled') or config.get('connection',{}).get('connected') is not True:
             pipeline.snapshot(config,db_path,output);return {'state':'noop','reason':'disabled_or_needs_connection'}
         now=datetime.now(timezone.utc)
-        pipeline.recover_unknown(config,db_path)
-        pipeline.reconcile(config,db_path)
+        with ego_action('tool','threads-recovery'):
+            pipeline.recover_unknown(config,db_path)
+        with ego_action('tool','threads-reconcile'):
+            pipeline.reconcile(config,db_path)
         from . import measurement
         with pipeline.connect(db_path) as db:
             publications=[dict(r) for r in db.execute("SELECT * FROM parts WHERE state='published_verified'")]
         if getattr(measurement,'should_collect',lambda p:False)(publications):
-            measured=measurement.collect(config,publications)
+            with ego_action('tool','threads-measurement'):
+                measured=measurement.collect(config,publications)
             with pipeline.connect(db_path) as db:
                 db.execute('INSERT OR REPLACE INTO runtime VALUES(?,?)',('measurement',json.dumps(measured)))
         try:day=pipeline._gate(config,now)
@@ -88,7 +95,9 @@ def tick(config_path=settings.CONFIG,db_path=settings.DB,output=settings.PUBLIC)
             if slots:
                 from .authoring import prepare_next
                 with pipeline.connect(db_path) as db:db.execute('INSERT INTO authoring_slots VALUES(?,?,?,?,?,?)',(config['account_key'],day,slots[0],'claimed',None,settings.stamp()))
-                try:result=prepare_next(config,day,slots[0],db_path)
+                try:
+                    with ego_action('tool','threads-authoring'):
+                        result=prepare_next(config,day,slots[0],db_path)
                 except Exception:
                     with pipeline.connect(db_path) as db:db.execute("UPDATE authoring_slots SET state='blocked',reason='authoring_failed',updated_at=? WHERE account_key=? AND day=? AND slot=?",(settings.stamp(),config['account_key'],day,slots[0]))
                     raise

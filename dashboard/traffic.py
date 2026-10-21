@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, urlparse, parse_qs, urlencode, urlunparse, unquote
@@ -27,6 +28,9 @@ except ImportError:
 SNAPSHOT = DATA / 'traffic.json'
 METRICS = ['totalUsers', 'sessions', 'screenPageViews']
 SEARCH_HOSTS = {'search.naver.com', 'm.search.naver.com'}
+
+
+from common.ego_telemetry import observed_operation, action as ego_action
 
 
 def classify_source(channel, source, medium):
@@ -261,6 +265,7 @@ def collect_growth_pages(client, property_id, base, domain, now):
             'source': 'GA4 Data API', 'fullEnumeration': not limited, 'pages': pages}
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_ga(site, settings, readers, now):
     domain = site['site_id']
     ranges = periods(now, 'Asia/Seoul')
@@ -439,16 +444,19 @@ def collect_linked_page_queries(page,record,domain,now):
     url=('https://search.google.com/search-console/performance/search-analytics?resource_id='
          +quote(record['property'],safe='')+'&start_date='+windows['current28']['start'].replace('-','')
          +'&end_date='+windows['current28']['end'].replace('-',''))
-    response=page.goto(url,wait_until='domcontentloaded',timeout=15000)
+    with ego_action('navigate', 'metrics-browser'):
+        response=page.goto(url,wait_until='domcontentloaded',timeout=15000)
     check_response('sj',response);check_text('sj',page.locator('body').inner_text())
-    page.get_by_role('tab',name='페이지',exact=True).click(timeout=5000)
+    with ego_action('click', 'metrics-browser'):
+        page.get_by_role('tab',name='페이지',exact=True).click(timeout=5000)
     table=page.locator('table:visible').first
     table.locator('tr').nth(1).wait_for(timeout=5000)
     rows=table.locator('tr').all()
     matches=[row for row in rows[1:] if row.locator('td').count() and row.locator('td').first.inner_text().split()[0]==target]
     if len(matches)!=1:
         return {'status':'not_collected','reason':'실제 화면에서 목표 글 행을 확인하지 못함'}
-    matches[0].locator('td').first.click(timeout=5000)
+    with ego_action('click', 'metrics-browser'):
+        matches[0].locator('td').first.click(timeout=5000)
     page.wait_for_function('target => decodeURIComponent(location.href).includes(target)',arg=target,timeout=5000)
     filtered=page.url
     result={'status':'collected','url':target,'source':'Google owner UI exact page filter','periods':{}}
@@ -456,7 +464,8 @@ def collect_linked_page_queries(page,record,domain,now):
         parsed=urlparse(filtered);params=parse_qs(parsed.query)
         params.update(start_date=[windows[key]['start'].replace('-','')],end_date=[windows[key]['end'].replace('-','')])
         address=urlunparse(parsed._replace(query=urlencode(params,doseq=True)))
-        response=page.goto(address,wait_until='domcontentloaded',timeout=15000)
+        with ego_action('navigate', 'metrics-browser'):
+            response=page.goto(address,wait_until='domcontentloaded',timeout=15000)
         check_response('sj',response);check_text('sj',page.locator('body').inner_text())
         actual=parse_qs(urlparse(page.url).query)
         if actual.get('resource_id')!=[record['property']] or not any(target in unquote(v) for k,values in actual.items() if k not in ('resource_id','start_date','end_date') for v in values):
@@ -470,7 +479,8 @@ def collect_linked_page_queries(page,record,domain,now):
         tabs=page.get_by_role('tab',name='검색어',exact=True)
         if tabs.count()!=1:
             raise ValueError('실제 검색어 탭 미확인')
-        tabs.click(timeout=5000)
+        with ego_action('click', 'metrics-browser'):
+            tabs.click(timeout=5000)
         page.wait_for_function("() => Array.from(document.querySelectorAll('table')).some(t=>t.getClientRects().length&&t.innerText.includes('인기 검색어')&&(t.querySelectorAll('tr').length>1||document.body.innerText.includes('데이터 없음')))",timeout=7000)
         rows=page.locator('table:visible').first.locator('tr').evaluate_all('rows=>rows.slice(1).map(r=>Array.from(r.querySelectorAll("td")).map(c=>c.innerText))')
         result['periods'][key]={**windows[key],'queries':parse_query_cells(rows,target),
@@ -479,6 +489,7 @@ def collect_linked_page_queries(page,record,domain,now):
     return result
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_search(site, settings, readers, now, snapshot=None):
     if snapshot is None:
         try:
@@ -548,6 +559,7 @@ def collect_search(site, settings, readers, now, snapshot=None):
     return result
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_browser_search(sites, config, now, on_record=None):
     from gsc_ui_state import paused,state
     if paused('sj',now):
@@ -608,7 +620,8 @@ def _collect_browser_search(sites, config, now, on_record=None):
                         url = ('https://search.google.com/search-console/performance/search-analytics?resource_id='
                                + quote(record['property'], safe='') + '&start_date=' + start.strftime('%Y%m%d')
                                + '&end_date=' + end.strftime('%Y%m%d'))
-                        response=page.goto(url, wait_until='domcontentloaded', timeout=25000)
+                        with ego_action('navigate', 'metrics-browser'):
+                            response=page.goto(url, wait_until='domcontentloaded', timeout=25000)
                         check_response('sj',response)
                         check_text('sj',page.locator('body').inner_text())
                         caption = f'{end.year}년 {end.month}월 {end.day}일까지의 총 클릭수'
@@ -651,7 +664,8 @@ def _collect_browser_search(sites, config, now, on_record=None):
                             'note': '소유자 화면의 공개 검색어 · 페이지 연결은 미제공 · 평균 게재순위'}
                         if key in ('month', 'current28', 'previous28') or key.startswith('action_'):
                             try:
-                                page.get_by_role('tab', name='페이지', exact=True).click()
+                                with ego_action('click', 'metrics-browser'):
+                                    page.get_by_role('tab', name='페이지', exact=True).click()
                                 page.wait_for_function("""() => Array.from(document.querySelectorAll('table')).some(t =>
                                     t.getClientRects().length && t.innerText.includes('인기 페이지') &&
                                     (t.querySelectorAll('tr').length > 1 || document.body.innerText.includes('데이터 없음')))""", timeout=10000)
@@ -722,6 +736,7 @@ def parse_naver_visitors(body):
     return days
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_naver_visitors():
     sites = [s for s in inventory() if s['platform'] == 'naver']
     today = datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
@@ -995,6 +1010,7 @@ def bing_date_metadata(source, now):
             'dateRangeScope': 'Min/max dates in returned rows, UTC epoch decoded; not a continuous or exact 7/28-day reporting window'}
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_bing(sites, config, previous, now, client=requests):
     options = config.get('bing_search', {})
     def private_credential(filename):
@@ -1275,6 +1291,7 @@ def import_naver_ui(path):
     return {'status': 'imported', 'domains': sorted(validated), 'sourceCheckedAt': {d:r['checkedAt'] for d,r in validated.items()}}
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect_naver_only():
     with collector_lock(DATA / 'traffic.lock') as locked:
         if not locked:
@@ -1305,6 +1322,7 @@ def safe_error_reason(metadata):
     return f'통계 원천 HTTP {status}' if status is not None else '통계 원천 연결 실패'
 
 
+@observed_operation('metrics', 'traffic-collection')
 def collect():
     now = datetime.now(ZoneInfo('Asia/Seoul'))
     with collector_lock(DATA / 'traffic.lock') as locked:
@@ -1347,7 +1365,9 @@ def collect():
         with ThreadPoolExecutor(max_workers=4) as workers:
             output = {'schema': 'domain-traffic-v1', 'checkedAt': stamp(),
                       'naverSearchAccount': old.get('naverSearchAccount'),
-                      'sites': {r['site']['site_id']: r for r in workers.map(one, sites)}}
+                      'sites': {r['site']['site_id']: r for r in workers.map(
+                          lambda item: item[0].run(one, item[1]),
+                          [(copy_context(), site) for site in sites])}}
         missing = [s for s in sites if not config['sites'][s['site_id']].get('search_property')]
         if missing:
             try:

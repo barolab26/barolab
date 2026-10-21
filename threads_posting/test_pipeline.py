@@ -7,7 +7,26 @@ import unittest
 from unittest.mock import patch
 from . import config,pipeline,scheduler
 
+def setUpModule():
+    directory=tempfile.TemporaryDirectory();unittest.addModuleCleanup(directory.cleanup)
+    guard=patch('common.ego_telemetry.DIRECTORY',Path(directory.name));guard.start();unittest.addModuleCleanup(guard.stop)
+
 class LedgerTests(unittest.TestCase):
+    def test_disabled_scheduler_is_observed_without_network_or_publish(self):
+        from contextlib import nullcontext
+        from common import ego_telemetry as t
+        seen=[]
+        def snapshot(*args): seen.append(t.current_context())
+        with patch.object(scheduler,'lock',return_value=nullcontext()),patch.object(config,'load',return_value={'enabled':False}),patch.object(pipeline,'snapshot',side_effect=snapshot),patch.object(pipeline,'publish') as publish:
+            result=scheduler.tick()
+        self.assertEqual(result['state'],'noop');publish.assert_not_called()
+        self.assertEqual(seen[0]['requester'],'scheduler')
+        self.assertEqual(seen[0]['actor'],'unknown')
+        with t.execution_context(task_id='staff:test',requester='jarvis',actor='publi',source='staff_queue'):
+            with patch.object(scheduler,'lock',return_value=nullcontext()),patch.object(config,'load',return_value={'enabled':False}),patch.object(pipeline,'snapshot',side_effect=snapshot):
+                scheduler.tick()
+        self.assertEqual(seen[-1]['taskId'],'staff:test')
+        self.assertEqual(seen[-1]['requester'],'jarvis')
     def setUp(self):
         failure = patch('common.host_failure.report_host_failure'); failure.start(); self.addCleanup(failure.stop)
         events = patch('threads_posting.pipeline._emit_crew_state')

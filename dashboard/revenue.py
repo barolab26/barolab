@@ -36,6 +36,9 @@ class RevenueSourceError(ValueError):
         self.status = status
 
 
+from common.ego_telemetry import observed_operation, action as ego_action
+
+
 def revenue_config():
     from dotenv import dotenv_values
     # Preserve project-specific NAVER_<account>_ID/PW keys, then allow explicit
@@ -85,6 +88,7 @@ def response_json(response):
     return response.json()
 
 
+@observed_operation('metrics', 'revenue-collection')
 def adsense(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE'):
     from google.oauth2.credentials import Credentials
     from google.auth.transport.requests import AuthorizedSession
@@ -182,6 +186,7 @@ def adsense_page_performance(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE')
     return pages
 
 
+@observed_operation('metrics', 'revenue-collection')
 def collect_page_revenue(cfg, accounts, now):
     end = now.astimezone(KST).date() - timedelta(days=1)
     start = end - timedelta(days=6)
@@ -322,6 +327,7 @@ def import_growth_daily(result):
     return {'status': 'imported', 'rows': count, 'checkedAt': stamp(), 'revenueScope': 'unknown'}
 
 
+@observed_operation('metrics', 'revenue-collection')
 def collect_growth_revenue(start=None, end=None, force=False, windows=None):
     """Read-only AdSense growth evidence; no missing credentials become zero."""
     if isinstance(start, dict):
@@ -574,12 +580,15 @@ def _adpost_login(page, cfg, account):
         raise RevenueSourceError('auth_required', '네이버 로그인 자격증명 미설정')
     if page.locator('#id').count() != 1 or page.locator('#pw').count() != 1:
         raise RevenueSourceError('auth_required', '네이버 추가 인증 또는 로그인 화면 확인 필요')
-    page.locator('#id').fill(username)
-    page.locator('#pw').fill(password)
+    with ego_action('type', 'metrics-auth'):
+        page.locator('#id').fill(username)
+    with ego_action('type', 'metrics-auth'):
+        page.locator('#pw').fill(password)
     button = page.get_by_role('button', name='로그인', exact=True)
     if button.count() != 1:
         raise RevenueSourceError('auth_required', '네이버 로그인 제출 버튼 확인 필요')
-    button.click()
+    with ego_action('click', 'metrics-auth'):
+        button.click()
     try:
         page.wait_for_url(lambda url: urlparse(str(url)).hostname == 'adpost.naver.com', timeout=15000)
     except Exception:
@@ -589,18 +598,22 @@ def _adpost_login(page, cfg, account):
 
 
 def _adpost_report(page, cfg, account, start, end):
-    page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
-    if _adpost_login(page, cfg, account):
+    with ego_action('navigate', 'metrics-browser'):
         page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
+    if _adpost_login(page, cfg, account):
+        with ego_action('navigate', 'metrics-browser'):
+            page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
     # /main does not request channels. Its observed /api/logins response is the
     # account/publisher source of truth; fetch channels only after verifying it.
     login = browser_json(page, '/api/logins')
     if not isinstance(login, dict) or not login.get('isLoggedIn'):
         links = page.locator('a[href*="nid.naver.com"]').all()
         if len(links) == 1:
-            links[0].click()
+            with ego_action('click', 'metrics-browser'):
+                links[0].click()
             _adpost_login(page, cfg, account)
-            page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
+            with ego_action('navigate', 'metrics-browser'):
+                page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
             login = browser_json(page, '/api/logins')
     if not isinstance(login, dict) or not login.get('isNaverLoggedIn'):
         raise RevenueSourceError('auth_required', 'AdPost Naver authentication required')
@@ -626,6 +639,7 @@ def _adpost_report(page, cfg, account, start, end):
     return rows, publisher, blogs
 
 
+@observed_operation('metrics', 'revenue-collection')
 def adpost(start, end, cfg=None, account='soul5373', port=9333):
     from playwright.sync_api import sync_playwright
     cfg = cfg if cfg is not None else revenue_config()
@@ -694,6 +708,7 @@ def parse_adpost_rows(rows, start, end):
             'reportSource': '네이버 애드포스트 수입 보고서'}
 
 
+@observed_operation('metrics', 'revenue-collection')
 def coupang(cfg, start, end, now=None):
     path = '/v2/providers/affiliate_open_api/apis/openapi/v1/reports/commission'
     query = urlencode({'startDate': start.strftime('%Y%m%d'), 'endDate': end.strftime('%Y%m%d')})
@@ -961,6 +976,7 @@ def replyalba(cfg, start, end, now=None):
             'reason': '공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기'}
 
 
+@observed_operation('metrics', 'revenue-collection')
 def collect(now=None):
     now = now or datetime.now(KST)
     today, month = now.date(), now.strftime('%Y-%m')

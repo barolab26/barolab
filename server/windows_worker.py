@@ -25,6 +25,9 @@ METRICS_STAGE_LIMITS = {'dashboard/revenue.py': 180, 'dashboard/traffic.py': 840
                         'threads_posting': 480}
 
 
+from common.ego_telemetry import observed_operation, export_environment
+
+
 def _naver_recovery_schedule_script(apply=False):
     script = r'''[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $ErrorActionPreference = 'Stop'
@@ -118,6 +121,7 @@ def configure_naver_recovery_schedule(*, apply=False):
     return report
 
 
+@observed_operation('metrics', 'metrics-collection')
 def run_metrics(python, commands):
     """Bound only automation helpers. Attached browser processes are never terminated."""
     from dashboard.metrics import collector_lock
@@ -157,7 +161,7 @@ def run_metrics(python, commands):
                 target = ['-m', script] if script in ('naver_kin.measurement', 'threads_posting') else [str(ROOT / script)]
                 process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', *target, *([argument] if argument else [])],
                     cwd=str(ROOT), stdout=sys.stdout, stderr=sys.stderr,
-                    env=dict(os.environ, PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
+                    env=dict(export_environment(), PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
                     creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
                 stage['helperPid'] = process.pid
                 while True:

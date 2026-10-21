@@ -93,7 +93,7 @@ class MonitorTests(unittest.TestCase):
         text='\n'.join(hud.render_lines({},[],now=now,inputs=[row]))
         self.assertIn('사용자 → [Codex(실행 검증)]',text)
         self.assertIn('검색어 입력란 타이핑 · 6자 — 입력 시작 관측',text)
-        self.assertNotIn('자비스',text)
+        self.assertNotIn('자비스 →',text)
         self.assertIn('\033[',hud.color_line('  [네이버 검색 검증] 사용자 → [Codex(실행 검증)]'))
         row['context']={'source':'staff_queue','requester':'jarvis','actor':'patch','taskId':'unmatched','requestId':'wrong'}
         text='\n'.join(hud.render_lines({},[],now=now,inputs=[row]))
@@ -109,6 +109,24 @@ class MonitorTests(unittest.TestCase):
         self.assertIn('추가 기록 있음',lines[-1])
         self.assertNotEqual(hud.color_line('[자비스]'),hud.color_line('[패치]'))
         self.assertIn('94m',hud.color_line('  CF 블로그'))
+
+    def test_recent_actions_and_project_labels_preserve_actual_scope(self):
+        from common.ego_telemetry import TARGETS
+        now=datetime.datetime.now(hud.KST)
+        events=[{'action':action,'target':target,'phase':'after','at':now.isoformat()}
+                for action,target in [('click','naver-search'),('type','naver-search-query'),('press','naver-search-submit')]]
+        row={'context':{'source':'direct','requester':'scheduler','project':'threads'},
+             'latest':events[-1],'recent':events,'fresh':True,'processObserved':True}
+        text='\n'.join(hud.render_lines({'projects':[{'id':'mobile_apps','source':{}}]},[],now=now,inputs=[row]))
+        self.assertIn('등록 스케줄러',text)
+        self.assertIn('최근 동작: 네이버 검색 클릭(반환)',text)
+        self.assertIn('검색어 입력란 타이핑(반환)',text)
+        self.assertIn('등록된 자동작업 없음 / 상태자료 관측',text)
+        self.assertIn('직원 색상: [자비스] [퍼블리] [트레이스] [패치] [레이더] [닥터]',text)
+        self.assertIn('95m',hud.color_line('  네이버 지식iN'))
+        for target in ('metrics-auth','metrics-browser','threads-api-write','maintenance-run'):
+            self.assertIn(target,TARGETS)
+            self.assertIn(target,hud.INPUT_TARGETS)
 
     def test_default_ego_only_delegates_monitor(self):
         import ego_lite_runner as ego

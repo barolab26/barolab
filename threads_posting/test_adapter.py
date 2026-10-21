@@ -8,12 +8,28 @@ from unittest.mock import Mock, patch
 import requests
 from . import adapter as a
 
+def setUpModule():
+    directory=tempfile.TemporaryDirectory();unittest.addModuleCleanup(directory.cleanup)
+    guard=patch('common.ego_telemetry.DIRECTORY',Path(directory.name));guard.start();unittest.addModuleCleanup(guard.stop)
+
 
 def response(value,status=200):
     item=Mock();item.status_code=status;item.json.return_value=value;return item
 
 
 class AdapterTests(unittest.TestCase):
+    def test_api_action_tracks_real_return_and_failure_without_payload(self):
+        from common import ego_telemetry as t
+        events=[]
+        with patch.object(t,'_record',side_effect=lambda *args:events.append(args)),patch.object(a.requests,'request',return_value=response({'id':'1'})):
+            a.Client(self.config).request('GET','me',{'secret':'private-payload'})
+        self.assertEqual([e[3] for e in events],['before','after'])
+        self.assertTrue(all(e[1]=='threads-api-read' for e in events))
+        self.assertNotIn('private-payload',str(events))
+        events.clear()
+        with patch.object(t,'_record',side_effect=lambda *args:events.append(args)),patch.object(a.requests,'request',side_effect=requests.RequestException('private')):
+            with self.assertRaises(a.AdapterError):a.Client(self.config).request('POST','me/threads',{})
+        self.assertEqual([e[3] for e in events],['before','failed'])
     def setUp(self):
         self.env=patch.dict(os.environ,{'THREADS_ACCESS_TOKEN':'private-test-token'});self.env.start()
         self.config={'account_key':'mustpickinfo','api':{}}

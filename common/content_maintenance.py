@@ -31,6 +31,9 @@ REVIEW_CHECKS = ('factsSupported', 'originalMeaningPreserved', 'searchIntentImpr
                 'mediaPreserved', 'noFabricatedExperience', 'newClaimsComplete', 'changedClaimsPrimarySupported')
 
 
+from common.ego_telemetry import observed_operation
+
+
 def now():
     return datetime.now(timezone.utc)
 
@@ -396,6 +399,7 @@ def deployed_cache_urls(domain, urls, binding):
     return list(dict.fromkeys(value for url in canonical for value in (url, url + '?' + version)))
 
 
+@observed_operation('content_maintenance', 'maintenance-apply')
 def purge_exact(domain, url, slug, binding):
     import requests
     if not operation_enabled():
@@ -448,6 +452,7 @@ def load_article(domain, url, catalog_cache=None):
     raise ValueError('기존 글 ID를 공개 목록에서 확인하지 못했습니다.')
 
 
+@observed_operation('content_maintenance', 'maintenance-audit')
 def audit_batch():
     from common.content_improvement import audit_article
     import requests
@@ -599,6 +604,7 @@ def escalate_jev_review(original, draft, evidence, jev_review):
             'modelReceipt': metadata}
 
 
+@observed_operation('content_maintenance', 'maintenance-prepare')
 def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     from common.content_improvement import prepare_improvement
     sys.path.insert(0, str(ROOT / 'dashboard'))
@@ -689,6 +695,7 @@ def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     return outcome
 
 
+@observed_operation('content_maintenance', 'maintenance-audit')
 def verify_public(domain, url, expected):
     import requests
     from bs4 import BeautifulSoup
@@ -709,6 +716,7 @@ def verify_public(domain, url, expected):
     return text(expected['content']) in text(str(article))
 
 
+@observed_operation('content_maintenance', 'maintenance-apply')
 def apply_job(job_id, canary=False):
     sys.path.insert(0, str(ROOT / 'dashboard'))
     from metrics import collector_lock
@@ -718,6 +726,7 @@ def apply_job(job_id, canary=False):
         return _apply_job(job_id, canary)
 
 
+@observed_operation('content_maintenance', 'maintenance-apply')
 def _apply_job(job_id, canary=False):
     import requests
     sys.path.insert(0, str(ROOT / 'dashboard'))
@@ -957,6 +966,7 @@ def recover_jobs():
             save_job(job['id'], status='applying', stage='verify', next_retry_at=(now() + timedelta(hours=6)).isoformat(), reason='반영 상태 미확인 · 원격 PUT 재시도 없이 조회만 대기')
 
 
+@observed_operation('content_maintenance', 'maintenance-run')
 def run_once(force_prepare=False):
     sys.path.insert(0, str(ROOT / 'dashboard'))
     from metrics import collector_lock

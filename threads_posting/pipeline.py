@@ -240,6 +240,10 @@ def _emit_crew_state(part_id, state):
     except Exception:
         pass
 
+from common.ego_telemetry import observed_operation
+
+
+@observed_operation('threads', 'threads-publish')
 def publish(part_id,config,db_path=settings.DB,adapter=None,config_loader=None):
     from .scheduler import lock
     with lock(settings.PRIVATE/('threads-account-'+config['account_key']+'.lock')):

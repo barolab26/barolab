@@ -70,6 +70,20 @@ class ActivityTests(unittest.TestCase):
         (folder/(key+'.json')).rename(folder/('b'*64+'.json'))
         self.assertEqual(a.read_input_activity(folder,self.now),[])
 
+    def test_recent_fast_actions_keep_latest_phase_per_action(self):
+        import hashlib
+        events=[]
+        for i,action in enumerate(('click','type','press')):
+            for phase in ('before','after'):
+                events.append({'actionId':str(i)*32,'action':action,'target':'naver-search',
+                    'phase':phase,'at':datetime.fromtimestamp(self.now-6+len(events),timezone.utc).isoformat()})
+        folder=self.root/'telemetry'
+        self.write(folder/(hashlib.sha256(b'task:123').hexdigest()+'.json'),
+                   {'context':{'taskId':'task','source':'direct'},'processId':123,'recent':events})
+        history=a.read_input_activity(folder,self.now)[0]['recent']
+        self.assertEqual([e['action'] for e in history],['click','type','press'])
+        self.assertEqual([e['phase'] for e in history],['after']*3)
+
     def test_unknown_input_target_and_old_input_not_live(self):
         import hashlib
         folder=self.root/'telemetry';key=hashlib.sha256(b'task:123').hexdigest()

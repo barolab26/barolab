@@ -114,9 +114,9 @@ def state_text(value):
     return STATES.get(value, clean(value))
 
 
-PROJECT_NAMES = {'cf_blog':'CF 블로그','cf':'CF 블로그','naver_blog':'네이버 블로그','naver':'네이버 블로그','naver_kin':'지식iN','threads':'Threads','naver_search':'네이버 검색 검증','project':'공통 작업'}
+PROJECT_NAMES = {'cf_blog':'CF 블로그','cf':'CF 블로그','naver_blog':'네이버 블로그','naver':'네이버 블로그','naver_kin':'지식iN','threads':'Threads','naver_search':'네이버 검색 검증','project':'공통 작업','metrics':'운영 지표','content_maintenance':'콘텐츠 유지보수','mobile_apps':'앱 프로젝트'}
 INPUT_ACTIONS = {'click':'클릭','type':'타이핑','press':'키 입력','insert_text':'문자 삽입','navigate':'화면 이동','download':'다운로드','upload':'업로드','api_request':'API 요청','tool':'등록 도구 실행'}
-INPUT_TARGETS = {'registered-tool':'업무 도구','naver-title':'제목','naver-body':'본문','naver-toolbar':'서식','naver-link':'링크','naver-image':'사진','naver-caption':'사진 설명','naver-sticker':'스티커','naver-editor':'편집기','naver-editor-key':'편집기 키','kin-editor':'답변 편집기','kin-answer':'답변','kin-submit':'답변 등록','kin-editor-key':'답변 키','flow-home':'Flow 시작 화면','flow-settings':'Flow 설정','flow-single-output':'Flow 1장 설정','flow-new-project':'Flow 새 프로젝트','flow-project-tile':'Flow 프로젝트','flow-generate':'Flow 생성 버튼','flow-dismiss':'Flow 팝업 닫기','flow-prompt':'Flow 생성 문구','flow-image':'Flow 이미지','cf-image-upload':'CF 이미지 전송','cf-post-submit':'CF 글 제출','search-results':'검색 결과','official-source':'공식 자료','naver-search':'네이버 검색','naver-search-query':'검색어 입력란','naver-search-submit':'검색 버튼'}
+INPUT_TARGETS = {'registered-tool':'업무 도구','naver-title':'제목','naver-body':'본문','naver-toolbar':'서식','naver-link':'링크','naver-image':'사진','naver-caption':'사진 설명','naver-sticker':'스티커','naver-editor':'편집기','naver-editor-key':'편집기 키','kin-editor':'답변 편집기','kin-answer':'답변','kin-submit':'답변 등록','kin-editor-key':'답변 키','flow-home':'Flow 시작 화면','flow-settings':'Flow 설정','flow-single-output':'Flow 1장 설정','flow-new-project':'Flow 새 프로젝트','flow-project-tile':'Flow 프로젝트','flow-generate':'Flow 생성 버튼','flow-dismiss':'Flow 팝업 닫기','flow-prompt':'Flow 생성 문구','flow-image':'Flow 이미지','cf-image-upload':'CF 이미지 전송','cf-post-submit':'CF 글 제출','search-results':'검색 결과','official-source':'공식 자료','naver-search':'네이버 검색','naver-search-query':'검색어 입력란','naver-search-submit':'검색 버튼','threads-scheduler':'Threads 일정 확인','threads-publish':'Threads 게시 작업','threads-api-read':'Threads API 조회','threads-api-write':'Threads API 쓰기','threads-reconcile':'Threads 실제 게시 대조','threads-recovery':'Threads 복구 검토','threads-measurement':'Threads 측정','threads-authoring':'Threads 원고 제작','metrics-collection':'운영 지표 수집','revenue-collection':'수익 자료 수집','traffic-collection':'유입 자료 수집','maintenance-audit':'콘텐츠 점검','maintenance-prepare':'콘텐츠 수정 준비','maintenance-apply':'검토된 콘텐츠 적용','maintenance-run':'콘텐츠 유지보수 실행','metrics-browser':'지표 수집 화면','metrics-auth':'인증 화면'}
 
 
 def input_lines(inputs, requests, now):
@@ -130,7 +130,7 @@ def input_lines(inputs, requests, now):
             requester=STAFF.get(context.get('requester'),'지시자 미관측')
             actor=STAFF.get(context.get('actor'),'담당 미관측')
         elif context.get('source')=='direct':
-            requester='사용자' if context.get('requester')=='user' else '지시자 미관측'
+            requester={'user':'사용자','scheduler':'등록 스케줄러'}.get(context.get('requester'),'지시자 미관측')
             actor='Codex(실행 검증)' if context.get('actor')=='codex' else '직접 실행'
         else:
             requester,actor='지시 연결 미확인','실행자 미관측'
@@ -143,6 +143,12 @@ def input_lines(inputs, requests, now):
         count=f" · {event['count']}자" if 'count' in event and event['action'] in ('type','insert_text') else ''
         lines.append(f'    {target} {action}{count} — {phase}')
         lines.append('    실제 동작: '+time_label(event['at'],now)+' · 반환은 업무 성공 판정 아님')
+        history=[]
+        for previous in row.get('recent', [])[-4:]:
+            suffix={'before':'시작','after':'반환','failed':'실패'}[previous['phase']]
+            history.append(INPUT_TARGETS.get(previous['target'],'등록 대상')+' '+INPUT_ACTIONS[previous['action']]+'('+suffix+')')
+        for start in range(0,len(history),2):
+            lines.append('    최근 동작: '+' → '.join(history[start:start+2]))
         if index==0 and row.get('additionalRecords',0)>=3:
             lines.append('    다른 입력 기록 '+str(row['additionalRecords']-2)+'건 · 가장 최근 진행 관측 우선')
         if row.get('scanLimited'):
@@ -157,6 +163,7 @@ def render_lines(snapshot, requests, *, now, columns=120, activity=None, inputs=
     label = '최근 관측' if fresh else '관측 지연 / 미관측'
     lines = ['EGO LITE 프로젝트 모니터', f'① 현재 시각: {now.astimezone(KST):%Y-%m-%d %H:%M:%S} KST',
              '화면 시계와 업무·원천 자료의 갱신 시각은 다릅니다.']
+    lines += ['직원 색상: [자비스] [퍼블리] [트레이스] [패치] [레이더] [닥터]']
     lines += input_lines(inputs or [],requests,now)
     lines += ['─'*min(columns-1,70),'② 직원 실행 요청 · 실제 결과']
     if not requests:
@@ -179,9 +186,10 @@ def render_lines(snapshot, requests, *, now, columns=120, activity=None, inputs=
             if not isinstance(project, dict):
                 continue
             source = project.get('source') or {}
+            app_note = ' · 등록된 자동작업 없음 / 상태자료 관측' if project.get('id')=='mobile_apps' else ''
             state = project.get('status') or 'unknown'
             lines.append('  '+clean(project.get('title') or project.get('id'))+' | '+state_text(state)+
-                         ('' if fresh else ' (지난 관측)'))
+                         ('' if fresh else ' (지난 관측)')+app_note)
             counts = project.get('counts') or {}
             progress = ', '.join(state_text(k)+':'+clean(v) for k,v in counts.items()) if isinstance(counts,dict) and counts else clean(project.get('observedState') or '미관측')
             lines.append('    '+progress+' | 공개 확인:'+clean(project.get('verifiedPublicCount') if project.get('verifiedPublicCount') is not None else '미관측')+
@@ -212,7 +220,7 @@ def color_line(line):
     reset='\033[0m'
     if line.startswith(('EGO','①','②','③','④','◆','─')):
         return '\033[1;36m'+line+reset
-    for title,color in [('CF','94'),('네이버','96'),('지식','95'),('Threads','93'),('앱','92'),('콘텐츠','95')]:
+    for title,color in [('CF','94'),('네이버 지식','95'),('네이버','96'),('지식','95'),('Threads','93'),('앱','92'),('콘텐츠','95')]:
         if line.lstrip().startswith((title,'['+title)):
             line='\033[1;'+color+'m'+line+reset
             break
