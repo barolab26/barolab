@@ -1711,6 +1711,10 @@ def validate_staff_actions(actions):
             raise ValueError('Invalid recipient')
         if tool == 'read_agent_status' and not args:
             pass
+        elif tool == 'prepare_cf_source_fact' and agent == 'publi' and set(args) == {'source_sha256','request_sha256'} and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
+            pass
+        elif tool == 'verify_cf_source_fact_fix' and agent == 'patch' and set(args) == {'source_sha256'} and isinstance(args['source_sha256'], str) and re.fullmatch(r'[0-9a-f]{64}', args['source_sha256']):
+            pass
         elif tool == 'repair_cf_known_failure' and agent == 'patch' and set(args) in ({'domain'}, {'domain','evidencePath','evidenceSha256'}) and args['domain'] in CF_16_DOMAINS:
             pass  # The registered repair tool retains its own typed-failure/permit gates.
         else:
@@ -1727,6 +1731,10 @@ def staff_instruction(action):
     name = names[action['agent']]
     if action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
+    elif action['tool'] == 'prepare_cf_source_fact':
+        text = '@퍼블리, 지정된 실패 작업의 공식 근거를 확보하고 같은 질문의 원고를 준비·검수해 주세요. 기존 1회 재개 제한을 지키며 이번 명령은 발행하지 않습니다.'
+    elif action['tool'] == 'verify_cf_source_fact_fix':
+        text = '@패치, 현재 source_fact 복구 코드의 해시를 확인하고 고정 회귀검사를 실행해 결과를 보고해 주세요. 코드 수정·자료 수집·발행·재개는 실행하지 않습니다.'
     else:
         domain = action['args']['domain']
         text = f'@{name}, {domain}의 등록된 오류를 검증해 주세요. 기존 검수와 중복 방지 확인을 통과한 경우에만 같은 작업을 한 번 재개하고 결과를 보고해 주세요.'
@@ -2110,6 +2118,57 @@ def repair_cf_known_failure(domain: str, evidencePath=None, evidenceSha256=None)
             "state": "등록된 오류의 검증·독립 검수를 시작했습니다. 재개와 게시 결과는 아직 확인되지 않았습니다."}
 
 
+def prepare_cf_source_fact(source_sha256, request_sha256):
+    """One source-bound existing preparation; no caller command or path is accepted."""
+    import hashlib
+    source = BASE_DIR / 'cf_posting/pipeline_runner.py'
+    folder = BASE_DIR / 'cf_posting/output/wrist-pain-when-bending-or-bearing-weight/run-20261021-171212-82b832'
+    request = folder / 'prewriter-acquisition-request.json'
+    if (hashlib.sha256(source.read_bytes()).hexdigest() != source_sha256
+            or hashlib.sha256(request.read_bytes()).hexdigest() != request_sha256):
+        return {'ok':False,'tool':'prepare_cf_source_fact','status':'held','reason':'evidence_changed'}
+    log = Path.home() / '.barolab/scratch/healthcox-crew-dispatch/prepare.log'
+    log.parent.mkdir(parents=True,exist_ok=True)
+    with log.open('ab') as output:
+        child = _ego_popen([sys.executable,'-u',str(source),'healthcox.com','--prepare-only',
+                           '--source-fact-folder',str(folder)],cwd=BASE_DIR,stdout=output,stderr=subprocess.STDOUT)
+        returncode = child.wait()
+    return {'ok':returncode == 0,'status':'returned' if returncode == 0 else 'failed',
+            'tool':'prepare_cf_source_fact','pid':child.pid,'exitCode':returncode,
+            'sourceSha256':source_sha256,'requestSha256':request_sha256,
+            'outputSha256':hashlib.sha256(log.read_bytes()).hexdigest(),
+            'publicationAttempted':False,'publicSuccessInferred':False}
+
+
+def verify_cf_source_fact_fix(source_sha256):
+    """Fixed regression execution only; never accepts commands or publication args."""
+    import hashlib
+    source = BASE_DIR / 'cf_posting/pipeline_runner.py'
+    actual = hashlib.sha256(source.read_bytes()).hexdigest()
+    if actual != source_sha256:
+        return {'ok':False,'status':'held','tool':'verify_cf_source_fact_fix','reason':'source_changed'}
+    test_source = BASE_DIR / 'cf_posting/test_source_fact_recovery.py'
+    test_sha = hashlib.sha256(test_source.read_bytes()).hexdigest()
+    from common.ego_telemetry import export_environment
+    result = subprocess.run([sys.executable, '-m', 'unittest', 'cf_posting.test_source_fact_recovery'],
+        cwd=BASE_DIR, env=export_environment(), capture_output=True, timeout=180)
+    stable = hashlib.sha256(source.read_bytes()).hexdigest() == actual
+    test_stable = hashlib.sha256(test_source.read_bytes()).hexdigest() == test_sha
+    output = (result.stdout + result.stderr).decode('utf-8', errors='replace')
+    counts = re.findall(r'^Ran (\d+) tests? in ', output, re.MULTILINE)
+    tests_run = int(counts[-1]) if counts else 0
+    skipped_match = re.search(r'skipped=(\d+)', output)
+    skipped = int(skipped_match.group(1)) if skipped_match else 0
+    verified = result.returncode == 0 and stable and test_stable and tests_run > skipped and bool(re.search(r'^OK(?: \(.*\))?$',output,re.MULTILINE))
+    return {'ok':verified,
+            'status':'verified' if verified else 'failed',
+            'tool':'verify_cf_source_fact_fix','sourceSha256':actual,'sourceUnchanged':stable,
+            'testModule':'cf_posting.test_source_fact_recovery','exitCode':result.returncode,
+            'testSha256':test_sha,'testUnchanged':test_stable,'testsRun':tests_run,'skipped':skipped,
+            'outputSha256':hashlib.sha256(result.stdout + result.stderr).hexdigest(),
+            'productionApplied':False,'publicationAttempted':False}
+
+
 def propose_patch_code(files: List[str], test_files: List[str], objective: str) -> Dict[str, Any]:
     if not files or not test_files:
         return {"ok": False, "tool": "propose_coding_job", "status": "needs_input",
@@ -2162,7 +2221,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
     actor = slug if slug in STAFF_ROLES else 'unknown'
     fields = {'actor': actor}
     projects = {
-        'read_agent_status':'all_projects', 'repair_cf_known_failure':'cf_blog',
+        'read_agent_status':'all_projects', 'repair_cf_known_failure':'cf_blog', 'verify_cf_source_fact_fix':'cf_blog', 'prepare_cf_source_fact':'cf_blog',
         'run_cf_publish':'cf_blog', 'run_cf_domain':'cf_blog',
         'run_naver_publish':'naver_blog', 'run_naver_slot':'naver_blog',
         'run_kin_publish':'naver_kin', 'run_kin_now':'naver_kin',
@@ -2191,6 +2250,14 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
         if slug not in readers or kwargs:
             return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
         return {'ok': True, 'status': 'observed', 'tool': tool_name, 'data': readers[slug]()}
+    if tool_name == "prepare_cf_source_fact":
+        if slug != "publi" or set(kwargs) != {"source_sha256","request_sha256"}:
+            return {"ok":False,"status":"forbidden","tool":tool_name}
+        return prepare_cf_source_fact(**kwargs)
+    if tool_name == "verify_cf_source_fact_fix":
+        if slug != "patch" or set(kwargs) != {"source_sha256"}:
+            return {"ok":False,"status":"forbidden","tool":tool_name}
+        return verify_cf_source_fact_fix(kwargs["source_sha256"])
     if tool_name == "repair_cf_known_failure":
         if slug != "patch": return {"ok": False, "tool": tool_name, "status": "forbidden"}
         return repair_cf_known_failure(kwargs.get('domain', ''),kwargs.get('evidencePath'),kwargs.get('evidenceSha256'))

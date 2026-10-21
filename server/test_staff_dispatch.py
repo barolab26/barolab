@@ -35,6 +35,35 @@ class StaffDispatchTests(unittest.TestCase):
         self.scope['staff_tool_reply'] = Mock(return_value={'reply':'대기 2건을 확인했으며 수리는 실행하지 않았습니다.',
             'route':{'events':[{'actualModel':'configured-model'}]}})
 
+    def test_fixed_cf_verification_preserves_nonzero_and_checks_source(self):
+        import subprocess, sys
+        tree = ast.parse(Path(__file__).with_name('agent_tools.py').read_text(encoding='utf-8'))
+        node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'verify_cf_source_fact_fix')
+        source = Path(self.temp.name) / 'cf_posting/pipeline_runner.py'
+        source.parent.mkdir(); source.write_text('# fixed source')
+        source.with_name('test_source_fact_recovery.py').write_text('# fixed tests')
+        run = Mock(return_value=types.SimpleNamespace(returncode=1, stdout=b'failed', stderr=b''))
+        scope = {'BASE_DIR':Path(self.temp.name),'sys':sys,'re':re,'subprocess':types.SimpleNamespace(run=run)}
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'<fixed-verification>','exec'),scope)
+        verify = scope['verify_cf_source_fact_fix']
+        self.assertEqual(verify('0'*64)['status'],'held'); run.assert_not_called()
+        result = verify(hashlib.sha256(source.read_bytes()).hexdigest())
+        self.assertFalse(result['ok']); self.assertEqual(result['exitCode'],1)
+        self.assertFalse(result['publicationAttempted'])
+        run.return_value = types.SimpleNamespace(returncode=0, stdout=b'', stderr=b'Ran 0 tests in 0.0s\n\nOK\n')
+        self.assertFalse(verify(hashlib.sha256(source.read_bytes()).hexdigest())['ok'])
+        run.return_value.stderr = b'Ran 2 tests in 0.1s\n\nOK\n'
+        self.assertTrue(verify(hashlib.sha256(source.read_bytes()).hexdigest())['ok'])
+        self.assertEqual(run.call_args.args[0][1:],['-m','unittest','cf_posting.test_source_fact_recovery'])
+
+    def test_fixed_cf_verification_is_patch_only_and_has_no_arbitrary_command(self):
+        action = {'agent':'patch','tool':'verify_cf_source_fact_fix','args':{'source_sha256':'a'*64}}
+        self.assertEqual(self.scope['validate_staff_actions']([action]), [action])
+        self.assertIn('발행·재개는 실행하지 않습니다', self.scope['staff_instruction'](action)['text'])
+        for bad in ({**action,'agent':'publi'}, {**action,'args':{'command':'publish'}},
+                    {**action,'args':{'source_sha256':'../escape'}}):
+            with self.assertRaises(ValueError): self.scope['validate_staff_actions']([bad])
+
     def test_request_ack_tool_actual_response_and_duplicate_once(self):
         enqueue = self.scope['enqueue_staff_request']
         row = enqueue('turn-1', self.actions)

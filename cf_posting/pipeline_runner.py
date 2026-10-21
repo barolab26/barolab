@@ -1859,7 +1859,7 @@ def rework_draft(folder, domain, categories, generate, progress, attribution):
 PRIMARY_HOSTS = ('gov.kr', 'go.kr', 'korea.kr', 'nps.or.kr', 'edu', 'ac.kr', 'support.google.com',
                  'developers.google.com', 'learn.microsoft.com', 'support.microsoft.com',
                  'support.apple.com', 'samsung.com', 'nhis.or.kr', 'korail.com',
-                 'asus.com', 'dell.com', 'support.hp.com', 'support.lenovo.com', 'blogs.windows.com')
+                 'asus.com', 'dell.com', 'support.hp.com', 'support.lenovo.com', 'blogs.windows.com', 'nhs.uk', 'orthoinfo.aaos.org')
 
 def primary_url(url):
     host = (urlparse(url).hostname or '').lower()
@@ -1940,7 +1940,12 @@ async def _gather_sources(context, keyword):
     try:
         main = keyword['mainKeyword'] if isinstance(keyword, dict) else keyword
         target = keyword.get('targetQuestion', main) if isinstance(keyword, dict) else main
-        queries = list(dict.fromkeys([target, main, main + ' 공식 가이드']))
+        queries = keyword.get('sourceQueries') if isinstance(keyword, dict) else None
+        if queries is not None:
+            if not isinstance(queries, list) or not 1 <= len(queries) <= 3 or any(not isinstance(q, str) or not q.strip() or len(q) > 400 for q in queries):
+                raise ReviewRequired('Bounded source acquisition queries required')
+        else:
+            queries = list(dict.fromkeys([target, main, main + ' 공식 가이드']))
         for query_idx, query in enumerate(queries):
             try:
                 async with ego_async_action('navigate', 'search-results'):
@@ -2521,6 +2526,64 @@ async def annotate_prewriting_materials(handoff, packet, *, render=None):
     return revised
 
 
+async def acquire_missing_source_facts(folder, missing, goal, generate, gather):
+    """One durable, source-only acquisition; never supplies an approval or invented fact."""
+    requests = [row for row in missing if row.get('kind') == 'source_fact']
+    if not requests:
+        return None
+    directory = Path(folder)/'source-fact-acquisition'
+    try:
+        directory.mkdir(exist_ok=False)
+    except FileExistsError:
+        return None
+    def save(name, value):
+        with (directory/name).open('x', encoding='utf-8') as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2)
+    save('request.json', {'readerGoal':goal,'missingInputs':requests,'attemptLimit':1})
+    schema = {'type':'object','properties':{'queries':{'type':'array','minItems':1,'maxItems':3,
+        'items':{'type':'object','properties':{'query':{'type':'string'},
+        'officialHost':{'type':'string','enum':list(PRIMARY_HOSTS)}},
+        'required':['query','officialHost'],'additionalProperties':False}}},
+        'required':['queries'],'additionalProperties':False}
+    plan = generate(agent_prompt('researcher',
+        'Retrieve missing primary-source facts for the SAME reader question. Propose up to three concise searches, '
+        'using only the listed authoritative host. Query text is a search, not evidence or an answer. '
+        'Do not weaken missing requirements or infer facts from search snippets.',
+        {'readerGoal':goal,'missingInputs':requests}), response_schema=schema)
+    save('search-plan.json',plan)
+    rows = plan.get('queries') if isinstance(plan,dict) else None
+    if not isinstance(rows,list) or not 1 <= len(rows) <= 3:
+        raise ReviewRequired('Source acquisition search plan missing')
+    queries=[];hosts=set()
+    for row in rows:
+        if not isinstance(row,dict) or row.get('officialHost') not in PRIMARY_HOSTS:
+            raise ReviewRequired('Source acquisition host not approved')
+        query=row.get('query')
+        if not isinstance(query,str) or not query.strip() or len(query)>280 or any(ord(c)<32 for c in query):
+            raise ReviewRequired('Source acquisition query invalid')
+        hosts.add(row['officialHost'])
+        queries.append(query+' site:'+row['officialHost'])
+    observed=await gather({'mainKeyword':goal['question'],'targetQuestion':goal['question'],'sourceQueries':queries})
+    accepted=[]
+    for source in observed.get('sources',[]):
+        host=(urlparse(source.get('url','')).hostname or '').lower()
+        text=source.get('text')
+        if not any(host==h or host.endswith('.'+h) for h in hosts) or not primary_url(source.get('url','')):
+            continue
+        if not isinstance(text,str) or len(text.strip())<100:
+            continue
+        actual=hashlib.sha256(text.encode('utf-8')).hexdigest()
+        if source.get('bodySha256',actual)!=actual:
+            raise ReviewRequired('Acquired official body hash mismatch')
+        accepted.append({**source,'kind':'primary','bodySha256':actual,
+                         'collectedAt':source.get('collectedAt') or stamp()})
+    accepted=accepted[:6]
+    packet={'readerQuestion':goal['question'],'queries':queries,'sources':accepted,
+            'observedSearches':observed.get('searches',[]),'status':'acquired' if accepted else 'no_official_body'}
+    save('result.json',packet)
+    return packet if accepted else None
+
+
 def record_prewrite_block(handoff, goal, error):
     path = handoff.folder/'prewriter-acquisition-request.json'
     path.write_text(json.dumps({'schemaVersion': 1, 'status': 'answer_inputs_required' if error.missing_inputs else 'planning_required',
@@ -2605,60 +2668,123 @@ def validate_writer_image_links(article):
             raise ReviewRequired('Writer image plan block is absent from the actual body')
 
 
-async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
-    progress('keyword-selector', '검색 의도 및 고트래픽 신규 키워드 기획')
-    style_repair = bool(fixed and fixed.get('stylePhotoRepair'))
-    demand_mode = cf_demand_mode(fixed)
-    explicit_request = (fixed or {}).get('explicitReaderQuestion')
-    dom_meta = DOMAIN_META.get(domain, {}) if 'DOMAIN_META' in globals() else {}
-    if domain == 'daynote.kr' and fixed and fixed.get('growthEvidence'):
-        category = '트렌드팩트체크'
-        domain_specialty = '데이노트 트렌드팩트체크 (트렌드팩트체크, IT·웨어러블 스마트워치 트렌드)'
-    else:
-        domain_specialty = f"{dom_meta.get('name', domain)} ({', '.join(dom_meta.get('categories', [category]))})"
-    kw = select_keyword_with_demand(
-        agent_prompt('keyword-selector', 'Validate observed candidate demand and duplication against the full published catalog. Never invent measurements. '
-            + ('Select a real current issue supported by observed recency signals.' if demand_mode == 'current_issue' else
-               'Evergreen practical questions may use measured ongoingDemand; latest policy accuracy is distinct from recent search popularity. Do not invent growth or news.'), {}),
-        {'domain': domain, 'preferredCategory': category, 'domainSpecialty': domain_specialty, 'registeredCategories': categories,
-         'publishedCatalog': recent_catalog(recent), 'inventoryScope': 'recent_15_model_context', 'checkedPostCount': len(recent),
-         'demandMode': demand_mode, 'explicitReaderQuestion': explicit_request},
-        generate, fixed=fixed, require_current_issue=demand_mode == 'current_issue')
-    if categories and kw.get('category') not in categories:
-        raise ReviewRequired('Selected category is not registered')
-    slug = kw['topicSlug']
-    folder = BASE_DIR / 'output' / slug / f"run-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
-    handoff = Handoff(folder, domain, slug, create=True)
-    RUN_CONTEXT['artifactFolder'] = str(folder)
-    goal = None
-    if not style_repair:
-        question = explicit_request if explicit_request is not None else kw.get('demandEvidence', {}).get('question')
-        if not isinstance(question, str) or not question.strip():
-            raise ReviewRequired('Original selected reader question missing')
-        goal = generate(agent_prompt('keyword-selector', READER_GOAL_POLICY,
-            {'originalQuestion': question, 'selectedDemandEvidence': kw['demandEvidence'],
-             'candidateTitleOnly': kw['title']}), response_schema=reader_goal_schema(question))
-        validate_reader_goal(goal, question)
-        kw['readerGoal'] = goal
-        kw['demandMode'] = demand_mode
-    document(folder / 'keywords.md', kw.get('mainKeyword', slug) + ' — 키워드 기획', kw)
-    handoff.accept('keyword-selector', ['keywords.md'], attribution())
+def open_source_fact_continuation(folder, domain, recent):
+    """Reuse one verified keyword handoff in a child folder; preserve all failed artifacts."""
+    original=Path(folder).resolve()
+    if not original.is_relative_to((BASE_DIR/'output').resolve()):
+        raise ReviewRequired('Source fact continuation outside CF output')
+    data=json.loads((original/'handoff.json').read_text(encoding='utf-8'))
+    previous=Handoff(original,domain,data['slug'])
+    if len(previous.check())!=1:
+        raise ReviewRequired('Source fact continuation requires exactly one accepted keyword stage')
+    request=json.loads((original/'prewriter-acquisition-request.json').read_text(encoding='utf-8'))
+    if request.get('status')!='answer_inputs_required' or not any(x.get('kind')=='source_fact' for x in request.get('missingInputs',[])):
+        raise ReviewRequired('Saved source-fact refusal required')
+    if any(original.glob('*publication*receipt*')) or (original/'article.json').exists():
+        raise ReviewRequired('Source fact continuation must precede manuscript and submission')
+    kw=read_document(previous.file('keywords.md'));research=read_document(previous.file('research.md'))
+    goal=kw.get('readerGoal')
+    if not goal or goal!=request.get('readerGoal') or goal!=research.get('readerGoal'):
+        raise ReviewRequired('Original reader goal binding mismatch')
+    if kw.get('topicSlug')!=data['slug'] or not kw.get('demandEvidence'):
+        raise ReviewRequired('Original keyword demand binding missing')
+    if any(row.get('slug')==data['slug'] or row.get('title')==kw.get('title') for row in recent):
+        raise ReviewRequired('Source continuation already has a public counterpart')
+    schedule=json.loads((DATA_DIR/'daily_schedule.json').read_text(encoding='utf-8'))
+    item=next((x for x in schedule.get('items',[]) if x.get('domain')==domain),None)
+    baseline=RUN_CONTEXT.get('sourceFactScheduleItem', item)
+    if not item or not baseline or baseline.get('status')!='review_required' or publication_may_be_inflight(item) or publication_may_be_inflight(baseline):
+        raise ReviewRequired('Source continuation schedule state is not safe')
+    if any(item.get(key)!=baseline.get(key) for key in ('domain','artifactFolder','attemptCount','totalAttempts')):
+        raise ReviewRequired('Source continuation task changed after preflight')
+    stored=str(item.get('artifactFolder','')).replace('\\','/')
+    stored_path=Path(stored)
+    if not stored_path.is_absolute():stored_path=BASE_DIR/stored_path
+    if stored_path.resolve()!=original:
+        raise ReviewRequired('Source continuation not the current failed run')
+    if schedule.get('date')!=datetime.datetime.now(KST).date().isoformat():
+        raise ReviewRequired('Source continuation is not today')
+    hashes={name:digest(original/name) for name in ('handoff.json','keywords.md','research.md','prewriter-acquisition-request.json')}
+    claim=original/'source-fact-continuation.json'
+    child=original/'source-fact-continuation'
+    with claim.open('x',encoding='utf-8') as stream:
+        json.dump({'schemaVersion':1,'originalRunId':data['runId'],'originalHashes':hashes,
+                   'continuationFolder':str(child),'publicationAttempted':False,'attemptLimit':1,
+                   'attemptCountUnchanged':item.get('attemptCount'),'claimedAt':stamp()},stream)
+    handoff=Handoff(child,domain,data['slug'],create=True)
+    shutil.copy2(original/'keywords.md',child/'keywords.md')
+    handoff.data['stages']=copy.deepcopy(data['stages'])
+    handoff.data['sourceFactContinuation']={'originalRunId':data['runId'],'claimSha256':digest(claim),'originalFolder':str(original)}
+    handoff.save();handoff.check()
+    return handoff,kw,goal,research,request
 
-    progress('researcher', '자료 및 경쟁 글 리서치 수행', handoff)
-    observations = await gather({'mainKeyword': kw.get('mainKeyword', slug), 'targetQuestion': goal['question'] if goal else kw.get('title') or kw['questions'][0]})
-    if not observations.get('sources'):
-        observations = await gather(kw.get('mainKeyword', slug))
-    compact_obs = {
-        'sources': [{
-            'id': s.get('id'),
-            'title': s.get('title'),
-            'url': s.get('url'),
-            'kind': s.get('kind'), 'observedPosition': s.get('observedPosition'),
-            'excerpt': (s.get('text') or '')[:2500],
-            'quotes': (s.get('quotes') or [])[:6]
-        } for s in observations.get('sources', [])[:6]],
-        'observedSearches': observations.get('searches', [])
-    }
+
+async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
+    continuation=os.environ.get('CF_SOURCE_FACT_FOLDER')
+    if continuation:
+        handoff,kw,goal,saved_research,saved_request=open_source_fact_continuation(continuation,domain,recent)
+        folder=handoff.folder;slug=kw['topicSlug'];explicit_request=None
+        RUN_CONTEXT['artifactFolder']=str(folder)
+        progress('researcher','동일 질문의 누락 공식 자료 확보 재개',handoff)
+        acquired=await acquire_missing_source_facts(folder,saved_request['missingInputs'],goal,generate,gather)
+        if not acquired:
+            record_prewrite_block(handoff,goal,AnswerBriefBlocked('Official source acquisition did not return a usable body',saved_request['missingInputs']))
+        observations={**saved_research['observations'],'sources':saved_research['observations'].get('sources',[])+acquired['sources']}
+        compact_obs={'sources':observations['sources'],'acquisitionContract':'Same approved question and demand. Original refusal preserved; fresh readiness and independent review required.'}
+    else:
+        progress('keyword-selector', '검색 의도 및 고트래픽 신규 키워드 기획')
+        style_repair = bool(fixed and fixed.get('stylePhotoRepair'))
+        demand_mode = cf_demand_mode(fixed)
+        explicit_request = (fixed or {}).get('explicitReaderQuestion')
+        dom_meta = DOMAIN_META.get(domain, {}) if 'DOMAIN_META' in globals() else {}
+        if domain == 'daynote.kr' and fixed and fixed.get('growthEvidence'):
+            category = '트렌드팩트체크'
+            domain_specialty = '데이노트 트렌드팩트체크 (트렌드팩트체크, IT·웨어러블 스마트워치 트렌드)'
+        else:
+            domain_specialty = f"{dom_meta.get('name', domain)} ({', '.join(dom_meta.get('categories', [category]))})"
+        kw = select_keyword_with_demand(
+            agent_prompt('keyword-selector', 'Validate observed candidate demand and duplication against the full published catalog. Never invent measurements. '
+                + ('Select a real current issue supported by observed recency signals.' if demand_mode == 'current_issue' else
+                   'Evergreen practical questions may use measured ongoingDemand; latest policy accuracy is distinct from recent search popularity. Do not invent growth or news.'), {}),
+            {'domain': domain, 'preferredCategory': category, 'domainSpecialty': domain_specialty, 'registeredCategories': categories,
+             'publishedCatalog': recent_catalog(recent), 'inventoryScope': 'recent_15_model_context', 'checkedPostCount': len(recent),
+             'demandMode': demand_mode, 'explicitReaderQuestion': explicit_request},
+            generate, fixed=fixed, require_current_issue=demand_mode == 'current_issue')
+        if categories and kw.get('category') not in categories:
+            raise ReviewRequired('Selected category is not registered')
+        slug = kw['topicSlug']
+        folder = BASE_DIR / 'output' / slug / f"run-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+        handoff = Handoff(folder, domain, slug, create=True)
+        RUN_CONTEXT['artifactFolder'] = str(folder)
+        goal = None
+        if not style_repair:
+            question = explicit_request if explicit_request is not None else kw.get('demandEvidence', {}).get('question')
+            if not isinstance(question, str) or not question.strip():
+                raise ReviewRequired('Original selected reader question missing')
+            goal = generate(agent_prompt('keyword-selector', READER_GOAL_POLICY,
+                {'originalQuestion': question, 'selectedDemandEvidence': kw['demandEvidence'],
+                 'candidateTitleOnly': kw['title']}), response_schema=reader_goal_schema(question))
+            validate_reader_goal(goal, question)
+            kw['readerGoal'] = goal
+            kw['demandMode'] = demand_mode
+        document(folder / 'keywords.md', kw.get('mainKeyword', slug) + ' — 키워드 기획', kw)
+        handoff.accept('keyword-selector', ['keywords.md'], attribution())
+
+        progress('researcher', '자료 및 경쟁 글 리서치 수행', handoff)
+        observations = await gather({'mainKeyword': kw.get('mainKeyword', slug), 'targetQuestion': goal['question'] if goal else kw.get('title') or kw['questions'][0]})
+        if not observations.get('sources'):
+            observations = await gather(kw.get('mainKeyword', slug))
+        compact_obs = {
+            'sources': [{
+                'id': s.get('id'),
+                'title': s.get('title'),
+                'url': s.get('url'),
+                'kind': s.get('kind'), 'observedPosition': s.get('observedPosition'),
+                'excerpt': (s.get('text') or '')[:2500],
+                'quotes': (s.get('quotes') or [])[:6]
+            } for s in observations.get('sources', [])[:6]],
+            'observedSearches': observations.get('searches', [])
+        }
     packet = observe_prewriting_materials(handoff, goal['question'], generate, attribution) if goal else {'materials': [], 'rejectedMaterials': []}
     if goal:packet = await annotate_prewriting_materials(handoff,packet)
     question_context = prepare_question_context(prewriting_question_context(observations, packet['materials'], explicit_request)) if goal else []
@@ -2680,7 +2806,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     if goal:
         research_schema['properties']['answerBrief'] = answer_brief_schema(goal, question_context)
         research_schema['required'].append('answerBrief')
-    acquisition_round = 0
+    acquisition_round = 1 if continuation else 0
     while True:
         research_data = generate(agent_prompt('researcher',
             '이번 스키마의 facts,answers,outline,competitorGaps,notes와 answerBrief가 있으면 이를 반환한다. '
@@ -2691,6 +2817,15 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         if not isinstance(research_data, dict):
             raise ReviewRequired('리서처 구조화 응답 누락')
         raw_facts = research_data.get('facts') if isinstance(research_data.get('facts'), list) else []
+        acquired_sources = compact_obs.get('acquiredPrimarySources', [])
+        if continuation:
+            acquired_sources = acquired['sources']
+        source_bodies = {row['url']:row['text'] for row in acquired_sources}
+        for fact in raw_facts:
+            if isinstance(fact,dict) and fact.get('sourceUrl') in source_bodies:
+                quote=fact.get('quote')
+                if not isinstance(quote,str) or not quote.strip() or ' '.join(quote.split()) not in ' '.join(source_bodies[fact['sourceUrl']].split()):
+                    raise ReviewRequired('Acquired official fact quote is not in the retrieved body')
         norm_facts = []
         default_src_url = (compact_obs.get('sources') or [{}])[0].get('url') or 'https://api.searchad.naver.com/keywordstool'
         for f_idx, f_row in enumerate(raw_facts, 1):
@@ -2731,7 +2866,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             try:
                 planning_audit = folder/'planning-reviews'
                 if acquisition_round: planning_audit = planning_audit/'after-public-acquisition'
-                planning_audit.mkdir(exist_ok=False)
+                planning_audit.mkdir(parents=True, exist_ok=False)
                 def save_plan(name, value):
                     (planning_audit/name).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')
                 def review_plan(current, attempt):
@@ -2744,7 +2879,9 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                         '독립 계획 검수다. 원고를 쓰기 전에 원래 requiredAnswers 각각이 실제 계획 내용으로 해결되는지 '
                         '확인한다. 작성자 자기평가를 승인으로 취급하지 말고 direct-answer 또는 정확한 section id로 답 위치를 연결한다.',
                         {'readerGoal':goal,'questionContext':review_context,'facts':research_data['facts'],
-                         'materials':packet,'answerBrief':current}),response_schema=brief_review_schema(goal,current))
+                         'materials':packet,'answerBrief':current,
+                         'acquiredOfficialSourceBodies':acquired_sources,
+                         'sourceContract':'Check medical requiredAnswers against these actual bodies, not generated facts alone. Missing support must remain blocked.'}),response_schema=brief_review_schema(goal,current))
                     save_plan('review-' + str(attempt) + '-raw.json',raw)
                     bound = bind_brief_review_draft(raw,goal,current)
                     save_plan('review-' + str(attempt) + '.json',{'answerBrief':current,'verdict':bound})
@@ -2770,6 +2907,17 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 document(folder / 'research.md', kw.get('mainKeyword', slug) + ' — 사전 해결 계획', research_data)
             except AnswerBriefBlocked as exc:
                 captured = None
+                if not acquisition_round:
+                    acquired = await acquire_missing_source_facts(folder, exc.missing_inputs, goal, generate, gather)
+                    if acquired:
+                        observations = {**observations, 'sources':observations.get('sources',[])+acquired['sources']}
+                        compact_obs = {**compact_obs, 'acquiredPrimarySources':acquired['sources'],
+                                       'missingInputs':exc.missing_inputs,
+                                       'acquisitionContract':'Actual retrieved bodies only; same goal and all readiness/review gates remain required.'}
+                        question_context = prepare_question_context(prewriting_question_context(observations, packet['materials'], explicit_request))
+                        research_schema['properties']['answerBrief'] = answer_brief_schema(goal, question_context)
+                        acquisition_round += 1
+                        continue
                 if not acquisition_round and os.environ.get('CF_EXTERNAL_BROWSER') != '1':
                     captured = await acquire_public_captures(folder,exc.missing_inputs,research_data['answerBrief'],
                         research_data['facts'],observations.get('sources',[]),primary_url,CDP_URL,BROWSER_EXE,BROWSER_USER_DATA)
@@ -2799,6 +2947,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
     if (folder/'prewriting-capture-manifest.json').is_file():
         research_outputs += ['prewriting-capture-manifest.json', 'prewriting-materials.json']
         research_outputs += [path.relative_to(folder).as_posix() for path in (folder/'prewriting-materials').iterdir() if path.is_file()]
+    if (folder/'source-fact-acquisition').is_dir():
+        research_outputs += [path.relative_to(folder).as_posix() for path in (folder/'source-fact-acquisition').glob('*.json')]
     if (folder/'public-source-acquisition').is_dir():
         research_outputs += [path.relative_to(folder).as_posix() for path in (folder/'public-source-acquisition').rglob('*') if path.is_file()]
         if raw_name != 'researcher-first-response.json':research_outputs.append('researcher-first-response.json')
@@ -4751,6 +4901,8 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
     dom_meta = DOMAIN_META.get(domain, {}) if 'DOMAIN_META' in globals() else {}
     blog_name = dom_meta.get("name") or base_info.get("blogName", domain)
     category = scheduled.get("category") or dom_meta.get("category") or base_info.get("category", "정보")
+    if os.environ.get('CF_SOURCE_FACT_FOLDER') and not prepare_only:
+        raise ReviewRequired('Source fact continuation is preparation-only')
     if scheduled.get('publicUrl') and scheduled.get('publicationDate') == schedule_date and not os.environ.get('CF_REVISION_POST_ID'):
         raise ReviewRequired('이 발행 슬롯에는 이미 공개된 글이 있습니다. 신규 글을 중복 발행하지 않고 기존 글 수정으로 처리해야 합니다')
     base_info.update(blogName=blog_name, category=category, title=scheduled.get('title', base_info['title']), summary=scheduled.get('summary', base_info['summary']), topicSlug=scheduled.get('slug', base_info['topicSlug']))
@@ -4888,7 +5040,7 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
             lambda agent, detail, trace=None: handoff_progress(base_info, completed_ids, agent, detail, trace),
             current_attribution)
     else:
-        resumed = None if revision_id else resume_unpublished_draft(scheduled, domain, call_model_json,
+        resumed = None if revision_id or os.environ.get('CF_SOURCE_FACT_FOLDER') else resume_unpublished_draft(scheduled, domain, call_model_json,
             lambda agent, detail, trace=None: handoff_progress(base_info, completed_ids, agent, detail, trace), current_attribution)
         if resumed:
             ai_result, handoff = resumed
@@ -5177,7 +5329,7 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
 
 async def run_workflows():
     arg = sys.argv[1] if len(sys.argv) > 1 else "remaining"
-    manual_tracking = (os.environ.get('CF_FROM_CLEANER') != '1' or bool(os.environ.get('CF_REVISION_POST_ID'))) and os.environ.get('CF_REPAIR_OFF_SLOT') != '1'
+    manual_tracking = not os.environ.get('CF_SOURCE_FACT_FOLDER') and (os.environ.get('CF_FROM_CLEANER') != '1' or bool(os.environ.get('CF_REVISION_POST_ID'))) and os.environ.get('CF_REPAIR_OFF_SLOT') != '1'
     
     # Load completed blog IDs dynamically from daily_schedule.json (single source of truth for today)
     completed_ids = []
@@ -5210,6 +5362,11 @@ async def run_workflows():
     
     if not targets_to_run:
         return
+    if os.environ.get('CF_SOURCE_FACT_FOLDER'):
+        source_item=next((item for item in items if item.get('domain')==targets_to_run[0]),None)
+        if len(targets_to_run)!=1 or not source_item or source_item.get('status')!='review_required' or publication_may_be_inflight(source_item):
+            raise ReviewRequired('Source continuation requires one unsubmitted review-required task')
+        RUN_CONTEXT['sourceFactScheduleItem']=copy.deepcopy(source_item)
     if manual_tracking:
         fresh = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
         for item in fresh.get('items', []):
@@ -7142,12 +7299,19 @@ def main():
     parser.add_argument("--scheduler", action="store_true", help="Run 60s scheduler loop")
     parser.add_argument("--retry-browser-failures", action="store_true", help="Queue retry after browser recovery")
     parser.add_argument("--prepare-only", action="store_true", help="Prepare articles without publishing")
+    parser.add_argument('--source-fact-folder', help='One source-only continuation of an accepted keyword run; requires prepare-only')
     parser.add_argument('--growth-radar', action='store_true')
     parser.add_argument('--growth-doctor', action='store_true')
     parser.add_argument('--apply-growth', action='store_true')
     parser.add_argument('--growth-domain', choices=ALL_DOMAINS)
     parser.add_argument('--growth-limit', type=int, default=None)
     args, unknown = parser.parse_known_args()
+    if args.source_fact_folder:
+        if not args.prepare_only or len(args.domains)!=1 or args.domains[0] not in ALL_DOMAINS or any((args.scheduler,args.catch_up_today_once,args.catch_up_once,args.manual_retry_once,args.repair_failed_domain)):
+            parser.error('source-fact-folder requires one explicit domain and prepare-only')
+        if any(os.environ.get(k) for k in ('CF_ARTICLE_FILE','CF_ARTICLE_INPUT_FILE','CF_REWORK_FOLDER','CF_REVIEW_REWORK_FOLDER','CF_LAYOUT_REVIEW_FOLDER','CF_REVISION_POST_ID','CF_FROM_CLEANER')):
+            parser.error('source fact continuation cannot mix other workflow inputs')
+        os.environ['CF_SOURCE_FACT_FOLDER']=str(Path(args.source_fact_folder).resolve())
     if args.repair_failed_domain:
         print(json.dumps(repair_failed_schedule_item(args.repair_failed_domain), ensure_ascii=False))
         return
