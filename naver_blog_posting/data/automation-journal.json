@@ -23345,6 +23345,45 @@
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-21T01:47:17.905617+09:00",
       "blogId": "yoonviews"
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-21",
+      "startedAt": "2026-10-21T09:42:14.674198+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-21",
+      "reserveTime": "2026-10-21 11:00",
+      "runMode": "manual",
+      "workerId": null,
+      "recoveryContextSha256": "9ff2fa5b01782948c5c867e513ebd56b88756a91b929e15974b5f68585b2a649",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "52d361fd47d20c506eefa92079fd18bcb907e7297ac48a6e8c2ab20290056d10",
+        "requestedTopicSeed": "장기요양 인정신청 전에 의사소견서를 먼저 받아야 할까요?",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "0903898da3ffe350eed83554cdf3b9665d57f71809d4eb2b3b7eb1fcf09e0b7c",
+        "materialPresenceKnown": true,
+        "hadMaterials": true,
+        "materialContentSha256": "d62669363d98e706679c1d0bd125a2e01e7cee99d8908fa60b16bbf075f733bf",
+        "materialBytesSha256": "95dcb5580b99d7e9937c534146e659c7718438bd0983632549b317e962656a5e",
+        "readerQuestion": "장기요양 인정신청 전에 의사소견서를 먼저 받아야 할까요?",
+        "sha256": "9ff2fa5b01782948c5c867e513ebd56b88756a91b929e15974b5f68585b2a649"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "verified",
+      "updatedAt": "2026-10-21T09:44:40.825329+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/장기요양-의사소견서-20261021-6f7c66577f",
+      "preparedHandoffSha256": "43e43b83e6ecc71b60182b3abcd40de3c7366eb9ce3c0edf71076ab6406f4bc5",
+      "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
+      "verifiedAt": "2026-10-21T09:44:40.805463+09:00",
+      "blogId": "mustpickinfo",
+      "topic": "장기요양 의사소견서, 인정신청 전에 먼저 받아야 할까요?",
+      "logNo": "224448649049",
+      "documentSha256": "19c6078ce1252457d59c1d3ff503b5ed1f234aa5d62c0c8a6d5b23565df78378",
+      "submissionStatus": "verified_reserved",
+      "publicPublicationVerified": false
     }
   ]
 }

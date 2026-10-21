@@ -1,8 +1,8 @@
 {
   "soultin": {
-    "last_strategy_index": 3,
-    "last_strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
-    "last_updated": "2026-10-19 09:02:03",
+    "last_strategy_index": 1,
+    "last_strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
+    "last_updated": "2026-10-21 09:44:40",
     "history": [
       {
         "date": "2026-10-11 14:41:25",
@@ -87,6 +87,13 @@
         "strategy_name": "전략 4: D-1 '타임래그(Time-lag)' 선점 키워드 (예고형 키워드)",
         "keyword": "국민연금 예상액",
         "title": "2027년 국민연금 예상액 조회와 가입내역 점검 순서"
+      },
+      {
+        "date": "2026-10-21 09:44:40",
+        "strategy_index": 1,
+        "strategy_name": "전략 2: 자모(ㄱ~ㅎ) 자동완성 스파이더 + 질문형 어미 결합",
+        "keyword": "장기요양 의사소견서",
+        "title": "장기요양 의사소견서, 인정신청 전에 먼저 받아야 할까요?"
       }
     ]
   },
