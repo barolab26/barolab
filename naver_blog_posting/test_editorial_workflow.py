@@ -35,6 +35,27 @@ class EditorialWorkflowTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(RuntimeError):
                 r.require_top_three_evidence(bad,'specific query')
 
+    def test_researcher_only_sees_selected_query_bodies_and_url_schema(self):
+        selected=evidence();seed=copy.deepcopy(selected)
+        seed['query']='initial seed query'
+        for row in seed['competitors']:
+            row['url']=row['url'].replace('/123','/999')
+            row['excerpt']['text']='Initial seed-only competitor body'
+        context={'evidence':seed,'selectedEvidence':selected,'sources':[{'url':'https://www.gov.kr/official'}]}
+        original=copy.deepcopy(context)
+        results={'keyword-selector':{'mainKeyword':'specific query'}}
+        inputs=r.researcher_input_context(context,results)
+        self.assertNotIn('evidence',inputs)
+        text=json.dumps(inputs)
+        self.assertNotIn('Initial seed-only competitor body',text)
+        for row in seed['competitors']:self.assertNotIn(row['url'],text)
+        for row in selected['competitors']:
+            self.assertIn(row['url'],text);self.assertIn(row['excerpt']['text'],text)
+        urls=[row['url'] for row in selected['competitors']]
+        schema=r.agent_output_schema('researcher',['https://www.gov.kr/official'],urls)
+        self.assertEqual(schema['properties']['editorialDecision']['properties']['competitorFindings']['items']['properties']['url']['enum'],urls)
+        self.assertEqual(context,original)
+
     def test_test_decision_requires_hypothesis_and_observed_findings(self):
         packet=evidence()
         decision={'decision':'test','reason':'Narrow intent not fully answered','readerBenefit':'Can choose next action',

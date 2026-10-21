@@ -4030,10 +4030,25 @@ def bind_official_capture_requests(requests, sources):
     return bound
 
 
-def editorial_decision_schema():
+def researcher_input_context(context, results):
+    """Only final-query observations can support the researcher's top-three comparison."""
+    selected=context.get('selectedEvidence')
+    require_top_three_evidence(selected,results['keyword-selector']['mainKeyword'])
+    inputs={key:value for key,value in context.items() if key not in ('evidence','keyword-evidence.json')}
+    inputs['priorResults']=results
+    inputs['competitorComparisonContract']=(
+        'selectedEvidence is the sole authority for competitorFindings. Compare its exact observedRank 1,2,3 '
+        'in order, binding every URL to that same row excerpt body. Initial seed-query samples are not '
+        'comparison evidence and are intentionally omitted. Do not infer performance or rankings beyond this observation.')
+    return inputs
+
+
+def editorial_decision_schema(comparison_urls=None):
     finding = {'type':'object', 'properties': {key:{'type':'string','minLength':1} for key in
         ('url','observedStrength','unansweredNeed','adoptPattern','avoidPattern')},
         'required':['url','observedStrength','unansweredNeed','adoptPattern','avoidPattern'], 'additionalProperties':False}
+    if comparison_urls:
+        finding['properties']['url']['enum'] = list(comparison_urls)
     return {'type':'object','properties': {'decision':{'type':'string','enum':['publish','test','skip']},
         'reason':{'type':'string','minLength':1},'readerBenefit':{'type':'string','minLength':1},
         'competitorFindings':{'type':'array','minItems':3,'maxItems':3,'items':finding},
@@ -4236,7 +4251,7 @@ def render_preview(article, plans, folder):
     (folder / 'final.md').write_text('\n\n'.join(md), encoding='utf-8')
 
 
-def agent_output_schema(role, source_urls=None):
+def agent_output_schema(role, source_urls=None, comparison_urls=None):
     """Build strict JSON Schema contracts for agent handoffs."""
     def obj(properties, required=None):
         return {"type": "object", "properties": properties,
@@ -4274,7 +4289,7 @@ def agent_output_schema(role, source_urls=None):
         fact = obj({"id": string(), "claim": string(),
                     "url": {"type": "string", **({"enum": urls} if urls else {})}})
         return obj({"facts": array(fact, maximum=0 if not urls else None), "researchMd": string(),
-                    "answerBrief": answer_brief_schema(), "editorialDecision": editorial_decision_schema(),
+                    "answerBrief": answer_brief_schema(), "editorialDecision": editorial_decision_schema(comparison_urls),
                     "captureRequests": array(obj({"materialId":string(),"stepId":string(),
                         "sourceUrl":{"type":"string", **({"enum":urls} if urls else {})},
                         "anchors":array(string(),minimum=1,maximum=4),"observation":string()}),maximum=12)})
@@ -5217,7 +5232,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             atomic_json(handoff.path, handoff.data)
             context['materialObservations'] = material_context(materials)
             context['materialPixelObservations'] = observations
-        inputs = {**context, 'priorResults': results}
+        inputs = researcher_input_context(context,results) if role == 'researcher' else {**context, 'priorResults': results}
         if role == 'researcher':
             inputs['sourceScope'] = {'sourceUrls':[source['url'] for source in context['sources']],
                 'mode':'actual_observations_candidate' if not context['sources'] else 'fetched_sources',
@@ -5315,7 +5330,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
         elif preserve_review_photos and role == 'image-maker':
             result = json.loads((folder/'image-maker.json').read_text(encoding='utf-8'))
         else:
-            schema = agent_output_schema(role, [s['url'] for s in context.get('sources', [])])
+            comparison_urls = [row['url'] for row in inputs['selectedEvidence']['competitors']] if role == 'researcher' else None
+            schema = agent_output_schema(role, [s['url'] for s in context.get('sources', [])], comparison_urls)
             if role == 'image-maker':
                 prompt, schema = supplied_capture_image_contract(prompt, schema, materials, results['writer']['readerTask']['requiredMaterialIds'])
             if role == 'researcher':
