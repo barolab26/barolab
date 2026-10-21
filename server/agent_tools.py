@@ -1034,6 +1034,27 @@ def sync_growth_metrics() -> Dict[str, Any]:
 # 3. @patch (패치 - 시스템·브라우저 CDP·스케줄러 엔지니어)
 # ============================================================================
 
+PATCH_UNITS = ("barolab-cf.timer", "barolab-kin.timer", "barolab-dashboard.service",
+               "barolab-memory-review.service", "barolab-naver-monitor.timer")
+
+
+def _read_ubuntu_tasks() -> List[Dict[str, Any]]:
+    rows = []
+    for unit in PATCH_UNITS:
+        try:
+            result = subprocess.run(["systemctl", "--user", "show", unit,
+                "--property=LoadState,ActiveState,SubState,NextElapseUSecRealtime"],
+                capture_output=True, text=True, timeout=3)
+            values = dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
+            rows.append({"TaskName": unit, "State": values.get("ActiveState", "unknown"),
+                         "LoadState": values.get("LoadState", "unknown"),
+                         "NextRunTime": values.get("NextElapseUSecRealtime", ""),
+                         "observed": result.returncode == 0})
+        except (OSError, subprocess.TimeoutExpired):
+            rows.append({"TaskName": unit, "State": "unknown", "observed": False})
+    return rows
+
+
 def read_patch_data() -> Dict[str, Any]:
     # 1) Probe core CDP ports (9230, 9231, 9333, 9334, 9335, 9336, 9226)
     cdp_ports = [probe_cdp_port(p) for p in (9230, 9231, 9333, 9334, 9335, 9336, 9226)]
@@ -1042,6 +1063,8 @@ def read_patch_data() -> Dict[str, Any]:
     kin_state = _read_json(DATA_DIR / "kin-automation-state.json", {})
     tasks_info = ((kin_state.get("registeredTasks") or {}).get("tasks")) or []
     try:
+        if os.name != "nt":
+            raise OSError("Windows scheduler is not used on Ubuntu")
         ps_cmd = (
             "Get-ScheduledTask -TaskName 'BaroLab-*' -ErrorAction SilentlyContinue | "
             "ForEach-Object { $info = Get-ScheduledTaskInfo -TaskName $_.TaskName -ErrorAction SilentlyContinue; "
@@ -1065,6 +1088,9 @@ def read_patch_data() -> Dict[str, Any]:
             tasks_info = [parsed] if isinstance(parsed, dict) else parsed
     except Exception:
         pass
+
+    if os.name != "nt":
+        tasks_info = _read_ubuntu_tasks()
 
     # 3) `.agent-routing/ledger.jsonl` last 20 entries
     ledger_path = BASE_DIR / ".agent-routing" / "ledger.jsonl"
@@ -1119,7 +1145,7 @@ def format_patch_context_block() -> str:
     return (
         f"[패치(@patch) 전용 실시간 시스템·CDP·스케줄러 실측값]\n"
         f"1. 포터블 브라우저 CDP 포트 생존 실측: {' | '.join(port_strs)}\n"
-        f"2. Windows 작업 스케줄러(BaroLab-*) 상태:\n" + ("\n".join(task_strs) if task_strs else "  · 조회된 BaroLab 작업 없음") + "\n"
+        f"2. {'Windows 작업 스케줄러' if os.name == 'nt' else 'Ubuntu systemd user'} 상태:\n" + ("\n".join(task_strs) if task_strs else "  · 조회된 BaroLab 작업 없음") + "\n"
         f"3. .agent-routing/ledger.jsonl 최근 {lg['total']}건: 성공 {lg['success']}건 / 실패 {lg['failed']}건\n"
         f"4. kin-scheduler-errors.log 최근 로그 요약: {err_tail}"
     )
@@ -1179,6 +1205,10 @@ def restart_browser_cdp(port: int) -> Dict[str, Any]:
     scripts inside `C:\\99_포터블브라우저` (strictly adhering to `AGENTS.md`).
     """
     p_int = int(port)
+    if os.name != "nt":
+        return {"ok": False, "tool": "restart_browser_cdp", "status": "manual_review_required",
+                "state": "Ubuntu 기존 계정 세션을 보존했습니다. 전용 런처와 소유 작업 확인 후 복구해야 합니다.",
+                "port": p_int, "probe": probe_cdp_port(p_int), "started": False}
     meta = CDP_PORT_REGISTRY.get(p_int)
     if not meta:
         return {
@@ -1257,6 +1287,10 @@ def restart_browser_cdp(port: int) -> Dict[str, Any]:
 
 def fix_scheduler_task(task_name: str = "BaroLab-Kin-Seven-Day-Pilot") -> Dict[str, Any]:
     """Enable and immediately trigger a Windows Scheduled Task (`BaroLab-*`)."""
+    if os.name != "nt":
+        return {"ok": False, "tool": "fix_scheduler_task", "status": "manual_review_required",
+                "state": "Ubuntu systemd 상태만 조회했습니다. 게시 작업을 임의로 시작하지 않았습니다.",
+                "scheduledTasks": _read_ubuntu_tasks(), "started": False}
     t_name = (task_name or "BaroLab-Kin-Seven-Day-Pilot").strip()
     if not t_name.startswith("BaroLab-"):
         t_name = "BaroLab-Kin-Seven-Day-Pilot"
@@ -1732,8 +1766,54 @@ def get_agent_live_context(slug: str, user_text: str = "") -> str:
     return clock_header + format_jarvis_context_block()
 
 
+def propose_patch_code(files: List[str], test_files: List[str], objective: str) -> Dict[str, Any]:
+    if not files or not test_files:
+        return {"ok": False, "tool": "propose_coding_job", "status": "needs_input",
+                "state": "수정할 저장소 상대 파일과 고정 테스트 파일을 지정해 주세요.",
+                "productionApplied": False, "testsRun": False}
+    from common.coding_job import propose_coding_job
+    try:
+        result = propose_coding_job(BASE_DIR, files, test_files, objective)
+        return {**result, "tool": "propose_coding_job", "ok": True,
+                "state": "변경안 생성 완료. 정확한 diff 검토 후 격리 검증이 필요합니다."}
+    except (ValueError, OSError, RuntimeError) as exc:
+        return {"ok": False, "tool": "propose_coding_job", "status": "proposal_failed",
+                "state": "변경안 생성 실패: " + type(exc).__name__, "productionApplied": False,
+                "testsRun": False}
+
+
+def read_patch_code_status(job_id: str, candidate_sha256: str) -> Dict[str, Any]:
+    from common.coding_job import read_coding_job_status
+    try:
+        result = read_coding_job_status(job_id, candidate_sha256)
+        return {**result, "tool": "read_coding_job_status", "ok": True}
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "tool": "read_coding_job_status", "status": "invalid_job",
+                "state": "작업 ID 또는 변경안 SHA 검증 실패: " + type(exc).__name__}
+
+
+def _route_patch_message(text: str) -> List[Dict[str, Any]]:
+    status_match = re.search(r"job:([0-9a-f]{32})\s+sha:([0-9a-f]{64})", text)
+    if status_match:
+        return [read_patch_code_status(*status_match.groups())]
+    paths = list(dict.fromkeys(re.findall(r"(?<![\w/])([A-Za-z0-9_./-]+\.(?:py|js|html))\b", text)))
+    code_intent = paths or any(word in text.lower() for word in ("코드", "소스", "버그", "수정", "고쳐", "구현", "code", "bug", "patch"))
+    if code_intent:
+        tests = [name for name in paths if Path(name).name.startswith("test_")]
+        return [propose_patch_code([name for name in paths if name not in tests], tests, text)]
+    return [{"ok": True, "tool": "read_patch_status", "status": "observed",
+             "state": "현재 운영 상태를 읽었습니다. 복구 실행은 하지 않았습니다.",
+             "data": read_patch_data(), "productionApplied": False}]
+
+
 def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     """Directly invoke one of the registered agent tools by name."""
+    if tool_name in ("propose_coding_job", "read_coding_job_status"):
+        if slug != "patch":
+            return {"ok": False, "tool": tool_name, "status": "forbidden"}
+        if tool_name == "propose_coding_job":
+            return propose_patch_code(kwargs.get("files", []), kwargs.get("test_files", []), kwargs.get("objective", ""))
+        return read_patch_code_status(kwargs.get("job_id", ""), kwargs.get("candidate_sha256", ""))
     if tool_name in ("index_check_and_submit",):
         return index_check_and_submit(kwargs.get("account", "sj"))
     if tool_name in ("run_auto_indexer",):
@@ -1811,6 +1891,9 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
       3. Channel Publish & Self-Healing Recovery (`run_cf_publish`, `run_naver_publish`, `run_kin_publish`, `run_threads_publish`, `run_watchdog_heal`)
     """
     clean = re.sub(r"@\S+", "", user_text or "").strip()
+    if slug == "patch":
+        # Code requests must never fall through to publication or broad watchdog actions.
+        return _route_patch_message(clean)
     lower = clean.lower()
     executed: List[Dict[str, Any]] = []
 
@@ -1892,23 +1975,6 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
             executed.append(verify_domain_index(matched_dom))
         if any(k in lower for k in ("동기화", "수집", "집계", "ga4", "트래픽", "수익", "갱신")):
             executed.append(sync_growth_metrics())
-
-    elif slug == "patch":
-        if is_recovery_order or any(k in lower for k in ("고쳐", "전체복구")):
-            executed.append(run_watchdog_heal())
-        port_match = re.search(r"\b(9226|9230|9231|9333|9334|9335|9336)\b", lower)
-        if port_match or any(k in lower for k in ("브라우저", "cdp", "포트", "재기동", "열어", "띄워")):
-            target_port = int(port_match.group(1)) if port_match else (
-                9226 if "sj" in lower else
-                9230 if "stone" in lower else
-                9231 if "adinfo" in lower else
-                9334 if "soultin" in lower else
-                9333 if "soul5373" in lower else
-                9335 if "yoon" in lower else 9231
-            )
-            executed.append(restart_browser_cdp(target_port))
-        if any(k in lower for k in ("스케줄러", "작업", "scheduler", "task", "트리거")):
-            executed.append(fix_scheduler_task("BaroLab-Kin-Seven-Day-Pilot"))
 
     elif slug == "doctor":
         if cf_post_urls:

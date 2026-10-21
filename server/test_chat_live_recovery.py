@@ -15,6 +15,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ChatLiveRecoveryTests(unittest.TestCase):
+    def test_execution_receipt_missing_exit_is_unknown_not_success(self):
+        html = (ROOT/'dashboard/chat.html').read_text(encoding='utf-8')
+        start = html.index('  function buildExecutionReceiptBoxHtml(')
+        function = html[start:html.index('\n  function buildStatusLineHtml', start)]
+        code = "const assert=require('node:assert/strict');const escapeHtml=String;\n" + function + """
+const render=receipt=>buildExecutionReceiptBoxHtml({who:'patch',executionReceipts:[{cmd:'bounded-check',...receipt}]});
+assert.ok(render({}).includes('Exit Code: unknown'));
+assert.ok(render({exit_code:null}).includes('Exit Code: unknown'));
+assert.ok(render({exit_code:0}).includes('Exit Code: 0'));
+assert.ok(render({exit_code:1}).includes('Exit Code: 1'));
+"""
+        result = subprocess.run(['node','-e',code], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_canonical_projection_dedupe_and_outbox_preserve_malformed(self):
         tree = ast.parse((ROOT/'server/chat_room.py').read_text(encoding='utf-8'))
         names = {'project_work_event','receive_work_event','drain_work_event_outbox','_is_noise_or_fake_loop_message','_enrich_legacy_message'}

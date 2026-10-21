@@ -1219,7 +1219,7 @@
       if (!rec || !rec.cmd) return '';
       const cmd = escapeHtml(rec.cmd || '');
       const pid = escapeHtml(String(rec.pid != null ? rec.pid : '-'));
-      const exitCode = escapeHtml(String(rec.exit_code != null ? rec.exit_code : 0));
+      const exitCode = escapeHtml(String(rec.exit_code != null ? rec.exit_code : 'unknown'));
       const rawTail = Array.isArray(rec.stdout_tail) ? rec.stdout_tail.join('\n') : String(rec.stdout_tail || '');
       const stdoutTail = escapeHtml(rawTail.trim() || '[콘솔 출력 없음]');
       return `

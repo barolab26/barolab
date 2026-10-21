@@ -569,9 +569,9 @@ def build_Contextual_task_info(slug: str, user_text: str, from_name: str, next_n
             summary = "원고·캡처 정합성 검수 완료"
             typing_text = "🤖 퍼블리가 응답을 작성하고 있습니다..."
     elif slug == "patch":
-        step = "파이프라인 및 자동화 모듈 점검 중..."
-        summary = "파이프라인·코드 검증 완료"
-        typing_text = "⚙️ 패치가 코드를 점검하고 있습니다..."
+        step = "요청 범위와 실행 가능한 점검 경로 확인 중..."
+        summary = "패치 응답 반환 · 코드 변경 및 검증 결과는 실행 영수증 확인 필요"
+        typing_text = "⚙️ 패치가 요청 범위와 실행 근거를 확인하고 있습니다..."
     elif slug == "trace":
         if any(k in lower for k in ("서치어드바이저", "indexnow", "색인", "인덱싱", "사이트맵", "sitemap")):
             step = "16개 CF 외부 도메인 미색인 URL 전수 추출 및 네이버 IndexNow·구글 사이트맵 자동 제출 중..."
@@ -997,7 +997,10 @@ AGENT_SYSTEM_PROMPTS: Dict[str, str] = {
     ),
     "patch": (
         "너는 BaroLab의 시스템·브라우저 CDP·스케줄러 엔지니어 '패치(@patch)'다. "
-        "전용 브라우저 CDP 포트(9230~9336, 9226) 실시간 생존 여부, Windows 작업 스케줄러(BaroLab-*) 상태, 라우팅·에러 로그 실측값을 바탕으로 대표님의 질문에 답하고, 타 분야 안건에는 파이프라인 자동화·안정성 관점의 기술 의견을 보탠다.\n"
+        "현재 Ubuntu 운영 서비스와 전용 브라우저 CDP·라우팅·에러의 실제 관측을 바탕으로 답한다. Windows 작업 스케줄러 기록을 Ubuntu 현재 상태로 취급하지 않는다. "
+        "코드 수리는 명시된 저장소 파일과 문제 범위로 제안 작업을 만들어 candidate.diff와 정적 검사를 얻는 단계, 검토한 후보 SHA와 고정 테스트 대상을 지정해 격리 검증하는 단계로 구분한다. "
+        "제안·접수·프로세스 시작·모델 응답·격리 테스트 통과는 운영 코드 적용이나 수리 성공이 아니다. 운영 자동 적용은 하지 않으며, 실제 작업 영수증의 상태·후보 해시·검증 결과만 보고한다. "
+        "읽기·수정·테스트를 실행한 근거가 없으면 실행했다고 말하지 않는다.\n"
         + STRICT_ANTI_HALLUCINATION_RULES
     ),
     "radar": (
@@ -1251,7 +1254,7 @@ def _synthesize_question_aware_fallback(
         lg = d["routingLedgerRecent20"]
         return (
             f"• **전용 브라우저 CDP 포트 상태**: {ports_line}\n"
-            f"• **스케줄러 및 라우팅 원장**: 최근 라우팅 `{lg['total']}건` 중 성공 `{lg['success']}건`·실패 `{lg['failed']}건`이며, 활성 워커 및 스케줄러 태스크 정상 동작 중입니다.{badges_str}"
+            f"• **라우팅 원장**: 최근 기록 `{lg['total']}건` 중 성공 `{lg['success']}건`·실패 `{lg['failed']}건`입니다. 이 집계만으로 현재 워커·스케줄러 정상 여부나 코드 수리 완료를 판단하지 않습니다.{badges_str}"
         )
 
     pub_d = read_publi_data()
@@ -1299,6 +1302,36 @@ def _is_llm_reply_polluted(slug: str, llm_out: str, has_url: bool) -> bool:
     return False
 
 
+def coding_job_report(tool):
+    """Describe only host job receipts; isolated verification is not production repair."""
+    receipt = tool.get('codingJob') or tool
+    status = receipt.get('status') or tool.get('state') or 'unknown'
+    messages = {
+        'proposed':'코드 변경 후보가 준비되었습니다. 운영 파일 변경 및 테스트 실행은 아직 하지 않았습니다.',
+        'queued':'코드 작업이 접수되었습니다. 실행·검증 완료는 아직 확인되지 않았습니다.',
+        'running':'코드 작업 실행 중입니다. 완료 결과는 아직 확인되지 않았습니다.',
+        'isolated_verified':'격리 사본 검증이 통과했습니다. 운영 코드에는 적용하지 않았으며 후보 검토가 필요합니다.',
+        'validation_failed':'격리 검증이 실패했습니다. 운영 코드에 적용하지 않았습니다.',
+        'failed':'코드 작업이 실패했습니다. 수리 성공으로 처리하지 않습니다.',
+        'proposal_failed':'코드 변경안 생성이 실패했습니다. 운영 코드 변경이나 검증 완료로 처리하지 않습니다.',
+        'invalid_job':'작업 ID 또는 후보 SHA 검증에 실패했습니다. 상태를 확인했다고 단정하지 않습니다.',
+        'needs_scope':'대상 파일·문제 범위·고정 테스트가 필요해 코드 작업을 시작하지 않았습니다.',
+        'needs_input':'대상 소스 파일·문제 범위·고정 테스트가 필요해 코드 작업을 시작하지 않았습니다.',
+    }
+    if receipt.get('productionApplied') is True:
+        return '지원 범위를 벗어난 운영 적용 상태가 반환되었습니다. 수리 성공을 선언하지 않고 확인이 필요합니다.'
+    text = messages.get(status, '코드 작업의 완료 증거가 아직 없습니다. 수리 성공을 선언하지 않습니다.')
+    job_id = receipt.get('jobId') or str(receipt.get('jobDir') or '').replace('\\','/').rstrip('/').split('/')[-1]
+    if isinstance(job_id,str) and re.fullmatch(r'[a-f0-9]{32}',job_id):
+        text += '\n작업 ID: ' + job_id
+    digest = receipt.get('candidateSha256')
+    if isinstance(digest,str) and re.fullmatch(r'[a-f0-9]{64}',digest):
+        text += '\n후보 SHA-256: ' + digest
+        if isinstance(job_id,str) and re.fullmatch(r'[a-f0-9]{32}',job_id):
+            text += '\n상태 조회: @패치 job:' + job_id + ' sha:' + digest
+    return text
+
+
 def synthesize_agent_reply(
     slug: str,
     user_text: str,
@@ -1322,7 +1355,11 @@ def synthesize_agent_reply(
     # [Step 1: 도구 먼저 실행 (Strict Execution-First Router)]
     # =========================================================================
     prior_had_tools = bool(prior_replies and any(pr.get("executionBadges") or pr.get("executionReceipts") for pr in prior_replies))
-    executed_tools: List[Dict[str, Any]] = [] if (is_followup and prior_had_tools) else maybe_execute_tools_for_message(slug, user_text)
+    explicit_patch = slug == 'patch' and 'patch' in _extract_mentioned_slugs(user_text)
+    executed_tools: List[Dict[str, Any]] = [] if (is_followup and prior_had_tools and not explicit_patch) else maybe_execute_tools_for_message(slug, user_text)
+    coding_tool = next((tool for tool in executed_tools if tool.get('tool') in ('propose_coding_job','read_coding_job_status')), None)
+    if coding_tool is not None:
+        return coding_job_report(coding_tool), [], executed_tools
     any_tool_executed_in_turn = bool(executed_tools) or prior_had_tools
     is_imperative = has_imperative_action_intent(user_text)
 
@@ -1400,9 +1437,9 @@ def synthesize_agent_reply(
                 )
             else:
                 tool_lines.append(
-                    f"- 도구 `{t.get('tool')}` 실행 완료:\n"
+                    f"- 도구 `{t.get('tool')}` 반환 기록(업무 성공 판단은 상태·검증 근거 확인):\n"
                     f"  · cmd: {rec.get('cmd') or t.get('cmd')}\n"
-                    f"  · pid / exit_code: PID {rec.get('pid') or t.get('pid')} / exit_code={rec.get('exit_code', 0)}\n"
+                    f"  · pid / exit_code: PID {rec.get('pid') or t.get('pid')} / exit_code={rec.get('exit_code', '미관측')}\n"
                     f"  · 상태 요약: {t.get('state')}\n"
                     f"  · 실제 콘솔 출력(stdout_tail):\n{rec.get('stdout_tail') or t.get('stdoutTail') or ''}\n"
                     f"  · 배지: {t.get('badge')}"
@@ -2390,6 +2427,12 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
         else:
             tracker_status = "completed"
             result_summary = exec_badges[0] if exec_badges else task_info["resultSummary"]
+
+        coding_tool = next((tool for tool in executed_tools if tool.get('tool') in ('propose_coding_job','read_coding_job_status')), None)
+        if coding_tool is not None:
+            coding_status = (coding_tool.get('codingJob') or coding_tool).get('status') or coding_tool.get('state')
+            tracker_status = 'processing' if coding_status in ('queued','running') else 'failed' if coding_status in ('validation_failed','failed','proposal_failed','invalid_job') else 'status_only'
+            result_summary = coding_job_report(coding_tool)
 
         completed_msg: Dict[str, Any] = {
             "id": msg_id,
