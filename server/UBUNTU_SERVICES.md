@@ -224,3 +224,25 @@ it does not refresh evidence, open a browser, generate content or submit anythin
 An expired receipt can block a new attempt even while previously verified
 reservation evidence remains stored. Timer activation requires a separate
 operational decision after representative publication verification.
+
+## CF current-day worker
+
+`barolab-cf.service` calls `cf_posting/pipeline_runner.py --catch-up-today-once`
+to process at most one due item from the existing current KST day's schedule.
+It preserves the cleaner and Flow locks and publication reconciliation. It does
+not create schedules, process historical schedules, run the growth doctor, or
+start the EGO daemon. The existing desktop session must be available on DISPLAY
+`:10`; the service uses the private Ubuntu virtual environment and X authority.
+
+`barolab-cf.timer` checks again 60 seconds after the oneshot becomes inactive;
+systemd does not start a second instance while it is active. The service has no
+execution timeout, so a long or uncertain publication is not killed automatically.
+Inspect its journal and submission evidence before considering any manual retry.
+
+Install the two templates into `~/.config/systemd/user/`, run `systemctl --user
+daemon-reload`, and first verify one bounded service execution and its actual
+publication result, including an honest pre-submission quality hold with zero
+publications. Enable ongoing checks with `systemctl --user enable --now
+barolab-cf.timer` only after that operational verification. Read status with
+`systemctl --user status barolab-cf.service barolab-cf.timer` and
+`journalctl --user -u barolab-cf.service -n 80 --no-pager`.

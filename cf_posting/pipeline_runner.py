@@ -5478,7 +5478,7 @@ def publication_receipt(item):
         return folder / 'publication.json'
     return BASE_DIR / 'output' / item.get('slug', '') / 'publication.json'
 
-def reconcile_item(item, schedule_date):
+def reconcile_item(item, schedule_date, *, strict=False):
     slug, title = item.get('slug', ''), item.get('title', '')
     if not slug or 'live-ai-planning' in slug or '[실시간 AI 기획 대기]' in title:
         return False
@@ -5521,6 +5521,8 @@ def reconcile_item(item, schedule_date):
                     reconciledAt=datetime.datetime.now(KST).isoformat())
         return True
     except Exception:
+        if strict:
+            raise
         return False
 
 def get_topic_for_domain(domain):
@@ -6400,10 +6402,17 @@ def sync_dashboard_status(schedule, active_item=None, stage_num=0, stage_name=""
 
 
 
+def publication_may_be_inflight(item):
+    return bool(publication_receipt(item).exists()
+                or item.get('status') in ('publishing', 'verification_pending')
+                or item.get('submissionStarted') or item.get('submissionStartedAt')
+                or item.get('submittedAt'))
+
+
 def schedule_failed_attempt(item, exit_code, now=None):
     now = now or datetime.datetime.now(KST)
     item.pop('nextRetryAt', None)
-    if publication_receipt(item).exists() or item.get('status') == 'verification_pending':
+    if publication_may_be_inflight(item):
         item.update(status='verification_pending', retryable=False)
         return
     norm_art = str(item.get('artifactFolder') or '__missing__').replace('\\', '/')
@@ -6491,9 +6500,21 @@ def run_publisher_for_item(item, schedule, schedule_path=None):
             try:
                 exit_code = proc.wait(timeout=1200)
             except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait()
-                exit_code = -3
+                # Keep the cleaner lock and process alive once a submission may exist.
+                # A timeout is not evidence that the external write failed.
+                try:
+                    timeout_schedule = json.loads(schedule_path.read_text(encoding='utf-8'))
+                    timeout_item = next(it for it in timeout_schedule.get('items', []) if it['domain'] == domain)
+                    inflight = publication_may_be_inflight(timeout_item)
+                except Exception:
+                    inflight = True  # Unreadable evidence cannot authorize killing a writer.
+                if inflight:
+                    log_scheduler('Publication outcome pending; waiting without killing ' + domain)
+                    exit_code = proc.wait()
+                else:
+                    proc.kill()
+                    proc.wait()
+                    exit_code = -3
     except Exception as e:
         log_scheduler(f"Execution error on {domain}: {e}")
         exit_code = -1
@@ -6622,6 +6643,48 @@ def bind_prepared_reviewed_articles(schedule):
         changed = True
     return changed
 
+def catch_up_today_once():
+    """Run at most one current-KST-date job; never consume recovery queues."""
+    with cleaner_lock() as acquired:
+        if not acquired:
+            log_scheduler('Today cleaner already running; skipped')
+            return
+        now = datetime.datetime.now(KST)
+        schedule = load_or_get_schedule()
+        if schedule.get('date') != now.date().isoformat():
+            raise RuntimeError('CF schedule is not the current KST date')
+        if schedule.get('executionState') == 'stopped':
+            return
+        # Select only safe states before select_due_items can mutate stale processing.
+        eligible = dict(schedule, items=[item for item in schedule.get('items', [])
+            if item.get('status') in ('waiting', 'pending', 'retry_wait', 'failed', 'prepared', 'review_required')
+            and not publication_may_be_inflight(item)])
+        due = select_due_items([eligible], now)
+        summary = {'checkedAt': now.isoformat(), 'mode': 'today-only-one',
+                   'eligibleCount': len(due), 'processedCount': 0,
+                   'publishedCount': 0, 'activeJob': None}
+        status_path = DATA_DIR / 'cleaner-status.json'
+        save_schedule_file(status_path, summary)
+        try:
+            if due:
+                _, item = due[0]
+                summary['activeJob'] = {'date': schedule['date'], 'domain': item['domain']}
+                save_schedule_file(status_path, summary)
+                # Network/parse failures must not be interpreted as "not published".
+                if reconcile_item(item, schedule['date'], strict=True):
+                    save_schedule_file(SCHEDULE_JSON, schedule)
+                    summary['publishedCount'] = 1
+                else:
+                    summary['publishedCount'] = int(bool(run_publisher_for_item(item, schedule, SCHEDULE_JSON)))
+                summary['processedCount'] = 1
+        finally:
+            summary['activeJob'] = None
+            summary['finishedAt'] = datetime.datetime.now(KST).isoformat()
+            save_schedule_file(status_path, summary)
+            latest = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+            sync_dashboard_status(latest)
+
+
 def catch_up_once():
     with cleaner_lock() as acquired:
         if not acquired:
@@ -6723,6 +6786,7 @@ def catch_up_once():
 def main():
     parser = argparse.ArgumentParser(description="CF Pipeline & Scheduler Runner")
     parser.add_argument("domains", nargs="*", help="Target domain(s) to run directly")
+    parser.add_argument("--catch-up-today-once", action="store_true", help="Process at most one due job today without growth or recovery queues")
     parser.add_argument("--catch-up-once", action="store_true", help="Catch up overdue schedule once")
     parser.add_argument("--manual-retry-once", action="store_true", help="Process queued manual retry once")
     parser.add_argument("--scheduler", action="store_true", help="Run 60s scheduler loop")
@@ -6742,6 +6806,9 @@ def main():
             print(json.dumps(result, ensure_ascii=False))
         return
 
+    if args.catch_up_today_once:
+        catch_up_today_once()
+        return
     if args.catch_up_once:
         catch_up_once()
         return

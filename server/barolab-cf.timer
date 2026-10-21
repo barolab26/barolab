@@ -1,0 +1,10 @@
+[Unit]
+Description=Check the existing BaroLab CF current-day queue
+
+[Timer]
+OnStartupSec=60
+OnUnitInactiveSec=60s
+Unit=barolab-cf.service
+
+[Install]
+WantedBy=timers.target
