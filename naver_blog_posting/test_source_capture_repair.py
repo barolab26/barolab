@@ -101,9 +101,11 @@ class SourceCaptureRepairTests(unittest.TestCase):
 
     def test_assembler_schema_binds_reviewed_positions_including_zero_images(self):
         for slots in ([2,4,8],[]):
-            schema=r.agent_output_schema('assembler',image_slots=slots)
-            self.assertEqual(schema['properties']['imageSlots']['enum'],[slots])
-        self.assertNotEqual(r.agent_output_schema('assembler',image_slots=[2,4,8])['properties']['imageSlots']['enum'],[[2,5,8]])
+            field=r.agent_output_schema('assembler',image_slots=slots)['properties']['imageSlots']
+            self.assertNotIn('enum',field)
+            self.assertEqual(field['minItems'],len(slots));self.assertEqual(field['maxItems'],len(slots))
+            if slots:self.assertEqual(field['items']['enum'],slots)
+            else:self.assertNotIn('enum',field['items'])
 
     def final_validation_fixture(self, approved=True, changed_bytes=False, missing_provenance=False):
         from contextlib import ExitStack

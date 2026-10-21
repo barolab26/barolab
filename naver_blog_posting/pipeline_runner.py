@@ -4329,7 +4329,9 @@ def agent_output_schema(role, source_urls=None, comparison_urls=None, image_slot
                     "issues": array(string()), "notes": array(string()), "imageSlots": array(integer(minimum=0), minimum=0),
                     "decorationPlan": obj({"stickers": array(obj({"afterBlock": integer(minimum=0)}), maximum=1)})})
         if image_slots is not None:
-            schema['properties']['imageSlots']['enum'] = [list(image_slots)]
+            slots=schema['properties']['imageSlots']
+            slots.update(minItems=len(image_slots),maxItems=len(image_slots))
+            if image_slots:slots['items']['enum']=sorted(set(image_slots))
         return schema
 
     if role == "reviewer":
@@ -5560,24 +5562,52 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
         acquisition_resume = RUN_OPTIONS.get('_visual_acquisition_resume')
         if len(review_handoff.check()) == 4:
             resume_receipt=review_handoff.folder/'assembly-contract-resume.json'
-            if resume_receipt.exists():raise RuntimeError('Assembly contract resume was already attempted')
             saved_plans=json.loads(review_handoff.file('image-plan.json').read_text(encoding='utf-8'))['imagePlans']
             groups=json.loads(review_handoff.file('photo-review.json').read_text(encoding='utf-8'))['groups']
             verify_visual_records(saved_plans,[review_handoff.file('images/'+p['filename']) for p in saved_plans],groups)
             assembly=json.loads(review_handoff.file('assembler.json').read_text(encoding='utf-8'))
             model_events=json.loads(review_handoff.file('assembler-model-events.json').read_text(encoding='utf-8'))
-            if (assembly.get('inputComplete') is not True or assembly.get('layoutReady') is not True
-                    or assembly.get('issues') != [] or assembly.get('imageSlots') == [p['afterBlock'] for p in saved_plans]
-                    or not any(event.get('state')=='returned' and event.get('actual_model') for event in model_events)):
-                raise RuntimeError('Only an actual assembler slot-contract mismatch can resume here')
-            backup=review_handoff.folder/('assembly-contract-backup-'+uuid.uuid4().hex[:10]);backup.mkdir()
-            hashes={}
-            for name in ('handoff.json','assembler.json','assembler-model-events.json','image-plan.json','photo-review.json'):
-                shutil.copyfile(review_handoff.file(name),backup/name);hashes[name]=sha(backup/name)
-                if hashes[name]!=sha(review_handoff.file(name)):raise RuntimeError('Assembly mismatch backup changed')
-            atomic_json(resume_receipt,{'reason':'bind assembly output schema to already approved image positions',
-                'acceptedStages':copy.deepcopy(review_handoff.data['stages']),'backupDirectory':backup.name,'backupHashes':hashes,
-                'approvedSlots':[p['afterBlock'] for p in saved_plans],'submissionAuthorized':False,'newCorrectionBudget':False})
+            slots=[p['afterBlock'] for p in saved_plans]
+            if resume_receipt.exists():
+                receipt=json.loads(resume_receipt.read_text(encoding='utf-8'))
+                if (receipt.get('schemaTransportContinuationUsed') or receipt.get('acceptedStages')!=review_handoff.data['stages']
+                        or any(event.get('state')=='returned' for event in model_events)
+                        or not any(event.get('state')=='failed' for event in model_events)):
+                    raise RuntimeError('Assembly resume cannot repeat a returned or already continued model request')
+                backup=(review_handoff.folder/receipt['backupDirectory']).resolve()
+                if backup==review_handoff.folder or not backup.is_relative_to(review_handoff.folder):raise RuntimeError('Unsafe assembly backup')
+                for name,digest in receipt['backupHashes'].items():
+                    path=(backup/name).resolve()
+                    if not path.is_relative_to(backup) or sha(path)!=digest:raise RuntimeError('Original assembly failure evidence changed')
+                if sha(review_handoff.file('assembler.json'))!=receipt['backupHashes']['assembler.json']:
+                    raise RuntimeError('A new assembly response cannot be reinterpreted as transport failure')
+                error_path=Path(RUN_OPTIONS.get('_assembly_schema_error_log') or '')
+                if not error_path.is_file() or error_path.stat().st_size>2_000_000:raise RuntimeError('Exact schema rejection log required')
+                error_text=error_path.read_text(encoding='utf-8',errors='replace')
+                if 'invalid_json_schema' not in error_text or "Invalid schema for response_format 'codex_output_schema'" not in error_text:
+                    raise RuntimeError('Only a pre-response provider schema rejection may continue')
+                failed_events=review_handoff.folder/'assembly-schema-rejection-events.json'
+                shutil.copyfile(review_handoff.file('assembler-model-events.json'),failed_events)
+                # This continues a rejected API request, not a returned content judgment or a new editorial budget.
+                receipt.update(schemaTransportContinuationUsed=True,transportFailure={'code':'invalid_json_schema',
+                    'scope':'pre-response schema transport correction only; no content approval or budget reset',
+                    'originalLogPath':str(error_path.resolve()),'originalLogSha256':sha(error_path),
+                    'failedEventsSha256':sha(failed_events),'returnedResponse':False},
+                    newSchemaSha256=hashlib.sha256(json.dumps(agent_output_schema('assembler',image_slots=slots),sort_keys=True).encode()).hexdigest())
+                atomic_json(resume_receipt,receipt)
+            else:
+                if (assembly.get('inputComplete') is not True or assembly.get('layoutReady') is not True
+                        or assembly.get('issues') != [] or assembly.get('imageSlots') == slots
+                        or not any(event.get('state')=='returned' and event.get('actual_model') for event in model_events)):
+                    raise RuntimeError('Only an actual assembler slot-contract mismatch can resume here')
+                backup=review_handoff.folder/('assembly-contract-backup-'+uuid.uuid4().hex[:10]);backup.mkdir()
+                hashes={}
+                for name in ('handoff.json','assembler.json','assembler-model-events.json','image-plan.json','photo-review.json'):
+                    shutil.copyfile(review_handoff.file(name),backup/name);hashes[name]=sha(backup/name)
+                    if hashes[name]!=sha(review_handoff.file(name)):raise RuntimeError('Assembly mismatch backup changed')
+                atomic_json(resume_receipt,{'reason':'bind assembly output schema to already approved image positions',
+                    'acceptedStages':copy.deepcopy(review_handoff.data['stages']),'backupDirectory':backup.name,'backupHashes':hashes,
+                    'approvedSlots':slots,'submissionAuthorized':False,'newCorrectionBudget':False})
         elif (review_handoff.folder/'source-capture-repair.json').is_file():
             require_capture_repair_audit(review_handoff)
         elif acquisition_resume:
@@ -6367,6 +6397,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             outputs += ['image-plan.json', 'images.md']
         elif role == 'assembler':
             if (folder/'assembly-contract-resume.json').is_file():outputs.append('assembly-contract-resume.json')
+            if (folder/'assembly-schema-rejection-events.json').is_file():outputs.append('assembly-schema-rejection-events.json')
             writer = results['writer']
             if (result.get('inputComplete') is not True or result.get('layoutReady') is not True
                     or result.get('issues') != []
