@@ -4183,6 +4183,34 @@ def record_flow_capture_required(output_dir, article, plans, reason):
     return path
 
 
+async def ensure_flow_single_output(page):
+    """Set only the image-generation result count; leave video, model and aspect settings intact."""
+    section = page.locator('.settings-section').filter(has_text='이미지 생성 기본값')
+    if not (await section.count() == 1 and await section.is_visible()):
+        settings = page.locator("button[aria-label='설정']").filter(has_text=re.compile(r'^\s*tune\s*$'))
+        if await settings.count() != 1:
+            raise RuntimeError('Unique Flow image settings control required before submission')
+        await settings.click(timeout=5000)
+    try:
+        await section.wait_for(state='visible', timeout=5000)
+        if await section.count() != 1:
+            raise RuntimeError('Unique Flow image generation defaults section required')
+        single = section.get_by_role('radio', name='x1', exact=True)
+        if await single.count() != 1:
+            raise RuntimeError('Flow single-image option missing')
+        if await single.get_attribute('aria-checked') != 'true':
+            await single.click(timeout=5000)
+        for _ in range(20):
+            states = {count: await section.get_by_role('radio', name=f'x{count}', exact=True).get_attribute('aria-checked')
+                      for count in (1,2,3,4)}
+            if states == {1:'true',2:'false',3:'false',4:'false'}:
+                return 1
+            await asyncio.sleep(0.1)
+        raise RuntimeError('Flow did not confirm exactly one image per request')
+    finally:
+        await page.keyboard.press('Escape')
+
+
 async def wait_flow_submit_ready(page, prompt, generation, persist, timeout=30):
     deadline = time.monotonic() + timeout
     while True:
@@ -4203,6 +4231,8 @@ async def wait_flow_submit_ready(page, prompt, generation, persist, timeout=30):
 
 
 async def submit_flow_once(page, client, button, generation, persist):
+    if generation.get('outputCount') != 1:
+        raise RuntimeError('Verified single-image output setting required before submission')
     box = await button.bounding_box()
     if not box:
         raise RuntimeError('Flow 생성 버튼의 실제 클릭 위치 없음')
@@ -4317,6 +4347,9 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
         for flow_try in range(1):
             await flow_page.keyboard.press("Escape")
             await flow_page.wait_for_timeout(400)
+            generation['outputCount'] = await ensure_flow_single_output(flow_page)
+            generation['outputCountVerifiedAt'] = stamp()
+            save_live(evidence_file, json.dumps(generation_evidence, ensure_ascii=False, indent=2))
             
             existing_tiles = await flow_page.locator("img[alt='사용자 이미지를 표시하는 타일']").count()
             initial_first_tile = flow_page.locator("img[alt='사용자 이미지를 표시하는 타일']").first
