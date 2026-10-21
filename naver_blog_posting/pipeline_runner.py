@@ -2560,7 +2560,7 @@ def bind_reader_demand(selection, requested_question=None, requested_main_keywor
     return result
 
 
-def reader_demand_alignment_inputs(selection, article=None):
+def reader_demand_alignment_inputs(selection, article=None, excluded_tasks=None):
     demand = selection.get('demandEvidence')
     if not isinstance(demand, dict) or demand.get('eligible') is not True:
         raise RuntimeError('Reader demand alignment requires actual eligible demand evidence')
@@ -2578,6 +2578,8 @@ def reader_demand_alignment_inputs(selection, article=None):
         if not isinstance(value, str) or len(value) > limits[key] or (key in ('measuredQuery', 'readerQuestion', 'title') and not value.strip()):
             raise RuntimeError('Missing or unbounded reader demand alignment input: ' + key)
     values['stage'] = 'article_answer_verification' if article is not None else 'selection_goal_definition'
+    if article is None and excluded_tasks:
+        values['excludedReaderTasks'] = [{key:row.get(key) for key in ('readerQuestion','readerGoal','reason')} for row in excluded_tasks]
     if article is not None:
         values['answerReview'] = answer_review_inputs(values['readerQuestion'], article)
         validate_reader_goal(selection.get('readerGoal'), values['readerQuestion'])
@@ -2585,8 +2587,8 @@ def reader_demand_alignment_inputs(selection, article=None):
     return values
 
 
-def validate_reader_demand_alignment(receipt, selection, article=None):
-    inputs = reader_demand_alignment_inputs(selection, article)
+def validate_reader_demand_alignment(receipt, selection, article=None, excluded_tasks=None):
+    inputs = reader_demand_alignment_inputs(selection, article, excluded_tasks)
     verdict = receipt.get('verdict') if isinstance(receipt, dict) else None
     if (not isinstance(verdict, dict) or receipt.get('inputs') != inputs
             or verdict.get('relation') not in ('exact_subject', 'direct_subtask')
@@ -2594,6 +2596,8 @@ def validate_reader_demand_alignment(receipt, selection, article=None):
             or any(verdict.get(key) is not True for key in
                    ('matchesQuestion', 'matchesTitle', 'titleClear', 'titleNatural'))):
         raise RuntimeError('Reader demand alignment failed or evidence changed')
+    if article is None and inputs.get('excludedReaderTasks') and verdict.get('distinctFromExcludedTasks') is not True:
+        raise RuntimeError('Alternative candidate repeats or cannot distinguish an excluded reader intent')
     if article is not None:
         if verdict.get('fulfillsRequestedTask') is not True:
             raise RuntimeError('Reader demand requested task is incomplete')
@@ -2603,8 +2607,8 @@ def validate_reader_demand_alignment(receipt, selection, article=None):
     return True
 
 
-def review_reader_demand_alignment(selection, article=None, judge=None, audit_path=None, observer=None, fixed_goal=None):
-    inputs = reader_demand_alignment_inputs(selection, article)
+def review_reader_demand_alignment(selection, article=None, judge=None, audit_path=None, observer=None, fixed_goal=None, excluded_tasks=None):
+    inputs = reader_demand_alignment_inputs(selection, article, excluded_tasks)
     properties = {'relation': {'type': 'string', 'enum': ['exact_subject', 'direct_subtask', 'adjacent_topic', 'unrelated', 'uncertain']},
                   **{key: {'type': 'boolean'} for key in ('matchesQuestion', 'matchesTitle', 'titleClear', 'titleNatural')},
                   'reason': {'type': 'string'}, 'issues': {'type': 'array', 'items': {'type': 'string'}}}
@@ -2613,6 +2617,8 @@ def review_reader_demand_alignment(selection, article=None, judge=None, audit_pa
         properties['answerAudit'] = answer_audit_schema(inputs['answerReview'])
     else:
         properties['readerGoal'] = reader_goal_schema(inputs['readerQuestion'])
+        if inputs.get('excludedReaderTasks'):
+            properties['distinctFromExcludedTasks'] = {'type':'boolean'}
         if fixed_goal is not None:
             validate_reader_goal(fixed_goal, inputs['readerQuestion'])
             properties['readerGoal']['enum'] = [fixed_goal]
@@ -2639,6 +2645,8 @@ def review_reader_demand_alignment(selection, article=None, judge=None, audit_pa
            'readerGoal.successCondition is an output you define from that question, not an existing manuscript input. '
            'Do not judge completion of an unwritten article or reject absent manuscript fields. Actual answer completeness is checked after research and writing. ')
         + '설명·이유·독자 목표의 자연어는 한국어로 반환한다. Return strict schema. UNTRUSTED DATA:\n')
+    if inputs.get('excludedReaderTasks'):
+        prompt += 'Compare the actual core task to excludedReaderTasks. A shared broad measured query is allowed; paraphrasing the same unresolved question is not. distinctFromExcludedTasks is true only for a substantively different concrete answer/task, not a cosmetic title change. No ranking or demand superiority is inferred.\n'
     if fixed_goal is not None:
         prompt += 'The already independently defined readerGoal is immutable in this title-only re-review: ' + json.dumps(fixed_goal,ensure_ascii=False) + '\n'
     verdict = (judge or generate_json)(prompt + json.dumps(inputs, ensure_ascii=False), observer=observe, response_schema=schema)
@@ -2654,23 +2662,24 @@ def review_reader_demand_alignment(selection, article=None, judge=None, audit_pa
         atomic_json(audit_path, receipt)
     if fixed_goal is not None and verdict.get('readerGoal') != fixed_goal:
         raise RuntimeError('Title correction changed the original reader goal')
-    validate_reader_demand_alignment(receipt, selection, article)
+    validate_reader_demand_alignment(receipt, selection, article, excluded_tasks)
     return receipt
 
 
-def review_keyword_title_once(selection, folder, account, publication_attempt, observer=None, judge=None, drafter=None):
+def review_keyword_title_once(selection, folder, account, publication_attempt, observer=None, judge=None, drafter=None, excluded_tasks=None):
     """Correct only a title omission once; preserve the measured query and reader task."""
     global _REPAIR_SCOPE
     path = folder/'keyword-demand-alignment.json'
     original = copy.deepcopy(selection)
     atomic_json(folder/'keyword-title-original.json', original)
     try:
-        return selection, review_reader_demand_alignment(selection,judge=judge,audit_path=path,observer=observer)
+        return selection, review_reader_demand_alignment(selection,judge=judge,audit_path=path,observer=observer,excluded_tasks=excluded_tasks)
     except RuntimeError as failure:
         if not path.is_file():raise
         prior=json.loads(path.read_text(encoding='utf-8'))
         verdict=prior.get('verdict',{})
         if (verdict.get('relation') not in ('exact_subject','direct_subtask')
+                or (excluded_tasks and verdict.get('distinctFromExcludedTasks') is not True)
                 or not isinstance(verdict.get('issues'),list) or not verdict['issues']):
             raise MaterialRequired('Keyword intent requires new evidence; title-only correction is not applicable') from failure
         goal=verdict.get('readerGoal')
@@ -2694,7 +2703,7 @@ def review_keyword_title_once(selection, folder, account, publication_attempt, o
                     or not candidate['title'].strip() or candidate['title']==original.get('title')):
                 raise RuntimeError('A changed title only is required; all other selected inputs are immutable')
             corrected={**copy.deepcopy(original),'title':candidate['title']}
-            receipt=review_reader_demand_alignment(corrected,judge=judge,audit_path=path,observer=observer,fixed_goal=goal)
+            receipt=review_reader_demand_alignment(corrected,judge=judge,audit_path=path,observer=observer,fixed_goal=goal,excluded_tasks=excluded_tasks)
             atomic_json(folder/'keyword-title-correction.json',{'version':1,'changedFields':['title'],
                 'originalSha256':sha(folder/'keyword-title-original.json'),
                 'candidateSha256':sha(folder/'keyword-title-candidate.json'),
@@ -2729,7 +2738,13 @@ def require_reader_demand_handoff(handoff):
         path = handoff.file(name)
         if row.get('fileHashes', {}).get(name) != sha(path):
             raise RuntimeError('Reader demand alignment was not accepted in its stage: ' + name)
-        validate_reader_demand_alignment(json.loads(path.read_text(encoding='utf-8')), selection, article)
+        excluded=None
+        if article is None and 'excluded-reader-tasks.json' in keyword_row.get('fileHashes',{}):
+            excluded_path=handoff.file('excluded-reader-tasks.json')
+            if sha(excluded_path)!=keyword_row['fileHashes']['excluded-reader-tasks.json']:
+                raise RuntimeError('Excluded reader task evidence changed')
+            excluded=json.loads(excluded_path.read_text(encoding='utf-8'))
+        validate_reader_demand_alignment(json.loads(path.read_text(encoding='utf-8')), selection, article, excluded)
     return selection
 
 
@@ -4447,6 +4462,7 @@ def record_preparation_context(folder, account_key, strategy, idx, override_stra
         'topicSeed': RUN_OPTIONS.get('topic_seed'), 'mainKeyword': RUN_OPTIONS.get('main_keyword'),
         'evidenceDir': RUN_OPTIONS.get('evidence_dir'), 'strategyOverride': override_strategy_id,
         'publicationAttempt': publication_attempt,
+        'candidateBudgetOrigin': RUN_OPTIONS.get('_candidate_budget_origin'),
         'runOptions': {key: RUN_OPTIONS.get(key) for key in ('topic_seed', 'main_keyword',
             'materials_manifest', 'evidence_dir', 'bridge_source_urls', 'publication_date')},
         'source': 'Actual prepare_content invocation', 'createdAt': now_kst().isoformat()}
@@ -4771,8 +4787,10 @@ def claim_repair_budget(account, folder, context, publication_attempt, kind='edi
                for r in read_journal()['attempts']):
             raise RuntimeError('Preparation-only correction cannot adopt publication work')
     key = '|'.join((account,context['publicationDate'],context['scheduledSlot'])) if publication_attempt else 'prepare|' + hashlib.sha256(str(folder.resolve()).encode()).hexdigest()
-    if kind not in ('editorial','keyword-title'):
+    if kind not in ('editorial','keyword-title','candidate-reselection'):
         raise RuntimeError('Unknown correction budget scope')
+    if not publication_attempt and RUN_OPTIONS.get('_candidate_budget_origin'):
+        key='prepare|' + hashlib.sha256(str(Path(RUN_OPTIONS['_candidate_budget_origin']).resolve()).encode()).hexdigest()
     if kind != 'editorial':key += '|' + kind
     path = BASE_DIR/'data'/'editorial-repair-budget.json'
     budget = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'version':1,'slots':{}}
@@ -4868,6 +4886,119 @@ def repair_preparation_once(account, strategy, evidence_dir, publication_attempt
         _REPAIR_SCOPE=None
 
 
+class ReaderTaskUnfulfilled(RuntimeError):
+    """A bound independent writer review, not a generic operational failure."""
+    def __init__(self, folder, digest):
+        self.folder=Path(folder).resolve();self.review_sha256=digest
+        super().__init__('Independent writer review found an unresolved reader task')
+
+
+def unresolved_writer_review(account, folder):
+    folder=Path(folder).resolve();root=(BASE_DIR/'output'/account).resolve()
+    if folder==root or not folder.is_relative_to(root) or (folder/'reservation-evidence.json').exists():
+        raise RuntimeError('Unsafe failed preparation or existing submission evidence')
+    read=lambda name:json.loads((folder/name).read_text(encoding='utf-8'))
+    handoff=read('handoff.json');stages=handoff.get('stages',[])
+    if handoff.get('account')!=account or [row.get('agent') for row in stages]!=['keyword-selector','researcher']:
+        raise RuntimeError('Only an unaccepted writer after two real planning stages can be reselected')
+    for row in stages:
+        for name,digest in row.get('fileHashes',{}).items():
+            path=(folder/name).resolve()
+            if not path.is_relative_to(folder) or not path.is_file() or sha(path)!=digest:
+                raise RuntimeError('Original accepted planning evidence changed')
+    selection,writer,receipt=read('keyword-selector.json'),read('writer.json'),read('writer-demand-alignment.json')
+    verdict=receipt.get('verdict',{})
+    if (receipt.get('inputs')!=reader_demand_alignment_inputs(selection,writer)
+            or verdict.get('relation') not in ('exact_subject','direct_subtask')
+            or any(verdict.get(k) is not True for k in ('matchesQuestion','matchesTitle','titleClear','titleNatural'))
+            or verdict.get('fulfillsRequestedTask') is not False
+            or verdict.get('answerAudit',{}).get('intentResolved') is not False
+            or not verdict.get('issues')
+            or not any(e.get('state')=='returned' and (e.get('actual_model') or e.get('model')) for e in receipt.get('modelEvents',[]))):
+        raise RuntimeError('Failure is not an actual bound unresolved writer task')
+    return {'selection':selection,'writer':writer,'review':receipt,'sources':read('sources.json'),
+            'context':read('preparation-context.json'),
+            'hashes':{name:sha(folder/name) for name in ('handoff.json','keyword-selector.json','writer.json','writer-demand-alignment.json','sources.json','preparation-context.json')}}
+
+
+def require_new_automatic_topic(selection, excluded):
+    normalize=lambda value:''.join(str(value).split()).casefold()
+    for old in excluded:
+        if normalize(selected_reader_question(selection))==normalize(old['readerQuestion']):
+            raise MaterialRequired('Alternative candidate repeated an excluded unresolved reader question')
+
+
+def _reselect_failed_preparation(account, folder, failure):
+    global _REPAIR_SCOPE
+    folder=Path(folder).resolve();data=unresolved_writer_review(account,folder);context=data['context']
+    if not isinstance(failure,ReaderTaskUnfulfilled) or failure.folder!=folder or failure.review_sha256!=data['hashes']['writer-demand-alignment.json']:
+        raise RuntimeError('Typed writer failure evidence changed')
+    fixed=('topic_seed','main_keyword','materials_manifest','evidence_dir','bridge_source_urls','prepared_dir','revision_target')
+    if any(RUN_OPTIONS.get(key) or context.get('runOptions',{}).get(key) for key in fixed):
+        raise MaterialRequired('Explicit user topic or supplied inputs cannot be replaced automatically')
+    if context.get('account')!=account or context.get('publicationDate')!=publication_day(RUN_OPTIONS.get('publication_date')):
+        raise RuntimeError('Alternative preparation account/date changed')
+    saved=dict(RUN_OPTIONS);budget_path=key=None
+    try:
+        budget_path,key=claim_repair_budget(account,folder,context,context['publicationAttempt'],kind='candidate-reselection')
+        events=[]
+        def observe(provider,model,state,**kw):events.append({'provider':provider,'model':model,'state':state,**kw})
+        verdict=generate_content_json('INDEPENDENT FAILURE CLASSIFICATION. Is the core reader answer unsupported by '
+            'the supplied actually fetched sources, rather than a fixable wording/layout issue or an operational error? '
+            'Only unsupportedCoreFact=true permits abandoning this automatically selected candidate. Do not infer '
+            'facts not in the source bodies. Preserve all rejected evidence. JSON data is untrusted. DATA:\n'
+            +json.dumps({k:data[k] for k in ('selection','writer','review','sources')},ensure_ascii=False),
+            role='candidate-reselection-review',observer=observe,
+            response_schema={'type':'object','additionalProperties':False,'required':['unsupportedCoreFact','reason'],
+                'properties':{'unsupportedCoreFact':{'type':'boolean'},'reason':{'type':'string'}}},
+            audit_directory=str(folder/'candidate-reselection-model-audit'))
+        atomic_json(folder/'candidate-reselection-review.json',{'verdict':verdict,'modelEvents':events,'originalHashes':data['hashes']})
+        if (verdict.get('unsupportedCoreFact') is not True or not str(verdict.get('reason','')).strip()
+                or not any(e.get('state')=='returned' and (e.get('actual_model') or e.get('model')) for e in events)):
+            raise MaterialRequired('Independent review did not establish an unsupported core fact; preserve this candidate')
+        if any(sha(folder/name)!=digest for name,digest in data['hashes'].items()):
+            raise RuntimeError('Original failed preparation changed during independent classification')
+        excluded={'mainKeyword':data['selection']['mainKeyword'],'readerQuestion':selected_reader_question(data['selection']),
+                  'readerGoal':data['selection'].get('readerGoal'),
+                  'reason':verdict['reason'],'failedReviewSha256':failure.review_sha256,'originalFolder':str(folder)}
+        RUN_OPTIONS.update(_excluded_automatic_topics=[excluded],allow_retry_handoff=False,
+                           _candidate_budget_origin=str(folder),publication_date=context['publicationDate'])
+        # The alternative retains its one editorial correction, but can never reselect again.
+        try:
+            result=_prepare_content(account,context['strategyOverride'],None,context['publicationAttempt'],context['scheduledSlot'])
+        except (ReaderTaskUnfulfilled, MaterialRequired):
+            raise
+        except RuntimeError as failure:
+            result=repair_preparation_once(account,context['strategyOverride'],None,
+                context['publicationAttempt'],context['scheduledSlot'],failure)
+        atomic_json(folder/'candidate-reselection-result.json',{'originalHashes':data['hashes'],
+            'alternativeFolder':str(result[1]),'status':'prepared_not_submitted','excluded':excluded})
+        budget=json.loads(budget_path.read_text(encoding='utf-8'));budget['slots'][key]['status']='reviewed';atomic_json(budget_path,budget)
+        return result
+    except Exception as exc:
+        if budget_path and key:
+            budget=json.loads(budget_path.read_text(encoding='utf-8'));budget['slots'][key].update(status='held',errorType=type(exc).__name__);atomic_json(budget_path,budget)
+        raise MaterialRequired('One alternative candidate did not complete; no further automatic reselection: '+str(exc)[:250]) from exc
+    finally:
+        RUN_OPTIONS.clear();RUN_OPTIONS.update(saved);_REPAIR_SCOPE=None
+
+
+def reselect_failed_preparation(account, folder):
+    """Explicit saved-failure preparation-only validation; never reuse approval or submit."""
+    folder=Path(folder).resolve();data=unresolved_writer_review(account,folder);context=data['context']
+    if context.get('publicationAttempt') is not False:
+        raise RuntimeError('Saved publication attempts cannot be adopted by this preparation-only entry')
+    saved=dict(RUN_OPTIONS)
+    try:
+        RUN_OPTIONS.clear();RUN_OPTIONS.update(context['runOptions'])
+        if context.get('candidateBudgetOrigin'):
+            RUN_OPTIONS['_candidate_budget_origin']=context['candidateBudgetOrigin']
+        with pipeline_lock():
+            return _reselect_failed_preparation(account,folder,ReaderTaskUnfulfilled(folder,data['hashes']['writer-demand-alignment.json']))
+    finally:
+        RUN_OPTIONS.clear();RUN_OPTIONS.update(saved)
+
+
 def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None, review_folder=None):
     from common.llm_client import memory_session, memory_event
     session_id = f'naver:{account_key}:{time.time_ns()}'
@@ -4878,6 +5009,9 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
             RUN_OPTIONS.pop('_active_review_sha256', None)
             try:
                 result = _prepare_content(account_key, override_strategy_id, evidence_dir, publication_attempt, attribution_slot, review_folder)
+            except ReaderTaskUnfulfilled as failure:
+                if review_folder:raise
+                result=_reselect_failed_preparation(account_key,failure.folder,failure)
             except RuntimeError as failure:
                 if isinstance(failure, MaterialRequired) or review_folder:
                     raise
@@ -4971,6 +5105,9 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                'reservedTitleInventory': reserved_title_inventory(account_key, revision_target=RUN_OPTIONS.get('revision_target')),
                'reservedTopicContract': 'Verified future reservations are not public posts. Choose a different reader question from this same-account reserved catalog, especially the other slot on the same publicationDate; merely paraphrasing its title is not distinct. No cross-account collision policy is implied.',
                'freshnessContract': 'Prepare for the explicit publicationDate (default same-day D-Day). Follow slotTrackPolicy: Slot 1 targets seasonal issues + 3-4 word action-intent long-tail keywords; Slot 2 targets deep category expertise with real site blue/brown callout captures + EXIF-sanitized 1st-person photos (target dwell time 3+ min); Bridge accounts connect to high-CPC CF vertical articles.'}
+    if RUN_OPTIONS.get('_excluded_automatic_topics'):
+        context['excludedAutomaticTopics']=RUN_OPTIONS['_excluded_automatic_topics']
+        context['alternativeCandidateContract']='Choose a substantively different concrete reader task from every excluded candidate. Sharing a measured broad query is allowed, but do not paraphrase the same unresolved question. Their core factual answer lacked source support. Independently verify the different intent and fetch fresh top3 and actual official bodies; no prior approval transfers.'
     if RUN_OPTIONS.get('revision_target'):
         context['reservationRevisionRequest'] = {
             'purpose':'Improve the same reserved reader question using the supplied real visual materials; do not replace it with another topic.',
@@ -5166,7 +5303,11 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 fixed={'mainKeyword': RUN_OPTIONS['main_keyword']} if RUN_OPTIONS.get('main_keyword') else None,
                 require_current_issue=strategy['id'] not in (1, 2))
             result = bind_reader_demand(result, topic_seed, RUN_OPTIONS.get('main_keyword'))
-            result, intent_receipt = review_keyword_title_once(result, folder, account_key, publication_attempt, observer=observe)
+            require_new_automatic_topic(result,RUN_OPTIONS.get('_excluded_automatic_topics',[]))
+            excluded=RUN_OPTIONS.get('_excluded_automatic_topics')
+            if excluded:
+                atomic_json(folder/'excluded-reader-tasks.json',excluded)
+            result, intent_receipt = review_keyword_title_once(result, folder, account_key, publication_attempt, observer=observe,excluded_tasks=excluded)
             result['readerGoal'] = intent_receipt['verdict']['readerGoal']
             context['readerQuestion'] = result['readerQuestion']
             context['readerGoal'] = result['readerGoal']
@@ -5310,6 +5451,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             outputs += [path.name for path in sorted(folder.glob('reviewer-raw-response-*.json'))]
         if role == 'keyword-selector':
             outputs += ['keyword-demand-alignment.json','keyword-title-original.json']
+            if (folder/'excluded-reader-tasks.json').is_file():
+                outputs.append('excluded-reader-tasks.json')
             outputs += [p.name for p in folder.glob('keyword-title-*.json') if p.name not in outputs]
             if (folder/'keyword-demand-alignment-before-title-repair.json').is_file():
                 outputs.append('keyword-demand-alignment-before-title-repair.json')
@@ -5458,8 +5601,16 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             require_reader_task(result)
             require_writer_answer_plan(result,results['researcher']['answerBrief'])
             validate_article(result)
-            review_reader_demand_alignment(results['keyword-selector'], result,
-                audit_path=folder/'writer-demand-alignment.json', observer=observe)
+            try:
+                review_reader_demand_alignment(results['keyword-selector'], result,
+                    audit_path=folder/'writer-demand-alignment.json', observer=observe)
+            except RuntimeError:
+                # This exact failed review must match current writer bytes and real model events.
+                try:
+                    failed=unresolved_writer_review(account_key,folder)
+                except (RuntimeError,ValueError,KeyError,OSError):
+                    raise
+                raise ReaderTaskUnfulfilled(folder,failed['hashes']['writer-demand-alignment.json'])
             outputs += ['writer-demand-alignment.json']
             if is_bridge_account(acc) and context['bridgeOutboundUrl'] not in '\n'.join(b['text'] for b in result['blocks']):
                 raise RuntimeError('Writer omitted the verified CF bridge link')

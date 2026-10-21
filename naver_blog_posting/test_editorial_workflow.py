@@ -48,6 +48,113 @@ class EditorialWorkflowTests(unittest.TestCase):
             else:bad[key]=''
             with self.assertRaises(RuntimeError):r.require_editorial_decision(bad,packet,'specific query')
 
+    def failed_writer_fixture(self, base):
+        folder=base/'output'/'soultin'/'failed';folder.mkdir(parents=True)
+        question='Is the proposed age change legally confirmed?'
+        goal={'question':question,'successCondition':'Determine current proposal status','requiredAnswers':['Proposal legal status']}
+        selection={'mainKeyword':'pension','title':'Proposed age status','readerQuestion':question,'readerGoal':goal,
+            'demandEvidence':{'eligible':True,'mainKeyword':'pension','measuredQuery':'pension'}}
+        writer={'title':selection['title'],'readerTask':{'articleType':'explainer','medium':'conceptual','question':question,
+            'successCondition':goal['successCondition'],'requiredMaterialIds':[]},
+            'blocks':[{'kind':'paragraph','text':'The available source establishes current age, but not proposal status.'}]}
+        context={'account':'soultin','publicationDate':'2026-10-22','scheduledSlot':'11:00','strategyOverride':None,
+            'publicationAttempt':False,'runOptions':{'publication_date':'2026-10-22'}}
+        review={'inputs':r.reader_demand_alignment_inputs(selection,writer),
+            'verdict':{'relation':'exact_subject',**dict.fromkeys(('matchesQuestion','matchesTitle','titleClear','titleNatural'),True),
+                'fulfillsRequestedTask':False,'answerAudit':{'intentResolved':False},'issues':['Core proposal status unsupported']},
+            'modelEvents':[{'state':'returned','model':'actual-test-model'}]}
+        for name,value in {'keyword-selector.json':selection,'writer.json':writer,'writer-demand-alignment.json':review,
+                           'sources.json':[],'preparation-context.json':context}.items():r.atomic_json(folder/name,value)
+        r.atomic_json(folder/'handoff.json',{'account':'soultin','stages':[
+            {'agent':'keyword-selector','fileHashes':{'keyword-selector.json':r.sha(folder/'keyword-selector.json')}},
+            {'agent':'researcher','fileHashes':{'sources.json':r.sha(folder/'sources.json')}}]})
+        return folder,context
+
+    def test_saved_failure_reselection_requires_real_bound_review_and_source_gap(self):
+        from unittest.mock import Mock
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp);folder,context=self.failed_writer_fixture(base)
+            options={'publication_date':'2026-10-22'}
+            def classify(prompt,observer=None,**kwargs):
+                observer('test','actual-model','returned',actual_model='actual-model')
+                return {'unsupportedCoreFact':True,'reason':'Core proposal status absent from fetched sources'}
+            def fresh(*args,**kwargs):
+                self.assertFalse(r.RUN_OPTIONS['allow_retry_handoff'])
+                self.assertEqual(r.RUN_OPTIONS['_excluded_automatic_topics'][0]['mainKeyword'],'pension')
+                self.assertEqual(args[4],'11:00')
+                return ({},base/'alternative',{},[],{},0)
+            with patch.object(r,'BASE_DIR',base),patch.object(r,'RUN_OPTIONS',options),patch.object(r,'read_journal',return_value={'attempts':[]}),patch.object(r,'_PIPELINE_LOCK_OWNER',(os.getpid(),threading.get_ident())),patch.object(r,'generate_content_json',side_effect=classify),patch.object(r,'_prepare_content',side_effect=fresh) as prepare:
+                data=r.unresolved_writer_review('soultin',folder)
+                failure=r.ReaderTaskUnfulfilled(folder,data['hashes']['writer-demand-alignment.json'])
+                result=r._reselect_failed_preparation('soultin',folder,failure)
+                self.assertEqual(result[1],base/'alternative');prepare.assert_called_once()
+                self.assertEqual(options,{'publication_date':'2026-10-22'})
+                for name,digest in data['hashes'].items():self.assertEqual(r.sha(folder/name),digest)
+                with self.assertRaises(r.MaterialRequired):r._reselect_failed_preparation('soultin',folder,failure)
+                self.assertEqual(prepare.call_count,1)
+                alternative=base/'output'/'soultin'/'alternative';alternative.mkdir()
+                options['_candidate_budget_origin']=str(folder)
+                with self.assertRaises(r.MaterialRequired):
+                    r.claim_repair_budget('soultin',alternative,context,False,kind='candidate-reselection')
+                options.pop('_candidate_budget_origin')
+                r.atomic_json(folder/'writer-demand-alignment.json',{'verdict':{'fulfillsRequestedTask':False}})
+                with self.assertRaises(RuntimeError):r.unresolved_writer_review('soultin',folder)
+
+    def test_alternative_retains_editorial_repair_but_never_recursively_reselects(self):
+        for kind in ('editorial','unresolved','materials'):
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as tmp:
+                base=Path(tmp);folder,context=self.failed_writer_fixture(base)
+                def classify(prompt,observer=None,**kwargs):
+                    observer('test','actual-model','returned',actual_model='actual-model')
+                    return {'unsupportedCoreFact':True,'reason':'Unsupported core fact'}
+                error=RuntimeError('structured assembler failure') if kind=='editorial' else (
+                    r.ReaderTaskUnfulfilled(base/'alternative','new-failure') if kind=='unresolved' else r.MaterialRequired('Missing actual evidence'))
+                with patch.object(r,'BASE_DIR',base),patch.object(r,'RUN_OPTIONS',{'publication_date':'2026-10-22'}),patch.object(r,'read_journal',return_value={'attempts':[]}),patch.object(r,'_PIPELINE_LOCK_OWNER',(os.getpid(),threading.get_ident())),patch.object(r,'generate_content_json',side_effect=classify) as judge,patch.object(r,'_prepare_content',side_effect=error) as prepare,patch.object(r,'repair_preparation_once',return_value=({},base/'alternative',{},[],{},0)) as repair:
+                    data=r.unresolved_writer_review('soultin',folder)
+                    failure=r.ReaderTaskUnfulfilled(folder,data['hashes']['writer-demand-alignment.json'])
+                    if kind=='editorial':
+                        self.assertEqual(r._reselect_failed_preparation('soultin',folder,failure)[1],base/'alternative')
+                        repair.assert_called_once_with('soultin',None,None,False,'11:00',error)
+                    else:
+                        with self.assertRaises(r.MaterialRequired):r._reselect_failed_preparation('soultin',folder,failure)
+                        repair.assert_not_called()
+                    prepare.assert_called_once();judge.assert_called_once()
+
+    def test_fixed_question_and_repeated_intent_cannot_be_reselected(self):
+        excluded=[{'mainKeyword':'pension','readerQuestion':'What is the proposal status?'}]
+        r.require_new_automatic_topic({'mainKeyword':'pension','readerQuestion':'Different question?'},excluded)
+        for selection in ({'mainKeyword':'different','readerQuestion':'What is the proposal status?'},):
+            with self.assertRaises(r.MaterialRequired):r.require_new_automatic_topic(selection,excluded)
+        r.require_new_automatic_topic({'mainKeyword':'basic pension application','readerQuestion':'Which application documents?'},excluded)
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp);folder,_=self.failed_writer_fixture(base)
+            with patch.object(r,'BASE_DIR',base),patch.object(r,'RUN_OPTIONS',{'topic_seed':'User fixed question'}),patch.object(r,'claim_repair_budget') as budget:
+                data=r.unresolved_writer_review('soultin',folder)
+                with self.assertRaises(r.MaterialRequired):r._reselect_failed_preparation('soultin',folder,r.ReaderTaskUnfulfilled(folder,data['hashes']['writer-demand-alignment.json']))
+                budget.assert_not_called()
+
+    def test_shared_broad_query_requires_independent_distinct_task_review(self):
+        question='How do early and deferred pension choices compare in monthly and cumulative amounts?'
+        selection={'mainKeyword':'pension','readerQuestion':question,'title':'Compare early and deferred pension amounts',
+            'demandEvidence':{'eligible':True,'mainKeyword':'pension','measuredQuery':'pension'},
+            'excludedAutomaticTopics':[{'mainKeyword':'pension','readerQuestion':'Is the age 68 proposal confirmed?',
+                'readerGoal':{'question':'Is the age 68 proposal confirmed?','successCondition':'Know proposal status','requiredAnswers':['Status']},
+                'reason':'Official proposal status not supported'}]}
+        excluded=selection.pop('excludedAutomaticTopics')
+        goal={'question':question,'successCondition':'Compare both payment choices','requiredAnswers':['Monthly difference','Cumulative difference']}
+        valid={'relation':'direct_subtask',**dict.fromkeys(('matchesQuestion','matchesTitle','titleClear','titleNatural'),True),
+            'issues':[],'readerGoal':goal,'distinctFromExcludedTasks':True,'reason':'Different concrete calculation task'}
+        def judge(prompt,observer=None,response_schema=None):
+            self.assertIn('excludedReaderTasks',prompt)
+            self.assertIn('distinctFromExcludedTasks',response_schema['properties'])
+            return valid
+        r.require_new_automatic_topic(selection,excluded)
+        receipt=r.review_reader_demand_alignment(selection,judge=judge,excluded_tasks=excluded)
+        self.assertTrue(receipt['verdict']['distinctFromExcludedTasks'])
+        valid['distinctFromExcludedTasks']=False
+        with self.assertRaisesRegex(RuntimeError,'excluded reader intent'):
+            r.review_reader_demand_alignment(selection,judge=judge,excluded_tasks=excluded)
+
     def test_title_only_repair_preserves_question_and_requires_fresh_independent_pass(self):
         from unittest.mock import Mock
         question='How do I check pension age and the income gap?'
