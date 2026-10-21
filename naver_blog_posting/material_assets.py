@@ -3,6 +3,8 @@ import hashlib
 import json
 from pathlib import Path
 
+PREVIOUS_VISUAL_REVIEW_SOURCE_SHA256 = 'c0ecb13a3fcb0e1e50a7cece799145e27495ded097f8230f8b8b23085c1705e8'
+
 VISUAL_SOURCES = ("generated", "capture", "original", "photo")
 
 class MaterialRequired(RuntimeError):
@@ -191,6 +193,16 @@ def review_visual_groups(plans, paths, judge, context, directory, prefix, plan_f
             "firsthand claims, unreadable necessary details, and unsupported observations. For official captures, reject any visible personal data, account identity, authentication information, fabricated UI, or claims not visible in the supplied pixels. A source URL, timestamp or privacy declaration alone never proves the pixels are authentic or safe. Generated examples "
             "are allowed when honestly labeled. Separate optional aesthetic preferences and perfectly identical composition from substantive reader claims; uncertainty whether an illustrative figure is a mannequin or a person alone is not rejection evidence when no real-photography or firsthand-wear claim is made. Still reject visible failures of claimed solid color, subject type, hem/sock exposure, or caption promises. Return passed only when no substantive issues remain.\n" +
             json.dumps({"imageIndex": index, "plan": plan, "publicationPlans": plans, "context": context}, ensure_ascii=False))
+        provenance = [row for row in context.get('hostVerifiedCaptureProvenance', [])
+                      if row.get('materialId') == plan.get('materialId') and row.get('imageSha256') == digest] if isinstance(context, dict) else []
+        if plan.get('source') == 'capture' and len(provenance) == 1:
+            request += ('\nHOST-VERIFIED CAPTURE PROVENANCE: the canonical host verified the official URL, '
+                'source-body SHA, captured-region text and exact attached image SHA. Use that acquisition evidence '
+                'for source identity; a crop need not repeat the institution logo or page heading. You have not '
+                'independently visited that URL. Pixels remain mandatory evidence for every claimed table value, '
+                'condition, completeness, legibility, caption match and absence of personal data. Reject those '
+                'defects normally. This exception does not apply to an unverified URL/timestamp claim. Evidence: '
+                + json.dumps(provenance[0], ensure_ascii=False))
         verdict = judge(request, [str(Path(path).resolve())], schema)
         destination = directory / f"{prefix}_{index}.json"
         destination.write_text(json.dumps({"version": 1, "status": "rejected", "imageSha256": digest,
