@@ -877,6 +877,7 @@
             </button>
           </div>
           <div class="filter-right-controls">
+            <button type="button" class="ceo-direct-toggle-btn" id="show-work-records">업무 기록</button>
             <button type="button" class="ceo-direct-toggle-btn" id="btn-ceo-only-filter" aria-pressed="false" title="에이전트끼리의 자율 업무 브리핑을 숨기고 대표님(윤대표-CEO)이 쓴 메시지와 그에 대한 직접 답변만 표시합니다">
               <span>📌 내 지시·답변만 보기</span>
               <span class="ceo-toggle-pill" id="ceo-only-pill">OFF</span>
@@ -885,6 +886,12 @@
         </div>
 
         <div class="room-stream chat-messages" id="room-stream"></div>
+        <dialog id="work-records-dialog" style="width:min(900px,90vw);max-height:80vh;border:1px solid #cbd5e1;border-radius:12px;padding:20px;">
+          <h3>업무 기록</h3>
+          <label>담당 직원 <select id="work-records-agent"><option value="all">전체</option><option value="jarvis">자비스</option><option value="publi">퍼블리</option><option value="trace">트레이스</option><option value="patch">패치</option><option value="radar">레이더</option><option value="doctor">닥터</option></select></label>
+          <button type="button" id="close-work-records">닫기</button>
+          <div id="work-records-list"></div>
+        </dialog>
 
         <!-- Real-Time Typing Indicator Bubble Zone -->
         <div class="typing-stream-zone" id="typing-stream-zone" aria-live="polite"></div>
@@ -954,6 +961,13 @@
   const messageStore = new Map();
   let activeAgentFilter = 'all';
   let ceoOnlyFilterActive = false;
+  document.getElementById('show-work-records').addEventListener('click', () => {
+    document.getElementById('work-records-agent').value = activeAgentFilter;
+    renderWorkRecords();
+    document.getElementById('work-records-dialog').showModal();
+  });
+  document.getElementById('close-work-records').addEventListener('click', () => document.getElementById('work-records-dialog').close());
+  document.getElementById('work-records-agent').addEventListener('change', renderWorkRecords);
 
   let pinnedUserRowId = null;
   let unreadBelowCount = 0;
@@ -1083,9 +1097,22 @@
     );
   }
 
+  function workActorDisplay(m) {
+    const staff = ['jarvis','publi','trace','patch','radar','doctor'];
+    if (staff.includes(m.who) || m.who === 'user') return {owner: m.who, tool: '', historical: false};
+    let owner = staff.includes(m.ownerAgent) ? m.ownerAgent : '';
+    // Historical projection only: the persisted actor and model evidence stay untouched.
+    if (!owner && m.eventType === 'crew_work_event') {
+      const match = /^(cf|naver)-(keyword-selector|researcher|writer|image-maker|assembler|reviewer)$/.exec(m.who || '');
+      if (match) owner = match[2] === 'keyword-selector' ? 'radar' : 'publi';
+      else if (['cf-pipeline','naver-pipeline','kin_pipeline','threads_pipeline','kin-pipeline','threads-pipeline'].includes(m.who)) owner = 'publi';
+    }
+    return {owner, tool: m.toolActor || m.who || 'unknown', historical: !!owner && !m.ownerAgent};
+  }
+
   function doesMessageInvolveAgent(m, slug) {
     if (!m || !slug || slug === 'all') return true;
-    if (m.who === slug) return true;
+    if (m.who === slug || workActorDisplay(m).owner === slug) return true;
     if (m.targetAgent === slug) return true;
     if (m.requestedTo === slug) return true;
     if (Array.isArray(m.mentionedAgents) && m.mentionedAgents.includes(slug)) return true;
@@ -1100,6 +1127,7 @@
 
   function doesMessageMatchFilters(m, agentFilter, ceoOnly) {
     if (!m) return false;
+    if (!isConversationMessage(m)) return false;
     const isWs = isMessageWorkstream(m);
     if (ceoOnly && isWs) {
       return false;
@@ -1263,7 +1291,8 @@
       : '';
     const recipientNames = { jarvis: '자비스', patch: '패치', publi: '퍼블리', trace: '트레이스', radar: '레이더', doctor: '닥터' };
     const recipientLabel = Object.hasOwn(recipientNames, m.requestedTo) ? `@${recipientNames[m.requestedTo]}` : m.requestedTo;
-    const linkage = [['작업', m.taskId], ['요청 대상', recipientLabel], ['상위 요청', m.parentRequestId], ['반환 유형', m.outputKind], ['근거', m.evidenceId]]
+    const actorDisplay = workActorDisplay(m);
+    const linkage = [['실행 도구', actorDisplay.tool], ['귀속 근거', actorDisplay.historical ? '과거 기록 역할 분류' : actorDisplay.tool && actorDisplay.owner ? '실행 소유 직원' : actorDisplay.tool ? '담당 미지정' : ''], ['단계', m.stage], ['작업', m.taskId], ['요청 대상', recipientLabel], ['상위 요청', m.parentRequestId], ['반환 유형', m.outputKind], ['근거', m.evidenceId]]
       .filter(([, value]) => value).map(([label, value]) => `<span>${escapeHtml(label)}: ${escapeHtml(String(value))}</span>`).join('');
 
     return `
@@ -1279,7 +1308,8 @@
     `;
   }
 
-  streamEl.addEventListener('click', async e => {
+  document.addEventListener('click', async e => {
+    if (!e.target.closest('#room-stream, #work-records-dialog')) return;
     const saveBtn = e.target.closest('.btn-inline-memory-save');
     if (!saveBtn) return;
     e.preventDefault();
@@ -1342,7 +1372,46 @@
     return (AGENT_STYLE[slug] && AGENT_STYLE[slug].defaultBrain) || '모델 미관측';
   }
 
+  function crewConversationText(m) {
+    const staff = ['jarvis','publi','trace','patch','radar','doctor'];
+    const reply = m.outputKind;
+    const validText = typeof reply === 'string' && reply.trim() && reply.length <= 160 && !/[\x00-\x1f]/.test(reply);
+    if (m.eventType === 'crew_work_event' && m.who === 'jarvis' && ['project-result-reviewed','project-instruction-issued'].includes(m.stage)
+        && m.phase === 'completed' && m.messageKind === 'staff_reply'
+        && typeof m.model === 'string' && m.model.trim() && validText) return reply;
+    if (m.eventType === 'crew_work_event' && staff.includes(m.who)
+        && ['staff-response','staff-terminal-response','staff-report-format-followup'].includes(m.stage) && m.phase === 'completed'
+        && typeof m.model === 'string' && m.model.trim()
+        && typeof reply === 'string' && reply.trim() && reply.length <= 120
+        && !/[\x00-\x1f]/.test(reply)) return reply;
+    return null;
+  }
+
+  function isConversationMessage(m) {
+    if (!m) return false;
+    if (m.who === 'user') return true;
+    if (m.eventType === 'crew_work_event') return crewConversationText(m) !== null;
+    return ['jarvis','publi','trace','patch','radar','doctor'].includes(m.who)
+      && !isMessageWorkstream(m) && !m.autonomous
+      && (!m.eventType || m.eventType === 'chat');
+  }
+
+  function renderWorkRecords() {
+    const agent = document.getElementById('work-records-agent').value;
+    const rows = chronologicalMessages(messageStore.values()).filter(m => m.who !== 'user' && doesMessageInvolveAgent(m, agent));
+    document.getElementById('work-records-list').innerHTML = rows.map(m => {
+      const owner = workActorDisplay(m).owner;
+      const name = AGENT_STYLE[owner]?.name || '담당 미지정';
+      return `<details style="margin-top:12px"><summary>${escapeHtml(name)} · ${escapeHtml(m.stage || m.eventType || '대화 실행 근거')} · ${formatTime(m.ts)}</summary><div>${formatBodyText(m.text)}${buildExecutionReceiptBoxHtml(m)}${buildStatusLineHtml(m)}</div></details>`;
+    }).join('') || '<p>해당 직원의 업무 기록이 없습니다.</p>';
+  }
+
+  function messageBodyText(m) {
+    return crewConversationText(m) ?? m.text;
+  }
+
   function buildMessageRowHtml(m) {
+    if (!isConversationMessage(m)) return '';
     const mid = escapeHtml(m.id || `msg-${m.ts}-${m.who}`);
     if (m.who === 'user') {
       const isPinned = (pinnedUserRowId && pinnedUserRowId === (m.id || `msg-${m.ts}-${m.who}`));
@@ -1359,24 +1428,24 @@
         </div>
       `;
     }
-    const ag = AGENT_STYLE[m.who] || { name: m.actorLabel || ((!m.who || ['common','unscoped','system'].includes(m.who)) ? '공통 작업 (담당 미지정)' : m.who), badge: '관측 기록', color: '#475569', short: '·', icon: '📋', defaultBrain: '모델 미관측' };
+    const actorDisplay = workActorDisplay(m);
+    const ownerStyle = AGENT_STYLE[actorDisplay.owner];
+    const ag = actorDisplay.tool
+      ? { ...(ownerStyle || {color:'#475569',short:'·'}), name: ownerStyle ? ownerStyle.name + ' 담당 · 도구 실행 관측' : '담당 미지정 · 도구 실행 관측', badge:'직원 직접 발언 아님' }
+      : AGENT_STYLE[m.who] || {name:'관측 기록',badge:'관측 기록',color:'#475569',short:'·'};
     const brainBadge = getAgentBrainBadge(m);
     const isWs = isMessageWorkstream(m);
-    const wsTagHtml = isWs
-      ? `<span class="workstream-tag-pill">⚡ 실시간 업무 토스</span>`
-      : '';
     return `
-      <div class="msg-row ${isWs ? 'workstream-row' : ''}" data-msg-id="${mid}" data-agent="${escapeHtml(m.who)}" data-is-workstream="${isWs ? 'true' : 'false'}" data-reply-to-ceo="${isWs ? 'false' : 'true'}">
+      <div class="msg-row ${isWs ? 'workstream-row' : ''}" data-msg-id="${mid}" data-agent="${escapeHtml(actorDisplay.owner || 'tool-observation')}" data-is-workstream="${isWs ? 'true' : 'false'}" data-reply-to-ceo="${isWs ? 'false' : 'true'}">
         <div class="crew-avatar" style="background:${ag.color};">${ag.short}</div>
         <div class="msg-col">
           <div class="msg-head">
             <strong style="color:${ag.color};">${escapeHtml(ag.name)}</strong>
-            <span class="brain-chip" title="현재 배정된 에이전트 두뇌(Brain) 모델">🧠 ${escapeHtml(brainBadge)}</span>
+            <span class="brain-chip" title="관측된 응답 모델">🧠 ${escapeHtml(brainBadge)}</span>
             <span style="color:#64748b; font-weight:700;">${escapeHtml(ag.badge)}</span>
-            ${wsTagHtml}
             <span style="color:#94a3b8;">${formatTime(m.ts)}</span>
           </div>
-          <div class="msg-bubble">${formatBodyText(m.text)}${buildExecutionReceiptBoxHtml(m)}${buildStatusLineHtml(m)}</div>
+          <div class="msg-bubble">${formatBodyText(messageBodyText(m))}</div>
         </div>
       </div>
     `;
@@ -1387,11 +1456,14 @@
     const mid = String(m.id || `msg-${m.ts}-${m.who}`);
     m.id = mid;
     messageStore.set(mid, m);
+    if (document.getElementById('work-records-dialog').open) renderWorkRecords();
 
     if (m.who && m.who !== 'user') {
       activeTypingMap.delete(m.who);
       renderTypingIndicators();
     }
+
+    if (!isConversationMessage(m)) return;
 
     // Strict Set-based deduplication: never append an already rendered message ID!
     if (renderedMessageIds.has(mid)) {

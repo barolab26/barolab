@@ -86,8 +86,30 @@ def _deliver(payload):
         return None
 
 
+STAFF_ACTORS = frozenset(('jarvis','publi','trace','patch','radar','doctor'))
+TOOL_OWNERS = {
+    **{prefix+'-'+role: ('radar' if role == 'keyword-selector' else 'publi')
+       for prefix in ('cf','naver')
+       for role in ('keyword-selector','researcher','writer','image-maker','assembler','reviewer')},
+    'cf-pipeline':'publi', 'naver-pipeline':'publi',
+    'kin_pipeline':'publi', 'threads_pipeline':'publi',
+    'kin-pipeline':'publi', 'threads-pipeline':'publi',
+}
+
+
+def work_actor_owner(actor, owner_agent=''):
+    """Configured responsibility only; an unknown caller has no invented owner."""
+    if owner_agent and owner_agent not in STAFF_ACTORS:
+        raise ValueError('Unknown staff owner')
+    if actor in STAFF_ACTORS:
+        if owner_agent and owner_agent != actor:
+            raise ValueError('Staff actor owner mismatch')
+        return actor
+    return owner_agent or TOOL_OWNERS.get(actor, '')
+
+
 def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
-                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind=''):
+                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind=''):
     """Host-observed lifecycle metadata only; never pass prompts, responses or secrets."""
     import uuid
     phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
@@ -96,11 +118,14 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
     clean = lambda value: str(value or '').replace('\n',' ')[:160]
     event_id = 'crew-'+uuid.uuid4().hex
     stage = clean(stage)
+    owner = work_actor_owner(actor, owner_agent)
+    if message_kind not in ('','host_instruction','host_ack','tool_result','staff_reply'):
+        raise ValueError('Unknown work message kind')
     payload = {'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
         'taskId':clean(task_id),'parentRequestId':clean(parent_request_id),
         'requestedTo':clean(requested_to),'phase':phase,'who':clean(actor),
-        'actorLabel':clean(actor_label),'model':clean(model),'evidenceId':clean(evidence_id),
-        'outputKind':clean(output_kind),'stage':stage,'ts':int(time.time()*1000),'autonomous':True,
+        'actorLabel':clean(actor_label),'ownerAgent':owner,'toolActor':clean(actor) if actor not in STAFF_ACTORS else '', 'model':clean(model),'evidenceId':clean(evidence_id),
+        'outputKind':clean(output_kind),'messageKind':message_kind,'stage':stage,'ts':int(time.time()*1000),'autonomous':True,
         'text':f'{stage}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다.',
         'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
                        'handoff':'','synapseLinked':False}}
@@ -138,17 +163,18 @@ def model_crew_call(function):
         stage = kwargs.pop('crew_stage', 'model-call')
         actor = kwargs.pop('crew_actor', 'common-runner')
         label = kwargs.pop('crew_actor_label', '공통 실행기')
+        owner = kwargs.pop('crew_owner_agent', '')
         if _model_crew_active.get():
             return function(prompt,*args,**kwargs)
         task = task_id or 'model-'+uuid.uuid4().hex
         model = kwargs.get('model') or (args[0] if args and isinstance(args[0],str) else '')
-        request = emit_work_event(actor=actor,actor_label=label,task_id=task,
+        request = emit_work_event(actor=actor,actor_label=label,task_id=task,owner_agent=owner,
             phase='requested',stage=stage,model=model,requested_to='model:'+str(model) if model else 'configured-model-runner',output_kind='model response pending')
         token = _model_crew_active.set(True)
         try:
             result = function(prompt,*args,**kwargs)
         except BaseException:
-            emit_work_event(actor=actor,actor_label=label,task_id=task,phase='failed',
+            emit_work_event(actor=actor,actor_label=label,task_id=task,owner_agent=owner,phase='failed',
                 stage=stage,parent_request_id=request,model=model,output_kind='no response confirmed')
             raise
         else:
@@ -170,7 +196,7 @@ def model_crew_call(function):
                 if observed:
                     kind = type(response).__name__+' '+','.join(observed)+' fields:'+','.join(keys[:6])
             actual = result[1] if isinstance(result,tuple) and len(result)>1 and isinstance(result[1],str) else model
-            emit_work_event(actor=actor,actor_label=label,task_id=task,phase='completed',
+            emit_work_event(actor=actor,actor_label=label,task_id=task,owner_agent=owner,phase='completed',
                 stage=stage,parent_request_id=request,model=actual,output_kind=kind+'; model response only')
             return result
         finally:

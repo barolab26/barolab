@@ -31,6 +31,27 @@ class CrewLifecycleTests(unittest.TestCase):
         self.assertNotIn('secret',json.dumps(rows))
         self.assertEqual(rows[0]['who'],'hermes-learning')
 
+    def test_staff_ownership_preserves_tool_origin_and_unknown(self):
+        for actor,owner in [('cf-image-maker','publi'),('kin-pipeline','publi'),('threads-pipeline','publi'),('naver-keyword-selector','radar'),('patch','patch'),('common-runner','')]:
+            with patch.object(bridge,'_deliver') as deliver:
+                bridge.emit_work_event(actor=actor,actor_label=actor,task_id='t',phase='completed')
+            event=deliver.call_args.args[0]
+            self.assertEqual(event['who'],actor)
+            self.assertEqual(event['ownerAgent'],owner)
+            self.assertEqual(event['toolActor'],'' if actor=='patch' else actor)
+        @bridge.model_crew_call
+        def call(prompt): return {'passed':False}
+        with patch.object(bridge,'_deliver') as deliver:
+            call('private',crew_owner_agent='doctor')
+        self.assertTrue(all(c.args[0]['ownerAgent']=='doctor' and c.args[0]['who']=='common-runner' for c in deliver.call_args_list))
+        with self.assertRaises(ValueError):bridge.work_actor_owner('patch','publi')
+        with self.assertRaises(ValueError):bridge.work_actor_owner('common-runner','invented')
+        with patch.object(bridge,'_deliver') as deliver:
+            bridge.emit_work_event(actor='jarvis',actor_label='자비스',task_id='t',phase='requested',message_kind='host_instruction')
+        self.assertEqual(deliver.call_args.args[0]['messageKind'],'host_instruction')
+        with self.assertRaises(ValueError):
+            bridge.emit_work_event(actor='jarvis',actor_label='자비스',task_id='t',phase='requested',message_kind='invented')
+
     def test_run_identity_target_and_actual_result_shape(self):
         @bridge.model_crew_call
         def call(prompt, model=None):

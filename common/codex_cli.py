@@ -52,12 +52,18 @@ def to_win_path(path):
 def _verified_installed_codex(executable, config):
     """Inspect the signature before running a replacement's version command."""
     env = environment(config)
-    env['BAROLAB_CODEX_VERIFY_PATH'] = str(executable)
+    wsl = is_wsl()
+    env['BAROLAB_CODEX_VERIFY_PATH'] = to_win_path(executable) if wsl else str(executable)
+    if wsl:
+        exported = [x for x in env.get('WSLENV','').split(':') if x and x.split('/')[0] not in ('BAROLAB_CODEX_VERIFY_PATH','CODEX_HOME','PSModulePath')]
+        # Values already use Windows syntax; /p would translate them a second time.
+        env['WSLENV'] = ':'.join(exported + ['BAROLAB_CODEX_VERIFY_PATH/w','CODEX_HOME/w'])
     powershell = Path(os.environ.get('SystemRoot', r'C:\Windows')) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
     # Do not inherit PowerShell 7 module paths into Windows PowerShell 5.1.
     env['PSModulePath'] = str(powershell.parent / 'Modules')
     script = (
         "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); $ErrorActionPreference = 'Stop'; "
+        "$env:PSModulePath = Join-Path $PSHOME 'Modules'; "
         "$s = Get-AuthenticodeSignature -LiteralPath $env:BAROLAB_CODEX_VERIFY_PATH; "
         "$publisher = if ($s.SignerCertificate) { $s.SignerCertificate.GetNameInfo("
         "[System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) } else { '' }; "
@@ -66,21 +72,28 @@ def _verified_installed_codex(executable, config):
     options = dict(capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=15,
                    env=env, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
     try:
-        signature = subprocess.run([str(powershell), '-NoProfile', '-NonInteractive', '-Command', script], **options)
+        signature = subprocess.run([to_wsl_path(powershell) if wsl else str(powershell), '-NoProfile', '-NonInteractive', '-Command', script], **options)
         evidence = json.loads(signature.stdout)
         if signature.returncode or evidence.get('status') != 'Valid' or evidence.get('publisher') != 'OpenAI OpCo, LLC':
             return False
-        version = subprocess.run([str(executable), '--version'], **options)
+        version = subprocess.run([to_wsl_path(executable) if wsl else str(executable), '--version'], **options)
         return version.returncode == 0 and re.fullmatch(r'codex-cli \d+\.\d+\.\d+(?:[-+.][\w.-]+)?', version.stdout.strip()) is not None
     except (OSError, ValueError, subprocess.SubprocessError):
         return False
 
 
 def _resolve_executable(config):
-    executable = Path(config['executable'])
+    wsl = is_wsl()
+    executable = Path(to_wsl_path(config['executable']) if wsl else config['executable'])
     if executable.is_file():
-        return str(executable)
-    install = (Path.home() / 'AppData/Local/OpenAI/Codex/bin').resolve()
+        return config['executable'] if wsl else str(executable)
+    if wsl:
+        configured = str(config['executable']).replace('\\','/')
+        if not re.fullmatch(r'[A-Za-z]:/Users/[^/]+/AppData/Local/OpenAI/Codex/bin/[a-f0-9]{16}/codex[.]exe', configured):
+            raise RuntimeError('Codex CLI 설치·로그인 경로를 확인하세요.')
+        install = executable.parent.parent.resolve()
+    else:
+        install = (Path.home() / 'AppData/Local/OpenAI/Codex/bin').resolve()
     missing = executable.resolve()
     if (missing.name.lower() != 'codex.exe' or missing.parent.parent != install
             or not re.fullmatch(r'[a-f0-9]{16}', missing.parent.name)):
@@ -91,19 +104,9 @@ def _resolve_executable(config):
         if (resolved.parent.parent == install and re.fullmatch(r'[a-f0-9]{16}', resolved.parent.name)
                 and resolved.is_file() and _verified_installed_codex(resolved, config)):
             verified.append(resolved)
-    if not verified:
-        raise RuntimeError('Codex CLI 교체 경로를 확정할 수 없습니다. 서명·버전이 검증된 설치 파일이 없습니다.')
-    verified.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    chosen = str(verified[0])
-    try:
-        worker_path = Path.home() / '.barolab' / 'codex-worker.json'
-        if worker_path.is_file():
-            saved = json.loads(worker_path.read_text(encoding='utf-8'))
-            saved['executable'] = chosen
-            worker_path.write_text(json.dumps(saved, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    except Exception:
-        pass
-    return chosen
+    if len(verified) != 1:
+        raise RuntimeError('서명·버전이 검증된 Codex 설치 파일이 정확히 1개여야 합니다.')
+    return to_win_path(verified[0]) if wsl else str(verified[0])
 
 
 def local_config():
@@ -116,10 +119,11 @@ def local_config():
         raise RuntimeError('Windows Codex 작업 호스트 설정이 없습니다.')
     config = json.loads(path.read_text(encoding='utf-8'))
     if is_wsl():
-        config['wsl_executable'] = to_wsl_path(config['executable'])
         config['wsl_home'] = to_wsl_path(config['home'])
         if not Path(config['wsl_home']).is_dir():
             raise RuntimeError('Codex CLI 설치·로그인 경로를 확인하세요.')
+        config['executable'] = _resolve_executable(config)
+        config['wsl_executable'] = to_wsl_path(config['executable'])
     else:
         if not Path(config['home']).is_dir():
             raise RuntimeError('Codex CLI 설치·로그인 경로를 확인하세요.')

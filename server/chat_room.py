@@ -805,6 +805,9 @@ def _call_chat_llm(
     user_prompt: str,
     timeout_sec: float = 9.0,
     agent_slug: Optional[str] = None,
+    staff_request_id: Optional[str] = None,
+    dispatch_receipts: Optional[list] = None,
+    allow_guarded_repair: bool = False,
 ) -> Optional[str]:
     """Use the configured active provider; FreeLLMAPI and AGY are disabled."""
     from common.llm_client import generate_json
@@ -813,11 +816,44 @@ def _call_chat_llm(
         # body only for relevant tasks, identically for all six agent roles.
         if re.search(r"SEO|색인|검색|유입|수익|마케팅|스카우|사업|트렌드|Google|Bing|Daum|네이버", user_prompt, re.I):
             user_prompt += "\n관련 프로젝트 절차: seo-marketing-master (출처/실측/가설 구분을 적용)."
-        response = generate_json(
-            system_prompt + '\n' + user_prompt + '\nReturn JSON {"reply": "your answer"}.',
-            agent_slot=agent_slug or "jarvis", timeout_seconds=timeout_sec,
-            response_schema={"type": "object", "properties": {"reply": {"type": "string"}},
-                             "required": ["reply"], "additionalProperties": False})
+        schema = {"type": "object", "properties": {"reply": {"type": "string"}},
+                  "required": ["reply"], "additionalProperties": False}
+        instruction = '\nReturn JSON {"reply": "your answer"}.'
+        structured = agent_slug == 'jarvis' and bool(staff_request_id)
+        if structured:
+            schema['properties']['actions'] = {'type':'array','maxItems':6,'items':{
+                'type':'object','properties':{'agent':{'type':'string','enum':['jarvis','publi','trace','patch','doctor','radar']},
+                'tool':{'type':'string','enum':['read_agent_status'] + (['repair_cf_known_failure'] if allow_guarded_repair else [])},
+                'domain':{'type':'string'}},'required':['agent','tool','domain'],'additionalProperties':False}}
+            schema['required'].append('actions')
+            instruction = ('\nReturn JSON reply and actions. Actions are explicit staff requests, not mentions. '
+                'Use read_agent_status with empty domain for status inspection. Only patch may request '
+                'repair_cf_known_failure for a named CF domain and an observed registered pre-submission failure. '
+                'Never request publishing, arbitrary commands, recursive delegation or repeat tools already run. '
+                'Use actions=[] when no supported action is needed. Queued does not mean executed or repaired. '
+                'In reply, say only that you are requesting the employee to act; execution and results are not yet observed. '
+                'Do not claim the employee received, executed, completed or repaired the task before its actual receipt.')
+        response = generate_json(system_prompt + '\n' + user_prompt + instruction,
+            agent_slot=agent_slug or 'jarvis', timeout_seconds=timeout_sec, response_schema=schema,
+            crew_actor=agent_slug or 'jarvis',
+            crew_actor_label={'jarvis':'자비스','publi':'퍼블리','patch':'패치','trace':'트레이스','radar':'레이더','doctor':'닥터'}.get(agent_slug or 'jarvis', '공통 실행기'),
+            crew_stage='chat-response', crew_task_id=('staff:' + hashlib.sha256(staff_request_id.encode()).hexdigest()) if staff_request_id else None)
+        if not isinstance(response.get('reply'), str) or not response['reply'].strip():
+            raise ValueError('Missing reply')
+        if structured and response.get('actions'):
+            for action in response['actions']:
+                if (set(action) != {'agent','tool','domain'} or (action['tool']=='read_agent_status' and action['domain'])
+                        or (action['tool']=='repair_cf_known_failure' and not allow_guarded_repair)):
+                    raise ValueError('Invalid structured action')
+            from agent_tools import enqueue_staff_request
+            actions = [{'agent':a['agent'],'tool':a['tool'],
+                        'args':{'domain':a['domain']} if a['tool']=='repair_cf_known_failure' else {}}
+                       for a in response['actions']]
+            receipt = enqueue_staff_request(staff_request_id, actions)
+            if dispatch_receipts is not None:
+                dispatch_receipts.append({'tool':'staff_dispatch','status':receipt['status'],
+                    'taskId':receipt['taskId'],'requestId':receipt['requestId'],
+                    'state':'구조화 지시 접수. 직원 실행·응답은 별도 관측합니다.'})
         reply = response.get("reply")
         return reply.strip() if isinstance(reply, str) and reply.strip() else None
     except Exception as exc:
@@ -1353,6 +1389,12 @@ def coding_job_report(tool):
     return text
 
 
+def _guard_dispatch_reply(reply, user_text, executed_tools, had_tools):
+    if any(t.get('tool') == 'staff_dispatch' and t.get('status') == 'queued' for t in executed_tools):
+        return reply  # Queue state belongs to the receipt/task tracker, not model dialogue.
+    return _enforce_status_only_guard(reply, user_text, had_tools)
+
+
 def synthesize_agent_reply(
     slug: str,
     user_text: str,
@@ -1361,6 +1403,7 @@ def synthesize_agent_reply(
     is_followup: bool = False,
     prior_replies: Optional[List[Dict[str, Any]]] = None,
     recent_history: Optional[List[Dict[str, Any]]] = None,
+    staff_request_id: Optional[str] = None,
 ) -> Tuple[str, List[str], List[Dict[str, Any]]]:
     """
     3-Step Tool-Calling -> LLM Reasoning Pipeline:
@@ -1377,7 +1420,7 @@ def synthesize_agent_reply(
     # =========================================================================
     prior_had_tools = bool(prior_replies and any(pr.get("executionBadges") or pr.get("executionReceipts") for pr in prior_replies))
     explicit_patch = slug == 'patch' and 'patch' in _extract_mentioned_slugs(user_text)
-    executed_tools: List[Dict[str, Any]] = [] if (is_followup and prior_had_tools and not explicit_patch) else maybe_execute_tools_for_message(slug, user_text)
+    executed_tools: List[Dict[str, Any]] = [] if (slug == 'jarvis' or (is_followup and prior_had_tools and not explicit_patch)) else maybe_execute_tools_for_message(slug, user_text)
     coding_tool = next((tool for tool in executed_tools if tool.get('tool') in ('propose_coding_job','read_coding_job_status')), None)
     if coding_tool is not None:
         return coding_job_report(coding_tool), [], executed_tools
@@ -1431,7 +1474,7 @@ def synthesize_agent_reply(
         else AGENT_SYSTEM_PROMPTS.get(slug, AGENT_SYSTEM_PROMPTS["jarvis"])
     )
     status_only_sys_notice = ""
-    if is_imperative and not any_tool_executed_in_turn:
+    if is_imperative and not any_tool_executed_in_turn and slug != 'jarvis':
         status_only_sys_notice = (
             f"\n[긴급 경고: status_only (파라미터 미특정)]\n"
             f"- 이번 요청에서는 특정 파라미터가 부족해 단순 상태 조회(`status_only`)만 수행되었다.\n"
@@ -1466,7 +1509,7 @@ def synthesize_agent_reply(
                     f"  · 배지: {t.get('badge')}"
                 )
         tools_result_block = "[Step 1: 방금 서버에서 실제 실행된 도구(Action Tools) 및 실행 영수증(Execution Receipt)]\n" + "\n".join(tool_lines) + "\n\n"
-    elif is_imperative and not any_tool_executed_in_turn:
+    elif is_imperative and not any_tool_executed_in_turn and slug != 'jarvis':
         tools_result_block = (
             "[Step 1: 실행된 Action Tool 없음 (status_only)]\n"
             f"- 경고: {STATUS_ONLY_WARNING_BANNER}\n\n"
@@ -1522,10 +1565,17 @@ def synthesize_agent_reply(
     # [Step 3: 대표님의 질문 의도에 맞춘 진짜 답변 생성 + status_only 사칭 차단 필터]
     # =========================================================================
     llm_timeout = 35.0 if has_url else 22.0
-    llm_out = _call_chat_llm(sys_prompt, user_prompt, timeout_sec=llm_timeout, agent_slug=slug)
+    llm_out = _call_chat_llm(sys_prompt, user_prompt, timeout_sec=llm_timeout, agent_slug=slug,
+        staff_request_id=staff_request_id, dispatch_receipts=executed_tools,
+        allow_guarded_repair=bool(re.search(r'수리해|복구해|고쳐|repair', user_text, re.I))
+            and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t', user_text, re.I)))
+
+    if slug == 'jarvis' and is_imperative and not any(t.get('tool') == 'staff_dispatch' for t in executed_tools):
+        executed_tools.append({'tool':'staff_dispatch','status':'dispatch_unmatched',
+            'state':'지원되는 구조화 지시가 없어 직원에게 전달되지 않았습니다.'})
 
     if llm_out and not _is_llm_reply_polluted(slug, llm_out, has_url):
-        final_text = _enforce_status_only_guard(llm_out.strip(), user_text, any_tool_executed_in_turn)
+        final_text = _guard_dispatch_reply(llm_out.strip(), user_text, executed_tools, any_tool_executed_in_turn)
         if slug == "radar" and ingested_items and not is_followup:
             saved_rel = _save_rnd_proposal_and_memory(ingested_items, final_text, clean_q)
             if saved_rel and saved_rel not in artifacts:
@@ -1544,7 +1594,7 @@ def synthesize_agent_reply(
         ingested_items=ingested_items,
         prior_replies=prior_replies,
     )
-    fallback_reply = _enforce_status_only_guard(fallback_reply, user_text, any_tool_executed_in_turn)
+    fallback_reply = _guard_dispatch_reply(fallback_reply, user_text, executed_tools, any_tool_executed_in_turn)
     if slug == "radar" and ingested_items and not is_followup:
         saved_rel = _save_rnd_proposal_and_memory(ingested_items, fallback_reply, clean_q)
         if saved_rel and saved_rel not in artifacts:
@@ -2141,7 +2191,7 @@ def project_work_event(payload):
     event_id = payload.get('eventId', '')
     if not isinstance(event_id, str) or not re.fullmatch(r'crew-[a-f0-9]{32}', event_id) or payload.get('id') != event_id:
         raise ValueError('Invalid event identity')
-    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage')
+    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage','ownerAgent','toolActor','messageKind')
     clean = {}
     for key in fields:
         value = payload.get(key, '')
@@ -2152,6 +2202,15 @@ def project_work_event(payload):
         clean[key] = value
     if not clean['taskId'] or not clean['who']:
         raise ValueError('Task and observed actor required')
+    if clean['messageKind'] not in ('','host_instruction','host_ack','tool_result','staff_reply'):
+        raise ValueError('Unknown work message kind')
+    staff = {'jarvis','publi','trace','patch','radar','doctor'}
+    if clean['ownerAgent'] and clean['ownerAgent'] not in staff:
+        raise ValueError('Unknown staff owner')
+    if clean['toolActor'] and (clean['toolActor'] != clean['who'] or clean['who'] in staff):
+        raise ValueError('Tool origin mismatch')
+    if clean['who'] in staff and clean['ownerAgent'] not in ('',clean['who']):
+        raise ValueError('Staff owner mismatch')
     ts = payload.get('ts')
     if not isinstance(ts, int) or isinstance(ts, bool) or ts <= 0:
         raise ValueError('Observed timestamp required')
@@ -2428,6 +2487,7 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
                 is_followup=(idx > 0),
                 prior_replies=turn_replies,
                 recent_history=prior_history,
+                staff_request_id=user_msg['id'] + ':jarvis',
             )
         elapsed = time.time() - t_start
         if slug == 'jarvis':
@@ -2456,6 +2516,11 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
             coding_status = (coding_tool.get('codingJob') or coding_tool).get('status') or coding_tool.get('state')
             tracker_status = 'processing' if coding_status in ('queued','running') else 'failed' if coding_status in ('validation_failed','failed','proposal_failed','invalid_job') else 'status_only'
             result_summary = coding_job_report(coding_tool)
+
+        dispatch_tool = next((t for t in executed_tools if t.get('tool') == 'staff_dispatch'), None)
+        if dispatch_tool:
+            tracker_status = 'queued' if dispatch_tool['status'] == 'queued' else 'status_only'
+            result_summary = dispatch_tool['state']
 
         completed_msg: Dict[str, Any] = {
             "id": msg_id,

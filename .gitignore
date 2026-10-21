@@ -101,3 +101,6 @@ server/data/kin-drafts/
 server/data/threads-drafts/
 skills/ui-ux-pro-max/
 server/data/repair-workflows/
+server/data/project-incidents/
+server/data/project-monitor-state.json
+server/data/project-monitor-observation.json

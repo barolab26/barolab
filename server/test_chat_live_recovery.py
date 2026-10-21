@@ -29,6 +29,57 @@ assert.ok(render({exit_code:1}).includes('Exit Code: 1'));
         result = subprocess.run(['node','-e',code], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_main_is_actual_conversation_and_records_are_separate(self):
+        html=(ROOT/'dashboard/chat.html').read_text(encoding='utf-8')
+        def grab(name,end):
+            start=html.index('  function '+name+'(')
+            return html[start:html.index(end,start)]
+        code="const assert=require('node:assert/strict');const AGENT_STYLE={publi:{name:'퍼블리',color:'green',short:'P'},patch:{name:'패치',color:'orange',short:'X'}};const escapeHtml=String,getAgentBrainBadge=()=>'',isMessageWorkstream=m=>!!m.eventType,formatTime=()=>'',formatBodyText=String,buildExecutionReceiptBoxHtml=()=>'',buildStatusLineHtml=m=>'META:'+m.taskId;const extractMentionsFromText=()=>[];"
+        code+=grab('workActorDisplay','\n  function doesMessageInvolveAgent')
+        code+=grab('doesMessageInvolveAgent','\n  function recomputeUserReplyLinks')
+        code+=grab('crewConversationText','\n  function buildMessageRowHtml')
+        code+=grab('buildMessageRowHtml','\n  function upsertMessageToDom')
+        code+="""
+const actual={id:'reply',who:'patch',eventType:'crew_work_event',stage:'staff-response',phase:'completed',model:'actual-model',outputKind:'실제 상태를 확인했습니다.',text:'generic',taskId:'private-task',ts:1};
+for(const stage of ['staff-response','staff-terminal-response','staff-report-format-followup']) {
+ const response={...actual,stage};
+ assert.ok(buildMessageRowHtml(response).includes(actual.outputKind));
+ assert.ok(!buildMessageRowHtml(response).includes('private-task'));
+ assert.ok(!buildMessageRowHtml(response).includes('<details'));
+ for(const change of [{who:'common-runner'},{phase:'failed'},{model:''},{outputKind:'x'.repeat(121)}]) assert.equal(buildMessageRowHtml({...response,...change}),'');
+}
+const records=[
+ {...actual,who:'cf-image-maker',stage:'model-call'},
+ {...actual,phase:'failed'},
+ {...actual,stage:'read_agent_status',phase:'requested',messageKind:'host_instruction'},
+ {...actual,stage:'read_agent_status',phase:'progress',messageKind:'host_ack'},
+ {...actual,who:'jarvis',stage:'project-result-reviewed',outputKind:'needs_attention; checked'},
+ {who:'jarvis',eventType:'project_health_briefing',text:'host'},
+ {who:'publi',eventType:'pipeline_workstream',text:'host'},
+ {who:'common-runner',text:'host'},
+ {who:'unknown-tool',text:'host'}
+];
+for(const record of records) {assert.equal(buildMessageRowHtml(record),'');assert.equal(doesMessageMatchFilters(record,'all',false),false);}
+const review={...actual,who:'jarvis',stage:'project-result-reviewed',messageKind:'staff_reply',outputKind:'직원 보고를 검토했습니다.'};
+assert.ok(buildMessageRowHtml(review).includes(review.outputKind));
+assert.ok(buildMessageRowHtml({...review,stage:'project-instruction-issued'}).includes(review.outputKind));
+assert.ok(isConversationMessage({who:'user',text:'Original user text'}));
+assert.ok(buildMessageRowHtml({who:'patch',text:'Actual chat',ts:1}).includes('Actual chat'));
+const messageStore=new Map([...records,actual].map((m,i)=>[i,m]));
+const list={innerHTML:''};let selected='publi';
+const document={getElementById:id=>id==='work-records-agent'?{value:selected}:list};
+const chronologicalMessages=values=>[...values];
+renderWorkRecords();assert.ok(list.innerHTML.includes('model-call'));
+assert.ok(!list.innerHTML.includes('staff-response'));
+selected='patch';renderWorkRecords();assert.ok(list.innerHTML.includes('private-task'));
+assert.equal(actual.text,'generic');
+"""
+        result=subprocess.run(['node','-e',code],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('<dialog id="work-records-dialog"',html)
+        self.assertNotIn('show-execution-records',html)
+        self.assertNotIn('<dialog open',html)
+
     def test_canonical_projection_dedupe_and_outbox_preserve_malformed(self):
         tree = ast.parse((ROOT/'server/chat_room.py').read_text(encoding='utf-8'))
         names = {'project_work_event','receive_work_event','drain_work_event_outbox','_is_noise_or_fake_loop_message','_enrich_legacy_message'}
@@ -51,6 +102,13 @@ assert.ok(render({exit_code:1}).includes('Exit Code: 1'));
             self.assertEqual(scope['_enrich_legacy_message'](messages[0],0,messages)['brain']['badge'],'모델 미관측')
             with self.assertRaises(ValueError):receive({**event,'phase':'failed'})
             with self.assertRaises(ValueError):receive({**event,'model':'api_key=unsafe'})
+            project=scope['project_work_event']
+            self.assertEqual(project({**event,'messageKind':'host_instruction'})['messageKind'],'host_instruction')
+            with self.assertRaises(ValueError):project({**event,'messageKind':'invented'})
+            tool=project({**event,'who':'cf-image-maker','ownerAgent':'publi','toolActor':'cf-image-maker'})
+            self.assertEqual((tool['who'],tool['ownerAgent'],tool['toolActor']),('cf-image-maker','publi','cf-image-maker'))
+            for bad in ({'ownerAgent':'outsider'},{'toolActor':'forged'},{'who':'patch','ownerAgent':'publi'}):
+                with self.assertRaises(ValueError):project({**event,**bad})
             out=Path(tmp)/'crew-outbox';out.mkdir()
             malformed=out/'000.json';malformed.write_text('{bad')
             second={**event,'id':'crew-'+'b'*32,'eventId':'crew-'+'b'*32}
@@ -98,9 +156,10 @@ const escapeHtml=s=>String(s).replaceAll('<','&lt;');
 const AGENT_STYLE={},agentBrainBadgeMap=new Map();
 const activeTypingMap=new Map();const renderTypingIndicators=()=>{};const upsertMessageToDom=()=>{};
 """
+        code += function('workActorDisplay', '\n  function doesMessageInvolveAgent')
         code += function('connectEventStream', '\n  function insertMention')
         code += function('getAgentBrainBadge', '\n  function buildMessageRowHtml')
-        code += function('buildStatusLineHtml', '\n  streamEl.addEventListener')
+        code += function('buildStatusLineHtml', '\n  document.addEventListener')
         code += function('isNoiseMessage', '\n  function getAgentBrainBadge')
         code += function('chronologicalMessages', '\n  function renderTypingIndicators')
         code += """
@@ -114,6 +173,22 @@ sseSource.handlers.message({lastEventId:'new:4',data:'{"id":"x"}'});
 assert.equal(lastEventSeq,4);sseSource.onerror();connectEventStream();
 assert.ok(sseSource.url.includes('since_seq=4'));
 assert.equal(getAgentBrainBadge({who:'unscoped'}),'모델 미관측');
+const legacyTool={who:'cf-image-maker',eventType:'crew_work_event'};
+assert.deepEqual(workActorDisplay(legacyTool),{owner:'publi',tool:'cf-image-maker',historical:true});
+assert.equal(legacyTool.who,'cf-image-maker');
+for (const who of ['kin-pipeline','threads-pipeline']) {
+  const event={who,eventType:'crew_work_event'};
+  assert.equal(workActorDisplay(event).owner,'publi');
+  assert.equal(workActorDisplay(event).tool,who);
+  assert.equal(event.who,who);
+}
+assert.equal(workActorDisplay({who:'naver-keyword-selector',eventType:'crew_work_event'}).owner,'radar');
+assert.equal(workActorDisplay({who:'common-runner',eventType:'crew_work_event'}).owner,'');
+assert.equal(workActorDisplay({who:'common-runner',ownerAgent:'patch'}).owner,'patch');
+assert.equal(workActorDisplay({who:'patch'}).tool,'');
+assert.ok(buildStatusLineHtml(legacyTool).includes('실행 도구: cf-image-maker'));
+assert.ok(buildStatusLineHtml(legacyTool).includes('과거 기록 역할 분류'));
+
 const row=buildStatusLineHtml({who:'unscoped',taskId:'<task>',requestedTo:'patch',parentRequestId:'req'});
 assert.ok(!row.includes('✅'));assert.ok(row.includes('&lt;task>'));assert.ok(row.includes('req'));
 for(const [slug,label] of Object.entries({jarvis:'자비스',patch:'패치',publi:'퍼블리',trace:'트레이스',radar:'레이더',doctor:'닥터'})) {
