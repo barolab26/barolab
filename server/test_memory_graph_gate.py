@@ -86,6 +86,20 @@ class MemoryGraphGateTests(unittest.TestCase):
             self.create(title="Reusable procedure", content="Inspect a result and preserve the verified procedure.", channel=None, evidence=evidence)
         self.assertFalse(any(d.get("verifiedKnowledge") for d in graph.load_all_docs(include_unqualified=True)))
 
+    def test_learned_skill_exposes_hashes_without_raw_receipt(self):
+        evidence = proof()
+        evidence["sourceEventId"] = "work:actual-repair"
+        evidence["knowledge"].update(workReceiptSha256="a" * 64, verifierReceiptSha256="b" * 64)
+        evidence["privateReceipt"] = {"privateDetail": "must not enter graph node"}
+        created = self.create(evidence=evidence)
+        result = self.assert_real_parents(created["rel"])
+        node = next(n for n in result["nodes"] if n["rel"] == created["rel"])
+        self.assertEqual(node["learningEvidence"]["sourceEventId"], "work:actual-repair")
+        self.assertEqual(node["learningEvidence"]["workReceiptSha256"], "a" * 64)
+        self.assertEqual(node["learningEvidence"]["skillRevision"], node["revision"])
+        self.assertEqual(node["learningEvidence"]["channel"], "cf")
+        self.assertNotIn("privateDetail", json.dumps(node))
+
     def test_missing_proof_operational_prefix_and_blocked_source_are_rejected(self):
         with self.assertRaises(ValueError):
             self.create(evidence={})
@@ -107,12 +121,12 @@ class MemoryGraphGateTests(unittest.TestCase):
         with self.assertRaises(HTTPException):
             graph.patch_memory_doc(graph.PatchMemoryDoc(expectedRevision=current["revision"], category="meeting"), current["rel"])
 
-    def test_core_identity_set_is_six_crew_five_channels_and_two_bounded_files(self):
+    def test_core_identity_set_is_six_crew_six_channels_and_two_bounded_files(self):
         actual = graph.get_memory_graph(category="all", revenue_only=False, q="")
         self.assertEqual(actual["contractVersion"], "memory-knowledge-gate-v1")
         self.assertIsInstance(actual["quarantine"]["count"], int)
         expected = {f"hubs/crew-{name}.md" for name in ("jarvis", "patch", "publi", "trace", "radar", "doctor")}
-        expected |= {f"hubs/channel-{name}.md" for name in ("cf-blog", "naver-blog", "naver-kin", "threads", "apps")}
+        expected |= {f"hubs/channel-{name}.md" for name in ("cf-blog", "naver-blog", "naver-kin", "threads", "apps", "project")}
         expected |= {"hermes/USER.md", "hermes/MEMORY.md"}
         self.assertEqual({n["rel"] for n in actual["nodes"] if n.get("isCoreHub")}, expected)
 
@@ -181,8 +195,18 @@ class MemoryGraphGateTests(unittest.TestCase):
         self.assertEqual(ledger.read_bytes(), before)
         graph.sync_argo_vault_and_growth(True)
         all_docs = graph.load_all_docs(include_unqualified=True)
-        self.assertEqual(sum(bool(d.get("isCoreHub")) for d in graph.get_memory_graph()["nodes"]), 13)
+        self.assertEqual(sum(bool(d.get("isCoreHub")) for d in graph.get_memory_graph()["nodes"]), 14)
         self.assertFalse(any(d.get("eventId") == "operational" for d in all_docs))
+
+    def test_project_parent_is_explicit_and_initialization_preserves_documents(self):
+        ownership = graph.auto_link_synapses("Common repair", "Verified shared operation", source_agent="patch", channel="project")
+        self.assertEqual(ownership["channel"], ["hubs/channel-project"])
+        graph.validate_synapse_hubs(ownership)
+        before = graph.get_memory_doc("hubs/channel-project.md")
+        self.assertEqual(graph.sync_argo_vault_and_growth()["seeded"], 0)
+        self.assertEqual(graph.get_memory_doc("hubs/channel-project.md")["revision"], before["revision"])
+        with self.assertRaises(ValueError):
+            graph.auto_link_synapses("Common operation", "No channel evidence", source_agent="patch", channel="unknown")
 
 
 class MemoryServiceCorsTests(unittest.TestCase):

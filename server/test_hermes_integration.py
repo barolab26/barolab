@@ -1,5 +1,6 @@
 """Bounded provider and outcome hooks; no external model, publishing or real memory writes."""
 import ast
+import hashlib
 import json
 import subprocess
 import sys
@@ -154,6 +155,12 @@ class MemoryIntegrationTests(unittest.TestCase):
         with self.store.db() as db:
             self.assertEqual(db.execute('SELECT COUNT(*) FROM episodes').fetchone()[0], 2)
             self.assertEqual(db.execute('SELECT COUNT(*) FROM review_queue').fetchone()[0], 0)
+            deliveries = [json.loads(row[0]) for row in db.execute(
+                "SELECT payload FROM memory_deliveries WHERE status='completed'").fetchall()]
+        self.assertEqual(len(deliveries), 2)
+        self.assertEqual({row['actualPromptSha256'] for row in deliveries},
+                         {hashlib.sha256(call['input'].encode('utf-8')).hexdigest() for call in captured[:2]})
+        self.assertTrue(all(row['memoryPrefixPresent'] for row in deliveries))
 
     def test_doctor_reviews_only_successful_republish_with_matching_public_text(self):
         from cf_posting import doctor_remodel as doctor

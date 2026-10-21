@@ -19,6 +19,38 @@ REVIEW_KEYS={'factual_supported','no_fabricated_experience','safe_nonindividual_
 def digest(value):
     return hashlib.sha256(json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
+
+def _record_public_work(db_path, part, evidence):
+    """Learning is separate from the already committed public verification."""
+    event_id = f'threads:{part["part_id"]}:{evidence["platform_id"]}:verified-work'
+    try:
+        from pathlib import Path
+        from common.hermes_memory import write_verified_work_receipt
+        from common.llm_client import record_verified_work
+        folder = Path(db_path).parent / 'secure' / 'threads-work-learning' / hashlib.sha256(event_id.encode()).hexdigest()
+        folder.mkdir(parents=True, exist_ok=True)
+        source = folder / 'verification.json'
+        observed = {key:evidence.get(key) for key in ('verified','public','account_key','platform_id','text_sha256','outbound_url','permalink')}
+        expected = {key:part.get(key) for key in ('account_key','platform_id','text_sha256','outbound_url','permalink')}
+        serialized = json.dumps({'observation':observed, 'expected':expected}, ensure_ascii=False, sort_keys=True)
+        if source.exists():
+            if source.read_text(encoding='utf-8') != serialized:
+                raise ValueError('Existing work evidence differs; preserve original')
+        else:
+            with source.open('x', encoding='utf-8') as output:
+                output.write(serialized)
+        proof = write_verified_work_receipt(folder / 'work-receipt.json',
+            work_type='verified_work_receipt_v1',
+            channel='threads', outcome='public_thread_verified', scope='public_thread_verified', source_agent='publi',
+            evidence_text='Threads exact authenticated identity, text hash and outbound URL passed separate public verification.',
+            artifacts=[{'path':str(source.resolve()),'sha256':hashlib.sha256(source.read_bytes()).hexdigest()}],
+            checks=[{'type':kind,'passed':True,'evidenceRef':str(source.resolve())} for kind in ('public_identity','public_content')])
+        learning = record_verified_work(event_id, proof)
+        print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning('work-learning %s learning_error=%s; publication remains verified', event_id, type(exc).__name__)
+
 @contextmanager
 def connect(path=settings.DB):
     path=__import__('pathlib').Path(path);path.parent.mkdir(parents=True,exist_ok=True)
@@ -226,7 +258,9 @@ def _publish(part_id,config,db_path=settings.DB,adapter=None,config_loader=None)
         except Exception:
             _update(db,part_id,'api_submitted','public_verification_pending');return {'part_id':part_id,'state':'api_submitted','platform_id':result['platform_id'],'permalink':result.get('permalink')}
         valid=(evidence.get('verified') is True and evidence.get('public') is True and evidence.get('account_key')==part['account_key'] and evidence.get('platform_id')==result['platform_id'] and evidence.get('text_sha256')==part['text_sha256'] and evidence.get('outbound_url')==part['outbound_url'])
-        if valid:_update(db,part_id,'published_verified',verified_at=settings.stamp(),published_at=evidence.get('published_at') or result.get('published_at'),publication_time_basis='api_timestamp' if evidence.get('published_at') or result.get('published_at') else 'unknown',evidence=json.dumps(evidence,ensure_ascii=False))
+        if valid:
+            _update(db,part_id,'published_verified',verified_at=settings.stamp(),published_at=evidence.get('published_at') or result.get('published_at'),publication_time_basis='api_timestamp' if evidence.get('published_at') or result.get('published_at') else 'unknown',evidence=json.dumps(evidence,ensure_ascii=False))
+            _record_public_work(db_path, {**part, 'platform_id':result['platform_id'], 'permalink':result.get('permalink')}, evidence)
         else:_update(db,part_id,'api_submitted','public_verification_pending',evidence=json.dumps(evidence,ensure_ascii=False))
         return {'part_id':part_id,'state':'published_verified' if valid else 'api_submitted','platform_id':result['platform_id'],'permalink':result.get('permalink')}
 
@@ -245,6 +279,7 @@ def reconcile(config,db_path=settings.DB,adapter=None):
             if part['state']=='published_verified':continue
             if e.get('verified') is True and e.get('public') is True and all(e.get(k)==part[k] for k in ('account_key','platform_id','text_sha256','outbound_url')):
                 _update(db,part['part_id'],'published_verified',verified_at=settings.stamp(),published_at=e.get('published_at') or part['published_at'],publication_time_basis='api_timestamp' if e.get('published_at') else part.get('publication_time_basis') or 'unknown',permalink=e.get('permalink') or part['permalink'],evidence=json.dumps(e,ensure_ascii=False));results.append(part['part_id'])
+                _record_public_work(db_path, part, e)
     return results
 
 def adopt_recovered(part_id,recovery,db_path=settings.DB):

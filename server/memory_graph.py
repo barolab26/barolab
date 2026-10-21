@@ -354,7 +354,7 @@ CLEAN_SEED_HUBS: List[Dict[str, Any]] = [
     },
 ]
 
-# Fixed identities requested by the operator: six agents, five channels,
+# Fixed identities requested by the operator: six agents, six channels,
 # plus the two real bounded context documents. Former skill seeds stay on disk.
 LEGACY_SKILL_HUBS = [h for h in CLEAN_SEED_HUBS if h["rel"].startswith("skills/")]
 CLEAN_SEED_HUBS = [h for h in CLEAN_SEED_HUBS if not h["rel"].startswith("skills/")]
@@ -365,6 +365,8 @@ for rel, title, group, body, links in (
      ["hubs/crew-patch", "hubs/crew-publi", "hubs/channel-cf-blog", "hubs/channel-naver-blog"]),
     ("hubs/channel-apps.md", "앱 팩토리", "channel", "Android 앱 빌드·실기기 검증·Play 테스트 출시 상태를 구분하는 운영 채널.",
      ["hubs/crew-jarvis", "hubs/crew-patch", "hubs/crew-publi"]),
+    ("hubs/channel-project.md", "프로젝트 공통 운영", "channel", "특정 발행 채널에 귀속되지 않는 공통 운영·개발 수선을 실제 검증 근거로 연결하는 범위. 발행이나 수익 성과를 뜻하지 않습니다.",
+     ["hubs/crew-patch", "hubs/crew-jarvis"]),
 ):
     CLEAN_SEED_HUBS.append({"rel": rel, "kind": "hub", "category": "core_hub", "sub_group": group,
                            "title": title, "is_core_hub": 1, "is_revenue_hub": 0,
@@ -601,6 +603,8 @@ def resolve_synapse_parents(
             crew_hubs.append(hub_stem)
 
     # 2. Operating Channel / Domain resolution
+    if str(channel or "").strip().lower() == "project":
+        channel_hubs.append("hubs/channel-project")
     if any(d in probe for d in CF_DOMAINS_LIST) or re.search(r"\bcf\b|cf_blog|cf_posting|cloudflare|애드센스|adsense", probe):
         channel_hubs.append("hubs/channel-cf-blog")
     if any(a in probe for a in NAVER_ACCOUNTS_LIST) or any(k in probe for k in ["네이버 블로그", "스마트블록", "애드포스트", "naver_blog"]):
@@ -1081,6 +1085,19 @@ def qualify_graph_documents(docs):
             elif not set(ownership["crew"]).intersection(doc.get("links", [])) or not set(ownership["channel"]).intersection(doc.get("links", [])):
                 raise ValueError("원본에 에이전트·채널 연결이 저장되어 있지 않습니다.")
             doc.update(verifiedKnowledge=True, knowledgeStatus="curated_procedure" if metadata.get("provenance") == "curated_procedure" else "verified_knowledge")
+            # Expose only source-bound learning identifiers, never raw work receipts.
+            receipt_hash = metadata.get("workReceiptSha256", "")
+            verifier_hash = metadata.get("verifierReceiptSha256", "")
+            if all(isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)
+                   for value in (receipt_hash, verifier_hash)):
+                doc["learningEvidence"] = {
+                    "sourceEventId": evidence.get("sourceEventId", doc.get("eventId", "")),
+                    "workReceiptSha256": receipt_hash,
+                    "verifierReceiptSha256": verifier_hash,
+                    "sourceAgent": metadata.get("sourceAgent", ""),
+                    "channel": metadata.get("channel", ""),
+                    "skillRevision": doc.get("revision", ""),
+                }
             admitted.append(doc)
         except ValueError as exc:
             quarantined.append({"rel": doc["rel"], "title": doc["title"], "sourceKind": doc.get("sourceKind"), "reason": str(exc)})
@@ -1222,6 +1239,7 @@ def build_graph_2d(
                 "skillName": d.get("skillName", ""),
                 "verifiedKnowledge": d.get("verifiedKnowledge", False),
                 "knowledgeStatus": d.get("knowledgeStatus", "core_identity" if d.get("isCoreHub") else "profile"),
+                "learningEvidence": d.get("learningEvidence"),
             }
         )
         by_base[node_id.split("/")[-1]] = node_id

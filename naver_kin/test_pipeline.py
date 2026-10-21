@@ -30,6 +30,8 @@ def document(account='adinfo0905', qid='123456789'):
 
 class LedgerTests(unittest.TestCase):
     def setUp(self):
+        learning = patch('common.llm_client.record_verified_work', return_value={'status':'test_only'})
+        learning.start(); self.addCleanup(learning.stop)
         self.folder=tempfile.TemporaryDirectory()
         self.db=p.connect(Path(self.folder.name)/'kin.sqlite3')
         self.window=patch.object(p,'enforce_trial_window');self.window.start()
@@ -63,8 +65,9 @@ class LedgerTests(unittest.TestCase):
         evidence={'verified':True,'public':True,'account':'adinfo0905','question_id':qid,'answer_id':'123',
                   'answer_text_sha256':hashlib.sha256(doc['answer_text'].encode()).hexdigest(),
                   'outbound_url':doc['attribution']['outboundUrl']}
-        with patch.object(p,'stamp',return_value='2099-01-01T00:00:00+00:00'), patch('common.llm_client.memory_event'):
+        with patch.object(p,'stamp',return_value='2099-01-01T00:00:00+00:00'), patch('common.llm_client.memory_event'), patch('common.hermes_memory.write_verified_work_receipt', side_effect=OSError('learning unavailable')):
             self.assertTrue(p.record_verification(self.db,qid,evidence))
+        self.assertEqual(self.db.execute('SELECT state FROM questions WHERE question_id=?',(qid,)).fetchone()[0], 'published_verified')
         scheduler.initialize_cadence(self.db)
         self.assertEqual(scheduler.submission_counts(self.db,original_day)['adinfo0905'],1)
         self.assertEqual(scheduler.operation_counts(self.db,original_day)['adinfo0905'],1)

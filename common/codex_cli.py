@@ -241,7 +241,7 @@ def _fallback_candidates(config, primary_model, primary_effort, allowed):
 @memory_call
 def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None,
                    timeout_seconds=None):
-    from common.llm_client import parse_json
+    from common.llm_client import parse_json, record_provider_memory_delivery
     config = local_config()
     allowed = {row['id'] for row in runtime().get('models', [])}
     if model not in allowed:
@@ -319,11 +319,13 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
                        '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
                        '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
                        '-c', 'features.multi_agent=false', '--output-schema', schema_arg, '--output-last-message', output_arg, '-']
+            record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'prepared')
             try:
                 result = subprocess.run(command, input=full_input,
                     capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
                     env=environment(config), timeout=remaining, creationflags=cflags)
             except subprocess.TimeoutExpired:
+                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'timeout')
                 if time.monotonic() >= deadline:
                     if audit_folder is not None:
                         if Path(output).is_file():
@@ -341,6 +343,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
 
             error_detail = _cli_error_detail(result.stdout, result.stderr) if result.returncode else None
             if result.returncode:
+                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'failed')
                 combined = (result.stdout + '\n' + result.stderr).strip().lower()
                 retriable = any(w in combined for w in ('capacity', 'overloaded', 'server_error', '502', '503', '504', 'rate limit', 'try again', 'input_too_large', 'maximum length'))
                 if retriable and attempt_idx + 1 < len(candidates):
@@ -371,11 +374,14 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
                 raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
             response = parse_json(Path(output).read_text(encoding='utf-8'))
             if response_schema:
+                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
                 return response, model
             if not isinstance(response.get('json'), str):
                 raise RuntimeError('Codex 구조화 응답 계약 불일치')
             try:
-                return parse_json(response['json']), model
+                parsed = parse_json(response['json'])
+                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
+                return parsed, model
             except RuntimeError:
                 (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
                 raise

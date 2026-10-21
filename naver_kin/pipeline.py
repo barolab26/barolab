@@ -307,6 +307,38 @@ def record_verification(db, qid, evidence):
         memory_event(f'kin:{qid}:{row["answer_id"]}', 'pipeline_publication_verified',
                      'KnowledgeIn public answer identity, content hash and outbound URL verified.',
                      evidence=evidence, session_id=f'kin:{qid}')
+        try:
+            from common.hermes_memory import write_verified_work_receipt
+            from common.llm_client import record_verified_work
+            database = db.execute('PRAGMA database_list').fetchone()[2]
+            if not database:
+                raise ValueError('Durable ledger required for work learning')
+            folder = Path(database).parent / 'secure' / 'kin-work-learning' / (str(qid) + '-' + str(row['answer_id']))
+            folder.mkdir(parents=True, exist_ok=True)
+            source = folder / 'verification.json'
+            observed = {key:evidence.get(key) for key in ('verified','public','account','question_id','answer_id',
+                        'answer_text_sha256','outbound_url','answer_url')}
+            expected = {'account':document['account'],'question_id':qid,'answer_id':row['answer_id'],
+                'answer_text_sha256':hashlib.sha256(document['answer_text'].encode()).hexdigest(),
+                'outbound_url':document['attribution']['outboundUrl'], 'answer_url':verified_url or row['answer_url']}
+            serialized = json.dumps({'observation':observed, 'expected':expected}, ensure_ascii=False, sort_keys=True)
+            if source.exists():
+                if source.read_text(encoding='utf-8') != serialized:
+                    raise ValueError('Existing work evidence differs; preserve original')
+            else:
+                with source.open('x', encoding='utf-8') as output:
+                    output.write(serialized)
+            proof = write_verified_work_receipt(folder / 'work-receipt.json',
+                work_type='verified_work_receipt_v1',
+                channel='naver_kin', outcome='public_answer_verified', scope='public_answer_verified', source_agent='publi',
+                evidence_text='KnowledgeIn exact account, question, answer identity, answer text hash and outbound URL passed public verification.',
+                artifacts=[{'path':str(source.resolve()),'sha256':hashlib.sha256(source.read_bytes()).hexdigest()}],
+                checks=[{'type':kind,'passed':True,'evidenceRef':str(source.resolve())} for kind in ('public_identity','public_content')])
+            learning = record_verified_work(f'kin:{qid}:{row["answer_id"]}:verified-work', proof)
+            print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning('work-learning kin:%s:%s learning_error=%s; publication remains verified', qid, row['answer_id'], type(exc).__name__)
     return bool(verified)
 
 

@@ -7198,6 +7198,24 @@ def _record_reservation_memory(account_key, folder, evidence, attempt):
                            'scheduledAt': evidence.get('reserveTime'), 'documentSha256': evidence.get('documentSha256'),
                            'publisherResponse': evidence.get('publisherResponse'), 'priorFailure': prior,
                            'revision': evidence.get('mode') == 'revision'})
+    try:
+        from common.hermes_memory import write_verified_work_receipt
+        from common.llm_client import record_verified_work
+        paths = [folder / 'reservation-evidence.json', folder / 'reserved-server-document.json']
+        from common.work_learning import observed_review_summary
+        review_summary, review_sources = observed_review_summary([folder/'reviewer.json', folder/'native-visual-review.json', folder/'image-plan.json'])
+        paths += review_sources
+        proof = write_verified_work_receipt(folder / 'work-learning-receipt.json',
+            work_type='verified_work_receipt_v1',
+            channel='naver_blog', outcome='reservation_verified', scope='reservation_verified', source_agent='publi',
+            evidence_text='Naver reservation identity, exact time and stored document matched after submission; public publication is not established. Observed review metadata (no new improvement is implied): '+review_summary,
+            artifacts=[{'path':str(path.resolve()), 'sha256':sha(path)} for path in paths],
+            checks=[{'type':kind, 'passed':True, 'evidenceRef':str(path.resolve())}
+                    for kind,path in zip(('reservation_identity','reservation_content'),paths)])
+        learning = record_verified_work(f'naver:{folder}:verified-work', proof)
+        print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
+    except Exception as exc:
+        print('[work-learning] Naver reservation remains verified; learning_error=' + type(exc).__name__, flush=True)
 
 
 def results_keyword(folder):

@@ -5167,6 +5167,24 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         evidence={'channel': 'cf', 'publicUrl': public_url, 'postId': post_id,
                   'publicPublicationVerified': True, 'validation': str(validation_file),
                   'resume': handoff.data.get('resume'), 'revision': bool(revision_post)})
+    try:
+        from common.hermes_memory import write_verified_work_receipt
+        from common.llm_client import record_verified_work
+        learning_sources = [receipt_file, validation_file]
+        from common.work_learning import observed_review_summary
+        review_summary, review_sources = observed_review_summary([validation_file, output_dir/'review.json', output_dir/'image-plan.json'])
+        learning_sources += [path for path in review_sources if path not in learning_sources]
+        proof = write_verified_work_receipt(output_dir / 'work-learning-receipt.json',
+            work_type='verified_work_receipt_v1',
+            channel='cf_blog', outcome='public_verified', scope='public_verified', source_agent='publi',
+            evidence_text='CF stored post identity and rendered public content matched the approved article after publication. Observed review metadata (no new improvement is implied): '+review_summary,
+            artifacts=[{'path':str(path.resolve()), 'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for path in learning_sources],
+            checks=[{'type':kind, 'passed':True, 'evidenceRef':str(path.resolve())}
+                    for kind,path in zip(('public_identity','public_content'),learning_sources)])
+        learning = record_verified_work(f'cf:{output_dir}:verified-work', proof)
+        print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
+    except Exception as exc:
+        print('[work-learning] CF publication remains verified; learning_error=' + type(exc).__name__, flush=True)
     if blog_info["activeBlogId"] not in completed_ids:
         completed_ids.append(blog_info["activeBlogId"])
     update_status(blog_info, completed_ids, 7, "발행 완료 (200 OK)", 100, f"독자 해결 과제 원고 + 검수 이미지 {len(generated_images)}장 + CF API {'기존 글 수정' if revision_post else '신규 글'}(ID: {post_id}) 정식 배포 완료 (HTTP 200 OK)", status="published")

@@ -9,6 +9,8 @@ from . import config,pipeline,scheduler
 
 class LedgerTests(unittest.TestCase):
     def setUp(self):
+        learning = patch('common.llm_client.record_verified_work', return_value={'status':'test_only'})
+        learning.start(); self.addCleanup(learning.stop)
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup);self.db=Path(self.temp.name)/'ledger.db'
         self.c=config.defaults();self.now=datetime.now(timezone.utc);self.day=self.now.astimezone(pipeline.KST).date().isoformat()
         self.c.update(enabled=True,activationApproved=True,activatedAt=(self.now-timedelta(days=1)).isoformat(),endsAt=(self.now+timedelta(days=13)).isoformat(),startDate=self.day,endDate=self.day)

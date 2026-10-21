@@ -246,3 +246,18 @@ publications. Enable ongoing checks with `systemctl --user enable --now
 barolab-cf.timer` only after that operational verification. Read status with
 `systemctl --user status barolab-cf.service barolab-cf.timer` and
 `journalctl --user -u barolab-cf.service -n 80 --no-pager`.
+
+## Hermes review consumer
+
+`barolab-memory-review.service` runs `server/memory_worker.py` independently of
+publication jobs. It consumes the durable verified-work candidate queue and
+keeps the existing memory review queue alive. Candidate extraction, independent
+verification, and promotion retain their separate evidence and verdicts;
+recording a task event alone does not make it approved knowledge.
+
+Install this unit into `~/.config/systemd/user/`, reload systemd, and enable it
+with `systemctl --user enable --now barolab-memory-review.service`. It uses the
+project Hermes store under `~/.barolab/memories`, not personal Codex memory.
+The worker resumes leased queued work after process restarts. Inspect queue and
+review results before claiming that a lesson was promoted or used by a later
+model request; a running service alone establishes neither outcome.
