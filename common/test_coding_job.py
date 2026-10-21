@@ -66,6 +66,23 @@ class CodingJobTests(unittest.TestCase):
         self.assertEqual(result['status'],'isolated_verified')
         self.assertIn('? 0 :',(self.root/'target.js').read_text())
 
+    def test_proposal_uses_configured_patch_and_records_actual_route(self):
+        def model(prompt, **kwargs):
+            self.assertEqual(kwargs['agent_slot'], 'patch')
+            self.assertNotIn('provider', kwargs)
+            self.assertTrue(kwargs['_skip_memory'])
+            self.assertTrue(kwargs['crew_task_id'].startswith('coding:'))
+            self.assertNotIn('audit_directory', kwargs)
+            kwargs['observer']('codex', 'configured-patch', 'calling')
+            kwargs['observer']('codex', 'configured-patch', 'returned', actual_model='actual-patch')
+            return self.candidate
+        with patch('common.llm_client.generate_json', side_effect=model):
+            receipt = self.propose()
+        route = json.loads((Path(receipt['jobDir'])/'model-route.json').read_text())
+        self.assertEqual(route['actualModel'], 'actual-patch')
+        self.assertEqual(route['provider'], 'codex')
+        self.assertEqual(route['phase'], 'returned')
+
     def test_symlink_input_is_rejected(self):
         linked=self.root/'linked.py'
         try: linked.symlink_to(self.root/'sample.py')

@@ -1309,9 +1309,10 @@ def _synthesize_question_aware_fallback(
             for p in d["cdpPorts"]
         )
         lg = d["routingLedgerRecent20"]
+        from common.routing_ledger import format_routing_summary
         return (
             f"• **전용 브라우저 CDP 포트 상태**: {ports_line}\n"
-            f"• **라우팅 원장**: 최근 기록 `{lg['total']}건` 중 성공 `{lg['success']}건`·실패 `{lg['failed']}건`입니다. 이 집계만으로 현재 워커·스케줄러 정상 여부나 코드 수리 완료를 판단하지 않습니다.{badges_str}"
+            f"• **라우팅 원장**: {format_routing_summary(lg)}. 이 집계만으로 현재 워커·스케줄러 정상 여부나 코드 수리 완료를 판단하지 않습니다.{badges_str}"
         )
 
     pub_d = read_publi_data()

@@ -1092,21 +1092,8 @@ def read_patch_data() -> Dict[str, Any]:
     if os.name != "nt":
         tasks_info = _read_ubuntu_tasks()
 
-    # 3) `.agent-routing/ledger.jsonl` last 20 entries
-    ledger_path = BASE_DIR / ".agent-routing" / "ledger.jsonl"
-    recent_ledger: List[Dict[str, Any]] = []
-    if ledger_path.is_file():
-        try:
-            lines = [ln.strip() for ln in ledger_path.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip()]
-            for ln in lines[-20:]:
-                try:
-                    recent_ledger.append(json.loads(ln))
-                except Exception:
-                    pass
-        except Exception:
-            pass
-    succ_cnt = sum(1 for x in recent_ledger if x.get("status") in ("ok", "success", "returned", "completed") or x.get("ok") is True)
-    fail_cnt = len(recent_ledger) - succ_cnt
+    from common.routing_ledger import read_routing_summary
+    routing_summary = read_routing_summary(BASE_DIR / ".agent-routing" / "ledger.jsonl")
 
     # 4) Last 30 lines of `server/data/kin-scheduler-errors.log`
     err_log_path = DATA_DIR / "kin-scheduler-errors.log"
@@ -1121,11 +1108,7 @@ def read_patch_data() -> Dict[str, Any]:
     return {
         "cdpPorts": cdp_ports,
         "scheduledTasks": tasks_info,
-        "routingLedgerRecent20": {
-            "total": len(recent_ledger),
-            "success": succ_cnt,
-            "failed": fail_cnt,
-        },
+        "routingLedgerRecent20": routing_summary,
         "kinSchedulerErrorTail": err_lines,
     }
 
@@ -1141,12 +1124,13 @@ def format_patch_context_block() -> str:
         for t in d["scheduledTasks"][:8]
     ]
     err_tail = " / ".join(d["kinSchedulerErrorTail"][-3:]) if d["kinSchedulerErrorTail"] else "최근 에러 없음"
+    from common.routing_ledger import format_routing_summary
     lg = d["routingLedgerRecent20"]
     return (
         f"[패치(@patch) 전용 실시간 시스템·CDP·스케줄러 실측값]\n"
         f"1. 포터블 브라우저 CDP 포트 생존 실측: {' | '.join(port_strs)}\n"
         f"2. {'Windows 작업 스케줄러' if os.name == 'nt' else 'Ubuntu systemd user'} 상태:\n" + ("\n".join(task_strs) if task_strs else "  · 조회된 BaroLab 작업 없음") + "\n"
-        f"3. .agent-routing/ledger.jsonl 최근 {lg['total']}건: 성공 {lg['success']}건 / 실패 {lg['failed']}건\n"
+        f"{format_routing_summary(lg)}\n"
         f"4. kin-scheduler-errors.log 최근 로그 요약: {err_tail}"
     )
 
@@ -1802,6 +1786,7 @@ def staff_tool_reply(agent, task_id, action, result, audit=None, *, stage='staff
         'Start the reply with @자비스 to identify its actual recipient. '
         'State one key observation and finish the unverified scope explicitly. End with punctuation. '
         'If too long, omit secondary items; never truncate a sentence or its uncertainty clause. '
+        'Dated or historical counts must retain their source date and historical scope; never describe stale statistics as current failures. '
         'Never claim the tool fixed or published anything beyond its receipt. No links, credentials, '
         'personal data, shell commands or further tool requests. Return JSON reply only.\n' +
         json.dumps({'action':action,'actualToolResult':result},ensure_ascii=False)[:12000],

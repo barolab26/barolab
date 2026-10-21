@@ -110,6 +110,8 @@ class StaffDispatchTests(unittest.TestCase):
             self.assertIn('two complete sentences within 80 characters',prompt)
             self.assertIn('Start the reply with @자비스',prompt)
             self.assertIn('never truncate a sentence',prompt)
+            self.assertIn('must retain their source date and historical scope',prompt)
+            self.assertIn('never describe stale statistics as current failures',prompt)
             kwargs['observer']('codex','configured-patch','returned',actual_model='actual-patch')
             return {'reply':'대기 상태를 읽었으며 수리 실행은 하지 않았습니다.'}
         with patch('common.llm_settings.get_agent_brain',return_value={'provider':'codex','model':'configured-patch'}),patch('common.llm_client.generate_json',side_effect=generate):
