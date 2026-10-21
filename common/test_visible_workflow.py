@@ -84,6 +84,22 @@ class VisibleWorkflowTests(unittest.TestCase):
                 ego.main(["--materials-manifest", "/private/official screens.json"])
             launch.assert_not_called()
 
+    def test_reserve_time_uses_existing_explicit_custom_time_contract(self):
+        from datetime import datetime
+        with patch.object(ego.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as run:
+            self.assertEqual(ego.run_visible_naver('soultin', publication_date='2026-10-21',
+                             prepared_dir='/private/prepared', reserve_time='2026-10-21 11:00'), 0)
+        command = run.call_args.args[0]
+        self.assertEqual(command[-2:], ['--reserve-time', '2026-10-21 11:00'])
+        self.assertNotIn('--slot', command)
+        self.assertFalse(run.call_args.kwargs['shell'])
+        now = datetime(2026, 10, 21, 9, 0, tzinfo=runner.KST)
+        target = runner.slot_target('soultin', '11:00', now=now,
+                                    publication_date='2026-10-21', allow_custom=True)
+        self.assertEqual(target.strftime('%Y-%m-%d %H:%M'), '2026-10-21 11:00')
+        with self.assertRaisesRegex(ValueError, 'Unknown publication slot'):
+            runner.slot_target('soultin', '11:00', now=now, publication_date='2026-10-21')
+
     def test_failed_refresh_does_not_launch_pipeline(self):
         with patch.object(ego.subprocess, "run", return_value=subprocess.CompletedProcess([], 9)) as run:
             self.assertEqual(ego.run_visible_naver("yoon_master"), 9)

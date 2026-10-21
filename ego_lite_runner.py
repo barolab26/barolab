@@ -193,7 +193,7 @@ def main_loop():
 
 
 def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=None,
-                      main_keyword=None, evidence_dir=None, prepared_dir=None, strategy=None, materials_manifest=None):
+                      main_keyword=None, evidence_dir=None, prepared_dir=None, strategy=None, materials_manifest=None, reserve_time=None):
     """Route a local explicit request through the existing reviewed Naver runner."""
     from common.ubuntu_naver_browser import accounts
     if account not in accounts():
@@ -203,7 +203,8 @@ def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=N
     for flag, value in (("--slot", slot), ("--publication-date", publication_date),
                         ("--topic-seed", topic_seed), ("--main-keyword", main_keyword),
                         ("--evidence-dir", evidence_dir), ("--prepared-dir", prepared_dir),
-                        ("--strategy", strategy), ("--materials-manifest", materials_manifest)):
+                        ("--strategy", strategy), ("--materials-manifest", materials_manifest),
+                        ("--reserve-time", reserve_time)):
         if value is not None:
             command.extend([flag, str(value)])
     environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
@@ -237,6 +238,7 @@ def main(argv=None):
     naver_mode.add_argument("--naver-catch-up", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--slot")
+    parser.add_argument("--reserve-time")
     parser.add_argument("--publication-date")
     parser.add_argument("--topic-seed")
     parser.add_argument("--main-keyword")
@@ -249,7 +251,7 @@ def main(argv=None):
         parser.error("--dry-run requires --naver-catch-up")
     if not args.naver_account and any((args.slot, args.publication_date, args.topic_seed,
                                       args.main_keyword, args.evidence_dir, args.prepared_dir,
-                                      args.strategy, args.materials_manifest)):
+                                      args.strategy, args.materials_manifest, args.reserve_time)):
         parser.error("Naver arguments require --naver-account")
     from dashboard.metrics import collector_lock
     lock_path = Path("/home/baro7/.barolab/ego-lite.lock")
@@ -263,7 +265,7 @@ def main(argv=None):
                                          publication_date=args.publication_date, topic_seed=args.topic_seed,
                                          main_keyword=args.main_keyword, evidence_dir=args.evidence_dir,
                                          prepared_dir=args.prepared_dir, strategy=args.strategy,
-                                         materials_manifest=args.materials_manifest)
+                                         materials_manifest=args.materials_manifest, reserve_time=args.reserve_time)
             main_loop()
         else:
             print("EGO LITE is already running.", flush=True)

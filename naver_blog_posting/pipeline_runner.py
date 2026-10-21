@@ -2444,6 +2444,7 @@ def require_generation_materials(writer, result, folder, packet=None):
 PUBLIC_LINK_POLICY = (
     '최신 사용자 지시: 네이버 공개 본문에는 참고자료·참고문헌·출처 목록을 넣지 않는다. '
     '원문 URL과 조사 출처는 내부 research.md에만 보관한다. 실명 계정 본문에는 외부 URL을 넣지 않는다. '
+    '독자가 다음 행동을 할 수 있도록 본문에서 공식 서비스·문서명을 찾아보라고 자연스럽게 안내하거나 근거 있는 기준일을 알리는 것은 허용한다. 이는 참고문헌 목록이나 내부 조사 로그 공개가 아니며, 외부 URL·모델 작업과정·검수 로그를 공개해도 된다는 뜻은 아니다. '
     '외부유입 계정은 관련 CF 상세 글로 자연스럽게 이어지는 본문 링크 한 개만 허용한다. '
     '끝에는 해시태그만 넣고 source 블록이나 참고자료 소제목을 만들지 않는다. '
     '비교는 소제목과 짧은 항목별 문단으로 쓴다. 네이버 본문에 |---| 같은 Markdown 표를 넣지 않는다. '
@@ -3963,7 +3964,7 @@ ROLE_SCHEMAS = {
         'Captions are truthful actions/results and never claim generated images are screenshots or firsthand photos. '
         'Do not output local paths, scripts or commands, and do not claim supplied/reused assets were newly acquired.'
     ),
-    'assembler': 'Return {inputComplete:boolean,layoutReady:boolean,issues:[],imageSlots:[distinct afterBlock indices matching all plans, empty when no images]}. Review actual writer body and all attached photo files/scene captions, if any. Validate imageSlots against the provided image-maker plans. Do not re-output or rewrite writer text: the host assembles the immutable approved writer blocks directly. Host renders escaped paragraphs, dedicated captions and hashtag footer after this response. layoutReady means the supplied writer blocks, actual images and placement plan are ready for assembly; article.json, final.html and native-editor PC/mobile captures are downstream outputs, not required inputs to this stage. Unresolved current layout/image issues must be reported.',
+    'assembler': 'Return {inputComplete:boolean,layoutReady:boolean,issues:[],notes:[],imageSlots:[distinct afterBlock indices matching all plans, empty when no images]}. Review actual writer body and all attached photo files/scene captions, if any. Validate imageSlots against the provided image-maker plans. Do not re-output or rewrite writer text: the host assembles the immutable approved writer blocks directly. Host renders escaped paragraphs, dedicated captions and hashtag footer after this response. layoutReady means the supplied writer blocks, actual images and placement plan are ready for assembly; article.json, final.html and native-editor PC/mobile captures are downstream outputs, not required inputs to this stage. Unresolved current layout/image issues must be reported. issues contains only actual blocking defects; positive observations, confirmations and optional suggestions belong in notes, never issues.',
     'reviewer': 'Return {passed:boolean,issues:[],checks:{factsSupported,searchIntentComplete,readerTaskComplete,actionableSteps,successVerification,troubleshootingUseful,experienceHonest,visualsServeTask,readability,individualImages,captionPlacement,bodyEndHashtags,competitiveAdvantageDemonstrated}} with all booleans. Read all provided evidence/deliverables and actual attached photographs when present. Check author judgment is useful, evidence-grounded and not fabricated experience. For zero images individualImages and captionPlacement pass only if no placeholders exist; still perform full text/factual review. Annotate defects; do not rewrite. Check the actual reader task classification, necessary actions or decisions, completion verification, useful next action when blocked, honest experience, task-serving visuals, factual accuracy, complete article and body-end tags. No abstract competitor-superiority proof is required; competitiveAdvantageDemonstrated is advisory. Every other check must pass. Non-applicable step/troubleshooting conditions may be true with an explicit reason in notes; empty or unusable content cannot pass. Unresolved issues must fail. Native-editor PC/mobile full visual review happens separately; do not claim it here.'}
 
 
@@ -4171,7 +4172,7 @@ def agent_output_schema(role, source_urls=None):
 
     if role == "assembler":
         return obj({"inputComplete": boolean(), "layoutReady": boolean(),
-                    "issues": array(string()), "imageSlots": array(integer(minimum=0), minimum=0)})
+                    "issues": array(string()), "notes": array(string()), "imageSlots": array(integer(minimum=0), minimum=0)})
 
     if role == "reviewer":
         checks = REVIEW_CHECKS
@@ -4185,8 +4186,20 @@ def assembly_review_evidence(folder, plans, sources):
     folder = Path(folder)
     records = json.loads((folder/'photo-review.json').read_text(encoding='utf-8'))['groups']
     verify_visual_records(plans, [folder/'images'/plan['filename'] for plan in plans], records)
-    dates = []
+    dates, official_evidence = [], []
+    if len(sources) > 12:
+        raise RuntimeError('Assembly source evidence exceeds bounded review capacity')
     for source in sources:
+        body = source.get('text')
+        if not isinstance(body, str) or not body.strip():
+            raise RuntimeError('Assembly source body missing')
+        original_hash = hashlib.sha256(body.encode('utf-8')).hexdigest()
+        if source.get('bodySha256') != original_hash:
+            raise RuntimeError('Assembly original source body digest mismatch')
+        excerpt = body[:22000]
+        official_evidence.append({'url': source['url'], 'sourceBodySha256': original_hash,
+            'excerpt': excerpt, 'excerptSha256': hashlib.sha256(excerpt.encode('utf-8')).hexdigest(),
+            'excerptScope': 'full supplied source body' if len(excerpt) == len(body) else 'first 22000 characters; remaining source not included'})
         raw = source.get('collectedAt')
         if not raw:
             continue
@@ -4200,7 +4213,7 @@ def assembly_review_evidence(folder, plans, sources):
         local = observed.astimezone(KST)
         dates.append({'url': source.get('url'), 'collectedAt': raw,
                       'collectedAtKst': local.isoformat(), 'collectedDateKst': local.date().isoformat()})
-    return {'validatedImageObservations': records, 'sourceCollectionTimes': dates,
+    return {'validatedImageObservations': records, 'sourceCollectionTimes': dates, 'officialSourceEvidence': official_evidence,
             'assemblyEvidenceScope': 'This call has no pixels attached and must not claim direct pixel inspection. The host verified these independent actual pixel review records against every current image SHA and exact plan SHA. Assess placement, captions, readability and task completeness using those observations and the approved writer. Absence of new pixel attachments alone is not an issue; reject missing, contradictory or insufficient evidence. Native PC/mobile review is still required downstream. Source collection timestamps are normalized to Asia/Seoul for date comparison; collection date alone does not prove factual applicability or a performed application.'}
 
 

@@ -91,13 +91,19 @@ class CaptureMaterialTests(unittest.TestCase):
             {}, run/'review', 'assembly')
         (run/'photo-review.json').write_text(json.dumps({'groups': records}), encoding='utf-8')
         result = r.assembly_review_evidence(run, [plan], [
-            {'url': 'https://example.go.kr', 'collectedAt': '2026-10-21T00:13:00Z'},
-            {'url': 'https://example.go.kr/unknown', 'collectedAt': '2026-10-21T00:13:00'}])
+            {'url': 'https://example.go.kr', 'collectedAt': '2026-10-21T00:13:00Z', 'text': 'Official exception', 'bodySha256': hashlib.sha256(b'Official exception').hexdigest()},
+            {'url': 'https://example.go.kr/unknown', 'collectedAt': '2026-10-21T00:13:00', 'text': 'Official guidance', 'bodySha256': hashlib.sha256(b'Official guidance').hexdigest()}])
         self.assertEqual(result['sourceCollectionTimes'][0]['collectedDateKst'], '2026-10-21')
         self.assertEqual(result['sourceCollectionTimes'][0]['collectedAtKst'], '2026-10-21T09:13:00+09:00')
         self.assertEqual(result['sourceCollectionTimes'][1]['localDateStatus'], 'unknown')
         self.assertIn('must not claim direct pixel inspection', result['assemblyEvidenceScope'])
         self.assertEqual(result['validatedImageObservations'], records)
+        self.assertEqual(result['officialSourceEvidence'][0]['excerpt'], 'Official exception')
+        self.assertEqual(result['officialSourceEvidence'][0]['sourceBodySha256'], hashlib.sha256(b'Official exception').hexdigest())
+        self.assertEqual(result['officialSourceEvidence'][0]['excerptSha256'], hashlib.sha256(b'Official exception').hexdigest())
+        self.assertIn('notes', r.agent_output_schema('assembler')['properties'])
+        with self.assertRaisesRegex(RuntimeError, 'digest mismatch'):
+            r.assembly_review_evidence(run, [plan], [{'url': 'https://example.go.kr', 'text': 'changed', 'bodySha256': 'wrong'}])
         changed = {**plan, 'afterBlock': 1}
         with self.assertRaises(ValueError):
             r.assembly_review_evidence(run, [changed], [])
