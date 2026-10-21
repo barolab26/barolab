@@ -26,6 +26,9 @@ class StaffDispatchTests(unittest.TestCase):
                       'CF_16_DOMAINS': ['example.com'],
                       'execute_agent_tool': Mock(return_value={'ok': True, 'status': 'observed', 'data': {'waiting': 2}})}
         exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names], type_ignores=[]), '<staff>', 'exec'), self.scope)
+        for name in ('validate_staff_actions', 'execute_agent_tool'):
+            p = patch('server.agent_tools.' + name, side_effect=lambda *a, _name=name, **kw: self.scope[_name](*a, **kw))
+            p.start(); self.addCleanup(p.stop)
         self.emit = Mock(side_effect=lambda **kw: 'event-' + str(self.emit.call_count))
         p = patch('common.crew_chat_bridge.emit_work_event', self.emit); p.start(); self.addCleanup(p.stop)
         self.actions = [{'agent':'patch','tool':'read_agent_status','args':{}}]
@@ -40,6 +43,11 @@ class StaffDispatchTests(unittest.TestCase):
         self.assertFalse(self.scope['process_staff_request_once']())
         final = enqueue('turn-1', self.actions)
         self.assertEqual(final['status'], 'completed')
+        receipt = final['results'][0]['result']['executorReceipt']
+        self.assertEqual(receipt['executor'], 'ego-lite')
+        self.assertEqual(receipt['taskId'], final['taskId'])
+        self.assertEqual(receipt['requestId'], 'turn-1')
+        self.assertTrue(receipt['completed'])
         self.assertEqual(final['results'][0]['responseEventId'], 'event-4')
         self.scope['execute_agent_tool'].assert_called_once_with('patch','read_agent_status')
         self.scope['staff_tool_reply'].assert_called_once()
@@ -142,7 +150,9 @@ class StaffDispatchTests(unittest.TestCase):
         self.assertEqual(row['status'],'held')
         self.assertEqual(row['results'][0]['result']['controllerStatus'],'review_rejected')
         self.assertEqual(row['results'][0]['result']['controllerEvidenceSha256'],hashlib.sha256(raw).hexdigest())
-        self.assertEqual(row['results'][0]['initialResult'],result)
+        initial = row['results'][0]['initialResult']
+        self.assertEqual({k:v for k,v in initial.items() if k != 'executorReceipt'}, result)
+        self.assertFalse(initial['executorReceipt']['completed'])
         self.assertEqual(ledger.read_bytes(),raw)
         self.scope['execute_agent_tool'].assert_called_once()
         self.assertEqual(self.scope['staff_tool_reply'].call_count,2)

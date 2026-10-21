@@ -1,13 +1,8 @@
 """
-BaroLab EGO LITE Autonomous Orchestrator (WSL2 Ubuntu GUI Mode)
-Author: BaroLab Autonomous Team
-Description:
-  Runs inside the active Ubuntu XFCE desktop session (DISPLAY=:10).
-  Coordinates:
-  1. CF Pipeline catch-up & scheduled blog publications
-  2. Naver Blog / Kin / SearchAdvisor cadence
-  3. Google Drive directive & status JSON synchronization
-  4. Real-time 24/7 bidirectional reporting to Google Gemini App via CDP 9440
+BaroLab EGO LITE Monitor and Explicit Naver Workflow Entry
+Default: read-only project observations and existing durable crew execution receipts.
+Explicit Naver requests retain the existing guarded pipeline and execution lock.
+No default publication scheduler or external chat access.
 """
 
 import os
@@ -21,7 +16,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from common.gemini_chat_controller import send_gemini_message_sync as _real_send_gemini_message_sync
 
 def send_gemini_message_sync(msg: str, reason: str = "") -> bool:
     # A local workflow event does not authorize sending a message to an external chat.
@@ -129,67 +123,9 @@ def check_and_report_publications(last_published_orders: set) -> set:
 
 
 def main_loop():
-    ensure_display()
-    from common.ego_growth import start_worker
-    start_worker()
-    log("==================================================================", "35")
-    log("   EGO LITE AUTONOMOUS ORCHESTRATOR ACTIVE (WSL2 XFCE GUI)       ", "32")
-    log("   Display: " + os.environ.get("DISPLAY", ":10") + " | Host: Ubuntu WSL2", "35")
-    log("   Gemini Chat Bridge: Connected via CDP 9440 (BaroLab 프로젝트)", "32")
-    log("==================================================================", "35")
-    
-    # Initial status
-    published_orders = check_and_report_publications(set())
-    next_slot = get_next_slot_info()
-    
-    # Startup greeting ping to Gemini
-    startup_msg = (
-        f"[EGO LITE 오케스트레이터 가동 보고]\n"
-        f"- 관제 환경: Ubuntu WSL2 GUI (DISPLAY=:10, xrdp 데스크톱 세션)\n"
-        "- 관제 대시보드: http://localhost:8790 (정상)\n"
-        "- 관제 브라우저: Headed GUI 모드 (CDP 9440)\n"
-        f"- 오늘자 슬롯: 총 16개 (기발행 {len(published_orders)}건, 차기 슬롯: {next_slot})\n"
-        "- 24시간 실시간 자율 제어 및 보고 루프가 활성화되었습니다."
-    )
-    log("[GEMINI-PING] Sending startup greeting to Gemini...", "35")
-    send_gemini_message_sync(startup_msg)
-    
-    interval = 60  # Check every 60 seconds
-    pass_num = 1
-    
-    while True:
-        log(f"--- [PASS #{pass_num}] System Cadence Check ---", "34")
-        try:
-            # 1. Sync Drive / State files
-            sync_drive_state_files()
-            
-            # 2. CF Pipeline Catch-Up
-            run_cf_catch_up()
-            
-            # 3. Detect new publications and report to Gemini
-            published_orders = check_and_report_publications(published_orders)
-            
-            # 4. Hourly Heartbeat Report (every 60 passes ~ 60 mins)
-            if pass_num % 60 == 0:
-                cur_next = get_next_slot_info()
-                hb_msg = f"[EGO LITE 정기 보고] 24시간 관제 루프 정상 가동 중 (Pass #{pass_num}). 차기 대기 슬롯: {cur_next}"
-                send_gemini_message_sync(hb_msg)
-            
-            # 5. Report active status
-            log(f"[HEALTH] Pass #{pass_num} completed. Sleeping {interval}s...", "32")
-        except KeyboardInterrupt:
-            log("EGO LITE stopped by user.", "33")
-            break
-        except Exception as err:
-            err_msg = f"[EGO LITE 긴급 알림] 오케스트레이터 루프 예외 발생: {err}"
-            log(err_msg, "31")
-            try:
-                send_gemini_message_sync(err_msg)
-            except Exception:
-                pass
-            
-        pass_num += 1
-        time.sleep(interval)
+    """Observe existing workers without starting duplicate schedulers."""
+    from server.ego_live_monitor import main as monitor_main
+    return monitor_main()
 
 
 def run_visible_naver(account, *, slot=None, publication_date=None, topic_seed=None,
@@ -264,6 +200,8 @@ def main(argv=None):
                                       args.main_keyword, args.evidence_dir, args.prepared_dir,
                                       args.strategy, args.materials_manifest, args.reserve_time)):
         parser.error("Naver arguments require --naver-account")
+    if not args.naver_account and not args.naver_catch_up:
+        return main_loop()
     from dashboard.metrics import collector_lock
     lock_path = Path("/home/baro7/.barolab/ego-lite.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
@@ -278,7 +216,6 @@ def main(argv=None):
                                          prepared_dir=args.prepared_dir, strategy=args.strategy,
                                          materials_manifest=args.materials_manifest, reserve_time=args.reserve_time,
                                          prepare_only=args.prepare_only)
-            main_loop()
         else:
             print("EGO LITE is already running.", flush=True)
             return 1

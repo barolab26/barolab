@@ -162,7 +162,7 @@ class VisibleWorkflowTests(unittest.TestCase):
             run.assert_not_called()
 
     def test_local_events_never_send_external_messages(self):
-        with patch.object(ego, "_real_send_gemini_message_sync") as send:
+        with patch("common.gemini_chat_controller.send_gemini_message_sync") as send:
             self.assertFalse(ego.send_gemini_message_sync("local event", "publication"))
             self.assertFalse(ego.send_gemini_message_sync("local event", "command_done"))
             send.assert_not_called()
