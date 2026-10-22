@@ -14,7 +14,7 @@ from common.collection_observability import locked, write
 ROOT=Path(__file__).resolve().parents[1]
 KST=dt.timezone(dt.timedelta(hours=9))
 STEPS=('query','scope','pivot')
-RECOVERY_REVISION='2026-10-22-body-scope-v2'
+RECOVERY_REVISION='2026-10-22-evidence-retention-v3'
 
 
 class ApprovalDeclined(RuntimeError):
