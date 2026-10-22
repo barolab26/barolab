@@ -2903,7 +2903,7 @@ def observed_quote_catalog(sources):
 
 async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
     from common.editorial_supervisor import authorize_next, dossier, lineage, STEPS
-    approvals=[];current_fixed=fixed
+    approvals=[];current_fixed=fixed;next_step=0
     continuation=os.environ.get('CF_SOURCE_FACT_FOLDER')
     try:
         for attempt in range(4):
@@ -2915,12 +2915,15 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 if attempt==3 or (fixed or {}).get('postId'):raise
                 folder=Path(RUN_CONTEXT.get('artifactFolder') or '')
                 if not folder.is_dir() or (folder/'draft.md').exists():raise
+                if (folder/'source-fact-acquisition/result.json').is_file():next_step=max(next_step,1)
+                if next_step>=len(STEPS):raise
                 packet,_=dossier(folder)
                 goal=packet.get('prewriter-acquisition-request.json',{}).get('readerGoal') or packet.get('research.md',{}).get('readerGoal') or {}
                 question=goal.get('question','')
                 from common.editorial_supervisor import acquire_recovery_sources
                 await asyncio.to_thread(acquire_recovery_sources,folder,question or category)
-                plan=authorize_next('cf_blog',domain,folder,STEPS[attempt:],failure,question,category)
+                plan=authorize_next('cf_blog',domain,folder,STEPS[next_step:],failure,question,category)
+                next_step=STEPS.index(plan['step'])+1
                 approvals.append(plan)
                 current_fixed={'mode':'editorial_seed','seedTitle':plan['approval']['searchQuery'],
                                'explicitReaderQuestion':plan['approval']['readerQuestion'],

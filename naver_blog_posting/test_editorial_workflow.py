@@ -125,15 +125,20 @@ class EditorialWorkflowTests(unittest.TestCase):
         source={'url':url,'text':'Actual manufacturer source body. '*20}
         captured=[]
         def prepare(*args):
-            captured.append(dict(r.RUN_OPTIONS));return {},Path(args[2])
+            captured.append(dict(r.RUN_OPTIONS))
+            if len(captured)==1:raise r.MaterialRequired('Scope still missing')
+            return {},Path(args[2])
         with tempfile.TemporaryDirectory() as folder, patch.dict(r.RUN_OPTIONS,{'_active_preparation_folder':folder},clear=True), \
                 patch.object(supervisor,'dossier',return_value=({'keyword-selector.json':{'mainKeyword':'기능성 소재'}},{})), \
-                patch.object(supervisor,'authorize_next',return_value=plan),patch.object(supervisor,'acquire_recovery_sources'), \
+                patch.object(supervisor,'authorize_next',side_effect=[{**plan,'step':'scope'},plan]) as authorize,patch.object(supervisor,'acquire_recovery_sources'), \
                 patch.object(supervisor,'lineage'),patch.object(r,'collect_evidence',return_value={'primarySourceCandidates':[]}), \
                 patch('common.source_discovery.search_urls',return_value=[source]),patch.object(cf,'source_snapshot',return_value=source), \
                 patch.object(r,'is_bridge_account',return_value=False),patch.object(r,'_prepare_content',side_effect=prepare):
             r._supervise_prewriting('yoon_master',None,False,None,r.MaterialRequired('missing'))
+        self.assertEqual([c.args[3] for c in authorize.call_args_list],[('query','scope','pivot'),('pivot',)])
+        self.assertEqual(len(captured),2)
         self.assertTrue(captured[0]['_editorial_conceptual_scope'])
+        self.assertTrue(captured[1]['_editorial_conceptual_scope'])
         self.assertEqual(captured[0]['_editorial_source_urls'],[url])
 
     def test_pure_conceptual_calculation_has_no_artificial_fact_quota(self):

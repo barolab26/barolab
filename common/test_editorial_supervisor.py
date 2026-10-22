@@ -184,6 +184,22 @@ class SupervisorTests(unittest.TestCase):
         self.assertTrue(calls.await_args_list[3].args[-1]['supervisorScope'])
         self.assertEqual([p['step'] for p in lineage.call_args.args[1]],['query','scope','pivot'])
 
+    def test_cf_completed_acquisition_advances_to_scope_then_pivot(self):
+        from cf_posting import pipeline_runner as runner
+        self.save('prewriter-acquisition-request.json',{'readerGoal':{'question':'Original question'}})
+        acquisition=self.folder/'source-fact-acquisition';acquisition.mkdir()
+        (acquisition/'result.json').write_text(json.dumps({'sources':[]}))
+        calls=AsyncMock(side_effect=[runner.ReviewRequired('missing'),runner.ReviewRequired('still missing'),
+                                     ({'title':'valid'},SimpleNamespace(folder=self.folder))])
+        def approve(project,identity,folder,steps,*args):
+            return {'step':steps[0],'approval':{'readerQuestion':'Supported question','searchQuery':'official query'}}
+        with patch.dict(runner.RUN_CONTEXT,{'artifactFolder':str(self.folder)}),patch.object(runner,'_draft_agents_once',calls), \
+                patch.object(supervisor,'authorize_next',side_effect=approve) as authorize, \
+                patch.object(supervisor,'lineage'),patch.object(supervisor,'acquire_recovery_sources',return_value={}):
+            asyncio.run(runner.draft_agents('example.com','생활',[],[],None,None,lambda *a:None,None))
+        self.assertEqual([c.args[3] for c in authorize.call_args_list],[('scope','pivot'),('pivot',)])
+        self.assertEqual(calls.await_count,3)
+
     def test_watchdog_reclaims_frozen_review_without_replaying_uncertain_submission(self):
         from cf_posting import pipeline_runner as runner
         now=dt.datetime.now(supervisor.KST)

@@ -5634,7 +5634,9 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
     saved=dict(RUN_OPTIONS);approvals=list(saved.get('_editorial_approvals',[]))
     steps=('scope','pivot') if isinstance(failure,BridgePlanningBlocked) else STEPS
     try:
-        for index,step in enumerate(steps):
+        remaining=steps
+        for attempt in range(len(steps)):
+            if not remaining:break
             folder=Path(RUN_OPTIONS.get('_active_preparation_folder') or '')
             if not folder.is_dir():raise failure
             packet,_=dossier(folder)
@@ -5644,9 +5646,10 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
                   packet.get('required-materials.json',{}).get('readerGoal') or {})
             from common.editorial_supervisor import acquire_recovery_sources
             acquire_recovery_sources(folder,goal.get('question') or ACCOUNT_MAP[account]['topic'].split(',')[0],'naver_blog')
-            plan=authorize_next('naver_blog',account,folder,steps[index:],failure,goal.get('question',''),ACCOUNT_MAP[account]['topic'])
+            plan=authorize_next('naver_blog',account,folder,remaining,failure,goal.get('question',''),ACCOUNT_MAP[account]['topic'])
+            remaining=steps[steps.index(plan['step'])+1:]
             approvals.append(plan)
-            evidence_folder=folder/('jarvis-'+step+'-evidence');evidence_folder.mkdir(exist_ok=True)
+            evidence_folder=folder/('jarvis-'+plan['step']+'-evidence');evidence_folder.mkdir(exist_ok=True)
             # Official evidence queries and organic competitor queries serve different tasks.
             # A long official query can have zero blog results despite usable official sources.
             previous_plan=packet.get('keyword-selector.json',{})
