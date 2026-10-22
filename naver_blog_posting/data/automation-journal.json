@@ -23418,6 +23418,40 @@
       "failureReason": "Keyword intent requires new evidence; title-only correction is not applicable",
       "preSubmissionFailure": true,
       "retryAfter": null
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T21:14:04.396586+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-23",
+      "reserveTime": "2026-10-23 11:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-0bc4f9dabdab4953b30d214f2512aa9a",
+      "recoveryContextSha256": "21b5377c4ae0e932a53d099c975ea0a5abe3787bfdea5b848ad13f43ca370669",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "21b5377c4ae0e932a53d099c975ea0a5abe3787bfdea5b848ad13f43ca370669"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "material_required",
+      "updatedAt": "2026-10-22T21:30:28.625200+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/ISA-만기-20261022-7e5c71d789",
+      "failureReason": "Editorial hold; choose a new evidence-backed question before retry: 현재 제공 자료에는 원래 질문의 기한 산정·완료 인정·세액공제 적용 조건을 확정할 공식 본문이 없다. 핵심 근거 확보 전 제작을 보류한다. 근거 부족을 test 판단으로 우회하지 않는다.",
+      "preSubmissionFailure": true,
+      "retryAfter": null
     }
   ]
 }
