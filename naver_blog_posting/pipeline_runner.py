@@ -5650,7 +5650,7 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
             from cf_posting.pipeline_runner import source_snapshot,primary_url
             actual_sources=[]
             for source_index,row in enumerate(search_urls(plan['approval']['searchQuery'])):
-                if not primary_url(row['url']):continue
+                if not is_primary_source_host((urlparse(row['url']).hostname or '').lower()):continue
                 observed=source_snapshot(row,'primary',source_index+1)
                 if observed and len(observed.get('text',''))>=200:actual_sources.append(observed)
                 if len(actual_sources)>=4:break
@@ -5659,7 +5659,9 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
             atomic_json(evidence_folder/'keyword-evidence.json',packet)
             RUN_OPTIONS.update(topic_seed=plan['approval']['readerQuestion'],main_keyword=None,
                                allow_retry_handoff=False,evidence_dir=str(evidence_folder),
-                               _editorial_conceptual_scope=plan['step']=='scope',_editorial_reader_goal=plan.get('readerGoal'))
+                               _editorial_conceptual_scope=plan['step'] in ('scope','pivot'),
+                               _editorial_source_urls=plan['approval'].get('sourceUrls',[]),
+                               _editorial_reader_goal=plan.get('readerGoal'))
             try:
                 result=_prepare_content(account,strategy,str(evidence_folder),publication_attempt,slot)
                 lineage(result[1],approvals)

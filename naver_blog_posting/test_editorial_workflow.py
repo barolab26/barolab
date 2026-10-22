@@ -116,6 +116,26 @@ class EditorialWorkflowTests(unittest.TestCase):
             result=asyncio.run(r.search_primary_sources('지원금'))
         self.assertEqual(result,[candidates[0]])
 
+    def test_inline_pivot_preserves_approved_sources_and_conceptual_scope(self):
+        import common.editorial_supervisor as supervisor
+        from cf_posting import pipeline_runner as cf
+        url='https://www.uniqlo.com/kr/ko/contents/feature/airism/'
+        plan={'step':'pivot','approval':{'readerQuestion':'실제 확인된 소재 차이는 무엇인가요?',
+              'sourceUrls':[url],'searchQuery':'공식 소재 안내'}}
+        source={'url':url,'text':'Actual manufacturer source body. '*20}
+        captured=[]
+        def prepare(*args):
+            captured.append(dict(r.RUN_OPTIONS));return {},Path(args[2])
+        with tempfile.TemporaryDirectory() as folder, patch.dict(r.RUN_OPTIONS,{'_active_preparation_folder':folder},clear=True), \
+                patch.object(supervisor,'dossier',return_value=({'keyword-selector.json':{'mainKeyword':'기능성 소재'}},{})), \
+                patch.object(supervisor,'authorize_next',return_value=plan),patch.object(supervisor,'acquire_recovery_sources'), \
+                patch.object(supervisor,'lineage'),patch.object(r,'collect_evidence',return_value={'primarySourceCandidates':[]}), \
+                patch('common.source_discovery.search_urls',return_value=[source]),patch.object(cf,'source_snapshot',return_value=source), \
+                patch.object(r,'is_bridge_account',return_value=False),patch.object(r,'_prepare_content',side_effect=prepare):
+            r._supervise_prewriting('yoon_master',None,False,None,r.MaterialRequired('missing'))
+        self.assertTrue(captured[0]['_editorial_conceptual_scope'])
+        self.assertEqual(captured[0]['_editorial_source_urls'],[url])
+
     def test_empty_research_facts_create_real_acquisition_request(self):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaises(r.MaterialRequired):
