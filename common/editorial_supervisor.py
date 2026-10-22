@@ -141,6 +141,8 @@ def authorize(project,identity,folder,step,error,original_question='',category='
         'sourceUrls':{'type':'array','items':{'type':'string'}}},
         'required':['approved','category','reason','readerQuestion','searchQuery','sourceUrls'],
         'additionalProperties':False}
+    if step=='query' and original_question:
+        schema['properties']['readerQuestion']={'type':'string','enum':[original_question]}
     evidence=learning_text(private_text_removed(json.dumps({'project':project,'identity':identity,'category':category,
         'originalQuestion':original_question,'error':str(error)[:1200],
         'failure':{k:v for k,v in packet.items() if k in ('prewriter-acquisition-request.json','required-materials.json',

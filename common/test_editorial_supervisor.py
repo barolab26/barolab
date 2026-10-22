@@ -53,10 +53,12 @@ class SupervisorTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'targeted rework'):supervisor.authorize('cf_blog','example.com',self.folder,'pivot','error')
 
     def test_query_cannot_silently_change_question(self):
-        with patch('common.llm_client.generate_json',side_effect=self.model()), \
+        with patch('common.llm_client.generate_json',side_effect=self.model()) as generate, \
                 patch('common.llm_settings.get_agent_brain',return_value={'provider':'codex','model':'configured'}),patch.object(supervisor,'event'):
             with self.assertRaisesRegex(ValueError,'original question'):
                 supervisor.authorize('cf_blog','example.com',self.folder,'query','missing','원래 질문 그대로 유지해야 합니다')
+        self.assertEqual(generate.call_args.kwargs['response_schema']['properties']['readerQuestion']['enum'],
+                         ['원래 질문 그대로 유지해야 합니다'])
 
     def test_live_event_contract_accepts_progress_and_links_staff_roles(self):
         with patch('common.crew_chat_bridge._deliver') as deliver,patch.object(supervisor,'ROOT',self.root):
