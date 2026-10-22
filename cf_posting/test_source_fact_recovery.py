@@ -52,6 +52,16 @@ class SourceFactAcquisitionTests(unittest.TestCase):
             self.assertIn(row['quote'],body)
         self.assertNotIn(original['quotes'][0],[row['quote'] for row in catalog])
 
+    def test_independent_review_sees_original_quote_beyond_excerpt_limit(self):
+        quote='Actual supported timing from the original official document.'
+        body='Navigation boilerplate. '*180+quote+' End of document.'
+        source={'url':'https://www.gov.kr/original','text':body,'kind':'primary'}
+        rows=r.review_source_evidence([source,source],[{'sourceUrl':source['url'],'quote':quote}])
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['bodySha256'],hashlib.sha256(body.encode()).hexdigest())
+        self.assertTrue(any(quote in passage for passage in rows[0]['passages']))
+        self.assertEqual(r.review_source_evidence([{'url':source['url'],'snippet':'search only'}],[]),[])
+
     def test_hash_mismatch_fails_closed(self):
         self.gather.return_value={'sources':[{**self.source,'bodySha256':'0'*64}]}
         with self.assertRaises(r.ReviewRequired):self.run_call()

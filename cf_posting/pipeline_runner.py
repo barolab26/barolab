@@ -2849,6 +2849,25 @@ def open_source_fact_continuation(folder, domain, recent):
 from common.editorial_supervisor import lessons as editorial_lessons
 
 
+def review_source_evidence(sources, facts):
+    """Give the reviewer original and acquired bodies with exact quote context."""
+    rows=[];seen=set()
+    for source in sources:
+        url=source.get('url');body=source.get('text')
+        if not url or not isinstance(body,str) or not body.strip() or url in seen:continue
+        seen.add(url);passages=[body[:1000]]
+        for fact in facts:
+            quote=fact.get('quote','')
+            if fact.get('sourceUrl')!=url or not quote:continue
+            offset=body.find(quote)
+            if offset>=0:
+                passages.append(body[max(0,offset-250):offset+len(quote)+250])
+        rows.append({'url':url,'title':source.get('title'),'kind':source.get('kind'),
+                     'bodySha256':hashlib.sha256(body.encode()).hexdigest(),
+                     'bodyCharacters':len(body),'passages':list(dict.fromkeys(passages))})
+    return rows
+
+
 def observed_quote_catalog(sources):
     """Offer source-bound examples without excluding other exact body substrings."""
     catalog=[]
@@ -3088,8 +3107,9 @@ async def _draft_agents_once(domain, category, categories, recent, generate, gat
                         '확인한다. 작성자 자기평가를 승인으로 취급하지 말고 direct-answer 또는 정확한 section id로 답 위치를 연결한다.',
                         {'readerGoal':goal,'questionContext':review_context,'facts':research_data['facts'],
                          'materials':packet,'answerBrief':current,
-                         'acquiredOfficialSourceBodies':acquired_sources,'hostPublishedCatalogEvidence':catalog_evidence,
-                         'sourceContract':'Check medical requiredAnswers against these actual bodies, not generated facts alone. Missing support must remain blocked.'}),response_schema=brief_review_schema(goal,current))
+                         'observedSourceBodies':review_source_evidence(list(observations.get('sources',[]))+list(acquired_sources),research_data['facts']),
+                         'hostPublishedCatalogEvidence':catalog_evidence,
+                         'sourceContract':'Check the fixed readerGoal against these originally retrieved and additionally acquired source passages. Source hashes refer to preserved full bodies. Do not request optional UI, personal account outcomes or adjacent topics outside this goal. Unsupported material claims still require evidence or removal, never invention.'}),response_schema=brief_review_schema(goal,current))
                     save_plan('review-' + str(attempt) + '-raw.json',raw)
                     bound = bind_brief_review_draft(raw,goal,current)
                     save_plan('review-' + str(attempt) + '.json',{'answerBrief':current,'verdict':bound})

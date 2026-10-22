@@ -107,6 +107,15 @@ class EditorialWorkflowTests(unittest.TestCase):
         self.assertEqual(result['accounts'][0]['slots'][0]['scheduledSlot'],'11:00')
         self.assertEqual(result['accounts'][0]['slots'][0]['status'],'published')
 
+    def test_official_http_discovery_does_not_connect_shared_flow_browser(self):
+        import asyncio
+        candidates=[{'url':'https://www.gov.kr/page','title':'Actual search result'},
+                    {'url':'https://unverified.example/page','title':'Other result'}]
+        with patch('common.source_discovery.search_urls',return_value=candidates), \
+                patch('common.browser_session.connect_async',side_effect=AssertionError('Flow must not be required')):
+            result=asyncio.run(r.search_primary_sources('지원금'))
+        self.assertEqual(result,[candidates[0]])
+
     def test_empty_research_facts_create_real_acquisition_request(self):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaises(r.MaterialRequired):

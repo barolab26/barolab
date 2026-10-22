@@ -4156,12 +4156,22 @@ def source_browser_paths():
 
 
 async def search_primary_sources(keyword):
-    from playwright.async_api import async_playwright
+    from playwright.async_api import async_playwright, Error as PlaywrightError
     from common.browser_session import connect_async
     from cf_posting.pipeline_runner import gather_sources
-    async with async_playwright() as p:
-        browser, _ = await connect_async(p, *source_browser_paths())
-        return (await gather_sources(browser.contexts[0], primary_source_search_query(keyword)))['sources']
+    from common.source_discovery import search_urls
+    # Official source discovery does not require the shared Flow browser. Search
+    # API/HTTP candidates still pass evidence_text body/hash validation downstream.
+    candidates=await asyncio.to_thread(search_urls,primary_source_search_query(keyword))
+    candidates=[row for row in candidates if is_primary_source_host((urlparse(row.get('url','')).hostname or '').lower())]
+    if candidates:return candidates
+    try:
+        async with async_playwright() as p:
+            browser, _ = await connect_async(p, *source_browser_paths())
+            return (await gather_sources(browser.contexts[0], primary_source_search_query(keyword)))['sources']
+    except (RuntimeError,OSError,TimeoutError,PlaywrightError) as exc:
+        print('[RESEARCH] Source browser unavailable; no fabricated evidence: '+type(exc).__name__,flush=True)
+        return []
 
 
 ROLE_SCHEMAS = {
