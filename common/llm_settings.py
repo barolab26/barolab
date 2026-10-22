@@ -258,6 +258,48 @@ def format_brain_badge(provider: str, model: str) -> str:
     return 'Argon High' if provider == 'agy' else 'gpt-6.1-sol'
 
 
+REASONING_EFFORTS = ('none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra')
+
+
+def validate_reasoning_effort(provider, model, value):
+    if value in (None, '', 'default'):
+        return None
+    if not isinstance(value, str) or value not in REASONING_EFFORTS:
+        raise SettingsError('유효한 추론 강도를 선택하세요.')
+    if provider != 'codex':
+        raise SettingsError('선택한 공급자는 별도 추론 강도 설정을 지원하지 않습니다.')
+    from common.codex_cli import model_catalog
+    row = next((row for row in model_catalog() if row.get('id') == model), {})
+    if value not in row.get('reasoningEfforts', []):
+        raise SettingsError('선택 모델에서 지원이 확인된 추론 강도를 선택하세요.')
+    return value
+
+
+def _saved_reasoning_effort(cfg, previous):
+    same_route = all(cfg.get(key) == previous.get(key) for key in ('provider', 'model'))
+    value = cfg.get('reasoningEffort', previous.get('reasoningEffort') if same_route else None)
+    return validate_reasoning_effort(cfg['provider'], cfg['model'], value)
+
+
+def reasoning_effort_for_call(provider, model, slot=None, data=None):
+    """Inherit only the caller's exact configured route; never another employee."""
+    if provider != 'codex':
+        return None
+    if slot is None:
+        from common.crew_chat_bridge import current_model_identity
+        actor, owner = current_model_identity()
+        slots = {row['slot'] for row in AGENT_BRAIN_SLOTS}
+        slot = actor if actor in slots else next((target for prefix, target in
+            (('cf-', 'cf_pipeline'), ('naver-', 'naver_pipeline'), ('kin-', 'kin_pipeline'),
+             ('threads-', 'threads_pipeline')) if actor.startswith(prefix)), owner)
+    if slot not in {row['slot'] for row in AGENT_BRAIN_SLOTS}:
+        return None
+    brain = get_agent_brain(slot, data)
+    if brain['provider'] == provider and brain['model'] == model:
+        return brain.get('reasoningEffort')
+    return None
+
+
 def ensure_agent_brains(data: dict) -> dict:
     """Ensure `data['agentBrains']` has valid entries for all 6 agents + 4 pipelines."""
     raw = data.get('agentBrains')
@@ -272,6 +314,7 @@ def ensure_agent_brains(data: dict) -> dict:
         out[slot] = {
             'provider': prov,
             'model': mod,
+            'reasoningEffort': cur.get('reasoningEffort') if prov == 'codex' and cur.get('reasoningEffort') in REASONING_EFFORTS else None,
             'badge': format_brain_badge(prov, mod),
             'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
         }
@@ -318,8 +361,9 @@ def public(data=None):
     data = load() if data is None else data
     brains = ensure_agent_brains(data)
     providers = {}
-    from common.codex_cli import runtime
+    from common.codex_cli import runtime, model_catalog
     codex = runtime()
+    capabilities = {row["id"]: row for row in model_catalog() if row.get("id")}
     for name, (label, _) in PROVIDERS.items():
         row = data['providers'].get(name, {})
         model_val = row.get('model', '') or ('gemini-4-argon-high' if name == 'agy' else ('gpt-6.1-sol' if name == 'codex' else ''))
@@ -336,6 +380,7 @@ def public(data=None):
             for cm in raw_codex_models:
                 if isinstance(cm, dict) and cm.get('id') not in {x['id'] for x in merged_codex_models}:
                     merged_codex_models.append(cm)
+            merged_codex_models = [{**row, **capabilities.get(row['id'], {})} for row in merged_codex_models]
             providers[name].update(installed=codex.get('installed', True), online=codex.get('online', True),
                                    authenticated=codex.get('authenticated', True), models=merged_codex_models,
                                    modelsFetchedAt=codex.get('modelsFetchedAt'), checkedAt=codex.get('checkedAt'))
@@ -375,6 +420,7 @@ def save_agent_brains(body: dict):
                 updated['agentBrains'][slot] = {
                     'provider': cfg['provider'],
                     'model': cfg['model'],
+                    'reasoningEffort': None,
                     'badge': format_brain_badge(cfg['provider'], cfg['model']),
                     'providerLabel': PROVIDERS.get(cfg['provider'], (cfg['provider'], ''))[0],
                 }
@@ -395,6 +441,7 @@ def save_agent_brains(body: dict):
                 updated['agentBrains'][slot] = {
                     'provider': prov,
                     'model': mod,
+                    'reasoningEffort': _saved_reasoning_effort({**cfg, 'provider': prov, 'model': mod}, updated['agentBrains'][slot]),
                     'badge': format_brain_badge(prov, mod),
                     'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
                 }
@@ -446,6 +493,7 @@ def save(body):
                     updated['agentBrains'][slot] = {
                         'provider': p,
                         'model': m,
+                        'reasoningEffort': _saved_reasoning_effort({**cfg, 'provider': p, 'model': m}, updated['agentBrains'].get(slot, {})),
                         'badge': format_brain_badge(p, m),
                         'providerLabel': PROVIDERS.get(p, (p, ''))[0],
                     }

@@ -10,6 +10,14 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from contextvars import ContextVar
+_model_crew_identity = ContextVar('model_crew_identity', default=('', ''))
+
+
+def current_model_identity():
+    return _model_crew_identity.get()
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOM_MAIN_FILE = BASE_DIR / "server" / "data" / "chats" / "room-main.json"
 
@@ -171,6 +179,7 @@ def model_crew_call(function):
         request = emit_work_event(actor=actor,actor_label=label,task_id=task,owner_agent=owner,
             phase='requested',stage=stage,model=model,requested_to='model:'+str(model) if model else 'configured-model-runner',output_kind='model response pending')
         token = _model_crew_active.set(True)
+        identity_token = _model_crew_identity.set((actor, owner))
         try:
             result = function(prompt,*args,**kwargs)
         except BaseException:
@@ -200,5 +209,6 @@ def model_crew_call(function):
                 stage=stage,parent_request_id=request,model=actual,output_kind=kind+'; model response only')
             return result
         finally:
+            _model_crew_identity.reset(identity_token)
             _model_crew_active.reset(token)
     return wrapped

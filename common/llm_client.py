@@ -294,6 +294,8 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         model_override = brain.get('model') or None
     provider, model_override = _enabled_route(config, provider, model_override)
     model = model_override or config['providers'].get(provider, {}).get('model', '')
+    if reasoning_effort is None:
+        reasoning_effort = settings.reasoning_effort_for_call(provider, model, slot=agent_slot, data=config)
     if observer:
         observer(provider, model, 'calling')
     try:

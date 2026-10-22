@@ -149,12 +149,29 @@ def refresh_runtime():
     home_dir = Path(config['wsl_home']) if (is_wsl() and 'wsl_home' in config) else Path(config['home'])
     cache = home_dir / 'models_cache.json'
     data = json.loads(cache.read_text(encoding='utf-8')) if cache.is_file() else {}
-    models = [{'id': row['slug'], 'label': row.get('display_name', row['slug'])}
-              for row in data.get('models', []) if row.get('visibility') == 'list']
+    models = _catalog_models(data)
     runtime = {'installed': True, 'authenticated': authenticated, 'authMethod': 'chatgpt' if authenticated else 'unavailable',
                'models': models, 'modelsFetchedAt': data.get('fetched_at'), 'checkedAt': jobs.stamp()}
     jobs.write(RUNTIME, runtime)
     return runtime
+
+
+def _catalog_models(data):
+    return [{'id': row['slug'], 'label': row.get('display_name', row['slug']),
+             'reasoningEfforts': [item['effort'] for item in row.get('supported_reasoning_levels', [])
+                                  if isinstance(item, dict) and isinstance(item.get('effort'), str)],
+             'defaultReasoningEffort': row.get('default_reasoning_level')}
+            for row in data.get('models', []) if row.get('visibility') == 'list']
+
+
+def model_catalog():
+    """Read installed model capabilities without spawning a CLI or testing login."""
+    try:
+        config = local_config()
+        home_dir = Path(config['wsl_home']) if (is_wsl() and 'wsl_home' in config) else Path(config['home'])
+        return _catalog_models(json.loads((home_dir / 'models_cache.json').read_text(encoding='utf-8')))
+    except (OSError, ValueError, KeyError, RuntimeError):
+        return runtime().get('models', [])
 
 
 def runtime():
@@ -255,6 +272,9 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             pass
     if model not in allowed:
         raise RuntimeError('로그인 계정의 모델 목록에 없는 Codex 모델입니다.')
+    if reasoning_effort is None:
+        from common.llm_settings import reasoning_effort_for_call
+        reasoning_effort = reasoning_effort_for_call('codex', model)
     effort = configured_reasoning_effort(config, model, reasoning_effort)
     timeout_seconds = 300 if timeout_seconds is None else max(0.1, float(timeout_seconds))
     deadline = time.monotonic() + timeout_seconds
@@ -301,7 +321,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         safe_prompt = prompt if len(prompt) <= MAX_TURN_CHARS else (prompt[:MAX_TURN_CHARS] + '\n...[truncated for CLI turn limit]')
         full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
 
-        candidates = _fallback_candidates(config, model, effort, allowed)
+        candidates = [(model, effort)] if reasoning_effort is not None else _fallback_candidates(config, model, effort, allowed)
         last_error = None
         for attempt_idx, (cand_model, cand_effort) in enumerate(candidates):
             remaining = deadline - time.monotonic()

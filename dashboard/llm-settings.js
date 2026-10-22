@@ -140,13 +140,42 @@ function getModelsForProvider(provider) {
         base.push({ id: m.id, label: m.label || m.id });
       }
     }
-    return base;
+    return base.map(m => ({ ...m, ...(config.providers.codex.models.find(row => row.id === m.id) || {}) }));
   }
   if (provider === 'agy' && config?.providers?.agy?.models?.length) {
     return config.providers.agy.models;
   }
   return PROVIDER_MODELS_MAP[provider] || DEFAULT_AGY_MODELS;
 }
+
+const EFFORT_LABELS = { none: '없음 (None)', minimal: '최소 (Minimal)', low: '낮음 (Low)',
+  medium: '보통 (Medium)', high: '높음 (High)', xhigh: '매우 높음 (XHigh)',
+  max: '최대 (Max)', ultra: '최상 (Ultra)' };
+
+function reasoningEfforts(provider, model) {
+  if (provider !== 'codex') return [];
+  const row = getModelsForProvider(provider).find(row => row.id === model);
+  return (row?.reasoningEfforts || []).filter(effort => Object.hasOwn(EFFORT_LABELS, effort));
+}
+
+function effortOptions(provider, model, current) {
+  const efforts = reasoningEfforts(provider, model);
+  const selected = efforts.includes(current) ? current : '';
+  return `<option value="" ${selected ? '' : 'selected'}>${provider === 'codex' ? '기본값 (Low)' : '공급자 기본값'}</option>` +
+    efforts.map(effort => `<option value="${effort}" ${effort === selected ? 'selected' : ''}>${EFFORT_LABELS[effort]}</option>`).join('');
+}
+
+function updateEffortSelect(slot) {
+  const provider = document.querySelector(`.brain-provider-select[data-slot="${slot}"]`)?.value;
+  const model = document.querySelector(`.brain-model-select[data-slot="${slot}"]`)?.value;
+  const select = document.querySelector(`.brain-effort-select[data-slot="${slot}"]`);
+  if (!select) return;
+  const current = select.value;
+  select.innerHTML = effortOptions(provider, model, current);
+  select.disabled = reasoningEfforts(provider, model).length === 0;
+  select.title = select.disabled ? '선택 가능한 추론 강도 정보가 없습니다.' : '높을수록 응답 시간이 길어질 수 있습니다.';
+}
+
 
 function buildBrainCardHtml(slotMeta, currentBrain) {
   const prov = currentBrain?.provider || slotMeta.recommendedProvider;
@@ -183,6 +212,14 @@ function buildBrainCardHtml(slotMeta, currentBrain) {
           <label>전용 모델 ID</label>
           <select class="brain-model-select" data-slot="${slotMeta.slot}">
             ${modelOptions.map(m => `<option value="${m.id}" ${m.id === mod ? 'selected' : ''}>${m.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="brain-field brain-effort-field">
+          <label for="brain-effort-${slotMeta.slot}">추론 강도</label>
+          <select id="brain-effort-${slotMeta.slot}" class="brain-effort-select" data-slot="${slotMeta.slot}"
+            ${reasoningEfforts(prov, mod).length ? '' : 'disabled'}
+            title="${reasoningEfforts(prov, mod).length ? '높을수록 응답 시간이 길어질 수 있습니다.' : '선택 가능한 추론 강도 정보가 없습니다.'}">
+            ${effortOptions(prov, mod, currentBrain?.reasoningEffort)}
           </select>
         </div>
       </div>
@@ -226,12 +263,14 @@ function renderBrainMatrix() {
       if (slotMeta && slotMeta.recommendedProvider === newProv) {
         modSel.value = slotMeta.recommendedModel;
       }
+      updateEffortSelect(slot);
       updateCardBadge(slot);
     });
   });
 
   document.querySelectorAll('.brain-model-select').forEach(modSel => {
     modSel.addEventListener('change', () => {
+      updateEffortSelect(modSel.dataset.slot);
       updateCardBadge(modSel.dataset.slot);
     });
   });
@@ -259,6 +298,7 @@ function collectBrainMatrixPayload() {
       out[slot] = {
         provider: provSel.value,
         model: modSel.value,
+        reasoningEffort: card.querySelector('.brain-effort-select')?.value || null,
       };
     }
   });
