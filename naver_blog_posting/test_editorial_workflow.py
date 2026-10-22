@@ -136,6 +136,18 @@ class EditorialWorkflowTests(unittest.TestCase):
         self.assertTrue(captured[0]['_editorial_conceptual_scope'])
         self.assertEqual(captured[0]['_editorial_source_urls'],[url])
 
+    def test_pure_conceptual_calculation_has_no_artificial_fact_quota(self):
+        result={'facts':[],'researchMd':'Explicit hypothetical: 2640 / 12 = 220; no measured income claim.',
+                'answerBrief':{'readerTask':{'medium':'conceptual','articleType':'calculation'},
+                               'readyForWriter':True,'missingInputs':[],'unresolvedQuestions':[]}}
+        sources=[{'url':'https://www.gov.kr/unrelated'}]
+        self.assertEqual(r.require_research_facts(result,sources),[])
+        result['answerBrief']['missingInputs']=[{'kind':'source_fact'}]
+        with self.assertRaises(RuntimeError):r.require_research_facts(result,sources)
+        result['answerBrief']['missingInputs']=[]
+        result['answerBrief']['readerTask']['medium']='screen'
+        with self.assertRaises(RuntimeError):r.require_research_facts(result,sources)
+
     def test_empty_research_facts_create_real_acquisition_request(self):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaises(r.MaterialRequired):

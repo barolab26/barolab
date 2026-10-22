@@ -4070,7 +4070,14 @@ def require_research_facts(result, sources, *, actual_observations=False, recove
         raise RuntimeError('Research fact must cite its exact fetched source URL; automatic source reassignment is forbidden')
     if len({fact['id'] for fact in facts}) != len(facts):
         raise RuntimeError('Research fact identities must be unique')
-    if not facts and (sources or not actual_observations):
+    brief=result.get('answerBrief') or {}
+    task=brief.get('readerTask') or {}
+    # Pure explanations and labelled example calculations have no fact quota;
+    # the mandatory independent brief review still rejects unsupported claims.
+    conceptual=(task.get('medium')=='conceptual' and task.get('articleType') in ('explainer','comparison','calculation')
+                and brief.get('readyForWriter') is True and brief.get('missingInputs')==[]
+                and brief.get('unresolvedQuestions')==[])
+    if not facts and (sources or not actual_observations) and not conceptual:
         if recovery_folder is not None and reader_goal:
             atomic_json(Path(recovery_folder)/'required-materials.json',{'status':'planning_required','stage':'researcher-before-writer',
                 'readerGoal':reader_goal,'requiredMaterials':[{'kind':'source_fact','description':reader_goal['question'],
