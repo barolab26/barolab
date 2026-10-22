@@ -423,9 +423,31 @@ def load_room_data() -> Dict[str, Any]:
             return {"messages": [], "delegationLimit": True, "autonomousEnabled": False, "sid": 1}
 
 
+def compact_room_telemetry(room, keep=200):
+    """Archive old transport events losslessly; never discard conversations."""
+    messages=room.get('messages',[])
+    indices=[i for i,row in enumerate(messages) if row.get('eventType')=='crew_work_event']
+    removed=set(indices[:-keep]) if keep else set(indices)
+    if not removed:return room
+    history=[row for i,row in enumerate(messages) if i in removed]
+    raw=json.dumps({'schema':'crew-work-history-v1','messages':history},ensure_ascii=False).encode('utf-8')
+    digest=hashlib.sha256(raw).hexdigest()
+    directory=CHATS_DIR/'work-event-history';directory.mkdir(parents=True,exist_ok=True)
+    target=directory/(digest+'.json')
+    if target.exists():
+        if target.read_bytes()!=raw:raise ValueError('Archived work event history hash mismatch')
+    else:
+        temporary=target.with_suffix('.tmp');temporary.write_bytes(raw);os.replace(temporary,target)
+    # Publish the smaller projection only after every removed event is durable.
+    room['messages']=[row for i,row in enumerate(messages) if i not in removed]
+    room['workEventHistory']={'directory':'work-event-history','recentLimit':keep}
+    return room
+
+
 def save_room_data(room: Dict[str, Any]):
     with _ROOM_LOCK:
         CHATS_DIR.mkdir(parents=True, exist_ok=True)
+        compact_room_telemetry(room)
         tmp = ROOM_MAIN_FILE.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(room, ensure_ascii=False, indent=2), encoding="utf-8")
         os.replace(tmp, ROOM_MAIN_FILE)

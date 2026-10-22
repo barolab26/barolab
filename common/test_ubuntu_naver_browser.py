@@ -29,12 +29,13 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
         with patch.dict("sys.modules", {"cf_posting.pipeline_runner": runtime}), \
                 patch.object(pipeline_runner, "os", SimpleNamespace(name="posix")), \
                 patch("playwright.async_api.async_playwright", return_value=MagicMock()), \
+                patch("common.source_discovery.search_urls", return_value=[]), \
                 patch.object(browser_session, "connect_async",
                              new=AsyncMock(side_effect=StopBeforeBrowserInteraction)) as connect:
-            for coroutine in (pipeline_runner.search_primary_sources("example"),
-                              pipeline_runner.generate_photos([], Path("/unused"), "soultin", "example")):
+            for make_call in (lambda: pipeline_runner.search_primary_sources("example"),
+                              lambda: pipeline_runner.generate_photos([], Path("/unused"), "soultin", "example")):
                 with self.assertRaises(StopBeforeBrowserInteraction):
-                    asyncio.run(coroutine)
+                    asyncio.run(make_call())
                 self.assertEqual(connect.call_args.args[1:],
                                  (runtime.CDP_URL, runtime.BROWSER_EXE, runtime.BROWSER_USER_DATA))
             runtime.ensure_isolated_browser_ready.assert_called_once()

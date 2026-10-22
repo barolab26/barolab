@@ -2849,6 +2849,25 @@ def open_source_fact_continuation(folder, domain, recent):
 from common.editorial_supervisor import lessons as editorial_lessons
 
 
+def retained_approved_sources(folder, plan, domain):
+    """Carry the exact observed bodies that Jarvis used into the new scope."""
+    folder=Path(folder).resolve()
+    if not folder.is_relative_to((BASE_DIR/'output').resolve()):return []
+    if json.loads((folder/'handoff.json').read_text()).get('domain')!=domain:return []
+    allowed=set(plan.get('approval',{}).get('sourceUrls',[]));rows=[]
+    for name in ('observed-research-sources.json','supervisor-research-sources.json'):
+        path=folder/name
+        if not path.is_file():continue
+        data=json.loads(path.read_text(encoding='utf-8'))
+        for source in data.get('sources',[]):
+            body=source.get('text');url=source.get('url')
+            if url not in allowed or not isinstance(body,str) or len(body)<200:continue
+            sha=hashlib.sha256(body.encode()).hexdigest()
+            if source.get('bodySha256') not in (None,sha):continue
+            rows.append({**source,'bodySha256':sha})
+    return list({row['url']:row for row in rows}.values())
+
+
 def review_source_evidence(sources, facts):
     """Give the reviewer original and acquired bodies with exact quote context."""
     rows=[];seen=set()
@@ -2905,7 +2924,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 approvals.append(plan)
                 current_fixed={'mode':'editorial_seed','seedTitle':plan['approval']['searchQuery'],
                                'explicitReaderQuestion':plan['approval']['readerQuestion'],
-                               'supervisorScope':plan['step'] in ('scope','pivot'), 'supervisorReaderGoal':plan.get('readerGoal')}
+                               'supervisorScope':plan['step'] in ('scope','pivot'), 'supervisorReaderGoal':plan.get('readerGoal'),
+                               'supervisorObservedSources':retained_approved_sources(folder,plan,domain)}
                 os.environ.pop('CF_SOURCE_FACT_FOLDER',None)
                 progress('researcher',domain+' · 자비스 '+plan['step']+' 승인 · 새 근거 검수',None)
     finally:
@@ -2981,6 +3001,8 @@ async def _draft_agents_once(domain, category, categories, recent, generate, gat
         observations = await gather({'mainKeyword': kw.get('mainKeyword', slug), 'targetQuestion': goal['question'] if goal else kw.get('title') or kw['questions'][0]})
         if not observations.get('sources'):
             observations = await gather(kw.get('mainKeyword', slug))
+        retained=(fixed or {}).get('supervisorObservedSources',[])
+        observations['sources']=list({row['url']:row for row in observations.get('sources',[])+retained}.values())
         observations['sources']=sorted(observations.get('sources',[]),key=lambda row:not primary_url(row.get('url','')))
         compact_obs = {
             'verifiedRecoveryLessons': editorial_lessons('cf_blog',domain,category=category),

@@ -37,3 +37,8 @@
   git add -A && git commit -m "auto-sync" && git push origin main
   ```
 - **보안 무결성 준수**: `.gitignore`에 정의된 민감 정보(`.env*`, `*secret*`, `*token*`, `*credential*`, `**/secure/`, `cookies/`, `browsers/`, `*.sqlite3`, `output/`, `runs/`, `rework*/`, `artifacts/`, 이미지/영상 바이너리 등)는 절대 커밋·푸시하지 않으며, 오직 소스코드와 안전한 실시간 상태 원장(`data/*.json`)만 동기화합니다.
+
+## 4. Ponytail 기본 작업 원칙
+- 모든 작업에서 `ponytail` 스킬의 `full` 모드를 기본 적용합니다. 사용자가 중지를 요청할 때까지 유지합니다.
+- Ubuntu 기준 스킬: `/home/baro7/.codex/skills/ponytail/SKILL.md`. 없으면 `/mnt/c/Users/baro7/.codex/skills/ponytail/SKILL.md`를 확인합니다.
+- 문제를 완전히 해결하는 최소 변경을 우선하며, 필요한 검증을 수행하고 미검증 항목과 남은 위험을 명확히 보고합니다.

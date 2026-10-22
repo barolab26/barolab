@@ -6212,7 +6212,9 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                              if isinstance(source, dict) and source.get('url') and source.get('text')
                              and source.get('collectedAt') and source.get('bodySha256') == hashlib.sha256(source['text'].encode('utf-8')).hexdigest()]
             # Preserve supplied evidence URLs, but fetch and validate them again as official sources.
-            source_urls = list(dict.fromkeys(enriched_urls + result['sourceUrls']))
+            approved_urls=[url for url in RUN_OPTIONS.get('_editorial_source_urls',[])
+                           if is_primary_source_host((urlparse(url).hostname or '').lower())]
+            source_urls = list(dict.fromkeys(approved_urls + enriched_urls + result['sourceUrls']))
             sources, source_failures, material_sources = collect_material_primary_sources(
                 selected, source_urls, materials, folder, allow_empty=actual_observations)
             atomic_json(folder / 'sources.json', sources)

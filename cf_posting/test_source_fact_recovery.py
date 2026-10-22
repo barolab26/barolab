@@ -62,6 +62,20 @@ class SourceFactAcquisitionTests(unittest.TestCase):
         self.assertTrue(any(quote in passage for passage in rows[0]['passages']))
         self.assertEqual(r.review_source_evidence([{'url':source['url'],'snippet':'search only'}],[]),[])
 
+    def test_scope_reuses_only_approved_unchanged_bodies_in_same_domain(self):
+        output=self.folder/'output';folder=output/'run';folder.mkdir(parents=True)
+        (folder/'handoff.json').write_text(json.dumps({'domain':'example.com'}))
+        source={**self.source,'bodySha256':hashlib.sha256(self.text.encode()).hexdigest()}
+        (folder/'observed-research-sources.json').write_text(json.dumps({'sources':[source]}))
+        plan={'approval':{'sourceUrls':[source['url']]}}
+        with patch.object(r,'BASE_DIR',self.folder):
+            self.assertEqual(r.retained_approved_sources(folder,plan,'example.com'),[source])
+            self.assertEqual(r.retained_approved_sources(folder,plan,'other.com'),[])
+            self.assertEqual(r.retained_approved_sources(folder,{'approval':{'sourceUrls':[]}},'example.com'),[])
+            source['text']='Tampered source body. '*20
+            (folder/'observed-research-sources.json').write_text(json.dumps({'sources':[source]}))
+            self.assertEqual(r.retained_approved_sources(folder,plan,'example.com'),[])
+
     def test_hash_mismatch_fails_closed(self):
         self.gather.return_value={'sources':[{**self.source,'bodySha256':'0'*64}]}
         with self.assertRaises(r.ReviewRequired):self.run_call()

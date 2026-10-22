@@ -681,7 +681,8 @@ def recover_cycle(project):
                             plan=authorize_next(project,key,folder,steps,previous.get('failureReason',''),question,
                                                 packet.get('keyword-title-original.json',{}).get('category') or runner.ACCOUNT_MAP[key]['topic'])
                             runner.RUN_OPTIONS.update(topic_seed=plan['approval']['readerQuestion'],main_keyword=None,allow_retry_handoff=False,
-                                                      _editorial_conceptual_scope=plan['step']=='scope',
+                                                      _editorial_conceptual_scope=plan['step'] in ('scope','pivot'),
+                                                      _editorial_source_urls=plan['approval'].get('sourceUrls',[]),
                                                       _editorial_reader_goal=plan.get('readerGoal'),
                                                       _editorial_approvals=[plan])
                     result=runner.run_accounts([key],True,slot=clock,publication_date=day)
