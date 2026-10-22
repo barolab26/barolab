@@ -1,4 +1,5 @@
 """Provider adapters for JSON article generation; no silent provider fallback."""
+from common.llm_usage import metered
 import json
 import re
 import time
@@ -286,6 +287,7 @@ def agy_generate(prompt, model, response_schema=None):
 
 
 @memory_call
+@metered
 def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None, timeout_seconds=None):
     config = settings.load()
     if agent_slot and not provider and not model_override:
@@ -296,6 +298,8 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
     model = model_override or config['providers'].get(provider, {}).get('model', '')
     if reasoning_effort is None:
         reasoning_effort = settings.reasoning_effort_for_call(provider, model, slot=agent_slot, data=config)
+    from common.llm_usage import _CURRENT
+    if _CURRENT.get() is not None:_CURRENT.get().update(provider=provider,model=model)
     if observer:
         observer(provider, model, 'calling')
     try:
@@ -357,11 +361,14 @@ def _generate_json(prompt, provider=None, images=None, model_override=None, resp
         response = requests.post(url, headers=headers, json=body, timeout=120 if timeout_seconds is None else max(0.1, float(timeout_seconds)), allow_redirects=False)
     except requests.RequestException:
         raise RuntimeError('LLM 네트워크 연결 실패 또는 시간 초과.') from None
+    from common.llm_usage import report_response
+    report_response(headers=response.headers,status=response.status_code,model=model)
     if response.status_code != 200:
         labels = {401: '인증 실패', 403: '접근 거절', 402: '잔액 부족', 404: '모델 또는 경로 없음', 429: '요청 한도 초과'}
         raise RuntimeError(f'LLM HTTP {response.status_code}: {labels.get(response.status_code, "공급자 요청 실패")}')
     try:
         data = response.json()
+        report_response(data,model=data.get('modelVersion') or data.get('model') or model)
         if provider == 'gemini':
             if data['candidates'][0].get('finishReason') not in (None, 'STOP'):
                 raise ValueError()

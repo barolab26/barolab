@@ -19,7 +19,8 @@ class AgentReasoningTests(unittest.TestCase):
         self.path = self.root / 'settings.json'
         self.path.write_text(json.dumps(self.config))
         self.catalog = [{'id': 'fixture-model', 'label': 'Fixture', 'reasoningEfforts': ['low', 'high', 'xhigh']}]
-        for item in (patch.object(settings, 'CONFIG', self.path),
+        for item in (patch('common.llm_usage.ROOT',self.root),
+                     patch.object(settings, 'CONFIG', self.path),
                      patch.object(codex_cli, 'model_catalog', return_value=self.catalog),
                      patch.object(codex_cli, 'runtime', return_value={'models': self.catalog}),
                      patch('common.crew_chat_bridge.emit_work_event', return_value='event')):

@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 KST = dt.timezone(dt.timedelta(hours=9))
 ROLES = {'jarvis':'자비스', 'patch':'패치', 'publi':'퍼블리',
          'trace':'트레이스', 'doctor':'닥터', 'radar':'레이더'}
-PORTS = (9334, 9333, 9231, 9230, 8790)
+PORTS = (9334, 9333, 9335, 9231, 9230, 8790, 3001)
 STAGES = {'original-work-diagnosis':'원작업 차단 원인 진단', 'repair-diagnosis-model':'수정할 코드 분석',
           'staff-response':'업무 결과 보고', 'staff-result-response':'직원 결과 정리',
           'staff-action-routing':'담당 업무 배정', 'keyword-selector':'키워드 선정',
@@ -94,7 +94,12 @@ class JsonCache:
                 raw = stream.read(12_000_001)
             if len(raw) > 12_000_000:
                 raise ValueError('file grew beyond bound')
-            value = json.loads(raw.decode('utf-8-sig'))
+            content=raw.decode('utf-8-sig')
+            if path.name=='pipeline_status.js':
+                matched=re.fullmatch(r'\s*window\.__NAVER_PIPELINE_STATUS__\s*=\s*(\{.*\})\s*;?\s*',content,re.S)
+                if not matched:raise ValueError('invalid pipeline assignment')
+                content=matched.group(1)
+            value = json.loads(content)
             if not isinstance(value, dict):
                 raise ValueError('object required')
             if projection is not None:value=projection(value)
@@ -192,7 +197,8 @@ def crew_rows(events, requests, brains, now):
                 model=next((clean(r.get('configuredModel'),50) for r in routes if r.get('configuredModel')),
                            clean((brains.get(role) or {}).get('model'),50))
                 break
-        output.append(dict(role=role,name=name,state=state,action=action,model=model,
+        completed=max((e.get('ts',0)/1000 for e in owned if e.get('phase')=='completed'),default=0)
+        output.append(dict(lastCompleted=dt.datetime.fromtimestamp(completed,KST).strftime('%H:%M:%S') if completed else '—',role=role,name=name,state=state,action=action,model=model,
                            configuredModel=clean((brains.get(role) or {}).get('model'),50)))
     return output
 
@@ -247,6 +253,8 @@ class Collector:
         self.stop=threading.Event();self.snapshot={};self.thread=None
         self.hosts=list(dict.fromkeys(['127.0.0.1',host] if host else ['127.0.0.1']))
         self.ports={};self.port_checked=0;self.requests=[];self.queue_checked=0
+        from server.cockpit_telemetry import RemoteTelemetry
+        self.remote=RemoteTelemetry(self.root,self.hosts)
 
     def read(self, relative):return self.cache.read(self.root/relative)
 
@@ -269,9 +277,7 @@ class Collector:
             try:
                 paths=sorted(directory.glob('*.json'),key=lambda p:p.stat().st_mtime_ns,reverse=True)[:128]
                 self.requests=[self.cache.read(p) for p in paths if not p.is_symlink()]
-                keep={self.root/p for p in ('cf_posting/data/daily_schedule.json','dashboard/naver_automation.json',
-                      'dashboard/data/kin.json','server/data/chats/room-main.json','server/data/llm-settings.json',
-                      'server/data/llm-usage.json','server/data/editorial-live-events.json')}.union(paths)
+                keep={p for p in self.cache.values if p.parent!=directory}.union(paths)
                 for collection in (self.cache.values,self.cache.signatures):
                     for key in list(collection):
                         if key not in keep:collection.pop(key,None)
@@ -294,6 +300,23 @@ class Collector:
                   cached=any(self.root/p in self.cache.errors for p in (
                       'cf_posting/data/daily_schedule.json','dashboard/naver_automation.json','dashboard/data/kin.json')),
                   collectedAt=now.timestamp())
+        for key,path in {'cf':'cf_posting/data/daily_schedule.json','naver':'dashboard/naver_automation.json',
+            'kin':'dashboard/data/kin.json','usage':'server/data/llm_usage_ledger.json','revenue':'server/data/revenue.json','revenueRefresh':'server/data/revenue-refresh.json',
+            'metrics':'server/data/metrics.json','threads':'dashboard/data/threads.json',
+            'maintenance':'server/data/content-maintenance.json','graph':'server/data/editorial-memory-graph.json',
+            'workflow':'naver_blog_posting/data/pipeline_status.js'}.items():data[key]=self.read(path)
+        # Prefer the documented dashboard contract when deployed there, else server collector ledger.
+        public_revenue=self.read('dashboard/data/revenue.json')
+        if public_revenue.get('months') and epoch(public_revenue.get('checkedAt'))>epoch(data['revenue'].get('checkedAt')):data['revenue']=public_revenue
+        from server.cockpit_panels import dated_graph_nodes
+        data['graph']={**data['graph'],'todayVerifiedNodes':dated_graph_nodes(data['graph'],now,self.root)}
+        data.update(events=events,remote=self.remote.get(),timeline=business_timeline(events,cf,kin,data['revenue'],now))
+        from server.cockpit_telemetry import env_values
+        try:data['openaiKey']=bool(env_values(self.root).get('OPENAI_API_KEY') or self.read('server/data/llm-settings.json').get('providers',{}).get('openai',{}).get('encrypted_key'))
+        except (OSError,ImportError):data['openaiKey']=False
+        proxy_calls=[r for r in data['usage'].get('byModel',{}).values() if r.get('provider')=='freellm']
+        proxy_call=max(proxy_calls,key=lambda r:r.get('lastAt',''),default={})
+        data['proxy']=dict(online=self.ports.get(3001),model=proxy_call.get('model'),latency=proxy_call.get('averageLatencyMs','—'))
         with self.lock:self.snapshot=data
 
     def run(self):
@@ -304,66 +327,38 @@ class Collector:
             self.stop.wait(2)
 
     def start(self):
+        self.remote.start()
         self.thread=threading.Thread(target=self.run,name='cockpit-read-only',daemon=True);self.thread.start()
 
     def get(self):
         with self.lock:return self.snapshot
 
 
+def business_timeline(events,cf,kin,revenue,now):
+    day=now.date().isoformat();rows=[]
+    for event in events:
+        at=epoch(event.get('ts',0)/1000);stage=event.get('stage','')
+        if not at or dt.datetime.fromtimestamp(at,KST).date().isoformat()!=day:continue
+        if str(event.get('outputKind','')).startswith('dict fields:') or 'model response only' in str(event.get('outputKind','')):continue
+        if event.get('phase')=='completed' and stage in ('editorial-query','editorial-scope','editorial-pivot','editorial-renewal','publication-verified','revenue-collected','recovery-verified'):
+            rows.append(dict(at=at,text=ROLES.get(event.get('ownerAgent') or event.get('who'),'업무')+' · '+clean(event.get('outputKind') or STAGES.get(stage,stage),150),alert=False))
+        elif event.get('phase')=='failed' and stage.startswith('editorial-'):
+            rows.append(dict(at=at,text='▲ ALERT · '+clean(event.get('outputKind') or stage,150),alert=True))
+    for r in activity_log([],cf,{},now):
+        if r['at'] and '발행 완료' in r['text']:rows.append(r)
+    for r in kin.get('recent',[]):
+        if r.get('state')=='published_verified' and r.get('send_day')==day:
+            rows.append(dict(at=epoch(r.get('updated_at')),text='지식iN '+clean(r.get('account'))+' · 발행 성공 · '+clean(r.get('title'),80),alert=False))
+    for src in revenue.get('months',{}).get(day[:7],{}).get('sources',[]):
+        at=epoch(src.get('checkedAt'))
+        if src.get('status')=='collected' and at and dt.datetime.fromtimestamp(at,KST).date().isoformat()==day:
+            rows.append(dict(at=at,text=clean(src.get('label'))+' 수익 수집 완료',alert=False))
+    return sorted({(r['at'],r['text']):r for r in rows}.values(),key=lambda r:r['at'],reverse=True)[:6]
+
+
 def render(data, now=None, height=32):
-    now=now or dt.datetime.now(KST)
-    layout=Layout(name='cockpit')
-    layout.split_column(Layout(name='hud',size=5),Layout(name='channels',size=5),
-                        Layout(name='crew',size=8),Layout(name='logs',minimum_size=5))
-    crew=data.get('crew',[])
-    active={r['model'] for r in crew if r['state']=='RUNNING' and r.get('model')}
-    brain=Text('활성: ',style='bold')
-    brain.append(', '.join(sorted(active)) if active else ('모델 응답 대기' if any(r['state']=='RUNNING' for r in crew) else '대기'),style='cyan')
-    waiting={r.get('configuredModel') for r in crew if r.get('configuredModel') and r['state']!='RUNNING'}-active
-    if waiting:brain.append(' | 대기: '+', '.join(sorted(waiting)),style='dim')
-    token,ratio=data.get('tokens',('집계 연결 대기',None))
-    tokens=Text('오늘 수집 토큰(Codex): '+token)
-    if ratio is not None:tokens.append(' '+'■'*round(10*ratio)+'░'*(10-round(10*ratio)),style='cyan')
-    ports=Text('인프라  ')
-    for port in PORTS:
-        online=data.get('ports',{}).get(port)
-        ports.append(('허브 ' if port==8790 else '')+str(port)+' ')
-        ports.append('● '+('ON' if online else 'OFF' if online is False else '…')+'  ',style='green' if online else 'red' if online is False else 'dim')
-    suffix=' · 데이터 캐시' if data.get('cached') else (' · 데이터 갱신 대기' if now.timestamp()-data.get('collectedAt',now.timestamp())>10 else '')
-    layout['hud'].update(Panel(Group(brain,tokens,ports),title='[bold cyan]EGO LITE MISSION CONTROL[/]',
-        subtitle=now.strftime('%Y-%m-%d %H:%M:%S KST')+suffix,border_style='cyan'))
-    progress=Progress(TextColumn('{task.fields[name]}',markup=False),
-        TextColumn('{task.fields[count]}',markup=False),TextColumn('{task.fields[bar]}',markup=False,style='cyan'),
-        TextColumn('{task.fields[percent]}',markup=False),TextColumn('{task.fields[note]}',markup=False),expand=False)
-    for row in data.get('channels',[]):
-        done=row['done'];target=row['target']
-        filled=round(18*min(done or 0,target)/target)
-        progress.add_task('',total=target,completed=min(done or 0,target),name=row['name'],
-            count=f'[{done if done is not None else "—":>2}/{target:>2}]',
-            bar='■'*filled+'░'*(18-filled),
-            percent=f'{done/target:.0%}' if done is not None else '—',note=clean(row['note'],65))
-    total=sum(r['done'] or 0 for r in data.get('channels',[]))
-    total_label=str(total) if data.get('channels') and all(r['done'] is not None for r in data['channels']) else '—'
-    layout['channels'].update(Panel(progress,title='1. 채널별 당일 발행 · '+total_label+'/43건',border_style='bright_blue'))
-    table=Table.grid(expand=True,padding=(0,1));table.add_column(width=24,no_wrap=True);table.add_column(ratio=1,no_wrap=True,overflow='ellipsis')
-    colors={'IDLE':'green','RUNNING':'cyan','CYCLING':'yellow','ERROR':'red'}
-    for row in crew:
-        state=Text('@'+row['name']+'  ');state.append(row['state'],style=colors[row['state']])
-        action=Text(row['action']);model=row.get('model') or row.get('configuredModel')
-        if model:action.append(' · '+model,style='dim')
-        table.add_row(state,action)
-    layout['crew'].update(Panel(table,title='2. 6인 에이전트 실시간 동작',border_style='cyan'))
-    logs=Table.grid(expand=True);logs.add_column(width=11);logs.add_column(no_wrap=True,overflow='ellipsis')
-    for row in data.get('logs',[dict(at=0,text='이벤트 연결 중',alert=False)]):
-        line=Text()
-        if row['alert']:line.append('[ALERT] ',style='bold red')
-        line.append(clean(row['text'],160),style='red' if row['alert'] else 'white')
-        when=dt.datetime.fromtimestamp(row['at'],KST).strftime('%H:%M:%S') if row['at'] else '대기'
-        logs.add_row('['+when+']',line)
-    layout['logs'].update(Panel(logs,title='3. 최근 완료 2건 · 경고 1건',border_style='bright_blue'))
-    if height<23:
-        return Group(layout['hud'].renderable,layout['channels'].renderable,layout['crew'].renderable,layout['logs'].renderable)
-    return layout
+    from server.cockpit_panels import render as vivid_render
+    return vivid_render(data,now or dt.datetime.now(KST),height)
 
 
 def main(argv=None):
@@ -386,7 +381,7 @@ def main(argv=None):
                 time.sleep(1)
     except KeyboardInterrupt:pass
     finally:
-        collector.stop.set()
+        collector.stop.set();collector.remote.stop.set()
         if collector.thread:collector.thread.join(timeout=2)
     return 0
 

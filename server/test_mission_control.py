@@ -74,7 +74,7 @@ class CockpitTests(unittest.TestCase):
         console.print(ui.render(data,self.now,height=24))
         text=stream.getvalue()
         self.assertLessEqual(len(text.splitlines()),24)
-        for word in ('MISSION CONTROL','43건','6인','최근 완료','8790','[ 4/16]','25%','[red]literal'):
+        for word in ('MISSION CONTROL','BRAIN','BROWSER FLEET','PIPELINE','VAULT','[ 4/16]','25%'):
             self.assertIn(word,text)
         self.assertNotIn('성공 판정 아님',text)
 
@@ -97,7 +97,7 @@ class CockpitTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, patch('socket.create_connection',side_effect=OSError) as probe:
             collector=ui.Collector(Path(directory))
             collector.collect();collector.collect()
-            self.assertEqual(probe.call_count,5)
+            self.assertEqual(probe.call_count,len(ui.PORTS))
             self.assertTrue(collector.get()['cached'])
 
 

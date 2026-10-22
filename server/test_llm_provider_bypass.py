@@ -12,6 +12,8 @@ from common import agy_fallback, codex_cli, content_improvement, llm_client
 
 class AgyBypassTests(unittest.TestCase):
     def setUp(self):
+        self.usage_temp=tempfile.TemporaryDirectory();self.addCleanup(self.usage_temp.cleanup)
+        meter=patch('common.llm_usage.ROOT',Path(self.usage_temp.name));meter.start();self.addCleanup(meter.stop)
         self.config = {'active': 'agy', 'providers': {
             'agy': {'model': 'gemini-4-argon-high'},
             'codex': {'model': 'gpt-6-luna'},

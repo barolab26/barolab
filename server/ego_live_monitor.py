@@ -1,4 +1,4 @@
-"""Read-only EGO terminal HUD backed by the existing project and staff ledgers."""
+"""Full-height six-panel EGO cockpit; legacy text adapters remain import-compatible."""
 import datetime
 import json
 import math
@@ -232,8 +232,11 @@ def color_line(line):
 
 def main():
     from server.mission_control import main as cockpit_main
-    return cockpit_main([])
+    import sys
+    return cockpit_main(sys.argv[1:])
 
 
 if __name__ == '__main__':
+    import sys
+    sys.path.insert(0,str(ROOT))
     main()

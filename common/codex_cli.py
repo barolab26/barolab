@@ -1,4 +1,5 @@
 """Codex subscription adapter. Credentials remain on the Windows worker."""
+from common.llm_usage import metered
 import datetime as dt
 import hashlib
 import json
@@ -260,6 +261,7 @@ def _fallback_candidates(config, primary_model, primary_effort, allowed):
 
 
 @memory_call
+@metered
 def generate_local(prompt, model, images=None, response_schema=None, audit_directory=None, reasoning_effort=None,
                    timeout_seconds=None):
     from common.llm_client import parse_json, record_provider_memory_delivery
@@ -397,6 +399,8 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             try:
                 from common.llm_usage import record_codex_usage
                 record_codex_usage(events, cand_model)
+                from common.llm_usage import report_response
+                report_response(events=events,model=cand_model)
             except (OSError, ValueError, TypeError, KeyError, AttributeError):
                 pass  # Monitoring must not interrupt a completed model call.
             if not any(event.get('type') == 'turn.completed' for event in events):
