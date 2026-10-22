@@ -37,7 +37,9 @@ def main():
     # Observation remains responsive while bounded model calls or learning run.
     observers = [
         threading.Thread(target=loop, args=([sample_project_health_once], 30), name='project-observer'),
-        threading.Thread(target=loop, args=([process_staff_request_once, process_project_feedback_once, process_project_autonomy_once, process_project_monitor_once], 30), name='project-supervisor'),
+        threading.Thread(target=loop, args=([process_staff_request_once], 5), name='staff-executor'),
+        threading.Thread(target=loop, args=([process_project_autonomy_once], 30), name='project-autonomy'),
+        threading.Thread(target=loop, args=([process_project_feedback_once, process_project_monitor_once], 30), name='project-supervisor'),
     ]
     for worker in observers:
         worker.start()
