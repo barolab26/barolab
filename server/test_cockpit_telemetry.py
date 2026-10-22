@@ -30,11 +30,13 @@ class TelemetryTests(unittest.TestCase):
         now=dt.datetime(2026,10,22,15,tzinfo=ui.KST)
         data={'channels':[{'name':'CF 블로그','done':4,'target':16,'note':'[red]literal'}],
               'crew':ui.crew_rows([],[],{},now),'remote':{'fleet':[dict(port=p,account=a,blog=b,purpose=u,online=True,tabs=[{'title':'[red]Title','url':'https://example.com/'}]) for p,a,b,u in probe.FLEET]}}
+        for member in data['crew']:member['action']='실제 원인과 조치 '+('긴 상세 설명 '*30)
         stream=io.StringIO();console=Console(file=stream,width=144,height=76,color_system=None)
         console.print(view.render(data,now,76));text=stream.getvalue()
         self.assertEqual(len(text.splitlines()),76);self.assertEqual(sum(view.panel_sizes(76)),76)
-        for title in ('MISSION CONTROL','BRAIN','BROWSER FLEET','PIPELINE','ACTIVE CREW','VAULT','[red]Title','[red]literal'):
+        for title in ('MISSION CONTROL','BRAIN','우분투 격리 크롬 세션','PIPELINE','ACTIVE CREW','VAULT','[red]Title','[red]literal'):
             self.assertIn(title,text)
+        for name in ('자비스','패치','퍼블리','트레이스','닥터','레이더'):self.assertIn('@'+name,text)
         self.assertNotIn('성공 판정 아님',text)
         self.assertIn('┗',text.splitlines()[-1])
     def test_missing_daily_revenue_is_not_zero_and_duplicate_adpost_is_not_added(self):

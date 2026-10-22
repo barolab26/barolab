@@ -69,13 +69,13 @@ class UbuntuSchedulerTests(unittest.TestCase):
                 patch('common.ubuntu_naver_browser.ensure_account') as ensure:
             result = scheduler.ensure_naver_browsers()
             self.assertEqual([call.args[0] for call in identity.call_args_list], [9230, 9231])
-            self.assertEqual([call.args[0] for call in listener.call_args_list], [9230, 9231])
-            ensure.assert_not_called()
+            self.assertEqual([call.args[0] for call in ensure.call_args_list], [9230, 9231])
             self.assertTrue(all(row['ready'] for row in result))
             identity.return_value = None
-            with self.assertRaisesRegex(RuntimeError, 'browser is closed'):
-                scheduler.ensure_naver_browsers()
-            ensure.assert_not_called()
+            ensure.reset_mock()
+            result=scheduler.ensure_naver_browsers()
+            self.assertTrue(all(row['started'] for row in result))
+            self.assertEqual(ensure.call_count,2)
 
 
 if __name__ == '__main__':

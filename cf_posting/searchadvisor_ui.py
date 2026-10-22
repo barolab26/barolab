@@ -19,7 +19,8 @@ from common.browser_session import PageScope, _runtime
 from dashboard.metrics import collector_lock
 
 BOARD = 'https://searchadvisor.naver.com/console/board'
-PROFILE = Path('C:/99_포터블브라우저/CentBrowserPotable_soultin')
+from common.ubuntu_naver_browser import account_paths
+CHROME,PROFILE,_ = account_paths(9334)
 
 
 def parse_visible_history(rows, text, today, origin=None):
@@ -130,8 +131,8 @@ def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5):
         if not acquired:
             return {'status': 'account_ui_busy', 'submitted': 0}
         # Only attach to a verified existing dedicated profile. Lifecycle startup
-        # remains the account's soultin_start_cdp.bat, never arbitrary Chrome.
-        _runtime(9334, str(PROFILE / 'chrome.exe'), str(PROFILE / 'User Data'))
+        # remains the verified Ubuntu soultin profile.
+        _runtime(9334,str(CHROME),str(PROFILE))
         from playwright.sync_api import sync_playwright
         result = {'status': 'paused', 'submitted': 0, 'indexed': None}
         with sync_playwright() as playwright:

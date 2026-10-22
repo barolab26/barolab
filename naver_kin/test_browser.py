@@ -393,22 +393,14 @@ class BrowserEvidenceTests(unittest.TestCase):
                 'ws://127.0.0.1:9230/devtools/browser/known', timeout=20000, no_defaults=True)
         connection.close.assert_called_once()
 
-    @patch('common.browser_session.subprocess.run')
-    @patch('common.browser_session.os', SimpleNamespace(name='nt', environ=os.environ, path=os.path))
-    def test_process_validation_uses_default_thirty_and_accepts_explicit_timeout(self, run):
-        expected = {'ProcessId': 123, 'ExecutablePath': 'C:/expected/chrome.exe',
-                    'ProfilePath': 'C:/expected/User Data'}
-        run.return_value = Mock(returncode=0, stdout=json.dumps(expected))
-        browser_session._runtime(9230, expected['ExecutablePath'], expected['ProfilePath'])
-        self.assertEqual(run.call_args.kwargs['timeout'], 30)
-        self.assertIn('-LocalPort 9230', run.call_args.args[0][-1])
-        browser_session._runtime(9230, expected['ExecutablePath'], expected['ProfilePath'], process_timeout=15)
-        self.assertEqual(run.call_args.kwargs['timeout'], 15)
-        for rows in ({**expected, 'ExecutablePath': 'C:/other/chrome.exe'},
-                     {**expected, 'ProfilePath': 'C:/other/User Data'}, [expected, expected]):
-            run.return_value = Mock(returncode=0, stdout=json.dumps(rows))
-            with self.assertRaises(RuntimeError):
-                browser_session._runtime(9230, expected['ExecutablePath'], expected['ProfilePath'], process_timeout=30)
+    def test_process_validation_requires_exact_native_profile_and_port(self):
+        with patch('common.ubuntu_naver_browser.account_paths',return_value=(Path('/chrome'),Path('/profile'),None)), \
+                patch('common.ubuntu_naver_browser.ensure_account',return_value=123) as ensure, \
+                patch('common.ubuntu_naver_browser.listener_owner') as listener:
+            result=browser_session._runtime(9230,'/chrome','/profile')
+            self.assertEqual(result['ProcessId'],123);ensure.assert_called_once_with(9230)
+            with self.assertRaisesRegex(RuntimeError,'mismatch'):browser_session._runtime(9230,'/other','/profile')
+            self.assertEqual(ensure.call_count,1)
 
     def test_own_answer_map_bounds_to_three_pages_without_crashing_above_twenty(self):
         page = Mock()
@@ -428,8 +420,8 @@ class BrowserEvidenceTests(unittest.TestCase):
         for configured in (None, 30):
             kwargs = {} if configured is None else {'process_timeout': configured}
             with self.assertRaisesRegex(RuntimeError, 'stop before CDP network'):
-                browser_session.preflight('http://127.0.0.1:9230', 'C:/expected/chrome.exe',
-                                          'C:/expected/User Data', **kwargs)
+                browser_session.preflight('http://127.0.0.1:9230', '/opt/google/chrome/chrome',
+                                          '/home/test/.config/cdp_naver_stone0747', **kwargs)
             self.assertEqual(runtime.call_args.kwargs['process_timeout'], configured or 30)
 
     def test_question_specific_layer_does_not_halt_account(self):

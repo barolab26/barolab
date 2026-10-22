@@ -258,6 +258,15 @@ def learn_public(folder,proof,project,identity,root=ROOT,public_url='',vault_eve
             saved=Path(approval['approvalPath'])
             if hashlib.sha256(saved.read_bytes()).hexdigest()!=approval['approvalSha256']:raise ValueError('Changed recovery approval')
             prefix=f'{key}:{index}';problem=prefix+':problem';resolution=prefix+':resolution';outcome=prefix+':outcome'
+            episode_id=hashlib.sha256((public_url+'|'+approval['approvalSha256']).encode()).hexdigest()
+            pattern='problem-pattern:'+hashlib.sha256((project+'|'+str(approval.get('topicCategory',''))+'|'+approval['step']).encode()).hexdigest()
+            aggregate=graph['nodes'].setdefault(pattern,{'type':'ProblemPattern','project':project,'strategy':approval['step'],'resolvedCount':0,'concreteExamples':[]})
+            if not any(e.get('episodeId')==episode_id for e in aggregate['concreteExamples']):
+                aggregate['concreteExamples'].append({'episodeId':episode_id,'domain':identity,'slug':public_url.rstrip('/').split('/')[-1],
+                    'keywordOrEvidence':approval['approval'].get('readerQuestion',''),'resolution':approval['approval']['reason'],'publicUrl':public_url,'resolvedAt':time.time()})
+                aggregate['resolvedCount']+=1;aggregate['lastResolvedAt']=time.time()
+            pattern_edge={'source':pattern,'target':problem,'type':'concrete_episode'}
+            if pattern_edge not in graph['edges']:graph['edges'].append(pattern_edge)
             graph['nodes'][problem]={'type':'Problem','project':project,'identity':identity,
                 'category':approval.get('topicCategory',''),
                 'stage':'researcher -> writer','originalQuestion':approval['originalQuestion'],
@@ -270,8 +279,8 @@ def learn_public(folder,proof,project,identity,root=ROOT,public_url='',vault_eve
                 'publicationUrl':public_url,
                 'elapsedSeconds':max(0,time.time()-approval['approvedAt']),
                 'publicEvidence':{k:verified.get(k) for k in ('channel','outcome','sourceAgent')},
-                'indexing':None,'traffic':None,'revenue':None,
-                'measurementState':'awaiting_trace_measurement'}
+                'indexing':graph['nodes'].get(outcome,{}).get('indexing'),'traffic':graph['nodes'].get(outcome,{}).get('traffic'),'revenue':graph['nodes'].get(outcome,{}).get('revenue'),
+                'measurementState':graph['nodes'].get(outcome,{}).get('measurementState','awaiting_trace_measurement')}
             for source,target,label in ((problem,resolution,'resolved_by'),(resolution,outcome,'verified_by')):
                 edge={'source':source,'target':target,'type':label}
                 if edge not in graph['edges']:graph['edges'].append(edge)

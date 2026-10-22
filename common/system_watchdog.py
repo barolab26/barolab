@@ -24,93 +24,7 @@ BROWSER_STATUS_PATH = DATA_DIR / "browser-status.json"
 
 KST = timezone(timedelta(hours=9))
 
-PORTABLE_BROWSER_ROOT = Path(r"C:\99_포터블브라우저")
-CDP_SCRIPT_PATH = PORTABLE_BROWSER_ROOT / "_cdp_browser.ps1"
-
-CDP_PORT_CATALOG: List[Dict[str, Any]] = [
-    {
-        "id": "stone0747_cdp",
-        "port": 9230,
-        "name": "stone0747 (CF 브릿지·지식iN)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_stone0747",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_stone0747" / "stone0747_start_cdp.bat",
-        "windowSize": "1280,900",
-        "required": True,
-    },
-    {
-        "id": "adinfo0905_cdp",
-        "port": 9231,
-        "name": "adinfo0905 (CF 브릿지·지식iN)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_adinfo0905",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_adinfo0905" / "adinfo0905_start_cdp.bat",
-        "windowSize": "1280,900",
-        "required": True,
-    },
-    {
-        "id": "soul5373_cdp",
-        "port": 9333,
-        "name": "soul5373 (mustinfo)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_soul5373",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_soul5373" / "soul5373_start_cdp.bat",
-        "windowSize": "1280,900",
-        "required": True,
-    },
-    {
-        "id": "soultin_cdp",
-        "port": 9334,
-        "name": "soultin (mustpickinfo)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_soultin",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_soultin" / "soultin_start_cdp.bat",
-        "windowSize": "1280,900",
-        "required": True,
-    },
-    {
-        "id": "yoon_master_cdp",
-        "port": 9335,
-        "name": "yoon_master (yoonviews)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_yoon_master",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_yoon_master" / "yoon_master_start_cdp.bat",
-        "windowSize": "1280,900",
-        "required": True,
-    },
-    {
-        "id": "cf_preparer_cdp",
-        "port": 9336,
-        "name": "cf_preparer (CF 준비·Flow)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_cf_preparer",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_cf_preparer" / "cf_preparer_start_cdp.bat",
-        "windowSize": None,
-        "required": True,
-    },
-    {
-        "id": "sj_cdp",
-        "port": 9226,
-        "name": "sj (서치어드바이저·스레드·AdMob)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_sj",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_sj" / "sj_start_cdp.bat",
-        "windowSize": None,
-        "required": True,
-    },
-    {
-        "id": "baro76650_cdp",
-        "port": 9420,
-        "name": "baro76650 (CF 블로그·Flow 생성)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_baro76650",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPortable_baro76650" / "baro76650_start_cdp.bat",
-        "windowSize": None,
-        "required": True,
-    },
-    {
-        "id": "aaa10291028_cdp",
-        "port": 9260,
-        "name": "aaa10291028 (GSC·애드센스 보조)",
-        "folder": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_aaa10291028",
-        "launcher": PORTABLE_BROWSER_ROOT / "CentBrowserPotable_aaa10291028" / "aaa10291028_start_cdp.bat",
-        "windowSize": None,
-        "proxy": "http://49.254.163.44:20339",
-        "required": False,
-    },
-]
+CDP_PORT_CATALOG=[{'id':account+'_cdp','port':port,'name':account+' · Ubuntu 격리 Chrome','required':True} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))]
 
 
 def now_kst() -> datetime:
@@ -237,84 +151,18 @@ def check_and_recover_server() -> Dict[str, Any]:
 
 def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
     """Check all dedicated CDP browser ports and automatically start any closed required port."""
-    powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
-    results: Dict[str, Any] = {}
-    recovered_ports: List[int] = []
-    failed_ports: List[int] = []
-
+    from common.ubuntu_naver_browser import ensure_account,account_paths,process_identity,listener_owner
+    results={};recovered_ports=[];failed_ports=[]
     for item in CDP_PORT_CATALOG:
-        port = int(item["port"])
-        open_now = is_port_open(port)
-        was_recovered = False
-        if not open_now and auto_start and item.get("required", True):
-            launcher_path = Path(item["launcher"]) if item.get("launcher") else None
-            folder_path = Path(item["folder"]) if item.get("folder") else None
-            if launcher_path and launcher_path.exists():
-                try:
-                    subprocess.run(
-                        ["cmd.exe", "/c", str(launcher_path)],
-                        cwd=str(launcher_path.parent),
-                        capture_output=True,
-                        timeout=15,
-                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-                    )
-                    time.sleep(2.0)
-                    open_now = is_port_open(port)
-                    if open_now:
-                        was_recovered = True
-                        recovered_ports.append(port)
-                    else:
-                        failed_ports.append(port)
-                except Exception:
-                    failed_ports.append(port)
-            elif CDP_SCRIPT_PATH.exists() and folder_path and folder_path.exists():
-                cmd = [
-                    str(powershell),
-                    "-NoProfile",
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-File",
-                    str(CDP_SCRIPT_PATH),
-                    "-Action",
-                    "Start",
-                    "-BrowserFolder",
-                    str(folder_path),
-                    "-Port",
-                    str(port),
-                    "-Launcher",
-                    str(launcher_path or ""),
-                ]
-                if item.get("windowSize"):
-                    cmd.extend(["-WindowSize", str(item["windowSize"])])
-                if item.get("proxy"):
-                    cmd.extend(["-Proxy", str(item["proxy"])])
-                try:
-                    subprocess.run(
-                        cmd,
-                        capture_output=True,
-                        text=True,
-                        encoding="utf-8",
-                        errors="replace",
-                        timeout=20,
-                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-                    )
-                    time.sleep(1.0)
-                    open_now = is_port_open(port)
-                    if open_now:
-                        was_recovered = True
-                        recovered_ports.append(port)
-                    else:
-                        failed_ports.append(port)
-                except Exception:
-                    failed_ports.append(port)
-
-        results[item["id"]] = {
-            "port": port,
-            "name": item["name"],
-            "open": open_now,
-            "recovered": was_recovered,
-            "required": bool(item.get("required", True)),
-        }
+        port=item['port'];was_open=is_port_open(port);verified=False
+        try:
+            _,profile,_=account_paths(port)
+            pid=ensure_account(port) if auto_start else process_identity(port,profile)
+            if pid:listener_owner(port,pid);verified=True
+        except (OSError,RuntimeError,ValueError):failed_ports.append(port)
+        recovered=not was_open and verified
+        if recovered:recovered_ports.append(port)
+        results[item['id']]={'port':port,'name':item['name'],'open':verified,'recovered':recovered,'required':True}
 
     required_items = [v for v in results.values() if v.get("required", True)]
     online_required = sum(1 for v in required_items if v.get("open"))

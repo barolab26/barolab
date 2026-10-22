@@ -66,6 +66,8 @@ def listener_owner(port, pid):
 
 
 def account_paths(port):
+    if port==9440:
+        return Path('/opt/google/chrome/chrome'),Path.home()/'.config/cdp_gui_9440',None
     account = next((key for key, value in accounts().items() if value["cdp_port"] == port), None)
     if account is None:
         raise ValueError("Unknown Naver account port")
@@ -79,13 +81,22 @@ def ensure_account(port):
     _, profile, script = account_paths(port)
     pid = process_identity(port, profile)
     if pid is None:
-        if not script.is_file():
+        if port==9440:
+            profile.mkdir(parents=True,exist_ok=True)
+            subprocess.Popen(['/opt/google/chrome/chrome',f'--remote-debugging-port={port}',f'--user-data-dir={profile}',
+                '--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check','https://flow.google.com'],
+                env=dict(os.environ,DISPLAY=os.environ.get('BAROLAB_DISPLAY',':10')),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
+            for _ in range(100):
+                time.sleep(.2);pid=process_identity(port,profile)
+                if pid:break
+        elif not script.is_file():
             raise RuntimeError(f"Dedicated Ubuntu account launcher missing: {script}")
-        subprocess.run([str(script)], check=True, timeout=35, stdout=subprocess.DEVNULL)
+        else:subprocess.run([str(script)], check=True, timeout=35, stdout=subprocess.DEVNULL)
         pid = process_identity(port, profile)
     if pid is None:
         raise RuntimeError(f"Dedicated Ubuntu account process missing on port {port}")
     listener_owner(port, pid)
+    gc_blank_tabs(port)
     return pid
 
 
@@ -203,3 +214,33 @@ if __name__ == "__main__":
         with (directory / "launch.lock").open("a") as handle:
             fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
             launch(args.account)
+
+
+def gc_blank_tabs(port):
+    """Close only empty, unfocused blank tabs; login/editor/search tabs are preserved."""
+    import requests
+    import websocket
+    try:
+        response=requests.get(f'http://127.0.0.1:{port}/json/list',timeout=.3)
+        tabs=[t for t in response.json() if t.get('type')=='page']
+        if not any(t.get('url') not in ('about:blank','chrome://newtab/','') for t in tabs):return 0
+        closed=0
+        for tab in tabs:
+            if tab.get('url')!='about:blank':continue
+            address=tab.get('webSocketDebuggerUrl','')
+            from urllib.parse import urlsplit,quote
+            u=urlsplit(address)
+            if u.scheme!='ws' or u.hostname not in ('127.0.0.1','localhost') or u.port!=port:continue
+            ws=None
+            try:
+                ws=websocket.create_connection(address,timeout=.3,suppress_origin=True)
+                ws.send(json.dumps({'id':1,'method':'Runtime.evaluate','params':{'expression':"location.href === 'about:blank' && !document.hasFocus() && (!document.body || document.body.innerHTML.trim() === '')",'returnByValue':True}}))
+                result=json.loads(ws.recv())
+                if result.get('id')==1 and result.get('result',{}).get('result',{}).get('value') is True:
+                    reply=requests.get(f"http://127.0.0.1:{port}/json/close/"+quote(tab['id'],safe=''),timeout=.3)
+                    closed+=int(reply.status_code==200)
+            except (OSError,ValueError,websocket.WebSocketException):pass
+            finally:
+                if ws:ws.close()
+        return closed
+    except (requests.RequestException,ValueError,TypeError):return 0

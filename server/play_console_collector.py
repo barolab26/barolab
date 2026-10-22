@@ -248,18 +248,19 @@ def owned_console_page(browser):
 
 
 def collect_browser():
-    """Automatic Windows executor; never launch, close or change a browser."""
-    if os.name != 'nt':
-        raise RuntimeError('windows_collector_required')
+    """Read an explicitly configured native session; never substitute another account."""
+    from common.ubuntu_naver_browser import account_paths
     from common.browser_session import _runtime
     from playwright.sync_api import sync_playwright
-    profile = Path('C:/99_포터블브라우저/CentBrowserPotable_sj')
-    identity = _runtime(9226, profile / 'chrome.exe', profile / 'User Data')
+    port=int(os.getenv('BAROLAB_PLAY_CONSOLE_CDP_PORT','0'))
+    if not port:raise RuntimeError('native_console_session_unconfigured')
+    executable,profile,_=account_paths(port)
+    identity=_runtime(port,str(executable),str(profile))
     if identity.get('fastPath'):
         raise RuntimeError('browser_identity_unconfirmed')
     results = {}
     with sync_playwright() as pw:
-        browser = pw.chromium.connect_over_cdp('http://127.0.0.1:9226', timeout=15000)
+        browser = pw.chromium.connect_over_cdp(f'http://127.0.0.1:{port}', timeout=15000)
         with owned_console_page(browser) as (page, ownership):
             for app, play_id in APP_IDS.items():
                 base = f'https://play.google.com/console/u/0/developers/{DEVELOPER_ID}/app/{play_id}'

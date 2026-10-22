@@ -189,37 +189,24 @@ class AuthoringEvidenceTests(unittest.TestCase):
     def test_watchdog_retains_nas_monitor_contract(self, port_open, socket, save):
         from common.system_watchdog import check_and_recover_cdp_browsers
         socket.return_value.__enter__.return_value.getsockname.return_value = ('192.168.45.248', 1)
-        observed = check_and_recover_cdp_browsers(auto_start=False)
+        with patch('common.ubuntu_naver_browser.process_identity',return_value=123),patch('common.ubuntu_naver_browser.listener_owner'):
+            observed = check_and_recover_cdp_browsers(auto_start=False)
         self.assertEqual(observed['host'], '192.168.45.248')
         self.assertTrue(all(observed['ports'][str(port)] for port in (9230, 9231, 9333, 9334, 9335)))
         self.assertTrue(observed['checkedAt'])
 
-    @patch('requests.get')
-    @patch('naver_kin.scheduler.subprocess.Popen')
-    @patch('common.system_watchdog.is_port_open', return_value=True)
-    def test_scheduler_reuses_all_five_running_browsers(self, port_open, launch, get):
+    def test_scheduler_reuses_only_two_authorized_native_sessions(self):
         from naver_kin.scheduler import ensure_naver_browsers
-        get.return_value.status_code = 200
-        get.return_value.json.return_value = {'webSocketDebuggerUrl': 'ws://127.0.0.1/devtools/browser/test'}
-        with patch('naver_kin.scheduler.os', SimpleNamespace(name='nt')):
-            rows = ensure_naver_browsers()
-        self.assertEqual({row['port'] for row in rows}, {9230, 9231, 9333, 9334, 9335})
-        self.assertTrue(all(row['ready'] and not row['started'] for row in rows))
-        launch.assert_not_called()
+        with patch('common.ubuntu_naver_browser.process_identity',return_value=123),patch('common.ubuntu_naver_browser.ensure_account') as ensure:
+            rows=ensure_naver_browsers()
+        self.assertEqual({r['port'] for r in rows},{9230,9231})
+        self.assertTrue(all(not r['started'] for r in rows));self.assertEqual(ensure.call_count,2)
 
-    @patch('requests.get')
-    @patch('naver_kin.scheduler.subprocess.Popen')
-    @patch('common.system_watchdog.is_port_open', side_effect=lambda port: port != 9230)
-    def test_scheduler_starts_only_missing_account_through_batch(self, port_open, launch, get):
+    def test_scheduler_heals_missing_native_session(self):
         from naver_kin.scheduler import ensure_naver_browsers
-        get.return_value.status_code = 200
-        get.return_value.json.return_value = {'webSocketDebuggerUrl': 'ws://127.0.0.1/devtools/browser/test'}
-        with patch('pathlib.Path.is_file', return_value=True), patch('naver_kin.scheduler.os.name', 'nt'):
-            rows = ensure_naver_browsers()
-        launch.assert_called_once()
-        self.assertEqual(launch.call_args.args[0][:3], ['cmd.exe', '/d', '/c'])
-        self.assertTrue(launch.call_args.args[0][3].endswith('stone0747_start_cdp.bat'))
-        self.assertEqual([row['port'] for row in rows if row['started']], [9230])
+        with patch('common.ubuntu_naver_browser.process_identity',return_value=None),patch('common.ubuntu_naver_browser.ensure_account') as ensure:
+            rows=ensure_naver_browsers()
+        self.assertTrue(all(r['started'] for r in rows));self.assertEqual(ensure.call_count,2)
 
 
 if __name__ == '__main__':

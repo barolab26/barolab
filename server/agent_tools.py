@@ -43,65 +43,15 @@ NAVER_DIR = BASE_DIR / "naver_blog_posting"
 CF_DIR = BASE_DIR / "cf_posting"
 KIN_DIR = BASE_DIR / "naver_kin"
 THREADS_DIR = BASE_DIR / "threads_posting"
-PORTABLE_BROWSER_ROOT = Path(r"C:\99_포터블브라우저")
+
 
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 if str(SERVER_DIR) not in sys.path:
     sys.path.insert(0, str(SERVER_DIR))
 
-# Dedicated Portable Browser CDP Port Registry (Strictly managed via *_start_cdp.bat / *_stop_cdp.bat per AGENTS.md)
-CDP_PORT_REGISTRY: Dict[int, Dict[str, str]] = {
-    9230: {
-        "account": "stone0747",
-        "label": "네이버 5호기·지식iN (stone0747)",
-        "dir": "CentBrowserPotable_stone0747",
-        "start_bat": "stone0747_start_cdp.bat",
-        "stop_bat": "stone0747_stop_cdp.bat",
-    },
-    9231: {
-        "account": "adinfo0905",
-        "label": "네이버 4호기·지식iN (adinfo0905)",
-        "dir": "CentBrowserPotable_adinfo0905",
-        "start_bat": "adinfo0905_start_cdp.bat",
-        "stop_bat": "adinfo0905_stop_cdp.bat",
-    },
-    9333: {
-        "account": "soul5373",
-        "label": "네이버 2호기 (soul5373)",
-        "dir": "CentBrowserPortable_soul5373",
-        "start_bat": "soul5373_start_cdp.bat",
-        "stop_bat": "soul5373_stop_cdp.bat",
-    },
-    9334: {
-        "account": "soultin",
-        "label": "네이버 1호기 (soultin)",
-        "dir": "CentBrowserPotable_soultin",
-        "start_bat": "soultin_start_cdp.bat",
-        "stop_bat": "soultin_stop_cdp.bat",
-    },
-    9335: {
-        "account": "yoon_master",
-        "label": "네이버 3호기 (yoon_master)",
-        "dir": "CentBrowserPotable_yoon_master",
-        "start_bat": "yoon_master_start_cdp.bat",
-        "stop_bat": "yoon_master_stop_cdp.bat",
-    },
-    9336: {
-        "account": "cf_preparer",
-        "label": "CF 캡처·준비 브라우저 (cf_preparer)",
-        "dir": "CentBrowserPortable_cf_preparer",
-        "start_bat": "cf_preparer_start_cdp.bat",
-        "stop_bat": "cf_preparer_stop_cdp.bat",
-    },
-    9226: {
-        "account": "sj",
-        "label": "서치콘솔·어드바이저 브라우저 (sj@must.biz)",
-        "dir": "CentBrowserPotable_sj",
-        "start_bat": "sj_start_cdp.bat",
-        "stop_bat": "sj_stop_cdp.bat",
-    },
-}
+# Ubuntu isolated Chrome registry; launch ownership is verified by the native manager.
+CDP_PORT_REGISTRY = {port:{'account':account,'label':account+' · Ubuntu 격리 Chrome'} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))}
 
 CF_16_DOMAINS: List[str] = [
     "must-good.com",
@@ -1191,89 +1141,14 @@ def run_watchdog_heal() -> Dict[str, Any]:
 
 
 def restart_browser_cdp(port: int) -> Dict[str, Any]:
-    """
-    Restart a dedicated portable browser ONLY using its `*_stop_cdp.bat` and `*_start_cdp.bat`
-    scripts inside `C:\\99_포터블브라우저` (strictly adhering to `AGENTS.md`).
-    """
-    p_int = int(port)
-    if os.name != "nt":
-        return {"ok": False, "tool": "restart_browser_cdp", "status": "manual_review_required",
-                "state": "Ubuntu 기존 계정 세션을 보존했습니다. 전용 런처와 소유 작업 확인 후 복구해야 합니다.",
-                "port": p_int, "probe": probe_cdp_port(p_int), "started": False}
-    meta = CDP_PORT_REGISTRY.get(p_int)
-    if not meta:
-        return {
-            "ok": False,
-            "tool": "restart_browser_cdp",
-            "pid": os.getpid(),
-            "port": p_int,
-            "state": f"등록되지 않은 CDP 포트({p_int})",
-            "badge": f"[실행 실패: 미등록 CDP 포트 {p_int}]",
-        }
-
-    folder = PORTABLE_BROWSER_ROOT / meta["dir"]
-    stop_bat = folder / meta["stop_bat"]
-    start_bat = folder / meta["start_bat"]
-
-    if not start_bat.is_file():
-        return {
-            "ok": False,
-            "tool": "restart_browser_cdp",
-            "pid": os.getpid(),
-            "port": p_int,
-            "state": f"배치파일 없음: {start_bat}",
-            "badge": f"[실행 실패: {meta['start_bat']} 파일 미존재]",
-        }
-
-    pre_status = probe_cdp_port(p_int)
-    if not pre_status["open"] and stop_bat.is_file():
-        try:
-            subprocess.run(
-                ["cmd.exe", "/c", str(stop_bat)],
-                cwd=str(folder),
-                capture_output=True,
-                timeout=8,
-                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-            )
-        except Exception:
-            pass
-
-    proc = _ego_popen(
-        ["cmd.exe", "/c", str(start_bat)],
-        cwd=str(folder),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
-    time.sleep(1.8)
-    post_status = probe_cdp_port(p_int)
-    state_str = "ONLINE" if post_status["open"] else "STARTING"
-    cmd_display = f"cmd /c \"{start_bat}\""
-    tail_str = (
-        f"[CDP Port {p_int} ({meta['account']})] Pre-state: {'ONLINE' if pre_status['open'] else 'OFFLINE'}\n"
-        f"[CDP Port {p_int} ({meta['account']})] Executed: {start_bat.name} -> Post-state: {state_str} (tabs={post_status['tabsCount']})"
-    )
-    receipt = _build_execution_receipt(
-        cmd_str=cmd_display,
-        pid=proc.pid,
-        exit_code=0 if post_status["open"] else "STARTING",
-        stdout_tail=tail_str,
-    )
-    badge = f"[실행 완료: 프로세스 PID {proc.pid} / CDP {p_int}({meta['account']}) 전용 배치파일 기동 → {state_str}]"
-    return {
-        "ok": True,
-        "tool": "restart_browser_cdp",
-        "pid": proc.pid,
-        "exitCode": 0,
-        "cmd": cmd_display,
-        "stdoutTail": tail_str,
-        "executionReceipt": receipt,
-        "port": p_int,
-        "account": meta["account"],
-        "open": post_status["open"],
-        "state": f"{meta['start_bat']} 실행 완료 (CDP {p_int} {state_str})",
-        "badge": badge,
-    }
+    """Heal only a missing native session; never destroy live editors or cookies."""
+    from common.ubuntu_naver_browser import ensure_account
+    port=int(port)
+    try:
+        pid=ensure_account(port)
+        return {'ok':True,'tool':'restart_browser_cdp','port':port,'pid':pid,'status':'verified','state':'Ubuntu 격리 Chrome 세션 확인·복구','probe':probe_cdp_port(port)}
+    except (OSError,ValueError,RuntimeError) as exc:
+        return {'ok':False,'tool':'restart_browser_cdp','port':port,'status':'failed','errorType':type(exc).__name__}
 
 
 def fix_scheduler_task(task_name: str = "BaroLab-Kin-Seven-Day-Pilot") -> Dict[str, Any]:

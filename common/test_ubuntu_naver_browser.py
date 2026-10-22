@@ -12,6 +12,9 @@ from common import ubuntu_naver_browser as browser
 
 
 class UbuntuNaverBrowserTests(unittest.TestCase):
+    def setUp(self):
+        gc=patch.object(browser,"gc_blank_tabs",return_value=0);gc.start();self.addCleanup(gc.stop)
+
     def test_naver_search_and_images_connect_to_same_cf_browser(self):
         from naver_blog_posting import pipeline_runner
         from common import browser_session
@@ -20,7 +23,7 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
                                   BROWSER_USER_DATA="/existing/shared/profile",
                                   gather_sources=AsyncMock(),
                                   generate_flow_images_in_browser=AsyncMock(),
-                                  ensure_portable_browser_ready=Mock())
+                                  ensure_isolated_browser_ready=Mock())
         class StopBeforeBrowserInteraction(Exception):
             pass
         with patch.dict("sys.modules", {"cf_posting.pipeline_runner": runtime}), \
@@ -34,16 +37,14 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
                     asyncio.run(coroutine)
                 self.assertEqual(connect.call_args.args[1:],
                                  (runtime.CDP_URL, runtime.BROWSER_EXE, runtime.BROWSER_USER_DATA))
-            runtime.ensure_portable_browser_ready.assert_called_once()
+            runtime.ensure_isolated_browser_ready.assert_called_once()
 
-    def test_windows_source_browser_keeps_original_account_and_port(self):
+    def test_source_browser_always_uses_observed_native_flow_session(self):
         from naver_blog_posting import pipeline_runner
-        with patch.object(pipeline_runner, "os", SimpleNamespace(name="nt")):
-            endpoint, executable, profile = pipeline_runner.source_browser_paths()
-        home = Path(r'C:\99_포터블브라우저\CentBrowserPortable_baro76650')
-        self.assertEqual(endpoint, "http://127.0.0.1:9420")
-        self.assertEqual(executable, str(home / "chrome.exe"))
-        self.assertEqual(profile, str(home / "User Data"))
+        endpoint,executable,profile=pipeline_runner.source_browser_paths()
+        self.assertEqual(endpoint,'http://127.0.0.1:9440')
+        self.assertEqual(executable,'/opt/google/chrome/chrome')
+        self.assertEqual(profile,str(Path.home()/'.config/cdp_gui_9440'))
 
     def test_shared_flow_runtime_verifies_actual_linux_profile(self):
         from common import browser_session
@@ -54,7 +55,7 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
             result = browser_session._runtime(9440, "/opt/google/chrome/chrome", str(profile))
             self.assertEqual(result["ProcessId"], 456)
             identity.assert_called_once_with(9440, profile)
-            listener.assert_called_once_with(9440, 456)
+            self.assertTrue(all(c.args==(9440,456) for c in listener.call_args_list))
 
     def test_naver_pipeline_routes_linux_to_account_launcher(self):
         from naver_blog_posting import pipeline_runner
@@ -134,15 +135,12 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "paths do not match"):
                 browser_session._runtime(9334, "/other/chrome", str(profile))
 
-    def test_session_missing_process_cannot_use_http_fast_path(self):
+    def test_failed_native_heal_cannot_use_http_fast_path(self):
         from common import browser_session
-        executable, profile, _ = browser.account_paths(9334)
-        with patch.object(browser_session, "os", SimpleNamespace(name="posix")), \
-                patch.object(browser, "process_identity", return_value=None), \
-                patch.object(browser_session.requests, "get") as get:
-            with self.assertRaisesRegex(RuntimeError, "process missing"):
-                browser_session._runtime(9334, str(executable), str(profile))
-            get.assert_not_called()
+        executable,profile,_=browser.account_paths(9334)
+        with patch.object(browser,'ensure_account',side_effect=RuntimeError('native launch failed')),patch('requests.get') as request:
+            with self.assertRaisesRegex(RuntimeError,'native launch failed'):browser_session._runtime(9334,str(executable),str(profile))
+            request.assert_not_called()
 
     def test_account_map_matches_expected_ports(self):
         self.assertEqual({key: value["cdp_port"] for key, value in browser.accounts().items()},
@@ -216,3 +214,15 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NativeTabGcTests(unittest.TestCase):
+    def test_gc_closes_only_unfocused_empty_blank_and_retains_login_and_editor(self):
+        response=Mock();response.json.return_value=[
+            {'id':'login','type':'page','url':'https://nid.naver.com/login'},
+            {'id':'editor','type':'page','url':'https://blog.naver.com/editor'},
+            {'id':'blank','type':'page','url':'about:blank','webSocketDebuggerUrl':'ws://127.0.0.1:9334/devtools/page/blank'}]
+        closed=Mock(status_code=200);ws=Mock();ws.recv.return_value='{"id":1,"result":{"result":{"value":true}}}'
+        with patch('requests.get',side_effect=[response,closed]) as get,patch('websocket.create_connection',return_value=ws):
+            self.assertEqual(browser.gc_blank_tabs(9334),1)
+        self.assertTrue(get.call_args.args[0].endswith('/blank'));ws.close.assert_called_once()

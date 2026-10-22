@@ -71,11 +71,8 @@ def _check_service_state(page):
 def account_config(account):
     if account not in ACCOUNTS:
         raise ValueError("Only the two authorized non-realname accounts are permitted")
-    home = Path("C:/99_포터블브라우저") / ("CentBrowserPotable_" + account)
-    executable, profile = home / "chrome.exe", home / "User Data"
-    if os.name != 'nt':
-        from common.ubuntu_naver_browser import account_paths
-        executable, profile, _ = account_paths(ACCOUNTS[account])
+    from common.ubuntu_naver_browser import account_paths
+    executable,profile,_=account_paths(ACCOUNTS[account])
     return {"account": account, "cdp_port": ACCOUNTS[account],
             "endpoint": f"http://127.0.0.1:{ACCOUNTS[account]}",
             "exe": str(executable), "profile": str(profile)}

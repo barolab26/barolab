@@ -61,6 +61,30 @@ class GrowthSeedTests(unittest.TestCase):
         self.assertEqual(evidence['threshold'],100)
         self.assertFalse(evidence['candidates'][0]['eligible'])
 
+class DemandRecoveryTests(unittest.TestCase):
+    def setUp(self):GrowthSeedTests.setUp(self)
+    def test_rejected_held_keyword_is_released_on_second_round(self):
+        class Observed(Exception):pass
+        rounds=[]
+        def propose(prompt,response_schema=None):
+            props=response_schema['properties']['candidates']['items']['properties']['mainKeyword']
+            rounds.append(dict(props))
+            if len(rounds)==2:
+                self.assertNotIn('enum',props);raise Observed()
+            return {'candidates':[{'mainKeyword':'긴 고정 검색어','question':'질문 확인 방법','category':'여행','title':'예약 확인','topicSlug':'booking-check'}]}
+        self.ns['keyword_demand_evidence']=lambda rows:{'threshold':100,'candidates':[{'mainKeyword':r['mainKeyword'],'volume':{'status':'ok','monthlyLowerBound':12},'eligible':False,'currentIssue':False} for r in rows]}
+        with self.assertRaises(Observed):self.ns['select_keyword_with_demand']('instruction',{},propose,{'mainKeyword':'긴 고정 검색어'},require_current_issue=False)
+        self.assertEqual(rounds[0]['enum'],['긴 고정 검색어'])
+
+    def test_evergreen_monthly_demand_reaches_final_plan_without_news(self):
+        class PlanReached(Exception):pass
+        def propose(prompt,response_schema=None):
+            if 'candidates' not in response_schema['properties']:raise PlanReached()
+            return {'candidates':[{'mainKeyword':'수목원','question':'예약 확인 방법','category':'여행','title':'예약 확인','topicSlug':'booking-check'}]}
+        self.ns['keyword_demand_evidence']=lambda rows:{'threshold':100,'candidates':[{'mainKeyword':r['mainKeyword'],'volume':{'status':'ok','monthlyLowerBound':200},'eligible':False,'currentIssue':False,'issueSignals':[],'news':[]} for r in rows]}
+        with self.assertRaises(PlanReached):self.ns['select_keyword_with_demand']('instruction',{},propose,require_current_issue=False)
+
+
 if __name__=='__main__':unittest.main()
 
 

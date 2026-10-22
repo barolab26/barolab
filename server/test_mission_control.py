@@ -74,7 +74,7 @@ class CockpitTests(unittest.TestCase):
         console.print(ui.render(data,self.now,height=24))
         text=stream.getvalue()
         self.assertLessEqual(len(text.splitlines()),24)
-        for word in ('MISSION CONTROL','BRAIN','BROWSER FLEET','PIPELINE','VAULT','[ 4/16]','25%'):
+        for word in ('MISSION CONTROL','BRAIN','우분투 격리 크롬 세션','PIPELINE','VAULT','[ 4/16]','25%'):
             self.assertIn(word,text)
         self.assertNotIn('성공 판정 아님',text)
 

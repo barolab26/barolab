@@ -1937,7 +1937,9 @@ def source_snapshot(row, kind, index):
                     break
         quotes = paragraphs if paragraphs else [text[:200]]
         return {'id': f'S{index}', 'url': url, 'title': row.get('title', ''), 'kind': kind,
-                'observedPosition': row.get('position'), 'text': text, 'quotes': quotes}
+                'observedPosition': row.get('position'), 'text': text, 'quotes': quotes,
+                'collectionMethod':'static HTML extraction','collectedAt':cached.get('collectedAt') or stamp(),
+                'bodySha256':hashlib.sha256(text.encode('utf-8')).hexdigest()}
     except Exception:
         return None
 
@@ -1955,8 +1957,10 @@ def round_robin_sources(groups):
 async def _gather_sources(context, keyword):
     from common.browser_session import deny_downloads_async
     from common.public_capture import fetch_url_cached, is_blocked_download_url, is_pdf_or_download_trigger_url
-    page = await context.new_page()
-    await deny_downloads_async(page)
+    page = None
+    try:
+        page=await context.new_page();await deny_downloads_async(page)
+    except Exception:pass
     sources = []
     source_groups = []
     observations = []
@@ -1988,7 +1992,7 @@ async def _gather_sources(context, keyword):
                     if cached_check.get('kind') in ('pdf', 'blocked_attachment') or is_pdf_or_download_trigger_url(row['url']):
                         continue
                     host = urlparse(row['url']).hostname or ''
-                    if primary_url(row['url']) or host.endswith(('lg.com', 'samsung.com')):
+                    if (primary_url(row['url']) or host.endswith(('lg.com', 'samsung.com'))) and not (snapshots[i] and len(snapshots[i].get('text',''))>=200):
                         rendered = await rendered_source_snapshot(context, row, query_idx*10+i+1)
                         if rendered:
                             snapshots[i] = rendered
@@ -1996,11 +2000,21 @@ async def _gather_sources(context, keyword):
                                       for source in snapshots if source])
             except Exception:
                 pass
+        if sum(primary_url(source['url']) for group in source_groups for source in group)<2:
+            from common.source_discovery import search_urls
+            for query_idx,query in enumerate(queries[:2]):
+                rows=await asyncio.to_thread(search_urls,query)
+                observations.append({'query':query,'provider':'naver-api/http-fallback','results':rows})
+                chosen=[row for row in rows if row['url'] not in seen and not is_blocked_download_url(row['url'])]
+                chosen.sort(key=lambda row:not primary_url(row['url']))
+                chosen=chosen[:8];seen.update(row['url'] for row in chosen)
+                fetched=await asyncio.gather(*(asyncio.to_thread(source_snapshot,row,'primary' if primary_url(row['url']) else 'competitor',80+query_idx*10+i) for i,row in enumerate(chosen)))
+                source_groups.append([{**item,'searchQuery':query,'searchQueryIndex':query_idx,'discoveryMethod':'naver-api/http-fallback'} for item in fetched if item and len(item.get('text',''))>=200])
         # Distribute fetched bodies across actual queries before downstream caps.
         sources = round_robin_sources(source_groups)
         return {'collectedAt': stamp(), 'searches': observations, 'sources': sources}
     finally:
-        await page.close()
+        if page:await page.close()
 
 
 async def rendered_source_snapshot(context, row, index):
@@ -2032,8 +2046,11 @@ async def rendered_source_snapshot(context, row, index):
     if is_pdf_or_download_trigger_url(target_url):
         return None
 
-    page = await context.new_page()
-    await deny_downloads_async(page)
+    try:
+        page=await context.new_page();await deny_downloads_async(page)
+    except Exception:
+        fallback=await asyncio.to_thread(source_snapshot,row,'primary' if primary_url(target_url) else 'competitor',index)
+        return fallback if fallback and len(fallback.get('text',''))>=200 else None
 
     async def _route_guard(route, request):
         req_url = request.url or ''
@@ -2064,7 +2081,8 @@ async def rendered_source_snapshot(context, row, index):
                 'observedPosition': row.get('position'), 'text': text[:24000], 'quotes': payload['quotes'],
                 'collectionMethod': 'actual browser rendered DOM', 'collectedAt': stamp()}
     except Exception:
-        return None
+        fallback=await asyncio.to_thread(source_snapshot,row,'primary' if primary_url(target_url) else 'competitor',index)
+        return fallback if fallback and len(fallback.get('text',''))>=200 else None
     finally:
         try:
             await page.unroute('**/*', _route_guard)
@@ -2105,13 +2123,18 @@ def _volume(keyword):
                          headers=headers, timeout=15, allow_redirects=False)
         if r.status_code != 200: return {'status': 'unknown', 'reason': f'HTTP {r.status_code}'}
         rows = r.json().get('keywordList', [])
+        related=[]
+        for candidate in rows[:200]:
+            lo,hi=_bounds(candidate.get('monthlyPcQcCnt'));ml,mh=_bounds(candidate.get('monthlyMobileQcCnt'))
+            if None not in (lo,hi,ml,mh):related.append({'mainKeyword':candidate.get('relKeyword'),'monthlyLowerBound':lo+ml,'monthlyUpperBound':hi+mh})
+        related=sorted(related,key=lambda x:x['monthlyLowerBound'],reverse=True)[:8]
         row = next((x for x in rows if _norm(x.get('relKeyword')) == _norm(keyword)), None)
-        if row is None: return {'status': 'unknown', 'reason': 'exact keyword absent'}
+        if row is None: return {'status': 'unknown', 'reason': 'exact keyword absent','relatedKeywords':related}
         pl, pu = _bounds(row.get('monthlyPcQcCnt')); ml, mu = _bounds(row.get('monthlyMobileQcCnt'))
         if None in (pl, pu, ml, mu):
             return {'status': 'unknown', 'reason': 'invalid monthly count', 'pcRaw': row.get('monthlyPcQcCnt'), 'mobileRaw': row.get('monthlyMobileQcCnt')}
         return {'status': 'ok', 'reason': None, 'pcRaw': row.get('monthlyPcQcCnt'), 'mobileRaw': row.get('monthlyMobileQcCnt'),
-                'monthlyLowerBound': pl + ml, 'monthlyUpperBound': pu + mu}
+                'monthlyLowerBound': pl + ml, 'monthlyUpperBound': pu + mu,'relatedKeywords':related}
     except Exception as e: return {'status': 'unknown', 'reason': type(e).__name__}
 
 def _trend(keyword, today):
@@ -2175,7 +2198,7 @@ def keyword_demand_evidence(candidates):
         trend_issue = trend['status'] == 'ok' and trend['relativeGrowth'] is not None and trend['relativeGrowth'] >= 1.2
         new_issue = trend['status'] == 'ok' and trend['newActivity']
         current = bool(news) or trend_issue or new_issue
-        eligible = demand and not (trend['status'] == 'ok' and trend['recent7Mean'] == 0)
+        eligible = demand  # Monthly demand and current-issue eligibility are separate gates.
         signals = (['recentRelevantNews'] if news else []) + (['relativeGrowth'] if trend_issue else []) + (['newPositiveActivity'] if new_issue else []) + (['ongoingDemand'] if demand else [])
         reasons = []
         if not demand: reasons.append('monthly demand below threshold or unknown')
@@ -2261,12 +2284,17 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
     domain_specialty = context.get('domainSpecialty') or account_category
     published_slugs = {str(p.get('slug')) for p in catalog if isinstance(p, dict) and p.get('slug')}
     for selection_round in range(3):
+        if selection_round and held:
+            candidate_schema['properties']['candidates']['items']['properties']['mainKeyword'].pop('enum',None)
+            related=[r for attempt in selection_rounds[-1:] for e in attempt['observed'].get('candidates',[]) for r in e.get('volume',{}).get('relatedKeywords',[]) if r.get('monthlyLowerBound',0)>=attempt['observed'].get('threshold',100)]
+            if related:
+                candidate_schema['properties']['candidates']['items']['properties']['mainKeyword']['enum']=list(dict.fromkeys(r['mainKeyword'] for r in sorted(related,key=lambda r:r['monthlyLowerBound'],reverse=True)))[:8]
         proposal = model(json.dumps({'task': f'This proposal task overrides the final-plan template in the agent instructions. Return exactly three candidate records only. Every candidate MUST strictly belong to the site domain specialty ({domain_specialty}) and accountCategory ({account_category}). NEVER propose off-domain topics (e.g., never propose transport passes like 기후동행카드 on a 국민·기초연금 / 핀테크 site). mainKeyword must be a SHORT measured base search query, usually 2 to 8 Korean syllables, not the full long-tail question. question/title specify the distinct actionable long-tail intent. topicSlug MUST be a descriptive English hyphenated SEO slug (never generic topic-1). Avoid website names, category names and placeholder guides. Prefer queries actually present in autocomplete and current news. Never invent volume or news.',
             'instruction': instruction, 'context': context, 'publishedCatalog': catalog,
             'domainSpecialty': domain_specialty,
             'accountCategory': account_category, 'registeredCategories': registered, 'strategy': strategy,
             'latestRealNewsSeed': {'category': category, 'items': news_seed},
-            'heldMainKeyword': held, 'editorialSeedTitleOnly': fixed.get('seedTitle'),
+            'heldMainKeyword': held if selection_round==0 else None, 'failedSeedKeyword':held,'keywordRecovery':'After rejection propose distinct measured 2-6 syllable related roots; preserve domain category and validate every query.', 'editorialSeedTitleOnly': fixed.get('seedTitle'),
             'previousObservedRejections': selection_rounds, 'schema': {'candidates': [{'mainKeyword': '', 'question': '', 'category': '', 'title': '', 'topicSlug': ''}] }}, ensure_ascii=False), candidate_schema)
         candidates = proposal.get('candidates')
         if not isinstance(candidates, list) or not 1 <= len(candidates) <= 3:
@@ -2303,7 +2331,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
                 c['question'] = q
                 identity = (_norm(kw), _norm(q))
             seen.add(identity)
-            if held and valid_text(held) and _norm(kw) != _norm(held):
+            if selection_round==0 and held and valid_text(held) and _norm(kw) != _norm(held):
                 c['mainKeyword'] = held
             clean.append(c)
         if not clean:
@@ -2319,7 +2347,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
                     metric['reason'] += '; keyword is not literal in CF title; evaluate reader relevance from the actual guide'
         if len(observed) != len(clean):
             reject('Demand evidence is incomplete')
-        eligible = [i for i, e in enumerate(observed) if e.get('eligible') is True and e.get('volume', {}).get('monthlyLowerBound') is not None and (not require_current_issue or e.get('currentIssue') is True)]
+        eligible = [i for i, e in enumerate(observed) if e.get('volume', {}).get('status','ok')=='ok' and e.get('volume', {}).get('monthlyLowerBound') is not None and e['volume']['monthlyLowerBound']>=evidence.get('threshold',100) and (not require_current_issue or e.get('currentIssue') is True)]
         selection_rounds.append({'proposed': clean, 'observed': evidence})
         if eligible:
             break
@@ -2355,7 +2383,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         'instruction': instruction, 'context': context, 'publishedCatalog': catalog,
         'candidates': clean, 'eligibleGlobalIndices': eligible, 'actualDemandEvidence': evidence,
         'whyNowAllowedKinds': allowed_kinds, 'whyNowAllowedExactUrls': sorted(set(allowed_urls)),
-        'heldMainKeyword': held, 'registeredCategories': registered,
+        'heldMainKeyword': held if selection_round==0 else None, 'registeredCategories': registered,
         'requiredSchema': {'selectedCandidateIndex': eligible[0], 'mainKeyword': clean[eligible[0]]['mainKeyword'], 'subKeywords': [], 'category': '',
             'targetAudience': '', 'questions': ['','','',''], 'angle': '', 'title': '', 'topicSlug': '',
             'whyNow': {'kind': allowed_kinds[0], 'evidenceUrl': allowed_urls[0], 'explanation': ''},
@@ -2385,9 +2413,8 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         draft['bridgeUrl'] = chosen.get('bridgeUrl', '')
     if _norm(draft.get('mainKeyword')) != _norm(chosen['mainKeyword']):
         draft['mainKeyword'] = chosen['mainKeyword']
-    if held and valid_text(held) and _norm(chosen['mainKeyword']) != _norm(held):
-        chosen['mainKeyword'] = held
-        draft['mainKeyword'] = held
+    if selection_round and held and _norm(chosen['mainKeyword'])!=_norm(held):
+        draft['demandRecovery']={'originalKeyword':held,'selectedKeyword':chosen['mainKeyword'],'round':selection_round+1,'basis':'freshly measured eligible query'}
     if registered and draft.get('category') not in registered:
         draft['category'] = chosen['category'] if chosen.get('category') in registered else registered[0]
     questions = [q for q in (draft.get('questions') or []) if valid_text(q)]
@@ -3249,16 +3276,11 @@ STATE_JSON = DATA_DIR / "pipeline_state.json"
 SCHEDULE_JSON = DATA_DIR / "daily_schedule.json"
 KEYS_FILE = DATA_DIR / "secure" / "cf_blog_keys.json"
 
-# Designated Portable Browser Settings
-BROWSER_EXE = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\chrome.exe"
-BROWSER_USER_DATA = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\User Data"
-if os.name != "nt":
-    BROWSER_EXE = "/opt/google/chrome/chrome"
-    BROWSER_USER_DATA = str(Path.home() / ".config/cdp_gui_9440")
+# Ubuntu isolated Chrome: retain the observed live CF/Flow profile.
+BROWSER_EXE = '/opt/google/chrome/chrome'
+BROWSER_USER_DATA = str(Path.home()/'.config/cdp_gui_9440')
 CDP_PORT = 9440
-CDP_URL = f"http://127.0.0.1:{CDP_PORT}"
-BROWSER_START_BAT = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\barolab26_start_cdp.bat"
-BROWSER_STOP_BAT = r"C:\99_Portable_Braowser\CentBrowserPotable_barolab26\barolab26_stop_cdp.bat"
+CDP_URL = f'http://127.0.0.1:{CDP_PORT}'
 FLOW_URL = "https://flow.google.com"
 RUN_CONTEXT = {}
 
@@ -4211,6 +4233,7 @@ def update_status(blog_info, completed_ids, stage: int, stage_name: str, pct: in
                             it["slug"] = blog_info.get("topicSlug", it.get("slug"))
                         it["status"] = status
                         it['detailMessage'] = detail
+                        previous_stage=it.get('currentStage')
                         it['currentStage'] = stage
                         if status in ('failed', 'review_required', 'verification_pending'):
                             it['lastError'] = detail
@@ -4218,7 +4241,8 @@ def update_status(blog_info, completed_ids, stage: int, stage_name: str, pct: in
                         if status == 'prepared' and blog_info.get('reviewedArticle'):
                             it['reviewedArticle'] = blog_info['reviewedArticle']
                         stage_times = it.setdefault('stageTimes', {})
-                        stage_times.setdefault(str(stage), datetime.datetime.now(datetime.timezone.utc).isoformat())
+                        if previous_stage!=stage or str(stage) not in stage_times:
+                            stage_times[str(stage)]=datetime.datetime.now(datetime.timezone.utc).isoformat()
                         for field in ('attemptCount', 'totalAttempts', 'retryRound', 'nextRetryAt', 'lastError',
                                       'currentModel', 'modelHistory', 'stageTimes', 'browserRuntime', 'handoffs', 'artifactFolder'):
                             if field in it:
@@ -4297,52 +4321,15 @@ def get_api_key(domain: str) -> str:
         keys = json.load(f)
     return keys[domain]
 
-def ensure_portable_browser_ready():
-    try:
-        r = requests.get(f"{CDP_URL}/json/version", timeout=1)
-        if r.status_code == 200:
-            print(f"[BROWSER] Portable CentBrowser already active on port {CDP_PORT}.", flush=True)
-            return True
-    except Exception:
-        pass
+def ensure_isolated_browser_ready():
+    from common.ubuntu_naver_browser import ensure_account
+    ensure_account(CDP_PORT)
+    return True
 
-    print("[BROWSER] Launching portable CentBrowser via start_cdp.bat...", flush=True)
-    if os.name != "nt":
-        display = os.environ.get("DISPLAY", ":10")
-        env = dict(os.environ, DISPLAY=display)
-        subprocess.Popen(["google-chrome", f"--remote-debugging-port={CDP_PORT}", "--user-data-dir=/home/baro7/.config/cdp_gui_9440", "--no-first-run", "--no-default-browser-check", "about:blank"], env=env)
-    else:
-        start_bat = BROWSER_START_BAT
-        if os.path.exists(start_bat):
-            subprocess.Popen(["cmd.exe", "/c", start_bat], cwd=os.path.dirname(start_bat), creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-        else:
-            raise RuntimeError("Designated browser start batch is missing; direct launch forbidden")
-    
-    for i in range(15):
-        time.sleep(1)
-        try:
-            r = requests.get(f"{CDP_URL}/json/version", timeout=1)
-            if r.status_code == 200:
-                print(f"[BROWSER] Portable CentBrowser ready on port {CDP_PORT} ({i+1}s)", flush=True)
-                return True
-        except Exception:
-            pass
-    raise RuntimeError(f"Failed to launch portable CentBrowser on port {CDP_PORT}")
 
-def stop_portable_browser():
-    """운영지침: 무조건 전용 baro76650_stop_cdp.bat 실행하여 브라우저 안전 종료"""
-    if os.environ.get("BAROLAB_CLOSE_BROWSER_ON_EXIT") != "1" or os.environ.get("BAROLAB_KEEP_BROWSER") == "1":
-        print("[BROWSER] Login session retained; browser remains open", flush=True)
-        return
-    stop_bat = BROWSER_STOP_BAT
-    if os.path.exists(stop_bat):
-        print(f"\n[브라우저 라이프사이클] 전용 종료 배치 실행: {stop_bat}", flush=True)
-        try:
-            subprocess.run(["cmd.exe", "/c", stop_bat], cwd=os.path.dirname(stop_bat), timeout=15)
-            time.sleep(2)
-            print("[브라우저 라이프사이클] baro76650 포터블 브라우저 정상 종료 완료", flush=True)
-        except Exception as e:
-            print(f"[브라우저 라이프사이클] 종료 배치 실행 오류 (무시 가능): {e}", flush=True)
+def retain_isolated_browser():
+    """Keep isolated login sessions and in-flight editors alive between jobs."""
+    return
 
 
 def clean_ai_watermark_bytes(
@@ -5579,7 +5566,7 @@ async def run_workflows():
     update_status(connecting, completed_ids, 1, "기존 브라우저 확인", 2,
                   "baro76650 실행정보·프로필·CDP 9420 및 기존 탭 응답 확인 중")
     try:
-        ensure_portable_browser_ready()
+        ensure_isolated_browser_ready()
     except Exception as exc:
         update_status(connecting, completed_ids, 1, "브라우저 실행 확인 실패", 2, safe_failure(exc), status='failed')
         raise
@@ -5683,7 +5670,7 @@ async def run_workflows():
                     save_live(SCHEDULE_JSON, json.dumps(fresh, ensure_ascii=False, indent=2))
                 await asyncio.sleep(3)
         finally:
-            stop_portable_browser()
+            retain_isolated_browser()
             
     print("\n" + "="*60, flush=True)
     if failed_domains:
@@ -6790,6 +6777,27 @@ def schedule_failed_attempt(item, exit_code, now=None):
 _REPAIR_AUTHORIZATION = object()
 
 
+def wait_for_publisher_progress(proc,schedule_path,domain,*,clock=time.monotonic,idle_seconds=600,total_seconds=5400):
+    """Bound actual stalled work, not a progressing multi-stage recovery round."""
+    start=last_progress=clock();signature=None
+    while True:
+        try:return proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:pass
+        try:
+            schedule=json.loads(Path(schedule_path).read_text(encoding='utf-8'))
+            item=next(row for row in schedule.get('items',[]) if row['domain']==domain)
+            if publication_may_be_inflight(item):return proc.wait()
+            model=item.get('currentModel') or {}
+            observed=(model.get('at'),model.get('status'),tuple((row.get('agent'),row.get('acceptedAt')) for row in item.get('handoffs',[])))
+            if observed!=signature:signature=observed;last_progress=clock()
+            if clock()-last_progress<idle_seconds and clock()-start<total_seconds:continue
+        except (OSError,ValueError,StopIteration,KeyError,TypeError):
+            # Unreadable publication evidence cannot authorize terminating a writer.
+            if clock()-start<total_seconds:continue
+            return proc.wait()
+        proc.kill();proc.wait();return -3
+
+
 def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_authorization=None):
     schedule_path = Path(schedule_path or SCHEDULE_JSON)
     domain = item["domain"]
@@ -6864,24 +6872,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
                 env=environment,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)
             )
-            try:
-                exit_code = proc.wait(timeout=1200)
-            except subprocess.TimeoutExpired:
-                # Keep the cleaner lock and process alive once a submission may exist.
-                # A timeout is not evidence that the external write failed.
-                try:
-                    timeout_schedule = json.loads(schedule_path.read_text(encoding='utf-8'))
-                    timeout_item = next(it for it in timeout_schedule.get('items', []) if it['domain'] == domain)
-                    inflight = publication_may_be_inflight(timeout_item)
-                except Exception:
-                    inflight = True  # Unreadable evidence cannot authorize killing a writer.
-                if inflight:
-                    log_scheduler('Publication outcome pending; waiting without killing ' + domain)
-                    exit_code = proc.wait()
-                else:
-                    proc.kill()
-                    proc.wait()
-                    exit_code = -3
+            exit_code=wait_for_publisher_progress(proc,schedule_path,domain)
     except Exception as e:
         log_scheduler(f"Execution error on {domain}: {e}")
         exit_code = -1
@@ -6901,7 +6892,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
         receipt = publication_receipt(fresh_item)
         fresh_item['lastExitCode'] = exit_code
         if exit_code == -3:
-            fresh_item['lastError'] = '작업 전체 제한시간 20분 초과 · 브라우저는 유지됨'
+            fresh_item['lastError'] = '실제 작업 진행 10분 정체 또는 전체 90분 상한 초과 · 브라우저 유지'
         elif not fresh_item.get('lastError'):
             fresh_item['lastError'] = f'Runner exit {exit_code}; 상세 오류 기록 미확인'
         schedule_failed_attempt(fresh_item, exit_code)

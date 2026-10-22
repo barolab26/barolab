@@ -19,7 +19,8 @@ FLEET=((9334,'soultin','mustpickinfo','정책·지원금·연금 / 블로그 1�
        (9333,'soul5373','mustinfo','연예이슈 / 애드포스트 수집'),
        (9335,'yoon_master','yoonviews','쇼핑커넥트 / 가전·리빙'),
        (9231,'adinfo0905','adinfo0905','직장인 루틴 / 지식iN 1호'),
-       (9230,'stone0747','stone0747','지원금 마감 / 지식iN 2호'))
+       (9230,'stone0747','stone0747','지원금 마감 / 지식iN 2호'),
+       (9440,'cf-flow','CF/Flow','CF 발행 / 공식 캡처 / 시각자료'))
 
 
 def env_values(root=ROOT):
@@ -41,7 +42,9 @@ def safe_url(value):
 
 def fleet_probe(spec,hosts=('127.0.0.1',)):
     port,account,blog,purpose=spec
-    row=dict(port=port,account=account,blog=blog,purpose=purpose,online=False,tabs=[],selection='열린 탭')
+    from common.ubuntu_naver_browser import account_paths
+    _,profile,_=account_paths(port)
+    row=dict(port=port,account=account,blog=blog,profile=profile.name,purpose=purpose,online=False,tabs=[],selection='열린 탭')
     for host in hosts:
         try:
             r=requests.get(f'http://{host}:{port}/json/list',timeout=.3,allow_redirects=False)

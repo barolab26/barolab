@@ -317,6 +317,14 @@ class Collector:
         proxy_calls=[r for r in data['usage'].get('byModel',{}).values() if r.get('provider')=='freellm']
         proxy_call=max(proxy_calls,key=lambda r:r.get('lastAt',''),default={})
         data['proxy']=dict(online=self.ports.get(3001),model=proxy_call.get('model'),latency=proxy_call.get('averageLatencyMs','—'))
+        owners={'keyword-selector':'radar','researcher':'radar','writer':'publi','image-maker':'publi','assembler':'publi','reviewer':'doctor'}
+        for item in cf.get('items',[]):
+            if item.get('status') not in ('processing','publishing'):continue
+            model=item.get('currentModel') or {};owner=owners.get(model.get('agent'))
+            for member in data['crew']:
+                if member['role']==owner and model.get('status')=='calling':
+                    member.update(state='RUNNING',model=model.get('actualModel') or model.get('requestedModel') or member.get('model'),
+                                  action=clean(item.get('domain'))+' · '+clean(item.get('stageName')))
         with self.lock:self.snapshot=data
 
     def run(self):

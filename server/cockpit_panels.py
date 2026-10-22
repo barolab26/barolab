@@ -33,7 +33,7 @@ def bar(done,target,width=12):
 
 def table(*columns):
     t=Table.grid(expand=True,padding=(0,1))
-    for width in columns:t.add_column(width=width,no_wrap=True,overflow='ellipsis')
+    for width in columns:t.add_column(width=width,ratio=1 if width is None else None,no_wrap=True,overflow='ellipsis')
     return t
 
 
@@ -192,7 +192,7 @@ def dated_graph_nodes(graph,now,root):
 
 
 def graph_summary(graph,now):
-    return f"Vault/Graph {len(graph.get('nodes',{}))} 노드 · 오늘 검증학습 {graph.get('todayVerifiedNodes',0)} 노드 (발행 증빙 기준)"
+    return f"Vault/Graph {len(graph.get('nodes',{}))} 노드 · {len(graph.get('edges',[]))} 연결 · 누적 해결 {sum(n.get('resolvedCount',0) for n in graph.get('nodes',{}).values())}회 · 오늘 검증학습 {graph.get('todayVerifiedNodes',0)} 노드"
 
 
 def panel_sizes(height):
@@ -235,7 +235,7 @@ def render(data,now,height):
         status='● ON' if row['online'] else '● OFF'
         fleet.add_row(line(f"{row['port']} {row['account']}"),line(row['blog']+' · '+status,'bold bright_green' if row['online'] else 'bold white on red'),
                       line(row['purpose']))
-        fleet.add_row('',line(f"{len(pages)}탭 · {row.get('selection')}"),line(page.get('title','연결 대기')+' · '+page.get('url','')))
+        fleet.add_row('',line(f"{len(pages)}탭 · {row.get('profile','')}"),line(page.get('title','연결 대기')+' · '+page.get('url','')))
     content.append(fleet)
     pipeline=[]
     for text in pipeline_lines(data,now):
@@ -258,7 +258,7 @@ def render(data,now,height):
         when=dt.datetime.fromtimestamp(row['at'],KST).strftime('%H:%M:%S') if row.get('at') else '--:--:--'
         logs.append(line('['+when+'] '+row['text'],'bold white on red' if row.get('alert') else 'bold bright_green'))
     content.append(Group(*logs) if logs else line('다음 발행·복구·수익 수집 이벤트 대기'))
-    titles=('EGO LITE MISSION CONTROL · ① 💰 $100/day','② 🧠 BRAIN · 크레딧 / 구독 / 호출','③ 🌐 BROWSER FLEET · 5대 계정','④ 🚀 PIPELINE · 6단계 위치','⑤ 🤖 ACTIVE CREW · VAULT','⑥ ⚡ 발행 / 검수 돌파 / 복구 / 수익')
+    titles=('EGO LITE MISSION CONTROL · ① 💰 $100/day','② 🧠 BRAIN · 크레딧 / 구독 / 호출','③ 🌐 우분투 격리 크롬 세션 · 계정/프로필','④ 🚀 PIPELINE · 6단계 위치','⑤ 🤖 ACTIVE CREW · VAULT','⑥ ⚡ 발행 / 검수 돌파 / 복구 / 수익')
     for i,name in enumerate(NAMES):
         layout[name].update(Panel(content[i],title=titles[i],subtitle=now.strftime('%Y-%m-%d %H:%M:%S KST') if i==0 else None,
              border_style='bold '+COLORS[i],box=box.HEAVY,padding=(0,1),style='white on black'))

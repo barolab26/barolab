@@ -181,83 +181,13 @@ def _listener_owners(port, deadline):
 
 
 def _runtime(port, expected_exe, expected_profile, *, process_timeout=30):
-    if os.name != 'nt':
-        if port in (9334, 9333, 9335, 9231, 9230, 9440):
-            from common.ubuntu_naver_browser import account_paths, process_identity, listener_owner
-            if port == 9440:
-                executable, profile = Path('/opt/google/chrome/chrome'), Path.home() / '.config/cdp_gui_9440'
-            else:
-                executable, profile, _ = account_paths(port)
-            if Path(expected_exe) != executable or Path(expected_profile) != profile:
-                raise RuntimeError('Dedicated Ubuntu account paths do not match the expected browser/profile')
-            pid = process_identity(port, profile)
-            if pid is None:
-                raise RuntimeError(f'Dedicated Ubuntu account process missing on port {port}')
-            listener_owner(port, pid)
-            return {'ProcessId': pid, 'ExecutablePath': str(executable), 'ProfilePath': str(profile)}
-        try:
-            ver_resp = requests.get(f'http://127.0.0.1:{port}/json/version', timeout=4)
-            if ver_resp.ok:
-                ws_url = ver_resp.json().get('webSocketDebuggerUrl', '')
-                if _local_socket(ws_url, port):
-                    return {
-                        'ProcessId': 0,
-                        'ExecutablePath': str(expected_exe),
-                        'ProfilePath': str(expected_profile),
-                        'fastPath': True,
-                    }
-        except Exception:
-            pass
-        raise RuntimeError(f'Dedicated portable browser on port {port} is unavailable')
-    if type(port) is not int or not 1 <= port <= 65535 or process_timeout <= 0:
-        raise ValueError('Invalid dedicated browser identity lookup parameters')
-    command = rf'''[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
-$ErrorActionPreference = 'Stop'
-$pids = @(Get-NetTCPConnection -LocalPort {port} -State Listen -ErrorAction Stop |
- Where-Object {{ $_.LocalAddress -in @('127.0.0.1', '::1') }} |
- Select-Object -ExpandProperty OwningProcess -Unique)
-if ($pids.Count -ne 1) {{ throw "Expected exactly one listener on port {port}" }}
-Get-CimInstance Win32_Process -Filter ("ProcessId = " + $pids[0]) |
-Select-Object ProcessId,ExecutablePath,@{{Name='ProfilePath';Expression={{
- if($_.CommandLine -match '"--user-data-dir(?:=|\s+)([^"]+)"|--user-data-dir(?:=|\s+)(?:"([^"]+)"|(\S+))') {{
- if($matches[1]) {{$matches[1]}} elseif($matches[2]) {{$matches[2]}} else {{$matches[3]}}}}}}}} | ConvertTo-Json -Compress'''
-    powershell = Path(os.environ.get('SystemRoot', r'C:\Windows')) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
-    environment = dict(os.environ, PSModulePath=str(powershell.parent / 'Modules'))
-    try:
-        result = subprocess.run(
-            [str(powershell), '-NoProfile', '-NonInteractive', '-Command', command],
-            capture_output=True, text=True, encoding='utf-8', errors='replace',
-            timeout=process_timeout, env=environment,
-            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-        )
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        try:
-            ver_resp = requests.get(f'http://127.0.0.1:{port}/json/version', timeout=4)
-            if ver_resp.ok:
-                ws_url = ver_resp.json().get('webSocketDebuggerUrl', '')
-                if _local_socket(ws_url, port):
-                    return {
-                        'ProcessId': 0,
-                        'ExecutablePath': str(expected_exe),
-                        'ProfilePath': str(expected_profile),
-                        'fastPath': True,
-                    }
-        except Exception:
-            pass
-        raise RuntimeError('Dedicated browser process information is unavailable') from exc
-    if result.returncode:
-        raise RuntimeError('Dedicated browser process information is unavailable')
-    try:
-        rows = json.loads(result.stdout.strip() or '[]')
-    except ValueError as exc:
-        raise RuntimeError('Dedicated browser process information is malformed') from exc
-    rows = [rows] if isinstance(rows, dict) else rows
-    norm = lambda value: os.path.normcase(os.path.normpath(value or ''))
-    if (not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict)
-            or not isinstance(rows[0].get('ExecutablePath'), str) or not isinstance(rows[0].get('ProfilePath'), str)
-            or norm(rows[0]['ExecutablePath']) != norm(expected_exe) or norm(rows[0]['ProfilePath']) != norm(expected_profile)):
-        raise RuntimeError('CDP port is not owned by the expected dedicated browser/profile')
-    return rows[0]
+    if type(port) is not int or not 1<=port<=65535 or process_timeout<=0:raise ValueError('Invalid Chrome lookup parameters')
+    from common.ubuntu_naver_browser import account_paths,ensure_account
+    executable,profile,_=account_paths(port)
+    if Path(expected_exe)!=executable or Path(expected_profile)!=profile:
+        raise RuntimeError('Ubuntu isolated Chrome paths do not match expected profile/port (mismatch)')
+    pid=ensure_account(port)
+    return {'ProcessId':pid,'ExecutablePath':str(executable),'ProfilePath':str(profile)}
 
 
 def _responsive(target, port, timeout=2):
@@ -306,7 +236,10 @@ def preflight(endpoint, expected_exe, expected_profile, preferred_host='flow.goo
     for target in blocked:
         activate(target)
         if not _responsive(target, port):
-            raise RuntimeError('Existing browser tab remains unresponsive after activation; browser retained')
+            if urlsplit(target.get('url','')).hostname==preferred_host:
+                raise RuntimeError('Required browser tab remains unresponsive; existing work retained')
+            log('[BROWSER] Unrelated unresponsive tab retained; dedicated workflow continues')
+            continue
         log(f"[BROWSER] Recovered suspended tab {target['id']}; browser and login retained")
     if blocked:
         preferred = next((target for target in pages if urlsplit(target.get('url', '')).hostname == preferred_host), None)

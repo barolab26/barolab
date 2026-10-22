@@ -98,7 +98,10 @@ class SupervisorTests(unittest.TestCase):
         with patch('common.hermes_memory.verified_work_proof',return_value={'outcome':'public_verified'}):
             for _ in range(2):supervisor.learn_public(self.folder,proof,'cf_blog','example.com',self.root,public_url='https://example.com/post')
         graph=json.loads((self.root/'server/data/editorial-memory-graph.json').read_text())
-        self.assertEqual(len(graph['nodes']),3);self.assertEqual(len(graph['edges']),2)
+        self.assertEqual(len(graph['nodes']),4);self.assertEqual(len(graph['edges']),3)
+        pattern=next(n for n in graph['nodes'].values() if n.get('type')=='ProblemPattern')
+        self.assertEqual(pattern['resolvedCount'],1);self.assertEqual(len(pattern['concreteExamples']),1)
+        self.assertEqual(pattern['concreteExamples'][0]['publicUrl'],'https://example.com/post')
         connected={e[k] for e in graph['edges'] for k in ('source','target')}
         self.assertEqual(connected,set(graph['nodes']))
         with patch('common.hermes_memory.verified_work_proof',return_value={'outcome':'public_verified'}):

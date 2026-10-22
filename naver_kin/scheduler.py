@@ -30,46 +30,12 @@ def now_kst():
 
 def ensure_naver_browsers():
     """Reuse live CDP sessions; start closed ports only through account launchers."""
-    if os.name != 'nt':
-        from common.ubuntu_naver_browser import accounts, account_paths, process_identity, listener_owner
-        result = []
-        for account in p.ACCOUNTS:
-            port = accounts()[account]['cdp_port']
-            _, profile, _ = account_paths(port)
-            pid = process_identity(port, profile)
-            if not pid:
-                raise RuntimeError('Dedicated logged-in browser is closed: ' + account +
-                                   '; open it with the approved account launcher before scheduling')
-            listener_owner(port, pid)
-            result.append({'account': account, 'port': port, 'ready': True, 'started': False})
-        return result
-    import requests
-    import time
-    from common.system_watchdog import CDP_PORT_CATALOG, is_port_open
-    result = []
-    for item in CDP_PORT_CATALOG:
-        port = int(item['port'])
-        if port not in (9230, 9231, 9333, 9334, 9335):
-            continue
-        started = False
-        if not is_port_open(port) and os.name == 'nt' and item['launcher'].is_file():
-            subprocess.Popen(['cmd.exe', '/d', '/c', str(item['launcher'])],
-                             cwd=str(item['folder']), stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL,
-                             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-            started = True
-        ready = False
-        for attempt in range(15 if started else 1):
-            try:
-                response = requests.get(f'http://127.0.0.1:{port}/json/version', timeout=2)
-                ready = response.status_code == 200 and bool(response.json().get('webSocketDebuggerUrl'))
-            except (requests.RequestException, ValueError):
-                pass
-            if ready:
-                break
-            if started and attempt < 14:
-                time.sleep(1)
-        result.append({'port': port, 'ready': ready, 'started': started})
+    from common.ubuntu_naver_browser import accounts,account_paths,process_identity,ensure_account
+    result=[]
+    for account in p.ACCOUNTS:
+        port=accounts()[account]['cdp_port'];_,profile,_=account_paths(port)
+        previous=process_identity(port,profile);ensure_account(port)
+        result.append(dict(account=account,port=port,ready=True,started=previous is None))
     return result
 
 

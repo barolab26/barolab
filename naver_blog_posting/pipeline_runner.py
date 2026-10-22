@@ -1543,8 +1543,6 @@ ACCOUNT_MAP = {
         "blog_id": "mustpickinfo",
         "blog_url": "https://blog.naver.com/mustpickinfo",
         "cdp_port": 9334,
-        "start_bat": r"C:\99_포터블브라우저\CentBrowserPotable_soultin\soultin_start_cdp.bat",
-        "stop_bat": r"C:\99_포터블브라우저\CentBrowserPotable_soultin\soultin_stop_cdp.bat",
         "topic": "5060 국민연금, 기초연금, 노후재정, 시니어 지원금",
         "topic_slug": "senior-pension",
         "bridge_domains": [],
@@ -1555,8 +1553,6 @@ ACCOUNT_MAP = {
         "blog_id": "mustinfo",
         "blog_url": "https://blog.naver.com/mustinfo",
         "cdp_port": 9333,
-        "start_bat": r"C:\99_포터블브라우저\CentBrowserPortable_soul5373\soul5373_start_cdp.bat",
-        "stop_bat": r"C:\99_포터블브라우저\CentBrowserPortable_soul5373\soul5373_stop_cdp.bat",
         "topic": "5060 중장년 건강, 건기식 성분 팩트체크, 혈당/혈압 식단 관리",
         "topic_slug": "health-blood-sugar",
         "bridge_domains": [],
@@ -1567,8 +1563,6 @@ ACCOUNT_MAP = {
         "blog_id": "yoonviews",
         "blog_url": "https://blog.naver.com/yoonviews",
         "cdp_port": 9335,
-        "start_bat": r"C:\99_포터블브라우저\CentBrowserPotable_yoon_master\yoon_master_start_cdp.bat",
-        "stop_bat": r"C:\99_포터블브라우저\CentBrowserPotable_yoon_master\yoon_master_stop_cdp.bat",
         "topic": "5060 우아한 데일리룩, 프리미엄 가전·리빙, 힐링 여행",
         "topic_slug": "senior-fashion",
         "bridge_domains": [],
@@ -1579,8 +1573,6 @@ ACCOUNT_MAP = {
         "blog_id": "adinfo0905",
         "blog_url": "https://blog.naver.com/adinfo0905",
         "cdp_port": 9231,
-        "start_bat": r"C:\99_포터블브라우저\CentBrowserPotable_adinfo0905\adinfo0905_start_cdp.bat",
-        "stop_bat": r"C:\99_포터블브라우저\CentBrowserPotable_adinfo0905\adinfo0905_stop_cdp.bat",
         "topic": "직장인 연말정산 소득공제, 엑셀 무료 서식, 업무 생산성, 절세",
         "topic_slug": "year-end-tax",
         "bridge_domains": [
@@ -1600,8 +1592,6 @@ ACCOUNT_MAP = {
         "blog_id": "stone0747",
         "blog_url": "https://blog.naver.com/stone0747",
         "cdp_port": 9230,
-        "start_bat": r"C:\99_포터블브라우저\CentBrowserPotable_stone0747\stone0747_start_cdp.bat",
-        "stop_bat": r"C:\99_포터블브라우저\CentBrowserPotable_stone0747\stone0747_stop_cdp.bat",
         "topic": "정부 소상공인 정책자금, 지자체 지원금 마감속보, 생활세무 혜택",
         "topic_slug": "gov-subsidy",
         "bridge_domains": [
@@ -1748,35 +1738,15 @@ def wait_for_cdp_port(port, timeout_seconds=15):
     return False
 
 def account_browser_paths(account_info):
-    if os.name != 'nt':
-        from common.ubuntu_naver_browser import account_paths
-        executable, profile, _ = account_paths(account_info['cdp_port'])
-        return str(executable), str(profile)
-    home = Path(account_info['start_bat']).parent
-    return str(home / 'chrome.exe'), str(home / 'User Data')
+    from common.ubuntu_naver_browser import account_paths
+    executable,profile,_=account_paths(account_info['cdp_port'])
+    return str(executable),str(profile)
 
 
 def start_browser(account_info):
-    """Reuse the account session; start only through its Windows batch or Ubuntu account script."""
-    port = account_info['cdp_port']
-    if os.name != 'nt':
-        from common.ubuntu_naver_browser import ensure_account
-        ensure_account(port)
-        return
-    # 이미 해당 포트가 열려 있는지 먼저 확인
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.settimeout(1)
-        if s.connect_ex(('127.0.0.1', port)) == 0:
-            print(f"[브라우저 라이프사이클] CDP 포트 {port}가 이미 정상 가동 중입니다 (기존 세션 재사용).", flush=True)
-            return
+    from common.ubuntu_naver_browser import ensure_account
+    return ensure_account(account_info['cdp_port'])
 
-    start_bat = account_info['start_bat']
-    print(f"\n[브라우저 라이프사이클] 전용 시작 배치 실행: {start_bat}", flush=True)
-    subprocess.Popen(['cmd.exe', '/c', start_bat], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-    
-    if not wait_for_cdp_port(port, timeout_seconds=15):
-        raise RuntimeError(f"CDP 포트 {port} 열림 확인 실패! ({start_bat})")
-    print(f"[브라우저 라이프사이클] CDP 포트 {port} 활성화 확인 완료 (실행정보 탭 자동 기동됨)", flush=True)
 
 def editor_review_hash(document):
     """저장 시 바뀌는 런타임 필드를 제외하고 내용과 서식을 함께 비교한다."""
@@ -4109,11 +4079,8 @@ def require_editorial_decision(value, evidence, query):
 
 
 def source_browser_paths():
-    if os.name != 'nt':
-        from cf_posting.pipeline_runner import CDP_URL, BROWSER_EXE, BROWSER_USER_DATA
-        return CDP_URL, BROWSER_EXE, BROWSER_USER_DATA
-    home = Path(r'C:\99_포터블브라우저\CentBrowserPortable_baro76650')
-    return 'http://127.0.0.1:9420', str(home / 'chrome.exe'), str(home / 'User Data')
+    from cf_posting.pipeline_runner import CDP_URL,BROWSER_EXE,BROWSER_USER_DATA
+    return CDP_URL,BROWSER_EXE,BROWSER_USER_DATA
 
 
 async def search_primary_sources(keyword):
@@ -5586,7 +5553,22 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
             plan=authorize_next('naver_blog',account,folder,STEPS[index:],failure,goal.get('question',''))
             approvals.append(plan)
             evidence_folder=folder/('jarvis-'+step+'-evidence');evidence_folder.mkdir(exist_ok=True)
-            packet=collect_evidence(account,plan['approval']['searchQuery'])
+            # Official evidence queries and organic competitor queries serve different tasks.
+            # A long official query can have zero blog results despite usable official sources.
+            previous_plan=packet.get('keyword-selector.json',{})
+            competitor_query=(previous_plan.get('mainKeyword') or packet.get('keyword-title-original.json',{}).get('mainKeyword')
+                              or ACCOUNT_MAP[account]['topic'].split(',')[0]).strip()
+            packet=collect_evidence(account,competitor_query)
+            from common.source_discovery import search_urls
+            from cf_posting.pipeline_runner import source_snapshot,primary_url
+            actual_sources=[]
+            for source_index,row in enumerate(search_urls(plan['approval']['searchQuery'])):
+                if not primary_url(row['url']):continue
+                observed=source_snapshot(row,'primary',source_index+1)
+                if observed and len(observed.get('text',''))>=200:actual_sources.append(observed)
+                if len(actual_sources)>=4:break
+            packet['primarySourceCandidates']=actual_sources+packet.get('primarySourceCandidates',[])
+            packet['additionalOfficialSearchQuery']=plan['approval']['searchQuery']
             atomic_json(evidence_folder/'keyword-evidence.json',packet)
             RUN_OPTIONS.update(topic_seed=plan['approval']['readerQuestion'],main_keyword=None,
                                allow_retry_handoff=False,evidence_dir=str(evidence_folder),
@@ -6512,10 +6494,10 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
 async def generate_photos(plans, image_dir, account, title):
     from playwright.async_api import async_playwright
     from common.browser_session import connect_async
-    from cf_posting.pipeline_runner import generate_flow_images_in_browser, ensure_portable_browser_ready
+    from cf_posting.pipeline_runner import generate_flow_images_in_browser, ensure_isolated_browser_ready
     def progress(index, total, message):
         update_pipeline_status(account, 4, 'image-maker · 실제 사진 생성', 55 + int(20 * index / max(1, total)), message, topic=title)
-    ensure_portable_browser_ready()
+    ensure_isolated_browser_ready()
     async with async_playwright() as p:
         browser, _ = await connect_async(p, *source_browser_paths())
         context = browser.contexts[0]
