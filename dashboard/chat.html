@@ -378,7 +378,8 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
+      overflow-anchor: none;
     }
 
     /* =========================================================================
@@ -1024,57 +1025,78 @@
     }
   }
 
-  floatingBtnEl.addEventListener('click', () => {
-    pinnedUserRowId = null;
+  let followLatest = true;
+  let followFrame = null;
+  let userScrollUntil = 0;
+  let lastScrollTop = streamEl.scrollTop;
+  let touchY = null;
+
+  function scheduleFollowLatest() {
+    if (!followLatest || followFrame !== null) return;
+    followFrame = requestAnimationFrame(() => {
+      followFrame = null;
+      if (!followLatest) return;
+      streamEl.scrollTop = streamEl.scrollHeight;
+      lastScrollTop = streamEl.scrollTop;
+    });
+  }
+
+  function pauseLatestFollow() {
+    followLatest = false;
+    scrollLockStatusEl.textContent = '📖 이전 대화 읽는 중';
+  }
+
+  function resumeLatestFollow() {
+    followLatest = true;
     unreadBelowCount = 0;
     updateFloatingNewMsgButton();
-    scrollLockStatusEl.textContent = '📌 스마트 스크롤 고정 활성';
-    streamEl.scrollTo({ top: streamEl.scrollHeight, behavior: 'smooth' });
-  });
+    scrollLockStatusEl.textContent = '↓ 최신 대화 자동 표시';
+    scheduleFollowLatest();
+  }
 
-  streamEl.addEventListener('scroll', () => {
-    if (isUserNearBottom(50)) {
-      unreadBelowCount = 0;
-      updateFloatingNewMsgButton();
+  floatingBtnEl.addEventListener('click', resumeLatestFollow);
+  streamEl.addEventListener('wheel', event => {
+    userScrollUntil = performance.now() + 1500;
+    if (event.deltaY < 0) pauseLatestFollow();
+  }, { passive: true });
+  streamEl.addEventListener('touchstart', event => {
+    touchY = event.touches[0]?.clientY ?? null;
+  }, { passive: true });
+  streamEl.addEventListener('touchmove', event => {
+    const nextY = event.touches[0]?.clientY;
+    userScrollUntil = performance.now() + 1500;
+    if (touchY !== null && nextY > touchY) pauseLatestFollow();
+    touchY = nextY ?? null;
+  }, { passive: true });
+  streamEl.addEventListener('pointerdown', () => {
+    userScrollUntil = performance.now() + 1500;
+  }, { passive: true });
+  streamEl.addEventListener('keydown', event => {
+    if (event.target.closest('input, textarea, [contenteditable="true"]')) return;
+    userScrollUntil = performance.now() + 1500;
+    if (['ArrowUp', 'PageUp', 'Home'].includes(event.key) || (event.key === ' ' && event.shiftKey)) {
+      pauseLatestFollow();
     }
   });
+  streamEl.addEventListener('scroll', () => {
+    const currentTop = streamEl.scrollTop;
+    if (performance.now() < userScrollUntil) {
+      if (currentTop < lastScrollTop - 1) pauseLatestFollow();
+      else if (isUserNearBottom(4)) resumeLatestFollow();
+    }
+    lastScrollTop = currentTop;
+  }, { passive: true });
+
+  // One coalesced frame covers streaming, edits, filters and late image loading.
+  new MutationObserver(scheduleFollowLatest).observe(streamEl, {
+    childList: true, subtree: true, characterData: true,
+  });
+  streamEl.addEventListener('load', scheduleFollowLatest, true);
+  new ResizeObserver(scheduleFollowLatest).observe(streamEl);
 
   function handleSmartScrollOnNewMessage(rowEl, isUserOwnMessage, wasNearBottom) {
-    if (isUserOwnMessage && rowEl) {
-      pinnedUserRowId = rowEl.dataset.msgId;
-      unreadBelowCount = 0;
-      updateFloatingNewMsgButton();
-      scrollLockStatusEl.textContent = '📌 내 질문 상단 고정 중 (답변이 아래로 쌓입니다)';
-      requestAnimationFrame(() => {
-        const targetTop = Math.max(0, rowEl.offsetTop - 18);
-        streamEl.scrollTo({ top: targetTop, behavior: 'smooth' });
-      });
-      return;
-    }
-
-    if (pinnedUserRowId) {
-      const pinnedEl = streamEl.querySelector(`[data-msg-id="${CSS.escape(pinnedUserRowId)}"]`);
-      if (pinnedEl) {
-        const anchorTop = Math.max(0, pinnedEl.offsetTop - 18);
-        const contentSpan = (rowEl ? (rowEl.offsetTop + rowEl.offsetHeight) : streamEl.scrollHeight) - anchorTop;
-        if (contentSpan <= streamEl.clientHeight - 20) {
-          streamEl.scrollTo({ top: anchorTop, behavior: 'smooth' });
-        } else {
-          unreadBelowCount += 1;
-          updateFloatingNewMsgButton();
-        }
-        return;
-      }
-    }
-
-    if (wasNearBottom) {
-      requestAnimationFrame(() => {
-        if (rowEl) {
-          const desiredTop = Math.max(0, rowEl.offsetTop + rowEl.offsetHeight - streamEl.clientHeight + 24);
-          streamEl.scrollTo({ top: desiredTop, behavior: 'smooth' });
-        }
-      });
-    } else {
+    if (followLatest) scheduleFollowLatest();
+    else {
       unreadBelowCount += 1;
       updateFloatingNewMsgButton();
     }
@@ -1516,10 +1538,13 @@
   }
 
   function sortVisibleMessages() {
+    const previousTop = streamEl.scrollTop;
     for (const message of chronologicalMessages(messageStore.values())) {
       const row = streamEl.querySelector(`[data-msg-id="${CSS.escape(message.id)}"]`);
-      if (row) streamEl.appendChild(row);
+      if (row && row !== streamEl.lastElementChild) streamEl.appendChild(row);
     }
+    if (followLatest) scheduleFollowLatest();
+    else streamEl.scrollTop = previousTop;
   }
 
   function renderTypingIndicators() {
@@ -1711,15 +1736,16 @@
     }
     eventEpoch = data.eventEpoch || '';
 
+    const previousTop = streamEl.scrollTop;
     streamEl.innerHTML = '';
     renderedMessageIds.clear();
     messageStore.clear();
     chronologicalMessages(data.messages || []).forEach(m => upsertMessageToDom(m, { initialLoad: true }));
     applyChatFilters();
 
-    if (resetScrollToBottom) {
-      streamEl.scrollTop = streamEl.scrollHeight;
-    }
+    if (resetScrollToBottom) resumeLatestFollow();
+    else if (followLatest) scheduleFollowLatest();
+    else streamEl.scrollTop = previousTop;
     connectEventStream();
   }
 
