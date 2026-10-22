@@ -330,7 +330,7 @@ def _get_agent_brain_safe(slug: str) -> Dict[str, Any]:
 
 
 
-def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str, Any]], brains=None) -> Dict[str, Any]:
     """Ensure every message has a stable `id`, `brain`, `replyToCeo`, `isWorkstream`, and `taskTracker` metadata."""
     if m.get('eventType') == 'crew_work_event':
         return project_work_event(m)
@@ -355,7 +355,11 @@ def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str,
         return m
 
     if who in AGENT_MAP:
-        m["brain"] = _get_agent_brain_safe(who)
+        if brains is None:
+            m["brain"] = _get_agent_brain_safe(who)
+        else:
+            if who not in brains:brains[who]=_get_agent_brain_safe(who)
+            m["brain"] = brains[who]
         is_ws = bool(
             m.get("isWorkstream")
             or m.get("msgKind") == "workstream"
@@ -407,10 +411,11 @@ def load_room_data() -> Dict[str, Any]:
                 raw_msgs = []
             cleaned_msgs: List[Dict[str, Any]] = []
             seen_ids = set()
+            brains = {}
             for idx, m in enumerate(raw_msgs):
                 if _is_noise_or_fake_loop_message(m):
                     continue
-                _enrich_legacy_message(m, idx, raw_msgs)
+                _enrich_legacy_message(m, idx, raw_msgs, brains)
                 mid = str(m.get("id"))
                 if mid in seen_ids:
                     continue

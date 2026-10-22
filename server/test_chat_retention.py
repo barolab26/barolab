@@ -10,6 +10,21 @@ from unittest.mock import patch
 
 
 class ChatRetentionTests(unittest.TestCase):
+    def test_one_settings_read_per_employee_per_room_snapshot(self):
+        tree=ast.parse((Path(__file__).parent/'chat_room.py').read_text())
+        node=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='_enrich_legacy_message')
+        reads=[]
+        def brain(who):reads.append(who);return {'model':'current-assigned-model'}
+        scope=dict(Dict=dict,Any=object,List=list,AGENT_MAP={'jarvis':{},'publi':{}},
+                   _extract_mentioned_slugs=lambda text:[],_get_agent_brain_safe=brain)
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'<snapshot>','exec'),scope)
+        messages=[{'id':str(i),'who':'jarvis' if i%2 else 'publi','text':'saved conversation',
+                   'taskTracker':{}} for i in range(100)]
+        brains={}
+        for index,row in enumerate(messages):scope['_enrich_legacy_message'](row,index,messages,brains)
+        self.assertEqual(sorted(reads),['jarvis','publi'])
+        self.assertTrue(all(row['brain']['model']=='current-assigned-model' for row in messages))
+
     def test_old_transport_events_are_archived_but_conversations_remain(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder)
