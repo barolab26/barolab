@@ -16,6 +16,11 @@ PROJECT_SOURCES = {
     'threads': ('threads_posting/pipeline.py', 'threads_posting/authoring.py', 'threads_posting/scheduler.py'),
     'legacy_remodel': ('common/content_maintenance.py', 'common/content_improvement.py'),
 }
+for _project in ('cf_blog','naver_blog','naver_kin'):
+    PROJECT_SOURCES[_project]+= ('common/browser_session.py','common/ubuntu_naver_browser.py','common/source_discovery.py')
+PROJECT_SOURCES['naver_blog']+=('naver_blog_posting/visible_research.py',)
+PROJECT_SOURCES['naver_kin']+=('naver_kin/browser.py',)
+
 ARTIFACT_NAMES = ('failure-diagnostics.json', 'prewriter-acquisition-request.json', 'required-materials.json',
     'keyword-evidence.json', 'writer-review.json', 'review.json', 'research.md', 'keywords.md',
     'handoff.json', 'validation.json', 'visible-editor-progress.json', 'native-layout-review.json',
