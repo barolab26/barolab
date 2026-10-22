@@ -1,6 +1,6 @@
 # CF bridge routing and attribution
 
-`ACCOUNT_MAP[account].bridge_domains` in `naver_blog_posting/pipeline_runner.py` is the single domain-pool authority. A pool permits consideration; it does not require rotation, a domain quota or promotion of every site. The three real-name accounts have empty pools and retain zero external links. Other domains in the CF portfolio are not enabled by the reporting source whitelist.
+`ACCOUNT_MAP[account].bridge_domains` in `naver_blog_posting/posting.py` is the single domain-pool authority. A pool permits consideration; it does not require rotation, a domain quota or promotion of every site. The three real-name accounts have empty pools and retain zero external links. Other domains in the CF portfolio are not enabled by the reporting source whitelist.
 
 The CEO traffic focus is `woorinote.kr`, `must-good.com`, then `must-pick.com`.
 The shared `common.channel_attribution.PRIORITY_CF_DOMAINS` provides this preference

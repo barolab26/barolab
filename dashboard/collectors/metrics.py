@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from common.channel_attribution import is_dummy_rescue_url
-DATA = ROOT / 'server' / 'data'
+DATA = ROOT / 'dashboard' / 'data'
 CONFIG = DATA / 'metrics-config.json'
 SNAPSHOT = DATA / 'metrics.json'
 SCOPES = ['https://www.googleapis.com/auth/webmasters',
@@ -477,7 +477,7 @@ def request_indexing(session, site, settings, urls, sitemap, *, indexnow=True):
 
 def discover_indexnow_keys():
     """Read existing per-site keys; never change website settings or print secrets."""
-    keys = read_json(ROOT / 'cf_posting' / 'data' / 'secure' / 'cf_blog_keys.json')
+    keys = read_json(ROOT / 'dashboard' / 'data' / 'cf' / 'secure' / 'cf_blog_keys.json')
     existing_cfg_sites = read_json(CONFIG).get('sites', {})
     cf_sites = [s for s in inventory() if s.get('platform') == 'cf']
 

@@ -1,0 +1,19 @@
+[Unit]
+Description=BaroLab Ubuntu dashboard
+After=network-online.target
+
+[Service]
+Environment=PYTHONDONTWRITEBYTECODE=1
+Type=simple
+WorkingDirectory=/mnt/c/10_Project/BaroLab/dashboard/server
+Environment=PYTHONUNBUFFERED=1
+Environment=BAROLAB_DISABLE_BACKGROUND=1
+Environment=BAROLAB_HEALTH_BROADCAST=0
+ExecStart=%h/.venvs/barolab/bin/python3 -m uvicorn main:app --host 0.0.0.0 --port 8790 --timeout-graceful-shutdown 15
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+UMask=0077
+
+[Install]
+WantedBy=default.target

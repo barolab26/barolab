@@ -651,7 +651,7 @@ def adpost(start, end, cfg=None, account='soul5373', port=9333):
             # Only the existing account-specific lifecycle manager may start it.
             if str(ROOT) not in sys.path:
                 sys.path.insert(0, str(ROOT))
-            from naver_blog_posting.pipeline_runner import ACCOUNT_MAP, start_browser
+            from naver_blog_posting.posting import ACCOUNT_MAP, start_browser
             settings = ACCOUNT_MAP.get(account)
             if not settings or int(settings.get('cdp_port', 0)) != port:
                 raise RevenueSourceError('error', '계정 전용 CDP 시작 배치 설정 없음') from None

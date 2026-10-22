@@ -141,7 +141,7 @@ class StaffDispatchTests(unittest.TestCase):
     def test_running_repair_terminal_rejection_is_observed_once_without_relaunch(self):
         task = 'cf-repair:2026-10-21:example.com'
         fp = hashlib.sha256((task + '|editorial_seed_pinned_as_keyword').encode()).hexdigest()
-        ledger = Path(self.temp.name) / 'server/data/repair-workflows' / (fp + '.json')
+        ledger = Path(self.temp.name) / 'dashboard/data/repair-workflows' / (fp + '.json')
         ledger.parent.mkdir(parents=True)
         result = {'ok': True, 'tool': 'repair_cf_known_failure', 'status': 'running', 'pid': 123, 'controllerTaskId': task, 'controllerFingerprint': fp, 'controllerLedgerPath': str(ledger)}
         self.scope['execute_agent_tool'].return_value = result
@@ -166,7 +166,7 @@ class StaffDispatchTests(unittest.TestCase):
     def test_missing_terminal_and_unobserved_process_is_unknown_not_success(self):
         task = 'cf-repair:2026-10-21:example.com'
         fp = hashlib.sha256((task + '|editorial_seed_pinned_as_keyword').encode()).hexdigest()
-        path = Path(self.temp.name) / 'server/data/repair-workflows' / (fp + '.json')
+        path = Path(self.temp.name) / 'dashboard/data/repair-workflows' / (fp + '.json')
         result = {'controllerTaskId': task, 'controllerFingerprint': fp, 'controllerLedgerPath': str(path), 'pid': 123}
         observed, snapshot = self.scope['_repair_terminal_result'](result)
         self.assertEqual(observed['status'], 'unknown')

@@ -11,10 +11,13 @@ class PostingEntryPointTests(unittest.TestCase):
         path = Path(__file__).with_name("posting.py")
         compile(path.read_text(encoding="utf-8"), str(path), "exec")
 
-    def test_legacy_import_forwards_without_running_publication(self):
-        legacy = importlib.import_module("cf_posting.pipeline_runner")
-        canonical = importlib.import_module("cf_posting.posting")
-        self.assertIs(legacy, canonical)
+    def test_canonical_import_and_minimal_layout(self):
+        canonical=importlib.import_module("cf_posting.posting")
+        root=Path(__file__).parent
+        self.assertEqual(Path(canonical.__file__),root/'posting.py')
+        self.assertFalse((root/'pipeline_runner.py').exists())
+        self.assertFalse((root/'data').exists())
+
 
 
 

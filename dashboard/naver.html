@@ -2471,7 +2471,7 @@
     return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
   }
 
-  // Live Status Poller from dashboard/pipeline_status.js (CF Blog 1:1 Engine)
+  // Live Status Poller from dashboard/data/naver/pipeline_status.js (CF Blog 1:1 Engine)
 
   function renderNaverScheduler(scheduler, now = Date.now()) {
     const badge = document.getElementById('naver-scheduler-badge');
@@ -2547,11 +2547,11 @@
           if (!match) throw new Error('invalid pipeline snapshot');
           return JSON.parse(match[1]);
         }),
-        fetch('../naver_blog_posting/data/automation-journal.json?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(response => {
+        fetch('../dashboard/data/naver/automation-journal.json?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(response => {
           if (!response.ok) throw new Error('journal unavailable');
           return response.json();
         }),
-        fetch('../naver_blog_posting/data/active-workflow.json?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(response => {
+        fetch('../dashboard/data/naver/active-workflow.json?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(response => {
           if (response.status === 404) return null;
           if (!response.ok) throw new Error('workflow unavailable');
           return response.json();
@@ -2792,5 +2792,6 @@
 </script>
 
 <script src="metrics.js?v=20261016-kst-rollover2"></script>
+<script src="/mission-control.js"></script>
 </body>
 </html>

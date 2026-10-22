@@ -760,7 +760,7 @@ def _naver_browser_awake_browser(playwright, config):
 
 def _naver_browser__check_account_blog_not_busy(account: str):
     """Only block if this exact account is actively running a Naver blog post right now."""
-    wf_path = _naver_browser_Path(__file__).resolve().parents[1] / 'naver_blog_posting' / 'data' / 'active-workflow.json'
+    wf_path = _naver_browser_Path(__file__).resolve().parents[1] / 'dashboard' / 'data' / 'naver' / 'active-workflow.json'
     if not wf_path.is_file():
         return
     try:
@@ -1939,7 +1939,7 @@ def _naver_scheduler_validate_config(config):
 
 def _naver_scheduler__is_account_blog_busy(account: str) -> bool:
     """Check if the specific account is currently executing a Naver blog post in its own browser."""
-    wf_path = _naver_scheduler_ROOT / 'naver_blog_posting/data/active-workflow.json'
+    wf_path = _naver_scheduler_ROOT / 'dashboard/data/naver/active-workflow.json'
     if not wf_path.is_file():
         return False
     try:

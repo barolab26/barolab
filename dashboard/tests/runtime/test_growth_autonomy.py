@@ -392,7 +392,7 @@ class EditorialBudgetTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder, patch.object(improvement, 'ROOT', Path(folder)), patch.object(improvement, 'provider_record', return_value={}), patch.object(improvement.time, 'monotonic', return_value=100.0), patch.object(improvement, 'generate_json') as generate:
             with self.assertRaisesRegex(ValueError, '입력 상한 초과'):
                 improvement.model_json('reviewer', 'complete evidence review', {'evidence': '가' * 48001}, 280.0)
-            self.assertFalse((Path(folder) / '.agent-routing').exists())
+            self.assertFalse((Path(folder) / 'dashboard/agents/routing').exists())
         generate.assert_not_called()
 
     def test_writer_and_researcher_keep_existing_16k_input_limit(self):

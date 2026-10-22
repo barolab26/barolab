@@ -39,7 +39,7 @@ async function harness(payload,now,platform='naver',healthFallback=null) {
   const document={body:{dataset:{summaryPlatform:platform}},getElementById:id=>elements[id]||null,createElement:()=>new Element(),querySelectorAll:()=>[],addEventListener:(event,fn)=>{listeners[event]=fn;}};
   const window={addEventListener:(event,fn)=>{listeners[event]=fn;}};
   const context=vm.createContext({document,window,Date:FakeDate,Intl,URLSearchParams,location:{search:'',hash:''},console,setInterval:(fn,ms)=>intervals.push({fn,ms}),fetch:async(url)=>{if(fail)throw Error('offline');return {ok:true,json:async()=>url==='/data/collection-health.json'?healthFallback:payload};}});
-  for(const file of ['traffic.js','metrics.js']) vm.runInContext(fs.readFileSync(path.join(__dirname,'../dashboard',file),'utf8'),context,{filename:file});
+  for(const file of ['traffic.js','metrics.js']) vm.runInContext(fs.readFileSync(path.join(__dirname,'../..',file),'utf8'),context,{filename:file});
   const settle=()=>new Promise(resolve=>setImmediate(resolve));
   await settle();await settle();
   assert.doesNotMatch(elements['metrics-refresh-status'].textContent,/조회 실패/,'the harness must finish the real render path');
@@ -56,7 +56,7 @@ async function historyRollover() {
   class FakeDate extends NativeDate {constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
   const window={addEventListener:(event,fn)=>{listeners[event]=fn;},dispatchEvent:event=>{events.push({type:event.type,stats:window.BaroLabHistory.getTodayStats()});}};
   const context=vm.createContext({window,localStorage,Date:FakeDate,Event:class{constructor(type){this.type=type;}},document:{addEventListener:(event,fn)=>{listeners[event]=fn;}},console:{log(){},warn(){},error(){}},setInterval:(fn,ms)=>intervals.push({fn,ms}),fetch:async()=>{fetches++;throw Error('offline');}});
-  vm.runInContext(fs.readFileSync(path.join(__dirname,'../dashboard/history_manager.js'),'utf8'),context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../../history_manager.js'),'utf8'),context);
   await new Promise(resolve=>setImmediate(resolve));
   const previousBefore=JSON.stringify(window.BaroLabHistory.loadHistoryStore()['2026-10-15']);
   const fetchesBefore=fetches,eventCount=events.length;
@@ -87,8 +87,8 @@ async function historyRollover() {
   assert.equal(events.at(-1).stats.totalCompleted,3,'focus keeps existing current-day evidence from another tab');
   assert.equal(window.BaroLabHistory.loadHistoryStore()['2026-10-15'].cf.completed,13);
 
-  const index=fs.readFileSync(path.join(__dirname,'../dashboard/index.html'),'utf8').replace(/\r\n/g,'\n');
-  const rateBlock=index.match(/if \(kpiRateEl\) \{([\s\S]*?)\n    \}\n    if \(headerQuotaEl\)/);
+  const index=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8').replace(/\r\n/g,'\n');
+  const rateBlock=index.match(/if \(kpiRateEl\) \{([\s\S]*?)\n    \}\n\n    const cfCompletedCountEl/);
   assert.ok(rateBlock,'overview publication source label block exists');
   for(const statuses of [{cfSourceStatus:'unknown',naverSourceStatus:'current'},{cfSourceStatus:'current',naverSourceStatus:'unknown'}]) {
     const rate=new Element();

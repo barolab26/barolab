@@ -679,8 +679,8 @@
       try {
         const ts = Date.now();
         const [jRes, awRes, vRes, mRes, psRes] = await Promise.all([
-          fetch('../naver_blog_posting/data/automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => fetch('./automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) })),
-          fetch('../naver_blog_posting/data/active-workflow.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null),
+          fetch('../dashboard/data/naver/automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => fetch('./automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) })),
+          fetch('../dashboard/data/naver/active-workflow.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null),
           fetch('./naver_public_verification.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
           fetch('./naver_automation.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
           fetch('./pipeline_status.js?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null)
@@ -955,10 +955,10 @@
 
       try {
         const [schedRes, pipeRes, pRes, ...hResList] = await Promise.all([
-          fetch('/cf_posting/data/daily_schedule.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
-          fetch('/cf_posting/data/pipeline_state.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('/dashboard/data/cf/daily_schedule.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('/dashboard/data/cf/pipeline_state.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
           fetch('/api/publications', { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
-          ...histDates.map(hd => fetch(`/cf_posting/data/schedule_history/${hd}.json`, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null))
+          ...histDates.map(hd => fetch(`/dashboard/data/cf/schedule_history/${hd}.json`, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null))
         ]);
         if (schedRes && schedRes.ok) dailySchedule = await schedRes.json();
         if (pipeRes && pipeRes.ok) pipelineState = await pipeRes.json();

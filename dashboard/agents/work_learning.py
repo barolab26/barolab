@@ -59,7 +59,7 @@ def learn_public(folder, proof, project, identity, root=ROOT, public_url='', vau
         raise ValueError('Verified final public URL required')
     if isinstance(verified.get('artifactHashes'), list) and (not any((Path(a['path']).resolve() == (Path(folder) / 'editorial-lineage.json').resolve() for a in verified['artifactHashes']))):
         return complete_resolution_learning(folder, proof, project, identity, public_url, root, graph_key=_graph_key or hashlib.sha256(json.dumps(proof, sort_keys=True).encode()).hexdigest())
-    path = Path(root) / 'server/data/editorial-memory-graph.json'
+    path = Path(root) / 'dashboard/data/editorial-memory-graph.json'
     path.parent.mkdir(parents=True, exist_ok=True)
     key = _graph_key or hashlib.sha256(json.dumps(proof, sort_keys=True).encode()).hexdigest()
     with locked(path.parent / 'editorial-memory.lock'):
@@ -123,7 +123,7 @@ def complete_resolution_learning(folder, original_proof, project, identity, publ
     return learn_public(folder, proof, project, identity, root, public_url=public_url, vault_event_id=event_id, vault_status=intake.get('state') or ('pending' if intake.get('queued') else 'existing'), _graph_key=graph_key)
 
 def lessons(project, identity, root=ROOT, category=''):
-    graph = read(Path(root) / 'server/data/editorial-memory-graph.json')
+    graph = read(Path(root) / 'dashboard/data/editorial-memory-graph.json')
     nodes = graph.get('nodes', {})
     result = []
     from common.hermes_memory import verified_work_proof
@@ -186,7 +186,7 @@ def learn_naver_public(attempt, public):
 
 def refresh_measurements(root=ROOT):
     """Attach exact-URL observations only; never allocate site-wide AdSense totals."""
-    path = Path(root) / 'server/data/editorial-memory-graph.json'
+    path = Path(root) / 'dashboard/data/editorial-memory-graph.json'
     graph = read(path)
     if not graph:
         return
@@ -210,7 +210,7 @@ def refresh_measurements(root=ROOT):
         except (OSError, ValueError):
             pass
     evidence = []
-    for relative in ('server/data/indexing-submissions.json', 'dashboard/data/public/metrics.json', 'server/data/kin-measurement.json', 'server/data/metrics.json'):
+    for relative in ('dashboard/data/indexing-submissions.json', 'dashboard/data/public/metrics.json', 'dashboard/data/kin-measurement.json', 'dashboard/data/metrics.json'):
         document = read(Path(root) / relative)
 
         def visit(value):

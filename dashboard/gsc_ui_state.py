@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
-PATH = Path(__file__).resolve().parent.parent / 'server' / 'data' / 'gsc-ui-state.json'
+PATH = Path(__file__).resolve().parent.parent / 'dashboard' / 'data' / 'gsc-ui-state.json'
 
 
 def state(account):

@@ -92,18 +92,18 @@ venv/
 .*.*.tmp
 *.log
 *.jsonl
-server/data/legacy_argo_backup/
-server/data/chats/
-server/data/maintenance-backups/
-server/data/tmp_sanitized/
-server/data/control-jobs/
-server/data/kin-drafts/
-server/data/threads-drafts/
+dashboard/data/legacy_argo_backup/
+dashboard/data/chats/
+dashboard/data/maintenance-backups/
+dashboard/data/tmp_sanitized/
+dashboard/data/control-jobs/
+dashboard/data/kin-drafts/
+dashboard/data/threads-drafts/
 skills/ui-ux-pro-max/
-server/data/repair-workflows/
-server/data/project-incidents/
-server/data/project-monitor-state.json
-server/data/project-monitor-observation.json
+dashboard/data/repair-workflows/
+dashboard/data/project-incidents/
+dashboard/data/project-monitor-state.json
+dashboard/data/project-monitor-observation.json
 
 # Consolidated private runtime stores
 dashboard/data/chats/
@@ -117,3 +117,7 @@ dashboard/data/project-incidents/
 dashboard/data/agent-routing/
 
 dashboard/data/skills/ui-ux-pro-max/
+
+.pytest_cache/
+dashboard/agents/routing/
+dashboard/agents/skills/ui-ux-pro-max/

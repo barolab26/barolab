@@ -98,13 +98,13 @@ class PromotionGateTests(unittest.TestCase):
         self.assertFalse(should_memorize('meeting_decision', evidence=evidence))
 
     def test_complete_domain_rpm_snapshot_without_baseline_is_supported(self):
-        data = {'knowledge': {'kind': 'measured_snapshot', 'sourceRef': 'server/data/revenue.json', 'verification': {'passed': True, 'evidence': 'qa/domain-rpm-verification.json'}, 'sourceStatus': 'complete', 'domain': 'example.org', 'metric': 'page_rpm', 'period': {'start': '2026-10-01', 'end': '2026-10-18'}, 'sourceTimezone': 'Asia/Seoul', 'currency': 'USD', 'numeratorMetric': 'revenue', 'denominatorMetric': 'pageviews', 'numerator': 1.5, 'denominator': 500, 'value': 3.0, 'analysis': 'Observed revenue per thousand pageviews for this complete period; causality unproved.'}}
+        data = {'knowledge': {'kind': 'measured_snapshot', 'sourceRef': 'dashboard/data/revenue.json', 'verification': {'passed': True, 'evidence': 'qa/domain-rpm-verification.json'}, 'sourceStatus': 'complete', 'domain': 'example.org', 'metric': 'page_rpm', 'period': {'start': '2026-10-01', 'end': '2026-10-18'}, 'sourceTimezone': 'Asia/Seoul', 'currency': 'USD', 'numeratorMetric': 'revenue', 'denominatorMetric': 'pageviews', 'numerator': 1.5, 'denominator': 500, 'value': 3.0, 'analysis': 'Observed revenue per thousand pageviews for this complete period; causality unproved.'}}
         self.assertEqual(memorization_decision('analysis', evidence=data)['kind'], 'measured_insight')
         for key, value in (('sourceStatus', 'partial'), ('denominator', 0), ('value', 99), ('domain', ''), ('analysis', ''), ('denominatorMetric', 'impressions')):
             changed = copy.deepcopy(data)
             changed['knowledge'][key] = value
             self.assertFalse(should_memorize('analysis', evidence=changed), key)
-        self.assertFalse(should_memorize('analysis', 'Top accumulated revenues', {'sourceRef': 'server/data/revenue.json'}))
+        self.assertFalse(should_memorize('analysis', 'Top accumulated revenues', {'sourceRef': 'dashboard/data/revenue.json'}))
 
     def test_rejected_log_still_searchable_and_no_reviewer_call(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -125,7 +125,7 @@ class PromotionGateTests(unittest.TestCase):
 
     def test_curated_channel_procedure_has_real_sources_and_no_execution_claim(self):
         root = Path(__file__).resolve().parents[3]
-        text = (root / 'data/skills/channel-verification/SKILL.md').read_text(encoding='utf-8')
+        text = (root / 'dashboard/data/knowledge/skills/channel-verification/SKILL.md').read_text(encoding='utf-8')
         evidence = json.loads(re.search('<!-- barolab-knowledge (.*?) -->', text).group(1))
         knowledge = evidence['knowledge']
         self.assertEqual(knowledge['provenance'], 'curated_procedure')

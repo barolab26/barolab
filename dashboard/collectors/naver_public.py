@@ -202,8 +202,8 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             rss_by_account[acc_name] = []
 
     # Load existing public verification ledger
-    dash_verify_path = dashboard_dir / "naver_public_verification.json"
-    local_verify_path = base_dir / "data" / "public-verification.json"
+    dash_verify_path = dashboard_dir / 'data/naver/public-verification.json'
+    local_verify_path = base_dir.parent / 'dashboard/data/naver' / "public-verification.json"
     ledger = {"schema": "naver-public-verification-v1", "publicationDate": now_dt.strftime("%Y-%m-%d"), "reportReceivedAt": now_iso, "evidence": []}
     for candidate in (dash_verify_path, local_verify_path):
         if candidate.exists():
@@ -220,13 +220,13 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     known_public_urls = set(evidence_by_url)
 
     # Load pipeline_status.js
-    dash_ps_path = dashboard_dir / "pipeline_status.js"
-    local_ps_path = base_dir / "data" / "pipeline_status.js"
+    dash_ps_path = dashboard_dir / 'data/naver/pipeline_status.js'
+    local_ps_path = base_dir.parent / 'dashboard/data/naver' / "pipeline_status.js"
     ps = _load_pipeline_status(dash_ps_path) or _load_pipeline_status(local_ps_path) or {}
 
     updated_count = 0
     try:
-        attempts = json.loads((base_dir / 'data' / 'automation-journal.json').read_text(encoding='utf-8')).get('attempts', [])
+        attempts = json.loads((base_dir.parent / 'dashboard/data/naver' / 'automation-journal.json').read_text(encoding='utf-8')).get('attempts', [])
     except (OSError, ValueError):
         attempts = []
     artifacts = {a.get('publicUrl'): a.get('artifactFolder') for a in attempts if a.get('publicUrl') and a.get('artifactFolder')}
@@ -381,8 +381,8 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                             _promote_slot_dict(ps, matched_rss, s_reserve)
 
     # Also walk automation-journal.json so any verified reservation whose reserveTime has passed and appears in RSS promotes automatically
-    local_journal_path = base_dir / "data" / "automation-journal.json"
-    dash_journal_path = dashboard_dir / "automation-journal.json"
+    local_journal_path = base_dir.parent / 'dashboard/data/naver' / "automation-journal.json"
+    dash_journal_path = dashboard_dir / 'data/naver/automation-journal.json'
     journal_data = None
     journal_dirty = False
     if local_journal_path.exists():
@@ -494,7 +494,7 @@ def record_check(base=None, result=None):
     """Persist the latest public verification worker check summary."""
     try:
         base_dir = Path(base).resolve() if base else (Path(__file__).resolve().parents[2] / 'naver_blog_posting')
-        status_path = base_dir / "data" / "public-verification-status.json"
+        status_path = base_dir.parent / 'dashboard/data/naver' / "public-verification-status.json"
         status_path.parent.mkdir(parents=True, exist_ok=True)
         payload = result if isinstance(result, dict) else {"status": "ok"}
         status_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

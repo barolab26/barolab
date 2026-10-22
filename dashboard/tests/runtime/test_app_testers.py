@@ -20,7 +20,7 @@ class TesterStoreTests(unittest.TestCase):
         self.patch = patch.object(store, 'ROOT', self.root)
         self.patch.start()
         self.addCleanup(self.patch.stop)
-        self.path = self.root / 'server/data/app_testers.json'
+        self.path = self.root / 'dashboard/data/app_testers.json'
         self.path.parent.mkdir(parents=True)
         self.original = {'emails': ['baro76650@gmail.com', 'barolab26@gmail.com'] + [f'fixture{i}@example.test' for i in range(11)], 'customExisting': {'keep': True}, 'closedTestOptIns': None, 'closedTestOptInsVerified': False, 'closedTestStartAt': None, 'apps': {'bible_app': {'unknownField': 'preserved'}}}
         self.path.write_text(json.dumps(self.original), encoding='utf-8')

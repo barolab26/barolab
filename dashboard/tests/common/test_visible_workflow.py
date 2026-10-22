@@ -2,7 +2,7 @@
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from dashboard.runtime import ego
+from dashboard.server import ego
 class WorkflowTests(unittest.TestCase):
     def test_default_ego_starts_the_single_dispatcher(self):
         with patch('sys.argv',['ego.py']),patch.object(ego.subprocess,'run') as run:

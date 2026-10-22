@@ -164,7 +164,7 @@ def cf_doctor_evidence_summary(schedule=None, today=None):
     """Current source ledger, unique URLs, public verification distinct from grades."""
     if schedule is None:
         try:
-            schedule = json.loads((Path(__file__).resolve().parent.parent / 'cf_posting/data/daily_schedule.json').read_text(encoding='utf-8'))
+            schedule = json.loads((Path(__file__).resolve().parent.parent / 'dashboard/data/cf/daily_schedule.json').read_text(encoding='utf-8'))
         except (OSError, ValueError):
             return {'status': 'unavailable', 'verified': None, 'partial': None, 'unknown': None, 'rows': []}
     today = today or datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
@@ -184,7 +184,7 @@ def cf_doctor_evidence_summary(schedule=None, today=None):
             day = None
         rows.append({'url': row['url'], 'domain': row.get('domain'), 'status': status,
                      'sourceStatus': row.get('status'), 'verifiedAt': at, 'today': day == today})
-    return {'status': 'observed', 'source': 'cf_posting/data/daily_schedule.json doctorRuns',
+    return {'status': 'observed', 'source': 'dashboard/data/cf/daily_schedule.json doctorRuns',
             **{key: sum(r['status'] == key for r in rows) for key in ('verified', 'partial', 'unknown')},
             'todayVerified': sum(r['status'] == 'verified' and r['today'] for r in rows),
             'rows': sorted(rows, key=lambda r: r['verifiedAt'] or '', reverse=True)}

@@ -4,7 +4,7 @@ description: cf_posting naver_blog_posting naver_kin threads_posting doctor_remo
 ---
 # 채널 실행과 결과 검증
 
-<!-- barolab-knowledge {"knowledge":{"kind":"verified_skill","reusable":true,"lesson":"채널별 공개 발행, 예약, 인증 API 관측, 검토 제출과 실제 승인 상태를 분리한다.","steps":["해당 채널의 기존 실행 및 검증 진입점을 확인한다.","실행 단위 스냅샷을 고정하고 원천 응답과 공개 결과를 구분한다.","확인된 범위의 증거만 원장에 기록하고 복구 결과를 재검증한다."],"sourceRef":"server/MEMORY_SERVICE.md","verification":{"passed":true,"evidence":"server/MEMORY_SERVICE.md","scope":"implementation_and_contract_tests_only","executionVerified":false,"tests":["server.test_hermes_memory.HermesMemoryTests.test_session_and_skill_frozen_across_scopes_and_instances","server.test_hermes_memory.HermesMemoryTests.test_review_all_operations_validated_before_writing","server.test_memory_promotion.PromotionGateTests.test_generic_success_and_event_labels_are_not_knowledge"]},"provenance":"curated_procedure","sourceAgent":"patch","channel":"hubs/channel-cf-blog","executionVerified":false,"implementationSources":["common/hermes_memory.py","cf_posting/posting.py","dashboard/collectors/naver_public.py","naver_kin/posting.py","threads_posting/posting.py","dashboard/runtime/doctor.py"],"curationScope":"Source and contract verification for user-requested initialization; not evidence that every channel procedure was executed successfully."}} -->
+<!-- barolab-knowledge {"knowledge":{"kind":"verified_skill","reusable":true,"lesson":"채널별 공개 발행, 예약, 인증 API 관측, 검토 제출과 실제 승인 상태를 분리한다.","steps":["해당 채널의 기존 실행 및 검증 진입점을 확인한다.","실행 단위 스냅샷을 고정하고 원천 응답과 공개 결과를 구분한다.","확인된 범위의 증거만 원장에 기록하고 복구 결과를 재검증한다."],"sourceRef":"dashboard/server/MEMORY_SERVICE.md","verification":{"passed":true,"evidence":"dashboard/server/MEMORY_SERVICE.md","scope":"implementation_and_contract_tests_only","executionVerified":false,"tests":["server.test_hermes_memory.HermesMemoryTests.test_session_and_skill_frozen_across_scopes_and_instances","server.test_hermes_memory.HermesMemoryTests.test_review_all_operations_validated_before_writing","server.test_memory_promotion.PromotionGateTests.test_generic_success_and_event_labels_are_not_knowledge"]},"provenance":"curated_procedure","sourceAgent":"patch","channel":"hubs/channel-cf-blog","executionVerified":false,"implementationSources":["dashboard/common/hermes_memory.py","cf_posting/posting.py","dashboard/collectors/naver_public.py","naver_kin/posting.py","threads_posting/posting.py","dashboard/server/doctor.py"],"curationScope":"Source and contract verification for user-requested initialization; not evidence that every channel procedure was executed successfully."}} -->
 
 출처: 2026-10-19 프로젝트 기억 초기화 요청과 아래 기존 실행·검증 진입점. 자동 학습 성과가 아니라 실제 구현을 근거로 초기화한 재사용 절차다.
 
@@ -24,7 +24,7 @@ description: cf_posting naver_blog_posting naver_kin threads_posting doctor_remo
 `threads_posting/authoring.py`의 `generate_local`, `pipeline.adopt_recovered`를 따른다. 인증 API에서 유일하게 일치하는 항목을 확인하고 DB 반영 후 복구 사건을 기록한다. 인증 API 확인을 공개 웹 페이지 확인으로 바꾸어 보고하지 않는다.
 
 ## doctor_remodel
-`dashboard/runtime/doctor.py`의 `remodel_cf_post_by_url`을 사용한다. 변경 적용·PUT 2xx·공개 본문 일치까지 확인한 후 개선 사건과 증거를 남긴다. 재시도 중 일부 단계 성공은 최종 복구 성공이 아니다.
+`dashboard/server/doctor.py`의 `remodel_cf_post_by_url`을 사용한다. 변경 적용·PUT 2xx·공개 본문 일치까지 확인한 후 개선 사건과 증거를 남긴다. 재시도 중 일부 단계 성공은 최종 복구 성공이 아니다.
 
 ## play_console
 앱 버전·AAB 해시·서명·실광고 설정·실기기 검증 버전을 구분한다. `apps/qa/2026-10-19-play-console-status.json`과 해당 릴리스 검증 보고서의 실제 증거를 대조한다. 내부 제공, Alpha 검토 제출, Google 검토 중, 승인, 참여 가능 여부를 각각 기록한다. 테스터 명단 수는 실제 참여 인원이 아니며 이전 빌드의 실기기 성공은 새 빌드의 성공이 아니다.

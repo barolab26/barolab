@@ -1,0 +1,20 @@
+[Unit]
+Description=BaroLab EGO Lite and bounded revenue experiments
+After=network-online.target
+
+[Service]
+Environment=PYTHONDONTWRITEBYTECODE=1
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=DISPLAY=:10
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/baro7/.venvs/barolab/bin/python3 /mnt/c/10_Project/BaroLab/dashboard/server/ego.py
+Restart=no
+RestartSec=30
+TimeoutStopSec=30
+KillMode=control-group
+UMask=0077
+
+[Install]
+WantedBy=default.target

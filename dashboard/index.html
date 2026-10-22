@@ -1525,10 +1525,10 @@
         </div>
       </article>
 
-      <!-- Big Gauge 2: 📝 오늘 전체 발행 게이지 (Goal: 23편, Double Donut Ring Gauge + ARGO Tick Ring) -->
+      <!-- Big Gauge 2: 📝 오늘 전체 발행 게이지 (Goal: 47편, Double Donut Ring Gauge + ARGO Tick Ring) -->
       <article class="argo-big-gauge-card" title="바깥 링: CF 16편 · 안쪽 링: 네이버 7편">
         <div class="argo-card-head">
-          <span class="argo-card-title">📝 오늘 전체 발행 (Goal: 23편)</span>
+          <span class="argo-card-title">📝 오늘 전체 발행 (Goal: 47편)</span>
           <span class="pillar-badge badge-orange" id="kpi-todo-badge">0 / 23편 (0%)</span>
         </div>
         <div class="argo-gauge-body">
@@ -2595,6 +2595,7 @@
   }
 
   function updateQuotaUI() {
+    if (window.BaroLabMissionControl) { window.applyMissionControl(); return; }
     const data = loadQuotaData();
     latestNaverQuotaMap = data;
     let totalPublic = 0;
@@ -2755,7 +2756,9 @@
       const liveParts = [];
       if (todayStats.cfActive?.domain) liveParts.push(`CF ${todayStats.cfActive.domain}`);
       if (todayStats.naverActive?.account) liveParts.push(`네이버 ${todayStats.naverActive.account}`);
-      if (liveParts.length > 0) {
+      if (todayStats.cfSourceStatus !== 'current' || todayStats.naverSourceStatus !== 'current') {
+        kpiRateEl.textContent = '오늘 발행 기록 조회 대기';
+      } else if (liveParts.length > 0) {
         kpiRateEl.textContent = `⚡ ${liveParts.join(' · ')}`;
         kpiRateEl.style.color = '#2563eb';
       } else {
@@ -2919,13 +2922,13 @@
       if (res.ok) {
         const gData = await res.json();
         const st = gData.stats || {};
-        const total = Number(st.total || 14);
+        const total = Number(st.total ?? 0);
         const linked = Number(st.linked ?? total);
         const isolated = Number(st.isolated || 0);
-        const links = Number(st.links || 47);
-        const coreHubs = Number(st.coreHubs || 13);
-        const skillNodes = Number(st.skillNodes || 4);
-        const revHubs = Number(st.revenueHubs || st.revenueMemories || 14);
+        const links = Number(st.links ?? 0);
+        const coreHubs = Number(st.coreHubs ?? 0);
+        const skillNodes = Number(st.skillNodes ?? 0);
+        const revHubs = Number(st.revenueHubs ?? st.revenueMemories ?? 0);
 
         const connectPct = total > 0 ? Math.round((linked / total) * 100) : 100;
         setRingGauge('ring-mem-synapse', 207.4, connectPct);
@@ -3299,5 +3302,6 @@
   setInterval(syncBentoAutonomousStatus, 8000);
 </script>
 
+<script src="/mission-control.js"></script>
 </body>
 </html>

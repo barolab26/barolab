@@ -511,8 +511,8 @@
   async function syncCFPublications() {
     try {
       const [response, stateRes] = await Promise.all([
-        fetch('/cf_posting/data/daily_schedule.json?t=' + Date.now(), { cache: 'no-store' }),
-        fetch('/cf_posting/data/pipeline_state.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null)
+        fetch('/dashboard/data/cf/daily_schedule.json?t=' + Date.now(), { cache: 'no-store' }),
+        fetch('/dashboard/data/cf/pipeline_state.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null)
       ]);
       if (!response.ok) throw new Error(`CF schedule HTTP ${response.status}`);
       const schedule = await response.json();
@@ -557,8 +557,8 @@
     try {
       const [response, wfRes, jnRes] = await Promise.all([
         fetch('/pipeline_status.js?t=' + Date.now(), { cache: 'no-store' }),
-        fetch('/naver_blog_posting/data/active-workflow.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null),
-        fetch('/naver_blog_posting/data/automation-journal.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null)
+        fetch('/dashboard/data/naver/active-workflow.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null),
+        fetch('/dashboard/data/naver/automation-journal.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null)
       ]);
       if (!response.ok) throw new Error(`Naver status HTTP ${response.status}`);
       const text = await response.text();

@@ -16,7 +16,7 @@ class SourceError(ValueError):
 class RevenueRefreshTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup);self.root=Path(self.temp.name)
-        self.data=self.root/'server/data';self.data.mkdir(parents=True)
+        self.data=self.root/'dashboard/data';self.data.mkdir(parents=True)
         self.now=dt.datetime.now(refresh.KST);self.day=self.now.date().isoformat();self.month=self.day[:7];self.calls=0
         @contextmanager
         def lock(path):yield True

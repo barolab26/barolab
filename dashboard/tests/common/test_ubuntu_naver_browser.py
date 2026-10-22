@@ -26,7 +26,7 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
             self.assertTrue(all((c.args == (9440, 456) for c in listener.call_args_list)))
 
     def test_naver_pipeline_routes_linux_to_account_launcher(self):
-        from naver_blog_posting import pipeline_runner
+        from naver_blog_posting import posting as pipeline_runner
         with patch.object(pipeline_runner, 'os', SimpleNamespace(name='posix')), patch.object(browser, 'ensure_account') as ensure, patch('subprocess.Popen') as popen:
             account = pipeline_runner.ACCOUNT_MAP['soultin']
             pipeline_runner.start_browser(account)

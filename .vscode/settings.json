@@ -1,5 +1,7 @@
 {
   "python.analysis.extraPaths": [
-    "."
-  ]
+    ".",
+    "./dashboard"
+  ],
+  "python.defaultInterpreterPath": "/home/baro7/.venvs/barolab/bin/python3"
 }

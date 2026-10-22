@@ -13,8 +13,8 @@
 - 사용자 탭, 대시보드 탭, 진행 중인 편집기, 제출 결과가 불명확한 탭은 보존한다. 브라우저·프로필 전체 종료로 대신하지 않는다.
 
 ## 디렉토리와 실행
-- 대시보드·크루는 `dashboard/agents/`, 서버·모니터·연결기는 `dashboard/runtime/`, 수집기는 `dashboard/collectors/`로 통합한다.
-- 공용 운영 원장은 `dashboard/data/`, 지식데이터는 `dashboard/data/knowledge/`에 둔다. 기존 `data/` 참조는 호환 링크로 유지한다. 채널 산출물·예약 증거는 각 프로젝트 `output/`에 보존한다.
+- 대시보드·크루는 `dashboard/agents/`, 서버·모니터는 `dashboard/server/`, 공용 연결기는 `dashboard/common/`, 수집기는 `dashboard/collectors/`로 통합한다.
+- 공용 운영 원장은 `dashboard/data/`, 지식데이터는 `dashboard/data/knowledge/`에 둔다. 루트 호환 링크를 만들지 않는다. 가상환경 `.pth`로 `dashboard/`의 공용 모듈을 찾는다. `apps/`의 4개 앱 프로젝트는 루트에 보존한다. 채널 산출물·예약 증거는 각 프로젝트 `output/`에 보존한다.
 - 채널의 표준 실행 진입점은 `<channel>/posting.py`이다. 각 채널은 `agents/`, `guides/`, `output/` 구조를 사용한다.
 - 일회성 점검은 인라인 명령이나 `/tmp`에서 한다. 프로젝트에 계정별 실행파일이나 임시 검사 스크립트를 추가하지 않는다.
 - 의미 있는 회귀 테스트를 삭제해 통과율을 꾸미지 않는다. 테스트를 합칠 때 기존 검증 범위와 실행 결과를 확인한다.
@@ -35,3 +35,5 @@
 - 주제·문서 구조 개선은 `dashboard/data/memory_graph.json`과 캐시된 `synapse-recipes.json`을 통해 공용 LLM 경계에서 주입한다. 기억 장애는 발행을 중단시키지 않는다.
 - 공개 HTTP 200, 예약, 색인, URL별 유입·수익을 구분한다. 미수집 값은 0으로 간주하지 않고 수익을 글에 임의 배분하지 않는다. 상관관계를 인과관계로 기록하지 않는다.
 - 닥터는 실측 유망 글의 발행 후 부분 보완을 수행한다. 기본 발행 엔진과 분리하고 기존 수정 한도·공개 검증·되돌림 증거를 보존한다.
+
+- 웹과 EGO 모니터는 8790 서버의 단일 수집기가 생성한 `dashboard/data/live_snapshot.json`을 동일하게 표시한다. 모니터에서 별도 집계기·크레딧 조회 프로세스를 만들지 않는다.

@@ -36,8 +36,8 @@ from bs4 import BeautifulSoup
 
 KST = ZoneInfo("Asia/Seoul")
 BASE_DIR = Path(__file__).resolve().parents[2]  # Y:\10_Project\BaroLab
-SERVER_DIR = BASE_DIR / "dashboard" / "runtime"       # Y:\10_Project\BaroLab\server
-DATA_DIR = SERVER_DIR / "data"
+SERVER_DIR = BASE_DIR / 'dashboard' / 'server'       # Y:\10_Project\BaroLab\server
+DATA_DIR = Path(__file__).resolve().parents[2] / 'dashboard/data'
 DASHBOARD_DIR = BASE_DIR / "dashboard"
 NAVER_DIR = BASE_DIR / "naver_blog_posting"
 CF_DIR = BASE_DIR / "cf_posting"
@@ -139,10 +139,10 @@ def read_publi_data() -> Dict[str, Any]:
     tomorrow_str = (now + timedelta(days=1)).strftime("%Y-%m-%d")
 
     # 1) Naver 7 Today Slots + 7 Tomorrow Slots
-    na = _read_json(DASHBOARD_DIR / "naver_automation.json", {})
-    pv = _read_json(DASHBOARD_DIR / "naver_public_verification.json", {})
-    wf = _read_json(NAVER_DIR / "data" / "active-workflow.json", {})
-    journal = _read_json(NAVER_DIR / "data" / "automation-journal.json", {})
+    na = _read_json(DASHBOARD_DIR / 'data/naver/automation-status.json', {})
+    pv = _read_json(DASHBOARD_DIR / 'data/naver/public-verification.json', {})
+    wf = _read_json(Path(__file__).resolve().parents[2] / 'dashboard/data/naver' / "active-workflow.json", {})
+    journal = _read_json(Path(__file__).resolve().parents[2] / 'dashboard/data/naver' / "automation-journal.json", {})
 
     pv_evidence = pv.get("evidence") if isinstance(pv.get("evidence"), list) else []
     published_list = journal.get("published") if isinstance(journal.get("published"), list) else []
@@ -239,7 +239,7 @@ def read_publi_data() -> Dict[str, Any]:
     tomorrow_slots = _slot_state_for_date(tomorrow_str)
 
     # 2) CF 16 Domains Schedule
-    cf_sched = _read_json(CF_DIR / "data" / "daily_schedule.json", {})
+    cf_sched = _read_json(Path(__file__).resolve().parents[2] / 'dashboard/data/cf' / "daily_schedule.json", {})
     cf_items = cf_sched.get("items") if isinstance(cf_sched.get("items"), list) else []
     cf_published = [it for it in cf_items if it.get("status") == "published"]
     cf_pending = [it for it in cf_items if it.get("status") != "published"]
@@ -662,7 +662,7 @@ def read_trace_data() -> Dict[str, Any]:
         except Exception:
             pass
 
-    # Check `server/data/metrics.json` for actual GSC/sitemap/index/IndexNow/traffic evidence across all 16 CF domains
+    # Check `dashboard/data/metrics.json` for actual GSC/sitemap/index/IndexNow/traffic evidence across all 16 CF domains
     ms = _read_json(DATA_DIR / "metrics.json", {})
     ms_sites = ms.get("sites") if isinstance(ms.get("sites"), dict) else {}
     cf_sitemap_ok = 0
@@ -752,8 +752,8 @@ def read_trace_data() -> Dict[str, Any]:
             ga4_7d = ga4_7d_sessions_sum
             ga4_7d_rows = len(ga4_by_day)
 
-    # Recent published URLs from cf_posting/data/daily_schedule.json
-    cf_sched = _read_json(CF_DIR / "data" / "daily_schedule.json", {})
+    # Recent published URLs from dashboard/data/cf/daily_schedule.json
+    cf_sched = _read_json(Path(__file__).resolve().parents[2] / 'dashboard/data/cf' / "daily_schedule.json", {})
     cf_items = cf_sched.get("items") if isinstance(cf_sched.get("items"), list) else []
     recent_cf_posts = [
         {"domain": it.get("domain"), "title": it.get("title"), "status": it.get("status"), "url": it.get("url") or f"https://{it.get('domain')}"}
@@ -1060,9 +1060,9 @@ def read_patch_data() -> Dict[str, Any]:
         tasks_info = _read_ubuntu_tasks()
 
     from common.routing_ledger import read_routing_summary
-    routing_summary = read_routing_summary(BASE_DIR / ".agent-routing" / "ledger.jsonl")
+    routing_summary = read_routing_summary(BASE_DIR / "dashboard/agents/routing" / "ledger.jsonl")
 
-    # 4) Last 30 lines of `server/data/kin-scheduler-errors.log`
+    # 4) Last 30 lines of `dashboard/data/kin-scheduler-errors.log`
     err_log_path = DATA_DIR / "kin-scheduler-errors.log"
     err_lines: List[str] = []
     if err_log_path.is_file():
@@ -1109,7 +1109,7 @@ def run_watchdog_heal() -> Dict[str, Any]:
     all CDP ports, zombie locks, and overdue daily pipelines.
     """
     cmd_display = "python common/system_watchdog.py --heal-now"
-    cmd = [sys.executable, "-X", "utf8", str(BASE_DIR / "common" / "system_watchdog.py"), "--heal-now"]
+    cmd = [sys.executable, "-X", "utf8", str(BASE_DIR / 'dashboard' / 'common' / "system_watchdog.py"), "--heal-now"]
     proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
@@ -1256,14 +1256,14 @@ def audit_blog_posts(channel: str = "cf", target: str = "", limit: int = 5) -> D
 def run_doctor_remodel_url(url: str) -> Dict[str, Any]:
     """
     Action Tool `run_doctor_remodel_url`:
-    Executes `python -m dashboard.runtime.doctor --url "<URL>" --apply --republish`
+    Executes `python -m dashboard.server.doctor --url "<URL>" --apply --republish`
     to surgically strip fake `CHECKPOINT #` / `정자체 가이드` / fake screen / fake map diagrams and dishonest captions,
     clean `⌧` / `**` / empty containers, crop bottom-right AI watermarks (`✦`) + inject clean smartphone EXIF,
     and immediately republish the post live via `PUT /api/posts/<id>`.
     """
     target_url = (url or "").strip()
-    cmd_display = f'python -m dashboard.runtime.doctor --url "{target_url}" --apply --republish'
-    cmd = [sys.executable, "-X", "utf8", "-m", "dashboard.runtime.doctor", "--url", target_url, "--apply", "--republish"]
+    cmd_display = f'python -m dashboard.server.doctor --url "{target_url}" --apply --republish'
+    cmd = [sys.executable, "-X", "utf8", "-m", "dashboard.server.doctor", "--url", target_url, "--apply", "--republish"]
     proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),
@@ -1679,7 +1679,7 @@ def _repair_terminal_result(result):
     import hashlib
     task = result.get('controllerTaskId', '')
     fingerprint = hashlib.sha256((task + '|editorial_seed_pinned_as_keyword').encode()).hexdigest()
-    path = BASE_DIR / 'server/data/repair-workflows' / (fingerprint + '.json')
+    path = BASE_DIR / 'dashboard/data/repair-workflows' / (fingerprint + '.json')
     if (not re.fullmatch(r'cf-repair:\d{4}-\d{2}-\d{2}:[a-z0-9.-]+', task)
             or result.get('controllerFingerprint') != fingerprint
             or str(path) != result.get('controllerLedgerPath') or path.is_symlink()):
@@ -2240,7 +2240,7 @@ def maybe_execute_tools_for_message(slug: str, user_text: str) -> List[Dict[str,
     Strict Execution-First Router (Step 1 of the Tool-Calling Pipeline):
     Dynamically extracts parameters (URLs, domains, accounts) from user instructions and executes
     the real Python CLI Action Tools BEFORE the LLM generates any reply:
-      1. Pinpoint CF Post Surgical Repair & Live Republish (`run_doctor_remodel_url` -> `python -m dashboard.runtime.doctor --url <URL> --apply --republish`)
+      1. Pinpoint CF Post Surgical Repair & Live Republish (`run_doctor_remodel_url` -> `python -m dashboard.server.doctor --url <URL> --apply --republish`)
       2. Automated Unindexed Site & URL Indexing (`run_auto_indexer` / `index_check_and_submit` -> `python -m common.auto_indexer --all --apply`)
       3. Channel Publish & Self-Healing Recovery (`run_cf_publish`, `run_naver_publish`, `run_kin_publish`, `run_threads_publish`, `run_watchdog_heal`)
     """

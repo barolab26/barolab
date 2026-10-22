@@ -10,7 +10,7 @@ from common import content_maintenance as maintenance
 class EgoGrowthTests(unittest.TestCase):
     def test_disabled_never_collects_or_publishes(self):
         with patch.object(maintenance, 'state', return_value={'policy': {'enabled': False}}), \
-             patch('dashboard.runtime.worker.run_metrics') as collect, \
+             patch('dashboard.server.worker.run_metrics') as collect, \
              patch.object(maintenance, 'run_once') as run:
             self.assertEqual(ego.growth_cycle()['status'], 'paused')
             collect.assert_not_called()
@@ -23,7 +23,7 @@ class EgoGrowthTests(unittest.TestCase):
             with patch.object(maintenance, 'DATA', Path(folder)), \
                  patch.object(maintenance, 'state', return_value=config), \
                  patch.object(ego, 'EXEC_KILL_SWITCH', Path(folder) / 'disabled'), \
-                 patch('dashboard.runtime.worker.run_metrics') as collect, \
+                 patch('dashboard.server.worker.run_metrics') as collect, \
                  patch.object(maintenance, 'run_once') as run:
                 self.assertEqual(ego.growth_cycle()['status'], 'waiting')
                 collect.assert_not_called()
@@ -37,7 +37,7 @@ class EgoGrowthTests(unittest.TestCase):
                  patch.object(maintenance, 'state', return_value=config), \
                  patch.object(maintenance, 'runtime'), \
                  patch.object(ego, 'EXEC_KILL_SWITCH', Path(folder) / 'disabled'), \
-                 patch('dashboard.runtime.worker.run_metrics', side_effect=lambda *_: calls.append('collect')), \
+                 patch('dashboard.server.worker.run_metrics', side_effect=lambda *_: calls.append('collect')), \
                  patch.object(maintenance, 'run_once', side_effect=lambda: (
                      calls.append('maintain') or {'runtime': {'status': 'waiting'}})):
                 result = ego.growth_cycle()

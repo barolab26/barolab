@@ -1,6 +1,6 @@
 # 색인 및 트래픽 수집
 
-코드는 두 곳에서 관리합니다. `metrics.py`는 수집과 요청, `metrics.js`는 화면 표시를 담당합니다. 채널 목록은 기존 `server/data/growth.sqlite3`를 재사용합니다.
+코드는 두 곳에서 관리합니다. `metrics.py`는 수집과 요청, `metrics.js`는 화면 표시를 담당합니다. 채널 목록은 기존 `dashboard/data/growth.sqlite3`를 재사용합니다.
 
 ```powershell
 python dashboard/metrics.py --collect
@@ -11,7 +11,7 @@ python dashboard/metrics.py --discover-indexnow --collect
 python dashboard/metrics.py --recover-indexing --account sj
 ```
 
-설정은 웹에서 제공되지 않는 `server/data/metrics-config.json`에 둡니다. Google 서비스 계정 또는 OAuth authorized-user JSON 경로와 사이트별 속성을 지정합니다. 인증 파일은 `dashboard/`에 두지 않습니다.
+설정은 웹에서 제공되지 않는 `dashboard/data/metrics-config.json`에 둡니다. Google 서비스 계정 또는 OAuth authorized-user JSON 경로와 사이트별 속성을 지정합니다. 인증 파일은 `dashboard/`에 두지 않습니다.
 
 ```json
 {
@@ -36,7 +36,7 @@ Google 인증 주체에 해당 Search Console 속성과 GA4 읽기 권한이 필
 
 수집 실행 시 새 공개 URL이 있거나 이전 요청이 미처리인 사이트를 다시 확인합니다. 인증과 소유확인이 준비되면 Google 사이트맵 및 네이버 IndexNow 요청을 처리합니다. 요청 완료 뒤 같은 URL 집합은 반복 제출하지 않습니다. 사이트별 `auto_submit: false`로 자동 제출을 끌 수 있습니다.
 
-결과는 `server/data/metrics.json`에 저장하며 `/api/metrics`에서 읽습니다. 자격 증명은 결과에 포함하지 않습니다. 요청 성공은 색인 완료가 아닙니다. URL Inspection은 URL별로 하루에 한 번, 실행당 도메인별 최대 10건을 확인합니다. 미확인 URL은 정상으로 집계하지 않습니다.
+결과는 `dashboard/data/metrics.json`에 저장하며 `/api/metrics`에서 읽습니다. 자격 증명은 결과에 포함하지 않습니다. 요청 성공은 색인 완료가 아닙니다. URL Inspection은 URL별로 하루에 한 번, 실행당 도메인별 최대 10건을 확인합니다. 미확인 URL은 정상으로 집계하지 않습니다.
 
 URL 검사는 미측정 글부터 오래된 공개 목록 순서로 진행합니다. API 속성 권한 오류(403)는 사이트당 한 번 확인한 뒤 6시간 API 재시도 대기를 적용합니다. API 권한 대기는 이미 로그인된 소유자 브라우저의 읽기 전용 검사까지 막지 않습니다. 실패 시각은 `attemptAt`, 성공 확인 시각은 `checkedAt`으로 분리하고, 실패가 과거 성공을 새 확인으로 바꾸지 않습니다.
 
@@ -46,7 +46,7 @@ URL 검사는 미측정 글부터 오래된 공개 목록 순서로 진행합니
 
 Google 브라우저 요청은 설정의 `gsc_accounts`에 등록한 전용 CDP·이메일·사이트만 사용합니다. 활성 GSC 브라우저 수집은 SJ(9226, CF 15사이트)와 aaa10291028(9260, Nolplace)입니다. 2026-10-14 사용자 승인으로 기존 HealthCox·TripMarvel의 동일 www 속성에 `sj@must.biz` 전체 사용자 권한을 추가하고 SJ 실적 조회·URL 검사를 확인했습니다. 기존 mustbiz06 소유자 및 서비스 계정 권한, 속성 이력·사이트맵은 유지합니다. 두 사이트의 API `analytics_reader`는 정상 조회되는 기존 mustbiz06 설정을 그대로 사용하며, 브라우저 수집 경로만 SJ로 통일합니다. mustbiz06 원소유 속성은 `retained_owner_sites`에 기록합니다. 프록시 계정은 현재 전용 배치 설정과 일치하는 출구 IP를 확인합니다. Flow용 baro76650(9420)을 색인 계정으로 대체하지 않습니다.
 
-브라우저 복구는 사이트맵 전체 URL 포함 여부를 확인한 뒤 재제출하고, 최근 공개 URL을 번갈아 검사하여 로컬 운영 한도인 계정별 하루 최대 10건을 개별 요청합니다. 이는 Google의 고정 공식 할당량으로 주장하는 값이 아닙니다. 요청 이력은 `server/data/indexing-recovery.json`에 남기며, 중복 실행·최근 요청 재제출·확인되지 않은 접수를 차단합니다. 브라우저는 종료하지 않습니다.
+브라우저 복구는 사이트맵 전체 URL 포함 여부를 확인한 뒤 재제출하고, 최근 공개 URL을 번갈아 검사하여 로컬 운영 한도인 계정별 하루 최대 10건을 개별 요청합니다. 이는 Google의 고정 공식 할당량으로 주장하는 값이 아닙니다. 요청 이력은 `dashboard/data/indexing-recovery.json`에 남기며, 중복 실행·최근 요청 재제출·확인되지 않은 접수를 차단합니다. 브라우저는 종료하지 않습니다.
 
 `--discover-indexnow`는 기존 CF 사이트 관리자 API에서 해당 사이트의 키를 읽고 공개 키 파일을 대조합니다. 사이트 설정이나 원고를 변경하지 않습니다. 인증 실패 또는 키 파일 404는 보류 사유로 기록합니다.
 

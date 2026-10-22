@@ -716,6 +716,7 @@
             <button type="button" class="graph-chip" id="btn-reset-view" title="화면 중앙 맞춤">화면 맞춤</button>
           </div>
           <div class="graph-chips" id="synapse-filter-group">
+            <button type="button" class="graph-chip" id="memory-source-toggle">문서 기억 편집 보기</button>
             <button type="button" class="graph-chip" id="btn-back-all" style="display:none; background:#1d4ed8; color:#fff;">← 전체 그래프 보기 (Esc)</button>
             <button type="button" class="graph-chip on" data-cat="all" id="chip-all">전체 보기</button>
             <button type="button" class="graph-chip" data-cat="core_hub" id="chip-core-hub">✦ 코어 허브</button>
@@ -855,6 +856,7 @@
     revenueOnly: false,
     query: '',
     categoryFilter: 'all',
+    source: 'synapses',
     focusId: null,
     selectedRel: 'hubs/crew-jarvis.md',
     hoverIdx: null,
@@ -1524,6 +1526,7 @@
     try {
     const params = new URLSearchParams({
       category: state.categoryFilter || 'all',
+      source: state.source,
       q: state.query,
     });
     let data = suppliedData;
@@ -1999,6 +2002,11 @@
     });
   }
 
+  document.getElementById('memory-source-toggle')?.addEventListener('click',event=>{
+    state.source=state.source==='synapses'?'documents':'synapses';
+    event.currentTarget.textContent=state.source==='synapses'?'문서 기억 편집 보기':'중앙 시냅스 보기';
+    loadGraphData();
+  });
   // 4-Synapse Category Filter Chips (`전체 보기`, `✦ 코어 허브`, `📈 수익 발생 기억`, `🛠️ 학습된 스킬(SKILL.md)`, `💬 회의실 결정사항`)
   document.querySelectorAll('#synapse-filter-group .graph-chip[data-cat]').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -2110,7 +2118,7 @@
     const requestAtStart = graphRequest;
     const updateStatus = document.getElementById('graph-update-status');
     try {
-      const params = new URLSearchParams({category:state.categoryFilter || 'all', q:state.query});
+      const params = new URLSearchParams({category:state.categoryFilter || 'all', q:state.query, source:state.source});
       const response = await apiFetch(`/api/memory/graph?${params}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
@@ -2151,5 +2159,6 @@
   requestAnimationFrame(renderFrame);
 })();
 </script>
+<script src="/mission-control.js"></script>
 </body>
 </html>

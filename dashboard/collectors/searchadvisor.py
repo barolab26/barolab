@@ -14,12 +14,12 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
-from dashboard.runtime.cf_themes import DOMAIN_WORKER_NAMES
+from dashboard.server.cf_themes import DOMAIN_WORKER_NAMES
 from common.channel_attribution import is_dummy_rescue_url
 from dashboard.metrics import collector_lock, atomic_write
 
 ROOT = Path(__file__).resolve().parents[2]
-LEDGER = ROOT / "server/data/searchadvisor-status.json"
+LEDGER = ROOT / "dashboard/data/searchadvisor-status.json"
 KST = ZoneInfo("Asia/Seoul")
 DAILY_CAP = 50
 

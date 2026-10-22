@@ -98,7 +98,7 @@ class _consolidated_part0_CockpitTests(_consolidated_part0_unittest.TestCase):
             root = _consolidated_part0_Path(directory)
             _consolidated_part0_record_codex_usage(events, 'actual-model', root, self.now)
             _consolidated_part0_record_codex_usage(events, 'actual-model', root, self.now)
-            path = root / 'server/data/llm-usage.json'
+            path = root / 'dashboard/data/llm-usage.json'
             usage = _consolidated_part0_json.loads(path.read_text())
             self.assertEqual(usage['totalTokens'], 240)
             self.assertEqual(usage['byModel'], {'actual-model': 240})
@@ -292,7 +292,7 @@ class _consolidated_part2_DashboardCacheTests(_consolidated_part2_unittest.TestC
             self.assertEqual(cache.get('b', lambda: 4), 4)
 
     def test_metrics_read_does_not_verify_external_publication(self):
-        source = (_consolidated_part2_Path(__file__).parent / 'runtime/main.py').read_text()
+        source = (_consolidated_part2_Path(__file__).parent / 'server/main.py').read_text()
         node = next((n for n in _consolidated_part2_ast.parse(source).body if isinstance(n, _consolidated_part2_ast.FunctionDef) and n.name == 'get_metrics'))
         self.assertFalse(any((isinstance(n, _consolidated_part2_ast.Name) and n.id == 'reconcile' for n in _consolidated_part2_ast.walk(node))))
 
@@ -396,7 +396,7 @@ class _consolidated_part4_UsageTests(_consolidated_part4_unittest.TestCase):
         self.root = _consolidated_part4_Path(self.temp.name)
 
     def ledger(self):
-        return _consolidated_part4_json.loads((self.root / 'server/data/llm_usage_ledger.json').read_text())
+        return _consolidated_part4_json.loads((self.root / 'dashboard/data/llm_usage_ledger.json').read_text())
 
     def test_nested_adapters_are_counted_once_and_headers_are_allowlisted(self):
 
@@ -474,9 +474,9 @@ class _consolidated_part5_RuntimeLockTests(_consolidated_part5_unittest.TestCase
 
     def test_windows_mounted_project_uses_native_home_lock(self):
         with _consolidated_part5_patch.object(_consolidated_part5_runtime_locks.sys, 'platform', 'linux'), _consolidated_part5_patch.object(_consolidated_part5_Path, 'home', return_value=_consolidated_part5_Path('/tmp/native-home')):
-            first = _consolidated_part5_runtime_locks.runtime_lock_path('/mnt/c/10_Project/BaroLab/cf_posting/data/cleaner.lock')
+            first = _consolidated_part5_runtime_locks.runtime_lock_path('/mnt/c/10_Project/BaroLab/dashboard/data/cf/cleaner.lock')
             self.assertTrue(first.is_relative_to('/tmp/native-home/.barolab/locks'))
-            self.assertEqual(first, _consolidated_part5_runtime_locks.runtime_lock_path('/mnt/c/10_Project/BaroLab/cf_posting/data/cleaner.lock'))
+            self.assertEqual(first, _consolidated_part5_runtime_locks.runtime_lock_path('/mnt/c/10_Project/BaroLab/dashboard/data/cf/cleaner.lock'))
             self.assertNotEqual(first, _consolidated_part5_runtime_locks.runtime_lock_path('/mnt/c/10_Project/BaroLab/naver/data/cleaner.lock'))
             self.assertEqual(_consolidated_part5_runtime_locks.runtime_lock_path('/tmp/example.lock'), _consolidated_part5_Path('/tmp/example.lock'))
         with _consolidated_part5_patch.object(_consolidated_part5_runtime_locks.sys, 'platform', 'win32'):
@@ -511,7 +511,7 @@ class _consolidated_part5_RuntimeLockTests(_consolidated_part5_unittest.TestCase
         with _consolidated_part5_tempfile.TemporaryDirectory() as folder:
             config = _consolidated_part5_Path(folder) / 'project-autonomy.json'
             config.write_text(_consolidated_part5_json.dumps({'enabled': True, 'projects': ['cf_blog']}))
-            with _consolidated_part5_patch.object(project_autonomy, 'CONFIG', config), _consolidated_part5_patch('common.system_watchdog.is_process_running_match', return_value=True), _consolidated_part5_patch('server.agent_tools._ego_popen') as launch:
+            with _consolidated_part5_patch.object(project_autonomy, 'CONFIG', config), _consolidated_part5_patch('common.system_watchdog.is_process_running_match', return_value=True), _consolidated_part5_patch('server.agent_tools._ego_popen') as launch, _consolidated_part5_patch('common.project_autonomy.Path.home', return_value=_consolidated_part5_Path(folder)):
                 self.assertEqual(project_autonomy.run_project_cycle('cf_blog')['status'], 'busy')
             launch.assert_not_called()
 
@@ -649,7 +649,7 @@ class ConsolidationBoundaryTests(_consolidated_part0_unittest.TestCase):
         from types import SimpleNamespace
         from pathlib import Path
         from fastapi import HTTPException, Request
-        source = Path(__file__).with_name('runtime').joinpath('main.py').read_text()
+        source = Path(__file__).with_name('server').joinpath('main.py').read_text()
         tree = ast.parse(source)
         names = {'protect_internal_files', 'public_channel_snapshot'}
         nodes = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name in names]
@@ -664,22 +664,26 @@ class ConsolidationBoundaryTests(_consolidated_part0_unittest.TestCase):
             response = asyncio.run(scope['protect_internal_files'](request, next_response))
             self.assertEqual(response.status_code, 404, path)
         for name in ('../secure/config.json', 'automation-journal.json', 'secure/key.json'):
-            request = SimpleNamespace(url=SimpleNamespace(path='/cf_posting/data/'+name))
+            request = SimpleNamespace(url=SimpleNamespace(path='/dashboard/data/cf/'+name))
             with self.assertRaises(HTTPException): scope['public_channel_snapshot'](request, name)
 
     def test_reconciliation_waits_for_the_active_publisher(self):
         from unittest.mock import patch
-        from dashboard.runtime import worker
+        from dashboard.server import worker
         with patch('naver_blog_posting.posting.pipeline_lock', side_effect=RuntimeError('Naver pipeline already running for this project')), patch('dashboard.collectors.naver_public.reconcile') as reconcile:
             self.assertEqual(worker.run_task('naver-monitor'), 0)
             reconcile.assert_not_called()
 
-    def test_legacy_data_aliases_preserve_one_physical_ledger(self):
-        from pathlib import Path
-        root = Path(__file__).resolve().parents[1]
-        for channel, key in [('cf_posting','cf'), ('naver_blog_posting','naver')]:
-            self.assertTrue((root/channel/'data').is_symlink())
-            self.assertEqual((root/channel/'data').resolve(), (root/'dashboard/data'/key).resolve())
+    def test_channel_ledgers_have_no_root_aliases(self):
+        root=Path(__file__).resolve().parents[1]
+        from cf_posting import posting as cf
+        from common import llm_settings
+        self.assertEqual(cf.DATA_DIR,root/'dashboard/data/cf')
+        self.assertEqual(llm_settings.CONFIG,root/'dashboard/data/llm-settings.json')
+        for name in ('server','common','data','skills','.agent-routing'):
+            self.assertFalse((root/name).exists(),name)
+        self.assertTrue((root/'apps').is_dir())
+        self.assertFalse((root/'apps').is_symlink())
 
 
 class SynapseFlywheelTests(_consolidated_part0_unittest.TestCase):
@@ -756,7 +760,8 @@ class SynapseFlywheelTests(_consolidated_part0_unittest.TestCase):
         dashboard=self.root/'dashboard'
         now=self.now.astimezone(collector.KST)
         address='https://blog.naver.com/mustpickinfo/123'
-        (dashboard/'naver_public_verification.json').write_text(json.dumps({'evidence':[{'publicUrl':address,'checkedAt':now.isoformat()}]}))
+        (dashboard/'data/naver').mkdir(parents=True,exist_ok=True)
+        (dashboard/'data/naver/public-verification.json').write_text(json.dumps({'evidence':[{'publicUrl':address,'checkedAt':now.isoformat()}]}))
         with patch.object(collector,'DEFAULT_ACCOUNTS',{}),patch('common.llm_client.memory_event') as event:
             result=collector.reconcile(base,now=now,force=True)
         self.assertEqual(result['totalVerifiedEvidence'],1)
@@ -839,8 +844,8 @@ class SynapseFlywheelTests(_consolidated_part0_unittest.TestCase):
         root=Path(__file__).resolve().parents[1]
         for channel in ('cf_posting','naver_blog_posting','naver_kin','threads_posting'):
             relative=channel+'/posting.py'
-            before=subprocess.check_output(['git','show','HEAD:'+relative],cwd=root)
-            self.assertEqual(hashlib.sha256(before).hexdigest(),hashlib.sha256((root/relative).read_bytes()).hexdigest())
+            before=bytes.fromhex(__import__('json').loads((root/'dashboard/agents/frozen-engines.json').read_text())['hashes'][channel])
+            self.assertEqual(before.hex(),hashlib.sha256((root/relative).read_bytes()).hexdigest())
 
 
 class SynapseExecutionTests(_consolidated_part0_unittest.TestCase):
@@ -896,6 +901,112 @@ class SynapseExecutionTests(_consolidated_part0_unittest.TestCase):
         boost=g['nodes'][s.key('boost',node['url'])]
         self.assertEqual(boost['observedDeltas']['gsc:clicks'],2)
         self.assertFalse(boost['causalClaim'])
+
+
+class SharedMissionSnapshotTests(_consolidated_part0_unittest.TestCase):
+    def test_web_and_monitor_read_exactly_the_same_safe_revision(self):
+        import json,tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from server import main,mission_control as mc
+        now=_consolidated_part0_dt.datetime(2026,10,23,9,tzinfo=mc.KST)
+        data=dict(collectedAt=now.timestamp(),channels=mc.channels({'date':'2026-10-23','items':[{'status':'published','publicUrl':'https://example.com/a'}]}, {'date':'2026-10-23'}, {'daily':{'date':'2026-10-23','publishedVerified':2}},now),
+            crew=mc.crew_rows([],[],{},now),synapses={'nodes':{'p':{'resolvedCount':3}},'edges':[]},
+            events=[{'private':'DO_NOT_EXPORT'}],cf={'secret':'DO_NOT_EXPORT'},naver={'accounts':[{'account':'a','accId':'acc1','expected':1,'slots':[{'publicationDate':'2026-10-23','publicationStatus':'reserved','secret':'DO_NOT_EXPORT'}]}]})
+        snapshot=mc.shared_snapshot(data)
+        self.assertNotIn('DO_NOT_EXPORT',json.dumps(snapshot))
+        self.assertEqual(len(snapshot['panels']),6)
+        self.assertEqual(snapshot['naverAccounts'][0]['slots'][0]['publicationStatus'],'reserved')
+        self.assertEqual(snapshot['vault'],dict(nodes=1,edges=0,episodes=3))
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target=root/'dashboard/data';target.mkdir(parents=True)
+            path=target/'live_snapshot.json';path.write_text(json.dumps(snapshot))
+            reader=mc.SnapshotReader(root)
+            with patch.object(main,'DATA_DIR',target),patch.object(main,'refresh_live_snapshot',side_effect=AssertionError('Reader re-aggregated')):
+                self.assertEqual(main.get_live_snapshot(),reader.get())
+            path.write_text('{')
+            self.assertEqual(reader.get(),snapshot)
+            self.assertIsNone(reader.thread)
+    def test_readonly_collector_lock_does_not_mean_naver_is_publishing(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from naver_blog_posting import posting as naver
+        now=naver.now_kst()
+        journal={'version':1,'attempts':[{'account':'stone0747','workDate':now.date().isoformat(),'phase':'started'}]}
+        with tempfile.TemporaryDirectory() as directory:
+            base=Path(directory)/'naver_blog_posting';base.mkdir()
+            with patch.object(naver,'read_journal',return_value=journal),patch.object(naver,'pipeline_busy',return_value=True),patch('common.system_watchdog.is_process_running_match',return_value=False):
+                self.assertEqual(naver.monitor(base,now)['counts']['running'],0)
+            with patch.object(naver,'read_journal',return_value=journal),patch.object(naver,'pipeline_busy',return_value=True),patch('common.system_watchdog.is_process_running_match',return_value=True):
+                self.assertEqual(naver.monitor(base,now)['counts']['running'],1)
+
+    def test_memory_page_counts_every_central_node_and_relation(self):
+        import tempfile,json
+        from pathlib import Path
+        from unittest.mock import patch
+        from server import memory_graph as memory
+        with tempfile.TemporaryDirectory() as directory:
+            data=Path(directory)
+            graph={'nodes':{'hub':{'type':'MemoryHub'},'post':{'type':'Post','title':'공개 가이드','secret':'PRIVATE'}},
+                   'edges':[{'source':'hub','target':'post','type':'contains'},{'source':'hub','target':'post','type':'resolved'}]}
+            (data/'memory_graph.json').write_text(json.dumps(graph))
+            with patch.object(memory,'DATA_DIR',data):
+                projection=memory._synapse_graph()
+                self.assertEqual(projection['stats']['total'],2)
+                self.assertEqual(projection['stats']['links'],2)
+                self.assertEqual(projection['stats']['isolated'],0)
+                self.assertNotIn('PRIVATE',json.dumps(projection))
+                self.assertFalse(projection['nodes'][1]['verifiedKnowledge'])
+
+    def test_daily_retry_counts_do_not_become_completed_slot_counts(self):
+        import sqlite3,tempfile
+        from pathlib import Path
+        from server import mission_control as mc
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);data=root/'dashboard/data';data.mkdir(parents=True)
+            path=data/'kin.sqlite3'
+            with sqlite3.connect(path) as db:
+                db.execute('CREATE TABLE automation_slots(state,planned_at)')
+                db.executemany('INSERT INTO automation_slots VALUES(?,?)',[('blocked','2026-10-22T16:00:00Z'),('blocked','2026-10-22T16:00:01Z'),('blocked','2026-10-22T01:00:00Z')])
+            collector=mc.Collector(root)
+            states=collector.operation_states('kin.sqlite3','automation_slots','2026-10-23',True)
+            self.assertEqual(states,{'blocked':2})
+            now=_consolidated_part0_dt.datetime(2026,10,23,tzinfo=mc.KST)
+            snapshot=mc.shared_snapshot(dict(collectedAt=now.timestamp(),channels=mc.channels({}, {}, {'daily':{'date':'2026-10-23','publishedVerified':0}},now),kinOperations=states))
+            kin=next(r for r in snapshot['channels'] if r['id']=='kin')
+            self.assertEqual(kin['counts']['completed'],0)
+            self.assertEqual(kin['counts']['waiting'],20)
+            self.assertEqual(kin['blockedAttempts'],2)
+            path.unlink()
+            self.assertEqual(collector.operation_states('kin.sqlite3','automation_slots','2026-10-23',True),states)
+            self.assertIsNone(collector.operation_states('kin.sqlite3','automation_slots','2026-10-24',True))
+            unknown=mc.shared_snapshot(dict(collectedAt=now.timestamp(),channels=mc.channels({}, {}, {'daily':{'date':'2026-10-23','publishedVerified':0}},now)))
+            self.assertIsNone(unknown['channels'][2]['counts']['failed'])
+
+    def test_real_terminal_height_wins_over_inherited_shell_size(self):
+        import os,pty,fcntl,termios,struct,subprocess,sys
+        master,slave=pty.openpty()
+        try:
+            fcntl.ioctl(slave,termios.TIOCSWINSZ,struct.pack('HHHH',70,120,0,0))
+            code="from server import mission_control as m; m.render=lambda data,now=None,height=0:'REAL_TERMINAL_HEIGHT='+str(height); m.main(['--once'])"
+            child=subprocess.Popen([sys.executable,'-B','-c',code],stdin=subprocess.DEVNULL,stdout=slave,stderr=subprocess.PIPE,
+                env={**os.environ,'LINES':'24','COLUMNS':'80','PYTHONDONTWRITEBYTECODE':'1'})
+            child.wait(timeout=10)
+            output=os.read(master,4096)
+            self.assertEqual(child.returncode,0,child.stderr.read())
+            self.assertIn(b'REAL_TERMINAL_HEIGHT=70',__import__('re').sub(rb'\x1b\[[0-9;]*m',b'',output))
+        finally:os.close(master);os.close(slave)
+
+    def test_shared_frame_uses_all_rows_at_multiple_heights(self):
+        from server.cockpit_panels import render_snapshot
+        from rich.console import Console
+        import io
+        snapshot={'schema':'barolab-mission-control-v2','date':'2026-10-23','revision':'a'*64,'panels':[['행']]*6}
+        for height in (32,70,95):
+            output=io.StringIO();console=Console(file=output,width=100,height=height)
+            console.print(render_snapshot(snapshot,_consolidated_part0_dt.datetime.now(),height))
+            self.assertEqual(len(output.getvalue().splitlines()),height)
 
 
 if __name__ == "__main__":

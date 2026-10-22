@@ -1197,14 +1197,15 @@ function isCFPublished(site) {
 function projectCFDay(schedule, state, now = new Date()) {
   const today = getCFDay(now), sourceDate = schedule?.date || null;
   const current = sourceDate === today && Array.isArray(schedule?.items);
-  const stateCurrent = current && (state?.date === today || state?.scheduleDate === today);
+  const stateDates = [state?.date, state?.scheduleDate].filter(Boolean);
+  const stateCurrent = current && stateDates.length > 0 && stateDates.every(date => date === today);
   const activeDomain = state?.domain || state?.activeDomain || '';
   const stateRunning = stateCurrent && ['processing', 'publishing'].includes(state?.status);
   const stateScheduleItems = Array.isArray(state?.dailySchedule) ? state.dailySchedule : [];
   const items = current ? schedule.items.map(site => {
     const copy = {...site};
     const stateItem = stateScheduleItems.find(s => s?.domain === copy.domain) || null;
-    if (stateRunning && copy.domain === activeDomain && !isCFPublished(copy)) {
+    if (stateRunning && copy.domain === activeDomain && !isCFPublished(copy) && !['failed','retry_wait','review_required','interrupted'].includes(copy.status)) {
       if (stateItem) Object.assign(copy, stateItem);
       copy.status = state.status;
       if (state.currentStage != null) copy.currentStage = state.currentStage;
@@ -1216,7 +1217,7 @@ function projectCFDay(schedule, state, now = new Date()) {
       if (state.handoffs) copy.handoffs = state.handoffs;
       if (state.title && (Number(state.currentStage) > 1 || Number(state.progressPct) >= 20)) copy.title = state.title;
       if (state.summary && (Number(state.currentStage) > 1 || Number(state.progressPct) >= 20)) copy.summary = state.summary;
-    } else if (stateItem && ['processing', 'publishing'].includes(stateItem.status) && !isCFPublished(copy)) {
+    } else if (stateItem && ['processing', 'publishing'].includes(stateItem.status) && !isCFPublished(copy) && !['failed','retry_wait','review_required','interrupted'].includes(copy.status)) {
       Object.assign(copy, stateItem);
     }
     return copy;
@@ -1539,7 +1540,7 @@ async function pollPipelineStatus() {
   if (statusRefreshRunning) return;
   statusRefreshRunning = true;
   try {
-    const root = window.location.protocol.startsWith('http') ? '/cf_posting/data/' : '../cf_posting/data/';
+    const root = window.location.protocol.startsWith('http') ? '/dashboard/data/cf/' : '../dashboard/data/cf/';
     const get = async name => { const response = await fetch(root + name + '?t=' + Date.now(), {cache:'no-store'}); if (!response.ok) throw new Error('운영 상태 조회 실패: ' + response.status); return response.json(); };
     const [schedule, state] = await Promise.all([get('daily_schedule.json'), get('pipeline_state.json')]);
     if (!Array.isArray(schedule.items)) throw new Error('발행 일정 확인 불가');
@@ -1636,5 +1637,6 @@ renderCFDay();
 </script>
 <script src="metrics.js?v=20261017-cf-trends"></script>
 <script src="/workflow-actions.js?v=20261016-kst-rollover"></script>
+<script src="/mission-control.js"></script>
 </body>
 </html>

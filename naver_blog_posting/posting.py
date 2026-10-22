@@ -84,14 +84,14 @@ def atomic_json(path, value):
     write(path, value)
 
 def read_journal(base=BASE):
-    path = base / 'data' / 'automation-journal.json'
+    path = base.parent / 'dashboard/data/naver' / 'automation-journal.json'
     if not path.exists():
         return {'version': 1, 'attempts': []}
     value = json.loads(path.read_text(encoding='utf-8'))
     if not isinstance(value, dict) or value.get('version') != 1 or (not isinstance(value.get('attempts'), list)):
         raise ValueError('Invalid automation journal; execution blocked')
     for entry in value['attempts']:
-        if not isinstance(entry, dict) or not entry.get('account') or (not entry.get('workDate')) or (entry.get('phase') not in ('started', 'submitting', 'verified', 'unknown', 'failed', 'material_required')):
+        if not isinstance(entry, dict) or not entry.get('account') or (not entry.get('workDate')) or (entry.get('phase') not in ('started', 'submitting', 'verified', 'unknown', 'failed', 'material_required', 'superseded')):
             raise ValueError('Invalid attempt; execution blocked')
     return value
 
@@ -108,7 +108,7 @@ def write_attempt(account, phase, *, base=BASE, now=None, start_new=True, **meta
         if entry is None:
             raise ValueError('No active attempt')
     entry.update(metadata, phase=phase, updatedAt=now.isoformat())
-    atomic_json(base / 'data' / 'automation-journal.json', journal)
+    atomic_json(base.parent / 'dashboard/data/naver' / 'automation-journal.json', journal)
     return dict(entry)
 
 def normalized_title(title):
@@ -117,7 +117,7 @@ def normalized_title(title):
 
 def pipeline_busy(base=BASE):
     from common.runtime_locks import runtime_lock_path
-    path = runtime_lock_path(base / 'data' / 'pipeline-run.lock')
+    path = runtime_lock_path(base.parent / 'dashboard/data/naver' / 'pipeline-run.lock')
     if not path.exists():
         return False
     with path.open('r+b') as handle:
@@ -232,7 +232,7 @@ def require_no_explicit_submission_failure(reply, http_status):
 ACCOUNT_MAP = {'soultin': {'acc_id': 'acc1', 'name': '시니어 브리프 (5060 연금·복지)', 'blog_id': 'mustpickinfo', 'blog_url': 'https://blog.naver.com/mustpickinfo', 'cdp_port': 9334, 'topic': '5060 국민연금, 기초연금, 노후재정, 시니어 지원금', 'topic_slug': 'senior-pension', 'bridge_domains': []}, 'soul5373': {'acc_id': 'acc2', 'name': '머스트 헬스뷰 (5060 건강·영양)', 'blog_id': 'mustinfo', 'blog_url': 'https://blog.naver.com/mustinfo', 'cdp_port': 9333, 'topic': '5060 중장년 건강, 건기식 성분 팩트체크, 혈당/혈압 식단 관리', 'topic_slug': 'health-blood-sugar', 'bridge_domains': []}, 'yoon_master': {'acc_id': 'acc3', 'name': '윤뷰스 (5060 라이프 & 리빙)', 'blog_id': 'yoonviews', 'blog_url': 'https://blog.naver.com/yoonviews', 'cdp_port': 9335, 'topic': '5060 우아한 데일리룩, 프리미엄 가전·리빙, 힐링 여행', 'topic_slug': 'senior-fashion', 'bridge_domains': []}, 'adinfo0905': {'acc_id': 'acc4', 'name': '직장인 루틴 (외부유입 브릿지)', 'blog_id': 'adinfo0905', 'blog_url': 'https://blog.naver.com/adinfo0905', 'cdp_port': 9231, 'topic': '직장인 연말정산 소득공제, 엑셀 무료 서식, 업무 생산성, 절세', 'topic_slug': 'year-end-tax', 'bridge_domains': ['www.woorinote.kr', 'www.must-good.com', 'www.must-pick.com', 'www.baronote.kr', 'www.justinfo.co.kr', 'www.daynote.kr', 'www.maxnote.kr', 'www.soulnote.kr']}, 'stone0747': {'acc_id': 'acc5', 'name': '지원금 마감속보 (외부유입 브릿지)', 'blog_id': 'stone0747', 'blog_url': 'https://blog.naver.com/stone0747', 'cdp_port': 9230, 'topic': '정부 소상공인 정책자금, 지자체 지원금 마감속보, 생활세무 혜택', 'topic_slug': 'gov-subsidy', 'bridge_domains': ['www.woorinote.kr', 'www.must-good.com', 'www.must-pick.com', 'www.baronote.kr', 'www.justinfo.co.kr', 'www.daynote.kr']}}
 
 def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, detail_message, status='processing', reserve_time=None, topic=None, strategy_id=None, strategy_name=None, verification=None):
-    """대시보드 실시간 상태 파일(data/pipeline_status.js 및 dashboard/pipeline_status.js) 갱신"""
+    """대시보드 실시간 상태 파일(data/pipeline_status.js 및 dashboard/data/naver/pipeline_status.js) 갱신"""
     if os.environ.get('BAROLAB_VISIBLE_WORKFLOW') == '1' and os.name != 'nt' and (status == 'processing'):
         from common.ubuntu_naver_browser import focus_workflow_window
         focus_workflow_window(9440 if stage_num == 4 else account_info['cdp_port'])
@@ -273,7 +273,7 @@ def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, de
     status_obj['completedSlots'] = {a.get('scheduledSlot') or a['reserveTime'][-5:]: {'topic': a['topic'], 'reserveTime': a['reserveTime'], 'verificationSource': a['verificationSource'], 'publicationStatus': 'verified_public' if a.get('state') == 'verified_public' else 'reserved', 'publicUrl': a.get('publicUrl'), 'artifactFolder': a.get('artifactFolder')} for a in receipts}
     status_obj['count'] = len({a['reserveTime'] for a in receipts})
     completed_by_date = {}
-    for state_path in (PROJECT_ROOT / 'dashboard' / 'pipeline_status.js', BASE_DIR / 'data' / 'pipeline_status.js'):
+    for state_path in (PROJECT_ROOT / 'dashboard/data/naver/pipeline_status.js', PROJECT_ROOT / 'dashboard/data/naver' / 'pipeline_status.js'):
         if not state_path.exists():
             continue
         raw = state_path.read_text(encoding='utf-8-sig')
@@ -302,11 +302,11 @@ def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, de
     if current_attempt.get('artifactFolder'):
         status_obj['folderPath'] = current_attempt['artifactFolder']
     content = f'window.__NAVER_PIPELINE_STATUS__ = {json.dumps(status_obj, ensure_ascii=False, indent=2)};\n'
-    p1 = BASE_DIR / 'data' / 'pipeline_status.js'
+    p1 = PROJECT_ROOT / 'dashboard/data/naver' / 'pipeline_status.js'
     p1.parent.mkdir(parents=True, exist_ok=True)
     from common.dashboard_jobs import atomic_text
     atomic_text(p1, content)
-    p2 = PROJECT_ROOT / 'dashboard' / 'pipeline_status.js'
+    p2 = PROJECT_ROOT / 'dashboard/data/naver/pipeline_status.js'
     if p2.parent.exists():
         atomic_text(p2, content)
     print(f'[{now_str}] [대시보드 실시간 동기화] {progress_pct}% - {stage_name}: {detail_message}', flush=True)
@@ -340,7 +340,7 @@ def pipeline_lock():
     global _PIPELINE_LOCK_OWNER
     import threading
     from common.runtime_locks import runtime_lock_path
-    lock_path = runtime_lock_path(BASE_DIR / 'data' / 'pipeline-run.lock')
+    lock_path = runtime_lock_path(PROJECT_ROOT / 'dashboard/data/naver' / 'pipeline-run.lock')
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with open(lock_path, 'a+b') as handle:
         handle.seek(0, 2)
@@ -1234,16 +1234,18 @@ def check_existing_reservations(context, account, *, title, reserve_time, revisi
     return observation
 
 def monitor(base=BASE, now=None):
+    from common.system_watchdog import is_process_running_match
+    publishing = is_process_running_match(str(base/'posting.py')) or is_process_running_match('naver_blog_posting.posting')
     now = now or now_kst()
     day = now.date().isoformat()
     journal = read_journal(base)
-    public_path = base.parent / 'dashboard' / 'naver_automation.json'
+    public_path = base.parent / 'dashboard/data/naver/automation-status.json'
     previous = json.loads(public_path.read_text()) if public_path.exists() else {}
     accounts = []
     totals = {'verified': 0, 'running': 0, 'failed': 0, 'waiting': 0, 'unknown': 0}
     latest = journal['attempts'][-1] if journal['attempts'] else {}
     for key, expected in DAILY_SLOTS.items():
-        attempts = [r for r in journal['attempts'] if r.get('account') == key and r.get('workDate') == day]
+        attempts = [r for r in journal['attempts'] if r.get('account') == key and (r.get('workDate') == day or str(r.get('reserveTime','')).startswith(day))]
         confirmed = list({(r.get('reserveTime'), r.get('artifactFolder')): r for r in attempts if r.get('phase') == 'verified' and r.get('verificationSource')}.values())
         last = attempts[-1] if attempts else {}
         slots = []
@@ -1255,15 +1257,15 @@ def monitor(base=BASE, now=None):
                     status = 'failed'
                 elif last.get('submissionStarted') and last.get('phase') in ('submitting', 'unknown'):
                     status = 'unknown'
-                elif latest is last and pipeline_busy(base):
+                elif latest is last and last.get('phase') in ('started','submitting') and publishing and pipeline_busy(base):
                     status = 'running'
             totals[status] += 1
-            slots.append({'slot': slot, 'status': status, 'reserveTime': row.get('reserveTime'), 'title': row.get('topic') or row.get('title'), 'verifiedAt': row.get('verifiedAt'), 'verificationSource': row.get('verificationSource'), 'publicationStatus': 'reserved' if row else status, 'publicPublicationVerified': row.get('publicPublicationVerified') is True})
+            slots.append({'slot': slot, 'status': status, 'reserveTime': row.get('reserveTime'), 'title': row.get('topic') or row.get('title'), 'verifiedAt': row.get('verifiedAt'), 'verificationSource': row.get('verificationSource'), 'publicationStatus': 'published' if row.get('publicPublicationVerified') is True else 'reserved' if row else status, 'publicPublicationVerified': row.get('publicPublicationVerified') is True, 'publicUrl': row.get('publicUrl'), 'publicationDate': str(row.get('reserveTime') or day)[:10]})
         status = 'verified' if all((s['status'] == 'verified' for s in slots)) else next((s['status'] for s in slots if s['status'] != 'verified'), 'waiting')
         accounts.append({'account': key, 'accId': ACCOUNT_MAP[key]['acc_id'], 'status': status, 'slots': slots, 'expected': len(slots), 'counts': {name: sum((s['status'] == name for s in slots)) for name in totals}, 'publicationDate': day})
-    result = {**previous, 'date': day, 'workDate': day, 'checkedAt': now.isoformat(), 'timezone': 'Asia/Seoul', 'plannedAccounts': len(accounts), 'plannedSlots': sum((len(x) for x in DAILY_SLOTS.values())), 'accounts': accounts, 'counts': totals, 'runner': {'mode': 'basic-one-pass'}}
+    result = {**previous, 'date': day, 'publicationDate': day, 'workDate': day, 'checkedAt': now.isoformat(), 'timezone': 'Asia/Seoul', 'plannedAccounts': len(accounts), 'plannedSlots': sum((len(x) for x in DAILY_SLOTS.values())), 'accounts': accounts, 'counts': totals, 'runner': {'mode': 'basic-one-pass'}}
     atomic_json(public_path, result)
-    atomic_json(base / 'data' / 'automation-status.json', result)
+    atomic_json(base.parent / 'dashboard/data/naver' / 'automation-status.json', result)
     return result
 
 def basic_daily(limit=None):

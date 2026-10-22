@@ -145,7 +145,7 @@ class Isolation(unittest.TestCase):
  def test_boundary(self):
   self.assertFalse(Path({str(secret)!r}).exists())
   self.assertFalse(Path('/home/baro7/.barolab').exists())
-  self.assertFalse(Path('/mnt/c/10_Project/BaroLab/server/data').exists())
+  self.assertFalse(Path('/mnt/c/10_Project/BaroLab/dashboard/data').exists())
   self.assertIsNone(os.environ.get('OPENAI_API_KEY'))
   with self.assertRaises(OSError):Path(__file__).write_text('changed')
   with self.assertRaises(OSError):socket.create_connection(('1.1.1.1',443),timeout=0.2)
@@ -209,16 +209,16 @@ class Isolation(unittest.TestCase):
 
     @unittest.skipUnless(sys.platform=='linux' and jobs.shutil.which('bwrap'),'Real Linux sandbox required')
     def test_pipeline_can_import_frozen_protected_source_dependency_without_edit_permission(self):
-        (self.root/'common').mkdir();(self.root/'cf_posting').mkdir()
-        (self.root/'common/codex_cli.py').write_text('def available(): return True\n',encoding='utf-8')
-        (self.root/'cf_posting/pipeline_runner.py').write_text('from common.codex_cli import available\ndef ready(): return False\n',encoding='utf-8')
-        (self.root/'test_pipeline.py').write_text('import unittest\nfrom cf_posting.pipeline_runner import ready\nclass T(unittest.TestCase):\n def test_ready(self): self.assertTrue(ready())\n',encoding='utf-8')
-        self.candidate['changes']=[{'path':'cf_posting/pipeline_runner.py','content':'from common.codex_cli import available\ndef ready(): return available()\n'}]
-        receipt=jobs.propose_coding_job(self.root,['cf_posting/pipeline_runner.py'],['test_pipeline.py'],'Controlled pipeline dependency fixture',context_files=['common/codex_cli.py'])
+        (self.root/ 'dashboard' / 'common').mkdir(parents=True);(self.root/'cf_posting').mkdir()
+        (self.root/'dashboard/common/codex_cli.py').write_text('def available(): return True\n',encoding='utf-8')
+        (self.root/'cf_posting/adapter.py').write_text('from common.codex_cli import available\ndef ready(): return False\n',encoding='utf-8')
+        (self.root/'test_pipeline.py').write_text('import unittest\nfrom cf_posting.adapter import ready\nclass T(unittest.TestCase):\n def test_ready(self): self.assertTrue(ready())\n',encoding='utf-8')
+        self.candidate['changes']=[{'path':'cf_posting/adapter.py','content':'from common.codex_cli import available\ndef ready(): return available()\n'}]
+        receipt=jobs.propose_coding_job(self.root,['cf_posting/adapter.py'],['test_pipeline.py'],'Controlled pipeline dependency fixture',context_files=['dashboard/common/codex_cli.py'])
         review=self.review(receipt)
         result=jobs.validate_coding_job(receipt['jobDir'],receipt['candidateSha256'],sandbox=True,review_sha256=review['reviewSha256'])
         self.assertEqual(result['status'],'isolated_verified',result['results'])
-        with self.assertRaises(ValueError):jobs.propose_coding_job(self.root,['common/codex_cli.py'],['test_pipeline.py'],'Disallowed edit')
+        with self.assertRaises(ValueError):jobs.propose_coding_job(self.root,['dashboard/common/codex_cli.py'],['test_pipeline.py'],'Disallowed edit')
 
     @unittest.skipUnless(sys.platform=='linux' and jobs.shutil.which('bwrap'),'Real Linux sandbox required')
     def test_rollback_rejects_newer_edit(self):

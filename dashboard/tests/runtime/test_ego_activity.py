@@ -25,7 +25,7 @@ class ActivityTests(unittest.TestCase):
         base = self.root / 'naver_blog_posting'
         folder = folder or base / 'output/test/run'
         iso = lambda t: datetime.fromtimestamp(t, timezone.utc).isoformat()
-        self.write(base / 'data/automation-journal.json', {'attempts': [{'phase': 'started', 'account': 'test', 'startedAt': iso(self.now - 30), 'artifactFolder': str(folder)}]})
+        self.write(self.root / 'dashboard/data/naver/automation-journal.json', {'attempts': [{'phase': 'started', 'account': 'test', 'startedAt': iso(self.now - 30), 'artifactFolder': str(folder)}]})
         self.write(folder / 'visible-editor-progress.json', {'events': [{'stage': 'block', 'at': iso(at or self.now - 2)}]})
 
     def test_idle_never_reads_old_typing(self):
@@ -56,7 +56,7 @@ class ActivityTests(unittest.TestCase):
             self.assertEqual(a.read_activity(self.root, self.now)['naver']['errorType'], 'ValueError')
 
     def test_cf_stage_needs_processing_domain_and_fresh_timestamp(self):
-        base = self.root / 'cf_posting/data'
+        base = self.root / 'dashboard/data/cf'
         self.write(base / 'pipeline_state.json', {'activeDomain': 'a', 'timestamp': self.now - 2, 'stageName': 'research'})
         with patch.object(a, 'lock_busy', return_value=True):
             for status, expected in [('failed', 'active_unobserved'), ('processing', 'active')]:

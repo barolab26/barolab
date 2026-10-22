@@ -179,7 +179,7 @@ class MemoryIntegrationTests(unittest.TestCase):
         self.assertTrue(all((row['memoryPrefixPresent'] for row in deliveries)))
 
     def test_doctor_reviews_only_successful_republish_with_matching_public_text(self):
-        from dashboard.runtime import doctor
+        from dashboard.server import doctor
         with patch.object(doctor, 'parse_cf_post_url', return_value=('example.org', 'post')), patch.object(doctor, 'find_live_cf_post', return_value={'id': 7, 'title': 'Repair', 'content': '<p>Actual corrected text</p>'}), patch.object(doctor, 'find_local_output_runs', return_value=[]), patch.object(doctor, '_get_cf_headers', return_value={}), patch.object(doctor, 'get_device_profile', return_value={}), patch.object(doctor, 'DOCTOR_LEDGER_PATH', Path(self.temp.name) / 'absent-ledger.json'), patch.object(doctor.requests, 'put') as put, patch.object(doctor.requests, 'get') as get, patch.object(llm_client, 'memory_event') as event:
             for apply, code, public_text, expected in [(False, 200, 'Actual corrected text', False), (True, 500, 'Actual corrected text', False), (True, 200, 'Old unrelated body', False), (True, 200, 'Actual corrected text', True)]:
                 with self.subTest(apply=apply, code=code, public_text=public_text):

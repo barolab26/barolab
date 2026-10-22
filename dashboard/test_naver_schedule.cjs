@@ -268,13 +268,13 @@ test('revision timeline never paints all six stages done from the old receipt',(
   assert.equal(account.status,'processing');assert.equal(account.stages[2].status,'active');
   assert.ok(account.stages.slice(3).every(s=>s.status==='wait'));
 });
-test('new growth strategy enforces 10 daily slots (2 per account) and unified today tracking',()=>{
+test('canonical schedule has seven daily slots and keeps historical reservation times',()=>{
   assert.deepEqual(JSON.parse(JSON.stringify(schedule.slots)), {
-    acc1: ['11:30', '19:30'],
-    acc2: ['12:00', '20:00'],
-    acc3: ['12:30', '20:30'],
-    acc4: ['11:00', '18:30'],
-    acc5: ['11:15', '19:00']
+    acc1: ['11:00'],
+    acc2: ['20:00'],
+    acc3: ['20:30'],
+    acc4: ['11:00', '19:00'],
+    acc5: ['11:00', '19:00']
   });
   const tomorrow = schedule.nextDay(publicationDate);
   const journal = {
@@ -288,13 +288,16 @@ test('new growth strategy enforces 10 daily slots (2 per account) and unified to
     ]
   };
   const unified = schedule.resolveUnifiedToday(null, publicationDate, journal, null, now, null, null);
-  assert.equal(unified.length, 10);
-  const soultinEve = unified.find(r => r.accId === 'acc1' && r.time === '19:30');
+  assert.equal(unified.length, 7);
+  const soultinEve = unified.find(r => r.accId === 'acc1' && r.time === '11:00');
   assert.equal(soultinEve.state, 'reserved');
   assert.match(soultinEve.scheduleTransition, /예약등록 13:52 ➔ 공개 19:30/);
   const adinfoRollover = unified.find(r => r.accId === 'acc4' && r.time === '11:00');
-  assert.equal(adinfoRollover.state, 'reserved');
-  assert.equal(adinfoRollover.isRollover, true);
-  assert.match(adinfoRollover.scheduleTransition, /예약등록 21:53 ➔ 공개 내일 11:00/);
+  assert.equal(adinfoRollover.state, 'wait');
+  assert.equal(adinfoRollover.isRollover, false);
+  const tomorrowSlot=schedule.resolve(null,'acc4',tomorrow,journal,null,now,null).find(r=>r.time==='11:00');
+  assert.equal(tomorrowSlot.state,'reserved');
+  assert.equal(tomorrowSlot.publicationDate,tomorrow);
+  assert.match(tomorrowSlot.scheduleTransition,/예약등록 21:53 ➔ 공개 11:00/);
 });
 console.log(`${checks} Naver schedule regressions passed`);

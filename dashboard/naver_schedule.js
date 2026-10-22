@@ -1,7 +1,7 @@
 /* Publication slots are server evidence, never browser-local quota counters. */
 (function (root) {
   const slots = {
-    acc1: ['19:30'],
+    acc1: ['11:00'],
     acc2: ['20:00'],
     acc3: ['20:30'],
     acc4: ['11:00', '19:00'],
@@ -9,7 +9,7 @@
   };
   const legacySingleSlots = {acc1:['19:30','11:30','08:00','10:00','11:00'], acc2:['20:00','12:00','08:30','12:30'], acc3:['20:30','12:30','09:00','14:00']};
   const legacySlotMap = {
-    acc1: { '19:30': ['19:30', '11:30', '08:00', '10:00', '11:00'] },
+    acc1: { '11:00': ['11:00','19:30','11:30','08:00','10:00'], '19:30': ['19:30', '11:30', '08:00', '10:00', '11:00'] },
     acc2: { '20:00': ['20:00', '12:00', '08:30', '12:30'] },
     acc3: { '20:30': ['20:30', '12:30', '09:00', '14:00'] },
     acc4: { '11:00': ['11:00', '12:30', '15:30'], '19:00': ['19:00', '18:30', '19:30'] },
@@ -50,7 +50,6 @@
     if(!force && Date.now()-evidenceFetched<30000 && publicEvidence)return publicEvidence;
     evidencePending=(async()=>{
       try {
-        await fetch('/api/naver/verify-public',{method:'POST',signal:AbortSignal.timeout(8000)}).catch(()=>null);
         const response=await fetch('./naver_public_verification.json?t='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(12000)});
         if(!response.ok)throw Error('Public evidence unavailable');const value=await response.json();
         if(value.schema!=='naver-public-verification-v1' || !Array.isArray(value.evidence))throw Error('Invalid public evidence');
@@ -96,7 +95,7 @@
     ];
     if (runtime?.schema !== 'naver-active-workflow-v1' || names[runtime.accId] !== runtime.account
       || !allKnownSlots.includes(runtime.scheduledSlot) || !/^\d{4}-\d{2}-\d{2}$/.test(runtime.publicationDate || '')
-      || !String(runtime.reserveTime || '').startsWith(runtime.publicationDate + ' ') || !runtime.workerId
+      || runtime.reserveTime !== runtime.publicationDate + ' ' + runtime.scheduledSlot || !runtime.workerId
       || !['running','finished','failed'].includes(runtime.status)) return null;
     const latest = (journal?.attempts || []).filter(a => a.account === runtime.account && publicationDay(a) === runtime.publicationDate
       && (a.scheduledSlot || a.reserveTime?.slice(-5)) === runtime.scheduledSlot)
@@ -111,7 +110,7 @@
     const value = workflowSnapshot(runtime, journal);
     if (runtime != null) {
       if (!value || value.status !== 'running' || !Number.isInteger(value.pid) || value.pid <= 0
-        || now-Date.parse(value.observedAt) < -1000 || now-Date.parse(value.observedAt) > 120000
+        || now-Date.parse(value.observedAt) < -1000 || now-Date.parse(value.observedAt) > 20000
         || !['started','generated','submitting','submitted'].includes(value.attempt.phase)) return null;
       return value;
     }
@@ -218,7 +217,7 @@
       const runnerFresh = freshSnapshot(runner?.observedAt, now);
       const live = (runnerFresh && runner.running === true && runner.activeAccount === names[accId]
         && runner.activePublicationDate === publicationDate && slotMatches(accId, runner.activeScheduledSlot, time))
-        || (!!runtimeInfo);
+        || (!!runtimeInfo && !!activeWorkflow(runtime,journal,monitor,now));
       const recoveryPlan = monitor?.recovery;
       const recoveryStamp = Date.parse(recoveryPlan?.checkedAt || '');
       const latestStamp = Date.parse(latest?.updatedAt || latest?.startedAt || '');
@@ -226,7 +225,7 @@
         && freshSnapshot(recoveryPlan.checkedAt, now) && (!Number.isFinite(latestStamp) || recoveryStamp >= latestStamp)
         && Array.isArray(recoveryPlan.items) ? recoveryPlan.items.find(item => item.account === names[accId]
           && item.accId === accId && item.publicationDate === publicationDate && slotMatches(accId, item.scheduledSlot, time)
-          && String(item.reserveTime || '').startsWith(publicationDate + ' ')
+          && item.reserveTime === publicationDate + ' ' + item.scheduledSlot
           && Object.hasOwn(recoveryStates, item.status)) || null : null;
       const inProgress = newerAttempt && ['started','generated','submitted','submitting'].includes(latest.phase);
       const submitting = newerAttempt ? ['submitted','submitting'].includes(latest.phase) : Number(active?.currentStage) >= 6;

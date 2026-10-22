@@ -132,7 +132,7 @@ test('real page script paints loaded graph, all resets search, and editor PATCH 
   page.element('chip-all').click();
   await page.flush();
   assert.equal(page.element('graph-search').value,'');
-  assert(page.calls.filter(c=>c.url.includes('/graph')).every(c=>c.url.includes('category=all&q=')));
+  assert(page.calls.filter(c=>c.url.includes('/graph')).every(c=>{const q=new URL(c.url,'http://localhost').searchParams;return q.get('category')==='all' && q.get('q')==='' && (!q.has('source') || q.get('source')==='synapses');}));
   page.element('btn-edit-doc').click();
   page.element('edit-doc-title').value='Updated';
   page.element('edit-doc-content').value='Changed body';

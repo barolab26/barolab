@@ -2,7 +2,7 @@
   "date": "2026-10-23",
   "workDate": "2026-10-23",
   "publicationDate": "2026-10-23",
-  "checkedAt": "2026-10-23T01:58:24.481959+09:00",
+  "checkedAt": "2026-10-23T08:45:55.702182+09:00",
   "timezone": "Asia/Seoul",
   "startTime": "08:00",
   "startTimeMeaning": "당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인",
@@ -30,7 +30,9 @@
           "verifiedAt": "2026-10-23T00:28:18.942629+09:00",
           "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
           "publicationStatus": "reserved",
-          "publicPublicationVerified": false
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         }
       ],
       "expected": 1,
@@ -56,7 +58,9 @@
           "verifiedAt": "2026-10-23T00:35:03.526857+09:00",
           "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
           "publicationStatus": "reserved",
-          "publicPublicationVerified": false
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         }
       ],
       "expected": 1,
@@ -82,7 +86,9 @@
           "verifiedAt": "2026-10-23T00:40:02.889561+09:00",
           "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
           "publicationStatus": "reserved",
-          "publicPublicationVerified": false
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         }
       ],
       "expected": 1,
@@ -98,7 +104,7 @@
     {
       "account": "adinfo0905",
       "accId": "acc4",
-      "status": "failed",
+      "status": "verified",
       "slots": [
         {
           "slot": "11:00",
@@ -108,24 +114,28 @@
           "verifiedAt": "2026-10-23T01:52:26.787061+09:00",
           "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
           "publicationStatus": "reserved",
-          "publicPublicationVerified": false
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         },
         {
           "slot": "19:00",
-          "status": "failed",
-          "reserveTime": null,
-          "title": null,
-          "verifiedAt": null,
-          "verificationSource": null,
-          "publicationStatus": "failed",
-          "publicPublicationVerified": false
+          "status": "verified",
+          "reserveTime": "2026-10-23 19:00",
+          "title": "편리한 연말정산 이용방법, PDF 제출과 간편제출은 어떻게 다를까",
+          "verifiedAt": "2026-10-23T08:30:00.520141+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         }
       ],
       "expected": 2,
       "counts": {
-        "verified": 1,
+        "verified": 2,
         "running": 0,
-        "failed": 1,
+        "failed": 0,
         "waiting": 0,
         "unknown": 0
       },
@@ -144,7 +154,9 @@
           "verifiedAt": null,
           "verificationSource": null,
           "publicationStatus": "waiting",
-          "publicPublicationVerified": false
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         },
         {
           "slot": "19:00",
@@ -154,7 +166,9 @@
           "verifiedAt": null,
           "verificationSource": null,
           "publicationStatus": "waiting",
-          "publicPublicationVerified": false
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-23"
         }
       ],
       "expected": 2,
@@ -174,9 +188,9 @@
     "reservation evidence"
   ],
   "counts": {
-    "verified": 4,
+    "verified": 5,
     "running": 0,
-    "failed": 1,
+    "failed": 0,
     "waiting": 2,
     "unknown": 0
   },

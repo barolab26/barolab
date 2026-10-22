@@ -1,7 +1,8 @@
 # BaroLab 통합 운영 구조
 
 - `agents/`: 6인 크루, 회의실, 발행 후 학습.
-- `runtime/`: 8790 서버, 6단 콕핏, Ubuntu Chrome·LLM 연결, 공용 실행 잠금.
+- `server/`: 8790 서버와 6단 콕핏.
+- `common/`: Ubuntu Chrome·LLM 연결과 공용 실행 잠금.
 - `collectors/`: 수익·트래픽·색인·공개 발행 확인.
 - `data/`: 운영 원장, Vault, 채널 상태. `secure/`와 DB는 Git 제외.
 - `data/public/`: HTTP 공개를 허용한 7개 대시보드 요약 파일.
@@ -9,9 +10,14 @@
 
 각 채널은 `posting.py` 한 곳에서 키워드 → 실제 리서치 → 원고·이미지 블록 → 형식 검증 → 발행/예약 → 실제 결과 확인을 수행한다. 별도 모델 검수 승인이나 경쟁글 순위 전량 수집을 기다리지 않는다. 불명확한 제출 결과는 재전송 전에 조회한다.
 
-CF·네이버·Threads 자동 요청은 memory-review 디스패처 한 곳에서 제한된 작업 단위로 순환한다. 지식iN은 별도 cadence 타이머가 전담한다. CF 중복 타이머는 비활성화했다. 서비스 정의는 `runtime/services/`에 보존한다.
+CF·네이버·Threads 자동 요청은 memory-review 디스패처 한 곳에서 제한된 작업 단위로 순환한다. 지식iN은 별도 cadence 타이머가 전담한다. CF 중복 타이머는 비활성화했다. 서비스 정의는 `server/services/`에 보존한다.
 
-기존 명령과 원장 참조를 위해 루트 `server`, `common`, `apps`, `skills` 및 채널 `data`는 호환 심볼릭 링크로 유지한다. 실제 파일은 통합 위치 한 곳에만 둔다. Android 프로젝트·기존 원장·로그인 프로필은 삭제하지 않았다.
+루트 호환 링크는 두지 않는다. Python 가상환경 site-packages의 `barolab_root.pth`와 `barolab_dashboard.pth`에 저장소 루트와 `dashboard/`를 각각 등록한다. `apps/`의 Android 4개 프로젝트는 루트에 실체로 보존한다.
+
+8790 서버의 단일 Collector가 `data/live_snapshot.json`을 1초마다 원자적으로 교체한다. 웹 `/api/mission-control`, `/api/live-snapshot`, `/api/status`와 EGO SnapshotReader가 동일 revision을 사용한다. 모니터는 브라우저·크레딧 조회를 별도로 실행하지 않는다. 네이버 공개 확인은 화면의 자동 polling에서 실행하지 않는다.
+
+`memory.html` 기본 그래프와 `/api/memory/summary`는 `data/memory_graph.json`의 노드·관계를 표시한다. 기존 문서 기반 기억의 편집 기능은 “문서 기억 편집 보기”에 보존한다.
+
 
 검증 명령:
 
@@ -23,6 +29,7 @@ python3 -B threads_posting/test_posting.py
 python3 -B dashboard/test_dashboard.py
 python3 -B -m unittest discover -s dashboard/tests/runtime
 python3 -B -m unittest discover -s dashboard/tests/common
+python3 -B -m pytest -c dashboard/pytest.ini --rootdir=. -q
 ```
 
 API 통합 테스트에는 테스트 환경의 httpx2가 필요하다. JavaScript 회귀 테스트에는 Node가 필요하다. 운영 서버의 의존성은 늘리지 않았다.
@@ -53,6 +60,10 @@ URL별 공개 HTTP 200은 기본 1점, 24시간 내 확인된 색인은 3점, �
 
 실증(2026-10-23): adinfo0905의 빈 signoff·리서치 0건 실패를 엔진 수정 없이 해결했다. 기억의 검색어 치환으로 국세청 본문 3건을 수집하고, 실제 모델 호출의 synapseCardSha256을 확인했다. `output/adinfo0905/synapse-5ddb559f9b`에서 11:00 예약과 서버 저장 문서·예약 목록 재확인을 완료했다. 에디터 입력 0.744초이며 전체 원고 생성·예약 시간과 구분한다. 해결 에피소드 1건과 제출 전 실패 대체 기록을 누적했다. URL별 수익은 아직 확인되지 않았고 발행일이 확정된 3~7일 유망 글 후보는 0건이며, 테스트의 합성 수치를 운영 수익으로 보고하지 않는다.
 
-최종 회귀 검증: 채널 31개 + 통합 운영·시냅스 58개 + 보존 회귀 381개, 총 470개 통과.
+이전 회귀 검증: 채널 31개 + 통합 운영·시냅스 58개 + 보존 회귀 381개, 총 470개 통과.
 
 최종 운영 스냅샷: 공개 본문·해시 근거가 있는 33개 글과 실측 연결 29개 글을 포함해 232개 노드·384개 연결, 고립 노드 0개. 이는 신규 발행 33건을 뜻하지 않는다. 실제 이번 요청의 추가 성과는 adinfo0905 예약 1건이다.
+
+2026-10-23 관제 일원화 검증: 전체 pytest 499개와 JavaScript 41개 통과. 실제 PTY 70행에서 상속된 LINES=24를 무시하는 회귀를 포함한다. 웹과 EGO의 수익·호출·크레딧·6개 크롬·4채널·6인 크루·Vault/타임라인은 동일 revision으로 비교한다.
+
+채널의 완료·준비·진행·대기·실패와 재시도/차단 연산 수는 구분한다. 지식iN·Threads 연산 원장은 DB/WAL 변경 시에만 읽기 전용으로 집계하고, KST 날짜 경계와 쓰기 잠금에서는 당일 캐시만 유지한다. 인증 파일 참조 4곳도 `data/secure/` 및 `data/`의 실제 파일로 갱신했다.

@@ -76,7 +76,7 @@ def duplicate_posts(candidate, posts, own_id=None):
     title = (candidate.get('title') or candidate.get('mainKeyword') or '').casefold()
     return [p for p in posts if p.get('id') != own_id and (p.get('slug', '').casefold() == slug or p.get('title', '').casefold() == title)]
 
-DATA_DIR = BASE_DIR / 'data'
+DATA_DIR = BASE_DIR.parent / 'dashboard/data/cf'
 
 SCHEDULE_JSON = DATA_DIR / 'daily_schedule.json'
 STATE_JSON = DATA_DIR / 'pipeline_state.json'
@@ -87,7 +87,7 @@ KEYS_FILE = DATA_DIR / 'secure' / 'cf_blog_keys.json'
 def get_api_key(domain: str) -> str:
     from dotenv import dotenv_values
     prefix = domain.split('.')[0].replace('-', '').upper()
-    key = dotenv_values(BASE_DIR / '.env').get(prefix + '_CF_API_KEY')
+    key = dotenv_values(BASE_DIR.parent / '.env').get(prefix + '_CF_API_KEY')
     if key:
         return key
     with open(KEYS_FILE, 'r', encoding='utf-8') as f:
@@ -120,7 +120,7 @@ def registered_categories(domain):
     response = requests.get(f'https://www.{domain}/api/settings', headers={'x-api-key': get_api_key(domain)}, timeout=12)
     if response.status_code in (401, 403):
         from dotenv import dotenv_values
-        values = dotenv_values(BASE_DIR / '.env')
+        values = dotenv_values(BASE_DIR.parent / '.env')
         prefix = domain.split('.')[0].replace('-', '').upper()
         password = values.get(prefix + '_CF_ADMIN_PASSWORD')
         if not password:

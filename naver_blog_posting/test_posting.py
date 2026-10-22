@@ -11,10 +11,13 @@ class PostingEntryPointTests(unittest.TestCase):
         path = Path(__file__).with_name("posting.py")
         compile(path.read_text(encoding="utf-8"), str(path), "exec")
 
-    def test_legacy_import_forwards_without_running_publication(self):
-        legacy = importlib.import_module("naver_blog_posting.pipeline_runner")
-        canonical = importlib.import_module("naver_blog_posting.posting")
-        self.assertIs(legacy, canonical)
+    def test_canonical_import_and_minimal_layout(self):
+        canonical=importlib.import_module("naver_blog_posting.posting")
+        root=Path(__file__).parent
+        self.assertEqual(Path(canonical.__file__),root/'posting.py')
+        self.assertFalse((root/'pipeline_runner.py').exists())
+        self.assertFalse((root/'data').exists())
+
 
 
 
@@ -36,6 +39,12 @@ def env():
         paras = ["도입", "", "▼ 낮의 코디", "", "A & B 분석", "", "마무리", "", "오늘도 읽어주셔서 감사해요 :)", "", "#고윤정 #파리사복"]
         obs = {"title": doc["title"], "paragraphs": [{"text": t, "center": True} for t in paras], "images": [{"file": "one.jpg", "caption": doc["blocks"][2]["caption"], "center": True, "caption_center": True, "complete": True, "uploaded": True, "representative": True}], "saved": True, "publish_button_clicked": False}
         yield td, plan, doc, obs
+
+import pytest
+
+@pytest.fixture(name='env')
+def _pytest_document_env():
+    with env() as value:yield value
 
 def test_document_and_render_valid(env):
     td, plan, doc, obs = env

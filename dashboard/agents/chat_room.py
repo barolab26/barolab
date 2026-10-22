@@ -214,7 +214,7 @@ def room_event_resume(since_seq, since_epoch, current_seq, current_epoch):
 
 
 def ensure_chat_migrated() -> Dict[str, Any]:
-    """Migrate ARGO chats/room-main.json, agent threads, and .archive into BaroLab server/data/chats."""
+    """Migrate ARGO chats/room-main.json, agent threads, and .archive into BaroLab dashboard/data/chats."""
     CHATS_DIR.mkdir(parents=True, exist_ok=True)
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -713,7 +713,7 @@ def get_live_system_context() -> Dict[str, Any]:
     cf_total = 16
     cf_active = ""
     cf_next_domain = "nolplace.com"
-    cf_sched_file = BASE_DIR / "cf_posting" / "data" / "daily_schedule.json"
+    cf_sched_file = BASE_DIR / 'dashboard' / 'data' / 'cf' / "daily_schedule.json"
     if cf_sched_file.is_file():
         try:
             cfs = json.loads(cf_sched_file.read_text(encoding="utf-8"))
@@ -754,7 +754,7 @@ def get_live_system_context() -> Dict[str, Any]:
         except Exception:
             pass
 
-    # Live KnowledgeIn status (`server/data/kin-automation-state.json` & `dashboard/data/public/kin.json`)
+    # Live KnowledgeIn status (`dashboard/data/kin-automation-state.json` & `dashboard/data/public/kin.json`)
     kin_state_file = DATA_DIR / "kin-automation-state.json"
     kin_dash_file = BASE_DIR / "dashboard" / "data" / "public" / "kin.json"
     kin_state: Dict[str, Any] = {}
@@ -782,8 +782,8 @@ def get_live_system_context() -> Dict[str, Any]:
     elif kin_state.get("reason"):
         kin_last_reason = str(kin_state.get("reason"))
 
-    # Live Naver Blog active workflow (`naver_blog_posting/data/active-workflow.json`)
-    naver_wf_file = BASE_DIR / "naver_blog_posting" / "data" / "active-workflow.json"
+    # Live Naver Blog active workflow (`dashboard/data/naver/active-workflow.json`)
+    naver_wf_file = BASE_DIR / 'dashboard' / 'data' / 'naver' / "active-workflow.json"
     naver_wf: Dict[str, Any] = {}
     if naver_wf_file.is_file():
         try:
@@ -926,7 +926,7 @@ def _save_rnd_proposal_and_memory(
     """
     Automatically register Radar's verified YouTube/Web 3-tier analysis into:
     1) `memory_graph.sqlite3` (`memory.html`) via `register_synapse_memory`
-    2) `server/data/rnd_proposals.json` (`rnd.html` R&D 결재함)
+    2) `dashboard/data/rnd_proposals.json` (`rnd.html` R&D 결재함)
     Returns a real registered memory path, or None when promotion is rejected.
     """
     yt = next((it for it in ingested_items if it.get("ok")), ingested_items[0] if ingested_items else {})
@@ -961,7 +961,7 @@ def _save_rnd_proposal_and_memory(
         saved_rel = None
         promotion = {"status": "skipped", "reason": "memory_registration_failed"}
 
-    # Also save to R&D proposals ledger (`server/data/rnd_proposals.json`) for `rnd.html`
+    # Also save to R&D proposals ledger (`dashboard/data/rnd_proposals.json`) for `rnd.html`
     rnd_file = DATA_DIR / "rnd_proposals.json"
     try:
         proposals = json.loads(rnd_file.read_text(encoding="utf-8")) if rnd_file.is_file() else []
@@ -2028,7 +2028,7 @@ def radar_indexing_evidence():
             state = row["engines"][engine].get("status", "unknown")
             counts[state] = counts.get(state, 0) + 1
         aggregate[engine] = {"domainCount": len(rows), "statusCounts": counts}
-    return {"source": "server/data/metrics.json + indexing-submissions.json", "ledgerUpdatedAt": payload.get("checkedAt") if isinstance(payload, dict) else None,
+    return {"source": "dashboard/data/metrics.json + indexing-submissions.json", "ledgerUpdatedAt": payload.get("checkedAt") if isinstance(payload, dict) else None,
             "observedAt": datetime.now().astimezone().isoformat(), "overview": aggregate,
             "sites": [row for row in rows if row["domain"] in PRIORITY_DOMAINS],
             "naverRegistration": {"checkedAt": naver.get("checkedAt"), "total": len(naver.get("sites", {})),
@@ -2466,7 +2466,7 @@ async def stream_room_events(since_seq: int = Query(0), since_epoch: str = Query
 
 
 def _append_agent_direct_thread(slug: str, user_msg: Dict[str, Any], agent_msg: Dict[str, Any]) -> None:
-    """Persist isolated per-agent conversation history in `server/data/chats/{slug}.json`."""
+    """Persist isolated per-agent conversation history in `dashboard/data/chats/{slug}.json`."""
     try:
         CHATS_DIR.mkdir(parents=True, exist_ok=True)
         f = CHATS_DIR / f"{slug}.json"

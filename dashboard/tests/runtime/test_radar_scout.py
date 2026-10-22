@@ -154,7 +154,7 @@ class MasterSkillTests(unittest.TestCase):
         scope = {'Optional': __import__('typing').Optional, 're': re}
         exec(compile(ast.Module(body=[fn], type_ignores=[]), 'chat-provider-test', 'exec'), scope)
         with tempfile.TemporaryDirectory() as tmp:
-            store = HermesMemory(Path(tmp) / 'memories', project_skills_root=Path('skills').resolve())
+            store = HermesMemory(Path(tmp) / 'memories', project_skills_root=Path('dashboard/agents/skills').resolve())
             received = []
 
             def provider(prompt, *args, **kwargs):

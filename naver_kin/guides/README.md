@@ -3,7 +3,7 @@
 The original trial dates were **2026-10-15 through 2026-10-21 KST**, with
 measurement through October 24. The existing configuration now has
 `continuousMode: true`; this migration preserves that value rather than extending
-or restarting the trial. Read `server/data/kin-automation.json` for the actual
+or restarting the trial. Read `dashboard/data/kin-automation.json` for the actual
 enable setting, interval and caps. The two authorized accounts
 are `adinfo0905` and `stone0747`; their existing dedicated CDP browsers must already
 be authenticated. On Ubuntu, only these two existing profiles are verified and
@@ -113,9 +113,9 @@ the original verification history. Condition-only ticks do not repeatedly collec
 Execution uses local Python and the absolute UNC script path, not mapped drive Y:.
 It requires the existing logged-in Windows session and both dedicated account
 browsers. Locking the screen preserves the session; signing out, powering off or
-closing browsers prevents work. Logs: `server/data/kin-scheduler.log` and private
+closing browsers prevents work. Logs: `dashboard/data/kin-scheduler.log` and private
 `kin-scheduler-errors.log`. Configuration/state: `kin-automation.json` and
-`kin-automation-state.json`; ledger: `server/data/kin.sqlite3`; public snapshot:
+`kin-automation-state.json`; ledger: `dashboard/data/kin.sqlite3`; public snapshot:
 `dashboard/data/kin.json`.
 
 ## Manual reviewed answer
@@ -154,7 +154,7 @@ closing browsers prevents work. Logs: `server/data/kin-scheduler.log` and privat
    evidence. Login-session visibility alone is insufficient.
 
 `--status` refreshes sanitized `dashboard/data/kin.json`. Private ledger:
-`server/data/kin.sqlite3`; per-account locks: `server/data/kin-ACCOUNT.lock`.
+`dashboard/data/kin.sqlite3`; per-account locks: `dashboard/data/kin-ACCOUNT.lock`.
 The global question key prevents the second account answering the same question.
 State is saved as `publishing` immediately before the final click, then remains
 `submitted_unverified` until independently verified. A crash, CAPTCHA, moderation,

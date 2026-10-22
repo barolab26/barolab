@@ -1,318 +1,1008 @@
 {
-  "schema": "barolab-live-snapshot-v1",
-  "generatedAt": "2026-10-20T04:54:25.326670+00:00",
-  "date": "2026-10-20",
-  "refreshSeconds": 300,
-  "complete": true,
-  "errors": {},
-  "system": {
-    "status": "online",
-    "kst_now": "2026-10-20 13:54:25 (Tuesday)",
-    "server_port": 8790,
-    "cdp_browsers": {
-      "soultin_cdp": {
-        "port": 9334,
-        "name": "soultin (mustpickinfo)",
-        "open": false
+  "schema": "barolab-mission-control-v2",
+  "date": "2026-10-23",
+  "generatedAt": "2026-10-23T08:46:17.764352+09:00",
+  "refreshSeconds": 1,
+  "channels": [
+    {
+      "name": "CF 블로그",
+      "done": 1,
+      "target": 16,
+      "note": "다음 Order 15 · 09:30",
+      "id": "cf",
+      "states": {
+        "published": 1,
+        "waiting": 15
       },
-      "soul5373_cdp": {
-        "port": 9333,
-        "name": "soul5373 (mustinfo)",
-        "open": false
+      "reserved": 0,
+      "tomorrowReserved": 0,
+      "counts": {
+        "completed": 1,
+        "prepared": 0,
+        "running": 0,
+        "failed": 0,
+        "waiting": 15
       },
-      "yoon_master_cdp": {
-        "port": 9335,
-        "name": "yoon_master (yoonviews)",
-        "open": false
-      },
-      "adinfo0905_cdp": {
-        "port": 9231,
-        "name": "adinfo0905 (CF 브릿지)",
-        "open": false
-      },
-      "stone0747_cdp": {
-        "port": 9230,
-        "name": "stone0747 (CF 브릿지)",
-        "open": false
-      },
-      "cf_preparer_cdp": {
-        "port": 9336,
-        "name": "cf_preparer (CF 준비용)",
-        "open": false
-      },
-      "sj_cdp": {
-        "port": 9226,
-        "name": "sj (서치어드바이저·스레드)",
-        "open": false
-      }
+      "operationStates": null,
+      "blockedAttempts": null
     },
-    "cdp_online_count": 0,
-    "cdp_total_count": 7,
-    "cdp_observation_host": "127.0.0.1"
+    {
+      "name": "네이버 블로그",
+      "done": 0,
+      "target": 7,
+      "note": "오늘 발행 0 · 오늘 예약 5건 · 내일 예약 — · 다음 슬롯 대기",
+      "id": "naver",
+      "states": {
+        "verified": 5,
+        "waiting": 2
+      },
+      "reserved": 5,
+      "tomorrowReserved": 0,
+      "counts": {
+        "completed": 5,
+        "prepared": 0,
+        "running": 0,
+        "failed": 0,
+        "waiting": 2
+      },
+      "operationStates": null,
+      "blockedAttempts": null
+    },
+    {
+      "name": "네이버 지식iN",
+      "done": 0,
+      "target": 20,
+      "note": "다음 배포: 10-24 00:00 · 20분 텀",
+      "id": "kin",
+      "states": {},
+      "reserved": 0,
+      "tomorrowReserved": 0,
+      "counts": {
+        "completed": 0,
+        "prepared": 0,
+        "running": 0,
+        "failed": 0,
+        "waiting": 20
+      },
+      "operationStates": {
+        "blocked": 60
+      },
+      "blockedAttempts": 60
+    },
+    {
+      "id": "threads",
+      "name": "Threads",
+      "done": 1,
+      "target": 4,
+      "states": {
+        "published_verified": 1
+      },
+      "note": "당일 본문 발행",
+      "counts": {
+        "completed": 1,
+        "prepared": 0,
+        "running": 0,
+        "failed": 0,
+        "waiting": 3
+      },
+      "operationStates": {
+        "queued": 1
+      },
+      "blockedAttempts": 0
+    }
+  ],
+  "crew": [
+    {
+      "role": "jarvis",
+      "name": "자비스",
+      "state": "CYCLING",
+      "action": "발행 파이프라인 실행",
+      "lastCompleted": "08:42:15",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "role": "patch",
+      "name": "패치",
+      "state": "IDLE",
+      "action": "chat-response 완료",
+      "lastCompleted": "08:42:16",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "role": "publi",
+      "name": "퍼블리",
+      "state": "IDLE",
+      "action": "업무 결과 보고 완료",
+      "lastCompleted": "08:45:42",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "role": "trace",
+      "name": "트레이스",
+      "state": "IDLE",
+      "action": "chat-response 완료",
+      "lastCompleted": "08:42:15",
+      "model": "gpt-6-luna"
+    },
+    {
+      "role": "doctor",
+      "name": "닥터",
+      "state": "IDLE",
+      "action": "업무 결과 보고 완료",
+      "lastCompleted": "08:42:19",
+      "model": "gpt-6-luna"
+    },
+    {
+      "role": "radar",
+      "name": "레이더",
+      "state": "IDLE",
+      "action": "chat-response 완료",
+      "lastCompleted": "08:42:16",
+      "model": "gpt-6.1-sol"
+    }
+  ],
+  "vault": {
+    "nodes": 234,
+    "edges": 387,
+    "episodes": 7
   },
-  "metrics": {
-    "checkedAt": "2026-10-20T00:47:53.986798+00:00",
-    "siteCount": 21,
-    "ga4": [
-      {
-        "domain": "baronote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:12:29.569289+00:00",
-        "sessions": 24,
-        "pageViews": 27,
-        "naverReferralSessions": 8
-      },
-      {
-        "domain": "daynote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:12:56.444032+00:00",
-        "sessions": 49,
-        "pageViews": 52,
-        "naverReferralSessions": 29
-      },
-      {
-        "domain": "healthcox.com",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:13:46.794597+00:00",
-        "sessions": 36,
-        "pageViews": 41,
-        "naverReferralSessions": 19
-      },
-      {
-        "domain": "joynote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:14:39.935252+00:00",
-        "sessions": 14,
-        "pageViews": 18,
-        "naverReferralSessions": 1
-      },
-      {
-        "domain": "justinfo.co.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:45:20.127151+00:00",
-        "sessions": 24,
-        "pageViews": 35,
-        "naverReferralSessions": 2
-      },
-      {
-        "domain": "maxnote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:45:44.322814+00:00",
-        "sessions": 13,
-        "pageViews": 15,
-        "naverReferralSessions": 0
-      },
-      {
-        "domain": "meganote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:46:28.872116+00:00",
-        "sessions": 28,
-        "pageViews": 29,
-        "naverReferralSessions": 3
-      },
-      {
-        "domain": "must-good.com",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:47:50.176013+00:00",
-        "sessions": 22,
-        "pageViews": 22,
-        "naverReferralSessions": 1
-      },
-      {
-        "domain": "must-joy.com",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:09:17.695072+00:00",
-        "sessions": 8,
-        "pageViews": 17,
-        "naverReferralSessions": 0
-      },
-      {
-        "domain": "must-pick.com",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:09:47.861877+00:00",
-        "sessions": 39,
-        "pageViews": 44,
-        "naverReferralSessions": 7
-      },
-      {
-        "domain": "nolplace.com",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:09:52.709845+00:00",
-        "sessions": 14,
-        "pageViews": 18,
-        "naverReferralSessions": 2
-      },
-      {
-        "domain": "smilenote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:09:58.476968+00:00",
-        "sessions": 5,
-        "pageViews": 5,
-        "naverReferralSessions": 0
-      },
-      {
-        "domain": "soulnote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:10:24.764096+00:00",
-        "sessions": 13,
-        "pageViews": 14,
-        "naverReferralSessions": 2
-      },
-      {
-        "domain": "topnote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:10:54.789829+00:00",
-        "sessions": 22,
-        "pageViews": 27,
-        "naverReferralSessions": 4
-      },
-      {
-        "domain": "tripmarvel.com",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:11:25.585942+00:00",
-        "sessions": 30,
-        "pageViews": 39,
-        "naverReferralSessions": 7
-      },
-      {
-        "domain": "woorinote.kr",
-        "start": "2026-10-12",
-        "end": "2026-10-18",
-        "checkedAt": "2026-10-20T00:11:55.207765+00:00",
-        "sessions": 11,
-        "pageViews": 12,
-        "naverReferralSessions": 2
-      }
+  "timeline": [
+    {
+      "at": 1792712131.153984,
+      "text": "soul5373 · 애드포스트 수익 수집 완료",
+      "alert": false
+    },
+    {
+      "at": 1792683225.863087,
+      "text": "CF Order 1 · must-good.com 발행 완료",
+      "alert": false
+    }
+  ],
+  "naverAccounts": [
+    {
+      "account": "soultin",
+      "accId": "acc1",
+      "expected": 1,
+      "slots": [
+        {
+          "status": "verified",
+          "publicationStatus": "reserved",
+          "publicationDate": "2026-10-23",
+          "reserveTime": "2026-10-23 11:00",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": "노후재정, ‘퇴직연금+장수연금’ 결합 제언에서 살펴볼 점",
+          "verifiedAt": "2026-10-23T00:28:18.942629+09:00"
+        }
+      ]
+    },
+    {
+      "account": "soul5373",
+      "accId": "acc2",
+      "expected": 1,
+      "slots": [
+        {
+          "status": "verified",
+          "publicationStatus": "reserved",
+          "publicationDate": "2026-10-23",
+          "reserveTime": "2026-10-23 20:00",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": "중장년 건강, 건기식 성분과 혈당·혈압 식단은 무엇부터 확인할까요",
+          "verifiedAt": "2026-10-23T00:35:03.526857+09:00"
+        }
+      ]
+    },
+    {
+      "account": "yoon_master",
+      "accId": "acc3",
+      "expected": 1,
+      "slots": [
+        {
+          "status": "verified",
+          "publicationStatus": "reserved",
+          "publicationDate": "2026-10-23",
+          "reserveTime": "2026-10-23 20:30",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": "5060 우아한 데일리룩",
+          "verifiedAt": "2026-10-23T00:40:02.889561+09:00"
+        }
+      ]
+    },
+    {
+      "account": "adinfo0905",
+      "accId": "acc4",
+      "expected": 2,
+      "slots": [
+        {
+          "status": "verified",
+          "publicationStatus": "reserved",
+          "publicationDate": "2026-10-23",
+          "reserveTime": "2026-10-23 11:00",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": "편리한 연말정산 이용방법, 회사 제출 방식부터 예상세액 계산까지",
+          "verifiedAt": "2026-10-23T01:52:26.787061+09:00"
+        },
+        {
+          "status": "verified",
+          "publicationStatus": "reserved",
+          "publicationDate": "2026-10-23",
+          "reserveTime": "2026-10-23 19:00",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": "편리한 연말정산 이용방법, PDF 제출과 간편제출은 어떻게 다를까",
+          "verifiedAt": "2026-10-23T08:30:00.520141+09:00"
+        }
+      ]
+    },
+    {
+      "account": "stone0747",
+      "accId": "acc5",
+      "expected": 2,
+      "slots": [
+        {
+          "status": "waiting",
+          "publicationStatus": "waiting",
+          "publicationDate": "2026-10-23",
+          "reserveTime": null,
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": null,
+          "verifiedAt": null
+        },
+        {
+          "status": "waiting",
+          "publicationStatus": "waiting",
+          "publicationDate": "2026-10-23",
+          "reserveTime": null,
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "title": null,
+          "verifiedAt": null
+        }
+      ]
+    }
+  ],
+  "fleet": [
+    {
+      "port": 9334,
+      "account": "soultin",
+      "blog": "mustpickinfo",
+      "profile": "cdp_naver_soultin",
+      "purpose": "정책·지원금·연금 / 블로그 1호",
+      "online": true,
+      "tabs": [
+        {
+          "id": "B90540662A60954216D7FA1697C2C791",
+          "title": "시니어 브리프｜5060 연금·복지·노후정보 : 네이버 블로그",
+          "url": "https://blog.naver.com/mustpickinfo",
+          "active": true
+        },
+        {
+          "id": "6523A0505C3500D3DC445821024449B2",
+          "title": "시니어 브리프｜5060 연금·복지·노후정보 : 네이버 블로그",
+          "url": "https://blog.naver.com/mustpickinfo",
+          "active": false
+        }
+      ],
+      "selection": "활성 탭"
+    },
+    {
+      "port": 9333,
+      "account": "soul5373",
+      "blog": "mustinfo",
+      "profile": "cdp_naver_soul5373",
+      "purpose": "연예이슈 / 애드포스트 수집",
+      "online": true,
+      "tabs": [
+        {
+          "id": "CF845B1CA2D2319D5DE9DAA2A90C2516",
+          "title": "머스트 헬스뷰｜5060 건강·영양 팩트체크 : 네이버 블로그",
+          "url": "https://blog.naver.com/mustinfo",
+          "active": true
+        }
+      ],
+      "selection": "활성 탭"
+    },
+    {
+      "port": 9335,
+      "account": "yoon_master",
+      "blog": "yoonviews",
+      "profile": "cdp_naver_yoon_master",
+      "purpose": "쇼핑커넥트 / 가전·리빙",
+      "online": true,
+      "tabs": [
+        {
+          "id": "04BC9B2301F4649CF0694487DC3F3130",
+          "title": "윤뷰스｜5060 품격 라이프 &amp; 리빙 : 네이버 블로그",
+          "url": "https://blog.naver.com/yoonviews",
+          "active": true
+        }
+      ],
+      "selection": "활성 탭"
+    },
+    {
+      "port": 9231,
+      "account": "adinfo0905",
+      "blog": "adinfo0905",
+      "profile": "cdp_naver_adinfo0905",
+      "purpose": "직장인 루틴 / 지식iN 1호",
+      "online": true,
+      "tabs": [
+        {
+          "id": "7344EDC3C2CC86619553FA8418450C0D",
+          "title": "퇴사 후 재입사 건강검진 질문드립니다. : 지식iN",
+          "url": "https://kin.naver.com/qna/detail.naver",
+          "active": true
+        },
+        {
+          "id": "4B1FB9E93E63AA9EE7F662A3BDE7E6F7",
+          "title": "사고 이후로 어깨가 계속 결리고 아파요(부천 교통사고 어깨통증) : 지식iN",
+          "url": "https://kin.naver.com/qna/detail.naver",
+          "active": false
+        }
+      ],
+      "selection": "활성 탭"
+    },
+    {
+      "port": 9230,
+      "account": "stone0747",
+      "blog": "stone0747",
+      "profile": "cdp_naver_stone0747",
+      "purpose": "지원금 마감 / 지식iN 2호",
+      "online": true,
+      "tabs": [
+        {
+          "id": "16041095A88144A1F6D94B156AC726D3",
+          "title": "임금체불 진정후 민사소송 진행하려면 진정을 취하해야 하나요? : 지식iN",
+          "url": "https://kin.naver.com/qna/detail.naver",
+          "active": true
+        },
+        {
+          "id": "2124B729674349F76B6C418A3ACA2B6A",
+          "title": "아침고요수목원 예약질문 : 지식iN",
+          "url": "https://kin.naver.com/qna/detail.naver",
+          "active": false
+        }
+      ],
+      "selection": "활성 탭"
+    },
+    {
+      "port": 9440,
+      "account": "cf-flow",
+      "blog": "CF/Flow",
+      "profile": "cdp_gui_9440",
+      "purpose": "CF 발행 / 공식 캡처 / 시각자료",
+      "online": true,
+      "tabs": [
+        {
+          "id": "76D031CBC13ABD13681690E556221A40",
+          "title": "Google Flow - 10월 21 - 12:58",
+          "url": "https://flow.google.com/project/9297283d-973a-4e87-b7b8-eaf0d0a4d125",
+          "active": true
+        },
+        {
+          "id": "D2064F840E9DA2A33838735B3490602C",
+          "title": "통합 종합상황실 - BaroLab ARGO Gauge Control Hub",
+          "url": "http://localhost/index.html",
+          "active": true
+        }
+      ],
+      "selection": "활성 탭"
+    }
+  ],
+  "panels": [
+    [
+      "애드센스 수집분 (0/16 CF)  오늘 $0.00  /  어제 $0.02  /  월 수집합 $1.66  (기준일 2026-10-23)",
+      "일일 목표 $100.00  ░░░░░░░░░░░░░░░░░░░░░░░░  0.00%",
+      "색인 확인 113/1,936건 (5.8%) · 검사 315건 · 오늘 IndexNow 0건",
+      "soul5373 · 애드포스트  오늘 집계 대기 / 최근 ₩251 (2026-10-22) · 10분 전 · collected",
+      "soultin · 애드포스트  오늘 집계 대기 / 최근 집계 대기 (—) · 3558분 전 · not_enrolled",
+      "yoon_master · 애드포스트  오늘 집계 대기 / 최근 집계 대기 (—) · 3558분 전 · not_enrolled",
+      "쿠팡 파트너스  오늘 집계 대기 / 최근 ₩0 (2026-10-22) · 80분 전 · error",
+      "토스 쉐어링크  오늘 ₩0 / 최근 ₩0 (2026-10-23) · 80분 전 · not_configured",
+      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 3557분 전 · not_configured",
+      "제휴알바  오늘 집계 대기 / 최근 ₩0 (2026-10-22) · 80분 전 · not_configured",
+      "AdMob (4앱) 당일 수익 원장 수집 대기"
     ],
-    "indexing": {
-      "indexed": 444,
-      "inspected": 1283,
-      "inventoryTotal": 1914
-    },
-    "traffic": {
-      "sessions": 352,
-      "pageViews": 415,
-      "connectedSites": 16,
-      "expectedSites": 16
-    },
-    "fresh": true
+    [
+      "codex · gpt-6-luna  성공 197 / 실패 0  IN 3,036,785 OUT 8,307  7.1s · 정상",
+      "codex · gpt-6.1-sol  성공 584 / 실패 37  IN 9,758,328 OUT 27,985  12.1s · 정상",
+      "codex · test-model  성공 30 / 실패 10  IN 0 OUT 0  0.0s · 호출 오류",
+      "Codex 오늘 보고 토큰 · 12,831,405 / 한도 미설정",
+      "호출 중: 다음 요청 대기",
+      "Codex · ChatGPT Subscription  codex 7일 잔여 99% · 초기화 10-30 02:09",
+      "Codex 계정 추가 크레딧  codex 36,378.33 크레딧",
+      "AGY Argon High / Med · 3.8 Flash: 현재 비활성 / Codex 우회 · 일일 쿼터 API 미제공",
+      "OpenRouter  사용 $34.99 · 키 잔여 제한 없음 · 계정 잔액 $-0.18 · collected",
+      "OpenAI API  키 설정 · API 잔액은 결제 페이지에서 제공 · 응답 한도 호출 대기",
+      "FreeLLMAPI :3001  ● OFFLINE · 라우팅 호출 기록 대기 · 평균 —ms"
+    ],
+    [
+      "9334 soultin (cdp_naver_soultin) · ● ON · 탭 2개 · 정책·지원금·연금 / 블로그 1호",
+      "  시니어 브리프｜5060 연금·복지·노후정보 : 네이버 블로그 · https://blog.naver.com/mustpickinfo",
+      "9333 soul5373 (cdp_naver_soul5373) · ● ON · 탭 1개 · 연예이슈 / 애드포스트 수집",
+      "  머스트 헬스뷰｜5060 건강·영양 팩트체크 : 네이버 블로그 · https://blog.naver.com/mustinfo",
+      "9335 yoon_master (cdp_naver_yoon_master) · ● ON · 탭 1개 · 쇼핑커넥트 / 가전·리빙",
+      "  윤뷰스｜5060 품격 라이프 &amp; 리빙 : 네이버 블로그 · https://blog.naver.com/yoonviews",
+      "9231 adinfo0905 (cdp_naver_adinfo0905) · ● ON · 탭 2개 · 직장인 루틴 / 지식iN 1호",
+      "  퇴사 후 재입사 건강검진 질문드립니다. : 지식iN · https://kin.naver.com/qna/detail.naver",
+      "9230 stone0747 (cdp_naver_stone0747) · ● ON · 탭 2개 · 지원금 마감 / 지식iN 2호",
+      "  임금체불 진정후 민사소송 진행하려면 진정을 취하해야 하나요? : 지식iN · https://kin.naver.com/qna/detail.naver",
+      "9440 cf-flow (cdp_gui_9440) · ● ON · 탭 2개 · CF 발행 / 공식 캡처 / 시각자료",
+      "  Google Flow - 10월 21 - 12:58 · https://flow.google.com/project/9297283d-973a-4e87-b7b8-eaf0d0a4d125"
+    ],
+    [
+      "CF 블로그 [ 1/16] ■░░░░░░░░░░░ 6% · 준비 0 · 대기 15 · 실패 0 · 성공 1 · 진행 0 · 검수 0 · 실패 0 · 다음 Order 15 · 09:30",
+      "네이버 블로그 [ 0/7] ░░░░░░░░░░░░ 0% · 준비 0 · 대기 2 · 실패 0 · 오늘 발행 0 · 오늘 예약 5건 · 내일 예약 — · 다음 슬롯 대기",
+      "네이버 지식iN [ 0/20] ░░░░░░░░░░░░ 0% · [ALERT] 차단 시도 60회 · 준비 0 · 대기 20 · 실패 0 · adinfo0905 0건 · stone0747 0건 · 다음 배포: 10-24 00:00 · 20분 텀",
+      "Threads [1/4] ■■■░░░░░░░░░ · 준비 0 · 대기 3 · 실패 0 · 닥터 오늘 개선 0건",
+      "다음 슬롯 준비 / 자동 복구 대기"
+    ],
+    [
+      "@jarvis · gpt-6.1-sol · CYCLING · 발행 파이프라인 실행 · 완료 08:42:15",
+      "@patch · gpt-6.1-sol · IDLE · chat-response 완료 · 완료 08:42:16",
+      "@publi · gpt-6.1-sol · IDLE · 업무 결과 보고 완료 · 완료 08:45:42",
+      "@trace · gpt-6-luna · IDLE · chat-response 완료 · 완료 08:42:15",
+      "@doctor · gpt-6-luna · IDLE · 업무 결과 보고 완료 · 완료 08:42:19",
+      "@radar · gpt-6.1-sol · IDLE · chat-response 완료 · 완료 08:42:16",
+      "Vault 234 노드 · 387 연결 · 누적 해결 7회"
+    ],
+    [
+      "08:35:31 soul5373 · 애드포스트 수익 수집 완료",
+      "00:33:45 CF Order 1 · must-good.com 발행 완료"
+    ]
+  ],
+  "ports": {
+    "9334": true,
+    "9333": true,
+    "9335": true,
+    "9231": true,
+    "9230": true,
+    "8790": true,
+    "3001": false
   },
-  "publications": {
-    "date": "2026-10-20",
-    "cf": {
-      "sourceDate": "2026-10-20",
-      "status": "current",
-      "published": 5
-    },
-    "naver": {
-      "sourceDate": "2026-10-20",
-      "status": "current",
-      "publishedVerified": 2
-    },
-    "kin": {
-      "status": "collected",
-      "states": {
-        "published_verified": 10,
-        "submitted_unverified": 1
-      }
-    },
-    "threads": {
-      "status": "collected",
-      "states": {
-        "published_verified": 1,
-        "submitted_unknown": 1
+  "brains": {
+    "usage": {
+      "schema": "llm-usage-ledger-v1",
+      "date": "2026-10-23",
+      "byModel": {
+        "codex:gpt-6.1-sol": {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "calls": 621,
+          "success": 584,
+          "errors": 37,
+          "inputTokens": 9758328,
+          "outputTokens": 27985,
+          "usageReportedCalls": 548,
+          "totalLatencyMs": 3251279,
+          "rateLimited": 0,
+          "averageLatencyMs": 5236,
+          "lastLatencyMs": 12127,
+          "lastAt": "2026-10-23T08:45:41.766654+09:00",
+          "lastStatus": "completed",
+          "errorType": null,
+          "rateLimitHeaders": {},
+          "httpStatus": null
+        },
+        "codex:gpt-6-luna": {
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "calls": 197,
+          "success": 197,
+          "errors": 0,
+          "inputTokens": 3036785,
+          "outputTokens": 8307,
+          "usageReportedCalls": 179,
+          "totalLatencyMs": 770062,
+          "rateLimited": 0,
+          "averageLatencyMs": 3909,
+          "lastLatencyMs": 7092,
+          "lastAt": "2026-10-23T08:42:19.757987+09:00",
+          "lastStatus": "completed",
+          "errorType": null,
+          "rateLimitHeaders": {},
+          "httpStatus": null
+        },
+        "codex:test-model": {
+          "provider": "codex",
+          "model": "test-model",
+          "calls": 40,
+          "success": 30,
+          "errors": 10,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "usageReportedCalls": 0,
+          "totalLatencyMs": 927,
+          "rateLimited": 0,
+          "averageLatencyMs": 23,
+          "lastLatencyMs": 28,
+          "lastAt": "2026-10-23T07:49:48.663147+09:00",
+          "lastStatus": "failed",
+          "errorType": "RuntimeError",
+          "rateLimitHeaders": {},
+          "httpStatus": null
+        }
       },
-      "byKind": {
-        "followup": 1,
-        "main": 1
+      "active": {},
+      "recent": [
+        {
+          "id": "884089a7bf1e4279b2182a75b10efc2e",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:23:16.622589+09:00",
+          "latencyMs": 4830,
+          "inputTokens": 17569,
+          "outputTokens": 40,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "f846e6e33d164edbaf5104679fe8f8ed",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:23:27.422534+09:00",
+          "latencyMs": 5288,
+          "inputTokens": 17268,
+          "outputTokens": 38,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "7061baa02bdc43e1b5d51bb60963587c",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:23:45.634667+09:00",
+          "latencyMs": 4831,
+          "inputTokens": 17567,
+          "outputTokens": 43,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "e668b6daf79944c888472c4aa5cb1984",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:23:55.919264+09:00",
+          "latencyMs": 6478,
+          "inputTokens": 17272,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "bac985c03e4049d792582bdb1a9f380a",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:24:16.444453+09:00",
+          "latencyMs": 6413,
+          "inputTokens": 17467,
+          "outputTokens": 41,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "7b007fa4dbce42b994819811b8430a1f",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:24:44.546632+09:00",
+          "latencyMs": 6356,
+          "inputTokens": 19055,
+          "outputTokens": 340,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "de755c488672497f856406b0c5403362",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:24:57.104932+09:00",
+          "latencyMs": 6021,
+          "inputTokens": 17270,
+          "outputTokens": 34,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "93d8db5ae1814a8ebe3e3731125dbf15",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:25:16.959115+09:00",
+          "latencyMs": 4461,
+          "inputTokens": 18111,
+          "outputTokens": 51,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "183e28716cba49f0bfc31044ce5ed170",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:26:05.885809+09:00",
+          "latencyMs": 4039,
+          "inputTokens": 16635,
+          "outputTokens": 40,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "0e04e09289db4531bd9072c1ea6b4bb1",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:28:14.700836+09:00",
+          "latencyMs": 5963,
+          "inputTokens": 17472,
+          "outputTokens": 40,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "d2d8bf4ffa344ff4b6c1eeaa943af9d6",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:28:26.652525+09:00",
+          "latencyMs": 5459,
+          "inputTokens": 17273,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "0dc7dc5a128b4ca09d03e012e1ce2458",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:28:45.965040+09:00",
+          "latencyMs": 8166,
+          "inputTokens": 17467,
+          "outputTokens": 43,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "163402ce19934eb2849d29bb388e1bf2",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:29:09.354218+09:00",
+          "latencyMs": 29959,
+          "inputTokens": 43540,
+          "outputTokens": 1257,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "c118b4fce655422da214bd99f60d1355",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:30:02.539166+09:00",
+          "latencyMs": 6102,
+          "inputTokens": 17273,
+          "outputTokens": 38,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "b09903a1faaa4f79ab6c5cd45a3c54fd",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:30:15.212174+09:00",
+          "latencyMs": 4835,
+          "inputTokens": 18800,
+          "outputTokens": 42,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "0dcb8d28be77404abac0e8c7216b9fbd",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:30:32.823995+09:00",
+          "latencyMs": 5392,
+          "inputTokens": 17266,
+          "outputTokens": 38,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "1c134d0c7842421aab5839eefd9c9646",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:30:44.796565+09:00",
+          "latencyMs": 3413,
+          "inputTokens": 16932,
+          "outputTokens": 47,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "fcbf94c8bfcb44359592e240009a7ff3",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:31:33.950526+09:00",
+          "latencyMs": 4130,
+          "inputTokens": 16576,
+          "outputTokens": 41,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "b8429e16ebef43d49f2ee4c644944809",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:33:18.236907+09:00",
+          "latencyMs": 10258,
+          "inputTokens": 18801,
+          "outputTokens": 40,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "9781683934854fd8846a5a977eab2df0",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:33:34.788280+09:00",
+          "latencyMs": 6105,
+          "inputTokens": 18603,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "33e8e8a22bf4419d827d9c501389a471",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:33:47.759493+09:00",
+          "latencyMs": 5552,
+          "inputTokens": 18802,
+          "outputTokens": 44,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "95f715ecc3a34f9fbe4ba7e12a04dd43",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:33:59.607583+09:00",
+          "latencyMs": 5613,
+          "inputTokens": 17276,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "7c67770816de47acb0da6239b8332194",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:35:17.482170+09:00",
+          "latencyMs": 5738,
+          "inputTokens": 17466,
+          "outputTokens": 42,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "9d504f0bd56d4a18a2cf1f6fdcb27763",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:35:48.583815+09:00",
+          "latencyMs": 6763,
+          "inputTokens": 17269,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "8e726dded6c149a2a6fc9f6580bc9200",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:36:16.724789+09:00",
+          "latencyMs": 14016,
+          "inputTokens": 16779,
+          "outputTokens": 49,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "50cc5ebdaa0c4c21ac93b36f71d6cfa0",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:37:04.165109+09:00",
+          "latencyMs": 6269,
+          "inputTokens": 16575,
+          "outputTokens": 46,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "9862205b6b014044b8897956ef5f3241",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:38:17.041142+09:00",
+          "latencyMs": 7929,
+          "inputTokens": 18902,
+          "outputTokens": 42,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "a076f18092c34dafbfda3563688d5c52",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:38:31.856004+09:00",
+          "latencyMs": 7233,
+          "inputTokens": 17265,
+          "outputTokens": 38,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "128a0ee854f9419fab66b1d2a7481aea",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:38:45.870036+09:00",
+          "latencyMs": 6760,
+          "inputTokens": 18914,
+          "outputTokens": 43,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "a01da149051e4b328e67fe8a6b49e1ab",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:38:58.841984+09:00",
+          "latencyMs": 6694,
+          "inputTokens": 17275,
+          "outputTokens": 37,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "3d6a231873d74737a2b24ab4c4e56ba3",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:40:18.932381+09:00",
+          "latencyMs": 7055,
+          "inputTokens": 17457,
+          "outputTokens": 42,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "0381dc1b69e944ad81af727b8128f021",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:40:32.447945+09:00",
+          "latencyMs": 6927,
+          "inputTokens": 17264,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "cbabc24757fb46b382d904a6d6766a75",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:41:19.475387+09:00",
+          "latencyMs": 5889,
+          "inputTokens": 16769,
+          "outputTokens": 47,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "b34e32a25d064a97a7992f9cfff1487f",
+          "provider": "codex",
+          "model": "gpt-6-luna",
+          "startedAt": "2026-10-23T08:42:12.666342+09:00",
+          "latencyMs": 7092,
+          "inputTokens": 17915,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "ac2bf07641e942c0a027ba2d9c23fadb",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:43:20.187846+09:00",
+          "latencyMs": 6597,
+          "inputTokens": 17468,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "f693a45d0a984182b44de5589a97abcb",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:43:33.252932+09:00",
+          "latencyMs": 7438,
+          "inputTokens": 17269,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "b0b2b8c301644d57b25dcbc07df52174",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:43:46.657561+09:00",
+          "latencyMs": 9008,
+          "inputTokens": 17467,
+          "outputTokens": 45,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "dea7cdc227814e9c9146bb41816ff8f0",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:44:01.089159+09:00",
+          "latencyMs": 8347,
+          "inputTokens": 17268,
+          "outputTokens": 42,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "3e44e9c5c2ad4559b5b86cc013498e74",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:45:16.473668+09:00",
+          "latencyMs": 6660,
+          "inputTokens": 17464,
+          "outputTokens": 40,
+          "httpStatus": null,
+          "errorType": null
+        },
+        {
+          "id": "ed5c0e685c0b460eb3577c8035d8ee90",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-23T08:45:29.640061+09:00",
+          "latencyMs": 12127,
+          "inputTokens": 17262,
+          "outputTokens": 39,
+          "httpStatus": null,
+          "errorType": null
+        }
+      ],
+      "coverageStartedAt": "2026-10-23T00:16:52.395717+09:00",
+      "checkedAt": "2026-10-23T08:45:41.766654+09:00"
+    },
+    "quotas": {
+      "openrouter": {
+        "status": "collected",
+        "checkedAt": 1792712713.8315392,
+        "usage": 34.985513286,
+        "usage_daily": 0,
+        "limit": null,
+        "limit_remaining": null,
+        "balance": -0.1844141939999986
+      },
+      "codexQuota": {
+        "status": "collected",
+        "buckets": {
+          "codex": {
+            "primary": {
+              "usedPercent": 1,
+              "windowDurationMins": 10080,
+              "resetsAt": 1793293787
+            },
+            "credits": {
+              "hasCredits": true,
+              "unlimited": false,
+              "balance": "36378.3268175000"
+            },
+            "planType": "pro"
+          }
+        },
+        "checkedAt": 1792712716.0999925
       }
     }
   },
-  "databases": {
-    "growth.sqlite3": {
-      "file": "growth.sqlite3",
-      "status": "collected",
-      "tables": {
-        "sites": {
-          "rows": 21
-        },
-        "connections": {
-          "rows": 59
-        },
-        "daily_metrics": {
-          "rows": 0
-        },
-        "improvement_actions": {
-          "rows": 0
-        },
-        "maintenance_jobs": {
-          "rows": 2021
-        },
-        "maintenance_attempts": {
-          "rows": 29
-        }
-      }
-    },
-    "kin.sqlite3": {
-      "file": "kin.sqlite3",
-      "status": "collected",
-      "tables": {
-        "questions": {
-          "rows": 51,
-          "todayStates": {
-            "published_verified": 10,
-            "submitted_unverified": 1
-          }
-        },
-        "discoveries": {
-          "rows": 76
-        },
-        "automation_slots": {
-          "rows": 279
-        },
-        "operating_cadence": {
-          "rows": 1
-        }
-      }
-    },
-    "threads.sqlite3": {
-      "file": "threads.sqlite3",
-      "status": "collected",
-      "tables": {
-        "parts": {
-          "rows": 19,
-          "todayStates": {
-            "published_verified": 1,
-            "submitted_unknown": 1
-          },
-          "todayByKind": {
-            "followup": 1,
-            "main": 1
-          }
-        },
-        "events": {
-          "rows": 50
-        },
-        "authoring_slots": {
-          "rows": 13,
-          "todayStates": {}
-        }
-      }
-    }
-  }
+  "revision": "b960987c43c895669fde1e856a3f385f01016990b4252510f9a4a6fffe8aaab6"
 }

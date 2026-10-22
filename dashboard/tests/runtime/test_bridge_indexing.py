@@ -117,7 +117,7 @@ class BridgeIndexingTests(unittest.TestCase):
 
     def test_indexer_preserves_prior_success_without_restamping_failed_attempt(self):
         from common import auto_indexer
-        tree = ast.parse((ROOT / 'common/auto_indexer.py').read_text(encoding='utf-8'))
+        tree = ast.parse((ROOT / 'dashboard/common/auto_indexer.py').read_text(encoding='utf-8'))
         run = next((n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'run_auto_indexing'))
         process = next((n for n in run.body if isinstance(n, ast.FunctionDef) and n.name == '_process_domain'))
         good = 'https://www.must-good.com/normal'

@@ -4,7 +4,7 @@
 
 ## 저장과 상태
 
-- 비공개: `server/data/threads-automation.json`, `threads.sqlite3`, `threads-drafts/`, `threads-evaluations.json`. 토큰은 별도 private 참조만 보관합니다.
+- 비공개: `dashboard/data/threads-automation.json`, `threads.sqlite3`, `threads-drafts/`, `threads-evaluations.json`. 토큰은 별도 private 참조만 보관합니다.
 - 공개: `dashboard/data/threads.json`에는 승인 원고/공개 URL/집계/연결 상태만 넣습니다. 자격증명과 비공개 경로는 제외합니다.
 - 원장: `queued → sending_intent → api_submitted → published_verified`. intent 이후 결과 불명은 `submitted_unknown`이며 자동 재전송하지 않습니다. ID를 받은 뒤 공개 검증 실패는 api_submitted로 보존하고 reconcile만 합니다.
 - 본문은 하루 최대2개입니다. intent/unknown/API접수도 시도 한도를 소비합니다. 후속은0~1개이며 공개 검증된 부모가 필요하고 별도 기록합니다.

@@ -135,7 +135,7 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(h['sources'][0]['verifiedLastSuccessAt'], o.stamp(NOW))
 
     def test_existing_snapshot_adapter_preserves_errors_and_dictionary_naver(self):
-        folder = self.folder / 'server/data'
+        folder = self.folder / 'dashboard/data'
         folder.mkdir(parents=True)
         period = {'start': '2026-10-01', 'end': '2026-10-14', 'users': 1, 'sessions': 2, 'pageViews': 3}
         o.write(folder / 'traffic.json', {'sites': {'example.com': {'ga4': {'status': 'error', 'checkedAt': o.stamp(NOW), 'periods': {n: period for n in ('day', 'week', 'month')}}}}, 'naverBlogs': {'blog-key': {'status': 'collected', 'checkedAt': o.stamp(NOW)}}})
@@ -144,7 +144,7 @@ class EvidenceTests(unittest.TestCase):
         self.assertTrue(any((s['source'] == 'naver:blog-key' for s in rows)))
 
     def test_gsc_cached_comparison_window_is_not_complete(self):
-        folder = self.folder / 'server/data'
+        folder = self.folder / 'dashboard/data'
         folder.mkdir(parents=True)
         p = {'start': '2026-09-01', 'end': '2026-09-28', 'clicks': 1, 'impressions': 10, 'ctr': 0.1, 'position': 12, 'queriesStatus': 'collected', 'pagesStatus': 'collected', 'checkedAt': o.stamp(NOW - timedelta(days=2))}
         o.write(folder / 'traffic.json', {'sites': {'example.com': {'google': {'status': 'collected', 'checkedAt': o.stamp(NOW), 'periods': {'current28': p, 'previous28': p}}}}})
@@ -153,7 +153,7 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(row['status'], 'partial')
 
     def test_missing_configured_domain_and_other_portals_remain_unknown(self):
-        folder = self.folder / 'server/data'
+        folder = self.folder / 'dashboard/data'
         folder.mkdir(parents=True)
         o.write(folder / 'metrics-config.json', {'sites': {'present.com': {}, 'missing.com': {}}})
         o.write(folder / 'traffic.json', {'sites': {'present.com': {}}})
@@ -164,7 +164,7 @@ class EvidenceTests(unittest.TestCase):
             self.assertTrue(row['required'])
 
     def test_inspection_domains_distinguish_api_owner_ui_and_missing_scope(self):
-        folder = self.folder / 'server/data'
+        folder = self.folder / 'dashboard/data'
         folder.mkdir(parents=True)
         o.write(folder / 'metrics-config.json', {'sites': {'api.com': {'search_property': 'https://www.api.com/'}, 'ui.com': {}}})
         o.write(folder / 'metrics.json', {'sites': {}, 'inspectionAutomation': {'accounts': {}}})
@@ -173,7 +173,7 @@ class EvidenceTests(unittest.TestCase):
         self.assertTrue(any((r['source'] == 'url-inspection-owner-ui:ui.com' and r['status'] == 'unknown' for r in rows)))
 
     def test_required_revenue_does_not_disappear_when_disconnected(self):
-        folder = self.folder / 'server/data'
+        folder = self.folder / 'dashboard/data'
         folder.mkdir(parents=True)
         o.write(folder / 'metrics-config.json', {'sites': {'example.com': {}}})
         o.write(folder / 'revenue.json', {'months': {'2026-10': {'sources': [{'id': 'adsense-sj', 'status': 'not_connected'}, {'id': 'trip', 'status': 'not_collected'}]}}})
@@ -217,11 +217,11 @@ class LiveSnapshotTests(unittest.TestCase):
         import ast
         import sqlite3
         import threading
-        source = (Path(__file__).resolve().parents[2] / 'runtime/main.py').read_text(encoding='utf-8')
+        source = (Path(__file__).resolve().parents[2] / 'server/main.py').read_text(encoding='utf-8')
         tree = ast.parse(source)
         names = {'_snapshot_database', '_snapshot_publications', '_snapshot_metric_summary'}
         tree.body = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name in names]
-        env = {'sqlite3': sqlite3, 'closing': __import__('contextlib').closing, 'datetime': datetime, 'timezone': timezone, 'timedelta': timedelta, 'CF_DIR': Path('/cf'), 'NAVER_DIR': Path('/naver'), 'load_json': lambda path, default: (documents or {}).get(str(path).replace('\\', '/'), default)}
+        env = {'sqlite3': sqlite3, 'closing': __import__('contextlib').closing, 'datetime': datetime, 'timezone': timezone, 'timedelta': timedelta, 'CF_DIR': Path('/cf'), 'DATA_DIR': Path('/dashboard/data'), 'NAVER_DIR': Path('/naver'), 'load_json': lambda path, default: (documents or {}).get(str(path).replace('\\', '/'), default)}
         exec(compile(tree, 'snapshot-helpers', 'exec'), env)
         return env
 
@@ -232,7 +232,7 @@ class LiveSnapshotTests(unittest.TestCase):
         self.assertNotIn('DO_NOT_EXPORT', json.dumps(result))
 
     def test_old_schedule_and_unverified_naver_are_not_today(self):
-        docs = {'/cf/data/daily_schedule.json': {'date': '2026-10-18', 'items': [{'status': 'published', 'publicUrl': 'https://example.test/a'}]}, '/naver/data/public-verification.json': {'publicationDate': '2026-10-19', 'evidence': [{'publishedAt': '2026-10-18T14:30:00+00:00', 'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/a/1'}, {'publishedAt': '2026-10-18T15:30:00+00:00', 'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/a/2'}, {'publishedAt': '2026-10-19T12:00:00+09:00', 'publicPublicationVerified': False, 'publicUrl': 'https://blog.naver.com/a/3'}]}}
+        docs = {'/dashboard/data/cf/daily_schedule.json': {'date': '2026-10-18', 'items': [{'status': 'published', 'publicUrl': 'https://example.test/a'}]}, '/dashboard/data/naver/public-verification.json': {'publicationDate': '2026-10-19', 'evidence': [{'publishedAt': '2026-10-18T14:30:00+00:00', 'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/a/1'}, {'publishedAt': '2026-10-18T15:30:00+00:00', 'publicPublicationVerified': True, 'publicUrl': 'https://blog.naver.com/a/2'}, {'publishedAt': '2026-10-19T12:00:00+09:00', 'publicPublicationVerified': False, 'publicUrl': 'https://blog.naver.com/a/3'}]}}
         result = self.helpers(docs)['_snapshot_publications']('2026-10-19')
         self.assertIsNone(result['cf']['published'])
         self.assertEqual(result['naver']['publishedVerified'], 1)

@@ -1,7 +1,7 @@
 """Read-only, domain-scoped GA4 and Search Console reports for the situation room.
 
 Windows collector: python -B -X utf8 dashboard/traffic.py --collect
-NAS reads server/data/traffic.json. No credentials are stored in public assets.
+NAS reads dashboard/data/traffic.json. No credentials are stored in public assets.
 """
 import argparse
 import json

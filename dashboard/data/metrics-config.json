@@ -262,15 +262,15 @@
   },
   "analytics_readers": {
     "sj": {
-      "file": "server/data/secure/growth-reader-sj.json",
+      "file": "dashboard/data/secure/growth-reader-sj.json",
       "email": "ts2-sj@indexing-431805.iam.gserviceaccount.com"
     },
     "mustbiz06": {
-      "file": "server/data/secure/growth-reader-mustbiz06.json",
+      "file": "dashboard/data/secure/growth-reader-mustbiz06.json",
       "email": "jarvis-cf-reader@fresh-rope-474911-j4.iam.gserviceaccount.com"
     },
     "aaa10291028": {
-      "file": "server/data/secure/growth-reader-aaa10291028.json",
+      "file": "dashboard/data/secure/growth-reader-aaa10291028.json",
       "email": "jarvis-cf-reader@gen-lang-client-0742794601.iam.gserviceaccount.com"
     }
   },
@@ -298,7 +298,7 @@
       "tripmarvel.com",
       "woorinote.kr"
     ],
-    "registrationSource": "server/data/searchadvisor-status.json",
+    "registrationSource": "dashboard/data/searchadvisor-status.json",
     "registrationCheckedAt": "2026-10-19T12:49:29.335368+09:00"
   },
   "adsense_accounts": {
