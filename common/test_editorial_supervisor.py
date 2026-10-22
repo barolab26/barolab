@@ -184,6 +184,10 @@ class SupervisorTests(unittest.TestCase):
         self.assertTrue(calls.await_args_list[3].args[-1]['supervisorScope'])
         self.assertEqual([p['step'] for p in lineage.call_args.args[1]],['query','scope','pivot'])
 
+    def test_original_question_survives_before_research_document_exists(self):
+        self.assertEqual(supervisor.original_question({'keywords.md':{'readerGoal':{'question':'Approved scope'}}}),
+                         'Approved scope')
+
     def test_cf_completed_acquisition_advances_to_scope_then_pivot(self):
         from cf_posting import pipeline_runner as runner
         self.save('prewriter-acquisition-request.json',{'readerGoal':{'question':'Original question'}})

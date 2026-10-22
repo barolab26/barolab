@@ -76,6 +76,25 @@ class DemandRecoveryTests(unittest.TestCase):
         with self.assertRaises(Observed):self.ns['select_keyword_with_demand']('instruction',{},propose,{'mainKeyword':'긴 고정 검색어'},require_current_issue=False)
         self.assertEqual(rounds[0]['enum'],['긴 고정 검색어'])
 
+    def test_scoped_selection_does_not_force_four_extra_questions_or_broader_title(self):
+        question='배우자 동의서가 필요한 이유는 무엇인가요?'
+        class PlanReached(Exception):pass
+        def propose(prompt,response_schema=None):
+            props=response_schema['properties']
+            if 'candidates' in props:
+                candidate=props['candidates']['items']['properties']
+                self.assertEqual(candidate['title']['enum'],[question])
+                return {'candidates':[{'mainKeyword':'기초연금','question':question,'category':'연금',
+                                       'title':question,'topicSlug':'spouse-consent-reason'}]}
+            self.assertEqual(props['questions']['maxItems'],1)
+            self.assertEqual(props['questions']['items']['enum'],[question]);raise PlanReached()
+        self.ns['keyword_demand_evidence']=lambda rows:{'threshold':100,'candidates':[
+            {'mainKeyword':r['mainKeyword'],'volume':{'status':'ok','monthlyLowerBound':200},
+             'eligible':True,'currentIssue':False,'issueSignals':[],'news':[]} for r in rows]}
+        with self.assertRaises(PlanReached):
+            self.ns['select_keyword_with_demand']('instruction',{},propose,
+                {'supervisorScope':True,'explicitReaderQuestion':question},require_current_issue=False)
+
     def test_evergreen_monthly_demand_reaches_final_plan_without_news(self):
         class PlanReached(Exception):pass
         def propose(prompt,response_schema=None):

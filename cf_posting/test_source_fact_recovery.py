@@ -76,6 +76,15 @@ class SourceFactAcquisitionTests(unittest.TestCase):
             (folder/'observed-research-sources.json').write_text(json.dumps({'sources':[source]}))
             self.assertEqual(r.retained_approved_sources(folder,plan,'example.com'),[])
 
+    def test_quote_layout_is_bound_to_actual_body_without_changing_characters(self):
+        body='앞 문장. 공공주택 특별법 시행규칙[시행 2026. 8. 24.] 뒤 문장.'
+        quote='공공주택 특별법 시행규칙\n[시행 2026. 8. 24.]'
+        actual=r.source_quote_span(body,quote)
+        self.assertIn(actual,body)
+        self.assertEqual(''.join(actual.split()),''.join(quote.split()))
+        self.assertIsNone(r.source_quote_span(body,quote.replace('2026','2027')))
+        self.assertIsNone(r.source_quote_span(body,''))
+
     def test_hash_mismatch_fails_closed(self):
         self.gather.return_value={'sources':[{**self.source,'bodySha256':'0'*64}]}
         with self.assertRaises(r.ReviewRequired):self.run_call()

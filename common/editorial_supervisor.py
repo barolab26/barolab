@@ -89,7 +89,7 @@ def dossier(folder):
 
 
 def original_question(packet):
-    for name in ('prewriter-acquisition-request.json','required-materials.json','keyword-selector.json','research.md','keyword-title-original.json'):
+    for name in ('prewriter-acquisition-request.json','required-materials.json','keyword-selector.json','keywords.md','research.md','keyword-title-original.json'):
         row=packet.get(name,{})
         question=(row.get('readerGoal') or {}).get('question') or row.get('readerQuestion')
         if isinstance(question,str) and question.strip():return question

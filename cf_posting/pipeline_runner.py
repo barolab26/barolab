@@ -2273,6 +2273,10 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         'items': {'type': 'object', 'properties': {k: {'type': 'string'} for k in ('mainKeyword', 'question', 'category', 'title', 'topicSlug')},
                   'required': ['mainKeyword', 'question', 'category', 'title', 'topicSlug'], 'additionalProperties': False}}},
         'required': ['candidates'], 'additionalProperties': False}
+    scoped_question=fixed.get('explicitReaderQuestion') if fixed.get('supervisorScope') else None
+    if scoped_question:
+        for field in ('question','title'):
+            candidate_schema['properties']['candidates']['items']['properties'][field]['enum']=[scoped_question]
     bridge_inventory = context.get('bridgeInventory', [])
     bridge_by_url = {row['url']: row for row in bridge_inventory}
     if bridge_inventory:
@@ -2365,6 +2369,8 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         sourceUrls={'type': 'array', 'items': {'type': 'string'}},
         whyNow={'type': 'object', 'properties': {k: {'type': 'string'} for k in ('kind', 'evidenceUrl', 'explanation')},
                 'required': ['kind', 'evidenceUrl', 'explanation'], 'additionalProperties': False})
+    if scoped_question:
+        plan_properties['questions']={'type':'array','minItems':1,'maxItems':1,'items':{'type':'string','enum':[scoped_question]}}
     allowed_kinds = sorted({kind for i in eligible for kind in observed[i]['issueSignals']}) or ['ongoingDemand']
     allowed_urls = sorted({row['link'] for i in eligible for row in observed[i]['news'] if row.get('link')})
     if any(kind in allowed_kinds for kind in ('relativeGrowth', 'newPositiveActivity')):
@@ -2385,7 +2391,7 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
         'whyNowAllowedKinds': allowed_kinds, 'whyNowAllowedExactUrls': sorted(set(allowed_urls)),
         'heldMainKeyword': held if selection_round==0 else None, 'registeredCategories': registered,
         'requiredSchema': {'selectedCandidateIndex': eligible[0], 'mainKeyword': clean[eligible[0]]['mainKeyword'], 'subKeywords': [], 'category': '',
-            'targetAudience': '', 'questions': ['','','',''], 'angle': '', 'title': '', 'topicSlug': '',
+            'targetAudience': '', 'questions': [scoped_question] if scoped_question else ['','','',''], 'angle': '', 'title': '', 'topicSlug': '',
             'whyNow': {'kind': allowed_kinds[0], 'evidenceUrl': allowed_urls[0], 'explanation': ''},
             'competitivePlan': '구체적인 비교 우위', 'differentiation': '', 'sourceUrls': [], 'keywordsMd': ''}}, ensure_ascii=False), plan_schema)
     idx = draft.get('selectedCandidateIndex')
@@ -2418,7 +2424,9 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
     if registered and draft.get('category') not in registered:
         draft['category'] = chosen['category'] if chosen.get('category') in registered else registered[0]
     questions = [q for q in (draft.get('questions') or []) if valid_text(q)]
-    while len(questions) < 4:
+    if scoped_question and questions != [scoped_question]:
+        reject('Scoped keyword plan expanded the approved reader question')
+    while len(questions) < (1 if scoped_question else 4):
         questions.append(f"{chosen['mainKeyword']} 핵심 확인 사항 {len(questions) + 1}은 무엇인가요?")
     draft['questions'] = questions
     signal = observed[idx]
@@ -2849,6 +2857,17 @@ def open_source_fact_continuation(folder, domain, recent):
 from common.editorial_supervisor import lessons as editorial_lessons
 
 
+def source_quote_span(body, quote):
+    """Return actual source text; only whitespace layout may differ."""
+    if not isinstance(quote,str) or not quote.strip():return None
+    if quote in body:return quote
+    positions=[i for i,char in enumerate(body) if not char.isspace()]
+    needle=''.join(quote.split());haystack=''.join(body[i] for i in positions)
+    start=haystack.find(needle)
+    if start<0:return None
+    return body[positions[start]:positions[start+len(needle)-1]+1]
+
+
 def retained_approved_sources(folder, plan, domain):
     """Carry the exact observed bodies that Jarvis used into the new scope."""
     folder=Path(folder).resolve()
@@ -2902,7 +2921,7 @@ def observed_quote_catalog(sources):
 
 
 async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
-    from common.editorial_supervisor import authorize_next, dossier, lineage, STEPS
+    from common.editorial_supervisor import authorize_next, dossier, lineage, STEPS, original_question
     approvals=[];current_fixed=fixed;next_step=0
     continuation=os.environ.get('CF_SOURCE_FACT_FOLDER')
     try:
@@ -2918,8 +2937,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 if (folder/'source-fact-acquisition/result.json').is_file():next_step=max(next_step,1)
                 if next_step>=len(STEPS):raise
                 packet,_=dossier(folder)
-                goal=packet.get('prewriter-acquisition-request.json',{}).get('readerGoal') or packet.get('research.md',{}).get('readerGoal') or {}
-                question=goal.get('question','')
+                question=original_question(packet)
                 from common.editorial_supervisor import acquire_recovery_sources
                 await asyncio.to_thread(acquire_recovery_sources,folder,question or category)
                 plan=authorize_next('cf_blog',domain,folder,STEPS[next_step:],failure,question,category)
@@ -3076,8 +3094,17 @@ async def _draft_agents_once(domain, category, categories, recent, generate, gat
         for fact in raw_facts:
             if isinstance(fact,dict) and fact.get('sourceUrl') in source_bodies:
                 quote=fact.get('quote')
-                if not isinstance(quote,str) or not quote.strip() or ' '.join(quote.split()) not in ' '.join(source_bodies[fact['sourceUrl']].split()):
-                    raise ReviewRequired('Acquired official fact quote is not in the retrieved body')
+                actual_quote=source_quote_span(source_bodies[fact['sourceUrl']],quote)
+                if actual_quote is None:
+                    record_prewrite_block(handoff,goal,AnswerBriefBlocked('Official fact quote is not in the retrieved body',[
+                        {'kind':'source_fact','description':str(fact.get('claim','')),
+                         'reason':'The proposed quote does not match this retrieved source',
+                         'acquisitionAction':'Correct the quote from the actual body or omit the unsupported claim'}]))
+                if actual_quote!=quote:
+                    research_data.setdefault('sourceQuoteNormalizations',[]).append({
+                        'factId':fact.get('id'),'sourceUrl':fact['sourceUrl'],'originalQuote':quote,
+                        'actualQuote':actual_quote,'reason':'whitespace layout only'})
+                    fact['quote']=actual_quote
         norm_facts = []
         default_src_url = (compact_obs.get('sources') or [{}])[0].get('url') or 'https://api.searchad.naver.com/keywordstool'
         for f_idx, f_row in enumerate(raw_facts, 1):
