@@ -45,6 +45,23 @@ class DashboardCacheTests(unittest.TestCase):
             self.assertIs(first.result(3), value)
         self.assertIs(cache.get('graph', lambda: self.fail('cache miss')), value)
 
+    def test_burst_does_not_spawn_duplicate_builds_or_block_http_workers(self):
+        cache=ReadCache();started=threading.Event();release=threading.Event();calls=[]
+        def build():
+            calls.append(1);started.set();release.wait(3);return {'ok':True}
+        def duplicate():
+            try:cache.get('same-projection',build)
+            except HTTPException as error:return error.status_code
+        with ThreadPoolExecutor(max_workers=17) as executor:
+            first=executor.submit(cache.get,'same-projection',build);self.assertTrue(started.wait(1))
+            try:
+                futures=[executor.submit(duplicate) for _ in range(16)]
+                self.assertEqual([f.result(.5) for f in futures],[503]*16)
+                self.assertEqual(calls,[1])
+            finally:release.set()
+            self.assertEqual(first.result(1),{'ok':True})
+        self.assertFalse(cache.building)
+
     def test_expiry_bounded_entries_and_failed_build_recovery(self):
         cache = ReadCache(ttl=30, capacity=2)
         with patch('server.dashboard_cache.time.monotonic', return_value=100):

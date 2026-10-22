@@ -33,6 +33,9 @@ from pydantic import BaseModel
 from server.dashboard_cache import ReadCache
 
 _LIVE_READ_CACHE = ReadCache(ttl=5, capacity=1)
+_ROOM_READ_CACHE = ReadCache(ttl=2, capacity=1)
+_CREW_READ_CACHE = ReadCache(ttl=4, capacity=1)
+_WORKSTREAM_SYNC_CACHE = ReadCache(ttl=4, capacity=1)
 
 from memory_graph import (
     ARGO_WS_DIR,
@@ -1641,6 +1644,10 @@ _LIVE_WS_CACHE: Dict[str, Any] = {"ts": 0.0, "agents": [], "live_map": {}}
 
 
 def get_crew_live_workstream_status() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
+    return _CREW_READ_CACHE.get('crew', _build_crew_live_workstream_status)
+
+
+def _build_crew_live_workstream_status() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
     """
     Compute each of the 6 crew agents' real-time task status (`liveTaskStatus`),
     status dot color (`liveDotColor`), and assigned AI brain (`brain` / `brainBadge`)
@@ -1846,6 +1853,14 @@ def append_agent_message(
 
 
 def sync_and_broadcast_pipeline_workstream() -> List[Dict[str, Any]]:
+    try:
+        return _WORKSTREAM_SYNC_CACHE.get('sync', _sync_pipeline_workstream)
+    except HTTPException as exc:
+        if exc.status_code != 503:raise
+        return []
+
+
+def _sync_pipeline_workstream() -> List[Dict[str, Any]]:
     """
     Ensure initial real pipeline workstream handoff messages exist in `room-main.json`
     and emit new handoff messages whenever real pipeline ledgers advance.
@@ -2315,11 +2330,16 @@ def drain_work_event_outbox():
 
 @chat_router.post('/work-event')
 def api_receive_work_event(payload: Dict[str, Any]):
+    # Producers retain rejected deliveries in their durable outbox.
+    if not _ROOM_LOCK.acquire(blocking=False):
+        raise HTTPException(503,'실행 기록을 반영 중입니다.',headers={'Retry-After':'1'})
     try:
         return receive_work_event(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    finally:
+        _ROOM_LOCK.release()
 
 @chat_router.get("/live-workstream")
 def api_get_live_workstream():
@@ -2370,6 +2390,10 @@ def api_execute_agent_tool(req: ExecuteAgentToolRequest):
 
 @chat_router.get("/room")
 def get_chat_room():
+    return _ROOM_READ_CACHE.get('room', _build_chat_room)
+
+
+def _build_chat_room():
     sync_and_broadcast_pipeline_workstream()
     room = load_room_data()
     archived = list_archived_meetings()
