@@ -139,7 +139,10 @@ def channels(cf, naver, kin, now):
     reserved = sum((r.get('status') in ('reserved','scheduled') or r.get('publicationStatus')=='reserved')
                    and r.get('publicPublicationVerified') is not True for r in slots) if current_nv else 0
     runner = naver.get('runner') or {}
-    nv_note = '예약 '+str(reserved)+'건'
+    tomorrow=(now.date()+dt.timedelta(days=1)).isoformat()
+    future_slots=[s for a in naver.get('accounts',[]) if isinstance(a,dict) for s in a.get('slots',[]) if isinstance(s,dict) and s.get('publicationDate')==tomorrow]
+    future_reserved=sum(s.get('status') in ('reserved','scheduled') or s.get('publicationStatus')=='reserved' for s in future_slots)
+    nv_note='오늘 발행 '+str(done_nv if done_nv is not None else '—')+' · 오늘 예약 '+str(reserved)+'건 · 내일 예약 '+(str(future_reserved)+'건' if future_slots else '—')
     if runner.get('running') is True:
         nv_note += ' · '+clean(runner.get('activeAccount') or '계정',25)+' 작성 중'
     else:
