@@ -41,6 +41,17 @@ class SourceFactAcquisitionTests(unittest.TestCase):
         self.assertNotIn('example.com',query)
         self.assertEqual(r.round_robin_sources([['a1','a2','a3','a4'],['b1','b2','b3'],[]])[:6],['a1','b1','a2','b2','a3','b3'])
 
+    def test_quote_catalog_keeps_original_bodies_when_new_sources_are_unrelated(self):
+        original={'url':'https://www.gov.kr/pension','text':'Confirmed pension application timing. '*20,
+                  'quotes':['Invented unobserved quote that must never be offered']}
+        unrelated={'url':'https://www.gov.kr/other','text':'Other official department announcement. '*20}
+        catalog=r.observed_quote_catalog([original,unrelated])
+        self.assertEqual({row['sourceUrl'] for row in catalog},{original['url'],unrelated['url']})
+        for row in catalog:
+            body=next(s['text'] for s in [original,unrelated] if s['url']==row['sourceUrl'])
+            self.assertIn(row['quote'],body)
+        self.assertNotIn(original['quotes'][0],[row['quote'] for row in catalog])
+
     def test_hash_mismatch_fails_closed(self):
         self.gather.return_value={'sources':[{**self.source,'bodySha256':'0'*64}]}
         with self.assertRaises(r.ReviewRequired):self.run_call()

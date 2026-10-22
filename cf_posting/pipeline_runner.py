@@ -2849,6 +2849,20 @@ def open_source_fact_continuation(folder, domain, recent):
 from common.editorial_supervisor import lessons as editorial_lessons
 
 
+def observed_quote_catalog(sources):
+    """Offer source-bound examples without excluding other exact body substrings."""
+    catalog=[]
+    for source in sources:
+        body=source.get('text','')
+        if not isinstance(body,str) or not source.get('url'):continue
+        candidates=list(source.get('quotes') or [])+[body[i:i+500] for i in range(0,min(len(body),3000),500)]
+        for quote in candidates[:10]:
+            if isinstance(quote,str) and len(quote.strip())>=20 and quote in body:
+                row={'sourceUrl':source['url'],'quote':quote}
+                if row not in catalog:catalog.append(row)
+    return catalog
+
+
 async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
     from common.editorial_supervisor import authorize_next, dossier, lineage, STEPS
     approvals=[];current_fixed=fixed
@@ -2872,7 +2886,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 approvals.append(plan)
                 current_fixed={'mode':'editorial_seed','seedTitle':plan['approval']['searchQuery'],
                                'explicitReaderQuestion':plan['approval']['readerQuestion'],
-                               'supervisorScope':plan['step']=='scope', 'supervisorReaderGoal':plan.get('readerGoal')}
+                               'supervisorScope':plan['step'] in ('scope','pivot'), 'supervisorReaderGoal':plan.get('readerGoal')}
                 os.environ.pop('CF_SOURCE_FACT_FOLDER',None)
                 progress('researcher',domain+' · 자비스 '+plan['step']+' 승인 · 새 근거 검수',None)
     finally:
@@ -2991,17 +3005,12 @@ async def _draft_agents_once(domain, category, categories, recent, generate, gat
         'publishedTitles':[{'slug':row.get('slug'),'title':row.get('title')} for row in recent]}
     acquisition_round = 1 if continuation else 0
     while True:
-        acquisition_sources=(acquired or {}).get('sources',[]) if continuation else compact_obs.get('acquiredPrimarySources',[])
-        exact_quotes=[]
-        for source in acquisition_sources:
-            body=source.get('text','')
-            if not isinstance(body,str):continue
-            candidates=list(source.get('quotes') or [])+[body[i:i+500] for i in range(0,min(len(body),3000),500)]
-            for quote in candidates[:10]:
-                if isinstance(quote,str) and len(quote.strip())>=20 and quote in body:
-                    exact_quotes.append({'sourceUrl':source['url'],'quote':quote})
+        acquisition_sources=list(observations.get('sources',[])) + list((acquired or {}).get('sources',[]) if continuation else compact_obs.get('acquiredPrimarySources',[]))
+        exact_quotes=observed_quote_catalog(acquisition_sources)
+        # Quotes are guidance, not a global enum: a newly acquired unrelated source
+        # must never exclude exact, relevant substrings in an existing observed body.
+        research_schema['properties']['facts']['items']['properties']['quote'].pop('enum',None)
         if exact_quotes:
-            research_schema['properties']['facts']['items']['properties']['quote']['enum']=list(dict.fromkeys(q['quote'] for q in exact_quotes))
             compact_obs['exactAcquiredQuoteCatalog']=exact_quotes
         if goal and (fixed or {}).get('supervisorScope'):
             from common.editorial_supervisor import conceptual_schema
@@ -3019,7 +3028,7 @@ async def _draft_agents_once(domain, category, categories, recent, generate, gat
         acquired_sources = compact_obs.get('acquiredPrimarySources', [])
         if continuation:
             acquired_sources = (acquired or {}).get('sources',[])
-        source_bodies = {row['url']:row['text'] for row in acquired_sources}
+        source_bodies = {row['url']:row['text'] for row in list(observations.get('sources',[]))+list(acquired_sources) if isinstance(row,dict) and isinstance(row.get('text'),str) and row.get('url')}
         for fact in raw_facts:
             if isinstance(fact,dict) and fact.get('sourceUrl') in source_bodies:
                 quote=fact.get('quote')

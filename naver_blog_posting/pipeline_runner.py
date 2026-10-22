@@ -650,7 +650,10 @@ def classify(base=BASE, now=None):
             last=relevant[-1] if relevant else {}
             public=next((r for r in reversed(public_rows) if r.get('account')==account
                 and r.get('publicPublicationVerified') is True and r.get('publicHttpStatus')==200
-                and r.get('publicationDate')==target_day and (r.get('reserveTime') or '')[-5:]==slot),{})
+                and r.get('publicationDate')==target_day and ((r.get('reserveTime') or '')[-5:]==slot
+                    or any(a.get('phase')=='verified' and a.get('reserveTime')==r.get('reserveTime')
+                           and normalized_title(a.get('topic') or a.get('title') or '')==normalized_title(r.get('title') or '')
+                           and normalized_title(r.get('title') or '') for a in relevant))),{})
             reserved=next((a for a in reversed(relevant) if a.get('phase')=='verified'
                 and a.get('reserveTime') and a.get('verificationSource')), {})
             display_gate=('published' if public else 'reserved' if reserved else
@@ -4057,7 +4060,7 @@ def selected_keyword_evidence(account_key, query, packet=None):
     return packet if valid else collect_evidence(ACCOUNT_MAP[account_key], query)
 
 
-def require_research_facts(result, sources, *, actual_observations=False):
+def require_research_facts(result, sources, *, actual_observations=False, recovery_folder=None, reader_goal=None):
     """Reject unsupported attribution; the host never invents facts or retargets URLs."""
     urls = {source['url'] for source in sources}
     facts = result.get('facts')
@@ -4068,6 +4071,12 @@ def require_research_facts(result, sources, *, actual_observations=False):
     if len({fact['id'] for fact in facts}) != len(facts):
         raise RuntimeError('Research fact identities must be unique')
     if not facts and (sources or not actual_observations):
+        if recovery_folder is not None and reader_goal:
+            atomic_json(Path(recovery_folder)/'required-materials.json',{'status':'planning_required','stage':'researcher-before-writer',
+                'readerGoal':reader_goal,'requiredMaterials':[{'kind':'source_fact','description':reader_goal['question'],
+                'reason':'Fetched pages did not yield a supported answer fact for this question',
+                'acquisitionAction':'Acquire substantive relevant official bodies or request Jarvis scope/pivot'}]})
+            raise MaterialRequired('No supported research facts; Jarvis evidence/scope recovery required')
         raise RuntimeError('Source-dependent research has no supported facts; synthetic fallback is forbidden')
     if not isinstance(result.get('researchMd'),str) or not result['researchMd'].strip():
         raise RuntimeError('Actual researcher notes are missing')
@@ -6229,8 +6238,9 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             acquisition_round = 0
             while True:
                 try:
-                    require_research_facts(result, context['sources'], actual_observations=bool(materials))
                     goal = results['keyword-selector']['readerGoal']
+                    require_research_facts(result, context['sources'], actual_observations=bool(materials),
+                        recovery_folder=folder,reader_goal=goal)
                     result['answerBrief'] = plan_answer_before_writer(result.get('answerBrief'),goal,result['facts'],
                         material_context(materials)['materials'] if materials else [],context['questionContext'],folder,
                         original_inputs=inputs,previous_raw_plan=json.loads((folder/raw_name).read_text(encoding='utf-8'))['answerBrief'],

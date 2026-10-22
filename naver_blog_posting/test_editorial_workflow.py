@@ -90,6 +90,32 @@ class EditorialWorkflowTests(unittest.TestCase):
             self.assertEqual(packet['requiredMaterials'][0]['kind'],'source_fact')
             self.assertFalse((Path(folder)/'answer-brief.json').exists())
 
+    def test_public_readback_maps_shifted_reservation_to_original_slot(self):
+        now=r.now_kst().replace(hour=18);day=now.date().isoformat()
+        title='실제 예약 검증 제목';when=day+' 20:00'
+        attempt={'account':'soultin','publicationDate':day,'scheduledSlot':'11:00','phase':'verified',
+                 'topic':title,'reserveTime':when,'verificationSource':'actual reservation list'}
+        with tempfile.TemporaryDirectory() as folder, patch.object(r,'DAILY_SLOTS',{'soultin':['11:00']}), \
+                patch.object(r,'read_journal',return_value={'attempts':[attempt]}), \
+                patch.object(r,'account_gate',return_value='verified'):
+            root=Path(folder);(root/'data').mkdir()
+            (root/'data/public-verification.json').write_text(json.dumps({'evidence':[{
+                'account':'soultin','title':title,'publicationDate':day,'reserveTime':when,
+                'publicPublicationVerified':True,'publicHttpStatus':200,'publicUrl':'https://blog.naver.com/mustpickinfo/123'}]}))
+            result=r.classify(root,now)
+        self.assertEqual(result['counts']['published'],1)
+        self.assertEqual(result['accounts'][0]['slots'][0]['scheduledSlot'],'11:00')
+        self.assertEqual(result['accounts'][0]['slots'][0]['status'],'published')
+
+    def test_empty_research_facts_create_real_acquisition_request(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaises(r.MaterialRequired):
+                r.require_research_facts({'facts':[],'researchMd':'No supported body facts'},
+                    [{'url':'https://www.gov.kr/page'}],recovery_folder=folder,reader_goal={'question':'실제 질문'})
+            packet=json.loads((Path(folder)/'required-materials.json').read_text())
+            self.assertEqual(packet['readerGoal']['question'],'실제 질문')
+            self.assertEqual(packet['requiredMaterials'][0]['kind'],'source_fact')
+
     def test_researcher_only_sees_selected_query_bodies_and_url_schema(self):
         selected=evidence();seed=copy.deepcopy(selected)
         seed['query']='initial seed query'
