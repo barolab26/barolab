@@ -35,6 +35,8 @@ def _file(root, relative, *, read_only=False):
     if relative.is_absolute() or '..' in relative.parts or not relative.parts:
         raise ValueError('Unsafe relative path')
     lowered=relative.as_posix().lower()
+    if not read_only and lowered in {c+'/posting.py' for c in ('cf_posting','naver_blog_posting','naver_kin','threads_posting')}:
+        raise ValueError('Frozen publishing engine; evolve memory instead')
     if (any(part.lower() in ('secure','data','output','runs','artifacts','browsers') or part.startswith('.') for part in relative.parts)
         or any(word in lowered for word in ('.env','.git','credential','secret','token','cookie','local_config'))
         or (not read_only and any(word in lowered for word in ('llm_settings','codex_cli','coding_job','repair_workflow')))):

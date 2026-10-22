@@ -2,7 +2,7 @@
   "date": "2026-10-23",
   "workDate": "2026-10-23",
   "publicationDate": "2026-10-23",
-  "checkedAt": "2026-10-23T00:35:03.801097+09:00",
+  "checkedAt": "2026-10-23T01:58:24.481959+09:00",
   "timezone": "Asia/Seoul",
   "startTime": "08:00",
   "startTimeMeaning": "당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인",
@@ -72,25 +72,25 @@
     {
       "account": "yoon_master",
       "accId": "acc3",
-      "status": "waiting",
+      "status": "verified",
       "slots": [
         {
           "slot": "20:30",
-          "status": "waiting",
-          "reserveTime": null,
-          "title": null,
-          "verifiedAt": null,
-          "verificationSource": null,
-          "publicationStatus": "waiting",
+          "status": "verified",
+          "reserveTime": "2026-10-23 20:30",
+          "title": "5060 우아한 데일리룩",
+          "verifiedAt": "2026-10-23T00:40:02.889561+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
           "publicPublicationVerified": false
         }
       ],
       "expected": 1,
       "counts": {
-        "verified": 0,
+        "verified": 1,
         "running": 0,
         "failed": 0,
-        "waiting": 1,
+        "waiting": 0,
         "unknown": 0
       },
       "publicationDate": "2026-10-23"
@@ -98,35 +98,35 @@
     {
       "account": "adinfo0905",
       "accId": "acc4",
-      "status": "waiting",
+      "status": "failed",
       "slots": [
         {
           "slot": "11:00",
-          "status": "waiting",
-          "reserveTime": null,
-          "title": null,
-          "verifiedAt": null,
-          "verificationSource": null,
-          "publicationStatus": "waiting",
+          "status": "verified",
+          "reserveTime": "2026-10-23 11:00",
+          "title": "편리한 연말정산 이용방법, 회사 제출 방식부터 예상세액 계산까지",
+          "verifiedAt": "2026-10-23T01:52:26.787061+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
           "publicPublicationVerified": false
         },
         {
           "slot": "19:00",
-          "status": "waiting",
+          "status": "failed",
           "reserveTime": null,
           "title": null,
           "verifiedAt": null,
           "verificationSource": null,
-          "publicationStatus": "waiting",
+          "publicationStatus": "failed",
           "publicPublicationVerified": false
         }
       ],
       "expected": 2,
       "counts": {
-        "verified": 0,
+        "verified": 1,
         "running": 0,
-        "failed": 0,
-        "waiting": 2,
+        "failed": 1,
+        "waiting": 0,
         "unknown": 0
       },
       "publicationDate": "2026-10-23"
@@ -174,10 +174,10 @@
     "reservation evidence"
   ],
   "counts": {
-    "verified": 2,
+    "verified": 4,
     "running": 0,
-    "failed": 0,
-    "waiting": 5,
+    "failed": 1,
+    "waiting": 2,
     "unknown": 0
   },
   "recovery": {

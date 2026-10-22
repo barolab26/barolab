@@ -1385,6 +1385,12 @@ from server.dashboard_cache import ReadCache
 _GRAPH_READ_CACHE = ReadCache(ttl=30, capacity=8)
 
 
+@memory_router.get("/synapses")
+def get_synapse_summary():
+    from dashboard.agents.synapse import summary
+    return _GRAPH_READ_CACHE.get(('synapses',), summary)
+
+
 @memory_router.get("/summary")
 def get_memory_summary():
     graph = _GRAPH_READ_CACHE.get(("all", False, ""), lambda: _build_memory_graph("all", False, ""))

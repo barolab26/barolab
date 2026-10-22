@@ -682,6 +682,222 @@ class ConsolidationBoundaryTests(_consolidated_part0_unittest.TestCase):
             self.assertEqual((root/channel/'data').resolve(), (root/'dashboard/data'/key).resolve())
 
 
+class SynapseFlywheelTests(_consolidated_part0_unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name)
+        self.data=self.root/'dashboard/data';self.data.mkdir(parents=True)
+        self.now=__import__('datetime').datetime(2026,10,23,tzinfo=__import__('datetime').timezone.utc)
+    def graph(self):
+        return {'nodes':{},'edges':[]}
+    def post(self,g,age=1):
+        from dashboard.agents import synapse as s
+        address='https://example.com/pension-amount'
+        published=(self.now-__import__('datetime').timedelta(days=age)).isoformat()
+        s.add_post(g,dict(publicUrl=address,title='기초연금 30만원 대상',publishedAt=published,publicPublicationVerified=True,httpStatus=200),dict(contentHtml='<h2>대상</h2><table><tr><td>조건</td></tr></table>',category='연금'))
+        return g['nodes'][s.key('post',address)]
+    def test_outcome_weight_and_recipe_round_trip(self):
+        import json
+        from dashboard.agents import synapse as s
+        g=self.graph();n=self.post(g)
+        n['measurements']['index']={'indexed':True,'checkedAt':(self.now-__import__('datetime').timedelta(hours=1)).isoformat()}
+        report=dict(complete=True,checkedAt=self.now.isoformat(),start='2026-10-22',end='2026-10-22',pages=[dict(url=n['url'],clicks=2,impressions=30)])
+        s.observe(g,report,'gsc',['clicks','impressions'])
+        s.observe(g,{**report,'currency':'USD','pages':[dict(url=n['url'],revenue=.8)]},'adsense',['revenue'])
+        s.score(g,self.now)
+        self.assertEqual(n['synapseWeight'],16)
+        self.assertFalse(n['weightEvidence']['causalClaim'])
+        (self.data/'synapse-recipes.json').write_text(json.dumps(s.build_index(g)))
+        card=s.recipe('example.com 연금 대상','cf_pipeline',self.root)
+        self.assertIn('16.0',card);self.assertLessEqual(len(card.splitlines()),10)
+    def test_missing_and_site_only_revenue_never_reward_or_penalize(self):
+        from dashboard.agents import synapse as s
+        g=self.graph();n=self.post(g,8)
+        s.observe(g,dict(complete=True,checkedAt=self.now.isoformat(),total=100,sites=[{'revenue':100}]),'adsense',['revenue'])
+        s.score(g,self.now)
+        self.assertEqual(n['synapseWeight'],1)
+        self.assertIsNone(n['weightEvidence']['pageRevenue'])
+    def test_only_explicit_full_week_zero_observation_decays(self):
+        from dashboard.agents import synapse as s
+        g=self.graph();n=self.post(g,9)
+        n['measurements']['gsc']=dict(start='2026-10-15',end='2026-10-21',clicks=0)
+        s.score(g,self.now);self.assertEqual(n['synapseWeight'],-4)
+        s.score(g,self.now);self.assertEqual(n['synapseWeight'],-4)
+    def test_question_identity_survives_query_canonicalization(self):
+        from dashboard.agents import synapse as s
+        first=s.url('https://kin.naver.com/qna/detail.naver?docId=123&trackingCode=secret')
+        second=s.url('https://kin.naver.com/qna/detail.naver?docId=456')
+        self.assertNotEqual(first,second)
+        self.assertIn('docId=123',first);self.assertNotIn('trackingCode',first)
+        self.assertEqual(s.url('https://10.0.0.1/private'),'')
+
+    def test_query_memory_is_account_scoped_and_never_changes_other_topics(self):
+        import json
+        from dashboard.agents import synapse as s
+        (self.data/'synapse-recipes.json').write_text(json.dumps({'queryHints':[{'account':'adinfo0905','originalQuery':'broad query','preferredQuery':'official query'}]}))
+        self.assertEqual(s.research_query('broad query',self.root/'adinfo0905/output',self.root),'official query')
+        self.assertEqual(s.research_query('broad query',self.root/'other/output',self.root),'broad query')
+        self.assertEqual(s.research_query('different',self.root/'adinfo0905/output',self.root),'different')
+
+    def test_card_audit_creates_the_output_directory_before_provider(self):
+        from unittest.mock import patch
+        from dashboard.agents import synapse as s
+        folder=self.root/'naver_blog_posting/output/draft/model-audit'
+        with patch.object(s,'ROOT',self.root):s.audit_card('observed recipe',folder)
+        self.assertTrue((folder/'synapse-card.json').is_file())
+
+    def test_public_monitor_does_not_relearn_the_same_url_each_poll(self):
+        import json
+        from unittest.mock import patch
+        from dashboard.collectors import naver_public as collector
+        base=self.root/'naver_blog_posting';base.mkdir()
+        dashboard=self.root/'dashboard'
+        now=self.now.astimezone(collector.KST)
+        address='https://blog.naver.com/mustpickinfo/123'
+        (dashboard/'naver_public_verification.json').write_text(json.dumps({'evidence':[{'publicUrl':address,'checkedAt':now.isoformat()}]}))
+        with patch.object(collector,'DEFAULT_ACCOUNTS',{}),patch('common.llm_client.memory_event') as event:
+            result=collector.reconcile(base,now=now,force=True)
+        self.assertEqual(result['totalVerifiedEvidence'],1)
+        event.assert_not_called()
+
+    def test_resolution_feedback_supersedes_only_the_unsent_failed_artifact(self):
+        import json
+        from dashboard.agents import synapse as s
+        failed=self.root/'naver_blog_posting/output/adinfo0905/failed';good=failed.with_name('recovered')
+        for folder in (failed,good):
+            folder.mkdir(parents=True)
+            (folder/'identity.json').write_text(json.dumps({'account':'adinfo0905','blogId':'adinfo0905'}))
+        (failed/'photo-plan.json').write_text(json.dumps({'signoff':''}))
+        (good/'photo-plan.json').write_text(json.dumps({'signoff':'감사합니다.'}))
+        (good/'reservation-evidence.json').write_text(json.dumps({'submissionStatus':'verified_reserved','reserveTime':'2026-10-23 11:00','verifiedAt':'2026-10-23T01:00:00+09:00','title':'근거 있는 안내','verificationSource':'actual-reservation-list'}))
+        journal=self.data/'naver/automation-journal.json';journal.parent.mkdir()
+        bad=dict(account='adinfo0905',artifactFolder=str(failed),phase='failed',submissionStarted=False,workDate='2026-10-23',updatedAt='2026-10-23T00:00:00+09:00')
+        uncertain={**bad,'phase':'unknown','submissionStarted':True}
+        journal.write_text(json.dumps({'attempts':[bad,uncertain,dict(account='adinfo0905',artifactFolder=str(good),phase='verified')]}))
+        s.refresh_once(self.root,force=True)
+        graph=s.read(self.data/'memory_graph.json')
+        lesson=next(n for n in graph['nodes'].values() if n['type']=='FailureLesson')
+        self.assertEqual(lesson['resolvedCount'],1)
+        self.assertFalse(lesson['concreteExamples'][0]['publicVerified'])
+        attempts=s.read(journal)['attempts']
+        self.assertEqual(attempts[0]['phase'],'superseded')
+        self.assertEqual(attempts[1]['phase'],'unknown')
+        s.refresh_once(self.root,force=True)
+        self.assertEqual(next(n for n in s.read(self.data/'memory_graph.json')['nodes'].values() if n['type']=='FailureLesson')['resolvedCount'],1)
+
+    def test_cross_channel_links_use_verified_body_and_keep_unknown_publish_date(self):
+        import json,sqlite3,hashlib
+        from dashboard.agents import synapse as s
+        body='확인된 기초연금 신청 대상과 준비 방법입니다.'*20
+        (self.data/'metrics.json').write_text(json.dumps({'sites':{'example.com':{}}}))
+        document={'question':{'question_url':'https://kin.naver.com/qna/detail.naver?docId=123','title':'기초연금 신청 대상'},'article':{'url':'https://example.com/pension','body':body,'body_sha256':hashlib.sha256(body.encode()).hexdigest(),'http_status':200,'checked_at':self.now.isoformat()}}
+        with sqlite3.connect(self.data/'kin.sqlite3') as db:
+            db.execute('CREATE TABLE questions(state,document,answer_url,updated_at)')
+            db.execute('INSERT INTO questions VALUES(?,?,?,?)',('published_verified',json.dumps(document),'https://kin.naver.com/qna/detail.naver?docId=123&answerNo=1',self.now.isoformat()))
+        graph=s.ingest(self.graph(),self.root)
+        post=graph['nodes'][s.key('post','https://example.com/pension')]
+        self.assertIsNone(post['publishedAt'])
+        self.assertTrue(any(e['type']=='links_to' and e['target']==s.key('post',post['url']) for e in graph['edges']))
+        self.assertTrue(any(e['type']=='answers_observed_question' for e in graph['edges']))
+        pattern=next(n for n in graph['nodes'].values() if n['type']=='Pattern')
+        self.assertIsNone(pattern['pattern']['headingCount'])
+
+    def test_reservation_is_never_a_public_post(self):
+        from dashboard.agents import synapse as s
+        g=self.graph();s.add_post(g,dict(publicUrl='https://example.com/a',submissionStatus='verified_reserved',httpStatus=200))
+        self.assertFalse(g['nodes'])
+    def test_corrupt_index_uses_cache_and_never_blocks_generation(self):
+        import json
+        from dashboard.agents import synapse as s
+        g=self.graph();self.post(g);s.score(g,self.now)
+        path=self.data/'synapse-recipes.json';path.write_text(json.dumps(s.build_index(g)))
+        good=s.recipe('example.com','publi',self.root)
+        path.write_text('{')
+        self.assertEqual(s.recipe('example.com','publi',self.root),good)
+        self.assertEqual(s.recipe('example.com','jarvis',self.root),'')
+    def test_winner_doctor_selection_is_after_publication_only(self):
+        import json
+        from dashboard.agents import synapse as s
+        g=self.graph();n=self.post(g,4)
+        n['measurements']['gsc']=dict(impressions=10,clicks=1,checkedAt=self.now.isoformat())
+        s.score(g,self.now)
+        (self.data/'memory_graph.json').write_text(json.dumps(g))
+        jobs=[{'url':n['url']},{'url':'https://example.com/unmeasured'}]
+        self.assertEqual(s.winner_jobs(jobs,self.root),jobs[:1])
+        self.assertEqual(g['doctorPlans'][0]['baseline'],n['measurements'])
+    def test_automatic_coding_cannot_modify_frozen_engine(self):
+        from common.coding_job import _file
+        with self.assertRaisesRegex(ValueError,'Frozen'):_file(self.root,'cf_posting/posting.py')
+    def test_shared_injection_precedes_provider_and_engine_hash_is_unchanged(self):
+        import inspect
+        from common import llm_client
+        from pathlib import Path
+        import hashlib,subprocess
+        self.assertIn("recipe(prompt, kwargs.get('agent_slot'))",inspect.getsource(llm_client.memory_call))
+        root=Path(__file__).resolve().parents[1]
+        for channel in ('cf_posting','naver_blog_posting','naver_kin','threads_posting'):
+            relative=channel+'/posting.py'
+            before=subprocess.check_output(['git','show','HEAD:'+relative],cwd=root)
+            self.assertEqual(hashlib.sha256(before).hexdigest(),hashlib.sha256((root/relative).read_bytes()).hexdigest())
+
+
+class SynapseExecutionTests(_consolidated_part0_unittest.TestCase):
+    setUp=SynapseFlywheelTests.setUp
+    graph=SynapseFlywheelTests.graph
+    post=SynapseFlywheelTests.post
+    def test_real_provider_boundary_to_mocked_publish_and_memory_feedback(self):
+        import json
+        from pathlib import Path
+        from types import SimpleNamespace
+        from unittest.mock import patch,Mock
+        from dashboard.agents import synapse as s
+        from common import llm_client,hermes_memory
+        from cf_posting import posting
+        g=self.graph();self.post(g);s.score(g,self.now)
+        (self.data/'synapse-recipes.json').write_text(json.dumps(s.build_index(g)))
+        captured=[]
+        article=dict(title='연금 대상 확인',summary='확인할 조건',category='연금',topicSlug='pension-check',contentHtml='<h2>대상</h2><p>공식 안내를 확인합니다.</p>')
+        original_recipe=s.recipe
+        def provider(prompt,**kwargs):captured.append(prompt);return article
+        store=SimpleNamespace(experience_context=lambda *a:{'text':'','selected':[]})
+        with patch('common.crew_chat_bridge.model_crew_call',side_effect=lambda f:f),patch.object(s,'recipe',side_effect=lambda p,slot:original_recipe(p,slot,self.root)),patch.object(hermes_memory,'frozen_session_context',return_value='snapshot'),patch.object(hermes_memory,'skill_context',return_value=''),patch.object(hermes_memory,'_store',store),patch.object(llm_client,'memory_event'):
+            document=llm_client.memory_call(provider)('example.com 연금 대상',agent_slot='cf_pipeline',memory_read_only=True)
+        self.assertIn('승리 시냅스',captured[0])
+        folder=self.root/'cf_posting/output/test-result';folder.mkdir(parents=True)
+        posted=Mock(status_code=201);posted.json.return_value={'post':{'id':23,'slug':'pension-check'}}
+        public=Mock(status_code=200,text='<h1>연금 대상 확인</h1>')
+        with patch.object(posting,'registered_categories',return_value=['연금']),patch.object(posting,'published_inventory',return_value=[]),patch.object(posting,'get_api_key',return_value='test-only'),patch.object(posting.requests,'post',return_value=posted) as send,patch.object(posting.requests,'get',return_value=public):
+            receipt=posting.publish_basic_article('example.com',document,folder)
+        self.assertTrue(receipt['publicPublicationVerified']);send.assert_called_once()
+        (folder/'article.json').write_text(json.dumps(article))
+        (self.data/'cf').mkdir()
+        (self.data/'cf/daily_schedule.json').write_text(json.dumps({'items':[{'artifactFolder':'output/test-result'}]}))
+        g=s.ingest(self.graph(),self.root)
+        node=g['nodes'][s.key('post',receipt['publicUrl'])]
+        node['measurements']['gsc']={'clicks':2,'impressions':30,'checkedAt':self.now.isoformat()}
+        node['measurements']['adsense']={'revenue':1,'currency':'USD','checkedAt':self.now.isoformat()}
+        s.score(g,self.now);weight=node['synapseWeight'];s.score(g,self.now)
+        self.assertEqual(weight,node['synapseWeight']);self.assertGreater(weight,1)
+        (self.data/'synapse-recipes.json').write_text(json.dumps(s.build_index(g)))
+        self.assertIn('examples',s.recipe('example.com 연금','cf_pipeline',self.root))
+    def test_doctor_before_after_uses_equal_nonoverlapping_windows(self):
+        import sqlite3
+        from dashboard.agents import synapse as s
+        g=self.graph();node=self.post(g,4)
+        node['measurements']['gsc']=dict(clicks=1,impressions=10,start='2026-10-20',end='2026-10-21',checkedAt=self.now.isoformat())
+        s.score(g,self.now);s.record_boosts(g,self.root)
+        with sqlite3.connect(self.data/'growth.sqlite3') as db:
+            db.execute('CREATE TABLE maintenance_jobs(url,completed_at,action_id,status)')
+            db.execute('INSERT INTO maintenance_jobs VALUES(?,?,?,?)',(node['url'],'2026-10-22T10:00:00+00:00','actual-action','completed'))
+        node['measurements']['gsc']=dict(clicks=3,impressions=20,start='2026-10-24',end='2026-10-25',checkedAt='2026-10-26T00:00:00+00:00')
+        s.record_boosts(g,self.root)
+        boost=g['nodes'][s.key('boost',node['url'])]
+        self.assertEqual(boost['observedDeltas']['gsc:clicks'],2)
+        self.assertFalse(boost['causalClaim'])
+
+
 if __name__ == "__main__":
     import unittest
     unittest.main()

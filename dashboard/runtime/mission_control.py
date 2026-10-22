@@ -306,7 +306,7 @@ class Collector:
         for key,path in {'cf':'cf_posting/data/daily_schedule.json','naver':'dashboard/naver_automation.json',
             'kin':'dashboard/data/public/kin.json','usage':'server/data/llm_usage_ledger.json','revenue':'server/data/revenue.json','revenueRefresh':'server/data/revenue-refresh.json',
             'metrics':'server/data/metrics.json','threads':'dashboard/data/public/threads.json',
-            'maintenance':'server/data/content-maintenance.json','graph':'server/data/editorial-memory-graph.json',
+            'synapses':'dashboard/data/memory_graph.json','maintenance':'server/data/content-maintenance.json','graph':'server/data/editorial-memory-graph.json',
             'workflow':'naver_blog_posting/data/pipeline_status.js'}.items():data[key]=self.read(path)
         # Prefer the documented dashboard contract when deployed there, else server collector ledger.
         public_revenue=self.read('dashboard/data/public/revenue.json')

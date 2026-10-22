@@ -252,7 +252,7 @@ def render(data,now,height):
         state=row['state'];style='bold bright_cyan' if state=='RUNNING' else 'bold white on red' if state=='ERROR' else 'bold bright_yellow' if state=='CYCLING' else 'bold bright_green'
         crew.add_row(line('@'+row['name']),line(row.get('model') or row.get('configuredModel') or '모델 설정 대기'),line(state,style),line(row['action']+' · 완료 '+row.get('lastCompleted','—')))
     graph=data.get('graph',{});resolutions=[n for n in graph.get('nodes',{}).values() if n.get('type')=='Resolution']
-    content.append(Group(crew,line(graph_summary(graph,now),'bold bright_magenta'),line('최근 학습 · '+str(resolutions[-1].get('reason','')) if resolutions else '다음 검증 결과 학습 대기')))
+    content.append(Group(crew,line(graph_summary(graph,now)+' · 시냅스 '+str(len(data.get('synapses',{}).get('nodes',{})))+' 노드 / '+str(len(data.get('synapses',{}).get('doctorPlans',[])))+' 유망 글','bold bright_magenta'),line('최근 학습 · '+str(resolutions[-1].get('reason','')) if resolutions else '다음 검증 결과 학습 대기')))
     logs=[]
     for row in data.get('timeline',[])[:6]:
         when=dt.datetime.fromtimestamp(row['at'],KST).strftime('%H:%M:%S') if row.get('at') else '--:--:--'

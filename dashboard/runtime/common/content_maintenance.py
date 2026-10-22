@@ -615,6 +615,8 @@ def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     atomic(folder / 'original.json', original)
     report = growth_analysis.summary()
     diagnostic = next((r for r in report.get('diagnosis', {}).get('domains', []) if r['domain'] == job['domain']), None)
+    from dashboard.agents.synapse import doctor_context
+    diagnostic = {**(diagnostic or {}), 'synapsePlan': doctor_context(job['url'], ROOT)}
     selection = json.loads(job.get('proof') or '{}').get('jevSelection')
     def observe(event, detail=None):
         if not operation_enabled():
@@ -1041,18 +1043,17 @@ def run_once(force_prepare=False):
         if not rows:
             runtime(status='waiting', stage='monitor', reason='기존 글의 마지막 Pacific 관측일까지 재수정 보류')
             return public_summary()
+        from dashboard.agents.synapse import winner_jobs
+        rows = winner_jobs(rows, ROOT)
+        if not rows:
+            runtime(status='waiting', stage='monitor', reason='실측 상위 유망 글 대기 · 발행 엔진과 독립')
+            return public_summary()
         job = next((r for r in rows if r['domain'] != last_domain), rows[0])
         if job['status'] != 'ready':
             window=preparation_window()
             if not window['available']:
                 runtime(status='waiting',stage='research',reason=window['reason'],nextRetryAt=window['nextRetryAt'],preparationWindow=window)
                 return public_summary()
-            if config['policy']['jevEnabled']:
-                job = choose_growth_job(rows)
-                if job is None:
-                    runtime(status='waiting', stage='selection', activeJob=None,
-                            reason='새 원천 자료 또는 JEV 선별 통과 후보 대기 · 기존 글 유지')
-                    return public_summary()
             with database() as db:
                 db.execute('INSERT INTO maintenance_attempts VALUES (?,?,?,?)', (uuid.uuid4().hex, job['id'], stamp(), 'deep_review' if inspect_only else 'research'))
         runtime(status='running', stage='research', lastAttemptAt=stamp(), activeJob=job['id'], lastDomain=job['domain'], reason=None)

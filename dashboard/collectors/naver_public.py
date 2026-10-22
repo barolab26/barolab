@@ -217,6 +217,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
 
     evidence_list = list(ledger.get("evidence") or [])
     evidence_by_url = {row.get("publicUrl"): row for row in evidence_list if row.get("publicUrl")}
+    known_public_urls = set(evidence_by_url)
 
     # Load pipeline_status.js
     dash_ps_path = dashboard_dir / "pipeline_status.js"
@@ -470,7 +471,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
         from common.llm_client import memory_event
         for item in merged_evidence:
             # RSS proves the public item's presence, not the full body or image layout.
-            if item.get('publicUrl') and item.get('checkedAt') == now_iso:
+            if item.get('publicUrl') and item['publicUrl'] not in known_public_urls and item.get('checkedAt') == now_iso:
                 memory_event('naver:rss:' + item['publicUrl'], 'public_rss_item_observed',
                              'Public Naver RSS item matched account/title; full-body verification is separate.',
                              evidence={k: item.get(k) for k in ('publicUrl', 'account', 'actualPublishedAt', 'checkedAt')})

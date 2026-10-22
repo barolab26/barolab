@@ -84,12 +84,17 @@ def public_text(url, timeout=8):
 def research(keyword, folder):
     from common.dashboard_jobs import write
     from datetime import datetime, timezone
+    requested_keyword=keyword
+    try:
+        from dashboard.agents.synapse import research_query
+        keyword=research_query(keyword,folder)
+    except (OSError,ValueError,TypeError):pass
     sources=[]
     for candidate in search_urls(keyword)[:5]:
         try: body=public_text(candidate['url'])
         except (requests.RequestException,ValueError,OSError,KeyError):continue
         if len(body['text'])>=200:sources.append({**body,'title':candidate.get('title','')})
         if len(sources)>=3:break
-    write(folder/'research.json',{'keyword':keyword,'sources':sources,'collectedAt':datetime.now(timezone.utc).isoformat()})
+    write(folder/'research.json',{'keyword':keyword,'requestedKeyword':requested_keyword,'sources':sources,'collectedAt':datetime.now(timezone.utc).isoformat()})
     (folder/'research.md').write_text('\n\n'.join(x['url']+'\n'+x['text'] for x in sources),encoding='utf-8')
     return sources

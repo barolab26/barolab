@@ -160,8 +160,16 @@ def memory_call(function):
         if explicit_session:
             session_id = str(explicit_session)
         event_id = 'llm:' + uuid.uuid4().hex
+        synapse_card = ''
+        try:
+            from dashboard.agents.synapse import recipe, audit_card
+            synapse_card = recipe(prompt, kwargs.get('agent_slot'))
+            prompt = synapse_card + prompt
+            audit_card(synapse_card, kwargs.get('audit_directory'))
+        except (OSError,ValueError,TypeError,KeyError):
+            pass  # Memory availability never blocks a provider call.
         original = prompt
-        trace, prefix = {}, ''
+        trace, prefix = ({'synapseCardSha256':hashlib.sha256(synapse_card.encode()).hexdigest()} if synapse_card else {}), ''
         try:
             from common import hermes_memory
             snapshot = hermes_memory.frozen_session_context(session_id, scope)
@@ -170,7 +178,7 @@ def memory_call(function):
             prefix = snapshot+'\n'+skills+'\n'+experience['text']+'\n'
             prompt = prefix + original
             selected_skills = [{'name':name,'sha256':hermes_memory.revision(content)} for name,content in re.findall(r"<skill name='([^']+)'>\n(.*?)\n</skill>",skills,re.S)]
-            trace = {'snapshotSha256':hermes_memory.revision(snapshot),'skillRefs':selected_skills,
+            trace = {**trace,'snapshotSha256':hermes_memory.revision(snapshot),'skillRefs':selected_skills,
                      'episodeRefs':[{k:row[k] for k in ('eventId','sha256','learningPolicyRevision','previousEventId','previousCandidateSha256') if k in row} for row in experience['selected']],
                      'preProviderPromptSha256':hermes_memory.revision(prompt)}
         except Exception as exc:
