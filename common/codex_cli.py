@@ -394,6 +394,11 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             if not Path(output).is_file():
                 raise RuntimeError('Codex CLI가 최종 JSON을 반환하지 않았습니다.')
             events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
+            try:
+                from common.llm_usage import record_codex_usage
+                record_codex_usage(events, cand_model)
+            except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                pass  # Monitoring must not interrupt a completed model call.
             if not any(event.get('type') == 'turn.completed' for event in events):
                 raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
             response = parse_json(Path(output).read_text(encoding='utf-8'))

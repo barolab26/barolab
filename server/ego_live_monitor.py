@@ -231,18 +231,8 @@ def color_line(line):
     return line
 
 def main():
-    from server.ego_activity import read_activity, read_input_activity
-    print('\033]0;EGO LITE Live Monitor\007\033[?25l', end='')
-    try:
-        while True:
-            size = shutil.get_terminal_size((140, 70))
-            width = size.columns
-            lines = render_lines(load(OBSERVATION), request_rows(REQUESTS), now=datetime.datetime.now(KST), columns=width, activity=read_activity(), inputs=read_input_activity(), rows=size.lines)
-            styled = [color_line(line) for line in lines]
-            print('\033[H\033[2J'+'\n'.join(styled), end='', flush=True)
-            time.sleep(1)
-    finally:
-        print('\033[?25h', end='', flush=True)
+    from server.mission_control import main as cockpit_main
+    return cockpit_main([])
 
 
 if __name__ == '__main__':
