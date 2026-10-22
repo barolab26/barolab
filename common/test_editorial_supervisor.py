@@ -180,6 +180,8 @@ class SupervisorTests(unittest.TestCase):
             result=asyncio.run(runner.draft_agents('example.com','생활',[],[],None,None,lambda *a:None,None))
         self.assertEqual(result[0]['title'],'valid')
         self.assertEqual(calls.await_count,4)
+        self.assertTrue(calls.await_args_list[2].args[-1]['supervisorScope'])
+        self.assertTrue(calls.await_args_list[3].args[-1]['supervisorScope'])
         self.assertEqual([p['step'] for p in lineage.call_args.args[1]],['query','scope','pivot'])
 
     def test_watchdog_reclaims_frozen_review_without_replaying_uncertain_submission(self):
