@@ -98,7 +98,7 @@ def ranked_posts(rows):
             posts.append({'url': url, 'title': row['title'].strip(), 'observedRank': len(posts) + 1})
         if len(posts) == 3:
             return posts
-    raise RuntimeError('Three actual organic blog title results required')
+    return posts
 
 
 def collect_blog_evidence(account, query):
@@ -108,7 +108,11 @@ def collect_blog_evidence(account, query):
     url = 'https://search.naver.com/search.naver?' + urlencode({'ssc': 'tab.blog.all', 'query': query})
     with research_browser(account) as context:
         with public_page(context, url) as (page, owned):
-            page.locator('a[data-heatmap-target=".nblg"] .sds-comps-text-type-headline1').first.wait_for(timeout=15000)
+            from playwright.sync_api import TimeoutError as BrowserTimeout, Error as BrowserError
+            try:
+                page.locator('a[data-heatmap-target=".nblg"] .sds-comps-text-type-headline1').first.wait_for(timeout=15000)
+            except BrowserTimeout:
+                pass  # A confirmed empty relevance search is an observation, not a fabricated ranking.
             observed = parse_qs(urlsplit(page.url).query)
             selected_sort = page.locator('[aria-selected="true"]').all_inner_texts()
             if (observed.get('ssc') != ['tab.blog.all'] or observed.get('query') != [query]
@@ -123,28 +127,33 @@ def collect_blog_evidence(account, query):
             serp = {'url': page.url, 'query': query, 'observedAt': at,
                     'text': page.locator('#main_pack').inner_text(),
                     'links': [p['url'] for p in posts], 'owned': owned}
+        available=[]; unavailable=[]
         for post in posts:
-            with public_page(context, post['url']) as (page, owned):
-                page.locator('#mainFrame').wait_for(timeout=15000)
-                frame = page.frame_locator('#mainFrame')
-                article = frame.locator('.se-main-container')
-                article.wait_for(timeout=15000)
-                text = article.inner_text().strip()
-                if len(text) < 100:
-                    raise RuntimeError('Top-three article body unavailable; do not replace its rank')
-                # Keep image/caption placement observations separate from inferred image meaning.
-                visuals = article.locator('.se-component.se-image').evaluate_all('''xs => xs.map((x,i)=>({
-                    index:i,caption:x.querySelector('.se-caption')?.innerText || '',
-                    alt:x.querySelector('img')?.alt || '',
-                    precedingText:x.previousElementSibling?.innerText || ''
-                }))''')
-                post['excerpt'] = {'url': post['url'], 'text': text, 'bodySha256': _sha(text),
-                                   'collectedAt': _now(), 'collectionMethod': 'visible_browser_article'}
-                post['visualPlacementObservations'] = visuals
-                post['owned'] = owned
+            try:
+                with public_page(context, post['url']) as (page, owned):
+                    page.locator('#mainFrame').wait_for(timeout=15000)
+                    frame = page.frame_locator('#mainFrame')
+                    article = frame.locator('.se-main-container')
+                    article.wait_for(timeout=15000)
+                    text = article.inner_text().strip()
+                    if len(text) < 120:
+                        raise RuntimeError('Top-three article body unavailable; do not replace its rank')
+                    # Keep image/caption placement observations separate from inferred image meaning.
+                    visuals = article.locator('.se-component.se-image').evaluate_all('''xs => xs.map((x,i)=>({
+                        index:i,caption:x.querySelector('.se-caption')?.innerText || '',
+                        alt:x.querySelector('img')?.alt || '',
+                        precedingText:x.previousElementSibling?.innerText || ''
+                    }))''')
+                    post['excerpt'] = {'url': post['url'], 'text': text, 'bodySha256': _sha(text),
+                                       'collectedAt': _now(), 'collectionMethod': 'visible_browser_article'}
+                    post['visualPlacementObservations'] = visuals
+                    post['owned'] = owned
+                available.append(post)
+            except (RuntimeError, BrowserError) as exc:
+                unavailable.append({'url':post['url'],'observedRank':post['observedRank'],'reason':type(exc).__name__})
     return {'account': account, 'query': query, 'searchSurface': 'naver_blog', 'sort': 'relevance',
             'observedAt': at, 'rankScope': 'Observed non-ad blog title order at this time; not a ranking guarantee',
-            'serp': serp, 'competitors': posts}
+            'serp': serp, 'competitors': available, 'unavailableCompetitors':unavailable}
 
 
 def validate_capture_request(request):

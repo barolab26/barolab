@@ -2866,6 +2866,8 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 packet,_=dossier(folder)
                 goal=packet.get('prewriter-acquisition-request.json',{}).get('readerGoal') or packet.get('research.md',{}).get('readerGoal') or {}
                 question=goal.get('question','')
+                from common.editorial_supervisor import acquire_recovery_sources
+                await asyncio.to_thread(acquire_recovery_sources,folder,question or category)
                 plan=authorize_next('cf_blog',domain,folder,STEPS[attempt:],failure,question,category)
                 approvals.append(plan)
                 current_fixed={'mode':'editorial_seed','seedTitle':plan['approval']['searchQuery'],
@@ -6798,6 +6800,26 @@ def wait_for_publisher_progress(proc,schedule_path,domain,*,clock=time.monotonic
         proc.kill();proc.wait();return -3
 
 
+def preserved_rework_checkpoint(item):
+    """Resume accepted assembly/review artifacts; never silently discard an accepted draft."""
+    value=item.get('artifactFolder')
+    if not value:return None
+    folder=(BASE_DIR/str(value).replace('\\','/')).resolve()
+    if not folder.is_relative_to((BASE_DIR/'output').resolve()) or not (folder/'handoff.json').is_file():return None
+    saved=json.loads((folder/'handoff.json').read_text(encoding='utf-8'))
+    if not any(row.get('agent')=='writer' for row in saved.get('stages',[])):return None
+    if publication_may_be_inflight(item) or (folder/'publication.json').exists():
+        raise ReviewRequired('Accepted draft has submission evidence; reconcile before rework')
+    article=json.loads((folder/'article.json').read_text(encoding='utf-8'))
+    handoff=Handoff(folder,item['domain'],article['topicSlug']);rows=handoff.check()
+    require_prewriting_handoff(handoff,article)
+    agents=[row['agent'] for row in rows]
+    if agents==list(Handoff.agents[:4]):return {'folder':str(folder),'mode':'assembly'}
+    if agents==list(Handoff.agents[:5]):return {'folder':str(folder),'mode':'review'}
+    # Earlier accepted writers are retained for a targeted image acquisition repair.
+    raise ReviewRequired('Accepted manuscript preserved; targeted image-stage recovery required')
+
+
 def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_authorization=None):
     schedule_path = Path(schedule_path or SCHEDULE_JSON)
     domain = item["domain"]
@@ -6826,6 +6848,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
             return False
     if (item.get('retryable') is False or item.get('attemptCount', 0) >= 3) and _repair_authorization is not _REPAIR_AUTHORIZATION:
         return False
+    checkpoint=preserved_rework_checkpoint(item) if not item.get('reviewedArticle') and not item.get('reviewReworkFolder') else None
     item["attemptCount"] = item.get("attemptCount", 0) + 1
     item['totalAttempts'] = item.get('totalAttempts', 0) + 1
     item['attemptStartedAt'] = datetime.datetime.now(KST).isoformat()
@@ -6848,6 +6871,8 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
         origin=(BASE_DIR/str(item['editorialOriginalFolder']).replace('\\','/')).resolve()
         if origin.is_relative_to((BASE_DIR/'output').resolve()):
             environment['CF_EDITORIAL_ORIGINAL_FOLDER']=str(origin)
+    if checkpoint:
+        environment['CF_REVIEW_REWORK_FOLDER' if checkpoint['mode']=='review' else 'CF_REWORK_FOLDER']=checkpoint['folder']
     if item.get('reviewReworkFolder'):
         environment['CF_REVIEW_REWORK_FOLDER'] = item['reviewReworkFolder']
     if item.get('reviewedArticle'):

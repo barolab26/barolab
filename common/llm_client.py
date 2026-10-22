@@ -1,4 +1,4 @@
-"""Provider adapters for JSON article generation; no silent provider fallback."""
+"""Provider adapters for JSON article generation; explicit audited credit-exhaustion recovery."""
 from common.llm_usage import metered
 import json
 import re
@@ -275,7 +275,8 @@ def _compact_schema_hint(schema):
 def _enabled_route(config, provider=None, model_override=None):
     """AGY is disabled after weekly quota exhaustion (2026-10-19)."""
     provider = provider or config['active']
-    if provider == 'agy':
+    if provider in ('agy','openrouter','freellm'):
+        # Unavailable/unsupported routes use the configured subscription adapter.
         # AGY model IDs are not valid Codex model overrides.
         return 'codex', config['providers'].get('codex', {}).get('model') or 'gpt-6.1-sol'
     return provider, model_override
@@ -302,6 +303,7 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
     if _CURRENT.get() is not None:_CURRENT.get().update(provider=provider,model=model)
     if observer:
         observer(provider, model, 'calling')
+    provider_started=time.monotonic()
     try:
         result, actual_model = _generate_json(prompt, provider, images, model_override, response_schema, audit_directory, reasoning_effort, timeout_seconds)
     except Exception as exc:
@@ -309,7 +311,28 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
             match = re.search(r'HTTP (\d{3})', str(exc))
             observer(provider, model, 'failed', reason=str(exc)[:400],
                      http_status=int(match.group(1)) if match else None)
-        raise
+        # Only an explicit exhausted-credit response permits cross-provider recovery.
+        # Authentication, content/schema errors and uncertain submissions never trigger it.
+        if provider=='codex' or not re.search(r'HTTP 402\b',str(exc)):
+            raise
+        previous_provider,previous_model=provider,model
+        provider='codex';model=config['providers'].get('codex',{}).get('model') or 'gpt-6.1-sol'
+        effort=settings.reasoning_effort_for_call(provider,model,slot=agent_slot,data=config)
+        call=_CURRENT.get()
+        if call is not None:
+            # Keep the rejected API request in its own model ledger before recording the actual retry.
+            from common.llm_usage import _safe_record
+            rejected={**call,'latencyMs':round((time.monotonic()-provider_started)*1000),'httpStatus':402,'errorType':'InsufficientCredits'}
+            _safe_record(rejected,'failed')
+            call.update(provider=provider,model=model,httpStatus=None,rateLimitHeaders={},
+                        fallbackFrom=previous_provider+':'+previous_model)
+        if observer:observer(provider,model,'calling',reason='HTTP 402 credit recovery from '+previous_provider)
+        logging.getLogger(__name__).warning('LLM credit recovery: %s -> codex',previous_provider)
+        try:
+            result,actual_model=_generate_json(prompt,provider,images,model,response_schema,audit_directory,effort,timeout_seconds)
+        except Exception as failure:
+            if observer:observer(provider,model,'failed',reason=str(failure)[:400])
+            raise
     if observer:
         observer(provider, model, 'returned', actual_model=actual_model)
     return result

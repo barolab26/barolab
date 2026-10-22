@@ -55,10 +55,30 @@ class SupervisorTests(unittest.TestCase):
     def test_query_cannot_silently_change_question(self):
         with patch('common.llm_client.generate_json',side_effect=self.model()) as generate, \
                 patch('common.llm_settings.get_agent_brain',return_value={'provider':'codex','model':'configured'}),patch.object(supervisor,'event'):
-            with self.assertRaisesRegex(ValueError,'original question'):
+            with self.assertRaisesRegex(supervisor.QuestionRebindingRequired,'original question'):
                 supervisor.authorize('cf_blog','example.com',self.folder,'query','missing','원래 질문 그대로 유지해야 합니다')
         self.assertEqual(generate.call_args.kwargs['response_schema']['properties']['readerQuestion']['enum'],
                          ['원래 질문 그대로 유지해야 합니다'])
+
+    def test_structured_budget_preserves_valid_json_source_identity_and_redacts_contacts(self):
+        payload={'originalQuestion':'실제 질문 유지','sources':[
+            {'url':f'https://www.gov.kr/{i}','body':'공식 내용 '*5000+' user@example.org',
+             'bodySha256':'a'*64} for i in range(8)],'failure':{'large':'x'*40000}}
+        encoded=supervisor.budgeted_evidence(payload)
+        value=json.loads(encoded)
+        self.assertLessEqual(len(encoded),22000)
+        self.assertEqual(value['originalQuestion'],payload['originalQuestion'])
+        self.assertEqual(len(value['sources']),8)
+        self.assertEqual(value['sources'][0]['bodySha256'],'a'*64)
+        self.assertNotIn('user@example.org',encoded)
+
+    def test_changed_query_advances_to_separately_approved_scope(self):
+        with patch.object(supervisor,'authorize',side_effect=[
+                supervisor.QuestionRebindingRequired('changed intent'),{'step':'scope'}]) as authorize:
+            result=supervisor.authorize_next('cf_blog','example.com',self.folder,
+                ('query','scope','pivot'),'missing','original')
+        self.assertEqual(result['step'],'scope')
+        self.assertEqual([c.args[3] for c in authorize.call_args_list],['query','scope'])
 
     def test_live_event_contract_accepts_progress_and_links_staff_roles(self):
         with patch('common.crew_chat_bridge._deliver') as deliver,patch.object(supervisor,'ROOT',self.root):
@@ -85,6 +105,13 @@ class SupervisorTests(unittest.TestCase):
         self.assertNotIn('person@example.org',clean)
         self.assertNotIn('session-value',clean)
         self.assertIn('실제 제도 기준',learning_text(clean))
+
+    def test_public_numeric_identifiers_are_not_private_phone_substrings(self):
+        from common.hermes_memory import learning_text
+        value='공공 문서 식별자 https://www.gov.kr/01012345678 202601012345678'
+        self.assertEqual(learning_text(value),value)
+        for secret in ('연락처 010-1234-5678', 'user@example.org', 'cookie: actual-session'):
+            with self.assertRaises(ValueError):learning_text(secret)
 
     def test_graph_is_connected_idempotent_and_only_public_outcomes_learn(self):
         approval={'originalQuestion':'Original','originalHashes':{},'step':'scope','approvedAt':1,
@@ -122,7 +149,7 @@ class SupervisorTests(unittest.TestCase):
             return {'step':step,'approval':{'readerQuestion':'Original question' if step=='query' else 'New supported question',
                                           'searchQuery':'official query'}}
         with patch.dict(runner.RUN_CONTEXT,{'artifactFolder':str(self.folder)}),patch.object(runner,'_draft_agents_once',calls), \
-                patch.object(supervisor,'authorize',side_effect=approve),patch.object(supervisor,'lineage') as lineage:
+                patch.object(supervisor,'authorize',side_effect=approve),patch.object(supervisor,'lineage') as lineage, patch.object(supervisor,'acquire_recovery_sources',return_value={}):
             result=asyncio.run(runner.draft_agents('example.com','생활',[],[],None,None,lambda *a:None,None))
         self.assertEqual(result[0]['title'],'valid')
         self.assertEqual(calls.await_count,4)
@@ -148,6 +175,26 @@ class SupervisorTests(unittest.TestCase):
         self.assertIs(publish.call_args.kwargs['_repair_authorization'],runner._REPAIR_AUTHORIZATION)
         ledger=json.loads(path.read_text())
         self.assertNotIn('editorialRecoveryCycles',ledger['items'][2])
+
+    def test_model_proposal_body_cannot_become_observed_source(self):
+        rows=supervisor.observed_sources({'researcher.json':{'url':'https://www.gov.kr/fake','text':'invented '*60},
+            'sources.json':[{'url':'https://www.gov.kr/real','text':'host fetched '*60}]})
+        self.assertEqual([row['url'] for row in rows],['https://www.gov.kr/real'])
+        self.assertEqual(len(rows[0]['bodySha256']),64)
+
+    def test_cf_checkpoint_preserves_accepted_assembly_instead_of_replanning(self):
+        from cf_posting import pipeline_runner as runner
+        folder=self.root/'output'/'draft';folder.mkdir(parents=True)
+        agents=runner.Handoff.agents
+        rows=[{'agent':name} for name in agents[:4]]
+        (folder/'handoff.json').write_text(json.dumps({'stages':rows}))
+        (folder/'article.json').write_text(json.dumps({'topicSlug':'draft'}))
+        handoff=SimpleNamespace(check=lambda:rows)
+        with patch.object(runner,'BASE_DIR',self.root),patch.object(runner,'publication_may_be_inflight',return_value=False), \
+                patch.object(runner,'require_prewriting_handoff'),patch.object(runner,'Handoff',return_value=handoff) as cls:
+            cls.agents=agents
+            result=runner.preserved_rework_checkpoint({'domain':'example.com','artifactFolder':'output/draft'})
+        self.assertEqual(result,{'folder':str(folder),'mode':'assembly'})
 
     def test_keyword_identity_mismatch_requests_schema_bound_repair(self):
         from cf_posting import pipeline_runner as runner

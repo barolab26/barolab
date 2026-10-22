@@ -33,7 +33,7 @@ _THREAD_LOCK = threading.RLock()
 
 def learning_text(value):
     text = str(value)
-    if len(text) > 24000 or re.search(r'(?i)(?:authorization|bearer|api[_ -]?key|password|secret|access[_ -]?token|cookie)\s*[:= ]|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|(?:\+82|010)[ -]?\d{3,4}[ -]?\d{4}', text):
+    if len(text) > 24000 or re.search(r'(?i)(?:authorization|bearer|api[_ -]?key|password|secret|access[_ -]?token|cookie)\s*[:= ]|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|(?<![\w/])(?:\+82|010)[ -]?\d{3,4}[ -]?\d{4}(?!\d)', text):
         raise ValueError('Sensitive or oversized learning material')
     return text
 

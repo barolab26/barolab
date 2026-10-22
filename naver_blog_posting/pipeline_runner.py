@@ -619,6 +619,9 @@ def classify(base=BASE, now=None):
     target_day = now.date().isoformat() if now.hour < 21 else (now.date() + timedelta(days=1)).isoformat()
     result = []
     proof_cache = {}
+    try:
+        public_rows=json.loads((base/'data'/'public-verification.json').read_text(encoding='utf-8')).get('evidence',[])
+    except (OSError,ValueError):public_rows=[]
     for account, slots in DAILY_SLOTS.items():
         attempts = [a for a in read_journal(base)['attempts'] if a['account'] == account]
         observed = []
@@ -642,14 +645,35 @@ def classify(base=BASE, now=None):
             slot_prep = SLOT_TRACK_POLICY.get(account, {}).get(slot, {}).get('prepTime', PREPARATION_TIMES[account])
             if gate == 'waiting' and target_day == now.date().isoformat() and now.strftime('%H:%M') >= slot_prep:
                 gate = 'overdue'
+            relevant=[a for a in attempts if receipt_publication_day(a)==target_day and
+                      _slot_matches(account,a.get('scheduledSlot') or (a.get('reserveTime') or '')[-5:],slot)]
+            last=relevant[-1] if relevant else {}
+            public=next((r for r in reversed(public_rows) if r.get('account')==account
+                and r.get('publicPublicationVerified') is True and r.get('publicHttpStatus')==200
+                and r.get('publicationDate')==target_day and (r.get('reserveTime') or '')[-5:]==slot),{})
+            reserved=next((a for a in reversed(relevant) if a.get('phase')=='verified'
+                and a.get('reserveTime') and a.get('verificationSource')), {})
+            display_gate=('published' if public else 'reserved' if reserved else
+                'failed' if gate=='unknown' and last.get('phase')=='failed'
+                and last.get('preSubmissionFailure') is True and last.get('submissionStarted') is not True else gate)
             observed.append({'scheduledSlot': slot, 'publicationDate': target_day,
+                             'publicationGate':gate,'lastAttemptPhase':last.get('phase'),
+                             'failureReason':last.get('failureReason'),
+                             'publicPublicationVerified':bool(public),'publicUrl':public.get('publicUrl'),
+                             'reservationVerified':bool(reserved),'reserveTime':reserved.get('reserveTime'),
+                             'verificationSource':public.get('verificationSource') or reserved.get('verificationSource'),
                              'track': SLOT_TRACK_POLICY.get(account, {}).get(slot, {}).get('track', ''),
                              'prepTime': slot_prep,
-                             'status': gate, 'expected': f'{target_day} {slot} KST 공개 예정'})
-        gate = next((state for state in ('running', 'unknown', 'material_required', 'overdue', 'retry_wait', 'waiting')
+                             'status': display_gate, 'expected': f'{target_day} {slot} KST 공개 예정'})
+        gate = next((state for state in ('running', 'unknown', 'failed', 'material_required', 'overdue', 'retry_wait', 'waiting')
                      if any(row['status'] == state for row in observed)), 'verified')
         acc_id = IDS.get(account) or {'adinfo0905': 'acc4', 'stone0747': 'acc5'}[account]
         result.append({'account': account, 'accId': acc_id, 'status': gate, 'slots': observed,
+                       'counts':{'published':sum(r['status']=='published' for r in observed),
+                                 'reserved':sum(r['status']=='reserved' for r in observed),
+                                 'running':sum(r['status']=='running' for r in observed),
+                                 'failed':sum(r['status']=='failed' for r in observed),
+                                 'reconciliationRequired':sum(r['publicationGate']=='unknown' for r in observed)},
                        'preparationTime': PREPARATION_TIMES[account], 'publicationDate': target_day,
                        'expected': target_day + ' ' + ', '.join(slots) + ' KST 공개 예정'})
     return {'date': now.date().isoformat(), 'workDate': now.date().isoformat(),
@@ -657,7 +681,9 @@ def classify(base=BASE, now=None):
             'startTime': '08:00', 'startTimeMeaning': '당일 오전 작성 ➔ 당일 슬롯 예약(🔵) ➔ 공개 시각 자동 공개검증(🟢) 단일 데일리 파이프라인',
             'preparationTimes': dict(PREPARATION_TIMES),
             'plannedAccounts': len(result), 'plannedSlots': sum(len(r['slots']) for r in result),
-            'registration': 'not_observed', 'accounts': result}
+            'registration': 'not_observed', 'accounts': result,
+            'aggregationSources':['automation-journal.json','public-verification.json','reservation evidence'],
+            'counts':{k:sum(a['counts'][k] for a in result) for k in ('published','reserved','running','failed','reconciliationRequired')}}
 
 @contextmanager
 def monitor_lock(base):
@@ -2978,7 +3004,28 @@ def fetch_bridge_article(url, account, fetch=None):
         raise RuntimeError('CF article body is empty or exceeds complete bounded review capacity')
     return {**source, 'text': text[:22000], 'httpStatus': 200, 'canonicalUrl': url,
             'primarySourceReferences': references,
+            'headings':[h.get_text(' ',strip=True) for h in body.select('h2,h3')][:12],
+            'summary':text[:1800], 'collectedAt':source.get('collectedAt') or now_kst().isoformat(),
             'articleBodySha256': hashlib.sha256(text.encode('utf-8')).hexdigest()}
+
+
+def observed_bridge_inventory(account, inventory, folder):
+    """Read allowed actual CF bodies before planning; metadata alone cannot bind a question."""
+    path=Path(folder)/'bridge-body-observations.json'
+    if path.exists():
+        return json.loads(path.read_text(encoding='utf-8'))
+    candidates=[];failures=[]
+    for row in inventory.get('candidates',[])[:6]:
+        try:
+            source=fetch_bridge_article(row['url'],account)
+            candidates.append({**row,**{key:source.get(key) for key in
+                ('canonicalUrl','articleBodySha256','collectedAt','headings','summary','primarySourceReferences')},
+                'bodyExcerpt':source['text'][:3000], 'bodyScope':'Observed article body; title is not evidence'})
+        except (ValueError,RuntimeError,OSError,requests.RequestException) as exc:
+            failures.append({'url':row.get('url'),'reason':type(exc).__name__+': '+str(exc)[:160]})
+    packet={'candidates':candidates,'failedCandidates':failures,'collectedAt':now_kst().isoformat()}
+    atomic_json(path,packet)
+    return packet
 
 
 def bridge_primary_sources(source, primary_sources, cache, fetch=None):
@@ -3831,8 +3878,11 @@ def require_top_three_evidence(packet, query):
         if observed.tzinfo is None or not timedelta(0) <= now_kst() - observed <= timedelta(hours=24):
             raise ValueError('Stale observation')
         rows = packet['competitors']
-        if len(rows) != 3 or [row.get('observedRank') for row in rows] != [1, 2, 3]:
-            raise ValueError('Actual positions one through three required')
+        if not isinstance(rows,list) or len(rows)>3:
+            raise ValueError('Bounded observed competitors required')
+        ranks=[row.get('observedRank') for row in rows]
+        if any(type(rank) is not int or rank not in (1,2,3) for rank in ranks) or ranks!=sorted(set(ranks)):
+            raise ValueError('Preserve unique actual observed positions')
         urls = set()
         for row in rows:
             body = row['excerpt']
@@ -3848,7 +3898,7 @@ def require_top_three_evidence(packet, query):
                     or collected.tzinfo is None or not timedelta(0) <= now_kst() - collected <= timedelta(hours=24)):
                 raise ValueError('Actual competitor body evidence missing or changed')
     except (KeyError, TypeError, ValueError, AttributeError) as exc:
-        raise RuntimeError('All three observed competitor bodies must be verified; later results cannot substitute') from exc
+        raise RuntimeError('Observed competitor bodies must be verified; unavailable positions cannot be fabricated') from exc
     return rows
 
 
@@ -4044,8 +4094,8 @@ def researcher_input_context(context, results):
     inputs={key:value for key,value in context.items() if key not in ('evidence','keyword-evidence.json')}
     inputs['priorResults']=results
     inputs['competitorComparisonContract']=(
-        'selectedEvidence is the sole authority for competitorFindings. Compare its exact observedRank 1,2,3 '
-        'in order, binding every URL to that same row excerpt body. Initial seed-query samples are not '
+        'selectedEvidence is the sole authority for competitorFindings. Compare ONLY its available observedRank rows '
+        'in their original order, binding each URL to its excerpt body. Missing ranks stay missing; official sources establish facts. Initial seed-query samples are not '
         'comparison evidence and are intentionally omitted. Do not infer performance or rankings beyond this observation.')
     return inputs
 
@@ -4058,7 +4108,7 @@ def editorial_decision_schema(comparison_urls=None):
         finding['properties']['url']['enum'] = list(comparison_urls)
     return {'type':'object','properties': {'decision':{'type':'string','enum':['publish','test','skip']},
         'reason':{'type':'string','minLength':1},'readerBenefit':{'type':'string','minLength':1},
-        'competitorFindings':{'type':'array','minItems':3,'maxItems':3,'items':finding},
+        'competitorFindings':{'type':'array','minItems':len(comparison_urls) if comparison_urls is not None else 0,'maxItems':len(comparison_urls) if comparison_urls is not None else 3,'items':finding},
         'testHypothesis':{'type':'string'}},
         'required':['decision','reason','readerBenefit','competitorFindings','testHypothesis'],'additionalProperties':False}
 
@@ -4068,13 +4118,13 @@ def require_editorial_decision(value, evidence, query):
     if not isinstance(value, dict) or value.get('decision') not in ('publish','test','skip'):
         raise RuntimeError('Structured evidence-backed editorial decision missing')
     findings = value.get('competitorFindings')
-    if (not isinstance(findings,list) or len(findings) != 3
+    if (not isinstance(findings,list) or len(findings) != len(rows)
             or [row.get('url') for row in findings] != [row['url'] for row in rows]
             or any(not isinstance(row.get(key),str) or not row[key].strip() for row in findings
                    for key in ('observedStrength','unansweredNeed','adoptPattern','avoidPattern'))
             or not str(value.get('reason') or '').strip() or not str(value.get('readerBenefit') or '').strip()
             or (value['decision']=='test' and not str(value.get('testHypothesis') or '').strip())):
-        raise RuntimeError('Editorial decision does not cite the observed top three and reader benefit')
+        raise RuntimeError('Editorial decision does not cite the available observed competitors and reader benefit')
     return value
 
 
@@ -5548,8 +5598,12 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
             folder=Path(RUN_OPTIONS.get('_active_preparation_folder') or '')
             if not folder.is_dir():raise failure
             packet,_=dossier(folder)
+            if is_bridge_account(ACCOUNT_MAP[account]) and packet.get('bridge-inventory.json'):
+                observed_bridge_inventory(ACCOUNT_MAP[account],packet['bridge-inventory.json'],folder)
             goal=(packet.get('keyword-selector.json',{}).get('readerGoal') or
                   packet.get('required-materials.json',{}).get('readerGoal') or {})
+            from common.editorial_supervisor import acquire_recovery_sources
+            acquire_recovery_sources(folder,goal.get('question') or ACCOUNT_MAP[account]['topic'].split(',')[0])
             plan=authorize_next('naver_blog',account,folder,STEPS[index:],failure,goal.get('question',''))
             approvals.append(plan)
             evidence_folder=folder/('jarvis-'+step+'-evidence');evidence_folder.mkdir(exist_ok=True)
@@ -5682,7 +5736,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             atomic_json(handoff.path, handoff.data)
         if evidence_dir:
             packet = json.loads((Path(evidence_dir) / 'keyword-evidence.json').read_text(encoding='utf-8'))
-            if packet.get('account') != account_key or not packet.get('serp') or not packet.get('competitors') or not packet.get('recentTitles'):
+            if packet.get('account') != account_key or not packet.get('serp') or not isinstance(packet.get('competitors'),list) or not packet.get('recentTitles'):
                 raise RuntimeError('Account-specific real keyword evidence missing')
             evidence = packet
         else:
@@ -5724,7 +5778,7 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                'freshnessContract': 'Prepare for the explicit publicationDate (default same-day D-Day). Follow slotTrackPolicy: Slot 1 targets seasonal issues + 3-4 word action-intent long-tail keywords; Slot 2 targets deep category expertise with real site blue/brown callout captures + EXIF-sanitized 1st-person photos (target dwell time 3+ min); Bridge accounts connect to high-CPC CF vertical articles.'}
     if RUN_OPTIONS.get('_excluded_automatic_topics'):
         context['excludedAutomaticTopics']=RUN_OPTIONS['_excluded_automatic_topics']
-        context['alternativeCandidateContract']='Choose a substantively different concrete reader task from every excluded candidate. Sharing a measured broad query is allowed, but do not paraphrase the same unresolved question. Their core factual answer lacked source support. Independently verify the different intent and fetch fresh top3 and actual official bodies; no prior approval transfers.'
+        context['alternativeCandidateContract']='Choose a substantively different concrete reader task from every excluded candidate. Sharing a measured broad query is allowed, but do not paraphrase the same unresolved question. Their core factual answer lacked source support. Independently verify the different intent and fetch available observed competitors and actual official bodies; no prior approval transfers.'
     if RUN_OPTIONS.get('revision_target'):
         context['reservationRevisionRequest'] = {
             'purpose':'Improve the same reserved reader question using the supplied real visual materials; do not replace it with another topic.',
@@ -5754,7 +5808,11 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
         if not accepted_rows:
             routing_inventory = bridge_inventory(acc, preferred_urls=RUN_OPTIONS.get('bridge_source_urls'))
             atomic_json(folder/'bridge-inventory.json', routing_inventory)
-            context['bridgeInventory'] = routing_inventory['candidates']
+            observed_inventory=observed_bridge_inventory(acc,routing_inventory,folder)
+            context['bridgeInventory'] = observed_inventory['candidates']
+            context['bridgeBodyPlanningContract']='Plan the reader question only within these observed article bodies/headings, never a title promise. Fresh official fact and temporal verification still apply.'
+            if not context['bridgeInventory']:
+                raise MaterialRequired('No actual allowed CF article body available for bridge planning')
             context['preferredBridgeSourceUrls'] = RUN_OPTIONS.get('bridge_source_urls') or []
             context['preferredBridgeSourceContract'] = 'These host-nominated URLs exist in the actual approved published inventory. Inspect their actual bodies for the explicit reader question before introducing unrelated features. Nomination does not establish relevance, official support or temporal eligibility; every normal validator remains required.'
         context['bridgeContract'] = 'Start from the reader question, then choose a genuinely useful actual CF article from the approved inventory, never a domain quota or random rotation. Return exact canonical bridgeUrl and reader-value bridgeReason. The host verifies actual body/canonical/temporal eligibility and supplies bridgeOutboundUrl with approved attribution. Writer must use [descriptive approved label](bridgeOutboundUrl) exactly once in a body paragraph before hashtags; no bare URLs, changed tracking or unrelated destinations.'
@@ -6127,6 +6185,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             atomic_json(folder / 'sources.json', sources)
             atomic_json(folder / 'source-fetch-results.json', {'sources': [s['url'] for s in sources], 'failedCandidates': source_failures,
                                                              'sourceEnrichmentUrls': enriched_urls, 'materialSources': material_sources})
+            if len(selected['competitors'])<3 and not sources:
+                raise MaterialRequired('Partial competitor observations require actual primary-source bodies before writing')
             context.update(selectedEvidence=selected, sources=sources, sourceFetchFailures=source_failures)
             if is_bridge_account(acc):
                 result, bridge_source, validation = choose_verified_bridge(result, account_key, acc, context['publicationDate'], context['bridgeInventory'], sources, folder)

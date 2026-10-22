@@ -70,6 +70,27 @@ class AgyBypassTests(unittest.TestCase):
         self.assertEqual(post.call_args.kwargs['json']['model'], 'api-model')
         self.generate.assert_not_called()
 
+    def test_credit_exhaustion_uses_codex_preserving_schema_and_observer(self):
+        observer=Mock();schema={'type':'object'}
+        with patch.object(llm_client,'_generate_json',side_effect=[RuntimeError('LLM HTTP 402: 잔액 부족'),
+                ({'ok':True},'actual-codex')]) as generate:
+            result=llm_client.generate_json('credit test',provider='openai',response_schema=schema,
+                images=['actual.png'],observer=observer,_skip_memory=True)
+        self.assertEqual(result,{'ok':True})
+        self.assertEqual(generate.call_args.args[1],'codex')
+        self.assertEqual(generate.call_args.args[2],['actual.png'])
+        self.assertEqual(generate.call_args.args[4],schema)
+        self.assertEqual(observer.call_args.args,('codex','gpt-6-luna','returned'))
+        with patch.object(llm_client,'_generate_json',side_effect=RuntimeError('LLM HTTP 401: 인증 실패')) as generate:
+            with self.assertRaises(RuntimeError):llm_client.generate_json('auth test',provider='openai',_skip_memory=True)
+            self.assertEqual(generate.call_count,1)
+
+    def test_openrouter_and_unsupported_local_route_use_real_codex_adapter(self):
+        for route in ('openrouter','freellm'):
+            result=llm_client.generate_json('task',provider=route,model_override='external-only-model',_skip_memory=True)
+            self.assertEqual(result,{'ok':True})
+            self.assertEqual(self.generate.call_args.args[1],'gpt-6-luna')
+
     def test_legacy_text_fallback_uses_codex_and_truthful_ledger(self):
         router = Mock()
         router.prepare.return_value = 'task'

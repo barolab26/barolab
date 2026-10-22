@@ -25,7 +25,7 @@ class EditorialWorkflowTests(unittest.TestCase):
     def test_top_three_requires_exact_query_rank_surface_and_actual_bodies(self):
         packet=evidence()
         self.assertEqual(len(r.require_top_three_evidence(packet,'specific query')),3)
-        for change in ('query','rank','surface','body','missing'):
+        for change in ('query','rank','surface','body'):
             bad=copy.deepcopy(packet)
             if change=='query':bad['query']='another'
             elif change=='rank':bad['competitors'][0]['observedRank']=4
@@ -34,6 +34,42 @@ class EditorialWorkflowTests(unittest.TestCase):
             else:bad['competitors'].pop()
             with self.subTest(change=change), self.assertRaises(RuntimeError):
                 r.require_top_three_evidence(bad,'specific query')
+
+    def test_partial_competitors_preserve_real_ranks_and_exact_findings_count(self):
+        packet=evidence();packet['competitors'].pop(1)
+        rows=r.require_top_three_evidence(packet,'specific query')
+        self.assertEqual([row['observedRank'] for row in rows],[1,3])
+        urls=[row['url'] for row in rows]
+        schema=r.editorial_decision_schema(urls)
+        self.assertEqual(schema['properties']['competitorFindings']['minItems'],2)
+        packet['competitors']=[]
+        self.assertEqual(r.require_top_three_evidence(packet,'specific query'),[])
+        self.assertEqual(r.editorial_decision_schema([])['properties']['competitorFindings']['maxItems'],0)
+
+    def test_bridge_planning_reads_body_not_title_before_selecting_question(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(r,'fetch_bridge_article',return_value={
+                'text':'실제 환급 절차 '*80,'canonicalUrl':'https://www.justinfo.co.kr/guide',
+                'articleBodySha256':'b'*64,'collectedAt':r.now_kst().isoformat(),
+                'summary':'실제 환급 범위','headings':['누락 공제'],'primarySourceReferences':[]}) as fetch:
+            packet=r.observed_bridge_inventory({}, {'candidates':[{'url':'https://www.justinfo.co.kr/guide','title':'넓은 제목'}]},folder)
+            self.assertIn('실제 환급',packet['candidates'][0]['bodyExcerpt'])
+            self.assertEqual(packet['candidates'][0]['headings'],['누락 공제'])
+            r.observed_bridge_inventory({}, {'candidates':[]},folder)
+            self.assertEqual(fetch.call_count,1)
+
+    def test_status_summary_separates_known_failure_from_historical_submission_gate(self):
+        now=r.now_kst();day=now.date().isoformat()
+        attempt={'account':'soultin','publicationDate':day,'scheduledSlot':'11:00','phase':'failed',
+                 'submissionStarted':False,'preSubmissionFailure':True,'failureReason':'actual collection failure'}
+        with tempfile.TemporaryDirectory() as folder, patch.object(r,'DAILY_SLOTS',{'soultin':['11:00']}), \
+                patch.object(r,'read_journal',return_value={'attempts':[attempt]}), \
+                patch.object(r,'account_gate',return_value='unknown'):
+            result=r.classify(Path(folder),now.replace(hour=18))
+        slot=result['accounts'][0]['slots'][0]
+        self.assertEqual(slot['status'],'failed')
+        self.assertEqual(slot['publicationGate'],'unknown')
+        self.assertEqual(result['counts']['failed'],1)
+        self.assertEqual(slot['failureReason'],'actual collection failure')
 
     def test_researcher_only_sees_selected_query_bodies_and_url_schema(self):
         selected=evidence();seed=copy.deepcopy(selected)

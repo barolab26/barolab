@@ -60,9 +60,11 @@ class ResearchEvidenceTests(unittest.TestCase):
         self.assertEqual([r['url'].rsplit('/', 1)[1] for r in result], ['7', '4', '1'])
         self.assertEqual([r['observedRank'] for r in result], [1, 2, 3])
 
-    def test_fewer_than_three_fails(self):
-        with self.assertRaises(RuntimeError):
-            ranked_posts([{'url': 'https://blog.naver.com/one/1', 'title': 'one'}])
+    def test_partial_search_keeps_actual_available_ranks(self):
+        rows=ranked_posts([{'url': 'https://blog.naver.com/one/1', 'title': 'one'}])
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['observedRank'],1)
+        self.assertEqual(ranked_posts([]),[])
 
     def request(self):
         text = 'A real official source paragraph describing an application.'
