@@ -492,7 +492,11 @@ def validate_brief_review(verdict, brief, reader_goal):
 
 def review_with_one_refinement(initial_brief, reader_goal, facts, materials, question_context,
                                review, refine, record):
-    """One semantic refinement using fixed evidence; initial missing inputs stop immediately."""
+    """One fixed-goal refinement, then an explicit handoff to supervisor replanning.
+
+    The caller may acquire evidence or approve a new question in a NEW attempt;
+    this validator never promotes incomplete evidence into writer approval.
+    """
     fixed = copy.deepcopy({'readerGoal':reader_goal,'facts':facts,'materials':materials,
                            'questionContext':question_context})
     def digest(value):
@@ -540,7 +544,8 @@ def review_with_one_refinement(initial_brief, reader_goal, facts, materials, que
             report('approved',verdictSha256=digest(verdict))
             return current,verdict
     except AnswerBriefBlocked as exc:
-        report('blocked',reason=str(exc),missingInputs=exc.missing_inputs)
+        report('blocked',reason=str(exc),missingInputs=exc.missing_inputs,
+               supervisorRequired=True,supervisorActions=['query','scope','pivot'])
         raise
     except Exception as exc:
         report('error',reason=str(exc)[:1000])

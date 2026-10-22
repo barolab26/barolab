@@ -10,10 +10,13 @@
   "provider": "authenticated-codex-subscription",
   "mode": "alternating_interval",
   "intervalMinutes": 20,
-  "intervalJitterMinutes": [18, 22],
+  "intervalJitterMinutes": [
+    18,
+    22
+  ],
   "pollMinutes": 5,
-  "operationDailyCap": 20,
-  "operationAccountDailyCap": 10,
+  "operationDailyCap": 60,
+  "operationAccountDailyCap": 30,
   "globalDailyCap": 20,
   "accountDailyCap": 10,
   "articleCatalog": [
@@ -39,5 +42,6 @@
   ],
   "createdAt": "2026-10-15T12:12:41.529315+00:00",
   "taskName": "BaroLab-Kin-Seven-Day-Pilot",
-  "registeredAt": "2026-10-17T12:40:00+00:00"
+  "registeredAt": "2026-10-17T12:40:00+00:00",
+  "editorialRecoveryEnabled": true
 }

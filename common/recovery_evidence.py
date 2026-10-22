@@ -9,10 +9,10 @@ import sys
 from pathlib import Path
 
 PROJECT_SOURCES = {
-    'cf_blog': ('cf_posting/pipeline_runner.py', 'common/answer_brief.py', 'common/public_capture.py'),
+    'cf_blog': ('cf_posting/pipeline_runner.py', 'common/answer_brief.py', 'common/public_capture.py','common/editorial_supervisor.py'),
     'naver_blog': ('naver_blog_posting/pipeline_runner.py', 'naver_blog_posting/visible_editor.py',
-                   'naver_blog_posting/material_assets.py', 'common/answer_brief.py'),
-    'naver_kin': ('naver_kin/pipeline.py', 'naver_kin/scheduler.py', 'naver_kin/authoring.py'),
+                   'naver_blog_posting/material_assets.py', 'common/answer_brief.py','common/editorial_supervisor.py'),
+    'naver_kin': ('naver_kin/pipeline.py', 'naver_kin/scheduler.py', 'naver_kin/authoring.py','common/editorial_supervisor.py'),
     'threads': ('threads_posting/pipeline.py', 'threads_posting/authoring.py', 'threads_posting/scheduler.py'),
     'legacy_remodel': ('common/content_maintenance.py', 'common/content_improvement.py'),
 }

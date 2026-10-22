@@ -13,8 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / 'server/data/project-autonomy.json'
 STATE = ROOT / 'server/data/project-autonomy-state.json'
 _bound_work = ContextVar('bound_recovery_work', default=None)
-# These entrypoints retain their own enabled/account/slot/quality/submission locks.
-# Never use force, manual-retry, a model-supplied command, or a shifted slot here.
+# Registered entrypoints retain their enabled/account/day/quality/submission locks.
 COMMANDS = {
     'cf_blog': ['cf_posting/pipeline_runner.py', '--catch-up-today-once'],
     'naver_blog': ['naver_blog_posting/pipeline_runner.py', '--catch-up'],
@@ -37,6 +36,8 @@ def run_project_cycle(project):
     if bound:
         if bound['plan']['project'] != project: raise ValueError('Recovery project changed')
         command = ['-m', 'common.project_autonomy', '--resume-work', bound['taskId'], '--plan', bound['planSha256']]
+    elif project in ('cf_blog','naver_blog','naver_kin'):
+        command=['-m','common.editorial_supervisor','--project',project]
     elif work_barrier(project, ROOT):
         return {'ok': False, 'status': 'held', 'reason': 'unfinished_original_work_requires_repair'}
     else:
@@ -102,9 +103,19 @@ def process_project_autonomy_once():
             from common.recovery_evidence import failure_targets
             targets = failure_targets(ROOT, project)
             work = row.get('failureWork')
+            if work and project in ('cf_blog','naver_blog'):
+                from common.editorial_supervisor import verified_replacement
+                replacement=verified_replacement(project,work['target'],ROOT)
+                if replacement:
+                    work.update(status='superseded_by_verified_slot',originalGoalSolved=False,
+                                completedAt=now,verifiedWorkProof=replacement)
+                    row.setdefault('completedWork',[]).append(work)
+                    row['completedWork']=row['completedWork'][-20:]
+                    row.pop('failureWork');row.update(status='replanned_slot_public_verified',nextRunAt=now+60)
+                    continue
             if work:
-                # Keep the exact original request even when the source changes,
-                # the date rolls over, or a repair is held. Never select a new topic.
+                # Keep the original failure and scope history. A separately
+                # supervised preparation may satisfy the same daily slot.
                 row['status'] = 'awaiting_original_work_completion'
                 row['failureBacklogCount'] = len(targets)
                 from common.repair_workflow import _recovery_path, RECOVERY_ROLES
@@ -121,6 +132,18 @@ def process_project_autonomy_once():
                         row['completedWork'] = row['completedWork'][-20:]
                         row.pop('failureWork')
                         row.update(status='original_work_verified', nextRunAt=now+60)
+                    elif (project in ('cf_blog','naver_blog','naver_kin') and
+                            recovery.get('status') in ('evidence_hold','inputs_hold','verification_hold','resume_hold',
+                                                      'held','failed','resume_failed','candidate_rejected',
+                                                      'resume_held','review_rejected','diagnosis_hold','interrupted_hold')
+                            and now>=row.get('nextRunAt',0)):
+                        # A held original task remains tracked. Other safe due slots
+                        # and fresh Jarvis-approved preparations must keep progressing.
+                        pending=STAFF_REQUEST_DIR/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json')
+                        try:pending_state=json.loads(pending.read_bytes()).get('status')
+                        except (OSError,ValueError):pending_state='missing'
+                        if pending_state not in ('queued','acknowledged','awaiting_completion','unknown'):
+                            eligible.append(project)
                 continue
             if request_id:
                 path = STAFF_REQUEST_DIR / (hashlib.sha256(request_id.encode()).hexdigest() + '.json')
@@ -181,16 +204,21 @@ def process_project_autonomy_once():
                 except (OSError, ValueError):
                     continue
                 if (request.get('status') in ('queued', 'acknowledged', 'awaiting_completion', 'unknown')
-                        and any(a.get('tool') == 'run_project_cycle'
-                            or (request.get('status') != 'unknown' and a.get('tool') in
-                                ('advance_project_recovery', 'repair_cf_known_failure'))
-                            for a in request.get('actions', []))):
+                        and any(a.get('tool') == 'run_project_cycle' for a in request.get('actions', []))):
                     active = True
                     break
             if active:
                 continue
             eligible.append(project)
         if eligible:
+            for pending_path in STAFF_REQUEST_DIR.glob('*.json'):
+                try:pending_request=json.loads(pending_path.read_bytes())
+                except (OSError,ValueError):continue
+                if pending_request.get('status') in ('queued','acknowledged','awaiting_completion','unknown') and any(
+                        action.get('tool') == 'run_project_cycle'
+                        for action in pending_request.get('actions',[])):
+                    write(STATE,state)
+                    return False
             project = eligible[0]
             row = rows[project]
             actor = 'doctor' if project == 'legacy_remodel' else 'publi'

@@ -1874,6 +1874,7 @@ def rework_draft(folder, domain, categories, generate, progress, attribution):
 
 
 PRIMARY_HOSTS = ('gov.kr', 'go.kr', 'korea.kr', 'nps.or.kr', 'edu', 'ac.kr', 'support.google.com',
+                 'applyhome.co.kr', 'lh.or.kr', 'khug.or.kr',
                  'developers.google.com', 'learn.microsoft.com', 'support.microsoft.com',
                  'support.apple.com', 'samsung.com', 'nhis.or.kr', 'korail.com',
                  'asus.com', 'dell.com', 'support.hp.com', 'support.lenovo.com', 'blogs.windows.com', 'nhs.uk', 'orthoinfo.aaos.org')
@@ -2363,6 +2364,20 @@ def select_keyword_with_demand(instruction, context, generate, fixed=None, *, re
     if isinstance(idx, bool) or not isinstance(idx, int) or idx not in eligible:
         raise ReviewRequired('Invalid selected candidate index; no fallback or writer handoff: ' + json.dumps(draft, ensure_ascii=False))
     chosen = clean[idx]
+    if any(draft.get(field)!=chosen.get(field) for field in ('mainKeyword','title','topicSlug')):
+        binding_schema=copy.deepcopy(plan_schema)
+        binding_schema['properties']['selectedCandidateIndex']['enum']=[idx]
+        for field in ('mainKeyword','title','topicSlug'):
+            binding_schema['properties'][field]['enum']=[chosen[field]]
+        original_draft=copy.deepcopy(draft)
+        draft=model(json.dumps({'task':'Correct a candidate binding error, not a new topic selection. '
+            'Regenerate the COMPLETE plan for this exact candidate and its reader question. '
+            'The schema fixes the actual selected index, keyword, title and slug. '
+            'Preserve measured demand; do not mix the rejected plan intent or invent sources.',
+            'candidate':chosen,'selectedCandidateIndex':idx,'rejectedPlan':original_draft,
+            'actualDemandEvidence':evidence,'instruction':instruction,'context':context},ensure_ascii=False),binding_schema)
+        if draft.get('selectedCandidateIndex')!=idx:
+            raise ReviewRequired('Candidate binding correction changed the selected index')
     for field in ('mainKeyword', 'title', 'topicSlug'):
         if draft.get(field) != chosen.get(field):
             raise ReviewRequired('Selected candidate identity mismatch (' + field + '); no writer handoff: ' + json.dumps({'candidate': chosen, 'plan': draft}, ensure_ascii=False))
@@ -2804,7 +2819,38 @@ def open_source_fact_continuation(folder, domain, recent):
     return handoff,kw,goal,research,request
 
 
+from common.editorial_supervisor import lessons as editorial_lessons
+
+
 async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
+    from common.editorial_supervisor import authorize_next, dossier, lineage, STEPS
+    approvals=[];current_fixed=fixed
+    continuation=os.environ.get('CF_SOURCE_FACT_FOLDER')
+    try:
+        for attempt in range(4):
+            try:
+                article,handoff=await _draft_agents_once(domain,category,categories,recent,generate,gather,progress,attribution,current_fixed)
+                lineage(handoff.folder,approvals)
+                return article,handoff
+            except (ReviewRequired,AnswerBriefBlocked) as failure:
+                if attempt==3 or (fixed or {}).get('postId'):raise
+                folder=Path(RUN_CONTEXT.get('artifactFolder') or '')
+                if not folder.is_dir() or (folder/'draft.md').exists():raise
+                packet,_=dossier(folder)
+                goal=packet.get('prewriter-acquisition-request.json',{}).get('readerGoal') or packet.get('research.md',{}).get('readerGoal') or {}
+                question=goal.get('question','')
+                plan=authorize_next('cf_blog',domain,folder,STEPS[attempt:],failure,question,category)
+                approvals.append(plan)
+                current_fixed={'mode':'editorial_seed','seedTitle':plan['approval']['searchQuery'],
+                               'explicitReaderQuestion':plan['approval']['readerQuestion'],
+                               'supervisorScope':plan['step']=='scope'}
+                os.environ.pop('CF_SOURCE_FACT_FOLDER',None)
+                progress('researcher',domain+' · 자비스 '+plan['step']+' 승인 · 새 근거 검수',None)
+    finally:
+        if continuation:os.environ['CF_SOURCE_FACT_FOLDER']=continuation
+
+
+async def _draft_agents_once(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
     continuation=os.environ.get('CF_SOURCE_FACT_FOLDER')
     continuation_manifest=None
     if continuation:
@@ -2841,6 +2887,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
                 + ('Select a real current issue supported by observed recency signals.' if demand_mode == 'current_issue' else
                    'Evergreen practical questions may use measured ongoingDemand; latest policy accuracy is distinct from recent search popularity. Do not invent growth or news.'), {}),
             {'domain': domain, 'preferredCategory': category, 'domainSpecialty': domain_specialty, 'registeredCategories': categories,
+             'verifiedRecoveryLessons': editorial_lessons('cf_blog',domain,category=category),
              'publishedCatalog': recent_catalog(recent), 'inventoryScope': 'recent_15_model_context', 'checkedPostCount': len(recent),
              'demandMode': demand_mode, 'explicitReaderQuestion': explicit_request},
             generate, fixed=fixed, require_current_issue=demand_mode == 'current_issue')
@@ -2869,6 +2916,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         if not observations.get('sources'):
             observations = await gather(kw.get('mainKeyword', slug))
         compact_obs = {
+            'verifiedRecoveryLessons': editorial_lessons('cf_blog',domain,category=category),
             'sources': [{
                 'id': s.get('id'),
                 'title': s.get('title'),
@@ -2879,6 +2927,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             } for s in observations.get('sources', [])[:6]],
             'observedSearches': observations.get('searches', [])
         }
+    (folder/'observed-research-sources.json').write_text(json.dumps({'sources':observations.get('sources',[])},ensure_ascii=False),encoding='utf-8')
     packet = observe_prewriting_materials(handoff, goal['question'], generate, attribution, manifest_path=continuation_manifest) if goal else {'materials': [], 'rejectedMaterials': []}
     if goal:packet = await annotate_prewriting_materials(handoff,packet)
     question_context = prepare_question_context(prewriting_question_context(observations, packet['materials'], explicit_request)) if goal else []
@@ -2908,6 +2957,21 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         'publishedTitles':[{'slug':row.get('slug'),'title':row.get('title')} for row in recent]}
     acquisition_round = 1 if continuation else 0
     while True:
+        acquisition_sources=(acquired or {}).get('sources',[]) if continuation else compact_obs.get('acquiredPrimarySources',[])
+        exact_quotes=[]
+        for source in acquisition_sources:
+            body=source.get('text','')
+            if not isinstance(body,str):continue
+            candidates=list(source.get('quotes') or [])+[body[i:i+500] for i in range(0,min(len(body),3000),500)]
+            for quote in candidates[:10]:
+                if isinstance(quote,str) and len(quote.strip())>=20 and quote in body:
+                    exact_quotes.append({'sourceUrl':source['url'],'quote':quote})
+        if exact_quotes:
+            research_schema['properties']['facts']['items']['properties']['quote']['enum']=list(dict.fromkeys(q['quote'] for q in exact_quotes))
+            compact_obs['exactAcquiredQuoteCatalog']=exact_quotes
+        if goal and (fixed or {}).get('supervisorScope'):
+            from common.editorial_supervisor import conceptual_schema
+            research_schema=conceptual_schema(research_schema)
         research_data = generate(agent_prompt('researcher',
             '이번 스키마의 facts,answers,outline,competitorGaps,notes와 answerBrief가 있으면 이를 반환한다. '
             'answerBrief가 요구된 호출은 실제 독자가 읽을 설명과 행동·계산·확인 결과를 먼저 완성한다. '
@@ -2920,7 +2984,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
         raw_facts = research_data.get('facts') if isinstance(research_data.get('facts'), list) else []
         acquired_sources = compact_obs.get('acquiredPrimarySources', [])
         if continuation:
-            acquired_sources = acquired['sources']
+            acquired_sources = (acquired or {}).get('sources',[])
         source_bodies = {row['url']:row['text'] for row in acquired_sources}
         for fact in raw_facts:
             if isinstance(fact,dict) and fact.get('sourceUrl') in source_bodies:
@@ -4806,8 +4870,11 @@ AGENT_MODEL_TIMEOUT_SECONDS = 600
 
 def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
     """Use the selected provider/model; errors never trigger another provider."""
-    from common.llm_settings import load as load_llm_settings
-    provider = load_llm_settings()['active']
+    from common.llm_settings import load as load_llm_settings,get_agent_brain
+    from common.crew_chat_bridge import work_actor_owner
+    owner=work_actor_owner('cf-'+str(RUN_CONTEXT.get('agent') or '')) or 'cf_pipeline'
+    brain=get_agent_brain(owner,load_llm_settings())
+    provider=brain['provider']
     if provider in ('legacy', 'agy', 'freellmapi'):
         raise RuntimeError('Select a configured provider in dashboard settings; legacy automatic routing is disabled')
     if images and provider not in ('codex', 'agy'):
@@ -4826,9 +4893,9 @@ def call_model_json(prompt: str, images=None, response_schema=None) -> dict:
             for key in ('medium', 'question', 'successCondition'):
                 if key in task_properties:
                     task_properties[key] = {**task_properties[key], 'enum':[task[key]]}
-    audit = {}
-    if provider == 'codex' and RUN_CONTEXT.get('agent') in Handoff.agents:
-        audit['reasoning_effort'] = 'medium'
+    audit = {'model_override':brain['model']}
+    if provider == 'codex' and brain.get('reasoningEffort') is not None:
+        audit['reasoning_effort'] = brain['reasoningEffort']
     if images or (provider in ('codex', 'agy') and RUN_CONTEXT.get('agent') in Handoff.agents and RUN_CONTEXT.get('artifactFolder')):
         if not RUN_CONTEXT.get('artifactFolder'):
             raise ReviewRequired('이미지 모델 입력을 보존할 실행 산출물 폴더가 없습니다')
@@ -5409,14 +5476,20 @@ async def process_single_blog(domain, completed_ids, flow_page, prepare_only=Fal
         from common.work_learning import observed_review_summary
         review_summary, review_sources = observed_review_summary([validation_file, output_dir/'review.json', output_dir/'image-plan.json'])
         learning_sources += [path for path in review_sources if path not in learning_sources]
+        from common.editorial_supervisor import solution_evidence
+        recovery_text,recovery_paths=solution_evidence(output_dir)
+        learning_sources+=recovery_paths
         proof = write_verified_work_receipt(output_dir / 'work-learning-receipt.json',
             work_type='verified_work_receipt_v1',
             channel='cf_blog', outcome='public_verified', scope='public_verified', source_agent='publi',
-            evidence_text='CF stored post identity and rendered public content matched the approved article after publication. Observed review metadata (no new improvement is implied): '+review_summary,
+            evidence_text='CF stored post identity and rendered public content matched the approved article after publication. Observed review metadata: '+review_summary+recovery_text,
             artifacts=[{'path':str(path.resolve()), 'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for path in learning_sources],
             checks=[{'type':kind, 'passed':True, 'evidenceRef':str(path.resolve())}
                     for kind,path in zip(('public_identity','public_content'),learning_sources)])
+        from common.editorial_supervisor import learn_public
         learning = record_verified_work(f'cf:{output_dir}:verified-work', proof)
+        learn_public(output_dir,proof,'cf_blog',domain,public_url=public_url,
+                     vault_event_id=f'cf:{output_dir}:verified-work',vault_status=learning.get('state') or ('pending' if learning.get('queued') else 'existing'))
         print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
     except Exception as exc:
         print('[work-learning] CF publication remains verified; learning_error=' + type(exc).__name__, flush=True)
@@ -6722,7 +6795,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
     domain = item["domain"]
     from common.recovery_evidence import work_barrier
     barrier = work_barrier('cf_blog', BASE_DIR.parent)
-    if barrier and (domain != barrier['target']['identity'] or _repair_authorization is not _REPAIR_AUTHORIZATION):
+    if barrier and domain == barrier['target']['identity'] and _repair_authorization is not _REPAIR_AUTHORIZATION:
         log_scheduler('Original failed work is assigned for repair; new publication skipped')
         return False
     if domain not in ALL_DOMAINS:
@@ -6737,7 +6810,7 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
         return False
     if item.get("status") not in ("waiting", "retry_wait", "pending", "failed", "prepared", "review_required"):
         return False
-    if item.get('status') == 'review_required' and not item.get('nextRetryAt'):
+    if item.get('status') == 'review_required' and not item.get('nextRetryAt') and _repair_authorization is not _REPAIR_AUTHORIZATION:
         return False
     if item.get("nextRetryAt"):
         retry = datetime.datetime.fromisoformat(item['nextRetryAt'])
@@ -6762,6 +6835,11 @@ def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_author
                        PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
     environment.pop('CF_REVIEW_REWORK_FOLDER', None)
     environment.pop('CF_REWORK_FOLDER', None)
+    environment.pop('CF_EDITORIAL_ORIGINAL_FOLDER',None)
+    if item.get('editorialOriginalFolder'):
+        origin=(BASE_DIR/str(item['editorialOriginalFolder']).replace('\\','/')).resolve()
+        if origin.is_relative_to((BASE_DIR/'output').resolve()):
+            environment['CF_EDITORIAL_ORIGINAL_FOLDER']=str(origin)
     if item.get('reviewReworkFolder'):
         environment['CF_REVIEW_REWORK_FOLDER'] = item['reviewReworkFolder']
     if item.get('reviewedArticle'):

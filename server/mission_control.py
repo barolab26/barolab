@@ -39,6 +39,9 @@ STAGES.update({'project-recovery-classification':'원작업 복구 담당 배정
     'repair-diagnosis':'코드 수정안 작성','repair-diagnosis-review':'수정안 검수',
     'repair-diagnosis-review-model':'수정안 독립 검수','staff-terminal-response':'업무 결과 보고',
     'handoff-accepted':'다음 직원에 인계',**TOOLS})
+STAGES.update({'editorial-query':'지연 슬롯 추가 리서치','editorial-scope':'근거에 맞춘 범위 재승인',
+               'editorial-pivot':'동일 슬롯 대체 주제 선정','editorial-watchdog':'당일 지연 슬롯 검사',
+               'editorial-renewal':'오래된 초안의 동일 질문 재검수'})
 
 
 def clean(value, limit=110):
@@ -168,7 +171,7 @@ def crew_rows(events, requests, brains, now):
         phase=latest.get('phase')
         fresh=0<=now.timestamp()-at<=180
         state='IDLE'; action='다음 업무 대기'; model=''
-        if fresh and phase in ('started','requested'):
+        if fresh and phase in ('started','requested','progress'):
             model_call=str(latest.get('requestedTo','')).startswith('model:') or latest.get('requestedTo')=='configured-model-runner'
             state='RUNNING' if phase=='started' or model_call else 'CYCLING'
             action=STAGES.get(latest.get('stage'),clean(latest.get('stage')) or '배정 업무 처리')
@@ -177,6 +180,8 @@ def crew_rows(events, requests, brains, now):
             state='ERROR';action=STAGES.get(latest.get('stage'),clean(latest.get('stage')) or '원작업 복구 대기')
         elif latest and phase=='completed':
             action=STAGES.get(latest.get('stage'),clean(latest.get('stage')) or '업무 처리')+' 완료'
+        if str(latest.get('stage','')).startswith('editorial-') and latest.get('outputKind'):
+            action=STAGES.get(latest.get('stage'),'지연 복구')+' · '+clean(latest['outputKind'],90)
         for request in requests:
             live=request.get('latestAction') or {}
             if (request.get('status') in ('acknowledged','awaiting_completion') and live.get('agent')==role
@@ -201,6 +206,8 @@ def activity_log(events, cf, kin, now):
         stage=event.get('stage') or ''
         who=ROLES.get(event.get('ownerAgent') or event.get('who'),'업무')
         summary=who+' · '+STAGES.get(stage,clean(stage,65))
+        if stage.startswith('editorial-') and event.get('outputKind'):
+            summary=who+' · '+clean(event['outputKind'],105)
         if event.get('phase')=='completed' and stage not in ('staff-response','staff-result-response','model-call'):
             completed.append((at,summary+' 완료'))
         if event.get('phase')=='failed':alerts.append((at,summary+' 실패 · 복구 확인 필요'))
@@ -209,7 +216,9 @@ def activity_log(events, cf, kin, now):
             if not isinstance(item,dict):continue
             label='CF Order '+str(item.get('order'))+' · '+clean(item.get('domain'),35)
             if item.get('status')=='published' and valid_url(item.get('publicUrl')):
-                completed.append((epoch(item.get('completedAt')),label+' 발행 완료'))
+                at=item.get('completedAt') or ''
+                if re.fullmatch(r'\d{2}:\d{2}:\d{2}',str(at)):at=day+'T'+at+'+09:00'
+                completed.append((epoch(at),label+' 발행 완료'))
             if item.get('status')=='failed':alerts.append((epoch(item.get('lastErrorAt')),label+' · '+error_reason(item.get('lastError'))))
     if (kin.get('daily') or {}).get('date')==day and kin.get('blockedReason'):
         reasons=kin.get('accountBlockedReasons') or {}
@@ -249,6 +258,12 @@ class Collector:
             {'messages':[e for e in d.get('messages',[])[-600:] if isinstance(e,dict) and e.get('eventType')=='crew_work_event']})
         events=[e for e in room.get('messages',[])[-600:] if isinstance(e,dict) and e.get('eventType')=='crew_work_event'
                 and isinstance(e.get('ts'),(int,float))]
+        local=self.read('server/data/editorial-live-events.json').get('messages',[])
+        merged={}
+        for e in events+[r for r in local if isinstance(r,dict) and isinstance(r.get('ts'),(int,float))]:
+            key=tuple(e.get(k,'') for k in ('taskId','phase','stage','who','outputKind'))
+            if key not in merged or merged[key]['ts']<e['ts']:merged[key]=e
+        events=list(merged.values())
         if tick-self.queue_checked>=15:
             directory=self.root/'server/data/chats/staff-requests'
             try:
@@ -256,7 +271,7 @@ class Collector:
                 self.requests=[self.cache.read(p) for p in paths if not p.is_symlink()]
                 keep={self.root/p for p in ('cf_posting/data/daily_schedule.json','dashboard/naver_automation.json',
                       'dashboard/data/kin.json','server/data/chats/room-main.json','server/data/llm-settings.json',
-                      'server/data/llm-usage.json')}.union(paths)
+                      'server/data/llm-usage.json','server/data/editorial-live-events.json')}.union(paths)
                 for collection in (self.cache.values,self.cache.signatures):
                     for key in list(collection):
                         if key not in keep:collection.pop(key,None)

@@ -410,6 +410,11 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             if matched_rss:
                 was_verified = attempt.get("publicPublicationVerified") is True and bool(attempt.get("publicUrl"))
                 _promote_slot_dict(attempt, matched_rss, a_reserve or f"{pub_date} {slot_key}")
+                try:
+                    from common.editorial_supervisor import learn_naver_public
+                    learn_naver_public(attempt,matched_rss)
+                except (OSError,ValueError,RuntimeError,KeyError):
+                    pass  # Public observation stays intact; no unverified lesson is written.
                 ev_row = _make_evidence_row(acc_name, blog_id, a_topic, a_reserve or f"{pub_date} {slot_key}", matched_rss, pub_date)
                 evidence_by_url[matched_rss["publicUrl"]] = ev_row
                 journal_dirty = True

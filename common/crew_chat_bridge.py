@@ -96,7 +96,7 @@ def _deliver(payload):
 
 STAFF_ACTORS = frozenset(('jarvis','publi','trace','patch','radar','doctor'))
 TOOL_OWNERS = {
-    **{prefix+'-'+role: ('radar' if role == 'keyword-selector' else 'publi')
+    **{prefix+'-'+role: ('radar' if role in ('keyword-selector','researcher') else 'doctor' if role=='reviewer' else 'publi')
        for prefix in ('cf','naver')
        for role in ('keyword-selector','researcher','writer','image-maker','assembler','reviewer')},
     'cf-pipeline':'publi', 'naver-pipeline':'publi',

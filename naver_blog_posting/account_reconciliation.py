@@ -292,7 +292,10 @@ def refresh_current_state(base, account, worker_id=None):
         browser = connect_sync(playwright, f"http://127.0.0.1:{acc['cdp_port']}",
                                *runner.account_browser_paths(acc))
         context = browser.contexts[0]
-        page = context.new_page()
+        page = next((p for p in context.pages if p.url.rstrip('/') in
+                     ('https://www.naver.com','https://blog.naver.com/MyBlog.naver')),None)
+        owned = page is None
+        if owned:page = context.new_page()
         try:
             page.goto('https://www.naver.com/', wait_until='domcontentloaded', timeout=30000)
             page.locator('body').filter(has_text=re.compile(r'(?<![\w.])' + re.escape(account) + r'@naver\.com')).wait_for(timeout=15000)
@@ -300,11 +303,12 @@ def refresh_current_state(base, account, worker_id=None):
             page.wait_for_url(lambda url: urlsplit(str(url)).hostname == 'blog.naver.com'
                               and urlsplit(str(url)).path.strip('/') == BLOGS[account], timeout=15000)
         finally:
-            page.close()
+            if owned:page.close()
         observed = runner.collect_existing_reservations(context, acc, folder)
         proof = {'schema': 'naver-authenticated-reservation-preflight-v1',
                  'checkedAt': runner.now_kst().isoformat(), 'account': account, 'blogId': BLOGS[account],
                  'authenticatedAccount': account, 'ownerBlogId': BLOGS[account], 'identityVerified': True,
+                 'tabOwnership':{'account':account,'task':'current-account-reconciliation','owned':owned,'reused':not owned},
                  'entries': observed['reservations'], 'inventory': observed}
         atomic_text(folder / 'proof.json', json.dumps(proof, ensure_ascii=False, indent=2))
     attempts = runner.effective_planning_attempts(runner.read_journal(base)['attempts'], base)

@@ -3,8 +3,11 @@ from datetime import datetime
 import json
 from pathlib import Path
 import re
+import time
+import hashlib
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
+from contextvars import ContextVar
 
 import requests
 from bs4 import BeautifulSoup
@@ -16,6 +19,7 @@ from common.channel_attribution import (
 )
 from common import codex_cli
 from naver_kin import browser, pipeline
+_renewal_question=ContextVar('kin_same_question_renewal',default=None)
 
 DEFAULT_CATALOG = [
     {'url': 'https://www.must-pick.com/robot-vacuum-obstacle-avoidance-mop-drying-comparison',
@@ -484,7 +488,81 @@ def _primary_discovery_keyword(entry):
                  and set(phrase.split()) - tokens - GENERIC_STOPWORDS), primary)
 
 
+def renew_stale_draft(db,account,qid,slot_id,model):
+    """Re-fetch and independently review the SAME unsent question; never just change its date."""
+    from common.editorial_supervisor import write,event,lineage
+    row=db.execute('SELECT * FROM questions WHERE question_id=?',(qid,)).fetchone()
+    if not row or row['account']!=account or row['state'] not in ('drafted','review_required') or row['send_day']:
+        raise ValueError('Only an unsent draft can be renewed')
+    original=json.loads(row['document'])
+    pipeline.validate_document(original,reviewed=True)
+    if original['attribution']['publicationDate']==pipeline.today_kst() and row['state']=='drafted':return True
+    folder=pipeline.ROOT/'server/data/kin-drafts/renewal'/str(qid)/str(time.time_ns())
+    folder.mkdir(parents=True)
+    write(folder/'original-document.json',original)
+    with pipeline.account_lock(account):
+        token=_renewal_question.set((account,qid,original['article']['url']))
+        try:
+            authored=generate_for_slot(account,slot_id,model,article_catalog=[{
+                'url':original['article']['url'],'title':original['question']['title'],
+                'keywords':[original['question']['title']]}],question_urls=[original['question']['question_url']])
+        finally:_renewal_question.reset(token)
+        revised=authored.get('document')
+        current=db.execute('SELECT * FROM questions WHERE question_id=?',(qid,)).fetchone()
+        if not current or current['state']!=row['state'] or current['send_day'] or current['document']!=row['document']:
+            raise ValueError('Draft changed during independent renewal')
+        if revised is None:
+            # The old document remains archived and in the ledger; only its send eligibility changes.
+            with db:db.execute("UPDATE questions SET state='review_required',updated_at=? WHERE question_id=?",(pipeline.stamp(),qid))
+            write(folder/'renewal-result.json',{'status':'review_required','reason':authored.get('reason'),
+                'oldDocumentSha256':pipeline.digest(original),'submissionAttempted':False})
+            return False
+        pipeline.validate_document(revised,reviewed=True)
+        if (revised['account']!=account or pipeline.question_id(revised['question']['question_url'])!=qid
+                or revised['article']['url']!=original['article']['url']
+                or revised['attribution']['publicationDate']!=pipeline.today_kst()):
+            raise ValueError('Independent renewal changed question, article, account or date')
+        with db:
+            db.execute("UPDATE questions SET state='drafted' WHERE question_id=? AND send_day IS NULL",(qid,))
+            pipeline.import_draft(db,revised)
+        write(folder/'renewal-result.json',{'status':'reviewed_not_submitted',
+            'oldDocumentSha256':pipeline.digest(original),'newDocumentSha256':pipeline.digest(revised),
+            'newReview':revised['review'],'submissionAttempted':False})
+        result_path=folder/'renewal-result.json'
+        approval={'originalQuestion':original['question']['title'],'originalHashes':{
+            'original-document.json':hashlib.sha256((folder/'original-document.json').read_bytes()).hexdigest()},'step':'same_question_renewal','agents':['publi'],
+            'failureReason':'Attribution date is stale','approvedAt':time.time(),
+            'authorizationSource':'host-validated-refetch-and-independent-review',
+            'approval':{'readerQuestion':revised['question']['title'],
+                        'reason':'동일 질문과 소유 글을 다시 읽고 오늘 날짜의 추적 정보·답변을 독립 재검수'},
+            'approvalPath':str(result_path),'approvalSha256':hashlib.sha256(result_path.read_bytes()).hexdigest()}
+        lineage(authored['artifact_dir'],[approval])
+        event('naver_kin',account,'renewal',account+' · 날짜가 지난 초안의 동일 질문·근거 재검수 완료',phase='completed')
+        return True
+
+
 def generate_for_slot(account, slot_id, model, article_catalog=None, question_urls=None):
+    from common.editorial_supervisor import authorize,lineage
+    approvals=[];query=None
+    for attempt in range(3):
+        result=_generate_for_slot_once(account,slot_id,model,article_catalog,question_urls,_supervisor_query=query)
+        if result.get('document') is not None:
+            lineage(result['artifact_dir'],approvals)
+            return result
+        if question_urls is not None or attempt==2:return result
+        if result.get('reason') not in ('no_good_match','no_eligible_candidate','no_keywords',
+                'model_skipped_no_good_match','independent_review_rejected'):return result
+        folder=Path(result.get('artifact_dir') or '')
+        if not result.get('artifact_dir'):
+            folder=pipeline.ROOT/'server/data/kin-drafts/auto'/('supervision-'+str(time.time_ns()))
+            folder.mkdir(parents=True)
+        plan=authorize('naver_kin',account,folder,'query' if attempt==0 else 'pivot',
+                       result.get('review_reason') or result['reason'],category='실제 질문과 검증된 소유 글 연결')
+        approvals.append(plan);query=plan['approval']['searchQuery']
+    return result
+
+
+def _generate_for_slot_once(account, slot_id, model, article_catalog=None, question_urls=None, *, _supervisor_query=None):
     """Return reviewed document or explicit skip; no ledger or publishing mutation."""
     pipeline.account_key(account)
     if question_urls is not None:
@@ -542,6 +620,7 @@ def generate_for_slot(account, slot_id, model, article_catalog=None, question_ur
         for kw in item.get('keywords', []):
             if kw not in keywords and len(keywords) < 8:
                 keywords.append(kw)
+    if _supervisor_query:keywords.insert(0,_supervisor_query)
     keywords = keywords[:8]
     if not keywords:
         return {'document': None, 'reason': 'no_keywords', 'discovered': []}
@@ -555,6 +634,13 @@ def generate_for_slot(account, slot_id, model, article_catalog=None, question_ur
           PRIMARY KEY(question_id,source_hash))''')
         rejected = {row[0] for row in db.execute(
             'SELECT question_id FROM authoring_evaluations WHERE source_hash=?', (source_hash,))}
+        renewal=_renewal_question.get()
+        if renewal and renewal[0]==account and question_urls and len(question_urls)==1 and len(article_catalog or [])==1:
+            target=browser.question_id(question_urls[0])
+            row=db.execute('SELECT state,send_day FROM questions WHERE question_id=? AND account=?',(target,account)).fetchone()
+            if (target==renewal[1] and article_catalog[0]['url']==renewal[2] and row
+                    and row['state'] in ('drafted','review_required') and not row['send_day']):
+                reserved.discard(target);rejected.discard(target)
     search_page = min(3, 1 + len(rejected) // 6)
     if question_urls is None:
         discovered = browser.discover(account, keywords, limit=18, page_number=search_page,

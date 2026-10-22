@@ -355,13 +355,20 @@ def record_verification(db, qid, evidence):
             else:
                 with source.open('x', encoding='utf-8') as output:
                     output.write(serialized)
+            from common.editorial_supervisor import solution_evidence
+            review_file=(document.get('review') or {}).get('evidence_file')
+            recovery_text,recovery_paths=solution_evidence(Path(review_file).parent) if review_file else ('',[])
             proof = write_verified_work_receipt(folder / 'work-receipt.json',
                 work_type='verified_work_receipt_v1',
                 channel='naver_kin', outcome='public_answer_verified', scope='public_answer_verified', source_agent='publi',
-                evidence_text='KnowledgeIn exact account, question, answer identity, answer text hash and outbound URL passed public verification.',
-                artifacts=[{'path':str(source.resolve()),'sha256':hashlib.sha256(source.read_bytes()).hexdigest()}],
+                evidence_text='KnowledgeIn exact account, question, answer identity, answer text hash and outbound URL passed public verification.'+recovery_text,
+                artifacts=[{'path':str(p.resolve()),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in [source]+recovery_paths],
                 checks=[{'type':kind,'passed':True,'evidenceRef':str(source.resolve())} for kind in ('public_identity','public_content')])
+            from common.editorial_supervisor import learn_public
+            review_file=(document.get('review') or {}).get('evidence_file')
             learning = record_verified_work(f'kin:{qid}:{row["answer_id"]}:verified-work', proof)
+            if review_file:learn_public(Path(review_file).parent,proof,'naver_kin',document['account'],public_url=verified_url or row['answer_url'],
+                vault_event_id=f'kin:{qid}:{row["answer_id"]}:verified-work',vault_status=learning.get('state') or ('pending' if learning.get('queued') else 'existing'))
             print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
         except Exception as exc:
             import logging

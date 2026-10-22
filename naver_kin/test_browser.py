@@ -58,6 +58,33 @@ class BrowserEvidenceTests(unittest.TestCase):
         self.assertTrue(result['complete'])
         self.assertEqual(result['answer_ids'], [])
 
+    def test_question_ownership_loads_observed_more_button_before_proving_absence(self):
+        from unittest.mock import MagicMock, patch
+        page = MagicMock()
+        page.context.request.get.return_value.status = 200
+        page.context.request.get.return_value.url = 'https://kin.naver.com/qna/detail.naver?docId=486320125'
+        page.context.request.get.return_value.text.return_value = self.ownership_html(total=2, loaded=1)
+        page.content.side_effect = [self.ownership_html(total=2, loaded=1), self.ownership_html()]
+        button = MagicMock(); button.is_visible.return_value = True; button.is_enabled.return_value = True
+        page.locator.return_value.all.return_value = [button]
+        with patch.object(browser, '_read'), patch.object(browser, '_check_service_state'):
+            result = browser._question_ownership(page, 'stone0747', page.context.request.get.return_value.url)
+        self.assertTrue(result['complete'])
+        button.click.assert_called_once()
+        page.wait_for_function.assert_called_once()
+
+    def test_missing_more_button_keeps_question_ownership_unknown(self):
+        from unittest.mock import MagicMock, patch
+        page = MagicMock()
+        page.context.request.get.return_value.status = 200
+        page.context.request.get.return_value.url = 'https://kin.naver.com/qna/detail.naver?docId=486320125'
+        html = self.ownership_html(total=2, loaded=1)
+        page.context.request.get.return_value.text.return_value = html
+        page.content.return_value = html; page.locator.return_value.all.return_value = []
+        with patch.object(browser, '_read'):
+            result = browser._question_ownership(page, 'stone0747', page.context.request.get.return_value.url)
+        self.assertFalse(result['complete'])
+
     def test_partial_question_cannot_prove_absence(self):
         result = browser._parse_question_ownership(self.ownership_html(total=100,loaded=5), 'stone0747', '486320125')
         self.assertFalse(result['known'])

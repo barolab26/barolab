@@ -327,7 +327,27 @@ def _question_ownership(page, account, url):
     response = page.context.request.get(url, timeout=15000)
     if response.status != 200 or question_id(response.url) != identifier:
         raise RuntimeError('Authenticated question ownership response unavailable')
-    return _parse_question_ownership(response.text(), account, identifier)
+    result = _parse_question_ownership(response.text(), account, identifier)
+    if result.get('reason') != 'question_answers_partially_loaded' or result.get('answer_ids'):
+        return result
+    # The observed page initially renders five answers. Read its own more button,
+    # never infer absence from account history or a registration control.
+    _read(page, url)
+    for _ in range(20):
+        result = _parse_question_ownership(page.content(), account, identifier)
+        if result.get('reason') != 'question_answers_partially_loaded' or result.get('answer_ids'):
+            return result
+        previous = result['loaded_answers']
+        buttons = page.locator('#nextPageButton, #lastNextPageButton')
+        visible = [button for button in buttons.all() if button.is_visible() and button.is_enabled()]
+        if len(visible) != 1:
+            return result
+        with ego_action('click', 'kin-answer-more'):
+            visible[0].click()
+        page.wait_for_function("count => document.querySelectorAll('.answerArea[id^=answer_]').length > count",
+                               arg=previous, timeout=15000)
+        _check_service_state(page)
+    return _parse_question_ownership(page.content(), account, identifier)
 
 
 def _read(page, url):

@@ -2349,14 +2349,17 @@ CONTENT_REASONING_ROLES = frozenset(('researcher', 'writer', 'image-maker', 'ass
 
 
 def generate_content_json(prompt, role, observer=None, **kwargs):
-    """Keep the configured provider/model; request high only on the Codex adapter."""
-    from common.llm_settings import load as load_settings
-    provider = load_settings()['active']
+    """Use the assigned staff provider, model and optional reasoning effort."""
+    from common.llm_settings import load as load_settings,get_agent_brain
+    from common.crew_chat_bridge import work_actor_owner
+    brain=get_agent_brain(work_actor_owner('naver-'+role) or 'naver_pipeline',load_settings())
+    provider=brain['provider']
     if kwargs.get('images') and provider not in ('codex', 'agy'):
         raise RuntimeError('Configured provider cannot inspect attached pixels; actual image review required')
-    effort = 'high' if provider == 'codex' and role in CONTENT_REASONING_ROLES else None
+    effort = brain.get('reasoningEffort') if provider == 'codex' else None
     options = dict(kwargs)
     options['provider'] = provider
+    options.setdefault('model_override',brain['model'])
     if effort:
         options['reasoning_effort'] = effort
     def observe(selected_provider, model, state, **event):
@@ -3586,7 +3589,7 @@ def require_content_handoff(folder, account):
 def is_primary_source_host(host):
     host = str(host or '').casefold()
     # Only Microsoft-authored documentation hosts; answers/techcommunity are not approved.
-    if host in ('support.microsoft.com', 'learn.microsoft.com', 'support.google.com'):
+    if host in ('support.microsoft.com', 'learn.microsoft.com', 'support.google.com','applyhome.co.kr','www.applyhome.co.kr'):
         return True
     existing_brands = ('samsung.com', 'samsungsvc.co.kr', 'lg.com', 'uniqlo.com', 'dedra.co.kr', 'kolonmall.com')
     return host == 'gov.kr' or host.endswith('.gov.kr') or host.endswith(('.go.kr', '.or.kr', '.gov')) or any(host == h or host.endswith('.' + h) for h in existing_brands)
@@ -5552,6 +5555,9 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
             except ReaderTaskUnfulfilled as failure:
                 if review_folder:raise
                 result=_reselect_failed_preparation(account_key,failure.folder,failure)
+            except MaterialRequired as failure:
+                if review_folder or RUN_OPTIONS.get('prepared_dir') or RUN_OPTIONS.get('revision_target'):raise
+                result=_supervise_prewriting(account_key,override_strategy_id,publication_attempt,attribution_slot,failure)
             except RuntimeError as failure:
                 if isinstance(failure, MaterialRequired) or review_folder:
                     raise
@@ -5562,7 +5568,37 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
             raise
         memory_event(session_id + ':ended', 'pipeline_preparation_ended', 'Naver preparation ended; reservation and public publication are separate.',
                      session_id=session_id, evidence={'account': account_key})
+        from common.editorial_supervisor import lineage
+        lineage(result[1],RUN_OPTIONS.get('_editorial_approvals',[]))
         return result
+
+
+def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
+    from common.editorial_supervisor import authorize_next,dossier,lineage,STEPS
+    saved=dict(RUN_OPTIONS);approvals=list(saved.get('_editorial_approvals',[]))
+    try:
+        for index,step in enumerate(STEPS):
+            folder=Path(RUN_OPTIONS.get('_active_preparation_folder') or '')
+            if not folder.is_dir():raise failure
+            packet,_=dossier(folder)
+            goal=(packet.get('keyword-selector.json',{}).get('readerGoal') or
+                  packet.get('required-materials.json',{}).get('readerGoal') or {})
+            plan=authorize_next('naver_blog',account,folder,STEPS[index:],failure,goal.get('question',''))
+            approvals.append(plan)
+            evidence_folder=folder/('jarvis-'+step+'-evidence');evidence_folder.mkdir(exist_ok=True)
+            packet=collect_evidence(account,plan['approval']['searchQuery'])
+            atomic_json(evidence_folder/'keyword-evidence.json',packet)
+            RUN_OPTIONS.update(topic_seed=plan['approval']['readerQuestion'],main_keyword=None,
+                               allow_retry_handoff=False,evidence_dir=str(evidence_folder),
+                               _editorial_conceptual_scope=plan['step']=='scope')
+            try:
+                result=_prepare_content(account,strategy,str(evidence_folder),publication_attempt,slot)
+                lineage(result[1],approvals)
+                return result
+            except MaterialRequired as exc:failure=exc
+        raise failure
+    finally:
+        RUN_OPTIONS.clear();RUN_OPTIONS.update(saved)
 
 
 def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, publication_attempt=False, attribution_slot=None, review_folder=None):
@@ -5820,6 +5856,8 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
             context['materialObservations'] = material_context(materials)
             context['materialPixelObservations'] = observations
         inputs = researcher_input_context(context,results) if role == 'researcher' else {**context, 'priorResults': results}
+        from common.editorial_supervisor import lessons
+        inputs['verifiedRecoveryLessons']=lessons('naver_blog',account_key)
         if role == 'researcher':
             inputs['sourceScope'] = {'sourceUrls':[source['url'] for source in context['sources']],
                 'mode':'actual_observations_candidate' if not context['sources'] else 'fetched_sources',
@@ -5931,6 +5969,9 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                 prompt, schema = supplied_capture_image_contract(prompt, schema, materials, results['writer']['readerTask']['requiredMaterialIds'])
             if role == 'researcher':
                 schema['properties']['answerBrief'] = answer_brief_schema(context['readerGoal'], context['questionContext'])
+                if RUN_OPTIONS.get('_editorial_conceptual_scope'):
+                    from common.editorial_supervisor import conceptual_schema
+                    schema=conceptual_schema(schema)
             if role == 'reviewer':
                 schema['properties']['answerAudit'] = answer_audit_schema(inputs['titleAnswerInputs'])
             if role == 'writer':

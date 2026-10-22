@@ -123,7 +123,14 @@ def validate_config(config):
     interval_min = config.get('intervalMinutes', 20)
     if config.get('mode')!='alternating_interval' or not (15 <= int(interval_min) <= 60) or config.get('pollMinutes')!=5:
         raise ValueError('Only the approved alternating 15-60 minute operating policy is permitted')
-    if config.get('operationDailyCap') not in (10, 20, None) or config.get('operationAccountDailyCap') not in (5, 10, None):
+    recovery=config.get('editorialRecoveryEnabled') is True
+    global_rounds=config.get('operationDailyCap')
+    account_rounds=config.get('operationAccountDailyCap')
+    if recovery:
+        if (type(global_rounds) is not int or not config['globalDailyCap']<=global_rounds<=3*config['globalDailyCap']
+                or type(account_rounds) is not int or not config['accountDailyCap']<=account_rounds<=3*config['accountDailyCap']):
+            raise ValueError('Editorial recovery allows at most three research rounds per submission target')
+    elif global_rounds not in (10,20,None) or account_rounds not in (5,10,None):
         raise ValueError('Model-driven operating rounds must be bounded to 10/20 global and 5/10 per account daily')
     if not isinstance(config.get('model'),str) or not config['model']:
         raise ValueError('Explicit subscribed model required')
@@ -357,6 +364,12 @@ def tick(config, now=None, dry_run=False, force=False):
                         "SELECT question_id, document FROM questions WHERE account=? AND state='drafted' ORDER BY created_at DESC LIMIT 1",
                         (account,),
                     ).fetchone()
+                    if existing_draft:
+                        document=json.loads(existing_draft['document'])
+                        if document['attribution']['publicationDate']!=p.today_kst():
+                            from naver_kin.authoring import renew_stale_draft
+                            if not renew_stale_draft(db,account,existing_draft['question_id'],run_id,config['model']):
+                                existing_draft=None
                     if existing_draft:
                         qid = existing_draft['question_id']
                         discovered = 18
