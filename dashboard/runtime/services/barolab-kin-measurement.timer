@@ -1,0 +1,10 @@
+[Unit]
+Description=BaroLab KnowledgeIn read-only measurement
+
+[Timer]
+OnCalendar=*-*-* 20:30:00 Asia/Seoul
+Persistent=false
+Unit=barolab-kin-measurement.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,191 @@
+{
+  "date": "2026-10-23",
+  "items": [
+    {
+      "order": 1,
+      "id": 1,
+      "name": "머스트굿 정책브리프",
+      "color": "#0B3B8C",
+      "icon": "G",
+      "category": "정부지원금",
+      "domain": "must-good.com",
+      "scheduledTime": "19:30",
+      "status": "failed",
+      "artifactFolder": "output/basic-must-good.com-9775e17d79",
+      "attemptStartedAt": "2026-10-22T15:22:00.722166+00:00",
+      "attemptCount": 2,
+      "totalAttempts": 2,
+      "currentStage": 1,
+      "stageName": "키워드·주제",
+      "progressPct": 10,
+      "detailMessage": "당일 슬롯과 보존 원고 확인",
+      "lastError": "NameError: name 'STATE_JSON' is not defined",
+      "nextRetryAt": "2026-10-23T00:27:00.758655+09:00"
+    },
+    {
+      "order": 2,
+      "id": 2,
+      "name": "바로노트 핀테크랩",
+      "color": "#0369A1",
+      "icon": "B",
+      "category": "국민·기초연금",
+      "domain": "baronote.kr",
+      "scheduledTime": "10:20",
+      "status": "waiting"
+    },
+    {
+      "order": 3,
+      "id": 9,
+      "name": "머스트조이 컬처매거진",
+      "color": "#C2410C",
+      "icon": "Y",
+      "category": "특산물·미식가이드",
+      "domain": "must-joy.com",
+      "scheduledTime": "11:10",
+      "status": "waiting"
+    },
+    {
+      "order": 4,
+      "id": 8,
+      "name": "맥스노트 AI워크",
+      "color": "#B45309",
+      "icon": "X",
+      "category": "생산성도구",
+      "domain": "maxnote.kr",
+      "scheduledTime": "20:20",
+      "status": "waiting"
+    },
+    {
+      "order": 5,
+      "id": 16,
+      "name": "조이노트 펫앤가든",
+      "color": "#047857",
+      "icon": "O",
+      "category": "펫보험·진료비비교",
+      "domain": "joynote.kr",
+      "scheduledTime": "17:00",
+      "status": "waiting"
+    },
+    {
+      "order": 6,
+      "id": 7,
+      "name": "헬스콕스 메디컬가이드",
+      "color": "#0F766E",
+      "icon": "H",
+      "category": "국가건강검진",
+      "domain": "healthcox.com",
+      "scheduledTime": "12:00",
+      "status": "waiting"
+    },
+    {
+      "order": 7,
+      "id": 4,
+      "name": "탑노트 테크독스",
+      "color": "#312E81",
+      "icon": "T",
+      "category": "윈도우·맥 설정",
+      "domain": "topnote.kr",
+      "scheduledTime": "12:50",
+      "status": "waiting"
+    },
+    {
+      "order": 8,
+      "id": 14,
+      "name": "놀플레이스 주말나들이",
+      "color": "#9A3412",
+      "icon": "N",
+      "category": "수목원·테마파크",
+      "domain": "nolplace.com",
+      "scheduledTime": "13:40",
+      "status": "waiting"
+    },
+    {
+      "order": 9,
+      "id": 10,
+      "name": "트립마블 트래블저널",
+      "color": "#1B4332",
+      "icon": "V",
+      "category": "국내외여행",
+      "domain": "tripmarvel.com",
+      "scheduledTime": "21:10",
+      "status": "waiting"
+    },
+    {
+      "order": 10,
+      "id": 13,
+      "name": "데이노트 살림백과",
+      "color": "#4338CA",
+      "icon": "D",
+      "category": "살림정보",
+      "domain": "daynote.kr",
+      "scheduledTime": "18:40",
+      "status": "waiting"
+    },
+    {
+      "order": 11,
+      "id": 6,
+      "name": "스마일노트 시니어웰니스",
+      "color": "#15803D",
+      "icon": "S",
+      "category": "시니어건강·운동",
+      "domain": "smilenote.kr",
+      "scheduledTime": "17:50",
+      "status": "waiting"
+    },
+    {
+      "order": 12,
+      "id": 12,
+      "name": "우리노트 부동산경제",
+      "color": "#115E59",
+      "icon": "W",
+      "category": "청약·분양자문",
+      "domain": "woorinote.kr",
+      "scheduledTime": "14:30",
+      "status": "waiting"
+    },
+    {
+      "order": 13,
+      "id": 5,
+      "name": "메가노트 모빌리티",
+      "color": "#5B21B6",
+      "icon": "M",
+      "category": "생활정보",
+      "domain": "meganote.kr",
+      "scheduledTime": "22:00",
+      "status": "waiting"
+    },
+    {
+      "order": 14,
+      "id": 3,
+      "name": "저스트인포 법률·행정",
+      "color": "#1E293B",
+      "icon": "J",
+      "category": "생활법률·과태료",
+      "domain": "justinfo.co.kr",
+      "scheduledTime": "15:20",
+      "status": "waiting"
+    },
+    {
+      "order": 15,
+      "id": 15,
+      "name": "소울노트 자격·커리어",
+      "color": "#4C1D95",
+      "icon": "L",
+      "category": "내일배움카드·국비",
+      "domain": "soulnote.kr",
+      "scheduledTime": "09:30",
+      "status": "waiting"
+    },
+    {
+      "order": 16,
+      "id": 11,
+      "name": "머스트픽 컨슈머리포트",
+      "color": "#0D1B2A",
+      "icon": "P",
+      "category": "대형·주방가전",
+      "domain": "must-pick.com",
+      "scheduledTime": "16:10",
+      "status": "waiting"
+    }
+  ]
+}

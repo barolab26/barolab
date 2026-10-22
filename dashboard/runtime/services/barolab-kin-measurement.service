@@ -1,0 +1,13 @@
+[Unit]
+Description=BaroLab KnowledgeIn read-only measurement
+After=network-online.target
+
+[Service]
+Environment=PYTHONDONTWRITEBYTECODE=1
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=DISPLAY=:10
+Environment=PYTHONUNBUFFERED=1
+ExecStart="/home/baro7/.venvs/barolab/bin/python3" -u -B -X utf8 -m naver_kin.posting --measure --scheduled
+TimeoutStartSec=55min
+UMask=0077

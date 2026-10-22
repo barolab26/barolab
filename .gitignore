@@ -104,3 +104,16 @@ server/data/repair-workflows/
 server/data/project-incidents/
 server/data/project-monitor-state.json
 server/data/project-monitor-observation.json
+
+# Consolidated private runtime stores
+dashboard/data/chats/
+dashboard/data/maintenance-backups/
+dashboard/data/tmp_sanitized/
+dashboard/data/control-jobs/
+dashboard/data/kin-drafts/
+dashboard/data/threads-drafts/
+dashboard/data/repair-workflows/
+dashboard/data/project-incidents/
+dashboard/data/agent-routing/
+
+dashboard/data/skills/ui-ux-pro-max/

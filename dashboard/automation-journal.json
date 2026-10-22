@@ -18,7 +18,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224438209742",
       "publishedAt": "2026-10-11T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -60,7 +60,7 @@
       "status": "done",
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "matchedParagraphs": 0,
       "substantiveParagraphs": 0,
@@ -87,7 +87,7 @@
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "status": "done",
       "state": "verified_public",
       "publicBodyMatched": null,
@@ -6510,7 +6510,7 @@
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "status": "done",
       "state": "verified_public",
       "publicBodyMatched": null,
@@ -6521,7 +6521,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "5a30317fda3d51fff83a2dd7f3e586b3c2ec7b292b2f6637e89b92ce15eee71a",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -6658,7 +6658,7 @@
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "reservationVerificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "state": "verified_public",
       "publicVerificationEvidence": {
@@ -6686,7 +6686,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "1596718655613b97fab8f9f85f3c5d843ce80dd5950f5a0a97cc3e24c96bbf4e",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -6743,7 +6743,7 @@
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "reservationVerificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "state": "verified_public",
       "publicVerificationEvidence": {
@@ -6771,7 +6771,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "8022d87ecefe03cceb608f2dfbad5a68f1a4a51f80140b5394ed287835254eaf",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -6820,7 +6820,7 @@
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "status": "done",
       "state": "verified_public",
       "publicBodyMatched": null,
@@ -6831,7 +6831,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "bd94592bd465d3924d63de58a1d8eb79117f5f2b57d626ba2e7de99b69f1b582",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -6936,7 +6936,7 @@
       "publicationStatus": "verified_public",
       "publicPublicationVerified": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "status": "done",
       "state": "verified_public",
       "publicBodyMatched": null,
@@ -6947,7 +6947,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "e31988de8acbc41b652c2706ea4c92e03f13e82ef0a03f1e46a51694971b674b",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -6973,7 +6973,7 @@
       "approvedDocumentSha256": "bfd87d7dfbd8ac511dbcde0bed68de5b65d142c636d704e88b7ef763e463c24d",
       "reconciledExistingReservation": true,
       "publicVerificationSource": "Naver public RSS exact title and KST day + public body and 3 photographs",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "status": "done",
       "state": "verified_public",
       "publicBodyMatched": null,
@@ -6984,7 +6984,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "cbe1ef3f8c67f1b1be6ad7726229035db0562d5e37fe55d007a6939bddd8b4e5",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -9109,7 +9109,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224441279289",
       "publishedAt": "2026-10-14T13:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "stone0747",
         "blogId": "stone0747",
@@ -9135,7 +9135,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "57dc5f005c04e4e999b4ae7c45578dfc242c6ce250ce240bf6becfc451972444",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -9157,7 +9157,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224441284844",
       "publishedAt": "2026-10-14T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -9166,7 +9166,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "24e4e9493d2fcdda5d3f7d741a3ef529909b7d3372759531a9bf37fdd2a9afb9",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -9188,7 +9188,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224441290258",
       "publishedAt": "2026-10-14T20:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -9197,7 +9197,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "61fe556e1155802fe4e8dab4077fee784ecb72dd6f032fb09eb476db4f8dd88e",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -9231,7 +9231,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224441298394",
       "publishedAt": "2026-10-14T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -9240,7 +9240,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "374491606b4bc7dbaf4dc4310ba61e8b4d9f824917d5f91a14f7526693d9d99b",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -9358,7 +9358,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224441317545",
       "publishedAt": "2026-10-14T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -9367,7 +9367,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "a830580aba7899de59c82a0a674fac086180339fff29a9591c517230a20484a2",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -9413,7 +9413,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224441326290",
       "publishedAt": "2026-10-14T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -9422,7 +9422,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "167138c8f4e9eccb0bae323c76ec801b974b4a576ef58e9c68d331ba3f72832d",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -10111,7 +10111,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224441851449",
       "publishedAt": "2026-10-15T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "soultin",
         "blogId": "mustpickinfo",
@@ -10142,7 +10142,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "693d70b403133a334195fe500afcb7d9ff183e6da3feb141d937bd97fdbd18b4",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -10167,7 +10167,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224441852878",
       "publishedAt": "2026-10-15T20:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "soul5373",
         "blogId": "mustinfo",
@@ -10198,7 +10198,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "fc55c748fdb50e9b12c9131dbf62d34b6aa2a9c69ab27039adfa8f31b35a31c3",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -10223,7 +10223,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224441854330",
       "publishedAt": "2026-10-15T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "yoon_master",
         "blogId": "yoonviews",
@@ -10254,7 +10254,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "d20b0e077310784fce248cb4a1c5def38cab9132f5d6cbd4974ea08eaa023c23",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -10343,7 +10343,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224441871028",
       "publishedAt": "2026-10-15T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "adinfo0905",
         "blogId": "adinfo0905",
@@ -10374,7 +10374,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "1fd61906374cf229aa32030fc79c193cb6f78d1a484c181144fc76090fb7d0c9",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -10494,7 +10494,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224441896004",
       "publishedAt": "2026-10-15T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "stone0747",
         "blogId": "stone0747",
@@ -10525,7 +10525,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "c3d75f9689388b78e144e8c8f3168b071c35809a1959dec0fb7f4b546f24889d",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -10566,7 +10566,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224441905675",
       "publishedAt": "2026-10-15T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "stone0747",
         "blogId": "stone0747",
@@ -10597,7 +10597,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "08fadcfadbf17c7a9609737090bbe2157f42a01e2f882711627e43c8c402e51c",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -10638,7 +10638,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224441915125",
       "publishedAt": "2026-10-15T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicVerificationEvidence": {
         "account": "adinfo0905",
         "blogId": "adinfo0905",
@@ -10669,7 +10669,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "cab9f36e7a257f53dc13856d470492c8d0ad40f4c69778acab9d19d98b612b72",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -10758,7 +10758,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224442967830",
       "publishedAt": "2026-10-16T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -10767,7 +10767,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "ff78ba7a28d1cfc8ebb3dd249a0a1ac3bb44062671d637759eeef9d1d44d18f3",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -11634,7 +11634,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224443377828",
       "publishedAt": "2026-10-16T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -11643,7 +11643,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "080038c033078851a7482168162fbd4aa962e984f4a7f31c817ef98eb73a9036",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -11845,7 +11845,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224443413732",
       "publishedAt": "2026-10-16T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -11854,7 +11854,7 @@
       "bodyVerificationStatus": "unknown",
       "publicHttpStatus": 200,
       "publicBodySha256": "06225871f8ebce9f5200c18aebfaffca2805f6cd1a47256098e6147f5d88e823",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -13127,7 +13127,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224443745785",
       "publishedAt": "2026-10-16T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -13139,7 +13139,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -13179,7 +13179,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224443753699",
       "publishedAt": "2026-10-16T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -13191,7 +13191,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -13366,7 +13366,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224443813788",
       "publishedAt": "2026-10-16T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -13378,7 +13378,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -13418,7 +13418,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224443828057",
       "publishedAt": "2026-10-16T20:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -13430,7 +13430,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -13470,7 +13470,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224443840873",
       "publishedAt": "2026-10-16T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -13482,7 +13482,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -18898,7 +18898,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224444548473",
       "publishedAt": "2026-10-17T12:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -18910,7 +18910,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -19082,7 +19082,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224444605692",
       "publishedAt": "2026-10-17T20:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19094,7 +19094,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -19134,7 +19134,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224444621331",
       "publishedAt": "2026-10-17T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19146,7 +19146,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -19186,7 +19186,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224444633747",
       "publishedAt": "2026-10-17T14:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19198,7 +19198,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -19238,7 +19238,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224444641640",
       "publishedAt": "2026-10-17T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19250,7 +19250,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -19290,7 +19290,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224444650408",
       "publishedAt": "2026-10-17T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19302,7 +19302,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -19606,7 +19606,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224444980165",
       "publishedAt": "2026-10-18T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19618,7 +19618,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -19658,7 +19658,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224444994571",
       "publishedAt": "2026-10-18T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19670,7 +19670,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -19710,7 +19710,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224445011309",
       "publishedAt": "2026-10-18T11:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19722,7 +19722,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -19762,7 +19762,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224445028097",
       "publishedAt": "2026-10-18T12:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19774,7 +19774,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -19814,7 +19814,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224445042541",
       "publishedAt": "2026-10-18T12:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19826,7 +19826,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -19866,7 +19866,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224445056097",
       "publishedAt": "2026-10-18T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19878,7 +19878,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -19951,7 +19951,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224445070650",
       "publishedAt": "2026-10-18T20:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -19963,7 +19963,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -20036,7 +20036,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224445096845",
       "publishedAt": "2026-10-18T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20048,7 +20048,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -20088,7 +20088,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224445246586",
       "publishedAt": "2026-10-19T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20100,7 +20100,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -20140,7 +20140,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224445254528",
       "publishedAt": "2026-10-19T18:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20152,7 +20152,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -20192,7 +20192,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224445266096",
       "publishedAt": "2026-10-19T11:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20204,7 +20204,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soul5373",
@@ -20244,7 +20244,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224445274707",
       "publishedAt": "2026-10-19T12:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20256,7 +20256,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "soultin",
@@ -20296,7 +20296,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustpickinfo/224445283525",
       "publishedAt": "2026-10-19T19:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20308,7 +20308,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -20447,7 +20447,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/mustinfo/224445303733",
       "publishedAt": "2026-10-19T20:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20459,7 +20459,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -20565,7 +20565,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224445327040",
       "publishedAt": "2026-10-19T20:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20577,7 +20577,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "yoon_master",
@@ -20650,7 +20650,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/yoonviews/224445345620",
       "publishedAt": "2026-10-19T12:30:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20662,7 +20662,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -20702,7 +20702,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224445445639",
       "publishedAt": "2026-10-18T14:40:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20714,7 +20714,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -20754,7 +20754,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224445463966",
       "publishedAt": "2026-10-18T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20766,7 +20766,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -20806,7 +20806,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224445477738",
       "publishedAt": "2026-10-19T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20818,7 +20818,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "stone0747",
@@ -20858,7 +20858,7 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224445494615",
       "publishedAt": "2026-10-19T19:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
       "publicBodyMatched": null,
       "bodyParagraphsMatch": null,
       "matchedParagraphs": 0,
@@ -20870,7 +20870,7 @@
       "savedParagraphsIncludingHashtags": null,
       "hashtagsExcludedFromBodyMatch": true,
       "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json",
-      "bodyVerificationReason": "FileNotFoundError"
+      "bodyVerificationReason": "saved_document_unavailable"
     },
     {
       "account": "adinfo0905",
@@ -20910,13 +20910,13 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/adinfo0905/224446163793",
       "publishedAt": "2026-10-20T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
-      "publicBodyMatched": null,
-      "bodyParagraphsMatch": null,
-      "matchedParagraphs": 0,
-      "substantiveParagraphs": 0,
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 20,
+      "substantiveParagraphs": 20,
       "tagsVerified": null,
-      "bodyVerificationStatus": "unknown",
+      "bodyVerificationStatus": "matched",
       "publicHttpStatus": 200,
       "publicBodySha256": "39f4b9df33aca0f944ce1f6c37af5600cde3dc19b09fb7f98e3d81e22ce73ea8",
       "savedParagraphsIncludingHashtags": null,
@@ -20962,13 +20962,13 @@
       "publicPublicationVerified": true,
       "publicUrl": "https://blog.naver.com/stone0747/224446171401",
       "publishedAt": "2026-10-20T11:00:00+09:00",
-      "publicVerifiedAt": "2026-10-20T13:55:06.565089+09:00",
-      "publicBodyMatched": null,
-      "bodyParagraphsMatch": null,
-      "matchedParagraphs": 0,
-      "substantiveParagraphs": 0,
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 12,
+      "substantiveParagraphs": 12,
       "tagsVerified": null,
-      "bodyVerificationStatus": "unknown",
+      "bodyVerificationStatus": "matched",
       "publicHttpStatus": 200,
       "publicBodySha256": "b76ec3a9df96d577767984ffa04f570b1a4ce0d488f3638510761c6dbca0d569",
       "savedParagraphsIncludingHashtags": null,
@@ -21007,7 +21007,26 @@
       "submissionStarted": true,
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-19T08:38:29.476489+09:00",
-      "blogId": "adinfo0905"
+      "blogId": "adinfo0905",
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicPublicationVerified": true,
+      "publicUrl": "https://blog.naver.com/adinfo0905/224446179709",
+      "publishedAt": "2026-10-20T19:00:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 16,
+      "substantiveParagraphs": 16,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "9e79b35a58f529cef2d1af5b6d174dc5870d20fde6159117f4b21e9d5c2d369c",
+      "bodyVerificationReason": "FileNotFoundError",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "stone0747",
@@ -21078,7 +21097,26 @@
       "submissionStarted": true,
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-19T08:52:22.534208+09:00",
-      "blogId": "stone0747"
+      "blogId": "stone0747",
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicPublicationVerified": true,
+      "publicUrl": "https://blog.naver.com/stone0747/224446189808",
+      "publishedAt": "2026-10-20T19:00:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 23,
+      "substantiveParagraphs": 23,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "a16691c83e9dc24fa4ef20fba864a189d8330e0aef1d1a37c64a51c98a3abb98",
+      "bodyVerificationReason": "FileNotFoundError",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "soultin",
@@ -21111,7 +21149,26 @@
       "submissionStarted": true,
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-19T09:02:02.964587+09:00",
-      "blogId": "mustpickinfo"
+      "blogId": "mustpickinfo",
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicPublicationVerified": true,
+      "publicUrl": "https://blog.naver.com/mustpickinfo/224446197521",
+      "publishedAt": "2026-10-20T19:30:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 19,
+      "substantiveParagraphs": 19,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "f5ec80d0588a1089338fc77358edddda5185b96b25b4db3026c0b0ce56ddd1d7",
+      "bodyVerificationReason": "FileNotFoundError",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "soul5373",
@@ -21144,7 +21201,26 @@
       "submissionStarted": true,
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-19T09:12:02.303439+09:00",
-      "blogId": "mustinfo"
+      "blogId": "mustinfo",
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicPublicationVerified": true,
+      "publicUrl": "https://blog.naver.com/mustinfo/224446205947",
+      "publishedAt": "2026-10-20T20:00:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 15,
+      "substantiveParagraphs": 15,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "419dc8eb73fbe99cfdd427a3b3c41014901bab8d2fc11d5761d6ba961a3ac8cf",
+      "bodyVerificationReason": "FileNotFoundError",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "yoon_master",
@@ -23267,7 +23343,26 @@
       "submissionStarted": true,
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-19T14:31:47.981961+09:00",
-      "blogId": "yoonviews"
+      "blogId": "yoonviews",
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicPublicationVerified": true,
+      "publicUrl": "https://blog.naver.com/yoonviews/224446553774",
+      "publishedAt": "2026-10-20T20:30:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 17,
+      "substantiveParagraphs": 17,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "5a77f81dfaa652d797c5a190543f720acfb01c7069b0587dcb9f4895ef469a17",
+      "bodyVerificationReason": "FileNotFoundError",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "yoon_master",
@@ -23344,7 +23439,25 @@
       "submissionStarted": true,
       "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time; saved document hash verified",
       "verifiedAt": "2026-10-21T01:47:17.905617+09:00",
-      "blogId": "yoonviews"
+      "blogId": "yoonviews",
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicPublicationVerified": true,
+      "publicUrl": "https://blog.naver.com/yoonviews/224448397730",
+      "publishedAt": "2026-10-21T20:30:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 17,
+      "substantiveParagraphs": 17,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "7efe0a286da5963c836375d7e7ddd8853864a9d66afa63c92f0fa5f12b4496fb",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "soultin",
@@ -23383,7 +23496,24 @@
       "logNo": "224448649049",
       "documentSha256": "19c6078ce1252457d59c1d3ff503b5ed1f234aa5d62c0c8a6d5b23565df78378",
       "submissionStatus": "verified_reserved",
-      "publicPublicationVerified": false
+      "publicPublicationVerified": true,
+      "status": "done",
+      "publicationStatus": "verified_public",
+      "state": "verified_public",
+      "publicUrl": "https://blog.naver.com/mustpickinfo/224448649049",
+      "publishedAt": "2026-10-21T11:00:00+09:00",
+      "publicVerifiedAt": "2026-10-23T00:33:04.909370+09:00",
+      "publicBodyMatched": true,
+      "bodyParagraphsMatch": true,
+      "matchedParagraphs": 14,
+      "substantiveParagraphs": 14,
+      "tagsVerified": null,
+      "bodyVerificationStatus": "matched",
+      "publicHttpStatus": 200,
+      "publicBodySha256": "61128620e7bc97310fb1c091db52eca64146eb41348ecd7f3dd0399ee909f6a0",
+      "savedParagraphsIncludingHashtags": null,
+      "hashtagsExcludedFromBodyMatch": true,
+      "bodyVerificationSource": "live mobile body vs existing reserved-server-document.json"
     },
     {
       "account": "soultin",
@@ -23418,6 +23548,813 @@
       "failureReason": "Keyword intent requires new evidence; title-only correction is not applicable",
       "preSubmissionFailure": true,
       "retryAfter": null
+    },
+    {
+      "account": "adinfo0905",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T16:25:17.481198+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 17:30",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-e31eb4c150cc4b1e9423d37cd721d31d",
+      "recoveryContextSha256": "c70733a087078c7759172ee082b208033734873972130690b547ce1aeaa25f68",
+      "recoveryContext": {
+        "account": "adinfo0905",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "d14fff5d896781397258c238ad28b0b9ef3cf6e3ac5ad9e5174beef44e120fc9",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "c70733a087078c7759172ee082b208033734873972130690b547ce1aeaa25f68"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T16:29:33.627610+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/adinfo0905/연말정산-20261022-6c6aa4b539",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2205, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7151, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5561, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5258, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5551, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6147, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3275, in choose_verified_bridge",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T16:34:33.627569+09:00"
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T16:51:25.931178+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 18:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-03392380d76c4b0e8e11dd91a90d224a",
+      "recoveryContextSha256": "08ce584d200c94409e027a3b6052e0d17014475dcccc407817b641955c2b0c3b",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "c09272b539f0985c32dc8e38c8e79c21476b8064c983e341bd6daf02dbb4cd67",
+        "requestedTopicSeed": "군 복무 기간을 국민연금 가입기간으로 인정받고 싶을 때, 군복무 크레딧 대상과 신청 시점을 어떻게 확인할까요?",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "08ce584d200c94409e027a3b6052e0d17014475dcccc407817b641955c2b0c3b"
+      },
+      "priorFailure": {
+        "phase": "material_required",
+        "reason": "Keyword intent requires new evidence; title-only correction is not applicable",
+        "workerId": "local-4d19fd2c4f004252be78f2e769c28bd4"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T16:52:38.711564+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/20261022-b5689fd4c9",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2205, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7154, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5564, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5261, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5554, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5941, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/cf_posting/pipeline_runner.py\", line 2327, in select_keyword_with_demand\n  File \"/mnt/c/10_Project/BaroLab/cf_posting/pipeline_runner.py\", line 2208, in reject",
+      "failureReason": "No eligible demand candidate: 군복무크레딧: bounds=440..440 threshold=100 unknown=None issue=no recent issue signal; monthly demand is reported separately; DataLab: response omitted dates; 군복무크레딧: bounds=440..440 threshold=100 unknown=None issue=no recent issue signal; monthly demand is reported separately; DataLab: response omitted dates; 군복무크레딧: bounds=440..440 threshold=100 unknown=None issue=no recent issue signal; monthly demand is reported separately; DataLab: response omitted dates",
+      "preSubmissionFailure": true,
+      "failureCategory": "other",
+      "nextAction": "실제 오류를 확인한 뒤 재개",
+      "retryAfter": "2026-10-22T16:57:38.711543+09:00"
+    },
+    {
+      "account": "stone0747",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T17:09:56.591185+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 18:10",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-5fc103179c6047c98515c58b976cfed6",
+      "recoveryContextSha256": "2197040082e43d17271e099ecce64f634949c22f1f44fab56e736d2b5e6aa38a",
+      "recoveryContext": {
+        "account": "stone0747",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "55717c90bfe0a59cbac5fcd21c12ad032bfb6209301bffd26d7277ce5e7b2d4e",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2197040082e43d17271e099ecce64f634949c22f1f44fab56e736d2b5e6aa38a"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T17:14:45.696283+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/stone0747/소상공인-정책자금-20261022-0ee8d5e768",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2205, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7154, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5564, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5261, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5554, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6150, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3278, in choose_verified_bridge",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T17:19:45.696258+09:00"
+    },
+    {
+      "account": "adinfo0905",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T17:25:36.963010+09:00",
+      "scheduledSlot": "19:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 19:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-83a7ab8c0fe34ecdb2d8c29b7cd165d2",
+      "recoveryContextSha256": "c70733a087078c7759172ee082b208033734873972130690b547ce1aeaa25f68",
+      "recoveryContext": {
+        "account": "adinfo0905",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "d14fff5d896781397258c238ad28b0b9ef3cf6e3ac5ad9e5174beef44e120fc9",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "c70733a087078c7759172ee082b208033734873972130690b547ce1aeaa25f68"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T17:31:17.526056+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/adinfo0905/중도퇴사-연말정산-20261022-16f770087d",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2205, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7154, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5564, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5261, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5554, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6150, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3278, in choose_verified_bridge",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T17:36:17.526033+09:00"
+    },
+    {
+      "account": "stone0747",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T17:47:11.139864+09:00",
+      "scheduledSlot": "19:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 19:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-3af2afe861c24823924e2d1c2940d337",
+      "recoveryContextSha256": "2197040082e43d17271e099ecce64f634949c22f1f44fab56e736d2b5e6aa38a",
+      "recoveryContext": {
+        "account": "stone0747",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "55717c90bfe0a59cbac5fcd21c12ad032bfb6209301bffd26d7277ce5e7b2d4e",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2197040082e43d17271e099ecce64f634949c22f1f44fab56e736d2b5e6aa38a"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T17:52:06.222284+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/stone0747/소상공인-정책자금-20261022-2baa128d4f",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2205, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7154, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5564, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5261, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5554, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6150, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3278, in choose_verified_bridge",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T17:57:06.222253+09:00"
+    },
+    {
+      "account": "soul5373",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T18:13:55.998940+09:00",
+      "scheduledSlot": "20:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 20:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-050908ffacc0460da1422ae8a9c566e6",
+      "recoveryContextSha256": "2e6609ea9ec3b4ee6ff041ab18498d323fd608125f782d81b0caf0eef47c1d3e",
+      "recoveryContext": {
+        "account": "soul5373",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2e6609ea9ec3b4ee6ff041ab18498d323fd608125f782d81b0caf0eef47c1d3e"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T18:19:39.454909+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soul5373/당뇨발-20261022-61e672f3b6",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2205, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7154, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5554, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6178, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2890, in plan_answer_before_writer",
+      "failureReason": "unsupported operand type(s) for /: 'NoneType' and 'str'",
+      "preSubmissionFailure": true,
+      "failureCategory": "other",
+      "nextAction": "실제 오류를 확인한 뒤 재개",
+      "retryAfter": "2026-10-22T18:24:39.454883+09:00"
+    },
+    {
+      "account": "yoon_master",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T18:20:51.189611+09:00",
+      "scheduledSlot": "20:30",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 20:30",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-9f5aceee2d1640459016822e187f7c54",
+      "recoveryContextSha256": "c0ebe2b2f7caaf3f18bb985c325257289f5a8c8646981ee148f5bc6386b69448",
+      "recoveryContext": {
+        "account": "yoon_master",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "c0ebe2b2f7caaf3f18bb985c325257289f5a8c8646981ee148f5bc6386b69448"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T18:26:23.372949+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/yoon_master/스웨이드자켓-20261022-080d01c1da",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2175, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7121, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5527, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5556, in _supervise_prewriting\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3859, in collect_evidence\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/visible_research.py\", line 111, in collect_blog_evidence\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/sync_api/_generated.py\", line 13635, in wait_for\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_sync_base.py\", line 111, in _sync\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_locator.py\", line 767, in wait_for\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_frame.py\", line 395, in wait_for_selector\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_connection.py\", line 78, in send\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_connection.py\", line 636, in wrap_api_call",
+      "failureReason": "Locator.wait_for: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"a[data-heatmap-target=\\\".nblg\\\"] .sds-comps-text-type-headline1\").first to be visible\n",
+      "preSubmissionFailure": true,
+      "failureCategory": "other",
+      "nextAction": "실제 오류를 확인한 뒤 재개",
+      "retryAfter": "2026-10-22T18:31:23.372911+09:00"
+    },
+    {
+      "account": "adinfo0905",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T18:32:37.361724+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 19:40",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-22b531a49a534ad8bd351fa0493bda5b",
+      "recoveryContextSha256": "ba68f1ab0d86eecd8c0f13739ac30de1c7f6930c2b14fe640cf9768324e8b9f6",
+      "recoveryContext": {
+        "account": "adinfo0905",
+        "requestedContentInputsSha256": "14b54b597f01ed5105d54a24cad8b730b09f2a266e7a99f38c128959e962f1a6",
+        "requestedTopicSeed": "이직한 직장인이 전 직장 원천징수영수증을 언제, 어디서 확인해 새 회사에 제출해야 할까?",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "d14fff5d896781397258c238ad28b0b9ef3cf6e3ac5ad9e5174beef44e120fc9",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "ba68f1ab0d86eecd8c0f13739ac30de1c7f6930c2b14fe640cf9768324e8b9f6"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+        "workerId": "local-e31eb4c150cc4b1e9423d37cd721d31d"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T18:37:01.489612+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/adinfo0905/원천징수영수증-20261022-48921c2e21",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2175, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7136, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5531, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5228, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5521, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6132, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3248, in choose_verified_bridge",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T18:42:01.489586+09:00"
+    },
+    {
+      "account": "stone0747",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T19:13:30.277221+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 20:20",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-1d6a3f0afe37483683d7b0df03d6b1a1",
+      "recoveryContextSha256": "3d3beb51b03eecdb02d8b6476ae060cb977db320a90a177c721196ec29c7956c",
+      "recoveryContext": {
+        "account": "stone0747",
+        "requestedContentInputsSha256": "ae5ddbea094c2af3928f5506898b18efd6fbeca8842148d894c518344829c14a",
+        "requestedTopicSeed": "개업한 지 3년이 지나도 일반경영안정자금을 신청할 수 있는지 어떤 공고 항목을 확인해야 하나요?",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "55717c90bfe0a59cbac5fcd21c12ad032bfb6209301bffd26d7277ce5e7b2d4e",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "3d3beb51b03eecdb02d8b6476ae060cb977db320a90a177c721196ec29c7956c"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+        "workerId": "local-5fc103179c6047c98515c58b976cfed6"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T19:17:02.905197+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/stone0747/일반경영안정자금-20261022-c6ff5732fb",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2175, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7136, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5531, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5223, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3417, in check",
+      "failureReason": "Posting checks changed after planning",
+      "preSubmissionFailure": true,
+      "failureCategory": "other",
+      "nextAction": "실제 오류를 확인한 뒤 재개",
+      "retryAfter": "2026-10-22T19:22:02.905174+09:00"
+    },
+    {
+      "account": "adinfo0905",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T19:26:51.144210+09:00",
+      "scheduledSlot": "19:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 20:30",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-41e2653db2e3453aba22989f402029d9",
+      "recoveryContextSha256": "46c18bb6f52ed083c754f5a47bb9304eaf07951fe7c85955362709a004606e18",
+      "recoveryContext": {
+        "account": "adinfo0905",
+        "requestedContentInputsSha256": "fd97f6a23099e7b48c9e472d21ac0bc69609bcfb8d24d93788c55c393cdb1e26",
+        "requestedTopicSeed": "퇴사 후 재취업하지 않았다면 카드 소득공제 자료에서 근무기간과 퇴사 후 사용액을 어떻게 구분해 준비해야 하나요?",
+        "contentQualitySha256": "34f23e3c0358b38d536bbd434d265ca491daa06f2afa9030fdeeae0b4d1cf5a1",
+        "routingPolicySha256": "d14fff5d896781397258c238ad28b0b9ef3cf6e3ac5ad9e5174beef44e120fc9",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "46c18bb6f52ed083c754f5a47bb9304eaf07951fe7c85955362709a004606e18"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+        "workerId": "local-83a7ab8c0fe34ecdb2d8c29b7cd165d2"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T19:30:52.004632+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/adinfo0905/카드-소득공제-20261022-1d08352295",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2201, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7196, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5581, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5278, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5571, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6192, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3295, in choose_verified_bridge",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T19:35:52.004607+09:00"
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T19:50:02.855376+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 20:50",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-2a5403a816a4426bafd263ea7d18117f",
+      "recoveryContextSha256": "2766bacf92ec846a665e8d7d87005515d8a2065823054fa324d448112891be08",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "76a53105a952ac46098e969037bcb5c9d09fa042ed9133e49186c3393d3c59d5",
+        "requestedTopicSeed": "노후생활비를 예상할 때 한 달 지출보다 1년치 지출을 12로 나눈 월평균을 참고하는 이유는 무엇인가요?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2766bacf92ec846a665e8d7d87005515d8a2065823054fa324d448112891be08"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "No eligible demand candidate: 군복무크레딧: bounds=440..440 threshold=100 unknown=None issue=no recent issue signal; monthly demand is reported separately; DataLab: response omitted dates; 군복무크레딧: bounds=440..440 threshold=100 unknown=None issue=no recent issue signal; monthly demand is reported separately; DataLab: response omitted dates; 군복무크레딧: bounds=440..440 threshold=100 unknown=None issue=no recent issue signal; monthly demand is reported separately; DataLab: response omitted dates",
+        "workerId": "local-03392380d76c4b0e8e11dd91a90d224a"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T19:52:11.599177+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/20261022-52759b84ad",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2201, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7209, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5593, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5290, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5583, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6008, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2698, in review_keyword_title_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2672, in review_reader_demand_alignment\n  File \"/mnt/c/10_Project/BaroLab/common/crew_chat_bridge.py\", line 184, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 182, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_usage.py\", line 116, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 344, in generate_json\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 391, in _generate_json\n  File \"/mnt/c/10_Project/BaroLab/common/codex_cli.py\", line 427, in generate\n  File \"/mnt/c/10_Project/BaroLab/common/crew_chat_bridge.py\", line 176, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 154, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_usage.py\", line 101, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/codex_cli.py\", line 388, in generate_local",
+      "failureReason": "Codex CLI 생성 실패: CLI 오류 (Reconnecting... 2/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 3/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 4/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 5/5 (We’re currently experiencing high demand, which may cause temporary errors.) | {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'codex_output_schema'. Please ensure it is a valid JSON Schema.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n} | {\n  \"error\": {\n    \"message\":",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T19:57:11.599155+09:00"
+    },
+    {
+      "account": "adinfo0905",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T19:55:52.132530+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 21:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-ec5534d01f484754bf2b3f30221f11b4",
+      "recoveryContextSha256": "c4c66f5103bc766fac97d2e24ec440811d890319c7aabbbc243b6503150aafa8",
+      "recoveryContext": {
+        "account": "adinfo0905",
+        "requestedContentInputsSha256": "66b0359bbd9c57976cc3458fc2c053abda1147b85140f90bd583b8a90b8b0703",
+        "requestedTopicSeed": "이직용 자격증을 고를 때 채용공고의 필수 요건과 우대 요건을 어떻게 구분해 우선순위를 정해야 할까?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": "d14fff5d896781397258c238ad28b0b9ef3cf6e3ac5ad9e5174beef44e120fc9",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "c4c66f5103bc766fac97d2e24ec440811d890319c7aabbbc243b6503150aafa8"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+        "workerId": "local-22b531a49a534ad8bd351fa0493bda5b"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T19:59:40.463867+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/adinfo0905/20261022-ca99b5eddc",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2201, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7209, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5593, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5290, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5583, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6008, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2698, in review_keyword_title_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2672, in review_reader_demand_alignment\n  File \"/mnt/c/10_Project/BaroLab/common/crew_chat_bridge.py\", line 184, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 182, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_usage.py\", line 116, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 344, in generate_json\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 392, in _generate_json\n  File \"/mnt/c/10_Project/BaroLab/common/codex_cli.py\", line 427, in generate\n  File \"/mnt/c/10_Project/BaroLab/common/crew_chat_bridge.py\", line 176, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 154, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_usage.py\", line 101, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/codex_cli.py\", line 388, in generate_local",
+      "failureReason": "Codex CLI 생성 실패: CLI 오류 (Reconnecting... 2/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 3/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 4/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 5/5 (We’re currently experiencing high demand, which may cause temporary errors.) | {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'codex_output_schema'. Please ensure it is a valid JSON Schema.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n} | {\n  \"error\": {\n    \"message\":",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T20:04:40.463833+09:00"
+    },
+    {
+      "account": "stone0747",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T20:00:42.734110+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 21:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-556f143f7e6843dbb4c46e017b0306ad",
+      "recoveryContextSha256": "2a478acf0411f44fa6e39c37c1b54075b95c14287fa657779f88f1dfefb35a1a",
+      "recoveryContext": {
+        "account": "stone0747",
+        "requestedContentInputsSha256": "ae5ddbea094c2af3928f5506898b18efd6fbeca8842148d894c518344829c14a",
+        "requestedTopicSeed": "개업한 지 3년이 지나도 일반경영안정자금을 신청할 수 있는지 어떤 공고 항목을 확인해야 하나요?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": "55717c90bfe0a59cbac5fcd21c12ad032bfb6209301bffd26d7277ce5e7b2d4e",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2a478acf0411f44fa6e39c37c1b54075b95c14287fa657779f88f1dfefb35a1a"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "Posting checks changed after planning",
+        "workerId": "local-1d6a3f0afe37483683d7b0df03d6b1a1"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T20:07:51.669639+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/stone0747/20261022-08c6e72e91",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2201, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7209, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5589, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5644, in _supervise_prewriting\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6008, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2698, in review_keyword_title_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2672, in review_reader_demand_alignment\n  File \"/mnt/c/10_Project/BaroLab/common/crew_chat_bridge.py\", line 184, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 182, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_usage.py\", line 116, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 344, in generate_json\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 392, in _generate_json\n  File \"/mnt/c/10_Project/BaroLab/common/codex_cli.py\", line 427, in generate\n  File \"/mnt/c/10_Project/BaroLab/common/crew_chat_bridge.py\", line 176, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_client.py\", line 154, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/llm_usage.py\", line 101, in wrapped\n  File \"/mnt/c/10_Project/BaroLab/common/codex_cli.py\", line 388, in generate_local",
+      "failureReason": "Codex CLI 생성 실패: CLI 오류 (Reconnecting... 2/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 3/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 4/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 5/5 (We’re currently experiencing high demand, which may cause temporary errors.) | {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'codex_output_schema'. Please ensure it is a valid JSON Schema.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n} | {\n  \"error\": {\n    \"message\":",
+      "preSubmissionFailure": true,
+      "failureCategory": "content_validation",
+      "nextAction": "반려 사유를 수정하고 현재 정책으로 다시 검수",
+      "retryAfter": "2026-10-22T20:12:51.669560+09:00"
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T20:14:28.233328+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 21:20",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-00238563db3045958695644f3bcaf8d6",
+      "recoveryContextSha256": "2766bacf92ec846a665e8d7d87005515d8a2065823054fa324d448112891be08",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "76a53105a952ac46098e969037bcb5c9d09fa042ed9133e49186c3393d3c59d5",
+        "requestedTopicSeed": "노후생활비를 예상할 때 한 달 지출보다 1년치 지출을 12로 나눈 월평균을 참고하는 이유는 무엇인가요?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2766bacf92ec846a665e8d7d87005515d8a2065823054fa324d448112891be08"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "Codex CLI 생성 실패: CLI 오류 (Reconnecting... 2/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 3/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 4/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 5/5 (We’re currently experiencing high demand, which may cause temporary errors.) | {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'codex_output_schema'. Please ensure it is a valid JSON Schema.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n} | {\n  \"error\": {\n    \"message\":",
+        "workerId": "local-2a5403a816a4426bafd263ea7d18117f"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T20:18:15.966137+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/노후생활비-20261022-f8d39c0842",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2201, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7210, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5594, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5291, in repair_preparation_once\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5584, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6232, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 4071, in require_research_facts",
+      "failureReason": "Source-dependent research has no supported facts; synthetic fallback is forbidden",
+      "preSubmissionFailure": true,
+      "failureCategory": "other",
+      "nextAction": "실제 오류를 확인한 뒤 재개",
+      "retryAfter": "2026-10-22T20:23:15.966109+09:00"
+    },
+    {
+      "account": "adinfo0905",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T20:26:43.416950+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 21:30",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-3ad39d6a9d084d69918a97078c1e1686",
+      "recoveryContextSha256": "c4c66f5103bc766fac97d2e24ec440811d890319c7aabbbc243b6503150aafa8",
+      "recoveryContext": {
+        "account": "adinfo0905",
+        "requestedContentInputsSha256": "66b0359bbd9c57976cc3458fc2c053abda1147b85140f90bd583b8a90b8b0703",
+        "requestedTopicSeed": "이직용 자격증을 고를 때 채용공고의 필수 요건과 우대 요건을 어떻게 구분해 우선순위를 정해야 할까?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": "d14fff5d896781397258c238ad28b0b9ef3cf6e3ac5ad9e5174beef44e120fc9",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "c4c66f5103bc766fac97d2e24ec440811d890319c7aabbbc243b6503150aafa8"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "Codex CLI 생성 실패: CLI 오류 (Reconnecting... 2/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 3/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 4/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 5/5 (We’re currently experiencing high demand, which may cause temporary errors.) | {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'codex_output_schema'. Please ensure it is a valid JSON Schema.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n} | {\n  \"error\": {\n    \"message\":",
+        "workerId": "local-ec5534d01f484754bf2b3f30221f11b4"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-22T20:30:50.854540+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/adinfo0905/채용공고-20261022-8d4db2de3a",
+      "lastTraceback": "  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 2204, in run_accounts\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 7220, in _run_pipeline\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 5593, in prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 6206, in _prepare_content\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 3986, in collect_material_primary_sources\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 4035, in collect_primary_sources\n  File \"/usr/lib/python3.14/asyncio/runners.py\", line 204, in run\n  File \"/usr/lib/python3.14/asyncio/runners.py\", line 127, in run\n  File \"/usr/lib/python3.14/asyncio/base_events.py\", line 719, in run_until_complete\n  File \"/mnt/c/10_Project/BaroLab/naver_blog_posting/pipeline_runner.py\", line 4163, in search_primary_sources\n  File \"/mnt/c/10_Project/BaroLab/common/browser_session.py\", line 258, in connect_async\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/async_api/_generated.py\", line 4034, in connect_over_cdp\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_browser_type.py\", line 210, in connect_over_cdp\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_connection.py\", line 105, in send_return_as_dict\n  File \"/home/baro7/.venvs/barolab/lib/python3.14/site-packages/playwright/_impl/_connection.py\", line 636, in wrap_api_call",
+      "failureReason": "BrowserType.connect_over_cdp: Timeout 20000ms exceeded.\nCall log:\n  - <ws connecting> ws://127.0.0.1:9440/devtools/browser/a2e10d02-c382-4e6f-ad65-709535b7786e\n  - <ws connected> ws://127.0.0.1:9440/devtools/browser/a2e10d02-c382-4e6f-ad65-709535b7786e\n",
+      "preSubmissionFailure": true,
+      "failureCategory": "other",
+      "nextAction": "실제 오류를 확인한 뒤 재개",
+      "retryAfter": "2026-10-22T20:35:50.854513+09:00"
+    },
+    {
+      "account": "stone0747",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T20:38:09.721923+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 21:40",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-2b7d36d078784cd08c142b6db82f00c2",
+      "recoveryContextSha256": "e09c9f70171d9a7d0a0bf4c1a06cabacae5e6d44e4ecdafded6761452916324b",
+      "recoveryContext": {
+        "account": "stone0747",
+        "requestedContentInputsSha256": "3602a71c00d901b83157d47a45a6f2984d392ad1d2f854d552f6a7e67388249b",
+        "requestedTopicSeed": "소상공인 정책자금 공고에서 공통 지원대상과 자금별 신청대상을 구분해야 하는 이유는 무엇인가요?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": "55717c90bfe0a59cbac5fcd21c12ad032bfb6209301bffd26d7277ce5e7b2d4e",
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "e09c9f70171d9a7d0a0bf4c1a06cabacae5e6d44e4ecdafded6761452916324b"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "Codex CLI 생성 실패: CLI 오류 (Reconnecting... 2/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 3/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 4/5 (We’re currently experiencing high demand, which may cause temporary errors.) | Reconnecting... 5/5 (We’re currently experiencing high demand, which may cause temporary errors.) | {\n  \"error\": {\n    \"message\": \"Invalid schema for response_format 'codex_output_schema'. Please ensure it is a valid JSON Schema.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"text.format.schema\",\n    \"code\": \"invalid_json_schema\"\n  }\n} | {\n  \"error\": {\n    \"message\":",
+        "workerId": "local-556f143f7e6843dbb4c46e017b0306ad"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "material_required",
+      "updatedAt": "2026-10-22T20:51:30.105169+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/stone0747/정책자금-20261022-ad93b83673",
+      "failureReason": "No verified relevant and temporally eligible CF destination after bounded routing review",
+      "preSubmissionFailure": true,
+      "retryAfter": null
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T20:55:27.002780+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 22:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-aab62ab60ca245a997aff8d275c8a8c1",
+      "recoveryContextSha256": "2766bacf92ec846a665e8d7d87005515d8a2065823054fa324d448112891be08",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "76a53105a952ac46098e969037bcb5c9d09fa042ed9133e49186c3393d3c59d5",
+        "requestedTopicSeed": "노후생활비를 예상할 때 한 달 지출보다 1년치 지출을 12로 나눈 월평균을 참고하는 이유는 무엇인가요?",
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "2766bacf92ec846a665e8d7d87005515d8a2065823054fa324d448112891be08"
+      },
+      "priorFailure": {
+        "phase": "failed",
+        "reason": "Source-dependent research has no supported facts; synthetic fallback is forbidden",
+        "workerId": "local-00238563db3045958695644f3bcaf8d6"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "material_required",
+      "updatedAt": "2026-10-22T21:12:35.427648+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/기초연금-신청-20261022-ff60a49541",
+      "failureReason": "Editorial hold; choose a new evidence-backed question before retry: 현재 입력에는 핵심 행정 조건을 입증할 공식 세부 원문이 없다. 경쟁 글만으로 사실을 확정하거나 test로 근거 부족을 우회할 수 없어 이번 제작을 보류한다.",
+      "preSubmissionFailure": true,
+      "retryAfter": null
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T21:14:04.396586+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-23",
+      "reserveTime": "2026-10-23 11:00",
+      "runMode": "manual",
+      "submissionStarted": false,
+      "workerId": "local-0bc4f9dabdab4953b30d214f2512aa9a",
+      "recoveryContextSha256": "21b5377c4ae0e932a53d099c975ea0a5abe3787bfdea5b848ad13f43ca370669",
+      "recoveryContext": {
+        "account": "soultin",
+        "requestedContentInputsSha256": "deaacbc6486b35fb81bff01517c5c29ce668c85c93420b4488762dc3675cf415",
+        "requestedTopicSeed": null,
+        "contentQualitySha256": "24e8a3e092dcdf7546773bdf011597f2b374470127f79fb257362cd33cc14184",
+        "routingPolicySha256": null,
+        "materialsManifestSha256": "",
+        "materialPresenceKnown": true,
+        "hadMaterials": false,
+        "materialContentSha256": "",
+        "materialBytesSha256": "",
+        "readerQuestion": "",
+        "sha256": "21b5377c4ae0e932a53d099c975ea0a5abe3787bfdea5b848ad13f43ca370669"
+      },
+      "freshnessScope": "preparation_time_only",
+      "publicationTimeFreshnessVerified": false,
+      "phase": "material_required",
+      "updatedAt": "2026-10-22T21:30:28.625200+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/ISA-만기-20261022-7e5c71d789",
+      "failureReason": "Editorial hold; choose a new evidence-backed question before retry: 현재 제공 자료에는 원래 질문의 기한 산정·완료 인정·세액공제 적용 조건을 확정할 공식 본문이 없다. 핵심 근거 확보 전 제작을 보류한다. 근거 부족을 test 판단으로 우회하지 않는다.",
+      "preSubmissionFailure": true,
+      "retryAfter": null
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T22:22:36.764285+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/basic-bfe9bf206c",
+      "scheduledSlot": "23:10",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 23:10",
+      "submissionStarted": false,
+      "runMode": "basic",
+      "phase": "started",
+      "updatedAt": "2026-10-22T22:22:36.764285+09:00"
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T22:26:01.648034+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/basic-bfe9bf206c",
+      "scheduledSlot": "23:20",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 23:20",
+      "submissionStarted": false,
+      "runMode": "basic",
+      "phase": "failed",
+      "updatedAt": "2026-10-22T22:26:05.873181+09:00",
+      "failureReason": "Native editor did not retain the supplied document",
+      "preSubmissionFailure": true
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-22",
+      "startedAt": "2026-10-22T22:34:28.323427+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/basic-bfe9bf206c",
+      "scheduledSlot": "23:20",
+      "publicationDate": "2026-10-22",
+      "reserveTime": "2026-10-22 23:20",
+      "submissionStarted": true,
+      "runMode": "basic",
+      "phase": "verified",
+      "updatedAt": "2026-10-22T22:40:23.073830+09:00",
+      "failureReason": null,
+      "preSubmissionFailure": false,
+      "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+      "verifiedAt": "2026-10-22T22:40:22.919981+09:00",
+      "blogId": "mustpickinfo"
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-23",
+      "startedAt": "2026-10-23T00:17:58.412454+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/basic-0781293824",
+      "runMode": "basic",
+      "submissionStarted": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-23T00:19:24.994409+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-23",
+      "reserveTime": "2026-10-23 01:10",
+      "topic": "노후재정, ‘퇴직연금+장수연금’ 결합 제언에서 살펴볼 점",
+      "failureReason": "Locator.select_option: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"select[class*=\\\"hour_option\\\"]\")\n    - locator resolved to <select title=\"예약 발행 시간 선택\" class=\"hour_option__Vk2eR\">…</select>\n  - attempting select option action\n    2 × waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n    - waiting 20ms\n    2 × waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select op",
+      "preSubmissionFailure": true
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-23",
+      "startedAt": "2026-10-23T00:22:57.033445+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/basic-0781293824",
+      "runMode": "basic",
+      "submissionStarted": false,
+      "phase": "failed",
+      "updatedAt": "2026-10-23T00:23:32.274510+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-23",
+      "reserveTime": "2026-10-23 01:10",
+      "topic": "노후재정, ‘퇴직연금+장수연금’ 결합 제언에서 살펴볼 점",
+      "failureReason": "Locator.select_option: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"select[class*=\\\"hour_option\\\"]\")\n    - locator resolved to <select title=\"예약 발행 시간 선택\" class=\"hour_option__Vk2eR\">…</select>\n  - attempting select option action\n    2 × waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n    - waiting 20ms\n    2 × waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select op",
+      "preSubmissionFailure": true
+    },
+    {
+      "account": "soultin",
+      "workDate": "2026-10-23",
+      "startedAt": "2026-10-23T00:27:59.935832+09:00",
+      "artifactFolder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/basic-0781293824",
+      "runMode": "basic",
+      "submissionStarted": true,
+      "phase": "verified",
+      "updatedAt": "2026-10-23T00:28:19.078017+09:00",
+      "scheduledSlot": "11:00",
+      "publicationDate": "2026-10-23",
+      "reserveTime": "2026-10-23 11:00",
+      "topic": "노후재정, ‘퇴직연금+장수연금’ 결합 제언에서 살펴볼 점",
+      "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+      "verifiedAt": "2026-10-23T00:28:18.942629+09:00",
+      "blogId": "mustpickinfo"
     }
   ]
 }

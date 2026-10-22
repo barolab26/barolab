@@ -1,0 +1,10 @@
+[Unit]
+Description=BaroLab KnowledgeIn condition check
+
+[Timer]
+OnCalendar=*-*-* *:00/5:00 Asia/Seoul
+Persistent=false
+Unit=barolab-kin.service
+
+[Install]
+WantedBy=timers.target

@@ -1,44 +1,31 @@
-# Project Rules & Guidelines
+# BaroLab 작업 규칙
 
-## 1. 전용 포터블 브라우저 라이프사이클 운영 지침 (Browser Lifecycle Rules)
-- **전용 시작 배치파일 필수 실행**: 브라우저를 시작할 때는 무조건 해당 계정 디렉토리 내의 전용 시작 배치파일(`*_start_cdp.bat`)을 실행하여 띄웁니다.
-  - 예시: `C:\99_포터블브라우저\CentBrowserPotable_adinfo0905\adinfo0905_start_cdp.bat`
-- **전용 종료 배치파일 필수 실행**: 브라우저를 종료할 때는 무조건 해당 계정 디렉토리 내의 전용 종료 배치파일(`*_stop_cdp.bat`)을 실행하여 닫습니다.
-  - 예시: `C:\99_포터블브라우저\CentBrowserPotable_adinfo0905\adinfo0905_stop_cdp.bat`
-- **임의 제어 절대 금지**: `chrome.exe` 직접 실행, `taskkill` 프로세스 강제 종료, 임의 커맨드라인 실행 등은 엄격히 금지하며, 오직 상기 전용 시작/종료 배치파일을 통해서만 라이프사이클을 관리합니다.
-- **기존 탭 우선 재사용**: 새 탭을 만들기 전에 해당 계정의 열린 탭 URL과 용도를 확인하고, 동일 페이지·작업은 기존 탭을 재사용합니다. 새 탭은 명확한 별도 필요가 있을 때만 만듭니다.
-- **병렬 작업의 탭 담당 지정**: 병렬 에이전트는 계정·사이트별 탭 담당을 정하여 동일 페이지의 중복 탭 생성을 방지합니다.
-- **탭 소유권 기록**: 탭을 확보할 때 담당 계정·작업과 직접 생성 여부(`owned`), 기존 탭 재사용 여부(`reused`)를 구분하여 기록합니다. URL만으로 자신이 만든 탭이라고 추정하지 않습니다.
-- **완료 즉시 탭 정리**: 캡처·검색·검증이 끝나면 직접 만든 완료 탭은 즉시 닫습니다. 중복 탭이나 턴 종료 때만 정리하는 방식으로 미루지 않습니다. 실패 시에도 불필요한 임시 탭은 `finally`에서 정리합니다.
-- **보존할 탭**: 대시보드는 기존 탭 한 개를 재사용하고, 사용자 소유 탭·작성 중인 문서·진행 중인 파이프라인 편집기·제출 결과가 불명확한 작업은 보존합니다. 브라우저·프로필 전체 종료나 다른 작업의 탭 정리로 대신하지 않습니다.
-- **자동 원고 실패 탭**: 자동 실행이 제출 전 검수에서 끝났고 원고·이미지·검수 화면이 산출물로 보존되어 있으면 직접 만든 편집기 탭도 닫습니다. 명시적으로 요청한 준비 완료 인계나 제출 시작 후 결과 미확인인 경우에만 보존 사유를 기록하여 남깁니다. 기존 사용자 탭에는 적용하지 않습니다.
+## 기본 작업 방식
+- 모든 작업에 `/home/baro7/.codex/skills/ponytail/SKILL.md`의 full 모드를 적용한다. 사용자가 중지를 요청할 때까지 유지한다.
+- 기준 저장소는 Ubuntu WSL의 `/mnt/c/10_Project/BaroLab`이다. NAS나 Windows 배치파일에서 실행하지 않는다.
+- 변경 전 호출부·설정·테스트·실행 중인 프로세스를 확인한다. 문제를 완전히 해결하는 최소 변경을 하고 필요한 검증을 수행한다.
+- `.env`, 로그인 세션, 데이터베이스, 승인 원고, 예약·공개 발행 증거는 삭제하거나 노출하지 않는다.
 
+## Ubuntu 격리 크롬
+- Linux Chrome과 계정별 `--user-data-dir`, 개별 CDP 포트를 사용한다. Windows 포터블 브라우저, `.bat`, `cmd.exe`, `taskkill`을 사용하지 않는다.
+- 기존 Ubuntu 세션 매니저를 재사용한다. 시작 전에 동일 프로필·포트의 실행 여부를 확인하고 중복 기동을 막는다.
+- 기존 탭을 우선 재사용하고 직접 만든 탭만 소유권을 기록한다. 검색·캡처·검증이 끝난 임시 탭은 실패 경로를 포함한 `finally`에서 정리한다.
+- 사용자 탭, 대시보드 탭, 진행 중인 편집기, 제출 결과가 불명확한 탭은 보존한다. 브라우저·프로필 전체 종료로 대신하지 않는다.
 
-## 2. 최소 파일 및 디렉토리 유지 원칙 (Minimal Files Principle)
-- **일회성 스크립트 난립 금지**: 디버깅이나 셀렉터 검증을 위해 프로젝트 코드 디렉토리(`scripts/` 등)에 `check_*.py`, `inspect_*.py`, `test_*.py` 등의 임시 파일을 마구잡이로 생성하는 것을 엄격히 금지합니다.
-- **임시 검증 공간 분리**: 일회성 점검은 인라인 실행(`python -c "..."`) 또는 워크스페이스 외부의 `scratch/` 임시 디렉토리를 사용합니다.
-- **단일 통합 파이프라인 일원화**: 계정별로 스크립트를 복사-붙여넣기(`publish_1호.py`, `publish_2호.py` 등)하거나 원고를 하드코딩하지 않고, 계정 인자(`--account`)를 받는 단일 파이프라인 모듈로 구조를 단순하고 견고하게 유지합니다.
+## 디렉토리와 실행
+- 대시보드·크루는 `dashboard/agents/`, 서버·모니터·연결기는 `dashboard/runtime/`, 수집기는 `dashboard/collectors/`로 통합한다.
+- 공용 운영 원장은 `dashboard/data/`, 지식데이터는 루트 `data/`에 둔다. 채널 산출물·예약 증거는 각 프로젝트 `output/`에 보존한다.
+- 채널의 표준 실행 진입점은 `<channel>/posting.py`이다. 각 채널은 `agents/`, `guides/`, `output/` 구조를 사용한다.
+- 일회성 점검은 인라인 명령이나 `/tmp`에서 한다. 프로젝트에 계정별 실행파일이나 임시 검사 스크립트를 추가하지 않는다.
+- 의미 있는 회귀 테스트를 삭제해 통과율을 꾸미지 않는다. 테스트를 합칠 때 기존 검증 범위와 실행 결과를 확인한다.
 
+## 운영 안정성
+- 발행 중인 프로세스의 코드·데이터 이동은 완료 시점과 연계한다. 발행 자식 프로세스가 있으면 `barolab-memory-review.service`를 재시작하지 않는다.
+- 새 작업 전에 기존 실행과 공용 잠금을 확인한다. 중복 프로세스와 무제한 재시도·이벤트·조회 누적을 만들지 않는다.
+- 사실 확인, 자격증명 보호, 중복 제출 방지, 예약·공개 확인은 보존한다. 선택적 참고자료·캡처 부족으로 전체 발행을 반복 반려하지 않는다.
 
-## 3. GitHub 실시간 자동 동기화 및 로컬 표준 저장소 규칙 (Mandatory GitHub & Local Workspace Rule)
-- **로컬 표준 작업 경로 (Local GitHub Workspace)**:
-  - 모든 개발·자동화·스케줄러 실행의 기준 저장소는 **`C:\10_Project\BaroLab`** 입니다. (NAS 네트워크 드라이브 `Y:\10_Project\BaroLab` 또는 `\\otns\yoonlab\...` 직접 실행 금지)
-  - 다른 PC에서 환경을 세팅할 때는 아래 명령으로 클론 및 부트스트랩을 실행합니다:
-    ```powershell
-    git clone https://github.com/barolab26/barolab.git C:\10_Project\BaroLab
-    powershell -ExecutionPolicy Bypass -File C:\10_Project\BaroLab\setup_pc.ps1
-    ```
-- **Git 계정 및 저장소 표준**:
-  - GitHub 계정: **`barolab26`** (`barolab26@gmail.com`)
-  - 커밋 작성자 설정: `git config user.name "barolab26"`, `git config user.email "barolab26@gmail.com"`
-  - 원격 저장소: **`https://github.com/barolab26/barolab.git`** (`origin` → `main` 브랜치)
-- **작업 완료 직후 자동 Push 의무화**: 에이전트가 소스코드(`server/`, `dashboard/`, `common/`, 각 채널 파이프라인 등)나 설정/원장 파일을 수정한 모든 작업 완료 직후에는 반드시 아래 명령(또는 `.\sync_github.ps1`)을 자동 실행하여 원격 저장소(`origin main`)와 실시간 동기화합니다:
-  ```bash
-  git add -A && git commit -m "auto-sync" && git push origin main
-  ```
-- **보안 무결성 준수**: `.gitignore`에 정의된 민감 정보(`.env*`, `*secret*`, `*token*`, `*credential*`, `**/secure/`, `cookies/`, `browsers/`, `*.sqlite3`, `output/`, `runs/`, `rework*/`, `artifacts/`, 이미지/영상 바이너리 등)는 절대 커밋·푸시하지 않으며, 오직 소스코드와 안전한 실시간 상태 원장(`data/*.json`)만 동기화합니다.
-
-## 4. Ponytail 기본 작업 원칙
-- 모든 작업에서 `ponytail` 스킬의 `full` 모드를 기본 적용합니다. 사용자가 중지를 요청할 때까지 유지합니다.
-- Ubuntu 기준 스킬: `/home/baro7/.codex/skills/ponytail/SKILL.md`. 없으면 `/mnt/c/Users/baro7/.codex/skills/ponytail/SKILL.md`를 확인합니다.
-- 문제를 완전히 해결하는 최소 변경을 우선하며, 필요한 검증을 수행하고 미검증 항목과 남은 위험을 명확히 보고합니다.
+## Git 동기화
+- 저장소: `https://github.com/barolab26/barolab.git`, 브랜치 `main`.
+- 작성자: `barolab26 <barolab26@gmail.com>`.
+- 작업 완료 후 변경 범위를 검토해 커밋하고 `origin/main`으로 푸시한다. 기존의 무관한 미커밋 변경을 섞지 않는다.
+- `.gitignore`의 환경변수·비밀·토큰·쿠키·프로필·DB·산출물·미디어 제외 규칙을 유지한다. 민감 파일을 강제로 추가하지 않는다.

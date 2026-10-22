@@ -1,0 +1,10 @@
+[Unit]
+Description=BaroLab frequent revenue-only refresh
+After=network-online.target
+
+[Service]
+Environment=PYTHONDONTWRITEBYTECODE=1
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+ExecStart=/home/baro7/.venvs/barolab/bin/python3 -u -B -m common.revenue_refresh --once
+TimeoutStartSec=600

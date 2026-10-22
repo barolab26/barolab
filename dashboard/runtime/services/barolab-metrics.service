@@ -1,0 +1,12 @@
+[Unit]
+Description=BaroLab read-only indexing and traffic evidence collection
+After=network-online.target
+
+[Service]
+Environment=PYTHONDONTWRITEBYTECODE=1
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.venvs/barolab/bin/python3 dashboard/metrics.py --collect --read-only
+TimeoutStartSec=2400
+UMask=0077

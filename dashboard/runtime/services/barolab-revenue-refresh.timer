@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh due revenue sources every minute
+
+[Timer]
+OnBootSec=30
+OnUnitInactiveSec=60
+AccuracySec=5
+RandomizedDelaySec=3
+Unit=barolab-revenue-refresh.service
+
+[Install]
+WantedBy=timers.target
