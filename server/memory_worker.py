@@ -15,6 +15,7 @@ def main():
     from common.repair_workflow import process_repair_diagnosis_once
     from server.project_monitor import process_project_monitor_once, sample_project_health_once, recover_interrupted_triage, process_project_feedback_once
     from server.agent_tools import process_staff_request_once
+    from common.project_autonomy import process_project_autonomy_once
 
     stopped = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
@@ -36,7 +37,7 @@ def main():
     # Observation remains responsive while bounded model calls or learning run.
     observers = [
         threading.Thread(target=loop, args=([sample_project_health_once], 30), name='project-observer'),
-        threading.Thread(target=loop, args=([process_staff_request_once, process_project_feedback_once, process_project_monitor_once], 30), name='project-supervisor'),
+        threading.Thread(target=loop, args=([process_staff_request_once, process_project_feedback_once, process_project_autonomy_once, process_project_monitor_once], 30), name='project-supervisor'),
     ]
     for worker in observers:
         worker.start()

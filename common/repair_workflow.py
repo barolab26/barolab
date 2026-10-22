@@ -16,7 +16,7 @@ KNOWN_FAILURE = 'editorial_seed_pinned_as_keyword'
 RECOVERY_ROLES = {'discover':'patch','classify':'jarvis','propose':'patch',
                   'review':'jarvis','test':'doctor','final_review':'jarvis',
                   'apply':'patch','resume':'publi','verify':'jarvis','inspect':'trace'}
-RECOVERY_TOOLS = {'prepare_cf_source_fact', 'run_cf_domain', 'verify_cf_source_fact_fix'}
+RECOVERY_TOOLS = {'prepare_cf_source_fact', 'run_cf_domain', 'verify_cf_source_fact_fix', 'run_project_cycle'}
 
 
 class RecoveryBusy(RuntimeError):
@@ -135,6 +135,27 @@ def _original_recovery_request(incident, request_path):
     from server.agent_tools import EGO_PROCESS_DIR, STAFF_REQUEST_DIR
     request=json.loads(request_path.read_bytes())
     if any(a.get('tool')!='read_agent_status' for a in request.get('actions',[])):
+        # A completed scheduler launch retains its own exact child evidence.
+        # Previously only historical read-only requests acquired stderr, leaving
+        # real executable requests with metadata but no traceback/source scope.
+        if len(request.get('actions',[])) == 1:
+            matches=[]
+            for result in request.get('results',[]):
+                supplied=(result.get('result') or {}).get('receiptPath')
+                if not supplied:continue
+                path=Path(supplied)
+                if (path.name!='receipt.json' or path.is_symlink() or path.parent.is_symlink()
+                        or path.resolve().parent.parent!=EGO_PROCESS_DIR.resolve()):continue
+                raw=path.read_bytes()
+                if len(raw)>100000:continue
+                receipt=json.loads(raw);action=receipt.get('action') or {};ref=receipt.get('originalTaskRef') or {}
+                saved=_proof(path.parent/'request.json',ref['requestSha256'])
+                if (ref.get('requestId')!=request.get('requestId') or ref.get('taskId')!=request.get('taskId')
+                        or saved.get('actions')!=request['actions']
+                        or action.get('argumentsComplete') is not True
+                        or {k:action.get(k) for k in ('agent','tool','args')}!=request['actions'][0]):continue
+                matches.append({'path':str(path),'sha256':_sha(raw),'originalTaskRef':ref})
+            if len(matches)==1:return request_path,matches[0]
         return request_path,None
     failures=incident.get('observation',{}).get('failures') or []
     identities={f.get('identity') for f in failures if f.get('identity')!='unidentified'}

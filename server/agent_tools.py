@@ -1716,7 +1716,12 @@ def validate_staff_actions(actions):
         agent, tool, args = action['agent'], action['tool'], action['args']
         if agent not in STAFF_ROLES or not isinstance(args, dict):
             raise ValueError('Invalid recipient')
-        if tool == 'read_agent_status' and not args:
+        if tool == 'run_project_cycle' and set(args) == {'project'}:
+            from common.project_autonomy import COMMANDS
+            project = args.get('project')
+            if project not in COMMANDS or agent != ('doctor' if project == 'legacy_remodel' else 'publi'):
+                raise ValueError('Unregistered autonomous project owner')
+        elif tool == 'read_agent_status' and not args:
             pass
         elif tool == 'advance_project_recovery' and set(args) == {'task_id','plan_sha256'}:
             from common.repair_workflow import recovery_expected_actor
@@ -1742,7 +1747,9 @@ def staff_instruction(action):
     """Host rendering of a validated instruction, never a quoted model utterance."""
     names = {'jarvis':'자비스','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터','radar':'레이더'}
     name = names[action['agent']]
-    if action['tool'] == 'read_agent_status':
+    if action['tool'] == 'run_project_cycle':
+        text = f'@{name}, 등록된 프로젝트 스케줄러를 한 회차 실행하고 실제 종료 결과를 확인해 주세요. 기존 계정·일정·검수·중복 방지 규칙을 유지하고 공개 확인 전에는 발행 완료로 보고하지 않습니다.'
+    elif action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
     elif action['tool'] == 'advance_project_recovery':
         text = f'@{name}, 승인된 복구 계획에서 현재 배정된 한 단계만 실행하고 실제 결과를 보고해 주세요. 검수나 실행 결과가 불명확하면 재개하지 않습니다.'
@@ -1872,12 +1879,13 @@ def _repair_terminal_result(result):
 def _finish_staff_repairs(path, row):
     from common.collection_observability import write
     from common.crew_chat_bridge import emit_work_event
+    from common.project_autonomy import terminal_result
     changed = False
     for item in row['results']:
         result = item['result']
-        if item['tool'] != 'repair_cf_known_failure' or result.get('status') not in ('running','started','awaiting_completion'):
+        if item['tool'] not in ('repair_cf_known_failure', 'run_project_cycle') or result.get('status') not in ('running','started','awaiting_completion'):
             continue
-        observed = _repair_terminal_result(result)
+        observed = (terminal_result(result) if item['tool'] == 'run_project_cycle' else _repair_terminal_result(result))
         if observed is None:
             continue
         terminal, snapshot = observed
@@ -1940,10 +1948,11 @@ def process_staff_request_once():
                 candidate.update(status='unknown', reason='interrupted_or_overdue_no_retry')
                 write(path, candidate)
             if candidate.get('status') == 'awaiting_completion':
-                pending = [r for r in candidate.get('results', []) if r.get('tool') == 'repair_cf_known_failure'
+                pending = [r for r in candidate.get('results', []) if r.get('tool') in ('repair_cf_known_failure', 'run_project_cycle')
                            and r.get('result',{}).get('status') in ('running','started','awaiting_completion')]
                 try:
-                    ready = any(_repair_terminal_result(r['result']) is not None for r in pending)
+                    from common.project_autonomy import terminal_result
+                    ready = any((terminal_result(r['result']) if r['tool'] == 'run_project_cycle' else _repair_terminal_result(r['result'])) is not None for r in pending)
                 except (ValueError, OSError):
                     candidate.update(status='unknown',reason='invalid_controller_receipt_no_retry')
                     write(path,candidate)
@@ -2458,6 +2467,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         'fix_scheduler_task':'project', 'propose_coding_job':'project', 'read_coding_job_status':'project',
         'extract_youtube_or_url':'research', 'scout_high_value_keywords':'research',
         'dispatch_multi_agent_action':'all_projects', 'advance_project_recovery':'project',
+        'run_project_cycle':'project',
     }
     fields['tool'] = tool_name if tool_name in projects else 'unknown'
     fields['project'] = projects.get(tool_name, 'unknown')
@@ -2465,7 +2475,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         fields['task_id'] = 'direct:' + uuid.uuid4().hex
     safe_args = {key: value for key, value in kwargs.items()
                  if key in {'domain','account','source_sha256','artifact_sha256','review_sha256',
-                            'request_sha256','revision_mode','revision_sha256','task_id','plan_sha256'}
+                            'request_sha256','revision_mode','revision_sha256','task_id','plan_sha256','project'}
                  and isinstance(value, str) and re.fullmatch(r'[A-Za-z0-9_.:-]{1,180}', value)}
     token = _EGO_REGISTERED_ACTION.set({'agent': actor, 'tool': fields['tool'], 'args': safe_args,
                                       'argumentsComplete': len(safe_args) == len(kwargs)})
@@ -2478,6 +2488,10 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
 
 def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     """Directly invoke one of the registered agent tools by name."""
+    if tool_name == 'run_project_cycle':
+        from common.project_autonomy import run_project_cycle
+        validate_staff_actions([{'agent': slug, 'tool': tool_name, 'args': kwargs}])
+        return run_project_cycle(kwargs['project'])
     if tool_name == 'advance_project_recovery':
         from common.repair_workflow import recovery_expected_actor, advance_project_recovery
         if set(kwargs) != {'task_id','plan_sha256'} or recovery_expected_actor(kwargs['task_id'], kwargs['plan_sha256']) != slug:
