@@ -1420,6 +1420,9 @@ def run_scheduled_worker(item, mode, base=BASE):
 def scheduled_batch(mode, base=BASE):
     if mode not in ('daily', 'catch_up'):
         raise ValueError('Automatic scheduling cannot select manual recovery')
+    from common.recovery_evidence import work_barrier
+    if work_barrier('naver_blog', PROJECT_ROOT):
+        return {'status': 'original_work_requires_repair', 'results': []}
     results, visited = [], {}
     initial_day = now_kst().date()
     batch_started = time.monotonic()
@@ -2220,7 +2223,8 @@ def run_accounts(account_keys, do_real_publish=True, override_strategy_id=None, 
                         phase = 'unknown' if attempt_has_submission_evidence(attempt, BASE_DIR) else 'failed'
                         category = failure_category(exc)
                         retry_minutes, next_action = retry_guidance(category)
-                        write_attempt(key, phase, base=BASE_DIR, failureReason=str(exc)[:700],
+                        frames = '\n'.join(f'  File "{frame.filename}", line {frame.lineno}, in {frame.name}' for frame in traceback.extract_tb(exc.__traceback__))
+                        write_attempt(key, phase, base=BASE_DIR, lastTraceback=frames, failureReason=str(exc)[:700],
                                       preSubmissionFailure=phase == 'failed', failureCategory=category, nextAction=next_action,
                                       retryAfter=(now_kst() + timedelta(minutes=retry_minutes)).isoformat())
                         update_pipeline_status(ACCOUNT_MAP[key], 6, '예약 확인 필요' if phase == 'unknown' else
@@ -7243,7 +7247,6 @@ def _record_reservation_memory(account_key, folder, evidence, attempt):
                            'revision': evidence.get('mode') == 'revision'})
     try:
         from common.hermes_memory import write_verified_work_receipt
-        from common.llm_client import record_verified_work
         paths = [folder / 'reservation-evidence.json', folder / 'reserved-server-document.json']
         from common.work_learning import observed_review_summary
         review_summary, review_sources = observed_review_summary([folder/'reviewer.json', folder/'native-visual-review.json', folder/'image-plan.json'])
@@ -7255,8 +7258,8 @@ def _record_reservation_memory(account_key, folder, evidence, attempt):
             artifacts=[{'path':str(path.resolve()), 'sha256':sha(path)} for path in paths],
             checks=[{'type':kind, 'passed':True, 'evidenceRef':str(path.resolve())}
                     for kind,path in zip(('reservation_identity','reservation_content'),paths)])
-        learning = record_verified_work(f'naver:{folder}:verified-work', proof)
-        print('[work-learning] ' + json.dumps(learning, ensure_ascii=False), flush=True)
+        print('[work-learning] ' + json.dumps({'status':'awaiting_public_verification',
+              'reservationProof':proof,'publicationVerified':False}, ensure_ascii=False), flush=True)
     except Exception as exc:
         print('[work-learning] Naver reservation remains verified; learning_error=' + type(exc).__name__, flush=True)
 

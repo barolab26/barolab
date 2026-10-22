@@ -88,6 +88,7 @@ class ProjectAutonomyTests(unittest.TestCase):
                     patch.object(tools, 'STAFF_REQUEST_DIR', queue), \
                     patch.object(tools, 'enqueue_staff_request', side_effect=enqueue), \
                     patch('server.project_health.observed_projects', return_value=projects), \
+                    patch('common.recovery_evidence.failure_targets', return_value=[]), \
                     patch('server.project_monitor.INCIDENTS', root / 'incidents'), \
                     patch.object(a.time, 'time', return_value=1000), \
                     patch.object(Path, 'home', return_value=root):

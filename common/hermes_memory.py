@@ -24,7 +24,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENTRY_DELIMITER = "\n§\n"
 LIMITS = {"memory": 2200, "user": 1375}
 WORK_CHANNELS = {'project', 'naver_blog', 'cf_blog', 'naver_kin', 'threads'}
-WORK_OUTCOMES = {'maintenance_verified', 'recovery_verified', 'reservation_verified', 'public_verified', 'public_answer_verified', 'public_thread_verified'}
+WORK_OUTCOMES = {'maintenance_verified', 'recovery_verified', 'reservation_verified', 'public_naver_verified', 'public_verified', 'public_answer_verified', 'public_thread_verified'}
 WORK_CHECKS = {'source_diff', 'http_response', 'read_only_state', 'tests_passed', 'original_task_verified', 'public_identity', 'public_content', 'reservation_identity', 'reservation_content'}
 LEARNING_POLICY_REVISION = 'observed-procedure-v2'
 LEARNING_PARSER_REVISION = 'optional-record-v1'
@@ -55,7 +55,7 @@ def validate_work_receipt(receipt):
     if verification.get('scope') != receipt['outcome']:
         raise ValueError('Work outcome scope mismatch')
     expected_channel = {'maintenance_verified':'project','recovery_verified':'project','reservation_verified':'naver_blog',
-                        'public_verified':'cf_blog','public_answer_verified':'naver_kin',
+                        'public_verified':'cf_blog','public_naver_verified':'naver_blog','public_answer_verified':'naver_kin',
                         'public_thread_verified':'threads'}[receipt['outcome']]
     if receipt['channel'] != expected_channel:
         raise ValueError('Work outcome channel mismatch')
@@ -149,6 +149,24 @@ def validate_work_receipt(receipt):
         if outcome == 'public_verified' and receipt['channel'] == 'cf_blog':
             published = [d for d in documents if isinstance(d,dict) and d.get('status') == 'verified' and d.get('postId') and d.get('publicUrl')]
             valid = any(any(isinstance(v,dict) and v.get('publication') == 'verified' and v.get('postId') == d['postId'] and v.get('publicUrl') == d['publicUrl'] and v.get('verifiedAt') for v in documents) for d in published)
+        elif outcome == 'public_naver_verified':
+            from urllib.parse import urlsplit
+            for document in documents:
+                if not isinstance(document,dict) or document.get('type')!='naver_public_completion_v1':continue
+                expected=document.get('expected',{});observation=document.get('observation',{})
+                url=urlsplit(str(observation.get('publicUrl','')))
+                reservation=next((d for d in documents if isinstance(d,dict)
+                    and d.get('submissionStatus')=='verified_reserved'
+                    and all(d.get(k)==expected.get(k) for k in ('account','title','reserveTime','documentSha256'))),None)
+                if (reservation and expected.get('documentSha256') and url.scheme=='https' and url.hostname=='blog.naver.com'
+                    and url.path.strip('/').split('/')[0]==reservation.get('blogId')
+                    and all(observation.get(k)==expected.get(k) and expected.get(k) for k in ('account','title','reserveTime'))
+                    and observation.get('publicPublicationVerified') is True
+                    and observation.get('publicHttpStatus')==200 and observation.get('publicBodyMatched') is True
+                    and observation.get('bodyParagraphsMatch') is True and observation.get('publicBodySha256')
+                    and expected.get('savedDocumentSha256')
+                    and actual.get(str(Path(expected.get('savedDocumentPath','')).resolve()))==expected['savedDocumentSha256']):
+                    valid=True
         elif outcome in ('public_answer_verified','public_thread_verified'):
             keys = ('account','question_id','answer_id','answer_text_sha256','outbound_url','answer_url') if outcome == 'public_answer_verified' else ('account_key','platform_id','text_sha256','outbound_url','permalink')
             for document in documents:

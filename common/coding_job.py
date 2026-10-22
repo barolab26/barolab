@@ -234,7 +234,7 @@ def derive_coding_scope(source_root, traceback_text):
     return found
 
 
-def derive_edit_regions(source_root, files, traceback_text):
+def derive_edit_regions(source_root, files, traceback_text, *, source_frames=()):
     """Use host traceback frames only; preserve exact UTF-8 lines and decorators."""
     import ast
     root=Path(source_root).resolve()
@@ -248,6 +248,9 @@ def derive_edit_regions(source_root, files, traceback_text):
             name=path.relative_to(root).as_posix()
             if name in sources:frames[name]=int(line)
         except (ValueError,OSError):continue
+    for frame in source_frames:
+        if frame.get('kind') == 'host_literal_raise_match' and frame.get('path') in sources and type(frame.get('line')) is int:
+            frames.setdefault(frame['path'], frame['line'])
     regions={}
     for name,raw in sources.items():
         text=raw.decode('utf-8')

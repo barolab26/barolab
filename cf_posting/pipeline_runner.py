@@ -2738,7 +2738,7 @@ def open_source_fact_continuation(folder, domain, recent):
     if len(previous.check())!=1:
         raise ReviewRequired('Source fact continuation requires exactly one accepted keyword stage')
     request=json.loads((original/'prewriter-acquisition-request.json').read_text(encoding='utf-8'))
-    if request.get('status')!='answer_inputs_required' or not any(x.get('kind')=='source_fact' for x in request.get('missingInputs',[])):
+    if request.get('status')!='answer_inputs_required' or not any(x.get('kind') in ('source_fact','actual_capture','observed_data','original_photo') for x in request.get('missingInputs',[])):
         raise ReviewRequired('Saved source-fact refusal required')
     if any(original.glob('*publication*receipt*')) or (original/'article.json').exists():
         raise ReviewRequired('Source fact continuation must precede manuscript and submission')
@@ -2806,15 +2806,24 @@ def open_source_fact_continuation(folder, domain, recent):
 
 async def draft_agents(domain, category, categories, recent, generate, gather, progress, attribution, fixed=None):
     continuation=os.environ.get('CF_SOURCE_FACT_FOLDER')
+    continuation_manifest=None
     if continuation:
         handoff,kw,goal,saved_research,saved_request=open_source_fact_continuation(continuation,domain,recent)
         folder=handoff.folder;slug=kw['topicSlug'];explicit_request=None
         RUN_CONTEXT['artifactFolder']=str(folder)
         progress('researcher','동일 질문의 누락 공식 자료 확보 재개',handoff)
         acquired=await acquire_missing_source_facts(folder,saved_request['missingInputs'],goal,generate,gather)
-        if not acquired:
-            record_prewrite_block(handoff,goal,AnswerBriefBlocked('Official source acquisition did not return a usable body',saved_request['missingInputs']))
-        observations={**saved_research['observations'],'sources':saved_research['observations'].get('sources',[])+acquired['sources']}
+        observations={**saved_research['observations'],'sources':saved_research['observations'].get('sources',[])+(acquired or {}).get('sources',[])}
+        captured=None
+        if any(item.get('kind') in ('actual_capture','observed_data','original_photo') for item in saved_request['missingInputs']):
+            captured=await acquire_public_captures(folder,saved_request['missingInputs'],
+                saved_research.get('answerBrief',{}),saved_research.get('facts',[]),
+                observations.get('sources',[]),primary_url,CDP_URL,BROWSER_EXE,BROWSER_USER_DATA)
+        if captured:
+            continuation_manifest=folder/'prewriting-capture-manifest.json'
+            continuation_manifest.write_text(json.dumps({'schemaVersion':1,'articleSlug':slug,'captures':captured},ensure_ascii=False,indent=2),encoding='utf-8')
+        if not acquired and not captured:
+            record_prewrite_block(handoff,goal,AnswerBriefBlocked('Original required sources or real observations remain unavailable; no replacement topic selected',saved_request['missingInputs']))
         compact_obs={'sources':observations['sources'],'acquisitionContract':'Same approved question and demand. Original refusal preserved; fresh readiness and independent review required.'}
     else:
         progress('keyword-selector', '검색 의도 및 고트래픽 신규 키워드 기획')
@@ -2870,7 +2879,7 @@ async def draft_agents(domain, category, categories, recent, generate, gather, p
             } for s in observations.get('sources', [])[:6]],
             'observedSearches': observations.get('searches', [])
         }
-    packet = observe_prewriting_materials(handoff, goal['question'], generate, attribution) if goal else {'materials': [], 'rejectedMaterials': []}
+    packet = observe_prewriting_materials(handoff, goal['question'], generate, attribution, manifest_path=continuation_manifest) if goal else {'materials': [], 'rejectedMaterials': []}
     if goal:packet = await annotate_prewriting_materials(handoff,packet)
     question_context = prepare_question_context(prewriting_question_context(observations, packet['materials'], explicit_request)) if goal else []
     if goal and not question_context:
@@ -5571,6 +5580,9 @@ async def run_workflows():
                         failed_item = next((it for it in failed_schedule.get('items', []) if it.get('domain') == domain), {})
                         info.update(title=failed_item.get('title', info.get('title', '')),
                                     summary=failed_item.get('summary', info.get('summary', '')))
+                        import traceback
+                        failed_item['lastTraceback'] = '\n'.join(f'  File "{frame.filename}", line {frame.lineno}, in {frame.name}' for frame in traceback.extract_tb(e.__traceback__))
+                        save_live(SCHEDULE_JSON, json.dumps(failed_schedule, ensure_ascii=False, indent=2))
                         failure_status = 'review_required' if isinstance(e, ReviewRequired) else 'failed'
                         update_status(info, completed_ids, current.get('currentStage', 1),
                                       current.get('stageName', '작업') + (' 검수 대기' if failure_status == 'review_required' else ' 실패'), current.get('progressPct', 0),
@@ -6708,6 +6720,11 @@ _REPAIR_AUTHORIZATION = object()
 def run_publisher_for_item(item, schedule, schedule_path=None, *, _repair_authorization=None):
     schedule_path = Path(schedule_path or SCHEDULE_JSON)
     domain = item["domain"]
+    from common.recovery_evidence import work_barrier
+    barrier = work_barrier('cf_blog', BASE_DIR.parent)
+    if barrier and (domain != barrier['target']['identity'] or _repair_authorization is not _REPAIR_AUTHORIZATION):
+        log_scheduler('Original failed work is assigned for repair; new publication skipped')
+        return False
     if domain not in ALL_DOMAINS:
         raise ValueError(f'Unknown CF domain: {domain}')
     log_scheduler(f"=== [EXECUTE PUBLISH] [{item.get('order', 0)}순번 / {item.get('name', domain)} ({domain})] ===")
@@ -7242,6 +7259,10 @@ def repair_failed_schedule_item(domain):
 
 def catch_up_today_once():
     """Run at most one current-KST-date job; never consume recovery queues."""
+    from common.recovery_evidence import work_barrier
+    if work_barrier('cf_blog', DATA_DIR.parent.parent):
+        log_scheduler('Original failed work pending repair; no next topic selected')
+        return
     with cleaner_lock() as acquired:
         if not acquired:
             log_scheduler('Today cleaner already running; skipped')
@@ -7285,6 +7306,10 @@ def catch_up_today_once():
 
 
 def catch_up_once():
+    from common.recovery_evidence import work_barrier
+    if work_barrier('cf_blog', DATA_DIR.parent.parent):
+        log_scheduler('Original failed work pending repair; no next topic selected')
+        return
     with cleaner_lock() as acquired:
         if not acquired:
             log_scheduler('Cleaner already running; overlapping invocation skipped')

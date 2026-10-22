@@ -245,6 +245,8 @@ def _kin_activity(doc, now):
 def observed_projects():
     now = now_kst()
     result = []
+    autonomy = load_json(ROOT / 'server/data/project-autonomy-state.json', {})
+    work_rows = autonomy.get('projects', {}) if isinstance(autonomy.get('projects'),dict) else {}
     for key, title, relative, owner, link in SOURCES:
         path = ROOT / relative
         error_type = None
@@ -335,6 +337,18 @@ def observed_projects():
             'source': {'errorType': error_type, 'supportingManifests': supporting, 'path': relative, 'sha256': hashlib.sha256(raw).hexdigest() if raw else None,
                        'observedAt': now.isoformat(), 'sourceCheckedAt': stamp, 'sourceDate': source_date,
                        'fresh': fresh, 'ageSeconds': round(age) if age is not None else None}})
+        active = work_rows.get(key, {}).get('failureWork') if isinstance(work_rows.get(key),dict) else None
+        if isinstance(active,dict) and active.get('status') != 'public_verified':
+            row = result[-1]
+            target = active.get('target') or {}
+            row['activeWork'] = {field: active.get(field) for field in
+                ('workId','status','recoveryStatus','step','assignedRole')}
+            row['activeWork']['identity'] = target.get('identity')
+            row['activeWork']['publicationDate'] = target.get('date')
+            row.update(status='attention',statusBadge='attention',actionType='repair_original',
+                nextAction='원작업 담당 직원이 누락 자료·반려 사유를 보완한 뒤 동일 건 재검수',
+                blocker='미완료 원작업 유지 · 새 주제 전환 중지 · 공개 검증 전 완료 처리 금지',
+                autoActionBadge='원작업 복구 단계: '+str(active.get('step') or '담당자 진단 대기'))
     return result
 
 

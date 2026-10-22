@@ -4,12 +4,22 @@ import json
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 source = Path(__file__).with_name('pipeline_runner.py').read_text(encoding='utf-8')
 module = ast.Module(body=[n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name in {'catch_up_today_once', 'select_due_items', 'schedule_failed_attempt', 'publication_may_be_inflight'}], type_ignores=[])
 
 class TodayCleanerTests(unittest.TestCase):
+    def setUp(self):
+        guard = patch('common.recovery_evidence.work_barrier', return_value=None)
+        guard.start(); self.addCleanup(guard.stop)
+
+    def test_unfinished_original_work_stops_new_topic_selection(self):
+        ns = self.setup_run([self.item('new-topic')])
+        with patch('common.recovery_evidence.work_barrier', return_value={'target': {'identity': 'original'}}):
+            ns['catch_up_today_once']()
+        ns['run_publisher_for_item'].assert_not_called()
+
     def setup_run(self, items, day=None, acquired=True):
         now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         schedule = {'date': day or now.date().isoformat(), 'items': items}
