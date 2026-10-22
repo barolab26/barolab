@@ -1620,9 +1620,12 @@
     });
   }
 
+  let liveWorkstreamPending = false;
   async function pollLiveWorkstream() {
+    if (liveWorkstreamPending || document.hidden) return;
+    liveWorkstreamPending = true;
     try {
-      const res = await apiFetch('/api/chat/live-workstream');
+      const res = await apiFetch('/api/chat/live-workstream', { signal: AbortSignal.timeout(10000) });
       if (!res.ok) return;
       const data = await res.json();
       if (data.kstNow) updateKstClockDisplay(data.kstNow);
@@ -1632,7 +1635,7 @@
       if (Array.isArray(data.newWorkstreamMessages) && data.newWorkstreamMessages.length) {
         data.newWorkstreamMessages.forEach(m => upsertMessageToDom(m, { allowInPlaceUpdate: false }));
       }
-    } catch (_) {}
+    } catch (_) {} finally { liveWorkstreamPending = false; }
   }
   setInterval(pollLiveWorkstream, 5000);
 

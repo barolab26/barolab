@@ -644,7 +644,11 @@
     };
   }
 
+  let channelLoadPending = false;
   async function loadChannelData() {
+    if (channelLoadPending || document.hidden) return;
+    channelLoadPending = true;
+    try {
     const today = getKSTDateStr(0);
     const tomorrow = getKSTDateStr(1);
     const yesterday = getKSTDateStr(-1);
@@ -654,7 +658,7 @@
     // Fetch shared metrics for visitors
     let metricsData = null;
     try {
-      const mRes = await fetch('/api/metrics', { cache: 'no-store' });
+      const mRes = await fetch('/api/metrics?compact=true', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (mRes.ok) metricsData = await mRes.json();
     } catch (_) {}
 
@@ -675,11 +679,11 @@
       try {
         const ts = Date.now();
         const [jRes, awRes, vRes, mRes, psRes] = await Promise.all([
-          fetch('../naver_blog_posting/data/automation-journal.json?t=' + ts, { cache: 'no-store' }).catch(() => fetch('./automation-journal.json?t=' + ts, { cache: 'no-store' })),
-          fetch('../naver_blog_posting/data/active-workflow.json?t=' + ts, { cache: 'no-store' }).catch(() => null),
-          fetch('./naver_public_verification.json?t=' + ts, { cache: 'no-store' }),
-          fetch('./naver_automation.json?t=' + ts, { cache: 'no-store' }),
-          fetch('./pipeline_status.js?t=' + ts, { cache: 'no-store' }).catch(() => null)
+          fetch('../naver_blog_posting/data/automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => fetch('./automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) })),
+          fetch('../naver_blog_posting/data/active-workflow.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null),
+          fetch('./naver_public_verification.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('./naver_automation.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('./pipeline_status.js?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null)
         ]);
         if (jRes && jRes.ok) journal = await jRes.json();
         if (awRes && awRes.ok) activeWorkflow = await awRes.json();
@@ -951,10 +955,10 @@
 
       try {
         const [schedRes, pipeRes, pRes, ...hResList] = await Promise.all([
-          fetch('/cf_posting/data/daily_schedule.json?t=' + Date.now(), { cache: 'no-store' }),
-          fetch('/cf_posting/data/pipeline_state.json?t=' + Date.now(), { cache: 'no-store' }),
-          fetch('/api/publications', { cache: 'no-store' }),
-          ...histDates.map(hd => fetch(`/cf_posting/data/schedule_history/${hd}.json`, { cache: 'no-store' }).catch(() => null))
+          fetch('/cf_posting/data/daily_schedule.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('/cf_posting/data/pipeline_state.json?t=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('/api/publications', { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          ...histDates.map(hd => fetch(`/cf_posting/data/schedule_history/${hd}.json`, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null))
         ]);
         if (schedRes && schedRes.ok) dailySchedule = await schedRes.json();
         if (pipeRes && pipeRes.ok) pipelineState = await pipeRes.json();
@@ -1228,8 +1232,8 @@
       try {
         const ts = Date.now();
         const [res, stRes] = await Promise.all([
-          fetch('data/kin.json?t=' + ts, { cache: 'no-store' }),
-          fetch('/api/kin/automation-status?t=' + ts, { cache: 'no-store' }).catch(() => null)
+          fetch('data/kin.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
+          fetch('/api/kin/automation-status?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null)
         ]);
         let kinAutoState = null;
         if (stRes && stRes.ok) {
@@ -1473,7 +1477,7 @@
       } catch (_) {}
     } else if (channel === 'threads') {
       try {
-        const res = await fetch('data/threads.json', { cache: 'no-store' });
+        const res = await fetch('data/threads.json', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
         if (res.ok) {
           const tData = await res.json();
           const records = Array.isArray(tData.records) ? tData.records : (Array.isArray(tData.posts) ? tData.posts : []);
@@ -1521,7 +1525,7 @@
       } catch (_) {}
     } else if (channel === 'apps') {
       try {
-        const res = await fetch('/api/projects', { cache: 'no-store' });
+        const res = await fetch('/api/projects', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
         if (res.ok) {
           const pData = await res.json();
           const projects = Array.isArray(pData.projects) ? pData.projects : [];
@@ -1553,6 +1557,7 @@
     state.allRows = rows;
     render14DayLedChart(dayCounts);
     renderTableAndGauges();
+    } finally { channelLoadPending = false; }
   }
 
   function renderActionCell(r, absIdx) {

@@ -90,10 +90,10 @@
     }
     // 1. Memory Graph count on other pages
     if (!memoryPage) try {
-      const res = await fetch('/api/memory/graph', { cache: 'no-store' });
+      const res = await fetch('/api/memory/summary', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (res && res.ok) {
         const data = await res.json();
-        const total = data?.stats?.total_nodes ?? (Array.isArray(data?.nodes) ? data.nodes.length : null);
+        const total = data?.stats?.total ?? data?.stats?.total_nodes ?? (Array.isArray(data?.nodes) ? data.nodes.length : null);
         const memBadge = document.getElementById('memory-sidebar-count');
         if (memBadge && Number.isFinite(total)) memBadge.textContent = String(total);
       }

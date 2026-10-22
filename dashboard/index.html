@@ -2796,10 +2796,14 @@
   }
 
   // 4. Sync All ARGO Gauges with Live Server Metrics, Projects, Kin, Threads & Memory Vault
+  let argoSyncPending = false;
   async function syncArgoGauges() {
+    if (argoSyncPending || document.hidden) return;
+    argoSyncPending = true;
+    try {
     // 4-1. Server & 5 CDP Browsers status
     try {
-      const res = await fetch(`${API_BASE}/api/status`);
+      const res = await fetch(`${API_BASE}/api/status`, { signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const data = await res.json();
         const badge = document.querySelector('.live-status');
@@ -2817,7 +2821,7 @@
 
     // 4-2. Revenue Speedometer Arc, Index Multi-Donut & Per-Domain Visitors from /api/metrics
     try {
-      const res = await fetch(`${API_BASE}/api/metrics`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/api/metrics?compact=true`, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const data = await res.json();
         const analysis = data.trafficAnalysis || {};
@@ -2911,7 +2915,7 @@
 
     // 4-3. Big Gauge 4: Memory Graph Synapse Gauge (ARGO Original Style)
     try {
-      const res = await fetch(`${API_BASE}/api/memory/graph?limit=100`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/api/memory/summary`, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const gData = await res.json();
         const st = gData.stats || {};
@@ -2947,7 +2951,7 @@
 
     // 4-4. App Projects 4-Step Milestone Gauges + Live SJ AdMob & Truthful Track Status
     try {
-      const res = await fetch(`${API_BASE}/api/projects`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/api/projects`, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const pData = await res.json();
         const projects = Array.isArray(pData.projects) ? pData.projects : [];
@@ -2987,11 +2991,12 @@
 
     // 4-6. SRE 6-Project Real-Time Audit Deck
     await syncProjectHealthDeck();
+    } finally { argoSyncPending = false; }
   }
 
   async function syncProjectHealthDeck() {
     try {
-      const res = await fetch(`${API_BASE}/api/project-health`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/api/project-health`, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (!res.ok) return;
       const h = await res.json();
       renderProjectHealthDeck(h);
@@ -3044,7 +3049,7 @@
 
   async function syncContentDoctorGauge() {
     try {
-      const res = await fetch(`${API_BASE}/api/auditor/status`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/api/auditor/status`, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (!res.ok) return;
       const doc = await res.json();
       const gc = doc.gradeCounts || doc.grades || doc.byGrade || {};

@@ -22,7 +22,7 @@ from functools import wraps
 from contextlib import closing
 from typing import Any, Dict, List, Optional, Tuple
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel
 from common.hermes_memory import _store as hermes_store, atomic_write, safe_path, file_lock, revision, MemoryConflict
 from common.hermes_memory import memorization_decision
@@ -1381,12 +1381,32 @@ class SaveNoteRequest(BaseModel):
     create: bool = False
 
 
+from server.dashboard_cache import ReadCache
+_GRAPH_READ_CACHE = ReadCache(ttl=30, capacity=8)
+
+
+@memory_router.get("/summary")
+def get_memory_summary():
+    graph = _GRAPH_READ_CACHE.get(("all", False, ""), lambda: _build_memory_graph("all", False, ""))
+    return {"contractVersion": graph["contractVersion"], "stats": graph["stats"]}
+
+
 @memory_router.get("/graph")
 def get_memory_graph(
+    request: Request = None,
     category: str = Query("all", description="Filter: all | core_hub | revenue | skill | meeting"),
     revenue_only: bool = Query(False),
     q: str = Query(""),
 ):
+    # Direct internal callers retain immediate source validation; HTTP readers
+    # share a short-lived projection without duplicating proof scans.
+    if request is None:
+        return _build_memory_graph(category, revenue_only, q)
+    return _GRAPH_READ_CACHE.get((category, revenue_only, q),
+        lambda: _build_memory_graph(category, revenue_only, q))
+
+
+def _build_memory_graph(category="all", revenue_only=False, q=""):
     cat_str = category if isinstance(category, str) else "all"
     rev_bool = revenue_only if isinstance(revenue_only, bool) else False
     q_str = q if isinstance(q, str) else ""

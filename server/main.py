@@ -35,6 +35,9 @@ from metrics import summary as metrics_summary
 NAVER_DIR = BASE_DIR / "naver_blog_posting"
 CF_DIR = BASE_DIR / "cf_posting"
 
+from server.dashboard_cache import ReadCache
+METRICS_READ_CACHE = ReadCache(ttl=30, capacity=1)
+
 app = FastAPI(title="BaroLab Master Hub Server", version="1.0.0")
 
 
@@ -358,19 +361,21 @@ def toggle_todo(req: ToggleTodoRequest):
     }
 
 @app.get("/api/metrics")
-def get_metrics():
+def get_metrics(compact: bool = False):
     """Collected evidence only; missing values remain null."""
-    try:
-        if str(BASE_DIR) not in sys.path:
-            sys.path.insert(0, str(BASE_DIR))
-        from naver_blog_posting.public_verification import reconcile
-        reconcile(NAVER_DIR, force=False)
-    except Exception:
-        pass
     from common.collection_observability import read_health
-    data = metrics_summary()
-    data['collectionObservability'] = read_health(DATA_DIR)
+    # GET only projects stored evidence. RSS verification belongs to the
+    # scheduled monitor / explicit verification action, never page polling.
+    def build():
+        data = metrics_summary()
+        data['collectionObservability'] = read_health(DATA_DIR)
+        return data
+    data = METRICS_READ_CACHE.get('metrics', build)
+    if compact:
+        from server.dashboard_cache import compact_metrics
+        return compact_metrics(data)
     return data
+
 
 @app.get("/api/naver/verify-public")
 @app.post("/api/naver/verify-public")

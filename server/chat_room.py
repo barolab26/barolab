@@ -30,6 +30,9 @@ from typing import Any, Dict, Generator, List, Optional, Tuple
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from server.dashboard_cache import ReadCache
+
+_LIVE_READ_CACHE = ReadCache(ttl=5, capacity=1)
 
 from memory_graph import (
     ARGO_WS_DIR,
@@ -2254,7 +2257,10 @@ def drain_work_event_outbox():
             return
         start = _OUTBOX_OFFSET % len(files)
         scanned = 0
-        for path in (files[start:] + files[:start])[:100]:
+        scan_started = time.monotonic()
+        for path in (files[start:] + files[:start])[:10]:
+            if scanned and time.monotonic() - scan_started > 0.25:
+                break
             scanned += 1
             try:
                 if path.is_symlink() or path.stat().st_size > 80_000:
@@ -2295,6 +2301,10 @@ def api_get_live_workstream():
     1) Returns all 6 crew agents with their live task status (`liveTaskStatus`, `liveDotColor`) and equipped brain (`brain`, `brainBadge`).
     2) Emits any new real-time pipeline `@mention` handoff messages (`newWorkstreamMessages`).
     """
+    return _LIVE_READ_CACHE.get('live', _build_live_workstream)
+
+
+def _build_live_workstream():
     new_ws = sync_and_broadcast_pipeline_workstream()
     enriched_agents, live_map = get_crew_live_workstream_status()
     return {
