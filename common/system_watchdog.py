@@ -84,7 +84,7 @@ def is_pid_alive(pid: Optional[int]) -> bool:
         return False
 
 
-def is_process_running_match(pattern: str) -> bool:
+def is_process_running_match(pattern: str, proc_root=None) -> bool:
     if os.name == "nt":
         try:
             res = subprocess.run(
@@ -103,6 +103,13 @@ def is_process_running_match(pattern: str) -> bool:
             return count > 0
         except Exception:
             return False
+    for path in Path(proc_root or '/proc').glob('[0-9]*/cmdline'):
+        try:
+            args=[part.decode('utf-8',errors='replace') for part in path.read_bytes().split(b'\0') if part]
+            if not args or not Path(args[0]).name.startswith('python'):continue
+            if any(arg==pattern or (not Path(pattern).is_absolute() and Path(arg).name==pattern) for arg in args[1:]):
+                return True
+        except OSError:continue
     return False
 
 
@@ -126,7 +133,7 @@ def check_and_recover_server() -> Dict[str, Any]:
     recovered = False
     detail = "정상 가동 중"
     if not port_8790:
-        python_exe = str(Path(sys.executable).with_name("python.exe"))
+        python_exe = sys.executable
         try:
             subprocess.Popen(
                 [python_exe, "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8790"],
@@ -196,23 +203,11 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
     """Detect zombie locks or running states stuck for >15 minutes and clean/re-trigger them."""
     stale_seconds = stale_minutes * 60
     actions: List[Dict[str, Any]] = []
-    python_exe = str(Path(sys.executable).with_name("python.exe"))
+    python_exe = sys.executable
 
-    # 1. Flow generation lock (~/.barolab/runtime/flow-generation.lock)
-    flow_lock = Path.home() / ".barolab" / "runtime" / "flow-generation.lock"
-    if flow_lock.exists():
-        try:
-            age = time.time() - flow_lock.stat().st_mtime
-            if age > stale_seconds:
-                flow_lock.unlink(missing_ok=True)
-                actions.append({
-                    "channel": "flow_lock",
-                    "owner": "@patch",
-                    "action": "Flow 이미지 생성 좀비 락 자동 해제",
-                    "detail": f"flow-generation.lock ({int(age // 60)}분 경과) 제거 완료",
-                })
-        except Exception:
-            pass
+    # Kernel locks are released when their owner exits. Never unlink their inode
+    # based on mtime: that creates a new lock alongside a live holder and permits
+    # overlapping Flow/browser writes. An old lock file itself is not a zombie.
 
     # 2. CF Blog pipeline state & lock
     cf_state_path = ROOT / "cf_posting" / "data" / "pipeline_state.json"
@@ -230,10 +225,10 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
         if age is None and cf_state_path.exists():
             age = time.time() - cf_state_path.stat().st_mtime
 
-        worker_alive = is_process_running_match("pipeline_runner.py")
+        worker_alive = is_process_running_match(str(ROOT / "cf_posting" / "pipeline_runner.py"))
         pid_dead = bool(pid and not is_pid_alive(int(pid)))
         is_stale = bool((age is not None and age > stale_seconds) or (not worker_alive))
-        if pid_dead or is_stale:
+        if not worker_alive and (pid_dead or is_stale):
             cf_state["status"] = "idle"
             cf_state["recoveredAt"] = now_kst_iso()
             cf_state["recoveryReason"] = (
@@ -266,7 +261,7 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
         age = parse_iso_age_seconds(nv_active.get("updatedAt") or nv_active.get("startedAt"))
         pid_dead = bool(pid and not is_pid_alive(int(pid)))
         is_stale = bool(age is not None and age > stale_seconds)
-        if pid_dead or is_stale:
+        if not is_process_running_match(str(ROOT / "naver_blog_posting" / "pipeline_runner.py")) and (pid_dead or is_stale):
             nv_active["status"] = "idle"
             nv_active["recoveredAt"] = now_kst_iso()
             nv_active["recoveryReason"] = "PID 종료 감지" if pid_dead else f"{int((age or 0) // 60)}분 무응답 좀비 상태 복구"
@@ -288,21 +283,7 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
                 "detail": nv_active["recoveryReason"],
             })
 
-    # 4. Content Maintenance / Doctor lock
-    maint_lock = DATA_DIR / "content-maintenance.lock"
-    if maint_lock.exists():
-        try:
-            age = time.time() - maint_lock.stat().st_mtime
-            if age > stale_seconds:
-                maint_lock.unlink(missing_ok=True)
-                actions.append({
-                    "channel": "legacy_remodel",
-                    "owner": "@doctor",
-                    "action": "콘텐츠 유지보수 좀비 락 자동 해제",
-                    "detail": f"content-maintenance.lock ({int(age // 60)}분 경과) 제거 완료",
-                })
-        except Exception:
-            pass
+    # Content-maintenance uses the same kernel-lock lifecycle; retain its inode.
 
     return actions
 
@@ -383,7 +364,7 @@ def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
                 if it.get("status") in ("waiting", "retry_wait", "failed")
                 and it.get("scheduledTime", "99:99") <= now.strftime("%H:%M")
             ]
-            python_exe = str(Path(sys.executable).with_name("python.exe"))
+            python_exe = sys.executable
             if overdue_items and not is_process_running_match("pipeline_runner.py"):
                 subprocess.Popen(
                     [python_exe, "-u", "-B", "-X", "utf8", str(ROOT / "cf_posting" / "pipeline_runner.py"), "--catch-up-once"],

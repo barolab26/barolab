@@ -66,7 +66,7 @@ def dossier(folder):
                  'sources.json','researcher.json','review.json','review-report.json','handoff.json',
                  'keyword-selector.json','preparation-context.json','keyword-title-original.json','keyword-demand-alignment.json',
                  'bridge-inventory.json','bridge-body-observations.json','supervisor-research-sources.json',
-                 'supervisor-research-sources-naver.json'):
+                 'supervisor-research-sources-naver.json','discovery-context.json'):
         path=folder/name
         if path.is_symlink():continue
         if not path.is_file():continue
@@ -232,7 +232,7 @@ def authorize(project,identity,folder,step,error,original_question='',category='
     evidence=budgeted_evidence({'project':project,'identity':identity,'category':category,
         'originalQuestion':original_question,'error':str(error)[:1200],
         'failure':{k:v for k,v in packet.items() if k in ('prewriter-acquisition-request.json','required-materials.json',
-                                                        'keyword-title-original.json','keyword-demand-alignment.json')},
+                                                        'keyword-title-original.json','keyword-demand-alignment.json','discovery-context.json')},
         'knownOwnedGuides':guides,
         'sources':sources,'verifiedLessons':lessons(project,identity)})
     event(project,identity,step,'검수 블로킹 진단 및 '+step+' 승인 판단')
@@ -666,7 +666,9 @@ def recover_cycle(project):
                             runner.RUN_OPTIONS.update(allow_retry_handoff=True)
                             event(project,key,'rework',key+' · 승인 원고 보존 · 실패한 후속 단계 부분 수선')
                         elif ("unsupported operand type(s) for /: 'NoneType' and 'str'" in previous.get('failureReason','')
-                              or previous.get('failureReason')=='Posting checks changed after planning'):
+                              or previous.get('failureReason')=='Posting checks changed after planning'
+                              or any(signal in previous.get('failureReason','').lower()
+                                     for signal in ('high demand','overloaded','http 502','http 503','http 504'))):
                             # Registered host bugs/policy changes fixed in this release need no
                             # evidence approval. The normal fresh plan/review still runs.
                             runner.RUN_OPTIONS.update(topic_seed=question or None,allow_retry_handoff=False)

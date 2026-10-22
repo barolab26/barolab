@@ -80,7 +80,7 @@ def flush_provider_memory_deliveries():
         if path.is_symlink():continue
         try:
             row=json.loads(path.read_text(encoding='utf-8'))
-            if row.get('status') not in ('prepared','completed') or not re.fullmatch(r'llm:[a-f0-9]{32}',row.get('eventId','')):
+            if row.get('status') not in ('prepared','completed','failed','timeout') or not re.fullmatch(r'llm:[a-f0-9]{32}',row.get('eventId','')):
                 continue
             with hermes_memory._store.db() as db:
                 db.execute('PRAGMA busy_timeout=1500')

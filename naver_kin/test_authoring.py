@@ -7,6 +7,41 @@ from naver_kin import authoring
 
 
 class AuthoringEvidenceTests(unittest.TestCase):
+    def test_empty_discovery_uses_pivot_with_owned_topic_context(self):
+        import tempfile,json
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as folder, patch.object(authoring.pipeline,'ROOT',Path(folder)), \
+                patch.object(authoring,'_generate_for_slot_once',side_effect=[
+                    {'document':None,'reason':'no_good_match','discovered':[]},
+                    {'document':{'review':'host verified'},'artifact_dir':folder}]) as generate, \
+                patch('common.editorial_supervisor.authorize_next',return_value={
+                    'step':'pivot','approval':{'searchQuery':'윈도우 업데이트 실제 질문'}}) as approve, \
+                patch('common.editorial_supervisor.lineage'):
+            result=authoring.generate_for_slot('stone0747','slot','selected',article_catalog=[{
+                'url':'https://www.topnote.kr/windows','title':'윈도우 업데이트','keywords':['윈도우 업데이트']}])
+            self.assertIsNotNone(result['document'])
+            self.assertEqual(approve.call_args.args[3],('pivot',))
+            context=json.loads((approve.call_args.args[2]/'discovery-context.json').read_text())
+            self.assertEqual(context['availableOwnedTopics'][0]['keywords'],['윈도우 업데이트'])
+            self.assertEqual(generate.call_args.kwargs['_supervisor_query'],'윈도우 업데이트 실제 질문')
+
+    def test_additional_research_keeps_the_exact_selected_external_question(self):
+        import tempfile,json
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);question={'question_id':'123','question_url':'https://kin.naver.com/qna/detail.naver?docId=123','title':'윈도우 업데이트 오류 확인'}
+            (root/'sources.json').write_text(json.dumps({'questions':[question]}))
+            (root/'generation.json').write_text(json.dumps({'question_id':'123'}))
+            with patch.object(authoring,'_generate_for_slot_once',side_effect=[
+                    {'document':None,'reason':'independent_review_rejected','discovered':[question],'artifact_dir':folder},
+                    {'document':{'review':'host verified'},'artifact_dir':folder}]) as generate, \
+                    patch('common.editorial_supervisor.authorize_next',return_value={
+                        'step':'query','approval':{'searchQuery':'공식 오류 안내'}}) as approve, \
+                    patch('common.editorial_supervisor.lineage'):
+                authoring.generate_for_slot('stone0747','slot','selected',article_catalog=[{'url':'https://www.topnote.kr/windows'}])
+            self.assertEqual(approve.call_args.args[5],question['title'])
+            self.assertEqual(generate.call_args.args[4],[question['question_url']])
+
     def test_discovery_refines_existing_topic_without_selecting_long_unrelated_phrase(self):
         entry = {'keywords': ['윈도우 업데이트', '윈도우 업데이트 재부팅', '윈도우 반복될']}
         self.assertEqual(authoring._primary_discovery_keyword(entry), '윈도우 업데이트 재부팅')

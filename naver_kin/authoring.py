@@ -542,23 +542,39 @@ def renew_stale_draft(db,account,qid,slot_id,model):
 
 
 def generate_for_slot(account, slot_id, model, article_catalog=None, question_urls=None):
-    from common.editorial_supervisor import authorize,lineage
-    approvals=[];query=None
+    from common.editorial_supervisor import authorize_next,lineage,read
+    approvals=[];query=None;requested_urls=question_urls;current_urls=question_urls
     for attempt in range(3):
-        result=_generate_for_slot_once(account,slot_id,model,article_catalog,question_urls,_supervisor_query=query)
+        result=_generate_for_slot_once(account,slot_id,model,article_catalog,current_urls,_supervisor_query=query)
         if result.get('document') is not None:
             lineage(result['artifact_dir'],approvals)
             return result
-        if question_urls is not None or attempt==2:return result
+        if requested_urls is not None or attempt==2:return result
         if result.get('reason') not in ('no_good_match','no_eligible_candidate','no_keywords',
                 'model_skipped_no_good_match','independent_review_rejected'):return result
         folder=Path(result.get('artifact_dir') or '')
         if not result.get('artifact_dir'):
             folder=pipeline.ROOT/'server/data/kin-drafts/auto'/('supervision-'+str(time.time_ns()))
             folder.mkdir(parents=True)
-        plan=authorize('naver_kin',account,folder,'query' if attempt==0 else 'pivot',
-                       result.get('review_reason') or result['reason'],category='실제 질문과 검증된 소유 글 연결')
+        context_path=folder/'discovery-context.json'
+        if not context_path.exists():
+            context={'reason':result.get('reason'),'observedQuestions':[
+                {k:q.get(k) for k in ('question_id','question_url','title')} for q in result.get('discovered',[])[:20] if isinstance(q,dict)],
+                'availableOwnedTopics':[{k:entry.get(k) for k in ('url','title','keywords')}
+                    for entry in (article_catalog or load_dynamic_catalog())[:16]],
+                'scope':'Discovery metadata only, not factual source evidence. Choose an actual related question; never invent one.'}
+            context_path.write_text(json.dumps(context,ensure_ascii=False,indent=2),encoding='utf-8')
+        generation=read(folder/'generation.json');evidence=read(folder/'sources.json')
+        selected=next((q for q in evidence.get('questions',[]) if q.get('question_id')==generation.get('question_id')), {})
+        question=selected.get('title','')
+        # A discovery failure has no selected question. It needs a new discovery query,
+        # not an impossible "preserve empty originalQuestion" approval.
+        steps=('query','pivot') if attempt==0 and question and article_catalog else ('pivot',)
+        plan=authorize_next('naver_kin',account,folder,steps,
+            result.get('review_reason') or result['reason'],question,
+            category='실제 외부 질문을 새로 발견하고 검증된 소유 글의 실제 해결 범위와 연결')
         approvals.append(plan);query=plan['approval']['searchQuery']
+        current_urls=[selected['question_url']] if plan['step']=='query' and selected.get('question_url') else requested_urls
     return result
 
 

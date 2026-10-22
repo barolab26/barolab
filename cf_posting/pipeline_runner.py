@@ -4617,7 +4617,7 @@ async def _generate_flow_images(flow_page, blog_info, completed_ids, images_dir,
         target_path = os.path.join(images_dir, filename)
         prompt = flow_image_prompt(plan)
         
-        detail_msg = f"포터블 브라우저(포트 {CDP_PORT}) Flow [{idx}/{len(plans)}] {filename} 고품질 주제 직관 비주얼 생성 및 다운로드 중..."
+        detail_msg = f"우분투 격리 크롬(포트 {CDP_PORT}) Flow [{idx}/{len(plans)}] {filename} 고품질 주제 직관 비주얼 생성 및 다운로드 중..."
         if progress_callback:
             progress_callback(idx, len(plans), detail_msg)
         else:
@@ -5573,7 +5573,7 @@ async def run_workflows():
                 raise
         return
     update_status(connecting, completed_ids, 1, "기존 브라우저 확인", 2,
-                  "baro76650 실행정보·프로필·CDP 9420 및 기존 탭 응답 확인 중")
+                  f"CF/Flow 실행정보·프로필·CDP {CDP_PORT} 및 기존 탭 응답 확인 중")
     try:
         ensure_isolated_browser_ready()
     except Exception as exc:
@@ -5594,7 +5594,7 @@ async def run_workflows():
         save_live(schedule_file, json.dumps(schedule, ensure_ascii=False, indent=2))
         RUN_CONTEXT['browser'] = browser_info
         update_status(connecting, completed_ids, 1, "기존 브라우저 연결 완료", 5,
-                      f"baro76650 PID {browser_info['pid']} · CDP 9420 · 기존 {browser_info['tabs']}개 탭 재사용")
+                      f"CF/Flow PID {browser_info['pid']} · CDP {CDP_PORT} · 기존 {browser_info['tabs']}개 탭 재사용")
         context = browser.contexts[0]
         
         flow_page = None
@@ -5629,7 +5629,7 @@ async def run_workflows():
             except Exception as pe:
                 print(f"[FLOW SETUP WARNING] Could not auto-enter project: {pe}", flush=True)
 
-        print(f"Connected to portable CentBrowser. Flow URL: {flow_page.url}", flush=True)
+        print(f"Connected to Ubuntu isolated Chrome. Flow URL: {flow_page.url}", flush=True)
         
         failed_domains = []
         try:

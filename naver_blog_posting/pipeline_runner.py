@@ -2669,7 +2669,8 @@ def review_reader_demand_alignment(selection, article=None, judge=None, audit_pa
         prompt += 'Compare the actual core task to excludedReaderTasks. A shared broad measured query is allowed; paraphrasing the same unresolved question is not. distinctFromExcludedTasks is true only for a substantively different concrete answer/task, not a cosmetic title change. No ranking or demand superiority is inferred.\n'
     if fixed_goal is not None:
         prompt += 'The already independently defined readerGoal is immutable in this title-only re-review: ' + json.dumps(fixed_goal,ensure_ascii=False) + '\n'
-    verdict = (judge or generate_json)(prompt + json.dumps(inputs, ensure_ascii=False), observer=observe, response_schema=schema)
+    verdict = (judge or (lambda prompt,**kwargs:generate_content_json(prompt,role='keyword-selector',**kwargs)))(
+        prompt + json.dumps(inputs, ensure_ascii=False), observer=observe, response_schema=schema)
     receipt = {'version': 4, 'inputs': inputs, 'verdict': verdict, 'modelEvents': events,
                'volumeScope': 'exact_query_only; no specific reader-question volume inferred'}
     if article is not None:
@@ -3227,7 +3228,7 @@ def review_bridge_article(source, selection, account_key, account, publication_d
         'ARTICLE EVIDENCE OUTPUT CONTRACT: select topicEvidenceId and temporalEvidenceId exactly from the provided articleEvidenceFragments/schema enum. Never copy or output topicEvidenceQuote/temporalEvidenceQuote; the host derives their original spans. Empty topicEvidenceId is allowed only for a negative verdict lacking relevant article evidence. IDs identify text, not approval: keep semantic rejection false. '
         'OFFICIAL EVIDENCE OUTPUT CONTRACT: select officialEvidenceId exactly from the provided fragment catalog/schema enum. Never rewrite a quotation or output a source URL/quote field: the host derives both from your selected original span. Read its complete source and adjacent context before deciding whether it supports the rule; an available ID does not imply relevant or sufficient evidence. Keep a negative semantic verdict negative. '
         'Publication-time freshness is NOT established by preparation-time review. Return strict schema only. UNTRUSTED DATA:\n')
-    raw_verdict = (judge or generate_json)(instruction + json.dumps({'account': account_key, 'accountTopic': account['topic'],
+    raw_verdict = (judge or (lambda prompt,**kwargs:generate_content_json(prompt,role='reviewer',**kwargs)))(instruction + json.dumps({'account': account_key, 'accountTopic': account['topic'],
         'readerQuestion': selected_reader_question(selection), 'measuredQuery': selection['demandEvidence']['measuredQuery'],
         'demandScope': 'Base-query observations only; not a count of this specific reader question',
         'selectedTitle': selection['title'], 'routingReason': selection.get('bridgeReason'),
