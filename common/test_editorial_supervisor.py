@@ -80,6 +80,20 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(result['step'],'scope')
         self.assertEqual([c.args[3] for c in authorize.call_args_list],['query','scope'])
 
+    def test_consumed_query_advances_without_repeating_the_model_call(self):
+        self.save('jarvis-query-approval.json',{'historical':'preserve'})
+        with patch('common.llm_client.generate_json') as generate:
+            with self.assertRaises(supervisor.ApprovalDeclined):
+                supervisor.authorize('cf_blog','example.com',self.folder,'query','missing','same exact original question')
+        generate.assert_not_called()
+
+    def test_scoped_goal_cannot_expand_back_into_unobserved_ui_tasks(self):
+        question='단위기간과 출석률은 어떻게 다른가요?'
+        goal=supervisor.scoped_reader_goal(question)
+        self.assertEqual(goal['question'],question)
+        self.assertEqual(goal['requiredAnswers'],[question])
+        self.assertNotIn('화면',goal['successCondition'])
+
     def test_live_event_contract_accepts_progress_and_links_staff_roles(self):
         with patch('common.crew_chat_bridge._deliver') as deliver,patch.object(supervisor,'ROOT',self.root):
             supervisor.event('cf_blog','example.com','query','추가 자료 조사')
@@ -112,6 +126,19 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(learning_text(value),value)
         for secret in ('연락처 010-1234-5678', 'user@example.org', 'cookie: actual-session'):
             with self.assertRaises(ValueError):learning_text(secret)
+
+    def test_owned_body_can_bind_scope_but_remains_secondary_evidence(self):
+        url='https://www.justinfo.co.kr/guide'
+        self.save('sources.json',[{'url':'https://www.gov.kr/rule','text':'host official body '*40}])
+        self.save('bridge-body-observations.json',{'candidates':[{
+            'url':url,'canonicalUrl':url,'articleBodySha256':'a'*64,'bodyExcerpt':'observed guide body '*40}]})
+        with patch('common.llm_client.generate_json',side_effect=self.model(sources=[url])) as generate, \
+                patch('common.llm_settings.get_agent_brain',return_value={'provider':'codex','model':'configured'}),patch.object(supervisor,'event'):
+            result=supervisor.authorize('naver_blog','adinfo0905',self.folder,'scope','bridge mismatch')
+        self.assertEqual(result['step'],'scope')
+        self.assertTrue(result['freshReviewRequired'])
+        self.assertIn(url,generate.call_args.kwargs['response_schema']['properties']['sourceUrls']['items']['enum'])
+        self.assertIn('secondary guides',generate.call_args.args[0])
 
     def test_graph_is_connected_idempotent_and_only_public_outcomes_learn(self):
         approval={'originalQuestion':'Original','originalHashes':{},'step':'scope','approvedAt':1,
@@ -195,6 +222,11 @@ class SupervisorTests(unittest.TestCase):
             cls.agents=agents
             result=runner.preserved_rework_checkpoint({'domain':'example.com','artifactFolder':'output/draft'})
         self.assertEqual(result,{'folder':str(folder),'mode':'assembly'})
+        rows.pop();(folder/'handoff.json').write_text(json.dumps({'stages':rows}))
+        with patch.object(runner,'BASE_DIR',self.root),patch.object(runner,'publication_may_be_inflight',return_value=False), \
+                patch.object(runner,'require_prewriting_handoff'),patch.object(runner,'Handoff',return_value=handoff) as cls:
+            cls.agents=agents
+            self.assertEqual(runner.preserved_rework_checkpoint({'domain':'example.com','artifactFolder':'output/draft'})['mode'],'assets')
 
     def test_keyword_identity_mismatch_requests_schema_bound_repair(self):
         from cf_posting import pipeline_runner as runner
@@ -269,7 +301,7 @@ class SupervisorTests(unittest.TestCase):
             'slots':[{'scheduledSlot':'20:00','publicationDate':'2026-10-22','status':'waiting'}]}]}))
         with patch.object(supervisor,'ROOT',self.root),patch.object(supervisor.dt,'datetime',FixedDatetime), \
                 patch.object(supervisor,'event'),patch.object(supervisor,'refresh_measurements'), \
-                patch.object(runner,'account_gate',return_value='waiting'),patch.object(runner,'read_journal',return_value={'attempts':[]}), \
+                patch.object(runner,'pipeline_busy',return_value=False),patch.object(runner,'account_gate',return_value='waiting'),patch.object(runner,'read_journal',return_value={'attempts':[]}), \
                 patch.object(runner,'run_accounts',return_value={'status':'prepared_and_reserved'}) as run:
             supervisor.recover_cycle('naver_blog')
         self.assertEqual(run.call_args.kwargs['slot'],'20:00')

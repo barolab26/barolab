@@ -71,6 +71,25 @@ class EditorialWorkflowTests(unittest.TestCase):
         self.assertEqual(result['counts']['failed'],1)
         self.assertEqual(slot['failureReason'],'actual collection failure')
 
+    def test_bridge_mismatch_enters_jarvis_scope_instead_of_generic_repair(self):
+        from contextlib import nullcontext
+        with patch.object(r,'_prepare_content',side_effect=r.BridgePlanningBlocked('body mismatch')), \
+                patch.object(r,'_supervise_prewriting',return_value=({},Path('/tmp'))) as supervise, \
+                patch.object(r,'repair_preparation_once') as generic, \
+                patch('common.llm_client.memory_session',return_value=nullcontext()), \
+                patch('common.llm_client.memory_event'),patch('common.editorial_supervisor.lineage'):
+            r.prepare_content('adinfo0905')
+        supervise.assert_called_once();generic.assert_not_called()
+
+    def test_host_readiness_block_without_review_routes_to_material_recovery(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(r,'review_with_one_refinement',
+                side_effect=r.AnswerBriefBlocked('essential source missing',[{'kind':'source_fact'}])):
+            with self.assertRaises(r.MaterialRequired):
+                r.plan_answer_before_writer({}, {'question':'actual question'},[],[],[],Path(folder),{}, {})
+            packet=json.loads((Path(folder)/'required-materials.json').read_text())
+            self.assertEqual(packet['requiredMaterials'][0]['kind'],'source_fact')
+            self.assertFalse((Path(folder)/'answer-brief.json').exists())
+
     def test_researcher_only_sees_selected_query_bodies_and_url_schema(self):
         selected=evidence();seed=copy.deepcopy(selected)
         seed['query']='initial seed query'

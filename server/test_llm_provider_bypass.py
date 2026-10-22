@@ -14,6 +14,10 @@ class AgyBypassTests(unittest.TestCase):
     def setUp(self):
         self.usage_temp=tempfile.TemporaryDirectory();self.addCleanup(self.usage_temp.cleanup)
         meter=patch('common.llm_usage.ROOT',Path(self.usage_temp.name));meter.start();self.addCleanup(meter.stop)
+        from common import hermes_memory
+        store=hermes_memory.HermesMemory(Path(self.usage_temp.name)/'memories')
+        isolated=patch.object(hermes_memory,'_store',store);isolated.start();self.addCleanup(isolated.stop);self.addCleanup(store.close)
+        delivery=patch('common.crew_chat_bridge._deliver');delivery.start();self.addCleanup(delivery.stop)
         self.config = {'active': 'agy', 'providers': {
             'agy': {'model': 'gemini-4-argon-high'},
             'codex': {'model': 'gpt-6-luna'},

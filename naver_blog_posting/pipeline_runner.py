@@ -2682,18 +2682,20 @@ def review_reader_demand_alignment(selection, article=None, judge=None, audit_pa
         atomic_json(audit_path, receipt)
     if fixed_goal is not None and verdict.get('readerGoal') != fixed_goal:
         raise RuntimeError('Title correction changed the original reader goal')
+    if article is None and fixed_goal is not None and receipt.get('verdict',{}).get('readerGoal')!=fixed_goal:
+        raise RuntimeError('Approved scoped reader goal changed')
     validate_reader_demand_alignment(receipt, selection, article, excluded_tasks)
     return receipt
 
 
-def review_keyword_title_once(selection, folder, account, publication_attempt, observer=None, judge=None, drafter=None, excluded_tasks=None):
+def review_keyword_title_once(selection, folder, account, publication_attempt, observer=None, judge=None, drafter=None, excluded_tasks=None, fixed_goal=None):
     """Correct only a title omission once; preserve the measured query and reader task."""
     global _REPAIR_SCOPE
     path = folder/'keyword-demand-alignment.json'
     original = copy.deepcopy(selection)
     atomic_json(folder/'keyword-title-original.json', original)
     try:
-        return selection, review_reader_demand_alignment(selection,judge=judge,audit_path=path,observer=observer,excluded_tasks=excluded_tasks)
+        return selection, review_reader_demand_alignment(selection,judge=judge,audit_path=path,observer=observer,excluded_tasks=excluded_tasks,fixed_goal=fixed_goal)
     except RuntimeError as failure:
         if not path.is_file():raise
         prior=json.loads(path.read_text(encoding='utf-8'))
@@ -2880,8 +2882,12 @@ def plan_answer_before_writer(brief, goal, facts, materials, question_context, f
         accepted, _ = review_with_one_refinement(brief,goal,facts,materials,question_context,
             review,refine,record)
     except AnswerBriefBlocked as exc:
-        print(f"[refinement] Gracefully accepting answer brief: {exc}", flush=True)
-        accepted = brief
+        atomic_json(folder/'required-materials.json',{'status':'planning_required','stage':'researcher-before-writer',
+            'readerGoal':goal,'requiredMaterials':exc.missing_inputs,'reason':str(exc),
+            'nextAction':'Jarvis query/scope/pivot; never accept an unreviewed plan'})
+        raise MaterialRequired('Answer planning requires Jarvis evidence/scope recovery: '+str(exc)) from exc
+    if last_review is None:
+        raise MaterialRequired('No independent planning review exists; preserve the proposal for Jarvis recovery')
     for name in ('answer-brief.json','answer-brief-inputs.json','answer-brief-review.json'):
         src = last_review / name
         if src.is_file():
@@ -3216,6 +3222,7 @@ def review_bridge_article(source, selection, account_key, account, publication_d
         'For active time-sensitive content identify the EARLIEST relevant application/use/eligibility cutoff, validThrough YYYY-MM-DD, with temporalEvidenceId selecting its exact article span; it must be later than publicationDate+1 day. '
         'For current_period annual rules, require supplied official content explicitly establishing applicability for the publication year, with no explicit relevant cutoff: applicableYear equals that year, hasExplicitCutoff false, validThrough empty, and officialEvidenceId selecting an officialEvidenceFragments entry that establishes that year and the actual rule. A copyright, last-updated date, unrelated annual announcement, or year alone is not applicability evidence. Confirm the selected official rule actually supports all date-sensitive claims; otherwise uncertain must fail. Absence of an announced ending date alone does not invalidate a confirmed current-year rule. An explicit cutoff must use active, never current_period. For evergreen, expired, incoherent and uncertain use applicableYear 0 and officialEvidenceId empty; evergreen uses validThrough empty and hasExplicitCutoff false. standing_rule separately requires its exact official evidence below. Choose topicEvidenceId from articleEvidenceFragments for the relevant article statement. For active choose temporalEvidenceId from that same catalog for the earliest relevant cutoff. For any other status with hasPeriodSpecificClaims true, select the exact body statement asserting year-specific applicability, a temporary condition or an effective change; this evidence is required for negative verdicts too. Otherwise temporalEvidenceId must be empty. '
         'First distinguish the kind of rule: mutable income thresholds, benefit amounts or eligibility conditions are not automatically annual rules. current_period is for actual year-specific applicability or annual changes, not merely any changeable number. A personal validity period measured from card issuance (for example five years) is a relative recipient condition, not a dated global program application cutoff; never invent a calendar expiry without the issuance date. Set officialCurrentGuidance according to whether this is current operating service guidance, independently of whether it contains a year. Use standing_rule only for currently operating official service/program guidance whose actually fetched body directly supports every relevant eligibility/amount condition, without annual-only, temporary, future-change or expired claims in the article title/body or official evidence. Require officialCurrentGuidance true, hasPeriodSpecificClaims false, applicableYear 0, hasExplicitCutoff false, validThrough empty and officialEvidenceId selecting a body fragment of the current operating guidance. An archived notice, old announcement, copyright year or a newly fetched timestamp does not prove operating status. A guide title merely labeled with this year is not itself an annual eligibility claim; any real year-specific change or limitation must retain current_period/active requirements. Never use standing_rule to excuse unsupported conditions or bypass a failed annual/cutoff check. Set hasPeriodSpecificClaims and officialCurrentGuidance truthfully for every status; current_period year-quote requirements remain unchanged. '
+        'A general reminder to check the applicable tax year or current official procedure is not itself a claim of a specific annual rule. Do not turn generic freshness advice into an unsupported annual eligibility assertion. Actual unsupported tax rules or period-specific promises still fail. '
         'TEMPORAL CLAIM SCOPE: hasPeriodSpecificClaims describes an actual year-specific applicability, temporary condition or effective-change assertion in the article body. A guide title displaying the current year and eligibility conditions that could change do not by themselves assert such a claim; assess their current official support under standing_rule. If a title promises an actual change but the body does not support it, preserve temporalCoherent false rather than inventing a body claim or changing the title. An absent cutoff is not itself evidence of an annual or temporary rule. '
         'ARTICLE EVIDENCE OUTPUT CONTRACT: select topicEvidenceId and temporalEvidenceId exactly from the provided articleEvidenceFragments/schema enum. Never copy or output topicEvidenceQuote/temporalEvidenceQuote; the host derives their original spans. Empty topicEvidenceId is allowed only for a negative verdict lacking relevant article evidence. IDs identify text, not approval: keep semantic rejection false. '
         'OFFICIAL EVIDENCE OUTPUT CONTRACT: select officialEvidenceId exactly from the provided fragment catalog/schema enum. Never rewrite a quotation or output a source URL/quote field: the host derives both from your selected original span. Read its complete source and adjacent context before deciding whether it supports the rule; an available ID does not imply relevant or sufficient evidence. Keep a negative semantic verdict negative. '
@@ -3249,6 +3256,11 @@ def review_bridge_article(source, selection, account_key, account, publication_d
     if not any(e.get('state') == 'returned' and (e.get('actual_model') or e.get('model')) for e in events):
         raise RuntimeError('Actual CF eligibility reviewer response missing')
     return receipt
+
+
+class BridgePlanningBlocked(MaterialRequired):
+    """No owned body serves the question; Jarvis must rebind scope before writing."""
+    pass
 
 
 def choose_verified_bridge(selection, account_key, account, publication_date, inventory, primary_sources, folder, fetch=None, judge=None, primary_fetch=None):
@@ -3292,7 +3304,7 @@ def choose_verified_bridge(selection, account_key, account, publication_date, in
             raise RuntimeError('Actual alternative route selection response missing')
         atomic_json(folder/'bridge-routing-model-events.json', events)
         candidate = {**selection, 'bridgeUrl': result.get('bridgeUrl'), 'bridgeReason': result.get('bridgeReason')}
-    raise RuntimeError('No verified relevant and temporally eligible CF destination after bounded routing review')
+    raise BridgePlanningBlocked('No verified relevant and temporally eligible CF destination after bounded routing review')
 
 
 def attribution_findings(url, canonical_url, receipt, article_id, account):
@@ -5593,8 +5605,9 @@ def prepare_content(account_key, override_strategy_id=None, evidence_dir=None, p
 def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
     from common.editorial_supervisor import authorize_next,dossier,lineage,STEPS
     saved=dict(RUN_OPTIONS);approvals=list(saved.get('_editorial_approvals',[]))
+    steps=('scope','pivot') if isinstance(failure,BridgePlanningBlocked) else STEPS
     try:
-        for index,step in enumerate(STEPS):
+        for index,step in enumerate(steps):
             folder=Path(RUN_OPTIONS.get('_active_preparation_folder') or '')
             if not folder.is_dir():raise failure
             packet,_=dossier(folder)
@@ -5603,8 +5616,8 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
             goal=(packet.get('keyword-selector.json',{}).get('readerGoal') or
                   packet.get('required-materials.json',{}).get('readerGoal') or {})
             from common.editorial_supervisor import acquire_recovery_sources
-            acquire_recovery_sources(folder,goal.get('question') or ACCOUNT_MAP[account]['topic'].split(',')[0])
-            plan=authorize_next('naver_blog',account,folder,STEPS[index:],failure,goal.get('question',''))
+            acquire_recovery_sources(folder,goal.get('question') or ACCOUNT_MAP[account]['topic'].split(',')[0],'naver_blog')
+            plan=authorize_next('naver_blog',account,folder,steps[index:],failure,goal.get('question',''),ACCOUNT_MAP[account]['topic'])
             approvals.append(plan)
             evidence_folder=folder/('jarvis-'+step+'-evidence');evidence_folder.mkdir(exist_ok=True)
             # Official evidence queries and organic competitor queries serve different tasks.
@@ -5626,7 +5639,7 @@ def _supervise_prewriting(account,strategy,publication_attempt,slot,failure):
             atomic_json(evidence_folder/'keyword-evidence.json',packet)
             RUN_OPTIONS.update(topic_seed=plan['approval']['readerQuestion'],main_keyword=None,
                                allow_retry_handoff=False,evidence_dir=str(evidence_folder),
-                               _editorial_conceptual_scope=plan['step']=='scope')
+                               _editorial_conceptual_scope=plan['step']=='scope',_editorial_reader_goal=plan.get('readerGoal'))
             try:
                 result=_prepare_content(account,strategy,str(evidence_folder),publication_attempt,slot)
                 lineage(result[1],approvals)
@@ -5986,13 +5999,13 @@ def _prepare_content(account_key, override_strategy_id=None, evidence_dir=None, 
                  'registeredCategories': []},
                 lambda request, response_schema=None: generate_naver_keyword_json(request, response_schema, folder, observe),
                 fixed={'mainKeyword': RUN_OPTIONS['main_keyword']} if RUN_OPTIONS.get('main_keyword') else None,
-                require_current_issue=strategy['id'] not in (1, 2))
+                require_current_issue=strategy['id'] not in (1, 2) and not RUN_OPTIONS.get('_editorial_conceptual_scope'))
             result = bind_reader_demand(result, topic_seed, RUN_OPTIONS.get('main_keyword'))
             require_new_automatic_topic(result,RUN_OPTIONS.get('_excluded_automatic_topics',[]))
             excluded=RUN_OPTIONS.get('_excluded_automatic_topics')
             if excluded:
                 atomic_json(folder/'excluded-reader-tasks.json',excluded)
-            result, intent_receipt = review_keyword_title_once(result, folder, account_key, publication_attempt, observer=observe,excluded_tasks=excluded)
+            result, intent_receipt = review_keyword_title_once(result, folder, account_key, publication_attempt, observer=observe,excluded_tasks=excluded,fixed_goal=RUN_OPTIONS.get('_editorial_reader_goal'))
             result['readerGoal'] = intent_receipt['verdict']['readerGoal']
             context['readerQuestion'] = result['readerQuestion']
             context['readerGoal'] = result['readerGoal']

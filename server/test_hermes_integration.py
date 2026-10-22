@@ -64,6 +64,22 @@ class MemoryIntegrationTests(unittest.TestCase):
             record.assert_not_called()
         self.assertFalse(llm_client._memory_read_only.get())
 
+    def test_delivery_db_lock_preserves_response_trace_and_replays_outbox(self):
+        import sqlite3
+        token=llm_client._memory_delivery.set({'trace':{},'eventId':'llm:'+'a'*32,
+            'sessionId':'test','prefix':'<project-memory>'})
+        self.addCleanup(lambda:llm_client._memory_delivery.reset(token))
+        self.store.initialize()
+        with patch.object(self.store,'db',side_effect=sqlite3.OperationalError('database is locked')):
+            row=llm_client.record_provider_memory_delivery('<project-memory> task','codex','fixture',status='completed')
+        self.assertTrue(row['memoryPrefixPresent'])
+        outbox=self.store.root/'provider-delivery-outbox'
+        self.assertEqual(len(list(outbox.glob('*.json'))),1)
+        self.assertEqual(llm_client.flush_provider_memory_deliveries(),1)
+        self.assertEqual(llm_client.flush_provider_memory_deliveries(),0)
+        with self.store.db() as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM memory_deliveries').fetchone()[0],1)
+
     def test_reviewer_skip_propagates_and_never_records_recursive_episode(self):
         @llm_client.memory_call
         def nested(prompt):
