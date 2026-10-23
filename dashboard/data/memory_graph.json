@@ -7378,6 +7378,73 @@
         "doctor"
       ],
       "immutableByPerformanceScore": true
+    },
+    "ceo-directive:senior-style-trial-20261023": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "priority": "highest",
+      "sourceType": "direct_user_instruction",
+      "recordedAt": "2026-10-23T14:59:31.504849+09:00",
+      "quote": "네이버 블로그 시니어 브리프 오늘 해야할 안건 바로 지금 올려봐. 오늘 사용할 키워드 에 상위노출 경쟁 블로그랑 완전 동일한 스타일을 적용해서 예약 발행 해보는걸 해볼거야.",
+      "guidance": "2026-10-23 soultin 시니어브리프 추가 예약 실험이다. 이번 안건에서 사용할 정확한 키워드로 실제 네이버 블로그 검색 후 경쟁 본문을 열어 보고 관측한 제목 패턴·도입·문단 호흡·소제목·정렬·사진/표 배치 스타일을 가능한 범위에서 가깝게 적용한다. 반드시 레이더 조사를 요청하고 실제 관측 URL과 채택 서식을 기록한다. 문장·체험·이미지는 복제하지 않고 공식 사실로 새 원고를 쓴다. 오늘 공개한 노후재정 및 내일 예약한 노후자금과 동일 의도를 피한다. 적용 대상은 soultin 이번 글뿐이며 정기 시간표 변경은 아니다. 검색 관측 순서와 검증 순위를 구분하고 미측정 성과는 미확인으로 남긴다.",
+      "roles": [
+        "jarvis",
+        "radar",
+        "publi"
+      ],
+      "account": "soultin",
+      "publicationDate": "2026-10-23",
+      "immutableByPerformanceScore": true
+    },
+    "ceo-directive:active-work-window": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "priority": "highest",
+      "sourceType": "direct_user_instruction",
+      "recordedAt": "2026-10-23T15:01:27.041915+09:00",
+      "quote": "항상 작업하고 있는 창이 활성화 되서 보이도록 해야해.",
+      "guidance": "브라우저 작업 시 현재 작업 중인 Ubuntu 창과 탭을 항상 전면 활성화해 대표님이 볼 수 있게 한다. 검색·Google Flow·네이버 스마트에디터·예약 확인으로 전환할 때 기존 focus_workflow_window와 page.bring_to_front를 사용한다. 사용자 탭과 진행 중인 편집기는 보존한다.",
+      "roles": [
+        "jarvis",
+        "radar",
+        "publi",
+        "patch",
+        "doctor",
+        "trace"
+      ],
+      "immutableByPerformanceScore": true
+    },
+    "ceo-directive:full-style-reproduction": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "priority": "highest",
+      "sourceType": "direct_user_instruction",
+      "recordedAt": "2026-10-23T15:06:17.910577+09:00",
+      "quote": "블로그탭에 상위노출 된 블로그 스타일을 그대로 재현 하도록 해봐.\n스티커를 사용했는지 이미지는 어떻게 사용했는지 모든 스타일을 그대로 재현하는거야.",
+      "guidance": "soultin 이번 실험은 블로그 탭에서 실제 관측한 한 개인 블로그의 전체 서식을 재현한다. 스티커 사용 여부·위치, 이미지 수·순서·크기·캡션, 표·인용구·구분선, 글꼴·크기·색·강조·정렬·문단 여백을 전부 관측해 기준으로 삼는다. 여러 글 특징 혼합이나 기존 기본 서식 적용으로 대신하지 않는다. 문구와 타인의 이미지는 복제하지 않는다. 실측한 순위만 순위라고 하며 관측 순서는 구별한다.",
+      "roles": [
+        "jarvis",
+        "radar",
+        "publi",
+        "patch"
+      ],
+      "immutableByPerformanceScore": true
+    },
+    "ceo-directive:retain-benchmark-tabs": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "priority": "highest",
+      "sourceType": "direct_user_instruction",
+      "recordedAt": "2026-10-23T15:06:17.910577+09:00",
+      "quote": "벤치마킹 하는 블로그 탭은 열어놔, 다 하고 내가 비교해 보게.",
+      "guidance": "사용자가 작업 후 직접 비교할 수 있도록 블로그 검색 결과와 이번 기준 글 탭을 열어두고 보존 이유와 URL·소유권을 기록한다. 이번 비교용 탭은 임시 탭 자동 정리 대상에서 제외한다.",
+      "roles": [
+        "jarvis",
+        "radar",
+        "publi",
+        "patch"
+      ],
+      "immutableByPerformanceScore": true
     }
   },
   "edges": [
@@ -9975,6 +10042,26 @@
       "source": "memory:hub",
       "target": "ceo:plain-language-and-staff-publication-verification",
       "type": "governed_by"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:senior-style-trial-20261023",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:active-work-window",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:full-style-reproduction",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:retain-benchmark-tabs",
+      "type": "contains"
     }
   ],
   "doctorPlans": [],
