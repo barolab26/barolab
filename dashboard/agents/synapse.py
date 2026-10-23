@@ -293,7 +293,7 @@ def build_index(graph):
     for domain in index:index[domain]=sorted(index[domain],key=lambda n:n['synapseWeight'],reverse=True)[:3]
     questions=[{'id':k,'title':n['title'],'url':n['url']} for k,n in graph['nodes'].items() if n['type']=='Question'][-100:]
     guides=[{'id':k,'title':n['title'],'url':n['url'],'synapseWeight':n['synapseWeight'],'summary':n.get('summary',''),'headings':n.get('headings',[])} for k,n in graph['nodes'].items() if n['type']=='Post']
-    return {'schema':'synapse-recipe-index-v1','meetingPolicy':next((n for n in graph['nodes'].values() if n.get('type')=='MeetingProtocol' and n.get('active')),{}),'accountProfiles':{n['account']:n for n in graph['nodes'].values() if n.get('type')=='AccountProfile'},'operatingDirectives':[{**n,'id':identity} for identity,n in graph['nodes'].items() if n.get('type')=='CEOOperatingDirective' and n.get('active')], 'styles':{n['account']:{'styleVariantId':identity,'effectiveDate':n['effectiveDate'],'parameters':n['parameters']} for identity,n in graph['nodes'].items() if n.get('type')=='StyleVariant' and n.get('active')},'domains':index,'lessons':[{k:n[k] for k in ('domain','failure','guidance','synapseWeight')} for n in graph['nodes'].values() if n['type']=='FailureLesson'],'reservations':[{k:n.get(k) for k in ('blogId','title','reserveTime')} for n in graph['nodes'].values() if n['type']=='Reservation'][-50:],'queryHints':[{k:n[k] for k in ('account','originalQuery','preferredQuery')} for n in graph['nodes'].values() if n['type']=='QueryRecipe'],'questions':questions,'guides':sorted(guides,key=lambda n:n['synapseWeight'],reverse=True)[:100]}
+    return {'schema':'synapse-recipe-index-v1','knowledgeNotes':[{**n,'id':identity} for identity,n in graph['nodes'].items() if n.get('type')=='PracticalKnowHow' and n.get('active')],'meetingPolicy':next((n for n in graph['nodes'].values() if n.get('type')=='MeetingProtocol' and n.get('active')),{}),'accountProfiles':{n['account']:n for n in graph['nodes'].values() if n.get('type')=='AccountProfile'},'operatingDirectives':[{**n,'id':identity} for identity,n in graph['nodes'].items() if n.get('type')=='CEOOperatingDirective' and n.get('active')], 'styles':{n['account']:{'styleVariantId':identity,'effectiveDate':n['effectiveDate'],'parameters':n['parameters']} for identity,n in graph['nodes'].items() if n.get('type')=='StyleVariant' and n.get('active')},'domains':index,'lessons':[{k:n[k] for k in ('domain','failure','guidance','synapseWeight')} for n in graph['nodes'].values() if n['type']=='FailureLesson'],'reservations':[{k:n.get(k) for k in ('blogId','title','reserveTime')} for n in graph['nodes'].values() if n['type']=='Reservation'][-50:],'queryHints':[{k:n[k] for k in ('account','originalQuery','preferredQuery')} for n in graph['nodes'].values() if n['type']=='QueryRecipe'],'questions':questions,'guides':sorted(guides,key=lambda n:n['synapseWeight'],reverse=True)[:100]}
 
 
 def winner_jobs(jobs, root=ROOT):
@@ -470,7 +470,15 @@ def recipe(prompt, slot, root=ROOT):
         matches=[n for n in index.get(kind,[]) if len(terms & set(re.findall(r'[가-힣A-Za-z0-9]{2,}',n['title'])))>=2]
         if not matches and kind=='questions' and slot=='radar':matches=index.get(kind,[])[-2:]
         for item in matches[:2]:lines.append(card_line({'kind':kind,**item}))
-    return '\n'.join(lines[:16])+'\n' if len(lines)>2 else ''
+    notes=[]
+    for note in index.get('knowledgeNotes',[]):
+        if note.get('roles') and slot not in note['roles']:continue
+        if not terms & set(re.findall(r'[가-힣A-Za-z0-9]{2,}',note.get('title','')+' '+' '.join(note.get('tags',[])))):continue
+        notes.append(card_line({'kind':'선택 가능한 실무 노하우 · 필수 지시 아님','title':note['title'],
+                                'method':note['method'],'whenToUse':note['whenToUse'],
+                                'limits':note['limits'],'measurementStatus':note['measurementStatus']}))
+    selected=lines[:12]+notes[:3] if notes else lines[:16]
+    return '\n'.join(selected)+'\n' if len(selected)>2 else ''
 
 
 if __name__=='__main__':print(json.dumps(refresh_once(force=True),ensure_ascii=False))
