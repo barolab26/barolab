@@ -23,3 +23,10 @@ class ConversationKnowledgeTests(unittest.TestCase):
             self.assertNotIn('선택적 방법',recipe('브라우저 포트 진단','radar'))
         self.assertTrue(node['optional'])
         self.assertFalse(node['causalClaim'])
+
+    def test_recent_directive_priority_compares_real_time_across_timezones(self):
+        index={'operatingDirectives':[{'guidance':'과거 지시','recordedAt':'2026-10-23T18:00:00+09:00'},
+                                      {'guidance':'최근 확인 지시','recordedAt':'2026-10-22T18:00:00+09:00','lastConfirmedAt':'2026-10-23T10:00:00+00:00'}]}
+        with patch('dashboard.agents.synapse.cached_index',return_value=index):
+            result=recipe('동작 확인','publi')
+        self.assertLess(result.index('최근 확인 지시'),result.index('과거 지시'))

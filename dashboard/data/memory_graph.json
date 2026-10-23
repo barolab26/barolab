@@ -7641,6 +7641,31 @@
         "patch"
       ],
       "immutableByPerformanceScore": true
+    },
+    "ceo-directive:ego-screen-execution": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "priority": "highest",
+      "sourceType": "direct_user_instruction",
+      "recordedAt": "2026-10-23T15:28:07.616609+09:00",
+      "quote": "ego lite 가 포스팅을 하는거 맞지?\n내가 ego lite 가 사람처럼 직접 화면을 보면서 포스팅이 가능해서 이 우분투 시스템으로 옮겼다고 얘기 했잖아.\n그럼 내가 원하는 ego lite 로 구조를 만들어야해. 벤치마킹 부터 제대로 할 줄 알아야 응용도 하는거 알지?",
+      "guidance": "EGO Lite가 화면 캡처를 모델로 관찰하고 다음 클릭·키보드 행동을 결정·실행한 뒤 다시 화면을 확인하는 구조로 벤치마킹부터 편집·비교를 수행한다. 고정 DOM 스크립트나 직원 도구 호출 기록을 EGO의 시각적 자율 작업이라고 대신 보고하지 않는다. 실제 블로그 탭을 화면에서 선택하고 기준 글 처음부터 끝까지 이미지·스티커·전체 서식을 관찰한다. 브라우저 작업창은 전면 활성화하고 비교용 탭은 보존한다. 팀장이 실험을 지시하고 실제 행동·모델·화면 증거와 결과를 지식으로 축적한다. 이번 요청에 필요한 공용 연결기 보완은 승인된 범위이며 일상 재승인을 받지 않는다. posting.py와 로그인·중복방지·실제 예약 검증은 보존한다.",
+      "roles": [
+        "jarvis",
+        "radar",
+        "publi",
+        "patch",
+        "trace",
+        "doctor"
+      ],
+      "immutableByPerformanceScore": true,
+      "lastConfirmedAt": "2026-10-23T09:57:44.080863+00:00",
+      "editorClarification": {
+        "originalText": "그냥 막 일자로 붙혀넣기 하고 뒤에 링크 붙혀서 달고 그러면 안되는거 알지? 모든 액션은 ego lite 가 보면서 타이핑치고 첨부하고 사람이 하는것 처럼 하는거야.",
+        "recordedAt": "2026-10-23T09:57:44.080863+00:00",
+        "scope": "사용자 화면에서 수행하는 게시 에디터 조작",
+        "guidance": "EGO가 실제 화면을 보고 클릭·타이핑·필요한 첨부를 결정한다. 문단 간격과 링크 위치를 확인한다. 고정 스크립트 입력을 시각적 자율 조작으로 보고하지 않는다. 계정·본문·중복 제출·공개 검증은 호스트의 실제 검사로 보존한다."
+      }
     }
   },
   "edges": [
@@ -11107,6 +11132,47 @@
       "source": "memory:hub",
       "target": "ceo-directive:jarvis-autonomous-experiments",
       "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:ego-screen-execution",
+      "type": "contains"
+    },
+    {
+      "source": "ceo-directive:ego-screen-execution",
+      "target": "staff:jarvis",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:ego-screen-execution",
+      "target": "staff:radar",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:ego-screen-execution",
+      "target": "staff:publi",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:ego-screen-execution",
+      "target": "staff:patch",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:ego-screen-execution",
+      "target": "staff:trace",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:ego-screen-execution",
+      "target": "staff:doctor",
+      "type": "applies_to_role",
+      "sourceField": "roles"
     }
   ],
   "doctorPlans": [],

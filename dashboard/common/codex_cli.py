@@ -291,8 +291,8 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         cli_image_arguments = []
         for idx, filename in enumerate(images or [], 1):
             image = Path(filename).resolve()
-            allowed_roots = (jobs.ROOT / 'cf_posting' / 'output',
-                             jobs.ROOT / 'naver_blog_posting' / 'output', scratch)
+            allowed_roots = (*tuple(jobs.ROOT / channel / 'output' for channel in
+                                   ('cf_posting', 'naver_blog_posting', 'naver_kin', 'threads_posting')), scratch)
             if not image.is_file() or image.suffix.lower() not in ('.jpg', '.jpeg', '.png') or not any(image.is_relative_to(root.resolve()) for root in allowed_roots):
                 raise RuntimeError('검증된 작업 산출물 이미지 경로가 아닙니다.')
             original_images.append(image)

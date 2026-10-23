@@ -86,7 +86,8 @@ def install_channel_conferences(kind):
         def publish(account, url, answer, before_submit=None):
             folder = folder_for('naver_kin', day, account + '-' + hashlib.sha256(url.encode()).hexdigest()[:16])
             planning_or_memory(account, '이 질문에 대한 답변 실행 계획: '+url+'\n'+answer[:800], folder, {}, channel='kin')
-            return original(account, url, answer, before_submit)
+            from common.kin_screen import publish_with_screen
+            return publish_with_screen(engine, original, account, url, answer, before_submit, folder)
         engine._naver_browser_publish = publish
         engine._conference_results = []
         verify = engine._naver_browser_verify_public
