@@ -117,7 +117,7 @@ def work_actor_owner(actor, owner_agent=''):
 
 
 def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
-                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url=''):
+                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url='', deliverable_label=''):
     """Host-observed lifecycle metadata only; never pass prompts, responses or secrets."""
     import uuid
     phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
@@ -143,6 +143,8 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
         if not address:
             raise ValueError('Invalid public deliverable URL')
         payload['deliverableUrl'] = address
+        if deliverable_label:
+            payload['deliverableLabel'] = clean(deliverable_label)
     _deliver(payload)
     if phase == 'failed':
         try:

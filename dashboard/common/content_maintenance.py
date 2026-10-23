@@ -604,6 +604,44 @@ def escalate_jev_review(original, draft, evidence, jev_review):
             'modelReceipt': metadata}
 
 
+def report_article_work(job, original, stage):
+    """Report the exact selected article; chat failure must not repeat a remote write."""
+    from common.collection_observability import locked
+    from agents.agent_tools import staff_tool_reply
+    from common.crew_chat_bridge import emit_work_event
+    stages = {'inspect': '근거·수정 필요 부분 점검 중 · 수정안 작성 및 공개 반영 안 함',
+              'prepare': '원문 점검·수정안 준비 중 · 공개 반영 전', 'apply': '검수된 수정안의 반영 전 점검 중',
+              'verified': '수정 반영·공개 본문 확인 완료'}
+    try:
+        if stage not in stages or not re.fullmatch(r'[a-f0-9]{32}', job['id']) or not valid_url(job['domain'], job['url']):
+            raise ValueError('Invalid article report identity')
+        folder = BACKUPS / job['id']
+        with locked(folder / 'chat-report-lock'):
+            path = folder / 'chat-reports.json'
+            reports = read(path)
+            if stage in reports:
+                return reports[stage]
+            draft = read(folder / 'draft.json')
+            changes = [str(change.get('reason', ''))[:160] for change in draft.get('changes', [])
+                       if isinstance(change, dict) and change.get('reason')][:3] if stage in ('apply', 'verified') else []
+            facts = {'channel': 'CF 블로그', 'domain': job['domain'], 'title': original['title'],
+                     'url': job['url'], 'currentStage': stages[stage], 'changes': changes,
+                     'publicVerified': stage == 'verified', 'reportScope': 'exact_existing_article'}
+            task = 'maintenance:' + job['id']
+            response = staff_tool_reply('doctor', task, {'tool': 'article_maintenance_report'}, facts)
+            event = emit_work_event(actor='doctor', actor_label='닥터', task_id=task,
+                phase='completed', stage='staff-response', message_kind='staff_reply', requested_to='jarvis',
+                model=response['route']['events'][-1]['actualModel'], output_kind=response['reply'],
+                deliverable_url=job['url'], deliverable_label=original['title'])
+            reports[stage] = {'eventId': event, 'facts': facts, 'response': response, 'reportedAt': stamp()}
+            atomic(path, reports)
+            return reports[stage]
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning('Article chat report deferred: %s', type(exc).__name__)
+        return None
+
+
 @observed_operation('content_maintenance', 'maintenance-prepare')
 def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     from common.content_improvement import prepare_improvement
@@ -613,6 +651,7 @@ def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     folder = BACKUPS / job['id']
     folder.mkdir(parents=True, exist_ok=True)
     atomic(folder / 'original.json', original)
+    report_article_work(job, original, 'inspect' if inspect_only else 'prepare')
     report = growth_analysis.summary()
     diagnostic = next((r for r in report.get('diagnosis', {}).get('domains', []) if r['domain'] == job['domain']), None)
     from dashboard.agents.synapse import doctor_context
@@ -780,6 +819,7 @@ def _apply_job(job_id, canary=False):
         raise ValueError('검수 완료 상태 또는 발행 우선 조건 미충족')
     if cooldown_active(job):
         raise ValueError('이전 실제 수정의 28일 관측 기간 · 재수정 보류')
+    report_article_work(job, original, 'apply')
     binding = cache_binding(job['domain'])
     with ExitStack() as stack:
         for lock in (ROOT / 'dashboard/data/cf/cleaner.lock', ROOT / 'dashboard/data/naver/pipeline-run.lock'):
@@ -868,6 +908,7 @@ def _apply_job(job_id, canary=False):
     save_job(job_id, status='completed', stage='monitor', completed_at=stamp(), action_id=action_id,
              proof=json.dumps(receipt, ensure_ascii=False), content_sha256=version_digest(expected), reason='동일 기존 URL 수정·공개 확인 완료')
     runtime(status='completed', stage='monitor', lastSuccessAt=stamp(), activeJob=None)
+    report_article_work(job, expected, 'verified')
     refresh_growth_state()
     return public_summary()
 

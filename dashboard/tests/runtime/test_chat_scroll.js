@@ -71,3 +71,21 @@ for (const who of ['jarvis','radar','trace','publi','patch','doctor']) {
   assert.equal(replies.crewConversationText(row),row.outputKind);
   assert.equal(replies.crewConversationText({...row,messageKind:'host_ack'}),null);
 }
+
+// Article links travel in trusted metadata, separately from staff prose.
+const linkStart = html.indexOf('  function articleLinkHtml(m) {');
+const linkEnd = html.indexOf('  function messageBodyText', linkStart);
+const links = {URL, escapeHtml: text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))};
+vm.createContext(links);
+vm.runInContext(html.slice(linkStart,linkEnd),links);
+const actualUrl = 'https://www.example.com/exact-article';
+const link = links.articleLinkHtml({who:'doctor',deliverableUrl:actualUrl});
+assert(link.includes(`href="${actualUrl}"`));
+assert(link.includes('수정 대상 글 열기'));
+assert(link.includes('rel="noopener noreferrer"'));
+assert.equal(links.articleLinkHtml({deliverableUrl:'javascript:alert(1)'}),'');
+assert.equal(links.articleLinkHtml({deliverableUrl:'https://user:password@example.com/article'}),'');
+assert.equal(links.articleLinkHtml({}),'');
+assert(links.articleLinkHtml({who:'doctor',taskTracker:{deliverableUrl:actualUrl}}).includes(actualUrl));
+
+assert(links.articleLinkHtml({who:'doctor',deliverableUrl:actualUrl,deliverableLabel:'<script>제목</script>'}).includes('&lt;script&gt;제목&lt;/script&gt;'));

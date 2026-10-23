@@ -1659,6 +1659,10 @@ def staff_tool_reply(agent, task_id, action, result, audit=None, *, stage='staff
         'If too long, omit secondary items; never truncate a sentence or its uncertainty clause. '
         'Dated or historical counts must retain their source date and historical scope; never describe stale statistics as current failures. '
         'If actualToolResult contains incident, discuss only that account/question/channel and the exact current/prior receipts; do not switch to unrelated project status. A prior verified answer with clicked=false is reconciliation, never a new publication. '
+        'For article_maintenance_report, identify the exact supplied article title, domain and currentStage; name the supplied changes when present. '
+        'Say 수정 반영 완료 only when publicVerified is true; preparing a draft is not a live edit. '
+        'The host attaches the exact supplied article URL separately; do not invent URLs or other targets. '
+        'If no article was selected, say 대상 선정 대기 and do not imply a specific edit is in progress. '
         'Never claim the tool fixed or published anything beyond its receipt. No links, credentials, '
         'personal data, shell commands or further tool requests. Return JSON reply only.\n' +
         json.dumps({'action':action,'actualToolResult':result},ensure_ascii=False)[:12000],

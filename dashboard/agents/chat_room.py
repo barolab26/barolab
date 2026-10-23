@@ -2243,7 +2243,7 @@ def project_work_event(payload):
     event_id = payload.get('eventId', '')
     if not isinstance(event_id, str) or not re.fullmatch(r'crew-[a-f0-9]{32}', event_id) or payload.get('id') != event_id:
         raise ValueError('Invalid event identity')
-    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage','ownerAgent','toolActor','messageKind')
+    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage','ownerAgent','toolActor','messageKind','deliverableLabel')
     clean = {}
     for key in fields:
         value = payload.get(key, '')
@@ -2279,7 +2279,7 @@ def project_work_event(payload):
             'isWorkstream':True,'replyToCeo':False,
             'brain':{'badge':clean['model'] or '모델 미관측'},
             'taskTracker':{'status':'failed' if phase == 'failed' else 'status_only',
-                           'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':'게시 글 확인' if address else ''}}
+                           'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':(clean['deliverableLabel'] or '게시 글 확인') if address else ''}}
 
 
 def receive_work_event(payload):

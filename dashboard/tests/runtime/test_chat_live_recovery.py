@@ -63,6 +63,10 @@ class ChatLiveRecoveryTests(unittest.TestCase):
                 receive({**event, 'model': 'api_key=unsafe'})
             project = scope['project_work_event']
             self.assertEqual(project({**event, 'messageKind': 'host_instruction'})['messageKind'], 'host_instruction')
+            linked = project({**event, 'who': 'doctor', 'deliverableUrl': 'https://www.example.com/actual-post', 'deliverableLabel': '실제 수정 대상 제목'})
+            self.assertEqual(linked['deliverableUrl'], 'https://www.example.com/actual-post')
+            self.assertEqual(linked['deliverableLabel'], '실제 수정 대상 제목')
+            self.assertEqual(linked['taskTracker']['deliverableLabel'], '실제 수정 대상 제목')
             with self.assertRaises(ValueError):
                 project({**event, 'messageKind': 'invented'})
             tool = project({**event, 'who': 'cf-image-maker', 'ownerAgent': 'publi', 'toolActor': 'cf-image-maker'})
