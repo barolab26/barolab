@@ -118,6 +118,9 @@ def _publication_quota(key, doc, now, fresh):
         policy = schedule_constants('naver_blog_posting/posting.py',
                                     ('DAILY_SLOTS', 'LEGACY_SLOT_ALIASES', 'LEGACY_SINGLE_SLOTS'))
         DAILY_SLOTS = policy['DAILY_SLOTS']
+        schedule_plan = load_json(DATA_DIR / 'daily_schedule.json')
+        if schedule_plan.get('effectiveDate') and day >= schedule_plan['effectiveDate']:
+            DAILY_SLOTS = {account: row['slots'] for account,row in schedule_plan['naver'].items()}
         def slot_matches(account, candidate, target):
             return (candidate == target or candidate in policy['LEGACY_SLOT_ALIASES'].get(account, {}).get(target, ())
                     or len(DAILY_SLOTS[account]) == 1 and candidate in policy['LEGACY_SINGLE_SLOTS'].get(account, ()))

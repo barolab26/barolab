@@ -1668,7 +1668,7 @@ def broadcast_patrol_to_meeting_room(results: List[Dict[str, Any]], status_snaps
         lines_publi.append(f"- **[{r['domain']}]** 「{r['title']}」 ➔ **「{sug}」** ({img_iss})")
 
     turns = [
-        ("doctor", "닥터", "자비스", "publi", "\n".join(lines_doctor), f"기존 글 {len(results)}건 시각 검열 & 클린 EXIF 세탁 완료"),
+        ("doctor", "닥터", "팀장", "publi", "\n".join(lines_doctor), f"기존 글 {len(results)}건 시각 검열 & 클린 EXIF 세탁 완료"),
         ("publi", "퍼블리", "닥터", "trace", "\n".join(lines_publi), f"C등급 {len(c_targets)}건 리모델링 큐 인수 완료"),
     ]
 

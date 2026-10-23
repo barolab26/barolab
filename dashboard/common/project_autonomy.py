@@ -10,10 +10,10 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / 'dashboard/data/project-autonomy.json'
 STATE = ROOT / 'dashboard/data/project-autonomy-state.json'
 COMMANDS = {
-    'cf_blog': ['cf_posting/posting.py', '--catch-up-today-once', '--limit', '1'],
-    'naver_blog': ['naver_blog_posting/posting.py', '--catch-up', '--limit', '1'],
-    'naver_kin': ['-m', 'naver_kin.posting', '--tick'],
-    'threads': ['-m', 'threads_posting.posting', '--tick'],
+    'cf_blog': ['-m', 'common.channel_parameters', 'cf-cycle'],
+    'naver_blog': ['-m', 'common.channel_parameters', 'naver-cycle'],
+    'naver_kin': ['-m', 'common.conference_dispatch', 'kin'],
+    'threads': ['-m', 'common.conference_dispatch', 'threads'],
     'legacy_remodel': ['-m', 'common.content_maintenance'],
 }
 
@@ -26,7 +26,7 @@ def run_project_cycle(project):
     if config.get('enabled') is not True or project not in config.get('projects', []) or (Path.home()/'EGO_EXEC_DISABLED').exists():
         return {'ok': False, 'status': 'held', 'reason': 'execution_disabled'}
     command = COMMANDS[project]
-    marker = command[1] if command[0]=='-m' else str(ROOT/command[0])
+    marker = ' '.join(command[1:]) if command[0]=='-m' else str(ROOT/command[0])
     if is_process_running_match(marker):
         return {'ok': False, 'status': 'busy', 'project': project}
     child = _ego_popen([sys.executable,'-u','-B','-X','utf8',*command],cwd=str(ROOT),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
@@ -93,6 +93,12 @@ def process_project_autonomy_once():
         for project in sorted(enabled,key=lambda p:rows.get(p,{}).get('lastStartedAt',0)):
             if project in pending_projects:continue
             row=rows.setdefault(project,{})
+            if project in ('cf_blog','naver_blog'):
+                from common.channel_parameters import policy, KST
+                from datetime import datetime
+                if datetime.now(KST).date().isoformat() >= policy()['effectiveDate']:
+                    row.update(dispatchOwner='barolab-parameters.timer',status='timer_managed')
+                    continue
             if project=='naver_kin':
                 row.update(dispatchOwner='barolab-kin.timer',status='timer_managed')
                 continue
@@ -103,7 +109,7 @@ def process_project_autonomy_once():
             row.update(requestId=request_id,action=action,lastStartedAt=now,nextRunAt=now+300,status='requested')
             write(STATE,state);enqueue_staff_request(request_id,[action])
             from common.crew_chat_bridge import emit_work_event
-            emit_work_event(actor='jarvis',actor_label='자비스',task_id=request_id,phase='completed',stage='project-instruction-issued',requested_to=actor,output_kind=project+' 기본 워크플로우 실행 배정')
+            emit_work_event(actor='jarvis',actor_label='팀장',task_id=request_id,phase='completed',stage='project-instruction-issued',requested_to=actor,output_kind=project+' 기본 워크플로우 실행 배정')
             return True
         write(STATE,state)
     return False

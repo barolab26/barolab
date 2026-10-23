@@ -72,16 +72,18 @@ class ChatRetentionTests(unittest.TestCase):
             scope = dict(CHATS_DIR=root, json=json, hashlib=hashlib, os=os)
             exec(compile(ast.Module(body=[node], type_ignores=[]), '<retention>', 'exec'), scope)
             messages = [{'id': str(i), 'eventType': 'crew_work_event', 'phase': 'completed'} for i in range(400)]
+            messages[0].update(messageKind='staff_reply',stage='post-style-planning',outputKind='머스트 헬스뷰 안건을 엽니다.')
             user = {'id': 'human', 'who': 'user', 'text': 'Keep my conversation'}
             messages.insert(4, user)
             room = {'messages': messages, 'sid': 42}
             scope['compact_room_telemetry'](room, keep=20)
             self.assertIn(user, room['messages'])
+            self.assertTrue(any(m.get('id')=='0' for m in room['messages']))
             self.assertEqual(room['sid'], 42)
-            self.assertEqual(len(room['messages']), 21)
+            self.assertEqual(len(room['messages']), 22)
             archived = list((root / 'work-event-history').glob('*.json'))
             history = json.loads(archived[0].read_text())['messages']
-            self.assertEqual(len(history), 380)
+            self.assertEqual(len(history), 379)
             self.assertEqual({r['id'] for r in history + room['messages']}, {r['id'] for r in messages})
             scope['compact_room_telemetry'](room, keep=20)
             self.assertEqual(len(list((root / 'work-event-history').glob('*.json'))), 1)

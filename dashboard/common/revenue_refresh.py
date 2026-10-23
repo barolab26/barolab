@@ -44,7 +44,8 @@ def collect_once(root=ROOT,now=None,backend=None):
                 return backend.adsense(cfg,start,today,settings['sites'],prefix)
             jobs.append((key,record,API_SECONDS,adsense_job))
         for account,port in backend.ADPOST_ACCOUNTS:
-            key='adpost-'+account;record=by_id.setdefault(key,backend.source(key,'adpost',account+' · 애드포스트','KRW','계정 publisher',browserPort=port))
+            key='adpost-'+account;record=by_id.setdefault(key,backend.source(key,'adpost','애드포스트 · 실명 3계정 통합','KRW','soul5373 통합 로그인 · 전체 등록 미디어',browserPort=port))
+            record.update(browserPort=9333,collectionAccount='soul5373',declaredRealNameAccountCount=3)
             def adpost_job(account=account,port=port):
                 # A refresh must never start a stopped browser or touch an active editor.
                 try:

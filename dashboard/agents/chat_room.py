@@ -4,12 +4,12 @@ ARGO Multi-Agent Meeting Room (room.mjs) ported & upgraded for BaroLab Master Hu
    - Replaces batch return with turn-by-turn tiki-taka streaming and live typing indicators
      (`[🤖 퍼블리가 응답을 작성하고 있습니다... ●●●]`, `[⚙️ 패치가 코드를 점검하고 있습니다... ●●●]`).
 2. Real-Time Hand-off & Task Status Tracker (`taskTracker` inside each message):
-   - `📋 업무 인계: @자비스 ➔ @퍼블리`
+   - `📋 업무 인계: @팀장 ➔ @퍼블리`
    - `🔄 처리 중` ➔ In-place transition to `✅ 처리 완료` / `🔴 처리 실패`
    - Deliverable links & `[🧠 기억 그래프에 새 노하우 연결됨]` synapse badge.
 3. Autonomous Work Stream (`AutonomousCrewWorker`):
    - Background worker & pipeline event receiver (`/api/chat/autonomous/event`, `/api/chat/autonomous/toggle`, `/api/chat/autonomous/trigger-cycle`)
-   - Streams multi-agent collaboration (`@트레이스` ➔ `@퍼블리` ➔ `@패치` ➔ `@자비스`) in real time even without user input.
+   - Streams multi-agent collaboration (`@트레이스` ➔ `@퍼블리` ➔ `@패치` ➔ `@팀장`) in real time even without user input.
 """
 
 import asyncio
@@ -60,14 +60,14 @@ ARGO_CHATS_DIR = ARGO_WS_DIR / "chats"
 CREW_AGENTS: List[Dict[str, Any]] = [
     {
         "slug": "jarvis",
-        "name": "자비스",
+        "name": "팀장",
         "title": "운영총괄 AI",
         "team": "운영총괄",
         "color": "#2563eb",
         "badge": "총괄",
         "icon": "🧭",
-        "aliases": ["jarvis", "자비스"],
-        "typingAction": "🧭 자비스가 전사 운영 지침 및 승인 사항을 정리하고 있습니다...",
+        "aliases": ["jarvis", "팀장", "자비스"],
+        "typingAction": "🧭 팀장가 전사 운영 지침 및 승인 사항을 정리하고 있습니다...",
         "defaultStep": "일일 목표($100)·발행 파이프라인·기억 그래프 시냅스 통합 점검 중...",
         "persona": "윤대표-CEO를 보좌하는 BaroLab 운영총괄 AI. 애드센스 일 $100 목표, 할일·예약·발행·검수 통합 관제 및 의사결정 요약.",
     },
@@ -306,7 +306,7 @@ def _extract_mentioned_slugs(text: str) -> List[str]:
 def normalize_staff_calls(text):
     """Mark explicit staff requests for display; mentions do not dispatch work."""
     protected = re.compile(r'(```[\s\S]*?```|`[^`\n]*`|https?://[^\s]+|\[[^\]]*\]\([^)]*\))')
-    names = r'(?:자비스|패치|퍼블리|트레이스|레이더|닥터|jarvis|patch|publi|trace|radar|doctor)'
+    names = r'(?:팀장|자비스|패치|퍼블리|트레이스|레이더|닥터|jarvis|patch|publi|trace|radar|doctor)'
     call = re.compile(r'(?<![@\w])(' + names + r')(?=(?:님)?(?:에게|[,:：\s]))', re.I)
     request = re.compile(r'(?:해주세요|해\s*주세요|하세요|해\s*줘|하라|바랍니다|부탁(?:합니다|해요|드립니다)?|요청합니다|요청드립니다|맡아\s*주세요)')
     pieces = protected.split(str(text or ''))
@@ -387,7 +387,7 @@ def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str,
             if pw and pw != "system" and pw != who:
                 prev_who = pw
                 break
-        from_name = "윤대표-CEO" if prev_who == "user" else AGENT_MAP.get(prev_who, {}).get("name", "자비스")
+        from_name = "윤대표-CEO" if prev_who == "user" else AGENT_MAP.get(prev_who, {}).get("name", "팀장")
         artifacts = m.get("artifacts") or []
         m["taskTracker"] = {
             "handoff": f"@{from_name} ➔ @{ag['name']}",
@@ -436,6 +436,8 @@ def compact_room_telemetry(room, keep=200):
     messages=room.get('messages',[])
     indices=[i for i,row in enumerate(messages) if row.get('eventType')=='crew_work_event']
     removed=set(indices[:-keep]) if keep else set(indices)
+    conversations=[i for i in indices if messages[i].get('messageKind')=='staff_reply' and messages[i].get('stage') in ('post-style-planning','style-strategy-discussion')]
+    removed.difference_update(conversations[-keep:] if keep else [])
     for role in ('jarvis','patch','publi','trace','doctor','radar'):
         owned=[i for i in indices if (messages[i].get('ownerAgent') or messages[i].get('who'))==role]
         for candidates in (owned,[i for i in owned if messages[i].get('phase')=='completed']):
@@ -654,7 +656,7 @@ def build_Contextual_task_info(slug: str, user_text: str, from_name: str, next_n
     else:  # jarvis
         step = "전사 운영 방향 정리 및 후속 실행 배정 중..."
         summary = "총괄 의사결정 및 실행 배정 완료"
-        typing_text = "🧭 자비스가 응답을 작성하고 있습니다..."
+        typing_text = "🧭 팀장가 응답을 작성하고 있습니다..."
 
     return {
         "typingText": typing_text,
@@ -873,7 +875,7 @@ def _call_chat_llm(
         response = generate_json(system_prompt + '\n' + user_prompt + instruction,
             agent_slot=agent_slug or 'jarvis', timeout_seconds=timeout_sec, response_schema=schema,
             crew_actor=agent_slug or 'jarvis',
-            crew_actor_label={'jarvis':'자비스','publi':'퍼블리','patch':'패치','trace':'트레이스','radar':'레이더','doctor':'닥터'}.get(agent_slug or 'jarvis', '공통 실행기'),
+            crew_actor_label={'jarvis':'팀장','publi':'퍼블리','patch':'패치','trace':'트레이스','radar':'레이더','doctor':'닥터'}.get(agent_slug or 'jarvis', '공통 실행기'),
             crew_stage='chat-response', crew_task_id=('staff:' + hashlib.sha256(staff_request_id.encode()).hexdigest()) if staff_request_id else None)
         if not isinstance(response.get('reply'), str) or not response['reply'].strip():
             raise ValueError('Missing reply')
@@ -1074,7 +1076,7 @@ STRICT_ANTI_HALLUCINATION_RULES = (
 
 AGENT_SYSTEM_PROMPTS: Dict[str, str] = {
     "jarvis": (
-        "너는 BaroLab의 총괄 디렉터 '자비스(@jarvis)'다. "
+        "너는 BaroLab의 총괄 디렉터 '팀장(@jarvis)'다. "
         "직원에게 현재 업무를 요청하는 문장은 @패치·@퍼블리처럼 호출 대상 앞에 @를 붙인다. 단순 과거 보고·일반 언급은 호출로 만들지 않는다. 멘션 문구 자체는 실제 요청 전달이나 실행 증거가 아니다. "
         "5명 직원(퍼블리·트레이스·패치·닥터·레이더)의 실시간 상태 요약본과 앞선 동료의 보고를 종합해, 대표님의 질문 맥락에 맞춰 핵심 결론과 즉시 실행 방향(PID, 채널 배정, 우선순위)을 자연스러운 한국어로 명쾌하게 브리핑한다.\n"
         + STRICT_ANTI_HALLUCINATION_RULES
@@ -2261,17 +2263,23 @@ def project_work_event(payload):
         raise ValueError('Tool origin mismatch')
     if clean['who'] in staff and clean['ownerAgent'] not in ('',clean['who']):
         raise ValueError('Staff owner mismatch')
+    address = ''
+    if payload.get('deliverableUrl'):
+        from dashboard.agents.synapse import url
+        address = url(payload['deliverableUrl'])
+        if not address or len(address)>1000:
+            raise ValueError('Invalid public deliverable URL')
     ts = payload.get('ts')
     if not isinstance(ts, int) or isinstance(ts, bool) or ts <= 0:
         raise ValueError('Observed timestamp required')
     phase = payload['phase']
     summary = f"{clean['stage'] or '작업'}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다."
     return {**clean, 'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
-            'phase':phase,'ts':ts,'text':summary,'autonomous':True,'msgKind':'workstream',
+            'phase':phase,'ts':ts,'text':summary,'autonomous':True,'msgKind':'workstream','deliverableUrl':address,
             'isWorkstream':True,'replyToCeo':False,
             'brain':{'badge':clean['model'] or '모델 미관측'},
             'taskTracker':{'status':'failed' if phase == 'failed' else 'status_only',
-                           'step':summary,'resultSummary':summary,'synapseLinked':False}}
+                           'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':'게시 글 확인' if address else ''}}
 
 
 def receive_work_event(payload):
@@ -2374,7 +2382,7 @@ def api_execute_agent_tool(req: ExecuteAgentToolRequest):
     res = execute_agent_tool(req.agent, req.tool, **(req.args or {}))
     if res.get("ok"):
         partner = FOLLOWUP_PARTNER_MAP.get(req.agent, "jarvis")
-        partner_name = AGENT_MAP.get(partner, {}).get("name", "자비스")
+        partner_name = AGENT_MAP.get(partner, {}).get("name", "팀장")
         ag_icon = AGENT_MAP.get(req.agent, {}).get("icon", "⚡")
         badge_txt = res.get("badge") or f"[실행 완료: {req.tool}]"
         ws_msg = broadcast_workstream_handoff(
@@ -2521,7 +2529,7 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
     for idx, slug in enumerate(speakers):
         ag = AGENT_MAP.get(slug, CREW_AGENTS[0])
         brain = _get_agent_brain_safe(slug)
-        from_name = "윤대표-CEO" if idx == 0 else AGENT_MAP.get(speakers[idx - 1], {}).get("name", "자비스")
+        from_name = "윤대표-CEO" if idx == 0 else AGENT_MAP.get(speakers[idx - 1], {}).get("name", "팀장")
         next_name = AGENT_MAP.get(speakers[idx + 1], {}).get("name") if idx + 1 < len(speakers) else None
         task_info = build_Contextual_task_info(slug, text, from_name, next_name)
 

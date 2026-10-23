@@ -282,3 +282,34 @@
 ### 7.6 공동 회의와 성과 환류
 
 @radar는 수집한 독자 질문·출처와 시간대 가설을 구분해 제안하고, @jarvis는 기존 공개·예약·진행 중인 슬롯을 보존한 조정만 승인한다. @publi는 현재 계정의 이 절을 읽어 intro·sections·signoff에 반영하고 생성 산출물 경로와 실제 예약 증거를 보고한다. @patch는 코드 수정 대신 기존 스키마로 표현 가능한 서식을 점검한다. @doctor는 이미 공개된 유망 글의 부분 개선만 제안한다. @trace는 같은 URL·같은 관측 기간의 실제 노출·클릭·체류시간·수익으로 평가하며 미수집 값을 0으로 간주하지 않는다. 실측 없이 +20점, 검색 피크 감지, 예약 완료를 주장하지 않는다. 다음 실험은 한 번에 시간 또는 서식 한 요소만 바꾸고, 가설과 관측 결과를 지식그래프로 연결한다.
+
+### 7.7 승인된 SmartEditor 표시 파라미터
+공용 실행기가 아래 설정을 editor-content.json의 presentation과 실제 네이티브 텍스트 노드에 전달한다. 표는 기존 image 블록으로 실제 2열 요약표 이미지를 생성하며, 네이티브 표인 것처럼 표시하지 않는다. 이미 승인된 원고는 변경하지 않는다. 시간표는 dashboard/data/daily_schedule.json을 사용한다.
+
+```json:editor-parameters
+{
+  "default": {
+    "bodyFontSize": 16,
+    "headingFontSize": 24,
+    "summaryFontSize": 19,
+    "summaryBold": true,
+    "summaryTable": false,
+    "tableHeaderColor": "#2563eb"
+  },
+  "accounts": {
+    "soultin": {
+      "bodyFontSize": 19,
+      "headingFontSize": 28,
+      "summaryFontSize": 24,
+      "summaryTable": true
+    },
+    "adinfo0905": {
+      "summaryFontSize": 19,
+      "summaryTable": true
+    },
+    "stone0747": {
+      "summaryTable": true
+    }
+  }
+}
+```

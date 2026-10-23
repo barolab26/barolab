@@ -1,0 +1,12 @@
+[Unit]
+Description=BaroLab approved parameter prepare schedule
+
+[Timer]
+OnCalendar=*-*-* *:15:00 Asia/Seoul
+AccuracySec=1s
+RandomizedDelaySec=0
+Persistent=true
+Unit=barolab-parameters-prepare.service
+
+[Install]
+WantedBy=timers.target

@@ -116,14 +116,14 @@ def brain_display(data,now):
             'bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim','dim']
     brains=data.get('agentBrains',{});crew={r.get('role'):r for r in data.get('crew',[])}
     def model(role):return brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
-    mapping='[직원 매핑] @jarvis('+model('jarvis')+') | '
+    mapping='[직원 매핑] @팀장('+model('jarvis')+') | '
     mapping+=('@publi·@patch('+model('publi')+')' if model('publi')==model('patch') else '@publi('+model('publi')+') | @patch('+model('patch')+')')
     mapping+=' | Threads('+model('threads_pipeline')+')';rows.append(mapping)
     spans=[]
     for r in active:
         role=r.get('agentSlot')
         if role in ('cf_pipeline','naver_pipeline','kin_pipeline'):role='publi'
-        name='Threads' if role=='threads_pipeline' else '@'+str(role)
+        name='Threads' if role=='threads_pipeline' else '@팀장' if role=='jarvis' else '@'+str(role)
         if role in ('jarvis','publi','patch','threads_pipeline'):
             start=mapping.find(name)
             if start>=0:spans.append([start,start+len(name)])
@@ -142,7 +142,7 @@ def brain_render(display):
 
 def stage_number(stage):
     text=str(stage).lower()
-    if any(x in text for x in ('editorial','prewrit','사전','자비스')):return 3
+    if any(x in text for x in ('editorial','prewrit','사전','팀장','자비스')):return 3
     if any(x in text for x in ('keyword','키워드','주제')):return 1
     if any(x in text for x in ('research','리서치','근거','소싱')):return 2
     if any(x in text for x in ('writer','원고','집필','본문')):return 4
@@ -176,6 +176,9 @@ def pipeline_lines(data,now):
         rows.append(title+' · '+str(stage)+' · '+str(elapsed)+'초')
         rows.append(' → '.join(('▶ ' if n==step else '')+f'{n}.{label}' for n,label in enumerate(STEPS,1)))
         if detail:rows.append(str(detail)[:180])
+    approved=data.get('schedulePolicy',{});prepared=data.get('scheduleRuntime',{})
+    if approved.get('effectiveDate'):
+        rows.append('시간표 직결 '+str(approved['effectiveDate'])+' · '+str(prepared.get('date',''))+' 네이버 예약 '+str(len(prepared.get('naver',{})))+'/7 · CF 준비 '+str(len(prepared.get('cf',{})))+'/16')
     if not active:
         rows.append('다음 슬롯 준비 / 자동 복구 대기')
         failed=next((r for r in reversed(items) if r.get('status') in ('failed','review_required')),None)

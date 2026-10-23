@@ -39,9 +39,25 @@
       .map(([key,value])=>`${credentialNames[key]} ${value?'있음':'없음'}`).join(' · ');
     return {statusLabel,configurationLabel,capabilityLabel,credentialLabel,accountLabel:source?.optional?'추가 계정':''};
   }
-  const revenueApi={periodView,moneyText:period=>periodView(period).text,currencyValue,categoryPeriod,sourceView};
+  function adpostAccounts(data,today) {
+    const sources=data?.months?.[today.slice(0,7)]?.sources || data?.categories?.find(c=>c.id==='adpost')?.sources || [];
+    const yesterday=new Date(Date.parse(today+'T00:00:00Z')-86400000).toISOString().slice(0,10);
+    return sources.filter(s=>s.category==='adpost' && s.accountBreakdownVerified===true).map(s=>{
+      const month=Object.entries(s.daily || {}).filter(([day,value])=>day.startsWith(today.slice(0,7)) && Number.isFinite(Number(value)));
+      return {account:s.account || s.id.replace('adpost-',''),today:s.daily?.[today]??null,yesterday:s.daily?.[yesterday]??null,month:month.length?month.reduce((n,[,value])=>n+Number(value),0):null};
+    });
+  }
+  const revenueApi={periodView,moneyText:period=>periodView(period).text,currencyValue,categoryPeriod,sourceView,adpostAccounts};
   if (typeof module!=='undefined' && module.exports) { module.exports=revenueApi; return; }
   root.BaroLabRevenue=revenueApi;
+  root.renderAdpostAccounts=(data,today)=>{
+    const box=document.getElementById('adpost-account-breakdown'),rows=adpostAccounts(data,today);
+    if(!box || !rows.length)return;
+    const money=value=>value===null?'집계 대기':'₩'+Number(value).toLocaleString('ko-KR');
+    box.replaceChildren(...rows.map(row=>{const line=document.createElement('div');line.textContent=`${row.account} · 오늘 ${money(row.today)} / 어제 ${money(row.yesterday)} / 이달 ${money(row.month)}`;return line;}));
+    const value=document.getElementById('val-rev-adpost');if(value)value.textContent='계정별 수익';
+    const bar=document.getElementById('bar-rev-adpost');if(bar)bar.parentElement.style.display='none';
+  };
   const set = (id, value) => {
     const node = document.getElementById(id);
     if (node) node.textContent = value;

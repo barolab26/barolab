@@ -815,7 +815,7 @@
       </div>
       <div class="toolbar" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <span class="kst-clock-pill" id="chat-kst-clock" title="모든 에이전트 시스템 프롬프트에 실시간 주입되는 한국 표준시(KST)">🕐 KST 동기화 중...</span>
-        <button type="button" class="btn-patrol-trigger" id="btn-trigger-sre-briefing" style="background:#eff6ff; border-color:#2563eb; color:#1d4ed8;" title="자비스·패치·트레이스가 6대 전 프로젝트(CF·네이버·지식iN·Threads·리모델링·앱4종 AdMob) 상태와 병목을 즉시 감사해 회의실에 브리핑합니다">
+        <button type="button" class="btn-patrol-trigger" id="btn-trigger-sre-briefing" style="background:#eff6ff; border-color:#2563eb; color:#1d4ed8;" title="팀장·패치·트레이스가 6대 전 프로젝트(CF·네이버·지식iN·Threads·리모델링·앱4종 AdMob) 상태와 병목을 즉시 감사해 회의실에 브리핑합니다">
           🛡️ 6대 전 프로젝트 감사·브리핑
         </button>
         <button type="button" class="btn-patrol-trigger" id="btn-trigger-doctor-patrol" title="닥터(Doctor)가 기존 발행 글 5건을 즉시 순찰·7대 검진·카테고리 자동 패치 후 회의실에 보고합니다">
@@ -853,7 +853,7 @@
               <span class="tab-cnt" data-cnt-for="all">0</span>
             </button>
             <button type="button" class="agent-filter-tab" data-agent-filter="jarvis">
-              <span>🧭 @자비스</span>
+              <span>🧭 @팀장</span>
               <span class="tab-cnt" data-cnt-for="jarvis">0</span>
             </button>
             <button type="button" class="agent-filter-tab" data-agent-filter="publi">
@@ -889,7 +889,7 @@
         <div class="room-stream chat-messages" id="room-stream"></div>
         <dialog id="work-records-dialog" style="width:min(900px,90vw);max-height:80vh;border:1px solid #cbd5e1;border-radius:12px;padding:20px;">
           <h3>업무 기록</h3>
-          <label>담당 직원 <select id="work-records-agent"><option value="all">전체</option><option value="jarvis">자비스</option><option value="publi">퍼블리</option><option value="trace">트레이스</option><option value="patch">패치</option><option value="radar">레이더</option><option value="doctor">닥터</option></select></label>
+          <label>담당 직원 <select id="work-records-agent"><option value="all">전체</option><option value="jarvis">팀장</option><option value="publi">퍼블리</option><option value="trace">트레이스</option><option value="patch">패치</option><option value="radar">레이더</option><option value="doctor">닥터</option></select></label>
           <button type="button" id="close-work-records">닫기</button>
           <div id="work-records-list"></div>
         </dialog>
@@ -906,7 +906,7 @@
           <div class="mention-bar">
             <div class="mention-pills-left">
               <button type="button" class="mention-pill" data-mention="@radar">@radar 레이더(신사업·마케팅·트렌드)</button>
-              <button type="button" class="mention-pill" data-mention="@jarvis">@jarvis 자비스(총괄)</button>
+              <button type="button" class="mention-pill" data-mention="@팀장">@팀장(총괄)</button>
               <button type="button" class="mention-pill" data-mention="@doctor" style="border-color:#99f6e4; background:#f0fdfa; color:#0f766e;">@doctor 닥터(감사·리모델링)</button>
               <button type="button" class="mention-pill" data-mention="@publi">@publi 퍼블리(검수)</button>
               <button type="button" class="mention-pill" data-mention="@trace">@trace 트레이스(분석)</button>
@@ -930,7 +930,7 @@
 <script>
 (() => {
   const AGENT_STYLE = {
-    jarvis: { name: '자비스', badge: '운영총괄', color: '#2563eb', short: 'J', icon: '🧭', title: '운영총괄 AI', defaultBrain: 'Argon High' },
+    jarvis: { name: '팀장', badge: '운영총괄', color: '#2563eb', short: 'J', icon: '🧭', title: '운영총괄 AI', defaultBrain: 'Argon High' },
     doctor: { name: '닥터', badge: '콘텐츠감사', color: '#0d9488', short: 'D', icon: '🩺', title: '콘텐츠 감사·재생 전담', defaultBrain: '3.8 Flash' },
     publi:  { name: '퍼블리', badge: '발행검수', color: '#059669', short: 'P', icon: '🤖', title: '블로그 발행·예약 검수 전문가', defaultBrain: 'gpt-6.1-sol' },
     trace:  { name: '트레이스', badge: '성과분석', color: '#7c3aed', short: 'T', icon: '📊', title: '색인·트래픽·수익 분석 전문가', defaultBrain: '3.8 Flash' },
@@ -939,7 +939,7 @@
   };
 
   const ALIAS_TO_SLUG = {
-    jarvis: 'jarvis', '자비스': 'jarvis',
+    jarvis: 'jarvis', '팀장': 'jarvis', '자비스': 'jarvis',
     publi: 'publi', '퍼블리': 'publi',
     trace: 'trace', '트레이스': 'trace',
     patch: 'patch', '패치': 'patch',
@@ -984,7 +984,7 @@
   function extractMentionsFromText(text) {
     const out = new Set();
     const raw = String(text || '');
-    const regex = /@(jarvis|publi|trace|patch|radar|doctor|자비스|퍼블리|트레이스|패치|레이더|닥터)/gi;
+    const regex = /@(jarvis|publi|trace|patch|radar|doctor|팀장|자비스|퍼블리|트레이스|패치|레이더|닥터)/gi;
     let match;
     while ((match = regex.exec(raw)) !== null) {
       const slug = ALIAS_TO_SLUG[match[1].toLowerCase()];
@@ -999,7 +999,7 @@
     safe = safe.replace(/(^|\n)(\[실행 완료:[^\]]+\])/g, '$1<span class="exec-tool-badge">⚡ $2</span>');
     safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     safe = safe.replace(/`([^`]+)`/g, '<code style="background:#f1f5f9; padding:1px 5px; border-radius:4px; font-size:12.5px; color:#0f172a;">$1</code>');
-    safe = safe.replace(/@(jarvis|publi|trace|patch|radar|doctor|자비스|퍼블리|트레이스|패치|레이더|닥터)/gi, '<span class="inline-mention-pill">@$1</span>');
+    safe = safe.replace(/@(jarvis|publi|trace|patch|radar|doctor|팀장|자비스|퍼블리|트레이스|패치|레이더|닥터)/gi, '<span class="inline-mention-pill">@$1</span>');
     safe = safe.replace(/\[([^\]]+)\]\((?:&lt;)?(?:\/\/otns\/yoonlab\/10_Project\/BaroLab\/)?vault\/([^)&>]+)(?:&gt;)?\)/g,
       '<a href="memory.html?rel=$2" class="artifact-chip">📄 $1</a>');
     return safe;
@@ -1311,7 +1311,7 @@
     const memoryBtnHtml = showMemorySaveBtn
       ? `<button type="button" class="btn-inline-memory-save ${isSynapseSaved ? 'is-saved' : ''}" data-save-msg-id="${escapeHtml(m.id || '')}" data-save-who="${escapeHtml(m.who || 'radar')}" title="이 분석 내용을 기억 그래프(memory.html)에 시냅스 노드로 즉시 저장합니다">${isSynapseSaved ? '[✦ 기억 그래프에 반영됨]' : '[✦ 기억 그래프에 반영]'}</button>`
       : '';
-    const recipientNames = { jarvis: '자비스', patch: '패치', publi: '퍼블리', trace: '트레이스', radar: '레이더', doctor: '닥터' };
+    const recipientNames = { jarvis: '팀장', patch: '패치', publi: '퍼블리', trace: '트레이스', radar: '레이더', doctor: '닥터' };
     const recipientLabel = Object.hasOwn(recipientNames, m.requestedTo) ? `@${recipientNames[m.requestedTo]}` : m.requestedTo;
     const actorDisplay = workActorDisplay(m);
     const linkage = [['실행 도구', actorDisplay.tool], ['귀속 근거', actorDisplay.historical ? '과거 기록 역할 분류' : actorDisplay.tool && actorDisplay.owner ? '실행 소유 직원' : actorDisplay.tool ? '담당 미지정' : ''], ['단계', m.stage], ['작업', m.taskId], ['요청 대상', recipientLabel], ['상위 요청', m.parentRequestId], ['반환 유형', m.outputKind], ['근거', m.evidenceId]]
@@ -1398,6 +1398,10 @@
     const staff = ['jarvis','publi','trace','patch','radar','doctor'];
     const reply = m.outputKind;
     const validText = typeof reply === 'string' && reply.trim() && reply.length <= 160 && !/[\x00-\x1f]/.test(reply);
+    if (m.eventType === 'crew_work_event' && staff.includes(m.who)
+        && ['style-strategy-discussion','post-style-planning'].includes(m.stage)
+        && m.phase === 'completed' && m.messageKind === 'staff_reply'
+        && typeof m.model === 'string' && m.model.trim() && validText) return reply;
     if (m.eventType === 'crew_work_event' && m.who === 'jarvis' && ['project-result-reviewed','project-instruction-issued'].includes(m.stage)
         && m.phase === 'completed' && m.messageKind === 'staff_reply'
         && typeof m.model === 'string' && m.model.trim() && validText) return reply;

@@ -158,7 +158,9 @@
     const records = [ps?.completedByDate?.[publicationDate]?.[accId], ps?.completedAccounts?.[accId], ps?.accId === accId ? ps : null]
       .filter(item => item && (!item.accId || item.accId === accId) && publicationDay(item) === publicationDate);
     const attempts = (journal?.attempts || []).filter(item => (item.account === names[accId] || item.accId === accId) && publicationDay(item) === publicationDate);
-    return (slots[accId] || []).map(time => {
+    const approved = monitor?.schedulePolicy;
+    const times = approved && publicationDate >= approved.effectiveDate ? approved.naver?.[names[accId]]?.slots : null;
+    return (times || slots[accId] || []).map(time => {
       let receipt = null;
       for (const record of records) {
         let child = record.completedSlots?.[time];

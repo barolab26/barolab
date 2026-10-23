@@ -1,0 +1,13 @@
+[Unit]
+Description=BaroLab Publish prepared CF articles at approved KST slots
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=DISPLAY=:10
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.venvs/barolab/bin/python3 -u -B -m common.channel_parameters dispatch
+TimeoutStartSec=5min
+UMask=0077

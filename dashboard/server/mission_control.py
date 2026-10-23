@@ -24,7 +24,7 @@ from rich.text import Text
 
 ROOT = Path(__file__).resolve().parents[2]
 KST = dt.timezone(dt.timedelta(hours=9))
-ROLES = {'jarvis':'자비스', 'patch':'패치', 'publi':'퍼블리',
+ROLES = {'jarvis':'팀장', 'patch':'패치', 'publi':'퍼블리',
          'trace':'트레이스', 'doctor':'닥터', 'radar':'레이더'}
 PORTS = (9334, 9333, 9335, 9231, 9230, 8790)
 STAGES = {'original-work-diagnosis':'원작업 차단 원인 진단', 'repair-diagnosis-model':'수정할 코드 분석',
@@ -332,7 +332,7 @@ class Collector:
                     except OSError:continue
             self.port_checked=tick
         brains=self.read('dashboard/data/llm-settings.json').get('agentBrains') or {}
-        data=dict(agentBrains=brains,channels=channels(cf,nv,kin,now),crew=crew_rows(events,self.requests,brains,now),
+        data=dict(schedulePolicy=self.read('dashboard/data/daily_schedule.json'),scheduleRuntime=self.read('dashboard/data/parameter-runtime.json'),agentBrains=brains,channels=channels(cf,nv,kin,now),crew=crew_rows(events,self.requests,brains,now),
                   logs=activity_log(events,cf,kin,now),ports=dict(self.ports),
                   tokens=token_summary(self.read('dashboard/data/llm-usage.json'),now),
                   cached=any(self.root/p in self.cache.errors for p in (
@@ -465,10 +465,13 @@ def shared_snapshot(data):
     live_attempts=[{k:attempt.get(k) for k in ('account','accId','workerId','workDate','publicationDate','scheduledSlot','reserveTime','startedAt','updatedAt','runMode','submissionStarted','phase','topic','title','verificationSource','verifiedAt','blogId','publicUrl','publicPublicationVerified')}
         for attempt in data.get('naverJournal',{}).get('attempts',[])[-128:]]
     cf_items=[{k:item.get(k) for k in ('domain','status','publicUrl','title','completedAt','stageName','order')} for item in data.get('cf',{}).get('items',[]) if data.get('cf',{}).get('date')==now.date().isoformat()]
-    revenue_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','aggregationEligible','aggregationKey','domains')}
+    revenue_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','aggregationEligible','aggregationKey','domains','account','collectionAccount','mediaIds','accountBreakdownVerified','pendingDates','scope') if source.get(k) is not None}
         for source in data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('sources',[])]
-    result=dict(schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
-        refreshSeconds=1,cfItems=cf_items,revenue={'months':{now.strftime('%Y-%m'):{'sources':revenue_sources}}},
+    from dashboard.collectors.revenue import summarize
+    revenue_document={'months':{now.strftime('%Y-%m'):{'sources':revenue_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('checkedAt')}}}
+    revenue_projection={**summarize(revenue_document,now),'months':revenue_document['months']}
+    result=dict(schedulePolicy=data.get('schedulePolicy',{}),scheduleRuntime=data.get('scheduleRuntime',{}),schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
+        refreshSeconds=1,cfItems=cf_items,revenue=revenue_projection,
         naverLive={'workflow':live_workflow or None,'journal':{'attempts':live_attempts}},channels=channel_rows,crew=crew,vault=vault,timeline=timeline,
         naverAccounts=[dict(account=a.get('account'),accId=a.get('accId'),expected=a.get('expected'),
             slots=[{k:slot.get(k) for k in ('status','publicationStatus','publicationDate','reserveTime','publicPublicationVerified','publicUrl','title','verifiedAt')} for slot in a.get('slots',[])])

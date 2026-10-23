@@ -174,7 +174,7 @@ class _consolidated_part1_TelemetryTests(_consolidated_part1_unittest.TestCase):
         self.assertEqual(sum(_consolidated_part1_view.panel_sizes(76)), 76)
         for title in ('MISSION CONTROL', 'AI 구독 한도 & 크레딧', '우분투 격리 크롬 세션', 'PIPELINE', 'ACTIVE CREW', 'VAULT', '[red]Title', '[red]literal'):
             self.assertIn(title, text)
-        for name in ('자비스', '패치', '퍼블리', '트레이스', '닥터', '레이더'):
+        for name in ('팀장', '패치', '퍼블리', '트레이스', '닥터', '레이더'):
             self.assertIn('@' + name, text)
         self.assertNotIn('성공 판정 아님', text)
         self.assertIn('┗', text.splitlines()[-1])
@@ -204,7 +204,7 @@ class _consolidated_part1_TelemetryTests(_consolidated_part1_unittest.TestCase):
         display = view.brain_display(data, now)
         self.assertEqual(len(display['rows']), 4)
         self.assertEqual(display['styles'], ['bold cyan', 'dim', 'bold red', 'dim'])
-        self.assertIn('@jarvis(actual-model)', display['rows'][3])
+        self.assertIn('@팀장(actual-model)', display['rows'][3])
         self.assertIn('Threads(thread-model)', display['rows'][3])
         self.assertIn('잔여 —', display['rows'][1])
         self.assertNotIn('사용 중', ''.join(display['rows']))
@@ -861,7 +861,7 @@ class SynapseFlywheelTests(_consolidated_part0_unittest.TestCase):
         good=s.recipe('example.com','publi',self.root)
         path.write_text('{')
         self.assertEqual(s.recipe('example.com','publi',self.root),good)
-        self.assertEqual(s.recipe('example.com','jarvis',self.root),'')
+        self.assertEqual(s.recipe('example.com','jarvis',self.root),good)
     def test_winner_doctor_selection_is_after_publication_only(self):
         import json
         from dashboard.agents import synapse as s
@@ -1200,3 +1200,232 @@ class BoundedNaverPublicTests(__import__('unittest').TestCase):
 if __name__ == "__main__":
     import unittest
     unittest.main()
+
+class ApprovedParameterWiringTests(__import__('unittest').TestCase):
+    def test_approved_plan_has_exact_times_and_no_engine_changes(self):
+        from common.channel_parameters import policy, styles, ROOT
+        import hashlib, json
+        plan = policy()
+        self.assertEqual(plan['naver']['soultin']['slots'], ['07:40'])
+        self.assertEqual(plan['naver']['adinfo0905']['slots'], ['08:10', '12:20'])
+        self.assertEqual(styles('soultin')['bodyFontSize'], 19)
+        frozen = json.loads((ROOT/'dashboard/agents/frozen-engines.json').read_text())['hashes']
+        for channel, expected in frozen.items():
+            self.assertEqual(hashlib.sha256((ROOT/channel/'posting.py').read_bytes()).hexdigest(), expected)
+
+    def test_style_wiring_reaches_native_nodes_without_changing_body(self):
+        from common.channel_parameters import styled_native, styles
+        import naver_blog_posting.posting as engine
+        doc = {'title':'연금 안내', 'presentation': styles('soultin'), 'blocks':[
+            {'type':'text','text':'확인된 요약'}, {'type':'heading','text':'신청 조건'}, {'type':'text','text':'공식 근거 본문'}]}
+        native = styled_native(engine.basic_native_document, {'document':{'components':[{'@ctype':'documentTitle'}]}}, doc)
+        nodes = [c['value'][0]['nodes'][0] for c in native['document']['components'][1:]]
+        self.assertEqual([n['style']['fontSizeCode'] for n in nodes], ['fs24','fs28','fs19'])
+        self.assertEqual([n['value'] for n in nodes], ['확인된 요약','신청 조건','공식 근거 본문'])
+
+    def test_tomorrow_reservations_do_not_count_today(self):
+        from common import channel_parameters as wiring
+        from unittest.mock import patch
+        import naver_blog_posting.posting as engine
+        from datetime import datetime
+        journal = {'attempts':[{'account':'soultin','workDate':'2026-10-23','reserveTime':'2026-10-24 07:40','phase':'verified','verificationSource':'saved-server'}]}
+        def aggregate(*args):
+            return {'attempts':engine.read_journal()['attempts']}
+        with patch.object(engine,'read_journal',return_value=journal), patch.object(engine,'monitor',side_effect=aggregate), patch.object(wiring,'write'):
+            today = wiring.monitor(now=datetime(2026,10,23,tzinfo=wiring.KST))
+        self.assertEqual(today['attempts'], [])
+
+    def test_summary_table_is_real_image_and_preserves_text(self):
+        from common.channel_parameters import summary_table, styles
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        from PIL import Image
+        with TemporaryDirectory() as directory:
+            path = summary_table({'sections':[{'heading':'대상','text':'공식 안내에서 확인된 대상입니다.'}]}, Path(directory), styles('soultin'))
+            with Image.open(path) as image:
+                self.assertEqual(image.width,1080)
+                self.assertGreater(image.height,150)
+
+    def test_cf_busy_dispatch_does_not_touch_schedule(self):
+        from common import channel_parameters as wiring
+        from unittest.mock import patch
+        from contextlib import contextmanager
+        import cf_posting.posting as engine
+        @contextmanager
+        def busy():
+            yield False
+        with patch.object(engine,'cleaner_lock',busy), patch.object(engine,'load_current_schedule') as load, patch.object(wiring,'policy',return_value={'effectiveDate':'2000-01-01'}):
+            self.assertEqual(wiring.dispatch_cf()['status'],'busy')
+        load.assert_not_called()
+
+class MemoryStyleEvolutionTests(__import__('unittest').TestCase):
+    def test_missing_metrics_are_not_losing_styles(self):
+        from dashboard.agents.style_strategy import comparable
+        from datetime import datetime, timezone
+        now = datetime(2026,11,5,tzinfo=timezone.utc)
+        self.assertEqual(comparable([{'publishedAt':'2026-10-24T00:00:00+00:00','styleVariantId':'one','measurements':{}}],now),[])
+
+    def test_measured_style_updates_weight_and_remains_connected(self):
+        from dashboard.agents.synapse import add_post, score, build_index
+        from datetime import datetime, timezone
+        graph={'nodes':{'style:one':{'type':'StyleVariant','account':'soultin','active':True,'effectiveDate':'2026-10-24','parameters':{'bodyFontSize':19}}},'edges':[]}
+        add_post(graph,{'publicUrl':'https://example.com/retirement','publicPublicationVerified':True,'httpStatus':200,'publishedAt':'2026-10-24T00:00:00+00:00','title':'예산표'}, {'contentHtml':'<h2>예산</h2><table><tr><td>예시</td></tr></table>','presentation':{'styleVariantId':'style:one'}})
+        post=next(n for n in graph['nodes'].values() if n.get('type')=='Post')
+        post['measurements']={'gsc':{'clicks':2},'adsense':{'revenue':1}}
+        score(graph,datetime(2026,11,5,tzinfo=timezone.utc))
+        self.assertGreater(graph['nodes']['style:one']['synapseWeight'],0)
+        self.assertTrue(any(e['target']=='style:one' and e['type']=='uses_style' for e in graph['edges']))
+        self.assertEqual(build_index(graph)['styles']['soultin']['styleVariantId'],'style:one')
+
+    def test_visible_builder_has_no_native_document_write(self):
+        from common import visible_naver_editor
+        import inspect
+        source=inspect.getsource(visible_naver_editor)
+        self.assertNotIn('setDocumentData',source)
+        self.assertIn('page.keyboard.type',source)
+        self.assertIn('data-role="option"',source)
+
+    def test_flow_receipt_reuses_exact_download_without_browser_or_second_request(self):
+        from common.flow_images import generate,image_prompt
+        from unittest.mock import patch
+        from contextlib import asynccontextmanager
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        from common.collection_observability import write
+        import hashlib
+        @asynccontextmanager
+        async def lock(**kwargs):
+            yield
+        with TemporaryDirectory() as directory:
+            folder=Path(directory);(folder/'images').mkdir();output=folder/'images/flow-hero.png';output.write_bytes(b'unchanged-flow-image')
+            write(folder/'flow-generation.json',{'status':'downloaded','promptSha256':hashlib.sha256(image_prompt('주제','요약').encode()).hexdigest(),'sha256':hashlib.sha256(output.read_bytes()).hexdigest()})
+            with patch('common.browser_session.flow_generation_lock',lock),patch('common.flow_images.load',side_effect=lambda p: {} if Path(p).name=='flow-active.json' else __import__('json').loads(Path(p).read_text())),patch('common.ubuntu_naver_browser.ensure_account') as launch:
+                self.assertEqual(generate('주제','요약',folder),output)
+            launch.assert_not_called()
+
+class CollaborativePolicyAndRevenueTests(__import__('unittest').TestCase):
+    def test_one_adpost_portal_preserves_three_distinct_account_amounts(self):
+        from dashboard.collectors import revenue as r
+        from datetime import date
+        self.assertEqual(r.ADPOST_ACCOUNTS,(('soul5373',9333),))
+        accounts=('soultin','soul5373','yoon_master')
+        media=[{'mediaId':i,'mediaNaverId':a,'name':'표시명 변경 가능'} for i,a in enumerate(accounts,1)]
+        rows=[{'date':'20261020','mediaTypeName':'nblog','mediaId':i,'mediaName':'동일 표시명','targetDeviceTypeName':'mobile','revenueAmount':str(i*100)} for i in (1,2,3)]
+        parts=r.parse_adpost_accounts(rows,media,date(2026,10,1),date(2026,10,23))
+        sources=[{'id':'adpost-soul5373','category':'adpost','currency':'KRW','publisherId':'7','status':'collected','accountBreakdown':parts},
+                 {'id':'adpost-soultin','category':'adpost','currency':'KRW','publisherId':'7','status':'collected','daily':{'2026-10-20':'999'}}]
+        r.deduplicate_adpost_sources(sources)
+        self.assertEqual(len(sources),3)
+        self.assertEqual({s['account']:s['daily']['2026-10-20'] for s in sources},{'soultin':'100','soul5373':'200','yoon_master':'300'})
+        self.assertTrue(all(s['browserPort']==9333 and s['collectionAccount']=='soul5373' for s in sources))
+        self.assertEqual(r.period(sources,date(2026,10,20),date(2026,10,20))['amounts'],{'KRW':'600'})
+
+    def test_jarvis_selects_needed_colleagues_after_publi_request(self):
+        from dashboard.agents.style_strategy import plan_post
+        from unittest.mock import patch
+        from tempfile import TemporaryDirectory
+        values=iter([
+            {'message':'자비스님, 이번 계정의 글은 어떤 구성으로 작성할까요?','keyword':'국민연금 수령 나이'},
+            {'message':'기존 지식을 쓰고 트레이스에게 성과만 확인하겠습니다.','researchTask':'성과 확인','benchmarkNeeded':False,'consultAgents':['trace']},
+            {'message':'글별 성과는 아직 측정 대기입니다.'},
+            {'message':'측정 전 가설로 기존 서식을 적용해 발행하세요.','writingGuide':'확인된 근거와 요약표로 작성한다.'}])
+        def generate(prompt,**kwargs):
+            kwargs['observer']('codex','fixture','returned',actual_model='actual-fixture')
+            return next(values)
+        with TemporaryDirectory() as folder,patch('dashboard.agents.synapse.cached_index',return_value={'meetingPolicy':{'openingRole':None}}),patch('common.llm_client.generate_json',side_effect=generate) as model,patch('common.llm_settings.get_agent_brain',return_value={'provider':'codex','model':'fixture'}),patch('dashboard.agents.style_strategy.benchmark') as search:
+            result=plan_post('soultin','연금',folder,{'bodyFontSize':19})
+            self.assertEqual([row['actor'] for row in result['transcript']],['publi','jarvis','trace','jarvis'])
+            search.assert_not_called()
+            self.assertEqual(plan_post('soultin','연금',folder,{})['keyword'],result['keyword'])
+            self.assertEqual(model.call_count,4)
+
+    def test_jarvis_reads_ceo_directives_from_memory(self):
+        from dashboard.agents.synapse import recipe
+        from unittest.mock import patch
+        with patch('dashboard.agents.synapse.cached_index',return_value={'operatingDirectives':[{'guidance':'코어는 불변, 대표님 지식으로 운영한다.','roles':['jarvis']}]}):
+            self.assertIn('코어는 불변',recipe('업무 판단','jarvis'))
+
+class AdvisoryPlanningFailureTests(__import__('unittest').TestCase):
+    def test_strategy_unavailability_preserves_pending_agenda_without_publishing(self):
+        from common.channel_parameters import planning_or_memory
+        from tempfile import TemporaryDirectory
+        from unittest.mock import patch
+        with TemporaryDirectory() as folder,patch('dashboard.agents.style_strategy.plan_post',side_effect=TimeoutError('private-route-detail')):
+            with self.assertRaisesRegex(RuntimeError, 'Conference pending'):
+                planning_or_memory('soultin','국민연금 수령 나이',folder,{'bodyFontSize':19})
+            result=__import__('json').loads((__import__('pathlib').Path(folder)/'strategy-status.json').read_text())
+            self.assertEqual(result['status'],'deferred')
+            self.assertNotIn('private-route-detail',str(result))
+
+class ConferenceDispatchTests(__import__('unittest').TestCase):
+    def test_timer_only_requests_one_agenda_and_never_launches_engine(self):
+        from common import conference_dispatch as bus
+        from unittest.mock import patch
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        with TemporaryDirectory() as folder,patch.object(bus,'QUEUE',Path(folder)),patch.object(bus.subprocess,'Popen') as launch:
+            first=bus.request('parameters',{'action':'dispatch'})
+            second=bus.request('parameters',{'action':'dispatch'})
+            self.assertEqual(first['agendaId'],second['agendaId'])
+            self.assertEqual(second['status'],'conference_pending')
+            self.assertEqual(len(list(Path(folder).glob('*.json'))),1)
+            launch.assert_not_called()
+
+    def test_team_lead_opens_account_agenda_from_memory_policy(self):
+        from dashboard.agents.style_strategy import plan_post
+        from unittest.mock import patch
+        from tempfile import TemporaryDirectory
+        values=iter([{'message':'머스트 헬스뷰 다음 발행 키워드를 논의합시다.'},
+                     {'message':'독감 예방접종 시기를 제안합니다.','keyword':'독감 예방접종 시기'},
+                     {'message':'기존 조사와 공식 근거로 진행하세요.','researchTask':'기존 근거 활용','benchmarkNeeded':False,'consultAgents':[]},
+                     {'message':'실행 후 글별 성과를 보고하세요.','writingGuide':'짧은 문단과 결론 우선으로 작성한다.'}])
+        def generate(prompt,**kwargs):
+            kwargs['observer']('codex','fixture','returned',actual_model='actual-fixture')
+            return next(values)
+        with TemporaryDirectory() as folder,patch('dashboard.agents.synapse.cached_index',return_value={'meetingPolicy':{'openingRole':'jarvis'},'accountProfiles':{'soul5373':{'brand':'머스트 헬스뷰'}}}),patch('common.llm_client.generate_json',side_effect=generate),patch('common.llm_settings.get_agent_brain',return_value={'provider':'codex','model':'fixture'}),patch('common.crew_chat_bridge.emit_work_event'):
+            result=plan_post('soul5373','다음 글',folder,{})
+            self.assertEqual(result['agenda']['brand'],'머스트 헬스뷰')
+            self.assertEqual([t['actor'] for t in result['transcript']],['jarvis','publi','jarvis','jarvis'])
+
+class PublicationOutcomeLanguageTests(__import__('unittest').TestCase):
+    def test_exit_zero_is_not_a_publication_report(self):
+        from common.conference_dispatch import report_outcome
+        from unittest.mock import patch
+        with patch('agents.agent_tools.staff_tool_reply') as staff:
+            self.assertIsNone(report_outcome({'exitCode':0},'test'))
+            staff.assert_not_called()
+
+    def test_verified_receipt_reports_posted_and_attaches_exact_public_url(self):
+        from common.conference_dispatch import report_outcome
+        from unittest.mock import patch
+        reply={'reply':'@팀장 게시 성공했습니다. 공개 글까지 확인했습니다.','route':{'events':[{'actualModel':'fixture'}]}}
+        with patch('agents.agent_tools.staff_tool_reply',return_value=reply) as staff,patch('common.crew_chat_bridge.emit_work_event') as event:
+            result=report_outcome({'publicPublicationVerified':True,'httpStatus':200,'publicUrl':'https://www.nolplace.com/example'},'test')
+            self.assertEqual(result['outcome'],'게시 성공')
+            self.assertEqual(event.call_args.kwargs['deliverable_url'],'https://www.nolplace.com/example')
+
+    def test_submitted_but_unverified_stays_under_staff_verification(self):
+        from common.conference_dispatch import report_outcome
+        from unittest.mock import patch
+        reply={'reply':'@팀장 게시 확인 중입니다. 제가 제출 결과를 다시 조회하겠습니다.','route':{'events':[{'actualModel':'fixture'}]}}
+        with patch('agents.agent_tools.staff_tool_reply',return_value=reply),patch('common.crew_chat_bridge.emit_work_event'):
+            result=report_outcome({'state':'api_submitted','permalink':'https://www.threads.net/@example/post/123'},'test')
+            self.assertEqual(result['outcome'],'게시 확인 중')
+            self.assertFalse(result['publicationVerified'])
+
+class ConferenceBeforeAuthoringTests(__import__('unittest').TestCase):
+    def test_knowledgein_conference_precedes_writer_and_injects_agreed_direction(self):
+        import naver_kin.posting as engine
+        from common.conference_dispatch import install_channel_conferences
+        from common import llm_client
+        from unittest.mock import patch
+        order=[]
+        def meeting(*a,**kw):
+            order.append('conference');return {'writingGuide':'결론 우선, 실제 질문에 직접 답한다.'}
+        def writer(*a,**kw):
+            order.append('writer');return llm_client.generate_json('원고 생성')
+        with patch('common.channel_parameters.planning_or_memory',side_effect=meeting),patch.object(engine,'_naver_authoring_generate_for_slot',side_effect=writer),patch.object(engine,'_naver_browser_publish'),patch.object(engine,'_naver_browser_verify_public'),patch.object(llm_client,'generate_json',return_value={'document':'fixture'}) as model:
+            install_channel_conferences('kin')
+            self.assertEqual(engine._naver_authoring_generate_for_slot('adinfo0905','slot-fixture','fixture'),{'document':'fixture'})
+            self.assertEqual(order,['conference','writer'])
+            self.assertIn('결론 우선',model.call_args.args[0])

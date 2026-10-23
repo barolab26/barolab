@@ -120,7 +120,7 @@ def observe(data, root=ROOT, now=None):
     from server.agent_tools import enqueue_staff_request
     message_id = 'ego-alert-' + row['id']
     receipt = emit_pipeline_crew_message('ego-lite',
-        f"[EGO ALERT] @자비스: {row['port'] or ''} {row['account']} {row['channel']}에서 '{row['title']}' 작업 지연 감지 (원인: {row['summary']})",
+        f"[EGO ALERT] @팀장: {row['port'] or ''} {row['account']} {row['channel']}에서 '{row['title']}' 작업 지연 감지 (원인: {row['summary']})",
         handoff='jarvis', status='needs_attention', step='ego-alert',
         result_summary=row['summary'], msg_id=message_id)
     if receipt != message_id:

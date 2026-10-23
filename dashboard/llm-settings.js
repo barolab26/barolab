@@ -58,7 +58,7 @@ const PROVIDER_MODELS_MAP = {
 };
 
 const DEFAULT_SLOTS = [
-  { slot: 'jarvis', kind: 'agent', name: '자비스 (@jarvis)', role: '총괄 · 전략판단 · 회의실 의사결정', icon: '🧭', color: '#2563eb', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-high', recommendedReason: '전사 데이터 종합 및 고차원 전략 판단용 최고 추론 모델' },
+  { slot: 'jarvis', kind: 'agent', name: '팀장 (@jarvis)', role: '총괄 · 전략판단 · 회의실 의사결정', icon: '🧭', color: '#2563eb', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-high', recommendedReason: '전사 데이터 종합 및 고차원 전략 판단용 최고 추론 모델' },
   { slot: 'publi', kind: 'agent', name: '퍼블리 (@publi)', role: '원고집필 · 최종검수 · 지식iN 총괄', icon: '🤖', color: '#059669', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '장문 구조화 원고 집필·HTML 테이블 조립·엄격한 스키마 검수 특화' },
   { slot: 'patch', kind: 'agent', name: '패치 (@patch)', role: '시스템 · 코드수선 · CDP/스케줄러', icon: '⚙️', color: '#d97706', recommendedProvider: 'codex', recommendedModel: 'gpt-6.1-sol', recommendedReason: '파이프라인 디버깅·DOM/코드 부분수선(Surgical Repair) 최적 모델' },
   { slot: 'radar', kind: 'agent', name: '레이더 (@radar)', role: '유튜브 자막분석 · 트렌드 · 고단가 R&D', icon: '🎯', color: '#e11d48', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-medium', recommendedReason: '대용량 유튜브 자막(1,400+ 구간) 고속 독해 및 핵심 전략 추출' },
@@ -382,7 +382,7 @@ async function saveBrainMatrix(useOptimalPreset = false) {
     render();
     matrixMessage(
       useOptimalPreset
-        ? '✅ [최적 효율 프리셋 자동 배정 완료] 자비스(Argon High) · 퍼블리/패치(gpt-6.1-sol) · 레이더(Argon Med) · 닥터/트레이스(3.8 Flash Med)가 즉시 적용되었습니다.'
+        ? '✅ [최적 효율 프리셋 자동 배정 완료] 팀장(Argon High) · 퍼블리/패치(gpt-6.1-sol) · 레이더(Argon Med) · 닥터/트레이스(3.8 Flash Med)가 즉시 적용되었습니다.'
         : '✅ [저장 완료] 6인 AI 크루 및 4대 채널 파이프라인 개별 두뇌 설정이 llm-settings.json에 즉시 반영되었습니다.',
       false
     );

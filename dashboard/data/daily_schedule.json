@@ -1,1 +1,111 @@
-{"schema": "audience-strategy-v1", "timezone": "Asia/Seoul", "effectiveDate": "2026-10-24", "source": "CEO-directed initial hypotheses, not observed traffic peaks", "naver": {"soultin": {"blogId": "mustpickinfo", "target": "50~70대 연금·복지", "slots": ["07:40"], "windows": ["07:00-08:30"]}, "adinfo0905": {"blogId": "adinfo0905", "target": "출퇴근·점심 직장인", "slots": ["08:10", "12:20"], "windows": ["07:40-08:40", "12:00-13:00"]}, "soul5373": {"blogId": "mustinfo", "target": "건강·연예 정보 독자", "slots": ["15:00"], "windows": ["14:00-16:00", "20:00-20:00"]}, "yoon_master": {"blogId": "yoonviews", "target": "퇴근 후 가전·리빙 구매 검토자", "slots": ["21:00"], "windows": ["20:30-22:00"]}, "stone0747": {"blogId": "stone0747", "target": "지원금 조건·마감 실무 독자", "slots": ["08:20", "12:40"], "windows": ["07:40-08:40", "12:00-13:00"], "basis": "proposed experiment; no CEO-specified peak"}}, "cf": {"must-good.com": "07:00", "baronote.kr": "07:20", "must-joy.com": "15:00", "maxnote.kr": "12:10", "joynote.kr": "20:00", "healthcox.com": "14:00", "topnote.kr": "12:30", "nolplace.com": "20:10", "tripmarvel.com": "20:30", "daynote.kr": "21:00", "smilenote.kr": "08:00", "woorinote.kr": "12:40", "meganote.kr": "21:30", "justinfo.co.kr": "12:50", "soulnote.kr": "08:10", "must-pick.com": "21:10"}, "safeguards": {"preservePublishedReservedAndRunning": true, "noBackdating": true, "noUnmeasuredWeightIncrease": true, "oneVariableAtATime": true, "engineCodeFrozen": true}, "scheduleIntegration": "planned; executable connector awaits explicit authorization; current protected reservations unchanged", "formatIntegration": "naver guide is already included in writer prompt; native font size/table support remains fixed", "continuousReview": {"owners": ["radar", "jarvis", "trace"], "compareAfterDays": 7, "metrics": ["URL-scoped impressions", "clicks", "sessions", "engagementSeconds", "revenue"], "missingMeasurements": "unknown; preserve weight", "approval": "Jarvis reviews Radar proposals against actual prior measurements and protected receipts"}, "experimentDesign": "Format rollout and timing changes are not attributed causally; time comparison needs matched format and actual URL-scoped baseline.", "status": "policy_approved_connection_pending"}
+{
+  "schema": "audience-strategy-v1",
+  "timezone": "Asia/Seoul",
+  "effectiveDate": "2026-10-24",
+  "source": "CEO-directed initial hypotheses, not observed traffic peaks",
+  "naver": {
+    "soultin": {
+      "blogId": "mustpickinfo",
+      "target": "50~70대 연금·복지",
+      "slots": [
+        "07:40"
+      ],
+      "windows": [
+        "07:00-08:30"
+      ]
+    },
+    "adinfo0905": {
+      "blogId": "adinfo0905",
+      "target": "출퇴근·점심 직장인",
+      "slots": [
+        "08:10",
+        "12:20"
+      ],
+      "windows": [
+        "07:40-08:40",
+        "12:00-13:00"
+      ]
+    },
+    "soul5373": {
+      "blogId": "mustinfo",
+      "target": "건강·연예 정보 독자",
+      "slots": [
+        "15:00"
+      ],
+      "windows": [
+        "14:00-16:00",
+        "20:00-20:00"
+      ]
+    },
+    "yoon_master": {
+      "blogId": "yoonviews",
+      "target": "퇴근 후 가전·리빙 구매 검토자",
+      "slots": [
+        "21:00"
+      ],
+      "windows": [
+        "20:30-22:00"
+      ]
+    },
+    "stone0747": {
+      "blogId": "stone0747",
+      "target": "지원금 조건·마감 실무 독자",
+      "slots": [
+        "08:20",
+        "12:40"
+      ],
+      "windows": [
+        "07:40-08:40",
+        "12:00-13:00"
+      ],
+      "basis": "proposed experiment; no CEO-specified peak"
+    }
+  },
+  "cf": {
+    "must-good.com": "07:00",
+    "baronote.kr": "07:20",
+    "must-joy.com": "15:00",
+    "maxnote.kr": "12:10",
+    "joynote.kr": "20:00",
+    "healthcox.com": "14:00",
+    "topnote.kr": "12:30",
+    "nolplace.com": "20:10",
+    "tripmarvel.com": "20:30",
+    "daynote.kr": "21:00",
+    "smilenote.kr": "08:00",
+    "woorinote.kr": "12:40",
+    "meganote.kr": "21:30",
+    "justinfo.co.kr": "12:50",
+    "soulnote.kr": "08:10",
+    "must-pick.com": "21:10"
+  },
+  "safeguards": {
+    "preservePublishedReservedAndRunning": true,
+    "noBackdating": true,
+    "noUnmeasuredWeightIncrease": true,
+    "oneVariableAtATime": true,
+    "engineCodeFrozen": true
+  },
+  "scheduleIntegration": "Approved shared connector active; exact server reservations; prepared CF minute dispatcher; existing receipts preserved",
+  "formatIntegration": "Guide parameters wired to visible SmartEditor toolbar for new documents; existing verified native-bound reservations preserved",
+  "continuousReview": {
+    "owners": [
+      "radar",
+      "jarvis",
+      "trace"
+    ],
+    "compareAfterDays": 7,
+    "metrics": [
+      "URL-scoped impressions",
+      "clicks",
+      "sessions",
+      "engagementSeconds",
+      "revenue"
+    ],
+    "missingMeasurements": "unknown; preserve weight",
+    "approval": "Jarvis reviews Radar proposals against actual prior measurements and protected receipts"
+  },
+  "experimentDesign": "Format rollout and timing changes are not attributed causally; time comparison needs matched format and actual URL-scoped baseline.",
+  "status": "wiring_active",
+  "knowledgePolicy": "CEO directives and measured strategy changes live in memory_graph.json; four posting.py hashes remain frozen"
+}

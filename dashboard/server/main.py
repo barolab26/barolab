@@ -312,7 +312,8 @@ def verify_naver_public():
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
     from dashboard.collectors.naver_public import reconcile
-    from naver_blog_posting.posting import monitor, pipeline_lock
+    from naver_blog_posting.posting import pipeline_lock
+    from common.channel_parameters import monitor
     try:
         with pipeline_lock():
             result = reconcile(NAVER_DIR, force=False)
@@ -594,20 +595,8 @@ def api_kin_automation_status():
 @app.post("/api/kin/run-now")
 def api_kin_run_now():
     """Immediately trigger the next KnowledgeIn slot (`naver_kin.posting --tick --force`) in the background."""
-    import subprocess
-    cmd = [sys.executable, "-X", "utf8", "-m", "naver_kin.posting", "--tick", "--force"]
-    subprocess.Popen(
-        cmd,
-        cwd=str(BASE_DIR),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
-    return {
-        "ok": True,
-        "started": True,
-        "message": "지식iN 즉시 실행 워커(naver_kin.posting --tick --force)를 백그라운드에서 가동했습니다.",
-    }
+    from common.conference_dispatch import request
+    return {"ok": True, **request('kin', {}), "message": "다음 지식iN 발행 건의 컨퍼런스를 요청했습니다."}
 
 app.middleware("http")(llm_guard)
 

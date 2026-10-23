@@ -141,7 +141,8 @@ def run_task(task):
         return run_metrics(sys.executable,[('dashboard/revenue.py','--collect'),('dashboard/traffic.py','--collect'),
             ('dashboard/metrics.py','--collect'),('naver_kin.posting','--measure'),('threads_posting.posting','measure')])
     if task=='naver-monitor':
-        from naver_blog_posting.posting import monitor, pipeline_lock
+        from naver_blog_posting.posting import pipeline_lock
+        from common.channel_parameters import monitor
         from dashboard.collectors.naver_public import reconcile
         try:
             with pipeline_lock():
@@ -151,8 +152,8 @@ def run_task(task):
             if 'already running' not in str(exc): raise
         return 0
     commands={
-      'cleaner':[str(ROOT/'cf_posting/posting.py'),'--catch-up-today-once','--limit','1'],
-      'naver-daily':[str(ROOT/'naver_blog_posting/posting.py'),'--catch-up','--limit','1'],
+      'cleaner':['-m','common.channel_parameters','cf-cycle'],
+      'naver-daily':['-m','common.channel_parameters','naver-cycle'],
       'maintenance':['-m','common.content_maintenance'],
       'watchdog':['-m','common.system_watchdog','--heal-now'],
     }

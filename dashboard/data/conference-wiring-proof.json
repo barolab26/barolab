@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-10-23T14:10:03.071818+09:00",
+  "agenda": {
+    "channel": "naver",
+    "account": "soul5373",
+    "brand": "머스트 헬스뷰",
+    "target": "건강·연예 정보 독자",
+    "publicationDate": "2026-10-23",
+    "slot": "2000"
+  },
+  "status": "agreed",
+  "keyword": "중장년 카페인 섭취 시간",
+  "planningId": "planning:0a1e31d63f99811202496068",
+  "actualSpeakers": [
+    {
+      "role": "jarvis",
+      "model": "gpt-6.1-sol",
+      "message": "네이버 soul5373 ‘머스트 헬스뷰’의 2026-10-23 20:00 발행 안건을 엽니다. 기존 예약 주제와 겹치지 않는 ‘중장년 수면과 카페인 섭취’를 공략할지 논의하겠습니다."
+    },
+    {
+      "role": "publi",
+      "model": "gpt-6.1-sol",
+      "message": "팀장님, ‘중장년 카페인 섭취 시간’을 제안합니다. 잠이 고민인 중장년 대상, 수면 영향·섭취 요령 순서와 본문 16·소제목 24·굵은 요약 19, 표 없이 구성하면 될지 의견 부탁드립니다."
+    },
+    {
+      "role": "jarvis",
+      "model": "gpt-6.1-sol",
+      "message": "수면 영향→섭취 요령 순서로, 본문 16·소제목 24·굵은 요약 19·표 없이 구성하세요. 이번 주제 성과는 실측 자료가 없어 미확인입니다."
+    },
+    {
+      "role": "radar",
+      "model": "gpt-6.1-sol",
+      "message": "제공된 관측에서 3번째 글은 수면 불편 도입·짧은 문단·번호 소제목·항목별 사진·표 없는 구성이므로 참고를 제안합니다. 수면 영향→섭취 요령으로 쓰되 공식 근거·순위·성과는 미확인입니다."
+    },
+    {
+      "role": "jarvis",
+      "model": "gpt-6.1-sol",
+      "message": "수면 영향→섭취 요령 순서로, 짧은 문단·소제목 5개·표 없이 작성하세요. 관측 글의 배치만 참고하고, 건강 수치와 스타일 성과는 미확인으로 구분합니다."
+    }
+  ],
+  "observedArticles": [
+    {
+      "url": "https://m.blog.naver.com/21uccm/224364729434",
+      "bodySha256": "f25ca783ad73aa4b6e4972900daad5406d780fce63db48121a423571bf8d1d0f",
+      "organicRank": null
+    },
+    {
+      "url": "https://m.blog.naver.com/oia_87/224431662050",
+      "bodySha256": "b4d5e459ea1e3667281cc042016d613eda4f798b48507627665c62b32ed4770d",
+      "organicRank": null
+    },
+    {
+      "url": "https://m.blog.naver.com/snsi8010/224429274583",
+      "bodySha256": "83467d2925c4afda4c80178e5c189efd5fdf6c7cd1a12a8e9ded9ffe5df931ec",
+      "organicRank": null
+    }
+  ],
+  "frozenEnginesUnchanged": true,
+  "publicationStatus": "conference completed; this agenda has not been submitted",
+  "schedulerContract": "timer requests conference; crew consumer executes agreed workflow",
+  "schedulerQueueProof": {
+    "agendaId": "f285f2cd78c9ce0e91a67f07ae37da712603b7d10de6e533cdb66f4404dec8bf",
+    "status": "completed",
+    "requestedAt": 1792731910.63259,
+    "completedAt": 1792732176.3013256
+  },
+  "latestVerifiedPublication": {
+    "publicUrl": "https://www.nolplace.com/jeju-sumokwon-theme-park-visit-guide",
+    "httpStatus": 200,
+    "titleMatched": true
+  }
+}

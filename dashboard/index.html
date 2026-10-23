@@ -1456,7 +1456,7 @@
       <section class="sre-audit-deck" id="sre-project-audit-deck" aria-label="6대 전 프로젝트 전담자·병목·다음 조치 실시간 자율 감사 보드">
         <div class="sre-audit-top">
           <div class="sre-audit-title-wrap">
-            <span class="sre-audit-title">🛡️ 자비스 6대 전 프로젝트 자율 감사 · 무인 워치독 관제</span>
+            <span class="sre-audit-title">🛡️ 팀장 6대 전 프로젝트 자율 감사 · 무인 워치독 관제</span>
             <span class="sre-watchdog-pill" id="sre-watchdog-pill">🟢 워치독 가동 중 · 6대 프로젝트 실시간 추적</span>
           </div>
           <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
@@ -1509,6 +1509,7 @@
             <div class="argo-bar-row">
               <div class="argo-bar-label-line"><span>애드포스트 (네이버)</span><strong id="val-rev-adpost">—</strong></div>
               <div class="argo-hbar-track"><div class="argo-hbar-fill fill-blue" id="bar-rev-adpost" style="width:0%;"></div></div>
+              <div id="adpost-account-breakdown" style="font-size:12px;line-height:1.7;margin-top:6px;"></div>
             </div>
             <div class="argo-bar-row">
               <div class="argo-bar-label-line"><span>제휴 마케팅</span><strong id="val-rev-affiliate">—</strong></div>
@@ -2045,7 +2046,7 @@
           <div class="bento-crew-grid-5" id="bento-crew-grid-5">
             <div class="crew-mini-card" id="crew-card-jarvis">
               <span class="crew-mini-role">총괄 아키텍트</span>
-              <span class="crew-mini-name">자비스</span>
+              <span class="crew-mini-name">팀장</span>
               <span class="crew-mini-state" id="crew-state-jarvis">🟢 100%</span>
             </div>
             <div class="crew-mini-card is-doctor" id="crew-card-doctor">
@@ -2866,6 +2867,7 @@
           const amount=revenueView.currencyValue(period,currency);
           if(bar) { bar.style.width=`${amount===null?0:Math.max(0,Math.min(100,amount/reference*100))}%`; bar.title=amount===null?'수익 미확인':`${currency} 확인분 · 표시 기준 ${reference}`; }
         }
+        window.renderAdpostAccounts?.(revenue,today);
         const goalPctEl=document.getElementById('kpi-revenue-goal-pct');
         if(goalPctEl) goalPctEl.textContent=totalUsd===null?'일 목표 $100 · 오늘 USD 수익 미확인':`일 목표 $100 · USD 확인분 $${totalUsd.toFixed(2)} (${revGoalPct.toFixed(1)}%) · KRW 별도`;
 

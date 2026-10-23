@@ -48,7 +48,7 @@ BOSS_PROFILE_REL = "notes/사장-프로필.md"
 BOSS_SECTIONS = ("취향", "결정", "금지")
 
 DEFAULT_AGENTS = [
-    {"slug": "jarvis", "name": "자비스(총괄)", "shortName": "자비스", "role": "BaroLab 운영총괄 AI", "team": "총괄", "hubRel": "hubs/crew-jarvis.md"},
+    {"slug": "jarvis", "name": "팀장(총괄)", "shortName": "팀장", "role": "BaroLab 운영총괄 AI", "team": "총괄", "hubRel": "hubs/crew-jarvis.md"},
     {"slug": "patch", "name": "패치(개발/스킬)", "shortName": "패치", "role": "대시보드·파이프라인·스킬 엔지니어", "team": "개발/스킬", "hubRel": "hubs/crew-patch.md"},
     {"slug": "publi", "name": "퍼블리(발행/검수)", "shortName": "퍼블리", "role": "블로그 발행·간접체험 검수 전문가", "team": "발행/검수", "hubRel": "hubs/crew-publi.md"},
     {"slug": "trace", "name": "트레이스(성과/수익)", "shortName": "트레이스", "role": "색인·GA4·애드센스·애드포스트 수익 분석", "team": "성과/수익", "hubRel": "hubs/crew-trace.md"},
@@ -64,7 +64,7 @@ CLEAN_SEED_HUBS: List[Dict[str, Any]] = [
         "kind": "hub",
         "category": "core_hub",
         "sub_group": "crew",
-        "title": "자비스(총괄)",
+        "title": "팀장(총괄)",
         "is_core_hub": 1,
         "is_revenue_hub": 1,
         "links": [
@@ -78,8 +78,8 @@ CLEAN_SEED_HUBS: List[Dict[str, Any]] = [
             "hubs/crew-radar",
         ],
         "body": (
-            "# 자비스(총괄)\n\n"
-            "- **역할**: BaroLab 마스터 컨트롤 운영총괄 AI (`@자비스`)\n"
+            "# 팀장(총괄)\n\n"
+            "- **역할**: BaroLab 마스터 컨트롤 운영총괄 AI (`@팀장`)\n"
             "- **핵심 임무**: 일일 애드센스 $100 목표 관제, 4대 운영 채널 스케줄 조율, 회의실 의사결정 종합 및 지식 그래프 품질 총괄.\n"
         ),
     },
@@ -578,7 +578,7 @@ def resolve_synapse_parents(
 ) -> Tuple[List[str], Dict[str, List[str]]]:
     """
     Enforce the 4-Synapse Rule so that EVERY memory node connects to >= 2 core parent hubs:
-    1. [출처 연결 (Source Crew)]: `@자비스`, `@패치`, `@퍼블리`, `@트레이스`, `@레이더`
+    1. [출처 연결 (Source Crew)]: `@팀장`, `@패치`, `@퍼블리`, `@트레이스`, `@레이더`
     2. [적용 채널/도메인 연결 (Channel)]: `네이버 블로그(5개 계정)`, `CF 블로그(16개 도메인)`, `네이버 지식iN`, `Threads`
     3. [스킬 연결 (Skill)]: `간접체험 4단계 집필법`, `SVG 캡처 가이드`, `부분 수선(In-Place Repair)`, `애드센스 고수익 배치`
     4. [성과(Growth) 연결]: Validated category (`revenue`, `skill`, `meeting`, `core_hub`, `published_post`).
@@ -591,7 +591,7 @@ def resolve_synapse_parents(
 
     # 1. Source Crew resolution
     crew_Patterns = [
-        ("hubs/crew-jarvis", ["jarvis", "자비스", "총괄", "회의록", "결정"]),
+        ("hubs/crew-jarvis", ["jarvis", "팀장", "총괄", "회의록", "결정"]),
         ("hubs/crew-patch", ["patch", "패치", "개발", "스킬", "수선", "테마", "렌더러", "css", "capture_guide", "repair"]),
         ("hubs/crew-publi", ["publi", "퍼블리", "발행", "검수", "간접체험", "캡처", "200 ok", "verify"]),
         ("hubs/crew-trace", ["trace", "트레이스", "수익", "성과", "ga4", "애드센스", "애드포스트", "색인", "rpm", "ctr", "세션"]),
@@ -803,7 +803,7 @@ def promote_growth_insights_to_nodes(db: sqlite3.Connection) -> int:
     ]
     body = (
         f"# {title}\n\n"
-        f"- **출처 크루**: [[hubs/crew-trace]] (`@트레이스`), [[hubs/crew-jarvis]] (`@자비스`)\n"
+        f"- **출처 크루**: [[hubs/crew-trace]] (`@트레이스`), [[hubs/crew-jarvis]] (`@팀장`)\n"
         f"- **적용 채널**: [[hubs/channel-cf-blog]], [[hubs/channel-naver-blog]]\n"
         f"- **적용 스킬**: [[skills/skill-adsense-high-rpm]], [[skills/skill-indirect-experience]]\n\n"
         f"## 실측 성과 요약 (`growth.sqlite3`)\n"

@@ -16,6 +16,8 @@ def main():
     from server.agent_tools import process_staff_request_once
     from common.project_autonomy import process_project_autonomy_once
     from dashboard.agents.synapse import refresh_once
+    from dashboard.agents.style_strategy import review_once
+    from common.conference_dispatch import process_once as process_conferences
 
     stopped = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
@@ -45,6 +47,11 @@ def main():
         while not stopped.is_set():
             # Restart a consumer that exited; SQLite leases retain ownership.
             _store.resume_reviews()
+            try:
+                process_conferences()
+                review_once()
+            except Exception:
+                logging.exception('Style strategy discussion unavailable; existing publishing parameters preserved')
             if not process_verified_work_once():
                 stopped.wait(30)
     finally:

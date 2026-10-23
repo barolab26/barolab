@@ -115,7 +115,7 @@ AGENT_BRAIN_SLOTS = [
     {
         'slot': 'jarvis',
         'kind': 'agent',
-        'name': '자비스 (@jarvis)',
+        'name': '팀장 (@jarvis)',
         'role': '총괄 · 전략판단 · 회의실 의사결정',
         'icon': '🧭',
         'color': '#2563eb',

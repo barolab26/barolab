@@ -58,6 +58,7 @@
         }
       }
     }
+    window.renderAdpostAccounts?.(snapshot.revenue,snapshot.date);
     const done=snapshot.channels.reduce((sum,r)=>sum+(r.done||0),0),target=snapshot.channels.reduce((sum,r)=>sum+r.target,0);
     text('gauge-pub-pct',`${Math.round(done/target*100)}%`);
     for(const [id,value,max] of [['ring-pub-cf',cf?.done||0,16],['ring-pub-naver',nv?.done||0,7]]) {

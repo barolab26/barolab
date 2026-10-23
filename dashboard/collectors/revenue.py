@@ -26,7 +26,8 @@ KST = timezone(timedelta(hours=9))
 SNAPSHOT = DATA / 'revenue.json'
 CATEGORIES = [('adsense', '구글 애드센스'), ('adpost', '네이버 애드포스트'),
               ('affiliate', '제휴마케팅')]
-ADPOST_ACCOUNTS = (('soul5373', 9333), ('soultin', 9334), ('yoon_master', 9335))
+# One authorized portal contains all three real-name accounts' registered media.
+ADPOST_ACCOUNTS = (('soul5373', 9333),)
 
 
 class RevenueSourceError(ValueError):
@@ -667,15 +668,49 @@ def adpost(start, end, cfg=None, account='soul5373', port=9333):
             page, owned = context.new_page(), True
         try:
             rows, publisher, blogs = _adpost_report(page, cfg, account, start, end)
+            medias = browser_json(page, '/api/medias?' + urlencode({'publisherId':publisher,'mediaStatus':'ALL','mediaType':'ALL'})) if account == 'soul5373' else []
         finally:
             # Existing publication/editor/user tabs and the CDP browser stay open.
             if owned:
                 page.close()
     result = parse_adpost_rows(rows, start, end)
+    if account == 'soul5373':
+        if not isinstance(medias,list) or any(str(m.get('publisherId'))!=str(publisher) for m in medias):
+            raise RevenueSourceError('auth_required','애드포스트 미디어 소유자 식별 불일치')
+        result['accountBreakdown'] = parse_adpost_accounts(rows, medias, start, end)
     result.update(publisherId=str(publisher), publisherVerified=True,
-                  mediaAliases=[b['alias'] for b in blogs], account=account,
+                  mediaAliases=[b['alias'] for b in blogs], account=account, collectionAccount='soul5373', declaredRealNameAccountCount=3,
                   tabOwnership={'ownedTemporary': owned, 'reusedExisting': not owned},
-                  reason=f'{account} 로그인 · 실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중')
+                  reason='soul5373 한 곳에서 조회 · 수익은 3개 계정별 구분 · 미집계 날짜는 집계 중')
+    return result
+
+
+
+def parse_adpost_accounts(rows, medias, start, end):
+    owners = {}
+    names = {}
+    blog_accounts = {'mustpickinfo':'soultin','mustinfo':'soul5373','yoonviews':'yoon_master'}
+    for media in medias:
+        alias = str(media.get('channelAlias') or '')
+        account = str(media.get('mediaNaverId') or '')
+        if account not in blog_accounts.values():
+            account = alias.split('.')[1] if alias.startswith('nblog.') else ''
+        if account not in blog_accounts.values():
+            address = urlparse(str(media.get('homeUrl') or ''))
+            account = blog_accounts.get(address.path.strip('/').split('/')[0], '') if address.hostname in ('blog.naver.com','m.blog.naver.com') else ''
+        if account in blog_accounts.values():
+            owners[str(media['mediaId'])] = account
+            names[account] = str(media.get('name') or account)
+    report_ids = {str(row['mediaId']) for row in rows if row.get('mediaTypeName')=='nblog'}
+    if not report_ids.issubset(owners):
+        raise RevenueSourceError('partial','애드포스트 보고서 미디어의 계정 식별 필요')
+    result=[]
+    for account in ('soultin','soul5373','yoon_master'):
+        ids=[media for media,owner in owners.items() if owner==account]
+        if not ids:continue
+        selected=[row for row in rows if not row.get('mediaTypeName') or str(row.get('mediaId')) in ids]
+        result.append({**parse_adpost_rows(selected,start,end),'account':account,'label':account+' · '+names.get(account,account),
+                       'mediaIds':ids,'accountBreakdownVerified':True})
     return result
 
 
@@ -834,6 +869,19 @@ def toss(cfg, start, end):
 
 def deduplicate_adpost_sources(sources):
     seen = {}
+    expanded=[]
+    replacements={'adpost-'+row['account'] for source_row in sources for row in source_row.get('accountBreakdown',[])}
+    for source_row in sources:
+        breakdown=source_row.get('accountBreakdown') if source_row.get('category')=='adpost' else None
+        if not breakdown:
+            if source_row.get('id') in replacements:continue
+            expanded.append(source_row)
+            continue
+        common={k:v for k,v in source_row.items() if k not in ('accountBreakdown','daily','details','pendingDates','account','label','id')}
+        for account in breakdown:
+            expanded.append({**common,**account,'id':'adpost-'+account['account'],'collectionAccount':'soul5373','browserPort':9333,
+                             'scope':'soul5373 조회 · '+account['account']+' 계정 수익'})
+    sources[:]=expanded
     candidates = [s for s in sources if s.get('category') == 'adpost']
     # Prefer a newly verified source over an old cached copy of the same publisher.
     for record in sorted(candidates, key=lambda r: r.get('status') != 'collected'):
@@ -844,6 +892,8 @@ def deduplicate_adpost_sources(sources):
                               aggregationEligible=False, aggregateExclusionReason='이전 수익의 publisher 미확인 · 중복 합산 방지')
             continue
         key = str(publisher)
+        if record.get('accountBreakdownVerified') is True and record.get('mediaIds'):
+            key += '-account-' + record['account']
         if key in seen:
             record.update(status='duplicate_source', aggregationEligible=False, duplicateOf=seen[key],
                           previousObservedDaily=record.get('daily') or record.get('previousObservedDaily', {}), daily={},
@@ -990,8 +1040,8 @@ def collect(now=None):
         expected = sum(s['platform'] == 'cf' for s in inventory())
         sources = [source('adsense-sj', 'adsense', 'SJ · CF 애드센스', 'USD',
                           f'SJ 수익 조회 대상 CF {len(owned)}/{expected}개 · 등록/승인 별도 확인', domains=owned)]
-        sources += [source('adpost-' + account, 'adpost', account + ' · 애드포스트', 'KRW',
-                           account + ' 로그인으로 확인한 publisher 블로그 미디어', browserPort=port,
+        sources += [source('adpost-' + account, 'adpost', '애드포스트 · 실명 3계정 통합', 'KRW',
+                           'soul5373 통합 로그인으로 조회한 전체 등록 미디어', browserPort=port,
                            optional=account != 'soul5373') for account, port in ADPOST_ACCOUNTS]
         sources.append(source('coupang', 'affiliate', '쿠팡 파트너스', 'KRW', '쿠팡 계정 전체 · 모든 subId'))
         cfg = revenue_config()
@@ -1108,10 +1158,13 @@ def period(sources, start, end):
 
 
 def summary(path=SNAPSHOT, now=None):
+    return summarize(read_json(path), now)
+
+
+def summarize(document, now=None):
     now = now or datetime.now(KST)
     today, month = now.date(), now.strftime('%Y-%m')
     start, yesterday = today.replace(day=1), today - timedelta(days=1)
-    document = read_json(path)
     selected = document.get('months', {}).get(month, {})
     sources = selected.get('sources', [])
     previous_sources = document.get('months', {}).get(yesterday.strftime('%Y-%m'), {}).get('sources', []) if yesterday.month != today.month else []

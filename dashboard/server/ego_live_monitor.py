@@ -101,7 +101,7 @@ def activity_lines(requests, now, activity=None, has_inputs=False):
     return lines
 
 
-STAFF = {'jarvis':'자비스','patch':'패치','publi':'퍼블리','trace':'트레이스','doctor':'닥터','radar':'레이더'}
+STAFF = {'jarvis':'팀장','patch':'패치','publi':'퍼블리','trace':'트레이스','doctor':'닥터','radar':'레이더'}
 TOOLS = {'read_agent_status':'운영 상태 확인','repair_cf_known_failure':'CF 오류 수리'}
 STATES = {'queued':'요청 대기','acknowledged':'접수','running':'실행 중','started':'시작됨',
           'awaiting_completion':'결과 대기','completed':'요청 처리 완료','held':'보류','failed':'실패',
@@ -163,7 +163,7 @@ def render_lines(snapshot, requests, *, now, columns=120, activity=None, inputs=
     label = '최근 관측' if fresh else '관측 지연 / 미관측'
     lines = ['EGO LITE 프로젝트 모니터', f'① 현재 시각: {now.astimezone(KST):%Y-%m-%d %H:%M:%S} KST',
              '화면 시계와 업무·원천 자료의 갱신 시각은 다릅니다.']
-    lines += ['직원 색상: [자비스] [퍼블리] [트레이스] [패치] [레이더] [닥터]']
+    lines += ['직원 색상: [팀장] [퍼블리] [트레이스] [패치] [레이더] [닥터]']
     lines += input_lines(inputs or [],requests,now)
     lines += ['─'*min(columns-1,70),'② 직원 실행 요청 · 실제 결과']
     if not requests:
@@ -226,7 +226,7 @@ def color_line(line):
             break
     for status,color in [('입력 실패','31'),('실패','31'),('미확인','33'),('미관측','33'),('보류','33'),('대기','33'),('시도 중','36'),('실행 중','36'),('요청 처리 완료','32'),('호출 반환','32')]:
         line=line.replace(status,'\033[1;'+color+'m'+status+reset)
-    for name,color in {'자비스':'94','퍼블리':'92','트레이스':'95','패치':'38;5;208','레이더':'38;5;213','닥터':'96','Codex(실행 검증)':'97'}.items():
+    for name,color in {'팀장':'94','퍼블리':'92','트레이스':'95','패치':'38;5;208','레이더':'38;5;213','닥터':'96','Codex(실행 검증)':'97'}.items():
         line=line.replace('['+name+']','\033[1;'+color+'m['+name+']'+reset)
     return line
 

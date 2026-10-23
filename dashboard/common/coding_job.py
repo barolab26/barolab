@@ -325,7 +325,7 @@ def review_coding_job(job_dir,candidate_sha256,evidence,*,validation_sha256=None
         ('Judge whether the exact sandbox-tested candidate may be applied to unchanged source, not whether the business task succeeded. ' if validation_sha256 else 'This authorizes only isolated testing; no production success is established. ')+ '\n'+
         json.dumps({'diff':diff,'tests':tests,'readOnlyContext':read_only_context,'hostEvidence':evidence,'scope':manifest,'actualValidation':validation},ensure_ascii=False),
         agent_slot='jarvis',response_schema=schema,observer=observe,memory_read_only=True,memory_session_id='coding:'+job.name,
-        crew_actor='jarvis',crew_actor_label='자비스',crew_stage='coding-independent-review',crew_task_id='coding:'+job.name)
+        crew_actor='jarvis',crew_actor_label='팀장',crew_stage='coding-independent-review',crew_task_id='coding:'+job.name)
     receipt={'candidateSha256':candidate_sha256,'manifestSha256':status['manifestSha256'],
              'claimSha256':digest(claim.read_bytes()),'route':route,'verdict':verdict,'validationSha256':validation_sha256}
     _save(job/(prefix+'.json'),receipt)

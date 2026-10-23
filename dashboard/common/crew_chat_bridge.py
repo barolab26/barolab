@@ -117,7 +117,7 @@ def work_actor_owner(actor, owner_agent=''):
 
 
 def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
-                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind=''):
+                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url=''):
     """Host-observed lifecycle metadata only; never pass prompts, responses or secrets."""
     import uuid
     phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
@@ -137,6 +137,12 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
         'text':f'{stage}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다.',
         'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
                        'handoff':'','synapseLinked':False}}
+    if deliverable_url:
+        from dashboard.agents.synapse import url
+        address = url(deliverable_url)
+        if not address:
+            raise ValueError('Invalid public deliverable URL')
+        payload['deliverableUrl'] = address
     _deliver(payload)
     if phase == 'failed':
         try:

@@ -59,3 +59,15 @@ stream.scrollTop = 1200; mutation(); flush(); assert.equal(stream.scrollTop, 120
 stream.scrollTop = 1700; handlers.scroll(); flush();
 stream.scrollHeight = 2000; mutation(); flush(); assert.equal(stream.scrollTop, 1900);
 console.log('Chat scroll regression checks passed');
+
+// Real strategy replies from all participating employees belong in the conversation.
+const replyStart = html.indexOf('  function crewConversationText(m) {');
+const replyEnd = html.indexOf('  function isConversationMessage', replyStart);
+const replies = {};
+vm.createContext(replies);
+vm.runInContext(html.slice(replyStart,replyEnd),replies);
+for (const who of ['jarvis','radar','trace','publi','patch','doctor']) {
+  const row = {eventType:'crew_work_event',who,stage:'post-style-planning',phase:'completed',messageKind:'staff_reply',model:'observed-model',outputKind:'실제 조사 결과를 보고합니다.'};
+  assert.equal(replies.crewConversationText(row),row.outputKind);
+  assert.equal(replies.crewConversationText({...row,messageKind:'host_ack'}),null);
+}
