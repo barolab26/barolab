@@ -432,10 +432,14 @@ def load_room_data() -> Dict[str, Any]:
 
 
 def compact_room_telemetry(room, keep=200):
-    """Archive old transport events losslessly; never discard conversations."""
+    """Archive transport events losslessly; preserve conversations and each staff member's last state."""
     messages=room.get('messages',[])
     indices=[i for i,row in enumerate(messages) if row.get('eventType')=='crew_work_event']
     removed=set(indices[:-keep]) if keep else set(indices)
+    for role in ('jarvis','patch','publi','trace','doctor','radar'):
+        owned=[i for i in indices if (messages[i].get('ownerAgent') or messages[i].get('who'))==role]
+        for candidates in (owned,[i for i in owned if messages[i].get('phase')=='completed']):
+            if candidates:removed.discard(max(candidates,key=lambda i:messages[i].get('ts',0)))
     if not removed:return room
     history=[row for i,row in enumerate(messages) if i in removed]
     raw=json.dumps({'schema':'crew-work-history-v1','messages':history},ensure_ascii=False).encode('utf-8')

@@ -286,7 +286,7 @@ class Collector:
         cf=self.read('dashboard/data/cf/daily_schedule.json')
         nv=self.read('dashboard/data/naver/automation-status.json');kin=self.read('dashboard/data/public/kin.json')
         room=self.cache.read(self.root/'dashboard/data/chats/room-main.json',projection=lambda d:
-            {'messages':[e for e in d.get('messages',[])[-600:] if isinstance(e,dict) and e.get('eventType')=='crew_work_event']})
+            {'messages':[e for e in d.get('messages',[]) if isinstance(e,dict) and e.get('eventType')=='crew_work_event'][-600:]})
         events=[e for e in room.get('messages',[])[-600:] if isinstance(e,dict) and e.get('eventType')=='crew_work_event'
                 and isinstance(e.get('ts'),(int,float))]
         local=self.read('dashboard/data/editorial-live-events.json').get('messages',[])

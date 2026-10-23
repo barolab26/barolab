@@ -90,5 +90,15 @@ class ChatRetentionTests(unittest.TestCase):
                 with self.assertRaises(OSError):
                     scope['compact_room_telemetry'](room, keep=10)
             self.assertEqual(room['messages'], messages)
+            quiet=[{'id':'patch-completed','who':'patch','eventType':'crew_work_event','phase':'completed','ts':1},
+                   {'id':'patch-latest','who':'patch','eventType':'crew_work_event','phase':'progress','ts':2}]
+            busy=[{'id':'publi-'+str(i),'who':'publi','eventType':'crew_work_event','phase':'completed','ts':i+3} for i in range(1000)]
+            room={'messages':quiet+busy}
+            scope['compact_room_telemetry'](room,keep=20)
+            self.assertEqual(len(room['messages']),22)
+            self.assertTrue({'patch-completed','patch-latest'}.issubset({row['id'] for row in room['messages']}))
+            scope['compact_room_telemetry'](room,keep=20)
+            self.assertEqual(len(room['messages']),22)
+
 if __name__ == '__main__':
     unittest.main()
