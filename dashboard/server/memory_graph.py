@@ -1400,7 +1400,7 @@ def _synapse_graph(query='', category='all'):
         for identity,node in graph.get('nodes',{}).items():
             kind=node.get('type','note');hub=kind=='MemoryHub'
             lookup[identity]=len(nodes)
-            nodes.append(dict(id=identity,label=str(node.get('title') or node.get('domain') or kind),
+            nodes.append(dict(id=identity,label=str(node.get('title') or node.get('displayName') or node.get('brand') or node.get('account') or node.get('domain') or {'MemoryHub':'공용 기억 허브','AudienceStrategy':'독자 전략'}.get(kind,kind)),
                 type='hub' if hub else 'note',kind=kind,category='core_hub' if hub else 'insight',
                 rel='',readOnly=True,sourceKind='synapse_memory',sourcePath='dashboard/data/memory_graph.json',
                 isCoreHub=hub,verifiedKnowledge=False,deg=0))

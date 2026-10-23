@@ -6,6 +6,7 @@ from dashboard.agents.synapse import build_index, recipe
 class ConversationKnowledgeTests(unittest.TestCase):
     def test_optional_unmeasured_knowledge_reaches_relevant_staff_without_becoming_a_rule(self):
         node={'type':'PracticalKnowHow','active':True,'title':'지식인 키워드 수요 조사','tags':['키워드','지식인'],
+              'originalText':'代表提供的可选方法','recordedAt':'2026-10-23T18:00:00+09:00','sourceType':'ceo_conversation',
               'roles':['radar','jarvis'],'method':'질문 수요에서 글감을 찾는 선택적 방법',
               'whenToUse':'기존 글과 질문 연결 방식과 비교해 선택','limits':'질문 수는 검색량의 증명이 아니다',
               'measurementStatus':'not_measured','optional':True,'causalClaim':False}

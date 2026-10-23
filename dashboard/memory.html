@@ -603,7 +603,8 @@
             <span class="vault-card-pill emerald" id="stat-linked-desc">—</span>
           </div>
           <div class="vault-card-headline" id="stat-total-docs">—</div>
-          <div class="argo-multi-seg-bar" title="코어 허브 / 지식 노드 / 고아 노드 비율">
+          <p style="font-size:11px;color:#64748b;margin:6px 0;">노드 수는 검증된 지식 수가 아닙니다. 운영 지침·노하우 후보·질문·발행 근거·관계 정보를 함께 표시합니다.</p>
+          <div class="argo-multi-seg-bar" title="코어 허브 / 그래프 기록 / 고아 노드 비율">
             <div class="argo-seg-piece" id="seg-core-hubs" style="width:0%; background:#10b981;"></div>
             <div class="argo-seg-piece" id="seg-know-nodes" style="width:0%; background:#3b82f6;"></div>
             <div class="argo-seg-piece" id="seg-orphan-nodes" style="width:0%; background:#cbd5e1;"></div>
@@ -833,7 +834,7 @@
   </div>
 </div>
 
-<script src="memory_graph_view.js?v=20261019-gate-v1"></script>
+<script src="memory_graph_view.js?v=20261023-major-labels"></script>
 <script>
 (() => {
   const canvas = document.getElementById('memory-canvas');
@@ -1239,9 +1240,9 @@
     }
 
     const fade = hoverIdx !== null ? 0.32 : 1.0;
-    ctx.setLineDash([3, 5]);
-    ctx.lineWidth = 0.85;
-    ctx.strokeStyle = `rgba(148, 163, 184, ${0.24 * fade})`;
+    ctx.setLineDash([]);
+    ctx.lineWidth = 1.1;
+    ctx.strokeStyle = `rgba(148, 163, 184, ${0.48 * fade})`;
     ctx.stroke(normalPath);
 
     ctx.setLineDash([2, 5]);
@@ -1359,7 +1360,7 @@
     const activeNode=state.nodes[activeTooltipIdx], activePoint=screenPts[activeTooltipIdx];
     let tooltip=null;
     if(activeNode && activePoint) {
-      const catTag=activeNode.isCoreHub?'코어 허브':activeNode.sourceKind==='project_skill'?'SKILL.md':activeNode.category==='meeting'?'회의실 결정':'지식 · 기억';
+      const catTag=activeNode.isCoreHub?'코어 허브':activeNode.sourceKind==='project_skill'?'SKILL.md':activeNode.category==='meeting'?'회의실 결정':({Staff:'담당 직원',AccountProfile:'계정 맥락',Question:'질문 관측',Reservation:'예약 기록',PracticalKnowHow:'노하우 후보 · 효과 미검증',CEOOperatingDirective:'대표 운영 지침',ChannelPublication:'발행 확인 기록',ObservedBenchmark:'벤치마킹 관측'})[activeNode.kind]||'지식·참고 기록';
       const subStr=`${graphView.nodeShape(activeNode)==='star'?'✦':'◆'} ${catTag} · 시냅스 ${activeNode.deg}`;
       ctx.font='800 12.5px Pretendard, sans-serif';
       const lines=graphView.wrapLabel(activeNode.label,Math.max(80,W-56),text=>ctx.measureText(text).width);
@@ -1368,15 +1369,22 @@
       const width=Math.min(W-16,Math.ceil(Math.max(w1,ctx.measureText(subStr).width)+20)),height=lines.length*16+22;
       tooltip={lines,subStr,width,height,x:Math.max(8,Math.min(W-width-8,activePoint.x-width/2)),y:Math.max(8,Math.min(H-height-8,activePoint.y+nodeRadius(activeNode)*scaleClamp*1.85+6))};
     }
+    const majorNodes=new Set(state.nodes.map((n,i)=>({i,priority:n.isCoreHub?1000+(n.deg||0):(n.deg||0)}))
+      .filter(item=>item.priority>=10).sort((a,b)=>b.priority-a.priority).slice(0,8).map(item=>item.i));
     const labelBoxes=state.nodes.map((n,i)=>{
-      const sp=screenPts[i],width=state.pts[i].labelWidth;
-      return {index:i,x:Math.round(sp.x-width/2),y:Math.round(sp.y+nodeRadius(n)*scaleClamp*1.75+5),width,height:20,priority:n.isCoreHub?1000+(n.deg||0):(n.deg||0)};
-    }).filter(box=>box.index!==activeTooltipIdx);
+      const sp=screenPts[i],important=majorNodes.has(i);
+      ctx.font=`${important?700:600} 11.5px Pretendard, sans-serif`;
+      const lines=important?graphView.wrapLabel(truncateTitle(n.label,36),180,text=>ctx.measureText(text).width).slice(0,2):[truncateTitle(n.label,16)];
+      const width=Math.ceil(Math.max(...lines.map(text=>ctx.measureText(text).width))+14);
+      return {index:i,x:Math.round(sp.x-width/2),y:Math.round(sp.y+nodeRadius(n)*scaleClamp*1.75+5),width,height:lines.length*16+8,lines,important,priority:n.isCoreHub?1000+(n.deg||0):(n.deg||0)};
+    }).filter(box=>box.index!==activeTooltipIdx && screenPts[box.index].x>=0 && screenPts[box.index].x<=W && screenPts[box.index].y>=0 && screenPts[box.index].y<=H);
     const glyphBoxes=state.nodes.map((n,i)=>{const r=nodeRadius(n)*scaleClamp*1.65,sp=screenPts[i];return {x:sp.x-r,y:sp.y-r,width:r*2,height:r*2};});
-    const visibleLabels=new Set(graphView.visibleLabels(labelBoxes,W,H,[...glyphBoxes,...(tooltip?[tooltip]:[])]));
+    const placedLabels=graphView.placeLabels(labelBoxes,W,H,glyphBoxes,tooltip?[tooltip]:[]);
+    const visibleLabels=new Map(placedLabels.map(box=>[box.index,box]));
+    canvas.setAttribute('data-major-label-count',String(placedLabels.filter(box=>box.important).length));
     const labelCount=visibleLabels.size+(tooltip?1:0);
     canvas.setAttribute('data-label-count',String(labelCount));
-    document.getElementById('graph-label-status').textContent=labelCount<state.nodes.length?`노드 ${state.nodes.length}개 모두 표시 · 겹침 방지 라벨 ${labelCount}개 · 확대하거나 노드를 선택하면 제목을 볼 수 있습니다.`:`노드·라벨 ${state.nodes.length}개 모두 표시.`;
+    document.getElementById('graph-label-status').textContent=labelCount<state.nodes.length?`노드 ${state.nodes.length}개 모두 표시 · 큰 노드 제목 우선 표시 · 라벨 ${labelCount}개 · 확대·선택하면 자세히 볼 수 있습니다.`:`노드·라벨 ${state.nodes.length}개 모두 표시.`;
 
 
     for (let i = 0; i < state.nodes.length; i++) {
@@ -1389,14 +1397,13 @@
       if (!sp) continue;
 
       const r = nodeRadius(n) * scaleClamp;
-      const shortLabel = truncateTitle(n.label, 16);
-      ctx.font = `${n.isCoreHub ? 700 : 600} 11.5px Pretendard, sans-serif`;
-      const textW = ctx.measureText(shortLabel).width;
-      const padX = 7;
-      const boxW = Math.ceil(textW + padX * 2);
-      const boxH = 20;
-      const boxX = Math.round(sp.x - boxW / 2);
-      const boxY = Math.round(sp.y + r * 1.75 + 5);
+      const label=visibleLabels.get(i);
+      ctx.font = `${label.important?700:600} 11.5px Pretendard, sans-serif`;
+      const boxW=label.width,boxH=label.height,boxX=label.x,boxY=label.y;
+      if(Math.abs(boxX+boxW/2-sp.x)>5 || Math.abs(boxY-(sp.y+r*1.75+5))>5) {
+        ctx.beginPath();ctx.moveTo(sp.x,sp.y);ctx.lineTo(boxX+boxW/2,boxY+boxH/2);
+        ctx.lineWidth=0.8;ctx.strokeStyle='rgba(147,197,253,0.6)';ctx.stroke();
+      }
 
       const isDimmed = hoverIdx !== null && !isNeighbor;
       ctx.save();
@@ -1415,7 +1422,7 @@
         : (n.category === 'meeting')
         ? '#d8b4fe'
         : '#93c5fd';
-      ctx.fillText(shortLabel, sp.x, boxY + boxH / 2 + 0.5);
+      label.lines.forEach((line,index)=>ctx.fillText(line,boxX+boxW/2,boxY+12+index*16));
       ctx.restore();
     }
 
@@ -1576,7 +1583,7 @@
     const lblKnow = document.getElementById('lbl-know-nodes');
     const lblOrph = document.getElementById('lbl-orphan-nodes');
     if (lblCore) lblCore.textContent = `코어 허브 ${coreHubs}`;
-    if (lblKnow) lblKnow.textContent = `지식 노드 ${knowNodes}`;
+    if (lblKnow) lblKnow.textContent = `참고·운영 기록 ${knowNodes}`;
     if (lblOrph) lblOrph.textContent = `고아 노드 ${isolated}`;
 
     // Card 2: Semi-Circle Edge Density Gauge

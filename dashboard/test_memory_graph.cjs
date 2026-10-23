@@ -378,3 +378,12 @@ test('knowledge-note registration keeps text on API failure and labels the entry
   assert(!Object.hasOwn(JSON.parse(post.options.body),'create'));
   assert.match(fs.readFileSync(__dirname+'/memory.html','utf8'),/실제 SKILL.md 파일은 그래프/);
 });
+
+test('major titles find alternate readable positions when dense glyphs block the default label',()=>{
+  const major={index:0,x:100,y:110,width:140,height:40,priority:1000,important:true};
+  const small={index:1,x:100,y:110,width:100,height:20,priority:1};
+  const placed=view.placeLabels([small,major],400,300,[{x:90,y:100,width:160,height:60}]);
+  assert(placed.some(box=>box.index===0));
+  for(let i=0;i<placed.length;i++) for(let j=i+1;j<placed.length;j++) assert(!view.overlaps(placed[i],placed[j]));
+  for(const box of placed) assert(box.x>=6 && box.y>=6 && box.x+box.width<=394 && box.y+box.height<=294);
+});

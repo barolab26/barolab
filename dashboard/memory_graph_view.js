@@ -59,6 +59,23 @@
       else {const d=(dy<0?-1:1)*(oy+0.1);a.y-=d*moveA;b.y+=d*moveB;}
     }
   }
+  function placeLabels(candidates,width,height,glyphs=[],reserved=[]) {
+    const placed=[];
+    const fits=(box,blocks)=>box.x>=6 && box.y>=6 && box.x+box.width<=width-6 && box.y+box.height<=height-6 && !blocks.some(other=>overlaps(box,other));
+    for(const label of [...candidates].sort((a,b)=>(b.priority||0)-(a.priority||0)||a.index-b.index)) {
+      let options=[label];
+      if(label.important) {
+        options.push({...label,y:label.y-label.height-45},{...label,x:label.x-label.width-20},{...label,x:label.x+label.width+20});
+        for(let row=0;row<8;row++) for(const x of [6,width-label.width-6]) options.push({...label,x,y:8+row*(label.height+8)});
+      }
+      const blocked=[...reserved,...placed];
+      let chosen=options.find(box=>fits(box,[...glyphs,...blocked]));
+      // Dense small glyphs must not hide a major node's readable title.
+      if(!chosen && label.important) chosen=options.find(box=>fits(box,blocked));
+      if(chosen) placed.push(chosen);
+    }
+    return placed;
+  }
   function graphRevision(data) { return JSON.stringify({nodes:data.nodes,edges:data.edges,quarantine:data.quarantine,quarantined:data.stats?.quarantined}); }
   function filterGraph(graph,category) {
     if(category!=='skill')return graph;
@@ -82,7 +99,7 @@
     lines.push(line);return lines;
   }
   function nodeShape(node) { return node.isCoreHub === true ? 'star' : 'diamond'; }
-  const api = { normalizeGraph, canvasSize, cameraFor, nodeShape, graphRevision, overlaps, visibleLabels, separatePoints, filterGraph, wrapLabel, isSkill, quarantineLabel, assertContract, contractVersion };
+  const api = { normalizeGraph, canvasSize, cameraFor, nodeShape, graphRevision, overlaps, visibleLabels, placeLabels, separatePoints, filterGraph, wrapLabel, isSkill, quarantineLabel, assertContract, contractVersion };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MemoryGraphView = api;
 })(typeof window !== 'undefined' ? window : globalThis);
