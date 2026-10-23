@@ -678,15 +678,13 @@
       let journal = null, verifyLedger = null, monitor = null, activeWorkflow = null;
       try {
         const ts = Date.now();
-        const [jRes, awRes, vRes, mRes, psRes] = await Promise.all([
-          fetch('../dashboard/data/naver/automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => fetch('./automation-journal.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) })),
-          fetch('../dashboard/data/naver/active-workflow.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null),
+        const [liveRes, vRes, mRes, psRes] = await Promise.all([
+          fetch('/api/mission-control', {cache:'no-store',signal:AbortSignal.timeout(2500)}),
           fetch('./naver_public_verification.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
           fetch('./naver_automation.json?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }),
           fetch('./pipeline_status.js?t=' + ts, { cache: 'no-store', signal: AbortSignal.timeout(10000) }).catch(() => null)
         ]);
-        if (jRes && jRes.ok) journal = await jRes.json();
-        if (awRes && awRes.ok) activeWorkflow = await awRes.json();
+        if (liveRes.ok) { const live=(await liveRes.json()).naverLive || {}; journal=live.journal; activeWorkflow=live.workflow; }
         if (vRes && vRes.ok) verifyLedger = await vRes.json();
         if (mRes && mRes.ok) monitor = await mRes.json();
         if (psRes && psRes.ok) {

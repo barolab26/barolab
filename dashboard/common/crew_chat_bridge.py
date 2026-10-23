@@ -169,7 +169,9 @@ def model_crew_call(function):
     def wrapped(prompt, *args, **kwargs):
         task_id = kwargs.pop('crew_task_id', None)
         stage = kwargs.pop('crew_stage', 'model-call')
-        actor = kwargs.pop('crew_actor', 'common-runner')
+        slot = kwargs.get('agent_slot', '')
+        default_actor = slot if slot in STAFF_ACTORS else {'cf_pipeline':'publi','naver_pipeline':'publi','kin_pipeline':'publi','threads_pipeline':'publi'}.get(slot, 'common-runner')
+        actor = kwargs.pop('crew_actor', default_actor)
         label = kwargs.pop('crew_actor_label', '공통 실행기')
         owner = kwargs.pop('crew_owner_agent', '')
         if _model_crew_active.get():

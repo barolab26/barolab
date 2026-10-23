@@ -1,32 +1,9 @@
 /* Both screens render the same versioned hub projection; polling never overlaps. */
 (() => {
   'use strict';
-  const titles = ['① 수익 · $100/day', '② AI 호출 · 크레딧', '③ 우분투 격리 크롬', '④ 오늘 발행 진행', '⑤ 크루 · Vault', '⑥ 완료 · 복구'];
-  const host = document.createElement('section');
-  host.id = 'mission-control'; host.setAttribute('aria-label', 'EGO 공용 실시간 관제');
-  host.innerHTML = '<header><strong>EGO MISSION CONTROL</strong> <small id="mission-revision">연결 중</small></header><div class="mission-panels"></div>';
-  const style = document.createElement('style');
-  style.textContent = '#mission-control{margin:12px;padding:12px;background:#07152a;color:#fff;border:2px solid #22d3ee;border-radius:12px}#mission-control header{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.mission-panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:10px;margin-top:10px}.mission-panel{padding:10px;border:1px solid #38bdf8;border-radius:8px;min-width:0}.mission-panel:nth-child(2n){border-color:#e879f9}.mission-panel h3{color:#fde047;font-size:14px;margin:0 0 6px}.mission-panel p{font-size:12px;line-height:1.6;margin:0;overflow-wrap:anywhere}.mission-alert{color:#fff;background:#b91c1c}';
-  document.head.append(style);
-  const main = document.querySelector('main') || document.body;
-  main.prepend(host);
-  const panels = titles.map(title => {
-    const panel=document.createElement('article');panel.className='mission-panel';
-    const heading=document.createElement('h3');heading.textContent=title;panel.append(heading);
-    const content=document.createElement('div');panel.append(content);
-    host.querySelector('.mission-panels').append(panel);return content;
-  });
   const text = (id,value) => {const el=document.getElementById(id);if(el)el.textContent=value;};
   function apply(snapshot) {
     window.BaroLabMissionControl = snapshot;
-    const age=Math.max(0,Math.floor((Date.now()-Date.parse(snapshot.generatedAt))/1000));
-    text('mission-revision',`${snapshot.date} KST · ${snapshot.revision.slice(0,8)} · ${age}초 전`);
-    host.dataset.revision=snapshot.revision;
-    snapshot.panels.forEach((rows,index) => {
-      const fragment=document.createDocumentFragment();
-      for(const row of rows) {const p=document.createElement('p');p.textContent=row;if(/ALERT|BLOCKED|OFFLINE/.test(row))p.className='mission-alert';fragment.append(p);}
-      panels[index].replaceChildren(fragment);
-    });
     const cf=snapshot.channels.find(r=>r.id==='cf');
     const nv=snapshot.channels.find(r=>r.id==='naver');
     if(cf) {
@@ -49,6 +26,38 @@
         cell.textContent=index>=published && index<published+reserved?'✓':'';
       });
     }
+    const kin=snapshot.channels.find(r=>r.id==='kin');
+    const threads=snapshot.channels.find(r=>r.id==='threads');
+    if(kin) {
+      text('overview-kin-verified',`${kin.done ?? '—'} / ${kin.target}건`);
+      text('gauge-kin-pct',`${Math.round((kin.done||0)/kin.target*100)}%`);
+      text('overview-kin-remaining',`${Math.max(0,kin.target-(kin.done||0))}건`);
+    }
+    if(threads) {
+      text('bento-threads-today',`${threads.done ?? '—'} / ${threads.target}건`);
+      text('gauge-threads-pct',`${Math.round((threads.done||0)/threads.target*100)}%`);
+    }
+    for(const [row,id,ring,length] of [[kin,'bar-kin-verified','ring-kin-quota',144.5],[threads,'bar-threads-today','ring-threads-quota',144.5]]) {
+      if(!row)continue;
+      const ratio=Math.min(1,(row.done||0)/row.target),bar=document.getElementById(id),circle=document.getElementById(ring);
+      if(bar)bar.style.width=`${ratio*100}%`;
+      if(circle)circle.style.strokeDashoffset=String(length*(1-ratio));
+    }
+    if(window.renderCF16Grid)window.renderCF16Grid();
+    const revenueView=window.BaroLabRevenue;
+    if(revenueView && snapshot.revenue) {
+      for(const [category,id,currency] of [['adsense','adsense','USD'],['adpost','adpost','KRW'],['affiliate','affiliate','KRW']]) {
+        const period=revenueView.categoryPeriod(snapshot.revenue,category,'today',snapshot.date);
+        text(`val-rev-${id}`,revenueView.moneyText(period));
+        if(category==='adsense') {
+          const amount=revenueView.currencyValue(period,currency);
+          text('gauge-rev-pct',amount===null?'—':`${Math.min(100,amount).toFixed(1)}%`);
+          text('metric-revenue-value',revenueView.moneyText(period));
+          const arc=document.getElementById('arc-revenue-goal');
+          if(arc)arc.style.strokeDashoffset=String(119.4*(1-Math.min(1,(amount||0)/100)));
+        }
+      }
+    }
     const done=snapshot.channels.reduce((sum,r)=>sum+(r.done||0),0),target=snapshot.channels.reduce((sum,r)=>sum+r.target,0);
     text('gauge-pub-pct',`${Math.round(done/target*100)}%`);
     for(const [id,value,max] of [['ring-pub-cf',cf?.done||0,16],['ring-pub-naver',nv?.done||0,7]]) {
@@ -59,10 +68,12 @@
     if(goal)goal.dataset.publicationTarget=String(target);
     text('kpi-todo-val',`${done}/${target}편`);text('kpi-todo-badge',`${done}/${target} 공개 발행`);
     text('kpi-todo-desc',snapshot.channels.map(r=>`${r.name} ${r.done ?? '—'}/${r.target}`).join(' · '));
+    text('gauge-mem-sub',`노드 ${snapshot.vault.nodes}개`);
+    text('bento-memory-node-pill',`시냅스 엣지 ${snapshot.vault.edges}개 · 해결 ${snapshot.vault.episodes}회`);
     for(const row of snapshot.crew) {
       text(`crew-state-${row.role}`,`${row.state} · ${row.model || '모델 대기'}`);
       const el=document.getElementById(`crew-card-${row.role}`);
-      if(el){el.classList.toggle('is-working',row.state==='RUNNING');el.title=row.action||'';}
+      if(el){el.classList.toggle('is-working',row.state==='RUNNING');el.title=[row.action,row.lastActivity && new Date(row.lastActivity).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})].filter(Boolean).join(' · ');}
     }
     window.dispatchEvent(new CustomEvent('barolab-mission-control',{detail:snapshot}));
   }
@@ -75,8 +86,8 @@
       const snapshot=await response.json();
       if(snapshot.schema!=='barolab-mission-control-v2')throw new Error('스냅샷 규격 오류');
       if(snapshot.revision!==lastRevision){apply(snapshot);lastRevision=snapshot.revision;}
-      else text('mission-revision',`${snapshot.date} KST · ${snapshot.revision.slice(0,8)} · ${Math.max(0,Math.floor((Date.now()-Date.parse(snapshot.generatedAt))/1000))}초 전`);
-    } catch(error) {text('mission-revision','관제 연결 지연 · 마지막 수신 기록 유지');}
+
+    } catch(error) { /* Keep the last received card values during a disconnect. */ }
     setTimeout(poll,1000);
   }
   poll();

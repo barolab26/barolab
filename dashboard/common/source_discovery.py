@@ -84,6 +84,9 @@ def public_text(url, timeout=8):
 def research(keyword, folder):
     from common.dashboard_jobs import write
     from datetime import datetime, timezone
+    from common.crew_chat_bridge import emit_work_event, work_task_id
+    task=work_task_id(folder)
+    emit_work_event(actor='radar',actor_label='레이더',task_id=task,phase='progress',stage='researcher',output_kind='웹/API 근거 수집 시작')
     requested_keyword=keyword
     try:
         from dashboard.agents.synapse import research_query
@@ -97,4 +100,5 @@ def research(keyword, folder):
         if len(sources)>=3:break
     write(folder/'research.json',{'keyword':keyword,'requestedKeyword':requested_keyword,'sources':sources,'collectedAt':datetime.now(timezone.utc).isoformat()})
     (folder/'research.md').write_text('\n\n'.join(x['url']+'\n'+x['text'] for x in sources),encoding='utf-8')
+    emit_work_event(actor='radar',actor_label='레이더',task_id=task,phase='completed',stage='researcher',output_kind=f'실제 본문 근거 {len(sources)}개 수집')
     return sources

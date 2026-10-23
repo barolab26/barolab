@@ -1613,7 +1613,7 @@ def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_ca
     articles = [articles[i] for i in matched_indices]
     sources = [sources[i] for i in matched_indices]
     stamp = _naver_authoring_datetime.now(_naver_authoring_ZoneInfo('Asia/Seoul')).strftime('%Y%m%dT%H%M%S%f')
-    folder = _naver_pipeline_ROOT / 'dashboard/data/kin-drafts/auto' / (_naver_authoring_re.sub('[^A-Za-z0-9_-]', '_', slot_id) + '_' + stamp)
+    folder = _naver_pipeline_ROOT / 'naver_kin/output/auto' / (_naver_authoring_re.sub('[^A-Za-z0-9_-]', '_', slot_id) + '_' + stamp)
     folder.mkdir(parents=True, exist_ok=False)
     inputs = {'account': account, 'track': target_track, 'questions': candidates, 'considered_questions': [{'question_id': q['question_id'], 'title': q['title'], 'track': q.get('track', target_track), 'answer_count': q.get('answer_count', 0), 'source_topic_score': max((_naver_authoring__relevance_score(q, e, used_domains_today) for e in catalogue))} for q in considered], 'discovery_skips': getattr(discovered, 'skipped', []), 'search_page': search_page, 'articles': [{'url': a['url'], 'body_sha256': a['body_sha256']} for a in articles], 'sources_by_article': [{'article_url': a['url'], 'documents': docs} for a, docs in zip(articles, sources)]}
     (folder / 'sources.json').write_text(_naver_authoring_json.dumps(inputs, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -2001,9 +2001,9 @@ def _naver_scheduler_submission_counts(db, day):
     return result
 
 def _naver_scheduler_operation_counts(db, day):
-    """Every reserved round consumes model budget, even without a successful submission."""
+    """Research rounds consume budget; a browser lock wait before research does not."""
     counts = {account: 0 for account in _naver_pipeline_ACCOUNTS}
-    for row in db.execute('SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? GROUP BY account', (day,)):
+    for row in db.execute("SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? AND NOT (state='deferred' AND reason IN ('browser_busy','audit_path_repaired') AND question_id IS NULL) GROUP BY account", (day,)):
         if row['account'] in counts:
             counts[row['account']] += row['n']
     for row in db.execute("SELECT q.account,COUNT(*) n FROM questions q WHERE q.send_day=? AND q.state IN ('publishing','submitted_unverified','published_verified') AND NOT EXISTS (SELECT 1 FROM automation_slots s WHERE s.question_id=q.question_id) GROUP BY q.account", (day,)):
@@ -2216,7 +2216,9 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                             state = db.execute('SELECT state FROM questions WHERE question_id=?', (qid,)).fetchone()[0]
                 except Exception as exc:
                     reason = 'operation_' + type(exc).__name__
-                    if type(exc).__name__ in ('AccountProtectionError', 'AccountPostingRestrictedError'):
+                    if qid is None and isinstance(exc, RuntimeError) and ('Naver pipeline already running' in str(exc) or 'currently running a Naver blog post' in str(exc)):
+                        state, reason = 'deferred', 'browser_busy'
+                    elif type(exc).__name__ in ('AccountProtectionError', 'AccountPostingRestrictedError'):
                         reason = 'account_protected'
                     elif type(exc).__name__ in ('QuestionUnavailableError', 'PostingRejectedError'):
                         reason = 'question_unavailable'
@@ -2247,7 +2249,7 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
             result['registeredTasks'] = _naver_scheduler_observe_tasks()
         finally:
             if run_id:
-                if state == 'blocked' and prev_cadence is not None:
+                if state in ('blocked', 'deferred') and prev_cadence is not None:
                     with db:
                         db.execute('UPDATE operating_cadence SET last_completed_at=?,last_account=?,active_run_id=NULL,active_account=NULL,active_started_at=NULL WHERE id=1', (prev_cadence['last_completed_at'], prev_cadence['last_account']))
                 else:

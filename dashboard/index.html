@@ -1433,7 +1433,6 @@
       <div class="toolbar">
         <div class="date-box">
           <div class="clock" id="live-clock">--:--:--</div>
-          <div class="tz">KST</div>
         </div>
         <div class="live-status">
           <span class="live-dot"></span>
@@ -2313,7 +2312,7 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const el = document.getElementById('live-clock');
-    if (el) el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    if (el) el.textContent = `${new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(now)} (${new Intl.DateTimeFormat('ko-KR', {timeZone:'Asia/Seoul',weekday:'short'}).format(now)}) ${new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(now)} KST (당일 작업 기준)`;
   }
   setInterval(updateClock, 1000);
   updateClock();
@@ -2514,7 +2513,11 @@
     const history = window.BaroLabHistory;
     const today = history ? history.getKSTDateString() : '';
     const store = history ? history.loadHistoryStore() : {};
-    const cfEntry = (store[today] && store[today].cf) || { items: [], active: null };
+    const snapshot = window.BaroLabMissionControl;
+    const cfEntry = snapshot ? {
+      items: (snapshot.cfItems || []).filter(r => r.status === 'published').map(r => ({...r,url:r.publicUrl,time:r.completedAt})),
+      active: (snapshot.cfItems || []).find(r => ['processing','publishing'].includes(r.status))
+    } : (store[today] && store[today].cf) || { items: [], active: null };
     const publishedMap = {};
     (cfEntry.items || []).forEach(it => {
       if (it.domain) publishedMap[it.domain] = it;
@@ -2561,6 +2564,8 @@
       `;
     }).join('');
   }
+
+  window.renderCF16Grid = renderCF16Grid;
 
   function getTodayKey() {
     if (window.BaroLabHistory) return `naver_quota_${window.BaroLabHistory.getKSTDateString()}`;
@@ -2844,12 +2849,12 @@
 
         // Big Gauge 1: Revenue Speedometer Arc ($100/day goal, arc length = 119.4)
         const revenueView=window.BaroLabRevenue;
-        const revenue=data.revenue || {};
+        const revenue=window.BaroLabMissionControl?.revenue || data.revenue || {};
         const adsensePeriod=revenueView.categoryPeriod(revenue,'adsense','today',today);
         const adpostPeriod=revenueView.categoryPeriod(revenue,'adpost','today',today);
         const affiliatePeriod=revenueView.categoryPeriod(revenue,'affiliate','today',today);
         const totalPeriod=revenueView.categoryPeriod(revenue,null,'today',today);
-        const totalUsd=revenueView.currencyValue(totalPeriod,'USD');
+        const totalUsd=revenueView.currencyValue(adsensePeriod,'USD');
         const revGoalPct=totalUsd===null?null:Math.max(0,Math.min(100,totalUsd));
         setRingGauge('arc-revenue-goal',119.4,revGoalPct ?? 0);
         const gaugeRevPct=document.getElementById('gauge-rev-pct');
@@ -3098,7 +3103,7 @@
       if (gbEl) gbEl.textContent = `🔵 B패치 ${bCnt}건`;
       if (gcEl) gcEl.textContent = `🟡 C리모델링 ${cCnt}건`;
       if (gdEl) gdEl.textContent = `🔴 D안전캡 ${dCnt}건`;
-      if (crewDocEl) crewDocEl.textContent = `🩺 ${todayAudited}/${dailyTarget}건`;
+      if (crewDocEl && !window.BaroLabMissionControl) crewDocEl.textContent = `🩺 ${todayAudited}/${dailyTarget}건`;
 
       const latest = (doc.recentAudits || [])[0];
       if (latest && latestEl) {

@@ -55,7 +55,7 @@ async function historyRollover() {
   const NativeDate=Date;
   class FakeDate extends NativeDate {constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
   const window={addEventListener:(event,fn)=>{listeners[event]=fn;},dispatchEvent:event=>{events.push({type:event.type,stats:window.BaroLabHistory.getTodayStats()});}};
-  const context=vm.createContext({window,localStorage,Date:FakeDate,Event:class{constructor(type){this.type=type;}},document:{addEventListener:(event,fn)=>{listeners[event]=fn;}},console:{log(){},warn(){},error(){}},setInterval:(fn,ms)=>intervals.push({fn,ms}),fetch:async()=>{fetches++;throw Error('offline');}});
+  const context=vm.createContext({window,localStorage,AbortSignal,Date:FakeDate,Event:class{constructor(type){this.type=type;}},document:{addEventListener:(event,fn)=>{listeners[event]=fn;}},console:{log(){},warn(){},error(){}},setInterval:(fn,ms)=>intervals.push({fn,ms}),fetch:async()=>{fetches++;throw Error('offline');}});
   vm.runInContext(fs.readFileSync(path.join(__dirname,'../../history_manager.js'),'utf8'),context);
   await new Promise(resolve=>setImmediate(resolve));
   const previousBefore=JSON.stringify(window.BaroLabHistory.loadHistoryStore()['2026-10-15']);

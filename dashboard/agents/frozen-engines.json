@@ -1,16 +1,16 @@
 {
-  "reason": "2026-10-23 user-authorized canonical ledger path migration and correct Naver reservation day aggregation",
-  "previousHead": "6cc402f2fd542a3d9c9e6256b733a0514982a228",
+  "reason": "2026-10-23 user-authorized worker recovery: defer pre-research lock waits and store Kin model audits in channel output",
+  "previousHead": "9c483da30c455fb3b301b7937e5e018ba271e51d",
   "previousHashes": {
-    "cf_posting": "e80733941218f524715ddb1e9ca0c706fb6a5b2dcca5e16e20ec3b68fdb8e50c",
-    "naver_blog_posting": "80a12eab1e3d729643467c2ea7f5848f2ae80481f6cf2ffa1da08f4b6d7a23f8",
-    "naver_kin": "5cf6894f91edf882af5f7dae54cf4cf86284f0420eec68699d381fa15c12e3ce",
+    "cf_posting": "d2419a3b7dd564d7224a780411d25af4335dfedadf3b945c4d26cb56e5dac075",
+    "naver_blog_posting": "35f4f945c4d112c005b71eeb32b5dcc00a577e5059ceb57fd89fafe9fd7c5c51",
+    "naver_kin": "c9e65d14a29deaba81ca6d409200d558ffd2bcda1d9322225a6979fdd877c492",
     "threads_posting": "03d616bb0d499915ca7223757bc3fc5522cd44379fb6b0ae9823994a41941c1a"
   },
   "hashes": {
     "cf_posting": "d2419a3b7dd564d7224a780411d25af4335dfedadf3b945c4d26cb56e5dac075",
     "naver_blog_posting": "35f4f945c4d112c005b71eeb32b5dcc00a577e5059ceb57fd89fafe9fd7c5c51",
-    "naver_kin": "c9e65d14a29deaba81ca6d409200d558ffd2bcda1d9322225a6979fdd877c492",
+    "naver_kin": "69c945e719981b1e5fddc66332a91ad6a4f66d3e3b888a8b1387f488a71680f6",
     "threads_posting": "03d616bb0d499915ca7223757bc3fc5522cd44379fb6b0ae9823994a41941c1a"
   }
 }

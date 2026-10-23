@@ -129,8 +129,6 @@ def brain_lines(data,now):
     rows.append('OpenRouter  사용 '+money(credit.get('usage'))+' · 키 잔여 '+('제한 없음' if credit.get('status')=='collected' and credit.get('limit') is None else money(credit.get('limit_remaining')))+' · 계정 잔액 '+money(credit.get('balance'))+' · '+credit.get('status','조회 중'))
     api=[r for r in today.get('byModel',{}).values() if r.get('provider')=='openai']
     rows.append('OpenAI API  '+('키 설정' if data.get('openaiKey') else '키 미설정')+' · API 잔액은 결제 페이지에서 제공 · 응답 한도 '+('연결' if api else '호출 대기'))
-    proxy=data.get('proxy',{});route=proxy.get('model') or '호출 기록 대기'
-    rows.append(f"FreeLLMAPI :3001  {'● ONLINE' if proxy.get('online') else '● OFFLINE'} · 라우팅 {route} · 평균 {proxy.get('latency','—')}ms")
     return rows
 
 

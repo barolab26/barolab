@@ -251,7 +251,7 @@ class ProcessReceiptTests(unittest.TestCase):
         from server import agent_tools as tools
         process = Mock(pid=123, ego_receipt_path='private-receipt')
         data = {'cfPendingItems': [], 'cfScheduleDate': '2026-10-21', 'cfPublishedCount': 0, 'cfTotalCount': 1}
-        with patch.object(tools, '_ego_popen', return_value=process), patch.object(tools, 'read_publi_data', return_value=data):
+        with patch('common.system_watchdog.is_process_running_match', return_value=False), patch.object(tools, '_ego_popen', return_value=process), patch.object(tools, 'read_publi_data', return_value=data):
             result = tools.run_cf_publish(domain=tools.CF_16_DOMAINS[0])
         self.assertIsNone(result['exit_code'])
         self.assertEqual(result['status'], 'running')

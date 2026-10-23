@@ -224,7 +224,7 @@ def select_model(cfg,override=None):
     if not isinstance(requested,str) or not re.fullmatch(r'[a-zA-Z0-9._:/-]{1,150}',requested):
         raise ValueError('편집 모델 설정 미확인')
     if requested not in registered_models(cfg):
-        raise ValueError('FreeLLMAPI에 등록되지 않은 편집 모델')
+        raise ValueError('설정에 등록되지 않은 편집 모델')
     record=provider_record('model:'+requested)
     try:
         if datetime.fromisoformat(record['nextRetryAt'])>datetime.now(timezone.utc):
@@ -676,7 +676,7 @@ def prepare_improvement(domain,url,article,diagnosis=None,limits=None,observer=N
         if isinstance(exc,ProviderUnavailable):
             result['providerFailure']=exc.metadata
         elif isinstance(exc,requests.RequestException):
-            result['providerFailure']={'provider':'FreeLLMAPI' if receipts and receipts[-1]['stage'] in ('research_sources','diagnose','draft') else 'network',
+            result['providerFailure']={'provider':'configured-llm' if receipts and receipts[-1]['stage'] in ('research_sources','diagnose','draft') else 'network',
                 'httpStatus':None,'errorType':type(exc).__name__,'errorCode':'transport_timeout' if isinstance(exc,requests.Timeout) else 'network_failure',
                 'checkedAt':stamp(),'nextRetryAt':(datetime.now(timezone.utc)+timedelta(minutes=30)).isoformat()}
         result.update(status='blocked',reason=str(exc)[:600] if isinstance(exc,(ValueError,RuntimeError,TimeoutError)) else '조사·편집 실행 실패: '+type(exc).__name__)

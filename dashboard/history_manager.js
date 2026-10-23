@@ -555,15 +555,14 @@
 
   async function syncNaverPublications() {
     try {
-      const [response, wfRes, jnRes] = await Promise.all([
+      const [response, liveRes] = await Promise.all([
         fetch('/pipeline_status.js?t=' + Date.now(), { cache: 'no-store' }),
-        fetch('/dashboard/data/naver/active-workflow.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null),
-        fetch('/dashboard/data/naver/automation-journal.json?t=' + Date.now(), { cache: 'no-store' }).catch(() => null)
+        fetch('/api/mission-control', {cache:'no-store',signal:AbortSignal.timeout(2500)})
       ]);
-      if (!response.ok) throw new Error(`Naver status HTTP ${response.status}`);
+      if (!response.ok || !liveRes.ok) throw new Error('Naver live snapshot unavailable');
       const text = await response.text();
-      const runtime = wfRes && wfRes.ok ? await wfRes.json().catch(() => null) : null;
-      const journal = jnRes && jnRes.ok ? await jnRes.json().catch(() => null) : null;
+      const live = (await liveRes.json()).naverLive || {};
+      const runtime = live.workflow || null, journal = live.journal || null;
       // Parse the JSON assignment without executing a remote script.
       const match = text.match(/^\s*window\.__NAVER_PIPELINE_STATUS__\s*=\s*([\s\S]+?);?\s*$/);
       if (!match) throw new Error('Invalid Naver status');

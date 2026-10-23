@@ -208,7 +208,7 @@ def write_verified_work_receipt(path, *, work_type, channel, outcome, scope, sou
 def _operational_source(summary="", source="", title="", source_path=""):
     """Operational records remain searchable logs, never permanent knowledge."""
     blocked = r"(?:ledger|circuit(?:[-_]breaker)?|model[-_]events?|scheduler|errors?|preparation|naver[-_]automation)"
-    forbidden_file = (r"(?:ledger\.jsonl?|(?:freellm[-_])?circuit(?:[-_]breaker)?\.json|"
+    forbidden_file = (r"(?:ledger\.jsonl?|(?:[a-z]+[-_])?circuit(?:[-_]breaker)?\.json|"
                       r"(?:.*[-_])?model[-_]events?\.jsonl?|scheduler\.log|(?:.*[-_])?errors?\.log|"
                       r"preparation\.json|naver[-_]automation\.json)")
     for value in (source, source_path):

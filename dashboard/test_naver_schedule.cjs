@@ -242,7 +242,8 @@ test('production UI follows start once and preserves subsequent manual selection
   ui.NaverSchedule.activeWorkflow=()=>({accId:'acc5',scheduledSlot:'19:00',publicationDate,startedAt:stamp(-1000),eventKey:'two'});
   assert.equal(vm.runInContext('followStartedNaverWorkflow()',ui),true);assert.equal(scrolls,2);
   assert.equal(vm.runInContext('selectedAccountIndex',ui),2);assert.equal(vm.runInContext('selectedNaverDateOffset',ui),0);
-  assert.match(html,/active-workflow\.json\?t='\+Date\.now\(\), \{cache:'no-store'/);
+  assert.match(html,/fetch\('\/api\/mission-control', \{cache:'no-store'/);
+  assert.doesNotMatch(html,/fetch\('[^']*(?:active-workflow|automation-journal)\.json/);
 });
 test('same reservation revision keeps reserved count and displays exact live stage',()=>{
   const original=attempt({phase:'verified',workerId:'original',topic:'Old verified title',verificationSource:'actual list',startedAt:stamp(-60000),verifiedAt:stamp(-50000)});

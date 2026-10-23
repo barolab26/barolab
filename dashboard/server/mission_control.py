@@ -26,13 +26,14 @@ ROOT = Path(__file__).resolve().parents[2]
 KST = dt.timezone(dt.timedelta(hours=9))
 ROLES = {'jarvis':'자비스', 'patch':'패치', 'publi':'퍼블리',
          'trace':'트레이스', 'doctor':'닥터', 'radar':'레이더'}
-PORTS = (9334, 9333, 9335, 9231, 9230, 8790, 3001)
+PORTS = (9334, 9333, 9335, 9231, 9230, 8790)
 STAGES = {'original-work-diagnosis':'원작업 차단 원인 진단', 'repair-diagnosis-model':'수정할 코드 분석',
           'staff-response':'업무 결과 보고', 'staff-result-response':'직원 결과 정리',
           'staff-action-routing':'담당 업무 배정', 'keyword-selector':'키워드 선정',
           'writer':'원고 작성', 'researcher':'근거 자료 수집', 'reviewer':'원고 검수',
           'image-maker':'이미지 제작', 'lesson-extraction':'발행 결과 학습',
-          'lesson-verification':'지식 검증', 'model-call':'모델 응답 생성'}
+          'lesson-verification':'지식 검증', 'model-call':'모델 응답 생성', 'revenue-collection':'수익 원천 수집',
+          'browser-lock-recovery':'브라우저 잠금 복구', 'audit-path-recovery':'모델 진단 경로 복구'}
 TOOLS = {'advance_project_recovery':'원작업 복구 단계 처리', 'run_project_cycle':'발행 파이프라인 실행',
          'read_agent_status':'운영 상태 점검', 'repair_cf_known_failure':'CF 오류 수정'}
 STAGES.update({'project-recovery-classification':'원작업 복구 담당 배정',
@@ -203,7 +204,7 @@ def crew_rows(events, requests, brains, now):
                            clean((brains.get(role) or {}).get('model'),50))
                 break
         completed=max((e.get('ts',0)/1000 for e in owned if e.get('phase')=='completed'),default=0)
-        output.append(dict(lastCompleted=dt.datetime.fromtimestamp(completed,KST).strftime('%H:%M:%S') if completed else '—',role=role,name=name,state=state,action=action,model=model,
+        output.append(dict(lastActivity=dt.datetime.fromtimestamp(at,KST).isoformat() if at else None,lastCompleted=dt.datetime.fromtimestamp(completed,KST).strftime('%m-%d %H:%M:%S') if completed else '—',role=role,name=name,state=state,action=action,model=model,
                            configuredModel=clean((brains.get(role) or {}).get('model'),50)))
     return output
 
@@ -326,6 +327,7 @@ class Collector:
             'kin':'dashboard/data/public/kin.json','usage':'dashboard/data/llm_usage_ledger.json','revenue':'dashboard/data/revenue.json','revenueRefresh':'dashboard/data/revenue-refresh.json',
             'metrics':'dashboard/data/metrics.json','threads':'dashboard/data/public/threads.json',
             'synapses':'dashboard/data/memory_graph.json','maintenance':'dashboard/data/content-maintenance.json','graph':'dashboard/data/editorial-memory-graph.json',
+            'naverJournal':'dashboard/data/naver/automation-journal.json','naverWorkflow':'dashboard/data/naver/active-workflow.json',
             'workflow':'dashboard/data/naver/pipeline_status.js'}.items():data[key]=self.read(path)
         data.update(events=events,remote=self.remote.get(),timeline=business_timeline(events,cf,kin,data['revenue'],now))
         data['kinOperations']=self.operation_states('kin.sqlite3','automation_slots',now.date().isoformat(),True)
@@ -333,9 +335,6 @@ class Collector:
         from server.cockpit_telemetry import env_values
         try:data['openaiKey']=bool(env_values(self.root).get('OPENAI_API_KEY') or self.read('dashboard/data/llm-settings.json').get('providers',{}).get('openai',{}).get('encrypted_key'))
         except (OSError,ImportError):data['openaiKey']=False
-        proxy_calls=[r for r in data['usage'].get('byModel',{}).values() if r.get('provider')=='freellm']
-        proxy_call=max(proxy_calls,key=lambda r:r.get('lastAt',''),default={})
-        data['proxy']=dict(online=self.ports.get(3001),model=proxy_call.get('model'),latency=proxy_call.get('averageLatencyMs','—'))
         owners={'keyword-selector':'radar','researcher':'radar','writer':'publi','image-maker':'publi','assembler':'publi','reviewer':'doctor'}
         for item in cf.get('items',[]):
             if item.get('status') not in ('processing','publishing'):continue
@@ -407,7 +406,7 @@ def shared_snapshot(data):
             row['counts'].update(prepared=None,running=None,failed=None,waiting=None)
         row['operationStates']=operations
         row['blockedAttempts']=sum(operations.get(k,0) for k in ('blocked','review_required','manual_review')) if isinstance(operations,dict) else None
-    crew=[{**{k:r.get(k) for k in ('role','name','state','action','lastCompleted')},'model':r.get('model') or r.get('configuredModel')} for r in data.get('crew',[])]
+    crew=[{**{k:r.get(k) for k in ('role','name','state','action','lastCompleted','lastActivity')},'model':r.get('model') or r.get('configuredModel')} for r in data.get('crew',[])]
     fleet=data.get('remote',{}).get('fleet',[])
     fleet_lines=[]
     for row in fleet:
@@ -421,8 +420,19 @@ def shared_snapshot(data):
     rows=[panels.revenue_summary(data.get('revenue',{}),data.get('metrics',{}),now),
           panels.brain_lines(data,now),fleet_lines,panels.pipeline_lines({**data,'channels':channel_rows[:3],'threadCounts':channel_rows[3]['counts']},now),crew_lines,
           [dt.datetime.fromtimestamp(r['at'],KST).strftime('%H:%M:%S')+' '+r['text'] for r in timeline]]
+    workflow=data.get('naverWorkflow') or {}
+    live_workflow={k:workflow.get(k) for k in ('schema','workerId','account','accId','publicationDate','scheduledSlot','reserveTime','startedAt','attemptStartedAt','observedAt','status','pid','mode')}
+    if isinstance(workflow.get('progress'),dict):
+        live_workflow['progress']={k:workflow['progress'].get(k) for k in ('workerId','currentStage','stageName','status','progressPct','workDate','publicationDate','updatedAt','topic')}
+    if not workflow:live_workflow={}
+    live_attempts=[{k:attempt.get(k) for k in ('account','accId','workerId','workDate','publicationDate','scheduledSlot','reserveTime','startedAt','updatedAt','runMode','submissionStarted','phase','topic','title','verificationSource','verifiedAt','blogId','publicUrl','publicPublicationVerified')}
+        for attempt in data.get('naverJournal',{}).get('attempts',[])[-128:]]
+    cf_items=[{k:item.get(k) for k in ('domain','status','publicUrl','title','completedAt','stageName','order')} for item in data.get('cf',{}).get('items',[]) if data.get('cf',{}).get('date')==now.date().isoformat()]
+    revenue_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','aggregationEligible','aggregationKey','domains')}
+        for source in data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('sources',[])]
     result=dict(schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
-        refreshSeconds=1,channels=channel_rows,crew=crew,vault=vault,timeline=timeline,
+        refreshSeconds=1,cfItems=cf_items,revenue={'months':{now.strftime('%Y-%m'):{'sources':revenue_sources}}},
+        naverLive={'workflow':live_workflow or None,'journal':{'attempts':live_attempts}},channels=channel_rows,crew=crew,vault=vault,timeline=timeline,
         naverAccounts=[dict(account=a.get('account'),accId=a.get('accId'),expected=a.get('expected'),
             slots=[{k:slot.get(k) for k in ('status','publicationStatus','publicationDate','reserveTime','publicPublicationVerified','publicUrl','title','verifiedAt')} for slot in a.get('slots',[])])
             for a in data.get('naver',{}).get('accounts',[])],
@@ -449,7 +459,7 @@ def business_timeline(events,cf,kin,revenue,now):
         at=epoch(event.get('ts',0)/1000);stage=event.get('stage','')
         if not at or dt.datetime.fromtimestamp(at,KST).date().isoformat()!=day:continue
         if str(event.get('outputKind','')).startswith('dict fields:') or 'model response only' in str(event.get('outputKind','')):continue
-        if event.get('phase')=='completed' and stage in ('editorial-query','editorial-scope','editorial-pivot','editorial-renewal','publication-verified','revenue-collected','recovery-verified'):
+        if event.get('phase')=='completed' and stage in ('editorial-query','editorial-scope','editorial-pivot','editorial-renewal','publication-verified','revenue-collected','recovery-verified','browser-lock-recovery','audit-path-recovery'):
             rows.append(dict(at=at,text=ROLES.get(event.get('ownerAgent') or event.get('who'),'업무')+' · '+clean(event.get('outputKind') or STAGES.get(stage,stage),150),alert=False))
         elif event.get('phase')=='failed' and stage.startswith('editorial-'):
             rows.append(dict(at=at,text='▲ ALERT · '+clean(event.get('outputKind') or stage,150),alert=True))

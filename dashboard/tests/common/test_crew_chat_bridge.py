@@ -52,6 +52,14 @@ class CrewLifecycleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             bridge.emit_work_event(actor='jarvis',actor_label='자비스',task_id='t',phase='requested',message_kind='invented')
 
+    def test_channel_model_calls_use_the_assigned_staff_owner(self):
+        @bridge.model_crew_call
+        def call(prompt, agent_slot):return {'ok':True}
+        for slot,owner in [('cf_pipeline','publi'),('kin_pipeline','publi'),('patch','patch'),('unknown-slot','')]:
+            with patch.object(bridge,'_deliver') as deliver:
+                call('private',agent_slot=slot)
+            self.assertTrue(all(row.args[0]['ownerAgent']==owner for row in deliver.call_args_list))
+
     def test_run_identity_target_and_actual_result_shape(self):
         @bridge.model_crew_call
         def call(prompt, model=None):

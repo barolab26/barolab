@@ -26,7 +26,7 @@ class PromotionGateTests(unittest.TestCase):
             self.assertFalse(should_memorize(event, 'Completed successfully', {'status': 200, 'verified': True}))
 
     def test_operational_provenance_overrides_verified_labels(self):
-        for path in ('.agent-routing/ledger.jsonl', 'data/freellm-circuit.json', 'data/topic-model-events.json', 'logs/scheduler.log', 'logs/pipeline-errors.log', 'runs/preparation.json', 'data/naver_automation.json'):
+        for path in ('.agent-routing/ledger.jsonl', 'data/legacy-circuit.json', 'data/topic-model-events.json', 'logs/scheduler.log', 'logs/pipeline-errors.log', 'runs/preparation.json', 'data/naver_automation.json'):
             for key in ('source', 'source_path'):
                 self.assertFalse(should_memorize('verified_skill', evidence=verified_skill(), **{key: path}), path)
         for prefix in ('ledger', 'circuit', 'model-events', 'scheduler', 'errors', 'preparation', 'naver_automation'):

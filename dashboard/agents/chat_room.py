@@ -842,7 +842,7 @@ def _call_chat_llm(
     dispatch_receipts: Optional[list] = None,
     allow_guarded_repair: bool = False,
 ) -> Optional[str]:
-    """Use the configured active provider; FreeLLMAPI and AGY are disabled."""
+    """Use the configured active provider; AGY is disabled."""
     from common.llm_client import generate_json
     try:
         # Catalog is already frozen by the shared client. Disclose the master

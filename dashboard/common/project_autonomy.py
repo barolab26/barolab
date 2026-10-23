@@ -81,15 +81,17 @@ def process_project_autonomy_once():
             state={'mode':'basic-one-pass','projects':{}}
         rows=state.setdefault('projects',{})
         # The same durable request is redelivered after a crash, never duplicated.
+        pending_projects=set()
         for project,row in rows.items():
             request_id=row.get('requestId')
             if not request_id: continue
             path=STAFF_REQUEST_DIR/(hashlib.sha256(request_id.encode()).hexdigest()+'.json')
             if not path.exists(): enqueue_staff_request(request_id,[row['action']]);return True
             request=json.loads(path.read_bytes())
-            if request.get('status') in ('queued','acknowledged','awaiting_completion'):return False
+            if request.get('status') in ('queued','acknowledged','awaiting_completion'):pending_projects.add(project)
         enabled=[p for p in config.get('projects',[]) if p in COMMANDS]
         for project in sorted(enabled,key=lambda p:rows.get(p,{}).get('lastStartedAt',0)):
+            if project in pending_projects:continue
             row=rows.setdefault(project,{})
             if project=='naver_kin':
                 row.update(dispatchOwner='barolab-kin.timer',status='timer_managed')
@@ -99,6 +101,9 @@ def process_project_autonomy_once():
             action={'agent':actor,'tool':'run_project_cycle','args':{'project':project}}
             request_id=f'autonomy-basic:{project}:{int(now)}'
             row.update(requestId=request_id,action=action,lastStartedAt=now,nextRunAt=now+300,status='requested')
-            write(STATE,state);enqueue_staff_request(request_id,[action]);return True
+            write(STATE,state);enqueue_staff_request(request_id,[action])
+            from common.crew_chat_bridge import emit_work_event
+            emit_work_event(actor='jarvis',actor_label='자비스',task_id=request_id,phase='completed',stage='project-instruction-issued',requested_to=actor,output_kind=project+' 기본 워크플로우 실행 배정')
+            return True
         write(STATE,state)
     return False

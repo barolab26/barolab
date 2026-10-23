@@ -230,44 +230,8 @@ def parse_json(text):
     raise RuntimeError('LLM 응답이 유효한 JSON 객체가 아닙니다.')
 
 
-FREELLM_CIRCUIT_FILE = Path.home() / '.barolab' / 'scratch' / 'freellm_circuit.json'
 AGY_COOLDOWN_FILE = Path.home() / '.barolab' / 'scratch' / 'agy_cooldown.json'
 AGY_MIN_COOLDOWN_SEC = 20.0
-FREELLM_MAX_FAILURES = 2
-FREELLM_COOLDOWN_SEC = 600.0  # 10 minutes
-
-
-def check_freellm_circuit():
-    """Return True if freellm circuit breaker is open (skip for 10m after 2 consecutive failures)."""
-    try:
-        if FREELLM_CIRCUIT_FILE.is_file():
-            data = json.loads(FREELLM_CIRCUIT_FILE.read_text(encoding='utf-8'))
-            if float(data.get('until', 0.0)) > time.time():
-                return True
-    except Exception:
-        pass
-    return False
-
-
-def record_freellm_result(success: bool):
-    """Record freellm call outcome; trip 10-minute circuit breaker on 2 consecutive failures."""
-    try:
-        FREELLM_CIRCUIT_FILE.parent.mkdir(parents=True, exist_ok=True)
-        data = {'failures': 0, 'until': 0.0}
-        if FREELLM_CIRCUIT_FILE.is_file():
-            try:
-                data = json.loads(FREELLM_CIRCUIT_FILE.read_text(encoding='utf-8'))
-            except Exception:
-                pass
-        if success:
-            data = {'failures': 0, 'until': 0.0, 'updatedAt': time.time()}
-        else:
-            failures = int(data.get('failures', 0)) + 1
-            until = time.time() + FREELLM_COOLDOWN_SEC if failures >= FREELLM_MAX_FAILURES else 0.0
-            data = {'failures': failures, 'until': until, 'updatedAt': time.time()}
-        FREELLM_CIRCUIT_FILE.write_text(json.dumps(data), encoding='utf-8')
-    except Exception:
-        pass
 
 
 def enforce_agy_cooldown(min_interval=AGY_MIN_COOLDOWN_SEC):
@@ -319,7 +283,7 @@ def _compact_schema_hint(schema):
 def _enabled_route(config, provider=None, model_override=None):
     """AGY is disabled after weekly quota exhaustion (2026-10-19)."""
     provider = provider or config['active']
-    if provider in ('agy','openrouter','freellm'):
+    if provider in ('agy','openrouter'):
         # Unavailable/unsupported routes use the configured subscription adapter.
         # AGY model IDs are not valid Codex model overrides.
         return 'codex', config['providers'].get('codex', {}).get('model') or 'gpt-6.1-sol'

@@ -69,6 +69,9 @@ def collect_once(root=ROOT,now=None,backend=None):
         for key,record,interval,job in jobs:
             status=state['sources'].setdefault(key,{})
             if not due(status,now.timestamp(),interval):continue
+            from common.crew_chat_bridge import emit_work_event
+            task='revenue:'+key+':'+now.isoformat()
+            emit_work_event(actor='trace',actor_label='트레이스',task_id=task,phase='progress',stage='revenue-collection',output_kind=key+' 수익 원천 수집 시작')
             attempted=dt.datetime.now(KST);status.update(attemptedAt=attempted.isoformat(),status='collecting')
             write(data/'revenue-refresh.json',state)
             try:
@@ -86,6 +89,7 @@ def collect_once(root=ROOT,now=None,backend=None):
                 record.update(status=code,reason=reason,attemptedAt=attempted.isoformat())
                 status.update(status=code,errorType=type(exc).__name__,reason=reason,
                               nextAttemptAt=time.time()+(1800 if code in ('not_configured','auth_required','not_enrolled') else 60 if code=='deferred' else interval))
+            emit_work_event(actor='trace',actor_label='트레이스',task_id=task,phase='completed',stage='revenue-collection',output_kind=key+' 수집 결과: '+str(status.get('status')))
             previous['months'][month].update(sources=list(by_id.values()),checkedAt=dt.datetime.now(KST).isoformat())
             previous.update(schema='dashboard-revenue-v1',checkedAt=dt.datetime.now(KST).isoformat())
             backend.deduplicate_adpost_sources(previous['months'][month]['sources'])

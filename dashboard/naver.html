@@ -2538,6 +2538,10 @@
     if (naverPollRunning) return;
     naverPollRunning = true;
     try {
+      const live = fetch('/api/mission-control', {cache:'no-store',signal:AbortSignal.timeout(2500)}).then(response => {
+        if (!response.ok) throw new Error('live snapshot unavailable');
+        return response.json();
+      }).then(snapshot => snapshot.naverLive);
       const results = await Promise.allSettled([
         window.NaverSchedule.loadPublicEvidence(),
         fetch('./pipeline_status.js?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(async response => {
@@ -2547,15 +2551,8 @@
           if (!match) throw new Error('invalid pipeline snapshot');
           return JSON.parse(match[1]);
         }),
-        fetch('../dashboard/data/naver/automation-journal.json?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(response => {
-          if (!response.ok) throw new Error('journal unavailable');
-          return response.json();
-        }),
-        fetch('../dashboard/data/naver/active-workflow.json?t='+Date.now(), {cache:'no-store',signal:AbortSignal.timeout(12000)}).then(response => {
-          if (response.status === 404) return null;
-          if (!response.ok) throw new Error('workflow unavailable');
-          return response.json();
-        })
+        live.then(value => value.journal),
+        live.then(value => value.workflow)
       ]);
       naverScheduleSource = results[1].status === 'fulfilled' ? results[1].value : null;
       naverJournalSource = results[2].status === 'fulfilled' ? results[2].value : null;

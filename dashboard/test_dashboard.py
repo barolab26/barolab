@@ -354,6 +354,22 @@ class _consolidated_part3_AgentReasoningTests(_consolidated_part3_unittest.TestC
             _consolidated_part3_llm_client.generate_json('task', provider='codex', model_override='fixture-model', _skip_memory=True)
             self.assertIsNone(call.call_args.args[6])
 
+    def test_codex_accepts_all_four_channel_audits_and_rejects_private_data(self):
+        from common import codex_cli
+        from unittest.mock import patch
+        from pathlib import Path
+        import subprocess
+        config={'home':str(self.root/'codex'),'executable':'mock-codex'}
+        def run(command,**kwargs):
+            Path(command[command.index('--output-last-message')+1]).write_text('{"json":"{\\"ok\\":true}"}')
+            return subprocess.CompletedProcess(command,0,'{"type":"turn.completed"}\n','')
+        with patch.object(codex_cli,'local_config',return_value=config),patch.object(codex_cli,'is_wsl',return_value=False),patch.object(codex_cli.Path,'home',return_value=self.root),patch.object(codex_cli.jobs,'ROOT',self.root),patch.object(codex_cli.subprocess,'run',side_effect=run):
+            for channel in ('cf_posting','naver_blog_posting','naver_kin','threads_posting'):
+                result,_=codex_cli.generate_local('task','fixture-model',audit_directory=self.root/channel/'output'/'model-audit',_skip_memory=True)
+                self.assertEqual(result,{'ok':True})
+            with self.assertRaisesRegex(RuntimeError,'포스팅 산출물'):
+                codex_cli.generate_local('task','fixture-model',audit_directory=self.root/'dashboard/data/secure',_skip_memory=True)
+
     def test_exact_selected_effort_reaches_cli_without_lowering_or_model_switch(self):
         home = self.root / 'codex'
         home.mkdir()
@@ -615,8 +631,8 @@ class _consolidated_part6_AgyBypassTests(_consolidated_part6_unittest.TestCase):
                 _consolidated_part6_llm_client.generate_json('auth test', provider='openai', _skip_memory=True)
             self.assertEqual(generate.call_count, 1)
 
-    def test_openrouter_and_unsupported_local_route_use_real_codex_adapter(self):
-        for route in ('openrouter', 'freellm'):
+    def test_openrouter_uses_real_codex_adapter(self):
+        for route in ('openrouter',):
             result = _consolidated_part6_llm_client.generate_json('task', provider=route, model_override='external-only-model', _skip_memory=True)
             self.assertEqual(result, {'ok': True})
             self.assertEqual(self.generate.call_args.args[1], 'gpt-6-luna')
@@ -913,9 +929,12 @@ class SharedMissionSnapshotTests(_consolidated_part0_unittest.TestCase):
         data=dict(collectedAt=now.timestamp(),channels=mc.channels({'date':'2026-10-23','items':[{'status':'published','publicUrl':'https://example.com/a'}]}, {'date':'2026-10-23'}, {'daily':{'date':'2026-10-23','publishedVerified':2}},now),
             crew=mc.crew_rows([],[],{},now),synapses={'nodes':{'p':{'resolvedCount':3}},'edges':[]},
             events=[{'private':'DO_NOT_EXPORT'}],cf={'secret':'DO_NOT_EXPORT'},naver={'accounts':[{'account':'a','accId':'acc1','expected':1,'slots':[{'publicationDate':'2026-10-23','publicationStatus':'reserved','secret':'DO_NOT_EXPORT'}]}]})
+        data.update(naverWorkflow={'schema':'naver-active-workflow-v1','workerId':'worker','artifactFolder':'DO_NOT_EXPORT'},naverJournal={'attempts':[{'account':'soultin','phase':'started','artifactFolder':'DO_NOT_EXPORT','apiKey':'DO_NOT_EXPORT'}]})
         snapshot=mc.shared_snapshot(data)
         self.assertNotIn('DO_NOT_EXPORT',json.dumps(snapshot))
         self.assertEqual(len(snapshot['panels']),6)
+        self.assertEqual(snapshot['naverLive']['workflow']['workerId'],'worker')
+        self.assertEqual(snapshot['naverLive']['journal']['attempts'][0]['phase'],'started')
         self.assertEqual(snapshot['naverAccounts'][0]['slots'][0]['publicationStatus'],'reserved')
         self.assertEqual(snapshot['vault'],dict(nodes=1,edges=0,episodes=3))
         with tempfile.TemporaryDirectory() as directory:
@@ -1007,6 +1026,24 @@ class SharedMissionSnapshotTests(_consolidated_part0_unittest.TestCase):
             output=io.StringIO();console=Console(file=output,width=100,height=height)
             console.print(render_snapshot(snapshot,_consolidated_part0_dt.datetime.now(),height))
             self.assertEqual(len(output.getvalue().splitlines()),height)
+
+
+class IndependentChannelDispatchTests(__import__('unittest').TestCase):
+    def test_active_cf_request_does_not_starve_other_channels(self):
+        import tempfile,json,hashlib
+        from pathlib import Path
+        from unittest.mock import patch
+        from common import project_autonomy as autonomy
+        from server import agent_tools
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);config=root/'config.json';state=root/'state.json';requests=root/'requests';requests.mkdir()
+            config.write_text(json.dumps({'enabled':True,'projects':['cf_blog','threads']}))
+            state.write_text(json.dumps({'mode':'basic-one-pass','projects':{'cf_blog':{'requestId':'cf-active','lastStartedAt':1}}}))
+            (requests/(hashlib.sha256(b'cf-active').hexdigest()+'.json')).write_text(json.dumps({'status':'awaiting_completion'}))
+            with patch.object(autonomy,'CONFIG',config),patch.object(autonomy,'STATE',state),patch.object(autonomy.Path,'home',return_value=root),patch.object(agent_tools,'STAFF_REQUEST_DIR',requests),patch.object(agent_tools,'enqueue_staff_request') as enqueue,patch('common.crew_chat_bridge.emit_work_event'):
+                self.assertTrue(autonomy.process_project_autonomy_once())
+                self.assertEqual(enqueue.call_args.args[1][0]['args']['project'],'threads')
+                self.assertEqual(json.loads(state.read_text())['projects']['cf_blog']['requestId'],'cf-active')
 
 
 if __name__ == "__main__":

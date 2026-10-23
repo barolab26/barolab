@@ -109,6 +109,10 @@ def is_process_running_match(pattern: str, proc_root=None) -> bool:
             if not args or not Path(args[0]).name.startswith('python'):continue
             if any(arg==pattern or (not Path(pattern).is_absolute() and Path(arg).name==pattern) for arg in args[1:]):
                 return True
+            if Path(pattern).is_absolute():
+                cwd = (path.parent / 'cwd').resolve(strict=True)
+                if any(not arg.startswith('-') and arg.endswith('.py') and (cwd / arg).resolve() == Path(pattern).resolve() for arg in args[1:]):
+                    return True
         except OSError:continue
     return False
 

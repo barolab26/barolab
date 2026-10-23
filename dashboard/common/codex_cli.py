@@ -301,7 +301,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         if audit_directory is not None:
             from PIL import Image
             audit_root = Path(audit_directory).resolve()
-            approved = (jobs.ROOT / 'cf_posting' / 'output', jobs.ROOT / 'naver_blog_posting' / 'output')
+            approved = tuple(jobs.ROOT / channel / 'output' for channel in ('cf_posting', 'naver_blog_posting', 'naver_kin', 'threads_posting'))
             if not any(audit_root.is_relative_to(root.resolve()) for root in approved):
                 raise RuntimeError('모델 진단 기록은 포스팅 산출물 폴더에만 저장할 수 있습니다.')
             call_id = uuid.uuid4().hex

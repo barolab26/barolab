@@ -37,4 +37,13 @@ class NativeWatchdogTests(unittest.TestCase):
             cmd.write_bytes(b'/bin/bash\0-c\0'+script.encode())
             self.assertFalse(watchdog.is_process_running_match(script,root))
 
+    def test_relative_cli_worker_is_the_same_publisher_as_its_absolute_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);process=root/'123';process.mkdir()
+            workspace=root/'workspace';workspace.mkdir()
+            (process/'cwd').symlink_to(workspace,target_is_directory=True)
+            (process/'cmdline').write_bytes(b'/venv/python3\0-u\0cf_posting/posting.py\0--catch-up-today-once\0')
+            self.assertTrue(watchdog.is_process_running_match(str(workspace/'cf_posting/posting.py'),root))
+            self.assertFalse(watchdog.is_process_running_match(str(workspace/'naver_blog_posting/posting.py'),root))
+
 if __name__=='__main__':unittest.main()

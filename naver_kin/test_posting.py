@@ -33,6 +33,14 @@ class PostingTests(unittest.TestCase):
             mock=patch.object(p,target);mock.start();self.addCleanup(mock.stop)
         mock=patch('common.host_failure.report_host_failure');mock.start();self.addCleanup(mock.stop)
 
+    def test_browser_lock_wait_does_not_spend_research_or_submission_budget(self):
+        p._naver_scheduler_initialize_cadence(self.db)
+        day=p.today_kst()
+        for i,(state,reason,qid) in enumerate([('deferred','browser_busy',None),('blocked','operation_RuntimeError',None),('blocked','no_sources',None),('deferred','browser_busy','123')]):
+            self.db.execute('INSERT INTO automation_slots(slot_id,account,planned_at,state,reason,question_id,updated_at) VALUES(?,?,?,?,?,?,?)', (str(i),'adinfo0905',day+'T09:00:00+09:00',state,reason,qid,p.stamp()))
+        counts=p._naver_scheduler_operation_counts(self.db,day)
+        self.assertEqual(counts['adinfo0905'],3)
+
     def test_basic_document_needs_no_reviewer(self):
         doc=document();self.assertNotIn('review',doc)
         self.assertEqual(p.validate_document(doc,reviewed=True),'123456789')
