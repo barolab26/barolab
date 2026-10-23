@@ -1894,6 +1894,11 @@
   }
 
   document.querySelectorAll('.mention-pill').forEach(btn => {
+    const agent = AGENT_STYLE[ALIAS_TO_SLUG[btn.dataset.mention.slice(1)]];
+    if (agent) {
+      btn.style.color = agent.color;
+      btn.style.borderColor = agent.color;
+    }
     btn.addEventListener('click', () => insertMention(btn.dataset.mention));
   });
 
