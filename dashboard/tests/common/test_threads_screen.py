@@ -119,6 +119,20 @@ class ThreadsScreenTests(unittest.TestCase):
             state['editorTargetId']='same-tab';proof.write_text(json.dumps(state));(proof.parent.parent/'intent.json').write_text('{}')
             self.assertIsNone(completed_draft(page,{'text':'승인 문장'},root))
 
+    def test_followup_requires_visible_exact_parent_and_reply_composer(self):
+        from common.threads_screen import verify_reply_context
+        page=Mock(url='https://www.threads.com/@mustpickinfo/post/parent')
+        dialog=Mock();dialog.get_by_text.side_effect=lambda value,**kwargs:Mock(count=lambda:0 if value=='New thread' else 1)
+        dialog.inner_text.return_value='Reply\n원래 부모 본문\n후속 원고'
+        parent={'permalink':page.url,'text':'원래 부모 본문'}
+        verify_reply_context(page,dialog,parent)
+        page.url='https://www.threads.com/@mustpickinfo/post/different'
+        with self.assertRaises(ValueError):verify_reply_context(page,dialog,parent)
+        page.url=parent['permalink'];dialog.inner_text.return_value='Reply\n다른 부모 글'
+        with self.assertRaises(ValueError):verify_reply_context(page,dialog,parent)
+        dialog.inner_text.return_value=parent['text'];dialog.get_by_text.return_value.count.return_value=1;dialog.get_by_text.side_effect=None
+        with self.assertRaises(ValueError):verify_reply_context(page,dialog,parent)
+
     def test_planning_uses_exact_saved_draft_and_slot(self):
         from dashboard.agents.style_strategy import plan_post
         prompts=[]

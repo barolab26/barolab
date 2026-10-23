@@ -109,6 +109,15 @@ def web_identity(page):
       return /^(Profile|프로필)$/.test(label)&&/^\\/@mustpickinfo\\/?$/.test(e.getAttribute('href')||'')})''') is True
 
 
+def verify_reply_context(page,dialog,parent):
+    from urllib.parse import urlsplit
+    if (urlsplit(page.url).path.rstrip('/')!=urlsplit(parent['permalink']).path.rstrip('/')
+            or dialog.get_by_text('New thread',exact=True).count()
+            or not dialog.get_by_text(re.compile(r'^(Reply|답글)$')).count()
+            or ' '.join(parent['text'].split()) not in ' '.join(dialog.inner_text().split())):
+        raise ValueError('threads_visible_reply_parent_unverified')
+
+
 def completed_draft(page,part,folder):
     """Resume only this task's fully typed, never-submitted browser draft."""
     editors=page.locator('[role="dialog"] [contenteditable="true"]')
@@ -145,23 +154,27 @@ class ScreenAdapter:
         if config['account_key']!=ACCOUNT or part['account_key']!=ACCOUNT:raise ValueError('threads_account_mismatch')
         folder=Path(self.engine.BASE_DIR)/'output'/'scheduled'/part['publication_date']/part['part_id']/('ego-'+str(time.time_ns()))
         folder.mkdir(parents=True)
+        parent=None
+        if part['kind']=='followup':
+            client=self.engine._threads_adapter_Client(config);self.engine._threads_adapter__identity(client)
+            parent=client.request('GET',str(part['parent_platform_id']),{'fields':'id,username,permalink,text'})
+            if (str(parent.get('id'))!=str(part['parent_platform_id']) or parent.get('username')!=ACCOUNT
+                    or not self.engine._threads_adapter__permalink(parent.get('permalink')) or not parent.get('text')):
+                raise ValueError('threads_parent_identity_unverified')
         with session(for_submission=True) as page:
             if not web_identity(page):raise RuntimeError('threads_web_login_required')
             resume=completed_draft(page,part,folder.parent) if page.locator('[contenteditable="true"]').count() else None
             if page.locator('[contenteditable="true"]').count() and not resume:raise RuntimeError('threads_existing_draft_preserved')
             if not resume:
                 target='https://www.threads.com/@'+ACCOUNT
-                if part['kind']=='followup':
-                    client=self.engine._threads_adapter_Client(config);self.engine._threads_adapter__identity(client)
-                    parent=client.request('GET',str(part['parent_platform_id']),{'fields':'id,username,permalink'})
-                    target=self.engine._threads_adapter__permalink(parent.get('permalink'))
-                    if parent.get('username')!=ACCOUNT or not target:raise ValueError('threads_parent_identity_unverified')
+                if parent:target=parent['permalink']
                 def opened():
                     if page.locator('[role="dialog"] [contenteditable="true"]').count()!=1:raise ValueError('threads_composer_not_ready')
                 run(page,port=PORT,folder=folder/'open',urls={'approved-thread':target},max_turns=10,time_budget_seconds=180,
                     goal='Threads에서 approved-thread로 이동하고 '+('이 글에 답글을 작성하는 입력창' if part['kind']=='followup' else '새 게시물 작성창')+
                         '을 연다. 아직 글을 입력하거나 게시하지 않는다. 입력창이 보이면 완료한다.',completion_check=opened)
             editor=page.locator('[role="dialog"] [contenteditable="true"]');dialog=page.locator('[role="dialog"]').filter(has=page.locator('[contenteditable="true"]'))
+            if parent:verify_reply_context(page,dialog,parent)
             lines=part['text'].split('\n');refs=[{'ref':str(i),'kind':'write','text':line} for i,line in enumerate(lines)]
             def check(written):
                 expected='\n'.join(lines[:len(written)])
@@ -178,6 +191,7 @@ class ScreenAdapter:
             intent={}
             def commit():
                 composed()
+                if parent:verify_reply_context(page,dialog,parent)
                 if not web_identity(page):raise ValueError('threads_account_changed')
                 before_submit();intent['at']=datetime.now(timezone.utc).isoformat()
                 cdp=page.context.new_cdp_session(page)
