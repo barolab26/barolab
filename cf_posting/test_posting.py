@@ -49,7 +49,7 @@ class BasicPublicationTests(unittest.TestCase):
             self.assertTrue(receipt['publicPublicationVerified'])
             self.assertEqual(receipt['httpStatus'], 200)
             self.assertEqual(post.call_count, 1)
-            self.assertIn('cf-responsive-table-v1', post.call_args.kwargs['json']['content'])
+            self.assertIn('data-cf-table-style="cf-responsive-table-v2"', post.call_args.kwargs['json']['content'])
             self.assertIn('보존할 값', post.call_args.kwargs['json']['content'])
             self.posting.publish_basic_article('example.com', self.article, self.folder)
             self.assertEqual(post.call_count, 1)
