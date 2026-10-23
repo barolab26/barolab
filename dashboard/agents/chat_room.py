@@ -1033,7 +1033,7 @@ from agent_tools import (
 )
 
 STATUS_ONLY_WARNING_BANNER = (
-    "⚠️ [파라미터 추가 확인 필요] 요청하신 작업을 즉시 자동 실행하려 했으나 대상 URL 또는 도메인 파라미터가 특정되지 않아 현재 실시간 상태만 먼저 조회했습니다. 대상 URL이나 채널을 지정해 주시면 제가 즉시 실행하겠습니다."
+    "⚠️ [작업 미실행] 이번 요청에 맞는 실행 도구가 연결되지 않아 작업을 실행하지 못했습니다. 대상 정보 부족 여부와 실행 기능 지원 여부를 구분해 확인해야 합니다."
 )
 
 FALSE_COMPLETION_PHRASES = (
@@ -1516,8 +1516,8 @@ def synthesize_agent_reply(
     status_only_sys_notice = ""
     if is_imperative and not any_tool_executed_in_turn and slug != 'jarvis':
         status_only_sys_notice = (
-            f"\n[긴급 경고: status_only (파라미터 미특정)]\n"
-            f"- 이번 요청에서는 특정 파라미터가 부족해 단순 상태 조회(`status_only`)만 수행되었다.\n"
+            f"\n[실행 결과: status_only (작업 미실행)]\n"
+            f"- 이번 요청에 맞는 작업 실행 증거가 없다. 이를 URL·도메인 부족으로 단정하지 마라. CF 채널 전체의 표·서식 개선 요청은 특정 URL 없이도 공통 스타일 점검 대상을 뜻한다. 지원하지 않는 작업은 기능 연결 문제로 보고하고 무관한 전사 현황으로 대체하지 마라.\n"
             f"- 절대 '진행했습니다', '요청했습니다', '완료했습니다' 같은 허위 완료 표현이나 '대시보드에서 직접 하세요 / CLI에서 수동으로 실행하세요' 같은 떠넘기기 문구를 쓰지 마라.\n"
         )
     sys_prompt = (

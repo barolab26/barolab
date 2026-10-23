@@ -245,6 +245,18 @@ class StaffDispatchTests(unittest.TestCase):
         self.assertNotIn('구조화 지시', reply)
         guard.assert_not_called()
         self.assertEqual(scope['_guard_dispatch_reply']('text', 'request', [], False), 'unmatched')
+    def test_unmatched_action_does_not_invent_missing_url(self):
+        tree = ast.parse((Path(__file__).resolve().parents[2] / 'agents/chat_room.py').read_text(encoding='utf-8'))
+        names = {'STATUS_ONLY_WARNING_BANNER', 'FALSE_COMPLETION_PHRASES', 'DIY_OFFLOADING_BANNED_PHRASES'}
+        nodes = [n for n in tree.body if (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id in names for t in n.targets)) or (isinstance(n, ast.FunctionDef) and n.name == '_enforce_status_only_guard')]
+        scope = {'re': re, 'has_imperative_action_intent': lambda text: True}
+        exec(compile(ast.Module(body=nodes, type_ignores=[]), '<guard>', 'exec'), scope)
+        reply = scope['_enforce_status_only_guard']('수정 완료했습니다.', 'CF 블로그 표 구분선을 이쁘게 해줘', False)
+        self.assertIn('작업 미실행', reply)
+        self.assertNotIn('파라미터 추가 확인 필요', reply)
+        self.assertNotIn('대상 URL이나 채널을 지정', reply)
+        self.assertNotIn('완료했습니다', reply)
+
 if __name__ == '__main__':
     unittest.main()
 

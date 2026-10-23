@@ -107,8 +107,12 @@ class ResponsiveTableTests(unittest.TestCase):
         self.assertEqual(len(doc.select('[data-cf-table-style]')),1)
         self.assertIn('overflow-x:auto',doc.table.parent['style'])
         self.assertIn('width:100%',doc.table['style'])
-        self.assertIn('background:#f8fafc',doc.th['style'])
-        self.assertIn('padding:10px 14px',doc.td['style'])
+        self.assertIn('background:#eaf1fb',doc.th['style'])
+        self.assertIn('padding:12px 16px',doc.td['style'])
+        for cell in doc.select('th,td'):
+            self.assertIn('border:1px solid #94a3b8',cell['style'])
+        legacy=result.replace(VERSION,'cf-responsive-table-v1')
+        self.assertEqual(style_tables(legacy),result)
         self.assertEqual(doc.caption.get_text(),'지원금 비교')
         self.assertIn('font-size:13px',doc.find('p')['style'])
 

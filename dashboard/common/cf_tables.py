@@ -1,11 +1,11 @@
 """Shared CF table presentation for new posts and content-preserving repairs."""
 from bs4 import BeautifulSoup
 
-VERSION = 'cf-responsive-table-v1'
+VERSION = 'cf-responsive-table-v2'
 WRAPPER = 'overflow-x:auto;max-width:100%;min-width:0;margin:20px 0;-webkit-overflow-scrolling:touch'
-TABLE = 'width:100%;border-collapse:collapse;font-size:15px;text-align:left;border-top:2px solid #2563eb'
-HEADER = 'background:#f8fafc;padding:12px 14px;font-weight:700;border-bottom:1px solid #cbd5e1;text-align:left;overflow-wrap:anywhere;word-break:normal;white-space:normal'
-CELL = 'padding:10px 14px;border-bottom:1px solid #f1f5f9;overflow-wrap:anywhere;word-break:normal;white-space:normal'
+TABLE = 'width:100%;border-collapse:collapse;font-size:15px;line-height:1.7;text-align:left;color:#1e293b;background:#ffffff;border:1px solid #94a3b8;border-top:3px solid #2563eb'
+HEADER = 'background:#eaf1fb;color:#0f172a;padding:13px 16px;font-weight:700;border:1px solid #94a3b8;border-bottom:2px solid #94a3b8;vertical-align:top;text-align:left;overflow-wrap:anywhere;word-break:normal;white-space:normal'
+CELL = 'padding:12px 16px;border:1px solid #94a3b8;border-bottom:1px solid #94a3b8;vertical-align:top;overflow-wrap:anywhere;word-break:normal;white-space:normal'
 CAPTION = 'caption-side:top;text-align:left;font-weight:700;color:#0f172a;padding:0 0 10px;line-height:1.6'
 SOURCE = 'font-size:13px;color:#475569;line-height:1.6;margin:8px 0 0;overflow-wrap:anywhere'
 
@@ -25,7 +25,7 @@ def style_tables(html):
     soup=BeautifulSoup(html,'html.parser')
     for table in list(soup.find_all('table')):
         parent=table.parent
-        if parent.name=='div' and (parent.get('data-cf-table-style')==VERSION or
+        if parent.name=='div' and (str(parent.get('data-cf-table-style','')).startswith('cf-responsive-table-v') or
                 ('overflow-x' in str(parent.get('style','')) and len(parent.find_all(recursive=False))==1)):
             wrapper=parent
         else:
