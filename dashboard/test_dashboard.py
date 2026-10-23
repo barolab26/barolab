@@ -1409,9 +1409,14 @@ class PublicationOutcomeLanguageTests(__import__('unittest').TestCase):
         from unittest.mock import patch
         reply={'reply':'@팀장 게시 확인 중입니다. 제가 제출 결과를 다시 조회하겠습니다.','route':{'events':[{'actualModel':'fixture'}]}}
         with patch('agents.agent_tools.staff_tool_reply',return_value=reply),patch('common.crew_chat_bridge.emit_work_event'):
-            result=report_outcome({'state':'api_submitted','permalink':'https://www.threads.net/@example/post/123'},'test')
+            result=report_outcome({'state':'api_submitted','channel':'threads','account':'example','title':'확인 대상 글','permalink':'https://www.threads.net/@example/post/123'},'test')
             self.assertEqual(result['outcome'],'게시 확인 중')
             self.assertFalse(result['publicationVerified'])
+            self.assertEqual(result['title'],'확인 대상 글')
+            self.assertEqual(result['account'],'example')
+            self.assertEqual(result['channel'],'threads')
+            self.assertEqual(result['submissionState'],'api_submitted')
+            self.assertEqual(result['submittedUrl'],'https://www.threads.net/@example/post/123')
 
 class ConferenceBeforeAuthoringTests(__import__('unittest').TestCase):
     def test_knowledgein_conference_precedes_writer_and_injects_agreed_direction(self):

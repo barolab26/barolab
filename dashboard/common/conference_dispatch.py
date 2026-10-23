@@ -129,7 +129,11 @@ def report_outcome(receipt, task_id):
     facts = {'outcome':'게시 성공' if public and address else '예약 완료' if reserved else '게시 확인 중' if pending else '게시 실패',
              'publicationVerified':bool(public and address),'reservationVerified':reserved,
              'publicUrl':address if public else '', 'reserveTime':receipt.get('reserveTime'),
-             'account':receipt.get('account') or receipt.get('domain'), 'errorType':receipt.get('errorType'),
+             'account':receipt.get('account') or receipt.get('domain'),
+             'channel':receipt.get('channel') or receipt.get('project'),
+             'title':receipt.get('title'), 'slot':receipt.get('slot') or receipt.get('scheduledSlot'),
+             'submissionState':receipt.get('submissionStatus') or receipt.get('state'),
+             'submittedUrl':address if pending else '', 'errorType':receipt.get('errorType'),
              'nextAction':'실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '담당 직원이 원인을 진단하고 같은 안건에서 복구한다.'}
     response=staff_tool_reply('publi',task_id,{'tool':'publication_verification'},facts,stage='staff-terminal-response')
     emit_work_event(actor='publi',actor_label='퍼블리',task_id=task_id,phase='completed',stage='staff-terminal-response',
