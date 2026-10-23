@@ -228,7 +228,8 @@ def publish_basic_article(domain, article, folder):
         raise ValueError('Existing title or slug; duplicate submission prevented')
     if previous.get('state') in ('submitting', 'submission_unknown', 'accepted'):
         raise RuntimeError('Previous submission must be reconciled before a second POST')
-    content = article['contentHtml']
+    from common.cf_tables import style_tables
+    content = style_tables(article['contentHtml'])
     plans = article.get('imagePlans', [])
     if plans:
         paths = [folder / 'images' / plan['filename'] for plan in plans]

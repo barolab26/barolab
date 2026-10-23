@@ -1,0 +1,294 @@
+{
+  "version": "cf-responsive-table-v1",
+  "checkedAt": "2026-10-23T02:25:50.122349+00:00",
+  "results": [
+    {
+      "domain": "baronote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "baronote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "baronote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-good.com",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-good.com",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-good.com",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-joy.com",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-joy.com",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-joy.com",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "maxnote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "maxnote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "maxnote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "joynote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "joynote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "joynote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "healthcox.com",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "healthcox.com",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "healthcox.com",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "topnote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "topnote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "topnote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "tripmarvel.com",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "tripmarvel.com",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "tripmarvel.com",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "daynote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "daynote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "daynote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "smilenote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "smilenote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "smilenote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "woorinote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "woorinote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "woorinote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "meganote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "meganote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "meganote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "soulnote.kr",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "soulnote.kr",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "soulnote.kr",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-pick.com",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-pick.com",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "must-pick.com",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "nolplace.com",
+      "width": 320,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "nolplace.com",
+      "width": 375,
+      "tables": 1,
+      "passed": true
+    },
+    {
+      "domain": "nolplace.com",
+      "width": 1280,
+      "tables": 1,
+      "passed": true
+    }
+  ]
+}

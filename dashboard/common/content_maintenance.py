@@ -801,7 +801,8 @@ def _apply_job(job_id, canary=False):
         current = current_response.json()['post']
         if version_digest(current) != version_digest(original) or current.get('updated_at') != original.get('updated_at'):
             raise ValueError('원본이 다른 작업에서 변경됨 · 덮어쓰기 차단')
-        payload = {'title': draft['title'], 'slug': original['slug'], 'content': draft['contentHtml'].strip()}
+        from common.cf_tables import style_tables, VERSION as table_style_version
+        payload = {'title': draft['title'], 'slug': original['slug'], 'content': style_tables(draft['contentHtml']).strip()}
         if isinstance(original.get('meta_description'), str) and draft.get('summary', '').strip():
             payload['meta_description'] = draft.get('metaDescription') or draft['summary']
         if isinstance(original.get('excerpt'), str) and draft.get('summary', '').strip():
@@ -812,6 +813,7 @@ def _apply_job(job_id, canary=False):
         save_job(job_id, status='applying', stage='apply', apply_attempt_at=stamp())
         runtime(status='running', stage='apply', activeJob=job_id)
         receipt['intent'] = {'endpoint': endpoint, 'method': 'PUT', 'postId': original['id'],
+                             'tableStyleVersion': table_style_version,
                              'originalVersionSha256': version_digest(original),
                              'expectedVersionSha256': version_digest(expected), 'expected': expected,
                              'checkedAt': stamp(), 'canary': bool(canary), 'writerScope': 'shared_managed_writer_locks; remote API has no atomic CAS'}
