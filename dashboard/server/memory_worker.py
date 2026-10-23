@@ -2,6 +2,7 @@
 
 import logging
 import signal
+import sqlite3
 import sys
 import threading
 from pathlib import Path
@@ -52,7 +53,12 @@ def main():
                 review_once()
             except Exception:
                 logging.exception('Style strategy discussion unavailable; existing publishing parameters preserved')
-            if not process_verified_work_once():
+            try:
+                learned = process_verified_work_once()
+            except sqlite3.OperationalError:
+                logging.exception('Learning database busy; retain publishing children and retry next tick')
+                learned = False
+            if not learned:
                 stopped.wait(30)
     finally:
         stopped.set()
