@@ -88,7 +88,7 @@ class _consolidated_part0_CockpitTests(_consolidated_part0_unittest.TestCase):
         console.print(_consolidated_part0_ui.render(data, self.now, height=24))
         text = stream.getvalue()
         self.assertLessEqual(len(text.splitlines()), 24)
-        for word in ('MISSION CONTROL', 'BRAIN', '우분투 격리 크롬 세션', 'PIPELINE', 'VAULT', '[ 4/16]', '25%'):
+        for word in ('MISSION CONTROL', 'AI 구독 한도 & 크레딧', '우분투 격리 크롬 세션', 'PIPELINE', 'VAULT', '[ 4/16]', '25%'):
             self.assertIn(word, text)
         self.assertNotIn('성공 판정 아님', text)
 
@@ -172,7 +172,7 @@ class _consolidated_part1_TelemetryTests(_consolidated_part1_unittest.TestCase):
         text = stream.getvalue()
         self.assertEqual(len(text.splitlines()), 76)
         self.assertEqual(sum(_consolidated_part1_view.panel_sizes(76)), 76)
-        for title in ('MISSION CONTROL', 'BRAIN', '우분투 격리 크롬 세션', 'PIPELINE', 'ACTIVE CREW', 'VAULT', '[red]Title', '[red]literal'):
+        for title in ('MISSION CONTROL', 'AI 구독 한도 & 크레딧', '우분투 격리 크롬 세션', 'PIPELINE', 'ACTIVE CREW', 'VAULT', '[red]Title', '[red]literal'):
             self.assertIn(title, text)
         for name in ('자비스', '패치', '퍼블리', '트레이스', '닥터', '레이더'):
             self.assertIn('@' + name, text)
@@ -192,8 +192,32 @@ class _consolidated_part1_TelemetryTests(_consolidated_part1_unittest.TestCase):
         data = {'remote': {'codexQuota': {'status': 'collected', 'buckets': {'codex': {'primary': {'usedPercent': 100, 'windowDurationMins': 10080}, 'credits': {'hasCredits': True, 'unlimited': False, 'balance': '39263.1127530000'}}}}}}
         text = '\n'.join(_consolidated_part1_view.brain_lines(data, now))
         self.assertIn('잔여 0%', text)
-        self.assertIn('39,263.11 크레딧', text)
+        self.assertIn('39,263.11 C', text)
         self.assertNotIn('$39,263', text)
+
+    def test_brain_four_rows_and_activity_colors(self):
+        now = _consolidated_part1_dt.datetime(2026, 10, 22, 15, tzinfo=_consolidated_part1_ui.KST)
+        data = {'usage': {'date': '2026-10-22', 'active': {'one': {'provider': 'codex', 'agentSlot': 'publi', 'startedAt': now.isoformat()}}},
+                'agentBrains': {'jarvis': {'model': 'actual-model'}, 'threads_pipeline': {'model': 'thread-model'}},
+                'remote': {'openrouter': {'balance': -0.18}}}
+        view = _consolidated_part1_view
+        display = view.brain_display(data, now)
+        self.assertEqual(len(display['rows']), 4)
+        self.assertEqual(display['styles'], ['bold cyan', 'dim', 'bold red', 'dim'])
+        self.assertIn('@jarvis(actual-model)', display['rows'][3])
+        self.assertIn('Threads(thread-model)', display['rows'][3])
+        self.assertIn('잔여 —', display['rows'][1])
+        self.assertNotIn('사용 중', ''.join(display['rows']))
+        rendered = list(view.brain_render(display).renderables)
+        self.assertEqual([rendered[3].plain[a:b] for a,b in display['spans']], ['@publi'])
+        self.assertEqual(str(rendered[0].style), 'bold cyan')
+        self.assertFalse(rendered[3].spans[0].style == 'bold cyan')
+        self.assertIn('not dim', str(rendered[3].spans[0].style))
+        data['remote']['codexQuota'] = {'buckets': {'codex': {'primary': {'usedPercent': 100}}}}
+        self.assertEqual(view.brain_display(data, now)['styles'][0], 'bold red')
+        data['usage']['active']['one']['startedAt'] = '2026-10-21T15:00:00+09:00'
+        data['remote'].pop('codexQuota')
+        self.assertEqual(view.brain_display(data, now)['styles'][0], 'dim')
 
     def test_all_stages_match_and_editorial_precedes_research(self):
         for stage, wanted in [('keyword-selector', 1), ('researcher', 2), ('editorial-query', 3), ('writer', 4), ('reviewer', 5), ('최종발행', 6)]:

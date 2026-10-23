@@ -317,7 +317,7 @@ class Collector:
                     except OSError:continue
             self.port_checked=tick
         brains=self.read('dashboard/data/llm-settings.json').get('agentBrains') or {}
-        data=dict(channels=channels(cf,nv,kin,now),crew=crew_rows(events,self.requests,brains,now),
+        data=dict(agentBrains=brains,channels=channels(cf,nv,kin,now),crew=crew_rows(events,self.requests,brains,now),
                   logs=activity_log(events,cf,kin,now),ports=dict(self.ports),
                   tokens=token_summary(self.read('dashboard/data/llm-usage.json'),now),
                   cached=any(self.root/p in self.cache.errors for p in (
@@ -436,7 +436,7 @@ def shared_snapshot(data):
         naverAccounts=[dict(account=a.get('account'),accId=a.get('accId'),expected=a.get('expected'),
             slots=[{k:slot.get(k) for k in ('status','publicationStatus','publicationDate','reserveTime','publicPublicationVerified','publicUrl','title','verifiedAt')} for slot in a.get('slots',[])])
             for a in data.get('naver',{}).get('accounts',[])],
-        fleet=fleet,panels=rows,ports=data.get('ports',{}),
+        fleet=fleet,panels=rows,brainDisplay=panels.brain_display(data,now),ports=data.get('ports',{}),
         brains=dict(usage=data.get('usage',{}),quotas={k:v for k,v in data.get('remote',{}).items() if k!='fleet'}))
     result['revision']=hashlib.sha256(json.dumps(result,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     return result

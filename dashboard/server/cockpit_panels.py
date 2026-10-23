@@ -94,42 +94,50 @@ def _date(value):
     at=_epoch(value);return dt.datetime.fromtimestamp(at,KST).date().isoformat() if at else ''
 
 
+def brain_display(data,now):
+    remote=data.get('remote',{});ledger=data.get('usage',{})
+    active=[r for r in ledger.get('active',{}).values() if ledger.get('date')==now.date().isoformat() and 0<=now.timestamp()-_epoch(r.get('startedAt'))<900]
+    providers={r.get('provider') for r in active}
+    buckets=remote.get('codexQuota',{}).get('buckets',{})
+    windows=[w for b in buckets.values() for k in ('primary','secondary') if isinstance(w:=b.get(k),dict) and number(w.get('usedPercent')) is not None]
+    window=max(windows,key=lambda w:number(w['usedPercent']),default={})
+    remaining=max(0,100-number(window['usedPercent'])) if window else None
+    reset=_epoch(window.get('resetsAt'));credit=next((number(b.get('credits',{}).get('balance')) for b in buckets.values() if number(b.get('credits',{}).get('balance')) is not None),None)
+    def gauge(value):
+        return ('—' if value is None else f'{value:g}%')+' ['+('░'*15 if value is None else '■'*round(max(0,min(100,value))*15/100)+'░'*(15-round(max(0,min(100,value))*15/100)))+']'
+    rows=['[Codex 구독] 잔여 '+gauge(remaining)+' | 리셋: '+(dt.datetime.fromtimestamp(reset,KST).strftime('%m-%d %H:%M') if reset else '—')+' | '+(f'{credit:,.2f} C' if credit is not None else '— C')]
+    agy=remote.get('agy',{});agy_remaining=number(agy.get('remainingPercent'))
+    rows.append('[안티그래비티 구독] 잔여 '+gauge(agy_remaining)+' | 리셋: '+str(agy.get('resetAt') or '—')+' | Argon / 3.8 Flash')
+    router=remote.get('openrouter',{});balance=number(router.get('balance'));limit=number(router.get('limit'));left=number(router.get('limit_remaining'))
+    router_remaining=max(0,min(100,left/limit*100)) if limit and left is not None else 0 if balance is not None and balance<=0 else None
+    rows.append('[OpenRouter] 잔여 '+gauge(router_remaining)+' | 종량제'+(' (충전 필요)' if balance is not None and balance<=0 else '')+' | '+money(balance))
+    styles=['bold red' if remaining is not None and remaining<=0 else 'bold cyan' if 'codex' in providers else 'dim',
+            'bold red' if agy_remaining is not None and agy_remaining<=0 else 'bold cyan' if providers & {'agy','gemini'} else 'dim',
+            'bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim','dim']
+    brains=data.get('agentBrains',{});crew={r.get('role'):r for r in data.get('crew',[])}
+    def model(role):return brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
+    mapping='[직원 매핑] @jarvis('+model('jarvis')+') | '
+    mapping+=('@publi·@patch('+model('publi')+')' if model('publi')==model('patch') else '@publi('+model('publi')+') | @patch('+model('patch')+')')
+    mapping+=' | Threads('+model('threads_pipeline')+')';rows.append(mapping)
+    spans=[]
+    for r in active:
+        role=r.get('agentSlot')
+        if role in ('cf_pipeline','naver_pipeline','kin_pipeline'):role='publi'
+        name='Threads' if role=='threads_pipeline' else '@'+str(role)
+        if role in ('jarvis','publi','patch','threads_pipeline'):
+            start=mapping.find(name)
+            if start>=0:spans.append([start,start+len(name)])
+    return dict(rows=rows,styles=styles,spans=spans)
+
+
 def brain_lines(data,now):
-    remote=data.get('remote',{});ledger=data.get('usage',{});rows=[]
-    today=ledger if ledger.get('date')==now.date().isoformat() else {}
-    for key,r in sorted(today.get('byModel',{}).items()):
-        total=r.get('inputTokens',0)+r.get('outputTokens',0)
-        latency=r.get('lastLatencyMs',0)/1000
-        headers=r.get('rateLimitHeaders',{});remain=headers.get('x-ratelimit-remaining-requests')
-        status='한도임박' if r.get('lastStatus')=='failed' and r.get('rateLimited') else '정상' if r.get('lastStatus')=='completed' else '호출 오류'
-        rows.append(f"{r['provider']} · {r['model']}  성공 {r.get('success',0)} / 실패 {r.get('errors',0)}  IN {r.get('inputTokens',0):,} OUT {r.get('outputTokens',0):,}  {latency:.1f}s · {status}"+(f' · 잔여요청 {remain}' if remain is not None else ''))
-    if not rows:rows.append('오늘 호출 상세 집계 시작 · 공급자 보고 토큰만 누적')
-    if data.get('tokens'):rows.append('Codex 오늘 보고 토큰 · '+str(data['tokens'][0]))
-    active=[r for r in today.get('active',{}).values() if 0<=now.timestamp()-_epoch(r.get('startedAt'))<900]
-    rows.append('호출 중: '+(', '.join(r.get('model','')+' '+str(int(now.timestamp()-_epoch(r.get('startedAt'))))+'s' for r in active[:3]) or '다음 요청 대기'))
-    quota=remote.get('codexQuota',{});windows=[]
-    for name,bucket in quota.get('buckets',{}).items():
-        for label_key in ('primary','secondary'):
-            window=bucket.get(label_key) or {}
-            used=window.get('usedPercent')
-            if isinstance(used,(int,float)):
-                mins=window.get('windowDurationMins');reset=_epoch(window.get('resetsAt'))
-                label=f'{mins//1440}일' if isinstance(mins,int) and mins>=1440 else f'{mins}분'
-                windows.append(f'{name} {label} 잔여 {max(0,100-used):g}%'+(f' · 초기화 {dt.datetime.fromtimestamp(reset,KST):%m-%d %H:%M}' if reset else ''))
-    rows.append('Codex · ChatGPT Subscription  '+(' | '.join(windows) if windows else quota.get('status','한도 조회 중')))
-    credit_rows=[]
-    for name,bucket in quota.get('buckets',{}).items():
-        credits=bucket.get('credits')
-        if isinstance(credits,dict):
-            balance=credits.get('balance')
-            credit_rows.append(name+' '+('무제한' if credits.get('unlimited') is True else format(number(balance),',.2f')+' 크레딧' if number(balance) is not None else '보유' if credits.get('hasCredits') is True else '없음'))
-    rows.append('Codex 계정 추가 크레딧  '+(' | '.join(credit_rows) if credit_rows else '계정 크레딧 조회 중'))
-    rows.append('AGY Argon High / Med · 3.8 Flash: 현재 비활성 / Codex 우회 · 일일 쿼터 API 미제공')
-    credit=remote.get('openrouter',{})
-    rows.append('OpenRouter  사용 '+money(credit.get('usage'))+' · 키 잔여 '+('제한 없음' if credit.get('status')=='collected' and credit.get('limit') is None else money(credit.get('limit_remaining')))+' · 계정 잔액 '+money(credit.get('balance'))+' · '+credit.get('status','조회 중'))
-    api=[r for r in today.get('byModel',{}).values() if r.get('provider')=='openai']
-    rows.append('OpenAI API  '+('키 설정' if data.get('openaiKey') else '키 미설정')+' · API 잔액은 결제 페이지에서 제공 · 응답 한도 '+('연결' if api else '호출 대기'))
-    return rows
+    return brain_display(data,now)['rows']
+
+
+def brain_render(display):
+    rows=[line(value,style) for value,style in zip(display['rows'],display['styles'])]
+    for start,end in display.get('spans',[]):rows[3].stylize('bold cyan not dim',start,end)
+    return Group(*rows)
 
 
 def stage_number(stage):
@@ -231,9 +239,10 @@ def render_snapshot(data,now,height):
         sizes=desired[:]
         for n in range(height-sum(sizes)):sizes[(3,4,2,0,1,5)[n%6]]+=1
     layout.split_column(*[Layout(name=name,size=size) for name,size in zip(NAMES,sizes)])
-    titles=('① 💰 수익 · 일일 목표 $100','② 🧠 AI 호출 · 크레딧 · 구독','③ 🌐 우분투 격리 크롬 세션','④ 🚀 당일 채널 발행 · 실행 단계','⑤ 🤖 6인 크루 · Vault','⑥ ⚡ 완료 · 복구 타임라인')
+    titles=('① 💰 수익 · 일일 목표 $100','② 🧠 AI 구독 한도 & 크레딧','③ 🌐 우분투 격리 크롬 세션','④ 🚀 당일 채널 발행 · 실행 단계','⑤ 🤖 6인 크루 · Vault','⑥ ⚡ 완료 · 복구 타임라인')
     for name,color,title,values in zip(NAMES,COLORS,titles,rows):
         content=Group(*[line(v,'bold white on red' if any(t in v for t in ('ALERT','BLOCKED','OFFLINE')) else 'bold bright_green' if any(t in v for t in ('RUNNING','● ON','발행 성공')) else 'bold white') for v in values])
+        if name=='brains' and data.get('brainDisplay'):content=brain_render(data['brainDisplay'])
         layout[name].update(Panel(content,title=title+(' · '+now.strftime('%H:%M:%S KST') if name=='revenue' else ''),subtitle=data.get('date','')+' KST · '+data.get('revision','연결 중')[:8],border_style=color,box=box.HEAVY))
     return layout
 
@@ -258,7 +267,7 @@ def render(data,now,height):
     refresh=data.get('revenueRefresh',{})
     if refresh:revenue_lines.insert(2,'수익 자동수집 · API 5분 / 브라우저 10분 · '+str(refresh.get('status','대기'))+' · 원천 보고 지연 별도')
     content.append(Group(*[line(s,'bold bright_yellow' if i<2 else 'bold white') for i,s in enumerate(revenue_lines)]))
-    content.append(Group(*[line(s,'bold white on red' if '잔여 0%' in s or '한도임박' in s or '잔액 $-' in s else 'bold bright_green' if 'Codex 계정 추가 크레딧' in s else 'bold bright_cyan' if 'Subscription' in s else 'bold white') for s in brain_lines(data,now)]))
+    content.append(brain_render(brain_display(data,now)))
     fleet=table(23,34,None)
     for row in data.get('remote',{}).get('fleet',[]):
         pages=sorted(row['tabs'],key=lambda t:not t.get('active'));page=pages[0] if pages else {}
@@ -288,7 +297,7 @@ def render(data,now,height):
         when=dt.datetime.fromtimestamp(row['at'],KST).strftime('%H:%M:%S') if row.get('at') else '--:--:--'
         logs.append(line('['+when+'] '+row['text'],'bold white on red' if row.get('alert') else 'bold bright_green'))
     content.append(Group(*logs) if logs else line('다음 발행·복구·수익 수집 이벤트 대기'))
-    titles=('EGO LITE MISSION CONTROL · ① 💰 $100/day','② 🧠 BRAIN · 크레딧 / 구독 / 호출','③ 🌐 우분투 격리 크롬 세션 · 계정/프로필','④ 🚀 PIPELINE · 6단계 위치','⑤ 🤖 ACTIVE CREW · VAULT','⑥ ⚡ 발행 / 검수 돌파 / 복구 / 수익')
+    titles=('EGO LITE MISSION CONTROL · ① 💰 $100/day','② 🧠 AI 구독 한도 & 크레딧','③ 🌐 우분투 격리 크롬 세션 · 계정/프로필','④ 🚀 PIPELINE · 6단계 위치','⑤ 🤖 ACTIVE CREW · VAULT','⑥ ⚡ 발행 / 검수 돌파 / 복구 / 수익')
     for i,name in enumerate(NAMES):
         layout[name].update(Panel(content[i],title=titles[i],subtitle=now.strftime('%Y-%m-%d %H:%M:%S KST') if i==0 else None,
              border_style='bold '+COLORS[i],box=box.HEAVY,padding=(0,1),style='white on black'))

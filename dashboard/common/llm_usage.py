@@ -73,6 +73,7 @@ def record_call(call, phase, *, root=None, now=None):
         if state.get('date')!=day:state={'schema':'llm-usage-ledger-v1','date':day,'byModel':{},'active':{},'recent':[],'coverageStartedAt':now.isoformat()}
         if phase=='started':
             state['active'][call['id']]={k:call[k] for k in ('provider','model','startedAt')}
+            state['active'][call['id']]['agentSlot']=call.get('agentSlot')
             state['active']=dict(list(state['active'].items())[-128:])
         else:
             state['active'].pop(call['id'],None)
@@ -109,7 +110,9 @@ def metered(function):
             except (OSError,ValueError,KeyError):config={};brain={}
             provider=provider or brain.get('provider') or config.get('active','unknown')
             model=model or brain.get('model') or config.get('providers',{}).get(provider,{}).get('model','unknown')
-        call=dict(id=uuid.uuid4().hex,provider=provider,model=model or 'unknown',startedAt=dt.datetime.now(KST).isoformat(),
+        from common.crew_chat_bridge import current_model_identity
+        actor,owner=current_model_identity()
+        call=dict(id=uuid.uuid4().hex,agentSlot=kwargs.get('agent_slot') or owner or actor,provider=provider,model=model or 'unknown',startedAt=dt.datetime.now(KST).isoformat(),
                   inputTokens=0,outputTokens=0,usageReports=0,rateLimitHeaders={})
         token=_CURRENT.set(call);start=time.monotonic();_safe_record(call,'started');phase='failed'
         try:
