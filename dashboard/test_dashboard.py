@@ -1070,6 +1070,133 @@ class IndependentChannelDispatchTests(__import__('unittest').TestCase):
                 self.assertEqual(json.loads(state.read_text())['projects']['cf_blog']['requestId'],'cf-active')
 
 
+class EgoAlertBusTests(__import__('unittest').TestCase):
+    def test_deduplicated_ordered_inspection_never_resubmits(self):
+        import tempfile, datetime
+        from pathlib import Path
+        from unittest.mock import patch
+        from common import ego_alerts as alerts
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=alerts.KST)
+        row={'question_id':'q1','account':'adinfo0905','state':'publishing',
+             'updated_at':(now-datetime.timedelta(seconds=181)).isoformat(),
+             'title':'국민연금 수령 나이'}
+        with tempfile.TemporaryDirectory() as folder, patch('common.crew_chat_bridge.emit_pipeline_crew_message',side_effect=lambda *a,**k:k['msg_id']) as emit, patch('server.agent_tools.enqueue_staff_request',return_value={'requestId':'test'}) as enqueue:
+            result=alerts.observe({'kinOperationsRows':[row]},Path(folder),now)
+            self.assertTrue(result['submissionUncertain'])
+            self.assertIsNone(alerts.observe({'kinOperationsRows':[row]},Path(folder),now))
+            self.assertEqual(emit.call_count,1)
+            actions=enqueue.call_args.args[1]
+            self.assertEqual([a['agent'] for a in actions],['jarvis','patch','trace'])
+            self.assertTrue(all(a['tool']=='read_agent_status' for a in actions))
+
+    def test_stale_or_successful_captcha_and_open_tabs_are_not_failures(self):
+        import datetime
+        from common import ego_alerts as alerts
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=alerts.KST)
+        row={'question_id':'q1','account':'adinfo0905','state':'failed',
+             'updated_at':'2026-10-22T12:00:00+09:00','reason':'captcha'}
+        data={'kinOperationsRows':[row], 'remote':{'fleet':[{'port':9231,'account':'adinfo0905','online':False,'tabs':[{'title':'국민연금'}]}]}}
+        self.assertEqual(list(alerts.incidents(data,now)),[])
+        row.update(state='published_verified',updated_at=now.isoformat())
+        self.assertEqual(list(alerts.incidents(data,now)),[])
+        row.update(state='failed')
+        self.assertEqual(list(alerts.incidents(data,now))[0]['cause'],'captcha')
+
+    def test_visible_captcha_is_reported_without_clicking_or_old_tab_inference(self):
+        import datetime
+        from common import ego_alerts as alerts
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=alerts.KST)
+        data={'remote':{'fleet':[{'port':9231,'account':'adinfo0905','online':True,'tabs':[{'id':'tab1','questionId':'123456789','captchaVisible':True}]}]}}
+        rows=list(alerts.incidents(data,now));self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['cause'],'captcha')
+        data['remote']['fleet'][0]['tabs'][0]['captchaVisible']=False
+        self.assertEqual(list(alerts.incidents(data,now)),[])
+
+    def test_numeric_kin_ticket_uses_guarded_helper_except_captcha(self):
+        import tempfile, datetime
+        from pathlib import Path
+        from unittest.mock import patch
+        from common import ego_alerts as alerts
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=alerts.KST)
+        row={'question_id':'492662135','account':'adinfo0905','state':'publishing',
+             'updated_at':(now-datetime.timedelta(seconds=181)).isoformat()}
+        for protected in (False, True):
+            row['reason']='captcha' if protected else ''
+            with tempfile.TemporaryDirectory() as folder, patch('common.crew_chat_bridge.emit_pipeline_crew_message',side_effect=lambda *a,**k:k['msg_id']), patch('server.agent_tools.enqueue_staff_request',return_value={'requestId':'test'}) as enqueue:
+                alerts.observe({'kinOperationsRows':[row]},Path(folder),now)
+                action=enqueue.call_args.args[1][1]
+                self.assertEqual(action['tool'],'read_agent_status' if protected else 'repair_kin_submission')
+                if not protected:
+                    self.assertEqual(action['args'],{'account':'adinfo0905','question_id':'492662135'})
+
+    def test_candidate_answer_url_is_not_publication_proof(self):
+        import datetime
+        from common import ego_alerts as alerts
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=alerts.KST)
+        row={'question_id':'123456789','state':'submitted_unverified','account':'adinfo0905','answer_url':'https://kin.naver.com/qna/detail.naver?docId=123456789','updated_at':(now-datetime.timedelta(seconds=181)).isoformat()}
+        self.assertEqual(list(alerts.incidents({'kinOperationsRows':[row]},now))[0]['cause'],'submission_unknown')
+        workflow={'account':'soultin','status':'running','observedAt':now.isoformat(),'progress':{'updatedAt':'11:50:00','workDate':'2026-10-23'}}
+        self.assertEqual(list(alerts.incidents({'naverWorkflow':workflow},now))[0]['cause'],'editor_stalled')
+
+    def test_current_cf_api_error_and_three_minute_boundary(self):
+        import datetime
+        from common import ego_alerts as alerts
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=alerts.KST)
+        cf={'domain':'example.com','status':'failed','lastError':'HTTP 503', 'updatedAt':now.isoformat()}
+        self.assertEqual(list(alerts.incidents({'cf':{'date':'2026-10-23','items':[cf]}},now))[0]['cause'],'api_error')
+        row={'question_id':'q1','state':'prepared','account':'adinfo0905','updated_at':(now-datetime.timedelta(seconds=179)).isoformat()}
+        self.assertEqual(list(alerts.incidents({'kinOperationsRows':[row]},now)),[])
+        row['updated_at']=(now-datetime.timedelta(seconds=180)).isoformat()
+        self.assertEqual(list(alerts.incidents({'kinOperationsRows':[row]},now))[0]['cause'],'editor_stalled')
+
+
+class BoundedNaverPublicTests(__import__('unittest').TestCase):
+    def test_verified_old_or_recent_body_proof_is_not_refetched_or_redated(self):
+        import tempfile,json,datetime
+        from pathlib import Path
+        from unittest.mock import patch
+        from dashboard.collectors import naver_public as collector
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=collector.KST)
+        for day,checked in [('2026-10-22','2026-10-22T12:00:00+09:00'),('2026-10-23','2026-10-23T11:40:00+09:00')]:
+            with tempfile.TemporaryDirectory() as folder:
+                root=Path(folder);base=root/'naver_blog_posting';base.mkdir();data=root/'dashboard/data/naver';data.mkdir(parents=True)
+                url='https://blog.naver.com/mustpickinfo/123'
+                prior={'publicUrl':url,'publicHttpStatus':200,'publicPublicationVerified':True,'checkedAt':checked,'publicBodySha256':'real-body-hash','bodyVerificationStatus':'matched'}
+                (data/'public-verification.json').write_text(json.dumps({'evidence':[prior]}))
+                collector._save_pipeline_status(data/'pipeline_status.js',{'completedAccounts':{'acc1':{'topic':'실제 글 제목','publicationDate':day,'publicPublicationVerified':True,'publicUrl':url}}})
+                rss=[{'publicUrl':url,'blogId':'mustpickinfo','publicationDate':day,'title':'실제 글 제목','publishedAt':day+'T11:00:00+09:00'}]
+                with patch.object(collector,'DEFAULT_ACCOUNTS',{'soultin':{'acc_id':'acc1','blog_id':'mustpickinfo'}}),patch.object(collector,'_LAST_RECONCILE_TS',0),patch.object(collector,'fetch_blog_rss',return_value=rss),patch.object(collector,'verify_public_body') as body:
+                    collector.reconcile(base,now=now)
+                    body.assert_not_called()
+                result=json.loads((data/'public-verification.json').read_text())['evidence'][0]
+                self.assertEqual(result['checkedAt'],checked)
+                self.assertEqual(result['publicBodySha256'],'real-body-hash')
+
+    def test_normal_cycle_limits_new_body_requests_and_marks_remaining_deferred(self):
+        import tempfile,json,datetime
+        from pathlib import Path
+        from unittest.mock import patch
+        from dashboard.collectors import naver_public as collector
+        now=datetime.datetime(2026,10,23,12,0,tzinfo=collector.KST)
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);base=root/'naver_blog_posting';base.mkdir();data=root/'dashboard/data/naver';data.mkdir(parents=True)
+            rss=[{'publicUrl':'https://blog.naver.com/mustpickinfo/'+str(n),'blogId':'mustpickinfo','publicationDate':'2026-10-23','title':'실제 글 제목'+str(n),'publishedAt':'2026-10-23T11:00:00+09:00'} for n in range(5)]
+            journal={'attempts':[{'account':'soultin','phase':'verified','topic':r['title'],'publicationDate':'2026-10-23'} for r in rss]}
+            (data/'automation-journal.json').write_text(json.dumps(journal))
+            with patch.object(collector,'DEFAULT_ACCOUNTS',{'soultin':{'acc_id':'acc1','blog_id':'mustpickinfo'}}),patch.object(collector,'_LAST_RECONCILE_TS',0),patch.object(collector,'fetch_blog_rss',return_value=rss),patch.object(collector,'verify_public_body',return_value={'publicHttpStatus':200,'bodyVerificationStatus':'unknown'}) as body,patch('dashboard.agents.work_learning.learn_naver_public'),patch('common.llm_client.memory_event'):
+                result=collector.reconcile(base,now=now)
+            self.assertEqual(body.call_count,2)
+            self.assertEqual(result['updated'],2)
+            saved=json.loads((data/'public-verification.json').read_text())['evidence']
+            self.assertEqual(sum(e['publicPublicationVerified'] for e in saved),2)
+            self.assertEqual(sum(e.get('bodyVerificationStatus')=='deferred' for e in saved),3)
+
+    def test_automatic_api_honors_reconciliation_cooldown(self):
+        import inspect
+        from server.main import verify_naver_public
+        self.assertIn('reconcile(NAVER_DIR, force=False)',inspect.getsource(verify_naver_public))
+
+
 if __name__ == "__main__":
     import unittest
     unittest.main()

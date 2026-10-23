@@ -76,4 +76,69 @@ class PostingTests(unittest.TestCase):
         with self.assertRaises(p.AccountProtectionError):p._check_protection_message('자동입력 방지 CAPTCHA')
 
 
+class ExistingEditorRepairTests(unittest.TestCase):
+    def editor(self, disabled=False):
+        from unittest.mock import MagicMock
+        from types import SimpleNamespace
+        doc=document();page=MagicMock();page.url=doc['question']['question_url']
+        page.content.return_value='<div class="endTitleSection">'+doc['question']['title']+'</div>'
+        text=MagicMock();text.all_inner_texts.return_value=[doc['answer_text']]
+        body=MagicMock();body.inner_text.return_value=doc['question']['body']
+        links=MagicMock();links.evaluate_all.return_value=[doc['attribution']['outboundUrl']]
+        button=MagicMock();button.count.return_value=1;button.is_visible.return_value=True;button.is_enabled.return_value=not disabled
+        page.locator.side_effect=lambda selector:{'.se-canvas .se-text-paragraph':text,'.questionDetail':body,'#answerRegisterButton':button,'.se-canvas a[href], .se-canvas .se-link[data-href]':links}[selector]
+        handlers={};page.on.side_effect=lambda name,fn:handlers.update({name:fn})
+        response=SimpleNamespace(url='https://kin.naver.com/ajax/detail/registerAnswerForSmartEditorOne.naver',status=200,request=SimpleNamespace(method='POST',post_data='docId=123456789'),json=lambda:{'isSuccess':True,'result':{'result':{'answerNo':9}}})
+        button.evaluate.side_effect=lambda script:handlers['response'](response)
+        return page,button,doc
+
+    def test_cdp_click_once_after_durable_intent_and_exact_match(self):
+        from common.kin_submit_repair import click_existing
+        from unittest.mock import Mock
+        page,button,doc=self.editor();intent=Mock()
+        with patch.object(p,'_naver_browser__check_service_state'),patch.object(p,'_naver_browser_wait_for_editor_ready'):
+            result=click_existing(page,doc,{'known':True,'complete':True,'answer_ids':[]},intent)
+        intent.assert_called_once();button.evaluate.assert_called_once()
+        self.assertEqual(result['answer_id'],'9');self.assertIn('answerNo=9',result['answer_url'])
+        self.assertEqual(page.remove_listener.call_count,2)
+
+    def test_disabled_or_owned_answer_never_clicks(self):
+        from common.kin_submit_repair import click_existing
+        from unittest.mock import Mock
+        for disabled,owned in [(True,[]),(False,['7'])]:
+            page,button,doc=self.editor(disabled);intent=Mock()
+            with patch.object(p,'_naver_browser__check_service_state'),patch.object(p,'_naver_browser_wait_for_editor_ready'),self.assertRaises(ValueError):
+                click_existing(page,doc,{'known':True,'complete':True,'answer_ids':owned},intent)
+            intent.assert_not_called();button.evaluate.assert_not_called()
+
+    def test_editor_mismatch_preserves_text_and_never_submits(self):
+        from common.kin_submit_repair import click_existing
+        from unittest.mock import Mock
+        page,button,doc=self.editor();doc['answer_text']='A different answer';intent=Mock()
+        with patch.object(p,'_naver_browser__check_service_state'),patch.object(p,'_naver_browser_wait_for_editor_ready'),self.assertRaises(ValueError):
+            click_existing(page,doc,{'known':True,'complete':True,'answer_ids':[]},intent)
+        intent.assert_not_called();button.evaluate.assert_not_called()
+
+    def test_verified_no_click_learning_is_connected_and_deduplicated(self):
+        from common.kin_submit_repair import remember
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'dashboard/data').mkdir(parents=True)
+            result={'publicVerified':True,'publicUrl':'https://kin.naver.com/qna/detail.naver?docId=123456789&answerNo=9#answer9','account':'adinfo0905','questionId':'123456789','clicked':False,'originalSendDay':'2026-10-19'}
+            self.assertTrue(remember(result,root));self.assertFalse(remember(result,root))
+            graph=json.loads((root/'dashboard/data/memory_graph.json').read_text());nodes=graph['nodes']
+            self.assertEqual(nodes['problem:KIN_SUBMIT_SELECTOR_HANG']['resolvedCount'],0)
+            self.assertEqual(nodes['problem:KIN_ALERT_STALE_STATE']['resolvedCount'],1)
+            self.assertTrue(all(e['source'] in nodes and e['target'] in nodes for e in graph['edges']))
+            self.assertEqual(sum(n['type']=='Outcome' for n in nodes.values()),1)
+
+    def test_uncertain_ledger_send_is_verification_only(self):
+        from common.kin_submit_repair import repair
+        from unittest.mock import MagicMock
+        doc=document();db=MagicMock();db.execute.return_value.fetchone.return_value={'document':__import__('json').dumps(doc),'state':'submitted_unverified','answer_id':None,'answer_url':None}
+        with patch.object(p,'connect',return_value=db),patch.object(p,'account_lock'),patch('common.kin_submit_repair.click_existing') as click:
+            result=repair('adinfo0905','123456789')
+        self.assertEqual(result['status'],'held');click.assert_not_called()
+
+
 if __name__=='__main__':unittest.main()

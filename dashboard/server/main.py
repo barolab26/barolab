@@ -315,7 +315,7 @@ def verify_naver_public():
     from naver_blog_posting.posting import monitor, pipeline_lock
     try:
         with pipeline_lock():
-            result = reconcile(NAVER_DIR, force=True)
+            result = reconcile(NAVER_DIR, force=False)
             monitor(NAVER_DIR)
             return result
     except RuntimeError as exc:

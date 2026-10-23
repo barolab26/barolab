@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 import requests
+from common.collection_observability import write as atomic_write
 
 KST = timezone(timedelta(hours=9))
 
@@ -117,17 +118,20 @@ def _load_pipeline_status(js_path: Path):
     return json.loads(m.group(1))
 
 
-def verify_public_body(public_url, artifact_folder=None):
+def verify_public_body(public_url, artifact_folder=None, timeout=2, deadline=None):
     """Compare actual public paragraphs with the existing saved reservation document."""
     from bs4 import BeautifulSoup
     result = {'publicBodyMatched': None, 'bodyParagraphsMatch': None, 'matchedParagraphs': 0,
               'substantiveParagraphs': 0, 'tagsVerified': None, 'bodyVerificationStatus': 'unknown'}
     try:
-        public = requests.get(public_url, timeout=12)
+        public = requests.get(public_url, timeout=timeout)
         result['publicHttpStatus'] = public.status_code
         public.raise_for_status()
         mobile_url = public_url.replace('https://blog.naver.com/', 'https://m.blog.naver.com/')
-        mobile = requests.get(mobile_url, timeout=12); mobile.raise_for_status()
+        if deadline is not None and time.monotonic() >= deadline:
+            result['bodyVerificationReason'] = 'cycle_budget_exhausted'
+            return result
+        mobile = requests.get(mobile_url, timeout=min(timeout, max(.1, deadline-time.monotonic())) if deadline else timeout); mobile.raise_for_status()
         soup = BeautifulSoup(mobile.content, 'html.parser')
         paragraphs = [p.get_text('', strip=True) for p in soup.select('.se-main-container .se-text-paragraph')]
         public_text = _norm_alnum(' '.join(paragraphs))
@@ -168,7 +172,8 @@ def verify_public_body(public_url, artifact_folder=None):
 def _save_pipeline_status(js_path: Path, data: dict):
     js_path.parent.mkdir(parents=True, exist_ok=True)
     payload = "window.__NAVER_PIPELINE_STATUS__ = " + json.dumps(data, ensure_ascii=False, indent=2) + ";\n"
-    js_path.write_text(payload, encoding="utf-8")
+    from common.dashboard_jobs import atomic_text
+    atomic_text(js_path,payload)
 
 
 def reconcile(base=None, account_map=None, now=None, force=False):
@@ -183,6 +188,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     now_dt = _now_kst(now)
     now_iso = now_dt.isoformat()
 
+    deadline = time.monotonic() + 12
     accounts = {}
     for acc_name, meta in DEFAULT_ACCOUNTS.items():
         passed = (account_map or {}).get(acc_name) if isinstance(account_map, dict) else None
@@ -196,7 +202,9 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     for acc_name, meta in accounts.items():
         blog_id = meta["blog_id"]
         try:
-            rss_by_account[acc_name] = fetch_blog_rss(blog_id)
+            if time.monotonic() >= deadline:
+                raise TimeoutError('Public verification cycle budget exhausted')
+            rss_by_account[acc_name] = fetch_blog_rss(blog_id, timeout=min(.8, max(.1, deadline-time.monotonic())))
         except Exception as exc:
             fetch_errors[acc_name] = str(exc)
             rss_by_account[acc_name] = []
@@ -240,9 +248,25 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                 if expected_account is not None and a.get('account') == expected_account
                 and _titles_match(a.get('topic'), rss_item.get('title'))
                 and a.get('publicationDate') == rss_item.get('publicationDate')), None)
-            folder = resolve_artifact_folder(folder, expected_account, base_dir)
-            body_evidence[url] = verify_public_body(url, folder)
-        return body_evidence[url]
+            prior = evidence_by_url.get(url) or {}
+            try:
+                checked = datetime.fromisoformat(str(prior.get('checkedAt')).replace('Z', '+00:00'))
+                age = (now_dt - checked).total_seconds()
+            except (TypeError, ValueError):
+                age = float('inf')
+            already_public = prior.get('publicHttpStatus') == 200 and prior.get('publicPublicationVerified') is True
+            historical = str(rss_item.get('publicationDate') or '') < now_dt.date().isoformat()
+            recent_failed_attempt = prior.get('bodyVerificationStatus') in ('unknown','mismatch') and prior.get('bodyVerificationReason') != 'cycle_budget_exhausted' and 0 <= age < 120
+            if recent_failed_attempt or already_public and (not force and historical or 0 <= age < 3600):
+                body_evidence[url] = dict(prior)
+            elif len([v for v in body_evidence.values() if v.get('_networkChecked')]) >= 2 or time.monotonic() >= deadline:
+                body_evidence[url] = dict(prior) if already_public else {'bodyVerificationStatus':'deferred', 'bodyVerificationReason':'cycle_budget_exhausted'}
+            else:
+                folder = resolve_artifact_folder(folder, expected_account, base_dir)
+                body_evidence[url] = verify_public_body(url, folder, timeout=min(1.5, max(.1, deadline-time.monotonic())), deadline=deadline)
+                body_evidence[url]['checkedAt'] = now_iso
+                body_evidence[url]['_networkChecked'] = True
+        return {k:v for k,v in body_evidence[url].items() if not k.startswith("_")}
 
     def _make_evidence_row(acc_name, blog_id, topic, reserve_time, rss_item, pub_date):
         eff_reserve = reserve_time or rss_item.get("reserveTime") or f"{pub_date} 11:00"
@@ -277,7 +301,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
         slot_obj["publicPublicationVerified"] = True
         slot_obj["publicUrl"] = rss_item["publicUrl"]
         slot_obj["publishedAt"] = rss_item.get("publishedAt")
-        slot_obj["publicVerifiedAt"] = now_iso
+        slot_obj["publicVerifiedAt"] = body_for(rss_item).get("checkedAt", now_iso)
         slot_obj.update(body_for(rss_item))
 
     # Walk completedByDate and completedAccounts in pipeline_status.js
@@ -312,7 +336,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                         _promote_slot_dict(slot_val, matched_rss, s_reserve)
                         ev_row = _make_evidence_row(acc_name, blog_id, s_topic, s_reserve, matched_rss, pub_date)
                         evidence_by_url[matched_rss["publicUrl"]] = ev_row
-                        if not was_verified:
+                        if not was_verified and body_for(matched_rss).get("publicHttpStatus") == 200:
                             updated_count += 1
                         # If record's main topic matches this slot, promote record too
                         if _titles_match(record.get("topic"), s_topic):
@@ -328,7 +352,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                     _promote_slot_dict(record, matched_rss, r_reserve or f"{pub_date} {record.get('scheduledSlot', '11:00')}")
                     ev_row = _make_evidence_row(acc_name, blog_id, r_topic, r_reserve, matched_rss, pub_date)
                     evidence_by_url[matched_rss["publicUrl"]] = ev_row
-                    if not was_verified:
+                    if not was_verified and body_for(matched_rss).get("publicHttpStatus") == 200:
                         updated_count += 1
 
     # Sync completedAccounts with completedByDate[today] or RSS
@@ -418,7 +442,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                 ev_row = _make_evidence_row(acc_name, blog_id, a_topic, a_reserve or f"{pub_date} {slot_key}", matched_rss, pub_date)
                 evidence_by_url[matched_rss["publicUrl"]] = ev_row
                 journal_dirty = True
-                if not was_verified:
+                if not was_verified and body_for(matched_rss).get("publicHttpStatus") == 200:
                     updated_count += 1
                 # Ensure pipeline_status completedByDate also reflects this public promotion
                 if isinstance(ps, dict):
@@ -444,11 +468,11 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                     _promote_slot_dict(slot_entry, matched_rss, a_reserve or f"{pub_date} {slot_key}")
         if journal_dirty:
             try:
-                local_journal_path.write_text(json.dumps(journal_data, ensure_ascii=False, indent=2), encoding="utf-8")
+                atomic_write(local_journal_path, journal_data)
             except Exception:
                 pass
         try:
-            dash_journal_path.write_text(json.dumps(journal_data, ensure_ascii=False, indent=2), encoding="utf-8")
+            atomic_write(dash_journal_path, journal_data)
         except Exception:
             pass
 
@@ -464,9 +488,9 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     }
 
     dash_verify_path.parent.mkdir(parents=True, exist_ok=True)
-    dash_verify_path.write_text(json.dumps(ledger_out, ensure_ascii=False, indent=2), encoding="utf-8")
+    atomic_write(dash_verify_path, ledger_out)
     local_verify_path.parent.mkdir(parents=True, exist_ok=True)
-    local_verify_path.write_text(json.dumps(ledger_out, ensure_ascii=False, indent=2), encoding="utf-8")
+    atomic_write(local_verify_path, ledger_out)
     if updated_count:
         from common.llm_client import memory_event
         for item in merged_evidence:

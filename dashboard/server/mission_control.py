@@ -258,11 +258,25 @@ class Collector:
         self.root=Path(root);self.cache=JsonCache();self.lock=threading.Lock()
         self.stop=threading.Event();self.snapshot={};self.thread=None
         self.hosts=list(dict.fromkeys(['127.0.0.1',host] if host else ['127.0.0.1']))
-        self.ports={};self.port_checked=0;self.requests=[];self.queue_checked=0;self.db_states={}
+        self.ports={};self.port_checked=0;self.requests=[];self.queue_checked=0;self.db_states={};self.alert_checked=0;self.kin_alert_rows=[];self.editor_stalls={}
         from server.cockpit_telemetry import RemoteTelemetry
         self.remote=RemoteTelemetry(self.root,self.hosts)
 
     def read(self, relative):return self.cache.read(self.root/relative)
+
+    def kin_alerts(self,day):
+        path=self.root/'dashboard/data/kin.sqlite3'
+        if not path.is_file():return []
+        try:
+            with closing(sqlite3.connect(path.resolve().as_uri()+'?mode=ro',uri=True,timeout=.05)) as db:
+                db.row_factory=sqlite3.Row
+                rows=[]
+                for row in db.execute("SELECT question_id,account,state,updated_at,answer_url,document,result FROM questions WHERE date(updated_at,'+9 hours')=? ORDER BY updated_at DESC LIMIT 64",(day,)):
+                    doc=json.loads(row['document']);result=json.loads(row['result'] or '{}')
+                    rows.append({k:row[k] for k in ('question_id','account','state','updated_at','answer_url')})
+                    rows[-1].update(title=doc.get('question',{}).get('title',''),reason=result.get('reason',''))
+                return rows
+        except (OSError,sqlite3.Error,ValueError,TypeError):return self.kin_alert_rows
 
     def operation_states(self, filename, table, day, timestamp=False):
         """Cache daily operation counts by DB/WAL revision; a busy writer never blocks the screen."""
@@ -343,6 +357,28 @@ class Collector:
                 if member['role']==owner and model.get('status')=='calling':
                     member.update(state='RUNNING',model=model.get('actualModel') or model.get('requestedModel') or member.get('model'),
                                   action=clean(item.get('domain'))+' · '+clean(item.get('stageName')))
+        if tick-self.alert_checked>=5:
+            self.alert_checked=tick
+            self.kin_alert_rows=self.kin_alerts(now.date().isoformat())
+            active_editors={}
+            for browser in data.get('remote',{}).get('fleet',[]):
+                for tab in browser.get('tabs',[]):
+                    if not tab.get('editorHasContent') or not tab.get('registerPresent'):continue
+                    key=(browser.get('account'),tab.get('questionId'))
+                    prior=self.editor_stalls.get(key)
+                    first=prior[1] if prior and prior[0]==tab.get('editorCharCount') else now.isoformat()
+                    active_editors[key]=(tab.get('editorCharCount'),first)
+            self.editor_stalls=active_editors
+            for row in self.kin_alert_rows:
+                editor=active_editors.get((row['account'],row['question_id']))
+                if row['state']=='drafted' and editor:
+                    row.update(state='prepared',updated_at=editor[1])
+            data['kinOperationsRows']=self.kin_alert_rows
+            try:
+                from common.ego_alerts import observe
+                observe(data,self.root,now)
+            except (OSError,ValueError,RuntimeError):
+                pass  # A busy incident bus never interrupts the shared telemetry snapshot.
         with self.lock:self.snapshot=data
 
     def run(self):
@@ -458,6 +494,9 @@ def business_timeline(events,cf,kin,revenue,now):
     for event in events:
         at=epoch(event.get('ts',0)/1000);stage=event.get('stage','')
         if not at or dt.datetime.fromtimestamp(at,KST).date().isoformat()!=day:continue
+        if stage=='ego-alert':
+            rows.append(dict(at=at,text='[EGO ALERT] '+clean(event.get('outputKind'),150),alert=True))
+            continue
         if str(event.get('outputKind','')).startswith('dict fields:') or 'model response only' in str(event.get('outputKind','')):continue
         if event.get('phase')=='completed' and stage in ('editorial-query','editorial-scope','editorial-pivot','editorial-renewal','publication-verified','revenue-collected','recovery-verified','browser-lock-recovery','audit-path-recovery'):
             rows.append(dict(at=at,text=ROLES.get(event.get('ownerAgent') or event.get('who'),'업무')+' · '+clean(event.get('outputKind') or STAGES.get(stage,stage),150),alert=False))

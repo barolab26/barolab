@@ -160,7 +160,7 @@ def pipeline_lines(data,now):
         if channel['name']=='네이버 지식iN':note=' · '.join(f"{a} {v.get('publishedVerified',0)}건" for a,v in kin.get('daily',{}).get('byAccount',{}).items())+' · '+note
         counts={k:('—' if v is None else v) for k,v in (channel.get('counts') or {}).items()}
         if counts:note='준비 '+str(counts.get('prepared','—'))+' · 대기 '+str(counts.get('waiting','—'))+' · 실패 '+str(counts.get('failed','—'))+' · '+note
-        if channel.get('blockedAttempts'):note='[ALERT] 차단 시도 '+str(channel['blockedAttempts'])+'회 · '+note
+        if channel.get('blockedAttempts'):note='차단 이력 '+str(channel['blockedAttempts'])+'회 · '+note
         rows.append(f"{channel['name']} [{done if done is not None else '—':>2}/{target}] {bar(done,target)} {((done or 0)/target):.0%} · {note}")
     threads=data.get('threads',{}).get('today',{});count=sum(int(r.get('n',0)) for r in threads.get('counts',[]) if r.get('state')=='published_verified' and r.get('kind')=='main') if threads.get('date')==day else None
     thread_counts={k:('—' if v is None else v) for k,v in (data.get('threadCounts') or {}).items()}

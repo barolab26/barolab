@@ -62,11 +62,13 @@ def fleet_probe(spec,hosts=('127.0.0.1',)):
                     if u.scheme!='ws' or u.hostname not in (host,'127.0.0.1','localhost'):continue
                     ws=websocket.create_connection(target,timeout=.3,suppress_origin=True)
                     ws.send(json.dumps({'id':1,'method':'Runtime.evaluate','params':{
-                        'expression':'document.visibilityState === "visible"','returnByValue':True}}))
+                        'expression':'''(() => { const b=document.querySelector('#answerRegisterButton'); const text=document.querySelector('.se-canvas')?.textContent || ''; return {active:document.visibilityState === 'visible',questionId:location.hostname==='kin.naver.com' ? new URL(location.href).searchParams.get('docId') : null,editorHasContent:text.trim().length>0,editorCharCount:text.trim().length,registerPresent:!!b,registerEnabled:!!b && !b.disabled && b.getAttribute('aria-disabled')!=='true',captchaVisible:[...document.querySelectorAll('iframe[src*=captcha], #captcha, .captcha_wrap, .u_captcha')].some(e=>e.getClientRects().length>0)}; })()''','returnByValue':True}}))
                     for _ in range(4):
                         answer=json.loads(ws.recv())
                         if answer.get('id')==1:
-                            tab['active']=answer.get('result',{}).get('result',{}).get('value') is True
+                            value=answer.get('result',{}).get('result',{}).get('value')
+                            if isinstance(value,dict):tab.update({k:value[k] for k in ('active','questionId','editorHasContent','editorCharCount','registerPresent','registerEnabled','captchaVisible') if k in value})
+                            else:tab['active']=value is True
                             break
                 except (OSError,ValueError,websocket.WebSocketException):pass
                 finally:

@@ -1557,6 +1557,8 @@ def validate_staff_actions(actions):
             project = args.get('project')
             if project not in COMMANDS or agent != ('doctor' if project == 'legacy_remodel' else 'publi'):
                 raise ValueError('Unregistered autonomous project owner')
+        elif tool == 'repair_kin_submission' and agent == 'patch' and set(args)=={'account','question_id'} and args.get('account') in ('adinfo0905','stone0747') and isinstance(args.get('question_id'),str) and re.fullmatch(r'\d{1,24}',args['question_id']):
+            pass
         elif tool == 'read_agent_status' and not args:
             pass
         elif tool == 'advance_project_recovery' and set(args) == {'task_id','plan_sha256'}:
@@ -1585,6 +1587,8 @@ def staff_instruction(action):
     name = names[action['agent']]
     if action['tool'] == 'run_project_cycle':
         text = f'@{name}, 등록된 프로젝트 스케줄러를 한 회차 실행하고 실제 종료 결과를 확인해 주세요. 기존 계정·일정·검수·중복 방지 규칙을 유지하고 공개 확인 전에는 발행 완료로 보고하지 않습니다.'
+    elif action['tool'] == 'repair_kin_submission':
+        text = '@패치, 지정된 계정·질문의 기존 답변을 먼저 확인하고 승인된 작성창만 한 번 복구해 주세요. 캡차·등록 차단·중복·결과 불명확 상태는 재제출하지 않습니다.'
     elif action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
     elif action['tool'] == 'advance_project_recovery':
@@ -1655,6 +1659,7 @@ def staff_tool_reply(agent, task_id, action, result, audit=None, *, stage='staff
         'State one key observation and finish the unverified scope explicitly. End with punctuation. '
         'If too long, omit secondary items; never truncate a sentence or its uncertainty clause. '
         'Dated or historical counts must retain their source date and historical scope; never describe stale statistics as current failures. '
+        'If actualToolResult contains incident, discuss only that account/question/channel and the exact current/prior receipts; do not switch to unrelated project status. A prior verified answer with clicked=false is reconciliation, never a new publication. '
         'Never claim the tool fixed or published anything beyond its receipt. No links, credentials, '
         'personal data, shell commands or further tool requests. Return JSON reply only.\n' +
         json.dumps({'action':action,'actualToolResult':result},ensure_ascii=False)[:12000],
@@ -1769,7 +1774,11 @@ def process_staff_request_once():
     with locked(STAFF_REQUEST_DIR):
         row = None
         completing = False
-        for path in sorted(STAFF_REQUEST_DIR.glob('*.json')):
+        from common.collection_observability import load
+        alerts=load(BASE_DIR/'dashboard/data/ego-alerts/tickets.json',{}).get('tickets',{})
+        urgent={hashlib.sha256(r['requestId'].encode()).hexdigest() for r in alerts.values()
+                if str(r.get('requestId','')).startswith('ego-alert:') and r.get('status') in ('inspection_queued','reported_reconciliation_queued')}
+        for path in sorted(STAFF_REQUEST_DIR.glob('*.json'),key=lambda p:(p.stem not in urgent,p.name)):
             if path.is_symlink():
                 continue
             try:
@@ -1841,8 +1850,16 @@ def process_staff_request_once():
                         row['latestAction'] = {'kind': 'staff_model', 'agent': action['agent'],
                                                'state': event.get('state', 'unknown'), 'observedAt': time.time()}
                     write(path, row)
+                report_result=result
+                if row['requestId'].startswith('ego-alert:'):
+                    incident=next((r for r in alerts.values() if r.get('requestId')==row['requestId']),{})
+                    report_result={'incident':{k:incident.get(k) for k in ('channel','account','port','title','cause','summary')},
+                        'priorResults':[{'agent':r['agent'],'tool':r['tool'],
+                            'receipt':{k:r['result'].get(k) for k in ('status','publicVerified','publicUrl','clicked','originalSendDay','reason')},
+                            'reply':r.get('staffResponse',{}).get('reply')} for r in row['results'][:-1]],
+                        'currentResult':{k:result.get(k) for k in ('ok','status','publicVerified','publicUrl','clicked','originalSendDay','reason')}}
                 response = staff_tool_reply(action['agent'], row['taskId'],
-                    {**action,'hostInstruction':staff_instruction(action)}, result, audit=save_route)
+                    {**action,'hostInstruction':staff_instruction(action)}, report_result, audit=save_route)
                 row['results'][-1]['staffResponse'] = response
                 row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
                     phase='completed', stage='staff-response', parent_request_id=tool_return, message_kind='staff_reply',
@@ -2102,7 +2119,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         'read_agent_status':'all_projects', 'repair_cf_known_failure':'cf_blog', 'verify_cf_source_fact_fix':'cf_blog', 'prepare_cf_source_fact':'cf_blog',
         'run_cf_publish':'cf_blog', 'run_cf_domain':'cf_blog',
         'run_naver_publish':'naver_blog', 'run_naver_slot':'naver_blog',
-        'run_kin_publish':'naver_kin', 'run_kin_now':'naver_kin',
+        'repair_kin_submission':'naver_kin', 'run_kin_publish':'naver_kin', 'run_kin_now':'naver_kin',
         'run_threads_publish':'threads', 'run_threads_now':'threads',
         'run_doctor_remodel_url':'content_maintenance', 'run_doctor_audit':'content_maintenance',
         'audit_blog_posts':'content_maintenance', 'quarantine_or_fix_post':'content_maintenance',
@@ -2119,7 +2136,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         fields['task_id'] = 'direct:' + uuid.uuid4().hex
     safe_args = {key: value for key, value in kwargs.items()
                  if key in {'domain','account','source_sha256','artifact_sha256','review_sha256',
-                            'request_sha256','revision_mode','revision_sha256','task_id','plan_sha256','project'}
+                            'question_id','request_sha256','revision_mode','revision_sha256','task_id','plan_sha256','project'}
                  and isinstance(value, str) and re.fullmatch(r'[A-Za-z0-9_.:-]{1,180}', value)}
     token = _EGO_REGISTERED_ACTION.set({'agent': actor, 'tool': fields['tool'], 'args': safe_args,
                                       'argumentsComplete': len(safe_args) == len(kwargs)})
@@ -2134,6 +2151,10 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
     """Directly invoke one of the registered agent tools by name."""
     if tool_name in {'repair_cf_known_failure','prepare_cf_source_fact','verify_cf_source_fact_fix','advance_project_recovery'}:
         return {'ok':False,'status':'unsupported','replacement':'run_project_cycle'}
+    if tool_name == 'repair_kin_submission':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from common.kin_submit_repair import repair
+        return repair(**kwargs)
     if tool_name == 'run_project_cycle':
         from common.project_autonomy import run_project_cycle
         validate_staff_actions([{'agent': slug, 'tool': tool_name, 'args': kwargs}])

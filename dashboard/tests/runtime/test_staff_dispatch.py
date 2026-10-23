@@ -32,6 +32,35 @@ class StaffDispatchTests(unittest.TestCase):
         self.actions = [{'agent': 'patch', 'tool': 'read_agent_status', 'args': {}}]
         self.scope['staff_tool_reply'] = Mock(return_value={'reply': '대기 2건을 확인했으며 수리는 실행하지 않았습니다.', 'route': {'events': [{'actualModel': 'configured-model'}]}})
 
+    def test_urgent_ego_ticket_precedes_ordinary_queued_work(self):
+        urgent_id='ego-alert:urgent'
+        target=hashlib.sha256(urgent_id.encode()).hexdigest()
+        normal=next('normal-'+str(i) for i in range(100) if hashlib.sha256(('normal-'+str(i)).encode()).hexdigest()<target)
+        self.scope['enqueue_staff_request'](normal,[{'agent':'trace','tool':'read_agent_status','args':{}}])
+        self.scope['enqueue_staff_request'](urgent_id,self.actions)
+        path=Path(self.temp.name)/'dashboard/data/ego-alerts/tickets.json';path.parent.mkdir(parents=True)
+        path.write_text(json.dumps({'tickets':{'one':{'requestId':urgent_id,'status':'inspection_queued'}}}))
+        self.scope['process_staff_request_once']()
+        self.scope['execute_agent_tool'].assert_called_once_with('patch','read_agent_status')
+
+    def test_alert_handoff_gives_trace_actual_patch_receipt(self):
+        request='ego-alert:handoff'
+        actions=[{'agent':'jarvis','tool':'read_agent_status','args':{}},{'agent':'patch','tool':'repair_kin_submission','args':{'account':'adinfo0905','question_id':'123456789'}},{'agent':'trace','tool':'read_agent_status','args':{}}]
+        self.scope['execute_agent_tool'].side_effect=lambda agent,tool,**kw: {'ok':True,'status':'observed','publicVerified':True,'clicked':False,'originalSendDay':'2026-10-19'} if tool=='repair_kin_submission' else {'ok':True,'status':'observed'}
+        self.scope['enqueue_staff_request'](request,actions)
+        self.scope['process_staff_request_once']()
+        report=self.scope['staff_tool_reply'].call_args_list[-1].args[3]
+        self.assertEqual(report['priorResults'][1]['agent'],'patch')
+        self.assertTrue(report['priorResults'][1]['receipt']['publicVerified'])
+        self.assertFalse(report['priorResults'][1]['receipt']['clicked'])
+        self.assertEqual(report['priorResults'][1]['receipt']['originalSendDay'],'2026-10-19')
+
+    def test_kin_repair_only_accepts_exact_patch_account_question(self):
+        action={'agent':'patch','tool':'repair_kin_submission','args':{'account':'adinfo0905','question_id':'492662135'}}
+        self.assertEqual(self.scope['validate_staff_actions']([action]),[action])
+        for invalid in ({**action,'agent':'publi'},{**action,'args':{'account':'other','question_id':'1'}},{**action,'args':{'account':'adinfo0905','question_id':'1; shell'}}):
+            with self.assertRaises(ValueError):self.scope['validate_staff_actions']([invalid])
+
     def test_fixed_cf_verification_is_patch_only_and_has_no_arbitrary_command(self):
         action = {'agent': 'patch', 'tool': 'verify_cf_source_fact_fix', 'args': {'source_sha256': 'a' * 64}}
         self.assertEqual(self.scope['validate_staff_actions']([action]), [action])
