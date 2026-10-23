@@ -109,6 +109,22 @@ def web_identity(page):
       return /^(Profile|프로필)$/.test(label)&&/^\\/@mustpickinfo\\/?$/.test(e.getAttribute('href')||'')})''') is True
 
 
+def completed_draft(page,part,folder):
+    """Resume only this task's fully typed, never-submitted browser draft."""
+    editors=page.locator('[role="dialog"] [contenteditable="true"]')
+    if editors.count()!=1 or editors.inner_text().rstrip('\n')!=part['text'].rstrip('\n'):return None
+    cdp=page.context.new_cdp_session(page)
+    try:target=cdp.send('Target.getTargetInfo')['targetInfo']['targetId']
+    finally:cdp.detach()
+    refs=[str(i) for i in range(len(part['text'].split('\n')))]
+    for proof in sorted(Path(folder).glob('ego-[0-9]*/type/screen-execution.json'),reverse=True):
+        state=json.loads(proof.read_text())
+        if (state.get('status')=='screen_task_complete' and state.get('editorTargetId')==target
+                and state.get('written')==refs and not (proof.parent.parent/'intent.json').exists()):
+            return str(proof)
+    return None
+
+
 class ScreenAdapter:
     def __init__(self,engine):self.engine=engine
     def connection_status(self,config):return self.engine._threads_adapter_connection_status(config)
@@ -131,27 +147,32 @@ class ScreenAdapter:
         folder.mkdir(parents=True)
         with session(for_submission=True) as page:
             if not web_identity(page):raise RuntimeError('threads_web_login_required')
-            if page.locator('[contenteditable="true"]').count():raise RuntimeError('threads_existing_draft_preserved')
-            target='https://www.threads.com/@'+ACCOUNT
-            if part['kind']=='followup':
-                client=self.engine._threads_adapter_Client(config);self.engine._threads_adapter__identity(client)
-                parent=client.request('GET',str(part['parent_platform_id']),{'fields':'id,username,permalink'})
-                target=self.engine._threads_adapter__permalink(parent.get('permalink'))
-                if parent.get('username')!=ACCOUNT or not target:raise ValueError('threads_parent_identity_unverified')
-            def opened():
-                if page.locator('[role="dialog"] [contenteditable="true"]').count()!=1:raise ValueError('threads_composer_not_ready')
-            run(page,port=PORT,folder=folder/'open',urls={'approved-thread':target},max_turns=10,time_budget_seconds=180,
-                goal='Threads에서 approved-thread로 이동하고 '+('이 글에 답글을 작성하는 입력창' if part['kind']=='followup' else '새 게시물 작성창')+
-                    '을 연다. 아직 글을 입력하거나 게시하지 않는다. 입력창이 보이면 완료한다.',completion_check=opened)
-            editor=page.locator('[role="dialog"] [contenteditable="true"]');dialog=page.locator('[role="dialog"]').filter(has=editor)
+            resume=completed_draft(page,part,folder.parent) if page.locator('[contenteditable="true"]').count() else None
+            if page.locator('[contenteditable="true"]').count() and not resume:raise RuntimeError('threads_existing_draft_preserved')
+            if not resume:
+                target='https://www.threads.com/@'+ACCOUNT
+                if part['kind']=='followup':
+                    client=self.engine._threads_adapter_Client(config);self.engine._threads_adapter__identity(client)
+                    parent=client.request('GET',str(part['parent_platform_id']),{'fields':'id,username,permalink'})
+                    target=self.engine._threads_adapter__permalink(parent.get('permalink'))
+                    if parent.get('username')!=ACCOUNT or not target:raise ValueError('threads_parent_identity_unverified')
+                def opened():
+                    if page.locator('[role="dialog"] [contenteditable="true"]').count()!=1:raise ValueError('threads_composer_not_ready')
+                run(page,port=PORT,folder=folder/'open',urls={'approved-thread':target},max_turns=10,time_budget_seconds=180,
+                    goal='Threads에서 approved-thread로 이동하고 '+('이 글에 답글을 작성하는 입력창' if part['kind']=='followup' else '새 게시물 작성창')+
+                        '을 연다. 아직 글을 입력하거나 게시하지 않는다. 입력창이 보이면 완료한다.',completion_check=opened)
+            editor=page.locator('[role="dialog"] [contenteditable="true"]');dialog=page.locator('[role="dialog"]').filter(has=page.locator('[contenteditable="true"]'))
             lines=part['text'].split('\n');refs=[{'ref':str(i),'kind':'write','text':line} for i,line in enumerate(lines)]
             def check(written):
                 expected='\n'.join(lines[:len(written)])
                 return '' if editor.inner_text().rstrip('\n')==expected.rstrip('\n') else '입력 본문이 승인 원고와 다릅니다. 추가 입력 전에 화면을 보고 고치세요.'
             def composed():
                 if editor.inner_text().rstrip('\n')!=part['text'].rstrip('\n'):raise ValueError('threads_visible_text_mismatch')
-            run(page,port=PORT,folder=folder/'type',references=refs,max_turns=22,time_budget_seconds=480,
-                goal='승인된 Threads 원고를 각 ref 순서대로 직접 타이핑한다. write는 한 줄을 입력하고 Enter를 한 번 누른다. 빈 줄도 유지한다. 붙여넣기와 게시 버튼은 사용하지 않는다. 모든 글과 문단을 눈으로 확인한 뒤 완료한다.',input_check=check,completion_check=composed)
+            if not resume:
+                run(page,port=PORT,folder=folder/'type',references=refs,max_turns=22,time_budget_seconds=480,
+                    goal='승인된 Threads 원고를 각 ref 순서대로 직접 타이핑한다. write는 한 줄을 입력하고 Enter를 한 번 누른다. 빈 줄도 유지한다. 붙여넣기와 게시 버튼은 사용하지 않는다. 모든 글과 문단을 눈으로 확인한 뒤 완료한다.',input_check=check,completion_check=composed)
+            else:
+                composed();write(folder/'resumed-draft.json',{'proof':resume,'textVerified':True})
             button=dialog.get_by_role('button',name=re.compile(r'^(Post|Reply|게시|답글)$'))
             if button.count()!=1:raise ValueError('threads_exact_submit_control_required')
             intent={}
@@ -163,6 +184,8 @@ class ScreenAdapter:
                 try:target_id=cdp.send('Target.getTargetInfo')['targetInfo']['targetId']
                 finally:cdp.detach()
                 write(folder/'intent.json',{'partId':part['part_id'],'intentAt':intent['at'],'executor':'ego-lite','targetId':target_id})
+                # API timestamps have whole-second precision; the click must follow the durable intent's second.
+                page.wait_for_timeout(1100)
             visual_click(page,button,PORT,folder/'submit','현재 원고의 '+('답글' if part['kind']=='followup' else '게시')+' 버튼',before_click=commit)
             for delay in (2,5,10):
                 page.wait_for_timeout(delay*1000)

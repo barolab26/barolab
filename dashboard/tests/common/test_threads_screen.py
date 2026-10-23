@@ -104,6 +104,21 @@ class ThreadsScreenTests(unittest.TestCase):
             page.close.assert_not_called()
             page.goto.assert_not_called()
 
+    def test_resume_requires_completed_exact_draft_same_tab_and_no_intent(self):
+        from common.threads_screen import completed_draft
+        import json
+        page=Mock();editor=page.locator.return_value;editor.count.return_value=1;editor.inner_text.return_value='승인 문장\n'
+        page.context.new_cdp_session.return_value.send.return_value={'targetInfo':{'targetId':'same-tab'}}
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);proof=root/'ego-123/type/screen-execution.json';proof.parent.mkdir(parents=True)
+            state={'status':'screen_task_complete','editorTargetId':'same-tab','written':['0']};proof.write_text(json.dumps(state))
+            self.assertEqual(completed_draft(page,{'text':'승인 문장'},root),str(proof))
+            self.assertIsNone(completed_draft(page,{'text':'다른 문장'},root))
+            state['editorTargetId']='other-tab';proof.write_text(json.dumps(state))
+            self.assertIsNone(completed_draft(page,{'text':'승인 문장'},root))
+            state['editorTargetId']='same-tab';proof.write_text(json.dumps(state));(proof.parent.parent/'intent.json').write_text('{}')
+            self.assertIsNone(completed_draft(page,{'text':'승인 문장'},root))
+
     def test_planning_uses_exact_saved_draft_and_slot(self):
         from dashboard.agents.style_strategy import plan_post
         prompts=[]
