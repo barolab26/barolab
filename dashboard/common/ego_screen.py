@@ -27,8 +27,8 @@ def clipboard_text():
 def focused_submission_control(page):
     return page.evaluate(r"""()=>{let e=document.activeElement;
         if(e?.tagName==='IFRAME')e=e.contentDocument?.activeElement;
-        const b=e?.closest('button,a');const text=(b?.innerText||'').replace(/\s/g,'');
-        return b?.id==='answerRegisterButton'||/confirm_btn/.test(b?.className||'')||/^(발행|예약|등록|답변등록|등록하기)$/.test(text)}""")
+        const b=e?.closest('button,a,[role=button]');const text=(b?.innerText||'').replace(/\s/g,'');
+        return b?.id==='answerRegisterButton'||/confirm_btn/.test(b?.className||'')||/^(발행|예약|등록|답변등록|등록하기|게시|답글|Post|Reply)$/.test(text)}""")
 
 
 def screen_point(x, y, width, height):
@@ -270,8 +270,8 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                         forbidden = page.evaluate('''([x,y])=>{let e=document.elementFromPoint(x,y);
                             if(e?.tagName==='IFRAME'){const r=e.getBoundingClientRect();
                               e=e.contentDocument?.elementFromPoint(x-r.x,y-r.y)}
-                            const b=e?.closest('button,a');const t=(b?.innerText||'').trim();
-                            return /confirm_btn/.test(b?.className||'')||b?.id==='answerRegisterButton'||/^(발행|예약|등록|답변등록|등록하기|저장|공감|좋아요|이웃추가|이웃 추가|공유|구매)$/.test(t)}''', [x, y])
+                            const b=e?.closest('button,a,[role=button]');const t=(b?.innerText||'').trim();
+                            return /confirm_btn/.test(b?.className||'')||b?.id==='answerRegisterButton'||/^(발행|예약|등록|답변등록|등록하기|게시|답글|Post|Reply|저장|공감|좋아요|이웃추가|이웃 추가|공유|구매)$/.test(t)}''', [x, y])
                         if forbidden:
                             raise ValueError('Screen composing actor attempted a submission control')
                     if kind in ('write', 'upload'):

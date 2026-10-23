@@ -68,6 +68,8 @@ def listener_owner(port, pid):
 def account_paths(port):
     if port==9440:
         return Path('/opt/google/chrome/chrome'),Path.home()/'.config/cdp_gui_9440',None
+    if port==9450:
+        return Path('/opt/google/chrome/chrome'),Path.home()/'.config/cdp_threads_mustpickinfo',None
     account = next((key for key, value in accounts().items() if value["cdp_port"] == port), None)
     if account is None:
         raise ValueError("Unknown Naver account port")
@@ -81,14 +83,18 @@ def ensure_account(port):
     _, profile, script = account_paths(port)
     pid = process_identity(port, profile)
     if pid is None:
-        if port==9440:
+        if port in (9440,9450):
             profile.mkdir(parents=True,exist_ok=True)
             subprocess.Popen(['/opt/google/chrome/chrome',f'--remote-debugging-port={port}',f'--user-data-dir={profile}',
-                '--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check','https://flow.google.com'],
+                '--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check',
+                'https://www.threads.com/@mustpickinfo' if port==9450 else 'https://flow.google.com'],
                 env=dict(os.environ,DISPLAY=os.environ.get('BAROLAB_DISPLAY',':10')),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
             for _ in range(100):
                 time.sleep(.2);pid=process_identity(port,profile)
-                if pid:break
+                if pid:
+                    try:listener_owner(port,pid)
+                    except RuntimeError:continue
+                    break
         elif not script.is_file():
             raise RuntimeError(f"Dedicated Ubuntu account launcher missing: {script}")
         else:subprocess.run([str(script)], check=True, timeout=35, stdout=subprocess.DEVNULL)

@@ -100,6 +100,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     index=cached_index(ROOT)
     profile=index.get('accountProfiles',{}).get(identity,{})
     agenda={'channel':channel,'account':identity,'brand':profile.get('brand',identity),'target':profile.get('target',''),'publicationDate':folder.parent.name,'slot':folder.name.rsplit('-',1)[-1]}
+    agenda.update(parameters.get('agenda',{}))
     meeting_policy=index.get('meetingPolicy',{})
     transcript=[];task=work_task_id(folder)
     last_reply=''
@@ -132,7 +133,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     opener=meeting_policy.get('openingRole','jarvis')
     if opener in ('jarvis','publi','radar','trace','patch','doctor'):
         call(opener,'지식그래프에 정한 개회 규칙으로 이번 발행 안건의 회의를 열어라. 실제 계정 브랜드와 발행일·슬롯을 밝히고 어떤 키워드를 공략할지 논의를 시작하라. 아직 조사·발행·수익이 완료된 것처럼 말하지 마라. JSON message.\n'+json.dumps({'agenda':agenda,'openingInstruction':meeting_policy.get('openingInstruction',''),'profile':profile},ensure_ascii=False),{'message':message})
-    existing_draft=load(folder/'editor-content.json') or load(folder/'article.json')
+    existing_draft=load(folder/'editor-content.json') or load(folder/'article.json') or parameters.get('existingDraft',{})
     request=call('publi','이번 계정과 주제를 발행하려는 퍼블리다. 기존 원고가 있으면 그 주제를 유지한 실행안을 제안하고, 없으면 정확한 키워드 하나를 제안하고, 어떤 독자·구성·서식으로 쓸지 팀장에게 짧게 질문하라. 기발행·검색 성과를 꾸미지 마라. JSON message,keyword.\n'+json.dumps({'identity':identity,'topic':topic,'memoryStyle':parameters,'channel':channel,'agenda':agenda,'existingDraftTitle':existing_draft.get('title'),'priorDiscussion':transcript},ensure_ascii=False), {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
     keyword=request['keyword']
     direction=call('jarvis','퍼블리의 보고와 지식그래프를 읽고 이번 원고의 방향을 정하라. 성과가 나쁘다고 단정하지 말고 실측 여부를 구분하라. 경쟁글 확인이 필요하면 레이더에게 이 정확한 키워드로 2~3개를 조사하도록 지시하라. 필요한 경우에만 트레이스·닥터·패치 최대 2명을 자문 요청하라. JSON message,researchTask,benchmarkNeeded,consultAgents.\n'+json.dumps({'publiRequest':request,'memoryStyle':parameters,'agenda':agenda,'priorDiscussion':transcript},ensure_ascii=False), {'message':message,'researchTask':{'type':'string','minLength':1,'maxLength':600},'benchmarkNeeded':{'type':'boolean'},'consultAgents':{'type':'array','maxItems':2,'items':{'type':'string','enum':['trace','doctor','patch']}}})

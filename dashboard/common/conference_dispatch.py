@@ -98,6 +98,8 @@ def install_channel_conferences(kind):
         engine._naver_browser_verify_public = verify_and_record
         return engine
     import threads_posting.posting as engine
+    from common.threads_screen import install
+    install(engine)
     author = engine._threads_authoring_prepare_next
     def prepare_next(config, publication_day, slot, *args, **kwargs):
         return author_after_conference(config['account_key'], str(publication_day)+'-'+str(slot), '다음 Threads 게시의 주제·독자·본문 구조와 유입 전략을 결정한다.', author, config, publication_day, slot, *args, **kwargs)
@@ -105,8 +107,17 @@ def install_channel_conferences(kind):
     original = engine._threads_pipeline_publish
     def publish(part_id, config, *args, **kwargs):
         folder = folder_for('threads_posting', day, str(part_id))
-        planning_or_memory(config['account_key'], 'Threads 게시 건 '+str(part_id)+'의 독자·표현·유입 전략', folder, {}, channel='threads')
-        result = original(part_id, config, *args, **kwargs)
+        with engine._threads_pipeline_connect(kwargs.get('db_path', args[0] if args else engine._threads_config_DB)) as db:
+            part = dict(db.execute('SELECT * FROM parts WHERE part_id=?', (part_id,)).fetchone())
+        engine._conference_context = {'channel':'Threads', 'account':part['account_key'], 'slot':part['slot'],
+            'reserveTime':part['publication_date']+' '+part['slot'], 'title':part['text'].splitlines()[0], 'partId':part_id}
+        readiness = engine._namespace_adapter.readiness_status(config)
+        if readiness.get('publishReady') is not True:
+            raise RuntimeError(readiness.get('reason') or 'threads_readiness_incomplete')
+        planning_or_memory(config['account_key'], '기존 승인 원고의 주제를 유지한다. '+part['text']+'\n복구 안건: '+getattr(engine,'_conference_agenda',''), folder/'publication-plan',
+            {'agenda':{'publicationDate':part['publication_date'],'slot':part['slot'],'kind':part['kind']},
+             'existingDraft':{'title':part['text'].splitlines()[0],'text':part['text'],'partId':part_id}}, channel='threads')
+        result = {**engine._conference_context, **original(part_id, config, *args, **kwargs)}
         engine._conference_results.append(result)
         return result
     engine._conference_results = []
@@ -138,7 +149,7 @@ def report_outcome(receipt, task_id, context=None):
              'title':receipt.get('title'), 'slot':receipt.get('slot') or receipt.get('scheduledSlot'),
              'submissionState':receipt.get('submissionStatus') or receipt.get('state'),
              'submittedUrl':address if pending else '', 'errorType':receipt.get('errorType'),
-             'nextAction':'실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '담당 직원이 원인을 진단하고 같은 안건에서 복구한다.'}
+             'nextAction':'열린 Threads 전용 Ubuntu 창에서 @mustpickinfo 로그인 후 같은 안건을 재개한다. 원고는 보존되어 있다.' if receipt.get('reason') == 'threads_web_login_required' else '실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '담당 직원이 원인을 진단하고 같은 안건에서 복구한다.'}
     report = {key: facts.get(key) for key in ('channel','account','title','reserveTime','slot','nextAction')}
     report['status'] = facts['outcome']
     if not address:
@@ -189,8 +200,8 @@ def work(identity):
             engine = install_channel_conferences(row['kind'])
             if row['kind'] == 'kin': engine.main(['--tick', '--scheduled'])
             else:
-                sys.argv = ['conference', '--tick']
-                engine.main()
+                engine._conference_agenda = row['arguments'].get('topic', '')
+                engine._threads_scheduler_tick()
             receipts = engine._conference_results
         row['outcomes'] = []
         for receipt in receipts:
@@ -204,7 +215,8 @@ def work(identity):
     except Exception as exc:
         row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300)
         try:
-            row['failureReport'] = report_outcome({'errorType':type(exc).__name__}, 'conference:'+identity[:24], context)
+            failure_context = {**context, **(getattr(locals().get('engine'), '_conference_context', {}) or {})}
+            row['failureReport'] = report_outcome({'errorType':type(exc).__name__, 'reason':str(exc) if str(exc) in ('threads_web_login_required','threads_readiness_incomplete') else None}, 'conference:'+identity[:24], failure_context)
         except Exception:
             row['reportPending'] = True
         raise
