@@ -1649,7 +1649,7 @@ def staff_tool_reply(agent, task_id, action, result, audit=None, *, stage='staff
         'Respond to Jarvis in Korean with two complete sentences within 80 characters. '
         'Start the reply with @팀장 to identify its actual recipient. '
         'Use plain Korean publication outcomes only for actual publication receipts: 게시 성공, 예약 완료, 게시 실패, or 게시 확인 중. '
-        'Always identify the channel/project and account or domain; include the title or slot when actually present. '
+        'Always identify the channel/project. Include account or domain and title or slot when actually present; for a channel-wide cycle say 채널 전체 and never invent 계정 미상. Use Korean channel names CF 블로그, 네이버 블로그, 지식iN, Threads. '
         'A run_project_cycle receipt is channel orchestration, not evidence of an individual submitted post. '
         'When it has no submitted post identity, report 채널 실행 요청 중 or 채널 실행 반환·개별 게시 결과 미확인; never say 게시 확인 중 or promise to recheck a nonexistent identified post. '
         'Use 게시 확인 중 only when an actual submitted post identity and pending submission state are supplied; name the identity and the next verification step. '

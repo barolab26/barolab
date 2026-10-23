@@ -7458,6 +7458,17 @@
       ],
       "originalText": "표 테이블 말한거야 나는 들어가서 CF 블로그들 표 보면 스타일이 이상해 구분선도 확실하게 없고 그래서",
       "guidance": "CF 글 본문의 HTML 표를 대상으로 선명한 가로·세로 구분선과 구별되는 머리글·일관된 여백을 적용한다. 특정 URL 누락으로 치부하거나 무관한 전사 현황으로 대체하지 않는다. 원문·링크·병합셀은 보존하고 공개 반영을 확인한다."
+    },
+    "ceo-directive:meeting-room-messenger-style": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "recordedAt": "2026-10-23T08:21:41.768168+00:00",
+      "roles": [
+        "jarvis",
+        "patch"
+      ],
+      "originalText": "회의실 채팅방 스타일을 카카오톡 채팅방 스타일처럼 수정해줘.",
+      "guidance": "회의실 대화를 카카오톡처럼 말풍선 중심으로 표시한다. 대표 메시지는 오른쪽 노랑, 직원 메시지는 왼쪽 흰색, 이름·시간을 명료하게 배치하고 PC·모바일 입력 및 스크롤을 보존한다."
     }
   },
   "edges": [
@@ -10079,6 +10090,11 @@
     {
       "source": "memory:hub",
       "target": "ceo-directive:cf-table-visible-borders",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:meeting-room-messenger-style",
       "type": "contains"
     }
   ],
