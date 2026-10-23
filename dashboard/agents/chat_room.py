@@ -2269,6 +2269,8 @@ def project_work_event(payload):
         address = url(payload['deliverableUrl'])
         if not address or len(address)>1000:
             raise ValueError('Invalid public deliverable URL')
+    from common.crew_chat_bridge import report_context
+    context = report_context(payload.get('reportContext', {}))
     ts = payload.get('ts')
     if not isinstance(ts, int) or isinstance(ts, bool) or ts <= 0:
         raise ValueError('Observed timestamp required')
@@ -2276,7 +2278,7 @@ def project_work_event(payload):
     summary = f"{clean['stage'] or '작업'}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다."
     return {**clean, 'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
             'phase':phase,'ts':ts,'text':summary,'autonomous':True,'msgKind':'workstream','deliverableUrl':address,
-            'isWorkstream':True,'replyToCeo':False,
+            'isWorkstream':True,'replyToCeo':False,'reportContext':context,
             'brain':{'badge':clean['model'] or '모델 미관측'},
             'taskTracker':{'status':'failed' if phase == 'failed' else 'status_only',
                            'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':(clean['deliverableLabel'] or '게시 글 확인') if address else ''}}
@@ -2400,6 +2402,30 @@ def api_execute_agent_tool(req: ExecuteAgentToolRequest):
     return res
 
 
+def project_channel_cycle_messages(messages):
+    """Keep proven channel-cycle chatter in work records; stored history is untouched."""
+    projected = []
+    requests = {}
+    for message in messages:
+        task = message.get('taskId', '')
+        if (message.get('eventType') == 'crew_work_event'
+                and message.get('stage') in ('staff-response','staff-terminal-response')
+                and re.fullmatch(r'staff:[a-f0-9]{64}', task)):
+            if task not in requests:
+                path = CHATS_DIR / 'staff-requests' / (task[6:] + '.json')
+                try:
+                    request = json.loads(path.read_text(encoding='utf-8')) if path.is_file() and path.stat().st_size < 500000 else {}
+                    actions = request.get('actions', [])
+                    requests[task] = (request.get('taskId') == task and bool(actions)
+                                      and all(a.get('tool') == 'run_project_cycle' for a in actions))
+                except (OSError, ValueError, TypeError):
+                    requests[task] = False
+            if requests[task]:
+                message = {**message, 'stage':'channel-cycle-summary'}
+        projected.append(message)
+    return projected
+
+
 @chat_router.get("/room")
 def get_chat_room():
     return _ROOM_READ_CACHE.get('room', _build_chat_room)
@@ -2412,7 +2438,7 @@ def _build_chat_room():
     sys_ctx = get_live_system_context()
     enriched_agents, live_map = get_crew_live_workstream_status()
     return {
-        "messages": room.get("messages", []),
+        "messages": project_channel_cycle_messages(room.get("messages", [])),
         "delegationLimit": room.get("delegationLimit", True),
         "autonomousEnabled": AUTONOMOUS_WORKER.is_enabled(),
         "autonomousStatus": radar_runtime_status(),

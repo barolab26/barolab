@@ -7481,6 +7481,21 @@
       ],
       "originalText": "회의실에서 닥터가 뭘 수정하는건지 수정하고 있는 콘텐츠를 정확하게 링크 걸려서 바로 확인할수 있도록 발언 하도록 해야해.",
       "guidance": "닥터의 글별 보고에 실제 대상 제목·도메인·현재 단계·확인된 수정 이유와 클릭 가능한 해당 글 URL을 표시한다. 원문 점검/수정안 준비/반영 전 점검/공개 검증 완료를 구분한다. 대상 미선정이면 대기로 보고하며 URL을 추정하지 않는다."
+    },
+    "ceo-directive:precise-meeting-operational-reports": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "recordedAt": "2026-10-23T08:42:17.976702+00:00",
+      "roles": [
+        "jarvis",
+        "publi",
+        "trace",
+        "patch",
+        "doctor",
+        "radar"
+      ],
+      "originalText": "회의실에 발언 하는게 다 얼버무리는 내용이야. cf (계정 미상) 은 뭐야? 네이버 블로그도 어떤 계정인지 몇시 예약건인지 자세하게 얘기를 하고 링크도 남기고 해야 내가 알아보지. 내가 볼려고 회의실을 보고 있는건데 안그래?",
+      "guidance": "대표가 실행 내용을 알아볼 수 있도록 채널·실제 계정/도메인·대상 글 제목·예약 날짜와 시각·현재 단계/결과·다음 확인·정확한 글 링크를 관측 기록에서 표시한다. 채널 전체 점검을 계정 미상이나 개별 글 확인 중으로 부르지 않는다. 미공개 예약 글의 URL은 만들어내지 않고 계정 링크와 구분한다. 모델 요약이 필수 작업 필드를 생략하지 않도록 실행 기록을 말풍선에 함께 표시한다."
     }
   },
   "edges": [
@@ -10112,6 +10127,11 @@
     {
       "source": "memory:hub",
       "target": "ceo-directive:doctor-exact-content-links",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:precise-meeting-operational-reports",
       "type": "contains"
     }
   ],

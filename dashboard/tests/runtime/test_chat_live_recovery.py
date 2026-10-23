@@ -14,6 +14,23 @@ ROOT = Path(__file__).resolve().parents[3]
 
 class ChatLiveRecoveryTests(unittest.TestCase):
 
+    def test_cycle_projection_uses_exact_request_and_preserves_history(self):
+        tree = ast.parse((ROOT / 'dashboard/agents/chat_room.py').read_text())
+        node = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='project_channel_cycle_messages')
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder);(root/'staff-requests').mkdir()
+            scope = {'CHATS_DIR':root,'re':re,'json':json}
+            exec(compile(ast.Module(body=[node],type_ignores=[]),'<projection>','exec'),scope)
+            task = 'staff:'+'a'*64
+            message = {'eventType':'crew_work_event','taskId':task,'stage':'staff-terminal-response','outputKind':'CF 계정 미상 확인 중.'}
+            path = root/'staff-requests'/('a'*64+'.json')
+            path.write_text(json.dumps({'taskId':task,'actions':[{'tool':'run_project_cycle'}]}))
+            projected = scope['project_channel_cycle_messages']([message])[0]
+            self.assertEqual(projected['stage'],'channel-cycle-summary')
+            self.assertEqual(message['stage'],'staff-terminal-response')
+            path.write_text(json.dumps({'taskId':task,'actions':[{'tool':'article_maintenance_report'}]}))
+            self.assertEqual(scope['project_channel_cycle_messages']([message])[0],message)
+
     def test_execution_receipt_missing_exit_is_unknown_not_success(self):
         html = (ROOT / 'dashboard/chat.html').read_text(encoding='utf-8')
         start = html.index('  function buildExecutionReceiptBoxHtml(')
@@ -63,9 +80,11 @@ class ChatLiveRecoveryTests(unittest.TestCase):
                 receive({**event, 'model': 'api_key=unsafe'})
             project = scope['project_work_event']
             self.assertEqual(project({**event, 'messageKind': 'host_instruction'})['messageKind'], 'host_instruction')
-            linked = project({**event, 'who': 'doctor', 'deliverableUrl': 'https://www.example.com/actual-post', 'deliverableLabel': '실제 수정 대상 제목'})
+            linked = project({**event, 'who': 'doctor', 'deliverableUrl': 'https://www.example.com/actual-post', 'deliverableLabel': '실제 수정 대상 제목', 'reportContext': {'channel':'네이버 블로그','account':'soultin','reserveTime':'2026-10-23 19:30'}})
             self.assertEqual(linked['deliverableUrl'], 'https://www.example.com/actual-post')
             self.assertEqual(linked['deliverableLabel'], '실제 수정 대상 제목')
+            self.assertEqual(linked['reportContext']['account'], 'soultin')
+            self.assertEqual(linked['reportContext']['reserveTime'], '2026-10-23 19:30')
             self.assertEqual(linked['taskTracker']['deliverableLabel'], '실제 수정 대상 제목')
             with self.assertRaises(ValueError):
                 project({**event, 'messageKind': 'invented'})

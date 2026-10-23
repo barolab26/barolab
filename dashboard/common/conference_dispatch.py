@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 import os
 from pathlib import Path
 import subprocess
@@ -112,12 +113,14 @@ def install_channel_conferences(kind):
     return engine
 
 
-def report_outcome(receipt, task_id):
+def report_outcome(receipt, task_id, context=None):
     """Report verified publishing facts, never a child's operating-system exit code."""
     from agents.agent_tools import staff_tool_reply
     from common.crew_chat_bridge import emit_work_event
     if not isinstance(receipt, dict):
         return None
+    context = context or {}
+    receipt = {**context, **{k:v for k,v in receipt.items() if v is not None}}
     public = (receipt.get('publicPublicationVerified') is True and receipt.get('httpStatus') == 200
               or receipt.get('verified') is True and receipt.get('public') is True
               or receipt.get('state') == 'published_verified')
@@ -135,10 +138,20 @@ def report_outcome(receipt, task_id):
              'submissionState':receipt.get('submissionStatus') or receipt.get('state'),
              'submittedUrl':address if pending else '', 'errorType':receipt.get('errorType'),
              'nextAction':'실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '담당 직원이 원인을 진단하고 같은 안건에서 복구한다.'}
+    report = {key: facts.get(key) for key in ('channel','account','title','reserveTime','slot','nextAction')}
+    report['status'] = facts['outcome']
+    if not address:
+        report['linkStatus'] = '예약 글의 공개 URL은 아직 발급되지 않았습니다.' if reserved else '대상 글 URL이 실행 기록에 없습니다.'
+    link = address
+    label = facts.get('title') or '대상 게시물 열기'
+    if not link and reserved and isinstance(receipt.get('blogId'), str) and re.fullmatch(r'[A-Za-z0-9_]+', receipt['blogId']):
+        link = 'https://blog.naver.com/' + receipt['blogId']
+        label = '예약 계정 블로그 열기 · 예약 글은 미공개'
+        report['linkStatus'] = '글은 아직 미공개입니다. 링크는 해당 계정 블로그로 연결됩니다.'
     response=staff_tool_reply('publi',task_id,{'tool':'publication_verification'},facts,stage='staff-terminal-response')
     emit_work_event(actor='publi',actor_label='퍼블리',task_id=task_id,phase='completed',stage='staff-terminal-response',
         message_kind='staff_reply',requested_to='jarvis',model=response['route']['events'][-1]['actualModel'],
-        output_kind=response['reply'],deliverable_url=facts['publicUrl'])
+        output_kind=response['reply'],deliverable_url=link,deliverable_label=label,report=report)
     return facts
 
 
@@ -149,6 +162,18 @@ def work(identity):
     # Parent stores ownership before the child reads the request.
     with locked(QUEUE):
         row = load(path)
+    context = {'channel': {'kin':'지식iN','threads':'Threads'}.get(row['kind'], '')}
+    if row['kind'] == 'parameters':
+        args = row['arguments']
+        context.update(channel={'naver':'네이버 블로그','cf':'CF 블로그','naver-cycle':'네이버 블로그','cf-cycle':'CF 블로그'}.get(args.get('action'), ''),
+                       account=args.get('account'), slot=args.get('slot'))
+        if args.get('date') and args.get('slot'):
+            context['reserveTime'] = args['date'] + ' ' + args['slot']
+        if args.get('action') == 'naver' and all(args.get(k) for k in ('date','account','slot')):
+            from common.channel_parameters import folder_for
+            folder = folder_for('naver_blog_posting', args['date'], args['account'] + '-' + args['slot'].replace(':',''))
+            document = load(folder / 'editor-content.json')
+            context['title'] = document.get('title')
     try:
         if (Path.home() / 'EGO_EXEC_DISABLED').exists():
             raise RuntimeError('Execution disabled')
@@ -169,7 +194,7 @@ def work(identity):
         row['outcomes'] = []
         for receipt in receipts:
             try:
-                outcome = report_outcome(receipt, 'conference:'+identity[:24])
+                outcome = report_outcome(receipt, 'conference:'+identity[:24], context)
                 if outcome: row['outcomes'].append(outcome)
             except Exception as exc:
                 row['reportPending'] = True
@@ -178,7 +203,7 @@ def work(identity):
     except Exception as exc:
         row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300)
         try:
-            row['failureReport'] = report_outcome({'errorType':type(exc).__name__}, 'conference:'+identity[:24])
+            row['failureReport'] = report_outcome({'errorType':type(exc).__name__}, 'conference:'+identity[:24], context)
         except Exception:
             row['reportPending'] = True
         raise

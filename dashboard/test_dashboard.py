@@ -1418,6 +1418,38 @@ class PublicationOutcomeLanguageTests(__import__('unittest').TestCase):
             self.assertEqual(result['submissionState'],'api_submitted')
             self.assertEqual(result['submittedUrl'],'https://www.threads.net/@example/post/123')
 
+class DetailedPublicationReportTests(__import__('unittest').TestCase):
+    def test_reservation_retains_account_title_time_without_inventing_a_public_url(self):
+        from common.conference_dispatch import report_outcome
+        from unittest.mock import patch
+        response = {'reply':'@팀장 지정 계정의 예약을 확인했습니다. 예약 목록과 저장 본문이 일치합니다.', 'route':{'events':[{'actualModel':'observed-model'}]}}
+        receipt = {'submissionStatus':'verified_reserved','verificationSource':'reservation-list-and-document'}
+        context = {'channel':'네이버 블로그','account':'soultin','reserveTime':'2026-10-23 19:30','title':'실제 승인 제목'}
+        with patch('agents.agent_tools.staff_tool_reply',return_value=response), patch('common.crew_chat_bridge.emit_work_event') as event:
+            facts = report_outcome(receipt,'test',context)
+        report = event.call_args.kwargs['report']
+        self.assertEqual(report['account'],'soultin')
+        self.assertEqual(report['reserveTime'],'2026-10-23 19:30')
+        self.assertEqual(report['title'],'실제 승인 제목')
+        self.assertEqual(report['status'],'예약 완료')
+        self.assertIn('아직 발급되지',report['linkStatus'])
+        self.assertEqual(event.call_args.kwargs['deliverable_url'],'')
+        self.assertTrue(facts['reservationVerified'])
+        with patch('agents.agent_tools.staff_tool_reply',return_value=response), patch('common.crew_chat_bridge.emit_work_event') as event:
+            report_outcome({**receipt,'blogId':'mustpickinfo'},'test',context)
+        self.assertEqual(event.call_args.kwargs['deliverable_url'],'https://blog.naver.com/mustpickinfo')
+        self.assertIn('미공개',event.call_args.kwargs['deliverable_label'])
+        self.assertIn('해당 계정 블로그',event.call_args.kwargs['report']['linkStatus'])
+
+    def test_exact_cf_url_and_domain_are_attached_even_if_model_prose_is_generic(self):
+        from common.conference_dispatch import report_outcome
+        from unittest.mock import patch
+        response = {'reply':'@팀장 공개 글을 확인했습니다. 본문이 일치합니다.','route':{'events':[{'actualModel':'observed-model'}]}}
+        with patch('agents.agent_tools.staff_tool_reply',return_value=response),patch('common.crew_chat_bridge.emit_work_event') as event:
+            report_outcome({'domain':'must-good.com','title':'정확한 대상 제목','publicPublicationVerified':True,'httpStatus':200,'publicUrl':'https://www.must-good.com/actual-post'},'test',{'channel':'CF 블로그'})
+        self.assertEqual(event.call_args.kwargs['report']['account'],'must-good.com')
+        self.assertEqual(event.call_args.kwargs['deliverable_url'],'https://www.must-good.com/actual-post')
+
 class ConferenceBeforeAuthoringTests(__import__('unittest').TestCase):
     def test_knowledgein_conference_precedes_writer_and_injects_agreed_direction(self):
         import naver_kin.posting as engine

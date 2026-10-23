@@ -632,7 +632,9 @@ def report_article_work(job, original, stage):
             event = emit_work_event(actor='doctor', actor_label='닥터', task_id=task,
                 phase='completed', stage='staff-response', message_kind='staff_reply', requested_to='jarvis',
                 model=response['route']['events'][-1]['actualModel'], output_kind=response['reply'],
-                deliverable_url=job['url'], deliverable_label=original['title'])
+                deliverable_url=job['url'], deliverable_label=original['title'],
+                report={'channel':'CF 블로그','domain':job['domain'],'title':original['title'],
+                        'status':stages[stage],'nextAction':' / '.join(changes) if changes else '선정된 기존 글의 원문과 근거를 확인합니다.' if stage in ('prepare','inspect') else '해당 글의 반영 결과를 확인합니다.'})
             reports[stage] = {'eventId': event, 'facts': facts, 'response': response, 'reportedAt': stamp()}
             atomic(path, reports)
             return reports[stage]

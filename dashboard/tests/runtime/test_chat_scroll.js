@@ -89,3 +89,11 @@ assert.equal(links.articleLinkHtml({}),'');
 assert(links.articleLinkHtml({who:'doctor',taskTracker:{deliverableUrl:actualUrl}}).includes(actualUrl));
 
 assert(links.articleLinkHtml({who:'doctor',deliverableUrl:actualUrl,deliverableLabel:'<script>제목</script>'}).includes('&lt;script&gt;제목&lt;/script&gt;'));
+
+const factsStart = html.indexOf('  function reportContextHtml(m) {');
+const factsEnd = html.indexOf('  function articleLinkHtml',factsStart);
+vm.runInContext(html.slice(factsStart,factsEnd),links);
+const details = links.reportContextHtml({reportContext:{channel:'네이버 블로그',account:'soultin',reserveTime:'2026-10-23 19:30',title:'<실제 글>',status:'예약 작성 보류'}});
+for (const text of ['soultin','2026-10-23 19:30','&lt;실제 글&gt;','예약 작성 보류']) assert(details.includes(text));
+assert.equal(links.reportContextHtml({}),'');
+assert.equal(replies.crewConversationText({eventType:'crew_work_event',who:'publi',stage:'channel-cycle-summary',phase:'completed',model:'observed-model',outputKind:'채널 전체 점검.'}),null);

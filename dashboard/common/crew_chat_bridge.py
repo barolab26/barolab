@@ -5,6 +5,7 @@ BaroLab Meeting Room (`server/chat_room.py` & `dashboard/chat.html`).
 """
 
 import json
+import re
 import time
 import urllib.request
 from pathlib import Path
@@ -116,8 +117,25 @@ def work_actor_owner(actor, owner_agent=''):
     return owner_agent or TOOL_OWNERS.get(actor, '')
 
 
+def report_context(value):
+    """Bounded public task facts; prose and URLs travel through their own fields."""
+    allowed = {'channel', 'account', 'domain', 'title', 'reserveTime', 'slot', 'status', 'scope', 'nextAction', 'linkStatus'}
+    if not isinstance(value, dict) or set(value) - allowed:
+        raise ValueError('Invalid report context')
+    result = {}
+    for key, item in value.items():
+        if item is None or item == '':
+            continue
+        if not isinstance(item, str) or len(item) > 500 or any(ord(c) < 32 for c in item):
+            raise ValueError('Invalid report field')
+        if re.search(r'https?://|(?:password|secret|cookie|api[_ -]?key|access[_ -]?token)\s*[:=]', item, re.I):
+            raise ValueError('Private report field')
+        result[key] = item
+    return result
+
+
 def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
-                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url='', deliverable_label=''):
+                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url='', deliverable_label='', report=None):
     """Host-observed lifecycle metadata only; never pass prompts, responses or secrets."""
     import uuid
     phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
@@ -137,6 +155,8 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
         'text':f'{stage}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다.',
         'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
                        'handoff':'','synapseLinked':False}}
+    if report is not None:
+        payload['reportContext'] = report_context(report)
     if deliverable_url:
         from dashboard.agents.synapse import url
         address = url(deliverable_url)

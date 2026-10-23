@@ -805,6 +805,10 @@
       background: #ccfbf1;
     }
 
+    .message-task-facts { margin:10px 0 0; padding:10px 0 0; border-top:1px solid #dbe3e9; font-size:12px; white-space:normal; }
+    .message-task-facts > div { display:grid; grid-template-columns:66px minmax(0,1fr); gap:8px; margin:4px 0; }
+    .message-task-facts dt { color:#526674; }
+    .message-task-facts dd { margin:0; overflow-wrap:anywhere; }
     .article-work-link { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:9px; border-top:1px solid #dbe3e9; color:#075e71; font-weight:700; font-size:12px; text-decoration:none; white-space:normal; }
     .article-work-link:hover { text-decoration:underline; }
     .article-work-link small { font-weight:400; color:#526674; overflow-wrap:anywhere; }
@@ -1482,6 +1486,15 @@
     }).join('') || '<p>해당 직원의 업무 기록이 없습니다.</p>';
   }
 
+  function reportContextHtml(m) {
+    const facts = m.reportContext;
+    if (!facts || typeof facts !== 'object') return '';
+    const fields = {channel:'채널', scope:'대상 범위', account:'계정', domain:'도메인', title:'글 제목', reserveTime:'예약 시각', slot:'슬롯', status:'현재 결과', nextAction:'다음 확인', linkStatus:'링크 상태'};
+    const rows = Object.entries(fields).filter(([key]) => typeof facts[key] === 'string' && facts[key]);
+    if (!rows.length) return '';
+    return `<dl class="message-task-facts" aria-label="실제 작업 기록">${rows.map(([key,label]) => `<div><dt>${label}</dt><dd>${escapeHtml(facts[key])}</dd></div>`).join('')}</dl>`;
+  }
+
   function articleLinkHtml(m) {
     const address = m.deliverableUrl || m.taskTracker?.deliverableUrl;
     if (!address) return '';
@@ -1530,7 +1543,7 @@
             <span class="brain-chip" title="관측된 응답 모델">🧠 ${escapeHtml(brainBadge)}</span>
             <span style="color:#64748b; font-weight:700;">${escapeHtml(ag.badge)}</span>
           </div>
-          <div class="msg-content"><div class="msg-bubble">${formatBodyText(messageBodyText(m))}${articleLinkHtml(m)}</div><time class="msg-time" title="${formatTime(m.ts)}">${new Date(Number(m.ts)).toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'})}</time></div>
+          <div class="msg-content"><div class="msg-bubble">${formatBodyText(messageBodyText(m))}${reportContextHtml(m)}${articleLinkHtml(m)}</div><time class="msg-time" title="${formatTime(m.ts)}">${new Date(Number(m.ts)).toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'})}</time></div>
         </div>
       </div>
     `;
