@@ -119,6 +119,21 @@ class ExistingEditorRepairTests(unittest.TestCase):
             click_existing(page,doc,{'known':True,'complete':True,'answer_ids':[]},intent)
         intent.assert_not_called();button.evaluate.assert_not_called()
 
+    def test_read_only_owner_fallback_closes_socket_without_context_protocol(self):
+        from common.kin_submit_repair import public_evidence
+        from unittest.mock import MagicMock,Mock
+        from types import SimpleNamespace
+        import json
+        doc=document();row={'question_id':'123456789','answer_url':doc['question']['question_url'],'answer_id':'9'}
+        socket=SimpleNamespace(send=Mock(),recv=Mock(return_value=json.dumps({'id':917,'result':{'result':{'value':{'status':200,'html':'authenticated html'}}}})),close=Mock())
+        response=MagicMock();response.json.return_value=[{'type':'page','url':row['answer_url'],'webSocketDebuggerUrl':'ws://127.0.0.1:9231/devtools/page/exact'}]
+        with patch.object(p,'_naver_browser_verify_public',return_value={'public':True,'verified':False}),patch('common.ubuntu_naver_browser.process_identity',return_value=1),patch('common.ubuntu_naver_browser.account_paths',return_value=(None,Path('/tmp/profile'),None)),patch('requests.get',return_value=response),patch('websocket.create_connection',return_value=socket),patch.object(p,'_naver_browser__parse_question_ownership',return_value={'verified_owned_answer_ids':['9']}):
+            evidence=public_evidence('adinfo0905',row,doc)
+        self.assertTrue(evidence['verified']);socket.close.assert_called_once()
+        self.assertEqual(evidence['account'],'adinfo0905')
+        self.assertIn('Runtime.evaluate',socket.send.call_args.args[0])
+        self.assertNotIn('click',socket.send.call_args.args[0])
+
     def test_verified_no_click_learning_is_connected_and_deduplicated(self):
         from common.kin_submit_repair import remember
         import json

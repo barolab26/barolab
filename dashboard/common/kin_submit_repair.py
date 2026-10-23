@@ -1,5 +1,6 @@
 """One exact, ledger-bound editor repair; uncertain submissions are verified only."""
 import json
+from contextlib import closing
 import re
 from pathlib import Path
 
@@ -81,7 +82,7 @@ def public_evidence(account,row,document):
         address=tab.get('webSocketDebuggerUrl','');parsed=urlsplit(address)
         if parsed.scheme!='ws' or parsed.hostname not in ('localhost','127.0.0.1') or parsed.port!=port:return evidence
         expression='(async()=>{const r=await fetch('+json.dumps(row['answer_url'])+',{credentials:"include",signal:AbortSignal.timeout(8000)});return {status:r.status,html:await r.text()};})()'
-        with websocket.create_connection(address,timeout=10,suppress_origin=True) as ws:
+        with closing(websocket.create_connection(address,timeout=10,suppress_origin=True)) as ws:
             ws.send(json.dumps({'id':917,'method':'Runtime.evaluate','params':{'expression':expression,'awaitPromise':True,'returnByValue':True}}))
             for _ in range(20):
                 response=json.loads(ws.recv())

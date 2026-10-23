@@ -308,7 +308,8 @@ class Collector:
         for e in events+[r for r in local if isinstance(r,dict) and isinstance(r.get('ts'),(int,float))]:
             key=tuple(e.get(k,'') for k in ('taskId','phase','stage','who','outputKind'))
             if key not in merged or merged[key]['ts']<e['ts']:merged[key]=e
-        events=list(merged.values())
+        dismissed={identity for identity,row in self.read('dashboard/data/ego-alerts/tickets.json').get('tickets',{}).items() if row.get('status')=='dismissed'}
+        events=[e for e in merged.values() if not (e.get('stage')=='ego-alert' and str(e.get('taskId','')).removeprefix('ego-alert:') in dismissed)]
         if tick-self.queue_checked>=15:
             directory=self.root/'dashboard/data/chats/staff-requests'
             try:
