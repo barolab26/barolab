@@ -59,7 +59,7 @@ class KinScreenTests(unittest.TestCase):
                 with patch('common.ubuntu_naver_browser.focus_workflow_window'),patch('common.llm_client.generate_json',return_value=plan):
                     if expected:visual_click(page,target,65001,folder,'등록 버튼')
                     else:
-                        with self.assertRaises(ValueError):visual_click(page,target,65001,folder,'등록 버튼')
+                        with self.assertRaises(TimeoutError):visual_click(page,target,65001,folder,'등록 버튼')
                 self.assertEqual(page.mouse.click.call_count,1 if expected else 0)
                 if expected:
                     gate=Mock(side_effect=ValueError('durable gate rejected'))
@@ -68,6 +68,16 @@ class KinScreenTests(unittest.TestCase):
                             visual_click(page,target,65001,Path(temp)/'rejected-gate','등록 버튼',before_click=gate)
                     self.assertEqual(page.mouse.click.call_count,1)
                     gate.assert_called_once()
+
+    def test_layout_shift_reobserves_before_one_durable_submit(self):
+        page=Mock();page.screenshot.side_effect=lambda path,**kw:Image.new('RGB',(960,960)).save(path)
+        target=Mock();target.evaluate.return_value=True;target.is_enabled.return_value=True
+        target.bounding_box.side_effect=[{'x':300,'y':300,'width':50,'height':50},{'x':100,'y':100,'width':100,'height':100}]
+        plan={'kind':'click','x':150,'y':150,'direction':'','reason':'새 화면에서 버튼 확인'};gate=Mock()
+        with tempfile.TemporaryDirectory() as temp,patch('common.ubuntu_naver_browser.focus_workflow_window'),patch('common.llm_client.generate_json',return_value=plan) as model:
+            folder=Path(temp)/'submit';visual_click(page,target,65001,folder,'Post 버튼',before_click=gate)
+            self.assertTrue((folder/'rejected-0.json').exists())
+        self.assertEqual(model.call_count,2);gate.assert_called_once();page.mouse.click.assert_called_once_with(150,150)
 
     def test_visual_failure_before_physical_submit_does_not_commit_the_durable_gate(self):
         page=Mock()
