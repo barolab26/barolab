@@ -173,7 +173,8 @@ def validate_work_receipt(receipt):
                 if not isinstance(document,dict):
                     continue
                 observation, expected = document.get('observation',{}), document.get('expected',{})
-                if observation.get('verified') is True and observation.get('public') is True and all(observation.get(k) is not None and observation.get(k) == expected.get(k) for k in keys):
+                required = tuple(k for k in keys if not (outcome == 'public_thread_verified' and k == 'outbound_url'))
+                if observation.get('verified') is True and observation.get('public') is True and all(observation.get(k) is not None for k in required) and all(k in observation and k in expected and observation[k] == expected[k] for k in keys):
                     valid = True
         if not valid:
             raise ValueError('Actual public verification record missing')
