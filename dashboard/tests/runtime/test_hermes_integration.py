@@ -23,6 +23,23 @@ class MemoryIntegrationTests(unittest.TestCase):
         self.addCleanup(self.store_patch.stop)
         self.addCleanup(self.store.close)
 
+    def test_kin_writing_policy_applies_at_actual_shared_boundary(self):
+        from common.kin_answering import POLICY_ID
+        policy = '안정적인 일반 지식은 직접 짧게 답하고 관련 글만 안내한다. 소유 관계와 사실 확인은 보존한다. ' * 3
+        evidence = '{"question_id":"actual-fixture","sources_by_article":[]}'
+        old = 'Return question_id from sources_by_article.\nEVIDENCE_JSON:\n' + evidence
+        captured = []
+        @llm_client.memory_call
+        def provider(prompt, agent_slot):
+            captured.append(prompt)
+            return {'ok':True}
+        index = {'operatingDirectives':[{'id':POLICY_ID,'active':True,'promptPolicy':policy}]}
+        with patch('dashboard.agents.synapse.recipe',return_value=''), patch('dashboard.agents.synapse.cached_index',return_value=index):
+            provider(old, agent_slot='kin_pipeline', memory_read_only=True)
+        self.assertIn(policy,captured[0])
+        self.assertTrue(captured[0].endswith(evidence))
+        self.assertNotIn('Return question_id from sources_by_article.',captured[0])
+
     def test_nested_provider_calls_inject_once_and_freeze_task_snapshot(self):
         self.store.memory('memory', 'add', text='Initial durable rule')
         prompts = []

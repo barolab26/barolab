@@ -163,6 +163,8 @@ def memory_call(function):
         synapse_card = ''
         try:
             from dashboard.agents.synapse import recipe, audit_card
+            from common.kin_answering import apply_policy
+            prompt = apply_policy(prompt, kwargs.get('agent_slot'))
             synapse_card = recipe(prompt, kwargs.get('agent_slot'))
             prompt = synapse_card + prompt
             audit_card(synapse_card, kwargs.get('audit_directory'))
