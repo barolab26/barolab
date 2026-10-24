@@ -60,3 +60,14 @@ class ModelIdentityTests(unittest.TestCase):
         source+='\nconst assert=require("node:assert/strict");\nassert.equal(formatBrainBadge("codex","gpt-6.1-sol","high"),"gpt-6.1-sol · High");\nassert.equal(formatBrainBadge("codex","gpt-6.1-sol"),"gpt-6.1-sol · Low");\nassert.equal(getAgentBrainBadge({who:"jarvis",brain:{badge:"gpt-6.1-sol"}}),"gpt-6.1-sol · 추론 미기록");\nassert.equal(getAgentBrainBadge({who:"jarvis",brain:{badge:"gpt-6.1-sol · High"}}),"gpt-6.1-sol · High");'
         result=subprocess.run(['node','-e',source],capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_korean_staff_sentence_without_ascii_period_keeps_original_text(self):
+        from server import agent_tools
+        text='@팀장 조회 수집은 부분 완료 상태입니다. 미수집 원천을 확인하겠습니다'
+        def response(*args,**kwargs):
+            kwargs['observer']('agy','gemini-3.8-flash-medium','returned',actual_model='gemini-3.8-flash-medium')
+            return {'reply':text}
+        with patch('common.llm_client.generate_json',side_effect=response), \
+             patch('common.llm_settings.get_agent_brain',return_value={'provider':'agy','model':'gemini-3.8-flash-medium'}):
+            actual=agent_tools.staff_tool_reply('trace','fixture',{'tool':'read_agent_status'},{'status':'observed'})
+        self.assertEqual(actual['reply'],text)

@@ -1701,7 +1701,7 @@ def staff_tool_reply(agent, task_id, action, result, audit=None, *, stage='staff
     if not any(e['state']=='returned' and e['provider']==provider and e['actualModel'] for e in events):
         raise ValueError('Actual staff model not observed')
     text = reply.get('reply') if isinstance(reply,dict) else None
-    if not isinstance(text,str) or not 1 <= len(text) <= 120 or not re.search(r'[.!?。]$',text.strip()):
+    if not isinstance(text,str) or not 1 <= len(text) <= 120 or not re.search(r'(?:[.!?。]|니다|요|죠)$',text.strip()):
         raise ValueError('Invalid staff response')
     if re.search(r'https?://|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|password|api[_ -]?key|token|secret|credential',text,re.I):
         raise ValueError('Staff response contains private data')
