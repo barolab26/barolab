@@ -306,6 +306,7 @@ class Collector:
             active={k:agenda.get(k) for k in ('id','project','title','status','activatedAt','updatedAt')}
             if agenda.get('kind')=='goal':active['title']='대표 지시 안건 · '+str(agenda.get('project') or '전사')
             active.update(target={k:args.get(k) for k in ('account','date','slot','partId')},processObserved=bool(running(agenda)))
+            active['automaticRecovery']={k:agenda.get('recoveryWatch',{}).get(k) for k in ('state','nextCheckAt','checks')}
         return {'enabled':control.get('enabled') is True,'active':active}
 
     def collect(self):

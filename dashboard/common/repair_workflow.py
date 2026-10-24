@@ -29,7 +29,7 @@ def _recovery_mutation_locks(row):
     root=Path(row['plan']['projectRoot'])
     project=row['plan']['project']
     files=row['discovered']['files']
-    shared=any(Path(name).parts[0] in ('common','server') for name in files)
+    shared=any(Path(name).parts[0] in ('common','server') or Path(name).parts[:2] in (('dashboard','common'),('dashboard','server')) for name in files)
     projects={'cf_blog','naver_blog','naver_kin','threads','legacy_remodel'} if shared else {project}
     if project=='mobile_apps':raise ValueError('No registered app execution task')
     paths=[]
@@ -330,7 +330,8 @@ def _discover_recovery(row):
     tests=[]
     for name in files:
         source=root/name
-        for candidate in sorted(source.parent.glob('test_*.py'))[:100]:
+        candidates=sorted(set(source.parent.glob('test_*.py')) | set((root/'dashboard/tests/common').glob('test_*.py')) | set((root/'dashboard/tests/runtime').glob('test_*.py')))
+        for candidate in candidates[:300]:
             if candidate.is_symlink() or candidate.stat().st_size>100000:continue
             try:tree=ast.parse(candidate.read_text(encoding='utf-8-sig'))
             except (ValueError,SyntaxError,UnicodeError):continue
@@ -385,7 +386,14 @@ def _discover_recovery(row):
     try: regions = derive_edit_regions(root, files, error_text, source_frames=frames) or {}
     except ValueError: regions = {}
     excerpts = {name: (regions.get(name) or (root/name).read_text(encoding='utf-8-sig'))[:12000] for name in files}
-    return {'schemaVersion': 4, 'environment': environment_evidence(root,plan.get('project')),
+    eligible=False
+    if target and plan['action']['tool']=='run_project_cycle':
+        from common.project_autonomy import recoverable_work
+        try:
+            _recovery_resume_guard(row)
+            eligible=any(t['workId']==target['workId'] for t in recoverable_work(plan['project']))
+        except (OSError,ValueError,KeyError):pass
+    return {'schemaVersion': 5, 'originalRetryEligible':eligible, 'environment': environment_evidence(root,plan.get('project'),target),
             'workEvidence': evidence, 'sourceFrames': frames, 'sourceExcerpts': excerpts,
             'errors':error_text,'files':files,'policyFiles':policies,'testFiles':tests[:5],'contextFiles':contexts,
             'fileHashes':{name:_sha((root/name).read_bytes()) for name in files+policies+tests[:5]+contexts},
@@ -404,7 +412,7 @@ def _classify_recovery(row,path):
         route.append({'provider':p,'requestedModel':m,'state':state,'actualModel':details.get('actual_model')})
         write(path,row)
     schema={'type':'object','properties':{
-        'kind':{'type':'string','enum':['code_repair','instruction_repair','inspect','source_acquisition','hold']},
+        'kind':{'type':'string','enum':['code_repair','instruction_repair','inspect','source_acquisition','retry_original','hold']},
         'inspectRole':{'type':'string','enum':['trace','radar','patch','doctor','publi']},
         'selectedFiles':{'type':'array','maxItems':5,'items':{'type':'string'}},
         'objective':{'type':'string','minLength':1,'maxLength':2000},
@@ -418,6 +426,7 @@ def _classify_recovery(row,path):
         'instruction_repair may select only host-discovered policyFiles and retains the same immutable regression tests. '
         'An instruction repair must never erase a failed factual/medical/quality requirement. '
         'Use inspectRole=patch for code/runtime, radar for missing factual sources, doctor for content/visual quality, publi for submission/reservation and trace for public verification. '
+        'A historical failure is not proof the same fault is present now. If current host diagnostics demonstrate the runtime is available and originalRetryEligible=true, retry_original may resume ONLY the original work through existing native gates; do not invent a code patch when none is needed. '
         'If additional diagnostic observations are needed, choose inspect with the relevant role once; '
         'after inspection choose a supported repair or hold. selectedFiles must be an exact subset of discovered files/policyFiles. '
         'Otherwise hold with the specific missing evidence. No commands or new paths.\n'+json.dumps({
@@ -668,10 +677,11 @@ def _inspect_work_evidence(row, path):
     from common import llm_settings
     from common.llm_client import generate_json
     role=row['classification']['inspectRole']
-    observations={}
+    from common.recovery_evidence import environment_evidence
+    observations={'environment':environment_evidence(row['plan']['projectRoot'],row['plan']['project'],row['plan'].get('workTarget'))}
     if role=='trace' and row['plan'].get('workTarget'):
         from common.recovery_evidence import public_work_observation
-        observations=public_work_observation(row['plan']['projectRoot'],row['plan']['workTarget'])
+        observations['publicWork']=public_work_observation(row['plan']['projectRoot'],row['plan']['workTarget'])
     brain=llm_settings.get_agent_brain(role)
     route=[]
     def observe(provider, model, state, **details):
@@ -785,6 +795,10 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
                 if not selected or any(name not in allowed for name in selected) or not row['discovered']['testFiles']:
                     raise ValueError('Host source or fixed regression evidence missing')
                 next_step='propose'
+            elif kind=='retry_original':
+                if not row['discovered'].get('originalRetryEligible'):raise ValueError('Original retry is not host eligible')
+                _recovery_resume_guard(row)
+                next_step='resume'
             elif kind=='inspect' and not row.get('inspection'):
                 next_step='inspect'
             elif kind=='source_acquisition':
@@ -909,6 +923,30 @@ def dispatch_project_recovery_once():
         from common import work_agenda as agendas
         current=agendas.active() if agendas.enabled() else {}
         if agendas.enabled() and (not current or row.get('businessAgendaId')!=current['id']):continue
+        if row.get('status') in ('held','evidence_hold') and row.get('step') in ('discover','classify','inspect') and not row.get('resumeAttempted'):
+            if row.get('evidenceRecheckAt',0)>time.time():continue
+            try:discovered=_discover_recovery(row)
+            except (OSError,ValueError,KeyError) as exc:
+                row.update(evidenceRecheckAt=time.time()+300,evidenceProbeError=type(exc).__name__);write(path,row)
+                continue
+            signature=_sha(json.dumps(discovered,sort_keys=True,ensure_ascii=False).encode())
+            previous=_sha(json.dumps(row.get('discovered',{}),sort_keys=True,ensure_ascii=False).encode())
+            transient=bool(row.get('errorCode')) and row.get('readonlyRetries',0)<2
+            changed=signature!=previous and signature not in row.get('recheckedEvidence',[])
+            with locked(ROOT):
+                fresh=json.loads(path.read_bytes())
+                if fresh.get('status')!=row.get('status') or fresh.get('step')!=row.get('step'):continue
+                fresh['evidenceRecheckAt']=time.time()+300
+                if changed or transient:
+                    fresh.setdefault('evidenceHistory',[]).append({'at':time.time(),'classification':fresh.get('classification'),'inspection':fresh.get('inspection'),'sourceHashes':fresh.get('discovered',{}).get('fileHashes')})
+                    fresh['evidenceHistory']=fresh['evidenceHistory'][-8:]
+                    fresh.update(discovered=discovered,step='classify',status='ready',classificationRound=fresh.get('classificationRound',1)+1,evidenceRound=fresh.get('evidenceRound',1)+1)
+                    fresh['recheckedEvidence']=[*fresh.get('recheckedEvidence',[]),signature][-64:]
+                    if transient and not changed:fresh['readonlyRetries']=fresh.get('readonlyRetries',0)+1
+                    fresh.pop('inspection',None);fresh.pop('errorCode',None)
+                write(path,fresh)
+            if changed or transient:return True
+            continue
         if row.get('status')=='awaiting_inputs':
             _observe_work_acquisition(row)
             write(path,row)

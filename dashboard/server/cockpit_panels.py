@@ -208,6 +208,8 @@ def pipeline_lines(data,now):
         if agenda:title+=' · '+LABELS.get(agenda.get('status'),str(agenda.get('status')))
         rows.insert(0,title)
         rows.insert(1,'등록된 작업 프로세스 실행 관측' if agenda.get('processObserved') else '등록된 작업 프로세스 실행 미관측 · 회의·진단 상태는 안건 기준')
+        check=agenda.get('automaticRecovery',{}).get('nextCheckAt')
+        if check:rows.insert(2,'같은 안건 자동 재확인: '+dt.datetime.fromtimestamp(check,KST).strftime('%H:%M:%S'))
     for title,stage,started,detail in active[:2]:
         step=stage_number(stage);elapsed=max(0,int(now.timestamp()-_epoch(started))) if _epoch(started) else 0
         rows.append(title+' · '+str(stage)+' · '+str(elapsed)+'초')

@@ -36,6 +36,16 @@ def test_closed_or_switched_agenda_is_not_reconstructed_as_current(context):
     assert collector.read_agenda()['active'] is None
 
 
+def test_automatic_recheck_time_is_visible_in_the_same_monitor_projection(context):
+    collector,row,rows,now=context
+    row['recoveryWatch']={'state':'waiting_for_change','nextCheckAt':now.timestamp()+300,'checks':2}
+    write(rows/(row['id']+'.json'),row)
+    control=collector.read_agenda()
+    lines=panels.pipeline_lines({'agendaControl':control},now)
+    assert control['active']['automaticRecovery']['checks']==2
+    assert any('자동 재확인: 04:05:00' in line for line in lines)
+
+
 def test_ego_uses_current_soultin_agenda_and_labels_old_stone_record_as_history(context):
     collector,row,rows,now=context
     data={'collectedAt':now.timestamp(),'channels':mc.channels({}, {}, {},now),'agendaControl':collector.read_agenda(),

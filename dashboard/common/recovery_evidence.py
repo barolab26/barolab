@@ -6,6 +6,8 @@ import re
 import os
 import shutil
 import sys
+import subprocess
+from math import isfinite
 from pathlib import Path
 
 PROJECT_SOURCES = {
@@ -175,7 +177,47 @@ def error_source_frames(root, project, errors):
     return list(selected.values())[:5]
 
 
-def environment_evidence(root, project):
+def browser_window_evidence(root,project,target=None):
+    """One registered work's current window mapping; no browser start or focus."""
+    if Path(root).resolve()!=Path(__file__).resolve().parents[2]:return {'status':'not_live_checkout'}
+    from common.ubuntu_naver_browser import accounts,inspect_workflow_window
+    port=9440 if project=='cf_blog' else 9450 if project=='threads' else None
+    if project in ('naver_blog','naver_kin'):
+        port=accounts().get((target or {}).get('identity'),{}).get('cdp_port')
+    if port is None:return {'status':'no_bound_browser'}
+    try:
+        result=inspect_workflow_window(port)
+        return {k:result.get(k) for k in ('status','port','browserPid','display','windowId','wmPid','mapped')}
+    except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as exc:return {'status':'unavailable','errorType':type(exc).__name__}
+
+
+def resource_availability(root):
+    """Project existing hub observations into availability, never poll providers here."""
+    quotas=read_object(Path(root)/'dashboard/data/live_snapshot.json').get('brains',{}).get('quotas',{})
+    result={}
+    for name,data in quotas.items():
+        if name not in ('agy','codexQuota','openrouter'):continue
+        if not isinstance(data,dict):continue
+        state={'status':data.get('status')}
+        if name=='agy':
+            state['groups']={}
+            for group in data.get('groups',[]):
+                if not isinstance(group,dict) or not isinstance(group.get('name'),str):continue
+                values=[b.get('remainingPercent') for b in group.get('buckets',[])]
+                state['groups'][group['name']]=all(v>0 for v in values) if values and all(type(v) in (int,float) and isfinite(v) for v in values) else None
+        elif name=='codexQuota':
+            values=[bucket[key]['usedPercent'] for bucket in data.get('buckets',{}).values() for key in ('primary','secondary') if isinstance(bucket.get(key),dict) and type(bucket[key].get('usedPercent')) in (int,float)]
+            state['observedRateWindowsAvailable']=all(v<100 for v in values) if values and all(isfinite(v) for v in values) else None
+        elif name=='openrouter':
+            try:
+                balance=float(data['balance']) if data.get('balance') is not None else None
+                state['observedCreditAvailable']=balance>0 if balance is not None and isfinite(balance) else None
+            except (TypeError,ValueError):state['observedCreditAvailable']=None
+        result[name]=state
+    return result
+
+
+def environment_evidence(root, project, target=None):
     """Report capabilities and route names, never keys, cookies or auth files."""
     from common import llm_settings
     config = llm_settings.load()
@@ -188,7 +230,7 @@ def environment_evidence(root, project):
         path = Path(root) / name
         sources[name] = {'exists':path.is_file(), 'readable':os.access(path,os.R_OK),
                          'writable':os.access(path,os.W_OK)}
-    return {'pythonAvailable':Path(sys.executable).is_file(),
+    return {'resourceAvailability':resource_availability(root),'browserWindow':browser_window_evidence(root,project,target),'pythonAvailable':Path(sys.executable).is_file(),
             'isolatedTestRunnerInstalled':bool(shutil.which('bwrap')),
             'sourceAccess':sources,'assignedModels':roles,
             'executionContract':'Model proposes a bounded patch; host reviews, sandbox-tests and applies it. '

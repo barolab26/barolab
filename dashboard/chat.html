@@ -1942,6 +1942,7 @@
       <div style="font-weight:700;margin:8px 0">${escapeHtml(row.title)}</div>
       <div>담당: ${escapeHtml(row.ownerLabel || '팀장')} · 완료 조건: ${escapeHtml(row.completionCriteria)}</div>
       <div style="margin-top:6px;color:${row.status === 'blocked' ? '#b45309' : '#475569'}">${escapeHtml(row.lastAction || row.blocker || '방향과 전략을 정한 뒤 실행합니다.')}</div>
+      ${row.automaticRecovery?.nextCheckAt ? `<div style="margin-top:4px">같은 안건 자동 재확인: ${new Date(row.automaticRecovery.nextCheckAt * 1000).toLocaleTimeString('ko-KR')} · 새 증거가 생기면 진단 재개</div>` : ''}
       ${row.blocker ? `<div style="margin-top:4px;color:#b45309">미해결: ${escapeHtml(row.blocker)}</div>` : ''}
       ${row.status === 'report_pending' ? '<div style="margin-top:4px">실제 결과 검증 완료 · 회의실 마무리 보고를 확인하고 있습니다.</div>' : ''}` : '<strong>진행 중인 안건 없음 · 다음 안건 선정 대기</strong>';
     node.innerHTML += `<details style="margin-top:8px"><summary>다음 안건 ${Number(board.pendingCount || 0)}개</summary><ol>${queue.map(item => `<li>${escapeHtml(item.title)} ${row && row.status !== 'report_pending' ? `<button type="button" data-agenda-switch="${item.id}">현재 안건 유예 후 이 안건 진행</button>` : ''}</li>`).join('')}</ol></details>`;

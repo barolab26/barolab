@@ -434,6 +434,54 @@ def test_exact_public_repair_can_finish_same_conference_with_room_reports_still_
     if same_question:assert current['verification']['results'][0]['publicUrl']==result['publicUrl']
 
 
+def test_spent_goal_automatically_wakes_on_new_evidence_but_not_poll_timestamps(runtime,monkeypatch,tmp_path):
+    from agents import crew_reasoning as crew
+    from common import recovery_evidence
+    from server import project_health
+    monkeypatch.setattr(crew,'GOALS',tmp_path/'goals')
+    monkeypatch.setattr(project_health,'ROOT',tmp_path)
+    monkeypatch.setattr(project_health,'SOURCES',[('naver_blog','Naver','data/source.json')])
+    monkeypatch.setattr(recovery_evidence,'browser_window_evidence',lambda *args:{'status':'observed','display':':11'})
+    now=[1000.0];monkeypatch.setattr(agendas.time,'time',lambda:now[0])
+    (tmp_path/'data').mkdir();write(tmp_path/'data/source.json',{'accounts':[{'account':'soultin','status':'failed'}],'updatedAt':1})
+    identity=offer('same-closed-loop','conference');opened(identity)
+    second=offer('later-business','conference')
+    goal={'id':'f'*64,'status':'blocked','decisions':24,'maxSteps':24,'delivered':True,'observations':[],
+          'actor':'jarvis','leadActor':'jarvis','businessAgendaId':identity,'answer':'Needs new diagnostics'}
+    crew.GOALS.mkdir()
+    crew.save(goal);row=agendas.get(identity);row['controllerGoalId']=goal['id'];row['source']={'arguments':{'account':'soultin'}};agendas._save(row)
+    agendas.hold(identity,'Decision window exhausted')
+    row=agendas.get(identity);row['controllerFailures']=3;agendas._save(row)
+    assert not (crew.GOALS/'pending'/goal['id']).exists()
+    assert agendas.process_once() is True
+    resumed=load(crew.goal_path(goal['id']))
+    assert resumed['status']=='ready' and resumed['decisions']==24 and resumed['maxSteps']==32
+    assert agendas.get(identity)['controllerFailures']==0
+    assert resumed['businessAgendaId']==identity and (crew.GOALS/'pending'/goal['id']).exists()
+    assert agendas.admit(second) is None
+    assert not agendas.get(identity).get('verification')
+    resumed.update(status='blocked',decisions=32,delivered=True);crew.save(resumed);agendas.hold(identity,'Still missing evidence')
+    now[0]+=301
+    write(tmp_path/'data/source.json',{'accounts':[{'account':'soultin','status':'failed'}],'updatedAt':2})
+    assert agendas.process_once() is False
+    assert load(crew.goal_path(goal['id']))['maxSteps']==32
+    assert agendas.view()['active']['automaticRecovery']['nextCheckAt']>now[0]
+    # A real source repair is a new investigation input; a polling clock is not.
+    code=tmp_path/'dashboard/common/ubuntu_naver_browser.py';code.parent.mkdir(parents=True);code.write_text('verified new diagnostic capability')
+    now[0]+=301
+    assert agendas.process_once() is True
+    resumed=load(crew.goal_path(goal['id']))
+    assert resumed['decisions']==32 and resumed['maxSteps']==40 and len(resumed['investigationEpisodes'])==2
+
+
+def test_reasoning_limit_does_not_cancel_an_already_queued_same_agenda_operation(runtime):
+    request=conferences._request_single('parameters',{'action':'naver','account':'soultin','date':'2026-10-25','slot':'07:40'})
+    receipt=load(conferences.QUEUE/(request['agendaId']+'.json'));identity=receipt['businessAgendaId'];opened(identity)
+    agendas.hold(identity,'Reasoning window exhausted while approved operation was queued')
+    assert agendas.get(identity)['status']=='recovering'
+    assert load(conferences.QUEUE/(request['agendaId']+'.json'))['status']=='queued'
+
+
 def test_late_result_does_not_implicitly_resume_suspended_work(runtime):
     first=offer();second=offer('B');opened(first)
     agendas.request_switch(first,second,'A 유예 후 B 먼저')

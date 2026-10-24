@@ -343,7 +343,9 @@ def hold(identity, reason, *, recovery=False):
         row = get(identity)
         if row['status'] in ('closed','suspended','report_pending'):
             return
-        row.update(status='recovering' if recovery else 'blocked', blocker=str(reason)[:1000])
+        conference=load(ROWS.parent/(row['source']['conferenceId']+'.json')) if row.get('source',{}).get('conferenceId') else {}
+        pending=(conference.get('businessAgendaId')==identity and conference.get('status') in ('queued','running'))
+        row.update(status='recovering' if recovery or pending or running(row) else 'blocked', blocker=str(reason)[:1000])
         if 'blocked' not in row['events']:
             row['events']['blocked'] = event(row, 'blocked', 'jarvis',
                 '같은 안건을 유지합니다: '+row['title']+'\n'+row['blocker']+'\n실제 해결은 미완료이며 다음 안건을 시작하지 않았습니다.')
@@ -434,7 +436,8 @@ def view():
     state = load(STATE)
     def public(row):
         return {**{k:row.get(k) for k in ('id','title','project','status','plan','completionCriteria','lastAction','blocker','updatedAt','verifiedAt','closedAt')},
-                'phase':LABELS.get(row.get('status'),'대기'), 'verified':bool(row.get('verification',{}).get('verified')),
+                'phase':('미해결 · 복구 조건 자동 확인' if row.get('status')=='blocked' and row.get('recoveryWatch') else LABELS.get(row.get('status'),'대기')), 'verified':bool(row.get('verification',{}).get('verified')),
+                'automaticRecovery':{k:row.get('recoveryWatch',{}).get(k) for k in ('state','nextCheckAt','checks','lastChangeAt')},
                 'ownerLabel':'팀장' if row.get('status') in ('meeting','report_pending') else {'publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터','radar':'레이더','jarvis':'팀장'}.get((row.get('source',{}).get('actions') or [{}])[0].get('agent'), '퍼블리' if row.get('kind')=='conference' else '팀장')}
     current_row = active()
     return {'enabled':True, 'active':public(current_row) if current_row else None,
@@ -509,6 +512,67 @@ def resume(identity):
                     goal.pop('answer',None);save(goal)
 
 
+def recovery_watch(row):
+    """A spent reasoning turn waits on new evidence; it never abandons the agenda."""
+    if row.get('status') not in ('blocked','recovering') or running(row):return False
+    watch=row.get('recoveryWatch',{})
+    if watch.get('nextCheckAt',0)>time.time():return False
+    from agents import crew_reasoning as crew
+    identity=row.get('controllerGoalId')
+    if not identity or load(crew.goal_path(identity)).get('status') not in ('blocked','answered'):return False
+    from server.project_health import SOURCES,ROOT as project_root
+    from common.recovery_evidence import environment_evidence
+    def stable(value):
+        clocks={'checkedAt','observedAt','collectedAt','generatedAt','updatedAt','modifiedAt','lastPoll','ts'}
+        if isinstance(value,dict):return {k:stable(v) for k,v in value.items() if k not in clocks}
+        if isinstance(value,list):return [stable(v) for v in value]
+        return value
+    args=(row.get('workTarget') or row.get('source',{})).get('arguments',{})
+    source=next((project_root/s[2] for s in SOURCES if s[0]==row['project']),None)
+    files=['dashboard/agents/crew_reasoning.py','dashboard/agents/agent_tools.py',
+           *['dashboard/common/'+name+'.py' for name in ('repair_workflow','recovery_evidence','ubuntu_naver_browser',
+              'ego_screen','kin_screen','kin_submit_repair','channel_parameters','conference_dispatch','visible_naver_editor','staff_capabilities')]]
+    document=load(source) if source else {}
+    if args.get('account') and row['project'] in ('cf_blog','naver_blog'):
+        key='items' if row['project']=='cf_blog' else 'accounts'
+        document={'date':document.get('publicationDate') or document.get('date'),
+                  key:[v for v in document.get(key,[]) if v.get('domain',v.get('account'))==args['account']]}
+    evidence={'source':stable(document),
+              'code':{name:hashlib.sha256((project_root/name).read_bytes()).hexdigest() for name in files if (project_root/name).is_file()},
+              'environment':environment_evidence(project_root,row['project'],{'identity':args.get('account')})}
+    fingerprint=hashlib.sha256(json.dumps(evidence,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    changed=fingerprint not in watch.get('seen',[])
+    watch.update(state='evidence_changed' if changed else 'waiting_for_change',checks=watch.get('checks',0)+1,nextCheckAt=time.time()+300)
+    if changed:
+        watch.update(lastChangeAt=time.time(),seen=[*watch.get('seen',[]),fingerprint][-64:])
+    with locked(ROWS):
+        saved=get(row['id'])
+        if saved['status'] not in ('blocked','recovering'):return False
+        saved['recoveryWatch']=watch
+        if changed:saved.update(controllerFailures=0,nextCheckAt=0)
+        if not changed:saved['lastAction']='같은 안건의 복구 조건을 자동 확인 중입니다. 새 증거가 생기면 진단을 재개합니다.'
+        _save(saved)
+    if not changed:return False
+    with crew.claim(identity) as acquired:
+        if not acquired:
+            # A running decision keeps its budget; recheck this evidence after it returns.
+            with locked(ROWS):
+                saved=get(row['id']);saved['recoveryWatch']['seen'].remove(fingerprint)
+                saved['recoveryWatch']['nextCheckAt']=time.time()+5;_save(saved)
+            return False
+        goal=load(crew.goal_path(identity))
+        if goal.get('status') not in ('blocked','answered'):return False
+        goal.setdefault('investigationEpisodes',[]).append({'reason':'automatic evidence change','at':time.time(),
+            'fingerprint':fingerprint,'previousMaxSteps':goal.get('maxSteps'),'previousAnswer':goal.get('answer')})
+        goal['maxSteps']=goal.get('decisions',0)+8
+        goal.update(status='ready',actor=goal.get('leadActor','jarvis'),delivered=False,nextCheckAt=time.time()+1)
+        goal.pop('answer',None);goal.pop('resolution',None)
+        crew.observe(goal,'host','automatic_recovery_recheck',{}, {'reason':'New runtime, source or tool evidence is available. Reassess the SAME agenda; do not replay an uncertain submission or bypass a held code review.',
+            'fingerprint':fingerprint,'environment':evidence['environment']})
+        progress(row['id'],'recovering','새 증거·도구 변경을 자동 감지해 같은 안건의 진단을 재개합니다.')
+    return True
+
+
 def process_once():
     """Use the existing background worker; never create a competing dispatcher."""
     if not enabled():
@@ -526,7 +590,9 @@ def process_once():
                     break
         if not row:return False
         if row.get('switchRequest'):return switch_once(row)
-        if row.get('nextCheckAt',0)>time.time() or row.get('controllerFailures',0)>=3:
+        if row.get('controllerFailures',0)>=3 and row['status'] in ('blocked','recovering'):
+            with context(token(row)):return recovery_watch(row)
+        if row.get('nextCheckAt',0)>time.time() or (row.get('controllerFailures',0)>=3 and row['status']!='report_pending'):
             return False
         try:
             with context(token(row)):
@@ -535,6 +601,7 @@ def process_once():
                 if row['status']=='meeting' and row['kind']!='goal' and not row.get('events',{}).get('opening',{}).get('receivedAt'):
                     return prepare_open(row['id'])
                 flush_events(row['id'])
+                if row['status'] in ('blocked','recovering') and recovery_watch(row):return True
                 if row['kind']=='conference' and row['status'] in ('meeting','executing') and not running(row):
                     from common.conference_dispatch import QUEUE, record_conference_result
                     receipt=load(QUEUE/(row['source']['conferenceId']+'.json'))

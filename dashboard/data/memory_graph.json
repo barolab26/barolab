@@ -7751,6 +7751,21 @@
       },
       "causalClaim": false,
       "successCount": 1
+    },
+    "ceo-directive:4f999bd6d359b289b0c2a5a9": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "이상태로 그냥 멈춰 있는거야? 만약에 내가 얘기 안하면? 만약에 그렇다면 구조 자체가 잘못된거 아니야?",
+      "recordedAt": "2026-10-24T19:47:07.792552+00:00",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "trace",
+        "patch",
+        "doctor"
+      ],
+      "guidance": "대표님의 추가 발언 없이도 현재 안건의 진행·복구·검증·마무리 책임을 유지한다. 추론 한도나 도구 오류로 멈춘 안건은 같은 안건에서 복구 조건을 주기적으로 확인하고 실제 새 증거가 생기면 진단을 재개한다. 같은 증거로 무한 모델 재시도하지 않는다. 현재 상태·다음 확인 시각·정확한 외부 개입 조건을 회의실과 모니터에 표시한다. 제출 여부 불명확 시 재제출하지 않고 기존 증거를 검증한다. 현재 안건의 검증과 마무리 전 다음 안건을 실행하지 않는다."
     }
   },
   "edges": [
@@ -11385,6 +11400,11 @@
     {
       "source": "memory:hub",
       "target": "screen-lesson:6251bbff601ee4aaa67f98ce",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:4f999bd6d359b289b0c2a5a9",
       "type": "contains"
     }
   ],
