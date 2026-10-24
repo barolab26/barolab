@@ -326,3 +326,21 @@ def test_native_finish_is_output_transport_and_other_native_tools_stay_denied(to
             assert result=={'reply':'근거를 확인했습니다.'} and model=='gemini-4-argon-high'
         else:
             with pytest.raises(RuntimeError,match='unexpected_tool_use'):agy_cli.generate('답변',model='gemini-4-argon-high',response_schema=schema)
+
+
+def test_large_ledgers_do_not_crowd_out_latest_colleague_findings(environment):
+    row=crew.reason_request('large-context','수익 우선순위를 판단해',steps=0)
+    for index in range(5):crew.observe(row,'trace','evidence',{'name':'traffic'},{'rows':['value'*5000]*4})
+    crew.observe(row,'publi','colleague_answer',{}, {'reply':'실측 유입 137세션이며 수익은 미수집입니다.'})
+    def generate(prompt,**kwargs):
+        context=json.loads(prompt.split('\nRespond in Korean.\n')[1])
+        assert len(json.dumps(context,ensure_ascii=False))<40000
+        assert context['observations'][-1]['result']['reply']=='실측 유입 137세션이며 수익은 미수집입니다.'
+        assert all(event['sha256'] for event in context['observations'])
+        assert any(event.get('result',{}).get('truncated') for event in context['observations'])
+        kwargs['observer']('agy','requested','returned',actual_model='gemini-4-argon-high')
+        return choice('finish')
+    with patch('common.llm_client.generate_json',side_effect=generate),patch('common.llm_client.memory_session'):crew.ask(row)
+    # Projection never rewrites the durable evidence or its original hash.
+    persisted=json.loads(crew.goal_path(row['id']).read_text())
+    assert persisted['observations'][1]['result']==row['observations'][1]['result']
