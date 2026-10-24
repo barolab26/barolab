@@ -179,3 +179,36 @@ class EmptyInlineReplyTests(unittest.TestCase):
         """
         result=subprocess.run(['node','-e',code,expression[0]],capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)
+
+class ComposerRecoveryTests(unittest.TestCase):
+    def test_aria_less_composer_is_verified_by_unique_editor_heading_and_button(self):
+        from common.threads_screen import composer
+        page=Mock();editor=page.locator.return_value;editor.count.return_value=1
+        first=Mock();second=Mock();editor.locator.return_value=first;first.locator.return_value=second
+        for root in (first,second):
+            root.count.return_value=1;root.evaluate.return_value='DIV'
+            root.get_by_role.return_value.count.return_value=1
+        first.get_by_text.return_value.count.return_value=0
+        second.get_by_text.return_value.count.return_value=1
+        self.assertIs(composer(page),second)
+        second.get_by_role.return_value.count.return_value=2
+        second.locator.return_value=Mock(count=lambda:0)
+        with self.assertRaises(ValueError):composer(page)
+
+    def test_only_same_part_open_evidence_can_resume_an_empty_composer(self):
+        import json
+        from common import threads_screen as screen
+        page=Mock();page.context.new_cdp_session.return_value.send.return_value={'targetInfo':{'targetId':'same'}}
+        modal=Mock();modal.locator.return_value.inner_text.return_value='\n'
+        with tempfile.TemporaryDirectory() as temp, patch.object(screen,'composer',return_value=modal):
+            root=Path(temp);proof=root/'ego-123/open/screen-execution.json';proof.parent.mkdir(parents=True)
+            state={'editorTargetId':'same','port':9450,'status':'held','turns':[{'action':'open'}],'written':[]}
+            proof.write_text(json.dumps(state))
+            self.assertEqual(screen.owned_empty_composer(page,root),str(proof))
+            modal.locator.return_value.inner_text.return_value='사용자 원고'
+            self.assertIsNone(screen.owned_empty_composer(page,root))
+            modal.locator.return_value.inner_text.return_value=''
+            state['editorTargetId']='different';proof.write_text(json.dumps(state))
+            self.assertIsNone(screen.owned_empty_composer(page,root))
+            state['editorTargetId']='same';proof.write_text(json.dumps(state));(proof.parent.parent/'intent.json').write_text('{}')
+            self.assertIsNone(screen.owned_empty_composer(page,root))

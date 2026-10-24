@@ -39,6 +39,7 @@ def test_safe_cause_preserves_nested_model_timeout_without_secrets():
     wrapped=RuntimeError('Conference pending; retry the same agenda');wrapped.__cause__=cause
     assert conferences.conference_failure_reason(wrapped)=='model_timeout'
     assert conferences.conference_failure_reason(ValueError('secret input'))=='execution_error'
+    assert conferences.conference_failure_reason(TimeoutError('Screen execution reached its turn budget'))=='screen_execution_budget_exhausted'
 
 
 def test_unverified_conference_outcome_is_not_success(tmp_path):

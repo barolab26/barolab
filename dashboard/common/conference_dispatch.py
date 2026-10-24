@@ -172,8 +172,12 @@ def conference_failure_reason(exc):
     """Retain a safe actionable cause rather than only the outer RuntimeError."""
     for _ in range(8):
         message = str(exc)
-        if isinstance(exc, TimeoutError) or '응답 시간 제한' in message:
+        if 'Screen execution reached' in message:
+            return 'screen_execution_budget_exhausted'
+        if '응답 시간 제한' in message:
             return 'model_timeout'
+        if isinstance(exc,TimeoutError):
+            return 'execution_timeout'
         if 'AGY CLI 모델·구조화 응답 확인 실패' in message:
             return 'model_response_invalid'
         if 'duplicate submission prevented' in message:

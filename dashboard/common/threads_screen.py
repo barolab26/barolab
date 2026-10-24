@@ -118,16 +118,56 @@ def verify_reply_context(page,dialog,parent):
         raise ValueError('threads_visible_reply_parent_unverified')
 
 
+def composer(page):
+    """Threads also renders composers without an ARIA dialog role."""
+    editor=page.locator('[contenteditable="true"]:visible')
+    if editor.count()!=1:raise ValueError('threads_unique_editor_required')
+    node=editor
+    for _ in range(14):
+        node=node.locator('..')
+        if node.count()!=1 or node.evaluate('e=>e.tagName') in ('BODY','HTML'):
+            break
+        heading=node.get_by_text(re.compile(r'^(New thread|새 스레드|스레드 만들기|Reply|답글)$'),exact=True)
+        submit=node.get_by_role('button',name=re.compile(r'^(Post|Reply|게시|답글)$'))
+        if heading.count()>0 and submit.count()==1:return node
+    raise ValueError('threads_composer_not_ready')
+
+
+def owned_empty_composer(page,folder):
+    """Resume an empty composer opened by this exact part, before any submit intent."""
+    try:
+        if composer(page).locator('[contenteditable="true"]').inner_text().strip():return None
+    except ValueError:return None
+    cdp=page.context.new_cdp_session(page)
+    try:target=cdp.send('Target.getTargetInfo')['targetInfo']['targetId']
+    finally:cdp.detach()
+    for proof in sorted(Path(folder).glob('ego-[0-9]*/open/screen-execution.json'),reverse=True):
+        state=json.loads(proof.read_text())
+        if (state.get('editorTargetId')==target and state.get('port')==PORT
+                and state.get('status') in ('held','screen_task_complete') and state.get('turns')
+                and state.get('written')==[] and not (proof.parent.parent/'intent.json').exists()):
+            return str(proof)
+    return None
+
+
 def existing_draft(page):
     """A default empty inline reply box is not a user draft."""
-    return page.locator('[contenteditable="true"]').evaluate_all("""els=>els.some(e=>
+    protected = page.locator('[contenteditable="true"]').evaluate_all("""els=>els.some(e=>
         (e.innerText||'').trim().length>0 ||
         (e.getClientRects().length>0 && !!e.closest('[role="dialog"]')))""") is True
+    if protected:return True
+    try:
+        composer(page)
+        return True
+    except ValueError:return False
 
 
 def completed_draft(page,part,folder):
     """Resume only this task's fully typed, never-submitted browser draft."""
     editors=page.locator('[role="dialog"] [contenteditable="true"]')
+    if editors.count()!=1:
+        try:editors=composer(page).locator('[contenteditable="true"]')
+        except ValueError:return None
     if editors.count()!=1 or editors.inner_text().rstrip('\n')!=part['text'].rstrip('\n'):return None
     cdp=page.context.new_cdp_session(page)
     try:target=cdp.send('Target.getTargetInfo')['targetInfo']['targetId']
@@ -172,16 +212,17 @@ class ScreenAdapter:
             if not web_identity(page):raise RuntimeError('threads_web_login_required')
             protected=existing_draft(page)
             resume=completed_draft(page,part,folder.parent) if protected else None
-            if protected and not resume:raise RuntimeError('threads_existing_draft_preserved')
-            if not resume:
+            opened_before=owned_empty_composer(page,folder.parent) if protected and not resume else None
+            if protected and not resume and not opened_before:raise RuntimeError('threads_existing_draft_preserved')
+            if not resume and not opened_before:
                 target='https://www.threads.com/@'+ACCOUNT
                 if parent:target=parent['permalink']
                 def opened():
-                    if page.locator('[role="dialog"] [contenteditable="true"]').count()!=1:raise ValueError('threads_composer_not_ready')
+                    composer(page)
                 run(page,port=PORT,folder=folder/'open',urls={'approved-thread':target},max_turns=10,time_budget_seconds=180,
                     goal='Threads에서 approved-thread로 이동하고 '+('이 글에 답글을 작성하는 입력창' if part['kind']=='followup' else '새 게시물 작성창')+
                         '을 연다. 아직 글을 입력하거나 게시하지 않는다. 입력창이 보이면 완료한다.',completion_check=opened)
-            editor=page.locator('[role="dialog"] [contenteditable="true"]');dialog=page.locator('[role="dialog"]').filter(has=page.locator('[contenteditable="true"]'))
+            dialog=composer(page);editor=dialog.locator('[contenteditable="true"]')
             if parent:verify_reply_context(page,dialog,parent)
             lines=part['text'].split('\n');refs=[{'ref':str(i),'kind':'write','text':line} for i,line in enumerate(lines)]
             def check(written):
