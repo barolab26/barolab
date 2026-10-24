@@ -38,9 +38,57 @@ import json
 import math
 import time
 import uuid
+import re
 
 _CURRENT = contextvars.ContextVar('llm_usage_call', default=None)
 RATE_HEADERS = frozenset('x-ratelimit-limit-requests x-ratelimit-limit-tokens x-ratelimit-remaining-requests x-ratelimit-remaining-tokens x-ratelimit-reset-requests x-ratelimit-reset-tokens retry-after'.split())
+
+
+def agenda_identity():
+    from common import work_agenda
+    value = work_agenda.current()
+    if not value:
+        return None
+    row = work_agenda.require()
+    identity = row.get('id')
+    return identity if isinstance(identity, str) and re.fullmatch(r'[a-f0-9]{64}', identity) else None
+
+
+def _agenda_metrics(state, call, phase, now):
+    identity = call.get('agendaId')
+    if not isinstance(identity, str) or not re.fullmatch(r'[a-f0-9]{64}', identity):
+        return
+    groups = state.setdefault('byAgenda', {})
+    row = groups.setdefault(identity, {'coverageStartedAt':now.isoformat(), 'modelCalls':0,
+        'modelErrors':0, 'modelLatencyMs':0, 'routes':{}, 'toolRoundTrips':0,
+        'toolFailures':0, 'uiActions':0, 'uiFailures':0})
+    if call['id'] in row.get('recentIds', []):
+        return
+    if phase.startswith('action_'):
+        tool = call.get('action') == 'tool'
+        row['toolRoundTrips' if tool else 'uiActions'] += 1
+        if phase == 'action_failed':
+            row['toolFailures' if tool else 'uiFailures'] += 1
+    elif phase != 'started':
+        row['modelCalls'] += 1
+        row['modelErrors'] += phase != 'completed'
+        row['modelLatencyMs'] += call['latencyMs']
+        route = '|'.join(str(call.get(k) or 'unknown') for k in ('provider','model','reasoningEffort'))
+        row['routes'][route] = row['routes'].get(route, 0) + 1
+    else:
+        return
+    row['recentIds'] = (row.get('recentIds', []) + [call['id']])[-256:]
+    row['checkedAt'] = now.isoformat()
+    state['byAgenda'] = dict(list(groups.items())[-128:])
+
+
+def record_action(identity, action, phase):
+    try:
+        agenda = agenda_identity()
+        if agenda:
+            record_call({'id':identity, 'agendaId':agenda, 'action':action}, 'action_'+phase)
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError):
+        pass
 
 
 def report_response(data=None, headers=None, status=None, model=None, events=None):
@@ -71,10 +119,15 @@ def record_call(call, phase, *, root=None, now=None):
         try:state=json.loads(path.read_text())
         except (OSError,ValueError):state={}
         if state.get('date')!=day:state={'schema':'llm-usage-ledger-v1','date':day,'byModel':{},'active':{},'recent':[],'coverageStartedAt':now.isoformat()}
+        _agenda_metrics(state, call, phase, now)
+        if phase.startswith('action_'):
+            state['checkedAt']=now.isoformat();write(path,state)
+            return
         if phase=='started':
             state['active'][call['id']]={k:call[k] for k in ('provider','model','startedAt')}
             state['active'][call['id']]['agentSlot']=call.get('agentSlot')
             state['active'][call['id']]['reasoningEffort']=call.get('reasoningEffort')
+            state['active'][call['id']]['agendaId']=call.get('agendaId')
             state['active']=dict(list(state['active'].items())[-128:])
         else:
             state['active'].pop(call['id'],None)
@@ -87,7 +140,7 @@ def record_call(call, phase, *, root=None, now=None):
             row.update(lastLatencyMs=call['latencyMs'],lastAt=now.isoformat(),lastStatus=phase,
                        errorType=call.get('errorType'),rateLimitHeaders=call['rateLimitHeaders'],httpStatus=call.get('httpStatus'))
             row['rateLimited']+=int(call.get('rateLimited',False))
-            state['recent'].append({k:call.get(k) for k in ('id','provider','model','startedAt','latencyMs','inputTokens','outputTokens','httpStatus','errorType','reasoningEffort')})
+            state['recent'].append({k:call.get(k) for k in ('id','agendaId','provider','model','startedAt','latencyMs','inputTokens','outputTokens','httpStatus','errorType','reasoningEffort')})
             state['recent']=state['recent'][-40:]
         state['checkedAt']=now.isoformat();write(path,state)
 
@@ -115,6 +168,8 @@ def metered(function):
         actor,owner=current_model_identity()
         call=dict(id=uuid.uuid4().hex,agentSlot=kwargs.get('agent_slot') or owner or actor,provider=provider,model=model or 'unknown',startedAt=dt.datetime.now(KST).isoformat(),
                   inputTokens=0,outputTokens=0,usageReports=0,rateLimitHeaders={})
+        try:call['agendaId']=agenda_identity()
+        except (OSError, ValueError, TypeError, KeyError, RuntimeError):pass
         token=_CURRENT.set(call);start=time.monotonic();_safe_record(call,'started');phase='failed'
         try:
             result=function(*args,**kwargs);phase='completed';return result

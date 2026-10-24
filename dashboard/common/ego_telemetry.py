@@ -114,9 +114,13 @@ def action(name, target, count=None):
         yield
     except BaseException:
         _record(name, target, count, 'failed', identity)
+        from common.llm_usage import record_action
+        record_action(identity, name, 'failed')
         raise
     else:
         _record(name, target, count, 'after', identity)
+        from common.llm_usage import record_action
+        record_action(identity, name, 'completed')
 
 
 @asynccontextmanager

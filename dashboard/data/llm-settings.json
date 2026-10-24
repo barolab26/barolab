@@ -22,40 +22,46 @@
   },
   "agentBrains": {
     "jarvis": {
-      "provider": "codex",
-      "model": "gpt-6-luna",
-      "badge": "gpt-6-luna",
-      "providerLabel": "Codex CLI · ChatGPT 구독"
+      "provider": "agy",
+      "model": "gemini-4-argon-high",
+      "reasoningEffort": null,
+      "badge": "Argon High",
+      "providerLabel": "Antigravity AGY CLI"
     },
     "publi": {
       "provider": "codex",
       "model": "gpt-6.1-sol",
-      "badge": "gpt-6.1-sol",
+      "reasoningEffort": "medium",
+      "badge": "gpt-6.1-sol · Medium",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "patch": {
       "provider": "codex",
       "model": "gpt-6.1-sol",
-      "badge": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "badge": "gpt-6.1-sol · High",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "radar": {
-      "provider": "codex",
-      "model": "gpt-6-luna",
-      "badge": "gpt-6-luna",
-      "providerLabel": "Codex CLI · ChatGPT 구독"
+      "provider": "agy",
+      "model": "gemini-4-argon-medium",
+      "reasoningEffort": null,
+      "badge": "Argon Med",
+      "providerLabel": "Antigravity AGY CLI"
     },
     "doctor": {
-      "provider": "codex",
-      "model": "gpt-6-luna",
-      "badge": "gpt-6-luna",
-      "providerLabel": "Codex CLI · ChatGPT 구독"
+      "provider": "agy",
+      "model": "gemini-3.8-flash-medium",
+      "reasoningEffort": null,
+      "badge": "3.8 Flash Med",
+      "providerLabel": "Antigravity AGY CLI"
     },
     "trace": {
-      "provider": "codex",
-      "model": "gpt-6-luna",
-      "badge": "gpt-6-luna",
-      "providerLabel": "Codex CLI · ChatGPT 구독"
+      "provider": "agy",
+      "model": "gemini-3.8-flash-medium",
+      "reasoningEffort": null,
+      "badge": "3.8 Flash Med",
+      "providerLabel": "Antigravity AGY CLI"
     },
     "cf_pipeline": {
       "provider": "codex",

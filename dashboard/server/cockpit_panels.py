@@ -152,7 +152,7 @@ def brain_display(data,now):
         if role in ('jarvis','publi','patch','threads_pipeline'):
             start=mapping.find(name)
             if start>=0:spans.append([start,start+len(name)])
-    return dict(rows=rows,styles=styles,spans=spans)
+    return dict(rows=rows,styles=styles,spans=spans,mappingRow=len(rows)-1)
 
 
 def brain_lines(data,now):
@@ -161,7 +161,7 @@ def brain_lines(data,now):
 
 def brain_render(display):
     rows=[line(value,style) for value,style in zip(display['rows'],display['styles'])]
-    for start,end in display.get('spans',[]):rows[3].stylize('bold cyan not dim',start,end)
+    for start,end in display.get('spans',[]):rows[display.get('mappingRow',3)].stylize('bold cyan not dim',start,end)
     return Group(*rows)
 
 
@@ -220,6 +220,9 @@ def pipeline_lines(data,now):
         if activity.get('lastResult'):rows.append('직전 결과: '+str(activity['lastResult']))
         if activity.get('lastActivityAt'):rows.append('최근 활동: '+dt.datetime.fromtimestamp(activity['lastActivityAt'],KST).strftime('%H:%M:%S'))
         if activity.get('intervention'):rows.append('필요 개입: '+str(activity['intervention']))
+        measured=agenda.get('performance') or {}
+        if measured.get('modelCalls') is not None:
+            rows.append('실측 모델 '+str(measured['modelCalls'])+'회 · '+str(round(measured['modelLatencyMs']/1000,1))+'초 · 도구 '+str(measured['toolRoundTrips'])+'회 · 실패 '+str(measured['toolFailures'])+'회 (관측분)')
         check=agenda.get('automaticRecovery',{}).get('nextCheckAt')
         if check:rows.insert(2,'같은 안건 자동 재확인: '+dt.datetime.fromtimestamp(check,KST).strftime('%H:%M:%S'))
     for title,stage,started,detail in active[:2]:

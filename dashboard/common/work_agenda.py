@@ -256,7 +256,7 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
             raise AgendaWaiting('안건 대기열이 가득 찼습니다. 기존 안건을 먼저 마무리합니다.')
         row = {'id':identity, 'kind':kind, 'title':str(title)[:500], 'project':project,
                'source':source, 'completionCriteria':completion, 'priority':priority,
-               'notBefore':not_before, 'createdAt':time.time(), 'status':'queued',
+               'notBefore':not_before, 'createdAt':time.time(), 'status':'queued','manualNudges':0,
                'version':1, 'owner':uuid.uuid4().hex, 'plan':[], 'events':{}, 'processes':[]}
         _save(row)
         state.setdefault('pending', []).append(identity)
@@ -280,6 +280,7 @@ def admit(identity):
         if chosen['id'] != identity:
             return None
         chosen.update(status='report_pending' if chosen.get('verification',{}).get('verified') else 'meeting', activatedAt=time.time())
+        chosen['measurementStartedAt'] = chosen['activatedAt']
         _save(chosen)
         state['activeId'] = identity
         state['pending'].remove(identity)
@@ -423,11 +424,34 @@ def finish_reports(identity):
                 or not all(row['events'][s].get('receivedAt') for s in ('opening','staff_result','closing'))):
             return False
         row.update(status='closed', closedAt=time.time())
+        row['performance'] = performance(row)
         _save(row)
         state['activeId'] = None
         state['recent'] = ([identity] + [i for i in state.get('recent',[]) if i!=identity])[:30]
         write(STATE, state)
     return True
+
+
+def performance(row, ledger=None):
+    ledger = load(DATA/'llm_usage_ledger.json') if ledger is None else ledger
+    measured = ledger.get('byAgenda', {}).get(row['id'])
+    result = {'wallTimeSeconds':max(0,(row.get('closedAt') or time.time())-row['activatedAt']) if row.get('activatedAt') else None,
+        'measurementStartedAt':row.get('measurementStartedAt'),
+        'coverage':'observed_calls_only', 'manualNudges':row.get('manualNudges'),
+        'verifiedCompletions':1 if row.get('verification',{}).get('verified') is True else None}
+    for key in ('coverageStartedAt','modelCalls','modelErrors','modelLatencyMs','routes','toolRoundTrips','toolFailures','uiActions','uiFailures'):
+        result[key] = measured.get(key) if measured else None
+    return result
+
+
+def operational_state(row, goal=None, conference=None):
+    goal=goal or {};conference=conference or {}
+    if row.get('status') in ('report_pending','verifying') or goal.get('status')=='waiting_verification':return 'verification_or_ack_pending'
+    if conference.get('status')=='running' and running(row):return 'running_publisher'
+    if conference.get('status')=='failed' and conference.get('executionGeneration') and conference.get('attempts',0)>=3:return 'needs_ceo_action'
+    if goal.get('status')=='waiting_external':return 'waiting_external'
+    if row.get('status')=='blocked' and row.get('recoveryWatch',{}).get('state')=='needs_ceo_action':return 'needs_ceo_action'
+    return 'internal_action_ready'
 
 
 def view():
@@ -500,7 +524,7 @@ def resume(identity):
     with locked(ROWS):
         state=load(STATE);row=get(identity)
         if row.get('status')!='suspended':raise ValueError('유예 상태의 안건만 재개할 수 있습니다.')
-        row.update(status='queued',priority=-1,controllerFailures=0,nextCheckAt=0)
+        row.update(status='queued',priority=-1,controllerFailures=0,nextCheckAt=0,manualNudges=row.get('manualNudges',0)+1)
         # The original target, proof and attempt budget survive the explicit resume.
         row['events'].pop('suspension',None)
         _save(row)
@@ -526,6 +550,13 @@ def recovery_watch(row):
         repair=load(file)
         if repair.get('businessAgendaId')==row['id'] and repair.get('status')=='ready':
             internal.append({k:repair.get(k) for k in ('taskId','planSha256','step','steps')})
+    if internal:
+        ready=internal[0]
+        with locked(ROWS):
+            saved=get(row['id']);saved['recoveryWatch']={**watch,'state':'internal_action_ready',
+                'nextCheckAt':time.time()+5,'taskId':ready['taskId'],'step':ready['step']};_save(saved)
+        # Internal phases already have host-owned queue tokens. Do not spend model decisions watching them.
+        with context(token(get(row['id']))):return repair_workflow.dispatch_project_recovery_once()
     if watch.get('nextCheckAt',0)>time.time() and not internal:return False
     from agents import crew_reasoning as crew
     identity=row.get('controllerGoalId')

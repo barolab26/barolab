@@ -36,7 +36,7 @@ def capability_catalog():
         {'tool':'repair_kin_submission','owner':ACTION_OWNERS['repair_kin_submission'],'args':['account','question_id'],'permission':'repair','verification':'existing task-owned editor and submission evidence; never bypass quota/captcha'},
         {'tool':'advance_project_recovery','owner':'read recovery assignedAgent; host resolves current phase','args':['task_id','plan_sha256'],'permission':'repair','verification':'phase receipt is not entire recovery; re-read plan and symptom'},
         {'tool':'search_source','owner':'current actor','args':['query'],'availability':'Python standard library, bounded fixed-string source search'},
-        {'tool':'evidence','owner':'current actor','args':['name','select?'],'availability':'named sanitized ledgers; conference, incident and recovery identifiers are separate'},
+        {'tool':'evidence','owner':'current actor','args':['name','select?','fields?','offset?','limit?'],'limits':{'fieldMaximum':16,'pageMaximum':240},'availability':'named sanitized ledgers; conference, incident and recovery identifiers are separate'},
         {'tool':'propose_patch','owner':'patch','args':['files','test_files','objective'],'permission':'repair','verification':'candidate only; independent tests/review/apply/resume/verify remain in registered recovery workflow'},
         {'tool':'prepare_recovery','owner':'host','args':['project'],'permission':'repair','verification':'requires an exact current incident bound to an original terminal operation; then advance registered phases'},
     ]

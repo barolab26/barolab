@@ -17,6 +17,7 @@ ROLES = ('jarvis','publi','radar','trace','patch','doctor')
 MAX_STEPS = 24
 COLLEAGUE_STEPS = 3
 MANAGER_FOLLOWUP_RESERVE = 2
+MAX_ACTIVE_REASONING_SECONDS = 3600
 ROLE_BRIEF = {'jarvis':'총괄: 목표·전사 상황·수익 우선순위와 직원 결과를 종합해 다음 행동을 결정한다.',
     'publi':'실행: 승인된 안건·계정·일정과 실제 제출/공개 결과를 확인한다.',
     'radar':'조사: 실제 자료를 찾아 출처와 관측, 미확인 가설을 구분한다.',
@@ -102,7 +103,7 @@ def overview():
 
 def observe(row,actor,tool,args,result):
     event={'id':f"e{len(row['observations'])}",'actor':actor,'tool':tool,'arguments':args,
-           'observedAt':time.time(),'result':bounded(result)}
+           'observedAt':time.time(),'result':safe(result) if tool in ('read_source','evidence','colleague_answer','colleague_partial') else bounded(result)}
     event['sha256']=hashlib.sha256(json.dumps(event,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     row['observations'].append(event);save(row)
     return event
@@ -132,10 +133,10 @@ def read_evidence(args):
             path=_recovery_path(identity)
             if path.is_symlink():raise ValueError('Symlink evidence denied')
             item=load(path)
-        fields=('taskId','status','step','reason','holdReason','retryAt','nextCheckAt','observation','planSha256','classification','discovered','verification','errorType','assignedAgent','additionalObservation','inspection','resumeCapabilityAvailable')
+        fields=('taskId','status','step','reason','holdReason','retryAt','nextCheckAt','observation','planSha256','classification','discovered','verification','errorType','errorCode','assignedAgent','additionalObservation','inspection','resumeCapabilityAvailable','hostRepairReceipt','resumeAttempted','repairState','failureDiagnostic')
         result={k:item.get(k) for k in fields if k in item}
         if item.get('plan'):result['plan']={k:item['plan'].get(k) for k in ('project','action','failure','scope','evidence')}
-        return {'kind':kind,'available':bool(item),'selection':args.get('select',[]),'data':bounded(select_evidence(result,args.get('select',[])))}
+        return {'kind':kind,'available':bool(item),**evidence_page(result,args)}
     if name=='recovery':
         from common.repair_workflow import ROOT as recovery_root,recovery_expected_actor
         rows=[]
@@ -160,11 +161,47 @@ def read_evidence(args):
     if name=='execution':
         value={'generatedAt':value.get('generatedAt'),'revision':value.get('revision'),
                'agendaControl':value.get('agendaControl',{}),'pipelinePanel':next(iter((value.get('panels') or [])[3:4]),[])}
+    page=evidence_page(value,args)
+    return {'source':str(path.relative_to(ROOT)),'sha256':hashlib.sha256(raw).hexdigest(),
+            'modifiedAt':path.stat().st_mtime,**page,'keys':list(value)[:60] if isinstance(value,dict) else None,
+            'operationalTiming':{k:value[k] for k in ('nextEligibleAt','nextRunAt','retryAt') if isinstance(value,dict) and k in value},'data':page['data']}
+
+
+def evidence_page(value,args):
     selection=args.get('select',[])
     value=select_evidence(value,selection)
-    return {'source':str(path.relative_to(ROOT)),'sha256':hashlib.sha256(raw).hexdigest(),
-            'modifiedAt':path.stat().st_mtime,'selection':selection,'keys':list(value)[:60] if isinstance(value,dict) else None,
-            'operationalTiming':{k:value[k] for k in ('nextEligibleAt','nextRunAt','retryAt') if isinstance(value,dict) and k in value},'data':bounded(value,8000)}
+    fields=args.get('fields')
+    missing=[]
+    if fields is not None:
+        if not isinstance(value,dict) or not isinstance(fields,list) or not 1<=len(fields)<=16 or not all(isinstance(k,str) and not re.search(r'password|secret|token|api.?key|cookie|authorization',k,re.I) for k in fields):
+            raise ValueError('fields requires one to sixteen public keys from the selected object')
+        missing=[k for k in fields if k not in value];value={k:value[k] for k in fields if k in value}
+    offset=args.get('offset',0);limit=args.get('limit',80)
+    if type(offset) is not int or type(limit) is not int or offset<0 or not 1<=limit<=240:raise ValueError('Invalid evidence page range')
+    total=len(value) if isinstance(value,(dict,list)) else None
+    if isinstance(value,list):data=value[offset:offset+limit]
+    elif isinstance(value,dict):data=dict(list(value.items())[offset:offset+limit])
+    else:data=value
+    if isinstance(data,(dict,list)):
+        rows=list(data.items()) if isinstance(data,dict) else list(enumerate(data,offset))
+        projected=[];budget=22000
+        for key,item in rows:
+            size=len(json.dumps(safe(item),ensure_ascii=False))
+            if size>8000:
+                item={'detailRequired':True,'characters':size,'readWith':{'name':args['name'],'select':[*selection,key]}}
+                size=len(json.dumps(item,ensure_ascii=False))
+            if projected and size>budget:break
+            projected.append((key,item));budget-=size
+        data=dict(projected) if isinstance(data,dict) else [item for _,item in projected]
+        limit=len(projected) if projected else limit
+    elif isinstance(data,str) and len(data)>16000:
+        start=args.get('text_offset',0)
+        if type(start) is not int or start<0:raise ValueError('Invalid text evidence offset')
+        data={'text':data[start:start+16000],'nextCharacter':start+16000 if start+16000<len(data) else None,'totalCharacters':len(data)}
+    return {'selection':selection,'fields':fields,'missingFields':missing,'data':safe(data),
+        'pagination':{'offset':offset,'limit':limit,'totalItems':total,
+            'truncated':total is not None and offset+limit<total,
+            'nextOffset':offset+limit if total is not None and offset+limit<total else None}}
 
 
 def select_evidence(value,selection):
@@ -371,7 +408,7 @@ def ask(row):
     history=[];remaining=32000
     protected={}
     for event in row['observations']:
-        if event['tool'] in ('read_source','colleague_answer','colleague_partial'):
+        if event['tool'] in ('read_source','colleague_answer','colleague_partial') or event['tool']=='evidence' and isinstance(event.get('result'),dict) and 'pagination' in event['result']:
             protected[event['tool']]=event['id']
     for event in reversed(row['observations']):
         keep=event['id'] in protected.values()
@@ -400,7 +437,7 @@ def ask(row):
         'Finish only with a direct answer to the CEO, citing real evidence IDs. A proposed code change is not applied code. '
         'If genuinely blocked after investigation, explain the precise constraint and the supported next step. '
         'Arguments are a JSON object encoded as a string; unused tool/colleague are empty strings. '
-        'Tools: projects {}; project_status {project}; evidence {name: revenue|traffic|metrics|kin|threads|collection|preparation|flow|execution|recovery|conference:<agendaId>,select?:[nested keys or array indices]}; '
+        'Tools: projects {}; project_status {project}; evidence {name: revenue|traffic|metrics|kin|threads|collection|preparation|flow|execution|recovery|conference:<agendaId>,select?:[one nested key/index path],fields?:[keys to project],offset?:0,limit?:80}; '
         'Incident and recovery IDs must be read as incident:<taskId> and recovery_plan:<taskId>, not conference IDs. Operational JSON is read with evidence, not read_source. '
         'browser_observe {port} reads existing account tabs, controls and verified X11 windowMapping (DISPLAY, windowId, browserPid, wmPid) without focusing/opening/navigating/typing; mapped=null means map state was not measured. patch_status {job_id,candidate_sha256} reads a patch candidate status. '
         'web_search {query} and fetch_page {url} read public web evidence with existing bounded fetchers; '
@@ -412,8 +449,8 @@ def ask(row):
         'decision=consult requires a colleague and a concrete question in message. decision=wait means an external constraint; name it. '
         'Return one JSON object matching this exact schema (arguments is a STRING containing JSON, not an object): '
         +json.dumps(SCHEMA,ensure_ascii=False)+'\nRespond in Korean.\n'+json.dumps({'originalObjective':row['goal'],'nowUtcEpoch':time.time(),'actor':row['actor'],
-        'activeBusinessAgenda':__import__('common.work_agenda',fromlist=['view']).view().get('active'),'latestSharedRecovery':recovery_progress(),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'handoff':row.get('handoff'),'toolLimits':{'read_source':{'linesMaximum':240,'pagination':['truncated','nextLine','totalLines','sha256']},'evidence':{'select':'nested keys or array indices'}},'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
-        'observations':list(reversed(history)),'remainingDecisions':row.get('maxSteps',MAX_STEPS)-row['decisions']},ensure_ascii=False))
+        'activeBusinessAgenda':__import__('common.work_agenda',fromlist=['view']).view().get('active'),'latestSharedRecovery':recovery_progress(),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'handoff':row.get('handoff'),'toolLimits':{'read_source':{'linesMaximum':240,'pagination':['truncated','nextLine','totalLines','sha256']},'evidence':{'select':'one nested path of keys/indices','fields':'up to 16 keys from selected object','limitMaximum':240,'pagination':['pagination.nextOffset','pagination.totalItems']}},'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
+        'observations':list(reversed(history)),'remainingDecisions':max(0,row.get('maxSteps',MAX_STEPS)-row['decisions']),'investigationBudget':{'colleagueRemaining':row.get('colleagueStepsRemaining'),'managerFollowup':row.get('managerFollowup'),'episodeExtraLimit':COLLEAGUE_STEPS+MANAGER_FOLLOWUP_RESERVE}},ensure_ascii=False))
     routes=[]
     def route(provider,model,state,**meta):
         if state=='returned':
@@ -585,25 +622,51 @@ def advance(row,steps=2):
 
 
 def _advance(row,steps=2):
+    lease=row.get('reasoningLease',{})
+    if row.get('status')=='working' and lease and not lease.get('returnedAt') and not lease.get('settledAt'):
+        now=time.time()
+        charged=max(0,min(now,lease['expiresAt'])-lease['startedAt'])
+        row.setdefault('timings',{})['modelActiveSeconds']=row.get('timings',{}).get('modelActiveSeconds',0)+charged
+        lease.update(settledAt=now,chargedSeconds=charged,settlement='interrupted_lease_upper_bound')
+        save(row)
+    if row.get('status')=='working' and lease and not lease.get('returnedAt') and not lease.get('interruptedAt'):
+        # The caller owns the goal's OS lock. Reclaim inference only, never a publisher.
+        lease['interruptedAt']=time.time()
+        row.setdefault('reasoningInterruptions',[]).append({k:lease.get(k) for k in ('pid','startedAt','expiresAt','interruptedAt')})
+        row['reasoningInterruptions']=row['reasoningInterruptions'][-8:]
+        observe(row,'host','reasoning_checkpoint_recovered',{}, {'nextAction':row.get('pendingNextAction'),'pendingConference':row.get('pendingConference'),'pendingAction':row.get('pendingAction'),'publisherReplayAllowed':False})
     if not refresh_pending(row):return row
     if row['status']=='waiting_external' and time.time()<row.get('nextCheckAt',0):return row
     row.pop('waitingMessage',None)
     for _ in range(steps):
-        while row.get('consultStack') and (row.get('colleagueStepsRemaining',COLLEAGUE_STEPS)<=0 or time.time()>=row.get('handoff',{}).get('deadlineAt',float('inf')) or row['decisions']>=row.get('maxSteps',MAX_STEPS)-MANAGER_FOLLOWUP_RESERVE):
+        while row.get('consultStack') and (row.get('colleagueStepsRemaining',COLLEAGUE_STEPS)<=0 or time.time()>=row.get('handoff',{}).get('deadlineAt',float('inf')) or row['decisions']-row.get('maxSteps',MAX_STEPS)>=COLLEAGUE_STEPS):
             actor=row['actor']
             partial=[e['id'] for e in row['observations'] if e['actor']==actor]
             observe(row,actor,'colleague_partial',{}, {'reason':'bounded investigation handoff','evidenceIds':partial,'nextAction':row.get('lastMessage')})
             row['actor']=row['consultStack'].pop();row.pop('colleagueTask',None)
             row.setdefault('handoff',{}).update(status='partial',returnedAt=time.time(),nextAction='팀장이 부분 증거를 검토하고 후속 조치·보고')
             save(row)
-        if row['decisions']>=row.get('maxSteps',MAX_STEPS):
+        beyond=row['decisions']-row.get('maxSteps',MAX_STEPS)
+        followup=row.get('managerFollowup',{})
+        reserved=(bool(row.get('consultStack')) and row.get('colleagueStepsRemaining',0)>0 and beyond<COLLEAGUE_STEPS) or (
+            row['actor']==row.get('leadActor','jarvis') and followup.get('remaining',0)>0 and beyond<COLLEAGUE_STEPS+MANAGER_FOLLOWUP_RESERVE)
+        if row.get('timings',{}).get('modelActiveSeconds',0)>=row.get('maxActiveReasoningSeconds',MAX_ACTIVE_REASONING_SECONDS):
+            row.update(status='blocked',answerSource='host',answer='이 안건의 유한 추론 시간 한도에 도달했습니다. 실제 작업과 증거는 보존했으며 내부 실행·검증 결과를 확인합니다.');save(row);return row
+        if row['decisions']>=row.get('maxSteps',MAX_STEPS) and not reserved:
             row.update(status='blocked',answerSource='host',answer='판단 횟수 한도에 도달했습니다. 수집한 증거와 계획은 보존했으며, 실행 완료로 처리하지 않았습니다.');save(row);return row
         row['decisions']+=1;row['status']='working';save(row)
         try:
             set_progress(row,'판단 중',row.get('lastMessage') or '요청 범위와 현재 자료를 바탕으로 확인할 항목과 다음 조치를 판단하고 있습니다.')
             started=time.time();row.setdefault('timings',{}).setdefault('firstModelStartedAt',started);save(row)
             row['reasoningLease']={'pid':os.getpid(),'startedAt':started,'expiresAt':started+210,'kind':'reasoning_only'};save(row)
-            decision=ask(row)
+            try:decision=ask(row)
+            finally:
+                settled=time.time();charged=max(0,settled-started)
+                row['timings']['modelActiveSeconds']=row['timings'].get('modelActiveSeconds',0)+charged
+                row['reasoningLease'].update(settledAt=settled,chargedSeconds=charged)
+                save(row)
+            if row['actor']==row.get('leadActor','jarvis') and row.get('managerFollowup',{}).get('remaining',0)>0:
+                row['managerFollowup']['remaining']-=1
             row['reasoningLease']['returnedAt']=time.time()
             if row.get('consultStack'):row['colleagueStepsRemaining']=row.get('colleagueStepsRemaining',COLLEAGUE_STEPS)-1
             row['timings'].setdefault('firstDecisionAt',time.time())
@@ -625,10 +688,11 @@ def _advance(row,steps=2):
                 peer=decision['colleague']
                 stack=row.setdefault('consultStack',[])
                 if peer not in ROLES or peer==actor or peer in stack or len(stack)>=2:raise ValueError('Colleague handoff cycle or depth limit')
-                if row['decisions']>=row.get('maxSteps',MAX_STEPS)-MANAGER_FOLLOWUP_RESERVE:
-                    raise ValueError('Manager follow-up reserve: use available evidence and report next action')
+                if row['decisions']>row.get('maxSteps',MAX_STEPS):
+                    raise ValueError('Episode continuation is reserved for completing the current handoff')
                 stack.append(actor)
-                row['colleagueStepsRemaining']=min(COLLEAGUE_STEPS,row.get('maxSteps',MAX_STEPS)-row['decisions']-MANAGER_FOLLOWUP_RESERVE)
+                row['colleagueStepsRemaining']=COLLEAGUE_STEPS
+                row['managerFollowup']={'owner':row.get('leadActor','jarvis'),'remaining':MANAGER_FOLLOWUP_RESERVE,'handoffDecision':row['decisions']}
                 row['handoff']={'owner':peer,'requestedBy':actor,'expectedResult':decision['message'],
                     'deadlineAt':time.time()+600,'nextAction':'investigate and return evidence to '+actor,'status':'investigating'}
                 observe(row,actor,'colleague_request',{'colleague':peer},{'question':decision['message']})

@@ -366,6 +366,8 @@ def conference_failure_reason(exc):
             return 'execution_timeout'
         if 'AGY CLI 모델·구조화 응답 확인 실패' in message:
             return 'model_response_invalid'
+        if message.startswith(('Interrupted action','Interrupted cut','Interrupted mutating action')):
+            return 'screen_action_reconciliation_required'
         if 'duplicate submission prevented' in message:
             return 'duplicate_submission_prevented'
         if message in ('threads_web_login_required','threads_readiness_incomplete','threads_existing_draft_preserved','threads_uncertain_submission_tab_preserved'):
@@ -373,6 +375,16 @@ def conference_failure_reason(exc):
         exc = exc.__cause__ or exc.__context__
         if exc is None:break
     return 'execution_error'
+
+
+def failure_diagnostic(exc):
+    import traceback
+    frames=[]
+    for frame in traceback.extract_tb(exc.__traceback__):
+        file=Path(frame.filename)
+        if file.is_absolute() and file.is_relative_to(ROOT):
+            frames.append({'file':str(file.relative_to(ROOT)),'line':frame.lineno,'function':frame.name})
+    return {'errorType':type(exc).__name__,'messageSha256':hashlib.sha256(str(exc).encode()).hexdigest(),'sourceFrames':frames[-16:]}
 
 
 def _work(identity):
@@ -448,8 +460,8 @@ def _work(identity):
         else:row['status']='completed'
         row.update(completedAt=time.time(), retryAt=time.time()+60)
     except Exception as exc:
-        row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300,
-                   failureReason=conference_failure_reason(exc))
+        row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300,completedAt=time.time(),
+                   failureReason=conference_failure_reason(exc),failureDiagnostic=failure_diagnostic(exc))
         try:
             failure_context = {**context, **(getattr(locals().get('engine'), '_conference_context', {}) or {})}
             row['failureReport'] = report_outcome({'errorType':type(exc).__name__, 'reason':str(exc) if str(exc) in ('threads_web_login_required','threads_readiness_incomplete') else None}, 'conference:'+identity[:24], failure_context)
@@ -496,6 +508,71 @@ def record_conference_result(row, result=None):
 NAVER_SUBMISSION_BOUNDARY_SHA256 = '35f4f945c4d112c005b71eeb32b5dcc00a577e5059ceb57fd89fafe9fd7c5c51'
 
 
+def _matching_naver_attempts(arguments):
+    journal=load(ROOT/'dashboard/data/naver/automation-journal.json')
+    return [r for r in journal.get('attempts',[]) if r.get('account')==arguments['account']
+        and (r.get('publicationDate') or str(r.get('reserveTime') or '')[:10])==arguments['date']
+        and (r.get('scheduledSlot') or str(r.get('reserveTime') or '')[-5:])==arguments['slot']]
+
+
+def reconcile_repaired_retry(current, original, task_id, plan_sha256):
+    """Observe legacy attempts on the real server; never rewrite their absent intent markers."""
+    from common import repair_workflow as repair
+    from common.recovery_evidence import artifact_folder
+    _,row=repair._recovery_row(task_id,plan_sha256)
+    if row.get('businessAgendaId')!=current['id'] or row['plan']['project']!='naver_blog':
+        raise ValueError('Read-only reconciliation ownership mismatch')
+    repair.verified_applied_repair(row)
+    folder=artifact_folder(ROOT,row['plan']['workTarget'])
+    if not folder:raise ValueError('Original artifact folder is unavailable')
+    screen=load(folder/'ego-screen-editor/screen-execution.json')
+    last=(screen.get('turns') or [{}])[-1]
+    reconciled={ref for item in screen.get('reconciliations',[]) for ref in item['previousWritten'] if ref not in item['verifiedWritten']}
+    if (last.get('completedActions',0)+len(last.get('rejectedActions',[]))!=len(last.get('actions',[]))
+            or last.get('inputStarted') and last['inputStarted'] not in screen.get('written',[]) and last['inputStarted'] not in reconciled):
+        raise ValueError('Preserved editor action needs read-only reconciliation before consuming a grant')
+    attempts=_matching_naver_attempts(original['arguments'])
+    if not attempts or any(r.get('submissionStarted') is not False or r.get('preCommitIntent') is True
+            or r.get('phase') not in ('failed','material_required','superseded') for r in attempts):
+        raise ValueError('Submitted or uncertain attempts require reconciliation without resubmission')
+    if all(r.get('preCommitIntent') is False for r in attempts):return
+    if not folder or (folder/'reservation-evidence.json').exists():raise ValueError('Existing receipt requires verification, never a retry')
+    document=load(folder/'editor-content.json');args=original['arguments']
+    from common.ego_screen import screen_lock
+    from common.browser_session import connect_sync
+    from playwright.sync_api import sync_playwright
+    from naver_blog_posting import posting as engine
+    account=engine.ACCOUNT_MAP[args['account']]
+    with screen_lock(account['cdp_port']),sync_playwright() as playwright:
+        browser=connect_sync(playwright,'http://127.0.0.1:'+str(account['cdp_port']),*engine.account_browser_paths(account))
+        inventory=engine.check_existing_reservations(browser.contexts[0],account,
+            title=document['title'],reserve_time=args['date']+' '+args['slot'],folder=folder)
+    # The two complete, identity-checked server inventories are the evidence, not a snapshot count.
+    write(folder/'pre-submit-reconciliation.json',{'schema':'original-reservation-absence-v1',
+        'businessAgendaId':current['id'],'planSha256':plan_sha256,'workId':row['plan']['workTarget']['workId'],
+        'failureReceiptSha256':row['plan']['originalRequestSha256'],
+        'approvedDocumentSha256':row['plan']['approvedDocumentSha256'],
+        'blogId':account['blog_id'],'arguments':args,'observedAt':time.time(),'inventory':inventory})
+
+
+def _verified_legacy_absence(current, recovery, original, folder):
+    from datetime import datetime, timezone
+    from dashboard.collectors.naver_accounts import validated_reservation_rows
+    evidence=load(folder/'pre-submit-reconciliation.json');plan=recovery['plan']
+    if (evidence.get('schema')!='original-reservation-absence-v1' or evidence.get('businessAgendaId')!=current['id']
+            or evidence.get('planSha256')!=recovery['planSha256'] or evidence.get('workId')!=plan['workTarget']['workId']
+            or evidence.get('arguments')!=original['arguments'] or evidence.get('failureReceiptSha256')!=plan['originalRequestSha256']
+            or evidence.get('approvedDocumentSha256')!=plan['approvedDocumentSha256']
+            or not 0<=time.time()-evidence.get('observedAt',0)<=120):return False
+    from naver_blog_posting.posting import ACCOUNT_MAP
+    if evidence.get('blogId')!=ACCOUNT_MAP[original['arguments']['account']]['blog_id']:return False
+    inventory=validated_reservation_rows(evidence.get('inventory',{}),evidence.get('blogId'),datetime.now(timezone.utc))
+    if inventory is None:return False
+    document=load(folder/'editor-content.json');args=original['arguments']
+    from naver_blog_posting.posting import normalized_title
+    return not any(r['reserveTime']==args['date']+' '+args['slot'] or normalized_title(r['title'])==normalized_title(document['title']) for r in inventory)
+
+
 def authorize_repaired_retry(current, original, task_id, plan_sha256):
     """Called only under QUEUE lock; consuming the grant and queueing are one write."""
     from common import repair_workflow as repair, coding_job
@@ -534,8 +611,9 @@ def authorize_repaired_retry(current, original, task_id, plan_sha256):
     public = read_object(ROOT/'dashboard/data/naver/public-verification.json')
     if not attempts or not isinstance(public.get('evidence'),list):
         raise ValueError('Authoritative submission observations missing')
+    legacy_absence=_verified_legacy_absence(current,recovery,original,folder) if any(r.get('preCommitIntent') is None for r in attempts) else False
     for attempt in attempts:
-        if (attempt.get('submissionStarted') is not False or attempt.get('preCommitIntent') is not False
+        if (attempt.get('submissionStarted') is not False or (attempt.get('preCommitIntent') is not False and not (attempt.get('preCommitIntent') is None and legacy_absence))
                 or attempt.get('submittedAt') or attempt.get('submissionStartedAt')
                 or attempt.get('phase') not in ('failed','material_required','superseded')):
             raise ValueError('A previous execution has uncertain or submitted evidence')
@@ -543,28 +621,10 @@ def authorize_repaired_retry(current, original, task_id, plan_sha256):
         if (evidence.get('account') == args['account']
                 and (evidence.get('reserveTime') or '') == args['date']+' '+args['slot']):
             raise ValueError('Server verification already exists; reconcile before executing')
-    application = repair._proof(recovery['application']['evidencePath'], recovery['application']['evidenceSha256'])
-    job = coding_job._job(recovery['job']['jobDir'])
-    if Path(recovery['application']['evidencePath']) != job/'application.json':
-        raise ValueError('Application receipt outside the bound coding job')
-    validation = repair._proof(job/'validation.json', recovery['validation']['validationSha256'])
-    candidate = recovery['job']['candidateSha256']
-    if (application.get('status') != 'applied' or application.get('productionApplied') is not True
-            or application.get('candidateSha256') != candidate or application.get('sourceRoot') != str(ROOT)
-            or application.get('validationSha256') != recovery['validation']['validationSha256']
-            or validation.get('status') != 'isolated_verified' or validation.get('candidateSha256') != candidate
-            or validation.get('sandbox',{}).get('enforced') is not True
-            or not validation.get('results') or any(r.get('returncode') != 0 for r in validation['results'])):
-        raise ValueError('Applied repair and successful regression receipts required')
-    after = application.get('after',{})
-    if not any(application.get('before',{}).get(name) != sha for name,sha in after.items() if '/tests/' not in name):
-        raise ValueError('No material cause repair was applied')
-    for name,sha in after.items():
-        if hashlib.sha256(coding_job._file(ROOT,name,read_only=True).read_bytes()).hexdigest() != sha:
-            raise ValueError('Applied repair bytes changed')
+    verified_repair = repair.verified_applied_repair(recovery)
     return {'generationId':2, 'parentGenerationId':1, 'budget':1, 'consumedAt':time.time(),
         'authorizingRepairRoundSha256':plan_sha256, 'repairTaskId':task_id,
-        'patchCandidateSha256':candidate, 'testReceiptSha256':recovery['validation']['validationSha256'],
+        'patchCandidateSha256':verified_repair['candidateSha256'], 'testReceiptSha256':verified_repair['testReceiptSha256'],
         'workId':target['workId'], 'approvedDocumentSha256':plan['approvedDocumentSha256']}
 
 
@@ -580,6 +640,9 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
         matches=[r for r in recoverable_work(current['project']) if r['date']==args.get('date') and r['identity']==args.get('account') and (r['slot'] is None if current['project']=='cf_blog' else r['slot']==args.get('slot'))]
         if len(matches)!=1:raise ValueError('Same work is not verified as a pre-submission failure; reconcile existing results')
     identity=hashlib.sha256(json.dumps([kind,args],sort_keys=True).encode()).hexdigest();file=QUEUE/(identity+'.json')
+    observed=load(file)
+    if kind=='parameters' and args.get('action')=='naver' and repair_task_id and observed.get('attempts',1)==2 and observed.get('status')=='failed':
+        reconcile_repaired_retry(current,observed,repair_task_id,repair_plan_sha256)
     with locked(QUEUE):
         row=load(file)
         limit=3 if kind=='kin' else 2
@@ -590,7 +653,15 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
             generation=authorize_repaired_retry(current,row,repair_task_id,repair_plan_sha256)
             row['executionGeneration']=generation
         if kind=='kin':row['retryTarget']=kin_retry_target(row)
-        row.setdefault('attemptHistory',[]).append({k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes','eligibility','executionFailures')})
+        terminal_raw=file.read_bytes();terminal_sha=hashlib.sha256(terminal_raw).hexdigest()
+        archive=QUEUE/'attempt-receipts'/(identity+'-'+str(row.get('attempts',1))+'-'+terminal_sha+'.json')
+        archive.parent.mkdir(parents=True,exist_ok=True)
+        from common.dashboard_jobs import atomic_text
+        if archive.exists():
+            if archive.read_bytes()!=terminal_raw:raise ValueError('Immutable attempt receipt conflict')
+        else:atomic_text(archive,terminal_raw.decode('utf-8'),durable=True)
+        row.setdefault('attemptHistory',[]).append({**{k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes','eligibility','executionFailures')},
+            'terminalReceipt':{'path':str(archive),'sha256':terminal_sha,'attempt':row.get('attempts',1)}})
         row.update(status='queued',attempts=row.get('attempts',1)+1,retryRequestedAt=time.time())
         if agendas.require()['id']!=current['id']:raise ValueError('Agenda ownership changed before retry consumption')
         from common.dashboard_jobs import write as durable_write

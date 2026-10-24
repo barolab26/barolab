@@ -310,6 +310,10 @@ class Collector:
             identity=agenda.get('controllerGoalId')
             goal=self.read('dashboard/data/chats/reasoning-goals/'+identity+'.json') if isinstance(identity,str) and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
             progress=goal.get('progress',{});last=(goal.get('observations') or [{}])[-1]
+            conference=self.read('dashboard/data/publication-conferences/'+str(agenda.get('source',{}).get('conferenceId'))+'.json') if agenda.get('kind')=='conference' else {}
+            from common.work_agenda import operational_state, performance
+            active['operationalState']=operational_state(agenda,goal,conference)
+            active['performance']=performance(agenda,self.read('dashboard/data/llm_usage_ledger.json'))
             active['activity']={'owner':goal.get('actor') or agenda.get('ownerAgent'),
                 'action':clean(progress.get('summary') or agenda.get('lastAction'),500),
                 'phase':clean(progress.get('phase'),100),'lastResult':clean(last.get('tool'),100),
@@ -320,12 +324,34 @@ class Collector:
                 'decisions':goal.get('decisions'),'maxSteps':goal.get('maxSteps'),
                 'wallTimeSeconds':max(0,time.time()-agenda['activatedAt']) if agenda.get('activatedAt') else None,
                 'toolRoundTrips':sum(e.get('actor') in ROLES and e.get('tool') not in ('colleague_request','colleague_answer','colleague_partial') for e in goal.get('observations',[])),
-                'manualNudges':goal.get('manualNudges'),
+                'manualNudges':agenda.get('manualNudges',goal.get('manualNudges')),
                 'verifiedCompletions':1 if agenda.get('verification',{}).get('verified') is True else 0,
                 'modelLatencyMs':sum(d.get('modelLatencyMs',0) for d in goal.get('discussion',[])),
                 'toolFailures':sum(e.get('result',{}).get('ok') is False for e in goal.get('observations',[]) if isinstance(e.get('result'),dict)),
                 'lastRoute':{k:goal.get('lastRoute',{}).get(k) for k in ('provider','model','reasoningEffort')},
                 'reportAcknowledgments':{k:agenda.get('events',{}).get(k,{}).get('receivedAt') for k in ('staff_result','closing')}}
+            for key in ('wallTimeSeconds','toolRoundTrips','toolFailures','modelLatencyMs','manualNudges','verifiedCompletions'):
+                active['activity'][key]=active['performance'].get(key)
+            active['activity']['metricsCoverage']=active['performance']['coverage']
+            if active['operationalState']=='needs_ceo_action' and conference.get('executionGeneration'):
+                active['activity']['intervention']='검증 수리 후 추가 실행권까지 소비했습니다. 새 실행 범위에 대한 대표 지시가 필요합니다.'
+            if agenda.get('project')=='naver_blog' and all(isinstance(args.get(k),str) for k in ('account','date','slot')):
+                account,day,slot=args['account'],args['date'],args['slot']
+                if re.fullmatch(r'[A-Za-z0-9_]+',account) and re.fullmatch(r'\d{4}-\d{2}-\d{2}',day) and re.fullmatch(r'\d{2}:\d{2}',slot):
+                    folder='naver_blog_posting/output/scheduled/'+day+'/'+account+'-'+slot.replace(':','')
+                    screen=self.read(folder+'/ego-screen-editor/screen-execution.json')
+                    turns=screen.get('turns',[]);latest=turns[-1] if turns else {}
+                    measured=[t['modelLatencyMs'] for t in turns if type(t.get('modelLatencyMs')) in (int,float)]
+                    active['activity']['screenMetrics']={'turns':len(turns),'writtenReferences':len(screen.get('written',[])),
+                        'modelLatencyObservedMs':sum(measured),'modelCallsMeasured':len(measured),'modelCallsUnmeasured':len(turns)-len(measured)}
+                    if screen.get('status')=='running' and active['processObserved']:
+                        active['activity'].update(owner='publi',phase='보존 편집기 입력·서식 확인',
+                            action='승인 원고 입력 '+str(len(screen.get('written',[])))+'개 참조 확인 · 화면 '+str(len(turns))+'회 관측',
+                            lastResult='화면 행동 '+str(latest.get('completedActions',0))+'개 완료',
+                            lastActivityAt=self.root.joinpath(folder+'/ego-screen-editor/screen-execution.json').stat().st_mtime)
+                    receipt=self.read(folder+'/reservation-evidence.json')
+                    active['submissionStarted']=True if receipt.get('preCommitIntent') is True or receipt.get('submissionStatus') in ('submitting','submission_unknown','verified_reserved') else None
+
 
         return {'enabled':control.get('enabled') is True,'active':active}
 

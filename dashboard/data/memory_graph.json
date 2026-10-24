@@ -7809,6 +7809,27 @@
         "kin_pipeline",
         "threads_pipeline"
       ]
+    },
+    "ceo:directive:8c41403f4b6ed2ec11eeab54": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "/tmp/barolab-argon-structure-review/review-briefing.txt 통합수정안 대로 모두 구현해서 문제없이 안건들이 마무리 되도록 해라.",
+      "recordedAt": "2026-10-24T22:52:35.826263+00:00",
+      "sourceType": "direct_user_instruction",
+      "priority": "highest",
+      "roles": [
+        "jarvis",
+        "patch",
+        "publi",
+        "radar",
+        "trace",
+        "doctor",
+        "cf_pipeline",
+        "naver_pipeline",
+        "kin_pipeline",
+        "threads_pipeline"
+      ],
+      "guidance": "승인된 통합 수정안의 공용 연결기·직원 후속 예산·증거 전달·불변 복구 이력·역할별 명시 추론 강도·단일 스냅샷 운영 표시를 모두 구현하고 필요한 회귀검사와 실제 검증을 수행한다. 현재 안건은 정확한 원래 대상의 실제 결과와 담당자·팀장 보고 수신으로 종결하고 다음 3건도 직렬 실측한다. 구현·배포와 실제 3건 완료를 구분하며 미완료를 완료로 보고하지 않는다. 기존 총 실행 한도·원고·날짜·계정·예약 시각을 이 지시만으로 초기화하거나 변경하지 않는다."
     }
   },
   "edges": [
@@ -11458,6 +11479,11 @@
     {
       "source": "memory:hub",
       "target": "ceo:directive:cb245a7267594243376b03c9",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo:directive:8c41403f4b6ed2ec11eeab54",
       "type": "contains"
     }
   ],

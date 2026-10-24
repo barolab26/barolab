@@ -113,6 +113,162 @@ def _recovery_row(task_id, plan_sha256):
     return path,row
 
 
+def certify_applied_host_repair(task_id, plan_sha256, *, baseline_commit, files, test_files, directive_id):
+    """Certify an already applied, explicitly CEO-authorized host patch, never a model assertion."""
+    import re
+    import subprocess
+    import tempfile
+    import shutil
+    from common import coding_job, work_agenda as agendas
+    from common.collection_observability import load
+    from common.codex_cli import generate
+    from common.llm_settings import get_agent_brain
+    path, row = _recovery_row(task_id, plan_sha256)
+    root = Path(row['plan']['projectRoot'])
+    business = agendas.require(project=row['plan']['project'])
+    directive = load(root/'dashboard/data/memory_graph.json').get('nodes',{}).get(directive_id,{})
+    if (row.get('businessAgendaId') != business['id'] or directive.get('type') != 'CEOOperatingDirective'
+            or directive.get('active') is not True or directive.get('sourceType') != 'direct_user_instruction'
+            or not re.fullmatch(r'[a-f0-9]{7,40}',baseline_commit)
+            or not files or len(files)>5 or not test_files or len(test_files)>5):
+        raise ValueError('Exact active work and explicit host repair authorization required')
+    if any(Path(name).name=='posting.py' or not name.startswith('dashboard/common/') for name in files):
+        raise ValueError('Host repair must stay inside approved common connector scope')
+    if any(not name.startswith('dashboard/tests/') for name in test_files):
+        raise ValueError('Existing fixed regression targets required')
+    before = {name:_sha(subprocess.check_output(['git','show',baseline_commit+':'+name],cwd=root)) for name in files}
+    after = {name:_sha(coding_job._file(root,name,read_only=True).read_bytes()) for name in files}
+    test_hashes = {name:_sha(coding_job._file(root,name,read_only=True).read_bytes()) for name in test_files}
+    support_names=[p.relative_to(root).as_posix() for p in (root/'dashboard/common').glob('*.py')]+['dashboard/agents/synapse.py']
+    support_hashes={name:_sha(coding_job._file(root,name,read_only=True).read_bytes()) for name in support_names}
+    if all(before[name]==after[name] for name in files):raise ValueError('No applied material repair')
+    candidate = _sha(json.dumps({'before':before,'after':after,'tests':test_hashes,'support':support_hashes},sort_keys=True).encode())
+    existing = ROOT/'applied-host-repairs'/(candidate+'.json')
+    if existing.exists():
+        proof = json.loads(existing.read_bytes())
+        if proof.get('planSha256')!=plan_sha256:raise ValueError('Applied repair receipt is already bound to another revision')
+        ref={'path':str(existing),'sha256':_sha(existing.read_bytes())}
+        with locked(ROOT):
+            _,fresh=_recovery_row(task_id,plan_sha256);fresh['hostRepairReceipt']=ref
+            verified_applied_repair(fresh);_ready_certified_resume(fresh);write(path,fresh)
+        return ref
+    results=[]
+    with tempfile.TemporaryDirectory(prefix='barolab-applied-repair-') as folder:
+        isolated=Path(folder)
+        # Copy source only. The sandbox never sees .env, sessions, DBs or production ledgers.
+        snapshot={**support_hashes,**after,**test_hashes}
+        for name in snapshot:
+            target=isolated/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(root/name,target)
+        if ({p.relative_to(isolated).as_posix() for p in isolated.rglob('*') if p.is_file()}!=set(snapshot)
+                or any(_sha((isolated/name).read_bytes())!=sha for name,sha in snapshot.items())):
+            raise ValueError('Source changed before isolated snapshot was frozen')
+        for name in test_files:
+            run=coding_job._sandbox_run(isolated,name)
+            summary=coding_job._test_summary(run.stdout+run.stderr,Path(name).suffix)
+            results.append({'target':name,'returncode':run.returncode,'summary':summary})
+            if run.returncode or not summary or summary['executed']<=0 or summary['failed']:
+                raise ValueError('Applied repair failed isolated regression: '+name)
+    brain=get_agent_brain('patch')
+    if brain.get('provider')!='codex' or brain.get('reasoningEffort')!='high':
+        raise ValueError('Configured independent Codex High patch review required')
+    checks=('fixSupported','scopeRespected','gatesPreserved','testsRelevant','safeToResume')
+    schema={'type':'object','properties':{**{key:{'type':'boolean'} for key in checks},'reason':{'type':'string'}},'required':[*checks,'reason'],'additionalProperties':False}
+    diff=subprocess.check_output(['git','diff',baseline_commit,'--',*files,*test_files],cwd=root).decode()
+    verdict,actual=generate('Independently review this already applied CEO-authorized connector repair. '
+        'Return true only from code and actual test evidence. This review does not authorize submission by itself. '
+        'The host separately checks exact original target/document, all attempt history, fresh server reservation inventory, '
+        'no submission/intent evidence, no live publisher and one finite extra execution. '
+        'Distinguish measured evidence from a historical hypothesis. Clipboard plaintext must never be logged. '
+        +json.dumps({'failure':row['plan'].get('failure'),'isolatedTests':results,'candidateSha256':candidate})+'\n'+diff,
+        brain['model'],response_schema=schema,reasoning_effort='high',timeout_seconds=180)
+    if actual!=brain['model'] or any(verdict.get(key) is not True for key in checks):
+        raise ValueError('Independent review held the applied repair: '+str(verdict.get('reason',''))[:1000])
+    if any(_sha((root/name).read_bytes())!=value for name,value in {**support_hashes,**after,**test_hashes}.items()):
+        raise ValueError('Reviewed/tested source changed during certification')
+    receipt={'schema':'approved-applied-host-repair-v1','taskId':task_id,'planSha256':plan_sha256,
+        'businessAgendaId':business['id'],'workId':row['plan']['workTarget']['workId'],
+        'failureReceiptSha256':row['plan']['originalRequestSha256'],
+        'approvedDocumentSha256':row['plan']['approvedDocumentSha256'],'directiveId':directive_id,
+        'candidateSha256':candidate,'baselineCommit':baseline_commit,'before':before,'after':after,'testHashes':test_hashes,'supportHashes':support_hashes,
+        'validation':{'status':'isolated_verified','sandbox':{'enforced':True,'kind':'bubblewrap'},'results':results},
+        'review':{'provider':'codex','requestedModel':brain['model'],'actualModel':actual,'reasoningEffort':'high','verdict':verdict},
+        'recordedAt':time.time()}
+    with locked(ROOT):
+        _,fresh=_recovery_row(task_id,plan_sha256)
+        if fresh.get('businessAgendaId')!=business['id']:raise ValueError('Repair ownership changed')
+        existing.parent.mkdir(parents=True,exist_ok=True)
+        if existing.exists():raise ValueError('Immutable applied repair receipt already exists')
+        write(existing,receipt)
+        ref={'path':str(existing),'sha256':_sha(existing.read_bytes())}
+        fresh['hostRepairReceipt']=ref
+        _ready_certified_resume(fresh)
+        write(path,fresh)
+    return ref
+
+
+def _ready_certified_resume(row):
+    if row.get('step')=='resume' and row.get('status') in ('held','resume_held'):
+        row.setdefault('evidenceHistory',[]).append({'step':'resume','status':row['status'],
+            'errorCode':row.get('errorCode'),'evidenceRound':row.get('evidenceRound',1),
+            'repairReceiptSha256':row['hostRepairReceipt']['sha256'],'at':time.time()})
+        row.update(evidenceRound=row.get('evidenceRound',1)+1,status='ready',repairState='internal_action_ready')
+        row.pop('errorCode',None);row.pop('holdReason',None)
+
+
+def verified_applied_repair(row):
+    """Read real review/test receipts for either the normal staff job or approved host repair."""
+    from common import coding_job
+    if row.get('hostRepairReceipt'):
+        ref=row['hostRepairReceipt'];path=Path(ref['path'])
+        if path.parent!=ROOT/'applied-host-repairs' or path.is_symlink():raise ValueError('Host repair receipt outside its immutable registry')
+        proof=_proof(path,ref['sha256']);plan=row['plan']
+        if (proof.get('schema')!='approved-applied-host-repair-v1' or proof.get('planSha256')!=row['planSha256']
+                or proof.get('businessAgendaId')!=row['businessAgendaId'] or proof.get('workId')!=plan['workTarget']['workId']
+                or proof.get('failureReceiptSha256')!=plan['originalRequestSha256']
+                or proof.get('approvedDocumentSha256')!=plan['approvedDocumentSha256']):
+            raise ValueError('Host repair receipt binding mismatch')
+        from common.collection_observability import load
+        directive=load(Path(plan['projectRoot'])/'dashboard/data/memory_graph.json').get('nodes',{}).get(proof.get('directiveId'),{})
+        if directive.get('type')!='CEOOperatingDirective' or directive.get('active') is not True or directive.get('sourceType')!='direct_user_instruction':
+            raise ValueError('Applied host repair authorization was revoked or is missing')
+        review=proof.get('review',{});validation=proof.get('validation',{})
+        if (review.get('provider')!='codex' or not review.get('actualModel') or review.get('actualModel')!=review.get('requestedModel') or review.get('reasoningEffort')!='high'
+                or any(review.get('verdict',{}).get(key) is not True for key in ('fixSupported','scopeRespected','gatesPreserved','testsRelevant','safeToResume'))):
+            raise ValueError('Independent applied repair review missing')
+        after=proof['after'];before=proof['before'];candidate=proof['candidateSha256']
+        tests=proof['testHashes'];test_sha=_sha(json.dumps(validation,sort_keys=True).encode())
+        support=proof.get('supportHashes',{})
+        source_root=Path(plan['projectRoot'])
+        expected_support={p.relative_to(source_root).as_posix() for p in (source_root/'dashboard/common').glob('*.py')}|{'dashboard/agents/synapse.py'}
+        if (set(support)!=expected_support or candidate!=_sha(json.dumps({'before':before,'after':after,'tests':tests,'support':support},sort_keys=True).encode())):
+            raise ValueError('Complete isolated source snapshot must be bound to the repair')
+        tests={**support,**tests}
+        if (not proof['testHashes'] or {r.get('target') for r in validation.get('results',[])}!=set(proof['testHashes'])
+                or any(r.get('summary',{}).get('executed',0)<=0 or r.get('summary',{}).get('failed')!=0 for r in validation.get('results',[]))):
+            raise ValueError('Applied repair requires actual executed regression results')
+    else:
+        if not row.get('application') or not row.get('validation') or not row.get('job'):
+            raise ValueError('Verified applied repair receipt is missing; certify the actual fix before retrying')
+        application=_proof(row['application']['evidencePath'],row['application']['evidenceSha256'])
+        job=coding_job._job(row['job']['jobDir'])
+        if Path(row['application']['evidencePath'])!=job/'application.json':raise ValueError('Application receipt outside its bound job')
+        validation=_proof(job/'validation.json',row['validation']['validationSha256'])
+        candidate=row['job']['candidateSha256'];test_sha=row['validation']['validationSha256'];tests={}
+        if (application.get('status')!='applied' or application.get('productionApplied') is not True
+                or application.get('candidateSha256')!=candidate or application.get('sourceRoot')!=row['plan']['projectRoot']
+                or application.get('validationSha256')!=test_sha or validation.get('candidateSha256')!=candidate):
+            raise ValueError('Applied candidate/test binding mismatch')
+        after=application.get('after',{});before=application.get('before',{})
+    if (validation.get('status')!='isolated_verified' or validation.get('sandbox',{}).get('enforced') is not True
+            or not validation.get('results') or any(r.get('returncode')!=0 for r in validation['results'])):
+        raise ValueError('Successful isolated regression receipt required')
+    if not any(before.get(name)!=sha for name,sha in after.items() if '/tests/' not in name):raise ValueError('Material cause repair required')
+    for name,sha in {**after,**tests}.items():
+        if _sha(coding_job._file(Path(row['plan']['projectRoot']),name,read_only=True).read_bytes())!=sha:
+            raise ValueError('Reviewed/tested repair bytes changed')
+    return {'candidateSha256':candidate,'testReceiptSha256':test_sha}
+
+
 def _recovery_phase(row):
     step=row['step']
     suffix = ':round:' + str(row['evidenceRound']) if row.get('evidenceRound',1)>1 else ''
@@ -273,14 +429,22 @@ def prepare_conference_recovery():
           'sourceSha256':_sha(raw),'sourceSnapshot':json.loads(raw),'originalRequestPath':str(original_path),
           'originalRequestSha256':_sha(original_path.read_bytes()),'originalTaskId':'conference:'+identity,
           'executionRef':None,'action':{'agent':'publi','tool':'run_project_cycle','args':{'project':business['project']}},
-          'failure':[{'reason':original.get('failureReason'),'errorType':original.get('errorType')}],'workTarget':targets[0]}
+          'failure':[{'reason':original.get('failureReason'),'errorType':original.get('errorType'),**({'diagnostic':original['failureDiagnostic']} if original.get('failureDiagnostic') else {})}],'workTarget':targets[0]}
     if business['project']=='naver_blog':
         from common.recovery_evidence import artifact_folder
         folder=artifact_folder(project_root,targets[0])
         if folder and (folder/'editor-content.json').is_file():
             plan['approvedDocumentSha256']=_sha((folder/'editor-content.json').read_bytes())
+    failure_raw=original_path.read_bytes()
+    if _sha(failure_raw)!=plan['originalRequestSha256']:raise ValueError('Terminal failure changed during repair preparation')
+    failure_path=ROOT/'failures'/(plan['originalRequestSha256']+'.json')
+    plan['failureReceiptPath']=str(failure_path)
     path=_recovery_path(task_id)
     with locked(ROOT):
+        failure_path.parent.mkdir(parents=True,exist_ok=True)
+        if failure_path.exists():
+            if failure_path.read_bytes()!=failure_raw:raise ValueError('Immutable failure receipt conflict')
+        else:failure_path.write_bytes(failure_raw)
         previous=load(path)
         if previous:
             if previous.get('businessAgendaId')!=business['id']:raise ValueError('Recovery ownership mismatch')
@@ -423,6 +587,12 @@ def _classify_recovery(row,path):
     from common import llm_settings
     from common.llm_client import generate_json
     from common.hermes_memory import learning_text
+    if row.get('hostRepairReceipt'):
+        verified_applied_repair(row)
+        _recovery_resume_guard(row)
+        return {'kind':'retry_original','inspectRole':'publi','selectedFiles':[],
+            'objective':'Continue the exact original work through its finite, evidence-checked native retry gate',
+            'reason':'Actual applied source, independent High review and isolated regressions are verified; no new model classification is needed'}
     brain=llm_settings.get_agent_brain('jarvis');provider,model=brain.get('provider'),brain.get('model')
     if provider not in ('codex','agy','openai','gemini','claude','deepseek') or not model:
         raise ValueError('Configured Jarvis route unavailable')
@@ -469,7 +639,7 @@ def _classify_recovery(row,path):
 def _recovery_resume_guard(row):
     """A coding verdict cannot authorize an unknown or active publication retry."""
     plan=row['plan']
-    original=_proof(plan['originalRequestPath'],plan['originalRequestSha256'])
+    original=_proof(plan.get('failureReceiptPath') or plan['originalRequestPath'],plan['originalRequestSha256'])
     if original.get('status')=='unknown':raise ValueError('Original execution outcome unknown')
     source=Path(plan['sourcePath'])
     if source.is_symlink():raise ValueError('Registered source changed type')
@@ -905,6 +1075,9 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
         row.setdefault('dispatches',{}).pop(phase,None)
     except Exception as exc:
         row.update(status='held',errorCode=step+':'+type(exc).__name__)
+        from common.hermes_memory import learning_text
+        try:row['holdReason']=learning_text(str(exc)[:1000])
+        except ValueError:row['holdReason']='Exception details omitted by the credential/privacy boundary'
         # One correction of a rejected candidate, never a second business retry.
         # Infrastructure exceptions without actual rejection evidence stay held.
         if step in ('review','test','final_review') and row.get('candidateRevision',1)<(4 if row['plan'].get('workTarget') else 2):

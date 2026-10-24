@@ -39,7 +39,7 @@ def _file(root, relative, *, read_only=False):
         raise ValueError('Frozen publishing engine; evolve memory instead')
     if (any(part.lower() in ('secure','data','output','runs','artifacts','browsers') or part.startswith('.') for part in relative.parts)
         or any(word in lowered for word in ('.env','.git','credential','secret','token','cookie','local_config'))
-        or (not read_only and any(word in lowered for word in ('llm_settings','codex_cli','coding_job','repair_workflow','staff_capabilities','work_agenda')))):
+        or (not read_only and any(word in lowered for word in ('llm_settings','codex_cli','coding_job','repair_workflow','staff_capabilities','work_agenda','conference_dispatch','dashboard_jobs')))):
         raise ValueError('Private configuration or approval infrastructure is outside coding scope')
     path = root / relative
     if any(part.is_symlink() for part in [path, *path.parents] if part != root.parent):

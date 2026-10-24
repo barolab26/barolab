@@ -384,9 +384,9 @@ def test_manager_reserve_survives_saved_peer_handoff(environment,monkeypatch):
     decisions(monkeypatch,[choice('consult',peer='patch')])
     row=crew.reason_request('saved-peer','조사 결과를 이어받아',steps=1,max_steps=4)
     row=json.loads(crew.goal_path(row['id']).read_text())
-    seen=decisions(monkeypatch,[choice(tool='projects'),choice(tool='projects'),choice('finish')])
-    crew._advance(row,4)
-    assert [s[0] for s in seen]==['patch','jarvis','jarvis']
+    seen=decisions(monkeypatch,[choice(tool='projects')]*3+[choice(tool='projects'),choice('finish')])
+    crew._advance(row,6)
+    assert [s[0] for s in seen]==['patch','patch','patch','jarvis','jarvis']
     assert row['status']=='answered'
 
 
@@ -409,3 +409,51 @@ def test_colleague_model_failure_returns_to_manager_without_waiting_for_source_c
     decisions(monkeypatch,[choice(tool='projects'),choice('finish')])
     crew._advance(row,2)
     assert row['status']=='answered'
+
+
+def test_late_consult_has_separate_peer_budget_and_two_manager_followups(environment,monkeypatch):
+    seen=decisions(monkeypatch,[choice(tool='projects'),choice('consult',peer='patch')]+[choice(tool='projects')]*3+[choice(tool='projects'),choice('finish')])
+    row=crew.reason_request('late-consult','예산 경계에서도 후속 판단까지',steps=9,max_steps=2)
+    assert [s[0] for s in seen]==['jarvis','jarvis','patch','patch','patch','jarvis','jarvis']
+    assert row['status']=='answered' and row['decisions']==7
+    assert row['maxSteps']==2 and row['managerFollowup']['remaining']==0
+
+
+def test_expired_reasoning_checkpoint_preserves_pending_conference_without_model_replay(environment,monkeypatch):
+    from common import conference_dispatch as conferences
+    identity='f'*64;queue=environment/'queue';queue.mkdir();monkeypatch.setattr(conferences,'QUEUE',queue)
+    (queue/(identity+'.json')).write_text(json.dumps({'status':'running'}))
+    row={'id':'e'*64,'status':'working','actor':'publi','leadActor':'jarvis','decisions':3,'maxSteps':8,
+        'observations':[],'reasoningLease':{'pid':999999,'startedAt':1,'expiresAt':2},'pendingConference':identity}
+    ask=Mock();monkeypatch.setattr(crew,'ask',ask)
+    crew.GOALS.mkdir()
+    crew._advance(row,2)
+    assert row['pendingConference']==identity and row['decisions']==3
+    assert row['reasoningInterruptions'][-1]['pid']==999999
+    assert row['observations'][-1]['tool']=='reasoning_checkpoint_recovered'
+    ask.assert_not_called()
+
+
+def test_evidence_projection_and_pagination_keep_json_and_missing_fields_explicit():
+    args={'name':'fixture','fields':['status','missing'],'limit':1}
+    result=crew.evidence_page({'status':'held','extra':123},args)
+    assert result['data']=={'status':'held'} and result['missingFields']==['missing']
+    page=crew.evidence_page(list(range(250)),{'name':'fixture','offset':240,'limit':10})
+    assert page['data']==list(range(240,250)) and page['pagination']['nextOffset'] is None
+    large=crew.evidence_page({'body':{'rows':['x'*9000]},'status':'held'},{'name':'fixture'})
+    assert large['data']['body']['readWith']=={'name':'fixture','select':['body']}
+
+
+def test_interrupted_inference_is_charged_once_before_resume(environment,monkeypatch):
+    crew.GOALS.mkdir()
+    row={'id':'a'*64,'status':'working','actor':'jarvis','leadActor':'jarvis','decisions':1,'maxSteps':2,
+        'observations':[],'timings':{'modelActiveSeconds':5},
+        'reasoningLease':{'pid':999999,'startedAt':100,'expiresAt':310}}
+    monkeypatch.setattr(crew.time,'time',lambda:500)
+    monkeypatch.setattr(crew,'refresh_pending',lambda row:False)
+    crew._advance(row,0)
+    assert row['timings']['modelActiveSeconds']==215
+    assert row['reasoningLease']['settlement']=='interrupted_lease_upper_bound'
+    crew._advance(row,0)
+    assert row['timings']['modelActiveSeconds']==215
+    assert len(row['reasoningInterruptions'])==1

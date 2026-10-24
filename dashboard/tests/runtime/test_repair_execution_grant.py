@@ -39,6 +39,7 @@ def repaired(tmp_path,monkeypatch):
     row={'taskId':'task','businessAgendaId':'business','step':'resume','status':'ready','plan':plan,'planSha256':digest,'job':{'candidateSha256':'candidate','jobDir':str(job)},'application':{'evidencePath':str(job/'application.json'),'evidenceSha256':sha(job/'application.json')},'validation':{'validationSha256':sha(job/'validation.json')}}
     write(repair._recovery_path('task'),row)
     monkeypatch.setattr(agendas,'require',lambda **kwargs:current);monkeypatch.setattr(agendas,'running',lambda row:[]);monkeypatch.setattr(agendas,'progress',lambda *args:None)
+    monkeypatch.setattr(conference,'reconcile_repaired_retry',lambda *args:None)
     monkeypatch.setattr(autonomy,'recoverable_work',lambda project:[target])
     return current,original,row,digest,file,folder,journal,source
 
@@ -129,3 +130,124 @@ def test_concurrent_consumers_cannot_duplicate_the_same_grant(repaired):
         except ValueError:return 'held'
     with ThreadPoolExecutor(2) as pool:results=list(pool.map(lambda _:attempt(),range(2)))
     assert sorted(results)==['held','queued'] and load(file)['attempts']==3
+
+
+def legacy_server_proof(repaired):
+    import time
+    from datetime import datetime,timezone
+    current,original,row,digest,file,folder,journal,source=repaired
+    blog='mustpickinfo'
+    observation={'checkedAt':datetime.now(timezone.utc).isoformat(),'verificationSource':'playwright-reservation-list',
+        'reservationListComplete':True,'reservationCount':0,'reservations':[],'independentReadings':2,
+        'serverCountEvidence':[{'pass':p,'requestQuery':{'blogId':[blog],'editorVersion':[v]},'blogId':blog,'httpStatus':200,
+            'path':'/PrePostListCount.naver','isSuccess':True,'totalCount':0,'requestMethod':'GET'} for p in (1,2) for v in ('2','4')]}
+    proof={'schema':'original-reservation-absence-v1','businessAgendaId':current['id'],'planSha256':digest,
+        'workId':'w','arguments':original['arguments'],'failureReceiptSha256':row['plan']['originalRequestSha256'],
+        'approvedDocumentSha256':row['plan']['approvedDocumentSha256'],'blogId':blog,'observedAt':time.time(),'inventory':observation}
+    data=load(journal);data['attempts'][0].pop('preCommitIntent',None);write(journal,data)
+    write(folder/'pre-submit-reconciliation.json',proof)
+    return proof
+
+
+def test_fresh_complete_server_reconciliation_allows_legacy_attempt_without_rewriting_history(repaired):
+    legacy_server_proof(repaired)
+    _,_,_,digest,file,folder,journal,_=repaired
+    conference.retry_active(repair_task_id='task',repair_plan_sha256=digest)
+    assert load(file)['attempts']==3
+    assert 'preCommitIntent' not in load(journal)['attempts'][0]
+
+
+@pytest.mark.parametrize('fault',['stale','wrong_blog','incomplete','wrong_document','true_intent'])
+def test_legacy_reconciliation_never_bypasses_missing_or_uncertain_evidence(repaired,fault):
+    proof=legacy_server_proof(repaired)
+    _,_,_,digest,file,folder,journal,_=repaired
+    if fault=='stale':proof['observedAt']-=121
+    if fault=='wrong_blog':proof['blogId']='someone_else'
+    if fault=='incomplete':proof['inventory']['serverCountEvidence']=[]
+    if fault=='wrong_document':proof['approvedDocumentSha256']='other'
+    if fault=='true_intent':
+        data=load(journal);data['attempts'][0]['preCommitIntent']=True;write(journal,data)
+    write(folder/'pre-submit-reconciliation.json',proof)
+    with pytest.raises(ValueError):conference.retry_active(repair_task_id='task',repair_plan_sha256=digest)
+    assert load(file)['attempts']==2
+
+
+def test_certified_resume_adds_phase_without_overwriting_prior_claims():
+    row={'step':'resume','status':'held','errorCode':'resume:ValueError','resumeAttempted':True,
+         'steps':{'resume':{'startedAt':1}},'hostRepairReceipt':{'sha256':'verified'}}
+    old=json.loads(json.dumps(row['steps']))
+    repair._ready_certified_resume(row)
+    assert row['steps']==old and row['resumeAttempted'] is True
+    assert row['status']=='ready' and repair._recovery_phase(row)=='resume:round:2'
+
+
+def test_unreconciled_editor_is_blocked_before_grant_consumption(repaired,monkeypatch):
+    current,original,row,digest,file,folder,*_=repaired
+    import importlib
+    actual=importlib.util.spec_from_file_location('isolated_dispatch',conference.__file__)
+    module=importlib.util.module_from_spec(actual);actual.loader.exec_module(module)
+    monkeypatch.setattr(module,'ROOT',conference.ROOT)
+    (folder/'ego-screen-editor').mkdir()
+    write(folder/'ego-screen-editor/screen-execution.json',{'turns':[{'actions':[{'kind':'press','value':'Control+X'}],'completedActions':0}]})
+    with pytest.raises(ValueError,match='before consuming'):
+        module.reconcile_repaired_retry(current,original,'task',digest)
+    assert load(file)['attempts']==2 and 'executionGeneration' not in load(file)
+
+
+@pytest.mark.parametrize('damage',[None,'dependency','new_source','unexecuted','wrong_model','test','revoked'])
+def test_host_proof_binds_complete_executed_source_snapshot(repaired,damage):
+    current,original,row,digest,file,folder,journal,source=repaired
+    root=conference.ROOT
+    dependency=root/'dashboard/agents/synapse.py';dependency.parent.mkdir();dependency.write_text('dependency=True')
+    test=root/'dashboard/tests/test_fix.py';test.parent.mkdir();test.write_text('test fixture')
+    directive=root/'dashboard/data/memory_graph.json'
+    write(directive,{'nodes':{'approval':{'type':'CEOOperatingDirective','active':True,'sourceType':'direct_user_instruction'}}})
+    files={'dashboard/common/fix.py':sha(source)};tests={'dashboard/tests/test_fix.py':sha(test)}
+    support={**files,'dashboard/agents/synapse.py':sha(dependency)};before={'dashboard/common/fix.py':'before'}
+    candidate=hashlib.sha256(json.dumps({'before':before,'after':files,'tests':tests,'support':support},sort_keys=True).encode()).hexdigest()
+    proof={'schema':'approved-applied-host-repair-v1','planSha256':digest,'businessAgendaId':'business','workId':'w',
+        'failureReceiptSha256':row['plan']['originalRequestSha256'],'approvedDocumentSha256':row['plan']['approvedDocumentSha256'],
+        'directiveId':'approval','candidateSha256':candidate,'before':before,'after':files,'testHashes':tests,'supportHashes':support,
+        'validation':{'status':'isolated_verified','sandbox':{'enforced':True},'results':[{'target':next(iter(tests)),'returncode':0,'summary':{'executed':1,'failed':0}}]},
+        'review':{'provider':'codex','requestedModel':'review-model','actualModel':'review-model','reasoningEffort':'high',
+                  'verdict':{k:True for k in ('fixSupported','scopeRespected','gatesPreserved','testsRelevant','safeToResume')}}}
+    if damage=='unexecuted':proof['validation']['results'][0]['summary']['executed']=0
+    if damage=='wrong_model':proof['review']['actualModel']='substituted'
+    path=repair.ROOT/'applied-host-repairs'/('a'*64+'.json');path.parent.mkdir();write(path,proof)
+    row['hostRepairReceipt']={'path':str(path),'sha256':sha(path)}
+    if damage=='dependency':dependency.write_text('dependency changed')
+    if damage=='new_source':(root/'dashboard/common/new_module.py').write_text('new=True')
+    if damage=='test':test.write_text('test changed')
+    if damage=='revoked':write(directive,{'nodes':{}})
+    if damage:
+        with pytest.raises(ValueError):repair.verified_applied_repair(row)
+    else:assert repair.verified_applied_repair(row)['candidateSha256']==candidate
+
+
+def test_host_certificate_copies_only_the_frozen_source_list(repaired,monkeypatch):
+    import tempfile,subprocess
+    from common import codex_cli,llm_settings
+    current,original,row,digest,file,folder,journal,source=repaired
+    root=conference.ROOT
+    dependency=root/'dashboard/agents/synapse.py';dependency.parent.mkdir();dependency.write_text('dependency=True')
+    test=root/'dashboard/tests/test_fix.py';test.parent.mkdir();test.write_text('fixed regression')
+    write(root/'dashboard/data/memory_graph.json',{'nodes':{'approval':{'type':'CEOOperatingDirective','active':True,'sourceType':'direct_user_instruction'}}})
+    real_temp=tempfile.TemporaryDirectory
+    added=root/'dashboard/common/arrived_after_hashing.py'
+    class RacingDirectory(real_temp):
+        def __enter__(self):
+            result=super().__enter__();added.write_text('must_not_enter_sandbox=True');return result
+    monkeypatch.setattr(tempfile,'TemporaryDirectory',RacingDirectory)
+    monkeypatch.setattr(subprocess,'check_output',lambda command,**kwargs:b'original' if command[1]=='show' else b'reviewed diff')
+    def sandbox(isolated,target):
+        assert not (isolated/added.relative_to(root)).exists()
+        added.unlink()
+        return subprocess.CompletedProcess([],0,stdout='Ran 1 test in 0.01s\nOK\n',stderr='')
+    monkeypatch.setattr(coding_job,'_sandbox_run',sandbox)
+    monkeypatch.setattr(llm_settings,'get_agent_brain',lambda role:{'provider':'codex','model':'review-model','reasoningEffort':'high'})
+    monkeypatch.setattr(codex_cli,'generate',lambda *args,**kwargs:({k:True for k in ('fixSupported','scopeRespected','gatesPreserved','testsRelevant','safeToResume')},'review-model'))
+    ref=repair.certify_applied_host_repair('task',digest,baseline_commit='1234567',files=['dashboard/common/fix.py'],test_files=['dashboard/tests/test_fix.py'],directive_id='approval')
+    saved=load(ref['path'])
+    assert set(saved['supportHashes'])=={'dashboard/common/fix.py','dashboard/agents/synapse.py'}
+    row=load(repair._recovery_path('task'))
+    assert repair.verified_applied_repair(row)['candidateSha256']==saved['candidateSha256']

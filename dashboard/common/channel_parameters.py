@@ -45,21 +45,30 @@ def styles(account, day=None):
         row['styleVariantId'] = variant['styleVariantId']
     else:
         row['styleVariantId'] = 'style:naver:' + account + ':baseline'
+    row['screenDriven'] = True
     return row
 
 
 def styled_native(builder, original, document):
+    from common.visible_naver_editor import displayed_document, text_style
+    document = displayed_document(document)
     native = builder(original, document)
     params = document.get('presentation')
     if not params:
         return native
     for index, (block, component) in enumerate(zip(document['blocks'], native['document']['components'][1:])):
-        size = params['headingFontSize'] if block['type'] == 'heading' else params['summaryFontSize'] if index == 0 else params['bodyFontSize']
+        size, bold, align = text_style(params, index, block)
+        block_params = {**params, **params.get('blockStyles', {}).get(str(index), {})}
         for paragraph in component.get('value', []):
+            paragraph.setdefault('style', {})['align'] = align
+            if block_params.get('lineHeight'):
+                paragraph['style']['lineHeight'] = block_params['lineHeight']
             for node in paragraph.get('nodes', []):
-                node.setdefault('style', {}).update(fontSizeCode=f'fs{size}')
-                if block['type'] == 'heading' or index == 0 and params['summaryBold']:
-                    node['style']['bold'] = True
+                node.setdefault('style', {}).update(fontSizeCode=f'fs{size}', bold=bold)
+                if block_params.get('fontFamily'):
+                    node['style']['fontFamily'] = block_params['fontFamily']
+                if block_params.get('fontColor'):
+                    node['style']['fontColor'] = block_params['fontColor']
     return native
 
 
@@ -130,6 +139,36 @@ def configure_naver(day):
     if getattr(engine, '_parameter_wiring', False):
         return engine
     prepare, builder, summary, attempt = engine.prepare_basic_content, engine.basic_native_document, engine.basic_summary_image, engine.write_attempt
+    acquire_editor = engine.acquire_naver_editor
+
+    def preserved_editor(context, pages, blog_id):
+        screen_folder = engine.RUN_OPTIONS.get('screen_folder')
+        if screen_folder:
+            folder = Path(screen_folder)
+            proof = load(folder / 'preserved-screen-editor.json')
+            progress = load(folder / 'ego-screen-editor/screen-execution.json')
+            target = proof.get('targetId') or progress.get('editorTargetId')
+            if target and progress.get('written'):
+                for candidate in context.pages:
+                    session = context.new_cdp_session(candidate)
+                    try:
+                        identity = session.send('Target.getTargetInfo')['targetInfo']['targetId']
+                    finally:
+                        session.detach()
+                    if identity != target:
+                        continue
+                    frame = candidate.frame(name='mainFrame') or candidate
+                    actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
+                    if proof.get('documentSha256') and engine.editor_review_hash(actual) != proof['documentSha256']:
+                        raise ValueError('Preserved editor changed outside the recorded checkpoint')
+                    from common.visible_naver_editor import editor_content
+                    if editor_content(actual)['title'] != load(folder / 'editor-content.json')['title']:
+                        raise ValueError('Preserved editor title differs from this task')
+                    return candidate, frame
+                raise RuntimeError('Recorded EGO editor is unavailable; do not create a duplicate')
+        page, frame = acquire_editor(context, pages, blog_id)
+        pages.retain(page, 'EGO screen editor: preserve partial input and uncertain results')
+        return page, frame
 
     def prepare_with_style(account, folder=None, topic=None):
         if folder is None:
@@ -143,6 +182,7 @@ def configure_naver(day):
         engine.basic_summary_image = lambda article, output: summary_table(article, output, params) if params['summaryTable'] else summary(article, output)
         planning = {}
         planning = planning_or_memory(account, topic or engine.ACCOUNT_MAP[account]['topic'], folder, params)
+        params.update(planning.get('presentation', {}))
         if not existing:
             topic = planning['keyword']
         from common import llm_client
@@ -160,7 +200,7 @@ def configure_naver(day):
             caption = '주제 이해를 돕는 개념 이미지'
             credit = 'Google Flow AI 생성'
             asset_id = max(a['id'] for a in result[3]['assets']) + 1
-            result[3]['assets'].append({'id':asset_id,'file':image.name,'description':caption,'credit':credit,'sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
+            result[3]['assets'].insert(0, {'id':asset_id,'file':image.name,'description':caption,'credit':credit,'sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
             result[3]['representative_file'] = image.name
             result[2]['blocks'].insert(1, {'type':'image','id':asset_id,'file':image.name,'alt':caption,'caption':caption+'｜'+credit})
             report = engine.validate_document(result[2], result[3], result[1] / 'images')
@@ -180,8 +220,11 @@ def configure_naver(day):
         return attempt(account, phase, *args, **kwargs)
 
     engine.prepare_basic_content = prepare_with_style
+    engine.acquire_naver_editor = preserved_editor
     engine.basic_native_document = lambda original, document: styled_native(builder, original, document)
-    from common.visible_naver_editor import bind
+    from common.visible_naver_editor import bind, editor_content
+    content_reader = engine.basic_editor_content
+    engine.basic_editor_content = lambda value: editor_content(value, reader=content_reader)
     engine.bind_basic_editor = bind
     engine.write_attempt = dated_attempt
     engine._parameter_wiring = True
@@ -221,18 +264,26 @@ def run_naver(day, account, clock):
     if agendas.enabled():
         agendas.require(project='naver_blog')
         agendas.bind_target({'kind':'parameters','arguments':{'action':'naver','date':day,'account':account,'slot':clock}})
+    when = datetime.strptime(day + ' ' + clock, '%Y-%m-%d %H:%M').replace(tzinfo=KST)
+    if when.strftime('%Y-%m-%d %H:%M') != day + ' ' + clock:
+        raise ValueError('Expected exact reservation date and clock')
     engine = configure_naver(day)
-    if clock not in engine.DAILY_SLOTS[account]:
-        raise ValueError('Unapproved account slot')
-    when = datetime.fromisoformat(day + 'T' + clock).replace(tzinfo=KST)
     folder = folder_for('naver_blog_posting', day, account + '-' + clock.replace(':', ''))
+    if clock not in engine.DAILY_SLOTS[account]:
+        contract = load(folder / 'style-reproduction-contract.json')
+        directive = load(DATA / 'memory_graph.json').get('nodes', {}).get(contract.get('sourceDirectiveId'), {})
+        if not (contract.get('status') == 'ready_for_screen_execution'
+                and contract.get('account') == account and contract.get('reserveTime') == day + ' ' + clock
+                and directive.get('active') is True and directive.get('sourceType') == 'direct_user_instruction'
+                and directive.get('account') == account and directive.get('publicationDate') == day):
+            raise ValueError('Unapproved account slot')
     receipt = load(folder / 'reservation-evidence.json')
     if receipt.get('submissionStatus') == 'verified_reserved':
         return receipt
     if receipt.get('submissionStatus') not in ('submitting', 'submission_unknown') and when < datetime.now(KST) + timedelta(minutes=30):
         raise ValueError('Approved reservation is too close; do not silently shift its time')
     planning_or_memory(account, engine.ACCOUNT_MAP[account]['topic'], folder, styles(account, day))
-    engine.RUN_OPTIONS.update(slot=clock, reserve_time=day + ' ' + clock)
+    engine.RUN_OPTIONS.update(slot=clock, reserve_time=day + ' ' + clock, screen_folder=str(folder))
     result = engine.run_basic_pipeline(account, folder=folder, reserve_time=day + ' ' + clock)
     saved = load(folder / 'reserved-server-document.json')
     sizes = sorted({node.get('style', {}).get('fontSizeCode', '') for component in saved.get('document', {}).get('components', []) for paragraph in component.get('value', []) for node in paragraph.get('nodes', [])})
