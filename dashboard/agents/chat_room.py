@@ -2205,10 +2205,14 @@ def project_work_event(payload):
 
 def receive_work_event(payload):
     message = project_work_event(payload)
+    identity=payload.get('agendaId')
+    if identity:
+        from common.work_agenda import get
+        if get(identity):message['agendaId']=identity
     with _ROOM_LOCK:
         existing = next((m for m in load_room_data().get('messages', []) if m.get('id') == message['id']), None)
         if existing:
-            if project_work_event(existing) != message:
+            if project_work_event(existing) != {k:v for k,v in message.items() if k!='agendaId'}:
                 raise ValueError('Conflicting existing event; preserve original')
             return {'ok':True, 'eventId':message['id'], 'duplicate':True}
         append_or_update_room_message(message)
@@ -2251,6 +2255,8 @@ def drain_work_event_outbox():
                     existing = next((m for m in load_room_data().get('messages', []) if m.get('id') == event_id), None)
                     if not existing or any(existing.get(k) != v for k,v in payload.items()):
                         receive_pipeline_autonomous_event(payload)
+                elif payload.get('eventType') == 'crew_agenda_event':
+                    receive_agenda_event(payload)
                 else:
                     receive_work_event(payload)
                 if path.read_bytes() == raw:
@@ -2364,6 +2370,10 @@ def receive_goal_result(payload: Dict[str, Any]):
         room=load_room_data()
         user=next((m for m in room.get('messages',[]) if m.get('id')==goal.get('userTurnId') and m.get('who')=='user'),None)
         automatic=goal.get('origin')=='project-monitor' and goal.get('requestId','').startswith('project-agent:project-incident:')
+        if goal.get('origin')=='agenda' and goal.get('businessAgendaId'):
+            from common.work_agenda import get
+            bound=get(goal['businessAgendaId'])
+            automatic=bound.get('controllerGoalId')==goal['id']
         if not automatic and (not user or user['text']!=goal['goal']):raise HTTPException(409,'Original CEO turn is not in this meeting')
         from common.llm_settings import format_brain_badge
         route=note['route'] if note else {} if goal.get('answerSource')=='host' else (goal.get('leadRoute') or {})
@@ -2374,7 +2384,7 @@ def receive_goal_result(payload: Dict[str, Any]):
         actor=note['actor'] if note else goal.get('leadActor','jarvis')
         message={'id':identity,'who':actor,'text':note['text'] if note else goal.get('answer',''),'ts':note['ts'] if note else int(time.time()*1000),
             'isWorkstream':False,'replyToCeo':note is None and not automatic,'userTurnId':goal['userTurnId'] if not automatic else '', 'autonomous':automatic,'brain':brain,
-            'goalId':goal['id'],'taskTracker':{'status':'processing' if note else 'completed' if goal['status']=='answered' else 'failed',
+            'goalId':goal['id'],'agendaId':goal.get('businessAgendaId'),'taskTracker':{'status':'processing' if note else 'completed' if goal['status']=='answered' else 'failed',
             'step':'조사·직원 협의·실제 도구 결과 검토','resultSummary':'판단 진행' if note else '원래 질문에 대한 최종 판단'}}
         from agents.crew_reasoning import progress_view
         state=progress_view(goal)
@@ -2437,6 +2447,7 @@ def _build_chat_room():
     enriched_agents, live_map = get_crew_live_workstream_status()
     return {
         "messages": project_goal_messages(project_channel_cycle_messages(room.get("messages", []))),
+        "workAgenda": __import__('common.work_agenda',fromlist=['view']).view(),
         "delegationLimit": room.get("delegationLimit", True),
         "autonomousEnabled": AUTONOMOUS_WORKER.is_enabled(),
         "autonomousStatus": radar_runtime_status(),
@@ -2878,3 +2889,46 @@ except Exception as _chat_err:
 
 
 
+
+
+@chat_router.get('/agenda')
+def get_work_agenda():
+    from common.work_agenda import view
+    return view()
+
+
+@chat_router.post('/agenda-control')
+def control_work_agenda(payload: Dict[str, Any]):
+    from common.work_agenda import request_switch,resume,view
+    try:
+        if payload.get('action')=='suspend_and_switch':
+            request_switch(payload.get('agendaId'),payload.get('nextId'),
+                '대표님이 회의실에서 현재 안건 유예 후 선택한 대기 안건으로 전환을 지시했습니다.')
+        elif payload.get('action')=='resume':resume(payload.get('agendaId'))
+        else:raise ValueError('지원하지 않는 안건 제어입니다.')
+    except ValueError as exc:raise HTTPException(409,str(exc)) from None
+    return view()
+
+
+@chat_router.post('/agenda-event')
+def receive_agenda_event(payload: Dict[str, Any]):
+    from common.work_agenda import get, acknowledge, LABELS
+    from common.llm_settings import format_brain_badge
+    try: row=get(payload.get('agendaId'))
+    except ValueError: raise HTTPException(400,'Invalid agenda') from None
+    stage=payload.get('stage');note=row.get('events',{}).get(stage)
+    if not note or note['id']!=payload.get('id'):
+        raise HTTPException(409,'Unrecorded agenda report')
+    route=note.get('route') or {}
+    brain={**route,'badge':format_brain_badge(route['provider'],route['model'],route.get('reasoningEffort'))} if route.get('model') else {'provider':'host','badge':'안건 실행 상태'}
+    message={'id':note['id'],'who':note['who'],'text':note['text'],'ts':note['ts'],
+             'agendaId':row['id'],'agendaStage':stage,'isAgendaEvent':True,'autonomous':True,
+             'isWorkstream':False,'brain':brain,'taskTracker':{'status':'completed' if stage=='closing' else 'processing',
+             'step':LABELS.get(row['status'],row['status']),'resultSummary':row['completionCriteria']}}
+    with _ROOM_LOCK:
+        existing=next((m for m in load_room_data().get('messages',[]) if m.get('id')==note['id']),None)
+        if not existing:append_or_update_room_message(message)
+        elif any(existing.get(k)!=message[k] for k in ('who','text','agendaId','agendaStage')):
+            raise HTTPException(409,'Conflicting agenda report')
+        acknowledge(row['id'],stage,note['id'])
+    return {'ok':True,'eventId':note['id'],'stored':True}

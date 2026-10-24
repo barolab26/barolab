@@ -217,6 +217,10 @@ def folder_for(channel, day, identity):
 
 
 def run_naver(day, account, clock):
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        agendas.require(project='naver_blog')
+        agendas.bind_target({'kind':'parameters','arguments':{'action':'naver','date':day,'account':account,'slot':clock}})
     engine = configure_naver(day)
     if clock not in engine.DAILY_SLOTS[account]:
         raise ValueError('Unapproved account slot')
@@ -237,7 +241,61 @@ def run_naver(day, account, clock):
     return result
 
 
+def prepare_cf(day, domain):
+    from common import work_agenda as agendas
+    if agendas.enabled():agendas.require(project='cf_blog')
+    import cf_posting.posting as cf
+    plan=policy()
+    if domain not in plan['cf'] or day<plan['effectiveDate']:raise ValueError('Unapproved CF preparation')
+    prior=load(cf.SCHEDULE_JSON)
+    folder = folder_for('cf_posting', day, domain)
+    folder.mkdir(parents=True, exist_ok=True)
+    item = next((r for r in prior.get('items', []) if r.get('domain') == domain), {'domain': domain})
+    # Future research must never overwrite today's active ledger/progress.
+    progress = cf.basic_progress
+    cf.basic_progress = lambda domain, stage, name, pct, detail, **kw: write(folder / 'preparation-progress.json', {'domain': domain, 'stage': stage, 'detail': detail, 'updatedAt': datetime.now(KST).isoformat()})
+    try:
+        scheduled = {k: v for k, v in item.items() if k in ('domain', 'category')}
+        planning = {}
+        if not (folder / 'article.json').exists():
+            planning = planning_or_memory(domain, str(scheduled.get('category') or domain), folder, {}, channel='cf')
+            scheduled['mainKeyword'] = planning['keyword']
+        from common import llm_client
+        generate = llm_client.generate_json
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[직원 합의 작성 방식]\n'+planning.get('writingGuide',''), *args, **kwargs)
+        try:
+            article = cf.basic_article(domain, scheduled, folder)
+        finally:
+            llm_client.generate_json = generate
+        if not article.get('imagePlans'):
+            from common.flow_images import generate as flow_image
+            from html import escape
+            image = flow_image(article['title'], article['summary'], folder)
+            caption = '주제 이해를 돕는 AI 생성 개념 이미지'
+            article['imagePlans'] = [{'filename':image.name,'source':'generated','caption':caption}]
+            article['contentHtml'] = '<figure><img src="{{IMAGE_0}}" alt="'+escape(caption)+'"><figcaption>'+escape(caption)+'</figcaption></figure>'+article['contentHtml']
+            if planning:
+                article['planningId'] = planning.get('planningId')
+            cf.validate_basic_article(article)
+            write(folder / 'article.json', article)
+            write(folder / 'editor-content.json', article)
+            write(folder / 'photo-plan.json', {'assets':article['imagePlans'],'medium':'google-flow','sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
+    finally:
+        cf.basic_progress = progress
+    article=load(folder/'article.json')
+    assets=[folder/p['filename'] for p in article.get('imagePlans',[]) if isinstance(p,dict) and p.get('filename')]
+    valid=bool(assets) and all(p.is_file() and p.stat().st_size>0 for p in assets)
+    return {'state':'prepared' if valid else 'preparation_unverified','preparationVerified':valid,
+            'account':domain,'date':day,'folder':str(folder),
+            'articleSha256':hashlib.sha256((folder/'article.json').read_bytes()).hexdigest(),
+            'assetSha256':[hashlib.sha256(p.read_bytes()).hexdigest() for p in assets if p.is_file()]}
+
+
 def _prepare_all(day):
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        from common.conference_dispatch import request
+        return request('parameters',{'action':'prepare','date':day,'account':None,'slot':None})
     import cf_posting.posting as cf
     plan = policy()
     if day < plan['effectiveDate']:
@@ -256,41 +314,8 @@ def _prepare_all(day):
             write(status_path, state)
     for domain, clock in plan['cf'].items():
         try:
-            folder = folder_for('cf_posting', day, domain)
-            folder.mkdir(parents=True, exist_ok=True)
-            item = next((r for r in prior.get('items', []) if r.get('domain') == domain), {'domain': domain})
-            # Future research must never overwrite today's active ledger/progress.
-            progress = cf.basic_progress
-            cf.basic_progress = lambda domain, stage, name, pct, detail, **kw: write(folder / 'preparation-progress.json', {'domain': domain, 'stage': stage, 'detail': detail, 'updatedAt': datetime.now(KST).isoformat()})
-            try:
-                scheduled = {k: v for k, v in item.items() if k in ('domain', 'category')}
-                planning = {}
-                if not (folder / 'article.json').exists():
-                    planning = planning_or_memory(domain, str(scheduled.get('category') or domain), folder, {}, channel='cf')
-                    scheduled['mainKeyword'] = planning['keyword']
-                from common import llm_client
-                generate = llm_client.generate_json
-                llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[직원 합의 작성 방식]\n'+planning.get('writingGuide',''), *args, **kwargs)
-                try:
-                    article = cf.basic_article(domain, scheduled, folder)
-                finally:
-                    llm_client.generate_json = generate
-                if not article.get('imagePlans'):
-                    from common.flow_images import generate as flow_image
-                    from html import escape
-                    image = flow_image(article['title'], article['summary'], folder)
-                    caption = '주제 이해를 돕는 AI 생성 개념 이미지'
-                    article['imagePlans'] = [{'filename':image.name,'source':'generated','caption':caption}]
-                    article['contentHtml'] = '<figure><img src="{{IMAGE_0}}" alt="'+escape(caption)+'"><figcaption>'+escape(caption)+'</figcaption></figure>'+article['contentHtml']
-                    if planning:
-                        article['planningId'] = planning.get('planningId')
-                    cf.validate_basic_article(article)
-                    write(folder / 'article.json', article)
-                    write(folder / 'editor-content.json', article)
-                    write(folder / 'photo-plan.json', {'assets':article['imagePlans'],'medium':'google-flow','sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
-            finally:
-                cf.basic_progress = progress
-            state['cf'][domain] = {'status': 'prepared', 'time': clock, 'folder': str(folder)}
+            result = prepare_cf(day, domain)
+            state['cf'][domain] = {'status': result['state'], 'time': clock, 'folder': result['folder']}
         except Exception as exc:
             state['errors'][domain] = type(exc).__name__ + ': ' + str(exc)[:180]
         write(status_path, state)
@@ -313,6 +338,10 @@ def prepare_all(day):
 
 
 def dispatch_cf():
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        from common.conference_dispatch import request
+        return request('parameters',{'action':'dispatch','date':None,'account':None,'slot':None},one=bool(agendas.current()))
     import cf_posting.posting as cf
     now = datetime.now(KST)
     day = now.date().isoformat()
@@ -345,7 +374,7 @@ def dispatch_cf():
 
 def main(argv=None, *, conference_worker=False):
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('prepare', 'dispatch', 'monitor', 'cf-cycle', 'naver-cycle', 'naver', 'conference', 'cf'))
+    parser.add_argument('action', choices=('prepare', 'dispatch', 'monitor', 'cf-cycle', 'naver-cycle', 'naver', 'conference', 'cf', 'cf-prepare'))
     parser.add_argument('--date')
     parser.add_argument('--account')
     parser.add_argument('--slot')
@@ -355,6 +384,12 @@ def main(argv=None, *, conference_worker=False):
         result = request('parameters', vars(args))
         print(json.dumps(result, ensure_ascii=False), flush=True)
         return result
+    from common import work_agenda as agendas
+    if agendas.enabled() and args.action!='monitor':
+        row=agendas.require()
+        target=(row.get('workTarget') or row.get('source') or {}).get('arguments',{})
+        if target and any(target.get(k)!=vars(args).get(k) for k in ('action','date','account','slot')):
+            raise agendas.AgendaWaiting('현재 안건의 날짜·계정·슬롯과 다른 실행입니다.')
     today = datetime.now(KST).date().isoformat()
     if (Path.home() / 'EGO_EXEC_DISABLED').exists() and args.action != 'monitor':
         raise RuntimeError('Execution disabled')
@@ -364,6 +399,8 @@ def main(argv=None, *, conference_worker=False):
         clock = args.slot or configure_naver(day).DAILY_SLOTS[account][0]
         folder = folder_for('naver_blog_posting', day, account+'-'+clock.replace(':',''))
         result = planning_or_memory(account, '다음 발행의 키워드·독자·서식 결정', folder, styles(account, day))
+    elif args.action == 'cf-prepare':
+        result=prepare_cf(args.date or today,args.account)
     elif args.action == 'prepare':
         now = datetime.now(KST)
         target = now.date() if now.hour < 6 else (now + timedelta(days=1)).date()
@@ -380,6 +417,7 @@ def main(argv=None, *, conference_worker=False):
             result = {'status': 'timer_managed', 'owner': 'barolab-parameters-prepare.timer'}
     elif args.action == 'cf' or args.action == 'cf-cycle' and today < policy()['effectiveDate']:
         import cf_posting.posting as cf
+        if agendas.enabled() and args.date!=today:raise ValueError('Original CF publication date expired; preserve the original agenda')
         schedule = cf.load_current_schedule()
         if args.action == 'cf' and args.account not in cf.ALL_DOMAINS:
             raise ValueError('Unknown CF domain')

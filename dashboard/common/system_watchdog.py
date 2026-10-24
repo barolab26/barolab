@@ -205,6 +205,9 @@ def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
 
 def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, Any]]:
     """Detect zombie locks or running states stuck for >15 minutes and clean/re-trigger them."""
+    from common import work_agenda as agendas
+    if agendas.enabled() and not agendas.current():return []
+    if agendas.enabled():agendas.require()
     stale_seconds = stale_minutes * 60
     actions: List[Dict[str, Any]] = []
     python_exe = sys.executable
@@ -294,6 +297,11 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
 
 def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
     """Calculate missed slots for today (KST) across channels and trigger catch-up runs."""
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        from common.conference_dispatch import request
+        result=request('parameters',{'action':'cf-cycle','date':None,'account':None,'slot':None})
+        return [{'channel':'cf_blog','status':result['status'],'action':'지연 슬롯 안건 접수 · 실제 실행·검증 전'}] if result.get('agendaId') or result.get('items') else []
     catchups: List[Dict[str, Any]] = []
     now = now_kst()
     today_str = now.strftime("%Y-%m-%d")

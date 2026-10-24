@@ -1634,6 +1634,8 @@ def enqueue_staff_request(request_id, actions):
     if not isinstance(request_id, str) or not re.fullmatch(r'[A-Za-z0-9:_-]{1,160}', request_id):
         raise ValueError('Invalid request ID')
     actions = validate_staff_actions(actions)
+    from common import work_agenda as agendas
+    business = agendas.staff_agenda(request_id,actions)
     key = hashlib.sha256(request_id.encode()).hexdigest()
     path = STAFF_REQUEST_DIR / (key + '.json')
     with locked(STAFF_REQUEST_DIR):
@@ -1645,8 +1647,10 @@ def enqueue_staff_request(request_id, actions):
         row = {'requestId': request_id, 'taskId': 'staff:' + key, 'status': 'queued', 'requester': 'jarvis',
                'createdAt': time.time(), 'actions': actions, 'results': [], 'requests': [],
                'instructions':[staff_instruction(action) for action in actions]}
+        if business:row['businessAgendaId']=business
         write(path, row)
         for index, action in enumerate(actions):
+            if business:continue  # Opening is published only when this agenda becomes active.
             event = emit_work_event(actor='jarvis', actor_label='팀장', task_id=row['taskId'],
                 phase='requested', stage=action['tool'], requested_to=action['agent'], message_kind='host_instruction',
                 output_kind=row['instructions'][index]['text'])
@@ -1785,9 +1789,9 @@ def _finish_staff_repairs(path, row):
     changed = False
     for item in row['results']:
         result = item['result']
-        if item['tool'] not in ('repair_cf_known_failure', 'run_project_cycle') or result.get('status') not in ('running','started','awaiting_completion'):
+        if item['tool'] not in ('repair_cf_known_failure', 'run_project_cycle', 'recover_project_work') or result.get('status') not in ('running','started','awaiting_completion'):
             continue
-        observed = (terminal_result(result) if item['tool'] == 'run_project_cycle' else _repair_terminal_result(result))
+        observed = (terminal_result(result) if item['tool'] in ('run_project_cycle','recover_project_work') else _repair_terminal_result(result))
         if observed is None:
             continue
         terminal, snapshot = observed
@@ -1825,6 +1829,8 @@ def _finish_staff_repairs(path, row):
         row['status'] = 'completed' if all(r['result'].get('ok') is True and r.get('staffResponse') for r in row['results']) else 'failed'
     _review_ceo_request(path, row)
     write(path, row)
+    from common.work_agenda import staff_result
+    staff_result(row,path)
     return changed
 
 
@@ -1851,15 +1857,27 @@ def process_staff_request_once():
                 import logging
                 logging.getLogger(__name__).warning('Unreadable staff request preserved: %s', path.name)
                 continue
+            if candidate.get('status') not in ('queued', 'acknowledged', 'awaiting_completion'):
+                continue
+            from common import work_agenda as agendas
+            if agendas.enabled():
+                if not candidate.get('businessAgendaId'):
+                    candidate['businessAgendaId']=agendas.staff_agenda(candidate['requestId'],candidate['actions'])
+                    write(path,candidate)
+                active=agendas.active()
+                if active.get('id')!=candidate['businessAgendaId']:continue
+                if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
+                if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
+                if candidate['status']=='queued' and agendas.running(active):continue
             if candidate.get('status') == 'acknowledged' and time.time() - candidate.get('claimedAt', 0) > 1800:
                 candidate.update(status='unknown', reason='interrupted_or_overdue_no_retry')
                 write(path, candidate)
             if candidate.get('status') == 'awaiting_completion':
-                pending = [r for r in candidate.get('results', []) if r.get('tool') in ('repair_cf_known_failure', 'run_project_cycle')
+                pending = [r for r in candidate.get('results', []) if r.get('tool') in ('repair_cf_known_failure', 'run_project_cycle', 'recover_project_work')
                            and r.get('result',{}).get('status') in ('running','started','awaiting_completion')]
                 try:
                     from common.project_autonomy import terminal_result
-                    ready = any((terminal_result(r['result']) if r['tool'] == 'run_project_cycle' else _repair_terminal_result(r['result'])) is not None for r in pending)
+                    ready = any((terminal_result(r['result']) if r['tool'] in ('run_project_cycle','recover_project_work') else _repair_terminal_result(r['result'])) is not None for r in pending)
                 except (ValueError, OSError):
                     candidate.update(status='unknown',reason='invalid_controller_receipt_no_retry')
                     write(path,candidate)
@@ -1875,76 +1893,82 @@ def process_staff_request_once():
                 row.update(status='acknowledged', claimedAt=time.time())
                 write(path, row)
                 break
-        if row is None:
-            return False
-    try:
-        if completing:
-            return _finish_staff_repairs(path, row)
-        actions = validate_staff_actions(row['actions'])
-        for index, action in enumerate(actions):
-            parent = (row.get('requests') or [])[index] if index < len(row.get('requests', [])) else ''
-            ack = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
-                phase='progress', stage=action['tool'], parent_request_id=parent, message_kind='host_ack',
-                output_kind='지시를 접수했고 운영 상태 확인을 시작했습니다.' if action['tool'] == 'read_agent_status' else '지시를 접수했고 등록된 오류의 수리 검증을 시작했습니다.')
-            from common.ego_executor import execute_staff_action
-            def save_execution(receipt):
-                row['currentExecution'] = receipt
-                row['executionObservedAt'] = time.time()
-                write(path, row)
-            result = execute_staff_action(action, task_id=row['taskId'], request_id=row['requestId'], observer=save_execution,
-                                          requester=row.get('requester', 'jarvis'), parent_request_id=parent or 'unknown')
-            row['results'].append({'agent': action['agent'], 'tool': action['tool'], 'result': result})
-            write(path, row)
-            digest = hashlib.sha256(json.dumps(result, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-            status = result.get('status') if result.get('status') in ('observed','running','held','failed','not_applicable','needs_input') else 'returned'
-            tool_return = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
-                phase='completed' if result.get('ok') is True else 'failed', stage=action['tool'],
-                parent_request_id=ack, requested_to='jarvis', evidence_id=digest, message_kind='tool_result',
-                output_kind='[도구 실행 기록] ' + action['tool'] + ' 반환 상태: ' +
-                    {'observed':'상태 관측 완료','running':'진행 중','held':'보류','failed':'실패','not_applicable':'적용 대상 아님','needs_input':'입력 필요'}.get(status,'반환됨') +
-                    '. 상세 결과는 연결된 증거에 보존했습니다. 게시 성공을 뜻하지 않습니다.')
-            try:
-                def save_route(route):
-                    row['results'][-1]['staffRoute'] = route
-                    events = route.get('events') or []
-                    if events:
-                        event = events[-1]
-                        row['latestAction'] = {'kind': 'staff_model', 'agent': action['agent'],
-                                               'state': event.get('state', 'unknown'), 'observedAt': time.time()}
+    if row is None:
+        return False
+    from contextlib import nullcontext
+    scope=agendas.context(agendas.token(agendas.get(row['businessAgendaId']))) if agendas.enabled() else nullcontext()
+    with scope:
+        if agendas.enabled():agendas.progress(row['businessAgendaId'],'verifying' if completing else 'executing','담당 직원이 합의한 작업을 실행하고 원천 증거를 확인합니다.')
+        try:
+            if completing:
+                return _finish_staff_repairs(path, row)
+            actions = validate_staff_actions(row['actions'])
+            for index, action in enumerate(actions):
+                parent = (row.get('requests') or [])[index] if index < len(row.get('requests', [])) else ''
+                ack = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
+                    phase='progress', stage=action['tool'], parent_request_id=parent, message_kind='host_ack',
+                    output_kind='지시를 접수했고 운영 상태 확인을 시작했습니다.' if action['tool'] == 'read_agent_status' else '지시를 접수했고 등록된 오류의 수리 검증을 시작했습니다.')
+                from common.ego_executor import execute_staff_action
+                def save_execution(receipt):
+                    row['currentExecution'] = receipt
+                    row['executionObservedAt'] = time.time()
                     write(path, row)
-                report_result=result
-                if row['requestId'].startswith('ego-alert:'):
-                    incident=next((r for r in alerts.values() if r.get('requestId')==row['requestId']),{})
-                    report_result={'incident':{k:incident.get(k) for k in ('channel','account','port','title','cause','summary')},
-                        'priorResults':[{'agent':r['agent'],'tool':r['tool'],
-                            'receipt':{k:r['result'].get(k) for k in ('status','publicVerified','publicUrl','clicked','originalSendDay','reason')},
-                            'reply':r.get('staffResponse',{}).get('reply')} for r in row['results'][:-1]],
-                        'currentResult':{k:result.get(k) for k in ('ok','status','publicVerified','publicUrl','clicked','originalSendDay','reason')}}
-                response = staff_tool_reply(action['agent'], row['taskId'],
-                    {**action,'hostInstruction':staff_instruction(action)}, report_result, audit=save_route)
-                row['results'][-1]['staffResponse'] = response
-                row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
-                    phase='completed', stage='channel-cycle-summary' if action['tool'] == 'run_project_cycle' else 'staff-response', parent_request_id=tool_return, message_kind='staff_reply',
-                    requested_to='jarvis', model=response['route']['events'][-1].get('actualModel') or '',
-                    evidence_id=digest, output_kind=response['reply'])
-            except Exception as exc:
-                row['results'][-1]['responseError'] = type(exc).__name__
-                row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
-                    phase='failed', stage='staff-response', parent_request_id=tool_return,
-                    requested_to='jarvis', evidence_id=digest, output_kind='tool returned; staff model response failed')
+                result = execute_staff_action(action, task_id=row['taskId'], request_id=row['requestId'], observer=save_execution,
+                                              requester=row.get('requester', 'jarvis'), parent_request_id=parent or 'unknown')
+                row['results'].append({'agent': action['agent'], 'tool': action['tool'], 'result': result})
+                write(path, row)
+                digest = hashlib.sha256(json.dumps(result, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+                status = result.get('status') if result.get('status') in ('observed','running','held','failed','not_applicable','needs_input') else 'returned'
+                tool_return = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
+                    phase='completed' if result.get('ok') is True else 'failed', stage=action['tool'],
+                    parent_request_id=ack, requested_to='jarvis', evidence_id=digest, message_kind='tool_result',
+                    output_kind='[도구 실행 기록] ' + action['tool'] + ' 반환 상태: ' +
+                        {'observed':'상태 관측 완료','running':'진행 중','held':'보류','failed':'실패','not_applicable':'적용 대상 아님','needs_input':'입력 필요'}.get(status,'반환됨') +
+                        '. 상세 결과는 연결된 증거에 보존했습니다. 게시 성공을 뜻하지 않습니다.')
+                try:
+                    def save_route(route):
+                        row['results'][-1]['staffRoute'] = route
+                        events = route.get('events') or []
+                        if events:
+                            event = events[-1]
+                            row['latestAction'] = {'kind': 'staff_model', 'agent': action['agent'],
+                                                   'state': event.get('state', 'unknown'), 'observedAt': time.time()}
+                        write(path, row)
+                    report_result=result
+                    if row['requestId'].startswith('ego-alert:'):
+                        incident=next((r for r in alerts.values() if r.get('requestId')==row['requestId']),{})
+                        report_result={'incident':{k:incident.get(k) for k in ('channel','account','port','title','cause','summary')},
+                            'priorResults':[{'agent':r['agent'],'tool':r['tool'],
+                                'receipt':{k:r['result'].get(k) for k in ('status','publicVerified','publicUrl','clicked','originalSendDay','reason')},
+                                'reply':r.get('staffResponse',{}).get('reply')} for r in row['results'][:-1]],
+                            'currentResult':{k:result.get(k) for k in ('ok','status','publicVerified','publicUrl','clicked','originalSendDay','reason')}}
+                    response = staff_tool_reply(action['agent'], row['taskId'],
+                        {**action,'hostInstruction':staff_instruction(action)}, report_result, audit=save_route)
+                    row['results'][-1]['staffResponse'] = response
+                    row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
+                        phase='completed', stage='channel-cycle-summary' if action['tool'] == 'run_project_cycle' else 'staff-response', parent_request_id=tool_return, message_kind='staff_reply',
+                        requested_to='jarvis', model=response['route']['events'][-1].get('actualModel') or '',
+                        evidence_id=digest, output_kind=response['reply'])
+                except Exception as exc:
+                    row['results'][-1]['responseError'] = type(exc).__name__
+                    row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
+                        phase='failed', stage='staff-response', parent_request_id=tool_return,
+                        requested_to='jarvis', evidence_id=digest, output_kind='tool returned; staff model response failed')
+                write(path, row)
+            row['status'] = 'completed' if all(item['result'].get('ok') is True and 'staffResponse' in item for item in row['results']) else 'failed'
+            if any(item['result'].get('status') in ('running','started','queued','awaiting_completion') for item in row['results']):
+                row['status'] = 'awaiting_completion'  # PID is not a terminal repair receipt.
+        except Exception as exc:
+            row.update(status='failed', errorCode=type(exc).__name__)
+            emit_work_event(actor='jarvis', actor_label='팀장', task_id=row['taskId'], phase='failed',
+                stage='staff-dispatch', output_kind='dispatch failed; no automatic retry')
+        _review_ceo_request(path, row)
+        row['finishedAt'] = time.time()
+        with locked(STAFF_REQUEST_DIR):
             write(path, row)
-        row['status'] = 'completed' if all(item['result'].get('ok') is True and 'staffResponse' in item for item in row['results']) else 'failed'
-        if any(item['result'].get('status') in ('running','started','queued','awaiting_completion') for item in row['results']):
-            row['status'] = 'awaiting_completion'  # PID is not a terminal repair receipt.
-    except Exception as exc:
-        row.update(status='failed', errorCode=type(exc).__name__)
-        emit_work_event(actor='jarvis', actor_label='팀장', task_id=row['taskId'], phase='failed',
-            stage='staff-dispatch', output_kind='dispatch failed; no automatic retry')
-    _review_ceo_request(path, row)
-    row['finishedAt'] = time.time()
-    with locked(STAFF_REQUEST_DIR):
-        write(path, row)
-    return True
+        from common.work_agenda import staff_result
+        staff_result(row,path)
+        return True
 
 
 def dispatch_multi_agent_action(actions: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -2067,7 +2091,8 @@ def _ego_popen(*args, **kwargs):
     import uuid
     from common.ego_telemetry import export_environment, current_context
     import hashlib
-    kwargs['env'] = export_environment(kwargs.get('env'))
+    from common import work_agenda as agendas
+    kwargs['env'] = agendas.child_environment(export_environment(kwargs.get('env')))
     folder = EGO_PROCESS_DIR / uuid.uuid4().hex
     folder.mkdir(parents=True, exist_ok=False, mode=0o700)
     folder.chmod(0o700)
@@ -2106,6 +2131,7 @@ def _ego_popen(*args, **kwargs):
                        finishedAt=datetime.now(KST).isoformat())
         save()
         raise
+    if agendas.enabled() and agendas.current():agendas.register_process(proc.pid)
     proc.ego_receipt_path = str(receipt_path)
     receipt.update(status='running', pid=proc.pid)
     try:
@@ -2176,6 +2202,13 @@ def _ego_popen(*args, **kwargs):
 def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     from common.ego_telemetry import execution_context, action, current_context
     import uuid
+    from common import work_agenda as agendas
+    if agendas.enabled() and tool_name not in agendas.READ_ONLY and not agendas.current():
+        try:
+            receipt=enqueue_staff_request('direct:'+uuid.uuid4().hex,[{'agent':slug,'tool':tool_name,'args':kwargs}])
+            return {'ok':True,'status':'queued','taskId':receipt['taskId'],'businessAgendaId':receipt.get('businessAgendaId'),'publicationVerified':False}
+        except ValueError:
+            return {'ok':False,'status':'held','reason':'이 작업은 검증 가능한 단일 안건의 컨퍼런스에서 실행해야 합니다.'}
     actor = slug if slug in STAFF_ROLES else 'unknown'
     fields = {'actor': actor}
     projects = {
@@ -2204,7 +2237,9 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
     token = _EGO_REGISTERED_ACTION.set({'agent': actor, 'tool': fields['tool'], 'args': safe_args,
                                       'argumentsComplete': len(safe_args) == len(kwargs)})
     try:
-        with execution_context(**fields), action('tool', 'registered-tool'):
+        from contextlib import nullcontext
+        scope=agendas.execution(kwargs.get('project')) if agendas.enabled() and tool_name not in agendas.READ_ONLY else nullcontext()
+        with scope, execution_context(**fields), action('tool', 'registered-tool'):
             return _execute_agent_tool(slug, tool_name, **kwargs)
     finally:
         _EGO_REGISTERED_ACTION.reset(token)

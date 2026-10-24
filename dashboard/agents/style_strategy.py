@@ -153,6 +153,11 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
 
 
 def review_once(force=False):
+    from common import work_agenda as agendas
+    if agendas.enabled() and not agendas.current():
+        day=datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
+        return {'status':'queued','businessAgendaId':agendas.propose('style',day,title='기존 글 실측에 따른 스타일 전략 검토 · '+day,
+            project='legacy_remodel',source={'date':day},completion='실측·미수집을 구분한 전략 결정과 적용 여부 기록',priority=30)}
     import fcntl
     from common.collection_observability import load, write
     from common.runtime_locks import runtime_lock_path

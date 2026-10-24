@@ -81,7 +81,7 @@ def _deliver(payload):
     import logging
     import uuid
     try:
-        endpoint = 'work-event' if payload.get('eventType') == 'crew_work_event' else 'autonomous/event'
+        endpoint = 'agenda-event' if payload.get('eventType') == 'crew_agenda_event' else 'work-event' if payload.get('eventType') == 'crew_work_event' else 'autonomous/event'
         req = urllib.request.Request('http://127.0.0.1:8790/api/chat/'+endpoint,
             data=json.dumps(payload, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type':'application/json'}, method='POST')
@@ -92,7 +92,7 @@ def _deliver(payload):
         logging.getLogger(__name__).warning('Crew HTTP delivery deferred: %s', type(exc).__name__)
     try:
         import hashlib
-        outbox_dir = OUTBOX_DIR if payload.get('eventType') == 'crew_work_event' else OUTBOX_DIR / 'legacy'
+        outbox_dir = OUTBOX_DIR if payload.get('eventType') in ('crew_work_event','crew_agenda_event') else OUTBOX_DIR / 'legacy'
         outbox_dir.mkdir(parents=True, exist_ok=True)
         name = hashlib.sha256(payload['id'].encode('utf-8')).hexdigest()
         target = outbox_dir / (name+'.json')
@@ -173,6 +173,8 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
         'text':f'{stage}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다.',
         'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
                        'handoff':'','synapseLinked':False}}
+    from common.work_agenda import current
+    if current():payload['agendaId'] = current()['id']
     if report is not None:
         payload['reportContext'] = report_context(report)
     if deliverable_url:

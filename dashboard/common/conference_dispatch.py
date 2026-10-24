@@ -14,26 +14,133 @@ ROOT = Path(__file__).resolve().parents[2]
 QUEUE = ROOT / 'dashboard/data/publication-conferences'
 
 
-def request(kind, arguments):
+def request(kind, arguments, *, one=False):
+    from common import work_agenda as agendas
+    if not agendas.enabled():return _request_single(kind,arguments)
+    choices=concrete_requests(kind,arguments)
+    if not choices:return {'status':'no_work','reason':'no_eligible_concrete_work'}
+    receipts=[]
+    for item in choices[:1] if one else choices:
+        receipts.append(_request_single(kind,item))
+    return receipts[0] if len(receipts)==1 else {'status':'conference_requested','items':receipts,'count':len(receipts)}
+
+
+def concrete_requests(kind, arguments):
+    from datetime import datetime,timedelta
+    from common.channel_parameters import KST,policy,folder_for
+    now=datetime.now(KST);today=now.date().isoformat()
+    if kind=='parameters':
+        action=arguments.get('action');plan=policy()
+        if action=='cf' and arguments.get('account') in plan['cf']:
+            arguments={**arguments,'slot':arguments.get('slot') or plan['cf'][arguments['account']]}
+        if action in ('naver','cf','cf-prepare','conference'):
+            return [{**arguments,'date':arguments.get('date') or today}]
+        result=[]
+        if action in ('prepare','naver-cycle'):
+            day=arguments.get('date') or (today if now.hour<6 else (now+timedelta(days=1)).date().isoformat())
+            day=max(day,plan['effectiveDate'])
+            for account,settings in plan['naver'].items():
+                for slot in settings['slots']:
+                    receipt=load(folder_for('naver_blog_posting',day,account+'-'+slot.replace(':',''))/'reservation-evidence.json')
+                    if receipt.get('submissionStatus')=='verified_reserved':continue
+                    # A missed reservation is an incident, never silently shifted or retried by the timer.
+                    if datetime.fromisoformat(day+'T'+slot).replace(tzinfo=KST)<now+timedelta(minutes=30):continue
+                    result.append({'action':'naver','date':day,'account':account,'slot':slot})
+            if action=='prepare':
+                for domain,slot in plan['cf'].items():
+                    folder=folder_for('cf_posting',day,domain)
+                    if not (folder/'photo-plan.json').exists():
+                        result.append({'action':'cf-prepare','date':day,'account':domain,'slot':slot})
+        elif action in ('dispatch','cf-cycle'):
+            schedule=load(ROOT/'dashboard/data/cf/daily_schedule.json')
+            for item in sorted(schedule.get('items',[]),key=lambda r:r.get('scheduledTime','')):
+                domain=item.get('domain');slot=plan['cf'].get(domain)
+                if slot and slot<=now.strftime('%H:%M') and item.get('status') not in ('published','failed','error'):
+                    result.append({'action':'cf','date':today,'account':domain,'slot':slot})
+        return result
+    if kind=='kin':
+        if arguments.get('account') and arguments.get('slot'):return [arguments]
+        state=load(ROOT/'dashboard/data/kin-automation-state.json')
+        due=state.get('nextEligibleAt');account=state.get('nextAccount')
+        if not due or not account or state.get('activeRunId') or state.get('enabled') is False:return []
+        when=datetime.fromisoformat(due)
+        if when>now:return []
+        return [{'date':today,'account':account,'slot':due}]
+    if kind=='threads':
+        if arguments.get('account') and arguments.get('slot'):return [arguments]
+        import sqlite3
+        import threads_posting.posting as engine
+        config=engine._threads_config_load()
+        if not config.get('enabled') or not config.get('connection',{}).get('connected'):return []
+        try:day=engine._threads_pipeline__gate(config,now)
+        except RuntimeError:return []
+        with sqlite3.connect(Path(engine._threads_config_DB).resolve().as_uri()+'?mode=ro',uri=True) as db:
+            db.row_factory=sqlite3.Row
+            parts=db.execute("SELECT * FROM parts WHERE account_key=? AND publication_date=?",(config['account_key'],day)).fetchall()
+            latest=engine._threads_scheduler_current_slot(config,now)
+            for part in parts:
+                due=part['kind']=='main' and part['slot']==latest
+                if part['kind']=='followup':
+                    parent=next((p for p in parts if p['attempt_id']==part['attempt_id'] and p['kind']=='main' and p['state']=='published_verified'),None)
+                    due=bool(parent and engine._threads_pipeline_is_followup_delay_satisfied(parent,json.loads(part['document']),now))
+                if part['state']=='queued' and part['slot']<=now.strftime('%H:%M') and due:
+                    return [{'date':day,'account':config['account_key'],'slot':part['slot'],'partId':part['part_id']}]
+            used={r['slot'] for r in parts}
+            used.update(r[0] for r in db.execute('SELECT slot FROM authoring_slots WHERE account_key=? AND day=?',(config['account_key'],day)))
+            slot=engine._threads_scheduler_current_slot(config,now,used)
+            attempted=sum(p['kind']=='main' and p['state'] in ('sending_intent','submitted_unknown','api_submitted','published_verified') for p in parts)
+            if slot and attempted<config['mainDailyCap']:
+                return [{'date':day,'account':config['account_key'],'slot':slot}]
+        return []
+    raise ValueError('Unknown conference channel')
+
+
+def _request_single(kind, arguments):
     if kind not in ('parameters', 'kin', 'threads'):
         raise ValueError('Unknown conference channel')
     QUEUE.mkdir(parents=True, exist_ok=True)
     # Repeated timer ticks share one pending agenda, including model retries.
     key = hashlib.sha256(json.dumps([kind, arguments], sort_keys=True).encode()).hexdigest()
     path = QUEUE / (key + '.json')
+    from common import work_agenda as agendas
+    business = None
+    if agendas.enabled():
+        project = {'kin':'naver_kin','threads':'threads'}.get(kind, 'naver_blog' if arguments.get('action')=='naver' else 'cf_blog')
+        target = {'kind':kind,'arguments':arguments}
+        agendas.bind_target(target)
+        title = {'naver_blog':'네이버 예약','cf_blog':'CF 글 준비' if arguments.get('action')=='cf-prepare' else 'CF 발행','naver_kin':'지식인 답변','threads':'Threads 게시'}[project]+' · '+' · '.join(str(arguments[k]) for k in ('account','date','slot') if arguments.get(k))
+        business = agendas.propose('conference',target,title=title,project=project,
+            source={'conferenceId':key,'kind':kind,'arguments':arguments},
+            completion='이 글의 승인 원고·이미지 준비 증거 확인' if arguments.get('action')=='cf-prepare' else '지정 계정·날짜·슬롯의 실제 예약 또는 공개 게시 증거 확인')
     with locked(QUEUE):
         row = load(path)
+        if business and row:
+            previous=row.get('businessAgendaId')
+            if previous and previous!=business and row['status'] not in ('completed',):
+                with locked(agendas.ROWS):
+                    prior=agendas.get(previous);state=load(agendas.STATE)
+                    if prior.get('status')!='queued' or prior.get('activatedAt') or prior.get('kind')!='conference':
+                        raise agendas.AgendaWaiting('원래 안건의 실행·복구 권한을 유지합니다. 해당 안건을 이어서 처리해야 합니다.')
+                    prior.update(status='linked',parentAgendaId=business);agendas._save(prior)
+                    state['pending']=[i for i in state.get('pending',[]) if i!=previous];write(agendas.STATE,state)
+                    row['businessAgendaId']=business;write(path,row)
+            if not row.get('businessAgendaId'):
+                row['businessAgendaId']=business;write(path,row)
+            # A timer tick cannot replace a failed/finished business attempt.
+            return {'status':'conference_'+row['status'],'agendaId':key,'requestedAt':row['requestedAt'],'businessAgendaId':business}
         if row.get('status') in ('queued', 'running'):
             return {'status': 'conference_pending', 'agendaId': key, 'requestedAt':row['requestedAt']}
         if time.time() < row.get('retryAt', 0):
             return {'status': 'conference_retry_wait', 'agendaId': key, 'requestedAt':row['requestedAt']}
         row = {'agendaId': key, 'kind': kind, 'arguments': arguments, 'status': 'queued', 'requestedAt': time.time()}
+        if business:row['businessAgendaId']=business
         write(path, row)
     return {'status': 'conference_requested', 'agendaId': key, 'requestedAt':row['requestedAt']}
 
 
 def process_once():
     """One child per isolated channel; blog preparation cannot starve Kin/Threads."""
+    from common import work_agenda as agendas
     if not QUEUE.exists() or (Path.home() / 'EGO_EXEC_DISABLED').exists():
         return False
     with locked(QUEUE):
@@ -49,16 +156,31 @@ def process_once():
                         continue
                 except (OSError, KeyError, IndexError):
                     pass
+                if agendas.enabled():
+                    row.update(status='unknown',interruptedAt=time.time(),failureReason='worker_interrupted_verify_before_retry')
+                    if row.get('businessAgendaId'):agendas.hold(row['businessAgendaId'],'실행 프로세스가 중단됐습니다. 기존 제출 결과를 확인하기 전에는 재실행하지 않습니다.',recovery=True)
+                    write(path,row)
+                    continue
                 row.update(status='queued', interruptedAt=time.time())
                 write(path, row)
         for path, row in sorted(entries, key=lambda pair: pair[1].get('requestedAt', 0)):
             if row.get('status') != 'queued' or row.get('kind') not in ('parameters','kin','threads') or row['kind'] in active:
                 continue
+            business = row.get('businessAgendaId')
+            if agendas.enabled():
+                if not business:continue  # Deployment migrates legacy queued requests without replaying old failures.
+                current=agendas.active()
+                if current.get('id')!=business or not current.get('events',{}).get('opening',{}).get('receivedAt') or agendas.running(current):continue
+                if current.get('switchRequest') or current.get('status') not in ('meeting','executing','recovering'):continue
             log = path.with_suffix('.log')
             with log.open('ab') as output:
-                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True)
+                environment=dict(os.environ)
+                if agendas.enabled():environment['BAROLAB_AGENDA_CONTEXT']=json.dumps(agendas.token(current))
+                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True,env=environment)
             row.update(status='running', pid=child.pid, startTicks=Path('/proc', str(child.pid), 'stat').read_text().split(') ', 1)[1].split()[19])
             write(path, row)
+            if agendas.enabled():
+                with agendas.context(agendas.token(current)):agendas.register_process(child.pid)
             return True
     return False
 
@@ -68,7 +190,16 @@ def install_channel_conferences(kind):
     from common.channel_parameters import planning_or_memory, folder_for, KST
     from datetime import datetime
     day = datetime.now(KST).date().isoformat()
+    def verify_target(account,slot=None):
+        from common import work_agenda as agendas
+        if agendas.enabled():
+            row=agendas.require(project={'kin':'naver_kin','threads':'threads'}[kind])
+            args=(row.get('workTarget') or row.get('source') or {}).get('arguments',{})
+            if args.get('account') and args['account']!=account:raise ValueError('Agenda account changed; preserve original work')
+            if args.get('date')!=day:raise ValueError('Original publication date changed')
+            if kind=='threads' and slot and slot not in (args.get('slot'),args['date']+'-'+str(args.get('slot'))):raise ValueError('Agenda slot changed')
     def author_after_conference(identity, slot, topic, original, *args, **kwargs):
+        verify_target(identity, str(slot))
         from common import llm_client
         folder = folder_for('naver_kin' if kind == 'kin' else 'threads_posting', day, str(identity)+'-'+str(slot))
         plan = planning_or_memory(identity, topic, folder, {}, channel=kind)
@@ -80,12 +211,25 @@ def install_channel_conferences(kind):
             llm_client.generate_json = generate
     if kind == 'kin':
         import naver_kin.posting as engine
+        reserve=engine._naver_scheduler_reserve_run
+        def reserve_original(db,config,now=None,force=False):
+            from common import work_agenda as agendas
+            if agendas.enabled():
+                moment=now or engine._naver_scheduler_now_kst()
+                status=engine._naver_scheduler_cadence_status(db,config,moment)
+                verify_target(status.get('nextAccount'))
+                expected=(agendas.require().get('workTarget') or agendas.require()['source'])['arguments']
+                if status.get('activeRunId') or expected['date']!=moment.date().isoformat():
+                    raise ValueError('Original Kin cadence needs reconciliation; no new reservation')
+            return reserve(db,config,now=now,force=force)
+        engine._naver_scheduler_reserve_run=reserve_original
         author = engine._naver_authoring_generate_for_slot
         def generate_for_slot(account, slot_id, model, *args, **kwargs):
             return author_after_conference(account, slot_id, '다음 지식iN 답변의 질문 탐색 주제·독자·구성을 결정한다.', author, account, slot_id, model, *args, **kwargs)
         engine._naver_authoring_generate_for_slot = generate_for_slot
         original = engine._naver_browser_publish
         def publish(account, url, answer, before_submit=None):
+            verify_target(account)
             folder = folder_for('naver_kin', day, account + '-' + hashlib.sha256(url.encode()).hexdigest()[:16])
             planning_or_memory(account, '이 질문에 대한 답변 실행 계획: '+url+'\n'+answer[:800], folder, {}, channel='kin')
             from common.kin_screen import publish_with_screen
@@ -111,6 +255,11 @@ def install_channel_conferences(kind):
         folder = folder_for('threads_posting', day, str(part_id))
         with engine._threads_pipeline_connect(kwargs.get('db_path', args[0] if args else engine._threads_config_DB)) as db:
             part = dict(db.execute('SELECT * FROM parts WHERE part_id=?', (part_id,)).fetchone())
+        verify_target(part['account_key'],part['slot'])
+        from common import work_agenda as agendas
+        if agendas.enabled():
+            bound=agendas.require();target=(bound.get('workTarget') or bound.get('source') or {}).get('arguments',{})
+            if target.get('partId') and target['partId']!=part_id:raise ValueError('Different Threads part is outside the current agenda')
         engine._conference_context = {'channel':'Threads', 'account':part['account_key'], 'slot':part['slot'],
             'reserveTime':part['publication_date']+' '+part['slot'], 'title':part['text'].splitlines()[0], 'partId':part_id}
         readiness = engine._namespace_adapter.readiness_status(config)
@@ -163,10 +312,14 @@ def report_outcome(receipt, task_id, context=None):
         link = 'https://blog.naver.com/' + receipt['blogId']
         label = '예약 계정 블로그 열기 · 예약 글은 미공개'
         report['linkStatus'] = '글은 아직 미공개입니다. 링크는 해당 계정 블로그로 연결됩니다.'
-    response=staff_tool_reply('publi',task_id,{'tool':'publication_verification' if public or reserved or pending else 'channel_execution'},facts,stage='staff-terminal-response')
-    emit_work_event(actor='publi',actor_label='퍼블리',task_id=task_id,phase='completed',stage='staff-terminal-response',
-        message_kind='staff_reply',requested_to='jarvis',model=response['route']['events'][-1]['actualModel'],
-        output_kind=response['reply'],deliverable_url=link,deliverable_label=label,report=report)
+    try:
+        response=staff_tool_reply('publi',task_id,{'tool':'publication_verification' if public or reserved or pending else 'channel_execution'},facts,stage='staff-terminal-response')
+        emit_work_event(actor='publi',actor_label='퍼블리',task_id=task_id,phase='completed',stage='staff-terminal-response',
+            message_kind='staff_reply',requested_to='jarvis',model=response['route']['events'][-1]['actualModel'],
+            output_kind=response['reply'],deliverable_url=link,deliverable_label=label,report=report)
+        facts['staffResponse']=response
+    except Exception as exc:
+        facts.update(reportPending=True,reportErrorType=type(exc).__name__)
     return facts
 
 
@@ -191,7 +344,7 @@ def conference_failure_reason(exc):
     return 'execution_error'
 
 
-def work(identity):
+def _work(identity):
     if len(identity) != 64 or any(c not in '0123456789abcdef' for c in identity):
         raise ValueError('Invalid agenda identity')
     path = QUEUE / (identity + '.json')
@@ -219,6 +372,7 @@ def work(identity):
             for key in ('date', 'account', 'slot'):
                 if a.get(key): argv += ['--'+key, a[key]]
             result = main(argv, conference_worker=True)
+            if isinstance(result,dict) and result.get('preparationVerified') is True:row['preparation']=result
             if isinstance(result,dict):
                 row['eligibility'] = {k:result[k] for k in ('state','status','reason','owner') if k in result}
             receipts = result if isinstance(result, list) else [result]
@@ -227,12 +381,21 @@ def work(identity):
             if row['kind'] == 'kin':
                 engine.main(['--tick', '--scheduled'])
                 state = load(ROOT/'dashboard/data/kin-automation-state.json')
-                row['eligibility'] = {k:state.get(k) for k in ('reason','cadenceState','nextEligibleAt','globalRemainingRuns','submissionCounts')}
+                row['eligibility'] = {k:state.get(k) for k in ('reason','state','runs','runId','account','cadenceState','nextEligibleAt','globalRemainingRuns','submissionCounts')}
             else:
                 engine._conference_agenda = row['arguments'].get('topic', '')
-                dispatch = engine._threads_scheduler_tick()
+                if row['arguments'].get('partId'):
+                    dispatch=engine._threads_pipeline_publish(row['arguments']['partId'],engine._threads_config_load())
+                else:
+                    dispatch = engine._threads_scheduler_tick()
                 if isinstance(dispatch,dict):
                     row['eligibility'] = {k:dispatch[k] for k in ('state','status','reason') if k in dispatch}
+            if row['kind']=='threads' and not engine._conference_results and row['arguments'].get('slot'):
+                # Authoring and its matching main post finish inside the SAME agenda.
+                config=engine._threads_config_load()
+                with engine._threads_pipeline_connect() as db:
+                    part=db.execute("SELECT part_id FROM parts WHERE account_key=? AND publication_date=? AND slot=? AND kind='main' AND state='queued'",(row['arguments']['account'],row['arguments']['date'],row['arguments']['slot'])).fetchone()
+                if part:engine._threads_pipeline_publish(part['part_id'],config)
             receipts = engine._conference_results
         row['outcomes'] = []
         for receipt in receipts:
@@ -242,7 +405,11 @@ def work(identity):
             except Exception as exc:
                 row['reportPending'] = True
                 row['reportErrorType'] = type(exc).__name__
-        row.update(status='completed', completedAt=time.time(), retryAt=time.time()+60)
+        failed_runs=[r for r in (row.get('eligibility') or {}).get('runs',[]) if r.get('state') in ('blocked','failed','error')]
+        if failed_runs and not row['outcomes']:
+            row.update(status='failed',failureReason='native_run_blocked:'+str(failed_runs[0].get('reason','unknown'))[:120])
+        else:row['status']='completed'
+        row.update(completedAt=time.time(), retryAt=time.time()+60)
     except Exception as exc:
         row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300,
                    failureReason=conference_failure_reason(exc))
@@ -254,6 +421,60 @@ def work(identity):
         raise
     finally:
         write(path, row)
+        from common import work_agenda as agendas
+        if agendas.enabled() and row.get('businessAgendaId'):
+            record_conference_result(row, result if 'result' in locals() else None)
+
+
+def work(identity):
+    from common import work_agenda as agendas
+    if not agendas.enabled():return _work(identity)
+    row=load(QUEUE/(identity+'.json'))
+    current=agendas.require()
+    if row.get('businessAgendaId')!=current['id']:raise agendas.AgendaWaiting('Conference agenda ownership mismatch')
+    with agendas.execution(current['project']):
+        agendas.progress(current['id'],'executing','합의한 단일 계정·슬롯의 실행과 검증을 진행합니다.')
+        return _work(identity)
+
+
+def record_conference_result(row, result=None):
+    from common import work_agenda as agendas
+    business=agendas.get(row['businessAgendaId'])
+    outcomes=row.get('outcomes',[])
+    good=bool(outcomes) and all(o.get('publicationVerified') or o.get('reservationVerified') for o in outcomes)
+    preparation=isinstance(result,dict) and result.get('preparationVerified') is True
+    if row['status']=='completed' and (good or preparation):
+        if business['kind']=='conference':
+            response=next((o.get('staffResponse') for o in outcomes if o.get('staffResponse')),None)
+            staff={'actor':'publi','text':response['reply'],'route':{k:v for k,v in response['route']['events'][-1].items() if k in ('provider','reasoningEffort')}} if response else None
+            if staff:staff['route']['model']=response['route']['events'][-1].get('actualModel')
+            agendas.verified(business['id'],{'verified':True,'source':str(QUEUE/(row['agendaId']+'.json')),
+                'outcomes':[{k:o.get(k) for k in ('outcome','publicationVerified','reservationVerified','publicUrl','reserveTime','account','slot')} for o in outcomes],
+                'preparation':result if preparation else None},staff=staff)
+    else:
+        reason=row.get('failureReason') or (row.get('eligibility') or {}).get('reason') or '실제 제출·예약 결과가 아직 확인되지 않았습니다.'
+        agendas.hold(business['id'],reason,recovery=True)
+
+
+def retry_active():
+    from common import work_agenda as agendas
+    current=agendas.require()
+    target=current.get('workTarget') or current.get('source',{})
+    kind=target.get('kind');args=target.get('arguments',{})
+    if kind!='parameters' or args.get('action') not in ('naver','cf'):
+        raise ValueError('This original operation requires its registered reconciliation or repair tool')
+    from common.project_autonomy import recoverable_work
+    matches=[r for r in recoverable_work(current['project']) if r['date']==args.get('date') and r['identity']==args.get('account') and (r['slot'] is None if current['project']=='cf_blog' else r['slot']==args.get('slot'))]
+    if len(matches)!=1:raise ValueError('Same work is not verified as a pre-submission failure; reconcile existing results')
+    identity=hashlib.sha256(json.dumps([kind,args],sort_keys=True).encode()).hexdigest();file=QUEUE/(identity+'.json')
+    with locked(QUEUE):
+        row=load(file)
+        if row.get('businessAgendaId')!=current['id'] or row.get('status')!='failed' or row.get('attempts',1)>=2:raise ValueError('Original attempt is pending, unknown or its retry budget is exhausted')
+        row.setdefault('attemptHistory',[]).append({k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes')})
+        row.update(status='queued',attempts=row.get('attempts',1)+1,retryRequestedAt=time.time())
+        write(file,row)
+    agendas.progress(current['id'],'recovering','원래 계정·날짜·슬롯의 제출 전 실패를 같은 안건에서 재개합니다.')
+    return {'ok':True,'status':'queued','agendaId':identity,'businessAgendaId':current['id'],'publicationVerified':False}
 
 
 def main():

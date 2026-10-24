@@ -7,6 +7,8 @@ def execute_staff_action(action, *, task_id, request_id, observer=None, requeste
     from server.agent_tools import validate_staff_actions, execute_agent_tool
 
     checked = validate_staff_actions([action])[0]
+    from common import work_agenda as agendas
+    if agendas.enabled() and checked['tool'] not in agendas.READ_ONLY:agendas.require(project=checked['args'].get('project'))
     if not isinstance(task_id, str) or not task_id or not isinstance(request_id, str) or not request_id:
         raise ValueError('Claimed staff execution identity required')
     started = datetime.now(timezone.utc).isoformat()

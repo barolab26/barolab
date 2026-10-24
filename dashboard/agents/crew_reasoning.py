@@ -31,7 +31,7 @@ SCHEMA = {'type':'object','properties':{
     'decision':{'type':'string','enum':['tool','consult','finish','wait']},
     'message':{'type':'string','minLength':1,'maxLength':4000},
     'plan':{'type':'array','maxItems':8,'items':{'type':'string','maxLength':400}},
-    'tool':{'type':'string','enum':['','projects','project_status','evidence','evidence_batch','read_source','search_source','web_search','fetch_page','browser_observe','patch_status','memory','dispatch','propose_patch','prepare_recovery']},
+    'tool':{'type':'string','enum':['','projects','project_status','evidence','evidence_batch','read_source','search_source','web_search','fetch_page','browser_observe','patch_status','memory','dispatch','propose_patch','prepare_recovery','retry_conference']},
     'arguments':{'type':'string','maxLength':8000},
     'colleague':{'type':'string','enum':['',*ROLES]},
     'evidence_ids':{'type':'array','maxItems':24,'items':{'type':'string'}},
@@ -201,6 +201,10 @@ def browser_observe(row,args):
 def tool_call(row,tool,args):
     from server.agent_tools import execute_agent_tool,validate_staff_actions,enqueue_staff_request
     if not isinstance(args,dict):raise ValueError('Tool arguments must be an object')
+    if tool=='retry_conference':
+        from common.conference_dispatch import retry_active
+        if not (row['permissions']['execute'] or row['permissions']['repair']):raise ValueError('Execution not authorized')
+        return retry_active()
     if tool=='projects':return overview()
     if tool=='project_status':
         return execute_agent_tool(row['actor'],'read_agent_status',project=args['project'])
@@ -228,6 +232,23 @@ def tool_call(row,tool,args):
         from common.repair_workflow import prepare_project_recovery
         from server.agent_tools import STAFF_REQUEST_DIR
         actual=next((p for p in overview()['projects'] if p['id']==args['project']),None)
+        if row.get('businessAgendaId'):
+            from common import work_agenda as agendas
+            business=agendas.get(row['businessAgendaId'])
+            if (business.get('workTarget') or business.get('source',{})).get('kind')=='parameters':
+                from common.repair_workflow import prepare_conference_recovery
+                return bounded(prepare_conference_recovery())
+        if row.get('businessAgendaId') and actual:
+            for action in reversed(row.get('actionHistory',[])):
+                request=STAFF_REQUEST_DIR/(hashlib.sha256(action['requestId'].encode()).hexdigest()+'.json')
+                receipt=load(request)
+                if receipt.get('businessAgendaId')!=row['businessAgendaId'] or receipt.get('status') not in ('failed','held','unknown'):continue
+                from common import work_agenda as agendas
+                fingerprint=hashlib.sha256(('agenda:'+row['businessAgendaId']).encode()).hexdigest()
+                path=INCIDENTS/(fingerprint+'.json');INCIDENTS.mkdir(parents=True,exist_ok=True)
+                if not path.exists():write(path,{'taskId':'project-incident:'+fingerprint[:24],'status':'needs_attention','observation':actual,
+                    'dispatch':{'requestId':receipt['requestId'],'taskId':receipt['taskId']},'businessAgendaId':row['businessAgendaId']})
+                return bounded(prepare_project_recovery(path,request))
         for path in sorted(INCIDENTS.glob('*.json'),key=lambda p:p.stat().st_mtime,reverse=True)[:100]:
             incident=load(path);dispatch=incident.get('dispatch',{})
             if incident.get('observation',{}).get('id')!=args['project'] or not dispatch.get('requestId'):continue
@@ -308,6 +329,11 @@ def ask(row):
     prompt=('You are an operating agent in a continuing team task, not a status-report template. '
         'Decide the next investigation/action from evidence, actually use host tools by returning decision=tool. '
         'Preserve the original CEO objective and plan across turns. Do not output private chain-of-thought; provide concise operational decisions and evidence. '
+        'Business work follows one active agenda. Keep its concrete account/date/slot and completion criteria. '
+        'Your plan must contain concrete investigation, execution and verification steps before requesting tools. '
+        'Finish is a proposal: unresolved execution stays in the SAME agenda and cannot release the next task. '
+        'Do not repeat evidence reads with no new facts. A status question never preempts ongoing work. '
+        'retry_conference {} retries only the current exact publication after host submission checks; never use it to bypass uncertain submission. '
         'A failure is input for diagnosis, not a reason to stop. Read the precise records/source, consult the relevant colleague, choose a supported repair, and inspect its actual result. '
         'For revenue questions inspect revenue/traffic/metrics before recommending priorities; distinguish observed results, hypotheses, expected effects and validation steps. Missing values are not zero. '
         'Other staff receive the same goal, shared evidence and plan. Consult chooses the colleague dynamically; the colleague may investigate with tools before answering you. '
@@ -332,7 +358,7 @@ def ask(row):
         'decision=consult requires a colleague and a concrete question in message. decision=wait means an external constraint; name it. '
         'Return one JSON object matching this exact schema (arguments is a STRING containing JSON, not an object): '
         +json.dumps(SCHEMA,ensure_ascii=False)+'\nRespond in Korean.\n'+json.dumps({'originalObjective':row['goal'],'nowUtcEpoch':time.time(),'actor':row['actor'],
-        'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
+        'activeBusinessAgenda':__import__('common.work_agenda',fromlist=['view']).view().get('active'),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
         'observations':list(reversed(history)),'remainingDecisions':row.get('maxSteps',MAX_STEPS)-row['decisions']},ensure_ascii=False))
     routes=[]
     def route(provider,model,state,**meta):
@@ -381,7 +407,126 @@ def next_eligible_time(row,evidence_ids):
     return min(found) if found else None
 
 
+def ensure_business_agenda(row, agenda_id=None):
+    from common import work_agenda as agendas
+    permissions=row['permissions']
+    if not agendas.enabled() or row.get('businessAgendaId') or row.get('subgoals') or not (permissions['execute'] or permissions['repair'] or agenda_id):return
+    units=[]
+    if len(permissions['projects'])==1 and permissions['repair'] and not agenda_id and ':work:' not in row['requestId']:
+        initial=next((o['result'] for o in row.get('observations',[]) if o['tool']=='projects'),{})
+        observation=next((p for p in initial.get('projects',[]) if p['id']==permissions['projects'][0]),{})
+        units=observation.get('recoverableWork',[])
+    if len(units)>1:
+        row['subgoals']=[];row['recheckWholeScope']=True
+        for work in units:
+            project=permissions['projects'][0]
+            child=reason_request(row['requestId']+':work:'+work['workId'],
+                '원래 목표: '+row['goal']+'\n이번에는 다음 실패 작업 1건만 같은 대상에서 복구하고 실제 예약·공개 증거를 검증하세요. '+json.dumps(work,ensure_ascii=False),
+                execute=permissions['execute'],repair=True,steps=0,origin='agenda',projects=[project])
+            row['subgoals'].append(child['id'])
+            from common.channel_parameters import policy
+            args={'action':'cf' if project=='cf_blog' else 'naver','date':work['date'],'account':work['identity'],
+                  'slot':work.get('slot') or policy()['cf'].get(work['identity'])}
+            with locked(agendas.ROWS):
+                candidate=agendas.get(child['businessAgendaId']);candidate.update(workTarget={'kind':'parameters','arguments':args},priority=0 if row.get('origin','ceo')=='ceo' else 20);agendas._save(candidate)
+        row.update(status='waiting_children',answerSource='host');save(row);return
+    if len(permissions['projects'])>1 and not agenda_id:
+        row['subgoals']=[];row['recheckWholeScope']=True
+        for project in permissions['projects']:
+            child=reason_request(row['requestId']+':project:'+project,
+                row['goal']+'\n이번 안건의 대상은 '+project+' 한 프로젝트입니다. 다른 프로젝트는 별도 대기 안건으로 보존합니다.',
+                execute=permissions['execute'],repair=permissions['repair'],steps=0,lead=row.get('leadActor','jarvis'),
+                origin='agenda',projects=[project],max_steps=row.get('maxSteps',MAX_STEPS))
+            row['subgoals'].append(child['id'])
+            if row.get('origin','ceo')=='ceo':
+                with locked(agendas.ROWS):
+                    candidate=agendas.get(child['businessAgendaId']);candidate['priority']=0;agendas._save(candidate)
+        row.update(status='waiting_children',answerSource='host')
+        save(row);return
+    parent=load(goal_path(row['parentGoalId'])) if row.get('parentGoalId') else {}
+    scope=permissions['projects']
+    inherited=agenda_id or (parent.get('businessAgendaId') if parent and agendas.active().get('id')==parent.get('businessAgendaId') and scope==parent['permissions']['projects'] else None)
+    row['businessAgendaId']=inherited or agendas.propose('goal',row['requestId'],title=row['goal'][:250],
+        project=scope[0] if len(scope)==1 else 'all',source={'goalId':row['id']},
+        completion='요청한 실제 작업의 해결 증거와 담당자·팀장 마무리 보고',
+        priority=0 if row.get('origin','ceo')=='ceo' else 20,inherit=False)
+    with locked(agendas.ROWS):
+        agenda=agendas.get(row['businessAgendaId']);agenda['controllerGoalId']=row['id']
+        if inherited and row.get('origin')=='ceo':
+            agenda.update(controllerFailures=0,nextCheckAt=0)
+            if parent.get('pendingAction'):row['pendingAction']=dict(parent['pendingAction'])
+        agendas._save(agenda)
+    save(row)
+    active=agendas.active()
+    if row.get('origin')=='ceo' and active and active['id']!=row['businessAgendaId'] and re.search(r'(?:보류|유예)\s*(?:하고|후|한\s*뒤|해).*?(?:전환|먼저|대신)',row['goal']):
+        agendas.request_switch(active['id'],row['businessAgendaId'],row['goal'])
+
+
 def advance(row,steps=2):
+    from common import work_agenda as agendas
+    ensure_business_agenda(row)
+    if row.get('subgoals'):
+        children=[load(goal_path(i)) for i in row['subgoals']]
+        closed=[c for c in children if c.get('businessAgendaId') and agendas.get(c['businessAgendaId']).get('status')=='closed']
+        scope_verified=True
+        if len(closed)==len(children) and row.get('recheckWholeScope'):
+            from datetime import datetime
+            actual=overview()['projects'];latest=max(agendas.get(c['businessAgendaId']).get('verifiedAt',0) for c in closed)
+            checked=[]
+            for project in row['permissions']['projects']:
+                observation=next((p for p in actual if p['id']==project),{})
+                try:fresh=datetime.fromisoformat(observation['source']['sourceCheckedAt'].replace('Z','+00:00')).timestamp()>=latest
+                except (KeyError,ValueError,TypeError,AttributeError):fresh=False
+                checked.append(observation.get('status')=='healthy' and fresh)
+            scope_verified=all(checked)
+        if len(closed)==len(children) and scope_verified:
+            row.update(status='answered',answer='요청한 '+str(len(children))+'개 프로젝트 안건의 실행·검증·회의실 마무리 기록을 모두 확인했습니다.',
+                resolution={'status':'verified_resolved','label':'하위 안건 모두 검증·종결 수신 완료','agendaIds':[c['businessAgendaId'] for c in closed]})
+        else:
+            row.update(status='waiting_children',nextCheckAt=time.time()+15,progress={'phase':'한 안건씩 실행·검증',
+                'summary':str(len(closed))+'/'+str(len(children))+'개 안건 종결. '+('원래 요청 범위 전체의 새로운 정상 상태는 아직 확인되지 않았습니다.' if not scope_verified else '미완료 안건과 원래 목표를 보존하고 순서대로 진행합니다.'),'at':time.time()})
+        save(row);return row
+    business=row.get('businessAgendaId')
+    if not agendas.enabled() or not business:return _advance(row,steps)
+    existing=agendas.get(business)
+    if existing['status']=='closed':
+        row.update(status='answered',answerSource='host',answer='이 안건의 실제 검증과 담당자·팀장 마무리 보고가 회의실에 저장되었습니다. '+existing['completionCriteria'],
+                   resolution={'status':'verified_resolved','label':'원래 안건의 실제 검증·종결 수신 완료','agendaId':business})
+        save(row);return row
+    ownership=agendas.admit(business)
+    if not ownership:
+        row.update(status='queued_agenda',nextCheckAt=time.time()+5)
+        row['progress']={'phase':'안건 순서 대기','summary':'현재 안건의 실행·검증·마무리 보고가 끝난 뒤 이 안건을 시작합니다.','at':time.time()}
+        save(row);return row
+    agenda=agendas.get(business)
+    if agenda.get('controllerGoalId')!=row['id']:
+        row.update(status='waiting',nextCheckAt=time.time()+30);save(row);return row
+    if agenda.get('switchRequest') or agenda['status']=='report_pending':return row
+    with agendas.context(ownership):
+        if agenda.get('plan') and not agendas.flush_events(business):
+            row.update(status='waiting',nextCheckAt=time.time()+5);save(row);return row
+        result=_advance(row,steps)
+        resolution=row.get('resolution',{}).get('status')
+        if row['status'] in ('answered','blocked'):
+            if resolution=='verified_resolved':
+                if agenda['kind']=='goal' or (agenda['kind']=='staff' and not agendas.running(agendas.get(business))):
+                    agendas.verified(business,{'verified':True,'source':str(goal_path(row['id'])),
+                        'resolution':row['resolution'],'evidenceIds':row.get('evidenceIds',[])},
+                        manager={'actor':row.get('leadActor','jarvis'),'text':row.get('answer',''),'route':row.get('leadRoute')})
+            elif row['status']=='answered' and row['decisions']<row.get('maxSteps',MAX_STEPS) and row.get('finishRejections',0)<2:
+                row['finishRejections']=row.get('finishRejections',0)+1
+                observe(row,'host','completion_rejected',{}, {'reason':'원래 업무의 해결 증거가 없습니다. 같은 안건에서 실패 원인을 진단하고 복구하거나 정확한 외부 재개 조건을 확인하세요.'})
+                row.update(status='ready',nextCheckAt=time.time()+5)
+                agendas.progress(business,'recovering','실제 완료 조건을 충족하지 못해 같은 안건에서 원인 조사와 복구를 이어갑니다.')
+                save(row)
+            else:
+                agendas.hold(business,row.get('answer') or row.get('lastMessage') or '현재 증거로 완료 조건을 충족하지 못했습니다.')
+        else:
+            agendas.progress(business,'meeting' if not agendas.get(business).get('plan') else 'verifying' if row['status']=='waiting_verification' else 'recovering' if agenda['status']=='recovering' else 'executing',row.get('lastMessage','현재 안건을 진행합니다.'))
+        return result
+
+
+def _advance(row,steps=2):
     if not refresh_pending(row):return row
     if row['status']=='waiting_external' and time.time()<row.get('nextCheckAt',0):return row
     row.pop('waitingMessage',None)
@@ -397,6 +542,11 @@ def advance(row,steps=2):
             if not isinstance(decision.get('plan'),list) or not isinstance(decision.get('message'),str) or not 1<=len(decision['message'])<=4000:raise ValueError('Invalid operational decision')
             note={'id':row['decisions'],'actor':row['actor'],'text':safe(decision['message']),'kind':decision['decision'],'route':row['lastRoute'],'ts':int(time.time()*1000),'modelLatencyMs':round((time.time()-started)*1000)}
             row.setdefault('discussion',[]).append(note);save(row)
+            from common import work_agenda as agendas
+            if agendas.enabled() and row.get('businessAgendaId'):
+                agendas.record_plan(row['businessAgendaId'],decision['plan'],row['lastRoute'])
+                if not agendas.flush_events(row['businessAgendaId']):
+                    row.update(status='waiting',nextCheckAt=time.time()+5);save(row);return row
             if not (row['actor']==row.get('leadActor','jarvis') and decision['decision'] in ('finish','wait')):deliver_step(row,note)
             row['lastMessage']=decision['message']
             if row['actor']==row.get('leadActor','jarvis'):row['plan']=decision['plan']
@@ -463,7 +613,7 @@ def requested_projects(question):
     return scoped or [row[0] for row in SOURCES]
 
 
-def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead='jarvis',origin='ceo',projects=None,max_steps=MAX_STEPS,history=None,session_id=None):
+def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead='jarvis',origin='ceo',projects=None,max_steps=MAX_STEPS,history=None,session_id=None,agenda_id=None):
     if lead not in ROLES:raise ValueError('Unknown goal owner')
     identity=hashlib.sha256(request_id.encode()).hexdigest()
     with claim(identity) as acquired:
@@ -473,14 +623,14 @@ def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead
             parent=conversation_parent(question,history or [])
             scope=projects or requested_projects(question)
             implicit=bool(re.search(r'그거|그것|그럼|아까|이어서|계속',question))
-            if parent and implicit:scope=parent['permissions']['projects']
+            if parent and implicit and scope==requested_projects(''):scope=parent['permissions']['projects']
             row={'id':identity,'requestId':request_id,'userTurnId':request_id.rsplit(':',1)[0],
                  'goal':question,'permissions':{'execute':execute,'repair':repair,'projects':scope},'actor':lead,'leadActor':lead,'origin':origin,'maxSteps':max_steps,
                  'createdAt':time.time(),'status':'ready','decisions':0,'observations':[],'plan':[], 'conversation':safe([{k:m.get(k) for k in ('who','text','goalId','userTurnId')} for m in (history or [])[-6:]]),'sessionId':session_id}
             if parent:
                 row.update(parentGoalId=parent['id'],lineageId=parent.get('lineageId',parent['id']),parentObjective=parent['goal'],plan=parent.get('plan',[]),observations=parent.get('observations',[])[:],actionHistory=parent.get('actionHistory',[])[:],executed=dict(parent.get('executed',{})))
                 if parent.get('resolution',{}).get('status')=='verified_resolved':row['lineageId']=identity
-                if implicit and len(scope)>1 and (execute or repair):
+                if implicit and len(scope)>1 and (execute or repair) and not __import__('common.work_agenda',fromlist=['enabled']).enabled():
                     row.update(status='answered',answerSource='host',answer='앞선 안건에 여러 프로젝트가 있습니다. 복구할 프로젝트를 지정해 주세요. 기존 조사 결과는 보존했습니다.',resolution={'status':'needs_clarification','label':'복구 대상 확인이 필요합니다.'})
             try:initial=overview()
             except Exception as exc:initial={'available':False,'errorType':type(exc).__name__}
@@ -492,6 +642,7 @@ def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead
             row['priorCases']=[{k:c.get(k) for k in ('goalId','answer','evaluationStatus','resolution','actualToolOutcomes','actionHistory')} for c in selected]
             row['retrievedCases']=[{'recipeId':c['goalId'],'version':hashlib.sha256(json.dumps(c,sort_keys=True,ensure_ascii=False).encode()).hexdigest()} for c in selected]
             observe(row,'host','projects',{},initial)
+        ensure_business_agenda(row,agenda_id)
         if row['goal']!=question:raise ValueError('Goal identity conflict')
         if row['status'] not in ('answered','blocked'):advance(row,steps)
         row['interactiveUntil']=time.time()+15;save(row)
@@ -510,6 +661,13 @@ def start_autonomous_goal_once():
     if len(pending)>=4:return False
     busy={project for goal in pending if goal.get('origin')=='project-monitor' and goal.get('status') not in ('answered','blocked') for project in goal['permissions']['projects']}
     from server.project_monitor import INCIDENTS,incident_key
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        state=load(agendas.STATE)
+        for identity in [state.get('activeId'),*state.get('pending',[])]:
+            if identity:
+                existing=agendas.get(identity)
+                if existing.get('status') not in ('closed','suspended'):busy.add(existing.get('project'))
     current={project['id']:project for project in overview()['projects']}
     for path in sorted(INCIDENTS.glob('*.json'),key=lambda p:p.stat().st_mtime,reverse=True)[:40]:
         incident=load(path)
@@ -532,6 +690,7 @@ def start_autonomous_goal_once():
 
 def resume_once(lane=None):
     if lane=='background':evaluate_case_once()
+    from common import work_agenda as agendas
     for marker in sorted((GOALS/'pending').glob('*'),key=lambda p:p.stat().st_mtime):
         if not re.fullmatch(r'[a-f0-9]{64}',marker.name):continue
         row=load(goal_path(marker.name))
@@ -543,10 +702,17 @@ def resume_once(lane=None):
         with claim(marker.name) as acquired:
             if not acquired:continue
             row=load(goal_path(marker.name))
+            if agendas.enabled() and row.get('businessAgendaId') and agendas.active().get('id')!=row['businessAgendaId']:
+                bound=agendas.get(row['businessAgendaId'])
+                if bound.get('status')=='closed':
+                    if row.get('status') not in ('answered','blocked'):advance(row,0)
+                else:
+                    if row.get('status') not in ('answered','blocked'):advance(row,0)
+                    continue
             if row.get('status') in ('answered','blocked'):
                 if time.time()<row.get('interactiveUntil',0):continue
                 deliver(row)
-                if row.get('delivered') or row.get('deliveryAttempts',0)>=3:marker.unlink(missing_ok=True)
+                if row.get('delivered') or (not agendas.enabled() and row.get('deliveryAttempts',0)>=3):marker.unlink(missing_ok=True)
                 return True
             if row.get('status')=='waiting_verification':
                 return recheck_resolution(row)
@@ -578,8 +744,9 @@ def deliver(row):
         row['delivered']=True
     except Exception:
         row['deliveryAttempts']=row.get('deliveryAttempts',0)+1
-        if row['deliveryAttempts']<3:
-            (GOALS/'pending'/row['id']).touch();row['nextCheckAt']=time.time()+30
+        from common import work_agenda as agendas
+        if row['deliveryAttempts']<3 or agendas.enabled():
+            (GOALS/'pending'/row['id']).touch();row['nextCheckAt']=time.time()+min(300,30*row['deliveryAttempts'])
     write(goal_path(row['id']),row)
 
 
@@ -685,8 +852,10 @@ def verify_resolution(row):
     # A new checksum alone is not success: require a healthy, fresh source after the action.
     from datetime import datetime
     requested=max((e['result'].get('requestedAt') or e['observedAt'] for e in receipts),default=row.get('createdAt',time.time())-300)
+    from common import work_agenda as agendas
+    exact_target=agendas.enabled() and row.get('businessAgendaId') and bool(agendas.get(row['businessAgendaId']).get('workTarget'))
     for event in row['observations']:
-        if event['tool']!='project_status':continue
+        if event['tool']!='project_status' or exact_target:continue
         observation=event.get('result',{}).get('data',{}).get('observation',{})
         checked=(observation.get('source') or {}).get('sourceCheckedAt')
         try:stamp=datetime.fromisoformat(checked.replace('Z','+00:00')).timestamp()
@@ -729,7 +898,7 @@ def resume_ceo_once():return resume_once('ceo')
 def resume_background_once():return resume_once('background')
 
 
-def recheck_resolution(row):
+def _recheck_resolution(row):
     from server.agent_tools import execute_agent_tool
     for project in row['permissions']['projects']:
         try:result=execute_agent_tool(row.get('leadActor','jarvis'),'read_agent_status',project=project)
@@ -745,3 +914,16 @@ def recheck_resolution(row):
     else:
         row['nextCheckAt']=time.time()+30;set_progress(row,'사후 검증', '실행 후 원천 상태가 실제로 정상화됐는지 확인하고 있습니다. '+row['resolution']['label'])
     return True
+
+
+def recheck_resolution(row):
+    from common import work_agenda as agendas
+    if not agendas.enabled() or not row.get('businessAgendaId'):return _recheck_resolution(row)
+    agenda=agendas.get(row['businessAgendaId'])
+    if agendas.active().get('id')!=agenda['id']:return False
+    with agendas.context(agendas.token(agenda)):
+        result=_recheck_resolution(row)
+        if row.get('resolution',{}).get('status')=='verified_resolved' and agenda['kind'] in ('goal','staff'):
+            agendas.verified(agenda['id'],{'verified':True,'source':str(goal_path(row['id'])),'resolution':row['resolution']})
+        elif row['status']=='blocked':agendas.hold(agenda['id'],row.get('answer','실제 해결 증거를 기다립니다.'))
+        return result

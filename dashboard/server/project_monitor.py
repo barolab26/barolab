@@ -249,6 +249,16 @@ def sample_project_health_once():
 
 
 def process_project_monitor_once():
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        # Observation may offer work, but only the active goal investigates or dispatches.
+        INCIDENTS.mkdir(parents=True,exist_ok=True)
+        for project in observed_projects():
+            if project.get('status') not in ('attention','stale','unknown'):continue
+            key=incident_key(project);path=INCIDENTS/(key+'.json')
+            if not path.exists():save_json(path,{'version':1,'taskId':'project-incident:'+key[:24],'fingerprint':key,
+                'status':'needs_attention','observedAt':time.time(),'observation':project,'publicationAttempted':False})
+        return False
     now = time.time()
     try:
         state = json.loads(STATE.read_text(encoding='utf-8'))
@@ -318,6 +328,8 @@ def process_project_monitor_once():
 
 def process_project_feedback_once():
     from common.repair_workflow import dispatch_project_recovery_once, prepare_project_recovery
+    from common import work_agenda as agendas
+    if agendas.enabled():return dispatch_project_recovery_once()
     # The existing supervisor consumes one next phase; no additional worker or
     # model-generated command loop is introduced.
     if dispatch_project_recovery_once():

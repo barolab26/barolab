@@ -217,6 +217,8 @@ def prepare_project_recovery(incident_path, request_path):
     source=project_root/project[2]
     raw=source.read_bytes()
     if len(raw)>2000000 or source.is_symlink():raise ValueError('Invalid registered source')
+    from common import work_agenda as agendas
+    business=agendas.require(project=project[0]) if agendas.enabled() else {}
     task_id=incident['taskId']
     plan={'project':project[0],'projectRoot':str(project_root),'sourcePath':str(source),
           'sourceSha256':_sha(raw),'sourceSnapshot':json.loads(raw),
@@ -236,11 +238,51 @@ def prepare_project_recovery(incident_path, request_path):
     with locked(ROOT):
         if path.exists():
             prior=json.loads(path.read_bytes())
+            if business and not prior.get('businessAgendaId'):
+                prior['businessAgendaId']=business['id'];write(path,prior)
             # Source changes do not silently grant a second repair/resume budget.
             return {'taskId':task_id,'planSha256':prior['planSha256'],'status':prior['status']}
         row={'type':'project_recovery_v1','taskId':task_id,'plan':plan,'planSha256':digest,
              'step':'discover','status':'ready','steps':{},'resumeAttempted':False}
+        if business:row['businessAgendaId']=business['id']
         write(path,row)
+    return {'taskId':task_id,'planSha256':digest,'status':'ready'}
+
+
+def prepare_conference_recovery():
+    """Bind the real failed conference itself; do not invent a staff execution receipt."""
+    from common import work_agenda as agendas,conference_dispatch as conferences
+    from common.collection_observability import load
+    from common.recovery_evidence import failure_targets
+    from server.project_health import SOURCES,ROOT as project_root
+    business=agendas.require()
+    target=business.get('workTarget') or business.get('source',{})
+    args=target.get('arguments',{})
+    if target.get('kind')!='parameters' or args.get('action') not in ('naver','cf'):
+        return {'status':'needs_evidence','reason':'This operation needs its registered channel reconciliation tool'}
+    identity=_sha(json.dumps(['parameters',args],sort_keys=True).encode())
+    original_path=conferences.QUEUE/(identity+'.json');original=load(original_path)
+    if original.get('businessAgendaId')!=business['id'] or original.get('status')!='failed':
+        raise ValueError('Only the original owned, known failed conference permits repair')
+    targets=[t for t in failure_targets(project_root,business['project']) if t['date']==args['date'] and t['identity']==args['account'] and (business['project']=='cf_blog' or t['slot']==args['slot'])]
+    if len(targets)!=1 or targets[0]['submissionStarted']:
+        return {'status':'needs_evidence','reason':'Exact failed work is missing or submission requires reconciliation'}
+    source=project_root/next(s[2] for s in SOURCES if s[0]==business['project'])
+    raw=source.read_bytes();task_id='project-incident:'+business['id'][:24]
+    plan={'project':business['project'],'projectRoot':str(project_root),'sourcePath':str(source),
+          'sourceSha256':_sha(raw),'sourceSnapshot':json.loads(raw),'originalRequestPath':str(original_path),
+          'originalRequestSha256':_sha(original_path.read_bytes()),'originalTaskId':'conference:'+identity,
+          'executionRef':None,'action':{'agent':'publi','tool':'run_project_cycle','args':{'project':business['project']}},
+          'failure':[{'reason':original.get('failureReason'),'errorType':original.get('errorType')}],'workTarget':targets[0]}
+    path=_recovery_path(task_id)
+    with locked(ROOT):
+        previous=load(path)
+        if previous:
+            if previous.get('businessAgendaId')!=business['id']:raise ValueError('Recovery ownership mismatch')
+            return {k:previous[k] for k in ('taskId','planSha256','status')}
+        digest=_sha(json.dumps(plan,sort_keys=True,ensure_ascii=False).encode())
+        write(path,{'type':'project_recovery_v1','taskId':task_id,'plan':plan,'planSha256':digest,
+            'step':'discover','status':'ready','steps':{},'resumeAttempted':False,'businessAgendaId':business['id']})
     return {'taskId':task_id,'planSha256':digest,'status':'ready'}
 
 
@@ -577,6 +619,15 @@ def _observe_recovery_process(row):
     from server.agent_tools import EGO_PROCESS_DIR
     request_id='recovery:'+row['planSha256']
     result=row.get('resumeResult') or {}
+    if result.get('conferenceAgendaId'):
+        from common.project_autonomy import terminal_result
+        observed=terminal_result(result)
+        if observed is None:row['status']='awaiting_completion';return
+        outcome,receipt=observed
+        row['resumeResult'].update(outcome)
+        row['processObservation']={'conferenceAgendaId':result['conferenceAgendaId'],'sha256':outcome.get('controllerEvidenceSha256'),'observedAt':time.time()}
+        row.update(status='ready' if outcome['status']=='completed' else 'resume_held',step='verify')
+        return
     supplied=result.get('receiptPath')
     candidates=[Path(supplied)] if supplied else sorted(EGO_PROCESS_DIR.glob('*/receipt.json'),key=lambda p:p.stat().st_mtime,reverse=True)[:100]
     matches=[]
@@ -709,6 +760,10 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
     """Execute exactly one durable phase; retries of a claimed phase never run it again."""
     from common import coding_job
     path,row=_recovery_row(task_id,plan_sha256)
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        current=agendas.require(project=row['plan']['project'])
+        if row.get('businessAgendaId')!=current['id']:raise ValueError('Recovery is not bound to the active agenda')
     with locked(ROOT):
         path,row=_recovery_row(task_id,plan_sha256)
         if actor!=recovery_expected_actor(task_id,plan_sha256):raise ValueError('Wrong recovery role')
@@ -851,6 +906,9 @@ def dispatch_project_recovery_once():
         try:row=json.loads(path.read_bytes())
         except (OSError,ValueError):continue
         if row.get('type')!='project_recovery_v1':continue
+        from common import work_agenda as agendas
+        current=agendas.active() if agendas.enabled() else {}
+        if agendas.enabled() and (not current or row.get('businessAgendaId')!=current['id']):continue
         if row.get('status')=='awaiting_inputs':
             _observe_work_acquisition(row)
             write(path,row)
@@ -907,8 +965,10 @@ def dispatch_project_recovery_once():
             write(path,row)
         actor=recovery_expected_actor(row['taskId'],row['planSha256'])
         request='recovery:'+row['planSha256']+':'+phase+':'+str(row.get('waitCount',0))
-        receipt=enqueue_staff_request(request,[{'agent':actor,'tool':'advance_project_recovery',
-            'args':{'task_id':row['taskId'],'plan_sha256':row['planSha256']}}])
+        from contextlib import nullcontext
+        with agendas.context(agendas.token(current)) if current else nullcontext():
+            receipt=enqueue_staff_request(request,[{'agent':actor,'tool':'advance_project_recovery',
+                'args':{'task_id':row['taskId'],'plan_sha256':row['planSha256']}}])
         # Reload: the consumer may have already completed this phase.
         with locked(ROOT):
             current=json.loads(path.read_bytes())

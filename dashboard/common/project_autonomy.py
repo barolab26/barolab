@@ -20,6 +20,8 @@ COMMANDS = {
 
 
 def run_project_cycle(project):
+    from common import work_agenda as agendas
+    if agendas.enabled():agendas.require(project=project)
     from server.agent_tools import _ego_popen
     from common.system_watchdog import is_process_running_match
     if project not in COMMANDS: raise ValueError('Unknown project')
@@ -31,7 +33,8 @@ def run_project_cycle(project):
         kind = {'naver_kin':'kin','threads':'threads'}.get(project,'parameters')
         arguments = ({'action':'cf-cycle' if project=='cf_blog' else 'naver-cycle',
                       'date':None,'account':None,'slot':None} if kind=='parameters' else {})
-        receipt = request(kind, arguments)
+        receipt = request(kind, arguments, one=True)
+        if not receipt.get('agendaId'):return {'ok':True,'status':'no_work','project':project,'reason':receipt.get('reason'),'publicationVerified':False}
         return {'ok':True, 'status':'awaiting_completion', 'project':project,
                 'conferenceAgendaId':receipt['agendaId'], 'conferenceRequestedAt':receipt['requestedAt'],
                 'publicationVerified':False}
@@ -74,6 +77,8 @@ def recoverable_work(project):
 
 
 def recover_project_work(project, work_id):
+    from common import work_agenda as agendas
+    if agendas.enabled():agendas.require(project=project)
     from common.conference_dispatch import request, QUEUE
     if project not in ('cf_blog','naver_blog') or not isinstance(work_id,str) or not re.fullmatch(r'[0-9a-f]{64}',work_id):
         raise ValueError('Invalid exact work recovery identity')
@@ -88,7 +93,7 @@ def recover_project_work(project, work_id):
             if prior.get('project')!=project:raise ValueError('Recovery project identity mismatch')
             agenda=load(QUEUE/(prior['conference']['agendaId']+'.json'))
             if prior.get('attempts',1)>=2 or agenda.get('status')!='failed' or agenda.get('retryAt',float('inf'))>time.time():
-                return prior
+                return completion_receipt(prior)
         target=next((t for t in recoverable_work(project) if t['workId']==work_id),None)
         if target is None:
             return {'ok':False,'status':'held','project':project,'reason':'same_work_not_eligible_or_requires_reconciliation'}
@@ -96,13 +101,24 @@ def recover_project_work(project, work_id):
               'account':target['identity'],'slot':target['slot']}
         # Same conference identity as the standard scheduler, never an alternate engine.
         agenda=request('parameters',args)
+        if agendas.enabled() and agenda.get('status')=='conference_failed':
+            from common.conference_dispatch import retry_active
+            retry_active()
         result={'ok':True,'status':'requested','project':project,'workId':work_id,
                 'account':target['identity'],'date':target['date'],'slot':target['slot'],
                 'conference':agenda,'publicationVerified':False,'requestedAt':time.time(),
                 'attempts':prior.get('attempts',1)+1 if prior else 1,
                 'attemptHistory':(prior.get('attemptHistory',[])+[{k:prior[k] for k in ('conference','requestedAt')}]) if prior else []}
         write(path,result)
-        return result
+        return completion_receipt(result)
+
+
+def completion_receipt(result):
+    conference=result.get('conference') or {}
+    if conference.get('agendaId'):
+        return {**result,'status':'awaiting_completion','conferenceAgendaId':conference['agendaId'],
+                'conferenceRequestedAt':conference.get('requestedAt')}
+    return result
 
 
 def terminal_result(result):
@@ -118,7 +134,7 @@ def terminal_result(result):
         expected = {'cf_blog':'parameters','naver_blog':'parameters','naver_kin':'kin','threads':'threads'}.get(result.get('project'))
         if not expected or receipt.get('agendaId') != identity or receipt.get('kind') != expected:
             raise ValueError('Conference identity mismatch')
-        if expected == 'parameters' and receipt.get('arguments',{}).get('action') != ('cf-cycle' if result['project']=='cf_blog' else 'naver-cycle'):
+        if expected == 'parameters' and receipt.get('arguments',{}).get('action') not in (('cf-cycle','cf') if result['project']=='cf_blog' else ('naver-cycle','naver')):
             raise ValueError('Conference channel action mismatch')
         if receipt.get('requestedAt') != result.get('conferenceRequestedAt'):
             return {'ok':False, 'status':'unknown', 'project':result['project'],
@@ -131,7 +147,8 @@ def terminal_result(result):
             status = 'no_work' if not outcomes else 'completed' if all(verified) else 'partial' if any(verified) else 'unknown'
         return {'ok':status in ('completed','no_work'), 'status':status,
                 'project':result['project'], 'conferenceAgendaId':identity,
-                'publicationVerified':any(row.get('publicationVerified') is True for row in outcomes),
+                'publicationVerified':status=='completed' and all(row.get('publicationVerified') is True for row in outcomes),
+                'reservationVerified':status=='completed' and bool(outcomes) and all(row.get('reservationVerified') is True for row in outcomes),
                 'outcomes':outcomes, 'eligibility':receipt.get('eligibility'),
                 'errorType':receipt.get('errorType'), 'reason':receipt.get('failureReason'),
                 'controllerEvidenceSha256':hashlib.sha256(raw).hexdigest()}, receipt
@@ -168,6 +185,13 @@ def terminal_result(result):
 
 
 def process_project_autonomy_once():
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        # Channel timers propose concrete due work; no five-minute no-work staff meetings.
+        from common.conference_dispatch import request
+        config=load(CONFIG)
+        if config.get('enabled') and 'threads' in config.get('projects',[]):request('threads',{})
+        return False
     from server.agent_tools import STAFF_REQUEST_DIR, enqueue_staff_request
     try: config=json.loads(CONFIG.read_bytes())
     except (OSError,ValueError): return False

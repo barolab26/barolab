@@ -25,7 +25,8 @@ class SameWorkRecoveryTests(unittest.TestCase):
              patch.object(conference,'request',return_value={'status':'conference_requested','agendaId':'b'*64}) as request:
             for _ in range(2):
                 result=tools._execute_agent_tool('publi','recover_project_work',project='naver_blog',work_id='a'*64)
-                self.assertEqual(result['status'],'requested')
+                self.assertEqual(result['status'],'awaiting_completion')
+                self.assertEqual(result['conferenceAgendaId'],'b'*64)
                 self.assertFalse(result['publicationVerified'])
             request.assert_called_once_with('parameters',{'action':'naver','date':'2026-10-25','account':'soultin','slot':'07:40'})
             with self.assertRaises(ValueError):tools._execute_agent_tool('patch','recover_project_work',project='naver_blog',work_id='a'*64)

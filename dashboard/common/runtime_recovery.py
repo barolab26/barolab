@@ -25,6 +25,8 @@ def runtime_state(project):
 
 
 def recover_project_runtime(project):
+    from common import work_agenda as agendas
+    if agendas.enabled():agendas.require(project=project)
     if project not in UNITS:
         raise ValueError('Unregistered runtime project')
     if (Path.home() / 'EGO_EXEC_DISABLED').exists():

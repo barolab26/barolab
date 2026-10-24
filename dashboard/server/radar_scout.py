@@ -276,6 +276,12 @@ class RadarScout:
             raise
 
     def trigger(self, publisher=None, slot=None, background=True):
+        from common import work_agenda as agendas
+        if agendas.enabled() and not agendas.current():
+            key=slot or now_iso()[:10]
+            identity=agendas.propose('radar',key,title='레이더 시장 조사 · '+str(key),project='collections',
+                source={'slot':slot},completion='실제 조회한 출처와 확인·미확인 사항을 구분한 조사 보고',priority=30)
+            return {'started':False,'status':'queued','businessAgendaId':identity}
         claim = self.claim(slot)
         if not claim["started"]:
             return claim

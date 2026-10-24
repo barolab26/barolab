@@ -771,6 +771,8 @@ def apply_job(job_id, canary=False):
 
 @observed_operation('content_maintenance', 'maintenance-apply')
 def _apply_job(job_id, canary=False):
+    from common import work_agenda as agendas
+    if agendas.enabled():agendas.require(project='legacy_remodel')
     import requests
     sys.path.insert(0, str(ROOT / 'dashboard'))
     from metrics import collector_lock
@@ -1015,6 +1017,16 @@ def recover_jobs():
 
 @observed_operation('content_maintenance', 'maintenance-run')
 def run_once(force_prepare=False):
+    from common import work_agenda as agendas
+    if agendas.enabled() and not agendas.current():
+        from server.agent_tools import enqueue_staff_request
+        config=state()
+        if not operation_enabled():return public_summary()
+        summary=public_summary()
+        eligible=[j for j in summary.get('queue',[]) if j.get('status') in ('ready','issues_found','retry_wait')]
+        if not eligible:return summary
+        identity='maintenance:'+str(eligible[0]['id'])
+        return enqueue_staff_request(identity,[{'agent':'doctor','tool':'run_project_cycle','args':{'project':'legacy_remodel'}}])
     sys.path.insert(0, str(ROOT / 'dashboard'))
     from metrics import collector_lock
     with collector_lock(DATA / 'content-maintenance.lock') as acquired:
@@ -1094,6 +1106,7 @@ def run_once(force_prepare=False):
             runtime(status='waiting', stage='monitor', reason='실측 상위 유망 글 대기 · 발행 엔진과 독립')
             return public_summary()
         job = next((r for r in rows if r['domain'] != last_domain), rows[0])
+        if agendas.enabled():agendas.bind_target({'maintenanceJobId':job['id'],'url':job.get('url')})
         if job['status'] != 'ready':
             window=preparation_window()
             if not window['available']:

@@ -873,7 +873,7 @@
           🛡️ 6대 전 프로젝트 감사·브리핑
         </button>
         <button type="button" class="btn-patrol-trigger" id="btn-trigger-doctor-patrol" title="닥터(Doctor)가 기존 발행 글 5건을 즉시 순찰·7대 검진·카테고리 자동 패치 후 회의실에 보고합니다">
-          🩺 닥터 5건 즉시 검진·수술
+          🩺 닥터 검진 5건 안건 등록
         </button>
         <button type="button" class="btn-quick" id="btn-radar-scout" title="원천 자료를 수집하고 내부 채팅에 제안합니다. 외부 발행은 하지 않습니다.">🔍 레이더 즉시 스카우팅 출동</button>
         <button class="btn-quick" id="btn-new-meeting" style="cursor:pointer;" title="현재 회의를 진행 중으로 보관하고 새 회의 시작">새 회의 (보관)</button>
@@ -940,6 +940,7 @@
           </div>
         </div>
 
+        <section id="work-agenda-board" hidden aria-label="현재 업무 안건" style="padding:14px 18px;border-bottom:1px solid #cbd5e1;background:#f8fafc;max-height:260px;overflow:auto;flex-shrink:0;"></section>
         <div class="room-stream chat-messages" id="room-stream"></div>
         <dialog id="work-records-dialog" style="width:min(900px,90vw);max-height:80vh;border:1px solid #cbd5e1;border-radius:12px;padding:20px;">
           <h3>업무 기록</h3>
@@ -1273,7 +1274,7 @@
     streamEl.querySelectorAll('.msg-row[data-msg-id]').forEach(rowEl => {
       const mid = rowEl.dataset.msgId;
       const m = messageStore.get(mid);
-      const visible = m ? doesMessageMatchFilters(m, activeAgentFilter, ceoOnlyFilterActive) : true;
+      const visible = m ? agendaMessageVisible(m) && doesMessageMatchFilters(m, activeAgentFilter, ceoOnlyFilterActive) : true;
       rowEl.classList.toggle('is-hidden-by-filter', !visible);
     });
   }
@@ -1429,6 +1430,7 @@
 
   function isNoiseMessage(m) {
     if (!m || !m.text) return true;
+    if (m.isAgendaEvent || m.agendaId) return false;
     if (m.goalId && m.userTurnId) return false;
     if (m.eventType === 'crew_work_event' && m.taskId && m.eventId) return false;
     const mid = String(m.id || '');
@@ -1475,7 +1477,8 @@
 
   function isConversationMessage(m) {
     if (!m) return false;
-    if (m.who === 'user') return true;
+    if (m.who === 'user' || m.isAgendaEvent) return true;
+    if (m.agendaId && m.goalId) return true;
     if (m.goalId && m.userTurnId && !m.autonomous) return ['jarvis','publi','trace','patch','radar','doctor'].includes(m.who);
     if (m.eventType === 'crew_work_event') return crewConversationText(m) !== null;
     return ['jarvis','publi','trace','patch','radar','doctor'].includes(m.who)
@@ -1811,6 +1814,7 @@
   async function loadRoom(resetScrollToBottom = false) {
     const res = await apiFetch('/api/chat/room');
     const data = await res.json();
+    renderAgendaBoard(data.workAgenda);
     if (data.kstNow) updateKstClockDisplay(data.kstNow);
     renderCrewList(data.agents || []);
     renderArchiveList(data.archivedMeetings || []);
@@ -1909,6 +1913,59 @@
     btn.addEventListener('click', () => insertMention(btn.dataset.mention));
   });
 
+  let agendaBoardKey = '';
+  let currentAgendaId = '';
+  let focusCurrentAgenda = true;
+  function renderAgendaBoard(board) {
+    if (!board) return;
+    const node = document.getElementById('work-agenda-board');
+    node.hidden = !board.enabled;
+    if (!board.enabled) return;
+    const key = JSON.stringify(board);
+    if (key === agendaBoardKey) return;
+    agendaBoardKey = key;
+    const row = board.active;
+    currentAgendaId = row?.id || '';
+    const queue = (board.pending || []).slice(0, 5);
+    node.innerHTML = row ? `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><strong>${escapeHtml(row.phase)} · 현재 안건 1개</strong><button type="button" id="agenda-focus-toggle" aria-pressed="${focusCurrentAgenda}">${focusCurrentAgenda ? '전체 대화 보기' : '현재 안건에 집중'}</button></div>
+      <div style="font-weight:700;margin:8px 0">${escapeHtml(row.title)}</div>
+      <div>담당: ${escapeHtml(row.ownerLabel || '팀장')} · 완료 조건: ${escapeHtml(row.completionCriteria)}</div>
+      <div style="margin-top:6px;color:${row.status === 'blocked' ? '#b45309' : '#475569'}">${escapeHtml(row.lastAction || row.blocker || '방향과 전략을 정한 뒤 실행합니다.')}</div>
+      ${row.blocker ? `<div style="margin-top:4px;color:#b45309">미해결: ${escapeHtml(row.blocker)}</div>` : ''}
+      ${row.status === 'report_pending' ? '<div style="margin-top:4px">실제 결과 검증 완료 · 회의실 마무리 보고를 확인하고 있습니다.</div>' : ''}` : '<strong>진행 중인 안건 없음 · 다음 안건 선정 대기</strong>';
+    node.innerHTML += `<details style="margin-top:8px"><summary>다음 안건 ${Number(board.pendingCount || 0)}개</summary><ol>${queue.map(item => `<li>${escapeHtml(item.title)} ${row && row.status !== 'report_pending' ? `<button type="button" data-agenda-switch="${item.id}">현재 안건 유예 후 이 안건 진행</button>` : ''}</li>`).join('')}</ol></details>`;
+    if (board.suspended?.length) node.innerHTML += `<details open style="margin-top:6px;color:#b45309"><summary>미해결 유예 ${board.suspended.length}개</summary><ul>${board.suspended.map(item => `<li>${escapeHtml(item.title)} <button type="button" data-agenda-resume="${item.id}">같은 안건 재개</button></li>`).join('')}</ul></details>`;
+    if (board.recent?.length) node.innerHTML += `<details style="margin-top:6px"><summary>최근 검증·마무리 완료</summary><ol>${board.recent.map(item => `<li>${escapeHtml(item.title)}</li>`).join('')}</ol></details>`;
+    node.querySelectorAll('[data-agenda-switch],[data-agenda-resume]').forEach(button => button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        const payload = button.dataset.agendaSwitch ? {action:'suspend_and_switch',agendaId:row.id,nextId:button.dataset.agendaSwitch} : {action:'resume',agendaId:button.dataset.agendaResume};
+        const response = await apiFetch('/api/chat/agenda-control', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || '안건 제어 실패');
+        renderAgendaBoard(result);
+        scrollLockStatusEl.textContent = '안건 지시 접수 · 실행 중 작업과 제출 결과를 확인한 뒤 반영합니다.';
+      } catch (error) {scrollLockStatusEl.textContent = error.message;} finally {button.disabled = false;}
+    }));
+    document.getElementById('agenda-focus-toggle')?.addEventListener('click', () => {
+      focusCurrentAgenda = !focusCurrentAgenda; agendaBoardKey = ''; renderAgendaBoard(board);
+    });
+    applyChatFilters();
+  }
+  function agendaMessageVisible(message) {
+    return !focusCurrentAgenda || !currentAgendaId || message?.who === 'user' || message?.userTurnId
+      || message?.agendaStage === 'closing' || message?.agendaId === currentAgendaId;
+  }
+  let agendaPolling = false;
+  async function refreshAgendaBoard() {
+    if (agendaPolling || document.hidden) return;
+    agendaPolling = true;
+    try {
+      const response = await apiFetch('/api/chat/agenda');
+      if (response.ok) renderAgendaBoard(await response.json());
+    } catch (_) {} finally { agendaPolling = false; }
+  }
+  setInterval(refreshAgendaBoard, 5000);
   let refreshingGoals = false;
   async function refreshGoalProgress() {
     if (refreshingGoals || document.hidden) return;
@@ -2049,18 +2106,22 @@
   if (btnDoctorPatrol) {
     btnDoctorPatrol.addEventListener('click', async () => {
       btnDoctorPatrol.disabled = true;
-      btnDoctorPatrol.textContent = '🩺 5건 정밀 검진·수술 중...';
+      btnDoctorPatrol.textContent = '🩺 검진 안건 등록 중...';
       pinnedUserRowId = null;
-      scrollLockStatusEl.textContent = '🩺 닥터 7대 정밀 검진 보고 수신 중';
+      scrollLockStatusEl.textContent = '🩺 검진 안건 등록 · 현재 안건 종결 후 한 글씩 진행';
       try {
-        await apiFetch('/api/auditor/patrol', {
+        const response = await apiFetch('/api/auditor/patrol', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ count: 5, broadcast: true }),
         });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || '검진 접수 실패');
+        scrollLockStatusEl.textContent = '검진 안건 '+Number(result.count || 0)+'개 접수 · 한 글씩 점검·보고합니다.';
+        refreshAgendaBoard();
       } finally {
         btnDoctorPatrol.disabled = false;
-        btnDoctorPatrol.textContent = '🩺 닥터 5건 즉시 검진·수술';
+        btnDoctorPatrol.textContent = '🩺 닥터 검진 5건 안건 등록';
       }
     });
   }

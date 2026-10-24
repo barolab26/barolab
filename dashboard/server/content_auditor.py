@@ -851,6 +851,10 @@ def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_ca
 
     headers = _get_cf_auth_headers(domain)
     target_status = status_override or post_detail.get("status", "published")
+    from common import work_agenda as agendas
+    if agendas.enabled():
+        agendas.require(project='legacy_remodel')
+        agendas.bind_target({'domain':domain,'postId':post_detail['id']})
     if status_override == "draft":
         # Minimal payload so the CF Worker does not re-slugify Korean slugs when unpublishing
         payload: Dict[str, Any] = {
@@ -1290,7 +1294,22 @@ def select_audit_candidates(count: int = 5, target_domain: Optional[str] = None)
     return [(dom, p) for _, dom, p in candidates[:count]]
 
 
-def run_patrol_batch(
+def run_patrol_batch(count=5, target_domain=None, broadcast_to_chat=True):
+    from common import work_agenda as agendas
+    if not agendas.enabled():return _run_patrol_batch(count,target_domain,broadcast_to_chat)
+    if not agendas.current():
+        candidates=select_audit_candidates(count=count,target_domain=target_domain)
+        identities=[agendas.propose('audit',{'domain':domain,'postId':post['id']},
+            title='기존 글 1건 정밀 점검 · '+domain+' · '+post.get('title',''),project='legacy_remodel',
+            source={'domain':domain,'post':post},completion='지정 URL의 7항목 점검 결과와 개선 필요 사항 보고. 수정·발행 성공과 구분한다.') for domain,post in candidates]
+        return {'ok':True,'status':'queued' if identities else 'no_work','agendaIds':identities,'count':len(identities)}
+    row=agendas.require(project='legacy_remodel')
+    if row['kind']!='audit':raise agendas.AgendaWaiting('등록된 단일 URL 검진 안건이 필요합니다.')
+    with agendas.execution('legacy_remodel'):
+        return _run_patrol_batch(1,row['source']['domain'],False)
+
+
+def _run_patrol_batch(
     count: int = 5,
     target_domain: Optional[str] = None,
     broadcast_to_chat: bool = True,
@@ -1311,12 +1330,14 @@ def run_patrol_batch(
             {"audited": 0, "remodeled": 0, "bPatched": 0, "cQueued": 0, "dCapped": 0, "dByDomain": {}},
         )
 
-        candidates = select_audit_candidates(count=count, target_domain=target_domain)
+        from common import work_agenda as agendas
+        current=agendas.require(project='legacy_remodel') if agendas.enabled() else {}
+        candidates = [(current['source']['domain'],current['source']['post'])] if current else select_audit_candidates(count=count, target_domain=target_domain)
         results: List[Dict[str, Any]] = []
 
         for dom, post_summary in candidates:
             try:
-                rec = audit_single_cf_post(dom, post_summary, index_lookup, ledger, auto_patch_category=True)
+                rec = audit_single_cf_post(dom, post_summary, index_lookup, ledger, auto_patch_category=not agendas.enabled())
                 ledger["auditedPosts"][rec["url"]] = rec
                 daily_rec["audited"] = daily_rec.get("audited", 0) + 1
 
@@ -1981,11 +2002,15 @@ def api_auditor_patrol(req: PatrolRequest):
 
 @auditor_router.post("/scan-fake-ai-images")
 def api_auditor_scan_fake_ai_images():
+    from common.work_agenda import enabled
+    if enabled():return queue_auditor_goal('기존 글의 이미지 이상을 점검하고 근거가 확인된 글부터 하나씩 복구해 주세요.')
     return scan_and_register_fake_ai_image_posts()
 
 
 @auditor_router.post("/quarantine-dummy-gossip")
 def api_auditor_quarantine_dummy_gossip():
+    from common.work_agenda import enabled
+    if enabled():return queue_auditor_goal('기존 글의 더미·주제 이탈 문제를 점검하고 한 글씩 해결해 주세요. 원문을 보존하세요.')
     return quarantine_dummy_and_gossip_posts_live()
 
 
@@ -1993,5 +2018,14 @@ def api_auditor_quarantine_dummy_gossip():
 def api_auditor_override(req: OverrideRequest):
     if not req.command.strip():
         raise HTTPException(status_code=400, detail="Empty command")
+    from common.work_agenda import enabled
+    if enabled():return queue_auditor_goal(req.command.strip()+' '+(req.target or ''))
     return apply_user_override(req.command.strip(), req.target)
 
+
+
+def queue_auditor_goal(command):
+    from agents.crew_reasoning import reason_request
+    identity='auditor:'+__import__('hashlib').sha256(command.encode()).hexdigest()
+    goal=reason_request(identity,command,execute=True,repair=True,steps=0,origin='agenda',projects=['legacy_remodel'])
+    return {'ok':True,'status':'queued','goalId':goal['id'],'businessAgendaId':goal.get('businessAgendaId')}
