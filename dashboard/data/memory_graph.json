@@ -7773,16 +7773,21 @@
       "originalText": "/tmp/barolab-argon-structure-review/review-briefing.txt 수정안 승인한다.",
       "recordedAt": "2026-10-24T20:59:53.476310+00:00",
       "sourceType": "direct_user_instruction",
-      "appliesTo": [
+      "priority": "highest",
+      "approvedDesignSha256": "3ca36839274716523faae7223e63d082c2cfafeeb505e50baf9d0e3858eefebb",
+      "guidance": "승인된 직원 구조 수정안을 따른다. 담당 조사 예산과 팀장 후속 판단 예산을 분리하고 담당자·기대 결과·기한·다음 조치 및 부분 증거를 같은 안건에 보존한다. 새로운 제출 전 오류는 기존 이력을 유지한 별도 복구 리비전으로 조사한다. 검증된 수리·테스트·동일 원고와 대상·명시적 미제출 증거·소유권·전체 한도를 확인해야 한 번만 추가 실행할 수 있다. 불명확한 제출은 읽기 전용으로 대조하며 결측값을 미제출로 바꾸지 않는다. frozen posting.py는 보존한다. 팀장 Argon High, 패치 Codex High, 퍼블리 Codex Medium을 초기 비교군으로 측정한다. 예약 증거와 담당자·팀장 보고 수신을 확인한 뒤 다음 안건을 진행하며 실제 3건 검증 전 완료·속도 향상을 주장하지 않는다.",
+      "roles": [
         "jarvis",
         "patch",
         "publi",
         "radar",
         "trace",
-        "doctor"
-      ],
-      "priority": "highest",
-      "approvedDesignSha256": "3ca36839274716523faae7223e63d082c2cfafeeb505e50baf9d0e3858eefebb"
+        "doctor",
+        "cf_pipeline",
+        "naver_pipeline",
+        "kin_pipeline",
+        "threads_pipeline"
+      ]
     },
     "ceo:directive:cb245a7267594243376b03c9": {
       "type": "CEOOperatingDirective",
@@ -7790,15 +7795,20 @@
       "originalText": "판단을 빨리 하기 위해 JEV 스킬도 사용할 수 있어. 그리고 JEV, KIE 도 크레딧 남은량 조회해서 EGO 에 표시해줘.",
       "recordedAt": "2026-10-24T20:59:53.476310+00:00",
       "sourceType": "direct_user_instruction",
-      "appliesTo": [
+      "priority": "highest",
+      "guidance": "빠른 의미 판단에 JEV 스킬과 기존 연결기를 필요할 때 사용할 수 있다. JEV 판단은 보조 근거이며 제출 허가나 수리 검증을 대신하지 않는다. JEV·KIE 크레딧 잔액은 8790 단일 수집기의 실제 조회 결과를 EGO와 웹에 동일하게 표시한다. 미수집 잔액은 0으로 만들지 않으며 로그인·공식 API 지원 여부를 구분한다.",
+      "roles": [
         "jarvis",
         "patch",
         "publi",
         "radar",
         "trace",
-        "doctor"
-      ],
-      "priority": "highest"
+        "doctor",
+        "cf_pipeline",
+        "naver_pipeline",
+        "kin_pipeline",
+        "threads_pipeline"
+      ]
     }
   },
   "edges": [
