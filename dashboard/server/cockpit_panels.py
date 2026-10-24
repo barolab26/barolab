@@ -109,11 +109,24 @@ def brain_display(data,now):
     agy=remote.get('agy',{})
     agy_fresh=agy.get('status')=='collected' and 0<=now.timestamp()-_epoch(agy.get('checkedAt'))<=180
     agy_remaining=number(agy.get('remainingPercent')) if agy_fresh else None
-    if agy_remaining is not None and not 0<=agy_remaining<=100:agy_remaining=None
-    if agy_remaining is None:
-        rows.append('[안티그래비티 구독] '+('구독량 조회 미연결' if not agy else '구독량 조회 미확인 · 갱신 필요'))
-    else:
+    agy_parts=[];agy_resets=[];agy_values=[]
+    if agy_fresh:
+        for group in agy.get('groups',[]):
+            values={b['window']:number(b.get('remainingPercent')) for b in group.get('buckets',[])}
+            if not values or any(v is None or not 0<=v<=100 for v in values.values()):continue
+            label={'Gemini Models':'Gemini','Claude and GPT models':'Claude/GPT'}.get(group.get('name'),group.get('name','모델'))
+            agy_parts.append(label+' '+ '/'.join(f'{values[w]:g}%' if w in values else '—' for w in ('weekly','5h')))
+            agy_values.extend(values.values())
+            agy_resets.extend(_epoch(b.get('resetAt')) for b in group.get('buckets',[]) if _epoch(b.get('resetAt'))>now.timestamp())
+    if agy_parts:
+        agy_remaining=min(agy_values)
+        next_reset=dt.datetime.fromtimestamp(min(agy_resets),KST).strftime('%m-%d %H:%M') if agy_resets else '—'
+        rows.append('[안티그래비티] '+' | '.join(agy_parts)+' (주간/5h) | 다음 리셋 '+next_reset)
+    elif agy_remaining is not None and 0<=agy_remaining<=100:
         rows.append('[안티그래비티 구독] 잔여 '+gauge(agy_remaining)+' | 리셋: '+str(agy.get('resetAt') or '—'))
+    else:
+        agy_remaining=None
+        rows.append('[안티그래비티 구독] '+('구독량 조회 미연결' if not agy else '구독량 조회 미확인 · '+str(agy.get('status') or '갱신 필요')))
     router=remote.get('openrouter',{});balance=number(router.get('balance'));limit=number(router.get('limit'));left=number(router.get('limit_remaining'))
     router_remaining=max(0,min(100,left/limit*100)) if limit and left is not None else 0 if balance is not None and balance<=0 else None
     rows.append('[OpenRouter] 잔여 '+gauge(router_remaining)+' | 종량제'+(' (충전 필요)' if balance is not None and balance<=0 else '')+' | '+money(balance))

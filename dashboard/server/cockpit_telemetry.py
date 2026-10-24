@@ -7,6 +7,7 @@ from pathlib import Path
 import queue
 import re
 import subprocess
+import tempfile
 import threading
 import time
 from urllib.parse import urlsplit, urlunsplit
@@ -146,6 +147,38 @@ def credit_probe(values):
     except (requests.RequestException,ValueError,KeyError,TypeError):return dict(status='연결 지연',checkedAt=time.time())
 
 
+def agy_quota():
+    """Only the built-in /usage command; never send a model prompt or log auth output."""
+    executable=Path.home()/'.local/bin/agy'
+    if not executable.is_file():return dict(status='CLI 미설치',checkedAt=time.time())
+    try:
+        with tempfile.TemporaryDirectory(prefix='barolab-agy-quota-') as folder:
+            result=subprocess.run([str(executable),'-p','/usage','--output-format','json','--print-timeout','15s'],
+                cwd=folder,stdin=subprocess.DEVNULL,capture_output=True,text=True,encoding='utf-8',timeout=20)
+        if result.returncode:return dict(status='조회 실패 · CLI 로그인 확인',checkedAt=time.time())
+        payload=json.loads(result.stdout)
+        if payload.get('status')!='SUCCESS' or payload.get('command',{}).get('name')!='usage':
+            raise ValueError('Not a quota command result')
+        groups=[]
+        for group in payload['command']['data']['groups'][:12]:
+            name=group['name']
+            if not isinstance(name,str) or not re.fullmatch(r'[A-Za-z0-9 +/()._-]{1,60}',name):raise ValueError('Invalid quota group')
+            buckets=[]
+            for bucket in group['buckets'][:8]:
+                fraction=bucket['remaining_fraction'];window=bucket['window'];reset=bucket['reset_time']
+                if type(fraction) not in (int,float) or not math.isfinite(fraction) or not 0<=fraction<=1:
+                    raise ValueError('Invalid quota fraction')
+                parsed=dt.datetime.fromisoformat(reset.replace('Z','+00:00'))
+                if parsed.tzinfo is None or window not in ('weekly','5h'):raise ValueError('Invalid quota window')
+                buckets.append(dict(window=window,remainingPercent=round(fraction*100,1),resetAt=parsed.isoformat()))
+            if not buckets:raise ValueError('Missing quota buckets')
+            groups.append(dict(name=name,buckets=buckets))
+        if not groups:raise ValueError('Missing quota groups')
+        return dict(status='collected',groups=groups,checkedAt=time.time())
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,subprocess.SubprocessError):
+        return dict(status='조회 지연 · CLI 로그인 확인',checkedAt=time.time())
+
+
 class RemoteTelemetry:
     def __init__(self,root=ROOT,hosts=('127.0.0.1',)):
         self.root=root;self.hosts=hosts;self.stop=threading.Event();self.lock=threading.Lock();self.data={};self.thread=None
@@ -158,11 +191,12 @@ class RemoteTelemetry:
                 if time.monotonic()-credits_at>=60:
                     try:values=env_values(self.root)
                     except (OSError,ImportError):values=dict(os.environ)
-                    cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota)
+                    cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
                     credit=cf.result()
                     try:quota=cq.result()
                     except (OSError,RuntimeError,ValueError,KeyError,queue.Empty,subprocess.SubprocessError):quota=dict(status='조회 연결 대기',checkedAt=time.time())
-                    with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota}
+                    agy=aq.result()
+                    with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy}
                     credits_at=time.monotonic()
                 self.stop.wait(5)
     def start(self):
