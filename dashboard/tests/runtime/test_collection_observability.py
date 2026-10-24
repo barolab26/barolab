@@ -27,6 +27,16 @@ class EvidenceTests(unittest.TestCase):
     def finish(self, outcomes, run='one', now=NOW):
         return o.finish_run(self.folder, runtime(run, now), outcomes, now=now)
 
+    def test_channel_measurement_adapters_preserve_incomplete_results(self):
+        folder = self.folder / 'dashboard/data'
+        folder.mkdir(parents=True)
+        for script, filename in [('naver_kin.posting', 'kin-measurement.json'), ('threads_posting.posting', 'threads-measurement.json')]:
+            o.write(folder / filename, {'checkedAt': o.stamp(NOW), 'status': 'partial', 'complete': False})
+            row = o.snapshot_outcomes(self.folder, script)[0]
+            self.assertEqual(row['status'], 'partial')
+            self.assertFalse(row['complete'])
+            self.assertIsNone(row['lastSuccessAt'])
+
     def test_process_zero_is_not_source_success(self):
         health = self.finish([source('failed', complete=False)])
         self.assertEqual(health['processStatus'], 'success')

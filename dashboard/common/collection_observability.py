@@ -318,10 +318,18 @@ def snapshot_outcomes(root, script):
     """Conservative adapters for existing collectors; explicit future outcomes take precedence."""
     root = Path(root)
     filename = {'dashboard/revenue.py': 'revenue.json', 'dashboard/traffic.py': 'traffic.json',
-                'dashboard/metrics.py': 'metrics.json'}[script]
+                'dashboard/metrics.py': 'metrics.json', 'naver_kin.posting': 'kin-measurement.json',
+                'threads_posting.posting': 'threads-measurement.json'}[script]
     payload = load(root / 'dashboard/data' / filename)
     if isinstance(payload.get('collectionOutcomes'), list):
         return payload['collectionOutcomes']
+    if script in ('naver_kin.posting', 'threads_posting.posting'):
+        complete = payload.get('complete') is True and payload.get('status') == 'collected'
+        status = 'success' if complete else 'failed' if payload.get('status') in ('failed', 'error') else 'partial' if payload else 'unknown'
+        checked = payload.get('checkedAt') or payload.get('collected_at')
+        return [{'source': script, 'scope': 'channel-measurement-evidence', 'status': status,
+                 'attemptedAt': checked, 'lastSuccessAt': checked if complete else None,
+                 'complete': complete, 'stale': False, 'reasonCode': 'source_' + status}]
     result = []
     config = load(root / 'dashboard/data/metrics-config.json')
     inventory = load(root / 'dashboard/data/metrics.json')
