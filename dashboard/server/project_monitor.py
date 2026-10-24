@@ -179,7 +179,7 @@ def _triage(project, task_id, row, path):
     row['route'] = {'provider': provider, 'model': model, 'events': []}
     def observe(p, requested, state, **details):
         row['route']['events'].append({'provider': p, 'requestedModel': requested,
-            'state': state, 'actualModel': details.get('actual_model') if state == 'returned' else None})
+            'state': state, 'actualModel': details.get('actual_model') if state == 'returned' else None,'reasoningEffort':details.get('reasoning_effort')})
         save_json(path, row)
     candidates = row.get('repairCandidates') or []
     from common.runtime_recovery import UNITS, runtime_state
@@ -353,7 +353,7 @@ def process_project_feedback_once():
                 raise ValueError('Configured Jarvis route unavailable')
             row['feedbackRoute'] = {'provider': provider, 'model': model, 'events': []}
             def observe(p, requested, state, **details):
-                row['feedbackRoute']['events'].append({'provider':p,'requestedModel':requested,'state':state,'actualModel':details.get('actual_model')})
+                row['feedbackRoute']['events'].append({'provider':p,'requestedModel':requested,'state':state,'actualModel':details.get('actual_model'),'reasoningEffort':details.get('reasoning_effort')})
                 save_json(path,row)
             safe_result = {'status':result['status'], 'results':[{'agent':r.get('agent'),
                 'tool':r.get('tool'), 'ok':r.get('result',{}).get('ok'),

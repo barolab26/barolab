@@ -610,40 +610,44 @@ class _consolidated_part6_AgyBypassTests(_consolidated_part6_unittest.TestCase):
         self.subprocess.start()
         self.codex = _consolidated_part6_patch.object(_consolidated_part6_codex_cli, 'generate', return_value=({'ok': True}, 'actual-codex'))
         self.generate = self.codex.start()
+        self.agy = _consolidated_part6_patch('common.agy_cli.generate', return_value=({'ok': True}, 'actual-agy'))
+        self.agy_generate = self.agy.start()
+        self.addCleanup(self.agy.stop)
 
     def tearDown(self):
         self.codex.stop()
         self.subprocess.stop()
         self.settings.stop()
 
-    def test_all_agy_entry_points_drop_agy_model_and_preserve_contract(self):
+    def test_all_agy_entry_points_keep_selected_model_and_preserve_contract(self):
         schema = {'type': 'object'}
         for entry in ('default', 'explicit', 'internal', 'legacy', 'agent_slot'):
             with self.subTest(entry=entry):
-                self.generate.reset_mock()
+                self.agy_generate.reset_mock()
                 if entry == 'legacy':
-                    result = _consolidated_part6_llm_client.agy_generate('task', 'gemini-4-argon-high', schema)
+                    result = _consolidated_part6_llm_client.agy_generate('task', 'gemini-4-argon-medium', schema)
                 elif entry == 'internal':
-                    result, _ = _consolidated_part6_llm_client._generate_json('task', 'agy', model_override='bad-agy', response_schema=schema)
+                    result, _ = _consolidated_part6_llm_client._generate_json('task', 'agy', model_override='gemini-4-argon-medium', response_schema=schema)
                 elif entry == 'agent_slot':
-                    with _consolidated_part6_patch.object(_consolidated_part6_llm_client.settings, 'get_agent_brain', return_value={'provider': 'agy', 'model': 'bad-agy'}):
-                        result = _consolidated_part6_llm_client.generate_json('task', agent_slot='jarvis', response_schema=schema)
+                    with _consolidated_part6_patch.object(_consolidated_part6_llm_client.settings, 'get_agent_brain', return_value={'provider':'agy','model':'gemini-4-argon-medium'}):
+                        result = _consolidated_part6_llm_client.generate_json('task',agent_slot='jarvis',response_schema=schema)
                 else:
-                    result = _consolidated_part6_llm_client.generate_json('task', provider='agy' if entry == 'explicit' else None, model_override='bad-agy', response_schema=schema)
-                self.assertEqual(result, {'ok': True})
-                self.assertTrue(self.generate.call_args.args[0].endswith('task'))
-                self.assertEqual(self.generate.call_args.args[1], 'gpt-6-luna')
-                self.assertEqual(self.generate.call_args.args[3], schema)
+                    result = _consolidated_part6_llm_client.generate_json('task',provider='agy' if entry=='explicit' else None,model_override='gemini-4-argon-medium',response_schema=schema)
+                self.assertEqual(result, {'ok':True})
+                self.assertEqual(self.agy_generate.call_args.args[1], 'gemini-4-argon-medium')
+                self.assertEqual(self.agy_generate.call_args.args[3], schema)
+                self.generate.assert_not_called()
 
-    def test_observer_records_codex_and_actual_model(self):
+    def test_observer_records_agy_and_actual_model_without_codex_substitution(self):
         observer = _consolidated_part6_Mock()
         _consolidated_part6_llm_client.generate_json('task', observer=observer)
-        self.assertEqual(observer.call_args_list[0].args, ('codex', 'gpt-6-luna', 'calling'))
-        self.assertEqual(observer.call_args.kwargs, {'actual_model': 'actual-codex'})
-        self.generate.side_effect = RuntimeError('failed')
-        with self.assertRaisesRegex(RuntimeError, 'failed'):
-            _consolidated_part6_llm_client.generate_json('task', observer=observer)
-        self.assertEqual(observer.call_args.args, ('codex', 'gpt-6-luna', 'failed'))
+        self.assertEqual(observer.call_args_list[0].args, ('agy','gemini-4-argon-high','calling'))
+        self.assertEqual(observer.call_args.kwargs['actual_model'], 'actual-agy')
+        self.agy_generate.side_effect=RuntimeError('failed')
+        with self.assertRaisesRegex(RuntimeError,'failed'):
+            _consolidated_part6_llm_client.generate_json('task',observer=observer)
+        self.assertEqual(observer.call_args.args,('agy','gemini-4-argon-high','failed'))
+        self.generate.assert_not_called()
 
     def test_active_api_route_is_preserved(self):
         response = _consolidated_part6_Mock(status_code=200)

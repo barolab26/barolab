@@ -134,7 +134,7 @@ def brain_display(data,now):
             'bold red' if agy_remaining is not None and agy_remaining<=0 else 'bold cyan' if providers & {'agy','gemini'} else 'dim',
             'bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim','dim']
     brains=data.get('agentBrains',{});crew={r.get('role'):r for r in data.get('crew',[])}
-    def model(role):return brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
+    def model(role):return brains.get(role,{}).get('badge') or brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
     mapping='[직원 매핑] @팀장('+model('jarvis')+') | '
     mapping+=('@publi·@patch('+model('publi')+')' if model('publi')==model('patch') else '@publi('+model('publi')+') | @patch('+model('patch')+')')
     mapping+=' | Threads('+model('threads_pipeline')+')';rows.append(mapping)

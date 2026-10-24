@@ -13,6 +13,16 @@ from typing import Any, Dict, Optional
 
 from contextvars import ContextVar
 _model_crew_identity = ContextVar('model_crew_identity', default=('', ''))
+_model_call_route = ContextVar('model_call_route', default=None)
+_last_model_route = ContextVar('last_model_route', default=None)
+
+
+def record_model_route(provider, model, reasoning_effort=None):
+    _model_call_route.set({'provider':provider,'model':model,'reasoningEffort':reasoning_effort or ('low' if provider=='codex' else None)})
+
+
+def last_model_route():
+    return dict(_last_model_route.get() or {})
 
 
 def current_model_identity():
@@ -135,7 +145,7 @@ def report_context(value):
 
 
 def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
-                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url='', deliverable_label='', report=None):
+                    parent_request_id='', requested_to='', model='', evidence_id='', output_kind='', owner_agent='', message_kind='', deliverable_url='', deliverable_label='', report=None, provider='', reasoning_effort=None):
     """Host-observed lifecycle metadata only; never pass prompts, responses or secrets."""
     import uuid
     phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
@@ -147,10 +157,18 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
     owner = work_actor_owner(actor, owner_agent)
     if message_kind not in ('','host_instruction','host_ack','tool_result','staff_reply'):
         raise ValueError('Unknown work message kind')
+    route=_model_call_route.get() or {}
+    last=_last_model_route.get() or {}
+    if not route and last.get('taskId')==task_id:route=last
+    if route.get('model')==model:
+        provider=provider or route.get('provider','')
+        reasoning_effort=reasoning_effort or route.get('reasoningEffort')
+    from common.llm_settings import format_brain_badge
+    badge=format_brain_badge(provider,model,reasoning_effort) if provider else model
     payload = {'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
         'taskId':clean(task_id),'parentRequestId':clean(parent_request_id),
         'requestedTo':clean(requested_to),'phase':phase,'who':clean(actor),
-        'actorLabel':clean(actor_label),'ownerAgent':owner,'toolActor':clean(actor) if actor not in STAFF_ACTORS else '', 'model':clean(model),'evidenceId':clean(evidence_id),
+        'actorLabel':clean(actor_label),'ownerAgent':owner,'toolActor':clean(actor) if actor not in STAFF_ACTORS else '', 'provider':clean(provider),'reasoningEffort':clean(reasoning_effort),'modelBadge':clean(badge),'model':clean(model),'evidenceId':clean(evidence_id),
         'outputKind':clean(output_kind),'messageKind':message_kind,'stage':stage,'ts':int(time.time()*1000),'autonomous':True,
         'text':f'{stage}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다.',
         'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
@@ -210,6 +228,7 @@ def model_crew_call(function):
             phase='requested',stage=stage,model=model,requested_to='model:'+str(model) if model else 'configured-model-runner',output_kind='model response pending')
         token = _model_crew_active.set(True)
         identity_token = _model_crew_identity.set((actor, owner))
+        route_token = _model_call_route.set(None)
         try:
             result = function(prompt,*args,**kwargs)
         except BaseException:
@@ -234,11 +253,14 @@ def model_crew_call(function):
                 # Fixed enum values only: never render arbitrary response strings.
                 if observed:
                     kind = type(response).__name__+' '+','.join(observed)+' fields:'+','.join(keys[:6])
-            actual = result[1] if isinstance(result,tuple) and len(result)>1 and isinstance(result[1],str) else model
+            route=_model_call_route.get() or {}
+            actual = route.get('model') or (result[1] if isinstance(result,tuple) and len(result)>1 and isinstance(result[1],str) else model)
+            _last_model_route.set({**route,'taskId':task,'actor':actor,'observedAt':time.time()})
             emit_work_event(actor=actor,actor_label=label,task_id=task,owner_agent=owner,phase='completed',
                 stage=stage,parent_request_id=request,model=actual,output_kind=kind+'; model response only')
             return result
         finally:
+            _model_call_route.reset(route_token)
             _model_crew_identity.reset(identity_token)
             _model_crew_active.reset(token)
     return wrapped

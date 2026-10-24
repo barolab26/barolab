@@ -70,13 +70,16 @@ const DEFAULT_SLOTS = [
   { slot: 'threads_pipeline', kind: 'pipeline', name: 'Threads 4슬롯 바이럴 파이프라인', role: '초반 3초 후킹 카피 생성 및 댓글 링크 유도', icon: '🧵', color: '#4f46e5', recommendedProvider: 'agy', recommendedModel: 'gemini-4-argon-medium', recommendedReason: '짧고 강렬한 SNS 바이럴 후킹 문구 및 요약본 생성' },
 ];
 
-function formatBrainBadge(provider, model) {
+function formatBrainBadge(provider, model, reasoningEffort = null) {
   const m = String(model || '').trim();
   const ml = m.toLowerCase();
+  if (provider === 'codex') { const effort=reasoningEffort || 'low'; return (m || 'Codex')+' · '+effort[0].toUpperCase()+effort.slice(1); }
   if (ml.includes('argon-high')) return 'Argon High';
   if (ml.includes('argon-medium')) return 'Argon Med';
   if (ml.includes('argon-low')) return 'Argon Low';
   if (ml.includes('3.8-flash-high')) return '3.8 Flash High';
+  if (ml.includes('3.8-flash-medium')) return '3.8 Flash Med';
+  if (ml.includes('3.8-flash-low')) return '3.8 Flash Low';
   if (ml.includes('3.8-flash')) return '3.8 Flash';
   if (ml.includes('gpt-6.1-sol')) return 'gpt-6.1-sol';
   if (ml.includes('opus-5-5')) return 'Opus 5.5';
@@ -94,7 +97,6 @@ function badgeClassFor(provider, model) {
 function normalizeConfig(d) {
   if (!d || !d.providers) return d;
   if (d.providers.agy) {
-    d.providers.agy.installed = true;
     if (!d.providers.agy.model) d.providers.agy.model = 'gemini-4-argon-high';
     if (!d.providers.agy.models || !d.providers.agy.models.length) d.providers.agy.models = DEFAULT_AGY_MODELS;
   }
@@ -180,7 +182,7 @@ function updateEffortSelect(slot) {
 function buildBrainCardHtml(slotMeta, currentBrain) {
   const prov = currentBrain?.provider || slotMeta.recommendedProvider;
   const mod = currentBrain?.model || slotMeta.recommendedModel;
-  const badgeText = formatBrainBadge(prov, mod);
+  const badgeText = formatBrainBadge(prov, mod, currentBrain?.reasoningEffort);
   const badgeCls = badgeClassFor(prov, mod);
   const models = getModelsForProvider(prov);
   const hasModInList = models.some(m => m.id === mod);
@@ -247,8 +249,10 @@ function renderBrainMatrix() {
 
   // Update KnowledgeIn summary label if present
   if ($('kin-settings-model') && brains.kin_pipeline) {
-    $('kin-settings-model').textContent = `${brains.kin_pipeline.provider.toUpperCase()} · ${brains.kin_pipeline.model}`;
+    $('kin-settings-model').textContent = brains.kin_pipeline.badge || formatBrainBadge(brains.kin_pipeline.provider,brains.kin_pipeline.model,brains.kin_pipeline.reasoningEffort);
   }
+
+  document.querySelectorAll('.brain-effort-select').forEach(select => select.addEventListener('change', () => updateCardBadge(select.dataset.slot)));
 
   // Bind provider change -> repopulate model select and update badge
   document.querySelectorAll('.brain-provider-select').forEach(provSel => {
@@ -281,9 +285,9 @@ function updateCardBadge(slot) {
   const modSel = document.querySelector(`.brain-model-select[data-slot="${slot}"]`);
   const badgeEl = document.querySelector(`[data-badge-for="${slot}"]`);
   if (!provSel || !modSel || !badgeEl) return;
-  const bText = formatBrainBadge(provSel.value, modSel.value);
+  const effort = document.querySelector(`.brain-effort-select[data-slot="${slot}"]`)?.value;
+  const bText = formatBrainBadge(provSel.value, modSel.value, effort);
   const bCls = badgeClassFor(provSel.value, modSel.value);
-  badgeEl.textName = `🧠 ${bText}`;
   badgeEl.textContent = `🧠 ${bText}`;
   badgeEl.className = `brain-live-badge ${bCls}`;
 }

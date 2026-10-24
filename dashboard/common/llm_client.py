@@ -283,9 +283,9 @@ def _compact_schema_hint(schema):
 
 
 def _enabled_route(config, provider=None, model_override=None):
-    """AGY is disabled after weekly quota exhaustion (2026-10-19)."""
+    """Keep the configured provider; only retired OpenRouter routes use Codex."""
     provider = provider or config['active']
-    if provider in ('agy','openrouter'):
+    if provider == 'openrouter':
         # Unavailable/unsupported routes use the configured subscription adapter.
         # AGY model IDs are not valid Codex model overrides.
         return 'codex', config['providers'].get('codex', {}).get('model') or 'gpt-6.1-sol'
@@ -293,8 +293,8 @@ def _enabled_route(config, provider=None, model_override=None):
 
 
 def agy_generate(prompt, model, response_schema=None):
-    """Compatibility entry point; never start AGY, even for direct callers."""
-    return generate_json(prompt, provider='agy', response_schema=response_schema)
+    """Compatibility entry point using the selected native AGY model."""
+    return generate_json(prompt, provider='agy', model_override=model, response_schema=response_schema)
 
 
 @memory_call
@@ -310,7 +310,9 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
     if reasoning_effort is None:
         reasoning_effort = settings.reasoning_effort_for_call(provider, model, slot=agent_slot, data=config)
     from common.llm_usage import _CURRENT
-    if _CURRENT.get() is not None:_CURRENT.get().update(provider=provider,model=model)
+    if _CURRENT.get() is not None:_CURRENT.get().update(provider=provider,model=model,reasoningEffort=reasoning_effort or ('low' if provider=='codex' else None))
+    from common.crew_chat_bridge import record_model_route
+    record_model_route(provider,model,reasoning_effort)
     if observer:
         observer(provider, model, 'calling')
     provider_started=time.monotonic()
@@ -344,8 +346,10 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         except Exception as failure:
             if observer:observer(provider,model,'failed',reason=str(failure)[:400])
             raise
+    actual_effort=(_CURRENT.get() or {}).get('reasoningEffort',reasoning_effort)
+    record_model_route(provider,actual_model,actual_effort)
     if observer:
-        observer(provider, model, 'returned', actual_model=actual_model)
+        observer(provider, model, 'returned', actual_model=actual_model, reasoning_effort=actual_effort)
     return result
 
 
@@ -360,6 +364,9 @@ def _generate_json(prompt, provider=None, images=None, model_override=None, resp
         model = 'gpt-6.1-sol'
     if not model:
         raise RuntimeError('모델 ID가 설정되지 않았습니다.')
+    if provider == 'agy':
+        from common.agy_cli import generate
+        return generate(prompt,model,images,response_schema,audit_directory,reasoning_effort,timeout_seconds)
     if provider == 'codex':
         from common.codex_cli import generate
         # Map gpt-6.1-sol gracefully if local codex CLI requires an installed alias or pass directly

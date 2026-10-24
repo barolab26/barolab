@@ -74,6 +74,7 @@ def record_call(call, phase, *, root=None, now=None):
         if phase=='started':
             state['active'][call['id']]={k:call[k] for k in ('provider','model','startedAt')}
             state['active'][call['id']]['agentSlot']=call.get('agentSlot')
+            state['active'][call['id']]['reasoningEffort']=call.get('reasoningEffort')
             state['active']=dict(list(state['active'].items())[-128:])
         else:
             state['active'].pop(call['id'],None)
@@ -86,7 +87,7 @@ def record_call(call, phase, *, root=None, now=None):
             row.update(lastLatencyMs=call['latencyMs'],lastAt=now.isoformat(),lastStatus=phase,
                        errorType=call.get('errorType'),rateLimitHeaders=call['rateLimitHeaders'],httpStatus=call.get('httpStatus'))
             row['rateLimited']+=int(call.get('rateLimited',False))
-            state['recent'].append({k:call.get(k) for k in ('id','provider','model','startedAt','latencyMs','inputTokens','outputTokens','httpStatus','errorType')})
+            state['recent'].append({k:call.get(k) for k in ('id','provider','model','startedAt','latencyMs','inputTokens','outputTokens','httpStatus','errorType','reasoningEffort')})
             state['recent']=state['recent'][-40:]
         state['checkedAt']=now.isoformat();write(path,state)
 

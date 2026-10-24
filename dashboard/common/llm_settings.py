@@ -233,10 +233,13 @@ DEFAULT_OPTIMAL_BRAINS = {
 }
 
 
-def format_brain_badge(provider: str, model: str) -> str:
+def format_brain_badge(provider: str, model: str, reasoning_effort=None) -> str:
     """Return a compact, human-readable badge for chat.html and settings.html (e.g. 'Argon High', 'gpt-6.1-sol', '3.8 Flash')."""
     m = (model or '').strip()
     ml = m.lower()
+    if provider == 'codex':
+        effort=reasoning_effort or 'low'
+        return (m or 'Codex')+' · '+str(effort).capitalize()
     if 'argon-high' in ml:
         return 'Argon High'
     if 'argon-medium' in ml:
@@ -245,7 +248,11 @@ def format_brain_badge(provider: str, model: str) -> str:
         return 'Argon Low'
     if '3.8-flash-high' in ml:
         return '3.8 Flash High'
-    if '3.8-flash-medium' in ml or '3.8-flash' in ml:
+    if '3.8-flash-low' in ml:
+        return '3.8 Flash Low'
+    if '3.8-flash-medium' in ml:
+        return '3.8 Flash Med'
+    if '3.8-flash' in ml:
         return '3.8 Flash'
     if 'gpt-6.1-sol' in ml:
         return 'gpt-6.1-sol'
@@ -315,7 +322,7 @@ def ensure_agent_brains(data: dict) -> dict:
             'provider': prov,
             'model': mod,
             'reasoningEffort': cur.get('reasoningEffort') if prov == 'codex' and cur.get('reasoningEffort') in REASONING_EFFORTS else None,
-            'badge': format_brain_badge(prov, mod),
+            'badge': format_brain_badge(prov, mod, cur.get('reasoningEffort')),
             'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
         }
     data['agentBrains'] = out
@@ -341,6 +348,8 @@ def resolve_agy_executable():
     found = shutil.which('agy')
     if found:
         return found
+    native = Path.home() / '.local/bin/agy'
+    if native.is_file():return str(native)
     win_candidate = Path.home() / 'AppData/Local/agy/bin/agy.exe'
     if win_candidate.is_file():
         return str(win_candidate)
@@ -348,13 +357,7 @@ def resolve_agy_executable():
 
 
 def is_agy_available():
-    if resolve_agy_executable():
-        return True
-    # Check shared codex-runtime.json to see if Windows worker host is online
-    rt = ROOT / 'dashboard' / 'data' / 'codex-runtime.json'
-    if rt.is_file():
-        return True
-    return False
+    return resolve_agy_executable() is not None
 
 
 def public(data=None):
@@ -395,6 +398,7 @@ def public(data=None):
 
 
 def _atomic_write_config(updated: dict):
+    ensure_agent_brains(updated)
     CONFIG.parent.mkdir(parents=True, exist_ok=True)
     fd, name = tempfile.mkstemp(prefix='llm-settings-', suffix='.tmp', dir=CONFIG.parent)
     try:

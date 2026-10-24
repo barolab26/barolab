@@ -186,7 +186,7 @@ def crew_rows(events, requests, brains, now):
             model_call=str(latest.get('requestedTo','')).startswith('model:') or latest.get('requestedTo')=='configured-model-runner'
             state='RUNNING' if phase=='started' or model_call else 'CYCLING'
             action=STAGES.get(latest.get('stage'),clean(latest.get('stage')) or '배정 업무 처리')
-            model=clean(latest.get('model') or (brains.get(role) or {}).get('model'),50) if state=='RUNNING' else ''
+            model=clean(latest.get('modelBadge') or latest.get('model') or (brains.get(role) or {}).get('badge') or (brains.get(role) or {}).get('model'),50) if state=='RUNNING' else ''
         elif fresh and phase=='failed':
             state='ERROR';action=STAGES.get(latest.get('stage'),clean(latest.get('stage')) or '원작업 복구 대기')
         elif latest and phase=='completed':
@@ -200,12 +200,12 @@ def crew_rows(events, requests, brains, now):
                     and 0<=now.timestamp()-epoch(live.get('observedAt'))<=180):
                 state='RUNNING';action='업무 판단 · 모델 응답 생성'
                 routes=[r.get('staffRoute') or {} for r in request.get('results',[]) if r.get('agent')==role]
-                model=next((clean(r.get('configuredModel'),50) for r in routes if r.get('configuredModel')),
-                           clean((brains.get(role) or {}).get('model'),50))
+                model=next((clean(r.get('configuredBadge') or r.get('configuredModel'),70) for r in routes if r.get('configuredModel')),
+                           clean((brains.get(role) or {}).get('badge') or (brains.get(role) or {}).get('model'),70))
                 break
         completed=max((e.get('ts',0)/1000 for e in owned if e.get('phase')=='completed'),default=0)
         output.append(dict(lastActivity=dt.datetime.fromtimestamp(at,KST).isoformat() if at else None,lastCompleted=dt.datetime.fromtimestamp(completed,KST).strftime('%m-%d %H:%M:%S') if completed else '—',role=role,name=name,state=state,action=action,model=model,
-                           configuredModel=clean((brains.get(role) or {}).get('model'),50)))
+                           configuredModel=clean((brains.get(role) or {}).get('badge') or (brains.get(role) or {}).get('model'),70)))
     return output
 
 
@@ -331,7 +331,8 @@ class Collector:
                         break
                     except OSError:continue
             self.port_checked=tick
-        brains=self.read('dashboard/data/llm-settings.json').get('agentBrains') or {}
+        from common.llm_settings import ensure_agent_brains
+        brains=ensure_agent_brains(self.read('dashboard/data/llm-settings.json'))
         data=dict(schedulePolicy=self.read('dashboard/data/daily_schedule.json'),scheduleRuntime=self.read('dashboard/data/parameter-runtime.json'),agentBrains=brains,channels=channels(cf,nv,kin,now),crew=crew_rows(events,self.requests,brains,now),
                   logs=activity_log(events,cf,kin,now),ports=dict(self.ports),
                   tokens=token_summary(self.read('dashboard/data/llm-usage.json'),now),

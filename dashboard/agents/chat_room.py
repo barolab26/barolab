@@ -328,8 +328,8 @@ def _get_agent_brain_safe(slug: str) -> Dict[str, Any]:
         from common.llm_settings import get_agent_brain
         return get_agent_brain(slug)
     except Exception:
-        return {"slot": slug, "provider": "codex", "providerLabel": "Codex CLI",
-                "model": "gpt-6.1-sol", "badge": "gpt-6.1-sol"}
+        return {"slot": slug, "provider": "unknown", "providerLabel": "설정 조회 실패",
+                "model": "", "badge": "설정 조회 실패"}
 
 
 
@@ -358,11 +358,7 @@ def _enrich_legacy_message(m: Dict[str, Any], idx: int, all_msgs: List[Dict[str,
         return m
 
     if who in AGENT_MAP:
-        if brains is None:
-            m["brain"] = _get_agent_brain_safe(who)
-        else:
-            if who not in brains:brains[who]=_get_agent_brain_safe(who)
-            m["brain"] = brains[who]
+        if not m.get('brain'):m['brain']={'badge':'모델 미기록'}
         is_ws = bool(
             m.get("isWorkstream")
             or m.get("msgKind") == "workstream"
@@ -2255,7 +2251,7 @@ def project_work_event(payload):
     event_id = payload.get('eventId', '')
     if not isinstance(event_id, str) or not re.fullmatch(r'crew-[a-f0-9]{32}', event_id) or payload.get('id') != event_id:
         raise ValueError('Invalid event identity')
-    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage','ownerAgent','toolActor','messageKind','deliverableLabel')
+    fields = ('taskId','parentRequestId','requestedTo','who','actorLabel','model','evidenceId','outputKind','stage','ownerAgent','toolActor','messageKind','deliverableLabel','provider','reasoningEffort','modelBadge')
     clean = {}
     for key in fields:
         value = payload.get(key, '')
@@ -2291,7 +2287,7 @@ def project_work_event(payload):
     return {**clean, 'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
             'phase':phase,'ts':ts,'text':summary,'autonomous':True,'msgKind':'workstream','deliverableUrl':address,
             'isWorkstream':True,'replyToCeo':False,'reportContext':context,
-            'brain':{'badge':clean['model'] or '모델 미관측'},
+            'brain':{'badge':clean['modelBadge'] or (clean['model']+' · 추론 미기록' if clean['model'].startswith(('gpt-','o3','o4')) else clean['model']) or '모델 미관측'},
             'taskTracker':{'status':'failed' if phase == 'failed' else 'status_only',
                            'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':(clean['deliverableLabel'] or '게시 글 확인') if address else ''}}
 
@@ -2601,6 +2597,11 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
                 recent_history=prior_history,
                 staff_request_id=user_msg['id'] + ':jarvis',
             )
+        from common.crew_chat_bridge import last_model_route
+        route=last_model_route()
+        if route.get('actor')==slug and route.get('observedAt',0)>=t_start:
+            from common.llm_settings import format_brain_badge
+            brain={**route,'badge':format_brain_badge(route['provider'],route['model'],route.get('reasoningEffort'))}
         elapsed = time.time() - t_start
         if slug == 'jarvis':
             reply_text = normalize_staff_calls(reply_text)

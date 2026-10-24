@@ -408,15 +408,19 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             if not any(event.get('type') == 'turn.completed' for event in events):
                 raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
             response = parse_json(Path(output).read_text(encoding='utf-8'))
+            from common.crew_chat_bridge import record_model_route
+            from common.llm_usage import _CURRENT
+            record_model_route('codex',cand_model,cand_effort)
+            if _CURRENT.get() is not None:_CURRENT.get()['reasoningEffort']=cand_effort
             if response_schema:
                 record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
-                return response, model
+                return response, cand_model
             if not isinstance(response.get('json'), str):
                 raise RuntimeError('Codex 구조화 응답 계약 불일치')
             try:
                 parsed = parse_json(response['json'])
                 record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
-                return parsed, model
+                return parsed, cand_model
             except RuntimeError:
                 (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
                 raise

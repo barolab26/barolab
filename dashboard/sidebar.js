@@ -70,7 +70,7 @@
     const model = document.getElementById('kin-settings-model');
     const accounts = document.getElementById('kin-settings-accounts');
     if (model) model.textContent = data
-      ? (typeof automation.model === 'string' && automation.model ? automation.model + (automation.provider === 'authenticated-codex-subscription' ? ' · Codex 구독' : '') + (state.stale || state.status === 'error' ? ' · 마지막 기록' : '') : '운영 기록에 전용 모델 정보 없음')
+      ? (typeof automation.model === 'string' && automation.model ? automation.model + (automation.provider === 'authenticated-codex-subscription' ? ' · Codex · 추론 '+(automation.reasoningEffort || '미기록')+' · 최근 실행' : '') + (state.stale || state.status === 'error' ? ' · 마지막 기록' : '') : '운영 기록에 전용 모델 정보 없음')
       : (state && state.status === 'error' ? '조회 실패' : '조회 중');
     if (accounts) accounts.textContent = data && Array.isArray(data.accounts) && data.accounts.length
       ? data.accounts.join(' · ') : '계정 기록 미확인';

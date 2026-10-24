@@ -21,7 +21,8 @@ FLEET=((9334,'soultin','mustpickinfo','정책·지원금·연금 / 블로그 1�
        (9335,'yoon_master','yoonviews','쇼핑커넥트 / 가전·리빙'),
        (9231,'adinfo0905','adinfo0905','직장인 루틴 / 지식iN 1호'),
        (9230,'stone0747','stone0747','지원금 마감 / 지식iN 2호'),
-       (9440,'cf-flow','CF/Flow','CF 발행 / 공식 캡처 / 시각자료'))
+       (9440,'cf-flow','CF/Flow','CF 발행 / 공식 캡처 / 시각자료'),
+       (9450,'threads','mustpickinfo','Threads 전용 작업 세션'))
 
 
 def env_values(root=ROOT):
