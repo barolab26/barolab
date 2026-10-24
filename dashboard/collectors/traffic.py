@@ -575,6 +575,7 @@ def _collect_browser_search(sites, config, now, on_record=None):
     """Read SJ owner reports without granting the API reader more permissions."""
     from playwright.sync_api import sync_playwright
     from gsc_ui_state import check_response,check_text,mark_success
+    from common.browser_session import PageScope, reusable_search_console_page
     end = now.astimezone(ZoneInfo('America/Los_Angeles')).date() - timedelta(days=3)
     account = config.get('gsc_accounts', {}).get('sj', {})
     output = {}
@@ -593,7 +594,8 @@ def _collect_browser_search(sites, config, now, on_record=None):
                     break
             except Exception:
                 pass
-        page = browser.contexts[0].new_page()
+        scope = PageScope()
+        page = scope.acquire(browser.contexts[0], reusable_search_console_page)
         try:
             for site in sites:
                 domain = site['site_id']
@@ -712,7 +714,8 @@ def _collect_browser_search(sites, config, now, on_record=None):
                     if type(exc) is ValueError and '계정 불일치' in str(exc):
                         break
         finally:
-            page.close()  # Own temporary report tab only; leave the profile and user tabs open.
+            if scope.owns(page):
+                page.close()
             if original_page and not original_page.is_closed():
                 original_page.bring_to_front()
     return output

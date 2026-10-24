@@ -55,6 +55,15 @@ async def deny_downloads_async(page_or_context):
         pass
 
 
+def reusable_search_console_page(page):
+    """Reuse report tabs, leaving inspection/submission screens untouched."""
+    url = urlsplit(page.url)
+    return (url.scheme == 'https' and url.hostname == 'search.google.com'
+            and url.path.rstrip('/') in (
+                '/search-console', '/search-console/performance/search-analytics',
+                '/search-console/sitemaps'))
+
+
 class PageScope:
     """Own only pages created here; borrowed pages and pending drafts survive."""
     def __init__(self, on_warning=print):

@@ -173,7 +173,7 @@ def launch(account):
                 "/usr/bin/google-chrome", f"--user-data-dir={profile}",
                 f"--remote-debugging-port={port}", "--remote-debugging-address=127.0.0.1",
                 f"--class=BaroLab-{account}", "--no-first-run", "--no-default-browser-check",
-                "--new-window", LOGIN_URL,
+                LOGIN_URL,
             ], env=environment, stdout=log, stderr=log, start_new_session=True)
         for _ in range(100):
             time.sleep(0.2)

@@ -619,7 +619,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
     if not enabled or not limit:
         return
     from playwright.sync_api import sync_playwright
-    from common.browser_session import _runtime
+    from common.browser_session import _runtime, PageScope, reusable_search_console_page
     from urllib.parse import parse_qs
     from gsc_ui_state import paused, state as ui_state, check_response, check_text, mark_success
 
@@ -699,7 +699,8 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                                 break
                         except Exception:
                             pass
-                    page = context.new_page()
+                    scope = PageScope()
+                    page = scope.acquire(context, reusable_search_console_page)
                     try:
                         page.set_default_timeout(5000)
                         if account.get('expected_ip'):
@@ -795,7 +796,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                             if progress['status'] == 'backoff':
                                 break
                     finally:
-                        if page and not retain_page and not page.is_closed():
+                        if page and scope.owns(page) and not retain_page and not page.is_closed():
                             page.close()
                         if original_page and not original_page.is_closed():
                             original_page.bring_to_front()
@@ -843,6 +844,7 @@ def request_inspected_url(page, account_id, site, url, proof):
 def _browser_recover(account_id, individual_limit=10):
     """Use only the configured account's existing browser; retain its session."""
     from playwright.sync_api import sync_playwright
+    from common.browser_session import PageScope, reusable_search_console_page
     config = read_json(CONFIG)
     account = config.get('gsc_accounts', {}).get(account_id)
     if not account:
@@ -917,7 +919,8 @@ def _browser_recover(account_id, individual_limit=10):
 
     with sync_playwright() as p:
         browser = p.chromium.connect_over_cdp('http://127.0.0.1:' + str(account['cdp']))
-        page = browser.contexts[0].new_page()
+        scope = PageScope()
+        page = scope.acquire(browser.contexts[0], reusable_search_console_page)
         try:
             if account.get('expected_ip'):
                 with ego_action('navigate', 'metrics-browser'):
@@ -1016,8 +1019,9 @@ def _browser_recover(account_id, individual_limit=10):
                 except Exception as exc:
                     save_event(site['site_id'], {'kind': 'url', 'url': url, 'outcome': 'error', 'reason': safe_reason(exc)})
         finally:
-            # Close only this temporary tab; browser and login sessions stay open.
-            page.close()
+            # Borrowed report tabs belong to the user.
+            if scope.owns(page):
+                page.close()
     return read_json(DATA / 'indexing-recovery.json')
 
 
