@@ -381,7 +381,7 @@ def test_native_blocked_run_is_failed_not_no_work(runtime,monkeypatch,tmp_path):
     assert agendas.get(identity)['status']=='recovering' and not agendas.get(identity).get('verification')
 
 
-def test_kin_retry_keeps_agenda_and_original_attempt_with_one_retry(runtime,monkeypatch):
+def test_kin_retry_keeps_agenda_and_original_attempt_with_bounded_retries(runtime,monkeypatch):
     args={'date':'2026-10-25','account':'stone0747','slot':'original-cadence'}
     request=conferences._request_single('kin',args);file=conferences.QUEUE/(request['agendaId']+'.json')
     receipt=load(file);identity=receipt['businessAgendaId'];ownership=opened(identity)
@@ -394,6 +394,9 @@ def test_kin_retry_keeps_agenda_and_original_attempt_with_one_retry(runtime,monk
     assert result['businessAgendaId']==identity and retried['attempts']==2 and retried['status']=='queued'
     assert retried['attemptHistory'][0]['eligibility']==receipt['eligibility']
     assert retried['retryTarget']['questionId']=='123'
+    retried['status']='failed';write(file,retried)
+    with agendas.context(ownership):conferences.retry_active()
+    retried=load(file);assert retried['attempts']==3
     retried['status']='failed';write(file,retried)
     with agendas.context(ownership),pytest.raises(ValueError,match='budget is exhausted'):conferences.retry_active()
 

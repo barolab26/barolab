@@ -127,16 +127,24 @@ def focus_workflow_window(port):
             display=next((item.split('=',1)[1] for item in (Path('/proc')/str(pid)/'environ').read_bytes().decode().split('\0') if item.startswith('DISPLAY=')),None)
         except (OSError,UnicodeError):
             pass
-    display=display or ':10'
-    if not re.fullmatch(r':\d+(?:\.\d+)?',display):raise RuntimeError('Expected local workflow DISPLAY')
-    environment = dict(os.environ, DISPLAY=display)
-    windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True,
-                             text=True, check=True, timeout=5)
-    for line in windows.stdout.splitlines():
-        fields = line.split(None, 4)
-        if len(fields) >= 3 and fields[2] == str(pid):
-            subprocess.run(["wmctrl", "-ia", fields[0]], env=environment, check=True, timeout=5)
-            return
+    displays=[display] if display else [':10']
+    # Chrome can rewrite its environment; locate its verified PID on existing X servers.
+    if not display:
+        displays.extend(':'+p.name[1:] for p in sorted(Path('/tmp/.X11-unix').glob('X*'))[:16] if re.fullmatch(r'X\d+',p.name))
+        displays.extend(':'+p.name[2:-5] for p in sorted(Path('/tmp').glob('.X*-lock'))[:16] if re.fullmatch(r'\.X\d+-lock',p.name))
+    for candidate in dict.fromkeys(displays):
+        if not re.fullmatch(r':\d+(?:\.\d+)?',candidate):raise RuntimeError('Expected local workflow DISPLAY')
+        environment = dict(os.environ, DISPLAY=candidate)
+        try:
+            windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True,
+                                     text=True, check=True, timeout=5)
+        except (subprocess.CalledProcessError,subprocess.TimeoutExpired):
+            continue
+        for line in windows.stdout.splitlines():
+            fields = line.split(None, 4)
+            if len(fields) >= 3 and fields[2] == str(pid):
+                subprocess.run(["wmctrl", "-ia", fields[0]], env=environment, check=True, timeout=5)
+                return
     raise RuntimeError(f"Verified browser window is not visible on DISPLAY for port {port}")
 
 

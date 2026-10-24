@@ -43,6 +43,7 @@ def test_safe_cause_preserves_nested_model_timeout_without_secrets():
     assert conferences.conference_failure_reason(TimeoutError('Screen execution reached its turn budget'))=='screen_execution_budget_exhausted'
     wrapped=RuntimeError('Existing draft failed validation');wrapped.__context__=FileExistsError('private path')
     assert conferences.conference_failure_reason(wrapped)=='execution_evidence_directory_collision'
+    assert conferences.conference_failure_reason(RuntimeError('Verified browser window is not visible on DISPLAY for port 9230'))=='browser_window_unavailable'
 
 
 @pytest.fixture

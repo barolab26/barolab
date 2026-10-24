@@ -345,6 +345,8 @@ def conference_failure_reason(exc):
         message = str(exc)
         if isinstance(exc,FileExistsError):
             return 'execution_evidence_directory_collision'
+        if 'Verified browser window is not visible on DISPLAY for port ' in message:
+            return 'browser_window_unavailable'
         if 'Screen execution reached' in message:
             return 'screen_execution_budget_exhausted'
         if '응답 시간 제한' in message:
@@ -494,7 +496,8 @@ def retry_active():
     identity=hashlib.sha256(json.dumps([kind,args],sort_keys=True).encode()).hexdigest();file=QUEUE/(identity+'.json')
     with locked(QUEUE):
         row=load(file)
-        if row.get('businessAgendaId')!=current['id'] or row.get('status')!='failed' or row.get('attempts',1)>=2:raise ValueError('Original attempt is pending, unknown or its retry budget is exhausted')
+        limit=3 if kind=='kin' else 2
+        if row.get('businessAgendaId')!=current['id'] or row.get('status')!='failed' or row.get('attempts',1)>=limit:raise ValueError('Original attempt is pending, unknown or its retry budget is exhausted')
         if kind=='kin':row['retryTarget']=kin_retry_target(row)
         row.setdefault('attemptHistory',[]).append({k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes','eligibility','executionFailures')})
         row.update(status='queued',attempts=row.get('attempts',1)+1,retryRequestedAt=time.time())

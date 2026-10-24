@@ -34,6 +34,25 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
             identity.assert_called_once_with(9440, profile)
             self.assertTrue(all((c.args == (9440, 456) for c in listener.call_args_list)))
 
+    def test_missing_chrome_environment_finds_only_verified_pid_on_existing_display(self):
+        with patch('common.browser_session._runtime',return_value={'ProcessId':456}), \
+             patch.object(browser.os,'environ',{}), patch.object(browser.Path,'read_bytes',return_value=b''), \
+             patch.object(browser.Path,'glob',side_effect=[[Path('X10')],[Path('.X11-lock')]]), \
+             patch.object(browser.subprocess,'Popen') as spawn, \
+             patch.object(browser.subprocess,'run',side_effect=[SimpleNamespace(stdout='0x100 0 999 host other'),SimpleNamespace(stdout='0x123 0 456 host account'),SimpleNamespace()]) as run:
+            browser.focus_workflow_window(9230)
+        self.assertEqual([c.kwargs['env']['DISPLAY'] for c in run.call_args_list],[':10',':11',':11'])
+        self.assertEqual(run.call_args_list[-1].args[0],['wmctrl','-ia','0x123'])
+        spawn.assert_not_called()
+
+    def test_missing_verified_window_never_focuses_another_account(self):
+        with patch('common.browser_session._runtime',return_value={'ProcessId':456}), \
+             patch.object(browser.os,'environ',{}), patch.object(browser.Path,'read_bytes',return_value=b''), \
+             patch.object(browser.Path,'glob',return_value=[Path('X11')]), \
+             patch.object(browser.subprocess,'run',return_value=SimpleNamespace(stdout='0x100 0 999 host other')) as run:
+            with self.assertRaisesRegex(RuntimeError,'not visible'):browser.focus_workflow_window(9230)
+        self.assertTrue(all(c.args[0]==['wmctrl','-lp'] for c in run.call_args_list))
+
     def test_naver_pipeline_routes_linux_to_account_launcher(self):
         from naver_blog_posting import posting as pipeline_runner
         with patch.object(pipeline_runner, 'os', SimpleNamespace(name='posix')), patch.object(browser, 'ensure_account') as ensure, patch('subprocess.Popen') as popen:
