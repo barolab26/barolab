@@ -170,8 +170,22 @@ def staff_agenda(request_id, actions):
 def staff_result(row, receipt_path):
     if not enabled() or not row.get('businessAgendaId'):return
     agenda=get(row['businessAgendaId'])
-    if agenda['kind']!='staff' or row['status'] in ('queued','acknowledged','awaiting_completion'):return
+    if row['status'] in ('queued','acknowledged','awaiting_completion'):return
     results=[r.get('result',{}) for r in row.get('results',[])]
+    if agenda['kind']=='conference':
+        actions=row.get('actions',[])
+        if len(actions)!=1 or actions[0]['tool']!='repair_kin_submission' or agenda['project']!='naver_kin':return
+        source=agenda.get('workTarget') or agenda['source']
+        original=load(ROWS.parent/(agenda['source']['conferenceId']+'.json'))
+        target=original.get('retryTarget') or next(iter(original.get('executionFailures',[])),{})
+        args=actions[0]['args'];result=results[0] if len(results)==1 else {}
+        if args.get('account')!=source['arguments'].get('account') or args.get('question_id')!=target.get('questionId'):return
+        exact=(args.get('account')==source['arguments'].get('account')==result.get('account')
+               and args.get('question_id')==target.get('questionId')==result.get('questionId'))
+        if not exact or not result.get('publicUrl') or result.get('httpStatus')!=200 or result.get('publicVerified') is not True:
+            hold(agenda['id'],result.get('reason') or '같은 답변의 실제 공개·계정 검증이 아직 완료되지 않았습니다.',recovery=True)
+            return
+    elif agenda['kind']!='staff':return
     inspection=all(a['tool'] in READ_ONLY for a in row['actions'])
     proof=bool(results) and row['status']=='completed' and all(r.get('ok') is True and
         (inspection or r.get('publicationVerified') is True or r.get('recoveryVerified') is True or r.get('reservationVerified') is True) for r in results)
@@ -183,7 +197,7 @@ def staff_result(row, receipt_path):
         staff={'actor':last['agent'],'text':response['reply'],'route':{'provider':observed.get('provider'),
                'model':observed.get('actualModel'),'reasoningEffort':observed.get('reasoningEffort')}} if response else None
         verified(agenda['id'],{'verified':True,'source':str(receipt_path),'scope':'원천 상태 조회' if inspection else '실제 업무 결과',
-            'results':[{k:r.get(k) for k in ('status','project','publicationVerified','recoveryVerified','reservationVerified')} for r in results]},staff=staff)
+            'results':[{k:r.get(k) for k in ('status','project','publicationVerified','recoveryVerified','reservationVerified','publicUrl','account','questionId')} for r in results]},staff=staff)
     else:
         hold(agenda['id'],'직원 실행 결과에서 원래 업무의 해결 증거가 확인되지 않았습니다. 같은 안건에서 원인을 조사합니다.',recovery=True)
 

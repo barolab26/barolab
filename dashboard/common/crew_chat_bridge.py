@@ -151,6 +151,9 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
     phases = {'requested':'실행 요청', 'completed':'실행 반환', 'failed':'실행 실패', 'progress':'작업 진행'}
     if phase not in phases:
         raise ValueError('Unknown crew lifecycle phase')
+    if message_kind=='staff_reply' and stage!='ceo-result-review':
+        from common.staff_message import display_message
+        output_kind=display_message(output_kind)
     clean = lambda value: str(value or '').replace('\n',' ')[:160]
     event_id = 'crew-'+uuid.uuid4().hex
     stage = clean(stage)

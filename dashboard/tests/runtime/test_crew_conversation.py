@@ -197,7 +197,7 @@ def test_real_frontend_keeps_goal_replies_with_dates_and_peer_dialogue_visible()
     import subprocess
     source=(Path(__file__).resolve().parents[2]/'chat.html').read_text()
     functions=[]
-    for name,next_name in [('isMessageWorkstream','workActorDisplay'),('isNoiseMessage','getAgentBrainBadge'),('crewConversationText','isConversationMessage'),('isConversationMessage','renderWorkRecords')]:
+    for name,next_name in [('isMessageWorkstream','workActorDisplay'),('isNoiseMessage','getAgentBrainBadge'),('staffMessageText','isConversationMessage'),('isConversationMessage','renderWorkRecords')]:
         start=source.index('  function '+name+'(');end=source.index('  function '+next_name+'(',start);functions.append(source[start:end])
     script='\n'.join(functions)+'''
 const assert = require('node:assert/strict');

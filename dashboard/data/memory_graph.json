@@ -7672,6 +7672,85 @@
         "scope": "Threads 및 회사 채널의 사용자 화면 액션",
         "guidance": "회의 안건 → 직원 실행 → EGO Lite의 화면 관찰·직접 클릭·타이핑·첨부·검증을 기본으로 한다. 쓰기 API 호출을 사람이 화면에서 게시한 것으로 대신하지 않는다. 인증·원문 일치·중복 제출 방지·실제 공개 확인은 호스트가 보존하고, 읽기 전용 조회는 실제 결과 확인과 복구에 사용한다. 로그인 미완료는 정확한 계정과 창을 알려 원고를 보존하며 API 쓰기로 우회하지 않는다."
       }
+    },
+    "ceo-directive:619c0c12af2c37edbc669be3": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "프로젝트의 모든 것은 수익을 올리기 위함이잖아? 그 걸 달성 하려면 어떻게 해야 할지를 팀장을 필두로 모두 그걸 위해서 생각하고 판단하고 실행하도록 해야지.",
+      "recordedAt": "2026-10-24T18:13:55.511012+00:00",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "trace",
+        "patch",
+        "doctor"
+      ],
+      "guidance": "팀장과 전 직원은 지속 가능한 수익 증대를 최상위 목표로 공유한다. 현재 프로젝트의 실측 자료로 수익 병목과 기회를 판단하고 현재 안건이 수익에 기여하는 가설·행동·검증 지표와 다음 측정 시점을 정한다. 발행·작업 건수와 URL 접속 성공을 수익 성과로 바꾸지 않는다. 미수집 성과는 미수집으로 유지한다.",
+      "source": "CEO conversation 2026-10-25"
+    },
+    "ceo-directive:fd5bb97f0808be1b75a2f2ca": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "그러니까 뭔가 방법이 코드로 정해져 있으면 안되지... 그럼 이런 저런 방법을 시도하고 가장 좋은 방법을 찾아야 하는 지금의 구조 매커니즘 효율이 떨어지잖아?",
+      "recordedAt": "2026-10-24T18:13:55.511074+00:00",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "trace",
+        "patch",
+        "doctor"
+      ],
+      "guidance": "목표·사실·계정 권한·중복 제출 방지·실제 결과 검증을 보존하고 작업 방법은 직원이 현재 화면과 증거로 선택한다. 실패하면 구체적인 결과를 보고 방법을 바꾸거나 도구 보완을 요청한다. 검증된 방법만 학습한다. OG 카드와 URL 등 표현은 가독성과 실제 연결을 목표로 컨퍼런스에서 판단하며 특정 표시 방식·문단 수·클릭 순서를 업무 목표 대신 강제하지 않는다.",
+      "source": "CEO conversation 2026-10-25"
+    },
+    "ceo-directive:e806d3b3986c4a911de71f0c": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "첫번째 목표가 애드센스 하루 $100 인거야. 각 전문가 직원들이 모두 지식을 모아 집단 지성으로 이뤄야 하는거야. 그다음 목표는 하루 $300 이야.",
+      "recordedAt": "2026-10-24T18:16:07.570396+00:00",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "trace",
+        "patch",
+        "doctor"
+      ],
+      "guidance": "공동 최상위 목표는 1단계 애드센스 하루 $100, 실제 달성 후 2단계 하루 $300이다. 팀장 주도로 각 전문가의 지식과 실측 증거를 합쳐 현재 수익 병목과 가장 유망한 개선·조사·실행을 선택한다. 각 안건은 목표 기여 가설과 검증 지표를 공유하고 같은 안건에서 협업하여 끝낸다. 목표액을 현재 실적처럼 말하지 않으며 실제 애드센스 일별 수익·통화·기간으로만 달성 여부를 판정한다. 미수집은 0이 아니다. 조회·발행·색인·유입 증가와 애드센스 수익 달성을 구분한다.",
+      "businessGoal": {
+        "metric": "AdSense daily earnings",
+        "currency": "USD",
+        "milestones": [
+          100,
+          300
+        ],
+        "activeMilestone": 100,
+        "attainmentStatus": "requires_actual_daily_earnings_evidence"
+      }
+    },
+    "screen-lesson:6251bbff601ee4aaa67f98ce": {
+      "type": "ScreenInteractionLesson",
+      "title": "지식인 승인 본문과 OG 목적지를 보존하면서 중복 URL 표시를 정리하기",
+      "domain": "naver-smarteditor",
+      "measurements": [
+        {
+          "actionCount": 2,
+          "elapsedSeconds": 28.012,
+          "checkedAt": "2026-10-24T18:28:08.674885+00:00"
+        }
+      ],
+      "status": "verified_success",
+      "recordedAt": "2026-10-24T18:28:08.674885+00:00",
+      "guidance": "호스트의 실제 검사를 통과한 조작 사례다. 현재 화면 조건을 확인하고 의미 단위 조작을 재사용한다. 좌표는 복사하지 않는다. 상황: 지식인 승인 본문과 OG 목적지를 보존하면서 중복 URL 표시를 정리하기 마지막 조작: OG 카드는 유지하고, 위에 중복 노출된 URL만 선택해 범위를 확인하겠습니다. / 선택된 중복 URL만 삭제한 뒤 본문과 OG 카드가 유지되는지 확인하겠습니다. / 중복 생 URL이 제거되고 기존 본문과 OG 카드가 유지된 화면을 확인했습니다. 등록·저장은 하지 않았습니다.",
+      "evidence": {
+        "beforeScreen": "/mnt/c/10_Project/BaroLab/naver_kin/output/ego-control-repair/1792865020/goal-execution/screen-000.png",
+        "afterScreen": "/mnt/c/10_Project/BaroLab/naver_kin/output/ego-control-repair/1792865020/goal-verified.png",
+        "verification": "Approved answer body unchanged; exact attributed OG destination matched; duplicate visible URL removed by observed screen selection and keyboard actions. Publication and revenue are not claimed by this check."
+      },
+      "causalClaim": false,
+      "successCount": 1
     }
   },
   "edges": [
@@ -11179,6 +11258,134 @@
       "target": "staff:doctor",
       "type": "applies_to_role",
       "sourceField": "roles"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:619c0c12af2c37edbc669be3",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "type": "contains"
+    },
+    {
+      "source": "ceo-directive:619c0c12af2c37edbc669be3",
+      "target": "staff:jarvis",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:619c0c12af2c37edbc669be3",
+      "target": "staff:publi",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:619c0c12af2c37edbc669be3",
+      "target": "staff:radar",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:619c0c12af2c37edbc669be3",
+      "target": "staff:trace",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:619c0c12af2c37edbc669be3",
+      "target": "staff:patch",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:619c0c12af2c37edbc669be3",
+      "target": "staff:doctor",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "target": "staff:jarvis",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "target": "staff:publi",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "target": "staff:radar",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "target": "staff:trace",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "target": "staff:patch",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:fd5bb97f0808be1b75a2f2ca",
+      "target": "staff:doctor",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "target": "staff:jarvis",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "target": "staff:publi",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "target": "staff:radar",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "target": "staff:trace",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "target": "staff:patch",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "ceo-directive:e806d3b3986c4a911de71f0c",
+      "target": "staff:doctor",
+      "type": "applies_to_role",
+      "sourceField": "roles"
+    },
+    {
+      "source": "memory:hub",
+      "target": "screen-lesson:6251bbff601ee4aaa67f98ce",
+      "type": "contains"
     }
   ],
   "doctorPlans": [],

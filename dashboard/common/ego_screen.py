@@ -137,7 +137,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                 focus_workflow_window(port)
                 page.bring_to_front()
                 inspect_input()
-                feedback = state.get('inputFeedback', '')
+                feedback = state.get('inputFeedback') or state.get('completionFeedback') or state.get('actionFeedback','')
                 incident = state.get('learningIncident')
                 if feedback and not incident:
                     state['learningIncident'] = {'problem': feedback, 'startTurn': turn, 'startedAt': time.time(),

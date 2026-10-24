@@ -254,6 +254,17 @@ def install_channel_conferences(kind):
         verify = engine._naver_browser_verify_public
         def verify_and_record(*a, **kw):
             result = verify(*a, **kw)
+            if not result.get('public') and len(a)>=5:
+                import sqlite3
+                from contextlib import closing
+                from common.kin_submit_repair import public_evidence
+                with closing(sqlite3.connect(Path(engine._naver_pipeline_DB).resolve().as_uri()+'?mode=ro',uri=True)) as db:
+                    db.row_factory=sqlite3.Row
+                    row=db.execute('SELECT * FROM questions WHERE account=? AND answer_id=?',(a[0],str(a[4]))).fetchone()
+                if row:
+                    document=json.loads(row['document'])
+                    if row['answer_url']==a[1] and document['answer_text']==a[2] and document['attribution']['outboundUrl']==a[3]:
+                        result=public_evidence(a[0],row,document,initial=result)
             engine._conference_results.append(result)
             return result
         engine._naver_browser_verify_public = verify_and_record

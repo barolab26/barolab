@@ -18,7 +18,7 @@ class KinScreenTests(unittest.TestCase):
         gate=Mock();answer='same approved draft'
         def original(account,url,text,before):
             with engine._naver_browser_session(account) as visible:
-                visible.locator('._answerWriteButton').first.click()
+                before();visible.locator('#answerRegisterButton').click()
         with tempfile.TemporaryDirectory() as temp,patch('common.ubuntu_naver_browser.focus_workflow_window'),patch('common.llm_client.generate_json',return_value={'kind':'stop'}):
             root=Path(temp)/'ego-kin'/hashlib.sha256(answer.encode()).hexdigest()[:16]
             old=root/'click-00';old.mkdir(parents=True);(old/'proof.json').write_text('original proof')
@@ -32,7 +32,8 @@ class KinScreenTests(unittest.TestCase):
         gate.assert_not_called();page.mouse.click.assert_not_called()
 
     def test_visible_typing_preserves_blank_paragraphs_callback_and_pending_tab(self):
-        page=Mock();page.paragraphs=[];page.locator.return_value.all_inner_texts.side_effect=lambda:page.paragraphs
+        page=Mock();page.paragraphs=[];page.locator.return_value.evaluate_all.side_effect=lambda script:page.paragraphs
+        page.evaluate.side_effect=lambda script,*args:[] if 'getDocumentData' in script else True
         @contextmanager
         def session(account):yield page
         typer=Mock();engine=types.SimpleNamespace(_naver_browser_session=session,_naver_browser__type_paragraphs=typer,_naver_browser_ACCOUNTS={'test':9231})
@@ -45,6 +46,8 @@ class KinScreenTests(unittest.TestCase):
             if '등록' in description:self.assertEqual(submitted,['durable-gate'])
         def run(real,**kwargs):
             Path(kwargs['folder']).mkdir(parents=True,exist_ok=True)
+            if 'references' not in kwargs:
+                kwargs['completion_check']();return {'turns':[{}]}
             self.assertEqual(kwargs['input_check']([]),'')
             written=[];lines=[]
             for reference in kwargs['references']:
@@ -52,6 +55,8 @@ class KinScreenTests(unittest.TestCase):
                 self.assertEqual(kwargs['input_check'](written),'')
             kwargs['completion_check']()
             page.paragraphs=[line for line in lines if line]
+            kwargs['completion_check']()  # Presentation may change without changing approved content.
+            page.paragraphs=['다른 원고']
             with self.assertRaises(ValueError):kwargs['completion_check']()
             page.paragraphs=lines+[''];return {'turns':[{}]}
         def original(account,url,text,before):
@@ -65,7 +70,7 @@ class KinScreenTests(unittest.TestCase):
                 return {'state':'submitted_unknown'}
         with tempfile.TemporaryDirectory() as folder,patch('common.kin_screen.visual_click',side_effect=click) as clicks,patch('common.ego_screen.run',side_effect=run):
             result=publish_with_screen(engine,original,'test','https://kin.naver.com/question',answer,lambda:submitted.append('durable-gate'),folder)
-        self.assertEqual(result['state'],'submitted_unknown');self.assertEqual(clicks.call_count,3)
+        self.assertEqual(result['state'],'submitted_unknown');self.assertEqual(clicks.call_count,1)
         self.assertIs(engine._naver_browser_session,session);self.assertIs(engine._naver_browser__type_paragraphs,typer)
         self.assertTrue(page._barolab_kin_submission_pending)
 
@@ -100,6 +105,27 @@ class KinScreenTests(unittest.TestCase):
             folder=Path(temp)/'submit';visual_click(page,target,65001,folder,'Post 버튼',before_click=gate)
             self.assertTrue((folder/'rejected-0.json').exists())
         self.assertEqual(model.call_count,2);gate.assert_called_once();page.mouse.click.assert_called_once_with(150,150)
+
+    def test_editor_focus_method_is_chosen_by_model_not_a_required_click(self):
+        from common.kin_screen import ScreenPage
+        page=Mock();page.url='https://kin.naver.com/qna/detail.naver?docId=487064308'
+        page.context.pages=[page]
+        page.context.new_cdp_session.return_value.send.return_value={'targetInfo':{'targetId':'test'}}
+        page.screenshot.side_effect=lambda path:Image.new('RGB',(960,960)).save(path)
+        focused=[False]
+        page.evaluate.side_effect=lambda script,*args:focused[0] if 'input_buffer' in script else False
+        page.keyboard.press.side_effect=lambda key:focused.__setitem__(0,True)
+        decisions=iter([{'message':'본문으로 키보드 포커스를 이동합니다.','done':False,'observations':[],
+                         'actions':[{'kind':'press','value':'Tab','x':0,'y':0}]},
+                        {'message':'실제 입력 포커스를 확인했습니다.','done':True,'observations':[],'actions':[]}])
+        def decide(*args,**kwargs):
+            kwargs['observer']('codex','test','returned',actual_model='test')
+            return next(decisions)
+        with tempfile.TemporaryDirectory() as temp,patch('common.ubuntu_naver_browser.focus_workflow_window'),patch('common.llm_client.generate_json',side_effect=decide):
+            gate=Mock();visible=ScreenPage(page,65001,temp,gate)
+            visible.locator('.se-canvas .se-text-paragraph').first.click()
+        page.keyboard.press.assert_called_once_with('Tab')
+        page.mouse.click.assert_not_called();page.keyboard.type.assert_not_called();gate.assert_not_called()
 
     def test_visual_failure_before_physical_submit_does_not_commit_the_durable_gate(self):
         page=Mock()

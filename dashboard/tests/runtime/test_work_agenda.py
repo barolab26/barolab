@@ -418,6 +418,22 @@ def test_kin_underlying_failure_reaches_recovery_instead_of_draft_validation(run
     assert agendas.get(identity)['blocker']==failure['reason']
 
 
+@pytest.mark.parametrize('same_question',[True,False])
+def test_exact_public_repair_can_finish_same_conference_with_room_reports_still_required(runtime,same_question):
+    request=conferences._request_single('kin',{'date':'2026-10-25','account':'stone0747','slot':'original'})
+    file=conferences.QUEUE/(request['agendaId']+'.json');original=load(file);identity=original['businessAgendaId']
+    opened(identity);original.update(status='failed',retryTarget={'questionId':'123','account':'stone0747'});write(file,original)
+    result={'ok':True,'account':'stone0747','questionId':'123' if same_question else '456',
+            'publicVerified':True,'publicationVerified':True,'recoveryVerified':True,'httpStatus':200,'publicUrl':'https://kin.naver.com/answer'}
+    row={'businessAgendaId':identity,'status':'completed','actions':[{'agent':'patch','tool':'repair_kin_submission','args':{'account':'stone0747','question_id':result['questionId']}}],
+         'results':[{'agent':'patch','result':result}]}
+    agendas.staff_result(row,conferences.QUEUE/'repair.json')
+    current=agendas.get(identity)
+    assert current['status']==('report_pending' if same_question else 'meeting')
+    assert not current.get('closedAt')
+    if same_question:assert current['verification']['results'][0]['publicUrl']==result['publicUrl']
+
+
 def test_late_result_does_not_implicitly_resume_suspended_work(runtime):
     first=offer();second=offer('B');opened(first)
     agendas.request_switch(first,second,'A 유예 후 B 먼저')

@@ -1456,9 +1456,19 @@
     return '모델 미관측';
   }
 
+  function staffMessageText(value) {
+    for (let depth=0; depth<3 && typeof value==='string' && value.length<=16000; depth++) {
+      let text=value.trim().replace(/^```(?:json)?\n([\s\S]*)\n```$/, '$1');
+      let decoded; try { decoded=JSON.parse(text); } catch (_) { return value; }
+      if (!decoded || Array.isArray(decoded) || Object.keys(decoded).length!==1 || typeof decoded.message!=='string') return value;
+      value=decoded.message;
+    }
+    return value;
+  }
+
   function crewConversationText(m) {
     const staff = ['jarvis','publi','trace','patch','radar','doctor'];
-    const reply = m.outputKind;
+    const reply = staffMessageText(m.outputKind);
     const validText = typeof reply === 'string' && reply.trim() && reply.length <= 160 && !/[\x00-\x1f]/.test(reply);
     if (m.eventType === 'crew_work_event' && staff.includes(m.who)
         && ['style-strategy-discussion','post-style-planning'].includes(m.stage)
@@ -1517,7 +1527,8 @@
   }
 
   function messageBodyText(m) {
-    return crewConversationText(m) ?? m.text;
+    const text=crewConversationText(m) ?? m.text;
+    return m.who==='user' ? text : staffMessageText(text);
   }
 
   function buildMessageRowHtml(m) {
