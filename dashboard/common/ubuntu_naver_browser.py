@@ -14,6 +14,8 @@ from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parents[2]
 LOGIN_URL = "https://nid.naver.com/nidlogin.login"
+# Google and Naver logins were consolidated into this existing Chrome profile.
+PROFILE_DIRECTORIES = {"soultin": "Profile 1"}
 
 
 def accounts():
@@ -89,8 +91,10 @@ def ensure_account(port):
             subprocess.Popen(['/opt/google/chrome/chrome',f'--remote-debugging-port={port}',f'--user-data-dir={profile}',
                 '--remote-debugging-address=127.0.0.1',
                 '--class=BaroLab-Threads' if port==9450 else '--class=BaroLab-CF-Flow',
+                '--profile-directory=Default', '--restore-last-session',
                 '--no-first-run','--no-default-browser-check',
-                'https://www.threads.com/@mustpickinfo' if port==9450 else 'https://flow.google.com'],
+                *(['https://www.threads.com/@mustpickinfo' if port==9450 else 'https://flow.google.com']
+                  if not (profile/'Default/Preferences').exists() else [])],
                 env=dict(os.environ,DISPLAY=os.environ.get('BAROLAB_DISPLAY',':10')),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
             for _ in range(100):
                 time.sleep(.2);pid=process_identity(port,profile)
@@ -159,23 +163,26 @@ def launch(account):
     profile.chmod(0o700)
     pid = process_identity(port, profile)
     reused = pid is not None
+    profile_directory = PROFILE_DIRECTORIES.get(account, "Default")
     if not reused:
         with socket.socket() as probe:
             if probe.connect_ex(("127.0.0.1", port)) == 0:
                 raise RuntimeError(f"Port {port} is occupied by an unverified process")
         # Set the visible Chrome profile name only before a new profile is created.
-        preferences = profile / "Default/Preferences"
-        if not preferences.exists():
+        preferences = profile / profile_directory / "Preferences"
+        fresh_profile = not preferences.exists()
+        if fresh_profile:
             preferences.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-            preferences.write_text(json.dumps({"profile": {"name": f"BaroLab · {account}"}}), encoding="utf-8")
+            preferences.write_text(json.dumps({"profile": {"name": f"BaroLab · {account}"}, "session": {"restore_on_startup": 1}}), encoding="utf-8")
             preferences.chmod(0o600)
         environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
         with (runtime / "chrome.log").open("ab") as log:
             subprocess.Popen([
                 "/usr/bin/google-chrome", f"--user-data-dir={profile}",
                 f"--remote-debugging-port={port}", "--remote-debugging-address=127.0.0.1",
-                f"--class=BaroLab-{account}", "--no-first-run", "--no-default-browser-check",
-                LOGIN_URL,
+                f"--class=BaroLab-{account}", f"--profile-directory={profile_directory}",
+                "--restore-last-session", "--no-first-run", "--no-default-browser-check",
+                *([LOGIN_URL] if fresh_profile else []),
             ], env=environment, stdout=log, stderr=log, start_new_session=True)
         for _ in range(100):
             time.sleep(0.2)
@@ -205,7 +212,8 @@ def launch(account):
                            env=environment, check=True)
     receipt = {
         "account": account, "blogId": config["blog_id"], "port": port, "pid": pid,
-        "profile": str(profile), "reused": reused, "owned": not reused,
+        "profile": str(profile), "profileDirectory": profile_directory,
+        "sessionPolicy": "persistent_profile_tabs", "reused": reused, "owned": not reused,
         "tabCount": sum(tab.get("type") == "page" for tab in tabs),
         "manualLoginRequired": "not_verified",
         "checkedAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"),

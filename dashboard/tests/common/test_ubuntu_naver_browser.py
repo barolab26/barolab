@@ -188,3 +188,33 @@ class WorkflowWindowClassTests(unittest.TestCase):
                 self.assertIn('--class=' + identity, command)
                 self.assertNotIn('--new-window', command)
                 self.assertFalse(any('cdp_dashboard' in arg for arg in command))
+
+class PersistentProfileTests(unittest.TestCase):
+    def test_restart_restores_selected_profile_without_extra_login_tab(self):
+        for account, directory, fresh in (('soultin', 'Profile 1', False),
+                                          ('yoon_master', 'Default', False),
+                                          ('soultin', 'Profile 1', True)):
+            with self.subTest(account=account, fresh=fresh), tempfile.TemporaryDirectory() as temporary:
+                home = Path(temporary)
+                preferences = home / f'.config/cdp_naver_{account}' / directory / 'Preferences'
+                if not fresh:
+                    preferences.parent.mkdir(parents=True)
+                    preferences.write_text('{"existing":"preserve"}')
+                with patch.object(Path, 'home', return_value=home), \
+                     patch.object(browser, 'process_identity', side_effect=[None, 123]), \
+                     patch.object(browser, 'listener_owner'), patch.object(browser.time, 'sleep'), \
+                     patch.object(browser.socket, 'socket') as socket, \
+                     patch.object(browser, 'urlopen', side_effect=[io.StringIO('{"Browser":"Chrome/1"}'), io.StringIO('[]')]), \
+                     patch.object(browser.subprocess, 'run', return_value=SimpleNamespace(stdout='')), \
+                     patch.object(browser.subprocess, 'Popen') as spawn:
+                    socket.return_value.__enter__.return_value.connect_ex.return_value = 1
+                    with patch('sys.stdout', new_callable=io.StringIO):
+                        browser.launch(account)
+                command = spawn.call_args.args[0]
+                self.assertIn('--profile-directory=' + directory, command)
+                self.assertIn('--restore-last-session', command)
+                self.assertEqual(browser.LOGIN_URL in command, fresh)
+                if fresh:
+                    self.assertEqual(json.loads(preferences.read_text())['session']['restore_on_startup'], 1)
+                else:
+                    self.assertEqual(preferences.read_text(), '{"existing":"preserve"}')
