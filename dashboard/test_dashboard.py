@@ -206,7 +206,7 @@ class _consolidated_part1_TelemetryTests(_consolidated_part1_unittest.TestCase):
         self.assertEqual(display['styles'], ['bold cyan', 'dim', 'bold red', 'dim'])
         self.assertIn('@팀장(actual-model)', display['rows'][3])
         self.assertIn('Threads(thread-model)', display['rows'][3])
-        self.assertIn('잔여 —', display['rows'][1])
+        self.assertIn('구독량 조회 미연결', display['rows'][1])
         self.assertNotIn('사용 중', ''.join(display['rows']))
         rendered = list(view.brain_render(display).renderables)
         self.assertEqual([rendered[3].plain[a:b] for a,b in display['spans']], ['@publi'])
@@ -218,6 +218,19 @@ class _consolidated_part1_TelemetryTests(_consolidated_part1_unittest.TestCase):
         data['usage']['active']['one']['startedAt'] = '2026-10-21T15:00:00+09:00'
         data['remote'].pop('codexQuota')
         self.assertEqual(view.brain_display(data, now)['styles'][0], 'dim')
+
+    def test_agy_only_fresh_verified_quota_can_show_zero_or_remaining(self):
+        now = _consolidated_part1_dt.datetime(2026, 10, 22, 15, tzinfo=_consolidated_part1_ui.KST)
+        for quota in ({'remainingPercent': 0}, {'status': 'collected', 'checkedAt': now.timestamp()-181, 'remainingPercent': 0},
+                      {'status': 'collected', 'checkedAt': now.timestamp(), 'remainingPercent': 101}):
+            display = _consolidated_part1_view.brain_display({'remote': {'agy': quota}}, now)
+            self.assertIn('조회 미확인', display['rows'][1])
+            self.assertNotIn('잔여 0%', display['rows'][1])
+            self.assertEqual(display['styles'][1], 'dim')
+        quota = {'status': 'collected', 'checkedAt': now.timestamp(), 'remainingPercent': 0}
+        display = _consolidated_part1_view.brain_display({'remote': {'agy': quota}}, now)
+        self.assertIn('잔여 0%', display['rows'][1])
+        self.assertEqual(display['styles'][1], 'bold red')
 
     def test_all_stages_match_and_editorial_precedes_research(self):
         for stage, wanted in [('keyword-selector', 1), ('researcher', 2), ('editorial-query', 3), ('writer', 4), ('reviewer', 5), ('최종발행', 6)]:
