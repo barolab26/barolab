@@ -92,7 +92,8 @@ def test_execution_waits_for_actual_result_and_resumes_original_goal(environment
     crew.advance(row,2);assert len(seen)==1
     path=next(requests.glob('*.json'));receipt=json.loads(path.read_text());receipt.update(status='completed',results=[{'tool':'run_project_cycle','result':{'status':'no_work','publicationVerified':False}}]);path.write_text(json.dumps(receipt))
     row=crew.advance(row,2)
-    assert row['status']=='answered' and row['goal']=='스레드 실행해'
+    assert row['status']=='waiting_verification' and row['goal']=='스레드 실행해'
+    assert row['resolution']['status']=='waiting_verification'
     assert row['observations'][-1]['result']['results'][0]['result']['publicationVerified'] is False
 
 
@@ -158,7 +159,8 @@ def test_duplicate_publication_request_is_not_dispatched_again(environment,monke
     crew.GOALS.mkdir();crew.observe(row,'host','projects',{}, {'available':True})
     with patch('server.agent_tools.enqueue_staff_request') as enqueue:crew.advance(row,1)
     enqueue.assert_not_called()
-    assert row['observations'][-1]['tool']=='decision_error'
+    assert row['observations'][-1]['tool']=='dispatch'
+    assert 'Same action already executed' in row['observations'][-1]['result']['reason']
 
 
 def test_pending_claim_prevents_two_workers_advancing_the_same_goal(environment,monkeypatch):
@@ -282,7 +284,7 @@ def test_interactive_staff_question_enters_durable_goal_instead_of_legacy_status
     row={'id':'a'*64,'status':'ready','plan':['실제 수익 자료 확인'],'actor':'trace'}
     with patch.object(crew,'reason_request',return_value=row) as reason:
         answer,artifacts,tools=scope['synthesize_agent_reply']('jarvis',question,[],'',staff_request_id='msg-1-user:jarvis')
-    reason.assert_called_once_with('msg-1-user:jarvis',question,execute=False,repair=repair,lead='jarvis')
+    reason.assert_called_once_with('msg-1-user:jarvis',question,execute=False,repair=repair,lead='jarvis',history=None,steps=0)
     assert tools[0]['goalId']==row['id'] and tools[0]['activeActor']=='trace'
     assert '실제 도구 결과' in answer and not artifacts
 

@@ -1352,6 +1352,8 @@
     const isSynapseSaved = Boolean((tt && tt.synapseLinked) || m.synapseSaved);
 
     let stateText = escapeHtml(summary);
+    if (status === 'replied') stateText = `💬 답변 완료 · ${escapeHtml(summary)}`;
+    if (status === 'waiting') stateText = `⏳ ${escapeHtml(tt?.resolution?.label || summary)}`;
     if (status === 'completed') stateText = `✅ ${escapeHtml(summary)}`;
     if (status === 'processing') {
       stateText = `🔄 ${escapeHtml((tt && tt.step) || '처리 중...')}`;
@@ -1427,6 +1429,7 @@
 
   function isNoiseMessage(m) {
     if (!m || !m.text) return true;
+    if (m.goalId && m.userTurnId) return false;
     if (m.eventType === 'crew_work_event' && m.taskId && m.eventId) return false;
     const mid = String(m.id || '');
     const who = String(m.who || '');
@@ -1473,6 +1476,7 @@
   function isConversationMessage(m) {
     if (!m) return false;
     if (m.who === 'user') return true;
+    if (m.goalId && m.userTurnId && !m.autonomous) return ['jarvis','publi','trace','patch','radar','doctor'].includes(m.who);
     if (m.eventType === 'crew_work_event') return crewConversationText(m) !== null;
     return ['jarvis','publi','trace','patch','radar','doctor'].includes(m.who)
       && !isMessageWorkstream(m) && !m.autonomous
@@ -1905,6 +1909,28 @@
     btn.addEventListener('click', () => insertMention(btn.dataset.mention));
   });
 
+  let refreshingGoals = false;
+  async function refreshGoalProgress() {
+    if (refreshingGoals || document.hidden) return;
+    const pending = [...messageStore.values()].filter(m => m.isGoalProgress && m.goalId && !['answered', 'blocked'].includes(m.goalStatus)).slice(-8);
+    if (!pending.length) return;
+    refreshingGoals = true;
+    try {
+      await Promise.allSettled(pending.map(async m => {
+        const response = await apiFetch('/api/chat/goals/' + encodeURIComponent(m.goalId) + '?view_only=true');
+        if (!response.ok) return;
+        const goal = await response.json();
+        const view = goal.view || {};
+        const elapsed = Math.max(0, Math.floor(Date.now() / 1000 - (view.lastActivityAt || Date.now() / 1000)));
+        const active = !['answered', 'blocked'].includes(goal.status);
+        const detail = active ? `\n현재 단계: ${view.phase || '확인 중'} · 마지막 활동 ${elapsed}초 전` : '';
+        upsertMessageToDom({...m, text: (view.text || m.text) + detail, goalStatus: goal.status,
+          taskTracker: {...m.taskTracker, status: view.status || 'processing', step: view.phase, resultSummary: view.text, resolution: view.resolution}}, {allowInPlaceUpdate: true});
+      }));
+    } finally { refreshingGoals = false; }
+  }
+  setInterval(refreshGoalProgress, 5000);
+
   async function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -1964,6 +1990,9 @@
           } catch (_) {}
         }
       }
+    } catch (error) {
+      scrollLockStatusEl.textContent = '접수 연결 확인 필요: ' + error.message + ' · 저장된 요청 상태를 다시 확인합니다.';
+      loadRoom(false).catch(() => {});
     } finally {
       activeTypingMap.clear();
       renderTypingIndicators();

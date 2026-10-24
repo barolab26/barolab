@@ -1546,6 +1546,7 @@ def validate_staff_actions(actions):
     """Only named host tools; prose, shell commands and nested dispatch are data."""
     if not isinstance(actions, list) or not 1 <= len(actions) <= 6:
         raise ValueError('Expected one to six structured actions')
+    from common.staff_capabilities import action_owner
     checked = []
     for action in actions:
         if not isinstance(action, dict) or set(action) != {'agent', 'tool', 'args'}:
@@ -1553,17 +1554,20 @@ def validate_staff_actions(actions):
         agent, tool, args = action['agent'], action['tool'], action['args']
         if agent not in STAFF_ROLES or not isinstance(args, dict):
             raise ValueError('Invalid recipient')
+        owner = action_owner(tool, args)
+        if owner is not None and agent != owner:
+            raise ValueError('Tool is assigned to ' + owner)
         if tool == 'run_project_cycle' and set(args) == {'project'}:
             from common.project_autonomy import COMMANDS
             project = args.get('project')
-            if project not in COMMANDS or agent != ('doctor' if project == 'legacy_remodel' else 'publi'):
+            if project not in COMMANDS:
                 raise ValueError('Unregistered autonomous project owner')
-        elif tool == 'repair_kin_submission' and agent == 'patch' and set(args)=={'account','question_id'} and args.get('account') in ('adinfo0905','stone0747') and isinstance(args.get('question_id'),str) and re.fullmatch(r'\d{1,24}',args['question_id']):
+        elif tool == 'repair_kin_submission' and set(args)=={'account','question_id'} and args.get('account') in ('adinfo0905','stone0747') and isinstance(args.get('question_id'),str) and re.fullmatch(r'\d{1,24}',args['question_id']):
             pass
-        elif tool == 'recover_project_work' and agent == 'publi' and set(args) == {'project','work_id'}:
+        elif tool == 'recover_project_work' and set(args) == {'project','work_id'}:
             if args['project'] not in ('cf_blog','naver_blog') or not isinstance(args['work_id'],str) or not re.fullmatch(r'[0-9a-f]{64}',args['work_id']):
                 raise ValueError('Unregistered same-work recovery')
-        elif tool == 'recover_project_runtime' and agent == 'patch' and set(args) == {'project'}:
+        elif tool == 'recover_project_runtime' and set(args) == {'project'}:
             from common.runtime_recovery import UNITS
             if args['project'] not in UNITS:
                 raise ValueError('Unregistered runtime recovery')
@@ -1576,13 +1580,13 @@ def validate_staff_actions(actions):
             from common.repair_workflow import recovery_expected_actor
             if recovery_expected_actor(args['task_id'], args['plan_sha256']) != agent:
                 raise ValueError('Recovery stage is not assigned to this recipient')
-        elif tool == 'run_cf_domain' and agent == 'publi' and set(args) in ({'domain','source_sha256','artifact_sha256','review_sha256'},{'domain','source_sha256','artifact_sha256','review_sha256','revision_mode','revision_sha256'}) and args.get('revision_mode','review') in ('review','asset_revalidation') and args.get('domain') == 'soulnote.kr' and all(isinstance(args[k],str) and re.fullmatch(r'[0-9a-f]{64}',args[k]) for k in ('source_sha256','artifact_sha256','review_sha256')):
+        elif tool == 'run_cf_domain' and set(args) in ({'domain','source_sha256','artifact_sha256','review_sha256'},{'domain','source_sha256','artifact_sha256','review_sha256','revision_mode','revision_sha256'}) and args.get('revision_mode','review') in ('review','asset_revalidation') and args.get('domain') == 'soulnote.kr' and all(isinstance(args[k],str) and re.fullmatch(r'[0-9a-f]{64}',args[k]) for k in ('source_sha256','artifact_sha256','review_sha256')):
             pass
-        elif tool == 'prepare_cf_source_fact' and agent == 'publi' and set(args) == {'source_sha256','request_sha256'} and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
+        elif tool == 'prepare_cf_source_fact' and set(args) == {'source_sha256','request_sha256'} and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
             pass
-        elif tool == 'verify_cf_source_fact_fix' and agent == 'patch' and set(args) in ({'source_sha256'},{'source_sha256','renderer_sha256'}) and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
+        elif tool == 'verify_cf_source_fact_fix' and set(args) in ({'source_sha256'},{'source_sha256','renderer_sha256'}) and all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in args.values()):
             pass
-        elif tool == 'repair_cf_known_failure' and agent == 'patch' and set(args) in ({'domain'}, {'domain','evidencePath','evidenceSha256'}) and args['domain'] in CF_16_DOMAINS:
+        elif tool == 'repair_cf_known_failure' and set(args) in ({'domain'}, {'domain','evidencePath','evidenceSha256'}) and args['domain'] in CF_16_DOMAINS:
             pass  # The registered repair tool retains its own typed-failure/permit gates.
         else:
             raise ValueError('Tool not authorized for autonomous delegation')
