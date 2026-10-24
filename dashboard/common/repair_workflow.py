@@ -734,8 +734,8 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
                 next_step='inspect'
             elif kind=='source_acquisition':
                 if row['plan']['action']['tool']=='prepare_cf_source_fact': next_step='resume'
-                elif row['plan']['action']['tool']=='run_project_cycle' and row['discovered'].get('workEvidence',{}).get('inputCapability') and row.get('acquisitionCount',0)<2:
-                    next_step='acquire'
+                elif row['plan']['action']['tool']=='run_project_cycle' and row['plan'].get('workTarget'):
+                    next_step='resume'
                 else: row['status']='evidence_hold'
             else:row['status']='evidence_hold'
         elif step=='inspect':
@@ -783,12 +783,12 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
             _recovery_resume_guard(row)
             from common.ego_executor import execute_staff_action
             row['resumeAttempted']=True;write(path,row)
-            from common.project_autonomy import _bound_work
-            bound_token = _bound_work.set(row if row['plan'].get('workTarget') else None)
-            try:
+            if row['plan']['action']['tool']=='run_project_cycle' and row['plan'].get('workTarget'):
+                from common.project_autonomy import recover_project_work
+                row['resumeResult']=recover_project_work(row['plan']['project'],row['plan']['workTarget']['workId'])
+            else:
                 row['resumeResult']=execute_staff_action(row['plan']['action'],task_id=task_id,
                     request_id='recovery:'+plan_sha256,requester='jarvis')
-            finally: _bound_work.reset(bound_token)
             result=row['resumeResult']
             if result.get('status') in ('running','started','queued','awaiting_completion','unknown'):
                 _observe_recovery_process(row)
@@ -846,7 +846,7 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
 
 def dispatch_project_recovery_once():
     """Reuse the staff queue; do not replay an interrupted phase or add a worker."""
-    from server.agent_tools import enqueue_staff_request
+    from server.agent_tools import enqueue_staff_request, STAFF_REQUEST_DIR
     for path in sorted(ROOT.glob('*.json')):
         try:row=json.loads(path.read_bytes())
         except (OSError,ValueError):continue
@@ -894,7 +894,17 @@ def dispatch_project_recovery_once():
             continue
         if row.get('status')!='ready' or row.get('retryAfter',0)>time.time():continue
         step=row['step'];phase=_recovery_phase(row);dispatches=row.setdefault('dispatches',{})
-        if phase in dispatches:continue
+        if phase in dispatches:
+            old=dispatches[phase]
+            prior=STAFF_REQUEST_DIR/(_sha(old['requestId'].encode())+'.json')
+            saved=json.loads(prior.read_bytes()) if prior.is_file() else {}
+            if (phase in row.get('steps',{}) or row.get('unsupportedDispatchReplaced') or
+                    saved.get('status')!='failed' or not saved.get('results') or
+                    not all(r.get('tool')=='advance_project_recovery' and r.get('result',{}).get('status')=='unsupported' for r in saved['results'])):
+                continue
+            row.setdefault('supersededDispatches',[]).append(dispatches.pop(phase))
+            row.update(unsupportedDispatchReplaced=True,waitCount=row.get('waitCount',0)+1)
+            write(path,row)
         actor=recovery_expected_actor(row['taskId'],row['planSha256'])
         request='recovery:'+row['planSha256']+':'+phase+':'+str(row.get('waitCount',0))
         receipt=enqueue_staff_request(request,[{'agent':actor,'tool':'advance_project_recovery',

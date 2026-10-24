@@ -3,6 +3,7 @@ import argparse
 import ast
 import json
 import os
+import re
 from pathlib import Path
 import shlex
 import socket
@@ -114,7 +115,15 @@ def focus_workflow_window(port):
     else:
         executable, profile, _ = account_paths(port)
     pid = _runtime(port, str(executable), str(profile))["ProcessId"]
-    environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
+    display=os.environ.get('BAROLAB_DISPLAY')
+    if not display:
+        try:
+            display=next((item.split('=',1)[1] for item in (Path('/proc')/str(pid)/'environ').read_bytes().decode().split('\0') if item.startswith('DISPLAY=')),None)
+        except (OSError,UnicodeError):
+            pass
+    display=display or ':10'
+    if not re.fullmatch(r':\d+(?:\.\d+)?',display):raise RuntimeError('Expected local workflow DISPLAY')
+    environment = dict(os.environ, DISPLAY=display)
     windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True,
                              text=True, check=True, timeout=5)
     for line in windows.stdout.splitlines():

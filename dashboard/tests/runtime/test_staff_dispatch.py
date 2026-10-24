@@ -218,7 +218,7 @@ class StaffDispatchTests(unittest.TestCase):
 
     def test_actual_chat_structured_reply_enqueues_but_mentions_do_not(self):
         tree = ast.parse((Path(__file__).resolve().parents[2] / 'agents' / 'chat_room.py').read_text(encoding='utf-8'))
-        scope = {'Optional': Optional, 're': re, 'hashlib': hashlib}
+        scope = {'Optional': Optional, 're': re, 'hashlib': hashlib, 'json': json}
         node = next((n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == '_call_chat_llm'))
         exec(compile(ast.Module(body=[node], type_ignores=[]), '<chat>', 'exec'), scope)
         module = types.ModuleType('agent_tools')
@@ -304,8 +304,14 @@ class ProcessReceiptTests(unittest.TestCase):
 
 class RecoveryDispatchTests(unittest.TestCase):
 
-    def test_retired_review_workflow_is_not_executed(self):
+    def test_registered_recovery_phase_is_reachable_only_by_assigned_role(self):
         from server import agent_tools as tools
-        with patch('common.repair_workflow.advance_project_recovery') as advance:
-            self.assertEqual(tools._execute_agent_tool('patch', 'advance_project_recovery', task_id='fixture', plan_sha256='a' * 64)['status'], 'unsupported')
-            advance.assert_not_called()
+        with patch('common.repair_workflow.recovery_expected_actor', return_value='patch'), \
+             patch('common.repair_workflow.advance_project_recovery', return_value={'ok':True,'status':'completed'}) as advance:
+            result=tools._execute_agent_tool('patch','advance_project_recovery',task_id='fixture',plan_sha256='a'*64)
+            self.assertEqual(result['status'],'completed')
+            advance.assert_called_once_with('fixture','a'*64,actor='patch')
+            self.assertEqual(tools._execute_agent_tool('publi','advance_project_recovery',task_id='fixture',plan_sha256='a'*64)['status'],'forbidden')
+            self.assertEqual(advance.call_count,1)
+        for tool in ('repair_cf_known_failure','prepare_cf_source_fact','verify_cf_source_fact_fix'):
+            self.assertEqual(tools._execute_agent_tool('patch',tool)['status'],'unsupported')

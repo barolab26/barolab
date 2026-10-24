@@ -338,7 +338,10 @@ def observed_projects():
             status = 'attention'
         elif quota.get('status') == 'unknown' and key in ('cf_blog', 'naver_blog', 'threads') and status == 'observed':
             status = 'unknown'
-        result.append({'id': key, 'icon': '•', 'title': title, 'owner': '@' + owner, 'quota': quota, 'activity': activity,
+        from common.project_autonomy import recoverable_work
+        work = [{k:t.get(k) for k in ('workId','identity','date','slot','status','stage')} for t in recoverable_work(key)] if key in ('cf_blog','naver_blog') else []
+        if work:status='attention'
+        result.append({'recoverableWork':work,'id': key, 'icon': '•', 'title': title, 'owner': '@' + owner, 'quota': quota, 'activity': activity,
             'ownerAgentIds': [owner], 'status': status, 'statusBadge': status,
             'progressText': json.dumps(counts, ensure_ascii=False) if counts else '관측 상태: ' + state,
             'progressPct': 0, 'counts': counts, 'failures': failures, 'verifiedPublicCount': public_count,

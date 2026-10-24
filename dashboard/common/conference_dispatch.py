@@ -141,26 +141,27 @@ def report_outcome(receipt, task_id, context=None):
     if not public and not reserved and not pending and not receipt.get('errorType'):
         return None
     address = receipt.get('publicUrl') or receipt.get('answer_url') or receipt.get('permalink') or ''
-    facts = {'outcome':'게시 성공' if public and address else '예약 완료' if reserved else '게시 확인 중' if pending else '게시 실패',
+    public = public and bool(address)
+    facts = {'outcome':'게시 성공' if public and address else '예약 완료' if reserved else '게시 확인 중' if pending else '작업 차단',
              'publicationVerified':bool(public and address),'reservationVerified':reserved,
              'publicUrl':address if public else '', 'reserveTime':receipt.get('reserveTime'),
              'account':receipt.get('account') or receipt.get('domain'),
-             'channel':receipt.get('channel') or receipt.get('project'),
+             'channel':receipt.get('channel') or receipt.get('project') or '발행 안건',
              'title':receipt.get('title'), 'slot':receipt.get('slot') or receipt.get('scheduledSlot'),
              'submissionState':receipt.get('submissionStatus') or receipt.get('state'),
              'submittedUrl':address if pending else '', 'errorType':receipt.get('errorType'),
-             'nextAction':'열린 Threads 전용 Ubuntu 창에서 @mustpickinfo 로그인 후 같은 안건을 재개한다. 원고는 보존되어 있다.' if receipt.get('reason') == 'threads_web_login_required' else '실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '담당 직원이 원인을 진단하고 같은 안건에서 복구한다.'}
+             'nextAction':'열린 Threads 전용 Ubuntu 창에서 @mustpickinfo 로그인 후 같은 안건을 재개한다. 원고는 보존되어 있다.' if receipt.get('reason') == 'threads_web_login_required' else '실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '해당 안건의 실행 오류를 확인한다. 제출 여부 확인 전에는 재제출하지 않는다.'}
     report = {key: facts.get(key) for key in ('channel','account','title','reserveTime','slot','nextAction')}
     report['status'] = facts['outcome']
     if not address:
-        report['linkStatus'] = '예약 글의 공개 URL은 아직 발급되지 않았습니다.' if reserved else '대상 글 URL이 실행 기록에 없습니다.'
+        report['linkStatus'] = '예약 글의 공개 URL은 아직 발급되지 않았습니다.' if reserved else '제출 확인 전 작업이 중단되어 공개 URL을 확인하지 못했습니다.' if not pending else '제출 기록에서 대상 URL을 확인해야 합니다.'
     link = address
     label = facts.get('title') or '대상 게시물 열기'
     if not link and reserved and isinstance(receipt.get('blogId'), str) and re.fullmatch(r'[A-Za-z0-9_]+', receipt['blogId']):
         link = 'https://blog.naver.com/' + receipt['blogId']
         label = '예약 계정 블로그 열기 · 예약 글은 미공개'
         report['linkStatus'] = '글은 아직 미공개입니다. 링크는 해당 계정 블로그로 연결됩니다.'
-    response=staff_tool_reply('publi',task_id,{'tool':'publication_verification'},facts,stage='staff-terminal-response')
+    response=staff_tool_reply('publi',task_id,{'tool':'publication_verification' if public or reserved or pending else 'channel_execution'},facts,stage='staff-terminal-response')
     emit_work_event(actor='publi',actor_label='퍼블리',task_id=task_id,phase='completed',stage='staff-terminal-response',
         message_kind='staff_reply',requested_to='jarvis',model=response['route']['events'][-1]['actualModel'],
         output_kind=response['reply'],deliverable_url=link,deliverable_label=label,report=report)
@@ -177,8 +178,8 @@ def work(identity):
     context = {'channel': {'kin':'지식iN','threads':'Threads'}.get(row['kind'], '')}
     if row['kind'] == 'parameters':
         args = row['arguments']
-        context.update(channel={'naver':'네이버 블로그','cf':'CF 블로그','naver-cycle':'네이버 블로그','cf-cycle':'CF 블로그'}.get(args.get('action'), ''),
-                       account=args.get('account'), slot=args.get('slot'))
+        context.update(channel={'naver':'네이버 블로그','cf':'CF 블로그','naver-cycle':'네이버 블로그','cf-cycle':'CF 블로그','dispatch':'CF 블로그','prepare':'네이버 블로그·CF 블로그 준비','conference':'발행 회의'}.get(args.get('action'), '발행 안건'),
+                       account=args.get('account'), slot=args.get('slot'), publicationDate=args.get('date'), action=args.get('action'))
         if args.get('date') and args.get('slot'):
             context['reserveTime'] = args['date'] + ' ' + args['slot']
         if args.get('action') == 'naver' and all(args.get(k) for k in ('date','account','slot')):

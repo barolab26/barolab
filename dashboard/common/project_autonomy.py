@@ -1,11 +1,12 @@
 """One registered channel worker at a time; no editorial approval chain."""
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import time
 from pathlib import Path
-from common.collection_observability import locked, write
+from common.collection_observability import locked, write, load
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / 'dashboard/data/project-autonomy.json'
 STATE = ROOT / 'dashboard/data/project-autonomy-state.json'
@@ -31,6 +32,68 @@ def run_project_cycle(project):
         return {'ok': False, 'status': 'busy', 'project': project}
     child = _ego_popen([sys.executable,'-u','-B','-X','utf8',*command],cwd=str(ROOT),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     return {'ok':True,'status':'running','project':project,'pid':child.pid,'receiptPath':child.ego_receipt_path,'publicationVerified':False}
+
+
+def recoverable_work(project):
+    """Exact current approved slots that failed before any submission evidence."""
+    from datetime import datetime, timedelta
+    from common.channel_parameters import policy, KST, folder_for
+    from common.recovery_evidence import failure_targets, artifact_folder, read_object
+    if project not in ('cf_blog','naver_blog'):return []
+    now=datetime.now(KST);plan=policy();result=[]
+    for target in failure_targets(ROOT,project):
+        if target['status'] not in ('failed','error') or target['submissionStarted']:continue
+        day=target['date'];identity=target['identity'];slot=target['slot']
+        if day not in (now.date().isoformat(),(now+timedelta(days=1)).date().isoformat()):continue
+        if day<plan['effectiveDate']:continue
+        if project=='cf_blog':
+            if day!=now.date().isoformat() or identity not in plan['cf']:continue
+            folder=folder_for('cf_posting',day,identity)
+        else:
+            if slot not in plan['naver'].get(identity,{}).get('slots',[]):continue
+            if datetime.fromisoformat(day+'T'+slot).replace(tzinfo=KST)<now+timedelta(minutes=30):continue
+            folder=folder_for('naver_blog_posting',day,identity+'-'+slot.replace(':',''))
+            evidence=read_object(ROOT/'dashboard/data/naver/public-verification.json').get('evidence',[])
+            attempts=read_object(ROOT/'dashboard/data/naver/automation-journal.json').get('attempts',[])
+            same=lambda r: r.get('account')==identity and (r.get('publicationDate') or str(r.get('reserveTime') or '')[:10])==day and (r.get('scheduledSlot') or str(r.get('reserveTime') or '')[-5:])==slot
+            if any(same(r) and (r.get('publicPublicationVerified') is True or any(r.get(k) for k in ('submittedAt','submissionStarted','submissionStartedAt')) or r.get('phase') in ('done','reserved','submitting','submission_unknown')) for r in evidence+attempts if isinstance(r,dict)):continue
+        if artifact_folder(ROOT,target)!=folder.resolve():continue
+        # Even an unconfirmed receipt fences resubmission; the existing engine owns reconciliation.
+        if any(folder.glob('*publication*receipt*')) or (folder/'reservation-evidence.json').exists():continue
+        result.append(target)
+    return result
+
+
+def recover_project_work(project, work_id):
+    from common.conference_dispatch import request, QUEUE
+    if project not in ('cf_blog','naver_blog') or not isinstance(work_id,str) or not re.fullmatch(r'[0-9a-f]{64}',work_id):
+        raise ValueError('Invalid exact work recovery identity')
+    config=json.loads(CONFIG.read_bytes())
+    if config.get('enabled') is not True or project not in config.get('projects',[]) or (Path.home()/'EGO_EXEC_DISABLED').exists():
+        return {'ok':False,'status':'held','project':project,'reason':'execution_disabled'}
+    folder=STATE.parent/'project-work-recovery'
+    with locked(folder):
+        path=folder/(work_id+'.json')
+        prior=load(path)
+        if prior:
+            if prior.get('project')!=project:raise ValueError('Recovery project identity mismatch')
+            agenda=load(QUEUE/(prior['conference']['agendaId']+'.json'))
+            if prior.get('attempts',1)>=2 or agenda.get('status')!='failed' or agenda.get('retryAt',float('inf'))>time.time():
+                return prior
+        target=next((t for t in recoverable_work(project) if t['workId']==work_id),None)
+        if target is None:
+            return {'ok':False,'status':'held','project':project,'reason':'same_work_not_eligible_or_requires_reconciliation'}
+        args={'action':'cf' if project=='cf_blog' else 'naver','date':target['date'],
+              'account':target['identity'],'slot':target['slot']}
+        # Same conference identity as the standard scheduler, never an alternate engine.
+        agenda=request('parameters',args)
+        result={'ok':True,'status':'requested','project':project,'workId':work_id,
+                'account':target['identity'],'date':target['date'],'slot':target['slot'],
+                'conference':agenda,'publicationVerified':False,'requestedAt':time.time(),
+                'attempts':prior.get('attempts',1)+1 if prior else 1,
+                'attemptHistory':(prior.get('attemptHistory',[])+[{k:prior[k] for k in ('conference','requestedAt')}]) if prior else []}
+        write(path,result)
+        return result
 
 
 def terminal_result(result):

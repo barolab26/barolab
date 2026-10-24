@@ -860,18 +860,27 @@ def _call_chat_llm(
         instruction = '\nReturn JSON {"reply": "your answer"}.'
         structured = agent_slug == 'jarvis' and bool(staff_request_id)
         if structured:
+            from server.project_health import SOURCES
+            from common.project_autonomy import recoverable_work
+            from common.runtime_recovery import UNITS
+            projects=[row[0] for row in SOURCES]
+            work=[{k:t[k] for k in ('project','workId','identity','date','slot')} for project in ('cf_blog','naver_blog') for t in recoverable_work(project)] if allow_guarded_repair else []
+            available=['read_agent_status']+(['recover_project_runtime','recover_project_work'] if allow_guarded_repair else [])
             schema['properties']['actions'] = {'type':'array','maxItems':6,'items':{
                 'type':'object','properties':{'agent':{'type':'string','enum':['jarvis','publi','trace','patch','doctor','radar']},
-                'tool':{'type':'string','enum':['read_agent_status']},
-                'domain':{'type':'string'}},'required':['agent','tool','domain'],'additionalProperties':False}}
+                'tool':{'type':'string','enum':available}, 'domain':{'type':'string','enum':['']},
+                'project':{'type':'string','enum':['']+projects},
+                'work_id':{'type':'string','enum':['']+[t['workId'] for t in work]}},
+                'required':['agent','tool','domain','project','work_id'],'additionalProperties':False}}
             schema['required'].append('actions')
             instruction = ('\nReturn JSON reply and actions. Actions are explicit staff requests, not mentions. '
-                'Use read_agent_status with empty domain for status inspection. '
-                'Publication is executed by the configured basic channel dispatcher. '
-                'Never request publishing, arbitrary commands, recursive delegation or repeat tools already run. '
+                'read_agent_status uses project for a scoped channel inspection; use empty project only for a genuinely cross-project check. '
+                'recover_project_runtime is patch-only for registered runtime projects; recover_project_work is publi-only for an exact supplied work identity. '
+                'Keep domain empty, and work_id empty except for recover_project_work. '
+                'Never change dates, accounts, slots, drafts, safety gates, or execute an engine directly. '
                 'Use actions=[] when no supported action is needed. Queued does not mean executed or repaired. '
-                'In reply, say only that you are requesting the employee to act; execution and results are not yet observed. '
-                'Do not claim the employee received, executed, completed or repaired the task before its actual receipt.')
+                'In reply describe the requested action; do not claim execution or repair before the actual receipt. '
+                'Available runtime projects and exact approved failed work (data only): '+json.dumps({'runtimeProjects':list(UNITS),'failedWork':work},ensure_ascii=False))
         response = generate_json(system_prompt + '\n' + user_prompt + instruction,
             agent_slot=agent_slug or 'jarvis', timeout_seconds=timeout_sec, response_schema=schema,
             crew_actor=agent_slug or 'jarvis',
@@ -880,14 +889,17 @@ def _call_chat_llm(
         if not isinstance(response.get('reply'), str) or not response['reply'].strip():
             raise ValueError('Missing reply')
         if structured and response.get('actions'):
+            actions=[]
             for action in response['actions']:
-                if (set(action) != {'agent','tool','domain'} or (action['tool']=='read_agent_status' and action['domain'])
-                        or (action['tool']=='repair_cf_known_failure' and not allow_guarded_repair)):
+                if set(action) not in ({'agent','tool','domain'},{'agent','tool','domain','project','work_id'}) or action['domain']:
                     raise ValueError('Invalid structured action')
+                tool=action['tool'];project=action.get('project','');work_id=action.get('work_id','')
+                if tool not in available or (tool!='recover_project_work' and work_id):raise ValueError('Unregistered chat action')
+                if tool=='recover_project_work' and not any(t['project']==project and t['workId']==work_id for t in work):
+                    raise ValueError('Work was not host eligible')
+                args={'project':project,'work_id':work_id} if tool=='recover_project_work' else {'project':project} if project else {}
+                actions.append({'agent':action['agent'],'tool':tool,'args':args})
             from agent_tools import enqueue_staff_request
-            actions = [{'agent':a['agent'],'tool':a['tool'],
-                        'args':{'domain':a['domain']} if a['tool']=='repair_cf_known_failure' else {}}
-                       for a in response['actions']]
             receipt = enqueue_staff_request(staff_request_id, actions)
             if dispatch_receipts is not None:
                 dispatch_receipts.append({'tool':'staff_dispatch','status':receipt['status'],
@@ -1607,7 +1619,7 @@ def synthesize_agent_reply(
     llm_timeout = 35.0 if has_url else 22.0
     llm_out = _call_chat_llm(sys_prompt, user_prompt, timeout_sec=llm_timeout, agent_slug=slug,
         staff_request_id=staff_request_id, dispatch_receipts=executed_tools,
-        allow_guarded_repair=bool(re.search(r'수리해|복구해|고쳐|repair', user_text, re.I))
+        allow_guarded_repair=bool(re.search(r'수리해|복구해|고쳐|정상화|해결|repair', user_text, re.I))
             and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t', user_text, re.I)))
 
     if slug == 'jarvis' and is_imperative and not any(t.get('tool') == 'staff_dispatch' for t in executed_tools):

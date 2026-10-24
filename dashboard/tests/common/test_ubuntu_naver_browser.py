@@ -16,6 +16,15 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
         gc.start()
         self.addCleanup(gc.stop)
 
+    def test_focus_uses_verified_browser_display_without_starting_browser(self):
+        with patch('common.browser_session._runtime',return_value={'ProcessId':456}), \
+             patch.object(browser.os,'environ',{}), patch.object(browser.Path,'read_bytes',return_value=b'DISPLAY=:11\0PRIVATE_KEY=never_export\0'), \
+             patch.object(browser.subprocess,'run',side_effect=[SimpleNamespace(stdout='0x123 0 456 host Flow'),SimpleNamespace()]) as run:
+            browser.focus_workflow_window(9440)
+        self.assertEqual(run.call_args_list[0].kwargs['env']['DISPLAY'],':11')
+        self.assertEqual(run.call_args_list[1].args[0],['wmctrl','-ia','0x123'])
+        self.assertNotIn('PRIVATE_KEY',run.call_args_list[0].kwargs['env'])
+
     def test_shared_flow_runtime_verifies_actual_linux_profile(self):
         from common import browser_session
         profile = Path.home() / '.config/cdp_gui_9440'
