@@ -41,6 +41,65 @@ def test_safe_cause_preserves_nested_model_timeout_without_secrets():
     assert conferences.conference_failure_reason(wrapped)=='model_timeout'
     assert conferences.conference_failure_reason(ValueError('secret input'))=='execution_error'
     assert conferences.conference_failure_reason(TimeoutError('Screen execution reached its turn budget'))=='screen_execution_budget_exhausted'
+    wrapped=RuntimeError('Existing draft failed validation');wrapped.__context__=FileExistsError('private path')
+    assert conferences.conference_failure_reason(wrapped)=='execution_evidence_directory_collision'
+
+
+@pytest.fixture
+def kin_failed_run(tmp_path,monkeypatch):
+    import sqlite3
+    monkeypatch.setattr(conferences,'ROOT',tmp_path)
+    path=tmp_path/'dashboard/data/kin.sqlite3';path.parent.mkdir(parents=True)
+    with sqlite3.connect(path) as db:
+        db.execute('CREATE TABLE automation_slots(slot_id,account,planned_at,state,question_id)')
+        db.execute("INSERT INTO automation_slots VALUES('run-1','stone0747','2026-10-25T02:00:00+09:00','blocked','123')")
+        db.execute('CREATE TABLE questions(question_id,account,state,send_day,answer_id,answer_url,result,created_at)')
+        db.execute("INSERT INTO questions VALUES('123','stone0747','drafted',NULL,NULL,NULL,NULL,'2026-10-25')")
+    return path,{'arguments':{'account':'stone0747','date':'2026-10-25'},'eligibility':{'runs':[{'runId':'run-1','state':'blocked'}]}}
+
+
+def test_kin_retry_binds_original_unsubmitted_question_without_changing_ledger(kin_failed_run):
+    path,row=kin_failed_run;before=path.read_bytes()
+    assert conferences.kin_retry_target(row)=={'runId':'run-1','account':'stone0747','questionId':'123'}
+    assert path.read_bytes()==before
+    row['arguments']['account']='adinfo0905'
+    with pytest.raises(ValueError,match='does not match'):conferences.kin_retry_target(row)
+
+
+@pytest.mark.parametrize('field,value',[('state','publishing'),('send_day','2026-10-25'),('answer_id','15'),('answer_url','https://kin.naver.com/answer'),('result','uncertain')])
+def test_kin_retry_rejects_every_submission_marker(kin_failed_run,field,value):
+    import sqlite3
+    path,row=kin_failed_run
+    with sqlite3.connect(path) as db:db.execute(f'UPDATE questions SET {field}=?',(value,))
+    with pytest.raises(ValueError,match='no retry'):conferences.kin_retry_target(row)
+
+
+def test_kin_retry_cannot_follow_another_latest_draft(kin_failed_run):
+    import sqlite3
+    path,row=kin_failed_run
+    with sqlite3.connect(path) as db:db.execute("INSERT INTO questions VALUES('456','stone0747','drafted',NULL,NULL,NULL,NULL,'2026-10-26')")
+    with pytest.raises(ValueError,match='no retry'):conferences.kin_retry_target(row)
+
+
+def test_kin_worker_rechecks_submission_and_cannot_switch_questions(kin_failed_run,monkeypatch):
+    import sqlite3
+    from unittest.mock import Mock
+    import naver_kin.posting as engine
+    path,row=kin_failed_run
+    row['retryTarget']=conferences.kin_retry_target(row)
+    for name in ('_naver_scheduler_reserve_run','_naver_authoring_generate_for_slot','_naver_browser_publish','_naver_browser_verify_public'):
+        monkeypatch.setattr(engine,name,Mock())
+    for name in ('_conference_retry','_conference_results','_conference_failures'):
+        monkeypatch.setattr(engine,name,None,raising=False)
+    reserve=engine._naver_scheduler_reserve_run
+    conferences.install_channel_conferences('kin');engine._conference_retry=row
+    with sqlite3.connect(path) as db:db.execute("UPDATE questions SET state='submitted_unverified'")
+    with pytest.raises(ValueError,match='no retry'):engine._naver_scheduler_reserve_run(None,{})
+    reserve.assert_not_called()
+    with pytest.raises(ValueError,match='Different question'):
+        engine._naver_browser_publish('stone0747','https://kin.naver.com/qna/detail.naver?docId=487064309','answer')
+    with pytest.raises(ValueError,match='replacement question'):
+        engine._naver_authoring_generate_for_slot('stone0747','new-run','test-model')
 
 
 def test_unverified_conference_outcome_is_not_success(tmp_path):

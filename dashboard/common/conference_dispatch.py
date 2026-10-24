@@ -221,19 +221,34 @@ def install_channel_conferences(kind):
                 expected=(agendas.require().get('workTarget') or agendas.require()['source'])['arguments']
                 if status.get('activeRunId') or expected['date']!=moment.date().isoformat():
                     raise ValueError('Original Kin cadence needs reconciliation; no new reservation')
+            if getattr(engine,'_conference_retry',None):
+                if kin_retry_target(engine._conference_retry)!=engine._conference_retry['retryTarget']:
+                    raise ValueError('Original Kin draft changed; reconcile before retry')
             return reserve(db,config,now=now,force=force)
         engine._naver_scheduler_reserve_run=reserve_original
         author = engine._naver_authoring_generate_for_slot
         def generate_for_slot(account, slot_id, model, *args, **kwargs):
+            if getattr(engine,'_conference_retry',None):
+                raise ValueError('Same-question recovery cannot author a replacement question')
             return author_after_conference(account, slot_id, '다음 지식iN 답변의 질문 탐색 주제·독자·구성을 결정한다.', author, account, slot_id, model, *args, **kwargs)
         engine._naver_authoring_generate_for_slot = generate_for_slot
         original = engine._naver_browser_publish
+        engine._conference_failures = []
         def publish(account, url, answer, before_submit=None):
             verify_target(account)
-            folder = folder_for('naver_kin', day, account + '-' + hashlib.sha256(url.encode()).hexdigest()[:16])
-            planning_or_memory(account, '이 질문에 대한 답변 실행 계획: '+url+'\n'+answer[:800], folder, {}, channel='kin')
-            from common.kin_screen import publish_with_screen
-            return publish_with_screen(engine, original, account, url, answer, before_submit, folder)
+            question=engine._naver_pipeline_question_id(url)
+            retry=getattr(engine,'_conference_retry',None)
+            if retry and (account!=retry['retryTarget']['account'] or question!=retry['retryTarget']['questionId']):
+                raise ValueError('Different question is outside the current recovery agenda')
+            try:
+                folder = folder_for('naver_kin', day, account + '-' + hashlib.sha256(url.encode()).hexdigest()[:16])
+                planning_or_memory(account, '이 질문에 대한 답변 실행 계획: '+url+'\n'+answer[:800], folder, {}, channel='kin')
+                from common.kin_screen import publish_with_screen
+                return publish_with_screen(engine, original, account, url, answer, before_submit, folder)
+            except Exception as exc:
+                engine._conference_failures.append({'account':account,'questionId':question,
+                    'errorType':type(exc).__name__,'reason':conference_failure_reason(exc)})
+                raise
         engine._naver_browser_publish = publish
         engine._conference_results = []
         verify = engine._naver_browser_verify_public
@@ -301,6 +316,7 @@ def report_outcome(receipt, task_id, context=None):
              'title':receipt.get('title'), 'slot':receipt.get('slot') or receipt.get('scheduledSlot'),
              'submissionState':receipt.get('submissionStatus') or receipt.get('state'),
              'submittedUrl':address if pending else '', 'errorType':receipt.get('errorType'),
+             'failureReason':receipt.get('reason'),
              'nextAction':'열린 Threads 전용 Ubuntu 창에서 @mustpickinfo 로그인 후 같은 안건을 재개한다. 원고는 보존되어 있다.' if receipt.get('reason') == 'threads_web_login_required' else '실제 게시 본문과 계정 확인 완료' if public else '예약 목록과 지정 시각 확인 완료' if reserved else '담당 직원이 기존 제출 결과를 재조회한다. 확인 전에는 재제출하지 않는다.' if pending else '해당 안건의 실행 오류를 확인한다. 제출 여부 확인 전에는 재제출하지 않는다.'}
     report = {key: facts.get(key) for key in ('channel','account','title','reserveTime','slot','nextAction')}
     report['status'] = facts['outcome']
@@ -327,6 +343,8 @@ def conference_failure_reason(exc):
     """Retain a safe actionable cause rather than only the outer RuntimeError."""
     for _ in range(8):
         message = str(exc)
+        if isinstance(exc,FileExistsError):
+            return 'execution_evidence_directory_collision'
         if 'Screen execution reached' in message:
             return 'screen_execution_budget_exhausted'
         if '응답 시간 제한' in message:
@@ -339,7 +357,7 @@ def conference_failure_reason(exc):
             return 'duplicate_submission_prevented'
         if message in ('threads_web_login_required','threads_readiness_incomplete','threads_existing_draft_preserved','threads_uncertain_submission_tab_preserved'):
             return message
-        exc = exc.__cause__
+        exc = exc.__cause__ or exc.__context__
         if exc is None:break
     return 'execution_error'
 
@@ -351,7 +369,8 @@ def _work(identity):
     # Parent stores ownership before the child reads the request.
     with locked(QUEUE):
         row = load(path)
-    context = {'channel': {'kin':'지식iN','threads':'Threads'}.get(row['kind'], '')}
+    context = {'channel': {'kin':'지식iN','threads':'Threads'}.get(row['kind'], ''),
+               **{k:row['arguments'].get(k) for k in ('account','slot','date')}}
     if row['kind'] == 'parameters':
         args = row['arguments']
         context.update(channel={'naver':'네이버 블로그','cf':'CF 블로그','naver-cycle':'네이버 블로그','cf-cycle':'CF 블로그','dispatch':'CF 블로그','prepare':'네이버 블로그·CF 블로그 준비','conference':'발행 회의'}.get(args.get('action'), '발행 안건'),
@@ -379,9 +398,11 @@ def _work(identity):
         else:
             engine = install_channel_conferences(row['kind'])
             if row['kind'] == 'kin':
+                if row.get('retryTarget'):engine._conference_retry=row
                 engine.main(['--tick', '--scheduled'])
                 state = load(ROOT/'dashboard/data/kin-automation-state.json')
                 row['eligibility'] = {k:state.get(k) for k in ('reason','state','runs','runId','account','cadenceState','nextEligibleAt','globalRemainingRuns','submissionCounts')}
+                row['executionFailures']=getattr(engine,'_conference_failures',[])
             else:
                 engine._conference_agenda = row['arguments'].get('topic', '')
                 if row['arguments'].get('partId'):
@@ -407,7 +428,10 @@ def _work(identity):
                 row['reportErrorType'] = type(exc).__name__
         failed_runs=[r for r in (row.get('eligibility') or {}).get('runs',[]) if r.get('state') in ('blocked','failed','error')]
         if failed_runs and not row['outcomes']:
-            row.update(status='failed',failureReason='native_run_blocked:'+str(failed_runs[0].get('reason','unknown'))[:120])
+            failure=(row.get('executionFailures') or [{}])[-1]
+            row.update(status='failed',failureReason=failure.get('reason') or 'native_run_blocked:'+str(failed_runs[0].get('reason','unknown'))[:120])
+            row['failureReport']=report_outcome({'errorType':failure.get('errorType') or failed_runs[0].get('reason'),
+                'reason':row['failureReason']},'conference:'+identity[:24],context)
         else:row['status']='completed'
         row.update(completedAt=time.time(), retryAt=time.time()+60)
     except Exception as exc:
@@ -461,20 +485,45 @@ def retry_active():
     current=agendas.require()
     target=current.get('workTarget') or current.get('source',{})
     kind=target.get('kind');args=target.get('arguments',{})
-    if kind!='parameters' or args.get('action') not in ('naver','cf'):
+    if kind!='kin' and (kind!='parameters' or args.get('action') not in ('naver','cf')):
         raise ValueError('This original operation requires its registered reconciliation or repair tool')
-    from common.project_autonomy import recoverable_work
-    matches=[r for r in recoverable_work(current['project']) if r['date']==args.get('date') and r['identity']==args.get('account') and (r['slot'] is None if current['project']=='cf_blog' else r['slot']==args.get('slot'))]
-    if len(matches)!=1:raise ValueError('Same work is not verified as a pre-submission failure; reconcile existing results')
+    if kind!='kin':
+        from common.project_autonomy import recoverable_work
+        matches=[r for r in recoverable_work(current['project']) if r['date']==args.get('date') and r['identity']==args.get('account') and (r['slot'] is None if current['project']=='cf_blog' else r['slot']==args.get('slot'))]
+        if len(matches)!=1:raise ValueError('Same work is not verified as a pre-submission failure; reconcile existing results')
     identity=hashlib.sha256(json.dumps([kind,args],sort_keys=True).encode()).hexdigest();file=QUEUE/(identity+'.json')
     with locked(QUEUE):
         row=load(file)
         if row.get('businessAgendaId')!=current['id'] or row.get('status')!='failed' or row.get('attempts',1)>=2:raise ValueError('Original attempt is pending, unknown or its retry budget is exhausted')
-        row.setdefault('attemptHistory',[]).append({k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes')})
+        if kind=='kin':row['retryTarget']=kin_retry_target(row)
+        row.setdefault('attemptHistory',[]).append({k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes','eligibility','executionFailures')})
         row.update(status='queued',attempts=row.get('attempts',1)+1,retryRequestedAt=time.time())
         write(file,row)
     agendas.progress(current['id'],'recovering','원래 계정·날짜·슬롯의 제출 전 실패를 같은 안건에서 재개합니다.')
     return {'ok':True,'status':'queued','agendaId':identity,'businessAgendaId':current['id'],'publicationVerified':False}
+
+
+def kin_retry_target(row):
+    """Bind a bounded retry to the original unsubmitted question, using a read-only ledger."""
+    import sqlite3
+    from contextlib import closing
+    runs=(row.get('eligibility') or {}).get('runs',[])
+    if len(runs)!=1 or runs[0].get('state')!='blocked':
+        raise ValueError('One exact blocked Kin run is required')
+    args=row['arguments'];run=runs[0]
+    database=ROOT/'dashboard/data/kin.sqlite3'
+    with closing(sqlite3.connect(database.resolve().as_uri()+'?mode=ro',uri=True)) as db:
+        db.row_factory=sqlite3.Row
+        slot=db.execute('SELECT * FROM automation_slots WHERE slot_id=?',(run.get('runId'),)).fetchone()
+        if not slot or slot['account']!=args.get('account') or slot['planned_at'][:10]!=args.get('date') or slot['state']!='blocked':
+            raise ValueError('Original Kin run/account/date does not match')
+        question=db.execute('SELECT * FROM questions WHERE question_id=?',(slot['question_id'],)).fetchone()
+        latest=db.execute("SELECT question_id FROM questions WHERE account=? AND state='drafted' ORDER BY created_at DESC LIMIT 1",(args['account'],)).fetchone()
+        if (not question or question['account']!=args['account'] or question['state']!='drafted'
+                or any(question[k] for k in ('send_day','answer_id','answer_url','result'))
+                or not latest or latest['question_id']!=question['question_id']):
+            raise ValueError('Original draft unavailable or submission uncertain; no retry')
+        return {'runId':slot['slot_id'],'account':slot['account'],'questionId':slot['question_id']}
 
 
 def main():

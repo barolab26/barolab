@@ -373,11 +373,46 @@ def test_native_blocked_run_is_failed_not_no_work(runtime,monkeypatch,tmp_path):
     (tmp_path/'dashboard/data').mkdir(parents=True)
     write(tmp_path/'dashboard/data/kin-automation-state.json',{'runs':[{'runId':'actual-run','state':'blocked','reason':'operation_RuntimeError'}]})
     monkeypatch.setattr(conferences,'install_channel_conferences',lambda kind:SimpleNamespace(main=lambda args:None,_conference_results=[]))
+    monkeypatch.setattr(conferences,'report_outcome',Mock(return_value={'outcome':'작업 차단'}))
     conferences._work(key)
     receipt=load(conferences.QUEUE/(key+'.json'))
     assert receipt['status']=='failed' and receipt['failureReason']=='native_run_blocked:operation_RuntimeError'
     assert receipt['eligibility']['runs'][0]['runId']=='actual-run'
     assert agendas.get(identity)['status']=='recovering' and not agendas.get(identity).get('verification')
+
+
+def test_kin_retry_keeps_agenda_and_original_attempt_with_one_retry(runtime,monkeypatch):
+    args={'date':'2026-10-25','account':'stone0747','slot':'original-cadence'}
+    request=conferences._request_single('kin',args);file=conferences.QUEUE/(request['agendaId']+'.json')
+    receipt=load(file);identity=receipt['businessAgendaId'];ownership=opened(identity)
+    receipt.update(status='failed',failureReason='execution_evidence_directory_collision',
+                                    eligibility={'runs':[{'runId':'original-run','state':'blocked'}]})
+    write(file,receipt)
+    monkeypatch.setattr(conferences,'kin_retry_target',lambda row:{'questionId':'123','account':'stone0747','runId':'original-run'})
+    with agendas.context(ownership):result=conferences.retry_active()
+    retried=load(file)
+    assert result['businessAgendaId']==identity and retried['attempts']==2 and retried['status']=='queued'
+    assert retried['attemptHistory'][0]['eligibility']==receipt['eligibility']
+    assert retried['retryTarget']['questionId']=='123'
+    retried['status']='failed';write(file,retried)
+    with agendas.context(ownership),pytest.raises(ValueError,match='budget is exhausted'):conferences.retry_active()
+
+
+def test_kin_underlying_failure_reaches_recovery_instead_of_draft_validation(runtime,monkeypatch,tmp_path):
+    from types import SimpleNamespace
+    monkeypatch.setattr(conferences,'ROOT',tmp_path)
+    identity=offer('kin','conference',project='naver_kin');opened(identity);key='e'*64
+    write(conferences.QUEUE/(key+'.json'),{'agendaId':key,'businessAgendaId':identity,'kind':'kin','arguments':{},'status':'running'})
+    (tmp_path/'dashboard/data').mkdir(parents=True)
+    write(tmp_path/'dashboard/data/kin-automation-state.json',{'runs':[{'runId':'actual-run','state':'blocked','reason':'operation_RuntimeError'}]})
+    failure={'errorType':'FileExistsError','reason':'execution_evidence_directory_collision','questionId':'123'}
+    monkeypatch.setattr(conferences,'install_channel_conferences',lambda kind:SimpleNamespace(main=lambda args:None,_conference_results=[],_conference_failures=[failure]))
+    monkeypatch.setattr(conferences,'report_outcome',Mock(return_value={'outcome':'작업 차단'}))
+    conferences._work(key)
+    receipt=load(conferences.QUEUE/(key+'.json'))
+    assert receipt['status']=='failed' and receipt['failureReason']==failure['reason']
+    assert receipt['executionFailures']==[failure]
+    assert agendas.get(identity)['blocker']==failure['reason']
 
 
 def test_late_result_does_not_implicitly_resume_suspended_work(runtime):

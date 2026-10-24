@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 import hashlib
+import uuid
 
 
 def visual_click(page, target, port, folder, description, before_click=None):
@@ -99,7 +100,7 @@ def publish_with_screen(engine, original, account, url, answer, before_submit, f
         before_submit();committed=True
     current=[];port=engine._naver_browser_ACCOUNTS[account];folder=Path(folder)/'ego-kin'
     # A distinct attempt folder preserves all prior drafts and ambiguous submissions.
-    folder=folder/hashlib.sha256(answer.encode()).hexdigest()[:16]
+    folder=folder/hashlib.sha256(answer.encode()).hexdigest()[:16]/uuid.uuid4().hex
     @contextmanager
     def visible_session(selected):
         if selected != account:raise ValueError('Screen session account differs from the approved answer')

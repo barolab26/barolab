@@ -204,7 +204,11 @@ def tool_call(row,tool,args):
     if tool=='retry_conference':
         from common.conference_dispatch import retry_active
         if not (row['permissions']['execute'] or row['permissions']['repair']):raise ValueError('Execution not authorized')
-        return retry_active()
+        result=retry_active()
+        row['pendingConference']=result['agendaId']
+        row.update(status='waiting',nextCheckAt=time.time()+15)
+        save(row)
+        return result
     if tool=='projects':return overview()
     if tool=='project_status':
         return execute_agent_tool(row['actor'],'read_agent_status',project=args['project'])
@@ -294,6 +298,15 @@ def tool_call(row,tool,args):
 
 
 def refresh_pending(row):
+    if row.get('pendingConference'):
+        from common.conference_dispatch import QUEUE
+        identity=row['pendingConference']
+        if not re.fullmatch(r'[a-f0-9]{64}',identity):raise ValueError('Invalid pending conference')
+        receipt=load(QUEUE/(identity+'.json'))
+        if not receipt or receipt.get('status') in ('queued','running','deployment_wait'):
+            row.update(status='waiting',nextCheckAt=time.time()+30);save(row);return False
+        observe(row,'host','conference_result',{'agendaId':identity},receipt)
+        row.pop('pendingConference');row.update(status='ready',actor=row.get('leadActor','jarvis'));save(row)
     pending=row.get('pendingAction')
     if not pending:return True
     from server.agent_tools import STAFF_REQUEST_DIR,enqueue_staff_request
@@ -568,7 +581,7 @@ def _advance(row,steps=2):
                 except Exception as exc:
                     result={'ok':False,'errorType':type(exc).__name__,'reason':safe(str(exc))[:500]}
                 observe(row,actor,tool,args,result)
-                if row.get('pendingAction'):save(row);return row
+                if row.get('pendingAction') or row.get('pendingConference'):save(row);return row
             elif kind in ('finish','wait'):
                 known={x['id'] for x in row['observations']}
                 if not decision['evidence_ids'] or not set(decision['evidence_ids'])<=known:raise ValueError('Answer must refer to actual supplied evidence IDs')

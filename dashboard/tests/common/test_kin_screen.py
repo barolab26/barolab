@@ -1,4 +1,5 @@
 import tempfile
+import hashlib
 import types
 import unittest
 from contextlib import contextmanager
@@ -9,6 +10,27 @@ from common.kin_screen import publish_with_screen, visual_click
 
 
 class KinScreenTests(unittest.TestCase):
+    def test_retry_after_pre_submit_failure_preserves_prior_screen_evidence(self):
+        page=Mock();page.screenshot.side_effect=lambda path,**kw:Image.new('RGB',(960,960)).save(path)
+        @contextmanager
+        def session(account):yield page
+        engine=types.SimpleNamespace(_naver_browser_session=session,_naver_browser__type_paragraphs=Mock(),_naver_browser_ACCOUNTS={'test':65001})
+        gate=Mock();answer='same approved draft'
+        def original(account,url,text,before):
+            with engine._naver_browser_session(account) as visible:
+                visible.locator('._answerWriteButton').first.click()
+        with tempfile.TemporaryDirectory() as temp,patch('common.ubuntu_naver_browser.focus_workflow_window'),patch('common.llm_client.generate_json',return_value={'kind':'stop'}):
+            root=Path(temp)/'ego-kin'/hashlib.sha256(answer.encode()).hexdigest()[:16]
+            old=root/'click-00';old.mkdir(parents=True);(old/'proof.json').write_text('original proof')
+            for _ in range(2):
+                with self.assertRaisesRegex(RuntimeError,'could not identify'):
+                    publish_with_screen(engine,original,'test','https://kin.naver.com/question',answer,gate,temp)
+            attempts=list(root.glob('*/click-00/before-0.png'))
+            self.assertEqual(len(attempts),2)
+            self.assertEqual((old/'proof.json').read_text(),'original proof')
+            self.assertIs(engine._naver_browser_session,session)
+        gate.assert_not_called();page.mouse.click.assert_not_called()
+
     def test_visible_typing_preserves_blank_paragraphs_callback_and_pending_tab(self):
         page=Mock();page.paragraphs=[];page.locator.return_value.all_inner_texts.side_effect=lambda:page.paragraphs
         @contextmanager

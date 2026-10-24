@@ -30,6 +30,25 @@ def decisions(monkeypatch,items):
     return seen
 
 
+def test_conference_retry_waits_for_actual_result_without_more_model_decisions(environment,monkeypatch):
+    from common import conference_dispatch as conferences
+    folder=environment/'conferences';folder.mkdir();identity='f'*64
+    monkeypatch.setattr(conferences,'QUEUE',folder)
+    retry=Mock(return_value={'agendaId':identity,'status':'queued','publicationVerified':False})
+    monkeypatch.setattr(conferences,'retry_active',retry)
+    seen=decisions(monkeypatch,[choice(tool='retry_conference')])
+    row=crew.reason_request('retry-same','같은 안건 복구',execute=True,repair=True,steps=1)
+    assert row['status']=='waiting' and row['pendingConference']==identity
+    path=folder/(identity+'.json');path.write_text(json.dumps({'status':'running'}))
+    crew._advance(row,1)
+    assert len(seen)==1 and row['decisions']==1
+    path.write_text(json.dumps({'status':'failed','failureReason':'root_cause','outcomes':[]}))
+    assert crew.refresh_pending(row)
+    assert 'pendingConference' not in row
+    assert row['observations'][-1]['result']['failureReason']=='root_cause'
+    retry.assert_called_once()
+
+
 def test_revenue_question_inspects_metrics_and_consults_real_role_before_answer(environment,monkeypatch):
     data=environment/'dashboard/data';data.mkdir(parents=True)
     (data/'revenue.json').write_text(json.dumps({'checkedAt':'today','revenue':None}))
