@@ -680,6 +680,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                         'lastRunAt': stamp(), 'lastAttemptAt': None}
             save(account_id, progress)
             page, original_page = None, None
+            retain_page = False
             started = time.monotonic()
             try:
                 from common.ubuntu_naver_browser import account_paths
@@ -777,6 +778,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                                 mark_success(account_id)
                                 if account_request_mode and proof['indexed'] is False:
                                     row['indexingRequest'] = request_inspected_url(page, account_id, site, url, row)
+                                    retain_page = row['indexingRequest']['status'] == 'request_unconfirmed'
                                     if row['indexingRequest']['status'] in ('quota_exceeded', 'request_unconfirmed'):
                                         progress.update(status='backoff', reason=row['indexingRequest']['status'],
                                             nextRetryAt=(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat())
@@ -793,7 +795,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                             if progress['status'] == 'backoff':
                                 break
                     finally:
-                        if page and not page.is_closed():
+                        if page and not retain_page and not page.is_closed():
                             page.close()
                         if original_page and not original_page.is_closed():
                             original_page.bring_to_front()
