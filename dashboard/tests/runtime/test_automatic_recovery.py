@@ -137,3 +137,24 @@ def test_exact_native_conference_owns_retry_budget_for_legacy_recovery(tmp_path,
     if expected_calls:
         assert result['attempts']==2 and result['conferenceRequestedAt']==7
         assert len(result['attemptHistory'])==1
+
+
+def test_team_receives_fresh_owned_recovery_result_without_source_reinvestigation(tmp_path,monkeypatch):
+    from agents import crew_reasoning as crew
+    from common import work_agenda as agendas,conference_dispatch as conferences
+    monkeypatch.setattr(repair,'ROOT',tmp_path)
+    monkeypatch.setattr(agendas,'enabled',lambda:True)
+    identity='a'*64
+    monkeypatch.setattr(agendas,'active',lambda:{'id':identity})
+    monkeypatch.setattr(conferences,'QUEUE',tmp_path)
+    path=repair._recovery_path('project-incident:'+identity[:24])
+    row={'businessAgendaId':identity,'status':'resume_held','step':'verify','classification':{'kind':'retry_original','reason':'Current window observed'},
+         'resumeResult':{'status':'unknown','reason':'conference_receipt_superseded','conference':{'agendaId':'b'*64}},'plan':{'secret':'never share'}}
+    write(path,row);write(tmp_path/('b'*64+'.json'),{'businessAgendaId':identity,'status':'failed','attempts':1,'cookie':'never share'})
+    observed=crew.recovery_progress()
+    assert observed['classification']['kind']=='retry_original'
+    assert observed['resumeOutcome']['reason']=='conference_receipt_superseded'
+    assert observed['originalConference']['status']=='failed'
+    assert 'never share' not in json.dumps(observed)
+    row['businessAgendaId']='other';write(path,row)
+    assert crew.recovery_progress()=={}
