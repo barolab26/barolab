@@ -1351,7 +1351,7 @@ def synthesize_agent_reply(
     clean_q = re.sub(r"@\S+", "", user_text).strip()
     if staff_request_id and slug in AGENT_MAP:
         from agents.crew_reasoning import reason_request
-        repair=bool(re.search(r'수리해|복구해|고쳐|정상화|해결|repair',user_text,re.I)) and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t',user_text,re.I))
+        repair=bool(re.search(r'(?:수리|복구|해결|정상화)\s*(?:해|하라|하세요|하고|시켜)|고쳐|(?:please|can you)\s+repair\b',user_text,re.I)) and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t',user_text,re.I))
         goal=reason_request(staff_request_id,user_text,execute=_project_cycle_requested(user_text),repair=repair,lead=slug)
         text=goal.get('answer') or goal.get('waitingMessage') or '질문에 대한 자료 확인과 직원 협의를 이어가고 있습니다. 실제 도구 결과를 검토한 최종 판단을 같은 질문에 연결해 보고합니다.'
         return text, [], [{'tool':'crew_goal','goalId':goal['id'],'status':goal['status'],'plan':goal.get('plan',[]),'activeActor':goal.get('actor'),

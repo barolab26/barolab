@@ -271,7 +271,8 @@ def test_dispatch_recovery_uses_same_intent_and_has_a_bounded_enqueue_retry(envi
     assert row['status']=='blocked' and row['answerSource']=='host'
 
 
-def test_interactive_staff_question_enters_durable_goal_instead_of_legacy_status_report():
+@pytest.mark.parametrize('question,repair',[('왜 진행이 안 돼?',False),('왜 해결이 안 돼?',False),('정상화 방법을 알려줘',False),('복구해줘',True),('정상화 시켜줘',True),('복구하지 마',False)])
+def test_interactive_staff_question_enters_durable_goal_instead_of_legacy_status_report(question,repair):
     import ast,re
     from typing import Optional,List,Dict,Any
     source=Path(__file__).resolve().parents[2]/'agents/chat_room.py'
@@ -280,8 +281,8 @@ def test_interactive_staff_question_enters_durable_goal_instead_of_legacy_status
     exec(compile(ast.Module(body=[node],type_ignores=[]),'<interactive-goal>','exec'),scope)
     row={'id':'a'*64,'status':'ready','plan':['실제 수익 자료 확인'],'actor':'trace'}
     with patch.object(crew,'reason_request',return_value=row) as reason:
-        answer,artifacts,tools=scope['synthesize_agent_reply']('jarvis','왜 진행이 안 돼?',[],'',staff_request_id='msg-1-user:jarvis')
-    reason.assert_called_once_with('msg-1-user:jarvis','왜 진행이 안 돼?',execute=False,repair=False,lead='jarvis')
+        answer,artifacts,tools=scope['synthesize_agent_reply']('jarvis',question,[],'',staff_request_id='msg-1-user:jarvis')
+    reason.assert_called_once_with('msg-1-user:jarvis',question,execute=False,repair=repair,lead='jarvis')
     assert tools[0]['goalId']==row['id'] and tools[0]['activeActor']=='trace'
     assert '실제 도구 결과' in answer and not artifacts
 
