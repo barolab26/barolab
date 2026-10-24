@@ -186,10 +186,28 @@ def pipeline_lines(data,now):
     experiments=data.get('maintenance',{}).get('growth',{}).get('experiments',[])
     repaired=sum(r.get('status')=='done' and _date(r.get('updatedAt'))==day for r in experiments)
     rows.append(f'Threads [{count if count is not None else "—"}/4] {bar(count,4)} · 준비 {thread_counts.get("prepared","—")} · 대기 {thread_counts.get("waiting","—")} · 실패 {thread_counts.get("failed","—")} · 닥터 오늘 개선 {repaired}건')
-    active=[('CF Order '+str(r.get('order'))+' '+str(r.get('domain')),r.get('stageName',''),r.get('stageTimes',{}).get(str(r.get('currentStage'))) or r.get('attemptStartedAt'),r.get('detailMessage') or r.get('lastError','')) for r in items if r.get('status') in ('processing','publishing')]
+    control=data.get('agendaControl') or {};agenda=control.get('active') or {};target=agenda.get('target') or {}
+    def belongs(project,account,slot,at):
+        if not control.get('enabled'):return True
+        return (agenda.get('project')==project and target.get('account')==account
+                and (not target.get('slot') or str(target['slot'])==str(slot))
+                and agenda.get('processObserved') is True and now.timestamp()+2>=_epoch(at)>=_epoch(agenda.get('activatedAt'))>0)
+    active=[('CF Order '+str(r.get('order'))+' '+str(r.get('domain')),r.get('stageName',''),r.get('stageTimes',{}).get(str(r.get('currentStage'))) or r.get('attemptStartedAt'),r.get('detailMessage') or r.get('lastError','')) for r in items if r.get('status') in ('processing','publishing')
+            and belongs('cf_blog',r.get('domain'),target.get('slot'),r.get('stageTimes',{}).get(str(r.get('currentStage'))) or r.get('attemptStartedAt'))]
     workflow=data.get('workflow',{});runtime=workflow.get('runtime',workflow)
+    workflow_at=(str(workflow.get('workDate') or workflow.get('date') or day)+'T'+workflow['updatedAt']+'+09:00') if len(str(workflow.get('updatedAt','')))==8 else workflow.get('attemptStartedAt')
     if workflow.get('status') in ('running','processing') or runtime.get('status')=='running':
-        active.append(('네이버 '+str(workflow.get('account') or runtime.get('account','')),workflow.get('stageName') or runtime.get('stage',''),(day+'T'+workflow['updatedAt']+'+09:00') if len(str(workflow.get('updatedAt','')))==8 else workflow.get('attemptStartedAt'),workflow.get('detailMessage','')))
+        account=str(workflow.get('account') or runtime.get('account') or workflow.get('blogId','')).split(' ',1)[0]
+        if belongs('naver_blog',account,workflow.get('scheduledSlot'),workflow_at):
+            active.append(('네이버 '+str(workflow.get('account') or runtime.get('account','')),workflow.get('stageName') or runtime.get('stage',''),workflow_at,workflow.get('detailMessage','')))
+        elif control.get('enabled'):
+            rows.append('과거 실행 기록 · 네이버 '+str(workflow.get('account') or runtime.get('account',''))+' · '+str(workflow.get('updatedAt') or '시각 미상')+' · 현재 실행 근거 없음')
+    if control.get('enabled'):
+        from common.work_agenda import LABELS
+        title='현재 안건 · '+str(agenda.get('title') or '활성 안건 없음')
+        if agenda:title+=' · '+LABELS.get(agenda.get('status'),str(agenda.get('status')))
+        rows.insert(0,title)
+        rows.insert(1,'등록된 작업 프로세스 실행 관측' if agenda.get('processObserved') else '등록된 작업 프로세스 실행 미관측 · 회의·진단 상태는 안건 기준')
     for title,stage,started,detail in active[:2]:
         step=stage_number(stage);elapsed=max(0,int(now.timestamp()-_epoch(started))) if _epoch(started) else 0
         rows.append(title+' · '+str(stage)+' · '+str(elapsed)+'초')
@@ -202,7 +220,8 @@ def pipeline_lines(data,now):
         rows.append('다음 슬롯 준비 / 자동 복구 대기')
         failed=next((r for r in reversed(items) if r.get('status') in ('failed','review_required')),None)
         if failed:rows.append(str(failed.get('domain'))+' · '+str(failed.get('lastError',''))[:160])
-    events=[e for e in data.get('events',[]) if str(e.get('stage','')).startswith('editorial-')]
+    events=[e for e in data.get('events',[]) if str(e.get('stage','')).startswith('editorial-')
+            and (not control.get('enabled') or e.get('businessAgendaId')==agenda.get('id'))]
     if active and events:
         last=max(events,key=lambda e:e.get('ts',0));rows.append('@jarvis · '+str(last.get('outputKind') or last.get('stage'))[:160])
     return rows

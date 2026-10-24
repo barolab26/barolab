@@ -113,8 +113,8 @@ def ensure_account(port):
     return pid
 
 
-def focus_workflow_window(port):
-    """Focus only the verified existing workflow browser; never start or navigate."""
+def inspect_workflow_window(port):
+    """Read the verified browser's X11 mapping without focusing, starting or navigating."""
     from common.browser_session import _runtime
     if port == 9440:
         executable, profile = Path("/opt/google/chrome/chrome"), Path.home() / ".config/cdp_gui_9440"
@@ -132,8 +132,10 @@ def focus_workflow_window(port):
     if not display:
         displays.extend(':'+p.name[1:] for p in sorted(Path('/tmp/.X11-unix').glob('X*'))[:16] if re.fullmatch(r'X\d+',p.name))
         displays.extend(':'+p.name[2:-5] for p in sorted(Path('/tmp').glob('.X*-lock'))[:16] if re.fullmatch(r'\.X\d+-lock',p.name))
+    attempted=[]
     for candidate in dict.fromkeys(displays):
         if not re.fullmatch(r':\d+(?:\.\d+)?',candidate):raise RuntimeError('Expected local workflow DISPLAY')
+        attempted.append(candidate)
         environment = dict(os.environ, DISPLAY=candidate)
         try:
             windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True,
@@ -142,9 +144,19 @@ def focus_workflow_window(port):
             continue
         for line in windows.stdout.splitlines():
             fields = line.split(None, 4)
-            if len(fields) >= 3 and fields[2] == str(pid):
-                subprocess.run(["wmctrl", "-ia", fields[0]], env=environment, check=True, timeout=5)
-                return
+            if len(fields) >= 3 and fields[2] == str(pid) and re.fullmatch(r'0x[0-9a-fA-F]+',fields[0]):
+                return {'status':'observed','port':port,'browserPid':pid,'display':candidate,
+                        'windowId':fields[0],'wmPid':int(fields[2]),'mapped':None,'attemptedDisplays':attempted,'browserStarted':False}
+    return {'status':'not_found','port':port,'browserPid':pid,'display':None,'windowId':None,
+            'wmPid':None,'mapped':None,'attemptedDisplays':attempted,'browserStarted':False}
+
+
+def focus_workflow_window(port):
+    """Focus only the verified existing workflow browser; never start or navigate."""
+    window=inspect_workflow_window(port)
+    if window['status']=='observed':
+        subprocess.run(['wmctrl','-ia',window['windowId']],env=dict(os.environ,DISPLAY=window['display']),check=True,timeout=5)
+        return
     raise RuntimeError(f"Verified browser window is not visible on DISPLAY for port {port}")
 
 

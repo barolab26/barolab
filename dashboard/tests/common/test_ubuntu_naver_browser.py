@@ -34,6 +34,17 @@ class UbuntuNaverBrowserTests(unittest.TestCase):
             identity.assert_called_once_with(9440, profile)
             self.assertTrue(all((c.args == (9440, 456) for c in listener.call_args_list)))
 
+    def test_window_diagnostics_do_not_focus_or_start_browser_or_export_titles(self):
+        with patch('common.browser_session._runtime',return_value={'ProcessId':456}), \
+             patch.object(browser.os,'environ',{}),patch.object(browser.Path,'read_bytes',return_value=b'DISPLAY=:11\0PRIVATE_KEY=never_export\0'), \
+             patch.object(browser.subprocess,'run',return_value=SimpleNamespace(stdout='0x123 0 456 host PRIVATE_WINDOW_TITLE')) as run, \
+             patch.object(browser.subprocess,'Popen') as spawn:
+            result=browser.inspect_workflow_window(9230)
+        self.assertEqual((result['display'],result['windowId'],result['wmPid']),(':11','0x123',456))
+        self.assertIsNone(result['mapped'])
+        self.assertNotIn('PRIVATE',json.dumps(result))
+        run.assert_called_once();self.assertEqual(run.call_args.args[0],['wmctrl','-lp']);spawn.assert_not_called()
+
     def test_missing_chrome_environment_finds_only_verified_pid_on_existing_display(self):
         with patch('common.browser_session._runtime',return_value={'ProcessId':456}), \
              patch.object(browser.os,'environ',{}), patch.object(browser.Path,'read_bytes',return_value=b''), \

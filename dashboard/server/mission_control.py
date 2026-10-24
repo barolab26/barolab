@@ -295,6 +295,19 @@ class Collector:
             return states
         except (OSError,sqlite3.Error):return cached
 
+    def read_agenda(self):
+        control=self.read('dashboard/data/active-agenda.json')
+        identity=control.get('activeId')
+        agenda=self.read('dashboard/data/publication-conferences/operations/'+identity+'.json') if isinstance(identity,str) and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
+        active=None
+        if control.get('enabled') is True and identity and agenda.get('id')==identity and agenda.get('status') not in ('closed','suspended','linked'):
+            from common.work_agenda import running
+            args=(agenda.get('workTarget') or agenda.get('source') or {}).get('arguments',{})
+            active={k:agenda.get(k) for k in ('id','project','title','status','activatedAt','updatedAt')}
+            if agenda.get('kind')=='goal':active['title']='대표 지시 안건 · '+str(agenda.get('project') or '전사')
+            active.update(target={k:args.get(k) for k in ('account','date','slot','partId')},processObserved=bool(running(agenda)))
+        return {'enabled':control.get('enabled') is True,'active':active}
+
     def collect(self):
         now=dt.datetime.now(KST); tick=time.monotonic()
         cf=self.read('dashboard/data/cf/daily_schedule.json')
@@ -345,6 +358,7 @@ class Collector:
             'synapses':'dashboard/data/memory_graph.json','maintenance':'dashboard/data/content-maintenance.json','graph':'dashboard/data/editorial-memory-graph.json',
             'naverJournal':'dashboard/data/naver/automation-journal.json','naverWorkflow':'dashboard/data/naver/active-workflow.json',
             'workflow':'dashboard/data/naver/pipeline_status.js'}.items():data[key]=self.read(path)
+        data['agendaControl']=self.read_agenda()
         data.update(events=events,remote=self.remote.get(),timeline=business_timeline(events,cf,kin,data['revenue'],now))
         data['kinOperations']=self.operation_states('kin.sqlite3','automation_slots',now.date().isoformat(),True)
         data['threadsOperations']=self.operation_states('threads.sqlite3','authoring_slots',now.date().isoformat())
@@ -471,7 +485,7 @@ def shared_snapshot(data):
     from dashboard.collectors.revenue import summarize
     revenue_document={'months':{now.strftime('%Y-%m'):{'sources':revenue_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('checkedAt')}}}
     revenue_projection={**summarize(revenue_document,now),'months':revenue_document['months']}
-    result=dict(schedulePolicy=data.get('schedulePolicy',{}),scheduleRuntime=data.get('scheduleRuntime',{}),schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
+    result=dict(agendaControl=data.get('agendaControl',{}),schedulePolicy=data.get('schedulePolicy',{}),scheduleRuntime=data.get('scheduleRuntime',{}),schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
         refreshSeconds=1,cfItems=cf_items,revenue=revenue_projection,
         naverLive={'workflow':live_workflow or None,'journal':{'attempts':live_attempts}},channels=channel_rows,crew=crew,vault=vault,timeline=timeline,
         naverAccounts=[dict(account=a.get('account'),accId=a.get('accId'),expected=a.get('expected'),

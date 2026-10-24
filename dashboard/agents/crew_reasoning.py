@@ -25,7 +25,7 @@ EVIDENCE = {
     'revenue':'revenue.json','traffic':'traffic.json','metrics':'metrics.json',
     'kin':'kin-automation-state.json','threads':'public/threads.json',
     'collection':'collection-health.json','preparation':'parameter-runtime.json',
-    'flow':'flow-active.json','cf_schedule':'cf/daily_schedule.json','naver_schedule':'naver/automation-status.json',
+    'flow':'flow-active.json','cf_schedule':'cf/daily_schedule.json','naver_schedule':'naver/automation-status.json','execution':'live_snapshot.json',
 }
 SCHEMA = {'type':'object','properties':{
     'decision':{'type':'string','enum':['tool','consult','finish','wait']},
@@ -93,7 +93,9 @@ def overview():
         item['recoverableWork']=source.get('recoverableWork',[])[:8]
         item['incidentFingerprint']=incident_key(source)
         projects.append(item)
-    return {'observedAt':time.time(),'projects':projects}
+    live=load(ROOT/'dashboard/data/live_snapshot.json')
+    return {'observedAt':time.time(),'projects':projects,'executionContext':live.get('agendaControl',{}),
+            'executionSnapshotAt':live.get('generatedAt')}
 
 
 def observe(row,actor,tool,args,result):
@@ -127,10 +129,10 @@ def read_evidence(args):
             path=_recovery_path(identity)
             if path.is_symlink():raise ValueError('Symlink evidence denied')
             item=load(path)
-        fields=('taskId','status','step','reason','holdReason','retryAt','nextCheckAt','observation','planSha256','classification','discovered','verification','errorType')
+        fields=('taskId','status','step','reason','holdReason','retryAt','nextCheckAt','observation','planSha256','classification','discovered','verification','errorType','assignedAgent','additionalObservation','inspection','resumeCapabilityAvailable')
         result={k:item.get(k) for k in fields if k in item}
         if item.get('plan'):result['plan']={k:item['plan'].get(k) for k in ('project','action','failure','scope','evidence')}
-        return {'kind':kind,'available':bool(item),'data':bounded(result)}
+        return {'kind':kind,'available':bool(item),'selection':args.get('select',[]),'data':bounded(select_evidence(result,args.get('select',[])))}
     if name=='recovery':
         from common.repair_workflow import ROOT as recovery_root,recovery_expected_actor
         rows=[]
@@ -151,14 +153,24 @@ def read_evidence(args):
     if path.is_symlink():raise ValueError('Symlink evidence denied')
     if not path.exists():return {'available':False,'source':str(path.relative_to(ROOT))}
     raw=path.read_bytes()
-    value=json.loads(raw);selection=args.get('select',[])
-    if not isinstance(selection,list) or len(selection)>8:raise ValueError('Invalid evidence selection')
-    for key in selection:
-        if not isinstance(key,(str,int)) or re.search(r'password|secret|token|api.?key|cookie|authorization|private.?key',str(key),re.I):raise ValueError('Private evidence selection denied')
-        value=value[key]
+    value=json.loads(raw)
+    if name=='execution':
+        value={'generatedAt':value.get('generatedAt'),'revision':value.get('revision'),
+               'agendaControl':value.get('agendaControl',{}),'pipelinePanel':next(iter((value.get('panels') or [])[3:4]),[])}
+    selection=args.get('select',[])
+    value=select_evidence(value,selection)
     return {'source':str(path.relative_to(ROOT)),'sha256':hashlib.sha256(raw).hexdigest(),
             'modifiedAt':path.stat().st_mtime,'selection':selection,'keys':list(value)[:60] if isinstance(value,dict) else None,
             'operationalTiming':{k:value[k] for k in ('nextEligibleAt','nextRunAt','retryAt') if isinstance(value,dict) and k in value},'data':bounded(value,8000)}
+
+
+def select_evidence(value,selection):
+    if not isinstance(selection,list) or len(selection)>8:raise ValueError('Invalid evidence selection')
+    for key in selection:
+        if not isinstance(key,(str,int)) or re.search(r'password|secret|token|api.?key|cookie|authorization|private.?key',str(key),re.I):raise ValueError('Private evidence selection denied')
+        try:value=value[key]
+        except (KeyError,IndexError,TypeError):raise ValueError('Evidence select is one nested path, for example ["classification"], not a list of separate fields') from None
+    return value
 
 
 def recall(args):
@@ -174,7 +186,7 @@ def recall(args):
 
 
 def browser_observe(row,args):
-    from common.ubuntu_naver_browser import account_paths,process_identity
+    from common.ubuntu_naver_browser import account_paths,process_identity,inspect_workflow_window
     from playwright.sync_api import sync_playwright
     from urllib.parse import urlsplit
     port=args['port']
@@ -184,6 +196,8 @@ def browser_observe(row,args):
     if type(port) is not int or port not in allowed:raise ValueError('Browser is outside the requested project scope')
     _,profile,_=account_paths(port);pid=process_identity(port,profile)
     if pid is None:return {'status':'offline','port':port,'browserStarted':False}
+    try:window=inspect_workflow_window(port)
+    except (OSError,RuntimeError,ValueError,subprocess.SubprocessError) as exc:window={'status':'unavailable','errorType':type(exc).__name__}
     with sync_playwright() as p:
         browser=p.chromium.connect_over_cdp('http://127.0.0.1:'+str(port),timeout=5000)
         result=[]
@@ -195,7 +209,7 @@ def browser_observe(row,args):
                     state=page.evaluate("""()=>({buttons:Array.from(document.querySelectorAll('button,[role=button]')).filter(e=>e.getClientRects().length).map(e=>e.getAttribute('aria-label')||e.innerText).filter(t=>t&&t.length<100&&!t.includes('@')).slice(0,60),editors:Array.from(document.querySelectorAll('[contenteditable=true]')).map(e=>({visible:!!e.getClientRects().length,characters:(e.innerText||'').trim().length,inDialog:!!e.closest('[role=dialog]')})),dialogs:document.querySelectorAll('[role=dialog]').length})""")
                     result.append({'url':parsed.scheme+'://'+parsed.netloc+parsed.path,'controls':state})
                 except Exception as exc:result.append({'status':'unreadable','errorType':type(exc).__name__})
-        return {'port':port,'pid':pid,'status':'observed','tabs':result,'browserStarted':False}
+        return {'port':port,'pid':pid,'status':'observed','tabs':result,'windowMapping':window,'browserStarted':False}
 
 
 def tool_call(row,tool,args):
@@ -346,6 +360,7 @@ def ask(row):
         'Your plan must contain concrete investigation, execution and verification steps before requesting tools. '
         'Finish is a proposal: unresolved execution stays in the SAME agenda and cannot release the next task. '
         'Do not repeat evidence reads with no new facts. A status question never preempts ongoing work. '
+        'For meeting/EGO account or stage discrepancies, read execution evidence first: compare current agenda target, actual process observation and source timestamps. A processing flag in an old file is not a running job. Never switch accounts to match stale display text. '
         'retry_conference {} retries only the current exact publication after host submission checks; never use it to bypass uncertain submission. '
         'A failure is input for diagnosis, not a reason to stop. Read the precise records/source, consult the relevant colleague, choose a supported repair, and inspect its actual result. '
         'For revenue questions inspect revenue/traffic/metrics before recommending priorities; distinguish observed results, hypotheses, expected effects and validation steps. Missing values are not zero. '
@@ -359,9 +374,9 @@ def ask(row):
         'Finish only with a direct answer to the CEO, citing real evidence IDs. A proposed code change is not applied code. '
         'If genuinely blocked after investigation, explain the precise constraint and the supported next step. '
         'Arguments are a JSON object encoded as a string; unused tool/colleague are empty strings. '
-        'Tools: projects {}; project_status {project}; evidence {name: revenue|traffic|metrics|kin|threads|collection|preparation|flow|recovery|conference:<agendaId>,select?:[nested keys or array indices]}; '
+        'Tools: projects {}; project_status {project}; evidence {name: revenue|traffic|metrics|kin|threads|collection|preparation|flow|execution|recovery|conference:<agendaId>,select?:[nested keys or array indices]}; '
         'Incident and recovery IDs must be read as incident:<taskId> and recovery_plan:<taskId>, not conference IDs. Operational JSON is read with evidence, not read_source. '
-        'browser_observe {port} inspects existing account tabs and visible controls without opening/navigating/typing; patch_status {job_id,candidate_sha256} reads a patch candidate status. '
+        'browser_observe {port} reads existing account tabs, controls and verified X11 windowMapping (DISPLAY, windowId, browserPid, wmPid) without focusing/opening/navigating/typing; mapped=null means map state was not measured. patch_status {job_id,candidate_sha256} reads a patch candidate status. '
         'web_search {query} and fetch_page {url} read public web evidence with existing bounded fetchers; '
         'read_source {path,line?,lines?} (read-only repository code, never private data or secrets); search_source {query}; memory {query}; '
         'dispatch {agent,tool,args} using ONLY run_project_cycle {project}, recover_project_runtime {project}, recover_project_work {project,work_id}, '
