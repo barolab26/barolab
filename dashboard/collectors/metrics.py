@@ -682,8 +682,12 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
             page, original_page = None, None
             started = time.monotonic()
             try:
-                directory = Path(account.get('browser_dir', 'C:/99_포터블브라우저/CentBrowserPotable_' + account_id))
-                _runtime(int(account['cdp']), str(directory / 'chrome.exe'), str(directory / 'User Data'))
+                from common.ubuntu_naver_browser import account_paths
+                try:
+                    executable, profile, _ = account_paths(int(account['cdp']))
+                except ValueError:
+                    raise RuntimeError('Ubuntu Google 전용 로그인 세션 미설정 (CDP ' + str(account['cdp']) + ')') from None
+                _runtime(int(account['cdp']), str(executable), str(profile))
                 with sync_playwright() as playwright:
                     browser = playwright.chromium.connect_over_cdp('http://127.0.0.1:' + str(account['cdp']), timeout=10000)
                     context = browser.contexts[0]

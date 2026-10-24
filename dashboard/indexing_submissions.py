@@ -359,6 +359,23 @@ def validate_public_url(site, url, client=requests):
 
 def observe_daum(site, client=requests):
     state = daum_state(site)
+    registration_url = 'https://register.search.daum.net/searchSite.daum'
+    try:
+        response = client.post(registration_url, data={'act': 'search', 'chkIn': '1', 'url': site['url']},
+                               timeout=20, allow_redirects=False)
+        from bs4 import BeautifulSoup
+        text = BeautifulSoup(response.text, 'html.parser').get_text(' ', strip=True)
+        if response.status_code == 200 and site['url'] in text and '등록조회 결과' in text:
+            missing = '해당 사이트는 현재 등록 되어 있지 않습니다' in text
+            registered = False if missing else None
+            state.update(registrationVerified=registered,
+                         status='registered' if registered is True else 'not_registered' if registered is False else 'unknown',
+                         registrationEvidence={'sourceUrl': registration_url, 'method': 'official registration lookup',
+                             'checkedAt': metrics.stamp(), 'canonicalUrl': site['url'],
+                             'httpStatus': response.status_code,
+                             'result': '미등록 사이트' if missing else 'registration_unconfirmed' if registered is None else '등록 사이트'})
+    except Exception:
+        pass
     try:
         response = client.get(state['searchUrl'], timeout=20, allow_redirects=False)
         text = response.text

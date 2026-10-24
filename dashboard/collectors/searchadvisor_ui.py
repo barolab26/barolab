@@ -122,8 +122,8 @@ def submit_visible(page, url, *, path=ledger.LEDGER, timeout=45):
         return 'unknown'
 
 
-def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5):
-    if not 1 <= batch_size <= 10:
+def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5, candidate_urls=None):
+    if not 1 <= batch_size <= ledger.DAILY_CAP:
         raise ValueError('batch_size_out_of_range')
     if not apply:
         return {'status': 'explicit_apply_required', 'submitted': 0}
@@ -177,6 +177,8 @@ def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5):
                     reserved = {x['url'] for x in state['crawlRequests']}
                     for item in state.get('crawlQueue', []):
                         url = item['url']
+                        if candidate_urls is not None and url not in candidate_urls:
+                            continue
                         if 'https://' + urlsplit(url).netloc != selected:
                             continue
                         if result['submitted'] >= batch_size:
@@ -208,6 +210,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apply', action='store_true')
     parser.add_argument('--domain')
-    parser.add_argument('--batch-size', type=int, default=5, choices=range(1, 11))
+    parser.add_argument('--batch-size', type=int, default=5, choices=range(1, ledger.DAILY_CAP + 1))
     args = parser.parse_args()
     print(json.dumps(run(apply=args.apply, domain=args.domain, batch_size=args.batch_size), ensure_ascii=False))

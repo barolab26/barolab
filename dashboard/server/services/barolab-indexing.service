@@ -1,0 +1,14 @@
+[Unit]
+Description=BaroLab backlog indexing submissions within provider quotas
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/mnt/c/10_Project/BaroLab
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.venvs/barolab/bin/python3 -B -m common.indexing_dispatch
+TimeoutStartSec=7200
+KillSignal=SIGINT
+TimeoutStopSec=90
+UMask=0077
