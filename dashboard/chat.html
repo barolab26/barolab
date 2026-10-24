@@ -1942,6 +1942,10 @@
       <div style="font-weight:700;margin:8px 0">${escapeHtml(row.title)}</div>
       <div>담당: ${escapeHtml(row.ownerLabel || '팀장')} · 완료 조건: ${escapeHtml(row.completionCriteria)}</div>
       <div style="margin-top:6px;color:${row.status === 'blocked' ? '#b45309' : '#475569'}">${escapeHtml(row.lastAction || row.blocker || '방향과 전략을 정한 뒤 실행합니다.')}</div>
+      ${row.activity?.owner ? `<div style="margin-top:4px">현재 담당: ${escapeHtml(row.activity.owner)} · ${escapeHtml(row.activity.phase || '')}</div>` : ''}
+      ${row.activity?.action ? `<div>${escapeHtml(row.activity.action)}</div>` : ''}
+      ${row.activity?.lastResult ? `<div>직전 결과: ${escapeHtml(row.activity.lastResult)} · 최근 활동 ${row.activity.lastActivityAt ? new Date(row.activity.lastActivityAt * 1000).toLocaleTimeString('ko-KR') : '미수집'}</div>` : ''}
+      ${row.activity?.nextCheckAt ? `<div>다음 확인: ${new Date(row.activity.nextCheckAt * 1000).toLocaleTimeString('ko-KR')}</div>` : ''}
       ${row.automaticRecovery?.nextCheckAt ? `<div style="margin-top:4px">같은 안건 자동 재확인: ${new Date(row.automaticRecovery.nextCheckAt * 1000).toLocaleTimeString('ko-KR')} · 새 증거가 생기면 진단 재개</div>` : ''}
       ${row.blocker ? `<div style="margin-top:4px;color:#b45309">미해결: ${escapeHtml(row.blocker)}</div>` : ''}
       ${row.status === 'report_pending' ? '<div style="margin-top:4px">실제 결과 검증 완료 · 회의실 마무리 보고를 확인하고 있습니다.</div>' : ''}` : '<strong>진행 중인 안건 없음 · 다음 안건 선정 대기</strong>';

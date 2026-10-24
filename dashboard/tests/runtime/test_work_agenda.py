@@ -472,6 +472,11 @@ def test_spent_goal_automatically_wakes_on_new_evidence_but_not_poll_timestamps(
     assert agendas.process_once() is True
     resumed=load(crew.goal_path(goal['id']))
     assert resumed['decisions']==32 and resumed['maxSteps']==40 and len(resumed['investigationEpisodes'])==2
+    resumed.update(status='blocked',decisions=40,delivered=True);crew.save(resumed);agendas.hold(identity,'Finite investigation cap')
+    code.write_text('another different source version');now[0]+=301
+    assert agendas.process_once() is False
+    assert load(crew.goal_path(goal['id']))['maxSteps']==40
+    assert agendas.get(identity)['recoveryWatch']['state']=='needs_ceo_action'
 
 
 def test_reasoning_limit_does_not_cancel_an_already_queued_same_agenda_operation(runtime):

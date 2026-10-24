@@ -148,6 +148,33 @@ def credit_probe(values):
     except (requests.RequestException,ValueError,KeyError,TypeError):return dict(status='연결 지연',checkedAt=time.time())
 
 
+def provider_credit_probe(provider, values):
+    """Read balances only; a missing observation never becomes zero."""
+    checked = time.time()
+    names = {'kie': ('KIE_API_KEY',), 'jev': ('TYPESAFE_API_KEY', 'JEV_BAROINCOME_API_KEY')}
+    key = next((values.get(name) for name in names[provider] if values.get(name)), None)
+    out = dict(status='키 미설정', balance=None, checkedAt=checked, unit='credits')
+    if not key:
+        return out
+    if provider == 'jev':
+        # Public TypeSafe OpenAPI exposes models/systemone only; do not guess a billing API.
+        return {**out, 'status': '잔액 미수집 · 콘솔 로그인 필요',
+                'source': 'https://help.typesafe.ai/articles/5505198974-what-s-a-402-error-and-how-can-i-add-more-credits'}
+    try:
+        response = requests.get('https://api.kie.ai/api/v1/chat/credit',
+            headers={'Authorization': 'Bearer ' + key}, timeout=(3, 5), allow_redirects=False)
+        if response.status_code != 200:
+            return {**out, 'status': 'HTTP ' + str(response.status_code)}
+        data = response.json()
+        value = data.get('data')
+        if data.get('code') != 200 or type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+            return {**out, 'status': '잔액 응답 미확인'}
+        return {**out, 'status': 'collected', 'balance': value,
+                'source': 'https://api.kie.ai/api/v1/chat/credit'}
+    except (requests.RequestException, ValueError, TypeError, AttributeError):
+        return {**out, 'status': '잔액 조회 지연'}
+
+
 def agy_quota():
     """Only the built-in /usage command; never send a model prompt or log auth output."""
     executable=Path.home()/'.local/bin/agy'
@@ -193,11 +220,12 @@ class RemoteTelemetry:
                     try:values=env_values(self.root)
                     except (OSError,ImportError):values=dict(os.environ)
                     cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
+                    kp=pool.submit(provider_credit_probe,'kie',values);jp=pool.submit(provider_credit_probe,'jev',values)
                     credit=cf.result()
                     try:quota=cq.result()
                     except (OSError,RuntimeError,ValueError,KeyError,queue.Empty,subprocess.SubprocessError):quota=dict(status='조회 연결 대기',checkedAt=time.time())
                     agy=aq.result()
-                    with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy}
+                    with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy,'kie':kp.result(),'jev':jp.result()}
                     credits_at=time.monotonic()
                 self.stop.wait(5)
     def start(self):

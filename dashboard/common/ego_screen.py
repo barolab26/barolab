@@ -18,9 +18,24 @@ def approved_clipboard_text(text, references, samples=None):
     return bool(lines) and all(line in approved or line in (samples or {}).values() for line in lines)
 
 
-def clipboard_text():
-    value = subprocess.check_output(['xclip', '-o', '-selection', 'clipboard'],
-        env={**os.environ, 'DISPLAY': os.environ.get('BAROLAB_DISPLAY', ':10')}, timeout=3)
+def clipboard_text(port):
+    from common.ubuntu_naver_browser import inspect_workflow_window
+    window = inspect_workflow_window(port)
+    if window['status'] != 'observed' or not window.get('display'):
+        raise RuntimeError('Clipboard requires a verified existing browser window')
+    try:
+        value = subprocess.check_output(['xclip', '-o', '-selection', 'clipboard'],
+            env={**os.environ, 'DISPLAY': window['display']}, stderr=subprocess.PIPE, timeout=3)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        # Never include subprocess output: it can contain clipboard plaintext.
+        error = RuntimeError('Clipboard read failed on verified browser DISPLAY')
+        error.clipboard_diagnostic = {'port': port, 'display': window['display'],
+            'browserPid': window['browserPid'], 'errorType': type(exc).__name__,
+            'returncode': getattr(exc, 'returncode', None),
+            'stderrSha256': hashlib.sha256(exc.stderr or b'').hexdigest(),
+            'stderrSummary': 'clipboard_target_unavailable' if b'not available' in (exc.stderr or b'') else 'display_unavailable' if b"Can't open display" in (exc.stderr or b'') else 'xclip_error',
+            'xauthorityPresent': bool(os.environ.get('XAUTHORITY'))}
+        raise error from None
     return value.decode('utf-8')
 
 
@@ -319,14 +334,14 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                         if value in ('Control+V', 'Control+Shift+V'):
                             if not state.get('clipboardTextSha256'):
                                 raise ValueError('No approved clipboard copy exists for this task')
-                            normalized = ' '.join(clipboard_text().split()).encode()
+                            normalized = ' '.join(clipboard_text(port).split()).encode()
                             if hashlib.sha256(normalized).hexdigest() != state['clipboardTextSha256']:
                                 raise ValueError('Clipboard changed; do not paste unrelated content')
                         with action('press', 'naver-editor-key'):
                             page.keyboard.press(value)
                         if value in ('Control+C', 'Control+X'):
                             page.wait_for_timeout(150)
-                            copied = clipboard_text()
+                            copied = clipboard_text(port)
                             if approved_clipboard_text(copied, references, samples):
                                 state['clipboardTextSha256'] = hashlib.sha256(' '.join(copied.split()).encode()).hexdigest()
                                 state['actionFeedback'] = ''
@@ -402,5 +417,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
             raise TimeoutError('Screen execution reached its turn budget')
     except Exception as exc:
         state.update(status='held', errorType=type(exc).__name__, finishedAt=time.time())
+        if hasattr(exc, 'clipboard_diagnostic'):
+            state['clipboardDiagnostic'] = exc.clipboard_diagnostic
         write(state_path, state)
         raise

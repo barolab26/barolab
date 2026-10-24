@@ -76,7 +76,7 @@ def recoverable_work(project):
     return result
 
 
-def recover_project_work(project, work_id):
+def recover_project_work(project, work_id, *, repair_task_id=None, repair_plan_sha256=None):
     from common import work_agenda as agendas
     if agendas.enabled():agendas.require(project=project)
     from common.conference_dispatch import request, QUEUE
@@ -95,7 +95,7 @@ def recover_project_work(project, work_id):
             if agendas.enabled():
                 current=agendas.require(project=project)
                 # The exact conference owns submission attempts; old recovery counters counted requests.
-                native_retry=(agenda.get('businessAgendaId')==current['id'] and agenda.get('status')=='failed' and agenda.get('attempts',1)<2)
+                native_retry=(agenda.get('businessAgendaId')==current['id'] and agenda.get('status')=='failed' and (agenda.get('attempts',1)<2 or bool(repair_task_id and repair_plan_sha256)))
             else:native_retry=False
             if not native_retry and (prior.get('attempts',1)>=2 or agenda.get('status')!='failed' or agenda.get('retryAt',float('inf'))>time.time()):
                 return completion_receipt(prior)
@@ -108,7 +108,7 @@ def recover_project_work(project, work_id):
         agenda=request('parameters',args)
         if agendas.enabled() and agenda.get('status')=='conference_failed':
             from common.conference_dispatch import retry_active
-            retry_active()
+            retry_active(**({'repair_task_id':repair_task_id,'repair_plan_sha256':repair_plan_sha256} if repair_task_id else {}))
         attempts=(load(QUEUE/(agenda['agendaId']+'.json')).get('attempts',1) if agendas.enabled()
                   else prior.get('attempts',1)+1 if prior else 1)
         result={'ok':True,'status':'requested','project':project,'workId':work_id,

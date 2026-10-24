@@ -132,12 +132,18 @@ def brain_display(data,now):
     rows.append('[OpenRouter] 잔여 '+gauge(router_remaining)+' | 종량제'+(' (충전 필요)' if balance is not None and balance<=0 else '')+' | '+money(balance))
     styles=['bold red' if remaining is not None and remaining<=0 else 'bold cyan' if 'codex' in providers else 'dim',
             'bold red' if agy_remaining is not None and agy_remaining<=0 else 'bold cyan' if providers & {'agy','gemini'} else 'dim',
-            'bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim','dim']
+            'bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim']
+    for provider, label in (('jev', 'JEV'), ('kie', 'KIE')):
+        credit = remote.get(provider, {})
+        value = number(credit.get('balance'))
+        fresh = credit.get('status') == 'collected' and 0 <= now.timestamp()-_epoch(credit.get('checkedAt')) <= 180
+        rows.append('['+label+'] '+(f'잔여 {value:,.2f} credits' if fresh and value is not None else str(credit.get('status') or '잔액 미수집')))
+        styles.append('bold red' if fresh and value == 0 else 'dim')
     brains=data.get('agentBrains',{});crew={r.get('role'):r for r in data.get('crew',[])}
     def model(role):return brains.get(role,{}).get('badge') or brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
     mapping='[직원 매핑] @팀장('+model('jarvis')+') | '
     mapping+=('@publi·@patch('+model('publi')+')' if model('publi')==model('patch') else '@publi('+model('publi')+') | @patch('+model('patch')+')')
-    mapping+=' | Threads('+model('threads_pipeline')+')';rows.append(mapping)
+    mapping+=' | Threads('+model('threads_pipeline')+')';rows.append(mapping);styles.append('dim')
     spans=[]
     for r in active:
         role=r.get('agentSlot')
@@ -208,6 +214,12 @@ def pipeline_lines(data,now):
         if agenda:title+=' · '+LABELS.get(agenda.get('status'),str(agenda.get('status')))
         rows.insert(0,title)
         rows.insert(1,'등록된 작업 프로세스 실행 관측' if agenda.get('processObserved') else '등록된 작업 프로세스 실행 미관측 · 회의·진단 상태는 안건 기준')
+        activity=agenda.get('activity') or {}
+        if activity.get('owner'):rows.append('담당 '+str(activity['owner'])+' · '+str(activity.get('phase') or '진행 확인'))
+        if activity.get('action'):rows.append(str(activity['action']))
+        if activity.get('lastResult'):rows.append('직전 결과: '+str(activity['lastResult']))
+        if activity.get('lastActivityAt'):rows.append('최근 활동: '+dt.datetime.fromtimestamp(activity['lastActivityAt'],KST).strftime('%H:%M:%S'))
+        if activity.get('intervention'):rows.append('필요 개입: '+str(activity['intervention']))
         check=agenda.get('automaticRecovery',{}).get('nextCheckAt')
         if check:rows.insert(2,'같은 안건 자동 재확인: '+dt.datetime.fromtimestamp(check,KST).strftime('%H:%M:%S'))
     for title,stage,started,detail in active[:2]:

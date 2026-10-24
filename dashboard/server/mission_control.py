@@ -307,6 +307,26 @@ class Collector:
             if agenda.get('kind')=='goal':active['title']='대표 지시 안건 · '+str(agenda.get('project') or '전사')
             active.update(target={k:args.get(k) for k in ('account','date','slot','partId')},processObserved=bool(running(agenda)))
             active['automaticRecovery']={k:agenda.get('recoveryWatch',{}).get(k) for k in ('state','nextCheckAt','checks')}
+            identity=agenda.get('controllerGoalId')
+            goal=self.read('dashboard/data/chats/reasoning-goals/'+identity+'.json') if isinstance(identity,str) and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
+            progress=goal.get('progress',{});last=(goal.get('observations') or [{}])[-1]
+            active['activity']={'owner':goal.get('actor') or agenda.get('ownerAgent'),
+                'action':clean(progress.get('summary') or agenda.get('lastAction'),500),
+                'phase':clean(progress.get('phase'),100),'lastResult':clean(last.get('tool'),100),
+                'lastResultAt':last.get('observedAt'),'lastActivityAt':goal.get('updatedAt') or agenda.get('updatedAt'),
+                'nextCheckAt':goal.get('nextCheckAt') or agenda.get('recoveryWatch',{}).get('nextCheckAt'),
+                'handoff':{k:goal.get('handoff',{}).get(k) for k in ('owner','expectedResult','deadlineAt','status','nextAction')},
+                'intervention':clean(agenda.get('blocker'),500) if agenda.get('status')=='blocked' else None,
+                'decisions':goal.get('decisions'),'maxSteps':goal.get('maxSteps'),
+                'wallTimeSeconds':max(0,time.time()-agenda['activatedAt']) if agenda.get('activatedAt') else None,
+                'toolRoundTrips':sum(e.get('actor') in ROLES and e.get('tool') not in ('colleague_request','colleague_answer','colleague_partial') for e in goal.get('observations',[])),
+                'manualNudges':goal.get('manualNudges'),
+                'verifiedCompletions':1 if agenda.get('verification',{}).get('verified') is True else 0,
+                'modelLatencyMs':sum(d.get('modelLatencyMs',0) for d in goal.get('discussion',[])),
+                'toolFailures':sum(e.get('result',{}).get('ok') is False for e in goal.get('observations',[]) if isinstance(e.get('result'),dict)),
+                'lastRoute':{k:goal.get('lastRoute',{}).get(k) for k in ('provider','model','reasoningEffort')},
+                'reportAcknowledgments':{k:agenda.get('events',{}).get(k,{}).get('receivedAt') for k in ('staff_result','closing')}}
+
         return {'enabled':control.get('enabled') is True,'active':active}
 
     def collect(self):

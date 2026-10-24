@@ -440,11 +440,15 @@ def view():
                 'automaticRecovery':{k:row.get('recoveryWatch',{}).get(k) for k in ('state','nextCheckAt','checks','lastChangeAt')},
                 'ownerLabel':'팀장' if row.get('status') in ('meeting','report_pending') else {'publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터','radar':'레이더','jarvis':'팀장'}.get((row.get('source',{}).get('actions') or [{}])[0].get('agent'), '퍼블리' if row.get('kind')=='conference' else '팀장')}
     current_row = active()
-    return {'enabled':True, 'active':public(current_row) if current_row else None,
+    shared=load(DATA/'live_snapshot.json').get('agendaControl',{}).get('active') or {}
+    activity=shared.get('activity',{}) if current_row and shared.get('id')==current_row['id'] else {}
+    result={'enabled':True, 'active':public(current_row) if current_row else None,
             'pending':[public(get(i)) for i in state.get('pending',[])[:8]],
             'pendingCount':len(state.get('pending',[])),
             'suspended':[public(get(i)) for i in state.get('suspended',[])],
             'recent':[public(get(i)) for i in state.get('recent',[])[:5]]}
+    if result['active']:result['active']['activity']=activity
+    return result
 
 
 def request_switch(identity, next_identity, command):
@@ -516,7 +520,13 @@ def recovery_watch(row):
     """A spent reasoning turn waits on new evidence; it never abandons the agenda."""
     if row.get('status') not in ('blocked','recovering') or running(row):return False
     watch=row.get('recoveryWatch',{})
-    if watch.get('nextCheckAt',0)>time.time():return False
+    from common import repair_workflow
+    internal=[]
+    for file in repair_workflow.ROOT.glob('*.json'):
+        repair=load(file)
+        if repair.get('businessAgendaId')==row['id'] and repair.get('status')=='ready':
+            internal.append({k:repair.get(k) for k in ('taskId','planSha256','step','steps')})
+    if watch.get('nextCheckAt',0)>time.time() and not internal:return False
     from agents import crew_reasoning as crew
     identity=row.get('controllerGoalId')
     if not identity or load(crew.goal_path(identity)).get('status') not in ('blocked','answered'):return False
@@ -537,14 +547,19 @@ def recovery_watch(row):
         key='items' if row['project']=='cf_blog' else 'accounts'
         document={'date':document.get('publicationDate') or document.get('date'),
                   key:[v for v in document.get(key,[]) if v.get('domain',v.get('account'))==args['account']]}
-    evidence={'source':stable(document),
+    evidence={'internalRecovery':internal,'source':stable(document),
               'code':{name:hashlib.sha256((project_root/name).read_bytes()).hexdigest() for name in files if (project_root/name).is_file()},
               'environment':environment_evidence(project_root,row['project'],{'identity':args.get('account')})}
     fingerprint=hashlib.sha256(json.dumps(evidence,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     changed=fingerprint not in watch.get('seen',[])
-    watch.update(state='evidence_changed' if changed else 'waiting_for_change',checks=watch.get('checks',0)+1,nextCheckAt=time.time()+300)
+    if changed and watch.get('continuationEpisodes',0)>=2:
+        watch.update(state='needs_ceo_action',nextCheckAt=time.time()+300)
+        with locked(ROWS):
+            saved=get(row['id']);saved['recoveryWatch']=watch;_save(saved)
+        return False
+    watch.update(state='internal_action_ready' if internal else 'evidence_changed' if changed else 'waiting_for_change',checks=watch.get('checks',0)+1,nextCheckAt=time.time()+300)
     if changed:
-        watch.update(lastChangeAt=time.time(),seen=[*watch.get('seen',[]),fingerprint][-64:])
+        watch.update(continuationEpisodes=watch.get('continuationEpisodes',0)+1,lastChangeAt=time.time(),seen=[*watch.get('seen',[]),fingerprint][-64:])
     with locked(ROWS):
         saved=get(row['id'])
         if saved['status'] not in ('blocked','recovering'):return False

@@ -274,15 +274,34 @@ def prepare_conference_recovery():
           'originalRequestSha256':_sha(original_path.read_bytes()),'originalTaskId':'conference:'+identity,
           'executionRef':None,'action':{'agent':'publi','tool':'run_project_cycle','args':{'project':business['project']}},
           'failure':[{'reason':original.get('failureReason'),'errorType':original.get('errorType')}],'workTarget':targets[0]}
+    if business['project']=='naver_blog':
+        from common.recovery_evidence import artifact_folder
+        folder=artifact_folder(project_root,targets[0])
+        if folder and (folder/'editor-content.json').is_file():
+            plan['approvedDocumentSha256']=_sha((folder/'editor-content.json').read_bytes())
     path=_recovery_path(task_id)
     with locked(ROOT):
         previous=load(path)
         if previous:
             if previous.get('businessAgendaId')!=business['id']:raise ValueError('Recovery ownership mismatch')
-            return {k:previous[k] for k in ('taskId','planSha256','status')}
+            if previous['plan'].get('workTarget',{}).get('workId')!=plan['workTarget']['workId']:
+                raise ValueError('Recovery revision cannot change the original work target')
+            old_failure=previous['plan'].get('failure')
+            if old_failure==plan['failure']:
+                return {k:previous[k] for k in ('taskId','planSha256','status')}
+            if previous.get('status') in ('processing','ready') or len(previous.get('recoveryRounds',[]))>=2:
+                raise ValueError('Recovery revision is active or its finite round budget is exhausted')
+            archive=ROOT/'revisions'/previous['planSha256']
+            archive.parent.mkdir(parents=True,exist_ok=True)
+            if archive.exists():
+                if json.loads(archive.read_bytes())!=previous:raise ValueError('Immutable recovery revision conflict')
+            else:write(archive,previous)
+            rounds=[*previous.get('recoveryRounds',[]),{'planSha256':previous['planSha256'],
+                'path':str(archive),'sha256':_sha(archive.read_bytes())}]
+        else:rounds=[]
         digest=_sha(json.dumps(plan,sort_keys=True,ensure_ascii=False).encode())
         write(path,{'type':'project_recovery_v1','taskId':task_id,'plan':plan,'planSha256':digest,
-            'step':'discover','status':'ready','steps':{},'resumeAttempted':False,'businessAgendaId':business['id']})
+            'step':'discover','status':'ready','steps':{},'resumeAttempted':False,'businessAgendaId':business['id'],'recoveryRounds':rounds})
     return {'taskId':task_id,'planSha256':digest,'status':'ready'}
 
 
@@ -459,7 +478,7 @@ def _recovery_resume_guard(row):
         if isinstance(value,dict):
             if value.get('status') in ('running','processing','publishing','submitting','unknown'):
                 return True
-            if submission and any(value.get(k) for k in ('submissionStarted','submissionStartedAt','submittedAt')):return True
+            if submission and any(value.get(k) for k in ('preCommitIntent','submissionStarted','submissionStartedAt','submittedAt')):return True
             return any(unsafe(v,submission) for v in value.values() if isinstance(v,(dict,list)))
         return isinstance(value,list) and any(unsafe(v,submission) for v in value)
     # Completed historical submissions elsewhere are not this task's submission.
@@ -854,7 +873,7 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
             row['resumeAttempted']=True;write(path,row)
             if row['plan']['action']['tool']=='run_project_cycle' and row['plan'].get('workTarget'):
                 from common.project_autonomy import recover_project_work
-                row['resumeResult']=recover_project_work(row['plan']['project'],row['plan']['workTarget']['workId'])
+                row['resumeResult']=recover_project_work(row['plan']['project'],row['plan']['workTarget']['workId'],repair_task_id=task_id,repair_plan_sha256=plan_sha256)
             else:
                 row['resumeResult']=execute_staff_action(row['plan']['action'],task_id=task_id,
                     request_id='recovery:'+plan_sha256,requester='jarvis')
@@ -923,6 +942,12 @@ def dispatch_project_recovery_once():
         from common import work_agenda as agendas
         current=agendas.active() if agendas.enabled() else {}
         if agendas.enabled() and (not current or row.get('businessAgendaId')!=current['id']):continue
+        if row.get('status')=='resume_held' and row.get('plan',{}).get('originalTaskId','').startswith('conference:'):
+            try:
+                with agendas.context(agendas.token(current)):
+                    refreshed=prepare_conference_recovery()
+                if refreshed.get('planSha256')!=row['planSha256']:return True
+            except (ValueError,KeyError,TimeoutError):pass
         if row.get('status') in ('held','evidence_hold') and row.get('step') in ('discover','classify','inspect') and not row.get('resumeAttempted'):
             if row.get('evidenceRecheckAt',0)>time.time():continue
             try:discovered=_discover_recovery(row)

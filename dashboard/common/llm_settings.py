@@ -318,11 +318,12 @@ def ensure_agent_brains(data: dict) -> dict:
         cur = raw.get(slot) if isinstance(raw.get(slot), dict) else {}
         prov = cur.get('provider') if cur.get('provider') in PROVIDERS else slot_meta['recommendedProvider']
         mod = str(cur.get('model') or '').strip() or slot_meta['recommendedModel']
+        effort = (cur.get('reasoningEffort') if cur.get('reasoningEffort') in REASONING_EFFORTS else {'patch':'high','publi':'medium'}.get(slot)) if prov == 'codex' else None
         out[slot] = {
             'provider': prov,
             'model': mod,
-            'reasoningEffort': cur.get('reasoningEffort') if prov == 'codex' and cur.get('reasoningEffort') in REASONING_EFFORTS else None,
-            'badge': format_brain_badge(prov, mod, cur.get('reasoningEffort')),
+            'reasoningEffort': effort,
+            'badge': format_brain_badge(prov, mod, effort),
             'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
         }
     data['agentBrains'] = out

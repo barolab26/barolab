@@ -29,6 +29,7 @@ def capability_catalog():
     from common.project_autonomy import COMMANDS
     from common.runtime_recovery import UNITS
     return [
+        {'tool':'read_source','owner':'current actor','args':['path','line?','lines?'],'limits':{'linesMaximum':240},'pagination':['sha256','totalLines','truncated','nextLine'],'verification':'follow nextLine for complete evidence'},
         {'tool':'run_project_cycle','owner':'publi (legacy_remodel: doctor)','args':['project'],'projects':list(COMMANDS),'permission':'execute','verification':'actual publication/reservation receipt; queued is not completed'},
         {'tool':'recover_project_runtime','owner':ACTION_OWNERS['recover_project_runtime'],'args':['project'],'projects':list(UNITS),'permission':'repair','verification':'fresh source and symptom recheck; timer start alone is not recovery'},
         {'tool':'recover_project_work','owner':ACTION_OWNERS['recover_project_work'],'args':['project','work_id'],'projects':['cf_blog','naver_blog'],'permission':'repair','verification':'same approved work, existing submission fences and actual completion receipt'},

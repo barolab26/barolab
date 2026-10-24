@@ -200,7 +200,7 @@ def test_model_call_uses_the_active_staff_slot_and_shared_goal(environment,monke
         return choice('finish',message='측정 누락을 구분했습니다.')
     with patch('common.llm_client.generate_json',side_effect=generate),patch('common.llm_client.memory_session'):
         crew.ask(row)
-    assert row['lastRoute']=={'provider':'agy','model':'gemini-3.8-flash-medium','reasoningEffort':'medium'}
+    assert row['lastRoute']=={'provider':'agy','model':'gemini-3.8-flash-medium','reasoningEffort':'medium','effortBasis':'provider_metadata'}
 
 
 def test_autonomous_goal_uses_existing_incident_and_deduplicates(environment,monkeypatch):
@@ -365,3 +365,47 @@ def test_large_ledgers_do_not_crowd_out_latest_colleague_findings(environment):
     # Projection never rewrites the durable evidence or its original hash.
     persisted=json.loads(crew.goal_path(row['id']).read_text())
     assert persisted['observations'][1]['result']==row['observations'][1]['result']
+
+
+def test_colleague_budget_exhaustion_returns_partial_with_manager_followup(environment,monkeypatch):
+    items=[choice('consult',peer='patch',message='오류 원인을 확인해 주세요.')]
+    items += [choice(tool='projects')]*3
+    items += [choice(tool='projects'),choice('finish',message='부분 결과를 받아 다음 조치와 보고를 완료했습니다.')]
+    seen=decisions(monkeypatch,items)
+    row=crew.reason_request('bounded-peer','실제 자료를 조사해',steps=7,max_steps=6)
+    assert [s[0] for s in seen]==['jarvis','patch','patch','patch','jarvis','jarvis']
+    assert row['status']=='answered' and row['decisions']==6
+    assert any(e['tool']=='colleague_partial' for e in row['observations'])
+    assert row['handoff']['status']=='partial'
+    assert row['pendingNextAction']['completedAt']
+
+
+def test_manager_reserve_survives_saved_peer_handoff(environment,monkeypatch):
+    decisions(monkeypatch,[choice('consult',peer='patch')])
+    row=crew.reason_request('saved-peer','조사 결과를 이어받아',steps=1,max_steps=4)
+    row=json.loads(crew.goal_path(row['id']).read_text())
+    seen=decisions(monkeypatch,[choice(tool='projects'),choice(tool='projects'),choice('finish')])
+    crew._advance(row,4)
+    assert [s[0] for s in seen]==['patch','jarvis','jarvis']
+    assert row['status']=='answered'
+
+
+def test_source_pagination_preserves_complete_page_and_hash(environment):
+    p=environment/'dashboard/common/page.py';p.parent.mkdir(parents=True);p.write_text('\n'.join(str(i) for i in range(300)))
+    first=crew.read_source({'path':'dashboard/common/page.py','lines':240})
+    second=crew.read_source({'path':'dashboard/common/page.py','line':first['nextLine']})
+    assert first['truncated'] and first['nextLine']==241
+    assert second['nextLine'] is None and not second['truncated']
+    assert first['sha256']==second['sha256'] and len(first['lines']+second['lines'])==300
+
+
+def test_colleague_model_failure_returns_to_manager_without_waiting_for_source_change(environment,monkeypatch):
+    decisions(monkeypatch,[choice('consult',peer='patch')])
+    row=crew.reason_request('failed-peer','부분 결과라도 이어받아',steps=1,max_steps=10)
+    def failed(row):raise RuntimeError('model unavailable')
+    monkeypatch.setattr(crew,'ask',failed)
+    for _ in range(3):crew._advance(row,1)
+    assert row['actor']=='jarvis' and row['status']=='ready' and row['handoff']['status']=='partial'
+    decisions(monkeypatch,[choice(tool='projects'),choice('finish')])
+    crew._advance(row,2)
+    assert row['status']=='answered'

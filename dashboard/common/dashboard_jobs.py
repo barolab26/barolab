@@ -17,20 +17,36 @@ def stamp():
     return dt.datetime.now(dt.timezone.utc).isoformat()
 
 
-def write(path, data):
-    atomic_text(path, json.dumps(data, ensure_ascii=False, indent=2))
+def write(path, data, *, durable=False):
+    if Path(path).name == 'automation-journal.json' and isinstance(data, dict):
+        attempts = data.get('attempts') or []
+        latest = attempts[-1] if attempts else {}
+        if latest.get('phase') == 'started' and latest.get('submissionStarted') is False and 'preCommitIntent' not in latest:
+            data = {**data, 'attempts': [*attempts[:-1], {**latest, 'preCommitIntent': False}]}
+    submission = isinstance(data, dict) and data.get('submissionStatus') == 'submitting'
+    if submission:
+        data = {**data, 'preCommitIntent': True}
+    atomic_text(path, json.dumps(data, ensure_ascii=False, indent=2), durable=submission or durable)
 
 
-def atomic_text(path, content):
+def atomic_text(path, content, *, durable=False):
     """Publish a complete file despite brief Windows/SMB reader locks."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
     try:
-        temporary.write_text(content, encoding='utf-8')
+        with temporary.open('w', encoding='utf-8') as handle:
+            handle.write(content)
+            if durable:
+                handle.flush()
+                os.fsync(handle.fileno())
         for attempt in range(20):
             try:
                 os.replace(temporary, path)
+                if durable:
+                    descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+                    try:os.fsync(descriptor)
+                    finally:os.close(descriptor)
                 break
             except PermissionError:
                 if attempt == 19:

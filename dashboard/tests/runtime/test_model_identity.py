@@ -48,7 +48,7 @@ class ModelIdentityTests(unittest.TestCase):
         rows=mission_control.crew_rows([],[],brains,now)
         self.assertEqual(next(r for r in rows if r['role']=='patch')['configuredModel'],'gpt-6.1-sol · High')
         display=cockpit_panels.brain_display({'agentBrains':brains},now)
-        self.assertIn('gpt-6.1-sol · High',display['rows'][3])
+        self.assertIn('gpt-6.1-sol · High',next(row for row in display['rows'] if row.startswith('[직원 매핑]')))
 
     def test_javascript_badges_show_effort_and_never_relabel_historical_model(self):
         from pathlib import Path
@@ -71,3 +71,14 @@ class ModelIdentityTests(unittest.TestCase):
              patch('common.llm_settings.get_agent_brain',return_value={'provider':'agy','model':'gemini-3.8-flash-medium'}):
             actual=agent_tools.staff_tool_reply('trace','fixture',{'tool':'read_agent_status'},{'status':'observed'})
         self.assertEqual(actual['reply'],text)
+
+
+def test_missing_effort_uses_only_explicit_role_defaults():
+    from common.llm_settings import ensure_agent_brains
+    config={'agentBrains':{'patch':{'provider':'codex','model':'gpt-6.1-sol','reasoningEffort':None},'publi':{'provider':'codex','model':'gpt-6.1-sol'},'threads_pipeline':{'provider':'codex','model':'gpt-6.1-sol'}}}
+    brains=ensure_agent_brains(config)
+    assert brains['patch']['reasoningEffort']=='high' and brains['publi']['reasoningEffort']=='medium'
+    assert brains['threads_pipeline']['reasoningEffort'] is None
+    assert brains['patch']['badge'].endswith('High')
+    config['agentBrains']['publi']['reasoningEffort']='high'
+    assert ensure_agent_brains(config)['publi']['reasoningEffort']=='high'

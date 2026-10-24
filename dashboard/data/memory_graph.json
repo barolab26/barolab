@@ -7766,6 +7766,39 @@
         "doctor"
       ],
       "guidance": "대표님의 추가 발언 없이도 현재 안건의 진행·복구·검증·마무리 책임을 유지한다. 추론 한도나 도구 오류로 멈춘 안건은 같은 안건에서 복구 조건을 주기적으로 확인하고 실제 새 증거가 생기면 진단을 재개한다. 같은 증거로 무한 모델 재시도하지 않는다. 현재 상태·다음 확인 시각·정확한 외부 개입 조건을 회의실과 모니터에 표시한다. 제출 여부 불명확 시 재제출하지 않고 기존 증거를 검증한다. 현재 안건의 검증과 마무리 전 다음 안건을 실행하지 않는다."
+    },
+    "ceo:directive:faa1cb63ec4c32198e246483": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "/tmp/barolab-argon-structure-review/review-briefing.txt 수정안 승인한다.",
+      "recordedAt": "2026-10-24T20:59:53.476310+00:00",
+      "sourceType": "direct_user_instruction",
+      "appliesTo": [
+        "jarvis",
+        "patch",
+        "publi",
+        "radar",
+        "trace",
+        "doctor"
+      ],
+      "priority": "highest",
+      "approvedDesignSha256": "3ca36839274716523faae7223e63d082c2cfafeeb505e50baf9d0e3858eefebb"
+    },
+    "ceo:directive:cb245a7267594243376b03c9": {
+      "type": "CEOOperatingDirective",
+      "active": true,
+      "originalText": "판단을 빨리 하기 위해 JEV 스킬도 사용할 수 있어. 그리고 JEV, KIE 도 크레딧 남은량 조회해서 EGO 에 표시해줘.",
+      "recordedAt": "2026-10-24T20:59:53.476310+00:00",
+      "sourceType": "direct_user_instruction",
+      "appliesTo": [
+        "jarvis",
+        "patch",
+        "publi",
+        "radar",
+        "trace",
+        "doctor"
+      ],
+      "priority": "highest"
     }
   },
   "edges": [
@@ -11405,6 +11438,16 @@
     {
       "source": "memory:hub",
       "target": "ceo-directive:4f999bd6d359b289b0c2a5a9",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo:directive:faa1cb63ec4c32198e246483",
+      "type": "contains"
+    },
+    {
+      "source": "memory:hub",
+      "target": "ceo:directive:cb245a7267594243376b03c9",
       "type": "contains"
     }
   ],

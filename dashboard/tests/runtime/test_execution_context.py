@@ -107,3 +107,18 @@ def test_recovery_evidence_selection_is_applied_before_large_record_is_bounded(t
     assert crew.read_evidence({'name':'recovery_plan:known-task','select':['inspection']})['data']=={'status':'needs_evidence'}
     with pytest.raises(ValueError,match='Private'):crew.read_evidence({'name':'recovery_plan:known-task','select':['access_token']})
     with pytest.raises(ValueError,match='nested path'):crew.read_evidence({'name':'recovery_plan:known-task','select':['status','classification']})
+
+
+def test_activity_projection_keeps_owner_evidence_timing_and_both_ack_receipts(context):
+    collector,row,rows,now=context
+    identity='b'*64;row['controllerGoalId']=identity
+    row['events']={'staff_result':{'receivedAt':1},'closing':{'receivedAt':2}}
+    write(rows/(row['id']+'.json'),row)
+    folder=collector.root/'dashboard/data/chats/reasoning-goals';folder.mkdir(parents=True)
+    write(folder/(identity+'.json'),{'actor':'patch','updatedAt':now.timestamp(),
+        'progress':{'summary':'정확한 원인 코드 확인','phase':'진단'},'observations':[{'tool':'read_source','observedAt':now.timestamp(),'result':{'ok':False}}],
+        'discussion':[{'modelLatencyMs':200}], 'lastRoute':{'provider':'codex','model':'actual','reasoningEffort':'high'}})
+    activity=collector.read_agenda()['active']['activity']
+    assert activity['owner']=='patch' and activity['lastResult']=='read_source'
+    assert activity['modelLatencyMs']==200 and activity['toolFailures']==1
+    assert activity['reportAcknowledgments']=={'staff_result':1,'closing':2}

@@ -32,7 +32,7 @@ class AgyQuotaTests(unittest.TestCase):
         now = datetime(2026, 10, 24, 8, tzinfo=timezone.utc)
         result['checkedAt'] = now.timestamp()
         display = panels.brain_display({'remote': {'agy': result}}, now)
-        self.assertEqual(len(display['rows']), 4)
+        self.assertEqual(len(display['rows']), 6)
         self.assertIn('Gemini 98.6%/100%', display['rows'][1])
         self.assertIn('Claude/GPT 24.7%/100%', display['rows'][1])
         self.assertIn('다음 리셋 10-24 21:49', display['rows'][1])

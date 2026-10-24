@@ -60,3 +60,17 @@ class EgoScreenTests(unittest.TestCase):
     def test_enter_cannot_trigger_a_focused_registration_button(self):
         self.exercise({'message':'press','done':False,'observations':[],'actions':[
             {'kind':'press','value':'Enter','x':480,'y':480}]},[])
+
+    def test_clipboard_uses_verified_browser_display_and_redacts_process_output(self):
+        import subprocess
+        from common.ego_screen import clipboard_text
+        window={'status':'observed','display':':11','browserPid':123}
+        with patch('common.ubuntu_naver_browser.inspect_workflow_window',return_value=window), \
+             patch('common.ego_screen.subprocess.check_output',return_value=b'approved') as read:
+            self.assertEqual(clipboard_text(9334),'approved')
+            self.assertEqual(read.call_args.kwargs['env']['DISPLAY'],':11')
+        with patch('common.ubuntu_naver_browser.inspect_workflow_window',return_value=window), \
+             patch('common.ego_screen.subprocess.check_output',side_effect=subprocess.CalledProcessError(1,['xclip'],output=b'PRIVATE',stderr=b'PRIVATE')):
+            with self.assertRaises(RuntimeError) as raised:clipboard_text(9334)
+        self.assertNotIn('PRIVATE',str(raised.exception)+str(raised.exception.clipboard_diagnostic))
+        self.assertEqual(raised.exception.clipboard_diagnostic['display'],':11')

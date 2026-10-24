@@ -170,7 +170,7 @@ def process_once():
             if agendas.enabled():
                 if not business:continue  # Deployment migrates legacy queued requests without replaying old failures.
                 current=agendas.active()
-                if current.get('id')!=business or not current.get('events',{}).get('opening',{}).get('receivedAt') or agendas.running(current):continue
+                if current.get('id')!=business or not current.get('events',{}).get('opening',{}).get('receivedAt') or any(p.get('pid') != os.getpid() for p in agendas.running(current)):continue
                 if current.get('switchRequest') or current.get('status') not in ('meeting','executing','recovering'):continue
             log = path.with_suffix('.log')
             with log.open('ab') as output:
@@ -493,7 +493,82 @@ def record_conference_result(row, result=None):
         agendas.hold(business['id'],reason,recovery=True)
 
 
-def retry_active():
+NAVER_SUBMISSION_BOUNDARY_SHA256 = '35f4f945c4d112c005b71eeb32b5dcc00a577e5059ceb57fd89fafe9fd7c5c51'
+
+
+def authorize_repaired_retry(current, original, task_id, plan_sha256):
+    """Called only under QUEUE lock; consuming the grant and queueing are one write."""
+    from common import repair_workflow as repair, coding_job
+    from common.recovery_evidence import artifact_folder, read_object
+    from common.project_autonomy import recoverable_work
+    if (not task_id or not plan_sha256 or current.get('project') != 'naver_blog'
+            or original.get('attempts', 1) != 2 or original.get('executionGeneration')):
+        raise ValueError('Finite repaired execution grant unavailable')
+    _, recovery = repair._recovery_row(task_id, plan_sha256)
+    plan = recovery['plan']
+    if (recovery.get('businessAgendaId') != current['id'] or recovery.get('step') != 'resume'
+            or plan.get('project') != current['project'] or plan.get('projectRoot') != str(ROOT)
+            or recovery.get('status') not in ('ready', 'processing')):
+        raise ValueError('Recovery revision ownership or phase mismatch')
+    request_path = QUEUE / (hashlib.sha256(json.dumps([original['kind'],original['arguments']],sort_keys=True).encode()).hexdigest()+'.json')
+    if plan.get('originalRequestPath') != str(request_path) or hashlib.sha256(request_path.read_bytes()).hexdigest() != plan.get('originalRequestSha256'):
+        raise ValueError('Original terminal failure receipt changed')
+    args = original['arguments']
+    target = next((r for r in recoverable_work(current['project']) if r['workId'] == plan.get('workTarget',{}).get('workId')), None)
+    if (not target or target['identity'] != args.get('account') or target['date'] != args.get('date')
+            or target['slot'] != args.get('slot') or target.get('submissionStarted') is not False):
+        raise ValueError('Exact original work is no longer eligible')
+    folder = artifact_folder(ROOT,target)
+    if not folder or not plan.get('approvedDocumentSha256') or hashlib.sha256((folder/'editor-content.json').read_bytes()).hexdigest() != plan['approvedDocumentSha256']:
+        raise ValueError('Approved document binding missing or changed')
+    # This frozen Naver path writes reservation-evidence through dashboard_jobs before its only final click.
+    engine = ROOT/'naver_blog_posting/posting.py'
+    if hashlib.sha256(engine.read_bytes()).hexdigest() != NAVER_SUBMISSION_BOUNDARY_SHA256:
+        raise ValueError('Final submission boundary coverage changed')
+    if (folder/'reservation-evidence.json').exists() or list(folder.glob('*publication*receipt*')):
+        raise ValueError('Submission receipt exists; read-only reconciliation required')
+    journal = read_object(ROOT/'dashboard/data/naver/automation-journal.json')
+    attempts = [r for r in journal.get('attempts',[]) if r.get('account') == args['account']
+        and (r.get('publicationDate') or str(r.get('reserveTime') or '')[:10]) == args['date']
+        and (r.get('scheduledSlot') or str(r.get('reserveTime') or '')[-5:]) == args['slot']]
+    public = read_object(ROOT/'dashboard/data/naver/public-verification.json')
+    if not attempts or not isinstance(public.get('evidence'),list):
+        raise ValueError('Authoritative submission observations missing')
+    for attempt in attempts:
+        if (attempt.get('submissionStarted') is not False or attempt.get('preCommitIntent') is not False
+                or attempt.get('submittedAt') or attempt.get('submissionStartedAt')
+                or attempt.get('phase') not in ('failed','material_required','superseded')):
+            raise ValueError('A previous execution has uncertain or submitted evidence')
+    for evidence in public['evidence']:
+        if (evidence.get('account') == args['account']
+                and (evidence.get('reserveTime') or '') == args['date']+' '+args['slot']):
+            raise ValueError('Server verification already exists; reconcile before executing')
+    application = repair._proof(recovery['application']['evidencePath'], recovery['application']['evidenceSha256'])
+    job = coding_job._job(recovery['job']['jobDir'])
+    if Path(recovery['application']['evidencePath']) != job/'application.json':
+        raise ValueError('Application receipt outside the bound coding job')
+    validation = repair._proof(job/'validation.json', recovery['validation']['validationSha256'])
+    candidate = recovery['job']['candidateSha256']
+    if (application.get('status') != 'applied' or application.get('productionApplied') is not True
+            or application.get('candidateSha256') != candidate or application.get('sourceRoot') != str(ROOT)
+            or application.get('validationSha256') != recovery['validation']['validationSha256']
+            or validation.get('status') != 'isolated_verified' or validation.get('candidateSha256') != candidate
+            or validation.get('sandbox',{}).get('enforced') is not True
+            or not validation.get('results') or any(r.get('returncode') != 0 for r in validation['results'])):
+        raise ValueError('Applied repair and successful regression receipts required')
+    after = application.get('after',{})
+    if not any(application.get('before',{}).get(name) != sha for name,sha in after.items() if '/tests/' not in name):
+        raise ValueError('No material cause repair was applied')
+    for name,sha in after.items():
+        if hashlib.sha256(coding_job._file(ROOT,name,read_only=True).read_bytes()).hexdigest() != sha:
+            raise ValueError('Applied repair bytes changed')
+    return {'generationId':2, 'parentGenerationId':1, 'budget':1, 'consumedAt':time.time(),
+        'authorizingRepairRoundSha256':plan_sha256, 'repairTaskId':task_id,
+        'patchCandidateSha256':candidate, 'testReceiptSha256':recovery['validation']['validationSha256'],
+        'workId':target['workId'], 'approvedDocumentSha256':plan['approvedDocumentSha256']}
+
+
+def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
     from common import work_agenda as agendas
     current=agendas.require()
     target=current.get('workTarget') or current.get('source',{})
@@ -508,11 +583,18 @@ def retry_active():
     with locked(QUEUE):
         row=load(file)
         limit=3 if kind=='kin' else 2
-        if row.get('businessAgendaId')!=current['id'] or row.get('status')!='failed' or row.get('attempts',1)>=limit:raise ValueError('Original attempt is pending, unknown or its retry budget is exhausted')
+        if row.get('businessAgendaId')!=current['id'] or row.get('status')!='failed' or any(p.get('pid') != os.getpid() for p in agendas.running(current)):
+            raise ValueError('Original attempt is pending, unknown or owned by a live execution')
+        if row.get('attempts',1)>=limit:
+            if kind=='kin':raise ValueError('Original retry budget is exhausted')
+            generation=authorize_repaired_retry(current,row,repair_task_id,repair_plan_sha256)
+            row['executionGeneration']=generation
         if kind=='kin':row['retryTarget']=kin_retry_target(row)
         row.setdefault('attemptHistory',[]).append({k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes','eligibility','executionFailures')})
         row.update(status='queued',attempts=row.get('attempts',1)+1,retryRequestedAt=time.time())
-        write(file,row)
+        if agendas.require()['id']!=current['id']:raise ValueError('Agenda ownership changed before retry consumption')
+        from common.dashboard_jobs import write as durable_write
+        durable_write(file,row,durable=True)
     agendas.progress(current['id'],'recovering','원래 계정·날짜·슬롯의 제출 전 실패를 같은 안건에서 재개합니다.')
     return {'ok':True,'status':'queued','agendaId':identity,'businessAgendaId':current['id'],'publicationVerified':False}
 

@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 GOALS = ROOT / 'dashboard/data/chats/reasoning-goals'
 ROLES = ('jarvis','publi','radar','trace','patch','doctor')
 MAX_STEPS = 24
+COLLEAGUE_STEPS = 3
+MANAGER_FOLLOWUP_RESERVE = 2
 ROLE_BRIEF = {'jarvis':'총괄: 목표·전사 상황·수익 우선순위와 직원 결과를 종합해 다음 행동을 결정한다.',
     'publi':'실행: 승인된 안건·계정·일정과 실제 제출/공개 결과를 확인한다.',
     'radar':'조사: 실제 자료를 찾아 출처와 관측, 미확인 가설을 구분한다.',
@@ -113,7 +115,8 @@ def read_source(args):
     if type(start) is not int or type(count) is not int or start<1 or not 1<=count<=240:raise ValueError('Invalid source range')
     raw=path.read_bytes();lines=raw.decode('utf-8-sig').splitlines()
     return {'path':args['path'],'sha256':hashlib.sha256(raw).hexdigest(),'firstLine':start,
-            'totalLines':len(lines),'lines':lines[start-1:start-1+count]}
+            'totalLines':len(lines),'lines':lines[start-1:start-1+count],
+            'truncated':start-1+count<len(lines),'nextLine':start+count if start-1+count<len(lines) else None}
 
 
 def read_evidence(args):
@@ -366,9 +369,14 @@ def ask(row):
     from common.llm_client import generate_json,memory_session
     from common.staff_capabilities import capability_catalog
     history=[];remaining=32000
+    protected={}
+    for event in row['observations']:
+        if event['tool'] in ('read_source','colleague_answer','colleague_partial'):
+            protected[event['tool']]=event['id']
     for event in reversed(row['observations']):
-        preview={**event,'result':bounded(event['result'],8000)}
-        item=preview if len(json.dumps(preview,ensure_ascii=False))<=remaining else {k:event[k] for k in ('id','actor','tool','sha256','observedAt')}
+        keep=event['id'] in protected.values()
+        preview={**event,'result':event['result'] if keep else bounded(event['result'],8000)}
+        item=preview if keep or len(json.dumps(preview,ensure_ascii=False))<=remaining else {k:event[k] for k in ('id','actor','tool','sha256','observedAt')}
         remaining-=len(json.dumps(item,ensure_ascii=False));history.append(item)
     prompt=('You are an operating agent in a continuing team task, not a status-report template. '
         'Decide the next investigation/action from evidence, actually use host tools by returning decision=tool. '
@@ -404,14 +412,18 @@ def ask(row):
         'decision=consult requires a colleague and a concrete question in message. decision=wait means an external constraint; name it. '
         'Return one JSON object matching this exact schema (arguments is a STRING containing JSON, not an object): '
         +json.dumps(SCHEMA,ensure_ascii=False)+'\nRespond in Korean.\n'+json.dumps({'originalObjective':row['goal'],'nowUtcEpoch':time.time(),'actor':row['actor'],
-        'activeBusinessAgenda':__import__('common.work_agenda',fromlist=['view']).view().get('active'),'latestSharedRecovery':recovery_progress(),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
+        'activeBusinessAgenda':__import__('common.work_agenda',fromlist=['view']).view().get('active'),'latestSharedRecovery':recovery_progress(),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'handoff':row.get('handoff'),'toolLimits':{'read_source':{'linesMaximum':240,'pagination':['truncated','nextLine','totalLines','sha256']},'evidence':{'select':'nested keys or array indices'}},'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
         'observations':list(reversed(history)),'remainingDecisions':row.get('maxSteps',MAX_STEPS)-row['decisions']},ensure_ascii=False))
     routes=[]
     def route(provider,model,state,**meta):
-        if state=='returned':routes.append({'provider':provider,'model':meta.get('actual_model'), 'reasoningEffort':meta.get('reasoning_effort')})
+        if state=='returned':
+            actual=meta.get('actual_model');effort=meta.get('reasoning_effort')
+            encoded=next((level for level in ('high','medium','low') if provider=='agy' and str(actual).endswith('-'+level)),None)
+            routes.append({'provider':provider,'model':actual,'reasoningEffort':effort or encoded,
+                'effortBasis':'provider_metadata' if effort else 'observed_model_id_suffix' if encoded else 'unreported'})
     with memory_session('crew-goal:'+row['id'],row['actor']):
         result=generate_json(prompt,agent_slot=row['actor'],response_schema=SCHEMA,timeout_seconds=180,
-            observer=route,memory_read_only=True,crew_actor=row['actor'],crew_task_id='goal:'+row['id'],crew_stage='goal-decision')
+            observer=route,reasoning_effort='high' if row['actor']=='publi' and sum(e.get('result',{}).get('ok') is False for e in row['observations'][-3:] if isinstance(e.get('result'),dict))>=2 else None,memory_read_only=True,crew_actor=row['actor'],crew_task_id='goal:'+row['id'],crew_stage='goal-decision')
     if not routes or not routes[-1].get('model'):raise ValueError('Actual deciding model was not observed')
     row['lastRoute']=routes[-1]
     return result
@@ -577,13 +589,23 @@ def _advance(row,steps=2):
     if row['status']=='waiting_external' and time.time()<row.get('nextCheckAt',0):return row
     row.pop('waitingMessage',None)
     for _ in range(steps):
+        while row.get('consultStack') and (row.get('colleagueStepsRemaining',COLLEAGUE_STEPS)<=0 or time.time()>=row.get('handoff',{}).get('deadlineAt',float('inf')) or row['decisions']>=row.get('maxSteps',MAX_STEPS)-MANAGER_FOLLOWUP_RESERVE):
+            actor=row['actor']
+            partial=[e['id'] for e in row['observations'] if e['actor']==actor]
+            observe(row,actor,'colleague_partial',{}, {'reason':'bounded investigation handoff','evidenceIds':partial,'nextAction':row.get('lastMessage')})
+            row['actor']=row['consultStack'].pop();row.pop('colleagueTask',None)
+            row.setdefault('handoff',{}).update(status='partial',returnedAt=time.time(),nextAction='팀장이 부분 증거를 검토하고 후속 조치·보고')
+            save(row)
         if row['decisions']>=row.get('maxSteps',MAX_STEPS):
             row.update(status='blocked',answerSource='host',answer='판단 횟수 한도에 도달했습니다. 수집한 증거와 계획은 보존했으며, 실행 완료로 처리하지 않았습니다.');save(row);return row
         row['decisions']+=1;row['status']='working';save(row)
         try:
             set_progress(row,'판단 중',row.get('lastMessage') or '요청 범위와 현재 자료를 바탕으로 확인할 항목과 다음 조치를 판단하고 있습니다.')
             started=time.time();row.setdefault('timings',{}).setdefault('firstModelStartedAt',started);save(row)
+            row['reasoningLease']={'pid':os.getpid(),'startedAt':started,'expiresAt':started+210,'kind':'reasoning_only'};save(row)
             decision=ask(row)
+            row['reasoningLease']['returnedAt']=time.time()
+            if row.get('consultStack'):row['colleagueStepsRemaining']=row.get('colleagueStepsRemaining',COLLEAGUE_STEPS)-1
             row['timings'].setdefault('firstDecisionAt',time.time())
             if not isinstance(decision.get('plan'),list) or not isinstance(decision.get('message'),str) or not 1<=len(decision['message'])<=4000:raise ValueError('Invalid operational decision')
             note={'id':row['decisions'],'actor':row['actor'],'text':safe(decision['message']),'kind':decision['decision'],'route':row['lastRoute'],'ts':int(time.time()*1000),'modelLatencyMs':round((time.time()-started)*1000)}
@@ -603,23 +625,31 @@ def _advance(row,steps=2):
                 peer=decision['colleague']
                 stack=row.setdefault('consultStack',[])
                 if peer not in ROLES or peer==actor or peer in stack or len(stack)>=2:raise ValueError('Colleague handoff cycle or depth limit')
+                if row['decisions']>=row.get('maxSteps',MAX_STEPS)-MANAGER_FOLLOWUP_RESERVE:
+                    raise ValueError('Manager follow-up reserve: use available evidence and report next action')
                 stack.append(actor)
+                row['colleagueStepsRemaining']=min(COLLEAGUE_STEPS,row.get('maxSteps',MAX_STEPS)-row['decisions']-MANAGER_FOLLOWUP_RESERVE)
+                row['handoff']={'owner':peer,'requestedBy':actor,'expectedResult':decision['message'],
+                    'deadlineAt':time.time()+600,'nextAction':'investigate and return evidence to '+actor,'status':'investigating'}
                 observe(row,actor,'colleague_request',{'colleague':peer},{'question':decision['message']})
                 row['actor']=peer;row['colleagueTask']=decision['message']
                 set_progress(row,'직원 협의',decision['message'])
             elif kind=='tool':
                 args=json.loads(decision['arguments']);tool=decision['tool']
                 set_progress(row,'자료 확인' if tool!='dispatch' else '작업 접수',decision['message'])
+                row['pendingNextAction']={'owner':actor,'tool':tool,'arguments':safe(args),'expectedResult':decision['message'],'deadlineAt':time.time()+600};save(row)
                 try:result=tool_call(row,tool,args)
                 except Exception as exc:
                     result={'ok':False,'errorType':type(exc).__name__,'reason':safe(str(exc))[:500]}
                 observe(row,actor,tool,args,result)
+                row['pendingNextAction'].update(completedAt=time.time(),evidenceId=row['observations'][-1]['id'])
                 if row.get('pendingAction') or row.get('pendingConference'):save(row);return row
             elif kind in ('finish','wait'):
                 known={x['id'] for x in row['observations']}
                 if not decision['evidence_ids'] or not set(decision['evidence_ids'])<=known:raise ValueError('Answer must refer to actual supplied evidence IDs')
                 if actor!=row.get('leadActor','jarvis'):
                     observe(row,actor,'colleague_answer',{}, {'reply':decision['message'],'evidenceIds':decision['evidence_ids'],'route':row['lastRoute']})
+                    row.setdefault('handoff',{}).update(status='answered',returnedAt=time.time(),nextAction='팀장 후속 판단·조치·보고')
                     row['actor']=row.get('consultStack',[]).pop() if row.get('consultStack') else row.get('leadActor','jarvis');row.pop('colleagueTask',None)
                 else:
                     future=next_eligible_time(row,decision['evidence_ids']) if kind=='wait' and (row['permissions']['execute'] or row['permissions']['repair']) else None
@@ -644,6 +674,12 @@ def _advance(row,steps=2):
             row.update(status='blocked' if row['modelFailures']>=3 else 'ready',nextCheckAt=time.time()+30)
             row['lastMessage']='판단 응답 오류를 확인했습니다. 증거와 원래 목표를 보존하고 다음 판단에서 원인을 확인합니다.'
             if row['status']=='blocked':row['answerSource']='host';row['answer']='모델 판단 응답이 반복 실패했습니다. 작업 결과를 완료로 바꾸지 않았으며 수집한 증거와 계획을 보존했습니다.'
+            if row['modelFailures']>=3 and row.get('consultStack'):
+                observe(row,row['actor'],'colleague_partial',{}, {'reason':'colleague model repeatedly failed','evidenceIds':[e['id'] for e in row['observations'] if e['actor']==row['actor']]})
+                row['actor']=row['consultStack'].pop();row.pop('colleagueTask',None)
+                row.update(status='ready',modelFailures=0,nextCheckAt=time.time()+1)
+                row.pop('answer',None);row.pop('answerSource',None)
+                row.setdefault('handoff',{}).update(status='partial',returnedAt=time.time(),nextAction='팀장이 모델 오류와 부분 증거를 검토하고 후속 조치·보고')
             set_progress(row,'응답 재확인',row['lastMessage']);return row
     row['status']='ready';row['nextCheckAt']=time.time()+1;save(row)
     return row
