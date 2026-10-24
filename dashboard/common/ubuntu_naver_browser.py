@@ -87,7 +87,9 @@ def ensure_account(port):
         if port in (9440,9450):
             profile.mkdir(parents=True,exist_ok=True)
             subprocess.Popen(['/opt/google/chrome/chrome',f'--remote-debugging-port={port}',f'--user-data-dir={profile}',
-                '--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check',
+                '--remote-debugging-address=127.0.0.1',
+                '--class=BaroLab-Threads' if port==9450 else '--class=BaroLab-CF-Flow',
+                '--no-first-run','--no-default-browser-check',
                 'https://www.threads.com/@mustpickinfo' if port==9450 else 'https://flow.google.com'],
                 env=dict(os.environ,DISPLAY=os.environ.get('BAROLAB_DISPLAY',':10')),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
             for _ in range(100):

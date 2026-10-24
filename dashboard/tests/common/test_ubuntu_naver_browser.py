@@ -174,3 +174,17 @@ class NativeTabGcTests(unittest.TestCase):
             self.assertEqual(browser.gc_blank_tabs(9334), 1)
         self.assertTrue(get.call_args.args[0].endswith('/blank'))
         ws.close.assert_called_once()
+
+class WorkflowWindowClassTests(unittest.TestCase):
+    def test_flow_and_threads_launch_with_distinct_taskbar_classes(self):
+        for port, identity in ((9440, 'BaroLab-CF-Flow'), (9450, 'BaroLab-Threads')):
+            with self.subTest(port=port), tempfile.TemporaryDirectory() as directory, \
+                 patch.object(Path, 'home', return_value=Path(directory)), \
+                 patch.object(browser, 'process_identity', side_effect=[None, 123, 123]), \
+                 patch.object(browser, 'listener_owner'), patch.object(browser, 'gc_blank_tabs'), \
+                 patch.object(browser.time, 'sleep'), patch.object(browser.subprocess, 'Popen') as spawn:
+                self.assertEqual(browser.ensure_account(port), 123)
+                command = spawn.call_args.args[0]
+                self.assertIn('--class=' + identity, command)
+                self.assertNotIn('--new-window', command)
+                self.assertFalse(any('cdp_dashboard' in arg for arg in command))
