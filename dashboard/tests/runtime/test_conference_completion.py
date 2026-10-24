@@ -1,5 +1,6 @@
 """A queued meeting and an idle scheduler are never publication evidence."""
 import json
+from pathlib import Path
 from unittest.mock import patch
 import pytest
 from common import conference_dispatch as conferences, project_autonomy as autonomy
@@ -50,3 +51,24 @@ def test_unverified_conference_outcome_is_not_success(tmp_path):
         terminal,_=autonomy.terminal_result({'conferenceAgendaId':identity,'conferenceRequestedAt':10,'project':'threads'})
     assert terminal['status']=='unknown' and terminal['ok'] is False
     assert terminal['publicationVerified'] is False
+
+
+def test_independent_channel_can_run_while_blog_preparation_is_active(tmp_path):
+    import os
+    pid=os.getpid();ticks=Path('/proc',str(pid),'stat').read_text().split(') ',1)[1].split()[19]
+    for name,row in {
+        'a':{'status':'running','kind':'parameters','pid':pid,'startTicks':ticks},
+        'b':{'status':'queued','kind':'parameters','requestedAt':1},
+        'c':{'status':'queued','kind':'threads','requestedAt':2},
+        'd':{'status':'queued','kind':'threads','requestedAt':3},
+        'e':{'status':'queued','kind':'kin','requestedAt':4},
+    }.items():
+        (tmp_path/(name*64+'.json')).write_text(json.dumps(row))
+    with patch.object(conferences,'QUEUE',tmp_path), patch.object(conferences.subprocess,'Popen') as spawn:
+        spawn.return_value.pid=pid
+        assert conferences.process_once() is True
+        assert spawn.call_args.args[0][-1]=='c'*64
+        assert conferences.process_once() is True
+        assert spawn.call_args.args[0][-1]=='e'*64
+        assert conferences.process_once() is False
+        assert spawn.call_count==2

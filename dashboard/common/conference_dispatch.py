@@ -33,28 +33,30 @@ def request(kind, arguments):
 
 
 def process_once():
-    """At most one child globally; never block the monitor or create timer workers."""
+    """One child per isolated channel; blog preparation cannot starve Kin/Threads."""
     if not QUEUE.exists() or (Path.home() / 'EGO_EXEC_DISABLED').exists():
         return False
     with locked(QUEUE):
         entries = [(p, load(p)) for p in QUEUE.glob('*.json')]
+        active=set()
         for path, row in entries:
             if row.get('status') == 'running':
                 try:
                     stat = Path('/proc', str(row['pid']), 'stat').read_text().split(') ', 1)[1].split()
                     identity = stat[19]
                     if stat[0] != 'Z' and identity == row.get('startTicks'):
-                        return False
+                        active.add(row['kind'])
+                        continue
                 except (OSError, KeyError, IndexError):
                     pass
                 row.update(status='queued', interruptedAt=time.time())
                 write(path, row)
         for path, row in sorted(entries, key=lambda pair: pair[1].get('requestedAt', 0)):
-            if row.get('status') != 'queued':
+            if row.get('status') != 'queued' or row.get('kind') not in ('parameters','kin','threads') or row['kind'] in active:
                 continue
             log = path.with_suffix('.log')
             with log.open('ab') as output:
-                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output)
+                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True)
             row.update(status='running', pid=child.pid, startTicks=Path('/proc', str(child.pid), 'stat').read_text().split(') ', 1)[1].split()[19])
             write(path, row)
             return True

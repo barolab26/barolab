@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import io
+import re
 import time
 from pathlib import Path
 
@@ -39,6 +40,16 @@ async def existing_project_page(context, prior):
     await home.goto(target, wait_until='domcontentloaded', timeout=30000)
     await home.locator('div.ProseMirror').wait_for(state='visible', timeout=30000)
     return home
+
+
+async def open_generation_settings(page):
+    """Prefer the prompt's settings control over the unrelated global menu."""
+    settings=page.locator('flow-base-prompt-box').get_by_role('button',name=re.compile(r'^(Settings|설정)$'))
+    if await settings.count()!=1:
+        settings=page.get_by_role('button',name=re.compile(r'^(Settings|설정)$'))
+    if await settings.count()!=1:
+        raise RuntimeError('Flow image settings control is ambiguous or unavailable')
+    await settings.click(timeout=5000)
 
 
 def generate(title, summary, folder):
@@ -88,7 +99,7 @@ async def _generate(title, summary, folder):
                 section = page.locator('.settings-section').filter(has_text='이미지 생성 기본값')
                 if not await section.is_visible():
                     async with async_action('click', 'flow-settings'):
-                        await page.get_by_role('button', name='Settings', exact=True).click()
+                        await open_generation_settings(page)
                 await section.wait_for(state='visible', timeout=5000)
                 single = section.get_by_role('radio', name='x1', exact=True)
                 if await single.get_attribute('aria-checked') != 'true':
