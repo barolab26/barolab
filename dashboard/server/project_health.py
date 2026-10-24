@@ -61,6 +61,7 @@ SOURCES = (
     ('threads', 'Threads', 'dashboard/data/public/threads.json', 'publi', 'threads.html'),
     ('legacy_remodel', '콘텐츠 유지보수', 'dashboard/data/content-maintenance.json', 'doctor', 'growth.html'),
     ('mobile_apps', '앱 프로젝트', 'apps/bible/project.json', 'patch', 'apps.html'),
+    ('collections', '조회·수집', 'dashboard/data/collection-health.json', 'trace', 'growth.html'),
 )
 
 
@@ -122,8 +123,8 @@ def _publication_quota(key, doc, now, fresh):
         if schedule_plan.get('effectiveDate') and day >= schedule_plan['effectiveDate']:
             DAILY_SLOTS = {account: row['slots'] for account,row in schedule_plan['naver'].items()}
         def slot_matches(account, candidate, target):
-            return (candidate == target or candidate in policy['LEGACY_SLOT_ALIASES'].get(account, {}).get(target, ())
-                    or len(DAILY_SLOTS[account]) == 1 and candidate in policy['LEGACY_SINGLE_SLOTS'].get(account, ()))
+            return (candidate == target or candidate in policy.get('LEGACY_SLOT_ALIASES', {}).get(account, {}).get(target, ())
+                    or len(DAILY_SLOTS[account]) == 1 and candidate in policy.get('LEGACY_SINGLE_SLOTS', {}).get(account, ()))
         evidence = load_json(ROOT / 'dashboard/data/naver/public-verification.json')
         stamp = evidence.get('checkedAt') or evidence.get('reportReceivedAt')
         try:
@@ -260,10 +261,18 @@ def observed_projects():
             error_type = type(exc).__name__
         supporting = []
         if key == 'mobile_apps':
-            for app_path in sorted((ROOT / 'apps').glob('*/project.json')):
+            for app_name in ('bible', 'greeting', 'magnifier', 'shopping'):
+                app_path = ROOT / 'apps' / app_name / 'project.json'
                 try:
-                    supporting.append({'path': str(app_path.relative_to(ROOT)), 'sha256': hashlib.sha256(app_path.read_bytes()).hexdigest()})
-                except OSError as exc:
+                    app_raw = app_path.read_bytes()
+                    app = json.loads(app_raw.decode('utf-8-sig'))
+                    if not isinstance(app, dict):
+                        raise ValueError('Invalid app manifest')
+                    supporting.append({'path': str(app_path.relative_to(ROOT)),
+                        'sha256': hashlib.sha256(app_raw).hexdigest(),
+                        'stage': app.get('stage'), 'updatedAt': app.get('updatedAt'),
+                        'blocker': app.get('blocker'), 'nextAction': app.get('nextAction')})
+                except (OSError, ValueError, UnicodeError) as exc:
                     error_type = type(exc).__name__
                     supporting.append({'path': str(app_path.relative_to(ROOT)), 'errorType': error_type})
         try:
@@ -288,7 +297,7 @@ def observed_projects():
             pass
         source_date = doc.get('date') or doc.get('workDate')
         fresh = (source_date == now.date().isoformat()) if key == 'cf_blog' else age is not None and 0 <= age <= 7200 and (not source_date or source_date == now.date().isoformat())
-        rows = doc.get('items') or doc.get('reservedItems') or doc.get('accounts') or []
+        rows = doc.get('sources') or [] if key == 'collections' else doc.get('items') or doc.get('reservedItems') or doc.get('accounts') or []
         if not isinstance(rows, list):
             rows = []
         counts = {}
@@ -298,9 +307,9 @@ def observed_projects():
                 counts[status] = counts.get(status, 0) + 1
         failures = []
         for row in rows:
-            if isinstance(row, dict) and row.get('status') in ('failed', 'error', 'review_required', 'unknown'):
-                failures.append({'identity': str(row.get('domain') or row.get('account') or row.get('taskId') or row.get('id') or 'unidentified'),
-                    'status': row.get('status'), 'stage': row.get('currentStage') or row.get('stage'),
+            if isinstance(row, dict) and row.get('status') in ('failed', 'error', 'review_required', 'unknown', 'partial', 'backoff', 'stale'):
+                failures.append({'identity': str(row.get('domain') or row.get('account') or row.get('source') or row.get('taskId') or row.get('id') or 'unidentified'),
+                    'status': row.get('status'), 'reasonCode': row.get('reasonCode'), 'stage': row.get('currentStage') or row.get('stage'),
                     'failureAt': row.get('lastErrorAt') or row.get('failedAt'),
                     'errorSha256': hashlib.sha256(str(row.get('lastError') or row.get('errorCode') or '').encode()).hexdigest()})
         public_count = None
@@ -316,10 +325,10 @@ def observed_projects():
                              and r.get('publicationDate') == now.date().isoformat())]
             public_count = len({r.get('domain') if key == 'cf_blog' else r['publicUrl'] for r in verified}) if key == 'cf_blog' else None
             reserved_count = sum(1 for r in rows if isinstance(r, dict) and r.get('status') in ('reserved', 'scheduled'))
-        state = str(doc.get('state') or runtime.get('status') or 'unknown')
+        state = str(doc.get('collectionStatus') if key == 'collections' else doc.get('state') or runtime.get('status') or 'not_reported')
         failed = sum(counts.get(k, 0) for k in ('failed', 'error', 'review_required', 'unknown'))
-        status = 'unknown' if error_type or not raw or age is None else 'stale' if not fresh else 'attention' if failed or state in ('failed', 'error', 'unknown') else 'observed'
-        quota = publication_quota(key, doc, now, fresh and age is not None and not error_type)
+        status = 'unknown' if error_type or not raw or (age is None and key != 'cf_blog') else 'stale' if not fresh else 'attention' if failed or state in ('failed', 'error', 'unknown', 'partial', 'backoff', 'stale') else 'observed'
+        quota = publication_quota(key, doc, now, fresh and (age is not None or key == 'cf_blog') and not error_type)
         activity = kin_activity(doc, now) if key == 'naver_kin' else None
         if activity and activity['status'] in ('overdue', 'stalled', 'blocked'):
             status = 'attention'
@@ -359,7 +368,7 @@ def audit_all_projects_health(
     broadcast_if_changed: bool = False,
     force_broadcast: bool = False,
 ) -> Dict[str, Any]:
-    """Run real-time audit across all 6 core BaroLab projects and optionally post briefing to chat.html."""
+    """Run real-time audit across registered BaroLab projects and optionally post briefing to chat.html."""
     today_str = today_kst_str()
     checked_at = now_kst_iso()
 

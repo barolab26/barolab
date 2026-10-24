@@ -1,6 +1,6 @@
 """Read-only Play Console observations, isolated from release/tester mutations.
 
-Only the existing SJ Windows browser is used. One explicitly owned temporary
+Only the explicitly configured Ubuntu browser session is used. One explicitly owned temporary
 page is closed in finally; user pages, browser lifecycle and forms are untouched.
 No tester count or 14-day progress is inferred from a mailing list or installation.
 """
@@ -280,7 +280,7 @@ def collect_browser():
                     results[app] = parse_observation(app, pages)
                 except Exception as exc:
                     results[app] = {'status': 'error', 'error': type(exc).__name__ + ': console_read_unavailable'}
-    return results, {'port': 9226, 'profile': 'sj', **ownership}
+    return results, {'port': port, 'profile': profile.name, **ownership}
 
 
 def refresh_console_status(*, path=CACHE, reader=None, force=False):
@@ -331,7 +331,7 @@ def refresh_console_status(*, path=CACHE, reader=None, force=False):
 
 
 def _schedule(path, force):
-    if os.name != 'nt' or not _THREAD_LOCK.acquire(blocking=False):
+    if not os.getenv('BAROLAB_PLAY_CONSOLE_CDP_PORT') or not _THREAD_LOCK.acquire(blocking=False):
         return False
     def work():
         try:
@@ -349,18 +349,18 @@ def get_console_status(trigger_refresh=True, force=False, *, path=CACHE):
     state['refreshScheduled'] = bool(trigger_refresh and (due or force) and _schedule(path, force))
     state['stale'] = state.get('status') != 'collected' or _age(state.get('checkedAt')) >= TTL_SECONDS
     state['ttlSeconds'] = TTL_SECONDS
-    state['collectorHost'] = 'windows_sj_9226'
-    if os.name != 'nt' and (due or force):
-        state['refreshPendingReason'] = 'waiting_for_windows_collector'
+    state['collectorHost'] = 'ubuntu_configured_session'
+    if not os.getenv('BAROLAB_PLAY_CONSOLE_CDP_PORT') and (due or force):
+        state['refreshPendingReason'] = 'native_console_session_unconfigured'
     for app in state.get('apps', {}).values():
         app['stale'] = bool(app.get('stale') or _age(app.get('checkedAt')) >= TTL_SECONDS)
     return state
 
 
 def start_periodic_refresh():
-    """Attach to an existing Windows server process; NAS only reads shared cache."""
+    """Reuse the configured Ubuntu session; unconfigured hosts only read cache."""
     global _PERIODIC_THREAD
-    if os.name != 'nt' or not _PERIODIC_LOCK.acquire(blocking=False):
+    if not os.getenv('BAROLAB_PLAY_CONSOLE_CDP_PORT') or not _PERIODIC_LOCK.acquire(blocking=False):
         return False
     _STOP.clear()
     def loop():

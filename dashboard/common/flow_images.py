@@ -14,6 +14,33 @@ def image_prompt(title, summary):
             '관찰된 사실을 증명하는 용도가 아닌 설명용 이미지입니다. 주제: ' + title[:160] + '\n설명: ' + summary[:600])
 
 
+async def existing_project_page(context, prior):
+    """Reuse an existing project after Chrome starts on the Flow home page."""
+    import re
+    pages = [p for p in context.pages if re.fullmatch(r'https://flow\.google\.com/project/[A-Za-z0-9-]+', p.url)]
+    page = next((p for p in pages if p.url == prior.get('projectUrl')), None) if prior else next(iter(pages), None)
+    if page is not None:
+        return page
+    home = next((p for p in context.pages if p.url == 'https://flow.google.com/'), None)
+    if home is None:
+        return None
+    if prior:
+        target = prior.get('projectUrl', '')
+        if not re.fullmatch(r'https://flow\.google\.com/project/[A-Za-z0-9-]+', target):
+            return None
+    else:
+        links = home.locator('a[href^="/project/"]')
+        if not await links.count():
+            return None
+        href = await links.first.get_attribute('href')
+        if not re.fullmatch(r'/project/[A-Za-z0-9-]+', href or ''):
+            return None
+        target = 'https://flow.google.com' + href
+    await home.goto(target, wait_until='domcontentloaded', timeout=30000)
+    await home.locator('div.ProseMirror').wait_for(state='visible', timeout=30000)
+    return home
+
+
 def generate(title, summary, folder):
     return asyncio.run(_generate(title, summary, Path(folder)))
 
@@ -49,8 +76,7 @@ async def _generate(title, summary, folder):
         async with async_playwright() as playwright:
             browser, _ = await connect_async(playwright, 'http://127.0.0.1:9440', binary, profile)
             context = browser.contexts[0]
-            pages = [p for p in context.pages if 'flow.google.com/project/' in p.url]
-            page = next((p for p in pages if p.url == prior.get('projectUrl')), None) if prior else next(iter(pages), None)
+            page = await existing_project_page(context, prior)
             if page is None:
                 raise RuntimeError('Existing Flow project required; user tabs retained')
             await asyncio.to_thread(focus_workflow_window, 9440)

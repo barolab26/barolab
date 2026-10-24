@@ -280,7 +280,9 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
     effort = configured_reasoning_effort(config, model, reasoning_effort)
     timeout_seconds = 300 if timeout_seconds is None else max(0.1, float(timeout_seconds))
     deadline = time.monotonic() + timeout_seconds
-    scratch = Path('/mnt/c/Users/baro7/.barolab/scratch') if is_wsl() else (Path.home() / '.barolab' / 'scratch')
+    windows_cli = str(config['executable']).lower().endswith('.exe')
+    cli_path = to_win_path if windows_cli else str
+    scratch = Path('/mnt/c/Users/baro7/.barolab/scratch') if is_wsl() and windows_cli else (Path.home() / '.barolab' / 'scratch')
     scratch.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='codex-json-', dir=scratch) as folder:
         folder_path = Path(folder)
@@ -296,7 +298,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
             if not image.is_file() or image.suffix.lower() not in ('.jpg', '.jpeg', '.png') or not any(image.is_relative_to(root.resolve()) for root in allowed_roots):
                 raise RuntimeError('검증된 작업 산출물 이미지 경로가 아닙니다.')
             original_images.append(image)
-            cli_image_arguments.extend(['--image', to_win_path(_prepare_cli_image(image, folder_path, idx))])
+            cli_image_arguments.extend(['--image', cli_path(_prepare_cli_image(image, folder_path, idx))])
         audit_folder = None
         if audit_directory is not None:
             from PIL import Image
@@ -336,8 +338,8 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
                     pass
             exe = config.get('wsl_executable') or config['executable']
             cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
-            schema_arg = to_win_path(schema)
-            output_arg = to_win_path(output)
+            schema_arg = cli_path(schema)
+            output_arg = cli_path(output)
             command = [exe, 'exec', *cli_image_arguments,
                        '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
                        '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cand_model,

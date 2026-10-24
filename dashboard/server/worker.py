@@ -47,7 +47,7 @@ def run_metrics(python, commands):
             process, started = None, time.monotonic()
             try:
                 target = ['-m', script] if script in ('naver_kin.posting', 'threads_posting.posting') else [str(ROOT / script)]
-                process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', *target, *([argument] if argument else [])],
+                process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', *target, *(argument if isinstance(argument, (list, tuple)) else [argument] if argument else [])],
                     cwd=str(ROOT), stdout=sys.stdout, stderr=sys.stderr,
                     env=dict(export_environment(), PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
                     creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
@@ -139,7 +139,7 @@ def run_task(task):
         return subprocess.run(['systemctl','--user','start','barolab-memory-review.service'],timeout=30).returncode
     if task=='metrics':
         return run_metrics(sys.executable,[('dashboard/revenue.py','--collect'),('dashboard/traffic.py','--collect'),
-            ('dashboard/metrics.py','--collect'),('naver_kin.posting','--measure'),('threads_posting.posting','measure')])
+            ('dashboard/metrics.py',['--collect','--read-only']),('naver_kin.posting','--measure'),('threads_posting.posting','measure')])
     if task=='naver-monitor':
         from naver_blog_posting.posting import pipeline_lock
         from common.channel_parameters import monitor

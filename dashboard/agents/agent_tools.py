@@ -1551,6 +1551,10 @@ def validate_staff_actions(actions):
                 raise ValueError('Unregistered autonomous project owner')
         elif tool == 'repair_kin_submission' and agent == 'patch' and set(args)=={'account','question_id'} and args.get('account') in ('adinfo0905','stone0747') and isinstance(args.get('question_id'),str) and re.fullmatch(r'\d{1,24}',args['question_id']):
             pass
+        elif tool == 'recover_project_runtime' and agent == 'patch' and set(args) == {'project'}:
+            from common.runtime_recovery import UNITS
+            if args['project'] not in UNITS:
+                raise ValueError('Unregistered runtime recovery')
         elif tool == 'read_agent_status' and not args:
             pass
         elif tool == 'advance_project_recovery' and set(args) == {'task_id','plan_sha256'}:
@@ -1581,6 +1585,8 @@ def staff_instruction(action):
         text = f'@{name}, 등록된 프로젝트 스케줄러를 한 회차 실행하고 실제 종료 결과를 확인해 주세요. 기존 계정·일정·검수·중복 방지 규칙을 유지하고 공개 확인 전에는 발행 완료로 보고하지 않습니다.'
     elif action['tool'] == 'repair_kin_submission':
         text = '@패치, 지정된 계정·질문의 기존 답변을 먼저 확인하고 승인된 작성창만 한 번 복구해 주세요. 캡차·등록 차단·중복·결과 불명확 상태는 재제출하지 않습니다.'
+    elif action['tool'] == 'recover_project_runtime':
+        text = '@패치, 등록된 프로젝트의 스케줄러·수집기 상태를 확인하고 중단된 실행만 복구해 주세요. 실행 중인 작업·명시적 보류를 보존하고 실제 원천 갱신을 별도로 확인합니다.'
     elif action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
     elif action['tool'] == 'advance_project_recovery':
@@ -2132,7 +2138,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         'fix_scheduler_task':'project', 'propose_coding_job':'project', 'read_coding_job_status':'project',
         'extract_youtube_or_url':'research', 'scout_high_value_keywords':'research',
         'dispatch_multi_agent_action':'all_projects', 'advance_project_recovery':'project',
-        'run_project_cycle':'project',
+        'run_project_cycle':'project', 'recover_project_runtime':'project',
     }
     fields['tool'] = tool_name if tool_name in projects else 'unknown'
     fields['project'] = projects.get(tool_name, 'unknown')
@@ -2168,6 +2174,11 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
         if set(kwargs) != {'task_id','plan_sha256'} or recovery_expected_actor(kwargs['task_id'], kwargs['plan_sha256']) != slug:
             return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
         return advance_project_recovery(kwargs['task_id'], kwargs['plan_sha256'], actor=slug)
+    if tool_name == 'recover_project_runtime':
+        from common.runtime_recovery import recover_project_runtime
+        if slug != 'patch' or set(kwargs) != {'project'}:
+            return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
+        return recover_project_runtime(kwargs['project'])
     if tool_name == "read_agent_status":
         readers = {'publi': read_publi_data, 'trace': read_trace_data, 'patch': read_patch_data,
                    'doctor': read_doctor_data, 'radar': read_radar_data, 'jarvis': format_jarvis_context_block}

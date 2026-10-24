@@ -145,11 +145,21 @@ class CacheAndOwnershipTests(unittest.TestCase):
         browser.close.assert_not_called()
         self.assertTrue(ownership['existingTabsPreserved'])
 
-    def test_nas_returns_unknown_without_browser_connection(self):
-        with patch.object(c.os, 'name', 'posix'), patch.object(c, '_schedule') as schedule:
+    def test_unconfigured_host_returns_unknown_without_browser_connection(self):
+        with patch.dict(c.os.environ, {}, clear=True), patch.object(c, '_schedule') as schedule:
             schedule.return_value = False
             result = c.get_console_status(path=self.path)
-        self.assertEqual(result['refreshPendingReason'], 'waiting_for_windows_collector')
+        self.assertEqual(result['refreshPendingReason'], 'native_console_session_unconfigured')
         self.assertIsNone(result['apps']['bible_app']['googleOptInCount'])
+    def test_configured_linux_host_schedules_one_worker(self):
+        with patch.dict(c.os.environ, {'BAROLAB_PLAY_CONSOLE_CDP_PORT': '9440'}), \
+             patch.object(c, '_THREAD_LOCK') as lock, patch.object(c.threading, 'Thread') as thread:
+            lock.acquire.return_value = True
+            self.assertTrue(c._schedule(self.path, False))
+            thread.return_value.start.assert_called_once()
+            lock.acquire.return_value = False
+            self.assertFalse(c._schedule(self.path, False))
+            self.assertEqual(thread.call_count, 1)
+
 if __name__ == '__main__':
     unittest.main()

@@ -161,5 +161,27 @@ class CodexExecutableResolutionTests(unittest.TestCase):
     def test_error_detail_does_not_fallback_to_full_stream(self):
         self.assertEqual(codex_cli._cli_error_detail('PRIVATE RESPONSE', 'PRIVATE PROMPT'), '구조화 오류 메시지 없음')
         self.assertLessEqual(len(codex_cli._cli_error_detail('', 'Error: ' + 'x' * 5000)), 1600)
+    def test_native_cli_in_wsl_keeps_linux_schema_and_output_paths(self):
+        import inspect
+        core = inspect.unwrap(codex_cli.generate_local)
+        config = {'executable': '/home/fixture/codex', 'home': str(self.auth)}
+        schema = {'type': 'object'}
+        def run(command, **kwargs):
+            source = command[command.index('--output-schema') + 1]
+            output = command[command.index('--output-last-message') + 1]
+            self.assertTrue(Path(source).is_file())
+            self.assertTrue(output.startswith(str(self.root)))
+            Path(output).write_text('{"ok":true}')
+            return subprocess.CompletedProcess(command, 0, '{"type":"turn.completed"}', '')
+        with patch.object(codex_cli, 'is_wsl', return_value=True), \
+             patch.object(codex_cli, 'local_config', return_value=config), \
+             patch.object(codex_cli, 'runtime', return_value={'models': [{'id': 'fixture'}]}), \
+             patch.object(codex_cli, 'configured_reasoning_effort', return_value='low'), \
+             patch.object(codex_cli, 'to_win_path', side_effect=AssertionError('native path translated')), \
+             patch.object(codex_cli.subprocess, 'run', side_effect=run), \
+             patch('common.llm_client.record_provider_memory_delivery'), \
+             patch('common.llm_usage.record_codex_usage'), patch('common.llm_usage.report_response'):
+            self.assertEqual(core('fixture', 'fixture', response_schema=schema, reasoning_effort='low'), ({'ok': True}, 'fixture'))
+
 if __name__ == '__main__':
     unittest.main()

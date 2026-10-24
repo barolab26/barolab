@@ -10,6 +10,9 @@ from server.project_health import observed_projects, DATA_DIR, save_json
 STATE = Path.home() / '.barolab' / 'project-monitor' / 'state.json'
 INCIDENTS = STATE.parent / 'incidents'
 POLL_SECONDS = 60
+RECHECK_SECONDS = 1800
+RECHECKS_PER_DAY = 3
+RECHECKABLE = {'triage_failed', 'feedback_hold', 'interrupted_hold', 'needs_attention', 'unknown', 'observed_resolved'}
 
 
 def incident_key(project):
@@ -55,7 +58,7 @@ def report_project_incident_once(project):
             verdict = {'status': 'api_error', 'priority': 'unclassified', 'errorType': type(exc).__name__}
         row['classification'] = verdict
         title = {'cf_blog': 'CF 블로그', 'naver_blog': '네이버 블로그', 'naver_kin': '지식iN',
-                 'threads': 'Threads', 'legacy_remodel': '콘텐츠 유지보수', 'mobile_apps': '앱 프로젝트'}.get(project.get('id'), '프로젝트')
+                 'threads': 'Threads', 'legacy_remodel': '콘텐츠 유지보수', 'mobile_apps': '앱 프로젝트', 'collections': '조회·수집'}.get(project.get('id'), '프로젝트')
         lines = [f'@팀장 **[EGO LITE 이상 보고 · {title}]**',
                  '호스트 원천 관측: ' + {'attention': '확인 필요', 'stale': '자료 갱신 지연', 'unknown': '상태 미확인'}[project['status']]]
         quota = project.get('quota') or {}
@@ -117,6 +120,11 @@ def action_for_triage(project, verdict, candidates):
             'domain':domain,'evidencePath':candidate['evidencePath'],'evidenceSha256':candidate['evidenceSha256']}}
     if domain:
         raise ValueError('Unexpected domain for non-repair decision')
+    if decision == 'recover_runtime':
+        from common.runtime_recovery import UNITS
+        if project['id'] not in UNITS:
+            raise ValueError('Project has no registered runtime recovery')
+        return {'agent': 'patch', 'tool': 'recover_project_runtime', 'args': {'project': project['id']}}
     if decision == 'inspect':
         return {'agent':project['ownerAgentIds'][0],'tool':'read_agent_status','args':{}}
     if decision == 'hold':
@@ -167,8 +175,14 @@ def _triage(project, task_id, row, path):
             'state': state, 'actualModel': details.get('actual_model') if state == 'returned' else None})
         save_json(path, row)
     candidates = row.get('repairCandidates') or []
+    from common.runtime_recovery import UNITS, runtime_state
+    try:
+        runtime = runtime_state(project['id']) if project['id'] in UNITS else []
+    except Exception:
+        runtime = []
+    row['runtimeObservation'] = runtime
     schema = {'type': 'object', 'properties': {
-        'decision': {'type': 'string', 'enum': ['inspect', 'repair_known_cf', 'hold']},
+        'decision': {'type': 'string', 'enum': ['inspect', 'repair_known_cf', 'recover_runtime', 'hold']},
         'domain': {'type':'string','enum':['']+[x['domain'] for x in candidates]},
         'reason': {'type': 'string', 'minLength': 1, 'maxLength': 160}},
         'required': ['decision', 'domain', 'reason'], 'additionalProperties': False}
@@ -176,12 +190,13 @@ def _triage(project, task_id, row, path):
         'reason은 한국어 완결문 1~2개, 공백 포함 160자 이내로 쓰세요. 실제 판단 이유, 담당 직원, 다음 확인할 사항을 근거가 있는 범위에서 간결히 말하세요. 직원을 언급할 때는 @팀장/@퍼블리/@패치/@닥터/@레이더/@트레이스 호칭을 사용하세요. 개인정보·경로·URL·비밀값은 쓰지 마세요. '
         'Choose inspect only when a read-only owner status check can clarify this observed problem. '
         'reason은 선택한 decision과 일치해야 합니다. inspect는 관측 ownerAgentIds의 @담당직원에게 읽기 점검을 요청하고, repair_known_cf는 @패치에게 등록된 검수 절차를 요청하며, hold는 보류 판단을 설명하세요. 실행 완료나 발행 승인을 주장하지 마세요. '
+        'recover_runtime는 제공된 runtimeObservation에서 등록된 스케줄러가 중단됐거나 조회·수집 원천이 오래됐을 때 @패치에게 요청하세요. 실행 중인 서비스와 명시적 보류는 보존하며, 복구 완료는 새 원천 자료를 읽어 검증합니다. domain은 빈 문자열입니다. '
         'Stale data is not proof of failed publishing. A quality hold is not permission to retry. '
-        'Only repair_known_cf for an explicitly host-eligible listed domain may request the existing guarded repair workflow; it does not approve resumption or publication. Never select repair for quality holds or unknown submissions. Otherwise inspect or hold with domain empty. No arbitrary commands or restart.\n'
-        + json.dumps({'observation':project,'hostEligibleRepairCandidates':candidates}, ensure_ascii=False), provider=provider, model_override=model,
+        'Only repair_known_cf for an explicitly host-eligible listed domain may request the existing guarded repair workflow; it does not approve resumption or publication. Never select repair for quality holds or unknown submissions. Otherwise inspect, recover_runtime for an eligible supplied runtime, or hold with domain empty. No arbitrary commands, active-job restarts or direct publishing.\n'
+        + json.dumps({'observation':project,'hostEligibleRepairCandidates':candidates,'runtimeObservation':runtime}, ensure_ascii=False), provider=provider, model_override=model,
         response_schema=schema, observer=observe, memory_read_only=True, memory_session_id=task_id,
         timeout_seconds=120, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='project-incident-triage', crew_task_id=task_id)
-    if result.get('decision') not in ('inspect', 'repair_known_cf', 'hold') or not result.get('reason'):
+    if result.get('decision') not in ('inspect', 'repair_known_cf', 'recover_runtime', 'hold') or not result.get('reason'):
         raise ValueError('Invalid triage decision')
     if not any(e['state'] == 'returned' and e.get('actualModel') for e in row['route']['events']):
         raise ValueError('Actual model return evidence missing')
@@ -238,8 +253,6 @@ def process_project_monitor_once():
             continue
         report_project_incident_once(project)
         fingerprint = incident_key(project)
-        if fingerprint in state.get('upgradeBaseline', []):
-            continue
         INCIDENTS.mkdir(parents=True, exist_ok=True)
         path = INCIDENTS / (fingerprint + '.json')
         task_id = 'project-incident:' + fingerprint[:24]
@@ -250,8 +263,22 @@ def process_project_monitor_once():
             with path.open('x', encoding='utf-8') as f:
                 json.dump(row, f, ensure_ascii=False, indent=2)
         except FileExistsError:
-            continue
-        # Claim before model call: interrupted or failed triage is not sampled again.
+            previous = json.loads(path.read_text(encoding='utf-8'))
+            day = time.strftime('%Y-%m-%d', time.gmtime(now))
+            rechecks = previous.get('recheckCount', 0) if previous.get('recheckDate') == day else 0
+            if (rechecks >= RECHECKS_PER_DAY or previous.get('status') not in RECHECKABLE or
+                    now - previous.get('observedAt', now) < RECHECK_SECONDS):
+                continue
+            # Retain prior decisions and receipts; new IDs prevent request deduplication
+            # from hiding a fresh inspection. Pending work and explicit holds stay fenced.
+            attempts = INCIDENTS / 'history'
+            attempts.mkdir(exist_ok=True)
+            attempt = previous.get('attempt', 1) + 1
+            save_json(attempts / (fingerprint + '-' + str(attempt - 1) + '.json'), previous)
+            task_id += ':recheck:' + str(attempt)
+            row.update(taskId=task_id, attempt=attempt, recheckDate=day, recheckCount=rechecks + 1)
+            save_json(path, row)
+        # Claim before model call; unresolved triage receives only bounded later inspections.
         state['lastTriage'] = now
         save_json(STATE, state)
         try:
@@ -359,7 +386,11 @@ def process_project_feedback_once():
                 # runs even when only an inspection task exists; that cannot grant
                 # permission to invent a publication/resume command.
                 save_json(path,row)
-                row['recovery']=prepare_project_recovery(path,request_path)
+                if any(a.get('tool') == 'recover_project_runtime' for a in result.get('actions', [])):
+                    row['recovery'] = {'status': 'source_or_configuration_check_required',
+                                       'publicationRetryAuthorized': False}
+                else:
+                    row['recovery']=prepare_project_recovery(path,request_path)
 
         except Exception as exc:
             row['status']='feedback_hold';row['feedbackErrorType']=type(exc).__name__
