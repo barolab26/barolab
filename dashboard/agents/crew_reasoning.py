@@ -281,7 +281,7 @@ def ask(row):
     def route(provider,model,state,**meta):
         if state=='returned':routes.append({'provider':provider,'model':meta.get('actual_model'), 'reasoningEffort':meta.get('reasoning_effort')})
     with memory_session('crew-goal:'+row['id'],row['actor']):
-        result=generate_json(prompt,agent_slot=row['actor'],response_schema=SCHEMA,timeout_seconds=120,
+        result=generate_json(prompt,agent_slot=row['actor'],response_schema=SCHEMA,timeout_seconds=180,
             observer=route,memory_read_only=True,crew_actor=row['actor'],crew_task_id='goal:'+row['id'],crew_stage='goal-decision')
     if not routes or not routes[-1].get('model'):raise ValueError('Actual deciding model was not observed')
     row['lastRoute']=routes[-1]

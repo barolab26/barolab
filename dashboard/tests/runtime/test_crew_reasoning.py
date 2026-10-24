@@ -173,6 +173,7 @@ def test_model_call_uses_the_active_staff_slot_and_shared_goal(environment,monke
     row={'id':'a'*64,'goal':'수익 개선 우선순위','actor':'trace','permissions':{'execute':False,'repair':False,'projects':['threads']},'decisions':1,'observations':[],'plan':['실제 수익 확인']}
     def generate(prompt,**kwargs):
         assert kwargs['agent_slot']=='trace'
+        assert kwargs['timeout_seconds']==180
         assert '수익 개선 우선순위' in prompt and '실제 수익 확인' in prompt
         kwargs['observer']('agy','requested','returned',actual_model='gemini-3.8-flash-medium',reasoning_effort='medium')
         return choice('finish',message='측정 누락을 구분했습니다.')
