@@ -17,7 +17,7 @@ class StaffDispatchTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        names = {'validate_staff_actions', 'enqueue_staff_request', 'process_staff_request_once', 'staff_tool_reply', '_repair_terminal_result', '_finish_staff_repairs', 'staff_instruction'}
+        names = {'validate_staff_actions', 'enqueue_staff_request', 'process_staff_request_once', 'staff_tool_reply', '_repair_terminal_result', '_finish_staff_repairs', '_review_ceo_request', 'staff_instruction'}
         tree = ast.parse((Path(__file__).resolve().parents[2] / 'agents' / 'agent_tools.py').read_text(encoding='utf-8'))
         self.scope = {'re': re, 'json': json, 'time': time, 'BASE_DIR': Path(self.temp.name), '_STAFF_CHILDREN': {}, 'STAFF_REQUEST_DIR': Path(self.temp.name), 'STAFF_ROLES': ('jarvis', 'publi', 'trace', 'patch', 'doctor', 'radar'), 'CF_16_DOMAINS': ['example.com'], 'execute_agent_tool': Mock(return_value={'ok': True, 'status': 'observed', 'data': {'waiting': 2}})}
         exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names], type_ignores=[]), '<staff>', 'exec'), self.scope)

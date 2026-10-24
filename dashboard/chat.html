@@ -1463,7 +1463,7 @@
         && m.phase === 'completed' && m.messageKind === 'staff_reply'
         && typeof m.model === 'string' && m.model.trim() && validText) return reply;
     if (m.eventType === 'crew_work_event' && staff.includes(m.who)
-        && ['staff-response','staff-terminal-response','staff-report-format-followup'].includes(m.stage) && m.phase === 'completed'
+        && ['staff-response','staff-terminal-response','staff-report-format-followup','ceo-result-review'].includes(m.stage) && m.phase === 'completed'
         && typeof m.model === 'string' && m.model.trim()
         && typeof reply === 'string' && reply.trim() && reply.length <= 120
         && !/[\x00-\x1f]/.test(reply)) return reply;

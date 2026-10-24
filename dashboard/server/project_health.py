@@ -173,6 +173,8 @@ def _publication_quota(key, doc, now, fresh):
         total = sum(r.get('n', 0) for r in today.get('counts', []) if r.get('kind') == 'main' and r.get('state') == 'published_verified')
         if total > len(completed):
             return unknown
+    elif key == 'naver_kin':
+        return {**unknown, 'status':'interval_managed'}
     else:
         return {**unknown, 'status': 'not_scheduled'}
     return {'status': 'observed', 'date': day, 'due': len(expected), 'verified': len(completed),

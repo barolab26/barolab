@@ -838,13 +838,14 @@ def get_live_system_context() -> Dict[str, Any]:
 def _call_chat_llm(
     system_prompt: str,
     user_prompt: str,
-    timeout_sec: float = 9.0,
+    timeout_sec: float = 120.0,
     agent_slug: Optional[str] = None,
     staff_request_id: Optional[str] = None,
     dispatch_receipts: Optional[list] = None,
     allow_guarded_repair: bool = False,
+    allow_project_cycle: bool = False,
 ) -> Optional[str]:
-    """Use the configured active provider; AGY is disabled."""
+    """Answer the actual question and dispatch only explicitly authorized host tools."""
     from common.llm_client import generate_json
     try:
         # Catalog is already frozen by the shared client. Disclose the master
@@ -861,7 +862,7 @@ def _call_chat_llm(
             from common.runtime_recovery import UNITS
             projects=[row[0] for row in SOURCES]
             work=[{k:t[k] for k in ('project','workId','identity','date','slot')} for project in ('cf_blog','naver_blog') for t in recoverable_work(project)] if allow_guarded_repair else []
-            available=['read_agent_status']+(['recover_project_runtime','recover_project_work'] if allow_guarded_repair else [])
+            available=['read_agent_status']+(['recover_project_runtime','recover_project_work'] if allow_guarded_repair else [])+(['run_project_cycle'] if allow_project_cycle else [])
             schema['properties']['actions'] = {'type':'array','maxItems':6,'items':{
                 'type':'object','properties':{'agent':{'type':'string','enum':['jarvis','publi','trace','patch','doctor','radar']},
                 'tool':{'type':'string','enum':available}, 'domain':{'type':'string','enum':['']},
@@ -872,6 +873,7 @@ def _call_chat_llm(
             instruction = ('\nReturn JSON reply and actions. Actions are explicit staff requests, not mentions. '
                 'read_agent_status uses project for a scoped channel inspection; use empty project only for a genuinely cross-project check. '
                 'recover_project_runtime is patch-only for registered runtime projects; recover_project_work is publi-only for an exact supplied work identity. '
+                'run_project_cycle uses publi for cf_blog/naver_blog/naver_kin/threads, doctor for legacy_remodel; it queues the registered conference workflow, never bypasses its safety checks. '
                 'Keep domain empty, and work_id empty except for recover_project_work. '
                 'Never change dates, accounts, slots, drafts, safety gates, or execute an engine directly. '
                 'Use actions=[] when no supported action is needed. Queued does not mean executed or repaired. '
@@ -1204,6 +1206,34 @@ def _get_isolated_agent_history(slug: str, recent_history: Optional[List[Dict[st
     return f"[{AGENT_MAP.get(slug, {}).get('name', slug)} 최근 대화 맥락]\n" + "\n".join(lines[-3:]) + "\n\n"
 
 
+def _project_cycle_requested(text):
+    if re.search(r'하지\s*마|하지\s*말|금지|do not|don.t', text, re.I):
+        return False
+    return bool(re.search(r'(?:실행|진행|재개|발행|게시|작업|시작|가동|재시도)\s*(?:해|하라|하세요|하고|시켜)|돌려|올려', text))
+
+
+def _question_project_context(text):
+    """Keep the CEO's named channels ahead of unrelated aggregate statistics."""
+    from server.project_health import observed_projects
+    from common.collection_observability import load
+    patterns = {
+        'naver_kin': r'지식\s*[iI]?\s*[nN인]|지식인|\bkin\b',
+        'threads': r'스레드|쓰레드|threads',
+        'cf_blog': r'\bcf\b|클라우드플레어',
+        'naver_blog': r'네이버\s*블로그',
+        'mobile_apps': r'앱\s*프로젝트|앱\s*팩토리',
+    }
+    selected = [key for key, pattern in patterns.items() if re.search(pattern, text, re.I)]
+    rows = observed_projects()
+    result = {'projects': [row for row in rows if not selected or row['id'] in selected]}
+    if 'naver_kin' in selected:
+        kin = load(BASE_DIR / 'dashboard/data/kin-automation-state.json')
+        result['kinExecution'] = {k:kin.get(k) for k in (
+            'checkedAt','reason','cadenceState','operationCounts','submissionCounts',
+            'globalRemainingRuns','nextEligibleAt','activeRunId')}
+    return result
+
+
 def _synthesize_question_aware_fallback(
     slug: str,
     clean_q: str,
@@ -1211,164 +1241,22 @@ def _synthesize_question_aware_fallback(
     ingested_items: List[Dict[str, Any]],
     prior_replies: Optional[List[Dict[str, Any]]] = None,
 ) -> str:
-    """
-    Question-aware fallback used only if the configured provider is unavailable.
-    Synthesizes a direct answer to `clean_q` from Step 1 tool outputs (`ingested_items` / `executed_tools`)
-    and live ledger data — never returns static vending-machine templates or mechanical refusals.
-    """
-    badges_str = "\n" + "\n".join(t["badge"] for t in executed_tools if t.get("badge")) if executed_tools else ""
+    """Expose model failure and scoped observations without inventing an answer."""
+    lines = ['응답 모델이 답변을 완료하지 못했습니다. 아래는 현재 기록이며, 원인 진단이나 실행 완료를 뜻하지 않습니다.']
+    context = _question_project_context(clean_q)
+    for row in context.get('projects', []):
+        activity = row.get('activity') or {}
+        lines.append(f"• {row['title']}: {activity.get('reason') or row.get('blocker') or row.get('status', '미확인')}")
+    if context.get('kinExecution'):
+        kin = context['kinExecution']
+        lines.append('• 지식iN 실행 기록: ' + json.dumps(kin, ensure_ascii=False))
+    if executed_tools:
+        lines.append('• 이번 요청의 도구 기록: ' + json.dumps([
+            {k:t[k] for k in ('tool','status','state') if k in t} for t in executed_tools], ensure_ascii=False))
+    else:
+        lines.append('• 이 답변 단계에서 실행된 작업은 없습니다.')
+    return '\n'.join(lines)
 
-    # 1) Pinpoint CF URL Surgical Repair & Live Republish (`run_doctor_remodel_url`)
-    remodel_tool = next((t for t in executed_tools if t.get("tool") == "run_doctor_remodel_url"), None)
-    if not remodel_tool and prior_replies:
-        for pr in prior_replies:
-            for rec in pr.get("executionReceipts") or []:
-                if "doctor_remodel" in str(rec.get("cmd", "")):
-                    remodel_tool = {
-                        "tool": "run_doctor_remodel_url",
-                        "url": "",
-                        "cmd": rec.get("cmd"),
-                        "pid": rec.get("pid"),
-                        "exitCode": rec.get("exit_code", 0),
-                    }
-                    break
-    if remodel_tool:
-        if slug == "doctor" or not prior_replies:
-            removed_figs = remodel_tool.get("removedFigures") or []
-            rm_lines = (
-                " / ".join(
-                    f"`{rf.get('src') or '도표'}`({', '.join(rf.get('reasons') or ['AI 어색한 화면·도표'])})"
-                    for rf in removed_figs[:4]
-                )
-                if removed_figs
-                else "`namiseom-zipwire-booking-pricing.jpg`(한글 깨진 AI 폰 화면), `namiseom-zipwire-parking-map.jpg`(가짜 약도), `namiseom-zipwire-course-map.jpg`(`CHECKPOINT #4` 어색한 배치도 및 거짓 캡션)"
-            )
-            uploaded_media = remodel_tool.get("uploadedMedia") or []
-            up_str = (
-                f"`{uploaded_media[0].get('cleanFilename')}` (`{uploaded_media[0].get('uploadedUrl')}`)"
-                if uploaded_media
-                else "`namiseom-zipwire-booking-weight-01.jpg` (`https://www.nolplace.com/media/1792337414392-2480c01c.jpg`)"
-            )
-            return (
-                f"• **지정 포스트 핀셋 수선 및 라이브 재발행 즉시 완료 (`{remodel_tool.get('url') or 'https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips'}`)**:\n"
-                f"  - **실행 명령어**: `{remodel_tool.get('cmd')}` (PID `{remodel_tool.get('pid')}`, Exit Code `{remodel_tool.get('exitCode', 0)}` · CF Worker `PUT /api/posts/{remodel_tool.get('postId') or 39}` → **`HTTP {remodel_tool.get('republishStatus') or 200} OK`**)\n"
-                f"  - **어색한 이미지·도표 및 거짓 캡션 영구 삭제**: {rm_lines} 및 `\"시설 배치도 캡처\"` 거짓 캡션, 본문 내 `⌧`/`**` 잔재를 100% 제거했습니다.\n"
-                f"  - **클린 HTML 비교표 대체 & 실사 사진 워터마크(`✦`) 크롭·EXIF 세탁**: 깨진 도표 자리에 반응형 HTML 시간표·코스 비교표(`<table>`) 2종을 삽입하고, 80m 타워 실사 사진은 우측 하단 AI 워터마크(`✦`) 크롭 + `Apple iPhone 15` EXIF 주입 후 {up_str}로 재업로드해 라이브 반영 검증(`verified=True`, 잔여 정상 사진 `{remodel_tool.get('remainingImagesCount', 1)}장`)까지 마쳤습니다.{badges_str}"
-            )
-        else:
-            return (
-                f"• **라이브 재발행 본문 최종 검수 및 IndexNow 색인 재호출 완료**:\n"
-                f"  - `@닥터`가 수선·재발행(`PUT /api/posts/39` → `HTTP 200 OK`)한 `https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips` 라이브 페이지에서 어색한 AI 폰 화면·약도·`CHECKPOINT #4` 배치도가 완전히 제거되고 반응형 HTML 비교표 2종으로 깔끔하게 대체된 것을 확인했습니다.\n"
-                f"  - 수정된 포스트 URL을 네이버 서치어드바이저(IndexNow `HTTP 200`) 및 구글 사이트맵에 즉시 재호출하여 검색엔진 캐시 갱신까지 완료했습니다.{badges_str}"
-            )
-
-    # 2) Automated Unindexed Site & URL Indexing (`run_auto_indexer` / `index_check_and_submit`)
-    idx_tool = next(
-        (t for t in executed_tools if t.get("tool") in ("run_auto_indexer", "index_check_and_submit")),
-        None,
-    )
-    if idx_tool:
-        return (f"• 색인 요청 도구 상태: {idx_tool.get('state', '미확인')}\n"
-                f"• PID {idx_tool.get('pid')} / 종료 코드 {idx_tool.get('exitCode')}\n"
-                + format_radar_indexing_evidence(radar_indexing_evidence())
-                + "\n• 프로세스 실행/HTTP 접수는 색인 완료가 아닙니다. GSC·서치어드바이저 UI는 별도 원장으로 확인합니다.")
-
-    # If URL was ingested, always analyze the actual extracted transcript/webpage content
-    if ingested_items:
-        if slug == "radar" or not prior_replies:
-            url_analysis = build_radar_grounded_analysis(ingested_items, clean_q)
-            if url_analysis:
-                return f"{url_analysis}{badges_str}"
-        else:
-            yt0 = ingested_items[0]
-            v_title = yt0.get("title") or yt0.get("url") or "해당 영상"
-            pub_d = read_publi_data()
-            tr_d = read_trace_data()
-            return (
-                f"🧭 `@레이더`가 방금 추출·분석한 **「{v_title}」**의 수익화 메커니즘을 우리 BaroLab 파이프라인에 즉시 연결하겠습니다.\n"
-                f"• **우리의 현재 병목 진단**: 현재 CF 16개 도메인(`{tr_d['cfTotalInventoryPosts']}건` 발행, 최근 7일 `{tr_d['ga4Last7DaysSessions']}세션`)과 네이버 5개 채널·지식iN(`{pub_d['kinProgress']['totalDone']}/20건`)이 단순 줄글 발행에 머물러 있어, 영상에서 강조한 **'초반 3초 후킹 검증 구조'**와 **'유저가 직접 쓰고 공유하는 데이터/계산기 해자(Moat)'** 결합이 시급합니다.\n"
-                f"• **즉시 실행 배정**: `@퍼블리`는 오늘 Threads 4슬롯과 지식iN 답변부터 검증된 후킹 포맷을 즉시 적용하고, `@패치`·`@닥터`는 CF 주력 도메인(`must-pick.com`, `baronote.kr`, `must-good.com`) 상단에 인터랙티브 판독기/비교표 위젯과 초반 3줄 후킹 검수 규칙을 바로 탑재하겠습니다.{badges_str}"
-            )
-
-    if slug == "radar":
-        d = read_radar_data()
-        kws = d["recentScoutedKeywords"][:3]
-        kw_lines = "\n".join(
-            f"• **「{k.get('keyword')}」** → 타겟 채널: `{k.get('target')}` (검색 의도 직결 롱테일 구성)"
-            for k in kws
-        )
-        return (
-            f"실제 원천 자료에서 수집한 후보입니다 (최근 `{d['scoutQueueCount']}건`, 검색량·빈집·고단가 미검증):\n"
-            f"{kw_lines}\n"
-            f"• **발행 제안**: @publi/@trace가 출처·도메인 적합성을 검토할 후보이며 외부 발행은 하지 않았습니다.{badges_str}"
-        )
-
-    if slug == "doctor":
-        d = read_doctor_data()
-        gc = d["gradeCounts"]
-        top_flag = d["flaggedPosts"][0] if d["flaggedPosts"] else None
-        flag_str = (
-            f"`{top_flag['domain']}` 「{top_flag['title']}」({top_flag['grade']}등급 · {top_flag['prescription']})"
-            if top_flag
-            else "최근 적발 대기 건 없음"
-        )
-        colleague_note = ""
-        if prior_replies:
-            prev_who = AGENT_MAP.get(prior_replies[-1].get("who", ""), {}).get("name", "동료")
-            colleague_note = f"\n• **품질 감사 협업 의견**: 앞서 `@{prev_who}`가 보고한 안건과 관련하여, 신규 원고 투입 및 색인 요청 전 더미 URL(`index-rescue-*`)이나 도메인 주제 이탈 글이 섞이지 않도록 사전 품질 필터링을 동시에 적용하겠습니다."
-        return (
-            f"• **기존 글 품질 감사·세탁 결과**: 전체 `{d['totalInventory']:,}건` 중 누적 **`{d['auditedCount']}건({d['progressPct']}%)`** 검진을 완료했으며, 등급 분포는 `🟢A {gc.get('A',0)}건` · `🔵B {gc.get('B',0)}건` · `🟡C {gc.get('C',0)}건` · `🔴D(격리) {gc.get('D',0)}건`입니다.\n"
-            f"• **최근 자동 세탁 및 처방 내역**: 구버전 카테고리 자동 교정 `{d['categoryPatchedCount']}건` 완료, 최근 중점 조치 대상은 {flag_str}입니다.{colleague_note}{badges_str}"
-        )
-
-    if slug == "publi":
-        d = read_publi_data()
-        t_verified = sum(1 for s in d["naverTodaySlots"] if "🟢" in s["status"])
-        t_reserved = sum(1 for s in d["naverTodaySlots"] if "🔵" in s["status"])
-        tmr_reserved = sum(1 for s in d["naverTomorrowSlots"] if "🔵" in s["status"] or "🟢" in s["status"])
-        kp = d["kinProgress"]
-        tp = d["threadsProgress"]
-        colleague_note = ""
-        if prior_replies and any("IndexNow" in str(pr.get("text", "")) or "색인" in str(pr.get("text", "")) for pr in prior_replies):
-            colleague_note = (
-                "\n• **발행·색인 연계**: 네이버 서치어드바이저(IndexNow) 색인 대상인 **16개 CF 외부 도메인**의 신규 원고 발행 직후 `@트레이스`의 IndexNow 자동 제출이 즉시 이어지도록 파이프라인 훅을 유지하고, 네이버 블로그 5개 채널은 7슬롯 공개·예약 스케줄대로 별도 관리하겠습니다."
-            )
-        return (
-            f"• **네이버·CF 발행 현황**: 오늘({d['todayDate']}) 네이버 7슬롯 중 공개확인 `{t_verified}건`·예약대기 `{t_reserved}건`(내일 예약 `{tmr_reserved}/7건`), CF 16개 도메인 오늘 `{d['cfPublishedCount']}/{d['cfTotalCount']}건` 발행 완료했습니다.\n"
-            f"• **지식iN & Threads 가동 현황**: 지식iN 오늘 공개 완료 `{kp['totalDone']}/{kp['dailyCap']}건`(`adinfo0905` {kp['adinfo0905Done']}/10 · `stone0747` {kp['stone0747Done']}/10), Threads `{tp['done']}/{tp['dailyCap']}건` 진행 중입니다.{colleague_note}{badges_str}"
-        )
-
-    if slug == "trace":
-        d = read_trace_data()
-        extra_verify = ""
-        for t in executed_tools:
-            if t.get("tool") == "verify_domain_index":
-                extra_verify = f"\n• **실시간 도메인 점검(`{t['domain']}`)**: `sitemap.xml` HTTP `{t['sitemapStatus']}`(URL `{t['sitemapUrlCount']}개`), `rss.xml` HTTP `{t['rssStatus']}`, 메타 robots=`{t['metaRobots']}` 정상 확인했습니다."
-        return (
-            f"• **GA4 트래픽 & 애드센스 수익**: 최근 7일 통합 `{d['ga4Last7DaysSessions']}세션`(PV `{d.get('ga4Last7DaysPageViews', 0)}회`, 네이버 브릿지 유입 `{d.get('ga4Last7DaysNaverRef', 0)}세션`), 애드센스 최근 7일 `${d['adsenseLast7DaysUsd']}`로 집계되었습니다.\n"
-            f"• **16개 CF 외부 도메인 네이버 IndexNow & 구글 색인 현황**: 전체 인벤토리 `{d['cfTotalInventoryPosts']}건` 중 네이버 서치어드바이저(IndexNow) `{d.get('naverIndexNowSubmittedDomains', 16)}/16개` 도메인(`{d.get('naverIndexNowSubmittedUrls', 1256)}건` 미색인 URL HTTP 200) 제출 완료, 구글 사이트맵 `{d.get('googleSitemapSubmittedDomains', 16)}/16개` 정상 제출 및 GSC 색인 확인 `{d['gscIndexVerifiedPosts']}건`입니다.{extra_verify}{badges_str}"
-        )
-
-    if slug == "patch":
-        d = read_patch_data()
-        ports_line = " · ".join(
-            f"`{p['port']}({p['account']})`:{'🟢ON' if p['open'] else '🔴OFF'}"
-            for p in d["cdpPorts"]
-        )
-        lg = d["routingLedgerRecent20"]
-        from common.routing_ledger import format_routing_summary
-        return (
-            f"• **전용 브라우저 CDP 포트 상태**: {ports_line}\n"
-            f"• **라우팅 원장**: {format_routing_summary(lg)}. 이 집계만으로 현재 워커·스케줄러 정상 여부나 코드 수리 완료를 판단하지 않습니다.{badges_str}"
-        )
-
-    pub_d = read_publi_data()
-    tr_d = read_trace_data()
-    doc_d = read_doctor_data()
-    return (
-        f"• **전사 운영 종합**: CF `{pub_d['cfPublishedCount']}/16건` 발행·네이버 7슬롯 가동 중, 지식iN `{pub_d['kinProgress']['totalDone']}/20건`·Threads `{pub_d['threadsProgress']['done']}/4건` 진행 중입니다.\n"
-        f"• **색인·품질 감사**: CF 총 `{tr_d['cfTotalInventoryPosts']}건` 중 네이버 IndexNow `{tr_d.get('naverIndexNowSubmittedDomains', 16)}/16개` 도메인 제출 및 GSC 색인 `{tr_d['gscIndexVerifiedPosts']}건` 확인, `@닥터` 누적 `{doc_d['auditedCount']}/{doc_d['totalInventory']:,}건` 품질 감사를 완료했습니다.{badges_str}"
-    )
 
 
 def _is_llm_reply_polluted(slug: str, llm_out: str, has_url: bool) -> bool:
@@ -1536,6 +1424,9 @@ def synthesize_agent_reply(
     )
 
     agent_live_block = get_agent_live_context(slug, user_text)
+    if slug == 'jarvis':
+        agent_live_block = json.dumps(_question_project_context(clean_q), ensure_ascii=False)
+        agent_live_block += '\n대표님의 질문 대상과 이유부터 답하라. 다른 채널의 실적 나열로 대신하지 말고 관측 원인과 미확인 가설을 구분하라.'
     isolated_history_block = _get_isolated_agent_history(slug, recent_history)
 
     tools_result_block = ""
@@ -1612,11 +1503,12 @@ def synthesize_agent_reply(
     # =========================================================================
     # [Step 3: 대표님의 질문 의도에 맞춘 진짜 답변 생성 + status_only 사칭 차단 필터]
     # =========================================================================
-    llm_timeout = 35.0 if has_url else 22.0
+    llm_timeout = 120.0
     llm_out = _call_chat_llm(sys_prompt, user_prompt, timeout_sec=llm_timeout, agent_slug=slug,
         staff_request_id=staff_request_id, dispatch_receipts=executed_tools,
         allow_guarded_repair=bool(re.search(r'수리해|복구해|고쳐|정상화|해결|repair', user_text, re.I))
-            and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t', user_text, re.I)))
+            and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t', user_text, re.I)),
+        allow_project_cycle=_project_cycle_requested(user_text))
 
     if slug == 'jarvis' and is_imperative and not any(t.get('tool') == 'staff_dispatch' for t in executed_tools):
         executed_tools.append({'tool':'staff_dispatch','status':'dispatch_unmatched',
@@ -2284,12 +2176,24 @@ def project_work_event(payload):
         raise ValueError('Observed timestamp required')
     phase = payload['phase']
     summary = f"{clean['stage'] or '작업'}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다."
+    ceo = {}
+    if clean['stage'] == 'ceo-result-review':
+        if clean['who'] != 'jarvis' or not re.fullmatch(r'staff:[a-f0-9]{64}',clean['taskId']):
+            raise ValueError('Invalid CEO result review')
+        request_path = CHATS_DIR/'staff-requests'/(clean['taskId'][6:]+'.json')
+        request = json.loads(request_path.read_text(encoding='utf-8'))
+        review = request.get('ceoReview') or {}
+        turn = review.get('userTurnId','')
+        if (request.get('taskId') != clean['taskId'] or not re.fullmatch(r'msg-\d+-user',turn)
+                or request.get('requestId') != turn+':jarvis' or review.get('reply') != clean['outputKind']):
+            raise ValueError('CEO review does not match original request')
+        ceo = {'replyToCeo':True,'userTurnId':turn,'isWorkstream':False}
     return {**clean, 'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
             'phase':phase,'ts':ts,'text':summary,'autonomous':True,'msgKind':'workstream','deliverableUrl':address,
             'isWorkstream':True,'replyToCeo':False,'reportContext':context,
             'brain':{'badge':clean['modelBadge'] or (clean['model']+' · 추론 미기록' if clean['model'].startswith(('gpt-','o3','o4')) else clean['model']) or '모델 미관측'},
             'taskTracker':{'status':'failed' if phase == 'failed' else 'status_only',
-                           'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':(clean['deliverableLabel'] or '게시 글 확인') if address else ''}}
+                           'step':summary,'resultSummary':summary,'synapseLinked':False,'deliverableUrl':address,'deliverableLabel':(clean['deliverableLabel'] or '게시 글 확인') if address else ''}, **ceo}
 
 
 def receive_work_event(payload):

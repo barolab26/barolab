@@ -158,3 +158,24 @@ class ThreadsScreenTests(unittest.TestCase):
         self.assertNotIn('_threads_adapter_submit_part',inspect.getsource(ScreenAdapter))
 
 if __name__=='__main__':unittest.main()
+
+class EmptyInlineReplyTests(unittest.TestCase):
+    def test_default_empty_reply_is_not_a_draft_but_real_composers_are_preserved(self):
+        import subprocess
+        from common.threads_screen import existing_draft
+        page=Mock()
+        expression=[]
+        page.locator.return_value.evaluate_all.side_effect=lambda source:expression.append(source) or False
+        self.assertFalse(existing_draft(page))
+        code="""const assert=require('node:assert/strict');
+        const hasDraft=eval('('+process.argv[1]+')');
+        const editor=(text,visible,dialog)=>({innerText:text,getClientRects:()=>visible?[{}]:[],closest:()=>dialog?{}:null});
+        assert.equal(hasDraft([]),false);
+        assert.equal(hasDraft([editor('',true,false)]),false);
+        assert.equal(hasDraft([editor('  \\n',true,false)]),false);
+        assert.equal(hasDraft([editor('',true,true)]),true);
+        assert.equal(hasDraft([editor('사용자 원고',true,false)]),true);
+        assert.equal(hasDraft([editor('숨겨진 원고',false,false)]),true);
+        """
+        result=subprocess.run(['node','-e',code,expression[0]],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)

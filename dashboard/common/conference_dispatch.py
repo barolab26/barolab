@@ -24,12 +24,12 @@ def request(kind, arguments):
     with locked(QUEUE):
         row = load(path)
         if row.get('status') in ('queued', 'running'):
-            return {'status': 'conference_pending', 'agendaId': key}
+            return {'status': 'conference_pending', 'agendaId': key, 'requestedAt':row['requestedAt']}
         if time.time() < row.get('retryAt', 0):
-            return {'status': 'conference_retry_wait', 'agendaId': key}
+            return {'status': 'conference_retry_wait', 'agendaId': key, 'requestedAt':row['requestedAt']}
         row = {'agendaId': key, 'kind': kind, 'arguments': arguments, 'status': 'queued', 'requestedAt': time.time()}
         write(path, row)
-    return {'status': 'conference_requested', 'agendaId': key}
+    return {'status': 'conference_requested', 'agendaId': key, 'requestedAt':row['requestedAt']}
 
 
 def process_once():
@@ -168,6 +168,23 @@ def report_outcome(receipt, task_id, context=None):
     return facts
 
 
+def conference_failure_reason(exc):
+    """Retain a safe actionable cause rather than only the outer RuntimeError."""
+    for _ in range(8):
+        message = str(exc)
+        if isinstance(exc, TimeoutError) or '응답 시간 제한' in message:
+            return 'model_timeout'
+        if 'AGY CLI 모델·구조화 응답 확인 실패' in message:
+            return 'model_response_invalid'
+        if 'duplicate submission prevented' in message:
+            return 'duplicate_submission_prevented'
+        if message in ('threads_web_login_required','threads_readiness_incomplete','threads_existing_draft_preserved','threads_uncertain_submission_tab_preserved'):
+            return message
+        exc = exc.__cause__
+        if exc is None:break
+    return 'execution_error'
+
+
 def work(identity):
     if len(identity) != 64 or any(c not in '0123456789abcdef' for c in identity):
         raise ValueError('Invalid agenda identity')
@@ -196,13 +213,20 @@ def work(identity):
             for key in ('date', 'account', 'slot'):
                 if a.get(key): argv += ['--'+key, a[key]]
             result = main(argv, conference_worker=True)
+            if isinstance(result,dict):
+                row['eligibility'] = {k:result[k] for k in ('state','status','reason','owner') if k in result}
             receipts = result if isinstance(result, list) else [result]
         else:
             engine = install_channel_conferences(row['kind'])
-            if row['kind'] == 'kin': engine.main(['--tick', '--scheduled'])
+            if row['kind'] == 'kin':
+                engine.main(['--tick', '--scheduled'])
+                state = load(ROOT/'dashboard/data/kin-automation-state.json')
+                row['eligibility'] = {k:state.get(k) for k in ('reason','cadenceState','nextEligibleAt','globalRemainingRuns','submissionCounts')}
             else:
                 engine._conference_agenda = row['arguments'].get('topic', '')
-                engine._threads_scheduler_tick()
+                dispatch = engine._threads_scheduler_tick()
+                if isinstance(dispatch,dict):
+                    row['eligibility'] = {k:dispatch[k] for k in ('state','status','reason') if k in dispatch}
             receipts = engine._conference_results
         row['outcomes'] = []
         for receipt in receipts:
@@ -214,7 +238,8 @@ def work(identity):
                 row['reportErrorType'] = type(exc).__name__
         row.update(status='completed', completedAt=time.time(), retryAt=time.time()+60)
     except Exception as exc:
-        row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300)
+        row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300,
+                   failureReason=conference_failure_reason(exc))
         try:
             failure_context = {**context, **(getattr(locals().get('engine'), '_conference_context', {}) or {})}
             row['failureReport'] = report_outcome({'errorType':type(exc).__name__, 'reason':str(exc) if str(exc) in ('threads_web_login_required','threads_readiness_incomplete') else None}, 'conference:'+identity[:24], failure_context)

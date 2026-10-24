@@ -116,7 +116,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         def observe(provider, requested_model, state, **metadata):
             if state=='returned':routes.append({'provider':provider,'model':metadata.get('actual_model')})
         value=generate_json('회의실 message는 한국어 1~2문장, 110자 이내로 완결하고 마침표로 끝내라. 과장·더미 진행 보고는 금지한다.\n'+prompt,provider=brain['provider'],model_override=brain['model'],
-            observer=observe,agent_slot=role,memory_read_only=True,timeout_seconds=45,crew_actor=role,
+            observer=observe,agent_slot=role,memory_read_only=True,timeout_seconds=120,crew_actor=role,
             crew_actor_label={'radar':'레이더','jarvis':'팀장','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터'}[role],crew_task_id=task,crew_stage='post-style-planning',
             response_schema={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False},
             audit_directory=folder/'model-audit'/('strategy-'+role))

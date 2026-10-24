@@ -26,6 +26,15 @@ def run_project_cycle(project):
     config = json.loads(CONFIG.read_bytes())
     if config.get('enabled') is not True or project not in config.get('projects', []) or (Path.home()/'EGO_EXEC_DISABLED').exists():
         return {'ok': False, 'status': 'held', 'reason': 'execution_disabled'}
+    if project in ('cf_blog','naver_blog','naver_kin','threads'):
+        from common.conference_dispatch import request
+        kind = {'naver_kin':'kin','threads':'threads'}.get(project,'parameters')
+        arguments = ({'action':'cf-cycle' if project=='cf_blog' else 'naver-cycle',
+                      'date':None,'account':None,'slot':None} if kind=='parameters' else {})
+        receipt = request(kind, arguments)
+        return {'ok':True, 'status':'awaiting_completion', 'project':project,
+                'conferenceAgendaId':receipt['agendaId'], 'conferenceRequestedAt':receipt['requestedAt'],
+                'publicationVerified':False}
     command = COMMANDS[project]
     marker = ' '.join(command[1:]) if command[0]=='-m' else str(ROOT/command[0])
     if is_process_running_match(marker):
@@ -98,6 +107,34 @@ def recover_project_work(project, work_id):
 
 def terminal_result(result):
     """Read only the exact registered child; exit zero is not publication proof."""
+    if result.get('conferenceAgendaId'):
+        from common.conference_dispatch import QUEUE
+        identity = result['conferenceAgendaId']
+        if not isinstance(identity,str) or not re.fullmatch(r'[0-9a-f]{64}',identity):
+            raise ValueError('Invalid conference receipt')
+        path = QUEUE / (identity + '.json')
+        if path.is_symlink():raise ValueError('Unregistered conference receipt')
+        raw = path.read_bytes(); receipt = json.loads(raw)
+        expected = {'cf_blog':'parameters','naver_blog':'parameters','naver_kin':'kin','threads':'threads'}.get(result.get('project'))
+        if not expected or receipt.get('agendaId') != identity or receipt.get('kind') != expected:
+            raise ValueError('Conference identity mismatch')
+        if expected == 'parameters' and receipt.get('arguments',{}).get('action') != ('cf-cycle' if result['project']=='cf_blog' else 'naver-cycle'):
+            raise ValueError('Conference channel action mismatch')
+        if receipt.get('requestedAt') != result.get('conferenceRequestedAt'):
+            return {'ok':False, 'status':'unknown', 'project':result['project'],
+                    'publicationVerified':False, 'reason':'conference_receipt_superseded'}, receipt
+        if receipt.get('status') in ('queued','running'):return None
+        outcomes = receipt.get('outcomes') or []
+        status = 'failed'
+        if receipt.get('status') == 'completed':
+            verified = [row.get('publicationVerified') is True or row.get('reservationVerified') is True for row in outcomes]
+            status = 'no_work' if not outcomes else 'completed' if all(verified) else 'partial' if any(verified) else 'unknown'
+        return {'ok':status in ('completed','no_work'), 'status':status,
+                'project':result['project'], 'conferenceAgendaId':identity,
+                'publicationVerified':any(row.get('publicationVerified') is True for row in outcomes),
+                'outcomes':outcomes, 'eligibility':receipt.get('eligibility'),
+                'errorType':receipt.get('errorType'), 'reason':receipt.get('failureReason'),
+                'controllerEvidenceSha256':hashlib.sha256(raw).hexdigest()}, receipt
     from server.agent_tools import EGO_PROCESS_DIR
     path = Path(result['receiptPath'])
     if (path.name != 'receipt.json' or path.is_symlink() or path.parent.is_symlink()

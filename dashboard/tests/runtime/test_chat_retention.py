@@ -47,7 +47,7 @@ class ChatRetentionTests(unittest.TestCase):
             self.assertEqual(scope[name](), 'cached projection')
             self.assertIs(cache.get.call_args.args[1], scope[builder])
 
-    def test_one_settings_read_per_employee_per_room_snapshot(self):
+    def test_historical_messages_do_not_borrow_current_model_settings(self):
         tree = ast.parse((Path(__file__).resolve().parents[2] / 'agents/chat_room.py').read_text())
         node = next((n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == '_enrich_legacy_message'))
         reads = []
@@ -61,8 +61,12 @@ class ChatRetentionTests(unittest.TestCase):
         brains = {}
         for index, row in enumerate(messages):
             scope['_enrich_legacy_message'](row, index, messages, brains)
-        self.assertEqual(sorted(reads), ['jarvis', 'publi'])
-        self.assertTrue(all((row['brain']['model'] == 'current-assigned-model' for row in messages)))
+        self.assertEqual(reads, [])
+        self.assertTrue(all(row['brain'] == {'badge':'모델 미기록'} for row in messages))
+        saved={'id':'saved','who':'jarvis','text':'old reply','brain':{'model':'recorded-model','badge':'recorded-model · High'},'taskTracker':{}}
+        scope['_enrich_legacy_message'](saved,0,[saved],brains)
+        self.assertEqual(saved['brain']['model'],'recorded-model')
+        self.assertEqual(reads, [])
 
     def test_old_transport_events_are_archived_but_conversations_remain(self):
         with tempfile.TemporaryDirectory() as folder:

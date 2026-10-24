@@ -118,6 +118,13 @@ def verify_reply_context(page,dialog,parent):
         raise ValueError('threads_visible_reply_parent_unverified')
 
 
+def existing_draft(page):
+    """A default empty inline reply box is not a user draft."""
+    return page.locator('[contenteditable="true"]').evaluate_all("""els=>els.some(e=>
+        (e.innerText||'').trim().length>0 ||
+        (e.getClientRects().length>0 && !!e.closest('[role="dialog"]')))""") is True
+
+
 def completed_draft(page,part,folder):
     """Resume only this task's fully typed, never-submitted browser draft."""
     editors=page.locator('[role="dialog"] [contenteditable="true"]')
@@ -163,8 +170,9 @@ class ScreenAdapter:
                 raise ValueError('threads_parent_identity_unverified')
         with session(for_submission=True) as page:
             if not web_identity(page):raise RuntimeError('threads_web_login_required')
-            resume=completed_draft(page,part,folder.parent) if page.locator('[contenteditable="true"]').count() else None
-            if page.locator('[contenteditable="true"]').count() and not resume:raise RuntimeError('threads_existing_draft_preserved')
+            protected=existing_draft(page)
+            resume=completed_draft(page,part,folder.parent) if protected else None
+            if protected and not resume:raise RuntimeError('threads_existing_draft_preserved')
             if not resume:
                 target='https://www.threads.com/@'+ACCOUNT
                 if parent:target=parent['permalink']
