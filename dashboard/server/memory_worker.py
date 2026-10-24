@@ -16,6 +16,7 @@ def main():
     from server.project_monitor import sample_project_health_once
     from server.agent_tools import process_staff_request_once
     from common.project_autonomy import process_project_autonomy_once
+    from agents.crew_reasoning import resume_once as resume_crew_goal
     from dashboard.agents.synapse import refresh_once
     from dashboard.agents.style_strategy import review_once
     from common.conference_dispatch import process_once as process_conferences
@@ -39,7 +40,7 @@ def main():
     # Observation remains responsive while bounded model calls or learning run.
     observers = [
         threading.Thread(target=loop, args=([sample_project_health_once, refresh_once], 30), name='project-observer'),
-        threading.Thread(target=loop, args=([process_staff_request_once], 5), name='staff-executor'),
+        threading.Thread(target=loop, args=([process_staff_request_once, resume_crew_goal], 5), name='staff-executor'),
         threading.Thread(target=loop, args=([process_project_autonomy_once], 30), name='project-autonomy'),
     ]
     for worker in observers:

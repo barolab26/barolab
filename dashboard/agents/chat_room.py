@@ -1349,6 +1349,13 @@ def synthesize_agent_reply(
     [Step 3] Generate a genuine, context-aware answer tailored to the user's intent, guarded by `_enforce_status_only_guard`.
     """
     clean_q = re.sub(r"@\S+", "", user_text).strip()
+    if staff_request_id and slug in AGENT_MAP:
+        from agents.crew_reasoning import reason_request
+        repair=bool(re.search(r'수리해|복구해|고쳐|정상화|해결|repair',user_text,re.I)) and not bool(re.search(r'하지\s*마|하지\s*말|금지|do not|don.t',user_text,re.I))
+        goal=reason_request(staff_request_id,user_text,execute=_project_cycle_requested(user_text),repair=repair,lead=slug)
+        text=goal.get('answer') or goal.get('waitingMessage') or '질문에 대한 자료 확인과 직원 협의를 이어가고 있습니다. 실제 도구 결과를 검토한 최종 판단을 같은 질문에 연결해 보고합니다.'
+        return text, [], [{'tool':'crew_goal','goalId':goal['id'],'status':goal['status'],'plan':goal.get('plan',[]),'activeActor':goal.get('actor'),
+                           'route':{} if not (goal.get('answer') or goal.get('waitingMessage')) or goal.get('answerSource')=='host' else goal.get('leadRoute',{}),'state':'원래 목표·계획·실제 도구 결과를 보존하며 판단을 이어갑니다.'}]
     artifacts = [m["rel"] for m in recalled[:1] if "llo6ctmxdac" not in str(m.get("rel", "")).lower()] if not is_followup else []
 
     # =========================================================================
@@ -2338,6 +2345,50 @@ def project_channel_cycle_messages(messages):
     return projected
 
 
+@chat_router.post('/goal-result')
+def receive_goal_result(payload: Dict[str, Any]):
+    from agents.crew_reasoning import goal_path
+    from common.collection_observability import load
+    try:goal=load(goal_path(payload.get('goalId','')))
+    except ValueError:raise HTTPException(400,'Invalid goal identity') from None
+    index=payload.get('decisionIndex')
+    note=None
+    if index is not None:
+        if type(index) is not int:raise HTTPException(400,'Invalid decision identity')
+        note=next((n for n in goal.get('discussion',[]) if n.get('id')==index),None)
+        if not note:raise HTTPException(409,'Decision was not recorded')
+    elif goal.get('status') not in ('answered','blocked') or not goal.get('answer'):
+        raise HTTPException(409,'Goal has no terminal answer')
+    with _ROOM_LOCK:
+        room=load_room_data()
+        user=next((m for m in room.get('messages',[]) if m.get('id')==goal.get('userTurnId') and m.get('who')=='user'),None)
+        automatic=goal.get('origin')=='project-monitor' and goal.get('requestId','').startswith('project-agent:project-incident:')
+        if not automatic and (not user or user['text']!=goal['goal']):raise HTTPException(409,'Original CEO turn is not in this meeting')
+        from common.llm_settings import format_brain_badge
+        route=note['route'] if note else {} if goal.get('answerSource')=='host' else (goal.get('leadRoute') or {})
+        brain={**route,'badge':format_brain_badge(route['provider'],route['model'],route.get('reasoningEffort'))} if route.get('model') else {'provider':'host','badge':'실행 제어 알림'}
+        identity=('goal-step-'+goal['id']+'-'+str(index)) if note else 'goal-result-'+goal['id']
+        if any(m.get('id')==identity for m in room.get('messages',[])):return {'ok':True,'messageId':identity}
+        actor=note['actor'] if note else goal.get('leadActor','jarvis')
+        message={'id':identity,'who':actor,'text':note['text'] if note else goal['answer'],'ts':note['ts'] if note else int(time.time()*1000),
+            'isWorkstream':False,'replyToCeo':note is None and not automatic,'userTurnId':goal['userTurnId'] if not automatic else '', 'autonomous':automatic,'brain':brain,
+            'goalId':goal['id'],'taskTracker':{'status':'processing' if note else 'completed' if goal['status']=='answered' else 'failed',
+            'step':'조사·직원 협의·실제 도구 결과 검토','resultSummary':'판단 진행' if note else '원래 질문에 대한 최종 판단'}}
+        append_or_update_room_message(message)
+        if user:_append_agent_direct_thread(actor,user,message)
+    return {'ok':True,'messageId':identity}
+
+
+@chat_router.get('/goals/{identity}')
+def get_crew_goal(identity: str):
+    from agents.crew_reasoning import goal_path
+    from common.collection_observability import load
+    try:row=load(goal_path(identity))
+    except ValueError:raise HTTPException(400,'Invalid goal identity') from None
+    if not row:raise HTTPException(404,'Unknown goal')
+    return {k:row.get(k) for k in ('id','userTurnId','goal','status','plan','discussion','decisions','lastLeadMessage','answer','nextCheckAt','createdAt','updatedAt')}
+
+
 @chat_router.get("/room")
 def get_chat_room():
     return _ROOM_READ_CACHE.get('room', _build_chat_room)
@@ -2446,6 +2497,7 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
     delegation_limit = bool(room.get("delegationLimit", True))
     now_ms = int(time.time() * 1000)
     speakers = parse_mentioned_agents(text, delegation_limit=delegation_limit)[:2]
+    if speakers:speakers=speakers[:1]  # The goal owner chooses further colleagues from actual evidence.
 
     user_msg = {
         "id": f"msg-{now_ms}-user",
@@ -2499,7 +2551,7 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
                 is_followup=(idx > 0),
                 prior_replies=turn_replies,
                 recent_history=prior_history,
-                staff_request_id=user_msg['id'] + ':jarvis',
+                staff_request_id=user_msg['id'] + ':' + slug,
             )
         from common.crew_chat_bridge import last_model_route
         route=last_model_route()
@@ -2539,6 +2591,17 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
             tracker_status = 'queued' if dispatch_tool['status'] == 'queued' else 'status_only'
             result_summary = dispatch_tool['state']
 
+        goal_tool=next((tool for tool in executed_tools if tool.get('tool')=='crew_goal'),None)
+        if goal_tool:
+            tracker_status='completed' if goal_tool['status']=='answered' else 'failed' if goal_tool['status']=='blocked' else 'processing'
+            result_summary=goal_tool['state']
+            current=AGENT_MAP.get(goal_tool.get('activeActor'),{})
+            task_info={**task_info,'step':(goal_tool.get('plan') or ['원래 목표에 따른 조사·판단'])[0],
+                       'handoff':'공유 목표와 실제 관측을 이어받아 판단','nextAssignee':current.get('name')}
+            actual=goal_tool.get('route') or {}
+            from common.llm_settings import format_brain_badge
+            brain={**actual,'badge':format_brain_badge(actual['provider'],actual['model'],actual.get('reasoningEffort'))} if actual.get('model') else {'provider':'host','badge':'진행 제어'}
+
         completed_msg: Dict[str, Any] = {
             "id": msg_id,
             "who": slug,
@@ -2567,7 +2630,12 @@ def _stream_sequential_chat_turns(text: str, include_reaction_round: bool = Fals
                 "synapseLabel": "",
             },
         }
+        if goal_tool:completed_msg['goalId']=goal_tool['goalId'];completed_msg['taskTracker']['goalId']=goal_tool['goalId']
         append_or_update_room_message(completed_msg)
+        if goal_tool and goal_tool['status'] in ('answered','blocked'):
+            from agents.crew_reasoning import goal_path
+            from common.collection_observability import load,write
+            path=goal_path(goal_tool['goalId']);saved=load(path);saved['delivered']=True;write(path,saved)
         _append_agent_direct_thread(slug, user_msg, completed_msg)
         yield f"event: message\ndata: {json.dumps(completed_msg, ensure_ascii=False)}\n\n"
         turn_replies.append(completed_msg)
