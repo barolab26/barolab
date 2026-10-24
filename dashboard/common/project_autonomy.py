@@ -92,7 +92,12 @@ def recover_project_work(project, work_id):
         if prior:
             if prior.get('project')!=project:raise ValueError('Recovery project identity mismatch')
             agenda=load(QUEUE/(prior['conference']['agendaId']+'.json'))
-            if prior.get('attempts',1)>=2 or agenda.get('status')!='failed' or agenda.get('retryAt',float('inf'))>time.time():
+            if agendas.enabled():
+                current=agendas.require(project=project)
+                # The exact conference owns submission attempts; old recovery counters counted requests.
+                native_retry=(agenda.get('businessAgendaId')==current['id'] and agenda.get('status')=='failed' and agenda.get('attempts',1)<2)
+            else:native_retry=False
+            if not native_retry and (prior.get('attempts',1)>=2 or agenda.get('status')!='failed' or agenda.get('retryAt',float('inf'))>time.time()):
                 return completion_receipt(prior)
         target=next((t for t in recoverable_work(project) if t['workId']==work_id),None)
         if target is None:
@@ -104,10 +109,12 @@ def recover_project_work(project, work_id):
         if agendas.enabled() and agenda.get('status')=='conference_failed':
             from common.conference_dispatch import retry_active
             retry_active()
+        attempts=(load(QUEUE/(agenda['agendaId']+'.json')).get('attempts',1) if agendas.enabled()
+                  else prior.get('attempts',1)+1 if prior else 1)
         result={'ok':True,'status':'requested','project':project,'workId':work_id,
                 'account':target['identity'],'date':target['date'],'slot':target['slot'],
                 'conference':agenda,'publicationVerified':False,'requestedAt':time.time(),
-                'attempts':prior.get('attempts',1)+1 if prior else 1,
+                'attempts':attempts,
                 'attemptHistory':(prior.get('attemptHistory',[])+[{k:prior[k] for k in ('conference','requestedAt')}]) if prior else []}
         write(path,result)
         return completion_receipt(result)

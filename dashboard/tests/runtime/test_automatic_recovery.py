@@ -109,3 +109,31 @@ def test_resource_recheck_uses_availability_changes_not_usage_drip_or_timestamps
     snapshot(None,3);assert resource_availability(tmp_path)['agy']['groups']['Gemini'] is None
     snapshot(0,4);assert resource_availability(tmp_path)['agy']['groups']['Gemini'] is False
     snapshot(100,5);assert resource_availability(tmp_path)['agy']['groups']['Gemini'] is True
+
+
+@pytest.mark.parametrize('native_status,native_attempts,expected_calls',[
+    ('failed',1,1),('failed',2,0),('unknown',1,0),('running',1,0)])
+def test_exact_native_conference_owns_retry_budget_for_legacy_recovery(tmp_path,monkeypatch,native_status,native_attempts,expected_calls):
+    from common import project_autonomy as autonomy,conference_dispatch as conferences,work_agenda as agendas
+    queue=tmp_path/'queue';queue.mkdir();state=tmp_path/'state.json';config=tmp_path/'config.json'
+    write(config,{'enabled':True,'projects':['naver_blog']})
+    monkeypatch.setattr(autonomy,'CONFIG',config);monkeypatch.setattr(autonomy,'STATE',state)
+    monkeypatch.setattr(conferences,'QUEUE',queue);monkeypatch.setattr(agendas,'enabled',lambda:True)
+    monkeypatch.setattr(agendas,'require',lambda **kwargs:{'id':'same-business'})
+    identity='a'*64;conference_id='b'*64
+    prior={'project':'naver_blog','workId':identity,'attempts':2,'requestedAt':1,
+           'conference':{'agendaId':conference_id,'status':'conference_requested'}}
+    (tmp_path/'project-work-recovery').mkdir()
+    write(tmp_path/'project-work-recovery'/f'{identity}.json',prior)
+    canonical={'status':native_status,'attempts':native_attempts,'businessAgendaId':'same-business','requestedAt':7}
+    write(queue/f'{conference_id}.json',canonical)
+    monkeypatch.setattr(autonomy,'recoverable_work',lambda project:[{'workId':identity,'date':'2026-10-25','identity':'soultin','slot':'07:40'}])
+    request=Mock(return_value={'status':'conference_failed','agendaId':conference_id,'requestedAt':7})
+    monkeypatch.setattr(conferences,'request',request)
+    def retry():write(queue/f'{conference_id}.json',{**canonical,'status':'queued','attempts':2})
+    resume=Mock(side_effect=retry);monkeypatch.setattr(conferences,'retry_active',resume)
+    result=autonomy.recover_project_work('naver_blog',identity)
+    assert resume.call_count==request.call_count==expected_calls
+    if expected_calls:
+        assert result['attempts']==2 and result['conferenceRequestedAt']==7
+        assert len(result['attemptHistory'])==1

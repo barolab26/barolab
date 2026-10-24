@@ -531,7 +531,7 @@ def recovery_watch(row):
     source=next((project_root/s[2] for s in SOURCES if s[0]==row['project']),None)
     files=['dashboard/agents/crew_reasoning.py','dashboard/agents/agent_tools.py',
            *['dashboard/common/'+name+'.py' for name in ('repair_workflow','recovery_evidence','ubuntu_naver_browser',
-              'ego_screen','kin_screen','kin_submit_repair','channel_parameters','conference_dispatch','visible_naver_editor','staff_capabilities')]]
+              'ego_screen','kin_screen','kin_submit_repair','channel_parameters','conference_dispatch','project_autonomy','visible_naver_editor','staff_capabilities')]]
     document=load(source) if source else {}
     if args.get('account') and row['project'] in ('cf_blog','naver_blog'):
         key='items' if row['project']=='cf_blog' else 'accounts'
