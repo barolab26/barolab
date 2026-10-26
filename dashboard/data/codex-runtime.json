@@ -5,33 +5,94 @@
   "models": [
     {
       "id": "gpt-6.1-sol",
-      "label": "GPT-6.1-Sol"
+      "label": "GPT-6.1-Sol",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "defaultReasoningEffort": "low"
     },
     {
       "id": "gpt-6-astra",
-      "label": "GPT-6-Astra"
+      "label": "GPT-6-Astra",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "defaultReasoningEffort": "medium"
     },
     {
       "id": "gpt-6-sol",
-      "label": "GPT-6-Sol"
+      "label": "GPT-6-Sol",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "defaultReasoningEffort": "medium"
     },
     {
       "id": "gpt-6-luna",
-      "label": "GPT-6-Luna"
+      "label": "GPT-6-Luna",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "defaultReasoningEffort": "medium"
     },
     {
       "id": "gpt-5.6-sol",
-      "label": "GPT-5.6-Sol"
+      "label": "GPT-5.6-Sol",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "defaultReasoningEffort": "low"
     },
     {
       "id": "gpt-5.6-terra",
-      "label": "GPT-5.6-Terra"
+      "label": "GPT-5.6-Terra",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "defaultReasoningEffort": "medium"
     },
     {
       "id": "gpt-5.6-luna",
-      "label": "GPT-5.6-Luna"
+      "label": "GPT-5.6-Luna",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "defaultReasoningEffort": "medium"
     }
   ],
-  "modelsFetchedAt": "2026-10-20T03:48:17.596197200Z",
-  "checkedAt": "2026-10-20T12:23:13.441886+00:00"
+  "modelsFetchedAt": "2026-10-24T07:32:01.744885219Z",
+  "checkedAt": "2026-10-24T07:33:47.721521+00:00"
 }

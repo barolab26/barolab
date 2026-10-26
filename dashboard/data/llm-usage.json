@@ -1,0 +1,1 @@
+{"date": "2026-10-26", "totalTokens": 16552048, "byModel": {"gpt-6.1-sol": 16552048}, "calls": 578, "schema": "barolab-llm-usage-v1", "scope": "codex_cli_reported_usage", "checkedAt": "2026-10-26T10:15:40.079044+09:00", "coverageStartedAt": "2026-10-26T00:07:46.125435+09:00"}

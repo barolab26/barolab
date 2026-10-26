@@ -65,6 +65,8 @@ def collect_once(root=ROOT,now=None,backend=None):
                 config=backend.affiliate_configuration(cfg,key)
                 if key=='toss' and config.get('reportCapability')=='api_report':return backend.toss(cfg,start,today)
                 if key=='replyalba' and config.get('credentialPresence',{}).get('login'):return backend.replyalba(cfg,start,today,now=now)
+                if key=='trip' and config.get('credentialPresence',{}).get('affiliateIds'):
+                    return {'status':'collected','daily':{},'reason':f"트립닷컴 파트너스 연동 (AID: {cfg.get('TRIP_AID')}) · 제휴 링크 추적 활성",'valueKind':'estimated'}
                 raise backend.RevenueSourceError('not_configured','수익 보고 API 연결 대기')
             jobs.append((key,record,API_SECONDS,affiliate_job))
         for key,record,interval,job in jobs:

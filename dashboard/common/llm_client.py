@@ -233,7 +233,7 @@ def parse_json(text):
 
 
 AGY_COOLDOWN_FILE = Path.home() / '.barolab' / 'scratch' / 'agy_cooldown.json'
-AGY_MIN_COOLDOWN_SEC = 20.0
+AGY_MIN_COOLDOWN_SEC = 4.0
 
 
 def enforce_agy_cooldown(min_interval=AGY_MIN_COOLDOWN_SEC):
@@ -325,11 +325,16 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
                      http_status=int(match.group(1)) if match else None)
         # Only an explicit exhausted-credit response permits cross-provider recovery.
         # Authentication, content/schema errors and uncertain submissions never trigger it.
-        if provider=='codex' or not re.search(r'HTTP 402\b',str(exc)):
+        is_codex_timeout = (provider == 'codex' and not images and 'exceeded its hard timeout' in str(exc))
+        is_agy_recoverable = (provider != 'codex' and (re.search(r'HTTP 402\b', str(exc)) or '시간 제한 초과' in str(exc)))
+        if not (is_codex_timeout or is_agy_recoverable):
             raise
         previous_provider,previous_model=provider,model
-        provider='codex';model=config['providers'].get('codex',{}).get('model') or 'gpt-6.1-sol'
-        effort=settings.reasoning_effort_for_call(provider,model,slot=agent_slot,data=config)
+        if is_codex_timeout:
+            provider='agy';model='gemini-2.5-pro';effort=None
+        else:
+            provider='codex';model=config['providers'].get('codex',{}).get('model') or 'gpt-6.1-sol'
+            effort=settings.reasoning_effort_for_call(provider,model,slot=agent_slot,data=config)
         call=_CURRENT.get()
         if call is not None:
             # Keep the rejected API request in its own model ledger before recording the actual retry.

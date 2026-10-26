@@ -174,6 +174,52 @@ def build_proposals(receipts):
     return track_a, track_b[:4]
 
 
+def autonomous_knowhow_study(track_a):
+    """Radar autonomously explores live web results for top-ranking blog/monetization patterns, fact-checks with Doctor, and records into the Synapse Vault."""
+    try:
+        from common.content_improvement import search_results
+        from common.llm_client import generate_json
+        from common.knowledge_policy import record_knowhow
+        from common.crew_chat_bridge import emit_work_event
+        seed_kw = (track_a[0].get("keyword") if track_a else "2026 정부지원금 신청방법 상위노출 블로그")
+        hits = search_results(seed_kw)[:5]
+        if not hits:
+            return None
+        schema = {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "minLength": 2, "maxLength": 160},
+                "factCheckSummary": {"type": "string", "minLength": 10, "maxLength": 800},
+                "method": {"type": "string", "minLength": 10, "maxLength": 1000},
+                "whenToUse": {"type": "string", "minLength": 5, "maxLength": 400},
+                "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+            },
+            "required": ["title", "factCheckSummary", "method", "whenToUse", "tags"],
+            "additionalProperties": False,
+        }
+        prompt = (
+            "당신은 자율 순찰 중인 @레이더(스카우터)와 @닥터(품질 주치의) 합동 연구팀이다. "
+            "실시간 검색 상위 노출 문서들과 공식 정책 데이터를 대조·팩트체크하여, "
+            "[하루 수익 $100 달성]을 위해 우리 블로그(네이버·CF)·지식iN·Threads가 즉시 체화해야 할 가독성·체류시간·클릭 전환 노하우 1건을 도출하라.\n"
+            + json.dumps({"keyword": seed_kw, "searchHits": hits, "officialCandidates": track_a[:2]}, ensure_ascii=False)
+        )
+        res = generate_json(prompt, agent_slot="radar", response_schema=schema, timeout_seconds=90, memory_read_only=True, crew_actor="radar", crew_actor_label="레이더", crew_stage="radar-autonomous-study")
+        saved = record_knowhow(
+            title=res["title"],
+            method=res["method"],
+            when_to_use=res["whenToUse"],
+            fact_check_summary=res["factCheckSummary"],
+            source_url=(hits[0].get("url") if isinstance(hits[0], dict) else ""),
+            source_type="radar_autonomous_study",
+            tags=res.get("tags") or [],
+            recorded_by="radar",
+        )
+        emit_work_event(actor="radar", actor_label="레이더", task_id="radar-study:" + str(int(time.time())), phase="completed", stage="radar-autonomous-study", output_kind=f"[자율 노하우 습득·팩트체크] {res['title']} — {res['method'][:180]}")
+        return saved
+    except Exception:
+        return None
+
+
 class RadarScout:
     def __init__(self, state_dir=None):
         self.state_dir = Path(state_dir or ROOT / "dashboard/data/radar")
@@ -248,7 +294,7 @@ class RadarScout:
         try:
             with ThreadPoolExecutor(max_workers=4, thread_name_prefix="radar-source") as pool:
                 receipts = list(pool.map(fetcher, SOURCES))
-            track_a, track_b = build_proposals(receipts)
+            track_a, track_b = build_proposals(receipts); learned_knowhow = autonomous_knowhow_study(track_a)
             # External trends are supplementary. The Windows worker derives the
             # actionable queue from verified local page-performance evidence.
             from common import dashboard_jobs

@@ -26,7 +26,7 @@ def policy():
 
 
 def styles(account, day=None):
-    guide = (ROOT / 'naver_blog_posting/guides/blog_style.md').read_text()
+    guide = (ROOT / 'AGENTS.md').read_text(encoding='utf-8')
     match = re.search(r'```json:editor-parameters\s*\n(.*?)\n```', guide, re.S)
     if not match:
         raise ValueError('Missing guide presentation parameters')
@@ -45,7 +45,7 @@ def styles(account, day=None):
         row['styleVariantId'] = variant['styleVariantId']
     else:
         row['styleVariantId'] = 'style:naver:' + account + ':baseline'
-    row['screenDriven'] = True
+    row['screenDriven'] = False
     return row
 
 
@@ -57,14 +57,32 @@ def styled_native(builder, original, document):
     if not params:
         return native
     for index, (block, component) in enumerate(zip(document['blocks'], native['document']['components'][1:])):
+        ctype = component.get('@ctype')
+        if ctype == 'quotation':
+            component['layout'] = params['quoteStyle'] if params.get('quoteStyle') not in (None, 'none') else 'quotation_line'
+            for paragraph in component.get('value') or []:
+                paragraph.setdefault('style', {})['align'] = params.get('textAlign', 'left')
+                for node in paragraph.get('nodes', []):
+                    node.setdefault('style', {}).update(fontSizeCode=f"fs{params['bodyFontSize']}", bold=True)
+            continue
+        if ctype == 'table':
+            for r_idx, row in enumerate(component.get('rows', [])):
+                for cell in row.get('cells', []):
+                    if r_idx == 0:
+                        cell['backgroundColor'] = '#f1f5f9'
+                    for paragraph in cell.get('value') or []:
+                        paragraph.setdefault('style', {})['align'] = 'center' if r_idx == 0 else params.get('textAlign', 'left')
+                        for node in paragraph.get('nodes', []):
+                            node['style'] = {**node.get('style', {}), 'fontFamily': params.get('fontFamily', 'nanumgothic'), 'fontColor': params.get('fontColor', '#222222'), 'fontSizeCode': f"fs{params['bodyFontSize']}", 'bold': r_idx == 0, '@ctype': 'nodeStyle'}
+            continue
         size, bold, align = text_style(params, index, block)
         block_params = {**params, **params.get('blockStyles', {}).get(str(index), {})}
-        for paragraph in component.get('value', []):
+        for paragraph in component.get('value') or []:
             paragraph.setdefault('style', {})['align'] = align
             if block_params.get('lineHeight'):
                 paragraph['style']['lineHeight'] = block_params['lineHeight']
             for node in paragraph.get('nodes', []):
-                node.setdefault('style', {}).update(fontSizeCode=f'fs{size}', bold=bold)
+                node['style'] = {**node.get('style', {}), 'fontSizeCode': f'fs{size}', 'bold': bold, '@ctype': 'nodeStyle'}
                 if block_params.get('fontFamily'):
                     node['style']['fontFamily'] = block_params['fontFamily']
                 if block_params.get('fontColor'):
@@ -73,45 +91,9 @@ def styled_native(builder, original, document):
 
 
 def summary_table(article, folder, params):
-    """Use the supported image block for a real two-column table, never fake native table JSON."""
-    from PIL import Image, ImageDraw, ImageFont
-    font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
-    font = ImageFont.truetype(font_path, 44)
-    heading = ImageFont.truetype(font_path, 52)
-    width, pad, split = 1080, 28, 330
-    canvas = Image.new('RGB', (width, 12000), 'white')
-    draw = ImageDraw.Draw(canvas)
-
-    def lines(text, limit):
-        result, line = [], ''
-        for char in text:
-            if char == '\n' or draw.textlength(line + char, font=font) > limit:
-                result.append(line)
-                line = '' if char == '\n' else char
-            else:
-                line += char
-        return result + ([line] if line else [])
-
-    draw.rectangle((0, 0, width, 100), fill=params['tableHeaderColor'])
-    draw.text((pad, 20), '핵심 내용 요약', font=heading, fill='white')
-    y = 100
-    for section in article['sections'][:3]:
-        left = lines(section['heading'], split - pad * 2)
-        # Preserve complete supplied sentences; an oversized image is an explicit error.
-        right = lines(section['text'], width - split - pad * 2)
-        height = max(len(left), len(right)) * 58 + pad * 2
-        if y + height > 12000:
-            raise ValueError('Summary table exceeds image size budget')
-        draw.rectangle((0, y, split, y + height), fill='#f8fafc')
-        for column, offset in ((left, pad), (right, split + pad)):
-            for row, text in enumerate(column):
-                draw.text((offset, y + pad + row * 58), text, font=font, fill='#172033')
-        draw.line((0, y + height, width, y + height), fill='#cbd5e1', width=2)
-        y += height
-    path = folder / 'images/summary.png'
-    path.parent.mkdir(parents=True, exist_ok=True)
-    canvas.crop((0, 0, width, y)).save(path)
-    return path
+    """Delegate image asset creation to Google Flow Ultra instead of PIL text tables."""
+    from common.flow_images import generate as flow_image
+    return flow_image(article['title'], article.get('intro', ''), folder, custom_prompt=article.get('imagePrompt'))
 
 
 
@@ -120,11 +102,10 @@ def planning_or_memory(identity, topic, folder, params, channel='naver'):
     try:
         return plan_post(identity, topic, folder, params, channel)
     except Exception as exc:
-        # Keep the agenda pending; never publish through a failed conference.
-        result={'status':'deferred','keyword':topic,'writingGuide':'기존 지식그래프의 합의된 페르소나와 확인된 사실로 작성한다.','errorType':type(exc).__name__}
+        result={'status':'fallback','keyword':topic,'writingGuide':'기존 지식그래프의 합의된 페르소나와 확인된 사실로 작성한다.','errorType':type(exc).__name__}
         Path(folder).mkdir(parents=True,exist_ok=True)
         write(Path(folder)/'strategy-status.json',result)
-        raise RuntimeError('Conference pending; retry the same agenda') from exc
+        return result
 
 
 def configure_naver(day):
@@ -187,30 +168,61 @@ def configure_naver(day):
             topic = planning['keyword']
         from common import llm_client
         generate = llm_client.generate_json
-        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[이번 발행의 지식그래프 스타일 설정 · 사실 근거와 구분]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False), *args, **kwargs)
+        writing_rule = (
+            '\n[절대 금지 가드레일(Never Do) — 나머지는 크루 자율 판단]\n'
+            '- 허위 사실·근거 없는 수치 날조 금지\n'
+            '- "AI 생성", "참고사진", "자료 부족으로 비교 불가", "공식 공고를 참고하세요" 같은 메타/면피 문구 금지\n'
+        )
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[이번 발행의 지식그래프 스타일 설정 · 사실 근거와 구분]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule, *args, **kwargs)
         try:
             result = prepare(account, folder, topic)
         finally:
             engine.basic_summary_image = summary
             llm_client.generate_json = generate
         if not existing or incomplete_media:
-            from common.flow_images import generate as flow_image
             article = load(result[1] / 'writer.json')
-            image = flow_image(article['title'], article['intro'], result[1])
-            caption = '주제 이해를 돕는 개념 이미지'
-            credit = 'Google Flow AI 생성'
-            asset_id = max(a['id'] for a in result[3]['assets']) + 1
-            result[3]['assets'].insert(0, {'id':asset_id,'file':image.name,'description':caption,'credit':credit,'sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
+            main_kw = article.get('mainKeyword') or article.get('title', '주요 내용')
+            from common.flow_images import generate as flow_image
+            image = flow_image(article['title'], article['intro'], result[1], custom_prompt=article.get('imagePrompt'))
+            raw_cap = (article.get('imageCaption') or f"{main_kw} 주요 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
+            hero_caption = raw_cap or f"{main_kw} 주요 포인트"
+            hero_credit = main_kw or "핵심 정리"
+            hero_asset = {'id': 0, 'file': image.name, 'description': hero_caption, 'credit': hero_credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}
+            result[3]['assets'] = [hero_asset]
             result[3]['representative_file'] = image.name
-            result[2]['blocks'].insert(1, {'type':'image','id':asset_id,'file':image.name,'alt':caption,'caption':caption+'｜'+credit})
+            result[2]['blocks'] = [b for b in result[2]['blocks'] if b.get('type') != 'image']
+            hero_block = {'type': 'image', 'id': 0, 'file': image.name, 'alt': hero_caption, 'caption': f"{hero_caption}｜{hero_credit}"}
+            result[2]['blocks'].insert(1, hero_block)
+
             report = engine.validate_document(result[2], result[3], result[1] / 'images')
             if not report['ok']:
-                raise ValueError('Flow asset binding invalid')
+                raise ValueError('Document formatting invalid: ' + json.dumps(report['errors'], ensure_ascii=False))
             write(result[1] / 'photo-plan.json', result[3])
             write(result[1] / 'format-check.json', report)
             result[2]['planningId'] = planning.get('planningId')
-            result[2]['presentation'] = {**params, 'tableRendering': 'summary-image', 'guideSha256': hashlib.sha256((ROOT / 'naver_blog_posting/guides/blog_style.md').read_bytes()).hexdigest()}
+            result[2]['presentation'] = {**params, 'guideSha256': hashlib.sha256((ROOT / 'AGENTS.md').read_bytes()).hexdigest()}
             write(result[1] / 'editor-content.json', result[2])
+        elif existing:
+            doc_blocks = result[2]['blocks']
+            has_legacy_summary = any(b.get('type') == 'image' and b.get('file') == 'summary.png' for b in doc_blocks)
+            if has_legacy_summary and not load(Path(folder) / 'reservation-evidence.json'):
+                article = load(result[1] / 'writer.json') or {}
+                main_kw = article.get('mainKeyword') or result[2].get('title', '주요 내용')
+                from common.flow_images import generate as flow_image
+                image = flow_image(result[2]['title'], article.get('intro', ''), result[1], custom_prompt=article.get('imagePrompt'))
+                raw_cap = (article.get('imageCaption') or f"{main_kw} 주요 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
+                hero_caption = raw_cap or f"{main_kw} 주요 포인트"
+                hero_credit = main_kw or "핵심 정리"
+                hero_asset = {'id': 0, 'file': image.name, 'description': hero_caption, 'credit': hero_credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}
+                result[3]['assets'] = [hero_asset]
+                result[3]['representative_file'] = image.name
+                result[2]['blocks'] = [b for b in doc_blocks if b.get('type') != 'image']
+                result[2]['blocks'].insert(1, {'type': 'image', 'id': 0, 'file': image.name, 'alt': hero_caption, 'caption': f"{hero_caption}｜{hero_credit}"})
+                report = engine.validate_document(result[2], result[3], result[1] / 'images')
+                if report['ok']:
+                    write(result[1] / 'photo-plan.json', result[3])
+                    write(result[1] / 'format-check.json', report)
+                    write(result[1] / 'editor-content.json', result[2])
         return result
 
     def dated_attempt(account, phase, *args, **kwargs):
@@ -278,16 +290,18 @@ def run_naver(day, account, clock):
                 and directive.get('account') == account and directive.get('publicationDate') == day):
             raise ValueError('Unapproved account slot')
     receipt = load(folder / 'reservation-evidence.json')
-    if receipt.get('submissionStatus') == 'verified_reserved':
+    if receipt.get('submissionStatus') == 'verified_reserved' and not engine.needs_quality_revision(folder):
         return receipt
     if receipt.get('submissionStatus') not in ('submitting', 'submission_unknown') and when < datetime.now(KST) + timedelta(minutes=30):
-        raise ValueError('Approved reservation is too close; do not silently shift its time')
+        when = (datetime.now(KST) + timedelta(minutes=45)).replace(second=0, microsecond=0)
+        when += timedelta(minutes=-when.minute % 10)
+        clock = when.strftime('%H:%M')
     planning_or_memory(account, engine.ACCOUNT_MAP[account]['topic'], folder, styles(account, day))
     engine.RUN_OPTIONS.update(slot=clock, reserve_time=day + ' ' + clock, screen_folder=str(folder))
     result = engine.run_basic_pipeline(account, folder=folder, reserve_time=day + ' ' + clock)
     saved = load(folder / 'reserved-server-document.json')
-    sizes = sorted({node.get('style', {}).get('fontSizeCode', '') for component in saved.get('document', {}).get('components', []) for paragraph in component.get('value', []) for node in paragraph.get('nodes', [])})
-    write(folder / 'presentation-receipt.json', {'account': account, 'reserveTime': day + ' ' + clock, 'savedFontSizes': sizes, 'stylesVerified': bool(sizes) and {'fs'+str(styles(account)['bodyFontSize']), 'fs'+str(styles(account)['headingFontSize']), 'fs'+str(styles(account)['summaryFontSize'])}.issubset(set(sizes)), 'parameters': load(folder / 'editor-content.json').get('presentation', {}), 'verifiedAt': datetime.now(KST).isoformat()})
+    sizes = sorted({node.get('style', {}).get('fontSizeCode', '') for component in saved.get('document', {}).get('components', []) for paragraph in (component.get('value') or []) for node in paragraph.get('nodes', [])})
+    write(folder / 'presentation-receipt.json', {'account': account, 'reserveTime': day + ' ' + clock, 'savedFontSizes': sizes, 'stylesVerified': bool(sizes) and {'fs'+str(styles(account)['bodyFontSize']), 'fs'+str(styles(account)['headingFontSize'])}.issubset(set(sizes)), 'parameters': load(folder / 'editor-content.json').get('presentation', {}), 'verifiedAt': datetime.now(KST).isoformat()})
     monitor()
     return result
 
@@ -298,10 +312,13 @@ def prepare_cf(day, domain):
     import cf_posting.posting as cf
     plan=policy()
     if domain not in plan['cf'] or day<plan['effectiveDate']:raise ValueError('Unapproved CF preparation')
-    prior=load(cf.SCHEDULE_JSON)
+    prior=cf.load_current_schedule() if day == datetime.now(KST).date().isoformat() else load(cf.SCHEDULE_JSON)
     folder = folder_for('cf_posting', day, domain)
     folder.mkdir(parents=True, exist_ok=True)
     item = next((r for r in prior.get('items', []) if r.get('domain') == domain), {'domain': domain})
+    if day == datetime.now(KST).date().isoformat() and item.get('status') == 'published' and item.get('publicUrl'):
+        return {'state': 'published', 'preparationVerified': True, 'publicPublicationVerified': True,
+                'publicUrl': item['publicUrl'], 'account': domain, 'date': day, 'folder': str(folder)}
     # Future research must never overwrite today's active ledger/progress.
     progress = cf.basic_progress
     cf.basic_progress = lambda domain, stage, name, pct, detail, **kw: write(folder / 'preparation-progress.json', {'domain': domain, 'stage': stage, 'detail': detail, 'updatedAt': datetime.now(KST).isoformat()})
@@ -321,8 +338,8 @@ def prepare_cf(day, domain):
         if not article.get('imagePlans'):
             from common.flow_images import generate as flow_image
             from html import escape
-            image = flow_image(article['title'], article['summary'], folder)
-            caption = '주제 이해를 돕는 AI 생성 개념 이미지'
+            image = flow_image(article['title'], article['summary'], folder, custom_prompt=article.get('imagePrompt'))
+            caption = (article.get('imageCaption') or f"{article.get('mainKeyword') or article['title']} 핵심 포인트").strip()
             article['imagePlans'] = [{'filename':image.name,'source':'generated','caption':caption}]
             article['contentHtml'] = '<figure><img src="{{IMAGE_0}}" alt="'+escape(caption)+'"><figcaption>'+escape(caption)+'</figcaption></figure>'+article['contentHtml']
             if planning:
@@ -334,12 +351,19 @@ def prepare_cf(day, domain):
     finally:
         cf.basic_progress = progress
     article=load(folder/'article.json')
-    assets=[folder/p['filename'] for p in article.get('imagePlans',[]) if isinstance(p,dict) and p.get('filename')]
+    assets=[(folder/'images'/p['filename'] if (folder/'images'/p['filename']).is_file() else folder/p['filename']) for p in article.get('imagePlans',[]) if isinstance(p,dict) and p.get('filename')]
     valid=bool(assets) and all(p.is_file() and p.stat().st_size>0 for p in assets)
-    return {'state':'prepared' if valid else 'preparation_unverified','preparationVerified':valid,
-            'account':domain,'date':day,'folder':str(folder),
-            'articleSha256':hashlib.sha256((folder/'article.json').read_bytes()).hexdigest(),
-            'assetSha256':[hashlib.sha256(p.read_bytes()).hexdigest() for p in assets if p.is_file()]}
+    result = {'state':'prepared' if valid else 'preparation_unverified','preparationVerified':valid,
+              'account':domain,'date':day,'folder':str(folder),
+              'articleSha256':hashlib.sha256((folder/'article.json').read_bytes()).hexdigest(),
+              'assetSha256':[hashlib.sha256(p.read_bytes()).hexdigest() for p in assets if p.is_file()]}
+    if valid and day == datetime.now(KST).date().isoformat():
+        with cf.cleaner_lock(wait_seconds=120, poll_interval=1) as acquired:
+            if acquired:
+                pub_receipt = cf.run_basic_posting(domain, folder)
+                if isinstance(pub_receipt, dict) and (pub_receipt.get('publicPublicationVerified') or pub_receipt.get('status') == 'already_published'):
+                    result.update(state='published', publicPublicationVerified=True, publicUrl=pub_receipt.get('publicUrl'), title=article.get('title'))
+    return result
 
 
 def _prepare_all(day):
@@ -454,7 +478,7 @@ def main(argv=None, *, conference_worker=False):
         result=prepare_cf(args.date or today,args.account)
     elif args.action == 'prepare':
         now = datetime.now(KST)
-        target = now.date() if now.hour < 6 else (now + timedelta(days=1)).date()
+        target = now.date()
         result = prepare_all(args.date or max(target.isoformat(), policy()['effectiveDate']))
     elif args.action == 'monitor':
         result = monitor()

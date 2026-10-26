@@ -264,7 +264,7 @@ def preflight(endpoint, expected_exe, expected_profile, preferred_host='flow.goo
 
 async def connect_async(playwright, endpoint, expected_exe, expected_profile, log=print):
     info = await asyncio.to_thread(preflight, endpoint, expected_exe, expected_profile, 'flow.google.com', log)
-    browser = await playwright.chromium.connect_over_cdp(info['webSocketDebuggerUrl'], timeout=20000, no_defaults=True)
+    browser = await playwright.chromium.connect_over_cdp(info['webSocketDebuggerUrl'], timeout=20000)
     if browser.contexts:
         await deny_downloads_async(browser.contexts[0])
     return browser, {key: value for key, value in info.items() if key != 'webSocketDebuggerUrl'}
@@ -272,7 +272,7 @@ async def connect_async(playwright, endpoint, expected_exe, expected_profile, lo
 
 def connect_sync(playwright, endpoint, expected_exe, expected_profile, log=print):
     info = preflight(endpoint, expected_exe, expected_profile, log=log)
-    browser = playwright.chromium.connect_over_cdp(info['webSocketDebuggerUrl'], timeout=20000, no_defaults=True)
+    browser = playwright.chromium.connect_over_cdp(info['webSocketDebuggerUrl'], timeout=20000)
     if browser.contexts and browser.contexts[0].pages:
         _deny_downloads_sync(browser.contexts[0].pages[0])
     return browser

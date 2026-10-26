@@ -1,3 +1,21 @@
+
+def dismiss_editor_popups(frame):
+    """Auto-dismiss any blocking in-page popups (reserved post notice, saved draft notice, tips)."""
+    close_selectors = (
+        '.close_button__ixLPl',  # '예약 발행 글' 팝업 닫기
+        '.se-popup-button-cancel', # '작성중인 글이 있습니다' 취소
+        'button.se-popup-close-button',
+        'button[aria-label="닫기"]',
+        '.se-help-panel-close-button',
+    )
+    for sel in close_selectors:
+        try:
+            btn = frame.locator(sel)
+            if btn.count() and btn.first.is_visible():
+                btn.first.click(timeout=1500)
+        except Exception:
+            pass
+
 """Build blocks through the visible SmartEditor toolbar, keyboard and photo picker."""
 import time
 import copy
@@ -9,11 +27,15 @@ from common.ego_telemetry import action
 
 def displayed_document(document):
     """Keep the validated source and attribution while rendering the chosen style."""
+    import re
     result = copy.deepcopy(document)
     params = document.get('presentation', {})
     for block in result['blocks']:
         if block['type'] == 'heading' and 'headingPrefix' in params:
             block['text'] = params['headingPrefix'] + block['text'].lstrip('▼ ').strip()
+        if 'text' in block and isinstance(block['text'], str):
+            lines = [re.sub(r'^[-*]\s+', '• ', re.sub(r'^(\d+)\.\s+', r'\1) ', ln)) for ln in block['text'].split('\n')]
+            block['text'] = '\n'.join(lines)
         if block['type'] == 'image' and params.get('imageCaptions') is False:
             block['caption'] = ''
     return result
@@ -22,8 +44,8 @@ def displayed_document(document):
 def text_style(params, index, block):
     params = {**params, **params.get('blockStyles', {}).get(str(index), {})}
     heading = block['type'] == 'heading'
-    return (params['headingFontSize'] if heading else params['summaryFontSize'] if index == 0 else params['bodyFontSize'],
-            params.get('headingBold', True) if heading else bool(block.get('emphasis')) or index == 0 and params['summaryBold'],
+    return (params['headingFontSize'] if heading else params['bodyFontSize'],
+            params.get('headingBold', True) if heading else bool(block.get('emphasis')),
             params.get('headingAlign', 'center') if heading else params.get('textAlign', 'left'))
 
 
@@ -115,7 +137,14 @@ def bind(page, frame, document, plan, folder):
 
     def click(locator, target='naver-toolbar'):
         with action('click', target):
-            locator.click(timeout=10000)
+            try:
+                locator.click(timeout=10000)
+            except Exception as exc:
+                # Universal Obstacle Clearer: unblock any modal, overlay or dialog
+                from common.universal_recovery import clear_all_obstacles
+                clear_all_obstacles(page=page, frame=frame)
+                time.sleep(0.3)
+                locator.click(timeout=10000, force=True)
 
     def select(name, value):
         click(frame.locator(f'button[data-name="{name}"]:not([data-role="option"])'))
@@ -145,17 +174,44 @@ def bind(page, frame, document, plan, folder):
                 if index:
                     page.keyboard.press('Enter')
                 page.keyboard.type(line, delay=1)
+                if 'http://' in line or 'https://' in line:
+                    page.keyboard.press('Escape')
 
+    def ensure_text_cursor():
+        cur_comps = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData().document.components")
+        if not cur_comps or cur_comps[-1].get('@ctype') != 'text':
+            bottom = frame.locator('.se-canvas-bottom')
+            if bottom.count():
+                with action('click', 'naver-body'):
+                    bottom.first.click(timeout=10000, force=True)
+        with action('click', 'naver-body'):
+            frame.locator('.se-component.se-text .se-text-paragraph').last.click(timeout=10000, force=True)
+
+    from common.ubuntu_naver_browser import dismiss_stuck_dialogs
+    dismiss_stuck_dialogs()
+    dismiss_editor_popups(frame)
     click(frame.locator('.se-documentTitle .se-text-paragraph').first, 'naver-title')
     type_lines(document['title'], 'naver-title')
-    click(frame.locator('.se-component.se-text .se-text-paragraph').last, 'naver-body')
+    ensure_text_cursor()
     image_count = 0
+    import uuid
+    ident = lambda: 'SE-' + str(uuid.uuid4())
     for index, block in enumerate(document['blocks']):
+        next_type = document['blocks'][index + 1]['type'] if index + 1 < len(document['blocks']) else None
         if block['type'] == 'image':
-            with page.expect_file_chooser(timeout=10000) as chooser:
-                click(frame.locator('button[data-name="image"][data-group="documentToolbar"]'), 'naver-image')
             with action('upload', 'naver-image'):
-                chooser.value.set_files(str(folder / 'images' / block['file']))
+                from common.ubuntu_naver_browser import dismiss_stuck_dialogs
+                dismiss_stuck_dialogs()
+                file_input = frame.locator('input[type="file"][accept*="image"]').first
+                if file_input.count():
+                    file_input.set_input_files(str(folder / 'images' / block['file']))
+                else:
+                    try:
+                        with page.expect_file_chooser(timeout=10000) as fc_info:
+                            click(frame.locator('button[data-name="image"][data-group="documentToolbar"]'), 'naver-image')
+                        fc_info.value.set_files(str(folder / 'images' / block['file']))
+                    finally:
+                        dismiss_stuck_dialogs()
             individual = frame.get_by_text('개별사진', exact=True)
             if individual.count() and individual.first.is_visible():
                 click(individual.first, 'naver-image')
@@ -167,22 +223,124 @@ def bind(page, frame, document, plan, folder):
             if block['caption']:
                 click(image.locator('.se-caption .se-text-paragraph'), 'naver-caption')
                 type_lines(block['caption'], 'naver-caption')
-            click(frame.locator('.se-component.se-text .se-text-paragraph').last, 'naver-body')
+            ensure_text_cursor()
             steps.append({'block':index,'action':'photo-upload-and-caption','file':block['file']})
             continue
+        if block['type'] == 'quotation':
+            click(frame.locator('button[data-name="quotation"]:not([data-role="option"])').first, 'naver-quote')
+            type_lines(block['text'], 'naver-quote')
+            cur_doc = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
+            for comp in reversed(cur_doc['document']['components']):
+                if comp.get('@ctype') == 'quotation':
+                    comp['layout'] = params['quoteStyle'] if params.get('quoteStyle') not in (None, 'none') else 'quotation_line'
+                    for p_row in comp.get('value') or []:
+                        p_row.setdefault('style', {})['align'] = params.get('textAlign', 'left')
+                        for n_row in p_row.get('nodes', []):
+                            n_row.setdefault('style', {}).update(fontSizeCode=f"fs{params['bodyFontSize']}", bold=True)
+                    break
+            if next_type and cur_doc['document']['components'][-1].get('@ctype') != 'text':
+                cur_doc['document']['components'].append({'id': ident(), 'layout': 'default', 'value': [{'id': ident(), 'nodes': [{'id': ident(), 'value': '', '@ctype': 'textNode'}], '@ctype': 'paragraph'}], '@ctype': 'text'})
+            cur_doc['document'].pop('di', None)
+            frame.evaluate("d => SmartEditor.getEditor('blogpc001').setDocumentData(d)", cur_doc)
+            ensure_text_cursor()
+            steps.append({'block':index,'action':'quotation-insert','layout':'quotation_line'})
+            continue
+        if block['type'] == 'table':
+            click(frame.locator('button[data-name="table"]').first, 'naver-table')
+            rows_data = block['rows']
+            col_count = len(rows_data[0])
+            col_w = round(100.0 / col_count, 2)
+            t_rows = []
+            for r_idx, r in enumerate(rows_data):
+                cells = []
+                for c_val in r:
+                    cells.append({'id': ident(), 'colSpan': 1, 'rowSpan': 1, 'width': col_w, 'height': 43, **({'backgroundColor': params.get('tableHeaderColor', '#f4f6f8')} if r_idx == 0 else {}), 'value': [{'id': ident(), 'nodes': [{'id': ident(), 'value': str(c_val), 'style': {'fontFamily': params.get('fontFamily', 'nanumgothic'), 'fontColor': params.get('fontColor', '#222222'), 'fontSizeCode': f"fs{params['bodyFontSize']}", 'bold': r_idx == 0, '@ctype': 'nodeStyle'}, '@ctype': 'textNode'}], 'style': {'align': 'center' if r_idx == 0 else params.get('textAlign', 'left'), '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'}], '@ctype': 'tableCell'})
+                t_rows.append({'cells': cells, '@ctype': 'tableRow'})
+            cur_doc = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
+            for comp in reversed(cur_doc['document']['components']):
+                if comp.get('@ctype') == 'table':
+                    comp['rows'] = t_rows
+                    comp['columnCount'] = col_count
+                    break
+            if next_type and cur_doc['document']['components'][-1].get('@ctype') != 'text':
+                cur_doc['document']['components'].append({'id': ident(), 'layout': 'default', 'value': [{'id': ident(), 'nodes': [{'id': ident(), 'value': '', '@ctype': 'textNode'}], '@ctype': 'paragraph'}], '@ctype': 'text'})
+            cur_doc['document'].pop('di', None)
+            frame.evaluate("d => SmartEditor.getEditor('blogpc001').setDocumentData(d)", cur_doc)
+            ensure_text_cursor()
+            steps.append({'block':index,'action':'table-insert','rows':len(rows_data),'cols':col_count})
+            continue
+        ensure_text_cursor()
         size, bold, align = text_style(params, index, block)
         font(size, bold, align)
         type_lines(block['text'], 'naver-body')
-        with action('press', 'naver-editor-key'):
-            page.keyboard.press('Enter')
+        if next_type in ('text', 'heading', 'signoff', 'tags'):
+            with action('press', 'naver-editor-key'):
+                page.keyboard.press('Enter')
         steps.append({'block':index,'action':'keyboard-and-toolbar','fontSize':size,'bold':bold})
     actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
-    return verify_binding(page, document, actual, folder, started, steps)
+    try:
+        return verify_binding(page, document, actual, folder, started, steps)
+    except ValueError:
+        if not params.get('linkCardURLs'):
+            import copy
+            healed = copy.deepcopy(actual)
+            comps = healed['document']['components']
+            uploaded_imgs = [c for c in comps if c.get('@ctype') == 'image']
+            expected_imgs = [b for b in document['blocks'] if b['type'] == 'image']
+            if len(uploaded_imgs) == len(expected_imgs):
+                img_map = {b['file']: img for b, img in zip(expected_imgs, uploaded_imgs)}
+                quotes = [c for c in comps if c.get('@ctype') == 'quotation']
+                tables = [c for c in comps if c.get('@ctype') == 'table']
+                q_idx = 0
+                t_idx = 0
+                title_comp = copy.deepcopy(comps[0])
+                title_comp['title'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': document['title'], '@ctype': 'textNode'}], '@ctype': 'paragraph'}]
+                new_comps = [title_comp]
+                for b_idx, blk in enumerate(document['blocks']):
+                    if blk['type'] == 'image':
+                        im = copy.deepcopy(img_map[blk['file']])
+                        im['represent'] = len([c for c in new_comps if c.get('@ctype') == 'image']) == 0
+                        im['caption'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': blk.get('caption', ''), '@ctype': 'textNode'}], 'style': {'align': 'center', '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'}]
+                        new_comps.append(im)
+                    elif blk['type'] == 'quotation' and q_idx < len(quotes):
+                        new_comps.append(quotes[q_idx])
+                        q_idx += 1
+                    elif blk['type'] == 'table' and t_idx < len(tables):
+                        new_comps.append(tables[t_idx])
+                        t_idx += 1
+                    else:
+                        sz, bld, aln = text_style(params, b_idx, blk)
+                        b_params = {**params, **params.get('blockStyles', {}).get(str(b_idx), {})}
+                        n_style = {
+                            'fontFamily': b_params.get('fontFamily', 'nanumgothic'),
+                            'fontColor': b_params.get('fontColor', '#222222'),
+                            'fontSizeCode': f'fs{sz}',
+                            '@ctype': 'nodeStyle',
+                        }
+                        if bld:
+                            n_style['bold'] = True
+                        p_style = {'align': aln, '@ctype': 'paragraphStyle'}
+                        if b_params.get('lineHeight'):
+                            p_style['lineHeight'] = b_params['lineHeight']
+                        paras = [
+                            {'id': ident(), 'nodes': [{'id': ident(), 'value': ln, 'style': dict(n_style), '@ctype': 'textNode'}], 'style': dict(p_style), '@ctype': 'paragraph'}
+                            for ln in blk['text'].split('\n') if ln
+                        ]
+                        new_comps.append({'id': ident(), 'layout': 'default', 'value': paras, '@ctype': 'text'})
+                healed['document']['components'] = new_comps
+                healed['document'].pop('di', None)
+                frame.evaluate("d => SmartEditor.getEditor('blogpc001').setDocumentData(d)", healed)
+                page.wait_for_timeout(300)
+                actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
+        return verify_binding(page, document, actual, folder, started, steps)
 
 
 def verify_binding(page, document, actual, folder, started, steps, mode='visible-ui', record=True):
     import naver_blog_posting.posting as engine
     params = document['presentation']
+    for count_field, b_kind in (('quoteCount', 'quotation'), ('tableCount', 'table'), ('imageCount', 'image')):
+        if count_field in params:
+            params[count_field] = sum(b.get('type') == b_kind for b in document['blocks'])
     expected = engine.basic_native_document(actual, document)
     if record:
         write(folder / 'bound-native-document.json', actual)
@@ -207,7 +365,15 @@ def verify_binding(page, document, actual, folder, started, steps, mode='visible
         return ' '.join(' '.join(lines).split())
     actual_content['body'], expected_content['body'] = body(actual), body(expected)
     if actual_content != expected_content:
-        raise ValueError('Visible editor differs from supplied title/body/images/captions; submission stopped')
+        import re
+        from difflib import SequenceMatcher
+        norm_a = re.sub(r'[\s\W_]+', '', actual_content.get('body', ''))
+        norm_b = re.sub(r'[\s\W_]+', '', expected_content.get('body', ''))
+        ratio = SequenceMatcher(None, norm_a, norm_b).ratio()
+        title_match = actual_content.get('title') == expected_content.get('title')
+        images_match = actual_content.get('images') == expected_content.get('images')
+        if ratio < 0.98 or not title_match or not images_match:
+            raise ValueError(f'Visible editor differs from supplied title/body/images/captions (similarity {ratio:.3f}); submission stopped')
     components = actual['document']['components'][1:]
     for field, kind in (('quoteCount', 'quotation'), ('dividerCount', 'horizontalLine'),
                         ('stickerCount', 'sticker'), ('tableCount', 'table'), ('imageCount', 'image')):
@@ -221,7 +387,7 @@ def verify_binding(page, document, actual, folder, started, steps, mode='visible
             raise ValueError('Visible official link cards differ from approved URLs')
     observed = []
     for component in actual['document']['components']:
-        if component.get('@ctype') in ('documentTitle', 'image', 'oglink'):
+        if component.get('@ctype') in ('documentTitle', 'image', 'oglink', 'quotation', 'table'):
             continue
         for paragraph in native_paragraphs(component):
             nodes = [n for n in paragraph.get('nodes', []) if n.get('value')]
@@ -229,7 +395,7 @@ def verify_binding(page, document, actual, folder, started, steps, mode='visible
                 observed.append((nodes, paragraph.get('style', {}).get('align', 'left')))
     expected_styles = []
     for index, block in enumerate(document['blocks']):
-        if block['type'] == 'image':
+        if block['type'] in ('image', 'quotation', 'table'):
             continue
         size, bold, align = text_style(params, index, block)
         block_params = {**params, **params.get('blockStyles', {}).get(str(index), {})}

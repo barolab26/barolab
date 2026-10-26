@@ -940,7 +940,7 @@
           </div>
         </div>
 
-        <section id="work-agenda-board" hidden aria-label="현재 업무 안건" style="padding:14px 18px;border-bottom:1px solid #cbd5e1;background:#f8fafc;max-height:260px;overflow:auto;flex-shrink:0;"></section>
+        <section id="work-agenda-board" hidden aria-label="현재 업무 안건" style="padding:12px 18px;border-bottom:1px solid #cbd5e1;background:#f8fafc;max-height:290px;overflow:auto;flex-shrink:0;font-size:13px;"></section>
         <div class="room-stream chat-messages" id="room-stream"></div>
         <dialog id="work-records-dialog" style="width:min(900px,90vw);max-height:80vh;border:1px solid #cbd5e1;border-radius:12px;padding:20px;">
           <h3>업무 기록</h3>
@@ -985,12 +985,12 @@
 <script>
 (() => {
   const AGENT_STYLE = {
-    jarvis: { name: '팀장', badge: '운영총괄', color: '#2563eb', short: 'J', icon: '🧭', title: '운영총괄 AI', defaultBrain: 'Argon High' },
-    doctor: { name: '닥터', badge: '콘텐츠감사', color: '#0d9488', short: 'D', icon: '🩺', title: '콘텐츠 감사·재생 전담', defaultBrain: '3.8 Flash' },
-    publi:  { name: '퍼블리', badge: '발행검수', color: '#059669', short: 'P', icon: '🤖', title: '블로그 발행·예약 검수 전문가', defaultBrain: 'gpt-6.1-sol' },
-    trace:  { name: '트레이스', badge: '성과분석', color: '#7c3aed', short: 'T', icon: '📊', title: '색인·트래픽·수익 분석 전문가', defaultBrain: '3.8 Flash' },
-    patch:  { name: '패치', badge: '자동화개발', color: '#d97706', short: 'C', icon: '⚙️', title: '대시보드·파이프라인 개발·유지보수', defaultBrain: 'gpt-6.1-sol' },
-    radar:  { name: '레이더', badge: '수익전략', color: '#e11d48', short: 'R', icon: '🎯', title: '신사업 아이템 · 마케팅 기법 · 트렌드 자율 발굴', defaultBrain: 'Argon Med' },
+    jarvis: { name: '팀장', badge: 'OSMU총괄', color: '#2563eb', short: 'J', icon: '🧭', title: '총괄 디렉터 & OSMU 지휘', defaultBrain: 'Argon High' },
+    doctor: { name: '닥터', badge: '품질·CRO', color: '#0d9488', short: 'D', icon: '🩺', title: '콘텐츠 품질 감사 & 전환율(CRO) 주치의', defaultBrain: '3.8 Flash' },
+    publi:  { name: '퍼블리', badge: '멀티발행', color: '#059669', short: 'P', icon: '🤖', title: '멀티채널 크리에이터 & 퍼블리셔', defaultBrain: 'gpt-6.1-sol' },
+    trace:  { name: '트레이스', badge: '퍼널·수익', color: '#7c3aed', short: 'T', icon: '📊', title: '멀티채널 퍼널·트래픽·수익 분석가', defaultBrain: '3.8 Flash' },
+    patch:  { name: '패치', badge: '플랫폼개발', color: '#d97706', short: 'C', icon: '⚙️', title: '플랫폼 자동화 & 미디어 도구 엔지니어', defaultBrain: 'gpt-6.1-sol' },
+    radar:  { name: '레이더', badge: '트렌드소싱', color: '#e11d48', short: 'R', icon: '🎯', title: '전 채널 트렌드·바이럴·외부유입 스카우터', defaultBrain: 'Argon Med' },
   };
 
   const ALIAS_TO_SLUG = {
@@ -1469,7 +1469,7 @@
   function crewConversationText(m) {
     const staff = ['jarvis','publi','trace','patch','radar','doctor'];
     const reply = staffMessageText(m.outputKind);
-    const validText = typeof reply === 'string' && reply.trim() && reply.length <= 160 && !/[\x00-\x1f]/.test(reply);
+    const validText = typeof reply === 'string' && reply.trim() && reply.length <= 1200 && !/[\x00-\x1f]/.test(reply);
     if (m.eventType === 'crew_work_event' && staff.includes(m.who)
         && ['style-strategy-discussion','post-style-planning'].includes(m.stage)
         && m.phase === 'completed' && m.messageKind === 'staff_reply'
@@ -1480,7 +1480,7 @@
     if (m.eventType === 'crew_work_event' && staff.includes(m.who)
         && ['staff-response','staff-terminal-response','staff-report-format-followup','ceo-result-review'].includes(m.stage) && m.phase === 'completed'
         && typeof m.model === 'string' && m.model.trim()
-        && typeof reply === 'string' && reply.trim() && reply.length <= 120
+        && typeof reply === 'string' && reply.trim() && reply.length <= 1200
         && !/[\x00-\x1f]/.test(reply)) return reply;
     return null;
   }
@@ -1577,9 +1577,37 @@
     messageStore.set(mid, m);
     if (document.getElementById('work-records-dialog').open) renderWorkRecords();
 
-    if (m.who && m.who !== 'user') {
-      activeTypingMap.delete(m.who);
-      renderTypingIndicators();
+    if (!options.initialLoad) {
+      if (m.eventType === 'crew_work_event') {
+        const ownerSlug = m.ownerAgent || m.who;
+        if (ownerSlug && AGENT_STYLE[ownerSlug]) {
+          if (m.phase === 'requested' || m.phase === 'progress') {
+            const tsMs = Number(m.ts) || Date.now();
+            if ((Date.now() - tsMs) < 150000) {
+              const ag = AGENT_STYLE[ownerSlug];
+              const bBadge = (m.brain && m.brain.badge) || m.modelBadge || m.model || '';
+              const stg = m.stage || '작업';
+              activeTypingMap.set(ownerSlug, {
+                who: ownerSlug,
+                name: ag.name,
+                icon: ag.icon,
+                color: ag.color,
+                stage: stg,
+                modelBadge: bBadge,
+                startedAt: tsMs,
+                typingText: `${ag.icon} @${ag.name} — [${stg}] 발언·실행 준비 중${bBadge ? ' [' + bBadge + ']' : ''}`,
+              });
+              renderTypingIndicators();
+            }
+          } else if (m.phase === 'completed' || m.phase === 'failed') {
+            activeTypingMap.delete(ownerSlug);
+            renderTypingIndicators();
+          }
+        }
+      } else if (m.who && m.who !== 'user' && !m.isGoalProgress) {
+        activeTypingMap.delete(m.who);
+        renderTypingIndicators();
+      }
     }
 
     if (!isConversationMessage(m)) return;
@@ -1644,39 +1672,76 @@
     else streamEl.scrollTop = previousTop;
   }
 
+  function syncActivePreparing(preparingList) {
+    if (!Array.isArray(preparingList)) return;
+    const nowMs = Date.now();
+    const seen = new Set();
+    preparingList.forEach(item => {
+      if (!item || !item.who) return;
+      seen.add(item.who);
+      const existing = activeTypingMap.get(item.who) || {};
+      activeTypingMap.set(item.who, {
+        ...existing,
+        ...item,
+        startedAt: Number(item.startedAt || existing.startedAt || nowMs),
+        serverSyncedAt: nowMs,
+      });
+    });
+    for (const [slug, val] of activeTypingMap.entries()) {
+      const age = nowMs - Number(val.startedAt || val.ts || nowMs);
+      if (!seen.has(slug) && (val.serverSyncedAt || age > 45000)) {
+        activeTypingMap.delete(slug);
+      }
+    }
+    renderTypingIndicators();
+  }
+
   function renderTypingIndicators() {
+    const nowMs = Date.now();
     document.querySelectorAll('.crew-card').forEach(card => {
       const slug = card.dataset.slug;
       const statusTextEl = card.querySelector('.crew-live-status');
       const tInfo = activeTypingMap.get(slug);
       if (tInfo) {
         card.classList.add('is-typing');
-        if (statusTextEl) statusTextEl.textContent = tInfo.typingText || '응답 작성 중...';
+        const shortTxt = tInfo.shortStatus || tInfo.typingText || '발언 준비 중...';
+        if (statusTextEl && statusTextEl.textContent !== `🎙️ ${shortTxt}`) {
+          statusTextEl.textContent = `🎙️ ${shortTxt}`;
+        }
       } else {
         card.classList.remove('is-typing');
-        if (statusTextEl) statusTextEl.textContent = card.dataset.liveStatus || card.dataset.defaultTitle || '';
+        const defaultTxt = card.dataset.liveStatus || card.dataset.defaultTitle || '';
+        if (statusTextEl && statusTextEl.textContent !== defaultTxt) {
+          statusTextEl.textContent = defaultTxt;
+        }
       }
     });
 
     const entries = Array.from(activeTypingMap.values());
     if (!entries.length) {
-      typingZoneEl.innerHTML = '';
+      if (typingZoneEl.innerHTML !== '') typingZoneEl.innerHTML = '';
       return;
     }
 
-    typingZoneEl.innerHTML = entries.map(t => {
+    const html = entries.map(t => {
       const ag = AGENT_STYLE[t.who] || { name: t.name || t.who, color: t.color || '#2563eb', short: 'A', icon: '🤖' };
-      const label = t.typingText || `${ag.icon} ${ag.name}가 응답을 작성하고 있습니다...`;
+      const badge = t.modelBadge || agentBrainBadgeMap.get(t.who) || '';
+      const label = t.typingText || `${ag.icon} @${ag.name}가 발언을 준비하고 있습니다...`;
       return `
         <div class="typing-bubble-row" data-typing-who="${escapeHtml(t.who)}">
           <div class="crew-avatar" style="background:${ag.color}; width:28px; height:28px; font-size:11.5px;">${ag.short}</div>
-          <div class="typing-bubble-card">
+          <div class="typing-bubble-card" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="color:#92400e;">🎙️ 발언 준비 중</strong>
             <span>${escapeHtml(label)}</span>
+            ${badge ? `<span style="background:#fef3c7;border:1px solid #f59e0b;color:#92400e;padding:1px 6px;border-radius:999px;font-size:11px;font-weight:700;">🧠 ${escapeHtml(badge)}</span>` : ''}
             <span class="typing-dots"><span></span><span></span><span></span></span>
           </div>
         </div>
       `;
     }).join('');
+    if (typingZoneEl.innerHTML !== html) {
+      typingZoneEl.innerHTML = html;
+    }
   }
 
   function renderCrewList(agents) {
@@ -1751,6 +1816,9 @@
       if (!res.ok) return;
       const data = await res.json();
       if (data.kstNow) updateKstClockDisplay(data.kstNow);
+      if (Array.isArray(data.activePreparing)) {
+        syncActivePreparing(data.activePreparing);
+      }
       if (Array.isArray(data.agents)) {
         updateCrewLiveStatusInPlace(data.agents);
       }
@@ -1765,7 +1833,7 @@
     document.getElementById('archive-count').textContent = items.length;
     const el = document.getElementById('archive-list');
     if (!items.length) {
-      el.innerHTML = '<div style="padding:12px; font-size:12px; color:#94a3b8;">보관된 이전 회의가 없습니다.</div>';
+      el.innerHTML = '<div style="padding:12px; font-size:12px; color:#94a3b8; line-height:1.5;">보관된 이전 회의가 없습니다.<br><span style="font-size:11px; color:#64748b;">(미니멀 모드: 안건 종료 시 핵심 결정만 지식으로 승격 후 대화 자동 소멸)</span></div>';
       return;
     }
     el.innerHTML = items.map(item => `
@@ -1825,9 +1893,16 @@
   async function loadRoom(resetScrollToBottom = false) {
     const res = await apiFetch('/api/chat/room');
     const data = await res.json();
+    if (data.backgroundSummary && data.workAgenda) {
+      data.workAgenda.backgroundSummary = data.backgroundSummary;
+      data.workAgenda.activePreparing = data.activePreparing || [];
+    }
     renderAgendaBoard(data.workAgenda);
     if (data.kstNow) updateKstClockDisplay(data.kstNow);
     renderCrewList(data.agents || []);
+    if (Array.isArray(data.activePreparing)) {
+      syncActivePreparing(data.activePreparing);
+    }
     renderArchiveList(data.archivedMeetings || []);
     if (typeof data.eventSeq === 'number') {
       lastEventSeq = data.eventSeq;
@@ -1839,6 +1914,9 @@
     renderedMessageIds.clear();
     messageStore.clear();
     chronologicalMessages(data.messages || []).forEach(m => upsertMessageToDom(m, { initialLoad: true }));
+    if (Array.isArray(data.activePreparing)) {
+      syncActivePreparing(data.activePreparing);
+    }
     applyChatFilters();
 
     if (resetScrollToBottom) resumeLatestFollow();
@@ -1929,19 +2007,55 @@
   let focusCurrentAgenda = true;
   function renderAgendaBoard(board) {
     if (!board) return;
+    if (Array.isArray(board.activePreparing)) {
+      syncActivePreparing(board.activePreparing);
+    }
     const node = document.getElementById('work-agenda-board');
     node.hidden = !board.enabled;
     if (!board.enabled) return;
-    const key = JSON.stringify(board);
-    if (key === agendaBoardKey) return;
-    agendaBoardKey = key;
     const row = board.active;
+    const bg = board.backgroundSummary || {};
+    const nwf = bg.naverWorkflow || {};
+    const preps = Array.isArray(board.activePreparing) ? board.activePreparing : Array.from(activeTypingMap.values());
+    const stableKey = JSON.stringify({
+      activeId: row?.id,
+      status: row?.status,
+      phase: row?.phase,
+      blocker: row?.blocker,
+      lastAction: row?.lastAction,
+      pendingCount: board.pendingCount,
+      prepsWho: preps.map(p => p.who + ':' + (p.stage || '')).join(','),
+      pids: (bg.runningPids || []).join(','),
+      nwfStatus: (nwf.account || '') + ':' + (nwf.stageName || '') + ':' + (nwf.progress || 0),
+    });
+    if (stableKey === agendaBoardKey) return;
+    agendaBoardKey = stableKey;
     currentAgendaId = row?.id || '';
     const queue = (board.pending || []).slice(0, 5);
-    node.innerHTML = row ? `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><strong>${escapeHtml(row.phase)} · 현재 안건 1개</strong><button type="button" id="agenda-focus-toggle" aria-pressed="${focusCurrentAgenda}">${focusCurrentAgenda ? '전체 대화 보기' : '현재 안건에 집중'}</button></div>
+    const pidBadge = (Array.isArray(bg.runningPids) && bg.runningPids.length)
+      ? `<span style="background:#dcfce7;color:#166534;border:1px solid #86efac;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;">⚙️ 백그라운드 워커 가동 중 (PID ${bg.runningPids.join(', ')})</span>`
+      : `<span style="background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;">🔄 자율 스케줄러 상시 감시 중</span>`;
+    const nwfHtml = (nwf.account || nwf.stageName)
+      ? `<div style="margin-top:5px;padding:5px 9px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:7px;font-size:11.5px;color:#1e293b;">
+           <strong>🖥️ 백그라운드 파이프라인 실측:</strong>
+           네이버(<strong>${escapeHtml(nwf.account || '-')}</strong> · ${escapeHtml(nwf.slot || '-')})
+           — <strong>${escapeHtml(nwf.stageName || nwf.status || '대기')}</strong> (${Number(nwf.progress || 0)}%)
+           ${nwf.topic ? ` · 제목: <em>${escapeHtml(String(nwf.topic).slice(0, 42))}</em>` : ''}
+           · CF 오늘 <strong>${escapeHtml(bg.cfProgress || '0/16')}</strong> · 지식iN <strong>${escapeHtml(bg.kinProgress || '0/20')}</strong>
+         </div>`
+      : '';
+    const prepHtml = preps.length
+      ? `<div style="margin-top:6px;padding:6px 10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:7px;font-size:11.5px;color:#92400e;">
+           <strong>🎙️ 현재 회의실 발언 준비 중 (${preps.length}명):</strong>
+           ${preps.map(p => `<span style="display:inline-block;margin-left:6px;font-weight:700;">${escapeHtml(p.typingText || (p.name + ' 발언 준비 중'))} (⏱️ ${Number(p.elapsedSec || 1)}초 경과)</span>`).join(' · ')}
+         </div>`
+      : `<div style="margin-top:5px;font-size:11px;color:#64748b;">🎙️ 현재 발언 대기/준비 중인 직원 없음 · 백그라운드 작업 단계 전환 시 즉시 표시됩니다.</div>`;
+    node.innerHTML = row ? `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><strong>${escapeHtml(row.phase)} · 현재 안건 1개</strong>${pidBadge}</div><button type="button" id="agenda-focus-toggle" aria-pressed="${focusCurrentAgenda}">${focusCurrentAgenda ? '전체 대화 보기' : '현재 안건에 집중'}</button></div>
       <div style="font-weight:700;margin:8px 0">${escapeHtml(row.title)}</div>
       <div>담당: ${escapeHtml(row.ownerLabel || '팀장')} · 완료 조건: ${escapeHtml(row.completionCriteria)}</div>
       <div style="margin-top:6px;color:${row.status === 'blocked' ? '#b45309' : '#475569'}">${escapeHtml(row.lastAction || row.blocker || '방향과 전략을 정한 뒤 실행합니다.')}</div>
+      ${nwfHtml}
+      ${prepHtml}
       ${row.activity?.owner ? `<div style="margin-top:4px">현재 담당: ${escapeHtml(row.activity.owner)} · ${escapeHtml(row.activity.phase || '')}</div>` : ''}
       ${row.activity?.action ? `<div>${escapeHtml(row.activity.action)}</div>` : ''}
       ${row.activity?.lastResult ? `<div>직전 결과: ${escapeHtml(row.activity.lastResult)} · 최근 활동 ${row.activity.lastActivityAt ? new Date(row.activity.lastActivityAt * 1000).toLocaleTimeString('ko-KR') : '미수집'}</div>` : ''}
@@ -1949,7 +2063,7 @@
       ${row.activity?.nextCheckAt ? `<div>다음 확인: ${new Date(row.activity.nextCheckAt * 1000).toLocaleTimeString('ko-KR')}</div>` : ''}
       ${row.automaticRecovery?.nextCheckAt ? `<div style="margin-top:4px">같은 안건 자동 재확인: ${new Date(row.automaticRecovery.nextCheckAt * 1000).toLocaleTimeString('ko-KR')} · 새 증거가 생기면 진단 재개</div>` : ''}
       ${row.blocker ? `<div style="margin-top:4px;color:#b45309">미해결: ${escapeHtml(row.blocker)}</div>` : ''}
-      ${row.status === 'report_pending' ? '<div style="margin-top:4px">실제 결과 검증 완료 · 회의실 마무리 보고를 확인하고 있습니다.</div>' : ''}` : '<strong>진행 중인 안건 없음 · 다음 안건 선정 대기</strong>';
+      ${row.status === 'report_pending' ? '<div style="margin-top:4px">실제 결과 검증 완료 · 회의실 마무리 보고를 확인하고 있습니다.</div>' : ''}` : `<strong>진행 중인 안건 없음 · 다음 안건 선정 대기</strong>${nwfHtml}${prepHtml}`;
     node.innerHTML += `<details style="margin-top:8px"><summary>다음 안건 ${Number(board.pendingCount || 0)}개</summary><ol>${queue.map(item => `<li>${escapeHtml(item.title)} ${row && row.status !== 'report_pending' ? `<button type="button" data-agenda-switch="${item.id}">현재 안건 유예 후 이 안건 진행</button>` : ''}</li>`).join('')}</ol></details>`;
     if (board.suspended?.length) node.innerHTML += `<details open style="margin-top:6px;color:#b45309"><summary>미해결 유예 ${board.suspended.length}개</summary><ul>${board.suspended.map(item => `<li>${escapeHtml(item.title)} <button type="button" data-agenda-resume="${item.id}">같은 안건 재개</button></li>`).join('')}</ul></details>`;
     if (board.recent?.length) node.innerHTML += `<details style="margin-top:6px"><summary>최근 검증·마무리 완료</summary><ol>${board.recent.map(item => `<li>${escapeHtml(item.title)}</li>`).join('')}</ol></details>`;
@@ -2058,7 +2172,18 @@
             } else if (evtType === 'task_update') {
               upsertMessageToDom(payload, { allowInPlaceUpdate: true });
             } else if (evtType === 'done') {
-              activeTypingMap.clear();
+              const spk = Array.isArray(payload.speakers) && payload.speakers[0] ? payload.speakers[0] : 'jarvis';
+              const ag = AGENT_STYLE[spk] || AGENT_STYLE.jarvis;
+              activeTypingMap.set(spk, {
+                who: spk,
+                name: ag.name,
+                icon: ag.icon,
+                color: ag.color,
+                stage: 'chat-response',
+                modelBadge: agentBrainBadgeMap.get(spk) || '',
+                startedAt: Date.now(),
+                typingText: `${ag.icon} @${ag.name} — 대표님 질문 의도와 실시간 원장을 대조하며 발언을 준비하고 있습니다...`,
+              });
               renderTypingIndicators();
             }
           } catch (_) {}
@@ -2068,7 +2193,6 @@
       scrollLockStatusEl.textContent = '접수 연결 확인 필요: ' + error.message + ' · 저장된 요청 상태를 다시 확인합니다.';
       loadRoom(false).catch(() => {});
     } finally {
-      activeTypingMap.clear();
       renderTypingIndicators();
       btn.disabled = false;
       btn.textContent = '발언 전송';

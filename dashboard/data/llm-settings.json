@@ -17,22 +17,22 @@
       "model": "gemini-3.8-flash-medium"
     },
     "codex": {
-      "model": "gpt-6-luna"
+      "model": "gpt-6.1-sol"
     }
   },
   "agentBrains": {
     "jarvis": {
-      "provider": "agy",
-      "model": "gemini-4-argon-high",
-      "reasoningEffort": null,
-      "badge": "Argon High",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "badge": "gpt-6.1-sol · High",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "publi": {
       "provider": "codex",
       "model": "gpt-6.1-sol",
-      "reasoningEffort": "medium",
-      "badge": "gpt-6.1-sol · Medium",
+      "reasoningEffort": "high",
+      "badge": "gpt-6.1-sol · High",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "patch": {
@@ -51,9 +51,9 @@
     },
     "doctor": {
       "provider": "agy",
-      "model": "gemini-3.8-flash-medium",
+      "model": "gemini-3.8-flash-high",
       "reasoningEffort": null,
-      "badge": "3.8 Flash Med",
+      "badge": "3.8 Flash High",
       "providerLabel": "Antigravity AGY CLI"
     },
     "trace": {
@@ -66,26 +66,30 @@
     "cf_pipeline": {
       "provider": "codex",
       "model": "gpt-6.1-sol",
-      "badge": "gpt-6.1-sol",
+      "reasoningEffort": "medium",
+      "badge": "gpt-6.1-sol · Medium",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "naver_pipeline": {
       "provider": "codex",
       "model": "gpt-6.1-sol",
-      "badge": "gpt-6.1-sol",
+      "reasoningEffort": "medium",
+      "badge": "gpt-6.1-sol · Medium",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "kin_pipeline": {
       "provider": "codex",
       "model": "gpt-6.1-sol",
-      "badge": "gpt-6.1-sol",
+      "reasoningEffort": "medium",
+      "badge": "gpt-6.1-sol · Medium",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "threads_pipeline": {
-      "provider": "codex",
-      "model": "gpt-6-luna",
-      "badge": "gpt-6-luna",
-      "providerLabel": "Codex CLI · ChatGPT 구독"
+      "provider": "agy",
+      "model": "gemini-3.8-flash-high",
+      "reasoningEffort": null,
+      "badge": "3.8 Flash High",
+      "providerLabel": "Antigravity AGY CLI"
     }
   }
 }

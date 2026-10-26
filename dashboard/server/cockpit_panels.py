@@ -106,39 +106,88 @@ def brain_display(data,now):
     def gauge(value):
         return ('—' if value is None else f'{value:g}%')+' ['+('░'*15 if value is None else '■'*round(max(0,min(100,value))*15/100)+'░'*(15-round(max(0,min(100,value))*15/100)))+']'
     rows=['[Codex 구독] 잔여 '+gauge(remaining)+' | 리셋: '+(dt.datetime.fromtimestamp(reset,KST).strftime('%m-%d %H:%M') if reset else '—')+' | '+(f'{credit:,.2f} C' if credit is not None else '— C')]
+    styles=['bold red' if remaining is not None and remaining<=0 else 'bold cyan' if 'codex' in providers else 'bold white']
     agy=remote.get('agy',{})
-    agy_fresh=agy.get('status')=='collected' and 0<=now.timestamp()-_epoch(agy.get('checkedAt'))<=180
-    agy_remaining=number(agy.get('remainingPercent')) if agy_fresh else None
-    agy_parts=[];agy_resets=[];agy_values=[]
-    if agy_fresh:
-        for group in agy.get('groups',[]):
-            values={b['window']:number(b.get('remainingPercent')) for b in group.get('buckets',[])}
-            if not values or any(v is None or not 0<=v<=100 for v in values.values()):continue
-            label={'Gemini Models':'Gemini','Claude and GPT models':'Claude/GPT'}.get(group.get('name'),group.get('name','모델'))
-            agy_parts.append(label+' '+ '/'.join(f'{values[w]:g}%' if w in values else '—' for w in ('weekly','5h')))
-            agy_values.extend(values.values())
-            agy_resets.extend(_epoch(b.get('resetAt')) for b in group.get('buckets',[]) if _epoch(b.get('resetAt'))>now.timestamp())
-    if agy_parts:
-        agy_remaining=min(agy_values)
-        next_reset=dt.datetime.fromtimestamp(min(agy_resets),KST).strftime('%m-%d %H:%M') if agy_resets else '—'
-        rows.append('[안티그래비티] '+' | '.join(agy_parts)+' (주간/5h) | 다음 리셋 '+next_reset)
-    elif agy_remaining is not None and 0<=agy_remaining<=100:
-        rows.append('[안티그래비티 구독] 잔여 '+gauge(agy_remaining)+' | 리셋: '+str(agy.get('resetAt') or '—'))
+    agy_fresh=agy.get('status')=='collected' and 0<=now.timestamp()-_epoch(agy.get('checkedAt'))<=300
+    agy_accounts=agy.get('accounts') or []
+    try:
+        from common.agy_cli import rotation_state as _agy_rot
+        rot=_agy_rot()
+    except Exception:
+        rot={}
+    rot_active_acc=rot.get('activeAccount') if (rot.get('activeAccount') and 0<=now.timestamp()-_epoch(rot.get('activeStartedAt'))<300) else None
+    agy_in_use=bool((providers & {'agy','gemini'}) or rot_active_acc)
+    active_agy_email=rot_active_acc or (rot.get('lastUsedAccount') if (providers & {'agy','gemini'}) else None)
+    if agy_accounts:
+        for idx, acc in enumerate(agy_accounts, 1):
+            email_full=str(acc.get('email') or f'계정{idx}')
+            email_short=email_full.split('@')[0]
+            acc_usable=bool(acc.get('usable'))
+            acc_active=bool(agy_in_use and (email_full==active_agy_email or (not active_agy_email and acc.get('isLastUsed'))))
+            use_tag=('⚡사용중(호출활성)' if acc_active else '● 사용가능(대기)' if acc_usable else '○ 미연결')
+            acc_parts=[];acc_resets=[];acc_values=[]
+            for group in acc.get('groups',[]):
+                values={b['window']:number(b.get('remainingPercent')) for b in group.get('buckets',[])}
+                if not values or any(v is None or not 0<=v<=100 for v in values.values()):continue
+                label={'Gemini Models':'Gemini','Claude and GPT models':'Claude/GPT'}.get(group.get('name'),group.get('name','모델'))
+                acc_parts.append(label+' '+'/'.join(f'{values[w]:g}%' if w in values else '—' for w in ('weekly','5h')))
+                acc_values.extend(values.values())
+                acc_resets.extend(_epoch(b.get('resetAt')) for b in group.get('buckets',[]) if _epoch(b.get('resetAt'))>now.timestamp())
+            if acc_parts:
+                next_reset=dt.datetime.fromtimestamp(min(acc_resets),KST).strftime('%m-%d %H:%M') if acc_resets else '—'
+                call_cnt=int((rot.get('callCounts') or {}).get(email_full, acc.get('callCount',0)))
+                cnt_txt=f' | 누적 {call_cnt}회' if call_cnt else ''
+                rows.append(f'[제미나이 #{idx} {email_short}] {use_tag} | '+' | '.join(acc_parts)+f' (주간/5h) | 리셋 {next_reset}{cnt_txt}')
+                min_val=min(acc_values) if acc_values else 100
+                styles.append('bold red' if min_val<=0 else 'bold cyan' if acc_active else 'dim')
+            else:
+                rows.append(f'[제미나이 #{idx} {email_short}] {use_tag} | '+str(acc.get('status') or '조회 대기'))
+                styles.append('bold cyan' if acc_active else 'dim' if acc_usable else 'bold red')
     else:
-        agy_remaining=None
-        rows.append('[안티그래비티 구독] '+('구독량 조회 미연결' if not agy else '구독량 조회 미확인 · '+str(agy.get('status') or '갱신 필요')))
+        agy_remaining=number(agy.get('remainingPercent')) if agy_fresh else None
+        agy_parts=[];agy_resets=[];agy_values=[]
+        if agy_fresh:
+            for group in agy.get('groups',[]):
+                values={b['window']:number(b.get('remainingPercent')) for b in group.get('buckets',[])}
+                if not values or any(v is None or not 0<=v<=100 for v in values.values()):continue
+                label={'Gemini Models':'Gemini','Claude and GPT models':'Claude/GPT'}.get(group.get('name'),group.get('name','모델'))
+                agy_parts.append(label+' '+ '/'.join(f'{values[w]:g}%' if w in values else '—' for w in ('weekly','5h')))
+                agy_values.extend(values.values())
+                agy_resets.extend(_epoch(b.get('resetAt')) for b in group.get('buckets',[]) if _epoch(b.get('resetAt'))>now.timestamp())
+        if agy_parts:
+            agy_remaining=min(agy_values)
+            next_reset=dt.datetime.fromtimestamp(min(agy_resets),KST).strftime('%m-%d %H:%M') if agy_resets else '—'
+            rows.append('[안티그래비티] '+' | '.join(agy_parts)+' (주간/5h) | 다음 리셋 '+next_reset)
+        elif agy_remaining is not None and 0<=agy_remaining<=100:
+            rows.append('[안티그래비티 구독] 잔여 '+gauge(agy_remaining)+' | 리셋: '+str(agy.get('resetAt') or '—'))
+        else:
+            agy_remaining=None
+            rows.append('[안티그래비티 구독] '+('구독량 조회 미연결' if not agy else '구독량 조회 미확인 · '+str(agy.get('status') or '갱신 필요')))
+        styles.append('bold red' if agy_remaining is not None and agy_remaining<=0 else 'bold cyan' if providers & {'agy','gemini'} else 'dim')
     router=remote.get('openrouter',{});balance=number(router.get('balance'));limit=number(router.get('limit'));left=number(router.get('limit_remaining'))
     router_remaining=max(0,min(100,left/limit*100)) if limit and left is not None else 0 if balance is not None and balance<=0 else None
     rows.append('[OpenRouter] 잔여 '+gauge(router_remaining)+' | 종량제'+(' (충전 필요)' if balance is not None and balance<=0 else '')+' | '+money(balance))
-    styles=['bold red' if remaining is not None and remaining<=0 else 'bold cyan' if 'codex' in providers else 'dim',
-            'bold red' if agy_remaining is not None and agy_remaining<=0 else 'bold cyan' if providers & {'agy','gemini'} else 'dim',
-            'bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim']
+    styles.append('bold red' if router_remaining==0 else 'bold cyan' if 'openrouter' in providers else 'dim')
     for provider, label in (('jev', 'JEV'), ('kie', 'KIE')):
         credit = remote.get(provider, {})
         value = number(credit.get('balance'))
-        fresh = credit.get('status') == 'collected' and 0 <= now.timestamp()-_epoch(credit.get('checkedAt')) <= 180
-        rows.append('['+label+'] '+(f'잔여 {value:,.2f} credits' if fresh and value is not None else str(credit.get('status') or '잔액 미수집')))
-        styles.append('bold red' if fresh and value == 0 else 'dim')
+        fresh = credit.get('status') == 'collected' and 0 <= now.timestamp()-_epoch(credit.get('checkedAt')) <= 300
+        if provider == 'jev':
+            usable = bool(credit.get('usable'))
+            sess = credit.get('sessionLabel') or '04번 크롬'
+            tok = credit.get('tokensUsed')
+            tok_txt = f' | 누적 {tok} tok' if tok else ''
+            if fresh and value is not None:
+                use_state = '⚡사용중' if provider in providers else ('● 정상수집 · 사용가능(API연결)' if credit.get('apiKeySet') else '● 정상수집 · 콘솔연결')
+                rows.append(f'[JEV · {sess}] {use_state} | 잔여 ${value:,.2f}{tok_txt}')
+                styles.append('bold red' if value <= 0 else 'bold cyan' if provider in providers else 'dim')
+            else:
+                use_state = '● 사용가능(API키 설정됨)' if credit.get('apiKeySet') else '○ 미연결'
+                rows.append(f'[JEV · {sess}] {use_state} | ' + str(credit.get('status') or '잔액 미수집'))
+                styles.append('bold cyan' if provider in providers else 'dim')
+        else:
+            rows.append('['+label+'] '+(f'● 정상수집 · 사용가능 | 잔여 {value:,.2f} credits' if fresh and value is not None else str(credit.get('status') or '잔액 미수집')))
+            styles.append('bold red' if fresh and value == 0 else 'bold cyan' if provider in providers else 'dim')
     brains=data.get('agentBrains',{});crew={r.get('role'):r for r in data.get('crew',[])}
     def model(role):return brains.get(role,{}).get('badge') or brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
     mapping='[직원 매핑] @팀장('+model('jarvis')+') | '

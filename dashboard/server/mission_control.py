@@ -307,10 +307,15 @@ class Collector:
             if agenda.get('kind')=='goal':active['title']='대표 지시 안건 · '+str(agenda.get('project') or '전사')
             active.update(target={k:args.get(k) for k in ('account','date','slot','partId')},processObserved=bool(running(agenda)))
             active['automaticRecovery']={k:agenda.get('recoveryWatch',{}).get(k) for k in ('state','nextCheckAt','checks')}
-            identity=agenda.get('controllerGoalId')
+            identity=agenda.get('controllerGoalId') or agenda.get('recoveryGoalId')
             goal=self.read('dashboard/data/chats/reasoning-goals/'+identity+'.json') if isinstance(identity,str) and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
             progress=goal.get('progress',{});last=(goal.get('observations') or [{}])[-1]
-            conference=self.read('dashboard/data/publication-conferences/'+str(agenda.get('source',{}).get('conferenceId'))+'.json') if agenda.get('kind')=='conference' else {}
+            conf_id=agenda.get('source',{}).get('conferenceId')
+            conference=self.read('dashboard/data/publication-conferences/'+str(conf_id)+'.json') if agenda.get('kind')=='conference' and conf_id else {}
+            if conf_id:
+                active['conferenceId']=conf_id
+                active['conferenceStatus']=conference.get('status')
+                active['conferenceEligibility']=conference.get('eligibility')
             from common.work_agenda import operational_state, performance
             active['operationalState']=operational_state(agenda,goal,conference)
             active['performance']=performance(agenda,self.read('dashboard/data/llm_usage_ledger.json'))

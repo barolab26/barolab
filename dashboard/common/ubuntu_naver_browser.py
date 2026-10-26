@@ -153,6 +153,7 @@ def inspect_workflow_window(port):
 
 def focus_workflow_window(port):
     """Focus only the verified existing workflow browser; never start or navigate."""
+    dismiss_stuck_dialogs()
     window=inspect_workflow_window(port)
     if window['status']=='observed':
         subprocess.run(['wmctrl','-ia',window['windowId']],env=dict(os.environ,DISPLAY=window['display']),check=True,timeout=5)
@@ -262,24 +263,30 @@ if __name__ == "__main__":
 
 
 def gc_blank_tabs(port):
-    """Close only empty, unfocused blank tabs; login/editor/search tabs are preserved."""
+    """Close empty unfocused blank tabs and prune stale benchmark/search tabs on port 9440; active/login/editor tabs are preserved."""
     import requests
     import websocket
+    from urllib.parse import urlsplit, quote
     try:
-        response=requests.get(f'http://127.0.0.1:{port}/json/list',timeout=.3)
+        response=requests.get(f'http://127.0.0.1:{port}/json/list',timeout=.5)
         tabs=[t for t in response.json() if t.get('type')=='page']
-        if not any(t.get('url') not in ('about:blank','chrome://newtab/','') for t in tabs):return 0
+        if len(tabs)<=1:return 0
         closed=0
         for tab in tabs:
-            if tab.get('url')!='about:blank':continue
+            if len(tabs)-closed<=1:break
+            url=str(tab.get('url') or '')
+            is_blank=url in ('about:blank','chrome://newtab/','')
+            is_stale_bench=(port==9440 and ('search.naver.com/search.naver' in url or 'blog.naver.com/' in url) and 'PostWrite' not in url)
+            if not is_blank and not is_stale_bench:continue
             address=tab.get('webSocketDebuggerUrl','')
-            from urllib.parse import urlsplit,quote
             u=urlsplit(address)
             if u.scheme!='ws' or u.hostname not in ('127.0.0.1','localhost') or u.port!=port:continue
             ws=None
             try:
                 ws=websocket.create_connection(address,timeout=.3,suppress_origin=True)
-                ws.send(json.dumps({'id':1,'method':'Runtime.evaluate','params':{'expression':"location.href === 'about:blank' && !document.hasFocus() && (!document.body || document.body.innerHTML.trim() === '')",'returnByValue':True}}))
+                expr=("!document.hasFocus() && document.visibilityState !== 'visible'" if is_stale_bench
+                      else "(location.href === 'about:blank' || location.href.startsWith('chrome://newtab')) && !document.hasFocus()")
+                ws.send(json.dumps({'id':1,'method':'Runtime.evaluate','params':{'expression':expr,'returnByValue':True}}))
                 result=json.loads(ws.recv())
                 if result.get('id')==1 and result.get('result',{}).get('result',{}).get('value') is True:
                     reply=requests.get(f"http://127.0.0.1:{port}/json/close/"+quote(tab['id'],safe=''),timeout=.3)
@@ -289,3 +296,22 @@ def gc_blank_tabs(port):
                 if ws:ws.close()
         return closed
     except (requests.RequestException,ValueError,TypeError):return 0
+
+
+def dismiss_stuck_dialogs(display=None):
+    """Detect and close any blocking OS dialogs like 'Open Files' on the workflow DISPLAY."""
+    displays = [display] if display else [os.environ.get('BAROLAB_DISPLAY'), ':11', ':10', ':0']
+    closed = []
+    for cand in dict.fromkeys(d for d in displays if d):
+        try:
+            res = subprocess.run(["wmctrl", "-l"], env=dict(os.environ, DISPLAY=cand),
+                                 capture_output=True, text=True, timeout=3)
+            if res.returncode == 0:
+                for line in res.stdout.splitlines():
+                    if any(t in line for t in ('Open Files', '파일 선택', '열기', 'File Upload')):
+                        win_id = line.split()[0]
+                        subprocess.run(["wmctrl", "-ic", win_id], env=dict(os.environ, DISPLAY=cand), timeout=2)
+                        closed.append((cand, win_id, line))
+        except Exception:
+            pass
+    return closed

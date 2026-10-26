@@ -1,52 +1,85 @@
 {
   "schema": "metrics-runtime-v2",
-  "runId": "fe3adaec26f14aa18b6a290f491467fe",
-  "pid": 248019,
+  "runId": "ee81c47674fd42bcaae10e5d236b7b1c",
+  "pid": 1458845,
   "status": "completed",
-  "startedAt": "2026-10-20T12:27:40.818047+00:00",
-  "checkedAt": "2026-10-20T12:29:14.939937+00:00",
+  "startedAt": "2026-10-26T01:00:08.132743+00:00",
+  "checkedAt": "2026-10-26T01:07:12.388330+00:00",
   "stages": [
     {
       "script": "dashboard/revenue.py",
       "status": "completed",
-      "startedAt": "2026-10-20T12:27:40.821090+00:00",
+      "startedAt": "2026-10-26T01:00:08.136574+00:00",
       "timeoutSeconds": 180,
-      "lastProcessSuccessAt": "2026-10-20T12:28:22.106716+00:00",
-      "helperPid": 248076,
-      "elapsedSeconds": 41.3,
+      "lastProcessSuccessAt": "2026-10-26T01:00:18.611080+00:00",
+      "helperPid": 1458852,
+      "elapsedSeconds": 10.5,
       "exitCode": 0,
-      "finishedAt": "2026-10-20T12:28:22.106738+00:00"
+      "finishedAt": "2026-10-26T01:00:18.611097+00:00"
     },
     {
       "script": "dashboard/traffic.py",
       "status": "completed",
-      "startedAt": "2026-10-20T12:28:22.150232+00:00",
+      "startedAt": "2026-10-26T01:00:18.665587+00:00",
       "timeoutSeconds": 840,
-      "lastProcessSuccessAt": "2026-10-20T12:29:14.442235+00:00",
-      "helperPid": 248367,
-      "elapsedSeconds": 52.3,
+      "lastProcessSuccessAt": "2026-10-26T01:01:07.820940+00:00",
+      "helperPid": 1459120,
+      "elapsedSeconds": 49.2,
       "exitCode": 0,
-      "finishedAt": "2026-10-20T12:29:14.442253+00:00"
+      "finishedAt": "2026-10-26T01:01:07.820954+00:00"
+    },
+    {
+      "script": "dashboard/metrics.py",
+      "status": "completed",
+      "startedAt": "2026-10-26T01:01:07.952608+00:00",
+      "timeoutSeconds": 480,
+      "lastProcessSuccessAt": "2026-10-26T01:07:09.542915+00:00",
+      "helperPid": 1460385,
+      "elapsedSeconds": 361.6,
+      "exitCode": 0,
+      "finishedAt": "2026-10-26T01:07:09.542932+00:00"
+    },
+    {
+      "script": "naver_kin.posting",
+      "status": "completed",
+      "startedAt": "2026-10-26T01:07:09.641586+00:00",
+      "timeoutSeconds": 480,
+      "lastProcessSuccessAt": "2026-10-26T01:07:10.013093+00:00",
+      "helperPid": 1469316,
+      "exitCode": 0,
+      "finishedAt": "2026-10-26T01:07:10.013112+00:00",
+      "elapsedSeconds": 0.4
+    },
+    {
+      "script": "threads_posting.posting",
+      "status": "completed",
+      "startedAt": "2026-10-26T01:07:10.021087+00:00",
+      "timeoutSeconds": 480,
+      "lastProcessSuccessAt": "2026-10-26T01:07:11.846735+00:00",
+      "helperPid": 1469328,
+      "exitCode": 0,
+      "finishedAt": "2026-10-26T01:07:11.846761+00:00",
+      "elapsedSeconds": 1.8
     }
   ],
   "budgetSeconds": 2460,
-  "lastProcessSuccessAt": "2026-10-20T12:29:14.939918+00:00",
+  "lastProcessSuccessAt": "2026-10-26T01:07:12.388310+00:00",
   "lastSuccessAt": null,
   "lastCollectionSuccessAt": null,
   "previousInterrupted": false,
-  "previousStartedAt": "2026-10-20T12:25:42.997921+00:00",
+  "previousStartedAt": "2026-10-26T00:00:59.789487+00:00",
   "successMeaning": "process_exit_zero_not_source_collection",
   "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
   "currentStage": null,
   "pagePerformance": {
     "status": "partial",
     "complete": false,
-    "start": "2026-10-13",
-    "end": "2026-10-19",
+    "start": "2026-10-19",
+    "end": "2026-10-25",
     "reasonCodes": [
       "revenue_partial_or_missing"
     ]
   },
-  "finishedAt": "2026-10-20T12:29:14.939918+00:00",
+  "finishedAt": "2026-10-26T01:07:12.388310+00:00",
   "collectionStatus": "partial"
 }

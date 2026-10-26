@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "slots": {
+    "prepare|e70b88f74897e6feeadfe4250b2976020e7374dab07af12954cb647f72fc14b7|candidate-reselection": {
+      "account": "soultin",
+      "folder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/국민연금-20261021-770a7f770d",
+      "claimedAt": "2026-10-21T10:38:21.555061+09:00",
+      "workerId": null,
+      "status": "held",
+      "errorType": "MaterialRequired"
+    },
+    "prepare|ecb3bd899d386504ecd6e45ebf5b971585a3f3c9b313e351ad9a3571d1f63c0b": {
+      "account": "soultin",
+      "folder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/국민연금-20261021-55f3303066",
+      "claimedAt": "2026-10-21T11:19:54.320334+09:00",
+      "workerId": null,
+      "status": "held",
+      "errorType": "RuntimeError",
+      "formatContinuationUsed": true,
+      "formatReceiptSha256": "71cc7f69ad500abdcfd10f58ca529304d7b9a59c5ade907b58a1860ed04d4143",
+      "savedFormatParserUsed": true
+    },
+    "soultin|2026-10-22|11:00|keyword-title": {
+      "account": "soultin",
+      "folder": "/mnt/c/10_Project/BaroLab/naver_blog_posting/output/soultin/20261022-ff60a49541",
+      "claimedAt": "2026-10-22T21:10:46.459136+09:00",
+      "workerId": "local-aab62ab60ca245a997aff8d275c8a8c1",
+      "status": "reviewed"
+    }
+  }
+}

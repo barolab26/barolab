@@ -1479,6 +1479,43 @@ def extract_youtube_or_url(url: str) -> Dict[str, Any]:
     seg_cnt = int(ing.get("segmentCount") or 0)
     analysis = build_radar_grounded_analysis([ing], url)
     prompt_ctx = build_ingested_prompt_context([ing])
+    knowhow_saved = None
+    try:
+        from common.llm_client import generate_json
+        from common.knowledge_policy import record_knowhow
+        raw_txt = str(ing.get("transcriptPlain") or ing.get("shortDescription") or "")[:6000]
+        if len(raw_txt) >= 80:
+            kh_schema = {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string", "minLength": 2, "maxLength": 160},
+                    "factCheckSummary": {"type": "string", "minLength": 10, "maxLength": 800},
+                    "method": {"type": "string", "minLength": 10, "maxLength": 1000},
+                    "whenToUse": {"type": "string", "minLength": 5, "maxLength": 400},
+                    "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+                },
+                "required": ["title", "factCheckSummary", "method", "whenToUse", "tags"],
+                "additionalProperties": False,
+            }
+            kh_prompt = (
+                "당신은 @레이더·@닥터·@팀장 합동 팩트체크 및 지식 습득 위원회다. "
+                "대표님이 공유한 유튜브/웹 원문에서 과장·카더라·일반론은 걸러내고(팩트체크), "
+                "[하루 수익 $100 달성]을 위해 우리 블로그(네이버·CF)·지식iN·Threads에 즉시 적용할 수 있는 핵심 실전 노하우만 추출하라.\n"
+                f"제목: {ing.get('title', '')}\n출처: {ing.get('url') or url}\n본문/자막:\n{raw_txt}"
+            )
+            kh_res = generate_json(kh_prompt, agent_slot="radar", response_schema=kh_schema, timeout_seconds=90, memory_read_only=True, crew_actor="radar", crew_actor_label="레이더", crew_stage="url-knowhow-factcheck")
+            knowhow_saved = record_knowhow(
+                title=kh_res["title"],
+                method=kh_res["method"],
+                when_to_use=kh_res["whenToUse"],
+                fact_check_summary=kh_res["factCheckSummary"],
+                source_url=ing.get("url") or url,
+                source_type="ceo_shared_url_factcheck",
+                tags=kh_res.get("tags") or [],
+                recorded_by="radar",
+            )
+    except Exception:
+        pass
     tail_str = (
         f"[URL Ingestor] url={ing.get('url') or url}\n"
         f"[Metadata] title=\"{ing.get('title', '')}\" | author=\"{ing.get('author', '')}\" | segments={seg_cnt}\n"
@@ -1506,7 +1543,8 @@ def extract_youtube_or_url(url: str) -> Dict[str, Any]:
         "ingested": ing,
         "promptContext": prompt_ctx,
         "analysis": analysis,
-        "state": f"「{str(ing.get('title',''))[:28]}」 ({seg_cnt}구간 추출 완료)",
+        "knowhowSaved": knowhow_saved,
+        "state": f"「{str(ing.get('title',''))[:28]}」 ({seg_cnt}구간 추출·팩트체크·Vault 습득 완료)",
         "badge": badge,
     }
 
@@ -1839,36 +1877,37 @@ def process_staff_request_once():
     import hashlib
     from common.collection_observability import locked, write
     from common.crew_chat_bridge import emit_work_event
-    with locked(STAFF_REQUEST_DIR):
-        row = None
-        completing = False
-        from common.collection_observability import load
-        alerts=load(BASE_DIR/'dashboard/data/ego-alerts/tickets.json',{}).get('tickets',{})
-        urgent={hashlib.sha256(r['requestId'].encode()).hexdigest() for r in alerts.values()
-                if str(r.get('requestId','')).startswith('ego-alert:') and r.get('status') in ('inspection_queued','reported_reconciliation_queued')}
-        for path in sorted(STAFF_REQUEST_DIR.glob('*.json'),key=lambda p:(p.stem not in urgent,p.name)):
-            if path.is_symlink():
-                continue
-            try:
-                candidate = json.loads(path.read_text(encoding='utf-8'))
-                if not isinstance(candidate, dict):
-                    raise ValueError('Invalid request document')
-            except (OSError, ValueError):
-                import logging
-                logging.getLogger(__name__).warning('Unreadable staff request preserved: %s', path.name)
-                continue
-            if candidate.get('status') not in ('queued', 'acknowledged', 'awaiting_completion'):
-                continue
-            from common import work_agenda as agendas
-            if agendas.enabled():
-                if not candidate.get('businessAgendaId'):
-                    candidate['businessAgendaId']=agendas.staff_agenda(candidate['requestId'],candidate['actions'])
-                    write(path,candidate)
-                active=agendas.active()
-                if active.get('id')!=candidate['businessAgendaId']:continue
-                if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
-                if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
-                if candidate['status']=='queued' and agendas.running(active):continue
+    row = None
+    completing = False
+    from common.collection_observability import load
+    alerts=load(BASE_DIR/'dashboard/data/ego-alerts/tickets.json',{}).get('tickets',{})
+    urgent={hashlib.sha256(r['requestId'].encode()).hexdigest() for r in alerts.values()
+            if str(r.get('requestId','')).startswith('ego-alert:') and r.get('status') in ('inspection_queued','reported_reconciliation_queued')}
+    for path in sorted(STAFF_REQUEST_DIR.glob('*.json'),key=lambda p:(p.stem not in urgent,p.name)):
+        if path.is_symlink():
+            continue
+        try:
+            candidate = json.loads(path.read_text(encoding='utf-8'))
+            if not isinstance(candidate, dict):
+                raise ValueError('Invalid request document')
+        except (OSError, ValueError):
+            import logging
+            logging.getLogger(__name__).warning('Unreadable staff request preserved: %s', path.name)
+            continue
+        if candidate.get('status') not in ('queued', 'acknowledged', 'awaiting_completion'):
+            continue
+        from common import work_agenda as agendas
+        if agendas.enabled():
+            if not candidate.get('businessAgendaId'):
+                candidate['businessAgendaId']=agendas.staff_agenda(candidate['requestId'],candidate['actions'])
+                write(path,candidate)
+            active=agendas.active()
+            if active.get('id')!=candidate['businessAgendaId']:continue
+            if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
+            if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
+            if candidate['status']=='queued' and agendas.running(active):continue
+        with locked(STAFF_REQUEST_DIR):
+            candidate = json.loads(path.read_text(encoding='utf-8'))
             if candidate.get('status') == 'acknowledged' and time.time() - candidate.get('claimedAt', 0) > 1800:
                 candidate.update(status='unknown', reason='interrupted_or_overdue_no_retry')
                 write(path, candidate)

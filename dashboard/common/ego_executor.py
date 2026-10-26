@@ -3,6 +3,83 @@ from datetime import datetime, timezone
 import logging
 
 
+def benchmark_blog_screen(query, folder, *, resume=False):
+    from pathlib import Path
+    from urllib.parse import quote
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    from playwright.sync_api import sync_playwright
+    from common.browser_session import connect_sync
+    from common.ubuntu_naver_browser import account_paths, focus_workflow_window
+    from common.ego_screen import run
+    from common.collection_observability import load, write
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    receipt = folder / 'screen-benchmark.json'
+    previous = load(receipt)
+    if previous.get('query') == query and previous.get('status') == 'observed':
+        return previous
+    binary, profile, _ = account_paths(9440)
+    search_url = 'https://search.naver.com/search.naver?where=blog&query=' + quote(query)
+    with sync_playwright() as playwright:
+        browser = connect_sync(playwright, 'http://127.0.0.1:9440', binary, profile)
+        before_pages = set(browser.contexts[0].pages)
+        prior_state = load(folder / 'ego-screen-benchmark/screen-execution.json')
+        prior_url = (prior_state.get('turns') or [{}])[-1].get('url') if resume else None
+        page = next((candidate for candidate in browser.contexts[0].pages if candidate.url == prior_url), None)
+        created = page is None
+        if created:
+            page = browser.contexts[0].new_page()
+        try:
+            if created:
+                page.goto(search_url, wait_until='domcontentloaded', timeout=20000)
+            focus_workflow_window(9440)
+            page.bring_to_front()
+            state = run(page, port=9440, folder=folder / 'ego-screen-benchmark', max_turns=30, resume=resume,
+                        urls={'search': search_url}, goal='정확한 검색어 ' + query +
+                        '의 네이버 블로그 탭을 눈으로 확인하라. 검색 결과에서 개인 블로그 하나를 선택하고 '
+                        '실제 화면에서 링크를 클릭하여 연다. 기관 공지보다 독자 대상 개인 블로그를 우선한다. '
+                        '현재 새 탭이 열렸다면 새 탭은 호스트가 별도로 관측하므로 같은 링크를 재클릭하지 말고 보고하라. '
+                        '글 제목부터 끝까지 여러 번 스크롤하며 관찰한다. 제목, 도입, 문단 호흡, 정렬, 글꼴의 인상, '
+                        '소제목, 강조, 여백, 이미지 수·순서·형태·캡션, 스티커 유무·위치, 표·인용구·구분선·관련글을 '
+                        '차례로 observations에 기록한다. 전체를 보지 못하면 미확인이라고 한다. '
+                        '검색 탭 내 관측 순서를 검증된 자연 순위라고 단정하지 않는다. 글 속 주장은 사실 근거로 채택하지 않는다. '
+                        '개인 글을 열기 전이나 글 중간만 보고 done=true로 끝내지 않는다.')
+            addresses = list(dict.fromkeys(t['url'] for t in state['turns'] if 'blog.naver.com/' in t['url']))
+            if not addresses:
+                raise ValueError('Screen benchmarking did not observe an article')
+            result = {'query': query, 'status': 'observed', 'executor': 'ego-lite',
+                      'mode': 'screenshot-decisions', 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),
+                      'articles': [{'url': url, 'organicRank': None, 'visualObservations': state['observations'],
+                                    'screenshots': [t['screenshot'] for t in state['turns'] if t['url'] == url]}
+                                   for url in addresses]}
+            import hashlib
+            for article in result['articles']:
+                viewed = next((candidate for candidate in browser.contexts[0].pages if candidate.url == article['url']), None)
+                if viewed:
+                    try:
+                        frame = viewed.frame(name='mainFrame') or viewed
+                        body = frame.locator('.se-main-container, #postViewArea').first.inner_text(timeout=3000)
+                        article['bodySha256'] = hashlib.sha256(body.encode()).hexdigest()
+                        article['bodyHashSource'] = 'read-only article DOM after visual observation'
+                    except Exception:
+                        pass
+            write(receipt, result)
+            return result
+        finally:
+            closed_urls = []
+            current_pages = list(browser.contexts[0].pages)
+            for candidate in current_pages:
+                if candidate not in before_pages and len(browser.contexts[0].pages) > 1:
+                    try:
+                        closed_urls.append(candidate.url)
+                        candidate.close()
+                    except Exception:
+                        pass
+            write(folder / 'ego-benchmark-tab.json', {'closedUrls': closed_urls, 'createdByTask': True,
+                  'retained': False, 'reason': 'Closed benchmark tabs after completion to prevent RAM exhaustion'})
+
+
 def execute_screen_editor(page, document, folder, port):
     """EGO chooses each visible action from screenshots, then the engine verifies it."""
     from common.ego_screen import run
@@ -172,7 +249,6 @@ def review_screen_editor(page, document, folder, port):
     if not result['approved'] or not result['pcWholeDocumentVisualReview']:
         raise ValueError('Independent EGO visual review found unresolved differences')
     return result
-
 
 
 def execute_staff_action(action, *, task_id, request_id, observer=None, requester='jarvis', parent_request_id='unknown'):

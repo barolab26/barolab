@@ -1,0 +1,149 @@
+{
+  "checkedAt": "2026-10-24T06:44:10.661300+00:00",
+  "sites": [
+    {
+      "domain": "baronote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.baronote.kr/",
+      "sitemap": "https://www.baronote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:27.959464+00:00"
+    },
+    {
+      "domain": "daynote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.daynote.kr/",
+      "sitemap": "https://www.daynote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:29.315952+00:00"
+    },
+    {
+      "domain": "healthcox.com",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.healthcox.com/",
+      "sitemap": "https://www.healthcox.com/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:32.929264+00:00"
+    },
+    {
+      "domain": "joynote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.joynote.kr/",
+      "sitemap": "https://www.joynote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:34.623364+00:00"
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.justinfo.co.kr/",
+      "sitemap": "https://www.justinfo.co.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:36.141561+00:00"
+    },
+    {
+      "domain": "maxnote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.maxnote.kr/",
+      "sitemap": "https://www.maxnote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:39.132724+00:00"
+    },
+    {
+      "domain": "meganote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.meganote.kr/",
+      "sitemap": "https://www.meganote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:42.562410+00:00"
+    },
+    {
+      "domain": "must-good.com",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.must-good.com/",
+      "sitemap": "https://www.must-good.com/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:46.831773+00:00"
+    },
+    {
+      "domain": "must-joy.com",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.must-joy.com/",
+      "sitemap": "https://www.must-joy.com/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:50.559887+00:00"
+    },
+    {
+      "domain": "must-pick.com",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "sc-domain:must-pick.com",
+      "sitemap": "https://www.must-pick.com/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:55.225476+00:00"
+    },
+    {
+      "domain": "nolplace.com",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.nolplace.com/",
+      "sitemap": "https://www.nolplace.com/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:43:57.177125+00:00"
+    },
+    {
+      "domain": "smilenote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.smilenote.kr/",
+      "sitemap": "https://www.smilenote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:44:00.086174+00:00"
+    },
+    {
+      "domain": "soulnote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.soulnote.kr/",
+      "sitemap": "https://www.soulnote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:44:04.282984+00:00"
+    },
+    {
+      "domain": "topnote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.topnote.kr/",
+      "sitemap": "https://www.topnote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:44:07.485234+00:00"
+    },
+    {
+      "domain": "tripmarvel.com",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.tripmarvel.com/",
+      "sitemap": "https://www.tripmarvel.com/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:44:09.032057+00:00"
+    },
+    {
+      "domain": "woorinote.kr",
+      "status": "submitted",
+      "method": "sitemap",
+      "property": "https://www.woorinote.kr/",
+      "sitemap": "https://www.woorinote.kr/sitemap.xml",
+      "indexed": null,
+      "checkedAt": "2026-10-24T06:44:10.567550+00:00"
+    }
+  ]
+}

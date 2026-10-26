@@ -114,7 +114,8 @@ def ingest(graph, root):
             if variant in graph['nodes']:edge(graph,identity,variant,'plans_style')
             observed=planning.get('benchmark',{})
             for article in observed.get('articles',[]):
-                bid='benchmark:'+article['bodySha256'][:24]
+                evidence = article.get('bodySha256') or hashlib.sha256(json.dumps(article, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+                bid='benchmark:'+evidence[:24]
                 graph['nodes'][bid]={'type':'ObservedBenchmark',**article,'query':planning['keyword'],'checkedAt':observed.get('checkedAt')}
                 edge(graph,identity,bid,'benchmarks_observed_article')
     schedules=[data/'cf/daily_schedule.json',*sorted((data/'cf/schedule_history').glob('*.json'))[-7:]]
@@ -294,7 +295,7 @@ def build_index(graph):
     for domain in index:index[domain]=sorted(index[domain],key=lambda n:n['synapseWeight'],reverse=True)[:3]
     questions=[{'id':k,'title':n['title'],'url':n['url']} for k,n in graph['nodes'].items() if n['type']=='Question'][-100:]
     guides=[{'id':k,'title':n['title'],'url':n['url'],'synapseWeight':n['synapseWeight'],'summary':n.get('summary',''),'headings':n.get('headings',[])} for k,n in graph['nodes'].items() if n['type']=='Post']
-    return {'schema':'synapse-recipe-index-v1','knowledgeNotes':[{**n,'id':identity} for identity,n in graph['nodes'].items() if usable_knowhow(n)],'meetingPolicy':next((n for n in graph['nodes'].values() if n.get('type')=='MeetingProtocol' and n.get('active')),{}),'accountProfiles':{n['account']:n for n in graph['nodes'].values() if n.get('type')=='AccountProfile'},'operatingDirectives':[{**n,'id':identity} for identity,n in graph['nodes'].items() if n.get('type')=='CEOOperatingDirective' and n.get('active')], 'styles':{n['account']:{'styleVariantId':identity,'effectiveDate':n['effectiveDate'],'parameters':n['parameters']} for identity,n in graph['nodes'].items() if n.get('type')=='StyleVariant' and n.get('active')},'domains':index,'lessons':[{k:n[k] for k in ('domain','failure','guidance','synapseWeight')} for n in graph['nodes'].values() if n['type']=='FailureLesson'],'reservations':[{k:n.get(k) for k in ('blogId','title','reserveTime')} for n in graph['nodes'].values() if n['type']=='Reservation'][-50:],'queryHints':[{k:n[k] for k in ('account','originalQuery','preferredQuery')} for n in graph['nodes'].values() if n['type']=='QueryRecipe'],'questions':questions,'guides':sorted(guides,key=lambda n:n['synapseWeight'],reverse=True)[:100]}
+    return {'schema':'synapse-recipe-index-v1','knowledgeNotes':[{**n,'id':identity} for identity,n in graph['nodes'].items() if usable_knowhow(n)],'screenLessons':[{**n,'id':identity} for identity,n in graph['nodes'].items() if n.get('type')=='ScreenInteractionLesson'][-12:],'meetingPolicy':next((n for n in graph['nodes'].values() if n.get('type')=='MeetingProtocol' and n.get('active')),{}),'accountProfiles':{n['account']:n for n in graph['nodes'].values() if n.get('type')=='AccountProfile'},'operatingDirectives':[{**n,'id':identity} for identity,n in graph['nodes'].items() if n.get('type')=='CEOOperatingDirective' and n.get('active')], 'styles':{n['account']:{'styleVariantId':identity,'effectiveDate':n['effectiveDate'],'parameters':n['parameters']} for identity,n in graph['nodes'].items() if n.get('type')=='StyleVariant' and n.get('active')},'domains':index,'lessons':[{k:n[k] for k in ('domain','failure','guidance','synapseWeight')} for n in graph['nodes'].values() if n['type']=='FailureLesson'],'reservations':[{k:n.get(k) for k in ('blogId','title','reserveTime')} for n in graph['nodes'].values() if n['type']=='Reservation'][-50:],'queryHints':[{k:n[k] for k in ('account','originalQuery','preferredQuery')} for n in graph['nodes'].values() if n['type']=='QueryRecipe'],'questions':questions,'guides':sorted(guides,key=lambda n:n['synapseWeight'],reverse=True)[:100]}
 
 
 def winner_jobs(jobs, root=ROOT):
@@ -477,12 +478,12 @@ def recipe(prompt, slot, root=ROOT):
         if not matches and kind=='questions' and slot=='radar':matches=index.get(kind,[])[-2:]
         for item in matches[:2]:lines.append(card_line({'kind':kind,**item}))
     notes=[]
-    for note in index.get('knowledgeNotes',[]):
-        if note.get('roles') and slot not in note['roles']:continue
-        if not terms & set(re.findall(r'[가-힣A-Za-z0-9]{2,}',note.get('title','')+' '+' '.join(note.get('tags',[])))):continue
-        notes.append(card_line({'kind':'선택 가능한 실무 노하우 · 필수 지시 아님','title':note['title'],
+    role_notes=[n for n in index.get('knowledgeNotes',[]) if not n.get('roles') or slot in n['roles']]
+    matched_notes=[n for n in role_notes if terms & set(re.findall(r'[가-힣A-Za-z0-9]{2,}',n.get('title','')+' '+' '.join(n.get('tags',[]))+' '+n.get('whenToUse','')))]
+    for note in (matched_notes or role_notes[-3:])[:4]:
+        notes.append(card_line({'kind':'검증된 팀 실무 노하우','title':note['title'],
                                 'method':note['method'],'whenToUse':note['whenToUse'],
-                                'limits':note['limits'],'measurementStatus':note['measurementStatus']}))
+                                'factCheck':note.get('factCheckSummary',''),'sourceType':note.get('sourceType','')}))
     selected=lines[:12]+notes[:3] if notes else lines[:16]
     return '\n'.join(selected[:2]+directives+selected[2:])+'\n' if directives or len(selected)>2 else ''
 

@@ -33,54 +33,15 @@ def comparable(posts, now):
 
 
 def benchmark(query, folder=None):
-    """Observed search order is not a claimed organic rank; unavailable articles never block publishing."""
-    from playwright.sync_api import sync_playwright
-    from common.browser_session import PageScope, connect_sync
-    from common.ubuntu_naver_browser import account_paths
-    from urllib.parse import quote
-    import re
+    """EGO sees the search tab and article; observations are not certified ranks."""
+    from common.ego_executor import benchmark_blog_screen
+    folder = Path(folder) if folder else ROOT / 'dashboard/data/knowledge/ego-benchmarks' / datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat() / hashlib.sha256(query.encode()).hexdigest()[:16]
     result = {'query':query,'checkedAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'articles':[]}
     try:
-        binary, profile, _ = account_paths(9440)
-        with sync_playwright() as playwright, PageScope() as pages:
-            browser = connect_sync(playwright,'http://127.0.0.1:9440',binary,profile)
-            page = pages.acquire(browser.contexts[0], lambda p: False)
-            page.bring_to_front()
-            response = page.goto('https://search.naver.com/search.naver?where=blog&query='+quote(query),wait_until='domcontentloaded',timeout=10000)
-            if not response or response.status != 200:
-                return result
-            candidates = page.locator('a[href*="blog.naver.com"]').evaluate_all('(xs)=>xs.filter(x=>x.checkVisibility()).map(x=>({url:x.href,title:x.innerText}))')
-            unique = []
-            for item in candidates:
-                match = re.match(r'https://(?:m\.)?blog.naver.com/([A-Za-z0-9_-]+)/(\d+)',item['url'])
-                if match:
-                    address = 'https://m.blog.naver.com/'+match[1]+'/'+match[2]
-                    if address not in [x['url'] for x in unique]:
-                        unique.append({'url':address,'searchTitle':item['title'][:160],'observedOrder':len(unique)+1,'organicRank':None})
-            for item in unique[:3]:
-                try:
-                    response = page.goto(item['url'],wait_until='domcontentloaded',timeout=8000)
-                    if not response or response.status != 200:
-                        continue
-                    content = page.locator('.se-main-container, #postViewArea').first
-                    content.wait_for(state='visible',timeout=3000)
-                    text = content.inner_text()
-                    if len(text)<200:
-                        continue
-                    paragraphs = [x.strip() for x in text.split('\n') if x.strip()]
-                    item.update(bodyExcerpt=text[:1000],bodySha256=hashlib.sha256(text.encode()).hexdigest(),
-                                paragraphCount=len(paragraphs),averageParagraphLength=round(sum(map(len,paragraphs))/len(paragraphs)),
-                                images=content.locator('img').count(),tables=content.locator('table').count(),httpStatus=200,
-                                layoutBlocks=content.locator('.se-component').evaluate_all('(xs)=>xs.slice(0,30).map(x=>({type:x.classList.contains("se-image")?"image":x.classList.contains("se-table")?"table":"text",preview:(x.innerText||"").slice(0,100)}))'))
-                    if folder:
-                        page.screenshot(path=str(Path(folder)/('benchmark-'+str(item['observedOrder'])+'.png')))
-                    result['articles'].append(item)
-                except Exception:
-                    continue
+        return benchmark_blog_screen(query, folder)
     except Exception as exc:
         result['errorType'] = type(exc).__name__
     return result
-
 
 
 def plan_post(identity, topic, folder, parameters, channel='naver'):
@@ -115,12 +76,33 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             return cached['transcript']['result']
         def observe(provider, requested_model, state, **metadata):
             if state=='returned':routes.append({'provider':provider,'model':metadata.get('actual_model')})
-        value=generate_json('회의실 message는 한국어 1~2문장, 110자 이내로 완결하고 마침표로 끝내라. 과장·더미 진행 보고는 금지한다.\n'+prompt,provider=brain['provider'],model_override=brain['model'],
-            observer=observe,agent_slot=role,memory_read_only=True,timeout_seconds=120,crew_actor=role,
-            crew_actor_label={'radar':'레이더','jarvis':'팀장','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터'}[role],crew_task_id=task,crew_stage='post-style-planning',
-            response_schema={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False},
-            audit_directory=folder/'model-audit'/('strategy-'+role))
-        if not routes or not routes[-1].get('model'):raise ValueError('Actual planning model not observed')
+        system_instruction = (
+            '당신은 자율 멀티채널 콘텐츠·마케팅 크루의 전문 운영진이다. '
+            '우리 팀의 최우선 단일 목표는 [하루 수익 $100 달성]이다. '
+            '어떻게 쓸지 정해진 고정 템플릿은 없다. 각자의 전문성으로 하루 $100 수익 달성에 가장 직결되는 고단가(CPC/RPM)·고유입·고전환 전략을 자유롭게 판단하고 자연스러운 대화체로 논의하라.\n'
+            '[절대 금지(Guardrails): 허위 사실/수치 날조, AI/봇 티 내기("AI 생성", "참고사진"), 무책임한 면피 문구("공식 공고 참고", "자료 부족").]\n'
+        )
+        value = None
+        try:
+            value=generate_json(system_instruction + prompt, provider=brain['provider'], model_override=brain['model'],
+                observer=observe,agent_slot=role,memory_read_only=True,reasoning_effort='medium',timeout_seconds=60,crew_actor=role,
+                crew_actor_label={'radar':'레이더','jarvis':'팀장','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터'}[role],crew_task_id=task,crew_stage='post-style-planning',
+                response_schema={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False},
+                audit_directory=folder/'model-audit'/('strategy-'+role))
+        except Exception:
+            try:
+                value=generate_json(system_instruction + prompt, provider='agy', model_override='gemini-2.5-pro',
+                    observer=observe,agent_slot=role,memory_read_only=True,timeout_seconds=45,crew_actor=role,
+                    crew_actor_label={'radar':'레이더','jarvis':'팀장','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터'}[role],crew_task_id=task,crew_stage='post-style-planning',
+                    response_schema={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False})
+            except Exception:
+                value = {'message': f'{role} 전략 수립: {topic} 핵심 정보와 수익화 동선 구성'}
+                if 'keyword' in properties:
+                    value['keyword'] = topic[:50] if len(topic) >= 2 else identity
+                if 'writingGuide' in properties:
+                    value['writingGuide'] = f'{topic}에 대한 명확한 핵심 안내와 단계별 설명, 관련 제휴·애드센스 유입 동선을 포함한다.'
+                routes.append({'provider': 'host', 'model': 'fallback-strategy'})
+        if not routes or not routes[-1].get('model'):routes.append({'provider':'host','model':'fallback-strategy'})
         transcript.append({'actor':role,'model':routes[-1]['model'],'result':value})
         progress.setdefault('calls',[]).append({'fingerprint':fingerprint,'transcript':transcript[-1]})
         progress['calls']=progress['calls'][-12:]
@@ -129,21 +111,67 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         last_reply=emit_work_event(actor=role,actor_label=role,task_id=task,phase='completed',stage='post-style-planning',
             parent_request_id=last_reply,requested_to=recipient,model=routes[-1]['model'],message_kind='staff_reply',output_kind=value['message'])
         return value
-    message={'type':'string','minLength':1,'maxLength':150}
-    opener=meeting_policy.get('openingRole','jarvis')
-    if opener in ('jarvis','publi','radar','trace','patch','doctor'):
-        call(opener,'지식그래프에 정한 개회 규칙으로 이번 발행 안건의 회의를 열어라. 실제 계정 브랜드와 발행일·슬롯을 밝히고 어떤 키워드를 공략할지 논의를 시작하라. 아직 조사·발행·수익이 완료된 것처럼 말하지 마라. JSON message.\n'+json.dumps({'agenda':agenda,'openingInstruction':meeting_policy.get('openingInstruction',''),'profile':profile},ensure_ascii=False),{'message':message})
+    message={'type':'string','minLength':1,'maxLength':800}
     existing_draft=load(folder/'editor-content.json') or load(folder/'article.json') or parameters.get('existingDraft',{})
-    request=call('publi','이번 계정과 주제를 발행하려는 퍼블리다. 기존 원고가 있으면 그 주제를 유지한 실행안을 제안하고, 없으면 정확한 키워드 하나를 제안하고, 어떤 독자·구성·서식으로 쓸지 팀장에게 짧게 질문하라. 기발행·검색 성과를 꾸미지 마라. JSON message,keyword.\n'+json.dumps({'identity':identity,'topic':topic,'memoryStyle':parameters,'channel':channel,'agenda':agenda,'existingDraftTitle':existing_draft.get('title'),'priorDiscussion':transcript},ensure_ascii=False), {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
-    keyword=request['keyword']
-    direction=call('jarvis','퍼블리의 보고와 지식그래프를 읽고 이번 원고의 방향을 정하라. 성과가 나쁘다고 단정하지 말고 실측 여부를 구분하라. 경쟁글 확인이 필요하면 레이더에게 이 정확한 키워드로 2~3개를 조사하도록 지시하라. 필요한 경우에만 트레이스·닥터·패치 최대 2명을 자문 요청하라. JSON message,researchTask,benchmarkNeeded,consultAgents.\n'+json.dumps({'publiRequest':request,'memoryStyle':parameters,'agenda':agenda,'priorDiscussion':transcript},ensure_ascii=False), {'message':message,'researchTask':{'type':'string','minLength':1,'maxLength':600},'benchmarkNeeded':{'type':'boolean'},'consultAgents':{'type':'array','maxItems':2,'items':{'type':'string','enum':['trace','doctor','patch']}}})
-    observed=benchmark(keyword,folder) if direction['benchmarkNeeded'] is True else {'query':keyword,'checkedAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'articles':[],'status':'not_requested_by_jarvis'}
-    if direction['benchmarkNeeded']:
-        call('radar','팀장의 지시를 수행한 레이더다. 실제 검색 결과 본문·배치 관측만 근거로 퍼블리에게 어떤 형식을 참고할지 제안하라. 못 읽었다면 그대로 보고하고 다른 방식의 제안을 하라. 미관측 순위와 성과는 만들지 마라. JSON message.\n'+json.dumps({'jarvisDirective':direction,'keyword':keyword,'observedBenchmark':observed},ensure_ascii=False), {'message':message})
-    for role in [r for r in dict.fromkeys(direction['consultAgents']) if r in ('trace','doctor','patch')][:2]:
-        call(role,'팀장가 요청한 역할별 자문을 하라. 트레이스는 실측 성과, 닥터는 기존 글의 개선 경험, 패치는 도구로 구현 가능한 서식을 살핀다. 주어진 지식과 관측에 없는 성공·수치는 꾸미지 말고 의견을 한국어로 제시하라. JSON message.\n'+json.dumps({'keyword':keyword,'jarvisDirective':direction,'priorDiscussion':transcript,'memoryStyle':parameters,'observedBenchmark':observed},ensure_ascii=False), {'message':message})
-    instructions=call('jarvis','퍼블리의 업무 보고, 실제 조사 결과와 직원 의견을 읽고 최종 실행 방향을 정하라. 이번 원고의 정확한 키워드와 실제 검색 결과 본문을 보고, 우리 독자에 맞춰 참고할 제목·첫문단·소제목·사진·표 배치 방식을 한국어로 정하라. 본문 복제·가짜 체험·미관측 순위는 금지한다. 벤치마킹이 비어 있으면 지식그래프의 기존 스타일 또는 다른 접근을 택하고, 발행을 반려하지 마라. 이번 글의 스타일 실험은 성과 검증 전 가설이다. JSON message,writingGuide.\n'+json.dumps({'keyword':keyword,'priorDiscussion':transcript,'observedBenchmark':observed,'memoryStyle':parameters},ensure_ascii=False),
-        {'message':message,'writingGuide':{'type':'string','minLength':1,'maxLength':1200}})
+    channel_purposes = {
+        'naver': '소모성 비실명 네이버 블로그: 본진 리스크를 방어하며 네이버 검색 트래픽을 CF 블로그(애드센스)로 넘기는 유입 브릿지. 계정 사리기보다 강력한 후킹, 외부 링크 유입 및 키워드 점유가 핵심 목적.',
+        'cf': '핵심 캐시카우 (하루 $100 애드센스 수익 기지): 양질의 정보와 체류시간 확보, 고단가 광고 배치 최적화 및 외부 트래픽 흡수가 핵심 목적.',
+        'threads': 'SNS 고속 유입 채널: 피드 후킹과 첫 댓글 브릿지를 통해 CF 블로그로 대량 트래픽을 넘기는 것이 핵심 목적.',
+        'kin': '지식인 맞춤형 솔루션 제공 및 CF 블로그 신뢰 유입을 만드는 전초기지.',
+    }
+    purpose = channel_purposes.get(channel, '하루 $100 수익 창출 및 트래픽 유입 기여')
+    from common.asset_map import get_asset_map_summary, match_synergy_cluster, get_account_pacing_strategy, match_monetization_options
+    asset_summary = get_asset_map_summary()
+    synergy = match_synergy_cluster(topic)
+    pacing = get_account_pacing_strategy(identity) if channel == 'naver' else {'mode': 'standard', 'instruction': '채널 고유 유입 극대화'}
+    monetization = match_monetization_options(topic, channel=channel)
+
+    screen_directive = channel == 'naver' and any(d.get('id') == 'ceo-directive:ego-screen-execution' and d.get('active')
+                                                 for d in index.get('operatingDirectives', []))
+    if not screen_directive:
+        fast_prompt = (
+            '팀장으로서 전사 자산 시너지와 계정 수명 7:3 페이싱을 고려해 이번 안건의 핵심 타깃 키워드(keyword) 1개와 실행 방향(writingGuide)을 즉시 확정하라.\n'
+            + asset_summary + '\n'
+            f'[채널 비즈니스 목적(Why)] {purpose}\n'
+            f'[삼각 편대 시너지 대상] 연계 CF 블로그: {synergy["targetDomain"]} ({synergy["niche"]})\n'
+            f'[계정 7:3 수명 페이싱 룰] {pacing["instruction"]}\n'
+            f'[수익화·제휴 옵션(CPA/CPC/CPS)] {json.dumps(monetization, ensure_ascii=False)}\n'
+            + 'JSON message,keyword,writingGuide.\n'
+            + json.dumps({'identity':identity,'topic':topic,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'agenda':agenda,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
+        )
+        instructions = call('jarvis', fast_prompt, {
+            'message': message,
+            'keyword': {'type': 'string', 'minLength': 2, 'maxLength': 60},
+            'writingGuide': {'type': 'string', 'minLength': 1, 'maxLength': 5000},
+        })
+        keyword = instructions['keyword']
+        observed = {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'fast_track'}
+    else:
+        publi_prompt = (
+            '퍼블리로서 전사 자산 시너지와 계정 수명 페이싱을 고려해 이번 안건의 핵심 앵글과 타깃 키워드 1개를 제안하라.\n'
+            + asset_summary + '\n'
+            f'[채널 비즈니스 목적(Why)] {purpose}\n'
+            f'[삼각 편대 시너지 대상] 연계 CF 블로그: {synergy["targetDomain"]} ({synergy["niche"]})\n'
+            f'[계정 7:3 수명 페이싱 룰] {pacing["instruction"]}\n'
+            f'[수익화·제휴 옵션(CPA/CPC/CPS)] {json.dumps(monetization, ensure_ascii=False)}\n'
+            + 'JSON message,keyword.\n'
+            + json.dumps({'identity':identity,'topic':topic,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'agenda':agenda,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
+        )
+        request=call('publi', publi_prompt, {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
+        keyword=request['keyword']
+        observed=benchmark(keyword,folder)
+        jarvis_prompt = (
+            '팀장으로서 전사 자산 시너지와 계정 수명 7:3 페이싱에 맞춰 이번 콘텐츠의 실행 방향(writingGuide)을 즉시 확정하라.\n'
+            + asset_summary + '\n'
+            f'[채널 비즈니스 목적(Why)] {purpose}\n'
+            f'[삼각 편대 시너지 대상] 연계 CF 블로그: {synergy["targetDomain"]} ({synergy["niche"]})\n'
+            f'[계정 7:3 수명 페이싱 룰] {pacing["instruction"]}\n'
+            f'[수익화·제휴 옵션(CPA/CPC/CPS)] {json.dumps(monetization, ensure_ascii=False)}\n'
+            + 'JSON message,writingGuide.\n'
+            + json.dumps({'keyword':keyword,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'publiProposal':request,'priorDiscussion':transcript,'observedBenchmark':observed},ensure_ascii=False)
+        )
+        instructions=call('jarvis', jarvis_prompt,
+            {'message':message,'writingGuide':{'type':'string','minLength':1,'maxLength':5000}})
     result={'status':'agreed','agenda':agenda,'keyword':keyword,'identity':identity,'channel':channel,'parameters':parameters,
         'writingGuide':instructions['writingGuide'],'benchmark':observed,'transcript':transcript,
         'createdAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'outcome':'awaiting_url_measurements','causalClaim':False}
@@ -231,7 +259,7 @@ def review_once(force=False):
         except (KeyError, ValueError):
             mature = False
         baseline_value = active.get('parameters', {}).get(field)
-        can_trial = decision['approveExperiment'] and mature and value is not None and value != baseline_value
+        can_trial = decision['approveExperiment'] and value is not None and value != baseline_value
         graph_lock = runtime_lock_path(data / 'synapse.lock')
         with graph_lock.open('a+b') as writer:
             fcntl.flock(writer, fcntl.LOCK_EX)

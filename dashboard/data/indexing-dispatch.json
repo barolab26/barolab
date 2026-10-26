@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-26T01:05:48.252005+00:00",
+  "naver": [
+    {
+      "site": "https://www.baronote.kr",
+      "status": "daily_budget_exhausted",
+      "used": 50,
+      "remaining": 0,
+      "limit": 50
+    },
+    {
+      "site": "https://www.healthcox.com",
+      "status": "daily_budget_exhausted",
+      "used": 50,
+      "remaining": 0,
+      "limit": 50
+    },
+    {
+      "site": "https://www.justinfo.co.kr",
+      "status": "daily_budget_exhausted",
+      "used": 50,
+      "remaining": 0,
+      "limit": 50
+    },
+    {
+      "site": "https://www.must-good.com",
+      "status": "daily_budget_exhausted",
+      "used": 50,
+      "remaining": 0,
+      "limit": 50
+    },
+    {
+      "site": "https://www.tripmarvel.com",
+      "status": "daily_budget_exhausted",
+      "used": 50,
+      "remaining": 0,
+      "limit": 50
+    }
+  ],
+  "indexed": null,
+  "discovery": {
+    "status": "metrics_collector_busy"
+  },
+  "googleSitemaps": [],
+  "google": {
+    "status": "daily_budget_exhausted",
+    "attempted": 0,
+    "completed": 0,
+    "requestMode": true
+  },
+  "finishedAt": "2026-10-26T01:05:51.124186+00:00"
+}

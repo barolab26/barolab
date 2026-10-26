@@ -17,7 +17,7 @@ import requests
 
 ROOT=Path(__file__).resolve().parents[2]
 FLEET=((9334,'soultin','mustpickinfo','정책·지원금·연금 / 블로그 1호'),
-       (9333,'soul5373','mustinfo','연예이슈 / 애드포스트 수집'),
+       (9333,'soul5373','mustinfo','연예이슈 / 애드포스트 · JEV 콘솔(04세션)'),
        (9335,'yoon_master','yoonviews','쇼핑커넥트 / 가전·리빙'),
        (9231,'adinfo0905','adinfo0905','직장인 루틴 / 지식iN 1호'),
        (9230,'stone0747','stone0747','지원금 마감 / 지식iN 2호'),
@@ -148,18 +148,62 @@ def credit_probe(values):
     except (requests.RequestException,ValueError,KeyError,TypeError):return dict(status='연결 지연',checkedAt=time.time())
 
 
+def _jev_console_probe(ports=(9333, 9334, 9335, 9440)):
+    """Read live JEV (TypeSafe) balance and token usage from the logged-in Chrome console tab."""
+    import websocket
+    for port in ports:
+        try:
+            r = requests.get(f'http://127.0.0.1:{port}/json/list', timeout=0.4, allow_redirects=False)
+            if r.status_code != 200:
+                continue
+            tabs = r.json()
+            tab = next((t for t in tabs if t.get('type') == 'page' and 'console.typesafe.ai' in str(t.get('url', ''))), None)
+            if not tab or not tab.get('webSocketDebuggerUrl'):
+                continue
+            ws = websocket.create_connection(tab['webSocketDebuggerUrl'], timeout=0.8, suppress_origin=True)
+            try:
+                ws.send(json.dumps({'id': 1, 'method': 'Runtime.evaluate', 'params': {'expression': 'document.body ? document.body.innerText : ""', 'returnByValue': True}}))
+                for _ in range(4):
+                    msg = json.loads(ws.recv())
+                    if msg.get('id') == 1:
+                        text = str(msg.get('result', {}).get('result', {}).get('value') or '')
+                        m_bal = re.search(r'Balance\s*\$([0-9]+(?:\.[0-9]+)?)', text, re.I)
+                        m_tok = re.search(r'Tokens\s*([0-9.,]+[KMB]?)', text, re.I)
+                        if m_bal:
+                            bal = float(m_bal.group(1))
+                            return {
+                                'status': 'collected',
+                                'balance': bal,
+                                'unit': 'USD',
+                                'tokensUsed': m_tok.group(1) if m_tok else None,
+                                'sessionPort': port,
+                                'sessionLabel': '04번 크롬' if port == 9333 else f'{port}번 크롬',
+                                'source': str(tab.get('url', 'https://console.typesafe.ai/home')),
+                            }
+                        break
+            finally:
+                ws.close()
+        except Exception:
+            continue
+    return None
+
+
 def provider_credit_probe(provider, values):
     """Read balances only; a missing observation never becomes zero."""
     checked = time.time()
     names = {'kie': ('KIE_API_KEY',), 'jev': ('TYPESAFE_API_KEY', 'JEV_BAROINCOME_API_KEY')}
     key = next((values.get(name) for name in names[provider] if values.get(name)), None)
     out = dict(status='키 미설정', balance=None, checkedAt=checked, unit='credits')
+    if provider == 'jev':
+        console_data = _jev_console_probe()
+        if console_data:
+            return {**out, **console_data, 'usable': bool(key or console_data.get('balance', 0) > 0), 'apiKeySet': bool(key), 'checkedAt': checked}
+        if not key:
+            return out
+        return {**out, 'status': '잔액 미수집 · 콘솔 로그인 필요', 'usable': bool(key), 'apiKeySet': bool(key),
+                'source': 'https://help.typesafe.ai/articles/5505198974-what-s-a-402-error-and-how-can-i-add-more-credits'}
     if not key:
         return out
-    if provider == 'jev':
-        # Public TypeSafe OpenAPI exposes models/systemone only; do not guess a billing API.
-        return {**out, 'status': '잔액 미수집 · 콘솔 로그인 필요',
-                'source': 'https://help.typesafe.ai/articles/5505198974-what-s-a-402-error-and-how-can-i-add-more-credits'}
     try:
         response = requests.get('https://api.kie.ai/api/v1/chat/credit',
             headers={'Authorization': 'Bearer ' + key}, timeout=(3, 5), allow_redirects=False)
@@ -175,36 +219,73 @@ def provider_credit_probe(provider, values):
         return {**out, 'status': '잔액 조회 지연'}
 
 
+def _parse_agy_usage_output(stdout_text):
+    payload = json.loads(stdout_text)
+    if payload.get('status') != 'SUCCESS' or payload.get('command', {}).get('name') != 'usage':
+        raise ValueError('Not a quota command result')
+    groups = []
+    for group in payload['command']['data']['groups'][:12]:
+        name = group['name']
+        if not isinstance(name, str) or not re.fullmatch(r'[A-Za-z0-9 +/()._-]{1,60}', name):
+            raise ValueError('Invalid quota group')
+        buckets = []
+        for bucket in group['buckets'][:8]:
+            fraction = bucket['remaining_fraction']
+            window = bucket['window']
+            reset = bucket['reset_time']
+            if type(fraction) not in (int, float) or not math.isfinite(fraction) or not 0 <= fraction <= 1:
+                raise ValueError('Invalid quota fraction')
+            parsed = dt.datetime.fromisoformat(reset.replace('Z', '+00:00'))
+            if parsed.tzinfo is None or window not in ('weekly', '5h'):
+                raise ValueError('Invalid quota window')
+            buckets.append(dict(window=window, remainingPercent=round(fraction * 100, 1), resetAt=parsed.isoformat()))
+        if not buckets:
+            raise ValueError('Missing quota buckets')
+        groups.append(dict(name=name, buckets=buckets))
+    if not groups:
+        raise ValueError('Missing quota groups')
+    return groups
+
+
 def agy_quota():
-    """Only the built-in /usage command; never send a model prompt or log auth output."""
-    executable=Path.home()/'.local/bin/agy'
-    if not executable.is_file():return dict(status='CLI 미설치',checkedAt=time.time())
-    try:
-        with tempfile.TemporaryDirectory(prefix='barolab-agy-quota-') as folder:
-            result=subprocess.run([str(executable),'-p','/usage','--output-format','json','--print-timeout','15s'],
-                cwd=folder,stdin=subprocess.DEVNULL,capture_output=True,text=True,encoding='utf-8',timeout=20)
-        if result.returncode:return dict(status='조회 실패 · CLI 로그인 확인',checkedAt=time.time())
-        payload=json.loads(result.stdout)
-        if payload.get('status')!='SUCCESS' or payload.get('command',{}).get('name')!='usage':
-            raise ValueError('Not a quota command result')
-        groups=[]
-        for group in payload['command']['data']['groups'][:12]:
-            name=group['name']
-            if not isinstance(name,str) or not re.fullmatch(r'[A-Za-z0-9 +/()._-]{1,60}',name):raise ValueError('Invalid quota group')
-            buckets=[]
-            for bucket in group['buckets'][:8]:
-                fraction=bucket['remaining_fraction'];window=bucket['window'];reset=bucket['reset_time']
-                if type(fraction) not in (int,float) or not math.isfinite(fraction) or not 0<=fraction<=1:
-                    raise ValueError('Invalid quota fraction')
-                parsed=dt.datetime.fromisoformat(reset.replace('Z','+00:00'))
-                if parsed.tzinfo is None or window not in ('weekly','5h'):raise ValueError('Invalid quota window')
-                buckets.append(dict(window=window,remainingPercent=round(fraction*100,1),resetAt=parsed.isoformat()))
-            if not buckets:raise ValueError('Missing quota buckets')
-            groups.append(dict(name=name,buckets=buckets))
-        if not groups:raise ValueError('Missing quota groups')
-        return dict(status='collected',groups=groups,checkedAt=time.time())
-    except (OSError,ValueError,TypeError,KeyError,AttributeError,subprocess.SubprocessError):
-        return dict(status='조회 지연 · CLI 로그인 확인',checkedAt=time.time())
+    """Only the built-in /usage command across all configured Gemini accounts."""
+    executable = Path.home() / '.local/bin/agy'
+    if not executable.is_file():
+        return dict(status='CLI 미설치', checkedAt=time.time())
+    from common.agy_cli import list_account_homes, rotation_state
+    homes = list_account_homes()
+    rot = rotation_state()
+    call_counts = rot.get('callCounts') or {}
+    last_used = rot.get('lastUsedAccount')
+    account_rows = []
+    primary_groups = []
+    for email, home_dir in homes:
+        env = {**os.environ, 'HOME': str(home_dir), 'USERPROFILE': str(home_dir)}
+        try:
+            with tempfile.TemporaryDirectory(prefix='barolab-agy-quota-') as folder:
+                result = subprocess.run([str(executable), '-p', '/usage', '--output-format', 'json', '--print-timeout', '15s'],
+                    cwd=folder, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding='utf-8', timeout=20)
+            if result.returncode:
+                account_rows.append(dict(email=email, status='조회 실패 · 로그인 확인', usable=False, checkedAt=time.time()))
+                continue
+            groups = _parse_agy_usage_output(result.stdout)
+            if not primary_groups:
+                primary_groups = groups
+            account_rows.append(dict(
+                email=email,
+                status='collected',
+                usable=True,
+                activeRotation=True,
+                isLastUsed=(email == last_used),
+                callCount=int(call_counts.get(email, 0)),
+                groups=groups,
+                checkedAt=time.time(),
+            ))
+        except (OSError, ValueError, TypeError, KeyError, AttributeError, subprocess.SubprocessError):
+            account_rows.append(dict(email=email, status='조회 지연 · 로그인 확인', usable=False, checkedAt=time.time()))
+    if primary_groups:
+        return dict(status='collected', groups=primary_groups, accounts=account_rows, lastUsedAccount=last_used, checkedAt=time.time())
+    return dict(status='조회 지연 · CLI 로그인 확인', accounts=account_rows, checkedAt=time.time())
 
 
 class RemoteTelemetry:

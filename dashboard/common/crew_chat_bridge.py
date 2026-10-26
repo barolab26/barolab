@@ -154,7 +154,7 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
     if message_kind=='staff_reply' and stage!='ceo-result-review':
         from common.staff_message import display_message
         output_kind=display_message(output_kind)
-    clean = lambda value: str(value or '').replace('\n',' ')[:160]
+    clean = lambda value, limit=160: str(value or '').replace('\n',' ')[:limit]
     event_id = 'crew-'+uuid.uuid4().hex
     stage = clean(stage)
     owner = work_actor_owner(actor, owner_agent)
@@ -172,9 +172,9 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
         'taskId':clean(task_id),'parentRequestId':clean(parent_request_id),
         'requestedTo':clean(requested_to),'phase':phase,'who':clean(actor),
         'actorLabel':clean(actor_label),'ownerAgent':owner,'toolActor':clean(actor) if actor not in STAFF_ACTORS else '', 'provider':clean(provider),'reasoningEffort':clean(reasoning_effort),'modelBadge':clean(badge),'model':clean(model),'evidenceId':clean(evidence_id),
-        'outputKind':clean(output_kind),'messageKind':message_kind,'stage':stage,'ts':int(time.time()*1000),'autonomous':True,
+        'outputKind':clean(output_kind, 1200),'messageKind':message_kind,'stage':stage,'ts':int(time.time()*1000),'autonomous':True,
         'text':f'{stage}: {phases[phase]}. 업무 성공·게시 확인은 별도 검증합니다.',
-        'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind),
+        'taskTracker':{'status':phase,'step':stage,'resultSummary':clean(output_kind, 1200),
                        'handoff':'','synapseLinked':False}}
     from common.work_agenda import current
     if current():payload['agendaId'] = current()['id']

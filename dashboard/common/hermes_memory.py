@@ -523,7 +523,7 @@ class HermesMemory:
     @contextmanager
     def db(self):
         self.initialize()
-        db = sqlite3.connect(self.db_path, timeout=15)
+        db = sqlite3.connect(self.db_path, timeout=60)
         db.row_factory = sqlite3.Row
         try:
             with db:

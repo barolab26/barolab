@@ -44,7 +44,13 @@ def revenue_config():
     from dotenv import dotenv_values
     # Preserve project-specific NAVER_<account>_ID/PW keys, then allow explicit
     # environment overrides. Neither keys' values nor authentication responses log.
-    cfg = dict(dotenv_values(ROOT / 'cf_posting' / '.env'))
+    cfg = {}
+    master_env = ROOT / '.env'
+    if master_env.exists():
+        cfg.update(dotenv_values(master_env))
+    cf_env = ROOT / 'cf_posting' / '.env'
+    if cf_env.exists():
+        cfg.update(dotenv_values(cf_env))
     allowed = ('COUPANG_', 'TOSS_', 'REPLYALBA_', 'TRIP_', 'NAVER_',
                'SJ_GOOGLE_ADSENSE_', 'AAA10291028_GOOGLE_ADSENSE_')
     cfg.update({k: v for k, v in os.environ.items() if k in cfg or k.startswith(allowed)})

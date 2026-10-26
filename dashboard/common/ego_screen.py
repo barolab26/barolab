@@ -332,8 +332,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                           'write/upload는 pending 첫 ref만 사용하며 이미 입력한 내용을 중복 입력하지 않는다. '
                           'inputFeedback이 있으면 이미 입력한 부분의 관측된 결함을 먼저 화면에서 고쳐야 하며 다음 ref를 입력하지 않는다. '
                           'write는 제목 또는 문단 전체를 키보드로 입력하고 본문이면 끝에 Enter를 한 번 누르는 동작이다. '
-                          'upload는 해당 ref의 파일을 네이버 사진 파일선택기로 올리는 동작이다. 업로드 전 사진 버튼을 화면에서 클릭해야 한다. '
-                          '업로드 파일선택기는 호스트가 처리하므로 upload의 x,y는 사진 버튼 좌표다. '
+                          'upload는 해당 ref의 파일을 파일선택기 창 없이 즉시 첨부하는 동작이다. upload 전 별도로 사진 버튼을 click하지 말고 바로 upload(x,y는 사진 버튼 좌표, value=해당 ref)만 호출하라. '
                           '이미 올린 이미지에 승인 캡션이 빠졌으면 caption,value=해당 이미지 ref를 사용한다. 호스트가 정확한 이미지의 빈 캡션란에만 승인 캡션을 입력한다. '
                           'value는 write/upload에서 ref, press에서 허용 키, scroll에서 up/down, navigate에서 허용 URL 이름이다. '
                           'scroll은 x,y의 실제 스크롤 영역 위에서 실행한다. 모바일 미리보기를 읽을 때는 그 패널 안의 좌표를 고른다. '
@@ -388,7 +387,10 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                     return state
                 if not result['actions']:
                     state['emptyDecisionStreak']=state.get('emptyDecisionStreak',0)+1
-                    state['actionFeedback']='실행할 다음 동작이 없었습니다. 관측된 문제를 고치는 안전한 행동 또는 실제 완료 상태를 반환하세요.'
+                    state['actionFeedback']='실행할 다음 동작이 없었습니다. 장애물 해제 후 재시도합니다.'
+                    # Universal Obstacle Clearer on empty/blocked decision
+                    from common.universal_recovery import clear_all_obstacles
+                    clear_all_obstacles(page=page, port=port)
                     write(state_path,state)
                     if state['emptyDecisionStreak']>=3:raise RuntimeError('Screen actor returned no safe action three times')
                     continue
@@ -540,9 +542,14 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                                 page.keyboard.press('Enter')
                         state['written'].append(value)
                     elif kind == 'upload':
+                        frame = page.frame(name='mainFrame') or page
+                        img_btn = frame.locator('button[data-name="image"][data-group="documentToolbar"]')
                         with page.expect_file_chooser(timeout=10000) as chooser:
                             with action('click', 'naver-image'):
-                                page.mouse.click(x, y)
+                                if img_btn.count():
+                                    img_btn.first.click(timeout=5000)
+                                else:
+                                    page.mouse.click(x, y)
                         with action('upload', 'naver-image'):
                             chooser.value.set_files(reference['file'])
                         state['written'].append(value)

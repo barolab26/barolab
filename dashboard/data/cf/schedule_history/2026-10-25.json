@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-25",
+  "items": [
+    {
+      "order": 1,
+      "domain": "must-good.com",
+      "scheduledTime": "07:00",
+      "status": "waiting"
+    },
+    {
+      "order": 2,
+      "domain": "baronote.kr",
+      "scheduledTime": "07:20",
+      "status": "waiting"
+    },
+    {
+      "order": 3,
+      "domain": "smilenote.kr",
+      "scheduledTime": "08:00",
+      "status": "waiting"
+    },
+    {
+      "order": 4,
+      "domain": "soulnote.kr",
+      "scheduledTime": "08:10",
+      "status": "waiting"
+    },
+    {
+      "order": 5,
+      "domain": "maxnote.kr",
+      "scheduledTime": "12:10",
+      "status": "waiting"
+    },
+    {
+      "order": 6,
+      "domain": "topnote.kr",
+      "scheduledTime": "12:30",
+      "status": "waiting"
+    },
+    {
+      "order": 7,
+      "domain": "woorinote.kr",
+      "scheduledTime": "12:40",
+      "status": "waiting"
+    },
+    {
+      "order": 8,
+      "domain": "justinfo.co.kr",
+      "scheduledTime": "12:50",
+      "status": "waiting"
+    },
+    {
+      "order": 9,
+      "domain": "healthcox.com",
+      "scheduledTime": "14:00",
+      "status": "waiting"
+    },
+    {
+      "order": 10,
+      "domain": "must-joy.com",
+      "scheduledTime": "15:00",
+      "status": "waiting"
+    },
+    {
+      "order": 11,
+      "domain": "joynote.kr",
+      "scheduledTime": "20:00",
+      "status": "waiting"
+    },
+    {
+      "order": 12,
+      "domain": "nolplace.com",
+      "scheduledTime": "20:10",
+      "status": "waiting"
+    },
+    {
+      "order": 13,
+      "domain": "tripmarvel.com",
+      "scheduledTime": "20:30",
+      "status": "waiting"
+    },
+    {
+      "order": 14,
+      "domain": "daynote.kr",
+      "scheduledTime": "21:00",
+      "status": "waiting"
+    },
+    {
+      "order": 15,
+      "domain": "must-pick.com",
+      "scheduledTime": "21:10",
+      "status": "waiting"
+    },
+    {
+      "order": 16,
+      "domain": "meganote.kr",
+      "scheduledTime": "21:30",
+      "status": "waiting"
+    }
+  ]
+}

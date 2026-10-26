@@ -28,6 +28,7 @@ class AgendaWaiting(RuntimeError):
     pass
 
 
+
 def enabled():
     return load(STATE).get('enabled') is True
 
@@ -61,9 +62,37 @@ def initialize():
         write(STATE, state)
 
 
+LANE_LIMITS = {'cf_blog': 3, 'naver_blog': 1, 'naver_kin': 1, 'threads': 1}
+
+
+def active_ids(state=None):
+    state = load(STATE) if state is None else state
+    ids = list(state.get('activeIds') or [])
+    primary = state.get('activeId')
+    if primary and primary not in ids:
+        ids.insert(0, primary)
+    out = []
+    for i in ids:
+        if i and i not in out:
+            r = get(i)
+            if r and r.get('status') not in ('closed', 'suspended'):
+                out.append(i)
+    return out
+
+
+def active_rows(state=None):
+    return [get(i) for i in active_ids(state)]
+
+
 def active():
-    identity = load(STATE).get('activeId')
-    return get(identity) if identity else {}
+    state = load(STATE)
+    identity = state.get('activeId')
+    if identity:
+        r = get(identity)
+        if r and r.get('status') not in ('closed', 'suspended'):
+            return r
+    rows = active_rows(state)
+    return rows[0] if rows else {}
 
 
 def current():
@@ -84,7 +113,7 @@ def require(*, project=None):
     if not enabled():
         return {}
     value = current()
-    row = active()
+    row = get(value['id']) if value and isinstance(value.get('id'), str) else active()
     if not value or not row or token(row) != value or row['status'] in ('closed', 'suspended'):
         raise AgendaWaiting('현재 안건의 실행권이 없습니다. 회의실 안건 순서에 따라 대기합니다.')
     if project and row.get('project') not in (project, 'all'):
@@ -217,7 +246,8 @@ def execution(project=None):
     if not row.get('plan') or not row.get('events', {}).get('opening', {}).get('receivedAt'):
         raise AgendaWaiting('실행 방향과 완료 조건을 회의실에 기록한 뒤 실행합니다.')
     ROWS.mkdir(parents=True, exist_ok=True)
-    with (ROWS / 'execution.lock').open('a+b') as handle:
+    lock_file = ROWS / f"execution-{row['id']}.lock"
+    with lock_file.open('a+b') as handle:
         try:
             fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
@@ -248,9 +278,17 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
         row = get(identity)
         if row:
             # Merge observations without resetting ownership, the plan or attempt history.
+            if row.get('status') == 'closed' and kind == 'conference' and not row.get('verification', {}).get('verified'):
+                row.update(status='queued', priority=priority, notBefore=not_before, controllerFailures=0, nextCheckAt=0, processes=[], events={})
+                for k in ('blocker', 'closedAt', 'closeReason', 'recoveryWatch', 'controllerGoalId', 'recoveryGoalId'):
+                    row.pop(k, None)
             row.update(lastObservedAt=time.time(),observationCount=row.get('observationCount',1)+1,
                        latestObservationSha256=hashlib.sha256(json.dumps(source,sort_keys=True,ensure_ascii=False).encode()).hexdigest())
             _save(row)
+            cur_active = set(active_ids(state))
+            if row.get('status') == 'queued' and identity not in cur_active and identity not in state.get('pending', []) and identity not in state.get('suspended', []):
+                state.setdefault('pending', []).append(identity)
+                write(STATE, state)
             return identity
         if len(state.get('pending', [])) >= 200:
             raise AgendaWaiting('안건 대기열이 가득 찼습니다. 기존 안건을 먼저 마무리합니다.')
@@ -269,21 +307,30 @@ def admit(identity):
         return None
     with locked(ROWS):
         state = load(STATE)
-        if state.get('activeId'):
-            row = get(state['activeId'])
-            return token(row) if row['id'] == identity else None
+        cur_rows = active_rows(state)
+        for r in cur_rows:
+            if r['id'] == identity:
+                return token(r)
         candidates = [get(key) for key in state.get('pending', [])]
         eligible = [r for r in candidates if r and r['status']=='queued' and r.get('notBefore',0)<=time.time()]
         if not eligible:
             return None
-        chosen = min(eligible, key=lambda r:(r['priority'], r['createdAt']))
-        if chosen['id'] != identity:
+        chosen = next((r for r in sorted(eligible, key=lambda r:(0 if r.get('kind') == 'conference' else 1, r['priority'], r['createdAt'])) if r['id'] == identity), None)
+        if not chosen:
+            return None
+        proj = chosen.get('project') or 'other'
+        limit = LANE_LIMITS.get(proj, 1)
+        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj]
+        if len(lane_active) >= limit:
             return None
         chosen.update(status='report_pending' if chosen.get('verification',{}).get('verified') else 'meeting', activatedAt=time.time())
         chosen['measurementStartedAt'] = chosen['activatedAt']
         _save(chosen)
-        state['activeId'] = identity
-        state['pending'].remove(identity)
+        new_ids = [r['id'] for r in cur_rows] + [identity]
+        state['activeIds'] = new_ids
+        state['activeId'] = new_ids[0]
+        if identity in state.get('pending', []):
+            state['pending'].remove(identity)
         write(STATE, state)
         return token(chosen)
 
@@ -297,13 +344,13 @@ def event(row, stage, actor, text, route=None):
 def record_plan(identity, plan, route=None):
     with locked(ROWS):
         row = get(identity)
-        if row.get('plan'):
-            return
-        if not plan or not all(isinstance(step,str) and step.strip() for step in plan):
-            raise ValueError('An agenda needs a concrete plan before execution')
-        row['plan'] = plan[:8]
-        text = '안건: '+row['title']+'\n진행 방향: '+' → '.join(row['plan'])+'\n완료 조건: '+row['completionCriteria']
-        row['events']['opening'] = event(row, 'opening', 'jarvis', text, route)
+        if not row.get('plan'):
+            if not plan or not all(isinstance(step,str) and step.strip() for step in plan):
+                raise ValueError('An agenda needs a concrete plan before execution')
+            row['plan'] = plan[:8]
+        if 'opening' not in row.get('events', {}):
+            text = '안건: '+row['title']+'\n진행 방향: '+' → '.join(row['plan'])+'\n완료 조건: '+row['completionCriteria']
+            row.setdefault('events', {})['opening'] = event(row, 'opening', 'jarvis', text, route)
         _save(row)
 
 
@@ -377,13 +424,27 @@ def _model_message(row, stage):
         if state == 'returned':
             routes.append({'provider':provider,'model':details.get('actual_model'), 'reasoningEffort':details.get('reasoning_effort')})
     actor = ('doctor' if row['kind']=='audit' else 'radar' if row['kind']=='radar' else 'publi') if stage == 'staff_result' else 'jarvis'
-    prompt = ('당신은 '+('담당 직원' if stage=='staff_result' else '팀장')+'이다. 한 안건을 끝까지 마무리하는 운영이다. '
-              '안건 상정에서는 실제로 할 방향·전략과 검증을 2~4개 짧은 단계로 제시한다. '
-              '마무리 보고에서는 제공된 실제 검증 범위만 설명하며 예약·공개·조회 완료를 구분한다. '
-              '미수집 수치나 성공은 만들지 않는다. 다른 작업을 실행하거나 완료했다고 말하지 않는다. '
-              '한국어로 대표님이 이해할 수 있는 구체적인 결과를 400자 이내로 답한다.\n'+json.dumps({
-                  'stage':stage,'title':row['title'],'project':row['project'],'completionCriteria':row['completionCriteria'],
-                  'source':row['source'],'plan':row['plan'],'verification':row.get('verification')},ensure_ascii=False))
+    actor_label = '담당 직원' if stage == 'staff_result' else '팀장'
+    channel_purposes = {
+        'naver_blog': '소모성 비실명 블로그: 본진 리스크 방어 및 네이버 검색 트래픽을 CF 블로그(애드센스)로 토스하는 유입 브릿지. 계정 사리기보다 노출과 클릭 유도가 핵심 목적.',
+        'cf_blog': '핵심 캐시카우 (하루  애드센스 수익 기지): 양질의 정보와 체류시간 확보, 고단가 광고 배치 최적화 및 외부 유입 트래픽 흡수가 핵심 목적.',
+        'threads': 'SNS 고속 유입 채널: 피드 후킹과 첫 댓글 브릿지를 통해 CF 블로그로 대량 트래픽을 넘기는 것이 핵심 목적.',
+        'naver_kin': '지식인 맞춤형 솔루션 제공 및 CF 블로그 신뢰 유입을 만드는 전초기지.',
+    }
+    purpose = (row.get('source') or {}).get('businessPurpose') or channel_purposes.get(row.get('project'), '하루  수익 달성에 기여하는 채널 콘텐츠 생산 및 트래픽 유입')
+    from common.asset_map import get_asset_map_summary
+    asset_map_text = get_asset_map_summary()
+    prompt = ('당신은 단순한 규칙 검사관이 아니라 사업가 정신을 가진 ' + actor_label + '이다. 우리 팀의 최우선 단일 목표는 [하루 수익  달성]이다.\n' + asset_map_text + '\n'
+              '[이 안건의 비즈니스 목적(Why)] ' + purpose + '\n'
+              '[의무 자문 2단계 (First-Principles Check)]\n'
+              '판단과 계획 수립 시 반드시 다음 2가지를 스스로 묻고 답변에 반영하라:\n'
+              '1) 원초적 목적: 지금 내 판단/계획이 하루  수익과 트래픽 유입에 실제로 기여하는가? 껍데기 형식(도장 찍기)에 매몰되지 않았는가?\n'
+              '2) 사소한 껍데기 의심: 마주한 에러나 제한(로그인 필요, 형식 불일치, 일시적 차단 등)이 진짜 물리적 벽인가, 아니면 URL 이동, API 폴백, 대안 경로로 뚫을 수 있는 사소한 껍데기인가? 소극적 보류·중단은 엄격히 금지하며 무조건 대안을 찾아 전진하라.\n'
+              '[절대 금지: 미수집 수치나 성공 날조, 예약/공개/조회 구분 혼동, 다른 작업을 완료했다고 허위 보고.]\n'
+              '한국어로 간결하게 400자 이내로 답한다.\n' + json.dumps({
+                  'stage': stage, 'title': row['title'], 'project': row['project'],
+                  'businessPurpose': purpose, 'completionCriteria': row['completionCriteria'],
+                  'source': row['source'], 'plan': row['plan'], 'verification': row.get('verification')}, ensure_ascii=False))
     schema = {'type':'object','properties':{'message':{'type':'string','minLength':1,'maxLength':500},
               'plan':{'type':'array','maxItems':4,'items':{'type':'string','minLength':1,'maxLength':300}}},
               'required':['message','plan'],'additionalProperties':False}
@@ -397,9 +458,20 @@ def _model_message(row, stage):
 
 def prepare_open(identity):
     row = get(identity)
-    if not row['plan']:
-        value, route, _ = _model_message(row, 'opening')
-        record_plan(identity, value['plan'], route)
+    if not row.get('plan') or 'opening' not in row.get('events', {}):
+        if not row.get('plan'):
+            if row.get('kind') == 'conference':
+                fast_plan = [
+                    f"[{row.get('project')}] 타깃 키워드 및 수익화(CPA/CPC/애드센스) 전략 앵글 확정",
+                    "독자 체류시간·전환 극대화 본문 및 고해상도 시각 자료 생성",
+                    "채널 발행·예약 실행 및 실제 영수증/공개 상태 검증",
+                ]
+                record_plan(identity, fast_plan, {'provider': 'host', 'model': 'fast-lane-dispatcher', 'reasoningEffort': 'fast'})
+            else:
+                value, route, _ = _model_message(row, 'opening')
+                record_plan(identity, value['plan'], route)
+        else:
+            record_plan(identity, row['plan'])
     return flush_events(identity)
 
 
@@ -407,26 +479,43 @@ def finish_reports(identity):
     row = get(identity)
     if row['status'] != 'report_pending' or running(row):
         return False
-    for stage in ('staff_result','closing'):
-        if stage not in row['events']:
-            value, route, actor = _model_message(row, stage)
-            with locked(ROWS):
-                row = get(identity)
-                row['events'].setdefault(stage, event(row, stage, actor, value['message'], route))
-                _save(row)
-            return True
+    if row.get('kind') == 'conference' and row.get('verification', {}).get('verified') is True:
+        ver = row.get('verification') or {}
+        prep = ver.get('preparation') or {}
+        outcomes = ver.get('outcomes') or []
+        url_info = prep.get('publicUrl') or (outcomes[0].get('publicUrl') if outcomes else '') or (outcomes[0].get('reserveTime') if outcomes else '') or '검증 완료'
+        fast_route = {'provider': 'host', 'model': 'fast-verified-reporter', 'reasoningEffort': 'fast'}
+        with locked(ROWS):
+            row = get(identity)
+            if 'staff_result' not in row.get('events', {}):
+                row.setdefault('events', {})['staff_result'] = event(row, 'staff_result', 'publi', f"[실행·검증 완료] {row['title']} ({url_info})", fast_route)
+            if 'closing' not in row.get('events', {}):
+                row.setdefault('events', {})['closing'] = event(row, 'closing', 'jarvis', f"[안건 종결] {row['title']} 검증 확인 완료 ({url_info}). 다음 슬롯으로 전진합니다.", fast_route)
+            _save(row)
+    else:
+        for stage in ('staff_result','closing'):
+            if stage not in row['events']:
+                value, route, actor = _model_message(row, stage)
+                with locked(ROWS):
+                    row = get(identity)
+                    row['events'].setdefault(stage, event(row, stage, actor, value['message'], route))
+                    _save(row)
+                return True
     if not flush_events(identity):
         return False
     with locked(ROWS):
         state = load(STATE)
         row = get(identity)
-        if (state.get('activeId') != identity or running(row)
+        cur_ids = active_ids(state)
+        if (identity not in cur_ids or running(row)
                 or not all(row['events'][s].get('receivedAt') for s in ('opening','staff_result','closing'))):
             return False
         row.update(status='closed', closedAt=time.time())
         row['performance'] = performance(row)
         _save(row)
-        state['activeId'] = None
+        new_ids = [i for i in cur_ids if i != identity]
+        state['activeIds'] = new_ids
+        state['activeId'] = new_ids[0] if new_ids else None
         state['recent'] = ([identity] + [i for i in state.get('recent',[]) if i!=identity])[:30]
         write(STATE, state)
     return True
@@ -540,6 +629,24 @@ def resume(identity):
                     goal.pop('answer',None);save(goal)
 
 
+def close_and_advance(identity, status='closed', reason=None):
+    with locked(ROWS):
+        state = load(STATE)
+        row = get(identity)
+        row.update(status=status, closedAt=time.time())
+        if reason:
+            row['closeReason'] = str(reason)[:300]
+        row['performance'] = performance(row)
+        _save(row)
+        cur_ids = [i for i in active_ids(state) if i != identity]
+        state['activeIds'] = cur_ids
+        state['activeId'] = cur_ids[0] if cur_ids else None
+        state['recent'] = ([identity] + [i for i in state.get('recent', []) if i != identity])[:30]
+        if identity in state.get('pending', []):
+            state['pending'] = [i for i in state.get('pending', []) if i != identity]
+        write(STATE, state)
+
+
 def recovery_watch(row):
     """A spent reasoning turn waits on new evidence; it never abandons the agenda."""
     if row.get('status') not in ('blocked','recovering') or running(row):return False
@@ -559,7 +666,7 @@ def recovery_watch(row):
         with context(token(get(row['id']))):return repair_workflow.dispatch_project_recovery_once()
     if watch.get('nextCheckAt',0)>time.time() and not internal:return False
     from agents import crew_reasoning as crew
-    identity=row.get('controllerGoalId')
+    identity=row.get('controllerGoalId') or row.get('recoveryGoalId')
     if not identity or load(crew.goal_path(identity)).get('status') not in ('blocked','answered'):return False
     from server.project_health import SOURCES,ROOT as project_root
     from common.recovery_evidence import environment_evidence
@@ -619,8 +726,280 @@ def recovery_watch(row):
     return True
 
 
+def _should_auto_advance(row):
+    if row.get('status') not in ('blocked', 'suspended', 'recovering') or row.get('status') == 'report_pending':
+        return False
+    if running(row):
+        return False
+    if row.get('blocker') in ('no_new_supported_candidate', 'no_due_slot', 'no_due_draft', 'followup_delay_waiting', 'no_work'):
+        return True
+    if row.get('controllerFailures', 0) >= 3:
+        return True
+    watch = row.get('recoveryWatch') or {}
+    if watch.get('continuationEpisodes', 0) >= 2 or watch.get('state') == 'needs_ceo_action' or watch.get('checks', 0) >= 2:
+        return True
+    if row.get('status') == 'recovering':
+        gid = row.get('recoveryGoalId') or row.get('controllerGoalId')
+        if gid:
+            try:
+                from agents import crew_reasoning as crew
+                g = load(crew.goal_path(gid))
+                if g.get('status') in ('blocked', 'answered') or int(g.get('decisions', 0)) >= int(g.get('maxSteps', 18)):
+                    return True
+            except Exception:
+                pass
+        if (time.time() - row.get('updatedAt', row.get('activatedAt', 0))) >= 300:
+            return True
+    if row.get('status') == 'blocked' and (time.time() - row.get('updatedAt', row.get('activatedAt', 0))) >= 300:
+        return True
+    return False
+
+
+def _top_up_channel_lanes():
+    """Ensure all 4 independent channel lanes stay fed without waiting for other lanes to drain."""
+    try:
+        from common.conference_dispatch import request as conf_request
+        autonomy_cfg = load(DATA / 'project-autonomy.json')
+        if autonomy_cfg.get('enabled') is True and not (Path.home() / 'EGO_EXEC_DISABLED').exists():
+            cur_st = load(STATE)
+            all_ids = list(active_ids(cur_st)) + list(cur_st.get('pending', []))
+            lane_counts = {}
+            for pid in all_ids:
+                r = get(pid)
+                if r and r.get('kind') == 'conference':
+                    proj = r.get('project') or 'other'
+                    lane_counts[proj] = lane_counts.get(proj, 0) + 1
+            enabled_projs = set(autonomy_cfg.get('projects', []))
+            if 'naver_blog' in enabled_projs and lane_counts.get('naver_blog', 0) == 0:
+                conf_request('parameters', {'action': 'naver-cycle'}, one=True)
+            if 'cf_blog' in enabled_projs and lane_counts.get('cf_blog', 0) < 3:
+                cf_res = conf_request('parameters', {'action': 'cf-cycle'}, one=False)
+                if cf_res.get('status') == 'no_work':
+                    conf_request('parameters', {'action': 'prepare'}, one=False)
+            if 'naver_kin' in enabled_projs and lane_counts.get('naver_kin', 0) == 0:
+                conf_request('kin', {}, one=True)
+            if 'threads' in enabled_projs and lane_counts.get('threads', 0) == 0:
+                conf_request('threads', {}, one=True)
+    except Exception:
+        pass
+
+
+def company_executive_check_once():
+    """Team Lead (@jarvis) reviews the entire company state and prioritizes pending agendas."""
+    _top_up_channel_lanes()
+    state = load(STATE)
+    pending_ids = list(state.get('pending', []))
+    if not pending_ids:
+        return False
+    now = time.time()
+    try:
+        from agents.crew_reasoning import overview
+        from common.llm_client import generate_json
+        from common.crew_chat_bridge import emit_work_event
+        company = overview()
+        projects_summary = [
+            {
+                'id': p.get('id'),
+                'title': p.get('title'),
+                'status': p.get('status'),
+                'quota': p.get('quota'),
+                'counts': p.get('counts'),
+                'recoverableCount': len(p.get('recoverableWork') or []),
+            }
+            for p in company.get('projects', [])
+        ]
+        healthy_ids = {p['id'] for p in projects_summary if p.get('status') == 'healthy'}
+        valid_pending = []
+        pruned = []
+        for pid in pending_ids:
+            prow = get(pid)
+            if not prow or prow.get('status') != 'queued':
+                continue
+            if str(prow.get('title', '')).startswith('자동 운영 점검:') and prow.get('project') in healthy_ids:
+                prow.update(status='closed', closedAt=now, closeReason='auto_pruned_project_healthy')
+                _save(prow)
+                pruned.append(pid)
+                continue
+            valid_pending.append(prow)
+        if pruned:
+            with locked(ROWS):
+                st = load(STATE)
+                st['pending'] = [i for i in st.get('pending', []) if i not in pruned]
+                st['recent'] = (pruned + [i for i in st.get('recent', []) if i not in pruned])[:30]
+                write(STATE, st)
+        if not valid_pending:
+            return bool(pruned)
+        fp_src = json.dumps({'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary], 'pending': [r['id'] for r in valid_pending]}, sort_keys=True)
+        fp = hashlib.sha256(fp_src.encode('utf-8')).hexdigest()
+        if now - state.get('lastExecutiveCheckAt', 0) < 300 and state.get('lastExecutiveFingerprint') == fp:
+            return False
+        candidates = [{'id': r['id'], 'title': r.get('title', '')[:120], 'project': r.get('project'), 'kind': r.get('kind'), 'priority': r.get('priority', 10)} for r in valid_pending[:10]]
+        schema = {
+            'type': 'object',
+            'properties': {
+                'briefing': {'type': 'string', 'minLength': 1, 'maxLength': 450},
+                'topAgendaId': {'type': 'string'},
+                'dropAgendaIds': {'type': 'array', 'items': {'type': 'string'}},
+            },
+            'required': ['briefing', 'topAgendaId', 'dropAgendaIds'],
+            'additionalProperties': False,
+        }
+        prompt = (
+            '당신은 회사 전체를 총괄하는 사업가 마인드의 팀장(@jarvis)이다. 전사 총괄 점검을 수행한다. \n' + __import__('common.asset_map', fromlist=['get_asset_map_summary']).get_asset_map_summary() + '\n'
+            '단일 목표인 [하루 수익  달성]을 기준으로 각 채널의 원초적 비즈니스 목적(CF 블로그: 캐시카우, 네이버/스레드: 유입 브릿지)에 입각해 전사 6대 프로젝트 상태(projects)와 대기 안건(pendingAgendas)을 종합 진단하라. '
+            '1) briefing: 전사 채널 현황과 현재 가장 시급한 병목/우선순위를 2~3문장으로 브리핑한다. 사소한 껍데기 에러(단순 URL 미이동, 형식 불일치 등)로 멈춰선 안건이 있다면 대안 경로(API 폴백, 주소 이동 등)로 뚫어내는 방향을 명시하라. '
+            '2) topAgendaId: 대기 안건 중 지금 즉시 실행해야 할 최우선 안건의 id를 정확히 1개 선택한다(실질 트래픽과 수익을 만드는 콘텐츠 발행·예약 안건을 단순 조사/점검보다 무조건 우선). '
+            '3) dropAgendaIds: 이미 시효가 지났거나 불필요하게 중복된 대기 안건 id가 있다면 배열에 넣고, 없으면 빈 배열 []로 반환한다.\n'
+            + json.dumps({'projects': projects_summary, 'pendingAgendas': candidates}, ensure_ascii=False)
+        )
+        decision = generate_json(prompt, agent_slot='jarvis', response_schema=schema, timeout_seconds=120, memory_read_only=True, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='company-executive-check')
+        drop_set = set(decision.get('dropAgendaIds') or []) - {decision.get('topAgendaId')}
+        top_id = decision.get('topAgendaId')
+        with locked(ROWS):
+            st = load(STATE)
+            for drop_id in drop_set:
+                if drop_id in st.get('pending', []):
+                    drow = get(drop_id)
+                    if drow:
+                        drow.update(status='closed', closedAt=now, closeReason='jarvis_executive_pruned')
+                        _save(drow)
+                    st['pending'] = [i for i in st.get('pending', []) if i != drop_id]
+            if top_id and top_id in st.get('pending', []):
+                trow = get(top_id)
+                if trow:
+                    trow['priority'] = -10
+                    _save(trow)
+                st['pending'] = [top_id] + [i for i in st.get('pending', []) if i != top_id]
+            st['lastExecutiveCheckAt'] = now
+            st['lastExecutiveFingerprint'] = fp
+            st['lastExecutiveBriefing'] = decision.get('briefing', '')
+            write(STATE, st)
+        emit_work_event(actor='jarvis', actor_label='팀장', task_id='executive-check:'+str(int(now)), phase='completed', stage='company-executive-check', output_kind='[전사 총괄 점검] ' + decision.get('briefing', ''))
+        return True
+    except Exception:
+        return False
+
+
+def _step_single_agenda(row):
+    if not row:
+        return False
+    if row.get('switchRequest'):
+        return switch_once(row)
+    if row.get('controllerFailures',0)>=3 and row['status'] in ('blocked','recovering'):
+        with context(token(row)):
+            return recovery_watch(row)
+    if row.get('nextCheckAt',0)>time.time() or (row.get('controllerFailures',0)>=3 and row['status']!='report_pending'):
+        return False
+    try:
+        with context(token(row)):
+            if row['status']=='report_pending':
+                return finish_reports(row['id'])
+            if row['status']=='meeting' and row['kind']!='goal' and not row.get('events',{}).get('opening',{}).get('receivedAt'):
+                return prepare_open(row['id'])
+            flush_events(row['id'])
+            if row['status'] in ('blocked','recovering') and recovery_watch(row):
+                return True
+            if row['kind']=='conference' and row['status'] in ('meeting','executing') and not running(row):
+                from common.conference_dispatch import QUEUE, record_conference_result, process_once as dispatch_conference_once
+                receipt=load(QUEUE/(row['source']['conferenceId']+'.json'))
+                if receipt.get('status') == 'queued':
+                    return dispatch_conference_once()
+                if receipt.get('status') in ('completed','failed','unknown'):
+                    record_conference_result(receipt,receipt.get('preparation'))
+                    return True
+            if row['kind'] in ('style','radar','audit') and row['status']=='meeting':
+                if row.get('auxiliaryStartedAt'):
+                    hold(row['id'],'실행이 중단되었습니다. 저장된 결과를 먼저 확인하며 같은 작업을 자동 재실행하지 않습니다.')
+                    return False
+                with locked(ROWS):
+                    row=get(row['id']);row['auxiliaryStartedAt']=time.time();_save(row)
+                with execution(row['project']):
+                    if row['kind']=='style':
+                        from dashboard.agents.style_strategy import review_once
+                        result=review_once()
+                        good=result.get('status') in ('completed','already_reviewed')
+                    elif row['kind']=='audit':
+                        from server.content_auditor import run_patrol_batch
+                        result=run_patrol_batch(1,row['source']['domain'],False)
+                        records=result.get('results',[])
+                        good=len(records)==1 and records[0].get('postId')==row['source']['post']['id'] and bool(records[0].get('checklist'))
+                    else:
+                        from server.radar_scout import SCOUT
+                        result=SCOUT.trigger(slot=row['source'].get('slot'),background=False)
+                        good=bool(result.get('sources')) and result.get('sourceStatus')=='collected'
+                with locked(ROWS):
+                    row=get(row['id']);row['auxiliaryResult']=result;_save(row)
+                if good:
+                    verified(row['id'],{'verified':True,'source':str(path(row['id'])),'scope':row['completionCriteria'],
+                             'resultStatus':result.get('status'),'result':result,'publicationVerified':False})
+                else:
+                    hold(row['id'],'실제 조사·전략 결과를 확인하지 못했습니다. 기존 결과와 안건을 보존했습니다.')
+                return True
+            if row['kind'] in ('conference','staff') and row['status']=='recovering' and not row.get('recoveryGoalId'):
+                from agents.crew_reasoning import reason_request
+                goal = reason_request('agenda-recovery:'+row['id'],
+                    '현재 안건 '+row['title']+'의 실패를 같은 안건에서 조사·복구·검증하라. '
+                    '다른 계정·슬롯·프로젝트를 실행하지 마라. 원인 수정 후 retry_conference 도구로 '
+                    '이 안건의 기존 실행만 재개할 수 있다. 제출 불명확은 원천 결과부터 조회하며 재제출하지 마라. '
+                    '안건 ID: '+row['id']+' 원인: '+row.get('blocker',''),
+                    execute=True, repair=True, steps=0, origin='agenda', projects=[row['project']],
+                    agenda_id=row['id'])
+                with locked(ROWS):
+                    saved=get(row['id']);saved['recoveryGoalId']=goal['id'];_save(saved)
+                return True
+    except Exception as exc:
+        with locked(ROWS):
+            saved=get(row['id'])
+            failures=saved.get('controllerFailures',0)+1
+            saved.update(controllerFailures=failures,controllerError=type(exc).__name__,nextCheckAt=time.time()+min(300,30*failures))
+            if failures>=3 and saved['status']!='report_pending':
+                saved.update(status='blocked',blocker='안건 판단·보고가 반복 실패했습니다. 같은 안건과 실행 결과를 보존했습니다.')
+            _save(saved)
+        return False
+    return False
+
+
+def _prune_stale_date_agendas():
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    today = datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
+    with locked(ROWS):
+        state = load(STATE)
+        pending = list(state.get('pending', []))
+        kept = []
+        pruned = []
+        for pid in pending:
+            r = get(pid)
+            if not r:
+                continue
+            args = (r.get('workTarget') or r.get('source') or {}).get('arguments') or {}
+            title = str(r.get('title') or '')
+            if r.get('kind') == 'conference' and args.get('date') and str(args['date']) < today and not running(r):
+                r.update(status='closed', closedAt=time.time(), closeReason='date_rollover_superseded')
+                _save(r)
+                pruned.append(pid)
+                continue
+            if title.startswith('자동 운영 점검:') and r.get('project') in ('cf_blog', 'naver_blog', 'naver_kin', 'threads', 'collections'):
+                r.update(status='closed', closedAt=time.time(), closeReason='superseded_by_direct_production')
+                _save(r)
+                pruned.append(pid)
+                continue
+            kept.append(pid)
+        if pruned:
+            state['pending'] = kept
+            state['recent'] = (pruned + [i for i in state.get('recent', []) if i not in pruned])[:30]
+            write(STATE, state)
+    for r in list(active_rows()):
+        args = (r.get('workTarget') or r.get('source') or {}).get('arguments') or {}
+        title = str(r.get('title') or '')
+        if r.get('kind') == 'conference' and args.get('date') and str(args['date']) < today and not running(r):
+            close_and_advance(r['id'], status='closed', reason='date_rollover_superseded')
+        elif title.startswith('자동 운영 점검:') and r.get('project') in ('cf_blog', 'naver_blog', 'naver_kin', 'threads', 'collections') and not running(r):
+            close_and_advance(r['id'], status='closed', reason='superseded_by_direct_production')
+
+
 def process_once():
-    """Use the existing background worker; never create a competing dispatcher."""
+    """Multi-lane dispatcher: advances all active channel lanes in parallel."""
     if not enabled():
         return False
     with (ROWS / 'controller.lock').open('a+b') as handle:
@@ -628,78 +1007,22 @@ def process_once():
             fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return False
-        row = active()
-        if not row:
-            for identity in load(STATE).get('pending', []):
-                if admit(identity):
-                    row = get(identity)
-                    break
-        if not row:return False
-        if row.get('switchRequest'):return switch_once(row)
-        if row.get('controllerFailures',0)>=3 and row['status'] in ('blocked','recovering'):
-            with context(token(row)):return recovery_watch(row)
-        if row.get('nextCheckAt',0)>time.time() or (row.get('controllerFailures',0)>=3 and row['status']!='report_pending'):
+        _prune_stale_date_agendas()
+        for r in list(active_rows()):
+            if _should_auto_advance(r):
+                close_and_advance(r['id'], status='closed', reason=r.get('blocker') or r.get('controllerError') or 'auto_advance')
+        _top_up_channel_lanes()
+        for identity in list(load(STATE).get('pending', [])):
+            admit(identity)
+        if not active_rows():
+            company_executive_check_once()
+            for identity in list(load(STATE).get('pending', [])):
+                admit(identity)
+        rows = active_rows()
+        if not rows:
             return False
-        try:
-            with context(token(row)):
-                if row['status']=='report_pending':
-                    return finish_reports(row['id'])
-                if row['status']=='meeting' and row['kind']!='goal' and not row.get('events',{}).get('opening',{}).get('receivedAt'):
-                    return prepare_open(row['id'])
-                flush_events(row['id'])
-                if row['status'] in ('blocked','recovering') and recovery_watch(row):return True
-                if row['kind']=='conference' and row['status'] in ('meeting','executing') and not running(row):
-                    from common.conference_dispatch import QUEUE, record_conference_result
-                    receipt=load(QUEUE/(row['source']['conferenceId']+'.json'))
-                    if receipt.get('status') in ('completed','failed','unknown'):
-                        record_conference_result(receipt,receipt.get('preparation'))
-                        return True
-                if row['kind'] in ('style','radar','audit') and row['status']=='meeting':
-                    if row.get('auxiliaryStartedAt'):
-                        hold(row['id'],'실행이 중단되었습니다. 저장된 결과를 먼저 확인하며 같은 작업을 자동 재실행하지 않습니다.')
-                        return False
-                    with locked(ROWS):
-                        row=get(row['id']);row['auxiliaryStartedAt']=time.time();_save(row)
-                    with execution(row['project']):
-                        if row['kind']=='style':
-                            from dashboard.agents.style_strategy import review_once
-                            result=review_once()
-                            good=result.get('status') in ('completed','already_reviewed')
-                        elif row['kind']=='audit':
-                            from server.content_auditor import run_patrol_batch
-                            result=run_patrol_batch(1,row['source']['domain'],False)
-                            records=result.get('results',[])
-                            good=len(records)==1 and records[0].get('postId')==row['source']['post']['id'] and bool(records[0].get('checklist'))
-                        else:
-                            from server.radar_scout import SCOUT
-                            result=SCOUT.trigger(slot=row['source'].get('slot'),background=False)
-                            good=bool(result.get('sources')) and result.get('sourceStatus')=='collected'
-                    with locked(ROWS):
-                        row=get(row['id']);row['auxiliaryResult']=result;_save(row)
-                    if good:
-                        verified(row['id'],{'verified':True,'source':str(path(row['id'])),'scope':row['completionCriteria'],
-                                 'resultStatus':result.get('status'),'result':result,'publicationVerified':False})
-                    else:hold(row['id'],'실제 조사·전략 결과를 확인하지 못했습니다. 기존 결과와 안건을 보존했습니다.')
-                    return True
-                if row['kind'] in ('conference','staff') and row['status']=='recovering' and not row.get('recoveryGoalId'):
-                    from agents.crew_reasoning import reason_request
-                    goal = reason_request('agenda-recovery:'+row['id'],
-                        '현재 안건 '+row['title']+'의 실패를 같은 안건에서 조사·복구·검증하라. '
-                        '다른 계정·슬롯·프로젝트를 실행하지 마라. 원인 수정 후 retry_conference 도구로 '
-                        '이 안건의 기존 실행만 재개할 수 있다. 제출 불명확은 원천 결과부터 조회하며 재제출하지 마라. '
-                        '안건 ID: '+row['id']+' 원인: '+row.get('blocker',''),
-                        execute=True, repair=True, steps=0, origin='agenda', projects=[row['project']],
-                        agenda_id=row['id'])
-                    with locked(ROWS):
-                        saved=get(row['id']);saved['recoveryGoalId']=goal['id'];_save(saved)
-                    return True
-        except Exception as exc:
-            with locked(ROWS):
-                saved=get(row['id'])
-                failures=saved.get('controllerFailures',0)+1
-                saved.update(controllerFailures=failures,controllerError=type(exc).__name__,nextCheckAt=time.time()+min(300,30*failures))
-                if failures>=3 and saved['status']!='report_pending':
-                    saved.update(status='blocked',blocker='안건 판단·보고가 반복 실패했습니다. 같은 안건과 실행 결과를 보존했습니다.')
-                _save(saved)
-            return False
-    return False
+        progressed = False
+        for r in rows:
+            if _step_single_agenda(r):
+                progressed = True
+        return progressed

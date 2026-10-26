@@ -67,5 +67,96 @@
     "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과",
     "approved": true,
     "checked_at": "2026-10-19T12:34:01.536898+00:00"
+  },
+  "1c93deda523b47123eaf9669cd895f17d7166c0b48886dfc6bb3fd0f7304e225": {
+    "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과",
+    "approved": true,
+    "checked_at": "2026-10-22T04:49:39.259989+00:00"
+  },
+  "445f25aa9a63bbf62ef577c03a0bf60a0b3539dbb7a8b9d75f8bcfda5839f194": {
+    "reason": "본문 링크 0개 원칙 · 구어체 3버전 후킹 · 첫 타래 고지문/링크 분리 및 원문 팩트 일치 검수 통과",
+    "approved": true,
+    "checked_at": "2026-10-22T10:12:02.017762+00:00"
+  },
+  "f4410f9338b1cd0967140a34bea62e04e9dac6fc373adfecf45763a5d0f6804a": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-22T23:24:51.081389+00:00"
+  },
+  "a5dd45f896e736b754150ccc50f1fc3a394a5afc347bb9c64b32244433212d49": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-23T03:33:57.522204+00:00"
+  },
+  "8ba858f787f79eb8cacdb20b285c5e887f68d3686f9106d4e79bf8743d7f411b": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-23T10:59:11.072585+00:00"
+  },
+  "8997654b62063e5986341e94c1e5972ee1976bd21abe833788c5de85c9e1e75a": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-24T02:47:43.951217+00:00"
+  },
+  "0496bed74ce0f7d0a3f6207bb20bc10bcd6402213436bd757f962aa15cfda623": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-24T03:50:54.731140+00:00"
+  },
+  "88da60f3c0a9bc2dc20075cccd0b726013b3ffcfa30d8164e0d5f52d9b7ea368": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-24T09:21:28.906567+00:00"
+  },
+  "fb40d1fb960ee0f20eab9f7244fb5e022855e8686a185d694cab2e8b91f7c62a": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-25T12:22:43.269582+00:00"
+  },
+  "a64b3ebd7d280592b77d77db2b65636b5bdae7c426a3d50324bb6e76965b6e94": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T11:48:02.428403+00:00"
+  },
+  "aada37bee01dcb89a17cd9368ef43b810647eb9712defe1ca745f593e20b2fef": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T11:48:43.683447+00:00"
+  },
+  "349fb027f3d686de60886dc93451dea3581ccb0c9f1e3b4eea90b0116ed88c24": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T11:50:19.245321+00:00"
+  },
+  "c11704801c692f9e705b2d03f068d86199c93bc6c86a4ff4265aa9531be704f5": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T11:52:22.084658+00:00"
+  },
+  "c004f85b94880db8bc12ddacd2a9c72dff428de849cd0de6c8896139cc089ae0": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T11:56:04.335995+00:00"
+  },
+  "ec4cb5c6133145e3705875aa0fc1ee3079d1195d4472566036a7822919f3f659": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T11:56:51.258508+00:00"
+  },
+  "a890c4214dc36eb20777b4fa8bb3b3651d482d2274fb2f31c648b8d7dcdf8232": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T12:01:52.729616+00:00"
+  },
+  "63801dc972028d5746763295f5832f833198584dabd9a31b73cd8c762ef49313": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T12:03:14.052025+00:00"
+  },
+  "c90025dc0e87b611d851ac3496306ff9e6a0b441abd56508dd9770c04ead704b": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T12:09:31.964059+00:00"
+  },
+  "ff32a4b25c92729a5ec48a26f808d2f1fdca4beef095fff4033fbdfeca74e29c": {
+    "reason": "ValueError",
+    "checked_at": "2026-10-25T12:10:45.999826+00:00"
+  },
+  "items": [],
+  "1f128ed294c889bc5958c0c29500b3bfbcb99d6efa7acbc8e37f26537ec1c71b": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-25T23:02:22.601661+00:00"
   }
 }

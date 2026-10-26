@@ -1,4 +1,1 @@
-{
-  "enabled": true,
-  "projects": ["cf_blog", "naver_blog", "naver_kin", "threads", "legacy_remodel"]
-}
+{"enabled": true, "projects": ["cf_blog", "naver_blog", "naver_kin", "threads", "legacy_remodel"]}

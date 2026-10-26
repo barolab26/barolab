@@ -53,7 +53,7 @@ def locked(folder):
     with (folder / 'collection-observability.lock').open('a+b') as handle:
         if handle.tell() == 0:
             handle.write(b'0'); handle.flush()
-        deadline = time.monotonic() + 2
+        deadline = time.monotonic() + 15
         while True:
             try:
                 handle.seek(0)

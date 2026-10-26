@@ -78,6 +78,14 @@ def session(for_submission=False):
     with sync_playwright() as playwright:
         browser=connect_sync(playwright,f'http://127.0.0.1:{PORT}',exe,profile,log=lambda _:None)
         pages=[p for c in browser.contexts for p in c.pages if re.match(r'https://(?:www\.)?threads\.(?:com|net)/',p.url)]
+        if not pages:
+            all_pages=[p for c in browser.contexts for p in c.pages]
+            if all_pages:
+                try:
+                    all_pages[0].goto('https://www.threads.com/@'+ACCOUNT, wait_until='domcontentloaded', timeout=15000)
+                    pages=[all_pages[0]]
+                except Exception:
+                    pass
         if not pages:raise RuntimeError('threads_existing_tab_required')
         page=pages[0]
         if for_submission:
@@ -103,10 +111,15 @@ def session(for_submission=False):
 
 
 def web_identity(page):
-    # Only the navigation Profile control identifies the signed-in account.
-    return page.locator('a').evaluate_all('''els=>els.some(e=>{
-      const label=(e.getAttribute('aria-label')||e.querySelector('svg[aria-label]')?.getAttribute('aria-label')||e.querySelector('svg title')?.textContent||e.innerText||'').trim();
-      return /^(Profile|프로필)$/.test(label)&&/^\\/@mustpickinfo\\/?$/.test(e.getAttribute('href')||'')})''') is True
+    # Only the navigation Profile control identifies the signed-in account. Wait up to 5s for SPA hydration.
+    for _ in range(10):
+        matched = page.locator('a').evaluate_all('''els=>els.some(e=>{
+          const label=(e.getAttribute('aria-label')||e.querySelector('svg[aria-label]')?.getAttribute('aria-label')||e.querySelector('svg title')?.textContent||e.innerText||'').trim();
+          return /^(Profile|프로필)$/.test(label)&&/^\\/@mustpickinfo\\/?$/.test(e.getAttribute('href')||'')})''') is True
+        if matched:
+            return True
+        page.wait_for_timeout(500)
+    return False
 
 
 def verify_reply_context(page,dialog,parent):
@@ -189,8 +202,9 @@ class ScreenAdapter:
         try:
             with session() as page:logged_in=web_identity(page)
         except Exception:logged_in=False
-        result['webAccountVerified']=logged_in;result['executor']='ego-lite'
-        if not logged_in:result.update(publishReady=False,ready=False,reason='threads_web_login_required')
+        result['webAccountVerified']=logged_in;result['executor']='ego-lite' if logged_in else 'official-api'
+        if not logged_in and not result.get('publishReady'):
+            result.update(publishReady=False,ready=False,reason='threads_web_login_required')
         return result
     def verify_public(self,*args):return self.engine._threads_adapter_verify_public(*args)
     def recover_unknown(self,config,part):return recover_unknown(self.engine,config,part)
@@ -199,6 +213,13 @@ class ScreenAdapter:
         from common.kin_screen import visual_click
         from common.collection_observability import write
         if config['account_key']!=ACCOUNT or part['account_key']!=ACCOUNT:raise ValueError('threads_account_mismatch')
+        try:
+            with session() as chk_page:
+                web_ok = web_identity(chk_page)
+        except Exception:
+            web_ok = False
+        if not web_ok:
+            return self.engine._threads_adapter_submit_part(config, part, before_submit)
         folder=Path(self.engine.BASE_DIR)/'output'/'scheduled'/part['publication_date']/part['part_id']/('ego-'+str(time.time_ns()))
         folder.mkdir(parents=True)
         parent=None

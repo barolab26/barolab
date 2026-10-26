@@ -1,127 +1,23 @@
 {
   "runtime": {
-    "status": "completed",
+    "status": "waiting",
     "stage": "monitor",
-    "reason": "첫 기존 글 개선 공개 확인 완료 · 28일 성과 관측 중",
-    "checkedAt": "2026-10-20T13:14:42.438658+00:00",
-    "lastAuditAt": "2026-10-20T00:01:12.120133+00:00",
-    "lastAuditCount": 3,
+    "reason": "실측 상위 유망 글 대기 · 발행 엔진과 독립",
+    "checkedAt": "2026-10-24T16:57:15.896796+00:00",
+    "lastAuditAt": "2026-10-24T16:57:15.549968+00:00",
+    "lastAuditCount": 6,
     "auditCoverage": "rotating_never_then_oldest_domain_balanced",
-    "lastAuditStopReason": "CF 신규 발행 실행 중 · 발행 우선",
-    "providerBackoff": {},
-    "nextRetryAt": null,
-    "providerStatus": "ready",
-    "lastLaunchedAt": "2026-10-20T00:00:59.445836+00:00",
-    "launcher": "ego_lite",
-    "helperPid": 19232,
-    "lastAttemptAt": "2026-10-20T12:30:19.724316+00:00",
-    "activeJob": null,
-    "lastDomain": "must-good.com",
-    "publishingPriorityWait": false,
-    "jevSelection": {
-      "status": "ok",
-      "answers": {
-        "relevance_0": {
-          "type": "score",
-          "score": 1.97,
-          "confidence": 0.95,
-          "legend": {
-            "0": "The issue or query is unrelated to the page topic.",
-            "1": "The issue or query partly relates to the topic but its reader intent is unclear.",
-            "2": "The issue or query directly addresses the page topic and a specific reader intent."
-          },
-          "probabilities": {
-            "0": 0.0,
-            "1": 0.03,
-            "2": 0.97
-          }
-        },
-        "evidence_0": {
-          "type": "score",
-          "score": 1.62,
-          "confidence": 0.41,
-          "legend": {
-            "0": "No supplied observation supports this issue, or the evidence contradicts it.",
-            "1": "Supplied observations suggest the issue but leave its connection to this page uncertain.",
-            "2": "Supplied page-specific observations directly substantiate investigating this issue."
-          },
-          "probabilities": {
-            "0": 0.03,
-            "1": 0.33,
-            "2": 0.64
-          }
-        }
-      },
-      "usage": {
-        "input_tokens": 879,
-        "output_tokens": 38
-      },
-      "model": "jev-1.13.0",
-      "estimatedCostUsd": 3.6918e-05,
-      "billedCostUsd": null,
-      "costBasis": "reported_input_tokens_at_published_tariff_2026-10-20",
-      "elapsedMs": 204,
-      "thresholdVersion": "barolab-jev-v1",
-      "requestedModel": "jev-1.13.0",
-      "stateSha256": "1efc5272e1e131890fc22751a78e9e1fd1935d4fec0698df542b1f9e81bf3652",
-      "questionsSha256": "1e44055060d2d5d77f98860cce5a40f0362ebffc1481f8b004cf9ea3518c4c0f",
-      "ranking": [
-        {
-          "candidateId": "1121b8d21c6c416ba1fe77e09bbefabc",
-          "relevance": 0.985,
-          "evidenceSupport": 0.81,
-          "score": 0.8975,
-          "confidence": 0.41
-        }
-      ],
-      "checkedAt": "2026-10-20T12:30:19.724300+00:00",
-      "candidateCount": 1,
-      "thresholds": {
-        "score": 0.65,
-        "evidenceSupport": 0.6
-      },
-      "selected": {
-        "id": "1121b8d21c6c416ba1fe77e09bbefabc",
-        "domain": "must-good.com",
-        "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
-        "title": "국립중앙박물관 무료 관람·예약 가이드: 운영시간, 백팩과 촬영 준비",
-        "query": "개천절 | 국립중앙박물관 예약 없이 | 국립중앙박물관 예약 해야 하나요",
-        "issue": "실측 검색 노출이 있는 기존 글의 검색 의도·제목·답변 완전성 개선 후보; 개선 효과는 아직 미검증",
-        "evidence": {
-          "source": "Google Search Console",
-          "start": "2026-09-20",
-          "end": "2026-10-17",
-          "checkedAt": "2026-10-20T12:28:47.864979+00:00",
-          "timezone": "America/Los_Angeles",
-          "maxAgeHours": 26,
-          "scope": "observed_page_rows_not_all_pages",
-          "impressions": 202,
-          "clicks": 1,
-          "ctr": 0.0049504950495049506,
-          "position": 8.623762376237623,
-          "revenueVerified": false,
-          "causalProof": false
-        }
-      }
-    },
-    "egoLastCycleAt": "2026-10-20T12:56:03.962591+00:00",
-    "egoPid": 258608,
-    "dailyTargetUsd": 100,
-    "egoStatus": {
-      "status": "waiting",
-      "dailyTargetUsd": 100,
-      "nextCycleAt": "2026-10-20T13:26:03.962591+00:00"
-    },
-    "lastSuccessAt": "2026-10-20T13:12:41.153243+00:00"
+    "lastAuditStopReason": "회차 시간 상한",
+    "publishingPriorityWait": true
   },
   "growth": {
-    "checkedAt": "2026-10-20T13:14:03.588480+00:00",
+    "checkedAt": "2026-10-24T16:56:28.459764+00:00",
     "goal": {
       "scope": "등록 CF 도메인 전체",
       "site_count": 16,
       "complete_sites": 0,
-      "start": "2026-09-18",
-      "end": "2026-10-17",
+      "start": "2026-09-22",
+      "end": "2026-10-21",
       "currency": "USD",
       "daily_target": 100,
       "daily_average": null,
@@ -130,12 +26,12 @@
       "source_timezone": null,
       "reason": "전체 등록 사이트의 동일 기준 30일 USD 수익 미수집 · 최신 완료 원천일의 전체 사이트 수집 신선도 미확인 · 오래된 기간으로 대체하지 않음",
       "periodBasis": "collector_pacific_completed_dates",
-      "expectedSourceDataThrough": "2026-10-17",
+      "expectedSourceDataThrough": "2026-10-21",
       "sourceDataThrough": null,
       "reportingLagDays": 3,
       "freshness": {
         "status": "unconfirmed",
-        "freshSites": 13,
+        "freshSites": 0,
         "requiredSites": 16,
         "maxAgeHours": 26
       }
@@ -184,7 +80,7 @@
           "status": "observing",
           "start": "2026-10-21",
           "end": "2026-11-17",
-          "availableThrough": "2026-10-17",
+          "availableThrough": "2026-10-21",
           "completionTimezone": "Asia/Seoul",
           "sourceTimezone": "America/Los_Angeles",
           "measurementDate": "2026-10-20",
@@ -1320,7 +1216,7 @@
             "status": "observing",
             "start": "2026-10-21",
             "end": "2026-11-17",
-            "availableThrough": "2026-10-17",
+            "availableThrough": "2026-10-21",
             "completionTimezone": "Asia/Seoul",
             "sourceTimezone": "America/Los_Angeles",
             "measurementDate": "2026-10-20",

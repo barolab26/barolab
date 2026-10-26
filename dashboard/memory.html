@@ -859,7 +859,7 @@
     categoryFilter: 'all',
     source: 'synapses',
     focusId: null,
-    selectedRel: 'hubs/crew-jarvis.md',
+    selectedRel: null,
     hoverIdx: null,
     dragIdx: null,
     panStart: null,
@@ -2155,7 +2155,7 @@
   });
 
   // Check URL query ?rel=...
-  const urlRel = new URLSearchParams(location.search).get('rel') || 'hubs/crew-jarvis.md';
+  const urlRel = new URLSearchParams(location.search).get('rel');
   loadGraphData().then(loaded => {
     if (loaded) inspectDocument(urlRel);
   }).finally(scheduleGraphPoll);

@@ -1,11 +1,68 @@
 {
-  "checkedAt": "2026-10-20T12:50:16.897862+09:00",
-  "host": "192.168.45.248",
+  "checkedAt": "2026-10-25T05:30:35.089005+00:00",
+  "kstCheckedAt": "2026-10-25T14:30:35+09:00",
+  "host": "172.26.143.51",
   "ports": {
-    "9334": false,
-    "9333": false,
-    "9335": false,
-    "9231": false,
-    "9230": false
-  }
+    "9334": true,
+    "9333": true,
+    "9335": true,
+    "9231": true,
+    "9230": true,
+    "9440": true
+  },
+  "browsers": {
+    "soultin_cdp": {
+      "port": 9334,
+      "name": "soultin · Ubuntu 격리 Chrome",
+      "open": true,
+      "recovered": true,
+      "required": true
+    },
+    "soul5373_cdp": {
+      "port": 9333,
+      "name": "soul5373 · Ubuntu 격리 Chrome",
+      "open": true,
+      "recovered": true,
+      "required": true
+    },
+    "yoon_master_cdp": {
+      "port": 9335,
+      "name": "yoon_master · Ubuntu 격리 Chrome",
+      "open": true,
+      "recovered": true,
+      "required": true
+    },
+    "adinfo0905_cdp": {
+      "port": 9231,
+      "name": "adinfo0905 · Ubuntu 격리 Chrome",
+      "open": true,
+      "recovered": true,
+      "required": true
+    },
+    "stone0747_cdp": {
+      "port": 9230,
+      "name": "stone0747 · Ubuntu 격리 Chrome",
+      "open": true,
+      "recovered": true,
+      "required": true
+    },
+    "cf-flow_cdp": {
+      "port": 9440,
+      "name": "cf-flow · Ubuntu 격리 Chrome",
+      "open": true,
+      "recovered": true,
+      "required": true
+    }
+  },
+  "onlineCount": 6,
+  "totalRequired": 6,
+  "recoveredPorts": [
+    9334,
+    9333,
+    9335,
+    9231,
+    9230,
+    9440
+  ],
+  "failedPorts": []
 }

@@ -1,18 +1,18 @@
 {
   "schema": "threads-measurement-v1",
-  "status": "partial",
+  "status": "not_due",
   "complete": false,
-  "collected_at": "2026-10-19T23:43:33.423621+00:00",
+  "collected_at": "2026-10-26T01:07:10.327545+00:00",
   "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
   "windows": {
     "24h": {
-      "status": "partial",
-      "due_parts": 7,
+      "status": "not_due",
+      "due_parts": 0,
       "captured_parts": 0
     },
     "72h": {
-      "status": "partial",
-      "due_parts": 1,
+      "status": "not_due",
+      "due_parts": 0,
       "captured_parts": 0
     },
     "7d": {
@@ -23,382 +23,24 @@
   },
   "posts": [
     {
-      "part_id": "788037b3194a4ebe88bbbe11e080fc59-0",
-      "attempt_id": "788037b3194a4ebe88bbbe11e080fc59",
-      "platform_id": "18116224709093806",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/Deg1dRSH3zL",
+      "part_id": "8d4df57df489414caf2d56be7e2bd75b-0",
+      "attempt_id": "8d4df57df489414caf2d56be7e2bd75b",
+      "platform_id": "17906278596355347",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De6uLkFFPxZ",
       "format": "unclassified",
       "topic": "unclassified",
-      "published_at": "2026-10-15T11:19:43+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-16T11:23:40.530570+00:00",
-          "actual_age_hours": 24.066,
-          "capture_lag_hours": 0.066,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 0,
-              "likes": 0,
-              "replies": 0,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-16T11:23:43.131288+00:00"
-          },
-          "ga4": {
-            "status": "collection_error",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "ga4_ValueError",
-            "start_date": "2026-10-15",
-            "end_date": "2026-10-19"
-          }
-        },
-        "72h": {
-          "target_hours": 72,
-          "captured_at": "2026-10-18T11:43:41.166230+00:00",
-          "actual_age_hours": 72.399,
-          "capture_lag_hours": 0.399,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 0,
-              "likes": 0,
-              "replies": 0,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-18T11:43:45.061780+00:00"
-          },
-          "ga4": {
-            "status": "collection_error",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "ga4_ValueError",
-            "start_date": "2026-10-15",
-            "end_date": "2026-10-19"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "1a73685cf2cf40338e287d1125042733-0",
-      "attempt_id": "1a73685cf2cf40338e287d1125042733",
-      "platform_id": "18156215599555424",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DemIJCYHwNU",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-17T12:38:53+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-18T17:43:41.829795+00:00",
-          "actual_age_hours": 29.08,
-          "capture_lag_hours": 5.08,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 9,
-              "likes": 0,
-              "replies": 1,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-18T17:43:46.278929+00:00"
-          },
-          "ga4": {
-            "status": "unmeasured",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "attribution_url_unverified"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "90932c6617524805b315740cc8a4cd44-0",
-      "attempt_id": "90932c6617524805b315740cc8a4cd44",
-      "platform_id": "18466027636138474",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DenQO_7k-yd",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-17T23:08:50+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-18T23:48:40.992895+00:00",
-          "actual_age_hours": 24.664,
-          "capture_lag_hours": 0.664,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 70,
-              "likes": 0,
-              "replies": 0,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-18T23:48:46.230078+00:00"
-          },
-          "ga4": {
-            "status": "unmeasured",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "attribution_url_unverified"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "61e09cb555154abbb5f17baac4bfaa57-0",
-      "attempt_id": "61e09cb555154abbb5f17baac4bfaa57",
-      "platform_id": "17911179447500368",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DenvIa5HxtW",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-18T03:38:48+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-19T05:48:42.129275+00:00",
-          "actual_age_hours": 26.165,
-          "capture_lag_hours": 2.165,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 2,
-              "likes": 0,
-              "replies": 1,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-19T05:48:47.258976+00:00"
-          },
-          "ga4": {
-            "status": "unmeasured",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "attribution_url_unverified"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "dff78e2118be4085b64ecff63ba758a2-0",
-      "attempt_id": "dff78e2118be4085b64ecff63ba758a2",
-      "platform_id": "17998602047823391",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DeoWCrQHxDQ",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-18T09:18:50+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-19T11:53:39.721980+00:00",
-          "actual_age_hours": 26.58,
-          "capture_lag_hours": 2.58,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 37,
-              "likes": 0,
-              "replies": 1,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-19T11:53:44.200883+00:00"
-          },
-          "ga4": {
-            "status": "unmeasured",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "attribution_url_unverified"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "faf73c2f1fee4970a2037e95e2b2b96c-0",
-      "attempt_id": "faf73c2f1fee4970a2037e95e2b2b96c",
-      "platform_id": "17924636301430152",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/Deos7qAH7Yk",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-18T12:38:51+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-19T13:14:25.585599+00:00",
-          "actual_age_hours": 24.593,
-          "capture_lag_hours": 0.593,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 21,
-              "likes": 0,
-              "replies": 1,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-19T13:14:29.933293+00:00"
-          },
-          "ga4": {
-            "status": "unmeasured",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "attribution_url_unverified"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "20228544f6674b6ea506bba92f50f35f-0",
-      "attempt_id": "20228544f6674b6ea506bba92f50f35f",
-      "platform_id": "17947057848357932",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/Dep1B9ok4pE",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-18T23:08:51+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {
-        "24h": {
-          "target_hours": 24,
-          "captured_at": "2026-10-19T23:13:41.313871+00:00",
-          "actual_age_hours": 24.081,
-          "capture_lag_hours": 0.081,
-          "platform": {
-            "status": "collected",
-            "scope": "platform_reported_lifetime_post_metrics",
-            "metrics": {
-              "views": 17,
-              "likes": 0,
-              "replies": 0,
-              "reposts": 0,
-              "quotes": 0,
-              "shares": 0
-            },
-            "collected_at": "2026-10-19T23:13:45.330307+00:00"
-          },
-          "ga4": {
-            "status": "unmeasured",
-            "complete": false,
-            "sessions": null,
-            "engaged_sessions": null,
-            "page_views": null,
-            "source": "GA4 Data API",
-            "timezone": "Asia/Seoul",
-            "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
-            "provisional": true,
-            "reason": "attribution_url_unverified"
-          }
-        }
-      }
-    },
-    {
-      "part_id": "0bde9bc007ef48f18a2eda92e204d67e-0",
-      "attempt_id": "0bde9bc007ef48f18a2eda92e204d67e",
-      "platform_id": "18135424297676759",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DeqT8Gkn91N",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-19T03:38:57+00:00",
+      "published_at": "2026-10-25T12:36:00+00:00",
       "publication_time_basis": "api_timestamp",
       "snapshots": {}
     },
     {
-      "part_id": "5becebb790be4f06a9fe6d06ba00b13e-0",
-      "attempt_id": "5becebb790be4f06a9fe6d06ba00b13e",
-      "platform_id": "18637756495019780",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/Deq62sSHy5Q",
+      "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-0",
+      "attempt_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6",
+      "platform_id": "18138910369631432",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De72O0zk_VX",
       "format": "unclassified",
       "topic": "unclassified",
-      "published_at": "2026-10-19T09:18:58+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {}
-    },
-    {
-      "part_id": "598437aad8cb426bbf88c20aaedf4ea3-0",
-      "attempt_id": "598437aad8cb426bbf88c20aaedf4ea3",
-      "platform_id": "18466200322136941",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DerRukIH6ca",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-19T12:38:51+00:00",
-      "publication_time_basis": "api_timestamp",
-      "snapshots": {}
-    },
-    {
-      "part_id": "3f6f34fbc1e44ecdb534b2a84665b03c-0",
-      "attempt_id": "3f6f34fbc1e44ecdb534b2a84665b03c",
-      "platform_id": "18121386773515557",
-      "permalink": "https://www.threads.com/@mustpickinfo/post/DesZPndk_wc",
-      "format": "unclassified",
-      "topic": "unclassified",
-      "published_at": "2026-10-19T23:03:45+00:00",
+      "published_at": "2026-10-25T23:05:36+00:00",
       "publication_time_basis": "api_timestamp",
       "snapshots": {}
     }
@@ -408,14 +50,14 @@
     "clicks": 0,
     "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
     "requested_since": "2026-10-15T11:19:14.891210+00:00",
-    "requested_until": "2026-10-19T23:43:33.423621+00:00",
-    "collected_at": "2026-10-19T23:43:34.671153+00:00"
+    "requested_until": "2026-10-26T01:07:10.327545+00:00",
+    "collected_at": "2026-10-26T01:07:11.715781+00:00"
   },
   "revenue": null,
   "revenue_status": "publisher_attribution_unverified",
   "feedback": {
     "status": "insufficient_data",
-    "computedAt": "2026-10-19T23:43:33.423621+00:00",
+    "computedAt": "2026-10-26T01:07:10.327545+00:00",
     "checkpoint": null,
     "comparablePosts": 0,
     "evidence": [],

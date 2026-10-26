@@ -318,7 +318,7 @@ def ensure_agent_brains(data: dict) -> dict:
         cur = raw.get(slot) if isinstance(raw.get(slot), dict) else {}
         prov = cur.get('provider') if cur.get('provider') in PROVIDERS else slot_meta['recommendedProvider']
         mod = str(cur.get('model') or '').strip() or slot_meta['recommendedModel']
-        effort = (cur.get('reasoningEffort') if cur.get('reasoningEffort') in REASONING_EFFORTS else {'patch':'high','publi':'medium'}.get(slot)) if prov == 'codex' else None
+        effort = (cur.get('reasoningEffort') if cur.get('reasoningEffort') in REASONING_EFFORTS else {'jarvis':'high','patch':'high','publi':'high'}.get(slot)) if prov == 'codex' else None
         out[slot] = {
             'provider': prov,
             'model': mod,
@@ -338,10 +338,11 @@ def get_agent_brain(slug_or_slot: str, data: dict = None) -> dict:
     if key in brains:
         return brains[key]
     return brains.get('jarvis', {
-        'provider': 'agy',
-        'model': 'gemini-4-argon-high',
-        'badge': 'Argon High',
-        'providerLabel': 'Antigravity AGY CLI',
+        'provider': 'codex',
+        'model': 'gpt-6.1-sol',
+        'reasoningEffort': 'high',
+        'badge': 'gpt-6.1-sol ? High',
+        'providerLabel': 'Codex CLI ? ChatGPT ??',
     })
 
 

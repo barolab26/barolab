@@ -11,6 +11,7 @@ if importlib.util.find_spec('rich') is None:
         raise SystemExit('BaroLab 환경에 dashboard/server/requirements.txt를 설치해 주세요.')
     os.execv(str(python),[str(python),str(Path(__file__).resolve()),*sys.argv[1:]])
 sys.path.insert(0,str(ROOT))
+sys.path.insert(0,str(ROOT / 'dashboard'))
 
 if __name__=='__main__':
     from server.mission_control import main
