@@ -2,7 +2,7 @@
   "schema": "threads-measurement-v1",
   "status": "not_due",
   "complete": false,
-  "collected_at": "2026-10-26T01:07:10.327545+00:00",
+  "collected_at": "2026-10-26T07:08:43.961135+00:00",
   "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
   "windows": {
     "24h": {
@@ -43,6 +43,28 @@
       "published_at": "2026-10-25T23:05:36+00:00",
       "publication_time_basis": "api_timestamp",
       "snapshots": {}
+    },
+    {
+      "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
+      "attempt_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6",
+      "platform_id": "17983759775898773",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De8bRzQHzN4",
+      "format": "unclassified",
+      "topic": "unclassified",
+      "published_at": "2026-10-26T04:29:42+00:00",
+      "publication_time_basis": "api_timestamp",
+      "snapshots": {}
+    },
+    {
+      "part_id": "8ce43ef43d9c4514890765c101ce53e7-0",
+      "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+      "platform_id": "18125563663919802",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De8rgInH0EQ",
+      "format": "unclassified",
+      "topic": "unclassified",
+      "published_at": "2026-10-26T06:51:09+00:00",
+      "publication_time_basis": "api_timestamp",
+      "snapshots": {}
     }
   ],
   "account_metrics": {
@@ -50,14 +72,14 @@
     "clicks": 0,
     "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
     "requested_since": "2026-10-15T11:19:14.891210+00:00",
-    "requested_until": "2026-10-26T01:07:10.327545+00:00",
-    "collected_at": "2026-10-26T01:07:11.715781+00:00"
+    "requested_until": "2026-10-26T07:08:43.961135+00:00",
+    "collected_at": "2026-10-26T07:08:45.390609+00:00"
   },
   "revenue": null,
   "revenue_status": "publisher_attribution_unverified",
   "feedback": {
     "status": "insufficient_data",
-    "computedAt": "2026-10-26T01:07:10.327545+00:00",
+    "computedAt": "2026-10-26T07:08:43.961135+00:00",
     "checkpoint": null,
     "comparablePosts": 0,
     "evidence": [],

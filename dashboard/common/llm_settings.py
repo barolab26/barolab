@@ -233,36 +233,37 @@ DEFAULT_OPTIMAL_BRAINS = {
 }
 
 
-def format_brain_badge(provider: str, model: str, reasoning_effort=None) -> str:
+def format_brain_badge(provider: str, model: str, reasoning_effort=None, account=None) -> str:
     """Return a compact, human-readable badge for chat.html and settings.html (e.g. 'Argon High', 'gpt-6.1-sol', '3.8 Flash')."""
     m = (model or '').strip()
     ml = m.lower()
+    acc_suffix = f' ({str(account).split("@")[0]})' if account else ''
     if provider == 'codex':
         effort=reasoning_effort or 'low'
-        return (m or 'Codex')+' · '+str(effort).capitalize()
+        return (m or 'Codex')+' · '+str(effort).capitalize() + acc_suffix
     if 'argon-high' in ml:
-        return 'Argon High'
+        return 'Argon High' + acc_suffix
     if 'argon-medium' in ml:
-        return 'Argon Med'
+        return 'Argon Med' + acc_suffix
     if 'argon-low' in ml:
-        return 'Argon Low'
+        return 'Argon Low' + acc_suffix
     if '3.8-flash-high' in ml:
-        return '3.8 Flash High'
+        return '3.8 Flash High' + acc_suffix
     if '3.8-flash-low' in ml:
-        return '3.8 Flash Low'
+        return '3.8 Flash Low' + acc_suffix
     if '3.8-flash-medium' in ml:
-        return '3.8 Flash Med'
+        return '3.8 Flash Med' + acc_suffix
     if '3.8-flash' in ml:
-        return '3.8 Flash'
+        return '3.8 Flash' + acc_suffix
     if 'gpt-6.1-sol' in ml:
-        return 'gpt-6.1-sol'
+        return 'gpt-6.1-sol' + acc_suffix
     if 'claude-opus-5-5' in ml:
-        return 'Opus 5.5'
+        return 'Opus 5.5' + acc_suffix
     if 'claude-sonnet-5-5' in ml:
-        return 'Sonnet 5.5'
+        return 'Sonnet 5.5' + acc_suffix
     if m:
-        return m[:18]
-    return 'Argon High' if provider == 'agy' else 'gpt-6.1-sol'
+        return (m[:18] + acc_suffix)
+    return ('Argon High' if provider == 'agy' else 'gpt-6.1-sol') + acc_suffix
 
 
 REASONING_EFFORTS = ('none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra')

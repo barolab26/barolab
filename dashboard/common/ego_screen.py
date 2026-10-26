@@ -161,9 +161,18 @@ def screen_lock(port):
 
 def run(page, **arguments):
     with screen_lock(arguments['port']):
-        return _run(page, **arguments)
+        try:
+            return _run(page, **arguments)
+        except Exception as exc:
+            state=load(Path(arguments['folder'])/'screen-execution.json')
+            screen={'lastUrl':page.url,'observations':state.get('observations',[]),
+                    'sourceExecution':str(Path(arguments['folder'])/'screen-execution.json')}
+            try:screen['domText']=page.locator('body').inner_text()
+            except Exception as probe:screen['observationError']=type(probe).__name__
+            exc.live_screen_context=screen
+            raise
 
-def _run(page, *, port, folder, goal, references=None, urls=None, settings=None, samples=None, comparison_images=None, input_check=None, completion_check=None, caption_writer=None, max_turns=60, time_budget_seconds=2700, resume=False):
+def _run(page, *, port, folder, goal, references=None, urls=None, settings=None, samples=None, comparison_images=None, input_check=None, completion_check=None, caption_writer=None, max_turns=60, time_budget_seconds=2700, resume=False, actor='publi'):
     """Models see pixels; only approved references can be typed or uploaded."""
     from common.llm_client import generate_json
     from common.llm_settings import get_agent_brain
@@ -213,7 +222,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
             'y': {'type': 'integer', 'minimum': 0, 'maximum': 959},
             'value': {'type': 'string'}}, 'required': ['kind', 'x', 'y', 'value'], 'additionalProperties': False}}
         }, 'required': ['message', 'done', 'observations', 'actions'], 'additionalProperties': False}
-    keys = {'Enter', 'Escape', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight',
+    keys = {'Enter', 'Escape', 'Control+R', 'F5', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight',
             'End', 'Home', 'Control+Home', 'Control+End', 'Control+Shift+Home', 'Control+Shift+End', 'Control+Home', 'Backspace', 'Delete', 'Tab',
             'Shift+Home', 'Shift+End', 'Shift+ArrowLeft', 'Shift+ArrowRight',
             'Shift+ArrowUp', 'Shift+ArrowDown', 'Control+Shift+ArrowLeft', 'Control+Shift+ArrowRight',
@@ -313,7 +322,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                 if pending and pending[0].get('referenceImage'):
                     images.append(pending[0]['referenceImage'])
                 images.extend(comparison_images or [])
-                brain = get_agent_brain('publi')
+                brain = get_agent_brain(actor)
                 from dashboard.agents.synapse import cached_index
                 lessons = cached_index(Path(__file__).resolve().parents[2]).get('screenLessons', [])
                 if not lessons:
@@ -359,7 +368,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                 result = generate_json(prompt, provider=brain['provider'], model_override=brain['model'],
                                        images=images, response_schema=schema,
                                        audit_directory=folder / 'model-audit' / f'turn-{turn:03d}',
-                                       agent_slot='publi', observer=route, timeout_seconds=120,
+                                       agent_slot=actor, observer=route, timeout_seconds=120,
                                        reasoning_effort='high' if brain['provider']=='codex' and feedback and state.get('repeatedFeedbackTurns',0)>=3 else None)
                 if not observed or not observed[-1]:
                     raise ValueError('Actual screen decision model not observed')
@@ -534,11 +543,14 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                         if focused_submission_control(page):
                             raise ValueError('Screen input is focused on a submission control')
                         with action('type', 'naver-body', count=len(reference['text'])):
+                            from common.ego_telemetry import current_context
+                            is_threads = 'threads' in str(current_context().get('project', '')) or 'threads' in page.url
+                            newline_key = 'Shift+Enter' if is_threads else 'Enter'
                             for index, line in enumerate(reference['text'].split('\n')):
                                 if index:
-                                    page.keyboard.press('Enter')
+                                    page.keyboard.press(newline_key)
                                 page.keyboard.type(line, delay=1)
-                            if value != 'title':
+                            if value != 'title' and not is_threads:
                                 page.keyboard.press('Enter')
                         state['written'].append(value)
                     elif kind == 'upload':

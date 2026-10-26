@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-26T01:07:11.797309+00:00",
+  "checkedAt": "2026-10-26T07:08:45.533233+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -42,10 +42,97 @@
     "mainTrialCap": 56
   },
   "counts": {
-    "published_verified": 2,
-    "queued": 2
+    "published_verified": 4,
+    "queued": 1,
+    "submitted_unknown": 1
   },
   "recent": [
+    {
+      "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+      "part_id": "8ce43ef43d9c4514890765c101ce53e7-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De8rgInH0EQ",
+      "updated_at": "2026-10-26T06:51:12.615982+00:00",
+      "publication_date": "2026-10-26",
+      "slot": "12:30",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "동사무소 안 가도 된다! 2026 인감증명서 인터넷 무료 발급 방법 (정부24 온라인 신청 절차 총정리) | 저스트인포 금융·세무칼럼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 167,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "주민센터 방문할 시간 내기 어려우셨던 분들에게 반가운 소식이에요!\n\n그동안 직접 찾아가야 했던 인감증명서가 110년 만에 개편되어 이제 정부24에서 온라인 무료 발급이 가능해졌습니다. 집이나 사무실에서 수수료 0원으로 바로 신청할 수 있어요.\n\n다만 꼭 알아두셔야 할 점이 있습니다. 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원 목적의 인감증명서만 인터넷 발급이 지원됩니다.\n\n부동산이나 자동차 매도용은 기존처럼 반드시 주민센터 창구를 방문해 대면으로 발급받으셔야 해요.\n\n발급할 때는 공동·금융인증서 로그인과 휴대폰 SMS 본인인증이 필요하며, 발급 후에는 전자문서지갑으로 받거나 프린터로 즉시 출력할 수 있습니다.",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "바쁜 평일에 인감증명서 하나 떼려고 반차 쓰거나 점심시간 쪼개 주민센터 다녀오신 적 있으시죠?\n\n이제 그럴 필요가 없습니다. 110년 만에 전면 개편되어 정부24에서 인감증명서 온라인 무료 발급이 시작되었거든요.\n\n단, 용도 구분을 명확히 하셔야 합니다.\n보조금 신청, 경력 증명, 면허 신청, 기관 제출 같은 일반 행정 민원용은 온라인에서 수수료 0원으로 즉시 발급됩니다.\n하지만 부동산이나 자동차 매도용은 안전을 위해 기존대로 주민센터 창구 방문이 필수입니다.\n\n신청은 정부24에서 공동·금융인증서 로그인 후 본인인증을 거치면 되고, 종이 출력은 물론 전자문서지갑으로도 바로 보낼 수 있어요.\n\n일반 제출용 서류가 필요하다면 사무실에서 1분 만에 해결해 보세요!",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+      "published_at": "2026-10-26T06:51:09+00:00",
+      "verified_at": "2026-10-26T06:51:12.614512+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+      "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "submitted_unknown",
+      "permalink": null,
+      "updated_at": "2026-10-26T06:56:48.998127+00:00",
+      "publication_date": "2026-10-26",
+      "slot": "12:30",
+      "outbound_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1230_055531d1b8b20c55",
+      "parent_platform_id": "18125563663919802",
+      "title": "동사무소 안 가도 된다! 2026 인감증명서 인터넷 무료 발급 방법 (정부24 온라인 신청 절차 총정리) | 저스트인포 금융·세무칼럼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 167,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "주민센터 방문할 시간 내기 어려우셨던 분들에게 반가운 소식이에요!\n\n그동안 직접 찾아가야 했던 인감증명서가 110년 만에 개편되어 이제 정부24에서 온라인 무료 발급이 가능해졌습니다. 집이나 사무실에서 수수료 0원으로 바로 신청할 수 있어요.\n\n다만 꼭 알아두셔야 할 점이 있습니다. 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원 목적의 인감증명서만 인터넷 발급이 지원됩니다.\n\n부동산이나 자동차 매도용은 기존처럼 반드시 주민센터 창구를 방문해 대면으로 발급받으셔야 해요.\n\n발급할 때는 공동·금융인증서 로그인과 휴대폰 SMS 본인인증이 필요하며, 발급 후에는 전자문서지갑으로 받거나 프린터로 즉시 출력할 수 있습니다.",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "바쁜 평일에 인감증명서 하나 떼려고 반차 쓰거나 점심시간 쪼개 주민센터 다녀오신 적 있으시죠?\n\n이제 그럴 필요가 없습니다. 110년 만에 전면 개편되어 정부24에서 인감증명서 온라인 무료 발급이 시작되었거든요.\n\n단, 용도 구분을 명확히 하셔야 합니다.\n보조금 신청, 경력 증명, 면허 신청, 기관 제출 같은 일반 행정 민원용은 온라인에서 수수료 0원으로 즉시 발급됩니다.\n하지만 부동산이나 자동차 매도용은 안전을 위해 기존대로 주민센터 창구 방문이 필수입니다.\n\n신청은 정부24에서 공동·금융인증서 로그인 후 본인인증을 거치면 되고, 종이 출력은 물론 전자문서지갑으로도 바로 보낼 수 있어요.\n\n일반 제출용 서류가 필요하다면 사무실에서 1분 만에 해결해 보세요!",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "※ 직접 운영하는 블로그의 안내 글입니다.\n\n정부24 신청 화면과 단계별 전자서명, 출력 유의사항에 대한 구체적인 절차는 아래 글에 상세히 정리해 두었습니다 👇\nhttps://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1230_055531d1b8b20c55",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+      "published_at": null,
+      "verified_at": null,
+      "publication_time_basis": null
+    },
     {
       "attempt_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6",
       "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-0",
@@ -94,13 +181,13 @@
       "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
       "kind": "followup",
       "account_key": "mustpickinfo",
-      "state": "queued",
-      "permalink": null,
-      "updated_at": "2026-10-25T23:02:22.605842+00:00",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De8bRzQHzN4",
+      "updated_at": "2026-10-26T06:48:31.112225+00:00",
       "publication_date": "2026-10-26",
       "slot": "08:00",
       "outbound_url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_0800_94799aa6eb2b82ba",
-      "parent_platform_id": null,
+      "parent_platform_id": "18138910369631432",
       "title": "강아지가 머리를 흔든다면 의심! 반려견 귀 청소 주기와 외이도염 예방 관리법 총정리 | 조이노트 반려동물 케어",
       "mode": "cf_inbound",
       "followup_delay_seconds": 178,
@@ -128,9 +215,9 @@
         "reason": "basic_format"
       },
       "source_url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide",
-      "published_at": null,
-      "verified_at": null,
-      "publication_time_basis": null
+      "published_at": "2026-10-26T04:29:42+00:00",
+      "verified_at": "2026-10-26T06:48:31.111218+00:00",
+      "publication_time_basis": "api_timestamp"
     },
     {
       "attempt_id": "8d4df57df489414caf2d56be7e2bd75b",
@@ -221,6 +308,118 @@
   ],
   "pairedThreads": [
     {
+      "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+      "title": "동사무소 안 가도 된다! 2026 인감증명서 인터넷 무료 발급 방법 (정부24 온라인 신청 절차 총정리) | 저스트인포 금융·세무칼럼",
+      "publication_date": "2026-10-26",
+      "slot": "12:30",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 167,
+      "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "주민센터 방문할 시간 내기 어려우셨던 분들에게 반가운 소식이에요!\n\n그동안 직접 찾아가야 했던 인감증명서가 110년 만에 개편되어 이제 정부24에서 온라인 무료 발급이 가능해졌습니다. 집이나 사무실에서 수수료 0원으로 바로 신청할 수 있어요.\n\n다만 꼭 알아두셔야 할 점이 있습니다. 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원 목적의 인감증명서만 인터넷 발급이 지원됩니다.\n\n부동산이나 자동차 매도용은 기존처럼 반드시 주민센터 창구를 방문해 대면으로 발급받으셔야 해요.\n\n발급할 때는 공동·금융인증서 로그인과 휴대폰 SMS 본인인증이 필요하며, 발급 후에는 전자문서지갑으로 받거나 프린터로 즉시 출력할 수 있습니다.",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "바쁜 평일에 인감증명서 하나 떼려고 반차 쓰거나 점심시간 쪼개 주민센터 다녀오신 적 있으시죠?\n\n이제 그럴 필요가 없습니다. 110년 만에 전면 개편되어 정부24에서 인감증명서 온라인 무료 발급이 시작되었거든요.\n\n단, 용도 구분을 명확히 하셔야 합니다.\n보조금 신청, 경력 증명, 면허 신청, 기관 제출 같은 일반 행정 민원용은 온라인에서 수수료 0원으로 즉시 발급됩니다.\n하지만 부동산이나 자동차 매도용은 안전을 위해 기존대로 주민센터 창구 방문이 필수입니다.\n\n신청은 정부24에서 공동·금융인증서 로그인 후 본인인증을 거치면 되고, 종이 출력은 물론 전자문서지갑으로도 바로 보낼 수 있어요.\n\n일반 제출용 서류가 필요하다면 사무실에서 1분 만에 해결해 보세요!",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+        "part_id": "8ce43ef43d9c4514890765c101ce53e7-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8rgInH0EQ",
+        "updated_at": "2026-10-26T06:51:12.615982+00:00",
+        "publication_date": "2026-10-26",
+        "slot": "12:30",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "동사무소 안 가도 된다! 2026 인감증명서 인터넷 무료 발급 방법 (정부24 온라인 신청 절차 총정리) | 저스트인포 금융·세무칼럼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 167,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "주민센터 방문할 시간 내기 어려우셨던 분들에게 반가운 소식이에요!\n\n그동안 직접 찾아가야 했던 인감증명서가 110년 만에 개편되어 이제 정부24에서 온라인 무료 발급이 가능해졌습니다. 집이나 사무실에서 수수료 0원으로 바로 신청할 수 있어요.\n\n다만 꼭 알아두셔야 할 점이 있습니다. 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원 목적의 인감증명서만 인터넷 발급이 지원됩니다.\n\n부동산이나 자동차 매도용은 기존처럼 반드시 주민센터 창구를 방문해 대면으로 발급받으셔야 해요.\n\n발급할 때는 공동·금융인증서 로그인과 휴대폰 SMS 본인인증이 필요하며, 발급 후에는 전자문서지갑으로 받거나 프린터로 즉시 출력할 수 있습니다.",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "바쁜 평일에 인감증명서 하나 떼려고 반차 쓰거나 점심시간 쪼개 주민센터 다녀오신 적 있으시죠?\n\n이제 그럴 필요가 없습니다. 110년 만에 전면 개편되어 정부24에서 인감증명서 온라인 무료 발급이 시작되었거든요.\n\n단, 용도 구분을 명확히 하셔야 합니다.\n보조금 신청, 경력 증명, 면허 신청, 기관 제출 같은 일반 행정 민원용은 온라인에서 수수료 0원으로 즉시 발급됩니다.\n하지만 부동산이나 자동차 매도용은 안전을 위해 기존대로 주민센터 창구 방문이 필수입니다.\n\n신청은 정부24에서 공동·금융인증서 로그인 후 본인인증을 거치면 되고, 종이 출력은 물론 전자문서지갑으로도 바로 보낼 수 있어요.\n\n일반 제출용 서류가 필요하다면 사무실에서 1분 만에 해결해 보세요!",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+        "published_at": "2026-10-26T06:51:09+00:00",
+        "verified_at": "2026-10-26T06:51:12.614512+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+        "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "submitted_unknown",
+        "permalink": null,
+        "updated_at": "2026-10-26T06:56:48.998127+00:00",
+        "publication_date": "2026-10-26",
+        "slot": "12:30",
+        "outbound_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1230_055531d1b8b20c55",
+        "parent_platform_id": "18125563663919802",
+        "title": "동사무소 안 가도 된다! 2026 인감증명서 인터넷 무료 발급 방법 (정부24 온라인 신청 절차 총정리) | 저스트인포 금융·세무칼럼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 167,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "주민센터 방문할 시간 내기 어려우셨던 분들에게 반가운 소식이에요!\n\n그동안 직접 찾아가야 했던 인감증명서가 110년 만에 개편되어 이제 정부24에서 온라인 무료 발급이 가능해졌습니다. 집이나 사무실에서 수수료 0원으로 바로 신청할 수 있어요.\n\n다만 꼭 알아두셔야 할 점이 있습니다. 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원 목적의 인감증명서만 인터넷 발급이 지원됩니다.\n\n부동산이나 자동차 매도용은 기존처럼 반드시 주민센터 창구를 방문해 대면으로 발급받으셔야 해요.\n\n발급할 때는 공동·금융인증서 로그인과 휴대폰 SMS 본인인증이 필요하며, 발급 후에는 전자문서지갑으로 받거나 프린터로 즉시 출력할 수 있습니다.",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "아직도 인감증명서 떼러 주민센터 직접 가시나요?\n\n110년 만에 제도가 개편되면서 이제 정부24에서 수수료 0원으로 온라인 즉시 발급이 가능합니다. \n\n단, 헛걸음하지 않으려면 이 차이를 꼭 확인하셔야 합니다.\n\n온라인 무료 발급 가능:\n- 면허 신청, 경력 증명, 보조금 신청, 기관 제출용 등 일반 행정 민원용\n\n온라인 발급 불가:\n- 부동산 및 자동차 매도용 (기존처럼 창구 대면 발급 필수!)\n\n발급 방법도 간단해요. 정부24에서 공동·금융인증서로 로그인한 뒤 '인감증명서 발급'을 검색하고, 휴대폰 SMS 본인인증을 거치면 전자문서지갑 전송이나 프린터 출력이 바로 가능합니다. \n\n매도용 서류가 아니라면 이제 집에서 편하게 신청해 보세요!",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "바쁜 평일에 인감증명서 하나 떼려고 반차 쓰거나 점심시간 쪼개 주민센터 다녀오신 적 있으시죠?\n\n이제 그럴 필요가 없습니다. 110년 만에 전면 개편되어 정부24에서 인감증명서 온라인 무료 발급이 시작되었거든요.\n\n단, 용도 구분을 명확히 하셔야 합니다.\n보조금 신청, 경력 증명, 면허 신청, 기관 제출 같은 일반 행정 민원용은 온라인에서 수수료 0원으로 즉시 발급됩니다.\n하지만 부동산이나 자동차 매도용은 안전을 위해 기존대로 주민센터 창구 방문이 필수입니다.\n\n신청은 정부24에서 공동·금융인증서 로그인 후 본인인증을 거치면 되고, 종이 출력은 물론 전자문서지갑으로도 바로 보낼 수 있어요.\n\n일반 제출용 서류가 필요하다면 사무실에서 1분 만에 해결해 보세요!",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "※ 직접 운영하는 블로그의 안내 글입니다.\n\n정부24 신청 화면과 단계별 전자서명, 출력 유의사항에 대한 구체적인 절차는 아래 글에 상세히 정리해 두었습니다 👇\nhttps://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1230_055531d1b8b20c55",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
+        "published_at": null,
+        "verified_at": null,
+        "publication_time_basis": null
+      }
+    },
+    {
       "attempt_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6",
       "title": "강아지가 머리를 흔든다면 의심! 반려견 귀 청소 주기와 외이도염 예방 관리법 총정리 | 조이노트 반려동물 케어",
       "publication_date": "2026-10-26",
@@ -293,13 +492,13 @@
         "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
         "kind": "followup",
         "account_key": "mustpickinfo",
-        "state": "queued",
-        "permalink": null,
-        "updated_at": "2026-10-25T23:02:22.605842+00:00",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8bRzQHzN4",
+        "updated_at": "2026-10-26T06:48:31.112225+00:00",
         "publication_date": "2026-10-26",
         "slot": "08:00",
         "outbound_url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_0800_94799aa6eb2b82ba",
-        "parent_platform_id": null,
+        "parent_platform_id": "18138910369631432",
         "title": "강아지가 머리를 흔든다면 의심! 반려견 귀 청소 주기와 외이도염 예방 관리법 총정리 | 조이노트 반려동물 케어",
         "mode": "cf_inbound",
         "followup_delay_seconds": 178,
@@ -327,9 +526,9 @@
           "reason": "basic_format"
         },
         "source_url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide",
-        "published_at": null,
-        "verified_at": null,
-        "publication_time_basis": null
+        "published_at": "2026-10-26T04:29:42+00:00",
+        "verified_at": "2026-10-26T06:48:31.111218+00:00",
+        "publication_time_basis": "api_timestamp"
       }
     },
     {
@@ -499,8 +698,8 @@
   ],
   "automation": {
     "state": "waiting",
-    "nextEligibleAt": "2026-10-26T12:30:00+09:00",
-    "lastRunAt": "2026-10-25T23:02:22.707543+00:00",
+    "nextEligibleAt": "2026-10-26T18:10:00+09:00",
+    "lastRunAt": "2026-10-26T06:49:45.913427+00:00",
     "lastResult": "queued",
     "issue": null,
     "scheduler": {
@@ -516,7 +715,7 @@
     "schema": "threads-measurement-v1",
     "status": "not_due",
     "complete": false,
-    "collected_at": "2026-10-26T01:07:10.327545+00:00",
+    "collected_at": "2026-10-26T07:08:43.961135+00:00",
     "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
     "windows": {
       "24h": {
@@ -557,6 +756,28 @@
         "published_at": "2026-10-25T23:05:36+00:00",
         "publication_time_basis": "api_timestamp",
         "snapshots": {}
+      },
+      {
+        "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
+        "attempt_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6",
+        "platform_id": "17983759775898773",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8bRzQHzN4",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T04:29:42+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "8ce43ef43d9c4514890765c101ce53e7-0",
+        "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+        "platform_id": "18125563663919802",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8rgInH0EQ",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T06:51:09+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
       }
     ],
     "account_metrics": {
@@ -564,14 +785,14 @@
       "clicks": 0,
       "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
       "requested_since": "2026-10-15T11:19:14.891210+00:00",
-      "requested_until": "2026-10-26T01:07:10.327545+00:00",
-      "collected_at": "2026-10-26T01:07:11.715781+00:00"
+      "requested_until": "2026-10-26T07:08:43.961135+00:00",
+      "collected_at": "2026-10-26T07:08:45.390609+00:00"
     },
     "revenue": null,
     "revenue_status": "publisher_attribution_unverified",
     "feedback": {
       "status": "insufficient_data",
-      "computedAt": "2026-10-26T01:07:10.327545+00:00",
+      "computedAt": "2026-10-26T07:08:43.961135+00:00",
       "checkpoint": null,
       "comparablePosts": 0,
       "evidence": [],
@@ -584,7 +805,7 @@
   },
   "feedback": {
     "status": "insufficient_data",
-    "computedAt": "2026-10-26T01:07:10.327545+00:00",
+    "computedAt": "2026-10-26T07:08:43.961135+00:00",
     "checkpoint": null,
     "comparablePosts": 0,
     "evidence": [],
@@ -634,13 +855,18 @@
     "counts": [
       {
         "kind": "followup",
-        "state": "queued",
+        "state": "published_verified",
+        "n": 1
+      },
+      {
+        "kind": "followup",
+        "state": "submitted_unknown",
         "n": 1
       },
       {
         "kind": "main",
         "state": "published_verified",
-        "n": 1
+        "n": 2
       }
     ]
   },

@@ -1,3 +1,1 @@
-{
-  "tickets": {}
-}
+{"tickets": {"b5f3306952e555263354539ea408be70": {"id": "b5f3306952e555263354539ea408be70", "channel": "naver_kin", "identity": "486346632", "account": "stone0747", "port": 9230, "cause": "editor_stalled", "summary": "편집·답변 작업 3분 이상 진행 갱신 없음", "submissionUncertain": false, "observedAt": "2026-10-26T10:36:04.872599+09:00", "title": "국립중앙박물관 상설전시관 관람 시 유의사항은?", "createdAt": "2026-10-26T10:39:08.047938+09:00", "status": "delivery_pending"}, "b0bed4fb49cec90eb87e4e42abb8d53f": {"id": "b0bed4fb49cec90eb87e4e42abb8d53f", "channel": "naver_kin", "identity": "494619211", "account": "adinfo0905", "port": 9231, "cause": "editor_stalled", "summary": "편집·답변 작업 3분 이상 진행 갱신 없음", "submissionUncertain": false, "observedAt": "2026-10-26T15:23:14.709254+09:00", "title": "국민연금 수령 나이, 65세까지 기다리는 게 나을까요?", "createdAt": "2026-10-26T15:26:17.873893+09:00", "status": "delivery_pending"}}}

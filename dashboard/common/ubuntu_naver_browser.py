@@ -300,7 +300,7 @@ def gc_blank_tabs(port):
 
 def dismiss_stuck_dialogs(display=None):
     """Detect and close any blocking OS dialogs like 'Open Files' on the workflow DISPLAY."""
-    displays = [display] if display else [os.environ.get('BAROLAB_DISPLAY'), ':11', ':10', ':0']
+    displays = [display] if display else [os.environ.get('BAROLAB_DISPLAY'), ':11', ':10']
     closed = []
     for cand in dict.fromkeys(d for d in displays if d):
         try:

@@ -82,49 +82,119 @@ def fleet_probe(spec,hosts=('127.0.0.1',)):
 
 
 def codex_quota():
-    from common.codex_cli import local_config,environment
-    config=local_config();exe=config.get('wsl_executable') or config['executable']
-    process=subprocess.Popen([exe,'app-server'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
-        text=True,encoding='utf-8',env=environment(config),creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-    incoming=queue.Queue(maxsize=64)
-    def read():
+    from common.codex_cli import local_config, environment, list_codex_account_slots, codex_rotation_state
+    config = local_config()
+    exe = config.get('wsl_executable') or config['executable']
+    slots = list_codex_account_slots()
+    rot = codex_rotation_state()
+    call_counts = rot.get('callCounts') or {}
+    last_used = rot.get('lastUsedAccount')
+
+    account_rows = []
+    primary_buckets = {}
+
+    def _probe_slot(home_dir):
+        env = environment(config, home=home_dir)
+        process = subprocess.Popen([exe, 'app-server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding='utf-8', env=env, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+        incoming = queue.Queue(maxsize=64)
+        def read():
+            try:
+                for line in process.stdout:
+                    if len(line) < 200000:
+                        try:
+                            incoming.put_nowait(json.loads(line))
+                        except (ValueError, queue.Full):
+                            pass
+            except (OSError, ValueError):
+                pass
+        thread = threading.Thread(target=read, daemon=True)
+        thread.start()
+        deadline = time.monotonic() + 10
+        def rpc(identifier, method, params=None):
+            message = dict(id=identifier, method=method)
+            if params is not None:
+                message['params'] = params
+            process.stdin.write(json.dumps(message) + '\n')
+            process.stdin.flush()
+            while time.monotonic() < deadline:
+                obj = incoming.get(timeout=max(.01, deadline - time.monotonic()))
+                if obj.get('id') == identifier:
+                    if 'error' in obj:
+                        raise ValueError('quota response rejected')
+                    return obj['result']
+            raise TimeoutError()
         try:
-            for line in process.stdout:
-                if len(line)<200000:
-                    try:incoming.put_nowait(json.loads(line))
-                    except (ValueError,queue.Full):pass
-        except (OSError,ValueError):pass
-    thread=threading.Thread(target=read,daemon=True);thread.start();deadline=time.monotonic()+12
-    def rpc(identifier,method,params=None):
-        message=dict(id=identifier,method=method)
-        if params is not None:message['params']=params
-        process.stdin.write(json.dumps(message)+'\n');process.stdin.flush()
-        while time.monotonic()<deadline:
-            obj=incoming.get(timeout=max(.01,deadline-time.monotonic()))
-            if obj.get('id')==identifier:
-                if 'error' in obj:raise ValueError('quota response rejected')
-                return obj['result']
-        raise TimeoutError()
-    try:
-        rpc(1,'initialize',{'clientInfo':{'name':'barolab-monitor','version':'1.0'}})
-        process.stdin.write('{"method":"initialized"}\n');process.stdin.flush()
-        data=rpc(2,'account/rateLimits/read')
-        buckets=data.get('rateLimitsByLimitId') or {'codex':data.get('rateLimits') or {}}
-        safe={}
-        for name,row in list(buckets.items())[:12]:
-            safe[name]={k:{n:w.get(n) for n in ('usedPercent','windowDurationMins','resetsAt')} for k in ('primary','secondary')
-                        if isinstance((w:=row.get(k)),dict)}
-            credits=row.get('credits')
-            if isinstance(credits,dict):
-                safe[name]['credits']={k:credits.get(k) for k in ('hasCredits','unlimited','balance')}
-            if row.get('planType'):safe[name]['planType']=str(row['planType'])[:30]
-        return dict(status='collected',buckets=safe,checkedAt=time.time())
-    finally:
-        # Only this short-lived telemetry child; never a pipeline or browser.
-        process.stdin.close()
-        try:process.wait(timeout=1)
-        except subprocess.TimeoutExpired:process.terminate();process.wait(timeout=2)
-        thread.join(timeout=.2)
+            rpc(1, 'initialize', {'clientInfo': {'name': 'barolab-monitor', 'version': '1.0'}})
+            process.stdin.write('{"method":"initialized"}\n')
+            process.stdin.flush()
+            data = rpc(2, 'account/rateLimits/read')
+            raw_buckets = data.get('rateLimitsByLimitId') or {'codex': data.get('rateLimits') or {}}
+            safe = {}
+            for name, row in list(raw_buckets.items())[:12]:
+                safe[name] = {k: {n: w.get(n) for n in ('usedPercent', 'windowDurationMins', 'resetsAt')}
+                              for k in ('primary', 'secondary') if isinstance((w := row.get(k)), dict)}
+                credits = row.get('credits')
+                if isinstance(credits, dict):
+                    safe[name]['credits'] = {k: credits.get(k) for k in ('hasCredits', 'unlimited', 'balance')}
+                if row.get('planType'):
+                    safe[name]['planType'] = str(row['planType'])[:30]
+            return safe
+        finally:
+            process.stdin.close()
+            try:
+                process.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                process.terminate()
+                process.wait(timeout=2)
+            thread.join(timeout=.2)
+
+    for slot in slots:
+        email = slot['email']
+        home_dir = slot['home']
+        is_auth = slot['authenticated']
+        if not is_auth:
+            account_rows.append(dict(
+                email=email,
+                slotName=slot['slotName'],
+                status='미연결 · 로그인 필요',
+                usable=False,
+                isLastUsed=False,
+                callCount=int(call_counts.get(email, 0)),
+                checkedAt=time.time(),
+            ))
+            continue
+        try:
+            safe_buckets = _probe_slot(home_dir)
+            if not primary_buckets:
+                primary_buckets = safe_buckets
+            account_rows.append(dict(
+                email=email,
+                slotName=slot['slotName'],
+                status='collected',
+                usable=True,
+                activeRotation=True,
+                isLastUsed=(email == last_used),
+                callCount=int(call_counts.get(email, 0)),
+                buckets=safe_buckets,
+                checkedAt=time.time(),
+            ))
+        except (OSError, ValueError, RuntimeError, TimeoutError, queue.Empty, subprocess.SubprocessError):
+            account_rows.append(dict(
+                email=email,
+                slotName=slot['slotName'],
+                status='조회 실패 · 로그인 확인',
+                usable=False,
+                isLastUsed=(email == last_used),
+                callCount=int(call_counts.get(email, 0)),
+                checkedAt=time.time(),
+            ))
+
+    return dict(status='collected' if primary_buckets else '조회 연결 대기',
+                buckets=primary_buckets,
+                accounts=account_rows,
+                lastUsedAccount=last_used,
+                checkedAt=time.time())
 
 
 def credit_probe(values):

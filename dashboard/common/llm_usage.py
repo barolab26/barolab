@@ -43,7 +43,7 @@ from contextlib import contextmanager
 
 # Reported tokens are resource usage, not a dollar cost. Limits apply before the next call.
 DEFAULT_BUDGET = {'dailyTokens': 30000000, 'dailyCalls': 1200,
-                  'agendaTokens': 500000, 'agendaCalls': 40, 'agendaModelSeconds': 1200}
+                  'agendaTokens': 1000000, 'agendaCalls': 40, 'agendaModelSeconds': 1200}
 
 
 class UsageBudgetExceeded(RuntimeError):

@@ -34,7 +34,7 @@ SCHEMA = {'type':'object','properties':{
     'decision':{'type':'string','enum':['tool','consult','finish','wait']},
     'message':{'type':'string','minLength':1,'maxLength':4000},
     'plan':{'type':'array','maxItems':8,'items':{'type':'string','maxLength':400}},
-    'tool':{'type':'string','enum':['','projects','project_status','evidence','evidence_batch','read_source','search_source','web_search','fetch_page','ingest_url','save_knowhow','browser_observe','patch_status','memory','dispatch','propose_patch','prepare_recovery','retry_conference']},
+    'tool':{'type':'string','enum':['','projects','project_status','evidence','evidence_batch','read_source','search_source','web_search','fetch_page','ingest_url','save_knowhow','browser_observe','browser_ego_action','patch_status','memory','dispatch','propose_patch','prepare_recovery','retry_conference']},
     'arguments':{'type':'string','maxLength':8000},
     'colleague':{'type':'string','enum':['',*ROLES]},
     'evidence_ids':{'type':'array','maxItems':24,'items':{'type':'string'}},
@@ -230,6 +230,33 @@ def recall(args):
             'rule':'Past advice is a hypothesis. Only exact verified tool receipts prove execution/publication; missing revenue is unknown.'}
 
 
+def browser_ego_action(row,args):
+    """Give Patch the existing EGO executor on an explicitly selected, authorized tab."""
+    if row['actor']!='patch' or not row['permissions']['repair']:
+        raise ValueError('Browser action requires Patch repair permission')
+    if set(args)!={'port','goal','url'} or not isinstance(args['goal'],str) or not args['goal'].strip():
+        raise ValueError('Browser action requires port, goal and existing tab URL')
+    observed=browser_observe(row,{'port':args['port']})
+    if args['url'] not in [tab['url'] for tab in observed.get('tabs',[])]:
+        raise ValueError('Select an existing tab from browser_observe')
+    from common.ubuntu_naver_browser import account_paths
+    from common.browser_session import connect_sync
+    from common.ego_screen import run
+    from playwright.sync_api import sync_playwright
+    from urllib.parse import urlsplit
+    exe,profile,_=account_paths(args['port'])
+    with sync_playwright() as playwright:
+        browser=connect_sync(playwright,'http://127.0.0.1:'+str(args['port']),exe,profile,log=lambda _:None)
+        page=next(p for c in browser.contexts for p in c.pages
+                  if urlsplit(p.url)._replace(query='',fragment='').geturl()==args['url'])
+        folder=GOALS/row['id']/('browser-'+str(time.time_ns()))
+        result=run(page,port=args['port'],folder=folder,actor='patch',
+                   goal=args['goal']+' 작업 범위 안에서 화면을 보고 조작하라. 실제 게시·예약 제출은 기존 제출 검증 경로로 수행하라.',
+                   max_turns=12,time_budget_seconds=240)
+    return {'ok':result.get('status')=='screen_task_complete','status':result.get('status'),
+            'observations':result.get('observations',[]),'evidencePath':str(folder/'screen-execution.json')}
+
+
 def browser_observe(row,args):
     from common.ubuntu_naver_browser import account_paths,process_identity,inspect_workflow_window
     from playwright.sync_api import sync_playwright
@@ -303,6 +330,7 @@ def tool_call(row,tool,args):
             verified_work_proof=args.get('verifiedWorkProof'),
         )
     if tool=='browser_observe':return browser_observe(row,args)
+    if tool=='browser_ego_action':return browser_ego_action(row,args)
     if tool=='patch_status':
         from server.agent_tools import read_patch_code_status
         return read_patch_code_status(args['job_id'],args['candidate_sha256'])
@@ -425,19 +453,32 @@ def recovery_progress():
             'originalConference':{k:conference.get(k) for k in ('status','attempts','errorType','retryRequestedAt')}}
 
 
-def ask(row):
-    from common.llm_client import generate_json,memory_session
-    from common.staff_capabilities import capability_catalog
-    history=[];remaining=32000
+def prompt_observations(row):
+    history=[];remaining=16000;seen={}
     protected={}
     for event in row['observations']:
         if event['tool'] in ('read_source','colleague_answer','colleague_partial') or event['tool']=='evidence' and isinstance(event.get('result'),dict) and 'pagination' in event['result']:
             protected[event['tool']]=event['id']
     for event in reversed(row['observations']):
         keep=event['id'] in protected.values()
-        preview={**event,'result':event['result'] if keep else bounded(event['result'],8000)}
+        fingerprint=hashlib.sha256(json.dumps([event['tool'],event.get('arguments'),event['result']],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+        preview={**event,'result':bounded(event['result'],12000 if keep else 4000)}
         item=preview if keep or len(json.dumps(preview,ensure_ascii=False))<=remaining else {k:event[k] for k in ('id','actor','tool','sha256','observedAt')}
+        if fingerprint in seen:
+            item={k:event[k] for k in ('id','actor','tool','sha256','observedAt')}
+            item['sameAs']=seen[fingerprint]
+        else:seen[fingerprint]=event['id']
         remaining-=len(json.dumps(item,ensure_ascii=False));history.append(item)
+    return list(reversed(history))
+
+
+def ask(row):
+    from common.llm_client import generate_json,memory_session
+    from common.staff_capabilities import capability_catalog
+    from common import work_agenda as agendas
+    owned=agendas.get(row['businessAgendaId']) if row.get('businessAgendaId') else agendas.active()
+    agenda={k:owned.get(k) for k in ('id','project','title','status','completionCriteria','workTarget')}
+    agenda['workTarget']=owned.get('workTarget') or {'arguments':owned.get('source',{}).get('arguments',{})}
     prompt=('You are an operating agent in a continuing team task, not a status-report template. '
         'Decide the next investigation/action from evidence, actually use host tools by returning decision=tool. '
         'Preserve the original CEO objective and plan across turns. Do not output private chain-of-thought; provide concise operational decisions and evidence. '
@@ -465,6 +506,7 @@ def ask(row):
         'Tools: projects {}; project_status {project}; evidence {name: revenue|traffic|metrics|kin|threads|collection|preparation|flow|execution|recovery|conference:<agendaId>,select?:[one nested key/index path],fields?:[keys to project],offset?:0,limit?:80}; '
         'Incident and recovery IDs must be read as incident:<taskId> and recovery_plan:<taskId>, not conference IDs. Operational JSON is read with evidence, not read_source. '
         'browser_observe {port} reads existing account tabs, controls and verified X11 windowMapping (DISPLAY, windowId, browserPid, wmPid) without focusing/opening/navigating/typing; mapped=null means map state was not measured. patch_status {job_id,candidate_sha256} reads a patch candidate status. '
+        'browser_ego_action {port,url,goal} lets Patch with repair permission use EGO screenshots and generic mouse/keyboard actions on an existing authorized tab; use it to resolve popups, cancel edits or reload based on the actual screen. Consult patch to perform it. '
         'web_search {query} and fetch_page {url} read public web evidence with existing bounded fetchers; '
         'ingest_url {url} extracts full YouTube video transcripts/subtitles (yt-dlp) or web article bodies for study and fact-checking; '
         'save_knowhow {title,method,whenToUse,factCheckSummary,sourceUrl?,tags?,roles?,verifiedWorkProof?} stores a hypothesis by default. Only a valid host work receipt and an exact evidenceText excerpt as method permit reuse as an observed procedure. A source URL, model summary or colleague agreement never proves ranking, account longevity or revenue effects; '
@@ -477,8 +519,8 @@ def ask(row):
         'decision=consult requires a colleague and a concrete question in message. decision=wait means an external constraint; name it. '
         'Return one JSON object matching this exact schema (arguments is a STRING containing JSON, not an object): '
         +json.dumps(SCHEMA,ensure_ascii=False)+'\nRespond in Korean.\n'+json.dumps({'originalObjective':row['goal'],'corporateAssetMap':__import__('common.asset_map',fromlist=['get_asset_map_summary']).get_asset_map_summary(),'nowUtcEpoch':time.time(),'actor':row['actor'],
-        'activeBusinessAgenda':__import__('common.work_agenda',fromlist=['view']).view().get('active'),'latestSharedRecovery':recovery_progress(),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':row.get('conversation',[]),'parentObjective':row.get('parentObjective'),'priorCases':row.get('priorCases',[]),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'handoff':row.get('handoff'),'toolLimits':{'read_source':{'linesMaximum':240,'pagination':['truncated','nextLine','totalLines','sha256']},'evidence':{'select':'one nested path of keys/indices','fields':'up to 16 keys from selected object','limitMaximum':240,'pagination':['pagination.nextOffset','pagination.totalItems']}},'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
-        'observations':list(reversed(history)),'remainingDecisions':max(0,row.get('maxSteps',MAX_STEPS)-row['decisions']),'investigationBudget':{'colleagueRemaining':row.get('colleagueStepsRemaining'),'managerFollowup':row.get('managerFollowup'),'episodeExtraLimit':COLLEAGUE_STEPS+MANAGER_FOLLOWUP_RESERVE}},ensure_ascii=False))
+        'activeBusinessAgenda':agenda,'latestSharedRecovery':recovery_progress(),'permissions':row['permissions'],'capabilities':capability_catalog(),'conversation':bounded(row.get('conversation',[])[-3:],4000),'parentObjective':row.get('parentObjective'),'priorCases':bounded(row.get('priorCases',[]),4000),'role':ROLE_BRIEF[row['actor']],'sharedPlan':row.get('plan',[]),'actorPlan':row.get('actorPlans',{}).get(row['actor'],[]),'colleagueTask':row.get('colleagueTask'),'handoff':row.get('handoff'),'toolLimits':{'read_source':{'linesMaximum':240,'pagination':['truncated','nextLine','totalLines','sha256']},'evidence':{'select':'one nested path of keys/indices','fields':'up to 16 keys from selected object','limitMaximum':240,'pagination':['pagination.nextOffset','pagination.totalItems']}},'dialoguePolicy':'Respond directly to the latest question; keep progress concise. A tool receipt or answer is not business success. Finish may honestly report a verified result, unresolved blocker or pending verification.',
+        'observations':prompt_observations(row),'remainingDecisions':max(0,row.get('maxSteps',MAX_STEPS)-row['decisions']),'investigationBudget':{'colleagueRemaining':row.get('colleagueStepsRemaining'),'managerFollowup':row.get('managerFollowup'),'episodeExtraLimit':COLLEAGUE_STEPS+MANAGER_FOLLOWUP_RESERVE}},ensure_ascii=False))
     routes=[]
     def route(provider,model,state,**meta):
         if state=='returned':
@@ -590,7 +632,7 @@ def advance(row,steps=2):
     ensure_business_agenda(row)
     if row.get('subgoals'):
         children=[load(goal_path(i)) for i in row['subgoals']]
-        closed=[c for c in children if c.get('businessAgendaId') and agendas.get(c['businessAgendaId']).get('status')=='closed']
+        closed=[c for c in children if c.get('businessAgendaId') and agendas.get(c['businessAgendaId']).get('status')=='closed' and agendas.get(c['businessAgendaId']).get('verification',{}).get('verified') is True]
         scope_verified=True
         if len(closed)==len(children) and row.get('recheckWholeScope'):
             from datetime import datetime
@@ -612,6 +654,14 @@ def advance(row,steps=2):
     business=row.get('businessAgendaId')
     if not agendas.enabled() or not business:return _advance(row,steps)
     existing=agendas.get(business)
+    if existing['status']=='closed' and existing.get('investigationReport'):
+        row.update(status='answered',answer=existing['investigationReport']['summary'],
+                   resolution={'status':'investigation_closed','label':'조사 보고 후 안건 종결 · 업무 해결 여부는 별도 기록'})
+        save(row);return row
+    if existing['status']=='closed' and existing.get('verification',{}).get('verified') is not True:
+        row.update(status='blocked',answerSource='host',answer='안건은 종료됐지만 실제 해결 증거가 없습니다.',
+                   resolution={'status':'unresolved','label':'검증 없는 안건 종료','agendaId':business})
+        save(row);return row
     if existing['status']=='closed':
         row.update(status='answered',answerSource='host',answer='이 안건의 실제 검증과 담당자·팀장 마무리 보고가 회의실에 저장되었습니다. '+existing['completionCriteria'],
                    resolution={'status':'verified_resolved','label':'원래 안건의 실제 검증·종결 수신 완료','agendaId':business})
@@ -631,6 +681,10 @@ def advance(row,steps=2):
         if agenda.get('plan') and not agendas.flush_events(business):
             row.update(status='waiting',nextCheckAt=time.time()+5);save(row);return row
         result=_advance(row,steps)
+        if row.get('investigationClosed'):
+            agendas.finish_investigation(business,row['answer'],row['investigationClosed'])
+            row['delivered']=True;save(row)
+            return result
         resolution=row.get('resolution',{}).get('status')
         if row['status'] in ('answered','blocked'):
             if resolution=='verified_resolved':
@@ -651,6 +705,18 @@ def advance(row,steps=2):
         return result
 
 
+def summarize_investigation(row, reason):
+    latest = row.get('lastLeadMessage') or row.get('lastMessage') or '확정된 조사 결론이 없습니다.'
+    remaining = ' / '.join(row.get('plan', [])[:2]) or '저장된 원천 기록과 실제 실행 결과를 후속 확인합니다.'
+    opening = '조사 예산 한도로 이번 조사 안건을 종결합니다.' if reason.startswith('agenda_') else '대표 요청으로 이번 조사 안건을 종결합니다.'
+    answer = opening + '\n조사 내용: ' + safe(latest)[:500] + '\n미해결·후속 확인: ' + safe(remaining)[:400]
+    row.update(status='answered', answerSource='host', answer=answer, investigationClosed=reason,
+               resolution={'status':'investigation_closed','label':'조사 요약 보고 완료 · 실행·복구 성공을 의미하지 않습니다.'},
+               evidenceIds=[e['id'] for e in row.get('observations', [])[-8:]], nextCheckAt=0)
+    save(row)
+    return row
+
+
 def _advance(row,steps=2):
     lease=row.get('reasoningLease',{})
     if row.get('status')=='working' and lease and not lease.get('returnedAt') and not lease.get('settledAt'):
@@ -666,6 +732,15 @@ def _advance(row,steps=2):
         row['reasoningInterruptions']=row['reasoningInterruptions'][-8:]
         observe(row,'host','reasoning_checkpoint_recovered',{}, {'nextAction':row.get('pendingNextAction'),'pendingConference':row.get('pendingConference'),'pendingAction':row.get('pendingAction'),'publisherReplayAllowed':False})
     if not refresh_pending(row):return row
+    if row.get('businessAgendaId') and row['permissions']['repair']:
+        from common import work_agenda as agendas
+        business=agendas.get(row['businessAgendaId'])
+        conference_id=(business.get('workTarget') or business.get('source',{})).get('conferenceId')
+        if conference_id:
+            failure=read_evidence({'name':'conference:'+conference_id})
+            if failure.get('sha256') and failure['sha256']!=row.get('failureEvidenceSha256'):
+                observe(row,'host','evidence',{'name':'conference:'+conference_id},failure)
+                row['failureEvidenceSha256']=failure['sha256'];save(row)
     if row['status']=='waiting_external' and time.time()<row.get('nextCheckAt',0):return row
     row.pop('waitingMessage',None)
     for _ in range(steps):
@@ -766,6 +841,8 @@ def _advance(row,steps=2):
             from common.llm_usage import UsageBudgetExceeded, RouteCoolingDown
             if isinstance(exc, (UsageBudgetExceeded, RouteCoolingDown)):
                 observe(row,'host','resource_hold',{}, {'errorType':type(exc).__name__,'reason':str(exc)})
+                if isinstance(exc, UsageBudgetExceeded) and str(exc).startswith('agenda_'):
+                    return summarize_investigation(row,str(exc))
                 row.update(status='blocked' if isinstance(exc, UsageBudgetExceeded) else 'waiting',
                            nextCheckAt=time.time()+300, answerSource='host',
                            answer='자원 한도 또는 모델 경로 대기로 중단했습니다. 실제 작업 증거를 보존했으며 완료로 처리하지 않았습니다.')
@@ -837,6 +914,27 @@ def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead
         return row
 
 
+def operational_check_title(observation):
+    from datetime import datetime, timezone, timedelta
+    title = observation.get('title') or '운영 상태'
+    activity = observation.get('activity') or {}
+    if activity.get('status') in ('overdue', 'stalled'):
+        try:
+            last = datetime.fromisoformat(activity['lastAttemptAt'].replace('Z', '+00:00'))
+            if last.tzinfo is None:raise ValueError('Missing timezone')
+            minutes = max(0, int((time.time() - last.timestamp()) / 60))
+            elapsed = str(minutes // 60) + '시간' if minutes >= 60 else str(minutes) + '분'
+            clock = last.astimezone(timezone(timedelta(hours=9))).strftime('%H:%M')
+            reason = elapsed + ' 이상 주기 실행(' + clock + ' 이후) 미관측'
+        except (KeyError, ValueError, TypeError, AttributeError):
+            reason = '주기 실행 기록 미확인'
+    elif (observation.get('quota') or {}).get('missing'):
+        reason = '예정 게시 ' + str(observation['quota']['missing']) + '건의 공개 결과 미확인'
+    else:
+        reason = {'stale': '운영 자료 갱신 지연', 'unknown': '운영 상태 미확인'}.get(observation.get('status'), '운영 상태 확인 요청')
+    return '[' + title + '] ' + reason + '으로 인한 자동 운영 점검'
+
+
 def start_autonomous_goal_once():
     """Use existing incident evidence, never create a second project collector."""
     config=load(ROOT/'dashboard/data/project-autonomy.json')
@@ -852,7 +950,7 @@ def start_autonomous_goal_once():
     from common import work_agenda as agendas
     if agendas.enabled():
         state=load(agendas.STATE)
-        for identity in [state.get('activeId'),*state.get('pending',[])]:
+        for identity in [*agendas.active_ids(state),*state.get('pending',[])]:
             if identity:
                 existing=agendas.get(identity)
                 if existing.get('status') not in ('closed','suspended'):busy.add(existing.get('project'))
@@ -867,9 +965,7 @@ def start_autonomous_goal_once():
         request_id='project-agent:'+incident['taskId']
         identity=hashlib.sha256(request_id.encode()).hexdigest()
         if goal_path(identity).exists():continue
-        question=('자동 운영 점검: '+project+'의 실제 차단 원인을 조사하고, 관련 직원과 협의해 허용된 복구를 실행·검증하라. '
-                  '제출 불명확·명시적 보류·한도는 우회하지 마라. 자료 부족을 0이나 실패로 바꾸지 마라. '
-                  '관측된 안건: '+json.dumps(bounded(incident.get('observation',{}),10000),ensure_ascii=False))
+        question=operational_check_title(actual)
         reason_request(request_id,question,execute=project in config.get('projects',[]),repair=True,steps=0,
                        origin='project-monitor',projects=[project],max_steps=16)
         return True
@@ -890,7 +986,7 @@ def resume_once(lane=None):
         with claim(marker.name) as acquired:
             if not acquired:continue
             row=load(goal_path(marker.name))
-            if agendas.enabled() and row.get('businessAgendaId') and agendas.active().get('id')!=row['businessAgendaId']:
+            if agendas.enabled() and row.get('businessAgendaId') and row['businessAgendaId'] not in agendas.active_ids():
                 bound=agendas.get(row['businessAgendaId'])
                 if bound.get('status')=='closed':
                     if row.get('status') not in ('answered','blocked'):advance(row,0)
@@ -1012,7 +1108,7 @@ def progress_view(row):
     tracker='processing'
     if status in ('waiting_external','waiting_verification'):tracker='waiting'
     elif row.get('answer'):
-        tracker='completed' if resolution.get('status')=='verified_resolved' else 'replied' if not row.get('permissions',{}).get('execute') and not row.get('permissions',{}).get('repair') else 'failed' if resolution.get('status')=='failed' else 'waiting'
+        tracker='completed' if resolution.get('status')=='verified_resolved' else 'replied' if resolution.get('status')=='investigation_closed' or not row.get('permissions',{}).get('execute') and not row.get('permissions',{}).get('repair') else 'failed' if resolution.get('status')=='failed' else 'waiting'
     phase='답변 완료' if status in ('answered','blocked') and row.get('answer') else progress.get('phase','접수')
     return {'text':text,'status':tracker,'phase':phase,'lastActivityAt':progress.get('at',row.get('updatedAt',row.get('createdAt'))),'resolution':resolution,'target':target}
 

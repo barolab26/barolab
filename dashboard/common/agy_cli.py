@@ -195,6 +195,11 @@ def generate(prompt, model, images=None, response_schema=None, audit_directory=N
             except Exception:
                 pass
             record_provider_memory_delivery(text,'agy',initial['model'],audit_directory,'completed')
+            try:
+                from common.crew_chat_bridge import record_model_route
+                record_model_route('agy', initial['model'], None, account=account_label)
+            except Exception:
+                pass
             return value,initial['model']
         except (ValueError,KeyError,TypeError,StopIteration) as exc:
             last_exc = exc

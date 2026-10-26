@@ -2660,13 +2660,14 @@ def receive_goal_result(payload: Dict[str, Any]):
         from common.llm_settings import format_brain_badge
         route=note['route'] if note else {} if goal.get('answerSource')=='host' else (goal.get('leadRoute') or {})
         brain={**route,'badge':format_brain_badge(route['provider'],route['model'],route.get('reasoningEffort'))} if route.get('model') else {'provider':'host','badge':'실행 제어 알림'}
-        identity=('goal-step-'+goal['id']+'-'+str(index)) if note else 'goal-result-'+goal['id']
+        is_tool_step = bool(note and note.get('kind') == 'tool')
+        identity = ('goal-step-' + goal['id']) if is_tool_step else (('goal-step-' + goal['id'] + '-' + str(index)) if note else 'goal-result-' + goal['id'])
         if progress_requested:identity='goal-progress-'+goal['id']
-        if not progress_requested and any(m.get('id')==identity for m in room.get('messages',[])):return {'ok':True,'messageId':identity}
+        if not progress_requested and not is_tool_step and any(m.get('id')==identity for m in room.get('messages',[])):return {'ok':True,'messageId':identity}
         actor=note['actor'] if note else goal.get('leadActor','jarvis')
         raw_text = note['text'] if note else goal.get('answer','')
         # Deduplication: suppress repeated intermediate drafts from cluttering the room
-        if note and any(m.get('goalId') == goal['id'] and (m.get('text', '')[:40] == raw_text[:40] or m.get('text') == raw_text) for m in room.get('messages', [])):
+        if note and not is_tool_step and any(m.get('goalId') == goal['id'] and (m.get('text', '')[:40] == raw_text[:40] or m.get('text') == raw_text) for m in room.get('messages', [])):
             return {'ok': True, 'messageId': identity, 'deduplicated': True}
         is_ws = (note is not None)
         message={'id':identity,'who':actor,'text':raw_text,'ts':note['ts'] if note else int(time.time()*1000),
@@ -2680,7 +2681,7 @@ def receive_goal_result(payload: Dict[str, Any]):
             message.update(ts=int(goal.get('createdAt',time.time())*1000)+1,goalStatus=goal.get('status'),who=goal.get('leadActor','jarvis'),text=state['text'],brain={'provider':'host','badge':'요청 진행 상태'},isGoalProgress=True,replyToCeo=not automatic)
             message['taskTracker'].update(step=state['phase'],resultSummary=state['text'])
         append_or_update_room_message(message)
-        if user and not progress_requested:_append_agent_direct_thread(actor,user,message)
+        if user and not progress_requested and not note:_append_agent_direct_thread(actor,user,message)
     return {'ok':True,'messageId':identity}
 
 
@@ -2814,8 +2815,12 @@ def _append_agent_direct_thread(slug: str, user_msg: Dict[str, Any], agent_msg: 
             except Exception:
                 data = {"slug": slug, "messages": []}
         msgs = data.get("messages") if isinstance(data.get("messages"), list) else []
-        msgs.append(user_msg)
-        msgs.append(agent_msg)
+        uid = user_msg.get("id")
+        if uid and not any(m.get("id") == uid for m in msgs):
+            msgs.append(user_msg)
+        aid = agent_msg.get("id")
+        if aid and not any(m.get("id") == aid for m in msgs):
+            msgs.append(agent_msg)
         data["messages"] = msgs[-60:]
         f.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception:

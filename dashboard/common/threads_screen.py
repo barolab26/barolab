@@ -164,15 +164,10 @@ def owned_empty_composer(page,folder):
 
 
 def existing_draft(page):
-    """A default empty inline reply box is not a user draft."""
-    protected = page.locator('[contenteditable="true"]').evaluate_all("""els=>els.some(e=>
-        (e.innerText||'').trim().length>0 ||
-        (e.getClientRects().length>0 && !!e.closest('[role="dialog"]')))""") is True
-    if protected:return True
-    try:
-        composer(page)
-        return True
-    except ValueError:return False
+    """A default empty inline reply box or clean empty composer is not a user draft."""
+    has_text = page.locator('[contenteditable="true"]').evaluate_all("""els=>els.some(e=>
+        (e.innerText||'').trim().length > 0)""") is True
+    return has_text
 
 
 def completed_draft(page,part,folder):
@@ -234,14 +229,16 @@ class ScreenAdapter:
             protected=existing_draft(page)
             resume=completed_draft(page,part,folder.parent) if protected else None
             opened_before=owned_empty_composer(page,folder.parent) if protected and not resume else None
-            if protected and not resume and not opened_before:raise RuntimeError('threads_existing_draft_preserved')
             if not resume and not opened_before:
                 target='https://www.threads.com/@'+ACCOUNT
                 if parent:target=parent['permalink']
                 def opened():
-                    composer(page)
+                    dialog=composer(page)
+                    if dialog.locator('[contenteditable="true"]').inner_text().strip():
+                        raise ValueError('threads_composer_not_empty')
+                    if parent:verify_reply_context(page,dialog,parent)
                 run(page,port=PORT,folder=folder/'open',urls={'approved-thread':target},max_turns=10,time_budget_seconds=180,
-                    goal='Threads에서 approved-thread로 이동하고 '+('이 글에 답글을 작성하는 입력창' if part['kind']=='followup' else '새 게시물 작성창')+
+                    goal='화면을 확인하라. 이전 실행의 실패 잔재로 열린 팝업(Discard, 취소, 수정 취소)이나 빈 작성창을 화면 판단으로 닫아 정리하라. Threads에서 approved-thread로 이동하고 '+('이 글에 답글을 작성하는 입력창' if part['kind']=='followup' else '새 게시물 작성창')+
                         '을 연다. 아직 글을 입력하거나 게시하지 않는다. 입력창이 보이면 완료한다.',completion_check=opened)
             dialog=composer(page);editor=dialog.locator('[contenteditable="true"]')
             if parent:verify_reply_context(page,dialog,parent)

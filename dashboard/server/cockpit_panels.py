@@ -98,15 +98,74 @@ def brain_display(data,now):
     remote=data.get('remote',{});ledger=data.get('usage',{})
     active=[r for r in ledger.get('active',{}).values() if ledger.get('date')==now.date().isoformat() and 0<=now.timestamp()-_epoch(r.get('startedAt'))<900]
     providers={r.get('provider') for r in active}
-    buckets=remote.get('codexQuota',{}).get('buckets',{})
-    windows=[w for b in buckets.values() for k in ('primary','secondary') if isinstance(w:=b.get(k),dict) and number(w.get('usedPercent')) is not None]
-    window=max(windows,key=lambda w:number(w['usedPercent']),default={})
-    remaining=max(0,100-number(window['usedPercent'])) if window else None
-    reset=_epoch(window.get('resetsAt'));credit=next((number(b.get('credits',{}).get('balance')) for b in buckets.values() if number(b.get('credits',{}).get('balance')) is not None),None)
     def gauge(value):
         return ('—' if value is None else f'{value:g}%')+' ['+('░'*15 if value is None else '■'*round(max(0,min(100,value))*15/100)+'░'*(15-round(max(0,min(100,value))*15/100)))+']'
-    rows=['[Codex 구독] 잔여 '+gauge(remaining)+' | 리셋: '+(dt.datetime.fromtimestamp(reset,KST).strftime('%m-%d %H:%M') if reset else '—')+' | '+(f'{credit:,.2f} C' if credit is not None else '— C')]
-    styles=['bold red' if remaining is not None and remaining<=0 else 'bold cyan' if 'codex' in providers else 'bold white']
+    codex_info=remote.get('codexQuota',{})
+    codex_accounts=codex_info.get('accounts') or []
+    if not codex_accounts:
+        try:
+            from common.codex_cli import list_codex_account_slots
+            slots = list_codex_account_slots()
+            if slots:
+                codex_accounts = [
+                    dict(
+                        email=s['email'],
+                        slotName=s['slotName'],
+                        status='collected' if s['authenticated'] else '미연결 · 로그인 필요',
+                        usable=bool(s['authenticated']),
+                        isLastUsed=False,
+                        callCount=0,
+                        buckets=codex_info.get('buckets',{}) if s['authenticated'] else {},
+                    )
+                    for s in slots
+                ]
+        except Exception:
+            pass
+    try:
+        from common.codex_cli import codex_rotation_state as _codex_rot
+        crot=_codex_rot()
+    except Exception:
+        crot={}
+    crot_active_acc=crot.get('activeAccount') if (crot.get('activeAccount') and 0<=now.timestamp()-_epoch(crot.get('activeStartedAt'))<300) else None
+    codex_in_use=bool(('codex' in providers) or crot_active_acc)
+    active_codex_email=crot_active_acc or (crot.get('lastUsedAccount') if ('codex' in providers) else None)
+    rows=[]
+    styles=[]
+    if codex_accounts:
+        for idx, acc in enumerate(codex_accounts, 1):
+            email_full=str(acc.get('email') or f'계정{idx}')
+            email_short=email_full.split('@')[0]
+            acc_usable=bool(acc.get('usable'))
+            acc_active=bool(codex_in_use and (email_full==active_codex_email or (not active_codex_email and acc.get('isLastUsed'))))
+            use_tag=('⚡사용중(호출활성)' if acc_active else '● 사용가능(대기)' if acc_usable else '○ 미연결')
+            acc_buckets=acc.get('buckets',{})
+            windows=[w for b in acc_buckets.values() for k in ('primary','secondary') if isinstance(w:=b.get(k),dict) and number(w.get('usedPercent')) is not None]
+            window=max(windows,key=lambda w:number(w['usedPercent']),default={})
+            remaining=max(0,100-number(window['usedPercent'])) if window else None
+            reset=_epoch(window.get('resetsAt'))
+            credit=next((number(b.get('credits',{}).get('balance')) for b in acc_buckets.values() if number(b.get('credits',{}).get('balance')) is not None),None)
+            call_cnt=int((crot.get('callCounts') or {}).get(email_full, acc.get('callCount',0)))
+            cnt_txt=f' | 누적 {call_cnt}회' if call_cnt else ''
+            reset_txt=dt.datetime.fromtimestamp(reset,KST).strftime('%m-%d %H:%M') if reset else '—'
+            credit_txt=f' | {credit:,.2f} C' if credit is not None else ''
+            if acc_usable and remaining is not None:
+                rows.append(f'[코덱스 #{idx} {email_short}] {use_tag} | 잔여 {gauge(remaining)} | 리셋: {reset_txt}{credit_txt}{cnt_txt}')
+                styles.append('bold red' if remaining<=0 else 'bold cyan' if acc_active else 'bold white')
+            elif acc_usable:
+                rows.append(f'[코덱스 #{idx} {email_short}] {use_tag} | 정상연결{cnt_txt}')
+                styles.append('bold cyan' if acc_active else 'bold white')
+            else:
+                rows.append(f'[코덱스 #{idx} {email_short}] {use_tag} | '+str(acc.get('status') or '미연결'))
+                styles.append('bold red' if not acc_usable and acc.get('status')!='미연결 · 로그인 필요' else 'dim')
+    else:
+        buckets=codex_info.get('buckets',{})
+        windows=[w for b in buckets.values() for k in ('primary','secondary') if isinstance(w:=b.get(k),dict) and number(w.get('usedPercent')) is not None]
+        window=max(windows,key=lambda w:number(w['usedPercent']),default={})
+        remaining=max(0,100-number(window['usedPercent'])) if window else None
+        reset=_epoch(window.get('resetsAt'))
+        credit=next((number(b.get('credits',{}).get('balance')) for b in buckets.values() if number(b.get('credits',{}).get('balance')) is not None),None)
+        rows.append('[Codex 구독] 잔여 '+gauge(remaining)+' | 리셋: '+(dt.datetime.fromtimestamp(reset,KST).strftime('%m-%d %H:%M') if reset else '—')+' | '+(f'{credit:,.2f} C' if credit is not None else '— C'))
+        styles.append('bold red' if remaining is not None and remaining<=0 else 'bold cyan' if 'codex' in providers else 'bold white')
     agy=remote.get('agy',{})
     agy_fresh=agy.get('status')=='collected' and 0<=now.timestamp()-_epoch(agy.get('checkedAt'))<=300
     agy_accounts=agy.get('accounts') or []
@@ -349,7 +408,11 @@ def render_snapshot(data,now,height):
     titles=('① 💰 수익 · 일일 목표 $100','② 🧠 AI 구독 한도 & 크레딧','③ 🌐 우분투 격리 크롬 세션','④ 🚀 당일 채널 발행 · 실행 단계','⑤ 🤖 6인 크루 · Vault','⑥ ⚡ 완료 · 복구 타임라인')
     for name,color,title,values in zip(NAMES,COLORS,titles,rows):
         content=Group(*[line(v,'bold white on red' if any(t in v for t in ('ALERT','BLOCKED','OFFLINE')) else 'bold bright_green' if any(t in v for t in ('RUNNING','● ON','발행 성공')) else 'bold white') for v in values])
-        if name=='brains' and data.get('brainDisplay'):content=brain_render(data['brainDisplay'])
+        if name=='brains':
+            b_disp=data.get('brainDisplay')
+            if not b_disp or any('[Codex 구독]' in r for r in b_disp.get('rows',[])):
+                b_disp=brain_display(data,now)
+            content=brain_render(b_disp)
         layout[name].update(Panel(content,title=title+(' · '+now.strftime('%H:%M:%S KST') if name=='revenue' else ''),subtitle=data.get('date','')+' KST · '+data.get('revision','연결 중')[:8],border_style=color,box=box.HEAVY))
     return layout
 

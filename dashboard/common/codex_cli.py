@@ -1,11 +1,13 @@
 """Codex subscription adapter. Credentials remain on the Windows worker."""
 from common.llm_usage import metered
+import base64
 import datetime as dt
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -48,6 +50,149 @@ def to_win_path(path):
         rest = parts[1].replace('/', '\\') if len(parts) > 1 else ''
         return f'{drive}:\\{rest}'
     return p
+
+
+def extract_email_from_auth(auth_path: Path) -> str:
+    """Extract authenticated email from Codex auth.json JWT or profile without external dependencies."""
+    try:
+        data = json.loads(auth_path.read_text(encoding='utf-8'))
+        if data.get('email'):
+            return str(data['email'])
+        tokens = data.get('tokens') or {}
+        for token_key in ('id_token', 'access_token'):
+            raw = tokens.get(token_key)
+            if raw and isinstance(raw, str) and '.' in raw:
+                parts = raw.split('.')
+                if len(parts) >= 2:
+                    payload = parts[1] + '=' * (-len(parts[1]) % 4)
+                    decoded = json.loads(base64.urlsafe_b64decode(payload.encode('utf-8')).decode('utf-8', errors='ignore'))
+                    if decoded.get('email'):
+                        return str(decoded['email'])
+                    prof = decoded.get('https://api.openai.com/profile') or {}
+                    if prof.get('email'):
+                        return str(prof['email'])
+    except Exception:
+        pass
+    return ''
+
+
+def list_codex_account_slots():
+    """Read-only discovery of all configured Codex account slots with their authentication state."""
+    pool_root = Path.home() / '.barolab' / 'codex-accounts'
+    found = []
+    seen = set()
+
+    # 1. Inspect slots under ~/.barolab/codex-accounts/
+    if pool_root.is_dir():
+        for slot_dir in sorted(pool_root.iterdir()):
+            if not slot_dir.is_dir():
+                continue
+            auth_file = slot_dir / 'auth.json'
+            email = extract_email_from_auth(auth_file) if auth_file.is_file() else ''
+            ident = email or slot_dir.name
+            if ident not in seen:
+                seen.add(ident)
+                found.append({
+                    'email': ident,
+                    'slotName': slot_dir.name,
+                    'home': slot_dir,
+                    'authenticated': auth_file.is_file() and bool(email)
+                })
+
+    # 2. Inspect default ~/.codex (or local_config() home)
+    default_home = Path.home() / '.codex'
+    try:
+        cfg = local_config()
+        if cfg.get('wsl_home'):
+            default_home = Path(cfg['wsl_home'])
+        elif cfg.get('home'):
+            default_home = Path(cfg['home'])
+    except Exception:
+        pass
+
+    auth_file = default_home / 'auth.json'
+    if auth_file.is_file():
+        email = extract_email_from_auth(auth_file)
+        ident = email or 'default'
+        if ident not in seen:
+            seen.add(ident)
+            found.append({
+                'email': ident,
+                'slotName': 'default',
+                'home': default_home,
+                'authenticated': bool(email)
+            })
+
+    if not found:
+        found.append({
+            'email': 'default',
+            'slotName': 'default',
+            'home': default_home,
+            'authenticated': auth_file.is_file()
+        })
+
+    return found
+
+
+def list_codex_account_homes(include_unauthenticated=False):
+    """Return list of (email_or_slot, home_path) tuples."""
+    slots = list_codex_account_slots()
+    if not include_unauthenticated:
+        auth_slots = [s for s in slots if s['authenticated']]
+        if auth_slots:
+            return [(s['email'], s['home']) for s in auth_slots]
+    return [(s['email'], s['home']) for s in slots]
+
+
+def codex_rotation_state():
+    state_file = Path.home() / '.barolab' / 'codex-accounts' / 'rotation.json'
+    try:
+        if state_file.is_file():
+            return json.loads(state_file.read_text(encoding='utf-8'))
+    except Exception:
+        pass
+    return {}
+
+
+def _codex_account_homes():
+    """Return ordered list of (email_or_slot, home_path) for all authenticated Codex accounts."""
+    found = list_codex_account_homes(include_unauthenticated=False)
+    if not found:
+        found = list_codex_account_homes(include_unauthenticated=True)
+    pool_root = Path.home() / '.barolab' / 'codex-accounts'
+    state_file = pool_root / 'rotation.json'
+    idx = 0
+    prev = codex_rotation_state()
+    try:
+        idx = int(prev.get('next_index', 0)) % len(found)
+        pool_root.mkdir(parents=True, exist_ok=True)
+        state_file.write_text(json.dumps({**prev, 'next_index': (idx + 1) % len(found), 'accounts': [f[0] for f in found]}, ensure_ascii=False), encoding='utf-8')
+    except Exception:
+        pass
+    return found[idx:] + found[:idx]
+
+
+def prepare_codex_account_slot(slot_name):
+    """Prepare an isolated CODEX_HOME slot under ~/.barolab/codex-accounts/<slot_name> for logging in a 2nd Codex account."""
+    pool_root = Path.home() / '.barolab' / 'codex-accounts'
+    slot_dir = pool_root / slot_name
+    slot_dir.mkdir(parents=True, exist_ok=True)
+    src_dir = Path.home() / '.codex'
+    try:
+        cfg = local_config()
+        if cfg.get('wsl_home'):
+            src_dir = Path(cfg['wsl_home'])
+        elif cfg.get('home'):
+            src_dir = Path(cfg['home'])
+    except Exception:
+        pass
+
+    for fname in ('config.toml', 'installation_id', 'version.json'):
+        src_file = src_dir / fname
+        dst_file = slot_dir / fname
+        if src_file.is_file() and not dst_file.is_file():
+            shutil.copy2(src_file, dst_file)
+    return slot_dir
 
 
 def _verified_installed_codex(executable, config):
@@ -132,8 +277,11 @@ def local_config():
     return config
 
 
-def environment(config):
-    env = dict(os.environ, CODEX_HOME=config['home'])
+def environment(config, home=None):
+    target_home = str(home) if home else config['home']
+    if is_wsl() and str(config.get('executable', '')).lower().endswith('.exe'):
+        target_home = to_win_path(target_home)
+    env = dict(os.environ, CODEX_HOME=target_home)
     for key in ('OPENAI_API_KEY', 'CODEX_API_KEY', 'CODEX_ACCESS_TOKEN'):
         env.pop(key, None)
     return env
@@ -325,105 +473,146 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         safe_prompt = prompt if len(prompt) <= MAX_TURN_CHARS else (prompt[:MAX_TURN_CHARS] + '\n...[truncated for CLI turn limit]')
         full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
 
+        accounts = _codex_account_homes()
         candidates = [(model, effort)] if reasoning_effort is not None else _fallback_candidates(config, model, effort, allowed)
         last_error = None
-        for attempt_idx, (cand_model, cand_effort) in enumerate(candidates):
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise RuntimeError('Codex CLI agent stage exceeded its hard timeout.') from last_error
-            if Path(output).is_file():
-                try:
-                    Path(output).unlink()
-                except OSError:
-                    pass
-            exe = config.get('wsl_executable') or config['executable']
-            cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
-            schema_arg = cli_path(schema)
-            output_arg = cli_path(output)
-            command = [exe, 'exec', *cli_image_arguments,
-                       '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
-                       '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cand_model,
-                       '-c', 'forced_login_method="chatgpt"', '-c', f'model_reasoning_effort="{cand_effort}"',
-                       '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
-                       '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
-                       '-c', 'features.multi_agent=false', '--output-schema', schema_arg, '--output-last-message', output_arg, '-']
-            record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'prepared')
+
+        for acc_idx, (account_label, account_home) in enumerate(accounts):
+            env = environment(config, home=account_home)
             try:
-                result = subprocess.run(command, input=full_input,
-                    capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
-                    env=environment(config), timeout=remaining, creationflags=cflags)
-            except subprocess.TimeoutExpired:
-                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'timeout')
-                if time.monotonic() >= deadline:
+                st = codex_rotation_state()
+                st.update({'activeAccount': account_label, 'activeStartedAt': time.time()})
+                (Path.home() / '.barolab' / 'codex-accounts' / 'rotation.json').write_text(json.dumps(st, ensure_ascii=False), encoding='utf-8')
+            except Exception:
+                pass
+
+            account_failed = False
+            try:
+                for attempt_idx, (cand_model, cand_effort) in enumerate(candidates):
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise RuntimeError('Codex CLI agent stage exceeded its hard timeout.') from last_error
+                    if Path(output).is_file():
+                        try:
+                            Path(output).unlink()
+                        except OSError:
+                            pass
+                    exe = config.get('wsl_executable') or config['executable']
+                    cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
+                    schema_arg = cli_path(schema)
+                    output_arg = cli_path(output)
+                    command = [exe, 'exec', *cli_image_arguments,
+                               '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
+                               '--sandbox', 'read-only', '--json', '--color', 'never', '--model', cand_model,
+                               '-c', 'forced_login_method="chatgpt"', '-c', f'model_reasoning_effort="{cand_effort}"',
+                               '-c', 'project_doc_max_bytes=0', '-c', 'web_search="disabled"',
+                               '-c', 'features.shell_tool=false', '-c', 'features.apply_patch_freeform=false',
+                               '-c', 'features.multi_agent=false', '--output-schema', schema_arg, '--output-last-message', output_arg, '-']
+                    record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'prepared')
+                    try:
+                        result = subprocess.run(command, input=full_input,
+                            capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=folder,
+                            env=env, timeout=remaining, creationflags=cflags)
+                    except subprocess.TimeoutExpired:
+                        record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'timeout')
+                        if time.monotonic() >= deadline:
+                            if audit_folder is not None:
+                                if Path(output).is_file():
+                                    (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
+                                (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
+                            raise RuntimeError('Codex CLI agent stage exceeded its hard timeout.') from None
+                        if attempt_idx + 1 < len(candidates):
+                            time.sleep(1.5)
+                            continue
+                        if audit_folder is not None:
+                            if Path(output).is_file():
+                                (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
+                            (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
+                        raise RuntimeError('Codex CLI 생성 제한시간 5분 초과.') from None
+
+                    error_detail = _cli_error_detail(result.stdout, result.stderr) if result.returncode else None
+                    if result.returncode:
+                        record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'failed')
+                        combined = (result.stdout + '\n' + result.stderr).strip().lower()
+                        is_quota = any(word in combined for word in ('usage limit', 'rate limit', 'quota', '429'))
+                        if is_quota and acc_idx + 1 < len(accounts):
+                            last_error = RuntimeError(f'Codex 계정({account_label}) 사용량 한도 초과 -> 다음 계정으로 전환합니다.')
+                            account_failed = True
+                            break
+                        retriable = any(w in combined for w in ('capacity', 'overloaded', 'server_error', '502', '503', '504', 'rate limit', 'try again', 'input_too_large', 'maximum length'))
+                        if retriable and attempt_idx + 1 < len(candidates):
+                            if 'input_too_large' in combined or 'maximum length' in combined:
+                                safe_prompt = safe_prompt[:220_000]
+                                full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
+                            time.sleep(2.0)
+                            continue
+                        if audit_folder is not None:
+                            if Path(output).is_file():
+                                (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
+                            (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
+                                'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
+                                'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
+                        reason = '구독 사용량 한도 초과' if is_quota else f'CLI 오류 ({error_detail})'
+                        last_error = RuntimeError('Codex CLI 생성 실패: ' + reason)
+                        if acc_idx + 1 < len(accounts):
+                            account_failed = True
+                            break
+                        raise last_error
+
                     if audit_folder is not None:
                         if Path(output).is_file():
                             (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
-                        (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
-                    raise RuntimeError('Codex CLI agent stage exceeded its hard timeout.') from None
-                if attempt_idx + 1 < len(candidates):
-                    time.sleep(1.5)
-                    continue
-                if audit_folder is not None:
-                    if Path(output).is_file():
-                        (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
-                    (audit_folder / 'status.json').write_text(json.dumps({'status': 'timeout'}), encoding='utf-8')
-                raise RuntimeError('Codex CLI 생성 제한시간 5분 초과.') from None
+                        (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
+                            'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
+                            'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
+                    if not Path(output).is_file():
+                        raise RuntimeError('Codex CLI가 최종 JSON을 반환하지 않았습니다.')
+                    events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
+                    try:
+                        from common.llm_usage import record_codex_usage
+                        record_codex_usage(events, cand_model)
+                        from common.llm_usage import report_response
+                        report_response(events=events,model=cand_model)
+                    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                        pass
+                    if not any(event.get('type') == 'turn.completed' for event in events):
+                        raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
+                    response = parse_json(Path(output).read_text(encoding='utf-8'))
+                    try:
+                        st = codex_rotation_state()
+                        counts = dict(st.get('callCounts') or {})
+                        counts[account_label] = int(counts.get(account_label, 0)) + 1
+                        st.update({'lastUsedAccount': account_label, 'lastUsedAt': time.time(), 'callCounts': counts})
+                        (Path.home() / '.barolab' / 'codex-accounts' / 'rotation.json').write_text(json.dumps(st, ensure_ascii=False), encoding='utf-8')
+                    except Exception:
+                        pass
+                    from common.crew_chat_bridge import record_model_route
+                    from common.llm_usage import _CURRENT
+                    record_model_route('codex',cand_model,cand_effort,account=account_label)
+                    if _CURRENT.get() is not None:_CURRENT.get()['reasoningEffort']=cand_effort
+                    if response_schema:
+                        record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
+                        return response, cand_model
+                    if not isinstance(response.get('json'), str):
+                        raise RuntimeError('Codex 구조화 응답 계약 불일치')
+                    try:
+                        parsed = parse_json(response['json'])
+                        record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
+                        return parsed, cand_model
+                    except RuntimeError:
+                        (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
+                        raise
+            finally:
+                try:
+                    st = codex_rotation_state()
+                    st['activeAccount'] = None
+                    (Path.home() / '.barolab' / 'codex-accounts' / 'rotation.json').write_text(json.dumps(st, ensure_ascii=False), encoding='utf-8')
+                except Exception:
+                    pass
 
-            error_detail = _cli_error_detail(result.stdout, result.stderr) if result.returncode else None
-            if result.returncode:
-                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'failed')
-                combined = (result.stdout + '\n' + result.stderr).strip().lower()
-                retriable = any(w in combined for w in ('capacity', 'overloaded', 'server_error', '502', '503', '504', 'rate limit', 'try again', 'input_too_large', 'maximum length'))
-                if retriable and attempt_idx + 1 < len(candidates):
-                    if 'input_too_large' in combined or 'maximum length' in combined:
-                        safe_prompt = safe_prompt[:220_000]
-                        full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
-                    time.sleep(2.0)
-                    continue
-                if audit_folder is not None:
-                    if Path(output).is_file():
-                        (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
-                    (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
-                        'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
-                        'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
-                reason = '구독 사용량 한도 초과' if any(word in combined for word in ('usage limit', 'rate limit', 'quota', '429')) else f'CLI 오류 ({error_detail})'
-                raise RuntimeError('Codex CLI 생성 실패: ' + reason)
+            if account_failed:
+                continue
 
-            if audit_folder is not None:
-                if Path(output).is_file():
-                    (audit_folder / 'response.json').write_bytes(Path(output).read_bytes())
-                (audit_folder / 'status.json').write_text(json.dumps({'status': 'cli_returned',
-                    'returnCode': result.returncode, 'responsePresent': Path(output).is_file(),
-                    'errorSummary': error_detail}, ensure_ascii=False), encoding='utf-8')
-            if not Path(output).is_file():
-                raise RuntimeError('Codex CLI가 최종 JSON을 반환하지 않았습니다.')
-            events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
-            try:
-                from common.llm_usage import record_codex_usage
-                record_codex_usage(events, cand_model)
-                from common.llm_usage import report_response
-                report_response(events=events,model=cand_model)
-            except (OSError, ValueError, TypeError, KeyError, AttributeError):
-                pass  # Monitoring must not interrupt a completed model call.
-            if not any(event.get('type') == 'turn.completed' for event in events):
-                raise RuntimeError('Codex CLI 실행이 정상 완료되지 않았습니다.')
-            response = parse_json(Path(output).read_text(encoding='utf-8'))
-            from common.crew_chat_bridge import record_model_route
-            from common.llm_usage import _CURRENT
-            record_model_route('codex',cand_model,cand_effort)
-            if _CURRENT.get() is not None:_CURRENT.get()['reasoningEffort']=cand_effort
-            if response_schema:
-                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
-                return response, cand_model
-            if not isinstance(response.get('json'), str):
-                raise RuntimeError('Codex 구조화 응답 계약 불일치')
-            try:
-                parsed = parse_json(response['json'])
-                record_provider_memory_delivery(full_input, 'codex', cand_model, audit_folder, 'completed')
-                return parsed, cand_model
-            except RuntimeError:
-                (scratch / 'codex-json-last-invalid.json').write_text(json.dumps(response,ensure_ascii=False,indent=2),encoding='utf-8')
-                raise
         raise last_error or RuntimeError('Codex CLI 생성 실패')
 
 
@@ -450,3 +639,22 @@ def generate(prompt, model, images=None, response_schema=None, audit_directory=N
             raise RuntimeError(state['error'])
         time.sleep(0.5)
     raise RuntimeError('Windows Codex 연결 테스트 응답 시간 초과.')
+
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) >= 2 and sys.argv[1] == 'status':
+        slots = list_codex_account_slots()
+        print(json.dumps({'slots': [{'email': s['email'], 'slot': s['slotName'], 'authenticated': s['authenticated'], 'home': str(s['home'])} for s in slots], 'rotation': codex_rotation_state()}, ensure_ascii=False, indent=2))
+    elif len(sys.argv) >= 3 and sys.argv[1] == 'prepare':
+        slot_dir = prepare_codex_account_slot(sys.argv[2])
+        print(f'Prepared Codex slot at: {slot_dir}')
+    elif len(sys.argv) >= 3 and sys.argv[1] == 'login':
+        slot_name = sys.argv[2]
+        slot_dir = Path.home() / '.barolab' / 'codex-accounts' / slot_name
+        slot_dir.mkdir(parents=True, exist_ok=True)
+        cfg = local_config()
+        exe = cfg.get('wsl_executable') or cfg['executable']
+        print(f'Logging in Codex account for slot [{slot_name}] at {slot_dir}...')
+        env = environment(cfg, home=slot_dir)
+        subprocess.run([exe, 'login'], env=env)

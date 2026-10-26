@@ -1,6 +1,6 @@
 {
   "schema": "naver-kin-automation-state-v1",
-  "checkedAt": "2026-10-26T01:05:47.813990+00:00",
+  "checkedAt": "2026-10-26T06:18:41.327283+00:00",
   "startDate": "2026-10-15",
   "endDate": "2026-10-21",
   "enabled": true,
@@ -16,10 +16,10 @@
   "accountDailyCap": 10,
   "runs": [
     {
-      "runId": "2026-10-26_79d3d9e7598f_adinfo0905_1005",
+      "runId": "2026-10-26_55db80340231_adinfo0905_1518",
       "account": "adinfo0905",
-      "state": "skipped",
-      "reason": "model_skipped_no_good_match",
+      "state": "blocked",
+      "reason": "operation_TimeoutError",
       "discovered": 8
     }
   ],
@@ -40,45 +40,45 @@
       "started": false
     }
   ],
-  "runId": "2026-10-26_79d3d9e7598f_adinfo0905_1005",
+  "runId": "2026-10-26_55db80340231_adinfo0905_1518",
   "account": "adinfo0905",
-  "lastRunAt": "2026-10-26T10:09:37.711533+09:00",
-  "lastAccount": "adinfo0905",
-  "nextEligibleAt": "2026-10-26T10:29:37.711533+09:00",
-  "nextAccount": "stone0747",
+  "lastRunAt": "2026-10-26T13:03:31.123167+09:00",
+  "lastAccount": "stone0747",
+  "nextEligibleAt": "2026-10-26T13:23:31.123167+09:00",
+  "nextAccount": "adinfo0905",
   "activeRunId": null,
   "activeAccount": null,
   "activeStartedAt": null,
   "cadenceState": "waiting",
   "operationCounts": {
-    "adinfo0905": 16,
-    "stone0747": 10
+    "adinfo0905": 18,
+    "stone0747": 12
   },
   "submissionCounts": {
     "adinfo0905": 1,
-    "stone0747": 0
+    "stone0747": 2
   },
   "retryAttemptsToday": 0,
-  "globalRemainingRuns": 19,
+  "globalRemainingRuns": 17,
   "byAccountRemainingRuns": {
     "adinfo0905": 9,
-    "stone0747": 10
+    "stone0747": 8
   },
   "measurementComplete": true,
   "registeredTasks": {
     "status": "observed",
     "platform": "systemd-user",
-    "checkedAt": "2026-10-26T01:09:37.711515+00:00",
+    "checkedAt": "2026-10-26T06:26:53.326883+00:00",
     "tasks": [
       {
         "taskName": "barolab-kin.timer",
         "service": "barolab-kin.service",
-        "registered": false,
+        "registered": true,
         "enabled": true,
-        "workflowMatches": false,
-        "state": "Missing",
-        "nextRunAt": "Mon 2026-10-26 10:10:00 KST",
-        "lastRunAt": "Mon 2026-10-26 10:05:00 KST",
+        "workflowMatches": true,
+        "state": "Ready",
+        "nextRunAt": "Mon 2026-10-26 15:30:00 KST",
+        "lastRunAt": "Mon 2026-10-26 15:25:00 KST",
         "lastResult": "success",
         "lastExitStatus": "0"
       },

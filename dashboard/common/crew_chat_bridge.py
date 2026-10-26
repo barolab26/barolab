@@ -17,8 +17,8 @@ _model_call_route = ContextVar('model_call_route', default=None)
 _last_model_route = ContextVar('last_model_route', default=None)
 
 
-def record_model_route(provider, model, reasoning_effort=None):
-    _model_call_route.set({'provider':provider,'model':model,'reasoningEffort':reasoning_effort or ('low' if provider=='codex' else None)})
+def record_model_route(provider, model, reasoning_effort=None, account=None):
+    _model_call_route.set({'provider':provider,'model':model,'reasoningEffort':reasoning_effort or ('low' if provider=='codex' else None),'account':account})
 
 
 def last_model_route():
@@ -163,11 +163,13 @@ def emit_work_event(*, actor, actor_label, task_id, phase, stage='',
     route=_model_call_route.get() or {}
     last=_last_model_route.get() or {}
     if not route and last.get('taskId')==task_id:route=last
+    acc=None
     if route.get('model')==model:
         provider=provider or route.get('provider','')
         reasoning_effort=reasoning_effort or route.get('reasoningEffort')
+        acc=route.get('account')
     from common.llm_settings import format_brain_badge
-    badge=format_brain_badge(provider,model,reasoning_effort) if provider else model
+    badge=format_brain_badge(provider,model,reasoning_effort,account=acc) if provider else model
     payload = {'id':event_id,'eventId':event_id,'eventType':'crew_work_event',
         'taskId':clean(task_id),'parentRequestId':clean(parent_request_id),
         'requestedTo':clean(requested_to),'phase':phase,'who':clean(actor),

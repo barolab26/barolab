@@ -22499,6 +22499,319 @@
       "property": "https://www.tripmarvel.com/",
       "method": "SubmitUrlBatch",
       "completedAt": "2026-10-26T00:35:35.390522+00:00"
+    },
+    {
+      "id": "b4138f8de48a45238e6b44e1828d4d79",
+      "runId": "discovery-20261026T103554",
+      "provider": "bing_url_batch",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T01:36:37.341618+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.healthcox.com/national-health-screening-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 10,
+        "MonthlyQuota": 60
+      },
+      "property": "https://www.healthcox.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T01:36:39.970059+00:00"
+    },
+    {
+      "id": "d8eae6a6c44a4909b43701a6a695eff1",
+      "runId": "discovery-20261026T103554",
+      "provider": "bing_url_batch",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T01:37:22.943900+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-2",
+        "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 10,
+        "MonthlyQuota": 60
+      },
+      "property": "https://www.maxnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T01:37:25.827272+00:00"
+    },
+    {
+      "id": "53413aea075e436fa075eb3e19a35d2d",
+      "runId": "discovery-20261026T121559",
+      "provider": "bing_url_batch",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T03:18:00.759880+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-joy.com/honeymoon-packing-list"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 100,
+        "MonthlyQuota": 600
+      },
+      "property": "https://must-joy.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T03:18:03.954330+00:00"
+    },
+    {
+      "id": "4079aea21de7435e91efb48ecc6bd00b",
+      "runId": "discovery-20261026T121559",
+      "provider": "indexnow_global",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T03:18:04.264470+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-joy.com/honeymoon-packing-list"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T03:18:05.688482+00:00"
+    },
+    {
+      "id": "b4ded876ad0d403d9c2b1cfe13b0a247",
+      "runId": "discovery-20261026T121559",
+      "provider": "indexnow_bing",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T03:18:04.264470+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-joy.com/honeymoon-packing-list"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T03:18:06.430649+00:00"
+    },
+    {
+      "id": "f5c7dc6343044593859f40a90f860673",
+      "runId": "discovery-20261026T124921",
+      "provider": "indexnow_global",
+      "domain": "must-good.com",
+      "at": "2026-10-26T03:51:11.576782+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/government-benefits-work-child-tax-credit-eligibility"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T03:51:12.270594+00:00"
+    },
+    {
+      "id": "a113ba1f50ec4b5e897d003178b68c5e",
+      "runId": "discovery-20261026T124921",
+      "provider": "indexnow_bing",
+      "domain": "must-good.com",
+      "at": "2026-10-26T03:51:11.576782+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/government-benefits-work-child-tax-credit-eligibility"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T03:51:12.870652+00:00"
+    },
+    {
+      "id": "d8a7425802714aa28f56402c473a344e",
+      "runId": "discovery-20261026T124921",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T03:51:35.249047+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/earned-income-tax-credit-semi-annual-application-2026"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T03:51:36.191561+00:00"
+    },
+    {
+      "id": "0eaa1f7bd35e48e2b226ad82d25f1e1a",
+      "runId": "discovery-20261026T124921",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T03:51:35.249047+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/earned-income-tax-credit-semi-annual-application-2026"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T03:51:36.694562+00:00"
+    },
+    {
+      "id": "7d4b168318934e4da88b835137bdc269",
+      "runId": "discovery-20261026T132250",
+      "provider": "indexnow_global",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T04:23:12.045984+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/national-pension-basic-pension-eligibility"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T04:23:12.473851+00:00"
+    },
+    {
+      "id": "03ef3160b9bd40cfa9e230ae89041da0",
+      "runId": "discovery-20261026T132250",
+      "provider": "indexnow_bing",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T04:23:12.045984+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/national-pension-basic-pension-eligibility"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T04:23:12.891454+00:00"
+    },
+    {
+      "id": "4dcbba11f1c84924bc4dcaeda710fca3",
+      "runId": "discovery-20261026T132250",
+      "provider": "indexnow_global",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T04:25:19.628505+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/senior-home-exercise-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T04:25:21.055622+00:00"
+    },
+    {
+      "id": "980cb0e5c27d4634acdb828f7e588e7b",
+      "runId": "discovery-20261026T132250",
+      "provider": "indexnow_bing",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T04:25:19.628505+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/senior-home-exercise-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T04:25:21.759468+00:00"
+    },
+    {
+      "id": "92372f2de4b14cfb89660203ba2eab66",
+      "runId": "discovery-20261026T142947",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T05:30:34.447000+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/고지혈증-낮추는-음식-추천-고지혈증-낮추는-음식-8"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T05:30:35.419230+00:00"
+    },
+    {
+      "id": "f4f19262b3014e91b25237bd30cfbb05",
+      "runId": "discovery-20261026T142947",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T05:30:34.447000+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/고지혈증-낮추는-음식-추천-고지혈증-낮추는-음식-8"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T05:30:35.950451+00:00"
     }
   ],
   "gscQueue": [

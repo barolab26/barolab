@@ -440,6 +440,47 @@ def conference_failure_reason(exc):
     return 'execution_error'
 
 
+def extract_screen_context():
+    """Find the most recently updated screen-execution.json and extract live screen text."""
+    try:
+        from datetime import datetime
+        today = datetime.now().strftime('%Y-%m-%d')
+        today_threads = ROOT / 'threads_posting' / 'output' / 'scheduled' / today
+        candidates = []
+        if today_threads.is_dir():
+            for p in today_threads.rglob('screen-execution.json'):
+                try:
+                    candidates.append((p.stat().st_mtime, p))
+                except OSError:
+                    pass
+        if not candidates:
+            scheduled_root = ROOT / 'threads_posting' / 'output' / 'scheduled'
+            if scheduled_root.is_dir():
+                # Inspect only the top 3 most recent date subdirs
+                subdirs = sorted([d for d in scheduled_root.iterdir() if d.is_dir()], key=lambda d: d.name, reverse=True)[:3]
+                for d in subdirs:
+                    for p in d.rglob('screen-execution.json'):
+                        try:
+                            candidates.append((p.stat().st_mtime, p))
+                        except OSError:
+                            pass
+        if not candidates:
+            return {}
+        latest_path = max(candidates, key=lambda x: x[0])[1]
+        data = json.loads(latest_path.read_text('utf-8'))
+        turns = data.get('turns') or []
+        last_turn = turns[-1] if turns else {}
+        return {
+            'lastUrl': last_turn.get('url') or '',
+            'lastModelMessage': last_turn.get('message') or '',
+            'observations': (data.get('observations') or [])[-5:],
+            'inputFeedback': data.get('inputFeedback') or '',
+            'sourceExecution': str(latest_path.relative_to(ROOT))
+        }
+    except Exception:
+        return {}
+
+
 def failure_diagnostic(exc):
     import traceback
     frames=[]
@@ -447,7 +488,25 @@ def failure_diagnostic(exc):
         file=Path(frame.filename)
         if file.is_absolute() and file.is_relative_to(ROOT):
             frames.append({'file':str(file.relative_to(ROOT)),'line':frame.lineno,'function':frame.name})
-    return {'errorType':type(exc).__name__,'errorMessage':str(exc)[:500],'messageSha256':hashlib.sha256(str(exc).encode()).hexdigest(),'sourceFrames':frames[-16:]}
+    source_top = frames[-1] if frames else {}
+    file_info = f"{source_top.get('file', 'unknown')}:{source_top.get('line', '?')} in {source_top.get('function', '?')}"
+    screen = getattr(exc,'live_screen_context',{})
+    summary = f"오류 발생 지점: [{file_info}] | 에러: {str(exc)[:200]}"
+    if screen.get('observations'):
+        summary += f" | 현장 화면: {' / '.join(screen['observations'][-3:])}"
+    if screen.get('inputFeedback'):
+        summary += f" | 화면 피드백: {screen['inputFeedback']}"
+    return {
+        'errorType': type(exc).__name__,
+        'errorMessage': str(exc),
+        'traceback': ''.join(traceback.format_exception(type(exc),exc,exc.__traceback__)),
+        'observations': screen.get('observations',[]),
+        'messageSha256': hashlib.sha256(str(exc).encode()).hexdigest(),
+        'sourceFrames': frames[-16:],
+        'sourceLocation': file_info,
+        'liveScreenContext': screen,
+        'diagnosticSummary': summary
+    }
 
 
 def _work(identity):
@@ -564,30 +623,8 @@ def record_conference_result(row, result=None):
                 'outcomes':[{k:o.get(k) for k in ('outcome','publicationVerified','reservationVerified','publicUrl','reserveTime','account','slot')} for o in outcomes],
                 'preparation':result if preparation else None},staff=staff)
     else:
-        if row.get('status') == 'failed' and not row.get('autoRetried'):
-            can_retry = True
-            args = row.get('arguments') or {}
-            if row.get('kind') == 'parameters' and args.get('action') == 'naver' and all(args.get(k) for k in ('date', 'account', 'slot')):
-                from common.channel_parameters import folder_for
-                folder = folder_for('naver_blog_posting', args['date'], args['account'] + '-' + args['slot'].replace(':', ''))
-                if (folder / 'reservation-evidence.json').exists():
-                    can_retry = False
-            if can_retry:
-                try:
-                    from common.universal_recovery import clear_x11_modal_dialogs
-                    clear_x11_modal_dialogs()
-                except Exception:
-                    pass
-                with locked(QUEUE):
-                    qpath = QUEUE / (row['agendaId'] + '.json')
-                    saved_q = load(qpath)
-                    saved_q.update(status='queued', autoRetried=True, retryAt=0)
-                    saved_q.pop('pid', None)
-                    saved_q.pop('startTicks', None)
-                    write(qpath, saved_q)
-                agendas.progress(business['id'], 'executing', f"실행 중 일시적 오류({row.get('errorType') or '장애'})를 감지하여 화면 팝업·상태 정리 후 즉시 1회 자동 재시도합니다.")
-                return
-        reason=row.get('failureReason') or (row.get('eligibility') or {}).get('reason') or '실제 제출·예약 결과가 아직 확인되지 않았습니다.'
+        eligibility=row.get('eligibility') or {}
+        reason=row.get('failureReason') or eligibility.get('reason') or next((r.get('reason') for r in eligibility.get('runs',[]) if r.get('reason')),None) or row.get('errorType') or '실제 제출·예약 결과가 아직 확인되지 않았습니다.'
         agendas.close_and_advance(business['id'],status='closed',reason=reason) if row.get('status')=='completed' and (row.get('eligibility') or {}).get('reason') in ('no_due_slot','no_due_draft','followup_delay_waiting','disabled_or_needs_connection','publication_closed_measurement_continues','no_new_supported_candidate') else agendas.hold(business['id'],reason,recovery=True)
 
 
