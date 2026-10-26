@@ -102,3 +102,39 @@ const details = links.reportContextHtml({reportContext:{channel:'네이버 블�
 for (const text of ['soultin','2026-10-23 19:30','&lt;실제 글&gt;','예약 작성 보류']) assert(details.includes(text));
 assert.equal(links.reportContextHtml({}),'');
 assert.equal(replies.crewConversationText({eventType:'crew_work_event',who:'publi',stage:'channel-cycle-summary',phase:'completed',model:'observed-model',outputKind:'채널 전체 점검.'}),null);
+
+// Refreshing an already sorted stream must not detach any message rows.
+const orderStart = html.indexOf('  function sortVisibleMessages() {');
+const orderEnd = html.indexOf('  function syncActivePreparing', orderStart);
+let moves = 0;
+const rows = ['a', 'b', 'c'].map(id => ({id}));
+const orderedStream = {
+  scrollTop: 77,
+  get firstElementChild() { return rows[0] || null; },
+  querySelector(selector) { return rows.find(row => selector.includes(`"${row.id}"`)); },
+  insertBefore(row, next) {
+    moves++;
+    rows.splice(rows.indexOf(row), 1);
+    rows.splice(next ? rows.indexOf(next) : rows.length, 0, row);
+  },
+};
+for (const row of rows) Object.defineProperty(row, 'nextElementSibling', {
+  get() { return rows[rows.indexOf(row) + 1] || null; },
+});
+const ordering = {
+  streamEl: orderedStream, CSS: {escape: value => value}, followLatest: false,
+  messageStore: new Map(['a', 'b', 'c'].map(id => [id, {id}])),
+  chronologicalMessages: values => [...values],
+};
+vm.createContext(ordering);
+vm.runInContext(html.slice(orderStart, orderEnd), ordering);
+ordering.sortVisibleMessages();
+assert.equal(moves, 0);
+assert.equal(orderedStream.scrollTop, 77);
+rows.unshift(rows.pop());
+ordering.sortVisibleMessages();
+assert.deepEqual(rows.map(row => row.id), ['a', 'b', 'c']);
+const correctedMoves = moves;
+ordering.sortVisibleMessages();
+assert.equal(moves, correctedMoves);
+console.log('Chat stable DOM ordering checks passed');

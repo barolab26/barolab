@@ -1611,7 +1611,11 @@
       }
     }
 
-    if (!isConversationMessage(m)) return;
+    if (!isConversationMessage(m)) {
+      streamEl.querySelector(`[data-msg-id="${CSS.escape(mid)}"]`)?.remove();
+      renderedMessageIds.delete(mid);
+      return;
+    }
 
     // Strict Set-based deduplication: never append an already rendered message ID!
     if (renderedMessageIds.has(mid)) {
@@ -1621,11 +1625,16 @@
           const temp = document.createElement('div');
           temp.innerHTML = buildMessageRowHtml(m).trim();
           const newEl = temp.firstElementChild;
-          if (newEl) existingEl.replaceWith(newEl);
+          if (newEl) {
+            if (existingEl.innerHTML !== newEl.innerHTML) existingEl.innerHTML = newEl.innerHTML;
+            for (const attr of newEl.attributes) {
+              if (existingEl.getAttribute(attr.name) !== attr.value) existingEl.setAttribute(attr.name, attr.value);
+            }
+          }
         }
       }
       if (!options.initialLoad) sortVisibleMessages();
-      applyChatFilters();
+      if (!options.initialLoad) applyChatFilters();
       return;
     }
 
@@ -1637,7 +1646,7 @@
     if (!rowEl) return;
     streamEl.appendChild(rowEl);
     if (!options.initialLoad) sortVisibleMessages();
-    applyChatFilters();
+    if (!options.initialLoad) applyChatFilters();
 
     if (!options.initialLoad && !rowEl.classList.contains('is-hidden-by-filter')) {
       handleSmartScrollOnNewMessage(rowEl, m.who === 'user', wasNearBottom);
@@ -1665,9 +1674,12 @@
 
   function sortVisibleMessages() {
     const previousTop = streamEl.scrollTop;
+    let next = streamEl.firstElementChild;
     for (const message of chronologicalMessages(messageStore.values())) {
       const row = streamEl.querySelector(`[data-msg-id="${CSS.escape(message.id)}"]`);
-      if (row && row !== streamEl.lastElementChild) streamEl.appendChild(row);
+      if (!row) continue;
+      if (row === next) next = next.nextElementSibling;
+      else streamEl.insertBefore(row, next);
     }
     if (followLatest) scheduleFollowLatest();
     else streamEl.scrollTop = previousTop;
@@ -1740,8 +1752,17 @@
         </div>
       `;
     }).join('');
-    if (typingZoneEl.innerHTML !== html) {
-      typingZoneEl.innerHTML = html;
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const actors = new Set(entries.map(t => t.who));
+    for (const row of Array.from(typingZoneEl.children)) {
+      if (!actors.has(row.dataset.typingWho)) row.remove();
+    }
+    for (const row of template.content.children) {
+      const existing = typingZoneEl.querySelector(`[data-typing-who="${CSS.escape(row.dataset.typingWho)}"]`);
+      if (existing) {
+        if (existing.innerHTML !== row.innerHTML) existing.innerHTML = row.innerHTML;
+      } else typingZoneEl.appendChild(row.cloneNode(true));
     }
   }
 
@@ -1900,7 +1921,8 @@
     }
     renderAgendaBoard(data.workAgenda);
     if (data.kstNow) updateKstClockDisplay(data.kstNow);
-    renderCrewList(data.agents || []);
+    if (document.querySelector('.crew-card')) updateCrewLiveStatusInPlace(data.agents || []);
+    else renderCrewList(data.agents || []);
     if (Array.isArray(data.activePreparing)) {
       syncActivePreparing(data.activePreparing);
     }
@@ -1911,10 +1933,16 @@
     eventEpoch = data.eventEpoch || '';
 
     const previousTop = streamEl.scrollTop;
-    streamEl.innerHTML = '';
-    renderedMessageIds.clear();
-    messageStore.clear();
-    chronologicalMessages(data.messages || []).forEach(m => upsertMessageToDom(m, { initialLoad: true }));
+    const messages = data.messages || [];
+    const liveIds = new Set(messages.map(m => String(m.id || `msg-${m.ts}-${m.who}`)));
+    for (const id of messageStore.keys()) {
+      if (liveIds.has(id)) continue;
+      streamEl.querySelector(`[data-msg-id="${CSS.escape(id)}"]`)?.remove();
+      renderedMessageIds.delete(id);
+      messageStore.delete(id);
+    }
+    chronologicalMessages(messages).forEach(m => upsertMessageToDom(m, { initialLoad: true, allowInPlaceUpdate: true }));
+    sortVisibleMessages();
     if (Array.isArray(data.activePreparing)) {
       syncActivePreparing(data.activePreparing);
     }
