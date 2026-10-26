@@ -2708,7 +2708,7 @@ def get_crew_goal(identity: str, view_only: bool = False):
     if not row:raise HTTPException(404,'Unknown goal')
     from agents.crew_reasoning import progress_view
     if view_only:return {'id':row['id'],'status':row['status'],'view':progress_view(row)}
-    return {**{k:row.get(k) for k in ('id','userTurnId','goal','status','plan','discussion','decisions','lastLeadMessage','answer','nextCheckAt','createdAt','updatedAt','progress','resolution','parentGoalId','sessionId')},'view':progress_view(row)}
+    return {**{k:row.get(k) for k in ('id','userTurnId','goal','mode','strategy','status','plan','discussion','decisions','lastLeadMessage','answer','nextCheckAt','createdAt','updatedAt','progress','resolution','parentGoalId','sessionId')},'view':progress_view(row)}
 
 
 
@@ -2750,6 +2750,7 @@ def _build_chat_room():
     bg_info = _LIVE_WS_CACHE.get("bg_info") or get_live_background_and_preparing(sys_ctx)
     return {
         "messages": project_goal_messages(project_channel_cycle_messages(room.get("messages", []))),
+        "workEvents": room.get("workEvents", []),
         "workAgenda": __import__('common.work_agenda',fromlist=['view']).view(),
         "backgroundSummary": bg_info.get("backgroundSummary", {}),
         "activePreparing": bg_info.get("activePreparing", []),
