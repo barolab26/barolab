@@ -1009,13 +1009,23 @@ def start_autonomous_goal_once():
 def resume_once(lane=None):
     if lane=='background':evaluate_case_once()
     from common import work_agenda as agendas
+    if agendas.enabled():
+        for agenda in agendas.active_rows():
+            identity=agenda.get('controllerGoalId') or agenda.get('recoveryGoalId')
+            if not identity:continue
+            goal=load(goal_path(identity))
+            if goal.get('id')==identity and not (goal.get('status') in ('answered','blocked') and goal.get('delivered')):
+                pending=GOALS/'pending';pending.mkdir(exist_ok=True,parents=True)
+                marker=pending/identity
+                if not marker.exists():marker.touch()
     for marker in sorted((GOALS/'pending').glob('*'),key=lambda p:p.stat().st_mtime):
         if not re.fullmatch(r'[a-f0-9]{64}',marker.name):continue
         row=load(goal_path(marker.name))
         if lane=='ceo' and row.get('origin','ceo')!='ceo':continue
         if lane=='background' and row.get('origin','ceo')=='ceo':continue
         if row.get('id')!=marker.name:
-            marker.rename(marker.with_name(marker.name+'.invalid'));continue
+            if row:marker.rename(marker.with_name(marker.name+'.invalid'))
+            continue
         if time.time()<row.get('nextCheckAt',0):continue
         with claim(marker.name) as acquired:
             if not acquired:continue

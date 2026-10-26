@@ -1031,6 +1031,12 @@ def _step_single_agenda(row):
         with context(token(row)):
             if row['status']=='report_pending':
                 return finish_reports(row['id'])
+            if waiting_investigation(row):
+                identity=row.get('controllerGoalId') or row.get('source',{}).get('goalId')
+                goal=load(DATA/'chats/reasoning-goals'/(identity+'.json'))
+                finish_investigation(row['id'],goal.get('answer') or row.get('blocker') or '조사 결과는 저장했으며 실제 해결은 미확인입니다.',
+                                     'investigation_finished_unresolved')
+                return True
             if row['status']=='meeting' and row['kind']!='goal' and not row.get('events',{}).get('opening',{}).get('receivedAt'):
                 return prepare_open(row['id'])
             flush_events(row['id'])

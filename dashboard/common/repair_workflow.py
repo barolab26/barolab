@@ -1208,7 +1208,10 @@ def dispatch_project_recovery_once():
             except (ValueError,KeyError,TimeoutError):pass
         if row.get('status') in ('held','evidence_hold') and row.get('step') in ('discover','classify','inspect') and not row.get('resumeAttempted'):
             if row.get('evidenceRecheckAt',0)>time.time():continue
-            try:discovered=_discover_recovery(row)
+            try:
+                from contextlib import nullcontext
+                with agendas.context(agendas.token(current)) if current else nullcontext():
+                    discovered=_discover_recovery(row)
             except (OSError,ValueError,KeyError) as exc:
                 row.update(evidenceRecheckAt=time.time()+300,evidenceProbeError=type(exc).__name__);write(path,row)
                 continue
@@ -1237,7 +1240,9 @@ def dispatch_project_recovery_once():
             continue
         if (row.get('status')=='evidence_hold' and row['plan'].get('workTarget')
                 and row.get('evidenceRecheckAt',0)<=time.time()):
-            discovered=_discover_recovery(row)
+            from contextlib import nullcontext
+            with agendas.context(agendas.token(current)) if current else nullcontext():
+                discovered=_discover_recovery(row)
             row['evidenceRecheckAt']=time.time()+300
             if discovered!=row.get('discovered'):
                 row['discovered']=discovered

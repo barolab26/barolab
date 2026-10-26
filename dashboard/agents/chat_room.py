@@ -2669,7 +2669,7 @@ def receive_goal_result(payload: Dict[str, Any]):
         if goal.get('origin')=='agenda' and goal.get('businessAgendaId'):
             from common.work_agenda import get
             bound=get(goal['businessAgendaId'])
-            automatic=bound.get('controllerGoalId')==goal['id']
+            automatic=goal['id'] in (bound.get('controllerGoalId'),bound.get('recoveryGoalId'))
         if not automatic and (not user or user['text']!=goal['goal']):raise HTTPException(409,'Original CEO turn is not in this meeting')
         from common.llm_settings import format_brain_badge
         route=note['route'] if note else {} if goal.get('answerSource')=='host' else (goal.get('leadRoute') or {})
@@ -3246,6 +3246,10 @@ def receive_agenda_event(payload: Dict[str, Any]):
         existing=next((m for m in load_room_data().get('messages',[]) if m.get('id')==note['id']),None)
         if not existing:append_or_update_room_message(message)
         elif any(existing.get(k)!=message[k] for k in ('who','text','agendaId','agendaStage')):
-            raise HTTPException(409,'Conflicting agenda report')
+            if (existing.get('agendaId') != row['id'] or existing.get('agendaStage') != stage
+                    or existing.get('who') != note['who'] or note['ts'] <= existing.get('ts', 0)):
+                raise HTTPException(409,'Conflicting agenda report')
+            # A later host-recorded report can supersede the same stage after recovery.
+            append_or_update_room_message(message)
         acknowledge(row['id'],stage,note['id'])
     return {'ok':True,'eventId':note['id'],'stored':True}

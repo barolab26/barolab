@@ -3,11 +3,14 @@ import datetime as dt
 import functools
 import hashlib
 import json
+import sys
 import tempfile
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server'))
 
 from common import knowledge_policy as knowledge, llm_usage as usage
 from dashboard.agents import synapse
@@ -593,6 +596,73 @@ class BusinessControls(unittest.TestCase):
         self.assertTrue(all(task['registered'] and task['workflowMatches'] for task in result['tasks']))
         result = kin._naver_ubuntu_scheduler_observe(Path('/wrong'), lambda: 'now', query)
         self.assertFalse(any(task['registered'] for task in result['tasks']))
+
+    def test_recovery_report_supersedes_older_stage_without_delivery_deadlock(self):
+        from agents import chat_room as chat
+        from common import work_agenda as agendas
+        note=dict(id='report',who='jarvis',text='새 실패 원인',ts=2000,route={})
+        row=dict(id=self.agenda,events={'blocked':note},status='recovering',completionCriteria='실제 결과')
+        old=dict(id='report',who='jarvis',text='이전 실패 원인',ts=1000,agendaId=self.agenda,agendaStage='blocked')
+        payload=dict(id='report',agendaId=self.agenda,stage='blocked')
+        with patch.object(agendas,'get',return_value=row),patch.object(agendas,'acknowledge') as ack, \
+             patch.object(chat,'load_room_data',return_value={'messages':[old]}), \
+             patch.object(chat,'append_or_update_room_message') as append:
+            self.assertTrue(chat.receive_agenda_event(payload)['stored'])
+            self.assertEqual(append.call_args.args[0]['text'],'새 실패 원인')
+            ack.assert_called_once()
+            old['ts']=2000
+            with self.assertRaises(chat.HTTPException):chat.receive_agenda_event(payload)
+
+    def test_active_goal_recovers_missing_pending_marker(self):
+        from agents import crew_reasoning as crew
+        from common import work_agenda as agendas
+        goals=self.data/'goals';goals.mkdir()
+        (goals/(self.agenda+'.json')).write_text(json.dumps(dict(id=self.agenda,origin='agenda',status='waiting',nextCheckAt=1e20)))
+        with patch.object(crew,'GOALS',goals),patch.object(agendas,'enabled',return_value=True), \
+             patch.object(agendas,'active_rows',return_value=[{'recoveryGoalId':self.agenda}]), \
+             patch.object(crew,'evaluate_case_once',return_value=False),patch.object(crew,'start_autonomous_goal_once',return_value=False):
+            crew.resume_once('background')
+        self.assertTrue((goals/'pending'/self.agenda).exists())
+
+    def test_finished_investigation_reports_unresolved_and_releases_agenda(self):
+        from common import work_agenda as agendas
+        row=dict(id=self.agenda,status='blocked',kind='goal',controllerGoalId='b'*64)
+        with patch.object(agendas,'context',return_value=nullcontext()),patch.object(agendas,'token',return_value={}), \
+             patch.object(agendas,'waiting_investigation',return_value=True), \
+             patch.object(agendas,'load',return_value={'answer':'수집 누락은 미해결'}), \
+             patch.object(agendas,'finish_investigation') as finish:
+            self.assertTrue(agendas._step_single_agenda(row))
+        finish.assert_called_once_with(self.agenda,'수집 누락은 미해결','investigation_finished_unresolved')
+
+    def test_recovery_discovery_keeps_the_bound_agenda_context(self):
+        from common import repair_workflow as repair, work_agenda as agendas
+        root=self.data/'repairs';root.mkdir()
+        row=dict(type='project_recovery_v1',businessAgendaId=self.agenda,status='held',step='discover',
+                 taskId='repair-test',planSha256='plan',plan={},discovered={})
+        (root/'repair.json').write_text(json.dumps(row))
+        business=dict(id=self.agenda,version=1,owner='owner',status='recovering',project='threads')
+        def discover(value):
+            self.assertEqual(agendas.current(),agendas.token(business))
+            return {}
+        with patch.object(repair,'ROOT',root),patch.object(repair,'_discover_recovery',side_effect=discover) as probe, \
+             patch.object(agendas,'enabled',return_value=True),patch.object(agendas,'active_ids',return_value=[self.agenda]), \
+             patch.object(agendas,'get',return_value=business):
+            repair.dispatch_project_recovery_once()
+        probe.assert_called_once()
+
+    def test_bound_recovery_goal_can_deliver_without_a_ceo_chat_turn(self):
+        from agents import chat_room as chat, crew_reasoning as crew
+        from common import work_agenda as agendas
+        path=self.data/'goal.json'
+        path.write_text(json.dumps(dict(id=self.agenda,origin='agenda',businessAgendaId='b'*64,
+                                       status='answered',answer='복구 조사 결과',answerSource='host')))
+        with patch.object(crew,'goal_path',return_value=path), \
+             patch.object(agendas,'get',return_value={'recoveryGoalId':self.agenda}), \
+             patch.object(chat,'load_room_data',return_value={'messages':[{'id':'goal-result-'+self.agenda}]}):
+            self.assertTrue(chat.receive_goal_result({'goalId':self.agenda})['ok'])
+        with patch.object(crew,'goal_path',return_value=path),patch.object(agendas,'get',return_value={}), \
+             patch.object(chat,'load_room_data',return_value={'messages':[]}):
+            with self.assertRaises(chat.HTTPException):chat.receive_goal_result({'goalId':self.agenda})
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
