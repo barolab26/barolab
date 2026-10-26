@@ -1,5 +1,6 @@
 """Shared staff ownership and capability contracts; host validators keep write gates."""
 ACTION_OWNERS = {
+    'publish_strategy_link':'publi',
     'recover_project_runtime':'patch', 'recover_project_work':'publi',
     'repair_kin_submission':'patch', 'run_cf_domain':'publi',
     'prepare_cf_source_fact':'publi', 'verify_cf_source_fact_fix':'patch',
@@ -21,6 +22,8 @@ def canonical_action(action):
     if not isinstance(action,dict) or set(action) != {'agent','tool','args'} or not isinstance(action['args'],dict):
         raise ValueError('Invalid action fields')
     owner=action_owner(action['tool'],action['args'])
+    if owner is None and action['tool']=='read_agent_status' and action['agent'] in ('jarvis','publi','trace','patch','doctor','radar'):
+        return action
     if owner is None:raise ValueError('No registered owner for this write tool')
     return {**action,'agent':owner}
 
@@ -29,6 +32,8 @@ def capability_catalog():
     from common.project_autonomy import COMMANDS
     from common.runtime_recovery import UNITS
     return [
+        {'tool':'read_agent_status','owner':'trace','args':['project'],'permission':'read','verification':'source observation; no publication or revenue success inferred'},
+        {'tool':'publish_strategy_link','owner':'publi','args':['project=threads','target_url'],'permission':'execute','verification':'exact selected source, registered slot, native quality/quota/submission guards and public receipt'},
         {'tool':'browser_ego_action','owner':'patch','args':['port','url','goal'],'permission':'repair','verification':'EGO screenshot/action receipt and fresh screen observation; submission uses existing verification'},
         {'tool':'read_source','owner':'current actor','args':['path','line?','lines?'],'limits':{'linesMaximum':240},'pagination':['sha256','totalLines','truncated','nextLine'],'verification':'follow nextLine for complete evidence'},
         {'tool':'run_project_cycle','owner':'publi (legacy_remodel: doctor)','args':['project'],'projects':list(COMMANDS),'permission':'execute','verification':'actual publication/reservation receipt; queued is not completed'},

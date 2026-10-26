@@ -58,7 +58,7 @@ def main():
     from common.hermes_memory import _store
     from common.llm_client import process_verified_work_once
     from server.project_monitor import sample_project_health_once, process_project_monitor_once, process_project_feedback_once
-    from server.agent_tools import process_staff_request_once
+    from server.agent_tools import process_staff_request_once, process_staff_review_once
     from common.project_autonomy import process_project_autonomy_once
     from agents.crew_reasoning import resume_ceo_once, resume_background_once
     from common.work_agenda import process_once as process_agendas
@@ -109,8 +109,10 @@ def main():
         threading.Thread(target=loop, args=([process_project_monitor_once, process_project_feedback_once], 60), name='project-supervisor'),
         threading.Thread(target=loop, args=([refresh_once], 300), name='memory-refresh'),
         threading.Thread(target=loop, args=([process_staff_request_once], 5), name='staff-executor'),
+        threading.Thread(target=loop, args=([process_staff_review_once], 5), name='staff-reviews'),
         threading.Thread(target=loop, args=([resume_ceo_once], 1), name='ceo-goals'),
-        threading.Thread(target=loop, args=([process_agendas, resume_background_once], 5), name='background-goals'),
+        threading.Thread(target=loop, args=([process_agendas], 5), name='agenda-dispatch'),
+        threading.Thread(target=loop, args=([resume_background_once], 5), name='background-goals'),
         threading.Thread(target=loop, args=([process_project_autonomy_once], 30), name='project-autonomy'),
         threading.Thread(target=watchdog, name='worker-watchdog'),
     ]

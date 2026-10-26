@@ -1600,6 +1600,9 @@ def validate_staff_actions(actions):
             project = args.get('project')
             if project not in COMMANDS:
                 raise ValueError('Unregistered autonomous project owner')
+        elif tool == 'publish_strategy_link' and set(args)=={'project','target_url'} and args.get('project')=='threads':
+            from threads_posting.posting import _threads_authoring__canonical, _threads_config_HOSTS
+            _threads_authoring__canonical(args['target_url'],_threads_config_HOSTS)
         elif tool == 'repair_kin_submission' and set(args)=={'account','question_id'} and args.get('account') in ('adinfo0905','stone0747') and isinstance(args.get('question_id'),str) and re.fullmatch(r'\d{1,24}',args['question_id']):
             pass
         elif tool == 'recover_project_work' and set(args) == {'project','work_id'}:
@@ -1640,6 +1643,8 @@ def staff_instruction(action):
     name = names[action['agent']]
     if action['tool'] == 'run_project_cycle':
         text = f'@{name}, 등록된 프로젝트 스케줄러를 한 회차 실행하고 실제 종료 결과를 확인해 주세요. 기존 계정·일정·검수·중복 방지 규칙을 유지하고 공개 확인 전에는 발행 완료로 보고하지 않습니다.'
+    elif action['tool'] == 'publish_strategy_link':
+        text = '@퍼블리, 선택한 콘텐츠를 등록된 Threads 슬롯에서 준비·발행하고 같은 URL의 실제 공개 결과를 확인해 주세요.'
     elif action['tool'] == 'repair_kin_submission':
         text = '@패치, 지정된 계정·질문의 기존 답변을 먼저 확인하고 승인된 작성창만 한 번 복구해 주세요. 캡차·등록 차단·중복·결과 불명확 상태는 재제출하지 않습니다.'
     elif action['tool'] == 'recover_project_work':
@@ -1818,7 +1823,10 @@ def _review_ceo_request(path, row):
         return
     original = next((m for m in load(DATA_DIR/'chats/room-main.json').get('messages',[])
                      if m.get('id') == match[1] and m.get('who') == 'user'), None)
-    if not original:return
+    if not original:
+        row['ceoReview']={'status':'original_turn_unavailable'}
+        write(path,row)
+        return
     try:
         facts = [{'agent':item['agent'],'tool':item['tool'],'result':item['result'],
                   'staffReply':item.get('staffResponse',{}).get('reply')} for item in row['results']]
@@ -1835,6 +1843,19 @@ def _review_ceo_request(path, row):
     write(path,row)
 
 
+def process_staff_review_once():
+    """Optional model commentary never blocks tool dispatch or terminal receipts."""
+    from common.collection_observability import load
+    for path in sorted(STAFF_REQUEST_DIR.glob('*.json'),key=lambda p:p.stat().st_mtime,reverse=True)[:100]:
+        if path.is_symlink():continue
+        row=load(path)
+        if (re.fullmatch(r'msg-\d+-user:jarvis',row.get('requestId','')) and not row.get('ceoReview')
+                and row.get('status') in ('completed','failed','held','unknown')):
+            _review_ceo_request(path,row)
+            return True
+    return False
+
+
 def _finish_staff_repairs(path, row):
     from common.collection_observability import write
     from common.crew_chat_bridge import emit_work_event
@@ -1842,9 +1863,9 @@ def _finish_staff_repairs(path, row):
     changed = False
     for item in row['results']:
         result = item['result']
-        if item['tool'] not in ('repair_cf_known_failure', 'run_project_cycle', 'recover_project_work') or result.get('status') not in ('running','started','awaiting_completion'):
+        if item['tool'] not in ('repair_cf_known_failure', 'run_project_cycle', 'recover_project_work', 'publish_strategy_link') or result.get('status') not in ('running','started','awaiting_completion'):
             continue
-        observed = (terminal_result(result) if item['tool'] in ('run_project_cycle','recover_project_work') else _repair_terminal_result(result))
+        observed = (terminal_result(result) if item['tool'] in ('run_project_cycle','recover_project_work','publish_strategy_link') else _repair_terminal_result(result))
         if observed is None:
             continue
         terminal, snapshot = observed
@@ -1853,25 +1874,9 @@ def _finish_staff_repairs(path, row):
         item['result'] = terminal
         item['controllerSnapshot'] = snapshot  # Old controller file is never rewritten.
         item['initialStaffResponse'] = item.pop('staffResponse', None)
-        parent = item.get('responseEventId', '')
         write(path, row)
-        try:
-            def save_route(route):
-                item['terminalStaffRoute'] = route
-                write(path, row)
-            reply = staff_tool_reply(item['agent'], row['taskId'],
-                {'agent':item['agent'],'tool':item['tool'],'args':{}}, terminal, audit=save_route)
-            item['staffResponse'] = reply
-            item['responseEventId'] = emit_work_event(actor=item['agent'], actor_label=item['agent'],
-                task_id=row['taskId'],phase='completed',stage='channel-cycle-summary' if item['tool'] == 'run_project_cycle' else 'staff-terminal-response',message_kind='staff_reply',
-                parent_request_id=parent,requested_to='jarvis',
-                model=reply['route']['events'][-1].get('actualModel') or '',
-                evidence_id=terminal.get('controllerEvidenceSha256',''),output_kind=reply['reply'])
-        except Exception as exc:
-            item['responseError'] = type(exc).__name__
-            emit_work_event(actor=item['agent'],actor_label=item['agent'],task_id=row['taskId'],
-                phase='failed',stage='staff-terminal-response',parent_request_id=parent,
-                requested_to='jarvis',output_kind='terminal receipt preserved; staff response failed; no retry')
+        item['hostReport']={'source':'host','status':terminal.get('status')}
+        write(path,row)
     if any(r['result'].get('status') in ('running','started','awaiting_completion') for r in row['results']):
         row['status'] = 'awaiting_completion'
     elif any(r['result'].get('status') == 'unknown' for r in row['results']):
@@ -1879,8 +1884,7 @@ def _finish_staff_repairs(path, row):
     elif any(r['result'].get('status') == 'held' for r in row['results']):
         row['status'] = 'held'
     else:
-        row['status'] = 'completed' if all(r['result'].get('ok') is True and r.get('staffResponse') for r in row['results']) else 'failed'
-    _review_ceo_request(path, row)
+        row['status'] = 'completed' if all(r['result'].get('ok') is True and (r.get('staffResponse') or r.get('hostReport')) for r in row['results']) else 'failed'
     write(path, row)
     from common.work_agenda import staff_result
     staff_result(row,path)
@@ -1916,22 +1920,23 @@ def process_staff_request_once():
             if not candidate.get('businessAgendaId'):
                 candidate['businessAgendaId']=agendas.staff_agenda(candidate['requestId'],candidate['actions'])
                 write(path,candidate)
-            active=agendas.active()
-            if active.get('id')!=candidate['businessAgendaId']:continue
-            if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
-            if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
-            if candidate['status']=='queued' and agendas.running(active):continue
+            if candidate['status']!='awaiting_completion':
+                if candidate['businessAgendaId'] not in agendas.active_ids():continue
+                active=agendas.get(candidate['businessAgendaId'])
+                if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
+                if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
+                if candidate['status']=='queued' and agendas.running(active):continue
         with locked(STAFF_REQUEST_DIR):
             candidate = json.loads(path.read_text(encoding='utf-8'))
             if candidate.get('status') == 'acknowledged' and time.time() - candidate.get('claimedAt', 0) > 1800:
                 candidate.update(status='unknown', reason='interrupted_or_overdue_no_retry')
                 write(path, candidate)
             if candidate.get('status') == 'awaiting_completion':
-                pending = [r for r in candidate.get('results', []) if r.get('tool') in ('repair_cf_known_failure', 'run_project_cycle', 'recover_project_work')
+                pending = [r for r in candidate.get('results', []) if r.get('tool') in ('repair_cf_known_failure', 'run_project_cycle', 'recover_project_work', 'publish_strategy_link')
                            and r.get('result',{}).get('status') in ('running','started','awaiting_completion')]
                 try:
                     from common.project_autonomy import terminal_result
-                    ready = any((terminal_result(r['result']) if r['tool'] in ('run_project_cycle','recover_project_work') else _repair_terminal_result(r['result'])) is not None for r in pending)
+                    ready = any((terminal_result(r['result']) if r['tool'] in ('run_project_cycle','recover_project_work','publish_strategy_link') else _repair_terminal_result(r['result'])) is not None for r in pending)
                 except (ValueError, OSError):
                     candidate.update(status='unknown',reason='invalid_controller_receipt_no_retry')
                     write(path,candidate)
@@ -1950,9 +1955,9 @@ def process_staff_request_once():
     if row is None:
         return False
     from contextlib import nullcontext
-    scope=agendas.context(agendas.token(agendas.get(row['businessAgendaId']))) if agendas.enabled() else nullcontext()
+    scope=agendas.context(agendas.token(agendas.get(row['businessAgendaId']))) if agendas.enabled() and not completing else nullcontext()
     with scope:
-        if agendas.enabled():agendas.progress(row['businessAgendaId'],'verifying' if completing else 'executing','담당 직원이 합의한 작업을 실행하고 원천 증거를 확인합니다.')
+        if agendas.enabled() and not completing:agendas.progress(row['businessAgendaId'],'executing','담당 직원이 합의한 작업을 실행하고 원천 증거를 확인합니다.')
         try:
             if completing:
                 return _finish_staff_repairs(path, row)
@@ -1961,7 +1966,7 @@ def process_staff_request_once():
                 parent = (row.get('requests') or [])[index] if index < len(row.get('requests', [])) else ''
                 ack = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
                     phase='progress', stage=action['tool'], parent_request_id=parent, message_kind='host_ack',
-                    output_kind='지시를 접수했고 운영 상태 확인을 시작했습니다.' if action['tool'] == 'read_agent_status' else '지시를 접수했고 등록된 오류의 수리 검증을 시작했습니다.')
+                    output_kind='지시를 접수했고 운영 상태 확인을 시작했습니다.' if action['tool'] == 'read_agent_status' else '지시를 접수했고 등록된 작업의 실행을 시작했습니다.')
                 from common.ego_executor import execute_staff_action
                 def save_execution(receipt):
                     row['currentExecution'] = receipt
@@ -1979,44 +1984,15 @@ def process_staff_request_once():
                     output_kind='[도구 실행 기록] ' + action['tool'] + ' 반환 상태: ' +
                         {'observed':'상태 관측 완료','running':'진행 중','held':'보류','failed':'실패','not_applicable':'적용 대상 아님','needs_input':'입력 필요'}.get(status,'반환됨') +
                         '. 상세 결과는 연결된 증거에 보존했습니다. 게시 성공을 뜻하지 않습니다.')
-                try:
-                    def save_route(route):
-                        row['results'][-1]['staffRoute'] = route
-                        events = route.get('events') or []
-                        if events:
-                            event = events[-1]
-                            row['latestAction'] = {'kind': 'staff_model', 'agent': action['agent'],
-                                                   'state': event.get('state', 'unknown'), 'observedAt': time.time()}
-                        write(path, row)
-                    report_result=result
-                    if row['requestId'].startswith('ego-alert:'):
-                        incident=next((r for r in alerts.values() if r.get('requestId')==row['requestId']),{})
-                        report_result={'incident':{k:incident.get(k) for k in ('channel','account','port','title','cause','summary')},
-                            'priorResults':[{'agent':r['agent'],'tool':r['tool'],
-                                'receipt':{k:r['result'].get(k) for k in ('status','publicVerified','publicUrl','clicked','originalSendDay','reason')},
-                                'reply':r.get('staffResponse',{}).get('reply')} for r in row['results'][:-1]],
-                            'currentResult':{k:result.get(k) for k in ('ok','status','publicVerified','publicUrl','clicked','originalSendDay','reason')}}
-                    response = staff_tool_reply(action['agent'], row['taskId'],
-                        {**action,'hostInstruction':staff_instruction(action)}, report_result, audit=save_route)
-                    row['results'][-1]['staffResponse'] = response
-                    row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
-                        phase='completed', stage='channel-cycle-summary' if action['tool'] == 'run_project_cycle' else 'staff-response', parent_request_id=tool_return, message_kind='staff_reply',
-                        requested_to='jarvis', model=response['route']['events'][-1].get('actualModel') or '',
-                        evidence_id=digest, output_kind=response['reply'])
-                except Exception as exc:
-                    row['results'][-1]['responseError'] = type(exc).__name__
-                    row['results'][-1]['responseEventId'] = emit_work_event(actor=action['agent'], actor_label=action['agent'], task_id=row['taskId'],
-                        phase='failed', stage='staff-response', parent_request_id=tool_return,
-                        requested_to='jarvis', evidence_id=digest, output_kind='tool returned; staff model response failed')
-                write(path, row)
-            row['status'] = 'completed' if all(item['result'].get('ok') is True and 'staffResponse' in item for item in row['results']) else 'failed'
+                row['results'][-1]['hostReport']={'source':'host','status':result.get('status')}
+                write(path,row)
+            row['status'] = 'completed' if all(item['result'].get('ok') is True and ('staffResponse' in item or 'hostReport' in item) for item in row['results']) else 'failed'
             if any(item['result'].get('status') in ('running','started','queued','awaiting_completion') for item in row['results']):
                 row['status'] = 'awaiting_completion'  # PID is not a terminal repair receipt.
         except Exception as exc:
             row.update(status='failed', errorCode=type(exc).__name__)
             emit_work_event(actor='jarvis', actor_label='팀장', task_id=row['taskId'], phase='failed',
                 stage='staff-dispatch', output_kind='dispatch failed; no automatic retry')
-        _review_ceo_request(path, row)
         row['finishedAt'] = time.time()
         with locked(STAFF_REQUEST_DIR):
             write(path, row)
@@ -2325,6 +2301,10 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
         if slug != 'patch' or set(kwargs) != {'project'}:
             return {'ok': False, 'status': 'forbidden', 'tool': tool_name}
         return recover_project_runtime(kwargs['project'])
+    if tool_name == 'publish_strategy_link':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from common.project_autonomy import publish_strategy_link
+        return publish_strategy_link(kwargs['target_url'])
     if tool_name == "read_agent_status":
         readers = {'publi': read_publi_data, 'trace': read_trace_data, 'patch': read_patch_data,
                    'doctor': read_doctor_data, 'radar': read_radar_data, 'jarvis': format_jarvis_context_block}

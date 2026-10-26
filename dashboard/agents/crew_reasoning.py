@@ -587,6 +587,7 @@ def next_eligible_time(row,evidence_ids):
 def ensure_business_agenda(row, agenda_id=None):
     from common import work_agenda as agendas
     permissions=row['permissions']
+    if row.get('mode')=='strategy_execute':return
     if not agendas.enabled() or row.get('businessAgendaId') or row.get('subgoals') or not (permissions['execute'] or permissions['repair'] or agenda_id):return
     units=[]
     if len(permissions['projects'])==1 and permissions['repair'] and not agenda_id and ':work:' not in row['requestId']:
@@ -734,6 +735,8 @@ def _advance(row,steps=2):
         row.setdefault('mode',request_mode(row['goal'],row.get('permissions')))
     if steps and row.get('mode') == 'strategy':
         return answer_strategy(row)
+    if steps and row.get('mode') == 'strategy_execute':
+        return advance_strategy_execution(row)
     lease=row.get('reasoningLease',{})
     if row.get('status')=='working' and lease and not lease.get('returnedAt') and not lease.get('settledAt'):
         now=time.time()
@@ -905,15 +908,19 @@ def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead
         row=load(goal_path(identity))
         if not row:
             mode=request_mode(question,{'execute':execute,'repair':repair})
-            parent=conversation_parent(question,history or []) if mode in ('execute','recover') else None
+            parent=conversation_parent(question,history or []) if mode in ('execute','recover','strategy_execute') else None
             scope=projects or requested_projects(question)
-            implicit=bool(re.search(r'그거|그것|그럼|아까|이어서|계속',question))
+            implicit=bool(re.search(r'그거|그것|그럼|그대로|아까|이어서|계속',question))
             if parent and implicit and scope==requested_projects(''):scope=parent['permissions']['projects']
             row={'id':identity,'requestId':request_id,'userTurnId':request_id.rsplit(':',1)[0],
                  'goal':question,'mode':mode,'permissions':{'execute':execute,'repair':repair,'projects':scope},'actor':lead,'leadActor':lead,'origin':origin,'maxSteps':max_steps,
                  'createdAt':time.time(),'status':'ready','decisions':0,'observations':[],'plan':[], 'conversation':safe([{k:m.get(k) for k in ('who','text','goalId','userTurnId')} for m in (history or [])[-6:]]),'sessionId':session_id}
             if parent:
                 row.update(parentGoalId=parent['id'],lineageId=parent.get('lineageId',parent['id']),parentObjective=parent['goal'],plan=parent.get('plan',[]),observations=parent.get('observations',[])[:],actionHistory=parent.get('actionHistory',[])[:],executed=dict(parent.get('executed',{})))
+                if parent.get('mode') in ('strategy','strategy_execute') and execute:
+                    row['mode']='strategy_execute'
+                    if parent.get('strategyValidated') and parent.get('strategy'):
+                        row.update(strategy=parent['strategy'],strategyValidated=True,strategySource=parent['id'])
                 if parent.get('resolution',{}).get('status')=='verified_resolved':row['lineageId']=identity
                 if implicit and len(scope)>1 and (execute or repair) and not __import__('common.work_agenda',fromlist=['enabled']).enabled():
                     row.update(status='answered',answerSource='host',answer='앞선 안건에 여러 프로젝트가 있습니다. 복구할 프로젝트를 지정해 주세요. 기존 조사 결과는 보존했습니다.',resolution={'status':'needs_clarification','label':'복구 대상 확인이 필요합니다.'})
@@ -1063,9 +1070,135 @@ def deliver(row):
 
 def request_mode(question, permissions=None):
     permissions=permissions or request_permissions(question)
+    strategic=bool(re.search(r'전략|우선순위|팀장|오늘.*목표|다음.*(?:뭘|무엇)|뭐.*먼저',question))
+    if strategic and permissions.get('execute'):return 'strategy_execute'
     if permissions.get('repair'):return 'recover'
     if permissions.get('execute'):return 'execute'
-    return 'strategy' if re.search(r'전략|우선순위|팀장|오늘.*목표|다음.*(?:뭘|무엇)|뭐.*먼저',question) else 'inspect'
+    return 'strategy' if strategic else 'inspect'
+
+
+def validate_strategy(row, value):
+    from datetime import datetime, timezone, timedelta
+    from common.staff_capabilities import canonical_action
+    from server.agent_tools import validate_staff_actions
+    known=set()
+    for event in row.get('observations',[]):
+        if event.get('tool')!='projects':continue
+        business=event.get('result',{}).get('businessEvidence',{})
+        for key in ('trafficCandidates','revenueWinners'):
+            known.update(c['url'] for c in business.get(key,[]) if isinstance(c.get('url'),str))
+    actions=value.get('actions')
+    if not isinstance(actions,list) or not 1<=len(actions)<=3:raise ValueError('One to three concrete actions required')
+    for index,item in enumerate(actions):
+        for key in ('task','why','metric','checkAt','stopCondition','project'):
+            if not isinstance(item.get(key),str) or not item[key].strip():raise ValueError('Missing strategy deliverable: '+key)
+        due=datetime.fromisoformat(item['checkAt']).replace(tzinfo=timezone(timedelta(hours=9))) if len(item['checkAt'])==10 else datetime.fromisoformat(item['checkAt'])
+        if due.tzinfo is None or due.timestamp()<=time.time():raise ValueError('Future, timezone-aware deadline required')
+        if item['project'] not in row.get('permissions',{}).get('projects',[]):raise ValueError('Strategy exceeds project scope')
+        action={'agent':item.get('owner'),'tool':item.get('tool'),'args':json.loads(item.get('arguments') or '{}')}
+        if action['tool'] not in ('read_agent_status','run_project_cycle','publish_strategy_link','recover_project_runtime','recover_project_work','repair_kin_submission'):
+            raise ValueError('Unregistered strategy tool')
+        if canonical_action(action)!=action:raise ValueError('Wrong strategy task owner')
+        validate_staff_actions([action])
+        project=action['args'].get('project') or ('naver_kin' if action['tool']=='repair_kin_submission' else None)
+        if project!=item['project']:raise ValueError('Target and registered action disagree')
+        if item.get('targetUrl'):
+            if action['tool']!='publish_strategy_link' or item['targetUrl'] not in known or action['args'].get('target_url')!=item['targetUrl']:
+                raise ValueError('Selected asset must be observed and bound to publication')
+        elif action['tool']=='publish_strategy_link':raise ValueError('Exact publication asset required')
+        if type(item.get('after')) is not int or not -1<=item['after']<index:raise ValueError('Task dependencies must point backward')
+    return value
+
+
+def advance_strategy_execution(row):
+    from server.agent_tools import enqueue_staff_request, STAFF_REQUEST_DIR
+    from datetime import datetime, timezone, timedelta
+    if not row.get('strategyValidated'):
+        answer_strategy(row)
+        if not row.get('strategyValidated'):return row
+    if 'strategyAssignments' not in row:
+        try:validate_strategy(row,row['strategy'])
+        except (ValueError,TypeError,KeyError) as exc:
+            row.update(status='answered',answerSource='host',answer='[시스템 알림] 실행 계획의 대상·담당자·기한·등록 도구 검증에 실패해 접수하지 않았습니다.',
+                       resolution={'status':'strategy_invalid','label':'유효한 작업 배정 없음'},strategyError=type(exc).__name__)
+            save(row);return row
+        row['strategyRound']=row.get('strategyRound',0)+1
+        row['strategyAssignments']=[{'requestId':'strategy:'+row['id']+':'+str(row['strategyRound'])+':'+str(i),
+            'selection':a,'status':'planned'} for i,a in enumerate(row['strategy']['actions'])]
+        row.pop('answer',None);row.pop('delivered',None)
+        save(row)
+    tasks=row['strategyAssignments']
+    for index,task in enumerate(tasks):
+        if task['status'] in ('completed','failed','held'):continue
+        selection=task['selection'];tool=selection['tool']
+        action={'agent':selection['owner'],'tool':tool,'args':json.loads(selection['arguments'])}
+        permission='execute' if tool in ('run_project_cycle','publish_strategy_link') else 'repair'
+        permitted=tool=='read_agent_status' or row['permissions'].get(permission)
+        if not permitted:
+            task.update(status='held',reason='execution_not_authorized');continue
+        dependency=selection['after']
+        if dependency>=0 and tasks[dependency]['status']!='completed':
+            if tasks[dependency]['status'] in ('failed','held'):task.update(status='held',reason='prerequisite_not_completed')
+            continue
+        receipt_path=STAFF_REQUEST_DIR/(hashlib.sha256(task['requestId'].encode()).hexdigest()+'.json')
+        receipt=load(receipt_path)
+        due=datetime.fromisoformat(selection['checkAt'])
+        if due.tzinfo is None:due=due.replace(tzinfo=timezone(timedelta(hours=9)))
+        if not receipt:
+            if due.timestamp()<=time.time():
+                task.update(status='held',reason='assignment_deadline_expired');continue
+            save(row)  # Stable intent is durable before the idempotent queue call.
+            receipt=enqueue_staff_request(task['requestId'],[action])
+        task.update(taskId=receipt.get('taskId'),receiptPath=str(receipt_path),agendaId=receipt.get('businessAgendaId'))
+        if receipt.get('status') in ('queued','acknowledged','awaiting_completion'):
+            if due.timestamp()<=time.time():
+                task.update(status='held',reason='deadline_elapsed_receipt_pending');continue
+            task['status']='queued' if receipt['status']=='queued' else 'running';continue
+        results=[r.get('result',{}) for r in receipt.get('results',[])]
+        proof=bool(results) and all(r.get('ok') is True and (tool=='read_agent_status' or any(r.get(k) is True for k in
+            ('publicationVerified','reservationVerified','recoveryVerified','publicPublicationVerified')))
+            and (tool!='publish_strategy_link' or r.get('outboundLinkVerified') is True) for r in results)
+        task.update(status='completed' if receipt.get('status')=='completed' and proof else 'failed',
+                    reason=receipt.get('reason') or next((r.get('reason') or r.get('errorType') for r in results if r.get('reason') or r.get('errorType')),None),
+                    resultStatus=receipt.get('status'),results=[{k:r.get(k) for k in
+                    ('status','reason','publicationVerified','reservationVerified','recoveryVerified','outboundLinkVerified','outcomes','data')} for r in results])
+    pending=any(t['status'] not in ('completed','failed','held') for t in tasks)
+    row['strategyResults']=[{'owner':t['selection']['owner'],'task':t['selection']['task'],'status':t['status'],
+                            'receiptPath':t.get('receiptPath'),'reason':t.get('reason'),'results':t.get('results',[])} for t in tasks]
+    if pending:
+        row.update(status='waiting_execution',nextCheckAt=time.time()+15,
+                   progress={'phase':'직원 작업 실행·결과 확인','summary':'실제 접수 '+str(sum('taskId' in t for t in tasks))+'건 / 검증 완료 '+str(sum(t['status']=='completed' for t in tasks))+'건','at':time.time()})
+        save(row);return row
+    failed=any(t['status']!='completed' for t in tasks)
+    labels={'completed':'실제 결과 확인','failed':'미완료','held':'조건 대기'}
+    row['executionReport']='[시스템 실행 결과]\n'+'\n'.join('@'+r['owner']+' '+r['task']+': '+labels.get(r['status'],r['status']) for r in row['strategyResults'])+'\n게시·복구 결과와 유입·수익 효과는 별도로 기록합니다.'
+    previous_failed=sum(t['status']!='completed' for attempt in row.get('strategyHistory',[]) for t in attempt)
+    if previous_failed:row['executionReport']+='\n이전 시도의 미완료 '+str(previous_failed)+'건은 이력에 보존했으며 별도 후속 확인이 필요합니다.'
+    if failed and row.get('strategyRound',0)<2:
+        previous={json.dumps([t['selection']['tool'],json.loads(t['selection']['arguments'])],sort_keys=True) for t in tasks if t['selection']['tool']!='read_agent_status'}
+        observe(row,'host','projects',{},overview())
+        answer_strategy(row)
+        if row.get('strategyValidated'):
+            new=[a for a in row['strategy']['actions'] if json.dumps([a['tool'],json.loads(a['arguments'])],sort_keys=True) not in previous]
+            if len(new)==len(row['strategy']['actions']):
+                row.setdefault('strategyHistory',[]).append(tasks)
+                row.pop('strategyAssignments');row.pop('answer',None);row.pop('delivered',None)
+                row.update(status='ready',nextCheckAt=time.time()+1)
+                if row.get('userTurnId') and row.get('leadRoute') and row.get('answerSource')=='model':
+                    note={'id':len(row.get('discussion',[]))+1,'actor':row.get('leadActor','jarvis'),'kind':'decision',
+                          'text':row['strategy']['decision'],'route':row['leadRoute'],'ts':int(time.time()*1000)}
+                    row.setdefault('discussion',[]).append(note);save(row);deliver_step(row,note)
+                save(row);return row
+            row['strategyValidated']=False
+            row['strategyReviewStatus']='rejected_repeat'
+        row['reviewUnavailable']=not row.get('strategyValidated')
+    row.update(status='answered',answerSource='host',answer=row['executionReport']+
+               ('\n추가 전략 판단을 확보하지 못했거나 새 독립 작업이 없어 자동 재실행하지 않았습니다.' if failed else ''),
+               resolution={'status':'execution_partial' if failed else 'execution_completed','label':'실제 작업 결과 보고 · 수익 개선 확정 아님'},nextCheckAt=0)
+    save(row)
+    try:remember_case(row)
+    except Exception as exc:row['memoryError']=type(exc).__name__;save(row)
+    return row
 
 
 def answer_strategy(row):
@@ -1073,16 +1206,19 @@ def answer_strategy(row):
     snapshot=next((e['result'] for e in reversed(row['observations']) if e['tool']=='projects'),{})
     projects=[{k:p.get(k) for k in ('id','title','status','quota','activity')} for p in snapshot.get('projects',[])]
     business=snapshot.get('businessEvidence',{})
-    fields=('owner','task','why','metric','checkAt','stopCondition')
+    fields=('owner','task','why','metric','checkAt','stopCondition','project','targetUrl','tool','arguments')
     action_schema={'type':'object','properties':{k:{'type':'string','minLength':1,'maxLength':400} for k in fields},'required':list(fields),'additionalProperties':False}
     action_schema['properties']['owner']={'type':'string','enum':list(ROLES)}
+    for key in ('targetUrl','arguments'):action_schema['properties'][key]['minLength']=0
+    action_schema['properties']['tool']={'type':'string','enum':['read_agent_status','run_project_cycle','publish_strategy_link','recover_project_runtime','recover_project_work','repair_kin_submission']}
+    action_schema['properties']['after']={'type':'integer','minimum':-1,'maximum':2}
+    action_schema['required'].append('after')
     schema={'type':'object','properties':{'decision':{'type':'string','minLength':1,'maxLength':600},
         'hypotheses':{'type':'array','maxItems':3,'items':{'type':'string','maxLength':400}},
         'actions':{'type':'array','minItems':1,'maxItems':3,'items':action_schema}},
         'required':['decision','hypotheses','actions'],'additionalProperties':False}
-    from datetime import datetime, timezone, timedelta
-    tomorrow=(datetime.now(timezone(timedelta(hours=9)))+timedelta(days=1)).date().isoformat()
     def route(provider,model,state,**meta):
+        row['strategyModelRoute']={'provider':provider,'model':model,'state':state}
         if state=='returned':
             row['lastRoute']={'provider':provider,'model':meta.get('actual_model') or model,'reasoningEffort':meta.get('reasoning_effort')}
             row['leadRoute']=row['lastRoute']
@@ -1096,37 +1232,39 @@ def answer_strategy(row):
             '과거 장애의 로그 조사·코드 읽기·게시 영수증을 전략 답변의 완료 조건으로 삼지 마세요. '
             '필요한 복구는 Patch의 별도 작업으로 한정하고 다른 실행 가능한 행동을 선택하세요. '
             '각 행동에 담당자·구체적 산출물·이유·측정 지표·관찰 시각·중단 조건을 쓰세요. '
-            '측정 불가이면 추적 경로 확인을 선행 조건으로 두세요. 이 질문은 실행 권한을 추가하지 않습니다.\n'+
-            json.dumps({'question':row['goal'],'observedAt':snapshot.get('observedAt'),'projects':projects,'business':business,
+            'project는 실제 프로젝트 id입니다. tool과 arguments(JSON 문자열)는 아래 등록된 도구 중 하나를 정확히 선택하세요. '
+            '읽기·런타임 작업의 targetUrl은 빈 문자열, 콘텐츠 배포는 관측 자료에 있는 URL을 선택하세요. '
+            'publish_strategy_link는 project=threads, arguments={project:threads,target_url:선택URL}로 정확한 콘텐츠를 등록 슬롯에 연결합니다. '
+            'run_project_cycle은 기존 등록 스케줄러 회차이며 특정 URL 배포로 표현하지 마세요. '
+            '복구 작업은 필요한 실제 식별자가 자료에 있을 때만 선택하세요. '
+            'after=-1은 독립 작업, after=이전 행동의 0부터 시작하는 번호는 선행 작업 완료 뒤 실행입니다. '
+            'checkAt은 YYYY-MM-DDTHH:MM:SS+09:00 형식의 미래 시각입니다. '
+            '측정 불가이면 추적 경로 확인을 선행 조건으로 두세요. 실행 요청이면 permissions로 허용된 작업을 우선 선택하세요. 실제 실행 권한은 호스트가 검사합니다.\n'+
+            json.dumps({'question':row['goal'],'originalQuestion':row.get('parentObjective'),'permissions':row.get('permissions'), 'observedAt':snapshot.get('observedAt'),'projects':projects,'business':business,
+                        'priorExecution':bounded(row.get('strategyResults',[]),6000),'tools':[c for c in __import__('common.staff_capabilities',fromlist=['capability_catalog']).capability_catalog() if c['tool'] in action_schema['properties']['tool']['enum']],
                         'priorCases':bounded(row.get('priorCases',[]),2000)},ensure_ascii=False),
-            agent_slot=row.get('leadActor','jarvis'),response_schema=schema,timeout_seconds=45,observer=route,
+            agent_slot=row.get('leadActor','jarvis'),response_schema=schema,timeout_seconds=90,observer=route,
             _skip_memory=True,allow_provider_recovery=False,crew_actor=row.get('leadActor','jarvis'),crew_task_id='goal:'+row['id'],crew_stage='company-strategy')
-        if not value.get('actions') or any(a.get('owner') not in ROLES or any(not isinstance(a.get(k),str) or not a[k].strip() for k in fields) for a in value['actions']):
+        if not value.get('actions') or any(a.get('owner') not in ROLES or any(not isinstance(a.get(k),str) or not a[k].strip() for k in fields if k not in ('targetUrl','arguments')) for a in value['actions']):
             raise ValueError('Incomplete business decision')
+        validate_strategy(row,value)
+        if all(a['tool']=='read_agent_status' for a in value['actions']):
+            raise ValueError('Strategy must select a concrete business or recovery action, not only status reads')
+        row['strategyValidated']=True
         row['answerSource']='model'
     except Exception as exc:
-        row['strategyModelError']=type(exc).__name__
-        row['lastRoute']={'provider':'host','model':'strategy-fallback'}
-        row['leadRoute']=row['lastRoute']
-        from urllib.parse import urlsplit
-        candidates=[c for c in business.get('trafficCandidates',[]) if c.get('complete') is True
-                    and isinstance(c.get('sessions'),(int,float)) and c['sessions']>0
-                    and urlsplit(str(c.get('url') or '')).scheme=='https' and urlsplit(c['url']).hostname
-                    and not urlsplit(c['url']).username and not urlsplit(c['url']).password]
-        candidate=max(candidates,key=lambda c:c['sessions']) if candidates else {}
-        target=str(candidate.get('url') or '정상 채널의 기존 공개 글 후보')[:200]
-        observed=(' 기존 조회 기간 '+str(candidate.get('start'))+'~'+str(candidate.get('end'))+'에 '+
-                  str(candidate['sessions'])+'세션이 기록된 후보 '+target+'를 먼저 확인하겠습니다. 수익 순위는 확정하지 않습니다.') if candidate else ''
-        value={'decision':'모델 응답을 확보하지 못해 확인된 자료를 바탕으로 잠정 실행안을 남깁니다.'+observed+' 기존 콘텐츠의 작은 유입 실험을 준비하겠습니다.',
-               'hypotheses':['추적 가능한 기존 콘텐츠 배포가 유입에 도움이 되는지 검증합니다. 수익 효과는 미확인입니다.'],
-               'actions':[
-                   dict(owner='trace',task='현재 수집된 수익·유입의 기간과 추적 가능한 대상 URL 한 개를 확인',why='부분 자료를 전체 부재로 오인하지 않기 위해',metric='기간·통화·추적 경로 확인',checkAt=tomorrow,stopCondition='추적 불가이면 배포보다 측정 복구를 선행'),
-                   dict(owner='publi',task=target+'의 현재 공개 상태·내용 확인 후 기존 채널 배포안 준비',why='새 제작보다 기존 자산으로 적은 자원부터 실험',metric='출처를 구분할 수 있는 방문·참여 변화',checkAt=tomorrow,stopCondition='권한·품질·중복 제출 검사를 충족하지 못하면 게시 보류'),
-                   dict(owner='jarvis',task='위 실험의 결과와 남은 자원을 보고 확대·수정·중단 결정',why='발행량보다 실제 유입·수익 근거로 다음 행동 결정',metric='실측 방문·전환과 수익 자료의 수집 여부',checkAt=tomorrow,stopCondition='효과 미확인은 성공이나 0으로 확정하지 않고 관찰 기간 재설정')]}
-        row['answerSource']='host'
+        row.update(status='answered',answerSource='host',strategyModelError=type(exc).__name__,
+                   modelFailureDetail=safe(str(exc))[:500],
+                   lastRoute={'provider':'host','model':'system-notice'},leadRoute={'provider':'host','model':'system-notice'},
+                   strategy={'actions':[]},strategyValidated=False,
+                   answer='[시스템 알림] 전략 모델의 응답을 확보하거나 검증하지 못했습니다. 새 전략이나 업무 배정은 생성하지 않았습니다. 기존에 허용된 작업은 계속 진행됩니다.',
+                   resolution={'status':'model_unavailable','label':'시스템 장애 안내 · 직원의 사업 판단 아님'},nextCheckAt=0)
+        save(row)
+        return row
     lines=[value['decision']]
     for i,action in enumerate(value['actions'],1):
-        lines.append(str(i)+'. @'+action['owner']+' '+action['task']+'\n이유: '+action['why']+' · 측정: '+action['metric']+'\n확인: '+action['checkAt']+' · 중단: '+action['stopCondition'])
+        channel=next((p.get('title') or action['project'] for p in projects if p.get('id')==action['project']),action['project'])
+        lines.append(str(i)+'. @'+action['owner']+' '+action['task']+'\n대상: '+channel+(' · '+action['targetUrl'] if action['targetUrl'] else '')+'\n이유: '+action['why']+' · 측정: '+action['metric']+'\n확인: '+action['checkAt']+' · 중단: '+action['stopCondition'])
     if value.get('hypotheses'):lines.append('검증할 가설: '+' / '.join(value['hypotheses']))
     row.update(status='answered',answer='\n\n'.join(lines),strategy=value,plan=[a['task'] for a in value['actions']],
                evidenceIds=[e['id'] for e in row['observations'] if e['tool']=='projects'],
@@ -1146,7 +1284,7 @@ def request_permissions(question):
 
 
 def conversation_parent(question,history):
-    if not re.search(r'그거|그것|그럼|그러면|아까|이어서|계속|다시|왜.*(?:안|못).*하|아직',question):return None
+    if not re.search(r'그거|그것|그럼|그대로|그러면|아까|이어서|계속|다시|왜.*(?:안|못).*하|아직',question):return None
     previous=next((m for m in reversed(history) if m.get('who')=='user'),None)
     if not previous:return None
     ids=[m.get('goalId') for m in reversed(history) if m.get('userTurnId')==previous['id'] and m.get('goalId')]
@@ -1205,13 +1343,16 @@ def progress_view(row):
     elif row.get('pendingAction'):text='담당 직원에게 작업을 접수했습니다. 실제 실행 결과와 검증 근거를 기다리고 있습니다.'
     elif progress.get('summary'):text=progress['summary']
     else:
-        task='복구 대상과 안전한 조치, 실행 후 검증 방법' if row.get('permissions',{}).get('repair') else '최근 실행 기록과 실제 결과, 차단 원인'
-        text='요청을 접수했습니다. '+target+'의 '+task+'을 확인하겠습니다.'
+        if row.get('mode')=='strategy':text='전사 수익·유입·가용 채널을 비교해 오늘의 우선순위와 담당 작업을 결정합니다.'
+        elif row.get('mode')=='strategy_execute':text='선택한 작업을 실제 접수하고 담당자의 실행 결과를 확인합니다.'
+        else:
+            task='복구 대상과 안전한 조치, 실행 후 검증 방법' if row.get('permissions',{}).get('repair') else '최근 실행 기록과 실제 결과, 차단 원인'
+            text='요청을 접수했습니다. '+target+'의 '+task+'을 확인하겠습니다.'
         if row.get('parentGoalId'):text+=' 앞서 질문하신 안건의 조사 결과와 계획을 이어받았습니다.'
     tracker='processing'
     if status in ('waiting_external','waiting_verification'):tracker='waiting'
     elif row.get('answer'):
-        tracker='completed' if resolution.get('status')=='verified_resolved' else 'replied' if resolution.get('status')=='investigation_closed' or not row.get('permissions',{}).get('execute') and not row.get('permissions',{}).get('repair') else 'failed' if resolution.get('status')=='failed' else 'waiting'
+        tracker='completed' if resolution.get('status') in ('verified_resolved','execution_completed') else 'failed' if resolution.get('status') in ('model_unavailable','strategy_invalid','execution_partial','failed') else 'replied' if resolution.get('status')=='investigation_closed' or not row.get('permissions',{}).get('execute') and not row.get('permissions',{}).get('repair') else 'waiting'
     phase='답변 완료' if status in ('answered','blocked') and row.get('answer') else progress.get('phase','접수')
     return {'text':text,'status':tracker,'phase':phase,'lastActivityAt':progress.get('at',row.get('updatedAt',row.get('createdAt'))),'resolution':resolution,'target':target}
 

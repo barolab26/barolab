@@ -2679,6 +2679,7 @@ def receive_goal_result(payload: Dict[str, Any]):
         if progress_requested:identity='goal-progress-'+goal['id']
         if not progress_requested and not is_tool_step and any(m.get('id')==identity for m in room.get('messages',[])):return {'ok':True,'messageId':identity}
         actor=note['actor'] if note else goal.get('leadActor','jarvis')
+        if not note and goal.get('answerSource')=='host':actor='system'
         raw_text = note['text'] if note else goal.get('answer','')
         # Deduplication: suppress repeated intermediate drafts from cluttering the room
         if note and not is_tool_step and any(m.get('goalId') == goal['id'] and (m.get('text', '')[:40] == raw_text[:40] or m.get('text') == raw_text) for m in room.get('messages', [])):
@@ -2695,7 +2696,7 @@ def receive_goal_result(payload: Dict[str, Any]):
             message.update(ts=int(goal.get('createdAt',time.time())*1000)+1,goalStatus=goal.get('status'),who=goal.get('leadActor','jarvis'),text=state['text'],brain={'provider':'host','badge':'요청 진행 상태'},isGoalProgress=True,replyToCeo=not automatic)
             message['taskTracker'].update(step=state['phase'],resultSummary=state['text'])
         append_or_update_room_message(message)
-        if user and not progress_requested and not note:_append_agent_direct_thread(actor,user,message)
+        if user and not progress_requested and not note and actor in AGENT_MAP:_append_agent_direct_thread(actor,user,message)
     return {'ok':True,'messageId':identity}
 
 
@@ -2708,7 +2709,7 @@ def get_crew_goal(identity: str, view_only: bool = False):
     if not row:raise HTTPException(404,'Unknown goal')
     from agents.crew_reasoning import progress_view
     if view_only:return {'id':row['id'],'status':row['status'],'view':progress_view(row)}
-    return {**{k:row.get(k) for k in ('id','userTurnId','goal','mode','strategy','status','plan','discussion','decisions','lastLeadMessage','answer','nextCheckAt','createdAt','updatedAt','progress','resolution','parentGoalId','sessionId')},'view':progress_view(row)}
+    return {**{k:row.get(k) for k in ('id','userTurnId','goal','mode','strategy','strategyAssignments','strategyResults','strategyHistory','strategyModelRoute','strategyModelError','status','plan','discussion','decisions','lastLeadMessage','answer','nextCheckAt','createdAt','updatedAt','progress','resolution','parentGoalId','sessionId')},'view':progress_view(row)}
 
 
 

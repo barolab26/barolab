@@ -16,6 +16,276 @@ from server.growth import page_performance_evidence
 
 
 class BusinessControls(unittest.TestCase):
+    def strategy_action(self, **changes):
+        action=dict(owner='trace',task='수집 상태 관측 결과 보고',why='기존 수집 자료 확인',metric='원천 관측 상태',
+                    checkAt=(self.now+dt.timedelta(days=1)).isoformat(),stopCondition='원천 조회 불가 시 다른 독립 작업 진행',
+                    project='collections',targetUrl='',tool='read_agent_status',arguments='{"project":"collections"}',after=-1)
+        return {**action,**changes}
+
+    def test_strategy_assignment_runs_real_queue_worker_and_reports_returned_result(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        from common import work_agenda as agendas
+        requests=self.data/'staff-requests';requests.mkdir()
+        (self.data/'goals').mkdir()
+        row=dict(id=self.agenda,status='ready',mode='strategy_execute',origin='ceo',goal='계획대로 실행해',actor='jarvis',leadActor='jarvis',
+                 permissions={'execute':True,'repair':False,'projects':['collections']},observations=[],
+                 strategyValidated=True,strategy={'actions':[self.strategy_action()]})
+        def execute(action,**kwargs):
+            return tools.execute_agent_tool(action['agent'],action['tool'],**action['args'])
+        with patch.object(crew,'GOALS',self.data/'goals'),patch.object(tools,'STAFF_REQUEST_DIR',requests), \
+             patch.object(agendas,'enabled',return_value=False),patch('common.crew_chat_bridge.emit_work_event',return_value='observed-event'), \
+             patch('common.ego_executor.execute_staff_action',side_effect=execute), \
+             patch('server.project_health.observed_projects',return_value=[{'id':'collections','status':'observed'}]), \
+             patch('common.recovery_evidence.failure_targets',return_value=[]), \
+             patch.object(tools,'staff_tool_reply') as speech,patch.object(tools,'_review_ceo_request',side_effect=AssertionError('commentary must be asynchronous')),patch.object(crew,'remember_case'):
+            crew.advance(row,1)
+            self.assertEqual(row['status'],'waiting_execution')
+            self.assertEqual(len(list(requests.glob('*.json'))),1)
+            crew.advance(row,1)
+            self.assertEqual(len(list(requests.glob('*.json'))),1)
+            self.assertTrue(tools.process_staff_request_once())
+            receipt=json.loads(next(requests.glob('*.json')).read_text())
+            self.assertEqual(receipt['status'],'completed')
+            self.assertIn('hostReport',receipt['results'][0])
+            self.assertNotIn('staffResponse',receipt['results'][0])
+            crew.advance(row,1)
+        speech.assert_not_called()
+        self.assertEqual(row['status'],'answered')
+        self.assertEqual(row['resolution']['status'],'execution_completed')
+        self.assertEqual(row['strategyAssignments'][0]['status'],'completed')
+        self.assertIn('수익 효과는 별도로',row['answer'])
+        self.assertIn(chr(10),row['answer'])
+
+    def test_optional_ceo_review_has_its_own_consumer(self):
+        from server import agent_tools as tools
+        requests=self.data/'staff';requests.mkdir()
+        receipt={'requestId':'msg-123-user:jarvis','status':'completed','results':[]}
+        (requests/'receipt.json').write_text(json.dumps(receipt))
+        with patch.object(tools,'STAFF_REQUEST_DIR',requests),patch.object(tools,'_review_ceo_request') as review:
+            self.assertTrue(tools.process_staff_review_once())
+        review.assert_called_once()
+        with patch.object(tools,'STAFF_REQUEST_DIR',requests),patch.object(tools,'DATA_DIR',self.data), \
+             patch.object(tools,'staff_tool_reply') as model:
+            self.assertTrue(tools.process_staff_review_once())
+            self.assertFalse(tools.process_staff_review_once())
+        model.assert_not_called()
+
+    def test_execute_followup_inherits_validated_strategy_without_global_agenda(self):
+        from agents import crew_reasoning as crew
+        parent=dict(id=self.agenda,mode='strategy',goal='오늘의 전략',permissions={'projects':['collections']},
+                    strategyValidated=True,strategy={'actions':[self.strategy_action()]},observations=[],plan=[])
+        with patch.object(crew,'GOALS',self.data/'goals'),patch.object(crew,'conversation_parent',return_value=parent), \
+             patch.object(crew,'overview',return_value={'projects':[]}),patch.object(crew,'advance'):
+            row=crew.reason_request('followup','그대로 실행해',execute=True,steps=0)
+        self.assertEqual(row['mode'],'strategy_execute')
+        self.assertEqual(row['strategy'],parent['strategy'])
+        self.assertEqual(row['permissions']['projects'],['collections'])
+        self.assertNotIn('businessAgendaId',row)
+
+    def test_followup_to_model_failure_does_not_create_generic_execution_agendas(self):
+        from agents import crew_reasoning as crew
+        parent=dict(id=self.agenda,mode='strategy',goal='오늘의 전략',permissions={'projects':['threads']},
+                    strategyValidated=False,strategy={'actions':[]},observations=[],plan=[])
+        with patch.object(crew,'GOALS',self.data/'goals'),patch.object(crew,'conversation_parent',return_value=parent), \
+             patch.object(crew,'overview',return_value={'projects':[]}),patch.object(crew,'advance'):
+            row=crew.reason_request('failed-followup','그대로 실행해',execute=True,steps=0)
+        self.assertEqual(row['mode'],'strategy_execute')
+        self.assertNotIn('businessAgendaId',row)
+        self.assertNotIn('strategyValidated',row)
+
+    def test_independent_work_is_queued_when_repair_is_not_authorized(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        requests=self.data/'staff';requests.mkdir()
+        repair=self.strategy_action(owner='patch',project='naver_kin',tool='recover_project_runtime',arguments='{"project":"naver_kin"}')
+        publish=self.strategy_action(owner='publi',project='threads',tool='run_project_cycle',arguments='{"project":"threads"}')
+        row=dict(id=self.agenda,permissions={'execute':True,'repair':False,'projects':['naver_kin','threads']},
+                 observations=[],strategyValidated=True,strategy={'actions':[repair,publish]})
+        with patch.object(crew,'save'),patch.object(tools,'STAFF_REQUEST_DIR',requests), \
+             patch.object(tools,'enqueue_staff_request',return_value={'taskId':'staff:real','status':'queued'}) as enqueue:
+            crew.advance_strategy_execution(row)
+        self.assertEqual(row['strategyAssignments'][0]['status'],'held')
+        self.assertEqual(row['strategyAssignments'][1]['status'],'queued')
+        enqueue.assert_called_once()
+
+    def test_queued_publication_is_not_completed_without_public_proof(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        requests=self.data/'staff';requests.mkdir()
+        action=self.strategy_action(owner='publi',project='threads',tool='run_project_cycle',arguments='{"project":"threads"}')
+        row=dict(id=self.agenda,permissions={'execute':True,'repair':False,'projects':['threads']},observations=[],
+                 strategyValidated=True,strategy={'actions':[action]},strategyRound=1)
+        with patch.object(crew,'save'),patch.object(tools,'STAFF_REQUEST_DIR',requests), \
+             patch.object(tools,'enqueue_staff_request',return_value={'taskId':'task','status':'queued'}):
+            crew.advance_strategy_execution(row)
+            task=row['strategyAssignments'][0]
+            Path(task['receiptPath']).write_text(json.dumps({'status':'completed','results':[{'result':{'ok':True,'status':'no_work'}}]}))
+            with patch.object(crew,'remember_case'):
+                crew.advance_strategy_execution(row)
+        self.assertEqual(task['status'],'failed')
+        self.assertEqual(row['resolution']['status'],'execution_partial')
+
+    def test_failed_work_replans_once_and_never_replays_same_action(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        requests=self.data/'staff';requests.mkdir()
+        action=self.strategy_action(owner='publi',project='threads',tool='run_project_cycle',arguments='{"project":"threads"}')
+        row=dict(id=self.agenda,permissions={'execute':True,'repair':False,'projects':['threads']},observations=[],
+                 strategyValidated=True,strategy={'actions':[action]})
+        with patch.object(crew,'save'),patch.object(tools,'STAFF_REQUEST_DIR',requests), \
+             patch.object(tools,'enqueue_staff_request',return_value={'taskId':'task','status':'queued'}), \
+             patch.object(crew,'remember_case'),patch.object(crew,'overview',return_value={'projects':[]}), \
+             patch.object(crew,'answer_strategy',side_effect=lambda r:r) as review:
+            crew.advance_strategy_execution(row)
+            task=row['strategyAssignments'][0]
+            Path(task['receiptPath']).write_text(json.dumps({'status':'failed','results':[]}))
+            crew.advance_strategy_execution(row)
+        review.assert_called_once()
+        self.assertEqual(row['resolution']['status'],'execution_partial')
+        self.assertNotIn('strategyHistory',row)
+
+    def test_failed_channel_switches_to_new_independent_task_and_keeps_failure_history(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        requests=self.data/'staff';requests.mkdir()
+        first=self.strategy_action(owner='publi',project='threads',tool='run_project_cycle',arguments='{"project":"threads"}')
+        alternate=self.strategy_action(owner='publi',project='cf_blog',tool='run_project_cycle',arguments='{"project":"cf_blog"}')
+        row=dict(id=self.agenda,permissions={'execute':True,'repair':False,'projects':['threads','cf_blog']},observations=[],
+                 strategyValidated=True,strategy={'actions':[first]})
+        def enqueue(identity,actions):
+            receipt={'taskId':'staff:'+hashlib.sha256(identity.encode()).hexdigest(),'status':'queued'}
+            (requests/(hashlib.sha256(identity.encode()).hexdigest()+'.json')).write_text(json.dumps(receipt))
+            return receipt
+        def review(goal):
+            goal.update(strategy={'decision':'기존 장애는 보존하고 CF의 독립 작업을 먼저 실행합니다.','actions':[alternate]},strategyValidated=True)
+        with patch.object(crew,'save'),patch.object(tools,'STAFF_REQUEST_DIR',requests), \
+             patch.object(tools,'enqueue_staff_request',side_effect=enqueue),patch.object(crew,'remember_case'), \
+             patch.object(crew,'overview',return_value={'projects':[]}),patch.object(crew,'answer_strategy',side_effect=review):
+            crew.advance_strategy_execution(row)
+            failed=row['strategyAssignments'][0]
+            Path(failed['receiptPath']).write_text(json.dumps({'status':'failed','results':[]}))
+            crew.advance_strategy_execution(row)
+            self.assertEqual(row['status'],'ready')
+            crew.advance_strategy_execution(row)
+            replacement=row['strategyAssignments'][0]
+            self.assertNotEqual(replacement['requestId'],failed['requestId'])
+            Path(replacement['receiptPath']).write_text(json.dumps({'status':'completed','results':[{'result':{
+                'ok':True,'status':'completed','publicationVerified':True}}]}))
+            crew.advance_strategy_execution(row)
+        self.assertEqual(row['strategyRound'],2)
+        self.assertEqual(row['strategyHistory'][0][0]['status'],'failed')
+        self.assertEqual(row['resolution']['status'],'execution_completed')
+        self.assertIn('미완료 1건',row['answer'])
+
+    def test_selected_asset_must_match_observed_source_and_native_tool(self):
+        from agents import crew_reasoning as crew
+        action=self.strategy_action(owner='publi',project='threads',tool='publish_strategy_link',
+            targetUrl='https://www.baronote.kr/selected',arguments='{"project":"threads","target_url":"https://www.baronote.kr/selected"}')
+        row=dict(permissions={'projects':['threads']},observations=[{'tool':'projects','result':{'businessEvidence':{
+            'trafficCandidates':[{'url':action['targetUrl']}]}}}])
+        self.assertTrue(crew.validate_strategy(row,{'actions':[action]}))
+        with self.assertRaises(ValueError):
+            crew.validate_strategy({**row,'observations':[]},{'actions':[action]})
+        with self.assertRaises(ValueError):
+            crew.validate_strategy(row,{'actions':[{**action,'after':0}]})
+
+    def test_selected_link_never_overwrites_existing_slot_content(self):
+        import sqlite3
+        from common import project_autonomy as autonomy, work_agenda as agendas, conference_dispatch as conference
+        from threads_posting import posting as engine
+        database=self.data/'threads.sqlite3'
+        with sqlite3.connect(database) as db:
+            db.execute('CREATE TABLE parts(part_id TEXT,document TEXT)')
+            db.execute('INSERT INTO parts VALUES(?,?)',('existing-0',json.dumps({'source':{'url':'https://www.baronote.kr/original'}})))
+        with patch.object(agendas,'enabled',return_value=False),patch.object(autonomy,'load',return_value={'enabled':True,'projects':['threads']}), \
+             patch.object(conference,'concrete_requests',return_value=[{'partId':'existing-0'}]), \
+             patch.object(engine,'_threads_config_DB',database),patch.object(conference,'request') as submit:
+            result=autonomy.publish_strategy_link('https://www.baronote.kr/selected')
+        submit.assert_not_called()
+        self.assertEqual(result['reason'],'existing_slot_has_different_content')
+
+    def test_strategy_publication_waits_for_selected_outbound_link_not_just_main_post(self):
+        import sqlite3
+        from common import project_autonomy as autonomy, conference_dispatch as conference
+        from threads_posting import posting as engine
+        database=self.data/'threads.sqlite3'
+        target='https://www.baronote.kr/selected'
+        arguments={'account':'mustpickinfo','date':'2026-10-26','slot':'12:30','targetUrl':target}
+        document=json.dumps({'source':{'url':target},'outbound_url':target+'?utm_source=threads'})
+        with sqlite3.connect(database) as db:
+            db.execute('CREATE TABLE parts(kind TEXT,state TEXT,permalink TEXT,document TEXT,account_key TEXT,publication_date TEXT,slot TEXT)')
+            db.executemany('INSERT INTO parts VALUES(?,?,?,?,?,?,?)',[
+                ('main','published_verified','https://www.threads.com/@mustpickinfo/post/main',document,'mustpickinfo','2026-10-26','12:30'),
+                ('followup','queued',None,document,'mustpickinfo','2026-10-26','12:30')])
+        queue=self.data/'queue';queue.mkdir()
+        identity='b'*64
+        (queue/(identity+'.json')).write_text(json.dumps(dict(agendaId=identity,kind='threads',status='completed',
+            requestedAt=1,arguments=arguments,outcomes=[{'publicationVerified':True}])))
+        result=dict(project='threads',conferenceAgendaId=identity,conferenceRequestedAt=1,targetUrl=target)
+        with patch.object(conference,'QUEUE',queue),patch.object(engine,'_threads_config_DB',database):
+            self.assertIsNone(autonomy.terminal_result(result))
+            with sqlite3.connect(database) as db:
+                db.execute("UPDATE parts SET state='published_verified',permalink='https://www.threads.com/@mustpickinfo/post/reply' WHERE kind='followup'")
+            terminal,_=autonomy.terminal_result(result)
+            self.assertTrue(terminal['outboundLinkVerified'])
+            self.assertTrue(terminal['publicationVerified'])
+            with sqlite3.connect(database) as db:
+                db.execute("UPDATE parts SET document=? WHERE kind='followup'",(json.dumps({'source':{'url':target},'outbound_url':'https://www.baronote.kr/different'}),))
+            terminal,_=autonomy.terminal_result(result)
+            self.assertFalse(terminal['ok'])
+            self.assertFalse(terminal['outboundLinkVerified'])
+
+    def test_model_failure_never_enqueues_a_strategy_task(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        row=dict(id=self.agenda,goal='전략대로 실행해',leadActor='jarvis',permissions={'execute':True,'repair':True,'projects':['threads']},observations=[])
+        with patch('common.llm_client.generate_json',side_effect=RuntimeError('down')),patch.object(crew,'save'), \
+             patch.object(tools,'enqueue_staff_request') as enqueue:
+            crew.advance_strategy_execution(row)
+        enqueue.assert_not_called()
+        self.assertEqual(row['resolution']['status'],'model_unavailable')
+        self.assertEqual(row['strategy']['actions'],[])
+
+    def test_expired_pending_assignment_reports_unresolved_without_cancelling_or_replaying(self):
+        from agents import crew_reasoning as crew
+        from server import agent_tools as tools
+        requests=self.data/'staff';requests.mkdir()
+        action=self.strategy_action()
+        row=dict(id=self.agenda,strategyRound=1,permissions={'execute':True,'repair':False,'projects':['collections']},
+                 observations=[],strategyValidated=True,strategy={'actions':[action]})
+        with patch.object(crew,'save'),patch.object(crew,'remember_case'),patch.object(tools,'STAFF_REQUEST_DIR',requests), \
+             patch.object(tools,'enqueue_staff_request',return_value={'taskId':'task','status':'queued'}) as enqueue:
+            crew.advance_strategy_execution(row)
+            task=row['strategyAssignments'][0]
+            Path(task['receiptPath']).write_text(json.dumps({'status':'awaiting_completion'}))
+            with patch.object(crew.time,'time',return_value=self.now.timestamp()+3*86400):
+                crew.advance_strategy_execution(row)
+        enqueue.assert_called_once()
+        self.assertEqual(task['reason'],'deadline_elapsed_receipt_pending')
+        self.assertEqual(json.loads(Path(task['receiptPath']).read_text())['status'],'awaiting_completion')
+        self.assertEqual(row['resolution']['status'],'execution_partial')
+
+    def test_staff_polls_closed_agenda_receipt_without_replaying_publication(self):
+        from server import agent_tools as tools
+        from common import work_agenda as agendas
+        requests=self.data/'staff';requests.mkdir()
+        result=dict(ok=True,status='awaiting_completion',project='threads',conferenceAgendaId='b'*64,conferenceRequestedAt=1)
+        row=dict(requestId='strategy:'+self.agenda+':1:0',taskId='staff:task',status='awaiting_completion',
+                 businessAgendaId=self.agenda,results=[{'agent':'publi','tool':'publish_strategy_link','result':result}])
+        (requests/'task.json').write_text(json.dumps(row))
+        terminal=dict(ok=True,status='completed',publicationVerified=True,project='threads')
+        with patch.object(tools,'STAFF_REQUEST_DIR',requests),patch.object(agendas,'enabled',return_value=True), \
+             patch.object(agendas,'active',side_effect=AssertionError('poll cannot depend on current agenda')), \
+             patch.object(agendas,'staff_result'),patch('common.project_autonomy.terminal_result',return_value=(terminal,{})), \
+             patch('common.ego_executor.execute_staff_action') as publish,patch.object(tools,'staff_tool_reply') as speech:
+            self.assertTrue(tools.process_staff_request_once())
+        publish.assert_not_called()
+        speech.assert_not_called()
+        receipt=json.loads((requests/'task.json').read_text())
+        self.assertEqual(receipt['status'],'completed')
+        self.assertTrue(receipt['results'][0]['result']['publicationVerified'])
+
     def test_company_strategy_routes_to_jarvis_before_check_keyword(self):
         from agents import chat_room as chat
         from agents import crew_reasoning as crew
@@ -23,16 +293,15 @@ class BusinessControls(unittest.TestCase):
         self.assertEqual(chat.parse_mentioned_agents(question), ['jarvis'])
         self.assertEqual(crew.request_mode(question), 'strategy')
         self.assertEqual(chat.parse_mentioned_agents('@publi '+question), ['publi'])
-        self.assertEqual(crew.request_mode('전략대로 실행해'), 'execute')
+        self.assertEqual(crew.request_mode('전략대로 실행해'), 'strategy_execute')
 
     def test_strategy_answers_without_operational_tools_and_preserves_plan(self):
         from agents import crew_reasoning as crew
         business={'priorDayRevenue':[{'amount':None,'currency':'USD'}], 'trafficSites':[{'domain':'example.com','status':'collected'}]}
         row=dict(id=self.agenda,mode='strategy',goal='오늘 목표를 어떻게 세울까?',leadActor='jarvis',
-                 permissions={'execute':False,'repair':False}, observations=[{'id':'e0','tool':'projects',
+                 permissions={'execute':False,'repair':False,'projects':['threads']}, observations=[{'id':'e0','tool':'projects',
                  'result':{'businessEvidence':business,'executionContext':{'unrelated':'broken kin'},'projects':[]}}])
-        action=dict(owner='publi',task='기존 공개 글의 추적 가능한 배포안 준비',why='작은 유입 실험',
-                    metric='추적 가능한 방문',checkAt='2026-10-27',stopCondition='추적 불가 시 보류')
+        action=self.strategy_action(owner='publi',project='threads',tool='run_project_cycle',arguments='{"project":"threads"}')
         value=dict(decision='기존 자산의 작은 유입 실험을 우선하겠습니다.',hypotheses=['유입 증가 여부는 검증 필요'],actions=[action])
         with patch('common.llm_client.generate_json',return_value=value) as model, \
              patch.object(crew,'save'),patch.object(crew,'remember_case'),patch.object(crew,'tool_call') as tool:
@@ -48,7 +317,7 @@ class BusinessControls(unittest.TestCase):
         model.assert_called_once()
         tool.assert_not_called()
 
-    def test_strategy_model_failure_returns_honest_actionable_provisional_answer(self):
+    def test_strategy_model_failure_reports_system_error_without_fake_plan(self):
         from agents import crew_reasoning as crew
         row=dict(id=self.agenda,goal='오늘 전략',leadActor='jarvis',observations=[])
         with patch('common.llm_client.generate_json',side_effect=usage.RouteCoolingDown('cooldown')), \
@@ -56,11 +325,37 @@ class BusinessControls(unittest.TestCase):
             crew.answer_strategy(row)
         self.assertEqual(row['status'],'answered')
         self.assertEqual(row['answerSource'],'host')
-        self.assertIn('잠정',row['answer'])
-        self.assertEqual(len(row['strategy']['actions']),3)
-        self.assertTrue(all(a['owner'] and a['stopCondition'] and a['checkAt'] for a in row['strategy']['actions']))
+        self.assertIn('[시스템 알림]',row['answer'])
+        self.assertEqual(row['strategy']['actions'],[])
+        self.assertFalse(row['strategyValidated'])
+        self.assertEqual(row['resolution']['status'],'model_unavailable')
 
-    def test_provisional_strategy_uses_measured_candidate_without_claiming_revenue(self):
+    def test_model_status_reads_alone_are_not_accepted_as_a_business_strategy(self):
+        from agents import crew_reasoning as crew
+        row=dict(id=self.agenda,goal='오늘 전략',leadActor='jarvis',permissions={'projects':['collections']},observations=[])
+        value=dict(decision='자료부터 확인하겠습니다.',hypotheses=[],actions=[self.strategy_action()])
+        with patch('common.llm_client.generate_json',return_value=value),patch.object(crew,'save'):
+            crew.answer_strategy(row)
+        self.assertFalse(row['strategyValidated'])
+        self.assertEqual(row['strategy']['actions'],[])
+
+    def test_model_error_is_delivered_as_system_notice_not_staff_dialogue(self):
+        from agents import chat_room as chat
+        from agents import crew_reasoning as crew
+        path=self.data/'goal.json'
+        goal=dict(id=self.agenda,userTurnId='msg-1-user',goal='오늘 전략',origin='ceo',leadActor='jarvis',
+                  status='answered',answerSource='host',answer='[시스템 알림] 모델 응답 실패',
+                  resolution={'status':'model_unavailable','label':'모델 장애'})
+        path.write_text(json.dumps(goal))
+        room={'messages':[{'id':'msg-1-user','who':'user','text':'오늘 전략'}]}
+        with patch.object(crew,'goal_path',return_value=path),patch.object(chat,'load_room_data',return_value=room), \
+             patch.object(chat,'append_or_update_room_message') as append,patch.object(chat,'_append_agent_direct_thread') as direct:
+            chat.receive_goal_result({'goalId':self.agenda})
+        self.assertEqual(append.call_args.args[0]['who'],'system')
+        self.assertEqual(append.call_args.args[0]['taskTracker']['status'],'failed')
+        direct.assert_not_called()
+
+    def test_model_failure_does_not_manufacture_business_decision_from_candidate(self):
         from agents import crew_reasoning as crew
         candidate=dict(url='https://example.com/post',sessions=7,complete=True,start='2026-10-19',end='2026-10-25')
         row=dict(id=self.agenda,goal='오늘 전략',leadActor='jarvis',observations=[{
@@ -68,9 +363,9 @@ class BusinessControls(unittest.TestCase):
         with patch('common.llm_client.generate_json',side_effect=RuntimeError('unavailable')), \
              patch.object(crew,'save'),patch.object(crew,'remember_case'):
             crew.answer_strategy(row)
-        self.assertIn(candidate['url'],row['answer'])
-        self.assertIn('7세션',row['answer'])
-        self.assertIn('수익 순위는 확정하지 않습니다',row['answer'])
+        self.assertNotIn(candidate['url'],row['answer'])
+        self.assertNotIn('잠정 실행안',row['answer'])
+        self.assertEqual(row['strategy']['actions'],[])
         self.assertEqual(row['leadRoute']['provider'],'host')
 
     def test_strategy_provider_timeout_does_not_cascade_into_another_provider(self):
@@ -135,6 +430,19 @@ class BusinessControls(unittest.TestCase):
             self.assertTrue(agendas.admit(next_id))
             self.assertEqual(agendas.active()['id'],next_id)
             self.assertEqual(agendas.get(self.agenda)['status'],'blocked')
+
+    def test_read_only_staff_task_runs_without_occupying_existing_write_lane(self):
+        from common import work_agenda as agendas
+        rows=self.data/'operations';rows.mkdir()
+        state=self.data/'agenda.json';next_id='b'*64
+        state.write_text(json.dumps({'enabled':True,'activeId':self.agenda,'activeIds':[self.agenda],'pending':[next_id]}))
+        active=dict(id=self.agenda,kind='goal',project='collections',status='executing')
+        query=dict(id=next_id,kind='staff',project='collections',status='queued',priority=10,createdAt=0,owner='host',version=1,
+                   source={'actions':[{'tool':'read_agent_status','args':{'project':'collections'}}]})
+        for row in (active,query):(rows/(row['id']+'.json')).write_text(json.dumps(row))
+        with patch.object(agendas,'ROWS',rows),patch.object(agendas,'STATE',state):
+            self.assertTrue(agendas.admit(next_id))
+            self.assertEqual(agendas.get(self.agenda)['status'],'executing')
 
     def test_conference_evidence_resolves_business_id_only_with_matching_binding(self):
         from agents import crew_reasoning as crew

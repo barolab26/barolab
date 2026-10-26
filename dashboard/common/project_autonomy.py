@@ -46,6 +46,34 @@ def run_project_cycle(project):
     return {'ok':True,'status':'running','project':project,'pid':child.pid,'receiptPath':child.ego_receipt_path,'publicationVerified':False}
 
 
+def publish_strategy_link(target_url):
+    """Bind one selected asset to the existing Threads slot and publication guards."""
+    from common import work_agenda as agendas
+    from common.conference_dispatch import concrete_requests, request
+    import threads_posting.posting as engine
+    import sqlite3
+    engine._threads_authoring__canonical(target_url, engine._threads_config_HOSTS)
+    if agendas.enabled():agendas.require(project='threads')
+    config=load(CONFIG)
+    if config.get('enabled') is not True or 'threads' not in config.get('projects',[]) or (Path.home()/'EGO_EXEC_DISABLED').exists():
+        return {'ok':False,'status':'held','project':'threads','reason':'execution_disabled'}
+    choices=concrete_requests('threads',{})
+    if not choices:return {'ok':False,'status':'held','project':'threads','reason':'no_due_slot','targetUrl':target_url}
+    args=choices[0]
+    if args.get('partId'):
+        with sqlite3.connect(Path(engine._threads_config_DB).resolve().as_uri()+'?mode=ro',uri=True) as db:
+            part=db.execute('SELECT document FROM parts WHERE part_id=?',(args['partId'],)).fetchone()
+        if not part or json.loads(part[0]).get('source',{}).get('url')!=target_url:
+            return {'ok':False,'status':'held','project':'threads','reason':'existing_slot_has_different_content','targetUrl':target_url}
+    if engine._threads_authoring__slot_mode(engine._threads_config_load(),args['slot'])!='cf_inbound':
+        return {'ok':False,'status':'held','project':'threads','reason':'slot_not_cf_inbound','targetUrl':target_url}
+    receipt=request('threads',{**args,'targetUrl':target_url},one=True)
+    if not receipt.get('agendaId'):
+        return {'ok':False,'status':'held','project':'threads','reason':'no_conference_receipt','targetUrl':target_url}
+    return {'ok':True,'status':'awaiting_completion','project':'threads','targetUrl':target_url,
+            'conferenceAgendaId':receipt['agendaId'],'conferenceRequestedAt':receipt['requestedAt'],'publicationVerified':False}
+
+
 def recoverable_work(project):
     """Exact current approved slots that failed before any submission evidence."""
     from datetime import datetime, timedelta
@@ -128,6 +156,29 @@ def completion_receipt(result):
     return result
 
 
+def strategy_link_state(database, arguments, target):
+    import sqlite3
+    from urllib.parse import urlsplit
+    try:
+        with sqlite3.connect(Path(database).resolve().as_uri()+'?mode=ro',uri=True) as db:
+            rows=db.execute('SELECT kind,state,permalink,document FROM parts WHERE account_key=? AND publication_date=? AND slot=?',
+                            (arguments.get('account'),arguments.get('date'),arguments.get('slot'))).fetchall()
+        parts=[(kind,state,address,json.loads(document)) for kind,state,address,document in rows]
+        parts=[p for p in parts if p[3].get('source',{}).get('url')==target]
+        public=lambda p:p[1]=='published_verified' and urlsplit(str(p[2] or '')).scheme=='https' and urlsplit(str(p[2] or '')).hostname in ('threads.com','www.threads.com','threads.net','www.threads.net')
+        main=any(p[0]=='main' and public(p) for p in parts)
+        selected=urlsplit(target)
+        def linked(part):
+            outbound=urlsplit(part[3].get('outbound_url') or '')
+            return (outbound.scheme,outbound.hostname,outbound.path)==(selected.scheme,selected.hostname,selected.path)
+        reply=any(p[0]=='followup' and public(p) and linked(p) for p in parts)
+        if main and reply:return 'verified'
+        if any(p[1] in ('sending_intent','submitted_unknown','api_submitted') for p in parts):return 'waiting'
+        if main and any(p[0]=='followup' and p[1]=='queued' and linked(p) for p in parts):return 'waiting'
+        return 'failed'
+    except (OSError,sqlite3.Error,ValueError,TypeError):return 'unknown'
+
+
 def terminal_result(result):
     """Read only the exact registered child; exit zero is not publication proof."""
     if result.get('conferenceAgendaId'):
@@ -152,7 +203,18 @@ def terminal_result(result):
         if receipt.get('status') == 'completed':
             verified = [row.get('publicationVerified') is True or row.get('reservationVerified') is True for row in outcomes]
             status = 'no_work' if not outcomes else 'completed' if all(verified) else 'partial' if any(verified) else 'unknown'
+        link_verified=False
+        if expected=='threads' and result.get('targetUrl'):
+            if receipt.get('arguments',{}).get('targetUrl')!=result['targetUrl']:
+                status='unknown'
+            else:
+                from threads_posting.posting import _threads_config_DB
+                link=strategy_link_state(_threads_config_DB,receipt.get('arguments',{}),result['targetUrl'])
+                if link=='waiting':return None
+                link_verified=link=='verified'
+                status='completed' if link_verified else 'unknown' if link=='unknown' else 'failed'
         return {'ok':status in ('completed','no_work'), 'status':status,
+                'outboundLinkVerified':link_verified,
                 'project':result['project'], 'conferenceAgendaId':identity,
                 'publicationVerified':status=='completed' and all(row.get('publicationVerified') is True for row in outcomes),
                 'reservationVerified':status=='completed' and bool(outcomes) and all(row.get('reservationVerified') is True for row in outcomes),

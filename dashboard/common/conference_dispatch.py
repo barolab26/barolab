@@ -544,6 +544,11 @@ def _work(identity):
             receipts = result if isinstance(result, list) else [result]
         else:
             engine = install_channel_conferences(row['kind'])
+            if row['kind']=='threads' and row['arguments'].get('targetUrl'):
+                target=row['arguments']['targetUrl']
+                engine._threads_authoring__canonical(target,engine._threads_config_HOSTS)
+                catalog=engine._threads_authoring_catalog
+                engine._threads_authoring_catalog=lambda *a,**kw:[item for item in catalog(*a,**kw) if item.get('url')==target]
             if row['kind'] == 'kin':
                 if row.get('retryTarget'):engine._conference_retry=row
                 engine.main(['--tick', '--scheduled'])

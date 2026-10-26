@@ -336,6 +336,11 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
     return identity
 
 
+def read_only_agenda(row):
+    actions=row.get('source',{}).get('actions') or []
+    return row.get('kind')=='staff' and bool(actions) and all(a.get('tool') in READ_ONLY for a in actions)
+
+
 def admit(identity):
     if not enabled():
         return None
@@ -354,7 +359,8 @@ def admit(identity):
             return None
         proj = chosen.get('project') or 'other'
         limit = LANE_LIMITS.get(proj, 1)
-        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and not waiting_investigation(r)]
+        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and not waiting_investigation(r)
+                       and read_only_agenda(r)==read_only_agenda(chosen)]
         if len(lane_active) >= limit:
             return None
         chosen.update(status='report_pending' if chosen.get('verification',{}).get('verified') else 'meeting', activatedAt=time.time())
@@ -525,12 +531,14 @@ def prepare_open(identity):
     row = get(identity)
     if not row.get('plan') or 'opening' not in row.get('events', {}):
         if not row.get('plan'):
-            if row.get('kind') == 'conference':
+            if row.get('kind') in ('conference','staff'):
                 fast_plan = [
                     f"[{row.get('project')}] 타깃 키워드 및 수익화(CPA/CPC/애드센스) 전략 앵글 확정",
                     "독자 체류시간·전환 극대화 본문 및 고해상도 시각 자료 생성",
                     "채널 발행·예약 실행 및 실제 영수증/공개 상태 검증",
                 ]
+                if row['kind']=='staff':
+                    fast_plan=['등록된 담당자·도구로 지정 작업 실행','실제 반환값·공개 또는 조회 결과 확인','검증된 결과와 미해결 사항 보고']
                 record_plan(identity, fast_plan, {'provider': 'host', 'model': 'fast-lane-dispatcher', 'reasoningEffort': 'fast'})
             else:
                 value, route, _ = _model_message(row, 'opening')
@@ -544,7 +552,7 @@ def finish_reports(identity):
     row = get(identity)
     if row['status'] != 'report_pending' or running(row):
         return False
-    if (row.get('kind') == 'conference' or row.get('verification', {}).get('monitorReconciled') is True) and row.get('verification', {}).get('verified') is True:
+    if row.get('verification', {}).get('verified') is True:
         fast_route = {'provider': 'host', 'model': 'fast-verified-reporter', 'reasoningEffort': 'fast'}
         with locked(ROWS):
             row = get(identity)

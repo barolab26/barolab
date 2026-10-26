@@ -1487,6 +1487,7 @@
 
   function isConversationMessage(m) {
     if (!m) return false;
+    if (m.who === 'system' && m.goalId && m.userTurnId) return true;
     if (m.who === 'user' || m.isAgendaEvent) return true;
     if (m.agendaId && m.goalId) return true;
     if (m.goalId && m.userTurnId && !m.autonomous) return ['jarvis','publi','trace','patch','radar','doctor'].includes(m.who);
@@ -1550,7 +1551,7 @@
     }
     const actorDisplay = workActorDisplay(m);
     const ownerStyle = AGENT_STYLE[actorDisplay.owner];
-    const ag = actorDisplay.tool
+    const ag = m.who === 'system' ? {name:'시스템 안내',badge:'직원 판단 아님',color:'#475569',short:'·'} : actorDisplay.tool
       ? { ...(ownerStyle || {color:'#475569',short:'·'}), name: ownerStyle ? ownerStyle.name + ' 담당 · 도구 실행 관측' : '담당 미지정 · 도구 실행 관측', badge:'직원 직접 발언 아님' }
       : AGENT_STYLE[m.who] || {name:'관측 기록',badge:'관측 기록',color:'#475569',short:'·'};
     const brainBadge = getAgentBrainBadge(m);
