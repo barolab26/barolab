@@ -475,9 +475,19 @@ def business_evidence(root=ROOT):
     metrics = load(root / 'dashboard/data/metrics.json')
     feedback = metrics.get('performanceFeedback') or {}
     revenue = load(root / 'dashboard/data/revenue.json')
+    traffic = load(root / 'dashboard/data/traffic.json')
+    traffic_sites=[]
+    for domain, site in (traffic.get('sites') or {}).items():
+        ga4=site.get('ga4') or {}
+        traffic_sites.append({'domain':domain,'status':ga4.get('status'),'checkedAt':ga4.get('checkedAt'),
+            'timezone':ga4.get('timezone'),'periods':{period:{k:values.get(k) for k in
+                ('start','end','sessions','users','pageViews','provisional','limited')}
+                for period,values in (ga4.get('periods') or {}).items() if period in ('day','week')}})
     day = (datetime.now(ZoneInfo('Asia/Seoul')).date() - timedelta(days=1)).isoformat()
     sources = revenue.get('months', {}).get(day[:7], {}).get('sources', [])
     return {'performanceCheckedAt': feedback.get('checkedAt'), 'period': {k: feedback.get(k) for k in ('start', 'end')},
+            'trafficSites':traffic_sites,'trafficCheckedAt':traffic.get('checkedAt'),
+            'availableSources':{'revenue':bool(revenue),'traffic':bool(traffic),'metrics':bool(metrics)},
             'coverage': feedback.get('coverage'), 'reasonCodes': feedback.get('reasonCodes', []),
             'measurementPriority': 'restore_page_revenue' if not (feedback.get('coverage') or {}).get('revenueComplete') else 'evaluate_measured_funnels',
             'revenueWinners': feedback.get('revenueWinners', [])[:5],

@@ -105,6 +105,13 @@ def active_rows(state=None):
 
 def active():
     state = load(STATE)
+    rows = active_rows(state)
+    primary = next((r for r in rows if r['id']==state.get('activeId')), None)
+    if primary and not waiting_investigation(primary):
+        return primary
+    runnable = next((r for r in rows if not waiting_investigation(r)), None)
+    if runnable:
+        return runnable
     identity = state.get('activeId')
     if identity:
         r = get(identity)
@@ -112,6 +119,14 @@ def active():
             return r
     rows = active_rows(state)
     return rows[0] if rows else {}
+
+
+def waiting_investigation(row):
+    if row.get('kind') != 'goal' or row.get('status') != 'blocked' or running(row):
+        return False
+    identity=row.get('controllerGoalId') or row.get('source',{}).get('goalId')
+    goal=load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
+    return goal.get('status') in ('answered','blocked') and not goal.get('pendingAction') and not goal.get('pendingConference')
 
 
 def current():
@@ -339,7 +354,7 @@ def admit(identity):
             return None
         proj = chosen.get('project') or 'other'
         limit = LANE_LIMITS.get(proj, 1)
-        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj]
+        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and not waiting_investigation(r)]
         if len(lane_active) >= limit:
             return None
         chosen.update(status='report_pending' if chosen.get('verification',{}).get('verified') else 'meeting', activatedAt=time.time())
@@ -424,6 +439,8 @@ def hold(identity, reason, *, recovery=False):
         conference=load(ROWS.parent/(row['source']['conferenceId']+'.json')) if row.get('source',{}).get('conferenceId') else {}
         pending=(conference.get('businessAgendaId')==identity and conference.get('status') in ('queued','running'))
         row.update(status='recovering' if recovery or pending or running(row) else 'blocked', blocker=str(reason)[:1000])
+        row['waitingFor']={'owner':'patch' if row.get('project')!='collections' else 'trace',
+                           'condition':str(reason)[:500],'nextCheckAt':time.time()+300}
         if 'blocked' not in row['events']:
             row['events']['blocked'] = event(row, 'blocked', 'jarvis',
                 '같은 안건을 유지합니다: '+row['title']+'\n'+row['blocker']+'\n실제 해결은 미완료이며 다음 안건을 시작하지 않았습니다.')
@@ -602,6 +619,7 @@ def view():
     result={'enabled':True, 'active':public(current_row) if current_row else None,
             'pending':[public(get(i)) for i in state.get('pending',[])[:8]],
             'pendingCount':len(state.get('pending',[])),
+            'waiting':[{**public(r),'waitingFor':r.get('waitingFor',{})} for r in active_rows(state) if waiting_investigation(r)],
             'suspended':[public(get(i)) for i in state.get('suspended',[])],
             'recent':[public(get(i)) for i in state.get('recent',[])[:5]]}
     if result['active']:result['active']['activity']=activity
@@ -694,6 +712,8 @@ def close_and_advance(identity, status='closed', reason=None):
 def recovery_watch(row):
     """A spent reasoning turn waits on new evidence; it never abandons the agenda."""
     if row.get('status') not in ('blocked','recovering') or running(row):return False
+    if waiting_investigation(row) and any(p['id']!=row['id'] and p.get('project')==row.get('project')
+            and not waiting_investigation(p) for p in active_rows()):return False
     watch=row.get('recoveryWatch',{})
     from common import repair_workflow
     internal=[]

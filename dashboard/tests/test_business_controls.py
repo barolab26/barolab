@@ -16,6 +16,152 @@ from server.growth import page_performance_evidence
 
 
 class BusinessControls(unittest.TestCase):
+    def test_company_strategy_routes_to_jarvis_before_check_keyword(self):
+        from agents import chat_room as chat
+        from agents import crew_reasoning as crew
+        question='지금 현재 프로젝트 상태를 전반적으로 체크하고 너희들이 팀장이라면 다음으로 뭘 할 거 같아? 그리고 오늘 목표를 어떻게 전략적으로 수립할 거 같아?'
+        self.assertEqual(chat.parse_mentioned_agents(question), ['jarvis'])
+        self.assertEqual(crew.request_mode(question), 'strategy')
+        self.assertEqual(chat.parse_mentioned_agents('@publi '+question), ['publi'])
+        self.assertEqual(crew.request_mode('전략대로 실행해'), 'execute')
+
+    def test_strategy_answers_without_operational_tools_and_preserves_plan(self):
+        from agents import crew_reasoning as crew
+        business={'priorDayRevenue':[{'amount':None,'currency':'USD'}], 'trafficSites':[{'domain':'example.com','status':'collected'}]}
+        row=dict(id=self.agenda,mode='strategy',goal='오늘 목표를 어떻게 세울까?',leadActor='jarvis',
+                 permissions={'execute':False,'repair':False}, observations=[{'id':'e0','tool':'projects',
+                 'result':{'businessEvidence':business,'executionContext':{'unrelated':'broken kin'},'projects':[]}}])
+        action=dict(owner='publi',task='기존 공개 글의 추적 가능한 배포안 준비',why='작은 유입 실험',
+                    metric='추적 가능한 방문',checkAt='2026-10-27',stopCondition='추적 불가 시 보류')
+        value=dict(decision='기존 자산의 작은 유입 실험을 우선하겠습니다.',hypotheses=['유입 증가 여부는 검증 필요'],actions=[action])
+        with patch('common.llm_client.generate_json',return_value=value) as model, \
+             patch.object(crew,'save'),patch.object(crew,'remember_case'),patch.object(crew,'tool_call') as tool:
+            crew._advance(row,1)
+        self.assertEqual(row['status'],'answered')
+        self.assertEqual(row['resolution']['status'],'advice_only')
+        self.assertEqual(row['strategy']['actions'],[action])
+        self.assertIn('trafficSites',model.call_args.args[0])
+        self.assertNotIn('broken kin',model.call_args.args[0])
+        self.assertIn('stopCondition',str(model.call_args.kwargs['response_schema']))
+        self.assertTrue(model.call_args.kwargs['_skip_memory'])
+        self.assertFalse(model.call_args.kwargs['allow_provider_recovery'])
+        model.assert_called_once()
+        tool.assert_not_called()
+
+    def test_strategy_model_failure_returns_honest_actionable_provisional_answer(self):
+        from agents import crew_reasoning as crew
+        row=dict(id=self.agenda,goal='오늘 전략',leadActor='jarvis',observations=[])
+        with patch('common.llm_client.generate_json',side_effect=usage.RouteCoolingDown('cooldown')), \
+             patch.object(crew,'save'),patch.object(crew,'remember_case'):
+            crew.answer_strategy(row)
+        self.assertEqual(row['status'],'answered')
+        self.assertEqual(row['answerSource'],'host')
+        self.assertIn('잠정',row['answer'])
+        self.assertEqual(len(row['strategy']['actions']),3)
+        self.assertTrue(all(a['owner'] and a['stopCondition'] and a['checkAt'] for a in row['strategy']['actions']))
+
+    def test_provisional_strategy_uses_measured_candidate_without_claiming_revenue(self):
+        from agents import crew_reasoning as crew
+        candidate=dict(url='https://example.com/post',sessions=7,complete=True,start='2026-10-19',end='2026-10-25')
+        row=dict(id=self.agenda,goal='오늘 전략',leadActor='jarvis',observations=[{
+            'id':'e0','tool':'projects','result':{'businessEvidence':{'trafficCandidates':[candidate]}}}])
+        with patch('common.llm_client.generate_json',side_effect=RuntimeError('unavailable')), \
+             patch.object(crew,'save'),patch.object(crew,'remember_case'):
+            crew.answer_strategy(row)
+        self.assertIn(candidate['url'],row['answer'])
+        self.assertIn('7세션',row['answer'])
+        self.assertIn('수익 순위는 확정하지 않습니다',row['answer'])
+        self.assertEqual(row['leadRoute']['provider'],'host')
+
+    def test_strategy_provider_timeout_does_not_cascade_into_another_provider(self):
+        from common import llm_client
+        config={'active':'codex','providers':{'codex':{'model':'primary'}}}
+        with patch.object(llm_client.settings,'load',return_value=config), \
+             patch.object(llm_client,'_generate_json',side_effect=RuntimeError('exceeded its hard timeout')) as model, \
+             patch('common.crew_chat_bridge.record_model_route'):
+            with self.assertRaises(RuntimeError):
+                llm_client.generate_json.__wrapped__.__wrapped__('prompt',provider='codex',reasoning_effort='low',allow_provider_recovery=False)
+        model.assert_called_once()
+
+    def test_strategy_does_not_inherit_recovery_parent(self):
+        from agents import crew_reasoning as crew
+        with patch.object(crew,'GOALS',self.data/'goals'), \
+             patch.object(crew,'conversation_parent') as parent,patch.object(crew,'overview',return_value={'projects':[]}), \
+             patch.object(crew,'ensure_business_agenda'),patch.object(crew,'advance'):
+            row=crew.reason_request('strategy-test','그럼 팀장이라면 오늘 전략은?',steps=0)
+        parent.assert_not_called()
+        self.assertNotIn('parentGoalId',row)
+        self.assertEqual(row['mode'],'strategy')
+
+    def test_business_summary_keeps_traffic_and_missing_revenue_separate(self):
+        from server.growth import business_evidence
+        (self.data/'traffic.json').write_text(json.dumps({'checkedAt':'now','sites':{'example.com':{
+            'ga4':{'status':'collected','periods':{'day':{'sessions':7,'start':'2026-10-25','end':'2026-10-25'}}}}}}))
+        summary=business_evidence(self.root)
+        self.assertFalse(summary['availableSources']['revenue'])
+        self.assertTrue(summary['availableSources']['traffic'])
+        self.assertEqual(summary['trafficSites'][0]['periods']['day']['sessions'],7)
+        self.assertEqual(summary['priorDayRevenue'],[])
+
+    def test_low_level_work_events_stay_in_details_not_room_messages(self):
+        from agents import chat_room as chat
+        message=dict(id='event',taskId='goal-one',phase='completed',who='jarvis',stage='goal-decision')
+        room={'messages':[]}
+        with patch.object(chat,'project_work_event',return_value=message), \
+             patch.object(chat,'load_room_data',return_value=room),patch.object(chat,'save_room_data'), \
+             patch.object(chat,'append_or_update_room_message') as append,patch.object(chat.EVENT_BUS,'publish'):
+            result=chat.receive_work_event({})
+        append.assert_not_called()
+        self.assertTrue(result['detailOnly'])
+        self.assertEqual(room['workEvents'],[message])
+
+    def test_parked_investigation_does_not_occupy_publication_lane(self):
+        from common import work_agenda as agendas
+        rows=self.data/'operations';rows.mkdir()
+        goals=self.data/'chats/reasoning-goals';goals.mkdir(parents=True)
+        goal_id='c'*64;next_id='b'*64
+        goal_path=goals/(goal_id+'.json')
+        goal_path.write_text(json.dumps({'status':'blocked'}))
+        state=self.data/'agenda.json'
+        state.write_text(json.dumps({'enabled':True,'activeId':self.agenda,'activeIds':[self.agenda],'pending':[next_id]}))
+        blocked=dict(id=self.agenda,kind='goal',project='naver_kin',status='blocked',controllerGoalId=goal_id)
+        pending=dict(id=next_id,kind='conference',project='naver_kin',status='queued',priority=0,createdAt=0,owner='host',version=1)
+        for row in (blocked,pending):(rows/(row['id']+'.json')).write_text(json.dumps(row))
+        with patch.object(agendas,'DATA',self.data),patch.object(agendas,'ROWS',rows), \
+             patch.object(agendas,'STATE',state),patch.object(agendas,'running',return_value=[]):
+            goal_path.write_text(json.dumps({'status':'blocked','pendingAction':{'requestId':'still-owned'}}))
+            self.assertIsNone(agendas.admit(next_id))
+            goal_path.write_text(json.dumps({'status':'blocked'}))
+            self.assertTrue(agendas.admit(next_id))
+            self.assertEqual(agendas.active()['id'],next_id)
+            self.assertEqual(agendas.get(self.agenda)['status'],'blocked')
+
+    def test_conference_evidence_resolves_business_id_only_with_matching_binding(self):
+        from agents import crew_reasoning as crew
+        from common import work_agenda as agendas
+        folder=self.data/'publication-conferences';folder.mkdir()
+        conference_id='b'*64;path=folder/(conference_id+'.json')
+        path.write_text(json.dumps({'businessAgendaId':self.agenda,'status':'failed'}))
+        business=dict(id=self.agenda,source={'conferenceId':conference_id})
+        with patch.object(crew,'ROOT',self.root),patch.object(agendas,'get',return_value=business):
+            self.assertTrue(crew.read_evidence({'name':'conference:'+self.agenda})['available'])
+            path.write_text(json.dumps({'businessAgendaId':'wrong'}))
+            self.assertFalse(crew.read_evidence({'name':'conference:'+self.agenda})['available'])
+
+    def test_third_identical_read_parks_investigation_instead_of_looping(self):
+        from agents import crew_reasoning as crew
+        row=dict(id=self.agenda,actor='jarvis',leadActor='jarvis',status='ready',decisions=0,maxSteps=8,
+                 permissions={'execute':False,'repair':False},observations=[],lastRoute={'provider':'test','model':'test'})
+        decision=dict(decision='tool',message='근거 확인',plan=['자료 확인'],tool='evidence',arguments='{"name":"traffic"}')
+        with patch.object(crew,'refresh_pending',return_value=True),patch.object(crew,'save'), \
+             patch.object(crew,'set_progress'),patch.object(crew,'deliver_step'), \
+             patch.object(crew,'ask',return_value=decision), \
+             patch.object(crew,'tool_call',return_value={'sha256':'same-source'}) as read:
+            crew._advance(row,4)
+        self.assertEqual(read.call_count,3)
+        self.assertEqual(row['status'],'blocked')
+        self.assertIn('다른 실행 가능한 업무',row['answer'])
+
     def test_agenda_budget_exhaustion_answers_with_preserved_findings(self):
         from agents import crew_reasoning as crew
         row = dict(id=self.agenda, status='ready', actor='jarvis', leadActor='jarvis',

@@ -545,6 +545,10 @@ def parse_mentioned_agents(text: str, delegation_limit: bool = True) -> List[str
             return [explicit[0]]
         return explicit[:2]
 
+    from agents.crew_reasoning import request_mode
+    if request_mode(text, {'execute': False, 'repair': False}) == 'strategy':
+        return ['jarvis']
+
     # 0) Pinpoint CF Post URL surgical repair & live republish (`https://...` + repair/republish keywords) MUST route to @doctor -> @publi
     if re.search(r"https?://", lower) and re.search(
         r"지우|지워|삭제|제거|고쳐|수정|리모델링|재발행|다시\s*발행|어색한|도표|인포그래픽|이미지|워터마크|캡션",
@@ -1580,31 +1584,31 @@ def _build_crew_live_workstream_status() -> Tuple[List[Dict[str, Any]], Dict[str
     except Exception:
         rad_d = {}
 
-    cf_next = sys_ctx.get("cf_next_domain") or "must-good.com"
-    cf_done = sys_ctx.get("cf_done", 1)
-    cf_total = sys_ctx.get("cf_total", 16)
-    kin_done = sys_ctx.get("kin_done", 0)
-    kin_cap = sys_ctx.get("kin_cap", 20)
-    kin_acc = sys_ctx.get("kin_active_acc") or "stone0747"
+    cf_next = sys_ctx.get("cf_next_domain") or "대상 미확인"
+    cf_done = sys_ctx.get("cf_done", "미확인")
+    cf_total = sys_ctx.get("cf_total", "미확인")
+    kin_done = sys_ctx.get("kin_done", "미확인")
+    kin_cap = sys_ctx.get("kin_cap", "미확인")
+    kin_acc = sys_ctx.get("kin_active_acc") or "계정 미확인"
     kin_next_raw = str(sys_ctx.get("kin_next_at") or "")
     kin_hhmm = ""
     m_time = re.search(r"(\d{2}:\d{2})", kin_next_raw)
     if m_time:
         kin_hhmm = m_time.group(1)
 
-    doc_audited = doc_d.get("auditedCount", 32)
-    doc_total = doc_d.get("totalInventory", 1960)
+    doc_audited = doc_d.get("auditedCount", "미확인")
+    doc_total = doc_d.get("totalInventory", "미확인")
     flagged = doc_d.get("flaggedPosts") or []
-    doc_focus_domain = flagged[0].get("domain") if flagged else "nolplace.com"
+    doc_focus_domain = flagged[0].get("domain") if flagged else "대상 미확인"
 
-    gsc_indexed = tr_d.get("gscIndexVerifiedPosts", 213)
-    ga4_sess = tr_d.get("ga4Last7DaysSessions", 274)
+    gsc_indexed = tr_d.get("gscIndexVerifiedPosts", "미확인")
+    ga4_sess = tr_d.get("ga4Last7DaysSessions", "미확인")
 
     cdp_ports = pat_d.get("cdpPorts") or []
     open_cdp = sum(1 for p in cdp_ports if p.get("open"))
-    total_cdp = len(cdp_ports) or 6
+    total_cdp = len(cdp_ports) or "미확인"
 
-    scout_cnt = rad_d.get("scoutQueueCount", 0)
+    scout_cnt = rad_d.get("scoutQueueCount", "미확인")
 
     live_map: Dict[str, Dict[str, Any]] = {
         "jarvis": {
@@ -2463,6 +2467,16 @@ def project_work_event(payload):
 
 def receive_work_event(payload):
     message = project_work_event(payload)
+    if (not message.get('messageKind') and not message.get('deliverableUrl') and not message.get('reportContext')
+            and message.get('stage') != 'company-executive-check'):
+        with _ROOM_LOCK:
+            room=load_room_data()
+            events=[e for e in room.get('workEvents',[]) if e.get('taskId')!=message['taskId']]
+            room['workEvents']=(events+[message])[-200:]
+            save_room_data(room)
+        EVENT_BUS.publish('typing',{'who':message.get('ownerAgent') or message['who'],
+                                  'active':message['phase'] in ('requested','progress'),'stage':message.get('stage','')})
+        return {'ok':True,'eventId':message['id'],'duplicate':False,'detailOnly':True}
     identity=payload.get('agendaId')
     if identity:
         from common.work_agenda import get

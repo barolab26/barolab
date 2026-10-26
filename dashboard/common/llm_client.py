@@ -299,7 +299,7 @@ def agy_generate(prompt, model, response_schema=None):
 
 @memory_call
 @metered
-def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None, timeout_seconds=None):
+def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None, timeout_seconds=None, allow_provider_recovery=True):
     config = settings.load()
     if agent_slot and not provider and not model_override:
         brain = settings.get_agent_brain(agent_slot, config)
@@ -323,6 +323,8 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
             match = re.search(r'HTTP (\d{3})', str(exc))
             observer(provider, model, 'failed', reason=str(exc)[:400],
                      http_status=int(match.group(1)) if match else None)
+        if not allow_provider_recovery:
+            raise
         # Only an explicit exhausted-credit response permits cross-provider recovery.
         # Authentication, content/schema errors and uncertain submissions never trigger it.
         is_codex_timeout = (provider == 'codex' and not images and 'exceeded its hard timeout' in str(exc))

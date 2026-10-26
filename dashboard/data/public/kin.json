@@ -1,6 +1,6 @@
 {
   "schema": "naver-kin-pilot-v1",
-  "checkedAt": "2026-10-26T06:26:53.430938+00:00",
+  "checkedAt": "2026-10-26T07:38:43.075671+00:00",
   "accounts": [
     "adinfo0905",
     "stone0747"
@@ -64,7 +64,7 @@
   "attributedRevenue": null,
   "measurementStatus": "unmeasured",
   "complete": false,
-  "blockedReason": "adinfo0905: operation_TimeoutError",
+  "blockedReason": "adinfo0905: operation_RuntimeError",
   "byAccount": {
     "adinfo0905": {
       "drafted": 1,
@@ -77,7 +77,7 @@
     }
   },
   "accountBlockedReasons": {
-    "adinfo0905": "operation_TimeoutError"
+    "adinfo0905": "operation_RuntimeError"
   },
   "daily": {
     "date": "2026-10-26",
@@ -102,7 +102,7 @@
   },
   "measurement": {
     "schema": "naver-kin-measurement-v1",
-    "checkedAt": "2026-10-26T15:26:39.807066+09:00",
+    "checkedAt": "2026-10-26T16:38:24.402790+09:00",
     "source": "GA4 Data API",
     "timezone": "Asia/Seoul",
     "startDate": "2026-10-15",
@@ -541,7 +541,7 @@
   },
   "schedule": {
     "schema": "naver-kin-automation-state-v1",
-    "checkedAt": "2026-10-26T06:18:41.327283+00:00",
+    "checkedAt": "2026-10-26T07:35:45.626268+00:00",
     "startDate": "2026-10-15",
     "endDate": "2026-10-21",
     "enabled": true,
@@ -557,11 +557,11 @@
     "accountDailyCap": 10,
     "runs": [
       {
-        "runId": "2026-10-26_55db80340231_adinfo0905_1518",
+        "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
         "account": "adinfo0905",
         "state": "blocked",
-        "reason": "operation_TimeoutError",
-        "discovered": 8
+        "reason": "operation_RuntimeError",
+        "discovered": 18
       }
     ],
     "state": "completed_cycle",
@@ -581,7 +581,7 @@
         "started": false
       }
     ],
-    "runId": "2026-10-26_55db80340231_adinfo0905_1518",
+    "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
     "account": "adinfo0905",
     "lastRunAt": "2026-10-26T13:03:31.123167+09:00",
     "lastAccount": "stone0747",
@@ -592,7 +592,7 @@
     "activeStartedAt": null,
     "cadenceState": "waiting",
     "operationCounts": {
-      "adinfo0905": 18,
+      "adinfo0905": 19,
       "stone0747": 12
     },
     "submissionCounts": {
@@ -609,7 +609,7 @@
     "registeredTasks": {
       "status": "observed",
       "platform": "systemd-user",
-      "checkedAt": "2026-10-26T06:26:53.326883+00:00",
+      "checkedAt": "2026-10-26T07:38:43.020288+00:00",
       "tasks": [
         {
           "taskName": "barolab-kin.timer",
@@ -618,8 +618,8 @@
           "enabled": true,
           "workflowMatches": true,
           "state": "Ready",
-          "nextRunAt": "Mon 2026-10-26 15:30:00 KST",
-          "lastRunAt": "Mon 2026-10-26 15:25:00 KST",
+          "nextRunAt": "Mon 2026-10-26 16:40:00 KST",
+          "lastRunAt": "Mon 2026-10-26 16:35:00 KST",
           "lastResult": "success",
           "lastExitStatus": "0"
         },
@@ -1025,7 +1025,7 @@
     "scheduleDescription": "작업 종료 후 18~22분 지터(평균 20분) 계정 교대 · 개별 계정 40~45분 안전 텀 · 하루 20건(계정당 10건)",
     "lastRun": {
       "schema": "naver-kin-automation-state-v1",
-      "checkedAt": "2026-10-26T06:18:41.327283+00:00",
+      "checkedAt": "2026-10-26T07:35:45.626268+00:00",
       "startDate": "2026-10-15",
       "endDate": "2026-10-21",
       "enabled": true,
@@ -1041,11 +1041,11 @@
       "accountDailyCap": 10,
       "runs": [
         {
-          "runId": "2026-10-26_55db80340231_adinfo0905_1518",
+          "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
           "account": "adinfo0905",
           "state": "blocked",
-          "reason": "operation_TimeoutError",
-          "discovered": 8
+          "reason": "operation_RuntimeError",
+          "discovered": 18
         }
       ],
       "state": "completed_cycle",
@@ -1065,7 +1065,7 @@
           "started": false
         }
       ],
-      "runId": "2026-10-26_55db80340231_adinfo0905_1518",
+      "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
       "account": "adinfo0905",
       "lastRunAt": "2026-10-26T13:03:31.123167+09:00",
       "lastAccount": "stone0747",
@@ -1076,7 +1076,7 @@
       "activeStartedAt": null,
       "cadenceState": "waiting",
       "operationCounts": {
-        "adinfo0905": 18,
+        "adinfo0905": 19,
         "stone0747": 12
       },
       "submissionCounts": {
@@ -1093,7 +1093,7 @@
       "registeredTasks": {
         "status": "observed",
         "platform": "systemd-user",
-        "checkedAt": "2026-10-26T06:26:53.326883+00:00",
+        "checkedAt": "2026-10-26T07:38:43.020288+00:00",
         "tasks": [
           {
             "taskName": "barolab-kin.timer",
@@ -1102,8 +1102,8 @@
             "enabled": true,
             "workflowMatches": true,
             "state": "Ready",
-            "nextRunAt": "Mon 2026-10-26 15:30:00 KST",
-            "lastRunAt": "Mon 2026-10-26 15:25:00 KST",
+            "nextRunAt": "Mon 2026-10-26 16:40:00 KST",
+            "lastRunAt": "Mon 2026-10-26 16:35:00 KST",
             "lastResult": "success",
             "lastExitStatus": "0"
           },
@@ -1135,7 +1135,7 @@
       "stone0747": 8
     },
     "operationCounts": {
-      "adinfo0905": 18,
+      "adinfo0905": 19,
       "stone0747": 12
     },
     "submissionCounts": {
@@ -1143,13 +1143,13 @@
       "stone0747": 2
     },
     "retryAttemptsToday": 0,
-    "checkedAt": "2026-10-26T06:18:41.327283+00:00",
+    "checkedAt": "2026-10-26T07:35:45.626268+00:00",
     "state": "completed_cycle",
     "lastOperation": {
       "account": "adinfo0905",
       "state": "blocked",
-      "reason": "operation_TimeoutError",
-      "updatedAt": "2026-10-26T06:26:39.782797+00:00",
+      "reason": "operation_RuntimeError",
+      "updatedAt": "2026-10-26T07:38:24.368283+00:00",
       "questionId": "494619211",
       "questionState": "drafted",
       "submissionAttempted": false,

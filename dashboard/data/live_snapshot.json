@@ -2,77 +2,51 @@
   "agendaControl": {
     "enabled": true,
     "active": {
-      "id": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-      "project": "naver_kin",
-      "title": "지식인 답변 · adinfo0905 · 2026-10-26 · 2026-10-26T13:23:31.123167+09:00",
+      "id": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+      "project": "collections",
+      "title": "대표 지시 안건 · collections",
       "status": "recovering",
-      "activatedAt": 1792995520.5377393,
-      "updatedAt": 1792999363.4192805,
+      "activatedAt": 1792997268.8679228,
+      "updatedAt": 1793000559.5697865,
       "target": {
-        "account": "adinfo0905",
-        "date": "2026-10-26",
-        "slot": "2026-10-26T13:23:31.123167+09:00",
+        "account": null,
+        "date": null,
+        "slot": null,
         "partId": null
       },
       "processObserved": false,
       "automaticRecovery": {
         "state": "evidence_changed",
-        "nextCheckAt": 1792998291.8300729,
-        "checks": 1
-      },
-      "conferenceId": "572aad64be94413705cc258060d48053730d588b37353d5eb05fea9e3a266786",
-      "conferenceStatus": "failed",
-      "conferenceEligibility": {
-        "reason": null,
-        "state": "completed_cycle",
-        "runs": [
-          {
-            "runId": "2026-10-26_55db80340231_adinfo0905_1518",
-            "account": "adinfo0905",
-            "state": "blocked",
-            "reason": "operation_TimeoutError",
-            "discovered": 8
-          }
-        ],
-        "runId": "2026-10-26_55db80340231_adinfo0905_1518",
-        "account": "adinfo0905",
-        "cadenceState": "waiting",
-        "nextEligibleAt": "2026-10-26T13:23:31.123167+09:00",
-        "globalRemainingRuns": 17,
-        "submissionCounts": {
-          "adinfo0905": 1,
-          "stone0747": 2
-        }
+        "nextCheckAt": 1793000438.8534207,
+        "checks": 2
       },
       "operationalState": "internal_action_ready",
       "performance": {
-        "wallTimeSeconds": 3934.074542284012,
-        "measurementStartedAt": 1792995520.5377393,
+        "wallTimeSeconds": 3467.8085083961487,
+        "measurementStartedAt": 1792997268.8679228,
         "coverage": "observed_calls_only",
         "manualNudges": 0,
         "verifiedCompletions": null,
-        "coverageStartedAt": "2026-10-26T15:20:37.682422+09:00",
-        "modelCalls": 34,
+        "coverageStartedAt": "2026-10-26T15:47:55.277535+09:00",
+        "modelCalls": 28,
         "modelErrors": 2,
-        "modelLatencyMs": 1076358,
+        "modelLatencyMs": 1184582,
         "routes": {
-          "codex|gpt-6.1-sol|medium": 3,
-          "codex|gpt-6.1-sol|high": 30,
-          "agy|gemini-2.5-pro|high": 1
+          "codex|gpt-6.1-sol|high": 28
         },
-        "toolRoundTrips": 10,
+        "toolRoundTrips": 1,
         "toolFailures": 0,
-        "uiActions": 12,
-        "uiFailures": 1
+        "uiActions": 0,
+        "uiFailures": 0
       },
       "activity": {
         "owner": "jarvis",
-        "action": "판단 응답 오류를 확인했습니다. 증거와 원래 목표를 보존하고 다음 판단에서 원인을 확인합니다.",
+        "action": "本次收集进程已完成，但数据仅部分收集成功：97个来源中成功34、部分38、过期17、未知8（e29、e30）。继续处理原 collections 安排，先读取来源级错误，优先确认影响收入和流量测量的缺口；目前没有依据重启运行时，也不转入面板显示的地识iN任务。",
         "phase": "판단 중",
         "lastResult": "resource_hold",
-        "lastResultAt": 1792999363.3958123,
-        "lastActivityAt": 1792999363.4034312,
-        "nextCheckAt": 1792999663.403426,
+        "lastResultAt": 1793000559.5342445,
+        "lastActivityAt": 1793000559.5455377,
+        "nextCheckAt": 1793000859.5455308,
         "handoff": {
           "owner": null,
           "expectedResult": null,
@@ -81,13 +55,13 @@
           "nextAction": null
         },
         "intervention": null,
-        "decisions": 16,
-        "maxSteps": 16,
-        "wallTimeSeconds": 3934.074542284012,
-        "toolRoundTrips": 10,
+        "decisions": 30,
+        "maxSteps": 32,
+        "wallTimeSeconds": 3467.8085083961487,
+        "toolRoundTrips": 1,
         "manualNudges": 0,
         "verifiedCompletions": null,
-        "modelLatencyMs": 1076358,
+        "modelLatencyMs": 1184582,
         "toolFailures": 0,
         "lastRoute": {
           "provider": "codex",
@@ -222,7 +196,7 @@
   },
   "schema": "barolab-mission-control-v2",
   "date": "2026-10-26",
-  "generatedAt": "2026-10-26T16:24:14.583766+09:00",
+  "generatedAt": "2026-10-26T16:45:36.652697+09:00",
   "refreshSeconds": 1,
   "cfItems": [
     {
@@ -376,7 +350,7 @@
     "month": "2026-10",
     "today": "2026-10-26",
     "yesterday": "2026-10-25",
-    "checkedAt": "2026-10-26T16:22:43.675839+09:00",
+    "checkedAt": "2026-10-26T16:44:28.713669+09:00",
     "categories": [
       {
         "id": "adsense",
@@ -416,7 +390,7 @@
               "2026-10-26": "0.03"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:39.456448+09:00",
+            "checkedAt": "2026-10-26T16:44:25.545035+09:00",
             "domains": [
               "must-pick.com",
               "baronote.kr",
@@ -498,7 +472,7 @@
             "category": "adsense",
             "currency": "USD",
             "daily": {},
-            "status": "not_collected",
+            "status": "not_configured",
             "checkedAt": "2026-10-26T07:01:34.571266+00:00",
             "domains": [
               "nolplace.com"
@@ -508,7 +482,7 @@
             "periods": {
               "throughYesterday": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 25,
                 "start": "2026-10-01",
@@ -519,7 +493,7 @@
               },
               "yesterday": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 1,
                 "start": "2026-10-25",
@@ -530,7 +504,7 @@
               },
               "today": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 1,
                 "start": "2026-10-26",
@@ -541,7 +515,7 @@
               },
               "month": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 26,
                 "start": "2026-10-01",
@@ -634,7 +608,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:41.211408+09:00",
+            "checkedAt": "2026-10-26T16:44:27.269075+09:00",
             "aggregationEligible": true,
             "aggregationKey": "adpost-publisher-1224849-account-soultin",
             "account": "soultin",
@@ -735,7 +709,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:41.211408+09:00",
+            "checkedAt": "2026-10-26T16:44:27.269075+09:00",
             "aggregationEligible": true,
             "aggregationKey": "adpost-publisher-1224849-account-soul5373",
             "account": "soul5373",
@@ -836,7 +810,7 @@
               "2026-10-25": "439"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:41.211408+09:00",
+            "checkedAt": "2026-10-26T16:44:27.269075+09:00",
             "aggregationEligible": true,
             "aggregationKey": "adpost-publisher-1224849-account-yoon_master",
             "account": "yoon_master",
@@ -995,7 +969,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:19:16.753641+09:00",
+            "checkedAt": "2026-10-26T16:41:11.966691+09:00",
             "pendingDates": [
               "2026-10-26"
             ],
@@ -1089,7 +1063,7 @@
               "2026-10-26": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:19:18.314659+09:00",
+            "checkedAt": "2026-10-26T16:41:13.510138+09:00",
             "pendingDates": [],
             "scope": "토스 쉐어링크",
             "stale": false,
@@ -1240,7 +1214,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:43.532024+09:00",
+            "checkedAt": "2026-10-26T16:44:28.703263+09:00",
             "pendingDates": [
               "2026-10-26"
             ],
@@ -2597,7 +2571,7 @@
               "2026-10-26": "0.03"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:39.456448+09:00",
+            "checkedAt": "2026-10-26T16:44:25.545035+09:00",
             "domains": [
               "must-pick.com",
               "baronote.kr",
@@ -2694,7 +2668,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:41.211408+09:00",
+            "checkedAt": "2026-10-26T16:44:27.269075+09:00",
             "aggregationEligible": true,
             "aggregationKey": "adpost-publisher-1224849-account-soultin",
             "account": "soultin",
@@ -2795,7 +2769,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:41.211408+09:00",
+            "checkedAt": "2026-10-26T16:44:27.269075+09:00",
             "aggregationEligible": true,
             "aggregationKey": "adpost-publisher-1224849-account-soul5373",
             "account": "soul5373",
@@ -2896,7 +2870,7 @@
               "2026-10-25": "439"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:41.211408+09:00",
+            "checkedAt": "2026-10-26T16:44:27.269075+09:00",
             "aggregationEligible": true,
             "aggregationKey": "adpost-publisher-1224849-account-yoon_master",
             "account": "yoon_master",
@@ -2997,7 +2971,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:19:16.753641+09:00",
+            "checkedAt": "2026-10-26T16:41:11.966691+09:00",
             "pendingDates": [
               "2026-10-26"
             ],
@@ -3063,7 +3037,7 @@
             "category": "adsense",
             "currency": "USD",
             "daily": {},
-            "status": "not_collected",
+            "status": "not_configured",
             "checkedAt": "2026-10-26T07:01:34.571266+00:00",
             "domains": [
               "nolplace.com"
@@ -3073,7 +3047,7 @@
             "periods": {
               "throughYesterday": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 25,
                 "start": "2026-10-01",
@@ -3084,7 +3058,7 @@
               },
               "yesterday": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 1,
                 "start": "2026-10-25",
@@ -3095,7 +3069,7 @@
               },
               "today": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 1,
                 "start": "2026-10-26",
@@ -3106,7 +3080,7 @@
               },
               "month": {
                 "amounts": {},
-                "status": "not_collected",
+                "status": "not_configured",
                 "observedDays": 0,
                 "expectedDays": 26,
                 "start": "2026-10-01",
@@ -3152,7 +3126,7 @@
               "2026-10-26": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:19:18.314659+09:00",
+            "checkedAt": "2026-10-26T16:41:13.510138+09:00",
             "pendingDates": [],
             "scope": "토스 쉐어링크",
             "stale": false,
@@ -3303,7 +3277,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T16:22:43.532024+09:00",
+            "checkedAt": "2026-10-26T16:44:28.703263+09:00",
             "pendingDates": [
               "2026-10-26"
             ],
@@ -3364,7 +3338,7 @@
             "lastReportDay": "2026-10-25"
           }
         ],
-        "checkedAt": "2026-10-26T16:22:43.675839+09:00"
+        "checkedAt": "2026-10-26T16:44:28.713669+09:00"
       }
     }
   },
@@ -3733,12 +3707,12 @@
         "waiting": 17
       },
       "operationStates": {
-        "blocked": 6,
+        "blocked": 7,
         "deferred": 1,
         "published_verified": 3,
         "skipped": 21
       },
-      "blockedAttempts": 6
+      "blockedAttempts": 7
     },
     {
       "id": "threads",
@@ -3766,10 +3740,10 @@
     {
       "role": "jarvis",
       "name": "팀장",
-      "state": "CYCLING",
-      "action": "ego-alert",
-      "lastCompleted": "10-26 16:05:45",
-      "lastActivity": "2026-10-26T16:24:10.140000+09:00",
+      "state": "IDLE",
+      "action": "다음 업무 대기",
+      "lastCompleted": "10-26 16:33:41",
+      "lastActivity": "2026-10-26T16:34:21.027000+09:00",
       "model": "gpt-6.1-sol · High"
     },
     {
@@ -3784,10 +3758,10 @@
     {
       "role": "publi",
       "name": "퍼블리",
-      "state": "RUNNING",
-      "action": "goal-decision",
-      "lastCompleted": "10-26 16:23:09",
-      "lastActivity": "2026-10-26T16:23:11.398000+09:00",
+      "state": "IDLE",
+      "action": "goal-decision 완료",
+      "lastCompleted": "10-26 16:27:54",
+      "lastActivity": "2026-10-26T16:27:54.403000+09:00",
       "model": "gpt-6.1-sol · High"
     },
     {
@@ -3795,8 +3769,8 @@
       "name": "트레이스",
       "state": "IDLE",
       "action": "수익 원천 수집 완료",
-      "lastCompleted": "10-26 16:22:43",
-      "lastActivity": "2026-10-26T16:22:43.532000+09:00",
+      "lastCompleted": "10-26 16:33:46",
+      "lastActivity": "2026-10-26T16:33:46.816000+09:00",
       "model": "3.8 Flash Med"
     },
     {
@@ -3825,33 +3799,33 @@
   },
   "timeline": [
     {
-      "at": 1792999450.14,
-      "text": "[EGO ALERT] 9231 adinfo0905 · 국민연금 수령 나이, 65세까지 기다리는 게 나을까요? · 편집·답변 작업 3분 이상 진행 갱신 없음",
-      "alert": true
-    },
-    {
-      "at": 1792999363.532024,
+      "at": 1793000668.703263,
       "text": "제휴알바 수익 수집 완료",
       "alert": false
     },
     {
-      "at": 1792999361.211408,
+      "at": 1793000667.269075,
       "text": "soultin · 시니어 브리프｜5060 연금·복지·노후정보 수익 수집 완료",
       "alert": false
     },
     {
-      "at": 1792999361.211408,
+      "at": 1793000667.269075,
       "text": "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크 수익 수집 완료",
       "alert": false
     },
     {
-      "at": 1792999361.211408,
+      "at": 1793000667.269075,
       "text": "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙 수익 수집 완료",
       "alert": false
     },
     {
-      "at": 1792999359.456448,
+      "at": 1793000665.545035,
       "text": "SJ · CF 애드센스 수익 수집 완료",
+      "alert": false
+    },
+    {
+      "at": 1793000473.510138,
+      "text": "토스 쉐어링크 수익 수집 완료",
       "alert": false
     }
   ],
@@ -4082,10 +4056,10 @@
           "url": "https://kin.naver.com/qna/detail.naver",
           "active": true,
           "questionId": "494619211",
-          "editorHasContent": true,
-          "editorCharCount": 162,
-          "registerPresent": true,
-          "registerEnabled": true,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
           "captchaVisible": false
         },
         {
@@ -4224,15 +4198,15 @@
       "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙  오늘 집계 대기 / 최근 ₩439 (2026-10-25) · 1분 전 · collected",
       "쿠팡 파트너스  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 4분 전 · collected",
       "토스 쉐어링크  오늘 ₩0 / 최근 ₩0 (2026-10-26) · 4분 전 · collected",
-      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 22분 전 · report_unavailable",
+      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 44분 전 · report_unavailable",
       "제휴알바  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 1분 전 · collected",
       "AdMob (4앱) 당일 수익 원장 수집 대기"
     ],
     [
-      "[코덱스 #1 baro76650] ⚡사용중(호출활성) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:09 | 36,378.33 C | 누적 33회",
-      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:22 | 0.00 C | 누적 31회",
+      "[코덱스 #1 baro76650] ● 사용가능(대기) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:09 | 36,378.33 C | 누적 41회",
+      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:22 | 0.00 C | 누적 38회",
       "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 90.2%/99.8% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 18:00 | 누적 11회",
-      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 50.5%/94.2% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 18:01 | 누적 30회",
+      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 50.4%/93.9% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 18:01 | 누적 30회",
       "[OpenRouter] 잔여 0% [░░░░░░░░░░░░░░░] | 종량제 (충전 필요) | $-0.18",
       "[JEV · 04번 크롬] ● 사용가능(API키 설정됨) | 잔액 미수집 · 콘솔 로그인 필요",
       "[KIE] ● 정상수집 · 사용가능 | 잔여 91.97 credits",
@@ -4255,52 +4229,52 @@
       "  (1) 강아지 귀 청소할 때 면봉 쓰시는 분, 지금 즉시 멈추셔야 합니다 🚨 강아지 귓구멍은 사람과 달리 &#39;L자형&#39; 구조라 면봉을 넣으면 귀지를 안쪽으로 더 깊숙이 밀어 넣거나 고막을 파열시킬 수 있어 · https://www.threads.com/@mustpickinfo/post/De72O0zk_VX"
     ],
     [
-      "현재 안건 · 지식인 답변 · adinfo0905 · 2026-10-26 · 2026-10-26T13:23:31.123167+09:00 · 같은 안건 복구 중",
+      "현재 안건 · 대표 지시 안건 · collections · 같은 안건 복구 중",
       "등록된 작업 프로세스 실행 미관측 · 회의·진단 상태는 안건 기준",
-      "같은 안건 자동 재확인: 16:04:51",
+      "같은 안건 자동 재확인: 16:40:38",
       "CF 블로그 [16/16] ■■■■■■■■■■■■ 100% · 준비 0 · 대기 0 · 실패 0 · 성공 16 · 진행 0 · 검수 0 · 실패 0 · 다음 슬롯 대기",
       "네이버 블로그 [ 6/7] ■■■■■■■■■■░░ 86% · 준비 0 · 대기 0 · 실패 0 · 오늘 발행 6 · 오늘 예약 1건 · 내일 예약 — · 다음 슬롯 대기",
-      "네이버 지식iN [ 3/20] ■■░░░░░░░░░░ 15% · 차단 이력 6회 · 준비 0 · 대기 17 · 실패 0 · adinfo0905 1건 · stone0747 2건 · 다음 배포: 13:23 · 20분 텀",
+      "네이버 지식iN [ 3/20] ■■░░░░░░░░░░ 15% · 차단 이력 7회 · 준비 0 · 대기 17 · 실패 0 · adinfo0905 1건 · stone0747 2건 · 다음 배포: 13:23 · 20분 텀",
       "Threads [2/4] ■■■■■■░░░░░░ · 준비 0 · 대기 2 · 실패 0 · 닥터 오늘 개선 0건",
       "담당 jarvis · 판단 중",
-      "판단 응답 오류를 확인했습니다. 증거와 원래 목표를 보존하고 다음 판단에서 원인을 확인합니다.",
+      "本次收集进程已完成，但数据仅部分收集成功：97个来源中成功34、部分38、过期17、未知8（e29、e30）。继续处理原 collections 安排，先读取来源级错误，优先确认影响收入和流量测量的缺口；目前没有依据重启运行时，也不转入面板显示的地识iN任务。",
       "직전 결과: resource_hold",
-      "최근 활동: 16:22:43",
-      "실측 모델 34회 · 1076.4초 · 도구 10회 · 실패 0회 (관측분)",
+      "최근 활동: 16:42:39",
+      "실측 모델 28회 · 1184.6초 · 도구 1회 · 실패 0회 (관측분)",
       "시간표 직결 2026-10-24 · 2026-10-25 네이버 예약 0/7 · CF 준비 0/16",
       "다음 슬롯 준비 / 자동 복구 대기"
     ],
     [
-      "@jarvis · gpt-6.1-sol · High · CYCLING · ego-alert · 완료 10-26 16:05:45",
+      "@jarvis · gpt-6.1-sol · High · IDLE · 다음 업무 대기 · 완료 10-26 16:33:41",
       "@patch · gpt-6.1-sol · High · IDLE · 업무 결과 보고 완료 · 완료 10-26 15:50:43",
-      "@publi · gpt-6.1-sol · High · RUNNING · goal-decision · 완료 10-26 16:23:09",
-      "@trace · 3.8 Flash Med · IDLE · 수익 원천 수집 완료 · 완료 10-26 16:22:43",
+      "@publi · gpt-6.1-sol · High · IDLE · goal-decision 완료 · 완료 10-26 16:27:54",
+      "@trace · 3.8 Flash Med · IDLE · 수익 원천 수집 완료 · 완료 10-26 16:33:46",
       "@doctor · 3.8 Flash High · IDLE · post-style-planning 완료 · 완료 10-25 20:41:52",
       "@radar · Argon Med · IDLE · 업무 결과 보고 완료 · 완료 10-26 12:17:43",
       "Vault 105 노드 · 156 연결 · 누적 해결 2회"
     ],
     [
-      "16:24:10 [EGO ALERT] 9231 adinfo0905 · 국민연금 수령 나이, 65세까지 기다리는 게 나을까요? · 편집·답변 작업 3분 이상 진행 갱신 없음",
-      "16:22:43 제휴알바 수익 수집 완료",
-      "16:22:41 soultin · 시니어 브리프｜5060 연금·복지·노후정보 수익 수집 완료",
-      "16:22:41 soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크 수익 수집 완료",
-      "16:22:41 yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙 수익 수집 완료",
-      "16:22:39 SJ · CF 애드센스 수익 수집 완료"
+      "16:44:28 제휴알바 수익 수집 완료",
+      "16:44:27 soultin · 시니어 브리프｜5060 연금·복지·노후정보 수익 수집 완료",
+      "16:44:27 soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크 수익 수집 완료",
+      "16:44:27 yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙 수익 수집 완료",
+      "16:44:25 SJ · CF 애드센스 수익 수집 완료",
+      "16:41:13 토스 쉐어링크 수익 수집 완료"
     ]
   ],
   "brainDisplay": {
     "rows": [
-      "[코덱스 #1 baro76650] ⚡사용중(호출활성) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:09 | 36,378.33 C | 누적 33회",
-      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:22 | 0.00 C | 누적 31회",
+      "[코덱스 #1 baro76650] ● 사용가능(대기) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:09 | 36,378.33 C | 누적 41회",
+      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 100% [■■■■■■■■■■■■■■■] | 리셋: 11-02 15:22 | 0.00 C | 누적 38회",
       "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 90.2%/99.8% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 18:00 | 누적 11회",
-      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 50.5%/94.2% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 18:01 | 누적 30회",
+      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 50.4%/93.9% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 18:01 | 누적 30회",
       "[OpenRouter] 잔여 0% [░░░░░░░░░░░░░░░] | 종량제 (충전 필요) | $-0.18",
       "[JEV · 04번 크롬] ● 사용가능(API키 설정됨) | 잔액 미수집 · 콘솔 로그인 필요",
       "[KIE] ● 정상수집 · 사용가능 | 잔여 91.97 credits",
       "[직원 매핑] @팀장(gpt-6.1-sol · High) | @publi·@patch(gpt-6.1-sol · High) | Threads(3.8 Flash High)"
     ],
     "styles": [
-      "bold cyan",
+      "bold white",
       "bold white",
       "dim",
       "dim",
@@ -4309,12 +4283,7 @@
       "dim",
       "dim"
     ],
-    "spans": [
-      [
-        34,
-        40
-      ]
-    ],
+    "spans": [],
     "mappingRow": 7
   },
   "ports": {
@@ -4333,36 +4302,36 @@
         "codex:gpt-6.1-sol": {
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "calls": 843,
-          "success": 780,
-          "errors": 63,
-          "inputTokens": 22005842,
-          "outputTokens": 499791,
-          "usageReportedCalls": 780,
-          "totalLatencyMs": 32808997,
+          "calls": 863,
+          "success": 795,
+          "errors": 68,
+          "inputTokens": 22453483,
+          "outputTokens": 512148,
+          "usageReportedCalls": 795,
+          "totalLatencyMs": 33880345,
           "rateLimited": 0,
-          "averageLatencyMs": 38919,
-          "lastLatencyMs": 40318,
-          "lastAt": "2026-10-26T16:23:09.568692+09:00",
-          "lastStatus": "completed",
-          "errorType": null,
+          "averageLatencyMs": 39259,
+          "lastLatencyMs": 180167,
+          "lastAt": "2026-10-26T16:42:39.373377+09:00",
+          "lastStatus": "failed",
+          "errorType": "RuntimeError",
           "rateLimitHeaders": {},
           "httpStatus": null
         },
         "agy:gemini-2.5-pro": {
           "provider": "agy",
           "model": "gemini-2.5-pro",
-          "calls": 76,
+          "calls": 77,
           "success": 0,
-          "errors": 76,
+          "errors": 77,
           "inputTokens": 0,
           "outputTokens": 0,
           "usageReportedCalls": 0,
-          "totalLatencyMs": 7675817,
+          "totalLatencyMs": 7686293,
           "rateLimited": 0,
-          "averageLatencyMs": 100998,
-          "lastLatencyMs": 10893,
-          "lastAt": "2026-10-26T16:11:56.605256+09:00",
+          "averageLatencyMs": 99822,
+          "lastLatencyMs": 10476,
+          "lastAt": "2026-10-26T16:39:34.135667+09:00",
           "lastStatus": "failed",
           "errorType": "RuntimeError",
           "rateLimitHeaders": {},
@@ -4424,306 +4393,29 @@
           "errorType": null,
           "rateLimitHeaders": {},
           "httpStatus": null
-        }
-      },
-      "active": {
-        "a175cd0db8eb427fbadaee3a7284c354": {
+        },
+        "codex:primary": {
           "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T16:23:11.593985+09:00",
-          "agentSlot": "publi",
-          "reasoningEffort": null,
-          "agendaId": null,
-          "pid": 1879537
+          "model": "primary",
+          "calls": 1,
+          "success": 0,
+          "errors": 1,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "usageReportedCalls": 0,
+          "totalLatencyMs": 0,
+          "rateLimited": 0,
+          "averageLatencyMs": 0,
+          "lastLatencyMs": 0,
+          "lastAt": "2026-10-26T16:42:36.954752+09:00",
+          "lastStatus": "failed",
+          "errorType": "RuntimeError",
+          "rateLimitHeaders": {},
+          "httpStatus": null
         }
       },
+      "active": {},
       "recent": [
-        {
-          "id": "8c6e53925d074064afe90022f5be7bfd",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:50:31.415735+09:00",
-          "latencyMs": 11614,
-          "inputTokens": 17716,
-          "outputTokens": 164,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "05dbf3f5bd164861bd2c324f13838932",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:50:27.995130+09:00",
-          "latencyMs": 31391,
-          "inputTokens": 25431,
-          "outputTokens": 736,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "0be7d055a0754febb5fe30b535ee69f6",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:50:53.664207+09:00",
-          "latencyMs": 13738,
-          "inputTokens": 20341,
-          "outputTokens": 313,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "d5e5c620e60c49318d2808475eaf40e0",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:51:08.244366+09:00",
-          "latencyMs": 12960,
-          "inputTokens": 16253,
-          "outputTokens": 211,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "4f1a54bb5c9e43fe86b20c20f5f72c54",
-          "agendaId": null,
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:51:23.255555+09:00",
-          "latencyMs": 12523,
-          "inputTokens": 14229,
-          "outputTokens": 144,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "low"
-        },
-        {
-          "id": "3a42c74f174f4976a9e94a7961808cec",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:51:10.857758+09:00",
-          "latencyMs": 35393,
-          "inputTokens": 25899,
-          "outputTokens": 828,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "7d389fef1627407db3118c6b5fb7e1fa",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:51:52.921612+09:00",
-          "latencyMs": 47444,
-          "inputTokens": 27270,
-          "outputTokens": 1215,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "83663f0d7d244c3fa8bbaf79266378bb",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:52:46.687387+09:00",
-          "latencyMs": 31142,
-          "inputTokens": 28063,
-          "outputTokens": 690,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "a5a35f04590d47229249aca900982db1",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:53:29.587773+09:00",
-          "latencyMs": 64690,
-          "inputTokens": 27715,
-          "outputTokens": 1105,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "7dcb66ec68ac4c878ec5834bf256c90d",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:54:46.746844+09:00",
-          "latencyMs": 25297,
-          "inputTokens": 27481,
-          "outputTokens": 502,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "92525cf31e5e4d9999bbe32d22af8265",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:55:18.309645+09:00",
-          "latencyMs": 24607,
-          "inputTokens": 27853,
-          "outputTokens": 798,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "f00545fc19004a24a0a75ad95d4d76e0",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:55:48.861793+09:00",
-          "latencyMs": 46452,
-          "inputTokens": 28962,
-          "outputTokens": 615,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "cf185c99e73b47d7aa71714d89e4e8cb",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:56:47.282404+09:00",
-          "latencyMs": 24555,
-          "inputTokens": 29463,
-          "outputTokens": 536,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "5115d0bd4245492cb6f25f386ab84df4",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:57:23.586449+09:00",
-          "latencyMs": 31830,
-          "inputTokens": 29957,
-          "outputTokens": 581,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "d335785cc1c94ad0820b3b1e29e89b5d",
-          "agendaId": "1a85aa366c03f5541665f8335c84a892a33845a5fb4ed0bd80d25dbf2f788041",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:58:00.458043+09:00",
-          "latencyMs": 19794,
-          "inputTokens": 15858,
-          "outputTokens": 644,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "78ce2ec4aeb74135aaee96125377ad92",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:58:07.192540+09:00",
-          "latencyMs": 14629,
-          "inputTokens": 28316,
-          "outputTokens": 512,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "28b80fe981d340c3bb1226186c248a01",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:58:38.834083+09:00",
-          "latencyMs": 26361,
-          "inputTokens": 28692,
-          "outputTokens": 537,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "7f82075de1da4b73a2b888c6dd7065ab",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:59:16.982401+09:00",
-          "latencyMs": 23033,
-          "inputTokens": 27595,
-          "outputTokens": 519,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "5e984fc922b2477389caa0e42f2c1c77",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T15:59:52.234908+09:00",
-          "latencyMs": 30066,
-          "inputTokens": 29609,
-          "outputTokens": 798,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "70b807818505407c9b778a1f989db9b2",
-          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T16:00:28.799349+09:00",
-          "latencyMs": 38520,
-          "inputTokens": 31017,
-          "outputTokens": 730,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "8230c11b9b184d8986ae3dd3a4f5e123",
-          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T16:01:14.419096+09:00",
-          "latencyMs": 25645,
-          "inputTokens": 29763,
-          "outputTokens": 861,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "8a0e91e592034d1bbe3b9ad46fe5ec6c",
-          "agendaId": null,
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-26T16:01:26.055071+09:00",
-          "latencyMs": 36752,
-          "inputTokens": 21853,
-          "outputTokens": 875,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
         {
           "id": "474724155bf443c9998965dad3cf2c49",
           "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
@@ -4956,6 +4648,292 @@
           "outputTokens": 929,
           "httpStatus": null,
           "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "a175cd0db8eb427fbadaee3a7284c354",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:23:11.593985+09:00",
+          "latencyMs": 78189,
+          "inputTokens": 26075,
+          "outputTokens": 1320,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "e72c18fcd6f14e8cab9bf70b2451e459",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:27:02.073303+09:00",
+          "latencyMs": 52298,
+          "inputTokens": 28530,
+          "outputTokens": 1303,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "f4f329a8e8e941c2b966b8afdc124192",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:27:34.833376+09:00",
+          "latencyMs": 26868,
+          "inputTokens": 27425,
+          "outputTokens": 498,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "71be8f42da6445bb9c8dc80978d92bc0",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:28:15.093432+09:00",
+          "latencyMs": 43848,
+          "inputTokens": 30401,
+          "outputTokens": 1159,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "b8c16634b714495895ae70ee52605267",
+          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:29:05.694489+09:00",
+          "latencyMs": 31334,
+          "inputTokens": 31838,
+          "outputTokens": 747,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "8a5d63fb4e3f4c9d84f5805bdf5c0b67",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:29:49.561573+09:00",
+          "latencyMs": 33611,
+          "inputTokens": 30267,
+          "outputTokens": 579,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "cfbe3cf3b6c34a7b90f9b0a552a9e5e1",
+          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:30:30.084742+09:00",
+          "latencyMs": 35613,
+          "inputTokens": 30365,
+          "outputTokens": 703,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "33c77852500b4c0e913c044e74d04433",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:31:12.611097+09:00",
+          "latencyMs": 24742,
+          "inputTokens": 28895,
+          "outputTokens": 594,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "45084c129e9c434e94f9c852fc705bac",
+          "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:31:44.080961+09:00",
+          "latencyMs": 117108,
+          "inputTokens": 31076,
+          "outputTokens": 775,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "74fc587ac2d04fb7b9cc04ca24d0d6d5",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:33:48.172471+09:00",
+          "latencyMs": 27638,
+          "inputTokens": 30365,
+          "outputTokens": 513,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "a462f1a832094409af8970edb1317bb7",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:35:45.705143+09:00",
+          "latencyMs": 41646,
+          "inputTokens": 29662,
+          "outputTokens": 858,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "fa5b35ba6aa24ba7ad1ca604e1c4dff1",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:36:34.018764+09:00",
+          "latencyMs": 34019,
+          "inputTokens": 30798,
+          "outputTokens": 756,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "d9c31b8446924ad58d24d7ddaae01a11",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:37:14.568751+09:00",
+          "latencyMs": 43237,
+          "inputTokens": 30031,
+          "outputTokens": 889,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "5fad154a4e4b48bf9954dbfd7bd03b1a",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:38:04.489563+09:00",
+          "latencyMs": 33246,
+          "inputTokens": 30490,
+          "outputTokens": 806,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "47164effda2341308f82ebc49a60e813",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:38:23.099270+09:00",
+          "latencyMs": 60526,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "ac63221240484dfb95f37eefa3c7bd97",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:38:23.694510+09:00",
+          "latencyMs": 60253,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "7f8e5afa33464731aeac60e0e917518b",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:38:44.865087+09:00",
+          "latencyMs": 41664,
+          "inputTokens": 31423,
+          "outputTokens": 857,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "e2902af23f014b88b7486f70ccdaf942",
+          "agendaId": null,
+          "provider": "agy",
+          "model": "gemini-2.5-pro",
+          "startedAt": "2026-10-26T16:38:23.099270+09:00",
+          "latencyMs": 10476,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "452e4e39825347f9b0ec19dadbc75de5",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:39:36.013849+09:00",
+          "latencyMs": 60208,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "5082a4d9803c46ed8c72f67d60d6ba45",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:39:54.471344+09:00",
+          "latencyMs": 45133,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "4e452786f8584d6892bfa52c44385351",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "primary",
+          "startedAt": "2026-10-26T16:42:36.939400+09:00",
+          "latencyMs": 0,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
+          "reasoningEffort": "low"
+        },
+        {
+          "id": "4bd5a98353554e2486e6d69a680233c6",
+          "agendaId": "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-26T16:39:39.179556+09:00",
+          "latencyMs": 180167,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "httpStatus": null,
+          "errorType": "RuntimeError",
           "reasoningEffort": "high"
         }
       ],
@@ -8523,21 +8501,21 @@
         },
         "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272": {
           "coverageStartedAt": "2026-10-26T15:20:37.682422+09:00",
-          "modelCalls": 34,
+          "modelCalls": 37,
           "modelErrors": 2,
-          "modelLatencyMs": 1076358,
+          "modelLatencyMs": 1260413,
           "routes": {
             "codex|gpt-6.1-sol|medium": 3,
-            "codex|gpt-6.1-sol|high": 30,
+            "codex|gpt-6.1-sol|high": 33,
             "agy|gemini-2.5-pro|high": 1
           },
           "toolRoundTrips": 10,
           "toolFailures": 0,
-          "uiActions": 12,
-          "uiFailures": 1,
-          "inputTokens": 776095,
-          "outputTokens": 18468,
-          "usageReportedCalls": 32,
+          "uiActions": 15,
+          "uiFailures": 2,
+          "inputTokens": 869374,
+          "outputTokens": 20693,
+          "usageReportedCalls": 35,
           "recentIds": [
             "a7f650e969e549a186056117370d36dc",
             "f7458d07e2734151b8d5ecb8b5c05170",
@@ -8594,25 +8572,31 @@
             "9480dc49a22448138fecd3a536a6c053",
             "8da54c1b32454d6380c4c9f522437342",
             "7dcc0f59547a4ca4bb4745c6f5484059",
-            "1e7825a46c814e41992ec4620e8ddff1"
+            "1e7825a46c814e41992ec4620e8ddff1",
+            "b8c16634b714495895ae70ee52605267",
+            "cfbe3cf3b6c34a7b90f9b0a552a9e5e1",
+            "45084c129e9c434e94f9c852fc705bac",
+            "45edb5aba6c84addabee3df7bc261d59",
+            "c4f2e005fa2445eb81c1dac0a9488f25",
+            "12dd77b6746d40fc9d3c0c91cd4407bd"
           ],
-          "checkedAt": "2026-10-26T16:09:12.321795+09:00"
+          "checkedAt": "2026-10-26T16:38:23.868861+09:00"
         },
         "5632ebcae000ba4024b3e5f78b5d12451b6635a6d2f45982e603e78b29f52ef8": {
           "coverageStartedAt": "2026-10-26T15:47:55.277535+09:00",
-          "modelCalls": 17,
-          "modelErrors": 1,
-          "modelLatencyMs": 653896,
+          "modelCalls": 28,
+          "modelErrors": 2,
+          "modelLatencyMs": 1184582,
           "routes": {
-            "codex|gpt-6.1-sol|high": 17
+            "codex|gpt-6.1-sol|high": 28
           },
-          "toolRoundTrips": 0,
+          "toolRoundTrips": 1,
           "toolFailures": 0,
           "uiActions": 0,
           "uiFailures": 0,
-          "inputTokens": 440029,
-          "outputTokens": 10575,
-          "usageReportedCalls": 16,
+          "inputTokens": 739786,
+          "outputTokens": 18084,
+          "usageReportedCalls": 26,
           "recentIds": [
             "248fa6bd54d840df886907458a45b6fc",
             "4d60717a163e4ec3ae864ac2a36f3ec3",
@@ -8630,9 +8614,21 @@
             "8230c11b9b184d8986ae3dd3a4f5e123",
             "164fbf03655f49d4860f8bdbf7628c06",
             "d27e9360b58442e48e661dff4e9bbb53",
-            "8cc477bbd5ad491a9fc6fea7ddd0ab7d"
+            "8cc477bbd5ad491a9fc6fea7ddd0ab7d",
+            "f4f329a8e8e941c2b966b8afdc124192",
+            "71be8f42da6445bb9c8dc80978d92bc0",
+            "8a5d63fb4e3f4c9d84f5805bdf5c0b67",
+            "33c77852500b4c0e913c044e74d04433",
+            "74fc587ac2d04fb7b9cc04ca24d0d6d5",
+            "a462f1a832094409af8970edb1317bb7",
+            "fa5b35ba6aa24ba7ad1ca604e1c4dff1",
+            "d9c31b8446924ad58d24d7ddaae01a11",
+            "01afc8fab96e4fd3837a849ff24d10be",
+            "5fad154a4e4b48bf9954dbfd7bd03b1a",
+            "7f8e5afa33464731aeac60e0e917518b",
+            "4bd5a98353554e2486e6d69a680233c6"
           ],
-          "checkedAt": "2026-10-26T16:12:24.508232+09:00"
+          "checkedAt": "2026-10-26T16:42:39.373377+09:00"
         },
         "4c71a730543890feb17548e4420bb98fb31fda8ede63a141a9caaeebf72e9398": {
           "coverageStartedAt": "2026-10-26T15:47:55.361255+09:00",
@@ -8712,18 +8708,18 @@
           "usageReportedCalls": 1
         }
       },
-      "checkedAt": "2026-10-26T16:23:11.594019+09:00",
+      "checkedAt": "2026-10-26T16:42:39.388054+09:00",
       "lastBudgetBlock": {
-        "agendaId": "dbbada2aac51b7bd15b3ef9fbf1a1628f0e07a689359e088d156d34abba27a06",
-        "reason": "agenda_token_budget_exhausted",
-        "checkedAt": "2026-10-26T15:05:18.963025+09:00"
+        "agendaId": "7c25030041ea4301a15230eb0e18492b1a74170729b3f3a5b08f6069b9354272",
+        "reason": "agenda_time_budget_exhausted",
+        "checkedAt": "2026-10-26T16:38:43.215489+09:00"
       },
       "routeHealth": {
         "codex:gpt-6.1-sol": {
-          "failures": 0,
-          "retryAt": 0,
+          "failures": 3,
+          "retryAt": 1793000859.367316,
           "probeUntil": 0,
-          "checkedAt": 1792999389.5640879,
+          "checkedAt": 1793000559.367321,
           "errorType": "RuntimeError"
         },
         "agy:gemini-4-argon-medium": {
@@ -8745,23 +8741,23 @@
           "checkedAt": 1792997385.543599
         },
         "agy:gemini-2.5-pro": {
-          "failures": 3,
+          "failures": 4,
           "probeUntil": 0,
           "errorType": "RuntimeError",
-          "retryAt": 1792999016.5995805,
-          "checkedAt": 1792998716.5995855
+          "retryAt": 1793000974.129683,
+          "checkedAt": 1793000374.12969
         }
       },
       "lastRouteBlock": {
-        "provider": "codex",
-        "model": "gpt-6.1-sol",
-        "checkedAt": "2026-10-26T16:22:43.247829+09:00"
+        "provider": "agy",
+        "model": "gemini-2.5-pro",
+        "checkedAt": "2026-10-26T16:42:39.413984+09:00"
       }
     },
     "quotas": {
       "openrouter": {
         "status": "collected",
-        "checkedAt": 1792999387.4671185,
+        "checkedAt": 1793000681.561226,
         "usage": 34.985513286,
         "usage_daily": 0,
         "limit": null,
@@ -8793,7 +8789,7 @@
             "usable": true,
             "activeRotation": true,
             "isLastUsed": true,
-            "callCount": 33,
+            "callCount": 41,
             "buckets": {
               "codex": {
                 "primary": {
@@ -8809,7 +8805,7 @@
                 "planType": "pro"
               }
             },
-            "checkedAt": 1792999388.2471385
+            "checkedAt": 1793000682.5934365
           },
           {
             "email": "choiggerh@naver.com",
@@ -8818,7 +8814,7 @@
             "usable": true,
             "activeRotation": true,
             "isLastUsed": false,
-            "callCount": 30,
+            "callCount": 38,
             "buckets": {
               "codex": {
                 "primary": {
@@ -8834,11 +8830,11 @@
                 "planType": "pro"
               }
             },
-            "checkedAt": 1792999389.0555873
+            "checkedAt": 1793000683.682266
           }
         ],
         "lastUsedAccount": "baro76650@gmail.com",
-        "checkedAt": 1792999389.0555902
+        "checkedAt": 1793000683.682274
       },
       "agy": {
         "status": "collected",
@@ -8864,12 +8860,12 @@
               {
                 "window": "weekly",
                 "remainingPercent": 100,
-                "resetAt": "2026-11-02T07:23:14+00:00"
+                "resetAt": "2026-11-02T07:44:47+00:00"
               },
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-10-26T12:23:14+00:00"
+                "resetAt": "2026-10-26T12:44:47+00:00"
               }
             ]
           }
@@ -8904,17 +8900,17 @@
                   {
                     "window": "weekly",
                     "remainingPercent": 100,
-                    "resetAt": "2026-11-02T07:23:14+00:00"
+                    "resetAt": "2026-11-02T07:44:47+00:00"
                   },
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-26T12:23:14+00:00"
+                    "resetAt": "2026-10-26T12:44:47+00:00"
                   }
                 ]
               }
             ],
-            "checkedAt": 1792999393.7463937
+            "checkedAt": 1793000687.134688
           },
           {
             "email": "barolab26@gmail.com",
@@ -8929,12 +8925,12 @@
                 "buckets": [
                   {
                     "window": "weekly",
-                    "remainingPercent": 50.5,
+                    "remainingPercent": 50.4,
                     "resetAt": "2026-10-30T22:01:25+00:00"
                   },
                   {
                     "window": "5h",
-                    "remainingPercent": 94.2,
+                    "remainingPercent": 93.9,
                     "resetAt": "2026-10-26T09:01:44+00:00"
                   }
                 ]
@@ -8950,28 +8946,28 @@
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-26T12:23:20+00:00"
+                    "resetAt": "2026-10-26T12:44:53+00:00"
                   }
                 ]
               }
             ],
-            "checkedAt": 1792999399.8101838
+            "checkedAt": 1793000692.8064713
           }
         ],
         "lastUsedAccount": "barolab26@gmail.com",
-        "checkedAt": 1792999399.8101854
+        "checkedAt": 1793000692.806475
       },
       "kie": {
         "status": "collected",
         "balance": 91.97,
-        "checkedAt": 1792999387.2124662,
+        "checkedAt": 1793000681.5148642,
         "unit": "credits",
         "source": "https://api.kie.ai/api/v1/chat/credit"
       },
       "jev": {
         "status": "잔액 미수집 · 콘솔 로그인 필요",
         "balance": null,
-        "checkedAt": 1792999387.2112758,
+        "checkedAt": 1793000681.515499,
         "unit": "credits",
         "usable": true,
         "apiKeySet": true,
@@ -8979,5 +8975,5 @@
       }
     }
   },
-  "revision": "7bc23b94f94fae7b5493a4fcbb905d92e459200e1da4001165321baa96a4a5cf"
+  "revision": "eae00acfcaea733d97d0f6f659b6c9c0976dd13b4173e76d5fc937e687ab14a9"
 }
