@@ -6,8 +6,8 @@
       "project": "threads",
       "title": "Threads 게시 · mustpickinfo · 2026-10-26 · 08:00",
       "status": "executing",
-      "activatedAt": 1792977558.1255822,
-      "updatedAt": 1792977563.9226964,
+      "activatedAt": 1792977712.1230593,
+      "updatedAt": 1792977717.9033878,
       "target": {
         "account": "mustpickinfo",
         "date": "2026-10-26",
@@ -25,8 +25,8 @@
       "conferenceEligibility": null,
       "operationalState": "running_publisher",
       "performance": {
-        "wallTimeSeconds": 22.011826992034912,
-        "measurementStartedAt": 1792977558.1255822,
+        "wallTimeSeconds": 18.5279643535614,
+        "measurementStartedAt": 1792977712.1230593,
         "coverage": "observed_calls_only",
         "manualNudges": 0,
         "verifiedCompletions": null,
@@ -37,9 +37,9 @@
         "routes": {
           "codex|gpt-6.1-sol|high": 78
         },
-        "toolRoundTrips": 70,
-        "toolFailures": 70,
-        "uiActions": 566,
+        "toolRoundTrips": 72,
+        "toolFailures": 72,
+        "uiActions": 582,
         "uiFailures": 0
       },
       "activity": {
@@ -48,7 +48,7 @@
         "phase": "",
         "lastResult": "",
         "lastResultAt": null,
-        "lastActivityAt": 1792977563.9226964,
+        "lastActivityAt": 1792977717.9033878,
         "nextCheckAt": null,
         "handoff": {
           "owner": null,
@@ -60,12 +60,12 @@
         "intervention": null,
         "decisions": null,
         "maxSteps": null,
-        "wallTimeSeconds": 22.011826992034912,
-        "toolRoundTrips": 70,
+        "wallTimeSeconds": 18.5279643535614,
+        "toolRoundTrips": 72,
         "manualNudges": 0,
         "verifiedCompletions": null,
         "modelLatencyMs": 1192426,
-        "toolFailures": 70,
+        "toolFailures": 72,
         "lastRoute": {
           "provider": null,
           "model": null,
@@ -199,7 +199,7 @@
   },
   "schema": "barolab-mission-control-v2",
   "date": "2026-10-26",
-  "generatedAt": "2026-10-26T10:19:40.107114+09:00",
+  "generatedAt": "2026-10-26T10:22:10.629458+09:00",
   "refreshSeconds": 1,
   "cfItems": [
     {
@@ -353,7 +353,7 @@
     "month": "2026-10",
     "today": "2026-10-26",
     "yesterday": "2026-10-25",
-    "checkedAt": "2026-10-26T10:18:52.349337+09:00",
+    "checkedAt": "2026-10-26T10:21:01.549934+09:00",
     "categories": [
       {
         "id": "adsense",
@@ -972,7 +972,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T10:15:29.328685+09:00",
+            "checkedAt": "2026-10-26T10:20:59.609591+09:00",
             "pendingDates": [
               "2026-10-26"
             ],
@@ -1066,7 +1066,7 @@
               "2026-10-26": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T10:15:30.733431+09:00",
+            "checkedAt": "2026-10-26T10:21:01.396588+09:00",
             "pendingDates": [],
             "scope": "토스 쉐어링크",
             "stale": false,
@@ -2974,7 +2974,7 @@
               "2026-10-25": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T10:15:29.328685+09:00",
+            "checkedAt": "2026-10-26T10:20:59.609591+09:00",
             "pendingDates": [
               "2026-10-26"
             ],
@@ -3129,7 +3129,7 @@
               "2026-10-26": "0"
             },
             "status": "collected",
-            "checkedAt": "2026-10-26T10:15:30.733431+09:00",
+            "checkedAt": "2026-10-26T10:21:01.396588+09:00",
             "pendingDates": [],
             "scope": "토스 쉐어링크",
             "stale": false,
@@ -3341,7 +3341,7 @@
             "lastReportDay": "2026-10-25"
           }
         ],
-        "checkedAt": "2026-10-26T10:18:52.349337+09:00"
+        "checkedAt": "2026-10-26T10:21:01.549934+09:00"
       }
     }
   },
@@ -3764,7 +3764,7 @@
       "state": "RUNNING",
       "action": "업무 결과 보고",
       "lastCompleted": "10-26 10:09:23",
-      "lastActivity": "2026-10-26T10:19:31.469000+09:00",
+      "lastActivity": "2026-10-26T10:22:05.308000+09:00",
       "model": "gpt-6.1-sol · High"
     },
     {
@@ -3772,8 +3772,8 @@
       "name": "트레이스",
       "state": "IDLE",
       "action": "수익 원천 수집 완료",
-      "lastCompleted": "10-26 10:18:52",
-      "lastActivity": "2026-10-26T10:18:52.202000+09:00",
+      "lastCompleted": "10-26 10:21:01",
+      "lastActivity": "2026-10-26T10:21:01.396000+09:00",
       "model": "3.8 Flash Med"
     },
     {
@@ -3802,6 +3802,16 @@
   },
   "timeline": [
     {
+      "at": 1792977661.396588,
+      "text": "토스 쉐어링크 수익 수집 완료",
+      "alert": false
+    },
+    {
+      "at": 1792977659.609591,
+      "text": "쿠팡 파트너스 수익 수집 완료",
+      "alert": false
+    },
+    {
       "at": 1792977467.230947,
       "text": "제휴알바 수익 수집 완료",
       "alert": false
@@ -3819,16 +3829,6 @@
     {
       "at": 1792977464.645464,
       "text": "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙 수익 수집 완료",
-      "alert": false
-    },
-    {
-      "at": 1792977462.642378,
-      "text": "SJ · CF 애드센스 수익 수집 완료",
-      "alert": false
-    },
-    {
-      "at": 1792977330.733431,
-      "text": "토스 쉐어링크 수익 수집 완료",
       "alert": false
     }
   ],
@@ -4191,18 +4191,18 @@
       "애드센스 수집분 (15/16 CF)  오늘 $0.02  /  어제 $0.01  /  월 수집합 $1.72  (기준일 2026-10-26)",
       "일일 목표 $100.00  ░░░░░░░░░░░░░░░░░░░░░░░░  0.02%",
       "색인 확인 326/1,972건 (16.5%) · 검사 889건 · 오늘 IndexNow 0건",
-      "soultin · 시니어 브리프｜5060 연금·복지·노후정보  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 1분 전 · collected",
-      "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 1분 전 · collected",
-      "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙  오늘 집계 대기 / 최근 ₩439 (2026-10-25) · 1분 전 · collected",
-      "쿠팡 파트너스  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 4분 전 · collected",
-      "토스 쉐어링크  오늘 ₩0 / 최근 ₩0 (2026-10-26) · 4분 전 · collected",
-      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 7분 전 · report_unavailable",
-      "제휴알바  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 1분 전 · collected",
+      "soultin · 시니어 브리프｜5060 연금·복지·노후정보  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 4분 전 · collected",
+      "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 4분 전 · collected",
+      "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙  오늘 집계 대기 / 최근 ₩439 (2026-10-25) · 4분 전 · collected",
+      "쿠팡 파트너스  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 1분 전 · collected",
+      "토스 쉐어링크  오늘 ₩0 / 최근 ₩0 (2026-10-26) · 1분 전 · collected",
+      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 10분 전 · report_unavailable",
+      "제휴알바  오늘 집계 대기 / 최근 ₩0 (2026-10-25) · 4분 전 · collected",
       "AdMob (4앱) 당일 수익 원장 수집 대기"
     ],
     [
       "[Codex 구독] 잔여 94% [■■■■■■■■■■■■■■░] | 리셋: 11-01 15:10 | 36,378.33 C",
-      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 90.3%/100% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 15:19 | 누적 10회",
+      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 90.3%/100% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 15:21 | 누적 10회",
       "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 54.6%/100.0% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 13:01 | 누적 27회",
       "[OpenRouter] 잔여 0% [░░░░░░░░░░░░░░░] | 종량제 (충전 필요) | $-0.18",
       "[JEV · 04번 크롬] ● 사용가능(API키 설정됨) | 잔액 미수집 · 콘솔 로그인 필요",
@@ -4233,8 +4233,8 @@
       "네이버 지식iN [ 1/20] ■░░░░░░░░░░░ 5% · 차단 이력 5회 · 준비 0 · 대기 19 · 실패 0 · adinfo0905 1건 · stone0747 0건 · 다음 배포: 10:29 · 20분 텀",
       "Threads [1/4] ■■■░░░░░░░░░ · 준비 0 · 대기 3 · 실패 0 · 닥터 오늘 개선 0건",
       "합의한 단일 계정·슬롯의 실행과 검증을 진행합니다.",
-      "최근 활동: 10:19:23",
-      "실측 모델 78회 · 1192.4초 · 도구 70회 · 실패 70회 (관측분)",
+      "최근 활동: 10:21:57",
+      "실측 모델 78회 · 1192.4초 · 도구 72회 · 실패 72회 (관측분)",
       "시간표 직결 2026-10-24 · 2026-10-25 네이버 예약 0/7 · CF 준비 0/16",
       "다음 슬롯 준비 / 자동 복구 대기"
     ],
@@ -4242,24 +4242,24 @@
       "@jarvis · gpt-6.1-sol · High · IDLE · goal-decision 완료 · 완료 10-26 10:15:40",
       "@patch · gpt-6.1-sol · High · IDLE · goal-decision 완료 · 완료 10-26 03:36:25",
       "@publi · gpt-6.1-sol · High · RUNNING · 업무 결과 보고 · 완료 10-26 10:09:23",
-      "@trace · 3.8 Flash Med · IDLE · 수익 원천 수집 완료 · 완료 10-26 10:18:52",
+      "@trace · 3.8 Flash Med · IDLE · 수익 원천 수집 완료 · 완료 10-26 10:21:01",
       "@doctor · 3.8 Flash High · IDLE · post-style-planning 완료 · 완료 10-25 20:41:52",
       "@radar · Argon Med · IDLE · 근거 자료 수집 완료 · 완료 10-26 02:06:09",
       "Vault 96 노드 · 142 연결 · 누적 해결 2회"
     ],
     [
+      "10:21:01 토스 쉐어링크 수익 수집 완료",
+      "10:20:59 쿠팡 파트너스 수익 수집 완료",
       "10:17:47 제휴알바 수익 수집 완료",
       "10:17:44 soultin · 시니어 브리프｜5060 연금·복지·노후정보 수익 수집 완료",
       "10:17:44 soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크 수익 수집 완료",
-      "10:17:44 yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙 수익 수집 완료",
-      "10:17:42 SJ · CF 애드센스 수익 수집 완료",
-      "10:15:30 토스 쉐어링크 수익 수집 완료"
+      "10:17:44 yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙 수익 수집 완료"
     ]
   ],
   "brainDisplay": {
     "rows": [
       "[Codex 구독] 잔여 94% [■■■■■■■■■■■■■■░] | 리셋: 11-01 15:10 | 36,378.33 C",
-      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 90.3%/100% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 15:19 | 누적 10회",
+      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 90.3%/100% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 15:21 | 누적 10회",
       "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 54.6%/100.0% | Claude/GPT 100%/100% (주간/5h) | 리셋 10-26 13:01 | 누적 27회",
       "[OpenRouter] 잔여 0% [░░░░░░░░░░░░░░░] | 종량제 (충전 필요) | $-0.18",
       "[JEV · 04번 크롬] ● 사용가능(API키 설정됨) | 잔액 미수집 · 콘솔 로그인 필요",
@@ -7658,29 +7658,11 @@
           "routes": {
             "codex|gpt-6.1-sol|high": 78
           },
-          "toolRoundTrips": 70,
-          "toolFailures": 70,
-          "uiActions": 566,
+          "toolRoundTrips": 72,
+          "toolFailures": 72,
+          "uiActions": 582,
           "uiFailures": 0,
           "recentIds": [
-            "dd7e90000a7c43f293ecfeac6527debb",
-            "bf66e431f79f46058020107305ba4952",
-            "3bea6df868ed495e8efa847304ea369d",
-            "8f744a5e63ee4fa7a3b0d5cffae45d79",
-            "58c0bccbf3ec4d1783a52f826f112daf",
-            "c7781c7b80b84ab3a316a5d0990dc34d",
-            "bba12209277a4e98a324a647c82149e7",
-            "c69ab845cb884b26bc312854ea5fc887",
-            "d3aef49773c94baa9888932288e3e077",
-            "58ef663fe3bf46ff8a4e42150b3469de",
-            "8e6bcfaf9c0c41b58420eb36fb507e01",
-            "81f7164b9e7a4e99ab879a244c6a3a1e",
-            "fa7af080f47c476493296b486e9d8d9d",
-            "c81fd6718b93470fb1d2d6c955df8233",
-            "122f2d97749d425a824713720bdb3f4b",
-            "15bc3a50386644d9a7813ededaacc0fc",
-            "b2c8ced067734fb192a1f2a2e4bae035",
-            "6b04b555a52043d189d3fe99d37e61bb",
             "5b8202eb2e5040bab07b26418adc24d9",
             "4b2e76a735f6408e997e24423bf4a935",
             "eb1afda375a840c386b15279d14fa167",
@@ -7918,9 +7900,27 @@
             "2649b320188a4abf87a6f21dbd821e7c",
             "aa1a25a57a824185b4ee66e60bbd4e1b",
             "f1b1aa2d034b4dfdb16e1b3e6b3b61d0",
-            "84a4ee1b5fd24b8cb678f940cd220ef5"
+            "84a4ee1b5fd24b8cb678f940cd220ef5",
+            "39a799e9943c46bca61cb7f492149354",
+            "1d1993650f4945bf8f9f89a5da243f09",
+            "8c0b35f86a774f1787be9831030c86ed",
+            "83edbbad38b848aab30ccd1b0b90a294",
+            "8b0851fa99e748f4afa5917cdee8435f",
+            "515d30c9a2124b9f9d616d2a2252f7f9",
+            "c21095617c8442e68dfb3d34b0d027c0",
+            "d67a60a3f2a5463fb184d8b4beddbe1b",
+            "38314831383f4ba6958bc49f2eb82750",
+            "7694c710023b446f861164e0ec6e5bc8",
+            "402799fb274a49fca81e33a6a8982a6d",
+            "0bdedafbdf3a4eb6a4d2ff9b3b334add",
+            "5fa88742723d4fe6b5efd8214c5b97b0",
+            "84d1021df2f847d883dfd6eeb3ac0296",
+            "b41c1d774aaa4dcf90c05eeda46a23f4",
+            "ffa87de4cd7140fc926e75021ba786d6",
+            "96900c762bbe456f86e74eb79e2fcb08",
+            "14f645ccdbbe475ea21c317c6408e007"
           ],
-          "checkedAt": "2026-10-26T10:19:31.404507+09:00"
+          "checkedAt": "2026-10-26T10:22:05.243722+09:00"
         },
         "4c16c53f851bae187d6452f821ece7b2d1d0fafc4065c543cae02d367c4828d0": {
           "coverageStartedAt": "2026-10-26T08:15:09.358730+09:00",
@@ -8117,17 +8117,17 @@
           "checkedAt": "2026-10-26T10:15:40.149031+09:00"
         }
       },
-      "checkedAt": "2026-10-26T10:19:31.404507+09:00",
+      "checkedAt": "2026-10-26T10:22:05.243722+09:00",
       "lastBudgetBlock": {
         "agendaId": "7b80e2c987de6009909f3803133ca4982f713cba3f26c0f2d8690253f0be79f0",
         "reason": "agenda_call_budget_exhausted",
-        "checkedAt": "2026-10-26T10:19:09.788856+09:00"
+        "checkedAt": "2026-10-26T10:21:12.409516+09:00"
       }
     },
     "quotas": {
       "openrouter": {
         "status": "collected",
-        "checkedAt": 1792977555.5779047,
+        "checkedAt": 1792977694.229341,
         "usage": 34.985513286,
         "usage_daily": 0,
         "limit": null,
@@ -8151,7 +8151,7 @@
             "planType": "pro"
           }
         },
-        "checkedAt": 1792977556.609112
+        "checkedAt": 1792977695.1594937
       },
       "agy": {
         "status": "collected",
@@ -8167,7 +8167,7 @@
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-10-26T06:19:21+00:00"
+                "resetAt": "2026-10-26T06:21:39+00:00"
               }
             ]
           },
@@ -8177,12 +8177,12 @@
               {
                 "window": "weekly",
                 "remainingPercent": 100,
-                "resetAt": "2026-11-02T01:19:21+00:00"
+                "resetAt": "2026-11-02T01:21:39+00:00"
               },
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-10-26T06:19:21+00:00"
+                "resetAt": "2026-10-26T06:21:39+00:00"
               }
             ]
           }
@@ -8207,7 +8207,7 @@
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-26T06:19:21+00:00"
+                    "resetAt": "2026-10-26T06:21:39+00:00"
                   }
                 ]
               },
@@ -8217,17 +8217,17 @@
                   {
                     "window": "weekly",
                     "remainingPercent": 100,
-                    "resetAt": "2026-11-02T01:19:21+00:00"
+                    "resetAt": "2026-11-02T01:21:39+00:00"
                   },
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-26T06:19:21+00:00"
+                    "resetAt": "2026-10-26T06:21:39+00:00"
                   }
                 ]
               }
             ],
-            "checkedAt": 1792977561.4655752
+            "checkedAt": 1792977699.9623816
           },
           {
             "email": "barolab26@gmail.com",
@@ -8263,28 +8263,28 @@
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-26T06:19:27+00:00"
+                    "resetAt": "2026-10-26T06:21:45+00:00"
                   }
                 ]
               }
             ],
-            "checkedAt": 1792977567.4383776
+            "checkedAt": 1792977705.9623535
           }
         ],
         "lastUsedAccount": "barolab26@gmail.com",
-        "checkedAt": 1792977567.4383845
+        "checkedAt": 1792977705.9623554
       },
       "kie": {
         "status": "collected",
         "balance": 91.97,
-        "checkedAt": 1792977555.327867,
+        "checkedAt": 1792977693.944569,
         "unit": "credits",
         "source": "https://api.kie.ai/api/v1/chat/credit"
       },
       "jev": {
         "status": "잔액 미수집 · 콘솔 로그인 필요",
         "balance": null,
-        "checkedAt": 1792977555.3281646,
+        "checkedAt": 1792977693.9452937,
         "unit": "credits",
         "usable": true,
         "apiKeySet": true,
@@ -8292,5 +8292,5 @@
       }
     }
   },
-  "revision": "657f2603f52f9eabe27223958ebe0c95291a561d9d622eecf9982778e967cd4e"
+  "revision": "4d0a83ed4198931c4d3456b6b368aae1a67384fc3aeedf9741d990b533333c55"
 }

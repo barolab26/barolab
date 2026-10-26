@@ -89,7 +89,10 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
                 crew_actor_label={'radar':'레이더','jarvis':'팀장','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터'}[role],crew_task_id=task,crew_stage='post-style-planning',
                 response_schema={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False},
                 audit_directory=folder/'model-audit'/('strategy-'+role))
-        except Exception:
+        except Exception as exc:
+            from common.llm_usage import UsageBudgetExceeded
+            if isinstance(exc, UsageBudgetExceeded):
+                raise
             try:
                 value=generate_json(system_instruction + prompt, provider='agy', model_override='gemini-2.5-pro',
                     observer=observe,agent_slot=role,memory_read_only=True,timeout_seconds=45,crew_actor=role,
@@ -122,6 +125,8 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     purpose = channel_purposes.get(channel, '하루 $100 수익 창출 및 트래픽 유입 기여')
     from common.asset_map import get_asset_map_summary, match_synergy_cluster, get_account_pacing_strategy, match_monetization_options
     asset_summary = get_asset_map_summary()
+    from server.growth import business_evidence
+    asset_summary += '\n[실측 사업 근거 · 미수집은 0이 아님]\n' + json.dumps(business_evidence(), ensure_ascii=False)
     synergy = match_synergy_cluster(topic)
     pacing = get_account_pacing_strategy(identity) if channel == 'naver' else {'mode': 'standard', 'instruction': '채널 고유 유입 극대화'}
     monetization = match_monetization_options(topic, channel=channel)

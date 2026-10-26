@@ -97,7 +97,9 @@ def overview():
         item['incidentFingerprint']=incident_key(source)
         projects.append(item)
     live=load(ROOT/'dashboard/data/live_snapshot.json')
+    from server.growth import business_evidence
     return {'observedAt':time.time(),'projects':projects,'executionContext':live.get('agendaControl',{}),
+            'businessEvidence': business_evidence(),
             'executionSnapshotAt':live.get('generatedAt')}
 
 
@@ -298,6 +300,7 @@ def tool_call(row,tool,args):
             roles=args.get('roles') if isinstance(args.get('roles'), list) else None,
             tags=args.get('tags') if isinstance(args.get('tags'), list) else None,
             recorded_by=row.get('actor') or 'radar',
+            verified_work_proof=args.get('verifiedWorkProof'),
         )
     if tool=='browser_observe':return browser_observe(row,args)
     if tool=='patch_status':
@@ -464,7 +467,7 @@ def ask(row):
         'browser_observe {port} reads existing account tabs, controls and verified X11 windowMapping (DISPLAY, windowId, browserPid, wmPid) without focusing/opening/navigating/typing; mapped=null means map state was not measured. patch_status {job_id,candidate_sha256} reads a patch candidate status. '
         'web_search {query} and fetch_page {url} read public web evidence with existing bounded fetchers; '
         'ingest_url {url} extracts full YouTube video transcripts/subtitles (yt-dlp) or web article bodies for study and fact-checking; '
-        'save_knowhow {title,method,whenToUse,factCheckSummary,sourceUrl?,tags?,roles?} stores fact-checked, actionable know-how into the shared Synapse Vault so all crew members apply it in future posts; '
+        'save_knowhow {title,method,whenToUse,factCheckSummary,sourceUrl?,tags?,roles?,verifiedWorkProof?} stores a hypothesis by default. Only a valid host work receipt and an exact evidenceText excerpt as method permit reuse as an observed procedure. A source URL, model summary or colleague agreement never proves ranking, account longevity or revenue effects; '
         '대표님이 유튜브 영상이나 학습 URL을 주거나 새로운 노하우 학습을 지시하면, 반드시 ingest_url로 원문/자막을 끝까지 추출하고, web_search·동료 자문(consult)으로 교차 검증(팩트체크: 과장/허위 걸러내고 우리 $100/일 목표에 실제 작동하는 원리만 추출)한 뒤, save_knowhow로 Vault에 영구 습득하라. '
         'read_source {path,line?,lines?} (read-only repository code, never private data or secrets); search_source {query}; memory {query}; '
         'dispatch {agent,tool,args} using ONLY run_project_cycle {project}, recover_project_runtime {project}, recover_project_work {project,work_id}, '
@@ -760,6 +763,14 @@ def _advance(row,steps=2):
             else:raise ValueError('Invalid decision')
             row['modelFailures']=0;row['status']='ready';save(row)
         except Exception as exc:
+            from common.llm_usage import UsageBudgetExceeded, RouteCoolingDown
+            if isinstance(exc, (UsageBudgetExceeded, RouteCoolingDown)):
+                observe(row,'host','resource_hold',{}, {'errorType':type(exc).__name__,'reason':str(exc)})
+                row.update(status='blocked' if isinstance(exc, UsageBudgetExceeded) else 'waiting',
+                           nextCheckAt=time.time()+300, answerSource='host',
+                           answer='자원 한도 또는 모델 경로 대기로 중단했습니다. 실제 작업 증거를 보존했으며 완료로 처리하지 않았습니다.')
+                save(row)
+                return row
             row['modelFailures']=row.get('modelFailures',0)+1
             observe(row,'host','decision_error',{}, {'errorType':type(exc).__name__,'reason':safe(str(exc))[:500]})
             row.update(status='blocked' if row['modelFailures']>=3 else 'ready',nextCheckAt=time.time()+30)

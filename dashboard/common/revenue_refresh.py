@@ -66,7 +66,7 @@ def collect_once(root=ROOT,now=None,backend=None):
                 if key=='toss' and config.get('reportCapability')=='api_report':return backend.toss(cfg,start,today)
                 if key=='replyalba' and config.get('credentialPresence',{}).get('login'):return backend.replyalba(cfg,start,today,now=now)
                 if key=='trip' and config.get('credentialPresence',{}).get('affiliateIds'):
-                    return {'status':'collected','daily':{},'reason':f"트립닷컴 파트너스 연동 (AID: {cfg.get('TRIP_AID')}) · 제휴 링크 추적 활성",'valueKind':'estimated'}
+                    raise backend.RevenueSourceError('report_unavailable','트립닷컴 추적 식별자 설정됨 · 수익 보고서 미연결')
                 raise backend.RevenueSourceError('not_configured','수익 보고 API 연결 대기')
             jobs.append((key,record,API_SECONDS,affiliate_job))
         for key,record,interval,job in jobs:
@@ -98,9 +98,21 @@ def collect_once(root=ROOT,now=None,backend=None):
             backend.deduplicate_adpost_sources(previous['months'][month]['sources'])
             write(data/'revenue.json',previous)
             state.update(checkedAt=dt.datetime.now(KST).isoformat());write(data/'revenue-refresh.json',state)
+        page_status = state.setdefault('pageRevenue', {})
+        if due(page_status, now.timestamp(), 1800):
+            try:
+                previous['pagePerformance'] = backend.collect_page_revenue(cfg, accounts, now)
+                page_status.update(status='collected' if previous['pagePerformance'].get('complete') else 'partial',
+                                   checkedAt=now.isoformat(), nextAttemptAt=now.timestamp() + 1800)
+                write(data/'revenue.json', previous)
+            except Exception:
+                page_status.update(status='error', reasonCode='page_revenue_collection_failed', nextAttemptAt=now.timestamp() + 1800)
         state.update(status='completed',finishedAt=dt.datetime.now(KST).isoformat())
         write(data/'revenue-refresh.json',state)
-        return {'status':'completed','sources':{k:v.get('status') for k,v in state['sources'].items()}}
+    from server.growth import refresh_performance_feedback
+    feedback = refresh_performance_feedback()
+    return {'status':'completed','sources':{k:v.get('status') for k,v in state['sources'].items()},
+            'performanceFeedback': feedback.get('status')}
 
 
 def install_user_timer():

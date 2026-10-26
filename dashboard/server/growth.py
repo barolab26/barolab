@@ -467,6 +467,29 @@ def refresh_performance_feedback():
         return evidence
 
 
+def business_evidence(root=ROOT):
+    """Bounded measured inputs for decisions; no allocation of account revenue to posts."""
+    from common.collection_observability import load
+    from common.llm_usage import resource_summary
+    root = Path(root)
+    metrics = load(root / 'dashboard/data/metrics.json')
+    feedback = metrics.get('performanceFeedback') or {}
+    revenue = load(root / 'dashboard/data/revenue.json')
+    day = (datetime.now(ZoneInfo('Asia/Seoul')).date() - timedelta(days=1)).isoformat()
+    sources = revenue.get('months', {}).get(day[:7], {}).get('sources', [])
+    return {'performanceCheckedAt': feedback.get('checkedAt'), 'period': {k: feedback.get(k) for k in ('start', 'end')},
+            'coverage': feedback.get('coverage'), 'reasonCodes': feedback.get('reasonCodes', []),
+            'measurementPriority': 'restore_page_revenue' if not (feedback.get('coverage') or {}).get('revenueComplete') else 'evaluate_measured_funnels',
+            'revenueWinners': feedback.get('revenueWinners', [])[:5],
+            'trafficCandidates': feedback.get('radarCandidates', [])[:5],
+            'priorDayRevenue': [{'source': s.get('id'), 'date': day, 'amount': s.get('daily', {}).get(day),
+                                 'currency': s.get('currency'), 'status': s.get('status'), 'checkedAt': s.get('checkedAt')}
+                                for s in sources if s.get('aggregationEligible') is not False],
+            'pageRevenueIssues': [{k: s.get(k) for k in ('domain', 'reasonCode')} for s in (revenue.get('pagePerformance') or {}).get('sites', []) if not s.get('complete')],
+            'resources': resource_summary(root), 'netProfitUsd': None,
+            'decisionRule': 'Prioritize measurable revenue hypotheses within remaining resources. Traffic is a proxy, missing earnings are unknown. Restore actionable measurement gaps; unavailable threshold-limited page reports are not repaired by repeated calls. Reserve a bounded traffic experiment instead. No causal uplift or net profit claim without evidence.'}
+
+
 def action_analysis():
     import sys
     dashboard = str(ROOT / 'dashboard')

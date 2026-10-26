@@ -87,6 +87,7 @@ venv/
 *.dll
 
 # 6. Runtime Locks, Temp Files, Heavy Logs & Legacy Backups
+_backup_legacy/
 *.lock
 *.tmp
 .*.*.tmp

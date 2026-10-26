@@ -1498,7 +1498,7 @@ def extract_youtube_or_url(url: str) -> Dict[str, Any]:
                 "additionalProperties": False,
             }
             kh_prompt = (
-                "당신은 @레이더·@닥터·@팀장 합동 팩트체크 및 지식 습득 위원회다. "
+                "당신은 @레이더다. 독립적인 닥터·팀장 검수가 있었다고 주장하지 않는다. 원문 주장은 실험 전 가설이며 수익 효과로 확정하지 않는다. "
                 "대표님이 공유한 유튜브/웹 원문에서 과장·카더라·일반론은 걸러내고(팩트체크), "
                 "[하루 수익 $100 달성]을 위해 우리 블로그(네이버·CF)·지식iN·Threads에 즉시 적용할 수 있는 핵심 실전 노하우만 추출하라.\n"
                 f"제목: {ing.get('title', '')}\n출처: {ing.get('url') or url}\n본문/자막:\n{raw_txt}"

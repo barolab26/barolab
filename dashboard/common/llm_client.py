@@ -327,7 +327,8 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         # Authentication, content/schema errors and uncertain submissions never trigger it.
         is_codex_timeout = (provider == 'codex' and not images and 'exceeded its hard timeout' in str(exc))
         is_agy_recoverable = (provider != 'codex' and (re.search(r'HTTP 402\b', str(exc)) or '시간 제한 초과' in str(exc)))
-        if not (is_codex_timeout or is_agy_recoverable):
+        from common.llm_usage import RouteCoolingDown, UsageBudgetExceeded
+        if isinstance(exc, (RouteCoolingDown, UsageBudgetExceeded)) or not (is_codex_timeout or is_agy_recoverable):
             raise
         previous_provider,previous_model=provider,model
         if is_codex_timeout:
@@ -339,13 +340,15 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         if call is not None:
             # Keep the rejected API request in its own model ledger before recording the actual retry.
             from common.llm_usage import _safe_record
-            rejected={**call,'latencyMs':round((time.monotonic()-provider_started)*1000),'httpStatus':402,'errorType':'InsufficientCredits'}
+            rejected={**call,'latencyMs':round((time.monotonic()-provider_started)*1000),'errorType':type(exc).__name__}
             _safe_record(rejected,'failed')
-            call.update(provider=provider,model=model,httpStatus=None,rateLimitHeaders={},
+            call.update(id=uuid.uuid4().hex, provider=provider,model=model,httpStatus=None,rateLimitHeaders={},
+                        inputTokens=0, outputTokens=0, usageReports=0,
+                        latencyStart=time.monotonic(),
                         fallbackFrom=previous_provider+':'+previous_model)
             _safe_record(call,'started')
-        if observer:observer(provider,model,'calling',reason='HTTP 402 credit recovery from '+previous_provider)
-        logging.getLogger(__name__).warning('LLM credit recovery: %s -> codex',previous_provider)
+        if observer:observer(provider,model,'calling',reason='provider recovery from '+previous_provider)
+        logging.getLogger(__name__).warning('LLM provider recovery: %s -> %s',previous_provider,provider)
         try:
             result,actual_model=_generate_json(prompt,provider,images,model,response_schema,audit_directory,effort,timeout_seconds)
         except Exception as failure:
@@ -359,6 +362,16 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
 
 
 def _generate_json(prompt, provider=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, timeout_seconds=None):
+    config = settings.load()
+    provider, model_override = _enabled_route(config, provider, model_override)
+    model = model_override or config['providers'].get(provider, {}).get('model', '')
+    from common.llm_usage import route_attempt
+    with route_attempt(provider, model):
+        return _generate_json_once(prompt, provider, images, model_override, response_schema,
+                                   audit_directory, reasoning_effort, timeout_seconds)
+
+
+def _generate_json_once(prompt, provider=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, timeout_seconds=None):
     config = settings.load()
     provider, model_override = _enabled_route(config, provider, model_override)
     if provider not in settings.PROVIDERS:

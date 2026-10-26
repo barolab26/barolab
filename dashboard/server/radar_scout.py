@@ -198,7 +198,8 @@ def autonomous_knowhow_study(track_a):
             "additionalProperties": False,
         }
         prompt = (
-            "당신은 자율 순찰 중인 @레이더(스카우터)와 @닥터(품질 주치의) 합동 연구팀이다. "
+            "당신은 자율 순찰 중인 @레이더(스카우터)다. 독립적인 닥터 검수가 있었다고 주장하지 않는다. "
+            "검색 자료에서 도출하는 내용은 실험 전 가설이다. 순위·수익·계정 수명 효과가 검증됐다고 표현하지 않는다. "
             "실시간 검색 상위 노출 문서들과 공식 정책 데이터를 대조·팩트체크하여, "
             "[하루 수익 $100 달성]을 위해 우리 블로그(네이버·CF)·지식iN·Threads가 즉시 체화해야 할 가독성·체류시간·클릭 전환 노하우 1건을 도출하라.\n"
             + json.dumps({"keyword": seed_kw, "searchHits": hits, "officialCandidates": track_a[:2]}, ensure_ascii=False)

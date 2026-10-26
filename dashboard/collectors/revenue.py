@@ -160,6 +160,7 @@ def adsense_page_performance(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE')
                         client_id=cfg[prefix + '_CLIENT_ID'], client_secret=cfg[prefix + '_CLIENT_SECRET'])
     params = {'dateRange': 'CUSTOM', 'dimensions': ['PAGE_URL'],
               'metrics': ['ESTIMATED_EARNINGS'], 'currencyCode': 'USD',
+              'filters': ['PRODUCT_CODE==AFC'],
               'reportingTimeZone': 'ACCOUNT_TIME_ZONE', 'limit': 100000}
     for key, day in [('startDate', start), ('endDate', end)]:
         params.update({key + '.year': day.year, key + '.month': day.month, key + '.day': day.day})
@@ -173,8 +174,12 @@ def adsense_page_performance(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE')
     if ([h.get('name') for h in headers] != ['PAGE_URL', 'ESTIMATED_EARNINGS']
             or headers[-1].get('currencyCode') != 'USD'):
         raise ValueError('AdSense page report columns/currency mismatch')
-    if int(data.get('totalMatchedRows', -1)) != len(data.get('rows', [])) or data.get('warnings'):
-        raise ValueError('AdSense page report incomplete')
+    if data.get('warnings'):
+        raise RevenueSourceError('report_warning', 'AdSense page dimension unavailable for selected clients; no earnings inferred')
+    if not data.get('rows') and data.get('totalMatchedRows') in (None, '0', 0):
+        raise RevenueSourceError('insufficient_data', 'No eligible page rows; impression threshold or reporting availability, not zero revenue')
+    if int(data.get('totalMatchedRows', -1)) != len(data.get('rows', [])):
+        raise RevenueSourceError('incomplete_report', 'AdSense page report truncated; no earnings inferred')
     pages, seen = [], set()
     for row in data.get('rows', []):
         url, amount = [c.get('value') for c in row['cells']]
@@ -204,14 +209,18 @@ def collect_page_revenue(cfg, accounts, now):
             continue
         prefix = account.get('env_prefix', 'SJ_GOOGLE_ADSENSE' if account_key == 'sj' else 'AAA10291028_GOOGLE_ADSENSE')
         try:
+            if not all(cfg.get(prefix + '_' + key) for key in ('ACCOUNT_ID', 'CLIENT_ID', 'CLIENT_SECRET', 'REFRESH_TOKEN')):
+                raise RevenueSourceError('not_configured', 'AdSense OAuth not configured')
             rows = adsense_page_performance(cfg, start, end, domains, prefix)
             pages.extend(rows)
             sites.extend({'domain': d, 'complete': True, 'status': 'collected'} for d in domains)
-        except Exception:
+        except Exception as exc:
             sites.extend({'domain': d, 'complete': False, 'status': 'not_collected',
-                          'reason': 'AdSense PAGE_URL report unavailable; no page revenue inferred'} for d in domains)
+                          'reasonCode': exc.status if isinstance(exc, RevenueSourceError) else 'source_request_failed',
+                          'reason': str(exc) if isinstance(exc, RevenueSourceError) else 'AdSense PAGE_URL report unavailable; no page revenue inferred'} for d in domains)
     return {'start': start.isoformat(), 'end': end.isoformat(), 'timezone': 'Asia/Seoul',
             'checkedAt': stamp(), 'currency': 'USD', 'source': 'AdSense Management API v2', 'dimension': 'PAGE_URL',
+            'scope': 'Eligible reported pages only; absent URLs have unknown earnings',
             'complete': bool(sites) and all(s['complete'] for s in sites), 'pages': pages, 'sites': sites}
 
 

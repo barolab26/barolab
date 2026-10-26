@@ -28,6 +28,25 @@ class AgendaWaiting(RuntimeError):
     pass
 
 
+def validate_business_experiment(value):
+    from datetime import date
+    from urllib.parse import urlsplit
+    if not isinstance(value, dict):
+        raise ValueError('Business experiment required')
+    for key in ('hypothesis', 'measurementDate', 'successMetric', 'stopCondition'):
+        if not isinstance(value.get(key), str) or not value[key].strip() or len(value[key]) > 1000:
+            raise ValueError('Missing bounded experiment field: ' + key)
+    date.fromisoformat(value['measurementDate'])
+    if value.get('evidenceConfidence') not in ('low', 'medium', 'high') or type(value.get('maxModelCalls')) is not int or not 1 <= value['maxModelCalls'] <= 40:
+        raise ValueError('Invalid experiment confidence or resource bound')
+    target = value.get('targetUrl')
+    if not isinstance(target, str):
+        raise ValueError('Experiment target must be a URL or empty')
+    parsed = urlsplit(target)
+    if target and (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password):
+        raise ValueError('Invalid experiment target URL')
+    return value
+
 
 def enabled():
     return load(STATE).get('enabled') is True
@@ -829,7 +848,8 @@ def company_executive_check_once():
                 write(STATE, st)
         if not valid_pending:
             return bool(pruned)
-        fp_src = json.dumps({'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary], 'pending': [r['id'] for r in valid_pending]}, sort_keys=True)
+        business = company.get('businessEvidence', {})
+        fp_src = json.dumps({'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary], 'pending': [r['id'] for r in valid_pending], 'performanceCheckedAt': business.get('performanceCheckedAt')}, sort_keys=True)
         fp = hashlib.sha256(fp_src.encode('utf-8')).hexdigest()
         if now - state.get('lastExecutiveCheckAt', 0) < 300 and state.get('lastExecutiveFingerprint') == fp:
             return False
@@ -840,19 +860,27 @@ def company_executive_check_once():
                 'briefing': {'type': 'string', 'minLength': 1, 'maxLength': 450},
                 'topAgendaId': {'type': 'string'},
                 'dropAgendaIds': {'type': 'array', 'items': {'type': 'string'}},
+                'experiment': {'type': 'object', 'properties': {
+                    'hypothesis': {'type': 'string'}, 'targetUrl': {'type': 'string'},
+                    'measurementDate': {'type': 'string'}, 'evidenceConfidence': {'type': 'string', 'enum': ['low', 'medium', 'high']},
+                    'maxModelCalls': {'type': 'integer', 'minimum': 1, 'maximum': 40},
+                    'successMetric': {'type': 'string'}, 'stopCondition': {'type': 'string'}},
+                    'required': ['hypothesis', 'targetUrl', 'measurementDate', 'evidenceConfidence', 'maxModelCalls', 'successMetric', 'stopCondition'], 'additionalProperties': False},
             },
-            'required': ['briefing', 'topAgendaId', 'dropAgendaIds'],
+            'required': ['briefing', 'topAgendaId', 'dropAgendaIds', 'experiment'],
             'additionalProperties': False,
         }
         prompt = (
             '당신은 회사 전체를 총괄하는 사업가 마인드의 팀장(@jarvis)이다. 전사 총괄 점검을 수행한다. \n' + __import__('common.asset_map', fromlist=['get_asset_map_summary']).get_asset_map_summary() + '\n'
-            '단일 목표인 [하루 수익  달성]을 기준으로 각 채널의 원초적 비즈니스 목적(CF 블로그: 캐시카우, 네이버/스레드: 유입 브릿지)에 입각해 전사 6대 프로젝트 상태(projects)와 대기 안건(pendingAgendas)을 종합 진단하라. '
+            '단일 목표인 [하루 수익 $100 달성]을 기준으로 실측 businessEvidence와 안건별 자원 사용량을 보고 판단하라. 실청구 비용 미연결은 0원이 아니며 순이익은 미확인이다. '
             '1) briefing: 전사 채널 현황과 현재 가장 시급한 병목/우선순위를 2~3문장으로 브리핑한다. 사소한 껍데기 에러(단순 URL 미이동, 형식 불일치 등)로 멈춰선 안건이 있다면 대안 경로(API 폴백, 주소 이동 등)로 뚫어내는 방향을 명시하라. '
-            '2) topAgendaId: 대기 안건 중 지금 즉시 실행해야 할 최우선 안건의 id를 정확히 1개 선택한다(실질 트래픽과 수익을 만드는 콘텐츠 발행·예약 안건을 단순 조사/점검보다 무조건 우선). '
+            '2) topAgendaId: 기대 수익의 근거 신뢰도·소요시간·남은 자원을 비교해 최우선 안건 id를 1개 선택한다. 발행량 자체는 성과가 아니다. 측정 복구가 의사결정을 막고 있으면 우선할 수 있다. 노출 임계값으로 페이지 수익이 없으면 반복 수집보다 측정일과 자원 상한을 둔 소규모 유입 실험을 택한다. '
             '3) dropAgendaIds: 이미 시효가 지났거나 불필요하게 중복된 대기 안건 id가 있다면 배열에 넣고, 없으면 빈 배열 []로 반환한다.\n'
-            + json.dumps({'projects': projects_summary, 'pendingAgendas': candidates}, ensure_ascii=False)
+            '4) experiment: 선택한 안건의 가설·증거 신뢰도·실제 대상 URL(없으면 빈 문자열)·측정일(YYYY-MM-DD)·모델 호출 상한·성공 지표·중단 조건을 기록한다. 검색 유입에는 관찰 기간을 주고 미수집을 실패나 0으로 판단하지 않는다. 수익 개선을 미리 확정하지 않는다.\n'
+            + json.dumps({'projects': projects_summary, 'pendingAgendas': candidates, 'businessEvidence': business}, ensure_ascii=False)
         )
         decision = generate_json(prompt, agent_slot='jarvis', response_schema=schema, timeout_seconds=120, memory_read_only=True, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='company-executive-check')
+        experiment = validate_business_experiment(decision.get('experiment'))
         drop_set = set(decision.get('dropAgendaIds') or []) - {decision.get('topAgendaId')}
         top_id = decision.get('topAgendaId')
         with locked(ROWS):
@@ -868,6 +896,7 @@ def company_executive_check_once():
                 trow = get(top_id)
                 if trow:
                     trow['priority'] = -10
+                    trow['businessExperiment'] = experiment
                     _save(trow)
                 st['pending'] = [top_id] + [i for i in st.get('pending', []) if i != top_id]
             st['lastExecutiveCheckAt'] = now

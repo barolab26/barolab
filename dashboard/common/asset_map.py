@@ -181,7 +181,7 @@ def match_synergy_cluster(topic_or_keyword):
 
 
 def get_account_pacing_strategy(account, date_str=None):
-    """Enforce the 7:3 Golden Rule (Account Longevity & Trust Pacing).
+    """Apply the current experimental 7:3 allocation; longevity effects are unverified.
 
     70% Pure Informational Posts (No external link, C-Rank DIA build-up).
     30% Strategic Bridge Posts (Natural anchor link to target CF Blog).
@@ -218,8 +218,8 @@ def get_account_pacing_strategy(account, date_str=None):
         return {
             'mode': 'pure_info_build',
             'linkAllowed': False,
-            'ratio': '70% 순수 정보성 빌드업 (C-Rank 지수 강화)',
-            'instruction': '외부 링크 일절 삽입 금지. 네이버 스마트블록 1위 장악을 목표로 100% 완결형 양질 정보 제공. 계정 지수와 검색 신뢰도 축적 우선.'
+            'ratio': '70% 정보성 콘텐츠 배분 실험 · 순위·수명 효과 미검증',
+            'instruction': '이번 글은 외부 링크 없이 질문을 해결하는 완결형 정보로 작성한다. 이 배분이 계정 지수·순위·수명을 개선한다고 주장하지 않는다.'
         }
     else:
         return {
@@ -238,14 +238,14 @@ def get_asset_map_summary():
     return (
         "=== [BaroLab 전사 가용 자산 지도 (Asset Map)] ===\n"
         f"1. 캐시카우 (CF 블로그 16개): {cf_summary} (고단가 애드센스 수익화 종착지)\n"
-        f"2. 검색 유입 브릿지 (네이버 블로그 5개): {naver_summary} (비실명 7:3 수명연장 페이싱)\n"
+        f"2. 검색 유입 브릿지 (네이버 블로그 5개): {naver_summary} (7:3 배분 실험 · 수명 효과 미검증)\n"
         f"3. 바이럴 숏테일 (스레드): @{THREADS_ACCOUNT['account_key']} (공식 Graph API + 크롬 9450)\n"
         f"4. 신뢰 솔루션 (지식iN): {kin_summary}\n"
         "5. 제휴마케팅 무기 (수익 2차 엔진):\n"
-        "   - 리플알바 (CPA/CPC, ID: baro76650): 정책자금/대출/보험/렌탈 등 고단가 DB 상담신청 (건당 수만원 수수료)\n"
+        "   - 리플알바 (CPA/CPC, ID: baro76650): 정책자금/대출/보험/렌탈 상담신청 · 실제 수수료는 해당 캠페인 조건 확인\n"
         "   - 트립닷컴 (CPS, AID: 7143081, SID: 263330208): tripmarvel.com/여행/축제/K-패스 글에 숙소·교통 예약 링크\n"
         "   - 쿠팡 파트너스 & 토스 쉐어링크: 생활/가전/금융 이벤트 직결 전환\n"
         "6. 컴퓨팅 인프라: 제미나이 2개 풀(baro76650, barolab26) + Codex(gpt-6.1-sol/luna) + Google Flow 이미지(CDP 9440)\n"
-        "7. 운용 철학: [7:3 골든 룰] 네이버 70% 순수정보 빌드업, 30% CF 브릿지 링크 + CF 본문 내 애드센스+제휴(리플알바/트립닷컴) 융합으로 하루 $100 달성\n"
+        "7. 운용 가설: 네이버 정보글 70%·CF 링크 30% 배분 및 애드센스·제휴 병행을 실험한다. 하루 $100는 목표이며 이 전략의 수익·계정 수명 효과는 미검증이다.\n"
         "=================================================="
     )
