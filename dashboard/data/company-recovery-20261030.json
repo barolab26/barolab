@@ -576,5 +576,59 @@
       "dashboard": 53728,
       "memoryWorker": 49072
     }
+  },
+  "adpostSessionRepair": {
+    "checkedAt": "2026-10-30T10:05:14.506Z",
+    "account": "soul5373",
+    "transport": "ego-browser-cli",
+    "evidenceReconciliation": "Saved live browser report applied after successful task-space finish; CLI stderr envelope corrected separately",
+    "profileId": "Profile 4",
+    "publisherId": "1224849",
+    "totalKRW": "5990",
+    "period": {
+      "start": "2026-10-01",
+      "end": "2026-10-30"
+    },
+    "pendingDates": [
+      "2026-10-30"
+    ],
+    "accounts": [
+      {
+        "account": "soultin",
+        "amountKRW": "0",
+        "status": "collected",
+        "mediaIds": [
+          "895017"
+        ],
+        "latestObservedDay": "2026-10-29"
+      },
+      {
+        "account": "soul5373",
+        "amountKRW": "3731",
+        "status": "collected",
+        "mediaIds": [
+          "858728"
+        ],
+        "latestObservedDay": "2026-10-29"
+      },
+      {
+        "account": "yoon_master",
+        "amountKRW": "2259",
+        "status": "collected",
+        "mediaIds": [
+          "858828"
+        ],
+        "latestObservedDay": "2026-10-29"
+      }
+    ],
+    "verification": {
+      "collectionRuntimeTestsPassed": 18,
+      "nodeSyntaxCheck": "passed",
+      "liveDashboardAdPostKRW": "5990",
+      "liveDashboardAccountSources": 3,
+      "todayStatus": "pending",
+      "recurringRunAfterOutputFix": "not_yet_observed",
+      "task61": "finished; CLI stderr parser failure reconciled from retained live report"
+    }
   }
 }

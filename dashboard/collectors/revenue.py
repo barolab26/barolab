@@ -645,29 +645,76 @@ def _adpost_report(page, cfg, account, start, end):
     return rows, publisher, blogs
 
 
+def _adpost_ego_report(start, end, expected_account='soul5373', *, space_id=None):
+    """One read-only EGO goal; interrupted spaces require explicit reconciliation."""
+    import base64
+    import shutil
+    import subprocess
+    import uuid
+    if expected_account != 'soul5373' or space_id is not None and (type(space_id) is not int or space_id < 1):
+        raise RevenueSourceError('auth_required', '승인된 soul5373 EGO 세션이 필요합니다.')
+    executable = shutil.which('ego-browser')
+    if not executable:
+        raise RevenueSourceError('browser_offline', 'EGO Browser CLI 연결 대기')
+    control_path = DATA / 'secure' / 'adpost-ego-state.json'
+    with collector_lock(DATA / 'adpost-ego.lock') as acquired:
+        if not acquired:
+            raise RevenueSourceError('deferred', '애드포스트 EGO 조회가 이미 진행 중입니다.')
+        previous = read_json(control_path)
+        if space_id is None and previous.get('status') in ('running', 'held'):
+            raise RevenueSourceError(previous.get('sourceStatus', 'browser_unavailable'),
+                                     'EGO 세션 확인 필요 · 이전 작업 공간 보존 · 자동 재시도 보류')
+        request = {'expectedAccount': expected_account, 'start': start.strftime('%Y%m%d'),
+                   'end': end.strftime('%Y%m%d'), 'spaceId': space_id,
+                   'taskName': 'adpost-soul5373-' + datetime.now(KST).strftime('%Y%m%d-%H%M%S-') + uuid.uuid4().hex[:8]}
+        state = {'status': 'running', 'spaceId': space_id, 'taskName': request['taskName'], 'startedAt': stamp()}
+        atomic_write(control_path, state)
+        token = base64.urlsafe_b64encode(json.dumps(request).encode('utf-8')).decode('ascii').rstrip('=')
+        module = (ROOT / 'dashboard/collectors/adpost_ego.mjs').as_uri()
+        try:
+            result = subprocess.run([executable, 'nodejs', '-e', "await import('" + module + '?request=' + token + "')"],
+                capture_output=True, text=True, encoding='utf-8', timeout=120, check=True,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            streams = (getattr(result, 'stdout', '') or '', getattr(result, 'stderr', '') or '')
+            lines = [line.split('=', 1)[1] for output in streams for line in output.splitlines()
+                     if line.startswith('BAROLAB_ADPOST_RESULT=')]
+            if len(lines) != 1 or len(lines[0]) > 2_000_000:
+                raise ValueError('Invalid collector envelope')
+            payload = json.loads(lines[0])
+            state['spaceId'] = payload.get('spaceId')
+            if payload.get('ok') is not True:
+                code = payload.get('status')
+                raise RevenueSourceError(code if code in ('auth_required', 'not_enrolled', 'browser_unavailable', 'error') else 'error',
+                                         'EGO 애드포스트 읽기 중단 · 작업 공간 확인 필요')
+            publisher = str(payload.get('publisher', ''))
+            if payload.get('account') != expected_account or not publisher.isdigit():
+                raise RevenueSourceError('auth_required', 'EGO 애드포스트 계정 식별 불일치')
+            for key in ('blogs', 'medias', 'rows'):
+                if not isinstance(payload.get(key), list):
+                    raise ValueError('Invalid report rows')
+            if any(str(row.get('publisherId')) != publisher for row in payload['blogs'] + payload['medias']):
+                raise RevenueSourceError('auth_required', 'EGO 애드포스트 미디어 소유자 식별 불일치')
+            state.update(status='completed', finishedAt=stamp(), taskFinished=True)
+            atomic_write(control_path, state)
+            return payload['rows'], publisher, payload['blogs'], payload['medias']
+        except Exception as exc:
+            for output in (getattr(exc, 'stdout', None) or '', getattr(exc, 'stderr', None) or ''):
+                if isinstance(output, bytes):
+                    output = output.decode('utf-8', errors='replace')
+                for line in output.splitlines():
+                    if re.fullmatch(r'BAROLAB_ADPOST_SPACE=\d+', line):
+                        state['spaceId'] = int(line.split('=', 1)[1])
+            state.update(status='held', sourceStatus=getattr(exc, 'status', 'browser_unavailable'), checkedAt=stamp())
+            atomic_write(control_path, state)
+            if isinstance(exc, RevenueSourceError):
+                raise
+            # CLI output can contain account data; only a controlled reason leaves this boundary.
+            raise RevenueSourceError('browser_unavailable', 'EGO 애드포스트 조회 중단 · 이전 작업 공간 확인 필요') from None
+
+
 @observed_operation('metrics', 'revenue-collection')
-def adpost(start, end, cfg=None, account='soul5373', port=9333):
-    from playwright.sync_api import sync_playwright
-    cfg = cfg if cfg is not None else revenue_config()
-    owned = False
-    with sync_playwright() as p:
-        try:
-            browser = p.chromium.connect_over_cdp(f'http://127.0.0.1:{port}', timeout=10000)
-        except Exception:
-            # A recurring read must not revive a stopped account browser.
-            raise RevenueSourceError('browser_offline', '전용 브라우저 연결 대기 · 이전 수익 보존') from None
-        context = browser.contexts[0]
-        page = next((tab for tab in context.pages if urlparse(tab.url).hostname == 'adpost.naver.com'
-                     and urlparse(tab.url).path.rstrip('/') in ('/main', '/report', '/report/revenue')), None)
-        if page is None:
-            page, owned = context.new_page(), True
-        try:
-            rows, publisher, blogs = _adpost_report(page, cfg, account, start, end)
-            medias = browser_json(page, '/api/medias?' + urlencode({'publisherId':publisher,'mediaStatus':'ALL','mediaType':'ALL'})) if account == 'soul5373' else []
-        finally:
-            # Existing publication/editor/user tabs and the CDP browser stay open.
-            if owned:
-                page.close()
+def adpost(start, end, cfg=None, account='soul5373', port=9333, *, space_id=None):
+    rows, publisher, blogs, medias = _adpost_ego_report(start, end, account, space_id=space_id)
     result = parse_adpost_rows(rows, start, end)
     if account == 'soul5373':
         if not isinstance(medias,list) or any(str(m.get('publisherId'))!=str(publisher) for m in medias):
@@ -675,9 +722,23 @@ def adpost(start, end, cfg=None, account='soul5373', port=9333):
         result['accountBreakdown'] = parse_adpost_accounts(rows, medias, start, end)
     result.update(publisherId=str(publisher), publisherVerified=True,
                   mediaAliases=[b['alias'] for b in blogs], account=account, collectionAccount='soul5373', declaredRealNameAccountCount=3,
-                  tabOwnership={'ownedTemporary': owned, 'reusedExisting': not owned},
+                  collectionTransport='ego-browser', browserProfile='soul5373', browserPort=None,
+                  tabOwnership={'transport': 'ego-browser', 'profile': 'soul5373', 'ownedTemporary': True},
                   reason='soul5373 한 곳에서 조회 · 수익은 3개 계정별 구분 · 미집계 날짜는 집계 중')
     return result
+
+
+def preserve_adpost_sources(sources, old_sources):
+    """A failed unified read cannot erase the other two previously observed accounts."""
+    failed = next((row for row in sources if row.get('category') == 'adpost' and row.get('status') != 'collected'), None)
+    if not failed:
+        return
+    existing = {row.get('id') for row in sources}
+    for identity, old in old_sources.items():
+        if old.get('category') == 'adpost' and identity not in existing:
+            sources.append({**old, 'status': failed['status'], 'reason': failed.get('reason'),
+                            'attemptedAt': failed.get('attemptedAt'),
+                            'lastSuccessAt': old.get('lastSuccessAt') or old.get('checkedAt')})
 
 
 
@@ -874,7 +935,7 @@ def deduplicate_adpost_sources(sources):
             continue
         common={k:v for k,v in source_row.items() if k not in ('accountBreakdown','daily','details','pendingDates','account','label','id')}
         for account in breakdown:
-            expanded.append({**common,**account,'id':'adpost-'+account['account'],'collectionAccount':'soul5373','browserPort':9333,
+            expanded.append({**common,**account,'id':'adpost-'+account['account'],'collectionAccount':'soul5373',
                              'scope':'soul5373 조회 · '+account['account']+' 계정 수익'})
     sources[:]=expanded
     candidates = [s for s in sources if s.get('category') == 'adpost']
@@ -1064,6 +1125,7 @@ def collect(now=None):
                 else:
                     record.update(daily={}, details=[], pendingDates=[])
                 record.update(status=getattr(exc, 'status', 'error'), reason=reason, attemptedAt=stamp())
+        preserve_adpost_sources(sources, old_sources)
         deduplicate_adpost_sources(sources)
         family = accounts.get('aaa10291028', {})
         family_record = source('adsense-aaa10291028', 'adsense', '가족 aaa · 애드센스', 'USD', 'nolplace.com · 가족 계정 별도 수집', domains=family.get('sites', []))
