@@ -665,8 +665,9 @@ class BusinessControls(unittest.TestCase):
             with self.assertRaises(chat.HTTPException):chat.receive_goal_result({'goalId':self.agenda})
 
     def setUp(self):
+        import gc
         self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
+        self.addCleanup(lambda: (gc.collect(), self.temp.cleanup()))
         self.root = Path(self.temp.name)
         self.data = self.root / 'dashboard/data'
         self.data.mkdir(parents=True)

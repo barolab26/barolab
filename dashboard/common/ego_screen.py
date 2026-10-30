@@ -42,6 +42,29 @@ def clipboard_text(port):
     window = inspect_workflow_window(port)
     if window['status'] != 'observed' or not window.get('display'):
         raise RuntimeError('Clipboard requires a verified existing browser window')
+    if os.name == 'nt' and window.get('display') == 'windows':
+        import ctypes
+        user32 = ctypes.windll.user32
+        kernel32 = ctypes.windll.kernel32
+        kernel32.GlobalLock.argtypes = [ctypes.c_void_p]
+        kernel32.GlobalLock.restype = ctypes.c_void_p
+        kernel32.GlobalUnlock.argtypes = [ctypes.c_void_p]
+        user32.GetClipboardData.restype = ctypes.c_void_p
+        if not user32.OpenClipboard(None):
+            raise RuntimeError('Clipboard read failed on verified browser DISPLAY')
+        try:
+            handle = user32.GetClipboardData(13)  # CF_UNICODETEXT
+            if not handle:
+                return ''
+            ptr = kernel32.GlobalLock(handle)
+            if not ptr:
+                return ''
+            try:
+                return ctypes.wstring_at(ptr)
+            finally:
+                kernel32.GlobalUnlock(handle)
+        finally:
+            user32.CloseClipboard()
     try:
         value = subprocess.check_output(['xclip', '-o', '-selection', 'clipboard'],
             env={**os.environ, 'DISPLAY': window['display']}, stderr=subprocess.PIPE, timeout=3)
@@ -147,7 +170,7 @@ def screen_point(x, y, width, height):
 @contextmanager
 def screen_lock(port):
     """One screen actor per existing Ubuntu browser, including model latency."""
-    import fcntl
+    from common import runtime_locks as fcntl
     from common.runtime_locks import runtime_lock_path
     lock = runtime_lock_path(Path(__file__).resolve().parents[1] / 'data' / ('ego-screen-' + str(port) + '.lock'))
     lock.parent.mkdir(parents=True, exist_ok=True)

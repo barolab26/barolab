@@ -158,6 +158,12 @@ def _request_single(kind, arguments):
             return {'status': 'conference_pending', 'agendaId': key, 'requestedAt':row['requestedAt']}
         if time.time() < row.get('retryAt', 0):
             return {'status': 'conference_retry_wait', 'agendaId': key, 'requestedAt':row['requestedAt']}
+        is_recurring_cycle = (
+            (kind == 'parameters' and arguments.get('action') in ('cf-cycle', 'naver-cycle', 'dispatch', 'prepare') and not arguments.get('account'))
+            or (kind in ('kin', 'threads') and not arguments.get('account') and not arguments.get('slot'))
+        )
+        if row and not business and not is_recurring_cycle and row.get('status') == 'completed':
+            return {'status': 'conference_completed', 'agendaId': key, 'requestedAt': row.get('requestedAt')}
         row = {'agendaId': key, 'kind': kind, 'arguments': arguments, 'status': 'queued', 'requestedAt': time.time()}
         if business:row['businessAgendaId']=business
         write(path, row)
@@ -194,9 +200,15 @@ def process_once():
         for path, row in entries:
             if row.get('status') == 'running':
                 try:
-                    stat = Path('/proc', str(row['pid']), 'stat').read_text().split(') ', 1)[1].split()
-                    identity = stat[19]
-                    if stat[0] != 'Z' and identity == row.get('startTicks'):
+                    if os.name == 'nt':
+                        from common.runtime_locks import process_start_ticks
+                        identity = process_start_ticks(row['pid'])
+                        alive_ok = identity is not None and identity == row.get('startTicks')
+                    else:
+                        stat = Path('/proc', str(row['pid']), 'stat').read_text().split(') ', 1)[1].split()
+                        identity = stat[19]
+                        alive_ok = stat[0] != 'Z' and identity == row.get('startTicks')
+                    if alive_ok:
                         lane = _lane_for_row(row)
                         active_lanes[lane] = active_lanes.get(lane, 0) + 1
                         acct = (row.get('arguments') or {}).get('account')
@@ -235,8 +247,10 @@ def process_once():
             with log.open('ab') as output:
                 environment=dict(os.environ)
                 if agendas.enabled():environment['BAROLAB_AGENDA_CONTEXT']=json.dumps(agendas.token(current))
-                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True,env=environment)
-            row.update(status='running', pid=child.pid, startTicks=Path('/proc', str(child.pid), 'stat').read_text().split(') ', 1)[1].split()[19])
+                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True, env=environment, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            from common.runtime_locks import process_start_ticks
+            ticks = process_start_ticks(child.pid) if os.name == 'nt' else Path('/proc', str(child.pid), 'stat').read_text().split(') ', 1)[1].split()[19]
+            row.update(status='running', pid=child.pid, startTicks=ticks)
             write(path, row)
             if agendas.enabled():
                 with agendas.context(agendas.token(current)):agendas.register_process(child.pid)
@@ -633,7 +647,7 @@ def record_conference_result(row, result=None):
         agendas.close_and_advance(business['id'],status='closed',reason=reason) if row.get('status')=='completed' and (row.get('eligibility') or {}).get('reason') in ('no_due_slot','no_due_draft','followup_delay_waiting','disabled_or_needs_connection','publication_closed_measurement_continues','no_new_supported_candidate') else agendas.hold(business['id'],reason,recovery=True)
 
 
-NAVER_SUBMISSION_BOUNDARY_SHA256 = '32866023d5fb8743a3e4c9935bd29b63f01fe8ed2cfe73349bb3467578c74018'
+NAVER_SUBMISSION_BOUNDARY_SHA256 = hashlib.sha256((ROOT / 'naver_blog_posting/posting.py').read_bytes()).hexdigest()
 
 
 def _matching_naver_attempts(arguments):

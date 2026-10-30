@@ -429,7 +429,7 @@ def file_lock(path: Path):
             import msvcrt
             msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
         else:
-            import fcntl
+            from common import runtime_locks as fcntl
             fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
         try:
             yield

@@ -30,7 +30,6 @@ def incident_key(project):
 
 def report_project_incident_once(project):
     """Report only; this entry never invokes Jarvis, dispatches work or publishes."""
-    from common.jev import classify_incident
     from common.crew_chat_bridge import emit_pipeline_crew_message
     if project.get('status') not in ('attention', 'stale', 'unknown'):
         return {'status': 'not_needed'}
@@ -53,6 +52,7 @@ def report_project_incident_once(project):
         retry = True
     try:
         try:
+            from common.jev import classify_incident
             verdict = (row.get('classification') or {'status': 'interrupted', 'priority': 'unclassified'}) if retry else classify_incident(project)
         except Exception as exc:
             verdict = {'status': 'api_error', 'priority': 'unclassified', 'errorType': type(exc).__name__}

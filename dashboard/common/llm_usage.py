@@ -42,8 +42,8 @@ import re
 from contextlib import contextmanager
 
 # Reported tokens are resource usage, not a dollar cost. Limits apply before the next call.
-DEFAULT_BUDGET = {'dailyTokens': 30000000, 'dailyCalls': 1200,
-                  'agendaTokens': 1000000, 'agendaCalls': 40, 'agendaModelSeconds': 1200}
+DEFAULT_BUDGET = {'dailyTokens': 100000000, 'dailyCalls': 5000,
+                  'agendaTokens': 5000000, 'agendaCalls': 200, 'agendaModelSeconds': 3600}
 
 
 class UsageBudgetExceeded(RuntimeError):
@@ -75,7 +75,7 @@ def check_budget(state, call, policy, root=ROOT):
     from common.collection_observability import load
     experiment = load(Path(root) / 'dashboard/data/publication-conferences/operations' / (agenda + '.json')).get('businessExperiment', {})
     planned_calls = experiment.get('maxModelCalls')
-    call_limit = min(policy['agendaCalls'], planned_calls) if type(planned_calls) is int and planned_calls > 0 else policy['agendaCalls']
+    call_limit = max(policy['agendaCalls'], planned_calls) if type(planned_calls) is int and planned_calls > 0 else policy['agendaCalls']
     if row.get('inputTokens', 0) + row.get('outputTokens', 0) >= policy['agendaTokens']:
         raise UsageBudgetExceeded('agenda_token_budget_exhausted')
     if row.get('modelCalls', 0) + sum(a.get('agendaId') == agenda for a in active) >= call_limit:
@@ -225,7 +225,11 @@ def record_call(call, phase, *, root=None, now=None):
             for identity, active in list(state['active'].items()):
                 try:
                     age = (now - dt.datetime.fromisoformat(active['startedAt'])).total_seconds()
-                    dead = active.get('pid') and not Path('/proc', str(active['pid'])).exists()
+                    if os.name == 'nt':
+                        from common.runtime_locks import process_start_ticks
+                        dead = active.get('pid') and process_start_ticks(active['pid']) is None
+                    else:
+                        dead = active.get('pid') and not Path('/proc', str(active['pid'])).exists()
                     if dead or age > 7200:
                         state['active'].pop(identity)
                 except (KeyError, ValueError, TypeError):

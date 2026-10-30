@@ -200,7 +200,7 @@ def retire_resolved_attempts(graph, root):
     """Resume via ledger state; keep failed artifacts and never touch uncertain sends."""
     from common.runtime_locks import runtime_lock_path
     from common.collection_observability import write
-    import fcntl
+    from common import runtime_locks as fcntl
     path=root/'dashboard/data/naver/automation-journal.json'
     if not path.exists():return 0
     lock=runtime_lock_path(path.parent/'pipeline-run.lock');lock.parent.mkdir(parents=True,exist_ok=True)
@@ -245,33 +245,53 @@ def observe(graph, report, source, fields):
 def score(graph, now):
     posts=[n for n in graph['nodes'].values() if n['type']=='Post']
     for node in posts:
-        m=node['measurements'];published=date(node.get('publishedAt'));weight=1
+        m=node['measurements'];published=date(node.get('publishedAt'));weight=0
         clicks=number((m.get('gsc') or {}).get('clicks'))
+        sessions=number((m.get('ga4') or {}).get('sessions'))
+        pv=number((m.get('ga4') or {}).get('pageViews'))
         revenue=number((m.get('adsense') or {}).get('revenue'))
         index=m.get('index') or {};indexed=date(index.get('firstIndexedAt') or index.get('checkedAt'))
         early=bool(published and indexed and index.get('indexed') is True and 0 <= (indexed-published).total_seconds()<=86400)
-        if early:weight+=3
-        if clicks is not None and clicks>0:weight+=2
-        if revenue is not None and revenue>0:weight+=10 if early and clicks and clicks>0 else 3
-        # Explicit full post-publication seven-day observations alone can penalize.
-        positive=any((number((m.get(source) or {}).get(field)) or 0)>0 for source,field in [('gsc','clicks'),('ga4','sessions'),('adsense','revenue')])
-        for metric,field in ([] if positive else [('gsc','clicks'),('ga4','sessions')]):
+        traffic_volume=max(pv or 0, sessions or 0, clicks or 0)
+        if traffic_volume >= 500:
+            weight += 8
+        elif traffic_volume >= 50 or (clicks or 0) >= 10:
+            weight += 4
+        elif traffic_volume > 0:
+            weight += 2
+        if early and traffic_volume > 0:
+            weight += 2
+        if revenue is not None and revenue > 0:
+            weight += 15 if revenue >= 1.0 else 10
+        positive = traffic_volume > 0 or (revenue is not None and revenue > 0)
+        for metric,field in ([] if positive else [('gsc','clicks'),('ga4','sessions'),('ga4','pageViews')]):
             sample=m.get(metric) or {};start=date(sample.get('start'));end=date(sample.get('end'))
-            if published and start and end and start>=published and (end-start).days>=6 and sample.get(field)==0:weight-=5;break
+            if published and start and end and start>=published and sample.get(field)==0:
+                weight -= (5 if (end-start).days>=6 else 2)
+                break
         node['synapseWeight']=weight
-        node['weightEvidence']={'indexedWithin24h':early,'clicks':clicks,'pageRevenue':revenue,'causalClaim':False}
+        node['weightEvidence']={
+            'kpiBasis':'pv_and_revenue_only',
+            'indexedWithin24h':early,
+            'pageViews':pv,
+            'sessions':sessions,
+            'clicks':clicks,
+            'pageRevenue':revenue,
+            'status':'winner' if weight>=4 else ('active_traffic' if weight>0 else ('penalized_zero_traffic' if weight<0 else 'published_pending_traffic')),
+            'causalClaim':False,
+        }
     for pid,pattern in graph['nodes'].items():
         if pattern['type']!='Pattern':continue
         examples=[graph['nodes'][e['source']] for e in graph['edges'] if e['target']==pid and e['type']=='uses_pattern']
         pattern['synapseWeight']=round(sum(n['synapseWeight'] for n in examples)/len(examples),3) if examples else 0
         pattern['measuredExamples']=sum(bool(n['measurements']) for n in examples)
-        pattern['signal']='measured_outcomes' if pattern['measuredExamples'] else 'public_http_200_only'
+        pattern['signal']='measured_outcomes' if pattern['measuredExamples'] else 'published_pending_traffic'
         pattern['examples']=[n['url'] for n in sorted(examples,key=lambda n:n['synapseWeight'],reverse=True)[:3]]
     for identity, variant in graph['nodes'].items():
         if variant.get('type') != 'StyleVariant':continue
         examples=[p for p in posts if p.get('styleVariantId')==identity and p.get('measurements')]
         variant['measuredExamples']=len(examples)
-        variant['synapseWeight']=round(sum(p['synapseWeight']-1 for p in examples)/len(examples),3) if examples else 0
+        variant['synapseWeight']=round(sum(p['synapseWeight'] for p in examples)/len(examples),3) if examples else 0
         variant['signal']='measured_outcomes' if examples else 'measurement_pending'
     for identity, planning in graph['nodes'].items():
         if planning.get('type')!='EditorialPlanningSession':continue
@@ -344,7 +364,7 @@ def record_boosts(graph, root):
 def refresh_once(root=ROOT, force=False):
     from common.runtime_locks import runtime_lock_path
     from common.collection_observability import write
-    import fcntl
+    from common import runtime_locks as fcntl
     root=Path(root);data=root/'dashboard/data';path=data/'memory_graph.json'
     lock=runtime_lock_path(data/'synapse.lock');lock.parent.mkdir(parents=True,exist_ok=True)
     with lock.open('a+b') as handle:

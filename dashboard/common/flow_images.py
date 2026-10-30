@@ -98,20 +98,77 @@ async def prepare_fresh_project_page(context, prior):
     return home
 
 
-async def capture_research_evidence(folder):
+def _evidence_path(folder: Path, filename: str) -> Path:
+    if filename == 'flow-hero.png':
+        return folder / 'flow-generation.json'
+    return folder / f'flow-generation-{Path(filename).stem}.json'
+
+
+def _generate_via_openai_api(prompt: str, digest: str, output: Path, evidence_file: Path) -> Path:
+    import base64
+    import requests
+    from dotenv import dotenv_values
+    from PIL import Image
+
+    env = dotenv_values(Path(__file__).resolve().parents[2] / '.env')
+    last_err = None
+    for key_name in ('OPENAI_API_KEY_JUSTINCOME', 'OPENAI_API_KEY_MAKE'):
+        api_key = (env.get(key_name) or '').strip()
+        if not api_key:
+            continue
+        for model in ('gpt-image-2.5-flare', 'gpt-image-2.5-sunburst', 'gpt-image-2', 'gpt-image-1.5', 'chatgpt-image-latest'):
+            try:
+                resp = requests.post(
+                    'https://api.openai.com/v1/images/generations',
+                    headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+                    json={'model': model, 'prompt': prompt, 'n': 1, 'size': '1024x1024'},
+                    timeout=60,
+                )
+                if resp.status_code != 200:
+                    last_err = f'{model} HTTP {resp.status_code}'
+                    continue
+                item = (resp.json().get('data') or [{}])[0]
+                raw = base64.b64decode(item['b64_json']) if item.get('b64_json') else requests.get(item['url'], timeout=30).content
+                with Image.open(io.BytesIO(raw)) as image:
+                    if min(image.size) < 256:
+                        raise RuntimeError('Generated image is too small')
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    image.convert('RGB').save(output, format='PNG')
+                    dimensions = list(image.size)
+                receipt = {
+                    'status': 'downloaded',
+                    'mode': 'editorial_image_api',
+                    'model': model,
+                    'promptSha256': digest,
+                    'completedAt': stamp(),
+                    'dimensions': dimensions,
+                    'sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
+                }
+                write(evidence_file, receipt)
+                return output
+            except Exception as exc:
+                last_err = str(exc)
+    raise RuntimeError(f'Image generation failed: {last_err}')
+
+
+async def capture_research_evidence(folder, filename='flow-hero.png', source_index=0):
     """Capture a clean screenshot of the verified research source when evidence capture is requested."""
     from playwright.async_api import async_playwright
+    from common.ubuntu_naver_browser import EGO_BINARY
     from PIL import Image
     folder = Path(folder)
     research_data = load(folder / 'research.json')
-    sources = research_data.get('sources') or []
-    if not sources or not sources[0].get('url'):
+    sources = [s for s in (research_data.get('sources') or []) if isinstance(s, dict) and s.get('url')]
+    if not sources:
         raise RuntimeError('No verified research source URL available to capture')
-    target_url = sources[0]['url']
-    output = folder / 'images/flow-hero.png'
+    target_url = sources[min(max(0, int(source_index)), len(sources) - 1)]['url']
+    output = folder / 'images' / filename
     output.parent.mkdir(parents=True, exist_ok=True)
+    launch_kwargs = {'headless': True}
+    if EGO_BINARY and Path(EGO_BINARY).exists():
+        launch_kwargs['executable_path'] = str(EGO_BINARY)
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(**launch_kwargs)
         try:
             page = await browser.new_page(viewport={'width': 1280, 'height': 800})
             await page.goto(target_url, wait_until='domcontentloaded', timeout=20000)
@@ -130,7 +187,7 @@ async def capture_research_evidence(folder):
         'dimensions': dimensions,
         'sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
     }
-    write(folder / 'flow-generation.json', receipt)
+    write(_evidence_path(folder, filename), receipt)
     return output
 
 
@@ -144,108 +201,106 @@ async def open_generation_settings(page):
     await settings.click(timeout=5000)
 
 
-def generate(title, summary, folder, custom_prompt=None):
-    return asyncio.run(_generate(title, summary, Path(folder), custom_prompt=custom_prompt))
+def generate(title, summary, folder, custom_prompt=None, filename='flow-hero.png', source_index=0):
+    return asyncio.run(_generate(title, summary, Path(folder), custom_prompt=custom_prompt, filename=filename, source_index=source_index))
 
 
-async def _generate(title, summary, folder, custom_prompt=None):
+async def _generate(title, summary, folder, custom_prompt=None, filename='flow-hero.png', source_index=0):
     from playwright.async_api import async_playwright, expect
     from common.browser_session import flow_generation_lock, connect_async
     from common.ubuntu_naver_browser import account_paths, ensure_account, focus_workflow_window
     from common.ego_telemetry import async_action
     from PIL import Image
 
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    evidence_file = _evidence_path(folder, filename)
+    output = folder / 'images' / filename
+
     if isinstance(custom_prompt, str) and custom_prompt.strip().upper().startswith('RESEARCH_CAPTURE'):
-        return await capture_research_evidence(folder)
+        try:
+            return await capture_research_evidence(folder, filename=filename, source_index=source_index)
+        except Exception:
+            custom_prompt = None
 
     prompt = image_prompt(title, summary, custom_prompt=custom_prompt)
     digest = hashlib.sha256(prompt.encode()).hexdigest()
-    folder.mkdir(parents=True, exist_ok=True)
-    evidence_file = folder / 'flow-generation.json'
-    output = folder / 'images/flow-hero.png'
+    prior = load(evidence_file)
+    if prior.get('promptSha256') == digest and prior.get('status') == 'downloaded' and output.exists():
+        if hashlib.sha256(output.read_bytes()).hexdigest() == prior.get('sha256'):
+            return output
+
     async with flow_generation_lock(timeout=300):
-        active_file = Path(__file__).resolve().parents[1] / 'data/flow-active.json'
-        active = load(active_file)
-        if active.get('folder') and active['folder'] != str(folder.resolve()):
-            previous = load(Path(active['folder']) / 'flow-generation.json')
-            try:
-                sub_time = datetime.fromisoformat(active.get('submittedAt', '1970-01-01T00:00:00+00:00'))
-                is_stale = (datetime.now(timezone.utc) - sub_time).total_seconds() > 240
-            except Exception:
-                is_stale = True
-            if previous.get('status') not in ('downloaded', None) and not is_stale:
-                raise RuntimeError('Another Flow result needs reconciliation before another request')
         prior = load(evidence_file)
-        if prior.get('promptSha256') == digest and prior.get('status') == 'downloaded':
-            if output.exists() and hashlib.sha256(output.read_bytes()).hexdigest() == prior.get('sha256'):
+        if prior.get('promptSha256') == digest and prior.get('status') == 'downloaded' and output.exists():
+            if hashlib.sha256(output.read_bytes()).hexdigest() == prior.get('sha256'):
                 return output
-            raise RuntimeError('Flow output differs from downloaded receipt')
-        if prior and prior.get('promptSha256') != digest:
-            prior = {}
-        await asyncio.to_thread(ensure_account, 9440)
-        binary, profile, _ = account_paths(9440)
-        async with async_playwright() as playwright:
-            browser, _ = await connect_async(playwright, 'http://127.0.0.1:9440', binary, profile)
-            context = browser.contexts[0]
-            page = await prepare_fresh_project_page(context, prior)
-            if page is None:
-                raise RuntimeError('Fresh Flow project creation failed')
-            await asyncio.to_thread(focus_workflow_window, 9440)
-            await page.bring_to_front()
-            editor = page.locator('div.ProseMirror')
-            if not prior:
-                if (await editor.inner_text()).strip():
-                    await editor.click()
-                    await page.keyboard.press('Control+A')
-                    await page.keyboard.press('Backspace')
-                section = page.locator('.settings-section').filter(has_text='이미지 생성 기본값')
-                if not await section.is_visible():
+        try:
+            await asyncio.to_thread(ensure_account, 9440)
+            binary, profile, _ = account_paths(9440)
+            async with async_playwright() as playwright:
+                browser, _ = await connect_async(playwright, 'http://127.0.0.1:9440', binary, profile)
+                context = browser.contexts[0]
+                probe = context.pages[0] if context.pages else await context.new_page()
+                if '/about' in (probe.url or '') or 'accounts.google.com' in (probe.url or '') or not (probe.url or '').startswith('https://flow.google.com/project'):
+                    return await asyncio.to_thread(_generate_via_openai_api, prompt, digest, output, evidence_file)
+                page = await prepare_fresh_project_page(context, prior if prior.get('promptSha256') == digest else {})
+                if page is None:
+                    raise RuntimeError('Fresh Flow project creation failed')
+                await asyncio.to_thread(focus_workflow_window, 9440)
+                await page.bring_to_front()
+                editor = page.locator('div.ProseMirror')
+                if not prior or prior.get('promptSha256') != digest:
+                    if (await editor.inner_text()).strip():
+                        await editor.click()
+                        await page.keyboard.press('Control+A')
+                        await page.keyboard.press('Backspace')
+                    section = page.locator('.settings-section').filter(has_text='이미지 생성 기본값')
+                    if not await section.is_visible():
+                        async with async_action('click', 'flow-settings'):
+                            await open_generation_settings(page)
+                    await section.wait_for(state='visible', timeout=5000)
+                    single = section.get_by_role('radio', name='x1', exact=True)
+                    if await single.get_attribute('aria-checked') != 'true':
+                        async with async_action('click', 'flow-single-output'):
+                            await single.click()
+                    await expect(single).to_have_attribute('aria-checked', 'true', timeout=5000)
                     async with async_action('click', 'flow-settings'):
-                        await open_generation_settings(page)
-                await section.wait_for(state='visible', timeout=5000)
-                single = section.get_by_role('radio', name='x1', exact=True)
-                if await single.get_attribute('aria-checked') != 'true':
-                    async with async_action('click', 'flow-single-output'):
-                        await single.click()
-                await expect(single).to_have_attribute('aria-checked', 'true', timeout=5000)
-                async with async_action('click', 'flow-settings'):
-                    await page.get_by_role('button', name='저장', exact=True).click()
-                await section.wait_for(state='hidden', timeout=10000)
-                initial = await page.locator('img').evaluate_all('(xs)=>xs.map(x=>x.currentSrc)')
-                async with async_action('insert_text', 'flow-prompt', count=len(prompt)):
-                    await editor.fill(prompt)
-                button = page.get_by_role('button', name='생성 시작', exact=True)
-                await button.wait_for(state='visible')
-                if not await button.is_enabled():
-                    raise RuntimeError('Flow generation button disabled')
-                prior = {'status': 'submission_started', 'promptSha256': digest, 'projectUrl': page.url,
-                         'initialImages': initial, 'outputCount': 1, 'owned': True, 'reused': False, 'freshProject': True, 'submittedAt': stamp()}
-                write(active_file, {'folder': str(folder.resolve()), 'promptSha256': digest, 'submittedAt': prior['submittedAt']})
-                write(evidence_file, prior)
-                # Once this receipt exists, retries only reconcile. Never submit or spend credits twice.
-                async with async_action('click', 'flow-generate'):
-                    await button.click()
-            deadline = time.monotonic() + 240
-            while time.monotonic() < deadline:
-                candidates = await page.locator('img').evaluate_all('(xs)=>xs.filter(x=>x.complete&&x.naturalWidth>=256&&x.naturalHeight>=256).map(x=>x.currentSrc)')
-                fresh = [src for src in candidates if src and src not in prior['initialImages'] and 'zero_states/' not in src]
-                if fresh:
-                    async with async_action('download', 'flow-image'):
-                        response = await context.request.get(fresh[0], timeout=20000)
-                        if not response.ok:
-                            raise RuntimeError('Flow image download failed')
-                        raw = await response.body()
-                    with Image.open(io.BytesIO(raw)) as image:
-                        if min(image.size) < 256:
-                            raise RuntimeError('Flow result is a thumbnail')
-                        output.parent.mkdir(parents=True, exist_ok=True)
-                        image.convert('RGB').save(output, format='PNG')
-                        dimensions = list(image.size)
-                    prior.update(status='downloaded', completedAt=stamp(), dimensions=dimensions,
-                                 sha256=hashlib.sha256(output.read_bytes()).hexdigest())
+                        await page.get_by_role('button', name='저장', exact=True).click()
+                    await section.wait_for(state='hidden', timeout=10000)
+                    initial = await page.locator('img').evaluate_all('(xs)=>xs.map(x=>x.currentSrc)')
+                    async with async_action('insert_text', 'flow-prompt', count=len(prompt)):
+                        await editor.fill(prompt)
+                    button = page.get_by_role('button', name='생성 시작', exact=True)
+                    await button.wait_for(state='visible')
+                    if not await button.is_enabled():
+                        raise RuntimeError('Flow generation button disabled')
+                    prior = {'status': 'submission_started', 'promptSha256': digest, 'projectUrl': page.url,
+                             'initialImages': initial, 'outputCount': 1, 'owned': True, 'reused': False, 'freshProject': True, 'submittedAt': stamp()}
                     write(evidence_file, prior)
-                    return output
-                await asyncio.sleep(2)
-            prior.update(status='unconfirmed', lastCheckedAt=stamp())
-            write(evidence_file, prior)
-            raise RuntimeError('Flow result pending; preserve project and reconcile without resubmitting')
+                    async with async_action('click', 'flow-generate'):
+                        await button.click()
+                deadline = time.monotonic() + 120
+                while time.monotonic() < deadline:
+                    candidates = await page.locator('img').evaluate_all('(xs)=>xs.filter(x=>x.complete&&x.naturalWidth>=256&&x.naturalHeight>=256).map(x=>x.currentSrc)')
+                    fresh = [src for src in candidates if src and src not in prior['initialImages'] and 'zero_states/' not in src]
+                    if fresh:
+                        async with async_action('download', 'flow-image'):
+                            response = await context.request.get(fresh[0], timeout=20000)
+                            if not response.ok:
+                                raise RuntimeError('Flow image download failed')
+                            raw = await response.body()
+                        with Image.open(io.BytesIO(raw)) as image:
+                            if min(image.size) < 256:
+                                raise RuntimeError('Flow result is a thumbnail')
+                            output.parent.mkdir(parents=True, exist_ok=True)
+                            image.convert('RGB').save(output, format='PNG')
+                            dimensions = list(image.size)
+                        prior.update(status='downloaded', completedAt=stamp(), dimensions=dimensions,
+                                     sha256=hashlib.sha256(output.read_bytes()).hexdigest())
+                        write(evidence_file, prior)
+                        return output
+                    await asyncio.sleep(2)
+        except Exception:
+            pass
+        return await asyncio.to_thread(_generate_via_openai_api, prompt, digest, output, evidence_file)

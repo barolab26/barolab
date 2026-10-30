@@ -53,7 +53,7 @@
     "account_key": "mustpickinfo",
     "status": "ready",
     "reason": null,
-    "checked_at": "2026-10-20T15:06:07.329157+00:00",
+    "checked_at": "2026-10-29T12:45:04.228692+00:00",
     "ready": true,
     "publishReady": true,
     "requiredScopes": [
@@ -79,14 +79,14 @@
     "quotaStatus": "verified",
     "quota": {
       "posts": {
-        "usage": 1,
+        "usage": 4,
         "limit": 250,
-        "remaining": 249
+        "remaining": 246
       },
       "replies": {
-        "usage": 1,
+        "usage": 10,
         "limit": 1000,
-        "remaining": 999
+        "remaining": 990
       }
     },
     "readinessIssues": []

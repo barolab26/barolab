@@ -450,6 +450,18 @@
       </div>
     </header>
 
+    <!-- AI 구독 실시간 잔여량 & 크레딧 현황 -->
+    <section class="card" id="settings-subscription-card">
+      <div class="matrix-head" style="margin-bottom:6px; padding-bottom:6px;">
+        <div>
+          <h2>💳 AI 구독 계정별 실시간 잔여 한도 &amp; 오늘 사용량 (Codex 2계정 · Gemini AGY 2계정 · KIE)</h2>
+          <p>구독 계정의 5시간/7일 공유 한도 게이지와 오늘 호출·토큰 집계 현황입니다.</p>
+        </div>
+        <span id="bento-subscription-summary" style="font-size:11.5px; font-weight:800; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:4px 10px;">구독 잔여량 집계 중…</span>
+      </div>
+      <div id="bento-subscription-quotas" style="display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px;"></div>
+    </section>
+
     <!-- 단일 통합: 6인 AI 크루(3×2) + 4대 채널 파이프라인(2×2) 두뇌 배정 매트릭스 -->
     <section class="card" id="brain-matrix-section">
       <div class="matrix-head">
@@ -506,5 +518,6 @@
   </main>
 </div>
 <script src="/llm-settings.js?v=20261022-agent-reasoning"></script>
+<script src="/mission-control.js"></script>
 </body>
 </html>

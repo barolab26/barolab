@@ -1,85 +1,85 @@
 {
   "schema": "metrics-runtime-v2",
-  "runId": "cfa70117a52b4a2a85a1095a42a9b979",
-  "pid": 1900510,
+  "runId": "5eda880c7f004c8d8357b16db6c7e961",
+  "pid": 42712,
   "status": "completed",
-  "startedAt": "2026-10-26T07:01:26.631537+00:00",
-  "checkedAt": "2026-10-26T07:08:46.112260+00:00",
+  "startedAt": "2026-10-29T20:02:12.589169+00:00",
+  "checkedAt": "2026-10-29T20:09:31.557965+00:00",
   "stages": [
     {
       "script": "dashboard/revenue.py",
       "status": "completed",
-      "startedAt": "2026-10-26T07:01:26.637358+00:00",
+      "startedAt": "2026-10-29T20:02:12.590197+00:00",
       "timeoutSeconds": 180,
-      "lastProcessSuccessAt": "2026-10-26T07:01:42.326231+00:00",
-      "helperPid": 1900589,
-      "elapsedSeconds": 15.7,
+      "lastProcessSuccessAt": "2026-10-29T20:02:25.866125+00:00",
+      "helperPid": 50640,
+      "elapsedSeconds": 13.3,
       "exitCode": 0,
-      "finishedAt": "2026-10-26T07:01:42.326254+00:00"
+      "finishedAt": "2026-10-29T20:02:25.866137+00:00"
     },
     {
       "script": "dashboard/traffic.py",
       "status": "completed",
-      "startedAt": "2026-10-26T07:01:42.386828+00:00",
+      "startedAt": "2026-10-29T20:02:25.899842+00:00",
       "timeoutSeconds": 840,
-      "lastProcessSuccessAt": "2026-10-26T07:02:35.684827+00:00",
-      "helperPid": 1901116,
-      "elapsedSeconds": 53.3,
+      "lastProcessSuccessAt": "2026-10-29T20:03:03.486853+00:00",
+      "helperPid": 21704,
+      "elapsedSeconds": 37.6,
       "exitCode": 0,
-      "finishedAt": "2026-10-26T07:02:35.684842+00:00"
+      "finishedAt": "2026-10-29T20:03:03.486870+00:00"
     },
     {
       "script": "dashboard/metrics.py",
       "status": "completed",
-      "startedAt": "2026-10-26T07:02:35.853088+00:00",
+      "startedAt": "2026-10-29T20:03:03.571606+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-26T07:08:43.316243+00:00",
-      "helperPid": 1902422,
-      "elapsedSeconds": 367.5,
+      "lastProcessSuccessAt": "2026-10-29T20:09:11.722096+00:00",
+      "helperPid": 65368,
+      "elapsedSeconds": 368.1,
       "exitCode": 0,
-      "finishedAt": "2026-10-26T07:08:43.316261+00:00"
+      "finishedAt": "2026-10-29T20:09:11.722119+00:00"
     },
     {
       "script": "naver_kin.posting",
       "status": "completed",
-      "startedAt": "2026-10-26T07:08:43.397970+00:00",
+      "startedAt": "2026-10-29T20:09:11.794259+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-26T07:08:43.666736+00:00",
-      "helperPid": 1910790,
+      "lastProcessSuccessAt": "2026-10-29T20:09:27.897698+00:00",
+      "helperPid": 24652,
+      "elapsedSeconds": 16.1,
       "exitCode": 0,
-      "finishedAt": "2026-10-26T07:08:43.666755+00:00",
-      "elapsedSeconds": 0.3
+      "finishedAt": "2026-10-29T20:09:27.897715+00:00"
     },
     {
       "script": "threads_posting.posting",
       "status": "completed",
-      "startedAt": "2026-10-26T07:08:43.672706+00:00",
+      "startedAt": "2026-10-29T20:09:27.899401+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-26T07:08:45.595391+00:00",
-      "helperPid": 1910803,
+      "lastProcessSuccessAt": "2026-10-29T20:09:30.995561+00:00",
+      "helperPid": 65012,
       "exitCode": 0,
-      "finishedAt": "2026-10-26T07:08:45.595417+00:00",
-      "elapsedSeconds": 1.9
+      "finishedAt": "2026-10-29T20:09:30.995576+00:00",
+      "elapsedSeconds": 3.1
     }
   ],
   "budgetSeconds": 2460,
-  "lastProcessSuccessAt": "2026-10-26T07:08:46.112244+00:00",
-  "lastSuccessAt": null,
-  "lastCollectionSuccessAt": null,
+  "lastProcessSuccessAt": "2026-10-29T20:09:31.557953+00:00",
+  "lastSuccessAt": "2026-10-29T13:40:36.598767+00:00",
+  "lastCollectionSuccessAt": "2026-10-29T13:40:36.598767+00:00",
   "previousInterrupted": false,
-  "previousStartedAt": "2026-10-26T06:01:58.202620+00:00",
+  "previousStartedAt": "2026-10-29T16:42:38.906030+00:00",
   "successMeaning": "process_exit_zero_not_source_collection",
   "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
   "currentStage": null,
   "pagePerformance": {
     "status": "partial",
     "complete": false,
-    "start": "2026-10-19",
-    "end": "2026-10-25",
+    "start": "2026-10-23",
+    "end": "2026-10-29",
     "reasonCodes": [
       "revenue_partial_or_missing"
     ]
   },
-  "finishedAt": "2026-10-26T07:08:46.112244+00:00",
+  "finishedAt": "2026-10-29T20:09:31.557953+00:00",
   "collectionStatus": "partial"
 }

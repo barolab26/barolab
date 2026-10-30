@@ -43,7 +43,7 @@ def atomic_text(path, content, *, durable=False):
         for attempt in range(20):
             try:
                 os.replace(temporary, path)
-                if durable:
+                if durable and hasattr(os, 'O_DIRECTORY'):
                     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
                     try:os.fsync(descriptor)
                     finally:os.close(descriptor)

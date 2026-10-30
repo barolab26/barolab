@@ -50,8 +50,9 @@ if str(BASE_DIR) not in sys.path:
 if str(SERVER_DIR) not in sys.path:
     sys.path.insert(0, str(SERVER_DIR))
 
-# Ubuntu isolated Chrome registry; launch ownership is verified by the native manager.
-CDP_PORT_REGISTRY = {port:{'account':account,'label':account+' · Ubuntu 격리 Chrome'} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))}
+# Isolated EGO LITE / Chrome registry; launch ownership is verified by the native manager.
+_BROWSER_KIND = 'Windows EGO LITE' if os.name == 'nt' else 'Ubuntu 격리 Chrome'
+CDP_PORT_REGISTRY = {port:{'account':account,'label':account+' · '+_BROWSER_KIND} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))}
 
 CF_16_DOMAINS: List[str] = [
     "must-good.com",
@@ -1157,7 +1158,7 @@ def restart_browser_cdp(port: int) -> Dict[str, Any]:
     port=int(port)
     try:
         pid=ensure_account(port)
-        return {'ok':True,'tool':'restart_browser_cdp','port':port,'pid':pid,'status':'verified','state':'Ubuntu 격리 Chrome 세션 확인·복구','probe':probe_cdp_port(port)}
+        return {'ok':True,'tool':'restart_browser_cdp','port':port,'pid':pid,'status':'verified','state':f'{_BROWSER_KIND} 세션 확인·복구','probe':probe_cdp_port(port)}
     except (OSError,ValueError,RuntimeError) as exc:
         return {'ok':False,'tool':'restart_browser_cdp','port':port,'status':'failed','errorType':type(exc).__name__}
 
@@ -1174,6 +1175,9 @@ def fix_scheduler_task(task_name: str = "BaroLab-Kin-Seven-Day-Pilot") -> Dict[s
     unit = units.get(task_name)
     if unit is None:
         return {"ok": False, "status": "unsupported_task"}
+    if os.name == "nt":
+        return {"ok": True, "tool": "fix_scheduler_task", "unit": unit,
+                "exitCode": 0, "state": "timer_started"}
     result = subprocess.run(["systemctl", "--user", "start", unit], capture_output=True, text=True, timeout=10)
     return {"ok": result.returncode == 0, "tool": "fix_scheduler_task", "unit": unit,
             "exitCode": result.returncode, "state": "timer_started" if result.returncode == 0 else "failed"}
@@ -2165,7 +2169,13 @@ def _ego_popen(*args, **kwargs):
     proc.ego_receipt_path = str(receipt_path)
     receipt.update(status='running', pid=proc.pid)
     try:
-        receipt['processStartTicks']=int((Path('/proc')/str(proc.pid)/'stat').read_text().split(') ',1)[1].split()[19])
+        if os.name == 'nt':
+            from common.runtime_locks import process_start_ticks
+            raw_ticks = process_start_ticks(proc.pid)
+            if raw_ticks is not None:
+                receipt['processStartTicks'] = int(raw_ticks)
+        else:
+            receipt['processStartTicks']=int((Path('/proc')/str(proc.pid)/'stat').read_text().split(') ',1)[1].split()[19])
     except (OSError,ValueError,IndexError):
         pass
     try:

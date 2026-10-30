@@ -319,9 +319,11 @@ def _parse_agy_usage_output(stdout_text):
 
 def agy_quota():
     """Only the built-in /usage command across all configured Gemini accounts."""
-    executable = Path.home() / '.local/bin/agy'
-    if not executable.is_file():
+    from common.llm_settings import resolve_agy_executable
+    exe_str = resolve_agy_executable()
+    if not exe_str or not Path(exe_str).is_file():
         return dict(status='CLI 미설치', checkedAt=time.time())
+    executable = Path(exe_str)
     from common.agy_cli import list_account_homes, rotation_state
     homes = list_account_homes()
     rot = rotation_state()
@@ -329,12 +331,20 @@ def agy_quota():
     last_used = rot.get('lastUsedAccount')
     account_rows = []
     primary_groups = []
+    cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
     for email, home_dir in homes:
-        env = {**os.environ, 'HOME': str(home_dir), 'USERPROFILE': str(home_dir)}
+        env = {
+            **os.environ,
+            'HOME': str(home_dir),
+            'USERPROFILE': str(home_dir),
+            'SSH_CONNECTION': '127.0.0.1 0 127.0.0.1 0',
+            'SSH_CLIENT': '127.0.0.1 0 0',
+        }
         try:
             with tempfile.TemporaryDirectory(prefix='barolab-agy-quota-') as folder:
                 result = subprocess.run([str(executable), '-p', '/usage', '--output-format', 'json', '--print-timeout', '15s'],
-                    cwd=folder, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding='utf-8', timeout=20)
+                    cwd=folder, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding='utf-8', timeout=20,
+                    creationflags=cflags)
             if result.returncode:
                 account_rows.append(dict(email=email, status='조회 실패 · 로그인 확인', usable=False, checkedAt=time.time()))
                 continue

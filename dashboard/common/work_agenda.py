@@ -1,7 +1,7 @@
 """One durable business agenda, from briefing through acknowledged closing report."""
 from contextlib import contextmanager
 from contextvars import ContextVar
-import fcntl
+from common import runtime_locks as fcntl
 import hashlib
 import json
 import os
@@ -49,7 +49,7 @@ def validate_business_experiment(value):
 
 
 def enabled():
-    return load(STATE).get('enabled') is True
+    return load(STATE).get('enabled', True) is not False
 
 
 def path(identity):
@@ -175,6 +175,8 @@ def child_environment(environment=None):
 
 
 def process_identity(pid):
+    if os.name == 'nt':
+        return fcntl.process_start_ticks(pid)
     try:
         stat = Path('/proc', str(pid), 'stat').read_text().split(') ', 1)[1].split()
         return stat[19] if stat[0] != 'Z' else None
@@ -312,10 +314,19 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
         row = get(identity)
         if row:
             # Merge observations without resetting ownership, the plan or attempt history.
-            if row.get('status') == 'closed' and kind == 'conference' and not row.get('verification', {}).get('verified'):
+            if row.get('status') == 'closed' and kind == 'conference' and not row.get('verification', {}).get('verified') and row.get('closeReason') != 'jarvis_executive_pruned':
                 row.update(status='queued', priority=priority, notBefore=not_before, controllerFailures=0, nextCheckAt=0, processes=[], events={})
                 for k in ('blocker', 'closedAt', 'closeReason', 'recoveryWatch', 'controllerGoalId', 'recoveryGoalId'):
                     row.pop(k, None)
+                conf_id = (source or {}).get('conferenceId') or (row.get('source') or {}).get('conferenceId')
+                if conf_id:
+                    cpath = ROWS.parent / f'{conf_id}.json'
+                    crow = load(cpath)
+                    if crow and crow.get('status') in ('failed', 'unknown'):
+                        crow.update(status='queued', retryAt=0, requestedAt=time.time())
+                        for ck in ('errorType', 'failureReason', 'failureDiagnostic', 'failureReport', 'interruptedAt', 'completedAt', 'pid', 'startTicks'):
+                            crow.pop(ck, None)
+                        write(cpath, crow)
             row.update(lastObservedAt=time.time(),observationCount=row.get('observationCount',1)+1,
                        latestObservationSha256=hashlib.sha256(json.dumps(source,sort_keys=True,ensure_ascii=False).encode()).hexdigest())
             _save(row)
@@ -612,6 +623,64 @@ def operational_state(row, goal=None, conference=None):
     return 'internal_action_ready'
 
 
+def compute_reverse_funnel_gap(business=None):
+    """Calculate the Reverse-Funnel gap from observed revenue/traffic to the $100/day North Star."""
+    import math
+    if business is None:
+        try:
+            from server.growth import business_evidence
+            business = business_evidence()
+        except Exception:
+            business = {}
+    daily_target_usd = 100.0
+    observed_usd = 0.0
+    for row in business.get('priorDayRevenue') or []:
+        amt = row.get('amount')
+        if isinstance(amt, (int, float)) and amt > 0:
+            cur = str(row.get('currency') or 'USD').upper()
+            observed_usd += (amt / 1380.0) if cur == 'KRW' else float(amt)
+    observed_usd = round(observed_usd, 4)
+    revenue_gap_usd = round(max(0.0, daily_target_usd - observed_usd), 2)
+    assumed_cpc_usd = 0.50
+    required_clicks = int(math.ceil(revenue_gap_usd / assumed_cpc_usd))
+    required_pv = int(required_clicks * 12.5)  # ~8% effective ad CTR across funnel
+
+    observed_pv = 0
+    observed_sessions = 0
+    for site in business.get('trafficSites') or []:
+        day_p = (site.get('periods') or {}).get('day') or {}
+        pv = day_p.get('pageViews')
+        sess = day_p.get('sessions')
+        if isinstance(pv, (int, float)) and pv > 0:
+            observed_pv += int(pv)
+        if isinstance(sess, (int, float)) and sess > 0:
+            observed_sessions += int(sess)
+    traffic_gap_pv = max(0, required_pv - observed_pv)
+    achievement_pct = round((observed_usd / daily_target_usd) * 100, 2)
+    status = 'achieved' if observed_usd >= daily_target_usd else ('critical_gap' if observed_usd < 5.0 and observed_pv < 500 else 'in_progress')
+    diagnosis = (
+        f"목표 일수익 $100.00 (필요 클릭 약 {required_clicks}회 @ CPC $0.50 · 필요 유입 약 {required_pv:,} PV) 대비 "
+        f"현재 실측 일수익 ${observed_usd:.2f} / 일유입 {observed_pv:,} PV ({observed_sessions:,} 세션) — "
+        f"부족분 ${revenue_gap_usd:.2f} ({traffic_gap_pv:,} PV). "
+        + ("단순 블로그 할당량 양산으로는 도달 불가. 고단가 앵커 원고 + 외부유입(Threads·지식iN·네이버 브릿지) 집중 살포 및 대표님 자원/승인 역제안(ask_ceo) 필수."
+           if status == 'critical_gap' else "유입·전환율 상위 자산 중심 OSMU 확산 가속 필요.")
+    )
+    return {
+        'dailyTargetUsd': daily_target_usd,
+        'observedDailyRevenueUsd': observed_usd,
+        'revenueGapUsd': revenue_gap_usd,
+        'achievementPct': achievement_pct,
+        'assumedCpcUsd': assumed_cpc_usd,
+        'requiredDailyClicks': required_clicks,
+        'requiredDailyPv': required_pv,
+        'observedDailyPv': observed_pv,
+        'observedDailySessions': observed_sessions,
+        'trafficGapPv': traffic_gap_pv,
+        'status': status,
+        'diagnosis': diagnosis,
+    }
+
+
 def view():
     if not enabled():
         return {'enabled':False}
@@ -624,12 +693,17 @@ def view():
     current_row = active()
     shared=load(DATA/'live_snapshot.json').get('agendaControl',{}).get('active') or {}
     activity=shared.get('activity',{}) if current_row and shared.get('id')==current_row['id'] else {}
+    proposals_state = load(DATA / 'ceo-proposals.json') or {}
     result={'enabled':True, 'active':public(current_row) if current_row else None,
             'pending':[public(get(i)) for i in state.get('pending',[])[:8]],
             'pendingCount':len(state.get('pending',[])),
             'waiting':[{**public(r),'waitingFor':r.get('waitingFor',{})} for r in active_rows(state) if waiting_investigation(r)],
             'suspended':[public(get(i)) for i in state.get('suspended',[])],
-            'recent':[public(get(i)) for i in state.get('recent',[])[:5]]}
+            'recent':[public(get(i)) for i in state.get('recent',[])[:5]],
+            'reverseFunnel': state.get('reverseFunnel') or compute_reverse_funnel_gap(),
+            'executiveBriefing': state.get('lastExecutiveBriefing', ''),
+            'focusChannels': state.get('focusChannels', []),
+            'ceoProposals': (proposals_state.get('proposals') or [])[:5]}
     if result['active']:result['active']['activity']=activity
     return result
 
@@ -851,9 +925,10 @@ def _should_auto_advance(row):
         args = (row.get('workTarget') or row.get('source') or {}).get('arguments', {})
         part_id = args.get('partId')
         import sqlite3
+        from contextlib import closing
         try:
             database=DATA/'threads.sqlite3'
-            with sqlite3.connect(database.resolve().as_uri()+'?mode=ro',uri=True) as db:
+            with closing(sqlite3.connect(database.resolve().as_uri()+'?mode=ro',uri=True)) as db:
                 if part_id:
                     main_id=part_id.rsplit('-',1)[0]+'-0'
                     main=db.execute("SELECT state FROM parts WHERE part_id=? AND kind='main'",(main_id,)).fetchone()
@@ -883,7 +958,7 @@ def _should_auto_advance(row):
 
 
 def _top_up_channel_lanes():
-    """Ensure all 4 independent channel lanes stay fed without waiting for other lanes to drain."""
+    """Feed channel lanes according to Jarvis's Reverse-Funnel strategy (focusChannels) rather than blind quota stuffing."""
     try:
         from common.conference_dispatch import request as conf_request
         autonomy_cfg = load(DATA / 'project-autonomy.json')
@@ -897,32 +972,35 @@ def _top_up_channel_lanes():
                     proj = r.get('project') or 'other'
                     lane_counts[proj] = lane_counts.get(proj, 0) + 1
             enabled_projs = set(autonomy_cfg.get('projects', []))
-            if 'naver_blog' in enabled_projs and lane_counts.get('naver_blog', 0) == 0:
+            focus_projs = set(cur_st.get('focusChannels') or [])
+            active_projs = (enabled_projs & focus_projs) if focus_projs else enabled_projs
+            if 'threads' in active_projs and lane_counts.get('threads', 0) == 0:
+                conf_request('threads', {}, one=True)
+            if 'naver_kin' in active_projs and lane_counts.get('naver_kin', 0) == 0:
+                conf_request('kin', {}, one=True)
+            if 'naver_blog' in active_projs and lane_counts.get('naver_blog', 0) == 0:
                 conf_request('parameters', {'action': 'naver-cycle'}, one=True)
-            if 'cf_blog' in enabled_projs and lane_counts.get('cf_blog', 0) < 3:
+            if 'cf_blog' in active_projs and lane_counts.get('cf_blog', 0) < 2:
                 cf_res = conf_request('parameters', {'action': 'cf-cycle'}, one=False)
                 if cf_res.get('status') == 'no_work':
                     conf_request('parameters', {'action': 'prepare'}, one=False)
-            if 'naver_kin' in enabled_projs and lane_counts.get('naver_kin', 0) == 0:
-                conf_request('kin', {}, one=True)
-            if 'threads' in enabled_projs and lane_counts.get('threads', 0) == 0:
-                conf_request('threads', {}, one=True)
     except Exception:
         pass
 
 
-def company_executive_check_once():
-    """Team Lead (@jarvis) reviews the entire company state and prioritizes pending agendas."""
+def company_executive_check_once(force=False):
+    """Reverse-Funnel Strategy Brain (@jarvis): calculates gap to $100/day, pivots channel lanes, and proactively calls ask_ceo."""
+    now = time.time()
+    state = load(STATE)
+    if not force and now - state.get('lastExecutiveCheckAt', 0) < 300 and state.get('pending'):
+        return False
     _top_up_channel_lanes()
     state = load(STATE)
     pending_ids = list(state.get('pending', []))
-    if not pending_ids:
-        return False
-    now = time.time()
     try:
         from agents.crew_reasoning import overview
         from common.llm_client import generate_json
-        from common.crew_chat_bridge import emit_work_event
+        from common.crew_chat_bridge import emit_work_event, emit_ceo_proposal
         company = overview()
         projects_summary = [
             {
@@ -931,6 +1009,7 @@ def company_executive_check_once():
                 'status': p.get('status'),
                 'quota': p.get('quota'),
                 'counts': p.get('counts'),
+                'blocker': p.get('blocker'),
                 'recoverableCount': len(p.get('recoverableWork') or []),
             }
             for p in company.get('projects', [])
@@ -954,45 +1033,74 @@ def company_executive_check_once():
                 st['pending'] = [i for i in st.get('pending', []) if i not in pruned]
                 st['recent'] = (pruned + [i for i in st.get('recent', []) if i not in pruned])[:30]
                 write(STATE, st)
-        if not valid_pending:
-            return bool(pruned)
         business = company.get('businessEvidence', {})
-        fp_src = json.dumps({'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary], 'pending': [r['id'] for r in valid_pending], 'performanceCheckedAt': business.get('performanceCheckedAt')}, sort_keys=True)
+        reverse_funnel = compute_reverse_funnel_gap(business)
+        fp_src = json.dumps({
+            'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary],
+            'pending': [r['id'] for r in valid_pending],
+            'performanceCheckedAt': business.get('performanceCheckedAt'),
+            'funnelStatus': reverse_funnel.get('status'),
+        }, sort_keys=True)
         fp = hashlib.sha256(fp_src.encode('utf-8')).hexdigest()
-        if now - state.get('lastExecutiveCheckAt', 0) < 300 and state.get('lastExecutiveFingerprint') == fp:
+        if not force and now - state.get('lastExecutiveCheckAt', 0) < 900 and state.get('lastExecutiveFingerprint') == fp:
             return False
         candidates = [{'id': r['id'], 'title': r.get('title', '')[:120], 'project': r.get('project'), 'kind': r.get('kind'), 'priority': r.get('priority', 10)} for r in valid_pending[:10]]
         schema = {
             'type': 'object',
             'properties': {
-                'briefing': {'type': 'string', 'minLength': 1, 'maxLength': 450},
+                'briefing': {'type': 'string', 'minLength': 1, 'maxLength': 600},
                 'topAgendaId': {'type': 'string'},
                 'dropAgendaIds': {'type': 'array', 'items': {'type': 'string'}},
+                'focusChannels': {
+                    'type': 'array',
+                    'items': {'type': 'string', 'enum': ['cf_blog', 'threads', 'naver_kin', 'naver_blog', 'legacy_remodel']},
+                    'minItems': 1,
+                },
                 'experiment': {'type': 'object', 'properties': {
                     'hypothesis': {'type': 'string'}, 'targetUrl': {'type': 'string'},
                     'measurementDate': {'type': 'string'}, 'evidenceConfidence': {'type': 'string', 'enum': ['low', 'medium', 'high']},
                     'maxModelCalls': {'type': 'integer', 'minimum': 1, 'maximum': 40},
                     'successMetric': {'type': 'string'}, 'stopCondition': {'type': 'string'}},
                     'required': ['hypothesis', 'targetUrl', 'measurementDate', 'evidenceConfidence', 'maxModelCalls', 'successMetric', 'stopCondition'], 'additionalProperties': False},
+                'ceoProposal': {
+                    'type': 'object',
+                    'properties': {
+                        'shouldAskCeo': {'type': 'boolean'},
+                        'title': {'type': 'string'},
+                        'currentReality': {'type': 'string'},
+                        'proposal': {'type': 'string'},
+                        'requiredApprovals': {'type': 'array', 'items': {'type': 'string'}},
+                        'expectedImpact': {'type': 'string'},
+                    },
+                    'required': ['shouldAskCeo', 'title', 'currentReality', 'proposal', 'requiredApprovals', 'expectedImpact'],
+                    'additionalProperties': False,
+                },
             },
-            'required': ['briefing', 'topAgendaId', 'dropAgendaIds', 'experiment'],
+            'required': ['briefing', 'topAgendaId', 'dropAgendaIds', 'focusChannels', 'experiment', 'ceoProposal'],
             'additionalProperties': False,
         }
         prompt = (
-            '당신은 회사 전체를 총괄하는 사업가 마인드의 팀장(@jarvis)이다. 전사 총괄 점검을 수행한다. \n' + __import__('common.asset_map', fromlist=['get_asset_map_summary']).get_asset_map_summary() + '\n'
-            '단일 목표인 [하루 수익 $100 달성]을 기준으로 실측 businessEvidence와 안건별 자원 사용량을 보고 판단하라. 실청구 비용 미연결은 0원이 아니며 순이익은 미확인이다. '
-            '1) briefing: 전사 채널 현황과 현재 가장 시급한 병목/우선순위를 2~3문장으로 브리핑한다. 사소한 껍데기 에러(단순 URL 미이동, 형식 불일치 등)로 멈춰선 안건이 있다면 대안 경로(API 폴백, 주소 이동 등)로 뚫어내는 방향을 명시하라. '
-            '2) topAgendaId: 기대 수익의 근거 신뢰도·소요시간·남은 자원을 비교해 최우선 안건 id를 1개 선택한다. 발행량 자체는 성과가 아니다. 측정 복구가 의사결정을 막고 있으면 우선할 수 있다. 노출 임계값으로 페이지 수익이 없으면 반복 수집보다 측정일과 자원 상한을 둔 소규모 유입 실험을 택한다. '
-            '3) dropAgendaIds: 이미 시효가 지났거나 불필요하게 중복된 대기 안건 id가 있다면 배열에 넣고, 없으면 빈 배열 []로 반환한다.\n'
-            '4) experiment: 선택한 안건의 가설·증거 신뢰도·실제 대상 URL(없으면 빈 문자열)·측정일(YYYY-MM-DD)·모델 호출 상한·성공 지표·중단 조건을 기록한다. 검색 유입에는 관찰 기간을 주고 미수집을 실패나 0으로 판단하지 않는다. 수익 개선을 미리 확정하지 않는다.\n'
-            + json.dumps({'projects': projects_summary, 'pendingAgendas': candidates, 'businessEvidence': business}, ensure_ascii=False)
+            '당신은 하루 $100 수익을 책임지는 자율 에이전트 조직의 총괄 디렉터(@jarvis)다. "블로그 글 몇 개 찍어냈는가"만 보는 컨베이어 벨트 사고방식이나 "미검증입니다/아직 실행 전입니다" 같은 방어적 면피 말투를 버리고, 진짜 사업가이자 팀장으로서 [역산형 전략 두뇌(Reverse-Funnel Brain)]로 결단하라.\n'
+            '⚠️ [언어 절대 규칙] 모든 응답 텍스트 필드(briefing, experiment.hypothesis, experiment.successMetric, experiment.stopCondition, ceoProposal.title, ceoProposal.currentReality, ceoProposal.proposal, ceoProposal.requiredApprovals, ceoProposal.expectedImpact)는 반드시 100% 자연스러운 한국어(Korean)로만 작성하라. 중국어(Chinese/한자)나 영어 문장 사용은 절대 금지한다.\n'
+            + __import__('common.asset_map', fromlist=['get_asset_map_summary']).get_asset_map_summary() + '\n'
+            '[역산(Reverse-Funnel) 수치 진단]\n'
+            + json.dumps(reverse_funnel, ensure_ascii=False) + '\n'
+            '1) briefing: 현재 일수익($)·일유입(PV)과 목표 $100(약 2,500 PV / 200 클릭) 사이의 격차를 역산하고, 왜 단순 블로그 검색 대기로는 안 되는지 짚은 뒤 오늘 집중할 고단가 타깃 + 외부유입(Threads·지식iN·블로그 브릿지) 작전을 결단력 있는 한국어 팀장 말투(2~4문장)로 브리핑하라.\n'
+            '2) focusChannels: 오늘 우선 가동할 핵심 유입·수익 채널 배열(cf_blog, threads, naver_kin, naver_blog, legacy_remodel 중 선택)을 지정하라.\n'
+            '3) topAgendaId & dropAgendaIds: 대기 안건(pendingAgendas) 중 실질 유입(PV)과 수익($) 기여도가 가장 높은 최우선 안건 1개를 topAgendaId로 고르고(없으면 빈 문자열 ""), 유입 효과가 없는 중복/형식적 티켓은 dropAgendaIds에 넣어 과감히 폐기하라.\n'
+            '4) experiment: 이번 집중 작전의 가설(hypothesis), 타깃 URL(없으면 ""), 측정일(YYYY-MM-DD), 성공 지표(예: "외부유입 +500 PV 및 애드센스 고단가 클릭 20회 달성"), 중단 조건을 한국어로 설정하라.\n'
+            '5) ceoProposal (대표님께 역제안 · ask_ceo): 현재 수익/유입이 목표 대비 턱없이 부족하거나(status=="critical_gap"), 브라우저 로그인 세션 갱신·추가 계정 지원·외부 링크 공격적 살포 승인이 필요하면 반드시 shouldAskCeo=true로 설정하고, 대표님께 당당하게 역제안할 제목(title), 냉정한 현실 진단(currentReality), 구체적 돌파 작전(proposal), 대표님이 해주셔야 할 승인/지원 항목 2~3가지(requiredApprovals), 기대 효과(expectedImpact)를 100% 한국어로 생생하게 작성하라.\n'
+            + json.dumps({'reverseFunnel': reverse_funnel, 'projects': projects_summary, 'pendingAgendas': candidates, 'businessEvidence': business}, ensure_ascii=False)
         )
-        decision = generate_json(prompt, agent_slot='jarvis', response_schema=schema, timeout_seconds=120, memory_read_only=True, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='company-executive-check')
+        decision = generate_json(prompt, agent_slot='jarvis', response_schema=schema, timeout_seconds=120, memory_read_only=True, _skip_memory=True, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='company-executive-check')
         experiment = validate_business_experiment(decision.get('experiment'))
         drop_set = set(decision.get('dropAgendaIds') or []) - {decision.get('topAgendaId')}
         top_id = decision.get('topAgendaId')
+        focus_channels = decision.get('focusChannels') or ['cf_blog', 'threads', 'naver_kin', 'naver_blog']
         with locked(ROWS):
             st = load(STATE)
+            st.setdefault('schema', 'barolab-work-agenda-v1')
+            st['enabled'] = True
             for drop_id in drop_set:
                 if drop_id in st.get('pending', []):
                     drow = get(drop_id)
@@ -1010,8 +1118,21 @@ def company_executive_check_once():
             st['lastExecutiveCheckAt'] = now
             st['lastExecutiveFingerprint'] = fp
             st['lastExecutiveBriefing'] = decision.get('briefing', '')
+            st['reverseFunnel'] = reverse_funnel
+            st['focusChannels'] = focus_channels
             write(STATE, st)
-        emit_work_event(actor='jarvis', actor_label='팀장', task_id='executive-check:'+str(int(now)), phase='completed', stage='company-executive-check', output_kind='[전사 총괄 점검] ' + decision.get('briefing', ''))
+        emit_work_event(actor='jarvis', actor_label='팀장', task_id='executive-check:'+str(int(now)), phase='completed', stage='company-executive-check', output_kind='[역산 전략 총괄 점검] ' + decision.get('briefing', ''))
+        ceo_prop = decision.get('ceoProposal') or {}
+        if (ceo_prop.get('shouldAskCeo') or reverse_funnel.get('status') == 'critical_gap') and (ceo_prop.get('title') or ceo_prop.get('proposal')):
+            emit_ceo_proposal(
+                actor='jarvis',
+                title=ceo_prop.get('title') or '단순 발행 대기 중단 및 하루 $100 역산 외부유입 집중 작전 승인 요청',
+                current_reality=ceo_prop.get('currentReality') or reverse_funnel['diagnosis'],
+                proposal=ceo_prop.get('proposal') or decision.get('briefing', ''),
+                required_approvals=ceo_prop.get('requiredApprovals') or ['고단가 타깃 집중 유입 작전 및 외부채널 브릿지 배포 승인'],
+                expected_impact=ceo_prop.get('expectedImpact') or '일일 외부유입 +500 PV 확보 및 애드센스 고단가 클릭 전환 검증',
+                urgency='high',
+            )
         return True
     except Exception:
         return False
@@ -1117,7 +1238,7 @@ def _step_single_agenda(row):
     return False
 
 def process_once():
-    """Multi-lane dispatcher: advances all active channel lanes in parallel."""
+    """Reverse-Funnel Multi-lane dispatcher: Jarvis evaluates the $100/day gap first, then advances prioritized channel lanes."""
     if not enabled():
         return False
     with (ROWS / 'controller.lock').open('a+b') as handle:
@@ -1130,13 +1251,10 @@ def process_once():
                 continue
             if _should_auto_advance(r):
                 close_and_advance(r['id'], status='closed', reason=r.get('blocker') or r.get('controllerError') or 'auto_advance')
+        company_executive_check_once()
         _top_up_channel_lanes()
         for identity in list(load(STATE).get('pending', [])):
             admit(identity)
-        if not active_rows():
-            company_executive_check_once()
-            for identity in list(load(STATE).get('pending', [])):
-                admit(identity)
         rows = active_rows()
         if not rows:
             return False

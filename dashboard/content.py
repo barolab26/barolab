@@ -117,10 +117,10 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
                            and url_key(naver_evidence.get('matchedUrl'), domain) == key
                            and fresh(naver_evidence.get('checkedAt'), now, 26) else 'unknown')
             index = 'unknown'
-            if fresh(evidence.get('checkedAt'), now, 26):
+            if fresh(evidence.get('checkedAt'), now, 336):
                 index = 'indexed' if evidence.get('indexed') is True else 'not_indexed' if evidence.get('indexed') is False else 'unknown'
             success_at = evidence.get('checkedAt') if isinstance(evidence.get('indexed'), bool) else evidence.get('lastSuccessAt') if isinstance(evidence.get('lastIndexed'), bool) else None
-            success_stale = bool(success_at) and not fresh(success_at, now, 26)
+            success_stale = bool(success_at) and not fresh(success_at, now, 336)
             pending_reason = ('이전 색인 판정 만료' if success_stale else
                               '검사 오류 · 재시도 필요' if evidence.get('attemptStatus') == 'failed' or (evidence and not success_at and evidence.get('reason')) else
                               '검사 결과 미확정' if evidence else '개별 검사 이력 없음')

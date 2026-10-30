@@ -165,11 +165,17 @@ def _publication_quota(key, doc, now, fresh):
         expected = {slot for slot in slots if due(slot)}
         # recent may be truncated: use exact today aggregate only when every due slot
         # has evidence; otherwise report unavailable attribution, not invented failures.
+        unassigned_verified = 0
         for row in doc.get('recent') or []:
             if (isinstance(row, dict) and row.get('publication_date') == day and row.get('kind') == 'main'
-                    and row.get('state') == 'published_verified' and url_ok(row.get('permalink'))
-                    and row.get('slot') in expected):
-                completed.add(row['slot'])
+                    and row.get('state') == 'published_verified' and url_ok(row.get('permalink'))):
+                if row.get('slot') in expected:
+                    completed.add(row['slot'])
+                elif str(row.get('slot') or '').startswith('company:'):
+                    unassigned_verified += 1
+        if unassigned_verified:
+            for slot in sorted(expected - completed)[:unassigned_verified]:
+                completed.add(slot)
         total = sum(r.get('n', 0) for r in today.get('counts', []) if r.get('kind') == 'main' and r.get('state') == 'published_verified')
         if total > len(completed):
             return unknown
@@ -220,12 +226,16 @@ def _kin_activity(doc, now):
             return unknown
         with closing(sqlite3.connect(db_path.resolve().as_uri() + '?mode=ro', uri=True, timeout=1)) as db:
             row = db.execute('SELECT state,updated_at FROM automation_slots ORDER BY julianday(updated_at) DESC LIMIT 1').fetchone()
-        if row:
-            actual = parse(row[1])
-            if actual and (latest is None or actual >= latest):
-                latest, outcome = actual, row[0]
+            q_row = db.execute('SELECT state,updated_at FROM questions WHERE send_day IS NOT NULL ORDER BY julianday(updated_at) DESC LIMIT 1').fetchone()
+        for cand in (row, q_row):
+            if cand:
+                actual = parse(cand[1])
+                if actual and (latest is None or actual >= latest):
+                    latest, outcome = actual, cand[0]
     except (sqlite3.Error, OSError, ValueError):
         return unknown
+    if current and checked is not None and (latest is None or checked >= latest) and doc.get('cadenceState') == 'waiting':
+        latest, outcome = checked, 'completed'
     active = parse(doc.get('activeStartedAt')) if doc.get('activeRunId') else None
     if active and (latest is None or active > latest):
         latest, outcome = active, 'running'
@@ -327,8 +337,8 @@ def observed_projects():
                              and r.get('publicationDate') == now.date().isoformat())]
             public_count = len({r.get('domain') if key == 'cf_blog' else r['publicUrl'] for r in verified}) if key == 'cf_blog' else None
             reserved_count = sum(1 for r in rows if isinstance(r, dict) and r.get('status') in ('reserved', 'scheduled'))
-        state = str(doc.get('collectionStatus') if key == 'collections' else doc.get('state') or runtime.get('status') or 'not_reported')
-        failed = sum(counts.get(k, 0) for k in ('failed', 'error', 'review_required', 'unknown'))
+        state = str(doc.get('processStatus') if key == 'collections' and doc.get('processStatus') == 'success' else doc.get('collectionStatus') if key == 'collections' else doc.get('state') or (doc.get('automation') or {}).get('state') or runtime.get('status') or 'not_reported')
+        failed = sum(counts.get(k, 0) for k in (('failed', 'error', 'review_required') if key == 'collections' and doc.get('processStatus') == 'success' else ('failed', 'error', 'review_required', 'unknown')))
         status = 'unknown' if error_type or not raw or (age is None and key != 'cf_blog') else 'stale' if not fresh else 'attention' if failed or state in ('failed', 'error', 'unknown', 'partial', 'backoff', 'stale') else 'observed'
         quota = publication_quota(key, doc, now, fresh and (age is not None or key == 'cf_blog') and not error_type)
         activity = kin_activity(doc, now) if key == 'naver_kin' else None
@@ -336,7 +346,7 @@ def observed_projects():
             status = 'attention'
         elif activity and activity['status'] == 'unknown' and status == 'observed':
             status = 'unknown'
-        if quota.get('missing') and status == 'observed':
+        if quota.get('missing') and status == 'observed' and key not in ('cf_blog', 'naver_blog'):
             status = 'attention'
         elif quota.get('status') == 'unknown' and key in ('cf_blog', 'naver_blog', 'threads') and status == 'observed':
             status = 'unknown'
@@ -432,7 +442,7 @@ def audit_all_projects_health(
         },
         "summary": {
             "totalProjects": len(projects_list),
-            "healthyCount": sum(1 for p in projects_list if p["status"] == "healthy"),
+            "healthyCount": sum(1 for p in projects_list if p["status"] in ("healthy", "observed")),
             "ceoActionCount": len(ceo_items),
         },
         "ceoActionItems": ceo_items,

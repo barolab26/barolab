@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-26T07:08:45.533233+00:00",
+  "checkedAt": "2026-10-29T23:29:21.372131+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -35,18 +35,977 @@
     "apiConnected": true,
     "connection": {
       "status": "ready",
-      "checkedAt": "2026-10-20T15:06:07.329157+00:00",
+      "checkedAt": "2026-10-29T12:45:04.228692+00:00",
       "reason": null
     },
     "endsAt": "2026-10-29T11:19:14.891210+00:00",
     "mainTrialCap": 56
   },
   "counts": {
-    "published_verified": 4,
-    "queued": 1,
-    "submitted_unknown": 1
+    "published_verified": 37,
+    "queued": 1
   },
   "recent": [
+    {
+      "attempt_id": "company:18111198623238729",
+      "part_id": "company:18111198623238729",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDfTScEzcW",
+      "updated_at": "2026-10-28T22:19:14.801666+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18111198623238729",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T22:19:15+0000",
+      "verified_at": "2026-10-28T22:19:14.801668+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18129305962849656",
+      "part_id": "company:18129305962849656",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDY1Uzk780",
+      "updated_at": "2026-10-28T21:22:43.480751+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18129305962849656",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T21:22:44+0000",
+      "verified_at": "2026-10-28T21:22:43.480754+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:17938430361401729",
+      "part_id": "company:17938430361401729",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDW3y_E1Kl",
+      "updated_at": "2026-10-28T21:05:43.898944+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:17938430361401729",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T21:05:35+0000",
+      "verified_at": "2026-10-28T21:05:43.898947+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18105690251343233",
+      "part_id": "company:18105690251343233",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDOuO2k50J",
+      "updated_at": "2026-10-28T19:54:21.807003+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18105690251343233",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T19:54:22+0000",
+      "verified_at": "2026-10-28T19:54:21.807005+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18093328865196965",
+      "part_id": "company:18093328865196965",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDNy7_k_PD",
+      "updated_at": "2026-10-28T19:46:22.472088+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18093328865196965",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T19:46:17+0000",
+      "verified_at": "2026-10-28T19:46:22.472090+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:17976810642144747",
+      "part_id": "company:17976810642144747",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDJyTDk_uL",
+      "updated_at": "2026-10-28T19:11:15.957264+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:17976810642144747",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T19:11:15+0000",
+      "verified_at": "2026-10-28T19:11:15.957267+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18147555040573232",
+      "part_id": "company:18147555040573232",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDED7ln0El",
+      "updated_at": "2026-10-28T18:21:13.256869+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18147555040573232",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T18:21:13+0000",
+      "verified_at": "2026-10-28T18:21:13.256870+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18098790821435730",
+      "part_id": "company:18098790821435730",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDDgskn2dY",
+      "updated_at": "2026-10-28T18:16:23.550273+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18098790821435730",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T18:16:24+0000",
+      "verified_at": "2026-10-28T18:16:23.550275+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18117339430820173",
+      "part_id": "company:18117339430820173",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDC6b3n3v4",
+      "updated_at": "2026-10-28T18:11:10.825071+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18117339430820173",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T18:11:11+0000",
+      "verified_at": "2026-10-28T18:11:10.825073+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18127215112926007",
+      "part_id": "company:18127215112926007",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDBTUHH3O-",
+      "updated_at": "2026-10-28T17:57:06.566816+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18127215112926007",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T17:57:07+0000",
+      "verified_at": "2026-10-28T17:57:06.566818+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:17995907103019400",
+      "part_id": "company:17995907103019400",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDA0xzH3Vg",
+      "updated_at": "2026-10-28T17:53:06.975441+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:17995907103019400",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T17:52:56+0000",
+      "verified_at": "2026-10-28T17:53:06.975442+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18095533334487348",
+      "part_id": "company:18095533334487348",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfDAjTnn1gK",
+      "updated_at": "2026-10-28T17:50:34.686316+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18095533334487348",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T17:50:33+0000",
+      "verified_at": "2026-10-28T17:50:34.686320+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18131608691483973",
+      "part_id": "company:18131608691483973",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfC_VghH9Yu",
+      "updated_at": "2026-10-28T17:39:57.278477+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18131608691483973",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T17:39:56+0000",
+      "verified_at": "2026-10-28T17:39:57.278479+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18134839615804589",
+      "part_id": "company:18134839615804589",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfC-x2sn8rl",
+      "updated_at": "2026-10-28T17:35:14.971405+00:00",
+      "publication_date": "2026-10-29",
+      "slot": "company:18134839615804589",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T17:35:04+0000",
+      "verified_at": "2026-10-28T17:35:14.971408+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18111080075207030",
+      "part_id": "company:18111080075207030",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCYeD8n6QY",
+      "updated_at": "2026-10-28T12:00:22.366009+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18111080075207030",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T12:00:21+0000",
+      "verified_at": "2026-10-28T12:00:22.366011+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:17952889854294884",
+      "part_id": "company:17952889854294884",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQb8Wn6ap",
+      "updated_at": "2026-10-28T10:50:28.821438+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:17952889854294884",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:50:27+0000",
+      "verified_at": "2026-10-28T10:50:28.821440+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18105396146369920",
+      "part_id": "company:18105396146369920",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQToGH5wI",
+      "updated_at": "2026-10-28T10:49:03.478859+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18105396146369920",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:49:01+0000",
+      "verified_at": "2026-10-28T10:49:03.478862+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18032445926686017",
+      "part_id": "company:18032445926686017",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQK7KHzpO",
+      "updated_at": "2026-10-28T10:47:51.636558+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18032445926686017",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:47:50+0000",
+      "verified_at": "2026-10-28T10:47:51.636561+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18103030973548048",
+      "part_id": "company:18103030973548048",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQCLsH6Ec",
+      "updated_at": "2026-10-28T10:46:39.531413+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18103030973548048",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:46:38+0000",
+      "verified_at": "2026-10-28T10:46:39.531415+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18358403581216678",
+      "part_id": "company:18358403581216678",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCM0cJn79C",
+      "updated_at": "2026-10-28T10:18:33.521033+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18358403581216678",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:18:32+0000",
+      "verified_at": "2026-10-28T10:18:33.521035+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18052639928619017",
+      "part_id": "company:18052639928619017",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCMYOFn4Cq",
+      "updated_at": "2026-10-28T10:15:08.877593+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18052639928619017",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:14:59+0000",
+      "verified_at": "2026-10-28T10:15:08.877596+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:17993900784057402",
+      "part_id": "company:17993900784057402",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCMDtuHwB5",
+      "updated_at": "2026-10-28T10:11:54.538550+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:17993900784057402",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:11:53+0000",
+      "verified_at": "2026-10-28T10:11:54.538553+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18074951906750124",
+      "part_id": "company:18074951906750124",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCL50xH8Pe",
+      "updated_at": "2026-10-28T10:10:44.661769+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18074951906750124",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:10:31+0000",
+      "verified_at": "2026-10-28T10:10:44.661772+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:17979829721915637",
+      "part_id": "company:17979829721915637",
+      "kind": "reply",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCLwr7n_9z",
+      "updated_at": "2026-10-28T10:09:23.814940+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:17979829721915637",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:09:18+0000",
+      "verified_at": "2026-10-28T10:09:23.814944+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18236953225323832",
+      "part_id": "company:18236953225323832",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfCLm8In1M-",
+      "updated_at": "2026-10-28T10:08:05.614671+00:00",
+      "publication_date": "2026-10-28",
+      "slot": "company:18236953225323832",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-28T10:07:57+0000",
+      "verified_at": "2026-10-28T10:08:05.614673+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "company:18643628035008812",
+      "part_id": "company:18643628035008812",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De-gdzoHyCE",
+      "updated_at": "2026-10-27T00:47:59.397842+00:00",
+      "publication_date": "2026-10-27",
+      "slot": "company:18643628035008812",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": null,
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "variants": null,
+      "selected_variant": "hook",
+      "preview": null,
+      "review": {
+        "status": "legacy",
+        "reason": null
+      },
+      "source_url": null,
+      "published_at": "2026-10-26T23:53:13+0000",
+      "verified_at": "2026-10-27T00:47:59.397845+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "1d476482b57f49a9861c60d688242380",
+      "part_id": "1d476482b57f49a9861c60d688242380-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De-bCY4E0xT",
+      "updated_at": "2026-10-26T23:05:53.569500+00:00",
+      "publication_date": "2026-10-27",
+      "slot": "08:00",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "최대 330만 원 현금 지급! 2026 근로장려금 신청 자격 및 가구원별 지급액 계산 총정리 (국세청 홈택스 간편 신청) | 머스트굿 정책뉴스",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 163,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "일하느라 바쁜 와중에도 잊지 말고 꼭 챙겨야 하는 지원금이 있어요. 바로 최대 330만 원까지 현금으로 지급되는 근로장려금입니다!\n\n2026년에는 맞벌이 가구 소득 기준이 완화되면서 작년에 아쉽게 탈락했던 분들도 대상에 포함될 수 있게 되었어요.\n\n내 가구 기준을 먼저 체크해 보세요.\n• 단독 가구: 연소득 2,200만 원 미만 (최대 165만 원)\n• 홑벌이 가구: 연소득 3,200만 원 미만 (최대 285만 원)\n• 맞벌이 가구: 연소득 4,400만 원 미만 (최대 330만 원)\n\n재산은 가구원 합산 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50%가 감액 지급됩니다.\n\n정기 신청은 5월에 진행되고 8월 말에 지급돼요. 홈택스나 손택스 앱에서 간편인증으로 빠르게 접수할 수 있으니 대상자인지 미리 확인해 보세요. 상세 계산과 신청 방법은 첫 댓글에 남겨둘게요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "매년 5월마다 돌아오는 근로장려금, 올해는 소득 기준이 완화되었다고 해서 저도 꼼꼼히 정리해 봤어요.\n\n작년에 아슬아슬하게 기준을 넘겨서 아쉽게 놓쳤던 맞벌이 가구분들은 이번에 꼭 다시 확인해 보셔야 합니다.\n\n가구별 소득 기준 & 최대 지급액:\n• 단독 가구: 연 2,200만 원 미만 ➔ 최대 165만 원\n• 홑벌이 가구: 연 3,200만 원 미만 ➔ 최대 285만 원\n• 맞벌이 가구: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하고, 1억 7천만 원 이상이면 50%만 나오니 이 부분도 함께 체크해야 해요.\n\n국세청 홈택스나 손택스 모바일 앱에서 간편인증으로 금방 신청할 수 있어요. 5월 정기 신청 기간을 놓치지 않도록 미리 확인해 두세요.\n\n더 자세한 신청 방법과 계산 팁은 첫 댓글에 남겨둘게요!",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+      "published_at": "2026-10-26T23:05:47+00:00",
+      "verified_at": "2026-10-26T23:05:53.568383+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "1d476482b57f49a9861c60d688242380",
+      "part_id": "1d476482b57f49a9861c60d688242380-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De-bjG_E_2O",
+      "updated_at": "2026-10-26T23:38:53.572991+00:00",
+      "publication_date": "2026-10-27",
+      "slot": "08:00",
+      "outbound_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261027_0800_502b6d97e9cb63dd",
+      "parent_platform_id": "18606525028067019",
+      "title": "최대 330만 원 현금 지급! 2026 근로장려금 신청 자격 및 가구원별 지급액 계산 총정리 (국세청 홈택스 간편 신청) | 머스트굿 정책뉴스",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 163,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "일하느라 바쁜 와중에도 잊지 말고 꼭 챙겨야 하는 지원금이 있어요. 바로 최대 330만 원까지 현금으로 지급되는 근로장려금입니다!\n\n2026년에는 맞벌이 가구 소득 기준이 완화되면서 작년에 아쉽게 탈락했던 분들도 대상에 포함될 수 있게 되었어요.\n\n내 가구 기준을 먼저 체크해 보세요.\n• 단독 가구: 연소득 2,200만 원 미만 (최대 165만 원)\n• 홑벌이 가구: 연소득 3,200만 원 미만 (최대 285만 원)\n• 맞벌이 가구: 연소득 4,400만 원 미만 (최대 330만 원)\n\n재산은 가구원 합산 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50%가 감액 지급됩니다.\n\n정기 신청은 5월에 진행되고 8월 말에 지급돼요. 홈택스나 손택스 앱에서 간편인증으로 빠르게 접수할 수 있으니 대상자인지 미리 확인해 보세요. 상세 계산과 신청 방법은 첫 댓글에 남겨둘게요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "매년 5월마다 돌아오는 근로장려금, 올해는 소득 기준이 완화되었다고 해서 저도 꼼꼼히 정리해 봤어요.\n\n작년에 아슬아슬하게 기준을 넘겨서 아쉽게 놓쳤던 맞벌이 가구분들은 이번에 꼭 다시 확인해 보셔야 합니다.\n\n가구별 소득 기준 & 최대 지급액:\n• 단독 가구: 연 2,200만 원 미만 ➔ 최대 165만 원\n• 홑벌이 가구: 연 3,200만 원 미만 ➔ 최대 285만 원\n• 맞벌이 가구: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하고, 1억 7천만 원 이상이면 50%만 나오니 이 부분도 함께 체크해야 해요.\n\n국세청 홈택스나 손택스 모바일 앱에서 간편인증으로 금방 신청할 수 있어요. 5월 정기 신청 기간을 놓치지 않도록 미리 확인해 두세요.\n\n더 자세한 신청 방법과 계산 팁은 첫 댓글에 남겨둘게요!",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "※ 본 게시물은 직접 운영하는 블로그의 정보 안내 글입니다.\n\n2026년 근로장려금 가구원별 상세 모의 계산법과 홈택스 간편 신청 방법은 아래 링크에서 확인하실 수 있습니다 👇\nhttps://www.must-good.com/2026-earned-income-tax-credit-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261027_0800_502b6d97e9cb63dd",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+      "published_at": "2026-10-26T23:10:32+0000",
+      "verified_at": "2026-10-26T23:38:53.572977+00:00",
+      "publication_time_basis": null
+    },
+    {
+      "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+      "part_id": "e761007a97674e3ca704ae2b764dc2fa-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De9SysAHzIj",
+      "updated_at": "2026-10-26T12:34:32.144705+00:00",
+      "publication_date": "2026-10-26",
+      "slot": "21:30",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "과태료 10만 원 피하려면 꼭 확인! 2026 달라진 쓰레기 분리배출 기준 총정리 | 메가노트 피드",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 90,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "다들 쓰레기 버릴 때 ‘이거 재활용 맞나?’ 하고 멈칫한 적 있으시죠?\n\n무심코 잘못 버린 쓰레기 한 장 때문에 최대 10만 원 이상의 과태료가 부과될 수 있다고 해요. 2026년부터 분리배출 기준이 더 엄격해졌거든요.\n\n딱 이것만 기억해 두시면 안심이에요!\n✔ 기본 4원칙: 비운다, 헹군다, 분리한다, 섞지 않는다\n✔ 투명 페트병: 라벨 완전히 떼고, 꾹 압착해서, 뚜껑 닫기\n✔ 보조배터리: 종량제 봉투 절대 금지! 압축할 때 폭발이나 화재 위험이 있어서 반드시 행정복지센터나 아파트 전용 폐전지 수거함에 넣어야 해요.\n\n헷갈리는 품목별 세부 배출 기준은 아래 첫 댓글에 깔끔하게 정리해 둘게요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "살림하면서 분리수거 제대로 안 했다가 10만 원 넘게 낼 수는 없잖아요. 2026년 분리배출 핵심만 딱 짚어 드릴게요.\n\n기준이 엄격해져서 잘못 배출하면 최대 10만 원 이상의 과태료 대상이 됩니다.\n\n기본 4대 원칙은 ‘비우고, 헹구고, 분리하고, 섞지 않는다’예요.\n특히 매일 나오는 투명 페트병은 라벨을 완전히 떼어낸 뒤 꾹 눌러 압착하고 뚜껑을 닫아 배출하는 게 정석입니다.\n\n그리고 가장 주의할 점!\n리튬이온 배터리가 든 보조배터리나 전자기기는 종량제 봉투에 절대 넣지 마세요. 쓰레기 압축 중에 폭발이나 불이 날 수 있어요. 행정복지센터나 단지 내 전용 폐전지 수거함에 따로 버리셔야 안전합니다.\n\n품목별 상세 배출 가이드는 아래 첫 댓글에서 확인해 보세요.",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+      "published_at": "2026-10-26T12:34:29+00:00",
+      "verified_at": "2026-10-26T12:34:32.143189+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+      "part_id": "e761007a97674e3ca704ae2b764dc2fa-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De9XJscn4UA",
+      "updated_at": "2026-10-26T23:00:53.226147+00:00",
+      "publication_date": "2026-10-26",
+      "slot": "21:30",
+      "outbound_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_2130_906ee7994cd19f1d",
+      "parent_platform_id": "18077032373732120",
+      "title": "과태료 10만 원 피하려면 꼭 확인! 2026 달라진 쓰레기 분리배출 기준 총정리 | 메가노트 피드",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 90,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "다들 쓰레기 버릴 때 ‘이거 재활용 맞나?’ 하고 멈칫한 적 있으시죠?\n\n무심코 잘못 버린 쓰레기 한 장 때문에 최대 10만 원 이상의 과태료가 부과될 수 있다고 해요. 2026년부터 분리배출 기준이 더 엄격해졌거든요.\n\n딱 이것만 기억해 두시면 안심이에요!\n✔ 기본 4원칙: 비운다, 헹군다, 분리한다, 섞지 않는다\n✔ 투명 페트병: 라벨 완전히 떼고, 꾹 압착해서, 뚜껑 닫기\n✔ 보조배터리: 종량제 봉투 절대 금지! 압축할 때 폭발이나 화재 위험이 있어서 반드시 행정복지센터나 아파트 전용 폐전지 수거함에 넣어야 해요.\n\n헷갈리는 품목별 세부 배출 기준은 아래 첫 댓글에 깔끔하게 정리해 둘게요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "살림하면서 분리수거 제대로 안 했다가 10만 원 넘게 낼 수는 없잖아요. 2026년 분리배출 핵심만 딱 짚어 드릴게요.\n\n기준이 엄격해져서 잘못 배출하면 최대 10만 원 이상의 과태료 대상이 됩니다.\n\n기본 4대 원칙은 ‘비우고, 헹구고, 분리하고, 섞지 않는다’예요.\n특히 매일 나오는 투명 페트병은 라벨을 완전히 떼어낸 뒤 꾹 눌러 압착하고 뚜껑을 닫아 배출하는 게 정석입니다.\n\n그리고 가장 주의할 점!\n리튬이온 배터리가 든 보조배터리나 전자기기는 종량제 봉투에 절대 넣지 마세요. 쓰레기 압축 중에 폭발이나 불이 날 수 있어요. 행정복지센터나 단지 내 전용 폐전지 수거함에 따로 버리셔야 안전합니다.\n\n품목별 상세 배출 가이드는 아래 첫 댓글에서 확인해 보세요.",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "※ 직접 운영하는 블로그의 상세 안내 글로 연결됩니다.\n\n2026년 달라진 생활폐기물 분리배출 기준과 품목별 주의사항을 한눈에 보실 수 있도록 정리해 두었습니다. 과태료 걱정 없이 안전하게 분리배출하는 방법은 아래 링크에서 확인해 보세요! 👇\n\nhttps://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_2130_906ee7994cd19f1d",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+      "published_at": "2026-10-26T13:12:52+00:00",
+      "verified_at": "2026-10-26T23:00:53.224038+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+      "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De8756GH0G6",
+      "updated_at": "2026-10-26T09:14:31.534582+00:00",
+      "publication_date": "2026-10-26",
+      "slot": "18:10",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "퇴근 시간을 1시간 앞당기는 윈도우 11 필수 단축키 모음 (클립보드, 화면 분할) | 맥스노트 엑셀·업무자동화 위키",
+      "mode": "affiliate",
+      "followup_delay_seconds": 121,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "매번 마우스로 창 크기 맞추고 복사 붙여넣기 반복하느라 손목 아프셨던 분들 계신가요? 윈도우 11에서 작업 속도 확실히 올려주는 필수 단축키 정리해 봤어요.\n\n• Win + V : 클립보드 히스토리\n이전에 복사했던 텍스트와 이미지 목록을 확인하고 원하는 걸 골라서 붙여넣을 수 있어요.\n\n• Win + Z : 스냅 레이아웃\n클릭 한 번으로 창을 2~4분할로 깔끔하게 자동 정렬해 줍니다.\n\n• Win + Shift + S : 영역 지정 캡처\n원하는 화면 영역만 즉시 잘라내어 캡처할 수 있어요.\n\n• Win + Ctrl + D : 가상 데스크톱\n업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 빠르게 전환할 수 있어 멀티태스킹 피로를 크게 줄여줍니다.\n\n손에 익으면 마우스 잡는 시간부터 확 줄어드니 꼭 써보세요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "칼퇴하고 싶다면 마우스부터 내려놓아야 합니다. 윈도우 11에서 매일 실무 효율을 올려주는 핵심 단축키 4가지입니다.\n\n첫째, Win + V\n복사한 내용을 덮어써서 다시 복사하러 갈 필요가 없습니다. 클립보드 히스토리에서 이전 텍스트와 이미지를 바로 골라 씁니다.\n\n둘째, Win + Z\n창 크기 맞춘다고 마우스 끄는 시간을 아끼세요. 클릭 한 번에 2~4분할로 딱 맞춰줍니다.\n\n셋째, Win + Shift + S\n필요한 영역만 즉시 잘라내는 영역 지정 캡처입니다.\n\n넷째, Win + Ctrl + D\n가상 데스크톱을 새로 만들어 업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 즉시 전환합니다.\n\n손에 붙는 순간 작업 속도가 달라집니다. 내일 출근해서 바로 활용해 보세요.",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+      "published_at": "2026-10-26T09:14:29+00:00",
+      "verified_at": "2026-10-26T09:14:31.533128+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+      "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De88UDeHyYN",
+      "updated_at": "2026-10-26T12:30:57.148196+00:00",
+      "publication_date": "2026-10-26",
+      "slot": "18:10",
+      "outbound_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1810_41759bfffe7be804",
+      "parent_platform_id": "18096326723668839",
+      "title": "퇴근 시간을 1시간 앞당기는 윈도우 11 필수 단축키 모음 (클립보드, 화면 분할) | 맥스노트 엑셀·업무자동화 위키",
+      "mode": "affiliate",
+      "followup_delay_seconds": 121,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "매번 마우스로 창 크기 맞추고 복사 붙여넣기 반복하느라 손목 아프셨던 분들 계신가요? 윈도우 11에서 작업 속도 확실히 올려주는 필수 단축키 정리해 봤어요.\n\n• Win + V : 클립보드 히스토리\n이전에 복사했던 텍스트와 이미지 목록을 확인하고 원하는 걸 골라서 붙여넣을 수 있어요.\n\n• Win + Z : 스냅 레이아웃\n클릭 한 번으로 창을 2~4분할로 깔끔하게 자동 정렬해 줍니다.\n\n• Win + Shift + S : 영역 지정 캡처\n원하는 화면 영역만 즉시 잘라내어 캡처할 수 있어요.\n\n• Win + Ctrl + D : 가상 데스크톱\n업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 빠르게 전환할 수 있어 멀티태스킹 피로를 크게 줄여줍니다.\n\n손에 익으면 마우스 잡는 시간부터 확 줄어드니 꼭 써보세요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "칼퇴하고 싶다면 마우스부터 내려놓아야 합니다. 윈도우 11에서 매일 실무 효율을 올려주는 핵심 단축키 4가지입니다.\n\n첫째, Win + V\n복사한 내용을 덮어써서 다시 복사하러 갈 필요가 없습니다. 클립보드 히스토리에서 이전 텍스트와 이미지를 바로 골라 씁니다.\n\n둘째, Win + Z\n창 크기 맞춘다고 마우스 끄는 시간을 아끼세요. 클릭 한 번에 2~4분할로 딱 맞춰줍니다.\n\n셋째, Win + Shift + S\n필요한 영역만 즉시 잘라내는 영역 지정 캡처입니다.\n\n넷째, Win + Ctrl + D\n가상 데스크톱을 새로 만들어 업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 즉시 전환합니다.\n\n손에 붙는 순간 작업 속도가 달라집니다. 내일 출근해서 바로 활용해 보세요.",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "※ 직접 운영하는 블로그 콘텐츠입니다.\n\n단축키 세부 기능과 업무 환경 세팅에 관한 자세한 내용은 아래 정리 글에서 확인하실 수 있습니다 👇\nhttps://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1810_41759bfffe7be804",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+      "published_at": "2026-10-26T09:18:21+00:00",
+      "verified_at": "2026-10-26T12:30:57.147093+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
     {
       "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
       "part_id": "8ce43ef43d9c4514890765c101ce53e7-0",
@@ -95,9 +1054,9 @@
       "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
       "kind": "followup",
       "account_key": "mustpickinfo",
-      "state": "submitted_unknown",
-      "permalink": null,
-      "updated_at": "2026-10-26T06:56:48.998127+00:00",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/De8sHhEnxYT",
+      "updated_at": "2026-10-26T09:10:52.837149+00:00",
       "publication_date": "2026-10-26",
       "slot": "12:30",
       "outbound_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1230_055531d1b8b20c55",
@@ -129,9 +1088,9 @@
         "reason": "basic_format"
       },
       "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
-      "published_at": null,
-      "verified_at": null,
-      "publication_time_basis": null
+      "published_at": "2026-10-26T06:56:48+00:00",
+      "verified_at": "2026-10-26T09:10:52.835884+00:00",
+      "publication_time_basis": "api_timestamp"
     },
     {
       "attempt_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6",
@@ -308,6 +1267,1343 @@
   ],
   "pairedThreads": [
     {
+      "attempt_id": "company:18111198623238729",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18111198623238729",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18111198623238729",
+        "part_id": "company:18111198623238729",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDfTScEzcW",
+        "updated_at": "2026-10-28T22:19:14.801666+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18111198623238729",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T22:19:15+0000",
+        "verified_at": "2026-10-28T22:19:14.801668+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18129305962849656",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18129305962849656",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18129305962849656",
+        "part_id": "company:18129305962849656",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDY1Uzk780",
+        "updated_at": "2026-10-28T21:22:43.480751+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18129305962849656",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T21:22:44+0000",
+        "verified_at": "2026-10-28T21:22:43.480754+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:17938430361401729",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:17938430361401729",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:17938430361401729",
+        "part_id": "company:17938430361401729",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDW3y_E1Kl",
+        "updated_at": "2026-10-28T21:05:43.898944+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:17938430361401729",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T21:05:35+0000",
+        "verified_at": "2026-10-28T21:05:43.898947+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18105690251343233",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18105690251343233",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18105690251343233",
+        "part_id": "company:18105690251343233",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDOuO2k50J",
+        "updated_at": "2026-10-28T19:54:21.807003+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18105690251343233",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T19:54:22+0000",
+        "verified_at": "2026-10-28T19:54:21.807005+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18093328865196965",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18093328865196965",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18093328865196965",
+        "part_id": "company:18093328865196965",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDNy7_k_PD",
+        "updated_at": "2026-10-28T19:46:22.472088+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18093328865196965",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T19:46:17+0000",
+        "verified_at": "2026-10-28T19:46:22.472090+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:17976810642144747",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:17976810642144747",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:17976810642144747",
+        "part_id": "company:17976810642144747",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDJyTDk_uL",
+        "updated_at": "2026-10-28T19:11:15.957264+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:17976810642144747",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T19:11:15+0000",
+        "verified_at": "2026-10-28T19:11:15.957267+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18147555040573232",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18147555040573232",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18147555040573232",
+        "part_id": "company:18147555040573232",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDED7ln0El",
+        "updated_at": "2026-10-28T18:21:13.256869+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18147555040573232",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T18:21:13+0000",
+        "verified_at": "2026-10-28T18:21:13.256870+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18098790821435730",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18098790821435730",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18098790821435730",
+        "part_id": "company:18098790821435730",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDDgskn2dY",
+        "updated_at": "2026-10-28T18:16:23.550273+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18098790821435730",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T18:16:24+0000",
+        "verified_at": "2026-10-28T18:16:23.550275+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18117339430820173",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18117339430820173",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18117339430820173",
+        "part_id": "company:18117339430820173",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDC6b3n3v4",
+        "updated_at": "2026-10-28T18:11:10.825071+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18117339430820173",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T18:11:11+0000",
+        "verified_at": "2026-10-28T18:11:10.825073+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18127215112926007",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18127215112926007",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18127215112926007",
+        "part_id": "company:18127215112926007",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDBTUHH3O-",
+        "updated_at": "2026-10-28T17:57:06.566816+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18127215112926007",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T17:57:07+0000",
+        "verified_at": "2026-10-28T17:57:06.566818+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:17995907103019400",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:17995907103019400",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:17995907103019400",
+        "part_id": "company:17995907103019400",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDA0xzH3Vg",
+        "updated_at": "2026-10-28T17:53:06.975441+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:17995907103019400",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T17:52:56+0000",
+        "verified_at": "2026-10-28T17:53:06.975442+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18095533334487348",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18095533334487348",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18095533334487348",
+        "part_id": "company:18095533334487348",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDAjTnn1gK",
+        "updated_at": "2026-10-28T17:50:34.686316+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18095533334487348",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T17:50:33+0000",
+        "verified_at": "2026-10-28T17:50:34.686320+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18131608691483973",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18131608691483973",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18131608691483973",
+        "part_id": "company:18131608691483973",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfC_VghH9Yu",
+        "updated_at": "2026-10-28T17:39:57.278477+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18131608691483973",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T17:39:56+0000",
+        "verified_at": "2026-10-28T17:39:57.278479+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18134839615804589",
+      "title": null,
+      "publication_date": "2026-10-29",
+      "slot": "company:18134839615804589",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18134839615804589",
+        "part_id": "company:18134839615804589",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfC-x2sn8rl",
+        "updated_at": "2026-10-28T17:35:14.971405+00:00",
+        "publication_date": "2026-10-29",
+        "slot": "company:18134839615804589",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T17:35:04+0000",
+        "verified_at": "2026-10-28T17:35:14.971408+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18111080075207030",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18111080075207030",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18111080075207030",
+        "part_id": "company:18111080075207030",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCYeD8n6QY",
+        "updated_at": "2026-10-28T12:00:22.366009+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18111080075207030",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T12:00:21+0000",
+        "verified_at": "2026-10-28T12:00:22.366011+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:17952889854294884",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:17952889854294884",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:17952889854294884",
+        "part_id": "company:17952889854294884",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQb8Wn6ap",
+        "updated_at": "2026-10-28T10:50:28.821438+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:17952889854294884",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:50:27+0000",
+        "verified_at": "2026-10-28T10:50:28.821440+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18105396146369920",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18105396146369920",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18105396146369920",
+        "part_id": "company:18105396146369920",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQToGH5wI",
+        "updated_at": "2026-10-28T10:49:03.478859+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18105396146369920",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:49:01+0000",
+        "verified_at": "2026-10-28T10:49:03.478862+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18032445926686017",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18032445926686017",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18032445926686017",
+        "part_id": "company:18032445926686017",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQK7KHzpO",
+        "updated_at": "2026-10-28T10:47:51.636558+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18032445926686017",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:47:50+0000",
+        "verified_at": "2026-10-28T10:47:51.636561+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18103030973548048",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18103030973548048",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18103030973548048",
+        "part_id": "company:18103030973548048",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQCLsH6Ec",
+        "updated_at": "2026-10-28T10:46:39.531413+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18103030973548048",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:46:38+0000",
+        "verified_at": "2026-10-28T10:46:39.531415+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18358403581216678",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18358403581216678",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18358403581216678",
+        "part_id": "company:18358403581216678",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCM0cJn79C",
+        "updated_at": "2026-10-28T10:18:33.521033+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18358403581216678",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:18:32+0000",
+        "verified_at": "2026-10-28T10:18:33.521035+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18052639928619017",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18052639928619017",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:18052639928619017",
+        "part_id": "company:18052639928619017",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCMYOFn4Cq",
+        "updated_at": "2026-10-28T10:15:08.877593+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18052639928619017",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:14:59+0000",
+        "verified_at": "2026-10-28T10:15:08.877596+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:17993900784057402",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:17993900784057402",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:17993900784057402",
+        "part_id": "company:17993900784057402",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCMDtuHwB5",
+        "updated_at": "2026-10-28T10:11:54.538550+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:17993900784057402",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:11:53+0000",
+        "verified_at": "2026-10-28T10:11:54.538553+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18074951906750124",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18074951906750124",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18074951906750124",
+        "part_id": "company:18074951906750124",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCL50xH8Pe",
+        "updated_at": "2026-10-28T10:10:44.661769+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18074951906750124",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:10:31+0000",
+        "verified_at": "2026-10-28T10:10:44.661772+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:17979829721915637",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:17979829721915637",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": null,
+      "followup": null,
+      "reply": {
+        "attempt_id": "company:17979829721915637",
+        "part_id": "company:17979829721915637",
+        "kind": "reply",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCLwr7n_9z",
+        "updated_at": "2026-10-28T10:09:23.814940+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:17979829721915637",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:09:18+0000",
+        "verified_at": "2026-10-28T10:09:23.814944+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "company:18236953225323832",
+      "title": null,
+      "publication_date": "2026-10-28",
+      "slot": "company:18236953225323832",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18236953225323832",
+        "part_id": "company:18236953225323832",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCLm8In1M-",
+        "updated_at": "2026-10-28T10:08:05.614671+00:00",
+        "publication_date": "2026-10-28",
+        "slot": "company:18236953225323832",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-28T10:07:57+0000",
+        "verified_at": "2026-10-28T10:08:05.614673+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "company:18643628035008812",
+      "title": null,
+      "publication_date": "2026-10-27",
+      "slot": "company:18643628035008812",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 120,
+      "source_url": null,
+      "variants": null,
+      "main": {
+        "attempt_id": "company:18643628035008812",
+        "part_id": "company:18643628035008812",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De-gdzoHyCE",
+        "updated_at": "2026-10-27T00:47:59.397842+00:00",
+        "publication_date": "2026-10-27",
+        "slot": "company:18643628035008812",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": null,
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 120,
+        "variants": null,
+        "selected_variant": "hook",
+        "preview": null,
+        "review": {
+          "status": "legacy",
+          "reason": null
+        },
+        "source_url": null,
+        "published_at": "2026-10-26T23:53:13+0000",
+        "verified_at": "2026-10-27T00:47:59.397845+00:00",
+        "publication_time_basis": null
+      },
+      "followup": null
+    },
+    {
+      "attempt_id": "1d476482b57f49a9861c60d688242380",
+      "title": "최대 330만 원 현금 지급! 2026 근로장려금 신청 자격 및 가구원별 지급액 계산 총정리 (국세청 홈택스 간편 신청) | 머스트굿 정책뉴스",
+      "publication_date": "2026-10-27",
+      "slot": "08:00",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 163,
+      "source_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "일하느라 바쁜 와중에도 잊지 말고 꼭 챙겨야 하는 지원금이 있어요. 바로 최대 330만 원까지 현금으로 지급되는 근로장려금입니다!\n\n2026년에는 맞벌이 가구 소득 기준이 완화되면서 작년에 아쉽게 탈락했던 분들도 대상에 포함될 수 있게 되었어요.\n\n내 가구 기준을 먼저 체크해 보세요.\n• 단독 가구: 연소득 2,200만 원 미만 (최대 165만 원)\n• 홑벌이 가구: 연소득 3,200만 원 미만 (최대 285만 원)\n• 맞벌이 가구: 연소득 4,400만 원 미만 (최대 330만 원)\n\n재산은 가구원 합산 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50%가 감액 지급됩니다.\n\n정기 신청은 5월에 진행되고 8월 말에 지급돼요. 홈택스나 손택스 앱에서 간편인증으로 빠르게 접수할 수 있으니 대상자인지 미리 확인해 보세요. 상세 계산과 신청 방법은 첫 댓글에 남겨둘게요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "매년 5월마다 돌아오는 근로장려금, 올해는 소득 기준이 완화되었다고 해서 저도 꼼꼼히 정리해 봤어요.\n\n작년에 아슬아슬하게 기준을 넘겨서 아쉽게 놓쳤던 맞벌이 가구분들은 이번에 꼭 다시 확인해 보셔야 합니다.\n\n가구별 소득 기준 & 최대 지급액:\n• 단독 가구: 연 2,200만 원 미만 ➔ 최대 165만 원\n• 홑벌이 가구: 연 3,200만 원 미만 ➔ 최대 285만 원\n• 맞벌이 가구: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하고, 1억 7천만 원 이상이면 50%만 나오니 이 부분도 함께 체크해야 해요.\n\n국세청 홈택스나 손택스 모바일 앱에서 간편인증으로 금방 신청할 수 있어요. 5월 정기 신청 기간을 놓치지 않도록 미리 확인해 두세요.\n\n더 자세한 신청 방법과 계산 팁은 첫 댓글에 남겨둘게요!",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "1d476482b57f49a9861c60d688242380",
+        "part_id": "1d476482b57f49a9861c60d688242380-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De-bCY4E0xT",
+        "updated_at": "2026-10-26T23:05:53.569500+00:00",
+        "publication_date": "2026-10-27",
+        "slot": "08:00",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "최대 330만 원 현금 지급! 2026 근로장려금 신청 자격 및 가구원별 지급액 계산 총정리 (국세청 홈택스 간편 신청) | 머스트굿 정책뉴스",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 163,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "일하느라 바쁜 와중에도 잊지 말고 꼭 챙겨야 하는 지원금이 있어요. 바로 최대 330만 원까지 현금으로 지급되는 근로장려금입니다!\n\n2026년에는 맞벌이 가구 소득 기준이 완화되면서 작년에 아쉽게 탈락했던 분들도 대상에 포함될 수 있게 되었어요.\n\n내 가구 기준을 먼저 체크해 보세요.\n• 단독 가구: 연소득 2,200만 원 미만 (최대 165만 원)\n• 홑벌이 가구: 연소득 3,200만 원 미만 (최대 285만 원)\n• 맞벌이 가구: 연소득 4,400만 원 미만 (최대 330만 원)\n\n재산은 가구원 합산 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50%가 감액 지급됩니다.\n\n정기 신청은 5월에 진행되고 8월 말에 지급돼요. 홈택스나 손택스 앱에서 간편인증으로 빠르게 접수할 수 있으니 대상자인지 미리 확인해 보세요. 상세 계산과 신청 방법은 첫 댓글에 남겨둘게요!",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "매년 5월마다 돌아오는 근로장려금, 올해는 소득 기준이 완화되었다고 해서 저도 꼼꼼히 정리해 봤어요.\n\n작년에 아슬아슬하게 기준을 넘겨서 아쉽게 놓쳤던 맞벌이 가구분들은 이번에 꼭 다시 확인해 보셔야 합니다.\n\n가구별 소득 기준 & 최대 지급액:\n• 단독 가구: 연 2,200만 원 미만 ➔ 최대 165만 원\n• 홑벌이 가구: 연 3,200만 원 미만 ➔ 최대 285만 원\n• 맞벌이 가구: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하고, 1억 7천만 원 이상이면 50%만 나오니 이 부분도 함께 체크해야 해요.\n\n국세청 홈택스나 손택스 모바일 앱에서 간편인증으로 금방 신청할 수 있어요. 5월 정기 신청 기간을 놓치지 않도록 미리 확인해 두세요.\n\n더 자세한 신청 방법과 계산 팁은 첫 댓글에 남겨둘게요!",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+        "published_at": "2026-10-26T23:05:47+00:00",
+        "verified_at": "2026-10-26T23:05:53.568383+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "1d476482b57f49a9861c60d688242380",
+        "part_id": "1d476482b57f49a9861c60d688242380-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De-bjG_E_2O",
+        "updated_at": "2026-10-26T23:38:53.572991+00:00",
+        "publication_date": "2026-10-27",
+        "slot": "08:00",
+        "outbound_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261027_0800_502b6d97e9cb63dd",
+        "parent_platform_id": "18606525028067019",
+        "title": "최대 330만 원 현금 지급! 2026 근로장려금 신청 자격 및 가구원별 지급액 계산 총정리 (국세청 홈택스 간편 신청) | 머스트굿 정책뉴스",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 163,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "일하느라 바쁜 와중에도 잊지 말고 꼭 챙겨야 하는 지원금이 있어요. 바로 최대 330만 원까지 현금으로 지급되는 근로장려금입니다!\n\n2026년에는 맞벌이 가구 소득 기준이 완화되면서 작년에 아쉽게 탈락했던 분들도 대상에 포함될 수 있게 되었어요.\n\n내 가구 기준을 먼저 체크해 보세요.\n• 단독 가구: 연소득 2,200만 원 미만 (최대 165만 원)\n• 홑벌이 가구: 연소득 3,200만 원 미만 (최대 285만 원)\n• 맞벌이 가구: 연소득 4,400만 원 미만 (최대 330만 원)\n\n재산은 가구원 합산 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50%가 감액 지급됩니다.\n\n정기 신청은 5월에 진행되고 8월 말에 지급돼요. 홈택스나 손택스 앱에서 간편인증으로 빠르게 접수할 수 있으니 대상자인지 미리 확인해 보세요. 상세 계산과 신청 방법은 첫 댓글에 남겨둘게요!",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "최대 330만 원 현금 들어오는데, 조건 몰라서 그냥 지나치면 진짜 손해입니다. 2026년 근로장려금 기준이 바뀌었거든요.\n\n특히 맞벌이 가구 소득 요건이 연 4,400만 원 미만으로 대폭 완화되면서, 예전에 아쉽게 탈락했던 분들도 이번엔 지원 대상에 들어갈 수 있습니다.\n\n핵심 요건 딱 3가지만 확인하세요:\n1. 단독: 연 2,200만 원 미만 ➔ 최대 165만 원\n2. 홑벌이: 연 3,200만 원 미만 ➔ 최대 285만 원\n3. 맞벌이: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하며, 1억 7천만 원 이상이면 50% 감액됩니다.\n\n정기 신청은 5월 접수 후 8월 말에 계좌로 지급됩니다. 홈택스나 손택스에서 간편인증으로 1분이면 신청 가능해요.\n\n내 예상 수령액과 자세한 신청 절차는 아래 첫 댓글에 정리해 두었습니다.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "매년 5월마다 돌아오는 근로장려금, 올해는 소득 기준이 완화되었다고 해서 저도 꼼꼼히 정리해 봤어요.\n\n작년에 아슬아슬하게 기준을 넘겨서 아쉽게 놓쳤던 맞벌이 가구분들은 이번에 꼭 다시 확인해 보셔야 합니다.\n\n가구별 소득 기준 & 최대 지급액:\n• 단독 가구: 연 2,200만 원 미만 ➔ 최대 165만 원\n• 홑벌이 가구: 연 3,200만 원 미만 ➔ 최대 285만 원\n• 맞벌이 가구: 연 4,400만 원 미만 ➔ 최대 330만 원\n\n가구원 재산 합계는 2억 4천만 원 미만이어야 하고, 1억 7천만 원 이상이면 50%만 나오니 이 부분도 함께 체크해야 해요.\n\n국세청 홈택스나 손택스 모바일 앱에서 간편인증으로 금방 신청할 수 있어요. 5월 정기 신청 기간을 놓치지 않도록 미리 확인해 두세요.\n\n더 자세한 신청 방법과 계산 팁은 첫 댓글에 남겨둘게요!",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "※ 본 게시물은 직접 운영하는 블로그의 정보 안내 글입니다.\n\n2026년 근로장려금 가구원별 상세 모의 계산법과 홈택스 간편 신청 방법은 아래 링크에서 확인하실 수 있습니다 👇\nhttps://www.must-good.com/2026-earned-income-tax-credit-application-guide?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261027_0800_502b6d97e9cb63dd",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+        "published_at": "2026-10-26T23:10:32+0000",
+        "verified_at": "2026-10-26T23:38:53.572977+00:00",
+        "publication_time_basis": null
+      }
+    },
+    {
+      "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+      "title": "과태료 10만 원 피하려면 꼭 확인! 2026 달라진 쓰레기 분리배출 기준 총정리 | 메가노트 피드",
+      "publication_date": "2026-10-26",
+      "slot": "21:30",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 90,
+      "source_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "다들 쓰레기 버릴 때 ‘이거 재활용 맞나?’ 하고 멈칫한 적 있으시죠?\n\n무심코 잘못 버린 쓰레기 한 장 때문에 최대 10만 원 이상의 과태료가 부과될 수 있다고 해요. 2026년부터 분리배출 기준이 더 엄격해졌거든요.\n\n딱 이것만 기억해 두시면 안심이에요!\n✔ 기본 4원칙: 비운다, 헹군다, 분리한다, 섞지 않는다\n✔ 투명 페트병: 라벨 완전히 떼고, 꾹 압착해서, 뚜껑 닫기\n✔ 보조배터리: 종량제 봉투 절대 금지! 압축할 때 폭발이나 화재 위험이 있어서 반드시 행정복지센터나 아파트 전용 폐전지 수거함에 넣어야 해요.\n\n헷갈리는 품목별 세부 배출 기준은 아래 첫 댓글에 깔끔하게 정리해 둘게요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "살림하면서 분리수거 제대로 안 했다가 10만 원 넘게 낼 수는 없잖아요. 2026년 분리배출 핵심만 딱 짚어 드릴게요.\n\n기준이 엄격해져서 잘못 배출하면 최대 10만 원 이상의 과태료 대상이 됩니다.\n\n기본 4대 원칙은 ‘비우고, 헹구고, 분리하고, 섞지 않는다’예요.\n특히 매일 나오는 투명 페트병은 라벨을 완전히 떼어낸 뒤 꾹 눌러 압착하고 뚜껑을 닫아 배출하는 게 정석입니다.\n\n그리고 가장 주의할 점!\n리튬이온 배터리가 든 보조배터리나 전자기기는 종량제 봉투에 절대 넣지 마세요. 쓰레기 압축 중에 폭발이나 불이 날 수 있어요. 행정복지센터나 단지 내 전용 폐전지 수거함에 따로 버리셔야 안전합니다.\n\n품목별 상세 배출 가이드는 아래 첫 댓글에서 확인해 보세요.",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+        "part_id": "e761007a97674e3ca704ae2b764dc2fa-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De9SysAHzIj",
+        "updated_at": "2026-10-26T12:34:32.144705+00:00",
+        "publication_date": "2026-10-26",
+        "slot": "21:30",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "과태료 10만 원 피하려면 꼭 확인! 2026 달라진 쓰레기 분리배출 기준 총정리 | 메가노트 피드",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 90,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "다들 쓰레기 버릴 때 ‘이거 재활용 맞나?’ 하고 멈칫한 적 있으시죠?\n\n무심코 잘못 버린 쓰레기 한 장 때문에 최대 10만 원 이상의 과태료가 부과될 수 있다고 해요. 2026년부터 분리배출 기준이 더 엄격해졌거든요.\n\n딱 이것만 기억해 두시면 안심이에요!\n✔ 기본 4원칙: 비운다, 헹군다, 분리한다, 섞지 않는다\n✔ 투명 페트병: 라벨 완전히 떼고, 꾹 압착해서, 뚜껑 닫기\n✔ 보조배터리: 종량제 봉투 절대 금지! 압축할 때 폭발이나 화재 위험이 있어서 반드시 행정복지센터나 아파트 전용 폐전지 수거함에 넣어야 해요.\n\n헷갈리는 품목별 세부 배출 기준은 아래 첫 댓글에 깔끔하게 정리해 둘게요!",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "살림하면서 분리수거 제대로 안 했다가 10만 원 넘게 낼 수는 없잖아요. 2026년 분리배출 핵심만 딱 짚어 드릴게요.\n\n기준이 엄격해져서 잘못 배출하면 최대 10만 원 이상의 과태료 대상이 됩니다.\n\n기본 4대 원칙은 ‘비우고, 헹구고, 분리하고, 섞지 않는다’예요.\n특히 매일 나오는 투명 페트병은 라벨을 완전히 떼어낸 뒤 꾹 눌러 압착하고 뚜껑을 닫아 배출하는 게 정석입니다.\n\n그리고 가장 주의할 점!\n리튬이온 배터리가 든 보조배터리나 전자기기는 종량제 봉투에 절대 넣지 마세요. 쓰레기 압축 중에 폭발이나 불이 날 수 있어요. 행정복지센터나 단지 내 전용 폐전지 수거함에 따로 버리셔야 안전합니다.\n\n품목별 상세 배출 가이드는 아래 첫 댓글에서 확인해 보세요.",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+        "published_at": "2026-10-26T12:34:29+00:00",
+        "verified_at": "2026-10-26T12:34:32.143189+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+        "part_id": "e761007a97674e3ca704ae2b764dc2fa-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De9XJscn4UA",
+        "updated_at": "2026-10-26T23:00:53.226147+00:00",
+        "publication_date": "2026-10-26",
+        "slot": "21:30",
+        "outbound_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_2130_906ee7994cd19f1d",
+        "parent_platform_id": "18077032373732120",
+        "title": "과태료 10만 원 피하려면 꼭 확인! 2026 달라진 쓰레기 분리배출 기준 총정리 | 메가노트 피드",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 90,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "다들 쓰레기 버릴 때 ‘이거 재활용 맞나?’ 하고 멈칫한 적 있으시죠?\n\n무심코 잘못 버린 쓰레기 한 장 때문에 최대 10만 원 이상의 과태료가 부과될 수 있다고 해요. 2026년부터 분리배출 기준이 더 엄격해졌거든요.\n\n딱 이것만 기억해 두시면 안심이에요!\n✔ 기본 4원칙: 비운다, 헹군다, 분리한다, 섞지 않는다\n✔ 투명 페트병: 라벨 완전히 떼고, 꾹 압착해서, 뚜껑 닫기\n✔ 보조배터리: 종량제 봉투 절대 금지! 압축할 때 폭발이나 화재 위험이 있어서 반드시 행정복지센터나 아파트 전용 폐전지 수거함에 넣어야 해요.\n\n헷갈리는 품목별 세부 배출 기준은 아래 첫 댓글에 깔끔하게 정리해 둘게요!",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "솔직히 이거 몰라서 과태료 10만 원 그냥 날리는 분들 진짜 많습니다.\n\n2026년부터 생활폐기물 분리배출 기준이 한층 더 엄격해졌어요. 무심코 버린 쓰레기 한 장으로도 최대 10만 원 이상 과태료가 나올 수 있습니다.\n\n지금 바로 딱 3가지만 체크해 보세요.\n\n① 분리배출 4대 원칙: 비운다·헹군다·분리한다·섞지 않는다\n② 투명 페트병: 라벨 완전 제거 ➔ 찌그러뜨리기(압착) ➔ 뚜껑 닫아서 배출\n③ 보조배터리·전자기기: 종량제 봉투에 버리면 압축 과정에서 폭발·화재 납니다. 무조건 행정복지센터나 아파트 전용 폐전지 수거함으로!\n\n내 돈 지키는 상세 분리배출 가이드는 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "살림하면서 분리수거 제대로 안 했다가 10만 원 넘게 낼 수는 없잖아요. 2026년 분리배출 핵심만 딱 짚어 드릴게요.\n\n기준이 엄격해져서 잘못 배출하면 최대 10만 원 이상의 과태료 대상이 됩니다.\n\n기본 4대 원칙은 ‘비우고, 헹구고, 분리하고, 섞지 않는다’예요.\n특히 매일 나오는 투명 페트병은 라벨을 완전히 떼어낸 뒤 꾹 눌러 압착하고 뚜껑을 닫아 배출하는 게 정석입니다.\n\n그리고 가장 주의할 점!\n리튬이온 배터리가 든 보조배터리나 전자기기는 종량제 봉투에 절대 넣지 마세요. 쓰레기 압축 중에 폭발이나 불이 날 수 있어요. 행정복지센터나 단지 내 전용 폐전지 수거함에 따로 버리셔야 안전합니다.\n\n품목별 상세 배출 가이드는 아래 첫 댓글에서 확인해 보세요.",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "※ 직접 운영하는 블로그의 상세 안내 글로 연결됩니다.\n\n2026년 달라진 생활폐기물 분리배출 기준과 품목별 주의사항을 한눈에 보실 수 있도록 정리해 두었습니다. 과태료 걱정 없이 안전하게 분리배출하는 방법은 아래 링크에서 확인해 보세요! 👇\n\nhttps://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_2130_906ee7994cd19f1d",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+        "published_at": "2026-10-26T13:12:52+00:00",
+        "verified_at": "2026-10-26T23:00:53.224038+00:00",
+        "publication_time_basis": "api_timestamp"
+      }
+    },
+    {
+      "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+      "title": "퇴근 시간을 1시간 앞당기는 윈도우 11 필수 단축키 모음 (클립보드, 화면 분할) | 맥스노트 엑셀·업무자동화 위키",
+      "publication_date": "2026-10-26",
+      "slot": "18:10",
+      "mode": "affiliate",
+      "followup_delay_seconds": 121,
+      "source_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "매번 마우스로 창 크기 맞추고 복사 붙여넣기 반복하느라 손목 아프셨던 분들 계신가요? 윈도우 11에서 작업 속도 확실히 올려주는 필수 단축키 정리해 봤어요.\n\n• Win + V : 클립보드 히스토리\n이전에 복사했던 텍스트와 이미지 목록을 확인하고 원하는 걸 골라서 붙여넣을 수 있어요.\n\n• Win + Z : 스냅 레이아웃\n클릭 한 번으로 창을 2~4분할로 깔끔하게 자동 정렬해 줍니다.\n\n• Win + Shift + S : 영역 지정 캡처\n원하는 화면 영역만 즉시 잘라내어 캡처할 수 있어요.\n\n• Win + Ctrl + D : 가상 데스크톱\n업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 빠르게 전환할 수 있어 멀티태스킹 피로를 크게 줄여줍니다.\n\n손에 익으면 마우스 잡는 시간부터 확 줄어드니 꼭 써보세요!",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "칼퇴하고 싶다면 마우스부터 내려놓아야 합니다. 윈도우 11에서 매일 실무 효율을 올려주는 핵심 단축키 4가지입니다.\n\n첫째, Win + V\n복사한 내용을 덮어써서 다시 복사하러 갈 필요가 없습니다. 클립보드 히스토리에서 이전 텍스트와 이미지를 바로 골라 씁니다.\n\n둘째, Win + Z\n창 크기 맞춘다고 마우스 끄는 시간을 아끼세요. 클릭 한 번에 2~4분할로 딱 맞춰줍니다.\n\n셋째, Win + Shift + S\n필요한 영역만 즉시 잘라내는 영역 지정 캡처입니다.\n\n넷째, Win + Ctrl + D\n가상 데스크톱을 새로 만들어 업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 즉시 전환합니다.\n\n손에 붙는 순간 작업 속도가 달라집니다. 내일 출근해서 바로 활용해 보세요.",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+        "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8756GH0G6",
+        "updated_at": "2026-10-26T09:14:31.534582+00:00",
+        "publication_date": "2026-10-26",
+        "slot": "18:10",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "퇴근 시간을 1시간 앞당기는 윈도우 11 필수 단축키 모음 (클립보드, 화면 분할) | 맥스노트 엑셀·업무자동화 위키",
+        "mode": "affiliate",
+        "followup_delay_seconds": 121,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "매번 마우스로 창 크기 맞추고 복사 붙여넣기 반복하느라 손목 아프셨던 분들 계신가요? 윈도우 11에서 작업 속도 확실히 올려주는 필수 단축키 정리해 봤어요.\n\n• Win + V : 클립보드 히스토리\n이전에 복사했던 텍스트와 이미지 목록을 확인하고 원하는 걸 골라서 붙여넣을 수 있어요.\n\n• Win + Z : 스냅 레이아웃\n클릭 한 번으로 창을 2~4분할로 깔끔하게 자동 정렬해 줍니다.\n\n• Win + Shift + S : 영역 지정 캡처\n원하는 화면 영역만 즉시 잘라내어 캡처할 수 있어요.\n\n• Win + Ctrl + D : 가상 데스크톱\n업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 빠르게 전환할 수 있어 멀티태스킹 피로를 크게 줄여줍니다.\n\n손에 익으면 마우스 잡는 시간부터 확 줄어드니 꼭 써보세요!",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "칼퇴하고 싶다면 마우스부터 내려놓아야 합니다. 윈도우 11에서 매일 실무 효율을 올려주는 핵심 단축키 4가지입니다.\n\n첫째, Win + V\n복사한 내용을 덮어써서 다시 복사하러 갈 필요가 없습니다. 클립보드 히스토리에서 이전 텍스트와 이미지를 바로 골라 씁니다.\n\n둘째, Win + Z\n창 크기 맞춘다고 마우스 끄는 시간을 아끼세요. 클릭 한 번에 2~4분할로 딱 맞춰줍니다.\n\n셋째, Win + Shift + S\n필요한 영역만 즉시 잘라내는 영역 지정 캡처입니다.\n\n넷째, Win + Ctrl + D\n가상 데스크톱을 새로 만들어 업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 즉시 전환합니다.\n\n손에 붙는 순간 작업 속도가 달라집니다. 내일 출근해서 바로 활용해 보세요.",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+        "published_at": "2026-10-26T09:14:29+00:00",
+        "verified_at": "2026-10-26T09:14:31.533128+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+        "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De88UDeHyYN",
+        "updated_at": "2026-10-26T12:30:57.148196+00:00",
+        "publication_date": "2026-10-26",
+        "slot": "18:10",
+        "outbound_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1810_41759bfffe7be804",
+        "parent_platform_id": "18096326723668839",
+        "title": "퇴근 시간을 1시간 앞당기는 윈도우 11 필수 단축키 모음 (클립보드, 화면 분할) | 맥스노트 엑셀·업무자동화 위키",
+        "mode": "affiliate",
+        "followup_delay_seconds": 121,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "매번 마우스로 창 크기 맞추고 복사 붙여넣기 반복하느라 손목 아프셨던 분들 계신가요? 윈도우 11에서 작업 속도 확실히 올려주는 필수 단축키 정리해 봤어요.\n\n• Win + V : 클립보드 히스토리\n이전에 복사했던 텍스트와 이미지 목록을 확인하고 원하는 걸 골라서 붙여넣을 수 있어요.\n\n• Win + Z : 스냅 레이아웃\n클릭 한 번으로 창을 2~4분할로 깔끔하게 자동 정렬해 줍니다.\n\n• Win + Shift + S : 영역 지정 캡처\n원하는 화면 영역만 즉시 잘라내어 캡처할 수 있어요.\n\n• Win + Ctrl + D : 가상 데스크톱\n업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 빠르게 전환할 수 있어 멀티태스킹 피로를 크게 줄여줍니다.\n\n손에 익으면 마우스 잡는 시간부터 확 줄어드니 꼭 써보세요!",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "아직도 마우스로 창 모서리 잡고 늘렸다 줄였다 하시는 분들 많으시죠? 이 단축키들만 알아도 창 정리하고 복붙하는 시간이 확 줄어듭니다.\n\n1. Win + V\n방금 복사한 것뿐만 아니라 이전에 복사했던 텍스트와 이미지 목록까지 골라서 붙여넣을 수 있습니다.\n\n2. Win + Z\n클릭 한 번으로 창을 2분할부터 4분할까지 반듯하게 자동 정렬해 주는 스냅 레이아웃 기능입니다.\n\n3. Win + Shift + S\n전체 화면 대신 원하는 부분만 즉시 잘라내어 캡처합니다.\n\n4. Win + Ctrl + D & 좌우 방향키\n업무용 창과 개인용 창을 별도 가상 데스크톱으로 분리해 두고 방향키로 빠르게 넘나들 수 있습니다.\n\n작은 단축키 차이가 하루 퇴근 시간을 앞당깁니다. 지금 바로 눌러보세요.",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "칼퇴하고 싶다면 마우스부터 내려놓아야 합니다. 윈도우 11에서 매일 실무 효율을 올려주는 핵심 단축키 4가지입니다.\n\n첫째, Win + V\n복사한 내용을 덮어써서 다시 복사하러 갈 필요가 없습니다. 클립보드 히스토리에서 이전 텍스트와 이미지를 바로 골라 씁니다.\n\n둘째, Win + Z\n창 크기 맞춘다고 마우스 끄는 시간을 아끼세요. 클릭 한 번에 2~4분할로 딱 맞춰줍니다.\n\n셋째, Win + Shift + S\n필요한 영역만 즉시 잘라내는 영역 지정 캡처입니다.\n\n넷째, Win + Ctrl + D\n가상 데스크톱을 새로 만들어 업무용과 개인용 바탕화면을 분리하고, Win + Ctrl + 좌우 방향키로 즉시 전환합니다.\n\n손에 붙는 순간 작업 속도가 달라집니다. 내일 출근해서 바로 활용해 보세요.",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "※ 직접 운영하는 블로그 콘텐츠입니다.\n\n단축키 세부 기능과 업무 환경 세팅에 관한 자세한 내용은 아래 정리 글에서 확인하실 수 있습니다 👇\nhttps://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1810_41759bfffe7be804",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
+        "published_at": "2026-10-26T09:18:21+00:00",
+        "verified_at": "2026-10-26T12:30:57.147093+00:00",
+        "publication_time_basis": "api_timestamp"
+      }
+    },
+    {
       "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
       "title": "동사무소 안 가도 된다! 2026 인감증명서 인터넷 무료 발급 방법 (정부24 온라인 신청 절차 총정리) | 저스트인포 금융·세무칼럼",
       "publication_date": "2026-10-26",
@@ -380,9 +2676,9 @@
         "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
         "kind": "followup",
         "account_key": "mustpickinfo",
-        "state": "submitted_unknown",
-        "permalink": null,
-        "updated_at": "2026-10-26T06:56:48.998127+00:00",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8sHhEnxYT",
+        "updated_at": "2026-10-26T09:10:52.837149+00:00",
         "publication_date": "2026-10-26",
         "slot": "12:30",
         "outbound_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261026_1230_055531d1b8b20c55",
@@ -414,9 +2710,9 @@
           "reason": "basic_format"
         },
         "source_url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
-        "published_at": null,
-        "verified_at": null,
-        "publication_time_basis": null
+        "published_at": "2026-10-26T06:56:48+00:00",
+        "verified_at": "2026-10-26T09:10:52.835884+00:00",
+        "publication_time_basis": "api_timestamp"
       }
     },
     {
@@ -698,35 +2994,34 @@
   ],
   "automation": {
     "state": "waiting",
-    "nextEligibleAt": "2026-10-26T18:10:00+09:00",
-    "lastRunAt": "2026-10-26T06:49:45.913427+00:00",
-    "lastResult": "queued",
-    "issue": null,
+    "nextEligibleAt": "2026-10-30T12:30:00+09:00",
+    "lastRunAt": "2026-10-29T23:29:21.352132+00:00",
+    "lastResult": "skipped",
+    "issue": "no_new_supported_candidate",
     "scheduler": {
-      "registered": null,
-      "enabled": null,
-      "state": "unverified",
-      "checkedAt": null,
-      "nextRunAt": null,
-      "lastResult": null
+      "mode": "project-autonomy",
+      "registered": true,
+      "enabled": true,
+      "state": "active",
+      "checkedAt": "2026-10-29T13:38:11.652506+00:00"
     }
   },
   "measurement": {
     "schema": "threads-measurement-v1",
-    "status": "not_due",
+    "status": "partial",
     "complete": false,
-    "collected_at": "2026-10-26T07:08:43.961135+00:00",
+    "collected_at": "2026-10-29T20:09:28.151290+00:00",
     "scope": "@mustpickinfo published parts only; platform lifetime checkpoint metrics and exact-UTM GA4 calendar-day acquisition; no causal lift",
     "windows": {
       "24h": {
-        "status": "not_due",
-        "due_parts": 0,
-        "captured_parts": 0
+        "status": "partial",
+        "due_parts": 34,
+        "captured_parts": 3
       },
       "72h": {
-        "status": "not_due",
-        "due_parts": 0,
-        "captured_parts": 0
+        "status": "partial",
+        "due_parts": 9,
+        "captured_parts": 3
       },
       "7d": {
         "status": "not_due",
@@ -744,7 +3039,70 @@
         "topic": "unclassified",
         "published_at": "2026-10-25T12:36:00+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 96.167,
+            "capture_lag_hours": 72.167,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 58,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:02.067867+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 96.167,
+            "capture_lag_hours": 24.167,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 58,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:02.681277+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-0",
@@ -755,7 +3113,70 @@
         "topic": "unclassified",
         "published_at": "2026-10-25T23:05:36+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 85.673,
+            "capture_lag_hours": 61.673,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 128,
+                "likes": 0,
+                "replies": 3,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:03.186419+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 85.673,
+            "capture_lag_hours": 13.673,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 128,
+                "likes": 0,
+                "replies": 3,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:03.623130+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
       },
       {
         "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
@@ -766,7 +3187,80 @@
         "topic": "unclassified",
         "published_at": "2026-10-26T04:29:42+00:00",
         "publication_time_basis": "api_timestamp",
-        "snapshots": {}
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 80.272,
+            "capture_lag_hours": 56.272,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 2,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:04.106895+00:00"
+            },
+            "ga4": {
+              "status": "collected",
+              "complete": true,
+              "sessions": 2,
+              "engaged_sessions": 0,
+              "page_views": 2,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": null,
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-28",
+              "collected_at": "2026-10-29T12:46:06.189603+00:00",
+              "utm_content": "mustpickinfo_20261026_0800_94799aa6eb2b82ba",
+              "host": "www.joynote.kr"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 80.272,
+            "capture_lag_hours": 8.272,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 2,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:06.730541+00:00"
+            },
+            "ga4": {
+              "status": "collected",
+              "complete": true,
+              "sessions": 2,
+              "engaged_sessions": 0,
+              "page_views": 2,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": null,
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-28",
+              "collected_at": "2026-10-29T12:46:07.354108+00:00",
+              "utm_content": "mustpickinfo_20261026_0800_94799aa6eb2b82ba",
+              "host": "www.joynote.kr"
+            }
+          }
+        }
       },
       {
         "part_id": "8ce43ef43d9c4514890765c101ce53e7-0",
@@ -777,48 +3271,1678 @@
         "topic": "unclassified",
         "published_at": "2026-10-26T06:51:09+00:00",
         "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 77.914,
+            "capture_lag_hours": 53.914,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 134,
+                "likes": 0,
+                "replies": 2,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:07.845575+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 77.914,
+            "capture_lag_hours": 5.914,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 134,
+                "likes": 0,
+                "replies": 2,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:08.160245+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
+        "attempt_id": "8ce43ef43d9c4514890765c101ce53e7",
+        "platform_id": "17945622006360314",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8sHhEnxYT",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T06:56:48+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 77.82,
+            "capture_lag_hours": 53.82,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 3,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:08.731894+00:00"
+            },
+            "ga4": {
+              "status": "collected",
+              "complete": true,
+              "sessions": 2,
+              "engaged_sessions": 1,
+              "page_views": 2,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": null,
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-28",
+              "collected_at": "2026-10-29T12:46:09.565947+00:00",
+              "utm_content": "mustpickinfo_20261026_1230_055531d1b8b20c55",
+              "host": "www.justinfo.co.kr"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 77.82,
+            "capture_lag_hours": 5.82,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 3,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:10.076153+00:00"
+            },
+            "ga4": {
+              "status": "collected",
+              "complete": true,
+              "sessions": 2,
+              "engaged_sessions": 1,
+              "page_views": 2,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": null,
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-28",
+              "collected_at": "2026-10-29T12:46:10.991811+00:00",
+              "utm_content": "mustpickinfo_20261026_1230_055531d1b8b20c55",
+              "host": "www.justinfo.co.kr"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-0",
+        "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+        "platform_id": "18096326723668839",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De8756GH0G6",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T09:14:29+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 75.525,
+            "capture_lag_hours": 51.525,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 129,
+                "likes": 0,
+                "replies": 2,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:11.531573+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 75.525,
+            "capture_lag_hours": 3.525,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 129,
+                "likes": 0,
+                "replies": 2,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:12.036788+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-1",
+        "attempt_id": "711c8269dcfa440bbf28bd9e9bd5b3ec",
+        "platform_id": "17934205740422048",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De88UDeHyYN",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T09:18:21+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 75.461,
+            "capture_lag_hours": 51.461,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 2,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:12.601758+00:00"
+            },
+            "ga4": {
+              "status": "collected",
+              "complete": true,
+              "sessions": 2,
+              "engaged_sessions": 0,
+              "page_views": 2,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": null,
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-28",
+              "collected_at": "2026-10-29T12:46:13.377618+00:00",
+              "utm_content": "mustpickinfo_20261026_1810_41759bfffe7be804",
+              "host": "www.maxnote.kr"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 75.461,
+            "capture_lag_hours": 3.461,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 2,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:13.748195+00:00"
+            },
+            "ga4": {
+              "status": "collected",
+              "complete": true,
+              "sessions": 2,
+              "engaged_sessions": 0,
+              "page_views": 2,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": null,
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-28",
+              "collected_at": "2026-10-29T12:46:14.694822+00:00",
+              "utm_content": "mustpickinfo_20261026_1810_41759bfffe7be804",
+              "host": "www.maxnote.kr"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "e761007a97674e3ca704ae2b764dc2fa-0",
+        "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+        "platform_id": "18077032373732120",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De9SysAHzIj",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T12:34:29+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 72.192,
+            "capture_lag_hours": 48.192,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 37,
+                "likes": 0,
+                "replies": 3,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:15.182120+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 72.192,
+            "capture_lag_hours": 0.192,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 37,
+                "likes": 0,
+                "replies": 3,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:15.927211+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "e761007a97674e3ca704ae2b764dc2fa-1",
+        "attempt_id": "e761007a97674e3ca704ae2b764dc2fa",
+        "platform_id": "18121180549973506",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De9XJscn4UA",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T13:12:52+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 71.552,
+            "capture_lag_hours": 47.552,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 6,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:16.665845+00:00"
+            },
+            "ga4": {
+              "status": "collection_error",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "ga4_ValueError",
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-29"
+            }
+          },
+          "72h": {
+            "target_hours": 72,
+            "captured_at": "2026-10-29T13:31:49.834966+00:00",
+            "actual_age_hours": 72.316,
+            "capture_lag_hours": 0.316,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 6,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T13:31:54.991997+00:00"
+            },
+            "ga4": {
+              "status": "collection_error",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "ga4_ValueError",
+              "start_date": "2026-10-26",
+              "end_date": "2026-10-29"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "1d476482b57f49a9861c60d688242380-0",
+        "attempt_id": "1d476482b57f49a9861c60d688242380",
+        "platform_id": "18606525028067019",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De-bCY4E0xT",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T23:05:47+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 61.67,
+            "capture_lag_hours": 37.67,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 214,
+                "likes": 0,
+                "replies": 2,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:17.975503+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "1d476482b57f49a9861c60d688242380-1",
+        "attempt_id": "1d476482b57f49a9861c60d688242380",
+        "platform_id": "18153616369551713",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De-bjG_E_2O",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T23:10:32+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 61.591,
+            "capture_lag_hours": 37.591,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 5,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:18.435645+00:00"
+            },
+            "ga4": {
+              "status": "collection_error",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "ga4_ValueError",
+              "start_date": "2026-10-27",
+              "end_date": "2026-10-29"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18643628035008812",
+        "attempt_id": "company:18643628035008812",
+        "platform_id": "18643628035008812",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/De-gdzoHyCE",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-26T23:53:13+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 60.88,
+            "capture_lag_hours": 36.88,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 3,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:19.669320+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18236953225323832",
+        "attempt_id": "company:18236953225323832",
+        "platform_id": "18236953225323832",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCLm8In1M-",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:07:57+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 26.634,
+            "capture_lag_hours": 2.634,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 11,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:20.178955+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:17979829721915637",
+        "attempt_id": "company:17979829721915637",
+        "platform_id": "17979829721915637",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCLwr7n_9z",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:09:18+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 26.612,
+            "capture_lag_hours": 2.612,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 0,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:20.687875+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18074951906750124",
+        "attempt_id": "company:18074951906750124",
+        "platform_id": "18074951906750124",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCL50xH8Pe",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:10:31+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 26.591,
+            "capture_lag_hours": 2.591,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 7,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:21.160476+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:17993900784057402",
+        "attempt_id": "company:17993900784057402",
+        "platform_id": "17993900784057402",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCMDtuHwB5",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:11:53+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 26.569,
+            "capture_lag_hours": 2.569,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 6,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:21.581714+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18052639928619017",
+        "attempt_id": "company:18052639928619017",
+        "platform_id": "18052639928619017",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCMYOFn4Cq",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:14:59+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 26.517,
+            "capture_lag_hours": 2.517,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 0,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:22.053293+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18358403581216678",
+        "attempt_id": "company:18358403581216678",
+        "platform_id": "18358403581216678",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCM0cJn79C",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:18:32+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 26.458,
+            "capture_lag_hours": 2.458,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 12,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:22.515657+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18103030973548048",
+        "attempt_id": "company:18103030973548048",
+        "platform_id": "18103030973548048",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQCLsH6Ec",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:46:38+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 25.989,
+            "capture_lag_hours": 1.989,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 40,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:23.007273+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18032445926686017",
+        "attempt_id": "company:18032445926686017",
+        "platform_id": "18032445926686017",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQK7KHzpO",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:47:50+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 25.969,
+            "capture_lag_hours": 1.969,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 145,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:23.395239+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18105396146369920",
+        "attempt_id": "company:18105396146369920",
+        "platform_id": "18105396146369920",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQToGH5wI",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:49:01+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 25.95,
+            "capture_lag_hours": 1.95,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 9,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:23.881714+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:17952889854294884",
+        "attempt_id": "company:17952889854294884",
+        "platform_id": "17952889854294884",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCQb8Wn6ap",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T10:50:27+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 25.926,
+            "capture_lag_hours": 1.926,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 4,
+                "likes": 0,
+                "replies": 0,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:24.593306+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18111080075207030",
+        "attempt_id": "company:18111080075207030",
+        "platform_id": "18111080075207030",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfCYeD8n6QY",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T12:00:21+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T12:45:59.607806+00:00",
+            "actual_age_hours": 24.761,
+            "capture_lag_hours": 0.761,
+            "platform": {
+              "status": "collected",
+              "scope": "platform_reported_lifetime_post_metrics",
+              "metrics": {
+                "views": 150,
+                "likes": 0,
+                "replies": 1,
+                "reposts": 0,
+                "quotes": 0,
+                "shares": 0
+              },
+              "collected_at": "2026-10-29T12:46:25.151257+00:00"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18134839615804589",
+        "attempt_id": "company:18134839615804589",
+        "platform_id": "18134839615804589",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfC-x2sn8rl",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T17:35:04+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 26.573,
+            "capture_lag_hours": 2.573,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18131608691483973",
+        "attempt_id": "company:18131608691483973",
+        "platform_id": "18131608691483973",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfC_VghH9Yu",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T17:39:56+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 26.492,
+            "capture_lag_hours": 2.492,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18095533334487348",
+        "attempt_id": "company:18095533334487348",
+        "platform_id": "18095533334487348",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDAjTnn1gK",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T17:50:33+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 26.315,
+            "capture_lag_hours": 2.315,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:17995907103019400",
+        "attempt_id": "company:17995907103019400",
+        "platform_id": "17995907103019400",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDA0xzH3Vg",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T17:52:56+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 26.276,
+            "capture_lag_hours": 2.276,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18127215112926007",
+        "attempt_id": "company:18127215112926007",
+        "platform_id": "18127215112926007",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDBTUHH3O-",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T17:57:07+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 26.206,
+            "capture_lag_hours": 2.206,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18117339430820173",
+        "attempt_id": "company:18117339430820173",
+        "platform_id": "18117339430820173",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDC6b3n3v4",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T18:11:11+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 25.971,
+            "capture_lag_hours": 1.971,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18098790821435730",
+        "attempt_id": "company:18098790821435730",
+        "platform_id": "18098790821435730",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDDgskn2dY",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T18:16:24+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 25.884,
+            "capture_lag_hours": 1.884,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18147555040573232",
+        "attempt_id": "company:18147555040573232",
+        "platform_id": "18147555040573232",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDED7ln0El",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T18:21:13+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 25.804,
+            "capture_lag_hours": 1.804,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:17976810642144747",
+        "attempt_id": "company:17976810642144747",
+        "platform_id": "17976810642144747",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDJyTDk_uL",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T19:11:15+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 24.97,
+            "capture_lag_hours": 0.97,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18093328865196965",
+        "attempt_id": "company:18093328865196965",
+        "platform_id": "18093328865196965",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDNy7_k_PD",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T19:46:17+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 24.386,
+            "capture_lag_hours": 0.386,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:18105690251343233",
+        "attempt_id": "company:18105690251343233",
+        "platform_id": "18105690251343233",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDOuO2k50J",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T19:54:22+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {
+          "24h": {
+            "target_hours": 24,
+            "captured_at": "2026-10-29T20:09:28.151290+00:00",
+            "actual_age_hours": 24.252,
+            "capture_lag_hours": 0.252,
+            "platform": {
+              "status": "unmeasured",
+              "metrics": {
+                "views": null,
+                "likes": null,
+                "replies": null,
+                "reposts": null,
+                "quotes": null,
+                "shares": null
+              },
+              "reason": "api_access_denied"
+            },
+            "ga4": {
+              "status": "unmeasured",
+              "complete": false,
+              "sessions": null,
+              "engaged_sessions": null,
+              "page_views": null,
+              "source": "GA4 Data API",
+              "timezone": "Asia/Seoul",
+              "scope": "exact Threads UTM; publication date through yesterday; calendar-day cohort, not exact 24h/72h/7d",
+              "provisional": true,
+              "reason": "attribution_url_unverified"
+            }
+          }
+        }
+      },
+      {
+        "part_id": "company:17938430361401729",
+        "attempt_id": "company:17938430361401729",
+        "platform_id": "17938430361401729",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDW3y_E1Kl",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T21:05:35+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "company:18129305962849656",
+        "attempt_id": "company:18129305962849656",
+        "platform_id": "18129305962849656",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDY1Uzk780",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T21:22:44+00:00",
+        "publication_time_basis": "api_timestamp",
+        "snapshots": {}
+      },
+      {
+        "part_id": "company:18111198623238729",
+        "attempt_id": "company:18111198623238729",
+        "platform_id": "18111198623238729",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfDfTScEzcW",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "published_at": "2026-10-28T22:19:15+00:00",
+        "publication_time_basis": "api_timestamp",
         "snapshots": {}
       }
     ],
     "account_metrics": {
-      "status": "collected",
-      "clicks": 0,
-      "scope": "account_link_clicks_all_links_in_requested_period; not per-post clicks or unique visits",
-      "requested_since": "2026-10-15T11:19:14.891210+00:00",
-      "requested_until": "2026-10-26T07:08:43.961135+00:00",
-      "collected_at": "2026-10-26T07:08:45.390609+00:00"
+      "status": "unmeasured",
+      "clicks": null,
+      "scope": "account_link_clicks_not_post_clicks",
+      "reason": "api_access_denied"
     },
     "revenue": null,
     "revenue_status": "publisher_attribution_unverified",
     "feedback": {
-      "status": "insufficient_data",
-      "computedAt": "2026-10-26T07:08:43.961135+00:00",
-      "checkpoint": null,
-      "comparablePosts": 0,
-      "evidence": [],
+      "status": "diagnostic",
+      "computedAt": "2026-10-29T20:09:28.151290+00:00",
+      "checkpoint": "72h",
+      "comparablePosts": 3,
+      "evidence": [
+        {
+          "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
+          "format": "unclassified",
+          "topic": "unclassified",
+          "views": 2,
+          "sessions": 2,
+          "engaged_sessions": 0,
+          "ga4_start": "2026-10-26",
+          "ga4_end": "2026-10-28",
+          "capture_lag_hours": 8.272,
+          "provisional": true
+        },
+        {
+          "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
+          "format": "unclassified",
+          "topic": "unclassified",
+          "views": 3,
+          "sessions": 2,
+          "engaged_sessions": 1,
+          "ga4_start": "2026-10-26",
+          "ga4_end": "2026-10-28",
+          "capture_lag_hours": 5.82,
+          "provisional": true
+        },
+        {
+          "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-1",
+          "format": "unclassified",
+          "topic": "unclassified",
+          "views": 2,
+          "sessions": 2,
+          "engaged_sessions": 0,
+          "ga4_start": "2026-10-26",
+          "ga4_end": "2026-10-28",
+          "capture_lag_hours": 3.461,
+          "provisional": true
+        }
+      ],
       "recommendations": [
-        "동일 체크포인트의 비교 가능한 게시물 3개 이상을 기다립니다. 미수집을 성과 0으로 해석하지 않습니다."
+        "비교 가능한 관측은 있으나 변경을 권고할 뚜렷한 근거가 없습니다. 현재 빈도를 유지하며 추가 측정합니다."
       ],
       "authoringHints": [],
-      "policy": "diagnostic heuristics, not platform ranking rules or causal lift; no automatic frequency increase"
+      "policy": "diagnostic heuristics, not platform ranking rules or causal lift; no automatic frequency increase",
+      "groups": []
     }
   },
   "feedback": {
-    "status": "insufficient_data",
-    "computedAt": "2026-10-26T07:08:43.961135+00:00",
-    "checkpoint": null,
-    "comparablePosts": 0,
-    "evidence": [],
+    "status": "diagnostic",
+    "computedAt": "2026-10-29T20:09:28.151290+00:00",
+    "checkpoint": "72h",
+    "comparablePosts": 3,
+    "evidence": [
+      {
+        "part_id": "bd0fc9085b2f4bf0ad30ada670fb2cc6-1",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "views": 2,
+        "sessions": 2,
+        "engaged_sessions": 0,
+        "ga4_start": "2026-10-26",
+        "ga4_end": "2026-10-28",
+        "capture_lag_hours": 8.272,
+        "provisional": true
+      },
+      {
+        "part_id": "8ce43ef43d9c4514890765c101ce53e7-1",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "views": 3,
+        "sessions": 2,
+        "engaged_sessions": 1,
+        "ga4_start": "2026-10-26",
+        "ga4_end": "2026-10-28",
+        "capture_lag_hours": 5.82,
+        "provisional": true
+      },
+      {
+        "part_id": "711c8269dcfa440bbf28bd9e9bd5b3ec-1",
+        "format": "unclassified",
+        "topic": "unclassified",
+        "views": 2,
+        "sessions": 2,
+        "engaged_sessions": 0,
+        "ga4_start": "2026-10-26",
+        "ga4_end": "2026-10-28",
+        "capture_lag_hours": 3.461,
+        "provisional": true
+      }
+    ],
     "recommendations": [
-      "동일 체크포인트의 비교 가능한 게시물 3개 이상을 기다립니다. 미수집을 성과 0으로 해석하지 않습니다."
+      "비교 가능한 관측은 있으나 변경을 권고할 뚜렷한 근거가 없습니다. 현재 빈도를 유지하며 추가 측정합니다."
     ],
     "authoringHints": [],
-    "policy": "diagnostic heuristics, not platform ranking rules or causal lift; no automatic frequency increase"
+    "policy": "diagnostic heuristics, not platform ranking rules or causal lift; no automatic frequency increase",
+    "groups": []
   },
   "revenue": null,
   "connection": {
     "status": "ready",
-    "checkedAt": "2026-10-20T15:06:07.329157+00:00",
+    "checkedAt": "2026-10-29T12:45:04.228692+00:00",
     "reason": null,
     "connected": true,
     "account_verified": true,
@@ -838,37 +4962,21 @@
     "quotaStatus": "verified",
     "quota": {
       "posts": {
-        "usage": 1,
+        "usage": 4,
         "limit": 250,
-        "remaining": 249
+        "remaining": 246
       },
       "replies": {
-        "usage": 1,
+        "usage": 10,
         "limit": 1000,
-        "remaining": 999
+        "remaining": 990
       }
     }
   },
   "today": {
-    "date": "2026-10-26",
+    "date": "2026-10-30",
     "timezone": "Asia/Seoul",
-    "counts": [
-      {
-        "kind": "followup",
-        "state": "published_verified",
-        "n": 1
-      },
-      {
-        "kind": "followup",
-        "state": "submitted_unknown",
-        "n": 1
-      },
-      {
-        "kind": "main",
-        "state": "published_verified",
-        "n": 2
-      }
-    ]
+    "counts": []
   },
   "countsScope": "all_time_parts_not_today",
   "countsComplete": true

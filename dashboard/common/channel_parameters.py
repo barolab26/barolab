@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -15,10 +16,10 @@ KST = ZoneInfo('Asia/Seoul')
 
 
 def policy():
-    value = json.loads((DATA / 'daily_schedule.json').read_text())
+    value = json.loads((DATA / 'daily_schedule.json').read_text(encoding='utf-8'))
     datetime.strptime(value['effectiveDate'], '%Y-%m-%d')
-    if value['timezone'] != 'Asia/Seoul' or len(value['cf']) != 16 or sum(len(x['slots']) for x in value['naver'].values()) != 7:
-        raise ValueError('Expected KST, 16 CF domains and 7 Naver slots')
+    if value['timezone'] != 'Asia/Seoul' or not value.get('cf') or not value.get('naver'):
+        raise ValueError('Expected KST and valid CF/Naver schedule definitions')
     for clock in list(value['cf'].values()) + [s for row in value['naver'].values() for s in row['slots']]:
         if not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', clock):
             raise ValueError('Invalid schedule clock')
@@ -82,10 +83,14 @@ def styled_native(builder, original, document):
             if block_params.get('lineHeight'):
                 paragraph['style']['lineHeight'] = block_params['lineHeight']
             for node in paragraph.get('nodes', []):
-                node['style'] = {**node.get('style', {}), 'fontSizeCode': f'fs{size}', 'bold': bold, '@ctype': 'nodeStyle'}
+                is_link = bool(node.get('link'))
+                node['style'] = {**node.get('style', {}), 'fontSizeCode': f'fs{size}', 'bold': True if is_link else bold, '@ctype': 'nodeStyle'}
                 if block_params.get('fontFamily'):
                     node['style']['fontFamily'] = block_params['fontFamily']
-                if block_params.get('fontColor'):
+                if is_link:
+                    node['style']['fontColor'] = '#0068c3'
+                    node['style']['underline'] = True
+                elif block_params.get('fontColor'):
                     node['style']['fontColor'] = block_params['fontColor']
     return native
 
@@ -102,7 +107,7 @@ def planning_or_memory(identity, topic, folder, params, channel='naver'):
     try:
         return plan_post(identity, topic, folder, params, channel)
     except Exception as exc:
-        result={'status':'fallback','keyword':topic,'writingGuide':'기존 지식그래프의 합의된 페르소나와 확인된 사실로 작성한다.','errorType':type(exc).__name__}
+        result={'status':'fallback','keyword':topic,'writingGuide':'공고문 요약 매크로 말투를 버리고 독자의 진짜 통증(Pain Point)에서 출발한다. 제목은 내 얘기처럼 느껴지는 반려 함정·3분 자가진단형으로 잡고, 본문에는 한 끗 차이 실전 사례(탈락 vs 통과)와 3초 판독기 표, 2~3줄 짧은 문단 호흡을 적용하며, 마지막은 오늘 당장 실행할 Action Item으로 끝낸다.','errorType':type(exc).__name__}
         Path(folder).mkdir(parents=True,exist_ok=True)
         write(Path(folder)/'strategy-status.json',result)
         return result
@@ -169,30 +174,36 @@ def configure_naver(day):
         from common import llm_client
         generate = llm_client.generate_json
         writing_rule = (
-            '\n[절대 금지 가드레일(Never Do) — 나머지는 크루 자율 판단]\n'
-            '- 허위 사실·근거 없는 수치 날조 금지\n'
-            '- "AI 생성", "참고사진", "자료 부족으로 비교 불가", "공식 공고를 참고하세요" 같은 메타/면피 문구 금지\n'
+            '\n[사람의 언어로 쓰는 4대 집필 원칙 & 절대 금지 가드레일]\n'
+            '- 공무원 공고문 요약 매크로 말투 금지: 독자의 진짜 통증(Pain Point)과 막막함에 공감하는 도입부로 시작하라.\n'
+            '- 제목은 공공기관 보고서식이 아니라 독자가 "내 얘기잖아?" 하고 클릭할 반려 함정·한 끗 차이·3분 자가진단형으로 작성하라.\n'
+            '- 본문에는 스마트폰으로 바로 대입 가능한 한 끗 차이 실전 사례(A는 탈락 vs B는 통과), 3초 자가진단 판독기 표, 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 당장 실행할 Action Item으로 끝내라.\n'
+            '- 허위 사실·근거 없는 수치 날조 금지 (단, "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 쓰지 마라).\n'
+            '- "AI 생성", "참고사진", "자료 부족으로 비교 불가" 같은 메타/면피 문구 절대 금지.\n'
         )
-        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[이번 발행의 지식그래프 스타일 설정 · 사실 근거와 구분]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule, *args, **kwargs)
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[이번 발행의 지식그래프 스타일 설정 · 크루 회의 합의안]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule, *args, **kwargs)
         try:
             result = prepare(account, folder, topic)
         finally:
             engine.basic_summary_image = summary
             llm_client.generate_json = generate
         if not existing or incomplete_media:
-            article = load(result[1] / 'writer.json')
-            main_kw = article.get('mainKeyword') or article.get('title', '주요 내용')
-            from common.flow_images import generate as flow_image
-            image = flow_image(article['title'], article['intro'], result[1], custom_prompt=article.get('imagePrompt'))
-            raw_cap = (article.get('imageCaption') or f"{main_kw} 주요 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
-            hero_caption = raw_cap or f"{main_kw} 주요 포인트"
-            hero_credit = main_kw or "핵심 정리"
-            hero_asset = {'id': 0, 'file': image.name, 'description': hero_caption, 'credit': hero_credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}
-            result[3]['assets'] = [hero_asset]
-            result[3]['representative_file'] = image.name
-            result[2]['blocks'] = [b for b in result[2]['blocks'] if b.get('type') != 'image']
-            hero_block = {'type': 'image', 'id': 0, 'file': image.name, 'alt': hero_caption, 'caption': f"{hero_caption}｜{hero_credit}"}
-            result[2]['blocks'].insert(1, hero_block)
+            doc_blocks = result[2].get('blocks') or []
+            has_valid_images = any(b.get('type') == 'image' and b.get('file') != 'summary.png' for b in doc_blocks) and bool(result[3].get('assets'))
+            if not has_valid_images:
+                article = load(result[1] / 'writer.json')
+                main_kw = article.get('mainKeyword') or article.get('title', '주요 내용')
+                from common.flow_images import generate as flow_image
+                image = flow_image(article['title'], article['intro'], result[1], custom_prompt=article.get('imagePrompt'))
+                raw_cap = (article.get('imageCaption') or f"{main_kw} 주요 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
+                hero_caption = raw_cap or f"{main_kw} 주요 포인트"
+                hero_credit = main_kw or "핵심 정리"
+                hero_asset = {'id': 0, 'file': image.name, 'description': hero_caption, 'credit': hero_credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}
+                result[3]['assets'] = [hero_asset]
+                result[3]['representative_file'] = image.name
+                result[2]['blocks'] = [b for b in doc_blocks if b.get('type') != 'image']
+                hero_block = {'type': 'image', 'id': 0, 'file': image.name, 'alt': hero_caption, 'caption': f"{hero_caption}｜{hero_credit}"}
+                result[2]['blocks'].insert(1, hero_block)
 
             report = engine.validate_document(result[2], result[3], result[1] / 'images')
             if not report['ok']:
@@ -200,7 +211,10 @@ def configure_naver(day):
             write(result[1] / 'photo-plan.json', result[3])
             write(result[1] / 'format-check.json', report)
             result[2]['planningId'] = planning.get('planningId')
-            result[2]['presentation'] = {**params, 'guideSha256': hashlib.sha256((ROOT / 'AGENTS.md').read_bytes()).hexdigest()}
+            pres = {**params, 'guideSha256': hashlib.sha256((ROOT / 'AGENTS.md').read_bytes()).hexdigest()}
+            if result[2].get('lineLinks'):
+                pres['lineLinks'] = result[2]['lineLinks']
+            result[2]['presentation'] = pres
             write(result[1] / 'editor-content.json', result[2])
         elif existing:
             doc_blocks = result[2]['blocks']
@@ -268,7 +282,7 @@ def monitor(base=None, now=None):
 
 
 def folder_for(channel, day, identity):
-    return ROOT / channel / 'output/scheduled' / day / identity
+    return ROOT / channel / 'output/scheduled' / str(day).replace(':', '') / str(identity).replace(':', '')
 
 
 def run_naver(day, account, clock):
@@ -330,24 +344,23 @@ def prepare_cf(day, domain):
             scheduled['mainKeyword'] = planning['keyword']
         from common import llm_client
         generate = llm_client.generate_json
-        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[직원 합의 작성 방식]\n'+planning.get('writingGuide',''), *args, **kwargs)
+        cf_writing_rule = (
+            '\n[사람의 언어로 쓰는 4대 집필 원칙 & 절대 금지 가드레일]\n'
+            '- 공무원 공고문 요약 매크로 말투 금지: 독자의 진짜 통증(Pain Point)과 막막함에 공감하는 도입부로 시작하라.\n'
+            '- 제목은 공공기관 보고서식이 아니라 독자가 "내 얘기잖아?" 하고 클릭할 반려 함정·한 끗 차이·3분 자가진단형으로 작성하라.\n'
+            '- 본문에는 스마트폰으로 바로 대입 가능한 한 끗 차이 실전 사례(A는 탈락 vs B는 통과), 3초 자가진단 판독기 표(<table>), 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 당장 실행할 Action Item으로 끝내라.\n'
+            '- "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 노출 금지.\n'
+        )
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[크루 회의 합의 작성 방식]\n'+planning.get('writingGuide','')+cf_writing_rule, *args, **kwargs)
         try:
             article = cf.basic_article(domain, scheduled, folder)
         finally:
             llm_client.generate_json = generate
-        if not article.get('imagePlans'):
-            from common.flow_images import generate as flow_image
-            from html import escape
-            image = flow_image(article['title'], article['summary'], folder, custom_prompt=article.get('imagePrompt'))
-            caption = (article.get('imageCaption') or f"{article.get('mainKeyword') or article['title']} 핵심 포인트").strip()
-            article['imagePlans'] = [{'filename':image.name,'source':'generated','caption':caption}]
-            article['contentHtml'] = '<figure><img src="{{IMAGE_0}}" alt="'+escape(caption)+'"><figcaption>'+escape(caption)+'</figcaption></figure>'+article['contentHtml']
-            if planning:
-                article['planningId'] = planning.get('planningId')
-            cf.validate_basic_article(article)
+        article = cf.ensure_article_images(article, folder, domain=domain)
+        if planning and not article.get('planningId'):
+            article['planningId'] = planning.get('planningId')
             write(folder / 'article.json', article)
             write(folder / 'editor-content.json', article)
-            write(folder / 'photo-plan.json', {'assets':article['imagePlans'],'medium':'google-flow','sha256':hashlib.sha256(image.read_bytes()).hexdigest()})
     finally:
         cf.basic_progress = progress
     article=load(folder/'article.json')
@@ -400,7 +413,7 @@ def _prepare_all(day):
 
 
 def prepare_all(day):
-    import fcntl
+    from common import runtime_locks as fcntl
     from common.runtime_locks import runtime_lock_path
     lock = runtime_lock_path(DATA / 'parameters-prepare.lock')
     lock.parent.mkdir(parents=True, exist_ok=True)
@@ -485,12 +498,12 @@ def main(argv=None, *, conference_worker=False):
     elif args.action == 'naver':
         result = run_naver(args.date or today, args.account, args.slot or policy()['naver'][args.account]['slots'][0])
     elif args.action == 'naver-cycle':
-        if today < policy()['effectiveDate']:
+        if os.name == 'nt' or today < policy()['effectiveDate']:
             naver = configure_naver(today)
             result = naver.basic_daily(1)
         else:
             result = {'status': 'timer_managed', 'owner': 'barolab-parameters-prepare.timer'}
-    elif args.action == 'cf' or args.action == 'cf-cycle' and today < policy()['effectiveDate']:
+    elif args.action == 'cf' or (args.action == 'cf-cycle' and (os.name == 'nt' or today < policy()['effectiveDate'])):
         import cf_posting.posting as cf
         if agendas.enabled() and args.date!=today:raise ValueError('Original CF publication date expired; preserve the original agenda')
         schedule = cf.load_current_schedule()

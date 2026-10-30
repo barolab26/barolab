@@ -297,6 +297,27 @@ def agy_generate(prompt, model, response_schema=None):
     return generate_json(prompt, provider='agy', model_override=model, response_schema=response_schema)
 
 
+def generate_text(prompt, provider=None, model_override=None, agent_slot=None, timeout_seconds=None, reasoning_effort=None):
+    """Return plain text string using structured JSON transport."""
+    schema = {
+        'type': 'object',
+        'properties': {'text': {'type': 'string'}},
+        'required': ['text'],
+        'additionalProperties': False,
+    }
+    res = generate_json(
+        prompt,
+        provider=provider,
+        model_override=model_override,
+        response_schema=schema,
+        agent_slot=agent_slot,
+        timeout_seconds=timeout_seconds,
+        reasoning_effort=reasoning_effort,
+    )
+    return str((res or {}).get('text') or '').strip()
+
+
+
 @memory_call
 @metered
 def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None, timeout_seconds=None, allow_provider_recovery=True):

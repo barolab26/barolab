@@ -73,6 +73,112 @@ def emit_pipeline_crew_message(
     return _deliver(payload)
 
 
+CEO_PROPOSALS_FILE = BASE_DIR / 'dashboard' / 'data' / 'ceo-proposals.json'
+
+
+def emit_ceo_proposal(
+    actor: str,
+    title: str,
+    current_reality: str,
+    proposal: str,
+    required_approvals: Any = None,
+    expected_impact: str = "",
+    urgency: str = "high",
+) -> Dict[str, Any]:
+    """
+    Proactively escalate a business bottleneck, reverse-funnel pivot, or resource request (`ask_ceo`)
+    directly to the CEO in the Meeting Room and persist it in `ceo-proposals.json`.
+    """
+    import hashlib
+    from common.collection_observability import load, write, locked
+
+    who = actor if actor in ("jarvis", "radar", "publi", "doctor", "trace", "patch") else "jarvis"
+    role_names = {
+        "jarvis": "자비스(팀장)",
+        "radar": "레이더",
+        "publi": "퍼블리",
+        "doctor": "닥터",
+        "trace": "트레이스",
+        "patch": "패치",
+    }
+    role_label = role_names.get(who, "자비스(팀장)")
+    approvals_list = (
+        [str(x).strip() for x in required_approvals if str(x).strip()]
+        if isinstance(required_approvals, list)
+        else [str(required_approvals).strip()]
+        if required_approvals and str(required_approvals).strip()
+        else ["제안된 역산 집중 유입 작전 즉시 승인"]
+    )
+    fp_raw = f"{who}|{title.strip()}|{proposal.strip()}|{'|'.join(approvals_list)}"
+    fp = hashlib.sha256(fp_raw.encode("utf-8")).hexdigest()[:16]
+    now = time.time()
+    ts = int(now * 1000)
+
+    CEO_PROPOSALS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with locked(CEO_PROPOSALS_FILE.parent / "ceo-proposals-lock"):
+        state = load(CEO_PROPOSALS_FILE) or {"proposals": []}
+        proposals = list(state.get("proposals") or [])
+        recent_same = next(
+            (p for p in proposals if p.get("fingerprint") == fp and now - p.get("createdAt", 0) < 21600),
+            None,
+        )
+        if recent_same:
+            return {"ok": True, "status": "already_proposed", "proposal": recent_same}
+
+        approval_lines = "\n".join(f"{idx}. {item}" for idx, item in enumerate(approvals_list, 1))
+        text = (
+            f"🚨 **[{role_label} 긴급 보고 & 자원/승인 역제안]** — **{title.strip()}**\n\n"
+            f"- **현실 진단 (Reverse-Funnel):** {current_reality.strip()}\n"
+            f"- **돌파 작전 제안:** {proposal.strip()}\n"
+            f"- **대표님 승인·지원 요청 사항:**\n{approval_lines}\n"
+            + (f"- **기대 효과 (KPI 목표):** {expected_impact.strip()}" if expected_impact else "")
+        ).strip()
+
+        msg_id = f"ceo-proposal-{fp}-{ts}"
+        record = {
+            "id": msg_id,
+            "fingerprint": fp,
+            "actor": who,
+            "actorLabel": role_label,
+            "title": title.strip(),
+            "currentReality": current_reality.strip(),
+            "proposal": proposal.strip(),
+            "requiredApprovals": approvals_list,
+            "expectedImpact": expected_impact.strip(),
+            "urgency": urgency if urgency in ("critical", "high", "normal") else "high",
+            "status": "pending_ceo",
+            "createdAt": now,
+            "ts": ts,
+            "text": text,
+        }
+        proposals = [record] + [p for p in proposals if p.get("fingerprint") != fp][:29]
+        write(CEO_PROPOSALS_FILE, {"updatedAt": now, "proposals": proposals})
+
+    payload = {
+        "id": msg_id,
+        "who": who,
+        "text": text,
+        "ts": ts,
+        "autonomous": True,
+        "isWorkstream": False,
+        "replyToCeo": True,
+        "ceoProposal": True,
+        "taskTracker": {
+            "handoff": f"@{role_label} ➔ @윤대표-CEO (역제안·승인 요청)",
+            "status": "waiting",
+            "step": f"[대표님 결재·지원 요청] {title.strip()[:80]}",
+            "resultSummary": f"대표님 승인·지원 요청 {len(approvals_list)}건 대기 중",
+            "deliverableUrl": "",
+            "deliverableLabel": "",
+            "synapseLinked": True,
+            "synapseLabel": "🚨 목표 $100 역산 병목 돌파 역제안",
+        },
+    }
+    _deliver(payload)
+    return {"ok": True, "status": "delivered_to_ceo", "proposal": record}
+
+
+
 OUTBOX_DIR = BASE_DIR / 'dashboard' / 'data' / 'chats' / 'crew-outbox'
 
 

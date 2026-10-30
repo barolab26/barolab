@@ -78,9 +78,9 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             if state=='returned':routes.append({'provider':provider,'model':metadata.get('actual_model')})
         system_instruction = (
             '당신은 자율 멀티채널 콘텐츠·마케팅 크루의 전문 운영진이다. '
-            '우리 팀의 최우선 단일 목표는 [하루 수익 $100 달성]이다. '
-            '어떻게 쓸지 정해진 고정 템플릿은 없다. 각자의 전문성으로 하루 $100 수익 달성에 가장 직결되는 고단가(CPC/RPM)·고유입·고전환 전략을 자유롭게 판단하고 자연스러운 대화체로 논의하라.\n'
-            '[절대 금지(Guardrails): 허위 사실/수치 날조, AI/봇 티 내기("AI 생성", "참고사진"), 무책임한 면피 문구("공식 공고 참고", "자료 부족").]\n'
+            '우리 팀의 최우선 단일 목표는 [하루 수익 $100 달성]이며, 공무원 공고문 요약 매크로 같은 죽은 글을 영구 퇴출하고 진짜 사람이 쓴 것 같은 생생한 실전 콘텐츠를 기획한다. '
+            '회의실 발언(message)은 동료 크루들과 실제로 치고받는 생생하고 구체적인 구어체(2~4문장)로 작성하라. 내부 통계 미확인 변명이나 딱딱한 보고서 말투는 절대 쓰지 마라.\n'
+            '[절대 금지(Guardrails): 허위 사실/수치 날조, AI/봇 티 내기("AI 생성", "참고사진", "제공된 자료에 따르면"), 무책임한 면피 문구("공식 공고 참고", "조회 서비스가 아닙니다").]\n'
         )
         value = None
         try:
@@ -99,18 +99,23 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
                     crew_actor_label={'radar':'레이더','jarvis':'팀장','publi':'퍼블리','trace':'트레이스','patch':'패치','doctor':'닥터'}[role],crew_task_id=task,crew_stage='post-style-planning',
                     response_schema={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False})
             except Exception:
-                value = {'message': f'{role} 전략 수립: {topic} 핵심 정보와 수익화 동선 구성'}
+                value = {'message': f'{role} 전략 수립: {topic} 독자 통증(Pain Point) 직격 및 3초 판독표·실전 Action Item 구성'}
                 if 'keyword' in properties:
                     value['keyword'] = topic[:50] if len(topic) >= 2 else identity
                 if 'writingGuide' in properties:
-                    value['writingGuide'] = f'{topic}에 대한 명확한 핵심 안내와 단계별 설명, 관련 제휴·애드센스 유입 동선을 포함한다.'
+                    value['writingGuide'] = (
+                        f'1) 제목: "{topic}" 키워드를 포함하되 공공기관 보고서식 제목을 버리고 독자가 "내 얘기잖아?" 하고 클릭하게 만드는 반려 함정·3분 자가진단형 제목으로 작성.\n'
+                        '2) 도입부: 공문서 정의 대신 독자가 밤늦게 검색창을 켜는 막막함·억울함(Pain Point)과 당장 꺼내 확인해야 할 서류/화면에서 출발.\n'
+                        '3) 본문: 줄글 나열 금지, 한 끗 차이 실전 대비 사례(안 되는 경우 vs 되는 경우)와 손가락으로 짚어보는 3초 판독기(자가진단표), 스마트폰 기준 2~3줄 짧은 호흡 유지.\n'
+                        '4) 마무리: 면책 문구 금지, 오늘/이번 주말 당장 실행할 구체적 Action Item으로 마무리.'
+                    )
                 routes.append({'provider': 'host', 'model': 'fallback-strategy'})
         if not routes or not routes[-1].get('model'):routes.append({'provider':'host','model':'fallback-strategy'})
         transcript.append({'actor':role,'model':routes[-1]['model'],'result':value})
         progress.setdefault('calls',[]).append({'fingerprint':fingerprint,'transcript':transcript[-1]})
         progress['calls']=progress['calls'][-12:]
         write(folder/'planning-progress.json',progress)
-        recipient='radar' if role=='jarvis' and value.get('benchmarkNeeded') is True else 'publi' if role in ('jarvis','radar') else 'jarvis'
+        recipient={'publi':'radar','radar':'trace','trace':'jarvis','jarvis':'publi'}.get(role,'jarvis')
         last_reply=emit_work_event(actor=role,actor_label=role,task_id=task,phase='completed',stage='post-style-planning',
             parent_request_id=last_reply,requested_to=recipient,model=routes[-1]['model'],message_kind='staff_reply',output_kind=value['message'])
         return value
@@ -133,50 +138,46 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
 
     screen_directive = channel == 'naver' and any(d.get('id') == 'ceo-directive:ego-screen-execution' and d.get('active')
                                                  for d in index.get('operatingDirectives', []))
-    if not screen_directive:
-        fast_prompt = (
-            '팀장으로서 전사 자산 시너지와 계정 수명 7:3 페이싱을 고려해 이번 안건의 핵심 타깃 키워드(keyword) 1개와 실행 방향(writingGuide)을 즉시 확정하라.\n'
-            + asset_summary + '\n'
-            f'[채널 비즈니스 목적(Why)] {purpose}\n'
-            f'[삼각 편대 시너지 대상] 연계 CF 블로그: {synergy["targetDomain"]} ({synergy["niche"]})\n'
-            f'[계정 7:3 수명 페이싱 룰] {pacing["instruction"]}\n'
-            f'[수익화·제휴 옵션(CPA/CPC/CPS)] {json.dumps(monetization, ensure_ascii=False)}\n'
-            + 'JSON message,keyword,writingGuide.\n'
-            + json.dumps({'identity':identity,'topic':topic,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'agenda':agenda,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
-        )
-        instructions = call('jarvis', fast_prompt, {
-            'message': message,
-            'keyword': {'type': 'string', 'minLength': 2, 'maxLength': 60},
-            'writingGuide': {'type': 'string', 'minLength': 1, 'maxLength': 5000},
-        })
-        keyword = instructions['keyword']
-        observed = {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'fast_track'}
-    else:
-        publi_prompt = (
-            '퍼블리로서 전사 자산 시너지와 계정 수명 페이싱을 고려해 이번 안건의 핵심 앵글과 타깃 키워드 1개를 제안하라.\n'
-            + asset_summary + '\n'
-            f'[채널 비즈니스 목적(Why)] {purpose}\n'
-            f'[삼각 편대 시너지 대상] 연계 CF 블로그: {synergy["targetDomain"]} ({synergy["niche"]})\n'
-            f'[계정 7:3 수명 페이싱 룰] {pacing["instruction"]}\n'
-            f'[수익화·제휴 옵션(CPA/CPC/CPS)] {json.dumps(monetization, ensure_ascii=False)}\n'
-            + 'JSON message,keyword.\n'
-            + json.dumps({'identity':identity,'topic':topic,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'agenda':agenda,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
-        )
-        request=call('publi', publi_prompt, {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
-        keyword=request['keyword']
-        observed=benchmark(keyword,folder)
-        jarvis_prompt = (
-            '팀장으로서 전사 자산 시너지와 계정 수명 7:3 페이싱에 맞춰 이번 콘텐츠의 실행 방향(writingGuide)을 즉시 확정하라.\n'
-            + asset_summary + '\n'
-            f'[채널 비즈니스 목적(Why)] {purpose}\n'
-            f'[삼각 편대 시너지 대상] 연계 CF 블로그: {synergy["targetDomain"]} ({synergy["niche"]})\n'
-            f'[계정 7:3 수명 페이싱 룰] {pacing["instruction"]}\n'
-            f'[수익화·제휴 옵션(CPA/CPC/CPS)] {json.dumps(monetization, ensure_ascii=False)}\n'
-            + 'JSON message,writingGuide.\n'
-            + json.dumps({'keyword':keyword,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'publiProposal':request,'priorDiscussion':transcript,'observedBenchmark':observed},ensure_ascii=False)
-        )
-        instructions=call('jarvis', jarvis_prompt,
-            {'message':message,'writingGuide':{'type':'string','minLength':1,'maxLength':5000}})
+    publi_prompt = (
+        '당신은 퍼블리(콘텐츠 크리에이터)다. 이번 안건의 핵심 타깃 키워드(keyword) 1개를 선정하고 팀장과 크루들에게 기획 회의를 발제하라.\n'
+        '예시 톤: "팀장님, 이번에 [키워드] 쓸 건데요. 공고문/안내문 그대로 줄글로 나열하면 독자들 3초 만에 뒤로가기 누릅니다. 독자들이 제일 헷갈려 하고 헛걸음하기 쉬운 [핵심 함정/복잡한 조건]부터 정면으로 짚어야 합니다."\n'
+        + 'JSON message,keyword.\n'
+        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
+    )
+    request = call('publi', publi_prompt, {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
+    keyword = request['keyword']
+    observed = benchmark(keyword, folder) if screen_directive else {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'crew_debate'}
+
+    radar_prompt = (
+        '당신은 레이더(트렌드·경쟁 분석 스카우터)다. 퍼블리의 발제를 받아 기존 검색 상위 글들의 맹점(법조문·공고문 복붙으로 독자들이 "그래서 나는 된다는 거냐 안 된다는 거냐" 답답해하는 지점)을 꼬집고, '
+        '이번 글 전면에 내세울 [3초 판독기(자가진단표)]와 [한 끗 차이 실전 대비 사례(예: A는 탈락이지만 B는 통과)]를 구체적으로 제안하라.\n'
+        + 'JSON message.\n'
+        + json.dumps({'keyword':keyword,'publiProposal':request,'observedBenchmark':observed},ensure_ascii=False)
+    )
+    radar_opinion = call('radar', radar_prompt, {'message':message})
+
+    trace_prompt = (
+        '당신은 트레이스(모바일 가독성·유입·전환 분석가)다. 퍼블리와 레이더의 의견을 받아, '
+        '1) 독자가 보자마자 "어, 이거 내 얘기잖아?" 하고 클릭할 수밖에 없는 고클릭률(CTR) 제목 각도, '
+        '2) 바쁜 독자가 스마트폰으로 읽을 때 끝까지 스크롤하게 만드는 2~3줄 짧은 문단 호흡, '
+        '3) 글 마지막에 넣을 [지금 당장 할 일(Action Item)]과 수익화/브릿지 동선을 제안하라.\n'
+        + 'JSON message.\n'
+        + json.dumps({'keyword':keyword,'channel':channel,'synergy':synergy,'monetization':monetization,'priorDiscussion':transcript},ensure_ascii=False)
+    )
+    trace_opinion = call('trace', trace_prompt, {'message':message})
+
+    jarvis_prompt = (
+        '당신은 팀장(자비스)이다. 퍼블리·레이더·트레이스의 치열한 토론을 종합하여 공문서 냄새를 완전히 뺀 최종 집필 지침(writingGuide)을 확정하라.\n'
+        '예시 톤: "좋다. 공문서 냄새 다 빼라. 첫 문단은 독자 통증과 당장 꺼내볼 서류/화면으로 시작하고, 한 끗 차이 실전 사례와 3초 판정표 박고, 마지막은 오늘 당장 해둘 Action Item으로 끝내자."\n'
+        'writingGuide에는 반드시 아래 4가지를 구체적으로 명시하라:\n'
+        '1. [클릭 유도 제목]: 공공기관 보고서식 제목 금지 -> "내 얘기잖아?" 하고 누르게 만드는 반려 함정 / 한 끗 차이 기준 / 3분 자가진단형 제목\n'
+        '2. [도입부 Pain Point]: 밤늦게 검색창을 켜는 독자의 막막함·억울함·헛걸음 걱정에서 출발 ("제공된 자료를 정리했습니다" 같은 보고서/메타 문구 절대 금지)\n'
+        '3. [본문 실전 팁 & 3초 판독기]: 어려운 용어 줄글 나열 금지 -> 한 끗 차이 실전 대비 사례 + 손가락으로 짚어보는 3초 판독기(자가진단 표/인용구) + 스마트폰 기준 2~3줄 짧은 호흡\n'
+        '4. [마무리 Action Item]: 법적 면책 문구("개인별 자격을 조회하는 서비스가 아닙니다" 등) 절대 금지 -> 오늘/이번 주말 당장 실행할 구체적 준비 행동으로 닫기\n'
+        + 'JSON message,writingGuide.\n'
+        + json.dumps({'keyword':keyword,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'priorDiscussion':transcript,'observedBenchmark':observed},ensure_ascii=False)
+    )
+    instructions = call('jarvis', jarvis_prompt, {'message':message,'writingGuide':{'type':'string','minLength':1,'maxLength':5000}})
     result={'status':'agreed','agenda':agenda,'keyword':keyword,'identity':identity,'channel':channel,'parameters':parameters,
         'writingGuide':instructions['writingGuide'],'benchmark':observed,'transcript':transcript,
         'createdAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'outcome':'awaiting_url_measurements','causalClaim':False}
@@ -191,7 +192,7 @@ def review_once(force=False):
         day=datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
         return {'status':'queued','businessAgendaId':agendas.propose('style',day,title='기존 글 실측에 따른 스타일 전략 검토 · '+day,
             project='legacy_remodel',source={'date':day},completion='실측·미수집을 구분한 전략 결정과 적용 여부 기록',priority=30)}
-    import fcntl
+    from common import runtime_locks as fcntl
     from common.collection_observability import load, write
     from common.runtime_locks import runtime_lock_path
     from common.channel_parameters import policy, styles

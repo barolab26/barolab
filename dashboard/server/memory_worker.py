@@ -15,6 +15,53 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 def has_active_jobs(proc=Path('/proc'), parent=None):
     """Preserve every non-browser descendant before recovering this supervisor."""
     parent = os.getpid() if parent is None else parent
+    if os.name == 'nt' and proc == Path('/proc'):
+        try:
+            import ctypes
+            from ctypes import wintypes
+            kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+            class PROCESSENTRY32W(ctypes.Structure):
+                _fields_ = [
+                    ('dwSize', wintypes.DWORD),
+                    ('cntUsage', wintypes.DWORD),
+                    ('th32ProcessID', wintypes.DWORD),
+                    ('th32DefaultHeapID', ctypes.c_void_p),
+                    ('th32ModuleID', wintypes.DWORD),
+                    ('cntThreads', wintypes.DWORD),
+                    ('th32ParentProcessID', wintypes.DWORD),
+                    ('pcPriClassBase', wintypes.LONG),
+                    ('dwFlags', wintypes.DWORD),
+                    ('szExeFile', wintypes.WCHAR * 260),
+                ]
+
+            snap = kernel32.CreateToolhelp32Snapshot(0x00000002, 0)
+            if snap == wintypes.HANDLE(-1).value:
+                return True
+            try:
+                pe = PROCESSENTRY32W()
+                pe.dwSize = ctypes.sizeof(PROCESSENTRY32W)
+                children = {}
+                if kernel32.Process32FirstW(snap, ctypes.byref(pe)):
+                    while True:
+                        children[int(pe.th32ProcessID)] = (int(pe.th32ParentProcessID), pe.szExeFile.lower())
+                        if not kernel32.Process32NextW(snap, ctypes.byref(pe)):
+                            break
+            finally:
+                kernel32.CloseHandle(snap)
+            descendants = {parent}
+            while True:
+                found = {pid for pid, (ppid, _) in children.items() if ppid in descendants}
+                if found <= descendants:
+                    break
+                descendants |= found
+            for pid in descendants - {parent}:
+                exe_name = children[pid][1]
+                if exe_name not in ('ego.exe', 'chrome.exe', 'chrome_crashpad_handler.exe'):
+                    return True
+            return False
+        except Exception:
+            return True
     children = {}
     try:
         for entry in proc.iterdir():

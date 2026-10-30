@@ -108,7 +108,8 @@ def public_evidence(account,row,document,initial=None):
 
 def remember(result,root=ROOT):
     if result.get('publicVerified') is not True:return
-    import datetime,fcntl,hashlib
+    import datetime,hashlib
+    from common import runtime_locks as fcntl
     from common.runtime_locks import runtime_lock_path
     from common.collection_observability import write,locked,load
     from dashboard.agents.synapse import build_index

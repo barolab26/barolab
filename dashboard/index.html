@@ -1451,33 +1451,6 @@
     <div class="bento-cockpit">
 
       <!-- ====================================================================
-           [0단: 🚨 지금 대표님 확인 필요 & 🤖 6대 전 프로젝트 실시간 자율 감사 데크]
-           ==================================================================== -->
-      <section class="sre-audit-deck" id="sre-project-audit-deck" aria-label="6대 전 프로젝트 전담자·병목·다음 조치 실시간 자율 감사 보드">
-        <div class="sre-audit-top">
-          <div class="sre-audit-title-wrap">
-            <span class="sre-audit-title">🛡️ 팀장 6대 전 프로젝트 자율 감사 · 무인 워치독 관제</span>
-            <span class="sre-watchdog-pill" id="sre-watchdog-pill">🟢 워치독 가동 중 · 6대 프로젝트 실시간 추적</span>
-          </div>
-          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-            <button type="button" class="btn-quick" id="btn-sre-audit-now" style="background:#2563eb; border-color:#3b82f6; color:#fff;">⚡ 6대 프로젝트 즉시 감사 + 회의실 브리핑</button>
-            <a class="btn-quick" href="chat.html" style="text-decoration:none;">💬 회의실 브리핑 보기 →</a>
-          </div>
-        </div>
-
-        <!-- CEO Action Required Banner -->
-        <div class="sre-ceo-banner" id="sre-ceo-banner">
-          <div id="sre-ceo-banner-text">
-            <strong>[🚨 지금 대표님 확인 필요]</strong> 📱 <strong>앱 프로젝트 4종 (성경말씀·안부·돋보기·장보기)</strong> — <strong>현재 트랙:</strong> 내부 테스트 (테스터 1명) — ⚠️ 14일 카운트다운 미시작 | <strong>비공개 테스트 현황:</strong> 비공개 트랙 미개설 · 참여 테스터 0 / 12명 · SJ AdMob(<code>pub-7642010403138987</code>) &amp; <code>app-ads.txt</code> 200 OK 검증 완료.
-          </div>
-          <a href="apps.html#qr-install-center" class="btn-quick" style="background:#f59e0b; border-color:#d97706; color:#0f172a; font-weight:900; text-decoration:none; white-space:nowrap;">📱 앱 4종 QR 원클릭 설치 &amp; 14인 테스터 센터 열기 →</a>
-        </div>
-
-        <!-- 6 Core Projects Audit Grid -->
-        <div class="sre-project-grid-6" id="sre-project-grid-6"></div>
-      </section>
-
-      <!-- ====================================================================
            [1단: 상단 4대 코어 목표 '빅 게이지(Big Gauge) 카드']
            ==================================================================== -->
 
@@ -1947,7 +1920,67 @@
 
         </div>
 
-        <!-- 5. 📱 앱 프로젝트 4종 출시 마일스톤 스텝 게이지 (0% ~ 100%) -->
+        <!-- 5. 💳 AI 구독 실시간 잔여 한도 & 크레딧 슬림 데크 -->
+        <section class="bento-box" id="bento-subscription-panel" aria-label="AI 구독 실시간 잔여 한도" style="padding:10px 12px;">
+          <div class="bento-box-head" style="margin-bottom:6px;">
+            <h2 class="bento-box-title" style="font-size:12.5px;">
+              <span>💳 AI 구독 실시간 잔여 한도</span>
+            </h2>
+            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+              <span id="bento-subscription-summary" style="font-size:10px; font-weight:700; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:1.5px 7px;">집계 중…</span>
+              <a class="bento-go-btn" href="settings.html" style="padding:2px 6px; font-size:9.5px;">두뇌 설정 →</a>
+            </div>
+          </div>
+          <div id="bento-subscription-quotas" style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px;"></div>
+        </section>
+
+        <!-- 6. 🤖 AI 크루 6인 가동 상태 & 회의실/기억그래프 바로가기 -->
+        <section class="bento-box" id="ai-crew-gauge-card" aria-label="AI 크루 6인 실시간 가동률" style="padding:10px 12px;">
+          <div class="bento-box-head">
+            <h2 class="bento-box-title" style="font-size:12.5px;">
+              <span>🤖 AI 크루 6인 가동 게이지</span>
+            </h2>
+            <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+              <button type="button" class="bento-go-btn" id="bento-btn-toggle-autonomous" style="background:#ecfdf5; border-color:#10b981; color:#047857; cursor:pointer;" title="회의실에서 에이전트들이 스스로 소통하며 일하는 자율 협업 워커를 가동/일시정지합니다">▶️ 자율 협업 가동 중</button>
+              <a class="bento-go-btn" href="chat.html">💬 회의실 열기</a>
+              <a class="bento-go-btn" href="memory.html">🧠 기억 그래프</a>
+            </div>
+          </div>
+          <div class="bento-crew-grid-5" id="bento-crew-grid-5">
+            <div class="crew-mini-card" id="crew-card-jarvis">
+              <span class="crew-mini-role">총괄 · OSMU</span>
+              <span class="crew-mini-name">팀장</span>
+              <span class="crew-mini-state" id="crew-state-jarvis">🟢 100%</span>
+            </div>
+            <div class="crew-mini-card is-doctor" id="crew-card-doctor">
+              <span class="crew-mini-role">품질 · CRO</span>
+              <span class="crew-mini-name">🩺 닥터</span>
+              <span class="crew-mini-state" id="crew-state-doctor" style="color:#0d9488;">🟢 순찰 중</span>
+            </div>
+            <div class="crew-mini-card" id="crew-card-patch">
+              <span class="crew-mini-role">플랫폼 · 도구</span>
+              <span class="crew-mini-name">패치</span>
+              <span class="crew-mini-state" id="crew-state-patch">🟢 100%</span>
+            </div>
+            <div class="crew-mini-card" id="crew-card-publi">
+              <span class="crew-mini-role">멀티 제작·발행</span>
+              <span class="crew-mini-name">퍼블리</span>
+              <span class="crew-mini-state" id="crew-state-publi">🟢 가동 중</span>
+            </div>
+            <div class="crew-mini-card" id="crew-card-trace">
+              <span class="crew-mini-role">퍼널 · 수익</span>
+              <span class="crew-mini-name">트레이스</span>
+              <span class="crew-mini-state" id="crew-state-trace">🟢 집계 중</span>
+            </div>
+            <div class="crew-mini-card" id="crew-card-radar">
+              <span class="crew-mini-role">트렌드 · 바이럴</span>
+              <span class="crew-mini-name">레이더</span>
+              <span class="crew-mini-state" id="crew-state-radar">🟢 탐색 중</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. 📱 앱 프로젝트 4종 출시 마일스톤 스텝 게이지 (0% ~ 100%) -->
         <section class="bento-box" id="app-projects-gauge-card" aria-label="앱 프로젝트 4종 출시 마일스톤 게이지" style="padding:10px 12px;">
           <div class="bento-box-head">
             <h2 class="bento-box-title" style="font-size:12.5px;">
@@ -2028,52 +2061,6 @@
                 <span>출시 대기</span>
               </div>
             </a>
-          </div>
-        </section>
-
-        <!-- 6. 🤖 AI 크루 6인 가동 상태 & 회의실/기억그래프 바로가기 -->
-        <section class="bento-box" id="ai-crew-gauge-card" aria-label="AI 크루 6인 실시간 가동률" style="padding:10px 12px;">
-          <div class="bento-box-head">
-            <h2 class="bento-box-title" style="font-size:12.5px;">
-              <span>🤖 AI 크루 6인 가동 게이지</span>
-            </h2>
-            <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-              <button type="button" class="bento-go-btn" id="bento-btn-toggle-autonomous" style="background:#ecfdf5; border-color:#10b981; color:#047857; cursor:pointer;" title="회의실에서 에이전트들이 스스로 소통하며 일하는 자율 협업 워커를 가동/일시정지합니다">▶️ 자율 협업 가동 중</button>
-              <a class="bento-go-btn" href="chat.html">💬 회의실 열기</a>
-              <a class="bento-go-btn" href="memory.html">🧠 기억 그래프</a>
-            </div>
-          </div>
-          <div class="bento-crew-grid-5" id="bento-crew-grid-5">
-            <div class="crew-mini-card" id="crew-card-jarvis">
-              <span class="crew-mini-role">총괄 · OSMU</span>
-              <span class="crew-mini-name">팀장</span>
-              <span class="crew-mini-state" id="crew-state-jarvis">🟢 100%</span>
-            </div>
-            <div class="crew-mini-card is-doctor" id="crew-card-doctor">
-              <span class="crew-mini-role">품질 · CRO</span>
-              <span class="crew-mini-name">🩺 닥터</span>
-              <span class="crew-mini-state" id="crew-state-doctor" style="color:#0d9488;">🟢 순찰 중</span>
-            </div>
-            <div class="crew-mini-card" id="crew-card-patch">
-              <span class="crew-mini-role">플랫폼 · 도구</span>
-              <span class="crew-mini-name">패치</span>
-              <span class="crew-mini-state" id="crew-state-patch">🟢 100%</span>
-            </div>
-            <div class="crew-mini-card" id="crew-card-publi">
-              <span class="crew-mini-role">멀티 제작·발행</span>
-              <span class="crew-mini-name">퍼블리</span>
-              <span class="crew-mini-state" id="crew-state-publi">🟢 가동 중</span>
-            </div>
-            <div class="crew-mini-card" id="crew-card-trace">
-              <span class="crew-mini-role">퍼널 · 수익</span>
-              <span class="crew-mini-name">트레이스</span>
-              <span class="crew-mini-state" id="crew-state-trace">🟢 집계 중</span>
-            </div>
-            <div class="crew-mini-card" id="crew-card-radar">
-              <span class="crew-mini-role">트렌드 · 바이럴</span>
-              <span class="crew-mini-name">레이더</span>
-              <span class="crew-mini-state" id="crew-state-radar">🟢 탐색 중</span>
-            </div>
           </div>
         </section>
 

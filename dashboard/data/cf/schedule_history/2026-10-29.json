@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-29",
+  "items": [
+    {
+      "order": 1,
+      "id": 1,
+      "domain": "must-good.com",
+      "scheduledTime": "07:00",
+      "status": "processing",
+      "artifactFolder": "output\\scheduled\\2026-10-29\\must-good.com",
+      "attemptStartedAt": "2026-10-29T14:31:51.309453+00:00",
+      "attemptCount": 4,
+      "totalAttempts": 4,
+      "currentStage": 5,
+      "stageName": "이미지·썸네일 생성",
+      "progressPct": 75,
+      "detailMessage": "기초연금 소득인정액 계산, 국민연금·예금·집은 어떻게 반영될까",
+      "publicUrl": "https://www.must-good.com/basic-pension-income-assets-calculation",
+      "publicationDate": "2026-10-29",
+      "publishedAt": "2026-10-29T14:33:40.450188+00:00",
+      "completedAt": "2026-10-29T14:33:40.450188+00:00",
+      "title": "기초연금 소득인정액 계산, 국민연금·예금·집은 어떻게 반영될까",
+      "slug": "basic-pension-income-assets-calculation",
+      "lastExitCode": 0
+    },
+    {
+      "order": 2,
+      "id": 2,
+      "domain": "baronote.kr",
+      "scheduledTime": "07:20",
+      "status": "processing",
+      "artifactFolder": "output\\scheduled\\2026-10-29\\baronote.kr",
+      "attemptStartedAt": "2026-10-29T14:39:00.980981+00:00",
+      "attemptCount": 3,
+      "totalAttempts": 3,
+      "currentStage": 5,
+      "stageName": "이미지·썸네일 생성",
+      "progressPct": 75,
+      "detailMessage": "연말정산 신용카드·체크카드 소득공제, 남은 두 달 결제 전에 확인할 것",
+      "publicUrl": "https://www.baronote.kr/year-end-tax-credit-debit-card-deduction",
+      "publicationDate": "2026-10-29",
+      "publishedAt": "2026-10-29T14:40:51.765980+00:00",
+      "completedAt": "2026-10-29T14:40:51.765980+00:00",
+      "title": "연말정산 신용카드·체크카드 소득공제, 남은 두 달 결제 전에 확인할 것",
+      "slug": "year-end-tax-credit-debit-card-deduction",
+      "lastExitCode": 0
+    },
+    {
+      "order": 3,
+      "id": 3,
+      "domain": "must-joy.com",
+      "scheduledTime": "15:00",
+      "status": "processing",
+      "artifactFolder": "output\\scheduled\\2026-10-29\\must-joy.com",
+      "attemptStartedAt": "2026-10-29T14:47:37.271427+00:00",
+      "attemptCount": 2,
+      "totalAttempts": 2,
+      "currentStage": 5,
+      "stageName": "이미지·썸네일 생성",
+      "progressPct": 75,
+      "detailMessage": "문화누리카드 온라인 사용처, 예매 전 가맹점과 결제 조건 확인하는 순서",
+      "publicUrl": "https://www.must-joy.com/munhwa-nuri-card-online-merchants",
+      "publicationDate": "2026-10-29",
+      "publishedAt": "2026-10-29T14:49:14.905089+00:00",
+      "completedAt": "2026-10-29T14:49:14.905089+00:00",
+      "title": "문화누리카드 온라인 사용처, 예매 전 가맹점과 결제 조건 확인하는 순서",
+      "slug": "munhwa-nuri-card-online-merchants",
+      "lastExitCode": 0
+    },
+    {
+      "order": 4,
+      "id": 4,
+      "domain": "maxnote.kr",
+      "scheduledTime": "12:10",
+      "status": "published",
+      "artifactFolder": "output\\scheduled\\2026-10-29\\maxnote.kr",
+      "attemptStartedAt": "2026-10-29T14:52:39.394302+00:00",
+      "attemptCount": 2,
+      "totalAttempts": 2,
+      "currentStage": 6,
+      "stageName": "발행 완료",
+      "progressPct": 100,
+      "detailMessage": "공개 HTTP 200 · https://www.maxnote.kr/gov24-simple-auth-login-error",
+      "publicUrl": "https://www.maxnote.kr/gov24-simple-auth-login-error",
+      "publicationDate": "2026-10-29",
+      "publishedAt": "2026-10-29T14:54:11.722425+00:00",
+      "completedAt": "2026-10-29T14:54:11.722425+00:00",
+      "title": "정부24 간편인증 오류, 인증은 끝났는데 로그인이 안 될 때 확인 순서",
+      "slug": "gov24-simple-auth-login-error",
+      "lastExitCode": 0
+    },
+    {
+      "order": 5,
+      "id": 5,
+      "domain": "joynote.kr",
+      "scheduledTime": "20:00",
+      "status": "published",
+      "artifactFolder": "output\\scheduled\\2026-10-29\\joynote.kr",
+      "attemptStartedAt": "2026-10-29T14:57:42.278886+00:00",
+      "attemptCount": 1,
+      "totalAttempts": 1,
+      "currentStage": 6,
+      "stageName": "발행 완료",
+      "progressPct": 100,
+      "detailMessage": "공개 HTTP 200 · https://www.joynote.kr/culture-center-tuition-refund-guide",
+      "publicUrl": "https://www.joynote.kr/culture-center-tuition-refund-guide",
+      "publicationDate": "2026-10-29",
+      "publishedAt": "2026-10-29T14:59:55.745644+00:00",
+      "completedAt": "2026-10-29T14:59:55.745644+00:00",
+      "title": "문화센터 수강료 환불, 개강 전·후 취소할 때 확인할 것",
+      "slug": "culture-center-tuition-refund-guide",
+      "lastExitCode": 0
+    },
+    {
+      "order": 6,
+      "id": 6,
+      "domain": "healthcox.com",
+      "scheduledTime": "14:00",
+      "status": "waiting"
+    },
+    {
+      "order": 7,
+      "id": 7,
+      "domain": "topnote.kr",
+      "scheduledTime": "12:30",
+      "status": "waiting"
+    },
+    {
+      "order": 8,
+      "id": 8,
+      "domain": "nolplace.com",
+      "scheduledTime": "20:10",
+      "status": "waiting"
+    },
+    {
+      "order": 9,
+      "id": 9,
+      "domain": "tripmarvel.com",
+      "scheduledTime": "20:30",
+      "status": "waiting"
+    },
+    {
+      "order": 10,
+      "id": 10,
+      "domain": "daynote.kr",
+      "scheduledTime": "21:00",
+      "status": "waiting"
+    },
+    {
+      "order": 11,
+      "id": 11,
+      "domain": "smilenote.kr",
+      "scheduledTime": "08:00",
+      "status": "waiting"
+    },
+    {
+      "order": 12,
+      "id": 12,
+      "domain": "woorinote.kr",
+      "scheduledTime": "12:40",
+      "status": "waiting"
+    },
+    {
+      "order": 13,
+      "id": 13,
+      "domain": "meganote.kr",
+      "scheduledTime": "21:30",
+      "status": "waiting"
+    },
+    {
+      "order": 14,
+      "id": 14,
+      "domain": "justinfo.co.kr",
+      "scheduledTime": "12:50",
+      "status": "waiting"
+    },
+    {
+      "order": 15,
+      "id": 15,
+      "domain": "soulnote.kr",
+      "scheduledTime": "08:10",
+      "status": "waiting"
+    },
+    {
+      "order": 16,
+      "id": 16,
+      "domain": "must-pick.com",
+      "scheduledTime": "21:10",
+      "status": "waiting"
+    }
+  ],
+  "updatedAt": "2026-10-29T22:45:17.027332+09:00"
+}

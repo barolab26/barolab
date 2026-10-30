@@ -24,7 +24,8 @@ BROWSER_STATUS_PATH = DATA_DIR / "browser-status.json"
 
 KST = timezone(timedelta(hours=9))
 
-CDP_PORT_CATALOG=[{'id':account+'_cdp','port':port,'name':account+' · Ubuntu 격리 Chrome','required':True} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))]
+_BROWSER_KIND = 'Windows EGO LITE' if os.name == 'nt' else 'Ubuntu 격리 Chrome'
+CDP_PORT_CATALOG=[{'id':account+'_cdp','port':port,'name':account+' · '+_BROWSER_KIND,'required':True} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))]
 
 
 def now_kst() -> datetime:
@@ -96,6 +97,8 @@ def is_process_running_match(pattern: str, proc_root=None) -> bool:
                 ],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=5,
                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             )

@@ -76,7 +76,7 @@ def collector_lock(path=None):
                 import msvcrt
                 msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
             else:
-                import fcntl
+                from common import runtime_locks as fcntl
                 fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError:
             yield False
@@ -95,7 +95,23 @@ def inventory():
     # Reuse the existing channel inventory rather than maintain another list.
     with closing(sqlite3.connect(DATA / 'growth.sqlite3')) as db:
         db.row_factory = sqlite3.Row
-        return [dict(r) for r in db.execute('SELECT site_id,url,platform FROM sites ORDER BY site_id')]
+        db.execute(
+            'CREATE TABLE IF NOT EXISTS sites ('
+            'site_id TEXT PRIMARY KEY, url TEXT NOT NULL, platform TEXT NOT NULL, inventory_source TEXT NOT NULL)'
+        )
+        rows = [dict(r) for r in db.execute('SELECT site_id,url,platform FROM sites ORDER BY site_id')]
+        if not rows:
+            seed_sites = read_json(SNAPSHOT, {}).get('inventorySites') or []
+            if seed_sites:
+                with db:
+                    for s in seed_sites:
+                        if s.get('site_id') and s.get('url') and s.get('platform'):
+                            db.execute(
+                                'INSERT OR IGNORE INTO sites VALUES (?,?,?,?)',
+                                (s['site_id'], s['url'], s['platform'], 'metrics.json'),
+                            )
+                rows = [dict(r) for r in db.execute('SELECT site_id,url,platform FROM sites ORDER BY site_id')]
+        return rows
 
 
 def owned_url(site, url):
@@ -196,7 +212,7 @@ def inspection_time(value):
         return None
 
 
-def inspection_current(row, now=None, hours=26):
+def inspection_current(row, now=None, hours=336):
     now = now or datetime.now(timezone.utc)
     checked = inspection_time(row.get('checkedAt'))
     return type(row.get('indexed')) is bool and checked is not None and timedelta(0) <= now - checked <= timedelta(hours=hours)

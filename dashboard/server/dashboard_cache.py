@@ -31,28 +31,34 @@ class ReadCache:
         self.ttl = ttl
         self.capacity = capacity
         self.lock = threading.Lock()
+        self.cond = threading.Condition(self.lock)
         self.values = OrderedDict()
         self.building = set()
 
     def get(self, key, build):
-        with self.lock:
+        with self.cond:
             cached = self.values.get(key)
             if cached and time.monotonic() - cached[0] < self.ttl:
                 self.values.move_to_end(key)
                 return cached[1]
-            # Never occupy the shared HTTP thread pool waiting for another
-            # expensive projection. No stale result is presented as fresh.
+            if key in self.building:
+                self.cond.wait_for(lambda: key not in self.building, timeout=15.0)
+                cached = self.values.get(key)
+                if cached and time.monotonic() - cached[0] < self.ttl:
+                    self.values.move_to_end(key)
+                    return cached[1]
             if key in self.building or len(self.building) >= self.capacity:
                 raise HTTPException(503, '조회 자료를 갱신 중입니다.', headers={'Retry-After': '5'})
             self.building.add(key)
         try:
             value = build()
-            with self.lock:
+            with self.cond:
                 self.values[key] = (time.monotonic(), value)
                 self.values.move_to_end(key)
                 while len(self.values) > self.capacity:
                     self.values.popitem(last=False)
             return value
         finally:
-            with self.lock:
+            with self.cond:
                 self.building.discard(key)
+                self.cond.notify_all()

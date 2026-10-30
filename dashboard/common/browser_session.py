@@ -137,7 +137,7 @@ async def flow_generation_lock(timeout=600):
                     import msvcrt
                     msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
                 else:
-                    import fcntl
+                    from common import runtime_locks as fcntl
                     fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 acquired = True
             except OSError:

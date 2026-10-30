@@ -1,13 +1,13 @@
 {
   "schema": "naver-kin-pilot-v1",
-  "checkedAt": "2026-10-26T07:38:43.075671+00:00",
+  "checkedAt": "2026-10-29T23:37:30.193350+00:00",
   "accounts": [
     "adinfo0905",
     "stone0747"
   ],
   "counts": {
-    "drafted": 1,
-    "published_verified": 3,
+    "drafted": 2,
+    "published_verified": 5,
     "discovered": 0
   },
   "recent": [
@@ -15,10 +15,43 @@
       "account": "adinfo0905",
       "state": "drafted",
       "answer_url": null,
-      "updated_at": "2026-10-26T06:22:29.447455+00:00",
+      "updated_at": "2026-10-29T23:31:53.535356+00:00",
       "send_day": null,
+      "title": "조기노령연금 신청, 소득 기준 정확히 알고 싶어요!",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100103&docId=495349467&answerNo=9&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=",
+      "track": "track_a_latest",
+      "target_domain": "baronote.kr"
+    },
+    {
+      "account": "yoon_master",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495740656&answerNo=2#answer2",
+      "updated_at": "2026-10-29T03:55:07.473892+00:00",
+      "send_day": "2026-10-29",
+      "title": "동탄 중고가전 매입 : 지식iN",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495740656&answerNo=2#answer2",
+      "track": "track_b_search_top",
+      "target_domain": ""
+    },
+    {
+      "account": "adinfo0905",
+      "state": "published_verified",
+      "answer_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=494619211&answerNo=14#answer14",
+      "updated_at": "2026-10-26T13:04:18.186566+00:00",
+      "send_day": "2026-10-26",
       "title": "국민연금 수령 나이, 65세까지 기다리는 게 나을까요?",
       "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=494619211&answerNo=12&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=",
+      "track": "track_a_latest",
+      "target_domain": "baronote.kr"
+    },
+    {
+      "account": "stone0747",
+      "state": "drafted",
+      "answer_url": null,
+      "updated_at": "2026-10-26T09:47:14.392278+00:00",
+      "send_day": null,
+      "title": "국민 연금 수령 나이가 언제인가요?",
+      "question_url": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=478122551&answerNo=25&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA=",
       "track": "track_a_latest",
       "target_domain": "baronote.kr"
     },
@@ -57,56 +90,58 @@
     }
   ],
   "trackCounts": {
-    "track_a_latest": 4,
-    "track_b_search_top": 0
+    "track_a_latest": 6,
+    "track_b_search_top": 1
   },
   "inboundSessions": null,
   "attributedRevenue": null,
   "measurementStatus": "unmeasured",
   "complete": false,
-  "blockedReason": "adinfo0905: operation_RuntimeError",
+  "blockedReason": "stone0747: operation__naver_browser_LoginRequiredError; adinfo0905: operation_TimeoutError",
   "byAccount": {
     "adinfo0905": {
       "drafted": 1,
-      "published_verified": 1,
+      "published_verified": 2,
       "discovered": 0
     },
     "stone0747": {
+      "drafted": 1,
       "published_verified": 2,
       "discovered": 0
     }
   },
   "accountBlockedReasons": {
-    "adinfo0905": "operation_RuntimeError"
+    "stone0747": "operation__naver_browser_LoginRequiredError",
+    "adinfo0905": "operation_TimeoutError"
   },
   "daily": {
-    "date": "2026-10-26",
-    "attempted": 3,
-    "publishedVerified": 3,
-    "remainingScheduled": 17,
+    "date": "2026-10-30",
+    "attempted": 0,
+    "publishedVerified": 0,
+    "remainingScheduled": 20,
     "retryAttemptsToday": 0,
     "globalCap": 20,
     "accountCap": 10,
     "byAccount": {
       "adinfo0905": {
-        "attempted": 1,
-        "publishedVerified": 1,
-        "remainingScheduled": 9
+        "attempted": 0,
+        "publishedVerified": 0,
+        "remainingScheduled": 10
       },
       "stone0747": {
-        "attempted": 2,
-        "publishedVerified": 2,
-        "remainingScheduled": 8
+        "attempted": 0,
+        "publishedVerified": 0,
+        "remainingScheduled": 10
       }
     }
   },
   "measurement": {
     "schema": "naver-kin-measurement-v1",
-    "checkedAt": "2026-10-26T16:38:24.402790+09:00",
+    "checkedAt": "2026-10-30T08:37:07.701462+09:00",
     "source": "GA4 Data API",
     "timezone": "Asia/Seoul",
     "startDate": "2026-10-15",
-    "endDate": "2026-10-21",
+    "endDate": "2026-10-29",
     "trialStartDate": "2026-10-15",
     "trialEndDate": "2026-10-21",
     "finalCollectionDate": "2026-10-24",
@@ -140,33 +175,33 @@
       {
         "host": "www.must-good.com",
         "status": "collected",
-        "sessions": 3,
-        "engagedSessions": 2,
-        "pageViews": 3,
+        "sessions": 4,
+        "engagedSessions": 3,
+        "pageViews": 5,
         "reportMetadata": {
           "timeZone": "Asia/Seoul",
           "currencyCode": "USD",
           "subjectToThresholding": null,
           "samplingMetadatas": null,
           "dataLossFromOtherRow": null,
-          "rowCount": 3,
-          "returnedRows": 3
+          "rowCount": 4,
+          "returnedRows": 4
         }
       },
       {
         "host": "www.must-pick.com",
         "status": "collected",
-        "sessions": 1,
-        "engagedSessions": 1,
-        "pageViews": 1,
+        "sessions": 2,
+        "engagedSessions": 2,
+        "pageViews": 2,
         "reportMetadata": {
           "timeZone": "Asia/Seoul",
           "currencyCode": "KRW",
           "subjectToThresholding": null,
           "samplingMetadatas": null,
           "dataLossFromOtherRow": null,
-          "rowCount": 1,
-          "returnedRows": 1
+          "rowCount": 2,
+          "returnedRows": 2
         }
       },
       {
@@ -316,17 +351,17 @@
       {
         "host": "www.daynote.kr",
         "status": "collected",
-        "sessions": 0,
+        "sessions": 1,
         "engagedSessions": 0,
-        "pageViews": 0,
+        "pageViews": 1,
         "reportMetadata": {
           "timeZone": "Asia/Seoul",
           "currencyCode": "USD",
           "subjectToThresholding": null,
           "samplingMetadatas": null,
           "dataLossFromOtherRow": null,
-          "rowCount": 0,
-          "returnedRows": 0
+          "rowCount": 1,
+          "returnedRows": 1
         }
       },
       {
@@ -348,17 +383,17 @@
       {
         "host": "www.soulnote.kr",
         "status": "collected",
-        "sessions": 0,
-        "engagedSessions": 0,
-        "pageViews": 0,
+        "sessions": 1,
+        "engagedSessions": 1,
+        "pageViews": 1,
         "reportMetadata": {
           "timeZone": "Asia/Seoul",
           "currencyCode": "USD",
           "subjectToThresholding": null,
           "samplingMetadatas": null,
           "dataLossFromOtherRow": null,
-          "rowCount": 0,
-          "returnedRows": 0
+          "rowCount": 1,
+          "returnedRows": 1
         }
       },
       {
@@ -378,9 +413,9 @@
         }
       }
     ],
-    "sessions": 9,
-    "engagedSessions": 4,
-    "pageViews": 8,
+    "sessions": 13,
+    "engagedSessions": 7,
+    "pageViews": 13,
     "publisherRevenue": null,
     "revenueStatus": "unverified_publisher_link",
     "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
@@ -413,9 +448,27 @@
         "mappingStatus": "unattributed"
       },
       {
+        "day": "2026-10-28",
+        "host": "www.must-good.com",
+        "utmContent": "adinfo0905_20261015_1638_4b93d678c80eba71",
+        "sessions": 1,
+        "engagedSessions": 1,
+        "pageViews": 2,
+        "mappingStatus": "unattributed"
+      },
+      {
         "day": "2026-10-20",
         "host": "www.must-pick.com",
         "utmContent": "stone0747_20261019_1605_85862e37efe3a7f1",
+        "sessions": 1,
+        "engagedSessions": 1,
+        "pageViews": 1,
+        "mappingStatus": "unattributed"
+      },
+      {
+        "day": "2026-10-28",
+        "host": "www.must-pick.com",
+        "utmContent": "adinfo0905_20261020_0030_2ab272d593d7aa49",
         "sessions": 1,
         "engagedSessions": 1,
         "pageViews": 1,
@@ -440,6 +493,15 @@
         "mappingStatus": "unattributed"
       },
       {
+        "day": "2026-10-24",
+        "host": "www.daynote.kr",
+        "utmContent": "adinfo0905_20261019_1630_58b84ff6df04cf91",
+        "sessions": 1,
+        "engagedSessions": 0,
+        "pageViews": 1,
+        "mappingStatus": "unattributed"
+      },
+      {
         "day": "2026-10-18",
         "host": "www.nolplace.com",
         "utmContent": "adinfo0905_20261018_1452_fa80addfceb17ba7",
@@ -447,9 +509,81 @@
         "engagedSessions": 1,
         "pageViews": 2,
         "mappingStatus": "unattributed"
+      },
+      {
+        "day": "2026-10-24",
+        "host": "www.soulnote.kr",
+        "utmContent": "stone0747_20261020_0525_477abb9c2e089009",
+        "sessions": 1,
+        "engagedSessions": 1,
+        "pageViews": 1,
+        "mappingStatus": "unattributed"
       }
     ],
     "dailyFunnel": [
+      {
+        "day": "2026-10-30",
+        "discovered": 1,
+        "drafted": 1,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-29",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-28",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-27",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-26",
+        "discovered": 5,
+        "drafted": 5,
+        "attempted": 4,
+        "published_verified": 4
+      },
+      {
+        "day": "2026-10-25",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-24",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-23",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
+      {
+        "day": "2026-10-22",
+        "discovered": 0,
+        "drafted": 0,
+        "attempted": 0,
+        "published_verified": 0
+      },
       {
         "day": "2026-10-21",
         "discovered": 0,
@@ -501,8 +635,8 @@
       }
     ],
     "funnelStartDate": "2026-10-15",
-    "funnelEndDate": "2026-10-21",
-    "funnelTodayProvisional": false,
+    "funnelEndDate": "2026-10-30",
+    "funnelTodayProvisional": true,
     "funnelPeriodKind": "trial",
     "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
     "complete": true,
@@ -537,17 +671,17 @@
       ]
     },
     "matchedSessions": 0,
-    "unmatchedSessions": 9
+    "unmatchedSessions": 13
   },
   "schedule": {
     "schema": "naver-kin-automation-state-v1",
-    "checkedAt": "2026-10-26T07:35:45.626268+00:00",
+    "checkedAt": "2026-10-29T23:29:14.019484+00:00",
     "startDate": "2026-10-15",
     "endDate": "2026-10-21",
     "enabled": true,
     "continuousMode": true,
     "mode": "alternating_interval",
-    "intervalMinutes": 20,
+    "intervalMinutes": 19,
     "intervalJitterMinutes": [
       18,
       22
@@ -557,11 +691,11 @@
     "accountDailyCap": 10,
     "runs": [
       {
-        "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
+        "runId": "2026-10-30_b92fd220d962_adinfo0905_0829",
         "account": "adinfo0905",
         "state": "blocked",
-        "reason": "operation_RuntimeError",
-        "discovered": 18
+        "reason": "operation_TimeoutError",
+        "discovered": 8
       }
     ],
     "state": "completed_cycle",
@@ -581,36 +715,48 @@
         "started": false
       }
     ],
-    "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
+    "runId": "2026-10-30_b92fd220d962_adinfo0905_0829",
     "account": "adinfo0905",
-    "lastRunAt": "2026-10-26T13:03:31.123167+09:00",
-    "lastAccount": "stone0747",
-    "nextEligibleAt": "2026-10-26T13:23:31.123167+09:00",
+    "lastRunAt": "2026-10-26T13:04:18.186566+00:00",
+    "lastAccount": "adinfo0905",
+    "nextEligibleAt": "2026-10-26T13:23:18.186566+00:00",
     "nextAccount": "adinfo0905",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
     "cadenceState": "waiting",
     "operationCounts": {
-      "adinfo0905": 19,
-      "stone0747": 12
+      "adinfo0905": 18,
+      "stone0747": 30
     },
     "submissionCounts": {
-      "adinfo0905": 1,
-      "stone0747": 2
+      "adinfo0905": 0,
+      "stone0747": 0
     },
     "retryAttemptsToday": 0,
-    "globalRemainingRuns": 17,
+    "globalRemainingRuns": 12,
     "byAccountRemainingRuns": {
-      "adinfo0905": 9,
-      "stone0747": 8
+      "adinfo0905": 10,
+      "stone0747": 0
     },
     "measurementComplete": true,
     "registeredTasks": {
       "status": "observed",
-      "platform": "systemd-user",
-      "checkedAt": "2026-10-26T07:38:43.020288+00:00",
+      "platform": "windows-daemon",
+      "checkedAt": "2026-10-29T23:37:30.175359+00:00",
       "tasks": [
+        {
+          "taskName": "BaroLab-Kin-Seven-Day-Pilot",
+          "service": "barolab-kin.service",
+          "registered": true,
+          "enabled": true,
+          "workflowMatches": true,
+          "state": "Ready",
+          "nextRunAt": null,
+          "lastRunAt": "2026-10-29T23:37:30.175359+00:00",
+          "lastResult": "success",
+          "lastExitStatus": "0"
+        },
         {
           "taskName": "barolab-kin.timer",
           "service": "barolab-kin.service",
@@ -618,8 +764,8 @@
           "enabled": true,
           "workflowMatches": true,
           "state": "Ready",
-          "nextRunAt": "Mon 2026-10-26 16:40:00 KST",
-          "lastRunAt": "Mon 2026-10-26 16:35:00 KST",
+          "nextRunAt": null,
+          "lastRunAt": "2026-10-29T23:37:30.175359+00:00",
           "lastResult": "success",
           "lastExitStatus": "0"
         },
@@ -630,8 +776,8 @@
           "enabled": true,
           "workflowMatches": true,
           "state": "Ready",
-          "nextRunAt": "Mon 2026-10-26 20:30:00 KST",
-          "lastRunAt": "Sun 2026-10-25 20:30:00 KST",
+          "nextRunAt": null,
+          "lastRunAt": "2026-10-29T23:37:30.175359+00:00",
           "lastResult": "success",
           "lastExitStatus": "0"
         }
@@ -639,368 +785,46 @@
     }
   },
   "retention": {
-    "checkedAt": "2026-10-24T14:09:01.191020+00:00",
+    "checkedAt": "2026-10-29T20:09:27.818412+00:00",
     "scope": "up_to_100_initially_verified_pilot_and_trial_answers",
     "complete": true,
-    "initiallyVerified": 51,
-    "attemptedChecks": 51,
+    "initiallyVerified": 5,
+    "attemptedChecks": 5,
     "checks": [
       {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=494619211&answerNo=13&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer13",
-        "state": "publicly_retained",
-        "reason": null,
-        "checkedAt": "2026-10-24T14:08:46.590077+00:00"
+        "account": "yoon_master",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495740656&answerNo=2#answer2",
+        "state": "unknown",
+        "reason": "public_check_unavailable",
+        "checkedAt": "2026-10-29T20:09:26.788996+00:00"
       },
       {
         "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100401&docId=495657070&answerNo=2&qb=6rG06rCV6rKA7KeEIOuMgOyDgeyekA%3D%3D#answer2",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=494619211&answerNo=14#answer14",
         "state": "unknown",
         "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:46.860032+00:00"
+        "checkedAt": "2026-10-29T20:09:27.156317+00:00"
       },
       {
         "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=70103&docId=495234309&answerNo=5&qb=7Ja06rmo7Ya17Kad#answer5",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=492531542&answerNo=12&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer12",
         "state": "unknown",
         "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:47.051507+00:00"
+        "checkedAt": "2026-10-29T20:09:27.486548+00:00"
+      },
+      {
+        "account": "stone0747",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632&answerNo=5&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ%3D%3D#answer5",
+        "state": "unknown",
+        "reason": "public_check_unavailable",
+        "checkedAt": "2026-10-29T20:09:27.644960+00:00"
       },
       {
         "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495632228&answerNo=5&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer5",
+        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=486320125&answerNo=4&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ%3D%3D#answer4",
         "state": "unknown",
         "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:47.471744+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=477267393&answerNo=11&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer11",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:47.653171+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100403&docId=494595693&answerNo=6&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer6",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:48.017966+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=490646862&answerNo=2&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyWtOumsOydtOuwleusvOq0gCDsmIjslb0%3D#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:48.224978+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=7&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer7",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:48.407132+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495380744&answerNo=13&qb=6rWt66+864K07J2867Cw7JuA7Lm065Oc#answer13",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:48.814930+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=337679852&answerNo=8&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV#answer8",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:49.241426+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495619450&answerNo=4&qb=7Iuk7JeF6riJ7Jes#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:49.629499+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50502&docId=490959317&answerNo=6&qb=6rOg6rWs66eIIOuztOq0gA%3D%3D#answer6",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:50.005551+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617417&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:50.395237+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=40607&docId=495457589&answerNo=2&qb=7KCE6riw7LCoIOuztOyhsOq4iA%3D%3D#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:50.533479+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=406&docId=495447337&answerNo=6&qb=7J6Q6rKp7KadIOy2lOyynA%3D%3D#answer6",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:50.715646+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90107&docId=302394190&answerNo=2&qb=7ISc7Jq4IOq3vOq1kCDsiJjrqqnsm5A%3D#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:51.003225+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617634&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:51.368525+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=377172589&answerNo=20&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer20",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:51.568579+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=493559041&answerNo=3&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:51.954930+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8110104&docId=495595974&answerNo=5&qb=7KCE6riw7LCoIOuztOyhsOq4iA%3D%3D#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:52.319403+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=490364096&answerNo=6&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer6",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:52.499370+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50503&docId=482408760&answerNo=9&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV#answer9",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:52.972770+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=406&docId=494089138&answerNo=13&qb=7JeQ64SI7KeA67CU7Jqw7LKY#answer13",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:53.172093+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=492662135&answerNo=31&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguQ%3D%3D#answer31",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:53.340750+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495491290&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:53.722483+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8080103&docId=488359443&answerNo=1&qb=7Iux7YGs64yAIOuwsOyImOq1rCDssq3show=#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:53.911576+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100508&docId=495529695&answerNo=1&qb=7Lqg7ZWRIOuCnOuhnA==#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:54.284309+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=495609086&answerNo=2&qb=7IS47YOB6riwIO2GteyEuOyymQ==#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:54.562357+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=30312&docId=495402586&answerNo=1&qb=66y47ZmU64iE66as7Lm065Oc#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:55.013504+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=70113&docId=491264788&answerNo=3&qb=6rOg7JaR7J20IOuwqeq0keyXvA==#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:55.321447+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=441982579&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:55.519214+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8080101&docId=392385676&answerNo=4&qb=67aI66Cb7KCA64SQ#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:55.942530+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80511&docId=495099187&answerNo=1&qb=6rOg7JaR7J20IOuwqeq0keyXvA==#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:56.103755+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=40101&docId=495602453&answerNo=1&qb=7LKt64WE64+E7JW96rOE7KKM#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:56.495974+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80511&docId=495342527&answerNo=1&qb=6rOg7JaR7J20IO2EseuTnOumhA==#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:56.730041+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=492536055&answerNo=2&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:57.076491+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=102020101&docId=488241195&answerNo=3&qb=7JeR7IWAIO2LgOqzoOyglQ==#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:57.385724+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60223&docId=495333468&answerNo=3&qb=7J6E7LCo6raM65Ox6riw66qF66C5#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:57.547582+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=454425503&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:57.834589+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50503&docId=495253868&answerNo=1&qb=64yA7YyMIOuztOq0gOuylQ==#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:58.138734+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8050103&docId=494861618&answerNo=2&qb=6rOg7JaR7J20IO2EseuTnOumhA==#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:58.468570+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=494793198&answerNo=3&qb=7IS47YOB6riwIO2GteyEuOyymQ==#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:58.646709+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=1001020205&docId=495599305&answerNo=1&qb=66y47ZmU64iE66as7Lm065Oc#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:58.843655+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8110301&docId=495557971&answerNo=3&qb=7J6Q64+Z7LCoIOygleq4sOqygOyCrA==#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:59.245978+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=486320125&answerNo=2&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ==#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:59.431419+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495559634&answerNo=1&qb=6rCE7J2064yA7KeA6riJ6riI#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:59.608800+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=5010601&docId=463692705&answerNo=1&qb=7JWg7ZSM7JuM7LmYIOy2qeyghCDslYjrkKg=#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:08:59.755046+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=5010601&docId=482340466&answerNo=1&qb=7JWg7ZSM7JuM7LmYIOy2qeyghCDslYjrkKg=#answer3",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:09:00.086213+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=495595158&answerNo=1&qb=7ZmU64u07IiyIOyYiOyVvQ==#answer2",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:09:00.357150+00:00"
-      },
-      {
-        "account": "stone0747",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=4020201&docId=495470800#answer5",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:09:00.812313+00:00"
-      },
-      {
-        "account": "adinfo0905",
-        "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632#answer4",
-        "state": "unknown",
-        "reason": "public_check_unavailable",
-        "checkedAt": "2026-10-24T14:09:01.189744+00:00"
+        "checkedAt": "2026-10-29T20:09:27.818190+00:00"
       }
     ],
     "firstVerificationHistoryPreserved": true
@@ -1025,13 +849,13 @@
     "scheduleDescription": "작업 종료 후 18~22분 지터(평균 20분) 계정 교대 · 개별 계정 40~45분 안전 텀 · 하루 20건(계정당 10건)",
     "lastRun": {
       "schema": "naver-kin-automation-state-v1",
-      "checkedAt": "2026-10-26T07:35:45.626268+00:00",
+      "checkedAt": "2026-10-29T23:29:14.019484+00:00",
       "startDate": "2026-10-15",
       "endDate": "2026-10-21",
       "enabled": true,
       "continuousMode": true,
       "mode": "alternating_interval",
-      "intervalMinutes": 20,
+      "intervalMinutes": 19,
       "intervalJitterMinutes": [
         18,
         22
@@ -1041,11 +865,11 @@
       "accountDailyCap": 10,
       "runs": [
         {
-          "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
+          "runId": "2026-10-30_b92fd220d962_adinfo0905_0829",
           "account": "adinfo0905",
           "state": "blocked",
-          "reason": "operation_RuntimeError",
-          "discovered": 18
+          "reason": "operation_TimeoutError",
+          "discovered": 8
         }
       ],
       "state": "completed_cycle",
@@ -1065,36 +889,48 @@
           "started": false
         }
       ],
-      "runId": "2026-10-26_1fcb0a30ec40_adinfo0905_1635",
+      "runId": "2026-10-30_b92fd220d962_adinfo0905_0829",
       "account": "adinfo0905",
-      "lastRunAt": "2026-10-26T13:03:31.123167+09:00",
-      "lastAccount": "stone0747",
-      "nextEligibleAt": "2026-10-26T13:23:31.123167+09:00",
+      "lastRunAt": "2026-10-26T13:04:18.186566+00:00",
+      "lastAccount": "adinfo0905",
+      "nextEligibleAt": "2026-10-26T13:23:18.186566+00:00",
       "nextAccount": "adinfo0905",
       "activeRunId": null,
       "activeAccount": null,
       "activeStartedAt": null,
       "cadenceState": "waiting",
       "operationCounts": {
-        "adinfo0905": 19,
-        "stone0747": 12
+        "adinfo0905": 18,
+        "stone0747": 30
       },
       "submissionCounts": {
-        "adinfo0905": 1,
-        "stone0747": 2
+        "adinfo0905": 0,
+        "stone0747": 0
       },
       "retryAttemptsToday": 0,
-      "globalRemainingRuns": 17,
+      "globalRemainingRuns": 12,
       "byAccountRemainingRuns": {
-        "adinfo0905": 9,
-        "stone0747": 8
+        "adinfo0905": 10,
+        "stone0747": 0
       },
       "measurementComplete": true,
       "registeredTasks": {
         "status": "observed",
-        "platform": "systemd-user",
-        "checkedAt": "2026-10-26T07:38:43.020288+00:00",
+        "platform": "windows-daemon",
+        "checkedAt": "2026-10-29T23:37:30.175359+00:00",
         "tasks": [
+          {
+            "taskName": "BaroLab-Kin-Seven-Day-Pilot",
+            "service": "barolab-kin.service",
+            "registered": true,
+            "enabled": true,
+            "workflowMatches": true,
+            "state": "Ready",
+            "nextRunAt": null,
+            "lastRunAt": "2026-10-29T23:37:30.175359+00:00",
+            "lastResult": "success",
+            "lastExitStatus": "0"
+          },
           {
             "taskName": "barolab-kin.timer",
             "service": "barolab-kin.service",
@@ -1102,8 +938,8 @@
             "enabled": true,
             "workflowMatches": true,
             "state": "Ready",
-            "nextRunAt": "Mon 2026-10-26 16:40:00 KST",
-            "lastRunAt": "Mon 2026-10-26 16:35:00 KST",
+            "nextRunAt": null,
+            "lastRunAt": "2026-10-29T23:37:30.175359+00:00",
             "lastResult": "success",
             "lastExitStatus": "0"
           },
@@ -1114,43 +950,43 @@
             "enabled": true,
             "workflowMatches": true,
             "state": "Ready",
-            "nextRunAt": "Mon 2026-10-26 20:30:00 KST",
-            "lastRunAt": "Sun 2026-10-25 20:30:00 KST",
+            "nextRunAt": null,
+            "lastRunAt": "2026-10-29T23:37:30.175359+00:00",
             "lastResult": "success",
             "lastExitStatus": "0"
           }
         ]
       }
     },
-    "lastRunAt": "2026-10-26T13:03:31.123167+09:00",
-    "nextEligibleAt": "2026-10-26T13:23:31.123167+09:00",
+    "lastRunAt": "2026-10-26T13:04:18.186566+00:00",
+    "nextEligibleAt": "2026-10-26T13:23:18.186566+00:00",
     "nextAccount": "adinfo0905",
     "activeRunId": null,
     "activeAccount": null,
     "activeStartedAt": null,
     "cadenceState": "waiting",
-    "globalRemainingRuns": 17,
+    "globalRemainingRuns": 12,
     "byAccountRemainingRuns": {
-      "adinfo0905": 9,
-      "stone0747": 8
+      "adinfo0905": 10,
+      "stone0747": 0
     },
     "operationCounts": {
-      "adinfo0905": 19,
-      "stone0747": 12
+      "adinfo0905": 18,
+      "stone0747": 30
     },
     "submissionCounts": {
-      "adinfo0905": 1,
-      "stone0747": 2
+      "adinfo0905": 0,
+      "stone0747": 0
     },
     "retryAttemptsToday": 0,
-    "checkedAt": "2026-10-26T07:35:45.626268+00:00",
+    "checkedAt": "2026-10-29T23:29:14.019484+00:00",
     "state": "completed_cycle",
     "lastOperation": {
       "account": "adinfo0905",
       "state": "blocked",
-      "reason": "operation_RuntimeError",
-      "updatedAt": "2026-10-26T07:38:24.368283+00:00",
-      "questionId": "494619211",
+      "reason": "operation_TimeoutError",
+      "updatedAt": "2026-10-29T23:37:07.686576+00:00",
+      "questionId": "495349467",
       "questionState": "drafted",
       "submissionAttempted": false,
       "submitted": false

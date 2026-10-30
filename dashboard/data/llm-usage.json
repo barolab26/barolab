@@ -1,1 +1,1 @@
-{"date": "2026-10-26", "totalTokens": 22965631, "byModel": {"gpt-6.1-sol": 22965631}, "calls": 795, "schema": "barolab-llm-usage-v1", "scope": "codex_cli_reported_usage", "checkedAt": "2026-10-26T16:39:26.483979+09:00", "coverageStartedAt": "2026-10-26T00:07:46.125435+09:00"}
+{"date": "2026-10-30", "totalTokens": 17520742, "byModel": {"gpt-6.1-sol": 17520742}, "calls": 763, "schema": "barolab-llm-usage-v1", "scope": "codex_cli_reported_usage", "checkedAt": "2026-10-30T09:00:51.535851+09:00", "coverageStartedAt": "2026-10-30T00:00:20.926542+09:00"}

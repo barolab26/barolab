@@ -1,33 +1,37 @@
 {
   "schema": "barolab-system-watchdog-v1",
-  "triggerSource": "task-scheduler",
-  "startedAt": "2026-10-20T10:27:01+09:00",
-  "finishedAt": "2026-10-20T10:28:10+09:00",
-  "status": "degraded",
+  "triggerSource": "manual",
+  "startedAt": "2026-10-29T22:46:42+09:00",
+  "finishedAt": "2026-10-29T22:52:39.426805+09:00",
+  "status": "healthy",
   "server": {
     "port8790": true,
-    "port8791": false,
+    "port8791": true,
     "recovered": false,
     "detail": "정상 가동 중"
   },
   "cdpBrowsers": {
-    "onlineCount": 6,
-    "totalRequired": 8,
-    "recoveredPorts": [
-      9231,
-      9333,
-      9335,
-      9336,
-      9226,
-      9420
-    ],
-    "failedPorts": [
-      9230,
-      9334
-    ]
+    "onlineCount": 7,
+    "totalRequired": 7,
+    "recoveredPorts": [],
+    "failedPorts": []
   },
-  "zombieRecoveries": [],
-  "missedSlotCatchups": [],
+  "zombieRecoveries": [
+    {
+      "channel": "cf_blog",
+      "owner": "@publi",
+      "action": "CF 파이프라인 좀비 상태 초기화 및 재가동",
+      "detail": "작업 프로세스 미실행 감지"
+    }
+  ],
+  "missedSlotCatchups": [
+    {
+      "channel": "cf_blog",
+      "owner": "@publi",
+      "action": "CF 블로그 지연 슬롯 15건 감지 및 자동 캐치업 기동",
+      "detail": "대기/재시도 15건 자동 발행 프로세스 실행"
+    }
+  ],
   "appTrackTruth": {
     "ok": true,
     "updatedProjects": [
@@ -41,8 +45,8 @@
     "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
   },
   "projectHealthSummary": {
-    "totalProjects": 6,
-    "ceoActionCount": 1,
+    "totalProjects": 7,
+    "ceoActionCount": 0,
     "autoRecoveringCount": 0,
     "appTrackTruth": {
       "ok": true,
@@ -57,5 +61,5 @@
       "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
     }
   },
-  "broadcastedToChat": true
+  "broadcastedToChat": false
 }

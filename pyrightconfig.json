@@ -1,0 +1,27 @@
+{
+  "include": [
+    "cf_posting",
+    "dashboard",
+    "naver_blog_posting",
+    "naver_kin",
+    "threads_posting",
+    "experiment"
+  ],
+  "extraPaths": [
+    ".",
+    "dashboard",
+    "dashboard/server",
+    "dashboard/agents",
+    "dashboard/collectors",
+    "cf_posting",
+    "naver_blog_posting",
+    "naver_kin",
+    "threads_posting"
+  ],
+  "pythonVersion": "3.14",
+  "pythonPlatform": "Windows",
+  "typeCheckingMode": "off",
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none"
+}
+

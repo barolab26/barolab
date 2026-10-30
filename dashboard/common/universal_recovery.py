@@ -22,6 +22,9 @@ logger = logging.getLogger('universal_recovery')
 
 def clear_x11_modal_dialogs(display=None):
     """Detect and close any blocking OS dialogs like 'Open Files', '열기', 'Alert'."""
+    if os.name == 'nt' and display is None:
+        from common.ubuntu_naver_browser import dismiss_stuck_dialogs
+        return [{'windowId': wid, 'title': title, 'display': disp} for disp, wid, title in dismiss_stuck_dialogs()]
     displays = [display] if display else [os.environ.get('BAROLAB_DISPLAY'), ':11', ':10', ':0']
     closed = []
     for cand in dict.fromkeys(d for d in displays if d):

@@ -1,7 +1,27 @@
 {
+  "python.defaultInterpreterPath": "C:\\Users\\baro7\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
   "python.analysis.extraPaths": [
-    ".",
-    "./dashboard"
+    "c:\\10_Project\\BaroLab",
+    "c:\\10_Project\\BaroLab\\dashboard",
+    "c:\\10_Project\\BaroLab\\dashboard\\server",
+    "c:\\10_Project\\BaroLab\\dashboard\\agents",
+    "c:\\10_Project\\BaroLab\\dashboard\\collectors",
+    "c:\\10_Project\\BaroLab\\cf_posting",
+    "c:\\10_Project\\BaroLab\\naver_blog_posting",
+    "c:\\10_Project\\BaroLab\\naver_kin",
+    "c:\\10_Project\\BaroLab\\threads_posting"
   ],
-  "python.defaultInterpreterPath": "/home/baro7/.venvs/barolab/bin/python3"
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportMissingModuleSource": "none"
+  },
+  "basedpyright.analysis.extraPaths": [
+    "c:\\10_Project\\BaroLab",
+    "c:\\10_Project\\BaroLab\\dashboard",
+    "c:\\10_Project\\BaroLab\\dashboard\\server",
+    "c:\\10_Project\\BaroLab\\dashboard\\agents",
+    "c:\\10_Project\\BaroLab\\dashboard\\collectors"
+  ],
+  "basedpyright.analysis.typeCheckingMode": "off"
 }

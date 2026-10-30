@@ -7,41 +7,23 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
+sys.path.insert(0, str(BASE_DIR.parent / 'dashboard'))
 sys.path.insert(0, str(BASE_DIR.parent))
 
 import os
-
 import time
-
 import datetime
-
 import json
-
 import requests
-
 import re
-
 import hashlib
-
 import mimetypes
-
-from bs4 import BeautifulSoup
-
-from pathlib import Path
-
-from common.ego_telemetry import action as ego_action
-
-from common.channel_attribution import is_dummy_rescue_url
-
 import uuid
-
-import os, time, hashlib, datetime
-
 import argparse
-
 from contextlib import contextmanager
-
-BASE_DIR = Path(__file__).resolve().parent
+from bs4 import BeautifulSoup
+from common.ego_telemetry import action as ego_action
+from common.channel_attribution import is_dummy_rescue_url
 
 def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -165,26 +147,151 @@ def validate_basic_article(article):
 
 from common.source_discovery import research as basic_research
 
+def ensure_article_images(article, folder, domain=None):
+    from html import escape
+    from common.dashboard_jobs import write
+    from common.flow_images import generate as flow_image
+
+    folder = Path(folder)
+    existing_plans = [p for p in (article.get('imagePlans') or []) if isinstance(p, dict) and p.get('filename')]
+    if existing_plans and all((folder / 'images' / p['filename']).is_file() for p in existing_plans) and ('{{IMAGE_0}}' in article.get('contentHtml', '') or '<img' in article.get('contentHtml', '')):
+        return article
+
+    if domain:
+        try:
+            basic_progress(domain, 5, '이미지·썸네일 생성', 75, article.get('title', domain))
+        except Exception:
+            pass
+
+    hero_img = flow_image(article['title'], article['summary'], folder, custom_prompt=article.get('imagePrompt'), filename='flow-hero.png', source_index=0)
+    hero_caption = (article.get('imageCaption') or f"{article.get('mainKeyword') or article['title']} 핵심 요약").strip()
+    plans = [{'filename': hero_img.name, 'source': 'generated', 'caption': hero_caption, 'role': 'thumbnail'}]
+
+    soup = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
+    for old_fig in soup.find_all('figure'):
+        if '{{IMAGE_' in str(old_fig):
+            old_fig.decompose()
+
+    h2_tags = soup.find_all('h2')
+    sec_specs = [s for s in (article.get('sectionImages') or []) if isinstance(s, dict) and ((s.get('imagePrompt') or '').strip() or (s.get('sectionHeading') or '').strip())]
+    if not sec_specs and len(h2_tags) >= 2:
+        mid_h2 = h2_tags[len(h2_tags) // 2]
+        h_txt = mid_h2.get_text(' ', strip=True)
+        sec_specs = [{'sectionHeading': h_txt, 'imagePrompt': '', 'imageCaption': f'{h_txt} 핵심 확인 포인트'}]
+
+    for idx, spec in enumerate(sec_specs[:2], 1):
+        sec_fname = f'flow-section-{idx}.png'
+        sec_title = (spec.get('sectionHeading') or article['title']).strip()
+        sec_cap = (spec.get('imageCaption') or f'{sec_title} 핵심 포인트').strip()
+        sec_img = flow_image(sec_title, sec_cap + ' ' + article['summary'], folder, custom_prompt=spec.get('imagePrompt'), filename=sec_fname, source_index=idx)
+        plans.append({'filename': sec_img.name, 'source': 'generated', 'caption': sec_cap, 'sectionHeading': sec_title, 'role': 'section'})
+
+    def _make_figure_html(idx, caption, eager=False):
+        load_attr = 'eager' if eager else 'lazy'
+        return BeautifulSoup(
+            f'<figure class="post-image" style="margin:24px 0;text-align:center;">'
+            f'<img src="{{{{IMAGE_{idx}}}}}" alt="{escape(caption)}" style="max-width:100%;height:auto;border-radius:12px;" loading="{load_attr}">'
+            f'<figcaption class="image-caption" style="margin-top:8px;font-size:0.9rem;color:#64748b;">{escape(caption)}</figcaption>'
+            f'</figure>',
+            'html.parser',
+        ).figure
+
+    # Insert IMAGE_0 right after the opening intro paragraph (or before first h2)
+    hero_fig = _make_figure_html(0, hero_caption, eager=True)
+    first_h2 = h2_tags[0] if h2_tags else None
+    first_p = soup.find('p')
+    if first_h2 is not None:
+        first_h2.insert_before(hero_fig)
+    elif first_p is not None:
+        first_p.insert_after(hero_fig)
+    else:
+        soup.insert(0, hero_fig)
+
+    # Insert section images naturally inside their corresponding h2 sections
+    for idx, plan in enumerate(plans[1:], 1):
+        sec_fig = _make_figure_html(idx, plan['caption'], eager=False)
+        target_heading = (plan.get('sectionHeading') or '').strip()
+        matched_h2 = next((h for h in h2_tags if target_heading and (target_heading in h.get_text(' ', strip=True) or h.get_text(' ', strip=True) in target_heading)), None)
+        if matched_h2 is None and h2_tags:
+            matched_h2 = h2_tags[min(idx, len(h2_tags) - 1)]
+        if matched_h2 is not None:
+            next_p = matched_h2.find_next_sibling('p')
+            if next_p is not None:
+                next_p.insert_after(sec_fig)
+            else:
+                matched_h2.insert_after(sec_fig)
+        else:
+            soup.append(sec_fig)
+
+    article['imagePlans'] = plans
+    article['contentHtml'] = str(soup)
+    validate_basic_article(article)
+    write(folder / 'article.json', article)
+    write(folder / 'editor-content.json', article)
+    write(folder / 'photo-plan.json', {
+        'assets': plans,
+        'medium': 'editorial-image',
+        'sha256': hashlib.sha256(hero_img.read_bytes()).hexdigest(),
+    })
+    return article
+
+
 def basic_article(domain, item, folder):
     path = folder / 'article.json'
     if path.is_file():
         handoff = folder / 'handoff.json'
         if handoff.is_file() and json.loads(handoff.read_text(encoding='utf-8')).get('domain') not in (None, domain):
             raise ValueError('Saved article belongs to another domain')
-        return validate_basic_article(json.loads(path.read_text(encoding='utf-8')))
+        article = validate_basic_article(json.loads(path.read_text(encoding='utf-8')))
+        return ensure_article_images(article, folder, domain=domain)
     keyword = item.get('mainKeyword') or item.get('title') or item.get('topic') or item.get('category') or domain
     basic_progress(domain,2,'리서치',25,str(keyword))
     sources = basic_research(keyword, folder)
     from common.llm_client import generate_json
     from common.dashboard_jobs import write
-    schema = {'type': 'object', 'properties': {key: {'type': 'string'} for key in ('title', 'summary', 'category', 'topicSlug', 'contentHtml', 'imagePrompt', 'imageCaption')}, 'required': ['title', 'summary', 'category', 'topicSlug', 'contentHtml', 'imagePrompt', 'imageCaption'], 'additionalProperties': False}
-    prompt = '한국어 블로그 원고를 작성한다. 도입부·소제목·표·본문 구성은 고정 서식 없이 회의 합의와 독자 관점에 따라 전문 운영진이 자율 결정한다. imagePrompt는 반드시 구체적인 영어 문장(English prompt)으로 작성하되, 원고의 구체적 상황·장면·피사체·조명·분위기를 Google Flow Ultra로 생성할 고해상도 실사 에디토리얼 사진(high-resolution editorial photography) 스타일로 묘사하거나(이미지 내 글자/텍스트/로고/문서화면 절대 제외), 리서치 원본 웹페이지 증거 캡쳐가 더 적합한 경우 "RESEARCH_CAPTURE"로 지정한다. imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성한다. contentHtml은 본문 HTML(<p>, <h2>, <table> 등)로 작성하고, topicSlug는 영문 소문자·하이픈 조합으로 작성하며, 등록된 categories 중 하나를 선택한다. 절대 금지 가드레일: 1) 수집 자료(research)에 없는 허위 사실·수치 날조 금지 2) AI/봇 메타 발언이나 "공식 공고를 참고하세요" 같은 면피 문구 금지.\n' + json.dumps({'domain': domain, 'topic': keyword, 'categories': registered_categories(domain), 'research': sources}, ensure_ascii=False)
+    sec_img_schema = {
+        'type': 'object',
+        'properties': {
+            'sectionHeading': {'type': 'string'},
+            'imagePrompt': {'type': 'string'},
+            'imageCaption': {'type': 'string'},
+        },
+        'required': ['sectionHeading', 'imagePrompt', 'imageCaption'],
+        'additionalProperties': False,
+    }
+    schema = {
+        'type': 'object',
+        'properties': {
+            **{key: {'type': 'string'} for key in ('title', 'summary', 'category', 'topicSlug', 'contentHtml', 'imagePrompt', 'imageCaption')},
+            'sectionImages': {'type': 'array', 'items': sec_img_schema},
+        },
+        'required': ['title', 'summary', 'category', 'topicSlug', 'contentHtml', 'imagePrompt', 'imageCaption', 'sectionImages'],
+        'additionalProperties': False,
+    }
+    prompt = (
+        '독자가 끝까지 읽고 행동하게 만드는 진짜 사람의 한국어 블로그 원고를 작성한다. "공무원 공고문 요약 매크로"나 딱딱한 리서치 보고서 말투는 절대 쓰지 않는다.\n'
+        '[4대 집필 원칙 (필수 준수)]\n'
+        '1. 제목(title): 공공기관 보고서식 제목("[키워드], 조건·확인 순서")을 절대 쓰지 마라. 독자가 보자마자 "어, 이거 내 얘기잖아?" 하고 클릭하게 만드는 구체적 반려/실패 함정, 한 끗 차이 기준, 3분 자가진단형 제목으로 작성하라.\n'
+        '2. 도입부(contentHtml 첫 1~2문단): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하면 3초 만에 이탈한다. 밤늦게 검색창을 켜는 독자의 진짜 통증(Pain Point: 막막함, 억울함, 헛걸음 걱정, 헷갈리는 현실 상황)에 깊이 공감하며 시작하고, 이 글에서 바로 해결해 줄 핵심 기준을 딱 짚어라.\n'
+        '3. 본문(contentHtml — 한 끗 차이 실전 사례 + 3초 판독기 표 + 모바일 2~3줄 호흡):\n'
+        '   - 어려운 용어를 사전처럼 나열하지 말고 독자가 스마트폰을 보며 내 상황에 바로 대입할 수 있게 써라.\n'
+        '   - 구체적인 대비 사례(예: "A는 안 되지만 B는 됩니다", "X 코드는 탈락이지만 Y 코드는 통과입니다")를 본문에 녹여 독자가 무릎을 치게 만들어라.\n'
+        '   - 본문 중간에는 설명충용 표가 아니라 내 조건/상황을 손가락으로 짚어보며 "된다/안 된다/유리하다/불리하다"를 3초 만에 판별할 수 있는 실전 자가진단 판독기 <table>을 반드시 포함하라.\n'
+        '   - 한 문단(<p>)은 스마트폰 화면 기준 2~3줄이 넘지 않게 호흡을 짧고 리듬감 있게 끊어 쳐라.\n'
+        '4. 마무리(Action Item): 마지막 문단에 "해설 글이며 개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 관료적 면책 문구를 절대 넣지 마라. 대신 독자가 글 읽기를 마친 직후 오늘 당장(또는 이번 주말에 미리) 실행할 수 있는 구체적 행동 지침(Action Item: 먼저 꺼내볼 서류, 미리 조회할 메뉴, 체크할 항목 등)으로 힘 있게 닫아라.\n'
+        '[시각 자료 및 기술 규칙]\n'
+        '- 대표 썸네일용 imagePrompt와 본문 핵심 <h2> 소제목 구간(1~2곳)을 위한 sectionImages의 imagePrompt는 구체적인 영어 문장(English prompt)으로 작성하되, 원고의 구체적 상황·장면·피사체·조명·분위기를 고해상도 실사 에디토리얼 사진(high-resolution editorial photography) 스타일로 묘사하거나(이미지 내 글자/텍스트/로고/문서화면 절대 제외), 리서치 원본 웹페이지 증거 캡쳐가 더 적합한 경우 "RESEARCH_CAPTURE"로 지정한다.\n'
+        '- imageCaption과 sectionImages.imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성하고, sectionImages.sectionHeading에는 해당 이미지가 들어갈 본문 <h2> 소제목 텍스트를 정확히 기입한다.\n'
+        '- topicSlug는 영문 소문자·하이픈 조합으로 작성하며, 등록된 categories 중 하나를 선택한다.\n'
+        '[절대 금지 가드레일]\n'
+        '- 수집 자료(research)에 없는 허위 사실·수치 날조 금지 (단, 자료의 한계를 변명하는 "제공된 자료에서는 알 수 없습니다", "이 글은 제공된 안내를 바탕으로..." 같은 리서치 메타 발언은 본문에 절대 노출 금지)\n'
+        '- AI/봇 메타 발언("AI 생성", "참고사진") 및 면피성 문구("공식 공고 참고", "조회 서비스가 아닙니다") 절대 금지.\n'
+        + json.dumps({'domain': domain, 'topic': keyword, 'categories': registered_categories(domain), 'research': sources}, ensure_ascii=False)
+    )
     basic_progress(domain,4,'원고 작성',55,str(keyword))
     article = validate_basic_article(generate_json(prompt, agent_slot='cf_pipeline', response_schema=schema, audit_directory=folder / 'model-audit', timeout_seconds=600))
     write(path, article)
-    write(folder / 'editor-content.json', article)
-    write(folder / 'photo-plan.json', {'assets': [], 'medium': 'html-table'})
-    return article
+    return ensure_article_images(article, folder, domain=domain)
 
 def basic_public_receipt(domain, article, response, folder):
     from common.dashboard_jobs import write
@@ -220,17 +327,32 @@ def publish_basic_article(domain, article, folder):
     inventory = published_inventory('https://www.' + domain)
     collisions = duplicate_posts(article, inventory)
     if collisions:
-        if previous.get('state') in ('accepted', 'submitting', 'submission_unknown'):
-            exact = [p for p in collisions if p['slug'] == article['topicSlug'] and p['title'] == article['title']]
-            if len(exact) == 1:
-                response = requests.get(f"https://www.{domain}/api/posts/{exact[0]['id']}", timeout=15)
-                return basic_public_receipt(domain, article, response, folder)
-        raise ValueError('Existing title or slug; duplicate submission prevented')
+        exact = [p for p in collisions if p.get('title', '').casefold() == article['title'].casefold()]
+        if exact and previous.get('state') in ('accepted', 'submitting', 'submission_unknown'):
+            response = requests.get(f"https://www.{domain}/api/posts/{exact[0]['id']}", timeout=15)
+            return basic_public_receipt(domain, article, response, folder)
+        if not exact:
+            existing_slugs = {p.get('slug', '').casefold() for p in inventory}
+            base_slug = article['topicSlug'][:160].rstrip('-')
+            suffix = folder.parent.name.replace('-', '')[-4:] if re.fullmatch(r'\d{4}-\d{2}-\d{2}', folder.parent.name) else 'guide'
+            candidate_slug = f"{base_slug}-{suffix}"
+            seq = 2
+            while candidate_slug.casefold() in existing_slugs:
+                candidate_slug = f"{base_slug}-{suffix}-{seq}"
+                seq += 1
+            article['topicSlug'] = candidate_slug
+            write(folder / 'article.json', article)
+            write(folder / 'editor-content.json', article)
+            collisions = duplicate_posts(article, inventory)
+        if collisions:
+            raise ValueError('Existing title or slug; duplicate submission prevented')
     if previous.get('state') in ('submitting', 'submission_unknown', 'accepted'):
         raise RuntimeError('Previous submission must be reconciled before a second POST')
+    article = ensure_article_images(article, folder, domain=domain)
     from common.cf_tables import style_tables
     content = style_tables(article['contentHtml'])
     plans = article.get('imagePlans', [])
+    urls = []
     if plans:
         paths = [folder / 'images' / plan['filename'] for plan in plans]
         urls = upload_images_to_cf(domain, paths)
@@ -238,7 +360,19 @@ def publish_basic_article(domain, article, folder):
             content = content.replace(f'{{{{IMAGE_{index}}}}}', url).replace('images/' + plan['filename'], url)
     if re.search('\\{\\{IMAGE|src=[\\"\\\'](?:images/|file:)', content):
         raise ValueError('Unresolved image reference')
-    payload = {'title': article['title'], 'content': content, 'slug': article['topicSlug'], 'category': article['category'], 'meta_description': article['summary'], 'excerpt': article['summary'], 'isPublished': True, 'status': 'published'}
+    thumb_url = urls[0] if urls else ''
+    payload = {
+        'title': article['title'],
+        'content': content,
+        'slug': article['topicSlug'],
+        'category': article['category'],
+        'meta_description': article['summary'],
+        'excerpt': article['summary'],
+        'thumbnail': thumb_url,
+        'og_image': thumb_url,
+        'isPublished': True,
+        'status': 'published',
+    }
     key = get_api_key(domain)
     write(previous_path, {'state': 'submitting', 'domain': domain, 'title': article['title'], 'slug': article['topicSlug'], 'startedAt': stamp(), 'payloadSha256': hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()})
     try:
@@ -314,7 +448,7 @@ def save_live(path, content):
 
 @contextmanager
 def cleaner_lock(path=None, wait_seconds=0, poll_interval=5):
-    import fcntl
+    from common import runtime_locks as fcntl
     from common.runtime_locks import runtime_lock_path
     path = runtime_lock_path(path or DATA_DIR / 'cleaner.lock')
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -381,7 +515,7 @@ def run_basic_posting(domain, artifact_folder=None, prepare_only=False):
     item = next((row for row in schedule.get('items', []) if row.get('domain') == domain), None)
     if not item: raise ValueError('Domain missing from current schedule')
     if item.get('status') == 'published' and item.get('publicUrl'):
-        return {'status': 'already_published', 'publicUrl': item['publicUrl']}
+        return {'status': 'already_published', 'state': 'published', 'publicPublicationVerified': True, 'httpStatus': 200, 'publicUrl': item['publicUrl'], 'title': item.get('title', domain), 'domain': domain}
     folder = Path(artifact_folder).resolve() if artifact_folder else BASE_DIR / item.get('artifactFolder', '')
     if not artifact_folder and not (folder / 'article.json').is_file():
         folder = BASE_DIR / 'output' / ('basic-' + domain + '-' + uuid.uuid4().hex[:10])
@@ -408,7 +542,7 @@ def run_basic_posting(domain, artifact_folder=None, prepare_only=False):
     basic_progress(domain,6,'발행 완료',100,'공개 HTTP 200 · '+receipt['publicUrl'],status='published')
     try:
         from dashboard.collectors.metrics import inventory as site_inventory, read_json, CONFIG
-        from dashboard.indexing_submissions import submit_indexnow
+        from dashboard.collectors.indexing_submissions import submit_indexnow
         config = read_json(CONFIG)
         site = next(site for site in site_inventory() if site.get('site_id') == domain)
         write(folder / 'indexnow-receipt.json', submit_indexnow(site, config.get('sites', {}).get(domain, {}), [receipt['publicUrl']]))

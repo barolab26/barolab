@@ -1019,9 +1019,10 @@ def _threads_pipeline_snapshot(config, db_path=_threads_config_DB, output=_threa
     for row in rows:
         doc = _threads_pipeline_json.loads(row['document'])
         review = doc.get('format_validation', {})
-        item = {k: row.get(k) for k in ('attempt_id', 'part_id', 'kind', 'account_key', 'state', 'permalink', 'updated_at', 'publication_date', 'slot', 'outbound_url', 'parent_platform_id')} | {'title': doc.get('title'), 'mode': doc.get('mode', 'cf_inbound'), 'followup_delay_seconds': doc.get('followup_delay_seconds', 120), 'variants': doc.get('variants'), 'selected_variant': doc.get('selected_variant', 'hook'), 'preview': row['text'] if review.get('ok') else None, 'review': {'status': 'format_valid' if review.get('ok') else 'legacy', 'reason': review.get('reason')}, 'source_url': doc['source']['url'], 'published_at': row.get('published_at'), 'verified_at': row.get('verified_at'), 'publication_time_basis': row.get('publication_time_basis')}
+        src_url = (doc.get('source') or {}).get('url') or row.get('outbound_url')
+        item = {k: row.get(k) for k in ('attempt_id', 'part_id', 'kind', 'account_key', 'state', 'permalink', 'updated_at', 'publication_date', 'slot', 'outbound_url', 'parent_platform_id')} | {'title': doc.get('title'), 'mode': doc.get('mode', 'cf_inbound'), 'followup_delay_seconds': doc.get('followup_delay_seconds', 120), 'variants': doc.get('variants'), 'selected_variant': doc.get('selected_variant', 'hook'), 'preview': row['text'] if review.get('ok') else None, 'review': {'status': 'format_valid' if review.get('ok') else 'legacy', 'reason': review.get('reason')}, 'source_url': src_url, 'published_at': row.get('published_at'), 'verified_at': row.get('verified_at'), 'publication_time_basis': row.get('publication_time_basis')}
         recent.append(item)
-        grp = threads_by_attempt.setdefault(row['attempt_id'], {'attempt_id': row['attempt_id'], 'title': doc.get('title'), 'publication_date': row.get('publication_date'), 'slot': row.get('slot'), 'mode': doc.get('mode', 'cf_inbound'), 'followup_delay_seconds': doc.get('followup_delay_seconds', 120), 'source_url': doc['source']['url'], 'variants': doc.get('variants'), 'main': None, 'followup': None})
+        grp = threads_by_attempt.setdefault(row['attempt_id'], {'attempt_id': row['attempt_id'], 'title': doc.get('title'), 'publication_date': row.get('publication_date'), 'slot': row.get('slot'), 'mode': doc.get('mode', 'cf_inbound'), 'followup_delay_seconds': doc.get('followup_delay_seconds', 120), 'source_url': src_url, 'variants': doc.get('variants'), 'main': None, 'followup': None})
         grp[row['kind']] = item
     status = 'needs_account' if not config.get('account_key') else 'paused_token' if not connected else 'ready' if config['enabled'] else 'disabled'
     today = _threads_pipeline_datetime.now(_threads_pipeline_timezone.utc).astimezone(_threads_pipeline_KST).date().isoformat()
@@ -1127,11 +1128,12 @@ def _threads_authoring_catalog(config, db_path=_threads_config_DB):
     """Newest verified articles, rotating least recently used domains first."""
     with _threads_pipeline_connect(db_path) as db:
         documents = [_threads_authoring_json.loads(row[0]) for row in db.execute("SELECT document FROM parts WHERE kind='main' ORDER BY created_at DESC") if row[0]]
-    used = {doc['source']['url'] for doc in documents}
+    used = {(doc.get('source') or {}).get('url') for doc in documents if isinstance(doc, dict) and (doc.get('source') or {}).get('url')}
     recent_hosts = []
     for doc in documents:
-        host = (_threads_authoring_urlsplit(doc['source']['url']).hostname or '').removeprefix('www.')
-        if host not in recent_hosts:
+        src_url = (doc.get('source') or {}).get('url') if isinstance(doc, dict) else None
+        host = (_threads_authoring_urlsplit(src_url).hostname or '').removeprefix('www.') if src_url else ''
+        if host and host not in recent_hosts:
             recent_hosts.append(host)
     found = {}
     files = sorted((_threads_config_ROOT / 'cf_posting/output').glob('*/run-*/publication.json'), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -1787,9 +1789,12 @@ def _threads_scheduler_observe_task(db_path=_threads_config_DB):
     value = {'mode': 'project-autonomy', 'registered': None, 'enabled': None, 'state': 'unknown', 'checkedAt': _threads_config_stamp()}
     try:
         config = _threads_scheduler_json.loads((_threads_config_PRIVATE / 'project-autonomy.json').read_text())
-        result = _threads_scheduler_subprocess.run(['systemctl', '--user', 'show', 'barolab-memory-review.service', '--property=ActiveState', '--value'], capture_output=True, text=True, timeout=3)
         enabled = config.get('enabled') is True and 'threads' in config.get('projects', [])
-        value.update(registered=enabled, enabled=enabled, state=result.stdout.strip() if result.returncode == 0 else 'unknown')
+        if sys.platform == 'win32':
+            value.update(registered=enabled, enabled=enabled, state='active' if enabled else 'inactive')
+        else:
+            result = _threads_scheduler_subprocess.run(['systemctl', '--user', 'show', 'barolab-memory-review.service', '--property=ActiveState', '--value'], capture_output=True, text=True, timeout=3)
+            value.update(registered=enabled, enabled=enabled, state=result.stdout.strip() if result.returncode == 0 else 'unknown')
     except (OSError, ValueError, _threads_scheduler_subprocess.TimeoutExpired):
         pass
     with _threads_pipeline_connect(db_path) as db:
@@ -1798,7 +1803,7 @@ def _threads_scheduler_observe_task(db_path=_threads_config_DB):
 
 @_threads_scheduler_contextmanager
 def _threads_scheduler_lock(path=None):
-    import fcntl
+    from common import runtime_locks as fcntl
     from common.runtime_locks import runtime_lock_path
     path = runtime_lock_path(path or _threads_config_PRIVATE / 'threads-scheduler.lock')
     path.parent.mkdir(parents=True, exist_ok=True)

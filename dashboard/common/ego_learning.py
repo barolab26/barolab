@@ -1,5 +1,5 @@
 """Reuse verified screen interactions; keep hypotheses and measured outcomes separate."""
-import fcntl
+from common import runtime_locks as fcntl
 import hashlib
 import json
 from datetime import datetime, timezone

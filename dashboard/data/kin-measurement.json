@@ -1,10 +1,10 @@
 {
   "schema": "naver-kin-measurement-v1",
-  "checkedAt": "2026-10-26T16:38:24.402790+09:00",
+  "checkedAt": "2026-10-30T08:37:07.701462+09:00",
   "source": "GA4 Data API",
   "timezone": "Asia/Seoul",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-21",
+  "endDate": "2026-10-29",
   "trialStartDate": "2026-10-15",
   "trialEndDate": "2026-10-21",
   "finalCollectionDate": "2026-10-24",
@@ -38,33 +38,33 @@
     {
       "host": "www.must-good.com",
       "status": "collected",
-      "sessions": 3,
-      "engagedSessions": 2,
-      "pageViews": 3,
+      "sessions": 4,
+      "engagedSessions": 3,
+      "pageViews": 5,
       "reportMetadata": {
         "timeZone": "Asia/Seoul",
         "currencyCode": "USD",
         "subjectToThresholding": null,
         "samplingMetadatas": null,
         "dataLossFromOtherRow": null,
-        "rowCount": 3,
-        "returnedRows": 3
+        "rowCount": 4,
+        "returnedRows": 4
       }
     },
     {
       "host": "www.must-pick.com",
       "status": "collected",
-      "sessions": 1,
-      "engagedSessions": 1,
-      "pageViews": 1,
+      "sessions": 2,
+      "engagedSessions": 2,
+      "pageViews": 2,
       "reportMetadata": {
         "timeZone": "Asia/Seoul",
         "currencyCode": "KRW",
         "subjectToThresholding": null,
         "samplingMetadatas": null,
         "dataLossFromOtherRow": null,
-        "rowCount": 1,
-        "returnedRows": 1
+        "rowCount": 2,
+        "returnedRows": 2
       }
     },
     {
@@ -214,17 +214,17 @@
     {
       "host": "www.daynote.kr",
       "status": "collected",
-      "sessions": 0,
+      "sessions": 1,
       "engagedSessions": 0,
-      "pageViews": 0,
+      "pageViews": 1,
       "reportMetadata": {
         "timeZone": "Asia/Seoul",
         "currencyCode": "USD",
         "subjectToThresholding": null,
         "samplingMetadatas": null,
         "dataLossFromOtherRow": null,
-        "rowCount": 0,
-        "returnedRows": 0
+        "rowCount": 1,
+        "returnedRows": 1
       }
     },
     {
@@ -246,17 +246,17 @@
     {
       "host": "www.soulnote.kr",
       "status": "collected",
-      "sessions": 0,
-      "engagedSessions": 0,
-      "pageViews": 0,
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
       "reportMetadata": {
         "timeZone": "Asia/Seoul",
         "currencyCode": "USD",
         "subjectToThresholding": null,
         "samplingMetadatas": null,
         "dataLossFromOtherRow": null,
-        "rowCount": 0,
-        "returnedRows": 0
+        "rowCount": 1,
+        "returnedRows": 1
       }
     },
     {
@@ -276,9 +276,9 @@
       }
     }
   ],
-  "sessions": 9,
-  "engagedSessions": 4,
-  "pageViews": 8,
+  "sessions": 13,
+  "engagedSessions": 7,
+  "pageViews": 13,
   "publisherRevenue": null,
   "revenueStatus": "unverified_publisher_link",
   "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
@@ -311,9 +311,27 @@
       "mappingStatus": "unattributed"
     },
     {
+      "day": "2026-10-28",
+      "host": "www.must-good.com",
+      "utmContent": "adinfo0905_20261015_1638_4b93d678c80eba71",
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 2,
+      "mappingStatus": "unattributed"
+    },
+    {
       "day": "2026-10-20",
       "host": "www.must-pick.com",
       "utmContent": "stone0747_20261019_1605_85862e37efe3a7f1",
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
+      "mappingStatus": "unattributed"
+    },
+    {
+      "day": "2026-10-28",
+      "host": "www.must-pick.com",
+      "utmContent": "adinfo0905_20261020_0030_2ab272d593d7aa49",
       "sessions": 1,
       "engagedSessions": 1,
       "pageViews": 1,
@@ -338,6 +356,15 @@
       "mappingStatus": "unattributed"
     },
     {
+      "day": "2026-10-24",
+      "host": "www.daynote.kr",
+      "utmContent": "adinfo0905_20261019_1630_58b84ff6df04cf91",
+      "sessions": 1,
+      "engagedSessions": 0,
+      "pageViews": 1,
+      "mappingStatus": "unattributed"
+    },
+    {
       "day": "2026-10-18",
       "host": "www.nolplace.com",
       "utmContent": "adinfo0905_20261018_1452_fa80addfceb17ba7",
@@ -345,9 +372,81 @@
       "engagedSessions": 1,
       "pageViews": 2,
       "mappingStatus": "unattributed"
+    },
+    {
+      "day": "2026-10-24",
+      "host": "www.soulnote.kr",
+      "utmContent": "stone0747_20261020_0525_477abb9c2e089009",
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
+      "mappingStatus": "unattributed"
     }
   ],
   "dailyFunnel": [
+    {
+      "day": "2026-10-30",
+      "discovered": 1,
+      "drafted": 1,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-29",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-28",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-27",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-26",
+      "discovered": 5,
+      "drafted": 5,
+      "attempted": 4,
+      "published_verified": 4
+    },
+    {
+      "day": "2026-10-25",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-24",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-23",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
+    {
+      "day": "2026-10-22",
+      "discovered": 0,
+      "drafted": 0,
+      "attempted": 0,
+      "published_verified": 0
+    },
     {
       "day": "2026-10-21",
       "discovered": 0,
@@ -399,8 +498,8 @@
     }
   ],
   "funnelStartDate": "2026-10-15",
-  "funnelEndDate": "2026-10-21",
-  "funnelTodayProvisional": false,
+  "funnelEndDate": "2026-10-30",
+  "funnelTodayProvisional": true,
   "funnelPeriodKind": "trial",
   "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
   "complete": true,
@@ -435,5 +534,5 @@
     ]
   },
   "matchedSessions": 0,
-  "unmatchedSessions": 9
+  "unmatchedSessions": 13
 }

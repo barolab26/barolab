@@ -122,8 +122,15 @@ def generate(prompt, model, images=None, response_schema=None, audit_directory=N
     record_provider_memory_delivery(text,'agy',model,audit_directory,'prepared')
     failure = 'invalid_event_stream'
     last_exc = None
+    cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
     for account_label, account_home in accounts:
-        env = {**os.environ, 'HOME': str(account_home), 'USERPROFILE': str(account_home)}
+        env = {
+            **os.environ,
+            'HOME': str(account_home),
+            'USERPROFILE': str(account_home),
+            'SSH_CONNECTION': '127.0.0.1 0 127.0.0.1 0',
+            'SSH_CLIENT': '127.0.0.1 0 0',
+        }
         with tempfile.TemporaryDirectory(prefix='barolab-agy-json-') as folder:
             path=Path(folder)/'schema.json';path.write_text(json.dumps(wire_schema),encoding='utf-8')
             command=[executable,'--input-format','stream-json','--output-format','stream-json','--model',model,
@@ -139,7 +146,7 @@ def generate(prompt, model, images=None, response_schema=None, audit_directory=N
                 pass
             try:
                 process=subprocess.run(command,input=json.dumps({'event':'user','message':{'content':text}},ensure_ascii=False)+'\n',
-                    cwd=folder,env=env,capture_output=True,text=True,encoding='utf-8',timeout=timeout+5)
+                    cwd=folder,env=env,capture_output=True,text=True,encoding='utf-8',timeout=timeout+5,creationflags=cflags)
             except subprocess.TimeoutExpired as exc:
                 try:
                     st = rotation_state(); st['activeAccount'] = None

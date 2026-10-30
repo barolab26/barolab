@@ -27378,6 +27378,3431 @@
       "endpoint": "https://www.bing.com/indexnow",
       "method": "IndexNow",
       "completedAt": "2026-10-26T07:44:18.830721+00:00"
+    },
+    {
+      "id": "aa54786c40a4490fb91139ae914f3a02",
+      "runId": "discovery-20261026T171541",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T08:16:35.173149+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/national-health-screening-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:16:35.916055+00:00"
+    },
+    {
+      "id": "250757df454946e8be5b9744097cd129",
+      "runId": "discovery-20261026T171541",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T08:16:35.173149+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/national-health-screening-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:16:36.445491+00:00"
+    },
+    {
+      "id": "116f5bfd5690425bb8a74fdfaa900aa6",
+      "runId": "discovery-20261026T171541",
+      "provider": "indexnow_global",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T08:17:14.802490+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/administrative-fine-notice-payment-objection"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:17:15.347941+00:00"
+    },
+    {
+      "id": "0e329efede2241329fb3856118b9fb00",
+      "runId": "discovery-20261026T171541",
+      "provider": "indexnow_bing",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T08:17:14.802490+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/administrative-fine-notice-payment-objection"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:17:16.040904+00:00"
+    },
+    {
+      "id": "985850f5aa52452b86b851c64fc5c725",
+      "runId": "discovery-20261026T171541",
+      "provider": "indexnow_global",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T08:19:46.262367+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/gwangju-champions-city-price-payment-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:19:46.913349+00:00"
+    },
+    {
+      "id": "8535f1083fde42f39d9cbd8dd090ee63",
+      "runId": "discovery-20261026T171541",
+      "provider": "indexnow_bing",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T08:19:46.262367+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/gwangju-champions-city-price-payment-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:19:47.724424+00:00"
+    },
+    {
+      "id": "047e195e47c94a7384fc922cd8587b5c",
+      "runId": "discovery-20261026T174956",
+      "provider": "bing_url_batch",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T08:52:13.589356+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/administrative-fine-notice-payment-objection"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9795,
+        "MonthlyQuota": 59795
+      },
+      "property": "https://www.justinfo.co.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T08:52:15.559767+00:00"
+    },
+    {
+      "id": "39d7b2307dfb4baba7e888c752805709",
+      "runId": "discovery-20261026T174956",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T08:53:41.532112+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/dishwasher-12-vs-14-capacity-installation-storage"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:53:42.123715+00:00"
+    },
+    {
+      "id": "8d1eaf302e8d4d9295a4241a259c3c16",
+      "runId": "discovery-20261026T174956",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T08:53:41.532112+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/dishwasher-12-vs-14-capacity-installation-storage"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T08:53:42.690612+00:00"
+    },
+    {
+      "id": "a3f6b3b162db49db84b277bcb473c965",
+      "runId": "discovery-20261026T174956",
+      "provider": "bing_url_batch",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T08:54:47.290831+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.woorinote.kr/gwangju-champions-city-price-payment-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 63,
+        "MonthlyQuota": 563
+      },
+      "property": "https://woorinote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T08:54:49.930323+00:00"
+    },
+    {
+      "id": "24c2738835ac48b1a12534517bc820ab",
+      "runId": "discovery-20261026T182459",
+      "provider": "bing_url_batch",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T09:25:28.053610+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.daynote.kr/green-onion-fresh-storage-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9942,
+        "MonthlyQuota": 59942
+      },
+      "property": "https://daynote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T09:25:29.736221+00:00"
+    },
+    {
+      "id": "742c520351a24de1aae7df2bd64967bb",
+      "runId": "discovery-20261026T182459",
+      "provider": "indexnow_global",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T09:25:29.973550+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.daynote.kr/green-onion-fresh-storage-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T09:25:30.653978+00:00"
+    },
+    {
+      "id": "0ac0ebe9a7194109aefa5a031302fbb8",
+      "runId": "discovery-20261026T182459",
+      "provider": "indexnow_bing",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T09:25:29.973550+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.daynote.kr/green-onion-fresh-storage-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T09:25:31.460682+00:00"
+    },
+    {
+      "id": "e2395b8d949147d8ba4dc7d98ade3aef",
+      "runId": "discovery-20261026T185836",
+      "provider": "indexnow_global",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T10:01:54.010358+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/senior-chair-strength-exercise"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T10:01:54.687284+00:00"
+    },
+    {
+      "id": "d5b3703d914b494e95d870ba9571cc4a",
+      "runId": "discovery-20261026T185836",
+      "provider": "indexnow_bing",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T10:01:54.010358+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/senior-chair-strength-exercise"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T10:01:55.658052+00:00"
+    },
+    {
+      "id": "43d43377356048d7b1de54d446f53a01",
+      "runId": "discovery-20261026T193255",
+      "provider": "bing_url_batch",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T10:33:25.611269+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.daynote.kr/2026년-하루-일기-쓰기-5일-만에-습관-잡는-비법-공개"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9941,
+        "MonthlyQuota": 59941
+      },
+      "property": "https://daynote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T10:33:27.318555+00:00"
+    },
+    {
+      "id": "bfe6c539e49445c08dfcb15d988914bd",
+      "runId": "discovery-20261026T193255",
+      "provider": "indexnow_global",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T10:33:27.612472+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.daynote.kr/2026년-하루-일기-쓰기-5일-만에-습관-잡는-비법-공개"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T10:33:28.281150+00:00"
+    },
+    {
+      "id": "66be594013cd445b97674358176ebe9d",
+      "runId": "discovery-20261026T193255",
+      "provider": "indexnow_bing",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T10:33:27.612472+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.daynote.kr/2026년-하루-일기-쓰기-5일-만에-습관-잡는-비법-공개"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T10:33:28.916164+00:00"
+    },
+    {
+      "id": "a52a33993d9c400cb515ce8815d0a668",
+      "runId": "discovery-20261026T203622",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T11:37:49.934929+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/2026-최신-약값-본인부담금-줄이는-방법-2026-저가약-대체조제부터-환급금까지-5가지-필수-팁"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T11:37:50.646493+00:00"
+    },
+    {
+      "id": "b2967a0147ef4daaa4502916ae053368",
+      "runId": "discovery-20261026T203622",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T11:37:49.934929+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/2026-최신-약값-본인부담금-줄이는-방법-2026-저가약-대체조제부터-환급금까지-5가지-필수-팁"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T11:37:51.586723+00:00"
+    },
+    {
+      "id": "d55c48352bdf49e4b7b1dccd81590f04",
+      "runId": "discovery-20261026T211122",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T12:14:10.895965+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/4cha-minsaengjiwongeum-sinchunggigan-region-official-check"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T12:14:11.382033+00:00"
+    },
+    {
+      "id": "ae73ea8d6edd4f529525d91e98ec0991",
+      "runId": "discovery-20261026T211122",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T12:14:10.895965+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/4cha-minsaengjiwongeum-sinchunggigan-region-official-check"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T12:14:12.139573+00:00"
+    },
+    {
+      "id": "94b07b237ef946ccbb254799ba5df3b6",
+      "runId": "discovery-20261026T232652",
+      "provider": "bing_url_batch",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T14:28:51.448866+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/대전-공장-화재-3가지-원인과-2026년-안전-대책"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9794,
+        "MonthlyQuota": 59794
+      },
+      "property": "https://www.justinfo.co.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T14:28:52.825719+00:00"
+    },
+    {
+      "id": "b9d3be0d43e445489d1e386dfb256fcb",
+      "runId": "discovery-20261026T232652",
+      "provider": "indexnow_global",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T14:28:53.035809+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/대전-공장-화재-3가지-원인과-2026년-안전-대책"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T14:28:53.517831+00:00"
+    },
+    {
+      "id": "63d32b93f542455ab69181b80f82e7a9",
+      "runId": "discovery-20261026T232652",
+      "provider": "indexnow_bing",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T14:28:53.035809+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/대전-공장-화재-3가지-원인과-2026년-안전-대책"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T14:28:54.010210+00:00"
+    },
+    {
+      "id": "f4f454d4d4854d148f8c613aae2c1069",
+      "runId": "discovery-20261026T232652",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T14:30:17.085017+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/2026-energy-efficiency-appliance-rebate-application-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T14:30:17.738420+00:00"
+    },
+    {
+      "id": "a2643730040543e8a1e961bfb956f26f",
+      "runId": "discovery-20261026T232652",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T14:30:17.085017+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/2026-energy-efficiency-appliance-rebate-application-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T14:30:18.205055+00:00"
+    },
+    {
+      "id": "743128e0539f401181f7e0562cacd943",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "must-good.com",
+      "at": "2026-10-26T15:08:16.396295+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/basic-pension-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:08:17.069100+00:00"
+    },
+    {
+      "id": "1359a3b5ed1d48ad8a70348df028c8be",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "must-good.com",
+      "at": "2026-10-26T15:08:16.396295+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/basic-pension-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:08:17.731931+00:00"
+    },
+    {
+      "id": "67d6a4e82f274c5db6146d70ebd8e44d",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "must-good.com",
+      "at": "2026-10-26T15:08:16.396295+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/basic-pension-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:08:17.844210+00:00"
+    },
+    {
+      "id": "18508bdbfb6c44edb65540c0950b1819",
+      "provider": "gsc",
+      "account": "sj",
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/protein-supplement-guide-for-fifties",
+      "at": "2026-10-26T15:10:08.079095+00:00",
+      "status": "requested",
+      "indexed": null,
+      "evidence": {
+        "url": "https://www.healthcox.com/protein-supplement-guide-for-fifties",
+        "indexed": false,
+        "coverageState": "페이지 색인이 생성되지 않음: Google에는 아직 알려지지 않은 URL입니다.",
+        "googleCanonical": null,
+        "userCanonical": null,
+        "lastCrawlTimeDisplay": "해당사항 없음",
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "property": "https://www.healthcox.com/",
+        "checkedAt": "2026-10-26T15:10:08.058961+00:00",
+        "attemptAt": "2026-10-26T15:10:08.058961+00:00",
+        "attemptStatus": "verified",
+        "lastIndexed": false,
+        "lastSuccessAt": "2026-10-26T15:10:08.058961+00:00"
+      },
+      "completedAt": "2026-10-26T15:10:38.907880+00:00",
+      "confirmation": {
+        "source": "Google Search Console UI",
+        "url": "https://www.healthcox.com/protein-supplement-guide-for-fifties",
+        "outcome": "requested"
+      }
+    },
+    {
+      "id": "9c32633559b34d3c8f41a96718f177c6",
+      "provider": "gsc",
+      "account": "sj",
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap",
+      "at": "2026-10-26T15:11:12.934949+00:00",
+      "status": "requested",
+      "indexed": null,
+      "evidence": {
+        "url": "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap",
+        "indexed": false,
+        "coverageState": "페이지 색인이 생성되지 않음: Google에는 아직 알려지지 않은 URL입니다.",
+        "googleCanonical": null,
+        "userCanonical": null,
+        "lastCrawlTimeDisplay": "해당사항 없음",
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "property": "https://www.justinfo.co.kr/",
+        "checkedAt": "2026-10-26T15:11:12.901259+00:00",
+        "attemptAt": "2026-10-26T15:11:12.901259+00:00",
+        "attemptStatus": "verified",
+        "lastIndexed": false,
+        "lastSuccessAt": "2026-10-26T15:11:12.901259+00:00"
+      },
+      "completedAt": "2026-10-26T15:11:50.821256+00:00",
+      "confirmation": {
+        "source": "Google Search Console UI",
+        "url": "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap",
+        "outcome": "requested"
+      }
+    },
+    {
+      "id": "626182d8136a40809ef54fd538e043b5",
+      "provider": "gsc",
+      "account": "sj",
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide",
+      "at": "2026-10-26T15:11:57.289151+00:00",
+      "status": "quota_exceeded",
+      "indexed": null,
+      "evidence": {
+        "url": "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide",
+        "indexed": false,
+        "coverageState": "페이지 색인이 생성되지 않음: 발견됨 - 현재 색인이 생성되지 않음",
+        "googleCanonical": null,
+        "userCanonical": null,
+        "lastCrawlTimeDisplay": "해당사항 없음",
+        "source": "Google Search Console UI",
+        "account": "sj",
+        "property": "https://www.maxnote.kr/",
+        "checkedAt": "2026-10-26T15:11:57.268491+00:00",
+        "attemptAt": "2026-10-26T15:11:57.268491+00:00",
+        "attemptStatus": "verified",
+        "lastIndexed": false,
+        "lastSuccessAt": "2026-10-26T15:11:57.268491+00:00"
+      },
+      "completedAt": "2026-10-26T15:12:26.086977+00:00",
+      "confirmation": {
+        "source": "Google Search Console UI",
+        "url": "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide",
+        "outcome": "quota_exceeded"
+      }
+    },
+    {
+      "id": "525a0d7455cf42098219a882d2c5392c",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T15:15:26.257688+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-annual-monthly-subscription-cost"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:15:26.820266+00:00"
+    },
+    {
+      "id": "ea83ca4dbb6e4a65b01b87751a2fbe7d",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T15:15:26.257688+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-annual-monthly-subscription-cost"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:15:27.449530+00:00"
+    },
+    {
+      "id": "5644d6d6daca4558b5752d726092ea34",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T15:15:26.257688+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-annual-monthly-subscription-cost"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:15:27.595093+00:00"
+    },
+    {
+      "id": "36b0638ac0b9479b883fcafcda2b1167",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T15:16:31.823486+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/midyear-resignation-year-end-tax-settlement"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:16:32.326518+00:00"
+    },
+    {
+      "id": "e829f3778157490ea67f0b39caa33c0b",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T15:16:31.823486+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/midyear-resignation-year-end-tax-settlement"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:16:32.732874+00:00"
+    },
+    {
+      "id": "9c05b9e4ecc94681a0f0c8bd0e91ca76",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T15:16:31.823486+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.baronote.kr/midyear-resignation-year-end-tax-settlement"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:16:32.891043+00:00"
+    },
+    {
+      "id": "238e436a85264adb86ca1ee1463c3426",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T15:27:45.389242+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.joynote.kr/dog-outing-entry-check-questions"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:27:45.735188+00:00"
+    },
+    {
+      "id": "173e1a76110f48cb9366eff9b1b0e6e5",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T15:27:45.389242+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.joynote.kr/dog-outing-entry-check-questions"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:27:46.103028+00:00"
+    },
+    {
+      "id": "aafcdf4671e54558b6ce41d8ace55c33",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T15:27:45.389242+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.joynote.kr/dog-outing-entry-check-questions"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:27:46.216871+00:00"
+    },
+    {
+      "id": "f83a36422db34be2a4227e87392fc724",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T15:38:04.130739+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.topnote.kr/national-pension-age-first-payment"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:38:04.560319+00:00"
+    },
+    {
+      "id": "750111a5de124d1ab548fa600592322d",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T15:38:04.130739+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.topnote.kr/national-pension-age-first-payment"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:38:05.012736+00:00"
+    },
+    {
+      "id": "d654d9eb5b524ab98c5f2050b2dcf269",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T15:38:04.130739+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.topnote.kr/national-pension-age-first-payment"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:38:05.124139+00:00"
+    },
+    {
+      "id": "8abfed3317fe461abe4224e643f6baf2",
+      "runId": "discovery-20261027T004259",
+      "provider": "bing_url_batch",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T15:44:30.420429+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.meganote.kr/nhis-voluntary-continuation-qualification-deadline-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9933,
+        "MonthlyQuota": 59933
+      },
+      "property": "https://meganote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T15:44:32.155892+00:00"
+    },
+    {
+      "id": "7d2f58ea600c44fe8a2904909739be3c",
+      "runId": "discovery-20261027T004259",
+      "provider": "indexnow_global",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T15:44:32.403478+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/nhis-voluntary-continuation-qualification-deadline-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:44:33.092356+00:00"
+    },
+    {
+      "id": "bded2dc251354faaa5c4d022cd729abb",
+      "runId": "discovery-20261027T004259",
+      "provider": "indexnow_bing",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T15:44:32.403478+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/nhis-voluntary-continuation-qualification-deadline-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:44:33.612946+00:00"
+    },
+    {
+      "id": "8e62326d1c7743d8a5af134270415e7a",
+      "runId": "discovery-20261027T004259",
+      "provider": "indexnow_global",
+      "domain": "must-good.com",
+      "at": "2026-10-26T15:44:46.711775+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/national-pension-basic-pension-reduction"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:44:47.154244+00:00"
+    },
+    {
+      "id": "623853ba528144c4963930b934ce2eda",
+      "runId": "discovery-20261027T004259",
+      "provider": "indexnow_bing",
+      "domain": "must-good.com",
+      "at": "2026-10-26T15:44:46.711775+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-good.com/national-pension-basic-pension-reduction"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:44:47.740456+00:00"
+    },
+    {
+      "id": "f750255f1c08443b9bb9d5364618b5b6",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T15:47:26.140921+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-location"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:47:26.739876+00:00"
+    },
+    {
+      "id": "d0acb6bc3771475bb14812d44686a207",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T15:47:26.140921+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-location"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:47:27.514611+00:00"
+    },
+    {
+      "id": "d7f4af6395a041aeb1f6eb6a341a3493",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T15:47:26.140921+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-location"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:47:27.640132+00:00"
+    },
+    {
+      "id": "6cde1330319a4ca883fa731b2daf434f",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T15:51:30.046126+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/overseas-hotel-free-cancellation-conditions"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:51:30.725517+00:00"
+    },
+    {
+      "id": "b9ab49a80a52402fab7f08ba71a958ec",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T15:51:30.046126+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/overseas-hotel-free-cancellation-conditions"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:51:31.472707+00:00"
+    },
+    {
+      "id": "8d2def538560472a9a111fff410bf22e",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T15:51:30.046126+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/overseas-hotel-free-cancellation-conditions"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T15:51:31.587640+00:00"
+    },
+    {
+      "id": "46351cb333a44d18b0766b5cd7391ae3",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T16:21:10.234400+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.baronote.kr/midyear-resignation-year-end-tax-settlement"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9791,
+        "MonthlyQuota": 59791
+      },
+      "property": "https://baronote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:21:12.571077+00:00"
+    },
+    {
+      "id": "1c731b12e79545908fe46cf6430d128f",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T16:21:36.488505+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/protein-supplement-guide-for-fifties",
+        "https://www.healthcox.com/하루-활력-충전-새벽-스트레칭-2026년-당신의-아침을-바꿀-방법"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:21:37.053343+00:00"
+    },
+    {
+      "id": "349902e4abec4aceb6c82475bc346019",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T16:21:36.488505+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/protein-supplement-guide-for-fifties",
+        "https://www.healthcox.com/하루-활력-충전-새벽-스트레칭-2026년-당신의-아침을-바꿀-방법"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:21:37.619062+00:00"
+    },
+    {
+      "id": "ac020728f81040f5a38b8e9ead052899",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T16:21:47.340093+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.joynote.kr/dog-outing-entry-check-questions"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 40,
+        "MonthlyQuota": 540
+      },
+      "property": "https://joynote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:21:49.476592+00:00"
+    },
+    {
+      "id": "72c5adfbee37485a9de71bf2e8bce12e",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_global",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T16:21:49.701811+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.joynote.kr/joynote-dog-friendly-trip-planning"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:21:50.152515+00:00"
+    },
+    {
+      "id": "8b5e33aa04ad447db62096f108ebb220",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_bing",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T16:21:49.701811+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.joynote.kr/joynote-dog-friendly-trip-planning"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:21:50.533443+00:00"
+    },
+    {
+      "id": "28bce93364ab41c1b48d4bb51bcdb0f9",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T16:22:17.525659+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-annual-monthly-subscription-cost"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 1,
+        "MonthlyQuota": 51
+      },
+      "property": "https://www.maxnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:22:19.490815+00:00"
+    },
+    {
+      "id": "5d837c2077954c3b9bfe8ef916317f51",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_global",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T16:22:19.734087+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:22:20.243644+00:00"
+    },
+    {
+      "id": "342f6e0fbec7428a80d089c398edd6b8",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_bing",
+      "domain": "maxnote.kr",
+      "at": "2026-10-26T16:22:19.734087+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:22:21.030443+00:00"
+    },
+    {
+      "id": "446c5035e88c405bb2e96c24e906d652",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "must-good.com",
+      "at": "2026-10-26T16:22:44.425112+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-good.com/basic-pension-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 33,
+        "MonthlyQuota": 533
+      },
+      "property": "https://must-good.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:22:46.446423+00:00"
+    },
+    {
+      "id": "7a25d2a269b646998da9f9d37e60bc8a",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_global",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T16:22:59.138870+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-joy.com/october-exhibition-popup-outing-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:22:59.793804+00:00"
+    },
+    {
+      "id": "eb7b7b3e1a6e4449a5d251d7e821b3c3",
+      "runId": "discovery-20261027T012049",
+      "provider": "indexnow_bing",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T16:22:59.138870+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-joy.com/october-exhibition-popup-outing-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:23:00.536268+00:00"
+    },
+    {
+      "id": "925ebf480a1b4d51aebffcc72fa722dd",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T16:23:11.908089+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-location"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9974,
+        "MonthlyQuota": 59974
+      },
+      "property": "https://www.nolplace.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:23:13.771048+00:00"
+    },
+    {
+      "id": "91777d8b7af346d3b2e986a56a36fad6",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T16:23:48.676975+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.topnote.kr/national-pension-age-first-payment"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9920,
+        "MonthlyQuota": 59920
+      },
+      "property": "https://topnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:23:50.301243+00:00"
+    },
+    {
+      "id": "14e09845b312430f9a749cfe639e240c",
+      "runId": "discovery-20261027T012049",
+      "provider": "bing_url_batch",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T16:24:01.131576+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/overseas-hotel-free-cancellation-conditions"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 2,
+        "MonthlyQuota": 502
+      },
+      "property": "https://www.tripmarvel.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:24:02.764122+00:00"
+    },
+    {
+      "id": "a9fbefdb236e412489f550238ac33f0f",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T16:27:39.587958+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/moodwrite-stress-score-journal-privacy"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:27:40.222133+00:00"
+    },
+    {
+      "id": "70cd7d7857f14ae18e57318bf0774ec8",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T16:27:39.587958+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/moodwrite-stress-score-journal-privacy"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:27:40.725340+00:00"
+    },
+    {
+      "id": "98c56ea6d86243f9b53f4d7545b8f7aa",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T16:27:39.587958+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/moodwrite-stress-score-journal-privacy"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:27:40.839367+00:00"
+    },
+    {
+      "id": "e97af6c2cf1b448da8396b3d0e909784",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T16:38:41.850420+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-part-time-income-report"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:38:42.569358+00:00"
+    },
+    {
+      "id": "7e930111271d477dac36a96e8cdae1a6",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T16:38:41.850420+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-part-time-income-report"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:38:43.329969+00:00"
+    },
+    {
+      "id": "1b90a36015ee4bf1857889ef0938227d",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T16:38:41.850420+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-part-time-income-report"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:38:43.446784+00:00"
+    },
+    {
+      "id": "69d0f0b35bdc44998ad463bb9a407581",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T16:39:40.274449+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/emergency-welfare-livelihood-support-application"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:39:41.016345+00:00"
+    },
+    {
+      "id": "6c1c08ea2fe049f38e0911f121ee3ef7",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T16:39:40.274449+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/emergency-welfare-livelihood-support-application"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:39:41.775353+00:00"
+    },
+    {
+      "id": "5ac69f08f0fd4b79a256fc247ca4534d",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T16:39:40.274449+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/emergency-welfare-livelihood-support-application"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:39:41.889088+00:00"
+    },
+    {
+      "id": "92e54075635f4fdda6ff8b3f69278ed4",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "soulnote.kr",
+      "at": "2026-10-26T16:47:47.016569+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.soulnote.kr/unemployment-benefits-employment-support-overlap"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:47:47.467034+00:00"
+    },
+    {
+      "id": "df0a12c5fcdb4e7da297b3e9b5663587",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "soulnote.kr",
+      "at": "2026-10-26T16:47:47.016569+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.soulnote.kr/unemployment-benefits-employment-support-overlap"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:47:48.073516+00:00"
+    },
+    {
+      "id": "eaf8950bb0764723bda3f8ae7d6a57da",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "soulnote.kr",
+      "at": "2026-10-26T16:47:47.016569+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.soulnote.kr/unemployment-benefits-employment-support-overlap"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:47:48.199078+00:00"
+    },
+    {
+      "id": "15f17f26ef964a3f97c48fe814df69c7",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T16:48:52.461346+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-after-unemployment-benefits"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:48:52.953827+00:00"
+    },
+    {
+      "id": "c478ed6e8f3d43d6aacfda8e718f7b3f",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T16:48:52.461346+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-after-unemployment-benefits"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:48:53.684685+00:00"
+    },
+    {
+      "id": "4ec18066a73847fdb71a588102f58f73",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T16:48:52.461346+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-after-unemployment-benefits"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:48:53.815480+00:00"
+    },
+    {
+      "id": "da95daaf7b1140daa0ff088e402ef750",
+      "runId": null,
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T16:52:33.264662+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/seoul-youth-rent-transfer-certificate"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:52:33.754494+00:00"
+    },
+    {
+      "id": "4bd60db693024a7286a741948af46be6",
+      "runId": null,
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T16:52:33.264662+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/seoul-youth-rent-transfer-certificate"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:52:34.249212+00:00"
+    },
+    {
+      "id": "3d980d28994142fe8c3639c74371c190",
+      "runId": null,
+      "provider": "indexnow_naver",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T16:52:33.264662+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/seoul-youth-rent-transfer-certificate"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://searchadvisor.naver.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:52:34.362652+00:00"
+    },
+    {
+      "id": "6d78b46e5be6423ba1d55f5133162e03",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T16:58:09.276893+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.daynote.kr/daynote-website-app-content-check"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:58:10.085417+00:00"
+    },
+    {
+      "id": "243145864b424b998b6f4e4b96d1ab19",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T16:58:09.276893+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.daynote.kr/daynote-website-app-content-check"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:58:10.910536+00:00"
+    },
+    {
+      "id": "e2ec5d147ed641cc871720600fb58987",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T16:58:24.192575+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/scrub-typhus-symptoms-guide-2026"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:58:24.680529+00:00"
+    },
+    {
+      "id": "eee8bde80c694161ae85a64fb1c3beb8",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T16:58:24.192575+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/scrub-typhus-symptoms-guide-2026"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:58:25.286019+00:00"
+    },
+    {
+      "id": "61902ef345c0422ba34abfe262b07f50",
+      "runId": "discovery-20261027T015743",
+      "provider": "bing_url_batch",
+      "domain": "must-good.com",
+      "at": "2026-10-26T16:59:26.492751+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-good.com/national-pension-basic-pension-reduction"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 32,
+        "MonthlyQuota": 532
+      },
+      "property": "https://must-good.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:59:28.233733+00:00"
+    },
+    {
+      "id": "581e0e0a329d47549b69ad4b3f7351a9",
+      "runId": "discovery-20261027T015743",
+      "provider": "bing_url_batch",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T16:59:38.135729+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-joy.com/october-exhibition-popup-outing-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 59,
+        "MonthlyQuota": 559
+      },
+      "property": "https://must-joy.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T16:59:40.120932+00:00"
+    },
+    {
+      "id": "e09dcb42124a43f2b7520c6203d7f400",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T16:59:52.339315+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:59:53.100759+00:00"
+    },
+    {
+      "id": "64face59e7ed4b8cb253331cc33e06b3",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T16:59:52.339315+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T16:59:53.933293+00:00"
+    },
+    {
+      "id": "894af611bd0c4099b7b2a586b54ca1e7",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T17:00:05.460601+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/moodwrite-emotional-journal-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:05.920659+00:00"
+    },
+    {
+      "id": "218d23752ebf48dea6531caf077bd789",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T17:00:05.460601+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.smilenote.kr/moodwrite-emotional-journal-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:06.623187+00:00"
+    },
+    {
+      "id": "40cf68547d5b421198867ef4a9852b78",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T17:00:27.972984+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.topnote.kr/topnote-domain-search-access-check"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:28.292072+00:00"
+    },
+    {
+      "id": "fe57af902afc4e678fb397e77bb26bcc",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T17:00:27.972984+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.topnote.kr/topnote-domain-search-access-check"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:28.692389+00:00"
+    },
+    {
+      "id": "43bf6e37e69a4a65b9ea53b4edacf559",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T17:00:42.453561+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/hotel-booking-total-cost-checklist"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:42.897105+00:00"
+    },
+    {
+      "id": "5297875131344e5ebaeb917370899037",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T17:00:42.453561+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/hotel-booking-total-cost-checklist"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:43.533345+00:00"
+    },
+    {
+      "id": "b51cc62f703141ad8e43bb716a58dc64",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_global",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T17:00:52.413968+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/samsung-card-cancel-apartment-fee"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:53.035348+00:00"
+    },
+    {
+      "id": "143912b5cc02477699ffd8b91abd7982",
+      "runId": "discovery-20261027T015743",
+      "provider": "indexnow_bing",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T17:00:52.413968+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/samsung-card-cancel-apartment-fee"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:00:53.839223+00:00"
+    },
+    {
+      "id": "b4a1169a8c204e5fa2d452f7d389c20f",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_global",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T17:40:56.256677+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/universe-club-cancellation-guide"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:40:56.778378+00:00"
+    },
+    {
+      "id": "7941295ba10b4dcda9241a4af86e41e9",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_bing",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T17:40:56.256677+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/universe-club-cancellation-guide"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:40:57.271919+00:00"
+    },
+    {
+      "id": "b9d4a4e9d8974f6d8614f736f140c4b3",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "daynote.kr",
+      "at": "2026-10-26T17:41:07.363294+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.daynote.kr/daynote-website-app-content-check"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9940,
+        "MonthlyQuota": 59940
+      },
+      "property": "https://daynote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:41:09.783440+00:00"
+    },
+    {
+      "id": "f6c373054e8d410287e75a805759fce7",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T17:41:23.288654+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.healthcox.com/protein-supplement-guide-for-fifties"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 2,
+        "MonthlyQuota": 52
+      },
+      "property": "https://www.healthcox.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:41:25.157501+00:00"
+    },
+    {
+      "id": "486117449c994fa58dab1d5492531cc3",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "joynote.kr",
+      "at": "2026-10-26T17:41:34.593487+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.joynote.kr/joynote-dog-friendly-trip-planning"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 39,
+        "MonthlyQuota": 539
+      },
+      "property": "https://joynote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:41:36.584817+00:00"
+    },
+    {
+      "id": "43f94bf2c42c4d3894dcc880e8acd2b8",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T17:41:54.546172+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-after-unemployment-benefits"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9793,
+        "MonthlyQuota": 59793
+      },
+      "property": "https://www.justinfo.co.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:41:56.438660+00:00"
+    },
+    {
+      "id": "0076d923cfac470ca2908abc648a0e59",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_global",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T17:41:56.714753+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:41:57.193753+00:00"
+    },
+    {
+      "id": "26700d992a5d4579be8452b3d7ea65fc",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_bing",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T17:41:56.714753+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:41:58.028427+00:00"
+    },
+    {
+      "id": "7fbe06107f864893a0a12040e72b9b13",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T17:42:14.583749+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-part-time-income-report"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9932,
+        "MonthlyQuota": 59932
+      },
+      "property": "https://meganote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:42:16.648323+00:00"
+    },
+    {
+      "id": "2f9158dac2ac482093a7651c35898acd",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_global",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T17:42:16.947111+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-unemployment-benefit-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:42:17.416157+00:00"
+    },
+    {
+      "id": "34b5552f046c4e9f9495545fb0f38bbb",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_bing",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T17:42:16.947111+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-unemployment-benefit-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:42:18.247649+00:00"
+    },
+    {
+      "id": "902a199fc034498e855468e2d6f1b1af",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T17:42:42.452471+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-pick.com/seoul-youth-rent-transfer-certificate"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 1,
+        "MonthlyQuota": 51
+      },
+      "property": "https://www.must-pick.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:42:44.004232+00:00"
+    },
+    {
+      "id": "67555246f7a645e99a4ad1992a26bc79",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T17:42:44.535526+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/employment-support-part-time-income-report"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:42:45.081665+00:00"
+    },
+    {
+      "id": "930751cd6b9f4a3bb76266fb221dbfff",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T17:42:44.535526+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/employment-support-part-time-income-report"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:42:45.658500+00:00"
+    },
+    {
+      "id": "0048ccd4aeab488abfbf7edb831944fd",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "nolplace.com",
+      "at": "2026-10-26T17:42:47.199157+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.nolplace.com/sinsa-nolplace-booking-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9973,
+        "MonthlyQuota": 59973
+      },
+      "property": "https://www.nolplace.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:42:49.323092+00:00"
+    },
+    {
+      "id": "59a9c2b2c0ea4e10b6f5dae445c30958",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "smilenote.kr",
+      "at": "2026-10-26T17:42:58.587492+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.smilenote.kr/moodwrite-stress-score-journal-privacy",
+        "https://www.smilenote.kr/moodwrite-emotional-journal-guide"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 15,
+        "MonthlyQuota": 515
+      },
+      "property": "https://smilenote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:43:00.481985+00:00"
+    },
+    {
+      "id": "aab08ed84c624865b9ca58494cad132c",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "soulnote.kr",
+      "at": "2026-10-26T17:43:08.839028+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.soulnote.kr/unemployment-benefits-employment-support-overlap",
+        "https://www.soulnote.kr/soulnote-domain-career-information-check"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 61,
+        "MonthlyQuota": 561
+      },
+      "property": "https://www.soulnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:43:10.945816+00:00"
+    },
+    {
+      "id": "2a4a99cff5424bd299ccc36f5845721e",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_global",
+      "domain": "soulnote.kr",
+      "at": "2026-10-26T17:43:11.175656+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.soulnote.kr/soulnote-domain-career-information-check"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:43:11.536124+00:00"
+    },
+    {
+      "id": "f3f7af8769cc4eebb2d07a0ca57130db",
+      "runId": "discovery-20261027T024039",
+      "provider": "indexnow_bing",
+      "domain": "soulnote.kr",
+      "at": "2026-10-26T17:43:11.175656+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.soulnote.kr/soulnote-domain-career-information-check"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T17:43:11.918061+00:00"
+    },
+    {
+      "id": "3a107167b0664f1eabc428e6f0cdc2bc",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T17:43:19.397071+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.topnote.kr/topnote-domain-search-access-check"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9919,
+        "MonthlyQuota": 59919
+      },
+      "property": "https://topnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:43:21.348380+00:00"
+    },
+    {
+      "id": "4baac913ca1b46b0a4661091b74acacc",
+      "runId": "discovery-20261027T024039",
+      "provider": "bing_url_batch",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T17:43:39.703585+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.woorinote.kr/emergency-welfare-livelihood-support-application",
+        "https://www.woorinote.kr/samsung-card-cancel-apartment-fee"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 62,
+        "MonthlyQuota": 562
+      },
+      "property": "https://woorinote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T17:43:41.439288+00:00"
+    },
+    {
+      "id": "028949f3c4264e0fa6f423302a162512",
+      "runId": "discovery-20261027T031449",
+      "provider": "bing_url_batch",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T18:15:05.671332+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.baronote.kr/basic-pension-reduction-rules-avoid-calculation"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9790,
+        "MonthlyQuota": 59790
+      },
+      "property": "https://baronote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T18:15:07.682194+00:00"
+    },
+    {
+      "id": "6de03a19221443388a1d2598b6498435",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_global",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T18:15:07.902779+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/basic-pension-reduction-rules-avoid-calculation"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:15:08.318564+00:00"
+    },
+    {
+      "id": "05ca5e5ecab54b05aefb96959fceca35",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_bing",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T18:15:07.902779+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.baronote.kr/basic-pension-reduction-rules-avoid-calculation"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:15:08.837994+00:00"
+    },
+    {
+      "id": "3739f0fa00a046839e45a97662c7612f",
+      "runId": "discovery-20261027T031449",
+      "provider": "bing_url_batch",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T18:16:36.825403+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-joy.com/기초연금-수급자격-모의계산-전-꼭-알아야-할-소득인정액-공제-기준",
+        "https://www.must-joy.com/basic-pension-income-eligibility-calculator-check"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 58,
+        "MonthlyQuota": 558
+      },
+      "property": "https://must-joy.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T18:16:38.541418+00:00"
+    },
+    {
+      "id": "186761995a334a739d33b9b08988b167",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_global",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T18:16:38.750015+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-joy.com/기초연금-수급자격-모의계산-전-꼭-알아야-할-소득인정액-공제-기준",
+        "https://www.must-joy.com/basic-pension-income-eligibility-calculator-check"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:16:39.509374+00:00"
+    },
+    {
+      "id": "b9c5b3d7b6ec47e7aa3c82a38a3ed752",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_bing",
+      "domain": "must-joy.com",
+      "at": "2026-10-26T18:16:38.750015+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-joy.com/기초연금-수급자격-모의계산-전-꼭-알아야-할-소득인정액-공제-기준",
+        "https://www.must-joy.com/basic-pension-income-eligibility-calculator-check"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:16:40.275851+00:00"
+    },
+    {
+      "id": "fbb55e6d898547908c3f717d55d45261",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T18:16:46.188821+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/youth-monthly-rent-transfer-certificate-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:16:46.751334+00:00"
+    },
+    {
+      "id": "1c7ee987a6554b09a4b71d95c1086dce",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T18:16:46.188821+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/youth-monthly-rent-transfer-certificate-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:16:47.460218+00:00"
+    },
+    {
+      "id": "ea177902d2ff4a1b8f8f406179824f42",
+      "runId": "discovery-20261027T031449",
+      "provider": "bing_url_batch",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T18:17:20.641398+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.topnote.kr/national-pension-basic-pension-reduction-amount-2026"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9918,
+        "MonthlyQuota": 59918
+      },
+      "property": "https://topnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T18:17:22.258851+00:00"
+    },
+    {
+      "id": "e6adcd092e2243a395ec85fdd793c744",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_global",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T18:17:22.571617+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.topnote.kr/national-pension-basic-pension-reduction-amount-2026"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:17:22.996440+00:00"
+    },
+    {
+      "id": "60b698ed26e64821b8615bcc9625e594",
+      "runId": "discovery-20261027T031449",
+      "provider": "indexnow_bing",
+      "domain": "topnote.kr",
+      "at": "2026-10-26T18:17:22.571617+00:00",
+      "status": "rejected",
+      "urls": [
+        "https://www.topnote.kr/national-pension-basic-pension-reduction-amount-2026"
+      ],
+      "submittedCount": 0,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 403,
+      "reason": "KEY_VALIDATION_REJECTED",
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:17:23.398516+00:00"
+    },
+    {
+      "id": "69c7260af8b5466a98fe634c7eb2748e",
+      "runId": "discovery-20261027T034829",
+      "provider": "bing_url_batch",
+      "domain": "baronote.kr",
+      "at": "2026-10-26T18:48:45.678087+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.baronote.kr/universe-club-cancellation-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9789,
+        "MonthlyQuota": 59789
+      },
+      "property": "https://baronote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T18:48:47.740083+00:00"
+    },
+    {
+      "id": "fdeefbc9998c4a47a496748c6f9e9f94",
+      "runId": "discovery-20261027T034829",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T18:49:09.003888+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/2026-최신-혈압-낮추는-방법-2026년-최신-데이터로-본-생활"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:49:09.525996+00:00"
+    },
+    {
+      "id": "3baa1c0d9b64407299e1b82af69c3d7e",
+      "runId": "discovery-20261027T034829",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T18:49:09.003888+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/2026-최신-혈압-낮추는-방법-2026년-최신-데이터로-본-생활"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T18:49:10.025683+00:00"
+    },
+    {
+      "id": "634ef418e42a495fa468e5af0137b21e",
+      "runId": "discovery-20261027T034829",
+      "provider": "bing_url_batch",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T18:49:33.588478+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9792,
+        "MonthlyQuota": 59792
+      },
+      "property": "https://www.justinfo.co.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T18:49:36.646727+00:00"
+    },
+    {
+      "id": "ecc937fba5f6498086175e70904be89c",
+      "runId": "discovery-20261027T034829",
+      "provider": "bing_url_batch",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T18:49:54.416335+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.meganote.kr/employment-support-unemployment-benefit-application-timing"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9931,
+        "MonthlyQuota": 59931
+      },
+      "property": "https://meganote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T18:49:56.426696+00:00"
+    },
+    {
+      "id": "ea318ca0e2e841fd9f03c9f0f9788442",
+      "runId": "discovery-20261027T042139",
+      "provider": "bing_url_batch",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T19:22:44.965496+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.meganote.kr/pokemon-eevee-evolution-types-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9930,
+        "MonthlyQuota": 59930
+      },
+      "property": "https://meganote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T19:22:46.981467+00:00"
+    },
+    {
+      "id": "53ae2e598d7840cc91c29869055e1676",
+      "runId": "discovery-20261027T042139",
+      "provider": "indexnow_global",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T19:22:47.264842+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/pokemon-eevee-evolution-types-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T19:22:47.957059+00:00"
+    },
+    {
+      "id": "acd4bc358ade4fe9a974fdc911b00056",
+      "runId": "discovery-20261027T042139",
+      "provider": "indexnow_bing",
+      "domain": "meganote.kr",
+      "at": "2026-10-26T19:22:47.264842+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.meganote.kr/pokemon-eevee-evolution-types-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T19:22:48.479372+00:00"
+    },
+    {
+      "id": "88f00e41f49a4c6dae708386c14cc7e2",
+      "runId": "discovery-20261027T042139",
+      "provider": "indexnow_global",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T19:23:07.958777+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/youth-monthly-rent-income-asset-criteria",
+        "https://www.must-pick.com/youth-monthly-rent-deposit-criteria-exclusions"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T19:23:08.608723+00:00"
+    },
+    {
+      "id": "778e0fe4c5074566bc0672917b3aed42",
+      "runId": "discovery-20261027T042139",
+      "provider": "indexnow_bing",
+      "domain": "must-pick.com",
+      "at": "2026-10-26T19:23:07.958777+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.must-pick.com/youth-monthly-rent-income-asset-criteria",
+        "https://www.must-pick.com/youth-monthly-rent-deposit-criteria-exclusions"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T19:23:09.190629+00:00"
+    },
+    {
+      "id": "882011cdab7d4603a0bdc59d9f6c0198",
+      "runId": "discovery-20261027T045424",
+      "provider": "indexnow_global",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T19:55:05.545949+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/암-치료비-건강보험-적용범위-2026-7가지-꼼꼼-체크하세요"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T19:55:06.202371+00:00"
+    },
+    {
+      "id": "2ea2d99230e041e692ac57f6c37dbf38",
+      "runId": "discovery-20261027T045424",
+      "provider": "indexnow_bing",
+      "domain": "healthcox.com",
+      "at": "2026-10-26T19:55:05.545949+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.healthcox.com/암-치료비-건강보험-적용범위-2026-7가지-꼼꼼-체크하세요"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T19:55:06.758031+00:00"
+    },
+    {
+      "id": "62638507b33a44b1ac0f6c4761cfae04",
+      "runId": "discovery-20261027T052724",
+      "provider": "indexnow_global",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T20:30:05.830577+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/short-trip-packing-tips-20260515"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T20:30:06.348757+00:00"
+    },
+    {
+      "id": "603f1184dba5445488e986e71460ff1b",
+      "runId": "discovery-20261027T052724",
+      "provider": "indexnow_bing",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-26T20:30:05.830577+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/short-trip-packing-tips-20260515"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T20:30:06.833673+00:00"
+    },
+    {
+      "id": "72644b9c2d1b404785350e1b2bf96bea",
+      "runId": "discovery-20261027T080947",
+      "provider": "bing_url_batch",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T23:10:43.964437+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/다주택자-종부세-기준-2026-알아야-할-핵심-정보"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 9791,
+        "MonthlyQuota": 59791
+      },
+      "property": "https://www.justinfo.co.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T23:10:45.485862+00:00"
+    },
+    {
+      "id": "643d36924fea4d2788a0c1d9119c1488",
+      "runId": "discovery-20261027T080947",
+      "provider": "indexnow_global",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T23:10:45.727920+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/다주택자-종부세-기준-2026-알아야-할-핵심-정보"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T23:10:46.444383+00:00"
+    },
+    {
+      "id": "54772adaf1154165be182514826a2c8a",
+      "runId": "discovery-20261027T080947",
+      "provider": "indexnow_bing",
+      "domain": "justinfo.co.kr",
+      "at": "2026-10-26T23:10:45.727920+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.justinfo.co.kr/다주택자-종부세-기준-2026-알아야-할-핵심-정보"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T23:10:47.086693+00:00"
+    },
+    {
+      "id": "a6e873339c144feaa987ab6f3e95321c",
+      "runId": "discovery-20261027T080947",
+      "provider": "bing_url_batch",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T23:12:22.913935+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.woorinote.kr/명절-음식-간소화"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 60,
+        "MonthlyQuota": 560
+      },
+      "property": "https://woorinote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-26T23:12:24.640551+00:00"
+    },
+    {
+      "id": "de6b316cb40c404ca1bfd2179079e3ad",
+      "runId": "discovery-20261027T080947",
+      "provider": "indexnow_global",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T23:12:24.929054+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/명절-음식-간소화"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T23:12:25.637792+00:00"
+    },
+    {
+      "id": "1938c7224c174fa0b859a61fbd1387fa",
+      "runId": "discovery-20261027T080947",
+      "provider": "indexnow_bing",
+      "domain": "woorinote.kr",
+      "at": "2026-10-26T23:12:24.929054+00:00",
+      "status": "ping_accepted",
+      "urls": [
+        "https://www.woorinote.kr/명절-음식-간소화"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "httpStatus": 200,
+      "reason": null,
+      "endpoint": "https://www.bing.com/indexnow",
+      "method": "IndexNow",
+      "completedAt": "2026-10-26T23:12:26.496091+00:00"
+    },
+    {
+      "id": "a096260f3f1140c98689b9e0b335152f",
+      "runId": "discovery-20261027T091537",
+      "provider": "bing_url_batch",
+      "domain": "healthcox.com",
+      "at": "2026-10-27T00:16:15.151738+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.healthcox.com/flu-vaccine-side-effects-fever-muscle-pain-care",
+        "https://www.healthcox.com/covid-flu-symptom-difference-testing-care-2026"
+      ],
+      "submittedCount": 2,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 10,
+        "MonthlyQuota": 50
+      },
+      "property": "https://www.healthcox.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-27T00:16:16.357502+00:00"
+    },
+    {
+      "id": "57661ad8fe104d95aa9b4bfdfe8720d5",
+      "runId": "discovery-20261027T091537",
+      "provider": "bing_url_batch",
+      "domain": "maxnote.kr",
+      "at": "2026-10-27T00:16:53.450905+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 10,
+        "MonthlyQuota": 50
+      },
+      "property": "https://www.maxnote.kr/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-27T00:16:55.653392+00:00"
+    },
+    {
+      "id": "f02448a4d3f1444c97fabcce22863d5b",
+      "runId": "discovery-20261027T091537",
+      "provider": "bing_url_batch",
+      "domain": "must-pick.com",
+      "at": "2026-10-27T00:17:32.610215+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.must-pick.com/youth-monthly-rent-income-asset-criteria",
+        "https://www.must-pick.com/youth-monthly-rent-deposit-criteria-exclusions",
+        "https://www.must-pick.com/youth-monthly-rent-transfer-certificate-guide"
+      ],
+      "submittedCount": 3,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 10,
+        "MonthlyQuota": 50
+      },
+      "property": "https://www.must-pick.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-27T00:17:34.003442+00:00"
+    },
+    {
+      "id": "df03be11db3b4bc8bcd42edcaace5e23",
+      "runId": "discovery-20261027T091537",
+      "provider": "bing_url_batch",
+      "domain": "tripmarvel.com",
+      "at": "2026-10-27T00:18:16.547993+00:00",
+      "status": "submission_accepted",
+      "urls": [
+        "https://www.tripmarvel.com/여름해외여행추천"
+      ],
+      "submittedCount": 1,
+      "indexed": null,
+      "registered": null,
+      "crawled": null,
+      "reason": null,
+      "httpStatus": 200,
+      "quotaBefore": {
+        "DailyQuota": 100,
+        "MonthlyQuota": 500
+      },
+      "property": "https://www.tripmarvel.com/",
+      "method": "SubmitUrlBatch",
+      "completedAt": "2026-10-27T00:18:18.731020+00:00"
     }
   ],
   "gscQueue": [

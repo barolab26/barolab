@@ -1,5 +1,5 @@
 """Legacy EGO commands delegate to the single durable dispatcher."""
-import argparse,subprocess,sys
+import argparse,os,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -13,6 +13,8 @@ def main():
         channel='naver_blog_posting' if args.naver_catch_up else 'cf_posting'
         flag='--catch-up' if args.naver_catch_up else '--catch-up-today-once'
         return subprocess.run([sys.executable,'-B',str(ROOT/channel/'posting.py'),flag,'--limit','1'],cwd=ROOT).returncode
+    if os.name == 'nt':
+        return subprocess.run([sys.executable, '-u', '-B', '-m', 'dashboard.server.memory_worker'], cwd=ROOT, timeout=60).returncode
     return subprocess.run(['systemctl','--user','start','barolab-memory-review.service'],timeout=30).returncode
 
 

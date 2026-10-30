@@ -277,61 +277,89 @@ def bind(page, frame, document, plan, folder):
             with action('press', 'naver-editor-key'):
                 page.keyboard.press('Enter')
         steps.append({'block':index,'action':'keyboard-and-toolbar','fontSize':size,'bold':bold})
+    line_links = dict((document.get('presentation') or {}).get('lineLinks') or document.get('lineLinks') or {})
     actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
+    if line_links:
+        link_patched = False
+        for comp in actual['document']['components'][1:]:
+            if comp.get('@ctype') != 'text':
+                continue
+            for para in comp.get('value') or []:
+                for node in para.get('nodes') or []:
+                    val = (node.get('value') or '').strip()
+                    if val in line_links:
+                        node['link'] = {'url': line_links[val], '@ctype': 'urlLink'}
+                        node.setdefault('style', {}).update(fontColor='#0068c3', bold=True, underline=True)
+                        link_patched = True
+        if link_patched:
+            actual['document'].pop('di', None)
+            frame.evaluate("d => SmartEditor.getEditor('blogpc001').setDocumentData(d)", actual)
+            page.wait_for_timeout(200)
+            actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
     try:
         return verify_binding(page, document, actual, folder, started, steps)
     except ValueError:
-        if not params.get('linkCardURLs'):
-            import copy
-            healed = copy.deepcopy(actual)
-            comps = healed['document']['components']
-            uploaded_imgs = [c for c in comps if c.get('@ctype') == 'image']
-            expected_imgs = [b for b in document['blocks'] if b['type'] == 'image']
-            if len(uploaded_imgs) == len(expected_imgs):
-                img_map = {b['file']: img for b, img in zip(expected_imgs, uploaded_imgs)}
-                quotes = [c for c in comps if c.get('@ctype') == 'quotation']
-                tables = [c for c in comps if c.get('@ctype') == 'table']
-                q_idx = 0
-                t_idx = 0
-                title_comp = copy.deepcopy(comps[0])
-                title_comp['title'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': document['title'], '@ctype': 'textNode'}], '@ctype': 'paragraph'}]
-                new_comps = [title_comp]
-                for b_idx, blk in enumerate(document['blocks']):
-                    if blk['type'] == 'image':
-                        im = copy.deepcopy(img_map[blk['file']])
-                        im['represent'] = len([c for c in new_comps if c.get('@ctype') == 'image']) == 0
-                        im['caption'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': blk.get('caption', ''), '@ctype': 'textNode'}], 'style': {'align': 'center', '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'}]
-                        new_comps.append(im)
-                    elif blk['type'] == 'quotation' and q_idx < len(quotes):
-                        new_comps.append(quotes[q_idx])
-                        q_idx += 1
-                    elif blk['type'] == 'table' and t_idx < len(tables):
-                        new_comps.append(tables[t_idx])
-                        t_idx += 1
-                    else:
-                        sz, bld, aln = text_style(params, b_idx, blk)
-                        b_params = {**params, **params.get('blockStyles', {}).get(str(b_idx), {})}
-                        n_style = {
-                            'fontFamily': b_params.get('fontFamily', 'nanumgothic'),
-                            'fontColor': b_params.get('fontColor', '#222222'),
-                            'fontSizeCode': f'fs{sz}',
-                            '@ctype': 'nodeStyle',
-                        }
-                        if bld:
-                            n_style['bold'] = True
-                        p_style = {'align': aln, '@ctype': 'paragraphStyle'}
-                        if b_params.get('lineHeight'):
-                            p_style['lineHeight'] = b_params['lineHeight']
-                        paras = [
-                            {'id': ident(), 'nodes': [{'id': ident(), 'value': ln, 'style': dict(n_style), '@ctype': 'textNode'}], 'style': dict(p_style), '@ctype': 'paragraph'}
-                            for ln in blk['text'].split('\n') if ln
-                        ]
-                        new_comps.append({'id': ident(), 'layout': 'default', 'value': paras, '@ctype': 'text'})
-                healed['document']['components'] = new_comps
-                healed['document'].pop('di', None)
-                frame.evaluate("d => SmartEditor.getEditor('blogpc001').setDocumentData(d)", healed)
-                page.wait_for_timeout(300)
-                actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
+        import copy
+        healed = copy.deepcopy(actual)
+        comps = healed['document']['components']
+        uploaded_imgs = [c for c in comps if c.get('@ctype') == 'image']
+        expected_imgs = [b for b in document['blocks'] if b['type'] == 'image']
+        oglinks = [c for c in comps if c.get('@ctype') == 'oglink']
+        if len(uploaded_imgs) == len(expected_imgs):
+            img_map = {b['file']: img for b, img in zip(expected_imgs, uploaded_imgs)}
+            quotes = [c for c in comps if c.get('@ctype') == 'quotation']
+            tables = [c for c in comps if c.get('@ctype') == 'table']
+            q_idx = 0
+            t_idx = 0
+            title_comp = copy.deepcopy(comps[0])
+            title_comp['title'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': document['title'], '@ctype': 'textNode'}], '@ctype': 'paragraph'}]
+            new_comps = [title_comp]
+            for b_idx, blk in enumerate(document['blocks']):
+                if blk['type'] == 'image':
+                    im = copy.deepcopy(img_map[blk['file']])
+                    im['represent'] = len([c for c in new_comps if c.get('@ctype') == 'image']) == 0
+                    im['caption'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': blk.get('caption', ''), '@ctype': 'textNode'}], 'style': {'align': 'center', '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'}]
+                    new_comps.append(im)
+                elif blk['type'] == 'quotation' and q_idx < len(quotes):
+                    q_comp = copy.deepcopy(quotes[q_idx])
+                    q_comp['value'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': ln, 'style': {'fontSizeCode': f"fs{params['bodyFontSize']}", 'bold': True, '@ctype': 'nodeStyle'}, '@ctype': 'textNode'}], 'style': {'align': params.get('textAlign', 'left'), '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'} for ln in blk['text'].split('\n') if ln]
+                    new_comps.append(q_comp)
+                    q_idx += 1
+                elif blk['type'] == 'table' and t_idx < len(tables):
+                    new_comps.append(tables[t_idx])
+                    t_idx += 1
+                else:
+                    sz, bld, aln = text_style(params, b_idx, blk)
+                    b_params = {**params, **params.get('blockStyles', {}).get(str(b_idx), {})}
+                    n_style = {
+                        'fontFamily': b_params.get('fontFamily', 'nanumgothic'),
+                        'fontColor': b_params.get('fontColor', '#222222'),
+                        'fontSizeCode': f'fs{sz}',
+                        '@ctype': 'nodeStyle',
+                    }
+                    if bld:
+                        n_style['bold'] = True
+                    p_style = {'align': aln, '@ctype': 'paragraphStyle'}
+                    if b_params.get('lineHeight'):
+                        p_style['lineHeight'] = b_params['lineHeight']
+                    paras = []
+                    for ln in blk['text'].split('\n'):
+                        if not ln:
+                            continue
+                        ln_style = dict(n_style)
+                        node_obj = {'id': ident(), 'value': ln, 'style': ln_style, '@ctype': 'textNode'}
+                        link_url = line_links.get(ln.strip())
+                        if link_url:
+                            ln_style.update(fontColor='#0068c3', bold=True, underline=True)
+                            node_obj['link'] = {'url': link_url, '@ctype': 'urlLink'}
+                        paras.append({'id': ident(), 'nodes': [node_obj], 'style': dict(p_style), '@ctype': 'paragraph'})
+                    new_comps.append({'id': ident(), 'layout': 'default', 'value': paras, '@ctype': 'text'})
+            new_comps.extend(oglinks)
+            healed['document']['components'] = new_comps
+            healed['document'].pop('di', None)
+            frame.evaluate("d => SmartEditor.getEditor('blogpc001').setDocumentData(d)", healed)
+            page.wait_for_timeout(300)
+            actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
         return verify_binding(page, document, actual, folder, started, steps)
 
 
@@ -436,9 +464,10 @@ def verify_binding(page, document, actual, folder, started, steps, mode='visible
         offset = 0
         for node in nodes:
             style = {**node.get('style', {}), **effective.get(node.get('id'), {})}
+            is_link = bool(node.get('link'))
             if style.get('mixedBold'):raise ValueError('Rendered text has mixed bold formatting inside one native run')
             for position in range(offset, offset + len(node['value'])):
-                selected = {'bold': bold, 'backgroundColor': ''}
+                selected = {'bold': True if is_link else bold, 'backgroundColor': ''}
                 for rule in block_params.get('inlineStyles', []):
                     start = text.find(rule['text'])
                     if start >= 0 and start <= position < start + len(rule['text']):
@@ -452,8 +481,9 @@ def verify_binding(page, document, actual, folder, started, steps, mode='visible
             offset += len(node['value'])
             if block_params.get('fontFamily') and style.get('fontFamily', 'system') != block_params['fontFamily']:
                 raise ValueError(f'Paragraph {number} ({text[:30]}): expected font {block_params["fontFamily"]}, observed {style.get("fontFamily", "system")}')
-            if block_params.get('fontColor') and style.get('fontColor', '#000000').lower() != block_params['fontColor'].lower():
-                raise ValueError(f'Paragraph {number} ({text[:30]}): expected color {block_params["fontColor"]}, observed {style.get("fontColor", "#000000")}')
+            expected_color = '#0068c3' if is_link else block_params.get('fontColor')
+            if expected_color and style.get('fontColor', '#000000').lower() != expected_color.lower():
+                raise ValueError(f'Paragraph {number} ({text[:30]}): expected color {expected_color}, observed {style.get("fontColor", "#000000")}')
             if style.get('lineHeight') and block_params.get('lineHeight') and abs(style['lineHeight'] - block_params['lineHeight']) > .001:
                 raise ValueError(f'Paragraph {number} ({text[:30]}): expected line height {block_params["lineHeight"]}, observed {style["lineHeight"]}')
     if record:

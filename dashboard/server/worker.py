@@ -12,8 +12,13 @@ METRICS_STAGE_LIMITS={'dashboard/revenue.py':180,'dashboard/traffic.py':840,'das
 
 def run_metrics(python, commands):
     """Bound only automation helpers. Attached browser processes are never terminated."""
-    from dashboard.metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     from common import collection_observability as observation
+    collector_paths = {
+        'dashboard/revenue.py': 'dashboard/collectors/revenue.py',
+        'dashboard/traffic.py': 'dashboard/collectors/traffic.py',
+        'dashboard/metrics.py': 'dashboard/collectors/metrics.py',
+    }
     runtime_path = ROOT / 'dashboard/data/metrics-runtime.json'
     runtime_path.parent.mkdir(parents=True, exist_ok=True)
     with collector_lock(ROOT / 'dashboard/data/metrics-worker.lock') as acquired:
@@ -46,7 +51,7 @@ def run_metrics(python, commands):
             jobs.write(runtime_path, runtime)
             process, started = None, time.monotonic()
             try:
-                target = ['-m', script] if script in ('naver_kin.posting', 'threads_posting.posting') else [str(ROOT / script)]
+                target = ['-m', script] if script in ('naver_kin.posting', 'threads_posting.posting') else [str(ROOT / collector_paths.get(script, script))]
                 process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', *target, *(argument if isinstance(argument, (list, tuple)) else [argument] if argument else [])],
                     cwd=str(ROOT), stdout=sys.stdout, stderr=sys.stderr,
                     env=dict(export_environment(), PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
@@ -136,6 +141,8 @@ def run_metrics(python, commands):
 
 def run_task(task):
     if task=='serve':
+        if os.name == 'nt':
+            return subprocess.run([sys.executable, '-u', '-B', '-m', 'dashboard.server.memory_worker'], cwd=ROOT, timeout=60, env=export_environment()).returncode
         return subprocess.run(['systemctl','--user','start','barolab-memory-review.service'],timeout=30).returncode
     if task=='metrics':
         return run_metrics(sys.executable,[('dashboard/revenue.py','--collect'),('dashboard/traffic.py','--collect'),

@@ -1,366 +1,44 @@
 {
-  "checkedAt": "2026-10-24T14:09:01.191020+00:00",
+  "checkedAt": "2026-10-29T20:09:27.818412+00:00",
   "scope": "up_to_100_initially_verified_pilot_and_trial_answers",
   "complete": true,
-  "initiallyVerified": 51,
-  "attemptedChecks": 51,
+  "initiallyVerified": 5,
+  "attemptedChecks": 5,
   "checks": [
     {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=494619211&answerNo=13&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer13",
-      "state": "publicly_retained",
-      "reason": null,
-      "checkedAt": "2026-10-24T14:08:46.590077+00:00"
+      "account": "yoon_master",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495740656&answerNo=2#answer2",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-29T20:09:26.788996+00:00"
     },
     {
       "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100401&docId=495657070&answerNo=2&qb=6rG06rCV6rKA7KeEIOuMgOyDgeyekA%3D%3D#answer2",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=494619211&answerNo=14#answer14",
       "state": "unknown",
       "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:46.860032+00:00"
+      "checkedAt": "2026-10-29T20:09:27.156317+00:00"
     },
     {
       "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=70103&docId=495234309&answerNo=5&qb=7Ja06rmo7Ya17Kad#answer5",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=492531542&answerNo=12&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer12",
       "state": "unknown",
       "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:47.051507+00:00"
+      "checkedAt": "2026-10-29T20:09:27.486548+00:00"
+    },
+    {
+      "account": "stone0747",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632&answerNo=5&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ%3D%3D#answer5",
+      "state": "unknown",
+      "reason": "public_check_unavailable",
+      "checkedAt": "2026-10-29T20:09:27.644960+00:00"
     },
     {
       "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=495632228&answerNo=5&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer5",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=486320125&answerNo=4&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ%3D%3D#answer4",
       "state": "unknown",
       "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:47.471744+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=477267393&answerNo=11&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer11",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:47.653171+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100403&docId=494595693&answerNo=6&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer6",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:48.017966+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=490646862&answerNo=2&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyWtOumsOydtOuwleusvOq0gCDsmIjslb0%3D#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:48.224978+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=495460690&answerNo=7&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer7",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:48.407132+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495380744&answerNo=13&qb=6rWt66+864K07J2867Cw7JuA7Lm065Oc#answer13",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:48.814930+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=337679852&answerNo=8&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV#answer8",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:49.241426+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495619450&answerNo=4&qb=7Iuk7JeF6riJ7Jes#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:49.629499+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50502&docId=490959317&answerNo=6&qb=6rOg6rWs66eIIOuztOq0gA%3D%3D#answer6",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:50.005551+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617417&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:50.395237+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=40607&docId=495457589&answerNo=2&qb=7KCE6riw7LCoIOuztOyhsOq4iA%3D%3D#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:50.533479+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=406&docId=495447337&answerNo=6&qb=7J6Q6rKp7KadIOy2lOyynA%3D%3D#answer6",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:50.715646+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90107&docId=302394190&answerNo=2&qb=7ISc7Jq4IOq3vOq1kCDsiJjrqqnsm5A%3D#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:51.003225+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495617634&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:51.368525+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=377172589&answerNo=20&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer20",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:51.568579+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=493559041&answerNo=3&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:51.954930+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8110104&docId=495595974&answerNo=5&qb=7KCE6riw7LCoIOuztOyhsOq4iA%3D%3D#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:52.319403+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50104&docId=490364096&answerNo=6&qb=64OJ7J6l6rOgIOuDhOyDiA%3D%3D#answer6",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:52.499370+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50503&docId=482408760&answerNo=9&qb=7IS47YOB6riwIOuwsOyImO2VhO2EsCDssq3showg67Cp67KV#answer9",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:52.972770+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=406&docId=494089138&answerNo=13&qb=7JeQ64SI7KeA67CU7Jqw7LKY#answer13",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:53.172093+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=601&docId=492662135&answerNo=31&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguQ%3D%3D#answer31",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:53.340750+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6080402&docId=495491290&answerNo=3&qb=7Iuk7JeF6riJ7Jes#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:53.722483+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8080103&docId=488359443&answerNo=1&qb=7Iux7YGs64yAIOuwsOyImOq1rCDssq3show=#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:53.911576+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100508&docId=495529695&answerNo=1&qb=7Lqg7ZWRIOuCnOuhnA==#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:54.284309+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=495609086&answerNo=2&qb=7IS47YOB6riwIO2GteyEuOyymQ==#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:54.562357+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=30312&docId=495402586&answerNo=1&qb=66y47ZmU64iE66as7Lm065Oc#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:55.013504+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=70113&docId=491264788&answerNo=3&qb=6rOg7JaR7J20IOuwqeq0keyXvA==#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:55.321447+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=441982579&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:55.519214+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8080101&docId=392385676&answerNo=4&qb=67aI66Cb7KCA64SQ#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:55.942530+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80511&docId=495099187&answerNo=1&qb=6rOg7JaR7J20IOuwqeq0keyXvA==#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:56.103755+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=40101&docId=495602453&answerNo=1&qb=7LKt64WE64+E7JW96rOE7KKM#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:56.495974+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80511&docId=495342527&answerNo=1&qb=6rOg7JaR7J20IO2EseuTnOumhA==#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:56.730041+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=492536055&answerNo=2&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:57.076491+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=102020101&docId=488241195&answerNo=3&qb=7JeR7IWAIO2LgOqzoOyglQ==#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:57.385724+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60223&docId=495333468&answerNo=3&qb=7J6E7LCo6raM65Ox6riw66qF66C5#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:57.547582+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=100106&docId=454425503&answerNo=1&qb=7YyM7YGs6rOo7ZSEIOyeheusuA==#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:57.834589+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=50503&docId=495253868&answerNo=1&qb=64yA7YyMIOuztOq0gOuylQ==#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:58.138734+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8050103&docId=494861618&answerNo=2&qb=6rOg7JaR7J20IO2EseuTnOumhA==#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:58.468570+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=80903&docId=494793198&answerNo=3&qb=7IS47YOB6riwIO2GteyEuOyymQ==#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:58.646709+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=1001020205&docId=495599305&answerNo=1&qb=66y47ZmU64iE66as7Lm065Oc#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:58.843655+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=8110301&docId=495557971&answerNo=3&qb=7J6Q64+Z7LCoIOygleq4sOqygOyCrA==#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:59.245978+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=486320125&answerNo=2&qb=6rWt66a97KSR7JWZ67CV66y86rSAIOyFgOy5tOu0iQ==#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:59.431419+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=60804&docId=495559634&answerNo=1&qb=6rCE7J2064yA7KeA6riJ6riI#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:59.608800+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=5010601&docId=463692705&answerNo=1&qb=7JWg7ZSM7JuM7LmYIOy2qeyghCDslYjrkKg=#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:08:59.755046+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=5010601&docId=482340466&answerNo=1&qb=7JWg7ZSM7JuM7LmYIOy2qeyghCDslYjrkKg=#answer3",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:09:00.086213+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=901&docId=495595158&answerNo=1&qb=7ZmU64u07IiyIOyYiOyVvQ==#answer2",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:09:00.357150+00:00"
-    },
-    {
-      "account": "stone0747",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=4020201&docId=495470800#answer5",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:09:00.812313+00:00"
-    },
-    {
-      "account": "adinfo0905",
-      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=90105&docId=486346632#answer4",
-      "state": "unknown",
-      "reason": "public_check_unavailable",
-      "checkedAt": "2026-10-24T14:09:01.189744+00:00"
+      "checkedAt": "2026-10-29T20:09:27.818190+00:00"
     }
   ],
   "firstVerificationHistoryPreserved": true

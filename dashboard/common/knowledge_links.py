@@ -4,7 +4,10 @@ STAFF = {'jarvis':'팀장', 'publi':'퍼블리', 'radar':'레이더', 'trace':'�
 
 def connect_explicit_context(graph):
     nodes, edges = graph['nodes'], graph['edges']
-    known = {(edge['source'], edge['target'], edge['type']) for edge in edges}
+    for e in edges:
+        if isinstance(e, dict) and 'type' not in e:
+            e['type'] = e.get('relation', 'related')
+    known = {(edge.get('source'), edge.get('target'), edge.get('type', 'related')) for edge in edges if isinstance(edge, dict)}
     added = []
     profiles = {node['account']:identity for identity,node in nodes.items()
                 if node.get('type') == 'AccountProfile' and isinstance(node.get('account'), str) and node['account']}

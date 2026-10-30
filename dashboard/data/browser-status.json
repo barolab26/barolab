@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-10-25T05:30:35.089005+00:00",
-  "kstCheckedAt": "2026-10-25T14:30:35+09:00",
-  "host": "172.26.143.51",
+  "checkedAt": "2026-10-29T13:46:46.693456+00:00",
+  "kstCheckedAt": "2026-10-29T22:46:46+09:00",
+  "host": "192.168.45.248",
   "ports": {
     "9334": true,
     "9333": true,
@@ -13,56 +13,49 @@
   "browsers": {
     "soultin_cdp": {
       "port": 9334,
-      "name": "soultin · Ubuntu 격리 Chrome",
+      "name": "soultin · Windows EGO LITE",
       "open": true,
-      "recovered": true,
+      "recovered": false,
       "required": true
     },
     "soul5373_cdp": {
       "port": 9333,
-      "name": "soul5373 · Ubuntu 격리 Chrome",
+      "name": "soul5373 · Windows EGO LITE",
       "open": true,
-      "recovered": true,
+      "recovered": false,
       "required": true
     },
     "yoon_master_cdp": {
       "port": 9335,
-      "name": "yoon_master · Ubuntu 격리 Chrome",
+      "name": "yoon_master · Windows EGO LITE",
       "open": true,
-      "recovered": true,
+      "recovered": false,
       "required": true
     },
     "adinfo0905_cdp": {
       "port": 9231,
-      "name": "adinfo0905 · Ubuntu 격리 Chrome",
+      "name": "adinfo0905 · Windows EGO LITE",
       "open": true,
-      "recovered": true,
+      "recovered": false,
       "required": true
     },
     "stone0747_cdp": {
       "port": 9230,
-      "name": "stone0747 · Ubuntu 격리 Chrome",
+      "name": "stone0747 · Windows EGO LITE",
       "open": true,
-      "recovered": true,
+      "recovered": false,
       "required": true
     },
     "cf-flow_cdp": {
       "port": 9440,
-      "name": "cf-flow · Ubuntu 격리 Chrome",
+      "name": "cf-flow · Windows EGO LITE",
       "open": true,
-      "recovered": true,
+      "recovered": false,
       "required": true
     }
   },
   "onlineCount": 6,
   "totalRequired": 6,
-  "recoveredPorts": [
-    9334,
-    9333,
-    9335,
-    9231,
-    9230,
-    9440
-  ],
+  "recoveredPorts": [],
   "failedPorts": []
 }

@@ -95,9 +95,10 @@ def session(for_submission=False):
                 if not proof.with_name('readback.json').exists():
                     try:
                         import sqlite3
+                        from contextlib import closing
                         evidence=json.loads(proof.read_text())
                         database=Path(__file__).resolve().parents[1]/'data/threads.sqlite3'
-                        with sqlite3.connect(database.resolve().as_uri()+'?mode=ro',uri=True) as db:
+                        with closing(sqlite3.connect(database.resolve().as_uri()+'?mode=ro',uri=True)) as db:
                             adopted=db.execute("SELECT 1 FROM parts WHERE part_id=? AND state IN ('api_submitted','published_verified') AND platform_id IS NOT NULL",(evidence['partId'],)).fetchone()
                         if not adopted:pending.add(evidence['targetId'])
                     except (OSError,ValueError,KeyError,sqlite3.Error):raise RuntimeError('threads_submission_evidence_unreadable')

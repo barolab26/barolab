@@ -1,6 +1,7 @@
 """One registered channel worker at a time; no editorial approval chain."""
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -61,7 +62,8 @@ def publish_strategy_link(target_url):
     if not choices:return {'ok':False,'status':'held','project':'threads','reason':'no_due_slot','targetUrl':target_url}
     args=choices[0]
     if args.get('partId'):
-        with sqlite3.connect(Path(engine._threads_config_DB).resolve().as_uri()+'?mode=ro',uri=True) as db:
+        from contextlib import closing
+        with closing(sqlite3.connect(Path(engine._threads_config_DB).resolve().as_uri()+'?mode=ro',uri=True)) as db:
             part=db.execute('SELECT document FROM parts WHERE part_id=?',(args['partId'],)).fetchone()
         if not part or json.loads(part[0]).get('source',{}).get('url')!=target_url:
             return {'ok':False,'status':'held','project':'threads','reason':'existing_slot_has_different_content','targetUrl':target_url}
@@ -158,9 +160,10 @@ def completion_receipt(result):
 
 def strategy_link_state(database, arguments, target):
     import sqlite3
+    from contextlib import closing
     from urllib.parse import urlsplit
     try:
-        with sqlite3.connect(Path(database).resolve().as_uri()+'?mode=ro',uri=True) as db:
+        with closing(sqlite3.connect(Path(database).resolve().as_uri()+'?mode=ro',uri=True)) as db:
             rows=db.execute('SELECT kind,state,permalink,document FROM parts WHERE account_key=? AND publication_date=? AND slot=?',
                             (arguments.get('account'),arguments.get('date'),arguments.get('slot'))).fetchall()
         parts=[(kind,state,address,json.loads(document)) for kind,state,address,document in rows]
@@ -237,8 +240,14 @@ def terminal_result(result):
         raise ValueError('Process identity mismatch')
     if receipt.get('status') in ('starting', 'running'):
         try:
-            ticks=int((Path('/proc')/str(receipt['pid'])/'stat').read_text().split(') ',1)[1].split()[19])
-            same=receipt.get('processStartTicks') in (None,ticks)
+            if os.name == 'nt':
+                from common.runtime_locks import process_start_ticks
+                raw_ticks = process_start_ticks(receipt['pid'])
+                ticks = int(raw_ticks) if raw_ticks is not None else None
+                same = ticks is not None and receipt.get('processStartTicks') in (None, ticks)
+            else:
+                ticks=int((Path('/proc')/str(receipt['pid'])/'stat').read_text().split(') ',1)[1].split()[19])
+                same=receipt.get('processStartTicks') in (None,ticks)
         except (OSError,ValueError,IndexError):
             same=False
         if same:return None
@@ -286,13 +295,13 @@ def process_project_autonomy_once():
         for project in sorted(enabled,key=lambda p:rows.get(p,{}).get('lastStartedAt',0)):
             if project in pending_projects:continue
             row=rows.setdefault(project,{})
-            if project in ('cf_blog','naver_blog'):
+            if os.name != 'nt' and project in ('cf_blog','naver_blog'):
                 from common.channel_parameters import policy, KST
                 from datetime import datetime
                 if datetime.now(KST).date().isoformat() >= policy()['effectiveDate']:
                     row.update(dispatchOwner='barolab-parameters.timer',status='timer_managed')
                     continue
-            if project=='naver_kin':
+            if os.name != 'nt' and project=='naver_kin':
                 row.update(dispatchOwner='barolab-kin.timer',status='timer_managed')
                 continue
             if now<row.get('nextRunAt',0):continue

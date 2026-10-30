@@ -38,12 +38,23 @@ def load(path, default=None):
 
 def write(path, value):
     path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name('.' + path.name + '.' + uuid.uuid4().hex)
     try:
         temporary.write_text(json.dumps(value, ensure_ascii=False), encoding='utf-8')
-        os.replace(temporary, path)
+        for attempt in range(25):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError:
+                if attempt == 24:
+                    raise
+                time.sleep(0.04)
     finally:
-        temporary.unlink(missing_ok=True)
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 @contextmanager
@@ -61,7 +72,7 @@ def locked(folder):
                     import msvcrt
                     msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
                 else:
-                    import fcntl
+                    from common import runtime_locks as fcntl
                     fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except OSError:
@@ -76,7 +87,7 @@ def locked(folder):
                 import msvcrt
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
             else:
-                import fcntl
+                from common import runtime_locks as fcntl
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 

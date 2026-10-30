@@ -23,6 +23,22 @@ def read_json(path):
 def lock_busy(path):
     if not path.exists():
         return False
+    if os.name == 'nt':
+        from common import runtime_locks as fcntl
+        target = fcntl.runtime_lock_path(path)
+        if not target.exists():
+            return False
+        try:
+            with target.open('a+b') as handle:
+                try:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    return True
+                else:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+                    return False
+        except OSError:
+            return False
     if os.name != 'posix':
         raise ValueError('Passive OS lock observation unavailable')
     stat = path.stat()
@@ -155,8 +171,10 @@ def read_input_activity(directory=None, now=None):
             for event in events:
                 distinct[event['actionId']] = event
             recent = sorted(distinct.values(),key=lambda e: stamp(e['at']))[-4:]
+            from common.runtime_locks import process_start_ticks
+            proc_ok = (process_start_ticks(pid) is not None) if os.name == 'nt' else (os.name == 'posix' and Path('/proc', str(pid)).exists())
             rows.append({'context':context,'latest':latest,'recent':recent,
-                         'fresh':0 <= age <= 120, 'processObserved':os.name=='posix' and Path('/proc',str(pid)).exists()})
+                         'fresh':0 <= age <= 120, 'processObserved':proc_ok})
         except (OSError,ValueError,TypeError,KeyError,IndexError):
             continue
     rows = sorted(rows,key=lambda r:(r['fresh'] and r['latest']['phase']=='before',stamp(r['latest']['at'])),reverse=True)

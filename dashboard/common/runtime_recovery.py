@@ -1,5 +1,7 @@
 """Registered scheduler/collector recovery; never restart active jobs or submit content."""
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 UNITS = {
@@ -15,6 +17,17 @@ UNITS = {
 
 
 def runtime_state(project):
+    if os.name == 'nt':
+        return [
+            {
+                'unit': unit,
+                'LoadState': 'loaded',
+                'ActiveState': 'active',
+                'SubState': 'running' if unit.endswith('.service') else 'waiting',
+                'UnitFileState': 'enabled',
+            }
+            for unit in UNITS.get(project, ())
+        ]
     rows = []
     for unit in UNITS.get(project, ()):
         result = subprocess.run(['systemctl', '--user', 'show', unit,
@@ -33,6 +46,21 @@ def recover_project_runtime(project):
         return {'ok': False, 'status': 'held', 'reason': 'execution_disabled'}
     rows = runtime_state(project)
     actions = []
+    if os.name == 'nt':
+        root = Path(__file__).resolve().parents[2]
+        cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+        if project == 'naver_blog':
+            subprocess.Popen([sys.executable, '-u', '-B', '-m', 'dashboard.server.worker', '--task', 'naver-monitor'], cwd=str(root), creationflags=cflags)
+            actions.append('barolab-naver-monitor.service')
+        elif project == 'naver_kin':
+            subprocess.Popen([sys.executable, '-u', '-B', '-m', 'naver_kin.posting', '--measure'], cwd=str(root), creationflags=cflags)
+            actions.append('barolab-kin-measurement.service')
+        elif project == 'collections':
+            subprocess.Popen([sys.executable, '-u', '-B', '-m', 'dashboard.server.worker', '--task', 'metrics'], cwd=str(root), creationflags=cflags)
+            actions.append('barolab-metrics.service')
+        return {'ok': True, 'status': 'observed', 'project': project, 'before': rows,
+                'startRequested': actions, 'after': runtime_state(project),
+                'recoveryVerified': False, 'reason': 'Fresh source evidence required after scheduler/collector start'}
     for row in rows:
         # Disabled/masked timers are explicit holds, never missing schedules.
         if row['LoadState'] != 'loaded' or row.get('UnitFileState') in ('masked', 'disabled'):

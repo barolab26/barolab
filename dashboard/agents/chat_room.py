@@ -2563,7 +2563,7 @@ def drain_work_event_outbox():
 @chat_router.post('/work-event')
 def api_receive_work_event(payload: Dict[str, Any]):
     # Producers retain rejected deliveries in their durable outbox.
-    if not _ROOM_LOCK.acquire(blocking=False):
+    if not _ROOM_LOCK.acquire(timeout=0.5):
         raise HTTPException(503,'실행 기록을 반영 중입니다.',headers={'Retry-After':'1'})
     try:
         return receive_work_event(payload)
