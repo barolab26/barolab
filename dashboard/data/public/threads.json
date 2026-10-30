@@ -1,6 +1,6 @@
 {
   "schema": "threads-pilot-v1",
-  "checkedAt": "2026-10-29T23:29:21.372131+00:00",
+  "checkedAt": "2026-10-30T01:44:22.770226+00:00",
   "configuration": {
     "enabled": true,
     "account_key": "mustpickinfo",
@@ -35,17 +35,103 @@
     "apiConnected": true,
     "connection": {
       "status": "ready",
-      "checkedAt": "2026-10-29T12:45:04.228692+00:00",
+      "checkedAt": "2026-10-30T01:35:25.498966+00:00",
       "reason": null
     },
     "endsAt": "2026-10-29T11:19:14.891210+00:00",
     "mainTrialCap": 56
   },
   "counts": {
-    "published_verified": 37,
+    "published_verified": 39,
     "queued": 1
   },
   "recent": [
+    {
+      "attempt_id": "cce26be8b85549a292b39386636fcfd9",
+      "part_id": "cce26be8b85549a292b39386636fcfd9-0",
+      "kind": "main",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfGbckGnx0o",
+      "updated_at": "2026-10-30T01:43:17.813322+00:00",
+      "publication_date": "2026-10-30",
+      "slot": "08:00",
+      "outbound_url": null,
+      "parent_platform_id": null,
+      "title": "삼성카드 아파트관리비 자동납부 해지, 이번 달은 어디로 내야 할까? 3분 확인 | 우리노트 법률·부동산칼럼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 169,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "삼성카드 아파트 관리비 자동납부 해지할 때 은근히 많이 놓치는 부분이 있어요! 💡\n\n해지 신청만 누르고 끝났다고 생각하면 이번 달 관리비가 미납되거나 엉뚱하게 빠져나갈 수 있거든요.\n\n꼭 챙겨봐야 할 3가지 정리해 드릴게요.\n\n1. '해지 신청 접수'와 '해지 완료'는 달라요. 최종 처리 결과까지 꼭 확인하세요.\n2. 이번 달 카드 청구 내역에 관리비가 잡혀 있어도, 실제 납부까지 끝난 건지 확인해야 중복 송금을 막을 수 있어요.\n3. 새 카드나 계좌로 옮겼다면 '첫 납부 시작 월'이 언제인지 체크해야 납부 공백이 안 생깁니다.\n\n이번 달 관리비를 어디로 내야 할지 헷갈린다면 고지서 납부기한과 카드 청구 상태부터 먼저 메모해 두세요! 상세 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "얼마 전에 아파트 관리비 카드 바꾸려고 자동납부 해지 신청했는데, 이번 달 관리비는 어디로 내야 하는 건지 순간 멘붕 오더라고요 😅\n\n알고 보니 해지 버튼만 눌렀다고 끝난 게 아니었습니다.\n\n저처럼 헷갈리지 않으려면 딱 세 가지만 확인해 보세요!\n\n• 해지 신청 접수만 된 건지 완료까지 떴는지 확인하기\n• 이번 달 카드 내역에 관리비가 보여도 실제 납부 처리까지 끝났는지 보기\n• 새 결제수단을 등록했어도 '최초 적용 월'이 언제부터인지 체크하기\n\n안 그러면 관리사무소에 따로 송금했다가 이중 납부되거나, 반대로 미납될 수 있거든요.\n\n지금 내 화면에서 바로 확인하는 상황별 판독법은 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030",
+      "published_at": "2026-10-30T01:43:16+00:00",
+      "verified_at": "2026-10-30T01:43:17.813111+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
+    {
+      "attempt_id": "cce26be8b85549a292b39386636fcfd9",
+      "part_id": "cce26be8b85549a292b39386636fcfd9-1",
+      "kind": "followup",
+      "account_key": "mustpickinfo",
+      "state": "published_verified",
+      "permalink": "https://www.threads.com/@mustpickinfo/post/DfGbeR5n8vq",
+      "updated_at": "2026-10-30T01:44:22.572824+00:00",
+      "publication_date": "2026-10-30",
+      "slot": "08:00",
+      "outbound_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_0800_c3578b658c10bc63",
+      "parent_platform_id": "17918139696462567",
+      "title": "삼성카드 아파트관리비 자동납부 해지, 이번 달은 어디로 내야 할까? 3분 확인 | 우리노트 법률·부동산칼럼",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 2,
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "삼성카드 아파트 관리비 자동납부 해지할 때 은근히 많이 놓치는 부분이 있어요! 💡\n\n해지 신청만 누르고 끝났다고 생각하면 이번 달 관리비가 미납되거나 엉뚱하게 빠져나갈 수 있거든요.\n\n꼭 챙겨봐야 할 3가지 정리해 드릴게요.\n\n1. '해지 신청 접수'와 '해지 완료'는 달라요. 최종 처리 결과까지 꼭 확인하세요.\n2. 이번 달 카드 청구 내역에 관리비가 잡혀 있어도, 실제 납부까지 끝난 건지 확인해야 중복 송금을 막을 수 있어요.\n3. 새 카드나 계좌로 옮겼다면 '첫 납부 시작 월'이 언제인지 체크해야 납부 공백이 안 생깁니다.\n\n이번 달 관리비를 어디로 내야 할지 헷갈린다면 고지서 납부기한과 카드 청구 상태부터 먼저 메모해 두세요! 상세 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "얼마 전에 아파트 관리비 카드 바꾸려고 자동납부 해지 신청했는데, 이번 달 관리비는 어디로 내야 하는 건지 순간 멘붕 오더라고요 😅\n\n알고 보니 해지 버튼만 눌렀다고 끝난 게 아니었습니다.\n\n저처럼 헷갈리지 않으려면 딱 세 가지만 확인해 보세요!\n\n• 해지 신청 접수만 된 건지 완료까지 떴는지 확인하기\n• 이번 달 카드 내역에 관리비가 보여도 실제 납부 처리까지 끝났는지 보기\n• 새 결제수단을 등록했어도 '최초 적용 월'이 언제부터인지 체크하기\n\n안 그러면 관리사무소에 따로 송금했다가 이중 납부되거나, 반대로 미납될 수 있거든요.\n\n지금 내 화면에서 바로 확인하는 상황별 판독법은 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 92
+        }
+      },
+      "selected_variant": "hook",
+      "preview": "※ 본 글은 직접 운영하는 블로그의 정보 글을 바탕으로 작성되었습니다.\n\n삼성카드 아파트관리비 자동납부 해지 후 이번 달 납부 경로와 상황별 3초 자가진단 체크리스트는 아래 링크에서 확인하실 수 있습니다 👇\nhttps://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_0800_c3578b658c10bc63",
+      "review": {
+        "status": "format_valid",
+        "reason": "basic_format"
+      },
+      "source_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030",
+      "published_at": "2026-10-30T01:43:47+00:00",
+      "verified_at": "2026-10-30T01:44:22.572735+00:00",
+      "publication_time_basis": "api_timestamp"
+    },
     {
       "attempt_id": "company:18111198623238729",
       "part_id": "company:18111198623238729",
@@ -1266,6 +1352,118 @@
     }
   ],
   "pairedThreads": [
+    {
+      "attempt_id": "cce26be8b85549a292b39386636fcfd9",
+      "title": "삼성카드 아파트관리비 자동납부 해지, 이번 달은 어디로 내야 할까? 3분 확인 | 우리노트 법률·부동산칼럼",
+      "publication_date": "2026-10-30",
+      "slot": "08:00",
+      "mode": "cf_inbound",
+      "followup_delay_seconds": 169,
+      "source_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030",
+      "variants": {
+        "friendly": {
+          "label": "① 기본 친근형",
+          "text": "삼성카드 아파트 관리비 자동납부 해지할 때 은근히 많이 놓치는 부분이 있어요! 💡\n\n해지 신청만 누르고 끝났다고 생각하면 이번 달 관리비가 미납되거나 엉뚱하게 빠져나갈 수 있거든요.\n\n꼭 챙겨봐야 할 3가지 정리해 드릴게요.\n\n1. '해지 신청 접수'와 '해지 완료'는 달라요. 최종 처리 결과까지 꼭 확인하세요.\n2. 이번 달 카드 청구 내역에 관리비가 잡혀 있어도, 실제 납부까지 끝난 건지 확인해야 중복 송금을 막을 수 있어요.\n3. 새 카드나 계좌로 옮겼다면 '첫 납부 시작 월'이 언제인지 체크해야 납부 공백이 안 생깁니다.\n\n이번 달 관리비를 어디로 내야 할지 헷갈린다면 고지서 납부기한과 카드 청구 상태부터 먼저 메모해 두세요! 상세 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 89
+        },
+        "hook": {
+          "label": "② 강렬한 어그로 후킹형",
+          "text": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 95
+        },
+        "persona": {
+          "label": "③ 내 페르소나 맞춤형",
+          "text": "얼마 전에 아파트 관리비 카드 바꾸려고 자동납부 해지 신청했는데, 이번 달 관리비는 어디로 내야 하는 건지 순간 멘붕 오더라고요 😅\n\n알고 보니 해지 버튼만 눌렀다고 끝난 게 아니었습니다.\n\n저처럼 헷갈리지 않으려면 딱 세 가지만 확인해 보세요!\n\n• 해지 신청 접수만 된 건지 완료까지 떴는지 확인하기\n• 이번 달 카드 내역에 관리비가 보여도 실제 납부 처리까지 끝났는지 보기\n• 새 결제수단을 등록했어도 '최초 적용 월'이 언제부터인지 체크하기\n\n안 그러면 관리사무소에 따로 송금했다가 이중 납부되거나, 반대로 미납될 수 있거든요.\n\n지금 내 화면에서 바로 확인하는 상황별 판독법은 아래 첫 댓글에 남겨둘게요 👇",
+          "hook_score": 92
+        }
+      },
+      "main": {
+        "attempt_id": "cce26be8b85549a292b39386636fcfd9",
+        "part_id": "cce26be8b85549a292b39386636fcfd9-0",
+        "kind": "main",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfGbckGnx0o",
+        "updated_at": "2026-10-30T01:43:17.813322+00:00",
+        "publication_date": "2026-10-30",
+        "slot": "08:00",
+        "outbound_url": null,
+        "parent_platform_id": null,
+        "title": "삼성카드 아파트관리비 자동납부 해지, 이번 달은 어디로 내야 할까? 3분 확인 | 우리노트 법률·부동산칼럼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 169,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "삼성카드 아파트 관리비 자동납부 해지할 때 은근히 많이 놓치는 부분이 있어요! 💡\n\n해지 신청만 누르고 끝났다고 생각하면 이번 달 관리비가 미납되거나 엉뚱하게 빠져나갈 수 있거든요.\n\n꼭 챙겨봐야 할 3가지 정리해 드릴게요.\n\n1. '해지 신청 접수'와 '해지 완료'는 달라요. 최종 처리 결과까지 꼭 확인하세요.\n2. 이번 달 카드 청구 내역에 관리비가 잡혀 있어도, 실제 납부까지 끝난 건지 확인해야 중복 송금을 막을 수 있어요.\n3. 새 카드나 계좌로 옮겼다면 '첫 납부 시작 월'이 언제인지 체크해야 납부 공백이 안 생깁니다.\n\n이번 달 관리비를 어디로 내야 할지 헷갈린다면 고지서 납부기한과 카드 청구 상태부터 먼저 메모해 두세요! 상세 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "얼마 전에 아파트 관리비 카드 바꾸려고 자동납부 해지 신청했는데, 이번 달 관리비는 어디로 내야 하는 건지 순간 멘붕 오더라고요 😅\n\n알고 보니 해지 버튼만 눌렀다고 끝난 게 아니었습니다.\n\n저처럼 헷갈리지 않으려면 딱 세 가지만 확인해 보세요!\n\n• 해지 신청 접수만 된 건지 완료까지 떴는지 확인하기\n• 이번 달 카드 내역에 관리비가 보여도 실제 납부 처리까지 끝났는지 보기\n• 새 결제수단을 등록했어도 '최초 적용 월'이 언제부터인지 체크하기\n\n안 그러면 관리사무소에 따로 송금했다가 이중 납부되거나, 반대로 미납될 수 있거든요.\n\n지금 내 화면에서 바로 확인하는 상황별 판독법은 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030",
+        "published_at": "2026-10-30T01:43:16+00:00",
+        "verified_at": "2026-10-30T01:43:17.813111+00:00",
+        "publication_time_basis": "api_timestamp"
+      },
+      "followup": {
+        "attempt_id": "cce26be8b85549a292b39386636fcfd9",
+        "part_id": "cce26be8b85549a292b39386636fcfd9-1",
+        "kind": "followup",
+        "account_key": "mustpickinfo",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfGbeR5n8vq",
+        "updated_at": "2026-10-30T01:44:22.572824+00:00",
+        "publication_date": "2026-10-30",
+        "slot": "08:00",
+        "outbound_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_0800_c3578b658c10bc63",
+        "parent_platform_id": "17918139696462567",
+        "title": "삼성카드 아파트관리비 자동납부 해지, 이번 달은 어디로 내야 할까? 3분 확인 | 우리노트 법률·부동산칼럼",
+        "mode": "cf_inbound",
+        "followup_delay_seconds": 2,
+        "variants": {
+          "friendly": {
+            "label": "① 기본 친근형",
+            "text": "삼성카드 아파트 관리비 자동납부 해지할 때 은근히 많이 놓치는 부분이 있어요! 💡\n\n해지 신청만 누르고 끝났다고 생각하면 이번 달 관리비가 미납되거나 엉뚱하게 빠져나갈 수 있거든요.\n\n꼭 챙겨봐야 할 3가지 정리해 드릴게요.\n\n1. '해지 신청 접수'와 '해지 완료'는 달라요. 최종 처리 결과까지 꼭 확인하세요.\n2. 이번 달 카드 청구 내역에 관리비가 잡혀 있어도, 실제 납부까지 끝난 건지 확인해야 중복 송금을 막을 수 있어요.\n3. 새 카드나 계좌로 옮겼다면 '첫 납부 시작 월'이 언제인지 체크해야 납부 공백이 안 생깁니다.\n\n이번 달 관리비를 어디로 내야 할지 헷갈린다면 고지서 납부기한과 카드 청구 상태부터 먼저 메모해 두세요! 상세 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 89
+          },
+          "hook": {
+            "label": "② 강렬한 어그로 후킹형",
+            "text": "아파트 관리비 자동납부 해지 버튼 눌렀다고 안심했다가 이번 달 연체료 물거나 이중 납부하는 분들 진짜 많아요.\n\n'해지 신청 접수' 화면만 보고 그냥 창 닫으면 안 되는 이유:\n\n① 자동납부 해지 접수와 해지 완료는 다릅니다. 최종 처리 상태까지 반드시 확인해야 해요.\n② 이번 달 카드 청구서에 관리비가 떠 있어도 실제 납부 완료 상태인지 따로 봐야 합니다.\n③ 새 카드나 계좌를 등록했다면 '최초 적용 월'이 이번 달인지 다음 달인지 확인해야 빈틈이 없습니다.\n\n이사나 카드 교체를 앞두고 있다면 기존 카드 청구 처리 여부와 관리사무소 납부 기한부터 맞춰보세요.\n\n내 화면 상태별 3초 자가진단 체크리스트는 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 95
+          },
+          "persona": {
+            "label": "③ 내 페르소나 맞춤형",
+            "text": "얼마 전에 아파트 관리비 카드 바꾸려고 자동납부 해지 신청했는데, 이번 달 관리비는 어디로 내야 하는 건지 순간 멘붕 오더라고요 😅\n\n알고 보니 해지 버튼만 눌렀다고 끝난 게 아니었습니다.\n\n저처럼 헷갈리지 않으려면 딱 세 가지만 확인해 보세요!\n\n• 해지 신청 접수만 된 건지 완료까지 떴는지 확인하기\n• 이번 달 카드 내역에 관리비가 보여도 실제 납부 처리까지 끝났는지 보기\n• 새 결제수단을 등록했어도 '최초 적용 월'이 언제부터인지 체크하기\n\n안 그러면 관리사무소에 따로 송금했다가 이중 납부되거나, 반대로 미납될 수 있거든요.\n\n지금 내 화면에서 바로 확인하는 상황별 판독법은 아래 첫 댓글에 남겨둘게요 👇",
+            "hook_score": 92
+          }
+        },
+        "selected_variant": "hook",
+        "preview": "※ 본 글은 직접 운영하는 블로그의 정보 글을 바탕으로 작성되었습니다.\n\n삼성카드 아파트관리비 자동납부 해지 후 이번 달 납부 경로와 상황별 3초 자가진단 체크리스트는 아래 링크에서 확인하실 수 있습니다 👇\nhttps://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_0800_c3578b658c10bc63",
+        "review": {
+          "status": "format_valid",
+          "reason": "basic_format"
+        },
+        "source_url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030",
+        "published_at": "2026-10-30T01:43:47+00:00",
+        "verified_at": "2026-10-30T01:44:22.572735+00:00",
+        "publication_time_basis": "api_timestamp"
+      }
+    },
     {
       "attempt_id": "company:18111198623238729",
       "title": null,
@@ -2995,9 +3193,9 @@
   "automation": {
     "state": "waiting",
     "nextEligibleAt": "2026-10-30T12:30:00+09:00",
-    "lastRunAt": "2026-10-29T23:29:21.352132+00:00",
-    "lastResult": "skipped",
-    "issue": "no_new_supported_candidate",
+    "lastRunAt": "2026-10-30T01:43:18.011952+00:00",
+    "lastResult": "published_verified",
+    "issue": null,
     "scheduler": {
       "mode": "project-autonomy",
       "registered": true,
@@ -4942,7 +5140,7 @@
   "revenue": null,
   "connection": {
     "status": "ready",
-    "checkedAt": "2026-10-29T12:45:04.228692+00:00",
+    "checkedAt": "2026-10-30T01:35:25.498966+00:00",
     "reason": null,
     "connected": true,
     "account_verified": true,
@@ -4962,21 +5160,32 @@
     "quotaStatus": "verified",
     "quota": {
       "posts": {
-        "usage": 4,
+        "usage": 0,
         "limit": 250,
-        "remaining": 246
+        "remaining": 250
       },
       "replies": {
-        "usage": 10,
+        "usage": 0,
         "limit": 1000,
-        "remaining": 990
+        "remaining": 1000
       }
     }
   },
   "today": {
     "date": "2026-10-30",
     "timezone": "Asia/Seoul",
-    "counts": []
+    "counts": [
+      {
+        "kind": "followup",
+        "state": "published_verified",
+        "n": 1
+      },
+      {
+        "kind": "main",
+        "state": "published_verified",
+        "n": 1
+      }
+    ]
   },
   "countsScope": "all_time_parts_not_today",
   "countsComplete": true

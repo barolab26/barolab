@@ -1,0 +1,308 @@
+{
+  "pings": [
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/year-end-tax-credit-debit-card-check",
+      "pingedAt": "2026-10-30T01:21:11.673742+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/daynote-restaurant-visit-check",
+      "pingedAt": "2026-10-30T01:21:19.806305+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/protein-supplement-before-buying-in-your-fifties",
+      "pingedAt": "2026-10-30T01:21:25.989649+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/culture-center-tuition-refund-check",
+      "pingedAt": "2026-10-30T01:21:32.152608+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/employment-support-after-unemployment-benefits-1030",
+      "pingedAt": "2026-10-30T01:21:38.645333+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/mobile-carrier-billing-block-guide",
+      "pingedAt": "2026-10-30T01:21:46.287380+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/employment-support-after-unemployment-benefits",
+      "pingedAt": "2026-10-30T01:21:53.936723+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/national-museum-korea-reservation-weekend-check",
+      "pingedAt": "2026-10-30T01:22:00.050696+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/munhwa-nuri-card-online-payment-check",
+      "pingedAt": "2026-10-30T01:22:07.438973+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/employment-support-part-time-income-report-1030",
+      "pingedAt": "2026-10-30T01:22:14.146476+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/emotional-journal-when-words-wont-come",
+      "pingedAt": "2026-10-30T01:22:19.545701+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/naeil-learning-card-out-of-pocket-cost",
+      "pingedAt": "2026-10-30T01:22:26.056481+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/topnote-domain-search-access-check-1030",
+      "pingedAt": "2026-10-30T01:22:32.371220+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/hotel-booking-extra-fees-check",
+      "pingedAt": "2026-10-30T01:22:39.820722+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee-1030",
+      "pingedAt": "2026-10-30T01:22:44.315162+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/sinsa-nolplace-booking-check",
+      "pingedAt": "2026-10-30T01:23:33.081066+00:00",
+      "results": [
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.bing.com/indexnow",
+          "httpStatus": 202
+        },
+        {
+          "endpoint": "https://www.google.com/ping",
+          "httpStatus": 404
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "schema": "barolab-project-health-v1",
-  "checkedAt": "2026-10-30T10:15:59+09:00",
+  "checkedAt": "2026-10-30T18:24:48+09:00",
   "todayKst": "2026-10-30",
-  "fingerprint": "d693b143e3fc58c1",
+  "fingerprint": "c84fabc343dee91b",
   "lastBroadcastDate": "2026-10-30",
   "watchdog": {
     "lastRunAt": "2026-10-29T22:52:39.426805+09:00",
@@ -12,7 +12,7 @@
   },
   "summary": {
     "totalProjects": 7,
-    "healthyCount": 1,
+    "healthyCount": 2,
     "ceoActionCount": 0
   },
   "ceoActionItems": [],
@@ -26,8 +26,8 @@
       "quota": {
         "status": "observed",
         "date": "2026-10-30",
-        "due": 4,
-        "verified": 4,
+        "due": 10,
+        "verified": 10,
         "missing": 0,
         "missingSlots": []
       },
@@ -57,7 +57,7 @@
         "supportingManifests": [],
         "path": "dashboard/data/cf/daily_schedule.json",
         "sha256": "62089346a2707ed705bcf7ed6b78244ca0f313915e46c313327652875ea64e7b",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
         "sourceCheckedAt": null,
         "sourceDate": "2026-10-30",
         "fresh": true,
@@ -81,8 +81,8 @@
       "ownerAgentIds": [
         "publi"
       ],
-      "status": "unknown",
-      "statusBadge": "unknown",
+      "status": "stale",
+      "statusBadge": "stale",
       "progressText": "{\"verified\": 5}",
       "progressPct": 0,
       "counts": {
@@ -103,11 +103,11 @@
         "supportingManifests": [],
         "path": "dashboard/data/naver/automation-status.json",
         "sha256": "f2b5e95aedc5b559b7b4f511be90443eaf93d782d94966e756995be6cd6a3807",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
         "sourceCheckedAt": "2026-10-30T08:47:14.408946+09:00",
         "sourceDate": "2026-10-30",
-        "fresh": true,
-        "ageSeconds": 5325
+        "fresh": false,
+        "ageSeconds": 34654
       }
     },
     {
@@ -124,17 +124,17 @@
         "missing": null
       },
       "activity": {
-        "status": "overdue",
-        "lastAttemptAt": "2026-10-30T08:37:07.686576+09:00",
-        "expectedAt": "2026-10-30T09:52:07.686576+09:00",
-        "lastOutcome": "blocked",
-        "reason": "no_recent_attempt"
+        "status": "recent",
+        "lastAttemptAt": "2026-10-30T18:18:59.532549+09:00",
+        "expectedAt": "2026-10-30T19:33:59.532549+09:00",
+        "lastOutcome": "completed",
+        "reason": "attempt_observed"
       },
       "ownerAgentIds": [
         "publi"
       ],
-      "status": "attention",
-      "statusBadge": "attention",
+      "status": "observed",
+      "statusBadge": "observed",
       "progressText": "관측 상태: completed_cycle",
       "progressPct": 0,
       "counts": {},
@@ -142,7 +142,7 @@
       "verifiedPublicCount": null,
       "reservedCount": null,
       "observedState": "completed_cycle",
-      "blocker": "실제 원장 상태 확인 필요",
+      "blocker": "현재 원천 상태 관측; 작업 성공 여부 별도 검증",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
       "autoActionBadge": "조치 실행 증거 없음",
@@ -152,12 +152,12 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/kin-automation-state.json",
-        "sha256": "bb9c6f70ebad2ceee7de04ac44ad7b37bf26406bce86401c3d8b5e9218346d66",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
-        "sourceCheckedAt": "2026-10-29T23:29:14.019484+00:00",
+        "sha256": "7608f2195370d619245d1b5315cd446bc201091d2a5be7f720b9cf6d463edae7",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
+        "sourceCheckedAt": "2026-10-30T09:16:33.232202+00:00",
         "sourceDate": null,
         "fresh": true,
-        "ageSeconds": 6405
+        "ageSeconds": 495
       }
     },
     {
@@ -167,21 +167,18 @@
       "title": "Threads",
       "owner": "@publi",
       "quota": {
-        "status": "observed",
+        "status": "unknown",
         "date": "2026-10-30",
-        "due": 1,
-        "verified": 0,
-        "missing": 1,
-        "missingSlots": [
-          "08:00"
-        ]
+        "due": null,
+        "verified": null,
+        "missing": null
       },
       "activity": null,
       "ownerAgentIds": [
         "publi"
       ],
-      "status": "attention",
-      "statusBadge": "attention",
+      "status": "stale",
+      "statusBadge": "stale",
       "progressText": "관측 상태: waiting",
       "progressPct": 0,
       "counts": {},
@@ -189,7 +186,7 @@
       "verifiedPublicCount": null,
       "reservedCount": null,
       "observedState": "waiting",
-      "blocker": "실제 원장 상태 확인 필요",
+      "blocker": "원천 자료가 오래되었거나 불완전함",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
       "autoActionBadge": "조치 실행 증거 없음",
@@ -199,12 +196,12 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/public/threads.json",
-        "sha256": "5276ae42be9696dcb7db9132e954bb350aa40f8f1437acef55bfa89a933879cd",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
-        "sourceCheckedAt": "2026-10-29T23:29:21.372131+00:00",
+        "sha256": "7fe84982871e988b0ac02ffcd2d389e317271e3c76b5747b461b6844e6d506b5",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
+        "sourceCheckedAt": "2026-10-30T01:44:22.770226+00:00",
         "sourceDate": null,
-        "fresh": true,
-        "ageSeconds": 6398
+        "fresh": false,
+        "ageSeconds": 27625
       }
     },
     {
@@ -244,11 +241,11 @@
         "supportingManifests": [],
         "path": "dashboard/data/content-maintenance.json",
         "sha256": "307ebff1d9d74fc7fdd4cfc2adfb96169f391e9801d1ba0715863e189aca7ce6",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
         "sourceCheckedAt": "2026-10-29T13:37:36.216097+00:00",
         "sourceDate": null,
         "fresh": false,
-        "ageSeconds": 41903
+        "ageSeconds": 71232
       }
     },
     {
@@ -321,11 +318,11 @@
         ],
         "path": "apps/bible/project.json",
         "sha256": "4b8cb54c7dd61ecff85fb27dec6e97fe58598f27ecb6d38f9407d3feb2a74b94",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
         "sourceCheckedAt": "2026-10-29T22:46:55+09:00",
         "sourceDate": null,
         "fresh": false,
-        "ageSeconds": 41344
+        "ageSeconds": 70673
       }
     },
     {
@@ -987,11 +984,11 @@
         "supportingManifests": [],
         "path": "dashboard/data/collection-health.json",
         "sha256": "c30ec9ef567b47fec7c5b6dd1e770ddb28c0f7e4ffec0c0ed635562f94ae536e",
-        "observedAt": "2026-10-30T10:15:59.224097+09:00",
+        "observedAt": "2026-10-30T18:24:48.049071+09:00",
         "sourceCheckedAt": "2026-10-29T20:09:31.557984+00:00",
         "sourceDate": null,
         "fresh": false,
-        "ageSeconds": 18388
+        "ageSeconds": 47716
       }
     }
   ]

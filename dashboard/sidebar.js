@@ -10,6 +10,8 @@
 <a class="nav-item" href="cf.html"><span class="nav-icon" aria-hidden="true">&#9889;</span><div><strong>CF 블로그 (16)</strong><small>MustPick 허브 · 애드센스</small></div><span class="badge-count st-blue" id="cf-sidebar-count">16도메인</span></a>
 <a class="nav-item" href="kin.html"><span class="nav-icon" aria-hidden="true">&#128161;</span><div><strong>네이버 지식iN</strong><small id="kin-sidebar-note">계정 교대 · 운영 기록 확인 중</small></div><span class="badge-count st-green" id="kin-sidebar-status">대기</span></a>
 <a class="nav-item" href="threads.html"><span class="nav-icon" aria-hidden="true">@</span><div><strong>Threads</strong><small id="threads-sidebar-note">@mustpickinfo · 연결 대기</small></div><span class="badge-count st-amber" id="threads-sidebar-status">연결 대기</span></a>
+<a class="nav-item" href="brunch.html"><span class="nav-icon" aria-hidden="true">&#128214;</span><div><strong>브런치 스토리</strong><small id="brunch-sidebar-note">머스트픽 · 작가 심사 중</small></div><span class="badge-count st-blue" id="brunch-sidebar-status">서랍 3편</span></a>
+<a class="nav-item" href="premium.html"><span class="nav-icon" aria-hidden="true">&#11088;</span><div><strong>프리미엄콘텐츠</strong><small id="premium-sidebar-note">yoon_master · 심사 진행 중</small></div><span class="badge-count st-amber" id="premium-sidebar-status">심사중</span></a>
 <div class="nav-label">앱 프로젝트</div><a class="nav-item" href="apps.html"><span class="nav-icon" aria-hidden="true">&#128241;</span><div><strong id="apps-sidebar-title">앱 프로젝트 (4)</strong><small>생활 앱 · 출시 &amp; 수익화 관제</small></div><span class="badge-count st-blue" id="apps-sidebar-count">4종</span></a>
 <div class="nav-label">향후 확장 예정</div>
 <div class="nav-item" aria-disabled="true"><span class="nav-icon" aria-hidden="true">&#128308;</span><div><strong>티스토리 (14)</strong><small>Google 애드센스 다계정</small></div><span class="badge-count">준비중</span></div>
@@ -130,6 +132,26 @@
         updateKinState({ status: 'error', data: null, stale: true });
       }
     }
+
+    // 4. Brunch Story sidebar status sync
+    try {
+      const bRes = await fetch('/api/brunch', { cache: 'no-store' });
+      if (bRes && bRes.ok) {
+        const bData = await bRes.json();
+        const bBadge = document.getElementById('brunch-sidebar-status');
+        const bNote = document.getElementById('brunch-sidebar-note');
+        const dCnt = bData?.kpi?.drawerCount ?? 3;
+        const pCnt = bData?.kpi?.publishedCount ?? 0;
+        const approved = bData?.account?.canPublishLive === true;
+        if (bBadge) {
+          bBadge.textContent = approved ? `발행 ${pCnt}편` : `서랍 ${dCnt}편`;
+          bBadge.className = `badge-count ${approved ? 'st-green' : 'st-blue'}`;
+        }
+        if (bNote) {
+          bNote.textContent = approved ? `머스트픽 · 작가 가동중` : `머스트픽 · 작가 심사 중`;
+        }
+      }
+    } catch (_) {}
   }
   syncSharedSidebarBadges();
 })();

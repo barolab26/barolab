@@ -1144,6 +1144,22 @@ def normalize_naver_document_links(document, account):
             new_blocks.append({**blk, 'text': new_txt})
         else:
             changed = True
+    if is_bridge and not line_links:
+        try:
+            from common.asset_map import get_today_cf_bridge_targets
+            targets = get_today_cf_bridge_targets(document.get('title', ''), allowed_domains=(account or {}).get('bridge_domains'))
+            if targets:
+                top_target = targets[0]
+                short_lbl = top_target['title'].split(',')[0].strip()
+                cta = f'👉 [3초 자가진단 판독기] {short_lbl} 바로가기 (클릭)'
+                for b in reversed(new_blocks):
+                    if b.get('type') == 'text':
+                        b['text'] = b['text'].rstrip() + '\n' + cta
+                        line_links[cta] = top_target['url']
+                        changed = True
+                        break
+        except Exception:
+            pass
     if line_links != (document.get('lineLinks') or {}):
         if line_links:
             document['lineLinks'] = line_links

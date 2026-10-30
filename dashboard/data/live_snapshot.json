@@ -7,7 +7,7 @@
       "title": "CF 글 준비 · baronote.kr · 2026-10-30 · 07:20",
       "status": "report_pending",
       "activatedAt": 1793310151.507591,
-      "updatedAt": 1793322954.088702,
+      "updatedAt": 1793352298.7436233,
       "target": {
         "account": "baronote.kr",
         "date": "2026-10-30",
@@ -27,7 +27,7 @@
       },
       "operationalState": "verification_or_ack_pending",
       "performance": {
-        "wallTimeSeconds": 12807.225536584854,
+        "wallTimeSeconds": 42148.42770433426,
         "measurementStartedAt": 1793310151.507591,
         "coverage": "observed_calls_only",
         "manualNudges": 0,
@@ -52,7 +52,7 @@
         "phase": "",
         "lastResult": "",
         "lastResultAt": null,
-        "lastActivityAt": 1793322954.088702,
+        "lastActivityAt": 1793352298.7436233,
         "nextCheckAt": null,
         "handoff": {
           "owner": null,
@@ -64,7 +64,7 @@
         "intervention": null,
         "decisions": null,
         "maxSteps": null,
-        "wallTimeSeconds": 12807.225536584854,
+        "wallTimeSeconds": 42148.42770433426,
         "toolRoundTrips": 0,
         "manualNudges": 0,
         "verifiedCompletions": 1,
@@ -203,7 +203,7 @@
   },
   "schema": "barolab-mission-control-v2",
   "date": "2026-10-30",
-  "generatedAt": "2026-10-30T10:15:58.726731+09:00",
+  "generatedAt": "2026-10-30T18:24:59.931102+09:00",
   "refreshSeconds": 1,
   "cfItems": [
     {
@@ -5932,42 +5932,44 @@
     },
     {
       "name": "네이버 지식iN",
-      "done": 0,
+      "done": 7,
       "target": 20,
-      "note": "다음 배포: 10-26 22:23 · 20분 텀",
+      "note": "다음 배포: 18:40 · 20분 텀",
       "id": "kin",
       "states": {},
       "reserved": 0,
       "tomorrowReserved": 0,
       "counts": {
-        "completed": 0,
+        "completed": 7,
         "prepared": 0,
         "running": 0,
         "failed": 0,
-        "waiting": 20
+        "waiting": 13
       },
       "operationStates": {
-        "blocked": 48,
-        "deferred": 1
+        "published_verified": 7,
+        "skipped": 14
       },
-      "blockedAttempts": 48
+      "blockedAttempts": 0
     },
     {
       "id": "threads",
       "name": "Threads",
-      "done": 0,
+      "done": 1,
       "target": 4,
-      "states": {},
+      "states": {
+        "published_verified": 1
+      },
       "note": "당일 본문 발행",
       "counts": {
-        "completed": 0,
+        "completed": 1,
         "prepared": 0,
         "running": 0,
         "failed": 0,
-        "waiting": 4
+        "waiting": 3
       },
       "operationStates": {
-        "skipped": 1
+        "queued": 1
       },
       "blockedAttempts": 0
     }
@@ -5977,27 +5979,27 @@
       "role": "jarvis",
       "name": "팀장",
       "state": "IDLE",
-      "action": "agenda-opening 완료",
-      "lastCompleted": "10-30 09:00:51",
-      "lastActivity": "2026-10-30T09:00:51.589000+09:00",
+      "action": "company-executive-check 완료",
+      "lastCompleted": "10-30 18:21:57",
+      "lastActivity": "2026-10-30T18:21:57.767000+09:00",
       "model": "gpt-6.1-sol · High"
     },
     {
       "role": "patch",
       "name": "패치",
       "state": "IDLE",
-      "action": "coding-proposal 완료",
-      "lastCompleted": "10-30 08:15:03",
-      "lastActivity": "2026-10-30T08:15:03.625000+09:00",
+      "action": "원작업 복구 단계 처리 완료",
+      "lastCompleted": "10-30 14:41:57",
+      "lastActivity": "2026-10-30T14:41:57.013000+09:00",
       "model": "gpt-6.1-sol · High"
     },
     {
       "role": "publi",
       "name": "퍼블리",
       "state": "IDLE",
-      "action": "업무 결과 보고 완료",
-      "lastCompleted": "10-30 08:47:17",
-      "lastActivity": "2026-10-30T08:47:17.266000+09:00",
+      "action": "post-style-planning 완료",
+      "lastCompleted": "10-30 18:16:58",
+      "lastActivity": "2026-10-30T18:16:58.054000+09:00",
       "model": "gpt-6.1-sol · High"
     },
     {
@@ -6005,8 +6007,8 @@
       "name": "트레이스",
       "state": "IDLE",
       "action": "post-style-planning 완료",
-      "lastCompleted": "10-30 08:43:07",
-      "lastActivity": "2026-10-30T08:43:07.969000+09:00",
+      "lastCompleted": "10-30 18:17:43",
+      "lastActivity": "2026-10-30T18:17:43.229000+09:00",
       "model": "3.8 Flash Med"
     },
     {
@@ -6022,46 +6024,46 @@
       "role": "radar",
       "name": "레이더",
       "state": "IDLE",
-      "action": "근거 자료 수집 완료",
-      "lastCompleted": "10-30 08:43:47",
-      "lastActivity": "2026-10-30T08:43:47.003000+09:00",
+      "action": "post-style-planning 완료",
+      "lastCompleted": "10-30 18:17:26",
+      "lastActivity": "2026-10-30T18:17:26.869000+09:00",
       "model": "Argon Med"
     }
   ],
   "vault": {
-    "nodes": 275,
-    "edges": 452,
+    "nodes": 291,
+    "edges": 484,
     "episodes": 6
   },
   "timeline": [
     {
-      "at": 1793317026.632,
-      "text": "[EGO ALERT] 9231 adinfo0905 · 조기노령연금 신청, 소득 기준 정확히 알고 싶어요! · 편집·답변 작업 3분 이상 진행 갱신 없음",
-      "alert": true
-    },
-    {
-      "at": 1793311221.997285,
-      "text": "CF Order 13 · meganote.kr 발행 완료",
+      "at": 1793332734.501938,
+      "text": "지식iN adinfo0905 · 발행 성공 · 67년생 국민연금 조기수령시 피보험자 탈락여부",
       "alert": false
     },
     {
-      "at": 1793311189.195267,
-      "text": "CF Order 12 · woorinote.kr 발행 완료",
+      "at": 1793331095.84011,
+      "text": "지식iN stone0747 · 발행 성공 · 국민연금 해지, 지금 당장 가능할까요?",
       "alert": false
     },
     {
-      "at": 1793304142.439112,
-      "text": "제휴알바 수익 수집 완료",
+      "at": 1793329524.613077,
+      "text": "지식iN adinfo0905 · 발행 성공 · 드럼세탁기 청소하는 법 좀요",
       "alert": false
     },
     {
-      "at": 1793304140.79455,
-      "text": "토스 쉐어링크 수익 수집 완료",
+      "at": 1793327886.735185,
+      "text": "지식iN stone0747 · 발행 성공 · 국민연금 조기수령, 손해 감수하고 선택하는 이유는 뭘까요?",
       "alert": false
     },
     {
-      "at": 1793304139.142835,
-      "text": "쿠팡 파트너스 수익 수집 완료",
+      "at": 1793326360.965899,
+      "text": "지식iN adinfo0905 · 발행 성공 · 세탁기청소방법",
+      "alert": false
+    },
+    {
+      "at": 1793324952.644988,
+      "text": "지식iN stone0747 · 발행 성공 · 국민연금 조기 수령, 손해 보는 건 아닐까요?",
       "alert": false
     }
   ],
@@ -6182,9 +6184,45 @@
       "online": true,
       "tabs": [
         {
-          "id": "36AE9A42543EA48E00E88DB1F0C1052B",
-          "title": "국민연금 받는데 기초연금도 될까? 못 받는 경.. : 네이버블로그",
-          "url": "https://blog.naver.com/mustpickinfo/224458583984",
+          "id": "96B09A02DA114765E31A943CCA81EBF1",
+          "title": "네이버 프리미엄콘텐츠 스튜디오",
+          "url": "https://studio.premium.naver.com/intro",
+          "active": true,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "DA9385F8B1B2EE0C75A14E6269513685",
+          "title": "네이버 프리미엄콘텐츠",
+          "url": "https://contents.premium.naver.com/",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "C3893EB9A697F4B09E72A0B6EB2A5F94",
+          "title": "[프리미엄콘텐츠 스튜디오] 인증번호 안내",
+          "url": "https://mail.naver.com/v2/read/0/29052",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "81DFC188CD98DD213BAC128A465B4A56",
+          "title": "네이버 블로그",
+          "url": "https://section.blog.naver.com/BlogHome.naver",
           "active": false,
           "questionId": null,
           "editorHasContent": false,
@@ -6194,7 +6232,7 @@
           "captchaVisible": false
         }
       ],
-      "selection": "열린 탭"
+      "selection": "활성 탭"
     },
     {
       "port": 9333,
@@ -6205,7 +6243,31 @@
       "online": true,
       "tabs": [
         {
-          "id": "2539AE5B6528D258A3BACF3F6F2B3135",
+          "id": "CBBBA8C5DD5F86267C0BAC056DE80A0B",
+          "title": "네이버 프리미엄콘텐츠",
+          "url": "https://contents.premium.naver.com/",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "306333459D1E210CAB0F8602AC27BBA1",
+          "title": "네이버 프리미엄콘텐츠 스튜디오",
+          "url": "https://studio.premium.naver.com/intro",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "5ED6FED62398D06FAD027EC763E2B4ED",
           "title": "머스트 헬스뷰｜5060 건강·영양 팩트체크 : 네이버 블로그",
           "url": "https://blog.naver.com/mustinfo",
           "active": false,
@@ -6215,6 +6277,11 @@
           "registerPresent": false,
           "registerEnabled": false,
           "captchaVisible": false
+        },
+        {
+          "id": "88E6DE520E5BEE3ACD14D7AFDB72D918",
+          "title": "머스트 헬스뷰｜5060 건강·영양 팩트체크 : 네이버 블로그",
+          "url": "https://blog.naver.com/mustinfo"
         }
       ],
       "selection": "열린 탭"
@@ -6228,6 +6295,54 @@
       "online": true,
       "tabs": [
         {
+          "id": "2624F81E6BB44936DB33F8D94BE16366",
+          "title": "네이버 프리미엄콘텐츠 스튜디오",
+          "url": "https://studio.premium.naver.com/join/review",
+          "active": true,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "2E0FD47413ED979D06893D2FE97FD189",
+          "title": "네이버 프리미엄콘텐츠",
+          "url": "https://contents.premium.naver.com/",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "26F3A8176F98596F4FDBF51598C9B481",
+          "title": "[프리미엄콘텐츠 스튜디오] 인증번호 안내",
+          "url": "https://mail.naver.com/v2/read/-1/1081",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "E6D3241C7186319F82893C0954974467",
+          "title": "NAVER",
+          "url": "https://www.naver.com/",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
           "id": "C7BB1D35012F27675E35035E17236B31",
           "title": "윤뷰스｜5060 품격 라이프 &amp; 리빙 : 네이버 블로그",
           "url": "https://blog.naver.com/yoonviews",
@@ -6240,7 +6355,7 @@
           "captchaVisible": false
         }
       ],
-      "selection": "열린 탭"
+      "selection": "활성 탭"
     },
     {
       "port": 9231,
@@ -6251,7 +6366,19 @@
       "online": true,
       "tabs": [
         {
-          "id": "D1DE22B77DAE989CAFE4508CD3B03D68",
+          "id": "FC1668356384A4B82FD3D615DAC1A4ED",
+          "title": "세탁기 잠금 : 지식iN",
+          "url": "https://kin.naver.com/qna/detail.naver",
+          "active": true,
+          "questionId": "495713960",
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "5BE51FCCE63E597165ABAC2ACEE333D1",
           "title": "월급날 기록장 : 네이버 블로그",
           "url": "https://blog.naver.com/adinfo0905",
           "active": false,
@@ -6263,7 +6390,7 @@
           "captchaVisible": false
         }
       ],
-      "selection": "열린 탭"
+      "selection": "활성 탭"
     },
     {
       "port": 9230,
@@ -6274,9 +6401,21 @@
       "online": true,
       "tabs": [
         {
-          "id": "7346207DC179AB5000BD3FDEE8F436C1",
-          "title": "지원금 마감알리미 : 네이버 블로그",
-          "url": "https://blog.naver.com/stone0747",
+          "id": "9D55F3AED67EF1FADE99E65C4BEAF2CD",
+          "title": "국립중앙박물관 삼각대 : 지식iN",
+          "url": "https://kin.naver.com/qna/detail.naver",
+          "active": true,
+          "questionId": "423678763",
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "4C2EA36393B4F70B7906F8A2297C7C8C",
+          "title": "폐업 부가세 신고, 남은 냉장고도 세금 낼까?.. : 네이버블로그",
+          "url": "https://blog.naver.com/stone0747/224458586680",
           "active": false,
           "questionId": null,
           "editorHasContent": false,
@@ -6286,7 +6425,7 @@
           "captchaVisible": false
         }
       ],
-      "selection": "열린 탭"
+      "selection": "활성 탭"
     },
     {
       "port": 9440,
@@ -6300,7 +6439,7 @@
           "id": "3A1F2344365795CF17FDAC19F933820D",
           "title": "Google Flow - 동영상, 이미지, 맞춤 도구를 위한 AI 크리에이티브 스튜디오",
           "url": "https://flow.google.com/",
-          "active": false,
+          "active": true,
           "questionId": null,
           "editorHasContent": false,
           "editorCharCount": 0,
@@ -6309,7 +6448,7 @@
           "captchaVisible": false
         }
       ],
-      "selection": "열린 탭"
+      "selection": "활성 탭"
     },
     {
       "port": 9450,
@@ -6320,9 +6459,9 @@
       "online": true,
       "tabs": [
         {
-          "id": "7697D19221702AA3D7F21016CA0A26CE",
-          "title": "(1) Instagram",
-          "url": "https://www.instagram.com/",
+          "id": "22397D2AA182332C0DAFDDAED1041F42",
+          "title": "브런치",
+          "url": "https://brunch.co.kr/",
           "active": false,
           "questionId": null,
           "editorHasContent": false,
@@ -6330,6 +6469,23 @@
           "registerPresent": false,
           "registerEnabled": false,
           "captchaVisible": false
+        },
+        {
+          "id": "C00A53ED8F066AD50E7BBD711D60B6F3",
+          "title": "받은편지함 (11) - baro76650@gmail.com - Gmail",
+          "url": "https://mail.google.com/mail/u/0/",
+          "active": false,
+          "questionId": null,
+          "editorHasContent": false,
+          "editorCharCount": 0,
+          "registerPresent": false,
+          "registerEnabled": false,
+          "captchaVisible": false
+        },
+        {
+          "id": "0A155B5729B36AA30983C04FAD05DC69",
+          "title": "(1) 홈 • Threads",
+          "url": "https://www.threads.com/"
         }
       ],
       "selection": "열린 탭"
@@ -6339,77 +6495,77 @@
     [
       "애드센스 수집분 (15/16 CF)  오늘 $0.00  /  어제 $0.01  /  월 수집합 $1.88  (기준일 2026-10-30)",
       "일일 목표 $100.00  ░░░░░░░░░░░░░░░░░░░░░░░░  0.00%",
-      "색인 확인 683/2,020건 (33.8%) · 검사 1,950건 · 오늘 IndexNow 0건",
-      "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크  오늘 집계 대기 / 최근 ₩166 (2026-10-26) · 4369분 전 · auth_required",
-      "쿠팡 파트너스  오늘 집계 대기 / 최근 ₩0 (2026-10-29) · 313분 전 · collected",
-      "토스 쉐어링크  오늘 ₩0 / 최근 ₩0 (2026-10-30) · 313분 전 · collected",
-      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 313분 전 · configured_no_report_api",
-      "제휴알바  오늘 집계 대기 / 최근 ₩0 (2026-10-29) · 313분 전 · collected",
+      "색인 확인 640/1,391건 (46.0%) · 검사 1,391건 · 오늘 IndexNow 293건",
+      "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크  오늘 집계 대기 / 최근 ₩166 (2026-10-26) · 4858분 전 · auth_required",
+      "쿠팡 파트너스  오늘 집계 대기 / 최근 ₩0 (2026-10-29) · 802분 전 · collected",
+      "토스 쉐어링크  오늘 ₩0 / 최근 ₩0 (2026-10-30) · 802분 전 · collected",
+      "Trip.com  오늘 집계 대기 / 최근 집계 대기 (—) · 802분 전 · configured_no_report_api",
+      "제휴알바  오늘 집계 대기 / 최근 ₩0 (2026-10-29) · 802분 전 · collected",
       "AdMob (4앱) 당일 수익 원장 수집 대기"
     ],
     [
-      "[코덱스 #1 baro76650] ● 사용가능(대기) | 잔여 74% [■■■■■■■■■■■░░░░] | 리셋: 11-04 15:36 | 36,378.33 C | 누적 199회",
-      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 85% [■■■■■■■■■■■■■░░] | 리셋: 11-04 15:37 | 0.00 C | 누적 199회",
-      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 45.7%/98.9% | Claude/GPT 23.4%/100% (주간/5h) | 리셋 10-30 11:39 | 누적 18회",
-      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 9.0%/78.2% | Claude/GPT 17.4%/100% (주간/5h) | 리셋 10-30 11:08 | 누적 69회",
+      "[코덱스 #1 baro76650] ● 사용가능(대기) | 잔여 74% [■■■■■■■■■■■░░░░] | 리셋: 11-04 15:36 | 36,378.33 C | 누적 262회",
+      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 85% [■■■■■■■■■■■■■░░] | 리셋: 11-04 15:37 | 0.00 C | 누적 262회",
+      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 45.6%/100% | Claude/GPT 23.4%/100% (주간/5h) | 리셋 10-30 23:24 | 누적 19회",
+      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 1.0%/88.7% | Claude/GPT 17.4%/100% (주간/5h) | 리셋 10-30 21:08 | 누적 117회",
       "[OpenRouter] 잔여 0% [░░░░░░░░░░░░░░░] | 종량제 (충전 필요) | $-0.18",
       "[JEV · 04번 크롬] ● 사용가능(API키 설정됨) | 잔액 미수집 · 콘솔 로그인 필요",
       "[KIE] ● 정상수집 · 사용가능 | 잔여 91.97 credits",
       "[직원 매핑] @팀장(gpt-6.1-sol · High) | @publi·@patch(gpt-6.1-sol · High) | Threads(3.8 Flash High)"
     ],
     [
-      "9334 soultin (cdp_naver_soultin) · ● ON · 탭 1개 · 정책·지원금·연금 / 블로그 1호",
-      "  국민연금 받는데 기초연금도 될까? 못 받는 경.. : 네이버블로그 · https://blog.naver.com/mustpickinfo/224458583984",
-      "9333 soul5373 (cdp_naver_soul5373) · ● ON · 탭 1개 · 연예이슈 / 애드포스트 · JEV 콘솔(04세션)",
-      "  머스트 헬스뷰｜5060 건강·영양 팩트체크 : 네이버 블로그 · https://blog.naver.com/mustinfo",
-      "9335 yoon_master (cdp_naver_yoon_master) · ● ON · 탭 1개 · 쇼핑커넥트 / 가전·리빙",
-      "  윤뷰스｜5060 품격 라이프 &amp; 리빙 : 네이버 블로그 · https://blog.naver.com/yoonviews",
-      "9231 adinfo0905 (cdp_naver_adinfo0905) · ● ON · 탭 1개 · 직장인 루틴 / 지식iN 1호",
-      "  월급날 기록장 : 네이버 블로그 · https://blog.naver.com/adinfo0905",
-      "9230 stone0747 (cdp_naver_stone0747) · ● ON · 탭 1개 · 지원금 마감 / 지식iN 2호",
-      "  지원금 마감알리미 : 네이버 블로그 · https://blog.naver.com/stone0747",
+      "9334 soultin (cdp_naver_soultin) · ● ON · 탭 4개 · 정책·지원금·연금 / 블로그 1호",
+      "  네이버 프리미엄콘텐츠 스튜디오 · https://studio.premium.naver.com/intro",
+      "9333 soul5373 (cdp_naver_soul5373) · ● ON · 탭 4개 · 연예이슈 / 애드포스트 · JEV 콘솔(04세션)",
+      "  네이버 프리미엄콘텐츠 · https://contents.premium.naver.com/",
+      "9335 yoon_master (cdp_naver_yoon_master) · ● ON · 탭 5개 · 쇼핑커넥트 / 가전·리빙",
+      "  네이버 프리미엄콘텐츠 스튜디오 · https://studio.premium.naver.com/join/review",
+      "9231 adinfo0905 (cdp_naver_adinfo0905) · ● ON · 탭 2개 · 직장인 루틴 / 지식iN 1호",
+      "  세탁기 잠금 : 지식iN · https://kin.naver.com/qna/detail.naver",
+      "9230 stone0747 (cdp_naver_stone0747) · ● ON · 탭 2개 · 지원금 마감 / 지식iN 2호",
+      "  국립중앙박물관 삼각대 : 지식iN · https://kin.naver.com/qna/detail.naver",
       "9440 cf-flow (cdp_gui_9440) · ● ON · 탭 1개 · CF 발행 / 공식 캡처 / 시각자료",
       "  Google Flow - 동영상, 이미지, 맞춤 도구를 위한 AI 크리에이티브 스튜디오 · https://flow.google.com/",
-      "9450 threads (cdp_threads_mustpickinfo) · ● ON · 탭 1개 · Threads 전용 작업 세션",
-      "  (1) Instagram · https://www.instagram.com/"
+      "9450 threads (cdp_threads_mustpickinfo) · ● ON · 탭 3개 · Threads 전용 작업 세션",
+      "  브런치 · https://brunch.co.kr/"
     ],
     [
       "현재 안건 · CF 글 준비 · baronote.kr · 2026-10-30 · 07:20 · 마무리 보고 전달 중",
       "등록된 작업 프로세스 실행 미관측 · 회의·진단 상태는 안건 기준",
       "CF 블로그 [16/16] ■■■■■■■■■■■■ 100% · 준비 0 · 대기 0 · 실패 0 · 성공 16 · 진행 0 · 검수 0 · 실패 0 · 다음 슬롯 대기",
       "네이버 블로그 [ 0/7] ░░░░░░░░░░░░ 0% · 준비 0 · 대기 0 · 실패 0 · 오늘 발행 0 · 오늘 예약 7건 · 내일 예약 — · 다음 슬롯 대기",
-      "네이버 지식iN [ 0/20] ░░░░░░░░░░░░ 0% · 차단 이력 48회 · 준비 0 · 대기 20 · 실패 0 · adinfo0905 0건 · stone0747 0건 · 다음 배포: 10-26 22:23 · 20분 텀",
-      "Threads [0/4] ░░░░░░░░░░░░ · 준비 0 · 대기 4 · 실패 0 · 닥터 오늘 개선 0건",
+      "네이버 지식iN [ 7/20] ■■■■░░░░░░░░ 35% · 준비 0 · 대기 13 · 실패 0 · adinfo0905 4건 · stone0747 3건 · 다음 배포: 18:40 · 20분 텀",
+      "Threads [1/4] ■■■░░░░░░░░░ · 준비 0 · 대기 3 · 실패 0 · 닥터 오늘 개선 0건",
       "정해 둔 범위의 실제 결과를 확인했습니다. 담당자와 팀장의 마무리 보고를 전달하고 있습니다.",
-      "최근 활동: 10:15:54",
+      "최근 활동: 18:24:58",
       "실측 모델 5회 · 167.4초 · 도구 0회 · 실패 0회 (관측분)",
       "시간표 직결 2026-10-24 · 2026-10-25 네이버 예약 0/7 · CF 준비 0/16",
       "다음 슬롯 준비 / 자동 복구 대기"
     ],
     [
-      "@jarvis · gpt-6.1-sol · High · IDLE · agenda-opening 완료 · 완료 10-30 09:00:51",
-      "@patch · gpt-6.1-sol · High · IDLE · coding-proposal 완료 · 완료 10-30 08:15:03",
-      "@publi · gpt-6.1-sol · High · IDLE · 업무 결과 보고 완료 · 완료 10-30 08:47:17",
-      "@trace · 3.8 Flash Med · IDLE · post-style-planning 완료 · 완료 10-30 08:43:07",
+      "@jarvis · gpt-6.1-sol · High · IDLE · company-executive-check 완료 · 완료 10-30 18:21:57",
+      "@patch · gpt-6.1-sol · High · IDLE · 원작업 복구 단계 처리 완료 · 완료 10-30 14:41:57",
+      "@publi · gpt-6.1-sol · High · IDLE · post-style-planning 완료 · 완료 10-30 18:16:58",
+      "@trace · 3.8 Flash Med · IDLE · post-style-planning 완료 · 완료 10-30 18:17:43",
       "@doctor · 3.8 Flash High · IDLE · 원작업 복구 단계 처리 완료 · 완료 10-30 07:06:21",
-      "@radar · Argon Med · IDLE · 근거 자료 수집 완료 · 완료 10-30 08:43:47",
-      "Vault 275 노드 · 452 연결 · 누적 해결 6회"
+      "@radar · Argon Med · IDLE · post-style-planning 완료 · 완료 10-30 18:17:26",
+      "Vault 291 노드 · 484 연결 · 누적 해결 6회"
     ],
     [
-      "08:37:06 [EGO ALERT] 9231 adinfo0905 · 조기노령연금 신청, 소득 기준 정확히 알고 싶어요! · 편집·답변 작업 3분 이상 진행 갱신 없음",
-      "07:00:21 CF Order 13 · meganote.kr 발행 완료",
-      "06:59:49 CF Order 12 · woorinote.kr 발행 완료",
-      "05:02:22 제휴알바 수익 수집 완료",
-      "05:02:20 토스 쉐어링크 수익 수집 완료",
-      "05:02:19 쿠팡 파트너스 수익 수집 완료"
+      "12:58:54 지식iN adinfo0905 · 발행 성공 · 67년생 국민연금 조기수령시 피보험자 탈락여부",
+      "12:31:35 지식iN stone0747 · 발행 성공 · 국민연금 해지, 지금 당장 가능할까요?",
+      "12:05:24 지식iN adinfo0905 · 발행 성공 · 드럼세탁기 청소하는 법 좀요",
+      "11:38:06 지식iN stone0747 · 발행 성공 · 국민연금 조기수령, 손해 감수하고 선택하는 이유는 뭘까요?",
+      "11:12:40 지식iN adinfo0905 · 발행 성공 · 세탁기청소방법",
+      "10:49:12 지식iN stone0747 · 발행 성공 · 국민연금 조기 수령, 손해 보는 건 아닐까요?"
     ]
   ],
   "brainDisplay": {
     "rows": [
-      "[코덱스 #1 baro76650] ● 사용가능(대기) | 잔여 74% [■■■■■■■■■■■░░░░] | 리셋: 11-04 15:36 | 36,378.33 C | 누적 199회",
-      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 85% [■■■■■■■■■■■■■░░] | 리셋: 11-04 15:37 | 0.00 C | 누적 199회",
-      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 45.7%/98.9% | Claude/GPT 23.4%/100% (주간/5h) | 리셋 10-30 11:39 | 누적 18회",
-      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 9.0%/78.2% | Claude/GPT 17.4%/100% (주간/5h) | 리셋 10-30 11:08 | 누적 69회",
+      "[코덱스 #1 baro76650] ● 사용가능(대기) | 잔여 74% [■■■■■■■■■■■░░░░] | 리셋: 11-04 15:36 | 36,378.33 C | 누적 262회",
+      "[코덱스 #2 choiggerh] ● 사용가능(대기) | 잔여 85% [■■■■■■■■■■■■■░░] | 리셋: 11-04 15:37 | 0.00 C | 누적 262회",
+      "[제미나이 #1 baro76650] ● 사용가능(대기) | Gemini 45.6%/100% | Claude/GPT 23.4%/100% (주간/5h) | 리셋 10-30 23:24 | 누적 19회",
+      "[제미나이 #2 barolab26] ● 사용가능(대기) | Gemini 1.0%/88.7% | Claude/GPT 17.4%/100% (주간/5h) | 리셋 10-30 21:08 | 누적 117회",
       "[OpenRouter] 잔여 0% [░░░░░░░░░░░░░░░] | 종량제 (충전 필요) | $-0.18",
       "[JEV · 04번 크롬] ● 사용가능(API키 설정됨) | 잔액 미수집 · 콘솔 로그인 필요",
       "[KIE] ● 정상수집 · 사용가능 | 잔여 91.97 credits",
@@ -6444,17 +6600,17 @@
         "codex:gpt-6.1-sol": {
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "calls": 771,
-          "success": 758,
+          "calls": 897,
+          "success": 884,
           "errors": 13,
-          "inputTokens": 16914973,
-          "outputTokens": 513217,
-          "usageReportedCalls": 759,
-          "totalLatencyMs": 21288140,
+          "inputTokens": 19518411,
+          "outputTokens": 614844,
+          "usageReportedCalls": 885,
+          "totalLatencyMs": 25939554,
           "rateLimited": 0,
-          "averageLatencyMs": 27611,
-          "lastLatencyMs": 24852,
-          "lastAt": "2026-10-30T09:00:51.582219+09:00",
+          "averageLatencyMs": 28918,
+          "lastLatencyMs": 113322,
+          "lastAt": "2026-10-30T18:21:57.615877+09:00",
           "lastStatus": "completed",
           "errorType": null,
           "rateLimitHeaders": {},
@@ -6463,17 +6619,17 @@
         "agy:gemini-3.8-flash-medium": {
           "provider": "agy",
           "model": "gemini-3.8-flash-medium",
-          "calls": 40,
-          "success": 40,
+          "calls": 64,
+          "success": 64,
           "errors": 0,
-          "inputTokens": 1069550,
-          "outputTokens": 85108,
-          "usageReportedCalls": 40,
-          "totalLatencyMs": 851186,
+          "inputTokens": 1735270,
+          "outputTokens": 130123,
+          "usageReportedCalls": 64,
+          "totalLatencyMs": 1264866,
           "rateLimited": 0,
-          "averageLatencyMs": 21280,
-          "lastLatencyMs": 12604,
-          "lastAt": "2026-10-30T08:43:07.734017+09:00",
+          "averageLatencyMs": 19764,
+          "lastLatencyMs": 15887,
+          "lastAt": "2026-10-30T18:17:43.129376+09:00",
           "lastStatus": "completed",
           "errorType": null,
           "rateLimitHeaders": {},
@@ -6482,17 +6638,17 @@
         "agy:gemini-4-argon-medium": {
           "provider": "agy",
           "model": "gemini-4-argon-medium",
-          "calls": 41,
-          "success": 41,
-          "errors": 0,
-          "inputTokens": 579715,
-          "outputTokens": 28949,
-          "usageReportedCalls": 41,
-          "totalLatencyMs": 1098360,
+          "calls": 65,
+          "success": 64,
+          "errors": 1,
+          "inputTokens": 909793,
+          "outputTokens": 44368,
+          "usageReportedCalls": 64,
+          "totalLatencyMs": 1864705,
           "rateLimited": 0,
-          "averageLatencyMs": 26789,
-          "lastLatencyMs": 26302,
-          "lastAt": "2026-10-30T08:42:54.764684+09:00",
+          "averageLatencyMs": 28688,
+          "lastLatencyMs": 28394,
+          "lastAt": "2026-10-30T18:17:26.776443+09:00",
           "lastStatus": "completed",
           "errorType": null,
           "rateLimitHeaders": {},
@@ -6520,34 +6676,24 @@
         "agy:gemini-3.8-flash-high": {
           "provider": "agy",
           "model": "gemini-3.8-flash-high",
-          "calls": 1,
-          "success": 1,
+          "calls": 3,
+          "success": 3,
           "errors": 0,
-          "inputTokens": 27775,
-          "outputTokens": 12404,
-          "usageReportedCalls": 1,
-          "totalLatencyMs": 40732,
+          "inputTokens": 54206,
+          "outputTokens": 30432,
+          "usageReportedCalls": 3,
+          "totalLatencyMs": 155706,
           "rateLimited": 0,
-          "averageLatencyMs": 40732,
-          "lastLatencyMs": 40732,
-          "lastAt": "2026-10-30T07:06:21.629271+09:00",
+          "averageLatencyMs": 51902,
+          "lastLatencyMs": 26515,
+          "lastAt": "2026-10-30T10:43:05.041048+09:00",
           "lastStatus": "completed",
           "errorType": null,
           "rateLimitHeaders": {},
           "httpStatus": null
         }
       },
-      "active": {
-        "37a6f6e2c8424a1f851e22cf8bb44efd": {
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:02:17.184913+09:00",
-          "agentSlot": "jarvis",
-          "reasoningEffort": null,
-          "agendaId": "aec131c0e383401b5e1ad0063b2aff137045a3b6715395493cad0faf9dae05cf",
-          "pid": 41352
-        }
-      },
+      "active": {},
       "byAgenda": {
         "2bd6eb9cc3e4664277a8a9103d2afae3ae91e11a52ce1e26e5c817d0361a705e": {
           "coverageStartedAt": "2026-10-30T06:41:45.236965+09:00",
@@ -8373,6 +8519,709 @@
             "7b4f890c05404a8bbe0238d5657a6e13"
           ],
           "checkedAt": "2026-10-30T09:00:51.582219+09:00"
+        },
+        "aa0f5eb59b727ea6c205bb037c1cc94cb97359751cfe7d3bfeeee24b4725a58e": {
+          "coverageStartedAt": "2026-10-30T10:40:11.959410+09:00",
+          "modelCalls": 40,
+          "modelErrors": 0,
+          "modelLatencyMs": 1224084,
+          "routes": {
+            "codex|gpt-6.1-sol|high": 40
+          },
+          "toolRoundTrips": 17,
+          "toolFailures": 0,
+          "uiActions": 1,
+          "uiFailures": 1,
+          "recentIds": [
+            "b3a8d928275d479382b99501716ed0c0",
+            "efa64bc3f3e74bf295955549e9887317",
+            "2da0f451c3c148ddaf4141860a2e9291",
+            "53b8c4342be9420c86dd4f946f7cff2a",
+            "910b275ecb89411cb3aeec2b88ebde7f",
+            "2578087007154aa7b6190fa9d1bdd733",
+            "60073e112db74143b74bfcadfa60161d",
+            "55e9c169b7c14d32aa357dc931e80f77",
+            "c84bcfbbd2e641d2b3f7699315c000e3",
+            "90ffc21f47674a0693b42fe7f530abb5",
+            "e075a5c16f76446daa3839c3f26de6a6",
+            "aba3e98dfeb54494ba15858b1b09e494",
+            "7aee84186e004f80b3035288a1fcf6cf",
+            "2739bae4ed7643c6a6a78b863c8e7185",
+            "87db70424da94660b27438d9f63f719d",
+            "9695fe88d3214a72a96755b3561fd6da",
+            "1e3611bed35a44a6a0c5fc21c597e9f8",
+            "052e0252eefb49e2999d3d61c23c7442",
+            "3f0b1a8e6ccf401d825e3195f13e0af8",
+            "5de3bd078a224ddc8384085647dff369",
+            "1868461e09f24603a312f5128d5bef0a",
+            "7d8a264c92bc44f1837ed848090c5dc6",
+            "4f9bca4f8b6a4630b8920ce263322513",
+            "de6ee14156434e908b47c794e9508668",
+            "6c4fbc8047eb4a9d98c354296d62447f",
+            "efed9cbc82e046659acda503e03f6b4f",
+            "4d2ab648223f41fb8e3c4e8e0455bb90",
+            "6fa553582555446f8396956aa238b3c8",
+            "30cb3c10a8aa44fd8a6a6c24560efa0a",
+            "6c1544361afa4160a30b79f8d1b44f57",
+            "5ee8ead6f46b4cac89fc7f1b5bef1164",
+            "3159986cbfb04f5e9e5a2cf08b56acf6",
+            "34aca724d16942d08636f579571255d0",
+            "5db5cb93fd9d483cb636c490c898cea0",
+            "fcb2d494c797425fb62ac78614506d95",
+            "274ed7b69b4e4f47bbb1efd1129862d5",
+            "e543924068cc4c7a9bb3130830b2bb7a",
+            "645d75e919f548b882fcd889c925f8e8",
+            "aeb8e55e12214c99beff68ac2b9e4467",
+            "342817873aab4a5fa085c3474fc831d3",
+            "e4509b1b92c84ef2a4bda1d6ce0d19f8",
+            "f4d78f00627e475a9687a94b2af1313f",
+            "dea0b69a60c546d1bc7afb0a076e29b6",
+            "e85f046d6a8d44deb1625323769107d0",
+            "f058f4e787ac4e2bbab38c8dabca4e88",
+            "d17d5bdf16394b199ba389402372944c",
+            "27714c2a83884d1d978519b5e0de3863",
+            "5086a6a19aa34a34976bc55c04a318c2",
+            "e084efa92421411ca26ab88e1b19237e",
+            "611e0cca624f47c7b7f93d66b9b29bad",
+            "e3398609f6ba4726a33d436e1254c279",
+            "2540d19e08e64539b1ae2854acb57446",
+            "065226252fed4dfbbf701f4788ccf21c",
+            "70108602676b43df9abace0a52eb2639",
+            "7d5a93210a714a1ca367bfdac747b24e",
+            "51b0e094341340d8b19b556cc72ae3a3",
+            "4d6f0d7b38df46f69fda3579ad632772",
+            "bcf7b23304304753b352ceacfd0a640d"
+          ],
+          "checkedAt": "2026-10-30T14:45:23.581228+09:00",
+          "inputTokens": 962391,
+          "outputTokens": 26273,
+          "usageReportedCalls": 40
+        },
+        "628a274996d1a75438ac33db2ed18c37dc34940e023f5ef93df2deb20896359d": {
+          "coverageStartedAt": "2026-10-30T11:07:47.379281+09:00",
+          "modelCalls": 9,
+          "modelErrors": 0,
+          "modelLatencyMs": 240645,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 5,
+            "agy|gemini-4-argon-medium|medium": 2,
+            "agy|gemini-3.8-flash-medium|medium": 2
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 24,
+          "uiFailures": 0,
+          "inputTokens": 194292,
+          "outputTokens": 7356,
+          "usageReportedCalls": 9,
+          "recentIds": [
+            "c078f59eff844cde98ff8e0b778f9aba",
+            "5fe9fc9db2eb4f29b54114bf1121fbac",
+            "345cbe7fc714415abffe7228c1dce5e1",
+            "162d88e8acda435b97f5bfa5ca6c89ec",
+            "692410b8cff64cd4acb4a44a2a290d85",
+            "c1f07637bb0844aa82cc7e5623b7421b",
+            "d0794bb75dea4757b11932f598fc1969",
+            "59f3d9b1c79a4a1898f2cac15ea0bcbb",
+            "a34dbfa25e3f4a308e35a534f7c1c0c2",
+            "1e1431784e3b418aa7029f3a3b9058a6",
+            "f39b7bdf2e484591a55c667ba7bae71b",
+            "2c27b31b79a0413eaf8ec71c96937573",
+            "36fdd55b87fe4babbd0302304054cade",
+            "5dbef7c2aeba416caf936396b8b89717",
+            "e7f99f6fe9a4431a92ab99e2bbc8708f",
+            "81d45a6137534a21bfd9a15c8f6507ac",
+            "3c95d34e65864e2aa50c74e8fe471234",
+            "eda687e2583c4565b441866205f3c807",
+            "4f7aab111f02470b9b3970e4bba67bb3",
+            "678a7a23123341abb3fd72bc20c50033",
+            "b294c608baa34136b32c6ba9d7c37de8",
+            "48cc1bd94b5d48db8dc08489ebd77819",
+            "0ca0a9128d4d40ad867b3b54c485bbc8",
+            "2f74c580e83049888e2aa97b3a9c956b",
+            "96496bd940d0407fade42458b95cde04",
+            "5f9e1755cffa4ec5bdcc7eb26cd92798",
+            "db3f9b9b27d84b04b9c381966a3524bf",
+            "0bcbadbf83a440bb84bb5fcf3d0ec52d",
+            "1265fd7d1a484eb6b7a565c048b3b9e4",
+            "269d061cc4ff4427a446afc374aa0604",
+            "cccba6b017a34185919bea88c346d90b",
+            "7670158083ba4d01a9c777c859afccc7",
+            "12a379a7ef2a485fbea3f1592267f76a"
+          ],
+          "checkedAt": "2026-10-30T11:12:36.928041+09:00"
+        },
+        "5157122f7fb65181f6472337df9e5e51b171668cf71eb27a2e24fd10522ba96e": {
+          "coverageStartedAt": "2026-10-30T11:33:17.554066+09:00",
+          "modelCalls": 9,
+          "modelErrors": 0,
+          "modelLatencyMs": 247139,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 5,
+            "agy|gemini-4-argon-medium|medium": 2,
+            "agy|gemini-3.8-flash-medium|medium": 2
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 20,
+          "uiFailures": 0,
+          "inputTokens": 189838,
+          "outputTokens": 7539,
+          "usageReportedCalls": 9,
+          "recentIds": [
+            "d66ee38358d647f39afabb4e56e1108c",
+            "0ecd4380e4964120909005a74d9af06b",
+            "2bf02716e61a48bbac4aa04212c2b93c",
+            "5e6928a84f834db79195ec8d6f138032",
+            "afb05bc68eb640af8f87d3ec080d4e79",
+            "8f8cf6fa22e04938aca1a78db794e1ec",
+            "715cdb68ba9d42849efdb9b20acd25f5",
+            "21b915c4b76840b89517ba6407fc393c",
+            "5ecbd38613e84c498264d05e86f05c15",
+            "849169e0f2974fbe84b9bf19b152ec78",
+            "63fa2e25d7cc413299814e42ccc8dffd",
+            "270ed1c03066446d8624a41c876722f5",
+            "a86f5eaef1a04bfb95fe41563ef7e496",
+            "782b61b97fa140e18652a47f29f0711c",
+            "786bd378606c491fa6a780db3e89a499",
+            "80058ce3269d4d15b6348e83e3d00f1a",
+            "6857331a1ac840ed9b5fcbe4206ad3ec",
+            "31d1ac46f23e4d388a32bfb8ec9e5473",
+            "34035b8bc51f49f88d231ccadd881e28",
+            "5fc1ea8bd9214f60aef0fa5f691cff4b",
+            "13cf0e95cdca4c9695bf62956d23dab5",
+            "ebb9ed182baa4af39f165dfa512f67a6",
+            "6ef2c6b7fdec4cb89e521076213001ca",
+            "90824da6a0d642ed9c94c99fcb6eb35e",
+            "9a51e29f5af841c294eedf538838a55c",
+            "af01f100df8d4be98cc3daa4ad3a1490",
+            "a206108eab6f4c95bc906305d40993df",
+            "6ed4bd1def3d492fbe5c2d311451c282",
+            "8ad9cc8cde3846199a89e7c62c7d8796"
+          ],
+          "checkedAt": "2026-10-30T11:38:03.176158+09:00"
+        },
+        "f6b278074f7eed417797b5e822d1825310b31ce29b002475e21103cf74b109e5": {
+          "coverageStartedAt": "2026-10-30T12:00:42.961733+09:00",
+          "modelCalls": 9,
+          "modelErrors": 0,
+          "modelLatencyMs": 241879,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 5,
+            "agy|gemini-4-argon-medium|medium": 2,
+            "agy|gemini-3.8-flash-medium|medium": 2
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 21,
+          "uiFailures": 0,
+          "inputTokens": 195816,
+          "outputTokens": 7863,
+          "usageReportedCalls": 9,
+          "recentIds": [
+            "d576b1b0826948838a07a8f85da8388d",
+            "6ccaf5f80dc74323936924cae15ef440",
+            "049339faf6d54d4582d8a87d94d92dae",
+            "1186c2d1801246bd989435ee8bca0e49",
+            "76cca58d3dbc4d16b0e52a865610d72a",
+            "ad16472286654251b70eded382fc5ee9",
+            "a2f3b83c7f8640f4a8c50469cf95e859",
+            "806f838cb4a149bb9c99dad8e679e34d",
+            "51b90e1e5a4846f1b691fae10da5f631",
+            "f900dc1803ed45c49418411516d47713",
+            "8c0db5816e454ddbb53f05ed3e0b0543",
+            "f15f932b839c4d2093fe0931f5c1047d",
+            "3a6ba09b05bb496ea1129e34217745e0",
+            "83d78f0d8e384354924b7575147089b1",
+            "5f9c058ab4ed423493e6f026520342e1",
+            "9e8e1c1453a44ebf8783f34ca0a1eaca",
+            "5df61d8b964d41f180ff85feb6ca0403",
+            "68c688c4dfa94b7b890c1969542047ff",
+            "56d4f94159a344b59b3675c202275e1e",
+            "9c9ac88bbe5146e48d5a0068f341a5ec",
+            "208c0437925a4c47b2b86ba803d45cc1",
+            "0bbe73c3fcfc499987b0f8b2358d9628",
+            "4036b71df66a4cb7a99a45a9b705aaea",
+            "24937177d32047c38ea910767627b30f",
+            "6670dbf9548f4773806bb50816681331",
+            "70c7e2f181314d4c822f9a8bddf16ae0",
+            "76ffb9f0e7884dfb9dd66d8738f5b44f",
+            "f3c7f47ec9324da49a400e6bf4634ec6",
+            "bb8f57d35b7f4ef1b8f783099401722b",
+            "338c92b8e91f49db90d0cd9f14e81f4e"
+          ],
+          "checkedAt": "2026-10-30T12:05:20.015403+09:00"
+        },
+        "47467adc5bb5c3b8f888728a1ba35edccbde83a55e1435ffe7aaa4cdc798e349": {
+          "coverageStartedAt": "2026-10-30T12:26:54.833225+09:00",
+          "modelCalls": 9,
+          "modelErrors": 0,
+          "modelLatencyMs": 234074,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 5,
+            "agy|gemini-4-argon-medium|medium": 2,
+            "agy|gemini-3.8-flash-medium|medium": 2
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 21,
+          "uiFailures": 0,
+          "inputTokens": 191670,
+          "outputTokens": 8333,
+          "usageReportedCalls": 9,
+          "recentIds": [
+            "ba63f0a51be54d8b9d8849f3f37ead19",
+            "02baebdc629e4d4b9d89be73a4435ef5",
+            "6ed17add193247608323348a69b05bca",
+            "9681efd21b4f4bd08cda3f83ad3d39d8",
+            "3e16f83d75194531ba425049326c2b6f",
+            "f72b60fe37f24afd8b0c59e655ad68e1",
+            "4e904031ee2b4d0db001e3af1ecada53",
+            "54b18eec1703452fa067b25831938ffc",
+            "3698a1a6a6a24244b4f1756732da48f8",
+            "39dc985b6737414b840ae0cf4a7b1221",
+            "a1dccbd554504dfc9d016c6c22d4fb8b",
+            "e248cea2745244f092b6fdaa6672ea69",
+            "d5a77627a844489e9dc7004a45b8bb2b",
+            "553a5beffc234a779693aeba5f548d38",
+            "1c1bd7d05e2040eab3b0384d574e9a26",
+            "9f2e85c0843b4759916f2f4738d20482",
+            "b858a06a66ca4917911a338af26a73e7",
+            "779a8357f0d74c5c985f8d1916650252",
+            "248afe56089f49e1995a75d12e548f96",
+            "41102e119cbf4845a5f966b72c65c9e9",
+            "55ec7c3045dd4e26abcacd1ed9691178",
+            "6f57dfe3ff5c48349f30437b90717639",
+            "5ff7cf13ba5f4eae8862496aa5597fd0",
+            "5b50aac3202f4b6d8303bec84f97431c",
+            "bafaa8c5c93a42ee825b53189e0fa271",
+            "96370498adad40369257eb6839ba37e3",
+            "d6377c6f7d4e42d1a02b7aeed6d9bf50",
+            "331c73094c2242708b569259e5d7a5ef",
+            "fcf00614381340bea34cc408703aad06",
+            "429bdd279cee4be5921ea105ae9332da"
+          ],
+          "checkedAt": "2026-10-30T12:31:32.232365+09:00"
+        },
+        "16a39d0ade4393cce212118d007f1cd945738439a74f297a3ef9f6c532ac8962": {
+          "coverageStartedAt": "2026-10-30T12:54:10.588677+09:00",
+          "modelCalls": 9,
+          "modelErrors": 0,
+          "modelLatencyMs": 233264,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 5,
+            "agy|gemini-4-argon-medium|medium": 2,
+            "agy|gemini-3.8-flash-medium|medium": 2
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 18,
+          "uiFailures": 0,
+          "inputTokens": 186455,
+          "outputTokens": 8116,
+          "usageReportedCalls": 9,
+          "recentIds": [
+            "a8585824e32d454b8d526a0802596b73",
+            "5bf215ae8a1a440bac8880c760ccc3da",
+            "2d061ee838f34ba19f6eb4ee3fae7ecf",
+            "fe396fb2d8834746b23d7f353c33382f",
+            "05492fc6d22f4168807b830bfe7ba3d2",
+            "558787765c0f4550b948a45d3dde65c6",
+            "d1b02404669d49a194f78b4e2c03ae94",
+            "4d7fbf48d6ae412f89cbd71b18eb9d7b",
+            "da8307a72888468dbe8a8d7f32191ce7",
+            "48ed633cf7584be492821a4846a193f9",
+            "7a9c0c2d79624589b170ea921d49714c",
+            "eef7bc63fc3f458e9d4d286dc86a7171",
+            "de9a59ab1abd4174a4ba3c25d8ce5e2b",
+            "7805e36ba5a64a2196121b40ff59cc80",
+            "f7149ad7bf084e7ca79b4cd80f2de34f",
+            "47b17885a1d143cab5c1a4339cc22778",
+            "46f1fc2b442649028032efd24a7280c6",
+            "dcaad9c1101b413f9fcb365531c5dd0f",
+            "9cc63bfbdc1e488b9622df5007e46b2b",
+            "bc087394167b4457ac92dd489d17b5e5",
+            "1e9818c841a04e87bb46b6f2046b47b4",
+            "4a13a7475a7b4f2c817103a79a721f0a",
+            "1a4ce091500c4df18a43130f8b3453f7",
+            "d0fe083b1a6d4f5794e3d25e6e1dd076",
+            "44e52294392941eeb7d096969ea2153a",
+            "a2beb95589a84f0793f27a3cb12c58bb",
+            "c5b309229c3046dba7d8b5b71d57035a"
+          ],
+          "checkedAt": "2026-10-30T12:58:51.291908+09:00"
+        },
+        "bf3f38bdd6fcb53b41255c82970f8305f80083aec930c5b8e5553323c298e934": {
+          "coverageStartedAt": "2026-10-30T13:18:32.287045+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 115168,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 75590,
+          "outputTokens": 3785,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "a4b7d202cfe7494491c2f459665ffb38",
+            "09a2895a9c3f46c9a730591a52afc666",
+            "b575c887f22f4755bb0598527adfa10f",
+            "cfb73dd39f6b4ad286522423db32dc37"
+          ],
+          "checkedAt": "2026-10-30T13:20:28.942655+09:00"
+        },
+        "b5c7b6bd3608078379422d5d9edc5f0f756e94dc25e8365419fc0c9d397dca25": {
+          "coverageStartedAt": "2026-10-30T13:42:30.497666+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 94263,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 76001,
+          "outputTokens": 4492,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "28018e796362460cb32ce59736c2eba7",
+            "36be285d26fa48d18b82687cdf15fde3",
+            "4c2ed3a2a761441880eb3dc70bf0dc4b",
+            "e47fd2f9d65f4503bfeacb344d1953ac"
+          ],
+          "checkedAt": "2026-10-30T13:44:06.061637+09:00"
+        },
+        "92699f6243a368e7e5231d4cc29481e90c2e3e17981b84ed90c4d8f21c68f1dd": {
+          "coverageStartedAt": "2026-10-30T14:00:11.159308+09:00",
+          "modelCalls": 1,
+          "modelErrors": 0,
+          "modelLatencyMs": 46345,
+          "routes": {
+            "codex|gpt-6.1-sol|high": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 17724,
+          "outputTokens": 1042,
+          "usageReportedCalls": 1,
+          "recentIds": [
+            "288e5f230e6e411d8c9976bcec219ab6"
+          ],
+          "checkedAt": "2026-10-30T14:00:57.506718+09:00"
+        },
+        "7be0cb15881ae7ff5b66ba667a6e184ca3798db6068761976463cb53ab51e881": {
+          "coverageStartedAt": "2026-10-30T14:03:19.953325+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 102970,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 75498,
+          "outputTokens": 3872,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "2d2ef25645dc4d7d8265c778a53f2fb7",
+            "56a41232ed3640a7b7fd70415466facf",
+            "b54763b1957c43acbcd3ae4f8fb5bd30",
+            "ccbb7705cda340468ed63e11f6d09d3f"
+          ],
+          "checkedAt": "2026-10-30T14:05:04.195480+09:00"
+        },
+        "b3f5f80efcc45e1244aa420b38ac097144a5c1acb1c2d12a800bb9d33d5c0c71": {
+          "coverageStartedAt": "2026-10-30T14:26:09.756788+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 95368,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 75839,
+          "outputTokens": 2756,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "fd31823adb8a4f45a1b84c6603cd9636",
+            "459c4094074e49e4a00453c2903e8b1b",
+            "a499690f26314663abfe38a2dcdb0252",
+            "681a63891bee48ac87c15f98b9d871db"
+          ],
+          "checkedAt": "2026-10-30T14:27:46.374194+09:00"
+        },
+        "d3874f269a5c1e493c1a3392931f832427a619423c9e0cac7e7eaf812108ecfb": {
+          "coverageStartedAt": "2026-10-30T14:46:54.654628+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 93937,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 76183,
+          "outputTokens": 3292,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "fc9ec887b38747d680fe7ea492ac2197",
+            "76d5164751cf421384f261cec01cc987",
+            "5520c6b6dc184a8eae273ee8cbad13b0",
+            "b6bc05d50dda42b6923f0de6098ad7be"
+          ],
+          "checkedAt": "2026-10-30T14:48:29.912398+09:00"
+        },
+        "44b18e4bf6e8dc22a64e6002756df739e84dffbca1d04705539e9dc3a8017087": {
+          "coverageStartedAt": "2026-10-30T15:09:09.810319+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 103101,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 75198,
+          "outputTokens": 3408,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "f47127fe2dcf44a2ade1fa607e8b2d96",
+            "2b265d768ba14d8a85be518396141714",
+            "46fb641b62c6439fb191641b9c37e7c0",
+            "de3737278ab74eeaab87fb9380708ff1"
+          ],
+          "checkedAt": "2026-10-30T15:10:54.833967+09:00"
+        },
+        "6f8ba11f375177966e35b3b2b476ddf70e3f0b0608f821b9eae6f8c5c4ae4deb": {
+          "coverageStartedAt": "2026-10-30T15:31:55.446726+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 101408,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 70993,
+          "outputTokens": 3212,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "c5f4ddf800f54f7d8a5614dfdc8cd8c6",
+            "86b5649a6ec64c358f8b1741579c578a",
+            "8be5f3c6ec65455e903dafd4b1e184ce",
+            "0a5d1a841edc430bac61e4ad1405199a"
+          ],
+          "checkedAt": "2026-10-30T15:33:38.798554+09:00"
+        },
+        "4cac15b65ed8abca4dac9b15442346cfe7d2422dd12ab5889581a3693f94247d": {
+          "coverageStartedAt": "2026-10-30T15:55:56.632719+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 100374,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 71968,
+          "outputTokens": 3031,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "0b2f24674b9b4d68b3f63c3a84d76e3f",
+            "ae504e035b1640b1b57f4d22ee01204c",
+            "519b327ec29f4e2196d940be2026f20f",
+            "f47788eb9475456782114c4fcc8faafe"
+          ],
+          "checkedAt": "2026-10-30T15:57:39.218442+09:00"
+        },
+        "eea1967e769fd86b5ebe6bcb3145ed8aa2f77bc78fe8c18b15154e15cebd0697": {
+          "coverageStartedAt": "2026-10-30T16:17:43.592532+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 121287,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 77921,
+          "outputTokens": 3260,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "0d307082dfb14645a6ac60936681dc9b",
+            "4d72eee60300410eb4a70b38e3a83c84",
+            "47f856d3e7bd4731b1f3c279d30cc33a",
+            "a6c30d35c5d04d97b1734c3ddc7e09b3"
+          ],
+          "checkedAt": "2026-10-30T16:19:46.518573+09:00"
+        },
+        "e3810412830d1e98d86ebfeccdacdea24d7cee42ed362ecd7f202a107b49beae": {
+          "coverageStartedAt": "2026-10-30T16:40:33.304611+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 101905,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 77321,
+          "outputTokens": 4464,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "45fe1e01c506402e9a87556f0f00f17d",
+            "4e1498df5d31484e9913a5bb6dcb6e7b",
+            "601ab677866545e8bf698e51e66b10dc",
+            "8d9e6dde8aaf46c19e9f2a7475296651"
+          ],
+          "checkedAt": "2026-10-30T16:42:16.558466+09:00"
+        },
+        "932e74aad377310dd3dcacc152ad768be2fedfe371d9025d44f396d430ad9087": {
+          "coverageStartedAt": "2026-10-30T17:02:27.124421+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 114111,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 78535,
+          "outputTokens": 3595,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "52fe234a2ccc4fdab059957a90756486",
+            "a9631945446549059bf9d76c8d0c2bde",
+            "d58e78b0c3c24ab191759f2868a1c9cc",
+            "04b2e32eb2fa4bde917db603b2dbb1c3"
+          ],
+          "checkedAt": "2026-10-30T17:04:22.495660+09:00"
+        },
+        "2c526c78427b053a4a289d40078e15c070c8733f7a13438fd08948e9df253ee2": {
+          "coverageStartedAt": "2026-10-30T17:28:36.049230+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 109131,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 77207,
+          "outputTokens": 3632,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "b6dcff44a22f4590ab06bf5fa5b221c9",
+            "20c254f95610470da65dc83fc6a5566b",
+            "4d3103e6be144cacacbfceb88bf8ad64",
+            "45ec9383f1e84d049ee90e0d3a5450dc"
+          ],
+          "checkedAt": "2026-10-30T17:30:26.329900+09:00"
+        },
+        "bfb37107d9d30ae0edc067949f92c2ad18db4728c4afc66ca2267bdae647d8f1": {
+          "coverageStartedAt": "2026-10-30T17:50:38.305574+09:00",
+          "modelCalls": 5,
+          "modelErrors": 1,
+          "modelLatencyMs": 157600,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "codex|gpt-6.1-sol|low": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 77184,
+          "outputTokens": 3087,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "1a170bedab1146b5a0d3f8c819442710",
+            "5e4fce86a87e49b4af7a179959a9cfac",
+            "85ddb4d8e4184158b837899252f53fb7",
+            "11e7324049aa4eda8384702954a62959",
+            "1692ff6fd7bd4f799c4c67e6a3cf8d14"
+          ],
+          "checkedAt": "2026-10-30T17:53:17.270986+09:00"
+        },
+        "5c9dcd4953f29bbd20e3757262fa6fb24425d69fa2f218e318c54d9a4e69a468": {
+          "coverageStartedAt": "2026-10-30T18:16:42.473774+09:00",
+          "modelCalls": 4,
+          "modelErrors": 0,
+          "modelLatencyMs": 93851,
+          "routes": {
+            "codex|gpt-6.1-sol|medium": 2,
+            "agy|gemini-4-argon-medium|medium": 1,
+            "agy|gemini-3.8-flash-medium|medium": 1
+          },
+          "toolRoundTrips": 0,
+          "toolFailures": 0,
+          "uiActions": 0,
+          "uiFailures": 0,
+          "inputTokens": 75712,
+          "outputTokens": 2968,
+          "usageReportedCalls": 4,
+          "recentIds": [
+            "7fffe33cea5a48b2bd0363ce498a4381",
+            "2b0a066ccb8a4aa5a89ac81715542373",
+            "585d6fcc66664f48a2bb9f65892b5646",
+            "e2646c319abb410ba3ec1467490bb03d"
+          ],
+          "checkedAt": "2026-10-30T18:18:17.605914+09:00"
         }
       },
       "routeHealth": {
@@ -8380,26 +9229,27 @@
           "failures": 0,
           "retryAt": 0,
           "probeUntil": 0,
-          "checkedAt": 1793318451.5805774,
+          "checkedAt": 1793352117.6141427,
           "errorType": "RuntimeError"
         },
         "agy:gemini-4-argon-medium": {
           "failures": 0,
           "retryAt": 0,
           "probeUntil": 0,
-          "checkedAt": 1793317374.7634308
+          "checkedAt": 1793351846.7747378,
+          "errorType": "RuntimeError"
         },
         "agy:gemini-3.8-flash-medium": {
           "failures": 0,
           "retryAt": 0,
           "probeUntil": 0,
-          "checkedAt": 1793317387.7326355
+          "checkedAt": 1793351863.127694
         },
         "agy:gemini-3.8-flash-high": {
           "failures": 0,
           "retryAt": 0,
           "probeUntil": 0,
-          "checkedAt": 1793311581.6277144
+          "checkedAt": 1793324585.039024
         },
         "agy:gemini-2.5-pro": {
           "failures": 5,
@@ -8411,528 +9261,528 @@
       },
       "recent": [
         {
-          "id": "da4e5c2524cf47e791d5a4c31e9e7aca",
-          "agendaId": "aec131c0e383401b5e1ad0063b2aff137045a3b6715395493cad0faf9dae05cf",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:10:10.720266+09:00",
-          "latencyMs": 67284,
-          "inputTokens": 25598,
-          "outputTokens": 1952,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "36b100fd6b8a4f7aaff2d00e6d707893",
-          "agendaId": "aec131c0e383401b5e1ad0063b2aff137045a3b6715395493cad0faf9dae05cf",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:11:18.616599+09:00",
-          "latencyMs": 224998,
-          "inputTokens": 42473,
-          "outputTokens": 13187,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "c00d3f68af604ecbaa4c6bc4cc8d6fba",
-          "agendaId": "aec131c0e383401b5e1ad0063b2aff137045a3b6715395493cad0faf9dae05cf",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:15:09.265446+09:00",
-          "latencyMs": 17667,
-          "inputTokens": 25942,
-          "outputTokens": 496,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "4d7d6f708cea4eabb3c06d8016ed877a",
-          "agendaId": "aec131c0e383401b5e1ad0063b2aff137045a3b6715395493cad0faf9dae05cf",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:15:32.855658+09:00",
-          "latencyMs": 20091,
-          "inputTokens": 25853,
-          "outputTokens": 524,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "91df27cf532b49998306a4d86331f63e",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:29:23.493051+09:00",
-          "latencyMs": 19197,
-          "inputTokens": 16236,
-          "outputTokens": 289,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "medium"
-        },
-        {
-          "id": "d477cbc2d6944f5f8a661297564fc22d",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "agy",
-          "model": "gemini-4-argon-medium",
-          "startedAt": "2026-10-30T08:29:43.139790+09:00",
-          "latencyMs": 30936,
-          "inputTokens": 15020,
-          "outputTokens": 777,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "medium"
-        },
-        {
-          "id": "19d782b65719478895937798caf0ac6c",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "519b327ec29f4e2196d940be2026f20f",
+          "agendaId": "4cac15b65ed8abca4dac9b15442346cfe7d2422dd12ab5889581a3693f94247d",
           "provider": "agy",
           "model": "gemini-3.8-flash-medium",
-          "startedAt": "2026-10-30T08:30:14.457680+09:00",
-          "latencyMs": 15669,
-          "inputTokens": 28331,
-          "outputTokens": 2090,
+          "startedAt": "2026-10-30T15:56:45.341577+09:00",
+          "latencyMs": 14386,
+          "inputTokens": 24653,
+          "outputTokens": 1620,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "83b06f9ad2dc4e53a2729111c9972c58",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "f47788eb9475456782114c4fcc8faafe",
+          "agendaId": "4cac15b65ed8abca4dac9b15442346cfe7d2422dd12ab5889581a3693f94247d",
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:30:30.501460+09:00",
-          "latencyMs": 28673,
-          "inputTokens": 15972,
-          "outputTokens": 767,
+          "startedAt": "2026-10-30T15:57:00.315362+09:00",
+          "latencyMs": 38900,
+          "inputTokens": 16212,
+          "outputTokens": 661,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "c9f81e42e9c841e0bdae4d1521400599",
-          "agendaId": "7bc4ce47a3cc184d2a73f989abf00ae18897d8b46375f80d273bfca68f921977",
+          "id": "70decfb92d404c34adad06470db10b78",
+          "agendaId": null,
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:30:59.137924+09:00",
-          "latencyMs": 16604,
-          "inputTokens": 17396,
-          "outputTokens": 248,
+          "startedAt": "2026-10-30T15:59:26.495711+09:00",
+          "latencyMs": 79482,
+          "inputTokens": 21652,
+          "outputTokens": 2150,
           "httpStatus": null,
           "errorType": null,
-          "reasoningEffort": "medium"
+          "reasoningEffort": "high"
         },
         {
-          "id": "9bd43677414345b0a7989bab4aa5833e",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "a16e35b4bf8e44479360ab3a8e6efdf2",
+          "agendaId": null,
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:31:31.814823+09:00",
-          "latencyMs": 19463,
-          "inputTokens": 51049,
-          "outputTokens": 556,
+          "startedAt": "2026-10-30T16:14:29.554985+09:00",
+          "latencyMs": 76115,
+          "inputTokens": 22052,
+          "outputTokens": 1812,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "0d307082dfb14645a6ac60936681dc9b",
+          "agendaId": "eea1967e769fd86b5ebe6bcb3145ed8aa2f77bc78fe8c18b15154e15cebd0697",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:17:43.592027+09:00",
+          "latencyMs": 19488,
+          "inputTokens": 16234,
+          "outputTokens": 202,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "551fd44e8c614120ae972ed13978901b",
-          "agendaId": "7bc4ce47a3cc184d2a73f989abf00ae18897d8b46375f80d273bfca68f921977",
+          "id": "4d72eee60300410eb4a70b38e3a83c84",
+          "agendaId": "eea1967e769fd86b5ebe6bcb3145ed8aa2f77bc78fe8c18b15154e15cebd0697",
           "provider": "agy",
           "model": "gemini-4-argon-medium",
-          "startedAt": "2026-10-30T08:31:16.095414+09:00",
-          "latencyMs": 39612,
-          "inputTokens": 15530,
-          "outputTokens": 1362,
+          "startedAt": "2026-10-30T16:18:03.770043+09:00",
+          "latencyMs": 39304,
+          "inputTokens": 14684,
+          "outputTokens": 461,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "78be0c9341d641b78d508c97b85e65b7",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:31:58.018956+09:00",
-          "latencyMs": 12056,
-          "inputTokens": 15990,
-          "outputTokens": 179,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "medium"
-        },
-        {
-          "id": "a4c69dadf8444b3fb6446099f06671bc",
-          "agendaId": "7bc4ce47a3cc184d2a73f989abf00ae18897d8b46375f80d273bfca68f921977",
+          "id": "47f856d3e7bd4731b1f3c279d30cc33a",
+          "agendaId": "eea1967e769fd86b5ebe6bcb3145ed8aa2f77bc78fe8c18b15154e15cebd0697",
           "provider": "agy",
           "model": "gemini-3.8-flash-medium",
-          "startedAt": "2026-10-30T08:31:56.289045+09:00",
-          "latencyMs": 15380,
-          "inputTokens": 28292,
-          "outputTokens": 2317,
+          "startedAt": "2026-10-30T16:18:43.508717+09:00",
+          "latencyMs": 16440,
+          "inputTokens": 27813,
+          "outputTokens": 1801,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "6c26027ef94442d7b0451be2bc0916ea",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "a6c30d35c5d04d97b1734c3ddc7e09b3",
+          "agendaId": "eea1967e769fd86b5ebe6bcb3145ed8aa2f77bc78fe8c18b15154e15cebd0697",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:19:00.451539+09:00",
+          "latencyMs": 46055,
+          "inputTokens": 19190,
+          "outputTokens": 796,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "47fae719b0114dc7b2e00640bf042e57",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:29:30.174780+09:00",
+          "latencyMs": 83756,
+          "inputTokens": 21649,
+          "outputTokens": 2014,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "9ac220c9868f4b149bc0eee35c08b8f4",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:38:30.310156+09:00",
+          "latencyMs": 108423,
+          "inputTokens": 20767,
+          "outputTokens": 2468,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "45fe1e01c506402e9a87556f0f00f17d",
+          "agendaId": "e3810412830d1e98d86ebfeccdacdea24d7cee42ed362ecd7f202a107b49beae",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:40:33.304191+09:00",
+          "latencyMs": 16931,
+          "inputTokens": 15377,
+          "outputTokens": 239,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "4e1498df5d31484e9913a5bb6dcb6e7b",
+          "agendaId": "e3810412830d1e98d86ebfeccdacdea24d7cee42ed362ecd7f202a107b49beae",
           "provider": "agy",
           "model": "gemini-4-argon-medium",
-          "startedAt": "2026-10-30T08:32:10.661781+09:00",
-          "latencyMs": 30803,
-          "inputTokens": 13905,
-          "outputTokens": 1007,
+          "startedAt": "2026-10-30T16:40:50.683001+09:00",
+          "latencyMs": 33662,
+          "inputTokens": 15412,
+          "outputTokens": 1224,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "2824e87334ed468091c5497bf68b9333",
-          "agendaId": "7bc4ce47a3cc184d2a73f989abf00ae18897d8b46375f80d273bfca68f921977",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:32:12.051049+09:00",
-          "latencyMs": 32379,
-          "inputTokens": 17781,
-          "outputTokens": 878,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "medium"
-        },
-        {
-          "id": "b647d070509e487c9cbfb9185904b578",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "601ab677866545e8bf698e51e66b10dc",
+          "agendaId": "e3810412830d1e98d86ebfeccdacdea24d7cee42ed362ecd7f202a107b49beae",
           "provider": "agy",
           "model": "gemini-3.8-flash-medium",
-          "startedAt": "2026-10-30T08:32:41.936691+09:00",
-          "latencyMs": 13012,
-          "inputTokens": 27743,
-          "outputTokens": 1321,
+          "startedAt": "2026-10-30T16:41:24.868968+09:00",
+          "latencyMs": 17124,
+          "inputTokens": 28710,
+          "outputTokens": 2220,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "cddf559517c5485eb9871b0cd031ae46",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "8d9e6dde8aaf46c19e9f2a7475296651",
+          "agendaId": "e3810412830d1e98d86ebfeccdacdea24d7cee42ed362ecd7f202a107b49beae",
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:32:55.521320+09:00",
-          "latencyMs": 33814,
-          "inputTokens": 19087,
+          "startedAt": "2026-10-30T16:41:42.362077+09:00",
+          "latencyMs": 34188,
+          "inputTokens": 17822,
+          "outputTokens": 781,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "481033dc033e4f7c991ad9868380b9d6",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:43:31.868398+09:00",
+          "latencyMs": 94984,
+          "inputTokens": 21208,
+          "outputTokens": 2172,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "2c69a18bb5f04fc3b2cb5a80cc76e3a6",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T16:58:35.985720+09:00",
+          "latencyMs": 56564,
+          "inputTokens": 21171,
+          "outputTokens": 1718,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "52fe234a2ccc4fdab059957a90756486",
+          "agendaId": "932e74aad377310dd3dcacc152ad768be2fedfe371d9025d44f396d430ad9087",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:02:27.124017+09:00",
+          "latencyMs": 20778,
+          "inputTokens": 16238,
+          "outputTokens": 219,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "a9631945446549059bf9d76c8d0c2bde",
+          "agendaId": "932e74aad377310dd3dcacc152ad768be2fedfe371d9025d44f396d430ad9087",
+          "provider": "agy",
+          "model": "gemini-4-argon-medium",
+          "startedAt": "2026-10-30T17:02:48.311280+09:00",
+          "latencyMs": 29408,
+          "inputTokens": 14728,
+          "outputTokens": 525,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "d58e78b0c3c24ab191759f2868a1c9cc",
+          "agendaId": "932e74aad377310dd3dcacc152ad768be2fedfe371d9025d44f396d430ad9087",
+          "provider": "agy",
+          "model": "gemini-3.8-flash-medium",
+          "startedAt": "2026-10-30T17:03:18.121704+09:00",
+          "latencyMs": 19817,
+          "inputTokens": 28397,
+          "outputTokens": 2027,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "04b2e32eb2fa4bde917db603b2dbb1c3",
+          "agendaId": "932e74aad377310dd3dcacc152ad768be2fedfe371d9025d44f396d430ad9087",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:03:38.378524+09:00",
+          "latencyMs": 44108,
+          "inputTokens": 19172,
+          "outputTokens": 824,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "25ebb992e8ea403fa36f09bed801eddd",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:13:39.159803+09:00",
+          "latencyMs": 95685,
+          "inputTokens": 22141,
+          "outputTokens": 2401,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "2217a2bf456c4033bdd461bcee55ca87",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:27:10.188754+09:00",
+          "latencyMs": 68052,
+          "inputTokens": 21265,
+          "outputTokens": 1932,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "high"
+        },
+        {
+          "id": "b6dcff44a22f4590ab06bf5fa5b221c9",
+          "agendaId": "2c526c78427b053a4a289d40078e15c070c8733f7a13438fd08948e9df253ee2",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:28:36.048812+09:00",
+          "latencyMs": 17633,
+          "inputTokens": 15380,
+          "outputTokens": 260,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "20c254f95610470da65dc83fc6a5566b",
+          "agendaId": "2c526c78427b053a4a289d40078e15c070c8733f7a13438fd08948e9df253ee2",
+          "provider": "agy",
+          "model": "gemini-4-argon-medium",
+          "startedAt": "2026-10-30T17:28:54.024158+09:00",
+          "latencyMs": 32326,
+          "inputTokens": 14223,
+          "outputTokens": 836,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "4d3103e6be144cacacbfceb88bf8ad64",
+          "agendaId": "2c526c78427b053a4a289d40078e15c070c8733f7a13438fd08948e9df253ee2",
+          "provider": "agy",
+          "model": "gemini-3.8-flash-medium",
+          "startedAt": "2026-10-30T17:29:26.734469+09:00",
+          "latencyMs": 16828,
+          "inputTokens": 28406,
+          "outputTokens": 1677,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "45ec9383f1e84d049ee90e0d3a5450dc",
+          "agendaId": "2c526c78427b053a4a289d40078e15c070c8733f7a13438fd08948e9df253ee2",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:29:43.982947+09:00",
+          "latencyMs": 42344,
+          "inputTokens": 19198,
           "outputTokens": 859,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "fa13e486167547789193b49fb89e5760",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "1484787dddf44ce3bc6fcb4ad2875094",
+          "agendaId": null,
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:33:35.049551+09:00",
-          "latencyMs": 11082,
-          "inputTokens": 18926,
-          "outputTokens": 125,
+          "startedAt": "2026-10-30T17:32:12.913436+09:00",
+          "latencyMs": 50642,
+          "inputTokens": 22568,
+          "outputTokens": 2216,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "high"
         },
         {
-          "id": "ad5dafae53124db8999f54986f01c9e7",
-          "agendaId": "7bc4ce47a3cc184d2a73f989abf00ae18897d8b46375f80d273bfca68f921977",
+          "id": "ac4725471caa4871bac7ca9e22c8ccd7",
+          "agendaId": null,
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:32:47.424826+09:00",
-          "latencyMs": 69529,
-          "inputTokens": 22703,
-          "outputTokens": 3266,
+          "startedAt": "2026-10-30T17:47:13.662304+09:00",
+          "latencyMs": 73933,
+          "inputTokens": 21583,
+          "outputTokens": 2513,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "high"
         },
         {
-          "id": "6e395646a7ee4105abae0646f5a1e023",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "1a170bedab1146b5a0d3f8c819442710",
+          "agendaId": "bfb37107d9d30ae0edc067949f92c2ad18db4728c4afc66ca2267bdae647d8f1",
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:33:48.630383+09:00",
-          "latencyMs": 11040,
-          "inputTokens": 19105,
-          "outputTokens": 137,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "9c74d6aa12d74b199deb82f8c0540cae",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:34:00.441997+09:00",
-          "latencyMs": 12051,
-          "inputTokens": 18935,
-          "outputTokens": 160,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "39f6ed237cd04ba992be8458ed85a04c",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:34:15.028302+09:00",
-          "latencyMs": 19984,
-          "inputTokens": 20487,
-          "outputTokens": 340,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "30a07c0beea34d0c92053098f5d501a8",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:34:37.705632+09:00",
-          "latencyMs": 27888,
-          "inputTokens": 19478,
-          "outputTokens": 361,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "acbc14606b574b2f9c9c95b36078ddd3",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:35:07.541826+09:00",
-          "latencyMs": 20000,
-          "inputTokens": 19697,
-          "outputTokens": 307,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "b760b0a864844970a32f0666fdc75196",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:35:29.765819+09:00",
-          "latencyMs": 29557,
-          "inputTokens": 20765,
-          "outputTokens": 554,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "63e87e4e8e5e4c9d954ac5e5be4bf2e9",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:36:01.678904+09:00",
-          "latencyMs": 15951,
-          "inputTokens": 19842,
-          "outputTokens": 221,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "29587fe3e8cc4288ab5506968fde6ea1",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:36:21.372425+09:00",
-          "latencyMs": 13967,
-          "inputTokens": 20854,
-          "outputTokens": 210,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "248f542b92df4a088e7a4de288f69598",
-          "agendaId": "a299e819bd4d16a65111079df4ce35b247fe757e8b531c0b3a1ee818d4e2bef6",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:36:41.791564+09:00",
-          "latencyMs": 20021,
-          "inputTokens": 17004,
-          "outputTokens": 311,
+          "startedAt": "2026-10-30T17:50:38.305094+09:00",
+          "latencyMs": 15306,
+          "inputTokens": 15299,
+          "outputTokens": 178,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "93602187be344a6ea418832411db8ea0",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:36:42.545478+09:00",
-          "latencyMs": 23900,
-          "inputTokens": 19950,
-          "outputTokens": 401,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "24334ab28ab44cb3ba459dac6f6dad9a",
-          "agendaId": "a299e819bd4d16a65111079df4ce35b247fe757e8b531c0b3a1ee818d4e2bef6",
+          "id": "5e4fce86a87e49b4af7a179959a9cfac",
+          "agendaId": "bfb37107d9d30ae0edc067949f92c2ad18db4728c4afc66ca2267bdae647d8f1",
           "provider": "agy",
           "model": "gemini-4-argon-medium",
-          "startedAt": "2026-10-30T08:37:02.307706+09:00",
-          "latencyMs": 38692,
-          "inputTokens": 15516,
-          "outputTokens": 1170,
+          "startedAt": "2026-10-30T17:50:54.126445+09:00",
+          "latencyMs": 70775,
+          "inputTokens": 0,
+          "outputTokens": 0,
           "httpStatus": null,
-          "errorType": null,
+          "errorType": "RuntimeError",
           "reasoningEffort": "medium"
         },
         {
-          "id": "59be01a820ef494aa50d7dcde5f617c6",
-          "agendaId": "a299e819bd4d16a65111079df4ce35b247fe757e8b531c0b3a1ee818d4e2bef6",
+          "id": "85ddb4d8e4184158b837899252f53fb7",
+          "agendaId": "bfb37107d9d30ae0edc067949f92c2ad18db4728c4afc66ca2267bdae647d8f1",
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T17:50:54.126445+09:00",
+          "latencyMs": 18552,
+          "inputTokens": 15836,
+          "outputTokens": 231,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "low"
+        },
+        {
+          "id": "11e7324049aa4eda8384702954a62959",
+          "agendaId": "bfb37107d9d30ae0edc067949f92c2ad18db4728c4afc66ca2267bdae647d8f1",
           "provider": "agy",
           "model": "gemini-3.8-flash-medium",
-          "startedAt": "2026-10-30T08:37:41.355076+09:00",
-          "latencyMs": 12244,
-          "inputTokens": 27796,
-          "outputTokens": 1508,
+          "startedAt": "2026-10-30T17:52:23.860027+09:00",
+          "latencyMs": 18409,
+          "inputTokens": 28369,
+          "outputTokens": 1943,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "f279211d472e4e76b8e63916ee47d90a",
-          "agendaId": "11c445981b41fcf2870f0c8b7fa37209430deed9ee975e3c370f7a1b584b6f15",
+          "id": "1692ff6fd7bd4f799c4c67e6a3cf8d14",
+          "agendaId": "bfb37107d9d30ae0edc067949f92c2ad18db4728c4afc66ca2267bdae647d8f1",
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:37:30.275746+09:00",
-          "latencyMs": 27395,
-          "inputTokens": 15561,
-          "outputTokens": 964,
+          "startedAt": "2026-10-30T17:52:42.710238+09:00",
+          "latencyMs": 34558,
+          "inputTokens": 17680,
+          "outputTokens": 735,
+          "httpStatus": null,
+          "errorType": null,
+          "reasoningEffort": "medium"
+        },
+        {
+          "id": "cb581c9a6cc548dbb64e85ce80e9b08f",
+          "agendaId": null,
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "startedAt": "2026-10-30T18:02:15.683322+09:00",
+          "latencyMs": 75621,
+          "inputTokens": 21594,
+          "outputTokens": 2333,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "high"
         },
         {
-          "id": "00ad0fcec7a443cb923a689571ec060d",
-          "agendaId": "a299e819bd4d16a65111079df4ce35b247fe757e8b531c0b3a1ee818d4e2bef6",
+          "id": "d4e3d845fee74288b656cdf80c1c9a57",
+          "agendaId": null,
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:37:54.216506+09:00",
-          "latencyMs": 34050,
-          "inputTokens": 17864,
-          "outputTokens": 898,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "medium"
-        },
-        {
-          "id": "658e0f727d40472cbffa049af6c19f0b",
-          "agendaId": "a299e819bd4d16a65111079df4ce35b247fe757e8b531c0b3a1ee818d4e2bef6",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:38:31.053079+09:00",
-          "latencyMs": 96575,
-          "inputTokens": 27620,
-          "outputTokens": 3642,
+          "startedAt": "2026-10-30T18:15:00.731115+09:00",
+          "latencyMs": 86091,
+          "inputTokens": 21738,
+          "outputTokens": 2535,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "high"
         },
         {
-          "id": "2fabb611847d46189c4bfe8e5e0d8a45",
-          "agendaId": "1562136328554dcbefe10e78defe7c17880b69f5a7e070bc5dc25ed2284cef35",
+          "id": "7fffe33cea5a48b2bd0363ce498a4381",
+          "agendaId": "5c9dcd4953f29bbd20e3757262fa6fb24425d69fa2f218e318c54d9a4e69a468",
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:42:13.116253+09:00",
-          "latencyMs": 14998,
-          "inputTokens": 16805,
-          "outputTokens": 244,
+          "startedAt": "2026-10-30T18:16:42.473335+09:00",
+          "latencyMs": 15491,
+          "inputTokens": 15341,
+          "outputTokens": 168,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "051ce6e2fbaa452c86d9cf0bd6a6327d",
-          "agendaId": "1562136328554dcbefe10e78defe7c17880b69f5a7e070bc5dc25ed2284cef35",
+          "id": "2b0a066ccb8a4aa5a89ac81715542373",
+          "agendaId": "5c9dcd4953f29bbd20e3757262fa6fb24425d69fa2f218e318c54d9a4e69a468",
           "provider": "agy",
           "model": "gemini-4-argon-medium",
-          "startedAt": "2026-10-30T08:42:28.455450+09:00",
-          "latencyMs": 26302,
-          "inputTokens": 13600,
-          "outputTokens": 624,
+          "startedAt": "2026-10-30T18:16:58.372596+09:00",
+          "latencyMs": 28394,
+          "inputTokens": 14994,
+          "outputTokens": 789,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "0372c02469ee4612b2646f1eb5c8b4b2",
-          "agendaId": "1562136328554dcbefe10e78defe7c17880b69f5a7e070bc5dc25ed2284cef35",
+          "id": "585d6fcc66664f48a2bb9f65892b5646",
+          "agendaId": "5c9dcd4953f29bbd20e3757262fa6fb24425d69fa2f218e318c54d9a4e69a468",
           "provider": "agy",
           "model": "gemini-3.8-flash-medium",
-          "startedAt": "2026-10-30T08:42:55.121469+09:00",
-          "latencyMs": 12604,
-          "inputTokens": 27615,
-          "outputTokens": 1458,
+          "startedAt": "2026-10-30T18:17:27.235996+09:00",
+          "latencyMs": 15887,
+          "inputTokens": 27631,
+          "outputTokens": 1285,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "9e39e837c7f2412cb13a8167fada3435",
-          "agendaId": "1562136328554dcbefe10e78defe7c17880b69f5a7e070bc5dc25ed2284cef35",
+          "id": "e2646c319abb410ba3ec1467490bb03d",
+          "agendaId": "5c9dcd4953f29bbd20e3757262fa6fb24425d69fa2f218e318c54d9a4e69a468",
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:43:08.241699+09:00",
-          "latencyMs": 32664,
-          "inputTokens": 17769,
-          "outputTokens": 943,
+          "startedAt": "2026-10-30T18:17:43.523286+09:00",
+          "latencyMs": 34079,
+          "inputTokens": 17746,
+          "outputTokens": 726,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "medium"
         },
         {
-          "id": "300ab58b43f241d9aceb6aa71e26aaed",
-          "agendaId": "1562136328554dcbefe10e78defe7c17880b69f5a7e070bc5dc25ed2284cef35",
+          "id": "2421a1b1f2904e9181f2907a1222e78a",
+          "agendaId": null,
           "provider": "codex",
           "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T08:43:47.709324+09:00",
-          "latencyMs": 101361,
-          "inputTokens": 34777,
-          "outputTokens": 3462,
-          "httpStatus": null,
-          "errorType": null,
-          "reasoningEffort": "high"
-        },
-        {
-          "id": "7b4f890c05404a8bbe0238d5657a6e13",
-          "agendaId": "ed95fcbfffed97af0600a70a46682567058e0d4fff6721ae60ee7d2c874628f7",
-          "provider": "codex",
-          "model": "gpt-6.1-sol",
-          "startedAt": "2026-10-30T09:00:26.727153+09:00",
-          "latencyMs": 24852,
-          "inputTokens": 17668,
-          "outputTokens": 478,
+          "startedAt": "2026-10-30T18:20:04.290957+09:00",
+          "latencyMs": 113322,
+          "inputTokens": 23058,
+          "outputTokens": 2913,
           "httpStatus": null,
           "errorType": null,
           "reasoningEffort": "high"
         }
       ],
       "coverageStartedAt": "2026-10-30T00:00:10.187660+09:00",
-      "checkedAt": "2026-10-30T09:00:51.582219+09:00",
+      "checkedAt": "2026-10-30T18:21:57.615877+09:00",
       "lastRouteBlock": {
         "provider": "agy",
         "model": "gemini-2.5-pro",
@@ -8943,7 +9793,7 @@
     "quotas": {
       "openrouter": {
         "status": "collected",
-        "checkedAt": 1793322923.7338336,
+        "checkedAt": 1793352284.30739,
         "usage": 34.985513286,
         "usage_daily": 0,
         "limit": null,
@@ -8975,7 +9825,7 @@
             "usable": true,
             "activeRotation": true,
             "isLastUsed": true,
-            "callCount": 199,
+            "callCount": 262,
             "buckets": {
               "codex": {
                 "primary": {
@@ -8991,7 +9841,7 @@
                 "planType": "pro"
               }
             },
-            "checkedAt": 1793322928.801745
+            "checkedAt": 1793352289.7390273
           },
           {
             "email": "choiggerh@naver.com",
@@ -9000,7 +9850,7 @@
             "usable": true,
             "activeRotation": true,
             "isLastUsed": false,
-            "callCount": 199,
+            "callCount": 262,
             "buckets": {
               "codex": {
                 "primary": {
@@ -9016,11 +9866,11 @@
                 "planType": "pro"
               }
             },
-            "checkedAt": 1793322931.0220969
+            "checkedAt": 1793352290.7191718
           }
         ],
         "lastUsedAccount": "baro76650@gmail.com",
-        "checkedAt": 1793322931.0220985
+        "checkedAt": 1793352290.7191744
       },
       "agy": {
         "status": "collected",
@@ -9030,13 +9880,13 @@
             "buckets": [
               {
                 "window": "weekly",
-                "remainingPercent": 45.7,
+                "remainingPercent": 45.6,
                 "resetAt": "2026-11-02T09:00:01+00:00"
               },
               {
                 "window": "5h",
-                "remainingPercent": 98.9,
-                "resetAt": "2026-10-30T02:39:37+00:00"
+                "remainingPercent": 100,
+                "resetAt": "2026-10-30T14:24:51+00:00"
               }
             ]
           },
@@ -9051,7 +9901,7 @@
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-10-30T06:15:31+00:00"
+                "resetAt": "2026-10-30T14:24:51+00:00"
               }
             ]
           }
@@ -9063,20 +9913,20 @@
             "usable": true,
             "activeRotation": true,
             "isLastUsed": false,
-            "callCount": 18,
+            "callCount": 19,
             "groups": [
               {
                 "name": "Gemini Models",
                 "buckets": [
                   {
                     "window": "weekly",
-                    "remainingPercent": 45.7,
+                    "remainingPercent": 45.6,
                     "resetAt": "2026-11-02T09:00:01+00:00"
                   },
                   {
                     "window": "5h",
-                    "remainingPercent": 98.9,
-                    "resetAt": "2026-10-30T02:39:37+00:00"
+                    "remainingPercent": 100,
+                    "resetAt": "2026-10-30T14:24:51+00:00"
                   }
                 ]
               },
@@ -9091,12 +9941,12 @@
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-30T06:15:31+00:00"
+                    "resetAt": "2026-10-30T14:24:51+00:00"
                   }
                 ]
               }
             ],
-            "checkedAt": 1793322929.8578475
+            "checkedAt": 1793352291.3472328
           },
           {
             "email": "barolab26@gmail.com",
@@ -9104,20 +9954,20 @@
             "usable": true,
             "activeRotation": true,
             "isLastUsed": true,
-            "callCount": 69,
+            "callCount": 117,
             "groups": [
               {
                 "name": "Gemini Models",
                 "buckets": [
                   {
                     "window": "weekly",
-                    "remainingPercent": 9.0,
+                    "remainingPercent": 1.0,
                     "resetAt": "2026-10-30T22:01:25+00:00"
                   },
                   {
                     "window": "5h",
-                    "remainingPercent": 78.2,
-                    "resetAt": "2026-10-30T02:08:46+00:00"
+                    "remainingPercent": 88.7,
+                    "resetAt": "2026-10-30T12:08:46+00:00"
                   }
                 ]
               },
@@ -9132,28 +9982,28 @@
                   {
                     "window": "5h",
                     "remainingPercent": 100,
-                    "resetAt": "2026-10-30T06:15:38+00:00"
+                    "resetAt": "2026-10-30T14:24:58+00:00"
                   }
                 ]
               }
             ],
-            "checkedAt": 1793322936.7904997
+            "checkedAt": 1793352298.0324395
           }
         ],
         "lastUsedAccount": "barolab26@gmail.com",
-        "checkedAt": 1793322936.790501
+        "checkedAt": 1793352298.032441
       },
       "kie": {
         "status": "collected",
         "balance": 91.97,
-        "checkedAt": 1793322923.4678533,
+        "checkedAt": 1793352284.0588148,
         "unit": "credits",
         "source": "https://api.kie.ai/api/v1/chat/credit"
       },
       "jev": {
         "status": "잔액 미수집 · 콘솔 로그인 필요",
         "balance": null,
-        "checkedAt": 1793322923.4672701,
+        "checkedAt": 1793352284.057967,
         "unit": "credits",
         "usable": true,
         "apiKeySet": true,
@@ -9161,5 +10011,5 @@
       }
     }
   },
-  "revision": "6de1e0557d62e975eef583c00a1ef18ac1bc9f2e312c9b0b67f061ef2e365c79"
+  "revision": "0758d683edef38ab40a1ef7a7c92b06672346ad481ec266253867c5f8540f6f5"
 }

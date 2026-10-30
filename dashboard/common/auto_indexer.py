@@ -24,6 +24,7 @@ import json
 import os
 import shutil
 import sys
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -31,6 +32,8 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 import requests
+
+_SUBMISSION_LOCK = threading.Lock()
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 if str(BASE_DIR) not in sys.path:
@@ -81,23 +84,25 @@ def _check_rss_feed(domain: str) -> Dict[str, Any]:
 
 
 def _validate_candidates(site, urls):
-    """Reuse at most one hour of actual public evidence, otherwise recheck HTTP."""
+    """Reuse at most one hour of actual public evidence, otherwise recheck HTTP concurrently."""
     from dashboard.indexing_submissions import validate_public_url
     report = _read_json(SERVER_DATA_DIR / 'indexing-discovery-latest.json', {})
     domain = next((r for r in report.get('domains', []) if r.get('domain') == site['site_id']), {})
     known = {r['url']: r for r in domain.get('validations', [])}
-    output = []
-    for url in urls:
+
+    def _check_one(url):
         row = known.get(url, {})
         try:
             checked = datetime.datetime.fromisoformat(row['checkedAt'])
-            fresh = datetime.timedelta(0) <= datetime.datetime.now(datetime.timezone.utc)-checked < datetime.timedelta(hours=1)
+            fresh = datetime.timedelta(0) <= datetime.datetime.now(datetime.timezone.utc) - checked < datetime.timedelta(hours=1)
         except (ValueError, KeyError, TypeError):
             fresh = False
         if not fresh or row.get('valid') is not True or row.get('canonical') != url:
             row = validate_public_url(site, url)
-        output.append(row)
-    return output
+        return row
+
+    with ThreadPoolExecutor(max_workers=12) as v_pool:
+        return list(v_pool.map(_check_one, urls))
 
 
 def _queue_searchadvisor_candidates(domain_reports):
@@ -196,7 +201,10 @@ def run_auto_indexing(
         validations = _validate_candidates(site, target_push_urls) if apply else []
         if apply:
             target_push_urls = [row['url'] for row in validations if row.get('valid') is True]
-        indexnow_results = submit_indexnow(site, settings, target_push_urls) if apply else {}
+            with _SUBMISSION_LOCK:
+                indexnow_results = submit_indexnow(site, settings, target_push_urls)
+        else:
+            indexnow_results = {}
         naver_result = indexnow_results.get("naver", {})
         naver_status = naver_result.get("status", "not_attempted")
         naver_http = naver_result.get("httpStatus")
@@ -216,7 +224,8 @@ def run_auto_indexing(
             except Exception:
                 site_sess = None
             try:
-                req_res = dm.request_indexing(site_sess, site, settings, [], sm, indexnow=False)
+                with _SUBMISSION_LOCK:
+                    req_res = dm.request_indexing(site_sess, site, settings, [], sm, indexnow=False)
             except Exception:
                 req_res = {}
             g_res = (req_res.get("google") or {})

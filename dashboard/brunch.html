@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>브런치 스토리 (Brunch Story) 에세이·색인 브릿지 관제 · BaroLab</title>
+  <link rel="stylesheet" href="traffic.css">
+  <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
+  <link rel="stylesheet" href="signature_deck.css?v=20261017-sig-1">
+  <style>
+    body.brunch-page {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+    .br-main {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 16px 20px 44px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .br-top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      padding: 14px 20px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+      flex-wrap: wrap;
+    }
+    .br-top-title-box h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .br-top-title-box p {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .br-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      white-space: nowrap;
+    }
+    .br-pill-badge.approved {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.4);
+    }
+    .br-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .br-btn-primary {
+      padding: 9px 15px;
+      border-radius: 10px;
+      border: 1px solid #0d9488;
+      background: linear-gradient(135deg, #0d9488, #0f766e);
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.28);
+      transition: transform 0.12s ease;
+    }
+    .br-btn-primary:hover { transform: translateY(-1px); }
+    .br-btn-primary:disabled { opacity: 0.6; cursor: wait; }
+    .br-btn-blue {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #3b82f6;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .br-btn-ghost {
+      padding: 8px 13px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: #e2e8f0;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .br-tier1-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .br-card {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 13px;
+      padding: 13px 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .br-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #475569;
+    }
+    .br-card-val {
+      font-size: 20px;
+      font-weight: 900;
+      color: #0f172a;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .br-card-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .br-progress-track {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .br-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0d9488, #2563eb);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    .br-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .br-chip {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 800;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+    }
+    .br-chip.teal {
+      background: #f0fdfa;
+      border-color: #99f6e4;
+      color: #0f766e;
+    }
+    .br-chip.blue {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+    .br-chip.amber {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #b45309;
+    }
+    .br-tier2-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+    }
+    .br-compare-table, .br-curriculum-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .br-compare-table th, .br-compare-table td,
+    .br-curriculum-table th, .br-curriculum-table td {
+      padding: 9px 11px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .br-compare-table th, .br-curriculum-table th {
+      background: #f8fafc;
+      font-weight: 800;
+      color: #334155;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .br-curriculum-table tr:hover td {
+      background: #f8fafc;
+    }
+    .br-action-sm {
+      padding: 5px 10px;
+      border-radius: 7px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .br-action-sm:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+    }
+    .br-action-sm.primary {
+      background: #0f766e;
+      border-color: #0f766e;
+      color: #fff;
+    }
+    .br-action-sm.primary:hover {
+      background: #115e59;
+    }
+    .br-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(15, 23, 42, 0.62);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .br-modal-dialog {
+      width: 100%;
+      max-width: 820px;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+      padding: 22px 26px;
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.32);
+    }
+    @media (max-width: 1180px) {
+      .br-tier1-grid { grid-template-columns: repeat(2, 1fr); }
+      .br-tier2-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="control-room brunch-page">
+  <a class="skip-link" href="#main-content">본문으로 이동</a>
+  <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
+  <script src="sidebar.js?v=20261030-brunch-1"></script>
+
+  <main class="br-main" id="main-content">
+    <!-- Top Header -->
+    <header class="br-top-header">
+      <div class="br-top-title-box">
+        <h1>
+          <span>📖 브런치 스토리 (Brunch Story) 에세이 · 고권위 색인 브릿지 관제</span>
+          <span class="br-pill-badge" id="br-status-pill">🟡 머스트픽 (@31d1f5fb288c4fc) · 작가 심사 중 (CDP 9450)</span>
+        </h1>
+        <p>1단계: 심사 기간 중 『작가의 서랍』에 순수 실무 에세이 비축 ➔ 2단계: 작가 승인 즉시 다음(Daum) 4060 유입 & 구글(DA 80+) CF 백링크 자동 발행</p>
+      </div>
+      <div class="br-header-actions">
+        <button class="br-btn-blue" id="btn-sync-brunch" type="button">🔄 CDP 9450 실시간 동기화</button>
+        <button class="br-btn-primary" id="btn-write-next" type="button">✍️ 다음 연재편 서랍 비축/발행</button>
+        <a class="br-btn-ghost" href="https://brunch.co.kr/ready" target="_blank" rel="noopener">📂 작가의 서랍 열기 ↗</a>
+        <a class="br-btn-ghost" href="https://brunch.co.kr/@31d1f5fb288c4fc" target="_blank" rel="noopener">🏠 내 브런치 ↗</a>
+      </div>
+    </header>
+
+    <!-- Tier 1: 4-Col KPI Cards -->
+    <section class="br-tier1-grid">
+      <div class="br-card">
+        <div class="br-card-head">
+          <span>👤 브런치 계정 & 작가 심사 게이트</span>
+          <span class="br-chip blue" id="br-cdp-chip">CDP 9450 온라인</span>
+        </div>
+        <div class="br-card-val">
+          <span id="br-pen-name">머스트픽</span>
+          <small style="font-size:12px;font-weight:700;color:#0d9488;" id="br-email-label">baro76650@gmail.com</small>
+        </div>
+        <div class="br-card-sub" id="br-apply-desc">
+          신청서 제출: <strong>2026-10-30 14:24 KST</strong> (영업일 5일 이내 발표)<br>
+          심사 통과(`발행` 활성화) 감지 시 자동 공개 발행 전환
+        </div>
+      </div>
+
+      <div class="br-card">
+        <div class="br-card-head">
+          <span>📚 작가의 서랍 비축 & 브런치북 진척도</span>
+          <span class="br-chip teal" id="br-progress-pct">30% 완료</span>
+        </div>
+        <div class="br-card-val">
+          <span>서랍 <strong id="br-drawer-cnt">3</strong>편</span>
+          <span style="font-size:13px;color:#64748b;">/ 공개 발행 <strong id="br-pub-cnt">0</strong>편 (목표 10편)</span>
+        </div>
+        <div class="br-progress-track">
+          <div class="br-progress-fill" id="br-progress-bar" style="width: 30%;"></div>
+        </div>
+        <div class="br-card-sub">
+          심사용 에세이 3편 서랍 저장 및 작가 신청서 첨부 완료
+        </div>
+      </div>
+
+      <div class="br-card">
+        <div class="br-card-head">
+          <span>⚖️ 에세이·브릿지 7:3 황금 배분</span>
+          <span class="br-chip amber">C-Rank / 작가 지수 보호</span>
+        </div>
+        <div class="br-card-val">
+          <span>70% 순수 에세이</span>
+          <span style="font-size:13px;color:#2563eb;">: 30% CF 브릿지</span>
+        </div>
+        <div class="br-card-sub">
+          연속 브릿지 링크 금지 · 서사형 도입부로 체류시간 확보 후 하단 `og:link` 카드 1개만 정밀 연결
+        </div>
+      </div>
+
+      <div class="br-card">
+        <div class="br-card-head">
+          <span>🚀 구글(DA 80+) 색인 & 다음 4060 수혈 타깃</span>
+          <span class="br-chip blue">6대 우선 도메인</span>
+        </div>
+        <div class="br-chip-row" id="br-boost-domains" style="margin: 4px 0;">
+          <span class="br-chip teal">baronote.kr</span>
+          <span class="br-chip teal">smilenote.kr</span>
+          <span class="br-chip teal">topnote.kr</span>
+          <span class="br-chip blue">must-good.com</span>
+          <span class="br-chip blue">healthcox.com</span>
+          <span class="br-chip blue">woorinote.kr</span>
+        </div>
+        <div class="br-card-sub">
+          구글 미색인 도메인 백링크 공급 + 다음(Daum) 4060 시니어 고단가 트래픽 직결
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 2: Naver Blog vs Brunch Comparison & Writer Application Receipt -->
+    <section class="br-tier2-grid">
+      <div class="br-card">
+        <div class="br-card-head" style="margin-bottom:4px;">
+          <span style="font-size:13.5px;color:#0f172a;">🧭 네이버 블로그 vs 브런치 스토리 운영 문법 비교 (투트랙 전략)</span>
+          <span class="br-chip teal">OSMU 원소스 멀티유즈</span>
+        </div>
+        <table class="br-compare-table">
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>🟢 네이버 블로그 (5계정)</th>
+              <th>📖 브런치 스토리 (`머스트픽`)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>핵심 검색 엔진</strong></td>
+              <td>네이버 스마트블록 · VIEW 검색</td>
+              <td><strong>다음(Daum) 메인/검색 · 카카오뷰 · 구글(DA 80+)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>주력 독자층</strong></td>
+              <td>전 연령 검색 유입</td>
+              <td><strong>4060 중장년·은퇴 준비층 (연금·건보료 고단가 타깃)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>원고 문체·포맷</strong></td>
+              <td>핵심 결론 선제시 + 요약표 + 단계별 절차</td>
+              <td><strong>1인칭 경험담/사례 에세이 도입 + 실무 인사이트 칼럼</strong></td>
+            </tr>
+            <tr>
+              <td><strong>CF 외부유입 방식</strong></td>
+              <td>본문 하단 앵커 텍스트 링크 (7:3 배분)</td>
+              <td><strong>승인 전: 외부링크 0개 (서랍 비축) / 승인 후: 하단 `og:link` 박스</strong></td>
+            </tr>
+            <tr>
+              <td><strong>특수 역할</strong></td>
+              <td>일일 검색 트래픽 브릿지</td>
+              <td><strong>신생 CF 도메인(`baronote`, `smilenote`, `topnote`) 구글 색인 부스터</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="br-card">
+        <div class="br-card-head">
+          <span style="font-size:13.5px;color:#0f172a;">📋 브런치 작가 신청서 완료 & 네이버 프리미엄 콘텐츠 (`soultin`) 1+1 개설 패키지</span>
+          <span class="br-chip blue">1원고 2채널 동시 송출</span>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:8px 11px;font-size:11.5px;line-height:1.45;">
+          <strong style="color:#0f766e;display:block;margin-bottom:2px;">✅ [브런치 스토리 · CDP 9450] 작가 신청서 제출 완료 (서랍 3편 첨부)</strong>
+          <span id="br-intro-text">부모님의 연금 통장과 퇴직 선배의 건강보험료 고지서를 함께 들여다보며, 법령 속 차가운 숫자를 생활의 언어로 번역하기 시작한 기록자입니다...</span>
+          <span id="br-plan-text" style="display:none;"></span>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.5;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+            <strong style="color:#166534;">✅ [네이버 프리미엄 콘텐츠 · soultin (CDP 9334)] 판매자 가입 신청 완료 (2026-10-30 15:50)</strong>
+            <a href="https://studio.premium.naver.com/" target="_blank" rel="noopener" class="br-chip teal" style="text-decoration:none;">스튜디오 열기 ↗</a>
+          </div>
+          <div>• <strong>확정 서비스 URL</strong>: <code>https://contents.premium.naver.com/seniorbrief</code> | <strong>분야/주기</strong>: 경제/비즈니스 · 주 3회(월·수·금) 이상</div>
+          <div>• <strong>제출 레퍼런스</strong>: 네이버 블로그 <code>시니어 브리프 (mustpickinfo)</code> + 자체 매거진 <code>must-good.com</code> · <code>baronote.kr</code></div>
+          <div>• <strong>운영 방식</strong>: 심사 승인 및 스튜디오 오픈 즉시 브런치 10부작 칼럼을 <strong>100% 무료 전체공개 + CF 브릿지</strong>로 1+1 동시 송출</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 3: 10-Part BrunchBook Curriculum & Live Drawer Ledger -->
+    <section class="br-card">
+      <div class="br-card-head" style="margin-bottom:6px;">
+        <div>
+          <strong style="font-size:14px;color:#0f172a;">📚 10부작 브런치북 연재 파이프라인 & 『작가의 서랍』 실시간 원장</strong>
+          <span style="font-size:11.5px;color:#64748b;margin-left:8px;">심사 중에는 서랍에 안전 비축되며, 작가 승인 즉시 CF 브릿지 링크와 함께 순차 발행됩니다.</span>
+        </div>
+        <span class="br-chip teal" id="br-last-checked">최근 동기화: 확인 중...</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="br-curriculum-table">
+          <thead>
+            <tr>
+              <th>회차</th>
+              <th>브런치 에세이 제목 / 부제 (Subtitle)</th>
+              <th>분류</th>
+              <th>배분 전략 (7:3)</th>
+              <th>연결 CF 도메인 (색인·유입 타깃)</th>
+              <th>분량</th>
+              <th>현재 상태</th>
+              <th>관리 / 원고 보기</th>
+            </tr>
+          </thead>
+          <tbody id="br-curriculum-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Essay Preview Modal -->
+  <div class="br-modal-backdrop" id="br-preview-modal">
+    <div class="br-modal-dialog">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding-bottom:12px;margin-bottom:14px;">
+        <div>
+          <span class="br-chip teal" id="modal-part-chip">제1화</span>
+          <h2 id="modal-title" style="margin:6px 0 3px;font-size:18px;font-weight:900;color:#0f172a;"></h2>
+          <p id="modal-subtitle" style="margin:0;font-size:13px;color:#64748b;font-weight:600;"></p>
+        </div>
+        <button class="br-action-sm" type="button" onclick="document.getElementById('br-preview-modal').style.display='none'">✕ 닫기</button>
+      </div>
+      <div id="modal-body" style="font-size:14px;line-height:1.8;color:#1e293b;display:flex;flex-direction:column;gap:14px;"></div>
+      <div style="margin-top:18px;padding-top:12px;border-top:1px dashed #cbd5e1;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#475569;">
+        <span id="modal-bridge-info"></span>
+        <a id="modal-brunch-link" href="https://brunch.co.kr/ready" target="_blank" rel="noopener" class="br-action-sm primary" style="text-decoration:none;">브런치 서랍에서 열기 ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      let currentData = null;
+
+      function renderBrunchDashboard(data) {
+        if (!data) return;
+        currentData = data;
+        const acc = data.account || {};
+        const kpi = data.kpi || {};
+        const cur = Array.isArray(data.curriculum) ? data.curriculum : [];
+
+        const pill = document.getElementById('br-status-pill');
+        if (pill) {
+          pill.textContent = acc.canPublishLive
+            ? `🟢 ${acc.pen_name || '머스트픽'} (@${acc.profile_id}) · 작가 승인 완료 (즉시 발행 가능)`
+            : `🟡 ${acc.pen_name || '머스트픽'} (@${acc.profile_id}) · ${acc.writerStatusLabel || '작가 심사 중'}`;
+          pill.className = 'br-pill-badge' + (acc.canPublishLive ? ' approved' : '');
+        }
+
+        const cdpChip = document.getElementById('br-cdp-chip');
+        if (cdpChip) {
+          cdpChip.textContent = acc.cdpOnline ? `CDP ${acc.cdp_port || 9450} 온라인` : `CDP ${acc.cdp_port || 9450} 확인 필요`;
+        }
+
+        const dCnt = kpi.drawerCount ?? 3;
+        const pCnt = kpi.publishedCount ?? 0;
+        const total = kpi.curriculumTotal || 10;
+        const pct = Math.min(100, Math.round(((dCnt + pCnt) / total) * 100));
+
+        document.getElementById('br-drawer-cnt').textContent = String(dCnt);
+        document.getElementById('br-pub-cnt').textContent = String(pCnt);
+        document.getElementById('br-progress-pct').textContent = `${pct}% 비축`;
+        document.getElementById('br-progress-bar').style.width = `${pct}%`;
+
+        if (acc.applicationIntro) document.getElementById('br-intro-text').textContent = acc.applicationIntro;
+        if (acc.applicationPlan) document.getElementById('br-plan-text').textContent = acc.applicationPlan;
+
+        const checkedEl = document.getElementById('br-last-checked');
+        if (checkedEl && data.checkedAt) {
+          checkedEl.textContent = `최근 동기화: ${data.checkedAt.slice(0, 19).replace('T', ' ')}`;
+        }
+
+        const tbody = document.getElementById('br-curriculum-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = cur.map(item => {
+          const isSaved = item.status === 'saved_in_drawer';
+          const stChip = isSaved
+            ? `<span class="br-chip teal">${item.statusLabel}</span>`
+            : `<span class="br-chip">${item.statusLabel}</span>`;
+          const paceChip = item.pacingMode === 'pure_essay'
+            ? `<span class="br-chip blue">70% 순수 에세이</span>`
+            : `<span class="br-chip amber">30% CF 브릿지</span>`;
+          const writeBtn = isSaved
+            ? `<a class="br-action-sm" href="https://brunch.co.kr/ready" target="_blank" rel="noopener" style="text-decoration:none;">서랍 확인 ↗</a>`
+            : `<button class="br-action-sm primary" type="button" data-write-part="${item.part}">✍️ 서랍에 저장</button>`;
+          return `
+            <tr>
+              <td><strong>제${item.part}장</strong></td>
+              <td>
+                <div style="font-weight:800;color:#0f172a;">${item.title}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">${item.subtitle}</div>
+              </td>
+              <td><span class="br-chip">${item.category}</span></td>
+              <td>${paceChip}</td>
+              <td>
+                <a href="${item.bridgeUrl}" target="_blank" rel="noopener" style="font-weight:800;color:#2563eb;text-decoration:none;">
+                  ${item.targetDomain} ↗
+                </a>
+              </td>
+              <td><strong>${item.charCount.toLocaleString()}자</strong></td>
+              <td>${stChip}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button class="br-action-sm" type="button" data-preview-part="${item.part}">🔍 전문 보기</button>
+                  ${writeBtn}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('[data-preview-part]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const partNo = Number(btn.getAttribute('data-preview-part'));
+            const row = cur.find(c => c.part === partNo);
+            if (!row) return;
+            document.getElementById('modal-part-chip').textContent = `제${row.part}장 · ${row.category}`;
+            document.getElementById('modal-title').textContent = row.title;
+            document.getElementById('modal-subtitle').textContent = row.subtitle;
+            document.getElementById('modal-body').innerHTML = (row.paragraphs || []).map(p => `<p style="margin:0;">${p}</p>`).join('');
+            document.getElementById('modal-bridge-info').innerHTML = `승인 후 연결 타깃: <strong>${row.targetDomain}</strong> (<a href="${row.bridgeUrl}" target="_blank" rel="noopener">${row.bridgeUrl}</a>)`;
+            document.getElementById('br-preview-modal').style.display = 'flex';
+          });
+        });
+
+        tbody.querySelectorAll('[data-write-part]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const partNo = Number(btn.getAttribute('data-write-part'));
+            btn.disabled = true;
+            btn.textContent = '저장 중...';
+            try {
+              const res = await fetch('/api/brunch/write', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ part: partNo })
+              });
+              const out = await res.json();
+              if (out && out.status) renderBrunchDashboard(out.status);
+            } catch (_) {
+              btn.disabled = false;
+              btn.textContent = '✍️ 서랍에 저장';
+            }
+          });
+        });
+      }
+
+      async function loadBrunch() {
+        try {
+          const res = await fetch('/api/brunch', { cache: 'no-store' });
+          if (res.ok) {
+            renderBrunchDashboard(await res.json());
+            return;
+          }
+        } catch (_) {}
+        try {
+          const res2 = await fetch('data/brunch.json', { cache: 'no-store' });
+          if (res2.ok) renderBrunchDashboard(await res2.json());
+        } catch (_) {}
+      }
+
+      document.getElementById('btn-sync-brunch')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = '🔄 CDP 9450 동기화 중...';
+        try {
+          const res = await fetch('/api/brunch/sync', { method: 'POST' });
+          if (res.ok) renderBrunchDashboard(await res.json());
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '🔄 CDP 9450 실시간 동기화';
+        }
+      });
+
+      document.getElementById('btn-write-next')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = '✍️ CDP 9450 서랍 작성 중...';
+        try {
+          const res = await fetch('/api/brunch/write', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ part: null })
+          });
+          const out = await res.json();
+          if (out && out.status) renderBrunchDashboard(out.status);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '✍️ 다음 연재편 서랍 비축/발행';
+        }
+      });
+
+      loadBrunch();
+    })();
+  </script>
+</body>
+</html>
+

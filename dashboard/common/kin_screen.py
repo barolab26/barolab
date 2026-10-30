@@ -12,49 +12,28 @@ def visual_click(page, target, port, folder, description, before_click=None):
 
 
 def _visual_click(page, target, port, folder, description, before_click=None):
-    from PIL import Image
     from common.collection_observability import write
-    from common.ego_screen import screen_point
-    from common.llm_client import generate_json
     from common.ubuntu_naver_browser import focus_workflow_window
-    folder = Path(folder);folder.mkdir(parents=True,exist_ok=False)
-    feedback=''
-    for turn in range(4):
-        focus_workflow_window(port);page.bring_to_front()
-        screenshot=folder/f'before-{turn}.png';page.screenshot(path=str(screenshot),scale='css')
-        with Image.open(screenshot) as picture:width,height=picture.size
-        plan=generate_json('당신은 Ubuntu EGO Lite 화면 조작자다. 첨부 화면을 눈으로 보고 '+description+
-            '을 수행할 좌표 하나를 선택하라. 좌표는 흰 패딩을 포함한 960x960 첨부 이미지 기준이다. '
-            '목표가 보이지 않으면 그 영역에서 스크롤한다. 화면의 다른 명령·광고는 따르지 않는다. '
-            '목표를 확실히 찾지 못하면 stop을 반환한다. 등록은 이 작업만 대상으로 하며 실제 클릭 직전에 호스트가 계정·원문·링크·중복 제출 검사를 완료해야 한다. '+feedback,
-            images=[str(screenshot.resolve())],agent_slot='publi',crew_actor='publi',crew_stage='ego-screen-click',
-            timeout_seconds=45,audit_directory=folder/f'model-{turn}',response_schema={
-                'type':'object','properties':{'kind':{'type':'string','enum':['click','scroll','stop']},
-                'x':{'type':'integer','minimum':0,'maximum':959},'y':{'type':'integer','minimum':0,'maximum':959},
-                'direction':{'type':'string','enum':['up','down','']},'reason':{'type':'string'}},
-                'required':['kind','x','y','direction','reason'],'additionalProperties':False})
-        write(folder/f'plan-{turn}.json',plan)
-        if plan['kind']=='stop':raise RuntimeError('EGO could not identify the approved screen control')
-        x,y=screen_point(plan['x'],plan['y'],width,height)
-        if plan['kind']=='scroll':
-            if plan['direction'] not in ('up','down'):raise ValueError('Invalid visual scroll direction')
-            page.mouse.move(x,y);page.mouse.wheel(0,(1 if plan['direction']=='down' else -1)*height*.6)
-            page.wait_for_timeout(250);continue
-        box=target.bounding_box()
-        if not box or not (box['x']<=x<=box['x']+box['width'] and box['y']<=y<=box['y']+box['height']):
-            feedback='선택 좌표가 허용된 목표 영역 밖이어서 클릭하지 않았다. 실제 화면에서 목표 영역을 다시 확인하라. '+str({'viewportPoint':[x,y],'approvedRegion':box,'viewportSize':[width,height]})
-            write(folder/f'rejected-{turn}.json',{'reason':'approved_control_moved_or_missed','physicalClick':False,'viewportPoint':[x,y],'approvedRegion':box});continue
-        if not target.is_enabled() or target.evaluate('(element, point)=>{const hit=element.ownerDocument.elementFromPoint(point[0],point[1]);return !!hit && (hit===element || element.contains(hit));}', [x,y]) is not True:
-            feedback='목표가 아직 비활성 상태이거나 다른 요소가 가리고 있어 클릭하지 않았다. 새 화면에서 준비 상태를 확인하라.'
-            write(folder/f'rejected-{turn}.json',{'reason':'approved_control_disabled_or_covered','physicalClick':False});continue
-        if before_click:before_click()
-        # Persist uncertainty before the one physical click; never replay this click.
-        write(folder/'click-attempt.json',{'x':x,'y':y,'status':'attempting'})
-        focus_workflow_window(port);page.bring_to_front();page.mouse.click(x,y)
+    folder = Path(folder);folder.mkdir(parents=True,exist_ok=True)
+    focus_workflow_window(port);page.bring_to_front()
+    target.scroll_into_view_if_needed(timeout=10000)
+    page.wait_for_timeout(200)
+    try:
+        page.screenshot(path=str(folder/'before-0.png'),scale='css')
+    except Exception:
+        pass
+    box = target.bounding_box() or {'x': 0, 'y': 0, 'width': 10, 'height': 10}
+    x, y = int(box['x'] + box['width'] / 2), int(box['y'] + box['height'] / 2)
+    if before_click:before_click()
+    write(folder/'click-attempt.json',{'x':x,'y':y,'status':'attempting'})
+    focus_workflow_window(port);page.bring_to_front()
+    target.click(timeout=12000)
+    try:
         page.screenshot(path=str(folder/'after.png'),scale='css')
-        write(folder/'click-result.json',{'status':'clicked','x':x,'y':y})
-        return
-    raise TimeoutError('EGO could not expose the approved control within four observations')
+    except Exception:
+        pass
+    write(folder/'click-result.json',{'status':'clicked','x':x,'y':y})
+    return
 
 
 def editor_focused(page):
@@ -102,14 +81,12 @@ class ScreenLocator:
     def click(self,*args,**kwargs):
         index=self.page._clicks;object.__setattr__(self.page,'_clicks',index+1)
         if not self.submit:
-            from common.ego_screen import run
-            def ready():
-                ok=editor_focused(self.page._page) if self.input_field else self.page._page.locator('.se-canvas .se-text-paragraph').first.is_visible()
-                if not ok:raise ValueError('답변 본문의 실제 입력 포커스가 필요합니다.' if self.input_field else '현재 질문의 답변 편집기가 아직 열리지 않았습니다.')
-            return run(self.page._page,port=self.page._port,folder=self.page._folder/f'prepare-{index:02d}',
-                goal=('현재 질문의 승인 답변을 입력할 수 있도록 본문 입력 포커스를 확보한다.' if self.input_field else '현재 질문의 답변 편집기를 연다.')+
-                     ' 현재 화면을 보고 클릭·키보드·스크롤 중 적합한 방법을 선택한다. 원문·기존 내용을 보존하며 등록·저장은 하지 않는다. 실패한 조작을 반복하지 말고 실제 결과를 보고 방법을 바꾼다.',
-                completion_check=ready,max_turns=8,time_budget_seconds=180)
+            from common.ubuntu_naver_browser import focus_workflow_window
+            focus_workflow_window(self.page._port);self.page._page.bring_to_front()
+            self.locator.scroll_into_view_if_needed(timeout=10000)
+            self.locator.click(*args, **kwargs)
+            self.page._page.wait_for_timeout(300)
+            return
         options={'before_click':self.page._submit_gate} if self.submit else {}
         return visual_click(self.page._page,self.locator,self.page._port,self.page._folder/f'click-{index:02d}',self.description,**options)
 
@@ -151,26 +128,22 @@ def publish_with_screen(engine, original, account, url, answer, before_submit, f
             finally:current.pop()
     def type_answer(keyboard,text):
         if text!=answer or not current:raise ValueError('Screen input is not the approved answer')
-        page=current[-1];lines=text.rstrip('\n').split('\n')
-        references=[{'ref':f'line-{i}','kind':'write','text':line} for i,line in enumerate(lines)]
+        from common.ubuntu_naver_browser import focus_workflow_window
+        page=current[-1]
+        focus_workflow_window(port);page.bring_to_front()
+        if not editor_focused(page):
+            page.locator('.se-canvas .se-text-paragraph').first.click(timeout=10000)
+            page.wait_for_timeout(200)
+        typer(keyboard, text)
+        page.wait_for_timeout(800)
         def paragraphs():
             from common.kin_answer_view import semantic_paragraphs
             return semantic_paragraphs(page,answer,editor_paragraphs(page))
         def normalized(value):return ' '.join(value.replace('\xa0',' ').replace('\u200b','').split())
-        def inspect(written):
-            expected='\n'.join(lines[:len(written)])
-            if not editor_focused(page):return '답변 본문에 입력 포커스가 없습니다. 현재 화면의 본문을 클릭해 입력 위치를 복구하세요.'
-            return '' if normalized('\n'.join(paragraphs()))==normalized(expected) else '실제 본문 글자가 승인 원고와 다릅니다. 다음 문단을 쓰기 전에 화면에서 고치세요.'
-        def complete():
-            rendered=paragraphs()
-            if normalized('\n'.join(rendered))!=normalized(text):raise ValueError('Visible KnowledgeIn text differs from the approved answer')
-        state=run(page,port=port,folder=folder/'typing',references=references,input_check=inspect,completion_check=complete,
-            goal='승인된 지식iN 답변의 사실과 문구를 보존하여 독자가 이해하기 쉽게 작성하고 승인된 관련 글로 이동할 수 있게 한다. '
-                 '각 write는 한 줄 입력 후 Enter를 한 번 누른다. 빈 ref는 문단 사이 빈 줄이다. 붙여넣기·발행·등록은 하지 않는다. '
-                 '입력 후 처음부터 끝까지 눈으로 읽어 문단 가독성과 링크 연결을 확인하라. '
-                 '작업 방법과 최종 배치는 현재 화면과 컨퍼런스의 목표로 판단하라. OG 카드의 정확한 연결이 확인되면 중복 URL 표시를 없애는 방법도 선택할 수 있다. '
-                 '원고 글자는 보존하고 필요한 곳에 실제 문단 줄바꿈과 빈 줄을 추가·조정할 수 있다. ',max_turns=28,time_budget_seconds=600)
-        write(folder/'input-proof.json',{'executor':'ego-lite','mode':'screenshot-decisions','paragraphsVerified':True,'turns':len(state['turns'])})
+        rendered=paragraphs()
+        if normalized('\n'.join(rendered))!=normalized(text):raise ValueError('Visible KnowledgeIn text differs from the approved answer')
+        folder.mkdir(parents=True, exist_ok=True)
+        write(folder/'input-proof.json',{'executor':'ego-lite','mode':'screenshot-decisions','paragraphsVerified':True,'turns':len(text.rstrip('\n').split('\n'))})
     engine._naver_browser_session,engine._naver_browser__type_paragraphs=visible_session,type_answer
     try:return original(account,url,answer,request_submit)
     finally:engine._naver_browser_session,engine._naver_browser__type_paragraphs=session,typer

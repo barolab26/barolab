@@ -209,6 +209,20 @@ class ScreenAdapter:
         from common.kin_screen import visual_click
         from common.collection_observability import write
         if config['account_key']!=ACCOUNT or part['account_key']!=ACCOUNT:raise ValueError('threads_account_mismatch')
+        api_ready = False
+        try:
+            api_ready = self.engine._threads_adapter_readiness_status(config).get('publishReady') is True
+        except Exception:
+            api_ready = False
+        if api_ready:
+            res = self.engine._threads_adapter_submit_part(config, part, before_submit)
+            if res.get('permalink'):
+                try:
+                    with session() as vis_page:
+                        vis_page.goto(res['permalink'], wait_until='domcontentloaded', timeout=10000)
+                except Exception:
+                    pass
+            return res
         try:
             with session() as chk_page:
                 web_ok = web_identity(chk_page)

@@ -2817,7 +2817,7 @@
 
     // 4-2. Revenue Speedometer Arc, Index Multi-Donut & Per-Domain Visitors from /api/metrics
     try {
-      const res = await fetch(`${API_BASE}/api/metrics?compact=true`, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+      const res = await fetch(`${API_BASE}/api/metrics?compact=true` + (location.search.includes('demo=1') || window.__BAROLAB_DEMO ? '&demo=true' : ''), { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         const data = await res.json();
         const analysis = data.trafficAnalysis || {};

@@ -224,7 +224,8 @@ def ensure_article_images(article, folder, domain=None):
             soup.append(sec_fig)
 
     article['imagePlans'] = plans
-    article['contentHtml'] = str(soup)
+    from common.cf_tables import inject_interactive_widget
+    article['contentHtml'] = inject_interactive_widget(str(soup), article.get('title', ''))
     validate_basic_article(article)
     write(folder / 'article.json', article)
     write(folder / 'editor-content.json', article)
@@ -293,6 +294,30 @@ def basic_article(domain, item, folder):
     write(path, article)
     return ensure_article_images(article, folder, domain=domain)
 
+def ping_indexnow(domain, public_url):
+    key = hashlib.sha256(f'barolab-indexnow-{domain}'.encode('utf-8')).hexdigest()[:32]
+    endpoints = (
+        f'https://api.indexnow.org/indexnow?url={requests.utils.quote(public_url, safe="")}&key={key}',
+        f'https://www.bing.com/indexnow?url={requests.utils.quote(public_url, safe="")}&key={key}',
+        f'https://www.google.com/ping?sitemap={requests.utils.quote(f"https://www.{domain}/sitemap.xml", safe="")}',
+    )
+    results = []
+    for ep in endpoints:
+        try:
+            r = requests.get(ep, timeout=6)
+            results.append({'endpoint': ep.split('?')[0], 'httpStatus': r.status_code})
+        except Exception as exc:
+            results.append({'endpoint': ep.split('?')[0], 'error': type(exc).__name__})
+    try:
+        from common.dashboard_jobs import write
+        log_path = DATA_DIR / 'indexnow_log.json'
+        prev = json.loads(log_path.read_text(encoding='utf-8')) if log_path.is_file() else {'pings': []}
+        prev['pings'] = (prev.get('pings') or [])[-199:] + [{'domain': domain, 'url': public_url, 'pingedAt': stamp(), 'results': results}]
+        write(log_path, prev)
+    except Exception:
+        pass
+    return results
+
 def basic_public_receipt(domain, article, response, folder):
     from common.dashboard_jobs import write
     response.raise_for_status()
@@ -311,7 +336,8 @@ def basic_public_receipt(domain, article, response, folder):
     text = BeautifulSoup(public.text, 'html.parser').get_text(' ', strip=True)
     if public.status_code != 200 or article['title'] not in text:
         raise RuntimeError('Accepted post awaiting public title verification')
-    receipt.update(state='published', httpStatus=200, verifiedAt=stamp(), publicPublicationVerified=True)
+    index_pings = ping_indexnow(domain, url)
+    receipt.update(state='published', httpStatus=200, verifiedAt=stamp(), publicPublicationVerified=True, indexNowPings=index_pings)
     write(folder / 'publication-receipt.json', receipt)
     return receipt
 
@@ -349,8 +375,8 @@ def publish_basic_article(domain, article, folder):
     if previous.get('state') in ('submitting', 'submission_unknown', 'accepted'):
         raise RuntimeError('Previous submission must be reconciled before a second POST')
     article = ensure_article_images(article, folder, domain=domain)
-    from common.cf_tables import style_tables
-    content = style_tables(article['contentHtml'])
+    from common.cf_tables import style_tables, inject_interactive_widget
+    content = inject_interactive_widget(style_tables(article['contentHtml']), article.get('title', ''))
     plans = article.get('imagePlans', [])
     urls = []
     if plans:

@@ -496,7 +496,7 @@
     if(button){button.disabled=true;button.textContent='조회 중…';}
     try {
       await Promise.all([window.BaroLabHistory?.syncCFPublications(), window.BaroLabHistory?.syncNaverPublications()]);
-      const response = await fetch('/api/metrics', { cache: 'no-store' });
+      const response = await fetch('/api/metrics' + (location.search.includes('demo=1') || window.__BAROLAB_DEMO ? '?demo=true' : ''), { cache: 'no-store' });
       if (!response.ok) throw new Error('조회 실패');
       const data = await response.json();
       lastMetrics=data;renderedDay=kstDay();

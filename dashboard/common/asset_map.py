@@ -55,6 +55,18 @@ KIN_ACCOUNTS = {
     'soul5373': {'status': 'active', 'role': '생활 복지/건강 답변자'},
 }
 
+# 4-B. Brunch Story (Kakao/Daum & Google High-DA Essay Column Bridge)
+BRUNCH_ACCOUNT = {
+    'account_key': 'baro76650',
+    'email': 'baro76650@gmail.com',
+    'profile_id': '31d1f5fb288c4fc',
+    'pen_name': '머스트픽',
+    'url': 'https://brunch.co.kr/@31d1f5fb288c4fc',
+    'cdp_port': 9450,
+    'status': 'writer_application_submitted',
+    'strategy': '4060 은퇴·연금·건보료·세무 실무 에세이 칼럼 → 승인 즉시 다음(Daum)·구글(DA 80+) 색인 부스터 및 CF 16개 도메인 브릿지 가동',
+}
+
 # 5. Compute & Image Infrastructure
 INFRASTRUCTURE = {
     'llm_pool': {
@@ -172,12 +184,78 @@ def match_synergy_cluster(topic_or_keyword):
         domain = 'must-pick.com'
 
     target = CF_DOMAINS.get(domain, CF_DOMAINS['must-pick.com'])
+    live_targets = get_today_cf_bridge_targets(topic_or_keyword, allowed_domains=[domain]) or get_today_cf_bridge_targets(topic_or_keyword)
     return {
         'targetDomain': domain,
         'niche': target['niche'],
         'desc': target['desc'],
-        'synergyAngle': f'네이버/스레드에서 궁금증 유발 후 상세 모의계산 및 자격 조회는 {domain} 심화 분석 글로 연결'
+        'synergyAngle': f'네이버/스레드/지식iN에서 핵심 통증 후킹 후 3초 자가진단 체크리스트 및 세부 기준표는 {domain} 랜딩페이지로 일점사 연결',
+        'todayLiveBridgeTargets': live_targets[:3],
     }
+
+
+PRIORITY_CASHCOW_DOMAINS = (
+    'must-pick.com',
+    'baronote.kr',
+    'must-good.com',
+    'woorinote.kr',
+    'justinfo.co.kr',
+    'daynote.kr',
+    'meganote.kr',
+    'healthcox.com',
+)
+
+
+def get_today_cf_bridge_targets(topic_or_keyword='', allowed_domains=None):
+    """Return today's verified published CF landing pages ranked by topic match & cash-cow priority."""
+    import re
+    allowed = {d.replace('www.', '').strip().lower() for d in (allowed_domains or []) if d}
+    candidates = []
+    seen_urls = set()
+    sched_path = ROOT / 'dashboard/data/cf/daily_schedule.json'
+    if sched_path.is_file():
+        try:
+            sched = json.loads(sched_path.read_text(encoding='utf-8'))
+            for item in sched.get('items', []):
+                dom = str(item.get('domain') or '').replace('www.', '').strip().lower()
+                url = str(item.get('publicUrl') or '').strip()
+                title = str(item.get('title') or '').strip()
+                if dom and url and title and url not in seen_urls:
+                    if allowed and dom not in allowed:
+                        continue
+                    seen_urls.add(url)
+                    candidates.append({'domain': dom, 'url': url, 'title': title, 'category': str(item.get('category') or '')})
+        except Exception:
+            pass
+    cf_sched_root = ROOT / 'cf_posting/output/scheduled'
+    if cf_sched_root.is_dir():
+        for day_dir in sorted(cf_sched_root.iterdir(), reverse=True)[:2]:
+            if not day_dir.is_dir():
+                continue
+            for dom_dir in sorted(day_dir.iterdir()):
+                rec_p = dom_dir / 'publication-receipt.json'
+                if not rec_p.is_file():
+                    continue
+                try:
+                    rec = json.loads(rec_p.read_text(encoding='utf-8'))
+                    dom = str(rec.get('domain') or dom_dir.name).replace('www.', '').strip().lower()
+                    url = str(rec.get('publicUrl') or '').strip()
+                    title = str(rec.get('title') or '').strip()
+                    if dom and url and title and url not in seen_urls:
+                        if allowed and dom not in allowed:
+                            continue
+                        seen_urls.add(url)
+                        candidates.append({'domain': dom, 'url': url, 'title': title, 'category': ''})
+                except Exception:
+                    pass
+    tokens = [t for t in re.split(r'[\s,·/()|\[\]-]+', str(topic_or_keyword or '').lower()) if len(t) >= 2]
+    def _score(row):
+        hay = f"{row['title']} {row['category']} {row['domain']} {CF_DOMAINS.get(row['domain'], {}).get('niche', '')}".lower()
+        kw_hits = sum(3 for t in tokens if t in hay)
+        cash_bonus = (10 - PRIORITY_CASHCOW_DOMAINS.index(row['domain'])) if row['domain'] in PRIORITY_CASHCOW_DOMAINS else 1
+        return (kw_hits, cash_bonus)
+    candidates.sort(key=_score, reverse=True)
+    return candidates
 
 
 def get_account_pacing_strategy(account, date_str=None):
@@ -230,6 +308,69 @@ def get_account_pacing_strategy(account, date_str=None):
         }
 
 
+def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, auto_publish=True, cdp_port=9450):
+    """Write a Brunch column on CDP 9450. Publishes live if writer is approved, otherwise saves to drawer."""
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as p:
+        b = p.chromium.connect_over_cdp(f'http://127.0.0.1:{cdp_port}')
+        ctx = b.contexts[0]
+        page = ctx.new_page()
+        try:
+            page.goto('https://brunch.co.kr/write', wait_until='domcontentloaded', timeout=25000)
+            page.wait_for_timeout(1800)
+            try:
+                if page.locator('button.guide_close').is_visible(timeout=1200):
+                    page.locator('button.guide_close').click()
+                    page.wait_for_timeout(300)
+            except Exception:
+                pass
+
+            page.locator('h1.cover_title').click()
+            page.keyboard.type(str(title).strip())
+            page.wait_for_timeout(250)
+
+            page.locator('div.cover_sub_title').click()
+            page.keyboard.type(str(subtitle).strip())
+            page.wait_for_timeout(250)
+
+            body_el = page.locator('div.wrap_body')
+            body_el.click()
+            for idx, para in enumerate(paragraphs or []):
+                page.keyboard.type(str(para).strip())
+                if idx < len(paragraphs) - 1:
+                    page.keyboard.press('Enter')
+                    page.keyboard.press('Enter')
+                page.wait_for_timeout(150)
+
+            # Check if writer approval is active (i.e. '발행' button exists instead of '작가신청')
+            can_publish = page.locator('button:visible', has_text='발행').count() > 0
+            if can_publish and bridge_url:
+                page.keyboard.press('Enter')
+                page.keyboard.press('Enter')
+                page.keyboard.type(str(bridge_url).strip())
+                page.keyboard.press('Enter')
+                page.wait_for_timeout(1200)
+
+            page.locator('button.btn_article_save_draft').first.click()
+            page.wait_for_timeout(2000)
+            saved_url = page.url
+
+            if can_publish and auto_publish:
+                pub_btn = page.locator('button:visible', has_text='발행').first
+                pub_btn.click()
+                page.wait_for_timeout(1500)
+                confirm_pub = page.locator('button:visible', has_text='발행').last
+                if confirm_pub.is_visible():
+                    confirm_pub.click()
+                    page.wait_for_timeout(2500)
+                return {'ok': True, 'mode': 'published', 'url': page.url}
+
+            return {'ok': True, 'mode': 'saved_to_drawer', 'writerApproved': can_publish, 'url': saved_url}
+        finally:
+            page.close()
+
+
 def get_asset_map_summary():
     """Generates an executive-level asset map summary for LLM context injection."""
     cf_summary = ', '.join([f'{d}({info["niche"]})' for d, info in list(CF_DOMAINS.items())[:6]]) + f' 외 {len(CF_DOMAINS)-6}개'
@@ -241,6 +382,7 @@ def get_asset_map_summary():
         f"2. 검색 유입 브릿지 (네이버 블로그 5개): {naver_summary} (7:3 배분 실험 · 수명 효과 미검증)\n"
         f"3. 바이럴 숏테일 (스레드): @{THREADS_ACCOUNT['account_key']} (공식 Graph API + 크롬 9450)\n"
         f"4. 신뢰 솔루션 (지식iN): {kin_summary}\n"
+        f"4-B. 고권위 칼럼 브릿지 (브런치): {BRUNCH_ACCOUNT['pen_name']} ({BRUNCH_ACCOUNT['url']} · CDP {BRUNCH_ACCOUNT['cdp_port']})\n"
         "5. 제휴마케팅 무기 (수익 2차 엔진):\n"
         "   - 리플알바 (CPA/CPC, ID: baro76650): 정책자금/대출/보험/렌탈 상담신청 · 실제 수수료는 해당 캠페인 조건 확인\n"
         "   - 트립닷컴 (CPS, AID: 7143081, SID: 263330208): tripmarvel.com/여행/축제/K-패스 글에 숙소·교통 예약 링크\n"

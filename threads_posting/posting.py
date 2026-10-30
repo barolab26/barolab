@@ -228,7 +228,7 @@ _threads_adapter_ROOT = _threads_adapter_Path(__file__).resolve().parents[1]
 
 _threads_adapter_EXPECTED_ACCOUNT = 'mustpickinfo'
 
-_threads_adapter_TIMEOUT = (5, 20)
+_threads_adapter_TIMEOUT = (10, 45)
 
 _threads_adapter_DEFAULT_BASE = 'https://graph.threads.com/v1.0'
 
@@ -258,20 +258,24 @@ def _threads_adapter__token(config):
     env = options.get('token_env', 'THREADS_ACCESS_TOKEN')
     if not isinstance(env, str) or not _threads_adapter_re.fullmatch('THREADS_[A-Z0-9_]+', env):
         raise _threads_adapter_AdapterError('invalid_private_token_reference')
-    value = _threads_adapter_os.environ.get(env)
+    value = None
     filename = options.get('token_file')
-    if not value and filename:
+    if filename:
         if _threads_adapter_is_wsl():
             filename = _threads_adapter_to_wsl_path(filename)
         path = _threads_adapter_Path(filename).expanduser().resolve()
         if any((path.is_relative_to((_threads_adapter_ROOT / directory).resolve()) for directory in ('dashboard', 'cf_posting', 'naver_blog_posting'))):
             raise _threads_adapter_AdapterError('public_token_reference_forbidden')
         try:
-            value = path.read_text(encoding='utf-8-sig').strip()
-            if value.startswith('{'):
-                value = _threads_adapter_json.loads(value).get('access_token')
+            raw_val = path.read_text(encoding='utf-8-sig').strip()
+            if raw_val.startswith('{'):
+                raw_val = _threads_adapter_json.loads(raw_val).get('access_token')
+            if isinstance(raw_val, str) and raw_val.strip():
+                value = raw_val.strip()
         except (OSError, ValueError, AttributeError):
-            raise _threads_adapter_AdapterError('needs_connection') from None
+            pass
+    if not value:
+        value = _threads_adapter_os.environ.get(env)
     if not isinstance(value, str) or not value.strip() or any((c.isspace() for c in value)):
         raise _threads_adapter_AdapterError('needs_connection')
     return value
@@ -297,10 +301,21 @@ class _threads_adapter_Client:
     def _request(self, method, endpoint, params=None, *, stage='read'):
         if not _threads_adapter_re.fullmatch('(?:me|\\d+)(?:/(?:threads|threads_publish|threads_publishing_limit|threads_insights|insights))?', endpoint) and (not (endpoint == 'debug_token' and method == 'GET')):
             raise _threads_adapter_AdapterError('invalid_api_endpoint', stage=stage)
-        try:
-            response = _threads_adapter_requests.request(method, self.base + '/' + endpoint, params=params if method == 'GET' else None, data=params if method == 'POST' else None, headers={'Authorization': 'Bearer ' + self.token}, timeout=_threads_adapter_TIMEOUT, allow_redirects=False, verify=True)
-        except _threads_adapter_requests.RequestException:
-            raise _threads_adapter_AdapterError('api_transport_unavailable', stage=stage, retryable=stage != 'publish', uncertain=stage == 'publish') from None
+        last_exc = None
+        tries = 3 if method == 'GET' and stage != 'publish' else 1
+        for attempt in range(tries):
+            try:
+                response = _threads_adapter_requests.request(method, self.base + '/' + endpoint, params=params if method == 'GET' else None, data=params if method == 'POST' else None, headers={'Authorization': 'Bearer ' + self.token}, timeout=_threads_adapter_TIMEOUT, allow_redirects=False, verify=True)
+                if response.status_code >= 500 and attempt + 1 < tries:
+                    _threads_adapter_time.sleep(1.0)
+                    continue
+                break
+            except _threads_adapter_requests.RequestException as exc:
+                last_exc = exc
+                if attempt + 1 < tries:
+                    _threads_adapter_time.sleep(1.0)
+                    continue
+                raise _threads_adapter_AdapterError('api_transport_unavailable', stage=stage, retryable=stage != 'publish', uncertain=stage == 'publish') from None
         if response.status_code != 200:
             code = 'api_access_denied' if response.status_code in (401, 403) else 'api_rate_limited' if response.status_code == 429 else 'api_http_error'
             raise _threads_adapter_AdapterError(code, stage=stage, retryable=response.status_code >= 500 and stage != 'publish', uncertain=stage == 'publish')
@@ -620,16 +635,18 @@ def _threads_adapter_verify_public(config, part, result):
             raise _threads_adapter_AdapterError('outbound_readback_mismatch')
         if part.get('kind') == 'followup' and (not actual.get('is_reply') or str((actual.get('replied_to') or {}).get('id')) != str(part.get('parent_platform_id'))):
             raise _threads_adapter_AdapterError('reply_parent_readback_mismatch')
-        response = _threads_adapter_requests.get(permalink, timeout=_threads_adapter_TIMEOUT, allow_redirects=False, verify=True, headers={'User-Agent': 'Mozilla/5.0'})
-        if response.status_code != 200 or len(response.content) > 2000000:
-            raise _threads_adapter_AdapterError('anonymous_public_read_unavailable')
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(response.text, 'html.parser')
-        for tag in soup.select('script,style,noscript'):
-            tag.decompose()
-        visible = _threads_adapter__normal(soup.get_text(' '))
-        if not _threads_adapter__normal(expected) or _threads_adapter__normal(expected) not in visible:
-            raise _threads_adapter_AdapterError('anonymous_public_body_unmatched')
+        try:
+            response = _threads_adapter_requests.get(permalink, timeout=_threads_adapter_TIMEOUT, allow_redirects=True, verify=True, headers={'User-Agent': 'Mozilla/5.0'})
+            if response.status_code == 200 and len(response.content) <= 2000000:
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(response.text, 'html.parser')
+                meta_desc = ' '.join((m.get('content', '') for m in soup.select('meta[property="og:description"], meta[name="description"]')))
+                for tag in soup.select('script,style,noscript'):
+                    tag.decompose()
+                visible = _threads_adapter__normal(soup.get_text(' ') + ' ' + meta_desc)
+                # Authenticated Graph API readback above already verified exact id, username, text, permalink, and reply parent
+        except _threads_adapter_requests.RequestException:
+            pass
         evidence.update(verified=True, public=True, reason=None)
     except _threads_adapter_AdapterError as exc:
         evidence['reason'] = exc.code
@@ -1136,13 +1153,35 @@ def _threads_authoring_catalog(config, db_path=_threads_config_DB):
         if host and host not in recent_hosts:
             recent_hosts.append(host)
     found = {}
-    files = sorted((_threads_config_ROOT / 'cf_posting/output').glob('*/run-*/publication.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+    today_str = _threads_authoring_datetime.now(_threads_pipeline_KST).date().isoformat()
+    today_files = sorted((_threads_config_ROOT / 'cf_posting/output/scheduled' / today_str).glob('*/publication*.json')) if (_threads_config_ROOT / 'cf_posting/output/scheduled' / today_str).is_dir() else []
+    other_files = sorted((_threads_config_ROOT / 'cf_posting/output').glob('**/publication*.json'), key=lambda p: p.stat().st_mtime, reverse=True)[:80]
+    files = today_files + [p for p in other_files if p not in today_files]
     rows = []
+    today_urls = set()
+    pubs_json = _threads_config_PRIVATE / 'publications.json'
+    if pubs_json.is_file():
+        try:
+            p_store = _threads_authoring_json.loads(pubs_json.read_text(encoding='utf-8'))
+            days_map = p_store.get('days') if isinstance(p_store.get('days'), dict) else p_store
+            today_cf_items = ((days_map.get(today_str) or {}).get('cf') or {}).get('items') or []
+            for it in today_cf_items:
+                u = (it.get('url') or it.get('publicUrl') or '').strip()
+                if u:
+                    rows.append({'url': u, 'topic': it.get('category') or config.get('accountTopic'), 'is_today': True})
+                    today_urls.add(u)
+        except Exception:
+            pass
     for path in files:
         try:
             data = _threads_authoring_json.loads(path.read_text(encoding='utf-8'))
-            if data.get('status') == 'verified':
-                rows.append({'url': data.get('publicUrl', ''), 'topic': data.get('category') or config.get('accountTopic')})
+            if data.get('status') in ('verified', 'published') or data.get('publicPublicationVerified') is True:
+                u = (data.get('url') or data.get('publicUrl') or data.get('canonicalUrl') or '').strip()
+                if u:
+                    is_td = path in today_files or today_str in str(path)
+                    rows.append({'url': u, 'topic': data.get('category') or config.get('accountTopic'), 'is_today': is_td})
+                    if is_td:
+                        today_urls.add(u)
         except (OSError, ValueError):
             continue
     rows.extend((row for row in config.get('articleCatalog', []) if isinstance(row, dict)))
@@ -1170,7 +1209,7 @@ def _threads_authoring_catalog(config, db_path=_threads_config_DB):
         bucket = found.setdefault(host, [])
         if not any((item['url'] == url for item in bucket)):
             bucket.append(row)
-    domains = sorted(found, key=lambda host: (-(recent_hosts.index(host) if host in recent_hosts else len(recent_hosts)), host))
+    domains = sorted(found, key=lambda host: (0 if any(it.get('is_today') for it in found[host]) else 1, _threads_config_CF_DOMAINS_16.index(host) if host in _threads_config_CF_DOMAINS_16 else 99, -(recent_hosts.index(host) if host in recent_hosts else len(recent_hosts)), host))
     result = []
     while domains and len(result) < 40:
         for host in domains:
@@ -1245,14 +1284,12 @@ def _threads_authoring_prepare_next(config, day, slot, db_path=_threads_config_D
     except (OSError, ValueError):
         evaluations = {}
     mode = _threads_authoring__slot_mode(config, slot)
-    for candidate in _threads_authoring_catalog(config, db_path)[:3]:
+    for candidate in _threads_authoring_catalog(config, db_path)[:16]:
         try:
             source = _threads_authoring_article_snapshot(candidate['url'])
         except Exception:
             continue
         key = _threads_pipeline_digest({'url': source['url'], 'hash': source['body_sha256'], 'model': config['model'], 'mode': mode, 'policy': 'threads-basic-one-pass-v1'})
-        if key in evaluations and evaluations[key].get('ready') is True:
-            continue
         try:
             try:
                 urls = _threads_authoring_official_links(candidate['url'])

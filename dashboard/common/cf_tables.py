@@ -20,8 +20,82 @@ def style(tag, required):
     tag['style']=';'.join(key+':'+value for key,value in values.items())+';'
 
 
+def inject_interactive_widget(html, title=''):
+    from html import escape
+    if not html or 'data-cf-interactive-widget=' in html:
+        return html
+    soup = BeautifulSoup(html, 'html.parser')
+    h2s = soup.find_all('h2')
+    tables = soup.find_all('table')
+    check_items = []
+    scenarios = []
+    if tables:
+        t0 = tables[0]
+        rows = t0.find_all('tr')
+        headers = [th.get_text(' ', strip=True) for th in rows[0].find_all(['th', 'td'])] if rows else []
+        for r in rows[1:5]:
+            cells = [c.get_text(' ', strip=True) for c in r.find_all(['td', 'th'])]
+            if len(cells) >= 2 and cells[0] and cells[1]:
+                head_label = headers[1] if len(headers) >= 2 and headers[1] else '핵심 기준'
+                detail_txt = ' · '.join(c for c in cells[1:] if c)
+                check_items.append(f"{cells[0]}: {cells[1]}")
+                scenarios.append((cells[0], f"{head_label}: {detail_txt}"))
+    if len(check_items) < 3:
+        for h in h2s[:4]:
+            h_txt = h.get_text(' ', strip=True)
+            nxt_p = h.find_next_sibling('p')
+            p_txt = nxt_p.get_text(' ', strip=True) if nxt_p else ''
+            first_sent = p_txt.split('. ')[0].strip() + '.' if p_txt else '해당 구간의 세부 요건을 먼저 대조해보세요.'
+            if h_txt and len(check_items) < 4:
+                check_items.append(h_txt)
+                scenarios.append((h_txt, first_sent[:150]))
+    if not check_items:
+        return html
+
+    chk_html = ''.join(
+        f'<label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:10px;cursor:pointer;font-size:14.5px;line-height:1.5;color:#0f172a;font-weight:600;margin-bottom:8px;">'
+        f'<input type="checkbox" style="width:18px;height:18px;margin-top:2px;accent-color:#2563eb;flex-shrink:0;">'
+        f'<span>{escape(item[:110])}</span>'
+        f'</label>'
+        for item in check_items[:4]
+    )
+    acc_html = ''.join(
+        f'<details style="background:#ffffff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:8px;">'
+        f'<summary style="cursor:pointer;font-weight:800;font-size:14.5px;color:#1d4ed8;line-height:1.5;list-style:none;display:flex;justify-content:space-between;align-items:center;">'
+        f'<span>👉 [내 상황 판독 {idx}] {escape(sc_title[:55])}</span>'
+        f'<span style="font-size:12px;color:#2563eb;background:#eff6ff;padding:2px 8px;border-radius:999px;flex-shrink:0;">결과 보기 ▼</span>'
+        f'</summary>'
+        f'<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1;font-size:14px;line-height:1.65;color:#1e293b;">'
+        f'<strong style="color:#047857;">✔ 핵심 판독 기준:</strong> {escape(sc_desc)}'
+        f'</div>'
+        f'</details>'
+        for idx, (sc_title, sc_desc) in enumerate(scenarios[:3], 1)
+    )
+    short_title = (title or (h2s[0].get_text(' ', strip=True) if h2s else '핵심 조건')).split(',')[0].strip()
+    widget_markup = (
+        f'<section data-cf-interactive-widget="cf-diagnosis-v1" role="region" aria-label="3초 자가진단 판독기" '
+        f'style="margin:26px 0;padding:18px 18px 14px;background:linear-gradient(180deg,#f8fafc 0%,#eff6ff 100%);border:2px solid #3b82f6;border-radius:14px;box-shadow:0 4px 14px rgba(37,99,235,0.08);">'
+        f'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'
+        f'<strong style="font-size:16.5px;color:#0f172a;letter-spacing:-0.3px;">⚡ 3초 자가진단 체크리스트 · {escape(short_title[:36])}</strong>'
+        f'<span style="font-size:12px;font-weight:800;color:#ffffff;background:#2563eb;padding:3px 9px;border-radius:999px;">터치하여 직접 체크</span>'
+        f'</div>'
+        f'<p style="margin:0 0 12px;font-size:13.5px;color:#475569;line-height:1.5;">스마트폰 화면에서 본인에게 해당하는 항목을 직접 눌러 체크하고, 아래 상황별 판독 결과를 펼쳐 확인해보세요.</p>'
+        f'<div style="margin-bottom:12px;">{chk_html}</div>'
+        f'<div>{acc_html}</div>'
+        f'</section>'
+    )
+    widget_node = BeautifulSoup(widget_markup, 'html.parser').section
+    if len(h2s) >= 2:
+        mid_h2 = h2s[len(h2s) // 2]
+        mid_h2.insert_before(widget_node)
+    elif h2s:
+        h2s[-1].insert_before(widget_node)
+    else:
+        soup.append(widget_node)
+    return str(soup)
+
+
 def style_tables(html):
-    if '<table' not in html.lower():return html
     soup=BeautifulSoup(html,'html.parser')
     for table in list(soup.find_all('table')):
         parent=table.parent

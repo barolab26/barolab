@@ -1671,6 +1671,166 @@
       "after": "help_outline\n도움말\nmanage_accounts\n사용자 설정\n\t\nnotifications\n메시지\n7\n\nhome\n개요\nlightbulb_2\n유용한 정보\ntrending_up\n실적\nsearch\nURL 검사\n색인생성\nkeyboard_arrow_up\nfile_copy\n페이지\naccount_tree\nSitemaps\nvisibility_off\n삭제\n실험\nkeyboard_arrow_up\nspeed\n코어 웹 바이탈\nlock\nHTTPS\n개선사항\nkeyboard_arrow_up\nlayers\n탐색경로\n보안 및 직접 조치\nkeyboard_arrow_down\nlink_2\n링크\ntrophy\n업적\nsettings\n설정\nfeedback\n의견 제출하기\ninfo\nSearch Console 정보\n개인정보처리방침약관\nSitemaps\n새 사이트맵 추가\nhttps://www.woorinote.kr/\n제출\n제출된 사이트맵\n\nSitemap\n\t유형\n\t제출\n\t마지막으로 읽은 날짜\n\t상태\n\t\n발견된 페이지\t\n발견한 동영상\t\n/sitemap.xml\tSitemap\t2026. 10. 19.\t2026. 10. 19.\t성공\t81\t0\t\n/rss.xml\tRSS\t2026. 3. 29.\t2026. 10. 18.\t성공\t31\t0\t\n페이지당 행 수:\n5\n10\n25\n50\n100\n250\n500\n총 2행 중 1~2\n\ncheck_circle\n사이트맵이 제출됨\nGoogle에서 주기적으로 사이트맵을 처리하고 변경사항이 있는지 확인합니다. 향후 문제가 발생하면 알림이 전송됩니다.\n닫기",
       "account": "sj",
       "at": "2026-10-19T01:13:53.886198+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "baronote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 156,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "topnote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 34,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "smilenote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 32,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "tripmarvel.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 109,
+      "totalSubmitted": 109,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "justinfo.co.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 96,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "healthcox.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 80,
+      "totalSubmitted": 80,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "meganote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 38,
+      "totalSubmitted": 38,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-joy.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 30,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "nolplace.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 29,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-pick.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 28,
+      "totalSubmitted": 28,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "maxnote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 27,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "daynote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 20,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-good.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 19,
+      "totalSubmitted": 19,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "woorinote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 19,
+      "totalSubmitted": 19,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "joynote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 17,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "soulnote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 17,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-10-30T12:07:59.330820+09:00"
     }
   ],
   "historicalLog": "Y:/70_개발프로젝트/auto-blog-cf/data/google-index-requests.json",

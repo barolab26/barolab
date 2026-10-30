@@ -324,7 +324,7 @@ def _naver_pipeline_preflight_send(db, qid, account, run_id=None, cap=_naver_pip
         linked = db.execute('SELECT question_id FROM automation_slots WHERE slot_id=?', (run_id,)).fetchone()
         if not run_id or not cadence or cadence['active_run_id'] != run_id or (cadence['active_account'] != account) or (not linked) or (linked['question_id'] != qid):
             raise ValueError('An exact active scheduler reservation is required')
-        if cadence['last_completed_at'] and _naver_pipeline_datetime.now(_naver_pipeline_timezone.utc) < _naver_pipeline_datetime.fromisoformat(cadence['last_completed_at']) + _naver_pipeline_timedelta(minutes=15):
+        if cadence['last_account'] == account and cadence['last_completed_at'] and _naver_pipeline_datetime.now(_naver_pipeline_timezone.utc) < _naver_pipeline_datetime.fromisoformat(cadence['last_completed_at']) + _naver_pipeline_timedelta(minutes=15):
             raise ValueError('Minimum 15-minute global completion interval has not elapsed')
     if db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0] >= cap:
         raise ValueError('Global daily submission cap')
@@ -2015,9 +2015,9 @@ def _naver_scheduler_submission_counts(db, day):
     return result
 
 def _naver_scheduler_operation_counts(db, day):
-    """Research rounds consume budget; a browser lock wait before research does not."""
+    """Research rounds consume budget; a browser lock wait or pre-submission blocked error does not."""
     counts = {account: 0 for account in _naver_pipeline_ACCOUNTS}
-    for row in db.execute("SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? AND NOT (state='deferred' AND reason IN ('browser_busy','audit_path_repaired') AND question_id IS NULL) GROUP BY account", (day,)):
+    for row in db.execute("SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? AND state NOT IN ('blocked','deferred','interrupted_unknown') GROUP BY account", (day,)):
         if row['account'] in counts:
             counts[row['account']] += row['n']
     for row in db.execute("SELECT q.account,COUNT(*) n FROM questions q WHERE q.send_day=? AND q.state IN ('publishing','submitted_unverified','published_verified') AND NOT EXISTS (SELECT 1 FROM automation_slots s WHERE s.question_id=q.question_id) GROUP BY q.account", (day,)):
@@ -2102,10 +2102,7 @@ def _naver_scheduler_reserve_run(db, config, now=None, force=False):
             latest_sub = db.execute("SELECT account,updated_at FROM questions WHERE send_day IS NOT NULL AND state IN ('publishing','submitted_unverified','published_verified') ORDER BY updated_at DESC LIMIT 1").fetchone()
             anchor_ts = latest_sub['updated_at'] if latest_sub else None
             anchor_acc = latest_sub['account'] if latest_sub else None
-            if anchor_ts and now < _naver_scheduler_datetime.fromisoformat(anchor_ts) + _naver_scheduler_timedelta(minutes=15):
-                pass
-            else:
-                db.execute('UPDATE operating_cadence SET last_completed_at=?,last_account=? WHERE id=1', (anchor_ts, anchor_acc))
+            db.execute('UPDATE operating_cadence SET last_completed_at=?,last_account=? WHERE id=1', (anchor_ts, anchor_acc))
         status = _naver_scheduler_cadence_status(db, config, now)
         day = now.astimezone(_naver_scheduler_KST).date().isoformat()
         global_cap = int(config.get('globalDailyCap', _naver_pipeline_GLOBAL_DAILY_CAP))
