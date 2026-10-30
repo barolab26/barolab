@@ -3236,6 +3236,8 @@ def receive_agenda_event(payload: Dict[str, Any]):
     stage=payload.get('stage');note=row.get('events',{}).get(stage)
     if not note or note['id']!=payload.get('id'):
         raise HTTPException(409,'Unrecorded agenda report')
+    if any(key in payload and payload[key] != note.get(key) for key in ('who', 'text', 'ts')):
+        raise HTTPException(409,'Agenda report differs from saved event')
     route=note.get('route') or {}
     brain={**route,'badge':format_brain_badge(route['provider'],route['model'],route.get('reasoningEffort'))} if route.get('model') else {'provider':'host','badge':'안건 실행 상태'}
     message={'id':note['id'],'who':note['who'],'text':note['text'],'ts':note['ts'],
@@ -3245,11 +3247,14 @@ def receive_agenda_event(payload: Dict[str, Any]):
     with _ROOM_LOCK:
         existing=next((m for m in load_room_data().get('messages',[]) if m.get('id')==note['id']),None)
         if not existing:append_or_update_room_message(message)
-        elif any(existing.get(k)!=message[k] for k in ('who','text','agendaId','agendaStage')):
+        elif any(existing.get(k)!=message[k] for k in ('who','text','ts','agendaId','agendaStage')):
             if (existing.get('agendaId') != row['id'] or existing.get('agendaStage') != stage
-                    or existing.get('who') != note['who'] or note['ts'] <= existing.get('ts', 0)):
+                    or note['ts'] <= existing.get('ts', 0)):
                 raise HTTPException(409,'Conflicting agenda report')
-            # A later host-recorded report can supersede the same stage after recovery.
+            # The saved agenda is authoritative; recovery may change the reporting actor.
+            # Retain earlier investigation reports instead of erasing their history.
+            message['supersededReports'] = [*existing.get('supersededReports', []),
+                {k: v for k, v in existing.items() if k != 'supersededReports'}]
             append_or_update_room_message(message)
         acknowledge(row['id'],stage,note['id'])
     return {'ok':True,'eventId':note['id'],'stored':True}

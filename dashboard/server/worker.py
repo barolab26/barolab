@@ -2,7 +2,10 @@
 import argparse,json,os,subprocess,sys,time,uuid
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(ROOT))
+# Scheduled jobs must resolve the same modules as the dashboard launcher.
+IMPORT_PATHS = (ROOT, ROOT / 'dashboard', ROOT / 'dashboard' / 'server')
+for import_path in reversed(IMPORT_PATHS):
+    sys.path.insert(0, str(import_path))
 sys.dont_write_bytecode=True
 from common import dashboard_jobs as jobs
 from common.ego_telemetry import export_environment
@@ -54,7 +57,9 @@ def run_metrics(python, commands):
                 target = ['-m', script] if script in ('naver_kin.posting', 'threads_posting.posting') else [str(ROOT / collector_paths.get(script, script))]
                 process = subprocess.Popen([python, '-u', '-B', '-X', 'utf8', *target, *(argument if isinstance(argument, (list, tuple)) else [argument] if argument else [])],
                     cwd=str(ROOT), stdout=sys.stdout, stderr=sys.stderr,
-                    env=dict(export_environment(), PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
+                    env=dict(export_environment(), PYTHONPATH=os.pathsep.join(
+                        [*(str(p) for p in IMPORT_PATHS), os.environ.get('PYTHONPATH', '')]),
+                        PYTHONUTF8='1', PYTHONIOENCODING='utf-8', BAROLAB_KEEP_BROWSER='1'),
                     creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
                 stage['helperPid'] = process.pid
                 while True:

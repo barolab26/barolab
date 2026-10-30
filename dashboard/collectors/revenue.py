@@ -616,21 +616,11 @@ def _adpost_login(page, cfg, account):
 def _adpost_report(page, cfg, account, start, end):
     with ego_action('navigate', 'metrics-browser'):
         page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
-    if _adpost_login(page, cfg, account):
-        with ego_action('navigate', 'metrics-browser'):
-            page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
+    if urlparse(page.url).hostname == 'nid.naver.com':
+        raise RevenueSourceError('auth_required', '네이버 로그인 갱신 필요 · 수집기는 로그인하지 않음')
     # /main does not request channels. Its observed /api/logins response is the
     # account/publisher source of truth; fetch channels only after verifying it.
     login = browser_json(page, '/api/logins')
-    if not isinstance(login, dict) or not login.get('isLoggedIn'):
-        links = page.locator('a[href*="nid.naver.com"]').all()
-        if len(links) == 1:
-            with ego_action('click', 'metrics-browser'):
-                links[0].click()
-            _adpost_login(page, cfg, account)
-            with ego_action('navigate', 'metrics-browser'):
-                page.goto('https://adpost.naver.com/main', wait_until='domcontentloaded', timeout=30000)
-            login = browser_json(page, '/api/logins')
     if not isinstance(login, dict) or not login.get('isNaverLoggedIn'):
         raise RevenueSourceError('auth_required', 'AdPost Naver authentication required')
     expected = str(cfg.get(f'NAVER_{account}_ID') or account).split('@')[0].lower()
@@ -664,18 +654,8 @@ def adpost(start, end, cfg=None, account='soul5373', port=9333):
         try:
             browser = p.chromium.connect_over_cdp(f'http://127.0.0.1:{port}', timeout=10000)
         except Exception:
-            # Only the existing account-specific lifecycle manager may start it.
-            if str(ROOT) not in sys.path:
-                sys.path.insert(0, str(ROOT))
-            from naver_blog_posting.posting import ACCOUNT_MAP, start_browser
-            settings = ACCOUNT_MAP.get(account)
-            if not settings or int(settings.get('cdp_port', 0)) != port:
-                raise RevenueSourceError('error', '계정 전용 CDP 시작 배치 설정 없음') from None
-            start_browser(settings)
-            try:
-                browser = p.chromium.connect_over_cdp(f'http://127.0.0.1:{port}', timeout=10000)
-            except Exception:
-                raise RevenueSourceError('error', '계정 전용 시작 배치 실행 후 CDP 연결 실패') from None
+            # A recurring read must not revive a stopped account browser.
+            raise RevenueSourceError('browser_offline', '전용 브라우저 연결 대기 · 이전 수익 보존') from None
         context = browser.contexts[0]
         page = next((tab for tab in context.pages if urlparse(tab.url).hostname == 'adpost.naver.com'
                      and urlparse(tab.url).path.rstrip('/') in ('/main', '/report', '/report/revenue')), None)

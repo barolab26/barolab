@@ -613,6 +613,48 @@ class BusinessControls(unittest.TestCase):
             old['ts']=2000
             with self.assertRaises(chat.HTTPException):chat.receive_agenda_event(payload)
 
+    def test_verified_staff_report_can_replace_investigator_and_preserves_history(self):
+        from agents import chat_room as chat
+        from common import work_agenda as agendas
+        note=dict(id='report',who='publi',text='실제 결과 검증 완료',ts=2000,route={})
+        row=dict(id=self.agenda,events={'staff_result':note},status='report_pending',
+                 completionCriteria='실제 결과',verification={'verified':True})
+        prior=dict(who='jarvis',text='최초 조사',ts=500)
+        old=dict(id='report',who='jarvis',text='이전 조사 결과',ts=1000,
+                 agendaId=self.agenda,agendaStage='staff_result',supersededReports=[prior])
+        payload=dict(id='report',agendaId=self.agenda,stage='staff_result')
+        with patch.object(agendas,'get',return_value=row),patch.object(agendas,'acknowledge') as ack, \
+             patch.object(chat,'load_room_data',return_value={'messages':[old]}), \
+             patch.object(chat,'append_or_update_room_message') as append:
+            self.assertTrue(chat.receive_agenda_event(payload)['stored'])
+            saved=append.call_args.args[0]
+            self.assertEqual(saved['who'],'publi')
+            self.assertEqual(saved['supersededReports'][0],prior)
+            self.assertEqual(saved['supersededReports'][1]['text'],'이전 조사 결과')
+            self.assertEqual(old['who'],'jarvis')
+            ack.assert_called_once_with(self.agenda,'staff_result','report')
+
+    def test_agenda_report_rejects_forged_payload_stale_and_cross_agenda_replacements(self):
+        from agents import chat_room as chat
+        from common import work_agenda as agendas
+        note=dict(id='report',who='publi',text='저장된 검증 결과',ts=2000,route={})
+        row=dict(id=self.agenda,events={'staff_result':note},status='report_pending',completionCriteria='실제 결과')
+        old=dict(id='report',who='jarvis',text='이전 조사',ts=1000,
+                 agendaId=self.agenda,agendaStage='staff_result')
+        payload=dict(id='report',agendaId=self.agenda,stage='staff_result')
+        with patch.object(agendas,'get',return_value=row),patch.object(agendas,'acknowledge') as ack, \
+             patch.object(chat,'load_room_data',return_value={'messages':[old]}), \
+             patch.object(chat,'append_or_update_room_message') as append:
+            for forged in ({'who':'radar'},{'text':'위조 결과'},{'ts':3000}):
+                with self.subTest(forged=forged),self.assertRaises(chat.HTTPException):
+                    chat.receive_agenda_event({**payload,**forged})
+            for conflict in ({'ts':2000},{'ts':3000},{'agendaId':'b'*64},{'agendaStage':'closing'}):
+                original=dict(old);old.update(conflict)
+                with self.subTest(conflict=conflict),self.assertRaises(chat.HTTPException):
+                    chat.receive_agenda_event(payload)
+                old.clear();old.update(original)
+            ack.assert_not_called();append.assert_not_called()
+
     def test_active_goal_recovers_missing_pending_marker(self):
         from agents import crew_reasoning as crew
         from common import work_agenda as agendas
@@ -623,6 +665,80 @@ class BusinessControls(unittest.TestCase):
              patch.object(crew,'evaluate_case_once',return_value=False),patch.object(crew,'start_autonomous_goal_once',return_value=False):
             crew.resume_once('background')
         self.assertTrue((goals/'pending'/self.agenda).exists())
+
+    def test_ceo_request_context_deduplicates_wording_and_preserves_unapproved_followups(self):
+        from common import crew_chat_bridge as bridge
+        path=self.data/'ceo-proposals.json'
+        with patch.object(bridge,'CEO_PROPOSALS_FILE',path),patch.object(bridge,'_deliver') as deliver:
+            first=bridge.emit_ceo_proposal('jarvis','첫 제안','현재 상태','측정 복구',['로그인 지원'],request_key='auth:one')
+            state=json.loads(path.read_text(encoding='utf-8'))
+            state['executionPackages']={'collection_restore':{'state':'approved_not_verified'}}
+            state['proposals'][0]['status']='triaged_partial'
+            path.write_text(json.dumps(state),encoding='utf-8')
+            second=bridge.emit_ceo_proposal('jarvis','표현만 바꾼 제안','현재 상태','측정을 복구합니다',['로그인을 지원해 주세요'],request_key='auth:one')
+            self.assertEqual(second['status'],'already_proposed')
+            self.assertEqual(first['proposal']['id'],second['proposal']['id'])
+            stored=json.loads(path.read_text(encoding='utf-8'))
+            self.assertEqual(len(stored['proposals']),1)
+            self.assertEqual(stored['proposals'][0]['status'],'triaged_partial')
+            self.assertEqual(stored['proposals'][0]['followups'][0]['status'],'requires_scope_review')
+            self.assertTrue(stored['proposals'][0]['followupReviewRequired'])
+            self.assertIn('executionPackages',stored)
+            deliver.assert_called_once()
+
+    def test_verified_agenda_only_closes_after_all_report_acknowledgements(self):
+        from common import work_agenda as agendas
+        rows=self.data/'operations';rows.mkdir()
+        state_path=self.data/'agenda.json'
+        state_path.write_text(json.dumps({'enabled':True,'activeId':self.agenda,'activeIds':[self.agenda]}))
+        row=dict(id=self.agenda,kind='conference',project='cf_blog',status='report_pending',
+                 verification={'verified':True,'source':'receipt'},events={'opening':{'id':'opening','receivedAt':1},
+                     'staff_result':{'id':'staff'},'closing':{'id':'closing'}},waitingFor={'owner':'patch','condition':'old wait'})
+        (rows/(self.agenda+'.json')).write_text(json.dumps(row))
+        with patch.object(agendas,'ROWS',rows),patch.object(agendas,'STATE',state_path), \
+             patch.object(agendas,'running',return_value=[]),patch.object(agendas,'performance',return_value={}), \
+             patch.object(agendas,'flush_events',return_value=False) as flush:
+            self.assertFalse(agendas.finish_reports(self.agenda))
+            flush.return_value=True
+            self.assertFalse(agendas.finish_reports(self.agenda))
+            self.assertEqual(agendas.get(self.agenda)['status'],'report_pending')
+            saved=agendas.get(self.agenda)
+            for note in saved['events'].values():note['receivedAt']=1
+            agendas._save(saved)
+            self.assertTrue(agendas.finish_reports(self.agenda))
+            closed=agendas.get(self.agenda)
+            self.assertEqual(closed['status'],'closed')
+            self.assertNotIn('waitingFor',closed)
+            self.assertEqual(closed['resolvedWaitingFor']['previous']['owner'],'patch')
+
+    def test_ceo_request_different_context_creates_new_request(self):
+        from common import crew_chat_bridge as bridge
+        path=self.data/'ceo-proposals.json'
+        with patch.object(bridge,'CEO_PROPOSALS_FILE',path),patch.object(bridge,'_deliver') as deliver:
+            bridge.emit_ceo_proposal('jarvis','계정 A','현재','A 인증',['A 지원'],request_key='auth:A')
+            bridge.emit_ceo_proposal('jarvis','계정 B','현재','B 인증',['B 지원'],request_key='auth:B')
+            self.assertEqual(len(json.loads(path.read_text(encoding='utf-8'))['proposals']),2)
+            self.assertEqual(deliver.call_count,2)
+
+    def test_ceo_request_without_context_retains_exact_fingerprint_behavior(self):
+        from common import crew_chat_bridge as bridge
+        path=self.data/'ceo-proposals.json'
+        with patch.object(bridge,'CEO_PROPOSALS_FILE',path),patch.object(bridge,'_deliver') as deliver:
+            for _ in range(2):bridge.emit_ceo_proposal('jarvis','같은 제안','현재','복구',['지원'])
+            self.assertEqual(len(json.loads(path.read_text(encoding='utf-8'))['proposals']),1)
+            deliver.assert_called_once()
+
+    def test_executive_request_key_changes_for_new_auth_or_larger_scope(self):
+        from common import work_agenda as agendas
+        health={'sources':[{'source':'revenue:a','reasonCode':'source_auth_required'}]}
+        with patch.object(agendas,'load',return_value=health),patch.object(agendas,'active_rows',return_value=[]):
+            key=agendas._executive_proposal_key({'targetUrl':'https://example.com/a'},['threads'],{'requiredApprovals':['1건 배포']})
+            same=agendas._executive_proposal_key({'targetUrl':'https://example.com/a'},['threads'],{'requiredApprovals':['배포 1건 지원']})
+            larger=agendas._executive_proposal_key({'targetUrl':'https://example.com/a'},['threads'],{'requiredApprovals':['3건 배포']})
+            self.assertEqual(key,same);self.assertNotEqual(key,larger)
+            health['sources'].append({'source':'revenue:b','reasonCode':'source_auth_required'})
+            changed=agendas._executive_proposal_key({'targetUrl':'https://example.com/a'},['threads'],{'requiredApprovals':['1건 배포']})
+            self.assertNotEqual(key,changed)
 
     def test_finished_investigation_reports_unresolved_and_releases_agenda(self):
         from common import work_agenda as agendas
@@ -735,6 +851,23 @@ class BusinessControls(unittest.TestCase):
             usage.record_call(self.call('two'), 'started', root=self.root, now=self.now)
         state = json.loads((self.data / 'llm_usage_ledger.json').read_text())
         self.assertEqual(len(state['active']), 1)
+
+    def test_experiment_call_limit_cannot_raise_policy_or_ignore_smaller_plan(self):
+        folder=self.data/'publication-conferences/operations'
+        folder.mkdir(parents=True)
+        policy={**usage.DEFAULT_BUDGET,'agendaCalls':10}
+        for planned,expected in ((6,6),(40,10)):
+            with self.subTest(planned=planned):
+                (folder/(self.agenda+'.json')).write_text(json.dumps({'businessExperiment':{'maxModelCalls':planned}}))
+                state={'byAgenda':{self.agenda:{'modelCalls':expected-1}},'active':{}}
+                usage.check_budget(state,self.call(),policy,self.root)
+                state['active']={'inflight':{'agendaId':self.agenda}}
+                with self.assertRaisesRegex(usage.UsageBudgetExceeded,'agenda_call'):
+                    usage.check_budget(state,self.call(),policy,self.root)
+                state['active']={}
+                state['byAgenda'][self.agenda]['modelCalls']=expected
+                with self.assertRaisesRegex(usage.UsageBudgetExceeded,'agenda_call'):
+                    usage.check_budget(state,self.call(),policy,self.root)
 
     def test_metered_rejection_never_calls_provider(self):
         (self.data / 'llm-settings.json').write_text(json.dumps({'resourceBudget': {'dailyCalls': 1}}))

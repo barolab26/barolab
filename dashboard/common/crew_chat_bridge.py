@@ -84,6 +84,7 @@ def emit_ceo_proposal(
     required_approvals: Any = None,
     expected_impact: str = "",
     urgency: str = "high",
+    request_key: str = "",
 ) -> Dict[str, Any]:
     """
     Proactively escalate a business bottleneck, reverse-funnel pivot, or resource request (`ask_ceo`)
@@ -113,16 +114,30 @@ def emit_ceo_proposal(
     fp = hashlib.sha256(fp_raw.encode("utf-8")).hexdigest()[:16]
     now = time.time()
     ts = int(now * 1000)
+    if not isinstance(request_key, str) or len(request_key) > 160:
+        raise ValueError('Invalid CEO request key')
 
     CEO_PROPOSALS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with locked(CEO_PROPOSALS_FILE.parent / "ceo-proposals-lock"):
         state = load(CEO_PROPOSALS_FILE) or {"proposals": []}
         proposals = list(state.get("proposals") or [])
         recent_same = next(
-            (p for p in proposals if p.get("fingerprint") == fp and now - p.get("createdAt", 0) < 21600),
+            (p for p in proposals if now - p.get("createdAt", 0) < 21600 and
+             (p.get("fingerprint") == fp or
+              (request_key and p.get('requestKey') == request_key and p.get('actor') == who))),
             None,
         )
         if recent_same:
+            if recent_same.get('fingerprint') != fp and not any(
+                    item.get('fingerprint') == fp for item in recent_same.get('followups', [])):
+                recent_same.setdefault('followups', []).append({
+                    'fingerprint': fp, 'title': title.strip(), 'currentReality': current_reality.strip(),
+                    'proposal': proposal.strip(), 'requiredApprovals': approvals_list,
+                    'expectedImpact': expected_impact.strip(), 'createdAt': now,
+                    'status': 'requires_scope_review',
+                })
+                recent_same['followupReviewRequired'] = True
+                write(CEO_PROPOSALS_FILE, {**state, 'updatedAt': now, 'proposals': proposals})
             return {"ok": True, "status": "already_proposed", "proposal": recent_same}
 
         approval_lines = "\n".join(f"{idx}. {item}" for idx, item in enumerate(approvals_list, 1))
@@ -138,6 +153,7 @@ def emit_ceo_proposal(
         record = {
             "id": msg_id,
             "fingerprint": fp,
+            "requestKey": request_key,
             "actor": who,
             "actorLabel": role_label,
             "title": title.strip(),
@@ -151,8 +167,8 @@ def emit_ceo_proposal(
             "ts": ts,
             "text": text,
         }
-        proposals = [record] + [p for p in proposals if p.get("fingerprint") != fp][:29]
-        write(CEO_PROPOSALS_FILE, {"updatedAt": now, "proposals": proposals})
+        proposals = [record] + [p for p in proposals if p.get("fingerprint") != fp]
+        write(CEO_PROPOSALS_FILE, {**state, "updatedAt": now, "proposals": proposals})
 
     payload = {
         "id": msg_id,

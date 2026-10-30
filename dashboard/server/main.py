@@ -297,9 +297,11 @@ def get_metrics(compact: bool = False, demo: bool = False):
         return data
     data = METRICS_READ_CACHE.get('metrics', build)
     
-    import os, copy
-    if demo or os.environ.get("DEMO_PORTFOLIO_MODE") == "1":
+    import copy
+    # Ambient launcher settings must never replace operational evidence.
+    if demo:
         d = copy.deepcopy(data)
+        d.update(demo=True, dataMode='demo', dataWarning='합성 데모 시나리오 · 실제 수익과 유입이 아닙니다.')
         # Transform revenue to $5,120/month (~$170.66/day)
         if 'revenue' in d:
             rev = d['revenue']
@@ -321,7 +323,7 @@ def get_metrics(compact: bool = False, demo: bool = False):
                     }
                     for src in cat.get('sources', []):
                         src['status'] = 'collected'
-                        src['reason'] = 'Google AdSense 파트너 정상 정산 가동'
+                        src['reason'] = '합성 데모 수익 · 실제 정산이 아닙니다.'
                         src['daily'] = {f'2026-10-{i:02d}': '170.66' for i in range(1, 31)}
                         src['periods'] = cat['periods']
                 elif cat['id'] == 'adpost':
@@ -350,20 +352,25 @@ def get_metrics(compact: bool = False, demo: bool = False):
                 b['todayCount'] = 1450
                 b['yesterdayCount'] = 1520
                 b['totalCount'] = 485000
+        def mark_scenario(value):
+            if isinstance(value, dict):
+                if 'status' in value:
+                    value['status'] = 'demo'
+                if 'complete' in value:
+                    value['complete'] = False
+                for child in value.values():
+                    mark_scenario(child)
+            elif isinstance(value, list):
+                for child in value:
+                    mark_scenario(child)
+        mark_scenario(d.get('revenue', {}))
+        mark_scenario(d.get('trafficAnalysis', {}))
         if compact:
             from server.dashboard_cache import compact_metrics
             d = compact_metrics(d)
+            d.update(demo=True, dataMode='demo', dataWarning='합성 데모 시나리오 · 실제 수익과 유입이 아닙니다.')
         return d
 
-    """Collected evidence only; missing values remain null."""
-    from common.collection_observability import read_health
-    # GET only projects stored evidence. RSS verification belongs to the
-    # scheduled monitor / explicit verification action, never page polling.
-    def build():
-        data = metrics_summary()
-        data['collectionObservability'] = read_health(DATA_DIR)
-        return data
-    data = METRICS_READ_CACHE.get('metrics', build)
     if compact:
         from server.dashboard_cache import compact_metrics
         return compact_metrics(data)

@@ -524,7 +524,7 @@
     }
   ],
   "legacyEmailPreRecruitmentDeprecated": true,
-  "recruitmentMethod": "Google Groups (barolab-testers@googlegroups.com) 1-Click Join + Play Closed Testing Opt-in",
+  "recruitmentMethod": "Email list registration + per-app Play closed testing opt-in",
   "testerGroupUrl": "https://groups.google.com/g/barolab-testers",
   "testerGroupEmail": "barolab-testers@googlegroups.com",
   "outboundReciprocalProposals": [
@@ -561,7 +561,53 @@
       "ownInstallVerified": false,
       "partnerOptInVerified": false,
       "continuousParticipationVerified": false
+    },
+    {
+      "id": "outreach-20261030-ratifo",
+      "sourcePublicUrl": "https://www.androidpub.com/devfree/3121537",
+      "appName": "Ratifo",
+      "channel": "email",
+      "senderAccountAlias": "public_support_mailbox",
+      "gmailMessageId": "1a18c28b7aa8149e",
+      "gmailThreadId": "1a18c28b7aa8149e",
+      "sentAt": "2026-10-30T09:34:01+00:00",
+      "state": "sent_awaiting_reply",
+      "sentLabelVerified": true,
+      "proposalScope": "무료 1:1 테스트 가능 여부 문의. 실제 기기·범위·시작일은 미합의. 14일 참여와 사용성 피드백 제안.",
+      "agreedStartAt": null,
+      "ownInstallVerified": false,
+      "partnerOptInVerified": false,
+      "continuousParticipationVerified": false
+    },
+    {
+      "id": "outreach-20261030-safervia",
+      "sourcePublicUrl": "https://www.androidpub.com/devfree/3121382",
+      "appName": "세이퍼비아",
+      "channel": "email",
+      "senderAccountAlias": "public_support_mailbox",
+      "gmailMessageId": "1a18c28bc6d1e291",
+      "gmailThreadId": "1a18c28bc6d1e291",
+      "sentAt": "2026-10-30T09:34:02+00:00",
+      "state": "sent_awaiting_reply",
+      "sentLabelVerified": true,
+      "proposalScope": "무료 1:1 테스트 가능 여부 문의. 실제 기기·범위·시작일은 미합의. 14일 참여와 사용성 피드백 제안.",
+      "agreedStartAt": null,
+      "ownInstallVerified": false,
+      "partnerOptInVerified": false,
+      "continuousParticipationVerified": false
     }
   ],
-  "updatedAt": "2026-10-30T10:38:18+09:00"
+  "updatedAt": "2026-10-30T09:46:59.705669+00:00",
+  "closedTestLanding": {
+    "url": "https://barolab-daily-apps.pages.dev/testers/",
+    "previewDeploymentUrl": "https://94a0d2e1.barolab-daily-apps.pages.dev",
+    "checkedAt": "2026-10-30T09:46:59.705669+00:00",
+    "httpStatus": 200,
+    "sha256": "2740e05a431ce4bcdf3f542ecc758ba33bf08ed5dd1a42b099a88072ee6b83da",
+    "matchesLocal": true,
+    "primaryClosedTestLinks": 4,
+    "internalTestLinks": 0,
+    "enrollmentMethod": "email list registration before individual closed-test opt-in",
+    "scope": "Only testers/index.html replaced; live CSS, robots and other public assets preserved."
+  }
 }

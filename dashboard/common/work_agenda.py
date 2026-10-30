@@ -591,6 +591,9 @@ def finish_reports(identity):
                 or not all(row['events'][s].get('receivedAt') for s in ('opening','staff_result','closing'))):
             return False
         row.update(status='closed', closedAt=time.time())
+        if row.get('verification', {}).get('verified') is True and row.get('waitingFor'):
+            row['resolvedWaitingFor'] = {'previous': row.pop('waitingFor'), 'resolvedAt': row['closedAt'],
+                                         'reason': 'verified_result_and_reports_acknowledged'}
         row['performance'] = performance(row)
         _save(row)
         new_ids = [i for i in cur_ids if i != identity]
@@ -703,7 +706,9 @@ def view():
             'reverseFunnel': state.get('reverseFunnel') or compute_reverse_funnel_gap(),
             'executiveBriefing': state.get('lastExecutiveBriefing', ''),
             'focusChannels': state.get('focusChannels', []),
-            'ceoProposals': (proposals_state.get('proposals') or [])[:5]}
+            'ceoProposals': (proposals_state.get('proposals') or [])[:5],
+            'ceoApprovalReview': {k: proposals_state.get(k) for k in
+                                  ('approvalReviewSummary', 'executionPackages', 'residualDecisions')}}
     if result['active']:result['active']['activity']=activity
     return result
 
@@ -988,6 +993,21 @@ def _top_up_channel_lanes():
         pass
 
 
+def _executive_proposal_key(experiment, focus_channels, proposal):
+    """Deduplicate wording changes without hiding new accounts or larger requests."""
+    health = load(DATA / 'collection-health.json')
+    support = sorted((str(s.get('source')), str(s.get('reasonCode')))
+                     for s in health.get('sources', []) if s.get('reasonCode') in (
+                         'source_auth_required', 'source_not_connected', 'source_not_collected',
+                         'source_configured_no_report_api'))
+    blockers = sorted((r.get('project', ''), str(r.get('blocker', '')))
+                      for r in active_rows() if r.get('status') in ('blocked', 'recovering'))
+    quantities = re.findall(r'\d+(?:\.\d+)?', json.dumps(proposal.get('requiredApprovals') or [], ensure_ascii=False))
+    context = {'target': experiment.get('targetUrl'), 'channels': sorted(focus_channels),
+               'support': support, 'blockers': blockers, 'requestedQuantities': quantities}
+    return 'executive-pivot:' + hashlib.sha256(json.dumps(context, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
 def company_executive_check_once(force=False):
     """Reverse-Funnel Strategy Brain (@jarvis): calculates gap to $100/day, pivots channel lanes, and proactively calls ask_ceo."""
     now = time.time()
@@ -1132,6 +1152,7 @@ def company_executive_check_once(force=False):
                 required_approvals=ceo_prop.get('requiredApprovals') or ['고단가 타깃 집중 유입 작전 및 외부채널 브릿지 배포 승인'],
                 expected_impact=ceo_prop.get('expectedImpact') or '일일 외부유입 +500 PV 확보 및 애드센스 고단가 클릭 전환 검증',
                 urgency='high',
+                request_key=_executive_proposal_key(experiment, focus_channels, ceo_prop),
             )
         return True
     except Exception:

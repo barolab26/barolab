@@ -75,7 +75,7 @@ def check_budget(state, call, policy, root=ROOT):
     from common.collection_observability import load
     experiment = load(Path(root) / 'dashboard/data/publication-conferences/operations' / (agenda + '.json')).get('businessExperiment', {})
     planned_calls = experiment.get('maxModelCalls')
-    call_limit = max(policy['agendaCalls'], planned_calls) if type(planned_calls) is int and planned_calls > 0 else policy['agendaCalls']
+    call_limit = min(policy['agendaCalls'], planned_calls) if type(planned_calls) is int and planned_calls > 0 else policy['agendaCalls']
     if row.get('inputTokens', 0) + row.get('outputTokens', 0) >= policy['agendaTokens']:
         raise UsageBudgetExceeded('agenda_token_budget_exhausted')
     if row.get('modelCalls', 0) + sum(a.get('agendaId') == agenda for a in active) >= call_limit:
