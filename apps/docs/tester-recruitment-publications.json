@@ -600,14 +600,28 @@
   "updatedAt": "2026-10-30T09:46:59.705669+00:00",
   "closedTestLanding": {
     "url": "https://barolab-daily-apps.pages.dev/testers/",
-    "previewDeploymentUrl": "https://94a0d2e1.barolab-daily-apps.pages.dev",
-    "checkedAt": "2026-10-30T09:46:59.705669+00:00",
+    "previewDeploymentUrl": "https://5d9608a8.barolab-daily-apps.pages.dev",
+    "checkedAt": "2026-10-30T09:55:15.606912+00:00",
     "httpStatus": 200,
-    "sha256": "2740e05a431ce4bcdf3f542ecc758ba33bf08ed5dd1a42b099a88072ee6b83da",
+    "sha256": "6fb134d065031152b955bd54cc4d5ac117b68fbaad4870f22e04da54756d59e5",
     "matchesLocal": true,
     "primaryClosedTestLinks": 4,
     "internalTestLinks": 0,
     "enrollmentMethod": "email list registration before individual closed-test opt-in",
-    "scope": "Only testers/index.html replaced; live CSS, robots and other public assets preserved."
+    "scope": "Updated testers/index.html and its CSS contact spacing; live robots and other public assets preserved. Existing Content-Security-Policy preserved.",
+    "assets": [
+      {
+        "path": "testers/index.html",
+        "sha256": "6fb134d065031152b955bd54cc4d5ac117b68fbaad4870f22e04da54756d59e5",
+        "matchesLocal": true,
+        "status": 200
+      },
+      {
+        "path": "testers/testers.css",
+        "sha256": "ab5f442948fa7fd097122c098019260990d6e25e53e5cfd90ef5c1476de11d54",
+        "matchesLocal": true,
+        "status": 200
+      }
+    ]
   }
 }

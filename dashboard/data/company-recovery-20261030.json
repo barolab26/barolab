@@ -1,1 +1,580 @@
-{"schema": "barolab-company-recovery-v1", "checkedAt": "2026-10-30T09:46:59.705669+00:00", "authorization": "그리고 니가 제안한 1~4번 작업을 진행 하는데 승인한다.", "backupCommit": "b4b6eeb92b6a2c5fa5e1b4c97e4e94822f3f1405", "collectionReceipt": {"capturedAt": "2026-10-30T18:38:00.1010165+09:00", "scope": "Approved recovery of BaroLab collection only", "rootCause": "Disabled task referenced removed server/windows_worker.py; standalone module import path omitted dashboard", "task": {"name": "BaroLab-Metrics-Collector", "state": "Ready", "arguments": "-u -B -X utf8 -m dashboard.server.worker --task metrics", "workingDirectory": "C:\\10_Project\\BaroLab", "interval": "PT30M", "multipleInstances": "IgnoreNew", "lastResult": 0, "nextRunAt": "2026-10-30T19:06:38.0000000+09:00"}, "runtime": {"schema": "metrics-runtime-v2", "runId": "ce2667ea1d9544549c085ddb689a16a2", "pid": 56864, "status": "completed", "startedAt": "2026-10-30T09:28:53.299627+00:00", "checkedAt": "2026-10-30T09:37:25.585638+00:00", "stages": [{"script": "dashboard/revenue.py", "status": "completed", "startedAt": "2026-10-30T09:28:53.300948+00:00", "timeoutSeconds": 180, "lastProcessSuccessAt": "2026-10-30T09:29:30.856135+00:00", "helperPid": 50948, "elapsedSeconds": 37.6, "exitCode": 0, "finishedAt": "2026-10-30T09:29:30.856151+00:00"}, {"script": "dashboard/traffic.py", "status": "completed", "startedAt": "2026-10-30T09:29:30.883851+00:00", "timeoutSeconds": 840, "lastProcessSuccessAt": "2026-10-30T09:30:47.866588+00:00", "helperPid": 65084, "elapsedSeconds": 77.0, "exitCode": 0, "finishedAt": "2026-10-30T09:30:47.866606+00:00"}, {"script": "dashboard/metrics.py", "status": "completed", "startedAt": "2026-10-30T09:30:47.964594+00:00", "timeoutSeconds": 480, "lastProcessSuccessAt": "2026-10-30T09:36:52.224581+00:00", "helperPid": 13596, "elapsedSeconds": 364.3, "exitCode": 0, "finishedAt": "2026-10-30T09:36:52.224603+00:00"}, {"script": "naver_kin.posting", "status": "completed", "startedAt": "2026-10-30T09:36:52.288604+00:00", "timeoutSeconds": 480, "lastProcessSuccessAt": "2026-10-30T09:37:11.058631+00:00", "helperPid": 42924, "elapsedSeconds": 18.8, "exitCode": 0, "finishedAt": "2026-10-30T09:37:11.058643+00:00"}, {"script": "threads_posting.posting", "status": "completed", "startedAt": "2026-10-30T09:37:11.060452+00:00", "timeoutSeconds": 480, "lastProcessSuccessAt": "2026-10-30T09:37:25.122090+00:00", "helperPid": 60076, "elapsedSeconds": 14.1, "exitCode": 0, "finishedAt": "2026-10-30T09:37:25.122191+00:00"}], "budgetSeconds": 2460, "lastProcessSuccessAt": "2026-10-30T09:37:25.585626+00:00", "lastSuccessAt": "2026-10-29T13:40:36.598767+00:00", "lastCollectionSuccessAt": "2026-10-29T13:40:36.598767+00:00", "previousInterrupted": false, "previousStartedAt": "2026-10-29T20:02:12.589169+00:00", "successMeaning": "process_exit_zero_not_source_collection", "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인", "currentStage": null, "pagePerformance": {"status": "partial", "complete": false, "start": "2026-10-23", "end": "2026-10-29", "reasonCodes": ["revenue_partial_or_missing"]}, "finishedAt": "2026-10-30T09:37:25.585626+00:00", "collectionStatus": "partial"}, "collection": {"checkedAt": "2026-10-30T09:37:25.585656+00:00", "processStatus": "success", "collectionStatus": "partial", "sourceCount": 95, "states": [{"Name": "success", "Count": 46}, {"Name": "unknown", "Count": 7}, {"Name": "failed", "Count": 1}, {"Name": "partial", "Count": 21}, {"Name": "stale", "Count": 20}]}, "revenueSources": [{"id": "adsense-sj", "status": "collected", "checkedAt": "2026-10-30T09:28:59.112483+00:00", "attemptedAt": null, "reason": "조회 대상 15개 · 계정 등록 15개 · 수익 행 있는 날짜만 집계"}, {"id": "adpost-soul5373", "status": "error", "checkedAt": "2026-10-27T09:26:22.727300+09:00", "attemptedAt": "2026-10-30T09:29:21.362782+00:00", "reason": "계정 전용 시작 배치 실행 후 CDP 연결 실패"}, {"id": "coupang", "status": "collected", "checkedAt": "2026-10-30T09:29:21.491358+00:00", "attemptedAt": null, "reason": "계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기"}, {"id": "adsense-aaa10291028", "status": "not_collected", "checkedAt": "2026-10-30T09:29:21.491387+00:00", "attemptedAt": null, "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개"}, {"id": "toss", "status": "collected", "checkedAt": "2026-10-30T09:29:23.217297+00:00", "attemptedAt": null, "reason": "결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개"}, {"id": "trip", "status": "configured_no_report_api", "checkedAt": "2026-10-30T09:29:23.217310+00:00", "attemptedAt": null, "reason": "AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인"}, {"id": "replyalba", "status": "collected", "checkedAt": "2026-10-30T09:29:24.751802+00:00", "attemptedAt": null, "reason": "공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기"}], "validation": {"newRegressionTestsPassed": 12, "existingBusinessTestsPassed": 3, "diffCheckPassed": true, "demoEnvironmentCannotOverrideDefault": true, "explicitDemoClearlyLabeled": true}, "unchangedTask": {"name": "Jarvis-CF-Metrics", "state": "Disabled"}, "separateRevenueRefresh": {"windowsTaskRegistered": false, "separateTimerCreated": false, "sharedSourceLock": "dashboard/data/revenue.lock"}, "beforeTaskXml": "C:\\Users\\baro7\\ego\\company-recovery-20261030\\metrics-task-before.xml"}, "trafficExperiment": {"experimentId": "company-focus-20261030-garmin-v1", "state": "published_verified_measurement_running", "targetUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "sourceOfficialLinks": ["https://www8.garmin.com/manuals/webhelp/GUID-025D75CF-3445-49E1-8D81-1AA74AB4E00F/EN-US/GUID-6E986507-83A1-4051-9F28-EB79400940A5.html"], "baseline": {"domain": "daynote.kr", "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "title": "", "sessions": 16, "pageViews": 18, "start": "2026-10-23", "end": "2026-10-29", "complete": true, "checkedAt": "2026-10-29T20:02:32.714261+00:00"}, "businessExperiment": {"hypothesis": "Existing positive-traffic article plus one useful purchase-question post and attributable followup can attract measurable readers without increasing article output.", "measurementDate": "2026-11-02", "successMetric": "At least 10 GA4 sessions with exact experiment utm_content within 72h after verified publication; revenue is unknown until matched source evidence exists.", "stopCondition": "No automatic repetition; stop expansion at 72h if below 10 attributed sessions. Missing/incomplete measurement defers judgment; unknown submission state requires reconciliation instead of retry.", "evidenceConfidence": "medium", "maxModelCalls": 6, "targetUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison"}, "measurement": {"windowHours": 72, "reportingLagGraceHours": 48, "startBasis": "verified publication timestamp; not draft creation", "utm": {"schema": "cf-channel-attribution-v1", "source": "threads", "medium": "social", "campaign": "cf_bridge", "account": "mustpickinfo", "workDate": "2026-10-30", "publicationDate": "2026-10-30", "scheduledSlot": "18:35", "canonicalUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "outboundUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa", "postToken": "a1b0adcf4b2ff8fa", "utmContent": "mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa", "articleIdSha256": "c79e38312de9a17320d8f930d2ad042e6db000b41026d0bf4938bf62e5eabe6c", "verificationScope": "exact attribution derivation only; canonical article verified separately"}, "budget": {"mainPosts": 1, "followups": 1, "additionalNaverKinAnswersMax": 2, "additionalNaverBridgeMax": 1, "modelCallsMax": 6}, "causalProof": false, "revenueVerified": false, "ga4WindowMeaning": "Exact UTM attribution, calendar dates from publication through yesterday, not exact 72-hour event-time window. Review after 72h plus reporting delay."}, "documentPath": "C:\\Users\\baro7\\ego\\company-audit-20261030\\garmin-threads-document.json", "growthAction": {"record": {"id": "cf2a951a760647a38fa6aa8429134f77", "domain": "daynote.kr", "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "action": "기존 가민 구매 기준 글의 Threads 외부유입 1회 실험", "note": "사용자 승인 1~4 중 유입 실험. experimentId=company-focus-20261030-garmin-v1; 기존글 기준선 2026-10-23~29 16세션/18PV. Threads 본문1+링크댓글1, 추가 자동 반복 없음. 검증된 공개시각부터72h후평가하고 GA4보고지연48h허용. 목표 exactUTM10세션, 미수집은0성과로판정하지않음. 실제GA4범위는게시일부터어제까지달력일이며정확72h슬라이딩윈도우아님. 수익미검증. 추가모델최대6회. UTM=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa", "status": "planned", "createdAt": "2026-10-30T09:35:48.186369+00:00", "updatedAt": "2026-10-30T09:35:48.186369+00:00", "completedAt": null, "planningBaseline": {"start": "2026-09-30", "end": "2026-10-27", "impressions": null, "clicks": null, "ctr": null, "position": null, "status": "not_collected", "reason": "정확한 글별 비교기간 미수집"}, "baseline": null, "followup": null, "observation": null, "diagnosisSnapshot": {"capturedAt": "2026-10-30T09:35:48.297900+00:00", "sourceCheckedAt": "2026-10-30T09:35:48.186414+00:00", "domain": "daynote.kr", "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "diagnosis": {"domain": "daynote.kr", "facts": ["동일한 28일 비교에서 클릭 0→0, 노출 4→10 확인"], "hypotheses": [{"reason": "검색 수요·노출 대상·순위 변화가 노출 증감에 관여했을 가능성", "confidence": "낮음", "evidence": "노출 변화는 확인됐으나 검색 수요와 검색어 구성을 분리한 인과 자료 없음"}], "unknowns": ["평균순위는 검색어 구성과 노출 가중치의 영향을 받으므로 순위 변화만으로 원인을 확정하지 않음", "양기간에 같은 검색어·글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음", "양기간에 같은 글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음", "행이 없다는 이유로 노출 0이나 신규 발행 글로 판단하지 않음", "날씨·시즌·광고 배치·문서 개선 효과는 별도 근거 없으면 미확인"], "confidence": "측정 사실 확인·원인 가설 낮음", "pageContributors": [], "queryContributors": [], "decomposition": {"identityVerified": true, "clickDelta": 0, "impressionEffect": 0.0, "ctrEffect": 0.0, "reason": "노출과 CTR의 산술 분해이며 원인·개선 효과를 입증하지 않음"}, "coverage": {"topRowsOnly": true, "reason": "글·검색어는 상위 일부 행이며 비공개 검색어가 빠질 수 있음", "pageComparable": false, "queryComparable": false, "pageReportCollected": true, "pageRows": {"currentUnmatched": 10, "previousUnmatched": 4}, "queryReportCollected": true, "queryRows": {"currentUnmatched": 0, "previousUnmatched": 1}, "queryScope": "page_query"}, "actions": [{"action": "기여글과 검색어의 실제 내용 점검", "reason": "양기간에 관측된 글·검색어 행의 변화만 비교", "verification": "개선 기록을 남기고 다음 수집에서 정확한 후속 기간 확인"}], "revenueDecomposition": {"status": "not_comparable", "revenueDelta": null, "pageViewEffect": null, "rpmEffect": null, "residual": null, "currency": null, "causalProof": false, "reason": "양쪽 28일 전체·같은 통화·신선한 원천과 RPM이 확인되어야 분해 가능"}}, "pageEvidence": [], "causalProof": false, "reason": "등록 시점의 원천 진단 고정 · 가설과 관측을 구분하며 이후 수정하지 않음"}, "verification": {"status": "not_completed", "causalProof": false}}, "records": [{"id": "cf2a951a760647a38fa6aa8429134f77", "domain": "daynote.kr", "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "action": "기존 가민 구매 기준 글의 Threads 외부유입 1회 실험", "note": "사용자 승인 1~4 중 유입 실험. experimentId=company-focus-20261030-garmin-v1; 기존글 기준선 2026-10-23~29 16세션/18PV. Threads 본문1+링크댓글1, 추가 자동 반복 없음. 검증된 공개시각부터72h후평가하고 GA4보고지연48h허용. 목표 exactUTM10세션, 미수집은0성과로판정하지않음. 실제GA4범위는게시일부터어제까지달력일이며정확72h슬라이딩윈도우아님. 수익미검증. 추가모델최대6회. UTM=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa", "status": "planned", "createdAt": "2026-10-30T09:35:48.186369+00:00", "updatedAt": "2026-10-30T09:35:48.186369+00:00", "completedAt": null, "planningBaseline": {"start": "2026-09-30", "end": "2026-10-27", "impressions": null, "clicks": null, "ctr": null, "position": null, "status": "not_collected", "reason": "정확한 글별 비교기간 미수집"}, "baseline": null, "followup": null, "observation": null, "diagnosisSnapshot": {"capturedAt": "2026-10-30T09:35:48.297900+00:00", "sourceCheckedAt": "2026-10-30T09:35:48.186414+00:00", "domain": "daynote.kr", "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison", "diagnosis": {"domain": "daynote.kr", "facts": ["동일한 28일 비교에서 클릭 0→0, 노출 4→10 확인"], "hypotheses": [{"reason": "검색 수요·노출 대상·순위 변화가 노출 증감에 관여했을 가능성", "confidence": "낮음", "evidence": "노출 변화는 확인됐으나 검색 수요와 검색어 구성을 분리한 인과 자료 없음"}], "unknowns": ["평균순위는 검색어 구성과 노출 가중치의 영향을 받으므로 순위 변화만으로 원인을 확정하지 않음", "양기간에 같은 검색어·글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음", "양기간에 같은 글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음", "행이 없다는 이유로 노출 0이나 신규 발행 글로 판단하지 않음", "날씨·시즌·광고 배치·문서 개선 효과는 별도 근거 없으면 미확인"], "confidence": "측정 사실 확인·원인 가설 낮음", "pageContributors": [], "queryContributors": [], "decomposition": {"identityVerified": true, "clickDelta": 0, "impressionEffect": 0.0, "ctrEffect": 0.0, "reason": "노출과 CTR의 산술 분해이며 원인·개선 효과를 입증하지 않음"}, "coverage": {"topRowsOnly": true, "reason": "글·검색어는 상위 일부 행이며 비공개 검색어가 빠질 수 있음", "pageComparable": false, "queryComparable": false, "pageReportCollected": true, "pageRows": {"currentUnmatched": 10, "previousUnmatched": 4}, "queryReportCollected": true, "queryRows": {"currentUnmatched": 0, "previousUnmatched": 1}, "queryScope": "page_query"}, "actions": [{"action": "기여글과 검색어의 실제 내용 점검", "reason": "양기간에 관측된 글·검색어 행의 변화만 비교", "verification": "개선 기록을 남기고 다음 수집에서 정확한 후속 기간 확인"}], "revenueDecomposition": {"status": "not_comparable", "revenueDelta": null, "pageViewEffect": null, "rpmEffect": null, "residual": null, "currency": null, "causalProof": false, "reason": "양쪽 28일 전체·같은 통화·신선한 원천과 RPM이 확인되어야 분해 가능"}}, "pageEvidence": [], "causalProof": false, "reason": "등록 시점의 원천 진단 고정 · 가설과 관측을 구분하며 이후 수정하지 않음"}, "verification": {"status": "not_completed", "causalProof": false}}]}, "publications": [{"part_id": "company-focus-20261030-garmin-v1-1", "kind": "followup", "state": "published_verified", "permalink": "https://www.threads.com/@mustpickinfo/post/DfHR-iDH1DS", "platform_id": "18101158268388074", "published_at": "2026-10-30T09:39:46+00:00", "verified_at": "2026-10-30T09:39:53.510213+00:00", "outbound_url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa"}, {"part_id": "company-focus-20261030-garmin-v1-0", "kind": "main", "state": "published_verified", "permalink": "https://www.threads.com/@mustpickinfo/post/DfHRk_QHzSu", "platform_id": "18114960952869008", "published_at": "2026-10-30T09:36:17+00:00", "verified_at": "2026-10-30T09:36:21.597657+00:00", "outbound_url": null}], "growthActionId": "cf2a951a760647a38fa6aa8429134f77", "recordedAt": "2026-10-30T09:46:59.705669+00:00"}, "testerLanding": {"url": "https://barolab-daily-apps.pages.dev/testers/", "previewDeploymentUrl": "https://94a0d2e1.barolab-daily-apps.pages.dev", "checkedAt": "2026-10-30T09:46:59.705669+00:00", "httpStatus": 200, "sha256": "2740e05a431ce4bcdf3f542ecc758ba33bf08ed5dd1a42b099a88072ee6b83da", "matchesLocal": true, "primaryClosedTestLinks": 4, "internalTestLinks": 0, "enrollmentMethod": "email list registration before individual closed-test opt-in", "scope": "Only testers/index.html replaced; live CSS, robots and other public assets preserved."}, "outreachSentCount": 4, "outreachAcceptanceVerifiedCount": 0, "notes": ["Source authentication and missing-account/report access remain blockers, not zero revenue.", "Publication and outreach receipts are not revenue, tester acceptance or completed 14-day testing.", "Explicit demo metrics are labeled separately; default API uses observed evidence."], "finalVerification": {"checkedAt": "2026-10-30T09:49:31.373400+00:00", "defaultMetricsDemo": false, "defaultRevenueMonth": {"amounts": {"USD": "1.92", "KRW": "3824.0"}, "status": "partial", "observedDays": 30, "expectedDays": 30, "start": "2026-10-01", "end": "2026-10-30", "estimated": true, "complete": false, "reason": null}, "explicitDemoLabeled": true, "cfAgenda": {"id": "136b53d455860f94934d4427620c7779af6b1b27dc51a24cf23f2007ac75e90a", "status": "closed", "closedAt": 1793353384.4645956, "reportAcks": {"opening": 1793310152.0824714, "staff_result": 1793353384.254966, "closing": 1793353384.4545565}}, "approvalPackages": ["collection_restore", "agenda_reconciliation", "bounded_traffic_experiment", "free_tester_recruitment"], "proposalStates": {"triaged_partial": 28, "pending_ceo": 1}, "landingProductionMatchesLocal": true, "tests": {"collectionRuntime": {"passed": 12, "failed": 0}, "businessControls": {"passed": 79, "failed": 1, "knownExistingFailure": "test_agenda_budget_exhaustion_answers_with_preserved_findings: existing DEFAULT agendaTokens=5000000, old assertion expects1000000. Default and stale assertion preserved."}}, "runtimeProcesses": {"dashboard": 53728, "memoryWorker": 49072}}}
+{
+  "schema": "barolab-company-recovery-v1",
+  "checkedAt": "2026-10-30T09:46:59.705669+00:00",
+  "authorization": "그리고 니가 제안한 1~4번 작업을 진행 하는데 승인한다.",
+  "backupCommit": "b4b6eeb92b6a2c5fa5e1b4c97e4e94822f3f1405",
+  "collectionReceipt": {
+    "capturedAt": "2026-10-30T18:38:00.1010165+09:00",
+    "scope": "Approved recovery of BaroLab collection only",
+    "rootCause": "Disabled task referenced removed server/windows_worker.py; standalone module import path omitted dashboard",
+    "task": {
+      "name": "BaroLab-Metrics-Collector",
+      "state": "Ready",
+      "arguments": "-u -B -X utf8 -m dashboard.server.worker --task metrics",
+      "workingDirectory": "C:\\10_Project\\BaroLab",
+      "interval": "PT30M",
+      "multipleInstances": "IgnoreNew",
+      "lastResult": 0,
+      "nextRunAt": "2026-10-30T19:06:38.0000000+09:00"
+    },
+    "runtime": {
+      "schema": "metrics-runtime-v2",
+      "runId": "ce2667ea1d9544549c085ddb689a16a2",
+      "pid": 56864,
+      "status": "completed",
+      "startedAt": "2026-10-30T09:28:53.299627+00:00",
+      "checkedAt": "2026-10-30T09:37:25.585638+00:00",
+      "stages": [
+        {
+          "script": "dashboard/revenue.py",
+          "status": "completed",
+          "startedAt": "2026-10-30T09:28:53.300948+00:00",
+          "timeoutSeconds": 180,
+          "lastProcessSuccessAt": "2026-10-30T09:29:30.856135+00:00",
+          "helperPid": 50948,
+          "elapsedSeconds": 37.6,
+          "exitCode": 0,
+          "finishedAt": "2026-10-30T09:29:30.856151+00:00"
+        },
+        {
+          "script": "dashboard/traffic.py",
+          "status": "completed",
+          "startedAt": "2026-10-30T09:29:30.883851+00:00",
+          "timeoutSeconds": 840,
+          "lastProcessSuccessAt": "2026-10-30T09:30:47.866588+00:00",
+          "helperPid": 65084,
+          "elapsedSeconds": 77.0,
+          "exitCode": 0,
+          "finishedAt": "2026-10-30T09:30:47.866606+00:00"
+        },
+        {
+          "script": "dashboard/metrics.py",
+          "status": "completed",
+          "startedAt": "2026-10-30T09:30:47.964594+00:00",
+          "timeoutSeconds": 480,
+          "lastProcessSuccessAt": "2026-10-30T09:36:52.224581+00:00",
+          "helperPid": 13596,
+          "elapsedSeconds": 364.3,
+          "exitCode": 0,
+          "finishedAt": "2026-10-30T09:36:52.224603+00:00"
+        },
+        {
+          "script": "naver_kin.posting",
+          "status": "completed",
+          "startedAt": "2026-10-30T09:36:52.288604+00:00",
+          "timeoutSeconds": 480,
+          "lastProcessSuccessAt": "2026-10-30T09:37:11.058631+00:00",
+          "helperPid": 42924,
+          "elapsedSeconds": 18.8,
+          "exitCode": 0,
+          "finishedAt": "2026-10-30T09:37:11.058643+00:00"
+        },
+        {
+          "script": "threads_posting.posting",
+          "status": "completed",
+          "startedAt": "2026-10-30T09:37:11.060452+00:00",
+          "timeoutSeconds": 480,
+          "lastProcessSuccessAt": "2026-10-30T09:37:25.122090+00:00",
+          "helperPid": 60076,
+          "elapsedSeconds": 14.1,
+          "exitCode": 0,
+          "finishedAt": "2026-10-30T09:37:25.122191+00:00"
+        }
+      ],
+      "budgetSeconds": 2460,
+      "lastProcessSuccessAt": "2026-10-30T09:37:25.585626+00:00",
+      "lastSuccessAt": "2026-10-29T13:40:36.598767+00:00",
+      "lastCollectionSuccessAt": "2026-10-29T13:40:36.598767+00:00",
+      "previousInterrupted": false,
+      "previousStartedAt": "2026-10-29T20:02:12.589169+00:00",
+      "successMeaning": "process_exit_zero_not_source_collection",
+      "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
+      "currentStage": null,
+      "pagePerformance": {
+        "status": "partial",
+        "complete": false,
+        "start": "2026-10-23",
+        "end": "2026-10-29",
+        "reasonCodes": [
+          "revenue_partial_or_missing"
+        ]
+      },
+      "finishedAt": "2026-10-30T09:37:25.585626+00:00",
+      "collectionStatus": "partial"
+    },
+    "collection": {
+      "checkedAt": "2026-10-30T09:37:25.585656+00:00",
+      "processStatus": "success",
+      "collectionStatus": "partial",
+      "sourceCount": 95,
+      "states": [
+        {
+          "Name": "success",
+          "Count": 46
+        },
+        {
+          "Name": "unknown",
+          "Count": 7
+        },
+        {
+          "Name": "failed",
+          "Count": 1
+        },
+        {
+          "Name": "partial",
+          "Count": 21
+        },
+        {
+          "Name": "stale",
+          "Count": 20
+        }
+      ]
+    },
+    "revenueSources": [
+      {
+        "id": "adsense-sj",
+        "status": "collected",
+        "checkedAt": "2026-10-30T09:28:59.112483+00:00",
+        "attemptedAt": null,
+        "reason": "조회 대상 15개 · 계정 등록 15개 · 수익 행 있는 날짜만 집계"
+      },
+      {
+        "id": "adpost-soul5373",
+        "status": "error",
+        "checkedAt": "2026-10-27T09:26:22.727300+09:00",
+        "attemptedAt": "2026-10-30T09:29:21.362782+00:00",
+        "reason": "계정 전용 시작 배치 실행 후 CDP 연결 실패"
+      },
+      {
+        "id": "coupang",
+        "status": "collected",
+        "checkedAt": "2026-10-30T09:29:21.491358+00:00",
+        "attemptedAt": null,
+        "reason": "계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기"
+      },
+      {
+        "id": "adsense-aaa10291028",
+        "status": "not_collected",
+        "checkedAt": "2026-10-30T09:29:21.491387+00:00",
+        "attemptedAt": null,
+        "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개"
+      },
+      {
+        "id": "toss",
+        "status": "collected",
+        "checkedAt": "2026-10-30T09:29:23.217297+00:00",
+        "attemptedAt": null,
+        "reason": "결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개"
+      },
+      {
+        "id": "trip",
+        "status": "configured_no_report_api",
+        "checkedAt": "2026-10-30T09:29:23.217310+00:00",
+        "attemptedAt": null,
+        "reason": "AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인"
+      },
+      {
+        "id": "replyalba",
+        "status": "collected",
+        "checkedAt": "2026-10-30T09:29:24.751802+00:00",
+        "attemptedAt": null,
+        "reason": "공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기"
+      }
+    ],
+    "validation": {
+      "newRegressionTestsPassed": 12,
+      "existingBusinessTestsPassed": 3,
+      "diffCheckPassed": true,
+      "demoEnvironmentCannotOverrideDefault": true,
+      "explicitDemoClearlyLabeled": true
+    },
+    "unchangedTask": {
+      "name": "Jarvis-CF-Metrics",
+      "state": "Disabled"
+    },
+    "separateRevenueRefresh": {
+      "windowsTaskRegistered": false,
+      "separateTimerCreated": false,
+      "sharedSourceLock": "dashboard/data/revenue.lock"
+    },
+    "beforeTaskXml": "C:\\Users\\baro7\\ego\\company-recovery-20261030\\metrics-task-before.xml"
+  },
+  "trafficExperiment": {
+    "experimentId": "company-focus-20261030-garmin-v1",
+    "state": "published_verified_measurement_running",
+    "targetUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+    "sourceOfficialLinks": [
+      "https://www8.garmin.com/manuals/webhelp/GUID-025D75CF-3445-49E1-8D81-1AA74AB4E00F/EN-US/GUID-6E986507-83A1-4051-9F28-EB79400940A5.html"
+    ],
+    "baseline": {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+      "title": "",
+      "sessions": 16,
+      "pageViews": 18,
+      "start": "2026-10-23",
+      "end": "2026-10-29",
+      "complete": true,
+      "checkedAt": "2026-10-29T20:02:32.714261+00:00"
+    },
+    "businessExperiment": {
+      "hypothesis": "Existing positive-traffic article plus one useful purchase-question post and attributable followup can attract measurable readers without increasing article output.",
+      "measurementDate": "2026-11-02",
+      "successMetric": "At least 10 GA4 sessions with exact experiment utm_content within 72h after verified publication; revenue is unknown until matched source evidence exists.",
+      "stopCondition": "No automatic repetition; stop expansion at 72h if below 10 attributed sessions. Missing/incomplete measurement defers judgment; unknown submission state requires reconciliation instead of retry.",
+      "evidenceConfidence": "medium",
+      "maxModelCalls": 6,
+      "targetUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison"
+    },
+    "measurement": {
+      "windowHours": 72,
+      "reportingLagGraceHours": 48,
+      "startBasis": "verified publication timestamp; not draft creation",
+      "utm": {
+        "schema": "cf-channel-attribution-v1",
+        "source": "threads",
+        "medium": "social",
+        "campaign": "cf_bridge",
+        "account": "mustpickinfo",
+        "workDate": "2026-10-30",
+        "publicationDate": "2026-10-30",
+        "scheduledSlot": "18:35",
+        "canonicalUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+        "outboundUrl": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa",
+        "postToken": "a1b0adcf4b2ff8fa",
+        "utmContent": "mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa",
+        "articleIdSha256": "c79e38312de9a17320d8f930d2ad042e6db000b41026d0bf4938bf62e5eabe6c",
+        "verificationScope": "exact attribution derivation only; canonical article verified separately"
+      },
+      "budget": {
+        "mainPosts": 1,
+        "followups": 1,
+        "additionalNaverKinAnswersMax": 2,
+        "additionalNaverBridgeMax": 1,
+        "modelCallsMax": 6
+      },
+      "causalProof": false,
+      "revenueVerified": false,
+      "ga4WindowMeaning": "Exact UTM attribution, calendar dates from publication through yesterday, not exact 72-hour event-time window. Review after 72h plus reporting delay."
+    },
+    "documentPath": "C:\\Users\\baro7\\ego\\company-audit-20261030\\garmin-threads-document.json",
+    "growthAction": {
+      "record": {
+        "id": "cf2a951a760647a38fa6aa8429134f77",
+        "domain": "daynote.kr",
+        "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+        "action": "기존 가민 구매 기준 글의 Threads 외부유입 1회 실험",
+        "note": "사용자 승인 1~4 중 유입 실험. experimentId=company-focus-20261030-garmin-v1; 기존글 기준선 2026-10-23~29 16세션/18PV. Threads 본문1+링크댓글1, 추가 자동 반복 없음. 검증된 공개시각부터72h후평가하고 GA4보고지연48h허용. 목표 exactUTM10세션, 미수집은0성과로판정하지않음. 실제GA4범위는게시일부터어제까지달력일이며정확72h슬라이딩윈도우아님. 수익미검증. 추가모델최대6회. UTM=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa",
+        "status": "planned",
+        "createdAt": "2026-10-30T09:35:48.186369+00:00",
+        "updatedAt": "2026-10-30T09:35:48.186369+00:00",
+        "completedAt": null,
+        "planningBaseline": {
+          "start": "2026-09-30",
+          "end": "2026-10-27",
+          "impressions": null,
+          "clicks": null,
+          "ctr": null,
+          "position": null,
+          "status": "not_collected",
+          "reason": "정확한 글별 비교기간 미수집"
+        },
+        "baseline": null,
+        "followup": null,
+        "observation": null,
+        "diagnosisSnapshot": {
+          "capturedAt": "2026-10-30T09:35:48.297900+00:00",
+          "sourceCheckedAt": "2026-10-30T09:35:48.186414+00:00",
+          "domain": "daynote.kr",
+          "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+          "diagnosis": {
+            "domain": "daynote.kr",
+            "facts": [
+              "동일한 28일 비교에서 클릭 0→0, 노출 4→10 확인"
+            ],
+            "hypotheses": [
+              {
+                "reason": "검색 수요·노출 대상·순위 변화가 노출 증감에 관여했을 가능성",
+                "confidence": "낮음",
+                "evidence": "노출 변화는 확인됐으나 검색 수요와 검색어 구성을 분리한 인과 자료 없음"
+              }
+            ],
+            "unknowns": [
+              "평균순위는 검색어 구성과 노출 가중치의 영향을 받으므로 순위 변화만으로 원인을 확정하지 않음",
+              "양기간에 같은 검색어·글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음",
+              "양기간에 같은 글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음",
+              "행이 없다는 이유로 노출 0이나 신규 발행 글로 판단하지 않음",
+              "날씨·시즌·광고 배치·문서 개선 효과는 별도 근거 없으면 미확인"
+            ],
+            "confidence": "측정 사실 확인·원인 가설 낮음",
+            "pageContributors": [],
+            "queryContributors": [],
+            "decomposition": {
+              "identityVerified": true,
+              "clickDelta": 0,
+              "impressionEffect": 0.0,
+              "ctrEffect": 0.0,
+              "reason": "노출과 CTR의 산술 분해이며 원인·개선 효과를 입증하지 않음"
+            },
+            "coverage": {
+              "topRowsOnly": true,
+              "reason": "글·검색어는 상위 일부 행이며 비공개 검색어가 빠질 수 있음",
+              "pageComparable": false,
+              "queryComparable": false,
+              "pageReportCollected": true,
+              "pageRows": {
+                "currentUnmatched": 10,
+                "previousUnmatched": 4
+              },
+              "queryReportCollected": true,
+              "queryRows": {
+                "currentUnmatched": 0,
+                "previousUnmatched": 1
+              },
+              "queryScope": "page_query"
+            },
+            "actions": [
+              {
+                "action": "기여글과 검색어의 실제 내용 점검",
+                "reason": "양기간에 관측된 글·검색어 행의 변화만 비교",
+                "verification": "개선 기록을 남기고 다음 수집에서 정확한 후속 기간 확인"
+              }
+            ],
+            "revenueDecomposition": {
+              "status": "not_comparable",
+              "revenueDelta": null,
+              "pageViewEffect": null,
+              "rpmEffect": null,
+              "residual": null,
+              "currency": null,
+              "causalProof": false,
+              "reason": "양쪽 28일 전체·같은 통화·신선한 원천과 RPM이 확인되어야 분해 가능"
+            }
+          },
+          "pageEvidence": [],
+          "causalProof": false,
+          "reason": "등록 시점의 원천 진단 고정 · 가설과 관측을 구분하며 이후 수정하지 않음"
+        },
+        "verification": {
+          "status": "not_completed",
+          "causalProof": false
+        }
+      },
+      "records": [
+        {
+          "id": "cf2a951a760647a38fa6aa8429134f77",
+          "domain": "daynote.kr",
+          "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+          "action": "기존 가민 구매 기준 글의 Threads 외부유입 1회 실험",
+          "note": "사용자 승인 1~4 중 유입 실험. experimentId=company-focus-20261030-garmin-v1; 기존글 기준선 2026-10-23~29 16세션/18PV. Threads 본문1+링크댓글1, 추가 자동 반복 없음. 검증된 공개시각부터72h후평가하고 GA4보고지연48h허용. 목표 exactUTM10세션, 미수집은0성과로판정하지않음. 실제GA4범위는게시일부터어제까지달력일이며정확72h슬라이딩윈도우아님. 수익미검증. 추가모델최대6회. UTM=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa",
+          "status": "planned",
+          "createdAt": "2026-10-30T09:35:48.186369+00:00",
+          "updatedAt": "2026-10-30T09:35:48.186369+00:00",
+          "completedAt": null,
+          "planningBaseline": {
+            "start": "2026-09-30",
+            "end": "2026-10-27",
+            "impressions": null,
+            "clicks": null,
+            "ctr": null,
+            "position": null,
+            "status": "not_collected",
+            "reason": "정확한 글별 비교기간 미수집"
+          },
+          "baseline": null,
+          "followup": null,
+          "observation": null,
+          "diagnosisSnapshot": {
+            "capturedAt": "2026-10-30T09:35:48.297900+00:00",
+            "sourceCheckedAt": "2026-10-30T09:35:48.186414+00:00",
+            "domain": "daynote.kr",
+            "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+            "diagnosis": {
+              "domain": "daynote.kr",
+              "facts": [
+                "동일한 28일 비교에서 클릭 0→0, 노출 4→10 확인"
+              ],
+              "hypotheses": [
+                {
+                  "reason": "검색 수요·노출 대상·순위 변화가 노출 증감에 관여했을 가능성",
+                  "confidence": "낮음",
+                  "evidence": "노출 변화는 확인됐으나 검색 수요와 검색어 구성을 분리한 인과 자료 없음"
+                }
+              ],
+              "unknowns": [
+                "평균순위는 검색어 구성과 노출 가중치의 영향을 받으므로 순위 변화만으로 원인을 확정하지 않음",
+                "양기간에 같은 검색어·글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음",
+                "양기간에 같은 글로 매칭되는 근거 부족 · 미수집 또는 교집합 없음",
+                "행이 없다는 이유로 노출 0이나 신규 발행 글로 판단하지 않음",
+                "날씨·시즌·광고 배치·문서 개선 효과는 별도 근거 없으면 미확인"
+              ],
+              "confidence": "측정 사실 확인·원인 가설 낮음",
+              "pageContributors": [],
+              "queryContributors": [],
+              "decomposition": {
+                "identityVerified": true,
+                "clickDelta": 0,
+                "impressionEffect": 0.0,
+                "ctrEffect": 0.0,
+                "reason": "노출과 CTR의 산술 분해이며 원인·개선 효과를 입증하지 않음"
+              },
+              "coverage": {
+                "topRowsOnly": true,
+                "reason": "글·검색어는 상위 일부 행이며 비공개 검색어가 빠질 수 있음",
+                "pageComparable": false,
+                "queryComparable": false,
+                "pageReportCollected": true,
+                "pageRows": {
+                  "currentUnmatched": 10,
+                  "previousUnmatched": 4
+                },
+                "queryReportCollected": true,
+                "queryRows": {
+                  "currentUnmatched": 0,
+                  "previousUnmatched": 1
+                },
+                "queryScope": "page_query"
+              },
+              "actions": [
+                {
+                  "action": "기여글과 검색어의 실제 내용 점검",
+                  "reason": "양기간에 관측된 글·검색어 행의 변화만 비교",
+                  "verification": "개선 기록을 남기고 다음 수집에서 정확한 후속 기간 확인"
+                }
+              ],
+              "revenueDecomposition": {
+                "status": "not_comparable",
+                "revenueDelta": null,
+                "pageViewEffect": null,
+                "rpmEffect": null,
+                "residual": null,
+                "currency": null,
+                "causalProof": false,
+                "reason": "양쪽 28일 전체·같은 통화·신선한 원천과 RPM이 확인되어야 분해 가능"
+              }
+            },
+            "pageEvidence": [],
+            "causalProof": false,
+            "reason": "등록 시점의 원천 진단 고정 · 가설과 관측을 구분하며 이후 수정하지 않음"
+          },
+          "verification": {
+            "status": "not_completed",
+            "causalProof": false
+          }
+        }
+      ]
+    },
+    "publications": [
+      {
+        "part_id": "company-focus-20261030-garmin-v1-1",
+        "kind": "followup",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfHR-iDH1DS",
+        "platform_id": "18101158268388074",
+        "published_at": "2026-10-30T09:39:46+00:00",
+        "verified_at": "2026-10-30T09:39:53.510213+00:00",
+        "outbound_url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison?utm_source=threads&utm_medium=social&utm_campaign=cf_bridge&utm_content=mustpickinfo_20261030_1835_a1b0adcf4b2ff8fa"
+      },
+      {
+        "part_id": "company-focus-20261030-garmin-v1-0",
+        "kind": "main",
+        "state": "published_verified",
+        "permalink": "https://www.threads.com/@mustpickinfo/post/DfHRk_QHzSu",
+        "platform_id": "18114960952869008",
+        "published_at": "2026-10-30T09:36:17+00:00",
+        "verified_at": "2026-10-30T09:36:21.597657+00:00",
+        "outbound_url": null
+      }
+    ],
+    "growthActionId": "cf2a951a760647a38fa6aa8429134f77",
+    "recordedAt": "2026-10-30T09:46:59.705669+00:00"
+  },
+  "testerLanding": {
+    "url": "https://barolab-daily-apps.pages.dev/testers/",
+    "previewDeploymentUrl": "https://5d9608a8.barolab-daily-apps.pages.dev",
+    "checkedAt": "2026-10-30T09:55:15.606912+00:00",
+    "httpStatus": 200,
+    "sha256": "6fb134d065031152b955bd54cc4d5ac117b68fbaad4870f22e04da54756d59e5",
+    "matchesLocal": true,
+    "primaryClosedTestLinks": 4,
+    "internalTestLinks": 0,
+    "enrollmentMethod": "email list registration before individual closed-test opt-in",
+    "scope": "Updated testers/index.html and its CSS contact spacing; live robots and other public assets preserved. Existing Content-Security-Policy preserved.",
+    "assets": [
+      {
+        "path": "testers/index.html",
+        "sha256": "6fb134d065031152b955bd54cc4d5ac117b68fbaad4870f22e04da54756d59e5",
+        "matchesLocal": true,
+        "status": 200
+      },
+      {
+        "path": "testers/testers.css",
+        "sha256": "ab5f442948fa7fd097122c098019260990d6e25e53e5cfd90ef5c1476de11d54",
+        "matchesLocal": true,
+        "status": 200
+      }
+    ]
+  },
+  "outreachSentCount": 4,
+  "outreachAcceptanceVerifiedCount": 0,
+  "notes": [
+    "Source authentication and missing-account/report access remain blockers, not zero revenue.",
+    "Publication and outreach receipts are not revenue, tester acceptance or completed 14-day testing.",
+    "Explicit demo metrics are labeled separately; default API uses observed evidence."
+  ],
+  "finalVerification": {
+    "checkedAt": "2026-10-30T09:49:31.373400+00:00",
+    "defaultMetricsDemo": false,
+    "defaultRevenueMonth": {
+      "amounts": {
+        "USD": "1.92",
+        "KRW": "3824.0"
+      },
+      "status": "partial",
+      "observedDays": 30,
+      "expectedDays": 30,
+      "start": "2026-10-01",
+      "end": "2026-10-30",
+      "estimated": true,
+      "complete": false,
+      "reason": null
+    },
+    "explicitDemoLabeled": true,
+    "cfAgenda": {
+      "id": "136b53d455860f94934d4427620c7779af6b1b27dc51a24cf23f2007ac75e90a",
+      "status": "closed",
+      "closedAt": 1793353384.4645956,
+      "reportAcks": {
+        "opening": 1793310152.0824714,
+        "staff_result": 1793353384.254966,
+        "closing": 1793353384.4545565
+      }
+    },
+    "approvalPackages": [
+      "collection_restore",
+      "agenda_reconciliation",
+      "bounded_traffic_experiment",
+      "free_tester_recruitment"
+    ],
+    "proposalStates": {
+      "triaged_partial": 28,
+      "pending_ceo": 1
+    },
+    "landingProductionMatchesLocal": true,
+    "tests": {
+      "collectionRuntime": {
+        "passed": 12,
+        "failed": 0
+      },
+      "businessControls": {
+        "passed": 79,
+        "failed": 1,
+        "knownExistingFailure": "test_agenda_budget_exhaustion_answers_with_preserved_findings: existing DEFAULT agendaTokens=5000000, old assertion expects1000000. Default and stale assertion preserved."
+      }
+    },
+    "runtimeProcesses": {
+      "dashboard": 53728,
+      "memoryWorker": 49072
+    }
+  }
+}

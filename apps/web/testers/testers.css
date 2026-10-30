@@ -65,6 +65,10 @@ main {
   font-size: 13px;
   color: #cbd5e1;
 }
+
+.account-alert .registration-contact {
+  margin-top: 12px;
+}
 .remote-grid {
   display: grid;
   grid-template-columns: 1fr;
