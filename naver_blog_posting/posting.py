@@ -1055,8 +1055,9 @@ def document_fingerprint(doc):
     return hashlib.sha256(json.dumps(doc, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
 def basic_summary_image(article, folder):
-    from common.flow_images import generate as flow_image
-    return flow_image(article['title'], article['intro'], folder, custom_prompt=article.get('imagePrompt'))
+    from common.flow_images import generate as flow_image, render_postincome_hero_thumbnail
+    hero_path = flow_image(article['title'], article['intro'], folder, custom_prompt=article.get('imagePrompt'))
+    return render_postincome_hero_thumbnail(hero_path, article.get('mainKeyword') or '', article.get('title') or '')
 
 def _has_slash_table(text):
     rows = []
@@ -1388,6 +1389,7 @@ def prepare_basic_content(account_key, folder=None, topic=None):
         description, credit = (raw_cap or article['title'], (article.get('mainKeyword') or '핵심 정리').replace('|', ' ').replace('｜', ' ').replace('/', ' ').replace('\\', ' ').replace('\n', ' ').strip() or '핵심 정리')
         plan = {'version': 1, 'main_keyword': article['mainKeyword'], 'signoff': article['signoff'], 'representative_file': image.name, 'assets': [{'id': 0, 'file': image.name, 'description': description, 'credit': credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}]}
         blocks = [{'type': 'image', 'id': 0, 'file': image.name, 'alt': description, 'caption': description + '｜' + credit}, {'type': 'text', 'text': article['intro']}]
+        from common.flow_images import generate_section_smart_capture
         sections = article.get('sections') or []
         for sec_idx, section in enumerate(sections):
             blocks.append({'type': 'heading', 'text': section['heading'].strip()})
@@ -1395,8 +1397,28 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             sec_prompt = (section.get('imagePrompt') or '').strip()
             if len(plan['assets']) < 6 and (sec_prompt or sec_idx < 4):
                 next_id = len(plan['assets'])
-                sec_fname = f'flow-section-{next_id}.png'
-                sec_img = flow_image(section['heading'], sec_text, folder, custom_prompt=sec_prompt or None, filename=sec_fname, source_index=next_id)
+                sec_fname = f'IMG_831{5 + next_id}.png'
+                if next_id <= 4:
+                    sec_img = generate_section_smart_capture(
+                        section['heading'],
+                        sec_text,
+                        folder,
+                        sec_fname,
+                        section_index=next_id,
+                        main_keyword=article.get('mainKeyword') or '',
+                    )
+                else:
+                    try:
+                        sec_img = flow_image(section['heading'], sec_text, folder, custom_prompt=sec_prompt or None, filename=sec_fname, source_index=next_id)
+                    except Exception:
+                        sec_img = generate_section_smart_capture(
+                            section['heading'],
+                            sec_text,
+                            folder,
+                            sec_fname,
+                            section_index=next_id,
+                            main_keyword=article.get('mainKeyword') or '',
+                        )
                 sec_cap = (section.get('imageCaption') or f"{section['heading'].strip()} 핵심 확인 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
                 if not sec_cap:
                     sec_cap = f"{section['heading'].strip()} 핵심 포인트"
