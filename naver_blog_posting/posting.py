@@ -1081,14 +1081,15 @@ def normalize_naver_document_links(document, account):
             allowed_bridge_hosts.add(h)
             allowed_bridge_hosts.add('www.' + h)
     is_bridge = bool(allowed_bridge_hosts)
+    existing_links = dict(document.get('lineLinks') or (document.get('presentation') or {}).get('lineLinks') or {})
     line_links = {}
-    changed = bool(document.get('lineLinks') or (document.get('presentation') or {}).get('lineLinks'))
+    changed = False
     new_blocks = []
 
     def _is_owned_bridge_url(u):
         try:
             host = (urlparse(str(u).strip()).hostname or '').lower()
-            return bool(host and host in allowed_bridge_hosts)
+            return bool(host and (host in allowed_bridge_hosts or host in ('m.site.naver.com', 'site.naver.com')))
         except Exception:
             return False
 
@@ -1125,10 +1126,18 @@ def normalize_naver_document_links(document, account):
                         out_lines.append(cleaned_ln)
                     idx += 1
                     continue
+                if ln in existing_links and len(line_links) >= 1:
+                    idx += 1
+                    continue
                 out_lines.append(ln)
                 idx += 1
                 continue
             else:
+                if ln in existing_links and _is_owned_bridge_url(existing_links[ln]):
+                    line_links[ln] = existing_links[ln]
+                    out_lines.append(ln)
+                    idx += 1
+                    continue
                 if re.search(r'(심화\s*설명을\s*이어\s*읽어보세요|아래\s*글로\s*이어가세요|아래\s*글로\s*이어서)', ln) and 'http' not in ln:
                     out_lines.append('본문에서 다룬 조건별 세부 계산 기준과 실전 체크리스트는 아래에서 바로 확인하실 수 있습니다.')
                     idx += 1
@@ -1198,7 +1207,26 @@ def normalize_naver_document_links(document, account):
                         break
         except Exception:
             pass
-    if line_links != (document.get('lineLinks') or {}):
+    # Convert external CF bridge URL into internal Naver QR short link (https://m.site.naver.com/xxxx)
+    if is_bridge and line_links:
+        try:
+            from dashboard.common.ego_taskspace import create_naver_qr_short_url
+            acct_key = str((account or {}).get('key') or (account or {}).get('blog_id') or 'adinfo0905')
+            doc_title = str(document.get('title') or '')
+            converted_links = {}
+            for cta_txt, target_u in line_links.items():
+                raw_target = str(document.get('bridgeTargetUrl') or target_u).strip()
+                qr_u = create_naver_qr_short_url(acct_key, raw_target, title=doc_title, post_key=doc_title)
+                converted_links[cta_txt] = qr_u
+                if raw_target != qr_u:
+                    if document.get('bridgeTargetUrl') != raw_target or document.get('bridgeQrUrl') != qr_u:
+                        document['bridgeTargetUrl'] = raw_target
+                        document['bridgeQrUrl'] = qr_u
+                        changed = True
+            line_links = converted_links
+        except Exception as exc:
+            log(f"[WARN] Naver QR short link conversion skipped: {exc}")
+    if line_links != existing_links:
         if line_links:
             document['lineLinks'] = line_links
             if isinstance(document.get('presentation'), dict):

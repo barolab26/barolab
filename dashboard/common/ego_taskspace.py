@@ -963,3 +963,119 @@ try {{
 """
     return run_ego_mjs(script, timeout=90)
 
+
+def create_naver_qr_short_url(
+    account_or_port: str | int,
+    target_url: str,
+    *,
+    title: str = "",
+    post_key: str = "",
+) -> str:
+    """Convert an external bridge URL into a unique `https://m.site.naver.com/xxxx` Naver QR short URL.
+
+    Uses Naver QR's official `POST https://qr-web.naver.com/code/createCode` API with
+    `qrDirectLinkTypeCd: 29` so visitors are 302-redirected directly to `target_url` while
+    Naver Blog's editor/crawler sees an internal `*.naver.com` domain (`m.site.naver.com`).
+    Caches per `(account, post_key, target_url)` so retries of the same post reuse the same QR
+    while every new post receives a fresh unique `m.site.naver.com` code.
+    """
+    raw_url = str(target_url or "").strip()
+    if not raw_url.startswith(("http://", "https://")):
+        return raw_url
+    if "site.naver.com/" in raw_url or "qr.naver.com/" in raw_url:
+        return raw_url
+
+    # Append UTM parameters for GA4 bridge attribution if not already present
+    final_url = raw_url
+    if "utm_source=" not in final_url:
+        sep = "&" if "?" in final_url else "?"
+        final_url = f"{final_url}{sep}utm_source=naver_blog&utm_medium=qr_bridge"
+
+    if isinstance(account_or_port, int) or (isinstance(account_or_port, str) and account_or_port.isdigit()):
+        account = PORT_TO_ACCOUNT.get(int(account_or_port), "adinfo0905")
+    else:
+        account = str(account_or_port or "adinfo0905").strip()
+    profile_id = resolve_ego_profile(account)
+    space_name = f"barolab-naver-{account}"
+
+    cache_path = Path(__file__).resolve().parents[1] / "data" / "naver" / "qr_links.json"
+    cache_id = hashlib.sha1(f"{account}|{post_key or title}|{final_url}".encode("utf-8")).hexdigest()[:16]
+    cache_data: dict = {}
+    try:
+        if cache_path.is_file():
+            cache_data = json.loads(cache_path.read_text(encoding="utf-8"))
+            cached_entry = cache_data.get(cache_id)
+            if isinstance(cached_entry, dict) and str(cached_entry.get("shortUrl", "")).startswith("https://m.site.naver.com/"):
+                return str(cached_entry["shortUrl"])
+    except Exception:
+        cache_data = {}
+
+    qr_title = (str(title or "상세 기준 확인표").split(",")[0].split("...")[0].strip() or "상세 기준 확인표")[:18]
+    script = f"""
+const spaceName = {json.dumps(space_name)};
+const profileId = {json.dumps(profile_id)};
+const qrTitle = {json.dumps(qr_title)};
+const directLink = {json.dumps(final_url)};
+
+const spaces = await listTaskSpaces();
+const existing = Array.isArray(spaces) ? spaces.find(s => s && s.name === spaceName) : null;
+const task = existing ? await taskSpace(existing.id) : await taskSpace(spaceName, {{ profileId }});
+const pages = await task.pages();
+const page = pages.length > 0 ? pages[0] : task.page("p1");
+
+const curUrl = await page.url().catch(() => "");
+if (!curUrl.startsWith("https://qr.naver.com")) {{
+  await page.goto("https://qr.naver.com/create", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+}}
+
+const apiRes = await page.evaluate(async ({{ qrTitle, directLink }}) => {{
+  const payload = {{
+    qrName: qrTitle,
+    qrShape: 1,
+    qrColorBorderCd: "#03C75A",
+    infoType: "url",
+    qrDirectLink: directLink,
+    qrDirectLinkTypeCd: 29,
+    sessions: [
+      {{ orderId: 0, type: "Basic", attachment: {{ title: qrTitle, desc: "" }} }},
+      {{ orderId: 1, type: "Link", attachment: {{ linkSubject: "" }}, attachments: [{{ linkUrl: directLink }}] }}
+    ],
+    qrSaveStatusCd: 79,
+    isActive: true
+  }};
+  const r = await fetch("https://qr-web.naver.com/code/createCode", {{
+    method: "POST",
+    credentials: "include",
+    headers: {{ "Content-Type": "application/json" }},
+    body: JSON.stringify(payload)
+  }});
+  return await r.json();
+}}, {{ qrTitle, directLink }});
+
+console.log("BAROLAB_EGO_JSON:" + JSON.stringify(apiRes || {{}}));
+"""
+    try:
+        res = run_ego_mjs(script, timeout=35)
+        qr_code = str((res or {}).get("data") or "").strip()
+        if (res or {}).get("code") == 1 and qr_code:
+            short_url = f"https://m.site.naver.com/{qr_code}"
+            try:
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_data[cache_id] = {
+                    "account": account,
+                    "title": qr_title,
+                    "postKey": post_key or title,
+                    "targetUrl": final_url,
+                    "shortUrl": short_url,
+                    "qrCode": qr_code,
+                    "createdAt": datetime.now(ZoneInfo("Asia/Seoul")).isoformat(timespec="seconds"),
+                }
+                cache_path.write_text(json.dumps(cache_data, ensure_ascii=False, indent=2), encoding="utf-8")
+            except Exception:
+                pass
+            return short_url
+    except Exception as exc:
+        logger.warning("Failed to create Naver QR short URL for %s: %s", final_url, exc)
+    return raw_url
+
+
