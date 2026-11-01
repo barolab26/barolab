@@ -41,8 +41,8 @@ PUBLIC_DATA_PATH = BASE_DIR / "dashboard" / "data" / "public" / "brunch.json"
 BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     {
         "part": 1,
-        "title": "국민연금 받으면 기초연금이 왜 깎일까",
-        "subtitle": "어머니의 연금 통장 앞에서 다시 펼쳐본 연계감액과 소득인정액의 기록",
+        "title": "국민연금 기초연금 중복수령 감액 기준과 계산법",
+        "subtitle": "기초연금 소득인정액 선정기준액과 국민연금 연계감액 A급여액 산식 정리",
         "targetDomain": "must-good.com",
         "category": "연금·노후설계",
         "pacingMode": "pure_essay",
@@ -60,8 +60,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 2,
-        "title": "퇴직 후 첫 건강보험료 고지서의 충격",
-        "subtitle": "자녀 피부양자 자격 유지 조건과 소득·재산 기준선을 미리 점검해야 하는 이유",
+        "title": "퇴직 후 건강보험 피부양자 자격조건과 임의계속가입",
+        "subtitle": "연소득 2천만원·재산 과세표준 5.4억 기준과 임의계속가입 신청기한",
         "targetDomain": "baronote.kr",
         "category": "건보료·절세실무",
         "pacingMode": "pure_essay",
@@ -79,8 +79,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 3,
-        "title": "신청 안 하면 사라지는 환급금과 복지",
-        "subtitle": "신청주의 복지의 문턱을 넘기 위해 우리가 매년 챙겨야 할 생활 재무 점검표",
+        "title": "건강보험 본인부담상한제 환급금·미환급금 조회법",
+        "subtitle": "정부24 보조금24·홈택스 세금 환급·건보공단 환급금 신청 방법",
         "targetDomain": "must-pick.com",
         "category": "정책환급·복지",
         "pacingMode": "pure_essay",
@@ -98,8 +98,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 4,
-        "title": "만 65세 임플란트·보청기 지원의 함정",
-        "subtitle": "건강보험 급여 적용 개수와 본인부담률 차이를 알면 줄어드는 부모님 의료비",
+        "title": "만 65세 임플란트 건강보험 적용·보청기 보조금",
+        "subtitle": "평생 2개 본인부담률 30% 조건과 지자체 보청기 지원금 신청순서",
         "targetDomain": "smilenote.kr",
         "category": "시니어의료·돌봄",
         "pacingMode": "strategic_bridge",
@@ -117,8 +117,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 5,
-        "title": "부모님 집, 주택연금과 증여 사이 계산",
-        "subtitle": "공시가격 12억 이하 가입 기준과 부부 종신 수령 구조의 현실적인 득실 계산",
+        "title": "주택연금 가입조건 공시가격 12억·월 수령액 계산",
+        "subtitle": "만 55세 이상 주택연금 수령액 계산법과 사후 정산·상속 기준",
         "targetDomain": "topnote.kr",
         "category": "주거·주택연금",
         "pacingMode": "pure_essay",
@@ -136,8 +136,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 6,
-        "title": "폐업 전 순서 하나로 갈리는 철거비와 세금",
-        "subtitle": "희망리턴패키지 철거비 지원부터 부가가치세 잔존재화 신고까지 놓치지 말아야 할 기록",
+        "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+        "subtitle": "폐업신고 전 철거비 신청 순서와 부가세 잔존재화·건보료 조정",
         "targetDomain": "meganote.kr",
         "category": "소상공인·세무",
         "pacingMode": "strategic_bridge",
@@ -155,8 +155,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 7,
-        "title": "부모님 국가건강검진 결과표 제대로 읽는 법",
-        "subtitle": "혈압·공복혈당·신장 기능 수치가 보내는 조용한 신호를 가족이 함께 챙기는 시간",
+        "title": "국가건강검진 결과표 보는법 공복혈당·사구체여과율",
+        "subtitle": "공복혈당·신장 크레아티닌·LDL 콜레스테롤 정상수치와 확진검사",
         "targetDomain": "healthcox.com",
         "category": "중장년건강·검진",
         "pacingMode": "pure_essay",
@@ -174,8 +174,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 8,
-        "title": "퇴직금·여유자금, 비과세와 파킹통장 배분법",
-        "subtitle": "예금자보호 한도와 비과세 종합저축 자격을 함께 활용하는 시니어 현금흐름 관리",
+        "title": "비과세 종합저축 가입조건 5천만원 한도·파킹통장",
+        "subtitle": "만 65세 이자세금 면제 조건과 상호금융 세금우대·예금자보호",
         "targetDomain": "woorinote.kr",
         "category": "은퇴자산·예적금",
         "pacingMode": "strategic_bridge",
@@ -193,8 +193,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 9,
-        "title": "가족 간 계좌이체, 증여세 폭탄 피하는 법",
-        "subtitle": "부모 자식 간 10년 합산 공제 한도와 차용증 작성 시 놓치기 쉬운 실무 기준",
+        "title": "부모 자식간 계좌이체 증여세 한도와 차용증 작성법",
+        "subtitle": "자녀 10년 5천만원·혼인 1.5억 공제와 차용증 확정일자 기준",
         "targetDomain": "baronote.kr",
         "category": "상속·증여·절세",
         "pacingMode": "pure_essay",
@@ -212,8 +212,8 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
     },
     {
         "part": 10,
-        "title": "전기·가스요금 고지서 속 숨은 감면 혜택",
-        "subtitle": "대가족·출산가구·복지할인 신청 절차와 에너지바우처 중복 활용 점검 기록",
+        "title": "한전 전기요금·도시가스 복지할인 신청·에너지바우처",
+        "subtitle": "대가족·출산가구 30% 감면 조건과 취약계층 에너지바우처 신청법",
         "targetDomain": "joynote.kr",
         "category": "에너지·공과금절약",
         "pacingMode": "pure_essay",
@@ -486,12 +486,12 @@ def generate_dynamic_brunch_column(part_no: int) -> Dict[str, Any]:
     pacing_mode = "strategic_bridge" if (part_no % 3 == 0) else "pure_essay"
 
     prompt = (
-        f"당신은 카카오 브런치스토리의 4060 은퇴·연금·세무·건강 칼럼니스트 '머스트픽'입니다.\n"
+        f"당신은 카카오 브런치스토리 및 네이버 프리미엄콘텐츠의 4060 은퇴·연금·세무·건강 전문 칼럼니스트 '머스트픽'입니다.\n"
         f"다음 주제와 연결된 깊이 있는 1인칭 실무 에세이 칼럼을 작성하세요.\n"
         f"- 참고 주제: {chosen['title']} (타깃 도메인: {chosen['domain']})\n"
         f"- 필수 원칙:\n"
-        f"  1) 제목(title)은 공백 포함 반드시 26자 이내로 작성할 것(브런치 30자 제한 엄수, 문장이 중간에 잘리지 않게 완결).\n"
-        f"  2) 부제(subtitle)는 공백 포함 반드시 36자 이내로 작성할 것.\n"
+        f"  1) 제목(title)은 실제 다음(Daum)·구글·네이버 검색창에 사용자가 타이핑하는 핵심 검색 키워드(제도명 + 가입조건/한도/신청법/수령액)를 맨 앞(좌측)에 전진 배치하고, 공백 포함 반드시 27자 이내로 작성할 것(브런치 30자 제한 엄수). '고지서의 충격', '숨은 혜택', '함정', '기록' 같은 추상적 수필형 제목은 절대 금지.\n"
+        f"  2) 부제(subtitle)는 세부 롱테일 검색 키워드(구체적 수치·자격기준·신청절차)를 포함하여 공백 포함 반드시 38자 이내로 작성할 것.\n"
         f"  3) 본문(paragraphs)은 총 8개 문단, 전체 합산 1,800자~2,200자 분량으로 작성할 것.\n"
         f"  4) 자청의 4대 결핍(손실회피·불확실성 해소·비교우위·인지부조화 해소)을 녹여, 가족/지인의 실제 고지서·통장 에피소드로 시작해 구체적인 법정 기준 숫자·계산식·예외 함정·실행 순서를 차분하고 지적인 브런치 문체('~다')로 풀어낼 것.\n"
         f"  5) AI 생성 티가 나는 메타 문구나 번호 매기기 요약 대신 자연스러운 산문 문단으로만 구성할 것.\n"
@@ -537,10 +537,10 @@ def write_next_curriculum_part(part_no: Optional[int] = None, cdp_port: int = 94
         elif existing_in_drawer:
             edit_url = f"https://brunch.co.kr/@31d1f5fb288c4fc/{existing_in_drawer['articleNo']}/write"
     else:
-        # 1) First check if any existing published article has a truncated title (e.g. Article 1)
+        # 1) First check if any existing published article has a truncated title (>= 29 chars)
         for p_item in published:
             matched_c = next((c for c in BRUNCHBOOK_CURRICULUM if c["part"] == p_item["articleNo"]), None)
-            if matched_c and p_item["title"] != matched_c["title"]:
+            if matched_c and len(p_item.get("title", "")) >= 29 and p_item["title"] != matched_c["title"]:
                 target_item = matched_c
                 edit_url = f"https://brunch.co.kr/@31d1f5fb288c4fc/{p_item['articleNo']}/write"
                 break
