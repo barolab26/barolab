@@ -641,9 +641,20 @@ try {{
   const groups = [];
   for (const item of {json.dumps(search_urls)}) {{
     await page.goto(item.searchUrl, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
-    const hrefs = await page.evaluate(() =>
-      Array.from(document.querySelectorAll("._searchListTitleAnchor")).map(e => e.href).filter(Boolean)
-    );
+    const hrefs = await page.evaluate(() => {{
+      const rows = Array.from(document.querySelectorAll("._searchListTitleAnchor")).map((e, idx) => {{
+        const href = e.href || "";
+        const li = e.closest("li") || e.parentElement;
+        const txt = li ? (li.innerText || "") : "";
+        const m = txt.match(/답변수\\s*(\\d+)/);
+        const ansCnt = m ? parseInt(m[1], 10) : 0;
+        return {{ href, ansCnt, idx }};
+      }}).filter(r => Boolean(r.href));
+      const lowComp = rows.filter(r => r.ansCnt <= 3);
+      const pool = lowComp.length > 0 ? lowComp : rows.filter(r => r.ansCnt <= 4);
+      pool.sort((a, b) => (a.ansCnt - b.ansCnt) || (a.idx - b.idx));
+      return pool.map(r => r.href);
+    }});
     groups.push(hrefs.map(href => ({{ href, ordering: item.ordering, keyword: item.keyword }})));
   }}
   console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
@@ -835,6 +846,15 @@ try {{
       ed.setDocumentData(data);
     }}
   }});
+  for (let i = 0; i < 25; i++) {{
+    const postStripReady = await page.evaluate(() => {{
+      const ed = window.SmartEditor?.getEditor?.("kinpc001");
+      if (!ed || typeof ed.isDocumentProcessing !== "function" || typeof ed.isEmptyDocumentContent !== "function") return false;
+      return ed.isDocumentProcessing() === false && ed.isEmptyDocumentContent() === false;
+    }});
+    if (postStripReady) break;
+    await page.waitForTimeout(250);
+  }}
   await page.waitForTimeout(300);
 
   // Install fetch/XHR interceptor for registerAnswerForSmartEditorOne.naver before clicking submit
@@ -855,17 +875,38 @@ try {{
         return res;
       }};
     }}
+    const origOpen = XMLHttpRequest.prototype.open;
+    const origSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function(method, url, ...rest) {{
+      this.__barolabUrl = String(url || "");
+      return origOpen.call(this, method, url, ...rest);
+    }};
+    XMLHttpRequest.prototype.send = function(...args) {{
+      if (this.__barolabUrl && this.__barolabUrl.includes("/ajax/detail/registerAnswerForSmartEditorOne.naver")) {{
+        this.addEventListener("load", () => {{
+          try {{
+            const data = JSON.parse(this.responseText || "null");
+            window.__barolabKinResponses.push({{ status: this.status, data }});
+          }} catch (e) {{}}
+        }});
+      }}
+      return origSend.apply(this, args);
+    }};
   }});
 
-  await page.evaluate(() => {{
-    const area = document.querySelector("#answerButtonArea");
-    if (area) area.style.display = "block";
-    const btn = document.querySelector("#answerRegisterButton");
-    if (btn) {{
-      btn.scrollIntoView({{ block: "center" }});
-      btn.click();
-    }}
-  }});
+  const clickRegisterBtn = async () => {{
+    await page.evaluate(() => {{
+      const area = document.querySelector("#answerButtonArea");
+      if (area) area.style.display = "block";
+      const btn = document.querySelector("#answerRegisterButton");
+      if (btn) {{
+        btn.scrollIntoView({{ block: "center" }});
+        btn.click();
+      }}
+    }});
+  }};
+  await clickRegisterBtn();
+
   let finalHtml = "";
   let observedResponses = [];
   let postDialogs = [];
@@ -895,7 +936,14 @@ try {{
     finalHtml = snap.html;
     observedResponses = snap.responses;
     postDialogs = snap.dialogs;
+    if (i === 5 && snap.editorPresent && snap.registerEnabled && snap.dialogs.length === 0 && snap.responses.length === 0) {{
+      await clickRegisterBtn();
+    }}
     if (!snap.editorPresent && snap.html.includes("answer_") && snap.html.includes("loginUserId")) {{
+      if (!snap.html.includes("_myAnswer")) {{
+        await page.waitForTimeout(600);
+        finalHtml = await page.evaluate(() => document.documentElement.outerHTML);
+      }}
       break;
     }}
   }}

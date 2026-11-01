@@ -621,6 +621,11 @@ def _naver_pipeline_main(argv=None):
                 started = True
             try:
                 result = _naver_browser_publish(args.account, doc['question']['question_url'], doc['answer_text'], before_submit=before_submit)
+            except (_naver_browser_QuestionUnavailableError, _naver_browser_PostingRejectedError) as exc:
+                if started:
+                    with db:
+                        db.execute("UPDATE questions SET state='skipped',send_day=NULL,result=?,updated_at=? WHERE question_id=?", (_naver_pipeline_json.dumps({'reason': 'question_unavailable: ' + str(exc)}, ensure_ascii=False), _naver_pipeline_stamp(), row['question_id']))
+                raise
             except Exception as exc:
                 if started:
                     _naver_pipeline_finish_send(db, row['question_id'], {'reason': 'Publication uncertain: ' + type(exc).__name__, 'submissionObservation': getattr(exc, 'submission_observation', None)})
@@ -630,7 +635,7 @@ def _naver_pipeline_main(argv=None):
             _naver_pipeline_finish_send(db, row['question_id'], result)
             print(_naver_pipeline_json.dumps(result, ensure_ascii=False))
     except Exception as exc:
-        if args.account:
+        if args.account and not isinstance(exc, (_naver_browser_QuestionUnavailableError, _naver_browser_PostingRejectedError)):
             with db:
                 db.execute('INSERT OR REPLACE INTO runtime VALUES (?,?,?)', (args.account, 'Operation blocked (' + type(exc).__name__ + '); inspect private worker output', _naver_pipeline_stamp()))
             if isinstance(exc, (OSError, RuntimeError, TimeoutError)):
@@ -1089,6 +1094,12 @@ def _naver_browser__publish(account, question_url, answer_text, before_submit=No
                     _naver_browser__check_taskspace_dialogs(sub_res.get('dialogs'))
                 raise RuntimeError(sub_res.get('message') or 'TaskSpace publish failed')
             _naver_browser__check_taskspace_dialogs(sub_res.get('dialogs'))
+            for resp_row in sub_res.get('responses') or []:
+                rdata = resp_row.get('data') if isinstance(resp_row, dict) else None
+                if isinstance(rdata, dict) and rdata.get('isSuccess') is False:
+                    err_msg = str(rdata.get('errorMsg') or 'Answer registration rejected by server').strip()
+                    _naver_browser__check_protection_message(err_msg)
+                    raise _naver_browser_QuestionUnavailableError(err_msg)
             content = sub_res.get('html') or ''
             owned = _naver_browser__parse_question_ownership(content, account, _naver_browser_question_id(question_url))
             owned_ids = set(owned.get('verified_owned_answer_ids', []))
@@ -1097,6 +1108,14 @@ def _naver_browser__publish(account, question_url, answer_text, before_submit=No
             if len(matches) == 1:
                 aid = matches[0]['id'].split('_', 1)[1]
                 return {'answer_url': _naver_browser_exact_answer_url(question_url, aid), 'answer_id': aid, 'submissionObservation': {'responses': sub_res.get('responses') or [], 'dialogs': sub_res.get('dialogs') or [], 'exactOwnedBodyMatched': True, 'executor': 'ego-native-taskspace'}}
+            try:
+                recheck = _naver_browser__question_ownership_via_taskspace(account, question_url)
+                recheck_ids = list(recheck.get('verified_owned_answer_ids') or [])
+                if len(recheck_ids) == 1:
+                    aid = str(recheck_ids[0])
+                    return {'answer_url': _naver_browser_exact_answer_url(question_url, aid), 'answer_id': aid, 'submissionObservation': {'responses': sub_res.get('responses') or [], 'dialogs': sub_res.get('dialogs') or [], 'exactOwnedBodyMatched': True, 'recheckedOwnership': True, 'executor': 'ego-native-taskspace'}}
+            except Exception:
+                pass
             return {'answer_url': question_url, 'answer_id': None, 'reason': 'submitted_unverified: exact owned answer not observed within 15 seconds', 'submissionObservation': {'responses': sub_res.get('responses') or [], 'dialogs': sub_res.get('dialogs') or [], 'exactOwnedBodyMatched': False, 'executor': 'ego-native-taskspace'}}
     with _naver_browser_session(account) as page:
         ownership = _naver_browser__question_ownership(page, account, question_url)
@@ -1510,17 +1529,17 @@ def _naver_authoring_load_dynamic_catalog(max_items=50, base_catalog=None, db=No
     return interleaved[:max_items]
 
 def _naver_authoring_select_discovery_track(slot_id='', db=None):
-    """Alternate 50:50 between Track A (latest unanswered preemption) and Track B (search top exposure infiltration)."""
+    """Prioritize Track B (search top exposure snowball, ~70%) + Track A (0~1 answer real-time 1st-place preemption, ~30%)."""
     if db is not None:
         try:
-            row = db.execute('SELECT COUNT(*) FROM automation_slots WHERE substr(planned_at,1,10)=?', (_naver_pipeline_today_kst(),)).fetchone()
+            row = db.execute('SELECT COUNT(*) FROM questions WHERE send_day=?', (_naver_pipeline_today_kst(),)).fetchone()
             if row is not None:
-                return 'track_a_latest' if int(row[0]) % 2 == 0 else 'track_b_search_top'
+                return 'track_a_latest' if int(row[0]) % 3 == 2 else 'track_b_search_top'
         except Exception:
             pass
     nums = _naver_authoring_re.findall('\\d+', str(slot_id))
     last_num = int(nums[-1]) if nums else 0
-    return 'track_a_latest' if last_num % 2 == 0 else 'track_b_search_top'
+    return 'track_a_latest' if last_num % 3 == 2 else 'track_b_search_top'
 
 def _naver_authoring__schema(properties):
     return {'type': 'object', 'properties': properties, 'required': list(properties), 'additionalProperties': False}
@@ -1740,7 +1759,8 @@ def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_ca
                 rejected.discard(target)
     search_page = min(3, 1 + len(rejected) // 6)
     if question_urls is None:
-        discovered = _naver_browser_discover(account, keywords[:3], limit=8, sort='date', page_number=search_page, include_latest=False, track=None, exclude_question_ids=reserved | rejected)
+        primary_sort = 'date' if target_track == 'track_a_latest' else 'none'
+        discovered = _naver_browser_discover(account, keywords[:3], limit=10, sort=primary_sort, page_number=search_page, include_latest=True, track=target_track, exclude_question_ids=reserved | rejected)
     else:
         discovered = _naver_browser_DiscoveryResults()
         excluded = reserved | rejected
@@ -1754,7 +1774,9 @@ def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_ca
                 raise ValueError('Explicit question changed identity')
             question['discovery_method'] = 'explicit_question_url'
             discovered.append(question)
-    candidates = [q for q in discovered if q['question_id'] not in reserved and (not q.get('image_urls')) and (not q.get('requires_visual_evidence')) and q.get('answer_button_present', True) and _naver_authoring__related_question(q, catalogue) and (max((_naver_authoring__relevance_score(q, entry, used_domains_today) for entry in catalogue), default=0) > 0) and (q['question_id'] not in rejected) and (not any((word in q['title'] + q['body'] for word in _naver_authoring_RISK_WORDS)))]
+    base_candidates = [q for q in discovered if q['question_id'] not in reserved and (not q.get('image_urls')) and (not q.get('requires_visual_evidence')) and q.get('answer_button_present', True) and _naver_authoring__related_question(q, catalogue) and (max((_naver_authoring__relevance_score(q, entry, used_domains_today) for entry in catalogue), default=0) > 0) and (q['question_id'] not in rejected) and (not any((word in q['title'] + q['body'] for word in _naver_authoring_RISK_WORDS)))]
+    low_answer_candidates = [q for q in base_candidates if int(q.get('answer_count', 0)) <= 3]
+    candidates = low_answer_candidates if low_answer_candidates else [q for q in base_candidates if int(q.get('answer_count', 0)) <= 4]
     fit_indices = {q['question_id']: list(range(len(catalogue))) for q in candidates}
 
     def _best_article_idx(q):
@@ -1766,12 +1788,14 @@ def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_ca
         ans_cnt = int(q.get('answer_count', 0))
         track_bonus = 0
         if ans_cnt == 0:
+            track_bonus += 6
+        elif ans_cnt == 1:
             track_bonus += 4
-        elif ans_cnt <= 2:
+        elif ans_cnt == 2:
             track_bonus += 2
-        if target_track == 'track_a_latest' and q_track == 'track_a_latest':
-            track_bonus += 2
-        elif target_track == 'track_b_search_top' and q_track == 'track_b_search_top':
+        if q_track == 'track_b_search_top':
+            track_bonus += 3
+        if target_track == q_track:
             track_bonus += 2
         return (base_rel + track_bonus, -ans_cnt, base_rel)
     candidates.sort(key=_candidate_priority, reverse=True)
