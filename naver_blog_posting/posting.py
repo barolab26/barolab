@@ -59,7 +59,7 @@ PROJECT_ROOT = BASE_DIR.parent
 
 KST = timezone(timedelta(hours=9))
 
-DAILY_SLOTS = {'soultin': ('07:40',), 'adinfo0905': ('08:10', '12:20'), 'soul5373': ('15:00',), 'yoon_master': ('21:00',), 'stone0747': ('08:20', '12:40')}
+DAILY_SLOTS = {'soultin': ('07:40', '19:10'), 'adinfo0905': ('08:10', '19:20'), 'soul5373': ('15:00', '19:30'), 'yoon_master': ('19:50', '21:00'), 'stone0747': ('12:40',)}
 LEGACY_SLOT_ALIASES = {'soultin': {'07:40': ('11:00', '19:30')}, 'soul5373': {'15:00': ('20:00',)}, 'yoon_master': {'21:00': ('20:30',)}, 'adinfo0905': {'08:10': ('11:00',), '12:20': ('19:00', '14:30')}, 'stone0747': {'08:20': ('11:00', '14:40'), '12:40': ('19:00', '14:30')}}
 LEGACY_SINGLE_SLOTS = {'soultin': ('07:40', '11:00', '19:30'), 'soul5373': ('15:00', '20:00'), 'yoon_master': ('21:00', '20:30')}
 
@@ -240,7 +240,7 @@ def require_no_explicit_submission_failure(reply, http_status):
     if not 200 <= http_status < 300 or (isinstance(reply, dict) and reply.get('isSuccess') is False):
         raise RuntimeError('Server rejected reservation submission; result unknown, do not retry automatically')
 
-ACCOUNT_MAP = {'soultin': {'acc_id': 'acc1', 'name': '시니어 브리프 (5060 연금·복지)', 'blog_id': 'mustpickinfo', 'blog_url': 'https://blog.naver.com/mustpickinfo', 'cdp_port': 9334, 'topic': '5060 국민연금, 기초연금, 노후재정, 시니어 지원금', 'topic_slug': 'senior-pension', 'bridge_domains': []}, 'soul5373': {'acc_id': 'acc2', 'name': '머스트 헬스뷰 (5060 건강·영양)', 'blog_id': 'mustinfo', 'blog_url': 'https://blog.naver.com/mustinfo', 'cdp_port': 9333, 'topic': '5060 중장년 건강, 건기식 성분 팩트체크, 혈당/혈압 식단 관리', 'topic_slug': 'health-blood-sugar', 'bridge_domains': []}, 'yoon_master': {'acc_id': 'acc3', 'name': '윤뷰스 (5060 라이프 & 리빙)', 'blog_id': 'yoonviews', 'blog_url': 'https://blog.naver.com/yoonviews', 'cdp_port': 9335, 'topic': '5060 우아한 데일리룩, 프리미엄 가전·리빙, 힐링 여행', 'topic_slug': 'senior-fashion', 'bridge_domains': []}, 'adinfo0905': {'acc_id': 'acc4', 'name': '직장인 루틴 (외부유입 브릿지)', 'blog_id': 'adinfo0905', 'blog_url': 'https://blog.naver.com/adinfo0905', 'cdp_port': 9231, 'topic': '직장인 연말정산 소득공제, 엑셀 무료 서식, 업무 생산성, 절세', 'topic_slug': 'year-end-tax', 'bridge_domains': ['www.woorinote.kr', 'www.must-good.com', 'www.must-pick.com', 'www.baronote.kr', 'www.justinfo.co.kr', 'www.daynote.kr', 'www.maxnote.kr', 'www.soulnote.kr']}, 'stone0747': {'acc_id': 'acc5', 'name': '지원금 마감속보 (외부유입 브릿지)', 'blog_id': 'stone0747', 'blog_url': 'https://blog.naver.com/stone0747', 'cdp_port': 9230, 'topic': '정부 소상공인 정책자금, 지자체 지원금 마감속보, 생활세무 혜택', 'topic_slug': 'gov-subsidy', 'bridge_domains': ['www.woorinote.kr', 'www.must-good.com', 'www.must-pick.com', 'www.baronote.kr', 'www.justinfo.co.kr', 'www.daynote.kr']}}
+ACCOUNT_MAP = {'soultin': {'acc_id': 'acc1', 'name': '시니어 브리프 (5060 연금·복지)', 'blog_id': 'mustpickinfo', 'blog_url': 'https://blog.naver.com/mustpickinfo', 'cdp_port': 9334, 'topic': '5060 국민연금, 기초연금, 노후재정, 시니어 지원금', 'topic_slug': 'senior-pension', 'bridge_domains': []}, 'soul5373': {'acc_id': 'acc2', 'name': '머스트 헬스뷰 (5060 건강·영양)', 'blog_id': 'mustinfo', 'blog_url': 'https://blog.naver.com/mustinfo', 'cdp_port': 9333, 'topic': '5060 중장년 건강, 건기식 성분 팩트체크, 혈당/혈압 식단 관리', 'topic_slug': 'health-blood-sugar', 'bridge_domains': []}, 'yoon_master': {'acc_id': 'acc3', 'name': '윤뷰스 (5060 라이프 & 리빙)', 'blog_id': 'yoonviews', 'blog_url': 'https://blog.naver.com/yoonviews', 'cdp_port': 9335, 'topic': '5060 우아한 데일리룩, 프리미엄 가전·리빙, 힐링 여행', 'topic_slug': 'senior-fashion', 'bridge_domains': []}, 'adinfo0905': {'acc_id': 'acc4', 'name': '직장인 루틴 (외부유입 브릿지)', 'blog_id': 'adinfo0905', 'blog_url': 'https://blog.naver.com/adinfo0905', 'cdp_port': 9231, 'topic': '직장인 연말정산 소득공제, 엑셀 무료 서식, 업무 생산성, 절세', 'topic_slug': 'year-end-tax', 'bridge_domains': ['www.woorinote.kr', 'www.must-good.com', 'www.must-pick.com', 'www.baronote.kr', 'www.justinfo.co.kr', 'www.daynote.kr', 'www.maxnote.kr', 'www.soulnote.kr']}, 'stone0747': {'acc_id': 'acc5', 'name': '지원금 마감속보 (지수회복 완결형)', 'blog_id': 'stone0747', 'blog_url': 'https://blog.naver.com/stone0747', 'cdp_port': 9230, 'topic': '정부 소상공인 정책자금, 지자체 지원금 마감속보, 생활세무 혜택', 'topic_slug': 'gov-subsidy', 'bridge_domains': []}}
 
 def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, detail_message, status='processing', reserve_time=None, topic=None, strategy_id=None, strategy_name=None, verification=None):
     """대시보드 실시간 상태 파일(data/pipeline_status.js 및 dashboard/data/naver/pipeline_status.js) 갱신"""
@@ -1267,43 +1267,48 @@ def prepare_basic_content(account_key, folder=None, topic=None):
         if writer_path.is_file():
             article = json.loads(writer_path.read_text(encoding='utf-8'))
         else:
+            from common.asset_map import (
+                clean_naver_search_keyword,
+                collect_used_naver_topics,
+                enforce_naver_seo_title,
+                is_duplicate_naver_topic,
+                select_verified_naver_keyword,
+            )
             keyword = topic or RUN_OPTIONS.get('topic_seed') or account['topic']
-            if keyword == account['topic']:
+            used_nv_recent = collect_used_naver_topics(account_key, days=14, current_folder=folder)
+            if keyword == account['topic'] or is_duplicate_naver_topic(keyword, used_nv_recent):
                 try:
-                    used_nv_today = set()
-                    if folder and folder.parent.is_dir():
-                        for peer_d in folder.parent.iterdir():
-                            if peer_d.is_dir() and peer_d.resolve() != folder.resolve():
-                                for fn, fk in (('planning.json', 'keyword'), ('writer.json', 'mainKeyword'), ('research.json', 'keyword')):
-                                    fp = peer_d / fn
-                                    if fp.is_file():
-                                        val = json.loads(fp.read_text(encoding='utf-8')).get(fk)
-                                        if val:
-                                            used_nv_today.add(str(val).strip())
+                    cands = []
                     for rel_p in ('dashboard/data/radar/daily_winning_topics.json', 'dashboard/data/radar/blokey-golden.json'):
                         bp = BASE_DIR.parent / rel_p
                         if bp.is_file():
                             bd = json.loads(bp.read_text(encoding='utf-8'))
                             raw_nv = (bd.get('naverAccountSlotKeywords') or bd.get('naverAssignments') or {}).get(account_key)
-                            cands = raw_nv if isinstance(raw_nv, list) else ([raw_nv] if isinstance(raw_nv, dict) else [])
-                            for c in cands:
+                            raw_list = raw_nv if isinstance(raw_nv, list) else ([raw_nv] if isinstance(raw_nv, dict) else [])
+                            for c in raw_list:
                                 kw_c = (c.get('keyword') if isinstance(c, dict) else str(c or '')).strip()
-                                if kw_c and kw_c not in used_nv_today:
-                                    keyword = kw_c
-                                    break
-                            if keyword != account['topic']:
-                                break
+                                if kw_c and kw_c not in cands:
+                                    cands.append(kw_c)
+                    keyword = select_verified_naver_keyword(
+                        account_key,
+                        None if keyword == account['topic'] else keyword,
+                        cands,
+                        used_nv_recent,
+                        max_docs=5000,
+                    )
                 except Exception:
                     pass
+            else:
+                keyword = select_verified_naver_keyword(account_key, keyword, None, used_nv_recent, max_docs=5000)
             update_pipeline_status(account, 2, '리서치', 25, keyword)
             sources = basic_research(keyword, folder)
             guide = (BASE_DIR.parent / 'AGENTS.md').read_text(encoding='utf-8') if (BASE_DIR.parent / 'AGENTS.md').exists() else '독자 통증 출발, 3초 자가진단, 모바일 호흡'
             schema = {'type': 'object', 'properties': {'title': {'type': 'string'}, 'mainKeyword': {'type': 'string'}, 'intro': {'type': 'string'}, 'closing': {'type': 'string'}, 'signoff': {'type': 'string'}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'tags': {'type': 'array', 'items': {'type': 'string'}, 'minItems': 1}, 'sections': {'type': 'array', 'minItems': 1, 'items': {'type': 'object', 'properties': {'heading': {'type': 'string'}, 'quote': {'type': 'string'}, 'text': {'type': 'string'}, 'table': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'string'}}}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}}, 'required': ['heading', 'quote', 'text', 'table', 'imagePrompt', 'imageCaption'], 'additionalProperties': False}}}, 'required': ['title', 'mainKeyword', 'intro', 'closing', 'signoff', 'imagePrompt', 'imageCaption', 'tags', 'sections'], 'additionalProperties': False}
             prompt = (
-                '독자가 끝까지 스크롤하고 행동하게 만드는 진짜 사람의 네이버 블로그 원고를 작성한다. 최우선 목표는 [하루 수익 $100 달성]을 위한 독자 체류시간·가독성·전환 극대화이며, "공무원 공고문 요약 매크로"나 딱딱한 리서치 보고서 말투는 절대 쓰지 않는다.\n'
+                '독자가 끝까지 스크롤하고 행동하게 만드는 진짜 사람의 네이버 블로그 원고를 작성한다. 최우선 목표는 [하루 수익 $100 달성]을 위한 네이버 1페이지 상위노출·체류시간·전환 극대화이며, "공무원 공고문 요약 매크로"나 딱딱한 리서치 보고서 말투는 절대 쓰지 않는다.\n'
                 '[4대 집필 원칙 (필수 준수)]\n'
-                '1. 제목(title): 공공기관 보고서식 제목("[키워드], 조건·확인 순서")을 절대 쓰지 마라. 독자가 보자마자 "어, 이거 내 얘기잖아?" 하고 클릭하게 만드는 구체적 반려/실패 함정, 한 끗 차이 기준, 3분 자가진단형 제목으로 작성하라.\n'
-                '2. 도입부(intro): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하면 3초 만에 뒤로가기를 누른다. 밤늦게 검색창을 켜는 독자의 진짜 통증(Pain Point: 막막함, 억울함, 헛걸음 걱정, 헷갈리는 현실 상황)에 깊이 공감하며 시작하고, 이 글에서 바로 해결해 줄 핵심 기준을 딱 짚어라.\n'
+                f'1. 제목(title — 네이버 1페이지 상위노출 공식): 반드시 "{keyword}, [독자가 내 얘기처럼 느껴 클릭할 반려 함정·한 끗 차이·3분 자가진단 후킹 부제]" 구조로 작성하라. 앞 15자 이내에 검색 명사 키워드("{keyword}") 원형을 조사 변형 없이 정확히 고정 배치하고, 쉼표(,) 뒤에 후킹 부제를 붙여라. (서술형 질문으로 제목을 시작하면 네이버 형태소 매칭에서 밀리므로 절대 금지)\n'
+                f'2. 도입부(intro): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하면 3초 만에 뒤로가기를 누른다. 밤늦게 검색창을 켜는 독자의 진짜 통증(Pain Point: 막막함, 억울함, 헛걸음 걱정, 헷갈리는 현실 상황)에 깊이 공감하며 시작하고, 첫 문단에 핵심 검색어("{keyword}")와 이 글에서 바로 해결해 줄 핵심 기준을 자연스럽게 녹여라.\n'
                 '3. 본문(sections — 한 끗 차이 실전 사례 + 3초 판독기 표/인용구 + 모바일 2~3줄 호흡):\n'
                 '   - 어려운 용어를 사전처럼 나열하지 말고 독자가 스마트폰을 보며 내 상황에 바로 대입할 수 있게 써라.\n'
                 '   - 구체적인 한 끗 차이 대비 사례(예: "A는 안 되지만 B는 됩니다", "이 조건이면 유리하지만 저 조건이면 손해입니다")를 본문에 녹여 독자가 끝까지 읽게 만들어라.\n'
@@ -1327,6 +1332,10 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             )
             update_pipeline_status(account, 4, '원고 작성', 50, keyword)
             article = generate_json(prompt, agent_slot='publi', response_schema=schema, audit_directory=folder / 'model-audit', timeout_seconds=600)
+            clean_kw = clean_naver_search_keyword(keyword)
+            if clean_kw:
+                article['mainKeyword'] = clean_kw
+                article['title'] = enforce_naver_seo_title(article.get('title', ''), clean_kw)
             atomic_json(writer_path, article)
         update_pipeline_status(account, 5, '이미지·썸네일 생성', 75, article.get('title', account_key))
         image = basic_summary_image(article, folder)

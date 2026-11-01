@@ -128,7 +128,17 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         'kin': '지식인 맞춤형 솔루션 제공 및 CF 블로그 신뢰 유입을 만드는 전초기지.',
     }
     purpose = channel_purposes.get(channel, '하루 $100 수익 창출 및 트래픽 유입 기여')
-    from common.asset_map import CF_DOMAINS, get_asset_map_summary, match_synergy_cluster, get_account_pacing_strategy, match_monetization_options
+    from common.asset_map import (
+        CF_DOMAINS,
+        NAVER_NICHE_VERIFIED_POOLS,
+        collect_used_naver_topics,
+        get_account_pacing_strategy,
+        get_asset_map_summary,
+        is_duplicate_naver_topic,
+        match_monetization_options,
+        match_synergy_cluster,
+        select_verified_naver_keyword,
+    )
     if identity in CF_DOMAINS:
         topic = f"{CF_DOMAINS[identity]['niche']} ({CF_DOMAINS[identity]['desc']})"
     asset_summary = get_asset_map_summary()
@@ -138,6 +148,10 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     pacing = get_account_pacing_strategy(identity) if channel == 'naver' else {'mode': 'standard', 'instruction': '채널 고유 유입 극대화'}
     monetization = match_monetization_options(topic, channel=channel)
     used_today = list(parameters.get('usedKeywordsToday') or [])
+    if channel == 'naver':
+        for recent_t in collect_used_naver_topics(identity, days=14, current_folder=folder):
+            if recent_t not in used_today:
+                used_today.append(recent_t)
     day_dir = folder.parent
     if day_dir.is_dir():
         for peer in day_dir.iterdir():
@@ -163,15 +177,24 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         cands = raw_list if isinstance(raw_list, list) else ([raw_list] if isinstance(raw_list, dict) else [])
         for c in cands:
             kw_c = (c.get('keyword') if isinstance(c, dict) else str(c or '')).strip()
-            if kw_c and kw_c not in verified_candidates and not any(kw_c == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in kw_c) for u in used_today):
-                verified_candidates.append(kw_c)
+            if not kw_c or kw_c in verified_candidates:
+                continue
+            if channel == 'naver' and is_duplicate_naver_topic(kw_c, used_today + verified_candidates):
+                continue
+            if any(kw_c == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in kw_c) for u in used_today):
+                continue
+            verified_candidates.append(kw_c)
         if verified_candidates:
             break
+    if channel == 'naver' and len(verified_candidates) < 3:
+        for fallback_kw in NAVER_NICHE_VERIFIED_POOLS.get(identity, []):
+            if fallback_kw not in verified_candidates and not is_duplicate_naver_topic(fallback_kw, used_today + verified_candidates):
+                verified_candidates.append(fallback_kw)
 
     screen_directive = channel == 'naver' and any(d.get('id') == 'ceo-directive:ego-screen-execution' and d.get('active')
                                                  for d in index.get('operatingDirectives', []))
     bridge_targets = synergy.get('todayLiveBridgeTargets') or []
-    primary_bridge = bridge_targets[0] if bridge_targets else {}
+    primary_bridge = bridge_targets[0] if (bridge_targets and pacing.get('linkAllowed', True)) else {}
     bridge_mandate = (
         f"\n5. [OSMU 수익 일점사 브릿지 동선 (필수)]: 이 채널({channel})은 본진 캐시카우인 CF 블로그({primary_bridge.get('domain')}: {primary_bridge.get('title')} / {primary_bridge.get('url')})로 독자를 넘기는 유입 전초기지다. 본문 핵심 체크리스트 직후 또는 마무리 Action Item에서 독자가 세부 판독표·계산 기준을 바로 이어서 확인할 수 있도록 브릿지 연결 맥락을 자연스럽게 설계하라.\n"
         if channel != 'cf' and primary_bridge.get('url') else ''
@@ -181,10 +204,10 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         # Fast Single-Pass Revenue Planning: 1 unified LLM call instead of 4 sequential roleplay calls
         fast_prompt = (
             '당신은 하루 $100 수익 달성을 지휘하는 팀장(자비스)이자 4인 기획 크루(퍼블리·레이더·트레이스·자비스)다.\n'
-            '⚠️ [1순위 타깃 선정 규칙]: verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드가 있으면 반드시 그중 1순위 키워드를 keyword로 확정하라! usedKeywordsToday 목록에 이미 포함된 키워드나 주제는 카니발리제이션 방지를 위해 절대 재사용하지 마라.\n'
+            '⚠️ [1순위 타깃 선정 규칙]: verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드(문서 수 5,000건 이하 니치 명사구)가 있으면 반드시 그중 1순위 키워드를 원형 그대로 keyword로 확정하라! usedKeywordsToday 목록에 이미 포함된 키워드나 유사 주제는 카니발리제이션(유사문서 감점) 방지를 위해 절대 재사용하지 마라.\n'
             'writingGuide에는 반드시 아래 4대 원칙을 구체적으로 명시하라:\n'
-            '1. [클릭 유도 제목]: 공공기관 보고서식 제목 금지 -> "내 얘기잖아?" 하고 누르게 만드는 반려 함정 / 한 끗 차이 기준 / 3분 자가진단형 제목\n'
-            '2. [자청 4대 결핍 타격 도입부]: 공문서 정의 대신 독자의 원초적 결핍(①내 돈·혜택 날리는 손실 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)에서 출발\n'
+            '1. [네이버 1페이지 상위노출 공식 제목]: 반드시 "[정확한 검색 명사 키워드 3~4어절], [자청식 후킹 부제]" 구조로 작성하라. 앞 15자 이내에 검색 명사 키워드 원형을 조사 변형 없이 정확히 고정 배치하고, 쉼표(,) 뒤에 "어, 이거 내 얘기잖아?" 하고 누르게 만드는 반려 함정·3분 자가진단 부제를 붙여라. (서술형 질문으로 제목을 시작하면 네이버 형태소 매칭에서 탈락하므로 절대 금지)\n'
+            '2. [자청 4대 결핍 타격 도입부]: 공문서 정의 대신 독자의 원초적 결핍(①내 돈·혜택 날리는 손실 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)에서 출발하되, 첫 문단에 핵심 검색 명사 키워드를 자연스럽게 1회 포함하라.\n'
             '3. [본문 실전 수치 & 3초 판독기]: "조건에 따라 달라집니다 / 담당자에게 질문하세요" 같은 회피 문장 절대 금지! 구체적인 금액·비율(%)·기한 계산 공식과 손가락으로 짚어보는 3초 판독기(자가진단 표) 제시 + 스마트폰 기준 2~3줄 짧은 호흡\n'
             '4. [마무리 Action Item]: 법적 면책 문구("개인별 자격을 조회하는 서비스가 아닙니다" 등) 절대 금지 -> 오늘/이번 주말 당장 실행할 구체적 준비 행동으로 닫기\n'
             + bridge_mandate
@@ -193,7 +216,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
                 'topic': topic,
                 'channel': channel,
                 'verifiedGoldenCandidates': verified_candidates[:4],
-                'usedKeywordsToday': used_today[:20],
+                'usedKeywordsToday': used_today[:25],
                 'businessPurpose': purpose,
                 'synergy': synergy,
                 'pacing': pacing,
@@ -209,7 +232,9 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             'writingGuide': {'type': 'string', 'minLength': 1, 'maxLength': 5000},
         })
         keyword = fast_res.get('keyword') or (verified_candidates[0] if verified_candidates else topic[:50])
-        if used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
+        if channel == 'naver':
+            keyword = select_verified_naver_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
+        elif used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
             if verified_candidates:
                 keyword = verified_candidates[0][:60]
             else:
@@ -224,7 +249,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             'identity': identity,
             'channel': channel,
             'parameters': parameters,
-            'writingGuide': fast_res['writingGuide'] + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
+            'writingGuide': fast_res['writingGuide'] + f"\n[필수 고정 검색 명사 키워드] 제목 맨 앞머리는 반드시 '{keyword}, '로 시작하라." + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
             'bridgeTarget': primary_bridge if channel != 'cf' else None,
             'benchmark': observed,
             'transcript': transcript,
@@ -238,14 +263,16 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
 
     publi_prompt = (
         '당신은 퍼블리(콘텐츠 크리에이터)다. 이번 안건의 핵심 타깃 키워드(keyword) 1개를 선정하고 팀장과 크루들에게 기획 회의를 발제하라.\n'
-        '⚠️ [1순위 타깃 선정 & 중복 절대 금지] verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드가 있으면 최우선 선택하고, usedKeywordsToday 목록에 이미 포함된 키워드나 주제는 절대 재사용하지 마라.\n'
+        '⚠️ [1순위 타깃 선정 & 중복 절대 금지] verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드(총 문서 수 5,000건 이하 니치 명사구)가 있으면 최우선으로 원형 그대로 선택하고, usedKeywordsToday 목록에 이미 포함된 키워드나 유사 주제는 절대 재사용하지 마라.\n'
         '예시 톤: "팀장님, 이번에 [키워드] 쓸 건데요. 공고문/안내문 그대로 줄글로 나열하면 독자들 3초 만에 뒤로가기 누릅니다. 독자들이 제일 헷갈려 하고 헛걸음하기 쉬운 [핵심 함정/복잡한 조건]부터 정면으로 짚어야 합니다."\n'
         + 'JSON message,keyword.\n'
-        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'verifiedGoldenCandidates':verified_candidates[:4],'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'usedKeywordsToday':used_today,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
+        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'verifiedGoldenCandidates':verified_candidates[:4],'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'usedKeywordsToday':used_today[:25],'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
     )
     request = call('publi', publi_prompt, {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
     keyword = request['keyword']
-    if used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
+    if channel == 'naver':
+        keyword = select_verified_naver_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
+    elif used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
         if verified_candidates:
             keyword = verified_candidates[0][:60]
         else:
@@ -264,7 +291,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
 
     trace_prompt = (
         '당신은 트레이스(모바일 가독성·유입·전환 분석가)다. 퍼블리와 레이더의 의견을 받아, '
-        '1) 독자가 보자마자 "어, 이거 내 얘기잖아?" 하고 클릭할 수밖에 없는 고클릭률(CTR) 제목 각도, '
+        f'1) 제목 앞머리에 핵심 검색 명사구("{keyword}")를 그대로 고정 배치하고 쉼표(,) 뒤에 독자가 "어, 이거 내 얘기잖아?" 하고 클릭할 후킹 부제를 붙이는 상위노출+고클릭률(CTR) 제목 공식, '
         '2) 바쁜 독자가 스마트폰으로 읽을 때 끝까지 스크롤하게 만드는 2~3줄 짧은 문단 호흡, '
         '3) 글 마지막에 넣을 [지금 당장 할 일(Action Item)]과 수익화/브릿지 동선을 제안하라.\n'
         + 'JSON message.\n'
@@ -274,9 +301,9 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
 
     jarvis_prompt = (
         '당신은 팀장(자비스)이다. 퍼블리·레이더·트레이스의 치열한 토론을 종합하여 공문서 냄새를 완전히 뺀 최종 집필 지침(writingGuide)을 확정하라.\n'
-        '예시 톤: "좋다. 공문서 냄새 다 빼라. 첫 문단은 독자 통증과 당장 꺼내볼 서류/화면으로 시작하고, 한 끗 차이 실전 사례와 3초 판정표 박고, 마지막은 오늘 당장 해둘 Action Item으로 끝내자."\n'
+        '예시 톤: "좋다. 제목 맨 앞에는 실제 검색 명사 키워드를 정확히 박고 뒤에 후킹 부제를 붙여라. 첫 문단은 독자 통증과 당장 꺼내볼 서류/화면으로 시작하고, 한 끗 차이 실전 사례와 3초 판정표 박고, 마지막은 오늘 당장 해둘 Action Item으로 끝내자."\n'
         'writingGuide에는 반드시 아래 항목들을 구체적으로 명시하라:\n'
-        '1. [클릭 유도 제목]: 공공기관 보고서식 제목 금지 -> "내 얘기잖아?" 하고 누르게 만드는 반려 함정 / 한 끗 차이 기준 / 3분 자가진단형 제목\n'
+        f'1. [네이버 1페이지 상위노출 공식 제목]: 반드시 "{keyword}, [독자 통증·반려 함정·3분 자가진단 후킹 부제]" 구조로 작성하라. 앞머리에 "{keyword}" 원형을 조사 변형 없이 정확히 고정 배치해야 네이버 상위노출이 된다.\n'
         '2. [자청 4대 결핍 타격 도입부]: 공문서 정의 대신 독자의 원초적 결핍(①내 돈·혜택 날리는 손실 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)에서 출발\n'
         '3. [본문 실전 수치 & 3초 판독기]: "조건에 따라 달라집니다 / 담당자에게 질문하세요" 같은 회피 문장 절대 금지! 구체적인 금액·비율(%)·시차/기한 계산 공식과 손가락으로 짚어보는 3초 판독기(자가진단 표) 제시 + 스마트폰 기준 2~3줄 짧은 호흡\n'
         '4. [마무리 Action Item]: 법적 면책 문구("개인별 자격을 조회하는 서비스가 아닙니다" 등) 절대 금지 -> 오늘/이번 주말 당장 실행할 구체적 준비 행동으로 닫기\n'
@@ -286,7 +313,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     )
     instructions = call('jarvis', jarvis_prompt, {'message':message,'writingGuide':{'type':'string','minLength':1,'maxLength':5000}})
     result={'status':'agreed','agenda':agenda,'keyword':keyword,'identity':identity,'channel':channel,'parameters':parameters,
-        'writingGuide':instructions['writingGuide'] + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
+        'writingGuide':instructions['writingGuide'] + f"\n[필수 고정 검색 명사 키워드] 제목 맨 앞머리는 반드시 '{keyword}, '로 시작하라." + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
         'bridgeTarget':primary_bridge if channel != 'cf' else None,
         'benchmark':observed,'transcript':transcript,
         'createdAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'outcome':'awaiting_url_measurements','causalClaim':False}

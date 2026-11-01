@@ -112,7 +112,11 @@ def planning_or_memory(identity, topic, folder, params, channel='naver'):
     try:
         return plan_post(identity, topic, folder, params, channel)
     except Exception as exc:
-        result={'status':'fallback','keyword':topic,'writingGuide':'공고문 요약 매크로 말투를 버리고 독자의 진짜 통증(Pain Point)에서 출발한다. 제목은 내 얘기처럼 느껴지는 반려 함정·3분 자가진단형으로 잡고, 본문에는 한 끗 차이 실전 사례(탈락 vs 통과)와 3초 판독기 표, 2~3줄 짧은 문단 호흡을 적용하며, 마지막은 오늘 당장 실행할 Action Item으로 끝낸다.','errorType':type(exc).__name__}
+        from common.asset_map import collect_used_naver_topics, select_verified_naver_keyword
+        if channel == 'naver':
+            used = collect_used_naver_topics(identity, days=14, current_folder=folder)
+            topic = select_verified_naver_keyword(identity, topic, None, used, max_docs=5000)
+        result={'status':'fallback','keyword':topic,'writingGuide':f'공고문 요약 매크로 말투를 버리고 독자의 진짜 통증(Pain Point)에서 출발한다. 제목은 반드시 "{topic}, [독자 통증·반려 함정·3분 자가진단 후킹 부제]" 구조로 앞 15자 이내에 검색 명사 키워드를 정확히 고정 배치하고, 본문에는 한 끗 차이 실전 사례(탈락 vs 통과)와 3초 판독기 표, 2~3줄 짧은 문단 호흡을 적용하며, 마지막은 오늘 당장 실행할 Action Item으로 끝낸다.','errorType':type(exc).__name__}
         Path(folder).mkdir(parents=True,exist_ok=True)
         write(Path(folder)/'strategy-status.json',result)
         return result
@@ -179,9 +183,9 @@ def configure_naver(day):
         from common import llm_client
         generate = llm_client.generate_json
         writing_rule = (
-            '\n[사람의 언어로 쓰는 4대 집필 원칙 & 절대 금지 가드레일]\n'
+            '\n[네이버 1페이지 상위노출 공식 & 4대 집필 원칙]\n'
             '- 공무원 공고문 요약 매크로 말투 금지: 독자의 진짜 통증(Pain Point)과 막막함에 공감하는 도입부로 시작하라.\n'
-            '- 제목은 공공기관 보고서식이 아니라 독자가 "내 얘기잖아?" 하고 클릭할 반려 함정·한 끗 차이·3분 자가진단형으로 작성하라.\n'
+            f'- [가장 중요] 제목(title)은 반드시 "{topic}, [독자 통증·반려 함정·3분 자가진단 후킹 부제]" 구조로 작성하라. 앞 15자 이내에 검색 명사 키워드("{topic}") 원형을 조사 변형 없이 정확히 고정 배치하고, 쉼표(,) 뒤에 후킹 부제를 결합하라.\n'
             '- 본문에는 스마트폰으로 바로 대입 가능한 한 끗 차이 실전 사례(A는 탈락 vs B는 통과), 3초 자가진단 판독기 표, 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 당장 실행할 Action Item으로 끝내라.\n'
             '- 허위 사실·근거 없는 수치 날조 금지 (단, "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 쓰지 마라).\n'
             '- "AI 생성", "참고사진", "자료 부족으로 비교 불가" 같은 메타/면피 문구 절대 금지.\n'

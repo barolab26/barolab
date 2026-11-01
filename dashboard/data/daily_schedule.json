@@ -8,57 +8,59 @@
       "blogId": "mustpickinfo",
       "target": "50~70대 연금·복지",
       "slots": [
-        "07:40"
+        "07:40",
+        "19:10"
       ],
       "windows": [
-        "07:00-08:30"
+        "07:00-08:30",
+        "18:30-20:00"
       ]
     },
     "adinfo0905": {
       "blogId": "adinfo0905",
-      "target": "출퇴근·점심 직장인",
+      "target": "출퇴근 직장인 절세·청약",
       "slots": [
         "08:10",
-        "12:20"
+        "19:20"
       ],
       "windows": [
         "07:40-08:40",
-        "12:00-13:00"
+        "18:30-20:00"
       ]
     },
     "soul5373": {
       "blogId": "mustinfo",
-      "target": "건강·연예 정보 독자",
+      "target": "건강·의학 정보 독자",
       "slots": [
-        "15:00"
+        "15:00",
+        "19:30"
       ],
       "windows": [
         "14:00-16:00",
-        "20:00-20:00"
+        "19:00-20:30"
       ]
     },
     "yoon_master": {
       "blogId": "yoonviews",
       "target": "퇴근 후 가전·리빙 구매 검토자",
       "slots": [
+        "19:50",
         "21:00"
       ],
       "windows": [
-        "20:30-22:00"
+        "19:30-22:00"
       ]
     },
     "stone0747": {
       "blogId": "stone0747",
-      "target": "지원금 조건·마감 실무 독자",
+      "target": "지원금 조건·마감 실무 독자 (지수회복 완결형 1슬롯)",
       "slots": [
-        "08:20",
         "12:40"
       ],
       "windows": [
-        "07:40-08:40",
         "12:00-13:00"
       ],
-      "basis": "proposed experiment; no CEO-specified peak"
+      "basis": "index recovery pacing: 1 pure-info post/day without duplicate topics"
     }
   },
   "cf": {

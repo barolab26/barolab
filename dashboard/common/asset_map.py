@@ -4,9 +4,10 @@ Integrates 16 Cloudflare blogs, 5 Naver blogs, KnowledgeIn, Threads,
 multi-account Gemini/Codex compute, Flow image generation, and the 7:3 Account Longevity Rule.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from pathlib import Path
+import re
 from zoneinfo import ZoneInfo
 
 KST = ZoneInfo('Asia/Seoul')
@@ -270,7 +271,15 @@ def get_account_pacing_strategy(account, date_str=None):
     70% Pure Informational Posts (No external link, C-Rank DIA build-up).
     30% Strategic Bridge Posts (Natural anchor link to target CF Blog).
     Rule: Never bridge in consecutive posts on the same account.
+    Note: stone0747 is locked to pure_info_build (linkAllowed=False) for index recovery.
     """
+    if account == 'stone0747':
+        return {
+            'mode': 'pure_info_build',
+            'linkAllowed': False,
+            'ratio': '지수 회복 집중 모드 (외부 링크 0개 · 순수 정보 완결형)',
+            'instruction': 'stone0747 계정은 유사문서/색인 지수 회복을 위해 외부 링크를 절대 넣지 않고 본문 안에서 모든 질문과 수치·판독표를 100% 완결한다.'
+        }
     day = date_str or datetime.now(KST).date().isoformat()
     journal_path = ROOT / 'dashboard/data/naver/automation-journal.json'
     recent_attempts = []
@@ -312,6 +321,269 @@ def get_account_pacing_strategy(account, date_str=None):
             'ratio': '30% 전략적 브릿지 (수익형 트래픽 유입)',
             'instruction': '본문 85%는 충실한 정보로 체류시간 확보 후, 본문 하단에 자연스러운 앵커 텍스트로 연관 CF 블로그의 공식 모의계산/세부 서식 링크 1개 삽입.'
         }
+
+
+# ── Naver Blog Top-Exposure SEO Guardrails (3-Stage Patch) ──
+NAVER_NICHE_VERIFIED_POOLS = {
+    'soultin': [
+        '국민연금 유족연금 중복수급 감액률',
+        '퇴직 후 건강보험 임의계속가입 해지',
+        '기초연금 수급자격 자동차 시가표준액',
+        '노령연금 연기연금 신청 손익분기점',
+        '주택연금 우대형 가입조건 수령액 차이',
+        '국민연금 추납 신청자격 반환일시금',
+    ],
+    'soul5373': [
+        '당화혈색소 6.5 공복혈당 불일치 이유',
+        '대상포진 사백신 싱그릭스 접종간격 실비',
+        '무릎 연골주사 히알루론산 급여 주기',
+        '백내장 단초점 다초점 실손보험 청구서류',
+        '위내시경 조직검사 용종절제 실비보험 청구',
+        '도수치료 실손보험 10회 초과 소견서',
+        '고지혈증 스타틴 근육통 코엔자임Q10',
+    ],
+    'yoon_master': [
+        '호텔 디파짓 해외결제 승인취소 소요기간',
+        '로봇청소기 직배수 키트 타공 원상복구',
+        '인버터 제습기 일일제습량 소비전력 계산',
+        '가을 구스다운 세탁 중성세제 건조기 볼',
+        '국제선 기내수하물 보조배터리 단락방지 포장',
+        '친환경 콘덴싱보일러 보조금 세입자 신청',
+        '빌트인 식기세척기 싱크대 리폼 설치조건',
+        '한전 고효율 가전제품 환급 구매내역서 라벨',
+    ],
+    'adinfo0905': [
+        '청년주택드림 청약통장 전환 일시납 한도',
+        'IRP 중도인출 무주택 전세보증금 서류',
+        '퇴직금 중간정산 무주택자 전세계약서 기간',
+        '버팀목 전세자금대출 목적물변경 연장 조건',
+        '중소기업 청년 소득세 감면 경정청구 서류',
+        '연말정산 부모님 인적공제 양도소득 100만원',
+    ],
+    'stone0747': [
+        '청년월세 특별지원 이체확인증 보증금 감액',
+        '소상공인 대환대출 4.5% 보증서 발급절차',
+        '노란우산공제 해지 일시금 퇴직소득세율',
+        '근로장려금 반기신청 전세보증금 간주전세금',
+        '소상공인 고용보험료 지원 신청 등급별 비율',
+        '육아휴직급여 사후지급금 폐지 상한액 계산',
+        '희망리턴패키지 원스톱 폐업지원 정산서류',
+        '국민취업지원제도 1유형 조기취업성공수당 신청',
+    ],
+}
+
+_STOPWORDS_KO = frozenset({
+    '2025', '2026', '2026년', '신청', '조건', '방법', '기준', '확인', '확인법', '체크', '체크리스트',
+    '정리', '총정리', '계산', '계산법', '점검', '이유', '차이', '순서', '서류', '기간', '일정',
+    '대상', '조회', '할까', '될까', '있을까', '어떨까', '무엇', '언제', '어떻게', '왜',
+    '냈는데', '썼는데', '골랐는데', '받는데', '사셨나요', '그대로', '먼저', '전후', '포기',
+    '놓치기', '쉬운', '3분', '3초', '1분', '가지', '3가지', '4가지', '판독법', '판독기',
+    '자격', '수급자격', '지원', '지원금', '환급', '환급금', '공제', '세액공제', '소득공제',
+    '내가', '내겐', '부모님', '명의', '계약서', '계약자', '계약',
+})
+
+
+def _load_naver_openapi_keys():
+    import os
+    env_p = ROOT / '.env'
+    if env_p.is_file():
+        for line in env_p.read_text(encoding='utf-8', errors='replace').splitlines():
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                k, v = line.split('=', 1)
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+    cid = os.environ.get('NAVER_CLIENT_ID') or os.environ.get('NAVER_SEARCH_CLIENT_ID') or ''
+    csec = os.environ.get('NAVER_CLIENT_SECRET') or os.environ.get('NAVER_SEARCH_CLIENT_SECRET') or ''
+    return cid, csec
+
+
+def query_naver_blog_doc_count(keyword, timeout=3.5):
+    """Return total Naver Blog document count via Naver Search OpenAPI, or None if unavailable."""
+    import urllib.request
+    import urllib.parse
+    kw = str(keyword or '').strip()
+    if not kw:
+        return None
+    cid, csec = _load_naver_openapi_keys()
+    if not cid or not csec:
+        return None
+    try:
+        url = f'https://openapi.naver.com/v1/search/blog.json?query={urllib.parse.quote(kw)}&display=5&sort=sim'
+        req = urllib.request.Request(url, headers={
+            'X-Naver-Client-Id': cid,
+            'X-Naver-Client-Secret': csec,
+        })
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode('utf-8', errors='ignore'))
+            return int(data.get('total', 0))
+    except Exception:
+        return None
+
+
+def extract_core_topic_nouns(text):
+    """Extract normalized 2+ char domain nouns from a Korean title or keyword."""
+    cleaned = re.sub(r'[^\w가-힣\s]', ' ', str(text or '')).lower()
+    tokens = []
+    for raw_tok in cleaned.split():
+        # Strip common Korean trailing particles
+        tok = re.sub(r'(은|는|이|가|을|를|의|에|에서|으로|로|과|와|도|만|부터|까지|라도|처럼|보다|할까|될까|일까)$', '', raw_tok)
+        if len(tok) >= 2 and tok not in _STOPWORDS_KO and not tok.isdigit():
+            tokens.append(tok)
+    return set(tokens)
+
+
+def is_duplicate_naver_topic(candidate_text, used_texts):
+    """Return True if candidate_text duplicates any topic in used_texts (exact or >=2 core domain nouns overlap)."""
+    cand_str = re.sub(r'\s+', '', str(candidate_text or '')).lower()
+    if not cand_str:
+        return True
+    cand_nouns = extract_core_topic_nouns(candidate_text)
+    for u in (used_texts or []):
+        u_str = re.sub(r'\s+', '', str(u or '')).lower()
+        if not u_str:
+            continue
+        if cand_str == u_str or (len(cand_str) >= 7 and cand_str[:7] in u_str) or (len(u_str) >= 7 and u_str[:7] in cand_str):
+            return True
+        u_nouns = extract_core_topic_nouns(u)
+        overlap = cand_nouns & u_nouns
+        if len(overlap) >= 2:
+            return True
+    return False
+
+
+def collect_used_naver_topics(account=None, days=14, current_folder=None):
+    """Collect all titles/keywords used by `account` in the last `days` days + all accounts today."""
+    now_dt = datetime.now(KST)
+    cutoff_date = (now_dt - timedelta(days=days)).date().isoformat()
+    today_date = now_dt.date().isoformat()
+    used = []
+
+    def _add(val):
+        s = str(val or '').strip()
+        if s and s not in used:
+            used.append(s)
+
+    # 1. public-verification.json
+    pv_path = ROOT / 'dashboard/data/naver/public-verification.json'
+    if pv_path.is_file():
+        try:
+            pv = json.loads(pv_path.read_text(encoding='utf-8'))
+            for ev in (pv.get('evidence') or []):
+                pub_d = str(ev.get('publicationDate') or ev.get('reserveTime') or '')[:10]
+                if not pub_d or pub_d < cutoff_date:
+                    continue
+                if account is None or ev.get('account') == account or pub_d == today_date:
+                    _add(ev.get('title'))
+        except Exception:
+            pass
+
+    # 2. automation-journal.json
+    jr_path = ROOT / 'dashboard/data/naver/automation-journal.json'
+    if jr_path.is_file():
+        try:
+            jr = json.loads(jr_path.read_text(encoding='utf-8'))
+            for att in (jr.get('attempts') or []):
+                w_d = str(att.get('publicationDate') or att.get('reserveTime') or att.get('workDate') or '')[:10]
+                if not w_d or w_d < cutoff_date:
+                    continue
+                if account is None or att.get('account') == account or w_d == today_date:
+                    _add(att.get('topic') or att.get('title'))
+        except Exception:
+            pass
+
+    # 3. Scheduled output folders for recent days
+    sched_root = ROOT / 'naver_blog_posting/output/scheduled'
+    if sched_root.is_dir():
+        for day_dir in sorted(sched_root.iterdir(), reverse=True)[:days + 2]:
+            if not day_dir.is_dir() or day_dir.name < cutoff_date:
+                continue
+            for slot_dir in day_dir.iterdir():
+                if not slot_dir.is_dir():
+                    continue
+                if current_folder and slot_dir.resolve() == Path(current_folder).resolve():
+                    continue
+                slot_acc = slot_dir.name.rsplit('-', 1)[0]
+                if account is None or slot_acc == account or day_dir.name == today_date:
+                    for fn, fk in (('planning.json', 'keyword'), ('writer.json', 'mainKeyword'), ('writer.json', 'title'), ('editor-content.json', 'title')):
+                        fp = slot_dir / fn
+                        if fp.is_file():
+                            try:
+                                _add(json.loads(fp.read_text(encoding='utf-8')).get(fk))
+                            except Exception:
+                                pass
+    return used
+
+
+def clean_naver_search_keyword(raw_keyword):
+    """Normalize a topic/keyword into a clean 3~5 word search noun phrase that real Naver users type."""
+    s = str(raw_keyword or '').strip()
+    if ',' in s and len(s.split(',')[0].strip()) >= 6:
+        s = s.split(',')[0].strip()
+    if '?' in s and len(s.split('?')[0].strip()) >= 6:
+        s = s.split('?')[0].strip()
+    s = re.sub(r'\b(3분|3초|1분)\s*(체크|확인|판독|점검|계산|정리)\w*', '', s)
+    s = re.sub(r'[^\w가-힣.%+\s·-]', ' ', s)
+    words = [w for w in s.split() if w]
+    return ' '.join(words[:5]).strip()
+
+
+def select_verified_naver_keyword(account, candidate_kw, verified_candidates=None, used_topics=None, max_docs=5000):
+    """Select a non-duplicate Naver search keyword verified to have <= max_docs competing blog posts."""
+    used = list(used_topics or [])
+    pool = []
+    if candidate_kw:
+        pool.append(clean_naver_search_keyword(candidate_kw))
+    for c in (verified_candidates or []):
+        kw_c = clean_naver_search_keyword(c.get('keyword') if isinstance(c, dict) else c)
+        if kw_c and kw_c not in pool:
+            pool.append(kw_c)
+    for fallback_kw in NAVER_NICHE_VERIFIED_POOLS.get(account, []):
+        if fallback_kw not in pool:
+            pool.append(fallback_kw)
+
+    best_fallback = None
+    best_docs = 10**9
+    for kw in pool:
+        if not kw or is_duplicate_naver_topic(kw, used):
+            continue
+        doc_cnt = query_naver_blog_doc_count(kw)
+        if doc_cnt is None:
+            return kw
+        if 1 <= doc_cnt <= max_docs:
+            return kw
+        if doc_cnt < best_docs:
+            best_docs = doc_cnt
+            best_fallback = kw
+    return best_fallback or (NAVER_NICHE_VERIFIED_POOLS.get(account, ['국민연금 추납 신청자격 반환일시금'])[0])
+
+
+def enforce_naver_seo_title(raw_title, target_keyword):
+    """Enforce formula: '[실제 검색 명사 키워드 3~4어절], [자청식 후킹 부제]'."""
+    clean_kw = clean_naver_search_keyword(target_keyword)
+    title = re.sub(r'\s+', ' ', str(raw_title or '').strip())
+    if not clean_kw:
+        return title
+    kw_tokens = [t for t in clean_kw.split() if len(t) >= 2][:3]
+    front_window = title[:max(len(clean_kw) + 6, 20)]
+    if kw_tokens and all(t in front_window for t in kw_tokens):
+        return title
+
+    # Extract the hook part from raw_title
+    hook = title
+    if ',' in title:
+        parts = [p.strip() for p in title.split(',', 1)]
+        hook = parts[1] if len(parts[1]) >= 8 else title
+    # Remove exact duplicate words of clean_kw from the start of hook only on word/comma boundaries
+    if hook.startswith(clean_kw):
+        hook = hook[len(clean_kw):].lstrip(' ,·:')
+    for tok in clean_kw.split():
+        if hook.startswith(tok + ' ') or hook.startswith(tok + ','):
+            hook = hook[len(tok):].lstrip(' ,·:')
+    if not hook or len(hook) < 6:
+        hook = '놓치기 쉬운 핵심 기준과 신청 전 3분 자가진단'
+    combined = f'{clean_kw}, {hook}'
+    return combined[:68].rstrip(' ,')
+
 
 
 def _load_brunch_credentials():

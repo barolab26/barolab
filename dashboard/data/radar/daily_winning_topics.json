@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-01T15:43:58+09:00",
+  "updatedAt": "2026-11-01T19:37:17+09:00",
   "date": "2026-11-01",
   "northStarGoalUsd": 100.0,
   "revenueLeaders": [
@@ -123,7 +123,7 @@
       "domain": "must-good.com",
       "slugTopic": "을지로 노포 맛집 베스트 10 2026년에도 꼭 가봐야 할 숨은 보석",
       "clicks": 4,
-      "impressions": 31
+      "impressions": 30
     },
     {
       "source": "gsc_top_clicks",
@@ -131,7 +131,7 @@
       "domain": "must-good.com",
       "slugTopic": "강릉 회 맛집 BEST 10 신선도 끝판왕 횟집 2026 공개",
       "clicks": 3,
-      "impressions": 25
+      "impressions": 23
     },
     {
       "source": "gsc_top_clicks",
@@ -147,18 +147,18 @@
       "domain": "must-good.com",
       "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
       "slugTopic": "national museum korea reservation backpack photo guide",
-      "impressions": 153,
+      "impressions": 132,
       "clicks": 1,
-      "ctrPct": 0.65,
+      "ctrPct": 0.76,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
     },
     {
       "domain": "must-good.com",
       "url": "https://www.must-good.com/washing-machine-drain-filter-cleaning",
       "slugTopic": "washing machine drain filter cleaning",
-      "impressions": 92,
+      "impressions": 89,
       "clicks": 1,
-      "ctrPct": 1.09,
+      "ctrPct": 1.12,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
     },
     {
@@ -172,18 +172,18 @@
     },
     {
       "domain": "must-good.com",
-      "url": "https://www.must-good.com/%EB%B6%80%EC%82%B0-%EA%B4%91%EC%95%88%EB%A6%AC-%EC%B9%B4%ED%8E%98-%EB%B2%A0%EC%8A%A4%ED%8A%B8-10-%EC%98%A4%EC%85%98%EB%B7%B0-%EB%81%9D%ED%8C%90%EC%99%95-2026%EB%85%84-%EC%B6%94%EC%B2%9C",
-      "slugTopic": "부산 광안리 카페 베스트 10 오션뷰 끝판왕 2026년 추천",
-      "impressions": 31,
+      "url": "https://www.must-good.com/incheon-airport-emergency-passport-guide",
+      "slugTopic": "incheon airport emergency passport guide",
+      "impressions": 27,
       "clicks": 0,
       "ctrPct": 0.0,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
     },
     {
       "domain": "must-good.com",
-      "url": "https://www.must-good.com/incheon-airport-emergency-passport-guide",
-      "slugTopic": "incheon airport emergency passport guide",
-      "impressions": 28,
+      "url": "https://www.must-good.com/%EB%B6%80%EC%82%B0-%EA%B4%91%EC%95%88%EB%A6%AC-%EC%B9%B4%ED%8E%98-%EB%B2%A0%EC%8A%A4%ED%8A%B8-10-%EC%98%A4%EC%85%98%EB%B7%B0-%EB%81%9D%ED%8C%90%EC%99%95-2026%EB%85%84-%EC%B6%94%EC%B2%9C",
+      "slugTopic": "부산 광안리 카페 베스트 10 오션뷰 끝판왕 2026년 추천",
+      "impressions": 26,
       "clicks": 0,
       "ctrPct": 0.0,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
@@ -341,62 +341,62 @@
   "naverAccountSlotKeywords": {
     "soul5373": [
       {
-        "keyword": "심페리카 트리오가격",
-        "grade": "S",
-        "searchVolume": 3200,
-        "docCount": 3,
-        "goldenRate": 1066.7
-      },
-      {
-        "keyword": "심페리카트리오",
-        "grade": "S",
-        "searchVolume": 5190,
-        "docCount": 6,
-        "goldenRate": 865.0
-      },
-      {
         "keyword": "삼점삼 병원비 환급금",
         "grade": "S",
         "searchVolume": 450,
-        "docCount": 4,
+        "docCount": 15,
         "goldenRate": 112.5
       },
       {
-        "keyword": "홍금동물병원",
+        "keyword": "당화혈색소 6.5 공복혈당 불일치 이유",
         "grade": "S",
-        "searchVolume": 11650,
-        "docCount": 113,
-        "goldenRate": 103.1
+        "searchVolume": 4500,
+        "docCount": 147,
+        "goldenRate": 30.6
+      },
+      {
+        "keyword": "대상포진 사백신 싱그릭스 접종간격 실비",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 258,
+        "goldenRate": 17.4
+      },
+      {
+        "keyword": "무릎 연골주사 히알루론산 급여 주기",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 458,
+        "goldenRate": 9.8
       }
     ],
     "yoon_master": [
       {
-        "keyword": "탄항좌대 가격",
-        "grade": "S",
-        "searchVolume": 1150,
-        "docCount": 3,
-        "goldenRate": 383.3
-      },
-      {
-        "keyword": "아우디 A5 850만원 할인 후기",
-        "grade": "S",
-        "searchVolume": 2560,
-        "docCount": 9,
-        "goldenRate": 284.4
-      },
-      {
         "keyword": "아이폰18 폴더 블",
         "grade": "S",
         "searchVolume": 19290,
-        "docCount": 76,
+        "docCount": 164,
         "goldenRate": 253.8
       },
       {
-        "keyword": "26년햇들깨가격",
+        "keyword": "로봇청소기 직배수 키트 타공 원상복구",
         "grade": "S",
-        "searchVolume": 2910,
-        "docCount": 12,
-        "goldenRate": 242.5
+        "searchVolume": 4500,
+        "docCount": 229,
+        "goldenRate": 19.7
+      },
+      {
+        "keyword": "인버터 제습기 일일제습량 소비전력 계산",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 401,
+        "goldenRate": 11.2
+      },
+      {
+        "keyword": "가을 구스다운 세탁 중성세제 건조기 볼",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 408,
+        "goldenRate": 11.0
       }
     ],
     "soultin": [
@@ -404,59 +404,29 @@
         "keyword": "세이브텍스 환급금 뜻",
         "grade": "S",
         "searchVolume": 850,
-        "docCount": 7,
+        "docCount": 31,
         "goldenRate": 121.4
       },
       {
-        "keyword": "의정부 홈플러스 폐점 일정",
-        "grade": "B",
-        "searchVolume": 2390,
-        "docCount": 82,
-        "goldenRate": 29.1
+        "keyword": "기초연금 수급자격 자동차 시가표준액",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 2792,
+        "goldenRate": 1.6
       },
       {
-        "keyword": "국민연금 조기수령 감액률 손익분기점 계산",
+        "keyword": "노령연금 연기연금 신청 손익분기점",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
+        "docCount": 3016,
+        "goldenRate": 1.5
       },
       {
-        "keyword": "퇴직 후 건강보험 임의계속가입 피부양자 비교",
+        "keyword": "주택연금 우대형 가입조건 수령액 차이",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
-      }
-    ],
-    "stone0747": [
-      {
-        "keyword": "청년월세 한시 특별지원 이체확인증 보증금 기준",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
-      },
-      {
-        "keyword": "근로장려금 반기신청 지급일 재산 감액 기준",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
-      },
-      {
-        "keyword": "국민취업지원제도 1유형 구직촉진수당 알바 소득",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
-      },
-      {
-        "keyword": "가족돌봄수당 신청 자격 조부모 손주 돌봄비",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
+        "docCount": 3680,
+        "goldenRate": 1.2
       }
     ],
     "adinfo0905": [
@@ -464,29 +434,59 @@
         "keyword": "허그 든든전세 11차",
         "grade": "A",
         "searchVolume": 1460,
-        "docCount": 22,
+        "docCount": 513,
         "goldenRate": 66.4
       },
       {
-        "keyword": "리드코프 논스톱대출",
-        "grade": "A",
-        "searchVolume": 1180,
-        "docCount": 31,
-        "goldenRate": 38.1
-      },
-      {
-        "keyword": "청년주택드림 청약통장 전환 조건 우대금리",
+        "keyword": "IRP 중도인출 무주택 전세보증금 서류",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 35,
+        "docCount": 2307,
+        "goldenRate": 2.0
+      },
+      {
+        "keyword": "퇴직금 중간정산 무주택자 전세계약서 기간",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 2894,
+        "goldenRate": 1.6
+      },
+      {
+        "keyword": "버팀목 전세자금대출 목적물변경 연장 조건",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 3207,
+        "goldenRate": 1.4
+      }
+    ],
+    "stone0747": [
+      {
+        "keyword": "가족돌봄수당 신청 자격 조부모 손주 돌봄비",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1950,
         "goldenRate": 128.6
       },
       {
-        "keyword": "버팀목 전세자금대출 연장 금리 상환 조건",
+        "keyword": "노란우산공제 해지 일시금 퇴직소득세율",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 35,
-        "goldenRate": 128.6
+        "docCount": 1105,
+        "goldenRate": 4.1
+      },
+      {
+        "keyword": "근로장려금 반기신청 전세보증금 간주전세금",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1363,
+        "goldenRate": 3.3
+      },
+      {
+        "keyword": "소상공인 고용보험료 지원 신청 등급별 비율",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 3386,
+        "goldenRate": 1.3
       }
     ]
   },

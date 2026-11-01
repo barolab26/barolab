@@ -173,14 +173,17 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                     "demos": demos,
                 })
 
-        # Classification rules aligned with high-CPC AdSense & AdPost commercial search intent
-        re_policy_welfare = re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|신청|자격|조건|지급|정부|정책|산정특례|실업급여|내일배움|육아|출산")
-        re_finance_tax = re.compile(r"세금|상속|증여|취득세|양도세|연말정산|대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|보험|실비|실손|위약금|수수료")
-        re_health_issue = re.compile(r"건강|병원|치료|증상|효능|영양|단백질|혈당|혈압|당뇨|심페리카|넥스가드|심장사상충|보청기|임플란트|백내장|도수치료|수술|내시경|검진")
-        re_living_review = re.compile(r"가격|할인|구매|단점|후기|비교|아이오닉|기아|카니발|제네시스|갤럭시|아이폰|보일러|가전|제습기|식기세척기|로봇청소기|트리오|숙소|호텔|항공권|수하물")
+        # Classification rules aligned with high-CPC AdSense & AdPost commercial search intent (strict C-Rank topic purity)
+        re_spam_offtopic = re.compile(r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토")
+        re_policy_welfare = re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산")
+        re_finance_tax = re.compile(r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|보험|실비|실손|퇴직금|IRP")
+        re_health_issue = re.compile(r"건강검진|혈당|혈압|당뇨|당화혈색소|콜레스테롤|고지혈증|보청기|임플란트|백내장|도수치료|내시경|용종|수면무호흡|관절염|연골주사|대상포진")
+        re_living_review = re.compile(r"아이오닉|기아|카니발|제네시스|전기차|하이브리드|자동차보험|갤럭시|아이폰|노트북|보일러|제습기|식기세척기|로봇청소기|으뜸효율|숙소|호텔|항공권|수하물|트래블로그")
 
         def score_for_cpc(row):
             kw = row["keyword"]
+            if re_spam_offtopic.search(kw):
+                return -9999
             cats = set(row["categories"])
             grade_score = 3000 if row["grade"] == "S" else (1500 if row["grade"] == "A" else 0)
             live_bonus = 1200 if row["bucket"] == "live_trend" else 0
@@ -189,7 +192,7 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                 niche_bonus = 5500
             elif re_living_review.search(kw):
                 niche_bonus = 4000
-            elif cats & {"비즈니스·경제", "건강·의학", "교육·학문", "IT·컴퓨터", "인테리어·DIY", "상품리뷰", "자동차", "원예·재배"}:
+            elif cats & {"비즈니스·경제", "건강·의학", "교육·학문", "IT·컴퓨터", "상품리뷰", "자동차"}:
                 niche_bonus = 2500
             doc_bonus = 1000 if 2 <= row["docCount"] <= 80 else 0
             return grade_score + live_bonus + niche_bonus + doc_bonus + min(row["goldenRate"], 1500)
@@ -199,77 +202,61 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
         # Assign top tailored Golden Keywords to Naver 5 accounts (up to 4 distinct keywords per account so multi-slot days never collide)
         day_ord = datetime.now(KST).toordinal()
         naver_rules = {
-            "soul5373": lambda r: bool(re_health_issue.search(r["keyword"]) or "건강·의학" in r["categories"]),
-            "yoon_master": lambda r: bool(re_living_review.search(r["keyword"]) or (set(r["categories"]) & {"상품리뷰", "인테리어·DIY", "IT·컴퓨터", "자동차", "원예·재배"})),
-            "soultin": lambda r: bool(re_policy_welfare.search(r["keyword"]) or "교육·학문" in r["categories"]),
-            "stone0747": lambda r: bool(re_policy_welfare.search(r["keyword"]) or re.search(r"지원금|장려금|보조금|환급|과태료|수당", r["keyword"])),
-            "adinfo0905": lambda r: bool(re_finance_tax.search(r["keyword"]) or "비즈니스·경제" in r["categories"]),
+            "soul5373": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_health_issue.search(r["keyword"])),
+            "yoon_master": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_living_review.search(r["keyword"])),
+            "soultin": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_policy_welfare.search(r["keyword"])),
+            "stone0747": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_policy_welfare.search(r["keyword"])),
+            "adinfo0905": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_finance_tax.search(r["keyword"])),
         }
-        naver_niche_pools = {
-            "soul5373": [
-                "도수치료 실비보험 청구 횟수 제한",
-                "백내장 다초점렌즈 실손보험 지급 기준",
-                "대상포진 예방접종 65세 무료 보건소 조건",
-                "국가건강검진 대장내시경 수면 비용 실비",
-                "무릎 연골주사 건강보험 급여 주기",
-                "당화혈색소 정상수치 공복혈당 낮추는 식단",
-            ],
-            "yoon_master": [
-                "으뜸효율 가전제품 환급 신청 대상 모델",
-                "인버터 제습기 전기세 한달 요금 계산",
-                "식기세척기 빌트인 프리스탠딩 설치 조건 비교",
-                "콘덴싱 보일러 교체 정부지원금 신청 방법",
-                "로봇청소기 직배수 설치 비용 단점 비교",
-                "1등급 냉장고 한전 고효율 가전 환급 조건",
-            ],
-            "soultin": [
-                "기초연금 수급자격 재산 소득인정액 계산법",
-                "국민연금 조기수령 감액률 손익분기점 계산",
-                "퇴직 후 건강보험 임의계속가입 피부양자 비교",
-                "주택연금 가입조건 월수령액 실거주 예외",
-                "65세 이상 노인 임플란트 건강보험 본인부담금",
-                "장기요양등급 신청 판정 기준 가족요양비",
-            ],
-            "stone0747": [
-                "소상공인 정책자금 대환대출 자격 조건",
-                "청년월세 한시 특별지원 이체확인증 보증금 기준",
-                "근로장려금 반기신청 지급일 재산 감액 기준",
-                "국민취업지원제도 1유형 구직촉진수당 알바 소득",
-                "가족돌봄수당 신청 자격 조부모 손주 돌봄비",
-                "폐업 소상공인 점포철거비 지원금 신청 서류",
-            ],
-            "adinfo0905": [
-                "맞벌이 부부 연말정산 의료비 신용카드 몰아주기",
-                "청년주택드림 청약통장 전환 조건 우대금리",
-                "버팀목 전세자금대출 연장 금리 상환 조건",
-                "퇴직금 중간정산 사유 무주택 전세자금 서류",
-                "부모님 차용증 작성법 무이자 증여세 한도",
-                "ISA 계좌 만기 해지 연금저축 전환 세액공제",
-            ],
-        }
+        from common.asset_map import (
+            NAVER_NICHE_VERIFIED_POOLS,
+            collect_used_naver_topics,
+            is_duplicate_naver_topic,
+            query_naver_blog_doc_count,
+        )
+        naver_niche_pools = NAVER_NICHE_VERIFIED_POOLS
         used_naver = set()
         naver_assignments = {}
         for acc, pred in naver_rules.items():
-            picks = [r for r in merged if pred(r) and r["keyword"] not in used_naver][:4]
+            recent_14d = collect_used_naver_topics(acc, days=14)
+            picks = []
+            for r in merged:
+                kw_cand = r["keyword"]
+                if not pred(r) or kw_cand in used_naver:
+                    continue
+                if is_duplicate_naver_topic(kw_cand, recent_14d + list(used_naver)):
+                    continue
+                live_docs = query_naver_blog_doc_count(kw_cand)
+                if live_docs is not None and live_docs > 5000:
+                    continue
+                if live_docs is not None:
+                    r["docCount"] = live_docs
+                picks.append(r)
+                if len(picks) >= 4:
+                    break
             pool = naver_niche_pools.get(acc, [])
             for offset in range(len(pool)):
                 if len(picks) >= 4:
                     break
                 cand_kw = pool[(day_ord + offset) % len(pool)]
-                if cand_kw not in used_naver and all(p["keyword"] != cand_kw for p in picks):
-                    picks.append({
-                        "keyword": cand_kw,
-                        "totalSearch": 4500,
-                        "pcSearch": 1200,
-                        "mobileSearch": 3300,
-                        "docCount": 35,
-                        "goldenRate": 128.6,
-                        "grade": "S",
-                        "bucket": "niche_high_cpc",
-                        "sourceLabel": "고단가 검증 키워드",
-                        "categories": [],
-                        "demos": [],
-                    })
+                if cand_kw in used_naver or is_duplicate_naver_topic(cand_kw, recent_14d + [p["keyword"] for p in picks]):
+                    continue
+                live_docs = query_naver_blog_doc_count(cand_kw)
+                if live_docs is not None and live_docs > 5000:
+                    continue
+                picks.append({
+                    "keyword": cand_kw,
+                    "totalSearch": 4500,
+                    "pcSearch": 1200,
+                    "mobileSearch": 3300,
+                    "docCount": live_docs if live_docs is not None else 1200,
+                    "goldenRate": round(4500 / max(1, live_docs or 1200), 1),
+                    "grade": "S",
+                    "bucket": "niche_high_cpc",
+                    "sourceLabel": "5,000건 이하 검증 키워드",
+                    "categories": [],
+                    "demos": [],
+                })
             for p in picks[:4]:
                 used_naver.add(p["keyword"])
             if picks:
@@ -570,21 +557,66 @@ def build_daily_winning_topics(blokey_ledger=None):
         pass
 
     # 3. Map Blokey S/A-grade Golden Keywords per Naver account (multi-slot) & CF domain
+    from common.asset_map import (
+        NAVER_NICHE_VERIFIED_POOLS,
+        collect_used_naver_topics,
+        is_duplicate_naver_topic,
+        query_naver_blog_doc_count,
+    )
+    re_spam_offtopic = re.compile(r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토")
+    crank_domain_rules = {
+        "soul5373": re.compile(r"건강검진|혈당|혈압|당뇨|당화혈색소|콜레스테롤|고지혈증|보청기|임플란트|백내장|도수치료|내시경|용종|수면무호흡|관절염|연골주사|대상포진|환급금|병원비"),
+        "yoon_master": re.compile(r"아이오닉|기아|카니발|제네시스|전기차|하이브리드|자동차보험|갤럭시|아이폰|노트북|보일러|제습기|식기세척기|로봇청소기|으뜸효율|숙소|호텔|항공권|수하물|트래블로그"),
+        "soultin": re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산"),
+        "stone0747": re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산"),
+        "adinfo0905": re.compile(r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|보험|실비|실손|퇴직금|IRP|든든전세"),
+    }
     nv_raw = blokey_ledger.get("naverAssignments") or {}
     cf_raw = blokey_ledger.get("cfAssignments") or {}
     naver_accounts = {}
-    for acc, picks in nv_raw.items():
-        items = picks if isinstance(picks, list) else ([picks] if isinstance(picks, dict) else [])
-        naver_accounts[acc] = [
-            {
-                "keyword": r.get("keyword"),
-                "grade": r.get("grade"),
-                "searchVolume": r.get("totalSearch"),
-                "docCount": r.get("docCount"),
-                "goldenRate": r.get("goldenRate"),
-            }
-            for r in items if isinstance(r, dict) and r.get("keyword")
-        ]
+    day_ord = datetime.now(KST).toordinal()
+    for acc in ("soul5373", "yoon_master", "soultin", "adinfo0905", "stone0747"):
+        items = nv_raw.get(acc) or []
+        items = items if isinstance(items, list) else ([items] if isinstance(items, dict) else [])
+        recent_14d = collect_used_naver_topics(acc, days=14)
+        crank_rx = crank_domain_rules.get(acc)
+        valid_rows = []
+        for r in items:
+            if not isinstance(r, dict) or not r.get("keyword"):
+                continue
+            kw_cand = str(r["keyword"]).strip()
+            if re_spam_offtopic.search(kw_cand) or (crank_rx and not crank_rx.search(kw_cand)):
+                continue
+            if is_duplicate_naver_topic(kw_cand, recent_14d + [v["keyword"] for v in valid_rows]):
+                continue
+            live_docs = query_naver_blog_doc_count(kw_cand)
+            if live_docs is not None and live_docs > 5000:
+                continue
+            valid_rows.append({
+                "keyword": kw_cand,
+                "grade": r.get("grade") or "S",
+                "searchVolume": r.get("totalSearch") or r.get("searchVolume") or 3500,
+                "docCount": live_docs if live_docs is not None else (r.get("docCount") or 500),
+                "goldenRate": r.get("goldenRate") or 100.0,
+            })
+        pool = NAVER_NICHE_VERIFIED_POOLS.get(acc, [])
+        for offset in range(len(pool)):
+            if len(valid_rows) >= 4:
+                break
+            cand_kw = pool[(day_ord + offset) % len(pool)]
+            if is_duplicate_naver_topic(cand_kw, recent_14d + [v["keyword"] for v in valid_rows]):
+                continue
+            live_docs = query_naver_blog_doc_count(cand_kw)
+            if live_docs is not None and live_docs > 5000:
+                continue
+            valid_rows.append({
+                "keyword": cand_kw,
+                "grade": "S",
+                "searchVolume": 4500,
+                "docCount": live_docs if live_docs is not None else 1200,
+                "goldenRate": round(4500 / max(1, live_docs or 1200), 1),
+            })
+        naver_accounts[acc] = valid_rows[:4]
 
     cf_domains = {}
     for dom, picks in cf_raw.items():
