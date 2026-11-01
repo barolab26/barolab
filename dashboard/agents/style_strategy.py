@@ -130,13 +130,16 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     purpose = channel_purposes.get(channel, '하루 $100 수익 창출 및 트래픽 유입 기여')
     from common.asset_map import (
         CF_DOMAINS,
+        CF_NICHE_VERIFIED_POOLS,
         NAVER_NICHE_VERIFIED_POOLS,
+        collect_used_cf_topics,
         collect_used_naver_topics,
         get_account_pacing_strategy,
         get_asset_map_summary,
         is_duplicate_naver_topic,
         match_monetization_options,
         match_synergy_cluster,
+        select_verified_cf_keyword,
         select_verified_naver_keyword,
     )
     if identity in CF_DOMAINS:
@@ -150,6 +153,10 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     used_today = list(parameters.get('usedKeywordsToday') or [])
     if channel == 'naver':
         for recent_t in collect_used_naver_topics(identity, days=14, current_folder=folder):
+            if recent_t not in used_today:
+                used_today.append(recent_t)
+    elif channel == 'cf':
+        for recent_t in collect_used_cf_topics(identity, days=14, current_folder=folder):
             if recent_t not in used_today:
                 used_today.append(recent_t)
     day_dir = folder.parent
@@ -179,7 +186,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             kw_c = (c.get('keyword') if isinstance(c, dict) else str(c or '')).strip()
             if not kw_c or kw_c in verified_candidates:
                 continue
-            if channel == 'naver' and is_duplicate_naver_topic(kw_c, used_today + verified_candidates):
+            if is_duplicate_naver_topic(kw_c, used_today + verified_candidates):
                 continue
             if any(kw_c == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in kw_c) for u in used_today):
                 continue
@@ -188,6 +195,10 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             break
     if channel == 'naver' and len(verified_candidates) < 3:
         for fallback_kw in NAVER_NICHE_VERIFIED_POOLS.get(identity, []):
+            if fallback_kw not in verified_candidates and not is_duplicate_naver_topic(fallback_kw, used_today + verified_candidates):
+                verified_candidates.append(fallback_kw)
+    elif channel == 'cf' and len(verified_candidates) < 3:
+        for fallback_kw in CF_NICHE_VERIFIED_POOLS.get(identity, []):
             if fallback_kw not in verified_candidates and not is_duplicate_naver_topic(fallback_kw, used_today + verified_candidates):
                 verified_candidates.append(fallback_kw)
 
@@ -234,13 +245,8 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         keyword = fast_res.get('keyword') or (verified_candidates[0] if verified_candidates else topic[:50])
         if channel == 'naver':
             keyword = select_verified_naver_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
-        elif used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
-            if verified_candidates:
-                keyword = verified_candidates[0][:60]
-            else:
-                cf_desc_candidates = [c.strip() for c in CF_DOMAINS.get(identity, {}).get('desc', '').replace('·', ',').split(',') if c.strip()]
-                fallback_kw = next((f"{c} 신청 조건 및 반려 주의사항" for c in cf_desc_candidates if not any(c[:4] in u for u in used_today)), f"{CF_DOMAINS.get(identity, {}).get('niche', topic)} 핵심 체크리스트")
-                keyword = fallback_kw[:60]
+        elif channel == 'cf':
+            keyword = select_verified_cf_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
         observed = {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'fast_revenue_lane'}
         result = {
             'status': 'agreed',

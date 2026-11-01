@@ -179,6 +179,54 @@ def find_local_output_runs(slug: str) -> List[Path]:
     return runs
 
 
+def _infer_cf_post_search_keyword(domain: str, slug: str, title: str, content_html: str = "", planned_kw: str = "") -> str:
+    """Infer the clean 3~5 word search noun keyword for a CF post from planning.json or table caption."""
+    from dashboard.common.asset_map import clean_naver_search_keyword, extract_core_topic_nouns
+    p_kw = str(planned_kw or "").strip()
+    if (
+        p_kw
+        and p_kw != domain
+        and "(" not in p_kw
+        and "공식 가이드" not in p_kw
+        and "·" not in p_kw
+        and not re.search(r"(먼저\s*확인|살펴보세요|좁혀보세요|정해보세요|고정하세요|소개된\s*장소|\d+\.\s)", p_kw)
+    ):
+        return clean_naver_search_keyword(p_kw)
+
+    # Search scheduled folders for matching slug or domain+title
+    sched_root = CF_OUTPUT_DIR / "scheduled"
+    if sched_root.is_dir():
+        for day_dir in sorted(sched_root.iterdir(), reverse=True):
+            dom_dir = day_dir / domain
+            if not dom_dir.is_dir():
+                continue
+            art_p = dom_dir / "article.json"
+            plan_p = dom_dir / "planning.json"
+            if art_p.is_file():
+                try:
+                    art = json.loads(art_p.read_text(encoding="utf-8"))
+                    if art.get("topicSlug") == slug or art.get("title") == title:
+                        if plan_p.is_file():
+                            pk = str(json.loads(plan_p.read_text(encoding="utf-8")).get("keyword") or "").strip()
+                            if pk and pk != domain and "(" not in pk and "공식 가이드" not in pk and "·" not in pk:
+                                return clean_naver_search_keyword(pk)
+                except Exception:
+                    pass
+
+    # Extract from table caption in content_html if available
+    if content_html:
+        soup = BeautifulSoup(content_html, "html.parser")
+        cap = soup.find("caption")
+        if cap:
+            cap_txt = re.sub(r"(핵심|비교표|요약표|판독기|자가진단|3초|3분|체크리스트|확인표)", "", cap.get_text(" ", strip=True)).strip()
+            cleaned_cap = clean_naver_search_keyword(cap_txt)
+            if len(cleaned_cap) >= 6 and not re.search(r"(먼저|살펴|좁혀|정해|고정)", cleaned_cap):
+                return cleaned_cap
+
+    return ""
+
+
+
 def _is_fake_diagram_or_broken_screen_figure(
     fig_or_img: Any,
     asset_name: str,
@@ -449,7 +497,12 @@ def remodel_cf_post_by_url(
                 except Exception:
                     pass
 
-    # Step 5: Republish live to CF API (`PUT https://www.{domain}/api/posts/{post_id}`)
+    # Step 5: Enforce front-loaded SEO search keyword title + Republish live to CF API (`PUT https://www.{domain}/api/posts/{post_id}`)
+    from dashboard.common.asset_map import enforce_naver_seo_title
+    inferred_kw = _infer_cf_post_search_keyword(domain, slug, title, final_content_html)
+    if inferred_kw:
+        title = enforce_naver_seo_title(title, inferred_kw)
+
     republish_status = 0
     republish_ok = False
     remaining_img_urls = [im.get("src") for im in soup.find_all("img") if (im.get("src") or "").strip()]
@@ -481,6 +534,12 @@ def remodel_cf_post_by_url(
             )
             republish_status = put_resp.status_code
             republish_ok = put_resp.status_code in (200, 201)
+            if republish_ok:
+                try:
+                    from cf_posting.posting import ping_indexnow
+                    ping_indexnow(domain, f"https://www.{domain}/{slug}")
+                except Exception:
+                    pass
         except Exception as exc:
             return {"ok": False, "error": f"PUT failed: {exc}"}
 
@@ -571,13 +630,164 @@ def remodel_cf_post_by_url(
     }
 
 
+def repair_cf_seo_titles_batch(days: int = 10) -> Dict[str, Any]:
+    """
+    Scan all scheduled CF post folders and live CF posts from recent days,
+    enforce '[실제 검색 명사 키워드 3~4어절], [자청식 후킹 부제]' on any post whose title lacks front-loaded search nouns,
+    republish live via PUT /api/posts/{id}, update local schedules, and ping IndexNow.
+    """
+    from dashboard.common.asset_map import enforce_naver_seo_title, clean_naver_search_keyword
+    from cf_posting.posting import ping_indexnow
+
+    sched_root = CF_OUTPUT_DIR / "scheduled"
+    repaired: List[Dict[str, Any]] = []
+    skipped = 0
+    errors: List[Dict[str, Any]] = []
+
+    if not sched_root.is_dir():
+        return {"ok": False, "error": "No scheduled directory"}
+
+    day_dirs = sorted([d for d in sched_root.iterdir() if d.is_dir()], key=lambda p: p.name, reverse=True)[:days]
+    for day_dir in day_dirs:
+        for dom_dir in sorted(day_dir.iterdir()):
+            if not dom_dir.is_dir():
+                continue
+            domain = dom_dir.name
+            art_p = dom_dir / "article.json"
+            plan_p = dom_dir / "planning.json"
+            rec_p = dom_dir / "publication-receipt.json"
+            if not art_p.is_file():
+                continue
+            try:
+                art = json.loads(art_p.read_text(encoding="utf-8"))
+                plan = json.loads(plan_p.read_text(encoding="utf-8")) if plan_p.is_file() else {}
+                rec = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.is_file() else {}
+            except Exception:
+                continue
+
+            old_title = (art.get("title") or "").strip()
+            slug = (art.get("topicSlug") or "").strip()
+            if not slug and rec.get("publicUrl"):
+                slug = str(rec["publicUrl"]).rstrip("/").rsplit("/", 1)[-1]
+            if not old_title or not slug:
+                continue
+
+            kw = _infer_cf_post_search_keyword(
+                domain=domain,
+                slug=slug,
+                title=old_title,
+                content_html=art.get("contentHtml") or "",
+                planned_kw=plan.get("keyword") or art.get("mainKeyword") or "",
+            )
+            if not kw:
+                skipped += 1
+                continue
+
+            new_title = enforce_naver_seo_title(old_title, kw)
+            if new_title == old_title:
+                skipped += 1
+                continue
+
+            post_detail = find_live_cf_post(domain, slug)
+            if not post_detail or not post_detail.get("id"):
+                skipped += 1
+                continue
+
+            post_id = post_detail["id"]
+            headers = _get_cf_headers(domain)
+            payload = {
+                "title": new_title,
+                "content": post_detail.get("content") or art.get("contentHtml") or "",
+                "slug": slug,
+                "category": post_detail.get("category") or art.get("category") or "정보",
+                "meta_description": post_detail.get("meta_description") or post_detail.get("excerpt") or art.get("summary") or "",
+                "excerpt": post_detail.get("excerpt") or post_detail.get("meta_description") or art.get("summary") or "",
+                "thumbnail": post_detail.get("thumbnail") or "",
+                "og_image": post_detail.get("og_image") or post_detail.get("thumbnail") or "",
+                "isPublished": True,
+                "status": "published",
+            }
+            try:
+                put_resp = requests.put(
+                    f"https://www.{domain}/api/posts/{post_id}",
+                    headers=headers,
+                    json=payload,
+                    timeout=20,
+                )
+                if put_resp.status_code in (200, 201):
+                    art["title"] = new_title
+                    art["mainKeyword"] = clean_naver_search_keyword(kw)
+                    art_p.write_text(json.dumps(art, ensure_ascii=False, indent=2), encoding="utf-8")
+                    ed_p = dom_dir / "editor-content.json"
+                    if ed_p.is_file():
+                        ed_p.write_text(json.dumps(art, ensure_ascii=False, indent=2), encoding="utf-8")
+                    if rec_p.is_file():
+                        rec["title"] = new_title
+                        rec_p.write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+                    pub_url = f"https://www.{domain}/{slug}"
+                    try:
+                        ping_indexnow(domain, pub_url)
+                    except Exception:
+                        pass
+                    repaired.append({
+                        "date": day_dir.name,
+                        "domain": domain,
+                        "url": pub_url,
+                        "keyword": kw,
+                        "oldTitle": old_title,
+                        "newTitle": new_title,
+                        "httpStatus": put_resp.status_code,
+                    })
+                else:
+                    errors.append({"domain": domain, "slug": slug, "httpStatus": put_resp.status_code})
+            except Exception as exc:
+                errors.append({"domain": domain, "slug": slug, "error": str(exc)})
+
+    # Sync today's dashboard/data/cf/daily_schedule.json titles
+    sched_json_path = BASE_DIR / "dashboard" / "data" / "cf" / "daily_schedule.json"
+    if sched_json_path.is_file():
+        try:
+            sched_data = json.loads(sched_json_path.read_text(encoding="utf-8"))
+            s_date = sched_data.get("date")
+            by_dom = {r["domain"]: r for r in repaired if r["date"] == s_date}
+            changed = False
+            for item in (sched_data.get("items") or []):
+                dom = item.get("domain")
+                if dom in by_dom:
+                    item["title"] = by_dom[dom]["newTitle"]
+                    item["mainKeyword"] = by_dom[dom]["keyword"]
+                    changed = True
+            if changed:
+                sched_json_path.write_text(json.dumps(sched_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+
+    return {
+        "ok": True,
+        "repairedCount": len(repaired),
+        "skippedCount": skipped,
+        "errorCount": len(errors),
+        "repaired": repaired,
+        "errors": errors,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Pinpoint URL Surgical Repair & Live Republish (`@doctor` + `@publi`)")
-    parser.add_argument("--url", required=True, help="Target CF post URL (e.g. https://www.nolplace.com/...)")
+    parser.add_argument("--url", required=False, help="Target CF post URL (e.g. https://www.nolplace.com/...)")
+    parser.add_argument("--batch-seo-titles", action="store_true", help="Batch repair SEO titles across recent CF posts")
+    parser.add_argument("--days", type=int, default=10, help="Days to scan for --batch-seo-titles")
     parser.add_argument("--apply", action="store_true", default=True, help="Apply surgical DOM & image fixes")
     parser.add_argument("--republish", action="store_true", default=True, help="Immediately PUT updated post to live CF API")
     args = parser.parse_args()
 
+    if args.batch_seo_titles:
+        result = repair_cf_seo_titles_batch(days=args.days)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result.get("ok") else 1
+
+    if not args.url:
+        parser.error("--url or --batch-seo-titles is required")
     result = remodel_cf_post_by_url(args.url, apply=args.apply, republish=args.republish)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if result.get("ok") else 1

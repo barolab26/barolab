@@ -366,9 +366,11 @@ def prepare_cf(day, domain):
                             used_today.append(str(pdata.get(fk)))
         scheduled = {k: v for k, v in item.items() if k in ('domain', 'category')}
         domain_topic = f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else str(scheduled.get('category') or domain)
-        planning = {}
+        planning = load(folder / 'planning.json') if (folder / 'planning.json').is_file() else {}
         if not (folder / 'article.json').exists():
             planning = planning_or_memory(domain, domain_topic, folder, {'usedKeywordsToday': used_today}, channel='cf')
+            scheduled['mainKeyword'] = planning['keyword']
+        elif planning.get('keyword'):
             scheduled['mainKeyword'] = planning['keyword']
         from common import llm_client
         generate = llm_client.generate_json
@@ -376,7 +378,7 @@ def prepare_cf(day, domain):
             '\n[사람의 언어로 쓰는 4대 집필 원칙 & 절대 금지 가드레일]\n'
             f'- [도메인 고유 전문 분야 엄수 & 당일 타 도메인 중복 금지]: 이 블로그({domain})의 전문 분야는 [{domain_topic}]이다. 오늘 다른 도메인에서 이미 사용한 키워드/제목({json.dumps(used_today[:15], ensure_ascii=False)})과 겹치는 제목·주제는 절대 쓰지 마라.\n'
             '- 공무원 공고문 요약 매크로 말투 금지: 독자의 진짜 통증(Pain Point)과 막막함에 공감하는 도입부로 시작하라.\n'
-            '- 제목은 공공기관 보고서식이 아니라 독자가 "내 얘기잖아?" 하고 클릭할 반려 함정·한 끗 차이·3분 자가진단형으로 작성하라.\n'
+            '- 제목은 반드시 "[정확한 검색 명사 키워드 3~4어절], [자청식 후킹 부제]" 구조로 작성하라. 앞머리 15~18자에 실제 검색 명사구를 고정 배치하고, 쉼표 뒤에 반려 함정·한 끗 차이·3분 자가진단 부제를 붙여라.\n'
             '- 본문에는 스마트폰으로 바로 대입 가능한 한 끗 차이 실전 사례(A는 탈락 vs B는 통과), 3초 자가진단 판독기 표(<table>), 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 당장 실행할 Action Item으로 끝내라.\n'
             '- "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 노출 금지.\n'
         )

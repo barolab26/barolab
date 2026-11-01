@@ -511,20 +511,214 @@ def collect_used_naver_topics(account=None, days=14, current_folder=None):
                                 _add(json.loads(fp.read_text(encoding='utf-8')).get(fk))
                             except Exception:
                                 pass
+    # 4. Also include today's CF scheduled topics to prevent same-day cross-channel cannibalization
+    cf_sched_path = ROOT / 'dashboard/data/cf/daily_schedule.json'
+    if cf_sched_path.is_file():
+        try:
+            cf_s = json.loads(cf_sched_path.read_text(encoding='utf-8'))
+            if cf_s.get('date') == today_date:
+                for it in (cf_s.get('items') or []):
+                    _add(it.get('mainKeyword') or it.get('title'))
+        except Exception:
+            pass
     return used
 
 
+CF_NICHE_VERIFIED_POOLS = {
+    'must-pick.com': [
+        '으뜸효율 가전제품 환급 세입자 신청서류',
+        '식기세척기 빌트인 싱크대 걸레받이 절단 비용',
+        '인버터 제습기 일일제습량 소비전력 전기세 계산',
+        '로봇청소기 직배수 키트 타공 원상복구 비용',
+        '올인원 세탁건조기 히트펌프 소비전력 누진세',
+    ],
+    'must-good.com': [
+        '건강보험 임의계속가입 해지 신청기한 퇴직후',
+        '청년내일저축계좌 중도해지 적립중지 신청사유',
+        '부모급여 가정양육수당 전환 신청일 25일 기준',
+        '본인부담상한제 사후환급금 지급신청서 입금기간',
+        '근로장려금 반기신청 전세보증금 간주전세금 계산',
+    ],
+    'healthcox.com': [
+        '당화혈색소 6.5 공복혈당 불일치 이유',
+        '대상포진 사백신 싱그릭스 접종간격 실비',
+        '무릎 연골주사 히알루론산 급여 주기 6개월',
+        '대장내시경 용종절제술 수술비특약 질병수술비 청구',
+        '국가건강검진 위내시경 조직검사 실비 청구서류',
+    ],
+    'must-joy.com': [
+        '문화누리카드 세대원 잔액 합산 온라인 신청방법',
+        '온누리상품권 카드형 충전할인 전통시장 소득공제율',
+        '공연 관람료 소득공제 신용카드 문화비 한도',
+        '국립박물관 어린이박물관 사전예약 취소표 시간',
+        '고궁 야간개장 경복궁 특별관람 무료입장 대상',
+    ],
+    'maxnote.kr': [
+        '알뜰폰 번호이동 중립기관 제한 90일 해제 신청',
+        '모바일 주민등록증 발급 IC칩 재발급 수수료',
+        '휴대폰 소액결제 한도 차단 통신사별 원천차단',
+        '알뜰폰 eSIM 듀얼심 데이터 나눠쓰기 개통비용',
+        '엠세이퍼 명의도용방지 가입제한 해제 비대면 방법',
+    ],
+    'baronote.kr': [
+        'IRP 중도인출 무주택 전세보증금 필요서류',
+        '퇴직연금 DC형 DB형 전환 신청시기 임금피크제',
+        '신용카드 리볼빙 해지 일시결제 신용점수 복구',
+        '예금담보대출 중도상환수수료 한도 가산금리 계산',
+        '청년도약계좌 일시납입 전환 정부기여금 계산',
+    ],
+    'topnote.kr': [
+        '윈도우11 네트워크 프린터 공유 오류 0x0000011b 해결',
+        '카카오톡 대화내용 백업 복원 기한 14일 연장',
+        '아이폰 eSIM 기기변경 QR코드 재발급 수수료',
+        '엑셀 VLOOKUP N/A 오류 공백 문자 일괄제거',
+        '구글 계정 2단계인증 백업코드 분실 복구절차',
+    ],
+    'meganote.kr': [
+        '자동차보험 마일리지 특약 환급금 주행거리 사진',
+        '전기차 충전구역 과태료 완속 14시간 예외기준',
+        '자동차세 연납 후 폐차 매매 환급금 일할계산',
+        '하이브리드 개별소비세 취등록세 감면 한도 연장',
+        '운전자보험 교통사고처리지원금 중복가입 비례보상',
+    ],
+    'justinfo.co.kr': [
+        '실업급여 조기재취업수당 자영업 프리랜서 서류',
+        '주휴수당 지급조건 주 15시간 지각 조퇴 계산',
+        '가족간 부동산 저가양도 증여세 3억 30% 기준',
+        '퇴직금 중간정산 무주택자 전세계약서 신청기한',
+        '소상공인 폐업 점포철거비 지원금 부가세 제외',
+    ],
+    'smilenote.kr': [
+        '기초연금 수급자격 자동차 시가표준액 4천만원',
+        '노령연금 연기연금 신청 가산율 7.2% 손익분기점',
+        '주택연금 우대형 가입조건 공시가격 수령액 차이',
+        '장기요양등급 가족요양비 복지용구 본인부담률',
+        '만 65세 임플란트 건강보험 평생 2개 본인부담금',
+    ],
+    'tripmarvel.com': [
+        '인천공항 긴급여권 발급 소요시간 필요서류 당일',
+        '국제운전면허증 온라인 발급 영문운전면허증 국가',
+        '기내 보조배터리 용량 Wh 계산 160Wh 반입규정',
+        '호텔 디파짓 보증금 해외결제 가승인 취소 기간',
+        'KTX 지연배상금 기준 시간별 환불율 신청방법',
+    ],
+    'daynote.kr': [
+        '통돌이 세탁기 배수필터 청소 거름망 과탄산소다',
+        '대형폐기물 인터넷신고 스티커 취소 환불 수수료',
+        '도시가스 계량기 교체비용 자가검침 누락 요금정산',
+        '아파트 관리비 장기수선충당금 세입자 퇴거 환급',
+        '가을 겨울 구스다운 패딩 세탁 중성세제 건조기',
+    ],
+    'woorinote.kr': [
+        '버팀목 전세자금대출 목적물변경 추가대출 조건',
+        '전세보증금 반환보증 HUG HF 보증료율 가입기한',
+        '주택청약 부적격 당첨 청약통장 부활 신청기한',
+        '디딤돌대출 생애최초 무주택세대주 소득합산 예외',
+        '전입신고 세대주 확인 온라인 확정일자 우선변제권',
+    ],
+    'nolplace.com': [
+        '국립자연휴양림 숲나들e 우선예약 다자녀 대기예약',
+        '서울대공원 캠핑장 예약 매너타임 주차요금 할인',
+        '경복궁 야간관람 인터넷예매 현장발권 무료대상',
+        '국립수목원 광릉숲 사전예약 차량등록 입장료 면제',
+        '어린이대공원 주차장 만차시 주변 공영주차장 요금',
+    ],
+    'soulnote.kr': [
+        '국민내일배움카드 훈련장려금 단위기간 출석률 80%',
+        '산업안전기사 응시자격 관련학과 경력증명서 인정',
+        '국가기술자격증 취득자격확인서 큐넷 온라인 발급',
+        '청년일자리도약장려금 근속지원금 재직기간 계산',
+        '이직 확인서 처리기간 고용보험 상실신고 지연',
+    ],
+    'joynote.kr': [
+        '펫보험 슬개골탈구 면책기간 1년 자기부담금 비교',
+        '강아지 광견병 무료접종 시군구 동물병원 지참물',
+        '반려동물 등록 내장형 마이크로칩 외장형 과태료',
+        '강아지 심장사상충약 넥스가드 스펙트라 체중별 용량',
+        '몬스테라 분갈이 흙배합 마사토 펄라이트 물주기',
+    ],
+}
+
+
+def collect_used_cf_topics(domain=None, days=14, current_folder=None):
+    """Collect all titles/keywords used across CF domains in the last `days` days + Naver today."""
+    now_dt = datetime.now(KST)
+    cutoff_date = (now_dt - timedelta(days=days)).date().isoformat()
+    today_date = now_dt.date().isoformat()
+    used = []
+
+    def _add(val):
+        s = str(val or '').strip()
+        if s and s not in used:
+            used.append(s)
+
+    sched_root = ROOT / 'cf_posting/output/scheduled'
+    if sched_root.is_dir():
+        for day_dir in sorted(sched_root.iterdir(), reverse=True)[:days + 2]:
+            if not day_dir.is_dir() or day_dir.name < cutoff_date:
+                continue
+            for dom_dir in day_dir.iterdir():
+                if not dom_dir.is_dir():
+                    continue
+                if current_folder and dom_dir.resolve() == Path(current_folder).resolve():
+                    continue
+                if domain is None or dom_dir.name == domain or day_dir.name == today_date:
+                    for fn, fk in (('planning.json', 'keyword'), ('article.json', 'title'), ('article.json', 'mainKeyword')):
+                        fp = dom_dir / fn
+                        if fp.is_file():
+                            try:
+                                _add(json.loads(fp.read_text(encoding='utf-8')).get(fk))
+                            except Exception:
+                                pass
+    return used
+
+
+def select_verified_cf_keyword(domain, candidate_kw, verified_candidates=None, used_topics=None, max_docs=5000):
+    """Select a domain-consistent, non-duplicate CF search keyword verified to have <= max_docs competing posts."""
+    used = list(used_topics or [])
+    pool = []
+    if candidate_kw and candidate_kw != domain and not candidate_kw.startswith(CF_DOMAINS.get(domain, {}).get('niche', '___')):
+        pool.append(clean_naver_search_keyword(candidate_kw))
+    for c in (verified_candidates or []):
+        kw_c = clean_naver_search_keyword(c.get('keyword') if isinstance(c, dict) else c)
+        if kw_c and kw_c not in pool:
+            pool.append(kw_c)
+    for fallback_kw in CF_NICHE_VERIFIED_POOLS.get(domain, []):
+        if fallback_kw not in pool:
+            pool.append(fallback_kw)
+
+    best_fallback = None
+    best_docs = 10**9
+    for kw in pool:
+        if not kw or is_duplicate_naver_topic(kw, used):
+            continue
+        doc_cnt = query_naver_blog_doc_count(kw)
+        if doc_cnt is None:
+            return kw
+        if 1 <= doc_cnt <= max_docs:
+            return kw
+        if doc_cnt < best_docs:
+            best_docs = doc_cnt
+            best_fallback = kw
+    return best_fallback or (CF_NICHE_VERIFIED_POOLS.get(domain, ['건강보험 임의계속가입 해지 신청기한'])[0])
+
+
+
 def clean_naver_search_keyword(raw_keyword):
-    """Normalize a topic/keyword into a clean 3~5 word search noun phrase that real Naver users type."""
+    """Normalize a topic/keyword into a clean 3~5 word search noun phrase that real Naver/Google users type."""
     s = str(raw_keyword or '').strip()
     if ',' in s and len(s.split(',')[0].strip()) >= 6:
         s = s.split(',')[0].strip()
     if '?' in s and len(s.split('?')[0].strip()) >= 6:
         s = s.split('?')[0].strip()
     s = re.sub(r'\b(3분|3초|1분)\s*(체크|확인|판독|점검|계산|정리)\w*', '', s)
+    s = re.sub(r'\s+vs\s+', ' ', s, flags=re.IGNORECASE)
     s = re.sub(r'[^\w가-힣.%+\s·-]', ' ', s)
     words = [w for w in s.split() if w]
-    return ' '.join(words[:5]).strip()
+    words = words[:5]
+    if words:
+        words[-1] = re.sub(r'(와|과|은|는|이|가|을|를|에|에서)$', '', words[-1])
+    return ' '.join(w for w in words if w).strip()
 
 
 def select_verified_naver_keyword(account, candidate_kw, verified_candidates=None, used_topics=None, max_docs=5000):
@@ -567,18 +761,28 @@ def enforce_naver_seo_title(raw_title, target_keyword):
     front_window = title[:max(len(clean_kw) + 6, 20)]
     if kw_tokens and all(t in front_window for t in kw_tokens):
         return title
+    # If title already starts with a clean noun topic before ':' (no '?' or conversational verb before ':'), preserve it
+    if ':' in title[:22] and '?' not in title.split(':', 1)[0]:
+        pre_colon = title.split(':', 1)[0]
+        if not re.search(r'(는데|했더니|했는데|할까|전\s*3초|전\s*3분)', pre_colon):
+            return title
 
     # Extract the hook part from raw_title
     hook = title
     if ',' in title:
         parts = [p.strip() for p in title.split(',', 1)]
-        hook = parts[1] if len(parts[1]) >= 8 else title
-    # Remove exact duplicate words of clean_kw from the start of hook only on word/comma boundaries
+        if len(parts[1]) >= 8 and not re.match(r'^\d', parts[1]):
+            hook = parts[1]
     if hook.startswith(clean_kw):
         hook = hook[len(clean_kw):].lstrip(' ,·:')
-    for tok in clean_kw.split():
-        if hook.startswith(tok + ' ') or hook.startswith(tok + ','):
-            hook = hook[len(tok):].lstrip(' ,·:')
+    else:
+        cand_hook = hook
+        for tok in clean_kw.split():
+            if cand_hook.startswith(tok + ' ') or cand_hook.startswith(tok + ','):
+                cand_hook = cand_hook[len(tok):].lstrip(' ,·:')
+        # Only use stripped cand_hook if it doesn't start with a dangling verb/connective
+        if not re.match(r'^(했는데|내렸다는데|끝났는데|끝나면|받으면|깨면|있는데|된다는데|일찍\s*받으면)', cand_hook):
+            hook = cand_hook
     if not hook or len(hook) < 6:
         hook = '놓치기 쉬운 핵심 기준과 신청 전 3분 자가진단'
     combined = f'{clean_kw}, {hook}'
