@@ -1,0 +1,12 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:ec82a44a70d4517d348a",
+  "recordedAt": "2026-11-01T06:43:58.253203+00:00",
+  "recordedBy": "jarvis",
+  "sourceType": "ceo_notebooklm_verified",
+  "sourceUrl": "https://notebook.google.com/notebook/54a7fa66-ef38-4762-ab06-950264ca9c35",
+  "externalSources": [],
+  "title": "[NotebookLM·SSR+] 나만의 AI 업무 시스템 4단계(Skill·Second Brain·Routine·Extension) 구축법",
+  "factCheckSummary": "NotebookLM(54a7fa66-ef38-4762-ab06-950264ca9c35) 클로드 AI 업무 시스템 4단계(SSR+) 원본 분석 및 BaroLab 아키텍처 대조 검증 완료",
+  "evidenceText": "[NotebookLM·SSR+] 나만의 AI 업무 시스템 4단계(Skill·Second Brain·Routine·Extension) 구축법\nNotebookLM(54a7fa66-ef38-4762-ab06-950264ca9c35) 클로드 AI 업무 시스템 4단계(SSR+) 원본 분석 및 BaroLab 아키텍처 대조 검증 완료\n1) Skill: 반복 업무를 모듈화하여 프롬프트 재입력 제거. 2) Second Brain: 나무위키식 상위 길잡이 문서(Map of Content)와 1-Hop 마크다운 지식창고로 에이전트에게 문맥과 대표 철학을 즉시 주입. 3) Routine: 24/7 백그라운드 워커로 자율 실행. 4) Extension: 브라우저(CDP)·검색·발행 도구로 외부 세계와 연결.\n전 크루가 자율 업무를 수행하거나 새로운 도메인/채널 지식을 구조화할 때 1-Hop 길잡이 문서를 최우선 참조"
+}

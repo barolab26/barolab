@@ -546,6 +546,144 @@
       padding: 20px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.25);
     }
+    /* Second Brain 1-Hop Explorer (SSR+ & Anthropic 7 Official Skill Rules) */
+    .sb-explorer-section {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+    }
+    .sb-explorer-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid #334155;
+    }
+    .sb-explorer-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 460px;
+      max-height: 620px;
+    }
+    @media (max-width: 1024px) {
+      .sb-explorer-grid { grid-template-columns: 1fr; max-height: none; }
+    }
+    .sb-tree-pane {
+      border-right: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .sb-group-title {
+      padding: 9px 12px 5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .sb-tree-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: background 0.14s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sb-tree-item:hover { background: #eff6ff; }
+    .sb-tree-item.active {
+      background: #dbeafe;
+      border-left: 4px solid #2563eb;
+      padding-left: 8px;
+    }
+    .sb-tree-item-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.35;
+    }
+    .sb-tree-item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      font-size: 11px;
+      color: #64748b;
+      align-items: center;
+    }
+    .sb-pill {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .sb-pill.hop { background: #dcfce7; color: #166534; }
+    .sb-pill.freedom { background: #e0e7ff; color: #3730a3; }
+    .sb-preview-pane {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #fff;
+    }
+    .sb-preview-toolbar {
+      padding: 10px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sb-toc-bar {
+      padding: 8px 16px;
+      background: #eff6ff;
+      border-bottom: 1px solid #bfdbfe;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .sb-toc-chip {
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid #93c5fd;
+      color: #1d4ed8;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .sb-toc-chip:hover { background: #2563eb; color: #fff; }
+    .sb-markdown-body {
+      flex: 1;
+      padding: 18px 22px;
+      overflow-y: auto;
+      font-size: 13.5px;
+      line-height: 1.72;
+      color: #1e293b;
+    }
+    .sb-markdown-body h1 { font-size: 19px; font-weight: 900; color: #0f172a; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+    .sb-markdown-body h2 { font-size: 15.5px; font-weight: 800; color: #1e3a8a; margin: 18px 0 8px; padding: 6px 10px; background: #f8fafc; border-left: 4px solid #2563eb; border-radius: 4px; }
+    .sb-markdown-body h3 { font-size: 14px; font-weight: 800; color: #0f172a; margin: 14px 0 6px; }
+    .sb-markdown-body table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 12.5px; }
+    .sb-markdown-body th { background: #1e293b; color: #f8fafc; padding: 7px 10px; text-align: left; font-weight: 700; }
+    .sb-markdown-body td { border: 1px solid #cbd5e1; padding: 7px 10px; vertical-align: top; }
+    .sb-markdown-body tr:nth-child(even) td { background: #f8fafc; }
+    .sb-markdown-body blockquote { margin: 8px 0; padding: 8px 12px; background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; border-radius: 4px; font-size: 12.5px; }
+    .sb-markdown-body code { background: #f1f5f9; color: #be123c; padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
   </style>
 </head>
 <body class="control-room">
@@ -706,6 +844,66 @@
           </div>
         </div>
       </article>
+    </section>
+
+    <!-- [NEW] 🧠 세컨드 브레인 1-Hop 길잡이 & 공식 스킬 탐색기 (SSR+ & 앤트로픽 7대 공식 규칙) -->
+    <section class="sb-explorer-section" id="second-brain-explorer" aria-label="세컨드 브레인 1-Hop 길잡이 탐색기">
+      <div class="sb-explorer-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <strong style="font-size:15px; color:#f8fafc;">📚 세컨드 브레인 1-Hop 길잡이 &amp; 앤트로픽 7규칙 스킬 탐색기 (SSR+ Vault)</strong>
+            <span class="sb-pill hop" style="background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4);">1-Hop Direct Reference</span>
+            <span class="sb-pill freedom" style="background:rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(96,165,250,0.4);">Top-100-Line TOC · 5단계 Go-Back 루프</span>
+          </div>
+          <div style="font-size:11.5px; color:#94a3b8; margin-top:3px;">
+            나무위키식 상위 길잡이 문서(Map of Content) 5종 + 공식 SKILL.md 4종 · <code style="color:#fde68a;">AGENTS.md</code> 직결 · 실측 우승 원고/외부 노하우 실시간 자가 동기화
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <input type="search" id="sb-search-input" placeholder="길잡이·TOC 목차·황금키워드·결핍 검색..." style="padding:6px 10px; border-radius:7px; border:1px solid #475569; background:#0f172a; color:#f8fafc; font-size:12px; width:230px;" />
+          <button type="button" id="btn-sb-sync" class="graph-chip" style="background:#059669; color:#fff; border-color:#10b981; font-weight:800;">🔄 실시간 데이터로 길잡이 재동기화</button>
+          <button type="button" id="btn-sb-toggle-collapse" class="graph-chip" style="background:#334155; color:#e2e8f0; border-color:#475569;">접기/펼치기</button>
+        </div>
+      </div>
+
+      <div class="sb-explorer-grid" id="sb-explorer-body">
+        <!-- Left: 1-Hop Hierarchy Tree -->
+        <div class="sb-tree-pane" id="sb-tree-list">
+          <div style="padding:16px; color:#64748b; font-size:12.5px;">세컨드 브레인 길잡이 문서를 불러오는 중...</div>
+        </div>
+
+        <!-- Right: Top-100-Line TOC Jump Bar + Markdown Reader / Editor -->
+        <div class="sb-preview-pane">
+          <div class="sb-preview-toolbar">
+            <div>
+              <strong id="sb-doc-title" style="font-size:14.5px; color:#0f172a;">문서를 선택하세요</strong>
+              <div id="sb-doc-meta" style="font-size:11.5px; color:#64748b; margin-top:2px;"></div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              <button type="button" class="graph-chip on" id="btn-sb-mode-read">📖 마크다운 리더 뷰</button>
+              <button type="button" class="graph-chip" id="btn-sb-mode-top100" title="앤트로픽 Rule #1: 에이전트가 먼저 스캔하는 상단 100줄">⚡ 상단 100줄 스캔 뷰 (head -n 100)</button>
+              <button type="button" class="graph-chip" id="btn-sb-mode-edit">✏️ 원문 편집</button>
+            </div>
+          </div>
+
+          <div class="sb-toc-bar" id="sb-toc-bar">
+            <span style="font-size:11px; font-weight:800; color:#1e40af;">📑 상단 TOC 바로가기:</span>
+          </div>
+
+          <div class="sb-markdown-body" id="sb-markdown-viewer"></div>
+
+          <div id="sb-editor-wrap" hidden style="flex:1; display:flex; flex-direction:column; padding:14px 18px; gap:8px; background:#f8fafc;">
+            <textarea id="sb-editor-textarea" style="flex:1; min-height:320px; width:100%; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-size:12.5px; line-height:1.6; padding:12px; border:1px solid #cbd5e1; border-radius:8px;"></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span id="sb-editor-status" style="font-size:12px; color:#2563eb; font-weight:700;">하단 '대표님 &amp; 크루 수동 추가 노트'에 작성한 내용은 자동 동기화 시에도 영구 보존됩니다.</span>
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="btn-quick" id="btn-sb-cancel-edit">취소</button>
+                <button type="button" class="btn-quick" id="btn-sb-save-edit" style="background:#2563eb; color:#fff; border-color:#1d4ed8; font-weight:800;">💾 길잡이 저장</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <div class="memory-layout">
@@ -2154,8 +2352,233 @@
     if (!document.hidden) scheduleGraphPoll();
   });
 
+  // Second Brain 1-Hop Explorer (SSR+ & Anthropic 7 Official Skill Rules)
+  let sbGuides = [];
+  let sbSelectedId = null;
+  let sbViewMode = 'read'; // 'read' | 'top100' | 'edit'
+
+  function renderSimpleMarkdown(mdText) {
+    const rawLines = String(mdText || '').replace(/^---[\s\S]*?---\n*/, '').split('\n');
+    let html = '';
+    let inTable = false;
+    let tableRows = [];
+    const flushTable = () => {
+      if (!inTable || !tableRows.length) return;
+      inTable = false;
+      const header = tableRows[0];
+      const body = tableRows.slice(2);
+      html += '<table><thead><tr>' + header.map(c => `<th>${formatInlineMd(c)}</th>`).join('') + '</tr></thead><tbody>';
+      body.forEach(r => {
+        html += '<tr>' + r.map(c => `<td>${formatInlineMd(c)}</td>`).join('') + '</tr>';
+      });
+      html += '</tbody></table>';
+      tableRows = [];
+    };
+    const formatInlineMd = (txt) => {
+      return escapeHtml(txt)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+    };
+    rawLines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        inTable = true;
+        const cells = trimmed.slice(1, -1).split('|').map(c => c.trim());
+        tableRows.push(cells);
+        return;
+      } else if (inTable) {
+        flushTable();
+      }
+      const hMatch = trimmed.match(/^(#{1,3})\s+(.+)$/);
+      if (hMatch) {
+        const lvl = hMatch[1].length;
+        const title = hMatch[2].trim();
+        const slug = title.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-|-$/g, '');
+        html += `<h${lvl} id="sb-sec-${slug}" data-line="${idx + 1}">${formatInlineMd(title)}</h${lvl}>`;
+      } else if (trimmed.startsWith('> ')) {
+        html += `<blockquote>${formatInlineMd(trimmed.slice(2))}</blockquote>`;
+      } else if (trimmed === '---') {
+        html += '<hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0;" />';
+      } else if (/^[-*]\s+/.test(trimmed)) {
+        html += `<div style="margin:3px 0 3px 12px;">• ${formatInlineMd(trimmed.replace(/^[-*]\s+/, ''))}</div>`;
+      } else if (/^\d+\.\s+/.test(trimmed)) {
+        html += `<div style="margin:4px 0 4px 8px;font-weight:500;">${formatInlineMd(trimmed)}</div>`;
+      } else if (trimmed) {
+        html += `<p style="margin:6px 0;">${formatInlineMd(trimmed)}</p>`;
+      }
+    });
+    flushTable();
+    return html;
+  }
+
+  function renderSecondBrainTree() {
+    const listEl = document.getElementById('sb-tree-list');
+    if (!listEl) return;
+    if (!sbGuides.length) {
+      listEl.innerHTML = '<div style="padding:16px;color:#64748b;font-size:12.5px;">조건에 맞는 세컨드 브레인 길잡이 문서가 없습니다.</div>';
+      return;
+    }
+    const groups = [
+      { key: '1-Hop 세컨드 브레인 길잡이', items: sbGuides.filter(g => g.group !== 'official_skill') },
+      { key: '앤트로픽 7규칙 공식 스킬 (SKILL.md)', items: sbGuides.filter(g => g.group === 'official_skill') },
+    ];
+    let html = '';
+    groups.forEach(grp => {
+      if (!grp.items.length) return;
+      html += `<div class="sb-group-title">${escapeHtml(grp.key)} (${grp.items.length})</div>`;
+      grp.items.forEach(item => {
+        const active = item.id === sbSelectedId ? 'active' : '';
+        html += `
+          <div class="sb-tree-item ${active}" data-sb-id="${escapeHtml(item.id)}">
+            <div class="sb-tree-item-title">${escapeHtml(item.title)}</div>
+            <div class="sb-tree-item-meta">
+              <span class="sb-pill hop">1-Hop</span>
+              <span class="sb-pill freedom">${escapeHtml(item.freedomTier)}</span>
+              <span>${item.lineCount}줄 · TOC ${(item.toc || []).length}개</span>
+            </div>
+          </div>
+        `;
+      });
+    });
+    listEl.innerHTML = html;
+    listEl.querySelectorAll('.sb-tree-item').forEach(el => {
+      el.addEventListener('click', () => selectSecondBrainDoc(el.getAttribute('data-sb-id')));
+    });
+  }
+
+  function selectSecondBrainDoc(docId) {
+    const doc = sbGuides.find(g => g.id === docId) || sbGuides[0];
+    if (!doc) return;
+    sbSelectedId = doc.id;
+    renderSecondBrainTree();
+    document.getElementById('sb-doc-title').textContent = doc.title;
+    document.getElementById('sb-doc-meta').innerHTML = `
+      파일: <code>${escapeHtml(doc.filename)}</code> · 자유도 등급: <strong>${escapeHtml(doc.freedomTier)}</strong> · 총 ${doc.lineCount}줄 · 최근 갱신: ${escapeHtml(doc.updatedAt)} · 시냅스 허브: <span class="wiki-link-pill" id="sb-jump-hub" style="padding:1px 7px;font-size:11px;">[[${escapeHtml(doc.ownerHub)}]]</span>
+    `;
+    document.getElementById('sb-jump-hub')?.addEventListener('click', () => inspectDocument(doc.ownerHub + '.md'));
+
+    const tocBar = document.getElementById('sb-toc-bar');
+    const h2List = (doc.toc || []).filter(t => t.level <= 2);
+    tocBar.innerHTML = `<span style="font-size:11px; font-weight:800; color:#1e40af;">📑 상단 TOC 바로가기:</span>` +
+      h2List.map(t => `<button type="button" class="sb-toc-chip" data-slug="${escapeHtml(t.slug)}">${escapeHtml(t.title)}</button>`).join('');
+    tocBar.querySelectorAll('.sb-toc-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (sbViewMode === 'edit') setSecondBrainMode('read');
+        const slug = btn.getAttribute('data-slug');
+        const target = document.getElementById('sb-sec-' + slug);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    updateSecondBrainViewer(doc);
+  }
+
+  function updateSecondBrainViewer(doc) {
+    if (!doc) return;
+    const viewer = document.getElementById('sb-markdown-viewer');
+    const editorWrap = document.getElementById('sb-editor-wrap');
+    document.getElementById('btn-sb-mode-read').classList.toggle('on', sbViewMode === 'read');
+    document.getElementById('btn-sb-mode-top100').classList.toggle('on', sbViewMode === 'top100');
+    document.getElementById('btn-sb-mode-edit').classList.toggle('on', sbViewMode === 'edit');
+
+    if (sbViewMode === 'edit') {
+      viewer.hidden = true;
+      editorWrap.hidden = false;
+      document.getElementById('sb-editor-textarea').value = doc.content;
+    } else {
+      viewer.hidden = false;
+      editorWrap.hidden = true;
+      const sourceText = sbViewMode === 'top100' ? doc.top100Preview : doc.content;
+      viewer.innerHTML = (sbViewMode === 'top100'
+        ? `<div style="margin-bottom:10px;padding:8px 12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;font-size:12px;color:#1e3a8a;font-weight:700;">⚡ 앤트로픽 공식 스킬 규칙 #1: 에이전트가 문서를 열 때 가장 먼저 스캔하는 상단 100줄(head -n 100) 영역입니다.</div>`
+        : '') + renderSimpleMarkdown(sourceText);
+    }
+  }
+
+  function setSecondBrainMode(mode) {
+    sbViewMode = mode;
+    const doc = sbGuides.find(g => g.id === sbSelectedId);
+    if (doc) updateSecondBrainViewer(doc);
+  }
+
+  async function loadSecondBrainExplorer(query = '') {
+    try {
+      const res = await apiFetch(`/api/memory/second-brain?q=${encodeURIComponent(query)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      sbGuides = data.guides || [];
+      if (!sbSelectedId || !sbGuides.some(g => g.id === sbSelectedId)) {
+        sbSelectedId = sbGuides[0] ? sbGuides[0].id : null;
+      }
+      renderSecondBrainTree();
+      if (sbSelectedId) selectSecondBrainDoc(sbSelectedId);
+    } catch (e) {
+      console.warn('Second Brain explorer load skipped:', e);
+    }
+  }
+
+  document.getElementById('btn-sb-mode-read')?.addEventListener('click', () => setSecondBrainMode('read'));
+  document.getElementById('btn-sb-mode-top100')?.addEventListener('click', () => setSecondBrainMode('top100'));
+  document.getElementById('btn-sb-mode-edit')?.addEventListener('click', () => setSecondBrainMode('edit'));
+  document.getElementById('btn-sb-cancel-edit')?.addEventListener('click', () => setSecondBrainMode('read'));
+
+  document.getElementById('btn-sb-save-edit')?.addEventListener('click', async () => {
+    const doc = sbGuides.find(g => g.id === sbSelectedId);
+    if (!doc) return;
+    const content = document.getElementById('sb-editor-textarea').value;
+    const statusEl = document.getElementById('sb-editor-status');
+    statusEl.textContent = '저장 중...';
+    try {
+      const res = await apiFetch('/api/memory/second-brain/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: doc.id, content }),
+      });
+      const out = await res.json();
+      if (!res.ok || !out.ok) throw new Error(out.detail || '저장 실패');
+      statusEl.textContent = '✅ 세컨드 브레인 길잡이 저장 완료';
+      sbViewMode = 'read';
+      await loadSecondBrainExplorer(document.getElementById('sb-search-input')?.value || '');
+    } catch (err) {
+      statusEl.textContent = '⚠ ' + err.message;
+    }
+  });
+
+  document.getElementById('btn-sb-sync')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-sb-sync');
+    btn.textContent = '🔄 동기화 중...';
+    btn.disabled = true;
+    try {
+      const res = await apiFetch('/api/memory/second-brain/sync', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        sbGuides = data.guides || [];
+        renderSecondBrainTree();
+        if (sbSelectedId) selectSecondBrainDoc(sbSelectedId);
+      }
+      btn.textContent = '✅ 길잡이 최신화 완료';
+      setTimeout(() => { btn.textContent = '🔄 실시간 데이터로 길잡이 재동기화'; }, 2000);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('btn-sb-toggle-collapse')?.addEventListener('click', () => {
+    const body = document.getElementById('sb-explorer-body');
+    if (body) body.style.display = body.style.display === 'none' ? 'grid' : 'none';
+  });
+
+  let sbSearchTimer = null;
+  document.getElementById('sb-search-input')?.addEventListener('input', e => {
+    clearTimeout(sbSearchTimer);
+    sbSearchTimer = setTimeout(() => {
+      loadSecondBrainExplorer(e.target.value.trim());
+    }, 200);
+  });
+
   // Check URL query ?rel=...
   const urlRel = new URLSearchParams(location.search).get('rel');
+  loadSecondBrainExplorer();
   loadGraphData().then(loaded => {
     if (loaded) inspectDocument(urlRel);
   }).finally(scheduleGraphPoll);

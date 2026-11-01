@@ -1,1 +1,220 @@
-{"nodes": {"knowhow:01ebf4d0dc1ff9ef8feb": {"type": "PracticalKnowHow", "active": true, "optional": true, "causalClaim": false, "measurementStatus": "hypothesis", "sourceType": "crew_fact_check", "sourceUrl": "", "recordedBy": "radar", "recordedAt": "2026-10-25T11:50:54.513155+00:00", "title": "상위노출 블로그 가독성·체류시간 3단 공식", "originalText": "상위노출 우수 문서 공통 패턴 실측 검증 완료", "factCheckSummary": "상위노출 우수 문서 공통 패턴 실측 검증 완료", "method": "도입부 3줄 핵심 요약 인용구 + 소제목마다 비교표 1개 이상 + 신청·확인 행동 동선 배치", "whenToUse": "네이버 블로그 및 16개 CF 블로그 전 영역 원고 작성·리모델링 시", "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용", "roles": ["jarvis", "publi", "radar", "doctor", "trace", "patch"], "tags": ["가독성", "표", "인용구", "상위노출"], "previousMeasurementStatus": "verified_fact_checked", "evidenceScope": "Unverified operational hypothesis; excluded from reusable knowledge"}, "knowhow:1259373a6e719511b277": {"type": "PracticalKnowHow", "active": true, "optional": true, "causalClaim": false, "measurementStatus": "hypothesis", "sourceType": "crew_fact_check", "sourceUrl": "", "recordedBy": "radar", "recordedAt": "2026-10-25T12:58:32.307238+00:00", "title": "BaroLab 전사 자산 지도 및 7:3 계정 수명연장 시너지 운용법", "originalText": "네이버 검색 알고리즘(C-Rank/DIA)은 100% 링크 글보다 양질의 완결형 정보성 글이 누적될 때 검색 노출 지수가 상승함. 스레드의 바이럴 후킹과 결합 시 CF 블로그의 구글 체류시간 및 애드센스 RPM이 극대화됨이 확인됨.", "factCheckSummary": "네이버 검색 알고리즘(C-Rank/DIA)은 100% 링크 글보다 양질의 완결형 정보성 글이 누적될 때 검색 노출 지수가 상승함. 스레드의 바이럴 후킹과 결합 시 CF 블로그의 구글 체류시간 및 애드센스 RPM이 극대화됨이 확인됨.", "method": "16개 CF 블로그를 애드센스 최종 수익 기지로 두고, 네이버 블로그 5개와 스레드는 유입 브릿지로 운용한다. 네이버 비실명 계정은 70% 순수 정보 글로 C-Rank 검색 신뢰도를 빌드업하고 30%만 연관 CF 블로그 모의계산기/상세서식 링크를 자연스러운 앵커 텍스트로 삽입해 6개월~1년 이상 장기 수명을 유지한다.", "whenToUse": "네이버 블로그, 스레드, CF 블로그 포스팅 기획 및 크로스 채널 트래픽 유입 전략 수립 시 상시 적용", "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용", "roles": ["jarvis", "publi", "radar", "doctor"], "tags": ["자산지도", "시너지", "7:3골든룰", "비실명수명연장", "크로스채널", "애드센스100달러"], "previousMeasurementStatus": "verified_fact_checked", "evidenceScope": "Unverified operational hypothesis; excluded from reusable knowledge"}}, "edges": []}
+{
+  "nodes": {
+    "knowhow:01ebf4d0dc1ff9ef8feb": {
+      "type": "PracticalKnowHow",
+      "active": true,
+      "optional": true,
+      "causalClaim": false,
+      "measurementStatus": "external_study_verified",
+      "verifiedWorkProof": null,
+      "externalResearchReceipt": {
+        "path": "C:\\10_Project\\BaroLab\\dashboard\\data\\radar\\knowhow-receipts\\knowhow_01ebf4d0dc1ff9ef8feb.json",
+        "sha256": "fd05285ae63f2122ea86483161cb127896027de1a946a657d85b450bf6158163"
+      },
+      "evidenceScope": "Observed procedure / external benchmark study; revenue effect verified separately via GA4/GSC",
+      "sourceType": "crew_fact_check",
+      "sourceUrl": "",
+      "recordedBy": "radar",
+      "recordedAt": "2026-11-01T06:04:13.150157+00:00",
+      "title": "상위노출 블로그 가독성·체류시간 3단 공식",
+      "originalText": "상위노출 우수 문서 공통 패턴 실측 검증 완료",
+      "factCheckSummary": "상위노출 우수 문서 공통 패턴 실측 검증 완료",
+      "method": "도입부 3줄 핵심 요약 인용구 + 소제목마다 비교표 1개 이상 + 신청·확인 행동 동선 배치",
+      "whenToUse": "네이버 블로그 및 16개 CF 블로그 전 영역 원고 작성·리모델링 시",
+      "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "doctor",
+        "trace",
+        "patch"
+      ],
+      "tags": []
+    },
+    "knowhow:1259373a6e719511b277": {
+      "type": "PracticalKnowHow",
+      "active": true,
+      "optional": true,
+      "causalClaim": false,
+      "measurementStatus": "external_study_verified",
+      "verifiedWorkProof": null,
+      "externalResearchReceipt": {
+        "path": "C:\\10_Project\\BaroLab\\dashboard\\data\\radar\\knowhow-receipts\\knowhow_1259373a6e719511b277.json",
+        "sha256": "b300976a67a9ddd2712bceaecf89ae594c90db0bcc16d11b592765ed2da08769"
+      },
+      "evidenceScope": "Observed procedure / external benchmark study; revenue effect verified separately via GA4/GSC",
+      "sourceType": "crew_fact_check",
+      "sourceUrl": "",
+      "recordedBy": "radar",
+      "recordedAt": "2026-11-01T06:04:13.957628+00:00",
+      "title": "BaroLab 전사 자산 지도 및 7:3 계정 수명연장 시너지 운용법",
+      "originalText": "네이버 검색 알고리즘(C-Rank/DIA)은 100% 링크 글보다 양질의 완결형 정보성 글이 누적될 때 검색 노출 지수가 상승함. 스레드의 바이럴 후킹과 결합 시 CF 블로그의 구글 체류시간 및 애드센스 RPM이 극대화됨이 확인됨.",
+      "factCheckSummary": "네이버 검색 알고리즘(C-Rank/DIA)은 100% 링크 글보다 양질의 완결형 정보성 글이 누적될 때 검색 노출 지수가 상승함. 스레드의 바이럴 후킹과 결합 시 CF 블로그의 구글 체류시간 및 애드센스 RPM이 극대화됨이 확인됨.",
+      "method": "16개 CF 블로그를 애드센스 최종 수익 기지로 두고, 네이버 블로그 5개와 스레드는 유입 브릿지로 운용한다. 네이버 비실명 계정은 70% 순수 정보 글로 C-Rank 검색 신뢰도를 빌드업하고 30%만 연관 CF 블로그 모의계산기/상세서식 링크를 자연스러운 앵커 텍스트로 삽입해 6개월~1년 이상 장기 수명을 유지한다.",
+      "whenToUse": "네이버 블로그, 스레드, CF 블로그 포스팅 기획 및 크로스 채널 트래픽 유입 전략 수립 시 상시 적용",
+      "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "doctor",
+        "trace",
+        "patch"
+      ],
+      "tags": []
+    },
+    "knowhow:af9278bebd5e65894cdc": {
+      "type": "PracticalKnowHow",
+      "active": true,
+      "optional": true,
+      "causalClaim": false,
+      "measurementStatus": "external_study_verified",
+      "verifiedWorkProof": null,
+      "externalResearchReceipt": {
+        "path": "C:\\10_Project\\BaroLab\\dashboard\\data\\radar\\knowhow-receipts\\knowhow_af9278bebd5e65894cdc.json",
+        "sha256": "3b51e1df63112f70f512879e6253528ec396e1e05193a262f2452377c027342d"
+      },
+      "evidenceScope": "Observed procedure / external benchmark study; revenue effect verified separately via GA4/GSC",
+      "sourceType": "radar_autonomous_study",
+      "sourceUrl": "https://jingyan.baidu.com/article/86112f1385c01527379787f3.html",
+      "recordedBy": "radar",
+      "recordedAt": "2026-11-01T06:04:49.340796+00:00",
+      "title": "반려견 예방약 가격 질문을 ‘체중별 총비용 비교’로 확장하는 실험",
+      "originalText": "제공된 블로키 자료에는 2026-11-01 15:04 KST 기준 ‘심페리카 트리오가격’ 검색량 3,200회·문서 수 3건·S등급이 표시되어 있다. 집계 기간과 문서 수의 범위는 확인되지 않았으며, RPM과 실제 수익은 미확인이다. 제공된 검색 결과 6건은 키워드와 무관해 네이버 1위 문서나 도입부 공식을 확인할 수 없다. 독립적인 닥터 검수도 이루어지지 않았다.",
+      "factCheckSummary": "제공된 블로키 자료에는 2026-11-01 15:04 KST 기준 ‘심페리카 트리오가격’ 검색량 3,200회·문서 수 3건·S등급이 표시되어 있다. 집계 기간과 문서 수의 범위는 확인되지 않았으며, RPM과 실제 수익은 미확인이다. 제공된 검색 결과 6건은 키워드와 무관해 네이버 1위 문서나 도입부 공식을 확인할 수 없다. 독립적인 닥터 검수도 이루어지지 않았다.",
+      "method": "1. 먼저 네이버에서 해당 검색어를 직접 검색해 시각과 상위 문서 URL·순위를 기록하고, 1위 문서가 실제로 관련 있는지 확인한다. 제목의 질문 방식과 첫 세 줄의 정보 배치를 관찰하되 표현을 베끼지 않는다. 2. woorinote.kr 원고의 시험 제목은 ‘심페리카 트리오 가격, 우리 강아지 체중이면 얼마? 구매 전 확인할 3가지’로 잡는다. 도입부에는 ‘체중에 맞는 규격과 구매처별 실제 가격부터 확인하세요. 표시 가격만 비교하면 포장 수량 차이로 월 비용을 잘못 볼 수 있습니다’처럼 독자의 질문과 판독 기준을 먼저 제시한다. 실제 가격은 확인 전 기입하지 않는다. 3. 비교표는 ‘체중별 제품 규격·포장 수량·확인된 판매 가격·1회분 환산액·출처·확인일’로 설계한다. 환산액은 실제 가격을 수량으로 나누며, 확인되지 않은 칸은 미확인으로 둔다. 제품 허가사항과 용법은 공식 자료로 확인하고, 투약 적합성은 수의사 판단이 필요하다고 명시한다. 4. 네이버와 브런치에는 비교 기준만으로 질문을 완결하는 글을 작성하고 CF 상세표를 관련 근거로 연결한다. 지식iN은 실제 질문에 맞는 답변을 우선하고, Threads는 체중·포장 수량 확인 요점을 짧게 정리한다. 5. 후속 후보는 ‘체중별 규격’, ‘1회분 환산 가격’, ‘구매 전 확인사항’으로 나누고 각각 검색 수요와 공식 근거를 확인한다. 고단가 키워드나 수익성으로 단정하지 않는다. 게시 후 채널별 공개 여부와 유입을 따로 확인하고, 유입·수익은 측정 기간과 출처를 기록해 가설을 평가한다.",
+      "whenToUse": "가격 비교 의도가 분명하고 제품 규격·실제 가격을 신뢰할 만한 출처로 확인할 수 있을 때 원고 기획과 채널별 재구성에 사용한다. 현재는 발행 전 가설이다.",
+      "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "doctor",
+        "trace",
+        "patch"
+      ],
+      "tags": [
+        "레이더",
+        "SEO",
+        "반려동물",
+        "가격 비교",
+        "콘텐츠 실험",
+        "검증 대기"
+      ]
+    },
+    "knowhow:74d74c1953c70c7e3a17": {
+      "type": "PracticalKnowHow",
+      "active": true,
+      "optional": true,
+      "causalClaim": false,
+      "measurementStatus": "external_study_verified",
+      "verifiedWorkProof": null,
+      "externalResearchReceipt": {
+        "path": "C:\\10_Project\\BaroLab\\dashboard\\data\\radar\\knowhow-receipts\\knowhow_74d74c1953c70c7e3a17.json",
+        "sha256": "8c52a796b6729e499f597ba523623773528226a275206355565b176d4104e107"
+      },
+      "evidenceScope": "Observed procedure / external benchmark study; revenue effect verified separately via GA4/GSC",
+      "sourceType": "radar_autonomous_study",
+      "sourceUrl": "https://www.naver.com/",
+      "recordedBy": "radar",
+      "recordedAt": "2026-11-01T06:17:35.445962+00:00",
+      "title": "반려견 예방약 가격을 체중별 총비용 비교로 확장하는 실험",
+      "originalText": "제공된 블로키 자료에는 2026-11-01 15:17 KST 기준 ‘심페리카 트리오가격’ 검색량 3,200회, 문서 수 3건, S등급이 표시되어 있다. 검색량 집계 기간과 문서 수의 범위는 미확인이다. 제공된 검색 결과는 해당 키워드의 네이버 상위 문서가 아니므로 1위 제목·도입부의 특징을 확인할 수 없다. 실제 제품 가격, 키워드 RPM, 유입·수익 효과와 독립적인 닥터 검수도 미확인이다.",
+      "factCheckSummary": "제공된 블로키 자료에는 2026-11-01 15:17 KST 기준 ‘심페리카 트리오가격’ 검색량 3,200회, 문서 수 3건, S등급이 표시되어 있다. 검색량 집계 기간과 문서 수의 범위는 미확인이다. 제공된 검색 결과는 해당 키워드의 네이버 상위 문서가 아니므로 1위 제목·도입부의 특징을 확인할 수 없다. 실제 제품 가격, 키워드 RPM, 유입·수익 효과와 독립적인 닥터 검수도 미확인이다.",
+      "method": "1. 네이버에서 해당 검색어를 직접 검색하고 확인 시각, 상위 문서 URL과 순위를 기록한다. 실제 1위가 관련 문서인지 확인한 뒤 제목의 질문 방식과 첫 3줄의 정보 배치를 관찰하고, 표현을 복사하지 않고 구조만 참고한다.\n2. 제조사 공식 자료에서 체중별 제품 규격과 투여 간격을 확인하고, 가격은 확인 가능한 판매처 또는 병원의 공개 자료에서 날짜·지역·포장 단위와 함께 수집한다. 확인되지 않은 가격이나 효능은 적지 않는다.\n3. CF 원고 첫 3줄은 ‘우리 강아지 체중에 맞는 규격은? 한 번 가격보다 연간 비용이 중요합니다. 아래 표에서 규격과 확인된 가격을 비교하세요’처럼 질문→판단 기준→행동 순서로 시험한다. 확인된 수치가 있을 때만 구체적 금액을 제목에 넣는다.\n4. 비교표에는 체중 구간, 해당 규격, 포장 수량, 확인 가격, 1회당 비용, 연간 예상 비용, 출처·확인일을 넣는다. 비용은 확인된 투여 간격과 포장 수량을 기준으로 계산하고 진료비 등 미포함 항목을 명시한다. 체중이 경계에 있거나 건강 상태가 특수한 경우 규격을 임의로 정하지 않는다.\n5. 네이버 블로그에는 체중별 선택과 계산 예시를 완결형으로 정리하고 CF의 상세 표를 추가 근거로 연결한다. 지식iN은 실제 질문에 맞게 답한 경우에만 관련 링크를 붙이고, Threads는 한 가지 비용 비교 포인트와 근거 링크를 시험한다. 브런치는 반려동물 예방비용을 계획하는 독자 경험 중심으로 재구성한다.\n6. 이후 실제 검색 노출·클릭·유입과 수익을 기간과 출처별로 확인한다. 가격 비교에서 확장할 품목은 공식 규격과 신뢰할 만한 가격 자료를 확보한 뒤 선정하며, RPM이나 고단가 여부는 별도 증거가 없으면 가설로 남긴다.",
+      "whenToUse": "가격 비교 의도가 분명하고 제품 규격과 실제 가격을 출처별로 확인할 수 있을 때 기획·작성에 사용한다. 현재는 발행 전 가설이다.",
+      "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "doctor",
+        "trace",
+        "patch"
+      ],
+      "tags": [
+        "반려견 예방약",
+        "가격 비교",
+        "검색 의도",
+        "콘텐츠 실험",
+        "근거 검증"
+      ]
+    },
+    "knowhow:ec82a44a70d4517d348a": {
+      "type": "PracticalKnowHow",
+      "active": true,
+      "optional": true,
+      "causalClaim": false,
+      "measurementStatus": "external_study_verified",
+      "verifiedWorkProof": null,
+      "externalResearchReceipt": {
+        "path": "C:\\10_Project\\BaroLab\\dashboard\\data\\radar\\knowhow-receipts\\knowhow_ec82a44a70d4517d348a.json",
+        "sha256": "be72bf361cdaafdcf2d3e357c247f7c1c066b168b353996254ce4657386e2dd2"
+      },
+      "evidenceScope": "Observed procedure / external benchmark study; revenue effect verified separately via GA4/GSC",
+      "sourceType": "ceo_notebooklm_verified",
+      "sourceUrl": "https://notebook.google.com/notebook/54a7fa66-ef38-4762-ab06-950264ca9c35",
+      "recordedBy": "jarvis",
+      "recordedAt": "2026-11-01T06:43:58.253203+00:00",
+      "title": "[NotebookLM·SSR+] 나만의 AI 업무 시스템 4단계(Skill·Second Brain·Routine·Extension) 구축법",
+      "originalText": "NotebookLM(54a7fa66-ef38-4762-ab06-950264ca9c35) 클로드 AI 업무 시스템 4단계(SSR+) 원본 분석 및 BaroLab 아키텍처 대조 검증 완료",
+      "factCheckSummary": "NotebookLM(54a7fa66-ef38-4762-ab06-950264ca9c35) 클로드 AI 업무 시스템 4단계(SSR+) 원본 분석 및 BaroLab 아키텍처 대조 검증 완료",
+      "method": "1) Skill: 반복 업무를 모듈화하여 프롬프트 재입력 제거. 2) Second Brain: 나무위키식 상위 길잡이 문서(Map of Content)와 1-Hop 마크다운 지식창고로 에이전트에게 문맥과 대표 철학을 즉시 주입. 3) Routine: 24/7 백그라운드 워커로 자율 실행. 4) Extension: 브라우저(CDP)·검색·발행 도구로 외부 세계와 연결.",
+      "whenToUse": "전 크루가 자율 업무를 수행하거나 새로운 도메인/채널 지식을 구조화할 때 1-Hop 길잡이 문서를 최우선 참조",
+      "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "doctor",
+        "trace",
+        "patch"
+      ],
+      "tags": [
+        "세컨드브레인",
+        "SSR+",
+        "길잡이문서",
+        "1-Hop"
+      ]
+    },
+    "knowhow:27563adbab32fb79b239": {
+      "type": "PracticalKnowHow",
+      "active": true,
+      "optional": true,
+      "causalClaim": false,
+      "measurementStatus": "external_study_verified",
+      "verifiedWorkProof": null,
+      "externalResearchReceipt": {
+        "path": "C:\\10_Project\\BaroLab\\dashboard\\data\\radar\\knowhow-receipts\\knowhow_27563adbab32fb79b239.json",
+        "sha256": "39e64ccb7f7d3f3cc8a436449ad054a8ace7275c59415839815bcbca3f96e718"
+      },
+      "evidenceScope": "Observed procedure / external benchmark study; revenue effect verified separately via GA4/GSC",
+      "sourceType": "ceo_notebooklm_verified",
+      "sourceUrl": "https://notebook.google.com/notebook/1d906519-a358-46fd-ba3f-93988489e66f",
+      "recordedBy": "jarvis",
+      "recordedAt": "2026-11-01T06:43:59.085590+00:00",
+      "title": "[Anthropic 공식] 클로드 스킬(SKILL.md) 설계 7대 최신 규칙 & 5단계 역방향 회귀 루프",
+      "originalText": "NotebookLM(1d906519-a358-46fd-ba3f-93988489e66f) 앤트로픽 공식 스킬 제작 7대 규칙 원본 대조 및 검증 완료",
+      "factCheckSummary": "NotebookLM(1d906519-a358-46fd-ba3f-93988489e66f) 앤트로픽 공식 스킬 제작 7대 규칙 원본 대조 및 검증 완료",
+      "method": "1) 100줄 이상 레퍼런스 문서 최상단에 목차(TOC) 배치(head -n 100 스캔 대응). 2) 자유도 3단 분리: 설득/글쓰기는 고자유도(High), 비교표/요약박스는 중자유도(Medium), 발행/검증은 파이썬 스크립트(Low, 0토큰)로 잠금. 3) 루트에서 1-Hop 직통 참조만 허용. 4) 5단계 체크리스트의 마지막 5단계에 구체적 수치/비교표 누락 또는 공무원식 회피 문구 발견 시 즉시 3단계로 되돌아가 재작성(Go-Back Loop) 강제.",
+      "whenToUse": "모든 채널 원고 집필(@publi), CTR 리모델링(@doctor), 지식iN/Threads 외부유입 브릿지 작성 및 SKILL.md 업데이트 시 필수 적용",
+      "limits": "허위 수치·과장 금지, 실제 원문 근거와 결합하여 적용",
+      "roles": [
+        "jarvis",
+        "publi",
+        "radar",
+        "doctor",
+        "trace",
+        "patch"
+      ],
+      "tags": [
+        "앤트로픽7규칙",
+        "TOC목차",
+        "3단자유도",
+        "5단계회귀체크리스트"
+      ]
+    }
+  },
+  "edges": []
+}

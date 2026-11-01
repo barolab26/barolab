@@ -206,6 +206,30 @@ class CollectionRuntime(unittest.TestCase):
         self.assertFalse(demo['revenue']['totals']['month']['complete'])
         self.assertEqual(evidence['revenue']['totals']['month']['amounts']['USD'], '1.88')
 
+    def test_second_brain_guides_and_anthropic_7_rules_sync_and_preserve_custom_notes(self):
+        import tempfile
+        from common.knowledge_policy import sync_second_brain_guides, get_second_brain_explorer_data, save_second_brain_document
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'dashboard/data/radar').mkdir(parents=True, exist_ok=True)
+            res = sync_second_brain_guides(root)
+            self.assertTrue(res['ok'])
+            exp = get_second_brain_explorer_data(root)
+            self.assertTrue(exp['ok'])
+            self.assertEqual(len(exp['guides']), 5)
+            for g in exp['guides']:
+                self.assertEqual(g['hopDepth'], 1)
+                self.assertIn('목차 (Top-100-Line TOC', g['top100Preview'])
+                self.assertGreaterEqual(len(g['toc']), 4)
+            doc_id = 'second_brain/00_INDEX_세컨드브레인_길잡이.md'
+            updated_body = exp['guides'][0]['content'] + '\n- 대표님 커스텀 테스트 메모입니다.\n'
+            save_res = save_second_brain_document(doc_id, updated_body, root)
+            self.assertTrue(save_res['ok'])
+            sync_second_brain_guides(root)
+            exp2 = get_second_brain_explorer_data(root, q='커스텀 테스트 메모')
+            self.assertEqual(len(exp2['guides']), 1)
+            self.assertIn('대표님 커스텀 테스트 메모입니다.', exp2['guides'][0]['content'])
+
 
 if __name__ == '__main__':
     unittest.main()

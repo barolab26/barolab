@@ -175,6 +175,49 @@ def ingest(graph, root):
                 graph['nodes'].setdefault(qid,{'type':'Question','url':question_url,'title':str(question.get('title',''))[:180],'capturedAt':question.get('captured_at')})
                 edge(graph,identity,qid,'answers_observed_question')
             if destination and key('post',destination) in graph['nodes']:edge(graph,identity,key('post',destination),'links_to')
+    boss_mem = read(data/'boss_memories.json')
+    for mem in boss_mem.get('memories', []):
+        if not isinstance(mem, dict) or not mem.get('directive'):
+            continue
+        did = 'directive:' + str(mem.get('id') or hashlib.sha256(str(mem.get('title','')).encode()).hexdigest()[:12])
+        graph['nodes'][did] = {
+            'type': 'CEOOperatingDirective',
+            'active': True,
+            'title': str(mem.get('title') or ''),
+            'guidance': f"[{mem.get('categoryLabel', 'CEO 지침')}] {mem.get('title', '')} — {mem.get('directive', '')} ({mem.get('insight', '')[:160]})",
+            'principle': str(mem.get('directive') or ''),
+            'recordedAt': str(mem.get('date') or '2026-10-26') + 'T00:00:00+00:00',
+            'roles': ['jarvis', 'radar', 'publi', 'doctor', 'trace', 'patch', 'cf_pipeline', 'kin_pipeline', 'threads_pipeline'],
+        }
+    graph['nodes']['directive:jacheong-4-deficiencies'] = {
+        'type': 'CEOOperatingDirective',
+        'active': True,
+        'title': '자청 원초적 본능·4대 결핍 타격 및 공무원 양산형 글 금지',
+        'guidance': (
+            '모든 아티클·컬럼·리모델링은 공무원식 영혼 없는 안내문이나 "담당자에게 문의하세요"식 회피를 절대 금지하고, '
+            '인간의 원초적 4대 결핍을 직접 긁어줘야 한다: '
+            '① 손실 회피(모르면 내 돈·환급금·수수료 떼이는 구체적 액수와 조건), '
+            '② 정보 비대칭 해소(약관·공고문 뒤에 숨은 함정과 숫자 비교표), '
+            '③ 생존·시간 단축(복잡한 절차를 3분 안에 끝내는 직관적 판독 기준), '
+            '④ 상태 확인·통제감(내 상황이 해당되는지 즉시 판정하는 예/아니오 분기표).'
+        ),
+        'principle': '자청 4대 결핍(손실 회피·정보 비대칭·시간 단축·즉시 판정)으로 가려운 곳을 긁어주고, 공무원식 조건 나열·회피형 문장을 금지한다.',
+        'recordedAt': '2026-10-31T00:00:00+00:00',
+        'roles': ['jarvis', 'radar', 'publi', 'doctor', 'trace', 'patch', 'cf_pipeline', 'kin_pipeline', 'threads_pipeline'],
+    }
+    graph['nodes']['directive:anthropic-7-skill-rules-goback'] = {
+        'type': 'CEOOperatingDirective',
+        'active': True,
+        'title': '앤트로픽 공식 7대 스킬 규칙 & 5단계 역방향 회귀(Go-Back Loop) 강제',
+        'guidance': (
+            '[Anthropic Official 7 Rules & SSR+ Second Brain] '
+            '1) 자유도 3단 분리: 도입부 후킹·설득 스토리텔링은 고자유도(High)로 창의성을 극대화하고, 핵심 수치 비교표·3초 요약박스는 중자유도(Medium) 템플릿을 따르며, 발행·검증은 파이썬 스크립트(Low)에 맡긴다. '
+            '2) 5단계 역방향 회귀 체크리스트(Go-Back Gate): 초안 완성 후 마지막 5단계에서 "모든 핵심 주장에 구체적 금액/수치/비교표가 있는가? 담당자에게 문의하라는 식의 공무원 회피 문장이 없는가?"를 점검하여, 하나라도 미달이면 즉시 3단계(본문 집필)로 되돌아가 재작성한 뒤 최종 출력한다.'
+        ),
+        'principle': '앤트로픽 3단 자유도 분리 및 5단계 역방향 회귀 검증(구체적 수치·비교표 누락 시 Step 3 재작성)을 전 채널에 강제한다.',
+        'recordedAt': '2026-11-01T00:00:00+00:00',
+        'roles': ['jarvis', 'radar', 'publi', 'doctor', 'trace', 'patch', 'cf_pipeline', 'kin_pipeline', 'threads_pipeline'],
+    }
     return graph
 
 
@@ -414,6 +457,12 @@ def refresh_once(root=ROOT, force=False):
         graph.setdefault('engineHashes',current_hashes)
         graph['engineDrift']=[c for c,h in current_hashes.items() if graph['engineHashes'].get(c)!=h]
         write(path,graph);write(data/'synapse-recipes.json',build_index(graph))
+        if root.resolve() == ROOT.resolve():
+            try:
+                from common.knowledge_policy import sync_second_brain_guides
+                sync_second_brain_guides(root)
+            except Exception:
+                pass
         resumed=retire_resolved_attempts(graph,root)
         return {'status':'updated','nodes':len(graph['nodes']),'edges':len(graph['edges']),'doctorCandidates':len(graph['doctorPlans']),'supersededAttempts':resumed}
 
@@ -452,8 +501,10 @@ def cached_index(root=ROOT):
 
 
 def research_query(keyword, folder, root=ROOT):
+    parts = Path(folder).parts
     for hint in cached_index(root).get('queryHints',[]):
-        if hint['originalQuery']==keyword and hint['account'] in Path(folder).parts:
+        acc = str(hint.get('account') or '')
+        if hint.get('originalQuery')==keyword and acc and any(p == acc or p.startswith(acc + '-') for p in parts):
             return hint['preferredQuery']
     return keyword
 
@@ -482,7 +533,9 @@ def recipe(prompt, slot, root=ROOT):
             (value for value in (date(row.get('recordedAt')), date(row.get('lastConfirmedAt'))) if value),
             default=dt.datetime.min.replace(tzinfo=dt.timezone.utc)), reverse=True):
         if not directive.get('roles') or slot in directive['roles']:
-            directives.append(json.dumps({'priority':'CEO instruction','principle':directive['guidance']},ensure_ascii=False))
+            guidance = directive.get('guidance') or directive.get('principle') or directive.get('directive') or directive.get('title') or ''
+            if guidance:
+                directives.append(json.dumps({'priority':'CEO instruction','principle':guidance},ensure_ascii=False))
     for account,variant in index.get('styles',{}).items():
         if account in text:
             lines.append(card_line({'account':account,'styleVariantId':variant['styleVariantId'],'parameters':variant['parameters'],'advice':'합의된 스타일을 이번 원고에 적용하되 실제 사실 근거와 혼동하지 않는다.'}))
@@ -497,6 +550,17 @@ def recipe(prompt, slot, root=ROOT):
     for lesson in index.get('lessons',[]):
         if lesson['domain'] in text or lesson['domain'].split('/')[-1] in text:
             lines.append(json.dumps(lesson,ensure_ascii=False))
+    try:
+        wt=read(Path(root)/'dashboard/data/radar/daily_winning_topics.json')
+        if wt:
+            if slot=='doctor' and wt.get('doctorCtrRemodelTargets'):
+                lines.append(card_line({'kind':'doctor_ctr_remodel_priority','targets':wt['doctorCtrRemodelTargets'][:3],'advice':'노출 대비 클릭이 낮은 페이지의 제목·메타·3초 후킹·비교표를 우선 리모델링'}))
+            elif slot in ('kin_pipeline','threads_pipeline') and wt.get('pairedBridgeSets'):
+                lines.append(card_line({'kind':'paired_bridge_targets','targets':wt['pairedBridgeSets'][:3],'advice':'실측 유입·수익이 검증된 CF 브릿지 URL과 매칭되는 질문/주제를 최우선 공략'}))
+            elif wt.get('provenTrafficWinners'):
+                lines.append(card_line({'kind':'proven_traffic_and_revenue_winners','revenueLeaders':wt.get('revenueLeaders',{}),'topWinners':wt['provenTrafficWinners'][:3]}))
+    except Exception:
+        pass
     terms=set(re.findall(r'[가-힣A-Za-z0-9]{2,}',text))
     for kind in ('questions','guides'):
         matches=[n for n in index.get(kind,[]) if len(terms & set(re.findall(r'[가-힣A-Za-z0-9]{2,}',n['title'])))>=2]

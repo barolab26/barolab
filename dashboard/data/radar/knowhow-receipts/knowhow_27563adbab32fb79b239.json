@@ -1,0 +1,12 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:27563adbab32fb79b239",
+  "recordedAt": "2026-11-01T06:43:59.085590+00:00",
+  "recordedBy": "jarvis",
+  "sourceType": "ceo_notebooklm_verified",
+  "sourceUrl": "https://notebook.google.com/notebook/1d906519-a358-46fd-ba3f-93988489e66f",
+  "externalSources": [],
+  "title": "[Anthropic 공식] 클로드 스킬(SKILL.md) 설계 7대 최신 규칙 & 5단계 역방향 회귀 루프",
+  "factCheckSummary": "NotebookLM(1d906519-a358-46fd-ba3f-93988489e66f) 앤트로픽 공식 스킬 제작 7대 규칙 원본 대조 및 검증 완료",
+  "evidenceText": "[Anthropic 공식] 클로드 스킬(SKILL.md) 설계 7대 최신 규칙 & 5단계 역방향 회귀 루프\nNotebookLM(1d906519-a358-46fd-ba3f-93988489e66f) 앤트로픽 공식 스킬 제작 7대 규칙 원본 대조 및 검증 완료\n1) 100줄 이상 레퍼런스 문서 최상단에 목차(TOC) 배치(head -n 100 스캔 대응). 2) 자유도 3단 분리: 설득/글쓰기는 고자유도(High), 비교표/요약박스는 중자유도(Medium), 발행/검증은 파이썬 스크립트(Low, 0토큰)로 잠금. 3) 루트에서 1-Hop 직통 참조만 허용. 4) 5단계 체크리스트의 마지막 5단계에 구체적 수치/비교표 누락 또는 공무원식 회피 문구 발견 시 즉시 3단계로 되돌아가 재작성(Go-Back Loop) 강제.\n모든 채널 원고 집필(@publi), CTR 리모델링(@doctor), 지식iN/Threads 외부유입 브릿지 작성 및 SKILL.md 업데이트 시 필수 적용"
+}

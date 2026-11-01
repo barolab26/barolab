@@ -1,8 +1,16 @@
 ---
 name: evidence-first-repair
 description: 대시보드 API와 실제 상태 불일치, 네트워크 오류, 데이터 누락을 원본 증거로 조사하고 최소 수정하는 절차
+target_models: [claude-opus-4-6, gpt-5.4, gemini-3.1-pro]
+hop_depth: 1
+freedom_tier: low-surgical-repair
 ---
 # 증거 기반 부분 수정
+
+## 📑 목차 (Top-100-Line TOC — `head -n 100` 즉시 스캔용)
+1. [6단계 증거 기반 부분 수선 절차 (Go-Back 검증 포함)](#증거-기반-부분-수정)
+2. [성공 근거 및 회귀 검증 기준](#성공-근거)
+3. [명시적 적용 연결](#명시적-적용-연결)
 
 출처: 프로젝트 AGENTS.md와 2026-10-19 사용자가 승인한 프로젝트 기억 초기화 요구. 초기 절차 문서이며 자동 학습 완료 주장이나 벤치마크 데이터가 아니다.
 

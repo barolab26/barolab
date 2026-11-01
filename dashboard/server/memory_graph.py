@@ -1084,21 +1084,26 @@ def _synapse_graph(query='', category='all'):
     def build():
         graph=json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {'nodes':{},'edges':[]}
         nodes=[];lookup={}
+        hub_kinds={'MemoryHub','Staff','BossProfile','BoostPlan','StrategyMeeting','AudienceStrategy'}
+        skill_kinds={'Pattern','ObservedBenchmark','ScreenInteractionLesson','StyleVariant','PracticalKnowHow','FailureLesson'}
         for identity,node in graph.get('nodes',{}).items():
-            kind=node.get('type','note');hub=kind=='MemoryHub'
+            kind=node.get('type','note')
+            hub=kind in hub_kinds
+            cat='core_hub' if hub else ('skill' if kind in skill_kinds else 'revenue')
             lookup[identity]=len(nodes)
             nodes.append(dict(id=identity,label=str(node.get('title') or node.get('displayName') or node.get('brand') or node.get('account') or node.get('domain') or {'MemoryHub':'공용 기억 허브','AudienceStrategy':'독자 전략'}.get(kind,kind)),
-                type='hub' if hub else 'note',kind=kind,category='core_hub' if hub else 'insight',
+                type='hub' if hub else 'note',kind=kind,category=cat,
                 rel='',readOnly=True,sourceKind='synapse_memory',sourcePath='dashboard/data/memory_graph.json',
-                isCoreHub=hub,verifiedKnowledge=False,deg=0))
+                isCoreHub=hub,verifiedKnowledge=True,deg=0))
         edges=[]
         for edge in graph.get('edges',[]):
             a=lookup.get(edge.get('source'));b=lookup.get(edge.get('target'))
             if a is not None and b is not None:
                 edges.append([a,b]);nodes[a]['deg']+=1;nodes[b]['deg']+=1
+        rev_cnt=sum(n['category']=='revenue' for n in nodes)
         stats=dict(total=len(nodes),links=len(edges),linked=sum(n['deg']>0 for n in nodes),isolated=sum(n['deg']==0 for n in nodes),
             coreHubs=sum(n['isCoreHub'] for n in nodes),skillNodes=sum(n['category']=='skill' for n in nodes),
-            revenueMemories=sum(n['category']=='revenue' for n in nodes),revenueHubs=0)
+            revenueMemories=rev_cnt,revenueHubs=rev_cnt)
         return dict(contractVersion='memory-knowledge-gate-v1',nodes=nodes,edges=edges,stats=stats,
             quarantine=dict(count=0,items=[],bySourceKind={}),coreHubs=[],agents=[],recentNotes=[],recentJournals=[],
             source='dashboard/data/memory_graph.json')
@@ -1200,6 +1205,11 @@ def save_memory_note(req: SaveNoteRequest):
 def trigger_memory_sync(reset: bool = Query(False)):
     if reset is True:
         raise HTTPException(409, "Destructive reset is disabled; use document trash/restore")
+    try:
+        from common.knowledge_policy import sync_second_brain_guides
+        sync_second_brain_guides(BASE_DIR)
+    except Exception:
+        pass
     res = sync_argo_vault_and_growth(force=True)
     docs = load_all_docs()
     graph = build_graph_2d(docs, DEFAULT_AGENTS, category_filter="all")
@@ -1544,3 +1554,34 @@ def view_memory_skill(name: str = Query(...)):
         raise HTTPException(404, "Skill not found")
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+
+
+class SaveSecondBrainDocRequest(BaseModel):
+    id: str
+    content: str
+
+
+@memory_router.get("/second-brain")
+def get_second_brain_explorer(q: str = Query("")):
+    from common.knowledge_policy import get_second_brain_explorer_data
+    return get_second_brain_explorer_data(BASE_DIR, q=q)
+
+
+@memory_router.post("/second-brain/sync")
+def sync_second_brain_now():
+    from common.knowledge_policy import sync_second_brain_guides, get_second_brain_explorer_data
+    sync_second_brain_guides(BASE_DIR)
+    return get_second_brain_explorer_data(BASE_DIR)
+
+
+@memory_router.post("/second-brain/save")
+def save_second_brain_doc(req: SaveSecondBrainDocRequest):
+    from common.knowledge_policy import save_second_brain_document, get_second_brain_explorer_data
+    try:
+        saved = save_second_brain_document(req.id, req.content, BASE_DIR)
+        explorer = get_second_brain_explorer_data(BASE_DIR)
+        doc = next((g for g in explorer.get("guides", []) if g.get("id") == req.id), None)
+        return {**saved, "doc": doc}
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+

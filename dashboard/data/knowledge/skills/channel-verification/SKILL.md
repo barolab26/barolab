@@ -1,8 +1,17 @@
 ---
 name: channel-verification
 description: cf_posting naver_blog_posting naver_kin threads_posting doctor_remodel play_console 발행·예약·수정·테스트 배포의 실제 상태를 구분하는 공통 검증 절차
+target_models: [claude-opus-4-6, gpt-5.4, gemini-3.1-pro]
+hop_depth: 1
+freedom_tier: low-script-locked
 ---
 # 채널 실행과 결과 검증
+
+## 📑 목차 (Top-100-Line TOC — `head -n 100` 즉시 스캔용)
+1. [공통 원칙 & 0-Token 파이썬 스크립트 잠금 (Anthropic Rule #2 & #7)](#공통)
+2. [채널별 실행·검증 진입점 (`cf_posting` · `naver_blog_posting` · `naver_kin` · `threads_posting`)](#cf_posting)
+3. [닥터 리모델링(`doctor_remodel`) & Play Console(`play_console`)](#doctor_remodel)
+4. [리뷰 반영 및 명시적 적용 연결](#리뷰-반영)
 
 <!-- barolab-knowledge {"knowledge":{"kind":"verified_skill","reusable":true,"lesson":"채널별 공개 발행, 예약, 인증 API 관측, 검토 제출과 실제 승인 상태를 분리한다.","steps":["해당 채널의 기존 실행 및 검증 진입점을 확인한다.","실행 단위 스냅샷을 고정하고 원천 응답과 공개 결과를 구분한다.","확인된 범위의 증거만 원장에 기록하고 복구 결과를 재검증한다."],"sourceRef":"dashboard/server/MEMORY_SERVICE.md","verification":{"passed":true,"evidence":"dashboard/server/MEMORY_SERVICE.md","scope":"implementation_and_contract_tests_only","executionVerified":false,"tests":["server.test_hermes_memory.HermesMemoryTests.test_session_and_skill_frozen_across_scopes_and_instances","server.test_hermes_memory.HermesMemoryTests.test_review_all_operations_validated_before_writing","server.test_memory_promotion.PromotionGateTests.test_generic_success_and_event_labels_are_not_knowledge"]},"provenance":"curated_procedure","sourceAgent":"patch","channel":"hubs/channel-cf-blog","executionVerified":false,"implementationSources":["dashboard/common/hermes_memory.py","cf_posting/posting.py","dashboard/collectors/naver_public.py","naver_kin/posting.py","threads_posting/posting.py","dashboard/server/doctor.py"],"curationScope":"Source and contract verification for user-requested initialization; not evidence that every channel procedure was executed successfully."}} -->
 
