@@ -178,6 +178,12 @@ def request(client, method, endpoint, body=None):
 
 def ga_report(client, property_id, body, dimensions):
     data = request(client, 'POST', f'https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport', body)
+    if not data.get('rows') and int(data.get('rowCount', 0)) == 0 and not data.get('metricHeaders'):
+        if data.get('metadata', {}).get('timeZone') not in (None, 'Asia/Seoul'):
+            raise ValueError('GA4 원천 시간대 불일치')
+        meta = data.get('metadata', {})
+        limited = any(meta.get(k) for k in ('subjectToThresholding', 'samplingMetadatas', 'dataLossFromOtherRow'))
+        return [], limited
     if [h['name'] for h in data.get('metricHeaders', [])] != [m['name'] for m in body['metrics']]:
         raise ValueError('GA4 지표 열 불일치')
     if [h['name'] for h in data.get('dimensionHeaders', [])] != dimensions:

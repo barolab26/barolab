@@ -54,7 +54,7 @@
     const automation = data.automation || {};
     const globalCap = Number.isSafeInteger(automation.globalDailyCap) ? automation.globalDailyCap : 20;
     const accountCap = Number.isSafeInteger(automation.accountDailyCap) ? automation.accountDailyCap : 10;
-    const scheduleDetails = (typeof automation.enabled === 'boolean' ? (automation.enabled ? '자동 운영 켜짐 (상시 모드 · 전역 블로그 락 분리 완료)' : '자동 운영 꺼짐') : '자동 운영 상태 미확인') + '\n계정 교대 · 직전 작업 종료 후 18~22분 지터 교대 간격(개별 계정 40~45분 안전 텀)으로 다음 작업 진행';
+    const scheduleDetails = (typeof automation.enabled === 'boolean' ? (automation.enabled ? '자동 운영 켜짐 (상시 모드 · 전역 블로그 락 분리 완료)' : '자동 운영 꺼짐') : '자동 운영 상태 미확인') + '\n계정 교대 · 직전 작업 종료 후 30~35분 랜덤 교대 간격(개별 계정 60~70분 안전 텀)으로 다음 작업 진행';
     byId('kin-schedule').textContent = (automation.scheduleDescription ? automation.scheduleDescription + '\n' : '') + scheduleDetails;
     const runStates = {not_run:'실행 기록 없음',idle:'실행 시간 대기',review_pending:'운영 검토 중',registered:'예약 등록',completed_cycle:'회차 처리 완료',blocked:'확인 필요',skipped:'건너뜀',measurement_completed:'측정 완료',waiting:'다음 작업 대기',running:'작업 진행 중',reserved:'작업 진행 중',recovered_wait:'중단 확인 · 다시 대기',already_running:'작업 진행 중'};
     byId('kin-last-run').textContent = automation.activeRunId ? '현재 작업 시작: ' + time(automation.activeStartedAt) + ' · 작업 진행 중' : '최근 작업 완료: ' + time(automation.lastRunAt) + (automation.state ? ' · ' + (runStates[automation.state] || automation.state) : '');
@@ -69,7 +69,7 @@
       operationResult = '최근 작업 결과: ' + (accounts.includes(lastOperation.account) ? lastOperation.account + ' · ' : '') + result + ' · ' + time(lastOperation.updatedAt || lastOperation.updated_at);
     }
     byId('kin-operation-result').textContent = operationResult;
-    byId('kin-next-run').textContent = automation.activeRunId ? '작업 진행 중' + (accounts.includes(automation.activeAccount) ? ' · ' + automation.activeAccount : '') + ' · 다음 작업은 이 작업이 종료된 뒤 30~40분 지터 후에 가능합니다.' : '다음 작업 가능 시각: ' + time(automation.nextEligibleAt) + (accounts.includes(automation.nextAccount) ? ' · ' + automation.nextAccount : '');
+    byId('kin-next-run').textContent = automation.activeRunId ? '작업 진행 중' + (accounts.includes(automation.activeAccount) ? ' · ' + automation.activeAccount : '') + ' · 다음 작업은 이 작업이 종료된 뒤 30~35분 랜덤 교대 후에 가능합니다.' : '다음 작업 가능 시각: ' + time(automation.nextEligibleAt) + (accounts.includes(automation.nextAccount) ? ' · ' + automation.nextAccount : '');
     const daily = data.daily || {};
     const adAtt = (daily.byAccount && daily.byAccount.adinfo0905 && daily.byAccount.adinfo0905.attempted) || 0;
     const stAtt = (daily.byAccount && daily.byAccount.stone0747 && daily.byAccount.stone0747.attempted) || 0;

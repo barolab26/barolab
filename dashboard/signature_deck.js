@@ -45,7 +45,7 @@
       unit: '건',
       defaultTarget: 20,
       runLabel: '⚡ 지연 슬롯 즉시 실행',
-      stepTitle: '💡 지식iN 외부유입 엔진 v2.0 · 21채널 동적 매칭 & 20분 교대 캐치업 스텝퍼',
+      stepTitle: '💡 지식iN 외부유입 엔진 v2.0 · 21채널 동적 매칭 & 30~35분 랜덤 교대 스텝퍼',
       tableCols: ['No', '날짜 (KST)', '운영 계정', '발굴 트랙 · 연결 도메인', '선정 질문 및 3단 요약', '시각 / 교대 간격', '상태', '질문/즉시실행']
     },
     threads: {
@@ -1258,7 +1258,7 @@
           const pctA = trTot > 0 ? Math.round((trA / trTot) * 100) : 50;
           const pctB = trTot > 0 ? (100 - pctA) : 50;
           state.visitorsToday = `Track A 최신선점 ${pctA}% : Track B 검색상위 ${pctB}%`;
-          state.visitorsSub = `21채널 라운드로빈 · 20분 교대 (계정당 40분 간격)`;
+          state.visitorsSub = `21채널 라운드로빈 · 30~35분 교대 (계정당 1시간+ 간격)`;
 
           const isKinRunning = Boolean(kinAutoState?.activeRunId || kinAutoState?.cadenceState === 'running' || kinAutoState?.state === 'running');
           const activeKinAcc = kinAutoState?.activeAccount || kinAutoState?.nextAccount || 'adinfo0905';
@@ -1272,21 +1272,21 @@
               pillEl.textContent = `⚡ 실시간 답변 집필·발행 중: [${activeKinAcc}] 21채널 동적 매칭 & 3단 답변 생성 중...`;
             } else if (totToday < 20) {
               pillEl.className = 'sig-tier2-active-pill';
-              pillEl.textContent = `🟢 20분 교대 캐치업 가동 중: 오늘 ${totToday}/20건 완료 · 다음 차례 [${kinAutoState?.nextAccount || 'adinfo0905'}]`;
+              pillEl.textContent = `🟢 30~35분 랜덤 교대 가동 중: 오늘 ${totToday}/20건 완료 · 다음 차례 [${kinAutoState?.nextAccount || 'adinfo0905'}]`;
             } else {
               pillEl.className = 'sig-tier2-active-pill';
               pillEl.textContent = `🟢 오늘 20/20건 전량 완주 완료 (adinfo0905 10건 · stone0747 10건)`;
             }
           }
           if (subNote) {
-            subNote.textContent = '전역 블로그 락 분리 완료(계정별 독립 락) · 18~22분 교대(계정당 40~45분 안전 간격) · 자정 전 20건 100% 완주 캐치업 스케줄';
+            subNote.textContent = '전역 블로그 락 분리 완료(계정별 독립 락) · 30~35분 랜덤 교대(계정당 1시간+ 안전 간격) · 일 20건 완주 스케줄';
           }
           const stepDescs = [
             ['① 21채널 동적매칭', 'CF 16 + 네이버 5 무중복 라운드로빈'],
             ['② 50:50 하이브리드', 'Track A 최신선점 · Track B 검색상위'],
             ['③ 3단 CTR 답변 집필', '3줄 핵심결론 + 단계절차 + 시각브리지'],
             ['④ 3p 중복·독립검수', '계정별 독립 세션 · 3p(60건) 고속점검'],
-            ['⑤ 20분 교대 캐치업', `adinfo0905 ${adToday}/10 · stone0747 ${stToday}/10`]
+            ['⑤ 30~35분 랜덤 교대', `adinfo0905 ${adToday}/10 · stone0747 ${stToday}/10`]
           ];
           const stepNodes = document.querySelectorAll('#sig-stepper-track .sig-step-node');
           stepNodes.forEach((node, idx) => {
@@ -1305,7 +1305,7 @@
                 bg.textContent = '🟢 가동중';
               } else {
                 node.className = 'sig-step-node st-active';
-                bg.textContent = `⚡ ${totToday}/20건 (20분 교대)`;
+                bg.textContent = `⚡ ${totToday}/20건 (30~35분 교대)`;
               }
             }
           });
@@ -1378,7 +1378,7 @@
               col1: slotLabel,
               col2: `${trackTag} · ${domTag}`,
               title: r.title || r.questionTitle || '지식iN 선정 질문 답변',
-              meta: `✓ ${hm} 완료 · 20분 교대`,
+              meta: `✓ ${hm} 완료 · 30~35분 교대`,
               status: isPub ? 'public' : 'reserved',
               statusLabel: isPub ? `🟢 공개검증완료 (${hm})` : `🔵 답변제출완료 (${hm})`,
               url: isValidPostDetailUrl(rawUrl, 'kin') ? rawUrl : ''
@@ -1435,7 +1435,12 @@
                 : (i % 2 === 0 ? '🎯 Track A' : '🔍 Track B');
             const targetDom = readyDraft?.target_domain || allChannels21[i % allChannels21.length];
 
-            const rawSlotMins = Math.min(23 * 60 + 40, baseCatchupMins + offsetIdx * 20);
+            let cumJitter = 0;
+            for (let k = 0; k < offsetIdx; k++) {
+              cumJitter += 30 + ((i + k * 3 + 2) % 6);
+            }
+            const stepGap = 30 + ((i * 3 + 2) % 6);
+            const rawSlotMins = Math.min(23 * 60 + 55, baseCatchupMins + cumJitter);
             const slotHm = `${String(Math.floor(rawSlotMins / 60)).padStart(2, '0')}:${String(rawSlotMins % 60).padStart(2, '0')}`;
             const isFirstRemaining = offsetIdx === 0;
             const isPastDue = rawSlotMins <= nowMins;
@@ -1465,7 +1470,7 @@
               col1: `${acc} (${accSlotNum}/10)`,
               col2: `${trackLabel} · ${targetDom}`,
               title: slotTitle,
-              meta: `⏰ ${slotHm} 예정 · 20분 교대`,
+              meta: `⏰ ${slotHm} 예정 · ${typeof stepGap === 'number' ? stepGap : 32}분 교대 (계정당 1시간+)`,
               status: slotStatus,
               statusLabel: slotStatusLabel,
               url: ''
@@ -1479,7 +1484,7 @@
         if (res.ok) {
           const tData = await res.json();
           const records = Array.isArray(tData.records) ? tData.records : (Array.isArray(tData.posts) ? tData.posts : []);
-          const dailyCap = tData.configuration?.mainDailyCap || 4;
+          const dailyCap = tData.configuration?.mainDailyCap || 10;
           state.visitorsToday = `@mustpickinfo`;
           state.visitorsSub = `일일 본문 상한 ${dailyCap}건 · 후속 댓글 자동 연결`;
 
@@ -1504,7 +1509,7 @@
           });
 
           const todayThrCnt = rows.filter(r => r.date === today).length;
-          const slotTimes = ['09:30', '13:00', '17:30', '21:00'];
+          const slotTimes = ['07:30', '09:10', '10:50', '12:30', '14:10', '15:50', '17:30', '19:10', '21:00', '22:42'];
           for (let i = todayThrCnt; i < dailyCap; i++) {
             const stHm = slotTimes[i % slotTimes.length];
             rows.push({

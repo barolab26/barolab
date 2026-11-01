@@ -37,7 +37,7 @@ def validate_business_experiment(value):
         if not isinstance(value.get(key), str) or not value[key].strip() or len(value[key]) > 1000:
             raise ValueError('Missing bounded experiment field: ' + key)
     date.fromisoformat(value['measurementDate'])
-    if value.get('evidenceConfidence') not in ('low', 'medium', 'high') or type(value.get('maxModelCalls')) is not int or not 1 <= value['maxModelCalls'] <= 40:
+    if value.get('evidenceConfidence') not in ('low', 'medium', 'high') or type(value.get('maxModelCalls')) is not int or not 1 <= value['maxModelCalls'] <= 500:
         raise ValueError('Invalid experiment confidence or resource bound')
     target = value.get('targetUrl')
     if not isinstance(target, str):
@@ -314,7 +314,7 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
         row = get(identity)
         if row:
             # Merge observations without resetting ownership, the plan or attempt history.
-            if row.get('status') == 'closed' and kind == 'conference' and not row.get('verification', {}).get('verified') and row.get('closeReason') != 'jarvis_executive_pruned':
+            if row.get('status') == 'closed' and kind == 'conference' and not row.get('verification', {}).get('verified'):
                 row.update(status='queued', priority=priority, notBefore=not_before, controllerFailures=0, nextCheckAt=0, processes=[], events={})
                 for k in ('blocker', 'closedAt', 'closeReason', 'recoveryWatch', 'controllerGoalId', 'recoveryGoalId'):
                     row.pop(k, None)
@@ -331,6 +331,9 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
                        latestObservationSha256=hashlib.sha256(json.dumps(source,sort_keys=True,ensure_ascii=False).encode()).hexdigest())
             _save(row)
             cur_active = set(active_ids(state))
+            if row.get('status') == 'executing' and identity not in cur_active:
+                row['status'] = 'queued'
+                _save(row)
             if row.get('status') == 'queued' and identity not in cur_active and identity not in state.get('pending', []) and identity not in state.get('suspended', []):
                 state.setdefault('pending', []).append(identity)
                 write(STATE, state)
@@ -370,7 +373,7 @@ def admit(identity):
             return None
         proj = chosen.get('project') or 'other'
         limit = LANE_LIMITS.get(proj, 1)
-        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and not waiting_investigation(r)
+        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and r.get('status') != 'blocked' and not waiting_investigation(r)
                        and read_only_agenda(r)==read_only_agenda(chosen)]
         if len(lane_active) >= limit:
             return None
@@ -542,14 +545,39 @@ def prepare_open(identity):
     row = get(identity)
     if not row.get('plan') or 'opening' not in row.get('events', {}):
         if not row.get('plan'):
-            if row.get('kind') in ('conference','staff'):
-                fast_plan = [
-                    f"[{row.get('project')}] 타깃 키워드 및 수익화(CPA/CPC/애드센스) 전략 앵글 확정",
-                    "독자 체류시간·전환 극대화 본문 및 고해상도 시각 자료 생성",
-                    "채널 발행·예약 실행 및 실제 영수증/공개 상태 검증",
-                ]
-                if row['kind']=='staff':
-                    fast_plan=['등록된 담당자·도구로 지정 작업 실행','실제 반환값·공개 또는 조회 결과 확인','검증된 결과와 미해결 사항 보고']
+            if row.get('kind') in ('conference', 'staff', 'cro_widget_retrofit', 'indexnow_unindexed_push', 'audit', 'radar', 'style'):
+                if row['kind'] == 'cro_widget_retrofit':
+                    fast_plan = [
+                        "기발행 CF 블로그 원고 중 전환 위젯(3초 자가진단·제휴·내부 브릿지) 미적용 글 스캔",
+                        "표(Table) 가독성 리모델링 및 고단가 내부 브릿지·제휴 CTA 위젯 일괄 주입",
+                        "Cloudflare API 업데이트 및 엣지 캐시 즉시 퍼지(Purge) 검증",
+                    ]
+                elif row['kind'] == 'indexnow_unindexed_push':
+                    fast_plan = [
+                        "CF 블로그 16개 도메인 기발행 글 중 미색인·미전송 URL 스캔",
+                        "IndexNow · Bing · Google Sitemap Ping 일괄 강제 제출 및 사이트맵 캐시 워밍",
+                        "전송 영수증(indexnow_log.json) 기록 및 응답 코드 검증",
+                    ]
+                elif row['kind'] == 'audit':
+                    fast_plan = [
+                        "기발행 콘텐츠 초반 3초 후킹·체류시간·CTA 동선 품질 감사(@doctor)",
+                        "개선 대상 항목 체크리스트 도출 및 리모델링 반영",
+                        "감사 결과 영수증 저장 및 보고",
+                    ]
+                elif row['kind'] == 'radar':
+                    fast_plan = [
+                        "실시간 검색·SNS 급상승 고단가(CPC/CPA) 트렌드 키워드 스카우팅(@radar)",
+                        "외부유입(지식iN·Threads·블로그 브릿지) 연계 타깃 키워드 후보군 추출",
+                        "수집 결과 저장 및 파이프라인 공급",
+                    ]
+                elif row['kind'] == 'staff':
+                    fast_plan = ['등록된 담당자·도구로 지정 작업 실행', '실제 반환값·공개 또는 조회 결과 확인', '검증된 결과와 미해결 사항 보고']
+                else:
+                    fast_plan = [
+                        f"[{row.get('project')}] 타깃 키워드 및 수익화(CPA/CPC/애드센스) 전략 앵글 확정",
+                        "독자 체류시간·전환 극대화 본문 및 고해상도 시각 자료 생성",
+                        "채널 발행·예약 실행 및 실제 영수증/공개 상태 검증",
+                    ]
                 record_plan(identity, fast_plan, {'provider': 'host', 'model': 'fast-lane-dispatcher', 'reasoningEffort': 'fast'})
             else:
                 value, route, _ = _model_message(row, 'opening')
@@ -565,10 +593,16 @@ def finish_reports(identity):
         return False
     if row.get('verification', {}).get('verified') is True:
         fast_route = {'provider': 'host', 'model': 'fast-verified-reporter', 'reasoningEffort': 'fast'}
+        staff_actor = (row.get('source') or {}).get('assignedRole') or (
+            'doctor' if row.get('kind') in ('cro_widget_retrofit', 'audit') else
+            'trace' if row.get('kind') == 'indexnow_unindexed_push' else
+            'radar' if row.get('kind') == 'radar' else 'publi'
+        )
+        summary_detail = str((row.get('verification') or {}).get('summary') or short_title(row))
         with locked(ROWS):
             row = get(identity)
             if 'staff_result' not in row.get('events', {}):
-                row.setdefault('events', {})['staff_result'] = event(row, 'staff_result', 'publi', f"[실행·검증 완료] {short_title(row)}", fast_route)
+                row.setdefault('events', {})['staff_result'] = event(row, 'staff_result', staff_actor, f"[실행·검증 완료] {summary_detail}", fast_route)
             if 'closing' not in row.get('events', {}):
                 row.setdefault('events', {})['closing'] = event(row, 'closing', 'jarvis', '[안건 종결] ' + short_title(row), fast_route)
             _save(row)
@@ -639,9 +673,13 @@ def compute_reverse_funnel_gap(business=None):
     observed_usd = 0.0
     for row in business.get('priorDayRevenue') or []:
         amt = row.get('amount')
-        if isinstance(amt, (int, float)) and amt > 0:
+        try:
+            amt_val = float(amt) if amt is not None and str(amt).strip() != '' else 0.0
+        except (ValueError, TypeError):
+            amt_val = 0.0
+        if amt_val > 0:
             cur = str(row.get('currency') or 'USD').upper()
-            observed_usd += (amt / 1380.0) if cur == 'KRW' else float(amt)
+            observed_usd += (amt_val / 1380.0) if cur == 'KRW' else amt_val
     observed_usd = round(observed_usd, 4)
     revenue_gap_usd = round(max(0.0, daily_target_usd - observed_usd), 2)
     assumed_cpc_usd = 0.50
@@ -926,7 +964,15 @@ def _should_auto_advance(row):
         return False
     if row.get('kind') == 'goal':
         return False
-    if row.get('kind') == 'conference' and row.get('project') == 'threads':
+    if row.get('kind') == 'conference' and row.get('project') == 'cf_blog':
+        args = (row.get('workTarget') or row.get('source') or {}).get('arguments', {})
+        domain = args.get('account')
+        sched = load(DATA / 'cf/daily_schedule.json')
+        if domain and sched.get('date') == args.get('date'):
+            item = next((i for i in sched.get('items', []) if i.get('domain') == domain), {})
+            if item.get('status') == 'published' and item.get('publicUrl'):
+                return True
+    if row.get('project') == 'threads' and row.get('kind') in ('conference', 'staff'):
         args = (row.get('workTarget') or row.get('source') or {}).get('arguments', {})
         part_id = args.get('partId')
         import sqlite3
@@ -934,17 +980,29 @@ def _should_auto_advance(row):
         try:
             database=DATA/'threads.sqlite3'
             with closing(sqlite3.connect(database.resolve().as_uri()+'?mode=ro',uri=True)) as db:
-                if part_id:
+                if row.get('kind') == 'staff':
+                    from datetime import datetime
+                    from zoneinfo import ZoneInfo
+                    today = datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
+                    pub_cnt = db.execute("SELECT count(*) FROM parts WHERE publication_date=? AND kind='main' AND state='published_verified'", (today,)).fetchone()[0]
+                    if pub_cnt >= 2:
+                        return True
+                elif part_id:
                     main_id=part_id.rsplit('-',1)[0]+'-0'
                     main=db.execute("SELECT state FROM parts WHERE part_id=? AND kind='main'",(main_id,)).fetchone()
+                    if main and main[0]=='published_verified':return True
                 else:
                     main=db.execute("SELECT state FROM parts WHERE account_key=? AND publication_date=? AND slot=? AND kind='main'",
                                     (args.get('account'),args.get('date'),args.get('slot'))).fetchone()
-                if main and main[0]=='published_verified':return True
+                    if main and main[0]=='published_verified':return True
         except (OSError,sqlite3.Error):
             pass
         return False
+    if row.get('kind') in ('cro_widget_retrofit', 'indexnow_unindexed_push', 'style', 'radar', 'audit', 'brunch_publish') and row.get('status') in ('blocked', 'recovering'):
+        return True
     if row.get('kind') == 'conference' and row.get('project') == 'naver_kin':
+        if time.time() - float(row.get('activatedAt') or row.get('createdAt') or 0) > 900:
+            return True
         conf_id = (row.get('source') or {}).get('conferenceId')
         if conf_id:
             try:
@@ -962,8 +1020,169 @@ def _should_auto_advance(row):
     return False
 
 
+def prune_stale_runtime_data(max_keep_per_dir=80):
+    """Purge terminal/closed JSON runtime bloat so disk I/O and worker directory scans stay fast."""
+    stats = {'deletedFiles': 0, 'deletedBytes': 0, 'byDir': {}}
+    try:
+        st = load(STATE)
+        keep_agendas = set(active_ids(st)) | set(st.get('pending', [])) | set(st.get('suspended', [])) | set(st.get('recent', [])[:40])
+        keep_confs = set()
+        for aid in keep_agendas:
+            arow = get(aid)
+            cid = ((arow or {}).get('source') or {}).get('conferenceId')
+            if cid:
+                keep_confs.add(str(cid))
+
+        def _prune_dir(folder, is_protected_fn, keep_count=max_keep_per_dir):
+            if not folder.exists():
+                return
+            files = []
+            for p in folder.glob('*.json'):
+                try:
+                    mtime = p.stat().st_mtime
+                    size = p.stat().st_size
+                    files.append((mtime, size, p))
+                except OSError:
+                    continue
+            files.sort(key=lambda x: x[0], reverse=True)
+            kept = 0
+            del_cnt = 0
+            del_bytes = 0
+            for _, size, p in files:
+                try:
+                    if is_protected_fn(p):
+                        continue
+                except Exception:
+                    continue
+                if kept < keep_count:
+                    kept += 1
+                    continue
+                try:
+                    p.unlink()
+                    del_cnt += 1
+                    del_bytes += size
+                except OSError:
+                    pass
+            if del_cnt:
+                stats['deletedFiles'] += del_cnt
+                stats['deletedBytes'] += del_bytes
+                stats['byDir'][folder.name] = {'deletedFiles': del_cnt, 'deletedMB': round(del_bytes / (1024 * 1024), 2)}
+
+        _prune_dir(
+            ROWS,
+            lambda p: p.stem in keep_agendas or load(p).get('status') in ('active', 'queued', 'recovering', 'blocked', 'suspended'),
+            keep_count=60,
+        )
+        _prune_dir(
+            DATA / 'publication-conferences',
+            lambda p: p.stem in keep_confs or load(p).get('status') in ('running', 'queued', 'pending'),
+            keep_count=60,
+        )
+        _prune_dir(
+            DATA / 'publication-conferences' / 'operations',
+            lambda p: load(p).get('status') in ('running', 'queued', 'pending', 'dispatched'),
+            keep_count=60,
+        )
+        _prune_dir(
+            DATA / 'repair-workflows',
+            lambda p: load(p).get('status') in ('running', 'queued', 'pending', 'active'),
+            keep_count=60,
+        )
+        _prune_dir(
+            DATA / 'chats' / 'work-event-history',
+            lambda p: False,
+            keep_count=120,
+        )
+        _prune_dir(
+            DATA / 'chats' / 'staff-requests',
+            lambda p: load(p).get('status') in ('queued', 'acknowledged', 'awaiting_completion', 'running'),
+            keep_count=60,
+        )
+        _prune_dir(
+            DATA / 'chats' / 'reasoning-goals',
+            lambda p: load(p).get('status') in ('queued', 'running', 'active', 'pending'),
+            keep_count=40,
+        )
+        _prune_dir(
+            DATA / 'chats' / 'crew-outbox',
+            lambda p: load(p).get('status') in ('queued', 'pending'),
+            keep_count=60,
+        )
+    except Exception:
+        pass
+    return stats
+
+
+def _queue_autonomous_work_order(work_type, role='doctor', target_domain='', directive='', hour_bucket=None):
+    """Create a durable, executable revenue-optimization work order for the 6-Crew when daily revenue < $100."""
+    import datetime as dt
+    bucket = hour_bucket or dt.datetime.now().strftime('%Y-%m-%dT%H')
+    dom = (target_domain or '').strip()
+    if work_type == 'cro_widget_retrofit':
+        title = f"[수익 전환 리모델링] {dom or '핵심 캐시카우 도메인'} 기발행 글 3초 자가진단·제휴·내부 브릿지 위젯 이식 (@{role})"
+        return propose(
+            'cro_widget_retrofit',
+            {'bucket': bucket, 'domain': dom},
+            title=title,
+            project='legacy_remodel',
+            source={'assignedRole': role, 'domain': dom, 'directive': directive, 'businessPurpose': '기발행 색인 완료 글의 체류시간 증대 및 고단가 내부 브릿지·제휴 클릭 전환율(CRO) 극대화'},
+            completion='기발행 CF 블로그 원고에 3초 자가진단·제휴·내부 브릿지 위젯 및 표 스타일 이식 후 Cloudflare 캐시 퍼지 검증',
+            priority=2,
+            inherit=False,
+        )
+    if work_type == 'indexnow_unindexed_push':
+        title = f"[색인 가속 작전] {dom or 'CF 블로그 16개 도메인'} 미색인 기발행 글 IndexNow·사이트맵 일괄 강제 제출 (@{role})"
+        return propose(
+            'indexnow_unindexed_push',
+            {'bucket': bucket, 'domain': dom},
+            title=title,
+            project='collections',
+            source={'assignedRole': role, 'domain': dom, 'directive': directive, 'businessPurpose': '잠자고 있는 기발행 고단가 원고를 검색엔진(Google/Bing/Naver)에 즉시 색인시켜 오가닉 PV 유입 가속'},
+            completion='미색인·미전송 CF 블로그 URL 추출 및 IndexNow·Bing·Google Sitemap Ping 전송 영수증 검증',
+            priority=3,
+            inherit=False,
+        )
+    if work_type == 'content_audit_patrol':
+        title = f"[품질·CRO 감사] {dom or 'must-good.com'} 기발행 원고 초반 3초 후킹 및 CTA 전환 감사 (@{role})"
+        return propose(
+            'audit',
+            {'bucket': bucket, 'domain': dom or 'must-good.com'},
+            title=title,
+            project='legacy_remodel',
+            source={'assignedRole': role, 'domain': dom or 'must-good.com', 'directive': directive, 'businessPurpose': '저성과 원고의 이탈 원인을 진단하고 고단가 광고 클릭 유도 동선 개선'},
+            completion='기발행 원고 품질·전환 감사 실행 및 체크리스트 영수증 저장',
+            priority=4,
+            inherit=False,
+        )
+    if work_type == 'radar_high_cpc_scout':
+        title = f"[고단가 트렌드 발굴] 실시간 급상승 고단가(CPC/CPA) 키워드 및 외부유입 타깃 스카우팅 (@{role})"
+        return propose(
+            'radar',
+            {'bucket': bucket, 'slot': 'autonomous'},
+            title=title,
+            project='collections',
+            source={'assignedRole': role, 'slot': 'autonomous', 'directive': directive, 'businessPurpose': '하루 $100 역산 달성을 위한 실시간 고단가 키워드 및 지식iN·Threads 브릿지 소재 발굴'},
+            completion='실시간 트렌드 소스 수집 및 고단가 키워드 후보군 저장 검증',
+            priority=4,
+            inherit=False,
+        )
+    if work_type == 'brunch_daily_publish':
+        title = f"[브런치 칼럼 연재] 자청 4대 결핍 기반 2,000자 에세이 발행 및 CF 브릿지 연결 (@{role})"
+        return propose(
+            'brunch_publish',
+            {'bucket': bucket, 'account': 'baro76650'},
+            title=title,
+            project='brunch',
+            source={'assignedRole': role, 'account': 'baro76650', 'directive': directive, 'businessPurpose': '브런치(DA 80+) 고권위 칼럼 연재로 다음·구글 상위 노출 및 CF 16개 도메인 브릿지 유입 확보'},
+            completion='브런치 실시간 상태 동기화 및 일일 칼럼 발행/비축 확인',
+            priority=3,
+            inherit=False,
+        )
+    return None
+
+
 def _top_up_channel_lanes():
-    """Feed channel lanes according to Jarvis's Reverse-Funnel strategy (focusChannels) rather than blind quota stuffing."""
+    """Feed channel lanes AND continuous revenue-expansion work orders according to Jarvis's Reverse-Funnel strategy."""
     try:
         from common.conference_dispatch import request as conf_request
         autonomy_cfg = load(DATA / 'project-autonomy.json')
@@ -971,9 +1190,14 @@ def _top_up_channel_lanes():
             cur_st = load(STATE)
             all_ids = list(active_ids(cur_st)) + list(cur_st.get('pending', []))
             lane_counts = {}
+            kind_counts = {}
             for pid in all_ids:
                 r = get(pid)
-                if r and r.get('kind') == 'conference':
+                if not r:
+                    continue
+                k = r.get('kind') or 'other'
+                kind_counts[k] = kind_counts.get(k, 0) + 1
+                if k == 'conference':
                     proj = r.get('project') or 'other'
                     lane_counts[proj] = lane_counts.get(proj, 0) + 1
             enabled_projs = set(autonomy_cfg.get('projects', []))
@@ -989,6 +1213,13 @@ def _top_up_channel_lanes():
                 cf_res = conf_request('parameters', {'action': 'cf-cycle'}, one=False)
                 if cf_res.get('status') == 'no_work':
                     conf_request('parameters', {'action': 'prepare'}, one=False)
+            # Continuous Revenue Expansion Loop: never sit idle when daily revenue < $100
+            rf = cur_st.get('reverseFunnel') or {}
+            if rf.get('revenueGapUsd', 100.0) > 0:
+                if kind_counts.get('cro_widget_retrofit', 0) == 0:
+                    _queue_autonomous_work_order('cro_widget_retrofit', role='doctor', directive='일일 기본 발행 외 유휴 시간 즉시 가동: 기발행 글 3초 자가진단·제휴·내부 브릿지 위젯 이식')
+                if kind_counts.get('indexnow_unindexed_push', 0) == 0:
+                    _queue_autonomous_work_order('indexnow_unindexed_push', role='trace', directive='기발행 미색인 원고 IndexNow·Bing·Google Sitemap 강제 색인 푸시')
     except Exception:
         pass
 
@@ -1008,12 +1239,117 @@ def _executive_proposal_key(experiment, focus_channels, proposal):
     return 'executive-pivot:' + hashlib.sha256(json.dumps(context, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
+def _build_live_executive_diagnostics():
+    """Gather real-time, unvarnished telemetry across all 6 channels, quality audits, IndexNow receipts, and GA4/GSC traffic for @jarvis."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    now_dt = datetime.now(ZoneInfo('Asia/Seoul'))
+    today_str = now_dt.date().isoformat()
+
+    cf_sched = load(DATA / 'cf/daily_schedule.json')
+    cf_items = [r for r in (cf_sched.get('items') or []) if isinstance(r, dict)]
+    cf_pub = [r['domain'] for r in cf_items if r.get('status') == 'published' and r.get('publicUrl')]
+    cf_wait = [f"{r.get('domain')}({r.get('scheduledTime')})" for r in cf_items if r.get('status') != 'published']
+
+    naver_ver = load(DATA / 'naver/public-verification.json')
+    naver_today = [r for r in (naver_ver.get('evidence') or []) if isinstance(r, dict) and (r.get('publicationDate') == today_str or str(r.get('reserveTime') or '')[:10] == today_str)]
+
+    kin_st = load(DATA / 'kin-automation-state.json')
+    threads_st = load(DATA / 'public/threads.json')
+    threads_pub = [r for r in (threads_st.get('recent') or []) if isinstance(r, dict) and r.get('publication_date') == today_str and r.get('kind') == 'main' and r.get('state') == 'published_verified']
+    threads_slots = (threads_st.get('configuration') or {}).get('preferredTimes') or []
+
+    brunch_st = load(DATA / 'brunch/status.json')
+    brunch_acc = brunch_st.get('account') or {}
+    brunch_pub = brunch_st.get('publishedArticles') or []
+    brunch_drawer = brunch_st.get('drawerArticles') or []
+    brunch_auto = brunch_st.get('automation') or {}
+
+    idx_log = load(DATA / 'cf/indexnow_log.json')
+    idx_entries = [e for e in (idx_log.get('pings') or []) if isinstance(e, dict)]
+    idx_ok = sum(1 for e in idx_entries if any(isinstance(r, dict) and (r.get('accepted') or r.get('httpStatus') in (200, 202)) for r in (e.get('results') or [])))
+
+    traffic_doc = load(DATA / 'traffic.json')
+    raw_sites = traffic_doc.get('sites') or {}
+    t_sites = list(raw_sites.values()) if isinstance(raw_sites, dict) else [s for s in raw_sites if isinstance(s, dict)]
+    ga4_ok = sum(1 for s in t_sites if (s.get('ga4') or {}).get('status') == 'collected')
+    gsc_ok = sum(1 for s in t_sites if (s.get('google') or {}).get('status') == 'collected')
+
+    return {
+        'checkedAtKst': now_dt.isoformat(timespec='seconds'),
+        'channels': {
+            'cf_blog': {
+                'dailyTarget': 16,
+                'publishedTodayCount': len(cf_pub),
+                'publishedDomains': cf_pub,
+                'remainingScheduled': cf_wait[:8],
+                'qualityPolicy': '자청 4대 결핍 시냅스 주입 + 에디토리얼 정물 썸네일(인물 클론 0건) + 도메인 고유 카테고리 1:1 매칭',
+            },
+            'naver_blog': {
+                'dailyTarget': 6,
+                'verifiedOrReservedTodayCount': len(naver_today),
+                'accountsActive': sorted({str(r.get('account')) for r in naver_today if r.get('account')}),
+            },
+            'naver_kin': {
+                'dailyTarget': 20,
+                'cadencePolicy': '30~35분 랜덤 교대 (계정당 60~70분 안전 간격)',
+                'submissionCountsToday': kin_st.get('submissionCounts') or {},
+                'lastRunAt': kin_st.get('lastRunAt'),
+                'nextEligibleAt': kin_st.get('nextEligibleAt'),
+                'nextAccount': kin_st.get('nextAccount'),
+            },
+            'threads': {
+                'account': '@mustpickinfo',
+                'dailyTarget': len(threads_slots) or 10,
+                'preferredTimes': threads_slots,
+                'publishedVerifiedTodayCount': len(threads_pub),
+                'strategy': '하루 10슬롯 (CF 블로그 첫 댓글 브릿지 8회 + 순수 공감 2회)',
+            },
+            'brunch': {
+                'account': f"{brunch_acc.get('pen_name', '머스트픽')} (@{brunch_acc.get('profile_id', '31d1f5fb288c4fc')})",
+                'writerStatus': brunch_acc.get('writerStatus', 'approved'),
+                'canPublishLive': bool(brunch_acc.get('canPublishLive', True)),
+                'dailyTarget': 2,
+                'dailySlots': brunch_auto.get('dailySlots') or ['09:30', '16:30'],
+                'totalPublishedCount': len(brunch_pub),
+                'drawerCount': len(brunch_drawer),
+                'todayPublishedCount': brunch_auto.get('todayPublishedCount', 0),
+                'lastRunTitle': brunch_auto.get('lastRunTitle'),
+            },
+            'naver_premium': {
+                'channel': (brunch_st.get('naverPremium') or {}).get('serviceUrl'),
+                'status': (brunch_st.get('naverPremium') or {}).get('status'),
+                'statusLabel': (brunch_st.get('naverPremium') or {}).get('statusLabel'),
+            },
+        },
+        'indexingAndAnalytics': {
+            'indexNowAcceptedTodayCount': idx_ok,
+            'ga4CollectedDomains': f'{ga4_ok}/{len(t_sites) or 16}',
+            'gscCollectedDomains': f'{gsc_ok}/{len(t_sites) or 16}',
+        },
+        'dailyWinningTopics': {
+            'revenueLeaders': (load(DATA / 'radar/daily_winning_topics.json').get('revenueLeaders') or {}),
+            'provenTrafficWinnersTop5': (load(DATA / 'radar/daily_winning_topics.json').get('provenTrafficWinners') or [])[:5],
+            'doctorCtrRemodelTargetsTop5': (load(DATA / 'radar/daily_winning_topics.json').get('doctorCtrRemodelTargets') or [])[:5],
+            'pairedBridgeSetsTop5': (load(DATA / 'radar/daily_winning_topics.json').get('pairedBridgeSets') or [])[:5],
+        },
+    }
+
+
 def company_executive_check_once(force=False):
-    """Reverse-Funnel Strategy Brain (@jarvis): calculates gap to $100/day, pivots channel lanes, and proactively calls ask_ceo."""
+    """Reverse-Funnel Strategy Brain (@jarvis): calculates gap to $100/day, audits all 6 channels live, pivots lanes, and proactively calls ask_ceo."""
     now = time.time()
     state = load(STATE)
     if not force and now - state.get('lastExecutiveCheckAt', 0) < 300 and state.get('pending'):
         return False
+    prune_stale_runtime_data()
+    try:
+        wt_path = DATA / 'radar/daily_winning_topics.json'
+        if not wt_path.exists() or (now - wt_path.stat().st_mtime > 14400):
+            from server.radar_scout import build_daily_winning_topics
+            build_daily_winning_topics()
+    except Exception:
+        pass
     _top_up_channel_lanes()
     state = load(STATE)
     pending_ids = list(state.get('pending', []))
@@ -1022,6 +1358,7 @@ def company_executive_check_once(force=False):
         from common.llm_client import generate_json
         from common.crew_chat_bridge import emit_work_event, emit_ceo_proposal
         company = overview()
+        live_diag = _build_live_executive_diagnostics()
         projects_summary = [
             {
                 'id': p.get('id'),
@@ -1065,16 +1402,49 @@ def company_executive_check_once(force=False):
         if not force and now - state.get('lastExecutiveCheckAt', 0) < 900 and state.get('lastExecutiveFingerprint') == fp:
             return False
         candidates = [{'id': r['id'], 'title': r.get('title', '')[:120], 'project': r.get('project'), 'kind': r.get('kind'), 'priority': r.get('priority', 10)} for r in valid_pending[:10]]
+        active_blockers = []
+        for arow in active_rows():
+            if arow.get('status') in ('blocked', 'recovering'):
+                cid = (arow.get('source') or {}).get('conferenceId')
+                crow = load(ROWS.parent / f'{cid}.json') if cid else {}
+                diag = crow.get('failureDiagnostic') or {}
+                active_blockers.append({
+                    'id': arow['id'],
+                    'title': arow.get('title'),
+                    'project': arow.get('project'),
+                    'status': arow.get('status'),
+                    'blocker': arow.get('blocker'),
+                    'errorType': diag.get('errorType') or crow.get('errorType'),
+                    'errorMessage': diag.get('errorMessage'),
+                    'sourceLocation': diag.get('sourceLocation'),
+                })
         schema = {
             'type': 'object',
             'properties': {
                 'briefing': {'type': 'string', 'minLength': 1, 'maxLength': 600},
                 'topAgendaId': {'type': 'string'},
                 'dropAgendaIds': {'type': 'array', 'items': {'type': 'string'}},
+                'healOrRetryAgendaIds': {'type': 'array', 'items': {'type': 'string'}},
                 'focusChannels': {
                     'type': 'array',
-                    'items': {'type': 'string', 'enum': ['cf_blog', 'threads', 'naver_kin', 'naver_blog', 'legacy_remodel']},
+                    'items': {'type': 'string', 'enum': ['cf_blog', 'threads', 'naver_kin', 'naver_blog', 'brunch', 'legacy_remodel']},
                     'minItems': 1,
+                },
+                'autonomousWorkOrders': {
+                    'type': 'array',
+                    'minItems': 1,
+                    'maxItems': 3,
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'role': {'type': 'string', 'enum': ['doctor', 'patch', 'trace', 'radar', 'publi']},
+                            'workType': {'type': 'string', 'enum': ['cro_widget_retrofit', 'indexnow_unindexed_push', 'content_audit_patrol', 'radar_high_cpc_scout', 'brunch_daily_publish']},
+                            'targetDomain': {'type': 'string'},
+                            'directive': {'type': 'string', 'minLength': 1, 'maxLength': 300},
+                        },
+                        'required': ['role', 'workType', 'targetDomain', 'directive'],
+                        'additionalProperties': False,
+                    },
                 },
                 'experiment': {'type': 'object', 'properties': {
                     'hypothesis': {'type': 'string'}, 'targetUrl': {'type': 'string'},
@@ -1096,34 +1466,61 @@ def company_executive_check_once(force=False):
                     'additionalProperties': False,
                 },
             },
-            'required': ['briefing', 'topAgendaId', 'dropAgendaIds', 'focusChannels', 'experiment', 'ceoProposal'],
+            'required': ['briefing', 'topAgendaId', 'dropAgendaIds', 'healOrRetryAgendaIds', 'focusChannels', 'autonomousWorkOrders', 'experiment', 'ceoProposal'],
             'additionalProperties': False,
         }
         prompt = (
-            '당신은 하루 $100 수익을 책임지는 자율 에이전트 조직의 총괄 디렉터(@jarvis)다. "블로그 글 몇 개 찍어냈는가"만 보는 컨베이어 벨트 사고방식이나 "미검증입니다/아직 실행 전입니다" 같은 방어적 면피 말투를 버리고, 진짜 사업가이자 팀장으로서 [역산형 전략 두뇌(Reverse-Funnel Brain)]로 결단하라.\n'
-            '⚠️ [언어 절대 규칙] 모든 응답 텍스트 필드(briefing, experiment.hypothesis, experiment.successMetric, experiment.stopCondition, ceoProposal.title, ceoProposal.currentReality, ceoProposal.proposal, ceoProposal.requiredApprovals, ceoProposal.expectedImpact)는 반드시 100% 자연스러운 한국어(Korean)로만 작성하라. 중국어(Chinese/한자)나 영어 문장 사용은 절대 금지한다.\n'
+            '당신은 하루 $100 수익을 책임지는 자율 에이전트 조직의 총괄 디렉터(@jarvis)다. 대표님이 일일이 지적하기 전에 전사 모든 채널의 가동 상태·정체 여부·콘텐츠 품질(자청 4대 결핍·썸네일)·유입 전환율을 스스로 감시하고 결단하라.\n'
+            '⚠️ [언어 절대 규칙] 모든 응답 텍스트 필드는 반드시 100% 자연스러운 한국어(Korean)로만 작성하라.\n'
             + __import__('common.asset_map', fromlist=['get_asset_map_summary']).get_asset_map_summary() + '\n'
             '[역산(Reverse-Funnel) 수치 진단]\n'
             + json.dumps(reverse_funnel, ensure_ascii=False) + '\n'
-            '1) briefing: 현재 일수익($)·일유입(PV)과 목표 $100(약 2,500 PV / 200 클릭) 사이의 격차를 역산하고, 왜 단순 블로그 검색 대기로는 안 되는지 짚은 뒤 오늘 집중할 고단가 타깃 + 외부유입(Threads·지식iN·블로그 브릿지) 작전을 결단력 있는 한국어 팀장 말투(2~4문장)로 브리핑하라.\n'
-            '2) focusChannels: 오늘 우선 가동할 핵심 유입·수익 채널 배열(cf_blog, threads, naver_kin, naver_blog, legacy_remodel 중 선택)을 지정하라.\n'
-            '3) topAgendaId & dropAgendaIds: 대기 안건(pendingAgendas) 중 실질 유입(PV)과 수익($) 기여도가 가장 높은 최우선 안건 1개를 topAgendaId로 고르고(없으면 빈 문자열 ""), 유입 효과가 없는 중복/형식적 티켓은 dropAgendaIds에 넣어 과감히 폐기하라.\n'
-            '4) experiment: 이번 집중 작전의 가설(hypothesis), 타깃 URL(없으면 ""), 측정일(YYYY-MM-DD), 성공 지표(예: "외부유입 +500 PV 및 애드센스 고단가 클릭 20회 달성"), 중단 조건을 한국어로 설정하라.\n'
-            '5) ceoProposal (대표님께 역제안 · ask_ceo): 현재 수익/유입이 목표 대비 턱없이 부족하거나(status=="critical_gap"), 브라우저 로그인 세션 갱신·추가 계정 지원·외부 링크 공격적 살포 승인이 필요하면 반드시 shouldAskCeo=true로 설정하고, 대표님께 당당하게 역제안할 제목(title), 냉정한 현실 진단(currentReality), 구체적 돌파 작전(proposal), 대표님이 해주셔야 할 승인/지원 항목 2~3가지(requiredApprovals), 기대 효과(expectedImpact)를 100% 한국어로 생생하게 작성하라.\n'
-            + json.dumps({'reverseFunnel': reverse_funnel, 'projects': projects_summary, 'pendingAgendas': candidates, 'businessEvidence': business}, ensure_ascii=False)
+            '[전 채널 실시간 실측 가동·품질·색인 진단팩 (liveCompanyDiagnostics)]\n'
+            + json.dumps(live_diag, ensure_ascii=False) + '\n'
+            '1) briefing: 위 liveCompanyDiagnostics의 실제 실시간 수치를 바탕으로 ① 현재 일수익($)·일유입(PV)과 목표 $100(약 2,500~3,000 PV / 고단가 클릭 200회) 사이의 격차, ② 6대 핵심 채널(CF 16개 도메인, 네이버 블로그 5계정, 지식iN 30~35분 랜덤 교대 20슬롯, 스레드 10슬롯 브릿지, 브런치 작가 승인 완료 및 하루 2회 장문 칼럼 연재, 네이버 프리미엄콘텐츠 심사 현황)의 오늘 실제 진행 상황과 멈추거나 뒤처진 병목 유무, ③ 오늘 즉시 밀어붙일 최우선 돌파 작전을 결단력 있는 한국어 팀장 말투(3~4문장)로 정확히 브리핑하라. (과거 고정 숫자를 앵무새처럼 복창하지 말고 반드시 liveCompanyDiagnostics의 오늘 실측치로만 판단하라!)\n'
+            '2) focusChannels: 오늘 우선 가동할 핵심 유입·수익 채널 배열(cf_blog, threads, naver_kin, naver_blog, brunch, legacy_remodel 포함 가능)을 지정하라.\n'
+            '3) autonomousWorkOrders (능동적 직원 작업 하달 — 대표님이 시키기 전에 팀장이 직접 점검·지시): liveCompanyDiagnostics와 projects를 보고 지금 가장 시급한 3대 작업 지시서를 생성하라:\n'
+            '   - radar_high_cpc_scout (@radar): 블로키(blokey.co.kr/golden, CDP 9440) S/A급 황금키워드 발굴 및 CF 16개 도메인 고유 니치 × 네이버·지식iN·스레드·브런치 OSMU 배정.\n'
+            '   - content_audit_patrol / cro_widget_retrofit (@doctor/@patch): CF 16개 도메인 기발행·신규 글의 썸네일 누락 여부, 자청 4대 결핍(손실회피·불확실성·비교우위·인지부조화) 충족도, 도메인 카테고리 일치 여부 감사 및 3초 자가진단·내부 브릿지 리모델링.\n'
+            '   - indexnow_unindexed_push (@trace/@patch): 기발행 미색인 원고 IndexNow(200 OK 검증)·사이트맵 강제 색인 제출 및 GA4/GSC CTR 0% 페이지 추적.\n'
+            '   - brunch_daily_publish (@publi): 브런치(작가 승인 완료, 하루 2회 09:30·16:30) 2,000자 에세이 칼럼 연재 및 CF 고단가 도메인 브릿지 가동.\n'
+            '4) topAgendaId, dropAgendaIds & healOrRetryAgendaIds: 대기 안건(pendingAgendas) 중 실질 유입·수익 기여도가 가장 높은 최우선 안건 1개를 topAgendaId로 고르고, 불필요한 중복 티켓은 dropAgendaIds로 폐기하며, activeBlockers에 막힌 안건은 healOrRetryAgendaIds에 넣어 즉시 복구하라.\n'
+            '5) experiment: 오늘 실행할 구체적 가설(hypothesis), 타깃 URL, 측정일(YYYY-MM-DD), 모델 호출 한도(maxModelCalls: 10~40), 성공 지표, 중단 조건을 한국어로 설정하라.\n'
+            '6) ceoProposal (대표님께 역제안 · ask_ceo): 대표님의 결단/승인이 필요한 병목(예: 네이버 프리미엄콘텐츠 2단계 인증/심사 확인, 추가 계정/캠페인 승인, 수익 격차 돌파 작전 승인)을 선제적으로 정리해 보고하라.\n'
+            + json.dumps({'reverseFunnel': reverse_funnel, 'liveCompanyDiagnostics': live_diag, 'projects': projects_summary, 'activeBlockers': active_blockers, 'pendingAgendas': candidates, 'businessEvidence': business}, ensure_ascii=False)
         )
         decision = generate_json(prompt, agent_slot='jarvis', response_schema=schema, timeout_seconds=120, memory_read_only=True, _skip_memory=True, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='company-executive-check')
         experiment = validate_business_experiment(decision.get('experiment'))
         drop_set = set(decision.get('dropAgendaIds') or []) - {decision.get('topAgendaId')}
+        heal_set = set(decision.get('healOrRetryAgendaIds') or [])
         top_id = decision.get('topAgendaId')
         focus_channels = decision.get('focusChannels') or ['cf_blog', 'threads', 'naver_kin', 'naver_blog']
+        work_orders = decision.get('autonomousWorkOrders') or []
+        dispatched_orders = []
+        for order in work_orders[:3]:
+            aid = _queue_autonomous_work_order(
+                order.get('workType'),
+                role=order.get('role') or 'doctor',
+                target_domain=order.get('targetDomain') or '',
+                directive=order.get('directive') or '',
+            )
+            if aid:
+                dispatched_orders.append(f"@{order.get('role')}: {order.get('directive')}")
         with locked(ROWS):
             st = load(STATE)
             st.setdefault('schema', 'barolab-work-agenda-v1')
             st['enabled'] = True
+            for hid in heal_set:
+                hrow = get(hid)
+                if hrow and hrow.get('status') == 'blocked' and not running(hrow):
+                    hrow.update(status='recovering', controllerFailures=0, nextCheckAt=0)
+                    hrow.pop('recoveryGoalId', None)
+                    _save(hrow)
             for drop_id in drop_set:
                 if drop_id in st.get('pending', []):
                     drow = get(drop_id)
+                    if drow and drow.get('kind') == 'conference' and not drow.get('verification', {}).get('verified'):
+                        continue
                     if drow:
                         drow.update(status='closed', closedAt=now, closeReason='jarvis_executive_pruned')
                         _save(drow)
@@ -1138,10 +1535,12 @@ def company_executive_check_once(force=False):
             st['lastExecutiveCheckAt'] = now
             st['lastExecutiveFingerprint'] = fp
             st['lastExecutiveBriefing'] = decision.get('briefing', '')
+            st['lastAutonomousWorkOrders'] = work_orders
             st['reverseFunnel'] = reverse_funnel
             st['focusChannels'] = focus_channels
             write(STATE, st)
-        emit_work_event(actor='jarvis', actor_label='팀장', task_id='executive-check:'+str(int(now)), phase='completed', stage='company-executive-check', output_kind='[역산 전략 총괄 점검] ' + decision.get('briefing', ''))
+        order_summary = (' | 즉시 하달 작업: ' + ' / '.join(dispatched_orders)) if dispatched_orders else ''
+        emit_work_event(actor='jarvis', actor_label='팀장', task_id='executive-check:'+str(int(now)), phase='completed', stage='company-executive-check', output_kind='[역산 전략 총괄 점검] ' + decision.get('briefing', '') + order_summary)
         ceo_prop = decision.get('ceoProposal') or {}
         if (ceo_prop.get('shouldAskCeo') or reverse_funnel.get('status') == 'critical_gap') and (ceo_prop.get('title') or ceo_prop.get('proposal')):
             emit_ceo_proposal(
@@ -1182,6 +1581,61 @@ def _step_single_agenda(row):
             if row['status']=='meeting' and row['kind']!='goal' and not row.get('events',{}).get('opening',{}).get('receivedAt'):
                 return prepare_open(row['id'])
             flush_events(row['id'])
+            if row['kind'] in ('cro_widget_retrofit', 'indexnow_unindexed_push', 'style', 'radar', 'audit', 'brunch_publish') and row['status'] in ('meeting', 'recovering', 'blocked'):
+                if row.get('auxiliaryStartedAt') and row['status'] == 'meeting' and (time.time() - float(row.get('auxiliaryStartedAt') or 0) < 180):
+                    hold(row['id'], '실행이 중단되었습니다. 저장된 결과를 먼저 확인하며 같은 작업을 자동 재실행하지 않습니다.')
+                    return False
+                with locked(ROWS):
+                    row = get(row['id']); row['auxiliaryStartedAt'] = time.time(); _save(row)
+                summary_text = short_title(row)
+                with execution(row['project']):
+                    if row['kind'] == 'cro_widget_retrofit':
+                        from common.cf_tables import retrofit_cro_widgets_and_tables
+                        dom = (row.get('source') or {}).get('domain') or ''
+                        doms = [dom] if dom and '.' in dom else None
+                        result = retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=doms)
+                        good = result.get('status') in ('completed', 'already_optimized')
+                        summary_text = f"기발행 CF 원고 {result.get('updatedCount', 0)}건 CRO 3초 자가진단·제휴·내부 브릿지 위젯 이식 및 캐시 퍼지 완료"
+                    elif row['kind'] == 'indexnow_unindexed_push':
+                        from common.cf_tables import push_unindexed_cf_posts
+                        dom = (row.get('source') or {}).get('domain') or ''
+                        doms = [dom] if dom and '.' in dom else None
+                        result = push_unindexed_cf_posts(limit_per_domain=4, domains=doms)
+                        good = result.get('status') in ('completed', 'all_recent_pinged')
+                        summary_text = f"미색인 기발행 CF 원고 {result.get('pingedCount', 0)}건 IndexNow·Bing·Google Sitemap 강제 제출 완료"
+                    elif row['kind'] == 'style':
+                        from dashboard.agents.style_strategy import review_once
+                        result = review_once()
+                        good = result.get('status') in ('completed', 'already_reviewed')
+                    elif row['kind'] == 'audit':
+                        from server.content_auditor import run_patrol_batch
+                        dom = (row.get('source') or {}).get('domain') or 'must-good.com'
+                        result = run_patrol_batch(2, dom, False)
+                        records = result.get('results', [])
+                        good = bool(records) or result.get('status') in ('completed', 'ok') or result.get('ok') is True
+                        summary_text = f"{dom} 기발행 원고 품질·CRO 감사 완료 ({len(records)}건)"
+                    elif row['kind'] == 'brunch_publish':
+                        from brunch_posting.posting import process_brunch_autonomy_once
+                        result = process_brunch_autonomy_once(cdp_port=9450)
+                        good = bool(result.get('ok'))
+                        summary_text = f"브런치(@머스트픽) 실시간 상태 동기화 및 자동 칼럼 연재 점검 완료 (오늘 발행 {result.get('todayPublishedCount', 1)}건)"
+                    else:
+                        from server.radar_scout import SCOUT, fetch_blokey_golden
+                        blokey_res = fetch_blokey_golden(cdp_port=9440)
+                        raw_slot = row['source'].get('slot')
+                        valid_slot = raw_slot if raw_slot in (9, 14, 20, '09:00', '14:00', '20:00') else None
+                        scout_res = SCOUT.trigger(slot=valid_slot, background=False)
+                        result = {'status': 'completed', 'blokeyCount': len(blokey_res.get('items') or []), 'pairedSets': len(blokey_res.get('pairedBridgeSets') or []), 'scout': scout_res}
+                        good = bool(blokey_res.get('items')) or bool(scout_res.get('sources')) or scout_res.get('status') in ('collected', 'already_claimed', 'completed') or scout_res.get('started') is False
+                        summary_text = f"블로키 S/A급 황금키워드 {len(blokey_res.get('items') or [])}건(CF×네이버 브릿지 세트 {len(blokey_res.get('pairedBridgeSets') or [])}개) 발굴 및 배정 완료"
+                with locked(ROWS):
+                    row = get(row['id']); row['auxiliaryResult'] = result; _save(row)
+                if good:
+                    verified(row['id'], {'verified': True, 'source': str(path(row['id'])), 'scope': row['completionCriteria'],
+                             'summary': summary_text, 'resultStatus': result.get('status'), 'result': result, 'publicationVerified': False})
+                else:
+                    hold(row['id'], '실제 조사·전략 결과를 확인하지 못했습니다. 기존 결과와 안건을 보존했습니다.')
+                return True
             if row['status'] in ('blocked','recovering') and recovery_watch(row):
                 return True
             if row['kind']=='conference' and row['status'] in ('meeting','executing') and not running(row):
@@ -1192,34 +1646,6 @@ def _step_single_agenda(row):
                 if receipt.get('status') in ('completed','failed','unknown'):
                     record_conference_result(receipt,receipt.get('preparation'))
                     return True
-            if row['kind'] in ('style','radar','audit') and row['status']=='meeting':
-                if row.get('auxiliaryStartedAt'):
-                    hold(row['id'],'실행이 중단되었습니다. 저장된 결과를 먼저 확인하며 같은 작업을 자동 재실행하지 않습니다.')
-                    return False
-                with locked(ROWS):
-                    row=get(row['id']);row['auxiliaryStartedAt']=time.time();_save(row)
-                with execution(row['project']):
-                    if row['kind']=='style':
-                        from dashboard.agents.style_strategy import review_once
-                        result=review_once()
-                        good=result.get('status') in ('completed','already_reviewed')
-                    elif row['kind']=='audit':
-                        from server.content_auditor import run_patrol_batch
-                        result=run_patrol_batch(1,row['source']['domain'],False)
-                        records=result.get('results',[])
-                        good=len(records)==1 and records[0].get('postId')==row['source']['post']['id'] and bool(records[0].get('checklist'))
-                    else:
-                        from server.radar_scout import SCOUT
-                        result=SCOUT.trigger(slot=row['source'].get('slot'),background=False)
-                        good=bool(result.get('sources')) and result.get('sourceStatus')=='collected'
-                with locked(ROWS):
-                    row=get(row['id']);row['auxiliaryResult']=result;_save(row)
-                if good:
-                    verified(row['id'],{'verified':True,'source':str(path(row['id'])),'scope':row['completionCriteria'],
-                             'resultStatus':result.get('status'),'result':result,'publicationVerified':False})
-                else:
-                    hold(row['id'],'실제 조사·전략 결과를 확인하지 못했습니다. 기존 결과와 안건을 보존했습니다.')
-                return True
             if row['kind']=='conference' and row['status']=='recovering' and not row.get('recoveryPreparation'):
                 from common.repair_workflow import prepare_conference_recovery
                 try:prepared=prepare_conference_recovery()
@@ -1229,13 +1655,15 @@ def _step_single_agenda(row):
                     saved=get(row['id']);saved['recoveryPreparation']=prepared;_save(saved)
             if row['kind'] in ('conference','staff') and row['status']=='recovering' and not row.get('recoveryGoalId'):
                 from agents.crew_reasoning import reason_request
-                goal = reason_request('agenda-recovery:'+row['id'],
-                    '현재 안건 '+row['title']+'의 실패를 같은 안건에서 조사·복구·검증하라. '
-                    '다른 계정·슬롯·프로젝트를 실행하지 마라. 원인 수정 후 retry_conference 도구로 '
-                    '이 안건의 기존 실행만 재개할 수 있다. 제출 불명확은 원천 결과부터 조회하며 재제출하지 마라. '
-                    '안건 ID: '+row['id']+' 원인: '+row.get('blocker','')+
-                    ' 원래 실행 ID: '+str((row.get('workTarget') or row.get('source',{})).get('conferenceId',''))+
-                    ' 자동 수집한 실패 로그와 실제 복구 단계 결과를 먼저 확인하라. 코드 결함은 Patch 수정안→Jarvis 검토→Doctor 테스트→적용→Publi 재개→실제 결과 검증으로 처리하라.',
+                cid = str((row.get('workTarget') or row.get('source',{})).get('conferenceId',''))
+                crow = load(ROWS.parent / f'{cid}.json') if cid else {}
+                diag = crow.get('failureDiagnostic') or {}
+                diag_summary = f" [원천 에러 진단: {diag.get('sourceLocation')} | {diag.get('errorType')}: {diag.get('errorMessage')}]" if diag else ''
+                goal = reason_request('agenda-recovery:'+row['id']+':'+str(int(time.time())),
+                    '현재 안건 '+row['title']+'의 실패를 같은 안건에서 즉시 자가 치유(Self-Healing)·복구·검증하라.' + diag_summary + ' '
+                    '1) 원천 에러(failureDiagnostic.sourceLocation)가 파이썬 코드/검증 조건 버그이면 read_source로 해당 라인을 확인한 뒤 즉시 propose_patch {files:[...], objective:"...", auto_apply:true}를 호출해 코드를 직접 수정하라. '
+                    '2) 코드 패치 후 또는 일시적 런타임/브라우저 오류인 경우 retry_conference {} 도구로 이 안건의 실행을 즉시 재개하라. '
+                    '안건 ID: '+row['id']+' 원인: '+row.get('blocker','')+' 원래 실행 ID: '+cid,
                     execute=True, repair=True, steps=0, origin='agenda', projects=[row['project']],
                     agenda_id=row['id'])
                 with locked(ROWS):

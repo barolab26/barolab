@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.parse import quote, urlsplit
 
 from dashboard.collectors import searchadvisor as ledger
-from common.browser_session import PageScope, _runtime
+from common.browser_session import PageScope, _runtime, preflight
 from dashboard.metrics import collector_lock
 
 BOARD = 'https://searchadvisor.naver.com/console/board'
@@ -132,7 +132,7 @@ def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5, candidate
             return {'status': 'account_ui_busy', 'submitted': 0}
         # Only attach to a verified existing dedicated profile. Lifecycle startup
         # remains the verified Ubuntu soultin profile.
-        _runtime(9334,str(CHROME),str(PROFILE))
+        preflight('http://127.0.0.1:9334', str(CHROME), str(PROFILE), 'searchadvisor.naver.com', log=lambda _: None)
         from playwright.sync_api import sync_playwright
         result = {'status': 'paused', 'submitted': 0, 'indexed': None}
         with sync_playwright() as playwright:

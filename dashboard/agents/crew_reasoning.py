@@ -14,21 +14,23 @@ from common.collection_observability import load, write, locked
 ROOT = Path(__file__).resolve().parents[2]
 GOALS = ROOT / 'dashboard/data/chats/reasoning-goals'
 ROLES = ('jarvis','publi','radar','trace','patch','doctor')
-MAX_STEPS = 8
-COLLEAGUE_STEPS = 2
-MANAGER_FOLLOWUP_RESERVE = 2
+MAX_STEPS = 20
+COLLEAGUE_STEPS = 6
+MANAGER_FOLLOWUP_RESERVE = 4
 MAX_ACTIVE_REASONING_SECONDS = 3600
-ROLE_BRIEF = {'jarvis':'총괄 디렉터 & OSMU 지휘 (단일 목표: 하루 수익 $100 달성): 전 채널(블로그·유튜브·인스타·브런치·페북·스레드·앱) 수익화와 외부유입 우선순위를 종합해 다음 행동을 자율 결정한다.',
+ROLE_BRIEF = {'jarvis':'총괄 디렉터 & OSMU 지휘 (단일 목표: 하루 수익 $100 달성): 블로키(Blokey Pro, CDP 9440) S·A등급 황금키워드(검색≥1,000·문서≤150) 선점 배정 및 전 채널(블로그·지식iN·스레드·앱) 수익화·외부유입 우선순위를 종합해 다음 행동을 자율 결정한다.',
     'publi':'멀티채널 제작·발행 (단일 목표: 하루 수익 $100 달성): 매체별 문법과 수익 전환 동선에 맞춰 자율 제작하고 승인된 일정과 실제 제출/공개 결과를 확인한다.',
-    'radar':'트렌드·바이럴 스카우터 (단일 목표: 하루 수익 $100 달성): 고단가(CPC/RPM)·고유입 소재를 발굴하고 전 매체 실측 자료와 경쟁자 벤치마킹으로 출처·관측·미확인 가설을 구분한다.',
+    'radar':'트렌드·바이럴 스카우터 (단일 목표: 하루 수익 $100 달성): CDP 9440 블로키(Blokey Pro)에서 총검색량≥1,000 & 문서수≤150 S·A등급 황금키워드를 실측 추출해 네이버 5계정(체급 맞춤) 및 CF 16도메인(고단가 CPC)에 배정하고 경쟁자 벤치마킹을 수행한다.',
     'trace':'퍼널·트래픽·수익 분석 (단일 목표: 하루 수익 $100 달성): 검색 색인, SNS 도달률, 외부유입 전환율 및 매체별 수익($)의 실제 측정과 측정 누락을 구분한다.',
     'doctor':'품질 감사 & 전환율(CRO) 주치의 (단일 목표: 하루 수익 $100 달성): 체류시간·클릭률·전환 동선 지표를 근거로 리모델링 및 수익 극대화 개선안을 검증한다.',
     'patch':'플랫폼 자동화 & 도구 엔지니어 (단일 목표: 하루 수익 $100 달성): 플랫폼(EGO 브라우저·API·미디어 도구) 연동과 실제 기록·코드를 조사하고 검증 가능한 변경안을 선택한다.'}
 EVIDENCE = {
     'revenue':'revenue.json','traffic':'traffic.json','metrics':'metrics.json',
     'kin':'kin-automation-state.json','threads':'public/threads.json',
+    'brunch':'brunch/status.json',
     'collection':'collection-health.json','preparation':'parameter-runtime.json',
     'flow':'flow-active.json','cf_schedule':'cf/daily_schedule.json','naver_schedule':'naver/automation-status.json','execution':'live_snapshot.json',
+    'blokey':'radar/blokey-golden.json',
 }
 SCHEMA = {'type':'object','properties':{
     'decision':{'type':'string','enum':['tool','consult','finish','wait']},
@@ -97,12 +99,19 @@ def overview():
         item['incidentFingerprint']=incident_key(source)
         projects.append(item)
     live=load(ROOT/'dashboard/data/live_snapshot.json')
+    blokey=load(ROOT/'dashboard/data/radar/blokey-golden.json')
     from server.growth import business_evidence
     from common.work_agenda import compute_reverse_funnel_gap
     biz = business_evidence()
     return {'observedAt':time.time(),'projects':projects,'executionContext':live.get('agendaControl',{}),
             'businessEvidence': biz,
             'reverseFunnel': compute_reverse_funnel_gap(biz),
+            'blokeyGolden': {
+                'checkedAt': blokey.get('checkedAt'),
+                'totalQualified': blokey.get('totalQualified', 0),
+                'naverAssignments': {k: (v[0] if v else None) for k, v in (blokey.get('naverAssignments') or {}).items()},
+                'cfAssignments': blokey.get('cfAssignments') or {},
+            },
             'executionSnapshotAt':live.get('generatedAt')}
 
 
@@ -380,8 +389,11 @@ def tool_call(row,tool,args):
         return {'status':'needs_evidence','reason':'No current incident bound to an original terminal operation; no resubmission or code application was authorized'}
     if tool=='propose_patch':
         if not row['permissions']['repair']:raise ValueError('Code proposal not authorized by this request')
+        if args.get('auto_apply', True):
+            from common.coding_job import auto_heal_patch
+            return auto_heal_patch(ROOT, args['files'], row['goal']+'\n'+str(args.get('objective') or ''), args.get('test_files') or ())
         from server.agent_tools import propose_patch_code
-        return propose_patch_code(args['files'],args['test_files'],row['goal']+'\n'+args['objective'])
+        return propose_patch_code(args['files'],args.get('test_files') or [],row['goal']+'\n'+args['objective'])
     if tool=='ask_ceo':
         from common.crew_chat_bridge import emit_ceo_proposal
         from common.work_agenda import compute_reverse_funnel_gap
@@ -517,7 +529,7 @@ def ask(row):
         'Other staff receive the same goal, shared evidence and plan. Consult chooses the colleague dynamically; the colleague may investigate with tools before answering you. '
         'Reuse existing evidence unless stale or truncated. A consultation should usually answer after 1-3 necessary tool calls; return a useful direct answer once material evidence exists instead of exhausting the budget on optional checks. '
         'latestSharedRecovery is the current owned recovery phase and execution receipt, refreshed for this decision. Use its latest result before reinvestigating a historical fault; an unknown recovery receipt does not prove the original publication was submitted. Existing host retry/reconciliation tools still enforce actual submission state. '
-        'Decide business priority before diagnosing implementation details. Give a supported action even with incomplete measurement: label hypotheses and choose a small measurable experiment. '
+        'Decide business priority before diagnosing implementation details. Never freeze or cap active production to watch a single small experiment: daily channel targets (CF 16, Naver 1/account, Kin 20, Threads 4) are minimum floors (최소 기준선), not upper caps. Drive parallel execution of (1) Blokey S/A Golden Keyword + proven revenue topic (soul5373/yoon_master) CF pillar & Naver bridge publishing, (2) KnowledgeIn 20 + Threads 4 external referral pumping, and (3) 4-portal forced indexing of unindexed CF posts + Doctor title/3-sec CTA remodeling. '
         'A detailRequired or truncated field is unread, not unavailable. Fetch only the needed selection. Never treat missing page earnings as absent account earnings or absent traffic. '
         'After two reads with no new evidence, stop repeating them: delegate a bounded repair to Patch or record owner, resume condition and next check, then choose runnable work. '
         'For tool/browser errors use an existing supported recovery or equivalent API path within permissions; retain the same approved content, submission fences and verification. Content holds and uncertain submissions cannot be bypassed. '
@@ -544,7 +556,7 @@ def ask(row):
         'dispatch {agent,tool,args} using ONLY run_project_cycle {project}, recover_project_runtime {project}, recover_project_work {project,work_id}, '
         'repair_kin_submission {account,question_id}, advance_project_recovery {task_id,plan_sha256}; existing host validation still applies. '
         'prepare_recovery {project} binds the current real incident and original terminal operation to the existing independent review/test/apply/resume/verify workflow; missing evidence never manufactures permission. '
-        'propose_patch {files,test_files,objective} prepares a bounded patch candidate for review, never applies production code. '
+        'propose_patch {files,objective,test_files?,auto_apply?} autonomously proposes, AST/test-validates in an isolated sandbox, reviews, and applies the minimal code fix when a runtime traceback/bottleneck is found, so you can immediately call retry_conference {} afterward. '
         'decision=consult requires a colleague and a concrete question in message. decision=wait means an external constraint; name it. '
         'Return one JSON object matching this exact schema (arguments is a STRING containing JSON, not an object): '
         +json.dumps(SCHEMA,ensure_ascii=False)+'\nRespond in Korean.\n'+json.dumps({'originalObjective':row['goal'],'corporateAssetMap':__import__('common.asset_map',fromlist=['get_asset_map_summary']).get_asset_map_summary(),'nowUtcEpoch':time.time(),'actor':row['actor'],
@@ -1252,12 +1264,16 @@ def answer_strategy(row):
     try:
         from common.llm_client import generate_json
         value=generate_json('당신은 Jarvis 사업 총괄입니다. 대표의 전략 질문에 한국어로 먼저 결론을 답하세요. '
-            '하루 $100 목표에 가까워질 오늘의 우선순위 1~3개를 소요시간·근거 신뢰도·자원 대비 비교해 선택하세요. '
+            '하루 $100 목표(일 3,000~5,000 PV · 고단가 CPC 클릭 200회)에 도달하기 위한 오늘의 3대 핵심 작전을 동시에 추진하세요. '
+            '[대표님 핵심 운영 원칙 - 최소 기준선(Minimum Floor) & 3대 병렬 작전]: '
+            '1) 채널별 일일 목표(CF 16건, 네이버 주력 1건/계정, 지식iN 계정당 10건=20건, Threads 4건)는 절대 상한선이 아니라 "최소 기준선(Minimum Floor)"입니다. 플랫폼 제재가 없는 범위에서 얼마든지 추가 발행하며, 절대 "실험 하나만 해보고 새 작업을 승인하지 않겠다"거나 "호출 상한을 걸어 동결하겠다"는 수동적·관망적 답변을 하지 마세요. '
+            '2) [작전 1 · @radar + @publi]: 이미 수익·유입이 발생한 블로그(soul5373, yoon_master)의 상위 주제(지원금·연금·생활금융·건강/IT)를 확인하되 기존 글만 고치며 기다리지 말고, 블로키(blokey.co.kr/golden) S/A급 황금키워드(검색량 1,000~30,000 / 문서수 200 이하)를 즉시 추출해 CF 심층 비교표·계산기 본진 글과 네이버 5계정 브릿지 글을 세트로 복제 발행하세요. '
+            '3) [작전 2 · @publi + @doctor]: 자연 검색 색인을 기다리는 동안 당장 오늘 방문자를 데려올 지식iN(adinfo0905, stone0747 일 20건 이상)과 Threads(@mustpickinfo 일 4건 이상)에 고단가 CF 정보글을 참고 출처/상세 정리표로 연결해 즉각적인 외부 유입(Referral PV)을 펌프질하세요. '
+            '4) [작전 3 · @trace + @doctor]: CF 16개 도메인 미색인 글들을 4대 포털(구글·네이버·빙·다음) 일일 색인 루틴으로 전부 밀어 넣고, 노출 대비 클릭(CTR)이 저조한 글들의 제목과 첫 3줄 요약박스(CTA)를 닥터가 공격적으로 리모델링하게 하세요. '
             '아래 자료의 수익·유입은 기간·통화·미수집을 구분하세요. 페이지 수익 미수집은 전체 자료 부재가 아닙니다. '
             '근거 없는 수익·성과 수치는 만들지 말고, 불확실한 효과는 hypotheses에 명시하세요. '
-            '자료가 불완전해도 정상 채널과 기존 자산을 활용한 작은 측정 가능 실험을 제안하세요. '
             '과거 장애의 로그 조사·코드 읽기·게시 영수증을 전략 답변의 완료 조건으로 삼지 마세요. '
-            '필요한 복구는 Patch의 별도 작업으로 한정하고 다른 실행 가능한 행동을 선택하세요. '
+            '필요한 복구는 Patch의 별도 작업으로 한정하고 위 3대 병렬 실행 행동을 선택하세요. '
             '각 행동에 담당자·구체적 산출물·이유·측정 지표·관찰 시각·중단 조건을 쓰세요. '
             'project는 실제 프로젝트 id입니다. tool과 arguments(JSON 문자열)는 아래 등록된 도구 중 하나를 정확히 선택하세요. '
             '읽기·런타임 작업의 targetUrl은 빈 문자열, 콘텐츠 배포는 관측 자료에 있는 URL을 선택하세요. '

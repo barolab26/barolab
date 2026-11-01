@@ -9,11 +9,12 @@ const DEFAULT_AGY_MODELS = [
   { id: 'gemini-3.8-flash-high', label: 'Gemini 3.8 Flash (High)' },
   { id: 'gemini-3.8-flash-medium', label: 'Gemini 3.8 Flash (Medium) · 고속 검진' },
   { id: 'gemini-3.8-flash-low', label: 'Gemini 3.8 Flash (Low)' },
-  { id: 'gpt-6.1-sol', label: 'gpt-6.1-sol (High · 원고/코드 특화)' },
   { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
   { id: 'claude-opus-5-5-medium', label: 'Claude Opus 5.5 (Medium)' },
+  { id: 'claude-opus-5-5-low', label: 'Claude Opus 5.5 (Low)' },
   { id: 'claude-sonnet-5-5-high', label: 'Claude Sonnet 5.5 (High)' },
   { id: 'claude-sonnet-5-5-medium', label: 'Claude Sonnet 5.5 (Medium)' },
+  { id: 'claude-sonnet-5-5-low', label: 'Claude Sonnet 5.5 (Low)' },
   { id: 'gpt-oss-120b-medium', label: 'GPT-OSS 120B (Medium)' },
 ];
 
@@ -29,27 +30,32 @@ const PROVIDER_OPTIONS = [
 const PROVIDER_MODELS_MAP = {
   agy: DEFAULT_AGY_MODELS,
   codex: [
-    { id: 'gpt-6.1-sol', label: 'gpt-6.1-sol (Codex 최고성능 · 추천)' },
-    { id: 'gemini-4-argon-high', label: 'Gemini 4 Argon (High · 대체 호환)' },
-    { id: 'gpt-5.4', label: 'gpt-5.4 (Codex 표준 추론)' },
-    { id: 'gpt-5.3-codex', label: 'gpt-5.3-codex (Codex 고속 코딩)' },
-    { id: 'o3-pro', label: 'o3-pro (심층 검증)' },
+    { id: 'gpt-6.1-sol', label: 'GPT-6.1-Sol (최신 주력 코딩·집필 모델)' },
+    { id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra (최신 Terra 코덱스 모델)' },
+    { id: 'gpt-6-astra', label: 'GPT-6-Astra (최고 난이도 프론티어 추론)' },
+    { id: 'gpt-6-sol', label: 'GPT-6-Sol (6세대 주력 모델)' },
+    { id: 'gpt-6-luna', label: 'GPT-6-Luna (고속·경량 작업용)' },
+    { id: 'gpt-5.6-sol', label: 'GPT-5.6-Sol' },
+    { id: 'gpt-5.6-terra', label: 'GPT-5.6-Terra' },
+    { id: 'gpt-5.6-luna', label: 'GPT-5.6-Luna' },
   ],
   gemini: [
-    { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro (고성능 추론)' },
-    { id: 'gemini-2.5-flash', label: 'gemini-2.5-flash (고속·대량)' },
-    { id: 'gemini-4-argon-high', label: 'gemini-4-argon-high' },
+    { id: 'gemini-4-argon-high', label: 'Gemini 4 Argon (High)' },
+    { id: 'gemini-4-argon-medium', label: 'Gemini 4 Argon (Medium)' },
+    { id: 'gemini-3.8-flash-high', label: 'Gemini 3.8 Flash (High)' },
+    { id: 'gemini-3.8-flash-medium', label: 'Gemini 3.8 Flash (Medium)' },
   ],
   openai: [
-    { id: 'gpt-6.1-sol', label: 'gpt-6.1-sol' },
-    { id: 'gpt-5.4', label: 'gpt-5.4' },
-    { id: 'gpt-4.1', label: 'gpt-4.1' },
-    { id: 'o3-mini', label: 'o3-mini' },
+    { id: 'gpt-6.1-sol', label: 'GPT-6.1-Sol' },
+    { id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra' },
+    { id: 'gpt-6-astra', label: 'GPT-6-Astra' },
+    { id: 'gpt-6-luna', label: 'GPT-6-Luna' },
   ],
   claude: [
     { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
+    { id: 'claude-opus-5-5-medium', label: 'Claude Opus 5.5 (Medium)' },
     { id: 'claude-sonnet-5-5-high', label: 'Claude Sonnet 5.5 (High)' },
-    { id: 'claude-3-7-sonnet-latest', label: 'claude-3-7-sonnet-latest' },
+    { id: 'claude-sonnet-5-5-medium', label: 'Claude Sonnet 5.5 (Medium)' },
   ],
   deepseek: [
     { id: 'deepseek-chat', label: 'deepseek-chat (V3)' },
@@ -142,7 +148,7 @@ function getModelsForProvider(provider) {
         base.push({ id: m.id, label: m.label || m.id });
       }
     }
-    return base.map(m => ({ ...m, ...(config.providers.codex.models.find(row => row.id === m.id) || {}) }));
+    return base.map(m => ({ ...(config.providers.codex.models.find(row => row.id === m.id) || {}), ...m }));
   }
   if (provider === 'agy' && config?.providers?.agy?.models?.length) {
     return config.providers.agy.models;
@@ -384,6 +390,13 @@ async function saveBrainMatrix(useOptimalPreset = false) {
       : { agentBrains: collectBrainMatrixPayload(), revision: config?.revision };
     config = await api('agent-brains', payload);
     render();
+    try {
+      const snapRes = await fetch('/api/mission-control', { cache: 'no-store' });
+      if (snapRes.ok) {
+        window.BaroLabMissionControl = await snapRes.json();
+        if (typeof window.applyMissionControl === 'function') window.applyMissionControl();
+      }
+    } catch (_) {}
     matrixMessage(
       useOptimalPreset
         ? '✅ [최적 효율 프리셋 자동 배정 완료] 팀장(Argon High) · 퍼블리/패치(gpt-6.1-sol) · 레이더(Argon Med) · 닥터/트레이스(3.8 Flash Med)가 즉시 적용되었습니다.'

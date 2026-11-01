@@ -371,6 +371,21 @@ def agy_quota():
 class RemoteTelemetry:
     def __init__(self,root=ROOT,hosts=('127.0.0.1',)):
         self.root=root;self.hosts=hosts;self.stop=threading.Event();self.lock=threading.Lock();self.data={};self.thread=None
+    def collect_once(self,include_credits=True):
+        with ThreadPoolExecutor(max_workers=6,thread_name_prefix='cockpit-probe') as pool:
+            fleet=list(pool.map(lambda row:fleet_probe(row,self.hosts),FLEET))
+            with self.lock:self.data={**self.data,'fleet':fleet}
+            if include_credits:
+                try:values=env_values(self.root)
+                except (OSError,ImportError):values=dict(os.environ)
+                cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
+                kp=pool.submit(provider_credit_probe,'kie',values);jp=pool.submit(provider_credit_probe,'jev',values)
+                credit=cf.result()
+                try:quota=cq.result()
+                except (OSError,RuntimeError,ValueError,KeyError,queue.Empty,subprocess.SubprocessError):quota=dict(status='조회 연결 대기',checkedAt=time.time())
+                agy=aq.result()
+                with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy,'kie':kp.result(),'jev':jp.result()}
+        return self.get()
     def run(self):
         credits_at=0
         with ThreadPoolExecutor(max_workers=6,thread_name_prefix='cockpit-probe') as pool:

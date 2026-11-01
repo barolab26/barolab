@@ -497,7 +497,7 @@ def business_evidence(root=ROOT):
                                 for s in sources if s.get('aggregationEligible') is not False],
             'pageRevenueIssues': [{k: s.get(k) for k in ('domain', 'reasonCode')} for s in (revenue.get('pagePerformance') or {}).get('sites', []) if not s.get('complete')],
             'resources': resource_summary(root), 'netProfitUsd': None,
-            'decisionRule': 'Prioritize measurable revenue hypotheses within remaining resources. Traffic is a proxy, missing earnings are unknown. Restore actionable measurement gaps; unavailable threshold-limited page reports are not repaired by repeated calls. Reserve a bounded traffic experiment instead. No causal uplift or net profit claim without evidence.'}
+            'decisionRule': '하루 $100 수익 목표(일 3,000~5,000 PV · 고단가 CPC 클릭 200회) 역산 실행 원칙: (1) 채널별 일일 할당량(CF 16건, 네이버 주력 1건/계정, 지식iN 10건/계정=20건, Threads 4건)은 상한선이 아니라 최소 기준선(Minimum Floor)이다. 플랫폼 제재가 없는 선에서 언제든 초과 발행하라. (2) "작은 실험 1개만 해보고 나머지는 동결/관망하겠다"거나 모델 호출 상한을 걸어 파이프라인을 멈추는 수동적 행동을 절대 금지한다. (3) 이미 수익·유입이 검증된 주제(soul5373·yoon_master 상위 글 및 금융·연금·지원금·보험·건강/IT)와 블로키(blokey.co.kr/golden, CDP 9440) S/A급 황금키워드(검색량 1,000~30,000, 문서수 200 이하)를 결합해 CF 본진 글 + 네이버 5계정 브릿지 글 복제 발행(작전 1), 지식iN 20건·Threads 4건 외부유입 펌프질(작전 2), CF 미색인 744건 4대 포털 강제 색인 및 닥터 CTR 0% 제목·도입부 3초 요약박스 리모델링(작전 3)을 동시에 병렬 가동하라.'}
 
 
 def action_analysis():

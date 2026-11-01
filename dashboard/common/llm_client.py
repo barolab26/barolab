@@ -348,10 +348,10 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
             raise
         # Only an explicit exhausted-credit response permits cross-provider recovery.
         # Authentication, content/schema errors and uncertain submissions never trigger it.
-        is_codex_timeout = (provider == 'codex' and not images and 'exceeded its hard timeout' in str(exc))
-        is_agy_recoverable = (provider != 'codex' and (re.search(r'HTTP 402\b', str(exc)) or '시간 제한 초과' in str(exc)))
         from common.llm_usage import RouteCoolingDown, UsageBudgetExceeded
-        if isinstance(exc, (RouteCoolingDown, UsageBudgetExceeded)) or not (is_codex_timeout or is_agy_recoverable):
+        is_codex_timeout = (provider == 'codex' and not images and ('exceeded its hard timeout' in str(exc) or isinstance(exc, RouteCoolingDown)))
+        is_agy_recoverable = (provider != 'codex' and (re.search(r'HTTP 402\b', str(exc)) or '시간 제한 초과' in str(exc) or isinstance(exc, RouteCoolingDown)))
+        if isinstance(exc, UsageBudgetExceeded) or not (is_codex_timeout or is_agy_recoverable):
             raise
         previous_provider,previous_model=provider,model
         if is_codex_timeout:
@@ -415,7 +415,7 @@ def _generate_json_once(prompt, provider=None, images=None, model_override=None,
                         reasoning_effort=reasoning_effort, **({"timeout_seconds": timeout_seconds} if timeout_seconds is not None else {}))
     if reasoning_effort is not None:
         raise RuntimeError('선택한 공급자 어댑터는 명시적 추론 강도 전달을 지원하지 않습니다.')
-    prompt = 'Return only a complete JSON object. Do not use tools or access files.\n'+prompt
+    prompt = 'Return only a complete JSON object. Do not invoke native CLI shell commands; host tool requests inside the JSON schema are allowed.\n'+prompt
     key = settings.crypt(row['encrypted_key'], decrypt=True) if row.get('encrypted_key') else settings.environment_key(provider)
     if not key:
         raise RuntimeError('선택한 공급자의 API 키가 없습니다.')

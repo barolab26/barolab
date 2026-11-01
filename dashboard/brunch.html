@@ -523,16 +523,19 @@
         const tbody = document.getElementById('br-curriculum-tbody');
         if (!tbody) return;
         tbody.innerHTML = cur.map(item => {
+          const isPub = item.status === 'published';
           const isSaved = item.status === 'saved_in_drawer';
-          const stChip = isSaved
+          const stChip = (isPub || isSaved)
             ? `<span class="br-chip teal">${item.statusLabel}</span>`
             : `<span class="br-chip">${item.statusLabel}</span>`;
           const paceChip = item.pacingMode === 'pure_essay'
             ? `<span class="br-chip blue">70% 순수 에세이</span>`
             : `<span class="br-chip amber">30% CF 브릿지</span>`;
-          const writeBtn = isSaved
-            ? `<a class="br-action-sm" href="https://brunch.co.kr/ready" target="_blank" rel="noopener" style="text-decoration:none;">서랍 확인 ↗</a>`
-            : `<button class="br-action-sm primary" type="button" data-write-part="${item.part}">✍️ 서랍에 저장</button>`;
+          const writeBtn = isPub
+            ? `<a class="br-action-sm" href="https://brunch.co.kr/@31d1f5fb288c4fc/${item.part}" target="_blank" rel="noopener" style="text-decoration:none;">발행글 보기 ↗</a>`
+            : (isSaved
+              ? `<a class="br-action-sm" href="https://brunch.co.kr/ready" target="_blank" rel="noopener" style="text-decoration:none;">서랍 확인 ↗</a>`
+              : `<button class="br-action-sm primary" type="button" data-write-part="${item.part}">🚀 즉시 공개 발행</button>`);
           return `
             <tr>
               <td><strong>제${item.part}장</strong></td>

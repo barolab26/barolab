@@ -328,6 +328,18 @@ def runtime():
         data = json.loads(RUNTIME.read_text(encoding='utf-8'))
         age = (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(data['checkedAt'])).total_seconds()
         data['online'] = 0 <= age < 120
+        try:
+            config = local_config()
+            home_dir = Path(config['wsl_home']) if (is_wsl() and 'wsl_home' in config) else Path(config['home'])
+            cache_file = home_dir / 'models_cache.json'
+            if cache_file.is_file():
+                cache_data = json.loads(cache_file.read_text(encoding='utf-8'))
+                if cache_data.get('fetched_at') and cache_data.get('fetched_at') != data.get('modelsFetchedAt'):
+                    data['models'] = _catalog_models(cache_data)
+                    data['modelsFetchedAt'] = cache_data.get('fetched_at')
+                    jobs.write(RUNTIME, data)
+        except Exception:
+            pass
         return data
     except (OSError, ValueError, KeyError):
         return {'installed': False, 'authenticated': False, 'online': False, 'models': []}
@@ -471,7 +483,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         image_order = '\n'.join(f'Attached image {n}: {Path(filename).name}' for n,filename in enumerate(images or [],1))
         instruction = 'Return the task result directly as the required JSON schema. No Markdown.\n' if response_schema else 'Return the task JSON object serialized into the outer schema string field json. No Markdown inside the JSON string.\n'
         safe_prompt = prompt if len(prompt) <= MAX_TURN_CHARS else (prompt[:MAX_TURN_CHARS] + '\n...[truncated for CLI turn limit]')
-        full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
+        full_input = 'Do not invoke native CLI shell commands or local filesystem tools directly; however, requesting host application tools via the JSON response schema (e.g. decision="tool") IS explicitly allowed and expected. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
 
         accounts = _codex_account_homes()
         candidates = [(model, effort)] if reasoning_effort is not None else _fallback_candidates(config, model, effort, allowed)
@@ -543,7 +555,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
                         if retriable and attempt_idx + 1 < len(candidates):
                             if 'input_too_large' in combined or 'maximum length' in combined:
                                 safe_prompt = safe_prompt[:220_000]
-                                full_input = 'Do not use tools, access files, or execute commands. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
+                                full_input = 'Do not invoke native CLI shell commands or local filesystem tools directly; however, requesting host application tools via the JSON response schema (e.g. decision="tool") IS explicitly allowed and expected. Solve the task using supplied text and attached images.\n' + instruction + image_order + '\n' + safe_prompt
                             time.sleep(2.0)
                             continue
                         if audit_folder is not None:

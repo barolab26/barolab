@@ -155,7 +155,7 @@ def channels(cf, naver, kin, now):
     done_kin = daily.get('publishedVerified') if daily.get('date')==day else None
     schedule = kin.get('automation') or kin.get('schedule') or {}
     kin_note = clean(schedule.get('activeAccount'),25)+' 답변 작성 중' if schedule.get('activeRunId') else '다음 배포: '+format_time(schedule.get('nextEligibleAt'),now)
-    kin_note += ' · '+str(schedule.get('intervalMinutes') or 20)+'분 텀'
+    kin_note += ' · '+str(schedule.get('intervalMinutes') or 32)+'분 텀'
     rows = [dict(name='CF 블로그',done=done_cf,target=16,note=cf_note),
             dict(name='네이버 블로그',done=done_nv,target=7,note=nv_note),
             dict(name='네이버 지식iN',done=done_kin,target=20,note=kin_note)]
@@ -411,7 +411,21 @@ class Collector:
             'naverJournal':'dashboard/data/naver/automation-journal.json','naverWorkflow':'dashboard/data/naver/active-workflow.json',
             'workflow':'dashboard/data/naver/pipeline_status.js'}.items():data[key]=self.read(path)
         data['agendaControl']=self.read_agenda()
-        data.update(events=events,remote=self.remote.get(),timeline=business_timeline(events,cf,kin,data['revenue'],now))
+        remote_data=dict(self.remote.get() or {})
+        in_docker=Path('/.dockerenv').exists()
+        fleet_online=sum(1 for b in (remote_data.get('fleet') or []) if isinstance(b,dict) and b.get('online'))
+        if in_docker or fleet_online==0 or not remote_data.get('codexQuota') or not remote_data.get('agy'):
+            prior_snap=self.read('dashboard/data/live_snapshot.json')
+            if (in_docker or fleet_online==0) and prior_snap.get('fleet'):
+                remote_data['fleet']=prior_snap['fleet']
+            if (in_docker or not any(self.ports.values())) and prior_snap.get('ports'):
+                self.ports={int(k) if str(k).isdigit() else k:v for k,v in prior_snap['ports'].items()}
+                data['ports']=dict(self.ports)
+            prior_quotas=(prior_snap.get('brains') or {}).get('quotas') or {}
+            for qk,qv in prior_quotas.items():
+                if (in_docker or not remote_data.get(qk)) and qv:
+                    remote_data[qk]=qv
+        data.update(events=events,remote=remote_data,timeline=business_timeline(events,cf,kin,data['revenue'],now))
         data['kinOperations']=self.operation_states('kin.sqlite3','automation_slots',now.date().isoformat(),True)
         data['threadsOperations']=self.operation_states('threads.sqlite3','authoring_slots',now.date().isoformat())
         from server.cockpit_telemetry import env_values
@@ -452,10 +466,19 @@ class Collector:
     def run(self):
         while not self.stop.is_set():
             try:
+                try:
+                    from collectors import naver_public
+                    res_pub = naver_public.reconcile(force=False)
+                    if isinstance(res_pub, dict) and res_pub.get('updated', 0) > 0:
+                        from common import channel_parameters
+                        channel_parameters.monitor()
+                except Exception:
+                    pass
+                if Path('/.dockerenv').exists() and (self.root/'dashboard/data/live_snapshot.json').exists() and (time.time() - (self.root/'dashboard/data/live_snapshot.json').stat().st_mtime) < 5: self.stop.wait(1); continue
                 self.collect()
                 from common.dashboard_jobs import write
                 write(self.root/'dashboard/data/live_snapshot.json', shared_snapshot(self.get()))
-            except (OSError,ValueError,TypeError,KeyError,AttributeError):
+            except Exception:
                 with self.lock:self.snapshot={**self.snapshot,'cached':True}
             self.stop.wait(1)
 
@@ -473,8 +496,15 @@ def shared_snapshot(data):
     from server import cockpit_panels as panels
     now=dt.datetime.fromtimestamp(data.get('collectedAt',time.time()),KST)
     graph=data.get('synapses') or {}
-    vault=dict(nodes=len(graph.get('nodes',{})),edges=len(graph.get('edges',[])),
-        episodes=sum(n.get('resolvedCount',0) for n in graph.get('nodes',{}).values()))
+    g_nodes=list((graph.get('nodes') or {}).values())
+    hub_k={'MemoryHub','Staff','BossProfile','BoostPlan','StrategyMeeting','AudienceStrategy'}
+    skill_k={'Pattern','ObservedBenchmark','ScreenInteractionLesson','StyleVariant','PracticalKnowHow','FailureLesson'}
+    c_hubs=sum(n.get('type') in hub_k for n in g_nodes)
+    s_nodes=sum(n.get('type') in skill_k for n in g_nodes)
+    r_hubs=max(0,len(g_nodes)-c_hubs-s_nodes)
+    vault=dict(nodes=len(g_nodes),edges=len(graph.get('edges',[])),
+        episodes=sum(n.get('resolvedCount',0) for n in g_nodes),
+        coreHubs=c_hubs,skillNodes=s_nodes,revenueHubs=r_hubs)
     channel_rows=[]
     for index,row in enumerate(data.get('channels',[])):
         key=('cf','naver','kin')[index]
@@ -535,7 +565,7 @@ def shared_snapshot(data):
     revenue_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','aggregationEligible','aggregationKey','domains','account','collectionAccount','mediaIds','accountBreakdownVerified','pendingDates','scope') if source.get(k) is not None}
         for source in data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('sources',[])]
     from dashboard.collectors.revenue import summarize
-    revenue_document={'months':{now.strftime('%Y-%m'):{'sources':revenue_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('checkedAt')}}}
+    prev_m=(now.date().replace(day=1)-dt.timedelta(days=1)).strftime('%Y-%m');prev_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','lastSuccessAt','aggregationEligible','aggregationKey','domains','account','collectionAccount','mediaIds','accountBreakdownVerified','pendingDates','scope') if source.get(k) is not None} for source in data.get('revenue',{}).get('months',{}).get(prev_m,{}).get('sources',[])];revenue_document={'months':{prev_m:{'sources':prev_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(prev_m,{}).get('checkedAt')},now.strftime('%Y-%m'):{'sources':revenue_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('checkedAt')}},'checkedAt':data.get('revenue',{}).get('checkedAt')}
     revenue_projection={**summarize(revenue_document,now),'months':revenue_document['months']}
     result=dict(agendaControl=data.get('agendaControl',{}),schedulePolicy=data.get('schedulePolicy',{}),scheduleRuntime=data.get('scheduleRuntime',{}),schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
         refreshSeconds=1,cfItems=cf_items,revenue=revenue_projection,

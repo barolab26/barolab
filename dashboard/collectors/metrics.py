@@ -635,7 +635,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
     if not enabled or not limit:
         return
     from playwright.sync_api import sync_playwright
-    from common.browser_session import _runtime, PageScope, reusable_search_console_page
+    from common.browser_session import _runtime, preflight, PageScope, reusable_search_console_page
     from urllib.parse import parse_qs
     from gsc_ui_state import paused, state as ui_state, check_response, check_text, mark_success
 
@@ -704,7 +704,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                     executable, profile, _ = account_paths(int(account['cdp']))
                 except ValueError:
                     raise RuntimeError('Ubuntu Google 전용 로그인 세션 미설정 (CDP ' + str(account['cdp']) + ')') from None
-                _runtime(int(account['cdp']), str(executable), str(profile))
+                preflight('http://127.0.0.1:' + str(account['cdp']), str(executable), str(profile), 'search.google.com', log=lambda _: None)
                 with sync_playwright() as playwright:
                     browser = playwright.chromium.connect_over_cdp('http://127.0.0.1:' + str(account['cdp']), timeout=10000)
                     context = browser.contexts[0]

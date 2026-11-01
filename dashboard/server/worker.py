@@ -145,9 +145,28 @@ def run_metrics(python, commands):
 
 
 def run_task(task):
+    child_env = dict(
+        export_environment(),
+        PYTHONPATH=os.pathsep.join([*(str(p) for p in IMPORT_PATHS), os.environ.get('PYTHONPATH', '')]),
+        PYTHONUTF8='1',
+        PYTHONIOENCODING='utf-8',
+        BAROLAB_KEEP_BROWSER='1',
+        DISPLAY=os.environ.get('DISPLAY', ':10'),
+    )
     if task=='serve':
         if os.name == 'nt':
-            return subprocess.run([sys.executable, '-u', '-B', '-m', 'dashboard.server.memory_worker'], cwd=ROOT, timeout=60, env=export_environment()).returncode
+            from common.system_watchdog import is_process_running_match
+            if not is_process_running_match('dashboard\\.server\\.memory_worker'):
+                subprocess.Popen(
+                    [sys.executable, '-u', '-B', '-X', 'utf8', '-m', 'dashboard.server.memory_worker'],
+                    cwd=ROOT,
+                    env=child_env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+                )
+            return 0
         return subprocess.run(['systemctl','--user','start','barolab-memory-review.service'],timeout=30).returncode
     if task=='metrics':
         return run_metrics(sys.executable,[('dashboard/revenue.py','--collect'),('dashboard/traffic.py','--collect'),
@@ -169,8 +188,8 @@ def run_task(task):
       'maintenance':['-m','common.content_maintenance'],
       'watchdog':['-m','common.system_watchdog','--heal-now'],
     }
-    return subprocess.run([sys.executable,'-u','-B',*commands[task]],cwd=ROOT,
-                          env=dict(export_environment(),DISPLAY=os.environ.get('DISPLAY',':10')),
+    return subprocess.run([sys.executable,'-u','-B','-X','utf8',*commands[task]],cwd=ROOT,
+                          env=child_env,
                           timeout=5400).returncode
 
 

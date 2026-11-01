@@ -20,9 +20,12 @@ def due(record,now,interval):
 
 def collect_once(root=ROOT,now=None,backend=None):
     root=Path(root);now=now or dt.datetime.now(KST);today=now.date();month=now.strftime('%Y-%m');start=today.replace(day=1)
+    prev_end=start-dt.timedelta(days=1);prev_month=prev_end.strftime('%Y-%m')
+    query_start=min(start,today-dt.timedelta(days=7)) if today.day<=5 else start
     if backend is None:
         sys.path.insert(0,str(ROOT/'dashboard'))
         import revenue as backend
+    from dashboard.collectors.revenue import split_result_for_month, merge_previous_month_result
     from common.collection_observability import write
     data=root/'dashboard/data';data.mkdir(parents=True,exist_ok=True)
     with backend.collector_lock(data/'revenue.lock') as acquired:
@@ -41,7 +44,7 @@ def collect_once(root=ROOT,now=None,backend=None):
             def adsense_job(settings=settings,prefix=prefix):
                 if not settings.get('sites') or not all(cfg.get(prefix+'_'+n) for n in ('ACCOUNT_ID','CLIENT_ID','CLIENT_SECRET','REFRESH_TOKEN')):
                     raise backend.RevenueSourceError('not_configured','애드센스 OAuth 연결 대기')
-                return backend.adsense(cfg,start,today,settings['sites'],prefix)
+                return backend.adsense(cfg,query_start,today,settings['sites'],prefix)
             jobs.append((key,record,API_SECONDS,adsense_job))
         for account,port in backend.ADPOST_ACCOUNTS:
             key='adpost-'+account;record=by_id.setdefault(key,backend.source(key,'adpost','애드포스트 · 실명 3계정 통합','KRW','soul5373 통합 로그인 · 전체 등록 미디어',browserPort=port))
@@ -53,7 +56,7 @@ def collect_once(root=ROOT,now=None,backend=None):
                 except OSError:raise backend.RevenueSourceError('browser_offline','전용 브라우저 대기') from None
                 from naver_blog_posting.posting import pipeline_lock
                 try:
-                    with pipeline_lock():return backend.adpost(start,today,cfg,account,port)
+                    with pipeline_lock():return backend.adpost(query_start,today,cfg,account,port)
                 except RuntimeError as exc:
                     if 'already running' in str(exc):raise backend.RevenueSourceError('deferred','발행 작업 우선 · 수익 수집 다음 주기') from None
                     raise
@@ -61,10 +64,10 @@ def collect_once(root=ROOT,now=None,backend=None):
         for key,label in (('coupang','쿠팡 파트너스'),('toss','토스 쉐어링크'),('trip','Trip.com'),('replyalba','제휴알바')):
             record=by_id.setdefault(key,backend.source(key,'affiliate',label,'KRW',label))
             def affiliate_job(key=key):
-                if key=='coupang':return backend.coupang(cfg,start,today,now=now)
+                if key=='coupang':return backend.coupang(cfg,query_start,today,now=now)
                 config=backend.affiliate_configuration(cfg,key)
-                if key=='toss' and config.get('reportCapability')=='api_report':return backend.toss(cfg,start,today)
-                if key=='replyalba' and config.get('credentialPresence',{}).get('login'):return backend.replyalba(cfg,start,today,now=now)
+                if key=='toss' and config.get('reportCapability')=='api_report':return backend.toss(cfg,query_start,today)
+                if key=='replyalba' and config.get('credentialPresence',{}).get('login'):return backend.replyalba(cfg,query_start,today,now=now)
                 if key=='trip' and config.get('credentialPresence',{}).get('affiliateIds'):
                     raise backend.RevenueSourceError('report_unavailable','트립닷컴 추적 식별자 설정됨 · 수익 보고서 미연결')
                 raise backend.RevenueSourceError('not_configured','수익 보고 API 연결 대기')
@@ -78,12 +81,15 @@ def collect_once(root=ROOT,now=None,backend=None):
             attempted=dt.datetime.now(KST);status.update(attemptedAt=attempted.isoformat(),status='collecting')
             write(data/'revenue-refresh.json',state)
             try:
-                result=job()
-                if result.get('status')!='collected':raise backend.RevenueSourceError(result.get('status','partial'),'원천 보고서 집계 대기')
+                raw_result=job()
+                if raw_result.get('status')!='collected':raise backend.RevenueSourceError(raw_result.get('status','partial'),'원천 보고서 집계 대기')
+                completed=dt.datetime.now(KST).isoformat()
+                if query_start<start:
+                    merge_previous_month_result(previous,prev_month,key,raw_result,query_start,prev_end,completed)
+                result=split_result_for_month(raw_result,start,today)
                 for day,value in result.get('daily',{}).items():
                     if not start.isoformat()<=day<=today.isoformat():raise ValueError('out_of_range')
                     backend.money(value)
-                completed=dt.datetime.now(KST).isoformat()
                 record.update(result,checkedAt=completed,lastSuccessAt=completed,attemptedAt=attempted.isoformat(),reportStart=start.isoformat(),reportEnd=today.isoformat())
                 status.update(status='collected',lastSuccessAt=completed,nextAttemptAt=time.time()+interval)
             except Exception as exc:
@@ -93,11 +99,14 @@ def collect_once(root=ROOT,now=None,backend=None):
                 status.update(status=code,errorType=type(exc).__name__,reason=reason,
                               nextAttemptAt=time.time()+(1800 if code in ('not_configured','auth_required','not_enrolled') else 60 if code=='deferred' else interval))
             emit_work_event(actor='trace',actor_label='트레이스',task_id=task,phase='completed',stage='revenue-collection',output_kind=key+' 수집 결과: '+str(status.get('status')))
-            previous['months'][month].update(sources=list(by_id.values()),checkedAt=dt.datetime.now(KST).isoformat())
-            previous.update(schema='dashboard-revenue-v1',checkedAt=dt.datetime.now(KST).isoformat())
+            now_iso=dt.datetime.now(KST).isoformat()
+            previous['months'][month].update(sources=list(by_id.values()),checkedAt=now_iso)
+            previous.update(schema='dashboard-revenue-v1',checkedAt=now_iso,updatedAt=now_iso)
+            if isinstance(previous.get('adsenseCollection'),dict):
+                previous['adsenseCollection']['checkedAt']=now_iso
             backend.deduplicate_adpost_sources(previous['months'][month]['sources'])
             write(data/'revenue.json',previous)
-            state.update(checkedAt=dt.datetime.now(KST).isoformat());write(data/'revenue-refresh.json',state)
+            state.update(checkedAt=now_iso);write(data/'revenue-refresh.json',state)
         page_status = state.setdefault('pageRevenue', {})
         if due(page_status, now.timestamp(), 1800):
             try:

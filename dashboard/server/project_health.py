@@ -59,6 +59,7 @@ SOURCES = (
     ('naver_blog', '네이버 블로그', 'dashboard/data/naver/automation-status.json', 'publi', 'naver.html'),
     ('naver_kin', '네이버 지식iN', 'dashboard/data/kin-automation-state.json', 'publi', 'kin.html'),
     ('threads', 'Threads', 'dashboard/data/public/threads.json', 'publi', 'threads.html'),
+    ('brunch', '브런치스토리', 'dashboard/data/brunch/status.json', 'publi', 'brunch.html'),
     ('legacy_remodel', '콘텐츠 유지보수', 'dashboard/data/content-maintenance.json', 'doctor', 'growth.html'),
     ('mobile_apps', '앱 프로젝트', 'apps/bible/project.json', 'patch', 'apps.html'),
     ('collections', '조회·수집', 'dashboard/data/collection-health.json', 'trace', 'growth.html'),
@@ -181,6 +182,13 @@ def _publication_quota(key, doc, now, fresh):
             return unknown
     elif key == 'naver_kin':
         return {**unknown, 'status':'interval_managed'}
+    elif key == 'brunch':
+        slots = ((doc.get('automation') or {}).get('dailySlots')) or ['09:30', '16:30']
+        expected = {s for s in slots if due(s)}
+        pub_today = [p for p in (doc.get('publishedArticles') or []) if isinstance(p, dict) and str(p.get('publishedAt') or '')[:10] == day and url_ok(p.get('url'))]
+        for idx, slot in enumerate(sorted(expected)):
+            if idx < len(pub_today):
+                completed.add(slot)
     else:
         return {**unknown, 'status': 'not_scheduled'}
     return {'status': 'observed', 'date': day, 'due': len(expected), 'verified': len(completed),
@@ -309,7 +317,7 @@ def observed_projects():
             pass
         source_date = doc.get('date') or doc.get('workDate')
         fresh = (source_date == now.date().isoformat()) if key == 'cf_blog' else age is not None and 0 <= age <= 7200 and (not source_date or source_date == now.date().isoformat())
-        rows = doc.get('sources') or [] if key == 'collections' else doc.get('items') or doc.get('reservedItems') or doc.get('accounts') or []
+        rows = doc.get('sources') or [] if key == 'collections' else doc.get('publishedArticles') or [] if key == 'brunch' else doc.get('items') or doc.get('reservedItems') or doc.get('accounts') or []
         if not isinstance(rows, list):
             rows = []
         counts = {}

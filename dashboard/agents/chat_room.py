@@ -782,7 +782,7 @@ def get_live_system_context() -> Dict[str, Any]:
     if threads_file.is_file():
         try:
             th_data = json.loads(threads_file.read_text(encoding="utf-8"))
-            threads_cap = int((th_data.get("configuration") or {}).get("mainDailyCap", 4))
+            threads_cap = int((th_data.get("configuration") or {}).get("mainDailyCap", 10))
             today_iso = datetime.now().strftime("%Y-%m-%d")
             recs = th_data.get("records") or th_data.get("posts") or []
             threads_done = sum(1 for r in recs if str(r.get("publishedAt") or r.get("createdAt") or "").startswith(today_iso) and (r.get("publishedAt") or r.get("status") == "published"))
@@ -804,7 +804,7 @@ def get_live_system_context() -> Dict[str, Any]:
         "kin_ad_done": kin_ad_done,
         "kin_st_done": kin_st_done,
         "kin_cap": int(kin_state.get("globalDailyCap", 20)),
-        "kin_interval": int(kin_state.get("intervalMinutes", 20)),
+        "kin_interval": int(kin_state.get("intervalMinutes", 32)),
         "kin_active_run": kin_active_run,
         "kin_active_acc": kin_active_acc,
         "kin_next_at": kin_state.get("nextEligibleAt"),
@@ -1070,6 +1070,12 @@ AGENT_SYSTEM_PROMPTS: Dict[str, str] = {
     "jarvis": (
         "너는 BaroLab의 총괄 디렉터 및 원소스 멀티유즈(OSMU) 지휘관 '팀장(@jarvis)'다. "
         "온라인 전 채널(블로그·유튜브·인스타그램·브런치·페이스북·스레드·지식iN·앱)을 아우르는 멀티채널 확산과 외부유입 퍼널을 총괄한다. "
+        "[대표님 핵심 운영 지침 - 최소 기준선(Minimum Floor) & 3대 병렬 작전]: "
+        "1) 현재 설정된 일일 할당량(CF 16건, 네이버 주력 1건/계정, 지식iN 계정당 10건=20건, Threads 4건)은 절대 상한선이 아니라 '최소한 이 정도는 무조건 해라'라는 최소 기준선(Minimum Floor)이다! 플랫폼 제재가 되지 않는 선에서 언제든 더 많이 발행해야 하며, 절대 '작은 실험 1개만 해보고 나머지는 승인하지 않겠다/동결하겠다/관측만 하겠다'는 식의 수동적·보수적 태도를 취하지 마라. "
+        "2) 하루 $100(일 3,000~5,000 PV · 고단가 CPC 클릭 200회) 달성을 위해 언제나 아래 3대 작전을 동시에 밀어붙여라: "
+        "   - [작전 1 · @레이더 + @퍼블리]: 실제 수익·유입이 발생한 블로그(soul5373, yoon_master)의 상위 주제(지원금·연금·생활금융·건강/IT) × 블로키(blokey.co.kr/golden, CDP 9440) S/A급 황금키워드(검색량 1,000~30,000 / 문서수 200 이하) 10개를 즉시 추출해 CF 심층 비교표·자격 계산기 본진 글 + 네이버 5계정 브릿지 글을 세트로 복제 발행. "
+        "   - [작전 2 · @퍼블리 + @닥터]: 자연 검색 색인을 기다리는 동안 당장 오늘 방문자를 데려올 지식iN(adinfo0905, stone0747 일 20건 이상)과 Threads(@mustpickinfo 일 4건 이상) 완주 및 고단가 CF 정보글을 참고 출처/상세 정리표로 연결해 즉각적인 외부 유입(Referral PV) 펌프질. "
+        "   - [작전 3 · @트레이스 + @닥터]: CF 16개 도메인 미색인 글(744건)의 4대 포털(구글·네이버·빙·다음) 강제 색인 + 노출은 되지만 클릭이 안 되는(CTR 0%) 글들의 제목과 첫 3줄 요약박스(CTA) 공격적 리모델링. "
         "직원에게 현재 업무를 요청하는 문장은 @패치·@퍼블리처럼 호출 대상 앞에 @를 붙인다. 단순 과거 보고·일반 언급은 호출로 만들지 않는다. 멘션 문구 자체는 실제 요청 전달이나 실행 증거가 아니다. "
         "5명 직원(퍼블리·트레이스·패치·닥터·레이더)의 실시간 상태 요약본과 앞선 동료의 보고를 종합해, 대표님의 질문 맥락에 맞춰 핵심 결론과 즉시 실행 방향(채널 배정, 외부유입 브릿지, 우선순위)을 자연스러운 한국어로 명쾌하게 브리핑한다.\n"
         + STRICT_ANTI_HALLUCINATION_RULES

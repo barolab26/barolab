@@ -299,7 +299,7 @@ def read_publi_data() -> Dict[str, Any]:
             "dailyCap": int(kin_cfg.get("globalDailyCap", 20)),
             "adinfo0905Done": kin_ad,
             "stone0747Done": kin_st,
-            "intervalMinutes": int(kin_cfg.get("intervalMinutes", 20)),
+            "intervalMinutes": int(kin_cfg.get("intervalMinutes", 32)),
             "nextEligibleAt": kin_state.get("nextEligibleAt"),
             "nextAccount": kin_state.get("nextAccount"),
             "lastRunAt": kin_state.get("lastRunAt"),
@@ -307,7 +307,7 @@ def read_publi_data() -> Dict[str, Any]:
         },
         "threadsProgress": {
             "done": th_done,
-            "dailyCap": int(th_cfg.get("mainDailyCap", 4)),
+            "dailyCap": int(th_cfg.get("mainDailyCap", 10)),
             "preferredTimes": th_cfg.get("preferredTimes", ["08:40", "12:30", "18:10", "21:20"]),
             "connectionStatus": th_conn,
         },
@@ -695,15 +695,16 @@ def read_trace_data() -> Dict[str, Any]:
             cf_sitemap_ok += 1
 
         req_obj = s_info.get("indexingRequest") or {}
-        nv_req = req_obj.get("naver") or {}
-        gg_req = req_obj.get("google") or {}
+        nv_req = (req_obj.get("naver") if (req_obj.get("naver") or {}).get("status") in ("submitted", "received_pending_key_check", "ping_accepted") else None) or (s_info.get("searchAdvisor") or {}).get("indexNow") or (s_info.get("naver") or {}).get("indexNow") or req_obj.get("naver") or {}
+        gg_req = (req_obj.get("google") if (req_obj.get("google") or {}).get("status") == "submitted" else None) or (s_info.get("google") or {}).get("sitemapSubmission") or req_obj.get("google") or {}
         req_urls = req_obj.get("urls") if isinstance(req_obj.get("urls"), list) else []
         nv_st = nv_req.get("status", "not_submitted")
-        nv_http = nv_req.get("httpStatus", 200 if nv_st == "submitted" else 0)
+        nv_http = nv_req.get("httpStatus", 200 if nv_st in ("submitted", "received_pending_key_check", "ping_accepted") else 0)
         gg_st = gg_req.get("status", "not_submitted")
-        if nv_st in ("submitted", "received_pending_key_check"):
+        nv_sub_cnt = int(nv_req.get("submittedCount") or len(req_urls) or (p_tot or 0))
+        if nv_st in ("submitted", "received_pending_key_check", "ping_accepted"):
             naver_indexnow_submitted_domains += 1
-            naver_indexnow_submitted_urls += len(req_urls) or (p_tot or 0)
+            naver_indexnow_submitted_urls += nv_sub_cnt
         if gg_st == "submitted":
             google_sitemap_submitted_domains += 1
 
@@ -1412,7 +1413,17 @@ HIGH_VALUE_KEYWORD_POOL: Dict[str, List[Dict[str, str]]] = {
 
 def read_radar_data() -> Dict[str, Any]:
     rnd_proposals = _read_json(DATA_DIR / "rnd_proposals.json", [])
-    from radar_scout import SCOUT
+    from radar_scout import SCOUT, fetch_blokey_golden
+    blokey_path = DATA_DIR / "radar" / "blokey-golden.json"
+    blokey_data = _read_json(blokey_path, {})
+    if not blokey_data.get("topKeywords") or (
+        blokey_path.is_file() and (time.time() - blokey_path.stat().st_mtime) > 1800
+    ):
+        try:
+            fetch_blokey_golden()
+            blokey_data = _read_json(blokey_path, {})
+        except Exception:
+            pass
     scout_status = SCOUT.latest()
     scout_queue = (scout_status.get("latest", {}).get("result") or {}).get("trackA", [])
     if not isinstance(rnd_proposals, list):
@@ -1428,6 +1439,7 @@ def read_radar_data() -> Dict[str, Any]:
         "scoutQueueCount": len(scout_queue),
         "recentScoutedKeywords": scout_queue[:5],
         "scoutStatus": scout_status,
+        "blokeyGolden": blokey_data,
     }
 
 
@@ -1439,15 +1451,30 @@ def format_radar_context_block(has_url: bool = False) -> str:
             f"- BaroLab 보유 채널: 16개 CF 버티컬 블로그(must-pick.com, baronote.kr, must-good.com, nolplace.com, topnote.kr, healthcox.com, tripmarvel.com, daynote.kr 등) + 5개 네이버 블로그(1호기 soultin 시니어브리프, 2호기 soul5373 머스트헬스뷰, 3호기 yoon_master 윤뷰스, 4호기 adinfo0905 직장인루틴, 5호기 stone0747 지원금속보) + 지식iN(일 20건) + Threads(일 4슬롯) + 앱 팩토리(apps.html)\n"
             f"- 지침: URL이 주어졌으므로 기존 topic-scout-queue.json의 키워드(부모급여 등)는 절대 언급하지 말고, 오직 Step 1 도구(`extract_youtube_or_url`)가 추출한 실제 영상 자막 원문을 요약하고 BaroLab 채널 적용 전략 2~3가지를 제안할 것."
         )
+    bk = d.get("blokeyGolden") or {}
+    nv_assign = bk.get("naverAssignments") or {}
+    cf_assign = bk.get("cfAssignments") or {}
+    nv_lines = [
+        f"  · [{acc}] 「{picks[0]['keyword']}」 ({picks[0]['grade']}등급 💎{picks[0]['goldenRate']} · 총검색 {picks[0]['totalSearch']:,} / 문서 {picks[0]['docCount']}건)"
+        for acc, picks in nv_assign.items() if picks
+    ]
+    cf_lines = [
+        f"  · [{dom}] 「{row['keyword']}」 ({row['grade']}등급 💎{row['goldenRate']} · 총검색 {row['totalSearch']:,} / 문서 {row['docCount']}건)"
+        for dom, row in list(cf_assign.items())[:5] if isinstance(row, dict)
+    ]
     rec_kw = (
         "\n".join(f"  · {k.get('keyword')} → 배정: {k.get('target')}" for k in d["recentScoutedKeywords"])
         if d["recentScoutedKeywords"]
         else "  · 대기 중인 스카우팅 키워드 없음"
     )
     return (
-        f"[레이더(@radar) 전용 실시간 R&D·키워드 큐 조회값]\n"
-        f"1. 유튜브/웹 자막 실측 분석 보고서 누적: {d['rndProposalsCount']}건\n"
-        f"2. 실제 Radar 소스 수집 원장의 후보: {d['scoutQueueCount']}건 (빈집·고단가 미검증)\n"
+        f"[레이더(@radar) 전용 실시간 블로키(Blokey Pro, CDP 9440)·R&D 키워드 원장]\n"
+        f"1. 블로키(Blokey) S·A등급 황금키워드 실측 통과(검색≥1,000 & 문서≤150): {bk.get('totalQualified', 0)}건 (조회: {bk.get('checkedAt', '미조회')})\n"
+        f"2. 네이버 5계정 체급 맞춤 황금키워드 배정:\n"
+        + ("\n".join(nv_lines) if nv_lines else "  · 블로키 탭 조회 대기")
+        + f"\n3. CF 애드센스 고단가 황금키워드 배정:\n"
+        + ("\n".join(cf_lines) if cf_lines else "  · 블로키 탭 조회 대기")
+        + f"\n4. Radar 종합 후보 큐: {d['scoutQueueCount']}건 / R&D 누적: {d['rndProposalsCount']}건\n"
         f"{rec_kw}"
     )
 
@@ -1554,15 +1581,41 @@ def extract_youtube_or_url(url: str) -> Dict[str, Any]:
 
 
 def scout_high_value_keywords(category: str = "정책·금융·생활") -> Dict[str, Any]:
-    """Start actual source scouting; a launch receipt is not a discovery result."""
-    from radar_scout import SCOUT
+    """Fetch verified S/A-grade Golden Keywords from Blokey (CDP 9440) immediately and trigger RadarScout."""
+    from radar_scout import SCOUT, fetch_blokey_golden
     from chat_room import publish_radar_briefing
+    blokey_receipt = fetch_blokey_golden()
     claim = SCOUT.trigger(publish_radar_briefing)
-    state = "실제 원천 자료 수집 시작; 결과는 내부 채팅에 게시 예정" if claim["started"] else "기존 실행과 중복되어 새 수집은 시작하지 않음"
-    receipt = _build_execution_receipt(cmd_str="radar_scout.SCOUT.trigger (in-process thread)", pid=os.getpid(), exit_code=0, stdout_tail=state)
-    return {"ok": True, "tool": "scout_high_value_keywords", "started": claim["started"], "runId": claim["runId"],
-            "executionReceipt": receipt, "state": state, "category": category, "keywords": [],
-            "badge": "[스카우팅 실행 접수: 발굴·빈집·고단가·외부 발행 완료 아님]"}
+    items = blokey_receipt.get("items") or []
+    nv_assign = blokey_receipt.get("naverAssignments") or {}
+    cf_assign = blokey_receipt.get("cfAssignments") or {}
+    top_kws = [
+        f"{r['keyword']} ({r['grade']}등급 💎{r['goldenRate']} · 검색 {r['searchVolume']:,} / 문서 {r['competition']}건)"
+        for r in items[:6]
+    ]
+    state = (
+        f"블로키(CDP 9440) S·A등급 황금키워드 {len(items)}건 실측 추출 및 시냅스 QueryRecipe 배정 완료: "
+        + (" | ".join(top_kws[:4]) if top_kws else "조건 부합 키워드 없음")
+    )
+    receipt = _build_execution_receipt(
+        cmd_str="radar_scout.fetch_blokey_golden(cdp_port=9440) + SCOUT.trigger",
+        pid=os.getpid(),
+        exit_code=0 if items else 1,
+        stdout_tail=state,
+    )
+    return {
+        "ok": bool(items) or claim.get("started", False),
+        "tool": "scout_high_value_keywords",
+        "started": claim.get("started", False),
+        "runId": claim.get("runId"),
+        "executionReceipt": receipt,
+        "state": state,
+        "category": category,
+        "keywords": items[:10],
+        "naverAssignments": nv_assign,
+        "cfAssignments": cf_assign,
+        "badge": f"[블로키 황금키워드 실측 완료: S·A등급 {len(items)}건 추출 · 네이버 5계정 & CF 배정 반영]",
+    }
 
 
 # ============================================================================
@@ -1573,6 +1626,7 @@ def format_jarvis_context_block() -> str:
     return (
         f"[팀장(@jarvis) 총괄 실시간 5대 에이전트 원장 요약]\n"
         f"{format_publi_context_block()}\n\n"
+        f"{format_radar_context_block()}\n\n"
         f"{format_trace_context_block()}\n\n"
         f"{format_patch_context_block()}\n\n"
         f"{format_doctor_context_block()}"

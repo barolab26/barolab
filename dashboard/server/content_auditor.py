@@ -619,6 +619,27 @@ def _score_domain_alignment(domain: str, title: str, category: str, body_text: s
             "reason": "테스트 URL은 색인 후보에서 제외합니다.",
         }
 
+    dom_stem = domain.split(".")[0].lower()
+    if (
+        domain.lower() in title.lower()
+        or (len(dom_stem) >= 5 and dom_stem in title.lower())
+        or "moodwrite" in combined
+        or "검색 결과가 음반" in title
+        or "주소 확인부터 원하는 글" in title
+    ):
+        return {
+            "aligned": False,
+            "alignmentLevel": "self_referential_slop",
+            "ownScore": 0,
+            "bestCategory": valid_categories[0] if valid_categories else category,
+            "currentCategory": category,
+            "validCategories": valid_categories,
+            "needsCategoryRemap": False,
+            "recommendedDomain": domain,
+            "recommendedDomainBrand": matrix.get("brand", domain),
+            "reason": "도메인 자체 이름 검색·가상 앱 소개 등 독자에게 무가치한 양산형 메타 글 ➔ D등급 즉시 비공개/사이트맵 격리",
+        }
+
     # 1. Score all 16 domains to see how well this post fits `domain` vs other domains
     domain_scores: Dict[str, int] = {}
     for d, d_mat in DOMAIN_KEYWORD_MATRIX.items():
@@ -764,7 +785,7 @@ def _inspect_local_output_for_fake_ai_prompts(slug: str, title: str) -> List[str
     return hits
 
 
-def _check_images_and_suitability(domain: str, title: str, content_html: str, slug: str = "") -> Dict[str, Any]:
+def _check_images_and_suitability(domain: str, title: str, content_html: str, slug: str = "", thumbnail_url: str = "") -> Dict[str, Any]:
     """
     Checklist #4: [시각적 어색함 검열 & 이미지 메타데이터(EXIF) 정밀 감식]
     1. 조잡한 프로그래밍 생성 도표(`CHECKPOINT #` / `정자체 가이드`) 적발 -> 즉시 제거 및 반응형 HTML `<table>` 전환
@@ -873,6 +894,10 @@ def _check_images_and_suitability(domain: str, title: str, content_html: str, sl
         suitability = "missing"
         verdict_badge = "🔴 이미지 누락 (시각자료 0장)"
         issue = "본문 내 시각자료(이미지/캡처) 0장"
+    elif not str(thumbnail_url or "").strip() or str(thumbnail_url).strip().lower() == "null":
+        suitability = "missing_thumbnail"
+        verdict_badge = "🔴 대표 썸네일 누락 (카테고리 목록 빈 박스 노출 · 즉시 복구 대상)"
+        issue = "본문 이미지는 존재하나 post.thumbnail / og_image 필드가 비어 있어 목록에서 초록색 빈 박스로 노출됨 ➔ 첫 이미지 자동 추출 및 썸네일 복구"
     elif has_fake_person_or_broken_text_ai:
         suitability = "fake_person_or_broken_text_ai"
         verdict_badge = "🔴 이미지 교체 대상 (3인칭 인물 연출 / 깨진 한글 서류 적발)"
@@ -935,8 +960,22 @@ def _check_title_and_indirect_experience(domain: str, title: str, content_html: 
     lists = soup.find_all(["ul", "ol"])
 
     is_mechanical_title = any(re.search(pat, title) for pat in MECHANICAL_TITLE_PATTERNS)
-    has_numbers_in_body = len(re.findall(r"\d+(?:,\d{3})*\s*(?:원|만원|%|분|시간|일|개월|세|점|건|단계)", body_text)) >= 4
+    has_numbers_in_body = len(re.findall(r"\d+(?:,\d{3})*\s*(?:원|만원|%|분|시간|일|개월|세|점|건|단계|달러|\$)", body_text)) >= 4
     has_action_markers = sum(1 for w in ("경로", "순서", "단계", "클릭", "선택", "주의", "꿀팁", "비교", "직접", "확인") if w in body_text)
+    evasive_phrases = [
+        w for w in (
+            "담당자에게", "질문하세요", "문의하세요", "달라질 수 있습니다", "조건에 따라 달라집니다",
+            "확인해야 합니다", "공식 공고를 참고", "개인별 조회 서비스가 아닙니다", "안내를 바탕으로", "제공된 자료"
+        ) if w in body_text
+    ]
+    deficiency_hits = {
+        "lossAvoidance": any(w in body_text for w in ("수수료", "위약금", "감액", "환수", "손해", "불이익", "추가요금", "반려", "탈락", "떼이는", "날리는")),
+        "infoAsymmetry": len(tables) >= 1 and has_numbers_in_body,
+        "timeShortcut": any(w in body_text for w in ("3초", "3분", "1분", "즉시", "공식", "계산법", "한눈에")),
+        "statusControl": any(w in body_text for w in ("판독", "자가진단", "해당", "대상", "통과", "가능 여부", "체크리스트")),
+    }
+    deficiency_count = sum(1 for v in deficiency_hits.values() if v)
+    is_bureaucratic_slop = len(evasive_phrases) >= 2 or deficiency_count < 2 or not has_numbers_in_body
 
     score = 50
     if len(body_text) >= 1400:
@@ -955,6 +994,8 @@ def _check_title_and_indirect_experience(domain: str, title: str, content_html: 
         score += 8
     if is_mechanical_title:
         score -= 18
+    if is_bureaucratic_slop:
+        score -= 28
     score = max(10, min(100, score))
 
     # Build a 3~4 word ultra-specific long-tail indirect-experience title suggestion if needed
@@ -977,7 +1018,11 @@ def _check_title_and_indirect_experience(domain: str, title: str, content_html: 
         "tableCount": len(tables),
         "isMechanicalTitle": is_mechanical_title,
         "hasConcreteNumbers": has_numbers_in_body,
-        "IndirectExperiencePassed": score >= 72 and not is_mechanical_title,
+        "deficiencyHits": deficiency_hits,
+        "deficiencyCount": deficiency_count,
+        "evasivePhrases": evasive_phrases,
+        "needsFullRewrite": bool(is_bureaucratic_slop or score < 68),
+        "IndirectExperiencePassed": score >= 72 and not is_mechanical_title and not is_bureaucratic_slop,
         "suggestedRemodelTitle": suggested_title,
     }
 
@@ -1026,6 +1071,15 @@ def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_ca
             "status": "draft",
         }
     else:
+        from dashboard.common.cf_tables import extract_first_content_image
+        raw_thumb = post_detail.get("thumbnail")
+        clean_thumb = str(raw_thumb or "").strip()
+        if not clean_thumb or clean_thumb.lower() == "null":
+            clean_thumb = extract_first_content_image(post_detail.get("content") or "", domain)
+        raw_og = post_detail.get("og_image")
+        clean_og = str(raw_og or "").strip()
+        if not clean_og or clean_og.lower() == "null":
+            clean_og = clean_thumb
         payload = {
             "title": post_detail.get("title", ""),
             "content": post_detail.get("content", ""),
@@ -1033,8 +1087,8 @@ def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_ca
             "category": new_category,
             "meta_description": post_detail.get("meta_description") or post_detail.get("excerpt") or "",
             "excerpt": post_detail.get("excerpt") or post_detail.get("meta_description") or "",
-            "thumbnail": post_detail.get("thumbnail"),
-            "og_image": post_detail.get("og_image") or post_detail.get("thumbnail"),
+            "thumbnail": clean_thumb,
+            "og_image": clean_og,
             "isPublished": target_status == "published",
             "status": target_status,
         }
@@ -1064,18 +1118,22 @@ def remodel_cf_post_content_live(
     post_detail: Dict[str, Any],
     target_category: str,
     suggested_title: Optional[str] = None,
+    needs_full_rewrite: bool = False,
 ) -> Dict[str, Any]:
     """
-    Fast Surgical Remodeling for B/C-grade posts:
-      1. Sanitize raw markdown `**`, broken unicode, and AI disclaimers (`sanitize_html_pre_publish`).
-      2. Upgrade mechanical/weak title if `suggested_title` is provided and different.
+    Fast Surgical & Full-Substance Remodeling for B/C-grade posts:
+      1. If `needs_full_rewrite` is True (bureaucratic/evasive/low-utility slop), invoke LLM (`agent_slot='doctor'`)
+         with CEO's 4 Core Human Deficiencies (`자청 4대 결핍`) to rewrite the article into a sharp, concrete column
+         while preserving existing valid `<figure>` / `<img>` tags.
+      2. Sanitize raw markdown `**`, broken unicode, and AI disclaimers (`sanitize_html_pre_publish`).
       3. Inject the 3-second interactive checklist widget (`inject_interactive_widget`) if missing.
-      4. Remap category to `target_category` and update live via `PUT /api/posts/{id}`.
+      4. Auto-extract `thumbnail` & `og_image` from the first `<img>` in `content` so category cards are never blank.
+      5. Remap category to `target_category` and update live via `PUT /api/posts/{id}`.
     """
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
     from common.image_sanitizer import sanitize_html_pre_publish
-    from dashboard.common.cf_tables import inject_interactive_widget
+    from dashboard.common.cf_tables import inject_interactive_widget, style_tables, extract_first_content_image
 
     post_id = post_detail.get("id")
     if not post_id:
@@ -1084,17 +1142,86 @@ def remodel_cf_post_content_live(
     orig_title = post_detail.get("title") or ""
     new_title = (suggested_title or orig_title).strip() or orig_title
     raw_html = post_detail.get("content") or ""
+    full_rewritten = False
+
+    if needs_full_rewrite:
+        try:
+            from common.llm_client import generate_json
+            soup_orig = BeautifulSoup(raw_html, "html.parser")
+            preserved_figures = [str(fig) for fig in soup_orig.find_all("figure") if fig.find("img") and "data-cf-interactive-widget" not in str(fig)]
+            if not preserved_figures:
+                preserved_figures = [
+                    f'<figure class="post-image" style="margin:24px 0;text-align:center;"><img src="{img.get("src")}" alt="{img.get("alt") or orig_title}" style="max-width:100%;height:auto;border-radius:12px;" loading="lazy"></figure>'
+                    for img in soup_orig.find_all("img")
+                    if (img.get("src") or "").strip()
+                ]
+            plain_orig = soup_orig.get_text(" ", strip=True)[:2500]
+            remodel_schema = {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "excerpt": {"type": "string"},
+                    "contentHtml": {"type": "string"},
+                },
+                "required": ["title", "excerpt", "contentHtml"],
+                "additionalProperties": False,
+            }
+            remodel_prompt = (
+                "당신은 @닥터(콘텐츠 품질 감사 & CRO 리모델링 주치의)다.\n"
+                "아래 기존 블로그 글은 공무원식 조건 나열이거나 '담당자에게 질문하세요 / 조건에 따라 달라집니다' 식으로 독자의 가려운 곳을 회피하는 양산형 글이다.\n"
+                "윤대표의 핵심 철학인 [자청 원초적 본능·4대 결핍]을 적용해 독자가 무릎을 치고 끝까지 읽는 고밀도 실전 칼럼으로 전면 리모델링하라:\n"
+                "1. 손실 회피(Loss Avoidance) 직격: 모르면 내 돈·수수료·지원금·보증금을 얼마나 날리는지 첫 문단부터 구체적 금액/비율(%)과 통증 상황으로 시작하라.\n"
+                "2. 정보 비대칭 해소(3초 판독표): 애매한 줄글 대신 내 상황을 손가락으로 짚어 '통과 vs 탈락 / 무료 vs 위약금 부과 / 유리 vs 불리'를 3초 만에 판정하는 구체적 숫자 비교 <table>을 본문 핵심에 배치하라.\n"
+                "3. 시간 단축 & 즉시 해결: '담당자에게 물어보세요', '약관을 확인하세요', '조건에 따라 다릅니다' 같은 무책임한 회피 문장을 100% 삭제하고, 계산 공식·시간대 환산법·클릭 순서를 명확히 답하라.\n"
+                "4. 모바일 2~3줄 호흡: 각 <p> 문단은 2~3문장 이내로 짧고 리듬감 있게 끊어 치고, 소제목(<h2>)은 독자의 질문 형태로 3~4개 구성하라.\n"
+                f"도메인: {domain} / 카테고리: {target_category}\n"
+                f"기존 제목: {orig_title} (추천 리모델링 방향: {new_title})\n"
+                f"기존 본문 요약: {plain_orig}\n"
+            )
+            rewritten = generate_json(remodel_prompt, agent_slot="doctor", response_schema=remodel_schema, timeout_seconds=90)
+            if isinstance(rewritten, dict) and len(rewritten.get("contentHtml") or "") >= 700:
+                new_title = (rewritten.get("title") or new_title).strip()
+                soup_new = BeautifulSoup(rewritten["contentHtml"], "html.parser")
+                h2s_new = soup_new.find_all("h2")
+                for idx_f, fig_html in enumerate(preserved_figures[:3]):
+                    fig_tag = BeautifulSoup(fig_html, "html.parser")
+                    if idx_f == 0:
+                        if h2s_new:
+                            h2s_new[0].insert_before(fig_tag)
+                        else:
+                            soup_new.insert(0, fig_tag)
+                    elif idx_f < len(h2s_new):
+                        h2s_new[idx_f].insert_after(fig_tag)
+                    else:
+                        soup_new.append(fig_tag)
+                raw_html = str(soup_new)
+                if rewritten.get("excerpt"):
+                    post_detail = dict(post_detail)
+                    post_detail["excerpt"] = rewritten["excerpt"][:200]
+                    post_detail["meta_description"] = rewritten["excerpt"][:200]
+                full_rewritten = True
+        except Exception:
+            pass
+
     cleaned_html, _ = sanitize_html_pre_publish(raw_html)
-    if "baro-interactive-checklist" not in cleaned_html:
-        cleaned_html = inject_interactive_widget(cleaned_html, new_title, target_category)
+    cleaned_html = style_tables(cleaned_html)
+    if "baro-interactive-checklist" not in cleaned_html and "data-cf-interactive-widget=" not in cleaned_html:
+        cleaned_html = inject_interactive_widget(cleaned_html, new_title)
 
     updated_post = dict(post_detail)
     updated_post["title"] = new_title
     updated_post["content"] = cleaned_html
+    extracted_thumb = extract_first_content_image(cleaned_html, domain)
+    if extracted_thumb and (not str(updated_post.get("thumbnail") or "").strip() or str(updated_post.get("thumbnail")).lower() == "null"):
+        updated_post["thumbnail"] = extracted_thumb
+    if extracted_thumb and (not str(updated_post.get("og_image") or "").strip() or str(updated_post.get("og_image")).lower() == "null"):
+        updated_post["og_image"] = extracted_thumb
     res = patch_cf_post_category_live(domain, updated_post, target_category, status_override="published")
     res["titleUpdated"] = new_title != orig_title
     res["newTitle"] = new_title
-    res["widgetInjected"] = "baro-interactive-checklist" in cleaned_html
+    res["fullRewritten"] = full_rewritten
+    res["thumbnailRepaired"] = bool(extracted_thumb)
+    res["widgetInjected"] = ("baro-interactive-checklist" in cleaned_html) or ("data-cf-interactive-widget=" in cleaned_html)
     return res
 
 
@@ -1292,7 +1419,7 @@ def audit_single_cf_post(
             }
 
     # 4. [시각적 어색함 검열 & 이미지 메타데이터(EXIF) 정밀 감식]
-    image_check = _check_images_and_suitability(domain, title, content_html, slug=slug)
+    image_check = _check_images_and_suitability(domain, title, content_html, slug=slug, thumbnail_url=str(post_detail.get("thumbnail") or ""))
     remediation_res = {"remediated": False}
     if alignment["aligned"] and auto_patch_category and image_check["suitability"] in (
         "fake_person_or_broken_text_ai",
@@ -1339,8 +1466,9 @@ def audit_single_cf_post(
         )
         action_code = "quarantined_off_topic_d_grade"
     elif (
-        image_check["suitability"] in ("broken", "missing", "needs_real_capture", "fake_person_or_broken_text_ai", "watermark_or_exif_contaminated")
+        image_check["suitability"] in ("broken", "missing", "missing_thumbnail", "needs_real_capture", "fake_person_or_broken_text_ai", "watermark_or_exif_contaminated")
         or quality_check["isMechanicalTitle"]
+        or quality_check.get("needsFullRewrite")
         or quality_check["qualityScore"] < 72
         or (index_status == "not_indexed" and quality_check["qualityScore"] < 82)
         or performance == "opportunity"
@@ -1355,6 +1483,7 @@ def audit_single_cf_post(
                 post_detail,
                 target_cat,
                 suggested_title=quality_check["suggestedRemodelTitle"],
+                needs_full_rewrite=bool(quality_check.get("needsFullRewrite")),
             )
             if remodel_live_res.get("ok"):
                 title = remodel_live_res.get("newTitle") or title
@@ -1779,6 +1908,7 @@ def get_auditor_status() -> Dict[str, Any]:
                 remodeled_total += 1
 
         audited_count = sum(grade_counts.values())
+        total_inventory = max(total_inventory, audited_count)
         daily_target = int(ledger.get("dailyQuotaTarget") or 20)
         today_audited = int(daily_rec.get("audited") or 0)
         today_remodeled = int(daily_rec.get("remodeled") or 0)

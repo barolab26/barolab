@@ -1658,7 +1658,7 @@
   </div>
 </div>
 
-<script src="naver_schedule.js?v=20261018-naver-7slots"></script>
+<script src="naver_schedule.js?v=20261031-slot-fix2"></script>
 <script src="history_manager.js?v=20261017-live-sync"></script>
 <script>
   function updateClock() {
@@ -2256,7 +2256,7 @@
     tbody.innerHTML = html.join('');
     tbody.querySelectorAll('[data-account-index]').forEach(row => row.onclick = () => selectAccount(Number(row.dataset.accountIndex),row.dataset.slot));
     const sub = document.getElementById('table-panel-sub');
-    if (sub) sub.textContent = `${publicationDate} (KST) 공개분 · ` + (!naverScheduleLoaded ? '서버 기록 조회 중' : !naverScheduleSource && !naverJournalSource ? '예약 / 공개 집계 미확인' : `예약 근거 확인 ${selectedCounts.reserved}/10편 · 실제 공개 확인 ${selectedCounts.published}/10편`) + (naverScheduleError ? ' · '+naverScheduleError : '');
+    if (sub) sub.textContent = `${publicationDate} (KST) 공개분 · ` + (!naverScheduleLoaded ? '서버 기록 조회 중' : !naverScheduleSource && !naverJournalSource ? '예약 / 공개 집계 미확인' : `예약 근거 확인 ${selectedCounts.reserved}/7편 · 실제 공개 확인 ${selectedCounts.published}/7편`) + (naverScheduleError ? ' · '+naverScheduleError : '');
   }
 
   function selectAccount(index, slot) {

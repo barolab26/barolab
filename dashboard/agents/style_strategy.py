@@ -128,24 +128,130 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         'kin': '지식인 맞춤형 솔루션 제공 및 CF 블로그 신뢰 유입을 만드는 전초기지.',
     }
     purpose = channel_purposes.get(channel, '하루 $100 수익 창출 및 트래픽 유입 기여')
-    from common.asset_map import get_asset_map_summary, match_synergy_cluster, get_account_pacing_strategy, match_monetization_options
+    from common.asset_map import CF_DOMAINS, get_asset_map_summary, match_synergy_cluster, get_account_pacing_strategy, match_monetization_options
+    if identity in CF_DOMAINS:
+        topic = f"{CF_DOMAINS[identity]['niche']} ({CF_DOMAINS[identity]['desc']})"
     asset_summary = get_asset_map_summary()
     from server.growth import business_evidence
     asset_summary += '\n[실측 사업 근거 · 미수집은 0이 아님]\n' + json.dumps(business_evidence(), ensure_ascii=False)
-    synergy = match_synergy_cluster(topic)
+    synergy = match_synergy_cluster(topic, identity=identity)
     pacing = get_account_pacing_strategy(identity) if channel == 'naver' else {'mode': 'standard', 'instruction': '채널 고유 유입 극대화'}
     monetization = match_monetization_options(topic, channel=channel)
+    used_today = list(parameters.get('usedKeywordsToday') or [])
+    day_dir = folder.parent
+    if day_dir.is_dir():
+        for peer in day_dir.iterdir():
+            if peer.is_dir() and peer.resolve() != folder.resolve():
+                for fn, fk in (('planning.json', 'keyword'), ('article.json', 'title'), ('writer.json', 'mainKeyword'), ('editor-content.json', 'title')):
+                    p_obj = load(peer / fn)
+                    if isinstance(p_obj, dict) and p_obj.get(fk) and str(p_obj[fk]) not in used_today:
+                        used_today.append(str(p_obj[fk]))
+    if channel == 'cf':
+        for bt in (synergy.get('todayLiveBridgeTargets') or []):
+            if isinstance(bt, dict) and bt.get('title') and bt['title'] not in used_today:
+                used_today.append(str(bt['title']))
+        synergy = {k: v for k, v in synergy.items() if k != 'todayLiveBridgeTargets'}
+
+    # Load verified Golden Keywords & Winning Topics for this exact channel/account
+    verified_candidates = []
+    for rel_path in ('dashboard/data/radar/daily_winning_topics.json', 'dashboard/data/radar/blokey-golden.json'):
+        wt_data = load(ROOT / rel_path)
+        if not wt_data:
+            continue
+        raw_map = (wt_data.get('cfDomainKeywords') or wt_data.get('cfAssignments') or {}) if channel == 'cf' else (wt_data.get('naverAccountSlotKeywords') or wt_data.get('naverAssignments') or {})
+        raw_list = raw_map.get(identity)
+        cands = raw_list if isinstance(raw_list, list) else ([raw_list] if isinstance(raw_list, dict) else [])
+        for c in cands:
+            kw_c = (c.get('keyword') if isinstance(c, dict) else str(c or '')).strip()
+            if kw_c and kw_c not in verified_candidates and not any(kw_c == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in kw_c) for u in used_today):
+                verified_candidates.append(kw_c)
+        if verified_candidates:
+            break
 
     screen_directive = channel == 'naver' and any(d.get('id') == 'ceo-directive:ego-screen-execution' and d.get('active')
                                                  for d in index.get('operatingDirectives', []))
+    bridge_targets = synergy.get('todayLiveBridgeTargets') or []
+    primary_bridge = bridge_targets[0] if bridge_targets else {}
+    bridge_mandate = (
+        f"\n5. [OSMU 수익 일점사 브릿지 동선 (필수)]: 이 채널({channel})은 본진 캐시카우인 CF 블로그({primary_bridge.get('domain')}: {primary_bridge.get('title')} / {primary_bridge.get('url')})로 독자를 넘기는 유입 전초기지다. 본문 핵심 체크리스트 직후 또는 마무리 Action Item에서 독자가 세부 판독표·계산 기준을 바로 이어서 확인할 수 있도록 브릿지 연결 맥락을 자연스럽게 설계하라.\n"
+        if channel != 'cf' and primary_bridge.get('url') else ''
+    )
+
+    if not screen_directive:
+        # Fast Single-Pass Revenue Planning: 1 unified LLM call instead of 4 sequential roleplay calls
+        fast_prompt = (
+            '당신은 하루 $100 수익 달성을 지휘하는 팀장(자비스)이자 4인 기획 크루(퍼블리·레이더·트레이스·자비스)다.\n'
+            '⚠️ [1순위 타깃 선정 규칙]: verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드가 있으면 반드시 그중 1순위 키워드를 keyword로 확정하라! usedKeywordsToday 목록에 이미 포함된 키워드나 주제는 카니발리제이션 방지를 위해 절대 재사용하지 마라.\n'
+            'writingGuide에는 반드시 아래 4대 원칙을 구체적으로 명시하라:\n'
+            '1. [클릭 유도 제목]: 공공기관 보고서식 제목 금지 -> "내 얘기잖아?" 하고 누르게 만드는 반려 함정 / 한 끗 차이 기준 / 3분 자가진단형 제목\n'
+            '2. [자청 4대 결핍 타격 도입부]: 공문서 정의 대신 독자의 원초적 결핍(①내 돈·혜택 날리는 손실 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)에서 출발\n'
+            '3. [본문 실전 수치 & 3초 판독기]: "조건에 따라 달라집니다 / 담당자에게 질문하세요" 같은 회피 문장 절대 금지! 구체적인 금액·비율(%)·기한 계산 공식과 손가락으로 짚어보는 3초 판독기(자가진단 표) 제시 + 스마트폰 기준 2~3줄 짧은 호흡\n'
+            '4. [마무리 Action Item]: 법적 면책 문구("개인별 자격을 조회하는 서비스가 아닙니다" 등) 절대 금지 -> 오늘/이번 주말 당장 실행할 구체적 준비 행동으로 닫기\n'
+            + bridge_mandate
+            + json.dumps({
+                'identity': identity,
+                'topic': topic,
+                'channel': channel,
+                'verifiedGoldenCandidates': verified_candidates[:4],
+                'usedKeywordsToday': used_today[:20],
+                'businessPurpose': purpose,
+                'synergy': synergy,
+                'pacing': pacing,
+                'monetization': monetization,
+                'existingDraftTitle': existing_draft.get('title'),
+            }, ensure_ascii=False)
+        )
+        fast_res = call('jarvis', fast_prompt, {
+            'keyword': {'type': 'string', 'minLength': 2, 'maxLength': 60},
+            'publiMessage': message,
+            'radarMessage': message,
+            'message': message,
+            'writingGuide': {'type': 'string', 'minLength': 1, 'maxLength': 5000},
+        })
+        keyword = fast_res.get('keyword') or (verified_candidates[0] if verified_candidates else topic[:50])
+        if used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
+            if verified_candidates:
+                keyword = verified_candidates[0][:60]
+            else:
+                cf_desc_candidates = [c.strip() for c in CF_DOMAINS.get(identity, {}).get('desc', '').replace('·', ',').split(',') if c.strip()]
+                fallback_kw = next((f"{c} 신청 조건 및 반려 주의사항" for c in cf_desc_candidates if not any(c[:4] in u for u in used_today)), f"{CF_DOMAINS.get(identity, {}).get('niche', topic)} 핵심 체크리스트")
+                keyword = fallback_kw[:60]
+        observed = {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'fast_revenue_lane'}
+        result = {
+            'status': 'agreed',
+            'agenda': agenda,
+            'keyword': keyword,
+            'identity': identity,
+            'channel': channel,
+            'parameters': parameters,
+            'writingGuide': fast_res['writingGuide'] + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
+            'bridgeTarget': primary_bridge if channel != 'cf' else None,
+            'benchmark': observed,
+            'transcript': transcript,
+            'createdAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),
+            'outcome': 'awaiting_url_measurements',
+            'causalClaim': False,
+        }
+        result['planningId'] = 'planning:' + hashlib.sha256(str(folder.resolve()).encode()).hexdigest()[:24]
+        write(path, result)
+        return result
+
     publi_prompt = (
         '당신은 퍼블리(콘텐츠 크리에이터)다. 이번 안건의 핵심 타깃 키워드(keyword) 1개를 선정하고 팀장과 크루들에게 기획 회의를 발제하라.\n'
+        '⚠️ [1순위 타깃 선정 & 중복 절대 금지] verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드가 있으면 최우선 선택하고, usedKeywordsToday 목록에 이미 포함된 키워드나 주제는 절대 재사용하지 마라.\n'
         '예시 톤: "팀장님, 이번에 [키워드] 쓸 건데요. 공고문/안내문 그대로 줄글로 나열하면 독자들 3초 만에 뒤로가기 누릅니다. 독자들이 제일 헷갈려 하고 헛걸음하기 쉬운 [핵심 함정/복잡한 조건]부터 정면으로 짚어야 합니다."\n'
         + 'JSON message,keyword.\n'
-        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
+        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'verifiedGoldenCandidates':verified_candidates[:4],'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'usedKeywordsToday':used_today,'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
     )
     request = call('publi', publi_prompt, {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
     keyword = request['keyword']
+    if used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
+        if verified_candidates:
+            keyword = verified_candidates[0][:60]
+        else:
+            cf_desc_candidates = [c.strip() for c in CF_DOMAINS.get(identity, {}).get('desc', '').replace('·', ',').split(',') if c.strip()]
+            fallback_kw = next((f"{c} 신청 조건 및 반려 주의사항" for c in cf_desc_candidates if not any(c[:4] in u for u in used_today)), f"{CF_DOMAINS.get(identity, {}).get('niche', topic)} 핵심 체크리스트")
+            keyword = fallback_kw[:60]
     observed = benchmark(keyword, folder) if screen_directive else {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'crew_debate'}
 
     radar_prompt = (
@@ -169,17 +275,20 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
     jarvis_prompt = (
         '당신은 팀장(자비스)이다. 퍼블리·레이더·트레이스의 치열한 토론을 종합하여 공문서 냄새를 완전히 뺀 최종 집필 지침(writingGuide)을 확정하라.\n'
         '예시 톤: "좋다. 공문서 냄새 다 빼라. 첫 문단은 독자 통증과 당장 꺼내볼 서류/화면으로 시작하고, 한 끗 차이 실전 사례와 3초 판정표 박고, 마지막은 오늘 당장 해둘 Action Item으로 끝내자."\n'
-        'writingGuide에는 반드시 아래 4가지를 구체적으로 명시하라:\n'
+        'writingGuide에는 반드시 아래 항목들을 구체적으로 명시하라:\n'
         '1. [클릭 유도 제목]: 공공기관 보고서식 제목 금지 -> "내 얘기잖아?" 하고 누르게 만드는 반려 함정 / 한 끗 차이 기준 / 3분 자가진단형 제목\n'
-        '2. [도입부 Pain Point]: 밤늦게 검색창을 켜는 독자의 막막함·억울함·헛걸음 걱정에서 출발 ("제공된 자료를 정리했습니다" 같은 보고서/메타 문구 절대 금지)\n'
-        '3. [본문 실전 팁 & 3초 판독기]: 어려운 용어 줄글 나열 금지 -> 한 끗 차이 실전 대비 사례 + 손가락으로 짚어보는 3초 판독기(자가진단 표/인용구) + 스마트폰 기준 2~3줄 짧은 호흡\n'
+        '2. [자청 4대 결핍 타격 도입부]: 공문서 정의 대신 독자의 원초적 결핍(①내 돈·혜택 날리는 손실 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)에서 출발\n'
+        '3. [본문 실전 수치 & 3초 판독기]: "조건에 따라 달라집니다 / 담당자에게 질문하세요" 같은 회피 문장 절대 금지! 구체적인 금액·비율(%)·시차/기한 계산 공식과 손가락으로 짚어보는 3초 판독기(자가진단 표) 제시 + 스마트폰 기준 2~3줄 짧은 호흡\n'
         '4. [마무리 Action Item]: 법적 면책 문구("개인별 자격을 조회하는 서비스가 아닙니다" 등) 절대 금지 -> 오늘/이번 주말 당장 실행할 구체적 준비 행동으로 닫기\n'
+        + bridge_mandate
         + 'JSON message,writingGuide.\n'
         + json.dumps({'keyword':keyword,'channel':channel,'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'monetization':monetization,'priorDiscussion':transcript,'observedBenchmark':observed},ensure_ascii=False)
     )
     instructions = call('jarvis', jarvis_prompt, {'message':message,'writingGuide':{'type':'string','minLength':1,'maxLength':5000}})
     result={'status':'agreed','agenda':agenda,'keyword':keyword,'identity':identity,'channel':channel,'parameters':parameters,
-        'writingGuide':instructions['writingGuide'],'benchmark':observed,'transcript':transcript,
+        'writingGuide':instructions['writingGuide'] + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
+        'bridgeTarget':primary_bridge if channel != 'cf' else None,
+        'benchmark':observed,'transcript':transcript,
         'createdAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'outcome':'awaiting_url_measurements','causalClaim':False}
     result['planningId']='planning:'+hashlib.sha256(str(folder.resolve()).encode()).hexdigest()[:24]
     write(path,result)

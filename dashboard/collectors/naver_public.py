@@ -188,7 +188,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
     now_dt = _now_kst(now)
     now_iso = now_dt.isoformat()
 
-    deadline = time.monotonic() + 12
+    deadline = time.monotonic() + (30 if force else 12)
     accounts = {}
     for acc_name, meta in DEFAULT_ACCOUNTS.items():
         passed = (account_map or {}).get(acc_name) if isinstance(account_map, dict) else None
@@ -204,7 +204,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
         try:
             if time.monotonic() >= deadline:
                 raise TimeoutError('Public verification cycle budget exhausted')
-            rss_by_account[acc_name] = fetch_blog_rss(blog_id, timeout=min(.8, max(.1, deadline-time.monotonic())))
+            rss_by_account[acc_name] = fetch_blog_rss(blog_id, timeout=min(4.0, max(.5, deadline-time.monotonic())))
         except Exception as exc:
             fetch_errors[acc_name] = str(exc)
             rss_by_account[acc_name] = []
@@ -246,7 +246,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                                      if meta['blog_id'] == rss_item.get('blogId')), None)
             folder = artifacts.get(url) or next((a.get('artifactFolder') for a in attempts
                 if expected_account is not None and a.get('account') == expected_account
-                and _titles_match(a.get('topic'), rss_item.get('title'))
+                and _titles_match(a.get('topic') or a.get('title'), rss_item.get('title'))
                 and a.get('publicationDate') == rss_item.get('publicationDate')), None)
             prior = evidence_by_url.get(url) or {}
             try:
@@ -257,13 +257,14 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             already_public = prior.get('publicHttpStatus') == 200 and prior.get('publicPublicationVerified') is True
             historical = str(rss_item.get('publicationDate') or '') < now_dt.date().isoformat()
             recent_failed_attempt = prior.get('bodyVerificationStatus') in ('unknown','mismatch') and prior.get('bodyVerificationReason') != 'cycle_budget_exhausted' and 0 <= age < 120
-            if recent_failed_attempt or already_public and (not force and historical or 0 <= age < 3600):
+            max_net_checks = 15 if force else 8
+            if recent_failed_attempt or already_public and (historical or 0 <= age < 3600):
                 body_evidence[url] = dict(prior)
-            elif len([v for v in body_evidence.values() if v.get('_networkChecked')]) >= 2 or time.monotonic() >= deadline:
+            elif len([v for v in body_evidence.values() if v.get('_networkChecked')]) >= max_net_checks or time.monotonic() >= deadline:
                 body_evidence[url] = dict(prior) if already_public else {'bodyVerificationStatus':'deferred', 'bodyVerificationReason':'cycle_budget_exhausted'}
             else:
                 folder = resolve_artifact_folder(folder, expected_account, base_dir)
-                body_evidence[url] = verify_public_body(url, folder, timeout=min(1.5, max(.1, deadline-time.monotonic())), deadline=deadline)
+                body_evidence[url] = verify_public_body(url, folder, timeout=min(2.5, max(.1, deadline-time.monotonic())), deadline=deadline)
                 body_evidence[url]['checkedAt'] = now_iso
                 body_evidence[url]['_networkChecked'] = True
         return {k:v for k,v in body_evidence[url].items() if not k.startswith("_")}
@@ -304,11 +305,11 @@ def reconcile(base=None, account_map=None, now=None, force=False):
         slot_obj["publicVerifiedAt"] = body_for(rss_item).get("checkedAt", now_iso)
         slot_obj.update(body_for(rss_item))
 
-    # Walk completedByDate and completedAccounts in pipeline_status.js
+    # Walk completedByDate (newest dates first so today's posts are never starved) and completedAccounts in pipeline_status.js
     completed_by_date = ps.get("completedByDate") or {}
     acc_id_to_name = {v["acc_id"]: k for k, v in accounts.items()}
 
-    for pub_date, date_map in completed_by_date.items():
+    for pub_date, date_map in sorted(completed_by_date.items(), key=lambda kv: str(kv[0]), reverse=True):
         if not isinstance(date_map, dict):
             continue
         for acc_id, record in date_map.items():
@@ -421,10 +422,13 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             acc_name = attempt.get("account")
             if acc_name not in accounts:
                 continue
-            a_topic = attempt.get("topic")
+            a_topic = attempt.get("topic") or attempt.get("title")
             a_reserve = attempt.get("reserveTime") or ""
             pub_date = (attempt.get("publicationDate") or a_reserve[:10] or attempt.get("workDate") or now_dt.strftime("%Y-%m-%d"))[:10]
             slot_key = attempt.get("scheduledSlot") or (a_reserve[-5:] if len(a_reserve) >= 5 else "11:00")
+            m_slot = re.search(r'-(\d{2})(\d{2})$', Path(str(attempt.get("artifactFolder") or "")).name)
+            if m_slot:
+                slot_key = f"{m_slot.group(1)}:{m_slot.group(2)}"
             blog_id = accounts[acc_name]["blog_id"]
             acc_id = accounts[acc_name]["acc_id"]
             rss_items = rss_by_account.get(acc_name) or []
@@ -544,9 +548,10 @@ def resolve_artifact_folder(value, account, base):
             'soultin', 'soul5373', 'yoon_master', 'adinfo0905', 'stone0747'):
         return None
     output = (Path(base) / 'output' / account).resolve()
+    scheduled_output = (Path(base) / 'output' / 'scheduled').resolve()
     candidate = Path(value)
     native = candidate.resolve()
-    if native.is_relative_to(output) and native != output and native.is_dir():
+    if ((native.is_relative_to(output) and native != output) or (native.is_relative_to(scheduled_output) and native != scheduled_output)) and native.is_dir():
         return native
     windows = PureWindowsPath(value)
     relocated = False

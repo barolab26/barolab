@@ -711,13 +711,24 @@
     const day=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
     const todayPeriod=revenueView.categoryPeriod(rev,null,'today',day);
     const monthPeriod=revenueView.categoryPeriod(rev,null,'month',day);
+    const prevMonthPeriod=revenueView.categoryPeriod(rev,null,'previousMonth',day);
     const yesterdayPeriod=revenueView.categoryPeriod(rev,null,'yesterday',day);
     const todayUsd=revenueView.currencyValue(todayPeriod,'USD');
-    const goalPct=todayUsd===null?null:Math.max(0,Math.min(100,todayUsd));
-    if ($('kpi-rev-today')) $('kpi-rev-today').textContent=`오늘 ${revenueView.moneyText(todayPeriod)} · 이번 달 ${revenueView.moneyText(monthPeriod)}`;
-    if ($('kpi-rev-pct')) $('kpi-rev-pct').textContent=goalPct===null?'일 목표 $100 · USD 미확인':`일 목표 $100 · USD 확인분 ${todayUsd.toFixed(2)}%`;
+    const yestUsd=revenueView.currencyValue(yesterdayPeriod,'USD');
+    const effectiveUsd=(todayUsd!==null && todayUsd>0)?todayUsd:(yestUsd!==null?yestUsd:todayUsd);
+    const goalPct=effectiveUsd===null?null:Math.max(0,Math.min(100,effectiveUsd));
+    const allChecked=revenueView.categoryCheckedAt?.(rev,null);
+    const adsChecked=revenueView.categoryCheckedAt?.(rev,'adsense');
+    const adpChecked=revenueView.categoryCheckedAt?.(rev,'adpost');
+    const mText = (revenueView.currencyValue(monthPeriod,'KRW')!==null || (revenueView.currencyValue(monthPeriod,'USD')??0)>0)
+      ? `이번 달 ${revenueView.moneyText(monthPeriod)}`
+      : `${Number((rev.previousMonth||'').slice(5,7))||10}월 확정 ${revenueView.moneyText(prevMonthPeriod)}`;
+    if ($('kpi-rev-today')) $('kpi-rev-today').textContent=`오늘 ${revenueView.moneyText(todayPeriod)} · 어제 ${revenueView.moneyText(yesterdayPeriod)} (${mText})`;
+    if ($('kpi-rev-pct')) $('kpi-rev-pct').textContent=allChecked?`🕒 수집 ${revenueView.shortKstTime(allChecked)} KST`:(goalPct===null?'일 목표 $100 · USD 미확인':`일 목표 $100 · USD 확인분 ${effectiveUsd.toFixed(2)}%`);
     if ($('kpi-rev-bar')) $('kpi-rev-bar').style.width=`${goalPct ?? 0}%`;
-    if ($('kpi-rev-month')) $('kpi-rev-month').textContent=`원래 통화별 확인분 · 어제 ${revenueView.moneyText(yesterdayPeriod)}`;
+    if ($('kpi-rev-month')) $('kpi-rev-month').textContent=allChecked
+      ? `🕒 마지막 수집: 애드센스 ${revenueView.shortKstTime(adsChecked)} · 애드포스트 ${revenueView.shortKstTime(adpChecked)} · 일 목표 $100 대비 ${(goalPct??0).toFixed(2)}%`
+      : `원래 통화별 확인분 · 어제 ${revenueView.moneyText(yesterdayPeriod)}`;
 
     // KPI 2: Visitors (CF 16 + Naver 5)
     const ta = latestMetricsDoc?.trafficAnalysis || window.BaroLabTraffic?.getData() || {};

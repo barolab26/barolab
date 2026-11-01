@@ -142,12 +142,20 @@ def adsense(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE'):
         seen.add(key)
         values[key[0]] += money(value)
         details.append({'date': key[0], 'domain': domain, 'amount': str(money(value))})
-    return {'daily': {d: str(v) for d, v in values.items()}, 'details': details,
+    zero_dates = []
+    if any(d in registered for d in sites):
+        for offset in range((end - start).days + 1):
+            day_iso = (start + timedelta(days=offset)).isoformat()
+            if day_iso not in values:
+                values[day_iso] = Decimal('0.00')
+                zero_dates.append(day_iso)
+    return {'daily': {d: str(v) for d, v in sorted(values.items())}, 'details': details,
+            'zeroActivityDates': zero_dates,
             'status': 'collected',
             'reportSource': 'AdSense Management API v2 · DATE/DOMAIN_NAME',
             'siteStatus': {d: registered.get(d, 'not_registered') for d in sites},
             'registeredDomains': [d for d in sites if d in registered],
-            'reason': f'조회 대상 {len(sites)}개 · 계정 등록 {sum(d in registered for d in sites)}개 · 수익 행 있는 날짜만 집계'}
+            'reason': f'조회 대상 {len(sites)}개 · 계정 등록 {sum(d in registered for d in sites)}개 · 무실적 일자 $0.00 확인'}
 
 
 def adsense_page_performance(cfg, start, end, sites, prefix='SJ_GOOGLE_ADSENSE'):
@@ -712,9 +720,41 @@ def _adpost_ego_report(start, end, expected_account='soul5373', *, space_id=None
             raise RevenueSourceError('browser_unavailable', 'EGO 애드포스트 조회 중단 · 이전 작업 공간 확인 필요') from None
 
 
+def _adpost_cdp_report(start, end, cfg=None, account='soul5373', port=9333):
+    import socket
+    from playwright.sync_api import sync_playwright
+    try:
+        with socket.create_connection(('127.0.0.1', int(port)), timeout=0.5):
+            pass
+    except OSError:
+        return None
+    control_path = DATA / 'secure' / 'adpost-ego-state.json'
+    with collector_lock(DATA / 'adpost-ego.lock') as acquired:
+        if not acquired:
+            raise RevenueSourceError('deferred', '애드포스트 EGO 조회가 이미 진행 중입니다.')
+        with sync_playwright() as p:
+            browser = p.chromium.connect_over_cdp(f'http://127.0.0.1:{int(port)}', timeout=10000)
+            context = browser.contexts[0] if browser.contexts else browser.new_context()
+            page = context.new_page()
+            try:
+                rows, publisher, blogs = _adpost_report(page, cfg or {}, account, start, end)
+                medias = browser_json(page, f'/api/medias?publisherId={publisher}&mediaStatus=ALL&mediaType=ALL')
+                if not isinstance(medias, list) or any(str(m.get('publisherId')) != str(publisher) for m in medias):
+                    raise RevenueSourceError('auth_required', '애드포스트 미디어 소유자 식별 불일치')
+                atomic_write(control_path, {'status': 'completed', 'spaceId': None, 'transport': f'cdp:{int(port)}',
+                                            'finishedAt': stamp(), 'taskFinished': True})
+                return rows, str(publisher), blogs, medias
+            finally:
+                try:
+                    page.close()
+                except Exception:
+                    pass
+
+
 @observed_operation('metrics', 'revenue-collection')
 def adpost(start, end, cfg=None, account='soul5373', port=9333, *, space_id=None):
-    rows, publisher, blogs, medias = _adpost_ego_report(start, end, account, space_id=space_id)
+    cdp_result = _adpost_cdp_report(start, end, cfg, account, port) if space_id is None and port else None
+    rows, publisher, blogs, medias = cdp_result if cdp_result is not None else _adpost_ego_report(start, end, account, space_id=space_id)
     result = parse_adpost_rows(rows, start, end)
     if account == 'soul5373':
         if not isinstance(medias,list) or any(str(m.get('publisherId'))!=str(publisher) for m in medias):
@@ -722,7 +762,7 @@ def adpost(start, end, cfg=None, account='soul5373', port=9333, *, space_id=None
         result['accountBreakdown'] = parse_adpost_accounts(rows, medias, start, end)
     result.update(publisherId=str(publisher), publisherVerified=True,
                   mediaAliases=[b['alias'] for b in blogs], account=account, collectionAccount='soul5373', declaredRealNameAccountCount=3,
-                  collectionTransport='ego-browser', browserProfile='soul5373', browserPort=None,
+                  collectionTransport='ego-browser', browserProfile='soul5373', browserPort=port if cdp_result is not None else None,
                   tabOwnership={'transport': 'ego-browser', 'profile': 'soul5373', 'ownedTemporary': True},
                   reason='soul5373 한 곳에서 조회 · 수익은 3개 계정별 구분 · 미집계 날짜는 집계 중')
     return result
@@ -1082,11 +1122,67 @@ def replyalba(cfg, start, end, now=None):
             'reason': '공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기'}
 
 
+def split_result_for_month(result, m_start, m_end):
+    if not isinstance(result, dict):
+        return result
+    s_iso, e_iso = m_start.isoformat(), m_end.isoformat()
+    out = dict(result)
+    out['daily'] = {d: v for d, v in (result.get('daily') or {}).items() if s_iso <= d <= e_iso}
+    if 'details' in result:
+        out['details'] = [row for row in (result.get('details') or []) if not row.get('date') or s_iso <= row['date'] <= e_iso]
+    if 'pendingDates' in result:
+        out['pendingDates'] = [d for d in (result.get('pendingDates') or []) if s_iso <= d <= e_iso]
+    if 'zeroActivityDates' in result:
+        out['zeroActivityDates'] = [d for d in (result.get('zeroActivityDates') or []) if s_iso <= d <= e_iso]
+    if 'accountBreakdown' in result:
+        out['accountBreakdown'] = [split_result_for_month(acc, m_start, m_end) for acc in (result.get('accountBreakdown') or [])]
+    out['reportStart'] = s_iso
+    out['reportEnd'] = e_iso
+    return out
+
+
+def merge_previous_month_result(previous, prev_month, source_id, raw_result, query_start, prev_end, checked_at):
+    prev_entry = previous.get('months', {}).get(prev_month)
+    if not isinstance(prev_entry, dict) or not isinstance(prev_entry.get('sources'), list):
+        return
+    prev_slice = split_result_for_month(raw_result, query_start, prev_end)
+    q_iso, e_iso = query_start.isoformat(), prev_end.isoformat()
+    by_id = {s.get('id'): s for s in prev_entry['sources'] if isinstance(s, dict) and s.get('id')}
+
+    def _merge_into(target, patch):
+        daily = dict(target.get('daily') or {})
+        daily.update(patch.get('daily') or {})
+        target['daily'] = dict(sorted(daily.items()))
+        if 'details' in patch:
+            kept = [r for r in (target.get('details') or []) if r.get('date') and r['date'] < q_iso]
+            target['details'] = kept + list(patch.get('details') or [])
+        if 'pendingDates' in patch or 'pendingDates' in target:
+            settled = set(target['daily'].keys())
+            kept_p = [d for d in (target.get('pendingDates') or []) if d < q_iso and d not in settled]
+            target['pendingDates'] = sorted(set(kept_p + [d for d in (patch.get('pendingDates') or []) if d not in settled]))
+        if 'zeroActivityDates' in patch:
+            kept_z = [d for d in (target.get('zeroActivityDates') or []) if d < q_iso and float(target['daily'].get(d, 0) or 0) == 0]
+            target['zeroActivityDates'] = sorted(set(kept_z + list(patch.get('zeroActivityDates') or [])))
+        target.update(status='collected', checkedAt=checked_at, lastSuccessAt=checked_at, reportEnd=e_iso)
+
+    if source_id.startswith('adpost-') and prev_slice.get('accountBreakdown'):
+        for acc_row in prev_slice['accountBreakdown']:
+            acc_id = 'adpost-' + str(acc_row.get('account') or '')
+            if acc_id in by_id:
+                _merge_into(by_id[acc_id], acc_row)
+    elif source_id in by_id:
+        _merge_into(by_id[source_id], prev_slice)
+    prev_entry['checkedAt'] = checked_at
+
+
 @observed_operation('metrics', 'revenue-collection')
 def collect(now=None):
     now = now or datetime.now(KST)
     today, month = now.date(), now.strftime('%Y-%m')
     start = today.replace(day=1)
+    prev_end = start - timedelta(days=1)
+    prev_month = prev_end.strftime('%Y-%m')
+    query_start = min(start, today - timedelta(days=7)) if today.day <= 5 else start
     with collector_lock(DATA / 'revenue.lock') as acquired:
         if not acquired:
             return {'status': 'busy'}
@@ -1103,19 +1199,23 @@ def collect(now=None):
         cfg = revenue_config()
         previous = read_json(SNAPSHOT)
         old_sources = {s['id']: s for s in previous.get('months', {}).get(month, {}).get('sources', [])}
-        jobs = [lambda: adsense(cfg, start, today, owned, accounts.get('sj', {}).get('env_prefix', 'SJ_GOOGLE_ADSENSE'))]
-        jobs += [lambda account=account, port=port: adpost(start, today, cfg, account, port) for account, port in ADPOST_ACCOUNTS]
-        jobs.append(lambda: coupang(cfg, start, today, now=now))
+        jobs = [lambda: adsense(cfg, query_start, today, owned, accounts.get('sj', {}).get('env_prefix', 'SJ_GOOGLE_ADSENSE'))]
+        jobs += [lambda account=account, port=port: adpost(query_start, today, cfg, account, port) for account, port in ADPOST_ACCOUNTS]
+        jobs.append(lambda: coupang(cfg, query_start, today, now=now))
         for record, job in zip(sources, jobs):
             try:
                 if record['id'] == 'adsense-sj' and not owned:
                     raise ValueError('CF 소유 도메인 목록 미설정')
-                record.update(job())
+                raw_result = job()
+                now_stamp = stamp()
+                if query_start < start:
+                    merge_previous_month_result(previous, prev_month, record['id'], raw_result, query_start, prev_end, now_stamp)
+                record.update(split_result_for_month(raw_result, start, today))
                 for day, value in record['daily'].items():
                     if not start.isoformat() <= day <= today.isoformat():
                         raise ValueError('조회 기간 밖의 수익 행')
                     money(value)
-                record.update(checkedAt=stamp(), reportStart=start.isoformat(), reportEnd=today.isoformat())
+                record.update(checkedAt=now_stamp, lastSuccessAt=now_stamp, reportStart=start.isoformat(), reportEnd=today.isoformat())
             except Exception as exc:
                 # Exceptions can contain tokens/URLs. Persist only our controlled validation text.
                 reason = str(exc) if isinstance(exc, ValueError) and not isinstance(exc, json.JSONDecodeError) else '원천 연결 실패; 이전 수집값 유지'
@@ -1132,7 +1232,11 @@ def collect(now=None):
         family_prefix = family.get('env_prefix', 'AAA10291028_GOOGLE_ADSENSE')
         if family.get('sites') and all(cfg.get(family_prefix + '_' + key) for key in ('ACCOUNT_ID', 'CLIENT_ID', 'CLIENT_SECRET', 'REFRESH_TOKEN')):
             try:
-                family_record.update(adsense(cfg, start, today, family['sites'], family_prefix), reportStart=start.isoformat(), reportEnd=today.isoformat(), checkedAt=stamp())
+                raw_fam = adsense(cfg, query_start, today, family['sites'], family_prefix)
+                now_stamp = stamp()
+                if query_start < start:
+                    merge_previous_month_result(previous, prev_month, family_record['id'], raw_fam, query_start, prev_end, now_stamp)
+                family_record.update(split_result_for_month(raw_fam, start, today), reportStart=start.isoformat(), reportEnd=today.isoformat(), checkedAt=now_stamp)
             except Exception:
                 if old_sources.get(family_record['id']):
                     family_record.update(old_sources[family_record['id']])
@@ -1157,9 +1261,12 @@ def collect(now=None):
             record.update(affiliate_configuration(cfg, key))
             if (key == 'toss' and record['reportCapability'] == 'api_report') or (key == 'replyalba' and record['credentialPresence']['login']):
                 try:
-                    result = toss(cfg, start, today) if key == 'toss' else replyalba(cfg, start, today, now=now)
-                    record.update(result, reportStart=start.isoformat(),
-                                  reportEnd=today.isoformat(), checkedAt=stamp())
+                    raw_aff = toss(cfg, query_start, today) if key == 'toss' else replyalba(cfg, query_start, today, now=now)
+                    now_stamp = stamp()
+                    if query_start < start:
+                        merge_previous_month_result(previous, prev_month, key, raw_aff, query_start, prev_end, now_stamp)
+                    record.update(split_result_for_month(raw_aff, start, today), reportStart=start.isoformat(),
+                                  reportEnd=today.isoformat(), checkedAt=now_stamp, lastSuccessAt=now_stamp)
                 except Exception as exc:
                     old = old_sources.get(key)
                     if old and old.get('daily'):
@@ -1172,8 +1279,11 @@ def collect(now=None):
             elif key == 'replyalba' and record['configurationStatus'] == 'configured':
                 record['reason'] = '로그인 설정됨 · 정산서·공식 수익 보고 API 미확인'
             sources.append(record)
-        previous.setdefault('months', {})[month] = {'sources': sources, 'checkedAt': stamp()}
-        previous.update(schema='dashboard-revenue-v1', checkedAt=stamp())
+        final_stamp = stamp()
+        previous.setdefault('months', {})[month] = {'sources': sources, 'checkedAt': final_stamp}
+        previous.update(schema='dashboard-revenue-v1', checkedAt=final_stamp, updatedAt=final_stamp)
+        if isinstance(previous.get('adsenseCollection'), dict):
+            previous['adsenseCollection']['checkedAt'] = final_stamp
         previous['pagePerformance'] = collect_page_revenue(cfg, accounts, now)
         atomic_write(SNAPSHOT, previous)
     collect_growth_revenue()
@@ -1222,9 +1332,13 @@ def summarize(document, now=None):
     now = now or datetime.now(KST)
     today, month = now.date(), now.strftime('%Y-%m')
     start, yesterday = today.replace(day=1), today - timedelta(days=1)
+    prev_end = start - timedelta(days=1)
+    prev_start = prev_end.replace(day=1)
+    prev_month_key = prev_end.strftime('%Y-%m')
     selected = document.get('months', {}).get(month, {})
     sources = selected.get('sources', [])
-    previous_sources = document.get('months', {}).get(yesterday.strftime('%Y-%m'), {}).get('sources', []) if yesterday.month != today.month else []
+    prev_month_sources = document.get('months', {}).get(prev_month_key, {}).get('sources', [])
+    previous_sources = prev_month_sources if yesterday.month != today.month else []
     if not sources and previous_sources:
         sources = [dict(s, daily={}, pendingDates=[]) for s in previous_sources]
     # Older measurements remain visible with their original timestamp and stale badge.
@@ -1234,15 +1348,29 @@ def summarize(document, now=None):
         except (ValueError, KeyError, TypeError):
             record['stale'] = True
     windows = [('throughYesterday', start, yesterday), ('yesterday', yesterday, yesterday),
-               ('today', today, today), ('month', start, today)]
+               ('today', today, today), ('month', start, today), ('previousMonth', prev_start, prev_end)]
     def amounts(records):
         ids = {s['id'] for s in records}
-        return {key: period([s for s in previous_sources if s['id'] in ids]
-                            if key == 'yesterday' and previous_sources else records, a, b)
-                for key, a, b in windows}
-    categories = [{'id': key, 'label': label, 'sources': [s for s in sources if s['category'] == key],
-                   'periods': amounts([s for s in sources if s['category'] == key])}
-                  for key, label in CATEGORIES]
+        out = {}
+        for key, a, b in windows:
+            if key == 'yesterday' and previous_sources:
+                target = [s for s in previous_sources if s['id'] in ids]
+            elif key == 'previousMonth':
+                target = [s for s in prev_month_sources if s['id'] in ids]
+            else:
+                target = records
+            out[key] = period(target, a, b)
+        return out
+    categories = []
+    last_collected_by_category = {}
+    for key, label in CATEGORIES:
+        cat_sources = [s for s in sources if s['category'] == key]
+        cat_checked = max((s.get('checkedAt') or s.get('lastSuccessAt') for s in cat_sources if s.get('checkedAt') or s.get('lastSuccessAt')), default=None)
+        if not cat_checked and prev_month_sources:
+            cat_checked = max((s.get('checkedAt') or s.get('lastSuccessAt') for s in prev_month_sources if s.get('category') == key and (s.get('checkedAt') or s.get('lastSuccessAt'))), default=None)
+        last_collected_by_category[key] = cat_checked
+        categories.append({'id': key, 'label': label, 'checkedAt': cat_checked, 'sources': cat_sources,
+                           'periods': amounts(cat_sources)})
     daily = []
     for offset in range(today.day):
         day = start + timedelta(days=offset)
@@ -1252,10 +1380,16 @@ def summarize(document, now=None):
     for record in sources:
         record['periods'] = amounts([record])
         record['lastReportDay'] = max(record.get('daily', {}), default=None)
-    return {'status': 'partial' if any(s.get('daily') for s in sources) else 'not_collected',
-            'timezone': 'Asia/Seoul', 'month': month, 'today': today.isoformat(),
-            'yesterday': yesterday.isoformat(), 'checkedAt': selected.get('checkedAt'),
+    overall_checked = max([c for c in [selected.get('checkedAt'), document.get('checkedAt'), *last_collected_by_category.values()] if c], default=None)
+    return {'status': 'partial' if any(s.get('daily') or s.get('periods', {}).get('yesterday', {}).get('amounts') for s in sources) else 'not_collected',
+            'timezone': 'Asia/Seoul', 'month': month, 'previousMonth': prev_month_key, 'today': today.isoformat(),
+            'yesterday': yesterday.isoformat(), 'checkedAt': overall_checked,
+            'lastCollectedByCategory': last_collected_by_category,
             'categories': categories, 'totals': amounts(sources), 'daily': daily,
+            'months': {
+                prev_month_key: {'sources': prev_month_sources, 'checkedAt': document.get('months', {}).get(prev_month_key, {}).get('checkedAt')},
+                month: {'sources': sources, 'checkedAt': selected.get('checkedAt')},
+            },
             'note': '확인된 수익만 표시 · 미연결 계정/업체 제외 · 예상 수익이며 정산액과 다를 수 있음'}
 
 

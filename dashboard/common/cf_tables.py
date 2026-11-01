@@ -72,6 +72,28 @@ def inject_interactive_widget(html, title=''):
         for idx, (sc_title, sc_desc) in enumerate(scenarios[:3], 1)
     )
     short_title = (title or (h2s[0].get_text(' ', strip=True) if h2s else '핵심 조건')).split(',')[0].strip()
+    cta_footer_html = ''
+    try:
+        from common.asset_map import match_monetization_options, get_today_cf_bridge_targets
+        mon = match_monetization_options(title, channel='cf')
+        aff_links = []
+        for opt in mon.get('affiliateOptions') or []:
+            if opt.get('link'):
+                aff_links.append(
+                    f'<a href="{escape(opt["link"])}" target="_blank" rel="noopener noreferrer" '
+                    f'style="display:block;margin-top:8px;padding:11px 14px;background:#1d4ed8;color:#ffffff;font-weight:700;font-size:14px;border-radius:10px;text-decoration:none;text-align:center;">'
+                    f'✈️ 관련 특가 혜택·할인 조건 바로 확인하기 →</a>'
+                )
+        bridges = [b for b in (get_today_cf_bridge_targets(title) or []) if b.get('url') and b.get('title') and b.get('title') != title][:2]
+        bridge_items = ''.join(
+            f'<a href="{escape(b["url"])}" style="display:block;padding:8px 11px;margin-top:6px;background:#ffffff;border:1px solid #bfdbfe;border-radius:8px;color:#1e40af;font-size:13.5px;font-weight:600;text-decoration:none;">'
+            f'📌 함께 확인하면 돈 아끼는 글: {escape(b["title"][:48])} →</a>'
+            for b in bridges
+        )
+        if aff_links or bridge_items:
+            cta_footer_html = f'<div style="margin-top:12px;padding-top:10px;border-top:1px solid #bfdbfe;">{"".join(aff_links)}{bridge_items}</div>'
+    except Exception:
+        cta_footer_html = ''
     widget_markup = (
         f'<section data-cf-interactive-widget="cf-diagnosis-v1" role="region" aria-label="3초 자가진단 판독기" '
         f'style="margin:26px 0;padding:18px 18px 14px;background:linear-gradient(180deg,#f8fafc 0%,#eff6ff 100%);border:2px solid #3b82f6;border-radius:14px;box-shadow:0 4px 14px rgba(37,99,235,0.08);">'
@@ -82,6 +104,7 @@ def inject_interactive_widget(html, title=''):
         f'<p style="margin:0 0 12px;font-size:13.5px;color:#475569;line-height:1.5;">스마트폰 화면에서 본인에게 해당하는 항목을 직접 눌러 체크하고, 아래 상황별 판독 결과를 펼쳐 확인해보세요.</p>'
         f'<div style="margin-bottom:12px;">{chk_html}</div>'
         f'<div>{acc_html}</div>'
+        f'{cta_footer_html}'
         f'</section>'
     )
     widget_node = BeautifulSoup(widget_markup, 'html.parser').section
@@ -231,6 +254,177 @@ def repair_recent(days=7, root=None, domains=None):
         if result['status']!='confirmed':report['errors'].append({'domain':domain,'stage':'cache','error':result['error']})
     report['finishedAt']=dt.datetime.now(dt.timezone.utc).isoformat();save()
     return folder,report
+
+
+def extract_first_content_image(html_text, domain=''):
+    if not html_text:
+        return ''
+    soup = BeautifulSoup(html_text, 'html.parser')
+    for img in soup.find_all('img'):
+        src = (img.get('src') or '').strip()
+        if not src or src.startswith('data:') or '{{IMAGE_' in src:
+            continue
+        if src.startswith('/') and domain:
+            return f'https://www.{domain}{src}'
+        return src
+    return ''
+
+
+def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None):
+    """Retrofit existing published CF posts with the 3-second CRO self-check + affiliate/internal bridge widget + table styling."""
+    import datetime as dt
+    import hashlib, json, time
+    from pathlib import Path
+    import requests
+    from cf_posting import posting
+    from common.asset_map import PRIORITY_CASHCOW_DOMAINS
+    from common.dashboard_jobs import write
+    root = Path(root or Path(__file__).resolve().parents[2])
+    folder = root / 'cf_posting/output' / ('cro-retrofit-' + dt.datetime.now().strftime('%Y%m%dT%H%M%S%f'))
+    folder.mkdir(parents=True, exist_ok=True)
+    target_domains = list(domains) if domains else (list(PRIORITY_CASHCOW_DOMAINS) + [d for d in posting.ALL_DOMAINS if d not in PRIORITY_CASHCOW_DOMAINS])
+    report = {'version': VERSION, 'startedAt': dt.datetime.now(dt.timezone.utc).isoformat(), 'posts': [], 'errors': []}
+    def save():
+        write(folder / 'report.json', report)
+    save()
+    with posting.cleaner_lock(wait_seconds=30) as acquired:
+        if not acquired:
+            return {'status': 'busy', 'updatedCount': 0, 'posts': [], 'errors': [{'stage': 'lock', 'error': 'CF publisher active'}]}
+        for domain in target_domains:
+            try:
+                candidates = posting.published_inventory('https://www.' + domain)
+            except Exception as exc:
+                report['errors'].append({'domain': domain, 'stage': 'inventory', 'error': str(exc)})
+                save()
+                continue
+            domain_updated = 0
+            for item in candidates:
+                if domain_updated >= limit_per_domain:
+                    break
+                if item.get('status') not in ('published', None):
+                    continue
+                try:
+                    endpoint = f'https://www.{domain}/api/posts/{int(item["id"])}'
+                    response = requests.get(endpoint, timeout=15)
+                    response.raise_for_status()
+                    original = response.json()['post']
+                    body = original.get('content') or ''
+                    cur_thumb = str(original.get('thumbnail') or '').strip()
+                    thumb_missing = (not cur_thumb) or cur_thumb.lower() == 'null'
+                    extracted_thumb = extract_first_content_image(body, domain) if thumb_missing else cur_thumb
+                    if 'data-cf-interactive-widget=' in body and ('<table' not in body.lower() or VERSION in body) and not (thumb_missing and extracted_thumb):
+                        continue
+                    revised = inject_interactive_widget(style_tables(body), original.get('title', ''))
+                    if revised == body and not (thumb_missing and extracted_thumb):
+                        continue
+                    backup = folder / domain / str(item['id'])
+                    backup.mkdir(parents=True, exist_ok=True)
+                    write(backup / 'original.json', original)
+                    write(backup / 'revised.json', {'content': revised})
+                    payload = {k: original[k] for k in ('title', 'slug', 'excerpt', 'category', 'thumbnail', 'status', 'source', 'publish_at', 'meta_description', 'og_image', 'focus_keyword', 'redirect_to') if k in original}
+                    payload['content'] = revised
+                    if extracted_thumb:
+                        payload['thumbnail'] = extracted_thumb
+                        if not str(payload.get('og_image') or '').strip() or str(payload.get('og_image')).lower() == 'null':
+                            payload['og_image'] = extracted_thumb
+                    key = posting.get_api_key(domain)
+                    result = requests.put(endpoint, json=payload, headers={'x-api-key': key, 'Authorization': 'Bearer ' + key}, timeout=20, allow_redirects=False)
+                    if result.status_code in (401, 403):
+                        from dotenv import dotenv_values
+                        prefix = domain.split('.')[0].replace('-', '').upper()
+                        password = dotenv_values(root / '.env').get(prefix + '_CF_ADMIN_PASSWORD')
+                        if password:
+                            login = requests.post(f'https://www.{domain}/api/auth/login', json={'password': password}, timeout=12, allow_redirects=False)
+                            login.raise_for_status()
+                            token = login.json().get('token')
+                            if isinstance(token, str) and token:
+                                result = requests.put(endpoint, json=payload, headers={'Authorization': 'Bearer ' + token}, timeout=20, allow_redirects=False)
+                    result.raise_for_status()
+                    address = f'https://www.{domain}/{original["slug"]}'
+                    proof = {
+                        'domain': domain,
+                        'postId': original['id'],
+                        'title': original.get('title', ''),
+                        'url': address,
+                        'apiStatus': result.status_code,
+                        'croWidgetInjected': 'data-cf-interactive-widget=' in revised,
+                        'verifiedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+                    }
+                    write(backup / 'receipt.json', proof)
+                    report['posts'].append(proof)
+                    domain_updated += 1
+                    save()
+                except Exception as exc:
+                    report['errors'].append({'domain': domain, 'postId': item.get('id'), 'error': str(exc)})
+                    save()
+            time.sleep(0.05)
+    if report['posts']:
+        cache = purge_repaired_posts(report['posts'])
+        for proof in report['posts']:
+            proof['cachePurge'] = cache.get(proof['domain'], {'status': 'skipped'})
+    report['finishedAt'] = dt.datetime.now(dt.timezone.utc).isoformat()
+    save()
+    return {
+        'status': 'completed' if report['posts'] else 'already_optimized',
+        'reportDir': str(folder),
+        'updatedCount': len(report['posts']),
+        'posts': report['posts'],
+        'errors': report['errors'],
+    }
+
+
+def push_unindexed_cf_posts(limit_per_domain=4, domains=None):
+    """Push un-pinged published CF blog posts to IndexNow + Bing + Google Sitemap ping and warm edge sitemaps."""
+    import json
+    import requests
+    from cf_posting import posting
+    from common.asset_map import PRIORITY_CASHCOW_DOMAINS
+    target_domains = list(domains) if domains else (list(PRIORITY_CASHCOW_DOMAINS) + [d for d in posting.ALL_DOMAINS if d not in PRIORITY_CASHCOW_DOMAINS])
+    log_path = posting.DATA_DIR / 'indexnow_log.json'
+    try:
+        prev = json.loads(log_path.read_text(encoding='utf-8')) if log_path.is_file() else {'pings': []}
+    except Exception:
+        prev = {'pings': []}
+    already_pinged = {
+        row.get('url')
+        for row in (prev.get('pings') or [])
+        if isinstance(row, dict)
+        and row.get('url')
+        and any(isinstance(r, dict) and r.get('httpStatus') in (200, 202) for r in (row.get('results') or []))
+    }
+    pinged = []
+    errors = []
+    for domain in target_domains:
+        try:
+            requests.get(f'https://www.{domain}/sitemap.xml', timeout=8)
+            candidates = posting.published_inventory('https://www.' + domain)
+        except Exception as exc:
+            errors.append({'domain': domain, 'error': str(exc)})
+            continue
+        domain_count = 0
+        for item in candidates:
+            if domain_count >= limit_per_domain:
+                break
+            slug = item.get('slug')
+            if not slug or item.get('status') not in ('published', None):
+                continue
+            url = f'https://www.{domain}/{slug}'
+            if url in already_pinged:
+                continue
+            res = posting.ping_indexnow(domain, url)
+            accepted = any(isinstance(r, dict) and r.get('httpStatus') in (200, 202) for r in (res or []))
+            if accepted:
+                already_pinged.add(url)
+                pinged.append({'domain': domain, 'postId': item.get('id'), 'title': item.get('title', ''), 'url': url, 'results': res, 'accepted': True})
+                domain_count += 1
+            else:
+                errors.append({'domain': domain, 'url': url, 'results': res, 'accepted': False})
+    return {
+        'status': 'completed' if pinged else ('failed' if errors else 'all_recent_pinged'),
+        'pingedCount': len(pinged),
+        'pingedUrls': pinged[:30],
+        'errors': errors,
+    }
 
 
 if __name__=='__main__':

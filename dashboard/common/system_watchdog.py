@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parents[2]
 SERVER_DIR = ROOT / 'dashboard' / 'server'
-for _p in (ROOT, SERVER_DIR):
+for _p in (SERVER_DIR, ROOT / 'dashboard', ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
@@ -134,11 +134,27 @@ def parse_iso_age_seconds(iso_str: Optional[str]) -> Optional[float]:
 
 
 def check_and_recover_server() -> Dict[str, Any]:
-    """Ensure FastAPI dashboard server (port 8790) is listening."""
+    """Ensure FastAPI dashboard server (port 8790) is listening (prefer Docker container `barolab-dashboard`)."""
     port_8790 = is_port_open(8790)
     port_8791 = is_port_open(8791)
     recovered = False
-    detail = "정상 가동 중"
+    detail = "정상 가동 중 (Docker barolab-dashboard)"
+    if not port_8790:
+        try:
+            subprocess.run(
+                ["docker", "start", "barolab-dashboard"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=10,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            time.sleep(2.5)
+            port_8790 = is_port_open(8790)
+            recovered = port_8790
+            if recovered:
+                detail = "Docker barolab-dashboard 컨테이너 자동 재기동 완료"
+        except Exception:
+            pass
     if not port_8790:
         python_exe = sys.executable
         try:
@@ -298,14 +314,57 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
     return actions
 
 
+def ensure_daily_4portal_indexing() -> Optional[Dict[str, Any]]:
+    """Ensure the daily 4-portal indexing batch (Google GSC + Naver IndexNow/SearchAdvisor + Bing + Daum) runs automatically at least once every KST day."""
+    now = now_kst()
+    today_str = now.strftime("%Y-%m-%d")
+    metrics_doc = load_json(DATA_DIR / "metrics.json", {})
+    last_auto_at = str(((metrics_doc.get("inspectionAutomation") or {}).get("lastAutoIndexerRun") or {}).get("at") or "")
+    disc_doc = load_json(DATA_DIR / "indexing-discovery-latest.json", {})
+    last_disc_at = str(disc_doc.get("checkedAt") or "")
+    if last_auto_at.startswith(today_str) and last_disc_at[:10] == today_str:
+        return None
+    if is_process_running_match("auto_indexer") or is_process_running_match("indexing_dispatch"):
+        return None
+    python_exe = sys.executable
+    try:
+        subprocess.Popen(
+            [python_exe, "-u", "-B", "-X", "utf8", "-m", "common.auto_indexer", "--all", "--apply"],
+            cwd=str(ROOT / "dashboard"),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        subprocess.Popen(
+            [python_exe, "-u", "-B", "-X", "utf8", "-m", "common.indexing_dispatch"],
+            cwd=str(ROOT / "dashboard"),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        return {
+            "channel": "4portal_indexing",
+            "owner": "@trace",
+            "action": "일일 4대 포털(Google·Naver·Bing·Daum) 전 도메인 색인 작업 자동 기동",
+            "detail": f"{today_str} KST 당일 미실행 감지 → auto_indexer + indexing_dispatch 즉시 실행",
+        }
+    except Exception:
+        return None
+
+
 def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
     """Calculate missed slots for today (KST) across channels and trigger catch-up runs."""
+    catchups: List[Dict[str, Any]] = []
+    idx_action = ensure_daily_4portal_indexing()
+    if idx_action:
+        catchups.append(idx_action)
     from common import work_agenda as agendas
     if agendas.enabled():
         from common.conference_dispatch import request
         result=request('parameters',{'action':'cf-cycle','date':None,'account':None,'slot':None})
-        return [{'channel':'cf_blog','status':result['status'],'action':'지연 슬롯 안건 접수 · 실제 실행·검증 전'}] if result.get('agendaId') or result.get('items') else []
-    catchups: List[Dict[str, Any]] = []
+        if result.get('agendaId') or result.get('items'):
+            catchups.append({'channel':'cf_blog','owner':'@publi','status':result['status'],'action':'지연 슬롯 안건 접수 · 실제 실행·검증 전','detail':'cf-cycle'})
+        return catchups
     now = now_kst()
     today_str = now.strftime("%Y-%m-%d")
     current_hour = now.hour + now.minute / 60.0

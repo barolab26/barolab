@@ -14,9 +14,14 @@ import time
 from urllib.parse import urlsplit, quote
 import uuid
 from zoneinfo import ZoneInfo
-from common.content_quality import content_quality_sha256
 
 ROOT = Path(__file__).resolve().parents[2]
+for _p in (ROOT / 'dashboard' / 'server', ROOT / 'dashboard', ROOT):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+from common.content_quality import content_quality_sha256
+
 DATA = ROOT / 'dashboard/data'
 DB = DATA / 'growth.sqlite3'
 STATE = DATA / 'content-maintenance.json'

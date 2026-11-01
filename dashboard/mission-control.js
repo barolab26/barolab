@@ -7,25 +7,49 @@
     const cf=snapshot.channels.find(r=>r.id==='cf');
     const nv=snapshot.channels.find(r=>r.id==='naver');
     if(cf) {
-      const label=`${cf.done ?? '—'}/${cf.target}편`;
-      text('val-pub-cf',label);text('cf-master-gauge-pct',`${label} (${Math.round((cf.done||0)/cf.target*100)}%)`);
-      text('cf-summary-completed-count',`${cf.done ?? '—'}건`);
-      text('cf-summary-waiting-count',`${Math.max(0,cf.target-(cf.done||0))}건`);
-      for(const id of ['bar-pub-cf','cf-master-gauge-fill']){const el=document.getElementById(id);if(el)el.style.width=`${Math.min(100,(cf.done||0)/cf.target*100)}%`;}
+      const cfDone=cf.done ?? 0, cfBase=cf.target || 16;
+      const label=`오늘 ${cfDone}건 발행`;
+      text('val-pub-cf',label);text('cf-master-gauge-pct',`${label} (${Math.round(cfDone/cfBase*100)}%)`);
+      text('cf-summary-completed-count',`오늘 ${cfDone}건`);
+      text('cf-summary-waiting-count',`${Math.max(0,cfBase-cfDone)}건`);
+      for(const id of ['bar-pub-cf','cf-master-gauge-fill']){const el=document.getElementById(id);if(el)el.style.width=`${Math.min(100,cfDone/cfBase*100)}%`;}
     }
-    if(nv) {text('val-pub-naver',`${nv.done ?? '—'}/${nv.target} 공개 · 예약 ${nv.reserved ?? 0}`);text('nv-summary-total-progress',`${nv.done ?? '—'}/${nv.target} 공개 · 예약 ${nv.reserved ?? 0}`);}
+    if(nv) {
+      const nvDone=nv.done||0, nvRes=nv.reserved||0, nvTotal=nvDone+nvRes, nvTarget=nv.target||7;
+      const nvLabel=nvRes>0?`${nvTotal}/${nvTarget}편 (🟢공개 ${nvDone}·🔵예약 ${nvRes})`:`${nvDone}/${nvTarget}편`;
+      text('val-pub-naver',nvLabel);text('nv-summary-total-progress',nvLabel);
+      const nvBar=document.getElementById('bar-pub-naver');
+      if(nvBar)nvBar.style.width=`${Math.min(100,Math.round(nvTotal/nvTarget*100))}%`;
+    }
+    let realAchieved=0, bridgeAchieved=0;
     for(const account of snapshot.naverAccounts || []) {
       const slots=account.slots.filter(s=>s.publicationDate===snapshot.date);
       const published=slots.filter(s=>s.publicPublicationVerified===true).length;
-      const reserved=slots.filter(s=>s.publicationStatus==='reserved').length;
-      text(`mini-count-${account.accId}`,String(published+reserved));
-      text(`mini-status-${account.accId}`,`공개 ${published} · 예약 ${reserved}`);
+      const reserved=slots.filter(s=>s.publicationStatus==='reserved' || (s.status==='verified' && !s.publicPublicationVerified)).length;
+      const achieved=published+reserved;
+      const expected=account.expected || slots.length || 1;
+      if(['acc1','acc2','acc3'].includes(account.accId))realAchieved+=Math.min(expected,achieved);
+      else bridgeAchieved+=Math.min(expected,achieved);
+      text(`mini-count-${account.accId}`,String(achieved));
+      text(`mini-status-${account.accId}`,published>=expected?`🟢 공개 ${published}완료`:achieved>=expected?(published>0?`🟢공개${published}·🔵예약${reserved}`:`🔵 예약 ${reserved}완료`):`공개 ${published} · 예약 ${reserved}`);
       const battery=document.getElementById(`nv-batt-${account.accId}`);
       if(battery)Array.from(battery.children).forEach((cell,index)=>{
-        cell.className='batt-cell'+(index<published?' filled':index<published+reserved?' reserved':'');
-        cell.textContent=index>=published && index<published+reserved?'✓':'';
+        cell.className='batt-cell'+(index<published?' filled':index<achieved?' reserved':'');
+        cell.textContent=index<achieved?'✓':'';
       });
+      const coolBar=document.getElementById(`nv-coolbar-${account.accId}`);
+      if(coolBar){
+        coolBar.style.width=`${Math.min(100,Math.round(achieved/expected*100))}%`;
+        coolBar.className='nv-cooldown-fill '+(published>=expected?'done':achieved>=expected?'reserved':'ready');
+      }
+      const miniBox=document.getElementById(`mini-box-${account.accId}`);
+      if(miniBox){
+        miniBox.classList.toggle('is-done',published>=expected);
+        miniBox.classList.toggle('is-reserved',achieved>=expected && published<expected);
+      }
     }
+    text('nv-summary-real-progress',`${realAchieved}/3편`);
+    text('nv-summary-bridge-progress',`${bridgeAchieved}/4편`);
     const kin=snapshot.channels.find(r=>r.id==='kin');
     const threads=snapshot.channels.find(r=>r.id==='threads');
     if(kin) {
@@ -46,33 +70,70 @@
     if(window.renderCF16Grid)window.renderCF16Grid();
     const revenueView=window.BaroLabRevenue;
     if(revenueView && snapshot.revenue) {
-      for(const [category,id,currency] of [['adsense','adsense','USD'],['adpost','adpost','KRW'],['affiliate','affiliate','KRW']]) {
-        const period=revenueView.categoryPeriod(snapshot.revenue,category,'today',snapshot.date);
-        text(`val-rev-${id}`,revenueView.moneyText(period));
-        if(category==='adsense') {
-          const amount=revenueView.currencyValue(period,currency);
-          text('gauge-rev-pct',amount===null?'—':`${Math.min(100,amount).toFixed(1)}%`);
-          text('metric-revenue-value',revenueView.moneyText(period));
-          const arc=document.getElementById('arc-revenue-goal');
-          if(arc)arc.style.strokeDashoffset=String(119.4*(1-Math.min(1,(amount||0)/100)));
-        }
+      const rev=snapshot.revenue, today=snapshot.date;
+      const adsToday=revenueView.categoryPeriod(rev,'adsense','today',today);
+      const adsYest=revenueView.categoryPeriod(rev,'adsense','yesterday',today);
+      const adsMonth=revenueView.categoryPeriod(rev,'adsense','month',today);
+      const adsPrevMonth=revenueView.categoryPeriod(rev,'adsense','previousMonth',today);
+      const affToday=revenueView.categoryPeriod(rev,'affiliate','today',today);
+      const affYest=revenueView.categoryPeriod(rev,'affiliate','yesterday',today);
+      const affMonth=revenueView.categoryPeriod(rev,'affiliate','month',today);
+      const affPrevMonth=revenueView.categoryPeriod(rev,'affiliate','previousMonth',today);
+      const totalUsd=revenueView.currencyValue(adsToday,'USD');
+      const yestUsd=revenueView.currencyValue(adsYest,'USD');
+      const monthUsd=revenueView.currencyValue(adsMonth,'USD');
+      const prevMonthUsd=revenueView.currencyValue(adsPrevMonth,'USD');
+      const effectiveUsd=totalUsd!==null && totalUsd>0 ? totalUsd : (yestUsd!==null && yestUsd>0 ? yestUsd : totalUsd);
+      const adsChecked=revenueView.categoryCheckedAt?.(rev,'adsense');
+      const affChecked=revenueView.categoryCheckedAt?.(rev,'affiliate');
+      const allChecked=revenueView.categoryCheckedAt?.(rev,null) || adsChecked;
+      if(totalUsd!==null || yestUsd!==null) {
+        const mLabel=(monthUsd!==null && monthUsd>0)?`이달 $${monthUsd.toFixed(2)}`:(prevMonthUsd!==null?`${Number((rev.previousMonth||'').slice(5,7))||10}월 $${prevMonthUsd.toFixed(2)}`:'');
+        const tTag=adsChecked?` · 수집 ${revenueView.shortKstTime(adsChecked).slice(-5)}`:'';
+        text('val-rev-adsense',`오늘 $${(totalUsd??0).toFixed(2)} · 어제 $${(yestUsd??0).toFixed(2)}${mLabel?' ('+mLabel+')':''}${tTag}`);
+      } else {
+        text('val-rev-adsense',revenueView.moneyText(adsToday));
       }
+      const affYestVal=revenueView.currencyValue(affYest,'KRW');
+      const affMVal=revenueView.currencyValue(affMonth,'KRW') ?? revenueView.currencyValue(affPrevMonth,'KRW');
+      const affMTag=revenueView.currencyValue(affMonth,'KRW')!==null ? '이달' : `${Number((rev.previousMonth||'').slice(5,7))||10}월`;
+      const affTimeTag=affChecked?` · 수집 ${revenueView.shortKstTime(affChecked).slice(-5)}`:'';
+      if(affYestVal!==null || affMVal!==null) {
+        text('val-rev-affiliate',`어제 ₩${(affYestVal??0).toLocaleString('ko-KR')} · ${affMTag} ₩${(affMVal??0).toLocaleString('ko-KR')}${affTimeTag}`);
+      } else {
+        text('val-rev-affiliate',revenueView.moneyText(affToday)+affTimeTag);
+      }
+      text('gauge-rev-pct',effectiveUsd===null?'—':`${Math.min(100,effectiveUsd).toFixed(1)}%`);
+      text('metric-revenue-value',totalUsd!==null && totalUsd>0 ? `$${totalUsd.toFixed(2)}` : (yestUsd!==null ? `어제 $${yestUsd.toFixed(2)}` : revenueView.moneyText(adsToday)));
+      if(allChecked) text('metric-revenue-badge',`🕒 수집 ${revenueView.shortKstTime(allChecked)}`);
+      const arc=document.getElementById('arc-revenue-goal');
+      if(arc)arc.style.strokeDashoffset=String(119.4*(1-Math.min(1,(effectiveUsd||0)/100)));
     }
     window.renderAdpostAccounts?.(snapshot.revenue,snapshot.date);
-    const done=snapshot.channels.reduce((sum,r)=>sum+(r.done||0),0),target=snapshot.channels.reduce((sum,r)=>sum+r.target,0);
+    const done=snapshot.channels.reduce((sum,r)=>sum+(r.done||0)+(r.reserved||0),0),target=snapshot.channels.reduce((sum,r)=>sum+r.target,0);
+    const totalReserved=snapshot.channels.reduce((sum,r)=>sum+(r.reserved||0),0);
     text('gauge-pub-pct',`${Math.round(done/target*100)}%`);
-    for(const [id,value,max] of [['ring-pub-cf',cf?.done||0,16],['ring-pub-naver',nv?.done||0,7]]) {
+    for(const [id,value,max] of [['ring-pub-cf',cf?.done||0,16],['ring-pub-naver',(nv?.done||0)+(nv?.reserved||0),7]]) {
       const ring=document.getElementById(id);
       if(ring){const length=id==='ring-pub-cf'?219.9:157.1;ring.style.strokeDashoffset=String(length*(1-Math.min(1,value/max)));}
     }
     const goal=document.querySelector('#kpi-todo-val')?.closest('.pillar');
     if(goal)goal.dataset.publicationTarget=String(target);
-    text('kpi-todo-val',`${done}/${target}편`);text('kpi-todo-badge',`${done}/${target} 공개 발행`);
-    text('kpi-todo-desc',snapshot.channels.map(r=>`${r.name} ${r.done ?? '—'}/${r.target}`).join(' · '));
+    text('kpi-todo-val',`${done}/${target}편`);text('kpi-todo-badge',totalReserved>0?`${done}/${target}편 (공개 ${done-totalReserved}·예약 ${totalReserved})`:`${done}/${target} 공개 발행`);
+    text('kpi-todo-desc',snapshot.channels.map(r=>r.id==='cf'?`CF 블로그 오늘 ${r.done||0}건`:`${r.name} ${(r.done||0)+(r.reserved||0)}/${r.target}${r.reserved?`(예약${r.reserved})`:''}`).join(' · '));
     text('gauge-mem-sub',`노드 ${snapshot.vault.nodes}개`);
     text('bento-memory-node-pill',`시냅스 엣지 ${snapshot.vault.edges}개 · 해결 ${snapshot.vault.episodes}회`);
+    if(snapshot.vault.coreHubs!==undefined) {
+      const vTot=Math.max(1,snapshot.vault.nodes||1), vCore=snapshot.vault.coreHubs||0, vSkill=snapshot.vault.skillNodes||0, vRev=snapshot.vault.revenueHubs||0;
+      text('val-mem-core',`${vCore}개`);text('val-mem-skill',`${vSkill}개`);text('val-mem-rev',`${vRev}개`);
+      const bCore=document.getElementById('bar-mem-core'),bSkill=document.getElementById('bar-mem-skill'),bRev=document.getElementById('bar-mem-rev');
+      if(bCore)bCore.style.width=`${Math.min(100,Math.max(vCore>0?18:0,Math.round(vCore/15*100)))}%`;
+      if(bSkill)bSkill.style.width=`${Math.min(100,Math.max(vSkill>0?20:0,Math.round(vSkill/vTot*100*2.5)))}%`;
+      if(bRev)bRev.style.width=`${Math.min(100,Math.max(vRev>0?25:0,Math.round(vRev/vTot*100*1.25)))}%`;
+    }
     for(const row of snapshot.crew) {
-      text(`crew-state-${row.role}`,`${row.state} · ${row.model || '모델 대기'}`);
+      const stateLabel=row.state==='RUNNING'?'⚡ 작업중':'⏸️ 대기';
+      text(`crew-state-${row.role}`,`${stateLabel} · ${row.model || '모델 대기'}`);
       const el=document.getElementById(`crew-card-${row.role}`);
       if(el){el.classList.toggle('is-working',row.state==='RUNNING');el.title=[row.action,row.lastActivity && new Date(row.lastActivity).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})].filter(Boolean).join(' · ');}
     }

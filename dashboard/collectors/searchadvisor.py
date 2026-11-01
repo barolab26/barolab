@@ -51,20 +51,37 @@ def queue_crawl_candidates(urls, *, evidence, path=LEDGER):
     counts = {"queued": 0, "duplicate": 0, "rejected": 0}
     with locked_ledger(path) as state:
         queue = state.setdefault("crawlQueue", [])
-        known = {x["url"] for x in queue + state["crawlRequests"]}
+        reserved_urls = {x["url"] for x in state.get("crawlRequests", [])}
+        known = {x["url"] for x in queue} | reserved_urls
         for url in urls:
             if not canonical_candidate(url):
                 counts["rejected"] += 1
             elif url in known:
                 counts["duplicate"] += 1
                 pending = next((item for item in queue if item['url'] == url), None)
-                if pending and not any(x['url'] == url for x in state['crawlRequests']):
+                if pending and url not in reserved_urls:
                     pending['publicValidation'] = evidence
             else:
                 queue.append({"url": url, "status": "queued", "queuedAt": now(),
                               "publicValidation": evidence, "indexed": None})
                 known.add(url)
                 counts["queued"] += 1
+        # Keep freshly passed urls, fresh-validated (<24h), or already-reserved items in crawlQueue
+        now_dt = datetime.now(KST)
+        url_set = set(urls)
+        fresh_queue = []
+        for item in queue:
+            if item.get("url") in reserved_urls or item.get("url") in url_set:
+                fresh_queue.append(item)
+                continue
+            pv_ts = (item.get("publicValidation") or {}).get("checkedAt")
+            try:
+                chk = datetime.fromisoformat(pv_ts) if pv_ts else None
+                if chk and chk.tzinfo and -60 <= (now_dt - chk).total_seconds() <= 86400:
+                    fresh_queue.append(item)
+            except Exception:
+                continue
+        state["crawlQueue"] = fresh_queue
     return {"status": "blocked_ui_required", **counts, "ledgerPath": str(path)}
 
 

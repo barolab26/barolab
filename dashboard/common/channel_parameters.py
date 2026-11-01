@@ -4,13 +4,18 @@ import hashlib
 import json
 import os
 import re
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+ROOT = Path(__file__).resolve().parents[2]
+for _p in (ROOT / 'dashboard' / 'server', ROOT / 'dashboard', ROOT):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 from common.collection_observability import load, write
 
-ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / 'dashboard/data'
 KST = ZoneInfo('Asia/Seoul')
 
@@ -306,13 +311,15 @@ def run_naver(day, account, clock):
     receipt = load(folder / 'reservation-evidence.json')
     if receipt.get('submissionStatus') == 'verified_reserved' and not engine.needs_quality_revision(folder):
         return receipt
+    original_slot = clock
+    reserve_clock = clock
     if receipt.get('submissionStatus') not in ('submitting', 'submission_unknown') and when < datetime.now(KST) + timedelta(minutes=30):
         when = (datetime.now(KST) + timedelta(minutes=45)).replace(second=0, microsecond=0)
         when += timedelta(minutes=-when.minute % 10)
-        clock = when.strftime('%H:%M')
+        reserve_clock = when.strftime('%H:%M')
     planning_or_memory(account, engine.ACCOUNT_MAP[account]['topic'], folder, styles(account, day))
-    engine.RUN_OPTIONS.update(slot=clock, reserve_time=day + ' ' + clock, screen_folder=str(folder))
-    result = engine.run_basic_pipeline(account, folder=folder, reserve_time=day + ' ' + clock)
+    engine.RUN_OPTIONS.update(slot=original_slot, reserve_time=day + ' ' + reserve_clock, screen_folder=str(folder))
+    result = engine.run_basic_pipeline(account, folder=folder, reserve_time=day + ' ' + reserve_clock)
     saved = load(folder / 'reserved-server-document.json')
     sizes = sorted({node.get('style', {}).get('fontSizeCode', '') for component in saved.get('document', {}).get('components', []) for paragraph in (component.get('value') or []) for node in paragraph.get('nodes', [])})
     write(folder / 'presentation-receipt.json', {'account': account, 'reserveTime': day + ' ' + clock, 'savedFontSizes': sizes, 'stylesVerified': bool(sizes) and {'fs'+str(styles(account)['bodyFontSize']), 'fs'+str(styles(account)['headingFontSize'])}.issubset(set(sizes)), 'parameters': load(folder / 'editor-content.json').get('presentation', {}), 'verifiedAt': datetime.now(KST).isoformat()})
@@ -337,15 +344,33 @@ def prepare_cf(day, domain):
     progress = cf.basic_progress
     cf.basic_progress = lambda domain, stage, name, pct, detail, **kw: write(folder / 'preparation-progress.json', {'domain': domain, 'stage': stage, 'detail': detail, 'updatedAt': datetime.now(KST).isoformat()})
     try:
+        from common.asset_map import CF_DOMAINS
+        cf_info = CF_DOMAINS.get(domain, {})
+        used_today = []
+        for r in prior.get('items', []):
+            if r.get('domain') != domain:
+                for k in ('title', 'mainKeyword', 'slug'):
+                    if r.get(k) and r.get(k) not in used_today:
+                        used_today.append(str(r.get(k)))
+        day_root = ROOT / 'cf_posting/output/scheduled' / str(day).replace(':', '')
+        if day_root.is_dir():
+            for peer_dir in day_root.iterdir():
+                if peer_dir.is_dir() and peer_dir.name != domain:
+                    for fn, fk in (('planning.json', 'keyword'), ('article.json', 'title')):
+                        pdata = load(peer_dir / fn)
+                        if pdata.get(fk) and pdata.get(fk) not in used_today:
+                            used_today.append(str(pdata.get(fk)))
         scheduled = {k: v for k, v in item.items() if k in ('domain', 'category')}
+        domain_topic = f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else str(scheduled.get('category') or domain)
         planning = {}
         if not (folder / 'article.json').exists():
-            planning = planning_or_memory(domain, str(scheduled.get('category') or domain), folder, {}, channel='cf')
+            planning = planning_or_memory(domain, domain_topic, folder, {'usedKeywordsToday': used_today}, channel='cf')
             scheduled['mainKeyword'] = planning['keyword']
         from common import llm_client
         generate = llm_client.generate_json
         cf_writing_rule = (
             '\n[사람의 언어로 쓰는 4대 집필 원칙 & 절대 금지 가드레일]\n'
+            f'- [도메인 고유 전문 분야 엄수 & 당일 타 도메인 중복 금지]: 이 블로그({domain})의 전문 분야는 [{domain_topic}]이다. 오늘 다른 도메인에서 이미 사용한 키워드/제목({json.dumps(used_today[:15], ensure_ascii=False)})과 겹치는 제목·주제는 절대 쓰지 마라.\n'
             '- 공무원 공고문 요약 매크로 말투 금지: 독자의 진짜 통증(Pain Point)과 막막함에 공감하는 도입부로 시작하라.\n'
             '- 제목은 공공기관 보고서식이 아니라 독자가 "내 얘기잖아?" 하고 클릭할 반려 함정·한 끗 차이·3분 자가진단형으로 작성하라.\n'
             '- 본문에는 스마트폰으로 바로 대입 가능한 한 끗 차이 실전 사례(A는 탈락 vs B는 통과), 3초 자가진단 판독기 표(<table>), 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 당장 실행할 Action Item으로 끝내라.\n'
@@ -370,7 +395,7 @@ def prepare_cf(day, domain):
               'account':domain,'date':day,'folder':str(folder),
               'articleSha256':hashlib.sha256((folder/'article.json').read_bytes()).hexdigest(),
               'assetSha256':[hashlib.sha256(p.read_bytes()).hexdigest() for p in assets if p.is_file()]}
-    if valid and day == datetime.now(KST).date().isoformat():
+    if valid and day == datetime.now(KST).date().isoformat() and cf.slot_due(item, datetime.now(KST)):
         with cf.cleaner_lock(wait_seconds=120, poll_interval=1) as acquired:
             if acquired:
                 pub_receipt = cf.run_basic_posting(domain, folder)
@@ -513,9 +538,12 @@ def main(argv=None, *, conference_worker=False):
         if item is None:
             result = {'status':'waiting'}
         else:
+            from common.asset_map import CF_DOMAINS
+            cf_info = CF_DOMAINS.get(item['domain'], {})
+            used_today = [str(r.get(k)) for r in schedule.get('items', []) if r.get('domain') != item['domain'] for k in ('title', 'mainKeyword', 'slug') if r.get(k)]
             folder = folder_for('cf_posting', today, item['domain'])
-            topic = load(folder / 'article.json').get('title') or item.get('mainKeyword') or item.get('category') or item['domain']
-            planning = planning_or_memory(item['domain'], topic, folder, {}, channel='cf')
+            topic = load(folder / 'article.json').get('title') or (f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else item.get('mainKeyword') or item['domain'])
+            planning = planning_or_memory(item['domain'], topic, folder, {'usedKeywordsToday': used_today}, channel='cf')
             with cf.cleaner_lock() as acquired:
                 if acquired:
                     from common import llm_client

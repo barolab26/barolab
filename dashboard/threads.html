@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Threads 수익화·외부유입 하이브리드 관제 · BaroLab</title>
   <link rel="stylesheet" href="traffic.css">
-  <link rel="stylesheet" href="threads.css?v=20261017-dress-1">
+  <link rel="stylesheet" href="threads.css?v=20261031-viral-10slot">
   <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
   <link rel="stylesheet" href="signature_deck.css?v=20261017-sig-1">
   <style>
@@ -429,8 +429,8 @@
       resize: vertical;
     }
   </style>
-  <script src="threads-summary.js?v=20261017-dress-1" defer></script>
-  <script src="threads.js?v=20261017-dress-1" defer></script>
+  <script src="threads-summary.js?v=20261031-viral-10slot" defer></script>
+  <script src="threads.js?v=20261031-viral-10slot" defer></script>
 </head>
 <body class="control-room threads-page">
   <a class="skip-link" href="#main-content">본문으로 이동</a>
@@ -455,7 +455,7 @@
     </header>
 
     <!-- [TIER 1] Top Slim KPI & 4-Slot Gauge Bar -->
-    <section class="th-tier1-grid" aria-label="상단 4슬롯 진행률 및 핵심 지표 게이지 바">
+    <section class="th-tier1-grid" aria-label="상단 10슬롯 진행률 및 핵심 지표 게이지 바">
       <!-- Col 1: 4-Slot Daily Progress Ring & Bar -->
       <article class="th-kpi-card">
         <div class="sig-gauge-ring-box">
@@ -466,15 +466,15 @@
           </svg>
           <div class="sig-gauge-center">
             <span id="th-gauge-pct">100%</span>
-            <small>4슬롯</small>
+            <small>10슬롯</small>
           </div>
         </div>
         <div class="sig-card-info" style="flex:1;">
           <div class="sig-card-label">
-            <span>🎯 오늘 4슬롯 하이브리드 편성</span>
-            <span id="th-slot-fraction" style="color:#2563eb;font-weight:900;">4 / 4 슬롯 가동</span>
+            <span>🎯 오늘 10슬롯 고밀도 바이럴 편성</span>
+            <span id="th-slot-fraction" style="color:#2563eb;font-weight:900;">10슬롯 가동 (CF유입 8 · 화력부스터 2)</span>
           </div>
-          <div class="sig-card-main-val" id="th-slot-headline" style="font-size:13px;">밑밥 1 · CF유입 2 · 제휴 1</div>
+          <div class="sig-card-main-val" id="th-slot-headline" style="font-size:13px;">CF 직결 훅 8건 · 순수 바이럴 부스터 2건 (1.5~2시간 간격)</div>
           <div class="sig-seg-track">
             <div class="sig-seg-fill" id="th-gauge-bar" style="width:100%;"></div>
           </div>
@@ -485,14 +485,20 @@
       <article class="th-kpi-card">
         <div style="width:100%;">
           <div class="sig-card-label">
-            <span>⏰ 일일 4슬롯 트랙 편성표 (Track A·B·C)</span>
+            <span>⏰ 일일 10슬롯 고밀도 바이럴 편성 (1.5~2시간 간격)</span>
             <span style="color:#059669;font-weight:800;">연속 운영(Continuous) ON</span>
           </div>
-          <div class="th-slot-pills-grid" id="th-slot-chips-box">
-            <div class="th-slot-chip st-done">08:00 밑밥글<small>🟢 링크 0개</small></div>
-            <div class="th-slot-chip st-done">12:30 CF유입<small>🔵 첫타래 링크</small></div>
-            <div class="th-slot-chip st-queued">18:10 공감·제휴<small>🔵 토스/쿠팡</small></div>
-            <div class="th-slot-chip st-queued">21:30 CF유입<small>🔵 고단가 요약</small></div>
+          <div class="th-slot-pills-grid" id="th-slot-chips-box" style="grid-template-columns:repeat(5,1fr);">
+            <div class="th-slot-chip st-done">07:30 CF훅<small>🔵 출근 금융</small></div>
+            <div class="th-slot-chip st-done">09:10 부스터<small>🟢 댓글유도</small></div>
+            <div class="th-slot-chip st-done">10:50 CF훅<small>🔵 환급·세무</small></div>
+            <div class="th-slot-chip st-done">12:30 CF훅<small>🔵 점심 피크</small></div>
+            <div class="th-slot-chip st-queued">14:10 CF훅<small>🔵 생활꿀팁</small></div>
+            <div class="th-slot-chip st-queued">15:50 부스터<small>🟢 공감논쟁</small></div>
+            <div class="th-slot-chip st-queued">17:30 CF훅<small>🔵 퇴근 피크</small></div>
+            <div class="th-slot-chip st-queued">19:10 CF훅<small>🔵 저녁 고단가</small></div>
+            <div class="th-slot-chip st-queued">21:00 CF훅<small>🔵 야간 금리</small></div>
+            <div class="th-slot-chip st-queued">22:42 CF훅<small>🔵 심야 피크</small></div>
           </div>
         </div>
       </article>
@@ -588,7 +594,7 @@
         <div class="sig-tabs-left">
           <div class="sig-btn-group" role="tablist" aria-label="날짜 필터">
             <button type="button" class="sig-tab-btn active" data-th-date="all" onclick="window.BaroThreadsDeck.setDateFilter('all')">전체 타래 (실전+슬롯)</button>
-            <button type="button" class="sig-tab-btn" data-th-date="today" onclick="window.BaroThreadsDeck.setDateFilter('today')">📅 오늘 4슬롯</button>
+            <button type="button" class="sig-tab-btn" data-th-date="today" onclick="window.BaroThreadsDeck.setDateFilter('today')">📅 오늘 10슬롯</button>
             <button type="button" class="sig-tab-btn" data-th-date="published" onclick="window.BaroThreadsDeck.setDateFilter('published')">🟢 공개완료</button>
           </div>
           <div class="sig-btn-group" role="tablist" aria-label="트랙 모드 필터">
@@ -600,7 +606,7 @@
           <input type="search" class="sig-search-input" id="th-search-input" placeholder="제목 / 본문 / 도메인 검색...">
         </div>
         <div style="font-size:11.5px;font-weight:800;color:#475569;" id="th-pair-count-label">
-          총 4개 타래 세트
+          총 10개 타래 세트
         </div>
       </div>
 
@@ -662,10 +668,16 @@
           <div>
             <label style="display:block;font-size:11px;font-weight:800;color:#334155;margin-bottom:4px;">편성 슬롯 (KST)</label>
             <select id="th-se-slot" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;font-weight:700;">
-              <option value="08:00">08:00 (출근길 밑밥)</option>
-              <option value="12:30" selected>12:30 (점심 CF유입)</option>
-              <option value="18:10">18:10 (퇴근 제휴/공감)</option>
-              <option value="21:30">21:30 (야간 고단가 CF)</option>
+              <option value="07:30">07:30 (출근길 CF 훅)</option>
+              <option value="09:10">09:10 (오전 바이럴 부스터·링크0)</option>
+              <option value="10:50">10:50 (오전 세무·지원금 CF 훅)</option>
+              <option value="12:30" selected>12:30 (점심 피크 CF 훅)</option>
+              <option value="14:10">14:10 (오후 생활꿀팁 CF 훅)</option>
+              <option value="15:50">15:50 (오후 공감 부스터·링크0)</option>
+              <option value="17:30">17:30 (퇴근길 고단가 CF 훅)</option>
+              <option value="19:10">19:10 (저녁 시니어·의료 CF 훅)</option>
+              <option value="21:00">21:00 (야간 파킹통장·금리 CF 훅)</option>
+              <option value="22:42">22:42 (심야 침대 스크롤 CF 훅)</option>
             </select>
           </div>
           <div>

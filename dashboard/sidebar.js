@@ -144,7 +144,7 @@
         const pCnt = bData?.kpi?.publishedCount ?? 0;
         const approved = bData?.account?.canPublishLive === true;
         if (bBadge) {
-          bBadge.textContent = approved ? `발행 ${pCnt}편` : `서랍 ${dCnt}편`;
+          bBadge.textContent = (approved && pCnt > 0) ? `발행 ${pCnt}편` : `서랍 ${dCnt}편`;
           bBadge.className = `badge-count ${approved ? 'st-green' : 'st-blue'}`;
         }
         if (bNote) {

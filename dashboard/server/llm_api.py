@@ -59,6 +59,14 @@ def get_settings():
         return JSONResponse({'detail': str(e)}, status_code=503)
 
 
+def _sync_live_snapshot_after_brain_save():
+    try:
+        from server.main import refresh_live_snapshot
+        refresh_live_snapshot()
+    except Exception:
+        pass
+
+
 @router.post('/settings')
 async def set_settings(request: Request):
     raw = await request.body()
@@ -66,7 +74,9 @@ async def set_settings(request: Request):
         return JSONResponse({'detail': '요청이 너무 큽니다.'}, status_code=413)
     try:
         import json
-        return await run_in_threadpool(settings.save, json.loads(raw))
+        res = await run_in_threadpool(settings.save, json.loads(raw))
+        await run_in_threadpool(_sync_live_snapshot_after_brain_save)
+        return res
     except (ValueError, TypeError) as e:
         message = str(e) if isinstance(e, settings.SettingsError) else '잘못된 JSON 요청입니다.'
         return JSONResponse({'detail': message}, status_code=400)
@@ -79,7 +89,9 @@ async def set_agent_brains(request: Request):
         return JSONResponse({'detail': '요청이 너무 큽니다.'}, status_code=413)
     try:
         import json
-        return await run_in_threadpool(settings.save_agent_brains, json.loads(raw))
+        res = await run_in_threadpool(settings.save_agent_brains, json.loads(raw))
+        await run_in_threadpool(_sync_live_snapshot_after_brain_save)
+        return res
     except (ValueError, TypeError) as e:
         message = str(e) if isinstance(e, settings.SettingsError) else '잘못된 JSON 요청입니다.'
         return JSONResponse({'detail': message}, status_code=400)

@@ -12,24 +12,24 @@ from zoneinfo import ZoneInfo
 KST = ZoneInfo('Asia/Seoul')
 ROOT = Path(__file__).resolve().parents[2]
 
-# 1. 16 Cloudflare Blogs (Cash-Cow AdSense Conversion Hubs)
+# 1. 16 Cloudflare Blogs (Cash-Cow AdSense Conversion Hubs — Strictly Aligned with DOMAIN_KEYWORD_MATRIX)
 CF_DOMAINS = {
-    'must-pick.com': {'niche': '정책·금융·생활지원금', 'desc': '정부 정책자금, 국민취업지원제도, 지원금 신청 공식 가이드'},
-    'must-good.com': {'niche': '복지·연금·노후설계', 'desc': '국민연금, 조기노령연금, 기초연금, 노후 건강보험 가이드'},
-    'healthcox.com': {'niche': '건강·질환·의료혜택', 'desc': '건강보험 산정특례, 실손보험 청구, 질환별 영양·치료 혜택'},
-    'must-joy.com': {'niche': '생활·문화·여가소비', 'desc': '문화누리카드, 청년 문화예술 패스, 알뜰 여가 혜택'},
-    'maxnote.kr': {'niche': 'IT·모바일·스마트라이프', 'desc': '통신비 할인, 알뜰폰 요금제, 디지털 정책·앱 활용법'},
-    'baronote.kr': {'niche': '세금·절세·연말정산', 'desc': '종합소득세, 연말정산 공제, 상속·증여세 실무 팁'},
-    'topnote.kr': {'niche': '부동산·청약·주거복지', 'desc': '버팀목 전세자금, 디딤돌 대출, 청약통장 활용법'},
-    'meganote.kr': {'niche': '소상공인·자영업·창업', 'desc': '소상공인 대환대출, 희망리턴패키지, 세무 절세법'},
-    'justinfo.co.kr': {'niche': '시사·경제·트렌드', 'desc': '금리 변동, 물가 정책, 실생활 경제 지표 해설'},
-    'smilenote.kr': {'niche': '육아·교육·청년지원', 'desc': '부모급여, 아동수당, 청년도약계좌, 국가장학금'},
-    'tripmarvel.com': {'niche': '여행·지역축제·교통', 'desc': 'K-패스, 기후동행카드, 국내 여행 지원 사업'},
-    'daynote.kr': {'niche': '일상생활·민원·법률상식', 'desc': '정부24 민원 발급, 주민등록, 생활 법률 팁'},
-    'woorinote.kr': {'niche': '재테크·적금·예금', 'desc': '고금리 파킹통장, 특판 적금, 청년 적금 비교'},
-    'nolplace.com': {'niche': '지역명소·핫플·문화공간', 'desc': '전국 숨은 힐링 명소, 지자체 무료 개방 시설'},
-    'soulnote.kr': {'niche': '심리·자기계발·상담지원', 'desc': '전국민 마음투자 지원사업, 심리상담 바우처'},
-    'joynote.kr': {'niche': '생활 꿀팁·가전·에너지지원', 'desc': '에너지바우처, 한전 고효율 가전 환급, 난방비 지원'},
+    'must-pick.com': {'niche': '가전·IT기어·에너지환급 비교', 'desc': '로봇청소기, 식기세척기, 제습기, 노트북·태블릿 스펙 비교, 으뜸효율 가전 환급, A/S 수리비용 가이드'},
+    'must-good.com': {'niche': '정부지원금·청년장년복지·민원·세금환급', 'desc': '정부지원금, 국민취업지원제도, 부모급여, 건강보험료 환급, 정부24 민원 발급, 연말정산·종합소득세'},
+    'healthcox.com': {'niche': '관절통증·국가건강검진·만성질환·영양의학', 'desc': '관절·디스크 통증 케어, 국가건강검진·내시경, 혈압·혈당·콜레스테롤 관리, 영양제·수면 의학'},
+    'must-joy.com': {'niche': '로컬맛집·웨이팅·카페·전시공연 리뷰', 'desc': '백반기행·생활의달인 맛집 웨이팅·주차, 감성 카페·베이커리, 전시·팝업·공연 예매, 제철 특산물'},
+    'maxnote.kr': {'niche': 'AI툴·업무자동화·노션·엑셀·알뜰폰', 'desc': '챗GPT·클로드 프롬프트, 노션·엑셀 함수 자동화, 크리에이터 편집 도구, 알뜰폰 요금제·모바일신분증'},
+    'baronote.kr': {'niche': '국민기초연금·대출금리·카드혜택·보험절세', 'desc': '국민·기초·퇴직연금 수령액, 주담대·전세대출 금리·DSR 비교, 신용카드 캐시백, 실손보험·절세 전략'},
+    'topnote.kr': {'niche': '윈도우·맥 설정·스마트폰·오피스·계정복구', 'desc': '윈도우11·맥북 오류·프린터 설정, 아이폰·갤럭시·카톡 백업·알뜰폰 eSIM, 엑셀·PDF 팁, 2단계인증·계정복구'},
+    'meganote.kr': {'niche': '자동차·전기차보조금·다이렉트보험·생활금융', 'desc': '전기차·하이브리드 보조금, 다이렉트 자동차보험 특약·경정비·과태료, 마트 휴무일·온누리상품권·공과금 절약'},
+    'justinfo.co.kr': {'niche': '세무절세·실업급여노무·소비자환불·과태료', 'desc': '실업급여·퇴직금·주휴수당 노무, 양도세·증여세·종합소득세 절세, 소비자 위약금·환불 분쟁, 생활법률·과태료'},
+    'smilenote.kr': {'niche': '연금·은퇴설계·시니어혜택·중장년건강·돌봄', 'desc': '국민·기초·주택연금 은퇴설계, 시니어 경로우대·할인 바우처, 중장년 관절·근력 운동, 장기요양·임플란트·돌봄'},
+    'tripmarvel.com': {'niche': '해외여행·항공숙소예약팁·국내여행·패스', 'desc': '항공권·수하물·보조배터리 규정, 호텔 무료취소·보증금·리조트피 방어, 트래블로그·환전·eSIM, 국내여행·KTX'},
+    'daynote.kr': {'niche': '생활살림·물가절약·주방리빙·분리수거', 'desc': '식재료 냉장·냉동 보관법, 과탄산소다 배수구·세탁기 청소, 분리수거 과태료 기준, 전기세·가스비·관리비 절약'},
+    'woorinote.kr': {'niche': '청약분양·전월세 계약법률·주거대출·등기세법', 'desc': '청약 가점·특별공급 분양, 전월세 확정일자·보증금 반환·전입신고, 디딤돌·버팀목 대출, 취득세·재산세·셀프등기'},
+    'nolplace.com': {'niche': '수목원·테마파크·아이와나들이·축제·주차꿀팁', 'desc': '수목원·자연휴양림·캠핑장 예약, 주말 아이와 가볼만한곳, 시즌 축제·전시·팝업 일정, 무료주차·오픈런 동선'},
+    'soulnote.kr': {'niche': '내일배움카드·국비지원·국가자격증·이직커리어', 'desc': '국민내일배움카드 국비 신청, 유망 국가기술자격증 시험일정·기출 독학팁, 이직·취업·경조사 예절 가이드'},
+    'joynote.kr': {'niche': '강아지고양이건강·펫보험·애견동반·반려식물', 'desc': '강아지·고양이 증상·사료·예방접종, 동물병원 진료비·펫보험 비교, 애견동반 카페·숙소·산책로, 반려식물 분갈이·물주기'},
 }
 
 # 2. Naver Blogs (Frontline Search SEO Bridges)
@@ -157,10 +157,16 @@ def match_monetization_options(topic_or_keyword, channel='cf'):
     }
 
 
-def match_synergy_cluster(topic_or_keyword):
+def match_synergy_cluster(topic_or_keyword, identity=None):
     """Find the best CF Blog destination and cluster angle for a given topic."""
-    kw = (topic_or_keyword or '').lower()
-    if any(k in kw for k in ('건강', '보험', '의료', '병원', '약', '질환', '특례', '암')):
+    kw = (topic_or_keyword or '').lower().strip()
+    if identity and identity in CF_DOMAINS:
+        domain = identity
+    elif kw in CF_DOMAINS:
+        domain = kw
+    elif any(d in kw for d in CF_DOMAINS):
+        domain = next(d for d in CF_DOMAINS if d in kw)
+    elif any(k in kw for k in ('건강', '보험', '의료', '병원', '약', '질환', '특례', '암')):
         domain = 'healthcox.com'
     elif any(k in kw for k in ('연금', '노후', '기초', '노령', '퇴직', '실버')):
         domain = 'must-good.com'
@@ -308,17 +314,72 @@ def get_account_pacing_strategy(account, date_str=None):
         }
 
 
-def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, auto_publish=True, cdp_port=9450):
-    """Write a Brunch column on CDP 9450. Publishes live if writer is approved, otherwise saves to drawer."""
+def _load_brunch_credentials():
+    import os
+    env_p = ROOT / '.env'
+    if env_p.is_file():
+        for line in env_p.read_text(encoding='utf-8', errors='replace').splitlines():
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                k, v = line.split('=', 1)
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+    return os.environ.get('BRUNCH_ID_BARO76650', ''), os.environ.get('BRUNCH_PW_BARO76650', '')
+
+
+def ensure_brunch_logged_in(page, target_url='https://brunch.co.kr/ready'):
+    """Ensure Brunch session is authenticated on CDP 9450; auto-login via Kakao SSO if redirected to signin."""
+    page.goto(target_url, wait_until='domcontentloaded', timeout=25000)
+    page.wait_for_timeout(1500)
+    if 'signin' in page.url or 'accounts.kakao.com' in page.url:
+        uid, upw = _load_brunch_credentials()
+        if not uid or not upw:
+            return False
+        page.goto('https://brunch.co.kr/auth/kakao?url=%2Fsignin%2Ffinish%3Furl%3D%252Fready', wait_until='domcontentloaded', timeout=25000)
+        page.wait_for_timeout(2000)
+        if 'accounts.kakao.com' in page.url:
+            page.locator("input[name='loginId']").fill(uid)
+            page.wait_for_timeout(250)
+            page.locator("input[name='password']").fill(upw)
+            page.wait_for_timeout(250)
+            try:
+                chk = page.locator("input[name='saveSignedIn']")
+                if not chk.is_checked():
+                    chk.check(force=True)
+            except Exception:
+                pass
+            page.locator("button[type='submit']").first.click()
+            page.wait_for_timeout(3500)
+        if target_url and page.url != target_url:
+            page.goto(target_url, wait_until='domcontentloaded', timeout=25000)
+            page.wait_for_timeout(1500)
+    return 'signin' not in page.url and 'accounts.kakao.com' not in page.url
+
+
+def _fit_brunch_text(text, limit):
+    s = str(text or '').strip()
+    if len(s) <= limit:
+        return s
+    cut = s[:limit].rsplit(' ', 1)[0]
+    return cut if len(cut) >= limit - 7 else s[:limit].strip()
+
+
+def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, auto_publish=True, cdp_port=9450, edit_url=None):
+    """Write or update a Brunch column on CDP 9450. Publishes live if writer is approved, otherwise saves to drawer."""
     from playwright.sync_api import sync_playwright
+
+    safe_title = _fit_brunch_text(title, 28)
+    safe_subtitle = _fit_brunch_text(subtitle, 38)
 
     with sync_playwright() as p:
         b = p.chromium.connect_over_cdp(f'http://127.0.0.1:{cdp_port}')
         ctx = b.contexts[0]
         page = ctx.new_page()
+        dialogs = []
+        page.on('dialog', lambda d: (dialogs.append(d.message), d.accept()))
         try:
-            page.goto('https://brunch.co.kr/write', wait_until='domcontentloaded', timeout=25000)
-            page.wait_for_timeout(1800)
+            target_write_url = edit_url or 'https://brunch.co.kr/write'
+            ensure_brunch_logged_in(page, target_write_url)
+            page.wait_for_timeout(1500)
             try:
                 if page.locator('button.guide_close').is_visible(timeout=1200):
                     page.locator('button.guide_close').click()
@@ -326,47 +387,67 @@ def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, aut
             except Exception:
                 pass
 
-            page.locator('h1.cover_title').click()
-            page.keyboard.type(str(title).strip())
-            page.wait_for_timeout(250)
+            title_el = page.locator('h1.cover_title')
+            title_el.click()
+            page.keyboard.press('Control+A')
+            page.keyboard.press('Backspace')
+            page.keyboard.insert_text(safe_title)
+            page.wait_for_timeout(200)
 
-            page.locator('div.cover_sub_title').click()
-            page.keyboard.type(str(subtitle).strip())
-            page.wait_for_timeout(250)
+            sub_el = page.locator('div.cover_sub_title')
+            sub_el.click()
+            page.keyboard.press('Control+A')
+            page.keyboard.press('Backspace')
+            page.keyboard.insert_text(safe_subtitle)
+            page.wait_for_timeout(200)
 
             body_el = page.locator('div.wrap_body')
             body_el.click()
+            page.keyboard.press('Control+A')
+            page.keyboard.press('Backspace')
+            page.wait_for_timeout(200)
+
             for idx, para in enumerate(paragraphs or []):
-                page.keyboard.type(str(para).strip())
+                page.keyboard.insert_text(str(para).strip())
                 if idx < len(paragraphs) - 1:
                     page.keyboard.press('Enter')
                     page.keyboard.press('Enter')
-                page.wait_for_timeout(150)
+                page.wait_for_timeout(120)
 
-            # Check if writer approval is active (i.e. '발행' button exists instead of '작가신청')
-            can_publish = page.locator('button:visible', has_text='발행').count() > 0
+            # Check if writer approval is active ('button.be_header_button_publish' exists)
+            can_publish = page.locator('button.be_header_button_publish').count() > 0 or page.locator('button:visible', has_text='발행').count() > 0
             if can_publish and bridge_url:
                 page.keyboard.press('Enter')
                 page.keyboard.press('Enter')
+                page.keyboard.insert_text('▶ 관련 실무 기준표 및 3분 자가진단 원문 보기:')
+                page.keyboard.press('Enter')
                 page.keyboard.type(str(bridge_url).strip())
                 page.keyboard.press('Enter')
-                page.wait_for_timeout(1200)
+                page.wait_for_timeout(1800)
 
-            page.locator('button.btn_article_save_draft').first.click()
-            page.wait_for_timeout(2000)
+            save_btn = page.locator('button.btn_article_save_draft, button.be_header_button_save').first
+            if save_btn.count() > 0:
+                save_btn.click()
+                page.wait_for_timeout(2000)
             saved_url = page.url
 
             if can_publish and auto_publish:
-                pub_btn = page.locator('button:visible', has_text='발행').first
+                pub_btn = page.locator('button.be_header_button_publish').first
                 pub_btn.click()
                 page.wait_for_timeout(1500)
-                confirm_pub = page.locator('button:visible', has_text='발행').last
-                if confirm_pub.is_visible():
+                selected = page.locator('button.keyword.selected').count()
+                if selected < 3:
+                    unselected = page.locator('button.keyword:not(.selected)')
+                    for i in range(min(3 - selected, unselected.count())):
+                        unselected.nth(i).click()
+                        page.wait_for_timeout(200)
+                confirm_pub = page.locator('button.save.button.mint').first
+                if confirm_pub.count() > 0 and confirm_pub.is_visible():
                     confirm_pub.click()
-                    page.wait_for_timeout(2500)
-                return {'ok': True, 'mode': 'published', 'url': page.url}
+                    page.wait_for_timeout(3500)
+                return {'ok': True, 'mode': 'published', 'writerApproved': True, 'url': page.url, 'title': safe_title}
 
-            return {'ok': True, 'mode': 'saved_to_drawer', 'writerApproved': can_publish, 'url': saved_url}
+            return {'ok': True, 'mode': 'saved_to_drawer', 'writerApproved': can_publish, 'url': saved_url, 'title': safe_title}
         finally:
             page.close()
 

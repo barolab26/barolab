@@ -1,23 +1,30 @@
 /* Publication slots are server evidence, never browser-local quota counters. */
 (function (root) {
   const slots = {
-    acc1: ['11:00'],
-    acc2: ['20:00'],
-    acc3: ['20:30'],
-    acc4: ['11:00', '19:00'],
-    acc5: ['11:00', '19:00']
+    acc1: ['07:40'],
+    acc2: ['15:00'],
+    acc3: ['21:00'],
+    acc4: ['08:10', '12:20'],
+    acc5: ['08:20', '12:40']
   };
-  const legacySingleSlots = {acc1:['19:30','11:30','08:00','10:00','11:00'], acc2:['20:00','12:00','08:30','12:30'], acc3:['20:30','12:30','09:00','14:00']};
+  const legacySingleSlots = {acc1:['07:40','19:30','11:30','08:00','10:00','11:00'], acc2:['15:00','20:00','12:00','08:30','12:30'], acc3:['21:00','20:30','12:30','09:00','14:00']};
   const legacySlotMap = {
-    acc1: { '11:00': ['11:00','19:30','11:30','08:00','10:00'], '19:30': ['19:30', '11:30', '08:00', '10:00', '11:00'] },
-    acc2: { '20:00': ['20:00', '12:00', '08:30', '12:30'] },
-    acc3: { '20:30': ['20:30', '12:30', '09:00', '14:00'] },
-    acc4: { '11:00': ['11:00', '12:30', '15:30'], '19:00': ['19:00', '18:30', '19:30'] },
-    acc5: { '11:00': ['11:00', '11:15', '14:30', '16:30'], '19:00': ['19:00', '20:30'] }
+    acc1: { '07:40': ['07:40','11:00','19:30','11:30','08:00','10:00'], '11:00': ['11:00','19:30','11:30','08:00','10:00','07:40'], '19:30': ['19:30', '11:30', '08:00', '10:00', '11:00', '07:40'] },
+    acc2: { '15:00': ['15:00', '20:00', '12:00', '08:30', '12:30'], '20:00': ['20:00', '15:00', '12:00', '08:30', '12:30'] },
+    acc3: { '21:00': ['21:00', '20:30', '12:30', '09:00', '14:00'], '20:30': ['20:30', '21:00', '12:30', '09:00', '14:00'] },
+    acc4: { '08:10': ['08:10', '11:00', '12:30'], '12:20': ['12:20', '19:00', '14:30', '15:30', '18:30', '19:30'], '11:00': ['11:00', '08:10', '12:30', '15:30'], '19:00': ['19:00', '12:20', '18:30', '19:30'] },
+    acc5: { '08:20': ['08:20', '11:00', '11:15', '14:40'], '12:40': ['12:40', '19:00', '14:30', '16:30', '20:30'], '11:00': ['11:00', '08:20', '11:15', '14:30', '16:30'], '19:00': ['19:00', '12:40', '20:30'] }
   };
-  const slotMatches = (accId, candidateSlot, targetSlot) => {
+  const folderSlot = folder => {
+    const m = String(folder || '').match(/-([01]\d|2[0-3])([0-5]\d)(?:[\\/]|$)/);
+    return m ? `${m[1]}:${m[2]}` : null;
+  };
+  const slotMatches = (accId, candidateSlot, targetSlot, artifactFolder = null) => {
+    const fSlot = folderSlot(artifactFolder);
+    if (fSlot && fSlot === targetSlot) return true;
     if (!candidateSlot || !targetSlot) return false;
     if (candidateSlot === targetSlot) return true;
+    if (fSlot && fSlot !== targetSlot) return false;
     const mapped = legacySlotMap[accId]?.[targetSlot];
     if (mapped && mapped.includes(candidateSlot)) return true;
     if ((slots[accId] || []).length === 1 && (legacySingleSlots[accId] || []).includes(candidateSlot)) return true;
@@ -25,19 +32,26 @@
   };
   const slotMeta = {
     acc1: {
+      '07:40': { prepTime: '07:00', track: '카테고리 전문성·체류 트랙', desc: '5060 연금·복지 심층 간접체험 가이드 (일 1포 집중)' },
       '19:30': { prepTime: '08:30', track: '카테고리 전문성·체류 트랙', desc: '5060 연금·복지 심층 간접체험 가이드 (일 1포 집중)' }
     },
     acc2: {
+      '15:00': { prepTime: '09:00', track: '카테고리 전문성·체류 트랙', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (일 1포 집중)' },
       '20:00': { prepTime: '09:00', track: '카테고리 전문성·체류 트랙', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (일 1포 집중)' }
     },
     acc3: {
+      '21:00': { prepTime: '09:30', track: '트렌드·롱테일 유입 트랙', desc: '5060 데일리룩·리빙 심층 간접체험 가이드 (일 1포 집중)' },
       '20:30': { prepTime: '09:30', track: '트렌드·롱테일 유입 트랙', desc: '5060 데일리룩·리빙 심층 간접체험 가이드 (일 1포 집중)' }
     },
     acc4: {
+      '08:10': { prepTime: '08:00', track: 'CF 고단가 브리지 1차', desc: '지원금·금융·세무 핵심 요약 + CF 상세표 브리지' },
+      '12:20': { prepTime: '11:30', track: 'CF 고단가 브리지 2차', desc: '연말정산·IT·실무서식 핵심 요약 + CF 계산기 브리지' },
       '11:00': { prepTime: '08:00', track: 'CF 고단가 브리지 1차', desc: '지원금·금융·세무 핵심 요약 + CF 상세표 브리지' },
       '19:00': { prepTime: '13:00', track: 'CF 고단가 브리지 2차', desc: '연말정산·IT·실무서식 핵심 요약 + CF 계산기 브리지' }
     },
     acc5: {
+      '08:20': { prepTime: '08:15', track: 'CF 고단가 브리지 1차', desc: '소상공인·지자체 정책자금 요약 + CF 자격표 브리지' },
+      '12:40': { prepTime: '12:00', track: 'CF 고단가 브리지 2차', desc: '마감속보·생활세무·핫플 요약 + CF 상세가이드 브리지' },
       '11:00': { prepTime: '08:15', track: 'CF 고단가 브리지 1차', desc: '소상공인·지자체 정책자금 요약 + CF 자격표 브리지' },
       '19:00': { prepTime: '13:30', track: 'CF 고단가 브리지 2차', desc: '마감속보·생활세무·핫플 요약 + CF 상세가이드 브리지' }
     }
@@ -72,8 +86,8 @@
       return blog && /^\d+$/.test(post || '') ? blog.toLowerCase()+'/'+post : null;
     } catch { return null; }
   }
-  const publicVerified = item => item?.status==='done' && item.publicPublicationVerified===true && !!publicKey(item.publicUrl);
-  const reserved = item => !!item?.topic && !!item?.reserveTime && !!(item.reservationVerificationSource || /naver-reservation-list/i.test(item.verificationSource || '') || (item.phase === 'verified' && item.verificationSource));
+  const publicVerified = item => (item?.status==='done' || item?.phase==='verified' || item?.publicationStatus==='published' || item?.publicationStatus==='verified_public') && item.publicPublicationVerified===true && !!publicKey(item.publicUrl);
+  const reserved = item => !!(item?.topic || item?.title) && !!item?.reserveTime && !!(item.reservationVerificationSource || /naver-reservation-list/i.test(item.verificationSource || '') || (item.phase === 'verified' && item.verificationSource));
   const freshSnapshot = (stamp, now) => {
     const age = now - Date.parse(stamp || '');
     return Number.isFinite(age) && age >= -60000 && age <= 300000;
@@ -82,8 +96,8 @@
   function latestAttempt(journal, account, date, slot) {
     const accId = Object.keys(names).find(k => names[k] === account);
     const allForDay = (journal?.attempts || []).filter(a => a.account === account && publicationDay(a) === date);
-    const exact = allForDay.filter(a => (a.scheduledSlot || a.reserveTime?.slice(-5)) === slot);
-    const pool = exact.length > 0 ? exact : allForDay.filter(a => slotMatches(accId, a.scheduledSlot || a.reserveTime?.slice(-5), slot));
+    const exact = allForDay.filter(a => (folderSlot(a.artifactFolder) || a.scheduledSlot || a.reserveTime?.slice(-5)) === slot);
+    const pool = exact.length > 0 ? exact : allForDay.filter(a => slotMatches(accId, a.scheduledSlot || a.reserveTime?.slice(-5), slot, a.artifactFolder));
     return pool.reduce((a,b) => !a || attemptTime(b) > attemptTime(a) || (attemptTime(b) === attemptTime(a)
         && Date.parse(b.updatedAt || b.startedAt) >= Date.parse(a.updatedAt || a.startedAt)) ? b : a, null);
   }
@@ -177,8 +191,8 @@
           receipt = record;
         }
       }
-      const exactRelevant = attempts.filter(item => (item.scheduledSlot || item.reserveTime?.slice(-5)) === time);
-      const relevant = exactRelevant.length > 0 ? exactRelevant : attempts.filter(item => slotMatches(accId, item.scheduledSlot || item.reserveTime?.slice(-5), time));
+      const exactRelevant = attempts.filter(item => (folderSlot(item.artifactFolder) || item.scheduledSlot || item.reserveTime?.slice(-5)) === time);
+      const relevant = exactRelevant.length > 0 ? exactRelevant : attempts.filter(item => slotMatches(accId, item.scheduledSlot || item.reserveTime?.slice(-5), time, item.artifactFolder));
       const latest = latestAttempt(journal,names[accId],publicationDate,time);
       const verified = relevant.filter(item => item.phase === 'verified' && reserved(item)).pop();
       if (verified && !publicVerified(receipt)) receipt = {...receipt, ...verified};

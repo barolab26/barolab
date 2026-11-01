@@ -77,10 +77,10 @@
         }).format(dt);
       }
     }
-    const intervalMin = Number(auto.intervalMinutes || 20);
+    const intervalMin = Number(auto.intervalMinutes || 32);
     put('overview-kin-next-label', active ? '현재 작업 중' : '다음 예정');
-    put('overview-kin-next', active ? `${nextAcc} (진행 중 · ${intervalMin}분 간격)` : `${nextAcc} (${nextHm} · 20분 간격)`);
-    put('overview-kin-next-detail', active ? time(auto.activeStartedAt) + ' 시작 · 종료 후 20분 간격 교대' :
+    put('overview-kin-next', active ? `${nextAcc} (진행 중 · 30~35분 교대)` : `${nextAcc} (${nextHm} · 30~35분 교대)`);
+    put('overview-kin-next-detail', active ? time(auto.activeStartedAt) + ' 시작 · 종료 후 30~35분 랜덤 교대(계정당 1시간+)' :
       auto.nextEligibleAt ? time(auto.nextEligibleAt) + ' 이후 · 5분 주기 조건 확인' : '현재 다음 가능 시각 미확인');
 
     const m = view.measurement;

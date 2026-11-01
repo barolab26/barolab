@@ -245,7 +245,37 @@ def basic_article(domain, item, folder):
             raise ValueError('Saved article belongs to another domain')
         article = validate_basic_article(json.loads(path.read_text(encoding='utf-8')))
         return ensure_article_images(article, folder, domain=domain)
-    keyword = item.get('mainKeyword') or item.get('title') or item.get('topic') or item.get('category') or domain
+    used_today = []
+    try:
+        sched_now = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8')) if SCHEDULE_JSON.exists() else {}
+        for r in sched_now.get('items', []):
+            if r.get('domain') != domain:
+                for k in ('mainKeyword', 'title', 'slug'):
+                    if r.get(k) and str(r.get(k)) not in used_today:
+                        used_today.append(str(r.get(k)))
+    except Exception:
+        pass
+    keyword = item.get('mainKeyword') or item.get('topic')
+    if not keyword or str(keyword) in used_today:
+        try:
+            for rel_path in ('dashboard/data/radar/daily_winning_topics.json', 'dashboard/data/radar/blokey-golden.json', 'dashboard/data/blokey_golden.json'):
+                blokey_path = BASE_DIR.parent / rel_path
+                if not blokey_path.exists():
+                    continue
+                bdata = json.loads(blokey_path.read_text(encoding='utf-8'))
+                raw_dom = (bdata.get('cfDomainKeywords') or bdata.get('cfAssignments') or {}).get(domain)
+                candidates = raw_dom if isinstance(raw_dom, list) else ([raw_dom] if isinstance(raw_dom, dict) else [])
+                for cand in candidates:
+                    kw_c = (cand.get('keyword') if isinstance(cand, dict) else str(cand or '')).strip()
+                    if kw_c and kw_c not in used_today and not any(kw_c in u for u in used_today):
+                        keyword = kw_c
+                        item['mainKeyword'] = kw_c
+                        break
+                if keyword and str(keyword) not in used_today:
+                    break
+        except Exception:
+            pass
+    keyword = keyword or item.get('title') or item.get('category') or domain
     basic_progress(domain,2,'리서치',25,str(keyword))
     sources = basic_research(keyword, folder)
     from common.llm_client import generate_json
@@ -273,7 +303,7 @@ def basic_article(domain, item, folder):
         '독자가 끝까지 읽고 행동하게 만드는 진짜 사람의 한국어 블로그 원고를 작성한다. "공무원 공고문 요약 매크로"나 딱딱한 리서치 보고서 말투는 절대 쓰지 않는다.\n'
         '[4대 집필 원칙 (필수 준수)]\n'
         '1. 제목(title): 공공기관 보고서식 제목("[키워드], 조건·확인 순서")을 절대 쓰지 마라. 독자가 보자마자 "어, 이거 내 얘기잖아?" 하고 클릭하게 만드는 구체적 반려/실패 함정, 한 끗 차이 기준, 3분 자가진단형 제목으로 작성하라.\n'
-        '2. 도입부(contentHtml 첫 1~2문단): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하면 3초 만에 이탈한다. 밤늦게 검색창을 켜는 독자의 진짜 통증(Pain Point: 막막함, 억울함, 헛걸음 걱정, 헷갈리는 현실 상황)에 깊이 공감하며 시작하고, 이 글에서 바로 해결해 줄 핵심 기준을 딱 짚어라.\n'
+        '2. 도입부(contentHtml 첫 1~2문단 — 자청 4대 결핍 직격): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하면 3초 만에 이탈한다. 인간의 4대 결핍(①내 돈·혜택 날리는 손실 회피 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)을 첫 문장부터 찌르고 구체적 금액/수수료/기한 기준을 바로 제시하라.\n'
         '3. 본문(contentHtml — 한 끗 차이 실전 사례 + 3초 판독기 표 + 모바일 2~3줄 호흡):\n'
         '   - 어려운 용어를 사전처럼 나열하지 말고 독자가 스마트폰을 보며 내 상황에 바로 대입할 수 있게 써라.\n'
         '   - 구체적인 대비 사례(예: "A는 안 되지만 B는 됩니다", "X 코드는 탈락이지만 Y 코드는 통과입니다")를 본문에 녹여 독자가 무릎을 치게 만들어라.\n'
@@ -281,12 +311,13 @@ def basic_article(domain, item, folder):
         '   - 한 문단(<p>)은 스마트폰 화면 기준 2~3줄이 넘지 않게 호흡을 짧고 리듬감 있게 끊어 쳐라.\n'
         '4. 마무리(Action Item): 마지막 문단에 "해설 글이며 개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 관료적 면책 문구를 절대 넣지 마라. 대신 독자가 글 읽기를 마친 직후 오늘 당장(또는 이번 주말에 미리) 실행할 수 있는 구체적 행동 지침(Action Item: 먼저 꺼내볼 서류, 미리 조회할 메뉴, 체크할 항목 등)으로 힘 있게 닫아라.\n'
         '[시각 자료 및 기술 규칙]\n'
-        '- 대표 썸네일용 imagePrompt와 본문 핵심 <h2> 소제목 구간(1~2곳)을 위한 sectionImages의 imagePrompt는 구체적인 영어 문장(English prompt)으로 작성하되, 원고의 구체적 상황·장면·피사체·조명·분위기를 고해상도 실사 에디토리얼 사진(high-resolution editorial photography) 스타일로 묘사하거나(이미지 내 글자/텍스트/로고/문서화면 절대 제외), 리서치 원본 웹페이지 증거 캡쳐가 더 적합한 경우 "RESEARCH_CAPTURE"로 지정한다.\n'
+        '- 대표 썸네일용 imagePrompt와 본문 핵심 <h2> 소제목 구간(1~2곳)을 위한 sectionImages의 imagePrompt는 구체적인 영어 문장(English prompt)으로 작성하되, 3인칭 인물 연출 사진(예: "Korean adult sitting at a dining table", "woman looking at smartphone/documents")이나 글자/텍스트가 적힌 종이·화면 묘사는 절대 금지한다! 반드시 주제와 직결되는 실물 오브젝트·장소·정물 클로즈업 에디토리얼 사진(no people, no text, clean object/environment photography)으로 묘사하거나 "RESEARCH_CAPTURE"로 지정한다.\n'
         '- imageCaption과 sectionImages.imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성하고, sectionImages.sectionHeading에는 해당 이미지가 들어갈 본문 <h2> 소제목 텍스트를 정확히 기입한다.\n'
         '- topicSlug는 영문 소문자·하이픈 조합으로 작성하며, 등록된 categories 중 하나를 선택한다.\n'
         '[절대 금지 가드레일]\n'
         '- 수집 자료(research)에 없는 허위 사실·수치 날조 금지 (단, 자료의 한계를 변명하는 "제공된 자료에서는 알 수 없습니다", "이 글은 제공된 안내를 바탕으로..." 같은 리서치 메타 발언은 본문에 절대 노출 금지)\n'
-        '- AI/봇 메타 발언("AI 생성", "참고사진") 및 면피성 문구("공식 공고 참고", "조회 서비스가 아닙니다") 절대 금지.\n'
+        '- AI/봇 메타 발언("AI 생성", "참고사진") 및 면피·회피성 문구("공식 공고 참고", "조회 서비스가 아닙니다", "담당자에게 질문하세요", "조건에 따라 달라집니다") 절대 금지.\n'
+        + f'- [당일 타 도메인 중복 절대 금지]: 오늘 다른 CF 도메인에서 이미 발행된 주제/제목/슬러그({json.dumps(used_today[:20], ensure_ascii=False)})와 겹치는 주제나 슬러그는 절대 작성하지 마라.\n'
         + json.dumps({'domain': domain, 'topic': keyword, 'categories': registered_categories(domain), 'research': sources}, ensure_ascii=False)
     )
     basic_progress(domain,4,'원고 작성',55,str(keyword))
@@ -295,19 +326,35 @@ def basic_article(domain, item, folder):
     return ensure_article_images(article, folder, domain=domain)
 
 def ping_indexnow(domain, public_url):
-    key = hashlib.sha256(f'barolab-indexnow-{domain}'.encode('utf-8')).hexdigest()[:32]
+    key = ''
+    host = f'www.{domain}'
+    try:
+        mcfg_path = BASE_DIR.parent / 'dashboard/data/metrics-config.json'
+        if mcfg_path.exists():
+            mcfg = json.loads(mcfg_path.read_text(encoding='utf-8'))
+            site_cfg = (mcfg.get('sites') or {}).get(domain) or {}
+            key = str(site_cfg.get('indexnow_key') or site_cfg.get('indexNowKey') or '').strip()
+    except Exception:
+        pass
+    if not key:
+        key = hashlib.sha256(f'barolab-indexnow-{domain}'.encode('utf-8')).hexdigest()[:32]
+    payload = {
+        'host': host,
+        'key': key,
+        'keyLocation': f'https://{host}/{key}.txt',
+        'urlList': [public_url],
+    }
     endpoints = (
-        f'https://api.indexnow.org/indexnow?url={requests.utils.quote(public_url, safe="")}&key={key}',
-        f'https://www.bing.com/indexnow?url={requests.utils.quote(public_url, safe="")}&key={key}',
-        f'https://www.google.com/ping?sitemap={requests.utils.quote(f"https://www.{domain}/sitemap.xml", safe="")}',
+        'https://searchadvisor.naver.com/indexnow',
+        'https://api.indexnow.org/indexnow',
     )
     results = []
     for ep in endpoints:
         try:
-            r = requests.get(ep, timeout=6)
-            results.append({'endpoint': ep.split('?')[0], 'httpStatus': r.status_code})
+            r = requests.post(ep, json=payload, timeout=10)
+            results.append({'endpoint': ep, 'httpStatus': r.status_code, 'accepted': r.status_code in (200, 202)})
         except Exception as exc:
-            results.append({'endpoint': ep.split('?')[0], 'error': type(exc).__name__})
+            results.append({'endpoint': ep, 'error': type(exc).__name__, 'accepted': False})
     try:
         from common.dashboard_jobs import write
         log_path = DATA_DIR / 'indexnow_log.json'

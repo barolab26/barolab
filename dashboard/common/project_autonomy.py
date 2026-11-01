@@ -265,10 +265,11 @@ def terminal_result(result):
 def process_project_autonomy_once():
     from common import work_agenda as agendas
     if agendas.enabled():
-        # Channel timers propose concrete due work; no five-minute no-work staff meetings.
+        # Channel timers propose concrete due work; top up all enabled channel lanes & revenue work orders.
         from common.conference_dispatch import request
         config=load(CONFIG)
         if config.get('enabled') and 'threads' in config.get('projects',[]):request('threads',{})
+        agendas._top_up_channel_lanes()
         return False
     from server.agent_tools import STAFF_REQUEST_DIR, enqueue_staff_request
     try: config=json.loads(CONFIG.read_bytes())

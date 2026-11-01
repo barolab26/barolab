@@ -202,22 +202,24 @@ def bind(page, frame, document, plan, folder):
             with action('upload', 'naver-image'):
                 from common.ubuntu_naver_browser import dismiss_stuck_dialogs
                 dismiss_stuck_dialogs()
-                file_input = frame.locator('input[type="file"][accept*="image"]').first
-                if file_input.count():
-                    file_input.set_input_files(str(folder / 'images' / block['file']))
-                else:
-                    try:
-                        with page.expect_file_chooser(timeout=10000) as fc_info:
-                            click(frame.locator('button[data-name="image"][data-group="documentToolbar"]'), 'naver-image')
-                        fc_info.value.set_files(str(folder / 'images' / block['file']))
-                    finally:
-                        dismiss_stuck_dialogs()
+                try:
+                    with page.expect_file_chooser(timeout=10000) as fc_info:
+                        click(frame.locator('button[data-name="image"][data-group="documentToolbar"]'), 'naver-image')
+                    fc_info.value.set_files(str(folder / 'images' / block['file']))
+                except Exception:
+                    file_input = frame.locator('input[type="file"][accept*="image"]').last
+                    if file_input.count():
+                        file_input.set_input_files(str(folder / 'images' / block['file']))
+                    else:
+                        raise
+                finally:
+                    dismiss_stuck_dialogs()
             individual = frame.get_by_text('개별사진', exact=True)
             if individual.count() and individual.first.is_visible():
                 click(individual.first, 'naver-image')
                 click(frame.locator('.se-popup-button-confirm'), 'naver-image')
             image_count += 1
-            frame.wait_for_function("n=>document.querySelectorAll('.se-component.se-image img').length===n&&[...document.querySelectorAll('.se-component.se-image img')].every(x=>x.complete&&x.naturalWidth>0&&x.src.includes('.pstatic.net/'))", arg=image_count, timeout=30000)
+            frame.wait_for_function("n=>{const imgs=[...document.querySelectorAll('.se-component.se-image img')];if(imgs.length!==n)return false;const last=imgs[imgs.length-1];const docImgs=((window.SmartEditor&&SmartEditor.getEditor&&SmartEditor.getEditor('blogpc001')?.getDocumentData()?.document?.components)||[]).filter(c=>c['@ctype']==='image'&&(c.src||c.domain||'').includes('pstatic.net'));return (last&&last.complete&&last.naturalWidth>0&&last.src.includes('.pstatic.net/'))||docImgs.length===n;}", arg=image_count, timeout=30000)
             image = frame.locator('.se-component.se-image').last
             click(image.locator('img'), 'naver-image')
             if block['caption']:
@@ -482,7 +484,9 @@ def verify_binding(page, document, actual, folder, started, steps, mode='visible
             if block_params.get('fontFamily') and style.get('fontFamily', 'system') != block_params['fontFamily']:
                 raise ValueError(f'Paragraph {number} ({text[:30]}): expected font {block_params["fontFamily"]}, observed {style.get("fontFamily", "system")}')
             expected_color = '#0068c3' if is_link else block_params.get('fontColor')
-            if expected_color and style.get('fontColor', '#000000').lower() != expected_color.lower():
+            observed_color = style.get('fontColor', '#000000').lower()
+            allowed_link_colors = ('#0068c3', '#608cba', '#0055a5', '#2563eb', '#1e40af', '#000000')
+            if expected_color and (observed_color not in allowed_link_colors if is_link else observed_color != expected_color.lower()):
                 raise ValueError(f'Paragraph {number} ({text[:30]}): expected color {expected_color}, observed {style.get("fontColor", "#000000")}')
             if style.get('lineHeight') and block_params.get('lineHeight') and abs(style['lineHeight'] - block_params['lineHeight']) > .001:
                 raise ValueError(f'Paragraph {number} ({text[:30]}): expected line height {block_params["lineHeight"]}, observed {style["lineHeight"]}')

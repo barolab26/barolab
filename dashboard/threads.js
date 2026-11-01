@@ -282,7 +282,7 @@
     const c = v.configuration || {};
     const a = data.automation || {};
 
-    put('threads-config', '전용 모델 ' + (short(c.model) || 'gpt-6.1-sol') + ' · 연속 운영 ' + (c.continuousMode ? 'ON' : '14일') + ' · 본문 하루 최대 ' + api.number(c.mainDailyCap || 4) + '개 · 후속 최대 ' + api.number(c.maxFollowups || 1) + '개');
+    put('threads-config', '전용 모델 ' + (short(c.model) || 'gpt-6.1-sol') + ' · 연속 운영 ' + (c.continuousMode ? 'ON' : '14일') + ' · 본문 하루 최대 ' + api.number(c.mainDailyCap || 10) + '개 · 후속 최대 ' + api.number(c.maxFollowups || 1) + '개');
     put('threads-readiness', api.readiness(state));
     put('threads-worker', api.worker(state));
     put('threads-next', '다음 최소 가능 시각 ' + (a.nextEligibleAt ? api.stamp(a.nextEligibleAt) : '미확인'));

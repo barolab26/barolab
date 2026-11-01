@@ -7,6 +7,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
+sys.path.insert(0, str(BASE_DIR.parent / 'dashboard' / 'server'))
+sys.path.insert(0, str(BASE_DIR.parent / 'dashboard'))
 sys.path.insert(0, str(BASE_DIR.parent))
 
 import os, time, json, hashlib, argparse
@@ -57,7 +59,16 @@ PROJECT_ROOT = BASE_DIR.parent
 
 KST = timezone(timedelta(hours=9))
 
-DAILY_SLOTS = {'soultin': ('11:00',), 'soul5373': ('20:00',), 'yoon_master': ('20:30',), 'adinfo0905': ('11:00', '19:00'), 'stone0747': ('11:00', '19:00')}
+DAILY_SLOTS = {'soultin': ('07:40',), 'adinfo0905': ('08:10', '12:20'), 'soul5373': ('15:00',), 'yoon_master': ('21:00',), 'stone0747': ('08:20', '12:40')}
+LEGACY_SLOT_ALIASES = {'soultin': {'07:40': ('11:00', '19:30')}, 'soul5373': {'15:00': ('20:00',)}, 'yoon_master': {'21:00': ('20:30',)}, 'adinfo0905': {'08:10': ('11:00',), '12:20': ('19:00', '14:30')}, 'stone0747': {'08:20': ('11:00', '14:40'), '12:40': ('19:00', '14:30')}}
+LEGACY_SINGLE_SLOTS = {'soultin': ('07:40', '11:00', '19:30'), 'soul5373': ('15:00', '20:00'), 'yoon_master': ('21:00', '20:30')}
+
+def _infer_scheduled_slot(folder=None, fallback=None):
+    if folder:
+        m = re.search(r'-([01]\d|2[0-3])([0-5]\d)$', Path(str(folder)).name)
+        if m:
+            return f'{m.group(1)}:{m.group(2)}'
+    return fallback or RUN_OPTIONS.get('slot')
 
 def publication_day(value=None, now=None):
     """An explicit publication date never derives from journal workDate."""
@@ -270,8 +281,17 @@ def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, de
     if verification:
         status_obj.update(verification)
     receipts = [a for a in read_journal()['attempts'] if a['account'] == acc_key and a['phase'] == 'verified' and (a.get('reserveTime', '')[:10] == date_str) and a.get('topic') and a.get('verificationSource')]
-    status_obj['completedSlots'] = {a.get('scheduledSlot') or a['reserveTime'][-5:]: {'topic': a['topic'], 'reserveTime': a['reserveTime'], 'verificationSource': a['verificationSource'], 'publicationStatus': 'verified_public' if a.get('state') == 'verified_public' else 'reserved', 'publicUrl': a.get('publicUrl'), 'artifactFolder': a.get('artifactFolder')} for a in receipts}
-    status_obj['count'] = len({a['reserveTime'] for a in receipts})
+    completed_slots = {}
+    for a in receipts:
+        slot_entry = {'topic': a['topic'], 'reserveTime': a['reserveTime'], 'verificationSource': a['verificationSource'], 'publicationStatus': 'verified_public' if a.get('state') == 'verified_public' else 'reserved', 'publicUrl': a.get('publicUrl'), 'artifactFolder': a.get('artifactFolder')}
+        inferred_slot = _infer_scheduled_slot(a.get('artifactFolder'), a.get('scheduledSlot') or a['reserveTime'][-5:])
+        completed_slots[inferred_slot] = slot_entry
+        if a.get('scheduledSlot'):
+            completed_slots[a['scheduledSlot']] = slot_entry
+        if a.get('reserveTime'):
+            completed_slots[a['reserveTime'][-5:]] = slot_entry
+    status_obj['completedSlots'] = completed_slots
+    status_obj['count'] = len({a.get('artifactFolder') or a['reserveTime'] for a in receipts})
     completed_by_date = {}
     for state_path in (PROJECT_ROOT / 'dashboard/data/naver/pipeline_status.js', PROJECT_ROOT / 'dashboard/data/naver' / 'pipeline_status.js'):
         if not state_path.exists():
@@ -1181,7 +1201,7 @@ def needs_quality_revision(folder):
     if not receipt_path.is_file() or not doc_path.is_file():
         return False
     try:
-        receipt = json.loads(receipt_path.read_text())
+        receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
         if receipt.get('submissionStatus') != 'verified_reserved':
             return False
         when_str = str(receipt.get('reserveTime') or '')
@@ -1189,7 +1209,7 @@ def needs_quality_revision(folder):
             target = datetime.strptime(when_str, '%Y-%m-%d %H:%M').replace(tzinfo=KST)
             if target <= now_kst() + timedelta(minutes=5):
                 return False
-        doc = json.loads(doc_path.read_text())
+        doc = json.loads(doc_path.read_text(encoding='utf-8'))
         blocks = doc.get('blocks', [])
         if any(b.get('type') == 'image' and b.get('file') == 'summary.png' for b in blocks):
             return True
@@ -1197,7 +1217,7 @@ def needs_quality_revision(folder):
             return True
         srv_path = folder / 'reserved-server-document.json'
         if srv_path.is_file():
-            srv = json.loads(srv_path.read_text())
+            srv = json.loads(srv_path.read_text(encoding='utf-8'))
             srv_types = [c.get('@ctype') for c in srv.get('document', {}).get('components', [])]
             if any(b.get('type') == 'table' for b in blocks) and 'table' not in srv_types:
                 return True
@@ -1238,7 +1258,7 @@ def prepare_basic_content(account_key, folder=None, topic=None):
     folder.mkdir(parents=True, exist_ok=True)
     doc_path, plan_path = (folder / 'editor-content.json', folder / 'photo-plan.json')
     if doc_path.is_file() and plan_path.is_file():
-        document, plan = (json.loads(doc_path.read_text()), json.loads(plan_path.read_text()))
+        document, plan = (json.loads(doc_path.read_text(encoding='utf-8')), json.loads(plan_path.read_text(encoding='utf-8')))
         if _upgrade_existing_blocks(document):
             atomic_json(doc_path, document)
     else:
@@ -1248,6 +1268,33 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             article = json.loads(writer_path.read_text(encoding='utf-8'))
         else:
             keyword = topic or RUN_OPTIONS.get('topic_seed') or account['topic']
+            if keyword == account['topic']:
+                try:
+                    used_nv_today = set()
+                    if folder and folder.parent.is_dir():
+                        for peer_d in folder.parent.iterdir():
+                            if peer_d.is_dir() and peer_d.resolve() != folder.resolve():
+                                for fn, fk in (('planning.json', 'keyword'), ('writer.json', 'mainKeyword'), ('research.json', 'keyword')):
+                                    fp = peer_d / fn
+                                    if fp.is_file():
+                                        val = json.loads(fp.read_text(encoding='utf-8')).get(fk)
+                                        if val:
+                                            used_nv_today.add(str(val).strip())
+                    for rel_p in ('dashboard/data/radar/daily_winning_topics.json', 'dashboard/data/radar/blokey-golden.json'):
+                        bp = BASE_DIR.parent / rel_p
+                        if bp.is_file():
+                            bd = json.loads(bp.read_text(encoding='utf-8'))
+                            raw_nv = (bd.get('naverAccountSlotKeywords') or bd.get('naverAssignments') or {}).get(account_key)
+                            cands = raw_nv if isinstance(raw_nv, list) else ([raw_nv] if isinstance(raw_nv, dict) else [])
+                            for c in cands:
+                                kw_c = (c.get('keyword') if isinstance(c, dict) else str(c or '')).strip()
+                                if kw_c and kw_c not in used_nv_today:
+                                    keyword = kw_c
+                                    break
+                            if keyword != account['topic']:
+                                break
+                except Exception:
+                    pass
             update_pipeline_status(account, 2, '리서치', 25, keyword)
             sources = basic_research(keyword, folder)
             guide = (BASE_DIR.parent / 'AGENTS.md').read_text(encoding='utf-8') if (BASE_DIR.parent / 'AGENTS.md').exists() else '독자 통증 출발, 3초 자가진단, 모바일 호흡'
@@ -1338,7 +1385,7 @@ def prepare_basic_content(account_key, folder=None, topic=None):
         atomic_json(doc_path, document)
         atomic_json(plan_path, plan)
         atomic_json(folder / 'identity.json', {'account': account_key, 'blogId': account['blog_id']})
-    identity = json.loads((folder / 'identity.json').read_text())
+    identity = json.loads((folder / 'identity.json').read_text(encoding='utf-8'))
     if identity != {'account': account_key, 'blogId': account['blog_id']}:
         raise ValueError('Prepared document account mismatch')
     doc_modified = normalize_naver_document_links(document, account)
@@ -1420,7 +1467,7 @@ def basic_native_document(original, document):
 
 def verify_basic_saved_images(document, folder):
     from PIL import Image, ImageOps
-    plan = json.loads((folder / 'photo-plan.json').read_text())
+    plan = json.loads((folder / 'photo-plan.json').read_text(encoding='utf-8'))
     images = [c for c in document['document']['components'] if c.get('@ctype') == 'image']
     if len(images) != len(plan['assets']):
         raise ValueError('Saved image count mismatch')
@@ -1454,12 +1501,12 @@ def reconcile_basic_submission(account_key, account, folder, evidence):
     start_browser(account)
     with sync_playwright() as p:
         browser = connect_sync(p, 'http://127.0.0.1:' + str(account['cdp_port']), *account_browser_paths(account))
-        expected = json.loads((folder / 'bound-native-document.json').read_text())
+        expected = json.loads((folder / 'bound-native-document.json').read_text(encoding='utf-8'))
         verification = verify_reservation(browser.contexts[0], account, evidence['title'], evidence['reserveTime'], folder=folder, expected_document=expected)
         show_reservation_popup(browser.contexts[0], account)
     evidence.update(verification, submissionStatus='verified_reserved', reconciledAt=now_kst().isoformat())
     atomic_json(folder / 'reservation-evidence.json', evidence)
-    write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=evidence['reserveTime'][-5:], publicationDate=evidence['reserveTime'][:10], reserveTime=evidence['reserveTime'], submissionStarted=True, failureReason=None, preSubmissionFailure=False)
+    write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=_infer_scheduled_slot(folder, evidence['reserveTime'][-5:]), publicationDate=evidence['reserveTime'][:10], reserveTime=evidence['reserveTime'], submissionStarted=True, failureReason=None, preSubmissionFailure=False)
     update_pipeline_status(account, 6, '예약 완료', 100, '제목·본문·캡션 일치 및 원본 이미지 식별 확인', status='done', topic=evidence['title'], reserve_time=evidence['reserveTime'], verification=verification)
     return evidence
 
@@ -1550,7 +1597,7 @@ def revise_existing_reservation(context, account_key, account, document, plan, w
     verification = verify_reservation(context, account, document['title'], when, expected_document=actual, folder=folder)
     evidence = {**prior, **options, **verification, 'account': account_key, 'blogId': account['blog_id'], 'title': document['title'], 'reserveTime': when, 'documentSha256': editor_review_hash(actual), 'submissionStatus': 'verified_reserved', 'publicPublicationVerified': False}
     atomic_json(folder / 'reservation-evidence.json', evidence)
-    write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=when[-5:], publicationDate=when[:10], submissionStarted=True)
+    write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=_infer_scheduled_slot(folder, when[-5:]), publicationDate=when[:10], submissionStarted=True)
     update_pipeline_status(account, 6, '예약 완료', 100, '예약 원고 인플레이스 수정 및 검증 완료', status='done', topic=document['title'], reserve_time=when, verification=verification)
     show_reservation_popup(context, account)
     return evidence
@@ -1565,7 +1612,7 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
             if not folder.is_relative_to((BASE_DIR/'output').resolve()):
                 raise ValueError('Prepared content must remain inside channel output')
             early_receipt = folder/'reservation-evidence.json'
-            early = json.loads(early_receipt.read_text()) if early_receipt.is_file() else {}
+            early = json.loads(early_receipt.read_text(encoding='utf-8')) if early_receipt.is_file() else {}
             if early.get('submissionStatus') == 'verified_reserved' and not needs_quality_revision(folder):
                 return early
             if early.get('submissionStatus') not in ('submitting','submission_unknown','verified_reserved'):
@@ -1575,7 +1622,7 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
             if prepare_only:
                 return {'status': 'prepared', 'folder': str(folder), 'submissionAttempted': False}
             receipt_path = folder / 'reservation-evidence.json'
-            prior = json.loads(receipt_path.read_text()) if receipt_path.is_file() else {}
+            prior = json.loads(receipt_path.read_text(encoding='utf-8')) if receipt_path.is_file() else {}
             if prior.get('submissionStatus') == 'verified_reserved' and not needs_quality_revision(folder):
                 return prior
             if prior.get('submissionStatus') in ('submitting', 'submission_unknown'):
@@ -1616,7 +1663,7 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 verification = verify_reservation(context, account, document['title'], when, expected_document=actual, folder=folder)
                 evidence.update(verification, submissionStatus='verified_reserved', responseHttpStatus=response.status)
                 atomic_json(receipt_path, evidence)
-                write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=when[-5:], publicationDate=when[:10], submissionStarted=True)
+                write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=_infer_scheduled_slot(folder, when[-5:]), publicationDate=when[:10], submissionStarted=True)
                 update_pipeline_status(account, 6, '예약 완료', 100, '기본 문서 규격 → 에디터 바인딩 → 실제 예약 목록 확인', status='done', topic=document['title'], reserve_time=when, verification=verification)
                 pages.complete(page)
                 show_reservation_popup(context, account)
@@ -1647,17 +1694,28 @@ def monitor(base=BASE, now=None):
     day = now.date().isoformat()
     journal = read_journal(base)
     public_path = base.parent / 'dashboard/data/naver/automation-status.json'
-    previous = json.loads(public_path.read_text()) if public_path.exists() else {}
+    previous = json.loads(public_path.read_text(encoding='utf-8')) if public_path.exists() else {}
     accounts = []
     totals = {'verified': 0, 'running': 0, 'failed': 0, 'waiting': 0, 'unknown': 0}
     latest = journal['attempts'][-1] if journal['attempts'] else {}
     for key, expected in DAILY_SLOTS.items():
         attempts = [r for r in journal['attempts'] if r.get('account') == key and (r.get('workDate') == day or str(r.get('reserveTime','')).startswith(day))]
         confirmed = list({(r.get('reserveTime'), r.get('artifactFolder')): r for r in attempts if r.get('phase') == 'verified' and r.get('verificationSource')}.values())
+        by_slot = {}
+        unmatched = []
+        for r in confirmed:
+            inferred = _infer_scheduled_slot(r.get('artifactFolder'), r.get('scheduledSlot'))
+            if inferred in expected and inferred not in by_slot:
+                by_slot[inferred] = r
+            else:
+                unmatched.append(r)
+        for slot in expected:
+            if slot not in by_slot and unmatched:
+                by_slot[slot] = unmatched.pop(0)
         last = attempts[-1] if attempts else {}
         slots = []
         for index, slot in enumerate(expected):
-            row = confirmed[index] if index < len(confirmed) else {}
+            row = by_slot.get(slot) or {}
             status = 'verified' if row else 'waiting'
             if not row and index == len(confirmed) and last:
                 if last.get('phase') == 'failed':

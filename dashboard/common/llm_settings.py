@@ -93,21 +93,26 @@ AGY_MODELS = [
     {'id': 'gemini-4-argon-medium', 'label': 'Gemini 4 Argon (Medium) · 표준'},
     {'id': 'gemini-4-argon-low', 'label': 'Gemini 4 Argon (Low) · 고속'},
     {'id': 'gemini-3.8-flash-high', 'label': 'Gemini 3.8 Flash (High)'},
-    {'id': 'gemini-3.8-flash-medium', 'label': 'Gemini 3.8 Flash (Medium)'},
+    {'id': 'gemini-3.8-flash-medium', 'label': 'Gemini 3.8 Flash (Medium) · 고속 검진'},
     {'id': 'gemini-3.8-flash-low', 'label': 'Gemini 3.8 Flash (Low)'},
-    {'id': 'gpt-6.1-sol', 'label': 'GPT-6.1-Sol (High) · 에이전틱 코딩/집필'},
     {'id': 'claude-opus-5-5-high', 'label': 'Claude Opus 5.5 (High)'},
     {'id': 'claude-opus-5-5-medium', 'label': 'Claude Opus 5.5 (Medium)'},
+    {'id': 'claude-opus-5-5-low', 'label': 'Claude Opus 5.5 (Low)'},
     {'id': 'claude-sonnet-5-5-high', 'label': 'Claude Sonnet 5.5 (High)'},
     {'id': 'claude-sonnet-5-5-medium', 'label': 'Claude Sonnet 5.5 (Medium)'},
+    {'id': 'claude-sonnet-5-5-low', 'label': 'Claude Sonnet 5.5 (Low)'},
     {'id': 'gpt-oss-120b-medium', 'label': 'GPT-OSS 120B (Medium)'},
 ]
 
 CODEX_DEFAULT_MODELS = [
-    {'id': 'gpt-6.1-sol', 'label': 'gpt-6.1-sol (Codex 최고성능 · 원고집필/코드수선 추천)'},
-    {'id': 'gpt-5.4', 'label': 'gpt-5.4 (Codex 표준 추론)'},
-    {'id': 'gpt-5.3-codex', 'label': 'gpt-5.3-codex (Codex 고속 코딩)'},
-    {'id': 'o3-pro', 'label': 'o3-pro (심층 검증)'},
+    {'id': 'gpt-6.1-sol', 'label': 'GPT-6.1-Sol (최신 주력 코딩·집필 모델)'},
+    {'id': 'gpt-6.1-terra', 'label': 'GPT-6.1 Terra (최신 Terra 코덱스 모델)'},
+    {'id': 'gpt-6-astra', 'label': 'GPT-6-Astra (최고 난이도 프론티어 추론)'},
+    {'id': 'gpt-6-sol', 'label': 'GPT-6-Sol (6세대 주력 모델)'},
+    {'id': 'gpt-6-luna', 'label': 'GPT-6-Luna (고속·경량 작업용)'},
+    {'id': 'gpt-5.6-sol', 'label': 'GPT-5.6-Sol'},
+    {'id': 'gpt-5.6-terra', 'label': 'GPT-5.6-Terra'},
+    {'id': 'gpt-5.6-luna', 'label': 'GPT-5.6-Luna'},
 ]
 
 # 6 Crew Agents + 4 Channel Pipelines Individual Brain Matrix
@@ -214,7 +219,7 @@ AGENT_BRAIN_SLOTS = [
     {
         'slot': 'threads_pipeline',
         'kind': 'pipeline',
-        'name': 'Threads 4슬롯 바이럴 파이프라인',
+        'name': 'Threads 10슬롯 바이럴 파이프라인',
         'role': '초반 3초 후킹 카피 생성 및 댓글 링크 유도',
         'icon': '🧵',
         'color': '#4f46e5',
@@ -319,7 +324,8 @@ def ensure_agent_brains(data: dict) -> dict:
         cur = raw.get(slot) if isinstance(raw.get(slot), dict) else {}
         prov = cur.get('provider') if cur.get('provider') in PROVIDERS else slot_meta['recommendedProvider']
         mod = str(cur.get('model') or '').strip() or slot_meta['recommendedModel']
-        effort = (cur.get('reasoningEffort') if cur.get('reasoningEffort') in REASONING_EFFORTS else {'jarvis':'high','patch':'high','publi':'high'}.get(slot)) if prov == 'codex' else None
+        has_effort_key = 'reasoningEffort' in cur
+        effort = (cur.get('reasoningEffort') if cur.get('reasoningEffort') in REASONING_EFFORTS else (None if has_effort_key else {'jarvis':'high','patch':'high','publi':'high'}.get(slot))) if prov == 'codex' else None
         out[slot] = {
             'provider': prov,
             'model': mod,
@@ -386,7 +392,7 @@ def public(data=None):
             for cm in raw_codex_models:
                 if isinstance(cm, dict) and cm.get('id') not in {x['id'] for x in merged_codex_models}:
                     merged_codex_models.append(cm)
-            merged_codex_models = [{**row, **capabilities.get(row['id'], {})} for row in merged_codex_models]
+            merged_codex_models = [{**capabilities.get(row['id'], {}), **row} for row in merged_codex_models]
             providers[name].update(installed=codex.get('installed', True), online=codex.get('online', True),
                                    authenticated=codex.get('authenticated', True), models=merged_codex_models,
                                    modelsFetchedAt=codex.get('modelsFetchedAt'), checkedAt=codex.get('checkedAt'))
@@ -445,11 +451,12 @@ def save_agent_brains(body: dict):
                     raise SettingsError(f'[{slot}] 지원하지 않는 공급자입니다: {prov}')
                 if not mod or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}', mod):
                     raise SettingsError(f'[{slot}] 유효한 모델 ID를 입력하세요.')
+                eff = _saved_reasoning_effort({**cfg, 'provider': prov, 'model': mod}, updated['agentBrains'][slot])
                 updated['agentBrains'][slot] = {
                     'provider': prov,
                     'model': mod,
-                    'reasoningEffort': _saved_reasoning_effort({**cfg, 'provider': prov, 'model': mod}, updated['agentBrains'][slot]),
-                    'badge': format_brain_badge(prov, mod),
+                    'reasoningEffort': eff,
+                    'badge': format_brain_badge(prov, mod, eff),
                     'providerLabel': PROVIDERS.get(prov, (prov, ''))[0],
                 }
 
@@ -497,11 +504,12 @@ def save(body):
                 if isinstance(cfg, dict) and cfg.get('provider') in PROVIDERS and cfg.get('model'):
                     p = cfg['provider']
                     m = str(cfg['model']).strip()
+                    eff = _saved_reasoning_effort({**cfg, 'provider': p, 'model': m}, updated['agentBrains'].get(slot, {}))
                     updated['agentBrains'][slot] = {
                         'provider': p,
                         'model': m,
-                        'reasoningEffort': _saved_reasoning_effort({**cfg, 'provider': p, 'model': m}, updated['agentBrains'].get(slot, {})),
-                        'badge': format_brain_badge(p, m),
+                        'reasoningEffort': eff,
+                        'badge': format_brain_badge(p, m, eff),
                         'providerLabel': PROVIDERS.get(p, (p, ''))[0],
                     }
         _atomic_write_config(updated)

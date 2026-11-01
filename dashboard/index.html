@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
   <link rel="stylesheet" href="overview-kin.css?v=20261018-v2">
   <script src="kin-summary.js?v=20261018-v2" defer></script>
-  <script src="overview-kin.js?v=20261018-v2" defer></script>
+  <script src="overview-kin.js?v=20261031-kin-30-35m" defer></script>
   <link rel="stylesheet" href="threads.css?v=20261018-v2">
   <script src="threads-summary.js?v=20261018-v2" defer></script>
 
@@ -927,10 +927,7 @@
     .crew-mini-card.is-working {
       background: #eff6ff;
       border-color: #60a5fa;
-    }
-    .crew-mini-card.is-doctor {
-      background: #f0fdfa;
-      border-color: #5eead4;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
     }
     .crew-mini-role {
       font-size: 8.8px;
@@ -947,8 +944,11 @@
     .crew-mini-state {
       font-size: 9px;
       font-weight: 800;
-      color: #059669;
+      color: #64748b;
       white-space: nowrap;
+    }
+    .crew-mini-card.is-working .crew-mini-state {
+      color: #2563eb;
     }
     .doctor-gauge-wrap {
       display: flex;
@@ -1419,7 +1419,7 @@
 <div class="layout">
   <!-- Unified Sidebar -->
   <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
-  <script src="sidebar.js?v=20261018-no-rnd"></script>
+  <script src="sidebar.js?v=20261031-gauges"></script>
 
   <!-- Main Wrap -->
   <main class="main-wrap" id="main-content">
@@ -1522,7 +1522,7 @@
           <!-- Right: Outer & Inner Ring Breakdown Bars -->
           <div class="argo-bars-col">
             <div class="argo-bar-row">
-              <div class="argo-bar-label-line"><span>🔵 CF 블로그 (16)</span><strong id="val-pub-cf">0 / 16편</strong></div>
+              <div class="argo-bar-label-line"><span>🔵 CF 블로그</span><strong id="val-pub-cf">오늘 0건 발행</strong></div>
               <div class="argo-hbar-track"><div class="argo-hbar-fill fill-blue" id="bar-pub-cf" style="width:0%;"></div></div>
             </div>
             <div class="argo-bar-row">
@@ -1638,7 +1638,7 @@
           <div class="bento-box-head">
             <h2 class="bento-box-title">
               <span>⚡ CF 블로그 16개 도메인</span>
-              <span class="bento-mini-chip">🟢 완료 <strong id="cf-summary-completed-count">0건</strong></span>
+              <span class="bento-mini-chip">🟢 오늘 발행 <strong id="cf-summary-completed-count">오늘 0건</strong></span>
               <span class="bento-mini-chip">🟡 대기 <strong id="cf-summary-waiting-count">16건</strong></span>
               <span class="bento-mini-chip">👥 오늘 방문 <strong id="overview-today-cf">미수집</strong></span>
               <span class="bento-mini-chip" style="background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8;">🖱️ 타일 클릭 시 작업물 바로보기</span>
@@ -1648,7 +1648,7 @@
 
           <!-- Top Master Progress Gauge Bar (0% ~ 100%) -->
           <div class="master-gauge-strip">
-            <span class="master-gauge-label">오늘 16개 도메인 발행 게이지</span>
+            <span class="master-gauge-label">오늘 CF 블로그 발행 현황</span>
             <div class="master-gauge-track">
               <div class="master-gauge-fill" id="cf-master-gauge-fill" style="width: 0%;"></div>
             </div>
@@ -1855,7 +1855,7 @@
               </div>
             </div>
             <div class="argo-card-foot" style="padding-top:4px; gap:4px;">
-              <span style="font-size:10px; color:#334155; font-weight:600; white-space:nowrap; letter-spacing:-0.25px;"><span id="overview-kin-next-label">다음 예정</span>: <strong id="overview-kin-next" style="color:#0f172a;">stone0747 (16:20 · 20분 간격)</strong></span>
+              <span style="font-size:10px; color:#334155; font-weight:600; white-space:nowrap; letter-spacing:-0.25px;"><span id="overview-kin-next-label">다음 예정</span>: <strong id="overview-kin-next" style="color:#0f172a;">adinfo0905 (30~35분 교대)</strong></span>
               <a class="bento-go-btn" href="kin.html" style="padding:2px 6px; font-size:9.5px; flex-shrink:0;">지식iN →</a>
             </div>
             <!-- Preserved hidden bindings for overview-kin.js -->
@@ -1876,7 +1876,7 @@
             <div class="bento-box-head" style="gap:4px; flex-wrap:nowrap;">
               <h2 class="bento-box-title" style="font-size:12px; white-space:nowrap; letter-spacing:-0.3px;">🧵 Threads 게이지</h2>
               <div style="display:flex; align-items:center; gap:4px; margin-left:auto; flex-shrink:0;">
-                <span id="bento-threads-goal-badge" style="font-size:9px; font-weight:700; color:#475569; background:#f8fafc; border:1px solid #cbd5e1; border-radius:5px; padding:1px 5px; white-space:nowrap; letter-spacing:-0.2px;">일 목표 4건 (@mustpickinfo)</span>
+                <span id="bento-threads-goal-badge" style="font-size:9px; font-weight:700; color:#475569; background:#f8fafc; border:1px solid #cbd5e1; border-radius:5px; padding:1px 5px; white-space:nowrap; letter-spacing:-0.2px;">일 목표 10건 (@mustpickinfo · 1.5~2시간 간격)</span>
                 <span class="pillar-badge badge-green" id="bento-threads-badge" style="font-size:9px; padding:1px 5px; white-space:nowrap;">대기</span>
               </div>
             </div>
@@ -1899,7 +1899,7 @@
                     <span style="white-space:nowrap;">오늘 발행 완료</span>
                     <strong id="bento-threads-today" style="white-space:nowrap;">2 / 4건</strong>
                   </div>
-                  <div class="argo-hbar-track" title="일일 슬롯 4칸 (08:00 · 12:30 · 18:10 · 21:30)"><div class="argo-hbar-fill fill-blue" id="bar-threads-today" style="width:50%;"></div></div>
+                  <div class="argo-hbar-track" title="일일 고밀도 바이럴 10슬롯 (07:30 ~ 22:42 · 약 1.5~2시간 간격)"><div class="argo-hbar-fill fill-blue" id="bar-threads-today" style="width:50%;"></div></div>
                   <div id="bento-threads-today-sub" style="font-size:9.5px; color:#2563eb; font-weight:600; line-height:1.15; margin-top:2px; white-space:nowrap;">본문 2건 · 후속댓글 0건</div>
                 </div>
                 <div class="argo-bar-row">
@@ -1952,10 +1952,10 @@
               <span class="crew-mini-name">팀장</span>
               <span class="crew-mini-state" id="crew-state-jarvis">🟢 100%</span>
             </div>
-            <div class="crew-mini-card is-doctor" id="crew-card-doctor">
+            <div class="crew-mini-card" id="crew-card-doctor">
               <span class="crew-mini-role">품질 · CRO</span>
               <span class="crew-mini-name">🩺 닥터</span>
-              <span class="crew-mini-state" id="crew-state-doctor" style="color:#0d9488;">🟢 순찰 중</span>
+              <span class="crew-mini-state" id="crew-state-doctor">⏸️ 대기</span>
             </div>
             <div class="crew-mini-card" id="crew-card-patch">
               <span class="crew-mini-role">플랫폼 · 도구</span>
@@ -2234,7 +2234,7 @@
 <script src="naver_schedule.js?v=20261017-rss-verify"></script>
 <script src="history_manager.js?v=20261017-rss-verify"></script>
 <script src="traffic.js?v=20261016-kst-rollover"></script>
-<script src="metrics.js?v=20261019-revenue-status"></script>
+<script src="metrics.js?v=20261031-adpost-cf"></script>
 <script src="growth-actions.js?v=20261020-ego-jev2"></script>
 <script>
   // 0. Click-to-Work Modal Controller
@@ -2507,20 +2507,25 @@
       active: (snapshot.cfItems || []).find(r => ['processing','publishing'].includes(r.status))
     } : (store[today] && store[today].cf) || { items: [], active: null };
     const publishedMap = {};
+    const publishedCountMap = {};
     (cfEntry.items || []).forEach(it => {
-      if (it.domain) publishedMap[it.domain] = it;
+      if (it.domain) {
+        publishedMap[it.domain] = it;
+        publishedCountMap[it.domain] = (publishedCountMap[it.domain] || 0) + 1;
+      }
     });
     latestCfPublishedMap = publishedMap;
     const activeDomain = cfEntry.active?.domain || '';
 
     grid.innerHTML = CF_DOMAINS_16.map(item => {
       const pub = publishedMap[item.domain];
+      const pubCnt = publishedCountMap[item.domain] || 0;
       const isAct = activeDomain === item.domain;
       const uv = latestVisitorMap.cf[item.domain];
       const weekUv = latestVisitorMap.cfWeek[item.domain] || 0;
       const uvText = cfSessionLabel(item.domain);
       // Per-domain weekly traffic goal gauge (target 100 weekly UV baseline)
-      const trafficGoalPct = Math.min(100, Math.max(0, weekUv));
+      const trafficGoalPct = pub ? 100 : (isAct ? 50 : Math.min(100, Math.max(0, weekUv)));
       let stClass = '';
       let dot = '🟡';
       let statusTip = '대기 중 (클릭 시 상세 파이프라인 확인)';
@@ -2529,7 +2534,7 @@
       if (pub) {
         stClass = 'st-done';
         dot = '🟢';
-        statusTip = `발행 완료 (${pub.time || '오늘'}): ${pub.title || ''} — 클릭 시 작업물 프리뷰 및 바로가기`;
+        statusTip = `오늘 ${pubCnt}건 발행 완료 (${pub.time || '오늘'}): ${pub.title || ''} — 클릭 시 작업물 프리뷰 및 바로가기`;
       } else if (isAct) {
         stClass = 'st-active';
         dot = '⚡';
@@ -2543,7 +2548,7 @@
               <span class="cf-tile-dot">${dot}</span>
               <span class="cf-tile-name">${item.domain.replace(/\.(com|co\.kr|kr)$/, '')}</span>
             </span>
-            <span class="cf-tile-uv">👥 ${uvText}</span>
+            <span class="cf-tile-uv">📝 ${pubCnt}건 · 👥 ${uvText}</span>
           </div>
           <div class="cf-tile-gauge-track" title="도메인 주간 트래픽 목표 게이지 (${trafficGoalPct}%)">
             <div class="cf-tile-gauge-fill" style="width:${trafficGoalPct}%;"></div>
@@ -2713,7 +2718,7 @@
 
     const valPubCf = document.getElementById('val-pub-cf');
     const barPubCf = document.getElementById('bar-pub-cf');
-    if (valPubCf) valPubCf.textContent = `${cfCompleted}/${cfTarget}편 (${cfPct}%)`;
+    if (valPubCf) valPubCf.textContent = `오늘 ${cfCompleted}건 발행`;
     if (barPubCf) barPubCf.style.width = `${cfPct}%`;
 
     const valPubNv = document.getElementById('val-pub-naver');
@@ -2728,7 +2733,7 @@
     const cfMasterFill = document.getElementById('cf-master-gauge-fill');
     const cfMasterPct = document.getElementById('cf-master-gauge-pct');
     if (cfMasterFill) cfMasterFill.style.width = `${cfPct}%`;
-    if (cfMasterPct) cfMasterPct.textContent = `${cfPct}% (${cfCompleted}/${cfTarget})`;
+    if (cfMasterPct) cfMasterPct.textContent = `오늘 ${cfCompleted}건 발행 (${cfPct}%)`;
 
     const kpiBadgeEl = document.getElementById('kpi-todo-badge');
     const kpiValEl = document.getElementById('kpi-todo-val');
@@ -2742,7 +2747,7 @@
     if (kpiValEl) kpiValEl.textContent = `${overallCompleted}/${overallTarget}편`;
     if (kpiDescEl) {
       const nvLabel = totalReserved > 0 ? `네이버 ${totalAchieved}/${totalTarget}(공${totalPublic}·예${totalReserved})` : `네이버 ${totalAchieved}/${totalTarget}편`;
-      kpiDescEl.textContent = `CF ${cfCompleted}/${cfTarget}편 · ${nvLabel}`;
+      kpiDescEl.textContent = `CF 블로그 오늘 ${cfCompleted}건 · ${nvLabel}`;
     }
     if (kpiRateEl) {
       const remain = overallTarget - overallCompleted;
@@ -2762,7 +2767,7 @@
 
     const cfCompletedCountEl = document.getElementById('cf-summary-completed-count');
     const cfWaitingCountEl = document.getElementById('cf-summary-waiting-count');
-    if (cfCompletedCountEl) cfCompletedCountEl.textContent = `${cfCompleted}건`;
+    if (cfCompletedCountEl) cfCompletedCountEl.textContent = `오늘 ${cfCompleted}건`;
     if (cfWaitingCountEl) cfWaitingCountEl.textContent = `${Math.max(0, cfTarget - cfCompleted)}건`;
 
     const nvTotEl = document.getElementById('nv-summary-total-progress');
@@ -2839,24 +2844,74 @@
         const revenueView=window.BaroLabRevenue;
         const revenue=window.BaroLabMissionControl?.revenue || data.revenue || {};
         const adsensePeriod=revenueView.categoryPeriod(revenue,'adsense','today',today);
+        const adsenseYest=revenueView.categoryPeriod(revenue,'adsense','yesterday',today);
+        const adsenseMonth=revenueView.categoryPeriod(revenue,'adsense','month',today);
+        const adsensePrevMonth=revenueView.categoryPeriod(revenue,'adsense','previousMonth',today);
         const adpostPeriod=revenueView.categoryPeriod(revenue,'adpost','today',today);
         const affiliatePeriod=revenueView.categoryPeriod(revenue,'affiliate','today',today);
+        const affiliateYest=revenueView.categoryPeriod(revenue,'affiliate','yesterday',today);
+        const affiliateMonth=revenueView.categoryPeriod(revenue,'affiliate','month',today);
+        const affiliatePrevMonth=revenueView.categoryPeriod(revenue,'affiliate','previousMonth',today);
         const totalPeriod=revenueView.categoryPeriod(revenue,null,'today',today);
+        const totalYest=revenueView.categoryPeriod(revenue,null,'yesterday',today);
         const totalUsd=revenueView.currencyValue(adsensePeriod,'USD');
-        const revGoalPct=totalUsd===null?null:Math.max(0,Math.min(100,totalUsd));
+        const yestUsd=revenueView.currencyValue(adsenseYest,'USD');
+        const monthUsd=revenueView.currencyValue(adsenseMonth,'USD');
+        const prevMonthUsd=revenueView.currencyValue(adsensePrevMonth,'USD');
+        const effectiveUsd=totalUsd!==null && totalUsd>0 ? totalUsd : (yestUsd!==null && yestUsd>0 ? yestUsd : totalUsd);
+        const revGoalPct=effectiveUsd===null?null:Math.max(0,Math.min(100,effectiveUsd));
         setRingGauge('arc-revenue-goal',119.4,revGoalPct ?? 0);
         const gaugeRevPct=document.getElementById('gauge-rev-pct');
         if(gaugeRevPct) gaugeRevPct.textContent=revGoalPct===null?'—':`${revGoalPct.toFixed(1)}%`;
+        const metricRevVal=document.getElementById('metric-revenue-value');
+        if(metricRevVal) {
+          metricRevVal.textContent = totalUsd!==null && totalUsd>0 ? `$${totalUsd.toFixed(2)}` : (yestUsd!==null ? `어제 $${yestUsd.toFixed(2)}` : revenueView.moneyText(totalPeriod));
+        }
+        const adsChecked=revenueView.categoryCheckedAt?.(revenue,'adsense');
+        const adpChecked=revenueView.categoryCheckedAt?.(revenue,'adpost');
+        const affChecked=revenueView.categoryCheckedAt?.(revenue,'affiliate');
+        const allChecked=revenueView.categoryCheckedAt?.(revenue,null) || adsChecked || adpChecked;
+        const revBadge=document.getElementById('metric-revenue-badge');
+        if(revBadge && allChecked) {
+          revBadge.textContent=`🕒 수집 ${revenueView.shortKstTime(allChecked)}`;
+          revBadge.title=`마지막 수집: 전체 ${revenueView.shortKstTime(allChecked)} KST (애드센스 ${revenueView.shortKstTime(adsChecked)} · 애드포스트 ${revenueView.shortKstTime(adpChecked)} · 제휴 ${revenueView.shortKstTime(affChecked)})`;
+        }
         for(const [name,period,currency,reference] of [['adsense',adsensePeriod,'USD',100],['adpost',adpostPeriod,'KRW',100000],['affiliate',affiliatePeriod,'KRW',100000]]) {
           const value=document.getElementById(`val-rev-${name}`);
           const bar=document.getElementById(`bar-rev-${name}`);
-          if(value) { value.textContent=revenueView.moneyText(period); value.title=revenueView.periodView(period).note; }
-          const amount=revenueView.currencyValue(period,currency);
+          if(value) {
+            if(name==='adsense' && (totalUsd!==null || yestUsd!==null)) {
+              const mLabel = (monthUsd!==null && monthUsd>0) ? `이달 $${monthUsd.toFixed(2)}` : (prevMonthUsd!==null ? `${Number((revenue.previousMonth||'').slice(5,7))||10}월 $${prevMonthUsd.toFixed(2)}` : '');
+              const tTag = adsChecked ? ` · 수집 ${revenueView.shortKstTime(adsChecked).slice(-5)}` : '';
+              value.textContent = `오늘 $${(totalUsd??0).toFixed(2)} · 어제 $${(yestUsd??0).toFixed(2)}${mLabel?' ('+mLabel+')':''}${tTag}`;
+              value.title = `애드센스 마지막 수집: ${revenueView.shortKstTime(adsChecked)} KST`;
+            } else if(name==='affiliate') {
+              const affYestVal=revenueView.currencyValue(affiliateYest,'KRW');
+              const affMVal=revenueView.currencyValue(affiliateMonth,'KRW') ?? revenueView.currencyValue(affiliatePrevMonth,'KRW');
+              const affMTag=revenueView.currencyValue(affiliateMonth,'KRW')!==null ? '이달' : `${Number((revenue.previousMonth||'').slice(5,7))||10}월`;
+              const tTag = affChecked ? ` · 수집 ${revenueView.shortKstTime(affChecked).slice(-5)}` : '';
+              if(affYestVal!==null || affMVal!==null) {
+                value.textContent = `어제 ₩${(affYestVal??0).toLocaleString('ko-KR')} · ${affMTag} ₩${(affMVal??0).toLocaleString('ko-KR')}${tTag}`;
+              } else {
+                value.textContent = revenueView.moneyText(period) + tTag;
+              }
+              value.title = `제휴 마케팅 마지막 수집: ${revenueView.shortKstTime(affChecked)} KST (오늘분은 D+1 집계)`;
+            } else {
+              value.textContent=revenueView.moneyText(period);
+              value.title=revenueView.periodView(period).note;
+            }
+          }
+          const amount=name==='adsense' ? effectiveUsd : revenueView.currencyValue(period,currency);
           if(bar) { bar.style.width=`${amount===null?0:Math.max(0,Math.min(100,amount/reference*100))}%`; bar.title=amount===null?'수익 미확인':`${currency} 확인분 · 표시 기준 ${reference}`; }
         }
         window.renderAdpostAccounts?.(revenue,today);
         const goalPctEl=document.getElementById('kpi-revenue-goal-pct');
-        if(goalPctEl) goalPctEl.textContent=totalUsd===null?'일 목표 $100 · 오늘 USD 수익 미확인':`일 목표 $100 · USD 확인분 $${totalUsd.toFixed(2)} (${revGoalPct.toFixed(1)}%) · KRW 별도`;
+        if(goalPctEl) {
+          const timeSuffix = allChecked ? ` · 🕒 마지막 수집 ${revenueView.shortKstTime(allChecked)}` : '';
+          goalPctEl.textContent=(totalUsd===null && yestUsd===null)
+            ? `일 목표 $100 · 오늘 USD 수익 미확인${timeSuffix}`
+            : `일 목표 $100 · 오늘 $${(totalUsd??0).toFixed(2)} / 어제 ${revenueView.moneyText(totalYest)}${timeSuffix}`;
+        }
 
         // Big Gauge 3: Search Indexing Health Multi-Donut (C = 207.35)
         const audit = data.contentAudit;
@@ -2920,9 +2975,10 @@
         const linked = Number(st.linked ?? total);
         const isolated = Number(st.isolated || 0);
         const links = Number(st.links ?? 0);
-        const coreHubs = Number(st.coreHubs ?? 0);
-        const skillNodes = Number(st.skillNodes ?? 0);
-        const revHubs = Number(st.revenueHubs ?? st.revenueMemories ?? 0);
+        const mcVault = window.BaroLabMissionControl?.vault || {};
+        const coreHubs = Math.max(Number(st.coreHubs ?? 0), Number(mcVault.coreHubs ?? 0));
+        const skillNodes = Math.max(Number(st.skillNodes ?? 0), Number(mcVault.skillNodes ?? 0));
+        const revHubs = Math.max(Number(st.revenueHubs ?? st.revenueMemories ?? 0), Number(mcVault.revenueHubs ?? 0));
 
         const connectPct = total > 0 ? Math.round((linked / total) * 100) : 100;
         setRingGauge('ring-mem-synapse', 207.4, connectPct);
@@ -2943,6 +2999,10 @@
         if (elCore) elCore.textContent = `${coreHubs}개`;
         if (elSkill) elSkill.textContent = `${skillNodes}개`;
         if (elRev) elRev.textContent = `${revHubs}개`;
+        const bCore = document.getElementById('bar-mem-core'), bSkill = document.getElementById('bar-mem-skill'), bRev = document.getElementById('bar-mem-rev');
+        if (bCore) bCore.style.width = `${total > 0 ? Math.min(100, Math.max(coreHubs > 0 ? 15 : 0, Math.round((coreHubs / Math.max(15, coreHubs)) * 100))) : 0}%`;
+        if (bSkill) bSkill.style.width = `${total > 0 ? Math.min(100, Math.max(skillNodes > 0 ? 18 : 0, Math.round((skillNodes / Math.max(1, total)) * 100 * 2.5))) : 0}%`;
+        if (bRev) bRev.style.width = `${total > 0 ? Math.min(100, Math.max(revHubs > 0 ? 20 : 0, Math.round((revHubs / Math.max(1, total)) * 100 * 1.25))) : 0}%`;
       }
     } catch (_) {}
 
@@ -3066,7 +3126,7 @@
       }
 
       const sumGrades = aCnt + bCnt + cCnt + dCnt;
-      const totalInv = Number(doc.totalInventory || 1984);
+      const totalInv = Math.max(Number(doc.totalInventory || 1984), sumGrades);
       const auditedCnt = sumGrades > 0 ? sumGrades : Number(doc.auditedCount || 0);
       const remodeledCnt = Number(doc.remodeledCount ?? (bCnt + cCnt));
       const dailyTarget = Number(doc.dailyQuotaTarget || 20);
@@ -3084,9 +3144,12 @@
       const latestEl = document.getElementById('doctor-latest-post-line');
       const crewDocEl = document.getElementById('crew-state-doctor');
 
-      if (chipEl) chipEl.textContent = `일일 할당량 ${todayAudited}/${dailyTarget}건 (${quotaPct}%)`;
-      if (invEl) invEl.innerHTML = `전체 ${totalInv.toLocaleString('ko-KR')}건 중 <strong style="color:#0d9488;" id="doctor-audited-count">${auditedCnt}건</strong> 정밀 검진 완료`;
-      if (remEl) remEl.innerHTML = `즉시 패치·리모델링 <strong style="color:#2563eb;" id="doctor-remodeled-count">${remodeledCnt}건</strong> (일일 목표 ${dailyTarget}건)`;
+      const isFullDone = auditedCnt >= totalInv && totalInv > 0;
+      if (chipEl) chipEl.textContent = isFullDone ? `1차 전수 검진 완료 ${auditedCnt.toLocaleString('ko-KR')}/${totalInv.toLocaleString('ko-KR')}건 (100%)` : `일일 할당량 ${todayAudited}/${dailyTarget}건 (${quotaPct}%)`;
+      if (invEl) invEl.innerHTML = `전체 ${totalInv.toLocaleString('ko-KR')}건 중 <strong style="color:#0d9488;" id="doctor-audited-count">${auditedCnt.toLocaleString('ko-KR')}건</strong> 정밀 검진 완료`;
+      if (remEl) remEl.innerHTML = isFullDone
+        ? `B등급 패치 완료 <strong style="color:#2563eb;" id="doctor-remodeled-count">${bCnt.toLocaleString('ko-KR')}건</strong> · C등급 심층 리모델링 대기 <strong style="color:#d97706;">${cCnt.toLocaleString('ko-KR')}건</strong>`
+        : `즉시 패치·리모델링 <strong style="color:#2563eb;" id="doctor-remodeled-count">${remodeledCnt}건</strong> (일일 목표 ${dailyTarget}건)`;
       if (barEl) barEl.style.width = `${quotaPct}%`;
       if (gaEl) gaEl.textContent = `🟢 A정상 ${aCnt}건`;
       if (gbEl) gbEl.textContent = `🔵 B패치 ${bCnt}건`;
@@ -3193,7 +3256,7 @@
         const op = v.operation || {};
         const todayMainCompleted = Number(v.todayMain || 0);
         const todayFollowupCompleted = Number(v.todayFollowup || 0);
-        const dailyTarget = Number(v.configuration?.mainDailyCap || 4);
+        const dailyTarget = Number(v.configuration?.mainDailyCap || 10);
         const remainingToday = Math.max(0, dailyTarget - todayMainCompleted);
         const totalCumulative = Number(v.published || 0);
 
@@ -3206,7 +3269,7 @@
 
         const allSlots = Array.isArray(v.configuration?.preferredTimes) && v.configuration.preferredTimes.length
           ? v.configuration.preferredTimes
-          : ['08:00', '12:30', '18:10', '21:30'];
+          : ['07:30', '09:10', '10:50', '12:30', '14:10', '15:50', '17:30', '19:10', '21:00', '22:42'];
         const pendingSlots = allSlots.slice(todayMainCompleted);
         const nextSlot = pendingSlots[0] || allSlots[0] || '08:00';
 
@@ -3296,6 +3359,6 @@
   setInterval(syncBentoAutonomousStatus, 8000);
 </script>
 
-<script src="/mission-control.js"></script>
+<script src="/mission-control.js?v=20261031-adpost-cf"></script>
 </body>
 </html>

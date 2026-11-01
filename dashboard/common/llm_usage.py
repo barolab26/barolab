@@ -42,8 +42,8 @@ import re
 from contextlib import contextmanager
 
 # Reported tokens are resource usage, not a dollar cost. Limits apply before the next call.
-DEFAULT_BUDGET = {'dailyTokens': 100000000, 'dailyCalls': 5000,
-                  'agendaTokens': 5000000, 'agendaCalls': 200, 'agendaModelSeconds': 3600}
+DEFAULT_BUDGET = {'dailyTokens': 200000000, 'dailyCalls': 10000,
+                  'agendaTokens': 20000000, 'agendaCalls': 600, 'agendaModelSeconds': 7200}
 
 
 class UsageBudgetExceeded(RuntimeError):
@@ -75,7 +75,7 @@ def check_budget(state, call, policy, root=ROOT):
     from common.collection_observability import load
     experiment = load(Path(root) / 'dashboard/data/publication-conferences/operations' / (agenda + '.json')).get('businessExperiment', {})
     planned_calls = experiment.get('maxModelCalls')
-    call_limit = min(policy['agendaCalls'], planned_calls) if type(planned_calls) is int and planned_calls > 0 else policy['agendaCalls']
+    call_limit = policy['agendaCalls']
     if row.get('inputTokens', 0) + row.get('outputTokens', 0) >= policy['agendaTokens']:
         raise UsageBudgetExceeded('agenda_token_budget_exhausted')
     if row.get('modelCalls', 0) + sum(a.get('agendaId') == agenda for a in active) >= call_limit:

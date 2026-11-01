@@ -42,26 +42,42 @@ def line(value='',style='bold white'):
 
 
 def revenue_summary(revenue,metrics,now):
-    day=now.date().isoformat();month=day[:7];yesterday=(now.date()-dt.timedelta(days=1)).isoformat()
+    day=now.date().isoformat();month=day[:7];yesterday=(now.date()-dt.timedelta(days=1)).isoformat();prev_month=yesterday[:7]
     sources=revenue.get('months',{}).get(month,{}).get('sources',[])
+    prev_sources=revenue.get('months',{}).get(prev_month,{}).get('sources',[]) if prev_month!=month else []
+    prev_by_id={s.get('id'):s for s in prev_sources if isinstance(s,dict) and s.get('id')}
     usd=[s for s in sources if s.get('category')=='adsense' and s.get('currency')=='USD']
+    prev_usd=[s for s in prev_sources if s.get('category')=='adsense' and s.get('currency')=='USD']
     def amount(rows,date):
         values=[number(r.get('daily',{}).get(date)) for r in rows]
         return sum(v for v in values if v is not None) if any(v is not None for v in values) else None
     today=amount(usd,day);prior=amount(usd,yesterday)
+    if prior is None and prev_usd:prior=amount(prev_usd,yesterday)
     subtotal=sum((v for s in usd for k,a in s.get('daily',{}).items() if k.startswith(month) and (v:=number(a)) is not None),Decimal(0)) if usd else None
-    through=max((k for s in usd for k in s.get('daily',{})),default='—')
+    if not subtotal and prev_usd:
+        subtotal=sum((v for s in prev_usd for k,a in s.get('daily',{}).items() if k.startswith(prev_month) and (v:=number(a)) is not None),Decimal(0))
+    through=max((k for s in (usd + prev_usd) for k in s.get('daily',{})),default='—')
     coverage=len({domain for s in usd if s.get('status')=='collected' for domain in s.get('domains',[])})
     rows=[f'애드센스 수집분 ({coverage}/16 CF)  오늘 {money(today)}  /  어제 {money(prior)}  /  월 수집합 {money(subtotal)}  (기준일 {through})',
-          '일일 목표 $100.00  '+bar(float(today or 0),100,24)+'  '+(f'{today:.2f}%' if today is not None else '당일 집계 대기')]
+          '일일 목표 $100.00  '+bar(float(today or prior or 0),100,24)+'  '+(f'{(today if today is not None else (prior or 0)):.2f}%' if (today is not None or prior is not None) else '당일 집계 대기')]
     seen=set()
     for s in sources:
         if s.get('currency')!='KRW' or s.get('aggregationEligible') is False:continue
         key=s.get('aggregationKey') or s.get('id')
         if key in seen:continue
-        seen.add(key);daily=s.get('daily',{});date=max(daily,default='—');at=_epoch(s.get('checkedAt'))
+        seen.add(key);daily=s.get('daily',{});prev_daily=(prev_by_id.get(s.get('id')) or {}).get('daily',{})
+        merged_daily={**prev_daily,**daily}
+        date=max(merged_daily,default='—');at=_epoch(s.get('checkedAt'))
         age=f'{max(0,int((now.timestamp()-at)/60))}분 전' if at else '수집 대기'
-        rows.append(f"{s.get('label',s.get('id'))}  오늘 {money(daily.get(day),'₩')} / 최근 {money(daily.get(date),'₩')} ({date}) · {age} · {s.get('status','대기')}")
+        month_sum=sum((v for k,a in daily.items() if k.startswith(month) and (v:=number(a)) is not None),Decimal(0)) if daily else None
+        month_tag='이달'
+        if month_sum is None and prev_daily:
+            month_sum=sum((v for k,a in prev_daily.items() if k.startswith(prev_month) and (v:=number(a)) is not None),Decimal(0))
+            month_tag=f'{int(prev_month[-2:])}월'
+        if s.get('category')=='adpost':
+            rows.append(f"{s.get('label',s.get('id'))}  어제 {money(merged_daily.get(yesterday),'₩')} / {month_tag} {money(month_sum,'₩')} · {age} · {s.get('status','대기')}")
+        else:
+            rows.append(f"{s.get('label',s.get('id'))}  오늘 {money(daily.get(day),'₩')} / 최근 {money(merged_daily.get(date),'₩')} ({date}) · {age} · {s.get('status','대기')}")
     app_rows=[s for s in sources if s.get('category')=='admob']
     if app_rows:
         for currency in sorted({s.get('currency','USD') for s in app_rows}):
@@ -251,13 +267,15 @@ def brain_display(data,now):
     def model(role):return brains.get(role,{}).get('badge') or brains.get(role,{}).get('model') or crew.get(role,{}).get('configuredModel') or crew.get(role,{}).get('model') or '—'
     mapping='[직원 매핑] @팀장('+model('jarvis')+') | '
     mapping+=('@publi·@patch('+model('publi')+')' if model('publi')==model('patch') else '@publi('+model('publi')+') | @patch('+model('patch')+')')
-    mapping+=' | Threads('+model('threads_pipeline')+')';rows.append(mapping);styles.append('dim')
+    mapping+=' | @radar('+model('radar')+') | '
+    mapping+=('@doctor·@trace('+model('doctor')+')' if model('doctor')==model('trace') else '@doctor('+model('doctor')+') | @trace('+model('trace')+')')
+    rows.append(mapping);styles.append('dim')
     spans=[]
     for r in active:
         role=r.get('agentSlot')
         if role in ('cf_pipeline','naver_pipeline','kin_pipeline'):role='publi'
         name='Threads' if role=='threads_pipeline' else '@팀장' if role=='jarvis' else '@'+str(role)
-        if role in ('jarvis','publi','patch','threads_pipeline'):
+        if role in ('jarvis','publi','patch','radar','doctor','trace','threads_pipeline'):
             start=mapping.find(name)
             if start>=0:spans.append([start,start+len(name)])
     return dict(rows=rows,styles=styles,spans=spans,mappingRow=len(rows)-1)

@@ -207,7 +207,8 @@ def refresh_live_snapshot():
     with LIVE_SNAPSHOT_LOCK:
         collector=getattr(app.state,'mission_collector',None)
         if collector is None:
-            collector=Collector();app.state.mission_collector=collector
+            collector=Collector();app.state.mission_collector=collector;collector.start()
+        elif not getattr(collector,'thread',None) or not collector.thread.is_alive():collector.start()
         collector.collect()
         result=shared_snapshot(collector.get())
         write(DATA_DIR/'live_snapshot.json',result)
@@ -218,7 +219,7 @@ def refresh_live_snapshot():
 @app.get('/api/live-snapshot')
 def get_live_snapshot():
     snapshot=load_json(DATA_DIR/'live_snapshot.json',{})
-    if snapshot.get('schema')=='barolab-mission-control-v2':return snapshot
+    if snapshot.get('schema')=='barolab-mission-control-v2' and snapshot.get('generatedAt') and (datetime.now(timezone(timedelta(hours=9)))-datetime.fromisoformat(str(snapshot['generatedAt']).replace('Z','+00:00'))).total_seconds()<=12:return snapshot
     return refresh_live_snapshot()
 
 

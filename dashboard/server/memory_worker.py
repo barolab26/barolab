@@ -9,7 +9,13 @@ import threading
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_ROOT = Path(__file__).resolve().parents[2]
+_IMPORT_PATHS = (_ROOT / 'dashboard' / 'server', _ROOT / 'dashboard', _ROOT / 'dashboard' / 'agents', _ROOT / 'dashboard' / 'collectors', _ROOT)
+for _p in reversed(_IMPORT_PATHS):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+os.environ['PYTHONPATH'] = os.pathsep.join([*(str(p) for p in _IMPORT_PATHS), os.environ.get('PYTHONPATH', '')])
+os.environ['PYTHONUTF8'] = '1'
 
 
 def has_active_jobs(proc=Path('/proc'), parent=None):
@@ -107,6 +113,7 @@ def main():
     from server.project_monitor import sample_project_health_once, process_project_monitor_once, process_project_feedback_once
     from server.agent_tools import process_staff_request_once, process_staff_review_once
     from common.project_autonomy import process_project_autonomy_once
+    from brunch_posting.posting import process_brunch_autonomy_once
     from agents.crew_reasoning import resume_ceo_once, resume_background_once
     from common.work_agenda import process_once as process_agendas
     from dashboard.agents.synapse import refresh_once
@@ -150,6 +157,13 @@ def main():
                     mark(threading.current_thread().name, 'idle')
             stopped.wait(interval)
 
+    try:
+        from server.mission_control import Collector
+        host_collector = Collector()
+        host_collector.start()
+    except Exception:
+        host_collector = None
+
     # Observation remains responsive while bounded model calls or learning run.
     observers = [
         threading.Thread(target=loop, args=([sample_project_health_once], 30), name='project-observer'),
@@ -161,6 +175,7 @@ def main():
         threading.Thread(target=loop, args=([process_agendas], 5), name='agenda-dispatch'),
         threading.Thread(target=loop, args=([resume_background_once], 5), name='background-goals'),
         threading.Thread(target=loop, args=([process_project_autonomy_once], 30), name='project-autonomy'),
+        threading.Thread(target=loop, args=([process_brunch_autonomy_once], 600), name='brunch-autonomy'),
         threading.Thread(target=watchdog, name='worker-watchdog'),
     ]
     for worker in observers:

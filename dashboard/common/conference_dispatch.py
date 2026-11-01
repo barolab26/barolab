@@ -64,8 +64,12 @@ def concrete_requests(kind, arguments):
             for item in sorted(schedule.get('items',[]),key=lambda r:r.get('scheduledTime','')):
                 domain=item.get('domain');slot=plan['cf'].get(domain)
                 folder=folder_for('cf_posting',today,domain)
-                if slot and (folder/'photo-plan.json').exists() and item.get('status') not in ('published','failed','error'):
+                if slot and slot <= now.strftime('%H:%M') and (folder/'photo-plan.json').exists() and item.get('status') not in ('published','failed','error'):
                     result.append({'action':'cf','date':today,'account':domain,'slot':slot})
+                elif action=='cf-cycle' and slot and item.get('status') not in ('published','failed','error'):
+                    pub_rec = load(folder/'publication-receipt.json')
+                    if not (pub_rec.get('state') == 'published' and pub_rec.get('publicPublicationVerified')):
+                        result.append({'action':'cf-prepare','date':today,'account':domain,'slot':slot})
         return result
     if kind=='kin':
         if arguments.get('account') and arguments.get('slot'):return [arguments]
@@ -127,10 +131,17 @@ def _request_single(kind, arguments):
         agendas.bind_target(target)
         title = {'naver_blog':'네이버 예약','cf_blog':'CF 글 준비' if arguments.get('action')=='cf-prepare' else 'CF 발행','naver_kin':'지식인 답변','threads':'Threads 게시'}[project]+' · '+' · '.join(str(arguments[k]) for k in ('account','date','slot') if arguments.get(k))
         purpose = CHANNEL_PURPOSES.get(project, '하루  수익 달성에 기여하는 채널 콘텐츠 생산 및 트래픽 유입')
+        not_before = 0
+        if arguments.get('action') == 'cf' and arguments.get('date') and arguments.get('slot'):
+            try:
+                from datetime import datetime
+                not_before = datetime.fromisoformat(f"{arguments['date']}T{arguments['slot']}:00+09:00").timestamp()
+            except Exception:
+                not_before = 0
         business = agendas.propose('conference',target,title=title,project=project,
             source={'conferenceId':key,'kind':kind,'arguments':arguments,'businessPurpose':purpose},
             completion='이 글의 승인 원고·이미지 준비 증거 확인' if arguments.get('action')=='cf-prepare' else '지정 계정·날짜·슬롯의 실제 예약 또는 공개 게시 증거 확인',
-            priority=0)
+            priority=0, not_before=not_before)
     with locked(QUEUE):
         row = load(path)
         if business and row:
@@ -246,8 +257,10 @@ def process_once():
             log = path.with_suffix('.log')
             with log.open('ab') as output:
                 environment=dict(os.environ)
+                environment['PYTHONPATH']=os.pathsep.join([str(ROOT/'dashboard'/'server'),str(ROOT/'dashboard'),str(ROOT),environment.get('PYTHONPATH','')])
+                environment['PYTHONUTF8']='1'
                 if agendas.enabled():environment['BAROLAB_AGENDA_CONTEXT']=json.dumps(agendas.token(current))
-                child = subprocess.Popen([sys.executable, '-u', '-B', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True, env=environment, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                child = subprocess.Popen([sys.executable, '-u', '-B', '-X', 'utf8', '-m', 'common.conference_dispatch', 'work', path.stem], cwd=ROOT, stdout=output, stderr=output, start_new_session=True, env=environment, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             from common.runtime_locks import process_start_ticks
             ticks = process_start_ticks(child.pid) if os.name == 'nt' else Path('/proc', str(child.pid), 'stat').read_text().split(') ', 1)[1].split()[19]
             row.update(status='running', pid=child.pid, startTicks=ticks)
@@ -271,7 +284,11 @@ def install_channel_conferences(kind):
         if agendas.enabled():
             row=agendas.require(project={'kin':'naver_kin','threads':'threads'}[kind])
             args=(row.get('workTarget') or row.get('source') or {}).get('arguments',{})
-            if args.get('account') and args['account']!=account:raise ValueError('Agenda account changed; preserve original work')
+            if args.get('account') and args['account']!=account:
+                if kind=='kin' and account:
+                    args['account']=account
+                else:
+                    raise ValueError('Agenda account changed; preserve original work')
             if args.get('date')!=day:raise ValueError('Original publication date changed')
             if kind=='threads' and slot and slot not in (args.get('slot'),args['date']+'-'+str(args.get('slot'))):raise ValueError('Agenda slot changed')
     def author_after_conference(identity, slot, topic, original, *args, **kwargs):

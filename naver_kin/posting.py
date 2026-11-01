@@ -7,6 +7,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
+sys.path.insert(0, str(BASE_DIR.parent / 'dashboard' / 'server'))
+sys.path.insert(0, str(BASE_DIR.parent / 'dashboard'))
 sys.path.insert(0, str(BASE_DIR.parent))
 
 from datetime import date as _naver_experiment_date
@@ -886,7 +888,7 @@ def _naver_browser__read(page, url):
         raise RuntimeError('Question selectors changed or question is unavailable')
     for element in title.select('.blind, svg'):
         element.decompose()
-    return {'question_url': url, 'question_id': identifier, 'title': title.get_text(' ', strip=True), 'body': page.locator('.questionDetail').inner_text().strip(), 'image_urls': [x.get('src') for x in body.select('img')], 'requires_visual_evidence': bool(body.select('img, video, iframe, .kin_movie_info')), 'answer_count': len(soup.select('.answerArea[id^=answer_]')), 'answer_button_present': bool(soup.select('._answerWriteButton')), 'existing_answers': [x.get_text('\n', strip=True)[:10000] for x in soup.select('.answerArea[id^=answer_]')], 'captured_at': _naver_browser_datetime.now(_naver_browser_timezone.utc).isoformat()}
+    return {'question_url': url, 'question_id': identifier, 'title': title.get_text(' ', strip=True), 'body': page.locator('.questionDetail').first.inner_text().strip(), 'image_urls': [x.get('src') for x in body.select('img')], 'requires_visual_evidence': bool(body.select('img, video, iframe, .kin_movie_info')), 'answer_count': len(soup.select('.answerArea[id^=answer_]')), 'answer_button_present': bool(soup.select('._answerWriteButton')), 'existing_answers': [x.get_text('\n', strip=True)[:10000] for x in soup.select('.answerArea[id^=answer_]')], 'captured_at': _naver_browser_datetime.now(_naver_browser_timezone.utc).isoformat()}
 
 def _naver_browser_read_question(account, url):
     with _naver_browser_session(account) as page:
@@ -1143,7 +1145,7 @@ _naver_authoring_DEFAULT_CATALOG = [{'url': 'https://www.must-pick.com/robot-vac
 
 _naver_authoring_OFFICIAL_HOSTS = {'www.museum.go.kr', 'www.lge.co.kr', 'www.lg.com', 'www.samsungsvc.co.kr', 'www.gov.kr', 'www.bokjiro.go.kr', 'www.nhis.or.kr', 'www.nps.or.kr', 'www.hometax.go.kr', 'www.nts.go.kr', 'www.safedriving.or.kr', 'www.koroad.or.kr'}
 
-_naver_authoring_RISK_WORDS = ('대출', '투자', '수익률', '주식', '절세', '세금', '소송', '고소', '진단', '처방', '복용', '임신', '보험금')
+_naver_authoring_RISK_WORDS = ('불법대출', '작업대출', '사채', '수익률보장', '소송', '고소', '처방전', '복용량', '임신중절')
 
 _naver_authoring_GENERIC_STOPWORDS = {'방법', '관련', '가능', '어떻게', '정리', '기준', '최신', '안내', '총정리', '가이드', '알아보기', '확인', '문의', '질문', '궁금', '있나요', '될까요', '할까요', '무엇', '얼마나', '2025', '2026', '2026년', '드럼세탁기', '세탁기', '국립중앙박물관'}
 
@@ -1151,22 +1153,21 @@ _naver_authoring_SYNONYM_MAP = {'국중박': '국립중앙박물관', '물품보
 
 def _naver_authoring__extract_keywords_from_title(title, category=''):
     cleaned = _naver_authoring_re.sub('[^\\w\\s가-힣]', ' ', str(title or '')).strip()
-    tokens = [t for t in cleaned.split() if len(t) >= 2 and t not in {'총정리', '가이드', '완벽', '한눈에', '정리', '방법', '안내'}]
+    noise = {'총정리', '가이드', '완벽', '한눈에', '정리', '방법', '안내', '보고', '넣어도', '될까', '된다는데', '있는데', '어떻게', '얼마나', '늘까', '쉬운', '가지', '체크', '확인', '확인할', '오늘도', '끝났나요', '부터', '떼야', '할까', '내기', '보내기', '놓치기', '이거', '이번', '다음', '달인데', '적죠', '적지'}
+    tokens = [t for t in cleaned.split() if len(t) >= 2 and t not in noise and not t.isdigit()]
     if not tokens:
         return []
     anchor = tokens[0]
     phrases = []
-    if len(tokens) >= 3:
-        phrases.append(f'{tokens[0]} {tokens[1]} {tokens[2]}')
     if len(tokens) >= 2:
         phrases.append(f'{tokens[0]} {tokens[1]}')
-    for sub in tokens[1:4]:
+    for sub in tokens[1:10]:
         phrase = f'{anchor} {sub}'
         if phrase not in phrases:
             phrases.append(phrase)
     if category and len(category.strip()) >= 2:
         phrases.append(f'{anchor} {category.strip()}')
-    return phrases[:4]
+    return phrases[:10]
 
 def _naver_authoring_get_today_used_domains(db=None, day=None):
     """Return domain counts already linked in KnowledgeIn today (send_day == today)."""
@@ -1207,14 +1208,14 @@ def _naver_authoring_load_dynamic_catalog(max_items=50, base_catalog=None, db=No
             return
         if url in seen_urls:
             return
-        kw_list = [k.strip() for k in keywords or [] if isinstance(k, str) and len(k.strip()) >= 2]
+        kw_list = [k.strip() for k in keywords or [] if isinstance(k, str) and len(k.strip()) >= 2 and '.' not in k and '·' not in k]
         if not kw_list and title:
             kw_list = _naver_authoring__extract_keywords_from_title(title)
         if not kw_list:
             return
         seen_urls.add(url)
         domain = (parsed.hostname or '').lower().removeprefix('www.')
-        entry = {'url': url, 'title': str(title or '').strip() or kw_list[0], 'domain': domain, 'keywords': kw_list[:5], 'published_at': str(published_at or ''), 'cpc_tier': _naver_authoring_domain_cpc_priority_rank(domain)[0]}
+        entry = {'url': url, 'title': str(title or '').strip() or kw_list[0], 'domain': domain, 'keywords': kw_list[:10], 'published_at': str(published_at or ''), 'cpc_tier': _naver_authoring_domain_cpc_priority_rank(domain)[0]}
         if isinstance(body, str) and len(body.strip()) >= 250:
             entry['body'] = body.strip()[:45000]
         raw_items.append(entry)
@@ -1232,7 +1233,16 @@ def _naver_authoring_load_dynamic_catalog(max_items=50, base_catalog=None, db=No
             pass
     cf_out = _naver_pipeline_ROOT / 'cf_posting/output'
     if cf_out.is_dir():
-        pub_files = sorted(cf_out.glob('**/publication.json'), key=lambda p: p.stat().st_mtime, reverse=True)[:80]
+        cf_sched_path = _naver_pipeline_ROOT / 'dashboard/data/cf/daily_schedule.json'
+        if cf_sched_path.is_file():
+            try:
+                cf_sched = _naver_authoring_json.loads(cf_sched_path.read_text(encoding='utf-8'))
+                for it in cf_sched.get('items', []):
+                    if isinstance(it, dict) and it.get('status') == 'published' and it.get('publicUrl'):
+                        _add_entry(it.get('publicUrl'), it.get('title', ''), _naver_authoring__extract_keywords_from_title(it.get('title', ''), it.get('category', '')), it.get('summary', ''), it.get('publishedAt') or cf_sched.get('date', ''))
+            except Exception:
+                pass
+        pub_files = sorted(list(cf_out.glob('**/publication.json')) + list(cf_out.glob('**/publication-receipt.json')), key=lambda p: p.stat().st_mtime, reverse=True)[:80]
         for pf in pub_files:
             try:
                 data = _naver_authoring_json.loads(pf.read_text(encoding='utf-8'))
@@ -1254,7 +1264,17 @@ def _naver_authoring_load_dynamic_catalog(max_items=50, base_catalog=None, db=No
                     for extra_kw in _naver_authoring__extract_keywords_from_title(title, cat):
                         if extra_kw not in kws:
                             kws.append(extra_kw)
+                plan_path = pf.parent / 'planning.json'
+                if plan_path.is_file():
+                    try:
+                        plan_kw = _naver_authoring_json.loads(plan_path.read_text(encoding='utf-8')).get('keyword')
+                        if isinstance(plan_kw, str) and plan_kw.strip() and '.' not in plan_kw and '·' not in plan_kw and len(plan_kw.strip()) >= 4 and plan_kw.strip() not in kws:
+                            kws.insert(0, plan_kw.strip())
+                    except Exception:
+                        pass
                 body = data.get('body') or art_json.get('summary') or ''
+                if len(body) < 250 and art_json.get('contentHtml'):
+                    body = _naver_authoring_BeautifulSoup(art_json['contentHtml'], 'html.parser').get_text(' ', strip=True)
                 if len(body) < 250:
                     for md_name in ('final.md', 'draft.md'):
                         md_file = pf.parent / md_name
@@ -1319,6 +1339,8 @@ def _naver_authoring_load_dynamic_catalog(max_items=50, base_catalog=None, db=No
     for entry in raw_items:
         dom = entry.get('domain') or (_naver_authoring_urlsplit(entry['url']).hostname or '').lower().removeprefix('www.')
         by_domain.setdefault(dom, []).append(entry)
+    for dom in by_domain:
+        by_domain[dom].sort(key=lambda e: (1 if str(e.get('published_at', '')).startswith('2026-10-31') else 0, str(e.get('published_at', ''))), reverse=True)
     sorted_domains = sorted(by_domain.keys(), key=lambda d: (used_today.get(d, 0), _naver_authoring_domain_cpc_priority_rank(d), d))
     interleaved = []
     round_idx = 0
@@ -1914,7 +1936,7 @@ def _naver_scheduler__cooldown_minutes(config, anchor_iso=None):
             import hashlib
             seed = int(hashlib.sha256(str(anchor_iso).encode('utf-8')).hexdigest()[:8], 16)
             return low + seed % (high - low + 1)
-    return int(config.get('intervalMinutes', 35))
+    return int(config.get('intervalMinutes', 32))
 
 def _naver_scheduler_configure(model, start=None):
     from common.codex_cli import runtime, local_config
@@ -1925,7 +1947,7 @@ def _naver_scheduler_configure(model, start=None):
     day = _naver_scheduler_datetime.fromisoformat(start).date() if start else _naver_experiment_TRIAL_START
     if day != _naver_experiment_TRIAL_START:
         raise ValueError('Start date differs from the explicitly approved experiment dates')
-    config = {'schema': 'naver-kin-automation-v2', 'enabled': False, 'timezone': 'Asia/Seoul', 'continuousMode': True, 'startDate': day.isoformat(), 'endDate': _naver_experiment_TRIAL_END.isoformat(), 'measurementEndDate': _naver_experiment_FINAL_COLLECTION.isoformat(), 'model': model, 'provider': 'authenticated-codex-subscription', 'mode': 'alternating_interval', 'intervalMinutes': 35, 'intervalJitterMinutes': [30, 40], 'pollMinutes': 5, 'operationDailyCap': 20, 'operationAccountDailyCap': 10, 'globalDailyCap': 20, 'accountDailyCap': 10, 'articleCatalog': [], 'createdAt': _naver_pipeline_stamp(), 'taskName': _naver_scheduler_TASK}
+    config = {'schema': 'naver-kin-automation-v2', 'enabled': False, 'timezone': 'Asia/Seoul', 'continuousMode': True, 'startDate': day.isoformat(), 'endDate': _naver_experiment_TRIAL_END.isoformat(), 'measurementEndDate': _naver_experiment_FINAL_COLLECTION.isoformat(), 'model': model, 'provider': 'authenticated-codex-subscription', 'mode': 'alternating_interval', 'intervalMinutes': 32, 'intervalJitterMinutes': [30, 35], 'accountMinIntervalMinutes': 60, 'pollMinutes': 5, 'operationDailyCap': 20, 'operationAccountDailyCap': 10, 'globalDailyCap': 20, 'accountDailyCap': 10, 'articleCatalog': [], 'createdAt': _naver_pipeline_stamp(), 'taskName': _naver_scheduler_TASK}
     _naver_scheduler_write(_naver_scheduler_CONFIG, config)
     return config
 
@@ -1937,7 +1959,7 @@ def _naver_scheduler_validate_config(config):
         end = _naver_scheduler_datetime.fromisoformat(config['endDate']).date()
         if start != _naver_experiment_TRIAL_START or end != _naver_experiment_TRIAL_END or config.get('measurementEndDate') != _naver_experiment_FINAL_COLLECTION.isoformat():
             raise ValueError('Configuration must match the explicitly approved trial and final collection dates')
-    interval_min = config.get('intervalMinutes', 20)
+    interval_min = config.get('intervalMinutes', 32)
     if config.get('mode') != 'alternating_interval' or not 15 <= int(interval_min) <= 60 or config.get('pollMinutes') != 5:
         raise ValueError('Only the approved alternating 15-60 minute operating policy is permitted')
     recovery = config.get('editorialRecoveryEnabled') is True
@@ -2017,7 +2039,7 @@ def _naver_scheduler_submission_counts(db, day):
 def _naver_scheduler_operation_counts(db, day):
     """Research rounds consume budget; a browser lock wait or pre-submission blocked error does not."""
     counts = {account: 0 for account in _naver_pipeline_ACCOUNTS}
-    for row in db.execute("SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? AND state NOT IN ('blocked','deferred','interrupted_unknown') GROUP BY account", (day,)):
+    for row in db.execute("SELECT account,COUNT(*) n FROM automation_slots WHERE substr(planned_at,1,10)=? AND state NOT IN ('blocked','deferred','interrupted_unknown','skipped') GROUP BY account", (day,)):
         if row['account'] in counts:
             counts[row['account']] += row['n']
     for row in db.execute("SELECT q.account,COUNT(*) n FROM questions q WHERE q.send_day=? AND q.state IN ('publishing','submitted_unverified','published_verified') AND NOT EXISTS (SELECT 1 FROM automation_slots s WHERE s.question_id=q.question_id) GROUP BY q.account", (day,)):
@@ -2065,6 +2087,24 @@ def _naver_scheduler_cadence_status(db, config, now=None):
             if counts[account] < operation_account_cap and sends < account_cap:
                 next_account = account
                 break
+    if next_account:
+        acct_min_gap = int(config.get('accountMinIntervalMinutes', 60))
+        last_acct_row = db.execute(
+            "SELECT MAX(updated_at) AS last_ts FROM ("
+            "SELECT updated_at FROM questions WHERE account=? AND state IN ('publishing','submitted_unverified','published_verified') "
+            "UNION ALL "
+            "SELECT updated_at FROM automation_slots WHERE account=? AND state NOT IN ('blocked','deferred','interrupted_unknown','skipped')"
+            ")",
+            (next_account, next_account),
+        ).fetchone()
+        last_acct_ts = last_acct_row['last_ts'] if last_acct_row else None
+        if last_acct_ts:
+            try:
+                acct_next_dt = _naver_scheduler_datetime.fromisoformat(last_acct_ts) + _naver_scheduler_timedelta(minutes=acct_min_gap)
+                if acct_next_dt > _naver_scheduler_datetime.fromisoformat(next_at):
+                    next_at = acct_next_dt.isoformat()
+            except Exception:
+                pass
     cadence_state = 'waiting'
     if sum(sub_counts.values()) >= global_cap or sum(counts.values()) >= operation_cap or next_account is None:
         tomorrow = (now.astimezone(_naver_scheduler_KST) + _naver_scheduler_timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -2085,7 +2125,7 @@ def _naver_scheduler_cadence_status(db, config, now=None):
     if row['active_run_id']:
         next_at = None
         cadence_state = 'running'
-    return {'intervalMinutes': cooldown_min, 'intervalJitterMinutes': config.get('intervalJitterMinutes', [18, 22]), 'pollMinutes': 5, 'lastRunAt': row['last_completed_at'], 'lastAccount': row['last_account'], 'nextEligibleAt': next_at, 'nextAccount': next_account, 'activeRunId': row['active_run_id'], 'activeAccount': row['active_account'], 'activeStartedAt': row['active_started_at'], 'cadenceState': cadence_state, 'operationCounts': counts, 'submissionCounts': sub_counts, 'retryAttemptsToday': retries, 'globalRemainingRuns': max(0, min(global_cap - sum(sub_counts.values()), operation_cap - sum(counts.values()))), 'byAccountRemainingRuns': {account: max(0, min(account_cap - sub_counts[account], operation_account_cap - counts[account])) for account in _naver_pipeline_ACCOUNTS}}
+    return {'intervalMinutes': cooldown_min, 'intervalJitterMinutes': config.get('intervalJitterMinutes', [30, 35]), 'pollMinutes': 5, 'lastRunAt': row['last_completed_at'], 'lastAccount': row['last_account'], 'nextEligibleAt': next_at, 'nextAccount': next_account, 'activeRunId': row['active_run_id'], 'activeAccount': row['active_account'], 'activeStartedAt': row['active_started_at'], 'cadenceState': cadence_state, 'operationCounts': counts, 'submissionCounts': sub_counts, 'retryAttemptsToday': retries, 'globalRemainingRuns': max(0, min(global_cap - sum(sub_counts.values()), operation_cap - sum(counts.values()))), 'byAccountRemainingRuns': {account: max(0, min(account_cap - sub_counts[account], operation_account_cap - counts[account])) for account in _naver_pipeline_ACCOUNTS}}
 
 def _naver_scheduler_reserve_run(db, config, now=None, force=False):
     now = now or _naver_scheduler_now_kst()
@@ -2143,7 +2183,7 @@ def _naver_scheduler_complete_run(db, run_id, now=None):
 def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
     now = now or _naver_scheduler_now_kst()
     _naver_scheduler_validate_config(config)
-    result = {'schema': 'naver-kin-automation-state-v1', 'checkedAt': _naver_pipeline_stamp(), 'startDate': config['startDate'], 'endDate': config['endDate'], 'enabled': config['enabled'], 'continuousMode': bool(config.get('continuousMode', False)), 'mode': 'alternating_interval', 'intervalMinutes': config.get('intervalMinutes', 20), 'intervalJitterMinutes': config.get('intervalJitterMinutes', [18, 22]), 'pollMinutes': 5, 'globalDailyCap': int(config.get('globalDailyCap', _naver_pipeline_GLOBAL_DAILY_CAP)), 'accountDailyCap': int(config.get('accountDailyCap', _naver_pipeline_ACCOUNT_DAILY_CAP)), 'runs': [], 'state': 'idle', 'measurementStatus': 'not_attempted', 'dryRun': dry_run}
+    result = {'schema': 'naver-kin-automation-state-v1', 'checkedAt': _naver_pipeline_stamp(), 'startDate': config['startDate'], 'endDate': config['endDate'], 'enabled': config['enabled'], 'continuousMode': bool(config.get('continuousMode', False)), 'mode': 'alternating_interval', 'intervalMinutes': config.get('intervalMinutes', 32), 'intervalJitterMinutes': config.get('intervalJitterMinutes', [30, 35]), 'pollMinutes': 5, 'globalDailyCap': int(config.get('globalDailyCap', _naver_pipeline_GLOBAL_DAILY_CAP)), 'accountDailyCap': int(config.get('accountDailyCap', _naver_pipeline_ACCOUNT_DAILY_CAP)), 'runs': [], 'state': 'idle', 'measurementStatus': 'not_attempted', 'dryRun': dry_run}
     if dry_run:
         db = _naver_scheduler_sqlite3.connect(_naver_scheduler_Path(_naver_pipeline_DB).resolve().as_uri() + '?mode=ro', uri=True)
         db.row_factory = _naver_scheduler_sqlite3.Row

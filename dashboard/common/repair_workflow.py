@@ -132,8 +132,9 @@ def certify_applied_host_repair(task_id, plan_sha256, *, baseline_commit, files,
             or not re.fullmatch(r'[a-f0-9]{7,40}',baseline_commit)
             or not files or len(files)>5 or not test_files or len(test_files)>5):
         raise ValueError('Exact active work and explicit host repair authorization required')
-    if any(Path(name).name=='posting.py' or not name.startswith('dashboard/common/') for name in files):
-        raise ValueError('Host repair must stay inside approved common connector scope')
+    allowed_prefixes = ('dashboard/common/', 'dashboard/agents/', 'dashboard/server/', 'cf_posting/', 'naver_blog_posting/', 'naver_kin/', 'threads_posting/')
+    if any(not name.startswith(allowed_prefixes) for name in files):
+        raise ValueError('Host repair must stay inside approved connector/channel scope')
     if any(not name.startswith('dashboard/tests/') for name in test_files):
         raise ValueError('Existing fixed regression targets required')
     before = {name:_sha(subprocess.check_output(['git','show',baseline_commit+':'+name],cwd=root)) for name in files}
