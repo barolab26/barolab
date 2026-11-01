@@ -443,7 +443,7 @@ def page_performance_evidence(now=None, metrics=None, revenue=None, traffic_sour
 def refresh_performance_feedback():
     """Copy the measured page report to metrics after collection and publish feedback."""
     from common.dashboard_jobs import write
-    from dashboard.metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     folder = ROOT / 'dashboard/data'
     with collector_lock(folder / 'metrics.lock') as acquired:
         if not acquired:
@@ -505,7 +505,7 @@ def action_analysis():
     dashboard = str(ROOT / 'dashboard')
     if dashboard not in sys.path:
         sys.path.insert(0, dashboard)
-    import growth_analysis
+    from dashboard.collectors import growth_analysis
     return growth_analysis
 
 
@@ -798,7 +798,7 @@ def make_router(path=DEFAULT_DB):
     @router.get('/api/growth/action-center')
     def get_action_center():
         result = action_analysis().summary()
-        from revenue import collection_health
+        from dashboard.collectors.revenue import collection_health
         collection = result.get('diagnosis', {}).get('collection')
         if isinstance(collection, dict):
             collection['health'] = collection_health(collection)

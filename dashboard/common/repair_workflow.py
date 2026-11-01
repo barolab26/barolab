@@ -25,7 +25,7 @@ class RecoveryBusy(RuntimeError):
 
 @contextmanager
 def _recovery_mutation_locks(row):
-    from dashboard.metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     root=Path(row['plan']['projectRoot'])
     project=row['plan']['project']
     files=row['discovered']['files']

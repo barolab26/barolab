@@ -24,7 +24,7 @@ def collect_once(root=ROOT,now=None,backend=None):
     query_start=min(start,today-dt.timedelta(days=7)) if today.day<=5 else start
     if backend is None:
         sys.path.insert(0,str(ROOT/'dashboard'))
-        import revenue as backend
+        from dashboard.collectors import revenue as backend
     from dashboard.collectors.revenue import split_result_for_month, merge_previous_month_result
     from common.collection_observability import write
     data=root/'dashboard/data';data.mkdir(parents=True,exist_ok=True)

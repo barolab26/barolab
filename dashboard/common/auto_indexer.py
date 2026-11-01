@@ -85,7 +85,7 @@ def _check_rss_feed(domain: str) -> Dict[str, Any]:
 
 def _validate_candidates(site, urls):
     """Reuse at most one hour of actual public evidence, otherwise recheck HTTP concurrently."""
-    from dashboard.indexing_submissions import validate_public_url
+    from dashboard.collectors.indexing_submissions import validate_public_url
     report = _read_json(SERVER_DATA_DIR / 'indexing-discovery-latest.json', {})
     domain = next((r for r in report.get('domains', []) if r.get('domain') == site['site_id']), {})
     known = {r['url']: r for r in domain.get('validations', [])}
@@ -138,7 +138,7 @@ def run_auto_indexing(
     Execute automated sitemap/RSS verification, Naver IndexNow bulk submission, and Google Search Console
     sitemap + unindexed URL submission across all 16 CF domains (or `target_domain`).
     """
-    import metrics as dm
+    from dashboard.collectors import metrics as dm
 
     # 1. Discover/verify IndexNow keys first
     if apply:
@@ -191,7 +191,7 @@ def run_auto_indexing(
         unindexed_count = total_count - indexed_count if inventory_complete and inspection_complete else None
 
         # Discovery receipts are independent of registration, crawling, or indexing.
-        from dashboard.indexing_submissions import submit_indexnow, canonical_url
+        from dashboard.collectors.indexing_submissions import submit_indexnow, canonical_url
         target_push_urls = []
         for candidate in unindexed_urls:
             try:

@@ -1730,8 +1730,8 @@ def _threads_measurement__ga4(publication, now):
         return {**unknown, 'status': 'pending_reporting', 'reason': 'today_not_reported', 'start_date': str(start), 'end_date': None}
     if str(_threads_adapter_ROOT / 'dashboard') not in _threads_measurement_sys.path:
         _threads_measurement_sys.path.insert(0, str(_threads_adapter_ROOT / 'dashboard'))
-    import traffic
-    from metrics import CONFIG
+    from dashboard.collectors import traffic
+    from dashboard.collectors.metrics import CONFIG
     config = _threads_measurement__read(CONFIG)
     domain = parsed.hostname.removeprefix('www.')
     settings = config.get('sites', {}).get(domain, {})

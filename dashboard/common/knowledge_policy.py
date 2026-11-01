@@ -648,6 +648,12 @@ def get_second_brain_explorer_data(root=None, q=''):
         ('04_실측우승원고_황금키워드.md', '📈 04. 실측 우승 원고 & 황금키워드 뱅크', 'live_winners', 'Low (실측 데이터 앵커)', 'hubs/crew-trace'),
     ]
 
+    extra_core_files = [
+        ('AGENTS.md', root / 'AGENTS.md', 'AGENTS.md', '☀️ AGENTS.md — 세컨드 브레인 최상위 마스터 라우터', 'master_router', '1-Hop 세컨드 브레인 마스터 코어', 'High (전사 헌법 & 1-Hop 라우터)', 'hubs/crew-jarvis'),
+        ('memory/MEMORY.md', root / 'dashboard/data/knowledge/memories/MEMORY.md', 'MEMORY.md', '🧠 MEMORY.md — 전사 장기기억 핵심 요약', 'core_memory', '장기기억 코어 (Hermes Memory)', 'Medium (검증 기억)', 'hubs/crew-jarvis'),
+        ('memory/USER.md', root / 'dashboard/data/knowledge/memories/USER.md', 'USER.md', '👤 USER.md — 대표님 성향·의사결정·철학 프로필', 'core_memory', '장기기억 코어 (Hermes Memory)', 'High (대표님 헌법)', 'hubs/crew-jarvis'),
+    ]
+
     skill_files = [
         (root / 'dashboard/agents/skills/anti-hallucination-grounding/SKILL.md', '🛡️ SKILL: 환각 방지 & CoVe 4단계 팩트체크', 'official_skill', 'Low (엄격 팩트 검증)', 'hubs/crew-doctor'),
         (root / 'dashboard/agents/skills/seo-marketing-master/SKILL.md', '🚀 SKILL: 4대 검색엔진 색인·마케팅 마스터', 'official_skill', 'Medium (채널 표준)', 'hubs/crew-trace'),
@@ -675,6 +681,33 @@ def get_second_brain_explorer_data(root=None, q=''):
             'groupLabel': '1-Hop 세컨드 브레인 길잡이',
             'freedomTier': freedom,
             'hopDepth': 1,
+            'ownerHub': owner_hub,
+            'editable': True,
+            'updatedAt': dt.datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
+            'sizeBytes': stat.st_size,
+            'lineCount': len(content.splitlines()),
+            'revision': hashlib.sha256(content.encode('utf-8')).hexdigest()[:16],
+            'toc': toc,
+            'top100Preview': '\n'.join(content.splitlines()[:100]),
+            'content': content,
+        })
+
+    for doc_id, cpath, fname, label, group, group_label, freedom, owner_hub in extra_core_files:
+        if not cpath.is_file():
+            continue
+        content = cpath.read_text(encoding='utf-8')
+        if q_low and q_low not in content.lower() and q_low not in label.lower():
+            continue
+        toc = _parse_toc_headings(content)
+        stat = cpath.stat()
+        items.append({
+            'id': doc_id,
+            'filename': fname,
+            'title': label,
+            'group': group,
+            'groupLabel': group_label,
+            'freedomTier': freedom,
+            'hopDepth': 0 if doc_id == 'AGENTS.md' else 1,
             'ownerHub': owner_hub,
             'editable': True,
             'updatedAt': dt.datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
@@ -733,6 +766,9 @@ def save_second_brain_document(doc_id, content, root=None):
         raise ValueError('문서 본문이 비어 있거나 허용 크기를 초과했습니다.')
 
     allowed_sb = {
+        'AGENTS.md': root / 'AGENTS.md',
+        'memory/MEMORY.md': root / 'dashboard/data/knowledge/memories/MEMORY.md',
+        'memory/USER.md': root / 'dashboard/data/knowledge/memories/USER.md',
         'second_brain/00_INDEX_세컨드브레인_길잡이.md': root / 'dashboard/data/second_brain/00_INDEX_세컨드브레인_길잡이.md',
         'second_brain/01_CEO_철학_자청4대결핍.md': root / 'dashboard/data/second_brain/01_CEO_철학_자청4대결핍.md',
         'second_brain/02_채널별_승리공식_도감.md': root / 'dashboard/data/second_brain/02_채널별_승리공식_도감.md',

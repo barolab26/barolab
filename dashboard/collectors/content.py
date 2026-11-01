@@ -164,7 +164,7 @@ def cf_doctor_evidence_summary(schedule=None, today=None):
     """Current source ledger, unique URLs, public verification distinct from grades."""
     if schedule is None:
         try:
-            schedule = json.loads((Path(__file__).resolve().parent.parent / 'dashboard/data/cf/daily_schedule.json').read_text(encoding='utf-8'))
+            schedule = json.loads((Path(__file__).resolve().parents[2] / 'dashboard/data/cf/daily_schedule.json').read_text(encoding='utf-8'))
         except (OSError, ValueError):
             return {'status': 'unavailable', 'verified': None, 'partial': None, 'unknown': None, 'rows': []}
     today = today or datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()

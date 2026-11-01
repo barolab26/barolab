@@ -33,7 +33,8 @@ DASHBOARD_DIR = BASE_DIR / "dashboard"
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(SERVER_DIR))
 sys.path.insert(0, str(DASHBOARD_DIR))
-from metrics import summary as metrics_summary
+sys.path.insert(0, str(DASHBOARD_DIR / "collectors"))
+from dashboard.collectors.metrics import summary as metrics_summary
 NAVER_DIR = BASE_DIR / "naver_blog_posting"
 CF_DIR = BASE_DIR / "cf_posting"
 
@@ -796,6 +797,22 @@ from fastapi.responses import RedirectResponse
 @app.get("/rnd.html")
 def redirect_rnd_to_chat():
     return RedirectResponse(url="/chat.html", status_code=302)
+
+@app.get("/{asset_name}.js")
+def compat_root_js(asset_name: str):
+    from fastapi.responses import FileResponse
+    target = DASHBOARD_DIR / "js" / f"{asset_name}.js"
+    if target.is_file():
+        return FileResponse(target, media_type="application/javascript")
+    raise HTTPException(status_code=404)
+
+@app.get("/{asset_name}.css")
+def compat_root_css(asset_name: str):
+    from fastapi.responses import FileResponse
+    target = DASHBOARD_DIR / "css" / f"{asset_name}.css"
+    if target.is_file():
+        return FileResponse(target, media_type="text/css")
+    raise HTTPException(status_code=404)
 
 # Mount static dashboard at /
 if DASHBOARD_DIR.exists():

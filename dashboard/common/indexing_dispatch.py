@@ -4,10 +4,10 @@ from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlsplit
 
-from dashboard import metrics
+from dashboard.collectors import metrics
 from dashboard.collectors import searchadvisor
 from dashboard.collectors.searchadvisor_ui import run as crawl_visible
-from dashboard.indexing_submissions import run_discovery_submissions, validate_public_url
+from dashboard.collectors.indexing_submissions import run_discovery_submissions, validate_public_url
 
 
 def refresh_candidates(site, state, limit=50):

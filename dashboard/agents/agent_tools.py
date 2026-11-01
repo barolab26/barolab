@@ -892,7 +892,7 @@ def index_check_and_submit(account: str = "sj") -> Dict[str, Any]:
     result = run_auto_indexer("all")
     result["tool"] = "index_check_and_submit"
     try:
-        from dashboard.indexing_submissions import enqueue_gsc_request
+        from dashboard.collectors.indexing_submissions import enqueue_gsc_request
         gsc = enqueue_gsc_request("all", requested_by="agent_tools:" + account)
     except Exception as exc:
         gsc = {"queued": False, "started": False, "status": "queue_unavailable",
@@ -988,7 +988,7 @@ def verify_domain_index(domain: str) -> Dict[str, Any]:
 def sync_growth_metrics() -> Dict[str, Any]:
     """Launch `python dashboard/metrics.py --collect` in background to sync GA4/GSC/sitemap metrics."""
     cmd_display = "python dashboard/metrics.py --collect"
-    cmd = [sys.executable, "-X", "utf8", str(DASHBOARD_DIR / "metrics.py"), "--collect"]
+    cmd = [sys.executable, "-X", "utf8", str(DASHBOARD_DIR / "collectors" / "metrics.py"), "--collect"]
     proc = _ego_popen(
         cmd,
         cwd=str(BASE_DIR),

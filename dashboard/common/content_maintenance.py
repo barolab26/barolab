@@ -343,7 +343,7 @@ def preparation_window(moment=None, seconds=300):
 
 def lock_available(path):
     sys.path.insert(0, str(ROOT / 'dashboard'))
-    from metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     with collector_lock(path) as acquired:
         return acquired
 
@@ -653,7 +653,7 @@ def report_article_work(job, original, stage):
 def prepare_job(job, inspect_only=False, limits=None, proposal=None):
     from common.content_improvement import prepare_improvement
     sys.path.insert(0, str(ROOT / 'dashboard'))
-    import growth_analysis
+    from dashboard.collectors import growth_analysis
     original = load_article(job['domain'], job['url'])
     folder = BACKUPS / job['id']
     folder.mkdir(parents=True, exist_ok=True)
@@ -767,7 +767,7 @@ def verify_public(domain, url, expected):
 @observed_operation('content_maintenance', 'maintenance-apply')
 def apply_job(job_id, canary=False):
     sys.path.insert(0, str(ROOT / 'dashboard'))
-    from metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     with collector_lock(DATA / 'content-maintenance.lock') as acquired:
         if not acquired:
             raise ValueError('다른 유지보수 회차 실행 중 · 중복 적용 차단')
@@ -780,7 +780,7 @@ def _apply_job(job_id, canary=False):
     if agendas.enabled():agendas.require(project='legacy_remodel')
     import requests
     sys.path.insert(0, str(ROOT / 'dashboard'))
-    from metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     folder = BACKUPS / job_id
     original, draft, proposal, receipt = (read(folder / name) for name in ('original.json', 'draft.json', 'proposal.json', 'receipt.json'))
     quality_hash = content_quality_sha256()
@@ -1033,7 +1033,7 @@ def run_once(force_prepare=False):
         identity='maintenance:'+str(eligible[0]['id'])
         return enqueue_staff_request(identity,[{'agent':'doctor','tool':'run_project_cycle','args':{'project':'legacy_remodel'}}])
     sys.path.insert(0, str(ROOT / 'dashboard'))
-    from metrics import collector_lock
+    from dashboard.collectors.metrics import collector_lock
     with collector_lock(DATA / 'content-maintenance.lock') as acquired:
         if not acquired:
             return {'status': 'already_running'}

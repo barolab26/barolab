@@ -1919,8 +1919,8 @@ def _naver_measurement_collect(db=None, now=None, *, config=None, persist=True):
     for p in (_naver_pipeline_ROOT / 'dashboard', _naver_pipeline_ROOT / 'dashboard/collectors'):
         if str(p) not in _naver_measurement_sys.path:
             _naver_measurement_sys.path.insert(0, str(p))
-    import traffic
-    from metrics import read_json, CONFIG
+    from dashboard.collectors import traffic
+    from dashboard.collectors.metrics import read_json, CONFIG
     now = now or _naver_measurement_datetime.now(_naver_measurement_timezone.utc)
     day = now.astimezone(_naver_measurement_ZoneInfo('Asia/Seoul')).date()
     period_kind = 'baseline' if day <= _naver_experiment_TRIAL_START else 'trial_to_yesterday'

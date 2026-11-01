@@ -454,7 +454,7 @@ def collect_traffic(session, site, settings):
 
 def request_indexing(session, site, settings, urls, sitemap, *, indexnow=True):
     """Submit discovery hints; never represent an accepted request as indexed."""
-    from dashboard.indexing_submissions import canonical_url
+    from dashboard.collectors.indexing_submissions import canonical_url
     excluded = [url for url in urls if is_dummy_rescue_url(url)]
     urls = [canonical_url(site, url) for url in urls if not is_dummy_rescue_url(url)]
     sitemap_blocked = bool(sitemap.get('excludedDummyCount') or any(is_dummy_rescue_url(u) for u in sitemap.get('locations', [])))
@@ -486,7 +486,7 @@ def request_indexing(session, site, settings, urls, sitemap, *, indexnow=True):
     if sitemap_blocked:
         result['google'] = {'status': 'held_dummy_sitemap', 'reason': '공개 사이트맵에 테스트 URL이 남아 있어 제출을 보류합니다. 원본 수정·배포가 필요합니다.', 'indexed': None}
     if indexnow:
-        from dashboard.indexing_submissions import submit_indexnow
+        from dashboard.collectors.indexing_submissions import submit_indexnow
         result['naver'] = submit_indexnow(site, settings, urls, providers=('naver',), client=requests)['naver']
     return result
 
@@ -623,7 +623,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
     """Read-only default; explicitly authorized scheduled/manual requests share quota."""
     request_mode = authorized_gsc_request_mode(config, manual, request_mode)
     options = config.get('url_inspection', {})
-    from dashboard.indexing_submissions import gsc_budget
+    from dashboard.collectors.indexing_submissions import gsc_budget
     if request_mode and not any(gsc_budget(a)['remaining'] for a in options.get('request_indexing_accounts', options.get('browser_accounts', []))):
         return {'status': 'daily_budget_exhausted', 'attempted': 0, 'completed': 0, 'requestMode': True}
     sites = browser_fallback_sites(sites, config, manual=manual or request_mode)
@@ -637,7 +637,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
     from playwright.sync_api import sync_playwright
     from common.browser_session import _runtime, preflight, PageScope, reusable_search_console_page
     from urllib.parse import parse_qs
-    from gsc_ui_state import paused, state as ui_state, check_response, check_text, mark_success
+    from dashboard.collectors.gsc_ui_state import paused, state as ui_state, check_response, check_text, mark_success
 
     def save(account_id, progress, site_id=None, row=None):
         for _ in range(20):
@@ -830,7 +830,7 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
 
 def request_inspected_url(page, account_id, site, url, proof):
     """Bounded authorized UI operation; no live test, reclick, or CAPTCHA bypass."""
-    from dashboard.indexing_submissions import reserve_gsc_request, complete_gsc_request, observe_gsc_pending
+    from dashboard.collectors.indexing_submissions import reserve_gsc_request, complete_gsc_request, observe_gsc_pending
     text = page.locator('body').inner_text()
     if any(value in text for value in ('색인 생성 요청됨', '색인 생성이 요청됨', 'Indexing requested')):
         return observe_gsc_pending(account_id, site, url, {'source': 'Google Search Console UI', 'pending': True})
@@ -874,7 +874,7 @@ def _browser_recover(account_id, individual_limit=10):
     successes.update((e.get('url'), e.get('requestedAt')) for e in legacy
                      if e.get('account') == account_id and e.get('outcome') in ('requested', 'already_pending')
                      and e.get('requestedAt', '').startswith(today))
-    from dashboard.indexing_submissions import gsc_budget, canonical_url
+    from dashboard.collectors.indexing_submissions import gsc_budget, canonical_url
     remaining = min(individual_limit, gsc_budget(account_id)['remaining'])
     snapshot = read_json(SNAPSHOT)
     sites = [s for s in inventory() if s['site_id'] in account['sites']]
@@ -1160,7 +1160,7 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
         ui_result = collect_browser_inspections(config, [site for site in sites if not site_id or site['site_id'] == site_id],
                                                 request_mode=False if read_only else None)
         if not read_only:
-            from dashboard.indexing_submissions import record_gsc_queue_cycle
+            from dashboard.collectors.indexing_submissions import record_gsc_queue_cycle
             record_gsc_queue_cycle([s['site_id'] for s in sites if not site_id or s['site_id'] == site_id], ui_result)
         with collector_lock() as write_lock:
             if not write_lock:
@@ -1178,7 +1178,7 @@ def collect(config_path=CONFIG, site_id=None, request_url=None, limit=3, read_on
 def inspect_naver_public_url(url, client=requests):
     """Positive exact-URL public search evidence; absence never proves exclusion."""
     from bs4 import BeautifulSoup
-    from content import url_key
+    from dashboard.collectors.content import url_key
     domain = (urlparse(url).hostname or '').removeprefix('www.')
     key = url_key(url, domain)
     if key is None:
@@ -1211,7 +1211,7 @@ def collect_naver_inspections(site_id=None, limit=3):
     """Bounded read-only search; merge only per-URL evidence under collector lock."""
     if not 1 <= limit <= 5:
         raise ValueError('naver_inspection_limit_1_to_5')
-    from content import fresh
+    from dashboard.collectors.content import fresh
     document = read_json(SNAPSHOT)
     targets = []
     now = datetime.now(timezone.utc)
@@ -1261,7 +1261,7 @@ def searchadvisor_registration(site, ledger=None):
 
 
 def summary(path=SNAPSHOT):
-    from content import summary as content_summary
+    from dashboard.collectors.content import summary as content_summary
     from dashboard.collectors.revenue import summary as revenue_summary
     from dashboard.collectors.traffic import summary as traffic_summary
     document = read_json(path)
@@ -1289,7 +1289,7 @@ def summary(path=SNAPSHOT):
     # A subset can be reported as a subset, never as the entire system's total.
     compatible = bool(traffic) and len(periods) == 1
     analysis = traffic_summary()
-    from growth_analysis import summary as growth_summary
+    from dashboard.collectors.growth_analysis import summary as growth_summary
     growth = growth_summary()
     collections = [record.get('google', {}).get('collection', {}) for record in cf]
     collection = {key: sum(item.get(key, 0) for item in collections)

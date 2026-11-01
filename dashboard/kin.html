@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>네이버 지식iN · BaroLab</title>
-<link rel="stylesheet" href="traffic.css">
-<link rel="stylesheet" href="kin.css?v=20261015-2">
-<link rel="stylesheet" href="sidebar.css?v=20261017-unified-2">
-<link rel="stylesheet" href="kin-summary.css?v=20261015-1">
-<link rel="stylesheet" href="signature_deck.css?v=20261031-kin-30-35m">
-<script src="kin-summary.js?v=20261031-kin-30-35m" defer></script>
-<script src="signature_deck.js?v=20261031-kin-30-35m" defer></script>
+<link rel="stylesheet" href="css/traffic.css">
+<link rel="stylesheet" href="css/kin.css?v=20261015-2">
+<link rel="stylesheet" href="css/sidebar.css?v=20261017-unified-2">
+<link rel="stylesheet" href="css/kin-summary.css?v=20261015-1">
+<link rel="stylesheet" href="css/signature_deck.css?v=20261031-kin-30-35m">
+<script src="js/kin-summary.js?v=20261031-kin-30-35m" defer></script>
+<script src="js/signature_deck.js?v=20261031-kin-30-35m" defer></script>
 </head>
 <body class="control-room kin-page">
 <a class="skip-link" href="#main-content">본문으로 이동</a>
 <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
-<script src="sidebar.js?v=20261018-no-rnd"></script>
+<script src="js/sidebar.js?v=20261018-no-rnd"></script>
 <main class="growth-main" id="main-content">
 <header class="growth-header"><div><h1>네이버 지식iN 외부유입 엔진 v2.0 <span class="header-badge">30~35분 랜덤 교대 가동 중</span></h1><p>전역 블로그 락 분리(계정별 독립 락) · 30~35분 랜덤 교대(계정당 1시간+ 안전 간격) · 21채널 무중복 라운드로빈 · Track A(최신선점 50%) + Track B(검색상위 50%)</p></div><div class="toolbar"><button class="btn-quick" id="kin-run-now-btn" type="button" style="background:linear-gradient(135deg,#ea580c,#d97706) !important;border-color:#fdba74 !important;color:#fff !important;" onclick="window.BaroSigDeck && window.BaroSigDeck.runKinNow(this)">⚡ 지연 슬롯 즉시 실행</button><button class="btn-quick" id="kin-refresh" type="button">상태 새로고침</button><a class="overview-button" href="growth.html#domain-traffic">실제 유입 분석</a></div></header>
 <section data-kin-summary="compact" aria-label="지식iN 운영 요약"></section>
@@ -23,6 +23,6 @@
 <section class="traffic-panel" aria-labelledby="kin-operation-title"><h2 id="kin-operation-title">자동 운영 (v2.0 상시 가동 · 30~35분 랜덤 교대)</h2><p class="revenue-meta">하루 총 20건 · 계정별 최대 10건 (실제 제출 성공 건수 기준) · 30~35분 랜덤 교대(개별 계정 1시간+ 안전 간격) · 전역 블로그 락 분리(계정별 독립 락)</p><p id="kin-schedule" class="revenue-meta">스케줄 실행 상태 확인 중</p><p id="kin-last-run" class="revenue-meta">최근 실행 미확인</p><p id="kin-operation-result" class="revenue-meta">최근 작업 결과 미확인</p><p id="kin-next-run" class="revenue-meta">다음 작업 가능 시각 미확인</p><p id="kin-operations" class="revenue-meta">오늘 제출 현황 미확인</p><p id="kin-daily-remaining" class="revenue-meta">오늘 남은 한도 미확인</p><p class="revenue-note">단순 탐색·검수 반려(skipped) 및 등록 전 차단(blocked)은 일일 10/20건 제출 한도에서 차감하지 않으며, 실제 지식iN에 제출된 답변(send_day == today) 기준으로 계정당 10건(전체 20건)을 채웁니다. 게시 간격은 직전 작업 종료 후 30~35분 랜덤 교대(개별 계정 기준 60~70분 안전 간격)입니다.</p><div class="revenue-table-wrap"><table class="traffic-table"><thead><tr><th>기준일 KST</th><th>선정 질문</th><th>초안</th><th>제출 시도</th><th>공개 검증</th></tr></thead><tbody id="kin-daily"></tbody></table></div></section>
 <section class="traffic-panel" aria-labelledby="kin-measurement-title"><h2 id="kin-measurement-title">유입과 효과 측정</h2><p class="revenue-meta">상시 운영 모드 (continuousMode) · GA4 UTM 유입 및 공개 답변 유지율 추적</p><p id="kin-measurement-status" class="revenue-meta">GA4 측정 기록 확인 중</p><div id="kin-measurement-counts" class="kin-counts"></div><p id="kin-measurement-scope" class="revenue-note"></p><p id="kin-measurement-revenue" class="revenue-note"></p><div class="revenue-table-wrap"><table class="traffic-table"><thead><tr><th>방문일 · 대상</th><th>답변 귀속</th><th>세션</th><th>참여 세션</th><th>페이지뷰</th></tr></thead><tbody id="kin-measurement-rows"></tbody></table></div><p class="revenue-note">UTM으로 측정된 방문이며, 실제 사람이나 증분 수익을 단독 증명하지 않습니다. 최근 48시간은 처리 지연으로 바뀔 수 있습니다.</p></section>
 <section class="traffic-panel" aria-labelledby="kin-record-title"><div class="traffic-head"><h2 id="kin-record-title">최근 질문과 답변 기록</h2></div><div class="revenue-table-wrap"><table class="traffic-table"><thead><tr><th>질문 · 계정 · 트랙</th><th>진행 상태</th><th>답변 초안</th><th>공개 확인</th></tr></thead><tbody id="kin-records"><tr><td colspan="4">운영 기록 조회 중</td></tr></tbody></table></div><p class="revenue-note">이 화면은 저장된 실행 결과를 조회합니다. 답변 게시와 공개 확인은 운영 파이프라인의 실행 기록에 따릅니다.</p></section>
-</main><script src="kin.js?v=20261031-kin-30-35m" defer></script>
-<script src="/mission-control.js"></script>
+</main><script src="js/kin.js?v=20261031-kin-30-35m" defer></script>
+<script src="js/mission-control.js"></script>
 </body></html>

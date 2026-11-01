@@ -490,7 +490,7 @@ def _build_index_lookup_from_metrics() -> Tuple[int, Dict[str, Dict[str, Any]]]:
     lookup: Dict[str, Dict[str, Any]] = {}
     inventory_total = 0
     try:
-        from dashboard.metrics import summary as metrics_summary
+        from dashboard.collectors.metrics import summary as metrics_summary
 
         ms = metrics_summary()
         ca = ms.get("contentAudit") or {}
@@ -1872,7 +1872,7 @@ def apply_user_override(command_text: str, target_hint: Optional[str] = None) ->
 
 
 def cf_doctor_evidence_summary(schedule=None, today=None):
-    from dashboard.content import cf_doctor_evidence_summary as evidence_summary
+    from dashboard.collectors.content import cf_doctor_evidence_summary as evidence_summary
     return evidence_summary(schedule, today)
 
 

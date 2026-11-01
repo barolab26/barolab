@@ -16,7 +16,7 @@ from urllib.parse import quote, urlsplit
 
 from dashboard.collectors import searchadvisor as ledger
 from common.browser_session import PageScope, _runtime, preflight
-from dashboard.metrics import collector_lock
+from dashboard.collectors.metrics import collector_lock
 
 BOARD = 'https://searchadvisor.naver.com/console/board'
 from common.ubuntu_naver_browser import account_paths

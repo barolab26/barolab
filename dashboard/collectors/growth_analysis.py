@@ -3,9 +3,9 @@ from datetime import datetime, timedelta, timezone
 import math
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
-from metrics import DATA, read_json, inventory
-from traffic import search_windows
-from revenue import growth_revenue_summary
+from dashboard.collectors.metrics import DATA, read_json, inventory
+from dashboard.collectors.traffic import search_windows
+from dashboard.collectors.revenue import growth_revenue_summary
 
 
 def periods(now=None):
@@ -236,7 +236,7 @@ def summary(now=None):
             row['kinds']=[row['kind']]; row['title']=titles.get(row['url']) or row['url']; dedup[key]=row
     priorities=list(dedup.values())
     priorities.sort(key=lambda r:(r['impressions']<10,-r['impressions'],r['position']))
-    from gsc_ui_state import state as ui_state
+    from dashboard.collectors.gsc_ui_state import state as ui_state
     diagnosis={'domains':[diagnose_domain(r['domain'],raw.get('sites',{}).get(r['domain'],{}).get('google',{}),windows,now) for r in domains],
                'collection':{**raw.get('growthCollection',{}),'uiAccount':ui_state('sj'),
                              'runtime':read_json(DATA/'metrics-runtime.json'), 'revenue':revenue.get('collection',{})}}
@@ -250,7 +250,7 @@ def summary(now=None):
 
 
 def index_action(reason):
-    from content import next_action
+    from dashboard.collectors.content import next_action
     return ' · '.join(next_action('not_indexed',None,{'coverageState':reason}))
 
 

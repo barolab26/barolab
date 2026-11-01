@@ -16,7 +16,7 @@ from urllib.parse import urlparse, urlencode
 from zoneinfo import ZoneInfo
 
 import requests
-from dashboard import metrics
+from dashboard.collectors import metrics
 from common.channel_attribution import is_dummy_rescue_url
 
 LEDGER = metrics.DATA / 'indexing-submissions.json'
@@ -299,7 +299,7 @@ def submit_indexnow(site, settings, urls, *, providers=('global', 'bing', 'naver
 
 def submit_bing(site, property_url, urls, credentials, *, verified_properties,
                 ledger=None, client=requests, run_id=None, now=None):
-    from dashboard.traffic import bing_submission_request
+    from dashboard.collectors.traffic import bing_submission_request
     urls = list(dict.fromkeys(canonical_url(site, u) for u in urls))
     # An apex property must be explicitly returned by GetUserSites, not guessed.
     prop = urlparse(property_url or '')
@@ -395,7 +395,7 @@ def observe_daum(site, client=requests):
 
 def run_discovery_submissions(*, apply=False, run_id=None, domain=None):
     """One explicit API-only batch; never opens a browser or requests Google indexing."""
-    from dashboard.traffic import bing_credentials, bing_sites
+    from dashboard.collectors.traffic import bing_credentials, bing_sites
     run_id = run_id or 'discovery-'+datetime.now(KST).strftime('%Y%m%dT%H%M%S')
     with metrics.collector_lock(metrics.DATA / 'indexing-discovery-run.lock') as held:
         if not held:

@@ -23,7 +23,7 @@ import requests
 try:
     from .metrics import DATA, CONFIG, inventory, read_json, atomic_write, collector_lock, stamp, search_property
 except ImportError:
-    from metrics import DATA, CONFIG, inventory, read_json, atomic_write, collector_lock, stamp, search_property
+    from dashboard.collectors.metrics import DATA, CONFIG, inventory, read_json, atomic_write, collector_lock, stamp, search_property
 
 SNAPSHOT = DATA / 'traffic.json'
 METRICS = ['totalUsers', 'sessions', 'screenPageViews']
@@ -433,7 +433,7 @@ def parse_query_cells(rows,page_url=None):
 
 def collect_linked_page_queries(page,record,domain,now):
     """Observe a real page row, use its GSC filter, then verify both exact windows."""
-    from gsc_ui_state import check_response,check_text,mark_success
+    from dashboard.collectors.gsc_ui_state import check_response,check_text,mark_success
     current=record.get('periods',{}).get('current28',{})
     previous=record.get('periods',{}).get('previous28',{})
     windows=search_windows(now)
@@ -567,7 +567,7 @@ def collect_search(site, settings, readers, now, snapshot=None):
 
 @observed_operation('metrics', 'traffic-collection')
 def collect_browser_search(sites, config, now, on_record=None):
-    from gsc_ui_state import paused,state
+    from dashboard.collectors.gsc_ui_state import paused,state
     if paused('sj',now):
         return {s['site_id']:{'status':'backoff','reason':state('sj').get('reason'),
                              'nextRetryAt':state('sj').get('nextRetryAt')} for s in sites}
@@ -580,7 +580,7 @@ def collect_browser_search(sites, config, now, on_record=None):
 def _collect_browser_search(sites, config, now, on_record=None):
     """Read SJ owner reports without granting the API reader more permissions."""
     from playwright.sync_api import sync_playwright
-    from gsc_ui_state import check_response,check_text,mark_success
+    from dashboard.collectors.gsc_ui_state import check_response,check_text,mark_success
     from common.browser_session import PageScope, reusable_search_console_page
     end = now.astimezone(ZoneInfo('America/Los_Angeles')).date() - timedelta(days=3)
     account = config.get('gsc_accounts', {}).get('sj', {})
@@ -705,7 +705,7 @@ def _collect_browser_search(sites, config, now, on_record=None):
                             record['linkedPageQueries']['attemptAt']=stamp()
                         except Exception as exc:
                             record['linkedPageQueries']={**record.get('linkedPageQueries',{}),'status':'error','reason':str(exc) if isinstance(exc,ValueError) else '글별 검색어 조회 실패','attemptAt':stamp()}
-                            from gsc_ui_state import paused
+                            from dashboard.collectors.gsc_ui_state import paused
                             if paused('sj'):
                                 raise
                         if on_record:
@@ -713,7 +713,7 @@ def _collect_browser_search(sites, config, now, on_record=None):
                     output[domain] = record
                 except Exception as exc:
                     output[domain] = {**record,'status': 'error', 'reason': str(exc) if type(exc) is ValueError else f'Google 소유자 보고서 조회 실패 ({key}, {type(exc).__name__})'}
-                    from gsc_ui_state import paused,state
+                    from dashboard.collectors.gsc_ui_state import paused,state
                     if paused('sj'):
                         output[domain].update(status='backoff',nextRetryAt=state('sj').get('nextRetryAt'))
                         break
@@ -1417,7 +1417,7 @@ def collect():
                     ui_measured|=source.get('queriesScope')=='domain_query' or report.get('queriesScope')=='domain_query'
             backlog+=due
         _,next_cursor=growth_browser_targets(missing,now)
-        from gsc_ui_state import state as ui_state
+        from dashboard.collectors.gsc_ui_state import state as ui_state
         output['growthCollection']={**old_health,'status':'partial' if failures or backlog else 'completed',
             'lastAttemptAt':started,'lastSuccessAt':max(successful) if successful else old_health.get('lastSuccessAt'),
             'finishedAt':stamp(),'nextRunAt':(now+timedelta(minutes=30)).isoformat(),'scheduleEstimate':True,
