@@ -810,6 +810,33 @@ try {{
     return;
   }}
 
+  // Wait up to 4s for SmartEditor ONE to finish rendering the OG Card (.se-oglink),
+  // then strip the duplicate raw URL text paragraph so ONLY the clean OG Card remains!
+  for (let i = 0; i < 8; i++) {{
+    const hasOgDom = await page.evaluate(() => document.querySelectorAll(".se-oglink, .se-module-oglink").length > 0);
+    if (hasOgDom) break;
+    await page.waitForTimeout(500);
+  }}
+  await page.evaluate(() => {{
+    const ed = window.SmartEditor?.getEditor?.("kinpc001");
+    if (!ed || typeof ed.getDocumentData !== "function" || typeof ed.setDocumentData !== "function") return;
+    const data = ed.getDocumentData();
+    const comps = data?.document?.components || [];
+    const hasOg = comps.some(c => c["@ctype"] === "oglink");
+    if (hasOg) {{
+      for (const c of comps) {{
+        if (c["@ctype"] === "text" && Array.isArray(c.value)) {{
+          c.value = c.value.filter(p => {{
+            const txt = (p.nodes || []).map(n => n.value || "").join("").trim();
+            return !/^https?:\\/\\//i.test(txt);
+          }});
+        }}
+      }}
+      ed.setDocumentData(data);
+    }}
+  }});
+  await page.waitForTimeout(300);
+
   // Install fetch/XHR interceptor for registerAnswerForSmartEditorOne.naver before clicking submit
   await page.evaluate(() => {{
     window.__barolabKinResponses = [];
@@ -831,6 +858,8 @@ try {{
   }});
 
   await page.evaluate(() => {{
+    const area = document.querySelector("#answerButtonArea");
+    if (area) area.style.display = "block";
     const btn = document.querySelector("#answerRegisterButton");
     if (btn) {{
       btn.scrollIntoView({{ block: "center" }});

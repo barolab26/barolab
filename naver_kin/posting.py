@@ -1093,7 +1093,7 @@ def _naver_browser__publish(account, question_url, answer_text, before_submit=No
             owned = _naver_browser__parse_question_ownership(content, account, _naver_browser_question_id(question_url))
             owned_ids = set(owned.get('verified_owned_answer_ids', []))
             soup = _naver_browser_BeautifulSoup(content, 'html.parser')
-            matches = [node for node in soup.select('.answerArea[id^=answer_]') if node['id'].split('_', 1)[1] in owned_ids and _naver_browser__normalized(answer_text) in _naver_browser__normalized(node.get_text('\n'))]
+            matches = [node for node in soup.select('.answerArea[id^=answer_]') if node['id'].split('_', 1)[1] in owned_ids and (_naver_browser__normalized(answer_text) in _naver_browser__normalized(node.get_text('\n')) or _naver_browser__normalized_prose(answer_text) in _naver_browser__normalized_prose(node.get_text('\n')))]
             if len(matches) == 1:
                 aid = matches[0]['id'].split('_', 1)[1]
                 return {'answer_url': _naver_browser_exact_answer_url(question_url, aid), 'answer_id': aid, 'submissionObservation': {'responses': sub_res.get('responses') or [], 'dialogs': sub_res.get('dialogs') or [], 'exactOwnedBodyMatched': True, 'executor': 'ego-native-taskspace'}}
@@ -1203,7 +1203,7 @@ def _naver_browser__publish(account, question_url, answer_text, before_submit=No
                 owned = _naver_browser__parse_question_ownership(content, account, _naver_browser_question_id(question_url))
                 owned_ids = set(owned.get('verified_owned_answer_ids', []))
                 soup = _naver_browser_BeautifulSoup(content, 'html.parser')
-                matches = [node for node in soup.select('.answerArea[id^=answer_]') if node['id'].split('_', 1)[1] in owned_ids and _naver_browser__normalized(answer_text) in _naver_browser__normalized(node.get_text('\n')) and (not any((row.get('answerId') for row in responses)) or node['id'].split('_', 1)[1] in {row.get('answerId') for row in responses})]
+                matches = [node for node in soup.select('.answerArea[id^=answer_]') if node['id'].split('_', 1)[1] in owned_ids and (_naver_browser__normalized(answer_text) in _naver_browser__normalized(node.get_text('\n')) or _naver_browser__normalized_prose(answer_text) in _naver_browser__normalized_prose(node.get_text('\n'))) and (not any((row.get('answerId') for row in responses)) or node['id'].split('_', 1)[1] in {row.get('answerId') for row in responses})]
                 if len(matches) == 1:
                     aid = matches[0]['id'].split('_', 1)[1]
                     return {'answer_url': _naver_browser_exact_answer_url(question_url, aid), 'answer_id': aid, 'submissionObservation': {'responses': responses, 'dialogs': dialogs, 'exactOwnedBodyMatched': True}}
@@ -1235,6 +1235,9 @@ def _naver_browser__type_paragraphs(keyboard, text):
 def _naver_browser__normalized(text):
     return _naver_browser_re.sub('\\s+', ' ', text.replace('\u200b', '')).strip()
 
+def _naver_browser__normalized_prose(text):
+    return _naver_browser__normalized(_naver_browser_re.sub(r'https?://\S+', '', text))
+
 def _naver_browser_exact_answer_url(url, answer_id):
     """Select the actual answer page, not the question's old answerNo pagination."""
     _naver_browser_question_id(url)
@@ -1260,10 +1263,11 @@ def _naver_browser_verify_public(account, answer_url, expected_text, outbound_ur
     if not answer_id or not str(answer_id).isdigit():
         return {**evidence, 'reason': 'exact answer id unavailable'}
     node = soup.select_one('#answer_' + str(answer_id))
-    if not node or _naver_browser__normalized(expected_text) not in _naver_browser__normalized(node.get_text('\n')):
+    if not node or (_naver_browser__normalized(expected_text) not in _naver_browser__normalized(node.get_text('\n')) and _naver_browser__normalized_prose(expected_text) not in _naver_browser__normalized_prose(node.get_text('\n'))):
         return {**evidence, 'reason': 'answer body not publicly matched'}
-    links = {a.get('href') for a in node.select('a[href]')}
-    if outbound_url not in links:
+    links = {a.get('href') for a in node.select('a[href]') if a.get('href')}
+    base_links = {u.split('?', 1)[0] for u in links}
+    if outbound_url not in links and outbound_url.split('?', 1)[0] not in base_links:
         return {**evidence, 'reason': 'exact attributed outbound URL not publicly matched'}
     author_links = [a.get('href', '') for a in node.select('.profile_card a[href]')]
     identity_proven = any((_naver_browser_parse_qs(_naver_browser_urlsplit(u).query).get('userId') == [account] for u in author_links))
@@ -2507,8 +2511,11 @@ def _naver_scheduler_measure(config, now=None):
                 if response.status_code == 200 and str(row['answer_id']).isdigit():
                     soup = BeautifulSoup(response.text, 'html.parser')
                     node = soup.select_one('#answer_' + row['answer_id'])
-                    normal = lambda text: ' '.join(text.split())
-                    if node and normal(doc['answer_text']) in normal(node.get_text(' ')) and (doc['attribution']['outboundUrl'] in {a.get('href') for a in node.select('a[href]')}):
+                    normal = lambda text: ' '.join(_naver_browser_re.sub(r'https?://\S+', '', text).split())
+                    links = {a.get('href') for a in node.select('a[href]') if a.get('href')}
+                    base_links = {u.split('?', 1)[0] for u in links}
+                    out_url = doc['attribution']['outboundUrl']
+                    if node and normal(doc['answer_text']) in normal(node.get_text(' ')) and (out_url in links or out_url.split('?', 1)[0] in base_links):
                         state = 'publicly_retained'
                         reason = None
             except Exception:

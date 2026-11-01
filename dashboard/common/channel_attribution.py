@@ -67,15 +67,23 @@ def build_outbound_url(canonical_url, *, source, account, publication_date, slot
     _, content = _identity(canonical_url, source=source, account=account,
                           publication_date=publication_date, slot=slot, article_id=article_id,
                           allowed_hosts=allowed_hosts)
+    if source == 'naver_kin':
+        return canonical_url
     return canonical_url + '?' + urlencode({'utm_source': source, 'utm_medium': MEDIUM_BY_SOURCE[source],
                                            'utm_campaign': CAMPAIGN, 'utm_content': content})
 
 
 def validate_outbound_url(outbound_url, canonical_url, *, source, account, publication_date, slot, article_id, allowed_hosts):
+    _, content = _identity(canonical_url, source=source, account=account,
+                          publication_date=publication_date, slot=slot, article_id=article_id,
+                          allowed_hosts=allowed_hosts)
+    legacy_utm = canonical_url + '?' + urlencode({'utm_source': source, 'utm_medium': MEDIUM_BY_SOURCE[source],
+                                                 'utm_campaign': CAMPAIGN, 'utm_content': content})
     expected = build_outbound_url(canonical_url, source=source, account=account,
                                   publication_date=publication_date, slot=slot,
                                   article_id=article_id, allowed_hosts=allowed_hosts)
-    if not isinstance(outbound_url, str) or outbound_url != expected:
+    allowed_urls = {expected, legacy_utm, canonical_url} if source == 'naver_kin' else {expected}
+    if not isinstance(outbound_url, str) or outbound_url not in allowed_urls:
         raise ValueError('Outbound URL differs from exact verified article and approved attribution')
     return True
 
