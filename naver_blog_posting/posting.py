@@ -502,7 +502,7 @@ def select_clock_value(locator, number):
         raise RuntimeError('Reservation clock selection mismatch')
 
 def configure_reservation(page, frame, reserve_time, tags, category=None, folder=None):
-    if os.environ.get('BAROLAB_VISIBLE_WORKFLOW') == '1':
+    if os.environ.get('BAROLAB_VISIBLE_WORKFLOW') == '1' and os.name != 'nt':
         page.bring_to_front()
     target = datetime.strptime(reserve_time, '%Y-%m-%d %H:%M').replace(tzinfo=KST)
     if target < now_kst() + timedelta(minutes=30):
@@ -1493,7 +1493,8 @@ def show_reservation_popup(context, account):
         opener.first.wait_for(state='visible', timeout=10000)
         opener.first.click()
         vframe.get_by_text('예약 발행 글', exact=True).wait_for(state='visible', timeout=10000)
-        view_page.bring_to_front()
+        if os.name != 'nt':
+            view_page.bring_to_front()
     except Exception as exc:
         print(f'[show_reservation_popup] non-fatal warning: {exc}', flush=True)
 
@@ -1675,6 +1676,13 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 submitted = latest.get('submissionStarted') is True
                 write_attempt(account_key, 'unknown' if submitted else 'failed', start_new=False, failureReason=str(exc)[:500], preSubmissionFailure=not submitted, submissionStarted=submitted)
             raise
+        finally:
+            if os.name == 'nt':
+                try:
+                    from common.ubuntu_naver_browser import close_account
+                    close_account(account['cdp_port'])
+                except Exception:
+                    pass
 
 def check_existing_reservations(context, account, *, title, reserve_time, revision=None, folder=None):
     from dashboard.collectors.naver_accounts import validated_reservation_rows

@@ -313,9 +313,9 @@ def ensure_account(port):
             profile.mkdir(parents=True,exist_ok=True)
             cmd_args = [str(exe),f'--remote-debugging-port={port}',f'--user-data-dir={profile}',
                 '--remote-debugging-address=127.0.0.1',
-                *([f'--ego-server-name=barolab-{port}'] if os.name == 'nt' else []),
+                *([f'--ego-server-name=barolab-{port}', '--window-position=-32000,-32000', '--window-size=1280,900'] if os.name == 'nt' else ['--restore-last-session']),
                 '--class=BaroLab-Threads' if port==9450 else '--class=BaroLab-CF-Flow',
-                '--profile-directory=Default', '--restore-last-session',
+                '--profile-directory=Default',
                 '--no-first-run','--no-default-browser-check',
                 *(['https://www.threads.com/@mustpickinfo' if port==9450 else 'https://labs.google/fx/ko/tools/flow']
                   if not (profile/'Default/Preferences').exists() else [])]
@@ -346,6 +346,27 @@ def ensure_account(port):
             sync_cookies_from_ego_profile(port, account_key)
     gc_blank_tabs(port)
     return pid
+
+
+def close_account(port):
+    """Close temporary port-bound browser worker on Windows after an on-demand slot finishes."""
+    if os.name != "nt":
+        return False
+    try:
+        _, profile, _ = account_paths(port)
+        pid = process_identity(port, profile)
+        if pid:
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=8,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def _win_find_browser_hwnd(pid):
@@ -527,9 +548,9 @@ def launch(account):
         cmd_args = [
             exe, f"--user-data-dir={profile}",
             f"--remote-debugging-port={port}", "--remote-debugging-address=127.0.0.1",
-            *([f"--ego-server-name=barolab-{port}"] if os.name == "nt" else []),
+            *([f"--ego-server-name=barolab-{port}", "--window-position=-32000,-32000", "--window-size=1280,900"] if os.name == "nt" else ["--restore-last-session"]),
             f"--class=BaroLab-{account}", f"--profile-directory={profile_directory}",
-            "--restore-last-session", "--no-first-run", "--no-default-browser-check",
+            "--no-first-run", "--no-default-browser-check",
             *([start_url] if start_url else []),
         ]
         _spawn_ego_on_user_desktop(cmd_args, env=environment, log_path=(runtime / "chrome.log"))
@@ -558,6 +579,7 @@ def launch(account):
         if hwnd:
             import ctypes
             ctypes.windll.user32.SetWindowTextW(hwnd, f"BaroLab | {account} | {config['blog_id']} | EGO LITE")
+            ctypes.windll.user32.SetWindowPos(hwnd, 0, -32000, -32000, 1280, 900, 0x0010 | 0x0004)
     else:
         environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
         windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True, text=True, check=True)

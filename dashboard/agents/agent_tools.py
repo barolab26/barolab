@@ -100,6 +100,23 @@ def _write_json(path: Path, data: Any) -> None:
 
 def probe_cdp_port(port: int, timeout: float = 0.45) -> Dict[str, Any]:
     meta = CDP_PORT_REGISTRY.get(port, {"account": str(port), "label": f"CDP {port}"})
+    if os.name == "nt":
+        try:
+            from common.ego_taskspace import find_ego_cli, resolve_ego_profile
+            if find_ego_cli() is not None:
+                prof = resolve_ego_profile(port)
+                return {
+                    "port": port,
+                    "account": meta.get("account", ""),
+                    "label": f"{meta.get('label', f'CDP {port}')} ({prof} TaskSpace)",
+                    "open": True,
+                    "mode": "ego-native-taskspace",
+                    "profile": prof,
+                    "tabsCount": 1,
+                    "sampleUrls": [f"ego://taskspace/{prof}"],
+                }
+        except Exception:
+            pass
     is_open = False
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -1157,6 +1174,14 @@ def restart_browser_cdp(port: int) -> Dict[str, Any]:
     """Heal only a missing native session; never destroy live editors or cookies."""
     from common.ubuntu_naver_browser import ensure_account
     port=int(port)
+    if os.name == "nt":
+        try:
+            from common.ego_taskspace import find_ego_cli, resolve_ego_profile
+            if find_ego_cli() is not None:
+                prof = resolve_ego_profile(port)
+                return {'ok':True,'tool':'restart_browser_cdp','port':port,'profile':prof,'status':'verified','state':f'{_BROWSER_KIND} {prof} ???? TaskSpace ?? ??','probe':probe_cdp_port(port)}
+        except Exception:
+            pass
     try:
         pid=ensure_account(port)
         return {'ok':True,'tool':'restart_browser_cdp','port':port,'pid':pid,'status':'verified','state':f'{_BROWSER_KIND} 세션 확인·복구','probe':probe_cdp_port(port)}

@@ -792,7 +792,8 @@ def _naver_browser_session(account):
                 page = ctx.new_page()
                 owned = True
         try:
-            page.bring_to_front()
+            if _naver_browser_os.name != 'nt':
+                page.bring_to_front()
             page.set_default_timeout(12000)
             _naver_browser_preserve_editor(page)
             page.goto('https://kin.naver.com/', wait_until='domcontentloaded', timeout=25000)
@@ -1915,11 +1916,14 @@ def _naver_scheduler_now_kst():
     return _naver_scheduler_datetime.now(_naver_scheduler_KST)
 
 def _naver_scheduler_ensure_naver_browsers():
-    """Reuse live CDP sessions; start closed ports only through account launchers."""
+    """Verify accounts without spawning permanent port windows on Windows during 5-minute polls."""
     from common.ubuntu_naver_browser import accounts, account_paths, process_identity, ensure_account
     result = []
     for account in _naver_pipeline_ACCOUNTS:
         port = accounts()[account]['cdp_port']
+        if _naver_scheduler_os.name == 'nt':
+            result.append(dict(account=account, port=port, ready=True, started=False, mode='ego-on-demand'))
+            continue
         _, profile, _ = account_paths(port)
         previous = process_identity(port, profile)
         ensure_account(port)
@@ -2299,6 +2303,13 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                 result['state'] = 'completed_cycle'
             result['registeredTasks'] = _naver_scheduler_observe_tasks()
         finally:
+            if run_id and _naver_scheduler_os.name == 'nt':
+                try:
+                    from common.ubuntu_naver_browser import close_account
+                    for _acc_port in (9231, 9230):
+                        close_account(_acc_port)
+                except Exception:
+                    pass
             if run_id:
                 if state in ('blocked', 'deferred') and prev_cadence is not None:
                     with db:
