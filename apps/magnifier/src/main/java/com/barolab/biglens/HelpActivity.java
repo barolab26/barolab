@@ -22,6 +22,10 @@ public final class HelpActivity extends Activity {
         section(content,"권한과 문제 해결","카메라 허용을 거절해도 앱을 종료하지 않습니다. 다시 허용하거나 ‘기기 권한 설정’에서 변경할 수 있어요. 카메라 연결에 실패하면 다른 카메라 앱을 닫고 다시 시도하세요. 후면 카메라가 없으면 실시간 돋보기를 사용할 수 없습니다.\n회전 때 정지 화면은 메모리에 유지하지만 앱이 종료되면 사라질 수 있으니 필요한 화면은 직접 저장하세요.");
         section(content,"개인정보와 광고","카메라 영상은 기기 안에서만 표시합니다. 얼굴 인식, 원격 분석, 자동 촬영·업로드를 하지 않습니다. 마이크·사진첩 권한을 요구하지 않습니다. 회원가입과 자체 분석·크래시 SDK는 없습니다.\n메인 화면 하단에는 조작 버튼과 여백을 둔 배너가 표시될 수 있습니다. Google 광고·동의 SDK의 동의 확인 후 비맞춤 배너를 요청하며 광고가 없어도 모든 기본 기능을 사용할 수 있습니다. 도움말 하단 배너는 아래 버튼으로 선택합니다. 확대·정지·저장 조작을 가로막는 전면 광고는 없습니다. 광고 SDK는 IP·대략적 위치·기기 식별자·상호작용·진단 정보를 처리할 수 있으며, 영상·저장 이미지는 광고 요청에 넣지 않습니다.");
         section(content,"안전한 사용","눈이나 태양, 강한 광원을 확대해 바라보지 마세요. 의학적 진단이나 중요한 의약품 식별을 보증하는 앱이 아닙니다. 작은 글씨를 보기 위한 보조 도구입니다.");
+        Button bridge = new Button(this); bridge.setText("어르신 건강·복약·생활 정보 가이드 (웹)"); bridge.setOnClickListener(v -> {
+            try { startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("https://barolab-daily-apps.pages.dev/bridge/?tab=health&utm_source=biglens&utm_medium=in_app_bridge"))); }
+            catch (android.content.ActivityNotFoundException | SecurityException e) { android.widget.Toast.makeText(this,"브라우저에서 barolab-daily-apps.pages.dev/bridge/ 를 확인해 주세요.",android.widget.Toast.LENGTH_LONG).show(); }
+        }); content.addView(bridge);
         Button policy = new Button(this); policy.setText("웹 개인정보처리방침"); policy.setOnClickListener(v -> {
             try { startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("https://barolab-daily-apps.pages.dev/magnifier/privacy"))); }
             catch (android.content.ActivityNotFoundException | SecurityException e) { android.widget.Toast.makeText(this,"브라우저에서 barolab-daily-apps.pages.dev/magnifier/privacy 를 확인해 주세요.",android.widget.Toast.LENGTH_LONG).show(); }

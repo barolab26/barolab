@@ -282,6 +282,7 @@ public final class MainActivity extends Activity {
         if (enabled) fullButton(reminder, button("알림 끄기", v -> { preferences.edit().putBoolean("reminder_enabled", false).apply(); ReminderReceiver.schedule(this); showSettings(); }));
         reminder.addView(text("기기 절전 상태에 따라 늦게 도착할 수 있어요. 알림을 꺼도 읽기는 그대로 사용할 수 있습니다.", 13, MUTED)); gap(16);
         LinearLayout about = panel(); about.addView(text("안내와 도움", 19, GREEN));
+        fullButton(about, button("시니어 생활·건강 정보 가이드 (웹)", v -> { try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://barolab-daily-apps.pages.dev/bridge/?tab=senior&utm_source=harubible&utm_medium=in_app_bridge"))); } catch (ActivityNotFoundException e) { toast("브라우저가 설치되어 있지 않아요."); } }));
         fullButton(about, button("본문 출처 · 앱 개인정보 안내", v -> showAbout()));
         fullButton(about, button("광고 개인정보 선택", v -> { if (ads != null) ads.privacyOptions(); }));
         fullButton(about, button("웹 개인정보처리방침", v -> {

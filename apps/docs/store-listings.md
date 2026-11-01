@@ -5,9 +5,10 @@
 ## greeting — 오늘의 안부
 
 - 패키지: `com.barolab.morningcard`
-- 제목: 오늘의 안부 - 인사말 카드·공유
-- 간단 설명: 마음에 맞는 인사말을 고르고 직접 고쳐, 큰 글씨 카드로 나누세요.
+- 제목: 오늘의 안부 - 아침 인사말 카드·계절 감사 안부문자
+- 간단 설명: 아침 인사말, 계절·건강 안부, 감사 문구를 골라 직접 고치고 큰글씨 안부 카드로 카카오톡·문자에 나누세요.
 - 개인정보: https://barolab-daily-apps.pages.dev/greeting/privacy
+- 웹 생활혜택 브릿지: https://barolab-daily-apps.pages.dev/bridge/?tab=senior&utm_source=morningcard&utm_medium=in_app_bridge
 
 ### 자세한 설명
 
@@ -34,9 +35,10 @@
 ## magnifier — 큰글씨 돋보기
 
 - 패키지: `com.barolab.biglens`
-- 제목: 큰글씨 돋보기 - 확대·손전등
-- 간단 설명: 작은 글씨를 크게 보고, 조명과 화면 정지로 편하게 확인하세요.
+- 제목: 큰글씨 돋보기 - 약봉지·작은글씨 확대경 & 손전등
+- 간단 설명: 작은 글씨와 약봉지·설명서를 휴대폰 카메라로 크게 확대해 보고, 손전등 조명과 화면 정지·고대비로 편하게 확인하세요.
 - 개인정보: https://barolab-daily-apps.pages.dev/magnifier/privacy
+- 웹 건강·복약 브릿지: https://barolab-daily-apps.pages.dev/bridge/?tab=health&utm_source=biglens&utm_medium=in_app_bridge
 
 ### 자세한 설명
 
@@ -65,9 +67,10 @@ Google 광고·동의 SDK의 처리는 개인정보처리방침에서 확인해 
 ## shopping — 말로 장보기
 
 - 패키지: `com.barolab.voicebasket`
-- 제목: 말로 장보기 - 음성 장보기 메모
-- 간단 설명: 말하거나 직접 적고, 수정·미리보기 후 추가하세요. 체크와 보관도 간편하게.
+- 제목: 말로 장보기 - 큰글씨 음성 장보기 메모·체크리스트
+- 간단 설명: 생각난 마트 장보기 목록을 말하거나 큰글씨로 적고, 미리보기 확인 후 체크리스트로 하나씩 간편하게 관리하세요.
 - 개인정보: https://barolab-daily-apps.pages.dev/shopping/privacy
+- 웹 생활·장보기절약 브릿지: https://barolab-daily-apps.pages.dev/bridge/?tab=living&utm_source=voicebasket&utm_medium=in_app_bridge
 
 ### 자세한 설명
 

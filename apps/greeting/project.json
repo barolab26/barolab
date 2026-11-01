@@ -10,7 +10,25 @@
     "Android"
   ],
   "publicUrl": "https://barolab-daily-apps.pages.dev/greeting/",
-  "updatedAt": "2026-11-01T15:57:18+09:00",
+  "asoListing": {
+    "storeTitle": "오늘의 안부 - 아침 인사말 카드·계절 감사 안부문자",
+    "shortDescription": "아침 인사말, 계절·건강 안부, 감사 문구를 골라 직접 고치고 큰글씨 안부 카드로 카카오톡·문자에 나누세요.",
+    "targetKeywords": [
+      "아침 인사말 카드",
+      "안부 문자",
+      "계절 인사말",
+      "좋은글 이미지",
+      "감사 인사 카드"
+    ],
+    "benchmarkModel": "PostIncome ASO + 5070 Senior Organic Search"
+  },
+  "cfBridge": {
+    "monetizationModel": "AdMob_Banner + CF_AdSense_Dual_Funnel",
+    "bridgeHubUrl": "https://barolab-daily-apps.pages.dev/bridge/?tab=senior&utm_source=morningcard&utm_medium=in_app_bridge",
+    "primaryCfDomain": "https://smilenote.kr",
+    "secondaryCfDomain": "https://baronote.kr"
+  },
+  "updatedAt": "2026-11-01T22:37:11+09:00",
   "measurement": {
     "admob": {
       "status": "collected",
@@ -188,7 +206,7 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-11-01T15:57:18+09:00"
+      "checkedAt": "2026-11-01T22:37:11+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,

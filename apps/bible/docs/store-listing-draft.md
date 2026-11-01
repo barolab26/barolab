@@ -5,11 +5,12 @@
 스토어 이미지의 AI 관련 표시: 아이콘·기능 그래픽은 ‘예’, 편집하지 않은 실제 앱 스크린샷은 ‘아니오’로 저장했다.
 
 - 앱 이름: 오늘의 성경말씀
-- 스토어 제목: 오늘의 성경말씀 - 큰글씨·듣기·공유
+- 스토어 제목: 오늘의 성경말씀 - 큰글씨 무료 성경·듣기·말씀카드
 - 패키지: `com.barolab.harubible`
-- 간단 설명: 매일 한 구절, 큰글씨로 읽고 편안하게 듣고 말씀 카드로 나누세요.
+- 간단 설명: 매일 아침 성경말씀 한 구절을 큰글씨로 읽고, 한국어 오프라인 음성으로 편안하게 듣고 말씀 카드로 나누세요.
 - 개발자 웹사이트: https://haru-malsseum.pages.dev/
 - 개인정보처리방침: https://haru-malsseum.pages.dev/privacy
+- 웹 시니어 생활정보 브릿지: https://barolab-daily-apps.pages.dev/bridge/?tab=senior&utm_source=harubible&utm_medium=in_app_bridge
 - 문의 이메일: baro76650@gmail.com
 - 가격: 무료 / Google AdMob 배너 광고 포함
 

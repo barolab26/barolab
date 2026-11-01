@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+  <title>오늘의 시니어·건강·생활혜택 가이드 허브 | BaroLab</title>
+  <meta name="description" content="연령·가구별 맞춤 정부지원금, 어르신 건강·검진·복약 가이드, 장보기·공과금 환급 혜택을 한눈에 확인하세요.">
+  <style>
+    :root {
+      --bg: #eff4f9;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #dbe4f0;
+      --brand: #1d4ed8;
+      --brand-soft: #dbeafe;
+      --green: #059669;
+      --green-soft: #d1fae5;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    .app-shell {
+      max-width: 430px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: #f8fafc;
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+      padding-bottom: 92px;
+      position: relative;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-soft);
+      color: #065f46;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .hero-card {
+      margin: 16px;
+      padding: 20px 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(29, 78, 216, 0.22);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      color: #fde047;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .hero-card h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.32;
+      letter-spacing: -0.02em;
+    }
+    .hero-card p {
+      margin: 0;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .calc-box {
+      margin: 0 16px 16px;
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .calc-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
+    .calc-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+    .chip-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .chip-btn {
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 6px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .chip-btn.active {
+      background: var(--brand);
+      color: #ffffff;
+      border-color: var(--brand);
+    }
+    .calc-result {
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e3a8a;
+    }
+    .tab-panel {
+      display: none;
+      padding: 0 16px;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 8px 2px 12px;
+    }
+    .section-head h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .section-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand-soft);
+      padding: 4px 9px;
+      border-radius: 999px;
+    }
+    .guide-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 12px;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+    .guide-card:active {
+      transform: scale(0.99);
+    }
+    .guide-card:hover {
+      border-color: var(--brand);
+    }
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .card-badge {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 8px;
+      background: var(--amber-soft);
+      color: #92400e;
+    }
+    .card-domain {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .guide-card h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    .guide-card p {
+      margin: 0 0 12px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+    .cta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--brand);
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 8px 10px 12px;
+      z-index: 30;
+      box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.06);
+    }
+    .nav-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 4px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .nav-btn.active {
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 800;
+    }
+    .footer-note {
+      padding: 16px 18px 8px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .footer-note a { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand-title" href="/">BaroLab 생활혜택 허브</a>
+      <span class="status-pill"><span class="status-dot"></span>실시간 가이드</span>
+    </header>
+
+    <section class="hero-card">
+      <span class="hero-badge" id="caller-badge">앱 연동 맞춤 가이드</span>
+      <h1 id="hero-title">놓치면 손해 보는 시니어·건강·생활 지원금 한눈에 확인</h1>
+      <p id="hero-desc">복잡한 공고문 대신 핵심 자격 조건과 신청 순서만 큰 글씨로 정리했습니다.</p>
+    </section>
+
+    <section class="calc-box" aria-label="10초 혜택 자가진단">
+      <h2 class="calc-title">10초 맞춤 혜택 빠른 선택</h2>
+      <p class="calc-sub">가장 관심 있는 분야를 누르면 핵심 비교표와 신청 페이지로 연결됩니다.</p>
+      <div class="chip-row">
+        <button type="button" class="chip-btn active" data-age="senior" onclick="selectAge('senior')">60·70대 연금·복지</button>
+        <button type="button" class="chip-btn" data-age="health" onclick="selectAge('health')">약봉지·검진·건강</button>
+        <button type="button" class="chip-btn" data-age="living" onclick="selectAge('living')">장보기·환급·절약</button>
+      </div>
+      <div class="calc-result" id="calc-output">
+        기초연금·노인일자리·임플란트·교통비 지원 대상 여부를 아래 카드에서 바로 확인하세요.
+      </div>
+    </section>
+
+    <!-- Tab 1: 시니어·연금혜택 (오늘의 성경말씀 / 오늘의 안부 연동) -->
+    <main id="panel-senior" class="tab-panel active">
+      <div class="section-head">
+        <h2>시니어 연금·복지 핵심 가이드</h2>
+        <span class="section-tag">5070 필수 확인</span>
+      </div>
+
+      <a class="guide-card js-bridge-link" href="https://smilenote.kr/">
+        <div class="card-top">
+          <span class="card-badge">연금·노후지원</span>
+          <span class="card-domain">smilenote.kr</span>
+        </div>
+        <h3>기초연금·노령연금 수령액 조회 및 감액 피하는 핵심 조건</h3>
+        <p>재산·소득인정액 계산 기준과 부부 수령 시 감액 구간, 올해 인상 금액표를 한눈에 비교해 보세요.</p>
+        <div class="cta-row">
+          <span>수령 조건·신청방법 바로 보기</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <a class="guide-card js-bridge-link" href="https://baronote.kr/">
+        <div class="card-top">
+          <span class="card-badge">정부지원금·환급</span>
+          <span class="card-domain">baronote.kr</span>
+        </div>
+        <h3>어르신 교통비·케이패스(K-PASS) & 지자체별 숨은 지원금 총정리</h3>
+        <p>신청하지 않으면 소멸되는 대중교통 환급 혜택과 에너지 바우처·통신비 감면 신청 절차를 안내합니다.</p>
+        <div class="cta-row">
+          <span>내 지역 환급 혜택 확인하기</span>
+          <span>→</span>
+        </div>
+      </a>
+    </main>
+
+    <!-- Tab 2: 건강·검진가이드 (큰글씨 돋보기 연동) -->
+    <section id="panel-health" class="tab-panel">
+      <div class="section-head">
+        <h2>어르신 건강·검진·복약 가이드</h2>
+        <span class="section-tag">큰글씨 돋보기 추천</span>
+      </div>
+
+      <a class="guide-card js-bridge-link" href="https://healthcox.com/">
+        <div class="card-top">
+          <span class="card-badge">건강검진·의료비</span>
+          <span class="card-domain">healthcox.com</span>
+        </div>
+        <h3>국가건강검진 대상자 조회 및 65세 이상 임플란트·틀니 본인부담금 경감</h3>
+        <p>치과 임플란트 건강보험 적용 개수와 어르신 백신 무료 접종·의료비 환급금 신청 방법을 확인하세요.</p>
+        <div class="cta-row">
+          <span>건강보험 혜택·검진 안내 보기</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <a class="guide-card js-bridge-link" href="https://must-good.com/">
+        <div class="card-top">
+          <span class="card-badge">복약·혈압·혈당</span>
+          <span class="card-domain">must-good.com</span>
+        </div>
+        <h3>약봉지 복용법·영양제 궁합 및 시니어 만성질환 관리 체크리스트</h3>
+        <p>함께 먹으면 안 되는 약·영양제 조합과 아침 공복 혈당·혈압 정상 수치 비교표를 정리했습니다.</p>
+        <div class="cta-row">
+          <span>복약 주의사항·정상수치 표 보기</span>
+          <span>→</span>
+        </div>
+      </a>
+    </section>
+
+    <!-- Tab 3: 생활·장보기절약 (말로 장보기 연동) -->
+    <section id="panel-living" class="tab-panel">
+      <div class="section-head">
+        <h2>장보기 물가·생활비 절약 가이드</h2>
+        <span class="section-tag">말로 장보기 추천</span>
+      </div>
+
+      <a class="guide-card js-bridge-link" href="https://daynote.kr/">
+        <div class="card-top">
+          <span class="card-badge">장보기·식재료</span>
+          <span class="card-domain">daynote.kr</span>
+        </div>
+        <h3>대형마트 의무휴무일 조회 & 온누리상품권·농할상품권 20~30% 할인 구매법</h3>
+        <p>전통시장·마트 장보기 전 챙기면 매달 식비를 아끼는 모바일 할인권 충전 일정과 사용처 안내입니다.</p>
+        <div class="cta-row">
+          <span>장보기 할인·휴무일 확인하기</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <a class="guide-card js-bridge-link" href="https://must-pick.com/">
+        <div class="card-top">
+          <span class="card-badge">공과금·카드환급</span>
+          <span class="card-domain">must-pick.com</span>
+        </div>
+        <h3>숨은 카드포인트 통합 현금화 & 도시가스·전기요금 캐시백 신청</h3>
+        <p>1분 만에 계좌로 입금받는 여신금융협회 카드포인트 조회법과 에너지 캐시백 환급 기준을 확인하세요.</p>
+        <div class="cta-row">
+          <span>미환급 포인트·캐시백 조회하기</span>
+          <span>→</span>
+        </div>
+      </a>
+    </section>
+
+    <footer class="footer-note">
+      <p>BaroLab 생활 앱 공식 정보 허브 · <a href="/">앱 안내 홈</a> · <a href="mailto:baro76650@gmail.com">문의</a></p>
+    </footer>
+
+    <nav class="bottom-nav" aria-label="카테고리 탭">
+      <button type="button" class="nav-btn active" id="tab-btn-senior" onclick="switchTab('senior')">시니어·연금혜택</button>
+      <button type="button" class="nav-btn" id="tab-btn-health" onclick="switchTab('health')">건강·검진가이드</button>
+      <button type="button" class="nav-btn" id="tab-btn-living" onclick="switchTab('living')">생활·장보기절약</button>
+    </nav>
+  </div>
+
+  <script>
+    const TAB_META = {
+      senior: {
+        title: "놓치면 손해 보는 시니어 연금·지원금 한눈에 확인",
+        desc: "기초연금·교통비 환급·노인일자리 등 5070 세대 필수 혜택을 큰 글씨로 정리했습니다.",
+        calc: "기초연금·노인일자리·임플란트·교통비 지원 대상 여부를 아래 카드에서 바로 확인하세요."
+      },
+      health: {
+        title: "어르신 약봉지·국가검진·의료비 혜택 핵심 정리",
+        desc: "큰글씨 돋보기 이용자분들을 위한 건강보험 혜택과 복약·혈압·혈당 기준표입니다.",
+        calc: "65세 이상 치과 임플란트·틀니 건강보험 혜택과 약봉지 복용 주의사항을 바로 확인하세요."
+      },
+      living: {
+        title: "장보기 할인권·마트 휴무일·숨은 환급금 총정리",
+        desc: "말로 장보기 이용자분들을 위한 온누리상품권 할인과 공과금·카드포인트 현금화 가이드입니다.",
+        calc: "장보기 전 온누리·농할 할인권과 미환급 카드포인트 현금 입금 방법을 아래에서 확인하세요."
+      }
+    };
+
+    function switchTab(tab) {
+      ['senior', 'health', 'living'].forEach(function(k) {
+        var panel = document.getElementById('panel-' + k);
+        var btn = document.getElementById('tab-btn-' + k);
+        if (panel) panel.classList.toggle('active', k === tab);
+        if (btn) btn.classList.toggle('active', k === tab);
+      });
+      document.querySelectorAll('.chip-btn').forEach(function(chip) {
+        chip.classList.toggle('active', chip.getAttribute('data-age') === tab);
+      });
+      var meta = TAB_META[tab] || TAB_META.senior;
+      document.getElementById('hero-title').textContent = meta.title;
+      document.getElementById('hero-desc').textContent = meta.desc;
+      document.getElementById('calc-output').textContent = meta.calc;
+    }
+
+    function selectAge(tab) {
+      switchTab(tab);
+    }
+
+    (function initBridge() {
+      var params = new URLSearchParams(window.location.search);
+      var tab = params.get('tab');
+      if (tab && TAB_META[tab]) {
+        switchTab(tab);
+      }
+      var src = params.get('utm_source') || 'barolab_app';
+      var badgeMap = {
+        harubible: '오늘의 성경말씀 독자 맞춤 가이드',
+        morningcard: '오늘의 안부 독자 맞춤 가이드',
+        biglens: '큰글씨 돋보기 이용자 맞춤 가이드',
+        voicebasket: '말로 장보기 이용자 맞춤 가이드'
+      };
+      if (badgeMap[src]) {
+        document.getElementById('caller-badge').textContent = badgeMap[src];
+      }
+      document.querySelectorAll('.js-bridge-link').forEach(function(a) {
+        try {
+          var url = new URL(a.getAttribute('href'));
+          url.searchParams.set('utm_source', src);
+          url.searchParams.set('utm_medium', params.get('utm_medium') || 'app_bridge');
+          url.searchParams.set('utm_campaign', 'barolab_postincome_bridge');
+          a.setAttribute('href', url.toString());
+        } catch (e) {}
+      });
+    })();
+  </script>
+</body>
+</html>

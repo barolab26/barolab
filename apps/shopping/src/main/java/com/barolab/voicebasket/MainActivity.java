@@ -101,6 +101,7 @@ public final class MainActivity extends ComponentActivity {
             if(!mode.equals("active"))full(card,primary("항목 골라 다시 사용",v->{currentId=id;resetDraft();beginReuse();}));
         }
         if(count==0)content.addView(text(mode.equals("active")?"아직 목록이 없어요. ‘새 장보기 목록’으로 시작해 보세요.":"아직 여기에 보관된 목록이 없어요.",22,MUTED));
+        full(content,button("오늘의 장보기·생활혜택 가이드 (웹)",v->{try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://barolab-daily-apps.pages.dev/bridge/?tab=living&utm_source=voicebasket&utm_medium=in_app_bridge")));}catch(ActivityNotFoundException e){toast("브라우저에서 barolab-daily-apps.pages.dev/bridge/ 를 열어 주세요.");}}));
         full(content,button("개인정보와 광고 선택",v->help()));
         if(BuildConfig.IS_PREVIEW)content.addView(text("내부 테스트 · Google 테스트 광고",13,MUTED));
     }
