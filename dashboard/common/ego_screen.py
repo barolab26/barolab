@@ -167,6 +167,54 @@ def screen_point(x, y, width, height):
     return px, py
 
 
+def semantic_snapshot(page, width, height):
+    """Extract an EGO-style semantic control snapshot with 960x960 mapped coordinates."""
+    try:
+        raw = page.evaluate("""([w, h]) => {
+          const scale = Math.min(960 / w, 960 / h);
+          const padX = (960 - w * scale) / 2;
+          const padY = (960 - h * scale) / 2;
+          const to960 = (x, y) => [
+            Math.max(0, Math.min(959, Math.round(x * scale + padX))),
+            Math.max(0, Math.min(959, Math.round(y * scale + padY)))
+          ];
+          const nodes = [];
+          const collect = (doc, offsetX, offsetY) => {
+            const sel = 'button, [role="button"], input, select, textarea, .se-documentTitle, .se-canvas-bottom, [data-name]';
+            for (const el of doc.querySelectorAll(sel)) {
+              const r = el.getBoundingClientRect();
+              if (r.width < 6 || r.height < 6) continue;
+              const cx = offsetX + r.left + r.width / 2;
+              const cy = offsetY + r.top + r.height / 2;
+              if (cx < 0 || cy < 0 || cx >= w || cy >= h) continue;
+              const label = (
+                el.getAttribute('data-name') ||
+                el.getAttribute('aria-label') ||
+                el.getAttribute('placeholder') ||
+                el.innerText ||
+                el.className ||
+                el.tagName
+              ).replace(/\\s+/g, ' ').trim().slice(0, 48);
+              if (!label) continue;
+              const [x960, y960] = to960(cx, cy);
+              nodes.push({ role: el.tagName.toLowerCase(), label, x: x960, y: y960 });
+              if (nodes.length >= 45) break;
+            }
+          };
+          collect(document, 0, 0);
+          const mf = document.querySelector('iframe#mainFrame');
+          if (mf && mf.contentDocument && nodes.length < 45) {
+            const mr = mf.getBoundingClientRect();
+            collect(mf.contentDocument, mr.left, mr.top);
+          }
+          return nodes;
+        }""", [width, height])
+        return raw if isinstance(raw, list) else []
+    except Exception:
+        return []
+
+
+
 @contextmanager
 def screen_lock(port):
     """One screen actor per existing Ubuntu browser, including model latency."""
@@ -283,7 +331,14 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                 if time.time() - state['startedAt'] - state.get('pausedSeconds',0) > time_budget_seconds:
                     raise TimeoutError('Screen execution reached its time budget')
                 focus_workflow_window(port)
-                page.bring_to_front()
+                if os.name != 'nt':
+                    page.bring_to_front()
+                if 'nid.naver.com/nidlogin' in (page.url or '') or 'accounts.google.com/v3/signin' in (page.url or ''):
+                    try:
+                        from common.ego_taskspace import handoff_to_ceo
+                        handoff_to_ceo(port, page.url, '로그인 세션 만료 또는 추가 인증이 감지되어 에고라이트 스페이스 제어권을 대표님께 인계합니다.')
+                    except Exception:
+                        pass
                 inspect_input()
                 if finish_if_verified():return state
                 budget=state['turnBudget']
@@ -340,6 +395,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                     write(state_path, state)
                 with Image.open(screenshot) as pixels:
                     width, height = pixels.size
+                sem_nodes = semantic_snapshot(page, width, height)
                 pending = references[len(state['written']):]
                 images = [str(screenshot.resolve())]
                 if pending and pending[0].get('referenceImage'):
@@ -378,6 +434,7 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                           '관측 사실과 추정을 구분하고 보지 못한 스티커/이미지를 없다고 단정하지 않는다. '
                           '짧게 message, observations, actions, done을 반환하라.\n' + json.dumps({
                               'goal': goal, 'currentUrl': page.url, 'imageDimensions': [width, height],
+                              'semanticSnapshot': sem_nodes,
                               'pending': pending[:3], 'remaining': len(pending), 'writtenReferences':references[:len(state['written'])] if feedback else [], 'allowedUrls': urls,
                               'allowedSettings': settings, 'observationsSoFar': state['observations'][:8] + state['observations'][-64:],
                               'learnedScreenInteractions': lessons,
@@ -430,7 +487,8 @@ def _run(page, *, port, folder, goal, references=None, urls=None, settings=None,
                 for action_index, step in enumerate(result['actions']):
                     prior_action_feedback=state.get('actionFeedback','')
                     focus_workflow_window(port)
-                    page.bring_to_front()
+                    if os.name != 'nt':
+                        page.bring_to_front()
                     kind, value = step['kind'], step['value']
                     pages_before = set(page.context.pages)
                     if kind in ('click', 'upload'):

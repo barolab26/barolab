@@ -248,7 +248,8 @@ async def _generate(title, summary, folder, custom_prompt=None, filename='flow-h
                 if page is None:
                     raise RuntimeError('Fresh Flow project creation failed')
                 await asyncio.to_thread(focus_workflow_window, 9440)
-                await page.bring_to_front()
+                if __import__('os').name != 'nt':
+                    await page.bring_to_front()
                 editor = page.locator('div.ProseMirror')
                 if not prior or prior.get('promptSha256') != digest:
                     if (await editor.inner_text()).strip():

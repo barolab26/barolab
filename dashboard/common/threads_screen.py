@@ -106,7 +106,8 @@ def session(for_submission=False):
             try:target_id=cdp.send('Target.getTargetInfo')['targetInfo']['targetId']
             finally:cdp.detach()
             if target_id in pending:raise RuntimeError('threads_uncertain_submission_tab_preserved')
-        focus_workflow_window(PORT);page.bring_to_front()
+        focus_workflow_window(PORT)
+        if __import__('os').name != 'nt':page.bring_to_front()
         # Disconnecting Playwright preserves the existing browser and every user tab.
         yield page
 

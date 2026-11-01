@@ -116,7 +116,8 @@ def bind(page, frame, document, plan, folder):
     identity = load(folder / 'identity.json')
     account = engine.ACCOUNT_MAP[identity['account']]
     focus_workflow_window(account['cdp_port'])
-    page.bring_to_front()
+    if __import__('os').name != 'nt':
+        page.bring_to_front()
     params = document.get('presentation') or styles(identity['account'])
     document = displayed_document(document)
     document['presentation'] = params

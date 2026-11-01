@@ -262,85 +262,25 @@ def sync_cookies_from_ego_profile(port, account_key):
         has_naver = any("naver" in c.get("domain", "") and c.get("name") == "NID_AUT" for c in current)
         has_google = any("google" in c.get("domain", "") and c.get("name") in ("SID", "__Secure-1PSID") for c in current)
         has_threads = any(("threads" in c.get("domain", "") or "instagram" in c.get("domain", "")) and c.get("name") == "sessionid" for c in current)
-        if account_key == "cf-flow" and has_google and marker.exists():
+        marker_fresh = False
+        if marker.exists():
+            try:
+                marker_fresh = (time.time() - float(marker.read_text(encoding="utf-8").strip())) < 21600
+            except Exception:
+                marker_fresh = False
+        if account_key == "cf-flow" and has_google and marker_fresh:
             return True
-        if account_key == "threads" and has_threads and marker.exists():
+        if account_key == "threads" and has_threads and marker_fresh:
             return True
-        if account_key not in ("cf-flow", "threads") and has_naver and marker.exists():
+        if account_key not in ("cf-flow", "threads") and has_naver and marker_fresh:
             return True
 
-        profile_id, space_id = EGO_SOURCE_PROFILES[account_key]
-        ego_cli = _find_ego_cli()
-        if not ego_cli:
-            return False
-        space_name = f"BaroLab managed {account_key if account_key not in ('cf-flow', 'threads') else 'soultin'} session"
-        script = f"""
-async function getActivePage(task, url) {{
-  let p = null;
-  const pages = await task.pages();
-  if (pages && pages.length > 0) p = pages[0];
-  else {{
-    const tabs = await task.tabs();
-    if (tabs && tabs.length > 0) {{
-      if (tabs[0].label) p = task.page(tabs[0].label);
-      else p = await task.adopt(tabs[0].page);
-    }} else {{
-      p = await task.newPage();
-    }}
-  }}
-  const curUrl = await p.url();
-  if (url && (!curUrl || curUrl === 'about:blank' || curUrl.startsWith('chrome://new'))) {{
-    await p.goto(url);
-  }}
-  return p;
-}}
-const targetProfileId = {json.dumps(profile_id)};
-const targetSpaceId = {int(space_id)};
-const targetSpaceName = {json.dumps(space_name)};
-const spaces = await listTaskSpaces();
-let sp = spaces.find(s => s.name === targetSpaceName || s.profileId === targetProfileId || s.id === targetSpaceId);
-let task = null;
-if (sp) {{
-  if (sp.ownership === 'agentDelegatedToUser') {{
-    task = await takeOverTaskSpace(sp.id);
-  }} else if (sp.ownership === 'user') {{
-    task = await claimTaskSpace(sp.id);
-  }} else {{
-    task = await taskSpace(sp.id);
-  }}
-}} else {{
-  task = await taskSpace(targetSpaceName, {{ profileId: targetProfileId }});
-}}
-const p = await getActivePage(task, {json.dumps(default_url)});
-const res = await p.cdp('Network.getAllCookies');
-let allCookies = res.cookies || [];
-if ({json.dumps(account_key)} === 'cf-flow' || {json.dumps(account_key)} === 'threads') {{
-  const defSp = spaces.find(s => s.profileId === 'Default');
-  if (defSp) {{
-    try {{
-      const dt = defSp.ownership === 'agentDelegatedToUser' ? await takeOverTaskSpace(defSp.id) : (defSp.ownership === 'user' ? await claimTaskSpace(defSp.id) : await taskSpace(defSp.id));
-      const dp = await getActivePage(dt, {json.dumps(default_url)});
-      const dres = await dp.cdp('Network.getAllCookies');
-      allCookies = allCookies.concat(dres.cookies || []);
-    }} catch (e) {{}}
-  }}
-}}
-console.log('BAROLAB_COOKIES:' + JSON.stringify(allCookies));
-"""
-        fd, fname = tempfile.mkstemp(prefix="ego-sync-", suffix=".mjs")
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                f.write(script)
-            entry = "await import('" + Path(fname).resolve().as_uri() + "')"
-            cflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-            res = subprocess.run([str(ego_cli), "nodejs", "-e", entry], text=True, encoding="utf-8",
-                                 capture_output=True, timeout=25, creationflags=cflags)
-        finally:
-            Path(fname).unlink(missing_ok=True)
-        raw_line = next((l.removeprefix("BAROLAB_COOKIES:") for l in (res.stdout + "\n" + res.stderr).splitlines() if l.startswith("BAROLAB_COOKIES:")), None)
-        if not raw_line:
-            return False
-        cookies = json.loads(raw_line)
+        from common.ego_taskspace import extract_profile_cookies
+        cookies = extract_profile_cookies(
+            account_key,
+            default_url=default_url,
+            include_default_profile=(account_key in ("cf-flow", "threads")),
+        )
         if not cookies:
             return False
         clean_cookies = []
@@ -509,22 +449,23 @@ def inspect_workflow_window(port):
             'wmPid':None,'mapped':None,'attemptedDisplays':attempted,'browserStarted':False}
 
 
-def focus_workflow_window(port):
-    """Focus only the verified existing workflow browser; never start or navigate."""
+def focus_workflow_window(port, *, steal_os_focus=False):
+    """Activate the workflow browser tab internally without stealing OS desktop focus on Windows."""
     dismiss_stuck_dialogs()
     window=inspect_workflow_window(port)
     if window['status']=='observed':
         if os.name == 'nt' and window.get('display') == 'windows':
-            try:
-                import ctypes
-                user32 = ctypes.windll.user32
-                hwnd = _win_find_browser_hwnd(window.get('browserPid'))
-                if hwnd:
-                    if user32.IsIconic(hwnd):
-                        user32.ShowWindow(hwnd, 9)  # SW_RESTORE
-                    user32.SetForegroundWindow(hwnd)
-            except Exception:
-                pass
+            if steal_os_focus:
+                try:
+                    import ctypes
+                    user32 = ctypes.windll.user32
+                    hwnd = _win_find_browser_hwnd(window.get('browserPid'))
+                    if hwnd:
+                        if user32.IsIconic(hwnd):
+                            user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+                        user32.SetForegroundWindow(hwnd)
+                except Exception:
+                    pass
             try:
                 with urlopen(f"http://127.0.0.1:{port}/json/list", timeout=2) as resp:
                     tabs = [t for t in json.load(resp) if t.get("type") == "page" and t.get("id")]

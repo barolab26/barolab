@@ -258,7 +258,9 @@ updated_at: "{now_kst}"
 ---
 
 ## 4. 실행 환경·포트·스크립트 명세 (Anthropic Rule #7)
-- **전용 브라우저 (EGO / Chrome CDP)**: `http://127.0.0.1:9440` (절대 프로세스 강제 종료 금지)
+- **전용 브라우저 (EGO Lite v2.2.0 Native TaskSpace & CDP)**:
+  - 네이티브 스페이스 엔진: `dashboard/common/ego_taskspace.py` (`ego-browser.exe nodejs` + `Profile 3`~`Profile 7` 직결)
+  - 백그라운드 스페이스 작업 원칙: `SetForegroundWindow` 강제 화면 팝업 금지, 작업 완료 시 `await task.finish({{ keep: [] }})` 즉시 회수, 캡차·로그인 필요 시 `await task.handOff()`로 대표님께 인계
 - **통합 대시보드 & 기억 API 서버**: `http://127.0.0.1:8790` (`docker restart barolab-dashboard`)
 - **백그라운드 자율 워커**: `pythonw.exe -u -B -X utf8 -m dashboard.server.memory_worker`
 - **채널별 0-Token 실행 엔진**:
@@ -441,9 +443,10 @@ updated_at: "{now_kst}"
 ## 📑 목차 (Top-100-Line TOC — `head -n 100` 즉시 스캔용)
 1. [NotebookLM 핵심 이식 #1: AI 업무 시스템 4단계 구축법 (SSR+)](#1-notebooklm-핵심-이식-1-ai-업무-시스템-4단계-구축법-ssr)
 2. [NotebookLM 핵심 이식 #2: 앤트로픽 피셜 클로드 스킬 7대 공식 규칙](#2-notebooklm-핵심-이식-2-앤트로픽-피셜-클로드-스킬-7대-공식-규칙)
-3. [레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)](#3-레이더radar-실시간-검증-외부-노하우-practicalknowhow)
-4. [자가 진화 피드백 루프 규칙 (Anthropic Rule #6)](#4-자가-진화-피드백-루프-규칙-anthropic-rule-6)
-5. [대표님 & 크루 수동 추가 노트](#️-대표님--크루-수동-추가-노트)
+3. [NotebookLM 핵심 이식 #3: 에고라이트(EGO Lite v2.2.0) 네이티브 스페이스 자동화 표준](#3-notebooklm-핵심-이식-3-에고라이트ego-lite-v220-네이티브-스페이스-자동화-표준)
+4. [레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)](#4-레이더radar-실시간-검증-외부-노하우-practicalknowhow)
+5. [자가 진화 피드백 루프 규칙 (Anthropic Rule #6)](#5-자가-진화-피드백-루프-규칙-anthropic-rule-6)
+6. [대표님 & 크루 수동 추가 노트](#️-대표님--크루-수동-추가-노트)
 
 ---
 
@@ -453,7 +456,7 @@ updated_at: "{now_kst}"
   1. **Skill (스킬)**: 반복 업무 절차를 매번 프롬프트로 설명하지 않고 모듈화된 스킬(`SKILL.md`)로 캡슐화하여 일관된 고품질을 보장한다.
   2. **Second Brain (세컨드 브레인)**: 나무위키식 **상위 길잡이 문서(Map of Content)**와 **1-Hop 마크다운 지식창고**를 구축하여 에이전트가 작업 전 맥락을 즉시 파악하게 한다.
   3. **Routine (루틴)**: 사람이 매번 실행 버튼을 누르지 않아도 24시간 데몬(`memory_worker` + `radar_scout` + `posting.py`)이 정해진 슬롯에 자율 구동한다.
-  4. **Extension (확장)**: 브라우저 제어(CDP 9440), 검색어/경쟁자 스카우팅, 4대 포털 색인 API를 결합해 외부 세계와 직접 상호작용한다.
+  4. **Extension (확장)**: 브라우저 제어(EGO Lite Native TaskSpace), 검색어/경쟁자 스카우팅, 4대 포털 색인 API를 결합해 외부 세계와 직접 상호작용한다.
 
 ---
 
@@ -469,12 +472,26 @@ updated_at: "{now_kst}"
 
 ---
 
-## 3. 레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)
+## 3. NotebookLM 핵심 이식 #3: 에고라이트(EGO Lite v2.2.0) 네이티브 스페이스 자동화 표준
+- **출처**: `https://notebook.google.com/notebook/11a49ff6-a866-4f55-a21d-4188a7d4b39e` & 공식 `ego-browser skill v2.2.0`
+- **핵심 철학 ("AI가 내장된 브라우저가 아니라, 우리 에이전트가 직접 운전하는 백그라운드 스페이스 자동차")**:
+  1. **네이티브 TaskSpace & 프로필 직결 (`dashboard/common/ego_taskspace.py`)**:
+     - 대표님이 로그인해 두신 에고라이트 프로필(`Profile 3(soultin)`, `Profile 4(soul5373)`, `Profile 5(yoon_master)`, `Profile 6(adinfo0905)`, `Profile 7(stone0747)`, `Default(내 ego)`)을 `await taskSpace(name, {{ profileId }})`로 직결하여 로그인 세션을 100% 실시간 공유한다.
+  2. **백그라운드 비간섭 원칙 (`SetForegroundWindow` 강제 팝업 금지)**:
+     - 모든 크루의 브라우저 작업은 에고라이트 우측 상단의 파란 테두리 **스페이스(TaskSpace)** 안에서 백그라운드로 실행되며, 대표님의 PC 모니터 포커스를 절대 가로채지 않는다.
+  3. **시맨틱 스냅샷 우선 (`page.snapshot()` + `semantic_snapshot()`)**:
+     - 일반 웹페이지(검색·벤치마킹·수집)는 무거운 픽셀 추측 대신 `await page.snapshot()`과 DOM 평가(`page.evaluate`)로 고속 처리하고, 에디터/캔버스 조작 시에도 960×960 시맨틱 좌표 맵(`semanticSnapshot`)을 함께 제공한다.
+  4. **안전한 권한 위임 (`await task.handOff()`) 및 깔끔한 종료 (`await task.finish({{ keep: [] }})`)**:
+     - 2차 인증·캡차·로그인 필요 시 억지로 재시도하지 않고 즉시 `task.handOff()`로 대표님께 스페이스 제어권을 넘기며, 작업이 끝난 스페이스는 `task.finish({{ keep: [] }})`로 즉시 닫아 탭/메모리 누수를 원천 차단한다.
+
+---
+
+## 4. 레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)
 {knowhow_section}
 
 ---
 
-## 4. 자가 진화 피드백 루프 규칙 (Anthropic Rule #6)
+## 5. 자가 진화 피드백 루프 규칙 (Anthropic Rule #6)
 - `@radar`가 외부 트렌드·SERP·유튜브에서 검증한 노하우는 `record_knowhow()` 호출과 동시에 SHA-256 영수증(`dashboard/data/radar/knowhow-receipts/`)으로 검증되며, 본 `03_외부노하우_벤치마킹_금고.md`와 `synapse-recipes.json`에 즉시 자동 동기화되어 전 크루의 다음 턴 프롬프트에 주입된다.
 """
     (sb_dir / '03_외부노하우_벤치마킹_금고.md').write_text(_with_custom('03_외부노하우_벤치마킹_금고.md', doc_03), encoding='utf-8')

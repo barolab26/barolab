@@ -230,6 +230,33 @@ class CollectionRuntime(unittest.TestCase):
             self.assertEqual(len(exp2['guides']), 1)
             self.assertIn('대표님 커스텀 테스트 메모입니다.', exp2['guides'][0]['content'])
 
+    def test_ego_taskspace_profile_mapping_and_non_intrusive_window_focus(self):
+        from unittest.mock import MagicMock
+        from common.ego_taskspace import resolve_ego_profile
+        from common.ego_screen import semantic_snapshot
+        from common import ubuntu_naver_browser
+        self.assertEqual(resolve_ego_profile('soultin'), 'Profile 3')
+        self.assertEqual(resolve_ego_profile(9334), 'Profile 3')
+        self.assertEqual(resolve_ego_profile(9440), 'Profile 3')
+        self.assertEqual(resolve_ego_profile('soul5373'), 'Profile 4')
+        self.assertEqual(resolve_ego_profile('yoon_master'), 'Profile 5')
+        self.assertEqual(resolve_ego_profile('adinfo0905'), 'Profile 6')
+        self.assertEqual(resolve_ego_profile('stone0747'), 'Profile 7')
+        self.assertEqual(resolve_ego_profile('default'), 'Default')
+
+        page = MagicMock()
+        page.evaluate.return_value = [{'role': 'button', 'label': 'font-size', 'x': 310, 'y': 92}]
+        snap = semantic_snapshot(page, 1280, 800)
+        self.assertEqual(len(snap), 1)
+        self.assertEqual(snap[0]['label'], 'font-size')
+
+        with patch.object(ubuntu_naver_browser, 'dismiss_stuck_dialogs'), \
+             patch.object(ubuntu_naver_browser, 'inspect_workflow_window', return_value={'status': 'observed', 'display': 'windows', 'browserPid': 1234}), \
+             patch.object(ubuntu_naver_browser, '_win_find_browser_hwnd') as find_hwnd, \
+             patch.object(ubuntu_naver_browser, 'urlopen', side_effect=OSError('no cdp')):
+            ubuntu_naver_browser.focus_workflow_window(9440)
+            find_hwnd.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

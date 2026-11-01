@@ -3,7 +3,7 @@ name: second-brain-index-moc
 target_models: [claude-opus-4-6, gpt-5.4, gemini-3.1-pro]
 hop_depth: 1
 freedom_tier: medium-template
-updated_at: "2026-11-01 15:49:36 KST"
+updated_at: "2026-11-01 16:33:17 KST"
 ---
 # 🧠 BaroLab 세컨드 브레인 1-Hop 마스터 길잡이 (Map of Content)
 
@@ -56,7 +56,9 @@ updated_at: "2026-11-01 15:49:36 KST"
 ---
 
 ## 4. 실행 환경·포트·스크립트 명세 (Anthropic Rule #7)
-- **전용 브라우저 (EGO / Chrome CDP)**: `http://127.0.0.1:9440` (절대 프로세스 강제 종료 금지)
+- **전용 브라우저 (EGO Lite v2.2.0 Native TaskSpace & CDP)**:
+  - 네이티브 스페이스 엔진: `dashboard/common/ego_taskspace.py` (`ego-browser.exe nodejs` + `Profile 3`~`Profile 7` 직결)
+  - 백그라운드 스페이스 작업 원칙: `SetForegroundWindow` 강제 화면 팝업 금지, 작업 완료 시 `await task.finish({ keep: [] })` 즉시 회수, 캡차·로그인 필요 시 `await task.handOff()`로 대표님께 인계
 - **통합 대시보드 & 기억 API 서버**: `http://127.0.0.1:8790` (`docker restart barolab-dashboard`)
 - **백그라운드 자율 워커**: `pythonw.exe -u -B -X utf8 -m dashboard.server.memory_worker`
 - **채널별 0-Token 실행 엔진**:

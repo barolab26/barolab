@@ -12,10 +12,12 @@ def visual_click(page, target, port, folder, description, before_click=None):
 
 
 def _visual_click(page, target, port, folder, description, before_click=None):
+    import os
     from common.collection_observability import write
     from common.ubuntu_naver_browser import focus_workflow_window
     folder = Path(folder);folder.mkdir(parents=True,exist_ok=True)
-    focus_workflow_window(port);page.bring_to_front()
+    focus_workflow_window(port)
+    if os.name != 'nt':page.bring_to_front()
     target.scroll_into_view_if_needed(timeout=10000)
     page.wait_for_timeout(200)
     try:
@@ -26,7 +28,8 @@ def _visual_click(page, target, port, folder, description, before_click=None):
     x, y = int(box['x'] + box['width'] / 2), int(box['y'] + box['height'] / 2)
     if before_click:before_click()
     write(folder/'click-attempt.json',{'x':x,'y':y,'status':'attempting'})
-    focus_workflow_window(port);page.bring_to_front()
+    focus_workflow_window(port)
+    if os.name != 'nt':page.bring_to_front()
     target.click(timeout=12000)
     try:
         page.screenshot(path=str(folder/'after.png'),scale='css')
@@ -81,8 +84,10 @@ class ScreenLocator:
     def click(self,*args,**kwargs):
         index=self.page._clicks;object.__setattr__(self.page,'_clicks',index+1)
         if not self.submit:
+            import os
             from common.ubuntu_naver_browser import focus_workflow_window
-            focus_workflow_window(self.page._port);self.page._page.bring_to_front()
+            focus_workflow_window(self.page._port)
+            if os.name != 'nt':self.page._page.bring_to_front()
             self.locator.scroll_into_view_if_needed(timeout=10000)
             self.locator.click(*args, **kwargs)
             self.page._page.wait_for_timeout(300)
@@ -130,7 +135,8 @@ def publish_with_screen(engine, original, account, url, answer, before_submit, f
         if text!=answer or not current:raise ValueError('Screen input is not the approved answer')
         from common.ubuntu_naver_browser import focus_workflow_window
         page=current[-1]
-        focus_workflow_window(port);page.bring_to_front()
+        focus_workflow_window(port)
+        if __import__('os').name != 'nt':page.bring_to_front()
         if not editor_focused(page):
             page.locator('.se-canvas .se-text-paragraph').first.click(timeout=10000)
             page.wait_for_timeout(200)

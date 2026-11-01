@@ -19,6 +19,12 @@ def benchmark_blog_screen(query, folder, *, resume=False):
     previous = load(receipt)
     if previous.get('query') == query and previous.get('status') == 'observed':
         return previous
+    try:
+        from common.ego_taskspace import find_ego_cli, native_benchmark_blog_screen
+        if find_ego_cli() is not None:
+            return native_benchmark_blog_screen(query, folder)
+    except Exception as exc:
+        logging.getLogger(__name__).warning('Native EGO TaskSpace benchmark fallback to CDP: %s', exc)
     binary, profile, _ = account_paths(9440)
     search_url = 'https://search.naver.com/search.naver?where=blog&query=' + quote(query)
     with sync_playwright() as playwright:

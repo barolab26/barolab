@@ -287,7 +287,27 @@ def browser_observe(row,args):
     allowed={p for project in row['permissions']['projects'] for p in ports.get(project,())}
     if type(port) is not int or port not in allowed:raise ValueError('Browser is outside the requested project scope')
     _,profile,_=account_paths(port);pid=process_identity(port,profile)
-    if pid is None:return {'status':'offline','port':port,'browserStarted':False}
+    if pid is None:
+        try:
+            from common.ego_taskspace import find_ego_cli, native_observe_space
+            if find_ego_cli() is not None:
+                obs = native_observe_space(port)
+                u = urlsplit(obs.get('url') or '')
+                tab_url = (u.scheme + '://' + u.netloc + u.path) if u.scheme in ('http', 'https') else ''
+                return {
+                    'port': port,
+                    'pid': None,
+                    'status': 'observed',
+                    'nativeTaskSpace': True,
+                    'profileId': obs.get('profileId'),
+                    'spaceId': obs.get('spaceId'),
+                    'tabs': [{'url': tab_url, 'controls': obs.get('controls', {}), 'snapshot': obs.get('snapshot', '')}] if tab_url else [],
+                    'windowMapping': {'status': 'observed', 'port': port, 'display': 'ego-taskspace'},
+                    'browserStarted': False,
+                }
+        except Exception:
+            pass
+        return {'status':'offline','port':port,'browserStarted':False}
     try:window=inspect_workflow_window(port)
     except (OSError,RuntimeError,ValueError,subprocess.SubprocessError) as exc:window={'status':'unavailable','errorType':type(exc).__name__}
     with sync_playwright() as p:
