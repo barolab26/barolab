@@ -3,102 +3,250 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BaroLab 앱 4종 비공개 테스트 참여 안내</title>
+  <title>BaroLab 앱 4종 30초 원스톱 비공개 테스트 참여</title>
   <link rel="stylesheet" href="/testers/testers.css">
+  <style>
+    .step-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 22px rgba(29, 78, 216, 0.2);
+    }
+    .step-banner h1 {
+      margin: 4px 0 8px;
+      font-size: 20px;
+      line-height: 1.34;
+    }
+    .step-banner p {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #e2e8f0;
+    }
+    .btn-group-join {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: #fde047;
+      color: #0f172a;
+      font-size: 17px;
+      font-weight: 900;
+      text-decoration: none;
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+      margin-bottom: 8px;
+    }
+    .progress-bar-box {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    .progress-pill {
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .dual-btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-store-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: #059669;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .check-done-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f766e;
+      cursor: pointer;
+      user-select: none;
+    }
+    .check-done-label input {
+      width: 18px;
+      height: 18px;
+    }
+    .remote-card.done-card {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+    @media (max-width: 480px) {
+      .dual-btn-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
   <main>
     <div class="top-nav">
       <a class="brand-pill" href="https://barolab-daily-apps.pages.dev/">← BaroLab 생활 앱</a>
-      <span class="mode-pill">비공개 테스트 참여 안내</span>
+      <span class="mode-pill">Google 그룹스 원클릭 테스트</span>
     </div>
 
-    <section class="account-alert" aria-labelledby="account-check-heading">
-      <span class="account-alert-badge">참여는 3단계로 진행합니다</span>
-      <h1 id="account-check-heading">테스터 이메일 등록 → 테스트 참여 → 설치</h1>
-      <p>먼저 휴대폰 Play 스토어에서 사용하는 <strong>Google 계정 이메일과 원하는 앱 이름</strong>을 아래 주소로 보내주세요. 등록 완료 안내를 받은 뒤, 같은 계정으로 원하는 앱의 <strong>[테스트 참여하기]</strong>를 누르고 Google Play에서 설치하면 됩니다. 앱 하나부터 참여하셔도 좋습니다. 비밀번호나 결제정보는 받지 않습니다.</p>
-      <p class="registration-contact"><a class="sub-link-btn" href="mailto:baro76650@gmail.com?subject=BaroLab%20%EB%B9%84%EA%B3%B5%EA%B0%9C%20%ED%85%8C%EC%8A%A4%ED%8A%B8%20%EC%B0%B8%EC%97%AC">테스터 등록 요청: baro76650@gmail.com</a></p>
+    <section class="step-banner" aria-labelledby="account-check-heading">
+      <span class="account-alert-badge">STEP 1 · 최초 1회 필수 (10초)</span>
+      <h1 id="account-check-heading">먼저 Google 그룹스에 [그룹 가입]을 눌러주세요</h1>
+      <p>휴대폰 <strong>Google Play 스토어에 로그인된 구글 계정</strong>으로 아래 노란 버튼을 눌러 <strong>[그룹 가입(Join group)]</strong>을 완료하면, 이메일 대기 없이 아래 앱 4종 설치 권한이 즉시 열립니다.</p>
+      <a class="btn-group-join" href="https://groups.google.com/g/barolab-testers" target="_blank" rel="noopener noreferrer">
+        👉 1단계: Google 테스터 그룹 1초 가입하기
+      </a>
+      <p style="margin:4px 0 0;font-size:12.5px;color:#cbd5e1;">※ 그룹 주소: <strong>barolab-testers@googlegroups.com</strong> (또는 이메일 수동 등록 요청: <a href="mailto:baro76650@gmail.com?subject=BaroLab%20%ED%85%8C%EC%8A%A4%ED%84%B0%20%EC%9D%B4%EB%A9%94%EC%9D%BC%20%EB%93%B1%EB%A1%9D" style="color:#fde047;">baro76650@gmail.com</a>)</p>
     </section>
 
-    <section class="remote-grid" aria-label="이메일 등록 후 앱별 비공개 테스트 참여">
+    <div class="progress-bar-box">
+      <span>STEP 2 · 앱 4종 연속 참여 및 설치 현황</span>
+      <span class="progress-pill" id="install-progress">0 / 4 완료</span>
+    </div>
+
+    <section class="remote-grid" aria-label="앱 4종 원클릭 비공개 테스트 참여">
       <!-- 1. 오늘의 성경말씀 -->
-      <article class="remote-card">
+      <article class="remote-card" id="card-harubible">
         <div class="remote-card-head">
           <div class="remote-title-wrap">
             <h2 class="remote-title">1. 오늘의 성경말씀</h2>
             <span class="remote-pkg">com.barolab.harubible</span>
           </div>
-          <span class="remote-ver">비공개 테스트</span>
+          <label class="check-done-label">
+            <input type="checkbox" onchange="toggleDone('harubible', this.checked)"> 설치완료
+          </label>
         </div>
-        <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.harubible" target="_blank" rel="noopener noreferrer">
-          1. 오늘의 성경말씀 테스트 참여하기
-        </a>
-        <p class="join-hint">등록 완료 안내를 받은 계정으로 <strong>[테스트 참여하기] → [Google Play에서 다운로드]</strong>를 선택하세요. 글자 크기 바꾸기, 말씀 듣기, 공유 화면 열기를 사용해 보고 불편한 점을 알려주세요.</p>
-        <div class="sub-links">
-          <a class="sub-link-btn" href="https://haru-malsseum.pages.dev/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        <div class="dual-btn-row">
+          <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.harubible" target="_blank" rel="noopener noreferrer" onclick="markDone('harubible')">
+            ① 테스터 되기 (웹)
+          </a>
+          <a class="btn-store-secondary" href="https://play.google.com/store/apps/details?id=com.barolab.harubible" target="_blank" rel="noopener noreferrer" onclick="markDone('harubible')">
+            ② Play 스토어 설치
+          </a>
         </div>
+        <p class="join-hint">①번을 눌러 <strong>[테스터 되기]</strong> 동의 후 ②번으로 <strong>Play 스토어에서 설치 및 1회 실행</strong>해 주세요. (14일간 삭제 없이 유지 필수)</p>
       </article>
 
       <!-- 2. 오늘의 안부 -->
-      <article class="remote-card">
+      <article class="remote-card" id="card-morningcard">
         <div class="remote-card-head">
           <div class="remote-title-wrap">
             <h2 class="remote-title">2. 오늘의 안부</h2>
             <span class="remote-pkg">com.barolab.morningcard</span>
           </div>
-          <span class="remote-ver">비공개 테스트</span>
+          <label class="check-done-label">
+            <input type="checkbox" onchange="toggleDone('morningcard', this.checked)"> 설치완료
+          </label>
         </div>
-        <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.morningcard" target="_blank" rel="noopener noreferrer">
-          2. 오늘의 안부 테스트 참여하기
-        </a>
-        <p class="join-hint">등록 완료 안내를 받은 계정으로 <strong>[테스트 참여하기] → [Google Play에서 다운로드]</strong>를 선택하세요. 인사말 카드 만들기와 공유 화면 열기를 사용해 보고 불편한 점을 알려주세요. 실제 전송은 하지 않으셔도 됩니다.</p>
-        <div class="sub-links">
-          <a class="sub-link-btn" href="https://barolab-daily-apps.pages.dev/greeting/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        <div class="dual-btn-row">
+          <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.morningcard" target="_blank" rel="noopener noreferrer" onclick="markDone('morningcard')">
+            ① 테스터 되기 (웹)
+          </a>
+          <a class="btn-store-secondary" href="https://play.google.com/store/apps/details?id=com.barolab.morningcard" target="_blank" rel="noopener noreferrer" onclick="markDone('morningcard')">
+            ② Play 스토어 설치
+          </a>
         </div>
+        <p class="join-hint">①번 <strong>[테스터 되기]</strong> 동의 후 ②번 <strong>Play 스토어에서 설치 및 1회 실행</strong>해 주세요.</p>
       </article>
 
       <!-- 3. 큰글씨 돋보기 -->
-      <article class="remote-card">
+      <article class="remote-card" id="card-biglens">
         <div class="remote-card-head">
           <div class="remote-title-wrap">
             <h2 class="remote-title">3. 큰글씨 돋보기</h2>
             <span class="remote-pkg">com.barolab.biglens</span>
           </div>
-          <span class="remote-ver">비공개 테스트</span>
+          <label class="check-done-label">
+            <input type="checkbox" onchange="toggleDone('biglens', this.checked)"> 설치완료
+          </label>
         </div>
-        <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.biglens" target="_blank" rel="noopener noreferrer">
-          3. 큰글씨 돋보기 테스트 참여하기
-        </a>
-        <p class="join-hint">등록 완료 안내를 받은 계정으로 <strong>[테스트 참여하기] → [Google Play에서 다운로드]</strong>를 선택하세요. 제품 포장처럼 개인정보 없는 작은 글씨를 확대하고 손전등을 켜 보세요. 글씨가 잘 보이는지 알려주세요.</p>
-        <div class="sub-links">
-          <a class="sub-link-btn" href="https://barolab-daily-apps.pages.dev/magnifier/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        <div class="dual-btn-row">
+          <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.biglens" target="_blank" rel="noopener noreferrer" onclick="markDone('biglens')">
+            ① 테스터 되기 (웹)
+          </a>
+          <a class="btn-store-secondary" href="https://play.google.com/store/apps/details?id=com.barolab.biglens" target="_blank" rel="noopener noreferrer" onclick="markDone('biglens')">
+            ② Play 스토어 설치
+          </a>
         </div>
+        <p class="join-hint">①번 <strong>[테스터 되기]</strong> 동의 후 ②번 <strong>Play 스토어에서 설치 및 1회 실행</strong>해 주세요.</p>
       </article>
 
       <!-- 4. 말로 장보기 -->
-      <article class="remote-card">
+      <article class="remote-card" id="card-voicebasket">
         <div class="remote-card-head">
           <div class="remote-title-wrap">
             <h2 class="remote-title">4. 말로 장보기</h2>
             <span class="remote-pkg">com.barolab.voicebasket</span>
           </div>
-          <span class="remote-ver">비공개 테스트</span>
+          <label class="check-done-label">
+            <input type="checkbox" onchange="toggleDone('voicebasket', this.checked)"> 설치완료
+          </label>
         </div>
-        <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.voicebasket" target="_blank" rel="noopener noreferrer">
-          4. 말로 장보기 테스트 참여하기
-        </a>
-        <p class="join-hint">등록 완료 안내를 받은 계정으로 <strong>[테스트 참여하기] → [Google Play에서 다운로드]</strong>를 선택하세요. 예시 장보기 목록을 음성으로 입력하고 수정·완료 처리해 보세요. 인식이나 조작에서 불편한 점을 알려주세요.</p>
-        <div class="sub-links">
-          <a class="sub-link-btn" href="https://barolab-daily-apps.pages.dev/shopping/" target="_blank" rel="noopener noreferrer">앱 안내</a>
+        <div class="dual-btn-row">
+          <a class="btn-install-primary" href="https://play.google.com/apps/testing/com.barolab.voicebasket" target="_blank" rel="noopener noreferrer" onclick="markDone('voicebasket')">
+            ① 테스터 되기 (웹)
+          </a>
+          <a class="btn-store-secondary" href="https://play.google.com/store/apps/details?id=com.barolab.voicebasket" target="_blank" rel="noopener noreferrer" onclick="markDone('voicebasket')">
+            ② Play 스토어 설치
+          </a>
         </div>
+        <p class="join-hint">①번 <strong>[테스터 되기]</strong> 동의 후 ②번 <strong>Play 스토어에서 설치 및 1회 실행</strong>해 주세요.</p>
       </article>
     </section>
 
     <footer class="tip-box">
-      <div><strong>참여 후에는:</strong> 테스트 참여 상태를 14일 이상 유지하면서 앱을 여러 차례 사용해 주세요. 첫 사용·중간·마지막에 짧은 의견을 위 이메일로 보내주시면 도움이 됩니다. 테스트를 위해 광고 클릭, 상품 구매, 별점·공개 리뷰 작성은 필요하지 않습니다.</div>
-      <p><strong>기존 내부 테스터:</strong> 같은 앱의 내부 테스트에 참여 중이면 먼저 내부 테스트 참여를 종료한 뒤 비공개 테스트에 참여해 주세요. 앱을 여러 개 선택했다면 각 앱에서 참여하기를 눌러야 합니다.</p>
-      <p><strong>참여 페이지가 열리지 않으면:</strong> Play 스토어 계정이 등록된 이메일과 같은지 확인한 뒤, 앱 이름과 오류 내용을 이메일로 알려주세요. 명단 등록·테스트 참여·설치·14일 유지 여부는 각각 확인합니다.</p>
+      <div><strong>14일 유지 안내:</strong> 구글 플레이 출시 심사 규정에 따라 <strong>설치 후 14일 동안 앱을 삭제하지 않고 유지</strong>해 주셔야 정상 카운트됩니다. 앱 용량은 각 2~5MB 내외의 초경량이며 회원가입·결제·개인정보 수집이 전혀 없습니다.</div>
+      <p><strong>트러블슈팅:</strong> 만약 "앱을 사용할 수 없음" 화면이 뜨면 ① 상단 노란 버튼(Google 그룹스)에 Play 스토어와 동일한 구글 계정으로 가입되었는지 확인하거나, ② 기존 내부 테스터이신 경우 내부 테스트 참여를 먼저 종료한 뒤 다시 눌러주세요.</p>
     </footer>
   </main>
+
+  <script>
+    var APPS = ['harubible', 'morningcard', 'biglens', 'voicebasket'];
+    function syncProgress() {
+      var doneCount = 0;
+      APPS.forEach(function(id) {
+        var done = localStorage.getItem('barolab_test_' + id) === '1';
+        var card = document.getElementById('card-' + id);
+        if (card) {
+          card.classList.toggle('done-card', done);
+          var cb = card.querySelector('input[type="checkbox"]');
+          if (cb) cb.checked = done;
+        }
+        if (done) doneCount++;
+      });
+      var pill = document.getElementById('install-progress');
+      if (pill) pill.textContent = doneCount + ' / 4 완료';
+    }
+    function toggleDone(id, checked) {
+      localStorage.setItem('barolab_test_' + id, checked ? '1' : '0');
+      syncProgress();
+    }
+    function markDone(id) {
+      localStorage.setItem('barolab_test_' + id, '1');
+      syncProgress();
+    }
+    syncProgress();
+  </script>
 </body>
 </html>
