@@ -171,9 +171,72 @@ def check_and_recover_server() -> Dict[str, Any]:
             detail = "8790 대시보드 서버 자동 재기동 완료" if recovered else "8790 서버 기동 시도 완료"
         except Exception as exc:
             detail = f"8790 서버 자동 기동 실패: {type(exc).__name__}"
+
+    host_worker_running = True
+    host_worker_recovered = False
+    telemetry_refreshed = False
+    if os.name == "nt" and not Path("/.dockerenv").exists():
+        was_worker_running = is_process_running_match(r"dashboard\.server\.memory_worker")
+        host_worker_running = was_worker_running
+        if not host_worker_running:
+            try:
+                subprocess.run(
+                    ["schtasks", "/Run", "/TN", "BaroLab-Dashboard-Worker"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=6,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                time.sleep(1.5)
+                host_worker_running = is_process_running_match(r"dashboard\.server\.memory_worker")
+            except Exception:
+                pass
+        if not host_worker_running:
+            try:
+                pythonw = Path(sys.executable).with_name("pythonw.exe")
+                exe = str(pythonw if pythonw.exists() else Path(sys.executable))
+                child_env = dict(
+                    os.environ,
+                    PYTHONPATH=os.pathsep.join([str(SERVER_DIR), str(ROOT / "dashboard"), str(ROOT), os.environ.get("PYTHONPATH", "")]),
+                    PYTHONUTF8="1",
+                    PYTHONIOENCODING="utf-8",
+                )
+                subprocess.Popen(
+                    [exe, "-u", "-B", "-X", "utf8", "-m", "dashboard.server.memory_worker"],
+                    cwd=str(ROOT),
+                    env=child_env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                time.sleep(1.2)
+                host_worker_running = is_process_running_match(r"dashboard\.server\.memory_worker")
+            except Exception:
+                pass
+        if not was_worker_running and host_worker_running:
+            host_worker_recovered = True
+            recovered = True
+            detail += " · Windows 호스트 memory_worker(실시간 구독 한도 수집기) 자동 재기동 완료"
+        try:
+            host_telem_path = DATA_DIR / "host_telemetry.json"
+            host_telem = load_json(host_telem_path, {})
+            codex_checked = float((host_telem.get("codexQuota") or {}).get("checkedAt") or 0)
+            agy_checked = float((host_telem.get("agy") or {}).get("checkedAt") or 0)
+            oldest_checked = min(codex_checked, agy_checked) if (codex_checked and agy_checked) else 0
+            if time.time() - oldest_checked > 180:
+                from server.cockpit_telemetry import RemoteTelemetry
+                RemoteTelemetry(ROOT).collect_once(include_credits=True)
+                telemetry_refreshed = True
+        except Exception:
+            pass
+
     return {
         "port8790": port_8790,
         "port8791": port_8791,
+        "hostWorkerRunning": host_worker_running,
+        "hostWorkerRecovered": host_worker_recovered,
+        "telemetryRefreshed": telemetry_refreshed,
         "recovered": recovered,
         "detail": detail,
     }
@@ -637,6 +700,7 @@ def sync_data_to_nas() -> Dict[str, Any]:
         'revenue.json', 'collection-health.json', 'collection-watchdog.json',
         'metrics-runtime.json', 'kin-automation-state.json', 'kin-measurement.json',
         'threads-measurement.json', 'cf-retry-runtime.json', 'codex-runtime.json',
+        'host_telemetry.json',
     }
     try:
         import shutil

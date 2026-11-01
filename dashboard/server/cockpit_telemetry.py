@@ -88,7 +88,8 @@ def codex_quota():
     slots = list_codex_account_slots()
     rot = codex_rotation_state()
     call_counts = rot.get('callCounts') or {}
-    last_used = rot.get('lastUsedAccount')
+    active_acc = rot.get('activeAccount')
+    last_used = active_acc or rot.get('lastUsedAccount')
 
     account_rows = []
     primary_buckets = {}
@@ -328,7 +329,8 @@ def agy_quota():
     homes = list_account_homes()
     rot = rotation_state()
     call_counts = rot.get('callCounts') or {}
-    last_used = rot.get('lastUsedAccount')
+    active_acc = rot.get('activeAccount')
+    last_used = active_acc or rot.get('lastUsedAccount')
     account_rows = []
     primary_groups = []
     cflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
@@ -346,7 +348,8 @@ def agy_quota():
                     cwd=folder, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding='utf-8', timeout=20,
                     creationflags=cflags)
             if result.returncode:
-                account_rows.append(dict(email=email, status='조회 실패 · 로그인 확인', usable=False, checkedAt=time.time()))
+                account_rows.append(dict(email=email, status='조회 실패 · 로그인 확인', usable=False,
+                    isLastUsed=(email == last_used), callCount=int(call_counts.get(email, 0)), checkedAt=time.time()))
                 continue
             groups = _parse_agy_usage_output(result.stdout)
             if not primary_groups:
@@ -362,49 +365,208 @@ def agy_quota():
                 checkedAt=time.time(),
             ))
         except (OSError, ValueError, TypeError, KeyError, AttributeError, subprocess.SubprocessError):
-            account_rows.append(dict(email=email, status='조회 지연 · 로그인 확인', usable=False, checkedAt=time.time()))
+            account_rows.append(dict(email=email, status='조회 지연 · 로그인 확인', usable=False,
+                isLastUsed=(email == last_used), callCount=int(call_counts.get(email, 0)), checkedAt=time.time()))
     if primary_groups:
         return dict(status='collected', groups=primary_groups, accounts=account_rows, lastUsedAccount=last_used, checkedAt=time.time())
     return dict(status='조회 지연 · CLI 로그인 확인', accounts=account_rows, checkedAt=time.time())
 
 
+def _merge_account_quotas(new_q, prev_q, payload_key):
+    """Preserve last-known good per-account quota buckets/groups if one account transiently times out."""
+    if not isinstance(new_q, dict):
+        return prev_q if isinstance(prev_q, dict) else dict(status='조회 연결 대기', checkedAt=time.time())
+    if new_q.get('status') != 'collected' and isinstance(prev_q, dict) and prev_q.get('status') == 'collected':
+        return prev_q
+    prev_accs = {a.get('email'): a for a in (prev_q or {}).get('accounts', []) if isinstance(a, dict) and a.get('email')}
+    merged_accs = []
+    for acc in new_q.get('accounts', []):
+        if not isinstance(acc, dict):
+            continue
+        email = acc.get('email')
+        prev_a = prev_accs.get(email)
+        if not acc.get(payload_key) and isinstance(prev_a, dict) and prev_a.get(payload_key):
+            acc = {
+                **prev_a,
+                'isLastUsed': acc.get('isLastUsed', prev_a.get('isLastUsed', False)),
+                'callCount': acc.get('callCount', prev_a.get('callCount', 0)),
+                'staleFallback': True,
+            }
+        merged_accs.append(acc)
+    if merged_accs:
+        new_q = {**new_q, 'accounts': merged_accs}
+    return new_q
+
+
+def _apply_live_rotation_counts(data):
+    """Fast (<1ms) overlay of rotation.json callCounts & lastUsedAccount onto cached quota objects."""
+    if Path('/.dockerenv').exists():
+        return data
+    out = dict(data)
+    try:
+        from common.codex_cli import codex_rotation_state
+        c_rot = codex_rotation_state()
+        c_counts = c_rot.get('callCounts') or {}
+        c_last = c_rot.get('activeAccount') or c_rot.get('lastUsedAccount')
+        cq = dict(out.get('codexQuota') or {})
+        if cq.get('accounts'):
+            cq['lastUsedAccount'] = c_last or cq.get('lastUsedAccount')
+            cq['accounts'] = [
+                {**a, 'callCount': int(c_counts.get(a.get('email'), a.get('callCount', 0))),
+                 'isLastUsed': (a.get('email') == cq['lastUsedAccount'])}
+                for a in cq['accounts'] if isinstance(a, dict)
+            ]
+            out['codexQuota'] = cq
+    except Exception:
+        pass
+    try:
+        from common.agy_cli import rotation_state
+        a_rot = rotation_state()
+        a_counts = a_rot.get('callCounts') or {}
+        a_last = a_rot.get('activeAccount') or a_rot.get('lastUsedAccount')
+        aq = dict(out.get('agy') or {})
+        if aq.get('accounts'):
+            aq['lastUsedAccount'] = a_last or aq.get('lastUsedAccount')
+            aq['accounts'] = [
+                {**a, 'callCount': int(a_counts.get(a.get('email'), a.get('callCount', 0))),
+                 'isLastUsed': (a.get('email') == aq['lastUsedAccount'])}
+                for a in aq['accounts'] if isinstance(a, dict)
+            ]
+            out['agy'] = aq
+    except Exception:
+        pass
+    return out
+
+
 class RemoteTelemetry:
     def __init__(self,root=ROOT,hosts=('127.0.0.1',)):
-        self.root=root;self.hosts=hosts;self.stop=threading.Event();self.lock=threading.Lock();self.data={};self.thread=None
+        self.root=Path(root);self.hosts=hosts;self.stop=threading.Event();self.lock=threading.Lock();self.data={};self.thread=None
+        self.host_file=self.root/'dashboard/data/host_telemetry.json'
+        self._load_persisted()
+
+    def _load_persisted(self):
+        for candidate in (self.host_file, self.root/'dashboard/data/live_snapshot.json'):
+            try:
+                if not candidate.is_file():
+                    continue
+                raw = json.loads(candidate.read_text(encoding='utf-8'))
+                if candidate.name == 'live_snapshot.json':
+                    quotas = (raw.get('brains') or {}).get('quotas') or {}
+                    fleet = raw.get('fleet') or []
+                    if quotas or fleet:
+                        with self.lock:
+                            self.data = {**quotas, 'fleet': fleet, **self.data}
+                elif isinstance(raw, dict) and (raw.get('codexQuota') or raw.get('agy')):
+                    with self.lock:
+                        self.data = {**raw, **self.data}
+                        break
+            except Exception:
+                continue
+
+    def _persist_host_telemetry(self):
+        if Path('/.dockerenv').exists():
+            return
+        try:
+            from common.dashboard_jobs import write
+            with self.lock:
+                payload = {**self.data, 'updatedAt': time.time()}
+            write(self.host_file, payload)
+        except Exception:
+            pass
+
     def collect_once(self,include_credits=True):
+        in_docker = Path('/.dockerenv').exists()
+        if in_docker:
+            self._load_persisted()
+            if include_credits:
+                try:
+                    values = env_values(self.root)
+                except (OSError, ImportError):
+                    values = dict(os.environ)
+                try:
+                    credit = credit_probe(values)
+                except Exception:
+                    credit = None
+                try:
+                    kie = provider_credit_probe('kie', values)
+                except Exception:
+                    kie = None
+                with self.lock:
+                    if credit and credit.get('status') == 'collected':
+                        self.data['openrouter'] = credit
+                    if kie and kie.get('status') == 'collected':
+                        self.data['kie'] = kie
+            return self.get()
+
         with ThreadPoolExecutor(max_workers=6,thread_name_prefix='cockpit-probe') as pool:
-            fleet=list(pool.map(lambda row:fleet_probe(row,self.hosts),FLEET))
-            with self.lock:self.data={**self.data,'fleet':fleet}
+            try:
+                fleet=list(pool.map(lambda row:fleet_probe(row,self.hosts),FLEET))
+                with self.lock:self.data={**self.data,'fleet':fleet}
+            except Exception:
+                pass
             if include_credits:
                 try:values=env_values(self.root)
                 except (OSError,ImportError):values=dict(os.environ)
                 cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
                 kp=pool.submit(provider_credit_probe,'kie',values);jp=pool.submit(provider_credit_probe,'jev',values)
-                credit=cf.result()
-                try:quota=cq.result()
-                except (OSError,RuntimeError,ValueError,KeyError,queue.Empty,subprocess.SubprocessError):quota=dict(status='조회 연결 대기',checkedAt=time.time())
-                agy=aq.result()
-                with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy,'kie':kp.result(),'jev':jp.result()}
+                with self.lock:
+                    prev_data = dict(self.data)
+                try:credit=cf.result(timeout=12)
+                except Exception:credit=prev_data.get('openrouter') or dict(status='연결 지연',checkedAt=time.time())
+                try:quota=_merge_account_quotas(cq.result(timeout=25), prev_data.get('codexQuota'), 'buckets')
+                except Exception:quota=prev_data.get('codexQuota') or dict(status='조회 연결 대기',checkedAt=time.time())
+                try:agy=_merge_account_quotas(aq.result(timeout=45), prev_data.get('agy'), 'groups')
+                except Exception:agy=prev_data.get('agy') or dict(status='조회 지연 · CLI 로그인 확인',checkedAt=time.time())
+                try:kie_res=kp.result(timeout=10)
+                except Exception:kie_res=prev_data.get('kie') or dict(status='잔액 조회 지연',checkedAt=time.time())
+                try:jev_res=jp.result(timeout=10)
+                except Exception:jev_res=prev_data.get('jev') or dict(status='잔액 미수집',checkedAt=time.time())
+                with self.lock:
+                    self.data=_apply_live_rotation_counts({**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy,'kie':kie_res,'jev':jev_res})
+                self._persist_host_telemetry()
         return self.get()
+
     def run(self):
         credits_at=0
+        in_docker = Path('/.dockerenv').exists()
         with ThreadPoolExecutor(max_workers=6,thread_name_prefix='cockpit-probe') as pool:
             while not self.stop.is_set():
-                fleet=list(pool.map(lambda row:fleet_probe(row,self.hosts),FLEET))
-                with self.lock:self.data={**self.data,'fleet':fleet}
-                if time.monotonic()-credits_at>=60:
-                    try:values=env_values(self.root)
-                    except (OSError,ImportError):values=dict(os.environ)
-                    cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
-                    kp=pool.submit(provider_credit_probe,'kie',values);jp=pool.submit(provider_credit_probe,'jev',values)
-                    credit=cf.result()
-                    try:quota=cq.result()
-                    except (OSError,RuntimeError,ValueError,KeyError,queue.Empty,subprocess.SubprocessError):quota=dict(status='조회 연결 대기',checkedAt=time.time())
-                    agy=aq.result()
-                    with self.lock:self.data={**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy,'kie':kp.result(),'jev':jp.result()}
-                    credits_at=time.monotonic()
+                try:
+                    if in_docker:
+                        self._load_persisted()
+                        self.stop.wait(5)
+                        continue
+                    try:
+                        fleet=list(pool.map(lambda row:fleet_probe(row,self.hosts),FLEET))
+                        with self.lock:
+                            self.data=_apply_live_rotation_counts({**self.data,'fleet':fleet})
+                    except Exception:
+                        pass
+                    if time.monotonic()-credits_at>=30:
+                        try:values=env_values(self.root)
+                        except (OSError,ImportError):values=dict(os.environ)
+                        cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
+                        kp=pool.submit(provider_credit_probe,'kie',values);jp=pool.submit(provider_credit_probe,'jev',values)
+                        with self.lock:
+                            prev_data = dict(self.data)
+                        try:credit=cf.result(timeout=12)
+                        except Exception:credit=prev_data.get('openrouter') or dict(status='연결 지연',checkedAt=time.time())
+                        try:quota=_merge_account_quotas(cq.result(timeout=25), prev_data.get('codexQuota'), 'buckets')
+                        except Exception:quota=prev_data.get('codexQuota') or dict(status='조회 연결 대기',checkedAt=time.time())
+                        try:agy=_merge_account_quotas(aq.result(timeout=45), prev_data.get('agy'), 'groups')
+                        except Exception:agy=prev_data.get('agy') or dict(status='조회 지연 · CLI 로그인 확인',checkedAt=time.time())
+                        try:kie_res=kp.result(timeout=10)
+                        except Exception:kie_res=prev_data.get('kie') or dict(status='잔액 조회 지연',checkedAt=time.time())
+                        try:jev_res=jp.result(timeout=10)
+                        except Exception:jev_res=prev_data.get('jev') or dict(status='잔액 미수집',checkedAt=time.time())
+                        with self.lock:
+                            self.data=_apply_live_rotation_counts({**self.data,'openrouter':credit,'codexQuota':quota,'agy':agy,'kie':kie_res,'jev':jev_res})
+                        credits_at=time.monotonic()
+                    self._persist_host_telemetry()
+                except Exception:
+                    pass
                 self.stop.wait(5)
     def start(self):
         self.thread=threading.Thread(target=self.run,name='cockpit-remote',daemon=True);self.thread.start()
     def get(self):
-        with self.lock:return dict(self.data)
+        with self.lock:return _apply_live_rotation_counts(dict(self.data))

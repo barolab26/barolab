@@ -108,6 +108,13 @@ def stalled_actions(progress, now):
 
 
 def main():
+    try:
+        from server.mission_control import Collector
+        host_collector = Collector()
+        host_collector.start()
+    except Exception:
+        host_collector = None
+
     from common.hermes_memory import _store
     from common.llm_client import process_verified_work_once
     from server.project_monitor import sample_project_health_once, process_project_monitor_once, process_project_feedback_once
@@ -156,13 +163,6 @@ def main():
                 finally:
                     mark(threading.current_thread().name, 'idle')
             stopped.wait(interval)
-
-    try:
-        from server.mission_control import Collector
-        host_collector = Collector()
-        host_collector.start()
-    except Exception:
-        host_collector = None
 
     # Observation remains responsive while bounded model calls or learning run.
     observers = [

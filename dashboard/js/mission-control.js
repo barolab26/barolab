@@ -182,15 +182,24 @@
     const brains = snapshot.brains || {};
     const quotas = brains.quotas || {};
     const usage = brains.usage || {};
-    const byModel = Object.values(usage.byModel || {});
+    const isTodayUsage = !usage.date || !snapshot.date || usage.date === snapshot.date;
+    const byModel = isTodayUsage ? Object.values(usage.byModel || {}) : [];
     const totalCalls = byModel.reduce((s, m) => s + (m.calls || 0), 0);
     const totalTokens = byModel.reduce((s, m) => s + (m.inputTokens || 0) + (m.outputTokens || 0), 0);
     const kieBal = quotas.kie?.balance;
+    const checkedTs = Math.max(quotas.codexQuota?.checkedAt || 0, quotas.agy?.checkedAt || 0);
+    const checkedTimeStr = checkedTs > 0
+      ? new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date(checkedTs * 1000))
+      : '';
+    const ageMin = checkedTs > 0 ? Math.floor((Date.now() / 1000 - checkedTs) / 60) : null;
     const summaryParts = [
       `오늘 ${totalCalls.toLocaleString('ko-KR')}회`,
       `${(totalTokens / 1000000).toFixed(2)}M tok`
     ];
     if (typeof kieBal === 'number') summaryParts.push(`KIE ${kieBal.toFixed(1)}C`);
+    if (checkedTimeStr) {
+      summaryParts.push(ageMin !== null && ageMin >= 5 ? `⚠️ ${checkedTimeStr} (${ageMin}분 전)` : `🟢 ${checkedTimeStr} 조회`);
+    }
     text('bento-subscription-summary', summaryParts.join(' · '));
 
     const host = document.getElementById('bento-subscription-quotas');

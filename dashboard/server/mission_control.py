@@ -413,17 +413,26 @@ class Collector:
         data['agendaControl']=self.read_agenda()
         remote_data=dict(self.remote.get() or {})
         in_docker=Path('/.dockerenv').exists()
+        host_telem=self.read('dashboard/data/host_telemetry.json')
+        if isinstance(host_telem,dict) and host_telem:
+            for qk in ('codexQuota','agy','openrouter','kie','jev'):
+                hv=host_telem.get(qk)
+                rv=remote_data.get(qk)
+                if isinstance(hv,dict) and (in_docker or not isinstance(rv,dict) or rv.get('status')!='collected' or float(hv.get('checkedAt') or 0)>float(rv.get('checkedAt') or 0)):
+                    remote_data[qk]=hv
+            if (in_docker or not sum(1 for b in (remote_data.get('fleet') or []) if isinstance(b,dict) and b.get('online'))) and host_telem.get('fleet'):
+                remote_data['fleet']=host_telem['fleet']
         fleet_online=sum(1 for b in (remote_data.get('fleet') or []) if isinstance(b,dict) and b.get('online'))
         if in_docker or fleet_online==0 or not remote_data.get('codexQuota') or not remote_data.get('agy'):
             prior_snap=self.read('dashboard/data/live_snapshot.json')
-            if (in_docker or fleet_online==0) and prior_snap.get('fleet'):
+            if (in_docker or fleet_online==0) and not remote_data.get('fleet') and prior_snap.get('fleet'):
                 remote_data['fleet']=prior_snap['fleet']
             if (in_docker or not any(self.ports.values())) and prior_snap.get('ports'):
                 self.ports={int(k) if str(k).isdigit() else k:v for k,v in prior_snap['ports'].items()}
                 data['ports']=dict(self.ports)
             prior_quotas=(prior_snap.get('brains') or {}).get('quotas') or {}
             for qk,qv in prior_quotas.items():
-                if (in_docker or not remote_data.get(qk)) and qv:
+                if not remote_data.get(qk) and qv:
                     remote_data[qk]=qv
         data.update(events=events,remote=remote_data,timeline=business_timeline(events,cf,kin,data['revenue'],now))
         data['kinOperations']=self.operation_states('kin.sqlite3','automation_slots',now.date().isoformat(),True)
@@ -464,16 +473,19 @@ class Collector:
         with self.lock:self.snapshot=data
 
     def run(self):
+        reconcile_at=0
         while not self.stop.is_set():
             try:
-                try:
-                    from collectors import naver_public
-                    res_pub = naver_public.reconcile(force=False)
-                    if isinstance(res_pub, dict) and res_pub.get('updated', 0) > 0:
-                        from common import channel_parameters
-                        channel_parameters.monitor()
-                except Exception:
-                    pass
+                if time.monotonic()-reconcile_at>=30:
+                    reconcile_at=time.monotonic()
+                    try:
+                        from collectors import naver_public
+                        res_pub = naver_public.reconcile(force=False)
+                        if isinstance(res_pub, dict) and res_pub.get('updated', 0) > 0:
+                            from common import channel_parameters
+                            channel_parameters.monitor()
+                    except Exception:
+                        pass
                 if Path('/.dockerenv').exists() and (self.root/'dashboard/data/live_snapshot.json').exists() and (time.time() - (self.root/'dashboard/data/live_snapshot.json').stat().st_mtime) < 5: self.stop.wait(1); continue
                 self.collect()
                 from common.dashboard_jobs import write
