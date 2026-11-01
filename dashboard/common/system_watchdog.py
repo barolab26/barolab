@@ -182,13 +182,13 @@ def check_and_recover_server() -> Dict[str, Any]:
 def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
     """Verify native EGO Lite profiles on Windows (single-browser TaskSpace mode) or dedicated CDP ports on Linux."""
     from common.ubuntu_naver_browser import ensure_account, account_paths, process_identity, listener_owner
-    from common.ego_taskspace import find_ego_cli, list_profiles_and_spaces, resolve_ego_profile
+    from common.ego_taskspace import find_ego_cli, ensure_persistent_ego_spaces, resolve_ego_profile
     results = {}; recovered_ports = []; failed_ports = []
     ego_profiles_available = set()
     use_native_ego = os.name == "nt" and find_ego_cli() is not None
     if use_native_ego:
         try:
-            meta = list_profiles_and_spaces(timeout=10)
+            meta = ensure_persistent_ego_spaces(timeout=35)
             if meta.get("ok"):
                 ego_profiles_available = {
                     str(p.get("id") or p.get("path") or p.get("name") or "")

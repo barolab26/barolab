@@ -79,10 +79,11 @@ def run_ego_mjs(script_source: str, *, timeout: int = 60, result_prefix: str = "
     if not ego_cli:
         raise RuntimeError("ego-browser CLI is not available on this host")
 
+    wrapped_source = f"async function __barolabRun() {{\n{script_source}\n}}\nawait __barolabRun();\n"
     cflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     proc = subprocess.run(
         [str(ego_cli), "nodejs"],
-        input=script_source,
+        input=wrapped_source,
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -119,6 +120,46 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
   ok: true,
   profiles: profList,
   taskSpaces: spaces || []
+}));
+"""
+    return run_ego_mjs(script, timeout=timeout)
+
+
+def ensure_persistent_ego_spaces(timeout: int = 45) -> dict:
+    """Ensure all 5 BaroLab account Spaces stay open inside the user's main EGO Lite browser."""
+    script = """
+const TARGET_SPACES = [
+  { account: "soultin", name: "barolab-soultin", profileId: "Profile 3", url: "https://blog.naver.com/mustpickinfo" },
+  { account: "soul5373", name: "barolab-soul5373", profileId: "Profile 4", url: "https://adpost.naver.com/main" },
+  { account: "yoon_master", name: "barolab-yoon_master", profileId: "Profile 5", url: "https://blog.naver.com/yoonviews" },
+  { account: "adinfo0905", name: "barolab-kin-adinfo0905", profileId: "Profile 6", url: "https://kin.naver.com/" },
+  { account: "stone0747", name: "barolab-kin-stone0747", profileId: "Profile 7", url: "https://kin.naver.com/" }
+];
+const existing = await listTaskSpaces();
+const opened = [];
+for (const cfg of TARGET_SPACES) {
+  const found = Array.isArray(existing) ? existing.find(s => s && s.name === cfg.name) : null;
+  const task = found ? await taskSpace(cfg.name) : await taskSpace(cfg.name, { profileId: cfg.profileId });
+  const page = task.page("p1");
+  const curUrl = await page.url().catch(() => "");
+  if (!curUrl || curUrl === "about:blank" || curUrl.startsWith("chrome://")) {
+    await page.goto(cfg.url, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+  }
+  opened.push({
+    account: cfg.account,
+    spaceName: cfg.name,
+    spaceId: task.spaceId,
+    profileId: cfg.profileId
+  });
+}
+const profRaw = await profiles();
+const profList = Array.isArray(profRaw) ? profRaw : (profRaw?.profiles || []);
+const spaces = await listTaskSpaces();
+console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
+  ok: true,
+  profiles: profList,
+  taskSpaces: Array.isArray(spaces) ? spaces : [],
+  opened
 }));
 """
     return run_ego_mjs(script, timeout=timeout)
@@ -179,7 +220,9 @@ def handoff_to_ceo(account_or_port: str | int, url: str, reason: str, space_labe
     profile_id = resolve_ego_profile(account_or_port)
     space_name = f"{space_label}-{profile_id.replace(' ', '')}"
     script = f"""
-const task = await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
+const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 const page = task.page("p1");
 await page.goto({json.dumps(url)}, {{ waitUntil: "domcontentloaded", timeout: 20000 }}).catch(() => {{}});
 const finalUrl = await page.url();
@@ -204,7 +247,9 @@ def native_observe_space(account_or_port: str | int, url: str | None = None, tim
     profile_id = resolve_ego_profile(account_or_port)
     space_name = f"barolab-observe-{profile_id.replace(' ', '-').lower()}"
     script = f"""
-const task = await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
+const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 try {{
   const page = task.page("p1");
   const targetUrl = {json.dumps(url)};
@@ -271,7 +316,9 @@ const searchUrl = {json.dumps(search_url)};
 const benchDir = {json.dumps(bench_dir_posix)};
 const spaceName = {json.dumps(space_name)};
 
-const task = await taskSpace(spaceName, {{ profileId: "Profile 3" }});
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === spaceName) : null;
+const task = found ? await taskSpace(spaceName) : await taskSpace(spaceName, {{ profileId: "Profile 3" }});
 const turns = [];
 const screenshots = [];
 try {{
@@ -484,3 +531,358 @@ try {{
         },
     )
     return result
+
+
+def native_kin_fetch_page_state(account: str, url: str, *, load_all_answers: bool = False) -> dict:
+    """Read a Naver KnowledgeIn question/answer page inside the main EGO Lite browser's native TaskSpace."""
+    profile_id = resolve_ego_profile(account)
+    space_name = f"barolab-kin-{account}"
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
+const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+try {{
+  const page = task.page("p1");
+  await page.goto("https://kin.naver.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  const loginCheck = await page.evaluate(() => {{
+    const el = document.querySelector(".my_service .user_id");
+    return {{ url: location.href, userId: el ? el.innerText.trim() : null }};
+  }});
+  if (loginCheck.url.includes("nid.naver.com") || loginCheck.userId !== {json.dumps(account)}) {{
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "LoginRequiredError",
+      message: "Logged-in KnowledgeIn identity does not match authorized account",
+      observedUserId: loginCheck.userId,
+      url: loginCheck.url
+    }}));
+    return;
+  }}
+
+  await page.goto({json.dumps(url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  await page.waitForTimeout(400);
+
+  const inspectState = async () => {{
+    return await page.evaluate(() => {{
+      const dialogs = [];
+      for (const sel of ["#notAnswerableLayer", "#deferredExpertLayer", "[role=\\"dialog\\"]"]) {{
+        for (const el of document.querySelectorAll(sel)) {{
+          if (el.getClientRects().length > 0) {{
+            const msg = (el.innerText || "").trim();
+            if (msg) dialogs.push({{ selector: sel, message: msg }});
+          }}
+        }}
+      }}
+      const qDetail = document.querySelector(".questionDetail");
+      return {{
+        url: location.href,
+        dialogs,
+        html: document.documentElement.outerHTML,
+        bodyText: qDetail ? qDetail.innerText.trim() : "",
+        answerCount: document.querySelectorAll(".answerArea[id^=answer_]").length
+      }};
+    }});
+  }};
+
+  let state = await inspectState();
+  if ({json.dumps(bool(load_all_answers))}) {{
+    for (let i = 0; i < 15; i++) {{
+      const clicked = await page.evaluate(() => {{
+        const btns = Array.from(document.querySelectorAll("#nextPageButton, #lastNextPageButton"))
+          .filter(b => b.getClientRects().length > 0 && !b.disabled);
+        if (btns.length !== 1) return false;
+        btns[0].click();
+        return true;
+      }});
+      if (!clicked) break;
+      await page.waitForTimeout(900);
+      state = await inspectState();
+    }}
+  }}
+
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: true,
+    account: {json.dumps(account)},
+    profileId: {json.dumps(profile_id)},
+    spaceId: task.spaceId,
+    ...state
+  }}));
+}} finally {{
+  // Keep persistent Space open inside the user's main EGO Lite browser sidebar
+}}
+"""
+    return run_ego_mjs(script, timeout=60)
+
+
+def native_kin_discover_links(account: str, search_urls: list[dict]) -> dict:
+    """Collect KnowledgeIn search result links inside the main EGO Lite browser's native TaskSpace."""
+    profile_id = resolve_ego_profile(account)
+    space_name = f"barolab-kin-{account}"
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
+const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+try {{
+  const page = task.page("p1");
+  await page.goto("https://kin.naver.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  const loginCheck = await page.evaluate(() => {{
+    const el = document.querySelector(".my_service .user_id");
+    return {{ url: location.href, userId: el ? el.innerText.trim() : null }};
+  }});
+  if (loginCheck.url.includes("nid.naver.com") || loginCheck.userId !== {json.dumps(account)}) {{
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "LoginRequiredError",
+      message: "Logged-in KnowledgeIn identity does not match authorized account"
+    }}));
+    return;
+  }}
+
+  const groups = [];
+  for (const item of {json.dumps(search_urls)}) {{
+    await page.goto(item.searchUrl, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+    const hrefs = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("._searchListTitleAnchor")).map(e => e.href).filter(Boolean)
+    );
+    groups.push(hrefs.map(href => ({{ href, ordering: item.ordering, keyword: item.keyword }})));
+  }}
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: true,
+    account: {json.dumps(account)},
+    profileId: {json.dumps(profile_id)},
+    spaceId: task.spaceId,
+    groups
+  }}));
+}} finally {{
+  // Keep persistent Space open inside the user's main EGO Lite browser sidebar
+}}
+"""
+    return run_ego_mjs(script, timeout=75)
+
+
+def native_kin_prepare_and_submit(account: str, question_url: str, answer_text: str, expected_urls: list[str]) -> dict:
+    """Type and submit a KnowledgeIn answer inside the main EGO Lite browser's native TaskSpace."""
+    profile_id = resolve_ego_profile(account)
+    space_name = f"barolab-kin-{account}"
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
+const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+let retainSpace = false;
+try {{
+  const page = task.page("p1");
+  await page.goto("https://kin.naver.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  const loginCheck = await page.evaluate(() => {{
+    const el = document.querySelector(".my_service .user_id");
+    return {{ url: location.href, userId: el ? el.innerText.trim() : null }};
+  }});
+  if (loginCheck.url.includes("nid.naver.com") || loginCheck.userId !== {json.dumps(account)}) {{
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "LoginRequiredError",
+      message: "Logged-in KnowledgeIn identity does not match authorized account"
+    }}));
+    return;
+  }}
+
+  await page.goto({json.dumps(question_url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  await page.waitForTimeout(500);
+
+  const preDialogs = await page.evaluate(() => {{
+    const dialogs = [];
+    for (const sel of ["#notAnswerableLayer", "#deferredExpertLayer", "[role=\\"dialog\\"]"]) {{
+      for (const el of document.querySelectorAll(sel)) {{
+        if (el.getClientRects().length > 0) {{
+          const msg = (el.innerText || "").trim();
+          if (msg) dialogs.push({{ selector: sel, message: msg }});
+        }}
+      }}
+    }}
+    return dialogs;
+  }});
+  if (preDialogs.length > 0) {{
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "DialogRestriction",
+      dialogs: preDialogs
+    }}));
+    return;
+  }}
+
+  const hasWriteBtn = await page.evaluate(() => {{
+    const btn = document.querySelector("._answerWriteButton");
+    if (!btn) return false;
+    btn.scrollIntoView({{ block: "center" }});
+    btn.click();
+    return true;
+  }});
+  if (!hasWriteBtn) {{
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "WriteButtonMissing",
+      message: "Answer write button is not available on this question"
+    }}));
+    return;
+  }}
+  await page.waitForSelector(".se-canvas .se-text-paragraph", {{ timeout: 15000 }});
+
+  const existingDraft = await page.evaluate(() => {{
+    return Array.from(document.querySelectorAll(".se-canvas .se-text-paragraph .__se-node"))
+      .some(n => (n.innerText || "").trim().length > 0);
+  }});
+  if (existingDraft) {{
+    retainSpace = true;
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "ExistingDraftError",
+      message: "Existing editor text requires manual review"
+    }}));
+    return;
+  }}
+
+  await page.click(".se-canvas .se-text-paragraph");
+  const lines = {json.dumps(answer_text)}.split("\\n");
+  for (const line of lines) {{
+    if (line) {{
+      await page.keyboard.insertText(line);
+    }}
+    await page.keyboard.press("Enter");
+  }}
+
+  let editorReady = false;
+  for (let i = 0; i < 60; i++) {{
+    editorReady = await page.evaluate(() => {{
+      const editor = window.SmartEditor?.getEditor?.("kinpc001");
+      if (!editor || typeof editor.isDocumentProcessing !== "function" || typeof editor.isEmptyDocumentContent !== "function") {{
+        return false;
+      }}
+      return editor.isDocumentProcessing() === false && editor.isEmptyDocumentContent() === false;
+    }});
+    if (editorReady) break;
+    await page.waitForTimeout(500);
+  }}
+  if (!editorReady) {{
+    throw new Error("SmartEditor readiness timeout");
+  }}
+
+  const editorVerification = await page.evaluate(() => {{
+    const rendered = Array.from(document.querySelectorAll(".se-canvas .se-text-paragraph"))
+      .map(el => el.innerText || "")
+      .join("\\n");
+    const actualLinks = Array.from(document.querySelectorAll(".se-canvas a[href], .se-canvas .se-link[data-href]"))
+      .map(el => el.href || el.getAttribute("data-href"))
+      .filter(Boolean);
+    const btn = document.querySelector("#answerRegisterButton");
+    return {{
+      rendered,
+      actualLinks,
+      buttonReady: Boolean(btn && !btn.disabled)
+    }};
+  }});
+
+  const norm = s => (s || "").replace(/\\u200b/g, "").replace(/\\s+/g, " ").trim();
+  if (norm(editorVerification.rendered) !== norm({json.dumps(answer_text)})) {{
+    retainSpace = true;
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "EditorMismatchError",
+      message: "Editor did not retain the reviewed answer exactly"
+    }}));
+    return;
+  }}
+  const expectedUrls = {json.dumps(expected_urls)};
+  if (expectedUrls.some(u => !editorVerification.actualLinks.includes(u))) {{
+    retainSpace = true;
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "HyperlinkMissingError",
+      message: "Reviewed outbound URL is not a clickable editor hyperlink"
+    }}));
+    return;
+  }}
+  if (!editorVerification.buttonReady) {{
+    retainSpace = true;
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: false,
+      errorType: "RegisterUnavailableError",
+      message: "Registration is unavailable"
+    }}));
+    return;
+  }}
+
+  // Install fetch/XHR interceptor for registerAnswerForSmartEditorOne.naver before clicking submit
+  await page.evaluate(() => {{
+    window.__barolabKinResponses = [];
+    const origFetch = window.fetch;
+    if (origFetch) {{
+      window.fetch = async function(...args) {{
+        const res = await origFetch.apply(this, args);
+        try {{
+          const u = String(args[0]?.url || args[0] || "");
+          if (u.includes("/ajax/detail/registerAnswerForSmartEditorOne.naver")) {{
+            const clone = res.clone();
+            const data = await clone.json().catch(() => null);
+            window.__barolabKinResponses.push({{ status: res.status, data }});
+          }}
+        }} catch (e) {{}}
+        return res;
+      }};
+    }}
+  }});
+
+  await page.evaluate(() => {{
+    const btn = document.querySelector("#answerRegisterButton");
+    if (btn) {{
+      btn.scrollIntoView({{ block: "center" }});
+      btn.click();
+    }}
+  }});
+  let finalHtml = "";
+  let observedResponses = [];
+  let postDialogs = [];
+  for (let i = 0; i < 30; i++) {{
+    await page.waitForTimeout(500);
+    await page.dismissDialog().catch(() => {{}});
+    const snap = await page.evaluate(() => {{
+      const dialogs = [];
+      for (const sel of ["#notAnswerableLayer", "#deferredExpertLayer", "[role=\\"dialog\\"]"]) {{
+        for (const el of document.querySelectorAll(sel)) {{
+          if (el.getClientRects().length > 0) {{
+            const msg = (el.innerText || "").trim();
+            if (msg) dialogs.push({{ type: "dom", message: msg.slice(0, 500) }});
+          }}
+        }}
+      }}
+      const btn = document.querySelector("#answerRegisterButton");
+      return {{
+        html: document.documentElement.outerHTML,
+        responses: window.__barolabKinResponses || [],
+        dialogs,
+        editorPresent: document.querySelectorAll(".se-canvas").length > 0,
+        registerVisible: Boolean(btn && btn.getClientRects().length > 0),
+        registerEnabled: Boolean(btn && !btn.disabled)
+      }};
+    }});
+    finalHtml = snap.html;
+    observedResponses = snap.responses;
+    postDialogs = snap.dialogs;
+    if (!snap.editorPresent && snap.html.includes("answer_") && snap.html.includes("loginUserId")) {{
+      break;
+    }}
+  }}
+
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: true,
+    account: {json.dumps(account)},
+    profileId: {json.dumps(profile_id)},
+    spaceId: task.spaceId,
+    html: finalHtml,
+    responses: observedResponses,
+    dialogs: postDialogs
+  }}));
+}} finally {{
+  // Keep persistent Space open inside the user's main EGO Lite browser sidebar
+}}
+"""
+    return run_ego_mjs(script, timeout=90)
+

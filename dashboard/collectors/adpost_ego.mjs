@@ -4,9 +4,11 @@ const request = JSON.parse(Buffer.from(input, "base64url").toString("utf8"));
 const marker = "BAROLAB_ADPOST_RESULT=";
 let task;
 try {
+  const existing = await listTaskSpaces();
+  const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soul5373") : null;
   task = request.spaceId
     ? await taskSpace(request.spaceId)
-    : await taskSpace(request.taskName, { profileId: "Profile 4" });
+    : (found ? await taskSpace("barolab-soul5373") : await taskSpace("barolab-soul5373", { profileId: "Profile 4" }));
   console.log("BAROLAB_ADPOST_SPACE=" + task.spaceId);
   const page = task.page("p1");
   await page.goto("https://adpost.naver.com/main", { waitUntil: "domcontentloaded", timeout: 15000 });
@@ -36,7 +38,6 @@ try {
   const rows = await read(`/api/report/revenue?startDate=${request.start}&endDate=${request.end}&publisherId=${publisher}&clipRequired=true`);
   if (!Array.isArray(rows)) throw { status: "error", reasonCode: "report_rows_invalid" };
   const result = { ok: true, account: request.expectedAccount, publisher, blogs, medias, rows, spaceId: task.spaceId };
-  await task.finish({ keep: [] });
   console.log(marker + JSON.stringify(result));
 } catch (error) {
   // A stopped or unexpected session stays available for explicit reconciliation.

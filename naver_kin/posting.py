@@ -891,7 +891,70 @@ def _naver_browser__read(page, url):
         element.decompose()
     return {'question_url': url, 'question_id': identifier, 'title': title.get_text(' ', strip=True), 'body': page.locator('.questionDetail').first.inner_text().strip(), 'image_urls': [x.get('src') for x in body.select('img')], 'requires_visual_evidence': bool(body.select('img, video, iframe, .kin_movie_info')), 'answer_count': len(soup.select('.answerArea[id^=answer_]')), 'answer_button_present': bool(soup.select('._answerWriteButton')), 'existing_answers': [x.get_text('\n', strip=True)[:10000] for x in soup.select('.answerArea[id^=answer_]')], 'captured_at': _naver_browser_datetime.now(_naver_browser_timezone.utc).isoformat()}
 
+def _naver_browser__use_native_taskspace():
+    if _naver_browser_os.name != 'nt':
+        return False
+    try:
+        from common.ego_taskspace import find_ego_cli
+        return find_ego_cli() is not None
+    except Exception:
+        return False
+
+def _naver_browser__check_taskspace_dialogs(dialogs):
+    for d in (dialogs or []):
+        msg = str(d.get('message') or '').strip()
+        if not msg:
+            continue
+        _naver_browser__check_protection_message(msg)
+        if d.get('selector') in ('#notAnswerableLayer', '#deferredExpertLayer'):
+            raise _naver_browser_QuestionUnavailableError('Visible question/field-specific answer restriction; skip question')
+
+def _naver_browser__read_via_taskspace(account, url):
+    from common.ego_taskspace import native_kin_fetch_page_state
+    identifier = _naver_browser_question_id(url)
+    res = native_kin_fetch_page_state(account, url, load_all_answers=False)
+    if not res.get('ok'):
+        if res.get('errorType') == 'LoginRequiredError':
+            raise _naver_browser_LoginRequiredError(res.get('message') or 'Logged-in KnowledgeIn identity does not match authorized account')
+        raise RuntimeError(res.get('message') or 'TaskSpace read failed')
+    _naver_browser__check_taskspace_dialogs(res.get('dialogs'))
+    soup = _naver_browser_BeautifulSoup(res.get('html') or '', 'html.parser')
+    title = soup.select_one('.endTitleSection')
+    body = soup.select_one('.questionDetail')
+    if not title or not body:
+        raise RuntimeError('Question selectors changed or question is unavailable')
+    for element in title.select('.blind, svg'):
+        element.decompose()
+    body_text = (res.get('bodyText') or body.get_text('\n', strip=True)).strip()
+    return {
+        'question_url': url,
+        'question_id': identifier,
+        'title': title.get_text(' ', strip=True),
+        'body': body_text,
+        'image_urls': [x.get('src') for x in body.select('img')],
+        'requires_visual_evidence': bool(body.select('img, video, iframe, .kin_movie_info')),
+        'answer_count': len(soup.select('.answerArea[id^=answer_]')),
+        'answer_button_present': bool(soup.select('._answerWriteButton')),
+        'existing_answers': [x.get_text('\n', strip=True)[:10000] for x in soup.select('.answerArea[id^=answer_]')],
+        'captured_at': _naver_browser_datetime.now(_naver_browser_timezone.utc).isoformat()
+    }
+
+def _naver_browser__question_ownership_via_taskspace(account, url):
+    from common.ego_taskspace import native_kin_fetch_page_state
+    identifier = _naver_browser_question_id(url)
+    res = native_kin_fetch_page_state(account, url, load_all_answers=True)
+    if not res.get('ok'):
+        if res.get('errorType') == 'LoginRequiredError':
+            raise _naver_browser_LoginRequiredError(res.get('message') or 'Logged-in KnowledgeIn identity does not match authorized account')
+        raise RuntimeError(res.get('message') or 'TaskSpace ownership check failed')
+    _naver_browser__check_taskspace_dialogs(res.get('dialogs'))
+    return _naver_browser__parse_question_ownership(res.get('html') or '', account, identifier)
+
 def _naver_browser_read_question(account, url):
+    if _naver_browser__use_native_taskspace():
+        _naver_browser__check_account_blog_not_busy(account)
+        with _naver_browser_account_lock(account):
+            return _naver_browser__read_via_taskspace(account, url)
     with _naver_browser_session(account) as page:
         return _naver_browser__read(page, url)
 
@@ -905,6 +968,54 @@ def _naver_browser_discover(account, keywords, limit=10, sort='none', page_numbe
     if not isinstance(page_number, int) or not 1 <= page_number <= 3:
         raise ValueError('Bounded search page must be between 1 and 3')
     results, seen = (_naver_browser_DiscoveryResults(), set(exclude_question_ids))
+    if _naver_browser__use_native_taskspace():
+        from common.ego_taskspace import native_kin_discover_links
+        _naver_browser__check_account_blog_not_busy(account)
+        with _naver_browser_account_lock(account):
+            searches = []
+            if include_latest and keywords:
+                for idx, keyword in enumerate(keywords):
+                    primary_sort = 'date' if track == 'track_a_latest' or (track is None and idx % 2 == 0) else 'none'
+                    secondary_sort = 'none' if primary_sort == 'date' else 'date'
+                    searches.append((keyword, primary_sort))
+                    if len(searches) < 6:
+                        searches.append((keyword, secondary_sort))
+            else:
+                searches = [(keyword, sort) for keyword in keywords]
+            search_urls = [
+                {
+                    'keyword': kw,
+                    'ordering': ord_,
+                    'searchUrl': 'https://kin.naver.com/search/list.naver?' + _naver_browser_urlencode({'query': kw, 'section': 'qna', 'sort': ord_, 'page': page_number})
+                }
+                for kw, ord_ in searches
+            ]
+            disc_res = native_kin_discover_links(account, search_urls)
+            if not disc_res.get('ok'):
+                if disc_res.get('errorType') == 'LoginRequiredError':
+                    raise _naver_browser_LoginRequiredError(disc_res.get('message') or 'Logged-in KnowledgeIn identity does not match authorized account')
+                raise RuntimeError(disc_res.get('message') or 'TaskSpace discovery failed')
+            groups = [[(item['href'], item['ordering'], item['keyword']) for item in grp] for grp in (disc_res.get('groups') or [])]
+            links = [group[i] for i in range(max((len(g) for g in groups), default=0)) for group in groups if len(group) > i]
+            for item_link in links:
+                url, ordering, keyword = item_link
+                identifier = _naver_browser_question_id(url)
+                if identifier in seen:
+                    continue
+                seen.add(identifier)
+                try:
+                    item = _naver_browser__read_via_taskspace(account, url)
+                    if isinstance(item, dict) and 'title' in item:
+                        item.setdefault('search_query', keyword)
+                        item.setdefault('search_sort', ordering)
+                        item.setdefault('track', track or ('track_a_latest' if ordering == 'date' else 'track_b_search_top'))
+                    results.append(item)
+                except _naver_browser_QuestionUnavailableError:
+                    results.skipped.append({'question_url': url, 'question_id': identifier, 'reason': 'question_unavailable'})
+                    continue
+                if len(results) >= min(limit, 20):
+                    return results
+            return results
     with _naver_browser_session(account) as page:
         groups = []
         searches = []
@@ -958,6 +1069,35 @@ def _naver_browser_publish(account, question_url, answer_text, before_submit=Non
 def _naver_browser__publish(account, question_url, answer_text, before_submit=None):
     if not callable(before_submit):
         raise ValueError('Durable before_submit callback is required')
+    if _naver_browser__use_native_taskspace():
+        from common.ego_taskspace import native_kin_prepare_and_submit
+        _naver_browser__check_account_blog_not_busy(account)
+        with _naver_browser_account_lock(account):
+            ownership = _naver_browser__question_ownership_via_taskspace(account, question_url)
+            if ownership['answer_ids']:
+                raise RuntimeError('Account already has an answer on this question')
+            if not ownership['known'] or not ownership['complete']:
+                raise RuntimeError('Current-question ownership is incomplete; absence from recent history cannot authorize submission')
+            urls = _naver_browser_re.findall(r'https://[^\s<>]+', answer_text)
+            before_submit()
+            sub_res = native_kin_prepare_and_submit(account, question_url, answer_text, urls)
+            if not sub_res.get('ok'):
+                err_type = sub_res.get('errorType')
+                if err_type == 'LoginRequiredError':
+                    raise _naver_browser_LoginRequiredError(sub_res.get('message') or 'Logged-in KnowledgeIn identity does not match authorized account')
+                if err_type == 'DialogRestriction':
+                    _naver_browser__check_taskspace_dialogs(sub_res.get('dialogs'))
+                raise RuntimeError(sub_res.get('message') or 'TaskSpace publish failed')
+            _naver_browser__check_taskspace_dialogs(sub_res.get('dialogs'))
+            content = sub_res.get('html') or ''
+            owned = _naver_browser__parse_question_ownership(content, account, _naver_browser_question_id(question_url))
+            owned_ids = set(owned.get('verified_owned_answer_ids', []))
+            soup = _naver_browser_BeautifulSoup(content, 'html.parser')
+            matches = [node for node in soup.select('.answerArea[id^=answer_]') if node['id'].split('_', 1)[1] in owned_ids and _naver_browser__normalized(answer_text) in _naver_browser__normalized(node.get_text('\n'))]
+            if len(matches) == 1:
+                aid = matches[0]['id'].split('_', 1)[1]
+                return {'answer_url': _naver_browser_exact_answer_url(question_url, aid), 'answer_id': aid, 'submissionObservation': {'responses': sub_res.get('responses') or [], 'dialogs': sub_res.get('dialogs') or [], 'exactOwnedBodyMatched': True, 'executor': 'ego-native-taskspace'}}
+            return {'answer_url': question_url, 'answer_id': None, 'reason': 'submitted_unverified: exact owned answer not observed within 15 seconds', 'submissionObservation': {'responses': sub_res.get('responses') or [], 'dialogs': sub_res.get('dialogs') or [], 'exactOwnedBodyMatched': False, 'executor': 'ego-native-taskspace'}}
     with _naver_browser_session(account) as page:
         ownership = _naver_browser__question_ownership(page, account, question_url)
         if ownership['answer_ids']:
@@ -1130,9 +1270,13 @@ def _naver_browser_verify_public(account, answer_url, expected_text, outbound_ur
     evidence.update(public=True)
     if not identity_proven:
         try:
-            with _naver_browser_session(account) as page:
-                ownership = _naver_browser__question_ownership(page, account, answer_url)
+            if _naver_browser__use_native_taskspace():
+                ownership = _naver_browser__question_ownership_via_taskspace(account, answer_url)
                 identity_proven = str(answer_id) in ownership.get('verified_owned_answer_ids', [])
+            else:
+                with _naver_browser_session(account) as page:
+                    ownership = _naver_browser__question_ownership(page, account, answer_url)
+                    identity_proven = str(answer_id) in ownership.get('verified_owned_answer_ids', [])
         except Exception as exc:
             return {**evidence, 'reason': 'public body/link matched; ownership inventory unavailable: ' + str(exc)}
         if not identity_proven:
@@ -1511,9 +1655,19 @@ def _naver_authoring_renew_stale_draft(db, account, qid, slot_id, model):
     return True
 
 def _naver_authoring_generate_for_slot(account, slot_id, model, article_catalog=None, question_urls=None):
-    return _naver_authoring__generate_for_slot_once(account, slot_id, model, article_catalog, question_urls)
+    last_res = None
+    for attempt_idx in range(3):
+        last_res = _naver_authoring__generate_for_slot_once(
+            account, slot_id, model, article_catalog, question_urls,
+            _rotation_offset=attempt_idx * 10
+        )
+        if isinstance(last_res, dict) and last_res.get('document') is not None:
+            return last_res
+        if question_urls is not None:
+            break
+    return last_res
 
-def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_catalog=None, question_urls=None, *, _supervisor_query=None):
+def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_catalog=None, question_urls=None, *, _supervisor_query=None, _rotation_offset=0):
     """Return reviewed document or explicit skip; no ledger or publishing mutation."""
     _naver_pipeline_account_key(account)
     if question_urls is not None:
@@ -1536,7 +1690,7 @@ def _naver_authoring__generate_for_slot_once(account, slot_id, model, article_ca
             raise ValueError('Explicit article seed was not accepted by the verified catalogue')
     if not 1 <= len(catalogue) <= 50:
         raise ValueError('Article catalogue must contain 1 to 50 verified owned entries')
-    slot_seed = sum((ord(c) for c in str(slot_id))) % max(1, len(catalogue))
+    slot_seed = (sum((ord(c) for c in str(slot_id))) + int(_rotation_offset or 0)) % max(1, len(catalogue))
     rotated_catalogue = catalogue if question_urls is not None else catalogue[slot_seed:] + catalogue[:slot_seed]
     working_catalogue = rotated_catalogue[:10]
     articles = []
@@ -2311,7 +2465,7 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                 except Exception:
                     pass
             if run_id:
-                if state in ('blocked', 'deferred') and prev_cadence is not None:
+                if state in ('blocked', 'deferred', 'skipped') and prev_cadence is not None:
                     with db:
                         db.execute('UPDATE operating_cadence SET last_completed_at=?,last_account=?,active_run_id=NULL,active_account=NULL,active_started_at=NULL WHERE id=1', (prev_cadence['last_completed_at'], prev_cadence['last_account']))
                 else:
