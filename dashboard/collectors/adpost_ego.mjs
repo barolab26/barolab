@@ -9,7 +9,7 @@ try {
     : await taskSpace(request.taskName, { profileId: "Profile 4" });
   console.log("BAROLAB_ADPOST_SPACE=" + task.spaceId);
   const page = task.page("p1");
-  await page.goto("https://adpost.naver.com/main");
+  await page.goto("https://adpost.naver.com/main", { waitUntil: "domcontentloaded", timeout: 15000 });
   const read = async (path) => {
     const response = await page.fetch(path, { method: "GET", credentials: "include", timeout: 15000 });
     if (!response.ok) throw { status: [401, 403].includes(response.status) ? "auth_required" : "error", reasonCode: "report_http_error" };

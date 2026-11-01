@@ -663,6 +663,13 @@ def _adpost_ego_report(start, end, expected_account='soul5373', *, space_id=None
         raise RevenueSourceError('auth_required', '승인된 soul5373 EGO 세션이 필요합니다.')
     executable = shutil.which('ego-browser')
     if not executable:
+        try:
+            from common.ego_taskspace import find_ego_cli
+            cli = find_ego_cli()
+            executable = str(cli) if cli else None
+        except Exception:
+            executable = None
+    if not executable:
         raise RevenueSourceError('browser_offline', 'EGO Browser CLI 연결 대기')
     control_path = DATA / 'secure' / 'adpost-ego-state.json'
     with collector_lock(DATA / 'adpost-ego.lock') as acquired:
@@ -681,7 +688,7 @@ def _adpost_ego_report(start, end, expected_account='soul5373', *, space_id=None
         module = (ROOT / 'dashboard/collectors/adpost_ego.mjs').as_uri()
         try:
             result = subprocess.run([executable, 'nodejs', '-e', "await import('" + module + '?request=' + token + "')"],
-                capture_output=True, text=True, encoding='utf-8', timeout=120, check=True,
+                stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding='utf-8', timeout=120, check=True,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             streams = (getattr(result, 'stdout', '') or '', getattr(result, 'stderr', '') or '')
             lines = [line.split('=', 1)[1] for output in streams for line in output.splitlines()
@@ -753,7 +760,9 @@ def _adpost_cdp_report(start, end, cfg=None, account='soul5373', port=9333):
 
 @observed_operation('metrics', 'revenue-collection')
 def adpost(start, end, cfg=None, account='soul5373', port=9333, *, space_id=None):
-    cdp_result = _adpost_cdp_report(start, end, cfg, account, port) if space_id is None and port else None
+    from common.ego_taskspace import find_ego_cli
+    prefer_native_ego = os.name == 'nt' and find_ego_cli() is not None
+    cdp_result = _adpost_cdp_report(start, end, cfg, account, port) if (space_id is None and port and not prefer_native_ego) else None
     rows, publisher, blogs, medias = cdp_result if cdp_result is not None else _adpost_ego_report(start, end, account, space_id=space_id)
     result = parse_adpost_rows(rows, start, end)
     if account == 'soul5373':

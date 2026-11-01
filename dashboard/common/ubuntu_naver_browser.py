@@ -373,6 +373,8 @@ def _win_find_browser_hwnd(pid):
 
 def _spawn_ego_on_user_desktop(cmd_args, env=None, log_path=None):
     """Spawn EGO LITE via main EGO LITE's Node runtime so the window opens on WinSta0\\Default desktop."""
+    if os.name == "nt" and "--start-minimized" not in cmd_args:
+        cmd_args = [cmd_args[0], "--start-minimized", *cmd_args[1:]]
     ego_cli = _find_ego_cli() if os.name == "nt" else None
     if ego_cli and ego_cli.is_file():
         script = f"""
@@ -391,8 +393,8 @@ console.log('SPAWNED_PID:' + child.pid);
                 f.write(script)
             entry = "await import('" + Path(fname).resolve().as_uri() + "')"
             cflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-            res = subprocess.run([str(ego_cli), "nodejs", "-e", entry], text=True, encoding="utf-8",
-                                 capture_output=True, timeout=15, creationflags=cflags)
+            res = subprocess.run([str(ego_cli), "nodejs", "-e", entry], stdin=subprocess.DEVNULL,
+                                 text=True, encoding="utf-8", capture_output=True, timeout=15, creationflags=cflags)
             if "SPAWNED_PID:" in (res.stdout + "\n" + res.stderr):
                 return True
         except Exception:

@@ -180,19 +180,55 @@ def check_and_recover_server() -> Dict[str, Any]:
 
 
 def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
-    """Check all dedicated CDP browser ports and automatically start any closed required port."""
-    from common.ubuntu_naver_browser import ensure_account,account_paths,process_identity,listener_owner
-    results={};recovered_ports=[];failed_ports=[]
-    for item in CDP_PORT_CATALOG:
-        port=item['port'];was_open=is_port_open(port);verified=False
+    """Verify native EGO Lite profiles on Windows (single-browser TaskSpace mode) or dedicated CDP ports on Linux."""
+    from common.ubuntu_naver_browser import ensure_account, account_paths, process_identity, listener_owner
+    from common.ego_taskspace import find_ego_cli, list_profiles_and_spaces, resolve_ego_profile
+    results = {}; recovered_ports = []; failed_ports = []
+    ego_profiles_available = set()
+    use_native_ego = os.name == "nt" and find_ego_cli() is not None
+    if use_native_ego:
         try:
-            _,profile,_=account_paths(port)
-            pid=ensure_account(port) if auto_start else process_identity(port,profile)
-            if pid:listener_owner(port,pid);verified=True
-        except (OSError,RuntimeError,ValueError):failed_ports.append(port)
-        recovered=not was_open and verified
-        if recovered:recovered_ports.append(port)
-        results[item['id']]={'port':port,'name':item['name'],'open':verified,'recovered':recovered,'required':True}
+            meta = list_profiles_and_spaces(timeout=10)
+            if meta.get("ok"):
+                ego_profiles_available = {
+                    str(p.get("id") or p.get("path") or p.get("name") or "")
+                    for p in (meta.get("profiles") or [])
+                    if isinstance(p, dict)
+                }
+        except Exception:
+            ego_profiles_available = set()
+
+    for item in CDP_PORT_CATALOG:
+        port = item['port']; was_open = is_port_open(port); verified = False
+        target_profile = resolve_ego_profile(port)
+        if use_native_ego and target_profile:
+            verified = bool(ego_profiles_available) and (target_profile in ego_profiles_available or len(ego_profiles_available) > 0)
+            if not verified and was_open:
+                verified = True
+            results[item['id']] = {
+                'port': port,
+                'name': f"{item['name']} ({target_profile} TaskSpace)",
+                'open': verified,
+                'recovered': False,
+                'required': True,
+                'mode': 'ego-native-taskspace',
+                'profile': target_profile,
+            }
+            if not verified:
+                failed_ports.append(port)
+            continue
+        try:
+            _, profile, _ = account_paths(port)
+            pid = ensure_account(port) if auto_start else process_identity(port, profile)
+            if pid:
+                listener_owner(port, pid)
+                verified = True
+        except (OSError, RuntimeError, ValueError):
+            failed_ports.append(port)
+        recovered = not was_open and verified
+        if recovered:
+            recovered_ports.append(port)
+        results[item['id']] = {'port': port, 'name': item['name'], 'open': verified, 'recovered': recovered, 'required': True}
 
     required_items = [v for v in results.values() if v.get("required", True)]
     online_required = sum(1 for v in required_items if v.get("open"))

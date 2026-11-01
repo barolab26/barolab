@@ -38,8 +38,8 @@ PORT_TO_ACCOUNT = {
     9334: "soultin",
     9333: "soul5373",
     9335: "yoon_master",
-    9230: "adinfo0905",
-    9231: "stone0747",
+    9231: "adinfo0905",
+    9230: "stone0747",
     9440: "cf-flow",
     9450: "threads",
 }
