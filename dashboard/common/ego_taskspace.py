@@ -1636,4 +1636,198 @@ try {
     return run_ego_mjs(script, timeout=45)
 
 
+def native_sync_youtube_channels() -> dict:
+    """Sync live 3-channel status under baro76650@gmail.com (`@yoon_autolab`, `@숨은지원금`, `@바로랭크`) in `barolab-soultin`."""
+    script = """
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
+const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", { profileId: "Profile 3" });
+const page = task.page("p1");
+const prevUrl = await page.url().catch(() => "");
+try {
+  await page.goto("https://www.youtube.com/@yoon_autolab/posts", { waitUntil: "domcontentloaded", timeout: 22000 });
+  await page.waitForTimeout(3000);
+  // Open top-right avatar menu -> Switch account -> select @yoon_autolab if composer not yet active
+  let hasComposerNow = await page.evaluate(() => !!document.querySelector("ytd-backstage-post-dialog-renderer"));
+  let switcherData = { switched: hasComposerNow };
+  if (!hasComposerNow) {
+    await page.evaluate(() => {
+      const av = document.querySelector("#avatar-btn, button#avatar-btn");
+      if (av) av.click();
+    });
+    await page.waitForTimeout(1800);
+    await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll("ytd-compact-link-renderer, tp-yt-paper-item, a"));
+      const sw = links.find(el => (el.innerText || "").includes("계정 전환") || (el.innerText || "").includes("Switch account"));
+      if (sw) sw.click();
+    });
+    await page.waitForTimeout(2500);
+    switcherData = await page.evaluate((targetHandle) => {
+      const items = Array.from(document.querySelectorAll("ytd-account-item-renderer, tp-yt-paper-icon-item"));
+      const match = items.find(el => (el.innerText || "").includes(targetHandle) || (el.innerText || "").includes("윤랩 자동화 연구소"));
+      if (match) {
+        const clickable = match.querySelector("tp-yt-paper-icon-item") || match;
+        clickable.click();
+        return { switched: true, matchedText: (match.innerText || "").replace(/\\s+/g, " ").trim().slice(0, 100) };
+      }
+      return { switched: false, count: items.length };
+    }, "@yoon_autolab");
+    if (switcherData.switched) {
+      await page.waitForTimeout(4200);
+      await page.goto("https://www.youtube.com/@yoon_autolab/posts", { waitUntil: "domcontentloaded", timeout: 22000 });
+      await page.waitForTimeout(3500);
+    }
+  }
+  const postsInfo = await page.evaluate(() => {
+    const postEls = Array.from(document.querySelectorAll("ytd-backstage-post-thread-renderer"));
+    const posts = postEls.slice(0, 6).map(el => {
+      const contentEl = el.querySelector("#content-text");
+      const timeEl = el.querySelector("#published-time-text a");
+      return {
+        text: contentEl ? (contentEl.innerText || "").trim().slice(0, 260) : "",
+        time: timeEl ? (timeEl.innerText || "").trim() : "",
+        url: timeEl && timeEl.href ? timeEl.href : "https://www.youtube.com/@yoon_autolab/posts"
+      };
+    }).filter(p => p.text);
+    const hasComposer = !!document.querySelector("ytd-backstage-post-dialog-renderer");
+    const pageText = (document.body ? document.body.innerText : "").slice(0, 600).replace(/\\s+/g, " ");
+    return { posts, hasComposer, url: location.href, pageText };
+  });
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
+    ok: true,
+    cdpOnline: true,
+    accountEmail: "baro76650@gmail.com",
+    switchedToMain: switcherData.switched,
+    switcherData,
+    mainChannelPosts: postsInfo.posts || [],
+    hasComposer: postsInfo.hasComposer,
+    pageText: postsInfo.pageText
+  }));
+} catch (err) {
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({ ok: false, error: String(err) }));
+} finally {
+  if (prevUrl && !prevUrl.includes("youtube.com")) {
+    await page.goto(prevUrl, { waitUntil: "domcontentloaded", timeout: 12000 }).catch(() => {});
+  }
+}
+"""
+    return run_ego_mjs(script, timeout=55)
+
+
+def native_publish_youtube_community_post(channel_handle: str, post_text: str) -> dict:
+    """Publish a live Community Post (`게시물`) on the specified YouTube channel (`@yoon_autolab` or `@바로랭크`) via EGO Lite."""
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
+const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
+const page = task.page("p1");
+const prevUrl = await page.url().catch(() => "");
+try {{
+  await page.goto("https://www.youtube.com/" + {json.dumps(channel_handle)} + "/posts", {{ waitUntil: "domcontentloaded", timeout: 22000 }});
+  await page.waitForTimeout(3200);
+  const alreadyOwner = await page.evaluate(() => !!document.querySelector("ytd-backstage-post-dialog-renderer"));
+  if (!alreadyOwner) {{
+    await page.evaluate(() => {{
+      const av = document.querySelector("#avatar-btn, button#avatar-btn");
+      if (av) av.click();
+    }});
+    await page.waitForTimeout(1800);
+    await page.evaluate(() => {{
+      const links = Array.from(document.querySelectorAll("ytd-compact-link-renderer, tp-yt-paper-item, a"));
+      const sw = links.find(el => (el.innerText || "").includes("계정 전환") || (el.innerText || "").includes("Switch account"));
+      if (sw) sw.click();
+    }});
+    await page.waitForTimeout(2500);
+    await page.evaluate((targetHandle) => {{
+      const items = Array.from(document.querySelectorAll("ytd-account-item-renderer, tp-yt-paper-icon-item"));
+      const match = items.find(el => (el.innerText || "").includes(targetHandle) || (el.innerText || "").includes("윤랩 자동화 연구소"));
+      if (match) {{
+        const clickable = match.querySelector("tp-yt-paper-icon-item") || match;
+        clickable.click();
+      }}
+    }}, {json.dumps(channel_handle)});
+    await page.waitForTimeout(4200);
+    await page.goto("https://www.youtube.com/" + {json.dumps(channel_handle)} + "/posts", {{ waitUntil: "domcontentloaded", timeout: 22000 }});
+    await page.waitForTimeout(3500);
+  }}
+
+  // Open community post box on @yoon_autolab/posts (or via Topbar Create -> 게시물 작성)
+  await page.evaluate(() => {{
+    const createBtn = Array.from(document.querySelectorAll("button, yt-icon-button")).find(b => {{
+      const t = (b.innerText || b.getAttribute("aria-label") || "").trim();
+      return t === "만들기" || t === "Create";
+    }});
+    if (createBtn) createBtn.click();
+  }});
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => {{
+    const items = Array.from(document.querySelectorAll("ytd-compact-link-renderer, tp-yt-paper-item, a"));
+    const postItem = items.find(el => (el.innerText || "").includes("게시물") || (el.innerText || "").includes("Create post"));
+    if (postItem) postItem.click();
+  }});
+  await page.waitForTimeout(2500);
+  // Click any visible simplebox-placeholder or contenteditable-root
+  await page.evaluate(() => {{
+    const placeholders = Array.from(document.querySelectorAll("#simplebox-placeholder, #placeholder-area"));
+    for (const p of placeholders) {{
+      if (p.offsetParent !== null) {{ p.click(); break; }}
+    }}
+  }});
+  await page.waitForTimeout(1000);
+  const focused = await page.evaluate(() => {{
+    const eds = Array.from(document.querySelectorAll("#contenteditable-root[contenteditable='true'], div#contenteditable-root"));
+    const visibleEd = eds.find(e => e.offsetParent !== null) || eds[0];
+    if (!visibleEd) return false;
+    visibleEd.click();
+    visibleEd.focus();
+    return true;
+  }});
+  await page.waitForTimeout(500);
+  await page.keyboard.insertText({json.dumps(post_text)});
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(2000);
+  const clickInfo = await page.evaluate(() => {{
+    const btns = Array.from(document.querySelectorAll("#submit-button button, button[aria-label='게시'], button"));
+    const postBtn = btns.find(b => {{
+      const t = (b.innerText || b.getAttribute("aria-label") || "").trim();
+      return (t === "게시" || t === "Post") && !b.disabled && b.getAttribute("aria-disabled") !== "true" && b.offsetParent !== null;
+    }});
+    if (postBtn) {{
+      postBtn.click();
+      return {{ clicked: true, label: (postBtn.innerText || postBtn.getAttribute("aria-label") || "게시").trim() }};
+    }}
+    return {{ clicked: false }};
+  }});
+  await page.waitForTimeout(4500);
+  const latestPost = await page.evaluate(() => {{
+    const posts = Array.from(document.querySelectorAll("ytd-backstage-post-thread-renderer")).map(el => {{
+      const contentEl = el.querySelector("#content-text");
+      const timeEl = el.querySelector("#published-time-text a");
+      return {{
+        text: contentEl ? (contentEl.innerText || "").trim().slice(0, 260) : "",
+        time: timeEl ? (timeEl.innerText || "").trim() : "방금 전",
+        url: timeEl && timeEl.href ? timeEl.href : location.href
+      }};
+    }}).filter(p => p.text);
+    return posts[0] || null;
+  }});
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: Boolean(clickInfo.clicked),
+    clickInfo,
+    channelHandle: {json.dumps(channel_handle)},
+    post: latestPost,
+    url: latestPost && latestPost.url ? latestPost.url : ("https://www.youtube.com/" + {json.dumps(channel_handle)} + "/posts")
+  }}));
+}} catch (err) {{
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: false, error: String(err) }}));
+}} finally {{
+  if (prevUrl && !prevUrl.includes("youtube.com")) {{
+    await page.goto(prevUrl, {{ waitUntil: "domcontentloaded", timeout: 12000 }}).catch(() => {{}});
+  }}
+}}
+"""
+    return run_ego_mjs(script, timeout=65)
+
+
+
 

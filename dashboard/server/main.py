@@ -714,6 +714,44 @@ def api_premium_sync():
     return sync_premium_live_state()
 
 
+class YouTubeProduceRequest(BaseModel):
+    part: int = 1
+    publish_community: bool = True
+
+
+@app.get("/api/youtube")
+def api_youtube_status():
+    from youtube_posting.posting import load_youtube_status, sync_youtube_live_state
+    st = load_youtube_status()
+    if not st:
+        st = sync_youtube_live_state()
+    return st
+
+
+@app.post("/api/youtube/sync")
+def api_youtube_sync():
+    from youtube_posting.posting import sync_youtube_live_state
+    return sync_youtube_live_state()
+
+
+@app.post("/api/youtube/produce")
+def api_youtube_produce(req: YouTubeProduceRequest):
+    from youtube_posting.posting import produce_youtube_svml_package
+    return produce_youtube_svml_package(part_no=req.part, publish_community=req.publish_community)
+
+
+@app.get("/api/youtube/media/{filename}")
+def api_youtube_media(filename: str):
+    from fastapi.responses import FileResponse
+    safe_name = Path(filename).name
+    if safe_name != filename or not safe_name.endswith((".mp4", ".png", ".mp3", ".wav")):
+        raise HTTPException(status_code=404)
+    path = DASHBOARD_DIR / "data" / "public" / "youtube_renders" / safe_name
+    if not path.is_file():
+        raise HTTPException(status_code=404)
+    return FileResponse(path)
+
+
 app.middleware("http")(llm_guard)
 
 
@@ -727,7 +765,7 @@ async def protect_internal_files(request, call_next):
         parts = path.strip('/').split('/')
         lowered = [part.casefold() for part in parts]
         public_data = {'app_testers.json', 'brunch.json', 'collection-health.json', 'kin-measurement.json',
-                       'kin.json', 'metrics.json', 'threads-measurement.json', 'threads.json'}
+                       'kin.json', 'metrics.json', 'threads-measurement.json', 'threads.json', 'youtube.json'}
         internal = (any(part.startswith('.') for part in parts)
                     or lowered[0] in {'runtime', 'server', 'common', 'agents', 'collectors', 'projects', 'tests'}
                     or (lowered[0] == 'data' and (len(parts) != 2 or parts[1] not in public_data or request.url.path != '/data/' + parts[1]))
@@ -742,7 +780,7 @@ async def protect_internal_files(request, call_next):
 def public_dashboard_snapshot(name: str):
     from fastapi.responses import FileResponse
     allowed = {'app_testers.json', 'brunch.json', 'collection-health.json', 'kin-measurement.json',
-               'kin.json', 'metrics.json', 'threads-measurement.json', 'threads.json'}
+               'kin.json', 'metrics.json', 'threads-measurement.json', 'threads.json', 'youtube.json'}
     if name not in allowed:
         raise HTTPException(status_code=404)
     path = DASHBOARD_DIR / 'data' / 'public' / name
