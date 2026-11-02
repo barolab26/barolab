@@ -322,90 +322,32 @@ def generate_and_upload_clean_editorial_thumbnail(
     category: str,
     slug: str,
     content_html: str = "",
+    summary_text: str = "",
+    custom_scene_prompt: str = "",
 ) -> str:
     """
-    Generate a clean 1200x675 domain-branded editorial data summary card with PIL,
+    Generate a genuine, text-free high-resolution editorial scene/object photograph
+    via `dashboard.common.flow_images` (strictly NO text, NO tables, NO people),
     sanitize with smartphone EXIF, and upload to `https://www.{domain}/api/media/upload`.
-    Used whenever a post has an empty thumbnail (`""`) or when fake AI images were removed.
     """
-    from PIL import Image, ImageDraw, ImageFont
-    from dashboard.common.cf_tables import _domain_theme
+    import tempfile
+    from dashboard.common.flow_images import image_prompt, _generate_via_openai_api
 
-    th = _domain_theme(domain)
-    acc_rgb = _hex_to_rgb(th.get("accent", "#9A3412"), (154, 52, 18))
-    bg_rgb = _hex_to_rgb(th.get("bg", "#FFFBF5"), (255, 251, 245))
-    hdr_rgb = _hex_to_rgb(th.get("headerBg", "#FFEDD5"), (255, 237, 213))
-    txt_rgb = _hex_to_rgb(th.get("text", "#0f172a"), (15, 23, 42))
+    summary_clean = summary_text or (BeautifulSoup(content_html, "html.parser").get_text(" ", strip=True)[:320] if content_html else title)
+    prompt = image_prompt(
+        title=title,
+        summary=summary_clean,
+        custom_prompt=custom_scene_prompt or None,
+    )
+    prompt += " Strictly NO people, NO human faces, NO Korean or English text, NO signs, NO posters, NO UI tables. Pure authentic location or object photography."
+    digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:16]
 
-    W, H = 1200, 675
-    img = Image.new("RGB", (W, H), bg_rgb)
-    draw = ImageDraw.Draw(img)
-
-    # Top accent bar & subtle card frame
-    draw.rectangle([0, 0, W, 16], fill=acc_rgb)
-    draw.rounded_rectangle([38, 42, W - 38, H - 38], radius=24, fill=(255, 255, 255), outline=acc_rgb, width=3)
-
-    def _font(sz: int, bold: bool = True):
-        for fp in (
-            "C:/Windows/Fonts/malgunbd.ttf" if bold else "C:/Windows/Fonts/malgun.ttf",
-            "C:/Windows/Fonts/NanumGothicBold.ttf" if bold else "C:/Windows/Fonts/NanumGothic.ttf",
-        ):
-            if os.path.exists(fp):
-                try:
-                    return ImageFont.truetype(fp, size=sz)
-                except Exception:
-                    pass
-        return ImageFont.load_default()
-
-    f_badge = _font(23, True)
-    f_title = _font(42, True)
-    f_row_h = _font(24, True)
-    f_row_b = _font(23, False)
-
-    # Category & Domain pill
-    cat_label = f" {category or '핵심 가이드'}  |  {domain.upper()} "
-    draw.rounded_rectangle([76, 76, 560, 124], radius=12, fill=hdr_rgb, outline=acc_rgb, width=2)
-    draw.text((94, 86), cat_label[:32], font=f_badge, fill=acc_rgb)
-
-    # Wrap title into 2 lines (max ~24 chars per line)
-    clean_t = re.sub(r"\s+", " ", (title or "핵심 비교 가이드")).strip()
-    line1 = clean_t[:25]
-    line2 = clean_t[25:50] + ("..." if len(clean_t) > 50 else "")
-    draw.text((76, 152), line1, font=f_title, fill=txt_rgb)
-    if line2:
-        draw.text((76, 212), line2, font=f_title, fill=acc_rgb)
-
-    # Extract up to 3 summary points from table or h2s
-    bullets: List[Tuple[str, str]] = []
-    if content_html:
-        soup = BeautifulSoup(content_html, "html.parser")
-        tbl = soup.find("table")
-        if tbl:
-            for tr in tbl.find_all("tr")[1:4]:
-                cells = [c.get_text(" ", strip=True) for c in tr.find_all(["td", "th"])]
-                if len(cells) >= 2 and cells[0] and cells[1]:
-                    bullets.append((cells[0][:18], " · ".join(cells[1:3])[:42]))
-        if not bullets:
-            for idx, h2 in enumerate(soup.find_all("h2")[:3], 1):
-                bullets.append((f"체크포인트 0{idx}", h2.get_text(" ", strip=True)[:42]))
-    if not bullets:
-        bullets = [
-            ("핵심 기준 01", "방문·신청 전 필수 운영 시간 및 대상 요건 확인"),
-            ("핵심 기준 02", "온라인 사전 예약 및 현장 발권·할인 조건 비교"),
-            ("핵심 기준 03", "주차장 위치·대중교통 동선 및 소요시간 체크"),
-        ]
-
-    y_box = 295
-    for b_key, b_val in bullets[:3]:
-        draw.rounded_rectangle([76, y_box, W - 76, y_box + 88], radius=14, fill=bg_rgb, outline=hdr_rgb, width=2)
-        draw.rounded_rectangle([92, y_box + 18, 330, y_box + 70], radius=10, fill=acc_rgb)
-        draw.text((112, y_box + 29), b_key[:14], font=f_row_h, fill=(255, 255, 255))
-        draw.text((356, y_box + 29), b_val[:40], font=f_row_b, fill=txt_rgb)
-        y_box += 104
-
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=92)
-    raw_bytes = buf.getvalue()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        out_img = tmp_path / "flow-hero.png"
+        ev_file = tmp_path / "flow-generation.json"
+        _generate_via_openai_api(prompt, digest, out_img, ev_file)
+        raw_bytes = out_img.read_bytes()
 
     clean_bytes, san_report = sanitize_and_optimize_image_bytes(
         img_bytes=raw_bytes,
@@ -415,7 +357,7 @@ def generate_and_upload_clean_editorial_thumbnail(
         caption=title,
         shot_index=1,
     )
-    seo_fname = san_report.get("seoFilename") or f"{slug[:32]}-summary-card.jpg"
+    seo_fname = san_report.get("seoFilename") or f"{slug[:32]}-photo.jpg"
     headers = _get_cf_headers(domain)
     upload_headers = {k: v for k, v in headers.items() if k.lower() != "content-type"}
     try:
