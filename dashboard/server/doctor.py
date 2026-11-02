@@ -1000,7 +1000,7 @@ def repair_nolplace_and_all_empty_thumbnails() -> Dict[str, Any]:
         slug = (item.get("slug") or "").strip()
         pid = item.get("id")
         cur_thumb = (item.get("thumbnail") or "").strip()
-        if slug in NOLPLACE_DUPLICATE_REMODELS:
+        if slug in NOLPLACE_DUPLICATE_REMODELS and (not cur_thumb or "17936039" in cur_thumb or "신사" in (item.get("title") or "")):
             spec = NOLPLACE_DUPLICATE_REMODELS[slug]
             styled_html = inject_interactive_widget(
                 style_tables(spec["content"], domain="nolplace.com"),
@@ -1067,18 +1067,50 @@ def repair_nolplace_and_all_empty_thumbnails() -> Dict[str, Any]:
             for p in (r_dom.json().get("posts") or []):
                 if p.get("status") not in ("published", None):
                     continue
-                if not (p.get("thumbnail") or "").strip():
+                cur_t = (p.get("thumbnail") or "").strip()
+                is_old_pil_card = any(ts in cur_t for ts in ("17936039", "17936040", "17936041", "17936042", "17936043", "17936044"))
+                if not cur_t or is_old_pil_card:
+                    pid = p.get("id")
                     slug = (p.get("slug") or "").strip()
-                    if slug:
-                        res = remodel_cf_post_by_url(f"https://www.{dom}/{slug}", apply=True, republish=True)
-                        fixed_posts.append({
-                            "domain": dom,
-                            "id": p.get("id"),
-                            "slug": slug,
-                            "action": "restored_empty_thumbnail_and_archetype",
-                            "httpStatus": res.get("httpStatus"),
-                            "ok": res.get("ok"),
-                        })
+                    if pid and slug:
+                        detail = requests.get(f"https://www.{dom}/api/posts/{pid}", headers=dom_headers, timeout=12).json().get("post") or p
+                        new_thumb = generate_and_upload_clean_editorial_thumbnail(
+                            domain=dom,
+                            title=detail.get("title") or "",
+                            category=detail.get("category") or "",
+                            slug=slug,
+                            content_html=detail.get("content") or "",
+                        )
+                        if new_thumb:
+                            soup_d = BeautifulSoup(detail.get("content") or "", "html.parser")
+                            first_img = soup_d.find("img")
+                            if first_img and is_old_pil_card:
+                                first_img["src"] = new_thumb
+                            elif not first_img:
+                                fig_tag = BeautifulSoup(
+                                    f'<figure class="post-image" style="margin:24px 0;text-align:center;">'
+                                    f'<img src="{new_thumb}" alt="{detail.get("title") or slug}" style="max-width:100%;height:auto;border-radius:12px;" loading="lazy">'
+                                    f'</figure>',
+                                    "html.parser",
+                                )
+                                first_h2 = soup_d.find("h2")
+                                if first_h2:
+                                    first_h2.insert_before(fig_tag)
+                                else:
+                                    soup_d.insert(0, fig_tag)
+                            detail["content"] = str(soup_d)
+                            detail["thumbnail"] = new_thumb
+                            detail["og_image"] = new_thumb
+                            put_d = requests.put(f"https://www.{dom}/api/posts/{pid}", headers=dom_headers, json=detail, timeout=20)
+                            fixed_posts.append({
+                                "domain": dom,
+                                "id": pid,
+                                "slug": slug,
+                                "action": "replaced_with_real_flow_photo",
+                                "thumbnail": new_thumb,
+                                "httpStatus": put_d.status_code,
+                                "ok": put_d.status_code in (200, 201),
+                            })
         except Exception as exc:
             errors.append({"domain": dom, "error": str(exc)})
 

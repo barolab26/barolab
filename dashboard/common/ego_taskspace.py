@@ -82,7 +82,20 @@ def run_ego_mjs(script_source: str, *, timeout: int = 60, result_prefix: str = "
     if not ego_cli:
         raise RuntimeError("ego-browser CLI is not available on this host")
 
-    wrapped_source = f"async function __barolabRun() {{\n{script_source}\n}}\ntry {{ await __barolabRun(); }} finally {{ process.exit(0); }}\n"
+    wrapped_source = (
+        "async function __barolabReclaimSpaces() {\n"
+        "  try {\n"
+        "    const sp = await listTaskSpaces();\n"
+        "    for (const s of (Array.isArray(sp) ? sp : [])) {\n"
+        "      if (s && typeof s.name === 'string' && s.name.startsWith('barolab-') && s.ownership === 'user' && s.id !== undefined) {\n"
+        "        await claimTaskSpace(s.id).catch(() => {});\n"
+        "      }\n"
+        "    }\n"
+        "  } catch (_) {}\n"
+        "}\n"
+        f"async function __barolabRun() {{\n  await __barolabReclaimSpaces();\n{script_source}\n}}\n"
+        f"try {{ await __barolabRun(); }} catch (__err) {{ console.log({json.dumps(result_prefix)} + JSON.stringify({{ ok: false, error: String(__err) }})); }} finally {{ process.exit(0); }}\n"
+    )
     cflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     lock_path = _ego_cli_lock_path()
     last_err = None
@@ -1306,17 +1319,11 @@ try {{
   await page.waitForTimeout(400);
 
   await page.click(".se-text-paragraph");
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(250);
   const paras = {json.dumps(paragraphs)};
-  for (const p of paras) {{
-    if (p) {{
-      await page.keyboard.insertText(String(p));
-    }}
-    await page.keyboard.press("Enter");
-    await page.keyboard.press("Enter");
-    await page.waitForTimeout(200);
-  }}
-  await page.waitForTimeout(2000);
+  const fullBody = paras.filter(Boolean).map(p => String(p).trim()).join("\\n\\n");
+  await page.keyboard.insertText(fullBody);
+  await page.waitForTimeout(1200);
 
   await page.evaluate(() => {{
     window.alert = () => {{}};
@@ -1324,7 +1331,7 @@ try {{
     const btn = document.querySelector("a.BaseButton--skinGreen");
     if (btn) btn.click();
   }});
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(5500);
   const finalUrl = await page.url();
   const pageTitle = await page.title().catch(() => "");
   console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
@@ -1350,7 +1357,7 @@ try {{
   }}
 }}
 """
-    return run_ego_mjs(script, timeout=65)
+    return run_ego_mjs(script, timeout=90)
 
 
 def native_sync_brunch_state(uid: str = "", upw: str = "") -> dict:
