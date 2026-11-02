@@ -306,6 +306,136 @@ def _build_replacement_summary_table_if_needed(asset_name: str, cap_txt: str, do
     return None
 
 
+def _hex_to_rgb(hex_str: str, fallback: Tuple[int, int, int] = (37, 99, 235)) -> Tuple[int, int, int]:
+    h = (hex_str or "").strip().lstrip("#")
+    if len(h) == 6:
+        try:
+            return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+        except Exception:
+            pass
+    return fallback
+
+
+def generate_and_upload_clean_editorial_thumbnail(
+    domain: str,
+    title: str,
+    category: str,
+    slug: str,
+    content_html: str = "",
+) -> str:
+    """
+    Generate a clean 1200x675 domain-branded editorial data summary card with PIL,
+    sanitize with smartphone EXIF, and upload to `https://www.{domain}/api/media/upload`.
+    Used whenever a post has an empty thumbnail (`""`) or when fake AI images were removed.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+    from dashboard.common.cf_tables import _domain_theme
+
+    th = _domain_theme(domain)
+    acc_rgb = _hex_to_rgb(th.get("accent", "#9A3412"), (154, 52, 18))
+    bg_rgb = _hex_to_rgb(th.get("bg", "#FFFBF5"), (255, 251, 245))
+    hdr_rgb = _hex_to_rgb(th.get("headerBg", "#FFEDD5"), (255, 237, 213))
+    txt_rgb = _hex_to_rgb(th.get("text", "#0f172a"), (15, 23, 42))
+
+    W, H = 1200, 675
+    img = Image.new("RGB", (W, H), bg_rgb)
+    draw = ImageDraw.Draw(img)
+
+    # Top accent bar & subtle card frame
+    draw.rectangle([0, 0, W, 16], fill=acc_rgb)
+    draw.rounded_rectangle([38, 42, W - 38, H - 38], radius=24, fill=(255, 255, 255), outline=acc_rgb, width=3)
+
+    def _font(sz: int, bold: bool = True):
+        for fp in (
+            "C:/Windows/Fonts/malgunbd.ttf" if bold else "C:/Windows/Fonts/malgun.ttf",
+            "C:/Windows/Fonts/NanumGothicBold.ttf" if bold else "C:/Windows/Fonts/NanumGothic.ttf",
+        ):
+            if os.path.exists(fp):
+                try:
+                    return ImageFont.truetype(fp, size=sz)
+                except Exception:
+                    pass
+        return ImageFont.load_default()
+
+    f_badge = _font(23, True)
+    f_title = _font(42, True)
+    f_row_h = _font(24, True)
+    f_row_b = _font(23, False)
+
+    # Category & Domain pill
+    cat_label = f" {category or '핵심 가이드'}  |  {domain.upper()} "
+    draw.rounded_rectangle([76, 76, 560, 124], radius=12, fill=hdr_rgb, outline=acc_rgb, width=2)
+    draw.text((94, 86), cat_label[:32], font=f_badge, fill=acc_rgb)
+
+    # Wrap title into 2 lines (max ~24 chars per line)
+    clean_t = re.sub(r"\s+", " ", (title or "핵심 비교 가이드")).strip()
+    line1 = clean_t[:25]
+    line2 = clean_t[25:50] + ("..." if len(clean_t) > 50 else "")
+    draw.text((76, 152), line1, font=f_title, fill=txt_rgb)
+    if line2:
+        draw.text((76, 212), line2, font=f_title, fill=acc_rgb)
+
+    # Extract up to 3 summary points from table or h2s
+    bullets: List[Tuple[str, str]] = []
+    if content_html:
+        soup = BeautifulSoup(content_html, "html.parser")
+        tbl = soup.find("table")
+        if tbl:
+            for tr in tbl.find_all("tr")[1:4]:
+                cells = [c.get_text(" ", strip=True) for c in tr.find_all(["td", "th"])]
+                if len(cells) >= 2 and cells[0] and cells[1]:
+                    bullets.append((cells[0][:18], " · ".join(cells[1:3])[:42]))
+        if not bullets:
+            for idx, h2 in enumerate(soup.find_all("h2")[:3], 1):
+                bullets.append((f"체크포인트 0{idx}", h2.get_text(" ", strip=True)[:42]))
+    if not bullets:
+        bullets = [
+            ("핵심 기준 01", "방문·신청 전 필수 운영 시간 및 대상 요건 확인"),
+            ("핵심 기준 02", "온라인 사전 예약 및 현장 발권·할인 조건 비교"),
+            ("핵심 기준 03", "주차장 위치·대중교통 동선 및 소요시간 체크"),
+        ]
+
+    y_box = 295
+    for b_key, b_val in bullets[:3]:
+        draw.rounded_rectangle([76, y_box, W - 76, y_box + 88], radius=14, fill=bg_rgb, outline=hdr_rgb, width=2)
+        draw.rounded_rectangle([92, y_box + 18, 330, y_box + 70], radius=10, fill=acc_rgb)
+        draw.text((112, y_box + 29), b_key[:14], font=f_row_h, fill=(255, 255, 255))
+        draw.text((356, y_box + 29), b_val[:40], font=f_row_b, fill=txt_rgb)
+        y_box += 104
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=92)
+    raw_bytes = buf.getvalue()
+
+    clean_bytes, san_report = sanitize_and_optimize_image_bytes(
+        img_bytes=raw_bytes,
+        account_or_domain=domain,
+        source_type="generated",
+        topic_or_slug=f"{slug} {title}",
+        caption=title,
+        shot_index=1,
+    )
+    seo_fname = san_report.get("seoFilename") or f"{slug[:32]}-summary-card.jpg"
+    headers = _get_cf_headers(domain)
+    upload_headers = {k: v for k, v in headers.items() if k.lower() != "content-type"}
+    try:
+        resp = requests.post(
+            f"https://www.{domain}/api/media/upload",
+            headers=upload_headers,
+            files={"file": (seo_fname, clean_bytes, "image/jpeg")},
+            timeout=25,
+        )
+        if resp.status_code in (200, 201):
+            up_data = resp.json()
+            new_url = up_data.get("media", {}).get("url") or up_data.get("url") or ""
+            if new_url and not new_url.startswith("http"):
+                new_url = f"https://www.{domain}{new_url}"
+            return new_url
+    except Exception:
+        pass
+    return ""
+
+
 def remodel_cf_post_by_url(
     url: str,
     apply: bool = True,
@@ -472,7 +602,13 @@ def remodel_cf_post_by_url(
             tag.decompose()
             empty_boxes_removed += 1
 
-    final_content_html = str(soup)
+    # Step 4.5: Apply New 4-Archetype Table Styling & Domain Interactive Editorial Summary Widget (`cf_tables.py`)
+    try:
+        from dashboard.common.cf_tables import style_tables, inject_interactive_widget
+        final_content_html = style_tables(str(soup), domain=domain)
+        final_content_html = inject_interactive_widget(final_content_html, title=title, domain=domain)
+    except Exception:
+        final_content_html = str(soup)
 
     # Also clean local output directory (`final.html`, `assembled.html`, `article.json`) if present
     local_files_updated: List[str] = []
@@ -511,6 +647,25 @@ def remodel_cf_post_by_url(
         if sanitized_images and sanitized_images[0].get("newSrc")
         else (remaining_img_urls[0] if remaining_img_urls else post_detail.get("thumbnail"))
     )
+    # Never leave a blank thumbnail (`""`)! Auto-generate & upload a domain-branded 1200x675 summary card if empty.
+    if apply and republish and (not new_thumb or not str(new_thumb).strip()):
+        generated_thumb = generate_and_upload_clean_editorial_thumbnail(
+            domain=domain,
+            title=title,
+            category=post_detail.get("category") or "핵심 가이드",
+            slug=slug,
+            content_html=final_content_html,
+        )
+        if generated_thumb:
+            new_thumb = generated_thumb
+            if not remaining_img_urls:
+                hero_fig = (
+                    f'<figure class="post-image" style="margin:22px 0;">'
+                    f'<img src="{generated_thumb}" alt="{title}" loading="lazy" style="width:100%;border-radius:12px;" />'
+                    f'<figcaption style="font-size:13px;color:#64748b;margin-top:6px;">{title} 핵심 기준 요약 카드</figcaption>'
+                    f'</figure>'
+                )
+                final_content_html = hero_fig + final_content_html
 
     if apply and republish and post_id:
         payload = {
@@ -770,6 +925,446 @@ def repair_cf_seo_titles_batch(days: int = 10) -> Dict[str, Any]:
         "repaired": repaired,
         "errors": errors,
     }
+
+
+NOLPLACE_DUPLICATE_REMODELS: Dict[str, Dict[str, str]] = {
+    "sinsa-nolplace-booking-check": {
+        "title": "에버랜드 스마트줄서기 시간과 자유이용권 예매, 종일권·오후권 요금 및 무료셔틀 주차장 비교",
+        "category": "수목원·테마파크",
+        "excerpt": "에버랜드 방문 전 필수 확인해야 할 오픈런 스마트줄서기 신청 시각, 판다월드·사파리월드 우선순위, 정문 유료주차장과 외곽 무료셔틀 주차장 동선을 비교표로 정리했습니다.",
+        "content": """<p>주말이나 휴일에 에버랜드를 찾을 때 가장 큰 변수는 <strong>입장 직후 15분 안에 마감되는 스마트줄서기 시간</strong>과 주차장 선택입니다. 현장 매표소 대기 없이 바로 게이트를 통과하려면 출발 전 스마트예약 QR 등록과 주차 구역부터 확정해야 대기 시간을 1시간 이상 줄일 수 있습니다.</p>
+<h2>에버랜드 스마트줄서기 시간 및 인기 어트랙션 선점 기준</h2>
+<p>스마트줄서기는 에버랜드 공식 앱에 이용권을 등록한 뒤 <strong>정문 게이트 통과(입장 체크) 직후부터 오전 11시 또는 오후 2시 전후</strong>까지 선착순으로 열립니다. 동시에 여러 시설을 잡을 수 없고, 앞선 예약의 이용 시간이 지나거나 취소해야 다음 시설 신청이 활성화됩니다.</p>
+<table>
+  <caption>에버랜드 스마트줄서기 vs 오후 현장줄서기 운영 비교표</caption>
+  <thead>
+    <tr><th>구분 항목</th><th>오전 스마트줄서기 (앱 선착순)</th><th>오후 현장줄서기 전환 (14:00 이후)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>신청 가능 조건</strong></td><td>에버랜드 앱에 이용권 QR 등록 + 정문 입장 스캔 완료 직후</td><td>별도 앱 예약 없이 해당 시설 입구 대기줄 합류</td></tr>
+    <tr><td><strong>1순위 마감 시설</strong></td><td>판다월드 · 사파리월드 · 티익스프레스 · 로스트밸리</td><td>기상 및 대기열 상황에 따라 탄력 운영 (마감 시각 조기 종료 주의)</td></tr>
+    <tr><td><strong>동시 예약 제한</strong></td><td>어트랙션군 1개 + 주토피아/판다월드군 1개 순차 진행</td><td>제한 없음 (현장 대기 시간 평균 60~120분 소요)</td></tr>
+  </tbody>
+</table>
+<h2>정문 유료주차장 vs 외곽 무료셔틀 주차장(1~3주차장) 비교</h2>
+<p>유모차를 동반하거나 아이와 함께 이동한다면 정문 바로 앞 <strong>정문 주차장(유료)</strong>이 도보 이동 거리를 크게 줄여주지만, 주말 오전 9시 30분 전후로 만차되는 경우가 많습니다. 만차 시 안내되는 1~3 외곽 주차장은 무료로 운영되며 정문까지 전용 셔틀버스가 수시 운행됩니다.</p>
+<table>
+  <caption>에버랜드 정문 주차장 vs 외곽 1~3 주차장 실측 비교</caption>
+  <thead>
+    <tr><th>주차 구역</th><th>주차 요금 기준</th><th>정문 게이트 이동 소요시간 및 특징</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>정문 주차장 (유료)</strong></td><td>일일 정액 또는 시간제 (카카오T 주차 정산 할인 가능)</td><td>도보 3~5분 직결 · 주말 오픈 30분 전 만차 빈번</td></tr>
+    <tr><td><strong>1A · 1B · 2 · 3 주차장</strong></td><td>무료 운영</td><td>전용 무료 셔틀버스 탑승 후 약 5~8분 이동 (배차 간격 5분 내외)</td></tr>
+    <tr><td><strong>발레파킹 라운지</strong></td><td>별도 사전 예약 및 유료 요금 적용</td><td>정문 최단거리 하차 및 출차 대기 시간 단축</td></tr>
+  </tbody>
+</table>
+<h2>종일권 vs 오후권 예매 및 우천·방문 전 3초 체크리스트</h2>
+<p>오전 오픈런이 어렵고 야간 퍼레이드와 문라이트 포토 스팟 위주로 관람한다면 <strong>오후 2시 30분(또는 3시) 이후 입장하는 오후권</strong>이 종일권 대비 비용 부담을 낮추는 데 유리합니다. 방문 당일 에버랜드 앱에서 기상 악화로 인한 운휴 시설을 먼저 확인한 뒤 동선을 확정하세요.</p>"""
+    },
+    "sinsa-nolplace-booking-location": {
+        "title": "아침고요수목원 입장료 할인과 주차장 동선, 오색별빛정원전 점등 시간 및 관람 코스 비교",
+        "category": "수목원·테마파크",
+        "excerpt": "가평 아침고요수목원 방문 전 확인해야 할 성인·어린이 입장료 기준, 하경정원·서화연 최단 관람 코스와 야간 오색별빛정원전 점등 시간, 주차장 진출입 팁을 정리했습니다.",
+        "content": """<p>가평 나들이 필수 코스로 꼽히는 <strong>아침고요수목원</strong>은 약 10만 평 규모의 야외 정원으로 이루어져 있어, 입장 전 어느 코스로 돌지 정하지 않으면 핵심 포토존인 하경정원과 서화연을 놓치거나 체력이 먼저 소진되기 쉽습니다.</p>
+<h2>아침고요수목원 입장료 기준 및 동물원 패키지 할인 비교</h2>
+<p>수목원 단독 입장권은 현장 매표소와 키오스크에서 바로 발권할 수 있으며, 인근 아침고요가족동물원을 함께 방문할 계획이라면 <strong>수목원+동물원 패키지권</strong>을 선택할 때 개별 발권보다 1인당 요금을 절약할 수 있습니다.</p>
+<table>
+  <caption>아침고요수목원 구분별 입장 요금 및 운영 시간 비교표</caption>
+  <thead>
+    <tr><th>구분 대상</th><th>수목원 일반 입장 기준</th><th>우대·패키지 및 운영 특징</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>어른 (성인)</strong></td><td>11,000원 (계절·축제 기간 공식 요금표 기준)</td><td>수목원+가족동물원 패키지 구매 시 묶음 할인 적용</td></tr>
+    <tr><td><strong>청소년 / 어린이</strong></td><td>청소년 8,500원 / 어린이 7,500원</td><td>36개월 미만 유아 증빙서류 지참 시 무료 입장</td></tr>
+    <tr><td><strong>운영 및 마감 시간</strong></td><td>오전 08:30 개장 ~ 일몰 시(동절기 별빛축제 시 21:00/23:00)</td><td>입장 마감은 폐장 1시간 전까지 완료 필수</td></tr>
+  </tbody>
+</table>
+<h2>핵심 1시간 알짜 코스 vs 2시간 전체 순환 동선 비교</h2>
+<p>부모님이나 어린 자녀와 동행해 오르막길을 줄이고 싶다면 <strong>고향집정원 ➔ 분재정원 ➔ 서화연 ➔ 하경정원(전망대)</strong>으로 이어지는 중앙 평지 중심 1시간 코스가 가장 효율적입니다.</p>
+<table>
+  <caption>아침고요수목원 동행 유형별 추천 관람 동선 비교</caption>
+  <thead>
+    <tr><th>코스 구분</th><th>세부 이동 경로</th><th>소요 시간 및 경사도</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>A코스 (유모차·시니어 알짜형)</strong></td><td>매표소 ➔ 고향집정원 ➔ 분재정원 ➔ 서화연 ➔ 하경정원</td><td>약 50~60분 · 완만한 평지 위주 동선</td></tr>
+    <tr><td><strong>B코스 (사진·전체 완주형)</strong></td><td>하경정원 ➔ 한국정원 ➔ 하늘길·달빛정원(하얀 성당) ➔ 출렁다리</td><td>약 1시간 40분~2시간 · 달빛정원 구간 완만한 오르막 포함</td></tr>
+    <tr><td><strong>야간 별빛정원전 코스</strong></td><td>일몰 직후 점등 (하경정원 메인 일루미네이션 ➔ 달빛정원)</td><td>약 60분 · 해 질 녘 오후 4시 30분 입장 시 주·야간 동시 관람 가능</td></tr>
+  </tbody>
+</table>
+<h2>주말 주차장 진입 정체 피하는 시간대 및 방문 팁</h2>
+<p>수목원 전용 주차장은 무료로 운영되지만, 주말 오후 1시부터 4시 사이에는 진입로 2차선 도로가 정체될 수 있습니다. 오전 10시 이전 도착으로 여유롭게 산책하거나, 별빛축제 시즌에는 오후 4시 이전에 미리 입차해 주간 풍경과 야간 점등을 한 번에 즐기는 일정을 권장합니다.</p>"""
+    },
+    "sinsa-nolplace-booking-guide": {
+        "title": "서울랜드 자유이용권 제휴카드 할인과 동문·후문 주차장 위치, 야간개장 루나파크 동선 비교",
+        "category": "주차·예매꿀팁",
+        "excerpt": "과천 서울랜드 방문 전 정가 결제를 피하기 위한 제휴카드·온라인 사전예매 할인 비교표와 코끼리열차 없이 바로 입장하는 동문주차장 공략법, 루나파크 야간 공연 동선을 정리했습니다.",
+        "content": """<p>과천 <strong>서울랜드</strong>는 대공원역에서 내려 코끼리열차를 타고 정문으로 들어가는 코스와, 자차로 <strong>동문주차장</strong>에 바로 세워 도보 1분 만에 입장하는 코스에 따라 입장까지 걸리는 시간이 30분 이상 차이 납니다. 출발 전 할인 권종과 주차장 위치부터 비교해 보세요.</p>
+<h2>서울랜드 정문(대공원) 주차장 vs 동문주차장 접근성 비교</h2>
+<p>자차로 방문한다면 내비게이션 목적지를 ‘서울랜드’ 대신 <strong>‘서울랜드 동문주차장’</strong>으로 설정하는 것이 핵심입니다. 대공원 통합주차장에 세우면 코끼리열차를 별도로 결제하거나 15분 이상 걸어야 하지만, 동문주차장은 서울랜드 동문 매표소와 바로 맞닿아 있습니다.</p>
+<table>
+  <caption>서울랜드 방문 시 동문주차장 vs 서울대공원 주차장 실측 비교표</caption>
+  <thead>
+    <tr><th>비교 항목</th><th>서울랜드 동문주차장 (추천)</th><th>서울대공원 통합주차장 (정문 측)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>게이트까지 이동 거리</strong></td><td>주차 후 도보 1~2분 즉시 동문 입장</td><td>코끼리열차 탑승(유료) 또는 도보 15~20분 이동</td></tr>
+    <tr><td><strong>주차 요금 혜택</strong></td><td>서울랜드 자유이용권 영수증·티켓 제시 시 무료 또는 우대 적용</td><td>서울대공원 공영주차장 일일 정액 요금 부과</td></tr>
+    <tr><td><strong>만차 시 대안</strong></td><td>주말 오전 10시 30분 이후 만차 시 후문주차장 연계 안내</td><td>부지가 넓어 주말 오후에도 주차 여유 높음</td></tr>
+  </tbody>
+</table>
+<h2>자유이용권 종일권 vs 오후권(야간개장) 제휴 할인 체크</h2>
+<p>현장 매표소에서 정가로 발권하기보다 통신사 멤버십, 전월 실적 무관 신용카드 프로모션, 또는 네이버 사전 예매를 활용하면 40~50% 이상 할인된 금액으로 자유이용권을 준비할 수 있습니다.</p>
+<table>
+  <caption>서울랜드 이용권 유형별 입장 시간 및 추천 관람 포인트</caption>
+  <thead>
+    <tr><th>권종 구분</th><th>입장 가능 시간</th><th>핵심 추천 코스 및 관람 포인트</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>종일 자유이용권</strong></td><td>오전 10:00 개장 시부터 폐장까지</td><td>어린이 인기 놀이기구(베스트키즈·구름빵) 오전 선점 + 전 구역 이용</td></tr>
+    <tr><td><strong>오후권 (야간개장)</strong></td><td>오후 16:00 이후 입장</td><td>블랙홀2000·은하열차 탑승 후 루나파크 레이저쇼·불꽃놀이 관람</td></tr>
+    <tr><td><strong>미취학·우대 할인</strong></td><td>종일/오후 동일 적용</td><td>36개월 미만 증빙서류 지참 시 무료 (키즈 실내 놀이터 베스트키즈 별도 시간제 확인)</td></tr>
+  </tbody>
+</table>
+<h2>베스트키즈 실내 놀이터 예약 및 루나파크 야간 동선 정리</h2>
+<p>미취학 아동과 동행한다면 입장 직후 삼천리동산 인근 실내 키즈파크인 <strong>베스트키즈</strong>의 당일 회차 시간표를 먼저 확인하고, 해가 진 뒤에는 지구별 무대와 루나레이크 주변에서 펼쳐지는 야간 일루미네이션 순서로 이동하면 동선 낭비 없이 알차게 관람할 수 있습니다.</p>"""
+    }
+}
+
+
+def repair_nolplace_and_all_empty_thumbnails() -> Dict[str, Any]:
+    """
+    1. Remodel the 3 duplicate brand-confusion Sinsa posts (`id: 44, 45, 46`) on `nolplace.com` into real theme-park/outing guides.
+    2. Repair `id: 42, 43` on `nolplace.com` and any post across all 16 CF domains that has an empty thumbnail (`""`),
+       generating & uploading a clean 1200x675 editorial summary card + applying `cf_tables.py` widgets & table styles.
+    """
+    from cf_posting import posting as cf_post
+    from dashboard.common.cf_tables import style_tables, inject_interactive_widget
+
+    fixed_posts: List[Dict[str, Any]] = []
+    errors: List[Dict[str, Any]] = []
+
+    # Part A: Fix nolplace.com specifically (duplicate Sinsa posts + empty thumbnail posts)
+    nol_headers = _get_cf_headers("nolplace.com")
+    try:
+        r = requests.get("https://www.nolplace.com/api/posts?limit=30&page=1", headers=nol_headers, timeout=15)
+        nol_list = (r.json().get("posts") or []) if r.status_code == 200 else []
+    except Exception as exc:
+        nol_list = []
+        errors.append({"domain": "nolplace.com", "error": str(exc)})
+
+    for item in nol_list:
+        slug = (item.get("slug") or "").strip()
+        pid = item.get("id")
+        cur_thumb = (item.get("thumbnail") or "").strip()
+        if slug in NOLPLACE_DUPLICATE_REMODELS:
+            spec = NOLPLACE_DUPLICATE_REMODELS[slug]
+            styled_html = inject_interactive_widget(
+                style_tables(spec["content"], domain="nolplace.com"),
+                title=spec["title"],
+                domain="nolplace.com",
+            )
+            thumb_url = generate_and_upload_clean_editorial_thumbnail(
+                domain="nolplace.com",
+                title=spec["title"],
+                category=spec["category"],
+                slug=slug,
+                content_html=styled_html,
+            )
+            if thumb_url:
+                hero_fig = (
+                    f'<figure class="post-image" style="margin:22px 0;">'
+                    f'<img src="{thumb_url}" alt="{spec["title"]}" loading="lazy" style="width:100%;border-radius:12px;" />'
+                    f'<figcaption style="font-size:13px;color:#64748b;margin-top:6px;">{spec["title"]} 핵심 비교 요약 카드</figcaption>'
+                    f'</figure>'
+                )
+                styled_html = hero_fig + styled_html
+            payload = {
+                "title": spec["title"],
+                "content": styled_html,
+                "slug": slug,
+                "category": spec["category"],
+                "meta_description": spec["excerpt"],
+                "excerpt": spec["excerpt"],
+                "thumbnail": thumb_url or cur_thumb,
+                "og_image": thumb_url or cur_thumb,
+                "isPublished": True,
+                "status": "published",
+            }
+            put_r = requests.put(f"https://www.nolplace.com/api/posts/{pid}", headers=nol_headers, json=payload, timeout=20)
+            fixed_posts.append({
+                "domain": "nolplace.com",
+                "id": pid,
+                "slug": slug,
+                "action": "replaced_duplicate_sinsa_post",
+                "newTitle": spec["title"],
+                "thumbnail": thumb_url,
+                "httpStatus": put_r.status_code,
+            })
+        elif not cur_thumb:
+            res = remodel_cf_post_by_url(f"https://www.nolplace.com/{slug}", apply=True, republish=True)
+            fixed_posts.append({
+                "domain": "nolplace.com",
+                "id": pid,
+                "slug": slug,
+                "action": "restored_empty_thumbnail_and_archetype",
+                "httpStatus": res.get("httpStatus"),
+                "ok": res.get("ok"),
+            })
+
+    # Part B: Scan the remaining 15 CF domains for any post with empty thumbnail (`""`)
+    for dom in cf_post.ALL_DOMAINS:
+        if dom == "nolplace.com":
+            continue
+        try:
+            dom_headers = _get_cf_headers(dom)
+            r_dom = requests.get(f"https://www.{dom}/api/posts?limit=20&page=1", headers=dom_headers, timeout=12)
+            if r_dom.status_code != 200:
+                continue
+            for p in (r_dom.json().get("posts") or []):
+                if p.get("status") not in ("published", None):
+                    continue
+                if not (p.get("thumbnail") or "").strip():
+                    slug = (p.get("slug") or "").strip()
+                    if slug:
+                        res = remodel_cf_post_by_url(f"https://www.{dom}/{slug}", apply=True, republish=True)
+                        fixed_posts.append({
+                            "domain": dom,
+                            "id": p.get("id"),
+                            "slug": slug,
+                            "action": "restored_empty_thumbnail_and_archetype",
+                            "httpStatus": res.get("httpStatus"),
+                            "ok": res.get("ok"),
+                        })
+        except Exception as exc:
+            errors.append({"domain": dom, "error": str(exc)})
+
+    return {"ok": True, "fixedCount": len(fixed_posts), "fixedPosts": fixed_posts, "errors": errors}
+
+
+DOMAIN_HOME_LAYOUT_CSS: Dict[str, str] = {
+    # Group 1: Newspaper / Legal / Tax Editorial Lists & Dossiers
+    "must-good.com": """
+/* must-good.com — Wikitree Navy Left Sidebar + 1-Lead Headline & 1-Col Horizontal News List */
+html body .layout:has(#postGrid) { display:grid !important; grid-template-columns:280px minmax(0,1fr) !important; gap:28px !important; max-width:1180px !important; margin:24px auto 60px !important; padding:0 20px !important; align-items:start !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:1fr !important; gap:18px !important; }
+html body #postGrid .card:first-child .card-link { display:grid !important; grid-template-columns:1.2fr 1fr !important; gap:22px !important; background:#0f172a !important; color:#f8fafc !important; border-radius:16px !important; overflow:hidden !important; padding:0 !important; }
+html body #postGrid .card:first-child h3 { color:#ffffff !important; font-size:1.38rem !important; -webkit-line-clamp:3 !important; }
+html body #postGrid .card:first-child .excerpt { color:#cbd5e1 !important; }
+html body #postGrid .card:not(:first-child) .card-link { display:grid !important; grid-template-columns:220px 1fr !important; gap:18px !important; align-items:center !important; padding:12px !important; border-radius:12px !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/10 !important; width:100% !important; border-radius:10px !important; overflow:hidden !important; position:relative !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "daynote.kr": """
+/* daynote.kr — Crimson Right Sidebar + 2-Col Horizontal News Brief Cards */
+html body .layout:has(#postGrid) { display:grid !important; grid-template-columns:minmax(0,1fr) 280px !important; gap:26px !important; max-width:1180px !important; margin:24px auto 60px !important; padding:0 20px !important; align-items:start !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:16px !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:135px 1fr !important; gap:14px !important; padding:14px !important; align-items:center !important; border-top:3px solid var(--pri) !important; }
+html body #postGrid .card .thumb { aspect-ratio:1/1 !important; width:135px !important; border-radius:10px !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+html body #postGrid .card h3 { font-size:1.04rem !important; -webkit-line-clamp:2 !important; }
+""",
+    "woorinote.kr": """
+/* woorinote.kr — Legal Advisory 1-Col Right-Thumbnail Spine Dossier List */
+html body .layout:has(#postGrid) { display:block !important; max-width:1020px !important; margin:28px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:1fr !important; gap:16px !important; }
+html body #postGrid .card { border-left:6px solid var(--pri) !important; border-radius:8px !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:1fr 220px !important; gap:20px !important; padding:18px 22px !important; align-items:center !important; }
+html body #postGrid .card .thumb { order:2 !important; aspect-ratio:16/10 !important; width:220px !important; border-radius:8px !important; overflow:hidden !important; }
+html body #postGrid .card .card-body { order:1 !important; padding:0 !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "justinfo.co.kr": """
+/* justinfo.co.kr — Burgundy Tax Advisory 1-Full Banner + 2-Col Bordered Tax Cards */
+html body .layout:has(#postGrid) { display:block !important; max-width:1100px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:20px !important; }
+html body #postGrid .card:first-child { grid-column:1 / -1 !important; border-top:4px solid var(--pri) !important; }
+html body #postGrid .card:first-child .card-link { display:grid !important; grid-template-columns:340px 1fr !important; gap:24px !important; padding:20px !important; align-items:center !important; }
+html body #postGrid .card:not(:first-child) .card-link { display:flex !important; flex-direction:column !important; padding:16px !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/9 !important; width:100% !important; border-radius:8px !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+
+    # Group 2: Fintech App Feed & Technical Documentation Portal
+    "meganote.kr": """
+/* meganote.kr — Toss Blue 2-Col Inset Rounded App Feed Cards */
+html body .layout:has(#postGrid) { display:block !important; max-width:1020px !important; margin:28px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:22px !important; }
+html body #postGrid .card { border-radius:24px !important; padding:16px !important; background:#ffffff !important; box-shadow:0 10px 28px rgba(37,99,235,0.07) !important; border:1px solid #dbeafe !important; }
+html body #postGrid .card .card-link { display:flex !important; flex-direction:column !important; gap:14px !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/9 !important; border-radius:16px !important; overflow:hidden !important; }
+html body #postGrid .card .card-body { padding:4px 6px !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "smilenote.kr": """
+/* smilenote.kr — Senior Welfare 1-Col Large-Print Horizontal Feed */
+html body .layout:has(#postGrid) { display:block !important; max-width:960px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:1fr !important; gap:18px !important; }
+html body #postGrid .card { border-radius:20px !important; border:2px solid var(--line) !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:260px 1fr !important; gap:22px !important; padding:16px !important; align-items:center !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/10 !important; border-radius:14px !important; overflow:hidden !important; }
+html body #postGrid .card h3 { font-size:1.24rem !important; line-height:1.45 !important; }
+html body #postGrid .card .excerpt { font-size:1rem !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "topnote.kr": """
+/* topnote.kr — MS Learn Left Doc Tree + 2-Col Technical Manual Grid */
+html body .layout:has(#postGrid) { display:grid !important; grid-template-columns:240px minmax(0,1fr) !important; gap:24px !important; max-width:1200px !important; margin:24px auto 60px !important; padding:0 20px !important; align-items:start !important; }
+html body .msdocs-minimap-aside { display:none !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:18px !important; }
+html body #postGrid .card { border-radius:6px !important; border-top:4px solid var(--pri) !important; }
+html body #postGrid .card .card-link { display:flex !important; flex-direction:column !important; }
+html body #postGrid .card .thumb { aspect-ratio:21/9 !important; width:100% !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "maxnote.kr": """
+/* maxnote.kr — Apple Docs Left Tree + 1-Col Wide Manual Index Rows */
+html body .layout:has(#postGrid) { display:grid !important; grid-template-columns:230px minmax(0,1fr) !important; gap:26px !important; max-width:1180px !important; margin:24px auto 60px !important; padding:0 20px !important; align-items:start !important; }
+html body .msdocs-minimap-aside { display:none !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:1fr !important; gap:14px !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:190px 1fr !important; gap:18px !important; padding:14px !important; align-items:center !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/10 !important; border-radius:8px !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+
+    # Group 3: Clinical Medical Portal & Consumer Spec Matrix
+    "healthcox.com": """
+/* healthcox.com — Asan/WebMD Clinical Checksheet 2-Col Horizontal Medical Cards */
+html body .layout:has(#postGrid) { display:block !important; max-width:1140px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:18px !important; }
+html body #postGrid .card { border-left:5px solid #0F766E !important; border-radius:10px !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:165px 1fr !important; gap:16px !important; padding:14px !important; align-items:center !important; }
+html body #postGrid .card .thumb { aspect-ratio:4/3 !important; border-radius:8px !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "baronote.kr": """
+/* baronote.kr — Consumer Spec Report 2-Col Top-Bar Scoreboard Cards */
+html body .layout:has(#postGrid) { display:block !important; max-width:1140px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:20px !important; }
+html body #postGrid .card { border-top:5px solid var(--pri) !important; border-radius:10px !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:200px 1fr !important; gap:18px !important; padding:16px !important; align-items:center !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/10 !important; border-radius:8px !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "must-pick.com": """
+/* must-pick.com — Danawa DPG 2-Up Top Featured + 4-Col Compact Spec Grid */
+html body .layout:has(#postGrid) { display:block !important; max-width:1180px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(4, minmax(0,1fr)) !important; gap:16px !important; }
+html body #postGrid .card:nth-child(1), html body #postGrid .card:nth-child(2) { grid-column:span 2 !important; }
+html body #postGrid .card .card-link { display:flex !important; flex-direction:column !important; height:100% !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/9 !important; width:100% !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+html body #postGrid .card .card-body { padding:14px 16px !important; }
+""",
+    "tripmarvel.com": """
+/* tripmarvel.com — Lonely Planet Forest Expedition 1-Full Hero + 2-Col Route Cards */
+html body .layout:has(#postGrid) { display:block !important; max-width:1120px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:22px !important; }
+html body #postGrid .card:first-child { grid-column:1 / -1 !important; }
+html body #postGrid .card:first-child .card-link { display:grid !important; grid-template-columns:1.3fr 1fr !important; gap:24px !important; align-items:center !important; }
+html body #postGrid .card:not(:first-child) .card-link { display:flex !important; flex-direction:column !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/10 !important; width:100% !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+
+    # Group 4: Magazine Bento Grid & Boutique Lookbook
+    "nolplace.com": """
+/* nolplace.com — Asymmetric Magazine Bento Grid (Card #1 2-Span Hero + 4:3 Course Cards) */
+html body .layout:has(#postGrid) { display:block !important; max-width:1140px !important; margin:28px auto 60px !important; padding:0 22px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(3, minmax(0,1fr)) !important; gap:22px !important; }
+html body #postGrid .card:first-child { grid-column:span 2 !important; background:linear-gradient(135deg, #fffbf5 0%, #ffedd5 100%) !important; border:2px solid #fdba74 !important; }
+html body #postGrid .card:first-child .card-link { display:grid !important; grid-template-columns:1.25fr 1fr !important; gap:0 !important; height:100% !important; align-items:stretch !important; }
+html body #postGrid .card:first-child .thumb { aspect-ratio:auto !important; min-height:290px !important; border-radius:12px 0 0 12px !important; }
+html body #postGrid .card:first-child h3 { font-size:1.35rem !important; -webkit-line-clamp:3 !important; color:#7c2d12 !important; }
+html body #postGrid .card:not(:first-child) .card-link { display:flex !important; flex-direction:column !important; height:100% !important; }
+html body #postGrid .card:not(:first-child) .thumb { aspect-ratio:4/3 !important; width:100% !important; overflow:hidden !important; position:relative !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+html body #postGrid .card .card-body { padding:18px 20px !important; display:flex !important; flex-direction:column !important; gap:8px !important; flex:1 !important; }
+""",
+    "must-joy.com": """
+/* must-joy.com — Todayhouse 2-Col Big Lookbook Cards */
+html body .layout:has(#postGrid) { display:block !important; max-width:1100px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(2, minmax(0,1fr)) !important; gap:26px !important; }
+html body #postGrid .card { border-radius:22px !important; overflow:hidden !important; }
+html body #postGrid .card .card-link { display:flex !important; flex-direction:column !important; }
+html body #postGrid .card .thumb { aspect-ratio:16/10 !important; width:100% !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+html body #postGrid .card .card-body { padding:20px 22px !important; }
+""",
+    "joynote.kr": """
+/* joynote.kr — 29CM Editorial 1-Full Showcase + 3-Col Square Lookbook */
+html body .layout:has(#postGrid) { display:block !important; max-width:1100px !important; margin:26px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:repeat(3, minmax(0,1fr)) !important; gap:20px !important; }
+html body #postGrid .card:first-child { grid-column:1 / -1 !important; }
+html body #postGrid .card:first-child .card-link { display:grid !important; grid-template-columns:1.1fr 1fr !important; gap:24px !important; align-items:center !important; }
+html body #postGrid .card:not(:first-child) .card-link { display:flex !important; flex-direction:column !important; }
+html body #postGrid .card:not(:first-child) .thumb { aspect-ratio:1/1 !important; width:100% !important; overflow:hidden !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+""",
+    "soulnote.kr": """
+/* soulnote.kr — Brunch Essay Book 1-Col Right-Square-Photo Editorial List */
+html body .layout:has(#postGrid) { display:block !important; max-width:920px !important; margin:28px auto 60px !important; padding:0 20px !important; }
+html body #postGrid.grid { display:grid !important; grid-template-columns:1fr !important; gap:18px !important; }
+html body #postGrid .card .card-link { display:grid !important; grid-template-columns:1fr 180px !important; gap:24px !important; padding:20px 24px !important; align-items:center !important; }
+html body #postGrid .card .thumb { order:2 !important; aspect-ratio:1/1 !important; width:180px !important; border-radius:12px !important; overflow:hidden !important; }
+html body #postGrid .card .card-body { order:1 !important; padding:0 !important; }
+html body #postGrid .card .thumb img { width:100% !important; height:100% !important; object-fit:cover !important; }
+"""
+}
+
+
+def apply_16_domain_unique_home_layouts() -> Dict[str, Any]:
+    """
+    Replace the uniform `<style id="barolab-post-card-layout">/* BAROLAB_VERTICAL_CARDS_V3 */` block
+    across all 16 CF domains with each domain's unique Home & Card Layout CSS + responsive mobile fallback.
+    """
+    from cf_posting import posting as cf_post
+
+    updated: List[Dict[str, Any]] = []
+    errors: List[Dict[str, Any]] = []
+
+    mobile_fallback_css = """
+@media (max-width: 860px) {
+  html body .layout:has(#postGrid) { display:block !important; padding:0 16px !important; }
+  html body #postGrid.grid { grid-template-columns:1fr !important; gap:16px !important; }
+  html body #postGrid .card, html body #postGrid .card:first-child, html body #postGrid .card:nth-child(2) { grid-column:1 / -1 !important; }
+  html body #postGrid .card .card-link, html body #postGrid .card:first-child .card-link { display:flex !important; flex-direction:column !important; }
+  html body #postGrid .card .thumb { order:0 !important; width:100% !important; aspect-ratio:16/9 !important; min-height:0 !important; }
+}
+"""
+
+    for dom in cf_post.ALL_DOMAINS:
+        try:
+            headers = _get_cf_headers(dom)
+            r = requests.get(f"https://www.{dom}/api/settings", headers=headers, timeout=12)
+            if r.status_code != 200:
+                errors.append({"domain": dom, "stage": "get_settings", "httpStatus": r.status_code})
+                continue
+            settings = r.json().get("settings") or {}
+            ac = settings.get("adsense_code") or ""
+            custom_css = DOMAIN_HOME_LAYOUT_CSS.get(dom, DOMAIN_HOME_LAYOUT_CSS["nolplace.com"])
+            new_style_block = f'<style id="barolab-post-card-layout">\n/* BAROLAB_16_UNIQUE_HOME_LAYOUTS_V4 ({dom}) */{custom_css}{mobile_fallback_css}</style>'
+
+            if '<style id="barolab-post-card-layout">' in ac:
+                ac_new = re.sub(
+                    r'<style id="barolab-post-card-layout">.*?</style>',
+                    new_style_block,
+                    ac,
+                    flags=re.DOTALL,
+                )
+            else:
+                ac_new = ac + "\n" + new_style_block
+
+            settings["adsense_code"] = ac_new
+            put_r = requests.put(f"https://www.{dom}/api/settings", headers=headers, json=settings, timeout=15)
+            updated.append({"domain": dom, "httpStatus": put_r.status_code, "ok": put_r.status_code in (200, 201)})
+        except Exception as exc:
+            errors.append({"domain": dom, "error": str(exc)})
+
+    return {"ok": len(errors) == 0, "updatedCount": len(updated), "updated": updated, "errors": errors}
+
+
 
 
 def main() -> int:

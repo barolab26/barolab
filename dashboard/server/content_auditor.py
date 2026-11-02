@@ -1204,18 +1204,46 @@ def remodel_cf_post_content_live(
             pass
 
     cleaned_html, _ = sanitize_html_pre_publish(raw_html)
-    cleaned_html = style_tables(cleaned_html)
+    cleaned_html = style_tables(cleaned_html, domain=domain)
     if "baro-interactive-checklist" not in cleaned_html and "data-cf-interactive-widget=" not in cleaned_html:
-        cleaned_html = inject_interactive_widget(cleaned_html, new_title)
+        cleaned_html = inject_interactive_widget(cleaned_html, new_title, domain=domain)
 
     updated_post = dict(post_detail)
     updated_post["title"] = new_title
-    updated_post["content"] = cleaned_html
     extracted_thumb = extract_first_content_image(cleaned_html, domain)
-    if extracted_thumb and (not str(updated_post.get("thumbnail") or "").strip() or str(updated_post.get("thumbnail")).lower() == "null"):
-        updated_post["thumbnail"] = extracted_thumb
-    if extracted_thumb and (not str(updated_post.get("og_image") or "").strip() or str(updated_post.get("og_image")).lower() == "null"):
-        updated_post["og_image"] = extracted_thumb
+    existing_thumb = str(updated_post.get("thumbnail") or "").strip()
+    if existing_thumb.lower() in ("null", "none"):
+        existing_thumb = ""
+    try:
+        from dashboard.server.doctor import is_broken_or_fake_ai_image_url, generate_and_upload_clean_editorial_thumbnail
+        if existing_thumb and is_broken_or_fake_ai_image_url(existing_thumb):
+            existing_thumb = ""
+        if extracted_thumb and is_broken_or_fake_ai_image_url(extracted_thumb):
+            extracted_thumb = ""
+        if not extracted_thumb and not existing_thumb:
+            plain_for_card = BeautifulSoup(cleaned_html, "html.parser").get_text(" ", strip=True)
+            extracted_thumb = generate_and_upload_clean_editorial_thumbnail(
+                domain=domain,
+                title=new_title,
+                category=target_category,
+                slug=str(updated_post.get("slug") or f"post-{post_id}"),
+                summary_text=plain_for_card[:240],
+            )
+            if extracted_thumb:
+                fig_html = (
+                    f'<figure class="post-image" style="margin:24px 0;text-align:center;">'
+                    f'<img src="{extracted_thumb}" alt="{new_title}" style="max-width:100%;height:auto;border-radius:12px;" loading="lazy">'
+                    f'</figure>'
+                )
+                cleaned_html = fig_html + "\n" + cleaned_html
+    except Exception:
+        pass
+
+    updated_post["content"] = cleaned_html
+    final_thumb = extracted_thumb or existing_thumb
+    if final_thumb:
+        updated_post["thumbnail"] = final_thumb
+        updated_post["og_image"] = final_thumb
     res = patch_cf_post_category_live(domain, updated_post, target_category, status_override="published")
     res["titleUpdated"] = new_title != orig_title
     res["newTitle"] = new_title
@@ -1338,13 +1366,35 @@ def remediate_post_images_with_sanitizer(
     new_html = str(soup)
     remaining_imgs = [im.get("src") for im in soup.find_all("img") if (im.get("src") or "").strip()]
     post_detail_updated = dict(post_detail)
-    post_detail_updated["content"] = new_html
     if replaced_urls:
         post_detail_updated["thumbnail"] = replaced_urls[0]
         post_detail_updated["og_image"] = replaced_urls[0]
     elif remaining_imgs:
         post_detail_updated["thumbnail"] = remaining_imgs[0]
         post_detail_updated["og_image"] = remaining_imgs[0]
+    else:
+        try:
+            from dashboard.server.doctor import generate_and_upload_clean_editorial_thumbnail
+            plain_for_card = soup.get_text(" ", strip=True)
+            gen_thumb = generate_and_upload_clean_editorial_thumbnail(
+                domain=domain,
+                title=title,
+                category=target_category,
+                slug=slug,
+                summary_text=plain_for_card[:240],
+            )
+            if gen_thumb:
+                post_detail_updated["thumbnail"] = gen_thumb
+                post_detail_updated["og_image"] = gen_thumb
+                new_html = (
+                    f'<figure class="post-image" style="margin:24px 0;text-align:center;">'
+                    f'<img src="{gen_thumb}" alt="{title}" style="max-width:100%;height:auto;border-radius:12px;" loading="lazy">'
+                    f'</figure>\n' + new_html
+                )
+                replaced_urls.append(gen_thumb)
+        except Exception:
+            pass
+    post_detail_updated["content"] = new_html
     patch_res = patch_cf_post_category_live(domain, post_detail_updated, target_category)
 
     return {
