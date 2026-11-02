@@ -1279,3 +1279,361 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify(apiRes || {{}}));
     return raw_url
 
 
+def native_publish_naver_cafe_article(
+    account: str,
+    clubid: str,
+    menuid: str,
+    title: str,
+    paragraphs: list[str],
+    cafe_slug: str = "",
+) -> dict:
+    """Publish a public (전체공개 + 검색허용) Naver Cafe bridge article inside EGO Lite TaskSpace."""
+    profile_id = resolve_ego_profile(account)
+    space_name = f"barolab-{account}"
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
+const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const page = task.page("p1");
+const prevUrl = await page.url().catch(() => "");
+try {{
+  const writeUrl = "https://cafe.naver.com/ca-fe/cafes/" + {json.dumps(str(clubid))} + "/menus/" + {json.dumps(str(menuid))} + "/articles/write?boardType=L";
+  await page.goto(writeUrl, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  await page.waitForTimeout(3500);
+
+  await page.click("textarea.textarea_input");
+  await page.keyboard.insertText({json.dumps(title)});
+  await page.waitForTimeout(400);
+
+  await page.click(".se-text-paragraph");
+  await page.waitForTimeout(300);
+  const paras = {json.dumps(paragraphs)};
+  for (const p of paras) {{
+    if (p) {{
+      await page.keyboard.insertText(String(p));
+    }}
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(200);
+  }}
+  await page.waitForTimeout(2000);
+
+  await page.evaluate(() => {{
+    window.alert = () => {{}};
+    window.confirm = () => true;
+    const btn = document.querySelector("a.BaseButton--skinGreen");
+    if (btn) btn.click();
+  }});
+  await page.waitForTimeout(5000);
+  const finalUrl = await page.url();
+  const pageTitle = await page.title().catch(() => "");
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: !finalUrl.includes("/articles/write"),
+    account: {json.dumps(account)},
+    cafeSlug: {json.dumps(cafe_slug)},
+    clubid: {json.dumps(str(clubid))},
+    menuid: {json.dumps(str(menuid))},
+    url: finalUrl,
+    title: {json.dumps(title)},
+    pageTitle
+  }}));
+}} catch (err) {{
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: false,
+    error: String(err),
+    account: {json.dumps(account)},
+    clubid: {json.dumps(str(clubid))}
+  }}));
+}} finally {{
+  if (prevUrl && !prevUrl.includes("cafe.naver.com")) {{
+    await page.goto(prevUrl, {{ waitUntil: "domcontentloaded", timeout: 12000 }}).catch(() => {{}});
+  }}
+}}
+"""
+    return run_ego_mjs(script, timeout=65)
+
+
+def native_sync_brunch_state(uid: str = "", upw: str = "") -> dict:
+    """Sync Kakao Brunch writer state, drawer drafts, and published articles via EGO Lite `barolab-soultin`."""
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
+const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
+const page = task.page("p1");
+const prevUrl = await page.url().catch(() => "");
+try {{
+  await page.goto("https://brunch.co.kr/ready", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+  await page.waitForTimeout(1800);
+  let cur = await page.url();
+  if ((cur.includes("signin") || cur.includes("accounts.kakao.com")) && {json.dumps(bool(uid and upw))}) {{
+    await page.goto("https://brunch.co.kr/auth/kakao?url=%2Fsignin%2Ffinish%3Furl%3D%252Fready", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+    await page.waitForTimeout(2200);
+    cur = await page.url();
+    if (cur.includes("accounts.kakao.com")) {{
+      await page.click("input[name=loginId]").catch(() => {{}});
+      await page.keyboard.insertText({json.dumps(uid)});
+      await page.waitForTimeout(250);
+      await page.click("input[name=password]").catch(() => {{}});
+      await page.keyboard.insertText({json.dumps(upw)});
+      await page.waitForTimeout(250);
+      await page.evaluate(() => {{
+        const chk = document.querySelector("input[name=saveSignedIn]");
+        if (chk && !chk.checked) chk.click();
+        const btn = document.querySelector("button[type=submit]");
+        if (btn) btn.click();
+      }});
+      await page.waitForTimeout(4000);
+      await page.goto("https://brunch.co.kr/ready", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+      await page.waitForTimeout(1500);
+    }}
+  }}
+  const loggedIn = !(await page.url()).includes("signin") && !(await page.url()).includes("accounts.kakao.com");
+  let rawDrawer = [];
+  let rawPub = [];
+  let canPublishLive = true;
+  if (loggedIn) {{
+    rawDrawer = await page.evaluate(() => {{
+      const items = [];
+      document.querySelectorAll("li").forEach(li => {{
+        const a = li.querySelector("a[href*='/@31d1f5fb288c4fc/']");
+        if (!a) return;
+        const href = a.getAttribute("href") || "";
+        if (href.includes("/stats") || href.includes("/following")) return;
+        const lines = (li.innerText || "").split("\\n").map(s => s.trim()).filter(Boolean);
+        if (!lines.length) return;
+        items.push({{
+          title: lines[0],
+          excerpt: lines.slice(1, -1).join(" ").slice(0, 160),
+          href: href.startsWith("http") ? href : "https://brunch.co.kr" + href,
+          savedAtLabel: lines[lines.length - 1] || "저장됨"
+        }});
+      }});
+      return items;
+    }}).catch(() => []);
+
+    await page.goto("https://brunch.co.kr/@31d1f5fb288c4fc", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+    await page.waitForTimeout(1800);
+    rawPub = await page.evaluate(() => {{
+      const items = [];
+      document.querySelectorAll("a[href*='/@31d1f5fb288c4fc/']").forEach(a => {{
+        const href = a.getAttribute("href") || "";
+        if (!/\\/@31d1f5fb288c4fc\\/\\d+$/.test(href)) return;
+        const container = a.closest("li") || a;
+        const lines = (container.innerText || "").split("\\n").map(s => s.trim()).filter(Boolean);
+        if (!lines.length) return;
+        items.push({{
+          title: lines[0],
+          excerpt: lines.slice(1).join(" ").slice(0, 160),
+          href: href.startsWith("http") ? href : "https://brunch.co.kr" + href
+        }});
+      }});
+      return items;
+    }}).catch(() => []);
+  }}
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: true,
+    cdpOnline: true,
+    loggedIn,
+    canPublishLive,
+    rawDrawer,
+    rawPub
+  }}));
+}} catch (err) {{
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: false, error: String(err) }}));
+}} finally {{
+  if (prevUrl && !prevUrl.includes("brunch.co.kr")) {{
+    await page.goto(prevUrl, {{ waitUntil: "domcontentloaded", timeout: 12000 }}).catch(() => {{}});
+  }}
+}}
+"""
+    return run_ego_mjs(script, timeout=55)
+
+
+def native_publish_brunch_column(
+    title: str,
+    subtitle: str,
+    paragraphs: list[str],
+    bridge_url: str | None = None,
+    auto_publish: bool = True,
+    edit_url: str | None = None,
+    uid: str = "",
+    upw: str = "",
+) -> dict:
+    """Write or update a Brunch column natively inside EGO Lite `barolab-soultin` TaskSpace."""
+    target_write_url = edit_url or "https://brunch.co.kr/write"
+    script = f"""
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
+const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
+const page = task.page("p1");
+const prevUrl = await page.url().catch(() => "");
+try {{
+  await page.goto({json.dumps(target_write_url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  await page.waitForTimeout(2000);
+  let cur = await page.url();
+  if ((cur.includes("signin") || cur.includes("accounts.kakao.com")) && {json.dumps(bool(uid and upw))}) {{
+    await page.goto("https://brunch.co.kr/auth/kakao?url=%2Fsignin%2Ffinish%3Furl%3D%252Fready", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+    await page.waitForTimeout(2200);
+    if ((await page.url()).includes("accounts.kakao.com")) {{
+      await page.click("input[name=loginId]").catch(() => {{}});
+      await page.keyboard.insertText({json.dumps(uid)});
+      await page.waitForTimeout(250);
+      await page.click("input[name=password]").catch(() => {{}});
+      await page.keyboard.insertText({json.dumps(upw)});
+      await page.waitForTimeout(250);
+      await page.evaluate(() => {{
+        const chk = document.querySelector("input[name=saveSignedIn]");
+        if (chk && !chk.checked) chk.click();
+        const btn = document.querySelector("button[type=submit]");
+        if (btn) btn.click();
+      }});
+      await page.waitForTimeout(4000);
+      await page.goto({json.dumps(target_write_url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+      await page.waitForTimeout(2000);
+    }}
+  }}
+  await page.evaluate(() => {{
+    const g = document.querySelector("button.guide_close");
+    if (g) g.click();
+  }}).catch(() => {{}});
+  await page.waitForTimeout(300);
+
+  await page.evaluate(() => {{
+    const t = document.querySelector("h1.cover_title");
+    if (t) t.innerText = "";
+    const s = document.querySelector("div.cover_sub_title");
+    if (s) s.innerText = "";
+    const b = document.querySelector("div.wrap_body");
+    if (b) b.innerHTML = "<p><br></p>";
+  }}).catch(() => {{}});
+  await page.waitForTimeout(200);
+
+  await page.click("h1.cover_title");
+  await page.keyboard.insertText({json.dumps(title)});
+  await page.waitForTimeout(250);
+
+  await page.click("div.cover_sub_title");
+  await page.keyboard.insertText({json.dumps(subtitle)});
+  await page.waitForTimeout(250);
+
+  await page.click("div.wrap_body");
+  await page.waitForTimeout(250);
+
+  const paras = {json.dumps(paragraphs)};
+  for (let i = 0; i < paras.length; i++) {{
+    await page.keyboard.insertText(String(paras[i] || "").trim());
+    if (i < paras.length - 1) {{
+      await page.keyboard.press("Enter");
+      await page.keyboard.press("Enter");
+    }}
+    await page.waitForTimeout(120);
+  }}
+
+  const canPublish = await page.evaluate(() => !!document.querySelector("button.be_header_button_publish"));
+  const bUrl = {json.dumps(bridge_url or "")};
+  if (canPublish && bUrl) {{
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
+    await page.keyboard.insertText("▶ 관련 실무 기준표 및 3분 자가진단 원문 보기:");
+    await page.keyboard.press("Enter");
+    await page.keyboard.insertText(bUrl);
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(1800);
+  }}
+
+  await page.evaluate(() => {{
+    const s = document.querySelector("button.btn_article_save_draft, button.be_header_button_save");
+    if (s) s.click();
+  }});
+  await page.waitForTimeout(2000);
+  let finalUrl = await page.url();
+
+  if (canPublish && {json.dumps(bool(auto_publish))}) {{
+    await page.evaluate(() => {{
+      const p = document.querySelector("button.be_header_button_publish");
+      if (p) p.click();
+    }});
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => {{
+      const selected = document.querySelectorAll("button.keyword.selected").length;
+      if (selected < 3) {{
+        const unsel = Array.from(document.querySelectorAll("button.keyword:not(.selected)"));
+        for (let i = 0; i < Math.min(3 - selected, unsel.length); i++) {{
+          unsel[i].click();
+        }}
+      }}
+    }});
+    await page.waitForTimeout(500);
+    await page.evaluate(() => {{
+      const c = document.querySelector("button.save.button.mint");
+      if (c) c.click();
+    }});
+    await page.waitForTimeout(3500);
+    finalUrl = await page.url();
+    console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+      ok: true,
+      mode: "published",
+      writerApproved: true,
+      url: finalUrl,
+      title: {json.dumps(title)}
+    }}));
+    return;
+  }}
+
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: true,
+    mode: "saved_to_drawer",
+    writerApproved: canPublish,
+    url: finalUrl,
+    title: {json.dumps(title)}
+  }}));
+}} catch (err) {{
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: false, error: String(err) }}));
+}} finally {{
+  if (prevUrl && !prevUrl.includes("brunch.co.kr")) {{
+    await page.goto(prevUrl, {{ waitUntil: "domcontentloaded", timeout: 12000 }}).catch(() => {{}});
+  }}
+}}
+"""
+    return run_ego_mjs(script, timeout=65)
+
+
+def native_check_naver_premium_status() -> dict:
+    """Check real-time Naver Premium Contents studio approval state on `barolab-yoon_master`."""
+    script = """
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-yoon_master") : null;
+const task = found ? await taskSpace("barolab-yoon_master") : await taskSpace("barolab-yoon_master", { profileId: "Profile 5" });
+const page = task.page("p1");
+const prevUrl = await page.url().catch(() => "");
+try {
+  await page.goto("https://studio.premium.naver.com/home", { waitUntil: "domcontentloaded", timeout: 20000 });
+  await page.waitForTimeout(2800);
+  const url = await page.url();
+  const bodyText = await page.evaluate(() => (document.body ? document.body.innerText : "").slice(0, 1200).replace(/\\s+/g, " ")).catch(() => "");
+  const underReview = url.includes("/join/review") || bodyText.includes("가입 심사가 진행 중입니다");
+  const approved = url.includes("/home") && !underReview && !url.includes("/intro") && !url.includes("nid.naver.com");
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
+    ok: true,
+    account: "yoon_master",
+    channelId: "baronotebrief",
+    channelName: "머스트픽 연금 자산 연구소",
+    url,
+    underReview,
+    approved,
+    status: approved ? "approved" : (underReview ? "under_review" : "pending"),
+    statusLabel: approved ? "🟢 심사 승인 완료 (스튜디오 즉시 발행 가능)" : "⏳ 판매회원 가입 심사 진행 중 (영업일 3~5일 소요)",
+    snippet: bodyText.slice(0, 300)
+  }));
+} catch (err) {
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({ ok: false, error: String(err) }));
+} finally {
+  if (prevUrl && !prevUrl.includes("studio.premium.naver.com")) {
+    await page.goto(prevUrl, { waitUntil: "domcontentloaded", timeout: 12000 }).catch(() => {});
+  }
+}
+"""
+    return run_ego_mjs(script, timeout=45)
+
+
+

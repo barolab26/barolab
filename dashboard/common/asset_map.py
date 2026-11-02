@@ -953,12 +953,29 @@ def _fit_brunch_text(text, limit):
 
 
 def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, auto_publish=True, cdp_port=9450, edit_url=None):
-    """Write or update a Brunch column on CDP 9450. Publishes live if writer is approved, otherwise saves to drawer."""
-    from playwright.sync_api import sync_playwright
-
+    """Write or update a Brunch column via native EGO Lite TaskSpace (`barolab-soultin`, Profile 3) without spawning extra windows."""
     safe_title = _fit_brunch_text(title, 28)
     safe_subtitle = _fit_brunch_text(subtitle, 38)
+    uid, upw = _load_brunch_credentials()
 
+    try:
+        from common.ego_taskspace import native_publish_brunch_column
+        ego_res = native_publish_brunch_column(
+            title=safe_title,
+            subtitle=safe_subtitle,
+            paragraphs=list(paragraphs or []),
+            bridge_url=bridge_url,
+            auto_publish=auto_publish,
+            edit_url=edit_url,
+            uid=uid or '',
+            upw=upw or '',
+        )
+        if isinstance(ego_res, dict) and ego_res.get('ok'):
+            return ego_res
+    except Exception:
+        pass
+
+    from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         b = p.chromium.connect_over_cdp(f'http://127.0.0.1:{cdp_port}')
         ctx = b.contexts[0]

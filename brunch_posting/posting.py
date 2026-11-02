@@ -45,7 +45,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "기초연금 소득인정액 선정기준액과 국민연금 연계감액 A급여액 산식 정리",
         "targetDomain": "must-good.com",
         "category": "연금·노후설계",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 1,
         "paragraphs": [
             "매달 25일이 되면 어머니는 거실 식탁 위에 돋보기안경과 통장 두 권을 나란히 올려두신다. 젊은 시절부터 조금씩 부어오신 국민연금 수령 계좌와, 만 65세가 지나면서 신청했던 기초연금이 들어오는 통장이다. 어느 주말 오후, 어머니가 조심스럽게 통장을 내미시며 물으셨다. 동네 복지관에서는 올해 기초연금 기준연금액이 올랐다고 하던데, 왜 내 통장에 찍히는 금액은 옆집 친구분보다 몇만 원이 적은지 모르겠다는 말씀이었다.",
@@ -64,7 +64,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "연소득 2천만원·재산 과세표준 5.4억 기준과 임의계속가입 신청기한",
         "targetDomain": "baronote.kr",
         "category": "건보료·절세실무",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 2,
         "paragraphs": [
             "오랜 시간 한 직장에서 성실히 일하고 정년퇴직한 선배를 오랜만에 만났을 때, 그가 찻잔을 내려놓으며 가장 먼저 꺼낸 이야기는 여행 계획도 취미 생활도 아닌 건강보험료 고지서였다. 재직 시절에는 급여명세서에서 회사가 절반을 부담하고 남은 금액만 원천징수로 빠져나갔기에 크게 체감하지 못했는데, 퇴직 후 지역가입자로 전환된 첫 달 고지서를 우편함에서 꺼내 들고는 눈을 의심했다는 것이다. 월급은 사라졌는데 매달 내야 할 건강보험료는 오히려 현역 시절보다 훌쩍 뛰어올라 있었다.",
@@ -83,7 +83,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "정부24 보조금24·홈택스 세금 환급·건보공단 환급금 신청 방법",
         "targetDomain": "must-pick.com",
         "category": "정책환급·복지",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 3,
         "paragraphs": [
             "우리 사회의 거의 모든 공적 지원금과 세금 환급 제도는 철저한 '신청주의' 원칙 위에서 움직인다. 내가 받을 자격이 아무리 충분하고 법령상 수급 요건을 완벽히 갖추었더라도, 정해진 기간 안에 정해진 양식으로 직접 신청서를 제출하지 않으면 국가는 알아서 내 통장에 돈을 넣어주지 않는다. 정보에 밝고 스마트폰 인증에 익숙한 사람들에게는 몇 번의 터치로 끝나는 절차가, 안내문 글씨가 작아 읽지 못하거나 제도의 존재조차 모르는 어르신들에게는 보이지 않는 거대한 벽이 된다.",
@@ -121,7 +121,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "만 55세 이상 주택연금 수령액 계산법과 사후 정산·상속 기준",
         "targetDomain": "topnote.kr",
         "category": "주거·주택연금",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 5,
         "paragraphs": [
             "명절이나 부모님 생신에 온 가족이 모이면 식사가 끝날 무렵 자연스레 부모님이 살고 계신 집 한 채에 대한 이야기가 오가곤 한다. 전체 자산의 70~80퍼센트 이상이 거주 주택 한 채에 묶여 있는 한국 시니어 가구의 특성상, 집은 든든한 보금자리이지만 당장 매달 써야 할 병원비와 생활비를 내어주지는 않는다. 이때 집을 팔아 작은 평수로 옮길 것인가, 자녀에게 미리 증여하고 용돈을 받을 것인가, 아니면 한국주택금융공사의 '주택연금'에 가입할 것인가를 두고 가족의 셈법이 복잡해진다.",
@@ -159,7 +159,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "공복혈당·신장 크레아티닌·LDL 콜레스테롤 정상수치와 확진검사",
         "targetDomain": "healthcox.com",
         "category": "중장년건강·검진",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 7,
         "paragraphs": [
             "매년 찬 바람이 불기 시작하는 10월과 11월이 되면 동네 내과와 건강검진 센터는 한 해 동안 미뤄둔 국가건강검진을 받으려는 사람들로 북적인다. 연말이 임박할수록 예약은 전쟁터가 되고, 바쁜 일정 속에 검진을 마치고 나면 몇 주 뒤 우편이나 카카오톡 알림톡으로 결과표가 도착한다. 하지만 막상 결과표를 받아 든 부모님들은 첫 장 맨 위에 적힌 '정상B(경계)'나 '일반질환 의심'이라는 짧은 판정 문구만 흘긋 확인하고는 서랍 깊숙이 넣어두기 일쑤다.",
@@ -197,7 +197,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "자녀 10년 5천만원·혼인 1.5억 공제와 차용증 확정일자 기준",
         "targetDomain": "baronote.kr",
         "category": "상속·증여·절세",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 9,
         "paragraphs": [
             "결혼을 앞둔 자녀가 전셋집을 구하거나 첫 내 집 마련에 나설 때, 부모가 퇴직금이나 아껴둔 예금을 깨서 부족한 자금을 잠시 보태주는 일은 우리 주변에서 흔히 볼 수 있는 풍경이다. 부모와 자식 사이에 잠시 빌려주고 형편이 나아질 때 갚기로 한 돈이니 별다른 서류가 필요 없으리라 생각하기 쉽다. 하지만 부동산 거래 자금출처조사와 금융정보 분석이 정교해진 요즘에는, 이 소박한 가족 간의 정이 몇 년 뒤 예상치 못한 증여세와 가산세 고지서로 되돌아오는 사례가 적지 않다.",
@@ -216,7 +216,7 @@ BRUNCHBOOK_CURRICULUM: List[Dict[str, Any]] = [
         "subtitle": "대가족·출산가구 30% 감면 조건과 취약계층 에너지바우처 신청법",
         "targetDomain": "joynote.kr",
         "category": "에너지·공과금절약",
-        "pacingMode": "pure_essay",
+        "pacingMode": "strategic_bridge",
         "articleNo": 10,
         "paragraphs": [
             "여름철 에어컨을 켜기가 무서워지는 8월과 보일러 온도를 한 칸 올리기가 망설여지는 12월이 오면, 나는 주변 지인들과 어르신들에게 아파트 관리비 명세서나 전기·도시가스 고지서 뒷면의 '복지할인 안내란'을 딱 한 번만 읽어보라고 권한다. 생각보다 훨씬 많은 가구가 전기요금과 도시가스 요금, 지역난방비 감면 대상에 해당하면서도 정작 본인이 대상자인 줄 몰라 매달 제값을 다 내고 있기 때문이다.",
@@ -254,137 +254,101 @@ def save_brunch_status(payload: Dict[str, Any]) -> None:
 
 
 def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
-    """Connect to CDP 9450, auto-login if needed, and inspect live Brunch writer approval state, drawer drafts, and published articles."""
-    from playwright.sync_api import sync_playwright
+    """Sync live Brunch writer approval state, drawer drafts, published articles, and Naver Premium status via EGO Lite TaskSpace."""
+    from common.asset_map import _load_brunch_credentials
+    from common.ego_taskspace import native_check_naver_premium_status, native_sync_brunch_state
 
     prev = load_brunch_status()
     now_iso = _now_kst_iso()
     cdp_online = False
     writer_status = prev.get("account", {}).get("writerStatus") or "approved"
-    writer_status_label = "🟢 브런치 작가 최종 승인 완료 (실시간 공개 발행 및 CF 브릿지 가동 중)"
+    writer_status_label = "🟢 브런치 작가 최종 승인 완료 (실시간 공개 발행 및 100% CF 브릿지 가동 중)"
     can_publish_live = True
     drawer_articles: List[Dict[str, Any]] = []
     published_articles: List[Dict[str, Any]] = []
-    apply_notice = "브런치 작가가 되신 것을 진심으로 축하드립니다! 실시간 칼럼 발행 및 다음(Daum)·구글(DA 80+) 색인 부스터가 가동 중입니다."
+    apply_notice = "브런치 작가가 되신 것을 진심으로 축하드립니다! 실시간 칼럼 발행 및 다음(Daum)·구글(DA 80+)·네이버카페 OSMU 브릿지가 가동 중입니다."
 
+    uid, upw = _load_brunch_credentials()
     try:
-        with sync_playwright() as p:
-            b = p.chromium.connect_over_cdp(f"http://127.0.0.1:{cdp_port}")
+        ego_sync = native_sync_brunch_state(uid=uid or "", upw=upw or "")
+        if isinstance(ego_sync, dict) and ego_sync.get("ok"):
             cdp_online = True
-            ctx = b.contexts[0]
-            page = ctx.new_page()
-            try:
-                logged_in = ensure_brunch_logged_in(page, "https://brunch.co.kr/ready")
-                if logged_in:
-                    # 1. Inspect /ready (Drawer drafts)
-                    page.wait_for_timeout(1200)
-                    raw_drawer = page.evaluate(
-                        """() => {
-                        const items = [];
-                        document.querySelectorAll('li').forEach(li => {
-                            const a = li.querySelector('a[href*="/@31d1f5fb288c4fc/"]');
-                            if (!a) return;
-                            const href = a.getAttribute('href') || '';
-                            if (href.includes('/stats') || href.includes('/following')) return;
-                            const lines = li.innerText.split('\\n').map(s => s.trim()).filter(Boolean);
-                            if (!lines.length) return;
-                            items.push({
-                                title: lines[0],
-                                excerpt: lines.slice(1, -1).join(' ').slice(0, 160),
-                                href: href.startsWith('http') ? href : 'https://brunch.co.kr' + href,
-                                savedAtLabel: lines[lines.length - 1] || '저장됨'
-                            });
-                        });
-                        return items;
-                    }"""
-                    )
-                    seen_urls = set()
-                    for idx, it in enumerate(raw_drawer, 1):
-                        if it["href"] in seen_urls:
-                            continue
-                        seen_urls.add(it["href"])
-                        m_no = re.search(r"/@31d1f5fb288c4fc/(\d+)", it["href"])
-                        art_no = int(m_no.group(1)) if m_no else idx
-                        matched_cur = next(
-                            (c for c in BRUNCHBOOK_CURRICULUM if c["part"] == art_no or c["title"][:10] in it["title"] or it["title"][:10] in c["title"]),
-                            None,
-                        )
-                        drawer_articles.append(
-                            {
-                                "articleNo": art_no,
-                                "title": it["title"],
-                                "subtitle": matched_cur["subtitle"] if matched_cur else "",
-                                "excerpt": it["excerpt"],
-                                "url": it["href"],
-                                "targetDomain": matched_cur["targetDomain"] if matched_cur else "must-good.com",
-                                "category": matched_cur["category"] if matched_cur else "연금·노후설계",
-                                "pacingMode": matched_cur["pacingMode"] if matched_cur else "pure_essay",
-                                "status": "drawer_saved",
-                                "statusLabel": "서랍 보관 중 (발행 대기)",
-                                "charCount": sum(len(x) for x in (matched_cur.get("paragraphs") or [])) if matched_cur else 1850,
-                                "savedAt": it["savedAtLabel"],
-                            }
-                        )
-
-                    # 2. Inspect /@31d1f5fb288c4fc?tab=articles (Published posts)
-                    page.goto("https://brunch.co.kr/@31d1f5fb288c4fc", wait_until="domcontentloaded", timeout=20000)
-                    page.wait_for_timeout(1500)
-                    prof_body = page.locator("body").inner_text(timeout=5000)
-                    if "글쓰기" in prof_body or "멤버십 작가 신청" in prof_body or "새 글을 발행해보세요" in prof_body:
-                        can_publish_live = True
-                        writer_status = "approved"
-                        writer_status_label = "🟢 브런치 작가 최종 승인 완료 (하루 2회 자동 연재 및 CF 브릿지 가동 중)"
-
-                    raw_pub = page.evaluate(
-                        """() => {
-                        const items = [];
-                        document.querySelectorAll('a[href*="/@31d1f5fb288c4fc/"]').forEach(a => {
-                            const href = a.getAttribute('href') || '';
-                            if (!/\\/@31d1f5fb288c4fc\\/\\d+$/.test(href)) return;
-                            const container = a.closest('li') || a;
-                            const lines = container.innerText.split('\\n').map(s => s.trim()).filter(Boolean);
-                            if (!lines.length) return;
-                            items.push({
-                                title: lines[0],
-                                excerpt: lines.slice(1).join(' ').slice(0, 160),
-                                href: href.startsWith('http') ? href : 'https://brunch.co.kr' + href,
-                            });
-                        });
-                        return items;
-                    }"""
-                    )
-                    seen_pub = set()
-                    for idx, it in enumerate(raw_pub, 1):
-                        if it["href"] in seen_pub:
-                            continue
-                        seen_pub.add(it["href"])
-                        m_no = re.search(r"/@31d1f5fb288c4fc/(\d+)", it["href"])
-                        art_no = int(m_no.group(1)) if m_no else idx
-                        matched_cur = next(
-                            (c for c in BRUNCHBOOK_CURRICULUM if c["part"] == art_no or c["title"][:10] in it["title"] or it["title"][:10] in c["title"]),
-                            None,
-                        )
-                        published_articles.append(
-                            {
-                                "articleNo": art_no,
-                                "title": it["title"],
-                                "subtitle": matched_cur["subtitle"] if matched_cur else "",
-                                "excerpt": it["excerpt"],
-                                "url": it["href"],
-                                "targetDomain": matched_cur["targetDomain"] if matched_cur else "must-good.com",
-                                "category": matched_cur["category"] if matched_cur else "연금·노후설계",
-                                "pacingMode": matched_cur["pacingMode"] if matched_cur else "pure_essay",
-                                "status": "published",
-                                "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
-                                "charCount": sum(len(x) for x in (matched_cur.get("paragraphs") or [])) if matched_cur else 1950,
-                                "publishedAt": now_iso[:10],
-                            }
-                        )
-            finally:
-                page.close()
+            raw_drawer = ego_sync.get("rawDrawer") or []
+            raw_pub = ego_sync.get("rawPub") or []
+            seen_urls = set()
+            for idx, it in enumerate(raw_drawer, 1):
+                if it["href"] in seen_urls:
+                    continue
+                seen_urls.add(it["href"])
+                m_no = re.search(r"/@31d1f5fb288c4fc/(\d+)", it["href"])
+                art_no = int(m_no.group(1)) if m_no else idx
+                matched_cur = next(
+                    (c for c in BRUNCHBOOK_CURRICULUM if c["part"] == art_no or c["title"][:10] in it["title"] or it["title"][:10] in c["title"]),
+                    None,
+                )
+                drawer_articles.append(
+                    {
+                        "articleNo": art_no,
+                        "title": it["title"],
+                        "subtitle": matched_cur["subtitle"] if matched_cur else "",
+                        "excerpt": it["excerpt"],
+                        "url": it["href"],
+                        "targetDomain": matched_cur["targetDomain"] if matched_cur else "must-good.com",
+                        "category": matched_cur["category"] if matched_cur else "연금·노후설계",
+                        "pacingMode": "strategic_bridge",
+                        "status": "drawer_saved",
+                        "statusLabel": "서랍 보관 중 (발행 대기)",
+                        "charCount": sum(len(x) for x in (matched_cur.get("paragraphs") or [])) if matched_cur else 1850,
+                        "savedAt": it.get("savedAtLabel", "저장됨"),
+                    }
+                )
+            seen_pub = set()
+            for idx, it in enumerate(raw_pub, 1):
+                if it["href"] in seen_pub:
+                    continue
+                seen_pub.add(it["href"])
+                m_no = re.search(r"/@31d1f5fb288c4fc/(\d+)", it["href"])
+                art_no = int(m_no.group(1)) if m_no else idx
+                matched_cur = next(
+                    (c for c in BRUNCHBOOK_CURRICULUM if c["part"] == art_no or c["title"][:10] in it["title"] or it["title"][:10] in c["title"]),
+                    None,
+                )
+                published_articles.append(
+                    {
+                        "articleNo": art_no,
+                        "title": it["title"],
+                        "subtitle": matched_cur["subtitle"] if matched_cur else "",
+                        "excerpt": it["excerpt"],
+                        "url": it["href"],
+                        "targetDomain": matched_cur["targetDomain"] if matched_cur else "must-good.com",
+                        "category": matched_cur["category"] if matched_cur else "연금·노후설계",
+                        "pacingMode": "strategic_bridge",
+                        "status": "published",
+                        "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
+                        "charCount": sum(len(x) for x in (matched_cur.get("paragraphs") or [])) if matched_cur else 1950,
+                        "publishedAt": now_iso[:10],
+                    }
+                )
     except Exception:
+        pass
+
+    if not published_articles:
         drawer_articles = prev.get("drawerArticles") or []
         published_articles = prev.get("publishedArticles") or []
+
+    # Check live Naver Premium Contents status on yoon_master
+    prem_live = {}
+    try:
+        prem_live = native_check_naver_premium_status() or {}
+        prem_file = BASE_DIR / "dashboard" / "data" / "premium" / "status.json"
+        if prem_file.is_file() and prem_live.get("ok"):
+            p_doc = json.loads(prem_file.read_text(encoding="utf-8"))
+            p_doc["status"] = "승인 완료 (Approved)" if prem_live.get("approved") else "심사 진행 중 (Under Review)"
+            p_doc["last_checked_at"] = now_iso
+            p_doc["studio_url"] = prem_live.get("url", "https://studio.premium.naver.com/join/review")
+            prem_file.write_text(json.dumps(p_doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        pass
 
     pub_nos = {p["articleNo"] for p in published_articles}
     pub_titles = {p["title"][:10] for p in published_articles}
@@ -568,11 +532,37 @@ def write_next_curriculum_part(part_no: Optional[int] = None, cdp_port: int = 94
         title=target_item["title"],
         subtitle=target_item["subtitle"],
         paragraphs=target_item["paragraphs"],
-        bridge_url=bridge_url if target_item["pacingMode"] == "strategic_bridge" else None,
+        bridge_url=bridge_url,
         auto_publish=True,
         cdp_port=cdp_port,
         edit_url=edit_url,
     )
+
+    # OSMU 1+2 Simultaneous Naver Cafe Bridge Publishing (loveshake1 28,495명 + boutiqueinfo 1,722명)
+    cafe_receipts = []
+    try:
+        from common.ego_taskspace import native_publish_naver_cafe_article
+        cafe_paras = list(target_item["paragraphs"][:4]) + [
+            f"▶ {target_item['title']} 상세 비교표 및 자가진단 원문 보기:",
+            bridge_url,
+        ]
+        for cafe_cfg in [
+            {"slug": "loveshake1", "clubid": "19858249", "menuid": "164"},
+            {"slug": "boutiqueinfo", "clubid": "31608088", "menuid": "4"},
+        ]:
+            c_res = native_publish_naver_cafe_article(
+                account="soul5373",
+                clubid=cafe_cfg["clubid"],
+                menuid=cafe_cfg["menuid"],
+                title=f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})",
+                paragraphs=cafe_paras,
+                cafe_slug=cafe_cfg["slug"],
+            )
+            if isinstance(c_res, dict) and c_res.get("ok"):
+                cafe_receipts.append({"cafe": cafe_cfg["slug"], "url": c_res.get("url")})
+    except Exception:
+        pass
+
     updated = sync_brunch_live_state(cdp_port=cdp_port)
     now_dt = datetime.datetime.now(KST)
     today_str = now_dt.date().isoformat()
@@ -586,6 +576,8 @@ def write_next_curriculum_part(part_no: Optional[int] = None, cdp_port: int = 94
             "title": target_item["title"],
             "mode": res.get("mode"),
             "url": res.get("url"),
+            "bridgeUrl": bridge_url,
+            "cafeBridges": cafe_receipts,
         }
     )
     today_runs = [h for h in history if h.get("date") == today_str]
@@ -658,6 +650,10 @@ def process_brunch_autonomy_once(cdp_port: int = 9450) -> Dict[str, Any]:
 
 
 def main() -> int:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     parser = argparse.ArgumentParser(description="BaroLab Brunch Story Automation Engine")
     parser.add_argument("--status", action="store_true", help="Print cached Brunch status")
     parser.add_argument("--sync", action="store_true", help="Sync live Brunch state from CDP 9450")
