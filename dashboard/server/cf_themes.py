@@ -2355,10 +2355,6 @@ main.page > hr,
 .side-search,
 #sideSearch,
 .sidebar .side-cat,
-.google-auto-placed,
-ins.adsbygoogle.adsbygoogle-noablate,
-ins.adsbygoogle[data-anchor-status],
-ins.adsbygoogle[data-anchor-shown],
 .google-anno-skip,
 .google-anno-sc,
 .google-aiuf,
@@ -2729,9 +2725,7 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
       '#topActions', '.wrap > .top', '.wrap > .actions', '.wrap > hr',
       'main.page > .top', 'main.page > .actions', 'main.page > hr',
       '#mobileOverlay', '#mobileMenu', '.mobile-overlay', '.mobile-menu',
-      '.menu-toggle', '.side-section', '.side-search', '#sideSearch', '.sidebar .side-cat',
-      '.google-auto-placed', 'ins.adsbygoogle.adsbygoogle-noablate',
-      'ins.adsbygoogle[data-anchor-status]', 'ins.adsbygoogle[data-anchor-shown]'
+      '.menu-toggle', '.side-section', '.side-search', '#sideSearch', '.sidebar .side-cat'
     ];
     sels.forEach(function(s){{
       scope.querySelectorAll(s).forEach(function(el){{ el.remove(); }});
@@ -2776,13 +2770,15 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
   }}
 
   function buildStickyAdSlotHtml() {{
+    var clientPub = CFG.pubId || 'ca-pub-7642010403138987';
+    var slotId = CFG.slotId || '8435735669';
+    setTimeout(function(){{
+      try {{ (window.adsbygoogle = window.adsbygoogle || []).push({{}}); }} catch (_) {{}}
+    }}, 350);
     return '<aside class="ad-slot adsense-slot adsense-slot--sticky-rail" data-h2ad="1" data-slot-type="sticky-300x600">' +
       '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:0.08em;margin-bottom:6px;">SPONSORED · AD</div>' +
-      '<div style="width:100%;min-height:240px;background:var(--bg);border:1px dashed var(--line);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;">' +
-      '<strong style="font-size:13px;color:var(--pri);margin-bottom:6px;">' + CFG.name + ' 추천 안내</strong>' +
-      '<p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5;">' + CFG.subTopic + ' 공식 기준 및 최신 혜택을 확인하세요.</p>' +
-      '<a href="/" style="padding:7px 14px;border-radius:6px;background:var(--pri);color:#fff;font-size:12px;font-weight:800;text-decoration:none;">공식 가이드 열람 →</a>' +
-      '</div></aside>';
+      '<ins class="adsbygoogle" style="display:block;min-width:250px;min-height:250px;" data-ad-client="' + clientPub + '" data-ad-slot="' + slotId + '" data-ad-format="auto" data-full-width-responsive="true"></ins>' +
+      '</aside>';
   }}
 
   /* ========================================================================

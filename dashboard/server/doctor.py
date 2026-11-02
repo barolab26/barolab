@@ -1317,6 +1317,32 @@ def apply_16_domain_unique_home_layouts() -> Dict[str, Any]:
                 continue
             settings = r.json().get("settings") or {}
             ac = settings.get("adsense_code") or ""
+            # 1) Unblock Google Auto Ads, Vignette Ads, and Anchor Ads in CSS & JS
+            ac = ac.replace(
+                ".google-auto-placed,\nins.adsbygoogle.adsbygoogle-noablate,\nins.adsbygoogle[data-anchor-status],\nins.adsbygoogle[data-anchor-shown],\n",
+                "",
+            )
+            ac = re.sub(
+                r",\s*'\.google-auto-placed',\s*'ins\.adsbygoogle\.adsbygoogle-noablate',\s*'ins\.adsbygoogle\[data-anchor-status\]',\s*'ins\.adsbygoogle\[data-anchor-shown\]'",
+                "",
+                ac,
+            )
+            # 2) Replace fake house banner in buildStickyAdSlotHtml() with real AdSense sticky rail unit
+            real_sticky_fn = (
+                "function buildStickyAdSlotHtml() {\n"
+                "    var clientPub = CFG.pubId || 'ca-pub-7642010403138987';\n"
+                "    var slotId = CFG.slotId || '8435735669';\n"
+                "    setTimeout(function(){\n"
+                "      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (_) {}\n"
+                "    }, 350);\n"
+                "    return '<aside class=\"ad-slot adsense-slot adsense-slot--sticky-rail\" data-h2ad=\"1\" data-slot-type=\"sticky-300x600\">' +\n"
+                "      '<div style=\"font-size:10px;font-weight:800;color:var(--muted);letter-spacing:0.08em;margin-bottom:6px;\">SPONSORED · AD</div>' +\n"
+                "      '<ins class=\"adsbygoogle\" style=\"display:block;min-width:250px;min-height:250px;\" data-ad-client=\"' + clientPub + '\" data-ad-slot=\"' + slotId + '\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>' +\n"
+                "      '</aside>';\n"
+                "  }"
+            )
+            ac = re.sub(r"function buildStickyAdSlotHtml\(\)\s*\{.*?\n  \}", real_sticky_fn, ac, flags=re.DOTALL)
+
             custom_css = DOMAIN_HOME_LAYOUT_CSS.get(dom, DOMAIN_HOME_LAYOUT_CSS["nolplace.com"])
             new_style_block = f'<style id="barolab-post-card-layout">\n/* BAROLAB_16_UNIQUE_HOME_LAYOUTS_V4 ({dom}) */{custom_css}{mobile_fallback_css}</style>'
 
