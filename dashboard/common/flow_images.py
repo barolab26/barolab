@@ -236,8 +236,9 @@ async def _generate(title, summary, folder, custom_prompt=None, filename='flow-h
             if hashlib.sha256(output.read_bytes()).hexdigest() == prior.get('sha256'):
                 return output
         try:
-            if __import__('os').name != 'nt':
-                await asyncio.to_thread(ensure_account, 9440)
+            if __import__('os').name == 'nt':
+                return await asyncio.to_thread(_generate_via_openai_api, prompt, digest, output, evidence_file)
+            await asyncio.to_thread(ensure_account, 9440)
             binary, profile, _ = account_paths(9440)
             async with async_playwright() as playwright:
                 browser, _ = await connect_async(playwright, 'http://127.0.0.1:9440', binary, profile)

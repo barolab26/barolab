@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-01T20:21:14+09:00",
-  "date": "2026-11-01",
+  "updatedAt": "2026-11-02T13:21:19+09:00",
+  "date": "2026-11-02",
   "northStarGoalUsd": 100.0,
   "revenueLeaders": [
     {
@@ -34,8 +34,8 @@
       "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
       "domain": "daynote.kr",
       "slugTopic": "garmin forerunner 970 specs comparison",
-      "pageViews": 15,
-      "sessions": 13
+      "pageViews": 14,
+      "sessions": 12
     },
     {
       "source": "ga4_top_pv",
@@ -55,27 +55,11 @@
     },
     {
       "source": "ga4_top_pv",
-      "url": "https://www.healthcox.com/yoga-mat-cleaning-guide",
-      "domain": "healthcox.com",
-      "slugTopic": "yoga mat cleaning guide",
-      "pageViews": 7,
-      "sessions": 6
-    },
-    {
-      "source": "ga4_top_pv",
       "url": "https://www.meganote.kr/kt-netflix-cancel",
       "domain": "meganote.kr",
       "slugTopic": "kt netflix cancel",
       "pageViews": 6,
       "sessions": 5
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.healthcox.com/단백질-보충제-추천-2026년-기준-50대를-위한-단백질-보",
-      "domain": "healthcox.com",
-      "slugTopic": "단백질 보충제 추천 2026년 기준 50대를 위한 단백질 보",
-      "pageViews": 5,
-      "sessions": 2
     },
     {
       "source": "ga4_top_pv",
@@ -103,19 +87,35 @@
     },
     {
       "source": "ga4_top_pv",
-      "url": "https://www.woorinote.kr/parking-account-balance-tier-interest",
-      "domain": "woorinote.kr",
-      "slugTopic": "parking account balance tier interest",
+      "url": "https://www.baronote.kr/universe-club-cancel",
+      "domain": "baronote.kr",
+      "slugTopic": "universe club cancel",
       "pageViews": 4,
       "sessions": 4
     },
     {
       "source": "ga4_top_pv",
-      "url": "https://www.baronote.kr/universe-club-cancel",
-      "domain": "baronote.kr",
-      "slugTopic": "universe club cancel",
-      "pageViews": 3,
-      "sessions": 3
+      "url": "https://www.healthcox.com/yoga-mat-cleaning-guide",
+      "domain": "healthcox.com",
+      "slugTopic": "yoga mat cleaning guide",
+      "pageViews": 4,
+      "sessions": 4
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.healthcox.com/단백질-보충제-추천-2026년-기준-50대를-위한-단백질-보",
+      "domain": "healthcox.com",
+      "slugTopic": "단백질 보충제 추천 2026년 기준 50대를 위한 단백질 보",
+      "pageViews": 4,
+      "sessions": 1
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.maxnote.kr/budget-mobile-number-transfer-termination-cost",
+      "domain": "maxnote.kr",
+      "slugTopic": "budget mobile number transfer termination cost",
+      "pageViews": 4,
+      "sessions": 4
     },
     {
       "source": "gsc_top_clicks",
@@ -218,245 +218,238 @@
   ],
   "goldenKeywords": [
     {
-      "keyword": "식기세척기 빌트인 싱크대 걸레받이 절단 비용",
+      "keyword": "로봇청소기 직배수 키트 타공 원상복구 비용",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 2876,
-      "saturation": 1.5,
+      "blogTotal": 160,
+      "saturation": 26.2,
       "recommendedChannel": "CF(must-pick.com) + 네이버 브릿지"
     },
     {
-      "keyword": "인버터 제습기 일일제습량 소비전력 전기세 계산",
+      "keyword": "올인원 세탁건조기 히트펌프 소비전력 누진세",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 300,
-      "saturation": 14.0,
+      "blogTotal": 44,
+      "saturation": 95.5,
       "recommendedChannel": "CF(must-pick.com) + 네이버 브릿지"
     },
     {
-      "keyword": "청년내일저축계좌 중도해지 적립중지 신청사유",
+      "keyword": "본인부담상한제 사후환급금 지급신청서 입금기간",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 1347,
-      "saturation": 3.1,
+      "blogTotal": 1582,
+      "saturation": 2.7,
       "recommendedChannel": "CF(must-good.com) + 네이버 브릿지"
     },
     {
-      "keyword": "부모급여 가정양육수당 전환 신청일 25일 기준",
+      "keyword": "근로장려금 반기신청 전세보증금 간주전세금 계산",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 4000,
-      "saturation": 1.1,
+      "blogTotal": 1081,
+      "saturation": 3.9,
       "recommendedChannel": "CF(must-good.com) + 네이버 브릿지"
     },
     {
-      "keyword": "대상포진 사백신 싱그릭스 접종간격 실비",
+      "keyword": "대장내시경 용종절제술 수술비특약 질병수술비 청구",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 258,
-      "saturation": 16.3,
+      "blogTotal": 2203,
+      "saturation": 1.9,
       "recommendedChannel": "CF(healthcox.com) + 네이버 브릿지"
     },
     {
-      "keyword": "무릎 연골주사 히알루론산 급여 주기 6개월",
+      "keyword": "국가건강검진 위내시경 조직검사 실비 청구서류",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 369,
-      "saturation": 11.4,
+      "blogTotal": 826,
+      "saturation": 5.1,
       "recommendedChannel": "CF(healthcox.com) + 네이버 브릿지"
-    },
-    {
-      "keyword": "공연 관람료 소득공제 신용카드 문화비 한도",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 2452,
-      "saturation": 1.7,
-      "recommendedChannel": "CF(must-joy.com) + 네이버 브릿지"
     },
     {
       "keyword": "국립박물관 어린이박물관 사전예약 취소표 시간",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 3120,
+      "blogTotal": 3129,
       "saturation": 1.3,
       "recommendedChannel": "CF(must-joy.com) + 네이버 브릿지"
+    },
+    {
+      "keyword": "고궁 야간개장 경복궁 특별관람 무료입장 대상",
+      "grade": "S",
+      "monthlySearch": 4200,
+      "blogTotal": 2074,
+      "saturation": 2.0,
+      "recommendedChannel": "CF(must-joy.com) + 네이버 브릿지"
+    },
+    {
+      "keyword": "엠세이퍼 명의도용방지 가입제한 해제 비대면 방법",
+      "grade": "S",
+      "monthlySearch": 4200,
+      "blogTotal": 1118,
+      "saturation": 3.8,
+      "recommendedChannel": "CF(maxnote.kr) + 네이버 브릿지"
     },
     {
       "keyword": "모바일 주민등록증 발급 IC칩 재발급 수수료",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 3305,
+      "blogTotal": 3312,
       "saturation": 1.3,
       "recommendedChannel": "CF(maxnote.kr) + 네이버 브릿지"
     },
     {
-      "keyword": "알뜰폰 eSIM 듀얼심 데이터 나눠쓰기 개통비용",
+      "keyword": "예금담보대출 중도상환수수료 한도 가산금리 계산",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 287,
-      "saturation": 14.6,
-      "recommendedChannel": "CF(maxnote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "퇴직연금 DC형 DB형 전환 신청시기 임금피크제",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 631,
-      "saturation": 6.7,
+      "blogTotal": 3138,
+      "saturation": 1.3,
       "recommendedChannel": "CF(baronote.kr) + 네이버 브릿지"
     },
     {
-      "keyword": "신용카드 리볼빙 해지 일시결제 신용점수 복구",
+      "keyword": "청년도약계좌 일시납입 전환 정부기여금 계산",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 72,
-      "saturation": 58.3,
+      "blogTotal": 2109,
+      "saturation": 2.0,
       "recommendedChannel": "CF(baronote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "카카오톡 대화내용 백업 복원 기한 14일 연장",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 32,
-      "saturation": 131.2,
-      "recommendedChannel": "CF(topnote.kr) + 네이버 브릿지"
     },
     {
       "keyword": "아이폰 eSIM 기기변경 QR코드 재발급 수수료",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 251,
+      "blogTotal": 252,
       "saturation": 16.7,
       "recommendedChannel": "CF(topnote.kr) + 네이버 브릿지"
     },
     {
-      "keyword": "전기차 충전구역 과태료 완속 14시간 예외기준",
+      "keyword": "구글 계정 2단계인증 백업코드 분실 복구절차",
       "grade": "S",
       "monthlySearch": 4200,
-      "blogTotal": 513,
-      "saturation": 8.2,
+      "blogTotal": 794,
+      "saturation": 5.3,
+      "recommendedChannel": "CF(topnote.kr) + 네이버 브릿지"
+    },
+    {
+      "keyword": "하이브리드 개별소비세 취등록세 감면 한도 연장",
+      "grade": "S",
+      "monthlySearch": 4200,
+      "blogTotal": 290,
+      "saturation": 14.5,
       "recommendedChannel": "CF(meganote.kr) + 네이버 브릿지"
     }
   ],
   "naverAccountSlotKeywords": {
     "soul5373": [
       {
-        "keyword": "삼점삼 병원비 환급금",
-        "grade": "S",
-        "searchVolume": 450,
-        "docCount": 15,
-        "goldenRate": 112.5
-      },
-      {
-        "keyword": "당화혈색소 6.5 공복혈당 불일치 이유",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 147,
-        "goldenRate": 30.6
-      },
-      {
-        "keyword": "대상포진 사백신 싱그릭스 접종간격 실비",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 258,
-        "goldenRate": 17.4
-      },
-      {
         "keyword": "무릎 연골주사 히알루론산 급여 주기",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 458,
+        "docCount": 459,
         "goldenRate": 9.8
+      },
+      {
+        "keyword": "백내장 단초점 다초점 실손보험 청구서류",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1035,
+        "goldenRate": 4.3
+      },
+      {
+        "keyword": "위내시경 조직검사 용종절제 실비보험 청구",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1504,
+        "goldenRate": 3.0
+      },
+      {
+        "keyword": "도수치료 실손보험 10회 초과 소견서",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1504,
+        "goldenRate": 3.0
       }
     ],
     "yoon_master": [
       {
-        "keyword": "아이폰18 폴더 블",
-        "grade": "S",
-        "searchVolume": 19290,
-        "docCount": 164,
-        "goldenRate": 253.8
-      },
-      {
-        "keyword": "로봇청소기 직배수 키트 타공 원상복구",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 229,
-        "goldenRate": 19.7
-      },
-      {
-        "keyword": "인버터 제습기 일일제습량 소비전력 계산",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 401,
-        "goldenRate": 11.2
-      },
-      {
         "keyword": "가을 구스다운 세탁 중성세제 건조기 볼",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 408,
+        "docCount": 410,
         "goldenRate": 11.0
+      },
+      {
+        "keyword": "국제선 기내수하물 보조배터리 단락방지 포장",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 763,
+        "goldenRate": 5.9
+      },
+      {
+        "keyword": "친환경 콘덴싱보일러 보조금 세입자 신청",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 974,
+        "goldenRate": 4.6
+      },
+      {
+        "keyword": "빌트인 식기세척기 싱크대 리폼 설치조건",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 3679,
+        "goldenRate": 1.2
       }
     ],
     "soultin": [
       {
-        "keyword": "세이브텍스 환급금 뜻",
-        "grade": "S",
-        "searchVolume": 850,
-        "docCount": 31,
-        "goldenRate": 121.4
-      },
-      {
-        "keyword": "기초연금 수급자격 자동차 시가표준액",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 2792,
-        "goldenRate": 1.6
-      },
-      {
         "keyword": "노령연금 연기연금 신청 손익분기점",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 3019,
+        "docCount": 3062,
         "goldenRate": 1.5
       },
       {
-        "keyword": "주택연금 우대형 가입조건 수령액 차이",
+        "keyword": "국민연금 추납 신청자격 반환일시금",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 3682,
-        "goldenRate": 1.2
+        "docCount": 4912,
+        "goldenRate": 0.9
+      },
+      {
+        "keyword": "국민연금 유족연금 중복수급 감액률",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1465,
+        "goldenRate": 3.1
       }
     ],
     "adinfo0905": [
       {
-        "keyword": "허그 든든전세 11차",
-        "grade": "A",
-        "searchVolume": 1460,
-        "docCount": 513,
-        "goldenRate": 66.4
+        "keyword": "버팀목 전세자금대출 목적물변경 연장 조건",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 3212,
+        "goldenRate": 1.4
+      },
+      {
+        "keyword": "중소기업 청년 소득세 감면 경정청구 서류",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 4961,
+        "goldenRate": 0.9
+      },
+      {
+        "keyword": "청년주택드림 청약통장 전환 일시납 한도",
+        "grade": "S",
+        "searchVolume": 4500,
+        "docCount": 1137,
+        "goldenRate": 4.0
       },
       {
         "keyword": "IRP 중도인출 무주택 전세보증금 서류",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 2307,
-        "goldenRate": 2.0
-      },
-      {
-        "keyword": "퇴직금 중간정산 무주택자 전세계약서 기간",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 2895,
-        "goldenRate": 1.6
-      },
-      {
-        "keyword": "버팀목 전세자금대출 목적물변경 연장 조건",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 3207,
-        "goldenRate": 1.4
+        "docCount": 2316,
+        "goldenRate": 1.9
       }
     ],
     "stone0747": [
@@ -464,7 +457,7 @@
         "keyword": "가족돌봄수당 신청 자격 조부모 손주 돌봄비",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 1951,
+        "docCount": 1954,
         "goldenRate": 128.6
       },
       {
@@ -485,27 +478,13 @@
         "keyword": "소상공인 고용보험료 지원 신청 등급별 비율",
         "grade": "S",
         "searchVolume": 4500,
-        "docCount": 3388,
+        "docCount": 3403,
         "goldenRate": 1.3
       }
     ]
   },
   "cfDomainKeywords": {
     "must-pick.com": [
-      {
-        "keyword": "식기세척기 빌트인 싱크대 걸레받이 절단 비용",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2876,
-        "goldenRate": 1.5
-      },
-      {
-        "keyword": "인버터 제습기 일일제습량 소비전력 전기세 계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 300,
-        "goldenRate": 14.0
-      },
       {
         "keyword": "로봇청소기 직배수 키트 타공 원상복구 비용",
         "grade": "S",
@@ -514,34 +493,48 @@
         "goldenRate": 26.2
       },
       {
+        "keyword": "올인원 세탁건조기 히트펌프 소비전력 누진세",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 44,
+        "goldenRate": 95.5
+      },
+      {
+        "keyword": "으뜸효율 가전제품 환급 세입자 신청서류",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 16,
+        "goldenRate": 262.5
+      },
+      {
         "keyword": "아이폰18 폴더 블",
         "grade": "S",
         "searchVolume": 19290,
-        "docCount": 164,
+        "docCount": 163,
         "goldenRate": 253.8
       }
     ],
     "must-good.com": [
       {
-        "keyword": "청년내일저축계좌 중도해지 적립중지 신청사유",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1347,
-        "goldenRate": 3.1
-      },
-      {
-        "keyword": "부모급여 가정양육수당 전환 신청일 25일 기준",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 4000,
-        "goldenRate": 1.1
-      },
-      {
         "keyword": "본인부담상한제 사후환급금 지급신청서 입금기간",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 1577,
+        "docCount": 1582,
         "goldenRate": 2.7
+      },
+      {
+        "keyword": "근로장려금 반기신청 전세보증금 간주전세금 계산",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 1081,
+        "goldenRate": 3.9
+      },
+      {
+        "keyword": "청년내일저축계좌 중도해지 적립중지 신청사유",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 1348,
+        "goldenRate": 3.1
       },
       {
         "keyword": "세이브텍스 환급금 뜻",
@@ -553,25 +546,25 @@
     ],
     "healthcox.com": [
       {
-        "keyword": "대상포진 사백신 싱그릭스 접종간격 실비",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 258,
-        "goldenRate": 16.3
-      },
-      {
-        "keyword": "무릎 연골주사 히알루론산 급여 주기 6개월",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 369,
-        "goldenRate": 11.4
-      },
-      {
         "keyword": "대장내시경 용종절제술 수술비특약 질병수술비 청구",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 2200,
+        "docCount": 2203,
         "goldenRate": 1.9
+      },
+      {
+        "keyword": "국가건강검진 위내시경 조직검사 실비 청구서류",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 826,
+        "goldenRate": 5.1
+      },
+      {
+        "keyword": "당화혈색소 6.5 공복혈당 불일치 이유",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 147,
+        "goldenRate": 28.6
       },
       {
         "keyword": "고지혈증 스타틴 복용 시간 코엔자임Q10 병용",
@@ -583,138 +576,138 @@
     ],
     "must-joy.com": [
       {
-        "keyword": "공연 관람료 소득공제 신용카드 문화비 한도",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2452,
-        "goldenRate": 1.7
-      },
-      {
         "keyword": "국립박물관 어린이박물관 사전예약 취소표 시간",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 3120,
+        "docCount": 3129,
         "goldenRate": 1.3
       },
       {
         "keyword": "고궁 야간개장 경복궁 특별관람 무료입장 대상",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 2069,
+        "docCount": 2074,
         "goldenRate": 2.0
       },
       {
         "keyword": "전통시장 온누리상품권 가맹점 조회 소득공제율",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 2385,
+        "docCount": 2391,
         "goldenRate": 135.7
       }
     ],
     "maxnote.kr": [
       {
-        "keyword": "모바일 주민등록증 발급 IC칩 재발급 수수료",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3305,
-        "goldenRate": 1.3
-      },
-      {
-        "keyword": "알뜰폰 eSIM 듀얼심 데이터 나눠쓰기 개통비용",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 287,
-        "goldenRate": 14.6
-      },
-      {
         "keyword": "엠세이퍼 명의도용방지 가입제한 해제 비대면 방법",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 1112,
+        "docCount": 1118,
         "goldenRate": 3.8
+      },
+      {
+        "keyword": "모바일 주민등록증 발급 IC칩 재발급 수수료",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 3312,
+        "goldenRate": 1.3
       },
       {
         "keyword": "모바일 운전면허증 IC운전면허증 은행 공항 사용처",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 1439,
+        "docCount": 1442,
+        "goldenRate": 135.7
+      },
+      {
+        "keyword": "구글 드라이브 원드라이브 용량 정리 자동동기화 해제",
+        "grade": "S",
+        "searchVolume": 3800,
+        "docCount": 786,
         "goldenRate": 135.7
       }
     ],
     "baronote.kr": [
       {
-        "keyword": "퇴직연금 DC형 DB형 전환 신청시기 임금피크제",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 631,
-        "goldenRate": 6.7
-      },
-      {
-        "keyword": "신용카드 리볼빙 해지 일시결제 신용점수 복구",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 72,
-        "goldenRate": 58.3
-      },
-      {
         "keyword": "예금담보대출 중도상환수수료 한도 가산금리 계산",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 3123,
+        "docCount": 3138,
         "goldenRate": 1.3
+      },
+      {
+        "keyword": "청년도약계좌 일시납입 전환 정부기여금 계산",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 2109,
+        "goldenRate": 2.0
+      },
+      {
+        "keyword": "IRP 중도인출 무주택 전세보증금 필요서류",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 2258,
+        "goldenRate": 1.9
+      },
+      {
+        "keyword": "퇴직연금 DC형 IRP 수령 일시금 연금 세율",
+        "grade": "S",
+        "searchVolume": 3800,
+        "docCount": 4986,
+        "goldenRate": 135.7
       }
     ],
     "topnote.kr": [
       {
-        "keyword": "카카오톡 대화내용 백업 복원 기한 14일 연장",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 32,
-        "goldenRate": 131.2
-      },
-      {
         "keyword": "아이폰 eSIM 기기변경 QR코드 재발급 수수료",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 251,
+        "docCount": 252,
         "goldenRate": 16.7
       },
       {
-        "keyword": "엑셀 VLOOKUP N/A 오류 공백 문자 일괄제거",
+        "keyword": "구글 계정 2단계인증 백업코드 분실 복구절차",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 67,
-        "goldenRate": 62.7
+        "docCount": 794,
+        "goldenRate": 5.3
       },
       {
-        "keyword": "윈도우11 네트워크 프린터 스캔 연결 오류 해결",
+        "keyword": "윈도우11 네트워크 프린터 공유 오류 0x0000011b 해결",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 82,
+        "goldenRate": 51.2
+      },
+      {
+        "keyword": "카카오톡 대화내용 백업 기기변경 사진 복원 기한",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 549,
+        "docCount": 927,
         "goldenRate": 135.7
       }
     ],
     "meganote.kr": [
-      {
-        "keyword": "전기차 충전구역 과태료 완속 14시간 예외기준",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 513,
-        "goldenRate": 8.2
-      },
-      {
-        "keyword": "자동차세 연납 후 폐차 매매 환급금 일할계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 814,
-        "goldenRate": 5.2
-      },
       {
         "keyword": "하이브리드 개별소비세 취등록세 감면 한도 연장",
         "grade": "S",
         "searchVolume": 4200,
         "docCount": 290,
         "goldenRate": 14.5
+      },
+      {
+        "keyword": "운전자보험 교통사고처리지원금 중복가입 비례보상",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 2311,
+        "goldenRate": 1.8
+      },
+      {
+        "keyword": "전기차 충전구역 과태료 완속 14시간 예외기준",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 515,
+        "goldenRate": 8.2
       },
       {
         "keyword": "아우디 A5 850만원 할인 후기",
@@ -726,72 +719,58 @@
     ],
     "justinfo.co.kr": [
       {
-        "keyword": "주휴수당 지급조건 주 15시간 지각 조퇴 계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 4999,
-        "goldenRate": 0.8
-      },
-      {
         "keyword": "가족간 부동산 저가양도 증여세 3억 30% 기준",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 13,
-        "goldenRate": 323.1
+        "docCount": 14,
+        "goldenRate": 300.0
       },
       {
-        "keyword": "퇴직금 중간정산 무주택자 전세계약서 신청기한",
+        "keyword": "실업급여 조기재취업수당 자영업 프리랜서 서류",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 965,
-        "goldenRate": 4.4
+        "docCount": 279,
+        "goldenRate": 15.1
       },
       {
         "keyword": "헬스장 필라테스 중도해지 위약금 10% 환불 계산",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 332,
+        "docCount": 334,
         "goldenRate": 135.7
       }
     ],
     "smilenote.kr": [
       {
-        "keyword": "노령연금 연기연금 신청 가산율 7.2% 손익분기점",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 975,
-        "goldenRate": 4.3
-      },
-      {
-        "keyword": "주택연금 우대형 가입조건 공시가격 수령액 차이",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1941,
-        "goldenRate": 2.2
-      },
-      {
         "keyword": "장기요양등급 가족요양비 복지용구 본인부담률",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 3411,
+        "docCount": 3438,
         "goldenRate": 1.2
+      },
+      {
+        "keyword": "기초연금 수급자격 자동차 시가표준액 4천만원",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 462,
+        "goldenRate": 9.1
+      },
+      {
+        "keyword": "노령연금 연기연금 신청 가산율 7.2% 손익분기점",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 987,
+        "goldenRate": 4.3
       },
       {
         "keyword": "노인장기요양보험 등급 판정 방문조사 질문 체크표",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 1077,
+        "docCount": 1080,
         "goldenRate": 135.7
       }
     ],
     "tripmarvel.com": [
-      {
-        "keyword": "KTX 지연배상금 기준 시간별 환불율 신청방법",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 75,
-        "goldenRate": 56.0
-      },
       {
         "keyword": "인천공항 긴급여권 발급 소요시간 필요서류 당일",
         "grade": "S",
@@ -810,85 +789,71 @@
         "keyword": "K패스 기후동행카드 환급 기준 경기 인천 광역버스",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 4504,
+        "docCount": 4508,
         "goldenRate": 135.7
       }
     ],
     "daynote.kr": [
       {
-        "keyword": "대형폐기물 인터넷신고 스티커 취소 환불 수수료",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 829,
-        "goldenRate": 5.1
-      },
-      {
-        "keyword": "도시가스 계량기 교체비용 자가검침 누락 요금정산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 36,
-        "goldenRate": 116.7
-      },
-      {
         "keyword": "아파트 관리비 장기수선충당금 세입자 퇴거 환급",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 1946,
+        "docCount": 1951,
         "goldenRate": 2.2
       },
       {
-        "keyword": "드럼세탁기 배수필터 청소 잔수제거 에러코드",
+        "keyword": "가을 겨울 구스다운 패딩 세탁 중성세제 건조기",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 702,
+        "goldenRate": 6.0
+      },
+      {
+        "keyword": "통돌이 세탁기 배수필터 청소 거름망 과탄산소다",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 835,
+        "goldenRate": 5.0
+      },
+      {
+        "keyword": "대형폐기물 스티커 인터넷 신고 환불 취소 방법",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 658,
+        "docCount": 920,
         "goldenRate": 135.7
       }
     ],
     "woorinote.kr": [
       {
-        "keyword": "전세보증금 반환보증 HUG HF 보증료율 가입기한",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2256,
-        "goldenRate": 1.9
-      },
-      {
         "keyword": "디딤돌대출 생애최초 무주택세대주 소득합산 예외",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 3581,
+        "docCount": 3594,
         "goldenRate": 1.2
+      },
+      {
+        "keyword": "전입신고 세대주 확인 온라인 확정일자 우선변제권",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 3329,
+        "goldenRate": 1.3
       },
       {
         "keyword": "버팀목 전세자금대출 목적물변경 추가대출 조건",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 3476,
+        "docCount": 3478,
         "goldenRate": 1.2
       },
       {
         "keyword": "허그 든든전세 11차",
         "grade": "A",
         "searchVolume": 1460,
-        "docCount": 513,
+        "docCount": 511,
         "goldenRate": 66.4
       }
     ],
     "nolplace.com": [
-      {
-        "keyword": "서울대공원 캠핑장 예약 매너타임 주차요금 할인",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 29,
-        "goldenRate": 144.8
-      },
-      {
-        "keyword": "경복궁 야간관람 인터넷예매 현장발권 무료대상",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1105,
-        "goldenRate": 3.8
-      },
       {
         "keyword": "국립수목원 광릉숲 사전예약 차량등록 입장료 면제",
         "grade": "S",
@@ -897,64 +862,78 @@
         "goldenRate": 72.4
       },
       {
+        "keyword": "어린이대공원 주차장 만차시 주변 공영주차장 요금",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 412,
+        "goldenRate": 10.2
+      },
+      {
+        "keyword": "국립자연휴양림 숲나들e 우선예약 다자녀 대기예약",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 434,
+        "goldenRate": 9.7
+      },
+      {
         "keyword": "서울 공영주차장 다둥이 저공해차 50% 자동감면 등록",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 711,
+        "docCount": 713,
         "goldenRate": 135.7
       }
     ],
     "soulnote.kr": [
       {
-        "keyword": "산업안전기사 응시자격 관련학과 경력증명서 인정",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2399,
-        "goldenRate": 1.8
-      },
-      {
-        "keyword": "국가기술자격증 취득자격확인서 큐넷 온라인 발급",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1131,
-        "goldenRate": 3.7
-      },
-      {
         "keyword": "청년일자리도약장려금 근속지원금 재직기간 계산",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 794,
+        "docCount": 795,
         "goldenRate": 5.3
+      },
+      {
+        "keyword": "이직 확인서 처리기간 고용보험 상실신고 지연",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 3388,
+        "goldenRate": 1.2
+      },
+      {
+        "keyword": "산업안전기사 응시자격 관련학과 경력증명서 인정",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 2402,
+        "goldenRate": 1.7
       },
       {
         "keyword": "지게차운전기능사 필기 실기 국비지원 학원 비용",
         "grade": "S",
         "searchVolume": 3800,
-        "docCount": 1653,
+        "docCount": 1655,
         "goldenRate": 135.7
       }
     ],
     "joynote.kr": [
       {
-        "keyword": "강아지 광견병 무료접종 시군구 동물병원 지참물",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2,
-        "goldenRate": 2100.0
-      },
-      {
-        "keyword": "반려동물 등록 내장형 마이크로칩 외장형 과태료",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2895,
-        "goldenRate": 1.5
-      },
-      {
         "keyword": "강아지 심장사상충약 넥스가드 스펙트라 체중별 용량",
         "grade": "S",
         "searchVolume": 4200,
-        "docCount": 1145,
+        "docCount": 1146,
         "goldenRate": 3.7
+      },
+      {
+        "keyword": "몬스테라 분갈이 흙배합 마사토 펄라이트 물주기",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 1058,
+        "goldenRate": 4.0
+      },
+      {
+        "keyword": "펫보험 슬개골탈구 면책기간 1년 자기부담금 비교",
+        "grade": "S",
+        "searchVolume": 4200,
+        "docCount": 1339,
+        "goldenRate": 3.1
       }
     ]
   },

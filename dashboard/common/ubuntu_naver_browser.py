@@ -275,12 +275,18 @@ def sync_cookies_from_ego_profile(port, account_key):
         if account_key not in ("cf-flow", "threads") and has_naver and marker_fresh:
             return True
 
-        from common.ego_taskspace import extract_profile_cookies
+        from common.ego_taskspace import extract_profile_cookies, inject_profile_cookies
         cookies = extract_profile_cookies(
             account_key,
             default_url=default_url,
             include_default_profile=(account_key in ("cf-flow", "threads")),
         )
+        ego_has_naver = any("naver" in c.get("domain", "") and c.get("name") == "NID_AUT" for c in (cookies or []))
+        if account_key not in ("cf-flow", "threads") and has_naver and not ego_has_naver:
+            naver_cookies = [c for c in current if "naver" in c.get("domain", "")]
+            inject_profile_cookies(account_key, naver_cookies, default_url=default_url)
+            marker.write_text(str(int(time.time())), encoding="utf-8")
+            return True
         if not cookies:
             return False
         clean_cookies = []
@@ -327,6 +333,7 @@ def ensure_account(port):
                     except RuntimeError:continue
                     break
             if pid and os.name == "nt":
+                _win_hide_from_taskbar(pid)
                 sync_cookies_from_ego_profile(port, "threads" if port == 9450 else "cf-flow")
         elif os.name == "nt":
             account = "soultin" if port == 9226 else next((k for k, v in accounts().items() if v["cdp_port"] == port), None)
@@ -345,6 +352,8 @@ def ensure_account(port):
         if account_key:
             sync_cookies_from_ego_profile(port, account_key)
     gc_blank_tabs(port)
+    if os.name == "nt":
+        _win_hide_from_taskbar(pid)
     return pid
 
 
@@ -353,6 +362,18 @@ def close_account(port):
     if os.name != "nt":
         return False
     try:
+        try:
+            with urlopen(f"http://127.0.0.1:{port}/json/version", timeout=2) as resp:
+                ver = json.load(resp)
+            import websocket
+            ws = websocket.create_connection(ver["webSocketDebuggerUrl"], timeout=2, suppress_origin=True)
+            try:
+                ws.send(json.dumps({"id": 1, "method": "Browser.close"}))
+            finally:
+                ws.close()
+            time.sleep(0.3)
+        except Exception:
+            pass
         _, profile, _ = account_paths(port)
         pid = process_identity(port, profile)
         if pid:
@@ -369,7 +390,7 @@ def close_account(port):
     return False
 
 
-def _win_find_browser_hwnd(pid):
+def _win_find_browser_hwnds(pid):
     import ctypes
     from ctypes import wintypes
     user32 = ctypes.windll.user32
@@ -377,51 +398,47 @@ def _win_find_browser_hwnd(pid):
     WNDENUMPROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
 
     def _cb(hwnd, lparam):
-        if user32.IsWindowVisible(hwnd):
-            win_pid = wintypes.DWORD()
-            user32.GetWindowThreadProcessId(hwnd, ctypes.byref(win_pid))
-            if win_pid.value == int(pid):
-                cls_buf = ctypes.create_unicode_buffer(64)
-                user32.GetClassNameW(hwnd, cls_buf, 64)
-                length = user32.GetWindowTextLengthW(hwnd)
-                if cls_buf.value.startswith("Chrome_WidgetWin_") or length > 0:
-                    found.append(int(hwnd))
+        win_pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(win_pid))
+        if win_pid.value == int(pid):
+            cls_buf = ctypes.create_unicode_buffer(64)
+            user32.GetClassNameW(hwnd, cls_buf, 64)
+            if cls_buf.value.startswith("Chrome_WidgetWin_"):
+                found.append(int(hwnd))
         return True
 
     user32.EnumWindows(WNDENUMPROC(_cb), 0)
-    return found[0] if found else None
+    return found
+
+
+def _win_find_browser_hwnd(pid):
+    hwnds = _win_find_browser_hwnds(pid)
+    return hwnds[0] if hwnds else None
+
+
+def _win_hide_from_taskbar(pid):
+    """Hide temporary port-bound CDP worker windows from the Windows Taskbar while keeping the single main EGO Lite window clean."""
+    if os.name != "nt" or not pid:
+        return
+    try:
+        import ctypes
+        user32 = ctypes.windll.user32
+        GWL_EXSTYLE = -20
+        WS_EX_TOOLWINDOW = 0x00000080
+        WS_EX_APPWINDOW = 0x00040000
+        for hwnd in _win_find_browser_hwnds(pid):
+            ex_style = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+            user32.ShowWindow(hwnd, 0)  # SW_HIDE removes taskbar button immediately
+            user32.SetWindowLongW(hwnd, GWL_EXSTYLE, (ex_style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW)
+            user32.SetWindowPos(hwnd, 0, -32000, -32000, 1280, 900, 0x0010 | 0x0004 | 0x0020)
+    except Exception:
+        pass
 
 
 def _spawn_ego_on_user_desktop(cmd_args, env=None, log_path=None):
-    """Spawn EGO LITE via main EGO LITE's Node runtime so the window opens on WinSta0\\Default desktop."""
+    """Spawn EGO LITE directly via Popen without blocking the ego_cli bootstrap pipe."""
     if os.name == "nt" and "--start-minimized" not in cmd_args:
         cmd_args = [cmd_args[0], "--start-minimized", *cmd_args[1:]]
-    ego_cli = _find_ego_cli() if os.name == "nt" else None
-    if ego_cli and ego_cli.is_file():
-        script = f"""
-const cp = await import('node:child_process');
-const child = cp.spawn({json.dumps(str(cmd_args[0]))}, {json.dumps([str(a) for a in cmd_args[1:]])}, {{
-  detached: true,
-  stdio: 'ignore',
-  windowsHide: false
-}});
-child.unref();
-console.log('SPAWNED_PID:' + child.pid);
-"""
-        fd, fname = tempfile.mkstemp(prefix="ego-spawn-", suffix=".mjs")
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                f.write(script)
-            entry = "await import('" + Path(fname).resolve().as_uri() + "')"
-            cflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-            res = subprocess.run([str(ego_cli), "nodejs", "-e", entry], stdin=subprocess.DEVNULL,
-                                 text=True, encoding="utf-8", capture_output=True, timeout=15, creationflags=cflags)
-            if "SPAWNED_PID:" in (res.stdout + "\n" + res.stderr):
-                return True
-        except Exception:
-            pass
-        finally:
-            Path(fname).unlink(missing_ok=True)
     if log_path:
         with Path(log_path).open("ab") as log:
             subprocess.Popen(cmd_args, env=env, stdout=log, stderr=log, start_new_session=(os.name != "nt"))
@@ -432,16 +449,17 @@ console.log('SPAWNED_PID:' + child.pid);
 
 def inspect_workflow_window(port):
     """Read the verified browser's window mapping without focusing, starting or navigating."""
-    from common.browser_session import _runtime
     if port == 9440:
         executable, profile = browser_executable(), Path.home() / ".config/cdp_gui_9440"
     else:
         executable, profile, _ = account_paths(port)
-    pid = _runtime(port, str(executable), str(profile))["ProcessId"]
     if os.name == "nt":
-        hwnd = _win_find_browser_hwnd(pid)
-        return {'status':'observed','port':port,'browserPid':pid,'display':'windows',
-                'windowId':f'0x{hwnd:08x}' if hwnd else f'0x{int(pid):08x}','wmPid':int(pid),'mapped':True,'attemptedDisplays':['windows'],'browserStarted':False}
+        pid = process_identity(port, profile)
+        hwnd = _win_find_browser_hwnd(pid) if pid else None
+        return {'status':'observed','port':port,'browserPid':pid or 0,'display':'windows',
+                'windowId':f'0x{hwnd:08x}' if hwnd else f'0x{int(pid or 0):08x}','wmPid':int(pid or 0),'mapped':True,'attemptedDisplays':['windows'],'browserStarted':False}
+    from common.browser_session import _runtime
+    pid = _runtime(port, str(executable), str(profile))["ProcessId"]
     display=os.environ.get('BAROLAB_DISPLAY')
     if not display:
         try:
@@ -580,6 +598,7 @@ def launch(account):
             import ctypes
             ctypes.windll.user32.SetWindowTextW(hwnd, f"BaroLab | {account} | {config['blog_id']} | EGO LITE")
             ctypes.windll.user32.SetWindowPos(hwnd, 0, -32000, -32000, 1280, 900, 0x0010 | 0x0004)
+        _win_hide_from_taskbar(pid)
     else:
         environment = dict(os.environ, DISPLAY=os.environ.get("BAROLAB_DISPLAY", ":10"))
         windows = subprocess.run(["wmctrl", "-lp"], env=environment, capture_output=True, text=True, check=True)

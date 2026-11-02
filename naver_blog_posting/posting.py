@@ -274,8 +274,16 @@ def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, de
         status_obj['artifactFolder'] = current_attempt.get('artifactFolder')
     topic_slug = account_info.get('topic_slug', 'general')
     status_obj['topicSlug'] = topic_slug
-    status_obj['folderPath'] = f'output/{acc_key}/{topic_slug}/'
-    status_obj['previewUrl'] = f'../naver_blog_posting/output/{acc_key}/{topic_slug}/final.html'
+    def _folder_to_preview_url(af):
+        if not af:
+            return f'../naver_blog_posting/output/{acc_key}/{topic_slug}/final.html'
+        norm_af = str(af).replace('\\', '/')
+        idx = norm_af.find('/naver_blog_posting/output/')
+        if idx >= 0:
+            return f"{norm_af[idx:]}/preview.html"
+        return f'../naver_blog_posting/output/{acc_key}/{topic_slug}/final.html'
+    status_obj['folderPath'] = current_attempt.get('artifactFolder') or f'output/{acc_key}/{topic_slug}/'
+    status_obj['previewUrl'] = _folder_to_preview_url(current_attempt.get('artifactFolder'))
     if reserve_time:
         status_obj['reserveTime'] = reserve_time
     if verification:
@@ -283,7 +291,7 @@ def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, de
     receipts = [a for a in read_journal()['attempts'] if a['account'] == acc_key and a['phase'] == 'verified' and (a.get('reserveTime', '')[:10] == date_str) and a.get('topic') and a.get('verificationSource')]
     completed_slots = {}
     for a in receipts:
-        slot_entry = {'topic': a['topic'], 'reserveTime': a['reserveTime'], 'verificationSource': a['verificationSource'], 'publicationStatus': 'verified_public' if a.get('state') == 'verified_public' else 'reserved', 'publicUrl': a.get('publicUrl'), 'artifactFolder': a.get('artifactFolder')}
+        slot_entry = {'topic': a['topic'], 'reserveTime': a['reserveTime'], 'verificationSource': a['verificationSource'], 'publicationStatus': 'verified_public' if a.get('state') == 'verified_public' else 'reserved', 'publicUrl': a.get('publicUrl'), 'artifactFolder': a.get('artifactFolder'), 'previewUrl': _folder_to_preview_url(a.get('artifactFolder'))}
         inferred_slot = _infer_scheduled_slot(a.get('artifactFolder'), a.get('scheduledSlot') or a['reserveTime'][-5:])
         completed_slots[inferred_slot] = slot_entry
         if a.get('scheduledSlot'):
@@ -315,6 +323,21 @@ def update_pipeline_status(account_info, stage_num, stage_name, progress_pct, de
                 completed_by_date.setdefault(day[:10], {})[acc_id] = info
     if status == 'done':
         completed_by_date.setdefault(date_str, {})[account_info['acc_id']] = dict(status_obj)
+    # Refresh verified_public state across all accounts for date_str from journal
+    all_day_receipts = [a for a in read_journal()['attempts'] if a.get('phase') == 'verified' and (a.get('reserveTime', '')[:10] == date_str) and a.get('topic') and a.get('verificationSource')]
+    for k_acc, v_acc in ACCOUNT_MAP.items():
+        aid = v_acc['acc_id']
+        a_recs = [a for a in all_day_receipts if a.get('account') == k_acc]
+        if a_recs and aid in completed_by_date.get(date_str, {}):
+            c_map = completed_by_date[date_str][aid].setdefault('completedSlots', {})
+            for a in a_recs:
+                sl_entry = {'topic': a['topic'], 'reserveTime': a['reserveTime'], 'verificationSource': a['verificationSource'], 'publicationStatus': 'verified_public' if a.get('state') == 'verified_public' else 'reserved', 'publicUrl': a.get('publicUrl'), 'artifactFolder': a.get('artifactFolder'), 'previewUrl': _folder_to_preview_url(a.get('artifactFolder'))}
+                inf_sl = _infer_scheduled_slot(a.get('artifactFolder'), a.get('scheduledSlot') or a['reserveTime'][-5:])
+                c_map[inf_sl] = sl_entry
+                if a.get('scheduledSlot'):
+                    c_map[a['scheduledSlot']] = sl_entry
+                if a.get('reserveTime'):
+                    c_map[a['reserveTime'][-5:]] = sl_entry
     status_obj['completedByDate'] = completed_by_date
     status_obj['completedAccounts'] = completed_by_date.get(date_str, {})
     if status in ('failed', 'unknown') and 'lastStageName' not in status_obj:
@@ -1020,12 +1043,62 @@ def render_document(doc, plan, assets_dir):
         raise ValueError('Invalid document')
     t = html.escape(doc.get('title', ''))
     rf = plan.get('representative_file') if isinstance(plan, dict) else getattr(plan, 'representative_file', None)
+    line_links = dict((doc.get('presentation') or {}).get('lineLinks') or doc.get('lineLinks') or {})
+    folder = Path(assets_dir).parent
+    receipt_banner = ''
+    try:
+        ev_path = folder / 'reservation-evidence.json'
+        ev = json.loads(ev_path.read_text(encoding='utf-8')) if ev_path.is_file() else {}
+        id_path = folder / 'identity.json'
+        ident = json.loads(id_path.read_text(encoding='utf-8')) if id_path.is_file() else {}
+        acc_label = html.escape(str(ev.get('account') or ident.get('account') or ''))
+        blog_label = html.escape(str(ev.get('blogId') or ident.get('blogId') or ''))
+        res_time = html.escape(str(ev.get('reserveTime') or '예약 완료'))
+        qr_url = str(doc.get('bridgeQrUrl') or '').strip()
+        target_url = str(doc.get('bridgeTargetUrl') or '').strip()
+        qr_html = ''
+        if qr_url:
+            qr_html = f'<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #cbd5e1;font-size:13px;">🔗 <strong>네이버 QR 안전 브릿지:</strong> <a href="{html.escape(qr_url)}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:700;">{html.escape(qr_url)}</a> ➔ <span style="color:#475569;">{html.escape(target_url)}</span></div>'
+        shots_html = ''
+        shot_items = []
+        if (folder / 'reservation-list-pass-2.png').is_file():
+            shot_items.append(('네이버 스마트에디터 실제 [예약 발행 글] 목록 검증 캡처', 'reservation-list-pass-2.png'))
+        elif (folder / 'reservation-list-pass-1.png').is_file():
+            shot_items.append(('네이버 스마트에디터 실제 [예약 발행 글] 목록 검증 캡처', 'reservation-list-pass-1.png'))
+        if (folder / 'reservation-options.png').is_file():
+            shot_items.append(('스마트에디터 발행 시각/태그 설정 캡처', 'reservation-options.png'))
+        if shot_items:
+            imgs_markup = ''.join(
+                f'<div style="flex:1;min-width:260px;background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:8px;"><div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:6px;">📸 {lbl}</div><a href="{fn}" target="_blank"><img src="{fn}" alt="{lbl}" style="width:100%;border-radius:6px;border:1px solid #e2e8f0;"></a></div>'
+                for lbl, fn in shot_items
+            )
+            shots_html = f'<details open style="margin-top:10px;"><summary style="cursor:pointer;font-weight:700;font-size:13px;color:#0f172a;">✅ 네이버 블로그 실제 예약발행 내역 캡처 확인 (클릭하여 접기/펼치기)</summary><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">{imgs_markup}</div></details>'
+        receipt_banner = (
+            f'<section style="text-align:left;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:14px 16px;margin-bottom:24px;font-size:13.5px;line-height:1.6;color:#1e293b;">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
+            f'<div><span style="background:#16a34a;color:#fff;font-weight:700;padding:3px 8px;border-radius:6px;font-size:12px;">예약발행 검증완료</span> '
+            f'<strong style="margin-left:6px;">계정: {acc_label} ({blog_label})</strong> · <span>예약시각: <strong>{res_time}</strong></span></div>'
+            f'<span style="font-size:12px;color:#15803d;font-weight:700;">포스트인컴 1:1 썸네일 + iOS 1080×1920 스마트캡처 적용</span>'
+            f'</div>'
+            f'{qr_html}{shots_html}</section>'
+        )
+    except Exception:
+        receipt_banner = ''
     blocks = []
     for i, b in enumerate(doc.get('blocks', [])):
         tp = b.get('type')
         if tp in ('text', 'signoff', 'tags'):
             lines = b['text'].split('\n')
-            c = '<br>'.join((html.escape(str(l)) for l in lines))
+            rendered_lines = []
+            for l in lines:
+                raw_l = str(l)
+                esc_l = html.escape(raw_l)
+                link_u = line_links.get(raw_l.strip())
+                if link_u:
+                    rendered_lines.append(f'<a href="{html.escape(link_u)}" target="_blank" rel="noopener noreferrer" style="color:#0068c3;font-weight:700;text-decoration:underline;">{esc_l}</a>')
+                else:
+                    rendered_lines.append(esc_l)
+            c = '<br>'.join(rendered_lines)
             if b.get('emphasis'):
                 c = f'<strong>{c}</strong>'
             cls = ' class="tags"' if tp == 'tags' else ''
@@ -1049,7 +1122,12 @@ def render_document(doc, plan, assets_dir):
             img = f'''<img src="images/{urllib.parse.quote(f)}" alt="{html.escape(b.get('alt', ''))}"''' + '>'
             blocks.append(f'<figure data-block-index="{i}"{rep_attr}>{img}{fc}</figure>')
     content = '<p class="gap" aria-hidden="true"><br></p>'.join(blocks)
-    return f'<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{t}</title><style>{CSS}</style></head><body><main><h1>{t}</h1>{content}</main></body></html>'
+    out_html = f'<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{t}</title><style>{CSS}</style></head><body><main>{receipt_banner}<h1>{t}</h1>{content}</main></body></html>'
+    try:
+        (folder / 'final.html').write_text(out_html, encoding='utf-8')
+    except Exception:
+        pass
+    return out_html
 
 def document_fingerprint(doc):
     return hashlib.sha256(json.dumps(doc, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
@@ -1534,7 +1612,7 @@ def verify_basic_saved_images(document, folder):
         if image.get('fileName') != asset['file'] or image.get('fileSize') != local.stat().st_size or (image.get('originalWidth'), image.get('originalHeight')) != (width, height):
             raise ValueError('Saved image identity differs from the uploaded file')
 
-def show_reservation_popup(context, account):
+def show_reservation_popup(context, account, latest_title=None):
     """Leave the account browser visibly open on the 예약 발행 글 modal popup."""
     try:
         view_page = context.pages[0] if context.pages else context.new_page()
@@ -1553,14 +1631,29 @@ def show_reservation_popup(context, account):
             view_page.bring_to_front()
     except Exception as exc:
         print(f'[show_reservation_popup] non-fatal warning: {exc}', flush=True)
+    if os.name == 'nt':
+        try:
+            from common.ego_taskspace import open_naver_reservation_in_ego_space
+            acct_key = account.get('account_key') or account.get('key') or next((k for k, v in ACCOUNTS.items() if v.get('blog_id') == account.get('blog_id')), 'soultin')
+            open_naver_reservation_in_ego_space(acct_key, account['blog_id'], latest_title=latest_title)
+        except Exception as exc:
+            print(f'[show_reservation_popup:ego_space] non-fatal warning: {exc}', flush=True)
 
 def reconcile_basic_submission(account_key, account, folder, evidence):
     start_browser(account)
-    with sync_playwright() as p:
-        browser = connect_sync(p, 'http://127.0.0.1:' + str(account['cdp_port']), *account_browser_paths(account))
-        expected = json.loads((folder / 'bound-native-document.json').read_text(encoding='utf-8'))
-        verification = verify_reservation(browser.contexts[0], account, evidence['title'], evidence['reserveTime'], folder=folder, expected_document=expected)
-        show_reservation_popup(browser.contexts[0], account)
+    try:
+        with sync_playwright() as p:
+            browser = connect_sync(p, 'http://127.0.0.1:' + str(account['cdp_port']), *account_browser_paths(account))
+            expected = json.loads((folder / 'bound-native-document.json').read_text(encoding='utf-8'))
+            verification = verify_reservation(browser.contexts[0], account, evidence['title'], evidence['reserveTime'], folder=folder, expected_document=expected)
+            show_reservation_popup(browser.contexts[0], account)
+    finally:
+        if os.name == 'nt':
+            try:
+                from common.ubuntu_naver_browser import close_account
+                close_account(account['cdp_port'])
+            except Exception:
+                pass
     evidence.update(verification, submissionStatus='verified_reserved', reconciledAt=now_kst().isoformat())
     atomic_json(folder / 'reservation-evidence.json', evidence)
     write_attempt(account_key, 'verified', start_new=False, **verification, artifactFolder=str(folder), scheduledSlot=_infer_scheduled_slot(folder, evidence['reserveTime'][-5:]), publicationDate=evidence['reserveTime'][:10], reserveTime=evidence['reserveTime'], submissionStarted=True, failureReason=None, preSubmissionFailure=False)

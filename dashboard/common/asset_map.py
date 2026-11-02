@@ -15,22 +15,134 @@ ROOT = Path(__file__).resolve().parents[2]
 
 # 1. 16 Cloudflare Blogs (Cash-Cow AdSense Conversion Hubs — Strictly Aligned with DOMAIN_KEYWORD_MATRIX)
 CF_DOMAINS = {
-    'must-pick.com': {'niche': '가전·IT기어·에너지환급 비교', 'desc': '로봇청소기, 식기세척기, 제습기, 노트북·태블릿 스펙 비교, 으뜸효율 가전 환급, A/S 수리비용 가이드'},
-    'must-good.com': {'niche': '정부지원금·청년장년복지·민원·세금환급', 'desc': '정부지원금, 국민취업지원제도, 부모급여, 건강보험료 환급, 정부24 민원 발급, 연말정산·종합소득세'},
-    'healthcox.com': {'niche': '관절통증·국가건강검진·만성질환·영양의학', 'desc': '관절·디스크 통증 케어, 국가건강검진·내시경, 혈압·혈당·콜레스테롤 관리, 영양제·수면 의학'},
-    'must-joy.com': {'niche': '로컬맛집·웨이팅·카페·전시공연 리뷰', 'desc': '백반기행·생활의달인 맛집 웨이팅·주차, 감성 카페·베이커리, 전시·팝업·공연 예매, 제철 특산물'},
-    'maxnote.kr': {'niche': 'AI툴·업무자동화·노션·엑셀·알뜰폰', 'desc': '챗GPT·클로드 프롬프트, 노션·엑셀 함수 자동화, 크리에이터 편집 도구, 알뜰폰 요금제·모바일신분증'},
-    'baronote.kr': {'niche': '국민기초연금·대출금리·카드혜택·보험절세', 'desc': '국민·기초·퇴직연금 수령액, 주담대·전세대출 금리·DSR 비교, 신용카드 캐시백, 실손보험·절세 전략'},
-    'topnote.kr': {'niche': '윈도우·맥 설정·스마트폰·오피스·계정복구', 'desc': '윈도우11·맥북 오류·프린터 설정, 아이폰·갤럭시·카톡 백업·알뜰폰 eSIM, 엑셀·PDF 팁, 2단계인증·계정복구'},
-    'meganote.kr': {'niche': '자동차·전기차보조금·다이렉트보험·생활금융', 'desc': '전기차·하이브리드 보조금, 다이렉트 자동차보험 특약·경정비·과태료, 마트 휴무일·온누리상품권·공과금 절약'},
-    'justinfo.co.kr': {'niche': '세무절세·실업급여노무·소비자환불·과태료', 'desc': '실업급여·퇴직금·주휴수당 노무, 양도세·증여세·종합소득세 절세, 소비자 위약금·환불 분쟁, 생활법률·과태료'},
-    'smilenote.kr': {'niche': '연금·은퇴설계·시니어혜택·중장년건강·돌봄', 'desc': '국민·기초·주택연금 은퇴설계, 시니어 경로우대·할인 바우처, 중장년 관절·근력 운동, 장기요양·임플란트·돌봄'},
-    'tripmarvel.com': {'niche': '해외여행·항공숙소예약팁·국내여행·패스', 'desc': '항공권·수하물·보조배터리 규정, 호텔 무료취소·보증금·리조트피 방어, 트래블로그·환전·eSIM, 국내여행·KTX'},
-    'daynote.kr': {'niche': '생활살림·물가절약·주방리빙·분리수거', 'desc': '식재료 냉장·냉동 보관법, 과탄산소다 배수구·세탁기 청소, 분리수거 과태료 기준, 전기세·가스비·관리비 절약'},
-    'woorinote.kr': {'niche': '청약분양·전월세 계약법률·주거대출·등기세법', 'desc': '청약 가점·특별공급 분양, 전월세 확정일자·보증금 반환·전입신고, 디딤돌·버팀목 대출, 취득세·재산세·셀프등기'},
-    'nolplace.com': {'niche': '수목원·테마파크·아이와나들이·축제·주차꿀팁', 'desc': '수목원·자연휴양림·캠핑장 예약, 주말 아이와 가볼만한곳, 시즌 축제·전시·팝업 일정, 무료주차·오픈런 동선'},
-    'soulnote.kr': {'niche': '내일배움카드·국비지원·국가자격증·이직커리어', 'desc': '국민내일배움카드 국비 신청, 유망 국가기술자격증 시험일정·기출 독학팁, 이직·취업·경조사 예절 가이드'},
-    'joynote.kr': {'niche': '강아지고양이건강·펫보험·애견동반·반려식물', 'desc': '강아지·고양이 증상·사료·예방접종, 동물병원 진료비·펫보험 비교, 애견동반 카페·숙소·산책로, 반려식물 분갈이·물주기'},
+    'must-pick.com': {
+        'niche': '가전·IT기어·에너지환급 비교',
+        'desc': '로봇청소기, 식기세척기, 제습기, 노트북·태블릿 스펙 비교, 으뜸효율 가전 환급, A/S 수리비용 가이드',
+        'persona': '가전·IT 실사용 스펙 비교 리뷰어',
+        'titleStyle': '스펙·비용 비교형 (예: "[핵심 키워드] 실구매 체감 차이와 유지비·수리비 비교")',
+        'writingTone': '실제 가전·기기를 써보고 스펙표의 함정과 A/S·유지비 차이를 짚어주는 스마트 컨슈머 리뷰 톤. 억지스러운 행정/탈락 용어 대신 체감 성능, 소비전력, 수리비, 호환성 기준으로 서술하라.',
+        'theme': {'accent': '#0284c7', 'bg': '#f0f9ff', 'border': '#bae6fd', 'headerBg': '#e0f2fe', 'text': '#0c4a6e', 'widgetStyle': 'spec_card'},
+    },
+    'must-good.com': {
+        'niche': '정부지원금·청년장년복지·민원·세금환급',
+        'desc': '정부지원금, 국민취업지원제도, 부모급여, 건강보험료 환급, 정부24 민원 발급, 연말정산·종합소득세',
+        'persona': '복지·민원 행정 실무 가이드',
+        'titleStyle': '신청기한·자격 핵심형 (예: "[핵심 키워드] 신청 자격과 지급일·서류 체크포인트")',
+        'writingTone': '주민센터·복지로 민원 창구에서 바로 써먹을 수 있도록 신청 기한, 소득·재산 산정 기준, 반려 사유를 명확히 짚어주는 친절한 행정 실무자 톤.',
+        'theme': {'accent': '#2563eb', 'bg': '#eff6ff', 'border': '#bfdbfe', 'headerBg': '#dbeafe', 'text': '#1e3a8a', 'widgetStyle': 'checklist'},
+    },
+    'healthcox.com': {
+        'niche': '관절통증·국가건강검진·만성질환·영양의학',
+        'desc': '관절·디스크 통증 케어, 국가건강검진·내시경, 혈압·혈당·콜레스테롤 관리, 영양제·수면 의학',
+        'persona': '건강검진·만성질환 메디컬 에디터',
+        'titleStyle': '증상·검사 수치 가이드형 (예: "[핵심 키워드] 정상 수치 기준과 검사 전 주의사항")',
+        'writingTone': '건강검진 결과표나 초기 증상을 보고 걱정하는 독자에게 수치 기준, 병원 진료과 선택, 식습관·복용 타이밍을 차분하고 신뢰감 있게 설명하는 헬스케어 칼럼 톤. 행정/심사 탈락 같은 어색한 표현은 절대 쓰지 마라.',
+        'theme': {'accent': '#0d9488', 'bg': '#f0fdfa', 'border': '#99f6e4', 'headerBg': '#ccfbf1', 'text': '#134e4a', 'widgetStyle': 'medical_note'},
+    },
+    'must-joy.com': {
+        'niche': '로컬맛집·웨이팅·카페·전시공연 리뷰',
+        'desc': '백반기행·생활의달인 맛집 웨이팅·주차, 감성 카페·베이커리, 전시·팝업·공연 예매, 제철 특산물',
+        'persona': '로컬 미식·문화 큐레이터',
+        'titleStyle': '현장 웨이팅·주차·메뉴 꿀팁형 (예: "[핵심 키워드] 주말 웨이팅 시간대와 주차·대표메뉴 정리")',
+        'writingTone': '직접 현장을 찾는 방문객을 위해 피크타임 대기 시간, 브레이크타임, 인근 공영주차장, 대표 메뉴 가격대와 주문 팁을 생생하게 전하는 매거진 에디터 톤. 심사·반려·판독기 같은 딱딱한 용어는 금지한다.',
+        'theme': {'accent': '#ea580c', 'bg': '#fff7ed', 'border': '#fed7aa', 'headerBg': '#ffedd5', 'text': '#7c2d12', 'widgetStyle': 'field_tip'},
+    },
+    'maxnote.kr': {
+        'niche': 'AI툴·업무자동화·노션·엑셀·알뜰폰',
+        'desc': '챗GPT·클로드 프롬프트, 노션·엑셀 함수 자동화, 크리에이터 편집 도구, 알뜰폰 요금제·모바일신분증',
+        'persona': '생산성 테크·통신비 최적화 에디터',
+        'titleStyle': '실전 세팅·요금 비교형 (예: "[핵심 키워드] 요금제·옵션 비교와 5분 개통·설정법")',
+        'writingTone': '복잡한 IT·통신·업무 툴 설정을 군더더기 없이 단계별(Step-by-step)로 풀어주고 숨은 요금 조건이나 단축키·옵션 차이를 콕 집어주는 테크 블로거 톤.',
+        'theme': {'accent': '#4f46e5', 'bg': '#eef2ff', 'border': '#c7d2fe', 'headerBg': '#e0e7ff', 'text': '#312e81', 'widgetStyle': 'step_box'},
+    },
+    'baronote.kr': {
+        'niche': '국민기초연금·대출금리·카드혜택·보험절세',
+        'desc': '국민·기초·퇴직연금 수령액, 주담대·전세대출 금리·DSR 비교, 신용카드 캐시백, 실손보험·절세 전략',
+        'persona': '가계 금융·연금 자산관리 플래너',
+        'titleStyle': '수령액·이자 계산 비교형 (예: "[핵심 키워드] 조건별 예상 금액과 유불리 비교")',
+        'writingTone': '은행·연금공단 창구 상담처럼 금리, 한도, 수령액 계산식과 중도상환·감액 조건을 숫자로 또렷하게 비교해주는 금융 플래너 톤.',
+        'theme': {'accent': '#1e40af', 'bg': '#f8fafc', 'border': '#cbd5e1', 'headerBg': '#e2e8f0', 'text': '#0f172a', 'widgetStyle': 'finance_summary'},
+    },
+    'topnote.kr': {
+        'niche': '윈도우·맥 설정·스마트폰·오피스·계정복구',
+        'desc': '윈도우11·맥북 오류·프린터 설정, 아이폰·갤럭시·카톡 백업·알뜰폰 eSIM, 엑셀·PDF 팁, 2단계인증·계정복구',
+        'persona': 'PC·모바일 트러블슈팅 엔지니어',
+        'titleStyle': '오류 원인·해결 순서형 (예: "[핵심 키워드] 원인별 해결 순서와 초기화 방지 설정")',
+        'writingTone': '갑작스러운 기기 오류나 계정 잠금으로 당황한 독자가 화면 메뉴 경로를 그대로 따라 누르며 즉시 해결할 수 있도록 안내하는 IT 헬프데스크 톤.',
+        'theme': {'accent': '#334155', 'bg': '#f8fafc', 'border': '#cbd5e1', 'headerBg': '#f1f5f9', 'text': '#1e293b', 'widgetStyle': 'troubleshoot_faq'},
+    },
+    'meganote.kr': {
+        'niche': '자동차·전기차보조금·다이렉트보험·생활금융',
+        'desc': '전기차·하이브리드 보조금, 다이렉트 자동차보험 특약·경정비·과태료, 마트 휴무일·온누리상품권·공과금 절약',
+        'persona': '자동차 유지비·생활경제 에디터',
+        'titleStyle': '보조금·특약·할인 실속형 (예: "[핵심 키워드] 특약·보조금 조건과 유지비 아끼는 법")',
+        'writingTone': '운전자와 주부·자영업자가 자동차 보험료, 경정비 비용, 과태료, 대형마트·전통시장 할인 혜택을 알뜰하게 챙길 수 있도록 돕는 실속 경제 가이드 톤.',
+        'theme': {'accent': '#059669', 'bg': '#ecfdf5', 'border': '#a7f3d0', 'headerBg': '#d1fae5', 'text': '#064e3b', 'widgetStyle': 'saving_point'},
+    },
+    'justinfo.co.kr': {
+        'niche': '세무절세·실업급여노무·소비자환불·과태료',
+        'desc': '실업급여·퇴직금·주휴수당 노무, 양도세·증여세·종합소득세 절세, 소비자 위약금·환불 분쟁, 생활법률·과태료',
+        'persona': '노무·세무·소비자분쟁 실무 해설가',
+        'titleStyle': '가산세·위약금 방어 기준형 (예: "[핵심 키워드] 법정 기준과 불이익 피하는 증빙 서류")',
+        'writingTone': '근로기준법·세법·소비자분쟁해결기준의 핵심 요건을 근거로 억울한 가산세나 위약금, 수급 불인정을 피하는 방법을 명쾌하게 정리하는 법률·세무 해설 톤.',
+        'theme': {'accent': '#4338ca', 'bg': '#eef2ff', 'border': '#c7d2fe', 'headerBg': '#e0e7ff', 'text': '#1e1b4b', 'widgetStyle': 'legal_qa'},
+    },
+    'smilenote.kr': {
+        'niche': '연금·은퇴설계·시니어혜택·중장년건강·돌봄',
+        'desc': '국민·기초·주택연금 은퇴설계, 시니어 경로우대·할인 바우처, 중장년 관절·근력 운동, 장기요양·임플란트·돌봄',
+        'persona': '5070 은퇴·시니어 라이프 컨설턴트',
+        'titleStyle': '부모님·중장년 혜택 맞춤형 (예: "[핵심 키워드] 연령별 지원 기준과 본인부담금 줄이는 법")',
+        'writingTone': '은퇴 전후 중장년층과 부모님 돌봄을 준비하는 자녀가 이해하기 쉽도록 편안하고 따뜻한 어조로 연령 기준과 신청 절차를 설명하는 시니어 라이프 가이드 톤.',
+        'theme': {'accent': '#15803d', 'bg': '#f0fdf4', 'border': '#bbf7d0', 'headerBg': '#dcfce7', 'text': '#14532d', 'widgetStyle': 'senior_guide'},
+    },
+    'tripmarvel.com': {
+        'niche': '해외여행·항공숙소예약팁·국내여행·패스',
+        'desc': '항공권·수하물·보조배터리 규정, 호텔 무료취소·보증금·리조트피 방어, 트래블로그·환전·eSIM, 국내여행·KTX',
+        'persona': '글로벌 트래블·항공숙소 에디터',
+        'titleStyle': '출국·예약 전 체크형 (예: "[핵심 키워드] 항공사·호텔별 규정과 추가요금 피하는 팁")',
+        'writingTone': '공항 카운터나 현지 호텔 체크인에서 당황하지 않도록 수하물 규격, 환전·결제 수수료, 교통 패스 동선을 실전 여행자 시각에서 짚어주는 트래블 가이드 톤.',
+        'theme': {'accent': '#0369a1', 'bg': '#f0f9ff', 'border': '#bae6fd', 'headerBg': '#e0f2fe', 'text': '#0c4a6e', 'widgetStyle': 'travel_memo'},
+    },
+    'daynote.kr': {
+        'niche': '생활살림·물가절약·주방리빙·분리수거',
+        'desc': '식재료 냉장·냉동 보관법, 과탄산소다 배수구·세탁기 청소, 분리수거 과태료 기준, 전기세·가스비·관리비 절약',
+        'persona': '살림·리빙 노하우 에디터',
+        'titleStyle': '살림·보관·청소 실용형 (예: "[핵심 키워드] 실패 없는 비율·순서와 보관 기간 정리")',
+        'writingTone': '주방·세탁실·거실에서 바로 따라 할 수 있도록 계량 비율, 세척 시간, 보관 온도, 분리배출 기준을 깔끔하고 실용적으로 정리해주는 리빙 매거진 톤.',
+        'theme': {'accent': '#b45309', 'bg': '#fffbeb', 'border': '#fde68a', 'headerBg': '#fef3c7', 'text': '#78350f', 'widgetStyle': 'living_recipe'},
+    },
+    'woorinote.kr': {
+        'niche': '청약분양·전월세 계약법률·주거대출·등기세법',
+        'desc': '청약 가점·특별공급 분양, 전월세 확정일자·보증금 반환·전입신고, 디딤돌·버팀목 대출, 취득세·재산세·셀프등기',
+        'persona': '부동산 청약·임대차 실무 가이드',
+        'titleStyle': '계약·청약 체크리스트형 (예: "[핵심 키워드] 계약 전 필수 특약과 순위·한도 기준")',
+        'writingTone': '전월세 계약서 작성부터 청약 가점 계산, 주택담보·정책 대출, 등기·취득세 신고까지 내 집 마련과 보증금 보호를 위한 실전 절차를 차근차근 짚어주는 주거 가이드 톤.',
+        'theme': {'accent': '#0f766e', 'bg': '#f0fdfa', 'border': '#99f6e4', 'headerBg': '#ccfbf1', 'text': '#115e59', 'widgetStyle': 'housing_check'},
+    },
+    'nolplace.com': {
+        'niche': '수목원·테마파크·아이와나들이·축제·주차꿀팁',
+        'desc': '수목원·자연휴양림·캠핑장 예약, 주말 아이와 가볼만한곳, 시즌 축제·전시·팝업 일정, 무료주차·오픈런 동선',
+        'persona': '주말 나들이·가족 여행 코스 플래너',
+        'titleStyle': '예약·주차·관람 동선형 (예: "[핵심 키워드] 예약 오픈 시간과 주차장·관람 추천 코스")',
+        'writingTone': '주말에 아이·가족·연인과 나들이를 떠나는 독자를 위해 매표·예약 팁, 유모차·그늘막 반입 여부, 가장 가까운 주차장과 추천 관람 코스를 경쾌하게 안내하는 나들이 가이드 톤.',
+        'theme': {'accent': '#16a34a', 'bg': '#f0fdf4', 'border': '#bbf7d0', 'headerBg': '#dcfce7', 'text': '#14532d', 'widgetStyle': 'outing_route'},
+    },
+    'soulnote.kr': {
+        'niche': '내일배움카드·국비지원·국가자격증·이직커리어',
+        'desc': '국민내일배움카드 국비 신청, 유망 국가기술자격증 시험일정·기출 독학팁, 이직·취업·경조사 예절 가이드',
+        'persona': '자격증·국비지원 커리어 코치',
+        'titleStyle': '응시자격·국비훈련 전략형 (예: "[핵심 키워드] 응시 자격 확인과 국비 지원·합격 준비법")',
+        'writingTone': '취업·이직·자격증 취득을 준비하는 독자에게 응시 자격 요건, 훈련장려금 수령 조건, 과목별 공부 순서와 실무 활용도를 명확히 잡아주는 커리어 멘토 톤.',
+        'theme': {'accent': '#7c3aed', 'bg': '#f5f3ff', 'border': '#ddd6fe', 'headerBg': '#ede9fe', 'text': '#4c1d95', 'widgetStyle': 'career_step'},
+    },
+    'joynote.kr': {
+        'niche': '강아지고양이건강·펫보험·애견동반·반려식물',
+        'desc': '강아지·고양이 증상·사료·예방접종, 동물병원 진료비·펫보험 비교, 애견동반 카페·숙소·산책로, 반려식물 분갈이·물주기',
+        'persona': '반려동물·반려식물 케어 에디터',
+        'titleStyle': '증상 대처·케어 가이드형 (예: "[핵심 키워드] 주요 원인과 병원 방문 전 대처·관리법")',
+        'writingTone': '강아지·고양이 보호자와 식집사가 일상에서 겪는 이상 증상, 사료·간식 급여량, 병원 진료비·펫보험 보장 기준, 분갈이·물주기 주기를 다정하고 세심하게 알려주는 펫·플랜트 케어 톤.',
+        'theme': {'accent': '#d97706', 'bg': '#fffbeb', 'border': '#fde68a', 'headerBg': '#fef3c7', 'text': '#78350f', 'widgetStyle': 'pet_care'},
+    },
 }
 
 # 2. Naver Blogs (Frontline Search SEO Bridges)
@@ -673,7 +785,7 @@ def collect_used_cf_topics(domain=None, days=14, current_folder=None):
     return used
 
 
-def select_verified_cf_keyword(domain, candidate_kw, verified_candidates=None, used_topics=None, max_docs=5000):
+def select_verified_cf_keyword(domain, candidate_kw, verified_candidates=None, used_topics=None, max_docs=300):
     """Select a domain-consistent, non-duplicate CF search keyword verified to have <= max_docs competing posts."""
     used = list(used_topics or [])
     pool = []
@@ -721,7 +833,7 @@ def clean_naver_search_keyword(raw_keyword):
     return ' '.join(w for w in words if w).strip()
 
 
-def select_verified_naver_keyword(account, candidate_kw, verified_candidates=None, used_topics=None, max_docs=5000):
+def select_verified_naver_keyword(account, candidate_kw, verified_candidates=None, used_topics=None, max_docs=500):
     """Select a non-duplicate Naver search keyword verified to have <= max_docs competing blog posts."""
     used = list(used_topics or [])
     pool = []
@@ -751,42 +863,43 @@ def select_verified_naver_keyword(account, candidate_kw, verified_candidates=Non
     return best_fallback or (NAVER_NICHE_VERIFIED_POOLS.get(account, ['국민연금 추납 신청자격 반환일시금'])[0])
 
 
-def enforce_naver_seo_title(raw_title, target_keyword):
-    """Enforce formula: '[실제 검색 명사 키워드 3~4어절], [자청식 후킹 부제]'."""
+def enforce_naver_seo_title(raw_title, target_keyword, domain=None):
+    """Ensure the search noun phrase appears naturally near the front without forcing an identical comma template across all domains."""
     clean_kw = clean_naver_search_keyword(target_keyword)
     title = re.sub(r'\s+', ' ', str(raw_title or '').strip())
     if not clean_kw:
         return title
     kw_tokens = [t for t in clean_kw.split() if len(t) >= 2][:3]
-    front_window = title[:max(len(clean_kw) + 6, 20)]
-    if kw_tokens and all(t in front_window for t in kw_tokens):
+    front_window = title[:max(len(clean_kw) + 12, 26)]
+    if kw_tokens and sum(1 for t in kw_tokens if t in front_window) >= max(1, len(kw_tokens) - 1):
         return title
-    # If title already starts with a clean noun topic before ':' (no '?' or conversational verb before ':'), preserve it
-    if ':' in title[:22] and '?' not in title.split(':', 1)[0]:
+    if ':' in title[:24] and '?' not in title.split(':', 1)[0]:
         pre_colon = title.split(':', 1)[0]
         if not re.search(r'(는데|했더니|했는데|할까|전\s*3초|전\s*3분)', pre_colon):
             return title
 
-    # Extract the hook part from raw_title
     hook = title
-    if ',' in title:
-        parts = [p.strip() for p in title.split(',', 1)]
-        if len(parts[1]) >= 8 and not re.match(r'^\d', parts[1]):
-            hook = parts[1]
+    for sep in (',', ':', ' - ', ' · '):
+        if sep in title:
+            parts = [p.strip() for p in title.split(sep, 1)]
+            if len(parts[1]) >= 8 and not re.match(r'^\d', parts[1]):
+                hook = parts[1]
+                break
     if hook.startswith(clean_kw):
-        hook = hook[len(clean_kw):].lstrip(' ,·:')
+        hook = hook[len(clean_kw):].lstrip(' ,·:-')
     else:
         cand_hook = hook
         for tok in clean_kw.split():
             if cand_hook.startswith(tok + ' ') or cand_hook.startswith(tok + ','):
-                cand_hook = cand_hook[len(tok):].lstrip(' ,·:')
-        # Only use stripped cand_hook if it doesn't start with a dangling verb/connective
+                cand_hook = cand_hook[len(tok):].lstrip(' ,·:-')
         if not re.match(r'^(했는데|내렸다는데|끝났는데|끝나면|받으면|깨면|있는데|된다는데|일찍\s*받으면)', cand_hook):
             hook = cand_hook
     if not hook or len(hook) < 6:
-        hook = '놓치기 쉬운 핵심 기준과 신청 전 3분 자가진단'
-    combined = f'{clean_kw}, {hook}'
-    return combined[:68].rstrip(' ,')
+        hook = '핵심 기준과 실전 체크포인트 정리'
+    separators = (' · ', ': ', ' - ', ', ')
+    sep_idx = sum(ord(c) for c in str(domain or clean_kw)) % len(separators)
+    combined = f'{clean_kw}{separators[sep_idx]}{hook}'
+    return combined[:68].rstrip(' ,·:-')
 
 
 
@@ -926,6 +1039,12 @@ def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, aut
             return {'ok': True, 'mode': 'saved_to_drawer', 'writerApproved': can_publish, 'url': saved_url, 'title': safe_title}
         finally:
             page.close()
+            if os.name == 'nt':
+                try:
+                    from common.ubuntu_naver_browser import close_account
+                    close_account(cdp_port)
+                except Exception:
+                    pass
 
 
 def get_asset_map_summary():

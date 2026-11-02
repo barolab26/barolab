@@ -108,6 +108,22 @@ def stalled_actions(progress, now):
 
 
 def main():
+    _mutex_handle = None
+    _pid_file = _ROOT / 'dashboard' / 'data' / 'memory_worker.pid'
+    if os.name == 'nt':
+        try:
+            import ctypes
+            kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+            _mutex_handle = kernel32.CreateMutexW(None, False, 'Local\\BaroLabMemoryWorkerSingleton')
+            if ctypes.get_last_error() == 183:  # ERROR_ALREADY_EXISTS
+                return
+        except Exception:
+            pass
+    try:
+        _pid_file.parent.mkdir(parents=True, exist_ok=True)
+        _pid_file.write_text(str(os.getpid()), encoding='utf-8')
+    except Exception:
+        pass
     try:
         from server.mission_control import Collector
         host_collector = Collector()

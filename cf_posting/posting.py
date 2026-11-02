@@ -261,7 +261,7 @@ def basic_article(domain, item, folder):
         article = validate_basic_article(json.loads(path.read_text(encoding='utf-8')))
         target_kw = planned_kw or article.get('mainKeyword') or item.get('mainKeyword') or ''
         if target_kw and target_kw != domain:
-            fixed_title = enforce_naver_seo_title(article.get('title', ''), target_kw)
+            fixed_title = enforce_naver_seo_title(article.get('title', ''), target_kw, domain=domain)
             if fixed_title != article.get('title'):
                 article['title'] = fixed_title
                 article['mainKeyword'] = clean_naver_search_keyword(target_kw)
@@ -294,7 +294,7 @@ def basic_article(domain, item, folder):
                     verified_cands.append(kw_c)
     except Exception:
         pass
-    keyword = select_verified_cf_keyword(domain, keyword, verified_cands, used_today, max_docs=5000)
+    keyword = select_verified_cf_keyword(domain, keyword, verified_cands, used_today, max_docs=300)
     item['mainKeyword'] = keyword
     basic_progress(domain,2,'리서치',25,str(keyword))
     sources = basic_research(keyword, folder)
@@ -318,17 +318,25 @@ def basic_article(domain, item, folder):
         'required': ['title', 'summary', 'category', 'topicSlug', 'contentHtml', 'imagePrompt', 'imageCaption', 'sectionImages'],
         'additionalProperties': False,
     }
+    from common.asset_map import CF_DOMAINS
+    dom_meta = CF_DOMAINS.get(domain, {})
+    persona = dom_meta.get('persona', '분야별 전문 에디터')
+    title_style = dom_meta.get('titleStyle', '핵심 키워드 + 구체적 해결 가이드형')
+    writing_tone = dom_meta.get('writingTone', '독자의 상황에 맞춰 핵심 기준과 실전 해결책을 자연스럽게 설명하는 전문 블로거 톤.')
     prompt = (
-        '독자가 끝까지 읽고 행동하게 만드는 진짜 사람의 한국어 블로그 원고를 작성한다. "공무원 공고문 요약 매크로"나 딱딱한 리서치 보고서 말투는 절대 쓰지 않는다.\n'
+        f'당신은 [{domain}] 블로그의 전담 필진인 "{persona}"이다. 독자가 끝까지 읽고 행동하게 만드는 진짜 사람의 한국어 블로그 원고를 작성한다. "공무원 공고문 요약 매크로"나 기계적인 템플릿 말투는 절대 쓰지 않는다.\n'
+        f'[이 도메인({domain})의 고유 페르소나 & 문체 규칙]\n'
+        f'- 전문 분야: {dom_meta.get("niche", "")} ({dom_meta.get("desc", "")})\n'
+        f'- 고유 문체(Tone & Manner): {writing_tone}\n'
+        f'- 고유 제목 스타일: {title_style}\n'
         '[4대 집필 원칙 (필수 준수)]\n'
-        f'1. 제목(title — 구글·네이버웹 1페이지 상위노출 절대 공식): 반드시 "[정확한 검색 명사 키워드 3~4어절], [자청식 후킹 부제]" 구조로 작성하라! 제목 맨 앞 15~18자 안에 타깃 검색어("{keyword}")의 핵심 명사 어절을 조사 변형 없이 정확히 배치하고, 쉼표(", ") 뒤에 독자가 보자마자 "어, 이거 내 얘기잖아?" 하고 클릭하게 만드는 구체적 반려/실패 함정·한 끗 차이·3분 자가진단 부제를 붙여라. (예: "{keyword}, 계약자 달라도 환급받는 3분 자가진단") 앞머리를 서술형 질문으로 시작해 검색 키워드가 뒤로 밀리거나 누락되는 것을 절대 금지한다!\n'
-        '2. 도입부(contentHtml 첫 1~2문단 — 자청 4대 결핍 직격): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하면 3초 만에 이탈한다. 인간의 4대 결핍(①내 돈·혜택 날리는 손실 회피 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)을 첫 문장부터 찌르고 구체적 금액/수수료/기한 기준과 핵심 검색 키워드를 바로 제시하라.\n'
-        '3. 본문(contentHtml — 한 끗 차이 실전 사례 + 3초 판독기 표 + 모바일 2~3줄 호흡):\n'
-        '   - 어려운 용어를 사전처럼 나열하지 말고 독자가 스마트폰을 보며 내 상황에 바로 대입할 수 있게 써라.\n'
-        '   - 구체적인 대비 사례(예: "A는 안 되지만 B는 됩니다", "X 코드는 탈락이지만 Y 코드는 통과입니다")를 본문에 녹여 독자가 무릎을 치게 만들어라.\n'
-        '   - 본문 중간에는 설명충용 표가 아니라 내 조건/상황을 손가락으로 짚어보며 "된다/안 된다/유리하다/불리하다"를 3초 만에 판별할 수 있는 실전 자가진단 판독기 <table>을 반드시 포함하라.\n'
-        '   - 한 문단(<p>)은 스마트폰 화면 기준 2~3줄이 넘지 않게 호흡을 짧고 리듬감 있게 끊어 쳐라.\n'
-        '4. 마무리(Action Item): 마지막 문단에 "해설 글이며 개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 관료적 면책 문구를 절대 넣지 마라. 대신 독자가 글 읽기를 마친 직후 오늘 당장(또는 이번 주말에 미리) 실행할 수 있는 구체적 행동 지침(Action Item: 먼저 꺼내볼 서류, 미리 조회할 메뉴, 체크할 항목 등)으로 힘 있게 닫아라.\n'
+        f'1. 제목(title — 검색어 전진 배치 & 도메인 맞춤형 후킹): 제목 앞머리에 타깃 검색어("{keyword}")의 핵심 명사 어절을 자연스럽게 배치하고, 이 도메인의 제목 스타일({title_style})에 맞춰 독자가 클릭하고 싶어지는 구체적 이득·해결 포인트를 붙여라. (16개 블로그가 똑같은 쉼표 패턴으로 보이지 않도록 `: `, ` · `, ` - `, 자연스러운 서술형 등을 주제에 맞게 활용하라.)\n'
+        '2. 도입부(contentHtml 첫 1~2문단): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하지 마라. 독자가 이 검색어를 검색할 때 겪는 가장 현실적인 고민·궁금증·손실 포인트를 첫 문장부터 짚고, 핵심 결론이나 수치/기준을 바로 제시하라.\n'
+        '3. 본문(contentHtml — 도메인 맞춤형 구조 + 실용 정리표 + 모바일 2~3줄 호흡):\n'
+        '   - 어려운 용어를 나열하지 말고 독자가 스마트폰을 보며 내 상황에 바로 적용할 수 있게 구체적인 사례와 수치를 들어 설명하라.\n'
+        '   - 본문 중간에는 주제 성격에 맞는 실용 비교/정리 <table>(예: 정책/금융은 자격·금액 비교표, 건강은 수치·증상별 가이드표, 맛집/나들이/여행은 시간대·주차·코스·요금 정리표, IT/살림은 옵션·비율·단계별 비교표)을 1개 포함하라.\n'
+        '   - 한 문단(<p>)은 스마트폰 화면 기준 2~3줄이 넘지 않게 호흡을 짧고 자연스럽게 끊어 써라.\n'
+        '4. 마무리(실천 가이드): 마지막 문단에 "해설 글이며 개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 관료적 면책 문구를 절대 넣지 마라. 대신 독자가 글을 읽은 직후 바로 실행할 수 있는 실전 팁(먼저 챙길 준비물, 확인해볼 설정 메뉴, 방문/신청 팁 등)으로 자연스럽게 마무리하라.\n'
         '[시각 자료 및 기술 규칙]\n'
         '- 대표 썸네일용 imagePrompt와 본문 핵심 <h2> 소제목 구간(1~2곳)을 위한 sectionImages의 imagePrompt는 구체적인 영어 문장(English prompt)으로 작성하되, 3인칭 인물 연출 사진(예: "Korean adult sitting at a dining table", "woman looking at smartphone/documents")이나 글자/텍스트가 적힌 종이·화면 묘사는 절대 금지한다! 반드시 주제와 직결되는 실물 오브젝트·장소·정물 클로즈업 에디토리얼 사진(no people, no text, clean object/environment photography)으로 묘사하거나 "RESEARCH_CAPTURE"로 지정한다.\n'
         '- imageCaption과 sectionImages.imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성하고, sectionImages.sectionHeading에는 해당 이미지가 들어갈 본문 <h2> 소제목 텍스트를 정확히 기입한다.\n'
@@ -342,7 +350,7 @@ def basic_article(domain, item, folder):
     basic_progress(domain,4,'원고 작성',55,str(keyword))
     article = validate_basic_article(generate_json(prompt, agent_slot='cf_pipeline', response_schema=schema, audit_directory=folder / 'model-audit', timeout_seconds=600))
     article['mainKeyword'] = clean_naver_search_keyword(keyword)
-    article['title'] = enforce_naver_seo_title(article.get('title', ''), keyword)
+    article['title'] = enforce_naver_seo_title(article.get('title', ''), keyword, domain=domain)
     write(path, article)
     return ensure_article_images(article, folder, domain=domain)
 
@@ -444,7 +452,7 @@ def publish_basic_article(domain, article, folder):
         raise RuntimeError('Previous submission must be reconciled before a second POST')
     article = ensure_article_images(article, folder, domain=domain)
     from common.cf_tables import style_tables, inject_interactive_widget
-    content = inject_interactive_widget(style_tables(article['contentHtml']), article.get('title', ''))
+    content = inject_interactive_widget(style_tables(article['contentHtml'], domain=domain), article.get('title', ''), domain=domain)
     plans = article.get('imagePlans', [])
     urls = []
     if plans:
@@ -520,7 +528,7 @@ def main():
         parser.error('Unknown channel domain')
     if args.basic_article and len(domains) != 1:
         parser.error('--basic-article requires exactly one domain')
-    with cleaner_lock() as acquired:
+    with cleaner_lock(wait_seconds=120, poll_interval=1) as acquired:
         if not acquired:
             print(json.dumps({'status': 'busy'}))
             return

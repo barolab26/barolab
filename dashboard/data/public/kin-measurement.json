@@ -1,10 +1,10 @@
 {
   "schema": "naver-kin-measurement-v1",
-  "checkedAt": "2026-10-30T18:18:44.921946+09:00",
+  "checkedAt": "2026-11-02T14:11:28.343377+09:00",
   "source": "GA4 Data API",
   "timezone": "Asia/Seoul",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-29",
+  "endDate": "2026-11-01",
   "trialStartDate": "2026-10-15",
   "trialEndDate": "2026-10-21",
   "finalCollectionDate": "2026-10-24",
@@ -70,17 +70,17 @@
     {
       "host": "www.baronote.kr",
       "status": "collected",
-      "sessions": 0,
-      "engagedSessions": 0,
-      "pageViews": 0,
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
       "reportMetadata": {
         "timeZone": "Asia/Seoul",
         "currencyCode": "USD",
         "subjectToThresholding": null,
         "samplingMetadatas": null,
         "dataLossFromOtherRow": null,
-        "rowCount": 0,
-        "returnedRows": 0
+        "rowCount": 1,
+        "returnedRows": 1
       }
     },
     {
@@ -276,9 +276,9 @@
       }
     }
   ],
-  "sessions": 13,
-  "engagedSessions": 7,
-  "pageViews": 13,
+  "sessions": 14,
+  "engagedSessions": 8,
+  "pageViews": 14,
   "publisherRevenue": null,
   "revenueStatus": "unverified_publisher_link",
   "revenueReason": "GA4 게시자 광고 수익 연결과 답변별 수익 범위를 검증하지 못했습니다. AdSense 전체 수익을 배분하지 않습니다.",
@@ -338,6 +338,21 @@
       "mappingStatus": "unattributed"
     },
     {
+      "day": "2026-10-31",
+      "host": "www.baronote.kr",
+      "utmContent": "adinfo0905_20261031_1133_994f553acb483e58",
+      "sessions": 1,
+      "engagedSessions": 1,
+      "pageViews": 1,
+      "mappingStatus": "ledger_matched",
+      "account": "adinfo0905",
+      "questionId": "477267393",
+      "state": "published_verified",
+      "answerUrl": "https://kin.naver.com/qna/detail.naver?dirId=6100402&docId=477267393&answerNo=15&qb=6rWt66+87Jew6riIIOyhsOq4sOyImOuguSDqsJDslaHrpaA%3D#answer15",
+      "canonicalUrl": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+      "sendDay": "2026-10-31"
+    },
+    {
       "day": "2026-10-20",
       "host": "www.meganote.kr",
       "utmContent": "adinfo0905_20261020_0600_b8a83d505818dcc5",
@@ -384,6 +399,27 @@
     }
   ],
   "dailyFunnel": [
+    {
+      "day": "2026-11-02",
+      "discovered": 15,
+      "drafted": 15,
+      "attempted": 15,
+      "published_verified": 14
+    },
+    {
+      "day": "2026-11-01",
+      "discovered": 20,
+      "drafted": 20,
+      "attempted": 19,
+      "published_verified": 18
+    },
+    {
+      "day": "2026-10-31",
+      "discovered": 9,
+      "drafted": 9,
+      "attempted": 9,
+      "published_verified": 9
+    },
     {
       "day": "2026-10-30",
       "discovered": 7,
@@ -498,7 +534,7 @@
     }
   ],
   "funnelStartDate": "2026-10-15",
-  "funnelEndDate": "2026-10-30",
+  "funnelEndDate": "2026-11-02",
   "funnelTodayProvisional": true,
   "funnelPeriodKind": "trial",
   "funnelScope": "발굴·초안은 생성일, 제출·공개검증은 제출일 코호트의 현재 상태; 오늘은 미실행 슬롯 포함 잠정 집계; 전이 이벤트 수 아님",
@@ -533,6 +569,6 @@
       }
     ]
   },
-  "matchedSessions": 0,
+  "matchedSessions": 1,
   "unmatchedSessions": 13
 }

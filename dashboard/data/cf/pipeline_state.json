@@ -1,34 +1,27 @@
 {
-  "activeBlogId": 13,
+  "activeBlogId": 6,
   "completedBlogIds": [
     1,
     2,
-    3,
     4,
-    5,
     6,
     7,
-    8,
-    9,
-    10,
     11,
     12,
-    13,
     14,
-    15,
-    16
+    15
   ],
-  "domain": "meganote.kr",
-  "activeDomain": "meganote.kr",
-  "blogName": "meganote.kr",
+  "domain": "healthcox.com",
+  "activeDomain": "healthcox.com",
+  "blogName": "healthcox.com",
   "category": null,
-  "title": "실업급여 끝났는데 6개월 기다려야 할까? 국민취업지원제도 신청 전 3분 체크",
+  "title": "무릎 연골주사 히알루론산 급여 주기, 다음 예약 전 지난 주사 날짜부터 확인",
   "summary": "",
   "currentStage": 6,
   "stageName": "발행 완료",
   "progressPct": 100,
-  "detailMessage": "공개 HTTP 200 · https://www.meganote.kr/employment-support-after-unemployment-benefits",
+  "detailMessage": "공개 HTTP 200 · https://www.healthcox.com/knee-hyaluronic-acid-injection-coverage-interval",
   "status": "published",
-  "updatedAt": "2026-10-30T07:00:22.013417+09:00",
-  "timestamp": 1793311222
+  "updatedAt": "2026-11-02T14:00:24.280543+09:00",
+  "timestamp": 1793595624
 }

@@ -1,74 +1,66 @@
 {
   "schema": "naver-kin-automation-state-v1",
-  "checkedAt": "2026-10-30T09:16:33.232202+00:00",
+  "checkedAt": "2026-11-02T05:14:03.275945+00:00",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-21",
+  "endDate": "2026-12-31",
   "enabled": true,
   "continuousMode": true,
   "mode": "alternating_interval",
-  "intervalMinutes": 22,
+  "intervalMinutes": 30,
   "intervalJitterMinutes": [
-    18,
-    22
+    30,
+    35
   ],
   "pollMinutes": 5,
   "globalDailyCap": 20,
   "accountDailyCap": 10,
-  "runs": [
-    {
-      "runId": "2026-10-30_21c1c4240611_adinfo0905_1816",
-      "account": "adinfo0905",
-      "state": "skipped",
-      "reason": "no_eligible_candidate",
-      "discovered": 8
-    }
-  ],
-  "state": "completed_cycle",
-  "measurementStatus": "collected",
+  "runs": [],
+  "state": "waiting",
+  "measurementStatus": "not_attempted",
   "dryRun": false,
   "browsers": [
     {
       "account": "adinfo0905",
       "port": 9231,
       "ready": true,
-      "started": false
+      "started": false,
+      "mode": "ego-on-demand"
     },
     {
       "account": "stone0747",
       "port": 9230,
       "ready": true,
-      "started": false
+      "started": false,
+      "mode": "ego-on-demand"
     }
   ],
-  "runId": "2026-10-30_21c1c4240611_adinfo0905_1816",
-  "account": "adinfo0905",
-  "lastRunAt": "2026-10-30T18:18:59.532549+09:00",
-  "lastAccount": "adinfo0905",
-  "nextEligibleAt": "2026-10-30T18:40:59.532549+09:00",
-  "nextAccount": "stone0747",
+  "reason": "minimum_interval_not_elapsed",
+  "lastRunAt": "2026-11-02T14:11:49.355234+09:00",
+  "lastAccount": "stone0747",
+  "nextEligibleAt": "2026-11-02T14:41:49.355234+09:00",
+  "nextAccount": "adinfo0905",
   "activeRunId": null,
   "activeAccount": null,
   "activeStartedAt": null,
   "cadenceState": "waiting",
   "operationCounts": {
-    "adinfo0905": 11,
-    "stone0747": 10
+    "adinfo0905": 7,
+    "stone0747": 8
   },
   "submissionCounts": {
-    "adinfo0905": 4,
-    "stone0747": 3
+    "adinfo0905": 7,
+    "stone0747": 8
   },
-  "retryAttemptsToday": 0,
-  "globalRemainingRuns": 13,
+  "retryAttemptsToday": 1,
+  "globalRemainingRuns": 5,
   "byAccountRemainingRuns": {
-    "adinfo0905": 6,
-    "stone0747": 7
+    "adinfo0905": 3,
+    "stone0747": 2
   },
-  "measurementComplete": true,
   "registeredTasks": {
     "status": "observed",
     "platform": "windows-daemon",
-    "checkedAt": "2026-10-30T09:18:59.532531+00:00",
+    "checkedAt": "2026-11-02T05:14:03.336965+00:00",
     "tasks": [
       {
         "taskName": "BaroLab-Kin-Seven-Day-Pilot",
@@ -78,7 +70,7 @@
         "workflowMatches": true,
         "state": "Ready",
         "nextRunAt": null,
-        "lastRunAt": "2026-10-30T09:18:59.532531+00:00",
+        "lastRunAt": "2026-11-02T05:14:03.336965+00:00",
         "lastResult": "success",
         "lastExitStatus": "0"
       },
@@ -90,7 +82,7 @@
         "workflowMatches": true,
         "state": "Ready",
         "nextRunAt": null,
-        "lastRunAt": "2026-10-30T09:18:59.532531+00:00",
+        "lastRunAt": "2026-11-02T05:14:03.336965+00:00",
         "lastResult": "success",
         "lastExitStatus": "0"
       },
@@ -102,7 +94,7 @@
         "workflowMatches": true,
         "state": "Ready",
         "nextRunAt": null,
-        "lastRunAt": "2026-10-30T09:18:59.532531+00:00",
+        "lastRunAt": "2026-11-02T05:14:03.336965+00:00",
         "lastResult": "success",
         "lastExitStatus": "0"
       }

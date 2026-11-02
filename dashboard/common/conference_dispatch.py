@@ -615,8 +615,12 @@ def _work(identity):
             row.update(status='failed',failureReason=failure.get('reason') or 'native_run_blocked:'+str(failed_runs[0].get('reason','unknown'))[:120])
             row['failureReport']=report_outcome({'errorType':failure.get('errorType') or failed_runs[0].get('reason'),
                 'reason':row['failureReason']},'conference:'+identity[:24],context)
-        else:row['status']='completed'
-        row.update(completedAt=time.time(), retryAt=time.time()+60)
+        elif not row['outcomes'] and (row.get('eligibility') or {}).get('status') == 'busy':
+            row.update(status='queued', retryAt=time.time()+30)
+            row.pop('completedAt', None)
+        else:
+            row['status']='completed'
+            row.update(completedAt=time.time(), retryAt=time.time()+60)
     except Exception as exc:
         row.update(status='failed', errorType=type(exc).__name__, retryAt=time.time()+300,completedAt=time.time(),
                    failureReason=conference_failure_reason(exc),failureDiagnostic=failure_diagnostic(exc))
@@ -646,6 +650,8 @@ def work(identity):
 
 def record_conference_result(row, result=None):
     from common import work_agenda as agendas
+    if row.get('status') == 'queued':
+        return
     business=agendas.get(row['businessAgendaId'])
     outcomes=row.get('outcomes',[])
     good=bool(outcomes) and all(o.get('publicationVerified') or o.get('reservationVerified') for o in outcomes)
@@ -805,7 +811,7 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
     with locked(QUEUE):
         row=load(file)
         limit=3 if kind in ('kin','threads') else 2
-        if row.get('businessAgendaId')!=current['id'] or (row.get('status')!='failed' and not (kind=='threads' and row.get('status')=='completed' and not row.get('outcomes'))) or any(p.get('pid') != os.getpid() for p in agendas.running(current)):
+        if row.get('businessAgendaId')!=current['id'] or (row.get('status')!='failed' and not (row.get('status')=='completed' and not row.get('outcomes') and (kind=='threads' or (row.get('eligibility') or {}).get('status')=='busy'))) or any(p.get('pid') != os.getpid() for p in agendas.running(current)):
             raise ValueError('Original attempt is pending, unknown or owned by a live execution')
         if row.get('attempts',1)>=limit:
             if kind in ('kin','threads'):raise ValueError('Original retry budget is exhausted')

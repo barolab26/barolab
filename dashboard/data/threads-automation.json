@@ -8,26 +8,38 @@
   "trialDays": 14,
   "continuousMode": true,
   "activatedAt": "2026-10-15T11:19:14.891210+00:00",
-  "endsAt": "2026-10-29T11:19:14.891210+00:00",
+  "endsAt": "2026-12-31T23:59:59+00:00",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-29",
+  "endDate": "2026-12-31",
   "timezone": "Asia/Seoul",
-  "mainDailyCap": 4,
-  "mainTrialCap": 56,
+  "mainDailyCap": 10,
+  "mainTrialCap": 1000,
   "maxFollowups": 1,
   "mainMaxChars": 500,
   "followupMaxChars": 500,
   "preferredTimes": [
-    "08:00",
+    "07:30",
+    "09:10",
+    "10:50",
     "12:30",
-    "18:10",
-    "21:30"
+    "14:10",
+    "15:50",
+    "17:30",
+    "19:10",
+    "21:00",
+    "22:42"
   ],
   "slotModes": {
-    "08:00": "warmup",
+    "07:30": "cf_inbound",
+    "09:10": "warmup",
+    "10:50": "cf_inbound",
     "12:30": "cf_inbound",
-    "18:10": "affiliate",
-    "21:30": "cf_inbound"
+    "14:10": "cf_inbound",
+    "15:50": "warmup",
+    "17:30": "cf_inbound",
+    "19:10": "cf_inbound",
+    "21:00": "cf_inbound",
+    "22:42": "cf_inbound"
   },
   "followupDelaySeconds": {
     "min": 90,
@@ -41,7 +53,7 @@
     "token_file": "C:\\Users\\baro7\\.barolab\\secrets\\threads-mustpickinfo.json"
   },
   "articleCatalog": [],
-  "accountTopic": "공식자료 기반 정책·생활정보",
+  "accountTopic": "돈 되는 실전 금융·지원금·생활꿀팁 반전 요약",
   "oauth": {
     "app_id_env": "THREADS_APP_ID",
     "app_secret_env": "THREADS_APP_SECRET",
@@ -53,7 +65,7 @@
     "account_key": "mustpickinfo",
     "status": "ready",
     "reason": null,
-    "checked_at": "2026-10-30T01:35:25.498966+00:00",
+    "checked_at": "2026-10-30T09:35:01.178399+00:00",
     "ready": true,
     "publishReady": true,
     "requiredScopes": [
@@ -79,14 +91,14 @@
     "quotaStatus": "verified",
     "quota": {
       "posts": {
-        "usage": 0,
+        "usage": 1,
         "limit": 250,
-        "remaining": 250
+        "remaining": 249
       },
       "replies": {
-        "usage": 0,
+        "usage": 1,
         "limit": 1000,
-        "remaining": 1000
+        "remaining": 999
       }
     },
     "readinessIssues": []

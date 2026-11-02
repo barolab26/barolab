@@ -38,9 +38,10 @@
             "2026-10-27": "0.10",
             "2026-10-28": "0.03",
             "2026-10-29": "0.01",
-            "2026-10-30": "0.04"
+            "2026-10-30": "0.06",
+            "2026-10-31": "0.02"
           },
-          "checkedAt": "2026-10-30T10:06:44.604160+00:00",
+          "checkedAt": "2026-11-02T05:06:44.644049+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "조회 대상 15개 · 계정 등록 15개 · 수익 행 있는 날짜만 집계",
@@ -965,12 +966,32 @@
             {
               "date": "2026-10-30",
               "domain": "must-pick.com",
-              "amount": "0.02"
+              "amount": "0.04"
             },
             {
               "date": "2026-10-30",
               "domain": "woorinote.kr",
               "amount": "0.00"
+            },
+            {
+              "date": "2026-10-31",
+              "domain": "baronote.kr",
+              "amount": "0.00"
+            },
+            {
+              "date": "2026-10-31",
+              "domain": "maxnote.kr",
+              "amount": "0.00"
+            },
+            {
+              "date": "2026-10-31",
+              "domain": "must-good.com",
+              "amount": "0.00"
+            },
+            {
+              "date": "2026-10-31",
+              "domain": "must-pick.com",
+              "amount": "0.02"
             }
           ],
           "reportSource": "AdSense Management API v2 · DATE/DOMAIN_NAME",
@@ -1009,7 +1030,7 @@
             "tripmarvel.com"
           ],
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30",
+          "reportEnd": "2026-10-31",
           "accountEmail": "sj@must.biz",
           "plannedDomains": [
             "must-pick.com",
@@ -1027,32 +1048,54 @@
             "woorinote.kr",
             "healthcox.com",
             "tripmarvel.com"
-          ]
+          ],
+          "zeroActivityDates": [],
+          "lastSuccessAt": "2026-11-02T05:06:44.644049+00:00"
         },
         {
-          "id": "coupang",
-          "category": "affiliate",
-          "label": "쿠팡 파트너스",
+          "category": "adpost",
           "currency": "KRW",
-          "scope": "쿠팡 계정 전체 · 모든 subId",
+          "scope": "soul5373 조회 · soultin 계정 수익",
+          "checkedAt": "2026-11-02T02:06:50.298394+00:00",
+          "valueKind": "estimated",
+          "status": "collected",
+          "reason": "실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
+          "browserPort": null,
+          "optional": false,
+          "reportSource": "네이버 애드포스트 수입 보고서",
+          "publisherId": "1224849",
+          "publisherVerified": true,
+          "mediaAliases": [
+            "nblog.soultin",
+            "nblog.soultin.ch3",
+            "nblog.soultin.ch4",
+            "nblog.soultin.ch2",
+            "nblog.soul5373",
+            "nblog.soul5373.ch3",
+            "nblog.soul5373.ch4",
+            "nblog.soul5373.ch2",
+            "nblog.yoon_master",
+            "nblog.yoon_master.ch3",
+            "nblog.yoon_master.ch4",
+            "nblog.yoon_master.ch2"
+          ],
+          "collectionAccount": "soul5373",
+          "declaredRealNameAccountCount": 3,
+          "collectionTransport": "ego-browser",
+          "browserProfile": "soul5373",
+          "tabOwnership": {
+            "transport": "ego-browser",
+            "profile": "soul5373",
+            "ownedTemporary": true
+          },
+          "reportStart": "2026-10-01",
+          "reportEnd": "2026-10-31",
           "daily": {
-            "2026-10-05": "0.0",
-            "2026-10-07": "0.0",
-            "2026-10-09": "597.0",
-            "2026-10-10": "0.0",
-            "2026-10-13": "0.0",
-            "2026-10-14": "0.0",
-            "2026-10-17": "0.0",
-            "2026-10-01": "0",
-            "2026-10-02": "0",
-            "2026-10-03": "0",
-            "2026-10-04": "0",
-            "2026-10-06": "0",
-            "2026-10-08": "0",
-            "2026-10-11": "0",
-            "2026-10-12": "0",
+            "2026-10-13": "0",
+            "2026-10-14": "0",
             "2026-10-15": "0",
             "2026-10-16": "0",
+            "2026-10-17": "0",
             "2026-10-18": "0",
             "2026-10-19": "0",
             "2026-10-20": "0",
@@ -1064,9 +1107,801 @@
             "2026-10-26": "0",
             "2026-10-27": "0",
             "2026-10-28": "0",
-            "2026-10-29": "0"
+            "2026-10-29": "0",
+            "2026-10-30": "0",
+            "2026-10-31": "0"
           },
-          "checkedAt": "2026-10-30T10:06:57.120257+00:00",
+          "details": [
+            {
+              "date": "2026-10-13",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-14",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-15",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-16",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-17",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-18",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-19",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-20",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-21",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-22",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-23",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-24",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-25",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-26",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-27",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-28",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-29",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-30",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-31",
+              "media": "시니어 브리프｜5060 연금·복지·노후정보",
+              "mediaId": 895017,
+              "device": "모바일",
+              "amount": "0"
+            }
+          ],
+          "pendingDates": [],
+          "account": "soultin",
+          "label": "soultin · 시니어 브리프｜5060 연금·복지·노후정보",
+          "mediaIds": [
+            "895017"
+          ],
+          "accountBreakdownVerified": true,
+          "id": "adpost-soultin",
+          "aggregationEligible": true,
+          "aggregationKey": "adpost-publisher-1224849-account-soultin",
+          "lastSuccessAt": "2026-11-02T02:06:50.298394+00:00"
+        },
+        {
+          "category": "adpost",
+          "currency": "KRW",
+          "scope": "soul5373 조회 · soul5373 계정 수익",
+          "checkedAt": "2026-11-02T02:06:50.298394+00:00",
+          "valueKind": "estimated",
+          "status": "collected",
+          "reason": "실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
+          "browserPort": null,
+          "optional": false,
+          "reportSource": "네이버 애드포스트 수입 보고서",
+          "publisherId": "1224849",
+          "publisherVerified": true,
+          "mediaAliases": [
+            "nblog.soultin",
+            "nblog.soultin.ch3",
+            "nblog.soultin.ch4",
+            "nblog.soultin.ch2",
+            "nblog.soul5373",
+            "nblog.soul5373.ch3",
+            "nblog.soul5373.ch4",
+            "nblog.soul5373.ch2",
+            "nblog.yoon_master",
+            "nblog.yoon_master.ch3",
+            "nblog.yoon_master.ch4",
+            "nblog.yoon_master.ch2"
+          ],
+          "collectionAccount": "soul5373",
+          "declaredRealNameAccountCount": 3,
+          "collectionTransport": "ego-browser",
+          "browserProfile": "soul5373",
+          "tabOwnership": {
+            "transport": "ego-browser",
+            "profile": "soul5373",
+            "ownedTemporary": true
+          },
+          "reportStart": "2026-10-01",
+          "reportEnd": "2026-10-31",
+          "daily": {
+            "2026-10-01": "462",
+            "2026-10-02": "0",
+            "2026-10-03": "0",
+            "2026-10-04": "0",
+            "2026-10-05": "0",
+            "2026-10-06": "653",
+            "2026-10-07": "2",
+            "2026-10-08": "0",
+            "2026-10-09": "2",
+            "2026-10-10": "0",
+            "2026-10-11": "40",
+            "2026-10-12": "438",
+            "2026-10-13": "169",
+            "2026-10-14": "383",
+            "2026-10-15": "310",
+            "2026-10-16": "1",
+            "2026-10-17": "0",
+            "2026-10-18": "347",
+            "2026-10-19": "2",
+            "2026-10-20": "0",
+            "2026-10-21": "0",
+            "2026-10-22": "251",
+            "2026-10-23": "0",
+            "2026-10-24": "1",
+            "2026-10-25": "0",
+            "2026-10-26": "166",
+            "2026-10-27": "0",
+            "2026-10-28": "1",
+            "2026-10-29": "503",
+            "2026-10-30": "0",
+            "2026-10-31": "2339"
+          },
+          "details": [
+            {
+              "date": "2026-10-01",
+              "media": "MUST INFO｜오늘 그 스타",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "462"
+            },
+            {
+              "date": "2026-10-02",
+              "media": "MUST INFO｜오늘 그 스타",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-03",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-04",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-05",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-06",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "653"
+            },
+            {
+              "date": "2026-10-07",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "2"
+            },
+            {
+              "date": "2026-10-08",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-09",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "2"
+            },
+            {
+              "date": "2026-10-10",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-11",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "40"
+            },
+            {
+              "date": "2026-10-12",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "438"
+            },
+            {
+              "date": "2026-10-13",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "169"
+            },
+            {
+              "date": "2026-10-14",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "383"
+            },
+            {
+              "date": "2026-10-15",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "310"
+            },
+            {
+              "date": "2026-10-16",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "1"
+            },
+            {
+              "date": "2026-10-17",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-18",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "347"
+            },
+            {
+              "date": "2026-10-19",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "2"
+            },
+            {
+              "date": "2026-10-20",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-21",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-22",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "251"
+            },
+            {
+              "date": "2026-10-23",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-24",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "1"
+            },
+            {
+              "date": "2026-10-25",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-26",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "166"
+            },
+            {
+              "date": "2026-10-27",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-28",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "1"
+            },
+            {
+              "date": "2026-10-29",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "503"
+            },
+            {
+              "date": "2026-10-30",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-31",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "2339"
+            }
+          ],
+          "pendingDates": [],
+          "account": "soul5373",
+          "label": "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크",
+          "mediaIds": [
+            "858728"
+          ],
+          "accountBreakdownVerified": true,
+          "id": "adpost-soul5373",
+          "aggregationEligible": true,
+          "aggregationKey": "adpost-publisher-1224849-account-soul5373",
+          "lastSuccessAt": "2026-11-02T02:06:50.298394+00:00"
+        },
+        {
+          "category": "adpost",
+          "currency": "KRW",
+          "scope": "soul5373 조회 · yoon_master 계정 수익",
+          "checkedAt": "2026-11-02T02:06:50.298394+00:00",
+          "valueKind": "estimated",
+          "status": "collected",
+          "reason": "실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
+          "browserPort": null,
+          "optional": false,
+          "reportSource": "네이버 애드포스트 수입 보고서",
+          "publisherId": "1224849",
+          "publisherVerified": true,
+          "mediaAliases": [
+            "nblog.soultin",
+            "nblog.soultin.ch3",
+            "nblog.soultin.ch4",
+            "nblog.soultin.ch2",
+            "nblog.soul5373",
+            "nblog.soul5373.ch3",
+            "nblog.soul5373.ch4",
+            "nblog.soul5373.ch2",
+            "nblog.yoon_master",
+            "nblog.yoon_master.ch3",
+            "nblog.yoon_master.ch4",
+            "nblog.yoon_master.ch2"
+          ],
+          "collectionAccount": "soul5373",
+          "declaredRealNameAccountCount": 3,
+          "collectionTransport": "ego-browser",
+          "browserProfile": "soul5373",
+          "tabOwnership": {
+            "transport": "ego-browser",
+            "profile": "soul5373",
+            "ownedTemporary": true
+          },
+          "reportStart": "2026-10-01",
+          "reportEnd": "2026-10-31",
+          "daily": {
+            "2026-10-01": "0",
+            "2026-10-02": "0",
+            "2026-10-03": "0",
+            "2026-10-04": "0",
+            "2026-10-05": "0",
+            "2026-10-06": "0",
+            "2026-10-07": "0",
+            "2026-10-08": "0",
+            "2026-10-09": "889",
+            "2026-10-10": "0",
+            "2026-10-11": "0",
+            "2026-10-12": "0",
+            "2026-10-13": "333",
+            "2026-10-14": "0",
+            "2026-10-15": "0",
+            "2026-10-16": "38",
+            "2026-10-17": "0",
+            "2026-10-18": "38",
+            "2026-10-19": "186",
+            "2026-10-20": "0",
+            "2026-10-21": "0",
+            "2026-10-22": "0",
+            "2026-10-23": "0",
+            "2026-10-24": "184",
+            "2026-10-25": "439",
+            "2026-10-26": "0",
+            "2026-10-27": "0",
+            "2026-10-28": "152",
+            "2026-10-29": "0",
+            "2026-10-30": "132",
+            "2026-10-31": "0"
+          },
+          "details": [
+            {
+              "date": "2026-10-01",
+              "media": "윤뷰스｜연예인 패선",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-02",
+              "media": "윤뷰스｜연예인 패선",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-03",
+              "media": "윤뷰스｜4060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-04",
+              "media": "윤뷰스｜4060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-05",
+              "media": "윤뷰스｜4060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-06",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-07",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-08",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-09",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "889"
+            },
+            {
+              "date": "2026-10-10",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-11",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-12",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-13",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "333"
+            },
+            {
+              "date": "2026-10-14",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-15",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-16",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "38"
+            },
+            {
+              "date": "2026-10-17",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-18",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "38"
+            },
+            {
+              "date": "2026-10-19",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "186"
+            },
+            {
+              "date": "2026-10-20",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-21",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-22",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-23",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-24",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "184"
+            },
+            {
+              "date": "2026-10-25",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "439"
+            },
+            {
+              "date": "2026-10-26",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-27",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-28",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "152"
+            },
+            {
+              "date": "2026-10-29",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            },
+            {
+              "date": "2026-10-30",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "132"
+            },
+            {
+              "date": "2026-10-31",
+              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
+              "mediaId": 858828,
+              "device": "모바일",
+              "amount": "0"
+            }
+          ],
+          "pendingDates": [],
+          "account": "yoon_master",
+          "label": "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙",
+          "mediaIds": [
+            "858828"
+          ],
+          "accountBreakdownVerified": true,
+          "id": "adpost-yoon_master",
+          "aggregationEligible": true,
+          "aggregationKey": "adpost-publisher-1224849-account-yoon_master",
+          "lastSuccessAt": "2026-11-02T02:06:50.298394+00:00"
+        },
+        {
+          "id": "coupang",
+          "category": "affiliate",
+          "label": "쿠팡 파트너스",
+          "currency": "KRW",
+          "scope": "쿠팡 계정 전체 · 모든 subId",
+          "daily": {
+            "2026-10-01": "0",
+            "2026-10-02": "0",
+            "2026-10-03": "0",
+            "2026-10-04": "0",
+            "2026-10-05": "0.0",
+            "2026-10-06": "0",
+            "2026-10-07": "0.0",
+            "2026-10-08": "0",
+            "2026-10-09": "597.0",
+            "2026-10-10": "0.0",
+            "2026-10-11": "0",
+            "2026-10-12": "0",
+            "2026-10-13": "0.0",
+            "2026-10-14": "0.0",
+            "2026-10-15": "0",
+            "2026-10-16": "0",
+            "2026-10-17": "0.0",
+            "2026-10-18": "0",
+            "2026-10-19": "0",
+            "2026-10-20": "0",
+            "2026-10-21": "0",
+            "2026-10-22": "0",
+            "2026-10-23": "0",
+            "2026-10-24": "0",
+            "2026-10-25": "0",
+            "2026-10-26": "0",
+            "2026-10-27": "0",
+            "2026-10-28": "0",
+            "2026-10-29": "0",
+            "2026-10-30": "0",
+            "2026-10-31": "0"
+          },
+          "checkedAt": "2026-11-02T05:06:44.766387+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기",
@@ -1117,9 +1952,7 @@
               "amount": "0.0"
             }
           ],
-          "pendingDates": [
-            "2026-10-30"
-          ],
+          "pendingDates": [],
           "zeroActivityDates": [
             "2026-10-01",
             "2026-10-02",
@@ -1142,12 +1975,15 @@
             "2026-10-26",
             "2026-10-27",
             "2026-10-28",
-            "2026-10-29"
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31"
           ],
           "queryComplete": true,
           "reportSource": "쿠팡 파트너스 Open API · commission",
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30"
+          "reportEnd": "2026-10-31",
+          "lastSuccessAt": "2026-11-02T05:06:44.766387+00:00"
         },
         {
           "id": "adsense-aaa10291028",
@@ -1156,7 +1992,7 @@
           "currency": "USD",
           "scope": "nolplace.com · 가족 계정 별도 수집",
           "daily": {},
-          "checkedAt": "2026-10-30T10:06:57.120284+00:00",
+          "checkedAt": "2026-10-31T14:36:51.436753+00:00",
           "valueKind": "estimated",
           "status": "not_collected",
           "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개",
@@ -1207,9 +2043,10 @@
             "2026-10-27": "0",
             "2026-10-28": "0",
             "2026-10-29": "0",
-            "2026-10-30": "0"
+            "2026-10-30": "0",
+            "2026-10-31": "0"
           },
-          "checkedAt": "2026-10-30T10:06:58.719449+00:00",
+          "checkedAt": "2026-11-02T05:06:45.392266+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개",
@@ -1431,6 +2268,13 @@
               "confirmedAmount": "0",
               "lastUpdatedAt": null,
               "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-10-31",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
             }
           ],
           "pendingDates": [],
@@ -1439,7 +2283,8 @@
           "reportSource": "토스 쉐어링크 공식 Open API · performance.summary.expectedCommissionAmount",
           "reportDocumentation": "https://sharelink-docs.toss.im/developers/open-api/api/performance",
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30"
+          "reportEnd": "2026-10-31",
+          "lastSuccessAt": "2026-11-02T05:06:45.392266+00:00"
         },
         {
           "id": "trip",
@@ -1448,7 +2293,7 @@
           "currency": "KRW",
           "scope": "Trip.com",
           "daily": {},
-          "checkedAt": "2026-10-30T10:06:58.719461+00:00",
+          "checkedAt": "2026-10-31T14:36:53.176614+00:00",
           "valueKind": "estimated",
           "status": "configured_no_report_api",
           "reason": "AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인",
@@ -1496,9 +2341,11 @@
             "2026-10-26": "0",
             "2026-10-27": "0",
             "2026-10-28": "0",
-            "2026-10-29": "0"
+            "2026-10-29": "0",
+            "2026-10-30": "0",
+            "2026-10-31": "0"
           },
-          "checkedAt": "2026-10-30T10:07:00.107608+00:00",
+          "checkedAt": "2026-11-02T05:06:46.779685+00:00",
           "valueKind": "estimated",
           "status": "collected",
           "reason": "공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기",
@@ -1511,9 +2358,7 @@
           "configurationStatus": "configured",
           "reportCapability": "authenticated_html_report",
           "details": [],
-          "pendingDates": [
-            "2026-10-30"
-          ],
+          "pendingDates": [],
           "zeroActivityDates": [
             "2026-10-01",
             "2026-10-02",
@@ -1543,23 +2388,154 @@
             "2026-10-26",
             "2026-10-27",
             "2026-10-28",
-            "2026-10-29"
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31"
           ],
           "queryComplete": true,
           "pagesRead": 1,
           "identityEvidence": "fresh_credential_login",
           "reportSource": "쉐어알바 실적/수익 · 신청일자별 수익금",
           "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30"
-        },
+          "reportEnd": "2026-10-31",
+          "lastSuccessAt": "2026-11-02T05:06:46.779685+00:00"
+        }
+      ],
+      "checkedAt": "2026-11-02T05:06:46.779685+00:00"
+    },
+    "2026-11": {
+      "sources": [
         {
-          "category": "adpost",
-          "currency": "KRW",
-          "scope": "soul5373 조회 · soultin 계정 수익",
-          "checkedAt": "2026-10-30T10:05:14.506Z",
+          "id": "adsense-sj",
+          "category": "adsense",
+          "label": "SJ · CF 애드센스",
+          "currency": "USD",
+          "scope": "sj@must.biz · CF 조회 대상 15개 · READY 14개 · 조치 필요 1개 (healthcox.com)",
+          "daily": {
+            "2026-11-01": "0.02",
+            "2026-11-02": "0.00"
+          },
+          "checkedAt": "2026-11-02T05:06:44.644049+00:00",
           "valueKind": "estimated",
           "status": "collected",
-          "reason": "실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
+          "reason": "조회 대상 15개 · 계정 등록 15개 · 무실적 일자 $0.00 확인",
+          "domains": [
+            "must-pick.com",
+            "baronote.kr",
+            "daynote.kr",
+            "joynote.kr",
+            "justinfo.co.kr",
+            "maxnote.kr",
+            "meganote.kr",
+            "must-good.com",
+            "must-joy.com",
+            "smilenote.kr",
+            "soulnote.kr",
+            "topnote.kr",
+            "woorinote.kr",
+            "healthcox.com",
+            "tripmarvel.com"
+          ],
+          "details": [
+            {
+              "date": "2026-11-01",
+              "domain": "justinfo.co.kr",
+              "amount": "0.00"
+            },
+            {
+              "date": "2026-11-01",
+              "domain": "must-pick.com",
+              "amount": "0.02"
+            },
+            {
+              "date": "2026-11-02",
+              "domain": "daynote.kr",
+              "amount": "0.00"
+            },
+            {
+              "date": "2026-11-02",
+              "domain": "justinfo.co.kr",
+              "amount": "0.00"
+            },
+            {
+              "date": "2026-11-02",
+              "domain": "must-good.com",
+              "amount": "0.00"
+            }
+          ],
+          "zeroActivityDates": [],
+          "reportSource": "AdSense Management API v2 · DATE/DOMAIN_NAME",
+          "siteStatus": {
+            "must-pick.com": "READY",
+            "baronote.kr": "READY",
+            "daynote.kr": "READY",
+            "joynote.kr": "READY",
+            "justinfo.co.kr": "READY",
+            "maxnote.kr": "READY",
+            "meganote.kr": "READY",
+            "must-good.com": "READY",
+            "must-joy.com": "READY",
+            "smilenote.kr": "READY",
+            "soulnote.kr": "READY",
+            "topnote.kr": "READY",
+            "woorinote.kr": "READY",
+            "healthcox.com": "NEEDS_ATTENTION",
+            "tripmarvel.com": "READY"
+          },
+          "registeredDomains": [
+            "must-pick.com",
+            "baronote.kr",
+            "daynote.kr",
+            "joynote.kr",
+            "justinfo.co.kr",
+            "maxnote.kr",
+            "meganote.kr",
+            "must-good.com",
+            "must-joy.com",
+            "smilenote.kr",
+            "soulnote.kr",
+            "topnote.kr",
+            "woorinote.kr",
+            "healthcox.com",
+            "tripmarvel.com"
+          ],
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T05:06:44.644049+00:00",
+          "accountEmail": "sj@must.biz",
+          "plannedDomains": [
+            "must-pick.com",
+            "baronote.kr",
+            "daynote.kr",
+            "joynote.kr",
+            "justinfo.co.kr",
+            "maxnote.kr",
+            "meganote.kr",
+            "must-good.com",
+            "must-joy.com",
+            "smilenote.kr",
+            "soulnote.kr",
+            "topnote.kr",
+            "woorinote.kr",
+            "healthcox.com",
+            "tripmarvel.com"
+          ]
+        },
+        {
+          "id": "adpost-soul5373",
+          "category": "adpost",
+          "label": "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크",
+          "currency": "KRW",
+          "scope": "soul5373 조회 · soul5373 계정 수익",
+          "daily": {
+            "2026-11-01": "264"
+          },
+          "checkedAt": "2026-11-02T02:06:50.298394+00:00",
+          "valueKind": "estimated",
+          "status": "browser_unavailable",
+          "reason": "EGO 세션 확인 필요 · 이전 작업 공간 보존 · 자동 재시도 보류",
+          "browserPort": null,
+          "optional": false,
           "reportSource": "네이버 애드포스트 수입 보고서",
           "publisherId": "1224849",
           "publisherVerified": true,
@@ -1581,143 +2557,106 @@
           "declaredRealNameAccountCount": 3,
           "collectionTransport": "ego-browser",
           "browserProfile": "soul5373",
-          "browserPort": null,
-          "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30",
+          "tabOwnership": {
+            "transport": "ego-browser",
+            "profile": "soul5373",
+            "ownedTemporary": true
+          },
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T02:06:50.298394+00:00",
+          "details": [
+            {
+              "date": "2026-11-01",
+              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
+              "mediaId": 858728,
+              "device": "모바일",
+              "amount": "264"
+            }
+          ],
+          "pendingDates": [
+            "2026-11-02"
+          ],
+          "account": "soul5373",
+          "mediaIds": [
+            "858728"
+          ],
+          "accountBreakdownVerified": true,
+          "aggregationEligible": true,
+          "aggregationKey": "adpost-publisher-1224849-account-soul5373",
+          "attemptedAt": "2026-11-02T05:06:44.649439+00:00"
+        },
+        {
+          "id": "coupang",
+          "category": "affiliate",
+          "label": "쿠팡 파트너스",
+          "currency": "KRW",
+          "scope": "쿠팡 계정 전체 · 모든 subId",
           "daily": {
-            "2026-10-13": "0",
-            "2026-10-14": "0",
-            "2026-10-15": "0",
-            "2026-10-16": "0",
-            "2026-10-17": "0",
-            "2026-10-18": "0",
-            "2026-10-19": "0",
-            "2026-10-20": "0",
-            "2026-10-21": "0",
-            "2026-10-22": "0",
-            "2026-10-23": "0",
-            "2026-10-24": "0",
-            "2026-10-25": "0",
-            "2026-10-26": "0",
-            "2026-10-27": "0",
-            "2026-10-28": "0",
-            "2026-10-29": "0"
+            "2026-11-01": "0"
+          },
+          "checkedAt": "2026-11-02T05:06:44.766387+00:00",
+          "valueKind": "estimated",
+          "status": "collected",
+          "reason": "계정 전체 · 성공한 전체 조회에서 과거 누락일은 실적 0 · 오늘은 D+1 보고서 집계 대기",
+          "details": [],
+          "pendingDates": [
+            "2026-11-02"
+          ],
+          "zeroActivityDates": [
+            "2026-11-01"
+          ],
+          "queryComplete": true,
+          "reportSource": "쿠팡 파트너스 Open API · commission",
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T05:06:44.766387+00:00"
+        },
+        {
+          "category": "adpost",
+          "currency": "KRW",
+          "scope": "soul5373 조회 · soultin 계정 수익",
+          "checkedAt": "2026-11-02T02:06:50.298394+00:00",
+          "valueKind": "estimated",
+          "status": "browser_unavailable",
+          "reason": "EGO 세션 확인 필요 · 이전 작업 공간 보존 · 자동 재시도 보류",
+          "browserPort": null,
+          "optional": false,
+          "reportSource": "네이버 애드포스트 수입 보고서",
+          "publisherId": "1224849",
+          "publisherVerified": true,
+          "mediaAliases": [
+            "nblog.soultin",
+            "nblog.soultin.ch3",
+            "nblog.soultin.ch4",
+            "nblog.soultin.ch2",
+            "nblog.soul5373",
+            "nblog.soul5373.ch3",
+            "nblog.soul5373.ch4",
+            "nblog.soul5373.ch2",
+            "nblog.yoon_master",
+            "nblog.yoon_master.ch3",
+            "nblog.yoon_master.ch4",
+            "nblog.yoon_master.ch2"
+          ],
+          "collectionAccount": "soul5373",
+          "declaredRealNameAccountCount": 3,
+          "collectionTransport": "ego-browser",
+          "browserProfile": "soul5373",
+          "tabOwnership": {
+            "transport": "ego-browser",
+            "profile": "soul5373",
+            "ownedTemporary": true
+          },
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T02:06:50.298394+00:00",
+          "daily": {
+            "2026-11-01": "0"
           },
           "details": [
             {
-              "date": "2026-10-13",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-14",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-15",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-16",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-17",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-18",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-19",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-20",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-21",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-22",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-23",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-24",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-25",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-26",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-27",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-28",
-              "media": "시니어 브리프｜5060 연금·복지·노후정보",
-              "mediaId": 895017,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-29",
+              "date": "2026-11-01",
               "media": "시니어 브리프｜5060 연금·복지·노후정보",
               "mediaId": 895017,
               "device": "모바일",
@@ -1725,7 +2664,7 @@
             }
           ],
           "pendingDates": [
-            "2026-10-30"
+            "2026-11-02"
           ],
           "account": "soultin",
           "label": "soultin · 시니어 브리프｜5060 연금·복지·노후정보",
@@ -1735,297 +2674,19 @@
           "accountBreakdownVerified": true,
           "id": "adpost-soultin",
           "aggregationEligible": true,
-          "aggregationKey": "adpost-publisher-1224849-account-soultin"
-        },
-        {
-          "category": "adpost",
-          "currency": "KRW",
-          "scope": "soul5373 조회 · soul5373 계정 수익",
-          "checkedAt": "2026-10-30T10:05:14.506Z",
-          "valueKind": "estimated",
-          "status": "collected",
-          "reason": "실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
-          "reportSource": "네이버 애드포스트 수입 보고서",
-          "publisherId": "1224849",
-          "publisherVerified": true,
-          "mediaAliases": [
-            "nblog.soultin",
-            "nblog.soultin.ch3",
-            "nblog.soultin.ch4",
-            "nblog.soultin.ch2",
-            "nblog.soul5373",
-            "nblog.soul5373.ch3",
-            "nblog.soul5373.ch4",
-            "nblog.soul5373.ch2",
-            "nblog.yoon_master",
-            "nblog.yoon_master.ch3",
-            "nblog.yoon_master.ch4",
-            "nblog.yoon_master.ch2"
-          ],
-          "collectionAccount": "soul5373",
-          "declaredRealNameAccountCount": 3,
-          "collectionTransport": "ego-browser",
-          "browserProfile": "soul5373",
-          "browserPort": null,
-          "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30",
-          "daily": {
-            "2026-10-01": "462",
-            "2026-10-02": "0",
-            "2026-10-03": "0",
-            "2026-10-04": "0",
-            "2026-10-05": "0",
-            "2026-10-06": "653",
-            "2026-10-07": "2",
-            "2026-10-08": "0",
-            "2026-10-09": "2",
-            "2026-10-10": "0",
-            "2026-10-11": "40",
-            "2026-10-12": "438",
-            "2026-10-13": "169",
-            "2026-10-14": "383",
-            "2026-10-15": "310",
-            "2026-10-16": "1",
-            "2026-10-17": "0",
-            "2026-10-18": "347",
-            "2026-10-19": "2",
-            "2026-10-20": "0",
-            "2026-10-21": "0",
-            "2026-10-22": "251",
-            "2026-10-23": "0",
-            "2026-10-24": "1",
-            "2026-10-25": "0",
-            "2026-10-26": "166",
-            "2026-10-27": "0",
-            "2026-10-28": "1",
-            "2026-10-29": "503"
-          },
-          "details": [
-            {
-              "date": "2026-10-01",
-              "media": "MUST INFO｜오늘 그 스타",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "462"
-            },
-            {
-              "date": "2026-10-02",
-              "media": "MUST INFO｜오늘 그 스타",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-03",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-04",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-05",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-06",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "653"
-            },
-            {
-              "date": "2026-10-07",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "2"
-            },
-            {
-              "date": "2026-10-08",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-09",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "2"
-            },
-            {
-              "date": "2026-10-10",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-11",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "40"
-            },
-            {
-              "date": "2026-10-12",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "438"
-            },
-            {
-              "date": "2026-10-13",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "169"
-            },
-            {
-              "date": "2026-10-14",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "383"
-            },
-            {
-              "date": "2026-10-15",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "310"
-            },
-            {
-              "date": "2026-10-16",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "1"
-            },
-            {
-              "date": "2026-10-17",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-18",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "347"
-            },
-            {
-              "date": "2026-10-19",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "2"
-            },
-            {
-              "date": "2026-10-20",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-21",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-22",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "251"
-            },
-            {
-              "date": "2026-10-23",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-24",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "1"
-            },
-            {
-              "date": "2026-10-25",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-26",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "166"
-            },
-            {
-              "date": "2026-10-27",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-28",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "1"
-            },
-            {
-              "date": "2026-10-29",
-              "media": "머스트 헬스뷰｜5060 건강·영양 팩트체크",
-              "mediaId": 858728,
-              "device": "모바일",
-              "amount": "503"
-            }
-          ],
-          "pendingDates": [
-            "2026-10-30"
-          ],
-          "account": "soul5373",
-          "label": "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크",
-          "mediaIds": [
-            "858728"
-          ],
-          "accountBreakdownVerified": true,
-          "id": "adpost-soul5373",
-          "aggregationEligible": true,
-          "aggregationKey": "adpost-publisher-1224849-account-soul5373"
+          "aggregationKey": "adpost-publisher-1224849-account-soultin",
+          "attemptedAt": "2026-11-02T05:06:44.649439+00:00"
         },
         {
           "category": "adpost",
           "currency": "KRW",
           "scope": "soul5373 조회 · yoon_master 계정 수익",
-          "checkedAt": "2026-10-30T10:05:14.506Z",
+          "checkedAt": "2026-11-02T02:06:50.298394+00:00",
           "valueKind": "estimated",
-          "status": "collected",
-          "reason": "실제 publisher의 블로그 보고서 · 미집계 날짜는 집계 중",
+          "status": "browser_unavailable",
+          "reason": "EGO 세션 확인 필요 · 이전 작업 공간 보존 · 자동 재시도 보류",
+          "browserPort": null,
+          "optional": false,
           "reportSource": "네이버 애드포스트 수입 보고서",
           "publisherId": "1224849",
           "publisherVerified": true,
@@ -2047,239 +2708,20 @@
           "declaredRealNameAccountCount": 3,
           "collectionTransport": "ego-browser",
           "browserProfile": "soul5373",
-          "browserPort": null,
-          "reportStart": "2026-10-01",
-          "reportEnd": "2026-10-30",
+          "tabOwnership": {
+            "transport": "ego-browser",
+            "profile": "soul5373",
+            "ownedTemporary": true
+          },
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T02:06:50.298394+00:00",
           "daily": {
-            "2026-10-01": "0",
-            "2026-10-02": "0",
-            "2026-10-03": "0",
-            "2026-10-04": "0",
-            "2026-10-05": "0",
-            "2026-10-06": "0",
-            "2026-10-07": "0",
-            "2026-10-08": "0",
-            "2026-10-09": "889",
-            "2026-10-10": "0",
-            "2026-10-11": "0",
-            "2026-10-12": "0",
-            "2026-10-13": "333",
-            "2026-10-14": "0",
-            "2026-10-15": "0",
-            "2026-10-16": "38",
-            "2026-10-17": "0",
-            "2026-10-18": "38",
-            "2026-10-19": "186",
-            "2026-10-20": "0",
-            "2026-10-21": "0",
-            "2026-10-22": "0",
-            "2026-10-23": "0",
-            "2026-10-24": "184",
-            "2026-10-25": "439",
-            "2026-10-26": "0",
-            "2026-10-27": "0",
-            "2026-10-28": "152",
-            "2026-10-29": "0"
+            "2026-11-01": "0"
           },
           "details": [
             {
-              "date": "2026-10-01",
-              "media": "윤뷰스｜연예인 패선",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-02",
-              "media": "윤뷰스｜연예인 패선",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-03",
-              "media": "윤뷰스｜4060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-04",
-              "media": "윤뷰스｜4060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-05",
-              "media": "윤뷰스｜4060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-06",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-07",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-08",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-09",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "889"
-            },
-            {
-              "date": "2026-10-10",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-11",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-12",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-13",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "333"
-            },
-            {
-              "date": "2026-10-14",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-15",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-16",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "38"
-            },
-            {
-              "date": "2026-10-17",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-18",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "38"
-            },
-            {
-              "date": "2026-10-19",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "186"
-            },
-            {
-              "date": "2026-10-20",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-21",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-22",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-23",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-24",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "184"
-            },
-            {
-              "date": "2026-10-25",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "439"
-            },
-            {
-              "date": "2026-10-26",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-27",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "0"
-            },
-            {
-              "date": "2026-10-28",
-              "media": "윤뷰스｜5060 품격 라이프 & 리빙",
-              "mediaId": 858828,
-              "device": "모바일",
-              "amount": "152"
-            },
-            {
-              "date": "2026-10-29",
+              "date": "2026-11-01",
               "media": "윤뷰스｜5060 품격 라이프 & 리빙",
               "mediaId": 858828,
               "device": "모바일",
@@ -2287,7 +2729,7 @@
             }
           ],
           "pendingDates": [
-            "2026-10-30"
+            "2026-11-02"
           ],
           "account": "yoon_master",
           "label": "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙",
@@ -2297,24 +2739,150 @@
           "accountBreakdownVerified": true,
           "id": "adpost-yoon_master",
           "aggregationEligible": true,
-          "aggregationKey": "adpost-publisher-1224849-account-yoon_master"
+          "aggregationKey": "adpost-publisher-1224849-account-yoon_master",
+          "attemptedAt": "2026-11-02T05:06:44.649439+00:00"
+        },
+        {
+          "id": "adsense-aaa10291028",
+          "category": "adsense",
+          "label": "가족 aaa · 애드센스",
+          "currency": "USD",
+          "scope": "nolplace.com · 가족 계정 별도 수집",
+          "daily": {},
+          "checkedAt": "2026-11-02T05:06:44.766491+00:00",
+          "valueKind": "estimated",
+          "status": "not_collected",
+          "reason": "가족 계정 AdSense OAuth 미연결 · GA4/Search Console 조회 인증과 별개",
+          "domains": [
+            "nolplace.com"
+          ],
+          "accountEmail": "aaa10291028@gmail.com",
+          "plannedDomains": [
+            "nolplace.com"
+          ],
+          "siteStatus": {
+            "nolplace.com": "registration_unverified"
+          }
+        },
+        {
+          "id": "toss",
+          "category": "affiliate",
+          "label": "토스 쉐어링크",
+          "currency": "KRW",
+          "scope": "토스 쉐어링크",
+          "daily": {
+            "2026-11-01": "0",
+            "2026-11-02": "0"
+          },
+          "checkedAt": "2026-11-02T05:06:45.392266+00:00",
+          "valueKind": "estimated",
+          "status": "collected",
+          "reason": "결제일별 전체 잠정 수익금(KRW·세전) · 구매확정월 정산액/실입금액과 별개",
+          "credentialPresence": {
+            "apiKey": true,
+            "apiSecret": true,
+            "login": true,
+            "affiliateIds": false
+          },
+          "configurationStatus": "configured",
+          "reportCapability": "api_report",
+          "details": [
+            {
+              "date": "2026-11-01",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            },
+            {
+              "date": "2026-11-02",
+              "amount": "0",
+              "confirmedAmount": "0",
+              "lastUpdatedAt": null,
+              "detailPagesRemaining": false
+            }
+          ],
+          "pendingDates": [],
+          "queryComplete": true,
+          "pagination": "summary_is_full_query_total",
+          "reportSource": "토스 쉐어링크 공식 Open API · performance.summary.expectedCommissionAmount",
+          "reportDocumentation": "https://sharelink-docs.toss.im/developers/open-api/api/performance",
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T05:06:45.392266+00:00"
+        },
+        {
+          "id": "trip",
+          "category": "affiliate",
+          "label": "Trip.com",
+          "currency": "KRW",
+          "scope": "Trip.com",
+          "daily": {},
+          "checkedAt": "2026-11-02T05:06:45.392318+00:00",
+          "valueKind": "estimated",
+          "status": "configured_no_report_api",
+          "reason": "AID/SID 설정됨 · 추적용 식별자이며 정산서·수익 보고 API 미확인",
+          "credentialPresence": {
+            "apiKey": false,
+            "apiSecret": false,
+            "login": false,
+            "affiliateIds": true
+          },
+          "configurationStatus": "configured",
+          "reportCapability": "affiliate_tracking_only"
+        },
+        {
+          "id": "replyalba",
+          "category": "affiliate",
+          "label": "제휴알바",
+          "currency": "KRW",
+          "scope": "제휴알바",
+          "daily": {
+            "2026-11-01": "0"
+          },
+          "checkedAt": "2026-11-02T05:06:46.779685+00:00",
+          "valueKind": "estimated",
+          "status": "collected",
+          "reason": "공식 로그인 후 전체 실적 표 조회 · 표시 수익금이며 정산/출금액과 별개 · 오늘은 집계 대기",
+          "credentialPresence": {
+            "apiKey": false,
+            "apiSecret": false,
+            "login": true,
+            "affiliateIds": false
+          },
+          "configurationStatus": "configured",
+          "reportCapability": "authenticated_html_report",
+          "details": [],
+          "pendingDates": [
+            "2026-11-02"
+          ],
+          "zeroActivityDates": [
+            "2026-11-01"
+          ],
+          "queryComplete": true,
+          "pagesRead": 1,
+          "identityEvidence": "fresh_credential_login",
+          "reportSource": "쉐어알바 실적/수익 · 신청일자별 수익금",
+          "reportStart": "2026-11-01",
+          "reportEnd": "2026-11-02",
+          "lastSuccessAt": "2026-11-02T05:06:46.779685+00:00"
         }
       ],
-      "checkedAt": "2026-10-30T10:14:34.175065+00:00"
+      "checkedAt": "2026-11-02T05:06:46.779738+00:00"
     }
   },
   "schema": "dashboard-revenue-v1",
-  "checkedAt": "2026-10-30T10:14:34.175072+00:00",
+  "checkedAt": "2026-11-02T05:06:46.779738+00:00",
   "growth": {
     "schema": "dashboard-growth-revenue-v1",
     "windows": {
       "recent": {
-        "start": "2026-09-30",
-        "end": "2026-10-27"
+        "start": "2026-10-02",
+        "end": "2026-10-29"
       },
       "previous": {
-        "start": "2026-09-02",
-        "end": "2026-09-29"
+        "start": "2026-09-04",
+        "end": "2026-10-01"
       }
     },
     "sources": {
@@ -2342,191 +2910,9 @@
           "healthcox.com",
           "tripmarvel.com"
         ],
-        "attemptedAt": "2026-10-30T09:29:27.729967+00:00",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "attemptedAt": "2026-11-01T19:36:50.732199+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "rows": [
-          {
-            "date": "2026-09-02",
-            "domain": "baronote.kr",
-            "host": "baronote.kr",
-            "revenue": "0.01",
-            "pageViews": 3
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "daynote.kr",
-            "host": "daynote.kr",
-            "revenue": "0.00",
-            "pageViews": 2
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "joynote.kr",
-            "host": "joynote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "justinfo.co.kr",
-            "host": "justinfo.co.kr",
-            "revenue": "0.00",
-            "pageViews": 2
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "maxnote.kr",
-            "host": "maxnote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "must-good.com",
-            "host": "must-good.com",
-            "revenue": "0.01",
-            "pageViews": 3
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "smilenote.kr",
-            "host": "smilenote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "soulnote.kr",
-            "host": "soulnote.kr",
-            "revenue": "0.00",
-            "pageViews": 5
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "topnote.kr",
-            "host": "topnote.kr",
-            "revenue": "0.00",
-            "pageViews": 2
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "meganote.kr",
-            "host": "www.meganote.kr",
-            "revenue": "0.07",
-            "pageViews": 8
-          },
-          {
-            "date": "2026-09-02",
-            "domain": "must-pick.com",
-            "host": "www.must-pick.com",
-            "revenue": "0.02",
-            "pageViews": 8
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "baronote.kr",
-            "host": "baronote.kr",
-            "revenue": "0.00",
-            "pageViews": 2
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "daynote.kr",
-            "host": "daynote.kr",
-            "revenue": "0.00",
-            "pageViews": 3
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "joynote.kr",
-            "host": "joynote.kr",
-            "revenue": "0.00",
-            "pageViews": 2
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "justinfo.co.kr",
-            "host": "justinfo.co.kr",
-            "revenue": "0.00",
-            "pageViews": 6
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "maxnote.kr",
-            "host": "maxnote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "meganote.kr",
-            "host": "meganote.kr",
-            "revenue": "0.01",
-            "pageViews": 0
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "must-good.com",
-            "host": "must-good.com",
-            "revenue": "0.00",
-            "pageViews": 3
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "smilenote.kr",
-            "host": "smilenote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "soulnote.kr",
-            "host": "soulnote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "topnote.kr",
-            "host": "topnote.kr",
-            "revenue": "0.00",
-            "pageViews": 2
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "justinfo.co.kr",
-            "host": "www.justinfo.co.kr",
-            "revenue": "0.00",
-            "pageViews": 4
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "meganote.kr",
-            "host": "www.meganote.kr",
-            "revenue": "0.00",
-            "pageViews": 8
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "must-good.com",
-            "host": "www.must-good.com",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "must-pick.com",
-            "host": "www.must-pick.com",
-            "revenue": "0.01",
-            "pageViews": 9
-          },
-          {
-            "date": "2026-09-03",
-            "domain": "woorinote.kr",
-            "host": "www.woorinote.kr",
-            "revenue": "0.00",
-            "pageViews": 1
-          },
           {
             "date": "2026-09-04",
             "domain": "baronote.kr",
@@ -6684,6 +7070,188 @@
             "host": "www.woorinote.kr",
             "revenue": "0.00",
             "pageViews": 1
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "baronote.kr",
+            "host": "www.baronote.kr",
+            "revenue": "0.00",
+            "pageViews": 14
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "daynote.kr",
+            "host": "www.daynote.kr",
+            "revenue": "0.00",
+            "pageViews": 7
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "healthcox.com",
+            "host": "www.healthcox.com",
+            "revenue": "0.00",
+            "pageViews": 1
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "joynote.kr",
+            "host": "www.joynote.kr",
+            "revenue": "0.01",
+            "pageViews": 6
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "justinfo.co.kr",
+            "host": "www.justinfo.co.kr",
+            "revenue": "0.00",
+            "pageViews": 6
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "maxnote.kr",
+            "host": "www.maxnote.kr",
+            "revenue": "0.00",
+            "pageViews": 4
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "meganote.kr",
+            "host": "www.meganote.kr",
+            "revenue": "0.00",
+            "pageViews": 5
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "must-good.com",
+            "host": "www.must-good.com",
+            "revenue": "0.00",
+            "pageViews": 4
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "must-pick.com",
+            "host": "www.must-pick.com",
+            "revenue": "0.00",
+            "pageViews": 15
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "smilenote.kr",
+            "host": "www.smilenote.kr",
+            "revenue": "0.00",
+            "pageViews": 5
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "soulnote.kr",
+            "host": "www.soulnote.kr",
+            "revenue": "0.00",
+            "pageViews": 4
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "topnote.kr",
+            "host": "www.topnote.kr",
+            "revenue": "0.00",
+            "pageViews": 1
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "tripmarvel.com",
+            "host": "www.tripmarvel.com",
+            "revenue": "0.00",
+            "pageViews": 5
+          },
+          {
+            "date": "2026-10-28",
+            "domain": "woorinote.kr",
+            "host": "www.woorinote.kr",
+            "revenue": "0.00",
+            "pageViews": 3
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "baronote.kr",
+            "host": "www.baronote.kr",
+            "revenue": "0.01",
+            "pageViews": 11
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "daynote.kr",
+            "host": "www.daynote.kr",
+            "revenue": "0.01",
+            "pageViews": 3
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "healthcox.com",
+            "host": "www.healthcox.com",
+            "revenue": "0.00",
+            "pageViews": 1
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "joynote.kr",
+            "host": "www.joynote.kr",
+            "revenue": "0.00",
+            "pageViews": 3
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "justinfo.co.kr",
+            "host": "www.justinfo.co.kr",
+            "revenue": "0.00",
+            "pageViews": 5
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "meganote.kr",
+            "host": "www.meganote.kr",
+            "revenue": "0.00",
+            "pageViews": 2
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "must-good.com",
+            "host": "www.must-good.com",
+            "revenue": "0.00",
+            "pageViews": 2
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "must-pick.com",
+            "host": "www.must-pick.com",
+            "revenue": "0.02",
+            "pageViews": 3
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "smilenote.kr",
+            "host": "www.smilenote.kr",
+            "revenue": "0.00",
+            "pageViews": 2
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "topnote.kr",
+            "host": "www.topnote.kr",
+            "revenue": "0.00",
+            "pageViews": 2
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "tripmarvel.com",
+            "host": "www.tripmarvel.com",
+            "revenue": "0.00",
+            "pageViews": 6
+          },
+          {
+            "date": "2026-10-29",
+            "domain": "woorinote.kr",
+            "host": "www.woorinote.kr",
+            "revenue": "0.00",
+            "pageViews": 4
           }
         ],
         "reportSource": "AdSense Management API v2 DATE/DOMAIN_CODE ESTIMATED_EARNINGS/PAGE_VIEWS"
@@ -6710,17 +7278,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "collected",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": null,
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
-          "revenue": 1.15,
-          "pageViews": 405,
-          "rpm": 2.8395061728395063,
-          "accountRevenue": 1.15,
-          "accountPageViews": 405,
-          "accountRpm": 2.8395061728395063,
+          "start": "2026-10-02",
+          "end": "2026-10-29",
+          "revenue": 0.91,
+          "pageViews": 363,
+          "rpm": 2.5068870523415976,
+          "accountRevenue": 0.91,
+          "accountPageViews": 363,
+          "accountRpm": 2.5068870523415976,
           "observedDays": 28,
           "expectedDays": 28,
           "complete": true,
@@ -6728,14 +7296,14 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
-          "revenue": 2.36,
-          "pageViews": 676,
-          "rpm": 3.4911242603550297,
-          "accountRevenue": 2.36,
-          "accountPageViews": 676,
-          "accountRpm": 3.4911242603550297,
+          "start": "2026-09-04",
+          "end": "2026-10-01",
+          "revenue": 2.59,
+          "pageViews": 719,
+          "rpm": 3.6022253129346313,
+          "accountRevenue": 2.59,
+          "accountPageViews": 719,
+          "accountRpm": 3.6022253129346313,
           "observedDays": 28,
           "expectedDays": 28,
           "complete": true,
@@ -6751,17 +7319,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
-          "revenue": 0.22,
-          "pageViews": 106,
-          "rpm": 2.0754716981132075,
-          "accountRevenue": 0.22,
-          "accountPageViews": 106,
-          "accountRpm": 2.0754716981132075,
+          "start": "2026-10-02",
+          "end": "2026-10-29",
+          "revenue": 0.17,
+          "pageViews": 110,
+          "rpm": 1.5454545454545454,
+          "accountRevenue": 0.17,
+          "accountPageViews": 110,
+          "accountRpm": 1.5454545454545454,
           "observedDays": 28,
           "expectedDays": 28,
           "complete": true,
@@ -6769,14 +7337,14 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.52,
-          "accountPageViews": 216,
-          "accountRpm": 2.4074074074074074,
+          "accountRevenue": 0.57,
+          "accountPageViews": 232,
+          "accountRpm": 2.456896551724138,
           "observedDays": 27,
           "expectedDays": 28,
           "complete": false,
@@ -6792,17 +7360,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": 0.21,
-          "pageViews": 149,
-          "rpm": 1.4093959731543624,
+          "pageViews": 152,
+          "rpm": 1.381578947368421,
           "accountRevenue": 0.21,
-          "accountPageViews": 149,
-          "accountRpm": 1.4093959731543624,
+          "accountPageViews": 152,
+          "accountRpm": 1.381578947368421,
           "observedDays": 28,
           "expectedDays": 28,
           "complete": true,
@@ -6810,14 +7378,14 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.2,
-          "accountPageViews": 68,
-          "accountRpm": 2.9411764705882355,
+          "accountRevenue": 0.21,
+          "accountPageViews": 70,
+          "accountRpm": 3.0,
           "observedDays": 25,
           "expectedDays": 28,
           "complete": false,
@@ -6833,17 +7401,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.0,
-          "accountPageViews": 67,
-          "accountRpm": 0.0,
+          "accountRevenue": 0.01,
+          "accountPageViews": 72,
+          "accountRpm": 0.1388888888888889,
           "observedDays": 25,
           "expectedDays": 28,
           "complete": false,
@@ -6851,13 +7419,13 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.0,
-          "accountPageViews": 52,
+          "accountPageViews": 53,
           "accountRpm": 0.0,
           "observedDays": 22,
           "expectedDays": 28,
@@ -6874,17 +7442,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.04,
-          "accountPageViews": 119,
-          "accountRpm": 0.33613445378151263,
+          "accountRevenue": 0.03,
+          "accountPageViews": 126,
+          "accountRpm": 0.23809523809523808,
           "observedDays": 27,
           "expectedDays": 28,
           "complete": false,
@@ -6892,14 +7460,14 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.05,
-          "accountPageViews": 113,
-          "accountRpm": 0.4424778761061947,
+          "accountRevenue": 0.06,
+          "accountPageViews": 105,
+          "accountRpm": 0.5714285714285714,
           "observedDays": 22,
           "expectedDays": 28,
           "complete": false,
@@ -6915,17 +7483,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.01,
-          "accountPageViews": 56,
-          "accountRpm": 0.17857142857142858,
+          "accountPageViews": 57,
+          "accountRpm": 0.17543859649122806,
           "observedDays": 21,
           "expectedDays": 28,
           "complete": false,
@@ -6933,15 +7501,15 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.01,
-          "accountPageViews": 25,
-          "accountRpm": 0.4,
-          "observedDays": 15,
+          "accountPageViews": 26,
+          "accountRpm": 0.38461538461538464,
+          "observedDays": 14,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
@@ -6956,33 +7524,33 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.04,
-          "accountPageViews": 96,
-          "accountRpm": 0.4166666666666667,
-          "observedDays": 26,
+          "accountPageViews": 102,
+          "accountRpm": 0.39215686274509803,
+          "observedDays": 27,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.22,
-          "accountPageViews": 89,
-          "accountRpm": 2.4719101123595504,
-          "observedDays": 24,
+          "accountRevenue": 0.14,
+          "accountPageViews": 74,
+          "accountRpm": 1.8918918918918919,
+          "observedDays": 23,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
@@ -6997,17 +7565,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
-          "revenue": 0.17,
-          "pageViews": 130,
-          "rpm": 1.3076923076923077,
-          "accountRevenue": 0.17,
-          "accountPageViews": 130,
-          "accountRpm": 1.3076923076923077,
+          "start": "2026-10-02",
+          "end": "2026-10-29",
+          "revenue": 0.15,
+          "pageViews": 112,
+          "rpm": 1.3392857142857142,
+          "accountRevenue": 0.15,
+          "accountPageViews": 112,
+          "accountRpm": 1.3392857142857142,
           "observedDays": 28,
           "expectedDays": 28,
           "complete": true,
@@ -7015,14 +7583,14 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
-          "accountRevenue": 0.88,
-          "accountPageViews": 113,
-          "accountRpm": 7.787610619469026,
+          "accountRevenue": 0.89,
+          "accountPageViews": 130,
+          "accountRpm": 6.846153846153846,
           "observedDays": 26,
           "expectedDays": 28,
           "complete": false,
@@ -7038,33 +7606,33 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.0,
-          "accountPageViews": 15,
+          "accountPageViews": 13,
           "accountRpm": 0.0,
-          "observedDays": 13,
+          "observedDays": 11,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.01,
-          "accountPageViews": 13,
-          "accountRpm": 0.7692307692307693,
-          "observedDays": 11,
+          "accountPageViews": 15,
+          "accountRpm": 0.6666666666666666,
+          "observedDays": 13,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
@@ -7079,33 +7647,33 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.01,
-          "accountPageViews": 49,
-          "accountRpm": 0.20408163265306123,
-          "observedDays": 19,
+          "accountPageViews": 55,
+          "accountRpm": 0.18181818181818182,
+          "observedDays": 20,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.0,
-          "accountPageViews": 27,
+          "accountPageViews": 26,
           "accountRpm": 0.0,
-          "observedDays": 17,
+          "observedDays": 16,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
@@ -7120,33 +7688,33 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.0,
-          "accountPageViews": 60,
+          "accountPageViews": 64,
           "accountRpm": 0.0,
-          "observedDays": 22,
+          "observedDays": 23,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.0,
-          "accountPageViews": 26,
+          "accountPageViews": 20,
           "accountRpm": 0.0,
-          "observedDays": 11,
+          "observedDays": 9,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
@@ -7161,17 +7729,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.07,
-          "accountPageViews": 94,
-          "accountRpm": 0.7446808510638298,
+          "accountPageViews": 93,
+          "accountRpm": 0.7526881720430108,
           "observedDays": 26,
           "expectedDays": 28,
           "complete": false,
@@ -7179,8 +7747,8 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
@@ -7202,17 +7770,17 @@
         "valueKind": "estimated",
         "sourceCoverage": "configured_account",
         "status": "partial",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "보고서에 없는 날짜는 미확인 · 확인된 날짜의 수익과 광고 페이지뷰만 표시",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.02,
-          "accountPageViews": 54,
-          "accountRpm": 0.37037037037037035,
+          "accountPageViews": 59,
+          "accountRpm": 0.3389830508474576,
           "observedDays": 21,
           "expectedDays": 28,
           "complete": false,
@@ -7220,15 +7788,15 @@
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.17,
-          "accountPageViews": 33,
-          "accountRpm": 5.151515151515151,
-          "observedDays": 17,
+          "accountPageViews": 34,
+          "accountRpm": 5.0,
+          "observedDays": 18,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
@@ -7243,26 +7811,26 @@
         "valueKind": "estimated",
         "sourceCoverage": "account_only",
         "status": "partial_account_scope",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "SJ 전환 이전 계정 수익 미연결 · 전체 도메인 수익 비교 불가",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.0,
-          "accountPageViews": 63,
+          "accountPageViews": 65,
           "accountRpm": 0.0,
-          "observedDays": 15,
+          "observedDays": 17,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
@@ -7284,26 +7852,26 @@
         "valueKind": "estimated",
         "sourceCoverage": "account_only",
         "status": "partial_account_scope",
-        "checkedAt": "2026-10-30T09:29:29.480722+00:00",
+        "checkedAt": "2026-11-01T19:36:52.555657+00:00",
         "reason": "SJ 전환 이전 계정 수익 미연결 · 전체 도메인 수익 비교 불가",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "accountRevenue": 0.03,
-          "accountPageViews": 95,
-          "accountRpm": 0.3157894736842105,
-          "observedDays": 15,
+          "accountPageViews": 106,
+          "accountRpm": 0.2830188679245283,
+          "observedDays": 17,
           "expectedDays": 28,
           "complete": false,
           "status": "partial",
           "noRows": false
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
@@ -7328,16 +7896,16 @@
         "checkedAt": null,
         "reason": "AdSense OAuth not connected; GA4/GSC credentials cannot read revenue",
         "recent": {
-          "start": "2026-09-30",
-          "end": "2026-10-27",
+          "start": "2026-10-02",
+          "end": "2026-10-29",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
           "status": "not_connected"
         },
         "previous": {
-          "start": "2026-09-02",
-          "end": "2026-09-29",
+          "start": "2026-09-04",
+          "end": "2026-10-01",
           "revenue": null,
           "pageViews": null,
           "rpm": null,
@@ -7347,20 +7915,20 @@
     },
     "timezone": "America/Los_Angeles",
     "currency": "USD",
-    "checkedAt": "2026-10-30T09:29:29.481395+00:00",
+    "checkedAt": "2026-11-01T19:36:52.556334+00:00",
     "status": "partial",
     "dailyImport": {
       "status": "imported",
-      "rows": 608,
-      "checkedAt": "2026-10-30T09:29:30.745046+00:00",
+      "rows": 611,
+      "checkedAt": "2026-11-01T19:36:53.255932+00:00",
       "revenueScope": "unknown"
     }
   },
   "pagePerformance": {
-    "start": "2026-10-23",
-    "end": "2026-10-29",
+    "start": "2026-10-26",
+    "end": "2026-11-01",
     "timezone": "Asia/Seoul",
-    "checkedAt": "2026-10-30T10:07:02.871979+00:00",
+    "checkedAt": "2026-11-02T05:06:49.856062+00:00",
     "currency": "USD",
     "source": "AdSense Management API v2",
     "dimension": "PAGE_URL",
@@ -7483,7 +8051,7 @@
     ]
   },
   "adsenseCollection": {
-    "checkedAt": "2026-10-29T13:25:57.429747+00:00",
+    "checkedAt": "2026-11-02T05:06:46.779738+00:00",
     "status": "partial",
     "nextRefreshAt": "2026-10-29T13:30:57.430005+00:00",
     "refreshing": false,
@@ -7494,7 +8062,7 @@
       "aaa10291028": "not_configured"
     }
   },
-  "updatedAt": "2026-10-29T13:25:57.429747+00:00",
+  "updatedAt": "2026-11-02T05:06:46.779738+00:00",
   "legacyCheckedAt": "2026-10-27T09:29:44.790533+09:00",
   "collectionScope": "adsense_only",
   "collectionStatus": "partial"

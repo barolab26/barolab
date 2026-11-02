@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-01T15:17:04+09:00",
+  "checkedAt": "2026-11-01T16:16:28+09:00",
   "cdpPort": 9440,
   "criteria": {
     "minSearchVolume": 300,
@@ -61,6 +61,19 @@
       "demos": []
     },
     {
+      "keyword": "26년햇들깨가격",
+      "totalSearch": 2910,
+      "pcSearch": 70,
+      "mobileSearch": 2840,
+      "docCount": 12,
+      "goldenRate": 242.5,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": []
+    },
+    {
       "keyword": "홍금동물병원",
       "totalSearch": 11650,
       "pcSearch": 1150,
@@ -106,19 +119,6 @@
       "mobileSearch": 15200,
       "docCount": 76,
       "goldenRate": 253.8,
-      "grade": "S",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "26년햇들깨가격",
-      "totalSearch": 2910,
-      "pcSearch": 70,
-      "mobileSearch": 2840,
-      "docCount": 12,
-      "goldenRate": 242.5,
       "grade": "S",
       "bucket": "cumulative",
       "sourceLabel": "누적",
@@ -375,6 +375,21 @@
       "demos": []
     },
     {
+      "keyword": "최불암 장례 미사 추도",
+      "totalSearch": 10110,
+      "pcSearch": 10,
+      "mobileSearch": 10100,
+      "docCount": 30,
+      "goldenRate": 337.0,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "네이버",
+      "categories": [
+        "좋은글·이미지"
+      ],
+      "demos": []
+    },
+    {
       "keyword": "제니시스 gv90 가격",
       "totalSearch": 3030,
       "pcSearch": 370,
@@ -382,19 +397,6 @@
       "docCount": 87,
       "goldenRate": 34.8,
       "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "의정부 홈플러스 폐점 일정",
-      "totalSearch": 2390,
-      "pcSearch": 210,
-      "mobileSearch": 2180,
-      "docCount": 82,
-      "goldenRate": 29.1,
-      "grade": "B",
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
@@ -458,6 +460,19 @@
     ],
     "yoon_master": [
       {
+        "keyword": "26년햇들깨가격",
+        "totalSearch": 2910,
+        "pcSearch": 70,
+        "mobileSearch": 2840,
+        "docCount": 12,
+        "goldenRate": 242.5,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
+        "categories": [],
+        "demos": []
+      },
+      {
         "keyword": "탄항좌대 가격",
         "totalSearch": 1150,
         "pcSearch": 160,
@@ -490,19 +505,6 @@
         "mobileSearch": 15200,
         "docCount": 76,
         "goldenRate": 253.8,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "26년햇들깨가격",
-        "totalSearch": 2910,
-        "pcSearch": 70,
-        "mobileSearch": 2840,
-        "docCount": 12,
-        "goldenRate": 242.5,
         "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",

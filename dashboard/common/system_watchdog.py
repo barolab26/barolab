@@ -25,7 +25,7 @@ BROWSER_STATUS_PATH = DATA_DIR / "browser-status.json"
 KST = timezone(timedelta(hours=9))
 
 _BROWSER_KIND = 'Windows EGO LITE' if os.name == 'nt' else 'Ubuntu 격리 Chrome'
-CDP_PORT_CATALOG=[{'id':account+'_cdp','port':port,'name':account+' · '+_BROWSER_KIND,'required':True} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'))]
+CDP_PORT_CATALOG=[{'id':account+'_cdp','port':port,'name':account+' · '+_BROWSER_KIND,'required':True} for port,account in ((9334,'soultin'),(9333,'soul5373'),(9335,'yoon_master'),(9231,'adinfo0905'),(9230,'stone0747'),(9440,'cf-flow'),(9450,'threads'))]
 
 
 def now_kst() -> datetime:
@@ -87,19 +87,27 @@ def is_pid_alive(pid: Optional[int]) -> bool:
 
 def is_process_running_match(pattern: str, proc_root=None) -> bool:
     if os.name == "nt":
+        if "memory_worker" in pattern:
+            pid_file = DATA_DIR / "memory_worker.pid"
+            if pid_file.is_file():
+                try:
+                    if is_pid_alive(int(pid_file.read_text(encoding="utf-8").strip())):
+                        return True
+                except Exception:
+                    pass
         try:
             res = subprocess.run(
                 [
                     "powershell",
                     "-NoProfile",
                     "-Command",
-                    f"@((Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {{ $_.CommandLine -match '{pattern}' }})).Count",
+                    f"@((Get-CimInstance Win32_Process -Filter \"Name='python.exe' OR Name='pythonw.exe'\" -ErrorAction SilentlyContinue | Where-Object {{ $_.CommandLine -match '{pattern}' }})).Count",
                 ],
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
                 errors="replace",
-                timeout=5,
+                timeout=8,
                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             )
             count = int((res.stdout or "0").strip())
@@ -265,6 +273,12 @@ def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
         port = item['port']; was_open = is_port_open(port); verified = False
         target_profile = resolve_ego_profile(port)
         if use_native_ego and target_profile:
+            if was_open and not is_process_running_match("posting.py"):
+                try:
+                    from common.ubuntu_naver_browser import close_account
+                    close_account(port)
+                except Exception:
+                    pass
             verified = bool(ego_profiles_available) and (target_profile in ego_profiles_available or len(ego_profiles_available) > 0)
             if not verified and was_open:
                 verified = True

@@ -1,18 +1,18 @@
 {
   "schema": "barolab-project-health-v1",
-  "checkedAt": "2026-10-30T18:24:48+09:00",
-  "todayKst": "2026-10-30",
-  "fingerprint": "c84fabc343dee91b",
-  "lastBroadcastDate": "2026-10-30",
+  "checkedAt": "2026-11-02T14:14:21+09:00",
+  "todayKst": "2026-11-02",
+  "fingerprint": "ac92ede0042cb954",
+  "lastBroadcastDate": "2026-11-02",
   "watchdog": {
-    "lastRunAt": "2026-10-29T22:52:39.426805+09:00",
+    "lastRunAt": "2026-11-02T14:07:12+09:00",
     "status": "healthy",
     "cdpOnline": 7,
     "cdpTotal": 7
   },
   "summary": {
-    "totalProjects": 7,
-    "healthyCount": 2,
+    "totalProjects": 8,
+    "healthyCount": 5,
     "ceoActionCount": 0
   },
   "ceoActionItems": [],
@@ -25,9 +25,9 @@
       "owner": "@publi",
       "quota": {
         "status": "observed",
-        "date": "2026-10-30",
-        "due": 10,
-        "verified": 10,
+        "date": "2026-11-02",
+        "due": 9,
+        "verified": 9,
         "missing": 0,
         "missingSlots": []
       },
@@ -37,13 +37,14 @@
       ],
       "status": "observed",
       "statusBadge": "observed",
-      "progressText": "{\"published\": 16}",
+      "progressText": "{\"published\": 9, \"waiting\": 7}",
       "progressPct": 0,
       "counts": {
-        "published": 16
+        "published": 9,
+        "waiting": 7
       },
       "failures": [],
-      "verifiedPublicCount": 16,
+      "verifiedPublicCount": 9,
       "reservedCount": 0,
       "observedState": "not_reported",
       "blocker": "현재 원천 상태 관측; 작업 성공 여부 별도 검증",
@@ -56,10 +57,10 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/cf/daily_schedule.json",
-        "sha256": "62089346a2707ed705bcf7ed6b78244ca0f313915e46c313327652875ea64e7b",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
+        "sha256": "7893f2ca01060ae75567bf11b2b17f8224596c64c68af1751bb8409ba1c37f51",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
         "sourceCheckedAt": null,
-        "sourceDate": "2026-10-30",
+        "sourceDate": "2026-11-02",
         "fresh": true,
         "ageSeconds": null
       }
@@ -71,28 +72,30 @@
       "title": "네이버 블로그",
       "owner": "@publi",
       "quota": {
-        "status": "unknown",
-        "date": "2026-10-30",
-        "due": null,
-        "verified": null,
-        "missing": null
+        "status": "observed",
+        "date": "2026-11-02",
+        "due": 3,
+        "verified": 3,
+        "missing": 0,
+        "missingSlots": []
       },
       "activity": null,
       "ownerAgentIds": [
         "publi"
       ],
-      "status": "stale",
-      "statusBadge": "stale",
-      "progressText": "{\"verified\": 5}",
+      "status": "observed",
+      "statusBadge": "observed",
+      "progressText": "{\"verified\": 4, \"waiting\": 1}",
       "progressPct": 0,
       "counts": {
-        "verified": 5
+        "verified": 4,
+        "waiting": 1
       },
       "failures": [],
       "verifiedPublicCount": null,
       "reservedCount": 0,
       "observedState": "not_reported",
-      "blocker": "원천 자료가 오래되었거나 불완전함",
+      "blocker": "현재 원천 상태 관측; 작업 성공 여부 별도 검증",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
       "autoActionBadge": "조치 실행 증거 없음",
@@ -102,12 +105,12 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/naver/automation-status.json",
-        "sha256": "f2b5e95aedc5b559b7b4f511be90443eaf93d782d94966e756995be6cd6a3807",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
-        "sourceCheckedAt": "2026-10-30T08:47:14.408946+09:00",
-        "sourceDate": "2026-10-30",
-        "fresh": false,
-        "ageSeconds": 34654
+        "sha256": "6078ddd5f83c9a2e65202fa0aa4f47e1880b1fcab309c13a0869f38c850ea0db",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-02T12:42:35.536781+09:00",
+        "sourceDate": "2026-11-02",
+        "fresh": true,
+        "ageSeconds": 5506
       }
     },
     {
@@ -118,15 +121,15 @@
       "owner": "@publi",
       "quota": {
         "status": "interval_managed",
-        "date": "2026-10-30",
+        "date": "2026-11-02",
         "due": null,
         "verified": null,
         "missing": null
       },
       "activity": {
         "status": "recent",
-        "lastAttemptAt": "2026-10-30T18:18:59.532549+09:00",
-        "expectedAt": "2026-10-30T19:33:59.532549+09:00",
+        "lastAttemptAt": "2026-11-02T14:14:03.275945+09:00",
+        "expectedAt": "2026-11-02T15:29:03.275945+09:00",
         "lastOutcome": "completed",
         "reason": "attempt_observed"
       },
@@ -135,13 +138,13 @@
       ],
       "status": "observed",
       "statusBadge": "observed",
-      "progressText": "관측 상태: completed_cycle",
+      "progressText": "관측 상태: waiting",
       "progressPct": 0,
       "counts": {},
       "failures": [],
       "verifiedPublicCount": null,
       "reservedCount": null,
-      "observedState": "completed_cycle",
+      "observedState": "waiting",
       "blocker": "현재 원천 상태 관측; 작업 성공 여부 별도 검증",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
@@ -152,12 +155,12 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/kin-automation-state.json",
-        "sha256": "7608f2195370d619245d1b5315cd446bc201091d2a5be7f720b9cf6d463edae7",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
-        "sourceCheckedAt": "2026-10-30T09:16:33.232202+00:00",
+        "sha256": "f192de47cf7d2b9462f680807f4b8a93caaba07af2a70eb25bc45a0faaaf25d3",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-02T05:14:03.275945+00:00",
         "sourceDate": null,
         "fresh": true,
-        "ageSeconds": 495
+        "ageSeconds": 19
       }
     },
     {
@@ -167,18 +170,21 @@
       "title": "Threads",
       "owner": "@publi",
       "quota": {
-        "status": "unknown",
-        "date": "2026-10-30",
-        "due": null,
-        "verified": null,
-        "missing": null
+        "status": "observed",
+        "date": "2026-11-02",
+        "due": 5,
+        "verified": 4,
+        "missing": 1,
+        "missingSlots": [
+          "14:10"
+        ]
       },
       "activity": null,
       "ownerAgentIds": [
         "publi"
       ],
-      "status": "stale",
-      "statusBadge": "stale",
+      "status": "attention",
+      "statusBadge": "attention",
       "progressText": "관측 상태: waiting",
       "progressPct": 0,
       "counts": {},
@@ -186,7 +192,7 @@
       "verifiedPublicCount": null,
       "reservedCount": null,
       "observedState": "waiting",
-      "blocker": "원천 자료가 오래되었거나 불완전함",
+      "blocker": "실제 원장 상태 확인 필요",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
       "autoActionBadge": "조치 실행 증거 없음",
@@ -196,12 +202,59 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/public/threads.json",
-        "sha256": "7fe84982871e988b0ac02ffcd2d389e317271e3c76b5747b461b6844e6d506b5",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
-        "sourceCheckedAt": "2026-10-30T01:44:22.770226+00:00",
+        "sha256": "cebb0e61079d45a0ffd881684d0871749ffdb958fa8845457ee0c2c02a8b4bab",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-02T05:14:17.207407+00:00",
         "sourceDate": null,
-        "fresh": false,
-        "ageSeconds": 27625
+        "fresh": true,
+        "ageSeconds": 5
+      }
+    },
+    {
+      "recoverableWork": [],
+      "id": "brunch",
+      "icon": "•",
+      "title": "브런치스토리",
+      "owner": "@publi",
+      "quota": {
+        "status": "observed",
+        "date": "2026-11-02",
+        "due": 1,
+        "verified": 1,
+        "missing": 0,
+        "missingSlots": []
+      },
+      "activity": null,
+      "ownerAgentIds": [
+        "publi"
+      ],
+      "status": "observed",
+      "statusBadge": "observed",
+      "progressText": "{\"published\": 5}",
+      "progressPct": 0,
+      "counts": {
+        "published": 5
+      },
+      "failures": [],
+      "verifiedPublicCount": null,
+      "reservedCount": null,
+      "observedState": "not_reported",
+      "blocker": "현재 원천 상태 관측; 작업 성공 여부 별도 검증",
+      "nextAction": "담당 직원 읽기 전용 점검",
+      "actionType": "observe",
+      "autoActionBadge": "조치 실행 증거 없음",
+      "ceoActionRequired": false,
+      "linkUrl": "brunch.html",
+      "source": {
+        "errorType": null,
+        "supportingManifests": [],
+        "path": "dashboard/data/brunch/status.json",
+        "sha256": "54769f78339dbfcbb5ac447a454c4cec27dfa17c7df8d0426f8d4d0c7f8adbff",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-02T13:57:15.158698+09:00",
+        "sourceDate": null,
+        "fresh": true,
+        "ageSeconds": 1027
       }
     },
     {
@@ -212,7 +265,7 @@
       "owner": "@doctor",
       "quota": {
         "status": "unknown",
-        "date": "2026-10-30",
+        "date": "2026-11-02",
         "due": null,
         "verified": null,
         "missing": null
@@ -223,13 +276,13 @@
       ],
       "status": "stale",
       "statusBadge": "stale",
-      "progressText": "관측 상태: waiting",
+      "progressText": "관측 상태: observed",
       "progressPct": 0,
       "counts": {},
       "failures": [],
       "verifiedPublicCount": null,
       "reservedCount": null,
-      "observedState": "waiting",
+      "observedState": "observed",
       "blocker": "원천 자료가 오래되었거나 불완전함",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
@@ -240,12 +293,12 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/content-maintenance.json",
-        "sha256": "307ebff1d9d74fc7fdd4cfc2adfb96169f391e9801d1ba0715863e189aca7ce6",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
-        "sourceCheckedAt": "2026-10-29T13:37:36.216097+00:00",
+        "sha256": "b84ea047063cc195f5a9daba72d96ce8927d2a0eb8ddeee20346e3966cc1ceab",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-01T09:55:42+09:00",
         "sourceDate": null,
         "fresh": false,
-        "ageSeconds": 71232
+        "ageSeconds": 101920
       }
     },
     {
@@ -255,8 +308,8 @@
       "title": "앱 프로젝트",
       "owner": "@patch",
       "quota": {
-        "status": "unknown",
-        "date": "2026-10-30",
+        "status": "not_scheduled",
+        "date": "2026-11-02",
         "due": null,
         "verified": null,
         "missing": null
@@ -265,8 +318,8 @@
       "ownerAgentIds": [
         "patch"
       ],
-      "status": "stale",
-      "statusBadge": "stale",
+      "status": "observed",
+      "statusBadge": "observed",
       "progressText": "관측 상태: not_reported",
       "progressPct": 0,
       "counts": {},
@@ -274,7 +327,7 @@
       "verifiedPublicCount": null,
       "reservedCount": null,
       "observedState": "not_reported",
-      "blocker": "원천 자료가 오래되었거나 불완전함",
+      "blocker": "현재 원천 상태 관측; 작업 성공 여부 별도 검증",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
       "autoActionBadge": "조치 실행 증거 없음",
@@ -284,45 +337,45 @@
         "errorType": null,
         "supportingManifests": [
           {
-            "path": "apps\\bible\\project.json",
-            "sha256": "4b8cb54c7dd61ecff85fb27dec6e97fe58598f27ecb6d38f9407d3feb2a74b94",
+            "path": "apps/bible/project.json",
+            "sha256": "c9a595401c16806c41d33137da3321cffed91eae8290a862a922df0551e7ae25",
             "stage": "현재 트랙: 내부 v5 제공 · Alpha v5 검토 제출 | 비공개 테스트 현황: Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
-            "updatedAt": "2026-10-29T22:46:55+09:00",
+            "updatedAt": "2026-11-02T14:07:12+09:00",
             "blocker": "현재 트랙: 내부 v5 제공 · Alpha v5 검토 제출 | 비공개 테스트 현황: Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인 | 실기기 확인: 삼성 실기기 v4 검증 완료 · 신규 v5 실기기 미검증",
             "nextAction": "Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, 12명 이상 실참여와 14일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다."
           },
           {
-            "path": "apps\\greeting\\project.json",
-            "sha256": "15c3993162a67dd6a66a7e3d26a4953c4eec724ad8ff1a3c183c7d90f53083fe",
+            "path": "apps/greeting/project.json",
+            "sha256": "4ade1354daf89ee06e1b66fbacda31f20a6a130ef132cb2e1db05e49628cf90c",
             "stage": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
-            "updatedAt": "2026-10-29T22:46:55+09:00",
+            "updatedAt": "2026-11-02T14:07:12+09:00",
             "blocker": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인 | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
             "nextAction": "Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, 12명 이상 실참여와 14일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다."
           },
           {
-            "path": "apps\\magnifier\\project.json",
-            "sha256": "cecdcefdaafd03182878e0ba72369a5ec2302be0d2ca0de68c1c51baae5135b6",
+            "path": "apps/magnifier/project.json",
+            "sha256": "afc97ce7ce5e36329c4e43f24b8cd5c2b90aeb189ac89a83cec3dfe1e268b979",
             "stage": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
-            "updatedAt": "2026-10-29T22:46:55+09:00",
+            "updatedAt": "2026-11-02T14:07:12+09:00",
             "blocker": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인 | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
             "nextAction": "Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, 12명 이상 실참여와 14일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다."
           },
           {
-            "path": "apps\\shopping\\project.json",
-            "sha256": "4d35df6e395daab046ee3db479528e7d9f225e788e15e7ae5c151224f0227194",
+            "path": "apps/shopping/project.json",
+            "sha256": "945507147ed3ee9d57c00367ccddaa80511deb98cb6dfd0fd3ecb1a78d8648f9",
             "stage": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인",
-            "updatedAt": "2026-10-29T22:46:55+09:00",
+            "updatedAt": "2026-11-02T14:07:12+09:00",
             "blocker": "현재 트랙: 내부 v3 제공 · Alpha v3 검토 제출 | 비공개 테스트 현황: Alpha v3 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인 | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
             "nextAction": "Google 검토 완료 후 Alpha 참여 링크로 실제 참여를 확인하세요. 등록 명단 수는 참여 인원이 아니며, 12명 이상 실참여와 14일 연속 유지가 필요합니다. 현재 시작 시점은 미확인입니다."
           }
         ],
         "path": "apps/bible/project.json",
-        "sha256": "4b8cb54c7dd61ecff85fb27dec6e97fe58598f27ecb6d38f9407d3feb2a74b94",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
-        "sourceCheckedAt": "2026-10-29T22:46:55+09:00",
+        "sha256": "c9a595401c16806c41d33137da3321cffed91eae8290a862a922df0551e7ae25",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-02T14:07:12+09:00",
         "sourceDate": null,
-        "fresh": false,
-        "ageSeconds": 70673
+        "fresh": true,
+        "ageSeconds": 430
       }
     },
     {
@@ -332,8 +385,8 @@
       "title": "조회·수집",
       "owner": "@trace",
       "quota": {
-        "status": "unknown",
-        "date": "2026-10-30",
+        "status": "not_scheduled",
+        "date": "2026-11-02",
         "due": null,
         "verified": null,
         "missing": null
@@ -342,25 +395,18 @@
       "ownerAgentIds": [
         "trace"
       ],
-      "status": "stale",
-      "statusBadge": "stale",
-      "progressText": "{\"partial\": 53, \"unknown\": 8, \"success\": 18, \"stale\": 16}",
+      "status": "attention",
+      "statusBadge": "attention",
+      "progressText": "{\"success\": 22, \"unknown\": 16, \"partial\": 38, \"stale\": 20, \"failed\": 1}",
       "progressPct": 0,
       "counts": {
-        "partial": 53,
-        "unknown": 8,
-        "success": 18,
-        "stale": 16
+        "success": 22,
+        "unknown": 16,
+        "partial": 38,
+        "stale": 20,
+        "failed": 1
       },
       "failures": [
-        {
-          "identity": "revenue:adsense-sj",
-          "status": "partial",
-          "reasonCode": "source_collected",
-          "stage": null,
-          "failureAt": null,
-          "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
         {
           "identity": "revenue:adsense-aaa10291028",
           "status": "unknown",
@@ -372,7 +418,7 @@
         {
           "identity": "revenue:adpost-soul5373",
           "status": "unknown",
-          "reasonCode": "source_auth_required",
+          "reasonCode": "source_browser_unavailable",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -386,9 +432,17 @@
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
-          "identity": "revenue:toss",
-          "status": "partial",
-          "reasonCode": "source_collected",
+          "identity": "revenue:adpost-soultin",
+          "status": "unknown",
+          "reasonCode": "source_browser_unavailable",
+          "stage": null,
+          "failureAt": null,
+          "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "identity": "revenue:adpost-yoon_master",
+          "status": "unknown",
+          "reasonCode": "source_browser_unavailable",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -834,14 +888,6 @@
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
-          "identity": "url-inspection-api:must-pick.com",
-          "status": "partial",
-          "reasonCode": "source_partial",
-          "stage": null,
-          "failureAt": null,
-          "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
           "identity": "url-inspection-api:baronote.kr",
           "status": "partial",
           "reasonCode": "source_partial",
@@ -851,8 +897,8 @@
         },
         {
           "identity": "url-inspection-api:daynote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -867,96 +913,88 @@
         },
         {
           "identity": "url-inspection-api:joynote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
-          "stage": null,
-          "failureAt": null,
-          "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "identity": "url-inspection-api:justinfo.co.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "stale",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:maxnote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:must-good.com",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:must-joy.com",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "stale",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:smilenote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:soulnote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "stale",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:topnote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
-          "stage": null,
-          "failureAt": null,
-          "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "identity": "url-inspection-api:tripmarvel.com",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:woorinote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-api:meganote.kr",
-          "status": "partial",
-          "reasonCode": "source_partial",
+          "status": "unknown",
+          "reasonCode": "not_current_complete_evidence",
+          "stage": null,
+          "failureAt": null,
+          "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "identity": "url-inspection-api:nolplace.com",
+          "status": "stale",
+          "reasonCode": "not_current_complete_evidence",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "identity": "url-inspection-account:sj",
-          "status": "unknown",
-          "reasonCode": "source_daily_budget_exhausted",
+          "status": "failed",
+          "reasonCode": "source_error",
           "stage": null,
           "failureAt": null,
           "errorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -973,7 +1011,7 @@
       "verifiedPublicCount": null,
       "reservedCount": null,
       "observedState": "success",
-      "blocker": "원천 자료가 오래되었거나 불완전함",
+      "blocker": "실제 원장 상태 확인 필요",
       "nextAction": "담당 직원 읽기 전용 점검",
       "actionType": "observe",
       "autoActionBadge": "조치 실행 증거 없음",
@@ -983,12 +1021,12 @@
         "errorType": null,
         "supportingManifests": [],
         "path": "dashboard/data/collection-health.json",
-        "sha256": "c30ec9ef567b47fec7c5b6dd1e770ddb28c0f7e4ffec0c0ed635562f94ae536e",
-        "observedAt": "2026-10-30T18:24:48.049071+09:00",
-        "sourceCheckedAt": "2026-10-29T20:09:31.557984+00:00",
+        "sha256": "950d5eab01336deb9d8292709ca312a9e4fec99805074234935c253a5571d60b",
+        "observedAt": "2026-11-02T14:14:21.993679+09:00",
+        "sourceCheckedAt": "2026-11-02T05:11:22.430276+00:00",
         "sourceDate": null,
-        "fresh": false,
-        "ageSeconds": 47716
+        "fresh": true,
+        "ageSeconds": 180
       }
     }
   ]

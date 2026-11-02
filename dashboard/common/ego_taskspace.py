@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
@@ -69,45 +70,88 @@ def resolve_ego_profile(account_or_port: str | int | None) -> str:
     return ACCOUNT_TO_EGO_PROFILE.get(account, "Profile 3")
 
 
-def run_ego_mjs(script_source: str, *, timeout: int = 60, result_prefix: str = "BAROLAB_EGO_JSON:") -> dict:
-    """Execute an ESM script in `ego-browser nodejs` via direct UTF-8 stdin pipe.
+def _ego_cli_lock_path() -> Path:
+    p = Path(__file__).resolve().parents[1] / "data" / "ego-cli.lock"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
 
-    Passing `input=script_source` directly to `[ego-browser.exe, "nodejs"]` bypasses
-    PowerShell/cmd argument parsing completely and preserves 100% of UTF-8 text.
-    """
+
+def run_ego_mjs(script_source: str, *, timeout: int = 60, result_prefix: str = "BAROLAB_EGO_JSON:") -> dict:
+    """Execute an ESM script in `ego-browser nodejs` via direct UTF-8 stdin pipe with serialized lock + retry."""
     ego_cli = find_ego_cli()
     if not ego_cli:
         raise RuntimeError("ego-browser CLI is not available on this host")
 
-    wrapped_source = f"async function __barolabRun() {{\n{script_source}\n}}\nawait __barolabRun();\n"
+    wrapped_source = f"async function __barolabRun() {{\n{script_source}\n}}\ntry {{ await __barolabRun(); }} finally {{ process.exit(0); }}\n"
     cflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    proc = subprocess.run(
-        [str(ego_cli), "nodejs"],
-        input=wrapped_source,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=timeout,
-        creationflags=cflags,
-    )
+    lock_path = _ego_cli_lock_path()
+    last_err = None
 
-    combined = (proc.stdout or "") + "\n" + (proc.stderr or "")
-    update_notice = next(
-        (line.strip() for line in combined.splitlines() if line.strip().startswith("[ego-browser:notice]")),
-        None,
-    )
-    for line in reversed(combined.splitlines()):
-        stripped = line.strip()
-        if stripped.startswith(result_prefix):
-            payload = json.loads(stripped[len(result_prefix):])
-            if isinstance(payload, dict) and update_notice:
-                payload.setdefault("egoNotice", update_notice)
-            return payload
+    for attempt in range(3):
+        lock_file = lock_path.open("a+b")
+        locked = False
+        try:
+            lock_file.seek(0, 2)
+            if not lock_file.tell():
+                lock_file.write(b"0")
+                lock_file.flush()
+            lock_file.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                deadline = time.time() + max(15, min(timeout, 45))
+                while time.time() < deadline:
+                    try:
+                        msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+                        locked = True
+                        break
+                    except OSError:
+                        time.sleep(0.25)
+            proc = subprocess.run(
+                [str(ego_cli), "nodejs"],
+                input=wrapped_source,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout,
+                creationflags=cflags,
+            )
+            combined = (proc.stdout or "") + "\n" + (proc.stderr or "")
+            update_notice = next(
+                (line.strip() for line in combined.splitlines() if line.strip().startswith("[ego-browser:notice]")),
+                None,
+            )
+            for line in reversed(combined.splitlines()):
+                stripped = line.strip()
+                if stripped.startswith(result_prefix):
+                    payload = json.loads(stripped[len(result_prefix):])
+                    if isinstance(payload, dict) and update_notice:
+                        payload.setdefault("egoNotice", update_notice)
+                    return payload
 
-    if proc.returncode != 0:
-        raise RuntimeError(f"ego-browser nodejs failed (code {proc.returncode}): {combined[-600:].strip()}")
-    return {"ok": True, "rawOutput": combined.strip(), "egoNotice": update_notice}
+            if proc.returncode != 0:
+                last_err = RuntimeError(f"ego-browser nodejs failed (code {proc.returncode}): {combined[-600:].strip()}")
+                if proc.returncode == 5 and attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                raise last_err
+            return {"ok": True, "rawOutput": combined.strip(), "egoNotice": update_notice}
+        except subprocess.TimeoutExpired as exc:
+            last_err = exc
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            raise
+        finally:
+            if locked and os.name == "nt":
+                try:
+                    import msvcrt
+                    lock_file.seek(0)
+                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
+            lock_file.close()
+    raise last_err or RuntimeError("ego-browser nodejs failed")
 
 
 def list_profiles_and_spaces(timeout: int = 15) -> dict:
@@ -126,19 +170,29 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
 
 
 def ensure_persistent_ego_spaces(timeout: int = 45) -> dict:
-    """Ensure all 5 BaroLab account Spaces stay open inside the user's main EGO Lite browser."""
+    """Ensure all 6 BaroLab Spaces (5 Naver accounts + Google Flow) stay open inside the user's main EGO Lite browser."""
     script = """
 const TARGET_SPACES = [
   { account: "soultin", name: "barolab-soultin", profileId: "Profile 3", url: "https://blog.naver.com/mustpickinfo" },
   { account: "soul5373", name: "barolab-soul5373", profileId: "Profile 4", url: "https://adpost.naver.com/main" },
   { account: "yoon_master", name: "barolab-yoon_master", profileId: "Profile 5", url: "https://blog.naver.com/yoonviews" },
   { account: "adinfo0905", name: "barolab-kin-adinfo0905", profileId: "Profile 6", url: "https://kin.naver.com/" },
-  { account: "stone0747", name: "barolab-kin-stone0747", profileId: "Profile 7", url: "https://kin.naver.com/" }
+  { account: "stone0747", name: "barolab-kin-stone0747", profileId: "Profile 7", url: "https://kin.naver.com/" },
+  { account: "cf-flow", name: "barolab-cf-flow", profileId: "Profile 3", url: "https://flow.google.com/" }
 ];
 const existing = await listTaskSpaces();
 const opened = [];
 for (const cfg of TARGET_SPACES) {
   const found = Array.isArray(existing) ? existing.find(s => s && s.name === cfg.name) : null;
+  if (found && Array.isArray(found.recentTabTitles) && found.recentTabTitles.length > 0 && found.recentTabTitles[0] !== "새 탭") {
+    opened.push({
+      account: cfg.account,
+      spaceName: cfg.name,
+      spaceId: found.id,
+      profileId: cfg.profileId
+    });
+    continue;
+  }
   const task = found ? await taskSpace(cfg.name) : await taskSpace(cfg.name, { profileId: cfg.profileId });
   const page = task.page("p1");
   const curUrl = await page.url().catch(() => "");
@@ -152,6 +206,44 @@ for (const cfg of TARGET_SPACES) {
     profileId: cfg.profileId
   });
 }
+try {
+  const firstTask = await taskSpace(TARGET_SPACES[0].name);
+  const cdpPage = firstTask.page("p1");
+  const targets = await cdpPage.cdp("Target.getTargets");
+  const pages = (targets.targetInfos || []).filter(t => t.type === "page");
+  const winMap = {};
+  for (const p of pages) {
+    try {
+      const w = await cdpPage.cdp("Browser.getWindowForTarget", { targetId: p.targetId });
+      if (!winMap[w.windowId]) winMap[w.windowId] = [];
+      winMap[w.windowId].push(p);
+    } catch (e) {}
+  }
+  let keptMain = false;
+  for (const wid of Object.keys(winMap)) {
+    const tabs = winMap[wid];
+    const hasDashboard = tabs.some(t => t.url.includes("127.0.0.1:8790"));
+    const isAgentSpace = tabs.some(
+      t => t.url.includes("Redirect=Write") || t.url.includes("flow.google.com") || t.url.includes("adpost.naver.com") || t.url.includes("kin.naver.com")
+    );
+    if (hasDashboard || isAgentSpace) {
+      if (hasDashboard) keptMain = wid;
+      continue;
+    }
+    const isExtraProfileWindow = tabs.every(
+      t => t.url.startsWith("chrome://newtab") || t.url.includes("onetab.html") || t.url === "about:blank" || t.url === "https://www.naver.com/"
+    );
+    if (isExtraProfileWindow) {
+      if (!keptMain) {
+        keptMain = wid;
+        continue;
+      }
+      for (const t of tabs) {
+        await cdpPage.cdp("Target.closeTarget", { targetId: t.targetId }).catch(() => {});
+      }
+    }
+  }
+} catch (e) {}
 const profRaw = await profiles();
 const profList = Array.isArray(profRaw) ? profRaw : (profRaw?.profiles || []);
 const spaces = await listTaskSpaces();
@@ -166,7 +258,7 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
 
 
 def extract_profile_cookies(account_or_port: str | int, default_url: str = "https://www.naver.com", include_default_profile: bool = False) -> list[dict]:
-    """Read cookies from a native EGO Lite profile and immediately close the temporary TaskSpace."""
+    """Read cookies from an existing EGO Lite profile TaskSpace without spawning extra profile windows."""
     profile_id = resolve_ego_profile(account_or_port)
     space_name = f"barolab-cookie-sync-{profile_id.replace(' ', '-').lower()}"
     script = f"""
@@ -180,9 +272,9 @@ async function readCookiesFromProfile(profId, sName) {{
   let createdNew = false;
   try {{
     const spaces = await listTaskSpaces();
-    const existing = spaces.find(s => s.name === sName && s.ownership !== 'user');
+    const existing = spaces.find(s => s.profileId === profId && s.ownership !== 'user') || spaces.find(s => s.name === sName && s.ownership !== 'user');
     if (existing) {{
-      task = await taskSpace(existing.id);
+      task = await taskSpace(existing.name || existing.id);
     }} else {{
       task = await taskSpace(sName, {{ profileId: profId }});
       createdNew = true;
@@ -213,6 +305,114 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: true, profileId, cookies
 """
     res = run_ego_mjs(script, timeout=25)
     return res.get("cookies") or []
+
+
+def inject_profile_cookies(account_or_port: str | int, cookies: list[dict], default_url: str = "https://www.naver.com") -> bool:
+    """Inject cookies into a native EGO Lite profile so the profile regains login session."""
+    if not cookies:
+        return False
+    profile_id = resolve_ego_profile(account_or_port)
+    account = PORT_TO_ACCOUNT.get(int(account_or_port), "soultin") if (isinstance(account_or_port, int) or str(account_or_port).isdigit()) else str(account_or_port).strip()
+    space_map = {
+        "soultin": "barolab-soultin",
+        "soul5373": "barolab-soul5373",
+        "yoon_master": "barolab-yoon_master",
+        "adinfo0905": "barolab-kin-adinfo0905",
+        "stone0747": "barolab-kin-stone0747",
+    }
+    space_name = space_map.get(account, f"barolab-{account}")
+    clean_cookies = []
+    for c in cookies:
+        item = {k: c[k] for k in ("name", "value", "domain", "path", "secure", "httpOnly", "sameSite", "expires") if k in c and c[k] is not None}
+        if item.get("expires", -1) <= 0:
+            item.pop("expires", None)
+        clean_cookies.append(item)
+    script = f"""
+const spaceName = {json.dumps(space_name)};
+const profileId = {json.dumps(profile_id)};
+const targetUrl = {json.dumps(default_url)};
+const cookies = {json.dumps(clean_cookies)};
+const spaces = await listTaskSpaces();
+const existing = Array.isArray(spaces) ? spaces.find(s => s && s.name === spaceName) : null;
+const task = existing ? await taskSpace(spaceName) : await taskSpace(spaceName, {{ profileId }});
+const page = task.page("p1");
+await page.cdp("Network.setCookies", {{ cookies }});
+await page.goto(targetUrl, {{ waitUntil: "domcontentloaded", timeout: 15000 }}).catch(() => {{}});
+console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: true, spaceName, injected: cookies.length }}));
+"""
+    try:
+        res = run_ego_mjs(script, timeout=25)
+        return bool((res or {}).get("ok"))
+    except Exception:
+        return False
+
+
+def open_naver_reservation_in_ego_space(account_key: str, blog_id: str, latest_title: str | None = None, timeout: int = 35) -> dict:
+    """Open the Naver SmartEditor ONE reservation list inside the account's persistent EGO Lite Space."""
+    profile_id = resolve_ego_profile(account_key)
+    space_map = {
+        "soultin": "barolab-soultin",
+        "soul5373": "barolab-soul5373",
+        "yoon_master": "barolab-yoon_master",
+        "adinfo0905": "barolab-kin-adinfo0905",
+        "stone0747": "barolab-kin-stone0747",
+    }
+    space_name = space_map.get(account_key, f"barolab-{account_key}")
+    write_url = f"https://blog.naver.com/{blog_id}?Redirect=Write&"
+    script = f"""
+const spaceName = {json.dumps(space_name)};
+const profileId = {json.dumps(profile_id)};
+const writeUrl = {json.dumps(write_url)};
+const latestTitle = {json.dumps(latest_title or "")};
+
+const spaces = await listTaskSpaces();
+const existing = Array.isArray(spaces) ? spaces.find(s => s && s.name === spaceName) : null;
+const task = existing ? await taskSpace(spaceName) : await taskSpace(spaceName, {{ profileId }});
+const page = task.page("p1");
+const curUrl = await page.url().catch(() => "");
+if (!curUrl.includes("Redirect=Write")) {{
+  await page.goto(writeUrl, {{ waitUntil: "domcontentloaded", timeout: 25000 }}).catch(() => {{}});
+  await page.waitForTimeout(3200);
+}}
+
+const state = await page.evaluate(async () => {{
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const iframe = document.querySelector("iframe#mainFrame");
+  const doc = iframe?.contentDocument || document;
+  const cancelBtn = doc.querySelector(".se-popup-button-cancel");
+  if (cancelBtn && cancelBtn.offsetParent !== null) {{
+    cancelBtn.click();
+    await sleep(400);
+  }}
+  const els = Array.from(doc.querySelectorAll("button, a"));
+  const opener = els.find(el => /^예약 발행\\s*\\d+건$/.test((el.innerText || "").trim()) && el.offsetParent !== null);
+  let reservationCountText = "";
+  if (opener) {{
+    reservationCountText = (opener.innerText || "").trim();
+    const alreadyOpen = Array.from(doc.querySelectorAll("h1, h2, h3, strong, div, span")).some(el => (el.innerText || "").trim() === "예약 발행 글" && el.offsetParent !== null);
+    if (!alreadyOpen) {{
+      opener.click();
+      await sleep(700);
+    }}
+  }}
+  const modalOpen = Array.from(doc.querySelectorAll("h1, h2, h3, strong, div, span")).some(el => (el.innerText || "").trim() === "예약 발행 글" && el.offsetParent !== null);
+  const items = Array.from(doc.querySelectorAll("li, tr, div")).map(el => (el.innerText || "").trim()).filter(t => t.includes("2026.") && t.length < 160).slice(0, 6);
+  return {{
+    url: location.href,
+    reservationCountText,
+    modalOpen,
+    items
+  }};
+}});
+
+console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+  ok: true,
+  account: {json.dumps(account_key)},
+  spaceName,
+  ...state
+}}));
+"""
+    return run_ego_mjs(script, timeout=timeout)
 
 
 def handoff_to_ceo(account_or_port: str | int, url: str, reason: str, space_label: str = "BaroLab-CEO-Action") -> dict:

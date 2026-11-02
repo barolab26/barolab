@@ -1,14 +1,17 @@
 {
   "schema": "barolab-system-watchdog-v1",
-  "triggerSource": "manual",
-  "startedAt": "2026-10-29T22:46:42+09:00",
-  "finishedAt": "2026-10-29T22:52:39.426805+09:00",
+  "triggerSource": "heal-now",
+  "startedAt": "2026-11-02T14:07:02+09:00",
+  "finishedAt": "2026-11-02T14:07:12+09:00",
   "status": "healthy",
   "server": {
     "port8790": true,
-    "port8791": true,
+    "port8791": false,
+    "hostWorkerRunning": true,
+    "hostWorkerRecovered": false,
+    "telemetryRefreshed": false,
     "recovered": false,
-    "detail": "정상 가동 중"
+    "detail": "정상 가동 중 (Docker barolab-dashboard)"
   },
   "cdpBrowsers": {
     "onlineCount": 7,
@@ -16,20 +19,14 @@
     "recoveredPorts": [],
     "failedPorts": []
   },
-  "zombieRecoveries": [
-    {
-      "channel": "cf_blog",
-      "owner": "@publi",
-      "action": "CF 파이프라인 좀비 상태 초기화 및 재가동",
-      "detail": "작업 프로세스 미실행 감지"
-    }
-  ],
+  "zombieRecoveries": [],
   "missedSlotCatchups": [
     {
       "channel": "cf_blog",
       "owner": "@publi",
-      "action": "CF 블로그 지연 슬롯 15건 감지 및 자동 캐치업 기동",
-      "detail": "대기/재시도 15건 자동 발행 프로세스 실행"
+      "status": "conference_requested",
+      "action": "지연 슬롯 안건 접수 · 실제 실행·검증 전",
+      "detail": "cf-cycle"
     }
   ],
   "appTrackTruth": {
@@ -45,7 +42,7 @@
     "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
   },
   "projectHealthSummary": {
-    "totalProjects": 7,
+    "totalProjects": 8,
     "ceoActionCount": 0,
     "autoRecoveringCount": 0,
     "appTrackTruth": {
@@ -61,5 +58,5 @@
       "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
     }
   },
-  "broadcastedToChat": false
+  "broadcastedToChat": true
 }

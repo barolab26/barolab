@@ -388,8 +388,11 @@ class Collector:
             except OSError:pass
             self.queue_checked=tick
         if tick-self.port_checked>=5:
+            bstat_ports=(self.read('dashboard/data/browser-status.json').get('ports') or {})
             for port in PORTS:
-                self.ports[port]=False
+                self.ports[port]=bool(bstat_ports.get(str(port)))
+                if self.ports[port]:
+                    continue
                 for host in self.hosts:
                     try:
                         with socket.create_connection((host,port),timeout=.08):self.ports[port]=True

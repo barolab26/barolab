@@ -1,6 +1,6 @@
 {
-  "checkedAt": "2026-10-29T13:46:46.693456+00:00",
-  "kstCheckedAt": "2026-10-29T22:46:46+09:00",
+  "checkedAt": "2026-11-02T05:07:11.550796+00:00",
+  "kstCheckedAt": "2026-11-02T14:07:11+09:00",
   "host": "192.168.45.248",
   "ports": {
     "9334": true,
@@ -8,54 +8,76 @@
     "9335": true,
     "9231": true,
     "9230": true,
-    "9440": true
+    "9440": true,
+    "9450": true
   },
   "browsers": {
     "soultin_cdp": {
       "port": 9334,
-      "name": "soultin · Windows EGO LITE",
+      "name": "soultin · Windows EGO LITE (Profile 3 TaskSpace)",
       "open": true,
       "recovered": false,
-      "required": true
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 3"
     },
     "soul5373_cdp": {
       "port": 9333,
-      "name": "soul5373 · Windows EGO LITE",
+      "name": "soul5373 · Windows EGO LITE (Profile 4 TaskSpace)",
       "open": true,
       "recovered": false,
-      "required": true
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 4"
     },
     "yoon_master_cdp": {
       "port": 9335,
-      "name": "yoon_master · Windows EGO LITE",
+      "name": "yoon_master · Windows EGO LITE (Profile 5 TaskSpace)",
       "open": true,
       "recovered": false,
-      "required": true
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 5"
     },
     "adinfo0905_cdp": {
       "port": 9231,
-      "name": "adinfo0905 · Windows EGO LITE",
+      "name": "adinfo0905 · Windows EGO LITE (Profile 6 TaskSpace)",
       "open": true,
       "recovered": false,
-      "required": true
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 6"
     },
     "stone0747_cdp": {
       "port": 9230,
-      "name": "stone0747 · Windows EGO LITE",
+      "name": "stone0747 · Windows EGO LITE (Profile 7 TaskSpace)",
       "open": true,
       "recovered": false,
-      "required": true
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 7"
     },
     "cf-flow_cdp": {
       "port": 9440,
-      "name": "cf-flow · Windows EGO LITE",
+      "name": "cf-flow · Windows EGO LITE (Profile 3 TaskSpace)",
       "open": true,
       "recovered": false,
-      "required": true
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 3"
+    },
+    "threads_cdp": {
+      "port": 9450,
+      "name": "threads · Windows EGO LITE (Profile 3 TaskSpace)",
+      "open": true,
+      "recovered": false,
+      "required": true,
+      "mode": "ego-native-taskspace",
+      "profile": "Profile 3"
     }
   },
-  "onlineCount": 6,
-  "totalRequired": 6,
+  "onlineCount": 7,
+  "totalRequired": 7,
   "recoveredPorts": [],
   "failedPorts": []
 }

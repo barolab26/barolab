@@ -756,9 +756,13 @@
                     : `🟡 예약작업 대기 (오늘 ${prepHm} 작업 예정)`;
 
             const validPubUrl = (isPub && isValidPostDetailUrl(slot.info?.publicUrl, 'naver')) ? slot.info.publicUrl : '';
-            const localPreviewHref = slot.info?.artifactFolder
-              ? `../naver_blog_posting/output/${cfg.name}/${String(slot.info.artifactFolder).split(/[\\/]/).pop()}/final.html`
-              : (slot.info?.previewUrl || '');
+            const normFolder = String(slot.info?.artifactFolder || '').replace(/\\/g, '/');
+            const outIdx = normFolder.indexOf('/naver_blog_posting/output/');
+            const localPreviewHref = outIdx >= 0
+              ? `${normFolder.slice(outIdx)}/preview.html`
+              : (slot.info?.artifactFolder
+                  ? `/naver_blog_posting/output/${cfg.name}/${normFolder.split('/').pop()}/preview.html`
+                  : (slot.info?.previewUrl || ''));
 
             const shortTrack = (slot.track || cfg.strat).replace('카테고리 ', '').replace(' 고단가', '').replace(' 트랙', '');
 
@@ -850,9 +854,13 @@
                   : `🟡 예약작업 대기 (오늘 ${tmPrepHm} 작업 예정)`;
 
             const validPubUrl = (isPub && isValidPostDetailUrl(slot.info?.publicUrl, 'naver')) ? slot.info.publicUrl : '';
-            const localPreviewHref = slot.info?.artifactFolder
-              ? `../naver_blog_posting/output/${cfg.name}/${String(slot.info.artifactFolder).split(/[\\/]/).pop()}/final.html`
-              : (slot.info?.previewUrl || '');
+            const normFolder = String(slot.info?.artifactFolder || '').replace(/\\/g, '/');
+            const outIdx = normFolder.indexOf('/naver_blog_posting/output/');
+            const localPreviewHref = outIdx >= 0
+              ? `${normFolder.slice(outIdx)}/preview.html`
+              : (slot.info?.artifactFolder
+                  ? `/naver_blog_posting/output/${cfg.name}/${normFolder.split('/').pop()}/preview.html`
+                  : (slot.info?.previewUrl || ''));
             const shortTrack = (slot.track || cfg.strat).replace('카테고리 ', '').replace(' 고단가', '').replace(' 트랙', '');
 
             rows.push({
@@ -1843,18 +1851,19 @@
       const todayRows = state.allRows.filter(r => r.date === today && !r.isRollover);
       const tomorrowRows = state.allRows.filter(r => r.date === tomorrow && !r.isRollover);
 
+      const tdTotal = Math.max(7, todayRows.length);
       const tdPub = todayRows.filter(r => r.status === 'public').length;
       const tdOpenWait = todayRows.filter(r => r.status === 'reserved' && !r.isProcessing).length;
       const tdProc = todayRows.filter(r => r.isProcessing).length;
       const tdOverdue = todayRows.filter(r => r.status === 'overdue').length;
-      const tdPct = Math.min(100, Math.round((tdPub / 7) * 100));
+      const tdPct = Math.min(100, Math.round((tdPub / tdTotal) * 100));
 
       const ring1 = document.getElementById('sig-ring-fg');
       if (ring1) ring1.style.strokeDashoffset = (150.8 * (1 - tdPct / 100)).toFixed(1);
       const pct1 = document.getElementById('sig-gauge-pct');
       if (pct1) pct1.textContent = `${tdPct}%`;
       const frac1 = document.getElementById('sig-gauge-fraction');
-      if (frac1) frac1.textContent = `${tdPub} / 7건 공개완료`;
+      if (frac1) frac1.textContent = `${tdPub} / ${tdTotal}건 공개완료`;
       const head1 = document.getElementById('sig-gauge-headline');
       if (head1) {
         head1.style.fontSize = '11px';
@@ -1862,21 +1871,25 @@
         head1.textContent = `🟢 공개됨 ${tdPub}건 · 🔵 오늘 오픈대기 ${tdOpenWait + tdProc}건`;
       }
       const bar1 = document.getElementById('sig-gauge-bar');
-      if (bar1) bar1.style.width = `${Math.min(100, Math.round(((tdPub + tdOpenWait) / 7) * 100))}%`;
+      if (bar1) bar1.style.width = `${Math.min(100, Math.round(((tdPub + tdOpenWait) / tdTotal) * 100))}%`;
+
+      const tdTabBtn = document.querySelector('[data-date-tab="today"]');
+      if (tdTabBtn) tdTabBtn.textContent = `📅 오늘 발행 (${today.slice(5)} · ${tdTotal}건)`;
 
       // Card 2: Tomorrow (10-19) Reservation Status
+      const tmTotal = Math.max(7, tomorrowRows.length);
       const tmRes = tomorrowRows.filter(r => r.status === 'reserved' && !r.isProcessing).length;
       const tmProc = tomorrowRows.filter(r => r.isProcessing).length;
       const tmOverdue = tomorrowRows.filter(r => r.status === 'overdue').length;
       const tmWait = tomorrowRows.filter(r => r.status === 'waiting').length;
-      const tmPct = Math.min(100, Math.round((tmRes / 7) * 100));
+      const tmPct = Math.min(100, Math.round((tmRes / tmTotal) * 100));
 
       const ring2 = document.getElementById('sig-ring-fg-2');
       if (ring2) ring2.style.strokeDashoffset = (150.8 * (1 - tmPct / 100)).toFixed(1);
       const pct2 = document.getElementById('sig-gauge-pct-2');
       if (pct2) pct2.textContent = `${tmPct}%`;
       const frac2 = document.getElementById('sig-gauge-fraction-2');
-      if (frac2) frac2.textContent = `${tmRes} / 7건 예약완료`;
+      if (frac2) frac2.textContent = `${tmRes} / ${tmTotal}건 예약완료`;
       const head2 = document.getElementById('sig-gauge-headline-2');
       if (head2) {
         head2.style.fontSize = '9.8px';
@@ -1885,6 +1898,9 @@
       }
       const bar2 = document.getElementById('sig-gauge-bar-2');
       if (bar2) bar2.style.width = `${tmPct}%`;
+
+      const tmTabBtn = document.querySelector('[data-date-tab="tomorrow"]');
+      if (tmTabBtn) tmTabBtn.textContent = `🚀 내일 예약 (${tomorrow.slice(5)} · ${tmTotal}건)`;
     } else {
       let targetVal = meta.defaultTarget;
       let achieved = pubCnt + resCnt;
@@ -2067,9 +2083,9 @@
 
       if (sumEl) {
         if (channel === 'naver' && state.dateFilter === 'tomorrow') {
-          sumEl.textContent = `🚀 내일(${tomorrow}) 예약분 ${filtered.length}건 (하루 7건 고정 슬롯) 한 화면 100% 전체 표시`;
+          sumEl.textContent = `🚀 내일(${tomorrow}) 예약분 ${filtered.length}건 (하루 ${dateMatchedRows.length}건 고정 슬롯) 한 화면 100% 전체 표시`;
         } else if (channel === 'naver' && state.dateFilter === 'today') {
-          sumEl.textContent = `📅 오늘(${today}) 발행분 ${filtered.length}건 (하루 7건 고정 슬롯) 한 화면 100% 전체 표시`;
+          sumEl.textContent = `📅 오늘(${today}) 발행분 ${filtered.length}건 (하루 ${dateMatchedRows.length}건 고정 슬롯) 한 화면 100% 전체 표시`;
         } else {
           sumEl.textContent = `📅 ${activeDateStr} 당일 작업물 ${filtered.length}건 한 화면 100% 전체 표시 · 날짜 이동 (${curDatePage} / 5일 페이지)`;
         }

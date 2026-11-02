@@ -1,57 +1,62 @@
 /* Publication slots are server evidence, never browser-local quota counters. */
 (function (root) {
   const slots = {
-    acc1: ['07:40'],
-    acc2: ['15:00'],
-    acc3: ['21:00'],
-    acc4: ['08:10', '12:20'],
-    acc5: ['08:20', '12:40']
+    acc1: ['07:40', '19:10'],
+    acc2: ['15:00', '19:30'],
+    acc3: ['19:50', '21:00'],
+    acc4: ['08:10', '19:20'],
+    acc5: ['12:40']
   };
   const legacySingleSlots = {acc1:['07:40','19:30','11:30','08:00','10:00','11:00'], acc2:['15:00','20:00','12:00','08:30','12:30'], acc3:['21:00','20:30','12:30','09:00','14:00']};
   const legacySlotMap = {
-    acc1: { '07:40': ['07:40','11:00','19:30','11:30','08:00','10:00'], '11:00': ['11:00','19:30','11:30','08:00','10:00','07:40'], '19:30': ['19:30', '11:30', '08:00', '10:00', '11:00', '07:40'] },
-    acc2: { '15:00': ['15:00', '20:00', '12:00', '08:30', '12:30'], '20:00': ['20:00', '15:00', '12:00', '08:30', '12:30'] },
-    acc3: { '21:00': ['21:00', '20:30', '12:30', '09:00', '14:00'], '20:30': ['20:30', '21:00', '12:30', '09:00', '14:00'] },
-    acc4: { '08:10': ['08:10', '11:00', '12:30'], '12:20': ['12:20', '19:00', '14:30', '15:30', '18:30', '19:30'], '11:00': ['11:00', '08:10', '12:30', '15:30'], '19:00': ['19:00', '12:20', '18:30', '19:30'] },
+    acc1: { '07:40': ['07:40','11:00','11:30','08:00','10:00'], '19:10': ['19:10','19:30','13:10'], '11:00': ['11:00','19:30','11:30','08:00','10:00','07:40'], '19:30': ['19:30', '19:10', '13:10', '11:30', '08:00', '10:00', '11:00'] },
+    acc2: { '15:00': ['15:00', '12:00', '08:30', '12:30'], '19:30': ['19:30', '20:00'], '20:00': ['20:00', '19:30'] },
+    acc3: { '19:50': ['19:50', '12:30', '09:00', '14:00'], '21:00': ['21:00', '20:30'], '20:30': ['20:30', '21:00'] },
+    acc4: { '08:10': ['08:10', '11:00', '12:30'], '19:20': ['19:20', '13:20', '12:20', '19:00', '14:30', '15:30', '18:30', '19:30'], '12:20': ['12:20', '19:20', '13:20', '19:00', '14:30', '15:30', '18:30', '19:30'], '11:00': ['11:00', '08:10', '12:30', '15:30'], '19:00': ['19:00', '19:20', '12:20', '18:30', '19:30'] },
     acc5: { '08:20': ['08:20', '11:00', '11:15', '14:40'], '12:40': ['12:40', '19:00', '14:30', '16:30', '20:30'], '11:00': ['11:00', '08:20', '11:15', '14:30', '16:30'], '19:00': ['19:00', '12:40', '20:30'] }
   };
   const folderSlot = folder => {
     const m = String(folder || '').match(/-([01]\d|2[0-3])([0-5]\d)(?:[\\/]|$)/);
     return m ? `${m[1]}:${m[2]}` : null;
   };
-  const slotMatches = (accId, candidateSlot, targetSlot, artifactFolder = null) => {
+  const slotMatches = (accId, candidateSlot, targetSlot, artifactFolder = null, activeSlotCount = null) => {
     const fSlot = folderSlot(artifactFolder);
     if (fSlot && fSlot === targetSlot) return true;
+    if (fSlot && fSlot !== targetSlot) return false;
     if (!candidateSlot || !targetSlot) return false;
     if (candidateSlot === targetSlot) return true;
-    if (fSlot && fSlot !== targetSlot) return false;
     const mapped = legacySlotMap[accId]?.[targetSlot];
     if (mapped && mapped.includes(candidateSlot)) return true;
-    if ((slots[accId] || []).length === 1 && (legacySingleSlots[accId] || []).includes(candidateSlot)) return true;
+    const slotCnt = activeSlotCount ?? (slots[accId] || []).length;
+    if (slotCnt === 1 && (legacySingleSlots[accId] || []).includes(candidateSlot)) return true;
     return false;
   };
   const slotMeta = {
     acc1: {
-      '07:40': { prepTime: '07:00', track: '카테고리 전문성·체류 트랙', desc: '5060 연금·복지 심층 간접체험 가이드 (일 1포 집중)' },
-      '19:30': { prepTime: '08:30', track: '카테고리 전문성·체류 트랙', desc: '5060 연금·복지 심층 간접체험 가이드 (일 1포 집중)' }
+      '07:40': { prepTime: '05:20', track: '카테고리 전문성·체류 1차', desc: '5060 연금·복지 심층 간접체험 가이드 (오전 슬롯)' },
+      '19:10': { prepTime: '05:35', track: '카테고리 전문성·체류 2차', desc: '5060 노후재정·환급·세무 핵심 판독 가이드 (오후 슬롯)' },
+      '19:30': { prepTime: '08:30', track: '카테고리 전문성·체류 트랙', desc: '5060 연금·복지 심층 간접체험 가이드' }
     },
     acc2: {
-      '15:00': { prepTime: '09:00', track: '카테고리 전문성·체류 트랙', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (일 1포 집중)' },
-      '20:00': { prepTime: '09:00', track: '카테고리 전문성·체류 트랙', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (일 1포 집중)' }
+      '15:00': { prepTime: '05:50', track: '카테고리 전문성·체류 1차', desc: '5060 건강·실손보험·의료비 핵심 체크 가이드 (오후 1차)' },
+      '19:30': { prepTime: '06:35', track: '카테고리 전문성·체류 2차', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (오후 2차)' },
+      '20:00': { prepTime: '09:00', track: '카테고리 전문성·체류 트랙', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드' }
     },
     acc3: {
-      '21:00': { prepTime: '09:30', track: '트렌드·롱테일 유입 트랙', desc: '5060 데일리룩·리빙 심층 간접체험 가이드 (일 1포 집중)' },
-      '20:30': { prepTime: '09:30', track: '트렌드·롱테일 유입 트랙', desc: '5060 데일리룩·리빙 심층 간접체험 가이드 (일 1포 집중)' }
+      '19:50': { prepTime: '06:50', track: '트렌드·롱테일 유입 1차', desc: '5060 프리미엄 가전·리빙 실전 비교 가이드 (저녁 1차)' },
+      '21:00': { prepTime: '07:10', track: '트렌드·롱테일 유입 2차', desc: '5060 데일리룩·라이프스타일 심층 가이드 (저녁 2차)' },
+      '20:30': { prepTime: '09:30', track: '트렌드·롱테일 유입 트랙', desc: '5060 데일리룩·리빙 심층 간접체험 가이드' }
     },
     acc4: {
-      '08:10': { prepTime: '08:00', track: 'CF 고단가 브리지 1차', desc: '지원금·금융·세무 핵심 요약 + CF 상세표 브리지' },
+      '08:10': { prepTime: '05:40', track: 'CF 고단가 브리지 1차', desc: '지원금·청약·금융 핵심 요약 + CF 상세표 브리지' },
+      '19:20': { prepTime: '05:46', track: 'CF 고단가 브리지 2차', desc: '퇴직금·연말정산·실무서식 핵심 요약 + CF 계산기 브리지' },
       '12:20': { prepTime: '11:30', track: 'CF 고단가 브리지 2차', desc: '연말정산·IT·실무서식 핵심 요약 + CF 계산기 브리지' },
       '11:00': { prepTime: '08:00', track: 'CF 고단가 브리지 1차', desc: '지원금·금융·세무 핵심 요약 + CF 상세표 브리지' },
       '19:00': { prepTime: '13:00', track: 'CF 고단가 브리지 2차', desc: '연말정산·IT·실무서식 핵심 요약 + CF 계산기 브리지' }
     },
     acc5: {
       '08:20': { prepTime: '08:15', track: 'CF 고단가 브리지 1차', desc: '소상공인·지자체 정책자금 요약 + CF 자격표 브리지' },
-      '12:40': { prepTime: '12:00', track: 'CF 고단가 브리지 2차', desc: '마감속보·생활세무·핫플 요약 + CF 상세가이드 브리지' },
+      '12:40': { prepTime: '05:50', track: 'CF 고단가 브리지 (완결형)', desc: '지원금 조건·수당·생활세무 핵심 판독 가이드' },
       '11:00': { prepTime: '08:15', track: 'CF 고단가 브리지 1차', desc: '소상공인·지자체 정책자금 요약 + CF 자격표 브리지' },
       '19:00': { prepTime: '13:30', track: 'CF 고단가 브리지 2차', desc: '마감속보·생활세무·핫플 요약 + CF 상세가이드 브리지' }
     }
@@ -173,13 +178,13 @@
       .filter(item => item && (!item.accId || item.accId === accId) && publicationDay(item) === publicationDate);
     const attempts = (journal?.attempts || []).filter(item => (item.account === names[accId] || item.accId === accId) && publicationDay(item) === publicationDate);
     const approved = monitor?.schedulePolicy;
-    const times = approved && publicationDate >= approved.effectiveDate ? approved.naver?.[names[accId]]?.slots : null;
-    return (times || slots[accId] || []).map(time => {
+    const times = (approved && publicationDate >= approved.effectiveDate ? approved.naver?.[names[accId]]?.slots : null) || slots[accId] || [];
+    return times.map(time => {
       let receipt = null;
       for (const record of records) {
         let child = record.completedSlots?.[time];
         if (!child && record.completedSlots) {
-          const fallbackKey = Object.keys(record.completedSlots).find(k => slotMatches(accId, k, time));
+          const fallbackKey = Object.keys(record.completedSlots).find(k => !times.includes(k) && slotMatches(accId, k, time, record.completedSlots[k]?.artifactFolder, times.length));
           if (fallbackKey) child = record.completedSlots[fallbackKey];
         }
         if (child && publicationDay(child) === publicationDate) {
@@ -187,12 +192,15 @@
           const candidate = {...child, status:child.status || record.status};
           if (same && !publicVerified(candidate)) Object.assign(candidate, {verifiedAt:record.verifiedAt || child.verifiedAt, reservedAt:record.reservedAt || child.reservedAt, publicPublicationVerified:record.publicPublicationVerified ?? child.publicPublicationVerified, publicationStatus:record.publicationStatus || child.publicationStatus, state:record.state || child.state, publicUrl:record.publicUrl || child.publicUrl});
           if (!publicVerified(receipt) || publicVerified(candidate)) receipt=candidate;
-        } else if (slotMatches(accId, record.scheduledSlot || record.reserveTime?.slice(-5), time) && record.status === 'done' && !publicVerified(receipt)) {
+        } else if (!record.completedSlots && slotMatches(accId, record.scheduledSlot || record.reserveTime?.slice(-5), time, record.artifactFolder, times.length) && record.status === 'done' && !publicVerified(receipt)) {
           receipt = record;
         }
       }
       const exactRelevant = attempts.filter(item => (folderSlot(item.artifactFolder) || item.scheduledSlot || item.reserveTime?.slice(-5)) === time);
-      const relevant = exactRelevant.length > 0 ? exactRelevant : attempts.filter(item => slotMatches(accId, item.scheduledSlot || item.reserveTime?.slice(-5), time, item.artifactFolder));
+      const relevant = exactRelevant.length > 0 ? exactRelevant : attempts.filter(item => {
+        const candSlot = folderSlot(item.artifactFolder) || item.scheduledSlot || item.reserveTime?.slice(-5);
+        return !times.includes(candSlot) && slotMatches(accId, candSlot, time, item.artifactFolder, times.length);
+      });
       const latest = latestAttempt(journal,names[accId],publicationDate,time);
       const verified = relevant.filter(item => item.phase === 'verified' && reserved(item)).pop();
       if (verified && !publicVerified(receipt)) receipt = {...receipt, ...verified};
@@ -212,7 +220,7 @@
             && row.account===names[accId] && row.blogId===blogs[accId] && key.split('/')[0]===blogs[accId]
             && (!row.publicationDate || row.publicationDate===publicationDate))) return false;
           if (receipt?.topic) return titleEq(row.title, receipt.topic);
-          return (row.reserveTime || '').slice(-5) === time || slotMatches(accId, (row.reserveTime || '').slice(-5), time);
+          return (row.reserveTime || '').slice(-5) === time || (!times.includes((row.reserveTime || '').slice(-5)) && slotMatches(accId, (row.reserveTime || '').slice(-5), time, null, times.length));
         });
         const proof=proofs.length>=1 ? proofs[proofs.length-1] : null;
         if(proof)receipt={...(receipt || {}),topic:receipt?.topic || proof.title,reserveTime:receipt?.reserveTime || proof.reserveTime || (publicationDate+' '+time),
@@ -223,8 +231,8 @@
       }
       const runtimeState = workflowSnapshot(runtime,journal);
       const runtimeInfo = runtimeState?.accId === accId && runtimeState.publicationDate === publicationDate
-        && slotMatches(accId, runtimeState.scheduledSlot, time) && runtimeState.progress?.workerId === runtimeState.workerId ? runtimeState.progress : null;
-      const active = runtimeInfo || records.find(item => item === ps && (!item.scheduledSlot ? slots[accId].length === 1 : slotMatches(accId, item.scheduledSlot, time))
+        && slotMatches(accId, runtimeState.scheduledSlot, time, null, times.length) && runtimeState.progress?.workerId === runtimeState.workerId ? runtimeState.progress : null;
+      const active = runtimeInfo || records.find(item => item === ps && (!item.scheduledSlot ? times.length === 1 : slotMatches(accId, item.scheduledSlot, time, item.artifactFolder, times.length))
         && (!latest?.workerId || item.workerId === latest.workerId || (!item.workerId && Date.parse((item.workDate || publicationDate)+'T'+item.updatedAt+'+09:00') >= attemptTime(latest))));
       const monitored = monitor?.publicationDate === publicationDate ? monitor.accounts?.find(item => item.accId === accId)?.slots?.find(item => slotMatches(accId, item.scheduledSlot, time) && item.publicationDate === publicationDate) : null;
       const activeStamp = active?.updatedAt?.includes('T') ? active.updatedAt : (active?.workDate || publicationDate)+'T'+(active?.updatedAt || '00:00:00')+'+09:00';

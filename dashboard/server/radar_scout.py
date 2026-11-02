@@ -55,27 +55,43 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
         "pairedBridgeSets": [],
     }
     try:
-        tabs_resp = requests.get(f"http://127.0.0.1:{cdp_port}/json/list", timeout=2.0)
-        tabs_resp.raise_for_status()
-        tabs = [t for t in tabs_resp.json() if isinstance(t, dict) and t.get("type") == "page"]
-        blokey_tab = next((t for t in tabs if "blokey.co.kr" in str(t.get("url", ""))), None)
-        if not blokey_tab or not blokey_tab.get("webSocketDebuggerUrl"):
-            receipt["reason"] = f"CDP {cdp_port} 세션에 blokey.co.kr 탭이 열려 있지 않음"
-            return receipt
-
-        ws_url = blokey_tab["webSocketDebuggerUrl"]
         live_rows, total_rows = [], []
-        ws = websocket.create_connection(ws_url, timeout=8)
+        cookies_list = []
+        ws_url = ""
         try:
-            ws.send(json.dumps({
-                "id": 1,
-                "method": "Network.getCookies",
-                "params": {"urls": ["https://blokey.co.kr"]}
-            }))
-            cookie_msg = json.loads(ws.recv())
-            cookies_list = ((cookie_msg.get("result") or {}).get("cookies")) or []
-        finally:
-            ws.close()
+            tabs_resp = requests.get(f"http://127.0.0.1:{cdp_port}/json/list", timeout=2.0)
+            tabs_resp.raise_for_status()
+            tabs = [t for t in tabs_resp.json() if isinstance(t, dict) and t.get("type") == "page"]
+            blokey_tab = next((t for t in tabs if "blokey.co.kr" in str(t.get("url", ""))), None)
+            if blokey_tab and blokey_tab.get("webSocketDebuggerUrl"):
+                ws_url = blokey_tab["webSocketDebuggerUrl"]
+                ws = websocket.create_connection(ws_url, timeout=8)
+                try:
+                    ws.send(json.dumps({
+                        "id": 1,
+                        "method": "Network.getCookies",
+                        "params": {"urls": ["https://blokey.co.kr"]}
+                    }))
+                    cookie_msg = json.loads(ws.recv())
+                    cookies_list = ((cookie_msg.get("result") or {}).get("cookies")) or []
+                finally:
+                    ws.close()
+        except Exception:
+            pass
+
+        if not cookies_list and os.name == "nt":
+            try:
+                from common.ego_taskspace import extract_profile_cookies
+                cookies_list = [
+                    c for c in extract_profile_cookies("cf-flow", default_url="https://blokey.co.kr/golden", include_default_profile=True)
+                    if "blokey.co.kr" in str(c.get("domain") or "")
+                ]
+            except Exception:
+                cookies_list = []
+
+        if not cookies_list and not ws_url:
+            receipt["reason"] = f"CDP {cdp_port} 또는 EGO Lite 세션에 blokey.co.kr 로그인 쿠키가 없음"
+            return receipt
 
         if cookies_list:
             sess = requests.Session()
@@ -96,7 +112,7 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
             except Exception:
                 pass
 
-        if not live_rows and not total_rows:
+        if not live_rows and not total_rows and ws_url:
             js_expr = """(async () => {
               const [liveRes, totalRes] = await Promise.all([
                 fetch('/api/golden?period=year', {credentials: 'include'}).then(r => r.json()).catch(() => ({})),

@@ -1,0 +1,175 @@
+{
+  "counts": {
+    "verified": 6,
+    "running": 0,
+    "failed": 0,
+    "waiting": 1,
+    "unknown": 0
+  },
+  "accounts": [
+    {
+      "account": "soultin",
+      "accId": "acc1",
+      "status": "verified",
+      "slots": [
+        {
+          "slot": "07:40",
+          "status": "verified",
+          "reserveTime": "2026-10-31 07:40",
+          "title": "월급 없는데 기초연금 탈락? 소득인정액 계산 전 짚을 3가지",
+          "verifiedAt": "2026-10-31T00:08:55.358343+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        }
+      ],
+      "expected": 1,
+      "counts": {
+        "verified": 1,
+        "running": 0,
+        "failed": 0,
+        "waiting": 0,
+        "unknown": 0
+      },
+      "publicationDate": "2026-10-31"
+    },
+    {
+      "account": "adinfo0905",
+      "accId": "acc4",
+      "status": "waiting",
+      "slots": [
+        {
+          "slot": "08:10",
+          "status": "waiting",
+          "reserveTime": null,
+          "title": null,
+          "verifiedAt": null,
+          "verificationSource": null,
+          "publicationStatus": "waiting",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        },
+        {
+          "slot": "12:20",
+          "status": "verified",
+          "reserveTime": "2026-10-31 14:30",
+          "title": "월세는 꼬박 냈는데 이체내역이 뒤죽박죽? 제출 전 3분 정리법",
+          "verifiedAt": "2026-10-31T13:40:26.030014+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        }
+      ],
+      "expected": 2,
+      "counts": {
+        "verified": 1,
+        "running": 0,
+        "failed": 0,
+        "waiting": 1,
+        "unknown": 0
+      },
+      "publicationDate": "2026-10-31"
+    },
+    {
+      "account": "soul5373",
+      "accId": "acc2",
+      "status": "verified",
+      "slots": [
+        {
+          "slot": "15:00",
+          "status": "verified",
+          "reserveTime": "2026-10-31 15:00",
+          "title": "50대 단백질 보충제 영양성분표 보는 법, 앞면 숫자만 보고 큰 통 사셨나요?",
+          "verifiedAt": "2026-10-31T14:13:27.924319+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        }
+      ],
+      "expected": 1,
+      "counts": {
+        "verified": 1,
+        "running": 0,
+        "failed": 0,
+        "waiting": 0,
+        "unknown": 0
+      },
+      "publicationDate": "2026-10-31"
+    },
+    {
+      "account": "yoon_master",
+      "accId": "acc3",
+      "status": "verified",
+      "slots": [
+        {
+          "slot": "21:00",
+          "status": "verified",
+          "reserveTime": "2026-10-31 21:00",
+          "title": "5060 우아한 데일리룩, 프리미엄 가전·리빙, 힐링 여행… 좋아 보여 골랐는데 왜 내겐 어색할까요?",
+          "verifiedAt": "2026-10-31T14:05:22.326028+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        }
+      ],
+      "expected": 1,
+      "counts": {
+        "verified": 1,
+        "running": 0,
+        "failed": 0,
+        "waiting": 0,
+        "unknown": 0
+      },
+      "publicationDate": "2026-10-31"
+    },
+    {
+      "account": "stone0747",
+      "accId": "acc5",
+      "status": "verified",
+      "slots": [
+        {
+          "slot": "08:20",
+          "status": "verified",
+          "reserveTime": "2026-10-31 14:40",
+          "title": "점포 철거비 지원 견적서, 총액만 적혀 있다면? 계약금 보내기 전 3분 체크",
+          "verifiedAt": "2026-10-31T13:50:35.588190+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        },
+        {
+          "slot": "12:40",
+          "status": "verified",
+          "reserveTime": "2026-10-31 14:30",
+          "title": "폐업 점포 철거비 지원 신청 순서, 계약금 보내기 전 무엇부터 확인할까?",
+          "verifiedAt": "2026-10-31T13:45:47.380178+09:00",
+          "verificationSource": "naver-reservation-list: fresh-page+reload exact title/time",
+          "publicationStatus": "reserved",
+          "publicPublicationVerified": false,
+          "publicUrl": null,
+          "publicationDate": "2026-10-31"
+        }
+      ],
+      "expected": 2,
+      "counts": {
+        "verified": 2,
+        "running": 0,
+        "failed": 0,
+        "waiting": 0,
+        "unknown": 0
+      },
+      "publicationDate": "2026-10-31"
+    }
+  ]
+}

@@ -1,85 +1,85 @@
 {
   "schema": "metrics-runtime-v2",
-  "runId": "5eda880c7f004c8d8357b16db6c7e961",
-  "pid": 42712,
+  "runId": "d29884425ae64814acc95f04a4b9cd3d",
+  "pid": 60648,
   "status": "completed",
-  "startedAt": "2026-10-29T20:02:12.589169+00:00",
-  "checkedAt": "2026-10-29T20:09:31.557965+00:00",
+  "startedAt": "2026-11-02T05:06:40.125175+00:00",
+  "checkedAt": "2026-11-02T05:11:22.430257+00:00",
   "stages": [
     {
       "script": "dashboard/revenue.py",
       "status": "completed",
-      "startedAt": "2026-10-29T20:02:12.590197+00:00",
+      "startedAt": "2026-11-02T05:06:40.126061+00:00",
       "timeoutSeconds": 180,
-      "lastProcessSuccessAt": "2026-10-29T20:02:25.866125+00:00",
-      "helperPid": 50640,
-      "elapsedSeconds": 13.3,
+      "lastProcessSuccessAt": "2026-11-02T05:06:49.911260+00:00",
+      "helperPid": 53136,
       "exitCode": 0,
-      "finishedAt": "2026-10-29T20:02:25.866137+00:00"
+      "finishedAt": "2026-11-02T05:06:49.911284+00:00",
+      "elapsedSeconds": 9.8
     },
     {
       "script": "dashboard/traffic.py",
       "status": "completed",
-      "startedAt": "2026-10-29T20:02:25.899842+00:00",
+      "startedAt": "2026-11-02T05:06:49.936959+00:00",
       "timeoutSeconds": 840,
-      "lastProcessSuccessAt": "2026-10-29T20:03:03.486853+00:00",
-      "helperPid": 21704,
-      "elapsedSeconds": 37.6,
+      "lastProcessSuccessAt": "2026-11-02T05:07:24.953178+00:00",
+      "helperPid": 14680,
+      "elapsedSeconds": 35.0,
       "exitCode": 0,
-      "finishedAt": "2026-10-29T20:03:03.486870+00:00"
+      "finishedAt": "2026-11-02T05:07:24.953193+00:00"
     },
     {
       "script": "dashboard/metrics.py",
       "status": "completed",
-      "startedAt": "2026-10-29T20:03:03.571606+00:00",
+      "startedAt": "2026-11-02T05:07:25.031205+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-29T20:09:11.722096+00:00",
-      "helperPid": 65368,
-      "elapsedSeconds": 368.1,
+      "lastProcessSuccessAt": "2026-11-02T05:10:44.391240+00:00",
+      "helperPid": 16252,
+      "elapsedSeconds": 199.4,
       "exitCode": 0,
-      "finishedAt": "2026-10-29T20:09:11.722119+00:00"
+      "finishedAt": "2026-11-02T05:10:44.391251+00:00"
     },
     {
       "script": "naver_kin.posting",
       "status": "completed",
-      "startedAt": "2026-10-29T20:09:11.794259+00:00",
+      "startedAt": "2026-11-02T05:10:44.453529+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-29T20:09:27.897698+00:00",
-      "helperPid": 24652,
-      "elapsedSeconds": 16.1,
+      "lastProcessSuccessAt": "2026-11-02T05:11:19.165241+00:00",
+      "helperPid": 44488,
+      "elapsedSeconds": 34.7,
       "exitCode": 0,
-      "finishedAt": "2026-10-29T20:09:27.897715+00:00"
+      "finishedAt": "2026-11-02T05:11:19.165256+00:00"
     },
     {
       "script": "threads_posting.posting",
       "status": "completed",
-      "startedAt": "2026-10-29T20:09:27.899401+00:00",
+      "startedAt": "2026-11-02T05:11:19.166636+00:00",
       "timeoutSeconds": 480,
-      "lastProcessSuccessAt": "2026-10-29T20:09:30.995561+00:00",
-      "helperPid": 65012,
+      "lastProcessSuccessAt": "2026-11-02T05:11:21.836347+00:00",
+      "helperPid": 59280,
       "exitCode": 0,
-      "finishedAt": "2026-10-29T20:09:30.995576+00:00",
-      "elapsedSeconds": 3.1
+      "finishedAt": "2026-11-02T05:11:21.836359+00:00",
+      "elapsedSeconds": 2.7
     }
   ],
   "budgetSeconds": 2460,
-  "lastProcessSuccessAt": "2026-10-29T20:09:31.557953+00:00",
+  "lastProcessSuccessAt": "2026-11-02T05:11:22.430244+00:00",
   "lastSuccessAt": "2026-10-29T13:40:36.598767+00:00",
   "lastCollectionSuccessAt": "2026-10-29T13:40:36.598767+00:00",
   "previousInterrupted": false,
-  "previousStartedAt": "2026-10-29T16:42:38.906030+00:00",
+  "previousStartedAt": "2026-11-02T04:36:40.818532+00:00",
   "successMeaning": "process_exit_zero_not_source_collection",
   "sourceHealthNote": "단계 종료 성공과 원천 데이터 수집 성공은 별도 · 원천 timestamp/backoff 확인",
   "currentStage": null,
   "pagePerformance": {
     "status": "partial",
     "complete": false,
-    "start": "2026-10-23",
-    "end": "2026-10-29",
+    "start": "2026-10-26",
+    "end": "2026-11-01",
     "reasonCodes": [
       "revenue_partial_or_missing"
     ]
   },
-  "finishedAt": "2026-10-29T20:09:31.557953+00:00",
+  "finishedAt": "2026-11-02T05:11:22.430244+00:00",
   "collectionStatus": "partial"
 }

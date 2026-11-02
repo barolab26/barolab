@@ -23,37 +23,37 @@
   "agentBrains": {
     "jarvis": {
       "provider": "codex",
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoningEffort": "high",
-      "badge": "gpt-6.1-sol · High",
+      "badge": "gpt-6.1-terra · High",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "publi": {
       "provider": "codex",
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoningEffort": "high",
-      "badge": "gpt-6.1-sol · High",
+      "badge": "gpt-6.1-terra · High",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "patch": {
       "provider": "codex",
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoningEffort": "high",
-      "badge": "gpt-6.1-sol · High",
+      "badge": "gpt-6.1-terra · High",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "radar": {
-      "provider": "agy",
-      "model": "gemini-4-argon-medium",
-      "reasoningEffort": null,
-      "badge": "Argon Med",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6.1-terra",
+      "reasoningEffort": "medium",
+      "badge": "gpt-6.1-terra · Medium",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "doctor": {
       "provider": "agy",
-      "model": "gemini-3.8-flash-high",
+      "model": "gemini-3.8-flash-medium",
       "reasoningEffort": null,
-      "badge": "3.8 Flash High",
+      "badge": "3.8 Flash Med",
       "providerLabel": "Antigravity AGY CLI"
     },
     "trace": {
@@ -65,31 +65,31 @@
     },
     "cf_pipeline": {
       "provider": "codex",
-      "model": "gpt-6.1-sol",
-      "reasoningEffort": "medium",
-      "badge": "gpt-6.1-sol · Medium",
+      "model": "gpt-6.1-terra",
+      "reasoningEffort": null,
+      "badge": "gpt-6.1-terra · Low",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "naver_pipeline": {
       "provider": "codex",
-      "model": "gpt-6.1-sol",
-      "reasoningEffort": "medium",
-      "badge": "gpt-6.1-sol · Medium",
+      "model": "gpt-6.1-terra",
+      "reasoningEffort": null,
+      "badge": "gpt-6.1-terra · Low",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "kin_pipeline": {
       "provider": "codex",
-      "model": "gpt-6.1-sol",
-      "reasoningEffort": "medium",
-      "badge": "gpt-6.1-sol · Medium",
+      "model": "gpt-6.1-terra",
+      "reasoningEffort": null,
+      "badge": "gpt-6.1-terra · Low",
       "providerLabel": "Codex CLI · ChatGPT 구독"
     },
     "threads_pipeline": {
-      "provider": "agy",
-      "model": "gemini-3.8-flash-high",
-      "reasoningEffort": null,
-      "badge": "3.8 Flash High",
-      "providerLabel": "Antigravity AGY CLI"
+      "provider": "codex",
+      "model": "gpt-6.1-terra",
+      "reasoningEffort": "medium",
+      "badge": "gpt-6.1-terra · Medium",
+      "providerLabel": "Codex CLI · ChatGPT 구독"
     }
   }
 }

@@ -173,5 +173,105 @@
     "reason": "basic_format",
     "ready": true,
     "checked_at": "2026-10-30T01:43:05.272537+00:00"
+  },
+  "06aefb491fae0e538e139c838e1c5d2b9eadfe32cbfaf55200ef631e26b59600": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-31T02:11:38.940312+00:00"
+  },
+  "a1fdf223e610c2722251f4f744a29f2cb283bb079123b9d15f6fc93b4d4ffdba": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-31T03:32:47.159040+00:00"
+  },
+  "1c84792fbe16dad98fa3495215867007b2123d8e810f9201035c2cbd99afe236": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-31T09:12:37.294927+00:00"
+  },
+  "83371c8c52a6757f4a49366e0c282d478a866aba8f859aa70547ba0ead5afb0f": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-31T12:32:45.744349+00:00"
+  },
+  "5cfc518fbac169f47a9d11cf6eaa2e0c177100e6ef62ce864026a9b13a3ce892": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-31T13:47:07.006522+00:00"
+  },
+  "a711f5c6526f0c838d38b8589581f3ed65ed32eb24861e50af86ccaee75ad368": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-10-31T22:34:11.688275+00:00"
+  },
+  "077ae07ca7bad1434659dd710725b5b14a63190cff0f1788ef7d1c955b26b98d": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T00:15:07.137902+00:00"
+  },
+  "e3c367e6a54f90aa7b24f68ff8951614769884ce20bdb5cc866398ff62a83b62": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T01:54:04.972522+00:00"
+  },
+  "07f7f52a75690bf23b31462f496bbb06a29c8704a89cca1c41db87782f4467f9": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T03:31:42.147074+00:00"
+  },
+  "1a09244c98cd5cc5799568f3c75aa51f92a01fea0255fcb2959f4120a03bb6ee": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T05:13:29.016029+00:00"
+  },
+  "51f810ca3eca1058b1274678b6d8e51d65fb12149353f9e2a749e54d773d713a": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T06:51:44.770429+00:00"
+  },
+  "7388a3f1a0a4cf6aa50d5a9beb3690e8854b6a14f4b1218495058472a0313201": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T08:34:41.374347+00:00"
+  },
+  "57545db2a104b6d73b828f19117eba10ca32031e549aa287988e562d268991e0": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T10:14:34.751228+00:00"
+  },
+  "edf302f12c0a02665bb423819a948d9785e51e69f16aed082939e2e22d562c39": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T12:04:29.591469+00:00"
+  },
+  "2515aeff5914f20c3e556a1b770937f8205d7f2316ba3f51aaadfc189f6025f6": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T13:44:50.466123+00:00"
+  },
+  "81bfb9fbc0d4136c35b24ede1259cfde00482dea38cd629138bec2cf4939e827": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-01T22:31:34.985653+00:00"
+  },
+  "1dcfdda893677e0f12538ac22f17d4338a6b69424b07d35d83598be17c3e975d": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T00:13:22.980206+00:00"
+  },
+  "03f09de4fb0c22d2e79a6ab338bedc6d666949ead53f3384c6aef530ba9dc38a": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T01:52:19.322248+00:00"
+  },
+  "a7349c3503159f8bce952837942c326a7df5d834366ef4d17847f29aef630224": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T03:31:41.295044+00:00"
+  },
+  "503e32e2f3fe81b8c2a3d5b832e71daa65b54d1374d0d424e57411c4ad73778e": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T05:14:17.035463+00:00"
   }
 }

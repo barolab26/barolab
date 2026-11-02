@@ -1831,6 +1831,486 @@
       "naverHttp": null,
       "googleStatus": "submitted",
       "at": "2026-10-30T12:07:59.330820+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "topnote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 35,
+      "totalSubmitted": 35,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "smilenote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 33,
+      "totalSubmitted": 33,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "meganote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 39,
+      "totalSubmitted": 39,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "nolplace.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 30,
+      "totalSubmitted": 30,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "maxnote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 28,
+      "totalSubmitted": 28,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-joy.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 28,
+      "totalSubmitted": 28,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-pick.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 28,
+      "totalSubmitted": 28,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "daynote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 21,
+      "totalSubmitted": 21,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-good.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 19,
+      "totalSubmitted": 19,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "woorinote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 19,
+      "totalSubmitted": 19,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "joynote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 17,
+      "totalSubmitted": 17,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "soulnote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 16,
+      "totalSubmitted": 16,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "baronote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 157,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "healthcox.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 81,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "justinfo.co.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 94,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "tripmarvel.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 109,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-10-31T16:58:37.020525+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "topnote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 31,
+      "totalSubmitted": 31,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "smilenote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 30,
+      "totalSubmitted": 30,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "meganote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 40,
+      "totalSubmitted": 40,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "nolplace.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 30,
+      "totalSubmitted": 30,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-joy.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 29,
+      "totalSubmitted": 29,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "maxnote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 27,
+      "totalSubmitted": 27,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-pick.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 26,
+      "totalSubmitted": 26,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "woorinote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 22,
+      "totalSubmitted": 22,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "daynote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 20,
+      "totalSubmitted": 20,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-good.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 19,
+      "totalSubmitted": 19,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "soulnote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 16,
+      "totalSubmitted": 15,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "joynote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": 14,
+      "totalSubmitted": 14,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "baronote.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 157,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "healthcox.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 80,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "justinfo.co.kr",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 94,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "tripmarvel.com",
+      "outcome": "ping_accepted",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 106,
+      "naverHttp": 200,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T09:00:09.951756+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "topnote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 31,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "smilenote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 30,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "meganote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 40,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "nolplace.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 30,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-joy.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 29,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "maxnote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 27,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-pick.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 26,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "woorinote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 22,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "daynote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 20,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "must-good.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 19,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "soulnote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 16,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "joynote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": 14,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "baronote.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "healthcox.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "justinfo.co.kr",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
+    },
+    {
+      "kind": "auto_indexer_batch",
+      "domain": "tripmarvel.com",
+      "outcome": "duplicate_suppressed",
+      "unindexedSubmitted": null,
+      "totalSubmitted": 0,
+      "naverHttp": null,
+      "googleStatus": "submitted",
+      "at": "2026-11-02T11:18:55.748534+09:00"
     }
   ],
   "historicalLog": "Y:/70_개발프로젝트/auto-blog-cf/data/google-index-requests.json",

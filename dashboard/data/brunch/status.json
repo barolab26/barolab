@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-11-02T05:26:45.583816+09:00",
+  "checkedAt": "2026-11-02T13:57:15.158698+09:00",
   "account": {
     "account_key": "baro76650",
     "email": "baro76650@gmail.com",
@@ -38,7 +38,7 @@
   },
   "kpi": {
     "drawerCount": 0,
-    "publishedCount": 4,
+    "publishedCount": 5,
     "curriculumTotal": 10,
     "dailyTargetCount": 2,
     "pureEssayRatio": 70,
@@ -60,11 +60,11 @@
       "09:30",
       "16:30"
     ],
-    "lastRunAt": "2026-11-01T09:40:07.250854+09:00",
-    "lastRunTitle": "만 65세 임플란트·보청기 지원의 함정",
-    "lastRunUrl": "https://brunch.co.kr/@31d1f5fb288c4fc/4",
-    "todayDate": "2026-11-01",
-    "todayPublishedCount": 4,
+    "lastRunAt": "2026-11-02T09:01:21.042664+09:00",
+    "lastRunTitle": "부모님 집, 주택연금과 증여 사이 계산",
+    "lastRunUrl": "https://brunch.co.kr/@31d1f5fb288c4fc/5",
+    "todayDate": "2026-11-02",
+    "todayPublishedCount": 1,
     "history": [
       {
         "at": "2026-11-01T09:38:49.525899+09:00",
@@ -97,15 +97,37 @@
         "title": "만 65세 임플란트·보청기 지원의 함정",
         "mode": "published",
         "url": "https://brunch.co.kr/@31d1f5fb288c4fc/4"
+      },
+      {
+        "at": "2026-11-02T09:01:21.042664+09:00",
+        "date": "2026-11-02",
+        "part": 5,
+        "title": "부모님 집, 주택연금과 증여 사이 계산",
+        "mode": "published",
+        "url": "https://brunch.co.kr/@31d1f5fb288c4fc/5"
       }
     ]
   },
   "drawerArticles": [],
   "publishedArticles": [
     {
+      "articleNo": 5,
+      "title": "부모님 집, 주택연금과 증여 사이 계산",
+      "subtitle": "만 55세 이상 주택연금 수령액 계산법과 사후 정산·상속 기준",
+      "excerpt": "공시가격 12억 이하 가입 기준과 부부 종신 수령 구조의 현실적인명절이나 부모님 생신에 온 가족이 모이면 식사가 끝날 무렵 자연스레 부모님이 살고 계신 집 한 채에 대한 이야기가 오가곤 한다. 전체 자산의 70~80퍼센트 이상이 거주 주택 한 채에 묶여 있는 한국 시니어 가구의 특성상,",
+      "url": "https://brunch.co.kr/@31d1f5fb288c4fc/5",
+      "targetDomain": "topnote.kr",
+      "category": "주거·주택연금",
+      "pacingMode": "pure_essay",
+      "status": "published",
+      "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
+      "charCount": 1772,
+      "publishedAt": "2026-11-02"
+    },
+    {
       "articleNo": 4,
       "title": "만 65세 임플란트·보청기 지원의 함정",
-      "subtitle": "건강보험 급여 적용 개수와 본인부담률 차이를 알면 줄어드는 부모님 의료비",
+      "subtitle": "평생 2개 본인부담률 30% 조건과 지자체 보청기 지원금 신청순서",
       "excerpt": "건강보험 급여 적용 개수와 본인부담률 차이를 알면 줄어드는 부모님부모님이 식사하실 때 평소 좋아하시던 깍두기나 질긴 고기를 은근슬쩍 피하기 시작하셨다면 가장 먼저 치아 상태를 살펴야 할 신호다. 어르신들은 자식들에게 병원비 부담을 지우기 싫어 잇몸이 붓고 어금니가 흔들려도 참으시다가, ",
       "url": "https://brunch.co.kr/@31d1f5fb288c4fc/4",
       "targetDomain": "smilenote.kr",
@@ -114,12 +136,12 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 2049,
-      "publishedAt": "2026-11-01"
+      "publishedAt": "2026-11-02"
     },
     {
       "articleNo": 3,
       "title": "신청 안 하면 사라지는 환급금과 복지",
-      "subtitle": "신청주의 복지의 문턱을 넘기 위해 우리가 매년 챙겨야 할 생활 재무 점검표",
+      "subtitle": "정부24 보조금24·홈택스 세금 환급·건보공단 환급금 신청 방법",
       "excerpt": "신청주의 복지의 문턱을 넘기 위해 우리가 매년 챙겨야 할 생활 재무우리 사회의 거의 모든 공적 지원금과 세금 환급 제도는 철저한 '신청주의' 원칙 위에서 움직인다. 내가 받을 자격이 아무리 충분하고 법령상 수급 요건을 완벽히 갖추었더라도, 정해진 기간 안에 정해진 양식으로 직접 신청서를",
       "url": "https://brunch.co.kr/@31d1f5fb288c4fc/3",
       "targetDomain": "must-pick.com",
@@ -128,12 +150,12 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 1851,
-      "publishedAt": "2026-11-01"
+      "publishedAt": "2026-11-02"
     },
     {
       "articleNo": 2,
       "title": "퇴직 후 첫 건강보험료 고지서의 충격",
-      "subtitle": "자녀 피부양자 자격 유지 조건과 소득·재산 기준선을 미리 점검해야 하는 이유",
+      "subtitle": "연소득 2천만원·재산 과세표준 5.4억 기준과 임의계속가입 신청기한",
       "excerpt": "자녀 피부양자 자격 유지 조건과 소득·재산 기준선을 미리 점검해야오랜 시간 한 직장에서 성실히 일하고 정년퇴직한 선배를 오랜만에 만났을 때, 그가 찻잔을 내려놓으며 가장 먼저 꺼낸 이야기는 여행 계획도 취미 생활도 아닌 건강보험료 고지서였다. 재직 시절에는 급여명세서에서 회사가 절반을 ",
       "url": "https://brunch.co.kr/@31d1f5fb288c4fc/2",
       "targetDomain": "baronote.kr",
@@ -142,12 +164,12 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 1987,
-      "publishedAt": "2026-11-01"
+      "publishedAt": "2026-11-02"
     },
     {
       "articleNo": 1,
       "title": "국민연금 받으면 기초연금이 왜 깎일까",
-      "subtitle": "어머니의 연금 통장 앞에서 다시 펼쳐본 연계감액과 소득인정액의 기록",
+      "subtitle": "기초연금 소득인정액 선정기준액과 국민연금 연계감액 A급여액 산식 정리",
       "excerpt": "어머니의 연금 통장 앞에서 다시 펼쳐본 연계감액과 소득인정액의 기록매달 25일이 되면 어머니는 거실 식탁 위에 돋보기안경과 통장 두 권을 나란히 올려두신다. 젊은 시절부터 조금씩 부어오신 국민연금 수령 계좌와, 만 65세가 지나면서 신청했던 기초연금이 들어오는 통장이다. 어느 주말 오후",
       "url": "https://brunch.co.kr/@31d1f5fb288c4fc/1",
       "targetDomain": "must-good.com",
@@ -156,7 +178,7 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 2092,
-      "publishedAt": "2026-11-01"
+      "publishedAt": "2026-11-02"
     }
   ],
   "curriculum": [
@@ -168,7 +190,7 @@
       "category": "연금·노후설계",
       "pacingMode": "pure_essay",
       "pacingLabel": "70% 순수 에세이 (심사·신뢰 축적)",
-      "bridgeUrl": "https://www.must-good.com/health-insurance-voluntary-continuation-deadline",
+      "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
       "charCount": 2092,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -191,7 +213,7 @@
       "category": "건보료·절세실무",
       "pacingMode": "pure_essay",
       "pacingLabel": "70% 순수 에세이 (심사·신뢰 축적)",
-      "bridgeUrl": "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract",
+      "bridgeUrl": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
       "charCount": 1987,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -237,7 +259,7 @@
       "category": "시니어의료·돌봄",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.smilenote.kr/early-national-pension-lifetime-reduction-break-even",
+      "bridgeUrl": "https://www.smilenote.kr/housing-pension-preferential-eligibility-home-value-payment",
       "charCount": 2049,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -260,10 +282,10 @@
       "category": "주거·주택연금",
       "pacingMode": "pure_essay",
       "pacingLabel": "70% 순수 에세이 (심사·신뢰 축적)",
-      "bridgeUrl": "https://www.topnote.kr/housing-subscription-cancel-after-winning",
+      "bridgeUrl": "https://www.topnote.kr/excel-vlookup-na-error-hidden-spaces",
       "charCount": 1772,
-      "status": "queued_for_publish",
-      "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",
+      "status": "published",
+      "statusLabel": "🟢 공개 발행 완료",
       "paragraphs": [
         "명절이나 부모님 생신에 온 가족이 모이면 식사가 끝날 무렵 자연스레 부모님이 살고 계신 집 한 채에 대한 이야기가 오가곤 한다. 전체 자산의 70~80퍼센트 이상이 거주 주택 한 채에 묶여 있는 한국 시니어 가구의 특성상, 집은 든든한 보금자리이지만 당장 매달 써야 할 병원비와 생활비를 내어주지는 않는다. 이때 집을 팔아 작은 평수로 옮길 것인가, 자녀에게 미리 증여하고 용돈을 받을 것인가, 아니면 한국주택금융공사의 '주택연금'에 가입할 것인가를 두고 가족의 셈법이 복잡해진다.",
         "과거에는 '내 손으로 일군 집 한 채는 어떻게든 자식에게 온전히 물려주어야 한다'는 인식이 강했지만, 최근 현장에서 만나는 6070 부모님들의 생각은 빠르게 달라지고 있다. 자녀에게 손 벌리지 않고 마지막 순간까지 내 집에서 품위를 지키며 살다가, 남는 정산 차액만 깔끔하게 물려주는 것이 진짜 효도이자 현실적인 노후 대책이라는 공감대가 넓어졌기 때문이다.",
@@ -329,7 +351,7 @@
       "category": "은퇴자산·예적금",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.woorinote.kr/savings-early-withdrawal-versus-deposit-backed-loan",
+      "bridgeUrl": "https://www.woorinote.kr/housing-subscription-ineligible-win-account-restoration",
       "charCount": 1880,
       "status": "queued_for_publish",
       "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",

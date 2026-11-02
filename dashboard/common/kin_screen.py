@@ -117,6 +117,8 @@ def publish_with_screen(engine, original, account, url, answer, before_submit, f
         nonlocal requested
         if requested:raise ValueError('Submission was requested twice')
         requested=True
+        if not current:
+            commit_submit()
     def commit_submit():
         nonlocal committed
         if not requested or committed:raise ValueError('Submission gate ordering or replay violation')

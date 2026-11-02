@@ -78,6 +78,14 @@ def fleet_probe(spec,hosts=('127.0.0.1',)):
             row['selection']='활성 탭' if any(t.get('active') for t in row['tabs']) else '열린 탭'
             return row
         except (requests.RequestException,ValueError,TypeError,AttributeError):continue
+    try:
+        bstat_path = ROOT / 'dashboard/data/browser-status.json'
+        if bstat_path.is_file():
+            bstat = json.loads(bstat_path.read_text(encoding='utf-8'))
+            if (bstat.get('ports') or {}).get(str(port)) is True:
+                row.update(online=True, selection='EGO 내부 스페이스 상주')
+    except Exception:
+        pass
     return row
 
 

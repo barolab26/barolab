@@ -203,6 +203,13 @@ def run(*, apply=False, path=ledger.LEDGER, domain=None, batch_size=5, candidate
                     result['reason'] = str(exc) if re.fullmatch(r'[a-z_]+', str(exc)) else 'ledger_gate_paused'
                 except Exception as exc:
                     result['reason'] = type(exc).__name__
+                finally:
+                    if __import__('os').name == 'nt':
+                        try:
+                            from common.ubuntu_naver_browser import close_account
+                            close_account(9334)
+                        except Exception:
+                            pass
         return result
 
 

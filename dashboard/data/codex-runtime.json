@@ -30,6 +30,19 @@
       "defaultReasoningEffort": "medium"
     },
     {
+      "id": "gpt-6.1-terra",
+      "label": "GPT-6.1 Terra",
+      "reasoningEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra"
+      ],
+      "defaultReasoningEffort": "low"
+    },
+    {
       "id": "gpt-6-sol",
       "label": "GPT-6-Sol",
       "reasoningEfforts": [
@@ -93,6 +106,7 @@
       "defaultReasoningEffort": "medium"
     }
   ],
-  "modelsFetchedAt": "2026-10-24T07:32:01.744885219Z",
-  "checkedAt": "2026-10-24T07:33:47.721521+00:00"
+  "modelsFetchedAt": "2026-11-02T02:11:02.992871100Z",
+  "checkedAt": "2026-10-24T07:33:47.721521+00:00",
+  "online": false
 }

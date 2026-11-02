@@ -1,0 +1,293 @@
+{
+  "openrouter": {
+    "status": "collected",
+    "checkedAt": 1793596405.8959434,
+    "usage": 34.985513286,
+    "usage_daily": 0,
+    "limit": null,
+    "limit_remaining": null,
+    "balance": -0.1844141939999986
+  },
+  "codexQuota": {
+    "status": "collected",
+    "buckets": {
+      "codex": {
+        "primary": {
+          "usedPercent": 32,
+          "windowDurationMins": 10080,
+          "resetsAt": 1793774189
+        },
+        "credits": {
+          "hasCredits": true,
+          "unlimited": false,
+          "balance": "36378.3268175000"
+        },
+        "planType": "pro"
+      }
+    },
+    "accounts": [
+      {
+        "email": "baro76650@gmail.com",
+        "slotName": "baro76650",
+        "status": "collected",
+        "usable": true,
+        "activeRotation": true,
+        "isLastUsed": true,
+        "callCount": 221,
+        "buckets": {
+          "codex": {
+            "primary": {
+              "usedPercent": 32,
+              "windowDurationMins": 10080,
+              "resetsAt": 1793774189
+            },
+            "credits": {
+              "hasCredits": true,
+              "unlimited": false,
+              "balance": "36378.3268175000"
+            },
+            "planType": "pro"
+          }
+        },
+        "checkedAt": 1793596411.2112274
+      },
+      {
+        "email": "choiggerh@naver.com",
+        "slotName": "barolab26",
+        "status": "collected",
+        "usable": true,
+        "activeRotation": true,
+        "isLastUsed": false,
+        "callCount": 225,
+        "buckets": {
+          "codex": {
+            "primary": {
+              "usedPercent": 20,
+              "windowDurationMins": 10080,
+              "resetsAt": 1793774249
+            },
+            "credits": {
+              "hasCredits": false,
+              "unlimited": false,
+              "balance": "0"
+            },
+            "planType": "pro"
+          }
+        },
+        "checkedAt": 1793596411.9835339
+      }
+    ],
+    "lastUsedAccount": "baro76650@gmail.com",
+    "checkedAt": 1793596411.9835365
+  },
+  "agy": {
+    "status": "collected",
+    "groups": [
+      {
+        "name": "Gemini Models",
+        "buckets": [
+          {
+            "window": "weekly",
+            "remainingPercent": 43.6,
+            "resetAt": "2026-11-02T09:00:01+00:00"
+          },
+          {
+            "window": "5h",
+            "remainingPercent": 100,
+            "resetAt": "2026-11-02T10:13:34+00:00"
+          }
+        ]
+      },
+      {
+        "name": "Claude and GPT models",
+        "buckets": [
+          {
+            "window": "weekly",
+            "remainingPercent": 23.4,
+            "resetAt": "2026-11-05T06:47:10+00:00"
+          },
+          {
+            "window": "5h",
+            "remainingPercent": 100,
+            "resetAt": "2026-11-02T10:13:34+00:00"
+          }
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "email": "baro76650@gmail.com",
+        "status": "collected",
+        "usable": true,
+        "activeRotation": true,
+        "isLastUsed": false,
+        "callCount": 81,
+        "groups": [
+          {
+            "name": "Gemini Models",
+            "buckets": [
+              {
+                "window": "weekly",
+                "remainingPercent": 43.6,
+                "resetAt": "2026-11-02T09:00:01+00:00"
+              },
+              {
+                "window": "5h",
+                "remainingPercent": 100,
+                "resetAt": "2026-11-02T10:13:34+00:00"
+              }
+            ]
+          },
+          {
+            "name": "Claude and GPT models",
+            "buckets": [
+              {
+                "window": "weekly",
+                "remainingPercent": 23.4,
+                "resetAt": "2026-11-05T06:47:10+00:00"
+              },
+              {
+                "window": "5h",
+                "remainingPercent": 100,
+                "resetAt": "2026-11-02T10:13:34+00:00"
+              }
+            ]
+          }
+        ],
+        "checkedAt": 1793596412.6832805
+      },
+      {
+        "email": "barolab26@gmail.com",
+        "status": "collected",
+        "usable": true,
+        "activeRotation": true,
+        "isLastUsed": true,
+        "callCount": 212,
+        "groups": [
+          {
+            "name": "Gemini Models",
+            "buckets": [
+              {
+                "window": "weekly",
+                "remainingPercent": 51.0,
+                "resetAt": "2026-11-06T22:01:25+00:00"
+              },
+              {
+                "window": "5h",
+                "remainingPercent": 79.0,
+                "resetAt": "2026-11-02T05:58:00+00:00"
+              }
+            ]
+          },
+          {
+            "name": "Claude and GPT models",
+            "buckets": [
+              {
+                "window": "weekly",
+                "remainingPercent": 17.4,
+                "resetAt": "2026-11-04T10:53:32+00:00"
+              },
+              {
+                "window": "5h",
+                "remainingPercent": 100,
+                "resetAt": "2026-11-02T10:13:41+00:00"
+              }
+            ]
+          }
+        ],
+        "checkedAt": 1793596418.5594923
+      }
+    ],
+    "lastUsedAccount": "barolab26@gmail.com",
+    "checkedAt": 1793596418.5594945
+  },
+  "kie": {
+    "status": "collected",
+    "balance": 91.97,
+    "checkedAt": 1793596405.8447452,
+    "unit": "credits",
+    "source": "https://api.kie.ai/api/v1/chat/credit"
+  },
+  "jev": {
+    "status": "잔액 미수집 · 콘솔 로그인 필요",
+    "balance": null,
+    "checkedAt": 1793596405.8446248,
+    "unit": "credits",
+    "usable": true,
+    "apiKeySet": true,
+    "source": "https://help.typesafe.ai/articles/5505198974-what-s-a-402-error-and-how-can-i-add-more-credits"
+  },
+  "fleet": [
+    {
+      "port": 9334,
+      "account": "soultin",
+      "blog": "mustpickinfo",
+      "profile": "cdp_naver_soultin",
+      "purpose": "정책·지원금·연금 / 블로그 1호",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    },
+    {
+      "port": 9333,
+      "account": "soul5373",
+      "blog": "mustinfo",
+      "profile": "cdp_naver_soul5373",
+      "purpose": "연예이슈 / 애드포스트 · JEV 콘솔(04세션)",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    },
+    {
+      "port": 9335,
+      "account": "yoon_master",
+      "blog": "yoonviews",
+      "profile": "cdp_naver_yoon_master",
+      "purpose": "쇼핑커넥트 / 가전·리빙",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    },
+    {
+      "port": 9231,
+      "account": "adinfo0905",
+      "blog": "adinfo0905",
+      "profile": "cdp_naver_adinfo0905",
+      "purpose": "직장인 루틴 / 지식iN 1호",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    },
+    {
+      "port": 9230,
+      "account": "stone0747",
+      "blog": "stone0747",
+      "profile": "cdp_naver_stone0747",
+      "purpose": "지원금 마감 / 지식iN 2호",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    },
+    {
+      "port": 9440,
+      "account": "cf-flow",
+      "blog": "CF/Flow",
+      "profile": "cdp_gui_9440",
+      "purpose": "CF 발행 / 공식 캡처 / 시각자료",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    },
+    {
+      "port": 9450,
+      "account": "threads",
+      "blog": "mustpickinfo",
+      "profile": "cdp_threads_mustpickinfo",
+      "purpose": "Threads 전용 작업 세션",
+      "online": true,
+      "tabs": [],
+      "selection": "EGO 내부 스페이스 상주"
+    }
+  ],
+  "updatedAt": 1793596447.2493913
+}

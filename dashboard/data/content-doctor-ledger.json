@@ -1,9 +1,9 @@
 {
   "schema": "content-doctor-ledger-v1",
-  "totalInventory": 2031,
+  "totalInventory": 1974,
   "dailyQuotaTarget": 2031,
   "dailyDGradePerDomainCap": 9999,
-  "updatedAt": "2026-10-30T11:55:22.932494+09:00",
+  "updatedAt": "2026-11-02T13:16:55.849270+09:00",
   "auditedPosts": {
     "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024": {
       "url": "https://www.must-good.com/iron-family-kbs2-drama-broadcast-guide-2024",
@@ -138048,6 +138048,926 @@
           "prescription": "전문 카테고리('강아지·고양이건강') 및 3초 체크리스트 위젯 이식 완료"
         }
       }
+    },
+    "https://www.baronote.kr/employment-support-part-time-income-report": {
+      "url": "https://www.baronote.kr/employment-support-part-time-income-report",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 스마트 소비리포트",
+      "platform": "cf",
+      "postId": 338,
+      "slug": "employment-support-part-time-income-report",
+      "title": "국민취업지원제도 알바 소득신고, 월급은 다음 달인데 이번 신청은?",
+      "auditedAt": "2026-10-31T19:52:10.273125+09:00",
+      "auditDate": "2026-10-31",
+      "grade": "A",
+      "gradeBadge": "🟢 A등급 (정상 유지)",
+      "actionCode": "keep_healthy",
+      "prescription": "도메인 주제·전문 카테고리('보험·절세전략')·본문 품질(87점)·렌더링 모두 양호 ➔ 현행 유지",
+      "remodeled": false,
+      "remodelStatus": "healthy",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+        },
+        "2_domainAlignment": {
+          "aligned": true,
+          "alignmentLevel": "aligned",
+          "ownScore": 5,
+          "bestCategory": "보험·절세전략",
+          "currentCategory": "보험·절세전략",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "baronote.kr",
+          "recommendedDomainBrand": "머스트굿 정책뉴스",
+          "reason": "도메인 전문 분야(국민·기초연금·대출·금리비교·신용·카드혜택·보험·절세전략)와 주제 일치 (정합 점수 5점)"
+        },
+        "3_categoryRemap": {
+          "patched": false,
+          "oldCategory": "보험·절세전략",
+          "newCategory": "보험·절세전략"
+        },
+        "4_imageSuitability": {
+          "totalImages": 3,
+          "brokenCount": 0,
+          "brokenUrls": [],
+          "syntheticCheckpointCount": 0,
+          "syntheticCheckpointUrls": [],
+          "needsRealCapture": true,
+          "hasAiDisclaimer": false,
+          "hasFakePersonOrBrokenTextAi": false,
+          "thirdPersonPortraitDetected": false,
+          "brokenKoreanTextDetected": false,
+          "hasWatermarkOrExifContamination": false,
+          "exifContaminatedCount": 0,
+          "watermarkSuspectCount": 0,
+          "genericFilenameCount": 0,
+          "targetDeviceProfile": "Galaxy S24 Ultra",
+          "forensics": [
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": true,
+              "deviceMake": "samsung",
+              "deviceModel": "SM-S928N",
+              "dateTimeOriginal": "2026:10:31 17:06:46",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": false,
+              "url": "https://www.baronote.kr/media/1793440045909-bf36db4d.jpg"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": true,
+              "deviceMake": "samsung",
+              "deviceModel": "SM-S928N",
+              "dateTimeOriginal": "2026:10:31 17:10:31",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": false,
+              "url": "https://www.baronote.kr/media/1793440047876-b67bfef7.jpg"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": true,
+              "deviceMake": "samsung",
+              "deviceModel": "SM-S928N",
+              "dateTimeOriginal": "2026:10:31 17:15:14",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": false,
+              "url": "https://www.baronote.kr/media/1793440049480-9d13e20c.jpg"
+            }
+          ],
+          "suitability": "good",
+          "verdictBadge": "🟢 클린 EXIF·시각자료 정상",
+          "issue": null,
+          "passed": true
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 87,
+          "charCount": 2623,
+          "h2Count": 6,
+          "tableCount": 1,
+          "isMechanicalTitle": false,
+          "hasConcreteNumbers": false,
+          "IndirectExperiencePassed": true,
+          "suggestedRemodelTitle": "국민취업지원제도 알바 소득신고, 월급은 다음 달인데 이번 신청은?"
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "not_indexed",
+          "performanceBucket": "unknown",
+          "impressions": 0,
+          "clicks": 0,
+          "position": null,
+          "coverageState": "URL is unknown to Google"
+        },
+        "7_finalGrade": {
+          "grade": "A",
+          "gradeBadge": "🟢 A등급 (정상 유지)",
+          "prescription": "도메인 주제·전문 카테고리('보험·절세전략')·본문 품질(87점)·렌더링 모두 양호 ➔ 현행 유지"
+        }
+      }
+    },
+    "https://www.must-good.com/health-insurance-voluntary-continuation-deadline": {
+      "url": "https://www.must-good.com/health-insurance-voluntary-continuation-deadline",
+      "domain": "must-good.com",
+      "brandName": "머스트굿 정책뉴스",
+      "platform": "cf",
+      "postId": 468,
+      "slug": "health-insurance-voluntary-continuation-deadline",
+      "title": "퇴직 후 건강보험료, 첫 고지서 버리면 늦을까? 노후 건강보험 신청기한 3분 체크",
+      "auditedAt": "2026-11-01T07:37:30.838491+09:00",
+      "auditDate": "2026-11-01",
+      "grade": "C",
+      "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+      "actionCode": "remodeled_c_grade_live",
+      "prescription": "전문 카테고리('청년·장년복지') 재매핑 + 제목 리모델링(「퇴직 후 건강보험료, 첫 고지서 버리면 늦을까? 노후 건강보험 신청기한 3분 체크」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료",
+      "remodeled": true,
+      "remodelStatus": "completed_remodel",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+        },
+        "2_domainAlignment": {
+          "aligned": true,
+          "alignmentLevel": "aligned",
+          "ownScore": 9,
+          "bestCategory": "청년·장년복지",
+          "currentCategory": "청년·장년복지",
+          "validCategories": [
+            "정부지원금속보",
+            "청년·장년복지",
+            "민원·행정기획",
+            "세금·환급이슈"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-good.com",
+          "recommendedDomainBrand": "스마일노트 연금·시니어",
+          "reason": "도메인 전문 분야(정부지원금·청년·장년복지·민원·서류발급·세금·환급)와 주제 일치 (정합 점수 9점)"
+        },
+        "3_categoryRemap": {
+          "patched": true,
+          "oldCategory": "청년·장년복지",
+          "newCategory": "청년·장년복지",
+          "httpStatus": 200
+        },
+        "4_imageSuitability": {
+          "totalImages": 3,
+          "brokenCount": 0,
+          "brokenUrls": [],
+          "syntheticCheckpointCount": 0,
+          "syntheticCheckpointUrls": [],
+          "needsRealCapture": true,
+          "hasAiDisclaimer": false,
+          "hasFakePersonOrBrokenTextAi": false,
+          "thirdPersonPortraitDetected": false,
+          "brokenKoreanTextDetected": false,
+          "hasWatermarkOrExifContamination": true,
+          "exifContaminatedCount": 3,
+          "watermarkSuspectCount": 0,
+          "genericFilenameCount": 0,
+          "targetDeviceProfile": "iPhone 15 Pro",
+          "forensics": [
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793484018180-086c4ed2.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793484021420-737003d7.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793484022721-372d28dc.png"
+            }
+          ],
+          "suitability": "watermark_or_exif_contaminated",
+          "verdictBadge": "🔴 이미지 세탁 대상 (AI 워터마크 ✦ / EXIF 메타데이터 오염 적발)",
+          "issue": "AI 워터마크(✦) 잔존 또는 AI 메타데이터 미제거(3장) 적발 ➔ image_sanitizer.py로 워터마크 크롭 및 iPhone 15 Pro 클린 EXIF 주입·SEO 파일명 변환 후 재업로드",
+          "passed": false,
+          "remediation": {
+            "remediated": true,
+            "replacedCount": 3,
+            "removedCheckpointCards": 0,
+            "replacedUrls": [
+              "https://www.must-good.com/media/1793486241784-82cb3a22.jpg",
+              "https://www.must-good.com/media/1793486243114-63f00557.jpg",
+              "https://www.must-good.com/media/1793486245036-3d3f43ad.jpg"
+            ],
+            "seoFilenames": [
+              "health-insurance-voluntary-continuation-fee-01.jpg",
+              "health-insurance-voluntary-continuation-fee-02.jpg",
+              "health-insurance-voluntary-continuation-fee-03.jpg"
+            ],
+            "deviceLabel": "iPhone 15 Pro",
+            "httpStatus": 200
+          }
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 100,
+          "charCount": 2501,
+          "h2Count": 4,
+          "tableCount": 1,
+          "isMechanicalTitle": false,
+          "hasConcreteNumbers": true,
+          "deficiencyHits": {
+            "lossAvoidance": false,
+            "infoAsymmetry": true,
+            "timeShortcut": true,
+            "statusControl": true
+          },
+          "deficiencyCount": 3,
+          "evasivePhrases": [],
+          "needsFullRewrite": false,
+          "IndirectExperiencePassed": true,
+          "suggestedRemodelTitle": "퇴직 후 건강보험료, 첫 고지서 버리면 늦을까? 노후 건강보험 신청기한 3분 체크"
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "not_indexed",
+          "performanceBucket": "unknown",
+          "impressions": 0,
+          "clicks": 0,
+          "position": null,
+          "coverageState": "URL is unknown to Google"
+        },
+        "7_finalGrade": {
+          "grade": "C",
+          "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+          "prescription": "전문 카테고리('청년·장년복지') 재매핑 + 제목 리모델링(「퇴직 후 건강보험료, 첫 고지서 버리면 늦을까? 노후 건강보험 신청기한 3분 체크」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료"
+        }
+      }
+    },
+    "https://www.must-good.com/employment-support-part-time-income-report": {
+      "url": "https://www.must-good.com/employment-support-part-time-income-report",
+      "domain": "must-good.com",
+      "brandName": "머스트굿 정책뉴스",
+      "platform": "cf",
+      "postId": 467,
+      "slug": "employment-support-part-time-income-report",
+      "title": "국민취업지원제도 알바 소득신고, 월급은 다음 달, 3분 온라인 신청 순서와 반려 막는 체크포인트",
+      "auditedAt": "2026-11-01T07:39:03.256498+09:00",
+      "auditDate": "2026-11-01",
+      "grade": "C",
+      "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+      "actionCode": "remodeled_c_grade_live",
+      "prescription": "전문 카테고리('청년·장년복지') 재매핑 + 제목 리모델링(「국민취업지원제도 알바 소득신고, 월급은 다음 달, 3분 온라인 신청 순서와 반려 막는 체크포인트」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료",
+      "remodeled": true,
+      "remodelStatus": "completed_remodel",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+        },
+        "2_domainAlignment": {
+          "aligned": true,
+          "alignmentLevel": "aligned",
+          "ownScore": 13,
+          "bestCategory": "청년·장년복지",
+          "currentCategory": "청년·장년복지",
+          "validCategories": [
+            "정부지원금속보",
+            "청년·장년복지",
+            "민원·행정기획",
+            "세금·환급이슈"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-good.com",
+          "recommendedDomainBrand": "머스트굿 정책뉴스",
+          "reason": "도메인 전문 분야(정부지원금·청년·장년복지·민원·서류발급·세금·환급)와 주제 일치 (정합 점수 13점)"
+        },
+        "3_categoryRemap": {
+          "patched": true,
+          "oldCategory": "청년·장년복지",
+          "newCategory": "청년·장년복지",
+          "httpStatus": 200
+        },
+        "4_imageSuitability": {
+          "totalImages": 3,
+          "brokenCount": 0,
+          "brokenUrls": [],
+          "syntheticCheckpointCount": 0,
+          "syntheticCheckpointUrls": [],
+          "needsRealCapture": true,
+          "hasAiDisclaimer": false,
+          "hasFakePersonOrBrokenTextAi": false,
+          "thirdPersonPortraitDetected": false,
+          "brokenKoreanTextDetected": false,
+          "hasWatermarkOrExifContamination": true,
+          "exifContaminatedCount": 3,
+          "watermarkSuspectCount": 1,
+          "genericFilenameCount": 0,
+          "targetDeviceProfile": "iPhone 15 Pro",
+          "forensics": [
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793372824981-86c45fcb.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793372827400-3bf125d2.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": true,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793372833075-4dd6cc37.png"
+            }
+          ],
+          "suitability": "watermark_or_exif_contaminated",
+          "verdictBadge": "🔴 이미지 세탁 대상 (AI 워터마크 ✦ / EXIF 메타데이터 오염 적발)",
+          "issue": "AI 워터마크(✦) 잔존 또는 AI 메타데이터 미제거(3장) 적발 ➔ image_sanitizer.py로 워터마크 크롭 및 iPhone 15 Pro 클린 EXIF 주입·SEO 파일명 변환 후 재업로드",
+          "passed": false,
+          "remediation": {
+            "remediated": true,
+            "replacedCount": 3,
+            "removedCheckpointCards": 0,
+            "replacedUrls": [
+              "https://www.must-good.com/media/1793486265540-d575cdf9.jpg",
+              "https://www.must-good.com/media/1793486268865-d3a88efb.jpg",
+              "https://www.must-good.com/media/1793486272593-58639068.jpg"
+            ],
+            "seoFilenames": [
+              "employment-support-part-time-application-01.jpg",
+              "employment-support-part-time-application-02.jpg",
+              "employment-support-part-time-application-03.jpg"
+            ],
+            "deviceLabel": "iPhone 15 Pro",
+            "httpStatus": 200
+          }
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 59,
+          "charCount": 2682,
+          "h2Count": 4,
+          "tableCount": 1,
+          "isMechanicalTitle": false,
+          "hasConcreteNumbers": false,
+          "deficiencyHits": {
+            "lossAvoidance": true,
+            "infoAsymmetry": false,
+            "timeShortcut": true,
+            "statusControl": true
+          },
+          "deficiencyCount": 3,
+          "evasivePhrases": [
+            "담당자에게",
+            "확인해야 합니다"
+          ],
+          "needsFullRewrite": true,
+          "IndirectExperiencePassed": false,
+          "suggestedRemodelTitle": "국민취업지원제도 알바 소득신고, 월급은 다음 달, 3분 온라인 신청 순서와 반려 막는 체크포인트"
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "not_indexed",
+          "performanceBucket": "unknown",
+          "impressions": 0,
+          "clicks": 0,
+          "position": null,
+          "coverageState": "URL is unknown to Google"
+        },
+        "7_finalGrade": {
+          "grade": "C",
+          "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+          "prescription": "전문 카테고리('청년·장년복지') 재매핑 + 제목 리모델링(「국민취업지원제도 알바 소득신고, 월급은 다음 달, 3분 온라인 신청 순서와 반려 막는 체크포인트」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료"
+        }
+      }
+    },
+    "https://www.must-good.com/엑시콘-주가2026-실제-조건-비교표와-놓치기-쉬운-핵심-절차": {
+      "url": "https://www.must-good.com/엑시콘-주가2026-실제-조건-비교표와-놓치기-쉬운-핵심-절차",
+      "domain": "must-good.com",
+      "brandName": "머스트굿 정책뉴스",
+      "platform": "cf",
+      "postId": 412,
+      "slug": "엑시콘-주가2026-실제-조건-비교표와-놓치기-쉬운-핵심-절차",
+      "title": "엑시콘 주가｜2026 실제 조건 비교표와 놓치기 쉬운 핵심 절차 리모델링",
+      "auditedAt": "2026-11-01T08:17:07.882273+09:00",
+      "auditDate": "2026-11-01",
+      "grade": "C",
+      "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+      "actionCode": "remodeled_c_grade_live",
+      "prescription": "전문 카테고리('정부지원금속보') 재매핑 + 제목 리모델링(「엑시콘 주가｜2026 실제 조건 비교표와 놓치기 쉬운 핵심 절차 리모델링」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료",
+      "remodeled": true,
+      "remodelStatus": "completed_remodel",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+        },
+        "2_domainAlignment": {
+          "aligned": true,
+          "alignmentLevel": "aligned",
+          "ownScore": 1,
+          "bestCategory": "정부지원금속보",
+          "currentCategory": "정부지원금속보",
+          "validCategories": [
+            "정부지원금속보",
+            "청년·장년복지",
+            "민원·행정기획",
+            "세금·환급이슈"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-good.com",
+          "recommendedDomainBrand": "머스트픽 가전·환급 비교",
+          "reason": "도메인 전문 분야(정부지원금·청년·장년복지·민원·서류발급·세금·환급)와 주제 일치 (정합 점수 1점)"
+        },
+        "3_categoryRemap": {
+          "patched": true,
+          "oldCategory": "정부지원금속보",
+          "newCategory": "정부지원금속보",
+          "httpStatus": 200
+        },
+        "4_imageSuitability": {
+          "totalImages": 3,
+          "brokenCount": 0,
+          "brokenUrls": [],
+          "syntheticCheckpointCount": 0,
+          "syntheticCheckpointUrls": [],
+          "needsRealCapture": false,
+          "hasAiDisclaimer": false,
+          "hasFakePersonOrBrokenTextAi": false,
+          "thirdPersonPortraitDetected": false,
+          "brokenKoreanTextDetected": false,
+          "hasWatermarkOrExifContamination": true,
+          "exifContaminatedCount": 3,
+          "watermarkSuspectCount": 0,
+          "genericFilenameCount": 0,
+          "targetDeviceProfile": "iPhone 15 Pro",
+          "forensics": [
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://must-good.com/media/1782326884873-4e5e0cbb.svg"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://must-good.com/media/1782326862596-f55a0884.svg"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://must-good.com/media/1782326863338-eba55d93.svg"
+            }
+          ],
+          "suitability": "watermark_or_exif_contaminated",
+          "verdictBadge": "🔴 이미지 세탁 대상 (AI 워터마크 ✦ / EXIF 메타데이터 오염 적발)",
+          "issue": "AI 워터마크(✦) 잔존 또는 AI 메타데이터 미제거(3장) 적발 ➔ image_sanitizer.py로 워터마크 크롭 및 iPhone 15 Pro 클린 EXIF 주입·SEO 파일명 변환 후 재업로드",
+          "passed": false,
+          "remediation": {
+            "remediated": false,
+            "deviceLabel": "iPhone 15 Pro"
+          }
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 72,
+          "charCount": 3932,
+          "h2Count": 13,
+          "tableCount": 1,
+          "isMechanicalTitle": false,
+          "hasConcreteNumbers": false,
+          "deficiencyHits": {
+            "lossAvoidance": false,
+            "infoAsymmetry": false,
+            "timeShortcut": true,
+            "statusControl": true
+          },
+          "deficiencyCount": 2,
+          "evasivePhrases": [],
+          "needsFullRewrite": true,
+          "IndirectExperiencePassed": false,
+          "suggestedRemodelTitle": "엑시콘 주가｜2026 실제 조건 비교표와 놓치기 쉬운 핵심 절차"
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "not_indexed",
+          "performanceBucket": "unknown",
+          "impressions": 0,
+          "clicks": 0,
+          "position": null,
+          "coverageState": "URL is unknown to Google"
+        },
+        "7_finalGrade": {
+          "grade": "C",
+          "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+          "prescription": "전문 카테고리('정부지원금속보') 재매핑 + 제목 리모델링(「엑시콘 주가｜2026 실제 조건 비교표와 놓치기 쉬운 핵심 절차 리모델링」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료"
+        }
+      }
+    },
+    "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract": {
+      "url": "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract",
+      "domain": "baronote.kr",
+      "brandName": "바로노트 스마트 소비리포트",
+      "platform": "cf",
+      "postId": 339,
+      "slug": "year-end-rent-tax-credit-parent-contract",
+      "title": "연말정산 월세공제, 계약서가 부모님 명의면 끝? 81만 6천 원 갈리는 3분 확인",
+      "auditedAt": "2026-11-01T09:56:56.720705+09:00",
+      "auditDate": "2026-11-01",
+      "grade": "C",
+      "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+      "actionCode": "remodeled_c_grade_live",
+      "prescription": "전문 카테고리('보험·절세전략') 재매핑 + 제목 리모델링(「연말정산 월세공제, 계약서가 부모님 명의면 끝? 81만 6천 원 갈리는 3분 확인」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료",
+      "remodeled": true,
+      "remodelStatus": "completed_remodel",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+        },
+        "2_domainAlignment": {
+          "aligned": true,
+          "alignmentLevel": "aligned",
+          "ownScore": 9,
+          "bestCategory": "보험·절세전략",
+          "currentCategory": "보험·절세전략",
+          "validCategories": [
+            "국민·기초연금",
+            "대출·금리비교",
+            "신용·카드혜택",
+            "보험·절세전략"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "baronote.kr",
+          "recommendedDomainBrand": "저스트인포 금융·세무칼럼",
+          "reason": "도메인 전문 분야(국민·기초연금·대출·금리비교·신용·카드혜택·보험·절세전략)와 주제 일치 (정합 점수 9점)"
+        },
+        "3_categoryRemap": {
+          "patched": true,
+          "oldCategory": "보험·절세전략",
+          "newCategory": "보험·절세전략",
+          "httpStatus": 200
+        },
+        "4_imageSuitability": {
+          "totalImages": 3,
+          "brokenCount": 0,
+          "brokenUrls": [],
+          "syntheticCheckpointCount": 0,
+          "syntheticCheckpointUrls": [],
+          "needsRealCapture": false,
+          "hasAiDisclaimer": false,
+          "hasFakePersonOrBrokenTextAi": false,
+          "thirdPersonPortraitDetected": false,
+          "brokenKoreanTextDetected": false,
+          "hasWatermarkOrExifContamination": true,
+          "exifContaminatedCount": 3,
+          "watermarkSuspectCount": 0,
+          "genericFilenameCount": 0,
+          "targetDeviceProfile": "Galaxy S24 Ultra",
+          "forensics": [
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.baronote.kr/media/1793476534622-351f8969.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.baronote.kr/media/1793476535420-bd75cf12.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.baronote.kr/media/1793476536676-b47f07d4.png"
+            }
+          ],
+          "suitability": "watermark_or_exif_contaminated",
+          "verdictBadge": "🔴 이미지 세탁 대상 (AI 워터마크 ✦ / EXIF 메타데이터 오염 적발)",
+          "issue": "AI 워터마크(✦) 잔존 또는 AI 메타데이터 미제거(3장) 적발 ➔ image_sanitizer.py로 워터마크 크롭 및 Galaxy S24 Ultra 클린 EXIF 주입·SEO 파일명 변환 후 재업로드",
+          "passed": false,
+          "remediation": {
+            "remediated": true,
+            "replacedCount": 3,
+            "removedCheckpointCards": 0,
+            "replacedUrls": [
+              "https://www.baronote.kr/media/1793494612032-066a1d58.jpg",
+              "https://www.baronote.kr/media/1793494613580-58496fae.jpg",
+              "https://www.baronote.kr/media/1793494616441-04e69d65.jpg"
+            ],
+            "seoFilenames": [
+              "year-end-rent-tax-01.jpg",
+              "year-end-rent-tax-02.jpg",
+              "year-end-rent-tax-credit-03.jpg"
+            ],
+            "deviceLabel": "Galaxy S24 Ultra",
+            "httpStatus": 200
+          }
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 97,
+          "charCount": 3022,
+          "h2Count": 5,
+          "tableCount": 1,
+          "isMechanicalTitle": false,
+          "hasConcreteNumbers": true,
+          "deficiencyHits": {
+            "lossAvoidance": true,
+            "infoAsymmetry": true,
+            "timeShortcut": true,
+            "statusControl": true
+          },
+          "deficiencyCount": 4,
+          "evasivePhrases": [],
+          "needsFullRewrite": false,
+          "IndirectExperiencePassed": true,
+          "suggestedRemodelTitle": "연말정산 월세공제, 계약서가 부모님 명의면 끝? 81만 6천 원 갈리는 3분 확인"
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "not_indexed",
+          "performanceBucket": "unknown",
+          "impressions": 0,
+          "clicks": 0,
+          "position": null,
+          "coverageState": "URL is unknown to Google"
+        },
+        "7_finalGrade": {
+          "grade": "C",
+          "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+          "prescription": "전문 카테고리('보험·절세전략') 재매핑 + 제목 리모델링(「연말정산 월세공제, 계약서가 부모님 명의면 끝? 81만 6천 원 갈리는 3분 확인」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료"
+        }
+      }
+    },
+    "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date": {
+      "url": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+      "domain": "must-good.com",
+      "brandName": "머스트굿 정책뉴스",
+      "platform": "cf",
+      "postId": 469,
+      "slug": "parent-benefit-home-care-allowance-application-payment-date",
+      "title": "부모급여 가정양육수당 전환 신청일 25일 리모델링 완료",
+      "auditedAt": "2026-11-02T13:16:55.846874+09:00",
+      "auditDate": "2026-11-02",
+      "grade": "C",
+      "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+      "actionCode": "remodeled_c_grade_live",
+      "prescription": "전문 카테고리('정부지원금속보') 재매핑 + 제목 리모델링(「부모급여 가정양육수당 전환 신청일 25일 리모델링 완료」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료",
+      "remodeled": true,
+      "remodelStatus": "completed_remodel",
+      "checklist": {
+        "1_render": {
+          "httpStatus": 200,
+          "renderOk": true,
+          "adSlotPresent": true,
+          "note": "HTTP 200 OK · 본문 렌더링 정상 · 애드센스 슬롯 확인"
+        },
+        "2_domainAlignment": {
+          "aligned": true,
+          "alignmentLevel": "aligned",
+          "ownScore": 12,
+          "bestCategory": "청년·장년복지",
+          "currentCategory": "정부지원금속보",
+          "validCategories": [
+            "정부지원금속보",
+            "청년·장년복지",
+            "민원·행정기획",
+            "세금·환급이슈"
+          ],
+          "needsCategoryRemap": false,
+          "recommendedDomain": "must-good.com",
+          "recommendedDomainBrand": "머스트굿 정책뉴스",
+          "reason": "도메인 전문 분야(정부지원금·청년·장년복지·민원·서류발급·세금·환급)와 주제 일치 (정합 점수 12점)"
+        },
+        "3_categoryRemap": {
+          "patched": true,
+          "oldCategory": "정부지원금속보",
+          "newCategory": "정부지원금속보",
+          "httpStatus": 200
+        },
+        "4_imageSuitability": {
+          "totalImages": 3,
+          "brokenCount": 0,
+          "brokenUrls": [],
+          "syntheticCheckpointCount": 0,
+          "syntheticCheckpointUrls": [],
+          "needsRealCapture": true,
+          "hasAiDisclaimer": false,
+          "hasFakePersonOrBrokenTextAi": false,
+          "thirdPersonPortraitDetected": false,
+          "brokenKoreanTextDetected": false,
+          "hasWatermarkOrExifContamination": true,
+          "exifContaminatedCount": 3,
+          "watermarkSuspectCount": 0,
+          "genericFilenameCount": 0,
+          "targetDeviceProfile": "iPhone 15 Pro",
+          "forensics": [
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793589413478-f77fc414.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793589414848-ebf45dc2.png"
+            },
+            {
+              "isSyntheticCheckpointCard": false,
+              "hasAiMetadataTrace": false,
+              "aiMetadataHits": [],
+              "hasCleanSmartphoneExif": false,
+              "deviceMake": "",
+              "deviceModel": "",
+              "dateTimeOriginal": "",
+              "hasCornerWatermarkSuspect": false,
+              "isGenericFilename": false,
+              "needsSanitization": true,
+              "url": "https://www.must-good.com/media/1793589416942-8dbf30b4.png"
+            }
+          ],
+          "suitability": "watermark_or_exif_contaminated",
+          "verdictBadge": "🔴 이미지 세탁 대상 (AI 워터마크 ✦ / EXIF 메타데이터 오염 적발)",
+          "issue": "AI 워터마크(✦) 잔존 또는 AI 메타데이터 미제거(3장) 적발 ➔ image_sanitizer.py로 워터마크 크롭 및 iPhone 15 Pro 클린 EXIF 주입·SEO 파일명 변환 후 재업로드",
+          "passed": false,
+          "remediation": {
+            "remediated": true,
+            "replacedCount": 3,
+            "removedCheckpointCards": 0,
+            "replacedUrls": [
+              "https://www.must-good.com/media/1793592973342-d8bab340.jpg",
+              "https://www.must-good.com/media/1793592975992-93c5a86a.jpg",
+              "https://www.must-good.com/media/1793592977673-dd8c933c.jpg"
+            ],
+            "seoFilenames": [
+              "parent-benefit-home-care-application-01.jpg",
+              "parent-benefit-home-care-application-02.jpg",
+              "parent-benefit-home-care-application-03.jpg"
+            ],
+            "deviceLabel": "iPhone 15 Pro",
+            "httpStatus": 200
+          }
+        },
+        "5_titleAndBodyQuality": {
+          "qualityScore": 69,
+          "charCount": 2928,
+          "h2Count": 5,
+          "tableCount": 1,
+          "isMechanicalTitle": false,
+          "hasConcreteNumbers": true,
+          "deficiencyHits": {
+            "lossAvoidance": true,
+            "infoAsymmetry": true,
+            "timeShortcut": true,
+            "statusControl": true
+          },
+          "deficiencyCount": 4,
+          "evasivePhrases": [
+            "달라질 수 있습니다",
+            "확인해야 합니다"
+          ],
+          "needsFullRewrite": true,
+          "IndirectExperiencePassed": false,
+          "suggestedRemodelTitle": "부모급여 가정양육수당 전환 신청일 25일, 하루, 3분 온라인 신청 순서와 반려 막는 체크포인트"
+        },
+        "6_indexAndPotential": {
+          "indexStatus": "not_indexed",
+          "performanceBucket": "unknown",
+          "impressions": 0,
+          "clicks": 0,
+          "position": null,
+          "coverageState": "URL is unknown to Google"
+        },
+        "7_finalGrade": {
+          "grade": "C",
+          "gradeBadge": "🔴 이미지 세탁 · 🟡 C등급 (수술 및 재발행 완료)",
+          "prescription": "전문 카테고리('정부지원금속보') 재매핑 + 제목 리모델링(「부모급여 가정양육수당 전환 신청일 25일 리모델링 완료」) + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료"
+        }
+      }
     }
   },
   "dailyHistory": {
@@ -138088,9 +139008,344 @@
       "cQueued": 698,
       "dCapped": 640,
       "dByDomain": {}
+    },
+    "2026-10-31": {
+      "audited": 1,
+      "remodeled": 0,
+      "bPatched": 0,
+      "cQueued": 0,
+      "dCapped": 0,
+      "dByDomain": {}
+    },
+    "2026-11-01": {
+      "audited": 4,
+      "remodeled": 8,
+      "bPatched": 4,
+      "cQueued": 4,
+      "dCapped": 0,
+      "dByDomain": {}
+    },
+    "2026-11-02": {
+      "audited": 1,
+      "remodeled": 2,
+      "bPatched": 1,
+      "cQueued": 1,
+      "dCapped": 0,
+      "dByDomain": {}
     }
   },
   "recentPatrolLogs": [
+    {
+      "patrolId": "patrol-1793593015",
+      "at": "2026-11-02T13:16:55.849258+09:00",
+      "count": 1,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 0
+      },
+      "urls": [
+        "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date"
+      ]
+    },
+    {
+      "patrolId": "patrol-1793589284",
+      "at": "2026-11-02T12:14:44.013782+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793586321",
+      "at": "2026-11-02T11:25:21.045434+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793582843",
+      "at": "2026-11-02T10:27:23.700929+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793578319",
+      "at": "2026-11-02T09:11:59.051375+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793576720",
+      "at": "2026-11-02T08:45:20.077114+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793571233",
+      "at": "2026-11-02T07:13:53.613477+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793567591",
+      "at": "2026-11-02T06:13:11.318977+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793565434",
+      "at": "2026-11-02T05:37:14.723929+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793517427",
+      "at": "2026-11-01T16:17:07.489405+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793513822",
+      "at": "2026-11-01T15:17:02.899755+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793509965",
+      "at": "2026-11-01T14:12:45.044096+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793506053",
+      "at": "2026-11-01T13:07:33.998785+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793502836",
+      "at": "2026-11-01T12:13:56.914495+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793499299",
+      "at": "2026-11-01T11:14:59.180976+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793495602",
+      "at": "2026-11-01T10:13:22.202688+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793494616",
+      "at": "2026-11-01T09:56:56.722903+09:00",
+      "count": 1,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 0
+      },
+      "urls": [
+        "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract"
+      ]
+    },
+    {
+      "patrolId": "patrol-1793492013",
+      "at": "2026-11-01T09:13:33.428877+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793488627",
+      "at": "2026-11-01T08:17:07.885068+09:00",
+      "count": 1,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 0
+      },
+      "urls": [
+        "https://www.must-good.com/엑시콘-주가2026-실제-조건-비교표와-놓치기-쉬운-핵심-절차"
+      ]
+    },
+    {
+      "patrolId": "patrol-1793486343",
+      "at": "2026-11-01T07:39:03.265327+09:00",
+      "count": 2,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 2,
+        "D": 0
+      },
+      "urls": [
+        "https://www.must-good.com/health-insurance-voluntary-continuation-deadline",
+        "https://www.must-good.com/employment-support-part-time-income-report"
+      ]
+    },
+    {
+      "patrolId": "patrol-1793476859",
+      "at": "2026-11-01T05:00:59.638234+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793444448",
+      "at": "2026-10-31T20:00:48.734754+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793443930",
+      "at": "2026-10-31T19:52:10.275119+09:00",
+      "count": 1,
+      "grades": {
+        "A": 1,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": [
+        "https://www.baronote.kr/employment-support-part-time-income-report"
+      ]
+    },
+    {
+      "patrolId": "patrol-1793440047",
+      "at": "2026-10-31T18:47:27.414615+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
+    {
+      "patrolId": "patrol-1793423872",
+      "at": "2026-10-31T14:17:52.285609+09:00",
+      "count": 0,
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "urls": []
+    },
     {
       "patrolId": "patrol-1792306823",
       "at": "2026-10-18T16:00:23.231121+09:00",

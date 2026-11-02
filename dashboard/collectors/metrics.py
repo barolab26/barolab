@@ -816,6 +816,12 @@ def collect_browser_inspections(config, sites, limit=None, seconds=None, manual=
                             page.close()
                         if original_page and not original_page.is_closed():
                             original_page.bring_to_front()
+                        if os.name == 'nt' and not retain_page:
+                            try:
+                                from common.ubuntu_naver_browser import close_account
+                                close_account(int(account['cdp']))
+                            except Exception:
+                                pass
             except Exception as exc:
                 progress.update(status='error', reason=safe_reason(exc),
                                 nextRetryAt=(datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat())

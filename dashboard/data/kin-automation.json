@@ -4,15 +4,15 @@
   "continuousMode": true,
   "timezone": "Asia/Seoul",
   "startDate": "2026-10-15",
-  "endDate": "2026-10-21",
-  "measurementEndDate": "2026-10-24",
+  "endDate": "2026-12-31",
+  "measurementEndDate": "2026-12-31",
   "model": "gpt-6.1-sol",
   "provider": "authenticated-codex-subscription",
   "mode": "alternating_interval",
-  "intervalMinutes": 20,
+  "intervalMinutes": 32,
   "intervalJitterMinutes": [
-    18,
-    22
+    30,
+    35
   ],
   "pollMinutes": 5,
   "operationDailyCap": 60,
@@ -43,5 +43,6 @@
   "createdAt": "2026-10-15T12:12:41.529315+00:00",
   "taskName": "BaroLab-Kin-Seven-Day-Pilot",
   "registeredAt": "2026-10-17T12:40:00+00:00",
-  "editorialRecoveryEnabled": true
+  "editorialRecoveryEnabled": true,
+  "accountMinIntervalMinutes": 60
 }

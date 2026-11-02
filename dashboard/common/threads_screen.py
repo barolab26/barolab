@@ -109,7 +109,15 @@ def session(for_submission=False):
         focus_workflow_window(PORT)
         if __import__('os').name != 'nt':page.bring_to_front()
         # Disconnecting Playwright preserves the existing browser and every user tab.
-        yield page
+        try:
+            yield page
+        finally:
+            if __import__('os').name == 'nt':
+                try:
+                    from common.ubuntu_naver_browser import close_account
+                    close_account(PORT)
+                except Exception:
+                    pass
 
 
 def web_identity(page):
