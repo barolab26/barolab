@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-02 16:00:29",
+  "updatedAt": "2026-11-02 17:58:54",
   "account": {
     "email": "baro76650@gmail.com",
     "owner": "윤성재 (대표님)",
@@ -15,9 +15,9 @@
     "totalSubscribers": 32,
     "svmlTemplateCount": 3,
     "renderedShortsCount": 3,
-    "communityPostsCount": 3,
-    "cafeBridgeMembers": 30217,
-    "cafePublishedCount": 2
+    "communityPostsCount": 2,
+    "plannedQueueCount": 4,
+    "ga4ReferralSessions28d": 0
   },
   "channels": [
     {
@@ -41,7 +41,9 @@
         "daynote.kr",
         "baronote.kr"
       ],
-      "strategyNote": "Hypit SVML 유형 A/B 쇼츠 + 커뮤니티 탭 1분 체크리스트로 CF IT·비즈니스·세무 본진 직결"
+      "strategyNote": "Hypit SVML 유형 A/B 쇼츠 + 커뮤니티 탭 1분 체크리스트로 CF IT·비즈니스·세무 본진 직결",
+      "renderedShorts": 2,
+      "publishedCommunityPosts": 2
     },
     {
       "handle": "@숨은지원금",
@@ -61,7 +63,9 @@
         "topnote.kr",
         "woorinote.kr"
       ],
-      "strategyNote": "자청 4대 결핍(손실회피·즉시판정) 24초 비교표 쇼츠 → 고정댓글로 CF 연금·복지 본진 유입"
+      "strategyNote": "자청 4대 결핍(손실회피·즉시판정) 24초 비교표 쇼츠 → 고정댓글로 CF 연금·복지 본진 유입",
+      "renderedShorts": 1,
+      "publishedCommunityPosts": 0
     },
     {
       "handle": "@바로랭크",
@@ -80,10 +84,12 @@
       "postsUrl": "https://www.youtube.com/@%EB%B0%94%EB%A1%9C%EB%9E%AD%ED%81%AC/posts",
       "bridgeDomains": [
         "healthcox.com",
-        "trendnote.co.kr",
-        "dailymemo.co.kr"
+        "joynote.kr",
+        "nolplace.com"
       ],
-      "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/건강 비교표 브릿지 활용"
+      "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/건강 비교표 브릿지 활용",
+      "renderedShorts": 0,
+      "publishedCommunityPosts": 0
     }
   ],
   "svmlTemplates": [
@@ -487,12 +493,7 @@
   "communityPosts": [
     {
       "text": "[윤랩 자동화 연구소 실전 브리핑 #01] 스마트폰·PC로 1분 만에 끝내는 2026 공시가격·재산세 특례 기준 판독표 ⚡\n\n매년 고지서가 나온 뒤에야 부랴부랴 세율과 공제 조건을 찾아보느라 시간을 쓰시진 않으셨나요?\n윤랩 자동화 연구소에서 복잡한 조문 대신 딱 3단계(Step 1 기준가 확인 → Step 2 1주택 특례 대조 → Step 3 공제율 합산)로 판독할 수 있는 실측 기준표를 정리했습니다.\n\n✅ 핵심 점검 포인트 3가지\n1) 1세대 1주택 공시가격 ",
-      "time": "0초 전",
-      "url": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5"
-    },
-    {
-      "text": "[윤랩 자동화 연구소 실전 브리핑 #01] 스마트폰·PC로 1분 만에 끝내는 2026 공시가격·재산세 특례 기준 판독표 ⚡\n\n매년 고지서가 나온 뒤에야 부랴부랴 세율과 공제 조건을 찾아보느라 시간을 쓰시진 않으셨나요?\n윤랩 자동화 연구소에서 복잡한 조문 대신 딱 3단계(Step 1 기준가 확인 → Step 2 1주택 특례 대조 → Step 3 공제율 합산)로 판독할 수 있는 실측 기준표를 정리했습니다.\n\n✅ 핵심 점검 포인트 3가지\n1) 1세대 1주택 공시가격 ",
-      "time": "3초 전",
+      "time": "1시간 전",
       "url": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5"
     },
     {
@@ -501,32 +502,193 @@
       "url": "https://www.youtube.com/post/UgkxKng5zf_rK3huQx2EgVkBy0z0tNv-qfph"
     }
   ],
-  "naverCafes": [
+  "plannedQueue": [
     {
-      "cafeId": "loveshake1",
-      "clubId": "19858249",
-      "menuId": "164",
-      "name": "[금융꿀팁]직장인/주부/서민/아파트론/대환/사잇돌/저금리/대출",
-      "grade": "가지5단계 (2009년 개설 17년 차)",
-      "members": 28495,
-      "account": "soul5373 (Profile 4)",
-      "latestArticleUrl": "https://cafe.naver.com/loveshake1/162878",
-      "latestTitle": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
-      "bridgeDomain": "smilenote.kr",
-      "status": "live"
+      "part": 1,
+      "channel": "@yoon_autolab",
+      "channelName": "윤랩 자동화 연구소",
+      "templateId": "svml-tpl-01",
+      "title": "스마트폰 1분 국민·기초연금·세무 환급 자동 통합조회 루틴",
+      "bridgeDomain": "meganote.kr",
+      "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+      "scheduleSlot": "오늘 09:00 완료",
+      "shortStatus": "rendered",
+      "shortStatusLabel": "🟢 MP4 렌더링 완료 (14.4초)",
+      "communityStatus": "published",
+      "communityStatusLabel": "🟢 커뮤니티 발행 완료",
+      "communityUrl": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5"
     },
     {
-      "cafeId": "boutiqueinfo",
-      "clubId": "31608088",
-      "menuId": "4",
-      "name": "고급지식의 모든 것",
-      "grade": "가지3단계",
-      "members": 1722,
-      "account": "soul5373 (Profile 4)",
-      "latestArticleUrl": "https://cafe.naver.com/boutiqueinfo/2302",
-      "latestTitle": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
+      "part": 2,
+      "channel": "@숨은지원금",
+      "channelName": "숨은지원금 (4060 정책 쇼츠)",
+      "templateId": "svml-tpl-01",
+      "title": "2026 주택연금 공시가격 12억 기준 및 수령액 월 +28만 원 우대형 비교",
       "bridgeDomain": "smilenote.kr",
-      "status": "live"
+      "bridgeUrl": "https://www.smilenote.kr/",
+      "scheduleSlot": "오늘 14:00 완료",
+      "shortStatus": "rendered",
+      "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)",
+      "communityStatus": "published",
+      "communityStatusLabel": "🟢 본진 커뮤니티 연동 완료",
+      "communityUrl": "https://www.youtube.com/@yoon_autolab/posts"
+    },
+    {
+      "part": 3,
+      "channel": "@yoon_autolab",
+      "channelName": "윤랩 자동화 연구소",
+      "templateId": "svml-tpl-02",
+      "title": "건강보험 본인부담상한제 환급금 1분 공식 조회 루틴 (스미싱 구별법)",
+      "bridgeDomain": "must-good.com",
+      "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+      "scheduleSlot": "오늘 17:00 렌더링 완료",
+      "shortStatus": "rendered",
+      "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)",
+      "communityStatus": "ready_to_publish",
+      "communityStatusLabel": "🟡 커뮤니티 즉시 발행 가능",
+      "communityUrl": "https://www.youtube.com/@yoon_autolab/posts"
+    },
+    {
+      "part": 4,
+      "channel": "@yoon_autolab",
+      "channelName": "윤랩 자동화 연구소",
+      "templateId": "svml-tpl-02",
+      "title": "소상공인 희망리턴패키지 점포철거비 지원금 & 폐업 부가세 3단 체크리스트",
+      "bridgeDomain": "meganote.kr",
+      "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+      "scheduleSlot": "내일 09:30 예정",
+      "shortStatus": "queued",
+      "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 25초)",
+      "communityStatus": "queued",
+      "communityStatusLabel": "⏳ 쇼츠 연동 발행 대기",
+      "communityUrl": ""
+    },
+    {
+      "part": 5,
+      "channel": "@숨은지원금",
+      "channelName": "숨은지원금 (4060 정책 쇼츠)",
+      "templateId": "svml-tpl-01",
+      "title": "퇴직 후 건강보험 피부양자 탈락 막는 연소득 2천만·재산 5.4억 방어선",
+      "bridgeDomain": "baronote.kr",
+      "bridgeUrl": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
+      "scheduleSlot": "내일 15:00 예정",
+      "shortStatus": "queued",
+      "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 24초)",
+      "communityStatus": "queued",
+      "communityStatusLabel": "⏳ 고정댓글 브릿지 대기",
+      "communityUrl": ""
+    },
+    {
+      "part": 6,
+      "channel": "@바로랭크",
+      "channelName": "바로랭크 (가전·건강 랭킹)",
+      "templateId": "svml-tpl-03",
+      "title": "한전 고효율 가전제품 환급금 30만 원 신청 조건 & 에너지바우처 비교",
+      "bridgeDomain": "joynote.kr",
+      "bridgeUrl": "https://www.joynote.kr/kepco-appliance-rebate-after-moving",
+      "scheduleSlot": "모레 10:00 예정",
+      "shortStatus": "queued",
+      "shortStatusLabel": "⏳ 쿠팡 이관 병행 대기 (SVML 22초)",
+      "communityStatus": "queued",
+      "communityStatusLabel": "⏳ 커뮤니티 비교표 대기",
+      "communityUrl": ""
     }
-  ]
+  ],
+  "measurement": {
+    "ga4Referrals": {
+      "todaySessions": 0,
+      "last7DaysSessions": 0,
+      "last28DaysSessions": 0,
+      "topDomains": [
+        {
+          "domain": "must-good.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 5
+        },
+        {
+          "domain": "woorinote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 4
+        },
+        {
+          "domain": "baronote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "healthcox.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "tripmarvel.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "daynote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        },
+        {
+          "domain": "justinfo.co.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        },
+        {
+          "domain": "nolplace.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        }
+      ]
+    },
+    "totalSubscribers": 32,
+    "renderedMp4Count": 3,
+    "publishedCommunityCount": 2,
+    "targetDailyShorts": 2,
+    "targetCtrPct": 4.8,
+    "estimatedHighCpcRpmUsd": 12.5,
+    "channelPerformance": [
+      {
+        "channel": "@yoon_autolab (윤랩 자동화 연구소)",
+        "subscribers": 12,
+        "completedAssets": "SVML 쇼츠 2편 · 커뮤니티 2건",
+        "targetDomains": "meganote.kr · baronote.kr · justinfo.co.kr",
+        "conversionPath": "쇼츠 24초 시청 → 게시물(커뮤니티) 클릭 → CF 세무·IT 본진 유입",
+        "status": "🟢 가동 중 (대표 본진)"
+      },
+      {
+        "channel": "@숨은지원금 (4060 정책 쇼츠)",
+        "subscribers": 2,
+        "completedAssets": "SVML 쇼츠 1편 (주택연금 12억 비교)",
+        "targetDomains": "smilenote.kr · must-good.com · topnote.kr",
+        "conversionPath": "쇼츠 고정댓글 원문 링크 → CF 연금·환급금 계산기 직결",
+        "status": "🟢 가동 중 (쇼츠 특공대)"
+      },
+      {
+        "channel": "@바로랭크 (쿠팡파트너스 랭킹)",
+        "subscribers": 18,
+        "completedAssets": "기존 롱폼 2편 · 커뮤니티 브릿지 대기",
+        "targetDomains": "healthcox.com · joynote.kr · nolplace.com",
+        "conversionPath": "쿠팡파트너스(AF1225691) 이관 완료 즉시 3단 가성비 쇼츠 재개",
+        "status": "⏸️ 이관 대기 (커뮤니티 활성)"
+      }
+    ]
+  }
 }

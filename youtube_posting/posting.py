@@ -29,6 +29,10 @@ STATUS_PATH = ROOT_DIR / "dashboard" / "data" / "youtube" / "status.json"
 PUBLIC_JSON_PATH = ROOT_DIR / "dashboard" / "data" / "public" / "youtube.json"
 RENDERS_DIR = ROOT_DIR / "dashboard" / "data" / "public" / "youtube_renders"
 
+CAFE_STATUS_PATH = ROOT_DIR / "dashboard" / "data" / "cafe" / "status.json"
+CAFE_PUBLIC_JSON_PATH = ROOT_DIR / "dashboard" / "data" / "public" / "cafe.json"
+TRAFFIC_JSON_PATH = ROOT_DIR / "dashboard" / "data" / "traffic.json"
+
 KST = dt.timezone(dt.timedelta(hours=9))
 
 
@@ -518,6 +522,54 @@ def render_hypit_svml_short(part_no: int = 1) -> dict[str, Any]:
     }
 
 
+def _extract_ga4_channel_referrals(channel_keywords: list[str]) -> dict[str, Any]:
+    """Read `dashboard/data/traffic.json` and aggregate GA4 sessions/pageviews matching `channel_keywords`."""
+    total_today_sessions = 0
+    total_7d_sessions = 0
+    total_28d_sessions = 0
+    domain_breakdown: list[dict[str, Any]] = []
+    if TRAFFIC_JSON_PATH.exists():
+        try:
+            tdata = json.loads(TRAFFIC_JSON_PATH.read_text(encoding="utf-8"))
+            sites = tdata.get("sites") or {}
+            for dom, sinfo in sites.items():
+                periods = (sinfo.get("ga4") or {}).get("periods") or {}
+                dom_today = 0
+                dom_7d = 0
+                dom_28d = 0
+                for p_key, p_val in periods.items():
+                    for src in (p_val.get("sources") or []):
+                        s_name = str(src.get("source") or "").lower()
+                        c_name = str(src.get("channel") or "").lower()
+                        if any(k in s_name or k in c_name for k in channel_keywords):
+                            sess = int(src.get("sessions") or 0)
+                            if p_key == "today":
+                                dom_today += sess
+                            elif p_key == "last7Days":
+                                dom_7d += sess
+                            elif p_key == "last28Days":
+                                dom_28d += sess
+                total_today_sessions += dom_today
+                total_7d_sessions += dom_7d
+                total_28d_sessions += dom_28d
+                domain_breakdown.append({
+                    "domain": dom,
+                    "todaySessions": dom_today,
+                    "last7DaysSessions": dom_7d,
+                    "last28DaysSessions": dom_28d,
+                    "totalPageViewsToday": int(((periods.get("today") or {}).get("pageViews")) or 0),
+                })
+        except Exception:
+            pass
+    domain_breakdown.sort(key=lambda x: (x["last28DaysSessions"], x["totalPageViewsToday"]), reverse=True)
+    return {
+        "todaySessions": total_today_sessions,
+        "last7DaysSessions": total_7d_sessions,
+        "last28DaysSessions": total_28d_sessions,
+        "topDomains": domain_breakdown[:8],
+    }
+
+
 def load_youtube_status() -> dict[str, Any]:
     if STATUS_PATH.exists():
         try:
@@ -537,7 +589,7 @@ def save_youtube_status(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def sync_youtube_live_state() -> dict[str, Any]:
-    """Sync live 3-channel state from EGO Lite (`barolab-soultin`) + rendered SVML assets + Naver Cafe OSMU bridges."""
+    """Sync live 3-channel state from EGO Lite (`barolab-soultin`) + rendered SVML assets + YouTube performance metrics."""
     from dashboard.common.ego_taskspace import native_sync_youtube_channels
 
     prev = load_youtube_status()
@@ -570,7 +622,9 @@ def sync_youtube_live_state() -> dict[str, Any]:
             "studioUrl": "https://www.youtube.com/@yoon_autolab",
             "postsUrl": "https://www.youtube.com/@yoon_autolab/posts",
             "bridgeDomains": ["meganote.kr", "justinfo.co.kr", "daynote.kr", "baronote.kr"],
-            "strategyNote": "Hypit SVML 유형 A/B 쇼츠 + 커뮤니티 탭 1분 체크리스트로 CF IT·비즈니스·세무 본진 직결"
+            "strategyNote": "Hypit SVML 유형 A/B 쇼츠 + 커뮤니티 탭 1분 체크리스트로 CF IT·비즈니스·세무 본진 직결",
+            "renderedShorts": 2,
+            "publishedCommunityPosts": len(live_posts),
         },
         {
             "handle": "@숨은지원금",
@@ -583,7 +637,9 @@ def sync_youtube_live_state() -> dict[str, Any]:
             "studioUrl": "https://www.youtube.com/@%EC%88%A8%EC%9D%80%EC%A7%80%EC%9B%90%EA%B8%88",
             "postsUrl": "https://www.youtube.com/@%EC%88%A8%EC%9D%80%EC%A7%80%EC%9B%90%EA%B8%88/shorts",
             "bridgeDomains": ["must-good.com", "smilenote.kr", "topnote.kr", "woorinote.kr"],
-            "strategyNote": "자청 4대 결핍(손실회피·즉시판정) 24초 비교표 쇼츠 → 고정댓글로 CF 연금·복지 본진 유입"
+            "strategyNote": "자청 4대 결핍(손실회피·즉시판정) 24초 비교표 쇼츠 → 고정댓글로 CF 연금·복지 본진 유입",
+            "renderedShorts": 1,
+            "publishedCommunityPosts": 0,
         },
         {
             "handle": "@바로랭크",
@@ -595,39 +651,143 @@ def sync_youtube_live_state() -> dict[str, Any]:
             "statusBadge": "⏸️ 쿠팡 계정 이관 대기 (커뮤니티 활성)",
             "studioUrl": "https://www.youtube.com/@%EB%B0%94%EB%A1%9C%EB%9E%AD%ED%81%AC",
             "postsUrl": "https://www.youtube.com/@%EB%B0%94%EB%A1%9C%EB%9E%AD%ED%81%AC/posts",
-            "bridgeDomains": ["healthcox.com", "trendnote.co.kr", "dailymemo.co.kr"],
-            "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/건강 비교표 브릿지 활용"
+            "bridgeDomains": ["healthcox.com", "joynote.kr", "nolplace.com"],
+            "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/건강 비교표 브릿지 활용",
+            "renderedShorts": 0,
+            "publishedCommunityPosts": 0,
         }
     ]
 
-    naver_cafes = prev.get("naverCafes") or [
+    rendered_parts = {int(r.get("part", 0)) for r in renders}
+    planned_queue = [
         {
-            "cafeId": "loveshake1",
-            "clubId": "19858249",
-            "menuId": "164",
-            "name": "[금융꿀팁]직장인/주부/서민/아파트론/대환/사잇돌/저금리/대출",
-            "grade": "가지5단계 (2009년 개설 17년 차)",
-            "members": 28495,
-            "account": "soul5373 (Profile 4)",
-            "latestArticleUrl": "https://cafe.naver.com/loveshake1/162878",
-            "latestTitle": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
-            "bridgeDomain": "smilenote.kr",
-            "status": "live"
+            "part": 1,
+            "channel": "@yoon_autolab",
+            "channelName": "윤랩 자동화 연구소",
+            "templateId": "svml-tpl-01",
+            "title": "스마트폰 1분 국민·기초연금·세무 환급 자동 통합조회 루틴",
+            "bridgeDomain": "meganote.kr",
+            "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+            "scheduleSlot": "오늘 09:00 완료",
+            "shortStatus": "rendered" if 1 in rendered_parts else "queued",
+            "shortStatusLabel": "🟢 MP4 렌더링 완료 (14.4초)" if 1 in rendered_parts else "⏳ 렌더링 대기",
+            "communityStatus": "published",
+            "communityStatusLabel": "🟢 커뮤니티 발행 완료",
+            "communityUrl": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5",
         },
         {
-            "cafeId": "boutiqueinfo",
-            "clubId": "31608088",
-            "menuId": "4",
-            "name": "고급지식의 모든 것",
-            "grade": "가지3단계",
-            "members": 1722,
-            "account": "soul5373 (Profile 4)",
-            "latestArticleUrl": "https://cafe.naver.com/boutiqueinfo/2302",
-            "latestTitle": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
+            "part": 2,
+            "channel": "@숨은지원금",
+            "channelName": "숨은지원금 (4060 정책 쇼츠)",
+            "templateId": "svml-tpl-01",
+            "title": "2026 주택연금 공시가격 12억 기준 및 수령액 월 +28만 원 우대형 비교",
             "bridgeDomain": "smilenote.kr",
-            "status": "live"
-        }
+            "bridgeUrl": "https://www.smilenote.kr/",
+            "scheduleSlot": "오늘 14:00 완료",
+            "shortStatus": "rendered" if 2 in rendered_parts else "queued",
+            "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)" if 2 in rendered_parts else "⏳ 렌더링 대기",
+            "communityStatus": "published",
+            "communityStatusLabel": "🟢 본진 커뮤니티 연동 완료",
+            "communityUrl": "https://www.youtube.com/@yoon_autolab/posts",
+        },
+        {
+            "part": 3,
+            "channel": "@yoon_autolab",
+            "channelName": "윤랩 자동화 연구소",
+            "templateId": "svml-tpl-02",
+            "title": "건강보험 본인부담상한제 환급금 1분 공식 조회 루틴 (스미싱 구별법)",
+            "bridgeDomain": "must-good.com",
+            "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+            "scheduleSlot": "오늘 17:00 렌더링 완료",
+            "shortStatus": "rendered" if 3 in rendered_parts else "queued",
+            "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)" if 3 in rendered_parts else "⏳ 렌더링 대기",
+            "communityStatus": "ready_to_publish",
+            "communityStatusLabel": "🟡 커뮤니티 즉시 발행 가능",
+            "communityUrl": "https://www.youtube.com/@yoon_autolab/posts",
+        },
+        {
+            "part": 4,
+            "channel": "@yoon_autolab",
+            "channelName": "윤랩 자동화 연구소",
+            "templateId": "svml-tpl-02",
+            "title": "소상공인 희망리턴패키지 점포철거비 지원금 & 폐업 부가세 3단 체크리스트",
+            "bridgeDomain": "meganote.kr",
+            "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+            "scheduleSlot": "내일 09:30 예정",
+            "shortStatus": "queued",
+            "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 25초)",
+            "communityStatus": "queued",
+            "communityStatusLabel": "⏳ 쇼츠 연동 발행 대기",
+            "communityUrl": "",
+        },
+        {
+            "part": 5,
+            "channel": "@숨은지원금",
+            "channelName": "숨은지원금 (4060 정책 쇼츠)",
+            "templateId": "svml-tpl-01",
+            "title": "퇴직 후 건강보험 피부양자 탈락 막는 연소득 2천만·재산 5.4억 방어선",
+            "bridgeDomain": "baronote.kr",
+            "bridgeUrl": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
+            "scheduleSlot": "내일 15:00 예정",
+            "shortStatus": "queued",
+            "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 24초)",
+            "communityStatus": "queued",
+            "communityStatusLabel": "⏳ 고정댓글 브릿지 대기",
+            "communityUrl": "",
+        },
+        {
+            "part": 6,
+            "channel": "@바로랭크",
+            "channelName": "바로랭크 (가전·건강 랭킹)",
+            "templateId": "svml-tpl-03",
+            "title": "한전 고효율 가전제품 환급금 30만 원 신청 조건 & 에너지바우처 비교",
+            "bridgeDomain": "joynote.kr",
+            "bridgeUrl": "https://www.joynote.kr/kepco-appliance-rebate-after-moving",
+            "scheduleSlot": "모레 10:00 예정",
+            "shortStatus": "queued",
+            "shortStatusLabel": "⏳ 쿠팡 이관 병행 대기 (SVML 22초)",
+            "communityStatus": "queued",
+            "communityStatusLabel": "⏳ 커뮤니티 비교표 대기",
+            "communityUrl": "",
+        },
     ]
+
+    yt_ga4 = _extract_ga4_channel_referrals(["youtube", "youtu.be", "google_video"])
+    measurement = {
+        "ga4Referrals": yt_ga4,
+        "totalSubscribers": 32,
+        "renderedMp4Count": len(renders),
+        "publishedCommunityCount": len(live_posts),
+        "targetDailyShorts": 2,
+        "targetCtrPct": 4.8,
+        "estimatedHighCpcRpmUsd": 12.50,
+        "channelPerformance": [
+            {
+                "channel": "@yoon_autolab (윤랩 자동화 연구소)",
+                "subscribers": 12,
+                "completedAssets": f"SVML 쇼츠 2편 · 커뮤니티 {len(live_posts)}건",
+                "targetDomains": "meganote.kr · baronote.kr · justinfo.co.kr",
+                "conversionPath": "쇼츠 24초 시청 → 게시물(커뮤니티) 클릭 → CF 세무·IT 본진 유입",
+                "status": "🟢 가동 중 (대표 본진)",
+            },
+            {
+                "channel": "@숨은지원금 (4060 정책 쇼츠)",
+                "subscribers": 2,
+                "completedAssets": "SVML 쇼츠 1편 (주택연금 12억 비교)",
+                "targetDomains": "smilenote.kr · must-good.com · topnote.kr",
+                "conversionPath": "쇼츠 고정댓글 원문 링크 → CF 연금·환급금 계산기 직결",
+                "status": "🟢 가동 중 (쇼츠 특공대)",
+            },
+            {
+                "channel": "@바로랭크 (쿠팡파트너스 랭킹)",
+                "subscribers": 18,
+                "completedAssets": "기존 롱폼 2편 · 커뮤니티 브릿지 대기",
+                "targetDomains": "healthcox.com · joynote.kr · nolplace.com",
+                "conversionPath": "쿠팡파트너스(AF1225691) 이관 완료 즉시 3단 가성비 쇼츠 재개",
+                "status": "⏸️ 이관 대기 (커뮤니티 활성)",
+            },
+        ],
+    }
 
     data = {
         "ok": True,
@@ -647,15 +807,16 @@ def sync_youtube_live_state() -> dict[str, Any]:
             "svmlTemplateCount": len(SVML_TEMPLATES),
             "renderedShortsCount": len(renders),
             "communityPostsCount": len(live_posts),
-            "cafeBridgeMembers": 30217,
-            "cafePublishedCount": len(naver_cafes),
+            "plannedQueueCount": len([q for q in planned_queue if q["shortStatus"] != "rendered" or q["communityStatus"] != "published"]),
+            "ga4ReferralSessions28d": yt_ga4["last28DaysSessions"],
         },
         "channels": channels,
         "svmlTemplates": SVML_TEMPLATES,
         "productionTopics": PRODUCTION_TOPICS,
         "renders": renders,
         "communityPosts": live_posts,
-        "naverCafes": naver_cafes,
+        "plannedQueue": planned_queue,
+        "measurement": measurement,
     }
     return save_youtube_status(data)
 
@@ -675,7 +836,6 @@ def produce_youtube_svml_package(part_no: int = 1, publish_community: bool = Tru
         )
 
     st = sync_youtube_live_state()
-    # Update or prepend render in status
     renders = [r for r in (st.get("renders") or []) if r.get("part") != render_res.get("part")]
     renders.insert(0, render_res)
     st["renders"] = renders
@@ -694,6 +854,326 @@ def produce_youtube_svml_package(part_no: int = 1, publish_community: bool = Tru
     }
 
 
+# ============================================================================
+# Dedicated Naver Cafe 30,217-Member Bridge Engine (`cafe.html` / `/api/cafe`)
+# ============================================================================
+
+DEFAULT_CAFE_PUBLISHED_ARTICLES: list[dict[str, Any]] = [
+    {
+        "id": "boutiqueinfo-2305",
+        "part": 6,
+        "cafeId": "boutiqueinfo",
+        "cafeName": "고급지식의 모든 것",
+        "boardName": "지식 아카이브 (menuId 4)",
+        "members": 1722,
+        "account": "soul5373",
+        "title": "[핵심정리] 희망리턴패키지 점포철거비 지원금·폐업 부가세 신고 (점포철거비 지원 조건과 폐업 부가세·잔존재화 과세)",
+        "articleUrl": "https://cafe.naver.com/boutiqueinfo/2305",
+        "bridgeDomain": "meganote.kr",
+        "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+        "publishedAt": "2026-11-02 17:41 KST",
+        "status": "published_verified",
+        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#2305)",
+    },
+    {
+        "id": "loveshake1-162878",
+        "part": 5,
+        "cafeId": "loveshake1",
+        "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리",
+        "boardName": "자유게시판·금융꿀팁 (menuId 164)",
+        "members": 28495,
+        "account": "soul5373",
+        "title": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
+        "articleUrl": "https://cafe.naver.com/loveshake1/162878",
+        "bridgeDomain": "smilenote.kr",
+        "bridgeUrl": "https://www.smilenote.kr/",
+        "publishedAt": "2026-11-02 14:22 KST",
+        "status": "published_verified",
+        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#162878)",
+    },
+    {
+        "id": "boutiqueinfo-2302",
+        "part": 5,
+        "cafeId": "boutiqueinfo",
+        "cafeName": "고급지식의 모든 것",
+        "boardName": "지식 아카이브 (menuId 4)",
+        "members": 1722,
+        "account": "soul5373",
+        "title": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
+        "articleUrl": "https://cafe.naver.com/boutiqueinfo/2302",
+        "bridgeDomain": "smilenote.kr",
+        "bridgeUrl": "https://www.smilenote.kr/",
+        "publishedAt": "2026-11-02 14:23 KST",
+        "status": "published_verified",
+        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#2302)",
+    },
+    {
+        "id": "loveshake1-162877",
+        "part": 1,
+        "cafeId": "loveshake1",
+        "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리",
+        "boardName": "자유게시판·금융꿀팁 (menuId 164)",
+        "members": 28495,
+        "account": "soul5373",
+        "title": "국민연금 기초연금 중복수령 감액 기준과 A급여액 산식·소득인정액 계산법",
+        "articleUrl": "https://cafe.naver.com/loveshake1/162877",
+        "bridgeDomain": "must-good.com",
+        "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+        "publishedAt": "2026-11-02 13:55 KST",
+        "status": "published_verified",
+        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#162877)",
+    },
+]
+
+
+def load_cafe_status() -> dict[str, Any]:
+    if CAFE_STATUS_PATH.exists():
+        try:
+            return json.loads(CAFE_STATUS_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+
+def save_cafe_status(data: dict[str, Any]) -> dict[str, Any]:
+    CAFE_STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    CAFE_PUBLIC_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
+    txt = json.dumps(data, ensure_ascii=False, indent=2)
+    CAFE_STATUS_PATH.write_text(txt, encoding="utf-8")
+    CAFE_PUBLIC_JSON_PATH.write_text(txt, encoding="utf-8")
+    return data
+
+
+def sync_cafe_live_state() -> dict[str, Any]:
+    """Build and sync the dedicated Naver Cafe 30,217-member control room state (뭘 했는지 / 뭘 할 건지 / 효과 측정)."""
+    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM, load_brunch_status
+
+    prev = load_cafe_status()
+    published_articles: list[dict[str, Any]] = list(prev.get("publishedArticles") or DEFAULT_CAFE_PUBLISHED_ARTICLES)
+    seen_urls = {a.get("articleUrl") for a in published_articles if a.get("articleUrl")}
+
+    # Merge any new cafeBridges recorded in brunch status history
+    br_st = load_brunch_status()
+    for h in reversed((br_st.get("automation") or {}).get("history") or []):
+        for cb in (h.get("cafeBridges") or []):
+            u = cb.get("url")
+            if u and u not in seen_urls:
+                seen_urls.add(u)
+                c_slug = cb.get("cafe", "loveshake1")
+                published_articles.insert(0, {
+                    "id": f"{c_slug}-{len(published_articles) + 1}",
+                    "part": h.get("part", 6),
+                    "cafeId": c_slug,
+                    "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리" if c_slug == "loveshake1" else "고급지식의 모든 것",
+                    "boardName": "자유게시판·금융꿀팁 (menuId 164)" if c_slug == "loveshake1" else "지식 아카이브 (menuId 4)",
+                    "members": 28495 if c_slug == "loveshake1" else 1722,
+                    "account": "soul5373",
+                    "title": f"[핵심정리] {h.get('title', '')}",
+                    "articleUrl": u,
+                    "bridgeDomain": (h.get("bridgeUrl") or "https://www.meganote.kr").split("/")[2].replace("www.", ""),
+                    "bridgeUrl": h.get("bridgeUrl") or "https://www.meganote.kr/",
+                    "publishedAt": str(h.get("at") or now_kst_str())[:16].replace("T", " ") + " KST",
+                    "status": "published_verified",
+                    "statusLabel": "🟢 실측 발행 영수증 검증 완료",
+                })
+
+    cafes = [
+        {
+            "cafeId": "loveshake1",
+            "clubId": "19858249",
+            "menuId": "164",
+            "name": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/사잇돌/저금리/대출",
+            "shortName": "러브쉐이크 (금융꿀팁)",
+            "grade": "가지5단계 (2009년 개설 · 17년 차 장수 카페)",
+            "members": 28495,
+            "account": "soul5373 (Profile 4 · barolab-soul5373)",
+            "cafeUrl": "https://cafe.naver.com/loveshake1",
+            "writeMode": "FEEditor + Clipboard Link Card (1+1 자동 브릿지)",
+            "targetTopics": "주택연금 · 대환대출 · 건보료 피부양자 · 소상공인 정책자금 · 세금 환급",
+            "publishedCount": len([a for a in published_articles if a.get("cafeId") == "loveshake1"]),
+            "latestArticleUrl": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "loveshake1"), "https://cafe.naver.com/loveshake1/162878"),
+            "status": "live",
+            "statusBadge": "🟢 28,495명 본진 가동 중",
+        },
+        {
+            "cafeId": "boutiqueinfo",
+            "clubId": "31608088",
+            "menuId": "4",
+            "name": "고급지식의 모든 것",
+            "shortName": "고급지식의 모든 것",
+            "grade": "가지3단계 (실무 정보·재테크 전문 카페)",
+            "members": 1722,
+            "account": "soul5373 (Profile 4 · barolab-soul5373)",
+            "cafeUrl": "https://cafe.naver.com/boutiqueinfo",
+            "writeMode": "FEEditor + Clipboard Link Card (1+1 자동 브릿지)",
+            "targetTopics": "절세·증여세 차용증 · 비과세 종합저축 · 중장년 건강검진 · 복지할인",
+            "publishedCount": len([a for a in published_articles if a.get("cafeId") == "boutiqueinfo"]),
+            "latestArticleUrl": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "boutiqueinfo"), "https://cafe.naver.com/boutiqueinfo/2305"),
+            "status": "live",
+            "statusBadge": "🟢 1,722명 세컨드 가동 중",
+        },
+    ]
+
+    # Build 10-part Planned Queue from BRUNCHBOOK_CURRICULUM mapped to Cafe status
+    planned_queue: list[dict[str, Any]] = []
+    for cur in BRUNCHBOOK_CURRICULUM:
+        part_no = int(cur["part"])
+        matching_pubs = [a for a in published_articles if int(a.get("part") or 0) == part_no or cur["title"][:8] in str(a.get("title") or "")]
+        loveshake_pub = next((a for a in matching_pubs if a.get("cafeId") == "loveshake1"), None)
+        boutique_pub = next((a for a in matching_pubs if a.get("cafeId") == "boutiqueinfo"), None)
+
+        if loveshake_pub and boutique_pub:
+            q_status = "completed_both"
+            q_label = "🟢 2개 카페 모두 발행 완료"
+        elif loveshake_pub or boutique_pub:
+            q_status = "completed_partial"
+            q_label = "🟡 1개 카페 발행 완료 (추가 송출 가능)"
+        else:
+            q_status = "queued"
+            q_label = "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+
+        planned_queue.append({
+            "part": part_no,
+            "title": f"[핵심정리] {cur['title']}",
+            "subtitle": cur["subtitle"],
+            "category": cur["category"],
+            "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+            "bridgeDomain": cur["targetDomain"],
+            "bridgeUrl": cur.get("bridgeUrl") or f"https://www.{cur['targetDomain']}/",
+            "loveshakeUrl": loveshake_pub["articleUrl"] if loveshake_pub else "",
+            "boutiqueUrl": boutique_pub["articleUrl"] if boutique_pub else "",
+            "status": q_status,
+            "statusLabel": q_label,
+        })
+
+    cafe_ga4 = _extract_ga4_channel_referrals(["cafe.naver", "m.cafe.naver", "naver_cafe"])
+    naver_all_ga4 = _extract_ga4_channel_referrals(["naver"])
+
+    measurement = {
+        "totalMembersReach": 30217,
+        "publishedTotalCount": len(published_articles),
+        "completedQueueCount": len([q for q in planned_queue if q["status"] != "queued"]),
+        "pendingQueueCount": len([q for q in planned_queue if q["status"] == "queued"]),
+        "cafeDirectReferrals": cafe_ga4,
+        "naverEcosystemReferrals": naver_all_ga4,
+        "cafeBreakdown": [
+            {
+                "cafeName": "[금융꿀팁] 러브쉐이크 (loveshake1)",
+                "members": 28495,
+                "publishedCount": len([a for a in published_articles if a.get("cafeId") == "loveshake1"]),
+                "targetDomains": "smilenote.kr · must-good.com · baronote.kr",
+                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "loveshake1"), ""),
+                "expectedEffect": "네이버 카페 탭 통합검색 노출 + 2.8만 금융/대출 진성 회원 CF 고단가 글 유입",
+            },
+            {
+                "cafeName": "고급지식의 모든 것 (boutiqueinfo)",
+                "members": 1722,
+                "publishedCount": len([a for a in published_articles if a.get("cafeId") == "boutiqueinfo"]),
+                "targetDomains": "meganote.kr · smilenote.kr · healthcox.com",
+                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "boutiqueinfo"), ""),
+                "expectedEffect": "소상공인·재테크·폐업지원금 검색 유입 + CF 비교표 원문 브릿지 클릭",
+            },
+        ],
+    }
+
+    payload = {
+        "ok": True,
+        "updatedAt": now_kst_str(),
+        "account": {
+            "naverId": "soul5373",
+            "egoProfile": "Profile 4 (barolab-soul5373)",
+            "cdpPort": 9440,
+            "autoReclaimEnabled": True,
+            "operatingRule": "브런치·CF 황금원고 발행 시 4문단 핵심 요약 + 원문 계산표 링크를 2개 카페(30,217명)에 동시 송출",
+        },
+        "kpi": {
+            "cafeCount": 2,
+            "totalMembers": 30217,
+            "publishedArticleCount": len(published_articles),
+            "pendingQueueCount": measurement["pendingQueueCount"],
+            "cafeGa4Sessions28d": cafe_ga4["last28DaysSessions"],
+            "naverTotalSessions28d": naver_all_ga4["last28DaysSessions"],
+        },
+        "cafes": cafes,
+        "publishedArticles": published_articles,
+        "plannedQueue": planned_queue,
+        "measurement": measurement,
+    }
+    return save_cafe_status(payload)
+
+
+def publish_cafe_bridge_part(part_no: int = 6) -> dict[str, Any]:
+    """Publish a specific curriculum part (1~10) to both Naver Cafes (`loveshake1` & `boutiqueinfo`) via `barolab-soul5373`."""
+    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM, get_today_cf_bridge_targets
+    from dashboard.common.ego_taskspace import native_publish_naver_cafe_article
+
+    target_item = next((c for c in BRUNCHBOOK_CURRICULUM if int(c["part"]) == int(part_no)), BRUNCHBOOK_CURRICULUM[0])
+    bridge_targets = get_today_cf_bridge_targets(target_item["title"], allowed_domains=[target_item["targetDomain"]])
+    bridge_url = target_item.get("bridgeUrl") or (bridge_targets[0]["url"] if bridge_targets else f"https://www.{target_item['targetDomain']}/")
+
+    cafe_paras = list(target_item["paragraphs"][:4]) + [
+        f"▶ {target_item['title']} 상세 비교표 및 자가진단 원문 보기:",
+        bridge_url,
+    ]
+    st = sync_cafe_live_state()
+    published_articles = list(st.get("publishedArticles") or [])
+    receipts = []
+
+    for cafe_cfg in [
+        {"slug": "loveshake1", "clubid": "19858249", "menuid": "164", "name": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리", "board": "자유게시판·금융꿀팁 (menuId 164)", "members": 28495},
+        {"slug": "boutiqueinfo", "clubid": "31608088", "menuid": "4", "name": "고급지식의 모든 것", "board": "지식 아카이브 (menuId 4)", "members": 1722},
+    ]:
+        # Skip if already published for this part + cafe
+        already = next((a for a in published_articles if a.get("cafeId") == cafe_cfg["slug"] and int(a.get("part") or 0) == int(target_item["part"])), None)
+        if already:
+            receipts.append({"cafe": cafe_cfg["slug"], "url": already["articleUrl"], "reused": True})
+            continue
+        c_res = native_publish_naver_cafe_article(
+            account="soul5373",
+            clubid=cafe_cfg["clubid"],
+            menuid=cafe_cfg["menuid"],
+            title=f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})",
+            paragraphs=cafe_paras,
+            cafe_slug=cafe_cfg["slug"],
+        )
+        if isinstance(c_res, dict) and c_res.get("ok") and c_res.get("url"):
+            art_url = str(c_res["url"])
+            receipts.append({"cafe": cafe_cfg["slug"], "url": art_url})
+            published_articles.insert(0, {
+                "id": f"{cafe_cfg['slug']}-{art_url.rstrip('/').split('/')[-1]}",
+                "part": int(target_item["part"]),
+                "cafeId": cafe_cfg["slug"],
+                "cafeName": cafe_cfg["name"],
+                "boardName": cafe_cfg["board"],
+                "members": cafe_cfg["members"],
+                "account": "soul5373",
+                "title": f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})",
+                "articleUrl": art_url,
+                "bridgeDomain": target_item["targetDomain"],
+                "bridgeUrl": bridge_url,
+                "publishedAt": now_kst_str()[:16] + " KST",
+                "status": "published_verified",
+                "statusLabel": f"🟢 실측 발행 영수증 검증 완료 (#{art_url.rstrip('/').split('/')[-1]})",
+            })
+
+    st["publishedArticles"] = published_articles
+    save_cafe_status(st)
+    final_st = sync_cafe_live_state()
+    return {
+        "ok": len(receipts) > 0,
+        "part": int(target_item["part"]),
+        "title": target_item["title"],
+        "receipts": receipts,
+        "status": final_st,
+    }
+
+
 if __name__ == "__main__":
     out = sync_youtube_live_state()
-    print(json.dumps({"ok": out.get("ok"), "renders": len(out.get("renders", [])), "posts": len(out.get("communityPosts", []))}, ensure_ascii=False))
+    c_out = sync_cafe_live_state()
+    print(json.dumps({
+        "ok": out.get("ok"),
+        "renders": len(out.get("renders", [])),
+        "posts": len(out.get("communityPosts", [])),
+        "cafePublished": len(c_out.get("publishedArticles", [])),
+    }, ensure_ascii=False))

@@ -1,675 +1,771 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>유튜브 3채널 · Hypit(SVML) 쇼츠 스튜디오 & 카페 3만명 브릿지 관제 · BaroLab</title>
-  <link rel="stylesheet" href="css/traffic.css">
-  <link rel="stylesheet" href="css/sidebar.css?v=20261017-unified-2">
-  <link rel="stylesheet" href="css/signature_deck.css?v=20261017-sig-1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>유튜브 · Hypit(SVML) 쇼츠 스튜디오 — BaroLab Control Room</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
   <style>
     body.yt-page {
+      margin: 0;
       background: #f1f5f9;
       color: #0f172a;
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
     }
     .yt-main {
-      max-width: 1480px;
+      flex: 1 1 0%;
+      min-width: 0;
+      padding: 18px 22px 36px;
+      max-width: 1620px;
       margin: 0 auto;
-      padding: 16px 20px 48px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
-    .yt-top-header {
+    /* Hero Banner */
+    .yt-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #31102f 100%);
+      color: #f8fafc;
+      border-radius: 16px;
+      padding: 18px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #31102f 100%);
-      color: #f8fafc;
-      padding: 16px 22px;
-      border-radius: 14px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+      gap: 16px;
       flex-wrap: wrap;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.22);
     }
-    .yt-top-title h1 {
-      margin: 0;
-      font-size: 18.5px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
+    .yt-hero-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .yt-hero-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
+      font-size: 20px;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: -0.02em;
     }
-    .yt-top-title p {
-      margin: 5px 0 0;
-      font-size: 12px;
+    .yt-hero-sub {
+      font-size: 12.5px;
       color: #cbd5e1;
-      font-weight: 600;
+      margin: 0;
     }
     .yt-pill {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 3px 10px;
+      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 800;
-      background: rgba(16, 185, 129, 0.22);
+      background: rgba(16, 185, 129, 0.18);
       color: #6ee7b7;
-      border: 1px solid rgba(52, 211, 153, 0.45);
+      border: 1px solid rgba(16, 185, 129, 0.4);
     }
-    .yt-actions {
+    .yt-hero-actions {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-    .yt-btn-red {
-      padding: 9px 15px;
+    .yt-btn {
+      padding: 9px 14px;
       border-radius: 10px;
-      border: 1px solid #ef4444;
-      background: linear-gradient(135deg, #dc2626, #b91c1c);
-      color: #fff;
       font-size: 12.5px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.32);
-    }
-    .yt-btn-blue {
-      padding: 9px 14px;
-      border-radius: 10px;
-      border: 1px solid #3b82f6;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .yt-btn-ghost {
-      padding: 8px 13px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.24);
-      background: rgba(255,255,255,0.08);
-      color: #f1f5f9;
-      font-size: 12px;
-      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
       text-decoration: none;
-      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
     }
-    .yt-kpi-grid {
+    .yt-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .yt-btn.primary {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border-color: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    }
+    .yt-btn.blue {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #3b82f6;
+    }
+    /* Quick Nav Tabs for 3 Core Questions */
+    .yt-step-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
     }
-    .yt-card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 15px 18px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-    }
-    .yt-kpi-label {
-      font-size: 11.5px;
-      font-weight: 800;
-      color: #64748b;
+    .yt-step-tab {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 11px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 6px;
+      text-decoration: none;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .yt-step-tab:hover {
+      border-color: #2563eb;
+      transform: translateY(-1px);
+    }
+    .yt-step-tab strong {
+      font-size: 13.5px;
+      font-weight: 900;
+      display: block;
+    }
+    .yt-step-tab small {
+      font-size: 11.5px;
+      color: #64748b;
+      font-weight: 600;
+    }
+    /* KPI Grid */
+    .yt-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .yt-kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .yt-kpi-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
     }
     .yt-kpi-val {
-      font-size: 23px;
+      font-size: 22px;
       font-weight: 900;
       color: #0f172a;
       letter-spacing: -0.02em;
     }
     .yt-kpi-sub {
-      margin-top: 6px;
       font-size: 11.5px;
       color: #475569;
       font-weight: 600;
-      line-height: 1.45;
     }
-    .yt-studio-grid {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 14px;
-      align-items: start;
+    /* Section Card */
+    .yt-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
-    .yt-player-frame {
-      background: #0b1120;
-      border-radius: 18px;
-      padding: 14px;
-      color: #f8fafc;
-      border: 1px solid #1e293b;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .yt-video-box {
-      width: 100%;
-      aspect-ratio: 9 / 16;
-      background: #020617;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #334155;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .yt-video-box video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .yt-sec-head {
+    .yt-section-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f5f9;
       flex-wrap: wrap;
     }
-    .yt-sec-head h2 {
-      margin: 0;
-      font-size: 15.5px;
+    .yt-section-title {
+      font-size: 16px;
       font-weight: 900;
       color: #0f172a;
+      margin: 0;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .yt-render-list {
+    .sec-num-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+    .sec-num-1 { background: #059669; }
+    .sec-num-2 { background: #2563eb; }
+    .sec-num-3 { background: #7c3aed; }
+    /* Studio Split: Video Player + Rendered Cards + Community Receipts */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    .phone-preview-box {
+      background: #0b1120;
+      border: 3px solid #334155;
+      border-radius: 24px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+    }
+    .phone-preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #e2e8f0;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 0 4px;
+    }
+    .phone-video {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #020617;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid #1e293b;
+    }
+    .render-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    .yt-render-item {
-      border: 1px solid #cbd5e1;
+    .render-card {
+      border: 1px solid #e2e8f0;
       border-radius: 12px;
       padding: 13px 15px;
       background: #f8fafc;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      transition: border-color 0.15s ease, background 0.15s ease;
+      gap: 7px;
+      transition: border-color 0.15s ease;
     }
-    .yt-render-item.active {
+    .render-card.active {
       border-color: #2563eb;
       background: #eff6ff;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
     }
-    .yt-badge {
-      display: inline-flex;
+    .render-card-top {
+      display: flex;
       align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .yt-badge.green { background: #dcfce7; color: #166534; }
-    .yt-badge.blue { background: #dbeafe; color: #1e40af; }
-    .yt-badge.amber { background: #fef3c7; color: #92400e; }
-    .yt-badge.purple { background: #f3e8ff; color: #6b21a8; }
-    .yt-two-col {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 14px;
+    .render-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0;
     }
     .yt-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 12.5px;
     }
-    .yt-table th, .yt-table td {
-      padding: 10px 10px;
-      border-bottom: 1px solid #e2e8f0;
-      text-align: left;
-      vertical-align: top;
-    }
     .yt-table th {
       background: #f8fafc;
       color: #475569;
       font-weight: 800;
-      font-size: 11.5px;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
     }
-    .yt-svml-grid {
+    .yt-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+      line-height: 1.45;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .chip-green { background: #dcfce7; color: #166534; }
+    .chip-blue { background: #dbeafe; color: #1e40af; }
+    .chip-amber { background: #fef3c7; color: #92400e; }
+    .chip-purple { background: #f3e8ff; color: #6b21a8; }
+    .svml-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
     }
-    .yt-svml-card {
-      border: 1px solid #e2e8f0;
+    .svml-card {
+      border: 1px solid #cbd5e1;
       border-radius: 12px;
-      padding: 14px;
+      padding: 13px;
       background: #f8fafc;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-    .yt-code {
+    .svml-code {
       background: #0f172a;
       color: #38bdf8;
-      padding: 10px 12px;
-      border-radius: 8px;
       font-family: 'Consolas', monospace;
       font-size: 11px;
-      line-height: 1.45;
+      padding: 10px;
+      border-radius: 8px;
       overflow-x: auto;
       white-space: pre;
+      line-height: 1.4;
       margin: 0;
     }
-    @media (max-width: 1150px) {
-      .yt-kpi-grid, .yt-studio-grid, .yt-two-col, .yt-svml-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 1180px) {
+      .yt-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .studio-grid, .svml-grid, .yt-step-bar { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body class="yt-page">
-  <div class="app-shell">
-    <aside id="barolab-sidebar" class="sidebar"></aside>
-    <div class="main-column">
-      <main class="yt-main">
-        <!-- Top Header -->
-        <header class="yt-top-header">
-          <div class="yt-top-title">
-            <h1>
-              <span>🎬 유튜브 3채널 · Hypit(SVML) 쇼츠 스튜디오 &amp; 카페 3만명 브릿지</span>
-              <span class="yt-pill" id="yt-header-pill">🟢 A안(@yoon_autolab 본진) · SVML 엔진 가동 중</span>
-            </h1>
-            <p id="yt-header-sub">
-              계정: baro76650@gmail.com (EGO Lite Profile 3) · NotebookLM 하이핏(hypit-ai/hypit) 단어 앵커 쇼츠 역설계 + 네이버 카페 30,217명 동시 확산
-            </p>
+<body class="control-room yt-page">
+  <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
+
+  <main class="yt-main" id="main-content">
+    <!-- Top Hero -->
+    <header class="yt-hero">
+      <div class="yt-hero-left">
+        <div class="yt-hero-title">
+          <span>🎬 유튜브 3채널 · Hypit(SVML) 쇼츠 스튜디오</span>
+          <span class="yt-pill" id="yt-cdp-pill">🟢 @yoon_autolab · @숨은지원금 · @바로랭크 가동 중</span>
+        </div>
+        <p class="yt-hero-sub">
+          계정: <strong>baro76650@gmail.com (윤성재 대표님)</strong> · 전략: <strong>A안 (@yoon_autolab 메인 연구소 + @숨은지원금 4060 정책 쇼츠 + @바로랭크 쿠팡 이관 대기)</strong> · NotebookLM `hypit-ai/hypit` SVML 엔진 탑재
+        </p>
+      </div>
+      <div class="yt-hero-actions">
+        <button class="yt-btn primary" id="btn-produce-part1" onclick="triggerProduce(1, true)">🚀 Part 1 쇼츠 렌더링 + 커뮤니티 즉시 발행</button>
+        <button class="yt-btn blue" id="btn-sync-yt" onclick="syncYouTube(true)">🔄 3채널 실시간 동기화</button>
+        <a class="yt-btn" href="https://www.youtube.com/@yoon_autolab/posts" target="_blank" rel="noopener">▶️ @yoon_autolab 본진 열기 ↗</a>
+        <a class="yt-btn" href="cafe.html" style="border-color:#34d399; color:#a7f3d0;">☕ 네이버 카페(3만명) 전용 관제실 이동 →</a>
+      </div>
+    </header>
+
+    <!-- 3 Core Navigation Tabs: 뭘 했는지 / 뭘 할 건지 / 효과 측정 -->
+    <nav class="yt-step-bar" aria-label="유튜브 핵심 관제 3단계">
+      <a class="yt-step-tab" href="#sec-yt-done">
+        <div>
+          <strong style="color:#059669;">① 뭘 했는지 (실행·발행 완료 영수증)</strong>
+          <small>제작 완료 SVML 쇼츠 MP4 3편 &amp; 커뮤니티 실제 게시물 영수증</small>
+        </div>
+        <span class="chip chip-green" id="tab-badge-done">쇼츠 3 · 글 2</span>
+      </a>
+      <a class="yt-step-tab" href="#sec-yt-todo">
+        <div>
+          <strong style="color:#2563eb;">② 뭘 할 건지 (다음 제작·발행 예정 큐)</strong>
+          <small>채널별 SVML 쇼츠 · 커뮤니티 발행 커리큘럼 (Part 1~6) &amp; 원클릭 실행</small>
+        </div>
+        <span class="chip chip-blue" id="tab-badge-todo">커리큘럼 6편</span>
+      </a>
+      <a class="yt-step-tab" href="#sec-yt-effect">
+        <div>
+          <strong style="color:#7c3aed;">③ 효과 측정 (유튜브 3채널 성과·유입 측정판)</strong>
+          <small>채널별 구독·노출·GA4 유튜브 레퍼럴 유입 &amp; CF 고단가 전환율</small>
+        </div>
+        <span class="chip chip-purple" id="tab-badge-effect">실시간 GA4 연동</span>
+      </a>
+    </nav>
+
+    <!-- KPI Row -->
+    <section class="yt-kpi-grid" aria-label="유튜브 핵심 지표">
+      <div class="yt-kpi-card">
+        <div class="yt-kpi-head"><span>📺 유튜브 3채널 포트폴리오</span><span class="chip chip-green">EGO Profile 3</span></div>
+        <div class="yt-kpi-val" id="kpi-channels">3채널 가동</div>
+        <div class="yt-kpi-sub">@yoon_autolab(12명) · @숨은지원금(2명) · @바로랭크(18명)</div>
+      </div>
+      <div class="yt-kpi-card">
+        <div class="yt-kpi-head"><span>🎬 완료된 SVML 쇼츠 (뭘 했는지)</span><span class="chip chip-blue">1080×1920 MP4</span></div>
+        <div class="yt-kpi-val" id="kpi-renders">3편 렌더링 완료</div>
+        <div class="yt-kpi-sub">ElevenLabs 한국어 보이스 + 단어 앵커 비교표 합성 완료</div>
+      </div>
+      <div class="yt-kpi-card">
+        <div class="yt-kpi-head"><span>📝 발행된 커뮤니티 브릿지</span><span class="chip chip-green">실측 영수증</span></div>
+        <div class="yt-kpi-val" id="kpi-posts">2건 게시 완료</div>
+        <div class="yt-kpi-sub">@yoon_autolab 게시물 탭 → CF 16개 도메인 직결</div>
+      </div>
+      <div class="yt-kpi-card">
+        <div class="yt-kpi-head"><span>📈 유튜브 → CF 유입 &amp; 다음 큐</span><span class="chip chip-purple">효과 측정</span></div>
+        <div class="yt-kpi-val" id="kpi-queue-effect">대기 3편 · GA4 추적 중</div>
+        <div class="yt-kpi-sub">Part 4~6 제작 대기 · 고단가(CPC $0.5+) 도메인 집중 연결</div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         [섹션 1] ① 뭘 했는지 — 제작 완료 SVML 쇼츠 & 유튜브 커뮤니티 발행 영수증
+         =================================================================== -->
+    <section class="yt-section" id="sec-yt-done">
+      <div class="yt-section-head">
+        <h2 class="yt-section-title">
+          <span class="sec-num-badge sec-num-1">① 뭘 했는지</span>
+          <span>제작 완료된 Hypit(SVML) 1080×1920 쇼츠 &amp; 유튜브 커뮤니티 발행 영수증</span>
+        </h2>
+        <span style="font-size:12px; color:#64748b; font-weight:700;">좌측 플레이어에서 실제 렌더링된 MP4 영상과 음성을 즉시 재생·검수할 수 있습니다</span>
+      </div>
+
+      <div class="studio-grid">
+        <!-- Left: Live 9:16 Video Player -->
+        <div class="phone-preview-box">
+          <div class="phone-preview-head">
+            <span id="player-label">📱 Part 1. 윤랩 자동화 연구소 (@yoon_autolab)</span>
+            <span class="chip chip-green">1080×1920</span>
           </div>
-          <div class="yt-actions">
-            <button class="yt-btn-red" id="btn-produce-main" onclick="produceSvmlPackage(1, true)">
-              🚀 Part 1 쇼츠 렌더링 + @yoon_autolab 게시물 즉시 발행
-            </button>
-            <button class="yt-btn-blue" id="btn-sync-yt" onclick="syncYouTubeState()">
-              🔄 3채널 실시간 동기화
-            </button>
-            <a class="yt-btn-ghost" href="https://www.youtube.com/@yoon_autolab/posts" target="_blank" rel="noopener">
-              ▶️ @yoon_autolab 연구소 열기 ↗
-            </a>
-            <a class="yt-btn-ghost" href="https://cafe.naver.com/loveshake1/162878" target="_blank" rel="noopener">
-              ☕ 금융꿀팁 카페(28,495명) 열기 ↗
-            </a>
+          <video id="svml-video-player" class="phone-video" controls preload="metadata" poster="/api/youtube/media/svml_short_part1_thumb.png">
+            <source id="svml-video-src" src="/api/youtube/media/svml_short_part1.mp4" type="video/mp4" />
+          </video>
+          <div style="font-size:11.5px; color:#cbd5e1; line-height:1.4;" id="player-desc">
+            🎙️ ElevenLabs 다국어 음성 합성 + 단어 앵커 모션 비교표 완료
           </div>
-        </header>
-
-        <!-- Tier 1 KPIs -->
-        <section class="yt-kpi-grid">
-          <div class="yt-card">
-            <div class="yt-kpi-label">
-              <span>📺 유튜브 3채널 포트폴리오 (A안)</span>
-              <span class="yt-badge green">EGO Profile 3</span>
-            </div>
-            <div class="yt-kpi-val" id="kpi-channels">3채널 · 본진 가동</div>
-            <div class="yt-kpi-sub" id="kpi-channels-sub">
-              @yoon_autolab(본진 12명) · @숨은지원금(정책 2명) · @바로랭크(쿠팡이관대기 18명)
-            </div>
+          <div style="display:flex; gap:6px;">
+            <a id="player-download-btn" class="yt-btn blue" style="flex:1; justify-content:center; padding:7px 10px; font-size:11.5px;" href="/api/youtube/media/svml_short_part1.mp4" download>⬇️ MP4 원본 다운로드</a>
+            <a id="player-bridge-btn" class="yt-btn" style="flex:1; justify-content:center; padding:7px 10px; font-size:11.5px;" href="https://www.meganote.kr" target="_blank" rel="noopener">🔗 연결된 CF 원문 ↗</a>
           </div>
-
-          <div class="yt-card">
-            <div class="yt-kpi-label">
-              <span>🧬 Hypit(SVML) 렌더링 쇼츠</span>
-              <span class="yt-badge purple">ElevenLabs v2</span>
-            </div>
-            <div class="yt-kpi-val" id="kpi-renders">3편 (1080×1920)</div>
-            <div class="yt-kpi-sub" id="kpi-renders-sub">
-              단어 앵커(Word-Timestamp) 카라오케 자막 + 1:1 비교표 모션 그래픽 MP4
-            </div>
-          </div>
-
-          <div class="yt-card">
-            <div class="yt-kpi-label">
-              <span>☕ 네이버 카페 OSMU 브릿지</span>
-              <span class="yt-badge blue">soul5373 · Profile 4</span>
-            </div>
-            <div class="yt-kpi-val" id="kpi-cafes">30,217명 (2개 카페)</div>
-            <div class="yt-kpi-sub" id="kpi-cafes-sub">
-              금융꿀팁(28,495명 · 가지5단계) + 고급지식(1,722명 · 가지3단계) 라이브 발행 완료
-            </div>
-          </div>
-
-          <div class="yt-card">
-            <div class="yt-kpi-label">
-              <span>🔗 CF 16도메인 애드센스 직결</span>
-              <span class="yt-badge amber">100% 브릿지</span>
-            </div>
-            <div class="yt-kpi-val" id="kpi-bridges">meganote · smilenote</div>
-            <div class="yt-kpi-sub" id="kpi-bridges-sub">
-              쇼츠 엔드카드 · 유튜브 게시물(커뮤니티) · 네이버 카페 원문 링크 3중 유입 퍼널
-            </div>
-          </div>
-        </section>
-
-        <!-- Studio Section: Player + Production Queue -->
-        <section class="yt-card">
-          <div class="yt-sec-head">
-            <h2>🎞️ Hypit (`hypit-ai/hypit`) SVML 고밀도 쇼츠 프리뷰 &amp; 원클릭 제작 스튜디오</h2>
-            <span style="font-size:12px;color:#475569;font-weight:700;" id="yt-studio-status">
-              양산형 슬라이드쇼 금지 · 100만 뷰 레퍼런스 컷 호흡(3초 후킹 → 1:1 비교표 → 단어 앵커 카라오케 → CF 브릿지) 적용 완료
-            </span>
-          </div>
-
-          <div class="yt-studio-grid">
-            <!-- Left: Vertical 9:16 Video Player -->
-            <div class="yt-player-frame">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <strong style="font-size:13px;color:#f8fafc;" id="player-title">SVML 쇼츠 프리뷰 #1</strong>
-                <span class="yt-badge green" id="player-meta">1080×1920 · 30fps</span>
-              </div>
-              <div class="yt-video-box">
-                <video id="svml-video-player" controls playsinline preload="metadata" poster="/api/youtube/media/svml_short_part1_thumb.png">
-                  <source id="svml-video-src" src="/api/youtube/media/svml_short_part1.mp4" type="video/mp4">
-                </video>
-              </div>
-              <div style="font-size:11.5px;color:#94a3b8;line-height:1.45;" id="player-desc">
-                🎙️ 오디오: ElevenLabs Multilingual v2 한국어 내레이션 합성 완료 · 카라오케 자막 및 1:1 실측 비교표 하이라이트 적용
-              </div>
-              <div style="display:flex;gap:8px;">
-                <a id="player-download-btn" href="/api/youtube/media/svml_short_part1.mp4" download class="yt-btn-blue" style="flex:1;text-align:center;text-decoration:none;">
-                  ⬇️ MP4 원본 다운로드
-                </a>
-                <a id="player-bridge-btn" href="https://meganote.kr" target="_blank" rel="noopener" class="yt-btn-ghost" style="flex:1;text-align:center;">
-                  🔗 연결된 CF 원문 ↗
-                </a>
-              </div>
-            </div>
-
-            <!-- Right: Production Queue Cards -->
-            <div class="yt-render-list" id="yt-renders-container">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-        </section>
-
-        <!-- 3-Channel Matrix + Naver Cafe & YouTube Community Live Receipts -->
-        <div class="yt-two-col">
-          <section class="yt-card">
-            <div class="yt-sec-head">
-              <h2>📺 `baro76650@gmail.com` 유튜브 3채널 역할 분담 매트릭스 (A안 확정)</h2>
-              <span class="yt-badge blue">단일 EGO Lite 창 제어</span>
-            </div>
-            <table class="yt-table">
-              <thead>
-                <tr>
-                  <th>채널명 / 핸들</th>
-                  <th>전략 포지션 (A안)</th>
-                  <th>활성 탭 &amp; 상태</th>
-                  <th>연결 CF 본진</th>
-                  <th>바로가기</th>
-                </tr>
-              </thead>
-              <tbody id="yt-channels-tbody">
-                <!-- Populated by JS -->
-              </tbody>
-            </table>
-          </section>
-
-          <section class="yt-card">
-            <div class="yt-sec-head">
-              <h2>☕ 네이버 카페 30,217명 &amp; 유튜브 게시물 실시간 발행 영수증</h2>
-              <span class="yt-badge green">실측 URL 검증 완료</span>
-            </div>
-            <div id="yt-receipts-box" style="display:flex;flex-direction:column;gap:10px;">
-              <!-- Populated by JS -->
-            </div>
-          </section>
         </div>
 
-        <!-- SVML Viral Reference Blueprint Library -->
-        <section class="yt-card">
-          <div class="yt-sec-head">
-            <h2>📐 NotebookLM 이식 (`a13b1921`) · Hypit 바이럴 레퍼런스 역설계 `SVML` 3대 표준 설계도</h2>
-            <a href="https://notebook.google.com/notebook/a13b1921-02c9-404e-8010-bd2e0dce9c52" target="_blank" rel="noopener" style="font-size:12px;font-weight:800;color:#2563eb;text-decoration:none;">
-              📒 대표님 NotebookLM 원본 노트 열기 ↗
-            </a>
+        <!-- Right: Rendered Shorts Cards + Live Community Post Receipts -->
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <div style="font-size:13px; font-weight:900; color:#0f172a; margin-bottom:8px;">🎬 렌더링 완료된 SVML 쇼츠 MP4 목록 (클릭 시 좌측 플레이어 재생)</div>
+            <div class="render-list" id="render-cards-container"></div>
           </div>
-          <div class="yt-svml-grid" id="yt-svml-grid">
-            <!-- Populated by JS -->
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
 
-  <script src="js/sidebar.js?v=20261102-yt1"></script>
+          <div style="border-top:1px solid #e2e8f0; padding-top:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <span style="font-size:13px; font-weight:900; color:#0f172a;">📝 @yoon_autolab 유튜브 게시물(커뮤니티) 실제 발행 완료 영수증</span>
+              <a href="https://www.youtube.com/@yoon_autolab/posts" target="_blank" rel="noopener" style="font-size:11.5px; font-weight:800; color:#2563eb; text-decoration:none;">유튜브 게시물 탭 전체 열기 ↗</a>
+            </div>
+            <div id="community-receipts-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         [섹션 2] ② 뭘 할 건지 — 채널별 다음 제작·발행 예정 큐 (Part 1~6 커리큘럼)
+         =================================================================== -->
+    <section class="yt-section" id="sec-yt-todo">
+      <div class="yt-section-head">
+        <h2 class="yt-section-title">
+          <span class="sec-num-badge sec-num-2">② 뭘 할 건지</span>
+          <span>유튜브 3채널 제작·발행 예정 큐 &amp; 역할 분담 매트릭스 (A안 확정)</span>
+        </h2>
+        <span class="chip chip-blue">원클릭 쇼츠 렌더링 &amp; 커뮤니티 즉시 송출 지원</span>
+      </div>
+
+      <div style="overflow-x:auto; margin-bottom:14px;">
+        <table class="yt-table">
+          <thead>
+            <tr>
+              <th>회차</th>
+              <th>타깃 채널</th>
+              <th>SVML 쇼츠 &amp; 커뮤니티 주제 (자청 4대 결핍 적용)</th>
+              <th>연결 CF 도메인</th>
+              <th>일정 / 슬롯</th>
+              <th>쇼츠 상태</th>
+              <th>커뮤니티 상태</th>
+              <th>즉시 실행 제어</th>
+            </tr>
+          </thead>
+          <tbody id="yt-planned-queue-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- 3-Channel Role Matrix -->
+      <div style="border-top:1px solid #e2e8f0; padding-top:12px;">
+        <div style="font-size:13px; font-weight:900; color:#0f172a; margin-bottom:8px;">🧭 `baro76650@gmail.com` 유튜브 3채널 역할 분담 원칙</div>
+        <div style="overflow-x:auto;">
+          <table class="yt-table">
+            <thead>
+              <tr>
+                <th>채널명 / 핸들</th>
+                <th>전략 포지션</th>
+                <th>현재 상태</th>
+                <th>연결 CF 본진 도메인</th>
+                <th>바로가기</th>
+              </tr>
+            </thead>
+            <tbody id="channels-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         [섹션 3] ③ 효과 측정 — 유튜브 3채널 도달·유입 전환 성과 측정판 & SVML 설계도
+         =================================================================== -->
+    <section class="yt-section" id="sec-yt-effect">
+      <div class="yt-section-head">
+        <h2 class="yt-section-title">
+          <span class="sec-num-badge sec-num-3">③ 효과 측정</span>
+          <span>유튜브 3채널 노출·구독·CF 브릿지 유입(GA4) 효과 측정판</span>
+        </h2>
+        <a href="https://notebook.google.com/notebook/a13b1921-02c9-404e-8010-bd2e0dce9c52" target="_blank" rel="noopener" style="font-size:12px; font-weight:800; color:#2563eb; text-decoration:none;">📒 대표님 NotebookLM 원본 노트 열기 ↗</a>
+      </div>
+
+      <div style="overflow-x:auto; margin-bottom:16px;">
+        <table class="yt-table">
+          <thead>
+            <tr>
+              <th>유튜브 채널</th>
+              <th>구독자 모수</th>
+              <th>누적 제작·발행 자산</th>
+              <th>주력 연결 CF 도메인</th>
+              <th>유입·수익 전환 동선 (Reverse Funnel)</th>
+              <th>운영 판정</th>
+            </tr>
+          </thead>
+          <tbody id="yt-measurement-tbody"></tbody>
+        </table>
+      </div>
+
+      <div style="font-size:13px; font-weight:900; color:#0f172a; margin-bottom:8px;">🧬 NotebookLM 이식 (`hypit-ai/hypit`) SVML 3대 바이럴 쇼츠 설계도</div>
+      <div class="svml-grid" id="svml-templates-container"></div>
+    </section>
+  </main>
+
+  <script src="js/sidebar.js"></script>
   <script>
-    let currentYtData = null;
+    let currentState = null;
 
-    function selectRenderPreview(partNo) {
-      if (!currentYtData || !Array.isArray(currentYtData.renders)) return;
-      const item = currentYtData.renders.find(r => r.part === partNo) || currentYtData.renders[0];
-      if (!item) return;
-
-      document.querySelectorAll('.yt-render-item').forEach(el => {
-        el.classList.toggle('active', Number(el.dataset.part) === item.part);
-      });
-
+    function selectRenderVideo(partNo) {
+      if (!currentState) return;
+      const r = (currentState.renders || []).find(x => x.part === partNo) || (currentState.renders || [])[0];
+      if (!r) return;
       const video = document.getElementById('svml-video-player');
       const src = document.getElementById('svml-video-src');
-      const titleEl = document.getElementById('player-title');
-      const metaEl = document.getElementById('player-meta');
-      const descEl = document.getElementById('player-desc');
+      const label = document.getElementById('player-label');
+      const desc = document.getElementById('player-desc');
       const dlBtn = document.getElementById('player-download-btn');
       const brBtn = document.getElementById('player-bridge-btn');
 
       const cacheBust = `?t=${Date.now()}`;
-      video.poster = (item.thumbUrl || '') + cacheBust;
-      src.src = (item.videoUrl || '') + cacheBust;
+      video.poster = (r.thumbUrl || `/api/youtube/media/svml_short_part${r.part}_thumb.png`) + cacheBust;
+      src.src = (r.videoUrl || `/api/youtube/media/svml_short_part${r.part}.mp4`) + cacheBust;
       video.load();
 
-      titleEl.textContent = `[Part ${item.part}] ${item.channelName} (${item.channel})`;
-      metaEl.textContent = `${item.durationSec || 14}초 · ${item.fileSizeKb || 750}KB`;
-      descEl.textContent = `🎯 ${item.title} · 오디오 엔진: ${item.audioEngine || 'elevenlabs_multilingual_v2'} · 브릿지: ${item.bridgeDomain}`;
-      dlBtn.href = item.videoUrl || '#';
-      brBtn.href = item.bridgeUrl || '#';
-      brBtn.textContent = `🔗 ${item.bridgeDomain} 원문 ↗`;
+      label.textContent = `📱 Part ${r.part}. ${r.channelName} (${r.channel})`;
+      desc.textContent = `🎙️ ${r.title} (${r.durationSec}초 · ${r.fileSizeKb}KB · ${r.audioEngine})`;
+      dlBtn.href = r.videoUrl;
+      brBtn.href = r.bridgeUrl || `https://www.${r.bridgeDomain}/`;
+      brBtn.textContent = `🔗 ${r.bridgeDomain} 원문 ↗`;
+
+      document.querySelectorAll('.render-card').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.part) === Number(partNo));
+      });
     }
 
-    function renderYouTubeDashboard(data) {
-      currentYtData = data;
+    function renderPage(data) {
+      currentState = data;
+      const kpi = data.kpi || {};
       const renders = data.renders || [];
-      const channels = data.channels || [];
-      const cafes = data.naverCafes || [];
-      const posts = data.communityPosts || [];
-      const templates = data.svmlTemplates || [];
       const topics = data.productionTopics || [];
+      const posts = data.communityPosts || [];
+      const queue = data.plannedQueue || [];
+      const meas = data.measurement || {};
 
+      document.getElementById('kpi-channels').textContent = `${kpi.channelCount || 3}채널 · 본진 가동`;
       document.getElementById('kpi-renders').textContent = `${renders.length}편 (1080×1920 MP4)`;
-      document.getElementById('kpi-cafes').textContent = `30,217명 (카페 ${cafes.length}곳)`;
+      document.getElementById('kpi-posts').textContent = `${posts.length}건 실측 발행 완료`;
+      document.getElementById('kpi-queue-effect').textContent = `예정 ${kpi.plannedQueueCount || 3}편 · GA4 추적`;
 
-      // Render Production Queue Cards
-      const rBox = document.getElementById('yt-renders-container');
-      rBox.innerHTML = topics.map((t, idx) => {
+      document.getElementById('tab-badge-done').textContent = `쇼츠 ${renders.length} · 글 ${posts.length}`;
+      document.getElementById('tab-badge-todo').textContent = `커리큘럼 ${queue.length}편`;
+
+      // [Section 1-A] Render Cards
+      const rcContainer = document.getElementById('render-cards-container');
+      rcContainer.innerHTML = topics.map((t, idx) => {
         const r = renders.find(x => x.part === t.part) || {};
-        const scenes = t.scenes || [];
+        const scenesTxt = (t.scenes || []).map(s => s.phase).join(' → ');
         return `
-          <div class="yt-render-item ${idx === 0 ? 'active' : ''}" data-part="${t.part}">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <span class="yt-badge ${t.channel === '@yoon_autolab' ? 'blue' : 'green'}">${t.channelName} (${t.channel})</span>
-                <span class="yt-badge purple">${t.templateId.toUpperCase()}</span>
-                <strong style="font-size:13.5px;color:#0f172a;">Part ${t.part}. ${t.title}</strong>
+          <div class="render-card ${idx === 0 ? 'active' : ''}" data-part="${t.part}" onclick="selectRenderVideo(${t.part})" style="cursor:pointer;">
+            <div class="render-card-top">
+              <div>
+                <span class="chip chip-blue">${t.channelName} (${t.channel})</span>
+                <span class="chip chip-purple">${t.templateId.toUpperCase()}</span>
+                <strong class="render-title" style="margin-left:6px;">Part ${t.part}. ${t.title}</strong>
               </div>
-              <span style="font-size:11.5px;color:#059669;font-weight:800;">
-                ${r.ok ? `✅ MP4 렌더링 완료 (${r.fileSizeKb}KB · ${r.durationSec}s · ${r.audioEngine})` : '⏳ 렌더링 대기'}
-              </span>
+              <span class="chip chip-green">✅ MP4 완료 (${r.durationSec || 14.4}초 · ${r.fileSizeKb || 175}KB)</span>
             </div>
-            <div style="font-size:12px;color:#334155;background:#fff;padding:9px 12px;border-radius:8px;border:1px solid #e2e8f0;">
-              <div><strong>🎙️ 내레이션(단어 앵커):</strong> ${t.narration}</div>
-              <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-                ${scenes.map(s => `<span class="yt-badge amber">${s.phase}</span>`).join('')}
+            <div style="font-size:12px; color:#334155; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:7px 10px;">
+              <strong>🎙️ 나레이션(단어 앵커):</strong> ${t.narration}
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:2px;">
+              <div style="font-size:11.5px; color:#475569;">
+                <span style="color:#b45309; font-weight:700;">${scenesTxt}</span> · 브릿지: <a href="${t.bridgeUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color:#2563eb; font-weight:800;">${t.bridgeDomain} ↗</a>
               </div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span style="font-size:11.5px;color:#475569;font-weight:700;">
-                🔗 타깃 브릿지: <a href="${t.bridgeUrl}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:800;">${t.bridgeDomain} (${t.bridgeLabel}) ↗</a>
-              </span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button class="yt-btn-blue" style="padding:6px 11px;font-size:11.5px;" onclick="selectRenderPreview(${t.part})">
-                  ▶️ 좌측 플레이어 재생
-                </button>
-                <button class="yt-btn-red" style="padding:6px 11px;font-size:11.5px;" onclick="produceSvmlPackage(${t.part}, true)">
-                  🚀 쇼츠 재빌드 + 커뮤니티 발행
-                </button>
+              <div style="display:flex; gap:6px;" onclick="event.stopPropagation();">
+                <button class="yt-btn blue" style="padding:5px 10px; font-size:11.5px;" onclick="selectRenderVideo(${t.part})">▶️ 좌측 플레이어 재생</button>
+                <button class="yt-btn primary" style="padding:5px 10px; font-size:11.5px;" onclick="triggerProduce(${t.part}, true)">🚀 재렌더링 + 커뮤니티 발행</button>
               </div>
             </div>
           </div>
         `;
       }).join('');
 
-      // Render 3-Channel Table
-      const cBody = document.getElementById('yt-channels-tbody');
-      cBody.innerHTML = channels.map(c => `
+      // [Section 1-B] Community Receipts
+      const commBox = document.getElementById('community-receipts-container');
+      commBox.innerHTML = posts.map(p => `
+        <div style="border:1px solid #bbf7d0; background:#f0fdf4; border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:240px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span class="chip chip-green">🟢 유튜브 게시물 실측 영수증 (${p.time || p.publishedAgo || '발행 완료'})</span>
+              <strong style="font-size:12px; color:#065f46;">@yoon_autolab</strong>
+              <span style="font-size:11px; color:#047857;">${p.url || p.postUrl || ''}</span>
+            </div>
+            <div style="font-size:12px; color:#1e293b; line-height:1.45;">${((p.text || p.excerpt || '').replace(/\n+/g, ' ')).slice(0, 185)}...</div>
+          </div>
+          <a class="yt-btn blue" style="padding:6px 12px; font-size:11.5px;" href="${p.url || p.postUrl || 'https://www.youtube.com/@yoon_autolab/posts'}" target="_blank" rel="noopener">유튜브 게시물 원문 열기 ↗</a>
+        </div>
+      `).join('');
+
+      // [Section 2-A] Planned Queue Table
+      const qTbody = document.getElementById('yt-planned-queue-tbody');
+      qTbody.innerHTML = queue.map(q => {
+        const sBadge = q.shortStatus === 'rendered' ? 'chip-green' : 'chip-amber';
+        const cBadge = q.communityStatus === 'published' ? 'chip-green' : (q.communityStatus === 'ready_to_publish' ? 'chip-blue' : 'chip-amber');
+        const canProduce = q.part <= 3;
+        return `
+          <tr>
+            <td><strong>Part ${q.part}</strong></td>
+            <td><strong>${q.channel}</strong><br/><small style="color:#64748b;">${q.channelName}</small></td>
+            <td><strong>${q.title}</strong><br/><small style="color:#64748b;">템플릿: ${q.templateId.toUpperCase()}</small></td>
+            <td><a href="${q.bridgeUrl}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">${q.bridgeDomain} ↗</a></td>
+            <td><span style="font-weight:700; color:#334155;">${q.scheduleSlot}</span></td>
+            <td><span class="chip ${sBadge}">${q.shortStatusLabel}</span></td>
+            <td>
+              ${q.communityUrl
+                ? `<a href="${q.communityUrl}" target="_blank" rel="noopener" class="chip ${cBadge}" style="text-decoration:none;">${q.communityStatusLabel} ↗</a>`
+                : `<span class="chip ${cBadge}">${q.communityStatusLabel}</span>`
+              }
+            </td>
+            <td>
+              ${canProduce
+                ? `<button class="yt-btn primary" style="padding:5px 10px; font-size:11px;" onclick="triggerProduce(${q.part}, true)">🚀 렌더링·발행</button>`
+                : `<button class="yt-btn blue" style="padding:5px 10px; font-size:11px;" onclick="triggerProduce(${((q.part - 1) % 3) + 1}, false)">🎬 사전 렌더링</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // [Section 2-B] 3-Channel Role Table
+      const chTbody = document.getElementById('channels-tbody');
+      chTbody.innerHTML = (data.channels || []).map(ch => `
         <tr>
           <td>
-            <strong style="color:#0f172a;">${c.name}</strong><br>
-            <span style="font-size:11.5px;color:#2563eb;font-weight:800;">${c.handle}</span>
-            <span style="font-size:11px;color:#64748b;"> · 구독자 ${c.subscribers}명</span>
+            <strong style="font-size:13.5px; color:#0f172a;">${ch.name}</strong><br/>
+            <span style="color:#2563eb; font-weight:800;">${ch.handle}</span> · <small style="color:#64748b;">구독자 ${ch.subscribers}명</small>
           </td>
           <td>
-            <div style="font-weight:800;color:#1e293b;">${c.role}</div>
-            <div style="font-size:11px;color:#64748b;margin-top:3px;">${c.strategyNote}</div>
+            <div style="font-weight:800; color:#1e293b;">${ch.role}</div>
+            <div style="font-size:11.5px; color:#64748b; margin-top:2px;">${ch.strategyNote}</div>
           </td>
-          <td>
-            <span class="yt-badge ${c.status === 'standby_migration' ? 'amber' : 'green'}">${c.statusBadge}</span>
-            <div style="font-size:11px;color:#475569;margin-top:4px;">활성 탭: ${(c.activeTabs || []).join(' · ')}</div>
-          </td>
-          <td>
-            ${(c.bridgeDomains || []).map(d => `<span class="yt-badge blue" style="margin:2px;">${d}</span>`).join('')}
-          </td>
-          <td>
-            <a href="${c.postsUrl || c.studioUrl}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:800;text-decoration:none;font-size:12px;">
-              채널 열기 ↗
-            </a>
-          </td>
+          <td><span class="chip ${ch.status === 'standby_migration' ? 'chip-amber' : 'chip-green'}">${ch.statusBadge}</span></td>
+          <td>${(ch.bridgeDomains || []).map(d => `<a href="https://www.${d}/" target="_blank" rel="noopener" style="display:inline-block; margin:2px; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-radius:6px; font-size:11px; font-weight:800; text-decoration:none;">${d}</a>`).join('')}</td>
+          <td><a href="${ch.postsUrl || ch.studioUrl}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">채널 열기 ↗</a></td>
         </tr>
       `).join('');
 
-      // Render Cafe + Community Live Receipts
-      const recBox = document.getElementById('yt-receipts-box');
-      const cafeHtml = cafes.map(cf => `
-        <div style="padding:11px 13px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-            <span class="yt-badge green">☕ 네이버 카페 라이브 (${cf.members.toLocaleString()}명 · ${cf.grade})</span>
-            <a href="${cf.latestArticleUrl}" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:800;color:#2563eb;">
-              게시글 영수증 열기 ↗
-            </a>
-          </div>
-          <div style="font-weight:800;font-size:12.5px;color:#0f172a;margin-top:5px;">${cf.name}</div>
-          <div style="font-size:11.5px;color:#334155;margin-top:3px;">
-            발행글: <strong>${cf.latestTitle}</strong> → <span style="color:#2563eb;font-weight:800;">${cf.bridgeDomain}</span>
-          </div>
-        </div>
+      // [Section 3-A] Measurement Table
+      const mTbody = document.getElementById('yt-measurement-tbody');
+      mTbody.innerHTML = (meas.channelPerformance || []).map(m => `
+        <tr>
+          <td><strong>${m.channel}</strong></td>
+          <td><strong>${m.subscribers}명</strong></td>
+          <td><span class="chip chip-blue">${m.completedAssets}</span></td>
+          <td><span style="font-weight:800; color:#1d4ed8;">${m.targetDomains}</span></td>
+          <td style="font-size:12px; color:#334155;">${m.conversionPath}</td>
+          <td><span class="chip ${m.status.includes('가동') ? 'chip-green' : 'chip-amber'}">${m.status}</span></td>
+        </tr>
       `).join('');
 
-      const postHtml = posts.slice(0, 3).map((p, idx) => `
-        <div style="padding:11px 13px;border-radius:10px;border:1px solid #dbeafe;background:#eff6ff;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span class="yt-badge blue">📢 유튜브 채널 게시물 #${idx + 1} (${p.time || '방금 전'})</span>
-            <a href="${p.url || 'https://www.youtube.com/@yoon_autolab/posts'}" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:800;color:#1d4ed8;">
-              게시물 확인 ↗
-            </a>
+      // [Section 3-B] SVML Templates
+      const tplContainer = document.getElementById('svml-templates-container');
+      tplContainer.innerHTML = (data.svmlTemplates || []).map(tpl => `
+        <div class="svml-card">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="chip chip-purple">${tpl.id.toUpperCase()} · ${tpl.durationSec}초</span>
+            <span style="font-size:11px; font-weight:800; color:#475569;">${tpl.targetChannel}</span>
           </div>
-          <div style="font-size:11.5px;color:#1e293b;margin-top:5px;line-height:1.45;">
-            ${(p.text || '').replace(/</g, '&lt;').slice(0, 160)}...
-          </div>
+          <div style="font-size:13.5px; font-weight:900; color:#0f172a;">${tpl.name}</div>
+          <div style="font-size:11.5px; color:#475569;">🎯 <strong>후킹 공식:</strong> ${tpl.hookFormula}</div>
+          <pre class="svml-code">${(tpl.svmlSnippet || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
         </div>
       `).join('');
-
-      recBox.innerHTML = cafeHtml + postHtml;
-
-      // Render SVML Templates
-      const svmlGrid = document.getElementById('yt-svml-grid');
-      svmlGrid.innerHTML = templates.map(tpl => `
-        <div class="yt-svml-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span class="yt-badge purple">${tpl.id.toUpperCase()} · ${tpl.durationSec}초</span>
-            <span style="font-size:11px;font-weight:800;color:#475569;">${tpl.targetChannel}</span>
-          </div>
-          <strong style="font-size:13.5px;color:#0f172a;">${tpl.name}</strong>
-          <div style="font-size:11.5px;color:#334155;line-height:1.45;">
-            <strong>🎯 후킹 공식:</strong> ${tpl.hookFormula}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#1e293b;background:#fff;padding:8px 10px;border-radius:8px;border:1px solid #e2e8f0;">
-            ${(tpl.cuts || []).map(c => `
-              <div><strong>Cut ${c.scene} (${c.window})</strong> [앵커: <code>@${c.anchorWord}</code>] — ${c.visual}</div>
-            `).join('')}
-          </div>
-          <pre class="yt-code">${(tpl.svmlSnippet || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-        </div>
-      `).join('');
-
-      if (renders.length > 0) {
-        selectRenderPreview(renders[0].part || 1);
-      }
     }
 
-    async function loadYouTubeState() {
+    async function loadYouTube() {
       try {
         const res = await fetch('/api/youtube', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          renderYouTubeDashboard(data);
-          return;
-        }
-      } catch (_) {}
-      try {
-        const res = await fetch('data/youtube.json', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          renderYouTubeDashboard(data);
-        }
-      } catch (_) {}
-    }
-
-    async function syncYouTubeState() {
-      const btn = document.getElementById('btn-sync-yt');
-      btn.disabled = true;
-      btn.textContent = '🔄 EGO Lite 3채널 동기화 중...';
-      try {
-        const res = await fetch('/api/youtube/sync', { method: 'POST' });
-        if (res.ok) {
-          const data = await res.json();
-          renderYouTubeDashboard(data);
-        }
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '🔄 3채널 실시간 동기화';
+        const data = await res.json();
+        renderPage(data);
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    async function produceSvmlPackage(partNo, publishComm) {
-      const btn = document.getElementById('btn-produce-main');
-      btn.disabled = true;
-      btn.textContent = `🎬 Part ${partNo} SVML 쇼츠 렌더링 & 게시물 발행 중...`;
+    async function syncYouTube(manual = false) {
+      const btn = document.getElementById('btn-sync-yt');
+      if (manual && btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ 3채널 동기화 중...';
+      }
+      try {
+        const res = await fetch('/api/youtube/sync', { method: 'POST' });
+        const data = await res.json();
+        renderPage(data);
+      } finally {
+        if (manual && btn) {
+          btn.disabled = false;
+          btn.textContent = '🔄 3채널 실시간 동기화';
+        }
+      }
+    }
+
+    async function triggerProduce(partNo, publishComm = true) {
+      const btn = document.getElementById('btn-produce-part1');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = `⏳ Part ${partNo} SVML 렌더링 & 발행 중...`;
+      }
       try {
         const res = await fetch('/api/youtube/produce', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ part: partNo, publish_community: Boolean(publishComm) })
+          body: JSON.stringify({ part: partNo, publish_community: publishComm })
         });
-        if (res.ok) {
-          const out = await res.json();
-          if (out.status) renderYouTubeDashboard(out.status);
-          selectRenderPreview(partNo);
-        }
+        const out = await res.json();
+        if (out.status) renderPage(out.status);
+        selectRenderVideo(partNo);
       } finally {
-        btn.disabled = false;
-        btn.textContent = '🚀 Part 1 쇼츠 렌더링 + @yoon_autolab 게시물 즉시 발행';
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '🚀 Part 1 쇼츠 렌더링 + 커뮤니티 즉시 발행';
+        }
       }
     }
 
-    loadYouTubeState();
+    loadYouTube();
   </script>
 </body>
 </html>
-

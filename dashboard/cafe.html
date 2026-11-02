@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>네이버 카페 (3만명) 전용 관제실 — BaroLab Control Room</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <style>
+    body.cafe-page {
+      margin: 0;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+    }
+    .cf-cafe-main {
+      flex: 1 1 0%;
+      min-width: 0;
+      padding: 18px 22px 36px;
+      max-width: 1620px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .cafe-hero {
+      background: linear-gradient(135deg, #064e3b 0%, #0f172a 65%, #1e293b 100%);
+      color: #f8fafc;
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+    }
+    .cafe-hero-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 900;
+      margin: 0;
+    }
+    .cafe-hero-sub {
+      font-size: 12.5px;
+      color: #cbd5e1;
+      margin: 6px 0 0;
+    }
+    .cafe-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.22);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+    .cafe-btn {
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .cafe-btn:hover { background: rgba(255, 255, 255, 0.18); }
+    .cafe-btn.emerald {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .cafe-btn.blue {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #3b82f6;
+    }
+    .cafe-step-bar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .cafe-step-tab {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .cafe-step-tab:hover { border-color: #059669; }
+    .cafe-step-tab strong { font-size: 13.5px; font-weight: 900; display: block; }
+    .cafe-step-tab small { font-size: 11.5px; color: #64748b; font-weight: 600; }
+    .cafe-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .cafe-kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cafe-kpi-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
+    }
+    .cafe-kpi-val {
+      font-size: 22px;
+      font-weight: 900;
+      color: #0f172a;
+    }
+    .cafe-kpi-sub {
+      font-size: 11.5px;
+      color: #475569;
+      font-weight: 600;
+    }
+    .cafe-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .cafe-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+    }
+    .cafe-section-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sec-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+    .sec-1 { background: #059669; }
+    .sec-2 { background: #2563eb; }
+    .sec-3 { background: #7c3aed; }
+    .cafe-cards-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .cafe-hub-card {
+      border: 1px solid #a7f3d0;
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cafe-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .cafe-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 800;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    .cafe-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+      line-height: 1.45;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .chip-green { background: #dcfce7; color: #166534; }
+    .chip-blue { background: #dbeafe; color: #1e40af; }
+    .chip-amber { background: #fef3c7; color: #92400e; }
+    .chip-purple { background: #f3e8ff; color: #6b21a8; }
+    @media (max-width: 1180px) {
+      .cafe-kpi-grid, .cafe-cards-pair, .cafe-step-bar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="control-room cafe-page">
+  <aside id="barolab-sidebar" class="sidebar" aria-label="주요 메뉴"></aside>
+
+  <main class="cf-cafe-main" id="main-content">
+    <!-- Top Hero -->
+    <header class="cafe-hero">
+      <div>
+        <div class="cafe-hero-title">
+          <span>☕ 네이버 카페 30,217명 브릿지 전용 관제실</span>
+          <span class="cafe-pill">🟢 soul5373 (Profile 4) · 자동 소유권 복구 가동 중</span>
+        </div>
+        <p class="cafe-hero-sub">
+          운영 카페 2곳: <strong>[금융꿀팁] 러브쉐이크 (28,495명 · 가지5단계)</strong> + <strong>고급지식의 모든 것 (1,722명 · 가지3단계)</strong> · CF 16개 고단가 도메인 1+1 직결 퍼널
+        </p>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="cafe-btn emerald" id="btn-publish-next-cafe" onclick="publishCafePart(6)">🚀 Part 6 (희망리턴패키지) 2개 카페 동시 발행</button>
+        <button class="cafe-btn blue" id="btn-sync-cafe" onclick="syncCafe(true)">🔄 카페 상태 동기화</button>
+        <a class="cafe-btn" href="https://cafe.naver.com/loveshake1" target="_blank" rel="noopener">☕ 금융꿀팁(2.8만) 열기 ↗</a>
+        <a class="cafe-btn" href="https://cafe.naver.com/boutiqueinfo" target="_blank" rel="noopener">☕ 고급지식(1.7천) 열기 ↗</a>
+      </div>
+    </header>
+
+    <!-- 3 Core Navigation Tabs: 뭘 했는지 / 뭘 할 건지 / 효과 측정 -->
+    <nav class="cafe-step-bar" aria-label="네이버 카페 핵심 관제 3단계">
+      <a class="cafe-step-tab" href="#sec-cafe-done">
+        <div>
+          <strong style="color:#059669;">① 뭘 했는지 (발행 완료 영수증 &amp; 원문 검증)</strong>
+          <small>러브쉐이크 · 고급지식 카페에 실제 등록된 게시글 URL 및 CF 브릿지 검증</small>
+        </div>
+        <span class="chip chip-green" id="tab-cafe-done">발행 4건</span>
+      </a>
+      <a class="cafe-step-tab" href="#sec-cafe-todo">
+        <div>
+          <strong style="color:#2563eb;">② 뭘 할 건지 (다음 발행 예정 큐 &amp; 원클릭 송출)</strong>
+          <small>Part 1~10 고단가 금융·세무·건보 브릿지 큐 &amp; 2개 카페 동시 발행 제어</small>
+        </div>
+        <span class="chip chip-blue" id="tab-cafe-todo">대기 7편</span>
+      </a>
+      <a class="cafe-step-tab" href="#sec-cafe-effect">
+        <div>
+          <strong style="color:#7c3aed;">③ 효과 측정 (카페별 도달·GA4 유입 전환 측정판)</strong>
+          <small>30,217명 회원 노출 · 네이버 카페/검색 GA4 유입 세션 · 도메인별 전환 성과</small>
+        </div>
+        <span class="chip chip-purple" id="tab-cafe-effect">30,217명 모수</span>
+      </a>
+    </nav>
+
+    <!-- KPI Row -->
+    <section class="cafe-kpi-grid" aria-label="네이버 카페 핵심 지표">
+      <div class="cafe-kpi-card">
+        <div class="cafe-kpi-head"><span>☕ 운영 중인 네이버 카페 모수</span><span class="chip chip-green">soul5373</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-members">30,217명 (2곳)</div>
+        <div class="cafe-kpi-sub">금융꿀팁 28,495명 + 고급지식 1,722명</div>
+      </div>
+      <div class="cafe-kpi-card">
+        <div class="cafe-kpi-head"><span>✅ 발행 완료 게시글 (뭘 했는지)</span><span class="chip chip-green">영수증 검증</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-published">4건 발행 완료</div>
+        <div class="cafe-kpi-sub">#162877 · #162878 · #2302 · #2305 실측 URL 확인</div>
+      </div>
+      <div class="cafe-kpi-card">
+        <div class="cafe-kpi-head"><span>⏳ 발행 예정 큐 (뭘 할 건지)</span><span class="chip chip-blue">1+2 동시 송출</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-pending">7편 대기 중</div>
+        <div class="cafe-kpi-sub">브런치·CF 황금원고 연동 하루 2회 자동/수동 송출</div>
+      </div>
+      <div class="cafe-kpi-card">
+        <div class="cafe-kpi-head"><span>📈 네이버 생태계 → CF 유입 (효과 측정)</span><span class="chip chip-purple">GA4 28일</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-traffic">실시간 추적 중</div>
+        <div class="cafe-kpi-sub">smilenote.kr · meganote.kr · must-good.com 집중 브릿지</div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         [섹션 1] ① 뭘 했는지 — 네이버 카페 실제 발행 완료 영수증 & 원문 검증
+         =================================================================== -->
+    <section class="cafe-section" id="sec-cafe-done">
+      <div class="cafe-section-head">
+        <h2 class="cafe-section-title">
+          <span class="sec-badge sec-1">① 뭘 했는지</span>
+          <span>네이버 카페 2곳 실제 발행 완료 영수증 &amp; CF 브릿지 원문 검증</span>
+        </h2>
+        <span style="font-size:12px; color:#64748b; font-weight:700;">모든 게시글은 EGO `barolab-soul5373` 스페이스에서 실제 글 번호(`articleid`)까지 검증된 라이브 게시물입니다</span>
+      </div>
+
+      <!-- 2 Cafe Hub Summary Cards -->
+      <div class="cafe-cards-pair" id="cafe-hubs-container"></div>
+
+      <!-- Published Articles Table -->
+      <div style="overflow-x:auto;">
+        <table class="cafe-table">
+          <thead>
+            <tr>
+              <th>발행 시각</th>
+              <th>발행 카페 (회원수)</th>
+              <th>실제 발행된 카페 게시글 제목</th>
+              <th>연결된 CF 본진 도메인</th>
+              <th>영수증 상태</th>
+              <th>원문 검증</th>
+            </tr>
+          </thead>
+          <tbody id="cafe-published-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         [섹션 2] ② 뭘 할 건지 — 다음 카페 브릿지 발행 예정 큐 (Part 1~10) & 원클릭 실행
+         =================================================================== -->
+    <section class="cafe-section" id="sec-cafe-todo">
+      <div class="cafe-section-head">
+        <h2 class="cafe-section-title">
+          <span class="sec-badge sec-2">② 뭘 할 건지</span>
+          <span>다음 네이버 카페 브릿지 발행 예정 큐 (Part 1~10 커리큘럼) &amp; 원클릭 동시 발행</span>
+        </h2>
+        <span class="chip chip-blue">버튼 클릭 시 `loveshake1` + `boutiqueinfo` 2곳에 즉시 발행됩니다</span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="cafe-table">
+          <thead>
+            <tr>
+              <th>회차</th>
+              <th>분야</th>
+              <th>카페 브릿지 원고 제목 &amp; 핵심 요약 포인트</th>
+              <th>타깃 CF 본진</th>
+              <th>러브쉐이크(2.8만)</th>
+              <th>고급지식(1.7천)</th>
+              <th>진행 상태</th>
+              <th>원클릭 실행</th>
+            </tr>
+          </thead>
+          <tbody id="cafe-queue-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         [섹션 3] ③ 효과 측정 — 카페별 노출·유입(GA4 Referrer)·CF 도메인 전환 측정판
+         =================================================================== -->
+    <section class="cafe-section" id="sec-cafe-effect">
+      <div class="cafe-section-head">
+        <h2 class="cafe-section-title">
+          <span class="sec-badge sec-3">③ 효과 측정</span>
+          <span>카페별 도달 모수 · GA4 유입 전환 · 타깃 CF 도메인 성과 측정판</span>
+        </h2>
+        <span class="chip chip-purple">GA4 Data API (`dashboard/data/traffic.json`) 실시간 연동</span>
+      </div>
+
+      <div style="overflow-x:auto; margin-bottom:16px;">
+        <table class="cafe-table">
+          <thead>
+            <tr>
+              <th>네이버 카페명</th>
+              <th>보유 회원 모수</th>
+              <th>누적 발행 건수</th>
+              <th>주력 연결 CF 도메인</th>
+              <th>기대 전환 효과 (Reverse-Funnel)</th>
+              <th>최근 영수증</th>
+            </tr>
+          </thead>
+          <tbody id="cafe-effect-tbody"></tbody>
+        </table>
+      </div>
+
+      <div style="font-size:13px; font-weight:900; color:#0f172a; margin-bottom:8px;">📊 타깃 CF 도메인별 오늘 페이지뷰(PV) &amp; 네이버 생태계 유입 현황 (Top 8)</div>
+      <div style="overflow-x:auto;">
+        <table class="cafe-table">
+          <thead>
+            <tr>
+              <th>CF 도메인</th>
+              <th>오늘 전체 PV (GA4)</th>
+              <th>오늘 네이버 유입 세션</th>
+              <th>최근 7일 네이버 유입</th>
+              <th>최근 28일 네이버 유입</th>
+              <th>도메인 열기</th>
+            </tr>
+          </thead>
+          <tbody id="cafe-domains-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/sidebar.js"></script>
+  <script>
+    function renderCafePage(data) {
+      const kpi = data.kpi || {};
+      const cafes = data.cafes || [];
+      const pubs = data.publishedArticles || [];
+      const queue = data.plannedQueue || [];
+      const meas = data.measurement || {};
+      const naverGa4 = meas.naverEcosystemReferrals || {};
+
+      document.getElementById('kpi-cafe-members').textContent = `${(kpi.totalMembers || 30217).toLocaleString()}명 (${kpi.cafeCount || 2}곳)`;
+      document.getElementById('kpi-cafe-published').textContent = `${pubs.length}건 발행 완료`;
+      document.getElementById('kpi-cafe-pending').textContent = `${kpi.pendingQueueCount ?? 7}편 대기 중`;
+      document.getElementById('kpi-cafe-traffic').textContent = `28일 ${naverGa4.last28DaysSessions ?? 0}세션 · 실시간 추적`;
+
+      document.getElementById('tab-cafe-done').textContent = `발행 ${pubs.length}건`;
+      document.getElementById('tab-cafe-todo').textContent = `큐 ${queue.length}편`;
+
+      // [Section 1-A] 2 Cafe Hub Cards
+      const hubsBox = document.getElementById('cafe-hubs-container');
+      hubsBox.innerHTML = cafes.map(c => `
+        <div class="cafe-hub-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <span class="chip chip-green">${c.statusBadge}</span>
+            <span style="font-size:11.5px; font-weight:800; color:#047857;">계정: ${c.account}</span>
+          </div>
+          <div style="font-size:15px; font-weight:900; color:#0f172a;">☕ ${c.name}</div>
+          <div style="font-size:12px; color:#334155;">
+            등급: <strong>${c.grade}</strong> · 회원수: <strong>${(c.members || 0).toLocaleString()}명</strong> · 누적 브릿지 발행: <strong>${c.publishedCount}건</strong>
+          </div>
+          <div style="font-size:11.5px; color:#475569;">🎯 주력 타깃: ${c.targetTopics}</div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <a class="cafe-btn emerald" style="padding:6px 12px; font-size:11.5px;" href="${c.latestArticleUrl}" target="_blank" rel="noopener">📄 최근 발행글 영수증 열기 ↗</a>
+            <a class="cafe-btn blue" style="padding:6px 12px; font-size:11.5px;" href="${c.cafeUrl}" target="_blank" rel="noopener">🏠 카페 홈 열기 ↗</a>
+          </div>
+        </div>
+      `).join('');
+
+      // [Section 1-B] Published Articles Table
+      const pubTbody = document.getElementById('cafe-published-tbody');
+      pubTbody.innerHTML = pubs.map(a => `
+        <tr>
+          <td style="white-space:nowrap; font-weight:700; color:#475569;">${a.publishedAt}</td>
+          <td>
+            <strong>${a.cafeName}</strong><br/>
+            <small style="color:#64748b;">회원 ${(a.members || 0).toLocaleString()}명 · ${a.boardName}</small>
+          </td>
+          <td>
+            <strong style="color:#0f172a;">${a.title}</strong><br/>
+            <a href="${a.articleUrl}" target="_blank" rel="noopener" style="font-size:11.5px; color:#059669; font-weight:800;">${a.articleUrl} ↗</a>
+          </td>
+          <td>
+            <a href="${a.bridgeUrl}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">⚡ ${a.bridgeDomain} ↗</a>
+          </td>
+          <td><span class="chip chip-green">${a.statusLabel}</span></td>
+          <td>
+            <a class="cafe-btn emerald" style="padding:5px 10px; font-size:11.5px;" href="${a.articleUrl}" target="_blank" rel="noopener">카페 원문 열기 ↗</a>
+          </td>
+        </tr>
+      `).join('');
+
+      // [Section 2] Planned Queue Table
+      const qTbody = document.getElementById('cafe-queue-tbody');
+      qTbody.innerHTML = queue.map(q => {
+        const badgeCls = q.status === 'completed_both' ? 'chip-green' : (q.status === 'completed_partial' ? 'chip-blue' : 'chip-amber');
+        return `
+          <tr>
+            <td><strong>Part ${q.part}</strong></td>
+            <td><span class="chip chip-purple">${q.category}</span></td>
+            <td>
+              <strong>${q.title}</strong><br/>
+              <small style="color:#64748b;">${q.subtitle}</small>
+            </td>
+            <td><a href="${q.bridgeUrl}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">${q.bridgeDomain} ↗</a></td>
+            <td>
+              ${q.loveshakeUrl
+                ? `<a href="${q.loveshakeUrl}" target="_blank" rel="noopener" class="chip chip-green" style="text-decoration:none;">🟢 발행 완료 ↗</a>`
+                : `<span class="chip chip-amber">⏳ 미발행</span>`
+              }
+            </td>
+            <td>
+              ${q.boutiqueUrl
+                ? `<a href="${q.boutiqueUrl}" target="_blank" rel="noopener" class="chip chip-green" style="text-decoration:none;">🟢 발행 완료 ↗</a>`
+                : `<span class="chip chip-amber">⏳ 미발행</span>`
+              }
+            </td>
+            <td><span class="chip ${badgeCls}">${q.statusLabel}</span></td>
+            <td>
+              <button class="cafe-btn emerald" style="padding:5px 10px; font-size:11px;" onclick="publishCafePart(${q.part})">
+                🚀 ${q.status === 'completed_both' ? '재발행 점검' : '2개 카페 동시 발행'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // [Section 3-A] Cafe Breakdown Table
+      const effTbody = document.getElementById('cafe-effect-tbody');
+      effTbody.innerHTML = (meas.cafeBreakdown || []).map(c => `
+        <tr>
+          <td><strong>${c.cafeName}</strong></td>
+          <td><strong>${(c.members || 0).toLocaleString()}명</strong></td>
+          <td><span class="chip chip-green">${c.publishedCount}건 완료</span></td>
+          <td><strong style="color:#1d4ed8;">${c.targetDomains}</strong></td>
+          <td style="font-size:12px; color:#334155;">${c.expectedEffect}</td>
+          <td><a href="${c.latestReceipt}" target="_blank" rel="noopener" style="color:#059669; font-weight:800; text-decoration:none;">영수증 확인 ↗</a></td>
+        </tr>
+      `).join('');
+
+      // [Section 3-B] Top CF Domains Traffic Table
+      const domTbody = document.getElementById('cafe-domains-tbody');
+      domTbody.innerHTML = (naverGa4.topDomains || []).map(d => `
+        <tr>
+          <td><strong>${d.domain}</strong></td>
+          <td><strong>${d.totalPageViewsToday} PV</strong></td>
+          <td>${d.todaySessions} 세션</td>
+          <td>${d.last7DaysSessions} 세션</td>
+          <td><strong>${d.last28DaysSessions} 세션</strong></td>
+          <td><a href="https://www.${d.domain}/" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">사이트 열기 ↗</a></td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadCafe() {
+      try {
+        const res = await fetch('/api/cafe', { cache: 'no-store' });
+        const data = await res.json();
+        renderCafePage(data);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function syncCafe(manual = false) {
+      const btn = document.getElementById('btn-sync-cafe');
+      if (manual && btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ 동기화 중...';
+      }
+      try {
+        const res = await fetch('/api/cafe/sync', { method: 'POST' });
+        const data = await res.json();
+        renderCafePage(data);
+      } finally {
+        if (manual && btn) {
+          btn.disabled = false;
+          btn.textContent = '🔄 카페 상태 동기화';
+        }
+      }
+    }
+
+    async function publishCafePart(partNo) {
+      const btn = document.getElementById('btn-publish-next-cafe');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = `⏳ Part ${partNo} 2개 카페 동시 발행 중...`;
+      }
+      try {
+        const res = await fetch('/api/cafe/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ part: partNo })
+        });
+        const out = await res.json();
+        if (out.status) renderCafePage(out.status);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '🚀 Part 6 (희망리턴패키지) 2개 카페 동시 발행';
+        }
+      }
+    }
+
+    loadCafe();
+  </script>
+</body>
+</html>

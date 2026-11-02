@@ -1,0 +1,403 @@
+{
+  "ok": true,
+  "updatedAt": "2026-11-02 17:58:54",
+  "account": {
+    "naverId": "soul5373",
+    "egoProfile": "Profile 4 (barolab-soul5373)",
+    "cdpPort": 9440,
+    "autoReclaimEnabled": true,
+    "operatingRule": "브런치·CF 황금원고 발행 시 4문단 핵심 요약 + 원문 계산표 링크를 2개 카페(30,217명)에 동시 송출"
+  },
+  "kpi": {
+    "cafeCount": 2,
+    "totalMembers": 30217,
+    "publishedArticleCount": 4,
+    "pendingQueueCount": 7,
+    "cafeGa4Sessions28d": 0,
+    "naverTotalSessions28d": 0
+  },
+  "cafes": [
+    {
+      "cafeId": "loveshake1",
+      "clubId": "19858249",
+      "menuId": "164",
+      "name": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/사잇돌/저금리/대출",
+      "shortName": "러브쉐이크 (금융꿀팁)",
+      "grade": "가지5단계 (2009년 개설 · 17년 차 장수 카페)",
+      "members": 28495,
+      "account": "soul5373 (Profile 4 · barolab-soul5373)",
+      "cafeUrl": "https://cafe.naver.com/loveshake1",
+      "writeMode": "FEEditor + Clipboard Link Card (1+1 자동 브릿지)",
+      "targetTopics": "주택연금 · 대환대출 · 건보료 피부양자 · 소상공인 정책자금 · 세금 환급",
+      "publishedCount": 2,
+      "latestArticleUrl": "https://cafe.naver.com/loveshake1/162878",
+      "status": "live",
+      "statusBadge": "🟢 28,495명 본진 가동 중"
+    },
+    {
+      "cafeId": "boutiqueinfo",
+      "clubId": "31608088",
+      "menuId": "4",
+      "name": "고급지식의 모든 것",
+      "shortName": "고급지식의 모든 것",
+      "grade": "가지3단계 (실무 정보·재테크 전문 카페)",
+      "members": 1722,
+      "account": "soul5373 (Profile 4 · barolab-soul5373)",
+      "cafeUrl": "https://cafe.naver.com/boutiqueinfo",
+      "writeMode": "FEEditor + Clipboard Link Card (1+1 자동 브릿지)",
+      "targetTopics": "절세·증여세 차용증 · 비과세 종합저축 · 중장년 건강검진 · 복지할인",
+      "publishedCount": 2,
+      "latestArticleUrl": "https://cafe.naver.com/boutiqueinfo/2305",
+      "status": "live",
+      "statusBadge": "🟢 1,722명 세컨드 가동 중"
+    }
+  ],
+  "publishedArticles": [
+    {
+      "id": "boutiqueinfo-2305",
+      "part": 6,
+      "cafeId": "boutiqueinfo",
+      "cafeName": "고급지식의 모든 것",
+      "boardName": "지식 아카이브 (menuId 4)",
+      "members": 1722,
+      "account": "soul5373",
+      "title": "[핵심정리] 희망리턴패키지 점포철거비 지원금·폐업 부가세 신고 (점포철거비 지원 조건과 폐업 부가세·잔존재화 과세)",
+      "articleUrl": "https://cafe.naver.com/boutiqueinfo/2305",
+      "bridgeDomain": "meganote.kr",
+      "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+      "publishedAt": "2026-11-02 17:41 KST",
+      "status": "published_verified",
+      "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#2305)"
+    },
+    {
+      "id": "loveshake1-162878",
+      "part": 5,
+      "cafeId": "loveshake1",
+      "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리",
+      "boardName": "자유게시판·금융꿀팁 (menuId 164)",
+      "members": 28495,
+      "account": "soul5373",
+      "title": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
+      "articleUrl": "https://cafe.naver.com/loveshake1/162878",
+      "bridgeDomain": "smilenote.kr",
+      "bridgeUrl": "https://www.smilenote.kr/",
+      "publishedAt": "2026-11-02 14:22 KST",
+      "status": "published_verified",
+      "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#162878)"
+    },
+    {
+      "id": "boutiqueinfo-2302",
+      "part": 5,
+      "cafeId": "boutiqueinfo",
+      "cafeName": "고급지식의 모든 것",
+      "boardName": "지식 아카이브 (menuId 4)",
+      "members": 1722,
+      "account": "soul5373",
+      "title": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
+      "articleUrl": "https://cafe.naver.com/boutiqueinfo/2302",
+      "bridgeDomain": "smilenote.kr",
+      "bridgeUrl": "https://www.smilenote.kr/",
+      "publishedAt": "2026-11-02 14:23 KST",
+      "status": "published_verified",
+      "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#2302)"
+    },
+    {
+      "id": "loveshake1-162877",
+      "part": 1,
+      "cafeId": "loveshake1",
+      "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리",
+      "boardName": "자유게시판·금융꿀팁 (menuId 164)",
+      "members": 28495,
+      "account": "soul5373",
+      "title": "국민연금 기초연금 중복수령 감액 기준과 A급여액 산식·소득인정액 계산법",
+      "articleUrl": "https://cafe.naver.com/loveshake1/162877",
+      "bridgeDomain": "must-good.com",
+      "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+      "publishedAt": "2026-11-02 13:55 KST",
+      "status": "published_verified",
+      "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#162877)"
+    }
+  ],
+  "plannedQueue": [
+    {
+      "part": 1,
+      "title": "[핵심정리] 국민연금 기초연금 중복수령 감액 기준과 계산법",
+      "subtitle": "기초연금 소득인정액 선정기준액과 국민연금 연계감액 A급여액 산식 정리",
+      "category": "연금·노후설계",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "must-good.com",
+      "bridgeUrl": "https://www.must-good.com/",
+      "loveshakeUrl": "https://cafe.naver.com/loveshake1/162877",
+      "boutiqueUrl": "",
+      "status": "completed_partial",
+      "statusLabel": "🟡 1개 카페 발행 완료 (추가 송출 가능)"
+    },
+    {
+      "part": 2,
+      "title": "[핵심정리] 퇴직 후 건강보험 피부양자 자격조건과 임의계속가입",
+      "subtitle": "연소득 2천만원·재산 과세표준 5.4억 기준과 임의계속가입 신청기한",
+      "category": "건보료·절세실무",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "baronote.kr",
+      "bridgeUrl": "https://www.baronote.kr/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    },
+    {
+      "part": 3,
+      "title": "[핵심정리] 건강보험 본인부담상한제 환급금·미환급금 조회법",
+      "subtitle": "정부24 보조금24·홈택스 세금 환급·건보공단 환급금 신청 방법",
+      "category": "정책환급·복지",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "must-pick.com",
+      "bridgeUrl": "https://www.must-pick.com/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    },
+    {
+      "part": 4,
+      "title": "[핵심정리] 만 65세 임플란트 건강보험 적용·보청기 보조금",
+      "subtitle": "평생 2개 본인부담률 30% 조건과 지자체 보청기 지원금 신청순서",
+      "category": "시니어의료·돌봄",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "smilenote.kr",
+      "bridgeUrl": "https://www.smilenote.kr/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    },
+    {
+      "part": 5,
+      "title": "[핵심정리] 주택연금 가입조건 공시가격 12억·월 수령액 계산",
+      "subtitle": "만 55세 이상 주택연금 수령액 계산법과 사후 정산·상속 기준",
+      "category": "주거·주택연금",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "topnote.kr",
+      "bridgeUrl": "https://www.topnote.kr/",
+      "loveshakeUrl": "https://cafe.naver.com/loveshake1/162878",
+      "boutiqueUrl": "https://cafe.naver.com/boutiqueinfo/2302",
+      "status": "completed_both",
+      "statusLabel": "🟢 2개 카페 모두 발행 완료"
+    },
+    {
+      "part": 6,
+      "title": "[핵심정리] 희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+      "subtitle": "폐업신고 전 철거비 신청 순서와 부가세 잔존재화·건보료 조정",
+      "category": "소상공인·세무",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "meganote.kr",
+      "bridgeUrl": "https://www.meganote.kr/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "https://cafe.naver.com/boutiqueinfo/2305",
+      "status": "completed_partial",
+      "statusLabel": "🟡 1개 카페 발행 완료 (추가 송출 가능)"
+    },
+    {
+      "part": 7,
+      "title": "[핵심정리] 국가건강검진 결과표 보는법 공복혈당·사구체여과율",
+      "subtitle": "공복혈당·신장 크레아티닌·LDL 콜레스테롤 정상수치와 확진검사",
+      "category": "중장년건강·검진",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "healthcox.com",
+      "bridgeUrl": "https://www.healthcox.com/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    },
+    {
+      "part": 8,
+      "title": "[핵심정리] 비과세 종합저축 가입조건 5천만원 한도·파킹통장",
+      "subtitle": "만 65세 이자세금 면제 조건과 상호금융 세금우대·예금자보호",
+      "category": "은퇴자산·예적금",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "woorinote.kr",
+      "bridgeUrl": "https://www.woorinote.kr/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    },
+    {
+      "part": 9,
+      "title": "[핵심정리] 부모 자식간 계좌이체 증여세 한도와 차용증 작성법",
+      "subtitle": "자녀 10년 5천만원·혼인 1.5억 공제와 차용증 확정일자 기준",
+      "category": "상속·증여·절세",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "baronote.kr",
+      "bridgeUrl": "https://www.baronote.kr/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    },
+    {
+      "part": 10,
+      "title": "[핵심정리] 한전 전기요금·도시가스 복지할인 신청·에너지바우처",
+      "subtitle": "대가족·출산가구 30% 감면 조건과 취약계층 에너지바우처 신청법",
+      "category": "에너지·공과금절약",
+      "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
+      "bridgeDomain": "joynote.kr",
+      "bridgeUrl": "https://www.joynote.kr/",
+      "loveshakeUrl": "",
+      "boutiqueUrl": "",
+      "status": "queued",
+      "statusLabel": "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
+    }
+  ],
+  "measurement": {
+    "totalMembersReach": 30217,
+    "publishedTotalCount": 4,
+    "completedQueueCount": 3,
+    "pendingQueueCount": 7,
+    "cafeDirectReferrals": {
+      "todaySessions": 0,
+      "last7DaysSessions": 0,
+      "last28DaysSessions": 0,
+      "topDomains": [
+        {
+          "domain": "must-good.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 5
+        },
+        {
+          "domain": "woorinote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 4
+        },
+        {
+          "domain": "baronote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "healthcox.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "tripmarvel.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "daynote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        },
+        {
+          "domain": "justinfo.co.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        },
+        {
+          "domain": "nolplace.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        }
+      ]
+    },
+    "naverEcosystemReferrals": {
+      "todaySessions": 0,
+      "last7DaysSessions": 0,
+      "last28DaysSessions": 0,
+      "topDomains": [
+        {
+          "domain": "must-good.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 5
+        },
+        {
+          "domain": "woorinote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 4
+        },
+        {
+          "domain": "baronote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "healthcox.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "tripmarvel.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 2
+        },
+        {
+          "domain": "daynote.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        },
+        {
+          "domain": "justinfo.co.kr",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        },
+        {
+          "domain": "nolplace.com",
+          "todaySessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 1
+        }
+      ]
+    },
+    "cafeBreakdown": [
+      {
+        "cafeName": "[금융꿀팁] 러브쉐이크 (loveshake1)",
+        "members": 28495,
+        "publishedCount": 2,
+        "targetDomains": "smilenote.kr · must-good.com · baronote.kr",
+        "latestReceipt": "https://cafe.naver.com/loveshake1/162878",
+        "expectedEffect": "네이버 카페 탭 통합검색 노출 + 2.8만 금융/대출 진성 회원 CF 고단가 글 유입"
+      },
+      {
+        "cafeName": "고급지식의 모든 것 (boutiqueinfo)",
+        "members": 1722,
+        "publishedCount": 2,
+        "targetDomains": "meganote.kr · smilenote.kr · healthcox.com",
+        "latestReceipt": "https://cafe.naver.com/boutiqueinfo/2305",
+        "expectedEffect": "소상공인·재테크·폐업지원금 검색 유입 + CF 비교표 원문 브릿지 클릭"
+      }
+    ]
+  }
+}

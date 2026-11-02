@@ -12,11 +12,11 @@
 <a class="nav-item" href="threads.html"><span class="nav-icon" aria-hidden="true">@</span><div><strong>Threads</strong><small id="threads-sidebar-note">@mustpickinfo · 연결 대기</small></div><span class="badge-count st-amber" id="threads-sidebar-status">연결 대기</span></a>
 <a class="nav-item" href="brunch.html"><span class="nav-icon" aria-hidden="true">&#128214;</span><div><strong>브런치 스토리</strong><small id="brunch-sidebar-note">머스트픽 · 작가 심사 중</small></div><span class="badge-count st-blue" id="brunch-sidebar-status">서랍 3편</span></a>
 <a class="nav-item" href="premium.html"><span class="nav-icon" aria-hidden="true">&#11088;</span><div><strong>프리미엄콘텐츠</strong><small id="premium-sidebar-note">yoon_master · 심사 진행 중</small></div><span class="badge-count st-amber" id="premium-sidebar-status">심사중</span></a>
-<a class="nav-item" href="youtube.html"><span class="nav-icon" aria-hidden="true">&#127916;</span><div><strong>유튜브 · Hypit 스튜디오</strong><small id="youtube-sidebar-note">3채널 A안 · 카페 3만명 브릿지</small></div><span class="badge-count st-green" id="youtube-sidebar-status">쇼츠 3편</span></a>
+<a class="nav-item" href="youtube.html"><span class="nav-icon" aria-hidden="true">&#127916;</span><div><strong>유튜브 · Hypit 스튜디오</strong><small id="youtube-sidebar-note">@yoon_autolab · 3채널 가동</small></div><span class="badge-count st-green" id="youtube-sidebar-status">쇼츠 3편</span></a>
+<a class="nav-item" href="cafe.html"><span class="nav-icon" aria-hidden="true">&#9749;</span><div><strong>네이버 카페 (2곳)</strong><small id="cafe-sidebar-note">금융꿀팁 2.8만 · 고급지식 1.7천</small></div><span class="badge-count st-green" id="cafe-sidebar-status">발행 4건</span></a>
 <div class="nav-label">앱 프로젝트</div><a class="nav-item" href="apps.html"><span class="nav-icon" aria-hidden="true">&#128241;</span><div><strong id="apps-sidebar-title">앱 프로젝트 (4)</strong><small>생활 앱 · 출시 &amp; 수익화 관제</small></div><span class="badge-count st-blue" id="apps-sidebar-count">4종</span></a>
 <div class="nav-label">향후 확장 예정</div>
 <div class="nav-item" aria-disabled="true"><span class="nav-icon" aria-hidden="true">&#128308;</span><div><strong>티스토리 (14)</strong><small>Google 애드센스 다계정</small></div><span class="badge-count">준비중</span></div>
-<a class="nav-item" href="youtube.html"><span class="nav-icon" aria-hidden="true">&#9749;</span><div><strong>네이버 카페 (2곳)</strong><small>금융꿀팁 2.8만 · 고급지식 1.7천</small></div><span class="badge-count st-green">3만명 LIVE</span></a>
 </nav><div class="sidebar-assistant"><div class="assistant-head"><span>&#129302; MASTER AI</span><span style="color:#10b981;">● ON</span></div><p class="assistant-quote">CF 16 · 네이버 5 · 닥터 EXIF 세탁 엔진 가동 중</p></div><a class="nav-item sidebar-settings" href="settings.html"><span class="nav-icon" aria-hidden="true">&#9881;&#65039;</span><div><strong>설정 · API 연결</strong><small>API / LLM 모델 연결</small></div></a><div class="sidebar-footer"><span>BaroLab Deck</span><span>KST</span></div></aside>`;
   const sidebar = document.getElementById('barolab-sidebar');
   function updateActivePage() {
@@ -162,12 +162,31 @@
         const yBadge = document.getElementById('youtube-sidebar-status');
         const yNote = document.getElementById('youtube-sidebar-note');
         const rCnt = yData?.kpi?.renderedShortsCount ?? 3;
+        const pCnt = yData?.kpi?.communityPostsCount ?? 2;
         if (yBadge) {
-          yBadge.textContent = `쇼츠 ${rCnt}편`;
+          yBadge.textContent = `쇼츠 ${rCnt}·글 ${pCnt}`;
           yBadge.className = 'badge-count st-green';
         }
         if (yNote) {
-          yNote.textContent = `@yoon_autolab · 카페 3만명`;
+          yNote.textContent = `@yoon_autolab · 3채널 가동`;
+        }
+      }
+    } catch (_) {}
+
+    // 6. Naver Cafe (2 cafes · 30,217 members) sidebar status sync
+    try {
+      const cRes = await fetch('/api/cafe', { cache: 'no-store' });
+      if (cRes && cRes.ok) {
+        const cData = await cRes.json();
+        const cBadge = document.getElementById('cafe-sidebar-status');
+        const cNote = document.getElementById('cafe-sidebar-note');
+        const pubCnt = cData?.kpi?.publishedArticleCount ?? 4;
+        if (cBadge) {
+          cBadge.textContent = `발행 ${pubCnt}건`;
+          cBadge.className = 'badge-count st-green';
+        }
+        if (cNote) {
+          cNote.textContent = `금융꿀팁 2.8만 · 고급지식 1.7천`;
         }
       }
     } catch (_) {}

@@ -752,6 +752,31 @@ def api_youtube_media(filename: str):
     return FileResponse(path)
 
 
+class CafePublishRequest(BaseModel):
+    part: int = 6
+
+
+@app.get("/api/cafe")
+def api_cafe_status():
+    from youtube_posting.posting import load_cafe_status, sync_cafe_live_state
+    st = load_cafe_status()
+    if not st:
+        st = sync_cafe_live_state()
+    return st
+
+
+@app.post("/api/cafe/sync")
+def api_cafe_sync():
+    from youtube_posting.posting import sync_cafe_live_state
+    return sync_cafe_live_state()
+
+
+@app.post("/api/cafe/publish")
+def api_cafe_publish(req: CafePublishRequest):
+    from youtube_posting.posting import publish_cafe_bridge_part
+    return publish_cafe_bridge_part(part_no=req.part)
+
+
 app.middleware("http")(llm_guard)
 
 
@@ -764,7 +789,7 @@ async def protect_internal_files(request, call_next):
     if not path.startswith('/api/'):
         parts = path.strip('/').split('/')
         lowered = [part.casefold() for part in parts]
-        public_data = {'app_testers.json', 'brunch.json', 'collection-health.json', 'kin-measurement.json',
+        public_data = {'app_testers.json', 'brunch.json', 'cafe.json', 'collection-health.json', 'kin-measurement.json',
                        'kin.json', 'metrics.json', 'threads-measurement.json', 'threads.json', 'youtube.json'}
         internal = (any(part.startswith('.') for part in parts)
                     or lowered[0] in {'runtime', 'server', 'common', 'agents', 'collectors', 'projects', 'tests'}
@@ -779,7 +804,7 @@ async def protect_internal_files(request, call_next):
 @app.get("/data/{name}")
 def public_dashboard_snapshot(name: str):
     from fastapi.responses import FileResponse
-    allowed = {'app_testers.json', 'brunch.json', 'collection-health.json', 'kin-measurement.json',
+    allowed = {'app_testers.json', 'brunch.json', 'cafe.json', 'collection-health.json', 'kin-measurement.json',
                'kin.json', 'metrics.json', 'threads-measurement.json', 'threads.json', 'youtube.json'}
     if name not in allowed:
         raise HTTPException(status_code=404)

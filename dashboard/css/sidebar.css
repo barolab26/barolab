@@ -4,12 +4,20 @@
 }
 body.control-room .layout,
 body.control-room:has(> #barolab-sidebar),
-body:has(> #barolab-sidebar) {
+body:has(> #barolab-sidebar),
+.app-shell:has(> #barolab-sidebar) {
   display: flex !important;
   flex-direction: row !important;
   align-items: stretch !important;
   min-height: 100vh !important;
   position: relative !important;
+}
+body:has(> #barolab-sidebar) > main,
+body.control-room > main,
+.app-shell:has(> #barolab-sidebar) > main,
+.app-shell:has(> #barolab-sidebar) > .main-column {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
 }
 #barolab-sidebar {
   width: 228px !important;
