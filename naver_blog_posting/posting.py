@@ -1098,7 +1098,7 @@ def render_document(doc, plan, assets_dir):
                     rendered_lines.append(f'<a href="{html.escape(link_u)}" target="_blank" rel="noopener noreferrer" style="color:#0068c3;font-weight:700;text-decoration:underline;">{esc_l}</a>')
                 else:
                     rendered_lines.append(esc_l)
-            c = '<br>'.join(rendered_lines)
+            c = ('<br><br>' if tp == 'text' else '<br>').join(rendered_lines)
             if b.get('emphasis'):
                 c = f'<strong>{c}</strong>'
             cls = ' class="tags"' if tp == 'tags' else ''
@@ -1343,9 +1343,17 @@ def needs_quality_revision(folder):
         srv_path = folder / 'reserved-server-document.json'
         if srv_path.is_file():
             srv = json.loads(srv_path.read_text(encoding='utf-8'))
-            srv_types = [c.get('@ctype') for c in srv.get('document', {}).get('components', [])]
+            srv_comps = srv.get('document', {}).get('components', [])
+            srv_types = [c.get('@ctype') for c in srv_comps]
             if any(b.get('type') == 'table' for b in blocks) and 'table' not in srv_types:
                 return True
+            for comp in srv_comps[1:]:
+                if comp.get('@ctype') == 'text':
+                    vals = comp.get('value') or []
+                    non_empty = [p for p in vals if any((n.get('value') or '').strip() for n in p.get('nodes') or [])]
+                    empty = [p for p in vals if all(not (n.get('value') or '').strip() for n in p.get('nodes') or [])]
+                    if len(non_empty) >= 3 and len(empty) < len(non_empty) - 1:
+                        return True
     except Exception:
         return False
     return False
@@ -1433,13 +1441,13 @@ def prepare_basic_content(account_key, folder=None, topic=None):
                 '네이버 통합검색 1페이지 최상단에 노출되는 「포스트인컴(다마고치) 상위노출 표준 포맷」의 고품격 인터넷 미디어·생활경제 블로그 원고를 작성한다. 최우선 목표는 [하루 수익 $100 달성]을 위한 네이버 DIA+ 상위노출·모바일 완독률(체류시간) 극대화이다.\n'
                 '[포스트인컴(다마고치) 5대 상위노출 공식 (필수 준수)]\n'
                 f'1. 제목(title — 검색어 선두 배치 + 호기심 유발 뉴스데스크형): 반드시 앞 15자 이내에 핵심 검색 키워드("{keyword}") 원형을 조사 변형 없이 정확히 고정 배치하고, 말줄임표("...") 또는 쉼표(",") 뒤에 독자가 궁금해할 실제 조건·보상·핵심 차이를 요약한 부제를 붙여라. (예: "{keyword}, 실제 신청 조건과 놓치기 쉬운 핵심 기준 정리")\n'
-                f'2. 도입부(intro — 1~2문장 단문 호흡 + 핵심 쟁점 제시): 첫 문장에서 독자가 왜 "{keyword}"를 검색하는지 핵심 상황이나 화두를 담백하게 던지고, 모든 문장을 1~2문장마다 줄바꿈(\\n)으로 분리하여 5~7줄로 구성하라. ("이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑 절대 금지)\n'
-                '3. 본문(sections — 총 5개 섹션, [밑줄 소제목 → 섹션 이미지 → 1~2문장 단문 호흡 본문] 공식):\n'
+                f'2. 도입부(intro — 모바일 2줄 호흡 + 핵심 쟁점 제시): 첫 문장에서 독자가 왜 "{keyword}"를 검색하는지 핵심 상황이나 화두를 담백하게 던지고, 각 줄(문단)을 모바일 화면에서 2줄 이내로 깔끔하게 떨어지는 32~48자 단문으로 작성하며 줄바꿈(\\n)으로 5~6개 문단으로 분리하라. ("이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑 절대 금지)\n'
+                '3. 본문(sections — 총 5개 섹션, [밑줄 소제목 → 섹션 이미지 → 모바일 2줄 호흡 본문] 공식):\n'
                 '   - 반드시 5개의 섹션(sections)으로 구성하고, 각 섹션의 heading은 "01. 핵심 소제목", "02. 핵심 소제목" 형태로 번호와 명확한 주제를 적어라.\n'
-                '   - 모바일 가독성을 해치는 무거운 표(table)는 사용하지 말고 빈 배열([])로 두어라(Tables: 0 공식). 대신 수치·비교·조건은 본문에서 1~2문장 단문 호흡으로 술술 읽히게 풀어 써라.\n'
+                '   - 모바일 가독성을 해치는 무거운 표(table)는 사용하지 말고 빈 배열([])로 두어라(Tables: 0 공식). 대신 수치·비교·조건은 본문에서 짧은 호흡으로 술술 읽히게 풀어 써라.\n'
                 '   - quote 역시 빈 문자열("")로 두고(heading 자체가 밑줄 인용구 소제목으로 렌더링됨), 본문(text)에만 집중하라.\n'
-                '   - 각 섹션의 text는 반드시 1~2문장(40~75자)마다 줄바꿈(\\n)으로 분리하여 섹션당 6~10줄(전체 원고 공백 포함 3,300~4,000자)의 풍부한 정보량을 담백하고 신뢰감 있는 인터넷 미디어 해설 톤으로 작성하라.\n'
-                '4. 마무리(closing & signoff): 관료적 면책 문구("공식 공고를 참고하세요", "개인별 조회 서비스가 아닙니다")를 절대 넣지 말고, 독자가 오늘 바로 확인해야 할 핵심 체크 포인트 2~3가지를 1~2문장 단문 호흡으로 깔끔하게 정리하며 닫아라.\n'
+                '   - [모바일 가독성 최우선 원칙]: 모바일 네이버 블로그는 한 줄에 약 20~22자가 들어간다. 문장이 55자를 넘어가면 3번째 줄 끝에 "니다.", "다." 두세 글자만 덜렁 남아 가독성이 무너지므로, 각 줄(\\n 단위 문단)은 반드시 공백 포함 32~48자(모바일 1.5~2줄 완결 호흡)로 끊어 작성하라. 섹션당 6~9개 짧은 문단(전체 원고 공백 포함 3,200~3,800자)으로 구성하라.\n'
+                '4. 마무리(closing & signoff): 관료적 면책 문구("공식 공고를 참고하세요", "개인별 조회 서비스가 아닙니다")를 절대 넣지 말고, 독자가 오늘 바로 확인해야 할 핵심 체크 포인트 2~3가지를 각 32~48자 짧은 문단(\\n 분리)으로 깔끔하게 정리하며 닫아라.\n'
                 '[시각 자료 5~6장 가로 썸네일 독점 규칙]\n'
                 '- 네이버 검색 결과에서 가로 썸네일 5~6장을 독점하기 위해, 최상위 대표 썸네일(imagePrompt/imageCaption) 1장과 5개 섹션 각각의 내용에 꼭 맞는 구체적인 영어 imagePrompt 및 한국어 한 줄 imageCaption을 빠짐없이 작성하라(모든 섹션에 imagePrompt 필수 작성).\n'
                 '- 모든 생성용 imagePrompt는 고해상도 실사 에디토리얼 사진(high-resolution editorial photography) 스타일로 묘사하되 이미지 내 글자/텍스트/로고/문서화면은 절대 제외한다.\n'
@@ -1583,6 +1591,8 @@ def basic_native_document(original, document):
         if block.get('emphasis'):
             style['bold'] = True
         paragraphs = []
+        if block['type'] in ('signoff', 'tags') and output and output[-1].get('@ctype') == 'text':
+            paragraphs.append({'id': ident(), 'nodes': [{'id': ident(), 'value': '', 'style': dict(style), '@ctype': 'textNode'}], 'style': {'align': 'left', 'lineHeight': 1.9, '@ctype': 'paragraphStyle'}, '@ctype': 'paragraph'})
         raw_lines = [ln for ln in block['text'].split('\n') if ln.strip()]
         for l_idx, line in enumerate(raw_lines):
             ln_style = dict(style)

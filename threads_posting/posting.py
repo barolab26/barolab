@@ -1905,7 +1905,8 @@ def _threads_scheduler_tick(config_path=_threads_config_CONFIG, db_path=_threads
         with _threads_pipeline_connect(db_path) as db:
             latest_slot = _threads_scheduler_current_slot(config, now)
             now_hm = now.astimezone(_threads_pipeline_KST).strftime('%H:%M')
-            eff_hm = max(now_hm, target_slot) if target_slot else now_hm
+            target_slot = target_slot if (target_slot and target_slot <= now_hm) else None
+            eff_hm = now_hm
             candidate_rows = db.execute("SELECT * FROM parts p WHERE state='queued' AND publication_date=? AND slot<=? AND ((kind='main' AND (slot=? OR slot=?)) OR (kind='followup' AND EXISTS(SELECT 1 FROM parts parent WHERE parent.attempt_id=p.attempt_id AND parent.kind='main' AND parent.state='published_verified'))) ORDER BY kind='followup',created_at", (day, eff_hm, latest_slot, target_slot or latest_slot)).fetchall()
             due = None
             waiting_followup_delay = False
