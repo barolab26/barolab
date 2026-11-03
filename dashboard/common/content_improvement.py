@@ -74,6 +74,8 @@ def primary_url(url):
         return parsed.path == '/ap_ko/890/subview.do' and not parsed.query and not parsed.fragment
     if host == 'm.samsungfire.com':
         return url == 'https://m.samsungfire.com/download/product/P_P02_03_01_033_2.pdf'
+    if host == 'd.samsungfire.com':
+        return url == 'https://d.samsungfire.com/claim/healthreward/health_doc.html'
     return any(host==suffix or host.endswith('.'+suffix) for suffix in PRIMARY_HOSTS)
 
 

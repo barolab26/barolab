@@ -468,15 +468,18 @@ class CFAutomaticPreparationTiming(unittest.TestCase):
 
 
 class ExactInsurerSource(unittest.TestCase):
-    def test_only_reviewed_product_pdf_is_primary(self):
+    def test_only_reviewed_insurer_documents_are_primary(self):
         ns=functions('dashboard/common/content_improvement.py',['primary_url'],{'urlparse':urlparse,'re':re,'PRIMARY_HOSTS':('gov.kr',)})
-        url='https://m.samsungfire.com/download/product/P_P02_03_01_033_2.pdf'
-        self.assertTrue(ns['primary_url'](url))
-        for hostile in (url+'?x=1',url+'#page=12',url.replace('https:','http:'),url.replace('.com/','.com:444/'),
-                        url.replace('https://','https://user@'),url.replace('.com/','.com.evil.com/'),
-                        url.replace('/download/','/downloads/'),url.replace('_2.pdf','_3.pdf'),
-                        url.replace('m.samsungfire.com','samsungfire.com'),url.replace('m.samsungfire.com','other.samsungfire.com')):
-            with self.subTest(url=hostile):self.assertFalse(ns['primary_url'](hostile))
+        urls=('https://m.samsungfire.com/download/product/P_P02_03_01_033_2.pdf',
+              'https://d.samsungfire.com/claim/healthreward/health_doc.html')
+        for url in urls:
+            with self.subTest(approved=url):self.assertTrue(ns['primary_url'](url))
+            host=urlparse(url).hostname
+            for hostile in (url+'?x=1',url+'#page=12',url.replace('https:','http:'),url.replace('.com/','.com:444/'),
+                            url.replace('https://','https://user@'),url.replace('.com/','.com.evil.com/'),
+                            url.replace('.com/','.com/other/'),url+'.other',
+                            url.replace(host,'samsungfire.com'),url.replace(host,'other.samsungfire.com')):
+                with self.subTest(url=hostile):self.assertFalse(ns['primary_url'](hostile))
 
 
 class CFRealModuleRouting(unittest.TestCase):
