@@ -147,93 +147,139 @@ def validate_basic_article(article):
 
 from common.source_discovery import research as basic_research
 
+def article_image_sections(article):
+    """Bind capture requests to ordered, exact HTML sections, never fuzzy headings."""
+    soup = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
+    for figure in soup.find_all('figure'):
+        figure.decompose()
+    sections = [{'id': 'intro', 'index': 0, 'heading': article['title'], 'body': '',
+                 'purpose': 'context', 'image_optional': bool(soup.find('h2'))}]
+    specs = article.get('sectionImages') or []
+    for node in soup.find_all(['h2', 'p', 'table', 'ul', 'ol', 'blockquote']):
+        if any(parent.name in ('table', 'ul', 'ol', 'blockquote') for parent in node.parents):
+            continue
+        if node.name == 'h2':
+            index = len(sections)
+            heading = node.get_text(' ', strip=True)
+            spec = next((x for x in specs if isinstance(x, dict) and x.get('sectionHeading') == heading), {})
+            sections.append({'id': f'section-{index}', 'index': index, 'heading': heading,
+                             'body': '', 'purpose': spec.get('purpose') or 'evidence',
+                             'image_optional': spec.get('image_optional') is True})
+        else:
+            sections[-1]['body'] += ('\n' if sections[-1]['body'] else '') + node.get_text(' ', strip=True)
+    sections[0]['body'] = sections[0]['body'] or article.get('summary', '')
+    return sections
+
+
+def _cf_image_plan(asset):
+    return {**asset, 'filename': Path(asset['path']).name, 'source': 'browser_capture',
+            'editorialAsset': asset}
+
+
+def verify_rendered_images(content, plans, folder, urls=None):
+    from common.flow_images import hold_editorial_images
+    soup = BeautifulSoup(content, 'html.parser')
+    section_index, image_index = 0, 0
+    for node in soup.find_all(['h2', 'img']):
+        if node.name == 'h2':
+            section_index += 1
+            continue
+        if image_index >= len(plans):
+            hold_editorial_images(folder, 'unreviewed_article_image')
+        plan = plans[image_index]
+        expected_src = urls[image_index] if urls is not None else '{{IMAGE_' + str(image_index) + '}}'
+        figure = node.find_parent('figure')
+        source = figure.find('a', href=plan['sourceUrl']) if figure else None
+        preceding = figure.find_previous(['p', 'table', 'ul', 'ol', 'blockquote']) if figure else None
+        if preceding:
+            for parent in preceding.parents:
+                if parent.name in ('table', 'ul', 'ol', 'blockquote'):
+                    preceding = parent
+        anchor = plan.get('anchor_text')
+        if (node.get('src') != expected_src or not figure or not source or
+                figure.get('data-editorial-section') != plan['sectionId'] or
+                section_index != plan['section_index'] or plan['caption'] not in figure.get_text() or
+                not anchor or preceding is None or anchor not in preceding.get_text(' ', strip=True)):
+            hold_editorial_images(folder, 'image_section_or_source_mapping_changed')
+        image_index += 1
+    if image_index != len(plans):
+        hold_editorial_images(folder, 'missing_article_image')
+
+
+def verify_article_images(article, folder):
+    from common.flow_images import require_editorial_images, hold_editorial_images
+    result = article.get('editorialImages')
+    if not result:
+        hold_editorial_images(folder, 'prepared_images_have_no_browser_evidence; reprepare in a new draft folder')
+    result = require_editorial_images(article['title'], article_image_sections(article), folder,
+                                      channel='cf', existing=result)
+    plans = [_cf_image_plan(a) for a in result['assets']]
+    digest = hashlib.sha256(article['contentHtml'].encode('utf-8')).hexdigest()
+    if article.get('imagePlans') != plans or article.get('imageDocumentSha256') != digest:
+        hold_editorial_images(folder, 'image_plan_or_document_changed; reprepare section placement')
+    verify_rendered_images(article['contentHtml'], plans, folder)
+    return result
+
+
 def ensure_article_images(article, folder, domain=None):
     from html import escape
     from common.dashboard_jobs import write
-    from common.flow_images import generate as flow_image
-
+    from common.flow_images import require_editorial_images, hold_editorial_images
     folder = Path(folder)
-    existing_plans = [p for p in (article.get('imagePlans') or []) if isinstance(p, dict) and p.get('filename')]
-    if existing_plans and all((folder / 'images' / p['filename']).is_file() for p in existing_plans) and ('{{IMAGE_0}}' in article.get('contentHtml', '') or '<img' in article.get('contentHtml', '')):
+    receipt = folder / 'publication-receipt.json'
+    if receipt.is_file() and json.loads(receipt.read_text(encoding='utf-8')).get('state') in (
+            'published', 'accepted', 'submitting', 'submission_unknown'):
         return article
-
+    if article.get('editorialImages'):
+        verify_article_images(article, folder)
+        return article
+    if article.get('imagePlans') or BeautifulSoup(article.get('contentHtml', ''), 'html.parser').find('img'):
+        hold_editorial_images(folder, 'legacy_prepared_images_unverified; preserve draft and reprepare in a new folder')
+    sections = article_image_sections(article)
+    research_path = folder / 'research.json'
+    sources = json.loads(research_path.read_text(encoding='utf-8')).get('sources', []) if research_path.is_file() else None
     if domain:
-        try:
-            basic_progress(domain, 5, '이미지·썸네일 생성', 75, article.get('title', domain))
-        except Exception:
-            pass
-
-    hero_img = flow_image(article['title'], article['summary'], folder, custom_prompt=article.get('imagePrompt'), filename='flow-hero.png', source_index=0)
-    hero_caption = (article.get('imageCaption') or f"{article.get('mainKeyword') or article['title']} 핵심 요약").strip()
-    plans = [{'filename': hero_img.name, 'source': 'generated', 'caption': hero_caption, 'role': 'thumbnail'}]
-
-    soup = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
-    for old_fig in soup.find_all('figure'):
-        if '{{IMAGE_' in str(old_fig):
-            old_fig.decompose()
-
-    h2_tags = soup.find_all('h2')
-    sec_specs = [s for s in (article.get('sectionImages') or []) if isinstance(s, dict) and ((s.get('imagePrompt') or '').strip() or (s.get('sectionHeading') or '').strip())]
-    if not sec_specs and len(h2_tags) >= 2:
-        mid_h2 = h2_tags[len(h2_tags) // 2]
-        h_txt = mid_h2.get_text(' ', strip=True)
-        sec_specs = [{'sectionHeading': h_txt, 'imagePrompt': '', 'imageCaption': f'{h_txt} 핵심 확인 포인트'}]
-
-    for idx, spec in enumerate(sec_specs[:2], 1):
-        sec_fname = f'flow-section-{idx}.png'
-        sec_title = (spec.get('sectionHeading') or article['title']).strip()
-        sec_cap = (spec.get('imageCaption') or f'{sec_title} 핵심 포인트').strip()
-        sec_img = flow_image(sec_title, sec_cap + ' ' + article['summary'], folder, custom_prompt=spec.get('imagePrompt'), filename=sec_fname, source_index=idx)
-        plans.append({'filename': sec_img.name, 'source': 'generated', 'caption': sec_cap, 'sectionHeading': sec_title, 'role': 'section'})
-
-    def _make_figure_html(idx, caption, eager=False):
-        load_attr = 'eager' if eager else 'lazy'
-        return BeautifulSoup(
-            f'<figure class="post-image" style="margin:24px 0;text-align:center;">'
-            f'<img src="{{{{IMAGE_{idx}}}}}" alt="{escape(caption)}" style="max-width:100%;height:auto;border-radius:12px;" loading="{load_attr}">'
-            f'<figcaption class="image-caption" style="margin-top:8px;font-size:0.9rem;color:#64748b;">{escape(caption)}</figcaption>'
-            f'</figure>',
-            'html.parser',
-        ).figure
-
-    # Insert IMAGE_0 right after the opening intro paragraph (or before first h2)
-    hero_fig = _make_figure_html(0, hero_caption, eager=True)
-    first_h2 = h2_tags[0] if h2_tags else None
-    first_p = soup.find('p')
-    if first_h2 is not None:
-        first_h2.insert_before(hero_fig)
-    elif first_p is not None:
-        first_p.insert_after(hero_fig)
-    else:
-        soup.insert(0, hero_fig)
-
-    # Insert section images naturally inside their corresponding h2 sections
-    for idx, plan in enumerate(plans[1:], 1):
-        sec_fig = _make_figure_html(idx, plan['caption'], eager=False)
-        target_heading = (plan.get('sectionHeading') or '').strip()
-        matched_h2 = next((h for h in h2_tags if target_heading and (target_heading in h.get_text(' ', strip=True) or h.get_text(' ', strip=True) in target_heading)), None)
-        if matched_h2 is None and h2_tags:
-            matched_h2 = h2_tags[min(idx, len(h2_tags) - 1)]
-        if matched_h2 is not None:
-            next_p = matched_h2.find_next_sibling('p')
-            if next_p is not None:
-                next_p.insert_after(sec_fig)
-            else:
-                matched_h2.insert_after(sec_fig)
+        basic_progress(domain, 5, '실제 자료 이미지 검색·검토', 75, article.get('title', domain))
+    result = require_editorial_images(article['title'], sections, folder, sources=sources, channel='cf')
+    soup = BeautifulSoup(article['contentHtml'], 'html.parser')
+    headings = soup.find_all('h2')
+    plans = []
+    for asset in result['assets']:
+        section_index = asset['section_index']
+        if (not isinstance(section_index, int) or not 0 <= section_index < len(sections) or
+                asset.get('sectionId') != sections[section_index]['id'] or
+                Path(asset['path']).resolve().parent != (folder / 'images').resolve()):
+            hold_editorial_images(folder, 'capture_section_or_path_mismatch')
+        index = len(plans)
+        plan = _cf_image_plan(asset)
+        plans.append(plan)
+        caption, source = escape(asset['caption']), escape(asset['sourceUrl'], quote=True)
+        figure = BeautifulSoup(
+            f'<figure class="post-image" data-editorial-section="{escape(asset["sectionId"], quote=True)}">'
+            f'<img src="{{{{IMAGE_{index}}}}}" alt="{escape(asset.get("alt") or asset["caption"], quote=True)}" '
+            f'loading="{"eager" if index == 0 else "lazy"}" style="max-width:100%;height:auto;">'
+            f'<figcaption>{caption} · <a href="{source}" rel="noopener noreferrer">'
+            f'{escape(asset.get("sourceTitle") or asset["sourceUrl"])}</a></figcaption></figure>', 'html.parser').figure
+        heading = headings[section_index - 1] if section_index else None
+        candidates = [node for node in soup.find_all(['p', 'table', 'ul', 'ol', 'blockquote'])
+                      if node.find_previous('h2') is heading and not node.find_parent('figure') and
+                      not any(parent.name in ('table', 'ul', 'ol', 'blockquote') for parent in node.parents)]
+        match = asset.get('anchor_text')
+        target = next((node for node in candidates if match and match in node.get_text(' ', strip=True)), None)
+        if target is not None:
+            target.insert_after(figure)
         else:
-            soup.append(sec_fig)
-
+            hold_editorial_images(folder, 'capture_exact_text_anchor_missing; select an exact paragraph quote')
     article['imagePlans'] = plans
-    from common.cf_tables import inject_interactive_widget
-    article['contentHtml'] = inject_interactive_widget(str(soup), article.get('title', ''))
+    article['editorialImages'] = result
+    article['contentHtml'] = str(soup)
+    article['imageDocumentSha256'] = hashlib.sha256(article['contentHtml'].encode('utf-8')).hexdigest()
     validate_basic_article(article)
+    verify_article_images(article, folder)
     write(folder / 'article.json', article)
     write(folder / 'editor-content.json', article)
-    write(folder / 'photo-plan.json', {
-        'assets': plans,
-        'medium': 'editorial-image',
-        'sha256': hashlib.sha256(hero_img.read_bytes()).hexdigest(),
-    })
+    write(folder / 'photo-plan.json', {'assets': plans, 'editorialImages': result,
+                                      'documentSha256': article['imageDocumentSha256']})
     return article
 
 
@@ -260,6 +306,9 @@ def basic_article(domain, item, folder):
         if handoff.is_file() and json.loads(handoff.read_text(encoding='utf-8')).get('domain') not in (None, domain):
             raise ValueError('Saved article belongs to another domain')
         article = validate_basic_article(json.loads(path.read_text(encoding='utf-8')))
+        receipt = folder / 'publication-receipt.json'
+        if receipt.is_file() and json.loads(receipt.read_text(encoding='utf-8')).get('state') in ('published', 'accepted', 'submitting', 'submission_unknown'):
+            return article
         target_kw = planned_kw or article.get('mainKeyword') or item.get('mainKeyword') or ''
         if target_kw and target_kw != domain:
             fixed_title = enforce_naver_seo_title(article.get('title', ''), target_kw, domain=domain)
@@ -307,10 +356,11 @@ def basic_article(domain, item, folder):
         'type': 'object',
         'properties': {
             'sectionHeading': {'type': 'string'},
+            'image_optional': {'type': 'boolean'},
             'imagePrompt': {'type': 'string'},
             'imageCaption': {'type': 'string'},
         },
-        'required': ['sectionHeading', 'imagePrompt', 'imageCaption'],
+        'required': ['sectionHeading', 'imagePrompt', 'imageCaption', 'image_optional'],
         'additionalProperties': False,
     }
     schema = {
@@ -342,8 +392,8 @@ def basic_article(domain, item, folder):
         '   - 한 문단(<p>)은 스마트폰 화면 기준 2~3줄이 넘지 않게 호흡을 짧고 자연스럽게 끊어 써라.\n'
         '4. 마무리(실천 가이드): 마지막 문단에 "해설 글이며 개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 관료적 면책 문구를 절대 넣지 마라. 대신 독자가 글을 읽은 직후 바로 실행할 수 있는 실전 팁(먼저 챙길 준비물, 확인해볼 설정 메뉴, 방문/신청 팁 등)으로 자연스럽게 마무리하라.\n'
         '[시각 자료 및 기술 규칙]\n'
-        '- 대표 썸네일용 imagePrompt와 본문 핵심 <h2> 소제목 구간(1~2곳)을 위한 sectionImages의 imagePrompt는 구체적인 영어 문장(English prompt)으로 작성하되, 3인칭 인물 연출 사진(예: "Korean adult sitting at a dining table", "woman looking at smartphone/documents")이나 글자/텍스트가 적힌 종이·화면 묘사는 절대 금지한다! 반드시 주제와 직결되는 실물 오브젝트·장소·정물 클로즈업 에디토리얼 사진(no people, no text, clean object/environment photography)으로 묘사하거나 "RESEARCH_CAPTURE"로 지정한다.\n'
-        '- imageCaption과 sectionImages.imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성하고, sectionImages.sectionHeading에는 해당 이미지가 들어갈 본문 <h2> 소제목 텍스트를 정확히 기입한다.\n'
+        '- imagePrompt와 sectionImages.imagePrompt는 실제 웹 자료를 찾을 검색 의도로 작성한다. 정보성 글과 사건·이슈 글 모두 해당 문단의 인물·사건·장소·시점·기관에 정확히 맞는 실제 자료를 사용한다. 생성 사진이나 모사 화면을 요청하지 않는다.\n'
+        '- imageCaption과 sectionImages.imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성하고, sectionImages에는 모든 본문 <h2> 구간을 포함하고 sectionHeading에 해당 소제목을 정확히 기입한다. 실제 화면·사건·인물·장소를 보여주어야 하는 섹션은 image_optional=false로, 이미지가 사실 확인에 필요 없는 정리·설명은 image_optional=true로 적는다.\n'
         '- topicSlug는 영문 소문자·하이픈 조합으로 작성하며, 등록된 categories 중 하나를 선택한다.\n'
         '[절대 금지 가드레일]\n'
         '- 수집 자료(research)에 없는 허위 사실·수치 날조 금지 (단, 자료의 한계를 변명하는 "제공된 자료에서는 알 수 없습니다", "이 글은 제공된 안내를 바탕으로..." 같은 리서치 메타 발언은 본문에 절대 노출 금지)\n'
@@ -454,7 +504,7 @@ def publish_basic_article(domain, article, folder):
             raise ValueError('Existing title or slug; duplicate submission prevented')
     if previous.get('state') in ('submitting', 'submission_unknown', 'accepted'):
         raise RuntimeError('Previous submission must be reconciled before a second POST')
-    article = ensure_article_images(article, folder, domain=domain)
+    verify_article_images(article, folder)
     from common.cf_tables import style_tables, inject_interactive_widget
     content = inject_interactive_widget(style_tables(article['contentHtml'], domain=domain), article.get('title', ''), domain=domain)
     from common.content_quality import ensure_publication_review
@@ -462,10 +512,14 @@ def publish_basic_article(domain, article, folder):
     plans = article.get('imagePlans', [])
     urls = []
     if plans:
+        verify_article_images(article, folder)
         paths = [folder / 'images' / plan['filename'] for plan in plans]
         urls = upload_images_to_cf(domain, paths)
+        if len(urls) != len(plans):
+            raise ValueError('Image upload result count mismatch')
         for index, (plan, url) in enumerate(zip(plans, urls)):
             content = content.replace(f'{{{{IMAGE_{index}}}}}', url).replace('images/' + plan['filename'], url)
+    verify_rendered_images(content, plans, folder, urls=urls)
     if re.search('\\{\\{IMAGE|src=[\\"\\\'](?:images/|file:)', content):
         raise ValueError('Unresolved image reference')
     thumb_url = urls[0] if urls else ''
@@ -481,6 +535,7 @@ def publish_basic_article(domain, article, folder):
         'isPublished': True,
         'status': 'published',
     }
+    verify_article_images(article, folder)
     key = get_api_key(domain)
     write(previous_path, {'state': 'submitting', 'domain': domain, 'title': article['title'], 'slug': article['topicSlug'], 'startedAt': stamp(), 'payloadSha256': hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()})
     try:

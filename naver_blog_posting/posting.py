@@ -1078,7 +1078,7 @@ def render_document(doc, plan, assets_dir):
             f'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
             f'<div><span style="background:#16a34a;color:#fff;font-weight:700;padding:3px 8px;border-radius:6px;font-size:12px;">예약발행 검증완료</span> '
             f'<strong style="margin-left:6px;">계정: {acc_label} ({blog_label})</strong> · <span>예약시각: <strong>{res_time}</strong></span></div>'
-            f'<span style="font-size:12px;color:#15803d;font-weight:700;">포스트인컴 1:1 썸네일 + iOS 1080×1920 스마트캡처 적용</span>'
+            f'<span style="font-size:12px;color:#15803d;font-weight:700;">본문 자료 이미지 및 출처 확인</span>'
             f'</div>'
             f'{qr_html}{shots_html}</section>'
         )
@@ -1117,10 +1117,16 @@ def render_document(doc, plan, assets_dir):
         elif tp == 'image':
             f = b['file']
             rep_attr = ' data-representative="true"' if f and f == rf else ''
+            asset = next((a for a in plan['assets'] if a['file'] == f), {})
+            source = asset.get('sourceUrl')
+            section_attr = f' data-editorial-section="{html.escape(asset["sectionId"], quote=True)}"' if asset.get('sectionId') else ''
             cap = b['caption']
-            fc = f'<figcaption>{html.escape(cap)}</figcaption>' if cap else ''
+            caption_html = html.escape(cap)
+            if source:
+                caption_html += f' <a href="{html.escape(source, quote=True)}" rel="noopener noreferrer">출처</a>'
+            fc = f'<figcaption>{caption_html}</figcaption>' if cap else ''
             img = f'''<img src="images/{urllib.parse.quote(f)}" alt="{html.escape(b.get('alt', ''))}"''' + '>'
-            blocks.append(f'<figure data-block-index="{i}"{rep_attr}>{img}{fc}</figure>')
+            blocks.append(f'<figure data-block-index="{i}"{rep_attr}{section_attr}>{img}{fc}</figure>')
     content = '<p class="gap" aria-hidden="true"><br></p>'.join(blocks)
     out_html = f'<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{t}</title><style>{CSS}</style></head><body><main>{receipt_banner}<h1>{t}</h1>{content}</main></body></html>'
     try:
@@ -1132,10 +1138,118 @@ def render_document(doc, plan, assets_dir):
 def document_fingerprint(doc):
     return hashlib.sha256(json.dumps(doc, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
-def basic_summary_image(article, folder):
-    from common.flow_images import generate as flow_image, render_postincome_hero_thumbnail
-    hero_path = flow_image(article['title'], article['intro'], folder, custom_prompt=article.get('imagePrompt'))
-    return render_postincome_hero_thumbnail(hero_path, article.get('mainKeyword') or '', article.get('title') or '')
+def naver_image_sections(document):
+    sections = [{'id': 'intro', 'index': 0, 'heading': document['title'], 'body': '',
+                 'purpose': 'context', 'image_optional': any(b.get('type') == 'heading' for b in document['blocks'])}]
+    options = document.get('editorialSectionOptions') or {}
+    for block in document['blocks']:
+        kind = block.get('type')
+        if kind == 'heading':
+            index = len(sections)
+            sid = f'section-{index}'
+            sections.append({'id': sid, 'index': index, 'heading': block['text'], 'body': '',
+                             'purpose': 'evidence', 'image_optional': options.get(sid) is True})
+        elif kind in ('text', 'quotation', 'table'):
+            text = block.get('text') if kind != 'table' else '\n'.join(' | '.join(row) for row in block['rows'])
+            sections[-1]['body'] += ('\n' if sections[-1]['body'] else '') + (text or '')
+    return sections
+
+
+def _naver_image_asset(asset, index):
+    clean = lambda value: re.sub(r'[|｜\r\n]', ' ', str(value)).strip()
+    description = clean(asset['caption'])
+    credit = re.sub(r'[/\\]', ' ', clean(asset.get('sourceTitle') or urlparse(asset['sourceUrl']).hostname))
+    if 'http' in credit.lower():
+        credit = urlparse(asset['sourceUrl']).hostname
+    return {'id': index, 'file': Path(asset['path']).name, 'description': description,
+            'credit': credit, 'sha256': asset['sha256'], 'sourceUrl': asset['sourceUrl'],
+            'sectionId': asset['sectionId'], 'section_index': asset['section_index'], 'editorialAsset': asset}
+
+
+def verify_document_images(document, plan, folder):
+    from common.flow_images import require_editorial_images, hold_editorial_images
+    result = plan.get('editorialImages')
+    if not result:
+        hold_editorial_images(folder, 'legacy_prepared_images_unverified; preserve draft and reprepare in a new folder')
+    result = require_editorial_images(document['title'], naver_image_sections(document), folder,
+                                      channel='naver', existing=result)
+    expected = [_naver_image_asset(asset, i) for i, asset in enumerate(result['assets'])]
+    if (plan.get('documentSha256') != document_fingerprint(document) or plan.get('assets') != expected or
+            plan.get('representative_file') != (expected[0]['file'] if expected else '')):
+        hold_editorial_images(folder, 'image_plan_or_document_changed; reprepare exact section placement')
+    section_index, image_index = 0, 0
+    for block_index, block in enumerate(document['blocks']):
+        if block['type'] == 'heading':
+            section_index += 1
+        elif block['type'] == 'image':
+            if image_index >= len(expected) or section_index != expected[image_index]['section_index']:
+                hold_editorial_images(folder, 'image_section_mapping_changed')
+            preceding = document['blocks'][block_index - 1] if block_index else {}
+            anchor = expected[image_index]['editorialAsset'].get('anchor_text')
+            previous_text = preceding.get('text', '') if preceding.get('type') != 'table' else '\n'.join(' | '.join(row) for row in preceding['rows'])
+            if not anchor or preceding.get('type') not in ('text', 'quotation', 'table') or anchor not in previous_text:
+                hold_editorial_images(folder, 'image_exact_text_anchor_changed')
+            image_index += 1
+    report = validate_document(document, plan, Path(folder) / 'images')
+    if not report['ok']:
+        hold_editorial_images(folder, 'image_document_format_mismatch: ' + json.dumps(report['errors'], ensure_ascii=False))
+    return result
+
+
+def prepare_document_images(document, folder, main_keyword, signoff=''):
+    from common.flow_images import require_editorial_images, hold_editorial_images
+    sections = naver_image_sections(document)
+    research_path = Path(folder) / 'research.json'
+    sources = json.loads(research_path.read_text(encoding='utf-8')).get('sources', []) if research_path.is_file() else None
+    result = require_editorial_images(document['title'], sections, folder, sources=sources, channel='naver')
+    assets = [_naver_image_asset(asset, index) for index, asset in enumerate(result['assets'])]
+    insertions = {}
+    for asset in assets:
+        original = asset['editorialAsset']
+        section_index = original['section_index']
+        if (not isinstance(section_index, int) or not 0 <= section_index < len(sections) or
+                original['sectionId'] != sections[section_index]['id'] or
+                Path(original['path']).resolve().parent != (Path(folder) / 'images').resolve()):
+            hold_editorial_images(folder, 'capture_section_or_path_mismatch')
+        current, candidates = 0, []
+        for index, block in enumerate(document['blocks']):
+            if block['type'] == 'heading':
+                current += 1
+            if current == section_index and block['type'] in ('text', 'quotation', 'table'):
+                candidates.append(index)
+        match = original.get('anchor_text')
+        def block_text(i):
+            block = document['blocks'][i]
+            return block.get('text', '') if block['type'] != 'table' else '\n'.join(' | '.join(row) for row in block['rows'])
+        anchor = next((i for i in candidates if match and match in block_text(i)), None)
+        if anchor is None:
+            hold_editorial_images(folder, 'capture_exact_text_anchor_missing; select an exact paragraph quote')
+        insertions.setdefault(anchor, []).append({'type': 'image', 'id': asset['id'], 'file': asset['file'],
+            'alt': original.get('alt') or asset['description'], 'caption': asset['description'] + '｜' + asset['credit']})
+    blocks = []
+    for index, block in enumerate(document['blocks']):
+        images = insertions.get(index, [])
+        # Keep the canonical section text identical while splitting a multiline
+        # text block after the actual quoted paragraph, before inserting its image.
+        split = -1
+        if images and block['type'] in ('text', 'quotation'):
+            asset = assets[images[0]['id']]['editorialAsset']
+            quote = asset['anchor_text']
+            split = block['text'].find('\n', block['text'].index(quote) + len(quote))
+        if split >= 0 and split < len(block['text']) - 1:
+            blocks.append({**block, 'text': block['text'][:split]})
+            blocks.extend(images)
+            blocks.append({**block, 'text': block['text'][split + 1:]})
+        else:
+            blocks.append(block)
+            blocks.extend(images)
+    document['blocks'] = blocks
+    plan = {'version': 1, 'main_keyword': main_keyword, 'signoff': signoff,
+            'representative_file': assets[0]['file'] if assets else '', 'assets': assets,
+            'editorialImages': result, 'documentSha256': document_fingerprint(document)}
+    verify_document_images(document, plan, folder)
+    return plan
+
 
 def _has_slash_table(text):
     rows = []
@@ -1391,12 +1505,18 @@ def prepare_basic_content(account_key, folder=None, topic=None):
         raise ValueError('Prepared content must remain inside channel output')
     folder.mkdir(parents=True, exist_ok=True)
     doc_path, plan_path = (folder / 'editor-content.json', folder / 'photo-plan.json')
+    receipt_path = folder / 'reservation-evidence.json'
+    prior = json.loads(receipt_path.read_text(encoding='utf-8')) if receipt_path.is_file() else {}
+    protected = prior.get('submissionStatus') in ('submitting', 'submission_unknown', 'verified_reserved')
+    if protected:
+        if not doc_path.is_file() or not plan_path.is_file():
+            raise ValueError('Submitted draft incomplete; reconcile existing receipt before repreparing')
+        return account, folder, json.loads(doc_path.read_text(encoding='utf-8')), json.loads(plan_path.read_text(encoding='utf-8'))
     if doc_path.is_file() and plan_path.is_file():
         document, plan = (json.loads(doc_path.read_text(encoding='utf-8')), json.loads(plan_path.read_text(encoding='utf-8')))
-        if _upgrade_existing_blocks(document):
-            atomic_json(doc_path, document)
+        verify_document_images(document, plan, folder)
     else:
-        from common.flow_images import generate as flow_image
+        plan = None
         writer_path = folder / 'writer.json'
         if writer_path.is_file():
             article = json.loads(writer_path.read_text(encoding='utf-8'))
@@ -1440,21 +1560,20 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             update_pipeline_status(account, 2, '리서치', 25, keyword)
             sources = basic_research(keyword, folder)
             guide = (BASE_DIR.parent / 'AGENTS.md').read_text(encoding='utf-8') if (BASE_DIR.parent / 'AGENTS.md').exists() else '독자 통증 출발, 3초 자가진단, 모바일 호흡'
-            schema = {'type': 'object', 'properties': {'title': {'type': 'string'}, 'mainKeyword': {'type': 'string'}, 'intro': {'type': 'string'}, 'closing': {'type': 'string'}, 'signoff': {'type': 'string'}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'tags': {'type': 'array', 'items': {'type': 'string'}, 'minItems': 1}, 'sections': {'type': 'array', 'minItems': 1, 'items': {'type': 'object', 'properties': {'heading': {'type': 'string'}, 'quote': {'type': 'string'}, 'text': {'type': 'string'}, 'table': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'string'}}}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}}, 'required': ['heading', 'quote', 'text', 'table', 'imagePrompt', 'imageCaption'], 'additionalProperties': False}}}, 'required': ['title', 'mainKeyword', 'intro', 'closing', 'signoff', 'imagePrompt', 'imageCaption', 'tags', 'sections'], 'additionalProperties': False}
+            schema = {'type': 'object', 'properties': {'title': {'type': 'string'}, 'mainKeyword': {'type': 'string'}, 'intro': {'type': 'string'}, 'closing': {'type': 'string'}, 'signoff': {'type': 'string'}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'tags': {'type': 'array', 'items': {'type': 'string'}, 'minItems': 1}, 'sections': {'type': 'array', 'minItems': 1, 'items': {'type': 'object', 'properties': {'heading': {'type': 'string'}, 'quote': {'type': 'string'}, 'text': {'type': 'string'}, 'table': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'string'}}}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'image_optional': {'type': 'boolean'}}, 'required': ['heading', 'quote', 'text', 'table', 'imagePrompt', 'imageCaption', 'image_optional'], 'additionalProperties': False}}}, 'required': ['title', 'mainKeyword', 'intro', 'closing', 'signoff', 'imagePrompt', 'imageCaption', 'tags', 'sections'], 'additionalProperties': False}
             prompt = CONTENT_QUALITY_POLICY + '\n' + (
                 '네이버 통합검색 1페이지 최상단에 노출되는 「포스트인컴(다마고치) 상위노출 표준 포맷」의 고품격 인터넷 미디어·생활경제 블로그 원고를 작성한다. 최우선 목표는 [하루 수익 $100 달성]을 위한 네이버 DIA+ 상위노출·모바일 완독률(체류시간) 극대화이다.\n'
                 '[포스트인컴(다마고치) 5대 상위노출 공식 (필수 준수)]\n'
                 f'1. 제목(title — 검색어 선두 배치 + 호기심 유발 뉴스데스크형): 반드시 앞 15자 이내에 핵심 검색 키워드("{keyword}") 원형을 조사 변형 없이 정확히 고정 배치하고, 말줄임표("...") 또는 쉼표(",") 뒤에 독자가 궁금해할 실제 조건·보상·핵심 차이를 요약한 부제를 붙여라. (예: "{keyword}, 실제 신청 조건과 놓치기 쉬운 핵심 기준 정리")\n'
                 f'2. 도입부(intro — 모바일 2줄 호흡 + 핵심 쟁점 제시): 첫 문장에서 독자가 왜 "{keyword}"를 검색하는지 핵심 상황이나 화두를 담백하게 던지고, 각 줄(문단)을 모바일 화면에서 2줄 이내로 깔끔하게 떨어지는 32~48자 단문으로 작성하며 줄바꿈(\\n)으로 5~6개 문단으로 분리하라. ("이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑 절대 금지)\n'
-                '3. 본문(sections — 총 5개 섹션, [밑줄 소제목 → 섹션 이미지 → 모바일 2줄 호흡 본문] 공식):\n'
-                '   - 반드시 5개의 섹션(sections)으로 구성하고, 각 섹션의 heading은 "01. 핵심 소제목", "02. 핵심 소제목" 형태로 번호와 명확한 주제를 적어라.\n'
+                '3. 본문(sections — 문맥별 소제목과 짧은 본문, 실제 자료 이미지는 해당 설명 가까이 배치):\n'
+                '   - 주제에 필요한 수의 섹션(sections)으로 구성하고, 각 섹션의 heading은 "01. 핵심 소제목", "02. 핵심 소제목" 형태로 번호와 명확한 주제를 적어라.\n'
                 '   - 모바일 가독성을 해치는 무거운 표(table)는 사용하지 말고 빈 배열([])로 두어라(Tables: 0 공식). 대신 수치·비교·조건은 본문에서 짧은 호흡으로 술술 읽히게 풀어 써라.\n'
                 '   - quote 역시 빈 문자열("")로 두고(heading 자체가 밑줄 인용구 소제목으로 렌더링됨), 본문(text)에만 집중하라.\n'
                 '   - [모바일 가독성 최우선 원칙]: 모바일 네이버 블로그는 한 줄에 약 20~22자가 들어간다. 문장이 55자를 넘어가면 3번째 줄 끝에 "니다.", "다." 두세 글자만 덜렁 남아 가독성이 무너지므로, 각 줄(\\n 단위 문단)은 반드시 공백 포함 32~48자(모바일 1.5~2줄 완결 호흡)로 끊어 작성하라. 섹션당 6~9개 짧은 문단(전체 원고 공백 포함 3,200~3,800자)으로 구성하라.\n'
                 '4. 마무리(closing & signoff): 관료적 면책 문구("공식 공고를 참고하세요", "개인별 조회 서비스가 아닙니다")를 절대 넣지 말고, 독자가 오늘 바로 확인해야 할 핵심 체크 포인트 2~3가지를 각 32~48자 짧은 문단(\\n 분리)으로 깔끔하게 정리하며 닫아라.\n'
-                '[시각 자료 5~6장 가로 썸네일 독점 규칙]\n'
-                '- 네이버 검색 결과에서 가로 썸네일 5~6장을 독점하기 위해, 최상위 대표 썸네일(imagePrompt/imageCaption) 1장과 5개 섹션 각각의 내용에 꼭 맞는 구체적인 영어 imagePrompt 및 한국어 한 줄 imageCaption을 빠짐없이 작성하라(모든 섹션에 imagePrompt 필수 작성).\n'
-                '- 모든 생성용 imagePrompt는 고해상도 실사 에디토리얼 사진(high-resolution editorial photography) 스타일로 묘사하되 이미지 내 글자/텍스트/로고/문서화면은 절대 제외한다.\n'
+                '[실제 시각 자료 선택]\n'
+                '- imagePrompt는 실제 웹 자료를 찾을 검색 의도로 적는다. 정보성·사건·이슈 글 모두 해당 문단의 인물·사건·장소·시점·기관에 맞는 실제 자료만 사용하며 생성 사진이나 모사 화면을 요청하지 않는다. 이미지 수는 관련 자료와 문맥에 따라 정하고 대표 이미지는 검토된 본문 자료에서 선택한다. 실제 화면·사건·인물·장소를 보여주어야 하는 섹션은 image_optional=false로, 이미지가 사실 확인에 필요 없는 정리·설명은 image_optional=true로 적는다.\n'
                 '- tags는 중복 없는 #한글태그 6~10개 배열로 작성한다.\n'
                 '[절대 금지 가드레일]\n'
                 '- 수집 자료(research)에 없는 허위 사실·수치 날조 금지 및 리서치 메타 발언 노출 금지.\n'
@@ -1473,58 +1592,22 @@ def prepare_basic_content(account_key, folder=None, topic=None):
                 article['mainKeyword'] = clean_kw
                 article['title'] = enforce_naver_seo_title(article.get('title', ''), clean_kw)
             atomic_json(writer_path, article)
-        update_pipeline_status(account, 5, '이미지·썸네일 생성', 75, article.get('title', account_key))
-        image = basic_summary_image(article, folder)
-        raw_cap = (article.get('imageCaption') or article.get('mainKeyword') or article['title']).replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
-        description, credit = (raw_cap or article['title'], (article.get('mainKeyword') or '핵심 정리').replace('|', ' ').replace('｜', ' ').replace('/', ' ').replace('\\', ' ').replace('\n', ' ').strip() or '핵심 정리')
-        plan = {'version': 1, 'main_keyword': article['mainKeyword'], 'signoff': article['signoff'], 'representative_file': image.name, 'assets': [{'id': 0, 'file': image.name, 'description': description, 'credit': credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}]}
-        blocks = [{'type': 'image', 'id': 0, 'file': image.name, 'alt': description, 'caption': description + '｜' + credit}, {'type': 'text', 'text': article['intro']}]
-        from common.flow_images import generate_section_smart_capture
+        update_pipeline_status(account, 5, '실제 자료 이미지 검색·검토', 75, article.get('title', account_key))
+        blocks = [{'type': 'text', 'text': article['intro']}]
         sections = article.get('sections') or []
-        for sec_idx, section in enumerate(sections):
+        for section in sections:
             blocks.append({'type': 'heading', 'text': section['heading'].strip()})
-            sec_text = section['text']
-            sec_prompt = (section.get('imagePrompt') or '').strip()
-            if len(plan['assets']) < 6 and (sec_prompt or sec_idx < 4):
-                next_id = len(plan['assets'])
-                sec_fname = f'IMG_831{5 + next_id}.png'
-                if next_id <= 4:
-                    sec_img = generate_section_smart_capture(
-                        section['heading'],
-                        sec_text,
-                        folder,
-                        sec_fname,
-                        section_index=next_id,
-                        main_keyword=article.get('mainKeyword') or '',
-                    )
-                else:
-                    try:
-                        sec_img = flow_image(section['heading'], sec_text, folder, custom_prompt=sec_prompt or None, filename=sec_fname, source_index=next_id)
-                    except Exception:
-                        sec_img = generate_section_smart_capture(
-                            section['heading'],
-                            sec_text,
-                            folder,
-                            sec_fname,
-                            section_index=next_id,
-                            main_keyword=article.get('mainKeyword') or '',
-                        )
-                sec_cap = (section.get('imageCaption') or f"{section['heading'].strip()} 핵심 확인 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
-                if not sec_cap:
-                    sec_cap = f"{section['heading'].strip()} 핵심 포인트"
-                plan['assets'].append({'id': next_id, 'file': sec_img.name, 'description': sec_cap, 'credit': credit, 'sha256': hashlib.sha256(sec_img.read_bytes()).hexdigest()})
-                blocks.append({'type': 'image', 'id': next_id, 'file': sec_img.name, 'alt': sec_cap, 'caption': sec_cap + '｜' + credit})
             q_txt = (section.get('quote') or '').replace('\n\n', '\n').strip()
             if q_txt:
                 blocks.append({'type': 'quotation', 'text': q_txt})
-            blocks.append({'type': 'text', 'text': sec_text})
+            blocks.append({'type': 'text', 'text': section['text']})
         blocks.append({'type': 'text', 'text': article['closing']})
         if isinstance(article.get('signoff'), str) and article['signoff'].strip():
             blocks.append({'type': 'signoff', 'text': article['signoff'].strip()})
         blocks.append({'type': 'tags', 'text': ' '.join(article['tags'])})
-        document = {'title': article['title'], 'published': False, 'blocks': blocks}
-        atomic_json(doc_path, document)
-        atomic_json(plan_path, plan)
+        document = {'title': article['title'], 'published': False, 'blocks': blocks,
+                    'editorialSectionOptions': {f'section-{i + 1}': section.get('image_optional') is True
+                                                for i, section in enumerate(sections)}}
         atomic_json(folder / 'identity.json', {'account': account_key, 'blogId': account['blog_id']})
     identity = json.loads((folder / 'identity.json').read_text(encoding='utf-8'))
     if identity != {'account': account_key, 'blogId': account['blog_id']}:
@@ -1538,8 +1621,12 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             if cleaned_txt != blk['text']:
                 blk['text'] = cleaned_txt
                 doc_modified = True
-    if doc_modified:
+    if plan is None:
+        plan = prepare_document_images(document, folder, article['mainKeyword'], article.get('signoff', ''))
+        atomic_json(plan_path, plan)
         atomic_json(doc_path, document)
+    else:
+        verify_document_images(document, plan, folder)
     report = validate_document(document, plan, folder / 'images')
     atomic_json(folder / 'format-check.json', report)
     if not report['ok']:
@@ -1692,9 +1779,21 @@ def basic_editor_content(document):
         return ''
     components = document['document']['components']
     clean = lambda value: re.sub('\\s+', ' ', str(value)).strip()
-    return {'title': clean(paragraph_text(components[0].get('title', []))), 'body': clean(' '.join((component_text(c) for c in components[1:] if c.get('@ctype') in ('text', 'quotation', 'table')))), 'images': [{'originalWidth': c.get('originalWidth'), 'originalHeight': c.get('originalHeight'), 'caption': clean(paragraph_text(c.get('caption', [])))} for c in components if c.get('@ctype') == 'image']}
+    sequence, pending = [], []
+    for component in components[1:]:
+        if component.get('@ctype') == 'image':
+            if pending:
+                sequence.append({'text': clean(' '.join(pending))})
+                pending = []
+            sequence.append({'image': component.get('fileName'), 'caption': clean(paragraph_text(component.get('caption', [])))})
+        elif component.get('@ctype') in ('text', 'quotation', 'table'):
+            pending.append(component_text(component))
+    if pending:
+        sequence.append({'text': clean(' '.join(pending))})
+    return {'title': clean(paragraph_text(components[0].get('title', []))), 'body': clean(' '.join((component_text(c) for c in components[1:] if c.get('@ctype') in ('text', 'quotation', 'table')))), 'images': [{'originalWidth': c.get('originalWidth'), 'originalHeight': c.get('originalHeight'), 'caption': clean(paragraph_text(c.get('caption', [])))} for c in components if c.get('@ctype') == 'image'], 'sequence': sequence}
 
 def bind_basic_editor(page, frame, document, plan, folder):
+    verify_document_images(document, plan, folder)
     started = time.monotonic()
     try:
         from common.universal_recovery import clear_all_obstacles
@@ -1722,10 +1821,12 @@ def bind_basic_editor(page, frame, document, plan, folder):
     atomic_json(folder / 'requested-native-document.json', native)
     if basic_editor_content(actual) != basic_editor_content(native):
         raise ValueError('Native editor title/body/images differ from the supplied document')
+    verify_basic_saved_images(actual, folder)
     atomic_json(folder / 'binding-receipt.json', {'seconds': round(time.monotonic() - started, 3), 'documentSha256': editor_review_hash(actual)})
     return actual
 
 def revise_existing_reservation(context, account_key, account, document, plan, when, folder, prior):
+    verify_document_images(document, plan, folder)
     page = context.pages[0] if context.pages else context.new_page()
     page.goto('https://blog.naver.com/' + account['blog_id'] + '?Redirect=Write&', wait_until='domcontentloaded', timeout=25000)
     page.wait_for_timeout(3000)
@@ -1760,6 +1861,7 @@ def revise_existing_reservation(context, account_key, account, document, plan, w
         raise ValueError('Native editor title/body/images differ from the supplied document')
     tags = document['blocks'][-1]['text'].split()
     options = configure_reservation(page, frame, when, tags, folder=folder)
+    verify_document_images(document, plan, folder)
     frame.locator('button[class*="confirm_btn"]').click(timeout=10000)
     page.wait_for_timeout(4000)
     verification = verify_reservation(context, account, document['title'], when, expected_document=actual, folder=folder)
@@ -1781,8 +1883,12 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 raise ValueError('Prepared content must remain inside channel output')
             early_receipt = folder/'reservation-evidence.json'
             early = json.loads(early_receipt.read_text(encoding='utf-8')) if early_receipt.is_file() else {}
-            if early.get('submissionStatus') == 'verified_reserved' and not needs_quality_revision(folder):
+            if early.get('submissionStatus') == 'verified_reserved':
                 return early
+            if early.get('submissionStatus') in ('submitting', 'submission_unknown'):
+                if prepare_only:
+                    return {**early, 'status': 'preserved_pending', 'submissionAttempted': False}
+                return reconcile_basic_submission(account_key, dict(ACCOUNT_MAP[account_key]), folder, early)
             if early.get('submissionStatus') not in ('submitting','submission_unknown','verified_reserved'):
                 write_attempt(account_key,'started',start_new=True,artifactFolder=str(folder),
                               runMode='basic',submissionStarted=False)
@@ -1791,7 +1897,7 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 return {'status': 'prepared', 'folder': str(folder), 'submissionAttempted': False}
             receipt_path = folder / 'reservation-evidence.json'
             prior = json.loads(receipt_path.read_text(encoding='utf-8')) if receipt_path.is_file() else {}
-            if prior.get('submissionStatus') == 'verified_reserved' and not needs_quality_revision(folder):
+            if prior.get('submissionStatus') == 'verified_reserved':
                 return prior
             if prior.get('submissionStatus') in ('submitting', 'submission_unknown'):
                 return reconcile_basic_submission(account_key, account, folder, prior)
@@ -1818,6 +1924,7 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 tags = document['blocks'][-1]['text'].split()
                 options = configure_reservation(page, frame, when, tags, folder=folder)
                 check_existing_reservations(context, account, title=document['title'], reserve_time=when, folder=folder)
+                verify_document_images(document, plan, folder)
                 evidence = {**options, 'account': account_key, 'blogId': account['blog_id'], 'title': document['title'], 'reserveTime': when, 'documentSha256': editor_review_hash(actual), 'submissionStatus': 'submitting', 'publicPublicationVerified': False}
                 atomic_json(receipt_path, evidence)
                 write_attempt(account_key, 'submitting', start_new=False, submissionStarted=True, artifactFolder=str(folder))

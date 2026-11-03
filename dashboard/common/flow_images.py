@@ -10,6 +10,37 @@ from pathlib import Path
 from common.collection_observability import load, write, stamp
 
 
+def hold_editorial_images(folder, reason):
+    """Persist an actionable hold without modifying the draft or submission receipt."""
+    write(Path(folder) / 'image-preparation-status.json', {
+        'status': 'held', 'reason': str(reason), 'updatedAt': stamp(),
+        'action': 'Review real browser sources and reprepare images in an unsubmitted draft; preserve submitted receipts.',
+    })
+    raise ValueError('editorial_images_held: ' + str(reason))
+
+
+def require_editorial_images(title, sections, folder, *, channel, existing=None, sources=None):
+    """The shared browser engine is the only authority for evidence image readiness."""
+    try:
+        from common.editorial_images import build_editorial_assets, validate_editorial_assets
+    except ImportError:
+        hold_editorial_images(folder, 'browser_capture_engine_unavailable; install the shared engine before repreparing')
+    if existing is None:
+        try:
+            existing = build_editorial_assets(title, sections, folder, sources=sources, channel=channel)
+        except Exception as exc:
+            hold_editorial_images(folder, 'browser_capture_failed: ' + str(exc))
+    if not isinstance(existing, dict) or existing.get('status') != 'ready':
+        hold_editorial_images(folder, (existing or {}).get('reasons') or 'browser_capture_missing_or_failed; reprepare required')
+    try:
+        valid = validate_editorial_assets(title, sections, folder, existing, channel=channel)
+    except Exception:
+        valid = False
+    if not valid:
+        hold_editorial_images(folder, 'browser_capture_stale_or_mismatched; reprepare and review exact document sections')
+    return existing
+
+
 def _ensure_english_scene(custom_prompt, title='', summary=''):
     text = (custom_prompt or '').strip()
     # Strip Korean characters if mixed, or if custom_prompt is mostly English keep it clean
@@ -218,10 +249,8 @@ async def _generate(title, summary, folder, custom_prompt=None, filename='flow-h
     output = folder / 'images' / filename
 
     if isinstance(custom_prompt, str) and custom_prompt.strip().upper().startswith('RESEARCH_CAPTURE'):
-        try:
-            return await capture_research_evidence(folder, filename=filename, source_index=source_index)
-        except Exception:
-            custom_prompt = None
+        # A request for evidence must never fall through to image generation.
+        return await capture_research_evidence(folder, filename=filename, source_index=source_index)
 
     prompt = image_prompt(title, summary, custom_prompt=custom_prompt)
     digest = hashlib.sha256(prompt.encode()).hexdigest()
@@ -453,192 +482,5 @@ def generate_section_smart_capture(
     section_index: int = 1,
     main_keyword: str = "",
 ) -> Path:
-    """Render an authentic iOS Mobile App UI Screen Capture (`1080 x 1920`, `IMG_83xx.PNG` style) matching the exact section heading and sentences."""
-    from PIL import Image, ImageDraw
-
-    folder = Path(folder)
-    output = folder / "images" / filename
-    output.parent.mkdir(parents=True, exist_ok=True)
-
-    W, H = 1080, 1920
-    # Vary theme slightly across sections 1~5 so horizontal search thumbnails look like distinct app screens
-    themes = [
-        {"bg": (242, 244, 248), "accent": (49, 130, 246), "accent_soft": (232, 243, 255), "header_bg": (255, 255, 255), "header_fg": (25, 31, 40), "badge": "핵심 기준 안내", "btn": "상세 기준 확인하기"},
-        {"bg": (244, 246, 250), "accent": (3, 199, 90), "accent_soft": (230, 249, 239), "header_bg": (25, 31, 40), "header_fg": (255, 255, 255), "badge": "단계별 진행 절차", "btn": "신청 절차 순서대로 보기"},
-        {"bg": (243, 245, 249), "accent": (91, 70, 246), "accent_soft": (238, 235, 255), "header_bg": (255, 255, 255), "header_fg": (25, 31, 40), "badge": "대상자 자가진단", "btn": "해당 여부 체크 완료"},
-        {"bg": (245, 246, 248), "accent": (240, 68, 82), "accent_soft": (255, 238, 240), "header_bg": (25, 31, 40), "header_fg": (255, 255, 255), "badge": "필수 주의사항 체크", "btn": "주의사항 확인 완료"},
-        {"bg": (242, 245, 248), "accent": (18, 149, 117), "accent_soft": (229, 247, 242), "header_bg": (255, 255, 255), "header_fg": (25, 31, 40), "badge": "최종 요약 리포트", "btn": "전체 요약 저장하기"},
-    ]
-    th = themes[(max(1, int(section_index)) - 1) % len(themes)]
-
-    img = Image.new("RGB", (W, H), th["bg"])
-    draw = ImageDraw.Draw(img)
-
-    f_status = _load_kr_font(28, bold=True)
-    f_nav = _load_kr_font(32, bold=True)
-    f_badge = _load_kr_font(26, bold=True)
-    f_title = _load_kr_font(44, bold=True)
-    f_card_num = _load_kr_font(28, bold=True)
-    f_card_head = _load_kr_font(34, bold=True)
-    f_card_body = _load_kr_font(28, bold=False)
-    f_pill = _load_kr_font(25, bold=True)
-    f_btn = _load_kr_font(36, bold=True)
-
-    # 1. iOS Status Bar (Top 0..96)
-    draw.rectangle([0, 0, W, 180], fill=(255, 255, 255))
-    draw.text((64, 34), "9:41", font=f_status, fill=(25, 31, 40))
-    # Dynamic Island pill
-    draw.rounded_rectangle([390, 24, 690, 74], radius=25, fill=(15, 18, 24))
-    # Signal + Wi-Fi + Battery icon bars
-    for bi, bh in enumerate((12, 18, 24, 30)):
-        bx = 860 + bi * 12
-        draw.rounded_rectangle([bx, 62 - bh, bx + 8, 62], radius=2, fill=(25, 31, 40))
-    draw.rounded_rectangle([948, 36, 1012, 64], radius=8, outline=(25, 31, 40), width=3)
-    draw.rounded_rectangle([953, 41, 1002, 59], radius=4, fill=(3, 199, 90))
-
-    # 2. App Navigation Bar (96..180)
-    nav_title = (main_keyword or "핵심 정보 가이드")[:18]
-    draw.text((58, 114), "‹", font=_load_kr_font(48, bold=False), fill=(25, 31, 40))
-    nb = draw.textbbox((0, 0), nav_title, font=f_nav)
-    draw.text(((W - (nb[2] - nb[0])) // 2, 120), nav_title, font=f_nav, fill=(25, 31, 40))
-    draw.line([(0, 180), (W, 180)], fill=(230, 233, 238), width=2)
-
-    # 3. Top Section Hero Card (220..520)
-    clean_heading = re.sub(r"^\s*0?\d+[\.\)\s-]+", "", (heading or "").strip()).strip()
-    hx1, hy1, hx2, hy2 = 52, 216, W - 52, 520
-    draw.rounded_rectangle([hx1, hy1 + 8, hx2, hy2 + 8], radius=36, fill=(224, 228, 236))
-    draw.rounded_rectangle([hx1, hy1, hx2, hy2], radius=36, fill=th["header_bg"])
-
-    # Badge inside Hero Card
-    b_txt = f"STEP 0{section_index} · {th['badge']}"
-    bb = draw.textbbox((0, 0), b_txt, font=f_badge)
-    bw = (bb[2] - bb[0]) + 36
-    draw.rounded_rectangle([hx1 + 44, hy1 + 40, hx1 + 44 + bw, hy1 + 88], radius=24, fill=th["accent_soft"] if th["header_bg"] == (255, 255, 255) else th["accent"])
-    draw.text(
-        (hx1 + 62, hy1 + 48),
-        b_txt,
-        font=f_badge,
-        fill=th["accent"] if th["header_bg"] == (255, 255, 255) else (255, 255, 255),
-    )
-
-    h_lines = _wrap_kr_text(draw, clean_heading, f_title, max_width=(hx2 - hx1 - 88), max_lines=2)
-    cur_hy = hy1 + 114
-    for hl in h_lines:
-        draw.text((hx1 + 44, cur_hy), hl, font=f_title, fill=th["header_fg"])
-        cur_hy += 60
-
-    # Subtitle status line inside Hero Card
-    sub_hint = "실제 적용 기준 및 핵심 체크 포인트 요약"
-    draw.text(
-        (hx1 + 44, hy2 - 66),
-        sub_hint,
-        font=f_card_body,
-        fill=(110, 120, 135) if th["header_bg"] == (255, 255, 255) else (190, 200, 215),
-    )
-
-    # 4. Extract 3~4 clean mobile UI cards from section_text
-    raw_sents = [s.strip() for s in re.split(r"[\n]+|(?<=[.!?다요])\s+", (section_text or "").strip()) if len(s.strip()) >= 12]
-    if not raw_sents:
-        raw_sents = [clean_heading + " 관련 세부 기준을 확인하세요."]
-    cards = raw_sents[:4]
-
-    cy = 556
-    pill_labels = ["핵심 체크", "필수 기준", "상세 요건", "실전 팁"]
-    for idx, sent in enumerate(cards):
-        if cy + 260 > 1680:
-            break
-        # Extract any number/amount/percent token for highlight pill
-        num_m = re.search(r"(\d[\d,]*\s*(?:만\s*원|원|%|일|개월|년|세|점|회|시간|배))", sent)
-        pill_txt = num_m.group(1).strip() if num_m else pill_labels[idx % len(pill_labels)]
-
-        # Split sentence into non-overlapping bold lead phrase + remainder body description
-        m_split = re.match(r"^(.{8,24}?(?:은|는|이|가|을|를|면|시|후|전|경우|때|마다|부터|까지|,|·))\s+(.+)$", sent)
-        if m_split:
-            c_head = m_split.group(1).rstrip(" ,·")
-            c_body = m_split.group(2).strip()
-        else:
-            words = sent.split()
-            if len(words) >= 4:
-                c_head = " ".join(words[:3])
-                c_body = " ".join(words[3:])
-            else:
-                c_head = f"핵심 체크 포인트 0{idx + 1}"
-                c_body = sent
-
-        body_lines = _wrap_kr_text(draw, c_body, f_card_body, max_width=(W - 220), max_lines=2)
-        card_h = 176 + max(0, len(body_lines) - 1) * 44
-
-        cx1, cy1, cx2, cy2 = 52, cy, W - 52, cy + card_h
-        draw.rounded_rectangle([cx1, cy1 + 6, cx2, cy2 + 6], radius=32, fill=(226, 230, 238))
-        draw.rounded_rectangle([cx1, cy1, cx2, cy2], radius=32, fill=(255, 255, 255))
-
-        # Left number circle badge
-        draw.ellipse([cx1 + 36, cy1 + 36, cx1 + 92, cy1 + 92], fill=th["accent_soft"])
-        num_str = f"0{idx + 1}"
-        nb_box = draw.textbbox((0, 0), num_str, font=f_card_num)
-        draw.text(
-            (cx1 + 64 - (nb_box[2] - nb_box[0]) // 2, cy1 + 46),
-            num_str,
-            font=f_card_num,
-            fill=th["accent"],
-        )
-
-        # Right highlight value pill
-        pb = draw.textbbox((0, 0), pill_txt, font=f_pill)
-        pw = (pb[2] - pb[0]) + 32
-        px1 = cx2 - 36 - pw
-        draw.rounded_rectangle([px1, cy1 + 36, cx2 - 36, cy1 + 82], radius=23, fill=th["accent_soft"])
-        draw.text((px1 + 16, cy1 + 44), pill_txt, font=f_pill, fill=th["accent"])
-
-        # Card heading (clipped before right pill)
-        head_lines = _wrap_kr_text(draw, c_head, f_card_head, max_width=(px1 - (cx1 + 114) - 16), max_lines=1)
-        if head_lines:
-            draw.text((cx1 + 114, cy1 + 42), head_lines[0], font=f_card_head, fill=(25, 31, 40))
-
-        # Card body lines
-        by_cur = cy1 + 106
-        for bl in body_lines:
-            draw.text((cx1 + 114, by_cur), bl, font=f_card_body, fill=(78, 89, 104))
-            by_cur += 44
-
-        cy = cy2 + 28
-
-    # Bottom Tip Summary Box if space remains above CTA button
-    if cy + 210 <= 1670:
-        tx1, ty1, tx2, ty2 = 52, cy + 8, W - 52, min(1666, cy + 228)
-        draw.rounded_rectangle([tx1, ty1, tx2, ty2], radius=28, fill=th["accent_soft"])
-        draw.text((tx1 + 40, ty1 + 34), f"[핵심 체크] {clean_heading[:20]}", font=f_card_head, fill=th["accent"])
-        tip_lines = _wrap_kr_text(
-            draw,
-            f"{main_keyword or clean_heading} 진행 전 위 {len(cards)}가지 세부 요건과 숫자를 반드시 먼저 대조해 보세요.",
-            f_card_body,
-            max_width=(tx2 - tx1 - 80),
-            max_lines=2,
-        )
-        t_cur = ty1 + 94
-        for tl in tip_lines:
-            draw.text((tx1 + 40, t_cur), tl, font=f_card_body, fill=(55, 65, 81))
-            t_cur += 42
-
-    # 5. Bottom Sticky Action Button + iOS Home Indicator Bar
-    btn_y1, btn_y2 = 1710, 1824
-    draw.rounded_rectangle([52, btn_y1, W - 52, btn_y2], radius=28, fill=th["accent"])
-    btn_txt = f"{th['btn']}  ›"
-    btb = draw.textbbox((0, 0), btn_txt, font=f_btn)
-    draw.text(((W - (btb[2] - btb[0])) // 2, btn_y1 + 34), btn_txt, font=f_btn, fill=(255, 255, 255))
-
-    # iOS Home Bar
-    draw.rounded_rectangle([(W - 360) // 2, 1878, (W + 360) // 2, 1892], radius=7, fill=(180, 186, 196))
-
-    img.save(output, format="PNG")
-    receipt = {
-        "status": "downloaded",
-        "mode": "mobile_ui_smart_capture",
-        "sectionIndex": section_index,
-        "completedAt": stamp(),
-        "dimensions": [W, H],
-        "sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
-    }
-    write(_evidence_path(folder, filename), receipt)
-    return output
-
+    """Removed: fabricated application screens are not source evidence."""
+    hold_editorial_images(folder, 'simulated_capture_removed; use build_editorial_assets with exact article sections')

@@ -38,6 +38,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
+from common.content_improvement import has_editorial_evidence, EDITORIAL_EVIDENCE_HOLD
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -1130,6 +1131,8 @@ def remodel_cf_post_content_live(
       4. Auto-extract `thumbnail` & `og_image` from the first `<img>` in `content` so category cards are never blank.
       5. Remap category to `target_category` and update live via `PUT /api/posts/{id}`.
     """
+    if has_editorial_evidence(post_detail.get('content') or post_detail.get('contentHtml')):
+        return {'ok': False, 'status': 'held', 'reason': EDITORIAL_EVIDENCE_HOLD}
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
     from common.image_sanitizer import sanitize_html_pre_publish
@@ -1267,6 +1270,8 @@ def remediate_post_images_with_sanitizer(
     immediately remove any synthetic `CHECKPOINT #` cards, sanitize genuine visual images using
     `common/image_sanitizer.py`, clean dishonest captions / raw `**` / `⌧`, and update the live post!
     """
+    if has_editorial_evidence(post_detail.get('content') or post_detail.get('contentHtml')):
+        return {'remediated': False, 'status': 'held', 'reason': EDITORIAL_EVIDENCE_HOLD}
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
     from common.image_sanitizer import (

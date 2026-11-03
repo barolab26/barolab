@@ -141,7 +141,7 @@ class PublicationClaims(unittest.TestCase):
         with patch.object(cf, 'registered_categories', return_value=['test']), \
              patch.object(cf, 'published_inventory', return_value=[]), \
              patch.object(cf, 'duplicate_posts', return_value=[]), \
-             patch.object(cf, 'ensure_article_images', side_effect=lambda article, *a, **k: article), \
+             patch.object(cf, 'verify_article_images', return_value={}), \
              patch('common.cf_tables.style_tables', side_effect=lambda content, **k: content), \
              patch('common.cf_tables.inject_interactive_widget', side_effect=lambda content, *a, **k: content), \
              patch.object(quality, 'ensure_publication_review', side_effect=ValueError('draft held')), \

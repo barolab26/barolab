@@ -234,6 +234,19 @@ def select_model(cfg,override=None):
     return requested
 
 
+EDITORIAL_EVIDENCE_HOLD = 'editorial_images_held: captured source context requires recapture and review before maintenance'
+
+
+def has_editorial_evidence(content):
+    return BeautifulSoup(content or '', 'html.parser').select_one('figure[data-editorial-section]') is not None
+
+
+def editorial_evidence_changed(article, draft):
+    original = article.get('content') or article.get('contentHtml') or ''
+    return has_editorial_evidence(original) and (
+        draft.get('title') != article.get('title') or draft.get('contentHtml') != original)
+
+
 def protected_media(content):
     soup=BeautifulSoup(content,'html.parser')
     nodes=list(soup.select('img,picture,source,video,audio,iframe,script,svg,math,.adsbygoogle,[data-ad-client],[data-ad-slot]'))
@@ -426,6 +439,8 @@ def number_tokens(text):
 
 def draft_rules(article,draft,sources,issues):
     errors=[]
+    if editorial_evidence_changed(article, draft):
+        return [EDITORIAL_EVIDENCE_HOLD]
     old=article.get('content') or article.get('contentHtml') or ''
     new=draft.get('contentHtml')
     if not isinstance(new,str) or not new.strip():
@@ -528,6 +543,9 @@ def prepare_improvement(domain,url,article,diagnosis=None,limits=None,observer=N
         content=article.get('content') or article.get('contentHtml') or ''
         if not isinstance(content,str) or len(content)>100000 or not article.get('title'):
             raise ValueError('원본 글 계약 미확인')
+        if has_editorial_evidence(content) and not limits.get('inspectOnly'):
+            result.update(status='blocked', reason=EDITORIAL_EVIDENCE_HOLD)
+            return result
         page=fetch_page(url)
         evidence['publicPage']=page
         if page['status']!=200 or len(page['text'])<100:

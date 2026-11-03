@@ -783,6 +783,9 @@ def _apply_job(job_id, canary=False):
     from dashboard.collectors.metrics import collector_lock
     folder = BACKUPS / job_id
     original, draft, proposal, receipt = (read(folder / name) for name in ('original.json', 'draft.json', 'proposal.json', 'receipt.json'))
+    from common.content_improvement import editorial_evidence_changed, EDITORIAL_EVIDENCE_HOLD
+    if editorial_evidence_changed(original, draft):
+        raise ValueError(EDITORIAL_EVIDENCE_HOLD)
     quality_hash = content_quality_sha256()
     policy_artifacts = [proposal, proposal.get('review') or {}, receipt]
     for artifact in (proposal, receipt):

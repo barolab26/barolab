@@ -32,6 +32,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
+from common.content_improvement import has_editorial_evidence, EDITORIAL_EVIDENCE_HOLD
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 if str(BASE_DIR) not in sys.path:
@@ -331,6 +332,8 @@ def generate_and_upload_clean_editorial_thumbnail(
     sanitize with smartphone EXIF, and upload to `https://www.{domain}/api/media/upload`.
     """
     import tempfile
+    if has_editorial_evidence(content_html):
+        raise ValueError(EDITORIAL_EVIDENCE_HOLD)
     from dashboard.common.flow_images import image_prompt, _generate_via_openai_api
 
     summary_clean = summary_text or (BeautifulSoup(content_html, "html.parser").get_text(" ", strip=True)[:320] if content_html else title)
@@ -397,6 +400,9 @@ def remodel_cf_post_by_url(
     post_id = post_detail.get("id")
     title = post_detail.get("title") or ""
     raw_content = post_detail.get("content") or ""
+    if has_editorial_evidence(raw_content):
+        return {"ok": False, "status": "held", "reason": EDITORIAL_EVIDENCE_HOLD,
+                "domain": domain, "postId": post_id}
     local_runs = find_local_output_runs(slug)
     latest_run_dir = local_runs[0] if local_runs else None
 
@@ -789,6 +795,10 @@ def repair_cf_seo_titles_batch(days: int = 10) -> Dict[str, Any]:
             if not post_detail or not post_detail.get("id"):
                 skipped += 1
                 continue
+            if has_editorial_evidence(post_detail.get('content')):
+                errors.append({'domain': domain, 'slug': slug, 'reason': EDITORIAL_EVIDENCE_HOLD})
+                skipped += 1
+                continue
 
             post_id = post_detail["id"]
             headers = _get_cf_headers(domain)
@@ -1001,6 +1011,10 @@ def repair_nolplace_and_all_empty_thumbnails() -> Dict[str, Any]:
         pid = item.get("id")
         cur_thumb = (item.get("thumbnail") or "").strip()
         if slug in NOLPLACE_DUPLICATE_REMODELS and (not cur_thumb or "17936039" in cur_thumb or "신사" in (item.get("title") or "")):
+            original = find_live_cf_post('nolplace.com', slug)
+            if not original or has_editorial_evidence(original.get('content')):
+                errors.append({'domain': 'nolplace.com', 'slug': slug, 'reason': EDITORIAL_EVIDENCE_HOLD})
+                continue
             spec = NOLPLACE_DUPLICATE_REMODELS[slug]
             styled_html = inject_interactive_widget(
                 style_tables(spec["content"], domain="nolplace.com"),
@@ -1074,6 +1088,9 @@ def repair_nolplace_and_all_empty_thumbnails() -> Dict[str, Any]:
                     slug = (p.get("slug") or "").strip()
                     if pid and slug:
                         detail = requests.get(f"https://www.{dom}/api/posts/{pid}", headers=dom_headers, timeout=12).json().get("post") or p
+                        if has_editorial_evidence(detail.get('content')):
+                            errors.append({'domain': dom, 'slug': slug, 'reason': EDITORIAL_EVIDENCE_HOLD})
+                            continue
                         new_thumb = generate_and_upload_clean_editorial_thumbnail(
                             domain=dom,
                             title=detail.get("title") or "",
