@@ -406,12 +406,13 @@ def extract_first_content_image(html_text, domain=''):
     return ''
 
 
-def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None):
+def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None, target_urls=None):
     """Retrofit existing published CF posts with domain-specific editorial summary + same-domain internal links + table styling."""
     import datetime as dt
     import hashlib, json, time
     from pathlib import Path
     import requests
+    from urllib.parse import unquote, urlsplit
     from cf_posting import posting
     from common.asset_map import PRIORITY_CASHCOW_DOMAINS
     from common.dashboard_jobs import write
@@ -419,7 +420,8 @@ def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None)
     folder = root / 'cf_posting/output' / ('cro-retrofit-' + dt.datetime.now().strftime('%Y%m%dT%H%M%S%f'))
     folder.mkdir(parents=True, exist_ok=True)
     target_domains = list(domains) if domains else (list(PRIORITY_CASHCOW_DOMAINS) + [d for d in posting.ALL_DOMAINS if d not in PRIORITY_CASHCOW_DOMAINS])
-    report = {'version': VERSION, 'startedAt': dt.datetime.now(dt.timezone.utc).isoformat(), 'posts': [], 'errors': []}
+    report = {'version': VERSION, 'startedAt': dt.datetime.now(dt.timezone.utc).isoformat(), 'posts': [], 'errors': [],
+              'holds': [], 'selectedCount': 0, 'verificationScope': 'rendering_only', 'factualReviewStatus': 'not_assessed'}
     def save():
         write(folder / 'report.json', report)
     save()
@@ -434,17 +436,33 @@ def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None)
                 save()
                 continue
             domain_updated = 0
+            domain_inspected = 0
             for item in candidates:
-                if domain_updated >= limit_per_domain:
+                if domain_updated >= limit_per_domain or domain_inspected >= max(2, limit_per_domain * 3):
                     break
                 if item.get('status') not in ('published', None):
                     continue
+                if target_urls is not None:
+                    item_path = unquote('/' + str(item.get('slug') or '').lstrip('/')).rstrip('/')
+                    if not any((urlsplit(url).hostname or '').removeprefix('www.') == domain
+                               and unquote(urlsplit(url).path).rstrip('/') == item_path for url in target_urls):
+                        continue
+                domain_inspected += 1
+                report['selectedCount'] += 1
                 try:
                     endpoint = f'https://www.{domain}/api/posts/{int(item["id"])}'
                     response = requests.get(endpoint, timeout=15)
                     response.raise_for_status()
                     original = response.json()['post']
                     body = original.get('content') or ''
+                    from common.content_quality import publication_risk_signals
+                    risk = publication_risk_signals({'title': original.get('title', ''), 'contentHtml': body})
+                    if risk['sensitiveTopic'] or risk['authorExperienceClaim']:
+                        report['holds'].append({'domain': domain, 'postId': item.get('id'),
+                            'reason': 'independent_factual_review_required', 'risk': risk,
+                            'nextAction': 'content_maintenance_review', 'existingPublicationPreserved': True})
+                        save()
+                        continue
                     cur_thumb = str(original.get('thumbnail') or '').strip()
                     thumb_missing = (not cur_thumb) or cur_thumb.lower() == 'null'
                     extracted_thumb = extract_first_content_image(body, domain) if thumb_missing else cur_thumb
@@ -485,6 +503,8 @@ def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None)
                         'apiStatus': result.status_code,
                         'croWidgetInjected': '<!-- editorial-summary -->' in revised,
                         'verifiedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+                        'verificationScope': 'rendering_only',
+                        'factualReviewStatus': 'not_assessed',
                     }
                     write(backup / 'receipt.json', proof)
                     report['posts'].append(proof)
@@ -501,11 +521,15 @@ def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None)
     report['finishedAt'] = dt.datetime.now(dt.timezone.utc).isoformat()
     save()
     return {
-        'status': 'completed' if report['posts'] else 'already_optimized',
+        'status': ('completed' if report['posts'] else 'held' if report['holds'] or report['errors']
+                   else 'no_matching_target' if target_urls and not report['selectedCount'] else 'already_optimized'),
         'reportDir': str(folder),
         'updatedCount': len(report['posts']),
         'posts': report['posts'],
         'errors': report['errors'],
+        'holds': report['holds'],
+        'verificationScope': 'rendering_only',
+        'factualReviewStatus': 'not_assessed',
     }
 
 

@@ -475,12 +475,19 @@ class BusinessControls(unittest.TestCase):
 
     def test_agenda_budget_exhaustion_answers_with_preserved_findings(self):
         from agents import crew_reasoning as crew
+        (self.data / 'llm-settings.json').write_text(json.dumps({
+            'resourceBudget': {'agendaTokens': 1000000, 'agendaCalls': 2}}), encoding='utf-8')
+        policy = usage.budget_policy(self.root)
+        self.assertEqual(policy['agendaTokens'], 1000000)
+        measured = {'byAgenda': {self.agenda: {'inputTokens': policy['agendaTokens'] - 1}}}
+        usage.check_budget(measured, self.call(), policy, self.root)
+        measured['byAgenda'][self.agenda]['inputTokens'] += 1
         row = dict(id=self.agenda, status='ready', actor='jarvis', leadActor='jarvis',
                    decisions=0, maxSteps=8, permissions={'repair': False}, observations=[],
                    lastMessage='수집 자료 일부의 확인 시각이 오래되었습니다.', plan=['캐시 갱신 주기 확인'])
         with patch.object(crew, 'refresh_pending', return_value=True), patch.object(crew, 'save'), \
              patch.object(crew, 'set_progress'), \
-             patch.object(crew, 'ask', side_effect=usage.UsageBudgetExceeded('agenda_token_budget_exhausted')) as ask:
+             patch.object(crew, 'ask', side_effect=lambda *_: usage.check_budget(measured, self.call(), policy, self.root)) as ask:
             crew._advance(row, 1)
         ask.assert_called_once()
         self.assertEqual(row['status'], 'answered')
@@ -489,7 +496,9 @@ class BusinessControls(unittest.TestCase):
         self.assertIn('캐시 갱신 주기 확인', row['answer'])
         row['permissions'] = {'execute': True, 'repair': True}
         self.assertEqual(crew.progress_view(row)['status'], 'replied')
-        self.assertEqual(usage.DEFAULT_BUDGET['agendaTokens'], 1000000)
+        with self.assertRaisesRegex(usage.UsageBudgetExceeded, 'agenda_call_budget_exhausted'):
+            usage.check_budget({'active': {'a': {'agendaId': self.agenda}, 'b': {'agendaId': self.agenda}}},
+                               self.call(), policy, self.root)
 
     def test_budget_answer_is_not_rejected_for_lacking_publication_proof(self):
         from agents import crew_reasoning as crew

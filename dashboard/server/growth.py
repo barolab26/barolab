@@ -467,6 +467,44 @@ def refresh_performance_feedback():
         return evidence
 
 
+def _business_page_evidence(traffic, revenue):
+    """Retain report identity for target experiments; missing rows remain unobserved."""
+    observations, matched = [], []
+    visits = traffic.get('pagePerformance') or {}
+    earnings = revenue.get('pagePerformance') or {}
+    fields = ('start', 'end', 'timezone', 'checkedAt', 'source', 'currency', 'scope')
+    def observed(report, row):
+        sites = report.get('sites') or []
+        sites = list(sites.values()) if isinstance(sites, dict) else sites
+        site = next((s for s in sites if s.get('domain') == row.get('domain')), {})
+        return {**{k: report.get(k) for k in fields}, **{k: site[k] for k in fields if k in site},
+                **row, 'complete': row.get('complete') is not False
+                    and site.get('complete', report.get('complete')) is True
+                    and row.get('status', site.get('status', report.get('status', 'collected'))) == 'collected'}
+    traffic_rows = [observed(visits, row) for row in visits.get('pages', []) if row.get('url')]
+    revenue_rows = [observed(earnings, row) for row in earnings.get('pages', []) if row.get('url')]
+    observations.extend(traffic_rows)
+    for row in revenue_rows:
+        traffic_source = row.get('source')
+        peers = [p for p in traffic_rows if p.get('url') == row.get('url') and
+                 all(p.get(k) == row.get(k) and p.get(k) is not None for k in ('start', 'end', 'timezone'))]
+        if row.get('pageViews') is None and len(peers) == 1 and peers[0]['complete'] and row['complete']:
+            row = {**row, 'pageViews': peers[0].get('pageViews'), 'sessions': peers[0].get('sessions'),
+                   'checkedAt': min(str(row.get('checkedAt') or ''), str(peers[0].get('checkedAt') or '')) or None}
+            traffic_source = peers[0].get('source')
+        row = {**row, 'trafficSource': traffic_source}
+        observations.append(row)
+        # Same-report AdSense PAGE_VIEWS is preferred; a GA4 join is explicitly scoped.
+        if (row['complete'] and row.get('currency') and row.get('estimatedRevenue') is not None
+                and row.get('pageViews') is not None):
+            matched.append({**{k: row.get(k) for k in fields}, 'complete': True, 'matched': True,
+                'revenue': row['estimatedRevenue'], 'pageViews': row['pageViews'],
+                'scope': {'kind': 'reported_page_only', 'url': row['url'],
+                          'trafficSource': traffic_source,
+                          'companyTotal': False}})
+    return observations, matched
+
+
 def business_evidence(root=ROOT):
     """Bounded measured inputs for decisions; no allocation of account revenue to posts."""
     from common.collection_observability import load
@@ -485,7 +523,9 @@ def business_evidence(root=ROOT):
                 for period,values in (ga4.get('periods') or {}).items() if period in ('day','week')}})
     day = (datetime.now(ZoneInfo('Asia/Seoul')).date() - timedelta(days=1)).isoformat()
     sources = revenue.get('months', {}).get(day[:7], {}).get('sources', [])
+    page_observations, matched_rpm = _business_page_evidence(traffic, revenue)
     return {'performanceCheckedAt': feedback.get('checkedAt'), 'period': {k: feedback.get(k) for k in ('start', 'end')},
+            'pageObservations': page_observations, 'matchedRevenuePv': matched_rpm,
             'trafficSites':traffic_sites,'trafficCheckedAt':traffic.get('checkedAt'),
             'availableSources':{'revenue':bool(revenue),'traffic':bool(traffic),'metrics':bool(metrics)},
             'coverage': feedback.get('coverage'), 'reasonCodes': feedback.get('reasonCodes', []),
@@ -493,11 +533,13 @@ def business_evidence(root=ROOT):
             'revenueWinners': feedback.get('revenueWinners', [])[:5],
             'trafficCandidates': feedback.get('radarCandidates', [])[:5],
             'priorDayRevenue': [{'source': s.get('id'), 'date': day, 'amount': s.get('daily', {}).get(day),
-                                 'currency': s.get('currency'), 'status': s.get('status'), 'checkedAt': s.get('checkedAt')}
+                                 'currency': s.get('currency'), 'status': s.get('status'), 'checkedAt': s.get('checkedAt'),
+                                 'scope': s.get('scope'), 'domains': s.get('domains'), 'valueKind': s.get('valueKind'),
+                                 'reportStart': s.get('reportStart'), 'reportEnd': s.get('reportEnd')}
                                 for s in sources if s.get('aggregationEligible') is not False],
             'pageRevenueIssues': [{k: s.get(k) for k in ('domain', 'reasonCode')} for s in (revenue.get('pagePerformance') or {}).get('sites', []) if not s.get('complete')],
             'resources': resource_summary(root), 'netProfitUsd': None,
-            'decisionRule': '하루 $100 수익 목표(일 3,000~5,000 PV · 고단가 CPC 클릭 200회) 역산 실행 원칙: (1) 채널별 일일 할당량(CF 16건, 네이버 주력 1건/계정, 지식iN 10건/계정=20건, Threads 4건)은 상한선이 아니라 최소 기준선(Minimum Floor)이다. 플랫폼 제재가 없는 선에서 언제든 초과 발행하라. (2) "작은 실험 1개만 해보고 나머지는 동결/관망하겠다"거나 모델 호출 상한을 걸어 파이프라인을 멈추는 수동적 행동을 절대 금지한다. (3) 이미 수익·유입이 검증된 주제(soul5373·yoon_master 상위 글 및 금융·연금·지원금·보험·건강/IT)와 블로키(blokey.co.kr/golden, CDP 9440) S/A급 황금키워드(검색량 1,000~30,000, 문서수 200 이하)를 결합해 CF 본진 글 + 네이버 5계정 브릿지 글 복제 발행(작전 1), 지식iN 20건·Threads 4건 외부유입 펌프질(작전 2), CF 미색인 744건 4대 포털 강제 색인 및 닥터 CTR 0% 제목·도입부 3초 요약박스 리모델링(작전 3)을 동시에 병렬 가동하라.'}
+            'decisionRule': '실측된 1~2개 주제·도메인에 URL별 가설·기준선·7/14/28일 관측·최소표본·중단조건·호출예산을 연결한다. 기존 자산과 승인·제출된 작업은 보존한다. 신규 자동배정은 활성 실험 범위를 따르며 발행량 하한을 강제하지 않는다. 미측정은 0이 아니며 작은 표본은 inconclusive로 유지한다. 수익·순위 개선은 보장하지 않는다.'}
 
 
 def action_analysis():

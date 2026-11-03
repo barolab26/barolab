@@ -1438,17 +1438,26 @@ HIGH_VALUE_KEYWORD_POOL: Dict[str, List[Dict[str, str]]] = {
 
 def read_radar_data() -> Dict[str, Any]:
     rnd_proposals = _read_json(DATA_DIR / "rnd_proposals.json", [])
-    from radar_scout import SCOUT, fetch_blokey_golden
+    from radar_scout import SCOUT, reported_keyword
     blokey_path = DATA_DIR / "radar" / "blokey-golden.json"
     blokey_data = _read_json(blokey_path, {})
-    if not blokey_data.get("topKeywords") or (
-        blokey_path.is_file() and (time.time() - blokey_path.stat().st_mtime) > 1800
-    ):
-        try:
-            fetch_blokey_golden()
-            blokey_data = _read_json(blokey_path, {})
-        except Exception:
-            pass
+    # Reads never collect. Unverified legacy metrics must not re-enter prompts.
+    unverified = []
+    def reported(rows):
+        result = []
+        for row in rows if isinstance(rows, list) else []:
+            measured = reported_keyword(row)
+            if measured:
+                result.append(measured)
+            elif isinstance(row, dict) and row.get('keyword'):
+                unverified.append({'keyword': row['keyword'], 'measurementStatus': 'unverified'})
+        return result
+    blokey_data = {**blokey_data, 'topKeywords': reported(blokey_data.get('topKeywords')),
+                  **{key: {name: reported(rows) for name, rows in (blokey_data.get(key) or {}).items()}
+                     for key in ('naverAssignments', 'cfAssignments')},
+                  'pairedBridgeSets': reported(blokey_data.get('pairedBridgeSets'))}
+    blokey_data['unverifiedCandidates'] = list({r['keyword']: r for r in unverified}.values())
+    blokey_data['collectionPolicy'] = 'explicit_scout_only; missing or stale reports do not trigger collection'
     scout_status = SCOUT.latest()
     scout_queue = (scout_status.get("latest", {}).get("result") or {}).get("trackA", [])
     if not isinstance(rnd_proposals, list):

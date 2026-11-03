@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import sqlite3
@@ -38,6 +39,105 @@ SOURCES = (
     {"id": "app_store", "track": "B", "url": "https://itunes.apple.com/search?term=medication%20reminder&entity=software&country=kr&limit=8", "kind": "app_store"},
     {"id": "youtube_outliers", "track": "B", "url": "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko", "kind": "feed"},
 )
+
+
+def reported_keyword(row, now=None):
+    """Accept collector-backed metrics, never legacy or model-generated estimates."""
+    if not isinstance(row, dict):
+        return None
+    evidence = row.get("metricEvidence") or {}
+    if not isinstance(evidence, dict):
+        return None
+    raw = evidence.get("raw") or {}
+    if not isinstance(raw, dict):
+        return None
+    try:
+        checked = datetime.fromisoformat(evidence["checkedAt"])
+        age = ((now or datetime.now(KST)) - checked).total_seconds()
+        total, docs = raw["total"], raw["doc"]
+        valid = (row.get("measurementStatus") == "reported"
+                 and evidence.get("sourceId") == "blokey_golden"
+                 and evidence.get("sourceUrl") in ("https://blokey.co.kr/api/golden?period=year",
+                                                   "https://blokey.co.kr/api/golden/total")
+                 and raw.get("keyword") == row.get("keyword") and 0 <= age <= 7 * 86400
+                 and all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                         and math.isfinite(v) and v > 0 for v in (total, docs))
+                 and row.get("totalSearch", row.get("searchVolume")) == total
+                 and row.get("docCount") == docs)
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not valid:
+        return None
+    rate = total / docs
+    return {"keyword": row["keyword"], "searchVolume": total, "totalSearch": total,
+            "docCount": docs, "goldenRate": round(rate, 1),
+            "grade": "S" if rate >= 100 else "A" if rate >= 30 else "B",
+            "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+            "measurementStatus": "reported", "metricEvidence": evidence}
+
+
+def revenue_leaders(document, now=None):
+    """Summarize observed source rows, preserving missing days and currencies."""
+    from decimal import Decimal, InvalidOperation
+    from dashboard.collectors.revenue import period
+    now = (now or datetime.now(KST)).astimezone(KST)
+    today, yesterday = now.date(), now.date() - timedelta(days=1)
+    start = today.replace(day=1)
+    prev_end = start - timedelta(days=1)
+    prev_start = prev_end.replace(day=1)
+    months = document.get("months") or {}
+
+    def sources(month):
+        result = {}
+        for source in (months.get(month, {}).get("sources") or []):
+            if source.get("aggregationEligible") is False or source.get("status") == "duplicate_source":
+                continue
+            if not source.get("id") or not source.get("currency"):
+                continue
+            rows = {}
+            for day, value in (source.get("daily") or {}).items():
+                try:
+                    if datetime.fromisoformat(day).date().isoformat() != day or not day.startswith(month + '-'):
+                        continue
+                    amount = Decimal(str(value))
+                    if amount.is_finite() and amount >= 0 and not isinstance(value, bool):
+                        rows[day] = str(amount)
+                except (InvalidOperation, ValueError, TypeError):
+                    pass
+            result[(source["id"], source["currency"])] = {**source, "daily": rows}
+        return result
+
+    current, previous = sources(start.strftime("%Y-%m")), sources(prev_start.strftime("%Y-%m"))
+    leaders = []
+    for identity in sorted(current.keys() | previous.keys()):
+        cur, prev = current.get(identity), previous.get(identity)
+        source = cur or prev
+        currency = source["currency"]
+        periods = {}
+        for name, record, a, b in (("yesterday", prev if yesterday < start else cur, yesterday, yesterday),
+                                   ("throughYesterday", cur, start, yesterday),
+                                   ("previousMonth", prev, prev_start, prev_end)):
+            value = period([record] if record else [], a, b)
+            value["amount"] = value.get("amounts", {}).get(currency)
+            value["valueKind"] = record.get("valueKind", "unknown") if record else "unknown"
+            value["estimated"] = True if value["valueKind"] == "estimated" else None
+            value["checkedAt"] = record.get("checkedAt") if record else None
+            value["scope"] = record.get("scope") if record else None
+            periods[name] = value
+        observed = {day: amount for record in (prev, cur) if record
+                    for day, amount in record["daily"].items() if day <= yesterday.isoformat()}
+        latest = max(observed, default=None)
+        leaders.append({"id": source["id"], "category": source.get("category"),
+                        "label": source.get("label", source["id"]), "currency": currency,
+                        "scope": source.get("scope"), "valueKind": source.get("valueKind", "unknown"),
+                        "collectionStatus": cur.get("status") if cur else "not_collected",
+                        "lastCollectedAt": source.get("checkedAt"), "reportSource": source.get("reportSource"),
+                        "periods": periods, "latestObservedCompletedDate": latest,
+                        "latestObservedCompletedAmount": observed.get(latest),
+                        "yesterdayAmount": periods["yesterday"]["amount"],
+                        "previousMonthAmount": periods["previousMonth"]["amount"],
+                        "evidenceScope": "observed source reports; not company total or settled cash"})
+    return leaders
 
 
 def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
@@ -168,7 +268,7 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                 doc_cnt = int(r.get("doc") or 0)
                 if total_vol < min_search or total_vol > 40000 or doc_cnt > max_docs or doc_cnt < 1:
                     continue
-                rate = float(r.get("rate") or (total_vol / max(1, doc_cnt)))
+                rate = total_vol / doc_cnt
                 if rate < 25:
                     continue
                 seen_kw.add(norm_kw)
@@ -178,8 +278,8 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                 merged.append({
                     "keyword": kw,
                     "totalSearch": total_vol,
-                    "pcSearch": int(r.get("pc") or 0),
-                    "mobileSearch": int(r.get("mobile") or 0),
+                    "pcSearch": int(r["pc"]) if r.get("pc") is not None else None,
+                    "mobileSearch": int(r["mobile"]) if r.get("mobile") is not None else None,
                     "docCount": doc_cnt,
                     "goldenRate": round(rate, 1),
                     "grade": grade,
@@ -187,6 +287,14 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                     "sourceLabel": str(r.get("sourceLabel") or ("실시간트렌드" if bucket_name == "live_trend" else "누적황금")),
                     "categories": cats,
                     "demos": demos,
+                    "measurementStatus": "reported",
+                    "metricEvidence": {
+                        "sourceId": "blokey_golden",
+                        "sourceUrl": "https://blokey.co.kr/api/golden?period=year" if bucket_name == "live_trend" else "https://blokey.co.kr/api/golden/total",
+                        "checkedAt": receipt["fetchedAt"],
+                        "searchPeriod": "provider_reported_unspecified",
+                        "raw": {"keyword": kw, "total": total_vol, "doc": doc_cnt},
+                    },
                 })
 
         # Classification rules aligned with high-CPC AdSense & AdPost commercial search intent (strict C-Rank topic purity)
@@ -216,7 +324,6 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
         merged.sort(key=score_for_cpc, reverse=True)
 
         # Assign top tailored Golden Keywords to Naver 5 accounts (up to 4 distinct keywords per account so multi-slot days never collide)
-        day_ord = datetime.now(KST).toordinal()
         naver_rules = {
             "soul5373": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_health_issue.search(r["keyword"])),
             "yoon_master": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_living_review.search(r["keyword"])),
@@ -225,12 +332,10 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
             "adinfo0905": lambda r: bool(not re_spam_offtopic.search(r["keyword"]) and re_finance_tax.search(r["keyword"])),
         }
         from common.asset_map import (
-            NAVER_NICHE_VERIFIED_POOLS,
             collect_used_naver_topics,
             is_duplicate_naver_topic,
             query_naver_blog_doc_count,
         )
-        naver_niche_pools = NAVER_NICHE_VERIFIED_POOLS
         used_naver = set()
         naver_assignments = {}
         for acc, pred in naver_rules.items():
@@ -245,34 +350,9 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                 live_docs = query_naver_blog_doc_count(kw_cand)
                 if live_docs is not None and live_docs > 5000:
                     continue
-                if live_docs is not None:
-                    r["docCount"] = live_docs
                 picks.append(r)
                 if len(picks) >= 4:
                     break
-            pool = naver_niche_pools.get(acc, [])
-            for offset in range(len(pool)):
-                if len(picks) >= 4:
-                    break
-                cand_kw = pool[(day_ord + offset) % len(pool)]
-                if cand_kw in used_naver or is_duplicate_naver_topic(cand_kw, recent_14d + [p["keyword"] for p in picks]):
-                    continue
-                live_docs = query_naver_blog_doc_count(cand_kw)
-                if live_docs is not None and live_docs > 5000:
-                    continue
-                picks.append({
-                    "keyword": cand_kw,
-                    "totalSearch": 4500,
-                    "pcSearch": 1200,
-                    "mobileSearch": 3300,
-                    "docCount": live_docs if live_docs is not None else 1200,
-                    "goldenRate": round(4500 / max(1, live_docs or 1200), 1),
-                    "grade": "S",
-                    "bucket": "niche_high_cpc",
-                    "sourceLabel": "5,000건 이하 검증 키워드",
-                    "categories": [],
-                    "demos": [],
-                })
             for p in picks[:4]:
                 used_naver.add(p["keyword"])
             if picks:
@@ -303,24 +383,6 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
             "soulnote.kr": re.compile(r"내일배움|국비|자격증|시험|이직|취업|훈련|수당"),
             "joynote.kr": re.compile(r"강아지|고양이|심페리카|넥스가드|사상충|동물병원|펫보험|예방접종|애견|식물|화분"),
         }
-        cf_domain_pools = {
-            "woorinote.kr": ["디딤돌대출 생애최초 LTV 소득 기준", "전세보증보험 가입조건 HUG HF 비교", "오피스텔 취득세 감면 주거용 업무용 차이", "묵시적갱신 중도해지 복비 반환 기한"],
-            "must-good.com": ["건강보험 본인부담상한제 환급금 신청 기간", "부모급여 가정양육수당 어린이집 전환 차액", "정부24 온라인 인감증명서 발급 용도 제한", "통신비 미환급금 조회 유선 무선 환급 신청"],
-            "must-pick.com": ["한전 고효율 가전제품 구매비용 환급 대상", "로봇청소기 올인원 열풍건조 스펙 비교", "에너지소비효율 1등급 제습기 제습량 비교", "식기세척기 12인용 14인용 전기세 물사용량"],
-            "baronote.kr": ["실손보험 4세대 전환 비급여 할증 손익분기점", "퇴직연금 DC형 IRP 수령 일시금 연금 세율", "주택담보대출 대환 중도상환수수료 면제 시점", "자동차보험 부부한정 가족한정 특약 변경 환급"],
-            "healthcox.com": ["중증질환 산정특례 재등록 5년 만료 연장 조건", "위내시경 대장내시경 조직검사 실비보험 청구 서류", "관절염 연골주사 히알루론산 콘드로이친 급여 기준", "고지혈증 스타틴 복용 시간 코엔자임Q10 병용"],
-            "justinfo.co.kr": ["자진퇴사 실업급여 통근곤란 왕복 3시간 증빙 서류", "주휴수당 지급조건 주 15시간 지각 조퇴 계산", "가족간 부동산 저가양도 증여세 3억 30% 기준", "헬스장 필라테스 중도해지 위약금 10% 환불 계산"],
-            "topnote.kr": ["해외여행 eSIM 듀얼심 데이터 로밍 차단 설정", "윈도우11 네트워크 프린터 스캔 연결 오류 해결", "카카오톡 대화내용 백업 기기변경 사진 복원 기한", "홈택스 전자세금계산서용 공동인증서 갱신 오류"],
-            "daynote.kr": ["도시가스 요금 경감할인 신청 자격 다자녀 기초수급", "대형폐기물 스티커 인터넷 신고 환불 취소 방법", "드럼세탁기 배수필터 청소 잔수제거 에러코드", "아파트 관리비 세대별 전기료 TV수신료 해지 신청"],
-            "meganote.kr": ["전기차 보조금 지자체 추경 잔여물량 출고 기준", "자동차보험 마일리지 특약 환급 주행거리 사진 등록", "어린이보호구역 속도위반 과태료 범칙금 벌점 전환", "디지털 온누리상품권 카드형 10% 할인 충전 한도"],
-            "smilenote.kr": ["만 65세 임플란트 건강보험 평생 2개 어금니 앞니", "노인장기요양보험 등급 판정 방문조사 질문 체크표", "노인 보청기 보조금 최대 131만원 이비인후과 처방", "시니어 국민연금 연기연금 신청 연 7.2% 증액 비교"],
-            "maxnote.kr": ["알뜰폰 번호이동 유심 재활용 셀프개통 시간", "모바일 운전면허증 IC운전면허증 은행 공항 사용처", "엑셀 VLOOKUP XLOOKUP 다중조건 함수 오류 해결", "구글 드라이브 원드라이브 용량 정리 자동동기화 해제"],
-            "must-joy.com": ["문화누리카드 잔액 합산 가족 충전 온라인 사용처", "국립박물관 어린이박물관 예약 취소표 시간대", "전통시장 온누리상품권 가맹점 조회 소득공제율", "공연 티켓 예매 취소수수료 관람일별 환불 규정"],
-            "tripmarvel.com": ["기내 반입 보조배터리 100Wh 160Wh 용량 계산법", "호텔 아고다 부킹닷컴 무료취소 현지결제 이중환전 방어", "K패스 기후동행카드 환급 기준 경기 인천 광역버스", "인천공항 스마트패스 등록 여권 만료 재등록 방법"],
-            "nolplace.com": ["국립자연휴양림 숲나들이 추첨제 선착순 예약 일정", "서울 공영주차장 다둥이 저공해차 50% 자동감면 등록", "수목원 사전예약 차량등록 무료입장 다자녀 증빙", "주말 지자체 공공캠핑장 예약 취소표 오픈 시간"],
-            "soulnote.kr": ["국민내일배움카드 훈련장려금 단위기간 출석률 80% 계산", "지게차운전기능사 필기 실기 국비지원 학원 비용", "산업안전기사 응시자격 관련학과 경력 인정 서류", "이직 시 건강보험 자격득실확인서 선택발급 제출법"],
-            "joynote.kr": ["강아지 심장사상충 약 심페리카 트리오 체중별 가격", "강아지 슬개골 탈구 수술비 펫보험 특약 대기기간", "고양이 종합백신 항체가 검사 동물병원 평균 진료비", "반려견 동물등록 내장형 마이크로칩 외장형 과태료"],
-        }
         cf_candidates = [
             r for r in merged
             if re_policy_welfare.search(r["keyword"]) or re_finance_tax.search(r["keyword"])
@@ -332,25 +394,6 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
         for idx, dom in enumerate(cf_domains):
             dom_re = cf_domain_rules.get(dom)
             dom_picks = [r for r in cf_candidates if dom_re and dom_re.search(r["keyword"]) and r["keyword"] not in used_cf_all][:3]
-            pool = cf_domain_pools.get(dom, [])
-            for offset in range(len(pool)):
-                if len(dom_picks) >= 3:
-                    break
-                cand_kw = pool[(day_ord + offset) % len(pool)]
-                if cand_kw not in used_cf_all and all(p["keyword"] != cand_kw for p in dom_picks):
-                    dom_picks.append({
-                        "keyword": cand_kw,
-                        "totalSearch": 3800,
-                        "pcSearch": 1100,
-                        "mobileSearch": 2700,
-                        "docCount": 28,
-                        "goldenRate": 135.7,
-                        "grade": "S",
-                        "bucket": "domain_high_cpc",
-                        "sourceLabel": "도메인 고단가 타깃",
-                        "categories": [],
-                        "demos": [],
-                    })
             for p in dom_picks:
                 used_cf_all.add(p["keyword"])
             if dom_picks:
@@ -366,6 +409,8 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
             nv_acc = naver_bridge_cycle[idx % len(naver_bridge_cycle)]
             kw = r["keyword"]
             paired_sets.append({
+                "metricEvidence": r["metricEvidence"],
+                "measurementStatus": "reported",
                 "setIndex": len(paired_sets) + 1,
                 "keyword": kw,
                 "grade": r["grade"],
@@ -385,10 +430,13 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
             cat_str = ", ".join(r["categories"]) if r["categories"] else r["sourceLabel"]
             summary_txt = (
                 f"[블로키 {r['grade']}등급 💎{r['goldenRate']}] 총검색량 {r['totalSearch']:,}회 "
-                f"(PC {r['pcSearch']:,} / 모바일 {r['mobileSearch']:,}) · 문서수 {r['docCount']:,}건 · 분류: {cat_str}"
+                f"(PC {r['pcSearch'] if r['pcSearch'] is not None else '미측정'} / "
+                f"모바일 {r['mobileSearch'] if r['mobileSearch'] is not None else '미측정'}) · 문서수 {r['docCount']:,}건 · 분류: {cat_str}"
             )
             q_url = f"https://blokey.co.kr/golden?kw={urlencode({'q': kw})[2:]}"
             receipt["items"].append({
+                "metricEvidence": r["metricEvidence"],
+                "measurementStatus": "reported",
                 "title": kw,
                 "keyword": kw,
                 "url": q_url,
@@ -435,6 +483,12 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
 
 def _sync_blokey_to_synapse_recipes(naver_assignments, cf_assignments, checked_at):
     """Register verified Blokey S/A-grade Golden Keywords as QueryRecipe hints in memory_graph.json & synapse-recipes.json."""
+    naver_assignments = {key: [measured for row in (rows if isinstance(rows, list) else [rows])
+                               if (measured := reported_keyword(row)) is not None]
+                         for key, rows in (naver_assignments or {}).items()}
+    cf_assignments = {key: [measured for row in (rows if isinstance(rows, list) else [rows])
+                            if (measured := reported_keyword(row)) is not None]
+                      for key, rows in (cf_assignments or {}).items()}
     try:
         mg_path = ROOT / "dashboard/data/memory_graph.json"
         sr_path = ROOT / "dashboard/data/synapse-recipes.json"
@@ -462,6 +516,8 @@ def _sync_blokey_to_synapse_recipes(naver_assignments, cf_assignments, checked_a
                 "goldenRate": top["goldenRate"],
                 "grade": top["grade"],
                 "checkedAt": checked_at,
+                "measurementStatus": "reported",
+                "metricEvidence": top["metricEvidence"],
             })
         if sr_path.is_file():
             sr = json.loads(sr_path.read_text(encoding="utf-8-sig"))
@@ -550,27 +606,10 @@ def build_daily_winning_topics(blokey_ledger=None):
 
     ctr_remodel_targets.sort(key=lambda x: x.get("impressions", 0), reverse=True)
 
-    # 2. Extract revenue-generating account performance from revenue.json
-    revenue_leaders = []
-    try:
-        rev_path = data_dir / "revenue.json"
-        if rev_path.is_file():
-            rev = json.loads(rev_path.read_text(encoding="utf-8"))
-            summary = rev.get("summary") or {}
-            prev_m = summary.get("previousMonth") or {}
-            for cat_k, label in (("naverBlog", "네이버 애드포스트"), ("cfBlog", "CF 애드센스")):
-                cur_c = (summary.get("categories") or {}).get(cat_k) or {}
-                prv_c = (prev_m.get("categories") or {}).get(cat_k) or {}
-                revenue_leaders.append({
-                    "category": cat_k,
-                    "label": label,
-                    "currency": cur_c.get("currency"),
-                    "yesterdayAmount": cur_c.get("yesterdayAmount") or prv_c.get("yesterdayAmount") or 0,
-                    "cumulativeAmount": (cur_c.get("amount") or 0) + (prv_c.get("amount") or 0),
-                    "lastCollectedAt": cur_c.get("lastCollectedAt"),
-                })
-    except Exception:
-        pass
+    # 2. Read the same observed source rows as the revenue dashboard.
+    revenue_path = data_dir / "revenue.json"
+    revenue_document = json.loads(revenue_path.read_text(encoding="utf-8")) if revenue_path.is_file() else {}
+    measured_revenue = revenue_leaders(revenue_document)
 
     # 3. Map Blokey S/A-grade Golden Keywords per Naver account (multi-slot) & CF domain
     from common.asset_map import (
@@ -580,7 +619,6 @@ def build_daily_winning_topics(blokey_ledger=None):
         collect_used_cf_topics,
         collect_used_naver_topics,
         is_duplicate_naver_topic,
-        query_naver_blog_doc_count,
     )
     re_spam_offtopic = re.compile(r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토")
     crank_domain_rules = {
@@ -590,129 +628,66 @@ def build_daily_winning_topics(blokey_ledger=None):
         "stone0747": re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산"),
         "adinfo0905": re.compile(r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|보험|실비|실손|퇴직금|IRP|든든전세"),
     }
-    nv_raw = blokey_ledger.get("naverAssignments") or {}
-    cf_raw = blokey_ledger.get("cfAssignments") or {}
-    naver_accounts = {}
-    day_ord = datetime.now(KST).toordinal()
-    for acc in ("soul5373", "yoon_master", "soultin", "adinfo0905", "stone0747"):
-        items = nv_raw.get(acc) or []
-        items = items if isinstance(items, list) else ([items] if isinstance(items, dict) else [])
-        recent_14d = collect_used_naver_topics(acc, days=14)
-        crank_rx = crank_domain_rules.get(acc)
-        valid_rows = []
-        for r in items:
-            if not isinstance(r, dict) or not r.get("keyword"):
-                continue
-            kw_cand = str(r["keyword"]).strip()
-            if re_spam_offtopic.search(kw_cand) or (crank_rx and not crank_rx.search(kw_cand)):
-                continue
-            if is_duplicate_naver_topic(kw_cand, recent_14d + [v["keyword"] for v in valid_rows]):
-                continue
-            live_docs = query_naver_blog_doc_count(kw_cand)
-            if live_docs is not None and live_docs > 5000:
-                continue
-            valid_rows.append({
-                "keyword": kw_cand,
-                "grade": r.get("grade") or "S",
-                "searchVolume": r.get("totalSearch") or r.get("searchVolume") or 3500,
-                "docCount": live_docs if live_docs is not None else (r.get("docCount") or 500),
-                "goldenRate": r.get("goldenRate") or 100.0,
-            })
-        pool = NAVER_NICHE_VERIFIED_POOLS.get(acc, [])
-        for offset in range(len(pool)):
-            if len(valid_rows) >= 4:
-                break
-            cand_kw = pool[(day_ord + offset) % len(pool)]
-            if is_duplicate_naver_topic(cand_kw, recent_14d + [v["keyword"] for v in valid_rows]):
-                continue
-            live_docs = query_naver_blog_doc_count(cand_kw)
-            if live_docs is not None and live_docs > 5000:
-                continue
-            valid_rows.append({
-                "keyword": cand_kw,
-                "grade": "S",
-                "searchVolume": 4500,
-                "docCount": live_docs if live_docs is not None else 1200,
-                "goldenRate": round(4500 / max(1, live_docs or 1200), 1),
-            })
-        naver_accounts[acc] = valid_rows[:4]
+    unverified = []
 
-    cf_domains = {}
-    for dom in CF_DOMAINS:
-        picks = cf_raw.get(dom) or []
-        items = picks if isinstance(picks, list) else ([picks] if isinstance(picks, dict) else [])
-        recent_cf_14d = collect_used_cf_topics(dom, days=14)
-        valid_cf = []
-        pool_cf = CF_NICHE_VERIFIED_POOLS.get(dom, [])
-        for offset in range(len(pool_cf)):
-            if len(valid_cf) >= 3:
-                break
-            cand_kw = pool_cf[(day_ord + offset) % len(pool_cf)]
-            if is_duplicate_naver_topic(cand_kw, recent_cf_14d + [v["keyword"] for v in valid_cf]):
+    def assign(items, pool, used, limit, predicate=None):
+        items = items if isinstance(items, list) else [items] if isinstance(items, dict) else []
+        selected = []
+        for row in items:
+            if not isinstance(row, dict) or not row.get("keyword"):
                 continue
-            live_docs = query_naver_blog_doc_count(cand_kw)
-            if live_docs is not None and live_docs > 5000:
+            measured = reported_keyword(row)
+            if measured is None:
+                unverified.append({"keyword": row["keyword"], "measurementStatus": "unverified",
+                                   "source": "legacy_or_unverified_ledger", "searchVolume": None,
+                                   "docCount": None, "grade": None})
                 continue
-            valid_cf.append({
-                "keyword": cand_kw,
-                "grade": "S",
-                "searchVolume": 4200,
-                "docCount": live_docs if live_docs is not None else 950,
-                "goldenRate": round(4200 / max(1, live_docs or 950), 1),
-            })
-        for r in items:
-            if len(valid_cf) >= 4:
-                break
-            if not isinstance(r, dict) or not r.get("keyword"):
+            keyword = measured["keyword"]
+            if (re_spam_offtopic.search(keyword) or (predicate and not predicate.search(keyword))
+                    or is_duplicate_naver_topic(keyword, used + [r["keyword"] for r in selected])):
                 continue
-            kw_cand = str(r["keyword"]).strip()
-            if re_spam_offtopic.search(kw_cand) or is_duplicate_naver_topic(kw_cand, recent_cf_14d + [v["keyword"] for v in valid_cf]):
-                continue
-            live_docs = query_naver_blog_doc_count(kw_cand)
-            if live_docs is not None and live_docs > 5000:
-                continue
-            valid_cf.append({
-                "keyword": kw_cand,
-                "grade": r.get("grade") or "S",
-                "searchVolume": r.get("totalSearch") or 3800,
-                "docCount": live_docs if live_docs is not None else (r.get("docCount") or 500),
-                "goldenRate": r.get("goldenRate") or 100.0,
-            })
-        cf_domains[dom] = valid_cf[:4]
+            if measured["grade"] in ("S", "A") and len(selected) < limit:
+                selected.append(measured)
+        for keyword in pool:
+            if keyword not in [r["keyword"] for r in selected]:
+                unverified.append({"keyword": keyword, "measurementStatus": "unverified",
+                                   "source": "editorial_pool", "searchVolume": None,
+                                   "docCount": None, "grade": None})
+        return selected
 
+    naver_accounts = {
+        acc: assign((blokey_ledger.get("naverAssignments") or {}).get(acc),
+                    NAVER_NICHE_VERIFIED_POOLS.get(acc, []), collect_used_naver_topics(acc, days=14),
+                    4, crank_domain_rules.get(acc))
+        for acc in ("soul5373", "yoon_master", "soultin", "adinfo0905", "stone0747")
+    }
+    cf_domains = {
+        dom: assign((blokey_ledger.get("cfAssignments") or {}).get(dom),
+                    CF_NICHE_VERIFIED_POOLS.get(dom, []), collect_used_cf_topics(dom, days=14), 4)
+        for dom in CF_DOMAINS
+    }
     flat_golden = []
-    for dom, rows in cf_domains.items():
-        for r in rows[:2]:
-            flat_golden.append({
-                "keyword": r.get("keyword"),
-                "grade": r.get("grade") or "A",
-                "monthlySearch": r.get("searchVolume") or 0,
-                "blogTotal": r.get("docCount") or 0,
-                "saturation": r.get("goldenRate") or 0,
-                "recommendedChannel": f"CF({dom}) + 네이버 브릿지",
-            })
-    for acc, rows in naver_accounts.items():
-        for r in rows[:2]:
-            flat_golden.append({
-                "keyword": r.get("keyword"),
-                "grade": r.get("grade") or "A",
-                "monthlySearch": r.get("searchVolume") or 0,
-                "blogTotal": r.get("docCount") or 0,
-                "saturation": r.get("goldenRate") or 0,
-                "recommendedChannel": f"네이버({acc}) + CF 본진",
-            })
+    for channel, groups in (("CF", cf_domains), ("네이버", naver_accounts)):
+        for target, rows in groups.items():
+            for row in rows[:2]:
+                flat_golden.append({**row, "reportedSearchVolume": row["searchVolume"],
+                                    "blogTotal": row["docCount"], "saturation": row["goldenRate"],
+                                    "recommendedChannel": f"{channel}({target})"})
+    reported_pairs = [pair for pair in (blokey_ledger.get("pairedBridgeSets") or [])
+                      if reported_keyword(pair) is not None]
 
     payload = {
         "updatedAt": now_iso(),
         "date": datetime.now(KST).date().isoformat(),
         "northStarGoalUsd": 100.0,
-        "revenueLeaders": revenue_leaders,
+        "revenueLeaders": measured_revenue,
         "provenTrafficWinners": proven_winners[:15],
         "doctorCtrRemodelTargets": ctr_remodel_targets[:10],
         "goldenKeywords": flat_golden[:15],
         "naverAccountSlotKeywords": naver_accounts,
         "cfDomainKeywords": cf_domains,
-        "pairedBridgeSets": (blokey_ledger.get("pairedBridgeSets") or [])[:10],
+        "pairedBridgeSets": reported_pairs[:10],
+        "unverifiedCandidates": list({r["keyword"]: r for r in unverified}.values()),
     }
     (radar_dir / "daily_winning_topics.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     try:
@@ -1023,8 +998,16 @@ class RadarScout:
         return {"started": True, "runId": run_id, "slot": slot}
 
     def latest(self):
-        with closing(self.db()) as db:
-            row = db.execute("SELECT * FROM runs ORDER BY started DESC LIMIT 1").fetchone()
+        empty = {"enabled": None, "scheduleKst": ["09:00", "14:00", "20:00"], "catchup": False, "latest": {}}
+        if not self.db_path.is_file():
+            return {**empty, "status": "not_collected"}
+        try:
+            with closing(sqlite3.connect(self.db_path.resolve().as_uri() + '?mode=ro', uri=True)) as db:
+                db.row_factory = sqlite3.Row
+                row = db.execute("SELECT * FROM runs ORDER BY started DESC LIMIT 1").fetchone()
+                setting = db.execute("SELECT value FROM settings WHERE key='enabled'").fetchone()
+        except sqlite3.Error:
+            return {**empty, "status": "unavailable"}
         result = dict(row) if row else {}
         if result.get("result"):
             result["result"] = json.loads(result["result"])
@@ -1037,7 +1020,7 @@ class RadarScout:
                     result['result']['growthActionResult'] = observed.get('result')
                 except (OSError, ValueError):
                     result['result']['growthActionObservation'] = 'unavailable'
-        return {"enabled": self.enabled(), "scheduleKst": ["09:00", "14:00", "20:00"], "catchup": False, "latest": result}
+        return {**empty, "enabled": setting is None or setting[0] == "true", "latest": result}
 
     def run_claimed(self, claim, publisher=None, fetcher=fetch_source):
         if not claim.get("started"):

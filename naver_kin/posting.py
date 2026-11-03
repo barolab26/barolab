@@ -2354,6 +2354,10 @@ def _naver_scheduler_reserve_run(db, config, now=None, force=False):
             reason = f"account_blog_running:{status['nextAccount']}"
         elif db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0] >= global_cap:
             reason = 'daily_submission_cap'
+        if reason is None and not db.execute("SELECT 1 FROM questions WHERE account=? AND state='drafted' LIMIT 1", (status['nextAccount'],)).fetchone():
+            from common.work_agenda import new_authoring_allowed
+            if not new_authoring_allowed('naver_kin'):
+                reason = 'new_authoring_requires_focused_agenda'
         if reason:
             db.rollback()
             return {'state': 'waiting', 'reason': reason, **status}
@@ -2445,6 +2449,9 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                             else:
                                 raise
                     if not existing_draft:
+                        from common.work_agenda import new_authoring_allowed
+                        if not new_authoring_allowed('naver_kin'):
+                            raise RuntimeError('new_authoring_requires_focused_agenda')
                         with _naver_pipeline_account_lock(account):
                             authored = _naver_authoring_generate_for_slot(account, run_id, config['model'], article_catalog=config['articleCatalog'])
                         if not isinstance(authored, dict):

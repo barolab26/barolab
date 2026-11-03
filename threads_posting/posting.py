@@ -1926,6 +1926,13 @@ def _threads_scheduler_tick(config_path=_threads_config_CONFIG, db_path=_threads
             selected_slot = (target_slot if (target_slot and target_slot not in used_slots) else _threads_scheduler_current_slot(config, now, used_slots))
             slots = [selected_slot] if selected_slot else []
             if slots:
+                from common.work_agenda import new_authoring_allowed
+                if not new_authoring_allowed('threads'):
+                    from common.conference_dispatch import request
+                    queued = request('threads', {'date':day, 'account':config['account_key'], 'slot':slots[0]}, one=True, automatic=True)
+                    _threads_pipeline_snapshot(config, db_path, output)
+                    return {'state':'held' if queued.get('status')=='held' else 'awaiting_focused_agenda',
+                            'reason':queued.get('reason') or 'authoring_delegated_to_budgeted_agenda'}
                 with _threads_pipeline_connect(db_path) as db:
                     db.execute('INSERT OR REPLACE INTO authoring_slots VALUES(?,?,?,?,?,?)', (config['account_key'], day, slots[0], 'claimed', None, _threads_config_stamp()))
                 try:

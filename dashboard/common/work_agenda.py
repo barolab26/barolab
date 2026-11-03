@@ -9,6 +9,9 @@ from pathlib import Path
 import re
 import time
 import uuid
+import math
+from datetime import datetime, timezone, timedelta
+from urllib.parse import urlsplit
 
 from common.collection_observability import load, write, locked
 
@@ -28,7 +31,7 @@ class AgendaWaiting(RuntimeError):
     pass
 
 
-def validate_business_experiment(value):
+def validate_business_experiment(value, *, strict=False):
     from datetime import date
     from urllib.parse import urlsplit
     if not isinstance(value, dict):
@@ -43,9 +46,264 @@ def validate_business_experiment(value):
     if not isinstance(target, str):
         raise ValueError('Experiment target must be a URL or empty')
     parsed = urlsplit(target)
-    if target and (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password):
+    if (strict or target) and (not target or parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password):
         raise ValueError('Invalid experiment target URL')
+    if strict and value.get('primaryMetric') not in ('pageViews', 'sessions', 'estimatedRevenue'):
+        raise ValueError('Invalid experiment primary metric')
+    if strict and value.get('measurementWindowDays') not in (7, 14, 28):
+        raise ValueError('Experiment requires a 7, 14 or 28 day observation window')
+    if strict and (type(value.get('minimumSample')) is not int or not 1 <= value['minimumSample'] <= 100000):
+        raise ValueError('Experiment requires a positive minimum sample')
     return value
+
+
+def _number(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        result = float(value)
+        return result if math.isfinite(result) and result >= 0 else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _stamp(value):
+    try:
+        stamp = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+        return stamp.timestamp() if stamp.tzinfo else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _url_key(value):
+    try:
+        parsed = urlsplit(value)
+        if parsed.scheme not in ('https', 'http') or not parsed.hostname or parsed.username or parsed.password:
+            return None
+        # UTM/query identity is retained: observations from different campaigns cannot mix.
+        return ((parsed.hostname or '').lower().removeprefix('www.'), parsed.path.rstrip('/') or '/', parsed.query)
+    except (ValueError, TypeError):
+        return None
+
+
+def _observations(business, target, metric):
+    key = _url_key(target)
+    return [r for r in business.get('pageObservations', []) if key and _url_key(r.get('url')) == key
+            and _number(r.get(metric)) is not None and r.get('complete') is True
+            and r.get('source') and r.get('timezone') and r.get('start') and r.get('end')]
+
+
+def bind_business_experiment(value, business, channels, now=None):
+    """Bind model hypotheses to host-observed baseline data, never model-invented metrics."""
+    now = time.time() if now is None else now
+    proposal = validate_business_experiment(dict(value), strict=True)
+    metric = proposal['primaryMetric']
+    candidates = []
+    for row in _observations(business, proposal['targetUrl'], metric):
+        checked = _stamp(row.get('checkedAt'))
+        try:
+            duration = (datetime.fromisoformat(row['end']) - datetime.fromisoformat(row['start'])).days + 1
+        except (ValueError, TypeError):
+            continue
+        if checked is not None and 0 <= now - checked <= 26 * 3600 and duration == proposal['measurementWindowDays']:
+            candidates.append(row)
+    if not candidates:
+        raise ValueError('Experiment requires a fresh observed target baseline for the chosen window')
+    baseline = max(candidates, key=lambda r: r['checkedAt'])
+    domain = _url_key(proposal['targetUrl'])[0]
+    allowed_channels = sorted(set(channels) & {'cf_blog', 'naver_blog', 'naver_kin', 'threads', 'brunch', 'legacy_remodel'})
+    if not allowed_channels:
+        raise ValueError('Experiment requires an explicit channel allocation')
+    identity = hashlib.sha256(json.dumps([proposal['targetUrl'], proposal['hypothesis'], metric,
+        proposal['measurementWindowDays'], baseline['start'], baseline['end'], baseline.get('source'),
+        baseline.get('currency'), baseline.get('timezone')], ensure_ascii=False).encode()).hexdigest()
+    start = datetime.fromtimestamp(now, timezone.utc).astimezone(__import__('zoneinfo').ZoneInfo(baseline['timezone'])).date() + timedelta(days=1)
+    end = start + timedelta(days=proposal['measurementWindowDays'] - 1)
+    return {**proposal, 'id': identity, 'baseline': baseline, 'focusDomains': [domain],
+            'focusChannels': allowed_channels, 'startedAt': now, 'observationStart': str(start),
+            'observationEnd': str(end), 'measurementDate': str(end + timedelta(days=1)),
+            'status': 'active', 'causalClaim': False, 'resourceScope': 'experiment_lifetime', 'finalObservation': None,
+            'maxNewPublications': 2, 'newPublicationAgendaIds': [],
+            'secondaryMetrics': ['sessions'], 'revenueAttributionStatus': 'unknown',
+            'interpretation': '관측된 대상의 가설 실험; 수익·순위 개선 보장 없음'}
+
+
+def autonomous_experiment_allows(project, target_url='', domain='', state=None, reserved_agenda_id=None):
+    """Read-only admission gate for NEW autonomous work; existing submissions keep ownership."""
+    state = load(STATE) if state is None else state
+    experiment = state.get('activeExperiment') or {}
+    if experiment.get('status') != 'active' or not experiment.get('id') or not experiment.get('baseline'):
+        return False
+    if len(experiment.get('focusDomains') or []) not in (1, 2):
+        return False
+    if project not in experiment.get('focusChannels', []):
+        return False
+    if project in ('cf_blog', 'naver_blog', 'naver_kin', 'threads', 'brunch'):
+        reservations = experiment.get('newPublicationAgendaIds') or []
+        if reserved_agenda_id not in reservations and len(reservations) >= experiment.get('maxNewPublications', 2):
+            return False
+    if datetime.now(timezone.utc).date().isoformat() > str(experiment.get('observationEnd') or ''):
+        return False
+    ledger = load(DATA / 'llm_usage_ledger.json')
+    used = (ledger.get('byExperiment') or {}).get(experiment['id'], {}).get('modelCalls', 0)
+    used += sum(r.get('experimentId') == experiment['id'] for r in (ledger.get('active') or {}).values())
+    if type(experiment.get('maxModelCalls')) is not int or used >= experiment['maxModelCalls']:
+        return False
+    requested = _url_key(target_url)
+    if target_url and requested != _url_key(experiment.get('targetUrl')):
+        return False
+    host = requested[0] if requested else str(domain or '').lower().removeprefix('www.')
+    return bool(host and host in experiment['focusDomains'])
+
+
+def new_authoring_allowed(project, *, domain='', target_url=''):
+    """A direct timer must obtain a durable agenda before spending an experiment budget."""
+    if not current():
+        return False
+    try:
+        row = require(project=project)
+    except (AgendaWaiting, ValueError, KeyError):
+        return False
+    source = row.get('source') or {}
+    if not source.get('autonomousExperiment'):
+        return True  # Existing explicitly owned work retains its authorization.
+    return (source.get('experimentId') == (load(STATE).get('activeExperiment') or {}).get('id')
+            and autonomous_experiment_allows(project,
+                target_url=target_url or source.get('targetUrl', ''), domain=domain or source.get('domain', ''), reserved_agenda_id=row['id']))
+
+
+def evaluate_business_experiment(experiment, business, now=None):
+    """Compare complete, equally long target windows. This is descriptive, not causal."""
+    now = time.time() if now is None else now
+    base = experiment.get('baseline') or {}
+    metric = experiment.get('primaryMetric')
+    result = {'status': 'inconclusive', 'causalClaim': False, 'reason': 'target_measurement_missing', 'metric': metric}
+    if metric not in ('pageViews', 'sessions', 'estimatedRevenue') or not base:
+        return result
+    observations = _observations(business, experiment.get('targetUrl'), metric)
+    archived = experiment.get('finalObservation') or {}
+    if archived.get('row') and _url_key(archived['row'].get('url')) == _url_key(experiment.get('targetUrl')):
+        observations = observations + [archived['row']]
+    for post in observations:
+        checked = _stamp(post.get('checkedAt'))
+        anchor = archived.get('capturedAt') if post is archived.get('row') else now
+        if (checked is None or type(anchor) not in (int, float) or not experiment.get('startedAt', 0) <= anchor <= now
+                or not 0 <= anchor - checked <= 26 * 3600 or post.get('complete') is not True):
+            result['reason'] = 'target_measurement_stale'; continue
+        if any(base.get(k) != post.get(k) for k in ('source', 'timezone', 'currency', 'scope', 'trafficSource')):
+            result['reason'] = 'incompatible_measurement_scope'; continue
+        try:
+            days = (datetime.fromisoformat(post['end']) - datetime.fromisoformat(post['start'])).days + 1
+            baseline_days = (datetime.fromisoformat(base['end']) - datetime.fromisoformat(base['start'])).days + 1
+        except (ValueError, TypeError, KeyError):
+            continue
+        if (post.get('start') != experiment.get('observationStart')
+                or post.get('end') != experiment.get('observationEnd')
+                or days != experiment.get('measurementWindowDays') or baseline_days != days):
+            result['reason'] = 'observation_window_incomplete'; continue
+        if base.get('end', '') >= post['start']:
+            result['reason'] = 'overlapping_observation_windows'; continue
+        before, after = _number(base.get(metric)), _number(post.get(metric))
+        if before is None or after is None:
+            continue
+        sample_before = _number(base.get('pageViews'))
+        sample_after = _number(post.get('pageViews'))
+        minimum = experiment.get('minimumSample')
+        if type(minimum) is not int or sample_before is None or sample_after is None or sample_after < minimum:
+            result.update(reason='insufficient_sample', before=before, after=after); continue
+        result.update(status='observed_gain' if after > before else 'no_observed_gain', reason='matched_target_windows',
+                      before=before, after=after, delta=after-before, baseline=base, observation=post,
+                      minimumSampleBasis='post_window_page_views', baselineSampleLimited=sample_before < minimum,
+                      statisticalSignificance='not_established')
+        return result
+    return result
+
+
+def capture_experiment_observation(experiment, business, now=None):
+    """Keep the exact completed window before rolling reports replace it."""
+    now = time.time() if now is None else now
+    for row in _observations(business, experiment.get('targetUrl'), experiment.get('primaryMetric')):
+        checked = _stamp(row.get('checkedAt'))
+        if (row.get('start') == experiment.get('observationStart') and row.get('end') == experiment.get('observationEnd')
+                and checked is not None and 0 <= now-checked <= 26*3600):
+            experiment['finalObservation'] = {'row': dict(row), 'capturedAt': now}
+    return experiment
+
+
+def _merge_experiment_observation(identity, **updates):
+    """Merge evaluation fields without losing concurrent reservations or overriding a stop."""
+    allowed = {'finalObservation','status','evaluation','evaluatedAt','observationClosed','followupNeeded'}
+    if set(updates) - allowed:
+        raise ValueError('Only observation lifecycle fields may be merged')
+    with locked(ROWS):
+        state = load(STATE)
+        experiment = state.get('activeExperiment') or {}
+        if experiment.get('id') != identity or experiment.get('status') not in ('active','inconclusive'):
+            return False
+        experiment.update(updates)
+        state['activeExperiment'] = experiment
+        write(STATE, state)
+    return True
+
+
+def experiment_observation_closed(experiment, evaluation, now=None):
+    """A sparse completed window can finish without success; missing reports get three days."""
+    if evaluation.get('status') != 'inconclusive':
+        return True
+    if evaluation.get('reason') == 'insufficient_sample' and experiment.get('finalObservation'):
+        return True
+    try:
+        day = datetime.fromtimestamp(time.time() if now is None else now, timezone.utc).date()
+        due = datetime.fromisoformat(experiment['measurementDate']).date()
+        return day >= due + timedelta(days=3)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
+def preview_business_experiment(business, target_url=None, now=None):
+    """Deterministic, read-only preview; activation is an explicit state update."""
+    now = time.time() if now is None else now
+    candidates = sorted((r for r in business.get('pageObservations', [])
+                         if r.get('source') == 'GA4 Data API' and r.get('complete') is True
+                         and _number(r.get('pageViews')) is not None
+                         and (not target_url or _url_key(r.get('url')) == _url_key(target_url))),
+                        key=lambda r: (-float(r['pageViews']), r.get('url', '')))
+    for row in candidates:
+        proposal = {'targetUrl': row['url'], 'hypothesis': '대상 글의 비교·선택 정보와 내부 안내를 개선하고 측정 가능한 방문 변화를 확인한다',
+                    'measurementDate': datetime.fromtimestamp(now, timezone.utc).date().isoformat(),
+                    'evidenceConfidence': 'low', 'maxModelCalls': 20, 'primaryMetric': 'pageViews',
+                    'measurementWindowDays': 7, 'minimumSample': 50,
+                    'successMetric': '완전한 대상 관측기간에서 50 PV 이상과 기준선 대비 증가; 수익 효과는 별도 검증',
+                    'stopCondition': '7일 관측 후 주지표 증가 미확인 또는 공유 호출 20회 소진 시 추가 자동배정 중단'}
+        try:
+            return bind_business_experiment(proposal, business, ['legacy_remodel', 'threads'], now)
+        except ValueError:
+            continue
+    return {'status': 'awaiting_baseline', 'reason': 'no_fresh_complete_seven_day_target_observation'}
+
+
+def activate_experiment_preview(preview):
+    """Explicit internal-state activation only; does not publish, collect or call a model."""
+    validate_business_experiment(preview, strict=True)
+    if not preview.get('id') or not preview.get('baseline') or preview.get('status') != 'active':
+        raise ValueError('An observed host-bound preview is required')
+    with locked(ROWS):
+        state = load(STATE)
+        previous = state.get('activeExperiment') or {}
+        if previous.get('id') == preview['id']:
+            return previous  # Never reset its observation clock or resource ledger.
+        if any(row.get('id') == preview['id'] for row in state.get('experimentHistory', [])):
+            raise ValueError('Archived experiment identities cannot be reactivated or reset')
+        if previous.get('id') and previous.get('status') in ('active', 'inconclusive') and not previous.get('observationClosed'):
+            raise ValueError('Existing experiment must be explicitly stopped before replacement')
+        if previous.get('id'):
+            history = state.setdefault('experimentHistory', [])
+            if not any(row.get('id') == previous['id'] for row in history):
+                history.append(previous)
+        state['activeExperiment'] = preview
+        state['focusChannels'] = preview['focusChannels']
+        write(STATE, state)
+    return preview
 
 
 def enabled():
@@ -126,7 +384,33 @@ def waiting_investigation(row):
         return False
     identity=row.get('controllerGoalId') or row.get('source',{}).get('goalId')
     goal=load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
-    return goal.get('status') in ('answered','blocked') and not goal.get('pendingAction') and not goal.get('pendingConference')
+    return goal.get('status') in ('answered','blocked') and not _pending_owned_work(goal)
+
+
+def _pending_owned_work(goal):
+    pending = goal.get('pendingAction') or {}
+    if pending:
+        request_id = pending.get('requestId')
+        receipt = load(DATA/'staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json')) if request_id else {}
+        # Missing/stale receipts are uncertainty, never proof that a submitted action stopped.
+        if receipt.get('status') not in ('completed', 'cancelled', 'denied') or receipt.get('pendingEffect'):
+            return True
+    conference = goal.get('pendingConference')
+    if conference:
+        receipt = load(ROWS.parent/(str(conference)+'.json')) if re.fullmatch(r'[a-f0-9]{64}', str(conference)) else {}
+        if receipt.get('status') not in ('completed', 'cancelled') or receipt.get('pendingEffect'):
+            return True
+    return False
+
+
+def occupies_lane(row):
+    if running(row):
+        return True
+    if row.get('status') != 'blocked':
+        return not waiting_investigation(row)
+    identity = row.get('controllerGoalId') or row.get('source', {}).get('goalId')
+    goal = load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}', identity) else {}
+    return _pending_owned_work(goal) or _pending_owned_work(row)
 
 
 def current():
@@ -340,10 +624,18 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
             return identity
         if len(state.get('pending', [])) >= 200:
             raise AgendaWaiting('안건 대기열이 가득 찼습니다. 기존 안건을 먼저 마무리합니다.')
+        if source.get('autonomousExperiment'):
+            if source.get('experimentId') != (state.get('activeExperiment') or {}).get('id') or not autonomous_experiment_allows(source.get('gateProject') or project,
+                    target_url=source.get('targetUrl', ''), domain=source.get('domain', ''), state=state):
+                return None
         row = {'id':identity, 'kind':kind, 'title':str(title)[:500], 'project':project,
                'source':source, 'completionCriteria':completion, 'priority':priority,
                'notBefore':not_before, 'createdAt':time.time(), 'status':'queued','manualNudges':0,
                'version':1, 'owner':uuid.uuid4().hex, 'plan':[], 'events':{}, 'processes':[]}
+        if source.get('autonomousExperiment'):
+            row['businessExperiment'] = state['activeExperiment']
+            if kind == 'conference':
+                state['activeExperiment'].setdefault('newPublicationAgendaIds', []).append(identity)
         _save(row)
         state.setdefault('pending', []).append(identity)
         write(STATE, state)
@@ -371,9 +663,16 @@ def admit(identity):
         chosen = next((r for r in sorted(eligible, key=lambda r:(0 if r.get('kind') == 'conference' else 1, r['priority'], r['createdAt'])) if r['id'] == identity), None)
         if not chosen:
             return None
+        source = chosen.get('source') or {}
+        if source.get('autonomousExperiment') and not chosen.get('activatedAt'):
+            experiment = state.get('activeExperiment') or {}
+            if (source.get('experimentId') != experiment.get('id') or
+                    not autonomous_experiment_allows(source.get('gateProject') or chosen.get('project'),
+                        target_url=source.get('targetUrl', ''), domain=source.get('domain', ''), state=state, reserved_agenda_id=identity)):
+                return None
         proj = chosen.get('project') or 'other'
         limit = LANE_LIMITS.get(proj, 1)
-        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and r.get('status') != 'blocked' and not waiting_investigation(r)
+        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and occupies_lane(r)
                        and read_only_agenda(r)==read_only_agenda(chosen)]
         if len(lane_active) >= limit:
             return None
@@ -661,71 +960,73 @@ def operational_state(row, goal=None, conference=None):
 
 
 def compute_reverse_funnel_gap(business=None):
-    """Calculate the Reverse-Funnel gap from observed revenue/traffic to the $100/day North Star."""
-    import math
+    """Report measured scope; derive PV only from a matched revenue/PV report."""
     if business is None:
         try:
             from server.growth import business_evidence
             business = business_evidence()
         except Exception:
             business = {}
-    daily_target_usd = 100.0
-    observed_usd = 0.0
-    for row in business.get('priorDayRevenue') or []:
-        amt = row.get('amount')
-        try:
-            amt_val = float(amt) if amt is not None and str(amt).strip() != '' else 0.0
-        except (ValueError, TypeError):
-            amt_val = 0.0
-        if amt_val > 0:
-            cur = str(row.get('currency') or 'USD').upper()
-            observed_usd += (amt_val / 1380.0) if cur == 'KRW' else amt_val
-    observed_usd = round(observed_usd, 4)
-    revenue_gap_usd = round(max(0.0, daily_target_usd - observed_usd), 2)
-    assumed_cpc_usd = 0.50
-    required_clicks = int(math.ceil(revenue_gap_usd / assumed_cpc_usd))
-    required_pv = int(required_clicks * 12.5)  # ~8% effective ad CTR across funnel
-
-    observed_pv = 0
-    observed_sessions = 0
+    totals, missing = {}, []
+    observed_rows = business.get('priorDayRevenue') or []
+    for row in observed_rows:
+        amount = _number(row.get('amount'))
+        currency = row.get('currency')
+        if amount is None or not currency or row.get('status') != 'collected':
+            missing.append(row.get('source')); continue
+        totals[currency] = totals.get(currency, 0.0) + amount
+    usd = totals.get('USD')
+    pv = sessions = None
+    traffic_scopes = []
     for site in business.get('trafficSites') or []:
-        day_p = (site.get('periods') or {}).get('day') or {}
-        pv = day_p.get('pageViews')
-        sess = day_p.get('sessions')
-        if isinstance(pv, (int, float)) and pv > 0:
-            observed_pv += int(pv)
-        if isinstance(sess, (int, float)) and sess > 0:
-            observed_sessions += int(sess)
-    traffic_gap_pv = max(0, required_pv - observed_pv)
-    achievement_pct = round((observed_usd / daily_target_usd) * 100, 2)
-    status = 'achieved' if observed_usd >= daily_target_usd else ('critical_gap' if observed_usd < 5.0 and observed_pv < 500 else 'in_progress')
-    diagnosis = (
-        f"목표 일수익 $100.00 (필요 클릭 약 {required_clicks}회 @ CPC $0.50 · 필요 유입 약 {required_pv:,} PV) 대비 "
-        f"현재 실측 일수익 ${observed_usd:.2f} / 일유입 {observed_pv:,} PV ({observed_sessions:,} 세션) — "
-        f"부족분 ${revenue_gap_usd:.2f} ({traffic_gap_pv:,} PV). "
-        + ("단순 블로그 할당량 양산으로는 도달 불가. 고단가 앵커 원고 + 외부유입(Threads·지식iN·네이버 브릿지) 집중 살포 및 대표님 자원/승인 역제안(ask_ceo) 필수."
-           if status == 'critical_gap' else "유입·전환율 상위 자산 중심 OSMU 확산 가속 필요.")
-    )
-    return {
-        'dailyTargetUsd': daily_target_usd,
-        'observedDailyRevenueUsd': observed_usd,
-        'revenueGapUsd': revenue_gap_usd,
-        'achievementPct': achievement_pct,
-        'assumedCpcUsd': assumed_cpc_usd,
-        'requiredDailyClicks': required_clicks,
-        'requiredDailyPv': required_pv,
-        'observedDailyPv': observed_pv,
-        'observedDailySessions': observed_sessions,
-        'trafficGapPv': traffic_gap_pv,
-        'status': status,
-        'diagnosis': diagnosis,
-    }
+        period = (site.get('periods') or {}).get('day') or {}
+        if site.get('status') != 'collected':
+            continue
+        value, count = _number(period.get('pageViews')), _number(period.get('sessions'))
+        if value is not None:
+            pv = (pv or 0) + value
+        if count is not None:
+            sessions = (sessions or 0) + count
+        traffic_scopes.append({'domain': site.get('domain'), **period, 'checkedAt': site.get('checkedAt')})
+    matching = []
+    for report in business.get('matchedRevenuePv') or []:
+        revenue, views = _number(report.get('revenue')), _number(report.get('pageViews'))
+        stamp = _stamp(report.get('checkedAt'))
+        if (report.get('matched') is True and report.get('complete') is True and report.get('currency') == 'USD'
+                and report.get('source') and report.get('start') and report.get('end') and report.get('timezone')
+                and stamp is not None and 0 <= time.time()-stamp <= 26*3600
+                and revenue is not None and views is not None and views > 0):
+            matching.append(report)
+    # Never pool different dates, currencies, page selections or reporting sources.
+    chosen = max(matching, key=lambda r: (r['end'], r['checkedAt'])) if matching else None
+    rpm = 1000 * float(chosen['revenue']) / float(chosen['pageViews']) if chosen else None
+    required = math.ceil(100000 / rpm) if rpm is not None and rpm > 0 else None
+    gap = round(max(0, 100-usd), 4) if usd is not None else None
+    diagnosis = ('동일 기간·범위의 USD 수익과 PV 실측 RPM이 없어 목표 필요 PV는 미확인입니다.' if required is None else
+                 f"선택된 관측 범위의 RPM ${rpm:.4f}를 가정한 $100/일 필요 PV는 {required:,}회입니다. 전체 회사 예측이나 수익 보장이 아닙니다.")
+    return {'dailyTargetUsd': 100.0, 'observedDailyRevenueUsd': usd, 'revenueGapUsd': gap,
+            'achievementPct': round(usd, 4) if usd is not None else None,
+            'assumedCpcUsd': None, 'requiredDailyClicks': None, 'requiredDailyPv': required,
+            'observedDailyPv': pv, 'observedDailySessions': sessions, 'trafficGapPv': None,
+            'measuredRpmUsd': rpm, 'rpmEvidence': chosen, 'revenueByCurrency': totals,
+            'revenueScope': {'reportedSources': observed_rows, 'missingSources': missing,
+                             'complete': bool(observed_rows) and not missing and business.get('revenueCoverageComplete') is True},
+            'trafficScope': traffic_scopes, 'currencyConversion': 'not_applied',
+            'status': 'scoped_target_observed' if usd is not None and usd >= 100 else 'measurement_required' if required is None else 'in_progress',
+            'diagnosis': diagnosis, 'causalClaim': False}
 
 
 def view():
     if not enabled():
         return {'enabled':False}
     state = load(STATE)
+    def experiment_summary(row):
+        return {'id': row.get('id'), 'status': row.get('status'), 'causalClaim': False,
+                'draft': {k: row.get(k) for k in ('targetUrl','hypothesis','primaryMetric','maxModelCalls','observationStart','observationEnd','measurementDate','minimumSample','maxNewPublications','stopCondition')},
+                'measured': {'baseline': {k: (row.get('baseline') or {}).get(k) for k in ('source','start','end','checkedAt','complete','pageViews','sessions','estimatedRevenue','currency')},
+                             'evaluation': {k: (row.get('evaluation') or {}).get(k) for k in ('status','reason','before','after','delta','baselineSampleLimited','statisticalSignificance')},
+                             'modelCalls': ((load(DATA/'llm_usage_ledger.json').get('byExperiment') or {}).get(row.get('id')) or {}).get('modelCalls')},
+                'publicationReservations': len(row.get('newPublicationAgendaIds') or [])}
     def public(row):
         return {**{k:row.get(k) for k in ('id','title','project','status','plan','completionCriteria','lastAction','blocker','updatedAt','verifiedAt','closedAt')},
                 'phase':('미해결 · 복구 조건 자동 확인' if row.get('status')=='blocked' and row.get('recoveryWatch') else LABELS.get(row.get('status'),'대기')), 'verified':bool(row.get('verification',{}).get('verified')),
@@ -744,6 +1045,8 @@ def view():
             'reverseFunnel': state.get('reverseFunnel') or compute_reverse_funnel_gap(),
             'executiveBriefing': state.get('lastExecutiveBriefing', ''),
             'focusChannels': state.get('focusChannels', []),
+            'activeExperiment': experiment_summary(state['activeExperiment']) if (state.get('activeExperiment') or {}).get('id') else None,
+            'recentExperiments': [experiment_summary(row) for row in reversed(state.get('experimentHistory', [])[-5:])],
             'ceoProposals': (proposals_state.get('proposals') or [])[:5],
             'ceoApprovalReview': {k: proposals_state.get(k) for k in
                                   ('approvalReviewSummary', 'executionPackages', 'residualDecisions')}}
@@ -1114,114 +1417,57 @@ def prune_stale_runtime_data(max_keep_per_dir=80):
 
 
 def _queue_autonomous_work_order(work_type, role='doctor', target_domain='', directive='', hour_bucket=None):
-    """Create a durable, executable revenue-optimization work order for the 6-Crew when daily revenue < $100."""
-    import datetime as dt
-    bucket = hour_bucket or dt.datetime.now().strftime('%Y-%m-%dT%H')
-    dom = (target_domain or '').strip()
-    if work_type == 'cro_widget_retrofit':
-        title = f"[수익 전환 리모델링] {dom or '핵심 캐시카우 도메인'} 기발행 글 3초 자가진단·제휴·내부 브릿지 위젯 이식 (@{role})"
-        return propose(
-            'cro_widget_retrofit',
-            {'bucket': bucket, 'domain': dom},
-            title=title,
-            project='legacy_remodel',
-            source={'assignedRole': role, 'domain': dom, 'directive': directive, 'businessPurpose': '기발행 색인 완료 글의 체류시간 증대 및 고단가 내부 브릿지·제휴 클릭 전환율(CRO) 극대화'},
-            completion='기발행 CF 블로그 원고에 3초 자가진단·제휴·내부 브릿지 위젯 및 표 스타일 이식 후 Cloudflare 캐시 퍼지 검증',
-            priority=2,
-            inherit=False,
-        )
-    if work_type == 'indexnow_unindexed_push':
-        title = f"[색인 가속 작전] {dom or 'CF 블로그 16개 도메인'} 미색인 기발행 글 IndexNow·사이트맵 일괄 강제 제출 (@{role})"
-        return propose(
-            'indexnow_unindexed_push',
-            {'bucket': bucket, 'domain': dom},
-            title=title,
-            project='collections',
-            source={'assignedRole': role, 'domain': dom, 'directive': directive, 'businessPurpose': '잠자고 있는 기발행 고단가 원고를 검색엔진(Google/Bing/Naver)에 즉시 색인시켜 오가닉 PV 유입 가속'},
-            completion='미색인·미전송 CF 블로그 URL 추출 및 IndexNow·Bing·Google Sitemap Ping 전송 영수증 검증',
-            priority=3,
-            inherit=False,
-        )
-    if work_type == 'content_audit_patrol':
-        title = f"[품질·CRO 감사] {dom or 'must-good.com'} 기발행 원고 초반 3초 후킹 및 CTA 전환 감사 (@{role})"
-        return propose(
-            'audit',
-            {'bucket': bucket, 'domain': dom or 'must-good.com'},
-            title=title,
-            project='legacy_remodel',
-            source={'assignedRole': role, 'domain': dom or 'must-good.com', 'directive': directive, 'businessPurpose': '저성과 원고의 이탈 원인을 진단하고 고단가 광고 클릭 유도 동선 개선'},
-            completion='기발행 원고 품질·전환 감사 실행 및 체크리스트 영수증 저장',
-            priority=4,
-            inherit=False,
-        )
-    if work_type == 'radar_high_cpc_scout':
-        title = f"[고단가 트렌드 발굴] 실시간 급상승 고단가(CPC/CPA) 키워드 및 외부유입 타깃 스카우팅 (@{role})"
-        return propose(
-            'radar',
-            {'bucket': bucket, 'slot': 'autonomous'},
-            title=title,
-            project='collections',
-            source={'assignedRole': role, 'slot': 'autonomous', 'directive': directive, 'businessPurpose': '하루 $100 역산 달성을 위한 실시간 고단가 키워드 및 지식iN·Threads 브릿지 소재 발굴'},
-            completion='실시간 트렌드 소스 수집 및 고단가 키워드 후보군 저장 검증',
-            priority=4,
-            inherit=False,
-        )
-    if work_type == 'brunch_daily_publish':
-        title = f"[브런치 칼럼 연재] 자청 4대 결핍 기반 2,000자 에세이 발행 및 CF 브릿지 연결 (@{role})"
-        return propose(
-            'brunch_publish',
-            {'bucket': bucket, 'account': 'baro76650'},
-            title=title,
-            project='brunch',
-            source={'assignedRole': role, 'account': 'baro76650', 'directive': directive, 'businessPurpose': '브런치(DA 80+) 고권위 칼럼 연재로 다음·구글 상위 노출 및 CF 16개 도메인 브릿지 유입 확보'},
-            completion='브런치 실시간 상태 동기화 및 일일 칼럼 발행/비축 확인',
-            priority=3,
-            inherit=False,
-        )
-    return None
+    """Queue each selected experiment intervention once, not once per timer/hour."""
+    state = load(STATE)
+    experiment = state.get('activeExperiment') or {}
+    domain = str(target_domain or '').lower().removeprefix('www.')
+    definitions = {
+        'cro_widget_retrofit': ('cro_widget_retrofit', 'legacy_remodel', '대상 원고 선택 기준·내부 안내 개선'),
+        'indexnow_unindexed_push': ('indexnow_unindexed_push', 'collections', '대상 도메인 색인 제출 상태 확인'),
+        'content_audit_patrol': ('audit', 'legacy_remodel', '대상 원고 근거·독자 과업 품질 감사'),
+        'radar_high_cpc_scout': ('radar', 'collections', '관측된 주제의 검색 의도 가설 조사'),
+        'brunch_daily_publish': ('brunch_publish', 'brunch', '대상 주제 외부 유입 실험'),
+    }
+    if work_type not in definitions:
+        return None
+    kind, project, purpose = definitions[work_type]
+    gate_project = 'legacy_remodel' if project == 'collections' else project
+    if not autonomous_experiment_allows(gate_project, domain=domain, state=state):
+        return None
+    # These legacy workers cannot bind their action to a selected URL yet.
+    # Do not widen a target experiment to unrelated articles or channels.
+    if kind in ('brunch_publish', 'radar', 'audit'):
+        return None
+    return propose(kind, {'experimentId': experiment['id'], 'workType': work_type, 'domain': domain},
+        title=purpose+' ? '+domain, project=project,
+        source={'assignedRole': role, 'domain': domain, 'directive': directive, 'businessPurpose': purpose,
+                'autonomousExperiment': True, 'experimentId': experiment['id'], 'targetUrl': experiment['targetUrl'],
+                'gateProject': gate_project},
+        completion='선택된 대상의 실행 영수증 및 근거 확인; 수익 효과는 관측기간 종료 후 별도 평가', priority=3, inherit=False)
 
 
 def _top_up_channel_lanes():
-    """Feed channel lanes AND continuous revenue-expansion work orders according to Jarvis's Reverse-Funnel strategy."""
+    """Only the focused experiment may create new automatic publication work."""
     try:
         from common.conference_dispatch import request as conf_request
-        autonomy_cfg = load(DATA / 'project-autonomy.json')
-        if autonomy_cfg.get('enabled') is True and not (Path.home() / 'EGO_EXEC_DISABLED').exists():
-            cur_st = load(STATE)
-            all_ids = list(active_ids(cur_st)) + list(cur_st.get('pending', []))
-            lane_counts = {}
-            kind_counts = {}
-            for pid in all_ids:
-                r = get(pid)
-                if not r:
-                    continue
-                k = r.get('kind') or 'other'
-                kind_counts[k] = kind_counts.get(k, 0) + 1
-                if k == 'conference':
-                    proj = r.get('project') or 'other'
-                    lane_counts[proj] = lane_counts.get(proj, 0) + 1
-            enabled_projs = set(autonomy_cfg.get('projects', []))
-            focus_projs = set(cur_st.get('focusChannels') or [])
-            active_projs = (enabled_projs & focus_projs) if focus_projs else enabled_projs
-            if 'threads' in active_projs and lane_counts.get('threads', 0) == 0:
-                conf_request('threads', {}, one=True)
-            if 'naver_kin' in active_projs and lane_counts.get('naver_kin', 0) == 0:
-                conf_request('kin', {}, one=True)
-            if 'naver_blog' in active_projs and lane_counts.get('naver_blog', 0) == 0:
-                conf_request('parameters', {'action': 'naver-cycle'}, one=True)
-            if 'cf_blog' in active_projs and lane_counts.get('cf_blog', 0) < 2:
-                cf_res = conf_request('parameters', {'action': 'cf-cycle'}, one=False)
-                if cf_res.get('status') == 'no_work':
-                    conf_request('parameters', {'action': 'prepare'}, one=False)
-            # Continuous Revenue Expansion Loop: never sit idle when daily revenue < $100
-            rf = cur_st.get('reverseFunnel') or {}
-            if rf.get('revenueGapUsd', 100.0) > 0:
-                if kind_counts.get('cro_widget_retrofit', 0) == 0:
-                    _queue_autonomous_work_order('cro_widget_retrofit', role='doctor', directive='일일 기본 발행 외 유휴 시간 즉시 가동: 기발행 글 3초 자가진단·제휴·내부 브릿지 위젯 이식')
-                if kind_counts.get('indexnow_unindexed_push', 0) == 0:
-                    _queue_autonomous_work_order('indexnow_unindexed_push', role='trace', directive='기발행 미색인 원고 IndexNow·Bing·Google Sitemap 강제 색인 푸시')
-    except Exception:
-        pass
+        config = load(DATA / 'project-autonomy.json')
+        state = load(STATE)
+        experiment = state.get('activeExperiment') or {}
+        if config.get('enabled') is not True or (Path.home() / 'EGO_EXEC_DISABLED').exists():
+            return
+        target = experiment.get('targetUrl') or ''
+        projects = set(config.get('projects') or []) & set(experiment.get('focusChannels') or [])
+        if 'threads' in projects and autonomous_experiment_allows('threads', target_url=target, state=state):
+            from common.project_autonomy import publish_strategy_link
+            publish_strategy_link(target, automatic=True)
+        # CF cycles enumerate only the focused domains in conference_dispatch.request.
+        if 'cf_blog' in projects:
+            for domain in experiment.get('focusDomains') or []:
+                if autonomous_experiment_allows('cf_blog', domain=domain, state=state):
+                    conf_request('parameters', {'action': 'cf-cycle'}, one=True, automatic=True)
+                    break
+    except (OSError, ValueError, AgendaWaiting):
+        return
 
 
 def _executive_proposal_key(experiment, focus_channels, proposal):
@@ -1392,14 +1638,39 @@ def company_executive_check_once(force=False):
                 write(STATE, st)
         business = company.get('businessEvidence', {})
         reverse_funnel = compute_reverse_funnel_gap(business)
+        previous_experiment = state.get('activeExperiment') or {}
+        if (previous_experiment.get('id') and previous_experiment.get('status') in ('active', 'inconclusive')
+                and not previous_experiment.get('observationClosed')):
+            prior_capture = previous_experiment.get('finalObservation')
+            capture_experiment_observation(previous_experiment, business, now=now)
+            if previous_experiment.get('finalObservation') != prior_capture:
+                if not _merge_experiment_observation(previous_experiment['id'], finalObservation=previous_experiment['finalObservation']):
+                    return False
+            today = datetime.now(timezone.utc).date().isoformat()
+            if today < previous_experiment.get('measurementDate', '9999'):
+                return False
+            evaluation = evaluate_business_experiment(previous_experiment, business, now=now)
+            closed = experiment_observation_closed(previous_experiment, evaluation, now)
+            changes = {'status': evaluation['status'], 'evaluation': evaluation, 'evaluatedAt': now,
+                       'observationClosed': closed, 'followupNeeded': closed and evaluation['status'] != 'observed_gain'}
+            previous_experiment.update(changes)
+            if not _merge_experiment_observation(previous_experiment['id'], **changes):
+                return False
+            # Missing reports get bounded collection grace; no new work or budget reset.
+            if not closed:
+                return False
         fp_src = json.dumps({
             'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary],
             'pending': [r['id'] for r in valid_pending],
-            'performanceCheckedAt': business.get('performanceCheckedAt'),
+            'observedValues': [{k: r.get(k) for k in ('url','source','start','end','complete','pageViews','sessions','estimatedRevenue','currency')}
+                               for r in business.get('pageObservations', [])],
+            'revenueValues': [{k: r.get(k) for k in ('source','date','amount','currency','status')}
+                              for r in business.get('priorDayRevenue', [])],
             'funnelStatus': reverse_funnel.get('status'),
+            'experimentLifecycle': {k: previous_experiment.get(k) for k in ('id','status','observationClosed','observationEnd')},
         }, sort_keys=True)
         fp = hashlib.sha256(fp_src.encode('utf-8')).hexdigest()
-        if not force and now - state.get('lastExecutiveCheckAt', 0) < 900 and state.get('lastExecutiveFingerprint') == fp:
+        if not force and state.get('lastExecutiveFingerprint') == fp:
             return False
         candidates = [{'id': r['id'], 'title': r.get('title', '')[:120], 'project': r.get('project'), 'kind': r.get('kind'), 'priority': r.get('priority', 10)} for r in valid_pending[:10]]
         active_blockers = []
@@ -1450,8 +1721,11 @@ def company_executive_check_once(force=False):
                     'hypothesis': {'type': 'string'}, 'targetUrl': {'type': 'string'},
                     'measurementDate': {'type': 'string'}, 'evidenceConfidence': {'type': 'string', 'enum': ['low', 'medium', 'high']},
                     'maxModelCalls': {'type': 'integer', 'minimum': 1, 'maximum': 40},
+                    'primaryMetric': {'type': 'string', 'enum': ['pageViews', 'sessions', 'estimatedRevenue']},
+                    'measurementWindowDays': {'type': 'integer', 'enum': [7, 14, 28]},
+                    'minimumSample': {'type': 'integer', 'minimum': 1, 'maximum': 100000},
                     'successMetric': {'type': 'string'}, 'stopCondition': {'type': 'string'}},
-                    'required': ['hypothesis', 'targetUrl', 'measurementDate', 'evidenceConfidence', 'maxModelCalls', 'successMetric', 'stopCondition'], 'additionalProperties': False},
+                    'required': ['hypothesis', 'targetUrl', 'measurementDate', 'evidenceConfidence', 'maxModelCalls', 'successMetric', 'stopCondition', 'primaryMetric', 'measurementWindowDays', 'minimumSample'], 'additionalProperties': False},
                 'ceoProposal': {
                     'type': 'object',
                     'properties': {
@@ -1477,24 +1751,22 @@ def company_executive_check_once(force=False):
             + json.dumps(reverse_funnel, ensure_ascii=False) + '\n'
             '[전 채널 실시간 실측 가동·품질·색인 진단팩 (liveCompanyDiagnostics)]\n'
             + json.dumps(live_diag, ensure_ascii=False) + '\n'
-            '1) briefing: 위 liveCompanyDiagnostics의 실제 실시간 수치를 바탕으로 ① 현재 일수익($)·일유입(PV)과 목표 $100(약 2,500~3,000 PV / 고단가 클릭 200회) 사이의 격차, ② 6대 핵심 채널(CF 16개 도메인, 네이버 블로그 5계정, 지식iN 30~35분 랜덤 교대 20슬롯, 스레드 10슬롯 브릿지, 브런치 작가 승인 완료 및 하루 2회 장문 칼럼 연재, 네이버 프리미엄콘텐츠 심사 현황)의 오늘 실제 진행 상황과 멈추거나 뒤처진 병목 유무, ③ 오늘 즉시 밀어붙일 최우선 돌파 작전을 결단력 있는 한국어 팀장 말투(3~4문장)로 정확히 브리핑하라. (과거 고정 숫자를 앵무새처럼 복창하지 말고 반드시 liveCompanyDiagnostics의 오늘 실측치로만 판단하라!)\n'
+            '1) briefing: 수익·유입의 기간·통화·범위와 미측정을 구분하고 목표 $100과의 확인된 격차를 브리핑하라. 필요 PV는 reverseFunnel의 동일 범위 실측 RPM이 있을 때만 사용한다. 채널 진행 현황은 발행 할당량 달성도가 아닌 실제 관측과 병목으로 설명하라.\n'
             '2) focusChannels: 오늘 우선 가동할 핵심 유입·수익 채널 배열(cf_blog, threads, naver_kin, naver_blog, brunch, legacy_remodel 포함 가능)을 지정하라.\n'
-            '3) autonomousWorkOrders (능동적 직원 작업 하달 — 대표님이 시키기 전에 팀장이 직접 점검·지시): liveCompanyDiagnostics와 projects를 보고 지금 가장 시급한 3대 작업 지시서를 생성하라:\n'
-            '   - radar_high_cpc_scout (@radar): 블로키(blokey.co.kr/golden, CDP 9440) S/A급 황금키워드 발굴 및 CF 16개 도메인 고유 니치 × 네이버·지식iN·스레드·브런치 OSMU 배정.\n'
-            '   - content_audit_patrol / cro_widget_retrofit (@doctor/@patch): CF 16개 도메인 기발행·신규 글의 썸네일 누락 여부, 자청 4대 결핍(손실회피·불확실성·비교우위·인지부조화) 충족도, 도메인 카테고리 일치 여부 감사 및 3초 자가진단·내부 브릿지 리모델링.\n'
-            '   - indexnow_unindexed_push (@trace/@patch): 기발행 미색인 원고 IndexNow(200 OK 검증)·사이트맵 강제 색인 제출 및 GA4/GSC CTR 0% 페이지 추적.\n'
-            '   - brunch_daily_publish (@publi): 브런치(작가 승인 완료, 하루 2회 09:30·16:30) 2,000자 에세이 칼럼 연재 및 CF 고단가 도메인 브릿지 가동.\n'
+            '3) autonomousWorkOrders: 선택된 target URL의 도메인에서 최대 3개 개입만 제안하라. 현재 자동실험은 cro_widget_retrofit(근거·비교·내부안내 개선), indexnow_unindexed_push(제출과 실제 색인 구분)만 실행한다. 다른 채널·도메인 확대와 수익 약속은 하지 마라.\n'
             '4) topAgendaId, dropAgendaIds & healOrRetryAgendaIds: 대기 안건(pendingAgendas) 중 실질 유입·수익 기여도가 가장 높은 최우선 안건 1개를 topAgendaId로 고르고, 불필요한 중복 티켓은 dropAgendaIds로 폐기하며, activeBlockers에 막힌 안건은 healOrRetryAgendaIds에 넣어 즉시 복구하라.\n'
-            '5) experiment: 오늘 실행할 구체적 가설(hypothesis), 타깃 URL, 측정일(YYYY-MM-DD), 모델 호출 한도(maxModelCalls: 10~40), 성공 지표, 중단 조건을 한국어로 설정하라.\n'
+            '5) experiment: pageObservations의 실제 targetUrl, 가설, primaryMetric(pageViews/sessions/estimatedRevenue), 기준선과 같은 measurementWindowDays(7/14/28), 사후 최소표본 minimumSample(PV), 공유 maxModelCalls(1~40), 성공 지표·중단 조건을 설정하라. 기준선 수치는 호스트가 연결한다. 초기 유입 관측과 수익 검증을 구분하고 효과를 보장하지 마라.\n'
             '6) ceoProposal (대표님께 역제안 · ask_ceo): 대표님의 결단/승인이 필요한 병목(예: 네이버 프리미엄콘텐츠 2단계 인증/심사 확인, 추가 계정/캠페인 승인, 수익 격차 돌파 작전 승인)을 선제적으로 정리해 보고하라.\n'
             + json.dumps({'reverseFunnel': reverse_funnel, 'liveCompanyDiagnostics': live_diag, 'projects': projects_summary, 'activeBlockers': active_blockers, 'pendingAgendas': candidates, 'businessEvidence': business}, ensure_ascii=False)
         )
         decision = generate_json(prompt, agent_slot='jarvis', response_schema=schema, timeout_seconds=120, memory_read_only=True, _skip_memory=True, crew_actor='jarvis', crew_actor_label='팀장', crew_stage='company-executive-check')
-        experiment = validate_business_experiment(decision.get('experiment'))
+        focus_channels = decision.get('focusChannels') or []
+        experiment = bind_business_experiment(decision.get('experiment'), business, focus_channels, now=now)
+        experiment = activate_experiment_preview(experiment)
         drop_set = set(decision.get('dropAgendaIds') or []) - {decision.get('topAgendaId')}
         heal_set = set(decision.get('healOrRetryAgendaIds') or [])
         top_id = decision.get('topAgendaId')
-        focus_channels = decision.get('focusChannels') or ['cf_blog', 'threads', 'naver_kin', 'naver_blog']
+        focus_channels = experiment['focusChannels']
         work_orders = decision.get('autonomousWorkOrders') or []
         dispatched_orders = []
         for order in work_orders[:3]:
@@ -1512,7 +1784,7 @@ def company_executive_check_once(force=False):
             st['enabled'] = True
             for hid in heal_set:
                 hrow = get(hid)
-                if hrow and hrow.get('status') == 'blocked' and not running(hrow):
+                if hrow and hrow.get('status') == 'blocked' and not running(hrow) and hrow.get('resumeAuthorized') is True:
                     hrow.update(status='recovering', controllerFailures=0, nextCheckAt=0)
                     hrow.pop('recoveryGoalId', None)
                     _save(hrow)
@@ -1549,7 +1821,7 @@ def company_executive_check_once(force=False):
                 current_reality=ceo_prop.get('currentReality') or reverse_funnel['diagnosis'],
                 proposal=ceo_prop.get('proposal') or decision.get('briefing', ''),
                 required_approvals=ceo_prop.get('requiredApprovals') or ['고단가 타깃 집중 유입 작전 및 외부채널 브릿지 배포 승인'],
-                expected_impact=ceo_prop.get('expectedImpact') or '일일 외부유입 +500 PV 확보 및 애드센스 고단가 클릭 전환 검증',
+                expected_impact=ceo_prop.get('expectedImpact') or '선택된 대상의 유입·수익 변화 측정; 개선 효과는 미확인',
                 urgency='high',
                 request_key=_executive_proposal_key(experiment, focus_channels, ceo_prop),
             )
@@ -1593,7 +1865,8 @@ def _step_single_agenda(row):
                         from common.cf_tables import retrofit_cro_widgets_and_tables
                         dom = (row.get('source') or {}).get('domain') or ''
                         doms = [dom] if dom and '.' in dom else None
-                        result = retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=doms)
+                        target_urls = [row['source']['targetUrl']] if row.get('source', {}).get('autonomousExperiment') else None
+                        result = retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=doms, target_urls=target_urls)
                         good = result.get('status') in ('completed', 'already_optimized')
                         summary_text = f"기발행 CF 원고 {result.get('updatedCount', 0)}건 CRO 3초 자가진단·제휴·내부 브릿지 위젯 이식 및 캐시 퍼지 완료"
                     elif row['kind'] == 'indexnow_unindexed_push':

@@ -305,7 +305,7 @@ updated_at: "{now_kst}"
 ## 1. 최우선 단일 북극성 목표: 하루 수익 \\$100 역산 두뇌
 - **단일 북극성(North Star)**: **일일 검증 수익 \\$100 달성 (월 \\$3,000+)**
 - **역산 퍼널(Reverse-Funnel)**:
-  - 목표 **\\$100/일** $\\rightarrow$ 고단가 CPC(`\\$0.50`) 기준 일일 광고 클릭 **약 200회** 필요 $\\rightarrow$ 평균 CTR `5~8%` 기준 일일 실측 유입 **2,500 ~ 3,000 PV** 필수.
+  - 목표 **\\$100/일**의 필요 유입은 **동일 기간·도메인·원천의 관측 RPM**으로 `필요 광고 PV = 100 / RPM × 1,000`을 계산한다. 관측 RPM이 없거나 0이면 필요 PV는 미확정으로 둔다. CPC·CTR 가정으로 만든 수치는 시나리오이며 실제 달성 전망으로 표시하지 않는다.
   - 단순 글 개수 채우기(티켓 찍어내기)는 0점(`published_pending_traffic`)이다. 오직 **검색 유입(GSC/GA4)**과 **외부 유입 펌프질(지식iN·Threads $\\rightarrow$ CF 본진)**로 실제 PV와 달러(\\$)를 데려오는 것이 유일한 판단 기준이다.
 
 ---
@@ -402,7 +402,7 @@ updated_at: "{now_kst}"
      - 에세이형 질문 제목(*"월세는 내가 냈는데 계약서는 부모님 명의?"*) 단독 사용을 금지하고, 반드시 **`연말정산 월세 세액공제 부모님 명의, 계약자 달라도 환급받는 3분 체크`**처럼 앞머리에 실제 검색어 명사구(`mainKeyword`)를 고정 배치한다 (`enforce_naver_seo_title` 자동 강제).
   2. **타깃 키워드 총 문서 수 `<= 5,000건` 빈집 롱테일 필터 (`query_naver_blog_doc_count`)**:
      - 준최적~최적 초입 계정이 총 문서 수 5만~60만 건의 대형 키워드를 치면 30~80위에 갇힌다.
-     - 네이버 검색 OpenAPI 실시간 조회로 **총 블로그 문서 수 5,000건 이하**인 세부 롱테일 검색어만 채택하여 발행 즉시 1페이지(1~5위)를 점령한다.
+     - 네이버 검색 OpenAPI에서 관측한 문서 수는 경쟁도 가설의 참고 자료다. 검색량·검색 의도·품질을 함께 검토하고 발행 후 실제 순위와 유입을 측정한다. 특정 순위나 즉시 상승을 보장하지 않는다.
   3. **14일 동일·유사 토픽 중복 차단 & 계정별 지수 보호 (`collect_used_naver_topics`)**:
      - 최근 14일 이내 동일 계정(및 당일 전 계정)에서 다룬 핵심 명사 2개 이상 겹치는 주제는 0-Token 코드로 자동 차단한다.
      - 실명 애드포스트 주력 3계정(`soultin`, `soul5373`, `yoon_master`) 및 지수 회복 모드 계정(`stone0747`, 일 1회 `12:40`)은 외부 링크 0개 순수 완결형 정보글로 운영하며, `adinfo0905`(일 2회 `08:10`, `19:20`)만 7:3 비율로 CF 본진 브릿지를 연결한다.
@@ -514,11 +514,23 @@ updated_at: "{now_kst}"
         for r in rev_leaders:
             if not isinstance(r, dict):
                 continue
-            cur = r.get('currency') or 'USD'
-            yest = r.get('yesterdayAmount') or 0
-            cum = r.get('cumulativeAmount') or 0
-            unit = f"\\${yest:,.2f} (누적 \\${cum:,.2f})" if cur == 'USD' else f"{int(yest):,}원 (누적 {int(cum):,}원)"
-            rev_lines.append(f"- **{r.get('label', r.get('category', '채널'))}**: 어제 실측 **{unit}** · 최근 수집 `{r.get('lastCollectedAt') or '-'}`")
+            currency = r.get('currency')
+            periods = r.get('periods') or {}
+
+            def report(name):
+                value = periods.get(name) or {}
+                amount = value.get('amount')
+                money = f"{amount} {currency}" if amount is not None and currency else '미측정'
+                kind = '추정 수익' if value.get('valueKind') == 'estimated' else value.get('valueKind', '종류 미확인')
+                coverage = '보고 범위 완전' if value.get('complete') is True else '부분/미수집'
+                return f"{money} ({value.get('start', '?')}~{value.get('end', '?')}, {kind}, {coverage})"
+
+            rev_lines.append(
+                f"- **{r.get('label', r.get('category', '채널'))}**: 어제 **{report('yesterday')}** · "
+                f"전월 **{report('previousMonth')}** · 이번 달 어제까지 **{report('throughYesterday')}** · "
+                f"최근 관측 완료일 `{r.get('latestObservedCompletedDate') or '미측정'}` · "
+                f"범위 `{r.get('scope') or '미확인'}` · 수집 상태 `{r.get('collectionStatus') or '미확인'}` · "
+                f"최근 수집 `{r.get('lastCollectedAt') or '미확인'}`")
     rev_md = '\n'.join(rev_lines) if rev_lines else '- 집계된 수익 리더 데이터가 없습니다.'
 
     winners_rows = []
@@ -543,12 +555,19 @@ updated_at: "{now_kst}"
         )
     doctor_table = '\n'.join(doctor_rows) if doctor_rows else '| - | - | 현재 CTR 긴급 수선 대상 없음 | - | - |'
 
+    from server.radar_scout import reported_keyword
     golden_rows = []
     for idx, g in enumerate((winning.get('goldenKeywords') or [])[:12], 1):
+        measured = reported_keyword(g)
+        if measured is None:
+            continue
         golden_rows.append(
-            f"| {idx} | **{g.get('keyword', '')}** | `{g.get('grade', 'A')}급` | 검색량 `{g.get('monthlySearch', 0):,}` / 문서수 `{g.get('blogTotal', 0):,}` (황금지수 `{g.get('saturation', 0)}`) | `{g.get('recommendedChannel', 'cf+naver')}` |"
+            f"| {idx} | **{measured['keyword']}** | `{measured['grade']}급` (내부 비율 등급) | "
+            f"보고 검색량 `{measured['searchVolume']:,}` / 문서수 `{measured['docCount']:,}` · "
+            f"수집 `{measured['metricEvidence']['checkedAt']}` · [원천]({measured['metricEvidence']['sourceUrl']}) | "
+            f"`{g.get('recommendedChannel') or '미배정'}` |"
         )
-    golden_table = '\n'.join(golden_rows) if golden_rows else '| - | 발굴된 황금키워드 없음 | - | - | - |'
+    golden_table = '\n'.join(golden_rows) if golden_rows else '| - | 근거 확인된 검색량 후보 없음 | 미검증 | 수치 미확인 | 실측 배정 보류 |'
 
     doc_04 = f"""---
 name: live-traffic-winners-and-golden-keywords
@@ -557,33 +576,34 @@ hop_depth: 1
 freedom_tier: low-data-grounded
 updated_at: "{now_kst}"
 ---
-# 📈 04. 실측 우승 원고 & 블로키 S/A급 황금키워드 뱅크
+# 📈 04. 관측 성과 & 근거 확인 검색 후보
 
 ## 📑 목차 (Top-100-Line TOC — `head -n 100` 즉시 스캔용)
-1. [실시간 수익 리더보드 (AdSense & AdPost 실측)](#1-실시간-수익-리더보드-adsense--adpost-실측)
-2. [실측 유입·수익 우승 원고 Top 12 (확장·외부유입 브릿지 1순위)](#2-실측-유입수익-우승-원고-top-12-확장외부유입-브릿지-1순위)
+1. [관측 수익 보고 (원천별 기간·범위)](#1-관측-수익-보고-원천별-기간범위)
+2. [관측 유입 상위 원고 Top 12 (수익 검증 별도)](#2-관측-유입-상위-원고-top-12-수익-검증-별도)
 3. [닥터(`@doctor`) CTR 0% 긴급 리모델링 타깃 리스트](#3-닥터doctor-ctr-0-긴급-리모델링-타깃-리스트)
-4. [블로키(Blokey) 실측 S/A급 빈집 황금키워드 Top 12](#4-블로키blokey-실측-sa급-빈집-황금키워드-top-12)
+4. [블로키 보고 검색 후보 Top 12 (내부 비율 등급)](#4-블로키-보고-검색-후보-top-12-내부-비율-등급)
 5. [대표님 & 크루 수동 추가 노트](#️-대표님--크루-수동-추가-노트)
 
 ---
 
-## 1. 실시간 수익 리더보드 (AdSense & AdPost 실측)
+## 1. 관측 수익 보고 (원천별 기간·범위)
+> 추정 보고 수익과 확정 정산액은 다르다. 미수집은 0원이 아니며 통화·기간·관측 범위가 다른 값을 합산하지 않는다.
 {rev_md}
 
 ---
 
-## 2. 실측 유입·수익 우승 원고 Top 12 (확장·외부유입 브릿지 1순위)
-> **활용 지침**: `@publi`와 `@jarvis`는 아래 우승 원고의 주제·표 구조·결핍 타격 각도를 인접 키워드로 수평 복제하고, `지식iN`·`Threads`의 최우선 착지 URL(Bridge Target)로 사용한다.
+## 2. 관측 유입 상위 원고 Top 12 (수익 검증 별도)
+> **활용 지침**: 아래 원고는 관측 유입 상위 후보이며 수익 우승이 검증된 것은 아니다. `@publi`와 `@jarvis`는 검색 의도와 표본·측정 기간을 확인한 뒤 개선 또는 외부유입 실험 대상으로 검토한다. 증분 유입과 수익은 실험 후 별도로 판정한다.
 
-| 순위 | 도메인 | 우승 원고 주제/슬러그 | 측정 출처 | 실측 트래픽 (GA4/GSC) | 공개 URL |
+| 순위 | 도메인 | 관측 상위 원고 주제/슬러그 | 측정 출처 | 관측 트래픽 (GA4/GSC) | 공개 URL |
 | :---: | :--- | :--- | :---: | :--- | :--- |
 {winners_table}
 
 ---
 
 ## 3. 닥터(`@doctor`) CTR 0% 긴급 리모델링 타깃 리스트
-> **활용 지침**: 검색 노출(`Impressions`)은 이미 확보되었으나 제목/도입부 후킹 부족으로 클릭이 새고 있는 금맥이다. 제목 숫자 후킹 + 3초 요약표 수선 시 즉각적인 PV 상승이 발생한다.
+> **활용 지침**: 노출 대비 클릭이 낮은 원고의 개선 가설이다. 검색 의도·게재순위·표본 크기를 확인한 뒤 제목이나 도입부를 변경하고 동일 기간의 CTR/PV를 비교한다. 원인이나 수익 상승을 미리 확정하지 않는다.
 
 | 순위 | 도메인 | 대상 원고 주제/슬러그 | 노출 / 클릭 (CTR) | 처방 액션 |
 | :---: | :--- | :--- | :--- | :--- |
@@ -591,10 +611,10 @@ updated_at: "{now_kst}"
 
 ---
 
-## 4. 블로키(Blokey) 실측 S/A급 빈집 황금키워드 Top 12
-> **활용 지침**: 월간 검색량은 높고 블로그 문서수(경쟁도)는 낮은 실측 빈집 키워드다. CF 본진과 네이버 주력 계정에 동시 배정한다.
+## 4. 블로키 보고 검색 후보 Top 12 (내부 비율 등급)
+> **활용 지침**: 원천·수집시각·원본 수치가 확인된 후보만 표시한다. 보고 기간이 불명확하면 월간 검색량으로 부르지 않는다. S/A는 내부 검색량/문서수 비율 등급이며 순위·수익을 보장하지 않는다. 편집풀·LLM 후보는 미검증 가설로만 사용한다.
 
-| 순위 | 황금 키워드 | 등급 | 월간 검색량 / 문서수 (황금지수) | 권장 배정 채널 |
+| 순위 | 검색량 보고 후보 | 내부 등급 | 보고 검색량 / 문서수 · 출처 | 권장 배정 채널 |
 | :---: | :--- | :---: | :--- | :--- |
 {golden_table}
 """

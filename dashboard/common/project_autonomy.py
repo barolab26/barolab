@@ -47,14 +47,16 @@ def run_project_cycle(project):
     return {'ok':True,'status':'running','project':project,'pid':child.pid,'receiptPath':child.ego_receipt_path,'publicationVerified':False}
 
 
-def publish_strategy_link(target_url):
+def publish_strategy_link(target_url, *, automatic=False):
     """Bind one selected asset to the existing Threads slot and publication guards."""
     from common import work_agenda as agendas
     from common.conference_dispatch import concrete_requests, request
     import threads_posting.posting as engine
     import sqlite3
     engine._threads_authoring__canonical(target_url, engine._threads_config_HOSTS)
-    if agendas.enabled():agendas.require(project='threads')
+    if automatic and not agendas.autonomous_experiment_allows('threads',target_url=target_url):
+        return {'ok':False,'status':'held','project':'threads','reason':'active_experiment_required'}
+    if agendas.enabled() and not automatic:agendas.require(project='threads')
     config=load(CONFIG)
     if config.get('enabled') is not True or 'threads' not in config.get('projects',[]) or (Path.home()/'EGO_EXEC_DISABLED').exists():
         return {'ok':False,'status':'held','project':'threads','reason':'execution_disabled'}
@@ -69,7 +71,7 @@ def publish_strategy_link(target_url):
             return {'ok':False,'status':'held','project':'threads','reason':'existing_slot_has_different_content','targetUrl':target_url}
     if engine._threads_authoring__slot_mode(engine._threads_config_load(),args['slot'])!='cf_inbound':
         return {'ok':False,'status':'held','project':'threads','reason':'slot_not_cf_inbound','targetUrl':target_url}
-    receipt=request('threads',{**args,'targetUrl':target_url},one=True)
+    receipt=request('threads',{**args,'targetUrl':target_url},one=True,automatic=automatic)
     if not receipt.get('agendaId'):
         return {'ok':False,'status':'held','project':'threads','reason':'no_conference_receipt','targetUrl':target_url}
     return {'ok':True,'status':'awaiting_completion','project':'threads','targetUrl':target_url,
@@ -265,10 +267,10 @@ def terminal_result(result):
 def process_project_autonomy_once():
     from common import work_agenda as agendas
     if agendas.enabled():
-        # Channel timers propose concrete due work; top up all enabled channel lanes & revenue work orders.
+        # Existing attempts retain their guards; new work follows the bounded experiment.
         from common.conference_dispatch import request
         config=load(CONFIG)
-        if config.get('enabled') and 'threads' in config.get('projects',[]):request('threads',{})
+        if config.get('enabled') and 'threads' in config.get('projects',[]):request('threads',{},automatic=True)
         agendas._top_up_channel_lanes()
         return False
     from server.agent_tools import STAFF_REQUEST_DIR, enqueue_staff_request
@@ -292,27 +294,6 @@ def process_project_autonomy_once():
             if not path.exists(): enqueue_staff_request(request_id,[row['action']]);return True
             request=json.loads(path.read_bytes())
             if request.get('status') in ('queued','acknowledged','awaiting_completion'):pending_projects.add(project)
-        enabled=[p for p in config.get('projects',[]) if p in COMMANDS]
-        for project in sorted(enabled,key=lambda p:rows.get(p,{}).get('lastStartedAt',0)):
-            if project in pending_projects:continue
-            row=rows.setdefault(project,{})
-            if os.name != 'nt' and project in ('cf_blog','naver_blog'):
-                from common.channel_parameters import policy, KST
-                from datetime import datetime
-                if datetime.now(KST).date().isoformat() >= policy()['effectiveDate']:
-                    row.update(dispatchOwner='barolab-parameters.timer',status='timer_managed')
-                    continue
-            if os.name != 'nt' and project=='naver_kin':
-                row.update(dispatchOwner='barolab-kin.timer',status='timer_managed')
-                continue
-            if now<row.get('nextRunAt',0):continue
-            actor='doctor' if project=='legacy_remodel' else 'publi'
-            action={'agent':actor,'tool':'run_project_cycle','args':{'project':project}}
-            request_id=f'autonomy-basic:{project}:{int(now)}'
-            row.update(requestId=request_id,action=action,lastStartedAt=now,nextRunAt=now+300,status='requested')
-            write(STATE,state);enqueue_staff_request(request_id,[action])
-            from common.crew_chat_bridge import emit_work_event
-            emit_work_event(actor='jarvis',actor_label='팀장',task_id=request_id,phase='completed',stage='project-instruction-issued',requested_to=actor,output_kind=project+' 기본 워크플로우 실행 배정')
-            return True
+        state['newWorkStatus']='held_requires_experiment_dispatcher'
         write(STATE,state)
     return False

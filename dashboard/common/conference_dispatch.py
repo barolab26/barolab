@@ -14,15 +14,48 @@ ROOT = Path(__file__).resolve().parents[2]
 QUEUE = ROOT / 'dashboard/data/publication-conferences'
 
 
-def request(kind, arguments, *, one=False):
+def request(kind, arguments, *, one=False, automatic=None):
     from common import work_agenda as agendas
-    if not agendas.enabled():return _request_single(kind,arguments)
+    if automatic is None:
+        automatic = not bool(agendas.current())
+    if not agendas.enabled() and not automatic:return _request_single(kind,arguments)
     choices=concrete_requests(kind,arguments)
     if not choices:return {'status':'no_work','reason':'no_eligible_concrete_work'}
     receipts=[]
-    for item in choices[:1] if one else choices:
-        receipts.append(_request_single(kind,item))
+    for item in choices:
+        existing = _existing_concrete_work(kind, item)
+        if automatic and not existing:
+            project = {'threads':'threads','kin':'naver_kin'}.get(kind, 'cf_blog' if item.get('action') in ('cf','cf-prepare') else 'naver_blog')
+            experiment = load(agendas.STATE).get('activeExperiment') or {}
+            if project == 'threads':
+                item = {**item, 'targetUrl': arguments.get('targetUrl') or experiment.get('targetUrl') or ''}
+            # Naver/Kin generation does not yet bind a selected experiment URL.
+            if project not in ('threads','cf_blog') or not agendas.autonomous_experiment_allows(project,
+                    target_url=item.get('targetUrl',''), domain=item.get('account','') if project=='cf_blog' else ''):
+                continue
+        receipts.append(_request_single(kind,item,automatic=automatic and not existing))
+        if one:break
+    if not receipts:return {'status':'held','reason':'new_automatic_work_requires_focused_experiment'}
     return receipts[0] if len(receipts)==1 else {'status':'conference_requested','items':receipts,'count':len(receipts)}
+
+
+def _existing_concrete_work(kind, arguments):
+    """Preserve durable attempts and already prepared assets, including uncertain submissions."""
+    key=hashlib.sha256(json.dumps([kind,arguments],sort_keys=True).encode()).hexdigest()
+    if load(QUEUE/(key+'.json')):
+        return True
+    if kind=='threads' and arguments.get('partId'):
+        return True
+    if kind=='parameters' and arguments.get('account') and arguments.get('date'):
+        from common.channel_parameters import folder_for
+        action=arguments.get('action')
+        if action in ('cf','cf-prepare'):
+            folder=folder_for('cf_posting',arguments['date'],arguments['account'])
+        elif action=='naver' and arguments.get('slot'):
+            folder=folder_for('naver_blog_posting',arguments['date'],arguments['account']+'-'+arguments['slot'].replace(':',''))
+        else:return False
+        return any((folder/name).is_file() for name in ('photo-plan.json','publication-receipt.json','reservation-evidence.json'))
+    return False
 
 
 def concrete_requests(kind, arguments):
@@ -116,7 +149,7 @@ CHANNEL_PURPOSES = {
 }
 
 
-def _request_single(kind, arguments):
+def _request_single(kind, arguments, *, automatic=False):
     if kind not in ('parameters', 'kin', 'threads'):
         raise ValueError('Unknown conference channel')
     QUEUE.mkdir(parents=True, exist_ok=True)
@@ -138,10 +171,17 @@ def _request_single(kind, arguments):
                 not_before = datetime.fromisoformat(f"{arguments['date']}T{arguments['slot']}:00+09:00").timestamp()
             except Exception:
                 not_before = 0
+        source={'conferenceId':key,'kind':kind,'arguments':arguments,'businessPurpose':purpose}
+        if automatic:
+            experiment=load(agendas.STATE).get('activeExperiment') or {}
+            source.update(autonomousExperiment=True,experimentId=experiment.get('id'),
+                          targetUrl=arguments.get('targetUrl',''),domain=arguments.get('account','') if project=='cf_blog' else '')
         business = agendas.propose('conference',target,title=title,project=project,
-            source={'conferenceId':key,'kind':kind,'arguments':arguments,'businessPurpose':purpose},
+            source=source,
             completion='이 글의 승인 원고·이미지 준비 증거 확인' if arguments.get('action')=='cf-prepare' else '지정 계정·날짜·슬롯의 실제 예약 또는 공개 게시 증거 확인',
             priority=0, not_before=not_before)
+        if automatic and not business:
+            return {'status':'held','reason':'experiment_admission_changed'}
     with locked(QUEUE):
         row = load(path)
         if business and row:

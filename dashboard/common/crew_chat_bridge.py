@@ -76,6 +76,22 @@ def emit_pipeline_crew_message(
 CEO_PROPOSALS_FILE = BASE_DIR / 'dashboard' / 'data' / 'ceo-proposals.json'
 
 
+def _ceo_blocker_key(context):
+    """Group observed blockers, never infer authorization from matching wording."""
+    import hashlib
+    if context is None:
+        return ''
+    if not isinstance(context, dict):
+        raise ValueError('Invalid CEO blocker context')
+    fields = {}
+    for name in ('project', 'account', 'reasonCode', 'resumeCondition'):
+        value = context.get(name, '')
+        if not isinstance(value, str) or len(value) > 500 or (name != 'account' and not value.strip()):
+            raise ValueError('Invalid CEO blocker context: ' + name)
+        fields[name] = ' '.join(value.split())
+    return 'blocker:' + hashlib.sha256(json.dumps(fields, sort_keys=True).encode('utf-8')).hexdigest()
+
+
 def emit_ceo_proposal(
     actor: str,
     title: str,
@@ -85,6 +101,7 @@ def emit_ceo_proposal(
     expected_impact: str = "",
     urgency: str = "high",
     request_key: str = "",
+    blocker_context: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     """
     Proactively escalate a business bottleneck, reverse-funnel pivot, or resource request (`ask_ceo`)
@@ -110,7 +127,8 @@ def emit_ceo_proposal(
         if required_approvals and str(required_approvals).strip()
         else ["제안된 역산 집중 유입 작전 즉시 승인"]
     )
-    fp_raw = f"{who}|{title.strip()}|{proposal.strip()}|{'|'.join(approvals_list)}"
+    blocker_key = _ceo_blocker_key(blocker_context)
+    fp_raw = f"{who}|{title.strip()}|{proposal.strip()}|{'|'.join(approvals_list)}" + ('|' + blocker_key if blocker_key else '')
     fp = hashlib.sha256(fp_raw.encode("utf-8")).hexdigest()[:16]
     now = time.time()
     ts = int(now * 1000)
@@ -122,13 +140,24 @@ def emit_ceo_proposal(
         state = load(CEO_PROPOSALS_FILE) or {"proposals": []}
         proposals = list(state.get("proposals") or [])
         recent_same = next(
-            (p for p in proposals if now - p.get("createdAt", 0) < 21600 and
-             (p.get("fingerprint") == fp or
+            (p for p in proposals if
+             (p.get('status') in ('pending_ceo', 'triaged_partial', 'approved', 'approved_not_verified', 'rejected', 'denied') or
+              now - p.get("createdAt", 0) < 21600) and
+             (not blocker_key or not p.get('blockerKey') or p['blockerKey'] == blocker_key) and
+             ((blocker_key and p.get('blockerKey') == blocker_key) or
+              p.get("fingerprint") == fp or
               (request_key and p.get('requestKey') == request_key and p.get('actor') == who))),
             None,
         )
         if recent_same:
-            if recent_same.get('fingerprint') != fp and not any(
+            if blocker_key and not recent_same.get('blockerKey'):
+                recent_same.update(blockerKey=blocker_key, blockerContext=blocker_context)
+            recent_same['lastSeenAt'] = now
+            recent_same['occurrences'] = recent_same.get('occurrences', 1) + 1
+            recent_same['latestObservation'] = {'title': title.strip(), 'currentReality': current_reality.strip(),
+                                               'expectedImpact': expected_impact.strip(), 'observedAt': now}
+            scope_changed = (recent_same.get('proposal') != proposal.strip() or recent_same.get('requiredApprovals') != approvals_list)
+            if recent_same.get('fingerprint') != fp and scope_changed and not any(
                     item.get('fingerprint') == fp for item in recent_same.get('followups', [])):
                 recent_same.setdefault('followups', []).append({
                     'fingerprint': fp, 'title': title.strip(), 'currentReality': current_reality.strip(),
@@ -137,7 +166,8 @@ def emit_ceo_proposal(
                     'status': 'requires_scope_review',
                 })
                 recent_same['followupReviewRequired'] = True
-                write(CEO_PROPOSALS_FILE, {**state, 'updatedAt': now, 'proposals': proposals})
+            # Keep the original decision and approved scope. Followups are not permission.
+            write(CEO_PROPOSALS_FILE, {**state, 'updatedAt': now, 'proposals': proposals})
             return {"ok": True, "status": "already_proposed", "proposal": recent_same}
 
         approval_lines = "\n".join(f"{idx}. {item}" for idx, item in enumerate(approvals_list, 1))
@@ -154,6 +184,8 @@ def emit_ceo_proposal(
             "id": msg_id,
             "fingerprint": fp,
             "requestKey": request_key,
+            "blockerKey": blocker_key,
+            "blockerContext": blocker_context,
             "actor": who,
             "actorLabel": role_label,
             "title": title.strip(),
@@ -164,10 +196,12 @@ def emit_ceo_proposal(
             "urgency": urgency if urgency in ("critical", "high", "normal") else "high",
             "status": "pending_ceo",
             "createdAt": now,
+            "lastSeenAt": now,
+            "occurrences": 1,
             "ts": ts,
             "text": text,
         }
-        proposals = [record] + [p for p in proposals if p.get("fingerprint") != fp]
+        proposals = [record] + proposals
         write(CEO_PROPOSALS_FILE, {**state, "updatedAt": now, "proposals": proposals})
 
     payload = {

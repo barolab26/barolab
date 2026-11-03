@@ -238,6 +238,7 @@ def ensure_article_images(article, folder, domain=None):
 
 
 def basic_article(domain, item, folder):
+    from common.content_quality import CONTENT_QUALITY_POLICY
     from common.asset_map import (
         clean_naver_search_keyword,
         collect_used_cf_topics,
@@ -268,6 +269,9 @@ def basic_article(domain, item, folder):
                 write(path, article)
                 write(folder / 'editor-content.json', article)
         return ensure_article_images(article, folder, domain=domain)
+    from common.work_agenda import new_authoring_allowed
+    if not new_authoring_allowed('cf_blog', domain=domain):
+        raise ValueError('Draft held: new_authoring_requires_focused_agenda')
     used_today = collect_used_cf_topics(domain, days=14, current_folder=folder)
     try:
         sched_now = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8')) if SCHEDULE_JSON.exists() else {}
@@ -323,7 +327,7 @@ def basic_article(domain, item, folder):
     persona = dom_meta.get('persona', '분야별 전문 에디터')
     title_style = dom_meta.get('titleStyle', '핵심 키워드 + 구체적 해결 가이드형')
     writing_tone = dom_meta.get('writingTone', '독자의 상황에 맞춰 핵심 기준과 실전 해결책을 자연스럽게 설명하는 전문 블로거 톤.')
-    prompt = (
+    prompt = CONTENT_QUALITY_POLICY + '\n' + (
         f'당신은 [{domain}] 블로그의 전담 필진인 "{persona}"이다. 독자가 끝까지 읽고 행동하게 만드는 진짜 사람의 한국어 블로그 원고를 작성한다. "공무원 공고문 요약 매크로"나 기계적인 템플릿 말투는 절대 쓰지 않는다.\n'
         f'[이 도메인({domain})의 고유 페르소나 & 문체 규칙]\n'
         f'- 전문 분야: {dom_meta.get("niche", "")} ({dom_meta.get("desc", "")})\n'
@@ -453,6 +457,8 @@ def publish_basic_article(domain, article, folder):
     article = ensure_article_images(article, folder, domain=domain)
     from common.cf_tables import style_tables, inject_interactive_widget
     content = inject_interactive_widget(style_tables(article['contentHtml'], domain=domain), article.get('title', ''), domain=domain)
+    from common.content_quality import ensure_publication_review
+    ensure_publication_review({**article, 'contentHtml': content}, folder)
     plans = article.get('imagePlans', [])
     urls = []
     if plans:

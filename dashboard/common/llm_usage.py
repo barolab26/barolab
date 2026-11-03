@@ -73,9 +73,24 @@ def check_budget(state, call, policy, root=ROOT):
         return
     row = state.get('byAgenda', {}).get(agenda, {})
     from common.collection_observability import load
-    experiment = load(Path(root) / 'dashboard/data/publication-conferences/operations' / (agenda + '.json')).get('businessExperiment', {})
-    planned_calls = experiment.get('maxModelCalls')
+    experiment = load(Path(root) / 'dashboard/data/publication-conferences/operations' / (agenda + '.json')).get('businessExperiment') or {}
+    if not isinstance(experiment, dict):
+        raise UsageBudgetExceeded('experiment_call_budget_invalid')
     call_limit = policy['agendaCalls']
+    if 'maxModelCalls' in experiment:
+        planned_calls = experiment['maxModelCalls']
+        # Missing plans retain policy limits; explicit zero disables model calls.
+        if type(planned_calls) is not int or planned_calls < 0:
+            raise UsageBudgetExceeded('experiment_call_budget_invalid')
+        call_limit = min(call_limit, planned_calls)
+    experiment_id = experiment.get('id')
+    if experiment_id is not None:
+        if not isinstance(experiment_id, str) or not experiment_id.strip() or len(experiment_id) > 160:
+            raise UsageBudgetExceeded('experiment_identity_invalid')
+        call['experimentId'] = experiment_id
+        total = state.get('byExperiment', {}).get(experiment_id, {}).get('modelCalls', 0)
+        if total + sum(a.get('experimentId') == experiment_id for a in active) >= call_limit:
+            raise UsageBudgetExceeded('experiment_call_budget_exhausted')
     if row.get('inputTokens', 0) + row.get('outputTokens', 0) >= policy['agendaTokens']:
         raise UsageBudgetExceeded('agenda_token_budget_exhausted')
     if row.get('modelCalls', 0) + sum(a.get('agendaId') == agenda for a in active) >= call_limit:
@@ -183,6 +198,17 @@ def _agenda_metrics(state, call, phase, now):
     state['byAgenda'] = dict(list(groups.items())[-128:])
 
 
+def _experiment_metrics(state, call, phase, now):
+    identity = call.get('experimentId')
+    if not identity or phase in ('started', 'blocked') or phase.startswith('action_'):
+        return
+    row = state.setdefault('byExperiment', {}).setdefault(identity, {'modelCalls': 0, 'recentIds': [], 'coverageStartedAt': now.isoformat()})
+    if call['id'] not in row['recentIds']:
+        row['modelCalls'] += 1
+        row['recentIds'] = (row['recentIds'] + [call['id']])[-256:]
+        row['checkedAt'] = now.isoformat()
+
+
 def record_action(identity, action, phase):
     try:
         agenda = agenda_identity()
@@ -219,7 +245,9 @@ def record_call(call, phase, *, root=None, now=None):
     with locked(path.with_suffix('.lock')):
         try:state=json.loads(path.read_text())
         except (OSError,ValueError):state={}
-        if state.get('date')!=day:state={'schema':'llm-usage-ledger-v1','date':day,'byModel':{},'active':state.get('active',{}),'byAgenda':state.get('byAgenda',{}),'routeHealth':state.get('routeHealth',{}),'recent':[],'coverageStartedAt':now.isoformat()}
+        if state.get('date')!=day:state={'schema':'llm-usage-ledger-v1','date':day,'byModel':{},'active':state.get('active',{}),'byAgenda':state.get('byAgenda',{}),'byExperiment':state.get('byExperiment',{}),'routeHealth':state.get('routeHealth',{}),'recent':[],'coverageStartedAt':now.isoformat()}
+        if phase != 'started' and not call.get('experimentId'):
+            call['experimentId'] = state.get('active', {}).get(call['id'], {}).get('experimentId')
         if phase == 'started':
             import os
             for identity, active in list(state['active'].items()):
@@ -246,6 +274,7 @@ def record_call(call, phase, *, root=None, now=None):
             write(path, state)
             return
         _agenda_metrics(state, call, phase, now)
+        _experiment_metrics(state, call, phase, now)
         if phase.startswith('action_'):
             state['checkedAt']=now.isoformat();write(path,state)
             return
@@ -254,6 +283,7 @@ def record_call(call, phase, *, root=None, now=None):
             state['active'][call['id']]['agentSlot']=call.get('agentSlot')
             state['active'][call['id']]['reasoningEffort']=call.get('reasoningEffort')
             state['active'][call['id']]['agendaId']=call.get('agendaId')
+            state['active'][call['id']]['experimentId']=call.get('experimentId')
             state['active'][call['id']]['pid']=os.getpid()
             state['active']=dict(list(state['active'].items())[-128:])
         else:

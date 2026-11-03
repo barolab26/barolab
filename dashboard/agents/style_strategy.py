@@ -44,6 +44,32 @@ def benchmark(query, folder=None):
     return result
 
 
+def planning_keyword_candidates(identity, channel, used, root=ROOT):
+    """Keep editorial/legacy ideas usable without treating them as measured demand."""
+    from common.collection_observability import load
+    from common.asset_map import NAVER_NICHE_VERIFIED_POOLS, CF_NICHE_VERIFIED_POOLS, is_duplicate_naver_topic
+    from server.radar_scout import reported_keyword
+    candidates = {}
+    for rel in ('radar/daily_winning_topics.json', 'radar/blokey-golden.json'):
+        data = load(Path(root) / 'dashboard/data' / rel)
+        mapping = (data.get('cfDomainKeywords') or data.get('cfAssignments') or {}) if channel == 'cf' else (data.get('naverAccountSlotKeywords') or data.get('naverAssignments') or {})
+        rows = mapping.get(identity) or []
+        for row in rows if isinstance(rows, list) else [rows]:
+            keyword = str(row.get('keyword') or '').strip() if isinstance(row, dict) else str(row or '').strip()
+            if not keyword or is_duplicate_naver_topic(keyword, used):
+                continue
+            measured = reported_keyword(row)
+            if keyword not in candidates or measured:
+                candidates[keyword] = measured or {'keyword': keyword, 'measurementStatus': 'unverified', 'source': 'legacy_candidate',
+                                                   'searchVolume': None, 'docCount': None, 'grade': None}
+    pools = CF_NICHE_VERIFIED_POOLS if channel == 'cf' else NAVER_NICHE_VERIFIED_POOLS
+    for keyword in pools.get(identity, []):
+        if keyword not in candidates and not is_duplicate_naver_topic(keyword, used):
+            candidates[keyword] = {'keyword': keyword, 'measurementStatus': 'unverified', 'source': 'editorial_pool',
+                                   'searchVolume': None, 'docCount': None, 'grade': None}
+    return sorted(candidates.values(), key=lambda row: row['measurementStatus'] != 'reported')
+
+
 def plan_post(identity, topic, folder, parameters, channel='naver'):
     """Select this post's keyword, inspect its real search results, then agree its presentation."""
     from common.collection_observability import load, write
@@ -173,34 +199,8 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
                 used_today.append(str(bt['title']))
         synergy = {k: v for k, v in synergy.items() if k != 'todayLiveBridgeTargets'}
 
-    # Load verified Golden Keywords & Winning Topics for this exact channel/account
-    verified_candidates = []
-    for rel_path in ('dashboard/data/radar/daily_winning_topics.json', 'dashboard/data/radar/blokey-golden.json'):
-        wt_data = load(ROOT / rel_path)
-        if not wt_data:
-            continue
-        raw_map = (wt_data.get('cfDomainKeywords') or wt_data.get('cfAssignments') or {}) if channel == 'cf' else (wt_data.get('naverAccountSlotKeywords') or wt_data.get('naverAssignments') or {})
-        raw_list = raw_map.get(identity)
-        cands = raw_list if isinstance(raw_list, list) else ([raw_list] if isinstance(raw_list, dict) else [])
-        for c in cands:
-            kw_c = (c.get('keyword') if isinstance(c, dict) else str(c or '')).strip()
-            if not kw_c or kw_c in verified_candidates:
-                continue
-            if is_duplicate_naver_topic(kw_c, used_today + verified_candidates):
-                continue
-            if any(kw_c == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in kw_c) for u in used_today):
-                continue
-            verified_candidates.append(kw_c)
-        if verified_candidates:
-            break
-    if channel == 'naver' and len(verified_candidates) < 3:
-        for fallback_kw in NAVER_NICHE_VERIFIED_POOLS.get(identity, []):
-            if fallback_kw not in verified_candidates and not is_duplicate_naver_topic(fallback_kw, used_today + verified_candidates):
-                verified_candidates.append(fallback_kw)
-    elif channel == 'cf' and len(verified_candidates) < 3:
-        for fallback_kw in CF_NICHE_VERIFIED_POOLS.get(identity, []):
-            if fallback_kw not in verified_candidates and not is_duplicate_naver_topic(fallback_kw, used_today + verified_candidates):
-                verified_candidates.append(fallback_kw)
+    candidate_evidence = planning_keyword_candidates(identity, channel, used_today, ROOT)
+    candidate_keywords = [row['keyword'] for row in candidate_evidence]
 
     screen_directive = channel == 'naver' and any(d.get('id') == 'ceo-directive:ego-screen-execution' and d.get('active')
                                                  for d in index.get('operatingDirectives', []))
@@ -215,7 +215,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         # Fast Single-Pass Revenue Planning: 1 unified LLM call instead of 4 sequential roleplay calls
         fast_prompt = (
             '당신은 하루 $100 수익 달성을 지휘하는 팀장(자비스)이자 4인 기획 크루(퍼블리·레이더·트레이스·자비스)다.\n'
-            '⚠️ [1순위 타깃 선정 규칙]: verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드(문서 수 5,000건 이하 니치 명사구)가 있으면 반드시 그중 1순위 키워드를 원형 그대로 keyword로 확정하라! usedKeywordsToday 목록에 이미 포함된 키워드나 유사 주제는 카니발리제이션(유사문서 감점) 방지를 위해 절대 재사용하지 마라.\n'
+            'keywordCandidates의 reported는 원천 검색량 보고이며 수익 검증과 다르다. unverified는 실험 가능한 주제 가설이다. 미측정 검색량·문서수·등급을 만들지 말고 독자 과업과 활성 실험 범위에 맞춰 선택하라. usedKeywordsToday와 겹치는 주제는 재사용하지 마라.\n'
             'writingGuide에는 반드시 아래 4대 원칙을 구체적으로 명시하라:\n'
             '1. [네이버 1페이지 상위노출 공식 제목]: 반드시 "[정확한 검색 명사 키워드 3~4어절], [자청식 후킹 부제]" 구조로 작성하라. 앞 15자 이내에 검색 명사 키워드 원형을 조사 변형 없이 정확히 고정 배치하고, 쉼표(,) 뒤에 "어, 이거 내 얘기잖아?" 하고 누르게 만드는 반려 함정·3분 자가진단 부제를 붙여라. (서술형 질문으로 제목을 시작하면 네이버 형태소 매칭에서 탈락하므로 절대 금지)\n'
             '2. [자청 4대 결핍 타격 도입부]: 공문서 정의 대신 독자의 원초적 결핍(①내 돈·혜택 날리는 손실 공포, ②나만 몰라 호구 잡히는 정보 격차, ③복잡한 절차 3초 종결, ④내 상태 즉시 판정)에서 출발하되, 첫 문단에 핵심 검색 명사 키워드를 자연스럽게 1회 포함하라.\n'
@@ -226,7 +226,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
                 'identity': identity,
                 'topic': topic,
                 'channel': channel,
-                'verifiedGoldenCandidates': verified_candidates[:4],
+                'keywordCandidates': candidate_evidence[:4],
                 'usedKeywordsToday': used_today[:25],
                 'businessPurpose': purpose,
                 'synergy': synergy,
@@ -242,16 +242,18 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             'message': message,
             'writingGuide': {'type': 'string', 'minLength': 1, 'maxLength': 5000},
         })
-        keyword = fast_res.get('keyword') or (verified_candidates[0] if verified_candidates else topic[:50])
+        keyword = fast_res.get('keyword') or (candidate_keywords[0] if candidate_keywords else topic[:50])
         if channel == 'naver':
-            keyword = select_verified_naver_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
+            keyword = select_verified_naver_keyword(identity, keyword, candidate_keywords, used_today, max_docs=5000)
         elif channel == 'cf':
-            keyword = select_verified_cf_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
+            keyword = select_verified_cf_keyword(identity, keyword, candidate_keywords, used_today, max_docs=5000)
         observed = {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'fast_revenue_lane'}
         result = {
             'status': 'agreed',
             'agenda': agenda,
             'keyword': keyword,
+            'keywordEvidence': next((row for row in candidate_evidence if row['keyword'] == keyword),
+                                    {'keyword': keyword, 'measurementStatus': 'unverified', 'source': 'planning_hypothesis'}),
             'identity': identity,
             'channel': channel,
             'parameters': parameters,
@@ -269,18 +271,18 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
 
     publi_prompt = (
         '당신은 퍼블리(콘텐츠 크리에이터)다. 이번 안건의 핵심 타깃 키워드(keyword) 1개를 선정하고 팀장과 크루들에게 기획 회의를 발제하라.\n'
-        '⚠️ [1순위 타깃 선정 & 중복 절대 금지] verifiedGoldenCandidates 목록에 검증된 고단가 황금키워드(총 문서 수 5,000건 이하 니치 명사구)가 있으면 최우선으로 원형 그대로 선택하고, usedKeywordsToday 목록에 이미 포함된 키워드나 유사 주제는 절대 재사용하지 마라.\n'
+        'keywordCandidates의 reported는 검색량 보고, unverified는 주제 가설이다. 가설 선택은 가능하지만 미측정 수치나 수익 효과를 검증됐다고 말하지 마라. usedKeywordsToday와 겹치는 주제는 재사용하지 마라.\n'
         '예시 톤: "팀장님, 이번에 [키워드] 쓸 건데요. 공고문/안내문 그대로 줄글로 나열하면 독자들 3초 만에 뒤로가기 누릅니다. 독자들이 제일 헷갈려 하고 헛걸음하기 쉬운 [핵심 함정/복잡한 조건]부터 정면으로 짚어야 합니다."\n'
         + 'JSON message,keyword.\n'
-        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'verifiedGoldenCandidates':verified_candidates[:4],'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'usedKeywordsToday':used_today[:25],'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
+        + json.dumps({'identity':identity,'topic':topic,'channel':channel,'keywordCandidates':candidate_evidence[:4],'businessPurpose':purpose,'synergy':synergy,'pacing':pacing,'agenda':agenda,'usedKeywordsToday':used_today[:25],'existingDraftTitle':existing_draft.get('title')},ensure_ascii=False)
     )
     request = call('publi', publi_prompt, {'message':message,'keyword':{'type':'string','minLength':2,'maxLength':60}})
     keyword = request['keyword']
     if channel == 'naver':
-        keyword = select_verified_naver_keyword(identity, keyword, verified_candidates, used_today, max_docs=5000)
+        keyword = select_verified_naver_keyword(identity, keyword, candidate_keywords, used_today, max_docs=5000)
     elif used_today and any(keyword.strip() == u.strip() or (len(u.strip()) >= 6 and u.strip()[:8] in keyword) for u in used_today):
-        if verified_candidates:
-            keyword = verified_candidates[0][:60]
+        if candidate_keywords:
+            keyword = candidate_keywords[0][:60]
         else:
             cf_desc_candidates = [c.strip() for c in CF_DOMAINS.get(identity, {}).get('desc', '').replace('·', ',').split(',') if c.strip()]
             fallback_kw = next((f"{c} 신청 조건 및 반려 주의사항" for c in cf_desc_candidates if not any(c[:4] in u for u in used_today)), f"{CF_DOMAINS.get(identity, {}).get('niche', topic)} 핵심 체크리스트")
@@ -323,6 +325,8 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
         'bridgeTarget':primary_bridge if channel != 'cf' else None,
         'benchmark':observed,'transcript':transcript,
         'createdAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(),'outcome':'awaiting_url_measurements','causalClaim':False}
+    result['keywordEvidence'] = next((row for row in candidate_evidence if row['keyword'] == keyword),
+                                    {'keyword': keyword, 'measurementStatus': 'unverified', 'source': 'planning_hypothesis'})
     result['planningId']='planning:'+hashlib.sha256(str(folder.resolve()).encode()).hexdigest()[:24]
     write(path,result)
     return result

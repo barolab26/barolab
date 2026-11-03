@@ -1,5 +1,6 @@
 """Bounded search discovery; snippets never become article evidence."""
 import os
+import hashlib
 from urllib.parse import urlsplit
 import requests
 from bs4 import BeautifulSoup
@@ -82,7 +83,9 @@ def public_text(url, timeout=8):
             soup=BeautifulSoup(b''.join(chunks),'html.parser')
             for tag in soup(['script','style','noscript','nav','footer']):tag.decompose()
             body=(soup.find('article') or soup.find('main') or soup).get_text(' ',strip=True)
-            return {'url':url,'text':body[:9000]}
+            text = body[:9000]
+            return {'url':url,'text':text,'status':response.status_code,
+                    'textSha256':hashlib.sha256(text.encode('utf-8')).hexdigest()}
     raise ValueError('Too many source redirects')
 
 

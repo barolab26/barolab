@@ -1382,6 +1382,7 @@ def _upgrade_existing_blocks(document):
     return changed
 
 def prepare_basic_content(account_key, folder=None, topic=None):
+    from common.content_quality import CONTENT_QUALITY_POLICY, ensure_publication_review
     from common.llm_client import generate_json
     from common.source_discovery import research as basic_research
     account = dict(ACCOUNT_MAP[account_key])
@@ -1400,6 +1401,9 @@ def prepare_basic_content(account_key, folder=None, topic=None):
         if writer_path.is_file():
             article = json.loads(writer_path.read_text(encoding='utf-8'))
         else:
+            from common.work_agenda import new_authoring_allowed
+            if not new_authoring_allowed('naver_blog'):
+                raise ValueError('Draft held: new_authoring_requires_focused_agenda')
             from common.asset_map import (
                 clean_naver_search_keyword,
                 collect_used_naver_topics,
@@ -1437,7 +1441,7 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             sources = basic_research(keyword, folder)
             guide = (BASE_DIR.parent / 'AGENTS.md').read_text(encoding='utf-8') if (BASE_DIR.parent / 'AGENTS.md').exists() else '독자 통증 출발, 3초 자가진단, 모바일 호흡'
             schema = {'type': 'object', 'properties': {'title': {'type': 'string'}, 'mainKeyword': {'type': 'string'}, 'intro': {'type': 'string'}, 'closing': {'type': 'string'}, 'signoff': {'type': 'string'}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'tags': {'type': 'array', 'items': {'type': 'string'}, 'minItems': 1}, 'sections': {'type': 'array', 'minItems': 1, 'items': {'type': 'object', 'properties': {'heading': {'type': 'string'}, 'quote': {'type': 'string'}, 'text': {'type': 'string'}, 'table': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'string'}}}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}}, 'required': ['heading', 'quote', 'text', 'table', 'imagePrompt', 'imageCaption'], 'additionalProperties': False}}}, 'required': ['title', 'mainKeyword', 'intro', 'closing', 'signoff', 'imagePrompt', 'imageCaption', 'tags', 'sections'], 'additionalProperties': False}
-            prompt = (
+            prompt = CONTENT_QUALITY_POLICY + '\n' + (
                 '네이버 통합검색 1페이지 최상단에 노출되는 「포스트인컴(다마고치) 상위노출 표준 포맷」의 고품격 인터넷 미디어·생활경제 블로그 원고를 작성한다. 최우선 목표는 [하루 수익 $100 달성]을 위한 네이버 DIA+ 상위노출·모바일 완독률(체류시간) 극대화이다.\n'
                 '[포스트인컴(다마고치) 5대 상위노출 공식 (필수 준수)]\n'
                 f'1. 제목(title — 검색어 선두 배치 + 호기심 유발 뉴스데스크형): 반드시 앞 15자 이내에 핵심 검색 키워드("{keyword}") 원형을 조사 변형 없이 정확히 고정 배치하고, 말줄임표("...") 또는 쉼표(",") 뒤에 독자가 궁금해할 실제 조건·보상·핵심 차이를 요약한 부제를 붙여라. (예: "{keyword}, 실제 신청 조건과 놓치기 쉬운 핵심 기준 정리")\n'
@@ -1540,6 +1544,10 @@ def prepare_basic_content(account_key, folder=None, topic=None):
     atomic_json(folder / 'format-check.json', report)
     if not report['ok']:
         raise ValueError('Document format: ' + json.dumps(report['errors'], ensure_ascii=False))
+    receipt = folder / 'reservation-evidence.json'
+    submitted = json.loads(receipt.read_text(encoding='utf-8')).get('submissionStatus') if receipt.is_file() else None
+    if submitted not in ('submitting', 'submission_unknown', 'verified_reserved'):
+        ensure_publication_review(document, folder)
     (folder / 'preview.html').write_text(render_document(document, plan, folder / 'images'), encoding='utf-8')
     return (account, folder, document, plan)
 
@@ -1787,6 +1795,8 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 return prior
             if prior.get('submissionStatus') in ('submitting', 'submission_unknown'):
                 return reconcile_basic_submission(account_key, account, folder, prior)
+            from common.content_quality import ensure_publication_review
+            ensure_publication_review(document, folder)
             target = datetime.strptime(reserve_time, '%Y-%m-%d %H:%M').replace(tzinfo=KST) if reserve_time else (now_kst() + timedelta(minutes=45)).replace(second=0, microsecond=0)
             if not reserve_time:
                 target += timedelta(minutes=-target.minute % 10)
