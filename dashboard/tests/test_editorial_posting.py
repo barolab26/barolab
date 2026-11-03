@@ -93,6 +93,10 @@ class EditorialPosting(unittest.TestCase):
 
     def test_core_rejection_blocks_reuse_and_upload(self):
         article = cf.ensure_article_images(self.article(), self.folder)
+        keyword = article['title'].split()[0]
+        article['mainKeyword'] = keyword
+        (self.folder / 'planning.json').write_text(json.dumps({'keyword': keyword}), encoding='utf-8')
+        (self.folder / 'research.json').write_text(json.dumps({'keyword': keyword, 'requestedKeyword': keyword}), encoding='utf-8')
         self.validate.return_value = False
         with patch.object(cf, 'registered_categories', return_value=['news']), \
              patch.object(cf, 'published_inventory', return_value=[]), \
@@ -252,6 +256,10 @@ class EditorialPosting(unittest.TestCase):
 
     def test_cf_upload_payload_preserves_exact_mapping_source_and_representative(self):
         article = cf.ensure_article_images(self.article(), self.folder)
+        keyword = article['title'].split()[0]
+        article['mainKeyword'] = keyword
+        (self.folder / 'planning.json').write_text(json.dumps({'keyword': keyword}), encoding='utf-8')
+        (self.folder / 'research.json').write_text(json.dumps({'keyword': keyword, 'requestedKeyword': keyword}), encoding='utf-8')
         urls = ['https://cdn.example/capture1.png', 'https://cdn.example/capture2.png']
         response = MagicMock(status_code=201)
         with patch.object(cf, 'registered_categories', return_value=['news']), \

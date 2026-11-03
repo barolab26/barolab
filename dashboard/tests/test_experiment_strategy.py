@@ -19,6 +19,9 @@ class ExperimentStrategyTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
+        from common import ego_telemetry
+        telemetry_root = patch.object(ego_telemetry, 'DIRECTORY', self.root/'ego-telemetry')
+        telemetry_root.start(); self.addCleanup(telemetry_root.stop)
         self.now = dt.datetime.now(dt.timezone.utc)
         self.target = 'https://www.example.com/observed'
         self.base = {'url': self.target, 'domain': 'example.com', 'source': 'GA4 Data API',
@@ -35,6 +38,12 @@ class ExperimentStrategyTests(unittest.TestCase):
         for field, value in [('DATA', self.root), ('STATE', self.root/'state.json'), ('ROWS', self.root/'operations')]:
             p = patch.object(agenda, field, value); p.start(); self.addCleanup(p.stop)
         self.exp = agenda.bind_business_experiment(self.proposal, self.business, ['cf_blog', 'threads', 'legacy_remodel'], self.now.timestamp())
+        # Observational fixtures represent a real, target-bound completed intervention.
+        self.exp = agenda.start_experiment_observation(self.exp,
+            {'id': 'fixture', 'kind': 'cro_widget_retrofit', 'source': {'experimentId': self.exp['id'], 'targetUrl': self.target}},
+            {'verified': True, 'source': 'fixture-receipt', 'result': {'status': 'completed',
+                'posts': [{'url': self.target, 'apiStatus': 200, 'verifiedAt': self.now.isoformat(),
+                           'durableSuccess': True, 'publicContentMatched': True}]}}, self.now.timestamp())
         self.state = {'enabled': True, 'activeExperiment': self.exp}
         agenda.write(agenda.STATE, self.state)
 

@@ -12,6 +12,7 @@ from email.utils import parsedate_to_datetime
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import re
 import sqlite3

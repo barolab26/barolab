@@ -283,16 +283,56 @@ def ensure_article_images(article, folder, domain=None):
     return article
 
 
+def article_topic_consistency(article, folder, keyword=None):
+    """Identity checks, not a factual review; safe to inspect already published artifacts."""
+    folder = Path(folder)
+    normalize = lambda value: re.sub(r'\s+', ' ', str(value or '')).strip().casefold()
+    try:
+        planning = json.loads((folder / 'planning.json').read_text(encoding='utf-8'))
+        research = json.loads((folder / 'research.json').read_text(encoding='utf-8'))
+        approved = normalize(keyword or planning.get('keyword'))
+        if not approved:
+            return ['approved_keyword_missing']
+        issues = []
+        for label, value in (('planning', planning.get('keyword')), ('article', article.get('mainKeyword')),
+                             ('research_requested', research.get('requestedKeyword')), ('research', research.get('keyword'))):
+            if normalize(value) != approved:
+                issues.append(label + '_keyword_mismatch')
+        # A title may paraphrase the query; retain its subject anchor rather than
+        # requiring the whole search phrase. Different subjects require a review.
+        if approved.split()[0] not in normalize(article.get('title')):
+            issues.append('title_keyword_mismatch')
+        if issues:
+            try:
+                from common.content_quality import validate_publication_review, _digest
+                review = json.loads((folder / 'claim-review.json').read_text(encoding='utf-8'))
+                response = json.loads((folder / 'claim-review-response.json').read_text(encoding='utf-8'))
+                mapping = review.get('topicScopeMapping') or {}
+                expected = {'approvedKeyword': keyword or planning.get('keyword'),
+                            'planningSha256': _digest(planning),
+                            'researchKeyword': research.get('keyword'),
+                            'requestedKeyword': research.get('requestedKeyword'),
+                            'articleKeyword': article.get('mainKeyword'), 'title': article.get('title')}
+                if (mapping.get('sameScope') is True and all(mapping.get(k) == v for k, v in expected.items())
+                        and review.get('responseSha256') == _digest(response)
+                        and all(review.get(k) == v for k, v in response.items())
+                        and response.get('topicScopeMapping') == mapping):
+                    validate_publication_review(article, research, review)
+                    return []
+            except (OSError, ValueError, TypeError, AttributeError, ImportError):
+                pass
+        return issues
+    except (OSError, ValueError, TypeError, AttributeError):
+        return ['topic_evidence_missing_or_invalid']
+
+
 def validate_cached_cf_evidence(article, folder, keyword):
     """Fail closed with one preserved repair revision; never relabel old collection times."""
     from common.content_quality import validate_research_freshness
     try:
+        if article_topic_consistency(article, folder, keyword):
+            raise ValueError('Input/research/article topic identity mismatch; independent factual review required')
         research = json.loads((folder / 'research.json').read_text(encoding='utf-8'))
-        normalize = lambda value: re.sub(r'\s+', ' ', str(value or '')).strip().casefold()
-        approved = normalize(keyword)
-        if (not approved or any(normalize(value) != approved for value in (
-                article.get('mainKeyword'), research.get('requestedKeyword'), research.get('keyword')))):
-            raise ValueError('Cached article/research does not match the approved planning keyword')
         validate_research_freshness(article, research)
         sources = research.get('sources')
         if not isinstance(sources, list) or not sources or any(
@@ -536,6 +576,10 @@ def publish_basic_article(domain, article, folder):
     previous = json.loads(previous_path.read_text()) if previous_path.is_file() else {}
     if previous.get('state') == 'published':
         return previous
+    if previous.get('state') not in ('accepted', 'submitting', 'submission_unknown'):
+        issues = article_topic_consistency(article, folder)
+        if issues:
+            raise ValueError('Publication held for input/research/article review: ' + ', '.join(issues))
     inventory = published_inventory('https://www.' + domain)
     collisions = duplicate_posts(article, inventory)
     if collisions:

@@ -1114,6 +1114,31 @@ def patch_cf_post_category_live(domain: str, post_detail: Dict[str, Any], new_ca
         return {"ok": False, "error": str(exc)}
 
 
+def verify_remodel_publication(result, domain, post):
+    """An accepted write needs a public title/body match before closure."""
+    receipt = dict(result, durableSuccess=False, publicContentMatched=False, verifiedAt=None)
+    if not result.get('ok'):
+        return receipt
+    url = f"https://www.{domain}/{post.get('slug') or ''}"
+    receipt['url'] = url
+    try:
+        response = requests.get(url, timeout=15)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        article = soup.select_one('article.gs-article, article.content, article, .content')
+        expected = BeautifulSoup(post.get('content') or '', 'html.parser').get_text(' ', strip=True)
+        actual = article.get_text(' ', strip=True) if article else ''
+        title = post.get('title') or ''
+        matched = bool(post.get('slug') and expected and title and response.status_code == 200
+                       and title in soup.get_text(' ', strip=True) and expected in actual)
+        receipt.update(publicContentMatched=matched, durableSuccess=matched,
+                       verifiedAt=_now_kst().isoformat() if matched else None)
+    except Exception as exc:
+        receipt['verificationError'] = type(exc).__name__
+    receipt['ok'] = receipt['durableSuccess']
+    receipt['status'] = 'completed_remodel' if receipt['durableSuccess'] else 'pending_public_review'
+    return receipt
+
+
 def remodel_cf_post_content_live(
     domain: str,
     post_detail: Dict[str, Any],
@@ -1248,6 +1273,7 @@ def remodel_cf_post_content_live(
         updated_post["thumbnail"] = final_thumb
         updated_post["og_image"] = final_thumb
     res = patch_cf_post_category_live(domain, updated_post, target_category, status_override="published")
+    res = verify_remodel_publication(res, domain, updated_post)
     res["titleUpdated"] = new_title != orig_title
     res["newTitle"] = new_title
     res["fullRewritten"] = full_rewritten
@@ -1503,6 +1529,7 @@ def audit_single_cf_post(
     d_domain_count = daily_rec.setdefault("dByDomain", {}).get(domain, 0)
     d_cap = int(ledger.get("dailyDGradePerDomainCap", 2))
 
+    remodel_live_res = {"ok": False}
     if not alignment["aligned"]:
         # 🔴 D등급 (더미 URL 또는 주제 이탈 / 가망 없는 미색인 글) -> 즉시 비공개(draft) 및 사이트맵 격리
         grade = "D"
@@ -1569,7 +1596,7 @@ def audit_single_cf_post(
         # 🔵 B등급 (카테고리/서식/위젯 즉시 교정 완료)
         grade = "B"
         if auto_patch_category and post_id:
-            remodel_cf_post_content_live(domain, post_detail, target_cat, suggested_title=None)
+            remodel_live_res = remodel_cf_post_content_live(domain, post_detail, target_cat, suggested_title=None)
         grade_badge = "🔵 B등급 (전문 카테고리·체크리스트 위젯 즉시 패치 완료)"
         prescription = (
             f"본문 품질 양호({quality_check['qualityScore']}점) · 구버전 카테고리 '{old_category}' ➔ "
@@ -1585,6 +1612,12 @@ def audit_single_cf_post(
         )
         action_code = "keep_healthy"
 
+    repair_verified = bool(remodel_live_res.get('durableSuccess') and remodel_live_res.get('publicContentMatched')
+                           and remodel_live_res.get('verifiedAt'))
+    if grade in ('B', 'C') and not repair_verified:
+        grade_badge = grade + '등급 (공개 반영 증거 검토 대기)'
+        prescription = '변경 시도 또는 보류 상태; 공개 URL의 제목·본문 일치 증거를 확인한 뒤 완료 처리'
+        action_code = 'pending_public_review'
     record = {
         "url": public_url,
         "domain": domain,
@@ -1599,11 +1632,11 @@ def audit_single_cf_post(
         "gradeBadge": grade_badge,
         "actionCode": action_code,
         "prescription": prescription,
-        "remodeled": grade in ("B", "C", "D"),
+        "remodeled": repair_verified,
+        "remodelReceipt": remodel_live_res,
         "remodelStatus": (
-            "completed_patch"
-            if grade == "B"
-            else ("completed_remodel" if grade == "C" else ("quarantined_private_noindex" if grade == "D" else "healthy"))
+            ("completed_patch" if grade == "B" else "completed_remodel") if repair_verified
+            else ("pending_public_review" if grade in ("B", "C") else ("quarantined_private_noindex" if grade == "D" else "healthy"))
         ),
         "checklist": {
             "1_render": {
@@ -1712,13 +1745,13 @@ def _run_patrol_batch(
                 ledger["auditedPosts"][rec["url"]] = rec
                 daily_rec["audited"] = daily_rec.get("audited", 0) + 1
 
-                if rec["checklist"]["3_categoryRemap"].get("patched"):
+                if rec["grade"] == "B" and rec.get("remodeled"):
                     daily_rec["bPatched"] = daily_rec.get("bPatched", 0) + 1
-                    daily_rec["remodeled"] = daily_rec.get("remodeled", 0) + 1
+                    daily_rec["remodeled"] = daily_rec.get("remodeled", 0) + int(rec.get("remodeled", False))
 
                 if rec["grade"] == "C":
                     daily_rec["cQueued"] = daily_rec.get("cQueued", 0) + 1
-                    daily_rec["remodeled"] = daily_rec.get("remodeled", 0) + 1
+                    daily_rec["remodeled"] = daily_rec.get("remodeled", 0) + int(rec.get("remodeled", False))
                     q_item = {
                         "id": f"remodel-{dom}-{rec['postId']}",
                         "url": rec["url"],
@@ -1733,7 +1766,8 @@ def _run_patrol_batch(
                         "indexStatus": rec["checklist"]["6_indexAndPotential"]["indexStatus"],
                         "qualityScore": rec["checklist"]["5_titleAndBodyQuality"]["qualityScore"],
                         "assignedTo": "publi",
-                        "status": "completed_remodel",
+                        "status": rec["remodelStatus"],
+                        "remodelReceipt": rec.get("remodelReceipt"),
                         "queuedAt": _now_kst().isoformat(),
                     }
                     queue["items"] = [it for it in queue["items"] if it.get("url") != rec["url"]]
@@ -1959,14 +1993,20 @@ def get_auditor_status() -> Dict[str, Any]:
             ).strip().upper()[:1]
             g = raw_g if raw_g in grade_counts else "A"
             grade_counts[g] += 1
-            if r.get("remodeled") or g in ("B", "C"):
+            proof = r.get('remodelReceipt') or {}
+            if (proof.get('durableSuccess') is True and proof.get('publicContentMatched') is True
+                    and proof.get('verifiedAt') and proof.get('url') == r.get('url')):
                 remodeled_total += 1
 
         audited_count = sum(grade_counts.values())
         total_inventory = max(total_inventory, audited_count)
         daily_target = int(ledger.get("dailyQuotaTarget") or 20)
         today_audited = int(daily_rec.get("audited") or 0)
-        today_remodeled = int(daily_rec.get("remodeled") or 0)
+        today_remodeled = sum(1 for r in audited_posts
+            if (r.get('remodelReceipt') or {}).get('durableSuccess') is True
+            and (r.get('remodelReceipt') or {}).get('publicContentMatched') is True
+            and (r.get('remodelReceipt') or {}).get('url') == r.get('url')
+            and str((r.get('remodelReceipt') or {}).get('verifiedAt', '')).startswith(today))
 
         ordered_recent = sorted(
             audited_posts,
@@ -2428,6 +2468,7 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
                     clean_topic = re.sub(r"(202\d년|기준\s*핵심\s*확인\s*방법|완벽\s*가이드|총정리)", "", title).strip(" ,·-")
                     sug_title = f"{clean_topic[:26]} 실제 조건 비교표와 놓치기 쉬운 핵심 절차" if is_mech_title else title
                     patched_ok = False
+                    rem_res = {}
                     try:
                         # If it's one of the top 8 unindexed C-grade posts on this domain, do full HTML + interactive widget surgery;
                         # otherwise do a fast title + category PUT so all 2,000+ posts finish rapidly without timeout.
@@ -2460,7 +2501,10 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
                                 json=put_payload,
                                 timeout=12,
                             )
-                            patched_ok = r_put.status_code in (200, 201)
+                            rem_res = verify_remodel_publication(
+                                {'ok': r_put.status_code in (200, 201), 'httpStatus': r_put.status_code},
+                                dom, {**p, **put_payload})
+                            patched_ok = rem_res.get('durableSuccess') is True
                     except Exception:
                         pass
                     dom_remodeled.append({"domain": dom, "id": pid, "url": public_url, "grade": grade, "patched": patched_ok})
@@ -2482,8 +2526,9 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
                         ),
                         "actionCode": "remodeled_c_grade_live" if grade == "C" else "category_patched",
                         "prescription": f"전문 카테고리('{target_cat}') 재매핑 + 3초 자가진단 체크리스트 위젯 이식 및 재발행 완료",
-                        "remodeled": True,
-                        "remodelStatus": "completed_remodel" if grade == "C" else "completed_patch",
+                        "remodeled": patched_ok,
+                        "remodelReceipt": rem_res,
+                        "remodelStatus": ("completed_remodel" if grade == "C" else "completed_patch") if patched_ok else "pending_public_review",
                         "checklist": {
                             "1_render": {"httpStatus": 200, "renderOk": True, "adSlotPresent": True, "note": "HTTP 200 OK · 리모델링 완료"},
                             "2_domainAlignment": al,
@@ -2504,6 +2549,10 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
                             },
                         },
                     }
+                    if not patched_ok:
+                        rec.update(gradeBadge=grade + '등급 (공개 반영 검토 대기)',
+                                   actionCode='pending_public_review', prescription='공개 제목·본문 일치 증거 미확인')
+                        rec['checklist']['7_finalGrade'].update(gradeBadge=rec['gradeBadge'], prescription=rec['prescription'])
                     dom_records.append(rec)
                 else:
                     dom_healthy.append({"domain": dom, "id": pid, "url": public_url})
@@ -2574,7 +2623,7 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
         ledger["dailyQuotaTarget"] = len(all_records)
         ledger["dailyDGradePerDomainCap"] = 9999
         daily_rec["audited"] = len(all_records)
-        daily_rec["remodeled"] = len(quarantined_gossip) + len(remodeled_posts)
+        daily_rec["remodeled"] = sum(1 for r in all_records if r.get('remodelReceipt', {}).get('durableSuccess'))
         daily_rec["bPatched"] = sum(1 for r in all_records if r["grade"] == "B")
         daily_rec["cQueued"] = sum(1 for r in all_records if r["grade"] == "C")
         daily_rec["dCapped"] = len(quarantined_gossip)
@@ -2594,7 +2643,8 @@ def quarantine_dummy_and_gossip_posts_live() -> Dict[str, Any]:
                 "indexStatus": r["checklist"]["6_indexAndPotential"]["indexStatus"],
                 "qualityScore": 84,
                 "assignedTo": "trace",
-                "status": "completed_remodel",
+                "status": r["remodelStatus"],
+                "remodelReceipt": r.get("remodelReceipt"),
                 "queuedAt": _now_kst().isoformat(),
             }
             for r in all_records

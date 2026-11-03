@@ -318,7 +318,8 @@ class CFEvidenceFreshness(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory(prefix='cf-evidence-test-');self.addCleanup(self.temp.cleanup)
         self.folder=Path(self.temp.name)
         self.now=datetime.datetime(2026,11,3,12,tzinfo=datetime.timezone.utc)
-        self.article={'mainKeyword':'approved topic','contentHtml':'medical condition'}
+        self.article={'mainKeyword':'approved topic','title':'Approved topic guide','contentHtml':'medical condition'}
+        write(self.folder/'planning.json', {'keyword':'approved topic'})
         self.research={'keyword':'approved topic','requestedKeyword':'approved topic','collectedAt':self.now.isoformat(),
                        'sources':[{'status':200,'text':'actual source','textSha256':hashlib.sha256(b'actual source').hexdigest()}]}
         quality=ModuleType('common.content_quality')
@@ -331,7 +332,7 @@ class CFEvidenceFreshness(unittest.TestCase):
         agendas=ModuleType('common.work_agenda');agendas.current=lambda:{'id':'owner','workTarget':{'arguments':{'action':'cf','account':'example.com'}}}
         self.addCleanup(patch.stopall)
         patch.dict(sys.modules,{'common':ModuleType('common'),'common.content_quality':quality,'common.work_agenda':agendas}).start()
-        self.ns=functions('cf_posting/posting.py',['validate_cached_cf_evidence'],{'json':json,'re':re,'hashlib':hashlib,'os':os,'stamp':lambda:'now'})
+        self.ns=functions('cf_posting/posting.py',['article_topic_consistency','validate_cached_cf_evidence'],{'Path':Path,'json':json,'re':re,'hashlib':hashlib,'os':os,'stamp':lambda:'now'})
 
     def save(self):
         write(self.folder/'research.json',self.research);write(self.folder/'article.json',self.article)

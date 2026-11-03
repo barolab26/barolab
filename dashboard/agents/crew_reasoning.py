@@ -134,6 +134,74 @@ def read_source(args):
             'truncated':start-1+count<len(lines),'nextLine':start+count if start-1+count<len(lines) else None}
 
 
+def measurement_evidence_name(key):
+    return 'measurement:'+hashlib.sha256(key.encode('utf-8')).hexdigest()
+
+
+def preload_measurement_review(goal_id,followup_key):
+    """Supply exact host evidence without executing or extending a reasoning goal."""
+    from common import work_agenda as agendas
+    goal_path(goal_id)  # Validate identity before creating a claim file.
+    with claim(goal_id) as acquired:
+        if not acquired:return {'preloaded':False,'reason':'goal_busy','goalId':goal_id}
+        row=load(goal_path(goal_id));permissions=row.get('permissions') or {}
+        agenda=agendas.get(row.get('businessAgendaId')) if row.get('businessAgendaId') else {}
+        source=agenda.get('source') or {}
+        if (row.get('origin')!='evidence-review' or permissions.get('execute') or permissions.get('repair')
+                or not source.get('evidenceReview')
+                or (source.get('originalWorkRefs') or {}).get('followupKey')!=followup_key):
+            raise ValueError('Measurement preload outside bound review scope')
+        if row.get('status') in ('answered','blocked') or row.get('decisions',0)>=row.get('maxSteps',0):
+            return {'preloaded':False,'reason':'review_steps_exhausted_or_terminal','goalId':goal_id}
+        name=measurement_evidence_name(followup_key)
+        result=read_evidence({'name':name})
+        binding={k:result[k] for k in ('evidenceName','followupKey','source','sha256','readerVersion')}
+        def receipt(event):
+            instruction=('Host supplied exact measurement evidence '+event['id']+': '
+                         +json.dumps(binding,ensure_ascii=False)+'. Review the supplied data and cite '
+                         +event['id']+' in your final evidence_ids, or explicitly report missing/unsupported evidence. '
+                         'Pagination/detailRequired is partial coverage; obtain the needed pages before claims. '
+                         'Source access or a reviewer answer does not verify business success; preserve unknown scope.')
+            if instruction not in row.get('goal',''):
+                row['goal']=row.get('goal','')+'\n'+instruction
+                save(row)
+            return {'preloaded':True,'goalId':goal_id,'evidenceId':event['id'],**binding}
+        for event in row.get('observations',[]):
+            previous=event.get('result') or {}
+            if (event.get('actor')=='host' and event.get('tool')=='evidence'
+                    and isinstance(previous,dict) and all(previous.get(k)==v for k,v in binding.items())):
+                return receipt(event)
+        result['reviewAfterDecision']=row.get('decisions',0)
+        event=observe(row,'host','evidence',{'name':name},result)
+        return receipt(event)
+
+
+def _measurement_source(name):
+    """Resolve host-owned followups, never a model-supplied filesystem path."""
+    from common import work_agenda as agendas
+    followups=load(agendas.STATE).get('unresolvedWork',{})
+    matches=[item for key,item in followups.items() if key.startswith('measurement:')
+             and item.get('key')==key and measurement_evidence_name(key)==name]
+    if len(matches)!=1:raise ValueError('Unknown measurement evidence identity')
+    item=matches[0];source=item.get('sourceRef')
+    if not isinstance(source,str) or not source:raise ValueError('Missing measurement source')
+    path=Path(source)
+    if '..' in path.parts:raise ValueError('Unsafe measurement source path')
+    if not path.is_absolute():path=ROOT/path
+    try:relative=path.relative_to(ROOT)
+    except ValueError:raise ValueError('Measurement source outside approved root') from None
+    allowed={'dashboard/data/revenue.json','dashboard/data/remodeling-queue.json',
+             'dashboard/data/threads-measurement.json','dashboard/data/play-console-status.json'}
+    scheduled=re.fullmatch(r'cf_posting/output/scheduled/\d{4}-\d{2}-\d{2}/[a-z0-9][a-z0-9.-]*/research\.json',relative.as_posix())
+    if relative.as_posix() not in allowed and not scheduled:
+        raise ValueError('unsupported_measurement_source')
+    if any(p.is_symlink() for p in [path,*path.parents] if p!=ROOT.parent):
+        raise ValueError('Symlink measurement source denied')
+    if not path.resolve().is_relative_to(ROOT.resolve()):raise ValueError('Measurement source outside approved root')
+    if path.stat().st_size>2_000_000:raise ValueError('Measurement source exceeds bounded read limit')
+    return path,item['key']
+
+
 def read_evidence(args):
     name=args['name']
     if name.startswith(('incident:','recovery_plan:')):
@@ -163,8 +231,14 @@ def read_evidence(args):
             except ValueError:record['assignedAgent']=None
             rows.append(record)
         return {'recoveryPlans':rows}
-    if name in EVIDENCE:
+    measurement_key=None
+    if re.fullmatch(r'measurement:[a-f0-9]{64}',name):
+        path,measurement_key=_measurement_source(name)
+    elif name in EVIDENCE:
         path=ROOT/'dashboard/data'/EVIDENCE[name]
+    elif re.fullmatch(r'agenda:[a-f0-9]{64}',name):
+        from common import work_agenda as agendas
+        path=agendas.path(name.split(':',1)[1])
     elif re.fullmatch(r'conference:[a-f0-9]{64}',name):
         path=ROOT/'dashboard/data/publication-conferences'/(name.split(':')[1]+'.json')
         if not path.exists():
@@ -188,6 +262,7 @@ def read_evidence(args):
                'agendaControl':value.get('agendaControl',{}),'pipelinePanel':next(iter((value.get('panels') or [])[3:4]),[])}
     page=evidence_page(value,args)
     return {'available':True,'source':str(path.relative_to(ROOT)),'sha256':hashlib.sha256(raw).hexdigest(),
+            **({'evidenceName':name,'followupKey':measurement_key,'readerVersion':'measurement-json-v1'} if measurement_key else {}),
             'modifiedAt':path.stat().st_mtime,**page,'keys':list(value)[:60] if isinstance(value,dict) else None,
             'operationalTiming':{k:value[k] for k in ('nextEligibleAt','nextRunAt','retryAt') if isinstance(value,dict) and k in value},'data':page['data']}
 
@@ -327,6 +402,9 @@ def browser_observe(row,args):
 def tool_call(row,tool,args):
     from server.agent_tools import execute_agent_tool,validate_staff_actions,enqueue_staff_request
     if not isinstance(args,dict):raise ValueError('Tool arguments must be an object')
+    if row.get('origin')=='evidence-review' and tool not in (
+            'projects','project_status','evidence','evidence_batch','read_source','search_source','memory'):
+        raise ValueError('Evidence review permits read-only evidence tools only')
     if tool=='retry_conference':
         from common.conference_dispatch import retry_active
         if not (row['permissions']['execute'] or row['permissions']['repair']):raise ValueError('Execution not authorized')
@@ -426,6 +504,7 @@ def tool_call(row,tool,args):
             required_approvals=args.get('requiredApprovals') or args.get('approvals') or ['제안된 고단가 집중 유입 작전 및 필요 세션/계정 지원 승인'],
             expected_impact=str(args.get('expectedImpact') or args.get('impact') or 'Measure selected target outcomes; improvement is unverified'),
             blocker_context=_ceo_blocker_context(row),
+            original_work={k:v for k,v in {'agendaId':row.get('businessAgendaId'),'goalId':row.get('id')}.items() if v} or None,
             urgency=str(args.get('urgency') or 'high'),
         )
     if tool!='dispatch':raise ValueError('Unknown tool')
@@ -567,6 +646,7 @@ def ask(row):
         'Tools: projects {}; project_status {project}; evidence {name: revenue|traffic|metrics|kin|threads|collection|preparation|flow|execution|recovery|conference:<agendaId>,select?:[one nested key/index path],fields?:[keys to project],offset?:0,limit?:80}; '
         'ask_ceo {title,currentReality,proposal,requiredApprovals,expectedImpact,urgency?} sends an urgent proactive reverse-funnel proposal & resource/approval request card directly to the CEO in the Meeting Room; '
         'Incident and recovery IDs must be read as incident:<taskId> and recovery_plan:<taskId>, not conference IDs. Operational JSON is read with evidence, not read_source. '
+        'For a measurement review use its host-supplied evidenceName measurement:<identity> with evidence {name}; it reads only that persisted followup source, returns current raw SHA256 and supports the same paging. Generic execution evidence cannot substitute for the requested source. '
         'browser_observe {port} reads existing account tabs, controls and verified X11 windowMapping (DISPLAY, windowId, browserPid, wmPid) without focusing/opening/navigating/typing; mapped=null means map state was not measured. patch_status {job_id,candidate_sha256} reads a patch candidate status. '
         'browser_ego_action {port,url,goal} lets Patch with repair permission use EGO screenshots and generic mouse/keyboard actions on an existing authorized tab; use it to resolve popups, cancel edits or reload based on the actual screen. Consult patch to perform it. '
         'web_search {query} and fetch_page {url} read public web evidence with existing bounded fetchers; '
@@ -603,11 +683,16 @@ def _ceo_blocker_context(row):
     from common import work_agenda as agendas
     agenda = agendas.get(row['businessAgendaId']) if row.get('businessAgendaId') else {}
     source = agenda.get('source') or {}
-    target = agenda.get('workTarget') or source.get('arguments') or {}
+    target = agenda.get('workTarget') or source
+    arguments = target.get('arguments') or source.get('arguments') or target
     recovery = agenda.get('recoveryWatch') or {}
+    from common.repair_workflow import agenda_recovery_blocker
+    reason=agenda_recovery_blocker(agenda) or recovery.get('reasonCode') or agenda.get('controllerError') or row.get('symptomKey') or 'needs_host_evidence'
     return {'project': agenda.get('project') or ','.join(sorted(row.get('permissions', {}).get('projects') or [])),
-            'account': target.get('account') or source.get('account') or source.get('domain') or '',
-            'reasonCode': recovery.get('reasonCode') or agenda.get('controllerError') or row.get('symptomKey') or 'needs_host_evidence',
+            'account': arguments.get('account') or arguments.get('domain') or source.get('account') or source.get('domain') or '',
+            'targetKey': hashlib.sha256(json.dumps(target or {'goalId':row['id']},sort_keys=True,ensure_ascii=False).encode()).hexdigest(),
+            'securityScope': str(arguments.get('securityScope') or arguments.get('permissionScope') or 'original_task_only'),
+            'reasonCode': reason,
             'resumeCondition': recovery.get('resumeCondition') or agenda.get('resumeCondition') or 'changed_host_evidence_required'}
 
 
@@ -653,6 +738,9 @@ def next_eligible_time(row,evidence_ids):
 
 def ensure_business_agenda(row, agenda_id=None):
     from common import work_agenda as agendas
+    if row.get('origin')=='evidence-review':
+        if agenda_id:row['businessAgendaId']=agenda_id
+        return
     permissions=row['permissions']
     if row.get('mode')=='strategy_execute':return
     if not agendas.enabled() or row.get('businessAgendaId') or row.get('subgoals') or not (permissions['execute'] or permissions['repair'] or agenda_id):return
@@ -1005,7 +1093,8 @@ def reason_request(request_id,question,*,execute=False,repair=False,steps=3,lead
             row['retrievedCases']=[{'recipeId':c['goalId'],'version':hashlib.sha256(json.dumps(c,sort_keys=True,ensure_ascii=False).encode()).hexdigest()} for c in selected]
             observe(row,'host','projects',{},initial)
         ensure_business_agenda(row,agenda_id)
-        if row['goal']!=question:
+        # A crash replay of a review request must preserve host source instructions and its spent allowance.
+        if row['goal']!=question and row.get('origin')!='evidence-review':
             row['goal']=question
             if row.get('status') in ('answered','blocked'):
                 row.update(status='ready',maxSteps=row.get('decisions',0)+max_steps,delivered=False,nextCheckAt=0)

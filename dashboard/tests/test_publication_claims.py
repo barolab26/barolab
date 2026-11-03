@@ -138,6 +138,12 @@ class PublicationClaims(unittest.TestCase):
     def test_cf_submission_and_media_upload_do_not_run_after_gate_rejection(self):
         from cf_posting import posting as cf
         article = {**self.document, 'category': 'test', 'topicSlug': 'test-claim'}
+        keyword = article['title'].split()[0]
+        article['mainKeyword'] = keyword
+        (self.folder / 'planning.json').write_text(json.dumps({'keyword': keyword}), encoding='utf-8')
+        research = json.loads((self.folder / 'research.json').read_text(encoding='utf-8'))
+        research.update(keyword=keyword, requestedKeyword=keyword)
+        (self.folder / 'research.json').write_text(json.dumps(research), encoding='utf-8')
         with patch.object(cf, 'registered_categories', return_value=['test']), \
              patch.object(cf, 'published_inventory', return_value=[]), \
              patch.object(cf, 'duplicate_posts', return_value=[]), \

@@ -89,6 +89,12 @@ def _ceo_blocker_key(context):
         if not isinstance(value, str) or len(value) > 500 or (name != 'account' and not value.strip()):
             raise ValueError('Invalid CEO blocker context: ' + name)
         fields[name] = ' '.join(value.split())
+    for name in ('targetKey','securityScope'):
+        if name not in context:continue
+        value=context[name]
+        if not isinstance(value,str) or not value.strip() or len(value)>500:
+            raise ValueError('Invalid CEO blocker context: '+name)
+        fields[name]=value.strip()
     return 'blocker:' + hashlib.sha256(json.dumps(fields, sort_keys=True).encode('utf-8')).hexdigest()
 
 
@@ -102,6 +108,7 @@ def emit_ceo_proposal(
     urgency: str = "high",
     request_key: str = "",
     blocker_context: Optional[Dict[str, str]] = None,
+    original_work: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     """
     Proactively escalate a business bottleneck, reverse-funnel pivot, or resource request (`ask_ceo`)
@@ -128,6 +135,10 @@ def emit_ceo_proposal(
         else ["제안된 역산 집중 유입 작전 즉시 승인"]
     )
     blocker_key = _ceo_blocker_key(blocker_context)
+    if original_work is not None and (not isinstance(original_work,dict) or not original_work
+            or set(original_work)-{'agendaId','goalId','taskId'}
+            or any(not isinstance(v,str) or not v or len(v)>180 for v in original_work.values())):
+        raise ValueError('Invalid original CEO work reference')
     fp_raw = f"{who}|{title.strip()}|{proposal.strip()}|{'|'.join(approvals_list)}" + ('|' + blocker_key if blocker_key else '')
     fp = hashlib.sha256(fp_raw.encode("utf-8")).hexdigest()[:16]
     now = time.time()
@@ -139,16 +150,15 @@ def emit_ceo_proposal(
     with locked(CEO_PROPOSALS_FILE.parent / "ceo-proposals-lock"):
         state = load(CEO_PROPOSALS_FILE) or {"proposals": []}
         proposals = list(state.get("proposals") or [])
-        recent_same = next(
-            (p for p in proposals if
+        matches = [p for p in proposals if
              (p.get('status') in ('pending_ceo', 'triaged_partial', 'approved', 'approved_not_verified', 'rejected', 'denied') or
               now - p.get("createdAt", 0) < 21600) and
              (not blocker_key or not p.get('blockerKey') or p['blockerKey'] == blocker_key) and
              ((blocker_key and p.get('blockerKey') == blocker_key) or
               p.get("fingerprint") == fp or
-              (request_key and p.get('requestKey') == request_key and p.get('actor') == who))),
-            None,
-        )
+              (request_key and p.get('requestKey') == request_key and p.get('actor') == who))]
+        # A decision remains attached to its exact request and scope; never copy it.
+        recent_same = next((p for p in matches if not p.get('duplicateOf')),None)
         if recent_same:
             if blocker_key and not recent_same.get('blockerKey'):
                 recent_same.update(blockerKey=blocker_key, blockerContext=blocker_context)
@@ -156,6 +166,21 @@ def emit_ceo_proposal(
             recent_same['occurrences'] = recent_same.get('occurrences', 1) + 1
             recent_same['latestObservation'] = {'title': title.strip(), 'currentReality': current_reality.strip(),
                                                'expectedImpact': expected_impact.strip(), 'observedAt': now}
+            if original_work and original_work not in recent_same.setdefault('originalWorkRefs',[]):
+                recent_same['originalWorkRefs'].append(dict(original_work))
+            for duplicate in matches:
+                if duplicate is recent_same or duplicate.get('duplicateOf'):continue
+                # Preserve independently decided requests; consolidation is not approval.
+                if duplicate.get('status')!='pending_ceo' or any(duplicate.get(k) for k in ('decision','approvalReview','approvalReviewHistory')):continue
+                duplicate.update(duplicateOf=recent_same['id'],statusBeforeConsolidation=duplicate['status'],
+                    status='consolidated',consolidatedAt=now)
+                recent_same.setdefault('consolidatedRequestIds',[]).append(duplicate['id'])
+                if (duplicate.get('proposal')!=recent_same.get('proposal') or
+                        duplicate.get('requiredApprovals')!=recent_same.get('requiredApprovals')):
+                    duplicate['requiresScopeReview']=True
+                    recent_same['followupReviewRequired']=True
+                for ref in duplicate.get('originalWorkRefs',[]):
+                    if ref not in recent_same.setdefault('originalWorkRefs',[]):recent_same['originalWorkRefs'].append(ref)
             scope_changed = (recent_same.get('proposal') != proposal.strip() or recent_same.get('requiredApprovals') != approvals_list)
             if recent_same.get('fingerprint') != fp and scope_changed and not any(
                     item.get('fingerprint') == fp for item in recent_same.get('followups', [])):
@@ -186,6 +211,8 @@ def emit_ceo_proposal(
             "requestKey": request_key,
             "blockerKey": blocker_key,
             "blockerContext": blocker_context,
+            "originalWorkRefs": [dict(original_work)] if original_work else [],
+            "resumeAuthorized": False,
             "actor": who,
             "actorLabel": role_label,
             "title": title.strip(),

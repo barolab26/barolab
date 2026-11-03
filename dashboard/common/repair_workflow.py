@@ -59,6 +59,190 @@ def _recovery_mutation_locks(row):
 def _sha(data): return hashlib.sha256(data).hexdigest()
 
 
+def _settled_submission(item):
+    """A historical intent is settled only by a validated, exact-target receipt."""
+    proof=item.get('verifiedWorkProof')
+    if not isinstance(proof,dict):return False
+    keys=next((keys for keys in (('account_key','platform_id','text_sha256'),
+        ('account','question_id','answer_id'),('account','title','reserveTime','documentSha256'),
+        ('postId','publicUrl')) if all(item.get(k) for k in keys)),None)
+    if not keys:return False
+    try:
+        from common.hermes_memory import verified_work_proof
+        receipt=verified_work_proof(proof)
+        for artifact in receipt['artifactHashes']:
+            raw=Path(artifact['path']).read_bytes()
+            if _sha(raw)!=artifact['sha256']:continue
+            document=json.loads(raw)
+            for bound in (document,document.get('expected',{}),document.get('observation',{})):
+                if all(bound.get(k)==item[k] for k in keys):return True
+    except (OSError,ValueError,KeyError,TypeError):pass
+    return False
+
+
+def _failure_cause(value):
+    """Only host error/status fields count; null errors and ordinary prose do not."""
+    messages=[]
+    def visit(item):
+        if isinstance(item,dict):
+            settled=_settled_submission(item) if any(item.get(k) for k in ('submissionStarted','preCommitIntent','pendingEffect','pending_effect')) else False
+            for key,val in item.items():
+                if key in ('manualStop','cancelRequested') and val:
+                    messages.append('manual_stop')
+                elif key in ('pendingEffect','pending_effect') and val and not settled:
+                    messages.append('uncertain_effect')
+                elif key in ('submissionStatus','submissionOutcome') and val in ('unknown','submitting','publishing','uncertain'):
+                    messages.append('uncertain_effect')
+                elif key in ('submissionStarted','preCommitIntent') and val and not settled:
+                    messages.append('uncertain_effect')
+                elif key=='status' and val in ('cancelled','canceled','manual_stop','user_stopped'):
+                    messages.append('manual_stop')
+                elif key in ('error','errorCode','errorType','holdReason','failureReason','reasonCode','blocker','controllerError','reason') and isinstance(val,str):
+                    messages.append(val.lower())
+                elif isinstance(val,(dict,list)):visit(val)
+        elif isinstance(item,list):
+            for val in item:visit(val)
+    visit(value)
+    text=' '.join(messages)
+    for cause,markers in (
+        ('budget_exhausted',('budget_exhausted','budget_invalid','usagebudgetexceeded')),
+        ('manual_stop',('manual_stop','manual stop','cancelled','canceled','user_stop','user stop')),
+        ('uncertain_effect',('uncertain_effect','outcome unknown','outcome_unknown','submission_unknown','submission requires','requires reconciliation','pending_effect')),
+        ('authentication_required',('authentication','unauthorized','auth_required','login_required','login required','session_expired','credential','oauth')),
+        ('configuration_required',('configuration_required','configurationerror','configuration error','configuration failure',
+                                   'config_required','config_invalid','route unavailable','route_unavailable','missing_config','invalid_config'))):
+        if any(marker in text for marker in markers):return cause
+    return ''
+
+
+def agenda_recovery_blocker(agenda):
+    """Read-only admission check, including the existing minimum model budget."""
+    if not agenda:return ''
+    cause=_failure_cause({k:agenda.get(k) for k in ('blocker','controllerError','manualStop','cancelRequested','recoveryWatch')})
+    if cause:return cause
+    from common import llm_usage
+    from common.collection_observability import load
+    root=llm_usage.ROOT
+    state=load(root/'dashboard/data/llm_usage_ledger.json')
+    if state.get('date')!=llm_usage.dt.datetime.now(llm_usage.KST).date().isoformat():
+        state={**state,'byModel':{}}  # Daily window rolls over; agenda/experiment totals do not.
+    try:
+        llm_usage.check_budget(state,
+            {'agendaId':agenda['id']},llm_usage.budget_policy(root),root)
+    except llm_usage.UsageBudgetExceeded:return 'budget_exhausted'
+    return ''
+
+
+def recovery_blocker(row, agenda=None):
+    """No model, reassignment or original retry can clear these host barriers."""
+    cause=agenda_recovery_blocker(agenda) or _failure_cause({
+        'errorCode':row.get('errorCode'),'holdReason':row.get('holdReason'),
+        'failure':row.get('plan',{}).get('failure'),
+        'target':row.get('plan',{}).get('workTarget'),
+        'snapshot':row.get('plan',{}).get('sourceSnapshot')})
+    authorization=row.get('retryAuthorization') or {}
+    if (cause and authorization.get('status') in ('available','in_progress')
+            and authorization.get('planSha256')==row.get('planSha256')
+            and not agenda_recovery_blocker(agenda)):
+        try:
+            if _sha(Path(row['plan']['sourcePath']).read_bytes())!=authorization['sourceSha256']:
+                return 'authorized_source_changed'
+            _recovery_resume_guard(row)
+        except (OSError,ValueError,KeyError):return 'original_work_requires_reconciliation'
+        return ''
+    return cause
+
+
+def resume_held_recovery(task_id, plan_sha256, *, authorization_id, proposal_id=None):
+    """Trusted host-only explicit resume; deliberately absent from model/HTTP tools.
+
+    Caller must authenticate the direct CEO instruction and reconcile the agenda
+    blocker first. This grants one phase sequence, never another submission or budget.
+    """
+    if not isinstance(authorization_id,str) or not 1<=len(authorization_id)<=180:
+        raise ValueError('Direct host authorization reference required')
+    from common import work_agenda as agendas
+    from common.collection_observability import load
+    path,row=_recovery_row(task_id,plan_sha256)
+    current=agendas.require(project=row['plan']['project'])
+    if current.get('id')!=row.get('businessAgendaId') or agenda_recovery_blocker(current):
+        raise ValueError('Original agenda blocker or budget remains active')
+    if proposal_id:
+        from common.crew_chat_bridge import CEO_PROPOSALS_FILE
+        proposal=next((p for p in load(CEO_PROPOSALS_FILE).get('proposals',[]) if p.get('id')==proposal_id),{})
+        if (proposal.get('status')!='approved' or proposal.get('followupReviewRequired')
+                or not any(ref.get('agendaId')==current['id'] for ref in proposal.get('originalWorkRefs',[]))):
+            raise ValueError('CEO decision does not authorize the exact original scope')
+    _recovery_resume_guard(row)
+    with locked(ROOT):
+        path,row=_recovery_row(task_id,plan_sha256)
+        if row.get('retryAuthorization',{}).get('authorizationId')==authorization_id:
+            return {'status':row['status'],'taskId':task_id,'duplicateAuthorization':True}
+        if row.get('status') not in ('held','evidence_hold') or row.get('resumeAttempted'):
+            raise ValueError('Recovery cannot repeat an active or attempted original operation')
+        _recovery_resume_guard(row)
+        row.setdefault('authorizationHistory',[]).append({'previous':row.get('retryAuthorization'),
+            'barrier':row.get('retryBarrier'),'errorCode':row.get('errorCode'),'holdReason':row.get('holdReason'),
+            'classification':row.get('classification'),'at':time.time()})
+        row['retryAuthorization']={'authorizationId':authorization_id,'proposalId':proposal_id,
+            'planSha256':plan_sha256,'sourceSha256':_sha(Path(row['plan']['sourcePath']).read_bytes()),
+            'status':'available','authorizedAt':time.time(),'agendaId':current['id']}
+        row.update(status='ready',step='discover',evidenceRound=row.get('evidenceRound',1)+1)
+        for field in ('errorCode','holdReason','inspection'):row.pop(field,None)
+        write(path,row)
+    return {'status':'ready','taskId':task_id,'authorizationId':authorization_id,'originalTaskId':row['plan']['originalTaskId']}
+
+
+def _material_fingerprint(discovered):
+    # Runtime PIDs, clocks, usage fluctuations and unrelated imports are not repairs.
+    ignored={'checkedAt','observedAt','collectedAt','generatedAt','updatedAt','modifiedAt',
+             'createdAt','lastSeenAt','lastPoll','ts','browserPid','wmPid','windowId',
+             'pid','mtime','mtimeNs','resourceAvailability'}
+    def stable(value):
+        if isinstance(value,dict):return {k:stable(v) for k,v in value.items() if k not in ignored}
+        if isinstance(value,list):return [stable(v) for v in value]
+        return value
+    evidence={k:discovered.get(k) for k in ('errors','failureDiagnostic','workEvidence','originalRetryEligible','environment')}
+    evidence['fileHashes']={name:digest for name,digest in discovered.get('fileHashes',{}).items()
+                            if name in discovered.get('files',[])+discovered.get('policyFiles',[])}
+    return _sha(json.dumps(stable(evidence),sort_keys=True,ensure_ascii=False).encode())
+
+
+def _hold_blocker(path,row,cause):
+    fingerprint=_sha(json.dumps([row.get('taskId'),cause],sort_keys=True).encode())
+    if row.get('retryBarrier',{}).get('fingerprint')==fingerprint and row.get('status')=='held':return
+    row.setdefault('barrierHistory',[]).append({'status':row.get('status'),'step':row.get('step'),
+        'errorCode':row.get('errorCode'),'holdReason':row.get('holdReason'),'at':time.time()})
+    row.update(status='held',retryBarrier={'fingerprint':fingerprint,'reasonCode':cause,
+        'automaticRetry':False,'resumeCondition':'host_reconciliation_or_explicit_authorized_resume'})
+    write(path,row)
+
+
+def _recheck_recovery(path,row,discovered):
+    """Two material-evidence episodes; two deterministic discovery retries maximum."""
+    signature=_material_fingerprint(discovered)
+    previous=_material_fingerprint(row.get('discovered',{}))
+    changed=signature!=previous and signature not in row.get('recheckedEvidence',[])
+    transient=row.get('errorCode') in ('discover:TimeoutError','discover:OSError') and row.get('readonlyRetries',0)<2
+    with locked(ROOT):
+        fresh=json.loads(path.read_bytes())
+        if any(fresh.get(k)!=row.get(k) for k in ('status','step','evidenceRound','planSha256','steps')):return False
+        fresh['evidenceRecheckAt']=time.time()+300
+        allowed=(changed and fresh.get('materialEvidenceReopens',0)<2) or (transient and not changed)
+        if allowed:
+            fresh.setdefault('evidenceHistory',[]).append({'at':time.time(),'fingerprint':previous,
+                'classification':fresh.get('classification'),'inspection':fresh.get('inspection'),
+                'errorCode':fresh.get('errorCode'),'holdReason':fresh.get('holdReason')})
+            fresh.update(discovered=discovered,step='classify',status='ready',
+                classificationRound=fresh.get('classificationRound',1)+1,evidenceRound=fresh.get('evidenceRound',1)+1)
+            fresh.setdefault('recheckedEvidence',[]).extend(v for v in (previous,signature) if v not in fresh.get('recheckedEvidence',[]))
+            key='materialEvidenceReopens' if changed else 'readonlyRetries'
+            fresh[key]=fresh.get(key,0)+1
+            fresh.pop('inspection',None);fresh.pop('errorCode',None)
+        write(path,fresh)
+    return allowed
+
+
 def record_failed_event(event):
     """Request diagnosis for observed failures; never invent a diagnosis or retry."""
     if _active.get() or event.get('phase')!='failed':
@@ -1058,16 +1242,23 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
     from common import coding_job
     path,row=_recovery_row(task_id,plan_sha256)
     from common import work_agenda as agendas
+    current={}
     if agendas.enabled():
         current=agendas.require(project=row['plan']['project'])
         if row.get('businessAgendaId')!=current['id']:raise ValueError('Recovery is not bound to the active agenda')
     with locked(ROOT):
         path,row=_recovery_row(task_id,plan_sha256)
+        cause=recovery_blocker(row,current)
+        if cause:
+            _hold_blocker(path,row,cause)
+            return {'ok':False,'status':'held','reasonCode':cause,'taskId':task_id,'planSha256':plan_sha256}
         if actor!=recovery_expected_actor(task_id,plan_sha256):raise ValueError('Wrong recovery role')
         step=row['step']
         phase=_recovery_phase(row)
         if phase in row['steps']:raise ValueError('Recovery phase already claimed')
         row['steps'][phase]={'startedAt':time.time(),'actor':actor};row['status']='processing';write(path,row)
+        if row.get('retryAuthorization',{}).get('status')=='available':
+            row['retryAuthorization']['status']='in_progress';write(path,row)
     token=_active.set(True)
     next_step=None
     try:
@@ -1197,6 +1388,8 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
                 next_step='propose'
     finally:
         _active.reset(token)
+        if row.get('retryAuthorization',{}).get('status')=='in_progress' and row.get('status') not in ('ready','awaiting_inputs','awaiting_completion','awaiting_verified_work'):
+            row['retryAuthorization']['status']='consumed'
         write(path,row)
     phase_returned=row['status'] in ('ready','awaiting_inputs','awaiting_completion','awaiting_verified_work','work_verified_learning_queued')
     return {'ok':phase_returned,
@@ -1208,6 +1401,11 @@ def advance_project_recovery(task_id, plan_sha256, *, actor):
 
 def dispatch_project_recovery_once():
     """Reuse the staff queue; do not replay an interrupted phase or add a worker."""
+    with locked(ROOT/'dispatch-lock'):
+        return _dispatch_project_recovery_once()
+
+
+def _dispatch_project_recovery_once():
     from server.agent_tools import enqueue_staff_request, STAFF_REQUEST_DIR
     for path in sorted(ROOT.glob('*.json')):
         try:row=json.loads(path.read_bytes())
@@ -1216,6 +1414,14 @@ def dispatch_project_recovery_once():
         from common import work_agenda as agendas
         current=agendas.get(row.get('businessAgendaId')) if agendas.enabled() and row.get('businessAgendaId') in agendas.active_ids() else {}
         if agendas.enabled() and not current:continue
+        # Do not interrupt observation of an already dispatched external operation.
+        if row.get('status') not in ('processing','awaiting_inputs','awaiting_completion','awaiting_verified_work','work_verified_learning_queued'):
+            cause=recovery_blocker(row,current)
+            if cause:
+                with locked(ROOT):
+                    fresh=json.loads(path.read_bytes())
+                    if fresh.get('status')==row.get('status'):_hold_blocker(path,fresh,cause)
+                continue
         if row.get('status')=='resume_held' and row.get('plan',{}).get('originalTaskId','').startswith('conference:'):
             try:
                 with agendas.context(agendas.token(current)):
@@ -1231,23 +1437,7 @@ def dispatch_project_recovery_once():
             except (OSError,ValueError,KeyError) as exc:
                 row.update(evidenceRecheckAt=time.time()+300,evidenceProbeError=type(exc).__name__);write(path,row)
                 continue
-            signature=_sha(json.dumps(discovered,sort_keys=True,ensure_ascii=False).encode())
-            previous=_sha(json.dumps(row.get('discovered',{}),sort_keys=True,ensure_ascii=False).encode())
-            transient=bool(row.get('errorCode')) and row.get('readonlyRetries',0)<2
-            changed=signature!=previous and signature not in row.get('recheckedEvidence',[])
-            with locked(ROOT):
-                fresh=json.loads(path.read_bytes())
-                if fresh.get('status')!=row.get('status') or fresh.get('step')!=row.get('step'):continue
-                fresh['evidenceRecheckAt']=time.time()+300
-                if changed or transient:
-                    fresh.setdefault('evidenceHistory',[]).append({'at':time.time(),'classification':fresh.get('classification'),'inspection':fresh.get('inspection'),'sourceHashes':fresh.get('discovered',{}).get('fileHashes')})
-                    fresh['evidenceHistory']=fresh['evidenceHistory'][-8:]
-                    fresh.update(discovered=discovered,step='classify',status='ready',classificationRound=fresh.get('classificationRound',1)+1,evidenceRound=fresh.get('evidenceRound',1)+1)
-                    fresh['recheckedEvidence']=[*fresh.get('recheckedEvidence',[]),signature][-64:]
-                    if transient and not changed:fresh['readonlyRetries']=fresh.get('readonlyRetries',0)+1
-                    fresh.pop('inspection',None);fresh.pop('errorCode',None)
-                write(path,fresh)
-            if changed or transient:return True
+            if _recheck_recovery(path,row,discovered):return True
             continue
         if row.get('status')=='awaiting_inputs':
             _observe_work_acquisition(row)
@@ -1259,14 +1449,7 @@ def dispatch_project_recovery_once():
             from contextlib import nullcontext
             with agendas.context(agendas.token(current)) if current else nullcontext():
                 discovered=_discover_recovery(row)
-            row['evidenceRecheckAt']=time.time()+300
-            if discovered!=row.get('discovered'):
-                row['discovered']=discovered
-                row.update(step='classify',status='ready',classificationRound=row.get('classificationRound',1)+1,
-                           evidenceRound=row.get('evidenceRound',0)+1)
-                row.pop('inspection',None)
-            write(path,row)
-            if row['status']=='ready':return True
+            if _recheck_recovery(path,row,discovered):return True
             continue
         if row.get('status')=='awaiting_verified_work':
             try:

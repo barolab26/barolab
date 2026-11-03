@@ -650,6 +650,7 @@ def remodel_cf_post_by_url(
     public_url = f"https://www.{domain}/{slug}"
     live_verified = False
     live_content_matched = False
+    live_title_matched = False
     live_remaining_imgs = 0
     live_has_dishonest_caption = False
     live_has_raw_markdown = False
@@ -668,14 +669,17 @@ def remodel_cf_post_by_url(
             live_verified = not live_has_dishonest_caption and not live_has_raw_markdown
             expected_text = BeautifulSoup(final_content_html, "html.parser").get_text(" ", strip=True)
             live_content_matched = bool(expected_text) and expected_text in art.get_text(" ", strip=True)
+            live_title_matched = bool(title) and title in v_soup.get_text(' ', strip=True)
     except Exception:
         pass
 
-    # Update doctor ledger & remodeling queue
+    # A draft or accepted PUT is not a publicly verified repair.
+    durable_success = bool(apply and republish and republish_ok and live_verified and live_content_matched and live_title_matched)
+    # Update doctor ledger only after the public replacement was observed.
     now_iso = datetime.datetime.now(KST).isoformat()
     today_str = datetime.datetime.now(KST).strftime("%Y-%m-%d")
     try:
-        if DOCTOR_LEDGER_PATH.exists():
+        if durable_success and DOCTOR_LEDGER_PATH.exists():
             ledger = json.loads(DOCTOR_LEDGER_PATH.read_text(encoding="utf-8"))
             if public_url in ledger.get("auditedPosts", {}):
                 rec = ledger["auditedPosts"][public_url]
@@ -683,6 +687,8 @@ def remodel_cf_post_by_url(
                 rec["gradeBadge"] = "🟢 A등급 (핀셋 수선·재발행 완료)"
                 rec["remodeled"] = True
                 rec["remodelStatus"] = "completed_remodel"
+                rec["remodelReceipt"] = {'durableSuccess': True, 'publicContentMatched': True,
+                                         'verifiedAt': now_iso, 'url': public_url, 'httpStatus': republish_status}
                 rec["auditedAt"] = now_iso
                 rec["prescription"] = (
                     f"어색한 가짜 도표/화면 이미지 {len(removed_figures)}건 완전 삭제 · "
@@ -698,7 +704,6 @@ def remodel_cf_post_by_url(
         pass
 
     from common.llm_client import memory_event
-    durable_success = bool(apply and republish and republish_ok and live_verified and live_content_matched)
     memory_event('doctor:' + hashlib.sha256((public_url + final_content_html).encode()).hexdigest(),
                  'doctor_republish_verified' if durable_success else 'doctor_remodel_attempt',
                  'Repair was republished and its text observed publicly.' if durable_success else 'Repair attempt has no confirmed public replacement.',
@@ -707,7 +712,10 @@ def remodel_cf_post_by_url(
                            'liveVerified': live_verified, 'removedFakeFiguresCount': len(removed_figures),
                            'tablesInserted': tables_inserted, 'localFilesUpdated': local_files_updated})
     return {
-        "ok": republish_ok,
+        "ok": durable_success,
+        "durableSuccess": durable_success,
+        "publicContentMatched": live_content_matched,
+        "verifiedAt": now_iso if durable_success else None,
         "url": public_url,
         "domain": domain,
         "slug": slug,

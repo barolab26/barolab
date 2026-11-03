@@ -1,18 +1,20 @@
 """Growth read API and explicit local import. No publisher or credential access."""
 import argparse
+import hashlib
 import json
 import math
 import os
+import re
 import shutil
 import sys
 import ipaddress
 import sqlite3
 import uuid
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -642,12 +644,267 @@ def autonomy_goal(db, moment):
     return goal
 
 
+def _measurement_json(path):
+    try:
+        value = json.loads(Path(path).read_text(encoding='utf-8'))
+        return value if isinstance(value, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def threads_observation(row, post, source_ref, source_checked_at=None):
+    """Link a named experiment and its exact UTM, preserving incompatible windows."""
+    note = row.get('note') or ''
+    attempt = post.get('attempt_id')
+    experiment_token = re.search(r'\bexperimentId=([^;\s]+)', note)
+    utm_token = re.search(r'\bUTM=([^;\s]+)', note)
+    if not attempt or not experiment_token or experiment_token[1] != attempt:
+        raise ValueError('Threads experiment identity does not match the action')
+    identity_path = Path(source_ref).parent / 'public/threads.json'
+    identity_raw = identity_path.read_bytes()
+    identities = []
+
+    def visit(value):
+        if isinstance(value, dict):
+            if value.get('part_id') == post.get('part_id') and value.get('state') == 'published_verified':
+                identities.append(value)
+            for child in value.values():
+                visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+    visit(json.loads(identity_raw))
+    identity = next((p for p in identities if p.get('source_url') == row['url']
+                     and p.get('attempt_id') == attempt and p.get('permalink') == post.get('permalink')
+                     and p.get('verified_at')), None)
+    outbound = urlsplit((identity or {}).get('outbound_url') or '')
+    if (not identity or outbound._replace(query='', fragment='').geturl() != row['url']
+            or not utm_token or parse_qs(outbound.query).get('utm_content') != [utm_token[1]]):
+        raise ValueError('Verified per-part outbound URL and UTM do not match this action')
+    snapshots = post.get('snapshots') or {}
+    if not isinstance(snapshots, dict) or not snapshots:
+        raise ValueError('No measured Threads snapshots')
+    for snapshot in snapshots.values():
+        if not isinstance(snapshot, dict):
+            raise ValueError('Invalid measured snapshot')
+        ga4 = snapshot.get('ga4') or {}
+        if ga4.get('status') == 'collected' and (
+                not ga4.get('utm_content') or not utm_token or utm_token[1] != ga4['utm_content']
+                or str(ga4.get('host', '')).removeprefix('www.') != row['domain']):
+            raise ValueError('Exact UTM or host does not match the action')
+    provisional = any((s.get('ga4') or {}).get('provisional') is not False for s in snapshots.values())
+    final_collected = any((s.get('ga4') or {}).get('status') == 'collected'
+                          and (s.get('ga4') or {}).get('complete') is True
+                          and (s.get('ga4') or {}).get('provisional') is False for s in snapshots.values())
+    return {'channel': 'threads', 'partId': post['part_id'], 'experimentId': attempt,
+            'targetUrl': row['url'], 'sourceRef': str(source_ref), 'sourceCheckedAt': source_checked_at,
+            'sourceSha256': hashlib.sha256(Path(source_ref).read_bytes()).hexdigest(),
+            'rowSha256': hashlib.sha256(json.dumps(post, sort_keys=True).encode()).hexdigest(),
+            'identitySourceRef': str(identity_path), 'identitySourceSha256': hashlib.sha256(identity_raw).hexdigest(),
+            'identity': {k: identity[k] for k in ('part_id', 'attempt_id', 'source_url', 'outbound_url', 'permalink', 'verified_at')},
+            'publicationUrl': post.get('permalink'), 'publishedAt': post.get('published_at'),
+            'snapshots': snapshots, 'status': 'awaiting_review' if final_collected else 'inconclusive', 'provisional': provisional,
+            'comparisonStatus': 'independent_sample_and_period_review_required',
+            'causalProof': False, 'revenueVerified': False,
+            'reason': 'Lifetime platform checkpoints and provisional exact-UTM calendar days are separate; small samples do not establish uplift or failure.'}
+
+
+def reconcile_threads_observation(action_id, part_id, *, path=DEFAULT_DB, source=None, apply=False):
+    """Dry-run by default; explicit local reconciliation never completes an action."""
+    path = Path(path)
+    source = Path(source or path.parent / 'threads-measurement.json')
+    document = _measurement_json(source)
+    posts = [p for p in document.get('posts', []) if p.get('part_id') == part_id]
+    if len(posts) != 1:
+        raise ValueError('Expected one exact measured part')
+    with closing(sqlite3.connect(path.resolve().as_uri() + '?mode=' + ('rw' if apply else 'ro'), uri=True)) as db, db:
+        db.row_factory = sqlite3.Row
+        row = db.execute('SELECT * FROM improvement_actions WHERE id=?', (action_id,)).fetchone()
+        if not row:
+            raise ValueError('Unknown improvement action')
+        evidence = threads_observation(dict(row), posts[0], source, document.get('collected_at'))
+        saved = json.loads(row['observation_snapshot'] or '{}')
+        changed = saved.get('threads') != evidence
+        if apply and changed:
+            saved['threads'] = evidence
+            db.execute('UPDATE improvement_actions SET observation_snapshot=? WHERE id=?',
+                       (json.dumps(saved, ensure_ascii=False), action_id))
+    return {'actionId': action_id, 'changed': changed, 'applied': bool(apply and changed), 'observation': evidence}
+
+
+def measurement_followups(data_dir=None, now=None):
+    """Read-only, stable-key work candidates; the agenda owns dedup and closure."""
+    data = Path(data_dir or DEFAULT_DB.parent)
+    now = now or datetime.now(timezone.utc)
+    if isinstance(now, (int, float)):
+        now = datetime.fromtimestamp(now, timezone.utc)
+    rows = []
+
+    def add(key, owner, target, source, checked, reason, acceptance, **extra):
+        try:
+            age = (now - datetime.fromisoformat(checked.replace('Z', '+00:00'))).total_seconds() / 3600
+            freshness = 'fresh' if 0 <= age <= 26 else 'stale'
+        except (ValueError, TypeError, AttributeError):
+            freshness = 'unknown'
+        try:
+            due = datetime.fromisoformat(checked.replace('Z', '+00:00')).timestamp()
+        except (ValueError, TypeError, AttributeError):
+            due = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+        rows.append(dict(key=key, owner=owner, target=target, sourceRef=str(data / source),
+                         sourceCheckedAt=checked, freshness=freshness, status='blocked',
+                         dueAt=due, reason=reason, acceptance=acceptance, **extra))
+
+    scout = data / 'radar/scout.sqlite3'
+    if scout.exists():
+        try:
+            with closing(sqlite3.connect(scout.resolve().as_uri() + '?mode=ro', uri=True)) as db:
+                latest = db.execute('SELECT result FROM runs ORDER BY started DESC LIMIT 1').fetchone()
+            result = json.loads(latest[0] or '{}') if latest else {}
+            if not isinstance(result, dict):
+                raise ValueError('invalid source receipt')
+        except (sqlite3.Error, ValueError, TypeError):
+            result = {}
+            add('measurement:radar:source', 'radar', 'radar', 'radar/scout.sqlite3', None,
+                'source_receipt_unreadable', ['Repair/read source receipt without replacing unknown candidates by zero.'])
+        for source in (result.get('sources') if isinstance(result.get('sources'), list) else []):
+            if not isinstance(source, dict) or not source.get('sourceId'):
+                continue
+            add('measurement:radar:' + source['sourceId'], 'radar', source.get('sourceUrl'),
+                'radar/scout.sqlite3', source.get('fetchedAt'), source.get('reason') or source.get('status'),
+                ['Obtain a successful source collection receipt with checkedAt and source status; failed collection is not zero candidates.'],
+                sourceStatus=source.get('status'), candidateCount=None, runId=result.get('runId'))
+            if source.get('status') == 'collected' and rows[-1]['freshness'] == 'fresh':
+                rows[-1].update(status='resolved', reason=None, candidateCount=len(source.get('items') or []))
+            elif source.get('status') == 'collected':
+                rows[-1]['reason'] = 'source_stale_or_undated'
+
+    revenue = _measurement_json(data / 'revenue.json')
+    month = now.astimezone(ZoneInfo('Asia/Seoul')).strftime('%Y-%m')
+    months = revenue.get('months') if isinstance(revenue.get('months'), dict) else {}
+    current_month = months.get(month) if isinstance(months.get(month), dict) else {}
+    sources = current_month.get('sources') if isinstance(current_month.get('sources'), list) else []
+    adpost = [s for s in sources if isinstance(s, dict) and s.get('category') == 'adpost']
+    if not adpost:
+        add('measurement:adpost:source', 'trace', 'adpost', 'revenue.json', None,
+            'missing_current_month_source', ['Collect account-scoped AdPost report with report range, currency and checkedAt; unknown is not zero.'])
+    for source in adpost:
+        source_id = source.get('id') or 'adpost-source'
+        add('measurement:' + source_id, 'trace', source_id, 'revenue.json', source.get('checkedAt'),
+            source.get('status') if source.get('status') != 'collected' else 'missing_source_dates',
+            ['Resolve the named browser/profile blocker without automatic submission retry.',
+             'Collect pending dates for this account and media scope; retain currency, period and source receipt.'],
+            blocker=source.get('reason'), sourceScope=source.get('scope'), pendingDates=source.get('pendingDates'),
+            reportStart=source.get('reportStart'), reportEnd=source.get('reportEnd'), measuredValue=None)
+        if source.get('status') == 'collected' and not source.get('pendingDates') and source.get('daily'):
+            if rows[-1]['freshness'] == 'fresh':
+                rows[-1].update(status='resolved', reason=None, blocker=None)
+            else:
+                rows[-1]['reason'] = 'source_stale_or_undated'
+    console = _measurement_json(data / 'play-console-status.json')
+    apps = console.get('apps') if isinstance(console.get('apps'), dict) else {}
+    if not apps:
+        add('measurement:app:source', 'trace', 'play-console', 'play-console-status.json', None,
+            'missing_per_app_console_source', ['Collect per-app opt-in, installation and continuous duration evidence separately.'])
+    for app_id, app in apps.items():
+        if not isinstance(app, dict):
+            app = {}
+        missing = [k for k in ('googleInstallCount', 'continuousTestDays') if app.get(k) is None]
+        add('measurement:app:' + app_id, 'trace', app_id, 'play-console-status.json', app.get('checkedAt'),
+            'missing_' + '_'.join(missing) if missing else 'source_stale_or_unverified',
+            ['Obtain per-app Play Console installation evidence with capture time.',
+             'Obtain per-app continuous opt-in duration evidence; registration/opt-in is not installation or use.'],
+            optInCount=app.get('googleOptInCount'), optInEvidence=app.get('evidence', []),
+            missingMetrics=missing, measuredValue=None)
+        if not missing and app.get('status') == 'collected' and rows[-1]['freshness'] == 'fresh':
+            rows[-1].update(status='resolved', reason=None)
+    document = _measurement_json(data / 'threads-measurement.json')
+    posts = document.get('posts') if isinstance(document.get('posts'), list) else []
+    db_path = data / 'growth.sqlite3'
+    if db_path.exists():
+        try:
+            with closing(sqlite3.connect(db_path.resolve().as_uri() + '?mode=ro', uri=True)) as db:
+                db.row_factory = sqlite3.Row
+                actions = [dict(r) for r in db.execute("SELECT * FROM improvement_actions WHERE status!='done'")]
+        except sqlite3.Error:
+            actions = []
+            add('measurement:threads:action-source', 'trace', 'growth-actions', 'growth.sqlite3', None,
+                'action_source_unreadable', ['Restore readable improvement action rows and link exact experiment/UTM evidence.'])
+        for action in actions:
+            for post in posts:
+                if not isinstance(post, dict):
+                    continue
+                if not post.get('attempt_id') or ('experimentId=' + post['attempt_id']) not in (action.get('note') or ''):
+                    continue
+                try:
+                    evidence = threads_observation(action, post, data / 'threads-measurement.json', document.get('collected_at'))
+                except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                    add('measurement:threads:' + action['id'] + ':identity', 'trace', action['url'],
+                        'threads-measurement.json', document.get('collected_at'), 'snapshot_identity_unverified',
+                        ['Reconcile the exact part, action, host and UTM; do not assign another post metrics.'])
+                    continue
+                add('measurement:threads:' + action['id'] + ':' + post['part_id'], 'trace', action['url'],
+                    'threads-measurement.json', document.get('collected_at'), evidence['status'],
+                    ['Link the exact part and UTM to this action, retaining original snapshot scopes.',
+                     'Collect the next due checkpoint and reporting-lag followup; independent review must retain inconclusive until comparable sufficient evidence.'],
+                    actionId=action['id'], observation=evidence)
+                rows[-1]['status'] = evidence['status']
+                snapshots = post['snapshots']
+                try:
+                    published = datetime.fromisoformat(post['published_at'].replace('Z', '+00:00'))
+                    next_hours = next((h for label, h in (('24h', 24), ('72h', 72), ('7d', 168)) if label not in snapshots), 168)
+                    if '72h' in snapshots and (snapshots['72h'].get('ga4') or {}).get('provisional'):
+                        next_hours = min(next_hours, 120)  # 72h checkpoint + declared 48h reporting lag
+                    rows[-1]['dueAt'] = (published + timedelta(hours=next_hours)).timestamp()
+                except (KeyError, ValueError, TypeError):
+                    pass
+    # Inspect recent immutable publication artifacts, never edit or resubmit them.
+    queue = _measurement_json(data / 'remodeling-queue.json')
+    ledger = _measurement_json(data / 'content-doctor-ledger.json')
+    queue_items = queue.get('items') if isinstance(queue.get('items'), list) else []
+    audited = ledger.get('auditedPosts') if isinstance(ledger.get('auditedPosts'), dict) else {}
+    pending = []
+    for row in queue_items:
+        if not isinstance(row, dict) or row.get('status') not in ('completed_remodel', 'completed_patch', 'pending_public_review'):
+            continue
+        record = audited.get(row.get('url')) if isinstance(audited.get(row.get('url')), dict) else {}
+        receipt = (record.get('remodelReceipt')
+                   or row.get('remodelReceipt') or {})
+        if not isinstance(receipt, dict):
+            receipt = {}
+        if not (receipt.get('durableSuccess') is True and receipt.get('publicContentMatched') is True
+                and receipt.get('verifiedAt') and receipt.get('url') == row.get('url')):
+            pending.append(row.get('url'))
+    if pending:
+        add('review:doctor:public-proof', 'doctor', 'remodeling-queue', 'remodeling-queue.json', queue.get('updatedAt'),
+            'completed_or_pending_without_public_proof',
+            ['Review each exact URL against persisted replacement receipt, public title/body and verifiedAt.',
+             'Keep JSON audit queue and SQLite maintenance inventory scopes separate; counts do not prove closure or justify replay.'],
+            targetUrls=sorted(set(filter(None, pending))), queueScope='JSON remodeling queue only',
+            queueItemCount=len(queue.get('items', [])), unverifiedCount=len(pending), noResend=True)
+    from cf_posting.posting import article_topic_consistency
+    scheduled = data.parent.parent / 'cf_posting/output/scheduled'
+    for day in sorted(scheduled.glob('????-??-??'), reverse=True)[:3]:
+        for folder in day.iterdir():
+            if not folder.is_dir():
+                continue
+            receipt = _measurement_json(folder / 'publication-receipt.json')
+            if receipt.get('state') != 'published':
+                continue
+            issues = article_topic_consistency(_measurement_json(folder / 'article.json'), folder)
+            if issues:
+                add('review:cf-topic:' + folder.relative_to(scheduled).as_posix(), 'doctor', receipt.get('publicUrl'),
+                    str(folder / 'research.json'), receipt.get('verifiedAt'), ','.join(issues),
+                    ['Independently review original input, research, article and public URL with hash-bound claim/source evidence.',
+                     'Preserve published receipt; no automatic repost or edit.'], noResend=True)
+    return rows
+
+
 def autonomy_summary(path=DEFAULT_DB, moment=None):
     moment = moment or datetime.now(timezone.utc)
     with connect(path) as db:
         goal = autonomy_goal(db, moment)
         actions = []
-        for row in db.execute('SELECT * FROM improvement_actions WHERE completed_at IS NOT NULL ORDER BY updated_at DESC LIMIT 50').fetchall():
+        for row in db.execute('SELECT * FROM improvement_actions WHERE completed_at IS NOT NULL OR observation_snapshot IS NOT NULL ORDER BY updated_at DESC LIMIT 50').fetchall():
             item = action_record(row, moment)
             if item['verification']['status'] == 'observed_change' and not row['observation_snapshot']:
                 db.execute('UPDATE improvement_actions SET observation_snapshot=? WHERE id=?',
@@ -655,6 +912,7 @@ def autonomy_summary(path=DEFAULT_DB, moment=None):
             actions.append(item)
     experiments = [item for item in actions if item.get('experiment')]
     return {'checkedAt': moment.isoformat(), 'goal': goal, 'experiments': experiments,
+            'measurementFollowups': measurement_followups(Path(path).parent, moment),
             'note': '공개 반영 완료는 수익 달성 아님 · 비교 가능한 관측 자료가 확보될 때까지 성과 미확인'}
 
 
@@ -745,6 +1003,13 @@ def action_record(row, now=None):
                               'observedChange': item['verification'], 'causalProof': False,
                               'revenueOutcome': {'status': 'unknown', 'amountUsd': None,
                                   'reason': '동일 URL·전후 관측기간의 페이지별 AdSense 수익 근거 미수집; 검색 증가를 수익으로 환산하지 않음'}}
+    linked = json.loads(row.get('observation_snapshot') or '{}').get('threads')
+    if linked:
+        item['channelObservation'] = linked
+        item['verification'] = {'status': linked['status'], 'causalProof': False, 'reason': linked['reason']}
+        item['experiment'] = {**(item.get('experiment') or {}), 'id': linked['experimentId'],
+                              'measurement': linked, 'performanceStatus': linked['status'],
+                              'causalProof': False, 'revenueOutcome': {'status': 'unknown', 'amountUsd': None}}
     return item
 
 
@@ -964,8 +1229,16 @@ if __name__ == '__main__':
     parser.add_argument('--import-daily', type=Path)
     parser.add_argument('--serve', action='store_true')
     parser.add_argument('--refresh-performance', action='store_true')
+    parser.add_argument('--reconcile-threads-action')
+    parser.add_argument('--threads-part')
+    parser.add_argument('--apply', action='store_true', help='Apply the explicit local Threads observation reconciliation')
     parser.add_argument('--port', type=int, default=8791)
     args = parser.parse_args()
+    if args.reconcile_threads_action:
+        if not args.threads_part:
+            parser.error('--threads-part is required')
+        print(json.dumps(reconcile_threads_observation(args.reconcile_threads_action, args.threads_part,
+                         path=args.db, apply=args.apply), ensure_ascii=False))
     for filename, importer in ((args.inventory, import_inventory), (args.import_daily, import_daily)):
         if filename:
             importer(args.db, json.loads(filename.read_text(encoding='utf-8-sig')))

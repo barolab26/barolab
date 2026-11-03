@@ -117,11 +117,9 @@ def bind_business_experiment(value, business, channels, now=None):
     identity = hashlib.sha256(json.dumps([proposal['targetUrl'], proposal['hypothesis'], metric,
         proposal['measurementWindowDays'], baseline['start'], baseline['end'], baseline.get('source'),
         baseline.get('currency'), baseline.get('timezone')], ensure_ascii=False).encode()).hexdigest()
-    start = datetime.fromtimestamp(now, timezone.utc).astimezone(__import__('zoneinfo').ZoneInfo(baseline['timezone'])).date() + timedelta(days=1)
-    end = start + timedelta(days=proposal['measurementWindowDays'] - 1)
     return {**proposal, 'id': identity, 'baseline': baseline, 'focusDomains': [domain],
-            'focusChannels': allowed_channels, 'startedAt': now, 'observationStart': str(start),
-            'observationEnd': str(end), 'measurementDate': str(end + timedelta(days=1)),
+            'focusChannels': allowed_channels, 'startedAt': now, 'observationStart': None,
+            'observationEnd': None, 'observationState': 'waiting_intervention', 'nextMeasureDate': None,
             'status': 'active', 'causalClaim': False, 'resourceScope': 'experiment_lifetime', 'finalObservation': None,
             'maxNewPublications': 2, 'newPublicationAgendaIds': [],
             'secondaryMetrics': ['sessions'], 'revenueAttributionStatus': 'unknown',
@@ -142,8 +140,12 @@ def autonomous_experiment_allows(project, target_url='', domain='', state=None, 
         reservations = experiment.get('newPublicationAgendaIds') or []
         if reserved_agenda_id not in reservations and len(reservations) >= experiment.get('maxNewPublications', 2):
             return False
-    if datetime.now(timezone.utc).date().isoformat() > str(experiment.get('observationEnd') or ''):
+    if experiment.get('observationEnd') and datetime.now(timezone.utc).date().isoformat() > experiment['observationEnd']:
         return False
+    if not experiment.get('interventionReceipt'):
+        checked = _stamp(experiment['baseline'].get('checkedAt'))
+        if checked is None or not 0 <= time.time() - checked <= 26 * 3600:
+            return False
     ledger = load(DATA / 'llm_usage_ledger.json')
     used = (ledger.get('byExperiment') or {}).get(experiment['id'], {}).get('modelCalls', 0)
     used += sum(r.get('experimentId') == experiment['id'] for r in (ledger.get('active') or {}).values())
@@ -178,6 +180,8 @@ def evaluate_business_experiment(experiment, business, now=None):
     base = experiment.get('baseline') or {}
     metric = experiment.get('primaryMetric')
     result = {'status': 'inconclusive', 'causalClaim': False, 'reason': 'target_measurement_missing', 'metric': metric}
+    if not experiment.get('interventionReceipt'):
+        return {**result, 'reason': 'waiting_intervention'}
     if metric not in ('pageViews', 'sessions', 'estimatedRevenue') or not base:
         return result
     observations = _observations(business, experiment.get('targetUrl'), metric)
@@ -222,6 +226,8 @@ def evaluate_business_experiment(experiment, business, now=None):
 def capture_experiment_observation(experiment, business, now=None):
     """Keep the exact completed window before rolling reports replace it."""
     now = time.time() if now is None else now
+    if not experiment.get('interventionReceipt'):
+        return experiment
     for row in _observations(business, experiment.get('targetUrl'), experiment.get('primaryMetric')):
         checked = _stamp(row.get('checkedAt'))
         if (row.get('start') == experiment.get('observationStart') and row.get('end') == experiment.get('observationEnd')
@@ -248,6 +254,8 @@ def _merge_experiment_observation(identity, **updates):
 
 def experiment_observation_closed(experiment, evaluation, now=None):
     """A sparse completed window can finish without success; missing reports get three days."""
+    if not experiment.get('interventionReceipt'):
+        return False
     if evaluation.get('status') != 'inconclusive':
         return True
     if evaluation.get('reason') == 'insufficient_sample' and experiment.get('finalObservation'):
@@ -546,7 +554,7 @@ def staff_result(row, receipt_path):
         staff={'actor':last['agent'],'text':response['reply'],'route':{'provider':observed.get('provider'),
                'model':observed.get('actualModel'),'reasoningEffort':observed.get('reasoningEffort')}} if response else None
         verified(agenda['id'],{'verified':True,'source':str(receipt_path),'scope':'원천 상태 조회' if inspection else '실제 업무 결과',
-            'results':[{k:r.get(k) for k in ('status','project','publicationVerified','recoveryVerified','reservationVerified','publicUrl','account','questionId')} for r in results]},staff=staff)
+            'results':[{k:r.get(k) for k in ('ok','status','project','publicationVerified','recoveryVerified','reservationVerified','publicUrl','account','questionId')} for r in results]},staff=staff)
     else:
         hold(agenda['id'],'직원 실행 결과에서 원래 업무의 해결 증거가 확인되지 않았습니다. 같은 안건에서 원인을 조사합니다.',recovery=True)
 
@@ -598,7 +606,8 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
         row = get(identity)
         if row:
             # Merge observations without resetting ownership, the plan or attempt history.
-            if row.get('status') == 'closed' and kind == 'conference' and not row.get('verification', {}).get('verified'):
+            if (row.get('status') == 'closed' and kind == 'conference'
+                    and row.get('resumeAuthorized') is True and not row.get('verification', {}).get('verified')):
                 row.update(status='queued', priority=priority, notBefore=not_before, controllerFailures=0, nextCheckAt=0, processes=[], events={})
                 for k in ('blocker', 'closedAt', 'closeReason', 'recoveryWatch', 'controllerGoalId', 'recoveryGoalId'):
                     row.pop(k, None)
@@ -632,6 +641,7 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
                'source':source, 'completionCriteria':completion, 'priority':priority,
                'notBefore':not_before, 'createdAt':time.time(), 'status':'queued','manualNudges':0,
                'version':1, 'owner':uuid.uuid4().hex, 'plan':[], 'events':{}, 'processes':[]}
+        row['acceptanceRequirements'] = acceptance_requirements(row)
         if source.get('autonomousExperiment'):
             row['businessExperiment'] = state['activeExperiment']
             if kind == 'conference':
@@ -677,7 +687,6 @@ def admit(identity):
         if len(lane_active) >= limit:
             return None
         chosen.update(status='report_pending' if chosen.get('verification',{}).get('verified') else 'meeting', activatedAt=time.time())
-        chosen['measurementStartedAt'] = chosen['activatedAt']
         _save(chosen)
         new_ids = [r['id'] for r in cur_rows] + [identity]
         state['activeIds'] = new_ids
@@ -699,7 +708,8 @@ def short_title(row):
 
 def event(row, stage, actor, text, route=None):
     if stage == 'closing':
-        text = ('[안건 종결] ' + short_title(row))[:30]
+        text = (('[검증 완료] ' if (row.get('outcome') or {}).get('status') == 'completed'
+                 else '[미해결 보고] ') + short_title(row))[:50]
     suffix=stage+('-'+str(row['version']) if stage=='suspension' else '')
     return {'id':'agenda-'+row['id']+'-'+suffix, 'agendaId':row['id'], 'stage':stage,
             'who':actor, 'text':text, 'route':route or {}, 'ts':int(time.time()*1000)}
@@ -760,10 +770,245 @@ def hold(identity, reason, *, recovery=False):
         row.update(status='recovering' if recovery or pending or running(row) else 'blocked', blocker=str(reason)[:1000])
         row['waitingFor']={'owner':'patch' if row.get('project')!='collections' else 'trace',
                            'condition':str(reason)[:500],'nextCheckAt':time.time()+300}
+        state = load(STATE)
+        outcome = task_outcome(row)
+        if not row.get('auxiliaryResult'):
+            outcome.update(blocker=str(reason)[:1000], owner=row['waitingFor']['owner'])
+        _retain_outcome(row, state, outcome)
+        write(STATE, state)
         if 'blocked' not in row['events']:
             row['events']['blocked'] = event(row, 'blocked', 'jarvis',
                 '같은 안건을 유지합니다: '+row['title']+'\n'+row['blocker']+'\n실제 해결은 미완료이며 다음 안건을 시작하지 않았습니다.')
         _save(row)
+
+
+def acceptance_requirements(row):
+    """Host-owned scope; a worker cannot narrow its assignment in a result."""
+    explicit = row.get('acceptanceRequirements') or (row.get('source') or {}).get('acceptanceRequirements')
+    if explicit:
+        required = list(dict.fromkeys(str(value) for value in explicit))
+        if (row.get('source') or {}).get('directive') and 'requested_directive' not in required:
+            required.append('requested_directive')
+        return required
+    if row.get('kind') == 'conference' and 'prepare' in str((row.get('source') or {}).get('arguments', {}).get('action', '')):
+        return ['preparation_receipt']
+    requirements = [{'cro_widget_retrofit': 'target_intervention', 'indexnow_unindexed_push': 'submission_receipt',
+             'radar': 'candidate_evidence', 'brunch_publish': 'publication_receipt',
+             'audit': 'audit_results', 'style': 'review_results', 'conference': 'conference_receipt',
+             'staff': 'requested_actions'}.get(row.get('kind'), 'requested_scope')]
+    # Preserve a broader assignment verbatim; a tool's narrower receipt cannot discharge it.
+    if (row.get('source') or {}).get('directive'):
+        requirements.append('requested_directive')
+    return requirements
+
+
+def task_outcome(row, evidence=None, now=None):
+    """Evaluate receipts, not administrative status, summaries or worker success flags."""
+    now = time.time() if now is None else now
+    evidence = evidence if evidence is not None else row.get('verification') or {}
+    result = evidence.get('result') or row.get('auxiliaryResult') or {}
+    required = acceptance_requirements(row)
+    satisfied = set()
+    owner = (row.get('source') or {}).get('assignedRole') or {
+        'cro_widget_retrofit': 'doctor', 'radar': 'radar', 'indexnow_unindexed_push': 'trace',
+        'brunch_publish': 'publi', 'audit': 'doctor'}.get(row.get('kind'), 'jarvis')
+    def nodes(value):
+        if isinstance(value, dict):
+            yield value
+            for child in value.values():
+                yield from nodes(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from nodes(child)
+    records = list(nodes(result))
+    ambiguous = any(r.get('pendingEffect') or r.get('pending_effect') or r.get('externalEffectUnknown')
+                    or r.get('status') == 'submitted_unknown' for r in records + [evidence])
+    ambiguous = ambiguous or bool(row.get('auxiliaryStartedAt') and not result)
+    errors = any(r.get('error') or r.get('errors') or r.get('errorType') or
+                 r.get('status') in ('failed', 'error') for r in records)
+    held = any(r.get('holds') or r.get('status') in ('held', 'blocked', 'review_required', 'busy') for r in records)
+    idle = result.get('status', result.get('state', result.get('action'))) in ('idle', 'no_work', 'no_due_slot', 'no_due_draft',
+        'already_optimized', 'all_recent_pinged', 'already_claimed', 'no_matching_target')
+    target = _url_key((row.get('source') or {}).get('targetUrl'))
+    receipts = result.get('posts', []) or ([result] if result.get('durableSuccess') else [])
+    posts = [p for p in receipts if isinstance(p, dict) and
+             (not target or _url_key(p.get('url')) == target) and p.get('apiStatus', p.get('httpStatus')) in (200, 201, 204)
+             and p.get('durableSuccess') is True and p.get('publicContentMatched') is True
+             and _stamp(p.get('verifiedAt')) is not None and row.get('createdAt', 0) <= _stamp(p['verifiedAt']) <= now]
+    if posts:
+        satisfied.add('target_intervention')
+    submitted = [p for p in result.get('pingedUrls', []) if isinstance(p, dict) and
+                 (not target or _url_key(p.get('url')) == target) and p.get('accepted') is True and
+                 any(r.get('httpStatus') in (200, 202) for r in p.get('results', []) if isinstance(r, dict))]
+    if submitted:
+        satisfied.add('submission_receipt')
+    if result.get('publicationVerified') is True and result.get('publicUrl'):
+        satisfied.add('publication_receipt')
+    if result.get('candidates') and all(isinstance(c, dict) and c.get('source') for c in result['candidates']):
+        satisfied.add('candidate_evidence')
+    sources = result.get('sources') or (result.get('scout') or {}).get('sources') or []
+    scan_scope = (row.get('source') or {}).get('scanScope')
+    if (scan_scope and result.get('scanScope') == scan_scope and sources
+            and all(s.get('status') == 'collected' and _stamp(s.get('fetchedAt')) is not None
+                    and 0 <= now - _stamp(s['fetchedAt']) <= 26*3600 for s in sources)):
+        satisfied.add('source_scan')  # A verified empty scan is valid when that is the requested deliverable.
+    if result.get('results') and result.get('status') == 'completed':
+        satisfied.add('audit_results')
+    if result.get('status') in ('completed', 'already_reviewed') and result.get('source'):
+        satisfied.add('review_results')
+    if evidence.get('verified') is True and evidence.get('source'):
+        outcomes = evidence.get('outcomes') or []
+        if (evidence.get('preparation') or {}).get('preparationVerified') is True:
+            satisfied.add('preparation_receipt')
+        if outcomes and all(r.get('publicationVerified') is True or r.get('reservationVerified') is True for r in outcomes):
+            satisfied.add('conference_receipt')
+        actions = (row.get('source') or {}).get('actions') or []
+        results = evidence.get('results') or []
+        if actions and len(results) == len(actions) and all(r.get('ok') is True and
+                (a.get('tool') in READ_ONLY or any(r.get(k) is True for k in
+                 ('publicationVerified', 'recoveryVerified', 'reservationVerified'))) for a, r in zip(actions, results)):
+            satisfied.add('requested_actions')
+        for key, proof in (evidence.get('acceptanceResults') or {}).items():
+            if not isinstance(proof, dict) or not proof.get('source') or not proof.get('sha256'):
+                continue
+            # Only a persisted host receipt bound to this agenda and the original scope is accepted.
+            receipt_path = Path(proof['source']).resolve()
+            if not receipt_path.is_relative_to(DATA.resolve()) or not receipt_path.is_file() or Path(proof['source']).is_symlink():
+                continue
+            raw = receipt_path.read_bytes()
+            if hashlib.sha256(raw).hexdigest() != proof['sha256']:
+                continue
+            try:
+                receipt = json.loads(raw)
+            except (ValueError, UnicodeError):
+                continue
+            scope = (row.get('source') or {}).get('directive') if key == 'requested_directive' else row.get('completionCriteria')
+            if (receipt.get('producer') == 'barolab-host-acceptance-v1' and receipt.get('agendaId') == row.get('id')
+                    and receipt.get('scope') == scope and (receipt.get('requirements') or {}).get(key) is True
+                    and type(receipt.get('verifiedAt')) in (int, float)
+                    and row.get('createdAt', 0) <= receipt['verifiedAt'] <= now):
+                satisfied.add(key)
+    missing = [key for key in required if key not in satisfied]
+    status = ('held' if ambiguous else 'partial' if satisfied and (missing or errors or held) else
+              'error' if errors else 'held' if held else 'idle' if idle else
+              'completed' if not missing else 'partial' if satisfied else 'held')
+    reason = ('external_effect_unknown' if ambiguous else 'source_error' if errors else
+              'independent_factual_review_required' if any(r.get('reason') == 'independent_factual_review_required' for r in records) else
+              'acceptance_unverified' if missing else 'no_intervention' if idle else 'required_scope_verified')
+    return {'status': status, 'owner': owner, 'required': required, 'verifiedScope': sorted(satisfied),
+            'missingScope': missing, 'blocker': None if status == 'completed' else reason,
+            'nextAction': None if status == 'completed' else
+                'verify_existing_external_receipt' if ambiguous else
+                'independent_factual_review' if reason == 'independent_factual_review_required' else 'review_missing_acceptance',
+            'autoRetry': False, 'checkedAt': now}
+
+
+def _retain_outcome(row, state, outcome):
+    """One durable review followup per agenda; it is never an execution/retry queue."""
+    row['outcome'] = outcome
+    row['acceptanceRequirements'] = outcome['required']
+    row['responsibleCrew'] = outcome['owner']
+    row['decisionChain'] = {'judgment': outcome['status'], 'why': outcome['blocker'] or 'required_scope_verified',
+        'evidence': {'source': (row.get('verification') or {}).get('source'),
+                     'verifiedScope': outcome['verifiedScope'], 'checkedAt': outcome['checkedAt']},
+        'responsibleCrew': outcome['owner'], 'acceptance': outcome['required'],
+        'verifiedOutcome': outcome['status'] == 'completed'}
+    if (row.get('source') or {}).get('evidenceReview'):
+        return  # Review reports cannot recursively commission more reviews.
+    followups = state.setdefault('unresolvedWork', {})
+    key = 'agenda:' + row['id']
+    if outcome['status'] == 'completed':
+        if key in followups:
+            followups[key].update(status='resolved', resolvedAt=time.time())
+        row.pop('blocker', None)
+        row.pop('nextAction', None)
+    else:
+        row.update(blocker=outcome['blocker'], nextAction=outcome['nextAction'])
+        previous = followups.get(key) or {}
+        followups[key] = {**previous, 'key': key, 'agendaId': row['id'], 'owner': outcome['owner'],
+            'status': outcome['status'], 'blocker': outcome['blocker'], 'nextAction': outcome['nextAction'],
+            'acceptance': outcome['missingScope'], 'createdAt': previous.get('createdAt', time.time()),
+            'dueAt': previous.get('dueAt', time.time()), 'autoRetry': False}
+
+
+def start_experiment_observation(experiment, row, evidence, now=None):
+    """Pure, idempotent receipt adapter; planning and dispatch do not start the clock."""
+    now = time.time() if now is None else now
+    if experiment.get('interventionReceipt') or (row.get('source') or {}).get('experimentId') != experiment.get('id'):
+        return experiment
+    if task_outcome(row, evidence, now)['status'] != 'completed':
+        return experiment
+    result = evidence.get('result') or {}
+    target = _url_key(experiment.get('targetUrl'))
+    receipts = [p for p in (result.get('posts', []) or ([result] if result.get('durableSuccess') else [])) if _url_key(p.get('url')) == target
+                and p.get('apiStatus', p.get('httpStatus')) in (200, 201, 204) and _stamp(p.get('verifiedAt')) is not None
+                and p.get('durableSuccess') is True and p.get('publicContentMatched') is True]
+    if not receipts and ((row.get('source') or {}).get('executionContract') or {}).get('scope') == 'accepted_target_submission':
+        receipts = [p for p in result.get('pingedUrls', []) if _url_key(p.get('url')) == target
+                    and p.get('accepted') is True and p.get('verificationScope') == 'submission_only'
+                    and _stamp(p.get('verifiedAt')) is not None
+                    and any(r.get('httpStatus') in (200, 202) for r in p.get('results', []))]
+    if not receipts:
+        return experiment
+    receipt = max(receipts, key=lambda p: _stamp(p['verifiedAt']))
+    stamp = _stamp(receipt['verifiedAt'])
+    if not experiment.get('startedAt', 0) <= stamp <= now:
+        return experiment
+    start = datetime.fromtimestamp(stamp, timezone.utc).astimezone(
+        __import__('zoneinfo').ZoneInfo(experiment['baseline']['timezone'])).date() + timedelta(days=1)
+    end = start + timedelta(days=experiment['measurementWindowDays'] - 1)
+    return {**experiment, 'interventionReceipt': {**receipt, 'agendaId': row['id'], 'source': evidence['source']},
+            'interventionType': 'submission' if receipt.get('verificationScope') == 'submission_only' else 'public_content_change',
+            'interventionAt': stamp, 'observationState': 'observing', 'observationStart': str(start),
+            'observationEnd': str(end), 'measurementDate': str(end + timedelta(days=1)),
+            'nextMeasureDate': str(end + timedelta(days=1))}
+
+
+def reconcile_task_outcomes(identities, *, apply=False, expected_fingerprint=None):
+    """Explicit bounded repair only. Preview first; apply rejects changed runtime inputs."""
+    if not identities or len(identities) > 100:
+        raise ValueError('Supply 1..100 audited agenda identities')
+    with locked(ROWS):
+        state = load(STATE)
+        rows = [get(identity) for identity in sorted(set(identities))]
+        fingerprint = hashlib.sha256(json.dumps([state, rows], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        if apply and fingerprint != expected_fingerprint:
+            raise ValueError('Reconciliation inputs changed; preview again')
+        changes = []
+        for row in rows:
+            if not row or running(row):
+                continue
+            outcome = task_outcome(row, now=row.get('verifiedAt') or time.time())
+            if outcome['status'] == 'completed' or not (row.get('auxiliaryResult') or row.get('auxiliaryStartedAt')
+                                                       or row.get('investigationReport') or row.get('outcome')):
+                continue
+            if (row.get('outcomeCorrections') and row.get('status') == 'blocked'
+                    and all((row.get('outcome') or {}).get(k) == outcome.get(k) for k in ('status', 'blocker', 'missingScope'))):
+                continue
+            changes.append({'agendaId': row['id'], 'previousStatus': row.get('status'), 'outcome': outcome})
+            if apply:
+                row.setdefault('outcomeCorrections', []).append({'at': time.time(), 'previousStatus': row.get('status'),
+                    'previousClosedAt': row.get('closedAt'), 'reason': 'audited_acceptance_reconciliation'})
+                _retain_outcome(row, state, outcome)
+                row.update(status='blocked', nextCheckAt=0)
+                _save(row)
+                state['pending'] = [key for key in state.get('pending', []) if key != row['id']]
+                state['activeIds'] = [key for key in state.get('activeIds', []) if key != row['id']]
+                if state.get('activeId') == row['id']:
+                    state['activeId'] = next(iter(state['activeIds']), None)
+        experiment = state.get('activeExperiment') or {}
+        affected = any((r.get('source') or {}).get('experimentId') == experiment.get('id') for r in rows if r)
+        reset_clock = bool(affected and experiment.get('id') and experiment.get('status') in ('active', 'inconclusive')
+                           and not experiment.get('interventionReceipt')
+                           and experiment.get('observationState') != 'waiting_intervention')
+        if apply and reset_clock:
+            experiment.setdefault('lifecycleCorrections', []).append({k: experiment.get(k) for k in
+                ('observationStart', 'observationEnd', 'measurementDate', 'evaluation', 'observationClosed')})
+            experiment.update(observationState='waiting_intervention', observationStart=None, observationEnd=None,
+                              nextMeasureDate=None, observationClosed=False, status='active')
+        if apply:
+            write(STATE, state)
+        return {'applied': apply, 'fingerprint': fingerprint, 'changes': changes, 'resetObservationClock': reset_clock}
 
 
 def verified(identity, evidence, *, staff=None, manager=None):
@@ -773,7 +1018,19 @@ def verified(identity, evidence, *, staff=None, manager=None):
     with locked(ROWS):
         row = get(identity)
         if row['status'] == 'closed':
-            return
+            return False
+        state = load(STATE)
+        outcome = task_outcome(row, evidence)
+        row['verification'] = evidence
+        _retain_outcome(row, state, outcome)
+        if outcome['status'] != 'completed':
+            row['status'] = 'blocked'
+            _save(row)
+            write(STATE, state)
+            return False
+        experiment = state.get('activeExperiment') or {}
+        state['activeExperiment'] = start_experiment_observation(experiment, row, evidence)
+        write(STATE, state)
         row.update(status='suspended' if row['status']=='suspended' else 'report_pending', verification=evidence, verifiedAt=time.time(),
                    lastAction='정해 둔 범위의 실제 결과를 확인했습니다. 담당자와 팀장의 마무리 보고를 전달하고 있습니다.')
         row.pop('blocker',None)
@@ -781,6 +1038,7 @@ def verified(identity, evidence, *, staff=None, manager=None):
             if reply and stage not in row['events']:
                 row['events'][stage] = event(row, stage, reply['actor'], reply['text'], reply.get('route'))
         _save(row)
+    return True
 
 
 def finish_investigation(identity, summary, reason):
@@ -795,7 +1053,9 @@ def finish_investigation(identity, summary, reason):
         row = get(identity)
         row.update(status='report_pending', investigationReport={'reason': reason, 'summary': summary},
                    nextCheckAt=0, controllerFailures=0, lastAction='조사 요약 보고 후 다음 안건으로 전환합니다.')
-        row.pop('blocker', None)
+        state = load(STATE)
+        _retain_outcome(row, state, task_outcome(row))
+        write(STATE, state)
         for stage, actor, message in (('staff_result', 'jarvis', summary), ('closing', 'jarvis', '조사 종결')):
             row.setdefault('events', {}).setdefault(stage, event(row, stage, actor, message, route))
         _save(row)
@@ -890,6 +1150,9 @@ def finish_reports(identity):
     row = get(identity)
     if row['status'] != 'report_pending' or running(row):
         return False
+    if row.get('verification') and task_outcome(row)['status'] != 'completed':
+        close_and_advance(identity, reason='acceptance_unverified')
+        return True
     if row.get('verification', {}).get('verified') is True:
         fast_route = {'provider': 'host', 'model': 'fast-verified-reporter', 'reasoningEffort': 'fast'}
         staff_actor = (row.get('source') or {}).get('assignedRole') or (
@@ -923,8 +1186,12 @@ def finish_reports(identity):
         if (identity not in cur_ids or running(row)
                 or not all(row['events'][s].get('receivedAt') for s in ('opening','staff_result','closing'))):
             return False
-        row.update(status='closed', closedAt=time.time())
-        if row.get('verification', {}).get('verified') is True and row.get('waitingFor'):
+        outcome = task_outcome(row)
+        _retain_outcome(row, state, outcome)
+        row.update(status='closed' if outcome['status'] == 'completed' else 'blocked', reportedAt=time.time())
+        if outcome['status'] == 'completed':
+            row['closedAt'] = time.time()
+        if outcome['status'] == 'completed' and row.get('waitingFor'):
             row['resolvedWaitingFor'] = {'previous': row.pop('waitingFor'), 'resolvedAt': row['closedAt'],
                                          'reason': 'verified_result_and_reports_acknowledged'}
         row['performance'] = performance(row)
@@ -943,7 +1210,7 @@ def performance(row, ledger=None):
     result = {'wallTimeSeconds':max(0,(row.get('closedAt') or time.time())-row['activatedAt']) if row.get('activatedAt') else None,
         'measurementStartedAt':row.get('measurementStartedAt'),
         'coverage':'observed_calls_only', 'manualNudges':row.get('manualNudges'),
-        'verifiedCompletions':1 if row.get('verification',{}).get('verified') is True else None}
+            'verifiedCompletions':1 if task_outcome(row)['status'] == 'completed' else None}
     for key in ('coverageStartedAt','modelCalls','modelErrors','modelLatencyMs','routes','toolRoundTrips','toolFailures','uiActions','uiFailures'):
         result[key] = measured.get(key) if measured else None
     return result
@@ -1123,7 +1390,12 @@ def close_and_advance(identity, status='closed', reason=None):
     with locked(ROWS):
         state = load(STATE)
         row = get(identity)
-        row.update(status=status, closedAt=time.time())
+        outcome = task_outcome(row)
+        _retain_outcome(row, state, outcome)
+        row.update(status=('closed' if outcome['status'] == 'completed' else 'blocked') if status == 'closed' else status,
+                   releasedAt=time.time())
+        if row['status'] == 'closed':
+            row['closedAt'] = time.time()
         if reason:
             row['closeReason'] = str(reason)[:300]
         row['performance'] = performance(row)
@@ -1144,6 +1416,8 @@ def recovery_watch(row):
             and not waiting_investigation(p) for p in active_rows()):return False
     watch=row.get('recoveryWatch',{})
     from common import repair_workflow
+    if repair_workflow.agenda_recovery_blocker(row):
+        return False
     internal=[]
     for file in repair_workflow.ROOT.glob('*.json'):
         repair=load(file)
@@ -1253,7 +1527,8 @@ def reconcile_monitor_goal(row):
                     'bodyVerification': '별도 검증 대상', 'quota': quota}
         if not row.get('events', {}).get('opening'):
             record_plan(row['id'], [evidence['scope']], {'provider': 'host', 'model': 'publication-reconciler'})
-        verified(row['id'], evidence)
+        if not verified(row['id'], evidence):
+            return False
         goal.update(status='answered', delivered=True, answer=evidence['scope'],
                     resolution={'status': 'verified_resolved', 'label': evidence['scope'], 'source': str(proof_path)})
         crew.save(goal)
@@ -1416,7 +1691,8 @@ def prune_stale_runtime_data(max_keep_per_dir=80):
     return stats
 
 
-def _queue_autonomous_work_order(work_type, role='doctor', target_domain='', directive='', hour_bucket=None):
+def _queue_autonomous_work_order(work_type, role='doctor', target_domain='', directive='', hour_bucket=None,
+                                 rationale='', additional_requirements=()):
     """Queue each selected experiment intervention once, not once per timer/hour."""
     state = load(STATE)
     experiment = state.get('activeExperiment') or {}
@@ -1430,20 +1706,56 @@ def _queue_autonomous_work_order(work_type, role='doctor', target_domain='', dir
     }
     if work_type not in definitions:
         return None
+    if not isinstance(additional_requirements, (list, tuple)) or not all(isinstance(r, str) and r.strip() for r in additional_requirements):
+        raise ValueError('Additional requested scope must be explicit text requirements')
     kind, project, purpose = definitions[work_type]
+    if kind in ('brunch_publish', 'radar', 'audit'):
+        # Keep capability gaps visible without authorizing unsupported multi-target/channel writes.
+        if (experiment.get('status') != 'active' or not experiment.get('id')
+                or len(experiment.get('focusDomains') or []) not in (1, 2) or domain not in experiment['focusDomains']):
+            return None
+        identity = propose('capability_review', {'experimentId': experiment['id'], 'workType': work_type, 'domain': domain},
+            title='정확한 대상 실행 기능 검토 · ' + work_type, project='collections',
+            source={'assignedRole': 'patch', 'requestedWorkType': work_type, 'targetUrl': experiment['targetUrl'],
+                    'rationale': rationale, 'directive': '\n'.join([*([directive] if directive else []), *additional_requirements]),
+                    'acceptanceRequirements': ['exact_target_capability']},
+            completion='정확한 대상에 한정된 실행·검증 기능과 제한을 읽기 전용으로 확인', inherit=False)
+        if identity:
+            with locked(ROWS):
+                saved = get(identity); state = load(STATE)
+                saved['businessExperiment'] = experiment
+                outcome = task_outcome(saved)
+                outcome.update(status='held', owner='patch', blocker='exact_target_capability_missing',
+                               nextAction='review_exact_target_adapter')
+                _retain_outcome(saved, state, outcome)
+                saved['status'] = 'blocked'; _save(saved); write(STATE, state)
+        return identity
     gate_project = 'legacy_remodel' if project == 'collections' else project
     if not autonomous_experiment_allows(gate_project, domain=domain, state=state):
         return None
-    # These legacy workers cannot bind their action to a selected URL yet.
-    # Do not widen a target experiment to unrelated articles or channels.
-    if kind in ('brunch_publish', 'radar', 'audit'):
-        return None
-    return propose(kind, {'experimentId': experiment['id'], 'workType': work_type, 'domain': domain},
+    unsupported = [*([directive] if directive else []), *additional_requirements]
+    required = ['target_intervention'] if kind == 'cro_widget_retrofit' else ['submission_receipt']
+    identity = propose(kind, {'experimentId': experiment['id'], 'workType': work_type, 'domain': domain},
         title=purpose+' ? '+domain, project=project,
-        source={'assignedRole': role, 'domain': domain, 'directive': directive, 'businessPurpose': purpose,
+        source={'assignedRole': 'doctor' if kind == 'cro_widget_retrofit' else 'trace', 'domain': domain,
+                'directive': '\n'.join(unsupported), 'rationale': rationale, 'businessPurpose': purpose,
+                'acceptanceRequirements': required,
+                'executionContract': {'version': 1, 'workType': work_type, 'targetUrl': experiment['targetUrl'],
+                    'scope': 'public_editorial_rendering' if kind == 'cro_widget_retrofit' else 'accepted_target_submission'},
                 'autonomousExperiment': True, 'experimentId': experiment['id'], 'targetUrl': experiment['targetUrl'],
                 'gateProject': gate_project},
-        completion='선택된 대상의 실행 영수증 및 근거 확인; 수익 효과는 관측기간 종료 후 별도 평가', priority=3, inherit=False)
+        completion=('지정 URL의 기존 내용으로 요약·표·내부 안내를 정리하고 저장된 HTML 및 공개 HTML을 확인'
+                    if kind == 'cro_widget_retrofit' else '지정 URL의 접수 영수증 확인; 실제 색인은 별도 범위'),
+        priority=3, inherit=False)
+    if identity and unsupported:
+        with locked(ROWS):
+            saved = get(identity); state = load(STATE)
+            if not saved.get('activatedAt') and saved.get('status') == 'queued':
+                outcome = task_outcome(saved)
+                outcome.update(status='held', blocker='unsupported_requested_scope', nextAction='scope_review_before_execution')
+                _retain_outcome(saved, state, outcome)
+                saved['status'] = 'blocked'; _save(saved); write(STATE, state)
+    return identity
 
 
 def _top_up_channel_lanes():
@@ -1582,11 +1894,388 @@ def _build_live_executive_diagnostics():
     }
 
 
+def _scoped_review_reads(followup, original, goal, crew):
+    """Credit only a registered read of the current, exact host-owned source."""
+    measurement = not original and followup['key'].startswith('measurement:')
+    try:
+        if measurement:
+            name = crew.measurement_evidence_name(followup['key'])
+            source_path, key = crew._measurement_source(name)
+        elif original:
+            name, key = 'agenda:' + original['id'], None
+            source_path = path(original['id'])
+        else:
+            return []
+        expected_source = source_path.resolve()
+        expected_hash = hashlib.sha256(source_path.read_bytes()).hexdigest()
+    except (OSError, ValueError, TypeError):
+        return []
+    reads = []
+    for observation in goal.get('observations', []):
+        result = observation.get('result') or {}
+        if observation.get('tool') not in ('evidence', 'read_source') or not isinstance(result, dict):
+            continue
+        source = result.get('source') or result.get('path')
+        if not isinstance(source, str) or result.get('sha256') != expected_hash:
+            continue
+        candidate = Path(source)
+        if not candidate.is_absolute():
+            candidate = crew.ROOT / candidate
+        if candidate.resolve() != expected_source:
+            continue
+        if measurement:
+            if (observation.get('tool') != 'evidence' or result.get('readerVersion') != 'measurement-json-v1'
+                    or result.get('evidenceName') != name or result.get('followupKey') != key
+                    or result.get('sha256') != followup.get('sourceFileSha256')
+                    or observation.get('id') not in goal.get('evidenceIds', [])
+                    or goal.get('answerSource') == 'host'):
+                continue
+            # Preloading makes the exact source available; it is not itself an employee review.
+            if observation.get('actor') == 'host':
+                if goal.get('decisions', 0) <= result.get('reviewAfterDecision', float('inf')):
+                    continue
+        else:
+            data = result.get('data') or {}
+            payload = (data.get('verification') or data.get('auxiliaryResult') or data) if isinstance(data, dict) else data
+            digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+            if digest != followup.get('originalEvidenceHash'):
+                continue
+        reads.append(observation)
+    return reads
+
+
+def _review_source_coverage(observation):
+    result = observation['result']
+    def omitted(value):
+        if isinstance(value, dict):
+            return bool(value.get('detailRequired') or value.get('nextCharacter')) or any(omitted(v) for v in value.values())
+        return isinstance(value, list) and any(omitted(v) for v in value)
+    return {**{k: result.get(k) for k in ('source', 'sha256', 'evidenceName', 'pagination', 'selection', 'fields')},
+            'detailRequired': omitted(result.get('data')),
+            'coverage': 'partial' if omitted(result.get('data')) or (result.get('pagination') or {}).get('truncated')
+                        or result.get('missingFields') else 'returned_page', 'acceptanceVerified': False}
+
+
+def _check_review_budget(experiment, agenda_id=None):
+    """Check shared lifetime usage before a new review agenda can be created."""
+    from common import llm_usage
+    root = DATA.parent.parent
+    ledger = load(DATA / 'llm_usage_ledger.json'); policy = llm_usage.budget_policy(root)
+    llm_usage.check_budget(ledger, {'agendaId': agenda_id} if agenda_id else {}, policy, root)
+    if not isinstance(experiment, dict):
+        raise llm_usage.UsageBudgetExceeded('experiment_call_budget_invalid')
+    identity = experiment.get('id')
+    if not isinstance(identity, str) or not identity.strip() or len(identity) > 160:
+        raise llm_usage.UsageBudgetExceeded('experiment_identity_invalid')
+    limit = experiment.get('maxModelCalls', policy['agendaCalls'])
+    if type(limit) is not int or limit < 0:
+        raise llm_usage.UsageBudgetExceeded('experiment_call_budget_invalid')
+    used = ledger.get('byExperiment', {}).get(identity, {}).get('modelCalls', 0)
+    active = sum(call.get('experimentId') == identity for call in ledger.get('active', {}).values())
+    if used + active >= min(limit, policy['agendaCalls']):
+        raise llm_usage.UsageBudgetExceeded('experiment_call_budget_exhausted')
+
+
+def _hold_review_budget(followup, experiment, reason, now, agenda_id=None):
+    """Persist a host-only decision request; repeated ticks share one CEO blocker."""
+    from common.crew_chat_bridge import emit_ceo_proposal
+    experiment = experiment if isinstance(experiment, dict) else {}
+    target = experiment.get('targetUrl') or ('shared-experiment:' + str(experiment.get('id')))
+    identity = {'experimentId': experiment.get('id'), 'target': target, 'reasonCode': reason,
+                'scope': {k: experiment.get(k) for k in ('focusDomains', 'focusChannels')}}
+    fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
+    owner = followup.get('owner') or 'jarvis'
+    with locked(ROWS):
+        state = load(STATE); item = state.get('unresolvedWork', {}).get(followup['key'])
+        if not item:
+            return
+        previous = item.get('reviewBudgetHold') or {}
+        hold = {**identity, 'owner': owner, 'maxModelCalls': experiment.get('maxModelCalls'),
+                'fingerprint': fingerprint, 'heldAt': previous.get('heldAt', now)}
+        item.update(reviewBudgetHold=hold, blocker=reason, nextAction='await_budget_decision', autoRetry=False)
+        if experiment.get('id'):
+            item.setdefault('reviewExperiment', experiment)
+        if previous.get('fingerprint') == fingerprint and previous.get('ceoProposalId'):
+            hold['ceoProposalId'] = previous['ceoProposalId']
+        write(STATE, state)
+        if hold.get('ceoProposalId'):
+            return
+    refs = {'taskId': 'review-followup:' + hashlib.sha256(followup['key'].encode()).hexdigest()}
+    if agenda_id:
+        refs['agendaId'] = agenda_id
+    if followup.get('reviewGoalId'):
+        refs['goalId'] = followup['reviewGoalId']
+    proposal = emit_ceo_proposal(owner, '원천 검토 예산 한도 도달 · 대표 결정 필요',
+        json.dumps({**identity, 'owner': owner, 'followupKey': followup['key'],
+                    'maxModelCalls': experiment.get('maxModelCalls')}, ensure_ascii=False),
+        '기존 증거와 호출 원장을 보존하고 검토를 보류합니다. 우선순위 조정 또는 명시적 재개 조건을 결정해 주세요.',
+        ['검토 우선순위와 허용된 재개 조건 결정; 예산 자동 증액·초기화 없음'],
+        expected_impact='원문 검토와 사업 성과는 미확인 상태로 유지', request_key='review-budget:'+fingerprint,
+        blocker_context={'project': 'evidence-review', 'reasonCode': reason, 'targetKey': fingerprint,
+                         'securityScope': 'read_only_review', 'resumeCondition': 'explicit_budget_decision'},
+        original_work=refs)
+    with locked(ROWS):
+        state = load(STATE); item = state.get('unresolvedWork', {}).get(followup['key'])
+        if item and (item.get('reviewBudgetHold') or {}).get('fingerprint') == fingerprint:
+            item['reviewBudgetHold']['ceoProposalId'] = proposal['proposal']['id']
+            write(STATE, state)
+
+
+def _queue_measurement_scope_correction(followup, goal, crew, now):
+    """One newly reachable source may use the existing bounded material-review allowance."""
+    if (goal.get('status') != 'answered' or goal.get('origin') != 'evidence-review'
+            or goal.get('decisions', 0) < goal.get('maxSteps', 4) or goal.get('modelFailures')
+            or any(goal.get('permissions', {}).get(k) for k in ('execute', 'repair'))):
+        return False
+    if not followup.get('reviewAgendaId'):
+        return False
+    previous_review = get(followup['reviewAgendaId'])
+    experiment = previous_review.get('businessExperiment') or {}
+    if (not experiment.get('id') or any(previous_review.get(k) or goal.get(k) for k in
+            ('manualStop', 'cancelRequested')) or previous_review.get('status') == 'suspended'):
+        return False
+    from common import llm_usage
+    try:
+        source, _ = crew._measurement_source(crew.measurement_evidence_name(followup['key']))
+        # Validate actual reachability through the same registered reader used by the employee.
+        proof = crew.tool_call(goal, 'evidence', {'name': crew.measurement_evidence_name(followup['key'])})
+        if not proof.get('available') or not proof.get('sha256'):
+            return False
+        _check_review_budget(experiment, previous_review['id'])
+    except llm_usage.UsageBudgetExceeded as exc:
+        _hold_review_budget(followup, experiment, str(exc), now, previous_review['id'])
+        return False
+    except (OSError, ValueError, TypeError):
+        return False
+    capability = 'measurement-json-v1:' + str(source.resolve())
+    with locked(ROWS):
+        state = load(STATE); item = state.get('unresolvedWork', {}).get(followup['key'])
+        if (not item or item.get('reviewGoalId') != goal['id'] or len(item.get('reviewHistory', [])) >= 2
+                or item.get('sourceReviewCapability') == capability):
+            return False
+        item.setdefault('reviewHistory', []).append({**{k: item.get(k) for k in
+            ('reviewGoalId', 'reviewAgendaId', 'reviewOutcome', 'evidenceFingerprint')},
+            'reason': 'registered_scoped_source_became_available', 'archivedAt': now})
+        item.update(sourceReviewCapability=capability, reviewBudgetAgendaId=previous_review['id'],
+                    reviewExperiment=experiment, nextAction='await_budgeted_scoped_source_review')
+        for key in ('reviewGoalId', 'reviewAgendaId', 'reviewOutcome'):
+            item.pop(key, None)
+        write(STATE, state)
+    return True
+
+
+def _preload_scoped_review(goal_id, key, crew):
+    try:
+        result = crew.preload_measurement_review(goal_id, key)
+        if result.get('preloaded'):
+            with locked(ROWS):
+                state = load(STATE); item = state.get('unresolvedWork', {}).get(key)
+                if item and not item.get('sourceFileSha256'):
+                    item.update(sourceFileSha256=result['sha256'], reviewSourceRef=result['source'])
+                    write(STATE, state)
+        return result
+    except (OSError, ValueError, TypeError) as exc:
+        with locked(ROWS):
+            state = load(STATE); item = state.get('unresolvedWork', {}).get(key)
+            if item:
+                item.update(sourceReadHold=str(exc), nextAction='establish_registered_scoped_source_access')
+                write(STATE, state)
+        return {'preloaded': False, 'reason': str(exc)}
+
+
+def dispatch_evidence_review_once(now=None):
+    """Assign one bounded source review; model prose never certifies business acceptance."""
+    now = time.time() if now is None else now
+    from common import llm_usage
+    from agents import crew_reasoning as crew
+    state = load(STATE)
+    pending = sorted(state.get('unresolvedWork', {}).values(), key=lambda f: (f.get('dueAt') or 0, f['key']))
+    for followup in pending:
+        measurement_proof = None
+        if followup.get('status') == 'resolved' or (followup.get('dueAt') or 0) > now:
+            continue
+        original = get(followup['agendaId']) if followup.get('agendaId') else {}
+        if followup.get('reviewGoalId'):
+            goal = load(crew.goal_path(followup['reviewGoalId']))
+            measurement = not original and followup['key'].startswith('measurement:')
+            reads = _scoped_review_reads(followup, original, goal, crew)
+            if goal.get('status') not in ('answered', 'blocked') and (not measurement or reads):
+                continue
+            with locked(ROWS):
+                saved = load(STATE); item = saved.get('unresolvedWork', {}).get(followup['key'])
+                if item:
+                    status = 'reviewed_unresolved' if reads else ('scoped_source_review_missing' if measurement else 'missing_source_evidence')
+                    previous = item.get('reviewOutcome')
+                    if previous and previous.get('status') == 'reviewed_unresolved' and not reads:
+                        item.setdefault('reviewOutcomeCorrections', []).append({'previous': previous, 'correctedAt': now,
+                            'reason': status})
+                    item['reviewOutcome'] = {'status': status,
+                        'source': str(crew.goal_path(followup['reviewGoalId'])), 'answer': goal.get('answer'),
+                        'evidenceHashes': [o['result']['sha256'] for o in reads],
+                        'sourceReads': [_review_source_coverage(o) for o in reads],
+                        'originalEvidenceHash': item.get('originalEvidenceHash'), 'businessOutcomeVerified': False}
+                    item['nextAction'] = 'read_exact_scoped_source' if measurement and not reads else 'obtain_missing_acceptance_evidence'
+                    current_hash = hashlib.sha256(json.dumps(original.get('verification') or original.get('auxiliaryResult') or {},
+                        sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+                    if (original and current_hash != item.get('originalEvidenceHash')
+                            and task_outcome(original)['status'] == 'completed'):
+                        _retain_outcome(original, saved, task_outcome(original)); _save(original)
+                    write(STATE, saved)
+            if measurement and not reads:
+                review = get(followup.get('reviewAgendaId')) if followup.get('reviewAgendaId') else {}
+                experiment = review.get('businessExperiment') or followup.get('reviewExperiment') or {}
+                try:
+                    _check_review_budget(experiment, review.get('id'))
+                except llm_usage.UsageBudgetExceeded as exc:
+                    _hold_review_budget(followup, experiment, str(exc), now, review.get('id'))
+                    continue
+                _preload_scoped_review(followup['reviewGoalId'], followup['key'], crew)
+                _queue_measurement_scope_correction(followup, goal, crew, now)
+            continue  # No new model budget or original-operation retry after a review.
+        if original.get('manualStop') or original.get('cancelRequested') or original.get('status') == 'suspended':
+            continue
+        if original and not (original.get('businessExperiment') or {}).get('id'):
+            # A fresh review agenda must never reset a legacy per-agenda call allowance.
+            with locked(ROWS):
+                saved = load(STATE)
+                item = saved.get('unresolvedWork', {}).get(followup['key'])
+                if item:
+                    item['nextAction'] = 'host_review_required_missing_shared_budget'
+                    write(STATE, saved)
+            continue
+        if not original and followup['key'].startswith('measurement:'):
+            try:
+                measurement_proof = crew.read_evidence({'name': crew.measurement_evidence_name(followup['key'])})
+            except (OSError, ValueError, TypeError) as exc:
+                with locked(ROWS):
+                    saved = load(STATE); item = saved.get('unresolvedWork', {}).get(followup['key'])
+                    if item:
+                        item.update(sourceReadHold=str(exc), nextAction='establish_registered_scoped_source_access')
+                        write(STATE, saved)
+                continue
+        project = original.get('project') or 'collections'
+        owner = followup.get('owner') or 'trace'
+        if owner not in ('jarvis', 'publi', 'trace', 'patch', 'doctor', 'radar'):
+            continue
+        experiment = original.get('businessExperiment') or followup.get('reviewExperiment') or state.get('activeExperiment')
+        budget_agenda_id = original.get('id') or followup.get('reviewBudgetAgendaId')
+        try:
+            _check_review_budget(experiment, budget_agenda_id)
+        except llm_usage.UsageBudgetExceeded as exc:
+            _hold_review_budget(followup, experiment, str(exc), now, budget_agenda_id)
+            continue
+        request_id = 'evidence-review:' + hashlib.sha256(
+            (followup['key'] + ':' + str(followup.get('evidenceFingerprint', 'original'))
+             + (':' + followup['sourceReviewCapability'] if followup.get('sourceReviewCapability') else '')).encode()).hexdigest()
+        original_hash = (measurement_proof['sha256'] if measurement_proof else
+            hashlib.sha256(json.dumps(original.get('verification') or original.get('auxiliaryResult') or {},
+                sort_keys=True, ensure_ascii=False).encode()).hexdigest())
+        identity = propose('goal', request_id, title='미해결 원천 근거 검토 · ' + owner, project=project,
+            source={'assignedRole': owner, 'evidenceReview': True,
+                    'originalWorkRefs': {'agendaId': original.get('id'), 'followupKey': followup['key']},
+                    'reviewAcceptance': followup.get('acceptance'), 'originalEvidenceHash': original_hash},
+            completion='원래 요청 범위의 원천 증거와 해시를 대조하고 미확인 항목을 보고', inherit=False)
+        if not identity:
+            return False
+        with locked(ROWS):
+            review = get(identity)
+            if experiment:
+                review['businessExperiment'] = experiment
+            _save(review)
+        question = ('읽기 전용 원천 근거 검토. 실제 evidence 도구로 원래 안건과 관련 원천을 읽고 '
+                    '각 수용 조건의 충족 여부와 정확한 출처·해시·미확인 이유를 보고하라. '
+                    '상태 조회나 답변 작성은 사실 검증 완료가 아니다. 쓰기·패치·제출·재시도 금지. '
+                    '근거 접근 권한 또는 기능이 없으면 담당자와 필요한 지원을 명시하라. '
+                    + json.dumps({'originalAgendaId': original.get('id'), 'originalEvidenceHash': original_hash,
+                        'sourceRef': followup.get('sourceRef') or (str(path(original['id'])) if original else None),
+                        'evidenceName': 'agenda:' + original['id'] if original else crew.measurement_evidence_name(followup['key']),
+                        'target': followup.get('target') or original.get('source', {}).get('targetUrl'),
+                        'acceptance': followup.get('acceptance'), 'directive': original.get('source', {}).get('directive')}, ensure_ascii=False))
+        goal = crew.reason_request(request_id, question, execute=False, repair=False, steps=0, max_steps=4,
+                                   lead=owner, origin='evidence-review', projects=[project], agenda_id=identity)
+        with locked(ROWS):
+            review = get(identity); review['controllerGoalId'] = goal['id']; _save(review)
+            saved = load(STATE); item = saved.get('unresolvedWork', {}).get(followup['key'])
+            if item:
+                item.update(reviewGoalId=goal['id'], reviewAgendaId=identity, reviewAssignedAt=now,
+                            originalEvidenceHash=original_hash, nextAction='await_scoped_source_review')
+                if item.get('reviewBudgetHold'):
+                    item.setdefault('reviewBudgetHoldHistory', []).append({**item.pop('reviewBudgetHold'), 'clearedAt': now})
+                    item['blocker'] = item.get('reason')
+                if measurement_proof:
+                    item.update(sourceFileSha256=measurement_proof['sha256'],
+                                reviewSourceRef=measurement_proof['source'], sourceReadHold=None)
+                write(STATE, saved)
+        if not original and followup['key'].startswith('measurement:'):
+            _preload_scoped_review(goal['id'], followup['key'], crew)
+        return True
+    return False
+
+
+def executive_health_check(company, now=None):
+    """Cheap current-evidence decisions run even while an experiment is observing."""
+    now = time.time() if now is None else now
+    from server.growth import measurement_followups
+    followups = measurement_followups(DATA, now=now)
+    projects = {p['id']: p for p in company.get('projects', []) if p.get('id')}
+    decisions = []
+    with locked(ROWS):
+        state = load(STATE)
+        for identity in dict.fromkeys([*state.get('pending', []), *active_ids(state)]):
+            row = get(identity)
+            if not row:
+                continue
+            project = projects.get(row.get('project')) or {}
+            source = project.get('source') or {}
+            fresh = source.get('fresh') is True
+            if row.get('auxiliaryResult') or row.get('outcome'):
+                outcome = task_outcome(row)
+                _retain_outcome(row, state, outcome)
+            judgment = 'review_unresolved' if row.get('blocker') else 'continue_owned_work' if fresh else 'refresh_evidence'
+            chain = {'agendaId': identity, 'judgment': judgment,
+                'why': row.get('blocker') or ('current_project_evidence' if fresh else 'stale_or_missing_project_evidence'),
+                'evidence': {'source': source, 'checkedAt': now, 'status': project.get('status')},
+                'responsibleCrew': row.get('responsibleCrew') or (row.get('source') or {}).get('assignedRole') or 'jarvis',
+                'acceptance': acceptance_requirements(row), 'verifiedOutcome': (row.get('outcome') or {}).get('status') == 'completed'}
+            row['priorityAssessment'] = chain
+            # Preserve user priorities. Review urgency does not authorize execution/retry.
+            row['reviewPriority'] = 0 if row.get('blocker') else 1 if not fresh else 2
+            _save(row)
+            decisions.append(chain)
+        for followup in followups:
+            key = 'measurement:' + followup['key']
+            previous = state.setdefault('unresolvedWork', {}).get(key) or {}
+            def material(value):
+                if isinstance(value, dict):
+                    return {k: material(v) for k, v in value.items() if not k.endswith(('At', 'Sha256'))
+                            and k not in ('dueAt', 'runId', 'collected_at', 'checked_at', 'sourceRef', 'sourceFileSha256')}
+                if isinstance(value, list):
+                    return [material(v) for v in value]
+                return value
+            fingerprint = hashlib.sha256(json.dumps(material(followup), sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+            if (previous.get('evidenceFingerprint') not in (None, fingerprint) and previous.get('reviewOutcome')
+                    and len(previous.get('reviewHistory', [])) < 2):
+                previous.setdefault('reviewHistory', []).append({k: previous.get(k) for k in
+                    ('reviewGoalId', 'reviewAgendaId', 'reviewOutcome', 'evidenceFingerprint')})
+                for field in ('reviewGoalId', 'reviewAgendaId', 'reviewOutcome'):
+                    previous.pop(field, None)
+            state['unresolvedWork'][key] = {**previous, **followup, 'key': key,
+                'blocker': None if followup.get('status') == 'resolved' else followup.get('reason'),
+                'nextAction': None if followup.get('status') == 'resolved' else 'collect_or_review_scoped_evidence',
+                'evidenceFingerprint': fingerprint, 'createdAt': previous.get('createdAt', now), 'autoRetry': False}
+        state['lastExecutiveHealthAt'] = now
+        state['executiveHealth'] = {'checkedAt': now, 'decisions': decisions, 'measurementFollowups': len(followups),
+                                    'modelCalls': 0, 'experimentPreserved': True}
+        write(STATE, state)
+    dispatch_evidence_review_once(now)
+    return True
+
+
 def company_executive_check_once(force=False):
     """Reverse-Funnel Strategy Brain (@jarvis): calculates gap to $100/day, audits all 6 channels live, pivots lanes, and proactively calls ask_ceo."""
     now = time.time()
     state = load(STATE)
-    if not force and now - state.get('lastExecutiveCheckAt', 0) < 300 and state.get('pending'):
+    if not force and now - state.get('lastExecutiveHealthAt', 0) < 300:
         return False
     prune_stale_runtime_data()
     try:
@@ -1604,6 +2293,7 @@ def company_executive_check_once(force=False):
         from common.llm_client import generate_json
         from common.crew_chat_bridge import emit_work_event, emit_ceo_proposal
         company = overview()
+        health_checked = executive_health_check(company, now)
         live_diag = _build_live_executive_diagnostics()
         projects_summary = [
             {
@@ -1617,17 +2307,11 @@ def company_executive_check_once(force=False):
             }
             for p in company.get('projects', [])
         ]
-        healthy_ids = {p['id'] for p in projects_summary if p.get('status') == 'healthy'}
         valid_pending = []
         pruned = []
         for pid in pending_ids:
             prow = get(pid)
             if not prow or prow.get('status') != 'queued':
-                continue
-            if (str(prow.get('title', '')).startswith('자동 운영 점검:') or str(prow.get('title', '')).endswith('자동 운영 점검')) and prow.get('project') in healthy_ids:
-                prow.update(status='closed', closedAt=now, closeReason='auto_pruned_project_healthy')
-                _save(prow)
-                pruned.append(pid)
                 continue
             valid_pending.append(prow)
         if pruned:
@@ -1641,6 +2325,8 @@ def company_executive_check_once(force=False):
         previous_experiment = state.get('activeExperiment') or {}
         if (previous_experiment.get('id') and previous_experiment.get('status') in ('active', 'inconclusive')
                 and not previous_experiment.get('observationClosed')):
+            if not previous_experiment.get('interventionReceipt'):
+                return health_checked
             prior_capture = previous_experiment.get('finalObservation')
             capture_experiment_observation(previous_experiment, business, now=now)
             if previous_experiment.get('finalObservation') != prior_capture:
@@ -1648,7 +2334,7 @@ def company_executive_check_once(force=False):
                     return False
             today = datetime.now(timezone.utc).date().isoformat()
             if today < previous_experiment.get('measurementDate', '9999'):
-                return False
+                return health_checked
             evaluation = evaluate_business_experiment(previous_experiment, business, now=now)
             closed = experiment_observation_closed(previous_experiment, evaluation, now)
             changes = {'status': evaluation['status'], 'evaluation': evaluation, 'evaluatedAt': now,
@@ -1658,7 +2344,7 @@ def company_executive_check_once(force=False):
                 return False
             # Missing reports get bounded collection grace; no new work or budget reset.
             if not closed:
-                return False
+                return health_checked
         fp_src = json.dumps({
             'projects': [(p['id'], p['status'], p['recoverableCount']) for p in projects_summary],
             'pending': [r['id'] for r in valid_pending],
@@ -1703,17 +2389,19 @@ def company_executive_check_once(force=False):
                 },
                 'autonomousWorkOrders': {
                     'type': 'array',
-                    'minItems': 1,
+                    'minItems': 0,
                     'maxItems': 3,
                     'items': {
                         'type': 'object',
                         'properties': {
                             'role': {'type': 'string', 'enum': ['doctor', 'patch', 'trace', 'radar', 'publi']},
-                            'workType': {'type': 'string', 'enum': ['cro_widget_retrofit', 'indexnow_unindexed_push', 'content_audit_patrol', 'radar_high_cpc_scout', 'brunch_daily_publish']},
+                            'workType': {'type': 'string', 'enum': ['cro_widget_retrofit', 'indexnow_unindexed_push',
+                                'content_audit_patrol', 'radar_high_cpc_scout', 'brunch_daily_publish']},
                             'targetDomain': {'type': 'string'},
-                            'directive': {'type': 'string', 'minLength': 1, 'maxLength': 300},
+                            'rationale': {'type': 'string', 'minLength': 1, 'maxLength': 300},
+                            'additionalRequirements': {'type': 'array', 'maxItems': 8, 'items': {'type': 'string'}},
                         },
-                        'required': ['role', 'workType', 'targetDomain', 'directive'],
+                        'required': ['role', 'workType', 'targetDomain', 'rationale', 'additionalRequirements'],
                         'additionalProperties': False,
                     },
                 },
@@ -1753,7 +2441,7 @@ def company_executive_check_once(force=False):
             + json.dumps(live_diag, ensure_ascii=False) + '\n'
             '1) briefing: 수익·유입의 기간·통화·범위와 미측정을 구분하고 목표 $100과의 확인된 격차를 브리핑하라. 필요 PV는 reverseFunnel의 동일 범위 실측 RPM이 있을 때만 사용한다. 채널 진행 현황은 발행 할당량 달성도가 아닌 실제 관측과 병목으로 설명하라.\n'
             '2) focusChannels: 오늘 우선 가동할 핵심 유입·수익 채널 배열(cf_blog, threads, naver_kin, naver_blog, brunch, legacy_remodel 포함 가능)을 지정하라.\n'
-            '3) autonomousWorkOrders: 선택된 target URL의 도메인에서 최대 3개 개입만 제안하라. 현재 자동실험은 cro_widget_retrofit(근거·비교·내부안내 개선), indexnow_unindexed_push(제출과 실제 색인 구분)만 실행한다. 다른 채널·도메인 확대와 수익 약속은 하지 마라.\n'
+            '3) autonomousWorkOrders: 작업이 필요할 때만 선택된 URL에 제안하라. cro_widget_retrofit은 기존 내용의 요약·표·내부 안내 정리와 저장·공개 HTML 검증, indexnow_unindexed_push는 지정 URL 제출 접수 검증만 실행한다. 나머지 세 workType은 Patch의 정확한 대상 기능 검토로 보류하며 자동 발행하지 않는다. rationale은 선택 이유이며 실행 지시가 아니다. 사실 검수·통계 조사 등 추가 요구는 반드시 additionalRequirements에 보존하라. 지원하지 않는 추가 요구가 있으면 실행 전에 보류한다.\n'
             '4) topAgendaId, dropAgendaIds & healOrRetryAgendaIds: 대기 안건(pendingAgendas) 중 실질 유입·수익 기여도가 가장 높은 최우선 안건 1개를 topAgendaId로 고르고, 불필요한 중복 티켓은 dropAgendaIds로 폐기하며, activeBlockers에 막힌 안건은 healOrRetryAgendaIds에 넣어 즉시 복구하라.\n'
             '5) experiment: pageObservations의 실제 targetUrl, 가설, primaryMetric(pageViews/sessions/estimatedRevenue), 기준선과 같은 measurementWindowDays(7/14/28), 사후 최소표본 minimumSample(PV), 공유 maxModelCalls(1~40), 성공 지표·중단 조건을 설정하라. 기준선 수치는 호스트가 연결한다. 초기 유입 관측과 수익 검증을 구분하고 효과를 보장하지 마라.\n'
             '6) ceoProposal (대표님께 역제안 · ask_ceo): 대표님의 결단/승인이 필요한 병목(예: 네이버 프리미엄콘텐츠 2단계 인증/심사 확인, 추가 계정/캠페인 승인, 수익 격차 돌파 작전 승인)을 선제적으로 정리해 보고하라.\n'
@@ -1775,16 +2463,20 @@ def company_executive_check_once(force=False):
                 role=order.get('role') or 'doctor',
                 target_domain=order.get('targetDomain') or '',
                 directive=order.get('directive') or '',
+                rationale=order.get('rationale') or '',
+                additional_requirements=order.get('additionalRequirements') or [],
             )
             if aid:
-                dispatched_orders.append(f"@{order.get('role')}: {order.get('directive')}")
+                dispatched_orders.append(f"@{order.get('role')}: {order.get('rationale') or order.get('directive')}")
         with locked(ROWS):
             st = load(STATE)
             st.setdefault('schema', 'barolab-work-agenda-v1')
             st['enabled'] = True
             for hid in heal_set:
                 hrow = get(hid)
-                if hrow and hrow.get('status') == 'blocked' and not running(hrow) and hrow.get('resumeAuthorized') is True:
+                from common.repair_workflow import agenda_recovery_blocker
+                if (hrow and hrow.get('status') == 'blocked' and not running(hrow)
+                        and hrow.get('resumeAuthorized') is True and not agenda_recovery_blocker(hrow)):
                     hrow.update(status='recovering', controllerFailures=0, nextCheckAt=0)
                     hrow.pop('recoveryGoalId', None)
                     _save(hrow)
@@ -1794,9 +2486,9 @@ def company_executive_check_once(force=False):
                     if drow and drow.get('kind') == 'conference' and not drow.get('verification', {}).get('verified'):
                         continue
                     if drow:
-                        drow.update(status='closed', closedAt=now, closeReason='jarvis_executive_pruned')
+                        # Model advice cannot discard unresolved acceptance or owned submissions.
+                        drow['executiveRecommendation'] = {'action': 'review_duplicate', 'at': now}
                         _save(drow)
-                    st['pending'] = [i for i in st.get('pending', []) if i != drop_id]
             if top_id and top_id in st.get('pending', []):
                 trow = get(top_id)
                 if trow:
@@ -1833,8 +2525,14 @@ def company_executive_check_once(force=False):
 def _step_single_agenda(row):
     if not row:
         return False
+    if (row.get('source') or {}).get('executionContract') and (row.get('source') or {}).get('directive'):
+        return False  # Typed work cannot execute while additional requested scope is unsupported.
     if row.get('switchRequest'):
         return switch_once(row)
+    if row.get('status') in ('blocked', 'recovering'):
+        from common.repair_workflow import agenda_recovery_blocker
+        if agenda_recovery_blocker(row):
+            return False
     if row.get('controllerFailures',0)>=3 and row['status'] in ('blocked','recovering'):
         with context(token(row)):
             return recovery_watch(row)
@@ -1854,8 +2552,15 @@ def _step_single_agenda(row):
                 return prepare_open(row['id'])
             flush_events(row['id'])
             if row['kind'] in ('cro_widget_retrofit', 'indexnow_unindexed_push', 'style', 'radar', 'audit', 'brunch_publish') and row['status'] in ('meeting', 'recovering', 'blocked'):
-                if row.get('auxiliaryStartedAt') and row['status'] == 'meeting' and (time.time() - float(row.get('auxiliaryStartedAt') or 0) < 180):
-                    hold(row['id'], '실행이 중단되었습니다. 저장된 결과를 먼저 확인하며 같은 작업을 자동 재실행하지 않습니다.')
+                if row.get('auxiliaryStartedAt'):
+                    # Restarts and elapsed time never authorize replay of a possible external effect.
+                    with locked(ROWS):
+                        saved = get(row['id']); state = load(STATE)
+                        outcome = task_outcome(saved)
+                        if not saved.get('auxiliaryResult'):
+                            outcome.update(status='held', blocker='external_effect_unknown', nextAction='verify_existing_external_receipt')
+                        _retain_outcome(saved, state, outcome)
+                        saved['status'] = 'blocked'; _save(saved); write(STATE, state)
                     return False
                 with locked(ROWS):
                     row = get(row['id']); row['auxiliaryStartedAt'] = time.time(); _save(row)
@@ -1867,47 +2572,41 @@ def _step_single_agenda(row):
                         doms = [dom] if dom and '.' in dom else None
                         target_urls = [row['source']['targetUrl']] if row.get('source', {}).get('autonomousExperiment') else None
                         result = retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=doms, target_urls=target_urls)
-                        good = result.get('status') in ('completed', 'already_optimized')
-                        summary_text = f"기발행 CF 원고 {result.get('updatedCount', 0)}건 CRO 3초 자가진단·제휴·내부 브릿지 위젯 이식 및 캐시 퍼지 완료"
+                        summary_text = f"CF 원고 수정 영수증 {result.get('updatedCount', 0)}건 관측; 사실 검수와 전체 수용 조건은 별도 확인"
                     elif row['kind'] == 'indexnow_unindexed_push':
                         from common.cf_tables import push_unindexed_cf_posts
                         dom = (row.get('source') or {}).get('domain') or ''
                         doms = [dom] if dom and '.' in dom else None
-                        result = push_unindexed_cf_posts(limit_per_domain=4, domains=doms)
-                        good = result.get('status') in ('completed', 'all_recent_pinged')
-                        summary_text = f"미색인 기발행 CF 원고 {result.get('pingedCount', 0)}건 IndexNow·Bing·Google Sitemap 강제 제출 완료"
+                        target_urls = [row['source']['targetUrl']] if row.get('source', {}).get('autonomousExperiment') else None
+                        result = push_unindexed_cf_posts(limit_per_domain=4, domains=doms, target_urls=target_urls)
+                        summary_text = f"색인 제출 접수 영수증 {result.get('pingedCount', 0)}건 관측; 실제 색인과 전체 조사 범위는 별도 확인"
                     elif row['kind'] == 'style':
                         from dashboard.agents.style_strategy import review_once
                         result = review_once()
-                        good = result.get('status') in ('completed', 'already_reviewed')
                     elif row['kind'] == 'audit':
                         from server.content_auditor import run_patrol_batch
                         dom = (row.get('source') or {}).get('domain') or 'must-good.com'
                         result = run_patrol_batch(2, dom, False)
                         records = result.get('results', [])
-                        good = bool(records) or result.get('status') in ('completed', 'ok') or result.get('ok') is True
-                        summary_text = f"{dom} 기발행 원고 품질·CRO 감사 완료 ({len(records)}건)"
+                        summary_text = f"{dom} 감사 결과 {len(records)}건 반환; 전체 수용 조건은 별도 확인"
                     elif row['kind'] == 'brunch_publish':
                         from brunch_posting.posting import process_brunch_autonomy_once
                         result = process_brunch_autonomy_once(cdp_port=9450)
-                        good = bool(result.get('ok'))
-                        summary_text = f"브런치(@머스트픽) 실시간 상태 동기화 및 자동 칼럼 연재 점검 완료 (오늘 발행 {result.get('todayPublishedCount', 1)}건)"
+                        summary_text = f"브런치 원천 상태: {result.get('status', result.get('state', 'unknown'))}"
                     else:
                         from server.radar_scout import SCOUT, fetch_blokey_golden
                         blokey_res = fetch_blokey_golden(cdp_port=9440)
                         raw_slot = row['source'].get('slot')
                         valid_slot = raw_slot if raw_slot in (9, 14, 20, '09:00', '14:00', '20:00') else None
                         scout_res = SCOUT.trigger(slot=valid_slot, background=False)
-                        result = {'status': 'completed', 'blokeyCount': len(blokey_res.get('items') or []), 'pairedSets': len(blokey_res.get('pairedBridgeSets') or []), 'scout': scout_res}
-                        good = bool(blokey_res.get('items')) or bool(scout_res.get('sources')) or scout_res.get('status') in ('collected', 'already_claimed', 'completed') or scout_res.get('started') is False
-                        summary_text = f"블로키 S/A급 황금키워드 {len(blokey_res.get('items') or [])}건(CF×네이버 브릿지 세트 {len(blokey_res.get('pairedBridgeSets') or [])}개) 발굴 및 배정 완료"
+                        result = {'status': 'completed', 'blokey': blokey_res, 'blokeyCount': len(blokey_res.get('items') or []),
+                                  'pairedSets': len(blokey_res.get('pairedBridgeSets') or []), 'scout': scout_res,
+                                  'candidates': blokey_res.get('items') or scout_res.get('candidates') or []}
+                        summary_text = f"블로키 후보 {len(blokey_res.get('items') or [])}건 반환; 원천 수집 성공과 배정은 별도 확인"
                 with locked(ROWS):
                     row = get(row['id']); row['auxiliaryResult'] = result; _save(row)
-                if good:
-                    verified(row['id'], {'verified': True, 'source': str(path(row['id'])), 'scope': row['completionCriteria'],
-                             'summary': summary_text, 'resultStatus': result.get('status'), 'result': result, 'publicationVerified': False})
-                else:
-                    hold(row['id'], '실제 조사·전략 결과를 확인하지 못했습니다. 기존 결과와 안건을 보존했습니다.')
+                verified(row['id'], {'verified': True, 'source': str(path(row['id'])), 'scope': row['completionCriteria'],
+                         'summary': summary_text, 'resultStatus': result.get('status'), 'result': result, 'publicationVerified': False})
                 return True
             if row['status'] in ('blocked','recovering') and recovery_watch(row):
                 return True
@@ -1934,8 +2633,8 @@ def _step_single_agenda(row):
                 diag_summary = f" [원천 에러 진단: {diag.get('sourceLocation')} | {diag.get('errorType')}: {diag.get('errorMessage')}]" if diag else ''
                 goal = reason_request('agenda-recovery:'+row['id']+':'+str(int(time.time())),
                     '현재 안건 '+row['title']+'의 실패를 같은 안건에서 즉시 자가 치유(Self-Healing)·복구·검증하라.' + diag_summary + ' '
-                    '1) 원천 에러(failureDiagnostic.sourceLocation)가 파이썬 코드/검증 조건 버그이면 read_source로 해당 라인을 확인한 뒤 즉시 propose_patch {files:[...], objective:"...", auto_apply:true}를 호출해 코드를 직접 수정하라. '
-                    '2) 코드 패치 후 또는 일시적 런타임/브라우저 오류인 경우 retry_conference {} 도구로 이 안건의 실행을 즉시 재개하라. '
+                    '1) 원천 에러와 기존 영수증을 읽고 결정론적 진단과 검토용 수정안을 제안하라. 모델 출력이나 후보 패치를 자동 적용하지 마라. '
+                    '2) 수동 중단·인증·설정·외부 효과 불확실성은 보류하고 담당자와 다음 검증 조건을 남겨라. 재실행은 호스트 안전 게이트와 명시적 권한이 있을 때만 가능하다. '
                     '안건 ID: '+row['id']+' 원인: '+row.get('blocker','')+' 원래 실행 ID: '+cid,
                     execute=True, repair=True, steps=0, origin='agenda', projects=[row['project']],
                     agenda_id=row['id'])

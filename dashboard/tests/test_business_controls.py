@@ -563,7 +563,8 @@ class BusinessControls(unittest.TestCase):
             agendas.finish_investigation(self.agenda, '확인한 자료는 보존, 복구 결과는 미확인', 'agenda_token_budget_exhausted')
             self.assertTrue(agendas.finish_reports(self.agenda))
             closed = agendas.get(self.agenda)
-            self.assertEqual(closed['status'], 'closed')
+            self.assertEqual(closed['status'], 'blocked')
+            self.assertEqual(closed['outcome']['status'], 'held')
             self.assertFalse(closed.get('verification', {}).get('verified', False))
             self.assertLessEqual(len(closed['events']['closing']['text']), 30)
             self.assertNotIn('raw', closed['events']['closing']['text'])
@@ -575,7 +576,7 @@ class BusinessControls(unittest.TestCase):
         row = dict(id=self.agenda, project='naver_blog', title='원시 제목'*100,
                    source={'arguments': {'slot': '15:00'}})
         note = agendas.event(row, 'closing', 'jarvis', row['title'])
-        self.assertEqual(note['text'], '[안건 종결] [네이버 블로그 15:00 슬롯]')
+        self.assertEqual(note['text'], '[미해결 보고] [네이버 블로그 15:00 슬롯]')
         self.assertLessEqual(len(note['text']), 30)
 
     def test_operational_check_title_is_korean_without_raw_observation(self):
@@ -701,7 +702,7 @@ class BusinessControls(unittest.TestCase):
         state_path=self.data/'agenda.json'
         state_path.write_text(json.dumps({'enabled':True,'activeId':self.agenda,'activeIds':[self.agenda]}))
         row=dict(id=self.agenda,kind='conference',project='cf_blog',status='report_pending',
-                 verification={'verified':True,'source':'receipt'},events={'opening':{'id':'opening','receivedAt':1},
+                 verification={'verified':True,'source':'receipt','outcomes':[{'publicationVerified':True}]},events={'opening':{'id':'opening','receivedAt':1},
                      'staff_result':{'id':'staff'},'closing':{'id':'closing'}},waitingFor={'owner':'patch','condition':'old wait'})
         (rows/(self.agenda+'.json')).write_text(json.dumps(row))
         with patch.object(agendas,'ROWS',rows),patch.object(agendas,'STATE',state_path), \
@@ -798,6 +799,25 @@ class BusinessControls(unittest.TestCase):
         self.data.mkdir(parents=True)
         self.now = dt.datetime.now(dt.timezone.utc)
         self.agenda = 'a' * 64
+        usage_root = patch.object(usage, 'ROOT', self.root)
+        usage_root.start(); self.addCleanup(usage_root.stop)
+        from common import ego_telemetry
+        telemetry_root = patch.object(ego_telemetry, 'DIRECTORY', self.root/'ego-telemetry')
+        telemetry_root.start(); self.addCleanup(telemetry_root.stop)
+        import memory_graph
+        memory_root = patch.object(memory_graph, 'DATA_DIR', self.data)
+        memory_root.start(); self.addCleanup(memory_root.stop)
+        from agents import chat_room
+        for field, value in [('BASE_DIR', self.root), ('DATA_DIR', self.data), ('CHATS_DIR', self.data/'chats'),
+                             ('ARCHIVE_DIR', self.data/'chats/.archive'), ('ROOM_MAIN_FILE', self.data/'chats/room-main.json')]:
+            scoped = patch.object(chat_room, field, value)
+            scoped.start(); self.addCleanup(scoped.stop)
+        # Every agenda path is isolated, including tests that mock get/_save only.
+        from common import work_agenda as agendas
+        for field, value in [('DATA', self.data), ('STATE', self.data/'active-agenda.json'),
+                             ('ROWS', self.data/'publication-conferences/operations')]:
+            scoped = patch.object(agendas, field, value)
+            scoped.start(); self.addCleanup(scoped.stop)
 
     def call(self, identity='one'):
         return dict(id=identity, provider='test', model='model', agendaId=self.agenda,
@@ -1152,8 +1172,10 @@ class BusinessControls(unittest.TestCase):
         row = dict(id=self.agenda, kind='goal', status='report_pending', events={},
                    title='발행 누락 점검', verification={'verified': True, 'monitorReconciled': True,
                                                       'scope': 'adinfo0905:12:20 공개 게시 확인'})
+        # Exercise reporting only: acceptance was checked by the host monitor adapter.
         with patch.object(agendas, 'get', return_value=row), patch.object(agendas, 'running', return_value=[]), \
              patch.object(agendas, 'locked', return_value=nullcontext()), patch.object(agendas, '_save'), \
+             patch.object(agendas, 'task_outcome', return_value={'status': 'completed'}), \
              patch.object(agendas, 'flush_events', return_value=False), patch.object(agendas, '_model_message') as model:
             self.assertFalse(agendas.finish_reports(self.agenda))
         model.assert_not_called()

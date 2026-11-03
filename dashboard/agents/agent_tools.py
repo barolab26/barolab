@@ -2015,6 +2015,16 @@ def process_staff_request_once():
             if candidate['status']!='awaiting_completion':
                 if candidate['businessAgendaId'] not in agendas.active_ids():continue
                 active=agendas.get(candidate['businessAgendaId'])
+                from common.repair_workflow import agenda_recovery_blocker
+                cause=agenda_recovery_blocker(active)
+                if cause:
+                    with locked(STAFF_REQUEST_DIR):
+                        fresh=json.loads(path.read_text(encoding='utf-8'))
+                        if fresh.get('status')=='queued':
+                            fresh.update(status='held',reasonCode=cause,heldAt=time.time(),
+                                resumeCondition='host_reconciliation_or_explicit_authorized_resume')
+                            write(path,fresh)
+                    continue
                 if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
                 if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
                 if candidate['status']=='queued' and agendas.running(active):continue

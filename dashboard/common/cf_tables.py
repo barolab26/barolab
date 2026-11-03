@@ -495,33 +495,64 @@ def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None,
                                 result = requests.put(endpoint, json=payload, headers={'Authorization': 'Bearer ' + token}, timeout=20, allow_redirects=False)
                     result.raise_for_status()
                     address = f'https://www.{domain}/{original["slug"]}'
-                    proof = {
+                    proof = {'domain': domain, 'postId': original['id'], 'title': original.get('title', ''),
+                        'url': address, 'apiStatus': result.status_code, 'apiAccepted': result.status_code in (200, 201, 204),
+                        'submittedAt': dt.datetime.now(dt.timezone.utc).isoformat(), 'status': 'pending_verification',
+                        'pendingEffect': True, 'durableSuccess': False, 'publicContentMatched': False, 'verifiedAt': None,
+                        'nextAction': 'verify_existing_external_receipt', 'contentSha256': hashlib.sha256(revised.encode()).hexdigest(),
+                        'verificationScope': 'rendering_only', 'factualReviewStatus': 'not_assessed'}
+                    write(backup / 'receipt.json', proof)
+                    report['posts'].append(proof)
+                    domain_updated += 1
+                    save()  # Persist the accepted mutation before either verification read can fail.
+                    # Accepted PUT is only an attempt; compare the stored and public replacement.
+                    stored_response = requests.get(endpoint, timeout=15, allow_redirects=False)
+                    stored_response.raise_for_status()
+                    stored = stored_response.json().get('post') or {}
+                    stored_matched = (stored.get('content') == revised and all(
+                        stored.get(k) == original.get(k) for k in ('title', 'slug', 'status')))
+                    proof['cachePurge'] = purge_repaired_posts([proof]).get(domain, {'status': 'skipped'})
+                    public = requests.get(address, timeout=15, allow_redirects=False)
+                    public.raise_for_status()
+                    public_soup = BeautifulSoup(public.text, 'html.parser')
+                    article = public_soup.select_one('article.gs-article, article.content, .content')
+                    expected_html = ' '.join(str(BeautifulSoup(revised, 'html.parser')).split())
+                    actual_html = ' '.join(str(article).split()) if article else ''
+                    public_matched = bool(expected_html and expected_html in actual_html
+                                          and original.get('title') in public_soup.get_text(' ', strip=True))
+                    durable = bool(result.status_code in (200, 201, 204) and stored_response.status_code == 200
+                                   and public.status_code == 200 and stored_matched and public_matched)
+                    proof.update({
                         'domain': domain,
                         'postId': original['id'],
                         'title': original.get('title', ''),
                         'url': address,
                         'apiStatus': result.status_code,
                         'croWidgetInjected': '<!-- editorial-summary -->' in revised,
-                        'verifiedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+                        'verifiedAt': dt.datetime.now(dt.timezone.utc).isoformat() if durable else None,
+                        'durableSuccess': durable, 'publicContentMatched': public_matched,
+                        'status': 'verified' if durable else 'pending_verification', 'pendingEffect': not durable,
+                        'nextAction': None if durable else 'verify_existing_external_receipt',
+                        'apiContentMatched': stored_matched, 'publicStatus': public.status_code,
+                        'contentSha256': hashlib.sha256(revised.encode()).hexdigest(),
+                        'publicResponseSha256': hashlib.sha256(public.text.encode()).hexdigest(),
                         'verificationScope': 'rendering_only',
                         'factualReviewStatus': 'not_assessed',
-                    }
+                    })
                     write(backup / 'receipt.json', proof)
-                    report['posts'].append(proof)
-                    domain_updated += 1
+                    if not durable:
+                        report['holds'].append({'domain': domain, 'postId': item['id'],
+                            'reason': 'public_replacement_unverified', 'nextAction': 'verify_existing_external_receipt'})
                     save()
                 except Exception as exc:
                     report['errors'].append({'domain': domain, 'postId': item.get('id'), 'error': str(exc)})
                     save()
             time.sleep(0.05)
-    if report['posts']:
-        cache = purge_repaired_posts(report['posts'])
-        for proof in report['posts']:
-            proof['cachePurge'] = cache.get(proof['domain'], {'status': 'skipped'})
     report['finishedAt'] = dt.datetime.now(dt.timezone.utc).isoformat()
     save()
     return {
-        'status': ('completed' if report['posts'] else 'held' if report['holds'] or report['errors']
+        'status': ('completed' if report['posts'] and all(p.get('durableSuccess') for p in report['posts'])
+                   and not report['holds'] and not report['errors'] else 'held' if report['posts'] or report['holds'] or report['errors']
                    else 'no_matching_target' if target_urls and not report['selectedCount'] else 'already_optimized'),
         'reportDir': str(folder),
         'updatedCount': len(report['posts']),
@@ -533,10 +564,12 @@ def retrofit_cro_widgets_and_tables(limit_per_domain=2, domains=None, root=None,
     }
 
 
-def push_unindexed_cf_posts(limit_per_domain=4, domains=None):
+def push_unindexed_cf_posts(limit_per_domain=4, domains=None, target_urls=None):
     """Push un-pinged published CF blog posts to IndexNow + Bing + Google Sitemap ping and warm edge sitemaps."""
     import json
     import requests
+    import datetime as dt
+    from urllib.parse import urlsplit, unquote
     from cf_posting import posting
     from common.asset_map import PRIORITY_CASHCOW_DOMAINS
     target_domains = list(domains) if domains else (list(PRIORITY_CASHCOW_DOMAINS) + [d for d in posting.ALL_DOMAINS if d not in PRIORITY_CASHCOW_DOMAINS])
@@ -569,13 +602,21 @@ def push_unindexed_cf_posts(limit_per_domain=4, domains=None):
             if not slug or item.get('status') not in ('published', None):
                 continue
             url = f'https://www.{domain}/{slug}'
+            if target_urls is not None and not any(
+                    urlsplit(target).scheme == 'https' and
+                    (urlsplit(target).hostname or '').lower().removeprefix('www.') == domain.lower().removeprefix('www.') and
+                    unquote(urlsplit(target).path).rstrip('/') == unquote(urlsplit(url).path).rstrip('/') and
+                    urlsplit(target).query == urlsplit(url).query for target in target_urls):
+                continue
             if url in already_pinged:
                 continue
             res = posting.ping_indexnow(domain, url)
             accepted = any(isinstance(r, dict) and r.get('httpStatus') in (200, 202) for r in (res or []))
             if accepted:
                 already_pinged.add(url)
-                pinged.append({'domain': domain, 'postId': item.get('id'), 'title': item.get('title', ''), 'url': url, 'results': res, 'accepted': True})
+                pinged.append({'domain': domain, 'postId': item.get('id'), 'title': item.get('title', ''), 'url': url,
+                               'results': res, 'accepted': True, 'verifiedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+                               'verificationScope': 'submission_only', 'indexedVerified': False})
                 domain_count += 1
             else:
                 errors.append({'domain': domain, 'url': url, 'results': res, 'accepted': False})
