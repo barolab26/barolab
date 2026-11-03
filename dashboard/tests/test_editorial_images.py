@@ -380,6 +380,131 @@ class EditorialTests(unittest.TestCase):
             with self.subTest(url=url), self.assertRaises(e.Held):
                 e._public_url(url)
 
+    def observe_dom_fixture(self, fixture):
+        """Run the real page.evaluate callbacks against a layout/DOM fixture.
+
+        Only the EGO transport and DOM geometry/styles are fixtures: observe is
+        neither copied nor replaced, and no browser, DNS or network is invoked.
+        """
+        helper = Path(e.__file__).with_name('editorial_browser.mjs').resolve().as_uri()
+        request = self.folder/'observe-fixture.json'
+        request.write_text(e._json({'op':'inspect','space':314,'url':'https://8.8.8.8/source'}),encoding='utf-8')
+        harness = r'''
+const fixture=FIXTURE;
+Object.assign(globalThis,{innerWidth:640,innerHeight:360,scrollX:0,scrollY:0,
+  location:{href:'https://8.8.8.8/source'}});
+function element(data) {
+  const e={tagName:data.tag||'H2',role:data.role,innerText:data.text??'Visible source heading',
+    closest(selector){
+      for(let node=this;node;node=node.parentElement) {
+        if(selector==='nav,[role=navigation]' && (node.tagName==='NAV'||node.role==='navigation'))return node;
+        if(selector==='figure' && node.tagName==='FIGURE')return node;
+      }
+      return null;
+    },style:{display:'block',visibility:'visible',opacity:'1',...data.style},
+    getBoundingClientRect:()=>{
+      const [x,y,width,height]=data.rect||[20,60,400,30];
+      return {x,y:y-scrollY,left:x,top:y-scrollY,right:x+width,bottom:y-scrollY+height,width,height};
+    }};
+  let next=null;
+  for(const sibling of [...(data.following||[])].reverse()) {
+    const node=element(sibling);node.nextElementSibling=next;next=node;
+  }
+  e.nextElementSibling=next;
+  let child=e;
+  for(const ancestor of data.ancestors||[]) {
+    child.parentElement=element({...ancestor,tag:ancestor.tag||'DIV'});child=child.parentElement;
+  }
+  return e;
+}
+const headings=(fixture.headings||[]).map(element),regions=(fixture.regions||[]).map(element);
+globalThis.getComputedStyle=e=>e.style;
+globalThis.document={body:{innerText:'Observed public fixture text'},title:'Fixture',
+  querySelector:()=>null,querySelectorAll:selector=>{
+    if(selector==='h1,h2,h3')return headings;
+    if(selector==='figure,img,table,article,main,section,[role=main]')return regions;
+    if(selector==='a[href]')return [];
+    if(selector==='h1,h2,h3,figure,img,main')return [...headings,...regions];
+    throw Error('Unexpected selector: '+selector);
+  }};
+const page={cdp:async()=>{},url:async()=>location.href,evaluate:async(fn)=>fn()};
+globalThis.taskSpace=async()=>({spaceId:314,ownership:'agent',page:()=>page});
+const {run}=await import(HELPER);
+for(const y of fixture.scrolls||[0]) {globalThis.scrollY=y;await run(REQUEST);}
+'''
+        script = harness.replace('FIXTURE',json.dumps(fixture)).replace('HELPER',json.dumps(helper)).replace('REQUEST',json.dumps(request.as_uri()))
+        process = subprocess.run(['node','--input-type=module','-e',script],capture_output=True,text=True,encoding='utf-8',timeout=10)
+        self.assertEqual(process.returncode,0,process.stderr)
+        values = [json.loads(line.split(':',1)[1]) for line in process.stdout.splitlines() if line.startswith('EDITORIAL_JSON:')]
+        self.assertEqual(len(values),len(fixture.get('scrolls',[0])),process.stdout)
+        for value in values:
+            self.assertTrue(value['ok'],value)
+        return values
+
+    @unittest.skipUnless(shutil.which('node'), 'Node is required for real observe DOM fixtures')
+    def test_observe_filters_before_heading_cap_after_scroll(self):
+        for preceding in (12,24):
+            with self.subTest(preceding=preceding):
+                ignored = [{'text':'Hidden navigation','style':{'visibility':'hidden'}} for _ in range(preceding//2)]
+                ignored += [{'text':'Offscreen navigation','rect':[20,-100,400,30]} for _ in range(preceding//2)]
+                before, after = self.observe_dom_fixture({'headings':ignored+[
+                    {'text':'Actual carrier guidance','rect':[20,660,400,30],
+                     'following':[{'tag':'P','text':'Actual carrier list','rect':[20,700,400,80]}]}], 'scrolls':[0,600]})
+                self.assertEqual(before['regions'],[])
+                self.assertEqual(after['scroll']['y'],600)
+                self.assertEqual(after['regions'],[{'id':0,'tag':'EXCERPT',
+                    'text':'Actual carrier guidance\nActual carrier list','credit':'',
+                    'clip':{'x':20,'y':60,'width':400,'height':130}}])
+
+    @unittest.skipUnless(shutil.which('node'), 'Node is required for real observe DOM fixtures')
+    def test_observe_skips_blank_zero_size_hidden_and_script_text(self):
+        rejected = [{'text':' \n\t'}, {'text':'Zero height','rect':[20,60,400,0]},
+            {'text':'Zero width','rect':[20,60,0,30]},
+            *[{'text':'Hidden heading','style':style} for style in (
+                {'display':'none'},{'visibility':'hidden'},{'visibility':'collapse'},{'opacity':'0'})]]
+        self.assertEqual(self.observe_dom_fixture({'headings':rejected})[0]['regions'],[])
+        following = [{'tag':tag,'text':'Unrendered script text'} for tag in ('SCRIPT','STYLE','TEMPLATE','NOSCRIPT')]
+        following += [{'tag':'P','text':'Hidden sibling','style':{'visibility':'hidden'}},
+            {'tag':'P','text':'Zero height sibling','rect':[20,90,400,0]},
+            {'tag':'P','text':'Observed paragraph','rect':[20,100,400,80]}]
+        result = self.observe_dom_fixture({'headings':rejected+[{'text':'Evidence','following':following}]})[0]
+        self.assertEqual([r['text'] for r in result['regions']],['Evidence\nObserved paragraph'])
+        self.assertEqual(self.observe_dom_fixture({})[0]['regions'],[])
+
+    @unittest.skipUnless(shutil.which('node'), 'Node is required for real observe DOM fixtures')
+    def test_observe_preserves_region_path_ids_caps_and_viewport_clips(self):
+        regions = [{'tag':'FIGURE','text':f'Existing figure {i}','rect':[0,0,100,100]} for i in range(41)]
+        headings = [{'text':'Too little visible width','rect':[600,60,100,30]},
+            {'text':'Offscreen left','rect':[-1,60,400,30]},
+            {'text':'Below viewport','rect':[20,370,400,30]}]
+        headings += [{'text':f'Excerpt {i}','rect':[500,250,300,30],
+            'following':[{'tag':'P','text':'Source paragraph','rect':[500,290,300,200]}]} for i in range(15)]
+        result = self.observe_dom_fixture({'headings':headings,'regions':regions})[0]['regions']
+        self.assertEqual(len(result),52)
+        self.assertEqual([r['id'] for r in result],list(range(52)))
+        for i,r in enumerate(result[:40]):
+            self.assertEqual(r,{'id':i,'tag':'FIGURE','text':f'Existing figure {i}','credit':f'Existing figure {i}',
+                'clip':{'x':0,'y':0,'width':100,'height':100}})
+        self.assertEqual([r['text'] for r in result[40:]],[f'Excerpt {i}\nSource paragraph' for i in range(12)])
+        for r in result[40:]:
+            self.assertEqual(r['clip'],{'x':500,'y':250,'width':140,'height':110})
+
+    @unittest.skipUnless(shutil.which('node'), 'Node is required for real observe DOM fixtures')
+    def test_observe_excludes_invisible_ancestors_and_semantic_navigation(self):
+        ancestors = [[{'tag':'DIV'},{'style':{'opacity':'0'}}],
+            [{'style':{'display':'none'}}], [{'tag':'DIV'},{'tag':'NAV'}],
+            [{'tag':'DIV'},{'role':'navigation'}]]
+        ignored = [{'text':'Not article evidence','ancestors':chain} for chain in ancestors]*3
+        following = [{'tag':'SCRIPT','text':'Script instructions'},
+            {'tag':'NAV','text':'Navigation menu'}, {'tag':'DIV','role':'navigation','text':'More navigation'},
+            {'tag':'P','text':'Transparent content','ancestors':ancestors[0]},
+            {'tag':'P','text':'Visible body text','rect':[20,100,400,80]}]
+        result = self.observe_dom_fixture({'headings':ignored+[
+            {'text':'Article heading','ancestors':[{'tag':'HEADER'}],'following':following}]})[0]['regions']
+        self.assertEqual(len(result),1)
+        self.assertEqual(result[0]['id'],0)
+        self.assertEqual(result[0]['text'],'Article heading\nVisible body text')
+
     @unittest.skipUnless(shutil.which('node'), 'Node is required for fixed browser helper contract tests')
     def test_real_js_helper_network_gate_with_mocked_browser(self):
         helper = Path(e.__file__).with_name('editorial_browser.mjs').resolve().as_uri()

@@ -45,12 +45,28 @@ const observe = () => {
     });
   // A bounded heading+following-text excerpt is a useful public documentation
   // region when the main element itself extends below the viewport.
-  for (const h of [...document.querySelectorAll('h1,h2,h3')].slice(0,12)) {
+  const rendered = e => {
+    const r=e.getBoundingClientRect(),style=getComputedStyle(e);
+    if (!(r.width>0 && r.height>0) || e.closest('nav,[role=navigation]') ||
+      style.display==='none' || ['hidden','collapse'].includes(style.visibility) || style.opacity==='0') return false;
+    // Opacity is not inherited: a transparent ancestor still hides its children.
+    for(let parent=e.parentElement;parent;parent=parent.parentElement) {
+      const inherited=getComputedStyle(parent);
+      if(inherited.display==='none' || inherited.opacity==='0')return false;
+    }
+    return true;
+  };
+  const headings=[...document.querySelectorAll('h1,h2,h3')].filter(h=>{
     const r=h.getBoundingClientRect();
-    if (r.width<80 || r.top<0 || r.top>innerHeight-100 || r.left<0) continue;
+    return rendered(h) && (h.innerText||'').trim() && r.left>=0 && r.top>=0 &&
+      r.top<=innerHeight-100 && Math.min(r.width,innerWidth-r.left)>=80;
+  }).slice(0,12);
+  for (const h of headings) {
+    const r=h.getBoundingClientRect();
     let bottom=r.bottom,excerpt=h.innerText;
     for(let sibling=h.nextElementSibling,n=0;sibling&&n<8;sibling=sibling.nextElementSibling,n++){
       if(/^H[1-6]$/.test(sibling.tagName))break;
+      if(/^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT)$/.test(sibling.tagName) || !rendered(sibling))continue;
       const sr=sibling.getBoundingClientRect();
       if(sr.top>=innerHeight)break;
       bottom=Math.max(bottom,sr.bottom);excerpt+='\n'+(sibling.innerText||'');
