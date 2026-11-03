@@ -1,0 +1,66 @@
+/* Offline home-card regressions. Run: node dashboard/tests/runtime/test_home_metrics.js */
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const root=path.resolve(__dirname,'../..');
+const api=require(path.join(root,'js/metrics.js'));
+const today='2026-11-03';
+const source=(account,daily,extra={})=>({category:'adpost',id:'adpost-'+account,account,accountBreakdownVerified:true,daily,...extra});
+const revenue=sources=>({today,categories:[{id:'adpost',sources}],months:{}});
+const r=revenue([source('soultin',{'2026-11-01':'172','2026-10-31':'90'}),source('soul5373',{'2026-11-01':'90'}),source('yoon_master',{'2026-11-01':'2'})]);
+let rows=api.adpostAccounts(r,today);
+assert.equal(rows.reduce((s,r)=>s+r.month,0),264);
+assert(rows.every(r=>r.yesterday===null && !r.monthComplete));
+assert.equal(rows[0].prevMonth,90);assert.equal(rows[0].prevMonthLabel,'10월');
+const edge=revenue([source('a',{'2025-12-31':'12','2026-01-01':null,'2026-01-02':'99'}, {periods:{yesterday:{start:'2025-12-30',end:'2025-12-30',status:'collected',amounts:{KRW:500}}}})]);
+rows=api.adpostAccounts(edge,'2026-01-01');
+assert.equal(rows[0].yesterday,12);assert.equal(rows[0].prevMonth,12);assert.equal(rows[0].month,null);assert.equal(rows[0].prevMonthLabel,'12월');
+const unknown=revenue([source('a',{'2026-11-01':null,'2026-11-02':'','2026-11-03':false},{periods:{yesterday:{start:'2026-11-01',end:'2026-11-01',status:'collected',amounts:{KRW:77}}}})]);
+assert.equal(api.adpostAccounts(unknown,today)[0].yesterday,null);
+assert.equal(api.adpostAccounts(unknown,today)[0].month,null);
+const zero=revenue([source('a',{'2026-11-02':'0'})]);
+assert.equal(api.adpostAccounts(zero,today)[0].yesterday,0);
+assert.equal(api.adpostAccounts(revenue([source('a',{}, {aggregationEligible:false}),source('b',{}, {status:'duplicate_source'})]),today).length,0);
+const duplicated=JSON.parse(JSON.stringify(r));duplicated.months['2026-11']={sources:r.categories[0].sources};
+assert.equal(api.adpostAccounts(duplicated,today).length,3);
+
+const blogs=[['adinfo0905',42],['mustinfo',93],['mustpickinfo',36],['stone0747',6],['yoonviews',11]];
+const analysis={today,expectedNaverBlogs:5,naverBlogs:blogs.map(([id,value])=>({site:{site_id:'naver:'+id},status:'collected',date:today,stale:false,days:{[today]:value,'2026-11-02':100}}))};
+assert.equal(api.naverVisitors(analysis,today).value,188);
+const old=JSON.parse(JSON.stringify(analysis));old.naverBlogs[0].date='2026-11-02';delete old.naverBlogs[0].days[today];
+assert.equal(api.naverVisitors(old,today).rows[0].count,null);
+const invalid=JSON.parse(JSON.stringify(analysis));invalid.naverBlogs[0].stale=true;invalid.naverBlogs[1].days[today]=null;invalid.naverBlogs[2].days[today]=0;invalid.naverBlogs[3].timezone='UTC';invalid.naverBlogs[4].status='error';
+assert.equal(api.naverVisitors(invalid,today).known,1);assert.equal(api.naverVisitors(invalid,today).value,0);
+assert.equal(api.naverVisitors(analysis,'2026-11-04').value,null);
+
+class Element {constructor(){this.textContent='';this.children=[];}replaceChildren(...children){this.children=children;}}
+let clock=Date.parse('2026-11-03T07:00:00Z');
+class Clock extends Date {constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
+const elements=Object.fromEntries(['val-rev-adpost','adpost-account-breakdown',...Array.from({length:5},(_,i)=>'nv-visit-acc'+(i+1))].map(id=>[id,new Element()]));
+const document={getElementById:id=>elements[id]||null,createElement:()=>new Element()};
+const window={BaroLabMissionControl:{},applyMissionControl(){window.applied=(window.applied||0)+1;}};
+const ctx=vm.createContext({document,window,Date:Clock,Intl,console,analysis,today,latestVisitorMap:{naver:{obsolete:999}},loadQuotaData:()=>{throw Error('mission-control early return lost');}});
+const metrics=fs.readFileSync(path.join(root,'js/metrics.js'),'utf8');
+vm.runInContext(metrics.slice(0,metrics.indexOf('  const set ='))+'})(window);',ctx);
+window.renderAdpostAccounts(r,today);
+assert.match(elements['val-rev-adpost'].textContent,/어제 미수집/);
+assert.match(elements['val-rev-adpost'].textContent,/이달 ₩264 \(확인분 3\/3계정\)/);
+assert.equal(elements['adpost-account-breakdown'].children.length,3);
+window.renderAdpostAccounts(zero,today);assert.match(elements['val-rev-adpost'].textContent,/어제 ₩0/);
+window.renderAdpostAccounts(revenue([source('a',{'2026-11-02':10},{declaredRealNameAccountCount:3}),source('b',{'2026-11-02':20},{declaredRealNameAccountCount:3})]),today);
+assert.match(elements['val-rev-adpost'].textContent,/어제 ₩30 \(확인분 2\/3계정\)/);
+window.renderAdpostAccounts({},today);assert.match(elements['val-rev-adpost'].textContent,/어제 미수집/);assert.equal(elements['adpost-account-breakdown'].children.length,0);
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+vm.runInContext(html.match(/  const QUOTA_CONFIG = \{[\s\S]*?\n  \};/)[0],ctx);
+for(const name of ['renderNaverVisitors','updateQuotaUI']) vm.runInContext(html.match(new RegExp('  function '+name+'\\(\\) \\{[\\s\\S]*?\\n  \\}'))[0],ctx);
+const binding=html.slice(html.indexOf('        latestVisitorMap.naver = {};'),html.indexOf('\n\n        // Big Gauge 1:'));
+vm.runInContext(binding+'\nupdateQuotaUI();',ctx);
+assert.equal(window.applied,1);
+assert.deepEqual(Array.from({length:5},(_,i)=>elements['nv-visit-acc'+(i+1)].textContent),['👥 36명','👥 93명','👥 11명','👥 42명','👥 6명']);
+assert.equal(ctx.latestVisitorMap.naver.obsolete,undefined);
+ctx.analysis=invalid;vm.runInContext(binding+'\nupdateQuotaUI();',ctx);
+assert.equal(elements['nv-visit-acc1'].textContent,'👥 0명');assert.equal(elements['nv-visit-acc2'].textContent,'👥 미수집');
+ctx.analysis={today,naverBlogs:[]};vm.runInContext(binding,ctx);assert.equal(elements['nv-visit-acc1'].textContent,'👥 미수집');
+ctx.analysis=analysis;vm.runInContext(binding,ctx);clock=Date.parse('2026-11-03T15:00:01Z');vm.runInContext('updateQuotaUI()',ctx);
+assert.equal(elements['nv-visit-acc1'].textContent,'👥 미수집');
+assert.match(html,/\$\{value\}세션/);
+assert(!metrics.includes('???'),'new labels must preserve Korean UTF-8');
+console.log('Home metrics regressions passed: calendar months, exact dates, missing/zero, partial scope, duplicate sources, account aliases, mission-control rendering, refresh replacement and KST midnight.');

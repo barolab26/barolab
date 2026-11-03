@@ -664,16 +664,9 @@
 
     if (channel === 'naver') {
       // Visitors
-      const nvBlogs = metricsData?.trafficAnalysis?.naverBlogs || [];
-      let todayUv = 0;
-      let weekUv = 0;
-      nvBlogs.forEach(b => {
-        const u = b.days?.[today] ?? b.days?.[b.date] ?? 0;
-        todayUv += Number(u) || 0;
-        Object.values(b.days || {}).forEach(v => { weekUv += Number(v) || 0; });
-      });
-      state.visitorsToday = todayUv > 0 ? `${todayUv.toLocaleString('ko-KR')}명` : '집계 중';
-      state.visitorsSub = `5개 계정 합산 · 최근 누적 ${weekUv.toLocaleString('ko-KR')}명`;
+      const visitors=window.BaroLabRevenue?.naverVisitors(metricsData?.trafficAnalysis || {},today);
+      state.visitorsToday=visitors?.value==null?'미수집':`${visitors.value.toLocaleString('ko-KR')}명`;
+      state.visitorsSub=visitors ? `${visitors.known}/${visitors.expected}개 블로그 확인 · 최근 5일 ${visitors.recent==null?'미수집':visitors.recent.toLocaleString('ko-KR')+'명 (일별 합계·중복 포함, '+visitors.recentKnown+'/'+visitors.expected+'개)'}` : '방문자 통계 미수집';
 
       let journal = null, verifyLedger = null, monitor = null, activeWorkflow = null;
       try {

@@ -54,59 +54,72 @@
     const kst=new Date(d.getTime()+9*3600000).toISOString();
     return `${kst.slice(5,7)}/${kst.slice(8,10)} ${kst.slice(11,16)}`;
   }
+  const finiteAmount = value => (typeof value === 'number' || typeof value === 'string' && value.trim() !== '') && Number.isFinite(Number(value)) ? Number(value) : null;
   function adpostAccounts(data,today) {
-    const curMonth=today.slice(0,7);
-    const yesterday=new Date(Date.parse(today+'T00:00:00Z')-86400000).toISOString().slice(0,10);
-    const prevMonth=yesterday.slice(0,7);
-    const sources=data?.months?.[curMonth]?.sources || data?.categories?.find(c=>c.id==='adpost')?.sources || [];
-    const prevSources=prevMonth!==curMonth ? (data?.months?.[prevMonth]?.sources || []) : [];
-    const prevById=Object.fromEntries(prevSources.filter(s=>s.category==='adpost').map(s=>[s.id || ('adpost-'+s.account), s]));
-    const base=(sources.filter(s=>s.category==='adpost' && s.accountBreakdownVerified===true).length
-      ? sources.filter(s=>s.category==='adpost' && s.accountBreakdownVerified===true)
-      : prevSources.filter(s=>s.category==='adpost' && s.accountBreakdownVerified===true));
-    return base.map(s=>{
-      const acc=s.account || s.id.replace('adpost-','');
-      const prevS=prevById[s.id || ('adpost-'+acc)] || s;
-      const monthEntries=Object.entries(s.daily || {}).filter(([day,value])=>day.startsWith(curMonth) && Number.isFinite(Number(value)));
-      const prevEntries=Object.entries(prevS?.daily || {}).filter(([day,value])=>day.startsWith(prevMonth) && Number.isFinite(Number(value)));
-      const yVal=s.daily?.[yesterday] ?? prevS?.daily?.[yesterday] ?? s.periods?.yesterday?.amounts?.KRW ?? prevS?.periods?.yesterday?.amounts?.KRW ?? null;
-      return {
-        account:acc,
-        today:s.daily?.[today]??null,
-        yesterday:yVal,
-        month:monthEntries.length?monthEntries.reduce((n,[,value])=>n+Number(value),0):null,
-        prevMonth:prevEntries.length?prevEntries.reduce((n,[,value])=>n+Number(value),0):((s.periods?.previousMonth?.amounts?.KRW ?? prevS?.periods?.previousMonth?.amounts?.KRW)!=null ? Number(s.periods?.previousMonth?.amounts?.KRW ?? prevS?.periods?.previousMonth?.amounts?.KRW) : null),
-        prevMonthLabel:`${Number(prevMonth.slice(5,7))}월`,
-        checkedAt:s.checkedAt || prevS?.checkedAt || null
+    const curMonth=today.slice(0,7), shift=day=>new Date(Date.parse(day+'T00:00:00Z')-86400000).toISOString().slice(0,10);
+    const yesterday=shift(today), prevEnd=shift(curMonth+'-01'), prevMonth=prevEnd.slice(0,7);
+    const sources=[...(data?.months?.[curMonth]?.sources || []), ...(data?.categories?.find(c=>c.id==='adpost')?.sources || []), ...(data?.months?.[prevMonth]?.sources || [])];
+    const accounts=new Map();
+    for(const source of sources) {
+      if(source.category!=='adpost' || source.accountBreakdownVerified!==true || source.aggregationEligible===false || source.status==='duplicate_source') continue;
+      const account=source.account || source.id?.replace(/^adpost-/,'');
+      if(account) { if(!accounts.has(account)) accounts.set(account,[]); accounts.get(account).push(source); }
+    }
+    return [...accounts].map(([account,records])=>{
+      const daily=Object.assign({},...records.slice().reverse().map(s=>s.daily || {}));
+      const exactPeriod=(key,start,end)=>{
+        for(const source of records) { const p=source.periods?.[key]; if(p?.start===start && p.end===end) { const n=currencyValue(p,'KRW'); if(n!==null)return n; } }
+        return null;
       };
+      const monthValue=(month,end,key)=>{
+        const entries=Object.entries(daily).filter(([day,value])=>/^\d{4}-\d{2}-\d{2}$/.test(day) && day.startsWith(month+'-') && day<=end && finiteAmount(value)!==null);
+        const value=entries.length ? entries.reduce((n,[,v])=>n+finiteAmount(v),0) : exactPeriod(key,month+'-01',end);
+        return {value,complete:entries.length===Number(end.slice(8,10))};
+      };
+      const month=monthValue(curMonth,today,'month'), previous=monthValue(prevMonth,prevEnd,'previousMonth');
+      return {account,expectedAccounts:Math.max(0,...records.map(s=>Number.isSafeInteger(s.declaredRealNameAccountCount)?s.declaredRealNameAccountCount:0)),today:finiteAmount(daily[today]),yesterday:finiteAmount(daily[yesterday]) ?? exactPeriod('yesterday',yesterday,yesterday),
+        month:month.value,monthComplete:month.complete,prevMonth:previous.value,prevMonthComplete:previous.complete,
+        prevMonthLabel:`${Number(prevMonth.slice(5,7))}월`,checkedAt:records.map(s=>s.checkedAt).filter(Boolean).sort().pop() || null};
     });
   }
-  const revenueApi={periodView,moneyText:period=>periodView(period).text,currencyValue,categoryPeriod,categoryCheckedAt,shortKstTime,sourceView,adpostAccounts};
+  function naverVisitors(analysis,today) {
+    const byId=new Map(), start=new Date(Date.parse(today+'T00:00:00Z')-4*86400000).toISOString().slice(0,10);
+    for(const row of analysis?.naverBlogs || []) {
+      const blogId=String(row.site?.site_id || '').replace(/^naver:/,'');
+      if(!blogId)continue;
+      const valid=['collected','partial'].includes(row.status) && !row.stale && (!row.timezone || row.timezone==='Asia/Seoul') && row.date<=today && analysis.today<=today;
+      const count=valid && row.date===today && analysis.today===today && Number.isSafeInteger(row.days?.[today]) && row.days[today]>=0 ? row.days[today] : null;
+      const days=valid ? Object.entries(row.days || {}).filter(([d,v])=>d>=start && d<=today && Number.isSafeInteger(v) && v>=0) : [];
+      byId.set(blogId,{blogId,count,recent:days.length===5 ? days.reduce((n,[,v])=>n+v,0) : null,date:row.date,checkedAt:row.checkedAt});
+    }
+    const rows=[...byId.values()], known=rows.filter(r=>r.count!==null), recent=rows.filter(r=>r.recent!==null);
+    return {rows,known:known.length,value:known.length ? known.reduce((n,r)=>n+r.count,0) : null,
+      recent:recent.length ? recent.reduce((n,r)=>n+r.recent,0) : null,recentKnown:recent.length,expected:analysis?.expectedNaverBlogs || rows.length};
+  }
+  const revenueApi={periodView,moneyText:period=>periodView(period).text,currencyValue,categoryPeriod,categoryCheckedAt,shortKstTime,sourceView,adpostAccounts,naverVisitors};
   if (typeof module!=='undefined' && module.exports) { module.exports=revenueApi; return; }
   root.BaroLabRevenue=revenueApi;
   root.renderAdpostAccounts=(data,today)=>{
+    today=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
     const box=document.getElementById('adpost-account-breakdown'),rows=adpostAccounts(data,today);
-    if(!box || !rows.length)return;
-    const money=value=>value===null?'집계 대기':'₩'+Number(value).toLocaleString('ko-KR');
-    const usePrevMonth=rows.every(r=>r.month===null) && rows.some(r=>r.prevMonth!==null);
-    const monthTag=usePrevMonth ? (rows[0]?.prevMonthLabel || '전월') : '이달';
-    box.replaceChildren(...rows.map(row=>{
+    const money=value=>value===null?'미수집':'₩'+Number(value).toLocaleString('ko-KR');
+    const usePrevMonth=rows.length>0 && rows.every(r=>r.month===null) && rows.some(r=>r.prevMonth!==null);
+    const key=usePrevMonth?'prevMonth':'month', monthTag=usePrevMonth ? rows[0].prevMonthLabel : '이달';
+    const expected=Math.max(rows.length,...rows.map(r=>r.expectedAccounts));
+    if(box)box.replaceChildren(...rows.map(row=>{
       const line=document.createElement('div');
-      const mVal=usePrevMonth ? row.prevMonth : row.month;
-      line.textContent=`${row.account} · 어제 ${money(row.yesterday)} / ${monthTag} ${money(mVal)}`;
+      line.textContent=`${row.account} · 어제 ${money(row.yesterday)} / ${monthTag} ${money(row[key])}${row[key]!==null && !row[key+'Complete']?' (확인분)':''}`;
       return line;
     }));
-    const yestTotal=rows.reduce((sum,r)=>sum+(Number.isFinite(Number(r.yesterday))?Number(r.yesterday):0),0);
-    const monthTotal=rows.reduce((sum,r)=>{
-      const v=usePrevMonth ? r.prevMonth : r.month;
-      return sum+(Number.isFinite(Number(v))?Number(v):0);
-    },0);
+    const total=field=>{
+      const known=rows.filter(r=>r[field]!==null);
+      return money(known.length ? known.reduce((sum,r)=>sum+r[field],0) : null)+(known.length && (known.length<expected || field!=='yesterday' && known.some(r=>!r[field+'Complete'])) ? ` (확인분 ${known.length}/${expected}계정)` : '');
+    };
     const adpChecked=categoryCheckedAt(data,'adpost') || rows[0]?.checkedAt;
-    const adpTimeTag=adpChecked ? ` · 수집 ${shortKstTime(adpChecked).slice(-5)}` : '';
     const value=document.getElementById('val-rev-adpost');
     if(value) {
-      value.textContent=`어제 ₩${yestTotal.toLocaleString('ko-KR')} · ${monthTag} ₩${monthTotal.toLocaleString('ko-KR')}${adpTimeTag}`;
-      if(adpChecked) value.title=`네이버 애드포스트 마지막 수집: ${shortKstTime(adpChecked)} KST (오늘분은 D+1 집계)`;
+      value.textContent=`어제 ${total('yesterday')} · ${monthTag} ${total(key)}${adpChecked ? ` · 수집 ${shortKstTime(adpChecked)}` : ''}`;
+      value.title=`${today} KST 기준 · 날짜가 일치하는 확인 금액만 합산 · 마지막 수집 ${shortKstTime(adpChecked)} KST (오늘분은 D+1 집계)`;
     }
     const bar=document.getElementById('bar-rev-adpost');if(bar)bar.parentElement.style.display='none';
   };

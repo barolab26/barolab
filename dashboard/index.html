@@ -2262,7 +2262,7 @@
 <script src="js/naver_schedule.js?v=20261017-rss-verify"></script>
 <script src="js/history_manager.js?v=20261017-rss-verify"></script>
 <script src="js/traffic.js?v=20261016-kst-rollover"></script>
-<script src="js/metrics.js?v=20261031-adpost-cf"></script>
+<script src="js/metrics.js?v=20261103-account-metrics"></script>
 <script src="js/growth-actions.js?v=20261020-ego-jev2"></script>
 <script>
   // 0. Click-to-Work Modal Controller
@@ -2425,7 +2425,7 @@
     const value = latestVisitorMap.cf[domain];
     const date = latestVisitorMap.cfDate[domain];
     const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
-    return value == null ? 'GA4 미수집' : `${date === today ? '오늘' : date.slice(5)} ${value}회`;
+    return value == null ? 'GA4 미수집' : `${date === today ? '오늘' : date.slice(5)} ${value}세션`;
   }
   let latestCfPublishedMap = {};
   let latestNaverQuotaMap = {};
@@ -2481,7 +2481,7 @@
     const accData = latestNaverQuotaMap[accId] || { count: 0, publicItems: [], reserved: 0, reservedItems: [] };
     const pubItem = (accData.publicItems || [])[0];
     const resItem = (accData.reservedItems || [])[0];
-    const uv = latestVisitorMap.naver[cfg.name];
+    const uv = latestVisitorMap.naverDate===new Date(Date.now()+9*3600000).toISOString().slice(0,10) ? latestVisitorMap.naver[cfg.name] : null;
     const uvStr = uv != null ? `오늘 방문 ${uv}명` : '방문자 집계 중';
 
     if (pubItem) {
@@ -2620,7 +2620,17 @@
     }));
   }
 
+  function renderNaverVisitors() {
+    const today=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
+    for(const [accId,cfg] of Object.entries(QUOTA_CONFIG)) {
+      const node=document.getElementById(`nv-visit-${accId}`);
+      const value=latestVisitorMap.naverDate===today ? latestVisitorMap.naver[cfg.name] : null;
+      if(node) { node.textContent=value==null?'👥 미수집':`👥 ${value}명`; node.title=`${today} KST · 네이버 공개 방문자 · 블로그 간 중복 포함`; }
+    }
+  }
+
   function updateQuotaUI() {
+    renderNaverVisitors();
     if (window.BaroLabMissionControl) { window.applyMissionControl(); return; }
     const data = loadQuotaData();
     latestNaverQuotaMap = data;
@@ -2647,7 +2657,6 @@
       const miniCountEl = document.getElementById(`mini-count-${accId}`);
       const miniStatusEl = document.getElementById(`mini-status-${accId}`);
       const miniBoxEl = document.getElementById(`mini-box-${accId}`);
-      const visitEl = document.getElementById(`nv-visit-${accId}`);
       const battContainer = document.getElementById(`nv-batt-${accId}`);
       const coolBar = document.getElementById(`nv-coolbar-${accId}`);
 
@@ -2656,10 +2665,6 @@
       }
 
       if (miniCountEl) miniCountEl.textContent = achievedCount;
-      if (visitEl) {
-        const uv = latestVisitorMap.naver[cfg.name];
-        visitEl.textContent = uv != null ? `👥 ${uv}명` : '👥 -';
-      }
 
       // Render Segmented Battery Cells: Solid Green for Public, Blue Check (✓) for Reserved
       if (battContainer) {
@@ -2858,15 +2863,14 @@
 
         bindCFSessionMetrics(data, today);
 
-        (analysis.naverBlogs || []).forEach(r => {
-          const rawId = String(r.site?.site_id || '').replace(/^naver:/, '');
-          const users = r.days?.[today] ?? r.days?.[r.date];
-          if (rawId && Number.isSafeInteger(users)) {
-            latestVisitorMap.naver[rawId] = users;
-            const matchedCfg = Object.values(QUOTA_CONFIG).find(c => c.blogId === rawId || c.name === rawId);
-            if (matchedCfg) latestVisitorMap.naver[matchedCfg.name] = users;
-          }
-        });
+        latestVisitorMap.naver = {};
+        latestVisitorMap.naverDate = today;
+        for(const row of window.BaroLabRevenue.naverVisitors(analysis,today).rows) {
+          latestVisitorMap.naver[row.blogId] = row.count;
+          const cfg=Object.values(QUOTA_CONFIG).find(c=>c.blogId===row.blogId || c.name===row.blogId);
+          if(cfg)latestVisitorMap.naver[cfg.name]=row.count;
+        }
+        renderNaverVisitors();
 
         // Big Gauge 1: Revenue Speedometer Arc ($100/day goal, arc length = 119.4)
         const revenueView=window.BaroLabRevenue;
