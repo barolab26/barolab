@@ -283,6 +283,59 @@ def ensure_article_images(article, folder, domain=None):
     return article
 
 
+def validate_cached_cf_evidence(article, folder, keyword):
+    """Fail closed with one preserved repair revision; never relabel old collection times."""
+    from common.content_quality import validate_research_freshness
+    try:
+        research = json.loads((folder / 'research.json').read_text(encoding='utf-8'))
+        normalize = lambda value: re.sub(r'\s+', ' ', str(value or '')).strip().casefold()
+        approved = normalize(keyword)
+        if (not approved or any(normalize(value) != approved for value in (
+                article.get('mainKeyword'), research.get('requestedKeyword'), research.get('keyword')))):
+            raise ValueError('Cached article/research does not match the approved planning keyword')
+        validate_research_freshness(article, research)
+        sources = research.get('sources')
+        if not isinstance(sources, list) or not sources or any(
+                not isinstance(source, dict) or source.get('status') != 200
+                or not isinstance(source.get('text'), str) or not source['text']
+                or source.get('textSha256') != hashlib.sha256(source['text'].encode('utf-8')).hexdigest()
+                for source in sources):
+            raise ValueError('Cached research lacks verified source text and hashes')
+        return
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        if (folder / 'publication-receipt.json').exists():
+            raise RuntimeError('Existing submission requires reconciliation, not evidence refresh') from exc
+        request = folder / 'evidence-refresh-request.json'
+        if not request.exists():
+            from common import work_agenda as agendas
+            owner = agendas.current()
+            originals = {}
+            archive = folder / 'evidence-refresh-original'
+            archive.mkdir(exist_ok=True)
+            for name in ('article.json', 'editor-content.json', 'planning.json', 'research.json',
+                         'claim-review.json', 'claim-review-response.json'):
+                source = folder / name
+                if source.is_file():
+                    raw = source.read_bytes(); digest = hashlib.sha256(raw).hexdigest()
+                    saved = archive / (digest + '-' + name)
+                    if not saved.exists():
+                        with saved.open('xb') as handle:handle.write(raw)
+                    originals[name] = {'sha256':digest, 'path':str(saved.relative_to(folder))}
+            payload = {'state':'held', 'revision':1, 'maxAttempts':1, 'attempts':0,
+                       'reason':str(exc), 'approvedKeyword':keyword, 'originals':originals,
+                       'businessAgendaId':owner.get('id') if owner else None,
+                       'originalTarget':(owner.get('workTarget') or owner.get('source')) if owner else None,
+                       'registeredRecoveryTool':'retry_conference', 'submissionStarted':False,
+                       'requires':['actual_fresh_collection','approved_topic_binding','independent_review'],
+                       'createdAt':stamp()}
+            try:
+                with request.open('x', encoding='utf-8') as handle:
+                    json.dump(payload, handle, ensure_ascii=False, indent=2)
+                    handle.flush(); os.fsync(handle.fileno())
+            except FileExistsError:pass
+        raise ValueError('Draft held: cached evidence requires the registered bounded repair revision') from exc
+
+
 def basic_article(domain, item, folder):
     from common.content_quality import CONTENT_QUALITY_POLICY
     from common.asset_map import (
@@ -310,6 +363,7 @@ def basic_article(domain, item, folder):
         if receipt.is_file() and json.loads(receipt.read_text(encoding='utf-8')).get('state') in ('published', 'accepted', 'submitting', 'submission_unknown'):
             return article
         target_kw = planned_kw or article.get('mainKeyword') or item.get('mainKeyword') or ''
+        validate_cached_cf_evidence(article, folder, planned_kw)
         if target_kw and target_kw != domain:
             fixed_title = enforce_naver_seo_title(article.get('title', ''), target_kw, domain=domain)
             if fixed_title != article.get('title'):
@@ -348,9 +402,11 @@ def basic_article(domain, item, folder):
     except Exception:
         pass
     keyword = select_verified_cf_keyword(domain, keyword, verified_cands, used_today, max_docs=300)
+    if planned_kw and clean_naver_search_keyword(keyword) != clean_naver_search_keyword(planned_kw):
+        raise ValueError('Approved planning keyword changed during selection; retain original topic for review')
     item['mainKeyword'] = keyword
     basic_progress(domain,2,'리서치',25,str(keyword))
-    sources = basic_research(keyword, folder)
+    sources = basic_research(keyword, folder, exact_query=True)
     from common.llm_client import generate_json
     sec_img_schema = {
         'type': 'object',
@@ -550,7 +606,10 @@ def publish_basic_article(domain, article, folder):
 
 
 def slot_due(item, now):
-    if item.get('status') == 'published':
+    if (item.get('retryable') is False or item.get('status') in (
+            'published', 'published_verified', 'verified', 'accepted', 'submitted',
+            'submitting', 'submission_unknown', 'unknown', 'pending_effect', 'verification_pending')
+            or any(item.get(key) for key in ('submissionStarted', 'submittedAt', 'submissionStartedAt', 'preCommitIntent'))):
         return False
     retry = item.get('nextRetryAt')
     if retry:
@@ -597,10 +656,6 @@ def main():
             try:
                 run_basic_posting(domain, args.basic_article, args.prepare_only)
             except Exception as exc:
-                schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
-                item = next((row for row in schedule['items'] if row['domain'] == domain))
-                item.update(status='failed', lastError=type(exc).__name__ + ': ' + str(exc)[:400], nextRetryAt=(datetime.datetime.now(KST) + datetime.timedelta(minutes=5)).isoformat())
-                save_schedule_file(SCHEDULE_JSON, schedule)
                 print(json.dumps({'domain': domain, 'status': 'failed', 'errorType': type(exc).__name__}), flush=True)
                 if len(domains) == 1:
                     raise
@@ -670,6 +725,29 @@ def basic_progress(domain, stage, name, pct, detail, status='processing'):
     save_live(STATUS_JS, 'window.__PIPELINE_STATUS__ = '+json.dumps(state,ensure_ascii=False)+';\n')
 
 
+def record_basic_failure(domain, day, started_at, folder, exc):
+    """Record the owned attempt without making uncertain submissions retryable."""
+    schedule = json.loads(SCHEDULE_JSON.read_text(encoding='utf-8'))
+    matches = [row for row in schedule.get('items', []) if row.get('domain') == domain]
+    item = matches[0] if len(matches) == 1 else None
+    if (schedule.get('date') != day or not item or item.get('attemptStartedAt') != started_at
+            or item.get('status') in ('published', 'published_verified', 'verified')):
+        return
+    # Any receipt, including unreadable or rejected evidence, belongs to reconciliation.
+    submitted = ((folder / 'publication-receipt.json').exists()
+                 or any(item.get(key) for key in ('submissionStarted', 'submittedAt', 'submissionStartedAt', 'preCommitIntent'))
+                 or item.get('status') in ('accepted', 'submitted', 'submitting', 'submission_unknown', 'unknown', 'pending_effect', 'verification_pending'))
+    item.update(lastError=type(exc).__name__ + ': ' + str(exc)[:400], lastErrorAt=stamp())
+    if submitted:
+        if item.get('status') not in ('accepted', 'submitted', 'submitting', 'submission_unknown', 'unknown', 'pending_effect'):
+            item['status'] = 'verification_pending'
+        item['retryable'] = False
+        item.pop('nextRetryAt', None)
+    else:
+        item.update(status='failed', nextRetryAt=(datetime.datetime.now(KST) + datetime.timedelta(minutes=5)).isoformat())
+    save_schedule_file(SCHEDULE_JSON, schedule)
+
+
 def run_basic_posting(domain, artifact_folder=None, prepare_only=False):
     if not prepare_only and (Path.home() / 'EGO_EXEC_DISABLED').exists():
         raise RuntimeError('Execution paused by EGO_EXEC_DISABLED')
@@ -679,7 +757,19 @@ def run_basic_posting(domain, artifact_folder=None, prepare_only=False):
     if not item: raise ValueError('Domain missing from current schedule')
     if item.get('status') == 'published' and item.get('publicUrl'):
         return {'status': 'already_published', 'state': 'published', 'publicPublicationVerified': True, 'httpStatus': 200, 'publicUrl': item['publicUrl'], 'title': item.get('title', domain), 'domain': domain}
+    if (item.get('retryable') is False or item.get('status') in (
+            'published', 'published_verified', 'verified', 'accepted', 'submitted',
+            'submitting', 'submission_unknown', 'unknown', 'pending_effect', 'verification_pending')
+            or any(item.get(key) for key in ('submissionStarted', 'submittedAt', 'submissionStartedAt', 'preCommitIntent'))):
+        raise RuntimeError('Existing publication state requires reconciliation before another attempt')
+    if item.get('artifactFolder'):
+        prior_folder = (BASE_DIR / item['artifactFolder']).resolve()
+        if (not prior_folder.is_relative_to((BASE_DIR / 'output').resolve())
+                or (prior_folder / 'publication-receipt.json').exists()):
+            raise RuntimeError('Authoritative artifact folder requires reconciliation before another attempt')
     folder = Path(artifact_folder).resolve() if artifact_folder else BASE_DIR / item.get('artifactFolder', '')
+    if (folder / 'publication-receipt.json').exists():
+        raise RuntimeError('Existing publication receipt requires reconciliation before another attempt')
     if not artifact_folder and not (folder / 'article.json').is_file():
         folder = BASE_DIR / 'output' / ('basic-' + domain + '-' + uuid.uuid4().hex[:10])
     if not folder.resolve().is_relative_to((BASE_DIR / 'output').resolve()):
@@ -688,6 +778,18 @@ def run_basic_posting(domain, artifact_folder=None, prepare_only=False):
     item.update(artifactFolder=str(folder.relative_to(BASE_DIR)), attemptStartedAt=stamp(),
                 attemptCount=item.get('attemptCount', 0)+1, totalAttempts=item.get('totalAttempts', 0)+1)
     save_schedule_file(SCHEDULE_JSON, schedule)
+    try:
+        return _complete_basic_posting(domain, item, folder, schedule, prepare_only)
+    except Exception as exc:
+        try:
+            record_basic_failure(domain, schedule['date'], item['attemptStartedAt'], folder, exc)
+        except Exception as recording_error:
+            exc.add_note('CF failure ledger update failed: ' + type(recording_error).__name__)
+        raise
+
+
+def _complete_basic_posting(domain, item, folder, schedule, prepare_only):
+    from common.dashboard_jobs import write
     basic_progress(domain, 1, '키워드·주제', 10, '당일 슬롯과 보존 원고 확인')
     article = basic_article(domain, item, folder)
     if prepare_only: return {'status': 'prepared', 'folder': str(folder)}

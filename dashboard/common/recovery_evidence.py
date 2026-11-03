@@ -21,6 +21,7 @@ for _project in ('cf_blog','naver_blog','naver_kin'):
     PROJECT_SOURCES[_project]+= ('dashboard/common/browser_session.py','dashboard/common/ubuntu_naver_browser.py','dashboard/common/source_discovery.py')
 
 ARTIFACT_NAMES = ('failure-diagnostics.json', 'prewriter-acquisition-request.json', 'required-materials.json',
+                 'evidence-refresh-request.json',
     'keyword-evidence.json', 'writer-review.json', 'review.json', 'research.md', 'keywords.md',
     'handoff.json', 'validation.json', 'visible-editor-progress.json', 'native-layout-review.json',
     'selected-evidence.json', 'keyword-selector.json', 'researcher.json', 'source-capture-repair.json')

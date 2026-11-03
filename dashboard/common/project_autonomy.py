@@ -134,17 +134,26 @@ def recover_project_work(project, work_id, *, repair_task_id=None, repair_plan_s
         target=next((t for t in recoverable_work(project) if t['workId']==work_id),None)
         if target is None:
             return {'ok':False,'status':'held','project':project,'reason':'same_work_not_eligible_or_requires_reconciliation'}
-        args={'action':'cf' if project=='cf_blog' else 'naver','date':target['date'],
-              'account':target['identity'],'slot':target['slot']}
-        # Same conference identity as the standard scheduler, never an alternate engine.
-        agenda=request('parameters',args)
-        if agendas.enabled() and agenda.get('status')=='conference_failed':
+        if project == 'cf_blog':
+            from common.conference_dispatch import cf_recovery_original, retry_active
+            if not agendas.enabled():raise ValueError('CF recovery requires the original owned agenda')
+            current = agendas.require(project=project)
+            identity, original = cf_recovery_original(current)
+            args = original['arguments']
+            if args['date'] != target['date'] or args['account'] != target['identity']:
+                raise ValueError('Original CF conference does not match failed work')
+            retry_active(**({'repair_task_id':repair_task_id,'repair_plan_sha256':repair_plan_sha256} if repair_task_id else {}))
+            agenda = {'status':'conference_requested','agendaId':identity,'businessAgendaId':current['id']}
+        else:
+            args={'action':'naver','date':target['date'],'account':target['identity'],'slot':target['slot']}
+            agenda=request('parameters',args)
+        if project != 'cf_blog' and agendas.enabled() and agenda.get('status')=='conference_failed':
             from common.conference_dispatch import retry_active
             retry_active(**({'repair_task_id':repair_task_id,'repair_plan_sha256':repair_plan_sha256} if repair_task_id else {}))
         attempts=(load(QUEUE/(agenda['agendaId']+'.json')).get('attempts',1) if agendas.enabled()
                   else prior.get('attempts',1)+1 if prior else 1)
         result={'ok':True,'status':'requested','project':project,'workId':work_id,
-                'account':target['identity'],'date':target['date'],'slot':target['slot'],
+                'account':target['identity'],'date':target['date'],'slot':args['slot'],'action':args['action'],
                 'conference':agenda,'publicationVerified':False,'requestedAt':time.time(),
                 'attempts':attempts,
                 'attemptHistory':(prior.get('attemptHistory',[])+[{k:prior[k] for k in ('conference','requestedAt')}]) if prior else []}

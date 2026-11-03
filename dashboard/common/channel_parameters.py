@@ -331,7 +331,7 @@ def run_naver(day, account, clock):
     return result
 
 
-def prepare_cf(day, domain):
+def prepare_cf(day, domain, *, publish_if_due=True):
     from common import work_agenda as agendas
     if agendas.enabled():agendas.require(project='cf_blog')
     import cf_posting.posting as cf
@@ -401,7 +401,7 @@ def prepare_cf(day, domain):
               'account':domain,'date':day,'folder':str(folder),
               'articleSha256':hashlib.sha256((folder/'article.json').read_bytes()).hexdigest(),
               'assetSha256':[hashlib.sha256(p.read_bytes()).hexdigest() for p in assets if p.is_file()]}
-    if valid and day == datetime.now(KST).date().isoformat() and cf.slot_due(item, datetime.now(KST)):
+    if publish_if_due and valid and day == datetime.now(KST).date().isoformat() and cf.slot_due(item, datetime.now(KST)):
         with cf.cleaner_lock(wait_seconds=120, poll_interval=1) as acquired:
             if acquired:
                 pub_receipt = cf.run_basic_posting(domain, folder)
@@ -519,7 +519,7 @@ def main(argv=None, *, conference_worker=False):
         folder = folder_for('naver_blog_posting', day, account+'-'+clock.replace(':',''))
         result = planning_or_memory(account, '다음 발행의 키워드·독자·서식 결정', folder, styles(account, day))
     elif args.action == 'cf-prepare':
-        result=prepare_cf(args.date or today,args.account)
+        result=prepare_cf(args.date or today,args.account,publish_if_due=False)
     elif args.action == 'prepare':
         now = datetime.now(KST)
         target = now.date()

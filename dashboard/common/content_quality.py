@@ -5,6 +5,7 @@ import json
 import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+MINIMUM_SOURCE_MAX_AGE = timedelta(hours=6)
 READER_GOAL_POLICY = '독자 질문에 확인된 사실로 답하고 가정과 실제 사실을 구분한다.'
 ANSWER_BRIEF_POLICY = '기본 문서 형식을 검증한 뒤 발행하며 별도 승인 절차를 요구하지 않는다.'
 
@@ -76,6 +77,20 @@ def publication_risk_signals(document):
     return {'sensitiveTopic': bool(_SENSITIVE.search(text)), 'authorExperienceClaim': bool(_EXPERIENCE.search(text))}
 
 
+def source_maximum_age(document):
+    return MINIMUM_SOURCE_MAX_AGE if _SENSITIVE.search(publication_text(document)) else timedelta(hours=24)
+
+
+def validate_research_freshness(document, research, *, now=None):
+    try:
+        collected = datetime.fromisoformat(research['collectedAt'].replace('Z', '+00:00'))
+        now = now or datetime.now(timezone.utc)
+        if not collected.tzinfo or not timedelta(0) <= now-collected <= source_maximum_age(document):
+            raise ValueError()
+    except (KeyError, TypeError, ValueError):
+        raise ValueError('Draft held: source/review collection time is missing or stale') from None
+
+
 def validate_publication_review(document, research, review):
     """Validate an independent review against collected text, never a writer's booleans."""
     from common.content_improvement import fact_valid, primary_url
@@ -87,11 +102,11 @@ def validate_publication_review(document, research, review):
             or review.get('experienceHonest') is not True or review.get('claimsComplete') is not True):
         raise ValueError('Draft held: independent factual/experience review missing or mismatched; improve evidence or rewrite truthfully')
     try:
-        collected = datetime.fromisoformat(research['collectedAt'].replace('Z', '+00:00'))
+        validate_research_freshness(document, research)
         checked = datetime.fromisoformat(review['checkedAt'])
-        maximum = timedelta(hours=6 if _SENSITIVE.search(text) else 24)
+        maximum = source_maximum_age(document)
         now = datetime.now(timezone.utc)
-        if not collected.tzinfo or not checked.tzinfo or not timedelta(0) <= now-collected <= maximum or not timedelta(0) <= now-checked <= maximum:
+        if not checked.tzinfo or not timedelta(0) <= now-checked <= maximum:
             raise ValueError()
     except (KeyError, TypeError, ValueError):
         raise ValueError('Draft held: source/review collection time is missing or stale') from None

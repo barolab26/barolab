@@ -72,6 +72,8 @@ def primary_url(url):
         return False
     if host in ('airport.kr','www.airport.kr'):
         return parsed.path == '/ap_ko/890/subview.do' and not parsed.query and not parsed.fragment
+    if host == 'm.samsungfire.com':
+        return url == 'https://m.samsungfire.com/download/product/P_P02_03_01_033_2.pdf'
     return any(host==suffix or host.endswith('.'+suffix) for suffix in PRIMARY_HOSTS)
 
 

@@ -417,6 +417,10 @@ def prepare_conference_recovery():
     args=target.get('arguments',{})
     if target.get('kind') in ('kin','threads'):
         return _prepare_channel_recovery(business,target)
+    if target.get('kind') == 'parameters' and args.get('action') == 'cf-prepare':
+        _, original = conferences.cf_recovery_original(business)
+        conferences.cf_preparation_retry_guard(business, original)
+        return _prepare_channel_recovery(business,target)
     if target.get('kind')!='parameters' or args.get('action') not in ('naver','cf'):
         return {'status':'needs_evidence','reason':'This operation needs its registered channel reconciliation tool'}
     identity=_sha(json.dumps(['parameters',args],sort_keys=True).encode())
@@ -702,7 +706,10 @@ def _recovery_resume_guard(row):
         if (current['id']!=row['businessAgendaId'] or fresh.get('businessAgendaId')!=current['id']
                 or fresh.get('status') not in ('failed','completed') or fresh.get('outcomes') or agendas.running(current)):
             raise ValueError('Original channel result is active or requires reconciliation')
-        if fresh['kind']=='kin':
+        if fresh['kind'] == 'parameters' and fresh['arguments'].get('action') == 'cf-prepare':
+            _, bound = conferences.cf_recovery_original(current)
+            conferences.cf_preparation_retry_guard(current, bound)
+        elif fresh['kind']=='kin':
             conferences.kin_retry_target(fresh)
         else:
             import sqlite3
@@ -897,6 +904,14 @@ def _observe_recovery_process(row):
         outcomes=receipt.get('outcomes') or []
         verified=receipt.get('status')=='completed' and bool(outcomes) and all(o.get('publicationVerified') or o.get('reservationVerified') for o in outcomes)
         row['verification']={'verified':verified,'source':row['plan']['sourcePath'],'outcomes':outcomes}
+        original_args = row['plan'].get('sourceSnapshot', {}).get('arguments', {})
+        if original_args.get('action') == 'cf-prepare':
+            prepared = receipt.get('preparation') or {}
+            verified = (receipt.get('status') == 'completed' and receipt.get('arguments') == original_args
+                        and receipt.get('preparationOnly') is True and receipt.get('submissionStarted') is False
+                        and prepared.get('preparationVerified') is True and prepared.get('state') == 'prepared'
+                        and prepared.get('account') == original_args.get('account') and prepared.get('date') == original_args.get('date'))
+            row['verification'].update(verified=verified, scope='preparation', publicationVerified=False, preparation=prepared)
         row['status']='work_verified' if verified else 'resume_held'
         return
     if result.get('conferenceAgendaId'):

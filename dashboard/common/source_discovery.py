@@ -89,17 +89,18 @@ def public_text(url, timeout=8):
     raise ValueError('Too many source redirects')
 
 
-def research(keyword, folder):
+def research(keyword, folder, *, exact_query=False):
     from common.dashboard_jobs import write
     from datetime import datetime, timezone
     from common.crew_chat_bridge import emit_work_event, work_task_id
     task=work_task_id(folder)
     emit_work_event(actor='radar',actor_label='레이더',task_id=task,phase='progress',stage='researcher',output_kind='웹/API 근거 수집 시작')
     requested_keyword=keyword
-    try:
-        from dashboard.agents.synapse import research_query
-        keyword=research_query(keyword,folder)
-    except (OSError,ValueError,TypeError):pass
+    if not exact_query:
+        try:
+            from dashboard.agents.synapse import research_query
+            keyword=research_query(keyword,folder)
+        except (OSError,ValueError,TypeError):pass
     sources=[]
     for candidate in search_urls(keyword)[:5]:
         try: body=public_text(candidate['url'])

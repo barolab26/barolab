@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import math
 from common.collection_observability import load, write, locked
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,8 +23,14 @@ def request(kind, arguments, *, one=False, automatic=None):
     choices=concrete_requests(kind,arguments)
     if not choices:return {'status':'no_work','reason':'no_eligible_concrete_work'}
     receipts=[]
+    deferred_preparation = False
     for item in choices:
         existing = _existing_concrete_work(kind, item)
+        if (automatic and not existing and kind == 'parameters' and item.get('action') == 'cf-prepare'
+                and arguments.get('action') in ('prepare', 'cf-cycle') and not arguments.get('account')
+                and not cf_preparation_window_open(item)):
+            deferred_preparation = True
+            continue
         if automatic and not existing:
             project = {'threads':'threads','kin':'naver_kin'}.get(kind, 'cf_blog' if item.get('action') in ('cf','cf-prepare') else 'naver_blog')
             experiment = load(agendas.STATE).get('activeExperiment') or {}
@@ -35,8 +42,21 @@ def request(kind, arguments, *, one=False, automatic=None):
                 continue
         receipts.append(_request_single(kind,item,automatic=automatic and not existing))
         if one:break
-    if not receipts:return {'status':'held','reason':'new_automatic_work_requires_focused_experiment'}
+    if not receipts:return {'status':'held','reason':'cf_preparation_window_waiting' if deferred_preparation else 'new_automatic_work_requires_focused_experiment'}
     return receipts[0] if len(receipts)==1 else {'status':'conference_requested','items':receipts,'count':len(receipts)}
+
+
+def cf_preparation_window_open(arguments, now=None):
+    """Start new automatic prep two hours ahead, leaving four hours of sensitive TTL."""
+    from datetime import datetime, timezone, timedelta
+    from common.content_quality import MINIMUM_SOURCE_MAX_AGE
+    zone = timezone(timedelta(hours=9))
+    now = now or datetime.now(zone)
+    try:
+        due = datetime.fromisoformat(arguments['date'] + 'T' + arguments['slot']).replace(tzinfo=zone)
+        return due.date() >= now.astimezone(zone).date() and due - MINIMUM_SOURCE_MAX_AGE / 3 <= now
+    except (KeyError, TypeError, ValueError):
+        return False
 
 
 def _existing_concrete_work(kind, arguments):
@@ -238,6 +258,71 @@ def _lane_for_row(row):
     return str(kind or 'other')
 
 
+def cf_recovery_original(current):
+    """Resolve the exact owned terminal CF operation, never synthesize its slot."""
+    from common import work_agenda as agendas
+    from common.channel_parameters import policy, KST, datetime, folder_for
+    target = current.get('workTarget') or current.get('source', {})
+    args = target.get('arguments') or {}
+    if (current.get('project') != 'cf_blog' or target.get('kind') != 'parameters'
+            or args.get('action') not in ('cf', 'cf-prepare')
+            or not all(isinstance(args.get(k), str) and args[k] for k in ('date', 'account', 'slot'))):
+        raise ValueError('Exact original CF action, date, account and slot required')
+    if (args['date'] != datetime.now(KST).date().isoformat()
+            or policy().get('cf', {}).get(args['account']) != args['slot']):
+        raise ValueError('Original CF date or approved slot changed; explicit rescheduling required')
+    entries = [(p, load(p)) for p in QUEUE.glob('*.json')]
+    matches = [(p, row) for p, row in entries if row.get('businessAgendaId') == current['id']
+               and row.get('kind') == 'parameters' and (row.get('arguments') or {}).get('action') in ('cf', 'cf-prepare')]
+    identity = hashlib.sha256(json.dumps(['parameters', args], sort_keys=True).encode()).hexdigest()
+    if (len(matches) != 1 or matches[0][0] != QUEUE / (identity + '.json')
+            or matches[0][1].get('arguments') != args):
+        raise ValueError('Original CF conference is missing, ambiguous or changed')
+    original = matches[0][1]
+    if any(row is not original and (row.get('arguments') or {}).get('account') == args['account']
+           and row.get('status') in ('queued', 'running', 'unknown') for _, row in entries):
+        raise ValueError('Another account execution is active or uncertain')
+    diagnostic = json.dumps({k: original.get(k) for k in ('failureReason', 'failureDiagnostic', 'errorMessage')}, ensure_ascii=False)
+    if ((Path.home() / 'EGO_EXEC_DISABLED').exists() or current.get('switchRequest')
+            or current.get('status') not in ('executing', 'recovering', 'meeting')
+            or original.get('status') != 'failed' or original.get('outcomes')
+            or any(p.get('pid') != os.getpid() for p in agendas.running(current))
+            or re.search(r'auth|credential|login|manual.stop|execution.disabled|cancelled|canceled|permission', diagnostic, re.I)):
+        raise ValueError('Original CF work is active, stopped, authentication-blocked or requires reconciliation')
+    folder = folder_for('cf_posting', args['date'], args['account'])
+    schedule = load(ROOT / 'dashboard/data/cf/daily_schedule.json')
+    slots = [row for row in schedule.get('items', []) if row.get('domain') == args['account']]
+    if schedule.get('date') != args['date'] or len(slots) != 1:
+        raise ValueError('Original CF schedule is missing, changed or ambiguous')
+    item = slots[0]
+    if (item.get('retryable') is False or item.get('status') in ('published', 'published_verified', 'verified',
+            'accepted', 'submitted', 'submitting', 'submission_unknown', 'unknown', 'pending_effect', 'verification_pending')
+            or any(item.get(k) for k in ('submissionStarted', 'submittedAt', 'submissionStartedAt', 'preCommitIntent'))):
+        raise ValueError('Original CF ledger requires reconciliation')
+    prior_folder = (ROOT / 'cf_posting' / item.get('artifactFolder', '')).resolve()
+    if item.get('artifactFolder') and (not prior_folder.is_relative_to((ROOT/'cf_posting/output').resolve())
+                                     or any(prior_folder.glob('*publication*receipt*'))):
+        raise ValueError('Original CF artifact folder requires reconciliation')
+    if (any(folder.glob('*publication*receipt*'))
+            or any(original.get(k) for k in ('submissionStarted', 'submittedAt', 'submissionStartedAt', 'preCommitIntent'))):
+        raise ValueError('Original CF submission requires reconciliation')
+    return identity, original
+
+
+def cf_preparation_retry_guard(current, original):
+    from common.channel_parameters import folder_for
+    import cf_posting.posting as cf
+    args = original['arguments']
+    if (args.get('action') != 'cf-prepare' or original.get('preparationOnly') is not True
+            or original.get('submissionStarted') is not False or original.get('attempts', 1) >= 2):
+        raise ValueError('Preparation needs explicit no-submission proof and remaining retry budget')
+    folder = folder_for('cf_posting', args['date'], args['account'])
+    # Corrected input must be real and valid before consuming the single retry.
+    article = json.loads((folder / 'article.json').read_text(encoding='utf-8'))
+    cf.validate_basic_article(article)
+    return folder
+
+
 def process_once():
     """Decoupled multi-lane execution: CF (3 workers), Naver (1), Kin (1), Threads (1)."""
     from common import work_agenda as agendas
@@ -278,6 +363,10 @@ def process_once():
         active_agenda_set = set(agendas.active_ids()) if agendas.enabled() else set()
         for path, row in sorted(entries, key=lambda pair: pair[1].get('requestedAt', 0)):
             if row.get('status') != 'queued' or row.get('kind') not in ('parameters','kin','threads'):
+                continue
+            retry_at = row.get('retryAt', 0)
+            if (isinstance(retry_at, bool) or not isinstance(retry_at, (int, float))
+                    or not math.isfinite(retry_at) or retry_at < 0 or retry_at > time.time()):
                 continue
             lane = _lane_for_row(row)
             if active_lanes.get(lane, 0) >= LANE_LIMITS.get(lane, 1):
@@ -606,6 +695,8 @@ def _work(identity):
         if row['kind'] == 'parameters':
             from common.channel_parameters import main
             a = row['arguments']; argv = [a['action']]
+            if a['action'] == 'cf-prepare':
+                row.update(preparationOnly=True, submissionStarted=False)
             for key in ('date', 'account', 'slot'):
                 if a.get(key): argv += ['--'+key, a[key]]
             result = main(argv, conference_worker=True)
@@ -838,9 +929,12 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
     current=agendas.require()
     target=current.get('workTarget') or current.get('source',{})
     kind=target.get('kind');args=target.get('arguments',{})
-    if kind not in ('kin','threads') and (kind!='parameters' or args.get('action') not in ('naver','cf')):
+    if kind not in ('kin','threads') and (kind!='parameters' or args.get('action') not in ('naver','cf','cf-prepare')):
         raise ValueError('This original operation requires its registered reconciliation or repair tool')
-    if kind not in ('kin','threads'):
+    if current.get('project') == 'cf_blog':
+        _, original = cf_recovery_original(current)
+        if args.get('action') == 'cf-prepare':cf_preparation_retry_guard(current, original)
+    if kind not in ('kin','threads') and args.get('action') != 'cf-prepare':
         from common.project_autonomy import recoverable_work
         matches=[r for r in recoverable_work(current['project']) if r['date']==args.get('date') and r['identity']==args.get('account') and (r['slot'] is None if current['project']=='cf_blog' else r['slot']==args.get('slot'))]
         if len(matches)!=1:raise ValueError('Same work is not verified as a pre-submission failure; reconcile existing results')
@@ -850,11 +944,14 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
         reconcile_repaired_retry(current,observed,repair_task_id,repair_plan_sha256)
     with locked(QUEUE):
         row=load(file)
+        if current.get('project') == 'cf_blog':
+            _, bound = cf_recovery_original(current)
+            if args.get('action') == 'cf-prepare':cf_preparation_retry_guard(current, bound)
         limit=3 if kind in ('kin','threads') else 2
         if row.get('businessAgendaId')!=current['id'] or (row.get('status')!='failed' and not (row.get('status')=='completed' and not row.get('outcomes') and (kind=='threads' or (row.get('eligibility') or {}).get('status')=='busy'))) or any(p.get('pid') != os.getpid() for p in agendas.running(current)):
             raise ValueError('Original attempt is pending, unknown or owned by a live execution')
         if row.get('attempts',1)>=limit:
-            if kind in ('kin','threads'):raise ValueError('Original retry budget is exhausted')
+            if kind in ('kin','threads') or args.get('action') == 'cf-prepare':raise ValueError('Original retry budget is exhausted')
             generation=authorize_repaired_retry(current,row,repair_task_id,repair_plan_sha256)
             row['executionGeneration']=generation
         if kind=='kin':row['retryTarget']=kin_retry_target(row)
