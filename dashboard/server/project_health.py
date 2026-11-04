@@ -60,6 +60,9 @@ SOURCES = (
     ('naver_kin', '네이버 지식iN', 'dashboard/data/kin-automation-state.json', 'publi', 'kin.html'),
     ('threads', 'Threads', 'dashboard/data/public/threads.json', 'publi', 'threads.html'),
     ('brunch', '브런치스토리', 'dashboard/data/brunch/status.json', 'publi', 'brunch.html'),
+    ('naver_cafe', '네이버 카페', 'dashboard/data/cafe/status.json', 'publi', 'cafe.html'),
+    ('naver_premium', '네이버 프리미엄콘텐츠', 'dashboard/data/premium/status.json', 'publi', 'premium.html'),
+    ('youtube', 'YouTube', 'dashboard/data/youtube/status.json', 'publi', 'youtube.html'),
     ('legacy_remodel', '콘텐츠 유지보수', 'dashboard/data/content-maintenance.json', 'doctor', 'growth.html'),
     ('mobile_apps', '앱 프로젝트', 'apps/bible/project.json', 'patch', 'apps.html'),
     ('collections', '조회·수집', 'dashboard/data/collection-health.json', 'trace', 'growth.html'),
@@ -122,7 +125,9 @@ def _publication_quota(key, doc, now, fresh):
         DAILY_SLOTS = policy['DAILY_SLOTS']
         schedule_plan = load_json(DATA_DIR / 'daily_schedule.json')
         if schedule_plan.get('effectiveDate') and day >= schedule_plan['effectiveDate']:
-            DAILY_SLOTS = {account: row['slots'] for account,row in schedule_plan['naver'].items()}
+            naver_eff = schedule_plan.get('naverEffectiveDate')
+            nv_map = schedule_plan['naverPrior'] if (naver_eff and day < naver_eff and schedule_plan.get('naverPrior')) else schedule_plan['naver']
+            DAILY_SLOTS = {account: row['slots'] for account,row in nv_map.items()}
         def slot_matches(account, candidate, target):
             return (candidate == target or candidate in policy.get('LEGACY_SLOT_ALIASES', {}).get(account, {}).get(target, ())
                     or len(DAILY_SLOTS[account]) == 1 and candidate in policy.get('LEGACY_SINGLE_SLOTS', {}).get(account, ()))
@@ -306,7 +311,7 @@ def observed_projects():
         if not isinstance(runtime, dict):
             runtime = {}
             error_type = 'InvalidRuntimeType'
-        stamp = doc.get('checkedAt') or doc.get('updatedAt') or runtime.get('checkedAt') or doc.get('createdAt')
+        stamp = doc.get('checkedAt') or doc.get('updatedAt') or doc.get('last_checked_at') or runtime.get('checkedAt') or doc.get('createdAt')
         age = None
         try:
             dt = datetime.fromisoformat(str(stamp).replace('Z', '+00:00'))
@@ -317,7 +322,13 @@ def observed_projects():
             pass
         source_date = doc.get('date') or doc.get('workDate')
         fresh = (source_date == now.date().isoformat()) if key == 'cf_blog' else age is not None and 0 <= age <= 7200 and (not source_date or source_date == now.date().isoformat())
-        rows = doc.get('sources') or [] if key == 'collections' else doc.get('publishedArticles') or [] if key == 'brunch' else doc.get('items') or doc.get('reservedItems') or doc.get('accounts') or []
+        rows = (
+            doc.get('sources') or [] if key == 'collections'
+            else doc.get('publishedArticles') or [] if key in ('brunch', 'naver_cafe')
+            else doc.get('channels') or [] if key == 'youtube'
+            else doc.get('posts') or [] if key == 'naver_premium'
+            else doc.get('items') or doc.get('reservedItems') or doc.get('accounts') or []
+        )
         if not isinstance(rows, list):
             rows = []
         counts = {}
@@ -345,7 +356,13 @@ def observed_projects():
                              and r.get('publicationDate') == now.date().isoformat())]
             public_count = len({r.get('domain') if key == 'cf_blog' else r['publicUrl'] for r in verified}) if key == 'cf_blog' else None
             reserved_count = sum(1 for r in rows if isinstance(r, dict) and r.get('status') in ('reserved', 'scheduled'))
-        state = str(doc.get('processStatus') if key == 'collections' and doc.get('processStatus') == 'success' else doc.get('collectionStatus') if key == 'collections' else doc.get('state') or (doc.get('automation') or {}).get('state') or runtime.get('status') or 'not_reported')
+        state = str(
+            doc.get('processStatus') if key == 'collections' and doc.get('processStatus') == 'success'
+            else doc.get('collectionStatus') if key == 'collections'
+            else doc.get('status') if key == 'naver_premium' and doc.get('status')
+            else ('active' if doc.get('ok') is True and key in ('naver_cafe', 'youtube', 'brunch') else None)
+            or doc.get('state') or (doc.get('automation') or {}).get('state') or runtime.get('status') or 'not_reported'
+        )
         failed = sum(counts.get(k, 0) for k in (('failed', 'error', 'review_required') if key == 'collections' and doc.get('processStatus') == 'success' else ('failed', 'error', 'review_required', 'unknown')))
         status = 'unknown' if error_type or not raw or (age is None and key != 'cf_blog') else 'stale' if not fresh else 'attention' if failed or state in ('failed', 'error', 'unknown', 'partial', 'backoff', 'stale') else 'observed'
         quota = publication_quota(key, doc, now, fresh and (age is not None or key == 'cf_blog') and not error_type)

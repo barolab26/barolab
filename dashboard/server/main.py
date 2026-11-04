@@ -758,7 +758,7 @@ class CafePublishRequest(BaseModel):
 
 @app.get("/api/cafe")
 def api_cafe_status():
-    from youtube_posting.posting import load_cafe_status, sync_cafe_live_state
+    from naver_cafe_posting.posting import load_cafe_status, sync_cafe_live_state
     st = load_cafe_status()
     if not st:
         st = sync_cafe_live_state()
@@ -767,13 +767,13 @@ def api_cafe_status():
 
 @app.post("/api/cafe/sync")
 def api_cafe_sync():
-    from youtube_posting.posting import sync_cafe_live_state
+    from naver_cafe_posting.posting import sync_cafe_live_state
     return sync_cafe_live_state()
 
 
 @app.post("/api/cafe/publish")
 def api_cafe_publish(req: CafePublishRequest):
-    from youtube_posting.posting import publish_cafe_bridge_part
+    from naver_cafe_posting.posting import publish_cafe_bridge_part
     return publish_cafe_bridge_part(part_no=req.part)
 
 

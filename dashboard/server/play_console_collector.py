@@ -206,7 +206,7 @@ def parse_observation(app, pages, checked_at=None):
                     result['alpha']['trackActive'] = active[1] == '활성'
                     signals['alpha.trackActive'] = active[0]
             patterns = {
-                'googleOptInCount': [r'^(?:현재 참여를 선택한 테스터|현재 참여 중인 테스터|참여 중인 테스터 수|Opted-in testers)\s*[:：]?\s*(\d[\d,]*)\s*(?:명)?\s*$'],
+                'googleOptInCount': [r'^(?:현재 참여를 선택한 테스터|현재 참여 중인 테스터|참여 중인 테스터 수|Opted-in testers)\s*[:：]?\s*(\d[\d,]*)\s*(?:명)?\s*$', r'^check\s*\n(\d+)명 이상의 테스터가 비공개 테스트 참여를 선택$'],
                 'googleInstallCount': [r'^(?:현재 설치된 기기|설치된 기기 수|Installed devices)\s*[:：]?\s*(\d[\d,]*)\s*(?:대)?\s*$'],
                 'continuousTestDays': [r'^(?:연속 테스트 일수|연속 참여 일수|Continuous testing days)\s*[:：]?\s*(\d+)\s*(?:일|days)?\s*$'],
             }

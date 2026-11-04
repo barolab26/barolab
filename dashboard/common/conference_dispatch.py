@@ -40,9 +40,13 @@ def request(kind, arguments, *, one=False, automatic=None):
             if project not in ('threads','cf_blog') or not agendas.autonomous_experiment_allows(project,
                     target_url=item.get('targetUrl',''), domain=item.get('account','') if project=='cf_blog' else ''):
                 continue
-        receipts.append(_request_single(kind,item,automatic=automatic and not existing))
-        if one:break
+        rec = _request_single(kind,item,automatic=automatic and not existing)
+        receipts.append(rec)
+        if one and rec.get('status') in ('conference_requested', 'conference_pending'):
+            break
     if not receipts:return {'status':'held','reason':'cf_preparation_window_waiting' if deferred_preparation else 'new_automatic_work_requires_focused_experiment'}
+    if one:
+        return next((r for r in receipts if r.get('status') in ('conference_requested', 'conference_pending')), receipts[0])
     return receipts[0] if len(receipts)==1 else {'status':'conference_requested','items':receipts,'count':len(receipts)}
 
 
@@ -64,15 +68,23 @@ def _existing_concrete_work(kind, arguments):
     key=hashlib.sha256(json.dumps([kind,arguments],sort_keys=True).encode()).hexdigest()
     if load(QUEUE/(key+'.json')):
         return True
-    if kind=='threads' and arguments.get('partId'):
+    if kind=='threads' and (arguments.get('partId') or arguments.get('account') == 'mustpickinfo'):
+        return True
+    if kind=='kin' and arguments.get('account') in ('adinfo0905', 'stone0747'):
         return True
     if kind=='parameters' and arguments.get('account') and arguments.get('date'):
-        from common.channel_parameters import folder_for
+        from common.channel_parameters import folder_for, policy
         action=arguments.get('action')
+        plan = policy()
         if action in ('cf','cf-prepare'):
             folder=folder_for('cf_posting',arguments['date'],arguments['account'])
+            if arguments.get('account') in plan.get('cf', {}):
+                if action == 'cf' or cf_preparation_window_open(arguments) or (folder / 'article.json').is_file():
+                    return True
         elif action=='naver' and arguments.get('slot'):
             folder=folder_for('naver_blog_posting',arguments['date'],arguments['account']+'-'+arguments['slot'].replace(':',''))
+            if arguments.get('account') in plan.get('naver', {}):
+                return True
         else:return False
         return any((folder/name).is_file() for name in ('photo-plan.json','publication-receipt.json','reservation-evidence.json'))
     return False
@@ -93,7 +105,9 @@ def concrete_requests(kind, arguments):
             day=arguments.get('date') or today
             day=max(day,plan['effectiveDate'])
             from naver_blog_posting.posting import needs_quality_revision
-            for account,settings in plan['naver'].items():
+            nv_eff=plan.get('naverEffectiveDate')
+            nv_map=plan['naverPrior'] if (nv_eff and day<nv_eff and plan.get('naverPrior')) else plan['naver']
+            for account,settings in nv_map.items():
                 for slot in settings['slots']:
                     slot_folder=folder_for('naver_blog_posting',day,account+'-'+slot.replace(':',''))
                     receipt=load(slot_folder/'reservation-evidence.json')
@@ -108,7 +122,7 @@ def concrete_requests(kind, arguments):
                         continue
                     folder=folder_for('cf_posting',day,domain)
                     pub_rec = load(folder/'publication-receipt.json')
-                    if pub_rec.get('state') == 'published' and pub_rec.get('publicPublicationVerified'):
+                    if (pub_rec.get('state') == 'published' and pub_rec.get('publicPublicationVerified')) or ((folder/'photo-plan.json').is_file() and (folder/'article.json').is_file()):
                         continue
                     result.append({'action':'cf-prepare','date':day,'account':domain,'slot':slot})
         elif action in ('dispatch','cf-cycle'):
@@ -121,7 +135,7 @@ def concrete_requests(kind, arguments):
                     result.append({'action':'cf','date':today,'account':domain,'slot':slot})
                 elif action=='cf-cycle' and slot and item.get('status') not in ('published','failed','error'):
                     pub_rec = load(folder/'publication-receipt.json')
-                    if not (pub_rec.get('state') == 'published' and pub_rec.get('publicPublicationVerified')):
+                    if not (pub_rec.get('state') == 'published' and pub_rec.get('publicPublicationVerified')) and not ((folder/'photo-plan.json').is_file() and (folder/'article.json').is_file()):
                         result.append({'action':'cf-prepare','date':today,'account':domain,'slot':slot})
         return result
     if kind=='kin':
@@ -209,11 +223,14 @@ def _request_single(kind, arguments, *, automatic=False):
             if previous and previous!=business and row['status'] not in ('completed',):
                 with locked(agendas.ROWS):
                     prior=agendas.get(previous);state=load(agendas.STATE)
-                    if prior.get('status')!='queued' or prior.get('activatedAt') or prior.get('kind')!='conference':
-                        raise agendas.AgendaWaiting('원래 안건의 실행·복구 권한을 유지합니다. 해당 안건을 이어서 처리해야 합니다.')
-                    prior.update(status='linked',parentAgendaId=business);agendas._save(prior)
-                    state['pending']=[i for i in state.get('pending',[]) if i!=previous];write(agendas.STATE,state)
-                    row['businessAgendaId']=business;write(path,row)
+                    if not prior or prior.get('status') in ('closed', 'completed', 'cancelled', 'linked', 'blocked', 'recovering'):
+                        row['businessAgendaId']=business;write(path,row)
+                    else:
+                        if prior.get('status')!='queued' or prior.get('activatedAt') or prior.get('kind')!='conference':
+                            raise agendas.AgendaWaiting('원래 안건의 실행·복구 권한을 유지합니다. 해당 안건을 이어서 처리해야 합니다.')
+                        prior.update(status='linked',parentAgendaId=business);agendas._save(prior)
+                        state['pending']=[i for i in state.get('pending',[]) if i!=previous];write(agendas.STATE,state)
+                        row['businessAgendaId']=business;write(path,row)
             if not row.get('businessAgendaId'):
                 row['businessAgendaId']=business;write(path,row)
             biz_row = agendas.get(business)

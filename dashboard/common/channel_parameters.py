@@ -65,11 +65,14 @@ def styled_native(builder, original, document):
     for index, (block, component) in enumerate(zip(document['blocks'], native['document']['components'][1:])):
         ctype = component.get('@ctype')
         if ctype == 'quotation':
-            component['layout'] = params['quoteStyle'] if params.get('quoteStyle') not in (None, 'none') else 'quotation_line'
+            is_heading = block.get('type') == 'heading'
+            component['layout'] = 'quotation_underline' if is_heading else (params['quoteStyle'] if params.get('quoteStyle') not in (None, 'none') else 'quotation_line')
+            q_size = params['headingFontSize'] if is_heading else params['bodyFontSize']
+            q_align = params.get('headingAlign', 'center') if is_heading else params.get('textAlign', 'left')
             for paragraph in component.get('value') or []:
-                paragraph.setdefault('style', {})['align'] = params.get('textAlign', 'left')
+                paragraph.setdefault('style', {})['align'] = q_align
                 for node in paragraph.get('nodes', []):
-                    node.setdefault('style', {}).update(fontSizeCode=f"fs{params['bodyFontSize']}", bold=True)
+                    node.setdefault('style', {}).update(fontSizeCode=f"fs{q_size}", bold=True)
             continue
         if ctype == 'table':
             for r_idx, row in enumerate(component.get('rows', [])):
@@ -122,6 +125,13 @@ def planning_or_memory(identity, topic, folder, params, channel='naver'):
         return result
 
 
+def naver_slots_for_date(plan, day):
+    naver_eff = plan.get('naverEffectiveDate')
+    if naver_eff and day < naver_eff and plan.get('naverPrior'):
+        return plan['naverPrior']
+    return plan['naver']
+
+
 def configure_naver(day):
     import naver_blog_posting.posting as engine
     plan = policy()
@@ -130,10 +140,11 @@ def configure_naver(day):
     if day < plan['effectiveDate']:
         engine.DAILY_SLOTS = engine._parameter_original_slots.copy()
     else:
-        engine.DAILY_SLOTS = {key: tuple(row['slots']) for key, row in plan['naver'].items()}
+        nv_map = naver_slots_for_date(plan, day)
+        engine.DAILY_SLOTS = {key: tuple(row['slots']) for key, row in nv_map.items()}
     if getattr(engine, '_parameter_wiring', False):
         return engine
-    prepare, builder, summary, attempt = engine.prepare_basic_content, engine.basic_native_document, engine.basic_summary_image, engine.write_attempt
+    prepare, builder, summary, attempt = engine.prepare_basic_content, engine.basic_native_document, getattr(engine, 'basic_summary_image', summary_table), engine.write_attempt
     acquire_editor = engine.acquire_naver_editor
 
     def preserved_editor(context, pages, blog_id):
@@ -190,62 +201,30 @@ def configure_naver(day):
             '- 허위 사실·근거 없는 수치 날조 금지 (단, "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 쓰지 마라).\n'
             '- "AI 생성", "참고사진", "자료 부족으로 비교 불가" 같은 메타/면피 문구 절대 금지.\n'
         )
-        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[이번 발행의 지식그래프 스타일 설정 · 크루 회의 합의안]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule, *args, **kwargs)
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt + (('\n[이번 발행의 지식그래프 스타일 설정 · 크루 회의 합의안]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule) if not kwargs.get('_skip_memory') else ''), *args, **kwargs)
         try:
+            if folder and not existing and load(Path(folder) / 'reservation-evidence.json').get('submissionStatus') not in ('submitting', 'submission_unknown', 'verified_reserved'):
+                ed_manifest = Path(folder) / 'editorial-images.json'
+                if ed_manifest.is_file() and load(ed_manifest).get('status') != 'ready':
+                    ed_manifest.unlink(missing_ok=True)
+                    (Path(folder) / 'image-preparation-status.json').unlink(missing_ok=True)
             result = prepare(account, folder, topic)
         finally:
             engine.basic_summary_image = summary
             llm_client.generate_json = generate
         if not existing or incomplete_media:
-            doc_blocks = result[2].get('blocks') or []
-            has_valid_images = any(b.get('type') == 'image' and b.get('file') != 'summary.png' for b in doc_blocks) and bool(result[3].get('assets'))
-            if not has_valid_images:
-                article = load(result[1] / 'writer.json')
-                main_kw = article.get('mainKeyword') or article.get('title', '주요 내용')
-                from common.flow_images import generate as flow_image
-                image = flow_image(article['title'], article['intro'], result[1], custom_prompt=article.get('imagePrompt'))
-                raw_cap = (article.get('imageCaption') or f"{main_kw} 주요 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
-                hero_caption = raw_cap or f"{main_kw} 주요 포인트"
-                hero_credit = main_kw or "핵심 정리"
-                hero_asset = {'id': 0, 'file': image.name, 'description': hero_caption, 'credit': hero_credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}
-                result[3]['assets'] = [hero_asset]
-                result[3]['representative_file'] = image.name
-                result[2]['blocks'] = [b for b in doc_blocks if b.get('type') != 'image']
-                hero_block = {'type': 'image', 'id': 0, 'file': image.name, 'alt': hero_caption, 'caption': f"{hero_caption}｜{hero_credit}"}
-                result[2]['blocks'].insert(1, hero_block)
-
             report = engine.validate_document(result[2], result[3], result[1] / 'images')
             if not report['ok']:
                 raise ValueError('Document formatting invalid: ' + json.dumps(report['errors'], ensure_ascii=False))
-            write(result[1] / 'photo-plan.json', result[3])
-            write(result[1] / 'format-check.json', report)
             result[2]['planningId'] = planning.get('planningId')
             pres = {**params, 'guideSha256': hashlib.sha256((ROOT / 'AGENTS.md').read_bytes()).hexdigest()}
             if result[2].get('lineLinks'):
                 pres['lineLinks'] = result[2]['lineLinks']
             result[2]['presentation'] = pres
+            result[3]['documentSha256'] = engine.document_fingerprint(result[2])
+            write(result[1] / 'photo-plan.json', result[3])
+            write(result[1] / 'format-check.json', report)
             write(result[1] / 'editor-content.json', result[2])
-        elif existing:
-            doc_blocks = result[2]['blocks']
-            has_legacy_summary = any(b.get('type') == 'image' and b.get('file') == 'summary.png' for b in doc_blocks)
-            if has_legacy_summary and not load(Path(folder) / 'reservation-evidence.json'):
-                article = load(result[1] / 'writer.json') or {}
-                main_kw = article.get('mainKeyword') or result[2].get('title', '주요 내용')
-                from common.flow_images import generate as flow_image
-                image = flow_image(result[2]['title'], article.get('intro', ''), result[1], custom_prompt=article.get('imagePrompt'))
-                raw_cap = (article.get('imageCaption') or f"{main_kw} 주요 포인트").replace('|', ' ').replace('｜', ' ').replace('\n', ' ').strip()
-                hero_caption = raw_cap or f"{main_kw} 주요 포인트"
-                hero_credit = main_kw or "핵심 정리"
-                hero_asset = {'id': 0, 'file': image.name, 'description': hero_caption, 'credit': hero_credit, 'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}
-                result[3]['assets'] = [hero_asset]
-                result[3]['representative_file'] = image.name
-                result[2]['blocks'] = [b for b in doc_blocks if b.get('type') != 'image']
-                result[2]['blocks'].insert(1, {'type': 'image', 'id': 0, 'file': image.name, 'alt': hero_caption, 'caption': f"{hero_caption}｜{hero_credit}"})
-                report = engine.validate_document(result[2], result[3], result[1] / 'images')
-                if report['ok']:
-                    write(result[1] / 'photo-plan.json', result[3])
-                    write(result[1] / 'format-check.json', report)
-                    write(result[1] / 'editor-content.json', result[2])
         return result
 
     def dated_attempt(account, phase, *args, **kwargs):
@@ -283,7 +262,12 @@ def monitor(base=None, now=None):
     try:
         result = engine.monitor(base or engine.BASE, now)
         plan = policy()
-        result['schedulePolicy'] = {'effectiveDate': plan['effectiveDate'], 'naver': plan['naver']}
+        result['schedulePolicy'] = {
+            'effectiveDate': plan['effectiveDate'],
+            'naverEffectiveDate': plan.get('naverEffectiveDate'),
+            'naverPrior': plan.get('naverPrior'),
+            'naver': plan['naver'],
+        }
         write(DATA / 'naver/automation-status.json', result)
         return result
     finally:
@@ -316,14 +300,14 @@ def run_naver(day, account, clock):
     if receipt.get('submissionStatus') == 'verified_reserved' and not engine.needs_quality_revision(folder):
         return receipt
     original_slot = clock
-    reserve_clock = clock
-    if receipt.get('submissionStatus') not in ('submitting', 'submission_unknown') and when < datetime.now(KST) + timedelta(minutes=30):
-        when = (datetime.now(KST) + timedelta(minutes=45)).replace(second=0, microsecond=0)
-        when += timedelta(minutes=-when.minute % 10)
-        reserve_clock = when.strftime('%H:%M')
+    reserve_dt = when
+    if receipt.get('submissionStatus') not in ('submitting', 'submission_unknown') and when < datetime.now(KST) + timedelta(minutes=55):
+        reserve_dt = (datetime.now(KST) + timedelta(minutes=65)).replace(second=0, microsecond=0)
+        reserve_dt += timedelta(minutes=-reserve_dt.minute % 10)
+    reserve_target = reserve_dt.strftime('%Y-%m-%d %H:%M')
     planning_or_memory(account, engine.ACCOUNT_MAP[account]['topic'], folder, styles(account, day))
-    engine.RUN_OPTIONS.update(slot=original_slot, reserve_time=day + ' ' + reserve_clock, screen_folder=str(folder))
-    result = engine.run_basic_pipeline(account, folder=folder, reserve_time=day + ' ' + reserve_clock)
+    engine.RUN_OPTIONS.update(slot=original_slot, reserve_time=reserve_target, screen_folder=str(folder))
+    result = engine.run_basic_pipeline(account, folder=folder, reserve_time=reserve_target)
     saved = load(folder / 'reserved-server-document.json')
     sizes = sorted({node.get('style', {}).get('fontSizeCode', '') for component in saved.get('document', {}).get('components', []) for paragraph in (component.get('value') or []) for node in paragraph.get('nodes', [])})
     write(folder / 'presentation-receipt.json', {'account': account, 'reserveTime': day + ' ' + clock, 'savedFontSizes': sizes, 'stylesVerified': bool(sizes) and {'fs'+str(styles(account)['bodyFontSize']), 'fs'+str(styles(account)['headingFontSize'])}.issubset(set(sizes)), 'parameters': load(folder / 'editor-content.json').get('presentation', {}), 'verifiedAt': datetime.now(KST).isoformat()})
@@ -382,7 +366,7 @@ def prepare_cf(day, domain, *, publish_if_due=True):
             '- 본문에는 스마트폰으로 바로 대입 가능한 구체적 사례, 주제 성격에 맞는 실용 비교/정리 표(<table>), 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 바로 실천할 수 있는 구체적 팁으로 마무리하라.\n'
             '- "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 노출 금지.\n'
         )
-        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt+'\n[크루 회의 합의 작성 방식]\n'+planning.get('writingGuide','')+cf_writing_rule, *args, **kwargs)
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt + (('\n[크루 회의 합의 작성 방식]\n'+planning.get('writingGuide','')+cf_writing_rule) if kwargs.get('agent_slot') == 'cf_pipeline' else ''), *args, **kwargs)
         try:
             article = cf.basic_article(domain, scheduled, folder)
         finally:

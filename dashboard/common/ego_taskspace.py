@@ -182,8 +182,70 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
     return run_ego_mjs(script, timeout=timeout)
 
 
+def _ensure_ego_window_visible_on_desktop() -> dict:
+    """When called from the interactive desktop (WinSta0\\Default), ensure EGO Lite is running without stealing focus or killing user windows."""
+    if os.name != "nt":
+        return {"ok": True, "mode": "non_windows"}
+    try:
+        import ctypes
+        from ctypes import wintypes
+        u32 = ctypes.windll.user32
+        WNDENUMPROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        total_hwnds = [0]
+        def _count_cb(hwnd, lparam):
+            total_hwnds[0] += 1
+            return True
+        u32.EnumWindows(WNDENUMPROC(_count_cb), 0)
+        if total_hwnds[0] < 10:
+            return {"ok": True, "mode": "sandbox_desktop", "totalHwnds": total_hwnds[0]}
+
+        restart_flag = Path(__file__).resolve().parents[1] / "data" / "restart_ego_once.flag"
+        force_restart = restart_flag.exists()
+        ego_exe = Path(r"C:\Program Files\Citro Labs\ego lite\Application\ego.exe")
+        if force_restart and ego_exe.exists():
+            try:
+                restart_flag.unlink()
+            except OSError:
+                pass
+            subprocess.run(
+                ["taskkill", "/F", "/IM", "ego-browser.exe", "/IM", "ego.exe"],
+                capture_output=True,
+                timeout=6,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            time.sleep(1.5)
+            subprocess.Popen(
+                [str(ego_exe), "http://127.0.0.1:8790/index.html"],
+                cwd=str(ego_exe.parent),
+            )
+            time.sleep(4.0)
+            return {"ok": True, "mode": "restarted_clean_on_desktop"}
+
+        res = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", "(Get-Process ego -ErrorAction SilentlyContinue).Id"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        ego_pids = {int(x) for x in (res.stdout or "").split() if x.strip().isdigit()}
+        if ego_pids:
+            return {"ok": True, "mode": "already_running", "pidCount": len(ego_pids)}
+        if ego_exe.exists():
+            subprocess.Popen(
+                [str(ego_exe), "http://127.0.0.1:8790/index.html"],
+                cwd=str(ego_exe.parent),
+            )
+            time.sleep(3.5)
+            return {"ok": True, "mode": "launched_on_desktop"}
+        return {"ok": False, "mode": "ego_exe_missing"}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
 def ensure_persistent_ego_spaces(timeout: int = 45) -> dict:
-    """Ensure all 6 BaroLab Spaces (5 Naver accounts + Google Flow) stay open inside the user's main EGO Lite browser."""
+    """Ensure all 6 BaroLab Spaces (5 Naver accounts + Google Flow) stay open and clean (1 tab each) inside EGO Lite."""
+    desktop_vis = _ensure_ego_window_visible_on_desktop()
     script = """
 const TARGET_SPACES = [
   { account: "soultin", name: "barolab-soultin", profileId: "Profile 3", url: "https://blog.naver.com/mustpickinfo" },
@@ -193,11 +255,24 @@ const TARGET_SPACES = [
   { account: "stone0747", name: "barolab-kin-stone0747", profileId: "Profile 7", url: "https://kin.naver.com/" },
   { account: "cf-flow", name: "barolab-cf-flow", profileId: "Profile 3", url: "https://flow.google.com/" }
 ];
+const targetNames = new Set(TARGET_SPACES.map(t => t.name));
 const existing = await listTaskSpaces();
+for (const s of (Array.isArray(existing) ? existing : [])) {
+  if (!s || typeof s.name !== "string" || !s.name || targetNames.has(s.name)) continue;
+  if (/^(editorial-|adpost-|barolab-cookie-sync-|barolab-cf-inline|barolab-verify|barolab-preview)/.test(s.name)) {
+    try {
+      const t = s.ownership === "agentDelegatedToUser" ? await takeOverTaskSpace(s.id) : (s.ownership === "user" ? await claimTaskSpace(s.id) : await taskSpace(s.id));
+      try { const up = t.userPage && t.userPage(); if (up && up.dismissDialog) await up.dismissDialog().catch(() => {}); } catch (_) {}
+      try { const p1 = t.page("p1"); if (p1 && p1.dismissDialog) await p1.dismissDialog().catch(() => {}); } catch (_) {}
+      await t.finish({ keep: [] }).catch(() => {});
+    } catch (_) {}
+  }
+}
 const opened = [];
 for (const cfg of TARGET_SPACES) {
   const found = Array.isArray(existing) ? existing.find(s => s && s.name === cfg.name) : null;
-  if (found && Array.isArray(found.recentTabTitles) && found.recentTabTitles.length > 0 && found.recentTabTitles[0] !== "새 탭") {
+  const needTrim = found && Array.isArray(found.recentTabTitles) && found.recentTabTitles.length > 1;
+  if (found && !needTrim && Array.isArray(found.recentTabTitles) && found.recentTabTitles.length === 1 && found.recentTabTitles[0] !== "새 탭") {
     opened.push({
       account: cfg.account,
       spaceName: cfg.name,
@@ -206,10 +281,27 @@ for (const cfg of TARGET_SPACES) {
     });
     continue;
   }
-  const task = found ? await taskSpace(cfg.name) : await taskSpace(cfg.name, { profileId: cfg.profileId });
-  const page = task.page("p1");
+  const task = found ? await taskSpace(found.id) : await taskSpace(cfg.name, { profileId: cfg.profileId });
+  const pages = await task.pages().catch(() => []);
+  if (pages.length > 1) {
+    let keepIdx = pages.findIndex(p => p);
+    for (let i = 0; i < pages.length; i++) {
+      const u = await pages[i].url().catch(() => "");
+      if (u && !u.startsWith("chrome-extension://") && !u.startsWith("chrome://") && u !== "about:blank") {
+        keepIdx = i;
+        break;
+      }
+    }
+    for (let i = 0; i < pages.length; i++) {
+      if (i !== keepIdx) {
+        await pages[i].cdp("Page.close").catch(() => {});
+      }
+    }
+  }
+  const remPages = await task.pages().catch(() => []);
+  const page = remPages.length > 0 ? remPages[0] : task.page("p1");
   const curUrl = await page.url().catch(() => "");
-  if (!curUrl || curUrl === "about:blank" || curUrl.startsWith("chrome://")) {
+  if (!curUrl || curUrl === "about:blank" || curUrl.startsWith("chrome://") || curUrl.startsWith("chrome-extension://")) {
     await page.goto(cfg.url, { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
   }
   opened.push({
@@ -219,44 +311,6 @@ for (const cfg of TARGET_SPACES) {
     profileId: cfg.profileId
   });
 }
-try {
-  const firstTask = await taskSpace(TARGET_SPACES[0].name);
-  const cdpPage = firstTask.page("p1");
-  const targets = await cdpPage.cdp("Target.getTargets");
-  const pages = (targets.targetInfos || []).filter(t => t.type === "page");
-  const winMap = {};
-  for (const p of pages) {
-    try {
-      const w = await cdpPage.cdp("Browser.getWindowForTarget", { targetId: p.targetId });
-      if (!winMap[w.windowId]) winMap[w.windowId] = [];
-      winMap[w.windowId].push(p);
-    } catch (e) {}
-  }
-  let keptMain = false;
-  for (const wid of Object.keys(winMap)) {
-    const tabs = winMap[wid];
-    const hasDashboard = tabs.some(t => t.url.includes("127.0.0.1:8790"));
-    const isAgentSpace = tabs.some(
-      t => t.url.includes("Redirect=Write") || t.url.includes("flow.google.com") || t.url.includes("adpost.naver.com") || t.url.includes("kin.naver.com")
-    );
-    if (hasDashboard || isAgentSpace) {
-      if (hasDashboard) keptMain = wid;
-      continue;
-    }
-    const isExtraProfileWindow = tabs.every(
-      t => t.url.startsWith("chrome://newtab") || t.url.includes("onetab.html") || t.url === "about:blank" || t.url === "https://www.naver.com/"
-    );
-    if (isExtraProfileWindow) {
-      if (!keptMain) {
-        keptMain = wid;
-        continue;
-      }
-      for (const t of tabs) {
-        await cdpPage.cdp("Target.closeTarget", { targetId: t.targetId }).catch(() => {});
-      }
-    }
-  }
-} catch (e) {}
 const profRaw = await profiles();
 const profList = Array.isArray(profRaw) ? profRaw : (profRaw?.profiles || []);
 const spaces = await listTaskSpaces();
@@ -267,7 +321,16 @@ console.log("BAROLAB_EGO_JSON:" + JSON.stringify({
   opened
 }));
 """
-    return run_ego_mjs(script, timeout=timeout)
+    res = run_ego_mjs(script, timeout=timeout)
+    if isinstance(res, dict):
+        res["desktopVisibility"] = desktop_vis
+        if desktop_vis.get("mode") != "sandbox_desktop":
+            try:
+                vis_path = Path(__file__).resolve().parents[1] / "data" / "ego-desktop-visibility.json"
+                vis_path.write_text(json.dumps(desktop_vis, ensure_ascii=False, indent=2), encoding="utf-8")
+            except Exception:
+                pass
+    return res
 
 
 def extract_profile_cookies(account_or_port: str | int, default_url: str = "https://www.naver.com", include_default_profile: bool = False) -> list[dict]:
@@ -347,7 +410,7 @@ const targetUrl = {json.dumps(default_url)};
 const cookies = {json.dumps(clean_cookies)};
 const spaces = await listTaskSpaces();
 const existing = Array.isArray(spaces) ? spaces.find(s => s && s.name === spaceName) : null;
-const task = existing ? await taskSpace(spaceName) : await taskSpace(spaceName, {{ profileId }});
+const task = existing ? await taskSpace(existing.id) : await taskSpace(spaceName, {{ profileId }});
 const page = task.page("p1");
 await page.cdp("Network.setCookies", {{ cookies }});
 await page.goto(targetUrl, {{ waitUntil: "domcontentloaded", timeout: 15000 }}).catch(() => {{}});
@@ -380,7 +443,7 @@ const latestTitle = {json.dumps(latest_title or "")};
 
 const spaces = await listTaskSpaces();
 const existing = Array.isArray(spaces) ? spaces.find(s => s && s.name === spaceName) : null;
-const task = existing ? await taskSpace(spaceName) : await taskSpace(spaceName, {{ profileId }});
+const task = existing ? await taskSpace(existing.id) : await taskSpace(spaceName, {{ profileId }});
 const page = task.page("p1");
 const curUrl = await page.url().catch(() => "");
 if (!curUrl.includes("Redirect=Write")) {{
@@ -435,7 +498,7 @@ def handoff_to_ceo(account_or_port: str | int, url: str, reason: str, space_labe
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
-const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const task = found ? await taskSpace(found.id) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 const page = task.page("p1");
 await page.goto({json.dumps(url)}, {{ waitUntil: "domcontentloaded", timeout: 20000 }}).catch(() => {{}});
 const finalUrl = await page.url();
@@ -462,7 +525,7 @@ def native_observe_space(account_or_port: str | int, url: str | None = None, tim
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
-const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const task = found ? await taskSpace(found.id) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 try {{
   const page = task.page("p1");
   const targetUrl = {json.dumps(url)};
@@ -531,7 +594,7 @@ const spaceName = {json.dumps(space_name)};
 
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === spaceName) : null;
-const task = found ? await taskSpace(spaceName) : await taskSpace(spaceName, {{ profileId: "Profile 3" }});
+const task = found ? await taskSpace(found.id) : await taskSpace(spaceName, {{ profileId: "Profile 3" }});
 const turns = [];
 const screenshots = [];
 try {{
@@ -746,16 +809,58 @@ try {{
     return result
 
 
-def native_kin_fetch_page_state(account: str, url: str, *, load_all_answers: bool = False) -> dict:
+def native_kin_fetch_page_state(account: str, url: str, *, load_all_answers: bool = False, fast_fetch: bool = False) -> dict:
     """Read a Naver KnowledgeIn question/answer page inside the main EGO Lite browser's native TaskSpace."""
     profile_id = resolve_ego_profile(account)
     space_name = f"barolab-kin-{account}"
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
-const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const task = found ? await taskSpace(found.id) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 try {{
   const page = task.page("p1");
+  const curHost = await page.evaluate(() => location.hostname).catch(() => "");
+  if (curHost !== "kin.naver.com") {{
+    await page.goto("https://kin.naver.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  }}
+  if ({json.dumps(bool(fast_fetch))}) {{
+    const fast = await page.evaluate(async (targetUrl) => {{
+      try {{
+        const res = await fetch(targetUrl, {{ credentials: "include" }});
+        if (!res.ok) return {{ ok: false }};
+        const html = await res.text();
+        const mTotal = html.match(/totalAnswerCount\\s*:\\s*(\\d+)/);
+        const total = mTotal ? parseInt(mTotal[1], 10) : 0;
+        const loaded = (html.match(/id="answer_\\d+"/g) || []).length;
+        const hasMyAnswer = html.includes("_myAnswer") || html.includes("optModify");
+        return {{
+          ok: true,
+          url: res.url || targetUrl,
+          html,
+          total,
+          loaded,
+          needsPagination: total > loaded && !hasMyAnswer
+        }};
+      }} catch (e) {{
+        return {{ ok: false }};
+      }}
+    }}, {json.dumps(url)});
+    if (fast && fast.ok && !fast.needsPagination && fast.html.includes("naver.isLogin")) {{
+      console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+        ok: true,
+        account: {json.dumps(account)},
+        profileId: {json.dumps(profile_id)},
+        spaceId: task.spaceId,
+        url: fast.url,
+        dialogs: [],
+        html: fast.html,
+        bodyText: "",
+        answerCount: fast.loaded,
+        fastFetch: true
+      }}));
+      return;
+    }}
+  }}
   await page.goto("https://kin.naver.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
   const loginCheck = await page.evaluate(() => {{
     const el = document.querySelector(".my_service .user_id");
@@ -834,7 +939,7 @@ def native_kin_discover_links(account: str, search_urls: list[dict]) -> dict:
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
-const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const task = found ? await taskSpace(found.id) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 try {{
   const page = task.page("p1");
   await page.goto("https://kin.naver.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
@@ -891,7 +996,7 @@ def native_kin_prepare_and_submit(account: str, question_url: str, answer_text: 
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
-const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const task = found ? await taskSpace(found.id) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 let retainSpace = false;
 try {{
   const page = task.page("p1");
@@ -1306,7 +1411,7 @@ def native_publish_naver_cafe_article(
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === {json.dumps(space_name)}) : null;
-const task = found ? await taskSpace({json.dumps(space_name)}) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
+const task = found ? await taskSpace(found.id) : await taskSpace({json.dumps(space_name)}, {{ profileId: {json.dumps(profile_id)} }});
 const page = task.page("p1");
 const prevUrl = await page.url().catch(() => "");
 try {{
@@ -1365,7 +1470,7 @@ def native_sync_brunch_state(uid: str = "", upw: str = "") -> dict:
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
-const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
+const task = found ? await taskSpace(found.id) : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
 const page = task.page("p1");
 const prevUrl = await page.url().catch(() => "");
 try {{
@@ -1418,8 +1523,8 @@ try {{
       return items;
     }}).catch(() => []);
 
-    await page.goto("https://brunch.co.kr/@31d1f5fb288c4fc", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
-    await page.waitForTimeout(1800);
+    await page.goto("https://brunch.co.kr/@31d1f5fb288c4fc?tab=articles", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
+    await page.waitForTimeout(2200);
     rawPub = await page.evaluate(() => {{
       const items = [];
       document.querySelectorAll("a[href*='/@31d1f5fb288c4fc/']").forEach(a => {{
@@ -1471,12 +1576,12 @@ def native_publish_brunch_column(
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
-const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
+const task = found ? await taskSpace(found.id) : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
 const page = task.page("p1");
 const prevUrl = await page.url().catch(() => "");
 try {{
   await page.goto({json.dumps(target_write_url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(2200);
   let cur = await page.url();
   if ((cur.includes("signin") || cur.includes("accounts.kakao.com")) && {json.dumps(bool(uid and upw))}) {{
     await page.goto("https://brunch.co.kr/auth/kakao?url=%2Fsignin%2Ffinish%3Furl%3D%252Fready", {{ waitUntil: "domcontentloaded", timeout: 20000 }});
@@ -1496,34 +1601,37 @@ try {{
       }});
       await page.waitForTimeout(4000);
       await page.goto({json.dumps(target_write_url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(2200);
     }}
   }}
+  const hasEditor = await page.evaluate(() => !!document.querySelector("h1.cover_title"));
+  if (!hasEditor) {{
+    await page.goto("https://brunch.co.kr/write", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+    await page.waitForTimeout(2200);
+  }}
   await page.evaluate(() => {{
+    window.alert = () => {{}};
+    window.confirm = () => true;
     const g = document.querySelector("button.guide_close");
     if (g) g.click();
   }}).catch(() => {{}});
   await page.waitForTimeout(300);
 
-  await page.evaluate(() => {{
-    const t = document.querySelector("h1.cover_title");
-    if (t) t.innerText = "";
-    const s = document.querySelector("div.cover_sub_title");
-    if (s) s.innerText = "";
-    const b = document.querySelector("div.wrap_body");
-    if (b) b.innerHTML = "<p><br></p>";
-  }}).catch(() => {{}});
-  await page.waitForTimeout(200);
-
   await page.click("h1.cover_title");
+  await page.keyboard.press("Control+A");
+  await page.keyboard.press("Backspace");
   await page.keyboard.insertText({json.dumps(title)});
   await page.waitForTimeout(250);
 
   await page.click("div.cover_sub_title");
+  await page.keyboard.press("Control+A");
+  await page.keyboard.press("Backspace");
   await page.keyboard.insertText({json.dumps(subtitle)});
   await page.waitForTimeout(250);
 
   await page.click("div.wrap_body");
+  await page.keyboard.press("Control+A");
+  await page.keyboard.press("Backspace");
   await page.waitForTimeout(250);
 
   const paras = {json.dumps(paragraphs)};
@@ -1548,19 +1656,9 @@ try {{
     await page.waitForTimeout(1800);
   }}
 
-  await page.evaluate(() => {{
-    const s = document.querySelector("button.btn_article_save_draft, button.be_header_button_save");
-    if (s) s.click();
-  }});
-  await page.waitForTimeout(2000);
-  let finalUrl = await page.url();
-
   if (canPublish && {json.dumps(bool(auto_publish))}) {{
-    await page.evaluate(() => {{
-      const p = document.querySelector("button.be_header_button_publish");
-      if (p) p.click();
-    }});
-    await page.waitForTimeout(1500);
+    await page.click("button.be_header_button_publish");
+    await page.waitForTimeout(1800);
     await page.evaluate(() => {{
       const selected = document.querySelectorAll("button.keyword.selected").length;
       if (selected < 3) {{
@@ -1570,13 +1668,10 @@ try {{
         }}
       }}
     }});
-    await page.waitForTimeout(500);
-    await page.evaluate(() => {{
-      const c = document.querySelector("button.save.button.mint");
-      if (c) c.click();
-    }});
-    await page.waitForTimeout(3500);
-    finalUrl = await page.url();
+    await page.waitForTimeout(600);
+    await page.click("button.save.button.mint");
+    await page.waitForTimeout(4500);
+    const finalUrl = await page.url();
     console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
       ok: true,
       mode: "published",
@@ -1586,6 +1681,10 @@ try {{
     }}));
     return;
   }}
+
+  await page.click("button.btn_article_save_draft, button.be_header_button_save").catch(() => {{}});
+  await page.waitForTimeout(2000);
+  const finalUrl = await page.url();
 
   console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
     ok: true,
@@ -1610,7 +1709,7 @@ def native_check_naver_premium_status() -> dict:
     script = """
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-yoon_master") : null;
-const task = found ? await taskSpace("barolab-yoon_master") : await taskSpace("barolab-yoon_master", { profileId: "Profile 5" });
+const task = found ? await taskSpace(found.id) : await taskSpace("barolab-yoon_master", { profileId: "Profile 5" });
 const page = task.page("p1");
 const prevUrl = await page.url().catch(() => "");
 try {
@@ -1648,7 +1747,7 @@ def native_sync_youtube_channels() -> dict:
     script = """
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
-const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", { profileId: "Profile 3" });
+const task = found ? await taskSpace(found.id) : await taskSpace("barolab-soultin", { profileId: "Profile 3" });
 const page = task.page("p1");
 const prevUrl = await page.url().catch(() => "");
 try {
@@ -1726,7 +1825,7 @@ def native_publish_youtube_community_post(channel_handle: str, post_text: str) -
     script = f"""
 const existing = await listTaskSpaces();
 const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soultin") : null;
-const task = found ? await taskSpace("barolab-soultin") : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
+const task = found ? await taskSpace(found.id) : await taskSpace("barolab-soultin", {{ profileId: "Profile 3" }});
 const page = task.page("p1");
 const prevUrl = await page.url().catch(() => "");
 try {{

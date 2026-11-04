@@ -80,6 +80,23 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
     traffic = {r['site']['site_id']: r for r in analysis.get('sites', [])}
     rows, source_domains, inventory_domains = [], [], []
     counts = {key: 0 for key in ('not_indexed', 'deep', 'opportunity', 'top', 'indexed_no_report', 'unknown')}
+    writer_by_url = {}
+    try:
+        base_data = Path(__file__).resolve().parents[2] / 'dashboard/data'
+        mg = json.loads((base_data / 'memory_graph.json').read_text(encoding='utf-8'))
+        for node in (mg.get('nodes') or {}).values():
+            if isinstance(node, dict) and node.get('type') == 'Post' and node.get('url') and node.get('writerBadge'):
+                writer_by_url[node['url'].rstrip('/')] = {
+                    k: node.get(k) for k in ('abArm', 'writerBadge', 'writerShortBadge', 'writerModel', 'title') if node.get(k)
+                }
+        sched = json.loads((base_data / 'cf/daily_schedule.json').read_text(encoding='utf-8'))
+        for item in sched.get('items', []):
+            if isinstance(item, dict) and item.get('publicUrl') and item.get('writerBadge'):
+                writer_by_url[str(item['publicUrl']).rstrip('/')] = {
+                    k: item.get(k) for k in ('abArm', 'writerBadge', 'writerShortBadge', 'writerModel', 'title') if item.get(k)
+                }
+    except Exception:
+        pass
     for record in records:
         site = record.get('site', {})
         if site.get('platform') != 'cf':
@@ -133,6 +150,8 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
             bucket = 'not_indexed' if index == 'not_indexed' else performance if performance != 'unknown' else 'indexed_no_report' if index == 'indexed' else 'unknown'
             counts[bucket] += 1
             action, explanation = next_action(index, performance, evidence)
+            norm_u = str(url).rstrip('/')
+            wmeta = writer_by_url.get(norm_u) or writer_by_url.get(norm_u.replace('https://www.', 'https://')) or writer_by_url.get(norm_u.replace('https://', 'https://www.')) or {}
             rows.append({'domain': domain, 'url': url, 'index': index, 'inspectionAt': evidence.get('checkedAt'),
                          'inspectionStale': success_stale,
                          'naverRequest': naver_receipts.get(key, {'status': 'unknown'}),
@@ -150,7 +169,7 @@ def summary(records, analysis, now=None, naver_requests=None, google_requests=No
                          'searchStart': report.get('start') if page_current else None,
                          'searchEnd': report.get('end') if page_current else None,
                          'pageReportAvailable': page_current, 'ambiguousPage': len(candidates) > 1,
-                         'action': action, 'explanation': explanation})
+                         'action': action, 'explanation': explanation, **wmeta})
     pending = [r for r in rows if r['index'] == 'unknown']
     return {'rows': rows, 'counts': counts, 'inventoryTotal': len(rows), 'inventoryDomains': len(inventory_domains),
             'inspectionPending': len(pending),

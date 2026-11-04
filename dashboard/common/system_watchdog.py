@@ -227,6 +227,15 @@ def check_and_recover_server() -> Dict[str, Any]:
             recovered = True
             detail += " · Windows 호스트 memory_worker(실시간 구독 한도 수집기) 자동 재기동 완료"
         try:
+            subprocess.run(
+                ["taskkill", "/F", "/IM", "UpdaterSetup.exe"],
+                capture_output=True,
+                timeout=5,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+        except Exception:
+            pass
+        try:
             host_telem_path = DATA_DIR / "host_telemetry.json"
             host_telem = load_json(host_telem_path, {})
             codex_checked = float((host_telem.get("codexQuota") or {}).get("checkedAt") or 0)

@@ -165,7 +165,7 @@ THREADS_ACCOUNT = {
 # 4. Naver KnowledgeIn (Kin)
 KIN_ACCOUNTS = {
     'adinfo0905': {'status': 'active', 'role': '전문 정책/대출 답변자'},
-    'soul5373': {'status': 'active', 'role': '생활 복지/건강 답변자'},
+    'stone0747': {'status': 'active', 'role': '세무/민원/정부 혜택 답변자'},
 }
 
 # 4-B. Brunch Story (Kakao/Daum & Google High-DA Essay Column Bridge)
@@ -176,7 +176,7 @@ BRUNCH_ACCOUNT = {
     'pen_name': '머스트픽',
     'url': 'https://brunch.co.kr/@31d1f5fb288c4fc',
     'cdp_port': 9450,
-    'status': 'writer_application_submitted',
+    'status': 'writer_approved',
     'strategy': '4060 은퇴·연금·건보료·세무 실무 에세이 칼럼 → 승인 즉시 다음(Daum)·구글(DA 80+) 색인 부스터 및 CF 16개 도메인 브릿지 가동',
 }
 
@@ -326,7 +326,7 @@ PRIORITY_CASHCOW_DOMAINS = (
 
 
 def get_today_cf_bridge_targets(topic_or_keyword='', allowed_domains=None):
-    """Return today's verified published CF landing pages ranked by topic match & cash-cow priority."""
+    """Return verified published CF landing pages ranked by topic match & cash-cow priority (strictly requiring topic overlap when topic_or_keyword is given)."""
     import re
     allowed = {d.replace('www.', '').strip().lower() for d in (allowed_domains or []) if d}
     candidates = []
@@ -348,7 +348,7 @@ def get_today_cf_bridge_targets(topic_or_keyword='', allowed_domains=None):
             pass
     cf_sched_root = ROOT / 'cf_posting/output/scheduled'
     if cf_sched_root.is_dir():
-        for day_dir in sorted(cf_sched_root.iterdir(), reverse=True)[:2]:
+        for day_dir in sorted(cf_sched_root.iterdir(), reverse=True)[:10]:
             if not day_dir.is_dir():
                 continue
             for dom_dir in sorted(day_dir.iterdir()):
@@ -367,12 +367,22 @@ def get_today_cf_bridge_targets(topic_or_keyword='', allowed_domains=None):
                         candidates.append({'domain': dom, 'url': url, 'title': title, 'category': ''})
                 except Exception:
                     pass
-    tokens = [t for t in re.split(r'[\s,·/()|\[\]-]+', str(topic_or_keyword or '').lower()) if len(t) >= 2]
+    topic_str = str(topic_or_keyword or '').strip()
+    core_tokens = [
+        t for t in extract_core_topic_nouns(topic_str)
+        if t not in ('놓치기', '쉬운', '점검', '정리', '확인', '가이드', '방법', '기준', '조건', '서류', '신청', '계산')
+    ]
     def _score(row):
-        hay = f"{row['title']} {row['category']} {row['domain']} {CF_DOMAINS.get(row['domain'], {}).get('niche', '')}".lower()
-        kw_hits = sum(3 for t in tokens if t in hay)
+        title_nouns = extract_core_topic_nouns(row['title'])
+        hay_title = f"{row['title']} {row['url']}".lower()
+        kw_hits = 0
+        for t in core_tokens:
+            if t in title_nouns or t in hay_title:
+                kw_hits += 3
         cash_bonus = (10 - PRIORITY_CASHCOW_DOMAINS.index(row['domain'])) if row['domain'] in PRIORITY_CASHCOW_DOMAINS else 1
         return (kw_hits, cash_bonus)
+    if core_tokens:
+        candidates = [c for c in candidates if _score(c)[0] >= 3]
     candidates.sort(key=_score, reverse=True)
     return candidates
 

@@ -301,6 +301,24 @@ class EditorialPosting(unittest.TestCase):
             generator.assert_not_called()
         self.assertFalse((self.folder / 'images' / 'fake.png').exists())
 
+    def test_ab_writer_routing_deconstraining_and_badge_resolution(self):
+        from common import llm_client
+        cf_schema = {'type': 'object', 'properties': {'contentHtml': {'type': 'string'}, 'topicSlug': {'type': 'string'}}}
+        nv_schema = {'type': 'object', 'properties': {'intro': {'type': 'string'}, 'sections': {'type': 'array'}}}
+        rev_schema = {'type': 'object', 'properties': {'status': {'type': 'string'}}}
+        self.assertTrue(llm_client.is_article_writer_call('cf_pipeline', cf_schema))
+        self.assertTrue(llm_client.is_article_writer_call('publi', nv_schema))
+        self.assertFalse(llm_client.is_article_writer_call('reviewer', rev_schema))
+        raw_prompt = '- [모바일 줄바꿈 (최우선)] 1문단 = 1~2문장(32~48자 단문)\n- 각 섹션은 5~6개 문단으로 작성\n본문 작성'
+        cleaned = llm_client.deconstrain_writer_prompt(raw_prompt, 'cf_pipeline')
+        self.assertNotIn('32~48자 단문', cleaned)
+        self.assertNotIn('각 섹션은 5~6개 문단', cleaned)
+        self.assertIn('De-Constrained Editorial Mode', cleaned)
+        llm_client.persist_writer_meta(self.folder / 'model-audit', 'agy', 'claude-sonnet-5-5-high', deconstrained=True)
+        resolved = llm_client.resolve_folder_writer_meta(self.folder)
+        self.assertEqual(resolved['abArm'], 'claude')
+        self.assertIn('Claude', resolved['writerBadge'])
+
 
 if __name__ == '__main__':
     unittest.main()

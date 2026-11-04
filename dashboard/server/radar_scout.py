@@ -182,15 +182,53 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
 
         if not cookies_list and os.name == "nt":
             try:
-                from common.ego_taskspace import extract_profile_cookies
-                cookies_list = [
-                    c for c in extract_profile_cookies("cf-flow", default_url="https://blokey.co.kr/golden", include_default_profile=True)
-                    if "blokey.co.kr" in str(c.get("domain") or "")
-                ]
+                from common.ego_taskspace import run_ego_mjs, extract_profile_cookies
+                ego_script = """
+const spaces = await listTaskSpaces();
+for (const spaceName of ["barolab-yoon_master", "barolab-soultin"]) {
+  try {
+    const found = Array.isArray(spaces) ? spaces.find(s => s && s.name === spaceName) : null;
+    if (!found) continue;
+    const task = await taskSpace(found.id);
+    const page = task.page("p1");
+    const curUrl = await page.url().catch(() => "");
+    if (!curUrl.includes("blokey.co.kr")) {
+      await page.goto("https://blokey.co.kr/golden", { waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+    }
+    const payload = await page.evaluate(async () => {
+      const [liveRes, totalRes] = await Promise.all([
+        fetch("/api/golden?period=year", { credentials: "include" }).then(r => r.json()).catch(() => ({})),
+        fetch("/api/golden/total", { credentials: "include" }).then(r => r.json()).catch(() => ({}))
+      ]);
+      return {
+        liveRows: Array.isArray(liveRes?.rows) ? liveRes.rows.slice(0, 5000) : [],
+        totalRows: Array.isArray(totalRes?.rows) ? totalRes.rows.slice(0, 5000) : []
+      };
+    });
+    if ((payload?.liveRows?.length || 0) > 0 || (payload?.totalRows?.length || 0) > 0) {
+      console.log("BAROLAB_EGO_JSON:" + JSON.stringify(payload));
+      process.exit(0);
+    }
+  } catch (e) {}
+}
+console.log("BAROLAB_EGO_JSON:" + JSON.stringify({ liveRows: [], totalRows: [] }));
+"""
+                ego_res = run_ego_mjs(ego_script, timeout=30)
+                if isinstance(ego_res, dict):
+                    live_rows = ego_res.get("liveRows") or []
+                    total_rows = ego_res.get("totalRows") or []
+                if not live_rows and not total_rows:
+                    for _prof in ("default", "cf-flow", "soultin", "soul5373", "yoon_master", "adinfo0905", "stone0747"):
+                        cookies_list = [
+                            c for c in extract_profile_cookies(_prof, default_url="https://blokey.co.kr/golden", include_default_profile=True)
+                            if "blokey.co.kr" in str(c.get("domain") or "")
+                        ]
+                        if cookies_list:
+                            break
             except Exception:
                 cookies_list = []
 
-        if not cookies_list and not ws_url:
+        if not cookies_list and not ws_url and not live_rows and not total_rows:
             receipt["reason"] = f"CDP {cdp_port} 또는 EGO Lite 세션에 blokey.co.kr 로그인 쿠키가 없음"
             return receipt
 
@@ -249,33 +287,64 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
         seen_kw = set()
         stale_or_game_re = re.compile(
             r"(?:[1-9]|12)월\s*\d{1,2}일|[1-9]월출산|힛카드|발\s*로란트|몬스터헌터|몬헌|LoL|선성권|왕옌청|트레이드|이닝|투구|포스트시즌|"
-            r"모친상|부친상|별세|논란|카광|이호선|박근수|이은샘|우지원|신지원|문동주|김도영|오선우|양의지|노시환|이정후|오승환|손혁|"
+            r"모친상|부친상|별세|논란|카광|이호선|박근수|이은샘|우지원|신지원|문동주|김도영|오선우|양의지|노시환|이정후|오승환|손혁|이호연|류중일|오타니|구자욱|원태인|"
             r"김종국|김고은|김소현|손예진|장승조|엄태웅|오인혜|하현승|백재호|남편|이혼|열애|결혼|근황|비주얼|눈매|성형|미코|시사회|"
-            r"태움|야구|청룡영화상|음바페|맨시티|치어리더|란제리|학폭|통역사|유튜버\s*갤|중보갤|포챔스|"
-            r"중간선거|대통령|트럼프|탄핵|국회의원|정당|지지율|주가|주식시세|배당금|맥그리거|할러웨이|최화정|지디|온병원|정이한|포에버송|메차|메챠|"
+            r"태움|야구|청룡영화상|음바페|맨시티|치어리더|란제리|학폭|통역사|유튜버\s*갤|중보갤|포챔스|갤러리|디플러스|딸깍|디펜스|벙커|"
+            r"중간선거|대통령|트럼프|탄핵|국회의원|정당|지지율|주가|주식시세|배당금|맥그리거|할러웨이|최화정|지디|온병원|정이한|포에버송|메차|메챠|멧챠|카멜레온|"
             r"나무위키|타이거즈|라이온즈|트윈스|베어스|자이언츠|이글스|위즈|랜더스|다이노스|히어로즈|고딩엄빠|나는솔로|나혼자산다|돌싱글즈|미우새|"
             r"박신혜|손연재|엄지원|여에스더|박위|정용진|최지\s*만|메이저리그|오케이징|진화\s*조건|곽빈|안우진|성적\s*비교|베타신청|퀴즈|정답|우승|결승|중계|엉뽕|D라인|출산\s*임박|잔류\s*이유|"
+            r"연금복권|복권|로또|당첨번호|프로필|릴\s*하이브리드|아이코스|글로\s*프로|전담|액상|전자담배|드라마|재방송|몇부작|사랑을\s*처방|결별|엔딩|연대기|종정시|감독|유력설|FA\s*행선지|패션\s*대결|정신병동|"
+            r"별사랑|이찬혁|윤미라|전제완|친모|징역|사망보험|살인|구속|체포|기소|재판|선고|포토|카톡\s*테마|특수기호|치이카와|포켓몬|슈퍼\s*마리오|마리오|심정지|사망|"
             r"의\s*결과|신형\s*정체|물어본|취향저격|품절대란|마성의|꼭\s*사야|\d+\s*가지|추천템|총정리|반한"
+        )
+        # Classification rules aligned with high-CPC AdSense & AdPost commercial search intent (strict C-Rank topic purity)
+        re_spam_offtopic = re.compile(
+            r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|펫보험|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토|"
+            r"연금복권|복권|로또|당첨번호|프로필|갤러리|디플러스|이호연|릴\s*하이브리드|아이코스|전자담배|전담|액상|드라마|재방송|몇부작|사랑을\s*처방|결별|엔딩|연대기|종정시|감독|유력설|FA\s*행선지|패션\s*대결|정신병동|"
+            r"별사랑|이찬혁|윤미라|전제완|친모|징역|사망보험|살인|구속|체포|기소|재판|선고|포토|카톡\s*테마|특수기호|치이카와|포켓몬|슈퍼\s*마리오|마리오|심정지|사망|딸깍|디펜스|벙커|멧챠|카멜레온|금리단길|호텔관광과"
+        )
+        re_policy_welfare = re.compile(
+            r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산|"
+            r"기초생활|차상위|의료급여|긴급복지|청년월세|부모급여|아동수당|근로장려|자녀장려|건강보험료|건보료|장기요양|임플란트\s*지원|보청기\s*지원|세이브텍스|삼점삼|국세환급|미환급|청년미래적금|청년\s*희망적금"
+        )
+        re_finance_tax = re.compile(
+            r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|혼례비대출|대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|머니카드|체크카드|보험|실비|실손|퇴직금|IRP|"
+            r"종소세|종합소득세|부가세|원천징수|중도상환|대환대출|특례보금자리|디딤돌|버팀목|든든전세|확정일자|전입신고|보증보험|HUG|연금저축|ISA|비과세|소득공제|세액공제|부양가족|주휴수당|통상임금|이자계산"
+        )
+        re_health_issue = re.compile(
+            r"건강검진|혈당|혈압|당뇨|당화혈색소|콜레스테롤|고지혈증|보청기|임플란트|백내장|도수치료|내시경|용종|수면무호흡|관절염|연골주사|대상포진|"
+            r"역류성|위염|대장내시경|위내시경|초음파|MRI|CT|비급여|급여기준|약값|처방|부작용|효능|영양제|유산균|오메가3|루테인|마그네슘|알부민|커큐민|아르기닌|차요태|차요테|비타민|단백질|치매|파킨슨|뇌졸중|심근경색|협심증|통풍|갑상선|전립선|갱년기|골다공증"
+        )
+        re_living_review = re.compile(
+            r"아이오닉|기아\s*(?:EV|K[3589]|스포티지|쏘렌토|카니발|셀토스|니로|레이|모닝|타스만)|카니발|제네시스|gv80|gv90|g90|쏘렌토|스포티지|싼타페|투싼|아반떼|그랜저|팰리세이드|테슬라|모델y|전기차|하이브리드|자동차보험|자동차세|과태료|"
+            r"갤럭시|아이폰|아이패드|맥북|노트북|보일러|제습기|식기세척기|로봇청소기|건조기|세탁기|에어컨|냉장고|김치냉장고|정수기|공기청정기|으뜸효율|숙소|호텔|리조트|펜션|항공권|수하물|트래블로그|트래블월렛|라운지|패스|렌트카"
         )
         for bucket_name, rows in (("live_trend", live_rows), ("cumulative", total_rows)):
             for r in rows:
-                kw = str(r.get("keyword") or "").strip()
+                kw = str(r.get("keyword") or "").strip().replace(".", "")
+                kw = re.sub(r"\s+", " ", kw).strip()
                 norm_kw = re.sub(r"\s+", "", kw).lower()
-                if not kw or norm_kw in seen_kw or len(kw) > 18:
+                if not kw or norm_kw in seen_kw or len(kw) > 22:
                     continue
-                if (" " not in kw and len(kw) >= 11) or stale_or_game_re.search(kw):
+                if (" " not in kw and len(kw) >= 11) or stale_or_game_re.search(kw) or re_spam_offtopic.search(kw):
                     continue
                 total_vol = int(r.get("total") or 0)
                 doc_cnt = int(r.get("doc") or 0)
-                if total_vol < min_search or total_vol > 40000 or doc_cnt > max_docs or doc_cnt < 1:
+                is_niche = bool(
+                    re_policy_welfare.search(kw) or re_finance_tax.search(kw)
+                    or re_health_issue.search(kw) or re_living_review.search(kw)
+                )
+                eff_max_docs = max(max_docs, 200000) if is_niche else max_docs
+                eff_min_rate = 0.15 if is_niche else 25.0
+                if total_vol < min_search or total_vol > 900000 or doc_cnt > eff_max_docs or doc_cnt < 1:
                     continue
                 rate = total_vol / doc_cnt
-                if rate < 25:
+                if rate < eff_min_rate:
                     continue
                 seen_kw.add(norm_kw)
                 cats = (r.get("origins") or {}).get("categories") or []
                 demos = (r.get("origins") or {}).get("demos") or []
-                grade = "S" if rate >= 100 else ("A" if rate >= 30 else "B")
+                grade = "S" if rate >= 50 or (is_niche and rate >= 2.0) else ("A" if rate >= 15 or is_niche else "B")
                 merged.append({
                     "keyword": kw,
                     "totalSearch": total_vol,
@@ -297,13 +366,6 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                         "raw": {"keyword": kw, "total": total_vol, "doc": doc_cnt},
                     },
                 })
-
-        # Classification rules aligned with high-CPC AdSense & AdPost commercial search intent (strict C-Rank topic purity)
-        re_spam_offtopic = re.compile(r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토")
-        re_policy_welfare = re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산")
-        re_finance_tax = re.compile(r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|보험|실비|실손|퇴직금|IRP")
-        re_health_issue = re.compile(r"건강검진|혈당|혈압|당뇨|당화혈색소|콜레스테롤|고지혈증|보청기|임플란트|백내장|도수치료|내시경|용종|수면무호흡|관절염|연골주사|대상포진")
-        re_living_review = re.compile(r"아이오닉|기아|카니발|제네시스|전기차|하이브리드|자동차보험|갤럭시|아이폰|노트북|보일러|제습기|식기세척기|로봇청소기|으뜸효율|숙소|호텔|항공권|수하물|트래블로그")
 
         def score_for_cpc(row):
             kw = row["keyword"]
@@ -342,6 +404,7 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
         for acc, pred in naver_rules.items():
             recent_14d = collect_used_naver_topics(acc, days=14)
             picks = []
+            max_per_acc = 2 if acc in ("soultin", "stone0747") else 4
             for r in merged:
                 kw_cand = r["keyword"]
                 if not pred(r) or kw_cand in used_naver:
@@ -349,12 +412,12 @@ def fetch_blokey_golden(cdp_port=9440, min_search=300, max_docs=220):
                 if is_duplicate_naver_topic(kw_cand, recent_14d + list(used_naver)):
                     continue
                 live_docs = query_naver_blog_doc_count(kw_cand)
-                if live_docs is not None and live_docs > 5000:
+                if live_docs is not None and live_docs > 200000:
                     continue
                 picks.append(r)
-                if len(picks) >= 4:
+                if len(picks) >= max_per_acc:
                     break
-            for p in picks[:4]:
+            for p in picks[:max_per_acc]:
                 used_naver.add(p["keyword"])
             if picks:
                 naver_assignments[acc] = picks
@@ -621,13 +684,32 @@ def build_daily_winning_topics(blokey_ledger=None):
         collect_used_naver_topics,
         is_duplicate_naver_topic,
     )
-    re_spam_offtopic = re.compile(r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토")
+    re_spam_offtopic = re.compile(
+        r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|펫보험|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토|"
+        r"연금복권|복권|로또|당첨번호|프로필|갤러리|디플러스|이호연|릴\s*하이브리드|아이코스|전자담배|전담|액상|드라마|재방송|몇부작|사랑을\s*처방|결별|엔딩|연대기|종정시|감독|유력설|FA\s*행선지|패션\s*대결|정신병동|"
+        r"별사랑|이찬혁|윤미라|전제완|친모|징역|사망보험|살인|구속|체포|기소|재판|선고|포토|카톡\s*테마|특수기호|치이카와|포켓몬|슈퍼\s*마리오|마리오|심정지|사망|딸깍|디펜스|벙커|멧챠|카멜레온|금리단길|호텔관광과"
+    )
     crank_domain_rules = {
-        "soul5373": re.compile(r"건강검진|혈당|혈압|당뇨|당화혈색소|콜레스테롤|고지혈증|보청기|임플란트|백내장|도수치료|내시경|용종|수면무호흡|관절염|연골주사|대상포진|환급금|병원비"),
-        "yoon_master": re.compile(r"아이오닉|기아|카니발|제네시스|전기차|하이브리드|자동차보험|갤럭시|아이폰|노트북|보일러|제습기|식기세척기|로봇청소기|으뜸효율|숙소|호텔|항공권|수하물|트래블로그"),
-        "soultin": re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산"),
-        "stone0747": re.compile(r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산"),
-        "adinfo0905": re.compile(r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|보험|실비|실손|퇴직금|IRP|든든전세"),
+        "soul5373": re.compile(
+            r"건강검진|혈당|혈압|당뇨|당화혈색소|콜레스테롤|고지혈증|보청기|임플란트|백내장|도수치료|내시경|용종|수면무호흡|관절염|연골주사|대상포진|환급금|병원비|"
+            r"역류성|위염|대장내시경|위내시경|초음파|MRI|CT|비급여|급여기준|약값|처방|부작용|효능|영양제|유산균|오메가3|루테인|마그네슘|알부민|커큐민|아르기닌|차요태|차요테|비타민|단백질|치매|파킨슨|뇌졸중|심근경색|협심증|통풍|갑상선|전립선|갱년기|골다공증"
+        ),
+        "yoon_master": re.compile(
+            r"아이오닉|기아\s*(?:EV|K[3589]|스포티지|쏘렌토|카니발|셀토스|니로|레이|모닝|타스만)|카니발|제네시스|gv80|gv90|g90|쏘렌토|스포티지|싼타페|투싼|아반떼|그랜저|팰리세이드|테슬라|모델y|전기차|하이브리드|자동차보험|자동차세|과태료|"
+            r"갤럭시|아이폰|아이패드|맥북|노트북|보일러|제습기|식기세척기|로봇청소기|건조기|세탁기|에어컨|냉장고|김치냉장고|정수기|공기청정기|으뜸효율|숙소|호텔|리조트|펜션|항공권|수하물|트래블로그|트래블월렛|라운지|패스|렌트카"
+        ),
+        "soultin": re.compile(
+            r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산|"
+            r"기초생활|차상위|의료급여|긴급복지|청년월세|부모급여|아동수당|근로장려|자녀장려|건강보험료|건보료|장기요양|임플란트\s*지원|보청기\s*지원|세이브텍스|삼점삼|국세환급|미환급|청년미래적금|청년\s*희망적금"
+        ),
+        "stone0747": re.compile(
+            r"지원금|장려금|연금|수당|복지|보조금|노인|시니어|환급|산정특례|실업급여|내일배움|육아|출산|돌봄|바우처|노란우산|"
+            r"기초생활|차상위|의료급여|긴급복지|청년월세|부모급여|아동수당|근로장려|자녀장려|건강보험료|건보료|장기요양|임플란트\s*지원|보청기\s*지원|세이브텍스|삼점삼|국세환급|미환급|청년미래적금|청년\s*희망적금"
+        ),
+        "adinfo0905": re.compile(
+            r"세금|상속|증여|취득세|양도세|연말정산|주택담보대출|전세대출|혼례비대출|대출|금리|적금|예금|청약|전세|월세|부동산|신용카드|머니카드|체크카드|보험|실비|실손|퇴직금|IRP|든든전세|"
+            r"종소세|종합소득세|부가세|원천징수|중도상환|대환대출|특례보금자리|디딤돌|버팀목|확정일자|전입신고|보증보험|HUG|연금저축|ISA|비과세|소득공제|세액공제|부양가족|주휴수당|통상임금|이자계산"
+        ),
     }
     unverified = []
 

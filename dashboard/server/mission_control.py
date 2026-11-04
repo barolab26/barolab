@@ -157,7 +157,7 @@ def channels(cf, naver, kin, now):
     kin_note = clean(schedule.get('activeAccount'),25)+' 답변 작성 중' if schedule.get('activeRunId') else '다음 배포: '+format_time(schedule.get('nextEligibleAt'),now)
     kin_note += ' · '+str(schedule.get('intervalMinutes') or 32)+'분 텀'
     rows = [dict(name='CF 블로그',done=done_cf,target=16,note=cf_note),
-            dict(name='네이버 블로그',done=done_nv,target=7,note=nv_note),
+            dict(name='네이버 블로그',done=done_nv,target=9,note=nv_note),
             dict(name='네이버 지식iN',done=done_kin,target=20,note=kin_note)]
     for row in rows:
         if type(row['done']) is not int or row['done']<0:row['done']=None
@@ -479,7 +479,7 @@ class Collector:
         reconcile_at=0
         while not self.stop.is_set():
             try:
-                if time.monotonic()-reconcile_at>=30:
+                if time.monotonic()-reconcile_at>=60:
                     reconcile_at=time.monotonic()
                     try:
                         from collectors import naver_public
@@ -489,13 +489,13 @@ class Collector:
                             channel_parameters.monitor()
                     except Exception:
                         pass
-                if Path('/.dockerenv').exists() and (self.root/'dashboard/data/live_snapshot.json').exists() and (time.time() - (self.root/'dashboard/data/live_snapshot.json').stat().st_mtime) < 5: self.stop.wait(1); continue
+                if Path('/.dockerenv').exists() and (self.root/'dashboard/data/live_snapshot.json').exists() and (time.time() - (self.root/'dashboard/data/live_snapshot.json').stat().st_mtime) < 5: self.stop.wait(3); continue
                 self.collect()
                 from common.dashboard_jobs import write
                 write(self.root/'dashboard/data/live_snapshot.json', shared_snapshot(self.get()))
             except Exception:
                 with self.lock:self.snapshot={**self.snapshot,'cached':True}
-            self.stop.wait(1)
+            self.stop.wait(5)
 
     def start(self):
         self.remote.start()
@@ -574,19 +574,55 @@ def shared_snapshot(data):
     if isinstance(workflow.get('progress'),dict):
         live_workflow['progress']={k:workflow['progress'].get(k) for k in ('workerId','currentStage','stageName','status','progressPct','workDate','publicationDate','updatedAt','topic')}
     if not workflow:live_workflow={}
-    live_attempts=[{k:attempt.get(k) for k in ('account','accId','workerId','workDate','publicationDate','scheduledSlot','reserveTime','startedAt','updatedAt','runMode','submissionStarted','phase','topic','title','verificationSource','verifiedAt','blogId','publicUrl','publicPublicationVerified')}
-        for attempt in data.get('naverJournal',{}).get('attempts',[])[-128:]]
-    cf_items=[{k:item.get(k) for k in ('domain','status','publicUrl','title','completedAt','stageName','order')} for item in data.get('cf',{}).get('items',[]) if data.get('cf',{}).get('date')==now.date().isoformat()]
+    from common.llm_client import resolve_folder_writer_meta
+    def _attempt_with_writer(attempt):
+        base={k:attempt.get(k) for k in ('account','accId','workerId','workDate','publicationDate','scheduledSlot','reserveTime','startedAt','updatedAt','runMode','submissionStarted','phase','topic','title','verificationSource','verifiedAt','blogId','publicUrl','publicPublicationVerified')}
+        if attempt.get('writerBadge'):
+            for wk in ('abArm','writerProvider','writerModel','writerBadge','writerShortBadge','plannedOnly'):
+                if wk in attempt: base[wk]=attempt.get(wk)
+        else:
+            slot_slug=str(attempt.get('scheduledSlot') or attempt.get('reserveTime') or '').replace(':','')
+            seed=f"{attempt.get('publicationDate') or attempt.get('workDate') or now.date().isoformat()}/{attempt.get('account') or ''}-{slot_slug}"
+            wmeta=resolve_folder_writer_meta(attempt.get('artifactFolder'), fallback_seed=seed)
+            for wk in ('abArm','writerProvider','writerModel','writerBadge','writerShortBadge','plannedOnly'):
+                if wk in wmeta: base[wk]=wmeta.get(wk)
+        return base
+    live_attempts=[_attempt_with_writer(attempt) for attempt in data.get('naverJournal',{}).get('attempts',[])[-128:]]
+    cf_day=data.get('cf',{}).get('date') or now.date().isoformat()
+    def _cf_with_writer(item):
+        base={k:item.get(k) for k in ('domain','status','publicUrl','title','completedAt','stageName','order')}
+        if item.get('writerBadge'):
+            for wk in ('abArm','writerProvider','writerModel','writerBadge','writerShortBadge','plannedOnly'):
+                if wk in item: base[wk]=item.get(wk)
+        else:
+            folder=item.get('artifactFolder') or (str(ROOT/'cf_posting/output/scheduled'/cf_day/str(item.get('domain') or '')) if item.get('domain') else '')
+            wmeta=resolve_folder_writer_meta(folder, fallback_seed=f"{cf_day}/{item.get('domain') or ''}")
+            for wk in ('abArm','writerProvider','writerModel','writerBadge','writerShortBadge','plannedOnly'):
+                if wk in wmeta: base[wk]=wmeta.get(wk)
+        return base
+    cf_items=[_cf_with_writer(item) for item in data.get('cf',{}).get('items',[]) if data.get('cf',{}).get('date')==now.date().isoformat()]
+    ab_summary={'mode':'50:50_claude_vs_codex','claude':{'cfPublished':0,'cfPlanned':0,'naverPublished':0,'naverPlanned':0},'codex':{'cfPublished':0,'cfPlanned':0,'naverPublished':0,'naverPlanned':0}}
+    for ci in cf_items:
+        arm='claude' if ci.get('abArm')=='claude' else 'codex'
+        ab_summary[arm]['cfPlanned']+=1
+        if ci.get('status')=='published': ab_summary[arm]['cfPublished']+=1
+    today_attempts={f"{a.get('account')}:{a.get('reserveTime') or a.get('scheduledSlot')}":a for a in live_attempts if (a.get('publicationDate') or a.get('workDate'))==now.date().isoformat()}
+    for tk, ta in today_attempts.items():
+        arm='claude' if ta.get('abArm')=='claude' else 'codex'
+        ab_summary[arm]['naverPlanned']+=1
+        if ta.get('publicPublicationVerified') or ta.get('phase') in ('reserved','published'): ab_summary[arm]['naverPublished']+=1
     revenue_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','aggregationEligible','aggregationKey','domains','account','collectionAccount','mediaIds','accountBreakdownVerified','pendingDates','scope') if source.get(k) is not None}
         for source in data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('sources',[])]
     from dashboard.collectors.revenue import summarize
     prev_m=(now.date().replace(day=1)-dt.timedelta(days=1)).strftime('%Y-%m');prev_sources=[{k:source.get(k) for k in ('id','label','category','currency','daily','status','checkedAt','lastSuccessAt','aggregationEligible','aggregationKey','domains','account','collectionAccount','mediaIds','accountBreakdownVerified','pendingDates','scope') if source.get(k) is not None} for source in data.get('revenue',{}).get('months',{}).get(prev_m,{}).get('sources',[])];revenue_document={'months':{prev_m:{'sources':prev_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(prev_m,{}).get('checkedAt')},now.strftime('%Y-%m'):{'sources':revenue_sources,'checkedAt':data.get('revenue',{}).get('months',{}).get(now.strftime('%Y-%m'),{}).get('checkedAt')}},'checkedAt':data.get('revenue',{}).get('checkedAt')}
     revenue_projection={**summarize(revenue_document,now),'months':revenue_document['months']}
     result=dict(agendaControl=data.get('agendaControl',{}),schedulePolicy=data.get('schedulePolicy',{}),scheduleRuntime=data.get('scheduleRuntime',{}),schema='barolab-mission-control-v2',date=now.date().isoformat(),generatedAt=now.isoformat(),
-        refreshSeconds=1,cfItems=cf_items,revenue=revenue_projection,
+        refreshSeconds=1,cfItems=cf_items,abTestSummary=ab_summary,revenue=revenue_projection,
         naverLive={'workflow':live_workflow or None,'journal':{'attempts':live_attempts}},channels=channel_rows,crew=crew,vault=vault,timeline=timeline,
         naverAccounts=[dict(account=a.get('account'),accId=a.get('accId'),expected=a.get('expected'),
-            slots=[{k:slot.get(k) for k in ('status','publicationStatus','publicationDate','reserveTime','publicPublicationVerified','publicUrl','title','verifiedAt')} for slot in a.get('slots',[])])
+            slots=[{**{k:slot.get(k) for k in ('status','publicationStatus','publicationDate','reserveTime','publicPublicationVerified','publicUrl','title','verifiedAt')},
+                    **{wk:slot.get(wk) or (today_attempts.get(f"{a.get('account')}:{slot.get('reserveTime')}") or {}).get(wk) for wk in ('abArm','writerBadge','writerShortBadge','writerModel','plannedOnly') if slot.get(wk) or (today_attempts.get(f"{a.get('account')}:{slot.get('reserveTime')}") or {}).get(wk)}}
+                   for slot in a.get('slots',[])])
             for a in data.get('naver',{}).get('accounts',[])],
         fleet=fleet,panels=rows,brainDisplay=panels.brain_display(data,now),ports=data.get('ports',{}),
         brains=dict(usage=data.get('usage',{}),quotas={k:v for k,v in data.get('remote',{}).items() if k!='fleet'}))

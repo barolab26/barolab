@@ -47,6 +47,16 @@ def fleet_probe(spec,hosts=('127.0.0.1',)):
     from common.ubuntu_naver_browser import account_paths
     _,profile,_=account_paths(port)
     row=dict(port=port,account=account,blog=blog,profile=profile.name,purpose=purpose,online=False,tabs=[],selection='열린 탭')
+    if os.name == 'nt':
+        try:
+            bstat_path = ROOT / 'dashboard/data/browser-status.json'
+            if bstat_path.is_file():
+                bstat = json.loads(bstat_path.read_text(encoding='utf-8'))
+                if (bstat.get('ports') or {}).get(str(port)) is True:
+                    row.update(online=True, selection='EGO 내부 스페이스 상주')
+                    return row
+        except Exception:
+            pass
     for host in hosts:
         try:
             r=requests.get(f'http://{host}:{port}/json/list',timeout=.3,allow_redirects=False)
@@ -550,7 +560,7 @@ class RemoteTelemetry:
                             self.data=_apply_live_rotation_counts({**self.data,'fleet':fleet})
                     except Exception:
                         pass
-                    if time.monotonic()-credits_at>=30:
+                    if time.monotonic()-credits_at>=180:
                         try:values=env_values(self.root)
                         except (OSError,ImportError):values=dict(os.environ)
                         cf=pool.submit(credit_probe,values);cq=pool.submit(codex_quota);aq=pool.submit(agy_quota)
@@ -573,7 +583,7 @@ class RemoteTelemetry:
                     self._persist_host_telemetry()
                 except Exception:
                     pass
-                self.stop.wait(5)
+                self.stop.wait(15)
     def start(self):
         self.thread=threading.Thread(target=self.run,name='cockpit-remote',daemon=True);self.thread.start()
     def get(self):

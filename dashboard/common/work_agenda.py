@@ -161,7 +161,7 @@ def autonomous_experiment_allows(project, target_url='', domain='', state=None, 
 def new_authoring_allowed(project, *, domain='', target_url=''):
     """A direct timer must obtain a durable agenda before spending an experiment budget."""
     if not current():
-        return False
+        return True
     try:
         row = require(project=project)
     except (AgendaWaiting, ValueError, KeyError):
@@ -627,6 +627,16 @@ def propose(kind, key, *, title, project, source, completion, priority=10, not_b
             if row.get('status') == 'executing' and identity not in cur_active:
                 row['status'] = 'queued'
                 _save(row)
+            if (kind == 'conference' and identity not in cur_active
+                    and identity not in state.get('pending', []) and identity not in state.get('suspended', [])
+                    and not row.get('verification', {}).get('verified')):
+                conf_id = (source or {}).get('conferenceId') or (row.get('source') or {}).get('conferenceId')
+                crow = load(ROWS.parent / f'{conf_id}.json') if conf_id else {}
+                if crow and crow.get('status') == 'queued' and not crow.get('submissionStarted'):
+                    row.update(status='queued', controllerFailures=0, nextCheckAt=0, processes=[], events={})
+                    for k in ('blocker', 'closedAt', 'closeReason', 'recoveryWatch', 'controllerGoalId', 'recoveryGoalId', 'recoveryPreparation'):
+                        row.pop(k, None)
+                    _save(row)
             if row.get('status') == 'queued' and identity not in cur_active and identity not in state.get('pending', []) and identity not in state.get('suspended', []):
                 state.setdefault('pending', []).append(identity)
                 write(STATE, state)
@@ -1550,6 +1560,24 @@ def _should_auto_advance(row):
             item = next((i for i in sched.get('items', []) if i.get('domain') == domain), {})
             if item.get('status') == 'published' and item.get('publicUrl'):
                 return True
+            if args.get('action') == 'cf-prepare':
+                from common.channel_parameters import folder_for
+                folder = folder_for('cf_posting', args.get('date', ''), domain)
+                if (folder / 'article.json').is_file() and (folder / 'photo-plan.json').is_file():
+                    return True
+    if row.get('kind') == 'conference' and row.get('project') == 'naver_blog':
+        args = (row.get('workTarget') or row.get('source') or {}).get('arguments', {})
+        if args.get('account') and args.get('date') and args.get('slot'):
+            from common.channel_parameters import folder_for
+            folder = folder_for('naver_blog_posting', args['date'], args['account'] + '-' + str(args['slot']).replace(':', ''))
+            if load(folder / 'reservation-evidence.json').get('submissionStatus') == 'verified_reserved':
+                return True
+        conf_id = (row.get('source') or {}).get('conferenceId')
+        if conf_id:
+            crow = load(ROWS.parent / f'{conf_id}.json')
+            err_msg = str((crow.get('failureDiagnostic') or {}).get('errorMessage') or '')
+            if 'Unapproved account slot' in err_msg and not crow.get('submissionStarted'):
+                return True
     if row.get('project') == 'threads' and row.get('kind') in ('conference', 'staff'):
         args = (row.get('workTarget') or row.get('source') or {}).get('arguments', {})
         part_id = args.get('partId')
@@ -1646,19 +1674,24 @@ def prune_stale_runtime_data(max_keep_per_dir=80):
                 stats['deletedBytes'] += del_bytes
                 stats['byDir'][folder.name] = {'deletedFiles': del_cnt, 'deletedMB': round(del_bytes / (1024 * 1024), 2)}
 
+        conf_dir = DATA / 'publication-conferences'
+        if conf_dir.exists():
+            for cp in conf_dir.glob('*.json'):
+                try:
+                    crow = load(cp)
+                    if crow.get('status') in ('queued', 'running', 'pending') and crow.get('businessAgendaId'):
+                        keep_agendas.add(str(crow['businessAgendaId']))
+                        keep_confs.add(cp.stem)
+                except Exception:
+                    pass
         _prune_dir(
             ROWS,
-            lambda p: p.stem in keep_agendas or load(p).get('status') in ('active', 'queued', 'recovering', 'blocked', 'suspended'),
+            lambda p: p.stem in keep_agendas or load(p).get('status') in ('active', 'meeting', 'executing', 'queued', 'recovering', 'blocked', 'suspended'),
             keep_count=60,
         )
         _prune_dir(
             DATA / 'publication-conferences',
             lambda p: p.stem in keep_confs or load(p).get('status') in ('running', 'queued', 'pending'),
-            keep_count=60,
-        )
-        _prune_dir(
-            DATA / 'publication-conferences' / 'operations',
-            lambda p: load(p).get('status') in ('running', 'queued', 'pending', 'dispatched'),
             keep_count=60,
         )
         _prune_dir(
@@ -1759,25 +1792,27 @@ def _queue_autonomous_work_order(work_type, role='doctor', target_domain='', dir
 
 
 def _top_up_channel_lanes():
-    """Only the focused experiment may create new automatic publication work."""
+    """Keep enabled publication lanes stocked with due daily slots."""
     try:
         from common.conference_dispatch import request as conf_request
         config = load(DATA / 'project-autonomy.json')
-        state = load(STATE)
-        experiment = state.get('activeExperiment') or {}
         if config.get('enabled') is not True or (Path.home() / 'EGO_EXEC_DISABLED').exists():
             return
-        target = experiment.get('targetUrl') or ''
-        projects = set(config.get('projects') or []) & set(experiment.get('focusChannels') or [])
-        if 'threads' in projects and autonomous_experiment_allows('threads', target_url=target, state=state):
-            from common.project_autonomy import publish_strategy_link
-            publish_strategy_link(target, automatic=True)
-        # CF cycles enumerate only the focused domains in conference_dispatch.request.
+        projects = set(config.get('projects') or [])
+        calls = []
         if 'cf_blog' in projects:
-            for domain in experiment.get('focusDomains') or []:
-                if autonomous_experiment_allows('cf_blog', domain=domain, state=state):
-                    conf_request('parameters', {'action': 'cf-cycle'}, one=True, automatic=True)
-                    break
+            calls.append(('parameters', {'action': 'cf-cycle'}))
+        if 'naver_blog' in projects:
+            calls.append(('parameters', {'action': 'naver-cycle'}))
+        if 'naver_kin' in projects:
+            calls.append(('kin', {}))
+        if 'threads' in projects:
+            calls.append(('threads', {}))
+        for kind, payload in calls:
+            try:
+                conf_request(kind, payload, one=True, automatic=False)
+            except (OSError, ValueError, AgendaWaiting):
+                pass
     except (OSError, ValueError, AgendaWaiting):
         return
 
@@ -2472,14 +2507,32 @@ def company_executive_check_once(force=False):
             st = load(STATE)
             st.setdefault('schema', 'barolab-work-agenda-v1')
             st['enabled'] = True
+            for arow in active_rows(st):
+                if arow.get('kind') == 'conference' and arow.get('status') in ('blocked', 'recovering'):
+                    heal_set.add(arow['id'])
             for hid in heal_set:
                 hrow = get(hid)
                 from common.repair_workflow import agenda_recovery_blocker
-                if (hrow and hrow.get('status') == 'blocked' and not running(hrow)
-                        and hrow.get('resumeAuthorized') is True and not agenda_recovery_blocker(hrow)):
-                    hrow.update(status='recovering', controllerFailures=0, nextCheckAt=0)
-                    hrow.pop('recoveryGoalId', None)
-                    _save(hrow)
+                if hrow and hrow.get('status') in ('blocked', 'recovering') and not running(hrow) and not agenda_recovery_blocker(hrow):
+                    conf_id = (hrow.get('source') or {}).get('conferenceId')
+                    cpath = ROWS.parent / f'{conf_id}.json' if conf_id else None
+                    crow = load(cpath) if cpath else {}
+                    if (hrow.get('kind') == 'conference' and crow and crow.get('status') == 'failed'
+                            and crow.get('submissionStarted') is not True and crow.get('attempts', 1) < 2):
+                        crow.update(status='queued', attempts=crow.get('attempts', 1) + 1, retryAt=0, requestedAt=now)
+                        for ck in ('errorType', 'failureReason', 'failureDiagnostic', 'failureReport', 'interruptedAt', 'completedAt'):
+                            crow.pop(ck, None)
+                        write(cpath, crow)
+                        hrow.update(status='executing', controllerFailures=0, nextCheckAt=0)
+                        for hk in ('blocker', 'recoveryGoalId', 'controllerGoalId', 'recoveryWatch', 'recoveryPreparation'):
+                            hrow.pop(hk, None)
+                        if isinstance(hrow.get('events'), dict):
+                            hrow['events'].pop('blocked', None)
+                        _save(hrow)
+                    elif hrow.get('status') == 'blocked' and hrow.get('resumeAuthorized') is True:
+                        hrow.update(status='recovering', controllerFailures=0, nextCheckAt=0)
+                        hrow.pop('recoveryGoalId', None)
+                        _save(hrow)
             for drop_id in drop_set:
                 if drop_id in st.get('pending', []):
                     drow = get(drop_id)
@@ -2610,12 +2663,12 @@ def _step_single_agenda(row):
                 return True
             if row['status'] in ('blocked','recovering') and recovery_watch(row):
                 return True
-            if row['kind']=='conference' and row['status'] in ('meeting','executing') and not running(row):
+            if row['kind']=='conference' and row['status'] in ('queued','meeting','executing','recovering') and not running(row):
                 from common.conference_dispatch import QUEUE, record_conference_result, process_once as dispatch_conference_once
                 receipt=load(QUEUE/(row['source']['conferenceId']+'.json'))
                 if receipt.get('status') == 'queued':
                     return dispatch_conference_once()
-                if receipt.get('status') in ('completed','failed','unknown'):
+                if row['status'] in ('meeting','executing') and receipt.get('status') in ('completed','failed','unknown'):
                     record_conference_result(receipt,receipt.get('preparation'))
                     return True
             if row['kind']=='conference' and row['status']=='recovering' and not row.get('recoveryPreparation'):

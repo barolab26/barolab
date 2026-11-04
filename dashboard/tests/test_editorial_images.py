@@ -565,6 +565,27 @@ console.log('ACTIONS:'+JSON.stringify(actions));
                 else:
                     self.assertIn('Fetch.failRequest',[a['method'] for a in actions])
 
+    def test_jev_visual_gate_and_section1_flow_policy(self):
+        from dashboard.common import jev
+        # Section 1 (cap_idx == 0) must never route to Flow illustration even if has_browser_capture is True
+        self.assertFalse(e._should_use_flow_for_section('삼쩜삼 병원비 환급금', {'heading': '신청 전 3초 판독', 'body': '일반 안내 문단'}, {'query': '삼쩜삼', 'subject': '환급'}, 0, 3, True))
+        # Checklist / portal UI sections must never route to Flow illustration even in later sections
+        self.assertFalse(e._should_use_flow_for_section('삼쩜삼 병원비 환급금', {'heading': '실제 입금액 비교표', 'body': '일반 안내 문단'}, {'query': '삼쩜삼', 'subject': '비교표'}, 1, 3, True))
+        # Non-first lifestyle section after a real browser capture can use Flow
+        self.assertTrue(e._should_use_flow_for_section('삼쩜삼 병원비 환급금', {'heading': '보관 루틴과 정리 방법', 'body': '평소 서랍에 영수증을 모아두면 편합니다.'}, {'query': '영수증 보관', 'subject': '보관 루틴'}, 2, 3, True))
+        # JEV inspect_published_visual requires all 3 noul checks >= 0.55
+        with unittest.mock.patch.object(jev, 'prepare_image_asset', return_value={'asset': {'data': 'x'}}), \
+             unittest.mock.patch.object(jev, '_ask', return_value={
+                 'status': 'ok',
+                 'answers': {
+                     'readableAndUnclipped': {'type': 'noul', 'noul': 0.91},
+                     'noAiGibberishOrAdBanner': {'type': 'noul', 'noul': 0.92},
+                     'koreanContextFit': {'type': 'noul', 'noul': 0.12},
+                 },
+             }):
+            res = jev.inspect_published_visual('dummy.png', title='삼쩜삼 병원비 환급금')
+            self.assertFalse(res['passed'])
+
 
 REAL_BROWSER = e._Browser
 REAL_MODEL = e._model

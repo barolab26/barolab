@@ -215,10 +215,12 @@ def is_article_path(path):
 
 
 def clean_post_title(title, path):
-    if isinstance(title, str) and title.strip() and title.strip() != '(not set)':
+    if isinstance(title, str) and title.strip() and title.strip() != '(not set)' and '???' not in title and '\ufffd' not in title:
         cleaned = re.split(r'\s+\|\s+', title.strip())[0].strip()
-        if cleaned:
+        if cleaned and '???' not in cleaned:
             return cleaned
+    if 'national-pension-deferral-application-guide' in str(path):
+        return '국민연금 연기연금 신청 연령과 예상액 조회, 지금 받을지 미룰지 확인하는 순서'
     return unquote(path.lstrip('/')).replace('-', ' ')
 
 

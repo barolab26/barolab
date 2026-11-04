@@ -51,9 +51,22 @@ def collect_once(root=ROOT,now=None,backend=None):
             record.update(browserPort=9333,collectionAccount='soul5373',declaredRealNameAccountCount=3)
             def adpost_job(account=account,port=port):
                 # A refresh must never start a stopped browser or touch an active editor.
-                try:
-                    with socket.create_connection(('127.0.0.1',port),timeout=.3):pass
-                except OSError:raise backend.RevenueSourceError('browser_offline','전용 브라우저 대기') from None
+                from common.ego_taskspace import find_ego_cli
+                has_native_ego = find_ego_cli() is not None
+                if not has_native_ego:
+                    try:
+                        with socket.create_connection(('127.0.0.1',port),timeout=.3):pass
+                    except OSError:raise backend.RevenueSourceError('browser_offline','전용 브라우저 대기') from None
+                else:
+                    ctrl = data / 'secure' / 'adpost-ego-state.json'
+                    prev_ctrl = backend.read_json(ctrl)
+                    if prev_ctrl.get('status') in ('held', 'running'):
+                        try:
+                            chk = dt.datetime.fromisoformat(str(prev_ctrl.get('checkedAt') or prev_ctrl.get('startedAt') or '').replace('Z', '+00:00'))
+                            if (now - chk).total_seconds() >= 600:
+                                backend.atomic_write(ctrl, {'status': 'idle', 'clearedAt': now.isoformat()})
+                        except Exception:
+                            backend.atomic_write(ctrl, {'status': 'idle', 'clearedAt': now.isoformat()})
                 from naver_blog_posting.posting import pipeline_lock
                 try:
                     with pipeline_lock():return backend.adpost(query_start,today,cfg,account,port)
@@ -105,6 +118,7 @@ def collect_once(root=ROOT,now=None,backend=None):
             if isinstance(previous.get('adsenseCollection'),dict):
                 previous['adsenseCollection']['checkedAt']=now_iso
             backend.deduplicate_adpost_sources(previous['months'][month]['sources'])
+            by_id={r['id']:r for r in previous['months'][month]['sources'] if isinstance(r,dict) and r.get('id')}
             write(data/'revenue.json',previous)
             state.update(checkedAt=now_iso);write(data/'revenue-refresh.json',state)
         page_status = state.setdefault('pageRevenue', {})

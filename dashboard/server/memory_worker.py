@@ -137,6 +137,8 @@ def main():
     from server.agent_tools import process_staff_request_once, process_staff_review_once
     from common.project_autonomy import process_project_autonomy_once
     from brunch_posting.posting import process_brunch_autonomy_once
+    from naver_cafe_posting.posting import process_cafe_autonomy_once
+    from youtube_posting.posting import process_youtube_autonomy_once
     from agents.crew_reasoning import resume_ceo_once, resume_background_once
     from common.work_agenda import process_once as process_agendas
     from dashboard.agents.synapse import refresh_once
@@ -191,7 +193,7 @@ def main():
         threading.Thread(target=loop, args=([process_agendas], 5), name='agenda-dispatch'),
         threading.Thread(target=loop, args=([resume_background_once], 5), name='background-goals'),
         threading.Thread(target=loop, args=([process_project_autonomy_once], 30), name='project-autonomy'),
-        threading.Thread(target=loop, args=([process_brunch_autonomy_once], 600), name='brunch-autonomy'),
+        threading.Thread(target=loop, args=([process_brunch_autonomy_once, process_cafe_autonomy_once, process_youtube_autonomy_once], 600), name='brunch-autonomy'),
         threading.Thread(target=watchdog, name='worker-watchdog'),
     ]
     for worker in observers:

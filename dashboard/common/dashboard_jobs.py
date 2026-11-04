@@ -81,12 +81,27 @@ def enqueue(kind, payload):
     if kind not in ('codex-test', 'cf-retry', 'growth-radar', 'growth-doctor'):
         raise ValueError('지원하지 않는 작업입니다.')
     with LOCK:
+        now_ts = stamp()
+        existing_pending = pending(kind)
         if kind in ('cf-retry', 'growth-radar', 'growth-doctor'):
-            for job in pending(kind):
-                if job['payload'] == payload:
+            for job in existing_pending:
+                if job.get('payload') == payload:
                     return job
-        job = {'id': uuid.uuid4().hex, 'kind': kind, 'payload': payload,
-               'status': 'pending', 'createdAt': stamp()}
+        new_id = uuid.uuid4().hex
+        if kind in ('growth-radar', 'growth-doctor'):
+            for stale_job in existing_pending:
+                if kind == 'growth-doctor' and (stale_job.get('payload') or {}).get('domain') != (payload or {}).get('domain'):
+                    continue
+                stale_job.update(
+                    status='superseded',
+                    reconciledAt=now_ts,
+                    finishedAt=now_ts,
+                    resolutionReason='superseded_by_newer_request',
+                    supersededBy=new_id,
+                )
+                write(path(stale_job['id']), stale_job)
+        job = {'id': new_id, 'kind': kind, 'payload': payload,
+               'status': 'pending', 'createdAt': now_ts}
         write(path(job['id']), job)
         return job
 
@@ -101,4 +116,8 @@ def finish(job, result=None, error=None):
 
 
 def public(job):
-    return {key: job[key] for key in ('id', 'kind', 'status', 'createdAt', 'finishedAt', 'error') if key in job}
+    return {
+        key: job[key]
+        for key in ('id', 'kind', 'status', 'createdAt', 'finishedAt', 'reconciledAt', 'resolutionReason', 'supersededBy', 'error')
+        if key in job
+    }

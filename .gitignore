@@ -125,3 +125,9 @@ dashboard/agents/skills/ui-ux-pro-max/
 dashboard/data/publication-conferences/
 dashboard/data/active-agenda.json
 .wrangler/
+
+*.ttf
+*.wav
+*.mp3
+*.pid
+youtube_posting/productions/

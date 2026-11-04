@@ -269,11 +269,11 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                 body_evidence[url]['_networkChecked'] = True
         return {k:v for k,v in body_evidence[url].items() if not k.startswith("_")}
 
-    def _make_evidence_row(acc_name, blog_id, topic, reserve_time, rss_item, pub_date):
+    def _make_evidence_row(acc_name, blog_id, topic, reserve_time, rss_item, pub_date, scheduled_slot=None):
         eff_reserve = reserve_time or rss_item.get("reserveTime") or f"{pub_date} 11:00"
         # Ensure publishedAt matches reserveTime minute so strict front-end filters accept it
         reserve_iso = eff_reserve.replace(" ", "T") + ":00+09:00" if re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$", eff_reserve) else (rss_item.get("publishedAt") or now_iso)
-        return {
+        row = {
             "account": acc_name,
             "blogId": blog_id,
             "title": topic or rss_item["title"],
@@ -291,6 +291,9 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             "publicationDate": pub_date,
             "actualPublishedAt": rss_item.get("publishedAt") or reserve_iso,
         }
+        if scheduled_slot:
+            row["scheduledSlot"] = scheduled_slot
+        return row
 
     def _promote_slot_dict(slot_obj, rss_item, eff_reserve):
         if body_for(rss_item).get("publicHttpStatus") != 200:
@@ -335,7 +338,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                     if matched_rss:
                         was_verified = slot_val.get("publicPublicationVerified") is True and bool(slot_val.get("publicUrl"))
                         _promote_slot_dict(slot_val, matched_rss, s_reserve)
-                        ev_row = _make_evidence_row(acc_name, blog_id, s_topic, s_reserve, matched_rss, pub_date)
+                        ev_row = _make_evidence_row(acc_name, blog_id, s_topic, s_reserve, matched_rss, pub_date, scheduled_slot=slot_key)
                         evidence_by_url[matched_rss["publicUrl"]] = ev_row
                         if not was_verified and body_for(matched_rss).get("publicHttpStatus") == 200:
                             updated_count += 1
@@ -443,7 +446,7 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                     learn_naver_public(attempt,matched_rss)
                 except (OSError,ValueError,RuntimeError,KeyError):
                     pass  # Public observation stays intact; no unverified lesson is written.
-                ev_row = _make_evidence_row(acc_name, blog_id, a_topic, a_reserve or f"{pub_date} {slot_key}", matched_rss, pub_date)
+                ev_row = _make_evidence_row(acc_name, blog_id, a_topic, a_reserve or f"{pub_date} {slot_key}", matched_rss, pub_date, scheduled_slot=slot_key)
                 evidence_by_url[matched_rss["publicUrl"]] = ev_row
                 journal_dirty = True
                 if not was_verified and body_for(matched_rss).get("publicHttpStatus") == 200:

@@ -455,9 +455,10 @@ updated_at: "{now_kst}"
 1. [NotebookLM 핵심 이식 #1: AI 업무 시스템 4단계 구축법 (SSR+)](#1-notebooklm-핵심-이식-1-ai-업무-시스템-4단계-구축법-ssr)
 2. [NotebookLM 핵심 이식 #2: 앤트로픽 피셜 클로드 스킬 7대 공식 규칙](#2-notebooklm-핵심-이식-2-앤트로픽-피셜-클로드-스킬-7대-공식-규칙)
 3. [NotebookLM 핵심 이식 #3: 에고라이트(EGO Lite v2.2.0) 네이티브 스페이스 자동화 표준](#3-notebooklm-핵심-이식-3-에고라이트ego-lite-v220-네이티브-스페이스-자동화-표준)
-4. [레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)](#4-레이더radar-실시간-검증-외부-노하우-practicalknowhow)
-5. [자가 진화 피드백 루프 규칙 (Anthropic Rule #6)](#5-자가-진화-피드백-루프-규칙-anthropic-rule-6)
-6. [대표님 & 크루 수동 추가 노트](#️-대표님--크루-수동-추가-노트)
+4. [NotebookLM 핵심 이식 #4: 제부(JEV 1.14.0 · System One) 비전·Box·262K 초고속 판정 표준](#4-notebooklm-핵심-이식-4-제부jev-1140-system-one-비전box262k-초고속-판정-표준)
+5. [레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)](#5-레이더radar-실시간-검증-외부-노하우-practicalknowhow)
+6. [자가 진화 피드백 루프 규칙 (Anthropic Rule #6)](#6-자가-진화-피드백-루프-규칙-anthropic-rule-6)
+7. [대표님 & 크루 수동 추가 노트](#️-대표님--크루-수동-추가-노트)
 
 ---
 
@@ -497,12 +498,28 @@ updated_at: "{now_kst}"
 
 ---
 
-## 4. 레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)
+## 4. NotebookLM 핵심 이식 #4: 제부(JEV 1.14.0 · System One) 비전·Box·262K 초고속 판정 표준
+- **출처**: `https://notebook.google.com/notebook/2f5bae8f-7c27-40db-8744-0bebdf8e4be2` & 공식 `https://docs.typesafe.ai` (`jev-1.14.0`)
+- **핵심 철학 ("생성형 AI의 환각 없는 System 1 초고속 정량 판정기 — $0.042/1M 입력 토큰, 출력 토큰 무료")**:
+  1. **4대 정량 출력 프리미티브 (`dashboard/common/jev.py`)**:
+     - **`noul` (`0.00~1.00`)**: 참/거짓·준수 여부 확률 판정 (`targetVisible`, `textUnclipped`, `noPopupOcclusion`, `groundedChanges`).
+     - **`choice` (`probabilities` + `confidence`)**: 상호배타적 라우팅 결정 (`real_browser_capture` vs `flow_ai_illustration`).
+     - **`score` (`0..N` 루브릭 가중 기대값)**: 장애 긴급도(`classify_incident`), 후보 우선순위(`choose_candidates`), 리모델링 유용성(`review_revision`) 채점.
+     - **`box` (`top, bottom, left, right` 정규화 좌표 `0..1`)**: 스크린샷 내 표·공고문·안내 카드의 정확한 바운딩 박스 검출 (`TypeSafe-Danger-Zone-Images: true`).
+  2. **비전(`assets`) + `box` 기반 가로 잘림 원천 차단 (`editorial_images.py::_refine_regions_with_jev`)**:
+     - 이미지 규격(`280~1,568px`, EXIF 회전 보정, Baseline JPEG)을 `prepare_image_asset()`으로 정규화하여 전송한다.
+     - 브라우저 DOM 캡처 영역(`clip.width < 620px`)이 좁아 문장 가로 잘림 위험이 있을 때, `inspect_capture_box()`가 검출한 전체 본문/표 폭(`JEV_CONTENT_BOX`)으로 좌우 경계를 자동 확장하여 텍스트 잘림과 하단 광고 배너 침범을 동시에 차단한다.
+  3. **한국어 능력 대폭 향상 & 262K 롱 컨텍스트 (`TypeSafe-Danger-Zone-Long-Context: true`)**:
+     - 대용량 한국어 공고문·약관 대조 및 5단계 역방향 회귀 체크리스트(CoVe 팩트 대조)에서 무거운 프론티어 LLM 호출 전 초저비용(건당 약 `\\$0.0001`) 1차 게이트키퍼로 동작한다.
+
+---
+
+## 5. 레이더(`@radar`) 실시간 검증 외부 노하우 (`PracticalKnowHow`)
 {knowhow_section}
 
 ---
 
-## 5. 자가 진화 피드백 루프 규칙 (Anthropic Rule #6)
+## 6. 자가 진화 피드백 루프 규칙 (Anthropic Rule #6)
 - `@radar`가 외부 트렌드·SERP·유튜브에서 검증한 노하우는 `record_knowhow()` 호출과 동시에 SHA-256 영수증(`dashboard/data/radar/knowhow-receipts/`)으로 검증되며, 본 `03_외부노하우_벤치마킹_금고.md`와 `synapse-recipes.json`에 즉시 자동 동기화되어 전 크루의 다음 턴 프롬프트에 주입된다.
 """
     (sb_dir / '03_외부노하우_벤치마킹_금고.md').write_text(_with_custom('03_외부노하우_벤치마킹_금고.md', doc_03), encoding='utf-8')
