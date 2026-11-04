@@ -51,7 +51,7 @@ def number(value):
     return float(value) if type(value) in (int,float) and math.isfinite(value) and value >= 0 else None
 
 
-def add_post(graph, receipt, document=None):
+def add_post(graph, receipt, document=None, folder=None):
     address = url(receipt.get('publicUrl'))
     if not address or receipt.get('publicPublicationVerified') is not True or receipt.get('publicHttpStatus',receipt.get('httpStatus')) != 200: return
     document = document or {}
@@ -68,6 +68,15 @@ def add_post(graph, receipt, document=None):
     domain=host+'/'+urlsplit(address).path.strip('/').split('/')[0] if host=='blog.naver.com' else host
     node.update(domain=domain,title=str(receipt.get('title') or document.get('title') or address.rsplit('/',1)[-1])[:180],
                 publishedAt=receipt.get('publishedAt') or receipt.get('acceptedAt'),observedAt=receipt.get('verifiedAt'),pattern=pattern,headings=headings,category=str(document.get('category',''))[:80],summary=str(document.get('summary') or document.get('intro') or '')[:500],publicVerified=True)
+    if folder:
+        try:
+            from common.llm_client import resolve_folder_writer_meta
+            wmeta = resolve_folder_writer_meta(folder)
+            for wk in ('abArm', 'writerProvider', 'writerModel', 'writerBadge', 'writerShortBadge'):
+                if wmeta.get(wk):
+                    node[wk] = wmeta[wk]
+        except Exception:
+            pass
     planning_id=document.get('planningId')
     if planning_id and planning_id in graph['nodes']:
         node['planningId']=planning_id
@@ -124,12 +133,12 @@ def ingest(graph, root):
             folder=artifact_folder(root,'cf_posting',item.get('artifactFolder'))
             if folder is None:continue
             receipt=read(folder/'publication-receipt.json')
-            if receipt.get('state')=='published': add_post(graph,receipt,read(folder/'article.json'))
+            if receipt.get('state')=='published': add_post(graph,receipt,read(folder/'article.json'),folder=folder)
     for attempt in read(data/'naver/automation-journal.json').get('attempts',[])[-300:]:
         folder=artifact_folder(root,'naver_blog_posting',attempt.get('artifactFolder'))
         if folder is None:continue
         receipt=read(folder/'public-verification.json')
-        add_post(graph,receipt,read(folder/'editor-content.json'))
+        add_post(graph,receipt,read(folder/'editor-content.json'),folder=folder)
         reserved=read(folder/'reservation-evidence.json')
         if reserved.get('submissionStatus')=='verified_reserved':
             account=read(folder/'identity.json')

@@ -946,7 +946,7 @@ def _naver_browser__read_via_taskspace(account, url):
 def _naver_browser__question_ownership_via_taskspace(account, url):
     from common.ego_taskspace import native_kin_fetch_page_state
     identifier = _naver_browser_question_id(url)
-    res = native_kin_fetch_page_state(account, url, load_all_answers=True)
+    res = native_kin_fetch_page_state(account, url, load_all_answers=True, fast_fetch=True)
     if not res.get('ok'):
         if res.get('errorType') == 'LoginRequiredError':
             raise _naver_browser_LoginRequiredError(res.get('message') or 'Logged-in KnowledgeIn identity does not match authorized account')

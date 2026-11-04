@@ -260,6 +260,7 @@ def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
 
     prev = load_brunch_status()
     now_iso = _now_kst_iso()
+    today_prefix = now_iso[:10]
     cdp_online = False
     writer_status = prev.get("account", {}).get("writerStatus") or "approved"
     writer_status_label = "🟢 브런치 작가 최종 승인 완료 (실시간 공개 발행 및 100% CF 브릿지 가동 중)"
@@ -267,6 +268,29 @@ def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
     drawer_articles: List[Dict[str, Any]] = []
     published_articles: List[Dict[str, Any]] = []
     apply_notice = "브런치 작가가 되신 것을 진심으로 축하드립니다! 실시간 칼럼 발행 및 다음(Daum)·구글(DA 80+)·네이버카페 OSMU 브릿지가 가동 중입니다."
+
+    # Build historical publishedAt map from automation.history and previous publishedArticles/publishedPosts
+    # so syncing never overwrites historical publication dates with today's date.
+    preserved_pub_at_by_url: Dict[str, str] = {}
+    for prev_item in (prev.get("publishedArticles") or prev.get("publishedPosts") or []):
+        if isinstance(prev_item, dict) and prev_item.get("url") and prev_item.get("publishedAt"):
+            u = str(prev_item["url"]).strip()
+            p_at = str(prev_item["publishedAt"]).strip()
+            if p_at:
+                preserved_pub_at_by_url[u] = p_at
+
+    for h_item in ((prev.get("automation") or {}).get("history") or []):
+        if not isinstance(h_item, dict):
+            continue
+        h_url = str(h_item.get("url") or "").strip()
+        if not re.search(r"/@31d1f5fb288c4fc/\d+", h_url):
+            continue
+        h_date = str(h_item.get("date") or str(h_item.get("at") or "")[:10]).strip()
+        if not h_date:
+            continue
+        existing = preserved_pub_at_by_url.get(h_url)
+        if not existing or h_date[:10] < existing[:10]:
+            preserved_pub_at_by_url[h_url] = h_date
 
     uid, upw = _load_brunch_credentials()
     try:
@@ -313,6 +337,7 @@ def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
                     (c for c in BRUNCHBOOK_CURRICULUM if c["part"] == art_no or c["title"][:10] in it["title"] or it["title"][:10] in c["title"]),
                     None,
                 )
+                pub_at = preserved_pub_at_by_url.get(it["href"]) or today_prefix
                 published_articles.append(
                     {
                         "articleNo": art_no,
@@ -326,7 +351,8 @@ def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
                         "status": "published",
                         "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
                         "charCount": sum(len(x) for x in (matched_cur.get("paragraphs") or [])) if matched_cur else 1950,
-                        "publishedAt": now_iso[:10],
+                        "publishedAt": pub_at,
+                        "checkedAt": now_iso,
                     }
                 )
     except Exception:
@@ -334,7 +360,15 @@ def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
 
     if not published_articles:
         drawer_articles = prev.get("drawerArticles") or []
-        published_articles = prev.get("publishedArticles") or []
+        published_articles = []
+        for prev_art in (prev.get("publishedArticles") or prev.get("publishedPosts") or []):
+            if not isinstance(prev_art, dict):
+                continue
+            art_copy = dict(prev_art)
+            art_url = str(art_copy.get("url") or "").strip()
+            art_copy["publishedAt"] = preserved_pub_at_by_url.get(art_url) or str(art_copy.get("publishedAt") or today_prefix)
+            art_copy["checkedAt"] = now_iso
+            published_articles.append(art_copy)
 
     # Check live Naver Premium Contents status on yoon_master
     prem_live = {}
@@ -430,9 +464,16 @@ def sync_brunch_live_state(cdp_port: int = 9450) -> Dict[str, Any]:
             "targetGoogleBacklinkDA": "DA 80+ (brunch.co.kr)",
             "priorityBoostDomains": ["baronote.kr", "smilenote.kr", "topnote.kr", "must-good.com", "healthcox.com", "woorinote.kr"],
         },
-        "automation": prev.get("automation") or {},
+        "automation": {
+            **(prev.get("automation") or {}),
+            "todayDate": today_prefix,
+            "todayPublishedCount": sum(
+                1 for p in published_articles if str(p.get("publishedAt") or "")[:10] == today_prefix
+            ),
+        },
         "drawerArticles": drawer_articles,
         "publishedArticles": published_articles,
+        "publishedPosts": published_articles,
         "curriculum": curriculum_rows,
     }
     save_brunch_status(payload)
@@ -538,28 +579,15 @@ def write_next_curriculum_part(part_no: Optional[int] = None, cdp_port: int = 94
         edit_url=edit_url,
     )
 
-    # OSMU 1+2 Simultaneous Naver Cafe Bridge Publishing (loveshake1 28,495명 + boutiqueinfo 1,722명)
+    # OSMU 1+2 Simultaneous Naver Cafe Bridge Publishing (boutiqueinfo Tier 1 + dekilab Tier 2 3:1 anti-ban)
     cafe_receipts = []
     try:
-        from common.ego_taskspace import native_publish_naver_cafe_article
-        cafe_paras = list(target_item["paragraphs"][:4]) + [
-            f"▶ {target_item['title']} 상세 비교표 및 자가진단 원문 보기:",
-            bridge_url,
-        ]
-        for cafe_cfg in [
-            {"slug": "loveshake1", "clubid": "19858249", "menuid": "164"},
-            {"slug": "boutiqueinfo", "clubid": "31608088", "menuid": "4"},
-        ]:
-            c_res = native_publish_naver_cafe_article(
-                account="soul5373",
-                clubid=cafe_cfg["clubid"],
-                menuid=cafe_cfg["menuid"],
-                title=f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})",
-                paragraphs=cafe_paras,
-                cafe_slug=cafe_cfg["slug"],
-            )
-            if isinstance(c_res, dict) and c_res.get("ok"):
-                cafe_receipts.append({"cafe": cafe_cfg["slug"], "url": c_res.get("url")})
+        from naver_cafe_posting.posting import publish_cafe_bridge_part
+        c_res = publish_cafe_bridge_part(target_item["part"])
+        if isinstance(c_res, dict):
+            for rec in c_res.get("receipts") or []:
+                if isinstance(rec, dict) and rec.get("ok"):
+                    cafe_receipts.append({"cafe": rec.get("cafeSlug") or rec.get("cafe"), "url": rec.get("url")})
     except Exception:
         pass
 
@@ -580,7 +608,9 @@ def write_next_curriculum_part(part_no: Optional[int] = None, cdp_port: int = 94
             "cafeBridges": cafe_receipts,
         }
     )
-    today_runs = [h for h in history if h.get("date") == today_str]
+    today_pub_count = sum(
+        1 for p in (updated.get("publishedArticles") or []) if str(p.get("publishedAt") or "")[:10] == today_str
+    )
     auto_state.update(
         {
             "enabled": True,
@@ -589,7 +619,7 @@ def write_next_curriculum_part(part_no: Optional[int] = None, cdp_port: int = 94
             "lastRunTitle": target_item["title"],
             "lastRunUrl": res.get("url"),
             "todayDate": today_str,
-            "todayPublishedCount": len(today_runs),
+            "todayPublishedCount": today_pub_count,
             "history": history[-30:],
         }
     )
@@ -625,7 +655,9 @@ def process_brunch_autonomy_once(cdp_port: int = 9450) -> Dict[str, Any]:
         st = sync_brunch_live_state(cdp_port=cdp_port)
 
     auto_state = dict(st.get("automation") or {})
-    history = [h for h in (auto_state.get("history") or []) if h.get("date") == today_str]
+    today_pub_count = sum(
+        1 for p in (st.get("publishedArticles") or []) if str(p.get("publishedAt") or "")[:10] == today_str
+    )
     last_run_at = str(auto_state.get("lastRunAt") or "")
     cooldown_ok = True
     if last_run_at:
@@ -639,14 +671,14 @@ def process_brunch_autonomy_once(cdp_port: int = 9450) -> Dict[str, Any]:
     # Slot 1: >= 09:00 KST (1st post of the day)
     # Slot 2: >= 16:00 KST (2nd post of the day, at least 3h after 1st)
     should_write = False
-    if len(history) == 0 and hhmm >= "09:00":
+    if today_pub_count == 0 and hhmm >= "09:00":
         should_write = True
-    elif len(history) == 1 and hhmm >= "16:00" and cooldown_ok:
+    elif today_pub_count == 1 and hhmm >= "16:00" and cooldown_ok:
         should_write = True
 
     if should_write:
         return write_next_curriculum_part(cdp_port=cdp_port)
-    return {"ok": True, "action": "idle", "todayPublishedCount": len(history)}
+    return {"ok": True, "action": "idle", "todayPublishedCount": today_pub_count}
 
 
 def main() -> int:

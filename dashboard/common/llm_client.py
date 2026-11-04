@@ -141,6 +141,202 @@ def memory_event(event_id, event_type, summary, *, evidence=None, success=True,
         return None
 
 
+AB_CLAUDE_MODEL = 'claude-sonnet-5-5-high'
+AB_CODEX_MODEL = 'gpt-6.1-sol'
+
+
+def is_article_writer_call(agent_slot, response_schema=None, prompt=''):
+    """Return True only when generating actual reader-facing article/post drafts."""
+    slot = str(agent_slot or '').strip().lower()
+    props = (response_schema or {}).get('properties') if isinstance(response_schema, dict) else {}
+    if not isinstance(props, dict):
+        props = {}
+    if slot == 'cf_pipeline' and ('contentHtml' in props or 'topicSlug' in props):
+        return True
+    if slot in ('publi', 'naver_pipeline') and ('sections' in props and 'intro' in props):
+        return True
+    if slot == 'threads_pipeline' and ('parts' in props and 'self_check' in props):
+        return True
+    if 'contentHtml' in props and 'topicSlug' in props and 'summaryBox' in props:
+        return True
+    if 'sections' in props and 'intro' in props and 'closing' in props and 'title' in props:
+        return True
+    return False
+
+
+def format_writer_badge(provider, model):
+    """Return human-readable writer badge and normalized arm ('claude' | 'codex' | 'gemini')."""
+    p = str(provider or '').strip().lower()
+    m = str(model or '').strip().lower()
+    if 'claude' in m:
+        return {
+            'abArm': 'claude',
+            'writerProvider': p or 'agy',
+            'writerModel': str(model or AB_CLAUDE_MODEL),
+            'writerBadge': '🟣 Claude Sonnet 5.5',
+            'writerShortBadge': '🟣 Claude 5.5',
+            'writerFamily': 'Claude (AGY 구독)',
+        }
+    if 'gpt' in m or p == 'codex':
+        return {
+            'abArm': 'codex',
+            'writerProvider': p or 'codex',
+            'writerModel': str(model or AB_CODEX_MODEL),
+            'writerBadge': '🟢 Codex GPT-6.1',
+            'writerShortBadge': '🟢 Codex 6.1',
+            'writerFamily': 'Codex CLI',
+        }
+    if 'gemini' in m:
+        return {
+            'abArm': 'gemini',
+            'writerProvider': p or 'agy',
+            'writerModel': str(model or 'gemini-2.5-pro'),
+            'writerBadge': '🔵 Gemini Pro',
+            'writerShortBadge': '🔵 Gemini',
+            'writerFamily': 'Gemini (AGY)',
+        }
+    return {
+        'abArm': 'codex',
+        'writerProvider': p or 'codex',
+        'writerModel': str(model or AB_CODEX_MODEL),
+        'writerBadge': '🟢 Codex GPT-6.1',
+        'writerShortBadge': '🟢 Codex 6.1',
+        'writerFamily': 'Codex CLI',
+    }
+
+
+def select_ab_writer_route(agent_slot, audit_directory=None, prompt='', config=None):
+    """Deterministic 50:50 A/B split between Antigravity Claude Sonnet 5.5 and Codex GPT-6.1-Sol."""
+    seed_source = ''
+    if audit_directory:
+        try:
+            p = Path(audit_directory)
+            folder = p.parent if p.name == 'model-audit' else p
+            seed_source = f"{folder.parent.name}/{folder.name}"
+        except Exception:
+            seed_source = str(audit_directory)
+    if not seed_source:
+        seed_source = f"{agent_slot}:{str(prompt or '')[:240]}"
+    # Deterministic hash so within any given day ~50% of domains/slots get Claude and ~50% get Codex
+    digest = int(hashlib.sha256(seed_source.encode('utf-8', errors='ignore')).hexdigest()[:8], 16)
+    use_claude = (digest % 2 == 0)
+    if use_claude:
+        provider = 'agy'
+        model = AB_CLAUDE_MODEL
+    else:
+        provider = 'codex'
+        model = (config or {}).get('providers', {}).get('codex', {}).get('model') or AB_CODEX_MODEL
+    meta = format_writer_badge(provider, model)
+    meta['seedSource'] = seed_source
+    meta['abMode'] = '50:50_claude_vs_codex'
+    return provider, model, meta
+
+
+def deconstrain_writer_prompt(prompt, agent_slot=None):
+    """Strip rigid character-count/paragraph-count handcuffs so the writer focuses on reader immersion & facts."""
+    if not isinstance(prompt, str) or not prompt:
+        return prompt
+    cleaned = prompt
+    mechanical_patterns = [
+        r'- \[모바일 줄바꿈 \(최우선\)\][^\n]*\n?',
+        r'- \[문단 호흡\][^\n]*\n?',
+        r'- \[전체 분량\][^\n]*\n?',
+        r'- \[소제목 넘버링\][^\n]*\n?',
+        r'- \[핵심 3줄 요약 박스\][^\n]*\n?',
+        r'- \[리드 문단 볼드체 금지\][^\n]*\n?',
+        r'- 각 섹션은 5~6개 문단[^\n]*\n?',
+        r'- 본문 문단\(<p>\)은 반드시 2~3문장\(110~180자\)마다 끊어[^\n]*\n?',
+        r'한 문단은 1~2문장\(32~48자 내외\)의 짧은 호흡으로 끊어[^\n]*\s*',
+        r'문장이 55자를 넘어가면 모바일에서[^\n]*\n?',
+        r'1문단 = 1~2문장\(32~48자 단문\)[^\n]*\n?',
+    ]
+    for pat in mechanical_patterns:
+        cleaned = re.sub(pat, '', cleaned)
+    editorial_freedom_guide = (
+        "\n\n[집필 자유도 & 독자 몰입 최우선 지침 (De-Constrained Editorial Mode)]\n"
+        "- 기계적인 글자 수 세기(32~48자 제한, 문단 개수 강제, 억지 줄바꿈)에 얽매이지 말고 한국어 원어민 에디터처럼 가장 자연스럽고 술술 읽히는 호흡으로 집필하세요.\n"
+        "- 독자가 검색해서 들어온 첫 3초 안에 '내가 찾던 정확한 기준·금액·해결책이 여기 있다'고 확신하도록 핵심 수치와 결론부터 명쾌하게 제시하세요.\n"
+        "- 공허한 인사말, 상투적인 완충 문구, 근거 없는 추정 표현을 배제하고 리서치된 실측 데이터·비교표·실행 체크리스트로 밀도 있게 설명하세요.\n"
+    )
+    return cleaned + editorial_freedom_guide
+
+
+def persist_writer_meta(audit_directory, provider, model, deconstrained=True):
+    """Write writer-meta.json to the post artifact folder and model-audit folder for dashboard tracking."""
+    meta = format_writer_badge(provider, model)
+    meta['deconstrainedPrompt'] = bool(deconstrained)
+    meta['recordedAt'] = time.strftime('%Y-%m-%dT%H:%M:%S+09:00')
+    if not audit_directory:
+        return meta
+    try:
+        audit_path = Path(audit_directory)
+        targets = [audit_path]
+        if audit_path.name == 'model-audit' and audit_path.parent.exists():
+            targets.append(audit_path.parent)
+        for target in targets:
+            target.mkdir(parents=True, exist_ok=True)
+            (target / 'writer-meta.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding='utf-8')
+    except Exception:
+        pass
+    return meta
+
+
+def resolve_folder_writer_meta(folder_path, fallback_seed=''):
+    """Inspect a post folder (writer-meta.json or model-audit/*/response.json) to identify who wrote it."""
+    if folder_path:
+        try:
+            folder = Path(folder_path)
+            if not folder.exists() and not folder.is_absolute():
+                root = Path(__file__).resolve().parents[2]
+                for prefix in (root, root / 'cf_posting', root / 'naver_blog_posting'):
+                    cand = prefix / folder
+                    if cand.exists():
+                        folder = cand
+                        break
+            meta_file = folder / 'writer-meta.json'
+            if meta_file.is_file():
+                data = json.loads(meta_file.read_text(encoding='utf-8'))
+                if isinstance(data, dict) and data.get('writerBadge'):
+                    return data
+            audit_meta_file = folder / 'model-audit' / 'writer-meta.json'
+            if audit_meta_file.is_file():
+                data = json.loads(audit_meta_file.read_text(encoding='utf-8'))
+                if isinstance(data, dict) and data.get('writerBadge'):
+                    return data
+            audit_dir = folder / 'model-audit'
+            if audit_dir.is_dir():
+                calls = sorted(
+                    [d for d in audit_dir.iterdir() if d.is_dir() and ((d / 'request.json').is_file() or (d / 'response.json').is_file())],
+                    key=lambda d: d.stat().st_mtime,
+                )
+                if calls:
+                    # First model call in a post folder is the draft writer; inspect response.json/request.json
+                    first_call = calls[0]
+                    req_f = first_call / 'request.json'
+                    res_f = first_call / 'response.json'
+                    provider, model = '', ''
+                    if res_f.is_file():
+                        res_data = json.loads(res_f.read_text(encoding='utf-8'))
+                        provider = res_data.get('provider') or ''
+                        model = res_data.get('model') or ''
+                    if (not provider or not model) and req_f.is_file():
+                        req_data = json.loads(req_f.read_text(encoding='utf-8'))
+                        provider = provider or req_data.get('provider') or ''
+                        model = model or req_data.get('model') or ''
+                    if provider or model:
+                        meta = format_writer_badge(provider, model)
+                        meta['source'] = 'model-audit'
+                        return meta
+        except Exception:
+            pass
+    # If not yet generated (e.g., waiting/scheduled slot), return planned A/B arm
+    if fallback_seed:
+        _, _, planned = select_ab_writer_route('planned', audit_directory=fallback_seed)
+        planned['plannedOnly'] = True
+        return planned
+    return format_writer_badge('codex', AB_CODEX_MODEL)
+
+
 def memory_call(function):
     """One snapshot and episode at the outer provider boundary, including direct CLI calls."""
     @functools.wraps(function)
@@ -160,13 +356,18 @@ def memory_call(function):
         if explicit_session:
             session_id = str(explicit_session)
         event_id = 'llm:' + uuid.uuid4().hex
+        is_writer = is_article_writer_call(kwargs.get('agent_slot'), kwargs.get('response_schema'), prompt)
+        if is_writer:
+            prompt = deconstrain_writer_prompt(prompt, kwargs.get('agent_slot'))
         synapse_card = ''
         try:
             from dashboard.agents.synapse import recipe, audit_card
             from common.kin_answering import apply_policy
-            prompt = apply_policy(prompt, kwargs.get('agent_slot'))
+            if not is_writer:
+                prompt = apply_policy(prompt, kwargs.get('agent_slot'))
             synapse_card = recipe(prompt, kwargs.get('agent_slot'))
-            prompt = synapse_card + prompt
+            if not is_writer:
+                prompt = synapse_card + prompt
             audit_card(synapse_card, kwargs.get('audit_directory'))
         except (OSError,ValueError,TypeError,KeyError):
             pass  # Memory availability never blocks a provider call.
@@ -177,8 +378,9 @@ def memory_call(function):
             snapshot = hermes_memory.frozen_session_context(session_id, scope)
             skills = hermes_memory.skill_context(str(original), session_id=session_id)
             experience = hermes_memory._store.experience_context(str(original),session_id)
-            prefix = snapshot+'\n'+skills+'\n'+experience['text']+'\n'
-            prompt = prefix + original
+            if not is_writer:
+                prefix = snapshot+'\n'+skills+'\n'+experience['text']+'\n'
+                prompt = prefix + original
             selected_skills = [{'name':name,'sha256':hermes_memory.revision(content)} for name,content in re.findall(r"<skill name='([^']+)'>\n(.*?)\n</skill>",skills,re.S)]
             trace = {**trace,'snapshotSha256':hermes_memory.revision(snapshot),'skillRefs':selected_skills,
                      'episodeRefs':[{k:row[k] for k in ('eventId','sha256','learningPolicyRevision','previousEventId','previousCandidateSha256') if k in row} for row in experience['selected']],
@@ -322,7 +524,12 @@ def generate_text(prompt, provider=None, model_override=None, agent_slot=None, t
 @metered
 def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None, timeout_seconds=None, allow_provider_recovery=True):
     config = settings.load()
-    if agent_slot and not provider and not model_override:
+    is_writer = is_article_writer_call(agent_slot, response_schema, prompt)
+    if is_writer and not provider and not model_override:
+        provider, model_override, _ = select_ab_writer_route(
+            agent_slot, audit_directory=audit_directory, prompt=prompt, config=config
+        )
+    elif agent_slot and not provider and not model_override:
         brain = settings.get_agent_brain(agent_slot, config)
         provider = brain.get('provider') or config['active']
         model_override = brain.get('model') or None
@@ -350,14 +557,14 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         # Authentication, content/schema errors and uncertain submissions never trigger it.
         from common.llm_usage import RouteCoolingDown, UsageBudgetExceeded
         is_codex_timeout = (provider == 'codex' and not images and ('exceeded its hard timeout' in str(exc) or isinstance(exc, RouteCoolingDown)))
-        is_agy_recoverable = (provider != 'codex' and (re.search(r'HTTP 402\b', str(exc)) or '시간 제한 초과' in str(exc) or isinstance(exc, RouteCoolingDown)))
+        is_agy_recoverable = (provider != 'codex' and (re.search(r'HTTP 402\b', str(exc)) or '시간 제한 초과' in str(exc) or '실패했습니다' in str(exc) or isinstance(exc, RouteCoolingDown)))
         if isinstance(exc, UsageBudgetExceeded) or not (is_codex_timeout or is_agy_recoverable):
             raise
         previous_provider,previous_model=provider,model
         if is_codex_timeout:
-            provider='agy';model='gemini-2.5-pro';effort=None
+            provider='agy';model=(AB_CLAUDE_MODEL if is_writer else 'gemini-2.5-pro');effort=None
         else:
-            provider='codex';model=config['providers'].get('codex',{}).get('model') or 'gpt-6.1-sol'
+            provider='codex';model=config['providers'].get('codex',{}).get('model') or AB_CODEX_MODEL
             effort=settings.reasoning_effort_for_call(provider,model,slot=agent_slot,data=config)
         call=_CURRENT.get()
         if call is not None:
@@ -377,6 +584,8 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
         except Exception as failure:
             if observer:observer(provider,model,'failed',reason=str(failure)[:400])
             raise
+    if is_writer:
+        persist_writer_meta(audit_directory, provider, actual_model or model, deconstrained=True)
     actual_effort=(_CURRENT.get() or {}).get('reasoningEffort',reasoning_effort)
     record_model_route(provider,actual_model,actual_effort)
     if observer:

@@ -53,7 +53,9 @@ def _ensure_english_scene(custom_prompt, title='', summary=''):
         from common.llm_client import generate_text
         translated = generate_text(
             'Write ONLY one concise, vivid English photography prompt (2-3 sentences, no Korean, no markdown, no quotes) '
-            'for a high-resolution editorial photograph matching this Korean article topic and summary. '
+            'for a high-resolution editorial photograph set in modern South Korea matching this Korean article topic and summary. '
+            'If a person appears, they MUST be an East Asian / Korean person in a realistic Korean apartment, Korean hospital/pharmacy, or Korean office setting. '
+            'If medicine is shown, use Korean-style paper pharmacy envelopes or blister packs—NEVER Western/US orange prescription pill bottles. '
             'Describe realistic lighting, environment, objects, and atmosphere without any text, letters, logos, or screens.\n'
             f'Title: {title[:160]}\nSummary: {summary[:400]}\nDraft prompt: {text[:300]}',
             agent_slot='synapse',
@@ -67,8 +69,8 @@ def _ensure_english_scene(custom_prompt, title='', summary=''):
     except Exception:
         pass
     return (
-        'A bright, modern Korean lifestyle and business workspace scene with a clean desk, '
-        'natural daylight streaming through a window, a warm cup of coffee, and a minimal notebook, '
+        'An authentic modern South Korean lifestyle and home office scene featuring a Korean adult at a clean wooden desk '
+        'in a bright Korean apartment living room, natural daylight streaming through a window, a warm cup of coffee, and a minimal notebook, '
         'captured in high-resolution editorial photography with shallow depth of field.'
     )
 
@@ -76,8 +78,10 @@ def _ensure_english_scene(custom_prompt, title='', summary=''):
 def image_prompt(title, summary, custom_prompt=None):
     scene = _ensure_english_scene(custom_prompt, title=title, summary=summary)
     return (
-        'High-resolution editorial photography, realistic natural lighting, 35mm lens, shallow depth of field (do not generate video). '
-        'Strictly no text, no letters, no numbers, no logos, no watermarks, and no document or UI screens inside the image. '
+        'High-resolution editorial photography set in modern South Korea, realistic natural lighting, 35mm lens, shallow depth of field (do not generate video). '
+        'Mandatory localization: any person shown MUST be Korean (East Asian appearance) in an authentic Korean apartment, Korean clinic/pharmacy, or Korean office environment; '
+        'never depict Western/Caucasian models, foreign currency, or US-style orange plastic prescription pill bottles. '
+        'Strictly no text, no letters, no numbers, no logos, no watermarks, and no readable document or UI screens inside the image. '
         'Scene direction: ' + scene
     )
 
@@ -133,6 +137,143 @@ def _evidence_path(folder: Path, filename: str) -> Path:
     if filename == 'flow-hero.png':
         return folder / 'flow-generation.json'
     return folder / f'flow-generation-{Path(filename).stem}.json'
+
+
+def _generate_via_ego_flow(prompt: str, digest: str, output: Path, evidence_file: Path) -> Path:
+    import base64
+    import json
+    from PIL import Image
+    from common.ego_taskspace import run_ego_mjs
+
+    script = f"""
+const promptText = {json.dumps(prompt)};
+const existing = await listTaskSpaces();
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-cf-flow") : null;
+const task = found ? await taskSpace(found.id) : await taskSpace("barolab-cf-flow", {{ profileId: "Profile 3" }});
+const page = task.page("p1");
+let curUrl = await page.url().catch(() => "");
+if (!curUrl.startsWith("https://flow.google.com/project/")) {{
+  if (!curUrl.startsWith("https://flow.google.com")) {{
+    await page.goto("https://flow.google.com/", {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+    await page.waitForTimeout(2500);
+  }}
+  const projHref = await page.evaluate(() => {{
+    const a = document.querySelector("a.project-thumbnail-container[href*='/project/']");
+    return a ? a.href : "";
+  }});
+  if (projHref) {{
+    await page.goto(projHref, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
+  }} else {{
+    await page.evaluate(() => {{
+      const btn = document.querySelector("button.new-project-button");
+      if (btn) btn.click();
+    }});
+  }}
+  for (let w = 0; w < 25; w++) {{
+    await page.waitForTimeout(1000);
+    const hasEd = await page.evaluate(() => !!document.querySelector("div.ProseMirror"));
+    if (hasEd) break;
+  }}
+}}
+await page.waitForTimeout(2200);
+await page.evaluate(() => {{
+  window.__barolabInitialImgs = Array.from(document.querySelectorAll("img"))
+    .map(x => x.currentSrc || x.src)
+    .filter(Boolean);
+}});
+await page.click("div.ProseMirror");
+await page.keyboard.press("Control+A");
+await page.keyboard.press("Backspace");
+await page.waitForTimeout(250);
+await page.keyboard.insertText(promptText);
+await page.waitForTimeout(600);
+let clicked = false;
+try {{
+  await page.click("button[aria-label='생성 시작']");
+  clicked = true;
+}} catch (e) {{
+  clicked = await page.evaluate(() => {{
+    const btns = Array.from(document.querySelectorAll("button"));
+    const btn = btns.find(b => b.getAttribute("aria-label") === "생성 시작" || (b.innerText || "").includes("arrow_forward"));
+    if (btn && !btn.disabled) {{
+      btn.click();
+      return true;
+    }}
+    return false;
+  }});
+}}
+if (!clicked) {{
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: false, error: "Flow generate button not enabled" }}));
+}} else {{
+  let dataUrl = null;
+  let freshUrl = null;
+  for (let i = 0; i < 40; i++) {{
+    await page.waitForTimeout(2000);
+    const res = await page.evaluate(async () => {{
+      const initList = window.__barolabInitialImgs || [];
+      const imgs = Array.from(document.querySelectorAll("img")).filter(
+        x => x.complete && x.naturalWidth >= 256 && x.naturalHeight >= 256 && !(x.currentSrc || x.src || "").includes("zero_states/")
+      );
+      const fresh = imgs.find(x => !initList.includes(x.currentSrc || x.src));
+      if (!fresh) return null;
+      const src = fresh.currentSrc || fresh.src;
+      try {{
+        const r = await fetch(src, {{ credentials: "include" }});
+        const blob = await r.blob();
+        const b64 = await new Promise((resolve) => {{
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        }});
+        return {{ src, b64 }};
+      }} catch (e) {{
+        try {{
+          const c = document.createElement("canvas");
+          c.width = fresh.naturalWidth;
+          c.height = fresh.naturalHeight;
+          c.getContext("2d").drawImage(fresh, 0, 0);
+          return {{ src, b64: c.toDataURL("image/png") }};
+        }} catch (e2) {{
+          return null;
+        }}
+      }}
+    }});
+    if (res && res.b64) {{
+      freshUrl = res.src;
+      dataUrl = res.b64;
+      break;
+    }}
+  }}
+  console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
+    ok: !!dataUrl,
+    projectUrl: await page.url(),
+    freshUrl,
+    dataUrl
+  }}));
+}}
+"""
+    res = run_ego_mjs(script, timeout=110)
+    if not (res or {}).get("ok") or not res.get("dataUrl"):
+        raise RuntimeError(f"EGO Flow generation failed: {(res or {}).get('error') or 'timeout'}")
+    b64_part = res["dataUrl"].split(",", 1)[-1]
+    raw = base64.b64decode(b64_part)
+    with Image.open(io.BytesIO(raw)) as image:
+        if min(image.size) < 256:
+            raise RuntimeError("Flow result is a thumbnail")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        image.convert("RGB").save(output, format="PNG")
+        dimensions = list(image.size)
+    receipt = {
+        "status": "downloaded",
+        "mode": "google_flow_ego_taskspace",
+        "projectUrl": res.get("projectUrl", "https://flow.google.com/"),
+        "promptSha256": digest,
+        "completedAt": stamp(),
+        "dimensions": dimensions,
+        "sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
+    }
+    write(evidence_file, receipt)
+    return output
 
 
 def _generate_via_openai_api(prompt: str, digest: str, output: Path, evidence_file: Path) -> Path:
@@ -266,7 +407,10 @@ async def _generate(title, summary, folder, custom_prompt=None, filename='flow-h
                 return output
         try:
             if __import__('os').name == 'nt':
-                return await asyncio.to_thread(_generate_via_openai_api, prompt, digest, output, evidence_file)
+                try:
+                    return await asyncio.to_thread(_generate_via_ego_flow, prompt, digest, output, evidence_file)
+                except Exception:
+                    return await asyncio.to_thread(_generate_via_openai_api, prompt, digest, output, evidence_file)
             await asyncio.to_thread(ensure_account, 9440)
             binary, profile, _ = account_paths(9440)
             async with async_playwright() as playwright:

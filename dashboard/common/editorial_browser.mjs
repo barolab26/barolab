@@ -20,6 +20,7 @@ function globalIP(ip) {
   // Conservative IPv6 global unicast only; translation/tunnelling and docs held.
   return isIP(ip) === 6 && /^[23]/i.test(ip) && !/^2001:(?:0*0:|0*2:|db8:|0*10:|0*20:)/i.test(ip) && !/^2002:/i.test(ip);
 }
+const dnsCache = new Map();
 async function publicURL(raw) {
   if (typeof raw !== 'string' || raw.length > 4096 || /[\s\\\x00-\x1f]/.test(raw)) throw Error('unsafe_navigation');
   const u = new URL(raw);
@@ -27,7 +28,14 @@ async function publicURL(raw) {
   if (/(?:^|[/_?&=.-])(login|signin|logout|checkout|payment|submit|delete|token|session|oauth|account|mypage)(?:$|[/_?&=.-])/i.test(u.pathname+'?'+u.search)) throw Error('unsafe_navigation');
   const host = u.hostname.replace(/^\[|\]$/g, '');
   if (/^(localhost)$|\.(localhost|local|internal)$/i.test(host)) throw Error('unsafe_navigation');
-  const ips = isIP(host) ? [{address:host}] : await lookup(host, {all:true});
+  let ips = dnsCache.get(host);
+  if (!ips) {
+    ips = isIP(host) ? [{address:host}] : await Promise.race([
+      lookup(host, {all:true}),
+      new Promise((_, reject) => setTimeout(() => reject(Error('dns_timeout')), 2500))
+    ]);
+    dnsCache.set(host, ips);
+  }
   if (!ips.length || ips.some(x => !globalIP(x.address))) throw Error('unsafe_navigation');
   return u.href;
 }
@@ -63,21 +71,25 @@ const observe = () => {
   }).slice(0,12);
   for (const h of headings) {
     const r=h.getBoundingClientRect();
-    let bottom=r.bottom,excerpt=h.innerText;
-    for(let sibling=h.nextElementSibling,n=0;sibling&&n<8;sibling=sibling.nextElementSibling,n++){
+    let right=r.right, bottom=r.bottom, excerpt=h.innerText;
+    let startEl = h.nextElementSibling ? h : (h.parentElement && !h.parentElement.nextElementSibling ? h.parentElement.parentElement : h.parentElement);
+    for(let sibling=(startEl||h).nextElementSibling,n=0;sibling&&n<8;sibling=sibling.nextElementSibling,n++){
       if(/^H[1-6]$/.test(sibling.tagName))break;
       if(/^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT)$/.test(sibling.tagName) || !rendered(sibling))continue;
       const sr=sibling.getBoundingClientRect();
       if(sr.top>=innerHeight)break;
+      if(sr.bottom > innerHeight - 6 && bottom - r.top >= 260) break;
+      if(sr.right <= innerWidth) right = Math.max(right, sr.right);
       bottom=Math.max(bottom,sr.bottom);excerpt+='\n'+(sibling.innerText||'');
     }
     bottom=Math.min(innerHeight,Math.max(r.bottom+100,bottom),r.top+900);
     regions.push({id:regions.length,tag:'EXCERPT',text:excerpt.slice(0,3000),credit:'',
-      clip:{x:r.left,y:r.top,width:Math.min(r.width,innerWidth-r.left),height:bottom-r.top}});
+      clip:{x:r.left,y:r.top,width:Math.min(right-r.left,innerWidth-r.left),height:bottom-r.top}});
   }
   const links=[...document.querySelectorAll('a[href]')].map(a=>({url:a.href,title:(a.innerText||'').trim().slice(0,500)}))
     .filter(x=>x.title && /^https?:/.test(x.url)).slice(0,120);
-  const sensitive = !!document.querySelector('input[type=password],input[autocomplete="cc-number"],input[autocomplete="one-time-code"]');
+  const pwInput = document.querySelector('input[type=password],input[autocomplete="cc-number"],input[autocomplete="one-time-code"]');
+  const sensitive = !!(pwInput && rendered(pwInput));
   return {url:location.href,title:document.title,text,regions,links,sensitive,scroll:{x:scrollX,y:scrollY},viewport:{width:innerWidth,height:innerHeight}};
 };
 
@@ -104,10 +116,13 @@ export async function run(requestFile) {
     await page.cdp('Network.setBlockedURLs',{urls:[]});
     async function pump(requireNavigation=false, sameDocumentTarget=null) {
       let domReady=!requireNavigation;
-      const until=Date.now()+25000;
+      const until=Date.now()+12000;
       let requests=0;
       while (true) {
-        if (Date.now()>until || requests>180) throw Error('network_budget_exhausted');
+        if (Date.now()>until || requests>250) {
+          if (domReady) return;
+          throw Error('network_budget_exhausted');
+        }
         const events=await page.events();
         for (const event of events) {
           eventMethods[event.method]=(eventMethods[event.method]||0)+1;
@@ -117,6 +132,9 @@ export async function run(requestFile) {
           requests++;
           try {
             if (p.request.method !== 'GET' || p.request.postData) throw Error('unsafe_navigation');
+            if (p.resourceType !== 'Document' && /(^|\.)(googlesyndication|doubleclick|googletagmanager|google-analytics|adservice|coupang|criteo|taboola|dable|widerplanet|kakao\.com\/adfit)\./i.test(new URL(p.request.url).hostname)) {
+              throw Error('ad_tracker_skipped');
+            }
             await publicURL(p.request.url);
             const headers=Object.entries(p.request.headers).filter(([k])=>! /^(cookie|authorization|proxy-authorization|referer)$/i.test(k)).map(([name,value])=>({name,value:String(value)}));
             await page.cdp('Fetch.continueRequest',{requestId:p.requestId,headers});
@@ -137,13 +155,42 @@ export async function run(requestFile) {
       if (input.op === 'observe') {
         await page.cdp('Page.enable');
         await page.events();
+        let targetUrl = input.url;
+        const mNaver = /^https?:\/\/blog\.naver\.com\/([A-Za-z0-9_-]+)\/(\d+)/i.exec(targetUrl);
+        if (mNaver) targetUrl = `https://m.blog.naver.com/${mNaver[1]}/${mNaver[2]}`;
         const before=await page.url();
-        const sameDocument=before!==input.url && before.split('#')[0]===input.url.split('#')[0];
+        const sameDocument=before!==targetUrl && before.split('#')[0]===targetUrl.split('#')[0];
         // goto waits inside EGO's per-page command queue, preventing the host
         // from servicing Fetch pauses. Fixed read-only navigation returns first;
         // all resulting requests/redirects still pass the public-content gate.
-        await page.evaluate(url=>{setTimeout(()=>location.assign(url),0);return true;},input.url);
-        await pump(!sameDocument,sameDocument?input.url:null);
+        await page.evaluate(url=>{setTimeout(()=>location.assign(url),0);return true;},targetUrl);
+        await pump(!sameDocument,sameDocument?targetUrl:null);
+        if (!input.search) {
+          await page.evaluate(() => {
+            if (typeof document.createElement !== 'function') return false;
+            try {
+              for (const el of document.querySelectorAll('[role=dialog],[aria-modal=true],.modal,.popup,.dimmed,.backdrop,.overlay')) {
+                const st = getComputedStyle(el);
+                if (st.position === 'fixed' || st.position === 'sticky' || Number(st.zIndex) >= 100) {
+                  el.style.setProperty('display', 'none', 'important');
+                }
+              }
+              for (const el of document.querySelectorAll('div,section,aside')) {
+                const st = getComputedStyle(el);
+                if (st.position === 'fixed') {
+                  const r = el.getBoundingClientRect();
+                  if ((r.width >= innerWidth * 0.8 && r.height >= innerHeight * 0.8) ||
+                      (r.width >= 200 && r.height >= 120 && r.top > 40 && r.left > 20 && Number(st.zIndex) >= 50)) {
+                    el.style.setProperty('display', 'none', 'important');
+                  }
+                }
+              }
+              if (document.body?.style) document.body.style.overflow = 'auto';
+              if (document.documentElement?.style) document.documentElement.style.overflow = 'auto';
+            } catch {}
+            return true;
+          });
+        }
       } else if(input.op === 'scroll') {
         const before=await page.url();
         await publicURL(before);
@@ -158,7 +205,7 @@ export async function run(requestFile) {
       // Background TaskSpaces may throttle requestAnimationFrame. Observe actual
       // geometry from the host instead. Search links need no screenshot region.
       let previous='',steady=input.search?3:0,stableSince=Date.now();
-      const layoutDeadline=Date.now()+5000;
+      const layoutDeadline=Date.now()+2500;
       while(!input.search && (steady<3 || Date.now()-stableSince<250) && Date.now()<layoutDeadline){
         const state=JSON.stringify(await page.evaluate(()=>[scrollX,scrollY,
           ...[...document.querySelectorAll('h1,h2,h3,figure,img,main')].slice(0,60).map(e=>{
@@ -168,8 +215,23 @@ export async function run(requestFile) {
         previous=state;
         if(steady<3)await new Promise(resolve=>setTimeout(resolve,50));
       }
-      if(steady<3)throw Error('source_layout_unstable');
       output=await page.evaluate(observe);
+      if (input.op === 'observe' && input.search) {
+        const extLinks = (output.links || []).filter(x => {
+          try { return !/(^|\.)(google\.[a-z.]+|gstatic\.com|googleapis\.com|search\.naver\.com)$/i.test(new URL(x.url).hostname); }
+          catch { return false; }
+        });
+        if (extLinks.length === 0) {
+          const q = new URL(input.url).searchParams.get('q') || '';
+          if (q) {
+            const naverSearch = 'https://search.naver.com/search.naver?where=nexearch&query=' + encodeURIComponent(q);
+            await publicURL(naverSearch);
+            await page.evaluate(url=>{setTimeout(()=>location.assign(url),0);return true;},naverSearch);
+            await pump(true, null);
+            output = await page.evaluate(observe);
+          }
+        }
+      }
       if (output.sensitive) throw Error('private_page');
       output.text_sha256=hash(output.text);
       if (input.screenshot) await page.screenshot({path:input.screenshot,fullPage:false});
@@ -199,7 +261,7 @@ export async function run(requestFile) {
     console.log('EDITORIAL_JSON:'+JSON.stringify({ok:true,space,public_only:true,network,...output}));
   } catch (error) {
     const raw=String(error);
-    const reason=/control|inactive|unassigned|ownership|takeover|not_owned|TAKEN|STOPPED/i.test(raw)?'user_takeover':/unsafe_navigation/.test(raw)?'unsafe_navigation':/source_changed/.test(raw)?'source_changed':'browser_held';
+    const reason=/PageEvaluationTimeoutError/i.test(raw)?'browser_held':/control|inactive|unassigned|ownership|takeover|not_owned|TAKEN|\bSTOPPED\b/i.test(raw)?'user_takeover':/unsafe_navigation/.test(raw)?'unsafe_navigation':/source_changed/.test(raw)?'source_changed':'browser_held';
     // No page action/finish/claim after an error or user takeover.
     console.log('EDITORIAL_JSON:'+JSON.stringify({ok:false,space,reason,
       diagnostic:raw.replace(/https?:\/\/\S+/g,'[public-url]').slice(0,500),eventMethods}));

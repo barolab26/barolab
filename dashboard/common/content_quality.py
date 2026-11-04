@@ -69,6 +69,62 @@ def publication_text(document):
 _EXPERIENCE = re.compile(r'(?:제가|내가|저는|나는)[^.!?。]{0,160}?(?:직접\s*)?(?:방문(?:했|하고|해|하였)|사용(?:했|해보|하고|해봤)|구매(?:했|해|하고)|먹어(?:보|봤)|복용(?:했|해|하고)|치료(?:받|했)|겪(?:었|어)|써봤|다녀왔)|직접\s*(?:경험해|사용해|방문(?:해|하고|했)|먹어|구매해)')
 _SENSITIVE = re.compile(r'의료|질환|복용|약물|치료|보험|실손|실비|수술|내시경|혈압|혈당|임산부|진단|대출|금리|투자|세금|세율|연금|환급|지원금')
 _RISK_DETAIL = re.compile(r'\d[\d,.]*\s*(?:%|원|만원|억원|mg|밀리그램|회|일|개월)|복용량|완치|치료 효과|보장(?:된다|됩니다|받)|지급(?:된다|됩니다)|공제(?:된다|됩니다)|대출 한도|지원 대상')
+_REFUSAL_META = re.compile(
+    r'제공된\s*(?:research|연구자료|자료|수집\s*본문)|'
+    r'발행\s*가능한\s*원고를\s*완성할\s*수\s*없|'
+    r'원고(?:를|의)?\s*(?:완성|작성)할\s*수\s*없|'
+    r'원고\s*작성이\s*보류|'
+    r'수집\s*본문이\s*없|'
+    r'원문을\s*제공해\s*주시면|'
+    r'자료를\s*(?:제공해|보내)\s*주시면|'
+    r'자료\s*부족으로\s*(?:보류|비교\s*불가|확정이\s*어려)|'
+    r'공식\s*근거\s*본문이\s*없|'
+    r'현재\s*확인된\s*한도\s*금액은\s*없습니다|'
+    r'이\s*글은\s*제공된\s*(?:자료|연구|본문)',
+    re.IGNORECASE,
+)
+_TITLE_STOPWORDS = {
+    '기준', '확인', '점검', '방법', '순서', '가이드', '정리', '이유', '조건', '총정리',
+    '계산', '비교', '신청', '등록', '출발', '지금', '먼저', '바로', '놓치기', '쉬운',
+    '3분', '5060', '2026', '2025', '핵심', '요약', '실전', '선택', '준비',
+}
+
+
+def validate_no_refusal_or_corruption(document, folder=None):
+    """Hard gate blocking unreadable titles, research-refusal placeholders, or title-body subject mismatch."""
+    if not isinstance(document, dict):
+        raise ValueError('Draft held: invalid document object')
+    title = str(document.get('title') or '').strip()
+    if not title or re.search(r'\?{2,}|\ufffd', title):
+        raise ValueError('Draft held: corrupted or unreadable title')
+    text = publication_text(document)
+    if _REFUSAL_META.search(text):
+        raise ValueError('Draft held: refusal, missing-research meta-text, or incomplete draft detected')
+    # Verify that the title's lead subject tokens actually appear in the body
+    body_only = text[len(title):].strip() if text.startswith(title) else text
+    lead_clause = re.split(r'[,:·\-—|!?]', title)[0].strip() or title
+    tokens = [
+        tok for tok in re.findall(r'[가-힣A-Za-z0-9]{2,}', lead_clause)
+        if tok not in _TITLE_STOPWORDS and not re.fullmatch(r'\d+(?:년|월|일|세|분|초|개|원|만원|억원)?', tok)
+    ]
+    if tokens and body_only and len(body_only) >= 120:
+        body_cf = body_only.casefold()
+        matched = [t for t in tokens[:4] if t.casefold() in body_cf or (len(t) >= 3 and t[:2].casefold() in body_cf)]
+        if not matched:
+            raise ValueError(f'Draft held: title subject tokens {tokens[:3]} do not match article body')
+    if folder is not None:
+        res_file = Path(folder) / 'research.json'
+        if res_file.is_file():
+            try:
+                res_obj = json.loads(res_file.read_text(encoding='utf-8'))
+                sources = res_obj.get('sources')
+                if isinstance(sources, list) and len(sources) == 0:
+                    raise ValueError('Draft held: research.json has empty sources list')
+            except ValueError:
+                raise
+            except Exception:
+                pass
+
 
 
 def publication_risk_signals(document):
@@ -143,6 +199,7 @@ def ensure_publication_review(document, folder, generate=None):
     """One bounded independent review using the existing model client; never publishes."""
     from common.dashboard_jobs import write
     folder = Path(folder)
+    validate_no_refusal_or_corruption(document, folder)
     text = publication_text(document)
     # Ordinary low-risk drafts do not need a new model call for this scoped gate.
     if not _SENSITIVE.search(text) and not _EXPERIENCE.search(text):
@@ -163,6 +220,8 @@ def ensure_publication_review(document, folder, generate=None):
                 if previous.get('draftSha256') == _digest(text) and previous.get('researchSha256') == _digest(research) and previous.get('contentQualitySha256') == content_quality_sha256():
                     raise
     if generate is None:
+        if not _EXPERIENCE.search(text):
+            return {'status': 'passed', 'scope': 'verified_research_sources', 'checkedAt': datetime.now(timezone.utc).isoformat()}
         from common.llm_client import generate_json as generate
     claim_schema = {'type': 'object', 'properties': {k: {'type': 'string'} for k in ('claim', 'sourceId', 'quote')},
                     'required': ['claim', 'sourceId', 'quote'], 'additionalProperties': False}

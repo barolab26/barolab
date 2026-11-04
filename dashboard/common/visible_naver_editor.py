@@ -169,11 +169,14 @@ def bind(page, frame, document, plan, folder):
             control.fill(str(round(params['lineHeight'] * 100)))
             control.press('Enter')
 
-    def type_lines(text, target):
+    def type_lines(text, target, double_enter=False):
         with action('type', target, count=len(text)):
-            for index, line in enumerate(text.split('\n')):
+            raw_lines = [ln for ln in text.split('\n') if ln.strip()] if double_enter else text.split('\n')
+            for index, line in enumerate(raw_lines):
                 if index:
                     page.keyboard.press('Enter')
+                    if double_enter:
+                        page.keyboard.press('Enter')
                 page.keyboard.type(line, delay=1)
                 if 'http://' in line or 'https://' in line:
                     page.keyboard.press('Escape')
@@ -275,9 +278,10 @@ def bind(page, frame, document, plan, folder):
         ensure_text_cursor()
         size, bold, align = text_style(params, index, block)
         font(size, bold, align)
-        type_lines(block['text'], 'naver-body')
+        type_lines(block['text'], 'naver-body', double_enter=(block['type'] == 'text'))
         if next_type in ('text', 'heading', 'signoff', 'tags'):
             with action('press', 'naver-editor-key'):
+                page.keyboard.press('Enter')
                 page.keyboard.press('Enter')
         steps.append({'block':index,'action':'keyboard-and-toolbar','fontSize':size,'bold':bold})
     line_links = dict((document.get('presentation') or {}).get('lineLinks') or document.get('lineLinks') or {})
@@ -300,6 +304,18 @@ def bind(page, frame, document, plan, folder):
             page.wait_for_timeout(200)
             actual = frame.evaluate("SmartEditor.getEditor('blogpc001').getDocumentData()")
     try:
+        # Enforce mobile paragraph breathing room (blank spacer paragraph between lines)
+        needs_spacing_heal = False
+        for comp in actual['document']['components'][1:]:
+            if comp.get('@ctype') == 'text':
+                vals = comp.get('value') or []
+                non_empty = [p for p in vals if any((n.get('value') or '').strip() for n in p.get('nodes') or [])]
+                empty = [p for p in vals if all(not (n.get('value') or '').strip() for n in p.get('nodes') or [])]
+                if len(non_empty) >= 2 and len(empty) < len(non_empty) - 1:
+                    needs_spacing_heal = True
+                    break
+        if needs_spacing_heal:
+            raise ValueError('Mobile paragraph spacing normalization required')
         return verify_binding(page, document, actual, folder, started, steps)
     except ValueError:
         import copy
@@ -318,6 +334,7 @@ def bind(page, frame, document, plan, folder):
             title_comp['title'] = [{'id': ident(), 'nodes': [{'id': ident(), 'value': document['title'], '@ctype': 'textNode'}], '@ctype': 'paragraph'}]
             new_comps = [title_comp]
             for b_idx, blk in enumerate(document['blocks']):
+                prev_type = document['blocks'][b_idx - 1]['type'] if b_idx > 0 else None
                 if blk['type'] == 'image':
                     im = copy.deepcopy(img_map[blk['file']])
                     im['represent'] = len([c for c in new_comps if c.get('@ctype') == 'image']) == 0
@@ -342,13 +359,12 @@ def bind(page, frame, document, plan, folder):
                     }
                     if bld:
                         n_style['bold'] = True
-                    p_style = {'align': aln, '@ctype': 'paragraphStyle'}
-                    if b_params.get('lineHeight'):
-                        p_style['lineHeight'] = b_params['lineHeight']
+                    p_style = {'align': aln, 'lineHeight': b_params.get('lineHeight', 1.9), '@ctype': 'paragraphStyle'}
                     paras = []
-                    for ln in blk['text'].split('\n'):
-                        if not ln:
-                            continue
+                    if blk['type'] in ('heading', 'signoff', 'tags') and prev_type == 'text':
+                        paras.append({'id': ident(), 'nodes': [{'id': ident(), 'value': '', 'style': dict(n_style), '@ctype': 'textNode'}], 'style': dict(p_style), '@ctype': 'paragraph'})
+                    raw_lns = [ln for ln in blk['text'].split('\n') if ln.strip()]
+                    for l_idx, ln in enumerate(raw_lns):
                         ln_style = dict(n_style)
                         node_obj = {'id': ident(), 'value': ln, 'style': ln_style, '@ctype': 'textNode'}
                         link_url = line_links.get(ln.strip())
@@ -356,6 +372,8 @@ def bind(page, frame, document, plan, folder):
                             ln_style.update(fontColor='#0068c3', bold=True, underline=True)
                             node_obj['link'] = {'url': link_url, '@ctype': 'urlLink'}
                         paras.append({'id': ident(), 'nodes': [node_obj], 'style': dict(p_style), '@ctype': 'paragraph'})
+                        if blk['type'] == 'text' and l_idx + 1 < len(raw_lns):
+                            paras.append({'id': ident(), 'nodes': [{'id': ident(), 'value': '', 'style': dict(n_style), '@ctype': 'textNode'}], 'style': dict(p_style), '@ctype': 'paragraph'})
                     new_comps.append({'id': ident(), 'layout': 'default', 'value': paras, '@ctype': 'text'})
             new_comps.extend(oglinks)
             healed['document']['components'] = new_comps

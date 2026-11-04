@@ -46,9 +46,11 @@ def benchmark(query, folder=None):
 
 def planning_keyword_candidates(identity, channel, used, root=ROOT):
     """Keep editorial/legacy ideas usable without treating them as measured demand."""
+    import re
     from common.collection_observability import load
     from common.asset_map import NAVER_NICHE_VERIFIED_POOLS, CF_NICHE_VERIFIED_POOLS, is_duplicate_naver_topic
     from server.radar_scout import reported_keyword
+    re_naver_offtopic = re.compile(r"동물병원|심페리카|넥스가드|심장사상충|강아지|고양이|들깨|좌대|낚시|리드코프|대부|일수|작업대출|폐점|운세|사주|타로|먹튀|토토")
     candidates = {}
     for rel in ('radar/daily_winning_topics.json', 'radar/blokey-golden.json'):
         data = load(Path(root) / 'dashboard/data' / rel)
@@ -57,6 +59,8 @@ def planning_keyword_candidates(identity, channel, used, root=ROOT):
         for row in rows if isinstance(rows, list) else [rows]:
             keyword = str(row.get('keyword') or '').strip() if isinstance(row, dict) else str(row or '').strip()
             if not keyword or is_duplicate_naver_topic(keyword, used):
+                continue
+            if channel == 'naver' and re_naver_offtopic.search(keyword):
                 continue
             measured = reported_keyword(row)
             if keyword not in candidates or measured:

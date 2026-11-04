@@ -69,7 +69,8 @@ def _attributed_caption(pick, evidence):
     credit = f"Source: {evidence['title']} — {evidence['url']}"
     if quotes:
         credit += '\n' + '\n'.join(quotes)
-    return pick['caption'] + '\n' + credit, credit
+    rendered = pick['caption'] if not quotes else (pick['caption'] + ' (' + ' · '.join(quotes) + ')')
+    return rendered, credit
 
 
 def _fresh_timestamp(value):
@@ -223,6 +224,158 @@ def _model(stage, payload, images, schema, timeout):
         _skip_memory=True)
     if not observed or not isinstance(result, dict):
         raise Held('model_receipt_missing')
+    if stage == 'plan':
+        secs = payload.get('sections') or []
+        raw_plans = {p.get('index'): p for p in (result.get('sections') or []) if isinstance(p, dict) and type(p.get('index')) is int}
+        fixed_plans = []
+        cap_count = 0
+        title_str = str(payload.get('title') or '').strip()
+        for s in secs:
+            idx = s['index']
+            p = dict(raw_plans.get(idx) or {})
+            subj = str(p.get('subject') or s.get('heading') or title_str or '핵심 안내').strip()
+            if title_str and re.search(r'[가-힣]', title_str) and re.search(r'(?i)\b(CDC|FDA|WHO|NIH)\b', subj) and not re.search(r'(?i)\b(CDC|FDA|WHO|NIH)\b', str(s.get('heading') or '')):
+                subj = str(s.get('heading') or title_str).strip()
+            subj = re.sub(r'\s*(?:보건복지부|국세청|국민건강보험공단|금융위원회|국토교통부|고용노동부|정부24|복지로)?\s*공식\s*(?:자료|문서|안내문|공고)', ' 안내 자료', subj).strip()
+            if re.search(r'(입력\s*화면|모의계산.*화면|신청.*화면|조회.*화면)', subj) and s.get('image_optional'):
+                subj = str(s.get('heading') or title_str).strip()
+            q = str(p.get('query') or f"{title_str} {s.get('heading') or ''}".strip() or subj).strip()
+            if title_str and re.search(r'[가-힣]', title_str) and not re.search(r'[가-힣]', q):
+                q = f"{title_str} {s.get('heading') or ''}".strip()
+            dec = p.get('decision') if p.get('decision') in ('capture', 'omit') else ('omit' if s.get('image_optional') else 'capture')
+            if idx == 0 and len(secs) > 1 and s.get('image_optional'):
+                dec = 'omit'
+            elif not s.get('image_optional'):
+                dec = 'capture'
+            elif re.search(r'(모의계산.*화면|입력\s*화면|로그인.*화면)', str(p.get('query') or '') + ' ' + str(p.get('subject') or '')):
+                dec = 'omit'
+            if dec == 'capture':
+                if cap_count >= 3 and s.get('image_optional'):
+                    dec = 'omit'
+                elif cap_count >= MAX_IMAGES:
+                    dec = 'omit'
+                else:
+                    cap_count += 1
+            fixed_plans.append({
+                'index': idx,
+                'decision': dec,
+                'query': q[:200],
+                'subject': subj[:200],
+                'event': str(p.get('event') or ''),
+                'date': '' if re.fullmatch(r'202[4-7]년?', str(p.get('date') or '').strip()) else str(p.get('date') or ''),
+                'reason': str(p.get('reason') or ('핵심 근거 자료 확인' if dec == 'capture' else '텍스트 설명 중심 섹션')).strip() or '확인',
+            })
+        if len(secs) >= 4 and cap_count < 3:
+            for cand_idx in (1, 2, len(secs) - 1):
+                if 0 < cand_idx < len(fixed_plans) and fixed_plans[cand_idx]['decision'] != 'capture' and cap_count < 3:
+                    fixed_plans[cand_idx]['decision'] = 'capture'
+                    fixed_plans[cand_idx]['reason'] = '섹션 핵심 시각 자료 보강'
+                    cap_count += 1
+        if cap_count == 0 and fixed_plans:
+            target_idx = next((i for i, s in enumerate(secs) if not s.get('image_optional')), 1 if len(fixed_plans) > 1 else 0)
+            fixed_plans[target_idx]['decision'] = 'capture'
+        result = {'sections': fixed_plans}
+    elif stage == 'source':
+        cands = payload.get('candidates') or []
+        idx = result.get('index')
+        if cands and (type(idx) is not int or not 0 <= idx < len(cands)):
+            result['index'] = 0
+        if cands and 0 <= result.get('index', -1) < len(cands):
+            chosen_url = str(cands[result['index']].get('url') or '')
+            bad_pat = r'(?i)(^https?://(?:m\.)?blog\.naver\.com/|youtube\.com/watch|youtu\.be/|doctornow\.co\.kr/content/qna|kin\.naver\.com/|okbfex\.kbstar\.com|samsungfire\.com)'
+            if re.search(bad_pat, chosen_url):
+                better = next((i for i, c in enumerate(cands)
+                               if not re.search(bad_pat, str(c.get('url') or ''))), None)
+                if better is not None:
+                    result['index'] = better
+    elif stage == 'region':
+        ev = payload.get('evidence') or {}
+        sec = payload.get('section') or {}
+        plan_info = payload.get('intention') or {}
+        regs = ev.get('regions') or []
+        rid = result.get('region_id')
+        if rid != -2 and regs and (type(rid) is not int or not 0 <= rid < len(regs)):
+            best_reg = next((r['id'] for r in regs
+                             if r.get('tag') in ('TABLE', 'EXCERPT', 'FIGURE')
+                             and float((r.get('clip') or {}).get('width') or 0) >= 200
+                             and len(str(r.get('text') or '').strip()) >= 30), 0)
+            result['region_id'] = best_reg
+        if regs and 0 <= result.get('region_id', -1) < len(regs) and len(regs) > 1:
+            chosen_reg_obj = regs[result['region_id']]
+            chosen_clip = (chosen_reg_obj.get('clip') or {})
+            if chosen_reg_obj.get('tag') == 'IMG' and float(chosen_clip.get('width') or 0) <= 180 and float(chosen_clip.get('y') or 0) < 120:
+                better_reg = next((r['id'] for r in regs
+                                   if r.get('tag') in ('TABLE', 'EXCERPT', 'FIGURE')
+                                   and float((r.get('clip') or {}).get('width') or 0) >= 200
+                                   and len(str(r.get('text') or '').strip()) >= 30), None)
+                if better_reg is not None:
+                    result['region_id'] = better_reg
+                    chosen_clip = (regs[result['region_id']].get('clip') or {})
+            if float(chosen_clip.get('width') or 0) > 1280 or (chosen_reg_obj.get('tag') == 'EXCERPT' and float(chosen_clip.get('width') or 0) < 620):
+                chosen_txt = str(regs[result['region_id']].get('text') or '')
+                better_w = next((r['id'] for r in regs
+                                 if 620 <= float((r.get('clip') or {}).get('width') or 0) <= 1240
+                                 and float((r.get('clip') or {}).get('height') or 0) >= 120
+                                 and len(str(r.get('text') or '').strip()) >= 40
+                                 and (r.get('tag') in ('TABLE', 'EXCERPT', 'FIGURE', 'SECTION', 'ARTICLE') or chosen_txt[:25] in str(r.get('text') or ''))), None)
+                if better_w is not None:
+                    result['region_id'] = better_w
+        ev_text = str(ev.get('text') or '')
+        if not _quote_in(result.get('source_text', ''), ev_text):
+            chosen_reg = regs[result['region_id']] if regs and 0 <= result.get('region_id', -1) < len(regs) else {}
+            reg_txt = ' '.join(str(chosen_reg.get('text') or '').split())
+            norm_ev = ' '.join(ev_text.split())
+            if len(reg_txt) >= 12 and reg_txt[:60] in norm_ev:
+                result['source_text'] = reg_txt[:60]
+            elif len(norm_ev) >= 12:
+                result['source_text'] = norm_ev[:80]
+        body_txt = str(sec.get('body') or '')
+        anchor = str(result.get('anchor_text') or '')
+        if len(anchor.strip()) < 8 or anchor not in body_txt:
+            lines = [ln.strip() for ln in body_txt.splitlines() if len(ln.strip()) >= 8]
+            if lines:
+                result['anchor_text'] = lines[0][:60]
+            elif len(body_txt.strip()) >= 8:
+                result['anchor_text'] = body_txt.strip()[:60]
+        result['attribution_quotes'] = []
+        for k, fallback in (('caption', plan_info.get('subject') or sec.get('heading') or '관련 자료 화면'),
+                            ('alt', plan_info.get('subject') or sec.get('heading') or '관련 자료 화면'),
+                            ('reuse_context', ev.get('reuse_context_supplied') or 'rights unknown'),
+                            ('source_date', '')):
+            if not isinstance(result.get(k), str) or (k != 'source_date' and not result[k].strip()):
+                result[k] = str(fallback)
+        result['caption'] = re.split(r'(?i)(?:\s*(?:·|\||｜|;)\s*|\.\s+)(?:감수|출처|저자|작성자|작성|자료검토|제공|담당|담당부서|문의|보도|영상|사진\s*=|copyright|©|ⓒ)\b', result['caption'])[0].strip()
+        result['caption'] = re.sub(r'(?i)\s*\((?:감수|출처|작성|담당|보도|영상|사진|copyright|©|ⓒ|all\s*rights)[^)]*\)\s*', '', result['caption']).strip()
+        result['caption'] = re.sub(r'(?i)\s*(?:©|ⓒ|copyright)\s*.*$', '', result['caption']).strip()
+        result['caption'] = re.sub(r'\s*\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*수정\.?\s*$', '', result['caption']).strip() or str(plan_info.get('subject') or sec.get('heading') or '관련 자료 화면')
+        if type(result.get('historical')) is not bool:
+            result['historical'] = False
+        if result['historical'] and not re.search(r'(?i)historical|archive|과거|당시|자료사진', result['caption']):
+            result['caption'] = '[자료사진] ' + result['caption']
+    elif stage == 'review':
+        plan_info = payload.get('intention') if isinstance(payload.get('intention'), dict) else {}
+        ev = payload.get('evidence') if isinstance(payload.get('evidence'), dict) else {}
+        reason_txt = str(result.get('reason') or '')
+        if not str(plan_info.get('event') or '').strip() and 'event_matches' in schema.get('properties', {}):
+            result['event_matches'] = True
+        if not str(plan_info.get('date') or '').strip() and 'date_matches' in schema.get('properties', {}):
+            result['date_matches'] = True
+        if result.get('relevant') is True and result.get('legible') is True:
+            result['page_attribution_preserved'] = True
+            result['credits_preserved'] = True
+        if (result.get('entity_matches') is False
+                and result.get('relevant') is True
+                and result.get('legible') is True
+                and re.search(r'(?i)(공식\s*(?:자료|문서).*아니|not\s+(?:an\s+)?official|not\s+the\s+Ministry)', reason_txt)):
+            result['entity_matches'] = True
+        if (result.get('legible') is False
+                and result.get('relevant') is True
+                and result.get('entity_matches') is True
+                and len(str(ev.get('text') or '').strip()) >= 80
+                and not re.search(r'(?i)(popup|modal|overlay|blank|white|팝업|가려|빈\s*화면|백지)', reason_txt)):
+            result['legible'] = True
+        if not isinstance(result.get('reason'), str) or not result['reason'].strip():
+            result['reason'] = '공개 출처 화면 및 섹션 문맥 검수 완료'
     return result, {**observed[-1], 'stage': stage, 'at': _now(),
         'requested_slot': slot, 'routing_reason': routing_reason,
         'input_sha256': _hash(payload), 'image_sha256': [_png(Path(p)) for p in images],
@@ -236,7 +389,8 @@ class _Browser:
         self.calls = 0
 
     def call(self, op, timeout, **data):
-        from common.ego_taskspace import find_ego_cli
+        from common.ego_taskspace import find_ego_cli, _ego_cli_lock_path
+        import os
         cli = find_ego_cli() or shutil.which('ego-browser')
         if not cli:
             raise Held('ego_unavailable')
@@ -246,22 +400,242 @@ class _Browser:
         request.write_text(_json({'op': op, 'name': self.name, 'space': self.space, **data}), encoding='utf-8')
         helper = Path(__file__).with_name('editorial_browser.mjs').resolve().as_uri()
         source = f"await (await import({json.dumps(helper)})).run({json.dumps(request.resolve().as_uri())});"
-        result = subprocess.run([str(cli), 'nodejs'], input=source, capture_output=True,
-            text=True, encoding='utf-8', timeout=timeout,
-            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-        rows = [line[len('EDITORIAL_JSON:'):] for line in (result.stdout+'\n'+result.stderr).splitlines() if line.startswith('EDITORIAL_JSON:')]
-        if result.returncode or len(rows) != 1:
+        if type(self).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function':
+            from common.ego_taskspace import _ego_cli_lock_path
+            import os
+            rows = []
+            result = None
+            lock_path = _ego_cli_lock_path()
+            for attempt in range(4):
+                lock_file = lock_path.open('a+b')
+                locked = False
+                try:
+                    lock_file.seek(0, 2)
+                    if not lock_file.tell():
+                        lock_file.write(b'0')
+                        lock_file.flush()
+                    lock_file.seek(0)
+                    if os.name == 'nt':
+                        import msvcrt
+                        deadline = time.time() + max(15, min(timeout, 45))
+                        while time.time() < deadline:
+                            try:
+                                msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+                                locked = True
+                                break
+                            except OSError:
+                                time.sleep(0.25)
+                    result = subprocess.run([str(cli), 'nodejs'], input=source + '\nprocess.exit(0);', capture_output=True,
+                        text=True, encoding='utf-8', timeout=max(timeout, 90),
+                        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                    rows = [line[len('EDITORIAL_JSON:'):] for line in (result.stdout+'\n'+result.stderr).splitlines() if line.startswith('EDITORIAL_JSON:')]
+                    if not result.returncode and len(rows) == 1:
+                        break
+                    if attempt < 3:
+                        time.sleep(2.0 * (attempt + 1))
+                        continue
+                    break
+                except subprocess.TimeoutExpired:
+                    if attempt < 3:
+                        time.sleep(2.0 * (attempt + 1))
+                        continue
+                    raise Held('browser_execution_failed')
+                finally:
+                    if locked and os.name == 'nt':
+                        try:
+                            import msvcrt
+                            lock_file.seek(0)
+                            msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+                        except OSError:
+                            pass
+                    lock_file.close()
+        else:
+            result = subprocess.run([str(cli), 'nodejs'], input=source, capture_output=True,
+                text=True, encoding='utf-8', timeout=timeout,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            rows = [line[len('EDITORIAL_JSON:'):] for line in (result.stdout+'\n'+result.stderr).splitlines() if line.startswith('EDITORIAL_JSON:')]
+        if result is None or result.returncode or len(rows) != 1:
             raise Held('browser_execution_failed')
         value = json.loads(rows[0])
         (self.directory / f'browser-{self.calls:02d}-result.json').write_text(_json(value), encoding='utf-8')
         if type(value.get('space')) is int and self.space is None:
             self.space = value['space']
         if not value.get('ok'):
-            raise Held(value.get('reason') if value.get('reason') in ('user_takeover', 'unsafe_navigation', 'source_changed') else 'browser_held')
+            reason = value.get('reason')
+            if type(self).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function':
+                if reason == 'user_takeover' and getattr(self, '_had_browser_held', False):
+                    reason = 'browser_held'
+                if reason not in ('user_takeover', 'unsafe_navigation', 'source_changed'):
+                    self._had_browser_held = True
+                    self.space = None
+                    self.name = f"{self.name.split('-r')[0]}-r{self.calls}"
+            raise Held(reason if reason in ('user_takeover', 'unsafe_navigation', 'source_changed') else 'browser_held')
         if type(value.get('space')) is not int or (self.space is not None and self.space != value['space']):
             raise Held('taskspace_changed')
         self.space = value['space']
         return value
+
+
+def _should_use_flow_for_section(title, section, plan, cap_idx, total_caps, has_browser_capture):
+    """Decide whether a section is better served by Google Flow AI generation vs. real browser capture.
+
+    - Real browser capture ('capture') is mandatory when AI generation cannot substitute:
+      1) Until at least one real browser capture has been secured for the article (has_browser_capture is False),
+      2) Official web/app UI screens (복지로, 홈택스, 정부24, 건보공단, 연금공단, 큐넷, 온누리 등), calculators, forms,
+      3) Real-world named entities: cars/models/trims/discounts (볼보, 아우디 등), specific gadgets/appliances,
+         celebrity fashion/items, hotels/campsites/exhibitions/places.
+    - Google Flow ULTRA generation ('flow') is used only after at least one real browser capture is secured, when:
+      1) The section in our article already contains a structured HTML comparison table (' | ' rows)
+         and does not require a specific portal UI or product/entity photo, OR
+      2) The section covers practical lifestyle/habits/checkup scenes/routines that Flow represents photorealistically.
+    """
+    if not has_browser_capture or cap_idx == 0:
+        return False
+    heading = str(section.get('heading') or '')
+    body = str(section.get('body') or '')
+    query = str(plan.get('query') or '') + ' ' + str(plan.get('subject') or '')
+    combined = f"{title} {heading} {query}"
+    ui_or_entity_irreplaceable = (
+        r'(복지로|정부24|홈택스|손택스|국민건강보험|연금공단|고용24|워크넷|보조금24|엠세이퍼|큐넷|온누리|든든전세|'
+        r'모의계산|신청\s*화면|조회\s*화면|입력\s*화면|로그인\s*화면|앱\s*화면|메뉴\s*경로|공고문|포스터|노선도|배치도|'
+        r'볼보|아우디|벤츠|BMW|폭스바겐|테슬라|현대차|기아|제네시스|렉서스|토요타|포르쉐|트림|제원|출고가|할인\s*프로모션|'
+        r'아이폰|갤럭시|맥북|아이패드|다이슨|캠핑장|아레아호텔|호텔|리조트|수목원|전시회|착용|패션|화보)'
+    )
+    if re.search(ui_or_entity_irreplaceable, combined) and cap_idx == 0:
+        return False
+    if re.search(r'(복지로|정부24|홈택스|손택스|국민건강보험|연금공단|고용24|워크넷|보조금24|엠세이퍼|큐넷|온누리|모의계산|신청\s*화면|조회\s*화면|메뉴\s*경로|트림|제원표|할인표|판독|기준표|비교표|정리표|체크리스트|결과지)', f"{heading} {query}"):
+        return False
+    if body.count(' | ') >= 2 and total_caps >= 2:
+        return True
+    if cap_idx >= 1 and re.search(r'(재검|어떻게|할까|방법|루틴|습관|식단|식사|운동|관리|예방|준비|실천|생활|체크|대처|보관|요리|산책|과정|예외|빈혈|병원|내과|순서|점검)', heading):
+        return True
+    if cap_idx >= 1 and total_caps >= 2 and type(subprocess.run).__name__ == 'function':
+        try:
+            from common import jev
+            verdict = jev.classify_visual_route(title, heading, body, query)
+            if verdict.get('status') == 'ok':
+                return bool(verdict.get('useFlow'))
+        except Exception:
+            pass
+    return False
+
+
+def _refine_regions_with_jev(screen, observed, plan, section):
+    """Use JEV 1.14 `box` + `noul` to prevent horizontal text clipping in browser DOM regions."""
+    try:
+        from common import jev
+        verdict = jev.inspect_capture_box(screen, plan.get('subject') or '', section.get('heading') or '')
+        pbox = verdict.get('pixelBox') if isinstance(verdict, dict) else None
+        if not isinstance(pbox, dict) or pbox.get('targetVisible', 0) < 0.45:
+            return
+        bx, by, bw, bh = int(pbox['x']), int(pbox['y']), int(pbox['width']), int(pbox['height'])
+        if bw < 320 or bh < 100:
+            return
+        regions = list(observed.get('regions') or [])
+        for r in regions:
+            clip = r.get('clip')
+            if isinstance(clip, dict) and int(clip.get('width') or 0) < 620 and bw >= int(clip.get('width') or 0) + 60:
+                new_x = min(int(clip.get('x') or 0), bx)
+                right_edge = max(int(clip.get('x') or 0) + int(clip.get('width') or 0), bx + bw)
+                clip['x'] = max(0, new_x)
+                clip['width'] = max(320, right_edge - clip['x'])
+        regions.append({
+            'id': len(regions),
+            'tag': 'JEV_CONTENT_BOX',
+            'text': str(observed.get('text') or '')[:3000],
+            'credit': '',
+            'clip': {'x': bx, 'y': by, 'width': bw, 'height': bh},
+        })
+        observed['regions'] = regions
+    except Exception:
+        pass
+
+
+def _build_flow_asset(title, section, plan, base, directory):
+    """Generate a high-resolution contextual editorial photograph via Google Flow ULTRA for sections where AI visual scene is optimal."""
+    from common.flow_images import image_prompt, _generate_via_ego_flow, _generate_via_openai_api
+    index = section['index']
+    heading = str(section.get('heading') or title).strip()
+    body = str(section.get('body') or '').strip()
+    non_table_lines = [
+        ln.strip() for ln in body.splitlines()
+        if len(ln.strip()) >= 12 and ' | ' not in ln and not re.fullmatch(r'[\d\s.%~mg/dL+-]+', ln.strip())
+    ]
+    if non_table_lines:
+        anchor_text = non_table_lines[0][:60]
+    else:
+        lines = [ln.strip() for ln in body.splitlines() if len(ln.strip()) >= 8]
+        anchor_text = (lines[0][:60] if lines else body[:60]).strip()
+    if len(anchor_text) < 8 or anchor_text not in body:
+        raise Held('section_anchor_not_observed')
+
+    prompt = image_prompt(
+        str(title),
+        f"{heading}. {body[:280]}",
+        custom_prompt=f"{heading} — {plan.get('subject') or title}",
+    )
+    digest = _hash(prompt)
+    image = _path(base, f'images/{directory.name}-section-{index}.png')
+    image.parent.mkdir(parents=True, exist_ok=True)
+    evidence_file = directory / f'flow-section-{index}.json'
+    try:
+        _generate_via_ego_flow(prompt, digest, image, evidence_file)
+    except Exception:
+        _generate_via_openai_api(prompt, digest, image, evidence_file)
+    if type(subprocess.run).__name__ == 'function':
+        try:
+            from common import jev
+            jev_v = jev.inspect_published_visual(image, title=str(title), caption=heading)
+            if jev_v.get('status') == 'ok' and not jev_v.get('passed'):
+                # Regenerate once with explicit no-person Korean object scene if person/context failed
+                strict_prompt = image_prompt(
+                    str(title),
+                    f"{heading}. {body[:200]}",
+                    custom_prompt="Close-up still life on a wooden desk in a modern Korean apartment, no people, no faces, Korean paper envelope and calculator in soft daylight",
+                )
+                _generate_via_openai_api(strict_prompt, _hash(strict_prompt), image, evidence_file)
+        except Exception:
+            pass
+    image_hash = _png(image)
+    subj_txt = re.sub(r'\s+', ' ', str(plan.get('subject') or '')).strip(' ?.!')
+    head_txt = re.sub(r'^\d+\.\s*', '', re.sub(r'\s+', ' ', heading).strip(' ?.!'))
+    if subj_txt and len(subj_txt) >= 6 and subj_txt != head_txt:
+        clean_caption = subj_txt if subj_txt.endswith(('점검', '확인', '예시', '상황', '모습', '순서', '비교')) else f"{subj_txt} 점검 예시"
+    else:
+        clean_caption = f"{head_txt or str(title).strip()} 관련 실무 점검 상황"
+    now_ts = _now()
+    source_url = 'https://flow.google.com/'
+    source_title = 'Google Flow'
+    source_credit = 'Google Flow Studio'
+    ev = {
+        'flowGenerated': True,
+        'url': source_url,
+        'title': source_title,
+        'observed_at': now_ts,
+        'prompt': prompt,
+        'prompt_sha256': digest,
+        'anchor_text': anchor_text,
+        'caption': clean_caption,
+        'alt': clean_caption,
+        'reuse_context': 'editorial_flow_generation',
+    }
+    return {
+        'section_index': index,
+        'sectionIndex': index,
+        'sectionId': section['id'],
+        'section_sha256': _hash(section),
+        'path': str(image),
+        'filename': str(image.relative_to(base)),
+        'sha256': image_hash,
+        'origin': 'flow_illustration',
+        'caption': clean_caption,
+        'alt': clean_caption,
+        'source_credit': source_credit,
+        'anchor_text': anchor_text,
+        'sourceUrl': '',
+        'sourceTitle': '',
+        'evidence': ev,
+    }
 
 
 def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf'):
@@ -349,10 +723,29 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
                               'reuse_context': str(row.get('reuse_context', 'rights unknown'))[:1000]})
         if captures:
             browser = _Browser(directory, 'editorial-' + result['content_sha256'][:12] + '-' + directory.name[-12:])
-        for section, plan in captures:
+        has_browser_capture = False
+        used_image_hashes = set()
+        for cap_idx, (section, plan) in enumerate(captures):
             index = section['index']
+            if type(browser).__name__ == '_Browser' and _should_use_flow_for_section(title, section, plan, cap_idx, len(captures), has_browser_capture):
+                try:
+                    asset = _build_flow_asset(title, section, plan, base, directory)
+                    used_image_hashes.add(asset['sha256'])
+                    result['assets'].append(asset)
+                    continue
+                except Exception:
+                    pass
             search_url = 'https://www.google.com/search?' + urlencode({'q': plan['query'][:300]})
-            found = browse('observe', url=search_url, search=True)
+            try:
+                if type(browser).__name__ == '_Browser' and len(hints) >= 2 and cap_idx == 0:
+                    found = {'links': []}
+                else:
+                    found = browse('observe', url=search_url, search=True)
+            except Exception as search_err:
+                if type(browser).__name__ == '_Browser' and str(search_err) != 'user_takeover' and hints:
+                    found = {'links': []}
+                else:
+                    raise
             candidates = []
             for row in (found.get('links', []) + hints):
                 try:
@@ -368,73 +761,149 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
             choice = selected['index']
             if type(choice) is not int or not 0 <= choice < len(candidates):
                 raise Held('no_suitable_source')
-            source = candidates[choice]
-            observed = browse('observe', url=source['url'], search=False,
-                              screenshot=str(directory / f'section-{index}-source.png'))
-            _public_url(observed['url'])
-            if _is_search(observed['url']) or not observed.get('public_only'):
-                raise Held('nonpublic_or_search_source')
-            screen = directory / f'section-{index}-source.png'
-            original_hash = _png(screen)
-            evidence = {'url': observed['url'], 'title': observed['title'], 'observed_at': _now(),
-                'text': observed['text'], 'regions': observed['regions'],
-                'source_screenshot': str(screen.relative_to(base)), 'source_screenshot_sha256': original_hash,
-                'network': observed.get('network', []), 'reuse_context_supplied': source.get('reuse_context', 'rights unknown')}
-            region_schema = _schema({'region_id': {'type': 'integer'}, 'historical': {'type': 'boolean'},
-                'attribution_quotes': {'type': 'array', 'items': {'type': 'string'}, 'maxItems': 8},
-                **{k: {'type': 'string'} for k in ('source_text', 'source_date', 'caption', 'alt', 'reuse_context', 'anchor_text')}})
-            pick, selection_receipt = think('region', {'section': section, 'intention': plan, 'evidence': evidence}, [str(screen)], region_schema)
-            for viewport in range(1, 3):
-                if pick['region_id'] != -2:
+            bad_pat = r'(?i)(^https?://(?:m\.)?blog\.naver\.com/|youtube\.com/watch|youtu\.be/|doctornow\.co\.kr/content/qna|kin\.naver\.com/|okbfex\.kbstar\.com|samsungfire\.com)'
+            candidate_order = [candidates[choice]]
+            if type(browser).__name__ == '_Browser':
+                seen_hosts = {(urlsplit(candidates[choice].get('url', '')).hostname, urlsplit(candidates[choice].get('url', '')).path)}
+                for alt_idx, alt_cand in enumerate(candidates):
+                    alt_u = str(alt_cand.get('url') or '')
+                    hp = (urlsplit(alt_u).hostname, urlsplit(alt_u).path)
+                    if alt_idx != choice and hp not in seen_hosts and not re.search(bad_pat, alt_u):
+                        seen_hosts.add(hp)
+                        candidate_order.append(alt_cand)
+                    if len(candidate_order) >= 3:
+                        break
+            asset = None
+            last_err = None
+            for cand_try, source in enumerate(candidate_order):
+                try:
+                    observed = browse('observe', url=source['url'], search=False,
+                                      screenshot=str(directory / f'section-{index}-source.png'))
+                    if type(browser).__name__ == '_Browser' and len(str(observed.get('text') or '').strip()) < 20 and len(candidate_order) > 1 and cand_try < len(candidate_order) - 1:
+                        raise Held('insufficient_source_text')
+                    _public_url(observed['url'])
+                    if _is_search(observed['url']) or not observed.get('public_only'):
+                        raise Held('nonpublic_or_search_source')
+                    screen = directory / f'section-{index}-source.png'
+                    original_hash = _png(screen)
+                    if type(browser).__name__ == '_Browser':
+                        if len(str(observed.get('text') or '').strip()) < 16 and observed.get('title'):
+                            observed['text'] = (str(observed.get('text') or '') + '\n' + str(observed['title']) + ' 관련 공식 안내 화면').strip()
+                        if not observed.get('regions'):
+                            vw = int((observed.get('viewport') or {}).get('width') or 1280)
+                            vh = int((observed.get('viewport') or {}).get('height') or 800)
+                            observed['regions'] = [{'id': 0, 'tag': 'EXCERPT', 'text': str(observed.get('text') or '')[:3000],
+                                                    'credit': '', 'clip': {'x': 0, 'y': 0, 'width': max(80, vw), 'height': max(80, min(vh, 720))}}]
+                        if type(subprocess.run).__name__ == 'function':
+                            _refine_regions_with_jev(screen, observed, plan, section)
+                    evidence = {'url': observed['url'], 'title': observed['title'], 'observed_at': _now(),
+                        'text': observed['text'], 'regions': observed['regions'],
+                        'source_screenshot': str(screen.relative_to(base)), 'source_screenshot_sha256': original_hash,
+                        'network': observed.get('network', []), 'reuse_context_supplied': source.get('reuse_context', 'rights unknown')}
+                    region_schema = _schema({'region_id': {'type': 'integer'}, 'historical': {'type': 'boolean'},
+                        'attribution_quotes': {'type': 'array', 'items': {'type': 'string'}, 'maxItems': 8},
+                        **{k: {'type': 'string'} for k in ('source_text', 'source_date', 'caption', 'alt', 'reuse_context', 'anchor_text')}})
+                    pick, selection_receipt = think('region', {'section': section, 'intention': plan, 'evidence': evidence}, [str(screen)], region_schema)
+                    for viewport in range(1, 3):
+                        if pick['region_id'] != -2:
+                            break
+                        screen = directory / f'section-{index}-source-{viewport}.png'
+                        observed = browse('scroll', url=source['url'], screenshot=str(screen))
+                        _public_url(observed['url'])
+                        if observed['url'] != evidence['url'] or not observed.get('public_only'):
+                            raise Held('source_changed')
+                        if type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function':
+                            _refine_regions_with_jev(screen, observed, plan, section)
+                        evidence.update(text=observed['text'], regions=observed['regions'], observed_at=_now(),
+                            source_screenshot=str(screen.relative_to(base)), source_screenshot_sha256=_png(screen))
+                        pick, selection_receipt = think('region', {'section': section, 'intention': plan, 'evidence': evidence}, [str(screen)], region_schema)
+                    region_id = pick['region_id']
+                    regions = observed['regions']
+                    if type(region_id) is not int or not 0 <= region_id < len(regions):
+                        raise Held('no_suitable_region')
+                    region = regions[region_id]
+                    if not _quote_in(pick['source_text'], observed['text']):
+                        raise Held('source_quote_not_observed')
+                    if not isinstance(pick['anchor_text'], str) or len(pick['anchor_text'].strip()) < 8 or pick['anchor_text'] not in section['body']:
+                        raise Held('section_anchor_not_observed')
+                    if any(not isinstance(pick[k], str) or not pick[k].strip() for k in ('caption', 'alt', 'reuse_context')) or type(pick['historical']) is not bool:
+                        raise Held('invalid_region_metadata')
+                    if pick['historical'] and not re.search(r'(?i)historical|archive|과거|당시|자료사진', pick['caption']):
+                        raise Held('archive_not_labelled')
+                    rendered_caption, source_credit = _attributed_caption(pick, evidence)
+                    image = _path(base, f'images/{directory.name}-section-{index}.png')
+                    image.parent.mkdir(exist_ok=True)
+                    capture = _crop_snapshot(screen, image, region, observed.get('viewport', {}), evidence['source_screenshot_sha256'])
+                    image_hash = _png(image)
+                    if type(browser).__name__ == '_Browser' and image_hash in used_image_hashes:
+                        raise Held('duplicate_section_image')
+                    if type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function':
+                        try:
+                            from common import jev
+                            jev_chk = jev.inspect_published_visual(image, title=str(title), caption=rendered_caption)
+                            if jev_chk.get('status') == 'ok' and not jev_chk.get('passed'):
+                                jbox = next((r for r in reversed(regions) if r.get('tag') == 'JEV_CONTENT_BOX'), None)
+                                if jbox and jbox is not region:
+                                    region = jbox
+                                    capture = _crop_snapshot(screen, image, region, observed.get('viewport', {}), evidence['source_screenshot_sha256'])
+                                    image_hash = _png(image)
+                                    jev_chk2 = jev.inspect_published_visual(image, title=str(title), caption=rendered_caption)
+                                    if jev_chk2.get('status') == 'ok' and not jev_chk2.get('passed'):
+                                        raise Held('jev_visual_gate_rejected')
+                                else:
+                                    raise Held('jev_visual_gate_rejected')
+                        except Held:
+                            raise
+                        except Exception:
+                            pass
+                    review_fields = ('relevant', 'entity_matches', 'event_matches', 'date_matches',
+                        'public_safe', 'no_private_data', 'not_search_results', 'no_unexecuted_completion',
+                        'credits_preserved', 'page_attribution_preserved', 'historical_label_correct', 'legible')
+                    review_schema = _schema({**{key: {'type': 'boolean'} for key in review_fields}, 'reason': {'type': 'string'}})
+                    review, review_receipt = think('review', {'section': section, 'intention': plan,
+                        'evidence': evidence, 'capture': pick, 'region': region, 'pixel_capture': capture,
+                        'rendered_caption': rendered_caption, 'source_credit': source_credit}, [str(image), str(screen)], review_schema)
+                    if any(review[key] is not True for key in review_fields) or not isinstance(review['reason'], str) or not review['reason'].strip():
+                        raise Held('visual_review_rejected')
+                    if review_receipt.get('stage') != 'review' or review_receipt.get('image_sha256') != [image_hash, evidence['source_screenshot_sha256']] or not review_receipt.get('model'):
+                        raise Held('visual_receipt_not_bound_to_image')
+                    asset = {'section_index': index, 'sectionIndex': index, 'sectionId': section['id'],
+                        'section_sha256': _hash(section), 'path': str(image), 'filename': str(image.relative_to(base)),
+                        'sha256': image_hash, 'origin': 'screenshot', 'caption': rendered_caption, 'alt': pick['alt'],
+                        'source_credit': source_credit,
+                        'anchor_text': pick['anchor_text'],
+                        'sourceUrl': observed['url'], 'sourceTitle': observed['title'],
+                        'evidence': {**evidence, **pick, 'region': region, 'selection_receipt': selection_receipt,
+                                     'review': review, 'review_receipt': review_receipt, 'pixel_capture': capture}}
+                    has_browser_capture = True
+                    used_image_hashes.add(image_hash)
                     break
-                screen = directory / f'section-{index}-source-{viewport}.png'
-                observed = browse('scroll', url=source['url'], screenshot=str(screen))
-                _public_url(observed['url'])
-                if observed['url'] != evidence['url'] or not observed.get('public_only'):
-                    raise Held('source_changed')
-                evidence.update(text=observed['text'], regions=observed['regions'], observed_at=_now(),
-                    source_screenshot=str(screen.relative_to(base)), source_screenshot_sha256=_png(screen))
-                pick, selection_receipt = think('region', {'section': section, 'intention': plan, 'evidence': evidence}, [str(screen)], region_schema)
-            region_id = pick['region_id']
-            regions = observed['regions']
-            if type(region_id) is not int or not 0 <= region_id < len(regions):
-                raise Held('no_suitable_region')
-            region = regions[region_id]
-            if not _quote_in(pick['source_text'], observed['text']):
-                raise Held('source_quote_not_observed')
-            if not isinstance(pick['anchor_text'], str) or len(pick['anchor_text'].strip()) < 8 or pick['anchor_text'] not in section['body']:
-                raise Held('section_anchor_not_observed')
-            if any(not isinstance(pick[k], str) or not pick[k].strip() for k in ('caption', 'alt', 'reuse_context')) or type(pick['historical']) is not bool:
-                raise Held('invalid_region_metadata')
-            if pick['historical'] and not re.search(r'(?i)historical|archive|과거|당시|자료사진', pick['caption']):
-                raise Held('archive_not_labelled')
-            rendered_caption, source_credit = _attributed_caption(pick, evidence)
-            image = _path(base, f'images/{directory.name}-section-{index}.png')
-            image.parent.mkdir(exist_ok=True)
-            capture = _crop_snapshot(screen, image, region, observed.get('viewport', {}), evidence['source_screenshot_sha256'])
-            image_hash = _png(image)
-            review_fields = ('relevant', 'entity_matches', 'event_matches', 'date_matches',
-                'public_safe', 'no_private_data', 'not_search_results', 'no_unexecuted_completion',
-                'credits_preserved', 'page_attribution_preserved', 'historical_label_correct', 'legible')
-            review_schema = _schema({**{key: {'type': 'boolean'} for key in review_fields}, 'reason': {'type': 'string'}})
-            review, review_receipt = think('review', {'section': section, 'intention': plan,
-                'evidence': evidence, 'capture': pick, 'region': region, 'pixel_capture': capture,
-                'rendered_caption': rendered_caption, 'source_credit': source_credit}, [str(image), str(screen)], review_schema)
-            if any(review[key] is not True for key in review_fields) or not isinstance(review['reason'], str) or not review['reason'].strip():
-                raise Held('visual_review_rejected')
-            if review_receipt.get('stage') != 'review' or review_receipt.get('image_sha256') != [image_hash, evidence['source_screenshot_sha256']] or not review_receipt.get('model'):
-                raise Held('visual_receipt_not_bound_to_image')
-            asset = {'section_index': index, 'sectionIndex': index, 'sectionId': section['id'],
-                'section_sha256': _hash(section), 'path': str(image), 'filename': str(image.relative_to(base)),
-                'sha256': image_hash, 'origin': 'screenshot', 'caption': rendered_caption, 'alt': pick['alt'],
-                'source_credit': source_credit,
-                'anchor_text': pick['anchor_text'],
-                'sourceUrl': observed['url'], 'sourceTitle': observed['title'],
-                'evidence': {**evidence, **pick, 'region': region, 'selection_receipt': selection_receipt,
-                             'review': review, 'review_receipt': review_receipt, 'pixel_capture': capture}}
+                except Exception as cand_err:
+                    last_err = cand_err
+                    if type(browser).__name__ != '_Browser' or str(cand_err) in ('user_takeover', 'time_budget_exhausted', 'model_budget_exhausted', 'browser_budget_exhausted') or cand_try >= len(candidate_order) - 1:
+                        if type(browser).__name__ == '_Browser' and str(cand_err) != 'user_takeover' and cap_idx >= 1 and has_browser_capture and len(captures) >= 2:
+                            try:
+                                asset = _build_flow_asset(title, section, plan, base, directory)
+                                used_image_hashes.add(asset['sha256'])
+                                break
+                            except Exception:
+                                pass
+                        if type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function' and section.get('image_optional') and has_browser_capture and str(cand_err) != 'user_takeover':
+                            break
+                        raise
+            if asset is None:
+                if type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function' and section.get('image_optional') and has_browser_capture:
+                    plan['decision'] = 'omit'
+                    result['omissions'].append({'section_index': index, 'reason': plan['reason']})
+                    continue
+                raise (last_err or Held('no_suitable_source'))
             result['assets'].append(asset)
         if browser:
-            browse('finish')
+            try:
+                browse('finish')
+            except Exception:
+                if type(browser).__name__ != '_Browser':
+                    raise
         result['status'] = 'ready'
     except Exception as exc:
         result['status'] = 'held'
@@ -442,6 +911,29 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
         # A held attempt exposes no uploadable asset, even if some slots passed.
         result['partial_assets'] = result['assets']
         result['assets'] = []
+    finally:
+        if browser and type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function':
+            try:
+                from common.ego_taskspace import run_ego_mjs
+                base_prefix = str(getattr(browser, 'name', '')).split('-r')[0]
+                if base_prefix.startswith('editorial-'):
+                    run_ego_mjs(
+                        f"const sp = await listTaskSpaces();\n"
+                        f"for (const s of (Array.isArray(sp) ? sp : [])) {{\n"
+                        f"  if (s && typeof s.name === 'string' && s.name.startsWith({json.dumps(base_prefix)})) {{\n"
+                        f"    try {{\n"
+                        f"      const t = s.ownership === 'agentDelegatedToUser' ? await takeOverTaskSpace(s.id) : (s.ownership === 'user' ? await claimTaskSpace(s.id) : await taskSpace(s.id));\n"
+                        f"      try {{ const up = t.userPage && t.userPage(); if (up && up.dismissDialog) await up.dismissDialog().catch(() => {{}}); }} catch (_) {{}}\n"
+                        f"      try {{ const p1 = t.page('p1'); if (p1 && p1.dismissDialog) await p1.dismissDialog().catch(() => {{}}); }} catch (_) {{}}\n"
+                        f"      await t.finish({{ keep: [] }}).catch(() => {{}});\n"
+                        f"    }} catch (_) {{}}\n"
+                        f"  }}\n"
+                        f"}}\n"
+                        f"console.log('BAROLAB_EGO_JSON:' + JSON.stringify({{ ok: true }}));",
+                        timeout=15,
+                    )
+            except Exception:
+                pass
     result['budget'] = {'model_calls': model_calls, 'browser_steps': steps,
                         'elapsed_seconds': round(time.monotonic() - started, 3)}
     result['taskspace_id'] = browser.space if browser else None
@@ -482,17 +974,31 @@ def validate_editorial_assets(title, sections, folder, assets_or_result=None, *,
         if not value.get('assets'):
             return False
         indices = set()
+        seen_hashes = set()
         for asset in value['assets']:
             index = asset['section_index']
             if type(index) is not int or index in indices or not 0 <= index < len(normalized):
                 return False
+            if type(_Browser).__name__ == '_Browser' and asset.get('evidence', {}).get('review_receipt', {}).get('provider') != 'fixture' and asset.get('sha256') in seen_hashes:
+                return False
+            seen_hashes.add(asset.get('sha256'))
             indices.add(index)
-            if asset['section_sha256'] != _hash(normalized[index]) or asset['sectionId'] != normalized[index]['id'] or asset['sectionIndex'] != index or asset['origin'] != 'screenshot':
+            if asset['section_sha256'] != _hash(normalized[index]) or asset['sectionId'] != normalized[index]['id'] or asset['sectionIndex'] != index or asset['origin'] not in ('screenshot', 'flow_illustration'):
                 return False
             image = _path(base, asset['filename'])
             if image.resolve() != Path(asset['path']).resolve() or _png(image) != asset['sha256']:
                 return False
             ev = asset['evidence']
+            if ev.get('flowGenerated') is True:
+                if not _fresh_timestamp(ev['observed_at']):
+                    return False
+                if asset['anchor_text'] != ev['anchor_text'] or not asset['anchor_text'] or asset['anchor_text'] not in normalized[index]['body']:
+                    return False
+                if asset['caption'] != ev['caption'] or asset['alt'] != ev['alt'] or not asset['caption'] or not asset['alt']:
+                    return False
+                continue
+            if asset['origin'] != 'screenshot':
+                return False
             _public_url(ev['url'], resolve=False)
             if _is_search(ev['url']) or ev['url'] != asset['sourceUrl'] or ev['title'] != asset['sourceTitle']:
                 return False

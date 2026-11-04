@@ -1136,7 +1136,8 @@ def render_document(doc, plan, assets_dir):
     return out_html
 
 def document_fingerprint(doc):
-    return hashlib.sha256(json.dumps(doc, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+    clean_doc = {k: v for k, v in doc.items() if k not in ('planningId', 'presentation')} if isinstance(doc, dict) else doc
+    return hashlib.sha256(json.dumps(clean_doc, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
 def naver_image_sections(document):
     sections = [{'id': 'intro', 'index': 0, 'heading': document['title'], 'body': '',
@@ -1152,6 +1153,12 @@ def naver_image_sections(document):
         elif kind in ('text', 'quotation', 'table'):
             text = block.get('text') if kind != 'table' else '\n'.join(' | '.join(row) for row in block['rows'])
             sections[-1]['body'] += ('\n' if sections[-1]['body'] else '') + (text or '')
+    req_cnt = 0
+    for sec in sections:
+        if not sec['image_optional']:
+            req_cnt += 1
+            if req_cnt > 3:
+                sec['image_optional'] = True
     return sections
 
 
@@ -1612,16 +1619,15 @@ def prepare_basic_content(account_key, folder=None, topic=None):
     identity = json.loads((folder / 'identity.json').read_text(encoding='utf-8'))
     if identity != {'account': account_key, 'blogId': account['blog_id']}:
         raise ValueError('Prepared document account mismatch')
-    doc_modified = normalize_naver_document_links(document, account)
-    for blk in document.get('blocks', []):
-        if isinstance(blk, dict) and isinstance(blk.get('text'), str):
-            cleaned_txt = re.sub(r'<[^>]+>', '', blk['text'])
-            cleaned_txt = re.sub(r'\[IMAGE:[^\]]*\]', '', cleaned_txt, flags=re.IGNORECASE)
-            cleaned_txt = re.sub(r'\n\s*\n+', '\n', cleaned_txt).strip()
-            if cleaned_txt != blk['text']:
-                blk['text'] = cleaned_txt
-                doc_modified = True
     if plan is None:
+        normalize_naver_document_links(document, account)
+        for blk in document.get('blocks', []):
+            if isinstance(blk, dict) and isinstance(blk.get('text'), str):
+                cleaned_txt = re.sub(r'<[^>]+>', '', blk['text'])
+                cleaned_txt = re.sub(r'\[IMAGE:[^\]]*\]', '', cleaned_txt, flags=re.IGNORECASE)
+                cleaned_txt = re.sub(r'\n\s*\n+', '\n', cleaned_txt).strip()
+                if cleaned_txt != blk['text']:
+                    blk['text'] = cleaned_txt
         plan = prepare_document_images(document, folder, article['mainKeyword'], article.get('signoff', ''))
         atomic_json(plan_path, plan)
         atomic_json(doc_path, document)

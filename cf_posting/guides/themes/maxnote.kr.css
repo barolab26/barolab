@@ -49,10 +49,6 @@ main.page > hr,
 .side-search,
 #sideSearch,
 .sidebar .side-cat,
-.google-auto-placed,
-ins.adsbygoogle.adsbygoogle-noablate,
-ins.adsbygoogle[data-anchor-status],
-ins.adsbygoogle[data-anchor-shown],
 .google-anno-skip,
 .google-anno-sc,
 .google-aiuf,
@@ -466,4 +462,30 @@ html body :is(#postGrid, .guide-layout .grid) .card .meta { margin-top: auto !im
   html body :is(#postGrid.grid, .guide-layout .grid:has(> .card)) { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; }
   html body .layout:has(#postGrid), html body[data-shell-family][data-domain] .layout:has(#postGrid),
   html body .wrap:has(.guide-layout #postGrid) { padding-inline: 16px !important; }
+}
+
+/* BAROLAB_SIDEBAR_LIST_LAYOUT_V1: preserve desktop sidebar columns after shared card styles. */
+@media (min-width: 1061px) {
+  html body[data-shell-family="arch1-wikitree"][data-domain] .layout:has(#postGrid),
+  html body[data-shell-family="arch4-mslearn"][data-domain] .layout:has(#postGrid) {
+    display: grid !important;
+  }
+}
+
+/* BAROLAB_MOBILE_NEWS_HEADER_V1: keep branding and controls within narrow screens. */
+@media (max-width: 760px) {
+  .wt-header-main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+  .wt-header-main > .wt-brand-center {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .wt-header-main > :first-child { grid-column: 1; grid-row: 2; min-width: 0; }
+  .wt-header-main > form { grid-column: 2; grid-row: 2; min-width: 0; }
+  .wt-header-main .wt-brand-logo { white-space: nowrap; font-size: clamp(1.4rem, 7vw, 2rem); }
+  .wt-header-main form > div { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .wt-header-main input { min-width: 0; }
 }
