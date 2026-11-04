@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-02 17:58:54",
+  "updatedAt": "2026-11-04 20:55:04",
   "account": {
     "email": "baro76650@gmail.com",
     "owner": "윤성재 (대표님)",
@@ -15,15 +15,18 @@
     "totalSubscribers": 32,
     "svmlTemplateCount": 3,
     "renderedShortsCount": 3,
-    "communityPostsCount": 2,
+    "communityPostsCount": 5,
     "plannedQueueCount": 4,
-    "ga4ReferralSessions28d": 0
+    "ga4ReferralSessions7d": 1,
+    "ga4ReferralSessions30d": 1,
+    "ga4ReferralSessions28d": 1,
+    "ga4WindowNote": "GA4 month period covers 30 days (week=7d, month=30d)"
   },
   "channels": [
     {
       "handle": "@yoon_autolab",
       "name": "윤랩 자동화 연구소",
-      "role": "A안 메인 본진 (AI·업무 자동화·스마트폰/정부24/세무 실전 기술 연구소)",
+      "role": "IT·테크·AI 에이전트·바이브코딩 자동화 & 수익화 연구소 (메인 본진)",
       "subscribers": 12,
       "activeTabs": [
         "동영상",
@@ -32,45 +35,44 @@
         "게시물(커뮤니티)"
       ],
       "status": "active_flagship",
-      "statusBadge": "🟢 A안 메인 본진 가동 중",
+      "statusBadge": "🟢 IT/AI 자동화 본진 가동 중",
       "studioUrl": "https://www.youtube.com/@yoon_autolab",
       "postsUrl": "https://www.youtube.com/@yoon_autolab/posts",
       "bridgeDomains": [
         "meganote.kr",
         "justinfo.co.kr",
-        "daynote.kr",
-        "baronote.kr"
+        "latpeed.com"
       ],
-      "strategyNote": "Hypit SVML 유형 A/B 쇼츠 + 커뮤니티 탭 1분 체크리스트로 CF IT·비즈니스·세무 본진 직결",
+      "strategyNote": "Google Flow AI(Nano Banana 2.1) 5-씬 시네마 + Hypit SVML 모션 쇼츠 → AI·자동화·수익화 아키텍처 본진 연결",
       "renderedShorts": 2,
-      "publishedCommunityPosts": 2
+      "publishedCommunityPosts": 5
     },
     {
       "handle": "@숨은지원금",
       "name": "숨은지원금",
-      "role": "4060 정책·환급금·연금 25초 SVML 요약 Shorts 특공대",
+      "role": "4060 정책·환급금·주택연금·건보료 1분 요약 Shorts 특공대",
       "subscribers": 2,
       "activeTabs": [
         "Shorts"
       ],
       "status": "active_shorts",
-      "statusBadge": "🟢 4060 정책 쇼츠 가동 중",
+      "statusBadge": "🟢 4060 정책·연금 쇼츠 가동 중",
       "studioUrl": "https://www.youtube.com/@%EC%88%A8%EC%9D%80%EC%A7%80%EC%9B%90%EA%B8%88",
       "postsUrl": "https://www.youtube.com/@%EC%88%A8%EC%9D%80%EC%A7%80%EC%9B%90%EA%B8%88/shorts",
       "bridgeDomains": [
-        "must-good.com",
         "smilenote.kr",
+        "must-good.com",
         "topnote.kr",
         "woorinote.kr"
       ],
-      "strategyNote": "자청 4대 결핍(손실회피·즉시판정) 24초 비교표 쇼츠 → 고정댓글로 CF 연금·복지 본진 유입",
+      "strategyNote": "복지·연금·세무·환급금 주제는 100% @숨은지원금 채널 전담 · 비교표 쇼츠로 CF 정책 본진 유입",
       "renderedShorts": 1,
       "publishedCommunityPosts": 0
     },
     {
       "handle": "@바로랭크",
       "name": "바로랭크",
-      "role": "쿠팡파트너스(AF1225691) 가전·생활 랭킹 & 커뮤니티 브릿지",
+      "role": "쿠팡파트너스(AF1225691) 가전·테크 S/A/B 티어 랭킹 & 커뮤니티 브릿지",
       "subscribers": 18,
       "activeTabs": [
         "홈",
@@ -87,7 +89,7 @@
         "joynote.kr",
         "nolplace.com"
       ],
-      "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/건강 비교표 브릿지 활용",
+      "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/가전 비교표 브릿지 활용",
       "renderedShorts": 0,
       "publishedCommunityPosts": 0
     }
@@ -203,117 +205,119 @@
       "channel": "@yoon_autolab",
       "channelName": "윤랩 자동화 연구소",
       "templateId": "svml-tpl-01",
-      "title": "스마트폰·PC 숨은 자동환급·세무 조회 3초 세팅법 (모르면 매년 놓치는 항목 비교)",
-      "hookTitle": "매년 직접 찾으러 다니시나요? 딱 1번 자동 조회 설정으로 끝내는 실측 비교표",
-      "badge": "윤랩 자동화 연구소 · 실전 리포트 #01",
+      "youtubeShortUrl": "https://youtube.com/shorts/of6rvdwE8jc",
+      "title": "챗GPT 단순 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 자동 수익화 파이프라인",
+      "hookTitle": "챗GPT 복붙 블로그가 망할 때 AI 에이전트 6명 분업 팀은 24시간 수익을 만듭니다",
+      "badge": "윤랩 자동화 연구소 · AI 아키텍처 #01",
       "bridgeDomain": "meganote.kr",
-      "bridgeUrl": "https://meganote.kr/entry/2026-%EB%B6%80%EB%8F%99%EC%82%B0-%EC%9E%AC%EC%82%B0%EC%84%B8-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-%EA%B8%B0%EC%A4%80-%EC%A1%B0%ED%9A%8C%EB%B2%95",
-      "bridgeLabel": "메가노트 IT·세무 자동조회 실측 비교표 전문",
-      "narration": "매년 세금이나 환급금 조회할 때마다 일일이 사이트 찾아다니시나요? 윤랩 자동화 연구소에서 실측한 결과, 단 세 번의 통합 조회 설정만으로 확인 시간을 30분에서 1분으로 줄일 수 있습니다. 화면의 비교표처럼 개별 조회 대신 통합 알림과 공시가격 기준표를 함께 체크하면 누락되는 공제 항목까지 즉시 판별됩니다. 자세한 1분 체크리스트와 계산표는 채널 게시물과 고정 링크에서 바로 확인해 보세요.",
+      "bridgeUrl": "https://www.meganote.kr/",
+      "bridgeLabel": "메가노트 AI 에이전트 자동화 파이프라인 아키텍처 전문",
+      "narration": "챗GPT에 주제만 던져주고 복사해 붙여넣는 블로그, 왜 아무리 글을 찍어내도 수익이 나지 않을까요? 검색엔진 알고리즘은 이제 단순 요약형 AI 문체를 즉시 걸러내지만, 역할을 나눈 여섯 명의 AI 에이전트 팀은 24시간 유입과 수익을 만들어냅니다. 레이더 에이전트가 빈집 황금키워드를 포착하고, 퍼블리와 닥터가 비교표 중심 원고를 설계한 뒤, 원소스 멀티유즈로 블로그와 카페, 스레드, 쇼츠까지 동시에 확산시킵니다.",
       "scenes": [
         {
-          "phase": "SCENE 01 · 3초 충격 후킹 (0.0s ~ 4.0s)",
-          "headline": "아직도 사이트마다\n일일이 로그인해서 조회하시나요?",
-          "subline": "수동 개별 조회(30분) vs 윤랩 통합 루틴(1분) 실측 비교",
-          "highlight": "연간 평균 3~4개 공제·감면 확인 누락 방지",
+          "phase": "SCENE 01 · Google Flow AI 시네마 + 훅 (0.0s ~ 11.5s)",
+          "headline": "챗GPT 복붙 블로그가 망할 때\nAI 에이전트 팀은 수익을 만듭니다",
+          "subline": "단일 프롬프트 양산형(검색 누락) vs 6-에이전트 자율 파이프라인 실측 비교",
+          "highlight": "6 AGENTS · 24시간 자율 구동 멀티채널 수익화 파이프라인",
           "rows": [
             [
-              "조회 방식",
-              "소요 시간",
-              "누락 위험"
+              "구분",
+              "단순 챗GPT 복붙",
+              "윤랩 6-에이전트 파이프라인"
             ],
             [
-              "개별 사이트 수동 탐색",
-              "평균 25~30분",
-              "높음 (특례 기준 누락)"
+              "원고 품질",
+              "천편일률 요약 (스팸 필터링)",
+              "SSR+ 비교표·수치 중심 고밀도 원고"
             ],
             [
-              "윤랩 3단계 통합 체크",
-              "1분 이내 완료",
-              "낮음 (기준표 즉시 대조)"
+              "유입·수익",
+              "검색 색인 누락 · 방문자 0명",
+              "멀티채널 OSMU 확산 + 실측 피드백"
             ]
           ],
           "activeRow": 2,
-          "footer": "⚡ SVML Anchor: @word(실측한) · Hook Retention Target 78%+"
+          "footer": "⚡ Google Flow Nano Banana 2.1 Scene #01~#02"
         },
         {
-          "phase": "SCENE 02 · 핵심 수치 1:1 비교표 (4.0s ~ 11.0s)",
-          "headline": "2026 공시가격·세무 통합 조회\n핵심 기준 1:1 비교표",
-          "subline": "1세대 1주택 특례세율 적용 구간 vs 일반 구간 한눈에 판독",
-          "highlight": "공시가격 9억 이하 구간 특례세율(0.05%~0.35%) 필수 체크",
-          "rows": [
-            [
-              "점검 항목",
-              "일반 수동 확인",
-              "윤랩 기준표 판독"
-            ],
-            [
-              "공시가격 기준",
-              "단순 시세 추측",
-              "공동주택 공시가격 정밀 대조"
-            ],
-            [
-              "특례세율 적용",
-              "미확인 과납 위험",
-              "9억 이하 0.05%p 감면 즉시 판별"
-            ],
-            [
-              "분납·공제 체크",
-              "기한 경과 빈번",
-              "사전 체크리스트 3문항 완결"
-            ]
-          ],
-          "activeRow": 2,
-          "footer": "📊 SVML Component: comparison-table (highlight-row=2)"
-        },
-        {
-          "phase": "SCENE 03 · 3클릭 실행 프로토콜 (11.0s ~ 16.0s)",
-          "headline": "실패 없는 1분 점검\n3-Step 자동화 프로토콜",
-          "subline": "복잡한 서류 없이 스마트폰에서 지금 바로 확인하는 순서",
-          "highlight": "Step 1 공시가 확인 → Step 2 특례 판정 → Step 3 감면 체크",
+          "phase": "SCENE 02 · 3단계 무인 파이프라인 (11.5s ~ 39.0s)",
+          "headline": "24시간 무인 수익화\n3-Step 에이전트 분업 구조",
+          "subline": "트렌드 채굴 → 비교표 원고·전환율 감사 → 전 채널 동시 배포",
+          "highlight": "Radar · Publi · Doctor · Trace · Patch · Jarvis 6크루 협업",
           "rows": [
             [
               "단계",
-              "핵심 행동",
-              "소요 시간"
+              "담당 에이전트",
+              "핵심 자동화 역할"
             ],
             [
               "Step 1",
-              "부동산공시가격 알리미 기준가 조회",
-              "20초"
+              "Radar 스카우터",
+              "고단가 빈집 키워드 & 실시간 질문 포착"
             ],
             [
               "Step 2",
-              "1세대 1주택 특례 구간 대조표 확인",
-              "20초"
+              "Publi & Doctor",
+              "손실회피 훅·비교표·체크리스트 원고 설계"
             ],
             [
               "Step 3",
-              "고령자·장기보유 세액공제 합산 점검",
-              "20초"
+              "OSMU 브릿지",
+              "블로그·카페·스레드·쇼츠 동시 변환 배포"
+            ]
+          ],
+          "activeRow": 2,
+          "footer": "📊 Google Flow Nano Banana 2.1 Scene #03~#04"
+        },
+        {
+          "phase": "SCENE 03 · 실측 피드백 루프 & 체크리스트 (39.0s ~ 57.5s)",
+          "headline": "발행 개수가 아닌\n실측 PV·RPM으로 자동 진화",
+          "subline": "GA4·GSC·애드센스 실측 데이터를 지식그래프(+1/-1점)에 즉시 역반영",
+          "highlight": "우승 포맷 자동 강화(+1점) · 무유입 패턴 즉시 폐기(-1점)",
+          "rows": [
+            [
+              "체크 번호",
+              "핵심 구축 원칙",
+              "목표 지표"
+            ],
+            [
+              "Check 1",
+              "단순 복붙 중단 · 역할별 멀티 에이전트 분업",
+              "색인율 90%+"
+            ],
+            [
+              "Check 2",
+              "비교표·수치 중심 원고로 체류시간 극대화",
+              "체류 2분+"
+            ],
+            [
+              "Check 3",
+              "블로그·카페·쇼츠 OSMU 외부유입 브릿지",
+              "고단가 RPM"
             ]
           ],
           "activeRow": 1,
-          "footer": "🎯 채널 게시물(커뮤니티)에서 상세 기준표 원문 바로가기 제공"
+          "footer": "🎯 Google Flow Nano Banana 2.1 Scene #05"
         }
       ],
-      "communityPostText": "[윤랩 자동화 연구소 실전 브리핑 #01] 스마트폰·PC로 1분 만에 끝내는 2026 공시가격·재산세 특례 기준 판독표 ⚡\n\n매년 고지서가 나온 뒤에야 부랴부랴 세율과 공제 조건을 찾아보느라 시간을 쓰시진 않으셨나요?\n윤랩 자동화 연구소에서 복잡한 조문 대신 딱 3단계(Step 1 기준가 확인 → Step 2 1주택 특례 대조 → Step 3 공제율 합산)로 판독할 수 있는 실측 기준표를 정리했습니다.\n\n✅ 핵심 점검 포인트 3가지\n1) 1세대 1주택 공시가격 9억 원 이하 구간 특례세율(0.05%~0.35%) 해당 여부\n2) 과세기준일(6월 1일) 전후 변동 사항 및 합산 배제 체크\n3) 분납 신청 기준 및 온라인 즉시 조회 경로\n\n📊 구간별 세율 비교표와 1분 자가진단 체크리스트 전문은 아래 연구소 아카이브 원문에서 바로 확인하실 수 있습니다.\n👉 https://meganote.kr/entry/2026-%EB%B6%80%EB%8F%99%EC%82%B0-%EC%9E%AC%EC%82%B0%EC%84%B8-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-%EA%B8%B0%EC%A4%80-%EC%A1%B0%ED%9A%8C%EB%B2%95"
+      "communityPostText": "[윤랩 자동화 연구소 아키텍처 브리핑 #01] 단순 챗GPT 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 수익화 파이프라인 ⚡\n\n아직도 챗GPT에 프롬프트 한 줄만 입력해서 나온 글을 그대로 블로그에 복사·붙여넣기 하고 계신가요?\n검색엔진 알고리즘이 고도화되면서 팩트 검증과 비교표가 없는 단순 요약형 AI 원고는 색인 단계에서 즉시 걸러집니다.\n\n윤랩 자동화 연구소에서는 단일 프롬프트 대신 역할을 완벽히 분리한 6명의 자율 AI 에이전트(Radar·Publi·Doctor·Trace·Patch·Jarvis) 파이프라인을 가동하고 있습니다.\n\n✅ 24시간 무인 수익화 파이프라인 3대 핵심 공식\n1) [Step 1 · Radar] 검색 수요 대비 경쟁 문서가 비어 있는 고단가 블루오션 키워드 실시간 채굴\n2) [Step 2 · Publi & Doctor] 공무원식 뻔한 서론을 제거하고 1:1 수치 비교표·체크리스트로 체류시간 극대화\n3) [Step 3 · OSMU & Trace] 원본 데이터 1개를 블로그·카페·스레드·쇼츠 문법으로 동시 배포하고, 실측 PV·RPM 데이터로 우승 공식만 자동 학습(+1/-1 피드백 루프)\n\n📊 AI 에이전트 자동화 파이프라인 설계도와 실전 칼럼은 윤랩 기술 아카이브(메가노트)에서 자세히 확인하실 수 있습니다.\n👉 https://www.meganote.kr/"
     },
     {
       "part": 2,
       "channel": "@숨은지원금",
       "channelName": "숨은지원금",
       "templateId": "svml-tpl-01",
-      "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 차이 (24초 핵심 비교)",
+      "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
+      "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 최대 20% 증액 비교",
       "hookTitle": "집값 9억 넘어서 포기하셨나요? 공시가격 12억 이하 + 우대형 최대 20% 증액 비교",
       "badge": "숨은지원금 · 4060 연금 브리핑 #01",
       "bridgeDomain": "smilenote.kr",
-      "bridgeUrl": "https://smilenote.kr/entry/2026-%EC%A3%BC%ED%83%9D%EC%97%B0%EA%B8%88-%EA%B0%80%EC%9E%85%EC%A1%B0%EA%B1%B4-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-12%EC%96%B5-%EC%9B%94%EC%88%98%EB%A0%B9%EC%95%A1-%EA%B3%84%EC%82%B0",
+      "bridgeUrl": "https://www.smilenote.kr/",
       "bridgeLabel": "스마일노트 주택연금 연령별·집값별 월 수령액 비교표",
-      "narration": "집값이 9억을 넘어서 주택연금 대상이 아니라고 생각하셨나요? 기준이 시세가 아닌 공시가격 12억 원 이하로 넓어지면서 실거래가 15억에서 17억 수준 아파트도 신청 대상에 들어옵니다. 특히 부부 중 한 분이 만 55세 이상이면 가능하고, 우대형 요건을 충족하면 일반형보다 월 지급금이 최대 20퍼센트까지 늘어납니다. 내 나이와 집값 기준 정확한 월 수령액 비교표는 고정 링크에서 바로 계산해 보세요.",
+      "narration": "평생 살던 내 집에 그대로 거주하면서 매달 따박따박 월급처럼 연금을 받을 수 있다면 얼마가 나올까요? 2026년 주택연금은 공시가격 12억 원 이하까지 문턱이 넓어졌고, 우대형 요건에 해당하면 월 수령액이 최대 20퍼센트까지 늘어납니다.",
       "scenes": [
         {
-          "phase": "SCENE 01 · 오해 깨기 후킹 (0.0s ~ 4.0s)",
+          "phase": "SCENE 01 · 오해 깨기 후킹 (0.0s ~ 12.0s)",
           "headline": "집값 9억 넘으면 탈락?\n공시가격 12억 이하까지 가능합니다",
           "subline": "실거래가 약 15~17억 원 수준 주택도 공시가 12억 이하면 가입 대상",
           "highlight": "부부 중 1명 만 55세 이상 + 공시가격 12억 원 이하",
@@ -335,10 +339,10 @@
             ]
           ],
           "activeRow": 1,
-          "footer": "⚡ SVML Anchor: @word(공시가격) · 4060 정책 쇼츠"
+          "footer": "⚡ Google Flow Nano Banana 2.1 Scene #01~#02"
         },
         {
-          "phase": "SCENE 02 · 일반형 vs 우대형 비교 (4.0s ~ 11.0s)",
+          "phase": "SCENE 02 · 일반형 vs 우대형 비교 (12.0s ~ 57.6s)",
           "headline": "일반형 vs 우대형 주택연금\n월 수령액 최대 20% 차이",
           "subline": "시가 2.5억 미만 1주택 + 기초연금 수급자라면 우대형 필수 확인",
           "highlight": "신청 전 우대형 해당 여부 체크만으로 평생 수령액 상승",
@@ -363,78 +367,159 @@
           "footer": "📊 상세 연령별 수령액 표: smilenote.kr 브릿지 연결"
         }
       ],
-      "communityPostText": "[숨은지원금 4060 핵심 체크] 2026 주택연금 공시가격 12억 기준 & 우대형 최대 20% 증액 판독표 💡\n\n시세가 9억 원을 넘는다는 이유로 주택연금을 아예 알아보지 않으셨다면 반드시 공시가격을 먼저 확인해 보셔야 합니다.\n공시가격 12억 원 이하(실거래가 약 15~17억 수준)까지 가입 문턱이 열려 있으며, 우대형 요건 충족 시 일반형보다 최대 20% 높은 월 지급금을 받을 수 있습니다.\n\n👉 연령별·주택가격별 상세 비교표 확인: https://smilenote.kr/entry/2026-%EC%A3%BC%ED%83%9D%EC%97%B0%EA%B8%88-%EA%B0%80%EC%9E%85%EC%A1%B0%EA%B1%B4-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-12%EC%96%B5-%EC%9B%94%EC%88%98%EB%A0%B9%EC%95%A1-%EA%B3%84%EC%82%B0"
+      "communityPostText": "[숨은지원금 4060 핵심 체크] 2026 주택연금 공시가격 12억 기준 & 우대형 최대 20% 증액 판독표 💡\n\n시세가 9억 원을 넘는다는 이유로 주택연금을 아예 알아보지 않으셨다면 반드시 공시가격을 먼저 확인해 보셔야 합니다.\n공시가격 12억 원 이하(실거래가 약 15~17억 수준)까지 가입 문턱이 열려 있으며, 우대형 요건 충족 시 일반형보다 최대 20% 높은 월 지급금을 받을 수 있습니다.\n\n👉 연령별·주택가격별 상세 비교표 확인: https://www.smilenote.kr/"
     },
     {
       "part": 3,
       "channel": "@yoon_autolab",
       "channelName": "윤랩 자동화 연구소",
       "templateId": "svml-tpl-02",
-      "title": "건강보험 본인부담상한제 환급금 1분 온라인 신청 루틴 (문자 사기 구별법 포함)",
-      "hookTitle": "병원비 많이 나온 해, 신청 안 하면 잠자는 환급금 1분 조회 루틴",
-      "badge": "윤랩 자동화 연구소 · 실전 리포트 #02",
-      "bridgeDomain": "must-good.com",
-      "bridgeUrl": "https://must-good.com/entry/2026-%EB%B3%B8%EC%9D%B8%EB%B6%80%EB%8B%B4%EC%83%81%ED%95%9C%EC%A0%9C-%EC%82%AC%ED%9B%84%ED%99%98%EA%B8%89%EA%B8%88-%EC%A1%B0%ED%9A%8C-%EC%8B%A0%EC%B2%AD%EB%B0%A9%EB%B2%95-%EC%86%8C%EB%93%9D%EB%B6%84%EC%9C%84-%EA%B8%B0%EC%A4%80",
-      "bridgeLabel": "머스트굿 소득분위별 본인부담상한액 표 & 조회 가이드",
-      "narration": "부모님 병원비가 많이 나왔던 해라면 건강보험 본인부담상한제 환급 대상인지 반드시 확인해야 합니다. 문자에 찍힌 의심스러운 인터넷 주소를 누르지 마시고, The건강보험 앱이나 공식 홈페이지에서 환급금 조회 메뉴만 누르면 1분 만에 대상 여부와 입금 계좌 신청이 끝납니다. 내 소득분위별 상한액 기준표는 채널 게시물 링크에서 한눈에 확인하세요.",
+      "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
+      "title": "코딩 1줄 몰라도 바이브코딩(Google Flow·SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식",
+      "hookTitle": "아직도 타임라인 자르고 붙이세요? Google Flow AI + SVML 코드가 쇼츠를 통째로 렌더링합니다",
+      "badge": "윤랩 자동화 연구소 · 바이브코딩 #02",
+      "bridgeDomain": "justinfo.co.kr",
+      "bridgeUrl": "https://www.justinfo.co.kr/",
+      "bridgeLabel": "저스트인포 바이브코딩 & 미디어 자동화 실전 가이드",
+      "narration": "유튜브 쇼츠 한 편 만들려고 아직도 영상 편집 프로그램에서 타임라인을 일일이 자르고 자막을 맞추고 계신가요? 이제는 코딩을 한 줄도 몰라도 바이브코딩과 구글 플로우 AI를 결합해 방송국 수준의 인포그래픽 쇼츠를 자동으로 렌더링할 수 있습니다.",
       "scenes": [
         {
-          "phase": "SCENE 01 · 스미싱 주의 & 공식 루틴 (0.0s ~ 5.0s)",
-          "headline": "환급금 문자 링크 클릭 금지!\n공식 앱 3클릭 조회 루틴",
-          "subline": "사칭 URL 대신 국민건강보험 공식 경로로 1분 안에 직접 확인",
-          "highlight": "비급여 제외 건강보험 본인부담금 연간 상한 초과분 환급",
+          "phase": "SCENE 01 · 수작업 편집 vs 바이브코딩 스튜디오 (0.0s ~ 22.0s)",
+          "headline": "아직도 타임라인 자르고 붙이세요?\n코드가 쇼츠를 통째로 렌더링합니다",
+          "subline": "배경 1장짜리 슬라이드쇼 탈피 · Google Flow 5-씬 시네마 + SVML 모션",
+          "highlight": "상단 AI 시네마 뷰포트 + 중단 인터랙티브 카드 + 하단 싱크 자막",
           "rows": [
             [
               "구분",
-              "포함 여부",
-              "핵심 판정 기준"
+              "기존 양산형 쇼츠",
+              "윤랩 Google Flow + SVML"
             ],
             [
-              "급여 본인부담금",
-              "O (환급 산정 포함)",
-              "소득분위별 연간 상한액 초과분"
+              "비주얼 구성",
+              "어두운 정지 사진 1장 반복",
+              "5개 비트별 맞춤 AI 시네마 전환"
             ],
             [
-              "비급여·도수·1인실",
-              "X (산정 제외)",
-              "실손보험 별도 청구 대상"
-            ]
-          ],
-          "activeRow": 1,
-          "footer": "⚡ SVML Anchor: @word(환급) · 3-Click Protocol"
-        },
-        {
-          "phase": "SCENE 02 · 소득구간별 상한 구조 (5.0s ~ 12.0s)",
-          "headline": "소득분위가 낮을수록\n돌려받는 기준선이 낮아집니다",
-          "subline": "1~3분위 저소득층부터 고소득 구간까지 차등 상한제 적용",
-          "highlight": "진료받은 날로부터 3년 이내 미신청 환급금 통합 조회 가능",
-          "rows": [
-            [
-              "점검 순서",
-              "실행 경로",
-              "확인 내용"
-            ],
-            [
-              "1단계",
-              "국민건강보험 홈페이지 / 앱 로그인",
-              "민원여기요 → 환급금 조회"
-            ],
-            [
-              "2단계",
-              "본인부담상한액 초과금 내역 확인",
-              "대상 연도 및 지급 가능액"
-            ],
-            [
-              "3단계",
-              "본인 명의 계좌번호 입력 신청",
-              "접수 후 영업일 순차 입금"
+              "정보 전달력",
+              "단순 기계식 자막 나열",
+              "비교표·단계별 카드 30fps 모션"
             ]
           ],
           "activeRow": 2,
-          "footer": "📌 상세 소득분위별 상한액 표: must-good.com 원문 연결"
+          "footer": "⚡ Google Flow Nano Banana 2.1 Scene #01~#03"
+        },
+        {
+          "phase": "SCENE 02 · 무인 쇼츠 빌드 3단계 프로토콜 (22.0s ~ 57.5s)",
+          "headline": "Google Flow + Hypit SVML\n무인 쇼츠 렌더링 3단계",
+          "subline": "AI 장면 생성부터 음성 타임스탬프 매핑·1080p MP4 컴파일까지 자동화",
+          "highlight": "30fps 프레임 단위 오디오·모션·자막 100% 정밀 동기화",
+          "rows": [
+            [
+              "단계",
+              "실행 모듈",
+              "자동화 출력물"
+            ],
+            [
+              "1단계",
+              "Google Flow (Nano Banana 2.1)",
+              "대본 5대 비트별 고해상도 장면 5장"
+            ],
+            [
+              "2단계",
+              "Edge Neural TTS + FFprobe",
+              "문장별 발화 시각(ms) → 30fps 프레임 매핑"
+            ],
+            [
+              "3단계",
+              "Hypit SVML + Chrome 152",
+              "1080x1920 30fps 풀 HD MP4 렌더링"
+            ]
+          ],
+          "activeRow": 3,
+          "footer": "📌 Google Flow Nano Banana 2.1 Scene #04~#05"
         }
       ],
-      "communityPostText": "[윤랩 자동화 연구소 실전 브리핑 #02] 건강보험 본인부담상한제 환급금 1분 공식 조회 루틴 (스미싱 구별 표 포함) 🛡️\n\n병원비 지출이 컸던 해에 돌려받을 수 있는 '본인부담상한액 초과금'을 조회할 때, 문자 메시지의 출처 불명 링크를 누르는 것은 위험합니다.\n반드시 국민건강보험 공식 홈페이지나 'The건강보험' 앱의 [환급금(지원금) 조회/신청] 메뉴로 직접 접속해 1분 만에 안전하게 확인하세요.\n\n✅ 급여 포함 vs 비급여 제외 구분표와 소득분위별 상한 기준 원문:\n👉 https://must-good.com/entry/2026-%EB%B3%B8%EC%9D%B8%EB%B6%80%EB%8B%B4%EC%83%81%ED%95%9C%EC%A0%9C-%EC%82%AC%ED%9B%84%ED%99%98%EA%B8%89%EA%B8%88-%EC%A1%B0%ED%9A%8C-%EC%8B%A0%EC%B2%AD%EB%B0%A9%EB%B2%95-%EC%86%8C%EB%93%9D%EB%B6%84%EC%9C%84-%EA%B8%B0%EC%A4%80"
+      "communityPostText": "[윤랩 자동화 연구소 실전 브리핑 #02] 코딩 1줄 몰라도 바이브코딩(Google Flow + Hypit SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식 🚀\n\n유튜브 쇼츠 1편을 만들기 위해 영상 편집 프로그램에서 타임라인을 일일이 자르고 자막 싱크를 맞추느라 시간을 쓰고 계신가요?\n반대로 어두운 배경 이미지 1장 위에 기계식 자막만 얹는 공장형 쇼츠는 시청자가 3초 만에 이탈해 버립니다.\n\n윤랩 자동화 연구소에서는 Google Flow AI(Nano Banana 2.1)와 코드 기반 비디오 엔진(Hypit SVML)을 결합해 3단계로 고밀도 인포그래픽 쇼츠를 자동 빌드합니다.\n\n✅ 바이브코딩 무인 쇼츠 스튜디오 3단계 파이프라인\n1) [Step 1 · Google Flow AI] 대본의 5대 흐름(도입 훅 → 전후 비교 → 실행 3단계 → 핵심 지표 → 최종 체크리스트)에 맞춘 5장의 시네마 비주얼 생성\n2) [Step 2 · Neural TTS 타임스탬프] 문장 단위 음성 길이를 정밀 계측해 30fps 프레임 타임라인에 자동 매핑\n3) [Step 3 · 3단 분할 렌더링] 상단 AI 시네마 뷰포트(Ken Burns 모션) + 중단 인터랙티브 비교 카드 + 하단 싱크 자막을 1080x1920 MP4로 원클릭 컴파일\n\n👉 상세 자동화 워크플로우와 실전 가이드는 연구소 기술 블로그에서 확인하세요: https://www.justinfo.co.kr/"
+    },
+    {
+      "part": 4,
+      "channel": "@yoon_autolab",
+      "channelName": "윤랩 자동화 연구소",
+      "templateId": "svml-tpl-02",
+      "title": "클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 실전 워크플로우",
+      "hookTitle": "아직도 복붙으로 리서치하세요? CDP 에이전트로 3분 만에 끝내는 법",
+      "bridgeDomain": "meganote.kr",
+      "bridgeUrl": "https://www.meganote.kr/",
+      "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
+      "accent": "#38bdf8",
+      "badge": "AI 에이전트 · CDP 실전 #04",
+      "scenes": [
+        {
+          "time": "00:00~00:08",
+          "label": "도입 훅",
+          "narration": "매일 아침 경쟁사 모니터링과 데이터 수집에 3시간씩 쓰고 계신가요? 브라우저 CDP와 MCP를 연결하면 단 3분이면 충분합니다.",
+          "stat": "리서치 시간 98% 단축"
+        },
+        {
+          "time": "00:08~00:22",
+          "label": "병목 진단",
+          "narration": "단순 API 크롤링은 로그인 세션과 동적 렌더링 앞에서 막힙니다. 실제 크롬 프로필 세션을 제어하는 CDP가 해답입니다.",
+          "stat": "CDP 로컬 세션 직결"
+        },
+        {
+          "time": "00:22~00:48",
+          "label": "3단계 자동화",
+          "narration": "1단계 타깃 URL 접속, 2단계 핵심 수치·표 실시간 캡처, 3단계 마크다운 리포트 자동 요약까지 무인으로 돌아갑니다.",
+          "stat": "무인 파이프라인 완성"
+        },
+        {
+          "time": "00:48~00:58",
+          "label": "상세 가이드",
+          "narration": "전체 오픈소스 설정값과 프롬프트 템플릿은 고정댓글과 설명란의 연구소 기술 노트에서 바로 확인하세요.",
+          "stat": "meganote.kr 원문 공개"
+        }
+      ],
+      "communityPostText": "[AI 실전 리서치 #04] 클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 워크플로우 🤖\n\n단순 웹 검색 API만으로는 로그인 세션이 필요한 대시보드나 동적 테이블 데이터를 정확히 수집하기 어렵습니다. 윤랩 자동화 연구소에서는 로컬 크롬 디버깅 프로토콜(CDP)과 AI 에이전트를 결합해 리서치와 시각 자료 수집을 자동화합니다.\n\n✅ CDP + MCP 실전 리서치 3단계 아키텍처\n1) [Step 1 · 독립 프로필 세션 유지] 계정별 격리된 브라우저 워크스페이스에서 인증 토큰 충돌 없이 타깃 페이지 즉시 진입\n2) [Step 2 · 핵심 데이터·표 정밀 캡처] 사람이 직접 서칭하듯 공식 통계표와 비교 데이터를 고해상도로 크롭 및 구조화\n3) [Step 3 · 검증 리포트 자동 발행] 수집된 실측 근거를 바탕으로 수치 오류 없는 의사결정 브리프 생성\n\n👉 실전 파이프라인 설계도와 세팅 가이드는 연구소 기술 노트에서 확인하세요: https://www.meganote.kr/"
+    },
+    {
+      "part": 5,
+      "channel": "@숨은지원금",
+      "channelName": "숨은지원금",
+      "templateId": "svml-tpl-01",
+      "title": "건강보험 본인부담상한제 환급금 1분 온라인 조회 & 퇴직 후 피부양자 방어선",
+      "hookTitle": "병원비 낸 거 그대로 두지 마세요! 건보 본인부담상한제 환급금 조회법",
+      "bridgeDomain": "must-good.com",
+      "bridgeUrl": "https://www.must-good.com/",
+      "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
+      "accent": "#10b981",
+      "badge": "4060 의료·건보 브리프 #05",
+      "scenes": [
+        {
+          "time": "00:00~00:08",
+          "label": "도입 훅",
+          "narration": "작년에 부모님 병원비 많이 나왔다면 건강보험 본인부담상한제 환급금 대상인지 지금 바로 확인해야 합니다.",
+          "stat": "1인당 평균 135만 원 환급"
+        },
+        {
+          "time": "00:08~00:25",
+          "label": "소득구간 기준",
+          "narration": "소득 분위 1구간부터 10구간까지 연간 본인부담 상한액이 정해져 있어 초과분은 공단에서 전액 돌려줍니다.",
+          "stat": "1구간 87만~10구간 808만"
+        },
+        {
+          "time": "00:25~00:48",
+          "label": "실손보험 중복체크",
+          "narration": "비급여 도수치료나 상급병실료는 제외되며, 조회 및 신청은 국민건강보험 앱에서 1분이면 끝납니다.",
+          "stat": "The건강보험 1분 신청"
+        },
+        {
+          "time": "00:48~00:58",
+          "label": "원문 가이드",
+          "narration": "올해 소득구간별 상한액 표와 피부양자 자격 방어 체크리스트는 고정댓글 원문에서 확인하세요.",
+          "stat": "must-good.com 기준표"
+        }
+      ],
+      "communityPostText": "[4060 의료·건보 핵심체크 #05] 건강보험 본인부담상한제 환급금 1분 조회 & 소득구간별 상한액 총정리 🏥\n\n연간 건강보험 급여 본인부담금이 가구 소득구간별 상한액을 초과하면, 그 초과 금액을 국민건강보험공단에서 돌려주는 '본인부담상한제' 사후환급 신청을 놓치는 분들이 많습니다.\n\n✅ 신청 전 반드시 확인해야 할 핵심 기준 3가지\n1) [소득구간별 상한액] 1분위(연 87만 원 수준)부터 10분위(연 808만 원 수준)까지 구간별 초과분 환급\n2) [제외 항목 주의] 비급여 항목, 임플란트, 추나요법, 상급병실 입원료 등은 상한제 합산에서 제외\n3) [조회 및 신청 경로] 국민건강보험 홈페이지 또는 'The건강보험' 모바일 앱 → 민원여기요 → 환급금(지원금) 조회/신청\n\n👉 2026 소득구간별 상세 기준표와 퇴직 후 건강보험료 피부양자 유지 조건은 아래 가이드에서 확인하세요: https://www.must-good.com/"
     }
   ],
   "renders": [
@@ -444,16 +529,17 @@
       "channel": "@yoon_autolab",
       "channelName": "윤랩 자동화 연구소",
       "templateId": "svml-tpl-01",
-      "title": "스마트폰·PC 숨은 자동환급·세무 조회 3초 세팅법 (모르면 매년 놓치는 항목 비교)",
-      "hookTitle": "매년 직접 찾으러 다니시나요? 딱 1번 자동 조회 설정으로 끝내는 실측 비교표",
+      "title": "챗GPT 단순 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 자동 수익화 파이프라인",
+      "hookTitle": "챗GPT 복붙 블로그가 망할 때 AI 에이전트 6명 분업 팀은 24시간 수익을 만듭니다",
       "bridgeDomain": "meganote.kr",
-      "bridgeUrl": "https://meganote.kr/entry/2026-%EB%B6%80%EB%8F%99%EC%82%B0-%EC%9E%AC%EC%82%B0%EC%84%B8-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-%EA%B8%B0%EC%A4%80-%EC%A1%B0%ED%9A%8C%EB%B2%95",
+      "bridgeUrl": "https://www.meganote.kr/",
+      "youtubeShortUrl": "https://youtube.com/shorts/of6rvdwE8jc",
       "videoUrl": "/api/youtube/media/svml_short_part1.mp4",
       "thumbUrl": "/api/youtube/media/svml_short_part1_thumb.png",
-      "fileSizeKb": 776.3,
-      "durationSec": 14.4,
-      "audioEngine": "elevenlabs_multilingual_v2",
-      "renderedAt": "2026-11-02 16:00:06"
+      "fileSizeKb": 9463.0,
+      "durationSec": 57.2,
+      "audioEngine": "edge_tts (ko-KR-InJoonNeural) + @hypit/hypit@0.3.1 (html.local + media.local)",
+      "renderedAt": "2026-11-04 20:55:04"
     },
     {
       "ok": true,
@@ -461,16 +547,17 @@
       "channel": "@숨은지원금",
       "channelName": "숨은지원금",
       "templateId": "svml-tpl-01",
-      "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 차이 (24초 핵심 비교)",
+      "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 최대 20% 증액 비교",
       "hookTitle": "집값 9억 넘어서 포기하셨나요? 공시가격 12억 이하 + 우대형 최대 20% 증액 비교",
       "bridgeDomain": "smilenote.kr",
-      "bridgeUrl": "https://smilenote.kr/entry/2026-%EC%A3%BC%ED%83%9D%EC%97%B0%EA%B8%88-%EA%B0%80%EC%9E%85%EC%A1%B0%EA%B1%B4-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-12%EC%96%B5-%EC%9B%94%EC%88%98%EB%A0%B9%EC%95%A1-%EA%B3%84%EC%82%B0",
+      "bridgeUrl": "https://www.smilenote.kr/",
+      "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
       "videoUrl": "/api/youtube/media/svml_short_part2.mp4",
       "thumbUrl": "/api/youtube/media/svml_short_part2_thumb.png",
-      "fileSizeKb": 704.8,
-      "durationSec": 12.0,
-      "audioEngine": "elevenlabs_multilingual_v2",
-      "renderedAt": "2026-11-02 15:48:20"
+      "fileSizeKb": 9506.2,
+      "durationSec": 57.2,
+      "audioEngine": "edge_tts (ko-KR-SunHiNeural) + @hypit/hypit@0.3.1 (html.local + media.local)",
+      "renderedAt": "2026-11-04 20:55:04"
     },
     {
       "ok": true,
@@ -478,23 +565,39 @@
       "channel": "@yoon_autolab",
       "channelName": "윤랩 자동화 연구소",
       "templateId": "svml-tpl-02",
-      "title": "건강보험 본인부담상한제 환급금 1분 온라인 신청 루틴 (문자 사기 구별법 포함)",
-      "hookTitle": "병원비 많이 나온 해, 신청 안 하면 잠자는 환급금 1분 조회 루틴",
-      "bridgeDomain": "must-good.com",
-      "bridgeUrl": "https://must-good.com/entry/2026-%EB%B3%B8%EC%9D%B8%EB%B6%80%EB%8B%B4%EC%83%81%ED%95%9C%EC%A0%9C-%EC%82%AC%ED%9B%84%ED%99%98%EA%B8%89%EA%B8%88-%EC%A1%B0%ED%9A%8C-%EC%8B%A0%EC%B2%AD%EB%B0%A9%EB%B2%95-%EC%86%8C%EB%93%9D%EB%B6%84%EC%9C%84-%EA%B8%B0%EC%A4%80",
+      "title": "코딩 1줄 몰라도 바이브코딩(Google Flow·SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식",
+      "hookTitle": "아직도 타임라인 자르고 붙이세요? Google Flow AI + SVML 코드가 쇼츠를 통째로 렌더링합니다",
+      "bridgeDomain": "justinfo.co.kr",
+      "bridgeUrl": "https://www.justinfo.co.kr/",
+      "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
       "videoUrl": "/api/youtube/media/svml_short_part3.mp4",
       "thumbUrl": "/api/youtube/media/svml_short_part3_thumb.png",
-      "fileSizeKb": 712.5,
-      "durationSec": 12.0,
-      "audioEngine": "elevenlabs_multilingual_v2",
-      "renderedAt": "2026-11-02 15:48:23"
+      "fileSizeKb": 8010.3,
+      "durationSec": 57.2,
+      "audioEngine": "edge_tts (ko-KR-InJoonNeural) + @hypit/hypit@0.3.1 (html.local + media.local)",
+      "renderedAt": "2026-11-04 20:55:04"
     }
   ],
   "communityPosts": [
     {
-      "text": "[윤랩 자동화 연구소 실전 브리핑 #01] 스마트폰·PC로 1분 만에 끝내는 2026 공시가격·재산세 특례 기준 판독표 ⚡\n\n매년 고지서가 나온 뒤에야 부랴부랴 세율과 공제 조건을 찾아보느라 시간을 쓰시진 않으셨나요?\n윤랩 자동화 연구소에서 복잡한 조문 대신 딱 3단계(Step 1 기준가 확인 → Step 2 1주택 특례 대조 → Step 3 공제율 합산)로 판독할 수 있는 실측 기준표를 정리했습니다.\n\n✅ 핵심 점검 포인트 3가지\n1) 1세대 1주택 공시가격 ",
-      "time": "1시간 전",
-      "url": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5"
+      "text": "[4060 의료·건보 핵심체크 #05] 건강보험 본인부담상한제 환급금 1분 조회 & 소득구간별 상한액 총정리 🏥\n\n연간 건강보험 급여 본인부담금이 가구 소득구간별 상한액을 초과하면, 그 초과 금액을 국민건강보험공단에서 돌려주는 '본인부담상한제' 사후환급 신청을 놓치는 분들이 많습니다.\n\n✅ 신청 전 반드시 확인해야 할 핵심 기준 3가지\n1) [소득구간별 상한액] 1분위(연 87만 원 수준)부터 10분위(연 808만 원 수준)까지 구간별 초과분 환급\n2) [제외",
+      "time": "3초 전",
+      "url": "https://www.youtube.com/post/UgkxZUStQbjcnxrIUszLY-sGaAPUIB3KYy20"
+    },
+    {
+      "text": "[숨은지원금 4060 핵심 체크] 2026 주택연금 공시가격 12억 기준 & 우대형 최대 20% 증액 판독표 💡\n\n시세가 9억 원을 넘는다는 이유로 주택연금을 아예 알아보지 않으셨다면 반드시 공시가격을 먼저 확인해 보셔야 합니다.\n공시가격 12억 원 이하(실거래가 약 15~17억 수준)까지 가입 문턱이 열려 있으며, 우대형 요건 충족 시 일반형보다 최대 20% 높은 월 지급금을 받을 수 있습니다.\n\n👉 연령별·주택가격별 상세 비교표 확인: https://ww",
+      "time": "12분 전",
+      "url": "https://www.youtube.com/post/UgkxKR9c7cfG3S6eKoM-2fjM8uPe1hWD5_0G"
+    },
+    {
+      "text": "[AI 실전 리서치 #04] 클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 워크플로우 🤖\n\n단순 웹 검색 API만으로는 로그인 세션이 필요한 대시보드나 동적 테이블 데이터를 정확히 수집하기 어렵습니다. 윤랩 자동화 연구소에서는 로컬 크롬 디버깅 프로토콜(CDP)과 AI 에이전트를 결합해 리서치와 시각 자료 수집을 자동화합니다.\n\n✅ CDP + MCP 실전 리서치 3단계 아키텍처\n1) [Step 1 · 독립 프로필 세션 유지]",
+      "time": "14시간 전",
+      "url": "https://www.youtube.com/post/Ugkxt06XkhhKGmIngjtQ12NIMuQwX10Arrsj"
+    },
+    {
+      "text": "[윤랩 자동화 연구소 아키텍처 브리핑 #01] 단순 챗GPT 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 수익화 파이프라인 ⚡\n\n아직도 챗GPT에 프롬프트 한 줄만 입력해서 나온 글을 그대로 블로그에 복사·붙여넣기 하고 계신가요?\n검색엔진 알고리즘이 고도화되면서 팩트 검증과 비교표가 없는 단순 요약형 AI 원고는 색인 단계에서 즉시 걸러집니다.\n\n윤랩 자동화 연구소에서는 단일 프롬프트 대신 역할을 완벽히 분리한 6명의 자율 AI 에이전트(Rada",
+      "time": "1일 전",
+      "url": "https://www.youtube.com/post/UgkxoUAWE6G2JHjFKBwmiu_bDgKkPBViBRd-"
     },
     {
       "text": "정정(2026-07-26): 이 게시물에 있던 래피드 URL 두 개의 상품 용도를 변경했습니다. 현재 링크는 아래 자료로 연결됩니다. 기존의 ‘바이브코딩 12/60항목’ 설명은 현재 링크 내용과 맞지 않습니다.\n\n무료: 쿠팡파트너스 첫 비교영상 10분 시작 체크\nhttps://www.latpeed.com/products/lafm7\n\n유료 49,000원: 첫 상품 비교영상 한 편 따라 만들기 실습팩\nhttps://www.latpeed.com/products/jU6",
@@ -506,89 +609,92 @@
     {
       "part": 1,
       "channel": "@yoon_autolab",
-      "channelName": "윤랩 자동화 연구소",
+      "channelName": "윤랩 자동화 연구소 (IT·AI·수익화)",
       "templateId": "svml-tpl-01",
-      "title": "스마트폰 1분 국민·기초연금·세무 환급 자동 통합조회 루틴",
+      "title": "챗GPT 단순 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 자동 수익화 파이프라인",
       "bridgeDomain": "meganote.kr",
-      "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
-      "scheduleSlot": "오늘 09:00 완료",
-      "shortStatus": "rendered",
-      "shortStatusLabel": "🟢 MP4 렌더링 완료 (14.4초)",
+      "bridgeUrl": "https://www.meganote.kr/",
+      "youtubeShortUrl": "https://youtube.com/shorts/of6rvdwE8jc",
+      "scheduleSlot": "YouTube Shorts 라이브 업로드 완료",
+      "shortStatus": "published",
+      "shortStatusLabel": "🟢 채널 업로드 완료 (57.2초 · of6rvdwE8jc)",
       "communityStatus": "published",
-      "communityStatusLabel": "🟢 커뮤니티 발행 완료",
-      "communityUrl": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5"
+      "communityStatusLabel": "🟢 AI 파이프라인 커뮤니티 게시 완료",
+      "communityUrl": "https://www.youtube.com/post/UgkxoUAWE6G2JHjFKBwmiu_bDgKkPBViBRd-"
     },
     {
       "part": 2,
       "channel": "@숨은지원금",
-      "channelName": "숨은지원금 (4060 정책 쇼츠)",
+      "channelName": "숨은지원금 (4060 정책·연금 전담)",
       "templateId": "svml-tpl-01",
-      "title": "2026 주택연금 공시가격 12억 기준 및 수령액 월 +28만 원 우대형 비교",
+      "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 최대 20% 증액 비교",
       "bridgeDomain": "smilenote.kr",
       "bridgeUrl": "https://www.smilenote.kr/",
-      "scheduleSlot": "오늘 14:00 완료",
-      "shortStatus": "rendered",
-      "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)",
+      "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
+      "scheduleSlot": "YouTube Shorts 라이브 업로드 완료",
+      "shortStatus": "published",
+      "shortStatusLabel": "🟢 채널 업로드 완료 (57.2초 · dh_JGWQYgqI)",
       "communityStatus": "published",
-      "communityStatusLabel": "🟢 본진 커뮤니티 연동 완료",
-      "communityUrl": "https://www.youtube.com/@yoon_autolab/posts"
+      "communityStatusLabel": "🟢 @숨은지원금 쇼츠 공개 완료",
+      "communityUrl": "https://youtube.com/shorts/dh_JGWQYgqI"
     },
     {
       "part": 3,
       "channel": "@yoon_autolab",
-      "channelName": "윤랩 자동화 연구소",
+      "channelName": "윤랩 자동화 연구소 (IT·AI·수익화)",
       "templateId": "svml-tpl-02",
-      "title": "건강보험 본인부담상한제 환급금 1분 공식 조회 루틴 (스미싱 구별법)",
-      "bridgeDomain": "must-good.com",
-      "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
-      "scheduleSlot": "오늘 17:00 렌더링 완료",
-      "shortStatus": "rendered",
-      "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)",
-      "communityStatus": "ready_to_publish",
-      "communityStatusLabel": "🟡 커뮤니티 즉시 발행 가능",
-      "communityUrl": "https://www.youtube.com/@yoon_autolab/posts"
+      "title": "코딩 1줄 몰라도 바이브코딩(Google Flow·SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식",
+      "bridgeDomain": "justinfo.co.kr",
+      "bridgeUrl": "https://www.justinfo.co.kr/",
+      "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
+      "scheduleSlot": "YouTube Shorts 라이브 업로드 완료",
+      "shortStatus": "published",
+      "shortStatusLabel": "🟢 채널 업로드 완료 (57.2초 · BctbZLl1Dtk)",
+      "communityStatus": "published",
+      "communityStatusLabel": "🟢 @yoon_autolab 쇼츠 공개 완료",
+      "communityUrl": "https://youtube.com/shorts/BctbZLl1Dtk"
     },
     {
       "part": 4,
       "channel": "@yoon_autolab",
-      "channelName": "윤랩 자동화 연구소",
+      "channelName": "윤랩 자동화 연구소 (IT·AI·수익화)",
       "templateId": "svml-tpl-02",
-      "title": "소상공인 희망리턴패키지 점포철거비 지원금 & 폐업 부가세 3단 체크리스트",
+      "title": "클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 실전 워크플로우",
       "bridgeDomain": "meganote.kr",
-      "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
-      "scheduleSlot": "내일 09:30 예정",
-      "shortStatus": "queued",
-      "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 25초)",
-      "communityStatus": "queued",
-      "communityStatusLabel": "⏳ 쇼츠 연동 발행 대기",
-      "communityUrl": ""
+      "bridgeUrl": "https://www.meganote.kr/",
+      "scheduleSlot": "오늘 09:50 슬롯 완료",
+      "shortStatus": "rendered",
+      "shortStatusLabel": "🟢 SVML 대본·씬 설계 완료 (CDP 워크플로우)",
+      "communityStatus": "published",
+      "communityStatusLabel": "🟢 커뮤니티 브릿지 게시 완료",
+      "communityUrl": "https://www.youtube.com/post/Ugkxt06XkhhKGmIngjtQ12NIMuQwX10Arrsj"
     },
     {
       "part": 5,
       "channel": "@숨은지원금",
-      "channelName": "숨은지원금 (4060 정책 쇼츠)",
+      "channelName": "숨은지원금 (4060 정책·연금 전담)",
       "templateId": "svml-tpl-01",
-      "title": "퇴직 후 건강보험 피부양자 탈락 막는 연소득 2천만·재산 5.4억 방어선",
-      "bridgeDomain": "baronote.kr",
-      "bridgeUrl": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
-      "scheduleSlot": "내일 15:00 예정",
-      "shortStatus": "queued",
-      "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 24초)",
-      "communityStatus": "queued",
-      "communityStatusLabel": "⏳ 고정댓글 브릿지 대기",
-      "communityUrl": ""
+      "title": "건강보험 본인부담상한제 환급금 1분 온라인 조회 & 퇴직 후 피부양자 방어선",
+      "bridgeDomain": "must-good.com",
+      "bridgeUrl": "https://www.must-good.com/",
+      "scheduleSlot": "오늘 15:20 슬롯 완료",
+      "shortStatus": "rendered",
+      "shortStatusLabel": "🟢 SVML 대본·씬 설계 완료",
+      "communityStatus": "published",
+      "communityStatusLabel": "🟢 커뮤니티 브릿지 게시 완료",
+      "communityUrl": "https://www.youtube.com/post/UgkxZUStQbjcnxrIUszLY-sGaAPUIB3KYy20"
     },
     {
       "part": 6,
       "channel": "@바로랭크",
-      "channelName": "바로랭크 (가전·건강 랭킹)",
+      "channelName": "바로랭크 (가전·테크 랭킹)",
       "templateId": "svml-tpl-03",
-      "title": "한전 고효율 가전제품 환급금 30만 원 신청 조건 & 에너지바우처 비교",
+      "title": "2026 가성비 미니 PC & AI 작업용 모니터 실측 S/A/B 티어 비교",
       "bridgeDomain": "joynote.kr",
-      "bridgeUrl": "https://www.joynote.kr/kepco-appliance-rebate-after-moving",
+      "bridgeUrl": "https://www.joynote.kr/",
       "scheduleSlot": "모레 10:00 예정",
       "shortStatus": "queued",
-      "shortStatusLabel": "⏳ 쿠팡 이관 병행 대기 (SVML 22초)",
+      "shortStatusLabel": "⏳ 쿠팡 이관 병행 대기 (Flow + SVML)",
       "communityStatus": "queued",
       "communityStatusLabel": "⏳ 커뮤니티 비교표 대기",
       "communityUrl": ""
@@ -596,97 +702,130 @@
   ],
   "measurement": {
     "ga4Referrals": {
-      "todaySessions": 0,
-      "last7DaysSessions": 0,
-      "last28DaysSessions": 0,
+      "windowMetadata": {
+        "today": {
+          "sourcePeriod": "today",
+          "windowDays": 1
+        },
+        "week": {
+          "sourcePeriod": "week",
+          "windowDays": 7
+        },
+        "month": {
+          "sourcePeriod": "month",
+          "windowDays": 30,
+          "note": "GA4 month period covers 30 days; last28DaysSessions aliases monthSessions for UI compatibility"
+        }
+      },
+      "todaySessions": 2,
+      "weekSessions": 1,
+      "monthSessions": 1,
+      "last7DaysSessions": 1,
+      "last28DaysSessions": 1,
       "topDomains": [
+        {
+          "domain": "meganote.kr",
+          "todaySessions": 2,
+          "weekSessions": 1,
+          "monthSessions": 1,
+          "last7DaysSessions": 1,
+          "last28DaysSessions": 1,
+          "totalPageViewsToday": 5
+        },
+        {
+          "domain": "smilenote.kr",
+          "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 11
+        },
+        {
+          "domain": "healthcox.com",
+          "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 9
+        },
         {
           "domain": "must-good.com",
           "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
+          "last7DaysSessions": 0,
+          "last28DaysSessions": 0,
+          "totalPageViewsToday": 9
+        },
+        {
+          "domain": "woorinote.kr",
+          "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
           "last7DaysSessions": 0,
           "last28DaysSessions": 0,
           "totalPageViewsToday": 5
         },
         {
-          "domain": "woorinote.kr",
+          "domain": "topnote.kr",
           "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
           "last7DaysSessions": 0,
           "last28DaysSessions": 0,
-          "totalPageViewsToday": 4
-        },
-        {
-          "domain": "baronote.kr",
-          "todaySessions": 0,
-          "last7DaysSessions": 0,
-          "last28DaysSessions": 0,
-          "totalPageViewsToday": 2
-        },
-        {
-          "domain": "healthcox.com",
-          "todaySessions": 0,
-          "last7DaysSessions": 0,
-          "last28DaysSessions": 0,
-          "totalPageViewsToday": 2
-        },
-        {
-          "domain": "tripmarvel.com",
-          "todaySessions": 0,
-          "last7DaysSessions": 0,
-          "last28DaysSessions": 0,
-          "totalPageViewsToday": 2
-        },
-        {
-          "domain": "daynote.kr",
-          "todaySessions": 0,
-          "last7DaysSessions": 0,
-          "last28DaysSessions": 0,
-          "totalPageViewsToday": 1
+          "totalPageViewsToday": 3
         },
         {
           "domain": "justinfo.co.kr",
           "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
           "last7DaysSessions": 0,
           "last28DaysSessions": 0,
-          "totalPageViewsToday": 1
+          "totalPageViewsToday": 2
         },
         {
-          "domain": "nolplace.com",
+          "domain": "soulnote.kr",
           "todaySessions": 0,
+          "weekSessions": 0,
+          "monthSessions": 0,
           "last7DaysSessions": 0,
           "last28DaysSessions": 0,
-          "totalPageViewsToday": 1
+          "totalPageViewsToday": 2
         }
       ]
     },
     "totalSubscribers": 32,
     "renderedMp4Count": 3,
-    "publishedCommunityCount": 2,
+    "publishedCommunityCount": 5,
     "targetDailyShorts": 2,
     "targetCtrPct": 4.8,
-    "estimatedHighCpcRpmUsd": 12.5,
+    "estimatedHighCpcRpmUsd": null,
     "channelPerformance": [
       {
         "channel": "@yoon_autolab (윤랩 자동화 연구소)",
         "subscribers": 12,
-        "completedAssets": "SVML 쇼츠 2편 · 커뮤니티 2건",
-        "targetDomains": "meganote.kr · baronote.kr · justinfo.co.kr",
-        "conversionPath": "쇼츠 24초 시청 → 게시물(커뮤니티) 클릭 → CF 세무·IT 본진 유입",
-        "status": "🟢 가동 중 (대표 본진)"
+        "completedAssets": "Google Flow + SVML 쇼츠 2편 (AI 에이전트·바이브코딩) · 커뮤니티 5건",
+        "targetDomains": "meganote.kr · justinfo.co.kr · latpeed.com",
+        "conversionPath": "IT·AI·자동화 쇼츠 시청 → 게시물(커뮤니티) 아키텍처 클릭 → 테크 본진/디지털 프로덕트 유입",
+        "status": "🟢 가동 중 (IT/AI 본진)"
       },
       {
-        "channel": "@숨은지원금 (4060 정책 쇼츠)",
+        "channel": "@숨은지원금 (4060 정책·연금 쇼츠)",
         "subscribers": 2,
-        "completedAssets": "SVML 쇼츠 1편 (주택연금 12억 비교)",
+        "completedAssets": "Google Flow + SVML 쇼츠 1편 (주택연금 12억·우대형 20% 비교)",
         "targetDomains": "smilenote.kr · must-good.com · topnote.kr",
-        "conversionPath": "쇼츠 고정댓글 원문 링크 → CF 연금·환급금 계산기 직결",
-        "status": "🟢 가동 중 (쇼츠 특공대)"
+        "conversionPath": "4060 연금·환급 쇼츠 시청 → 고정댓글 원문 링크 → CF 정책·연금 계산기 직결",
+        "status": "🟢 가동 중 (4060 정책 전담)"
       },
       {
-        "channel": "@바로랭크 (쿠팡파트너스 랭킹)",
+        "channel": "@바로랭크 (쿠팡파트너스·테크 랭킹)",
         "subscribers": 18,
         "completedAssets": "기존 롱폼 2편 · 커뮤니티 브릿지 대기",
         "targetDomains": "healthcox.com · joynote.kr · nolplace.com",
-        "conversionPath": "쿠팡파트너스(AF1225691) 이관 완료 즉시 3단 가성비 쇼츠 재개",
+        "conversionPath": "쿠팡파트너스(AF1225691) 이관 완료 즉시 S/A/B 티어 쇼츠 재개",
         "status": "⏸️ 이관 대기 (커뮤니티 활성)"
       }
     ]

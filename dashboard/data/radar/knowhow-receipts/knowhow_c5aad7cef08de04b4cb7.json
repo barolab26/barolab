@@ -1,0 +1,43 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:c5aad7cef08de04b4cb7",
+  "recordedAt": "2026-11-02T07:33:24.039094+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.google.co.kr/index.html",
+  "externalSources": [
+    {
+      "title": "Google",
+      "url": "https://www.google.co.kr/index.html",
+      "source": "web_search"
+    },
+    {
+      "title": "어스 버전 – Google 어스",
+      "url": "https://www.google.co.kr/intl/ko_ALL/earth/versions/",
+      "source": "web_search"
+    },
+    {
+      "title": "Google Maps",
+      "url": "https://maps.google.co.kr/mapfiles/home3.html",
+      "source": "web_search"
+    },
+    {
+      "title": "Google 번역",
+      "url": "https://translate.google.co.kr/details",
+      "source": "web_search"
+    },
+    {
+      "title": "탐색 - Google 트렌드",
+      "url": "https://trends.google.co.kr/trends/explore",
+      "source": "web_search"
+    },
+    {
+      "title": "Google 도서검색",
+      "url": "https://books.google.co.kr/intl/ko/googlebooks/about.html",
+      "source": "web_search"
+    }
+  ],
+  "title": "할인율보다 결제액을 먼저 보여주는 행사 비교법",
+  "factCheckSummary": "2026-11-02 16:33 KST에 수집된 정책브리핑 후보 제목에는 한우·수산물·의류 ‘최대 50% 할인’이 표시됐다. 출처: https://www.korea.kr/news/policyNewsView.do?newsId=148974363. 상세 본문, 행사 기간, 품목별 할인율·한도·중복 적용 조건은 확인되지 않았다. 제공된 검색 결과는 네이버 상위 문서가 아니므로 1위 문서의 후킹 방식은 분석할 수 없다. 검색량·경쟁도·키워드 RPM·수익 효과도 미확인이다.",
+  "evidenceText": "할인율보다 결제액을 먼저 보여주는 행사 비교법\n2026-11-02 16:33 KST에 수집된 정책브리핑 후보 제목에는 한우·수산물·의류 ‘최대 50% 할인’이 표시됐다. 출처: https://www.korea.kr/news/policyNewsView.do?newsId=148974363. 상세 본문, 행사 기간, 품목별 할인율·한도·중복 적용 조건은 확인되지 않았다. 제공된 검색 결과는 네이버 상위 문서가 아니므로 1위 문서의 후킹 방식은 분석할 수 없다. 검색량·경쟁도·키워드 RPM·수익 효과도 미확인이다.\n1. 정책브리핑 원문과 연결된 공식 행사 안내에서 게시일, 행사 기간, 참여 매장, 품목별 할인율, 할인 한도, 중복 적용 조건과 예외를 확인하고 URL·확인 시각을 기록한다. 확인되지 않은 항목은 미확인으로 둔다. 2. 확인된 품목만 ‘품목 | 정가 | 적용 할인율 | 할인 한도 | 중복 조건 | 예상 결제액’ 표에 넣는다. 예상 결제액은 실제 적용 조건에 따라 계산하고, 서로 다른 조건의 최대 할인율을 전 품목에 적용하지 않는다. 3. 제목은 ‘[품목] 최대 할인, 내 장바구니엔 얼마 적용될까?’로 구성한다. 첫 3줄에는 행사 기간, 해당 품목·매장, 할인 한도와 예상 결제액을 확인된 범위에서 제시한다. 이는 실험용 문안이며 상위 1위 문서에서 검증된 공식은 아니다. 4. CF에는 비교표와 조건별 계산 예시를, 네이버에는 대표 품목 하나의 완결형 비교와 관련 CF 링크를, 지식iN에는 실제 질문에 맞는 답변과 필요한 출처를, Threads에는 확인된 조건 한 가지와 관련 링크를, 브런치에는 소비 의사결정 맥락을 재구성한다. 5. 품목별 ‘할인 한도’, ‘중복 할인’, ‘참여 매장’으로 파생 주제를 만들고 검색량·경쟁·RPM 확인 전까지 고단가 황금키워드가 아닌 후보로 기록한다. 발행 후 채널별 공개 여부와 실제 유입을 별도로 확인한다.\n공식 자료에서 품목별 가격과 할인 조건을 확인할 수 있고, 독자가 구매 전 결제액을 비교하려는 행사형 콘텐츠를 기획할 때 사용한다. 이번 후보는 원문 검증 전 단계다."
+}

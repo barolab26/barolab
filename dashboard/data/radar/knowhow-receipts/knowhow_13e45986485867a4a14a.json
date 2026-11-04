@@ -1,0 +1,43 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:13e45986485867a4a14a",
+  "recordedAt": "2026-11-02T16:12:20.558629+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://namu.wiki/w/%EB%B3%B8%EC%9D%B8",
+  "externalSources": [
+    {
+      "title": "본인 - 나무위키",
+      "url": "https://namu.wiki/w/%EB%B3%B8%EC%9D%B8",
+      "source": "web_search"
+    },
+    {
+      "title": "[짧은글] 잘못 쓰는 말 ' 본인 '에 대해 - 네이버 블로그",
+      "url": "https://m.blog.naver.com/ceres702/220273710521",
+      "source": "web_search"
+    },
+    {
+      "title": "본인 - 나무위키",
+      "url": "https://namu.wiki/w/%EB%B3%B8%EC%9D%B8?from=%EC%9E%90%EC%8B%A0",
+      "source": "web_search"
+    },
+    {
+      "title": "본인 서명사실확인서 발급 | 민원안내 및 신청 | 정부24",
+      "url": "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13110000047&tp_seq=01",
+      "source": "web_search"
+    },
+    {
+      "title": "본인 뜻 - 본인 의미 - iChaCha사전",
+      "url": "https://ko.ichacha.net/korean/%EB%B3%B8%EC%9D%B8.html",
+      "source": "web_search"
+    },
+    {
+      "title": "\" 본인 (本人)\"의 뜻 몇 가지.",
+      "url": "https://amuna422.tistory.com/16889219",
+      "source": "web_search"
+    }
+  ],
+  "title": "환급금과 실손보험의 관계를 ‘내 돈 판별표’로 풀어내는 원고 실험",
+  "factCheckSummary": "제공 자료는 2026-11-03 01:11 KST에 수집된 한양경제 기사 제목과 피드만 확인한 것이다. 기사 본문·대법원 판결문·공식 정책 자료는 확인되지 않았다. 검색 결과도 ‘본인’에 관한 무관한 문서여서 네이버 1위나 상위 문서의 후킹 공식을 분석할 수 없다. 블로키 등급·검색량·경쟁도·키워드 RPM·수익 효과도 미확인이다.",
+  "evidenceText": "환급금과 실손보험의 관계를 ‘내 돈 판별표’로 풀어내는 원고 실험\n제공 자료는 2026-11-03 01:11 KST에 수집된 한양경제 기사 제목과 피드만 확인한 것이다. 기사 본문·대법원 판결문·공식 정책 자료는 확인되지 않았다. 검색 결과도 ‘본인’에 관한 무관한 문서여서 네이버 1위나 상위 문서의 후킹 공식을 분석할 수 없다. 블로키 등급·검색량·경쟁도·키워드 RPM·수익 효과도 미확인이다.\n1. 기사 원문에서 판결 날짜·사건번호·적용된 보험 약관과 환급금 관련 쟁점을 찾고, 대법원 판결문 및 국민건강보험공단의 상한제 안내와 대조한다. 확인 전에는 환급금이 모든 실손보험의 보상 대상에서 제외된다고 단정하지 않는다. 기사 피드: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5. 2. ‘본인부담상한제 환급금 실손보험’으로 네이버를 검색해 시각과 실제 1위 URL을 기록하고, 첫 문장·줄바꿈·질문 제시 방식을 관찰한다. 그 후 표현은 새로 쓰되 제목 후보를 ‘환급금 받으면 실손보험금은 어떻게 될까? 판결·약관별 확인표’로 시험한다. 3. CF 원고 첫 3줄에는 ‘환급 안내를 받았나요? 실손 청구 전 판결 적용 범위와 가입 약관을 함께 확인하세요’라는 질문과 확인 동선을 둔다. 표는 ‘확인 항목 | 내 자료 | 결과에 영향을 주는 조건 | 근거’로 만들고 진료비·상한액·환급액·보험금은 검증된 자료가 있을 때만 입력한다. 예시 금액을 실제 절감액처럼 표시하지 않는다. 4. 같은 근거로 네이버에는 독립적으로 질문을 해결하는 요약을, 지식iN에는 질문별 맞춤 답변을, Threads에는 핵심 질문과 관련 근거 링크를, 브런치에는 환급과 보험금 확인 과정의 사례형 설명을 구성한다. 5. 파생 주제는 가입 시기별 약관 차이, 환급액 확인 절차, 이미 지급된 보험금 관련 쟁점으로 나누되 각각 공식 근거와 실제 수요를 확인한 뒤 제작한다. 게시 후 채널별 조회·클릭·수익을 기간과 함께 따로 측정한다.\n원문 판결과 약관의 적용 범위를 확인하고, 관련 네이버 검색 결과 및 블로키 데이터를 확보한 뒤 woorinote.kr과 각 채널의 원고 기획에 사용한다. 현재는 발행 전 가설이며 고단가·상위노출·수익 달성을 뜻하지 않는다."
+}

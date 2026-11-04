@@ -1,38 +1,193 @@
 {
-  "checkedAt": "2026-11-01T16:16:28+09:00",
+  "checkedAt": "2026-11-04T20:00:38+09:00",
   "cdpPort": 9440,
   "criteria": {
     "minSearchVolume": 300,
     "maxDocCount": 220,
     "minGoldenRate": 15
   },
-  "totalQualified": 1857,
+  "totalQualified": 1922,
   "topKeywords": [
     {
-      "keyword": "심페리카 트리오가격",
-      "totalSearch": 3200,
-      "pcSearch": 80,
-      "mobileSearch": 3120,
-      "docCount": 3,
-      "goldenRate": 1066.7,
+      "keyword": "비피돌 구강유산균",
+      "totalSearch": 10020,
+      "pcSearch": 280,
+      "mobileSearch": 9740,
+      "docCount": 14,
+      "goldenRate": 715.7,
       "grade": "S",
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "비피돌 구강유산균",
+          "total": 10020,
+          "doc": 14
+        }
+      }
     },
     {
-      "keyword": "심페리카트리오",
-      "totalSearch": 5190,
-      "pcSearch": 180,
-      "mobileSearch": 5010,
-      "docCount": 6,
-      "goldenRate": 865.0,
+      "keyword": "차요태효능",
+      "totalSearch": 8530,
+      "pcSearch": 270,
+      "mobileSearch": 8260,
+      "docCount": 1168,
+      "goldenRate": 7.3,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "차요태효능",
+          "total": 8530,
+          "doc": 1168
+        }
+      }
+    },
+    {
+      "keyword": "청년미래적금",
+      "totalSearch": 852900,
+      "pcSearch": 156900,
+      "mobileSearch": 696000,
+      "docCount": 161731,
+      "goldenRate": 5.3,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "네이버",
+      "categories": [
+        "비즈니스·경제"
+      ],
+      "demos": [
+        "m-03"
+      ],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "청년미래적금",
+          "total": 852900,
+          "doc": 161731
+        }
+      }
+    },
+    {
+      "keyword": "젓산 마그네슘효능",
+      "totalSearch": 820,
+      "pcSearch": 10,
+      "mobileSearch": 810,
+      "docCount": 187,
+      "goldenRate": 4.4,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "젓산 마그네슘효능",
+          "total": 820,
+          "doc": 187
+        }
+      }
+    },
+    {
+      "keyword": "청년미래적금 2차",
+      "totalSearch": 178800,
+      "pcSearch": 37600,
+      "mobileSearch": 141200,
+      "docCount": 56707,
+      "goldenRate": 3.2,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "청년미래적금 2차",
+          "total": 178800,
+          "doc": 56707
+        }
+      }
+    },
+    {
+      "keyword": "차요태 요리법",
+      "totalSearch": 4590,
+      "pcSearch": 120,
+      "mobileSearch": 4470,
+      "docCount": 1474,
+      "goldenRate": 3.1,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "네이버",
+      "categories": [
+        "원예·재배"
+      ],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "차요태 요리법",
+          "total": 4590,
+          "doc": 1474
+        }
+      }
+    },
+    {
+      "keyword": "아큐스터 부작용",
+      "totalSearch": 10440,
+      "pcSearch": 890,
+      "mobileSearch": 9550,
+      "docCount": 54,
+      "goldenRate": 193.3,
       "grade": "S",
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "아큐스터 부작용",
+          "total": 10440,
+          "doc": 54
+        }
+      }
     },
     {
       "keyword": "세이브텍스 환급금 뜻",
@@ -45,7 +200,19 @@
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "세이브텍스 환급금 뜻",
+          "total": 850,
+          "doc": 7
+        }
+      }
     },
     {
       "keyword": "삼점삼 병원비 환급금",
@@ -58,59 +225,244 @@
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "삼점삼 병원비 환급금",
+          "total": 450,
+          "doc": 4
+        }
+      }
     },
     {
-      "keyword": "26년햇들깨가격",
-      "totalSearch": 2910,
+      "keyword": "허그 든든전세 11차",
+      "totalSearch": 1460,
+      "pcSearch": 350,
+      "mobileSearch": 1110,
+      "docCount": 22,
+      "goldenRate": 66.4,
+      "grade": "S",
+      "bucket": "cumulative",
+      "sourceLabel": "누적",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "허그 든든전세 11차",
+          "total": 1460,
+          "doc": 22
+        }
+      }
+    },
+    {
+      "keyword": "박경림 루테인",
+      "totalSearch": 500,
       "pcSearch": 70,
-      "mobileSearch": 2840,
-      "docCount": 12,
-      "goldenRate": 242.5,
-      "grade": "S",
-      "bucket": "live_trend",
-      "sourceLabel": "연관",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "홍금동물병원",
-      "totalSearch": 11650,
-      "pcSearch": 1150,
-      "mobileSearch": 10500,
-      "docCount": 113,
-      "goldenRate": 103.1,
+      "mobileSearch": 430,
+      "docCount": 10,
+      "goldenRate": 50.0,
       "grade": "S",
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "박경림 루테인",
+          "total": 500,
+          "doc": 10
+        }
+      }
     },
     {
-      "keyword": "탄항좌대 가격",
-      "totalSearch": 1150,
-      "pcSearch": 160,
-      "mobileSearch": 990,
-      "docCount": 3,
-      "goldenRate": 383.3,
+      "keyword": "마운엑스 부작용",
+      "totalSearch": 620,
+      "pcSearch": 20,
+      "mobileSearch": 600,
+      "docCount": 13,
+      "goldenRate": 47.7,
       "grade": "S",
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "마운엑스 부작용",
+          "total": 620,
+          "doc": 13
+        }
+      }
     },
     {
-      "keyword": "아우디 A5 850만원 할인 후기",
-      "totalSearch": 2560,
+      "keyword": "파다그정 부작용",
+      "totalSearch": 370,
       "pcSearch": 10,
-      "mobileSearch": 2550,
-      "docCount": 9,
-      "goldenRate": 284.4,
+      "mobileSearch": 360,
+      "docCount": 11,
+      "goldenRate": 33.6,
       "grade": "S",
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "파다그정 부작용",
+          "total": 370,
+          "doc": 11
+        }
+      }
+    },
+    {
+      "keyword": "박경림 오메가3",
+      "totalSearch": 990,
+      "pcSearch": 130,
+      "mobileSearch": 860,
+      "docCount": 33,
+      "goldenRate": 30.0,
+      "grade": "S",
+      "bucket": "cumulative",
+      "sourceLabel": "누적",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "박경림 오메가3",
+          "total": 990,
+          "doc": 33
+        }
+      }
+    },
+    {
+      "keyword": "2027 그랜저 모의견적",
+      "totalSearch": 101300,
+      "pcSearch": 19000,
+      "mobileSearch": 82300,
+      "docCount": 47,
+      "goldenRate": 2155.3,
+      "grade": "S",
+      "bucket": "cumulative",
+      "sourceLabel": "누적",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "2027 그랜저 모의견적",
+          "total": 101300,
+          "doc": 47
+        }
+      }
+    },
+    {
+      "keyword": "올리브영 고유가지원금",
+      "totalSearch": 41190,
+      "pcSearch": 2190,
+      "mobileSearch": 39000,
+      "docCount": 903,
+      "goldenRate": 45.6,
+      "grade": "S",
+      "bucket": "cumulative",
+      "sourceLabel": "누적",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "올리브영 고유가지원금",
+          "total": 41190,
+          "doc": 903
+        }
+      }
+    },
+    {
+      "keyword": "제네시스 GV90 예상 가격 13억~3억",
+      "totalSearch": 13600,
+      "pcSearch": 200,
+      "mobileSearch": 13400,
+      "docCount": 25,
+      "goldenRate": 544.0,
+      "grade": "S",
+      "bucket": "cumulative",
+      "sourceLabel": "누적",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "제네시스 GV90 예상 가격 13억~3억",
+          "total": 13600,
+          "doc": 25
+        }
+      }
+    },
+    {
+      "keyword": "대출 계산기",
+      "totalSearch": 359300,
+      "pcSearch": 107400,
+      "mobileSearch": 251900,
+      "docCount": 10162,
+      "goldenRate": 35.4,
+      "grade": "S",
+      "bucket": "cumulative",
+      "sourceLabel": "누적",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "대출 계산기",
+          "total": 359300,
+          "doc": 10162
+        }
+      }
     },
     {
       "keyword": "아이폰18 폴더 블",
@@ -123,396 +475,564 @@
       "bucket": "cumulative",
       "sourceLabel": "누적",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "아이폰18 폴더 블",
+          "total": 19290,
+          "doc": 76
+        }
+      }
     },
     {
-      "keyword": "기아 이호연 프로필",
-      "totalSearch": 14620,
-      "pcSearch": 720,
-      "mobileSearch": 13900,
-      "docCount": 67,
-      "goldenRate": 218.2,
-      "grade": "S",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "셀라이징 크림 후기",
-      "totalSearch": 5470,
-      "pcSearch": 1740,
-      "mobileSearch": 3730,
-      "docCount": 38,
-      "goldenRate": 143.9,
-      "grade": "S",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "선약국 화상연고 구매",
-      "totalSearch": 4420,
-      "pcSearch": 360,
-      "mobileSearch": 4060,
-      "docCount": 36,
-      "goldenRate": 122.8,
-      "grade": "S",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "심패리카 트리오",
-      "totalSearch": 7110,
-      "pcSearch": 460,
-      "mobileSearch": 6650,
-      "docCount": 61,
-      "goldenRate": 116.6,
-      "grade": "S",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [
-        "반려동물"
-      ],
-      "demos": []
-    },
-    {
-      "keyword": "허그 든든전세 11차",
-      "totalSearch": 1460,
-      "pcSearch": 350,
-      "mobileSearch": 1110,
-      "docCount": 22,
-      "goldenRate": 66.4,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "리드코프 논스톱대출",
-      "totalSearch": 1180,
-      "pcSearch": 110,
-      "mobileSearch": 1070,
-      "docCount": 31,
-      "goldenRate": 38.1,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "처음처럼 20주년 패키지 구매",
-      "totalSearch": 2040,
-      "pcSearch": 20,
-      "mobileSearch": 2020,
-      "docCount": 27,
-      "goldenRate": 75.6,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "노대도 탄항 좌대 가격",
-      "totalSearch": 430,
-      "pcSearch": 80,
-      "mobileSearch": 350,
-      "docCount": 6,
-      "goldenRate": 71.7,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "스웰리스정 가격",
-      "totalSearch": 960,
-      "pcSearch": 40,
-      "mobileSearch": 920,
-      "docCount": 20,
-      "goldenRate": 48.0,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "디플러스기아 갤러리",
-      "totalSearch": 3010,
-      "pcSearch": 300,
-      "mobileSearch": 2710,
-      "docCount": 63,
-      "goldenRate": 47.8,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "당진 로드인드림스 가격",
-      "totalSearch": 330,
-      "pcSearch": 10,
-      "mobileSearch": 320,
-      "docCount": 7,
-      "goldenRate": 47.1,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "KBO 우표 구매방법",
-      "totalSearch": 1070,
-      "pcSearch": 180,
-      "mobileSearch": 890,
-      "docCount": 28,
-      "goldenRate": 38.2,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "영주 아레아호텔",
-      "totalSearch": 470,
-      "pcSearch": 50,
-      "mobileSearch": 420,
-      "docCount": 13,
-      "goldenRate": 36.2,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "비브 인프라임 후기",
-      "totalSearch": 1670,
-      "pcSearch": 290,
-      "mobileSearch": 1380,
-      "docCount": 50,
-      "goldenRate": 33.4,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "해원 매화도령 후기",
-      "totalSearch": 1030,
-      "pcSearch": 10,
-      "mobileSearch": 1020,
-      "docCount": 31,
-      "goldenRate": 33.2,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "경제총조사 조사원 후기",
-      "totalSearch": 1190,
-      "pcSearch": 270,
-      "mobileSearch": 920,
-      "docCount": 36,
-      "goldenRate": 33.1,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "아시모토 노젠ex 후기",
-      "totalSearch": 5770,
-      "pcSearch": 640,
-      "mobileSearch": 5130,
-      "docCount": 88,
-      "goldenRate": 65.6,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "릴 토니노 후기",
-      "totalSearch": 4700,
-      "pcSearch": 430,
-      "mobileSearch": 4270,
-      "docCount": 89,
-      "goldenRate": 52.8,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "아이코스 비브 후기",
-      "totalSearch": 5510,
-      "pcSearch": 1060,
-      "mobileSearch": 4450,
-      "docCount": 131,
-      "goldenRate": 42.1,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
-      "categories": [],
-      "demos": []
-    },
-    {
-      "keyword": "최불암 장례 미사 추도",
-      "totalSearch": 10110,
-      "pcSearch": 10,
-      "mobileSearch": 10100,
-      "docCount": 30,
-      "goldenRate": 337.0,
+      "keyword": "갤럭시 s27",
+      "totalSearch": 144000,
+      "pcSearch": 28400,
+      "mobileSearch": 115600,
+      "docCount": 11914,
+      "goldenRate": 12.1,
       "grade": "S",
       "bucket": "live_trend",
       "sourceLabel": "네이버",
       "categories": [
-        "좋은글·이미지"
+        "IT·컴퓨터"
       ],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "갤럭시 s27",
+          "total": 144000,
+          "doc": 11914
+        }
+      }
     },
     {
-      "keyword": "제니시스 gv90 가격",
-      "totalSearch": 3030,
-      "pcSearch": 370,
-      "mobileSearch": 2660,
-      "docCount": 87,
-      "goldenRate": 34.8,
-      "grade": "A",
-      "bucket": "cumulative",
-      "sourceLabel": "누적",
+      "keyword": "테슬라 로드스터",
+      "totalSearch": 241600,
+      "pcSearch": 62500,
+      "mobileSearch": 179100,
+      "docCount": 25812,
+      "goldenRate": 9.4,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
       "categories": [],
-      "demos": []
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "테슬라 로드스터",
+          "total": 241600,
+          "doc": 25812
+        }
+      }
+    },
+    {
+      "keyword": "투싼 2027",
+      "totalSearch": 186000,
+      "pcSearch": 31800,
+      "mobileSearch": 154200,
+      "docCount": 21365,
+      "goldenRate": 8.7,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "투싼 2027",
+          "total": 186000,
+          "doc": 21365
+        }
+      }
+    },
+    {
+      "keyword": "테슬라 yL",
+      "totalSearch": 74400,
+      "pcSearch": 13100,
+      "mobileSearch": 61300,
+      "docCount": 21828,
+      "goldenRate": 3.4,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "테슬라 yL",
+          "total": 74400,
+          "doc": 21828
+        }
+      }
+    },
+    {
+      "keyword": "갤럭시 핏4 출시 예정",
+      "totalSearch": 15580,
+      "pcSearch": 2680,
+      "mobileSearch": 12900,
+      "docCount": 4742,
+      "goldenRate": 3.3,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "갤럭시 핏4 출시 예정",
+          "total": 15580,
+          "doc": 4742
+        }
+      }
+    },
+    {
+      "keyword": "갤럭시 s27 출시일",
+      "totalSearch": 23230,
+      "pcSearch": 4830,
+      "mobileSearch": 18400,
+      "docCount": 7761,
+      "goldenRate": 3.0,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "갤럭시 s27 출시일",
+          "total": 23230,
+          "doc": 7761
+        }
+      }
+    },
+    {
+      "keyword": "패스포트 양주",
+      "totalSearch": 2190,
+      "pcSearch": 380,
+      "mobileSearch": 1810,
+      "docCount": 988,
+      "goldenRate": 2.2,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "패스포트 양주",
+          "total": 2190,
+          "doc": 988
+        }
+      }
+    },
+    {
+      "keyword": "마나도 항공권",
+      "totalSearch": 6770,
+      "pcSearch": 1260,
+      "mobileSearch": 5510,
+      "docCount": 3244,
+      "goldenRate": 2.1,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "마나도 항공권",
+          "total": 6770,
+          "doc": 3244
+        }
+      }
+    },
+    {
+      "keyword": "GV80하이브리드",
+      "totalSearch": 200900,
+      "pcSearch": 39900,
+      "mobileSearch": 161000,
+      "docCount": 97342,
+      "goldenRate": 2.1,
+      "grade": "S",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "GV80하이브리드",
+          "total": 200900,
+          "doc": 97342
+        }
+      }
+    },
+    {
+      "keyword": "차요태 부작용",
+      "totalSearch": 300,
+      "pcSearch": 10,
+      "mobileSearch": 290,
+      "docCount": 223,
+      "goldenRate": 1.3,
+      "grade": "A",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "차요태 부작용",
+          "total": 300,
+          "doc": 223
+        }
+      }
+    },
+    {
+      "keyword": "젖산 마그네슘 효능",
+      "totalSearch": 24980,
+      "pcSearch": 1180,
+      "mobileSearch": 23800,
+      "docCount": 18970,
+      "goldenRate": 1.3,
+      "grade": "A",
+      "bucket": "live_trend",
+      "sourceLabel": "연관",
+      "categories": [],
+      "demos": [],
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "젖산 마그네슘 효능",
+          "total": 24980,
+          "doc": 18970
+        }
+      }
     }
   ],
   "naverAssignments": {
     "soul5373": [
       {
-        "keyword": "심페리카 트리오가격",
-        "totalSearch": 3200,
-        "pcSearch": 80,
-        "mobileSearch": 3120,
-        "docCount": 3,
-        "goldenRate": 1066.7,
+        "keyword": "비피돌 구강유산균",
+        "totalSearch": 10020,
+        "pcSearch": 280,
+        "mobileSearch": 9740,
+        "docCount": 14,
+        "goldenRate": 715.7,
         "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "비피돌 구강유산균",
+            "total": 10020,
+            "doc": 14
+          }
+        }
       },
       {
-        "keyword": "심페리카트리오",
-        "totalSearch": 5190,
-        "pcSearch": 180,
-        "mobileSearch": 5010,
-        "docCount": 6,
-        "goldenRate": 865.0,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "삼점삼 병원비 환급금",
-        "totalSearch": 450,
-        "pcSearch": 40,
-        "mobileSearch": 410,
-        "docCount": 4,
-        "goldenRate": 112.5,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "홍금동물병원",
-        "totalSearch": 11650,
-        "pcSearch": 1150,
-        "mobileSearch": 10500,
-        "docCount": 113,
-        "goldenRate": 103.1,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "yoon_master": [
-      {
-        "keyword": "26년햇들깨가격",
-        "totalSearch": 2910,
-        "pcSearch": 70,
-        "mobileSearch": 2840,
-        "docCount": 12,
-        "goldenRate": 242.5,
+        "keyword": "차요태효능",
+        "totalSearch": 8530,
+        "pcSearch": 270,
+        "mobileSearch": 8260,
+        "docCount": 1168,
+        "goldenRate": 7.3,
         "grade": "S",
         "bucket": "live_trend",
         "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "차요태효능",
+            "total": 8530,
+            "doc": 1168
+          }
+        }
       },
       {
-        "keyword": "탄항좌대 가격",
-        "totalSearch": 1150,
-        "pcSearch": 160,
-        "mobileSearch": 990,
-        "docCount": 3,
-        "goldenRate": 383.3,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "아우디 A5 850만원 할인 후기",
-        "totalSearch": 2560,
+        "keyword": "젓산 마그네슘효능",
+        "totalSearch": 820,
         "pcSearch": 10,
-        "mobileSearch": 2550,
-        "docCount": 9,
-        "goldenRate": 284.4,
+        "mobileSearch": 810,
+        "docCount": 187,
+        "goldenRate": 4.4,
         "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "젓산 마그네슘효능",
+            "total": 820,
+            "doc": 187
+          }
+        }
       },
       {
-        "keyword": "아이폰18 폴더 블",
-        "totalSearch": 19290,
-        "pcSearch": 4090,
-        "mobileSearch": 15200,
-        "docCount": 76,
-        "goldenRate": 253.8,
+        "keyword": "차요태 요리법",
+        "totalSearch": 4590,
+        "pcSearch": 120,
+        "mobileSearch": 4470,
+        "docCount": 1474,
+        "goldenRate": 3.1,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "네이버",
+        "categories": [
+          "원예·재배"
+        ],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "차요태 요리법",
+            "total": 4590,
+            "doc": 1474
+          }
+        }
+      }
+    ],
+    "yoon_master": [
+      {
+        "keyword": "2027 그랜저 모의견적",
+        "totalSearch": 101300,
+        "pcSearch": 19000,
+        "mobileSearch": 82300,
+        "docCount": 47,
+        "goldenRate": 2155.3,
         "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "2027 그랜저 모의견적",
+            "total": 101300,
+            "doc": 47
+          }
+        }
+      },
+      {
+        "keyword": "제네시스 GV90 예상 가격 13억~3억",
+        "totalSearch": 13600,
+        "pcSearch": 200,
+        "mobileSearch": 13400,
+        "docCount": 25,
+        "goldenRate": 544.0,
+        "grade": "S",
+        "bucket": "cumulative",
+        "sourceLabel": "누적",
+        "categories": [],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "제네시스 GV90 예상 가격 13억~3억",
+            "total": 13600,
+            "doc": 25
+          }
+        }
+      },
+      {
+        "keyword": "갤럭시 s27",
+        "totalSearch": 144000,
+        "pcSearch": 28400,
+        "mobileSearch": 115600,
+        "docCount": 11914,
+        "goldenRate": 12.1,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "네이버",
+        "categories": [
+          "IT·컴퓨터"
+        ],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 s27",
+            "total": 144000,
+            "doc": 11914
+          }
+        }
+      },
+      {
+        "keyword": "테슬라 로드스터",
+        "totalSearch": 241600,
+        "pcSearch": 62500,
+        "mobileSearch": 179100,
+        "docCount": 25812,
+        "goldenRate": 9.4,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
+        "categories": [],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "테슬라 로드스터",
+            "total": 241600,
+            "doc": 25812
+          }
+        }
       }
     ],
     "soultin": [
+      {
+        "keyword": "청년미래적금",
+        "totalSearch": 852900,
+        "pcSearch": 156900,
+        "mobileSearch": 696000,
+        "docCount": 161731,
+        "goldenRate": 5.3,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "네이버",
+        "categories": [
+          "비즈니스·경제"
+        ],
+        "demos": [
+          "m-03"
+        ],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "청년미래적금",
+            "total": 852900,
+            "doc": 161731
+          }
+        }
+      },
+      {
+        "keyword": "청년미래적금 2차",
+        "totalSearch": 178800,
+        "pcSearch": 37600,
+        "mobileSearch": 141200,
+        "docCount": 56707,
+        "goldenRate": 3.2,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
+        "categories": [],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "청년미래적금 2차",
+            "total": 178800,
+            "doc": 56707
+          }
+        }
+      }
+    ],
+    "stone0747": [
       {
         "keyword": "세이브텍스 환급금 뜻",
         "totalSearch": 850,
@@ -524,154 +1044,146 @@
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "세이브텍스 환급금 뜻",
+            "total": 850,
+            "doc": 7
+          }
+        }
       },
       {
-        "keyword": "의정부 홈플러스 폐점 일정",
-        "totalSearch": 2390,
-        "pcSearch": 210,
-        "mobileSearch": 2180,
-        "docCount": 82,
-        "goldenRate": 29.1,
-        "grade": "B",
+        "keyword": "올리브영 고유가지원금",
+        "totalSearch": 41190,
+        "pcSearch": 2190,
+        "mobileSearch": 39000,
+        "docCount": 903,
+        "goldenRate": 45.6,
+        "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "국민연금 조기수령 감액률 손익분기점 계산",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "퇴직 후 건강보험 임의계속가입 피부양자 비교",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "stone0747": [
-      {
-        "keyword": "청년월세 한시 특별지원 이체확인증 보증금 기준",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "근로장려금 반기신청 지급일 재산 감액 기준",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "국민취업지원제도 1유형 구직촉진수당 알바 소득",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "가족돌봄수당 신청 자격 조부모 손주 돌봄비",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "올리브영 고유가지원금",
+            "total": 41190,
+            "doc": 903
+          }
+        }
       }
     ],
     "adinfo0905": [
       {
-        "keyword": "허그 든든전세 11차",
-        "totalSearch": 1460,
-        "pcSearch": 350,
-        "mobileSearch": 1110,
-        "docCount": 22,
-        "goldenRate": 66.4,
-        "grade": "A",
+        "keyword": "대출 계산기",
+        "totalSearch": 359300,
+        "pcSearch": 107400,
+        "mobileSearch": 251900,
+        "docCount": 10162,
+        "goldenRate": 35.4,
+        "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "대출 계산기",
+            "total": 359300,
+            "doc": 10162
+          }
+        }
       },
       {
-        "keyword": "리드코프 논스톱대출",
-        "totalSearch": 1180,
-        "pcSearch": 110,
-        "mobileSearch": 1070,
-        "docCount": 31,
-        "goldenRate": 38.1,
+        "keyword": "네이버페이 부동산",
+        "totalSearch": 128800,
+        "pcSearch": 35200,
+        "mobileSearch": 93600,
+        "docCount": 104156,
+        "goldenRate": 1.2,
         "grade": "A",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "네이버페이 부동산",
+            "total": 128800,
+            "doc": 104156
+          }
+        }
       },
       {
-        "keyword": "청년주택드림 청약통장 전환 조건 우대금리",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
+        "keyword": "청년미래적금 신청",
+        "totalSearch": 108500,
+        "pcSearch": 17600,
+        "mobileSearch": 90900,
+        "docCount": 114875,
+        "goldenRate": 0.9,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "청년미래적금 신청",
+            "total": 108500,
+            "doc": 114875
+          }
+        }
       },
       {
-        "keyword": "버팀목 전세자금대출 연장 금리 상환 조건",
-        "totalSearch": 4500,
-        "pcSearch": 1200,
-        "mobileSearch": 3300,
-        "docCount": 35,
-        "goldenRate": 128.6,
-        "grade": "S",
-        "bucket": "niche_high_cpc",
-        "sourceLabel": "고단가 검증 키워드",
+        "keyword": "청년미래적금 조건",
+        "totalSearch": 48100,
+        "pcSearch": 10400,
+        "mobileSearch": 37700,
+        "docCount": 122232,
+        "goldenRate": 0.4,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "청년미래적금 조건",
+            "total": 48100,
+            "doc": 122232
+          }
+        }
       }
     ]
   },
@@ -684,37 +1196,48 @@
         "mobileSearch": 1110,
         "docCount": 22,
         "goldenRate": 66.4,
-        "grade": "A",
+        "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "허그 든든전세 11차",
+            "total": 1460,
+            "doc": 22
+          }
+        }
       },
       {
-        "keyword": "전세보증보험 가입조건 HUG HF 비교",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "네이버페이 부동산",
+        "totalSearch": 128800,
+        "pcSearch": 35200,
+        "mobileSearch": 93600,
+        "docCount": 104156,
+        "goldenRate": 1.2,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "오피스텔 취득세 감면 주거용 업무용 차이",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "네이버페이 부동산",
+            "total": 128800,
+            "doc": 104156
+          }
+        }
       }
     ],
     "must-good.com": [
@@ -729,7 +1252,19 @@
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "세이브텍스 환급금 뜻",
+            "total": 850,
+            "doc": 7
+          }
+        }
       },
       {
         "keyword": "삼점삼 병원비 환급금",
@@ -742,20 +1277,44 @@
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "삼점삼 병원비 환급금",
+            "total": 450,
+            "doc": 4
+          }
+        }
       },
       {
-        "keyword": "부모급여 가정양육수당 어린이집 전환 차액",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "올리브영 고유가지원금",
+        "totalSearch": 41190,
+        "pcSearch": 2190,
+        "mobileSearch": 39000,
+        "docCount": 903,
+        "goldenRate": 45.6,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "cumulative",
+        "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "올리브영 고유가지원금",
+            "total": 41190,
+            "doc": 903
+          }
+        }
       }
     ],
     "must-pick.com": [
@@ -770,405 +1329,384 @@
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "아이폰18 폴더 블",
+            "total": 19290,
+            "doc": 76
+          }
+        }
       },
       {
-        "keyword": "로봇청소기 올인원 열풍건조 스펙 비교",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "갤럭시 s27",
+        "totalSearch": 144000,
+        "pcSearch": 28400,
+        "mobileSearch": 115600,
+        "docCount": 11914,
+        "goldenRate": 12.1,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "bucket": "live_trend",
+        "sourceLabel": "네이버",
+        "categories": [
+          "IT·컴퓨터"
+        ],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 s27",
+            "total": 144000,
+            "doc": 11914
+          }
+        }
       },
       {
-        "keyword": "에너지소비효율 1등급 제습기 제습량 비교",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "갤럭시 핏4 출시 예정",
+        "totalSearch": 15580,
+        "pcSearch": 2680,
+        "mobileSearch": 12900,
+        "docCount": 4742,
+        "goldenRate": 3.3,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 핏4 출시 예정",
+            "total": 15580,
+            "doc": 4742
+          }
+        }
       }
     ],
     "baronote.kr": [
       {
-        "keyword": "리드코프 논스톱대출",
-        "totalSearch": 1180,
-        "pcSearch": 110,
-        "mobileSearch": 1070,
-        "docCount": 31,
-        "goldenRate": 38.1,
-        "grade": "A",
+        "keyword": "대출 계산기",
+        "totalSearch": 359300,
+        "pcSearch": 107400,
+        "mobileSearch": 251900,
+        "docCount": 10162,
+        "goldenRate": 35.4,
+        "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "대출 계산기",
+            "total": 359300,
+            "doc": 10162
+          }
+        }
       },
       {
-        "keyword": "퇴직연금 DC형 IRP 수령 일시금 연금 세율",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "네이버페이 머니카드",
+        "totalSearch": 29780,
+        "pcSearch": 6280,
+        "mobileSearch": 23500,
+        "docCount": 88968,
+        "goldenRate": 0.3,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "네이버페이 머니카드",
+            "total": 29780,
+            "doc": 88968
+          }
+        }
       },
       {
-        "keyword": "주택담보대출 대환 중도상환수수료 면제 시점",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "혼례비대출",
+        "totalSearch": 1700,
+        "pcSearch": 450,
+        "mobileSearch": 1250,
+        "docCount": 5563,
+        "goldenRate": 0.3,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "혼례비대출",
+            "total": 1700,
+            "doc": 5563
+          }
+        }
       }
     ],
     "healthcox.com": [
       {
-        "keyword": "위내시경 대장내시경 조직검사 실비보험 청구 서류",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "맥도날드 빅아치 단백질",
+        "totalSearch": 380,
+        "pcSearch": 50,
+        "mobileSearch": 330,
+        "docCount": 747,
+        "goldenRate": 0.5,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "관절염 연골주사 히알루론산 콘드로이친 급여 기준",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "고지혈증 스타틴 복용 시간 코엔자임Q10 병용",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "justinfo.co.kr": [
-      {
-        "keyword": "주휴수당 지급조건 주 15시간 지각 조퇴 계산",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "가족간 부동산 저가양도 증여세 3억 30% 기준",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "헬스장 필라테스 중도해지 위약금 10% 환불 계산",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "맥도날드 빅아치 단백질",
+            "total": 380,
+            "doc": 747
+          }
+        }
       }
     ],
     "topnote.kr": [
       {
-        "keyword": "윈도우11 네트워크 프린터 스캔 연결 오류 해결",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "갤럭시 s27 출시일",
+        "totalSearch": 23230,
+        "pcSearch": 4830,
+        "mobileSearch": 18400,
+        "docCount": 7761,
+        "goldenRate": 3.0,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 s27 출시일",
+            "total": 23230,
+            "doc": 7761
+          }
+        }
       },
       {
-        "keyword": "카카오톡 대화내용 백업 기기변경 사진 복원 기한",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "홈택스 전자세금계산서용 공동인증서 갱신 오류",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "daynote.kr": [
-      {
-        "keyword": "대형폐기물 스티커 인터넷 신고 환불 취소 방법",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "드럼세탁기 배수필터 청소 잔수제거 에러코드",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "아파트 관리비 세대별 전기료 TV수신료 해지 신청",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "meganote.kr": [
-      {
-        "keyword": "아우디 A5 850만원 할인 후기",
-        "totalSearch": 2560,
-        "pcSearch": 10,
-        "mobileSearch": 2550,
-        "docCount": 9,
-        "goldenRate": 284.4,
+        "keyword": "갤럭시 Z폴드8 수령 후 밝혀진 단점",
+        "totalSearch": 2700,
+        "pcSearch": 250,
+        "mobileSearch": 2450,
+        "docCount": 23,
+        "goldenRate": 117.4,
         "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 Z폴드8 수령 후 밝혀진 단점",
+            "total": 2700,
+            "doc": 23
+          }
+        }
       },
       {
-        "keyword": "자동차보험 마일리지 특약 환급 주행거리 사진 등록",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "갤럭시 s27 울트라",
+        "totalSearch": 17750,
+        "pcSearch": 3250,
+        "mobileSearch": 14500,
+        "docCount": 9022,
+        "goldenRate": 2.0,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "어린이보호구역 속도위반 과태료 범칙금 벌점 전환",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 s27 울트라",
+            "total": 17750,
+            "doc": 9022
+          }
+        }
       }
     ],
-    "smilenote.kr": [
+    "daynote.kr": [
       {
-        "keyword": "노인장기요양보험 등급 판정 방문조사 질문 체크표",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "부천 벽걸이에어컨청소 달인",
+        "totalSearch": 700,
+        "pcSearch": 10,
+        "mobileSearch": 690,
+        "docCount": 7,
+        "goldenRate": 100.0,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "cumulative",
+        "sourceLabel": "누적",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "노인 보청기 보조금 최대 131만원 이비인후과 처방",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "시니어 국민연금 연기연금 신청 연 7.2% 증액 비교",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "부천 벽걸이에어컨청소 달인",
+            "total": 700,
+            "doc": 7
+          }
+        }
       }
     ],
-    "maxnote.kr": [
+    "meganote.kr": [
       {
-        "keyword": "모바일 운전면허증 IC운전면허증 은행 공항 사용처",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "제네시스 GV90 예상 가격 13억~3억",
+        "totalSearch": 13600,
+        "pcSearch": 200,
+        "mobileSearch": 13400,
+        "docCount": 25,
+        "goldenRate": 544.0,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "cumulative",
+        "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "제네시스 GV90 예상 가격 13억~3억",
+            "total": 13600,
+            "doc": 25
+          }
+        }
       },
       {
-        "keyword": "엑셀 VLOOKUP XLOOKUP 다중조건 함수 오류 해결",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "GV80하이브리드",
+        "totalSearch": 200900,
+        "pcSearch": 39900,
+        "mobileSearch": 161000,
+        "docCount": 97342,
+        "goldenRate": 2.1,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "GV80하이브리드",
+            "total": 200900,
+            "doc": 97342
+          }
+        }
       },
       {
-        "keyword": "구글 드라이브 원드라이브 용량 정리 자동동기화 해제",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
+        "keyword": "2027 그랜저 하이브리드 제원",
+        "totalSearch": 18530,
+        "pcSearch": 4430,
+        "mobileSearch": 14100,
+        "docCount": 440,
+        "goldenRate": 42.1,
         "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "bucket": "cumulative",
+        "sourceLabel": "누적",
         "categories": [],
-        "demos": []
-      }
-    ],
-    "must-joy.com": [
-      {
-        "keyword": "국립박물관 어린이박물관 예약 취소표 시간대",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "전통시장 온누리상품권 가맹점 조회 소득공제율",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "공연 티켓 예매 취소수수료 관람일별 환불 규정",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "2027 그랜저 하이브리드 제원",
+            "total": 18530,
+            "doc": 440
+          }
+        }
       }
     ],
     "tripmarvel.com": [
+      {
+        "keyword": "마나도 항공권",
+        "totalSearch": 6770,
+        "pcSearch": 1260,
+        "mobileSearch": 5510,
+        "docCount": 3244,
+        "goldenRate": 2.1,
+        "grade": "S",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
+        "categories": [],
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "마나도 항공권",
+            "total": 6770,
+            "doc": 3244
+          }
+        }
+      },
       {
         "keyword": "영주 아레아호텔",
         "totalSearch": 470,
@@ -1176,168 +1714,95 @@
         "mobileSearch": 420,
         "docCount": 13,
         "goldenRate": 36.2,
-        "grade": "A",
+        "grade": "S",
         "bucket": "cumulative",
         "sourceLabel": "누적",
         "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "영주 아레아호텔",
+            "total": 470,
+            "doc": 13
+          }
+        }
       },
       {
-        "keyword": "호텔 아고다 부킹닷컴 무료취소 현지결제 이중환전 방어",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "화담숲 숙소",
+        "totalSearch": 2860,
+        "pcSearch": 570,
+        "mobileSearch": 2290,
+        "docCount": 15534,
+        "goldenRate": 0.2,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "K패스 기후동행카드 환급 기준 경기 인천 광역버스",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "화담숲 숙소",
+            "total": 2860,
+            "doc": 15534
+          }
+        }
       }
     ],
     "nolplace.com": [
       {
-        "keyword": "서울 공영주차장 다둥이 저공해차 50% 자동감면 등록",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
+        "keyword": "갤럭시 s27 사전예약",
+        "totalSearch": 1610,
+        "pcSearch": 310,
+        "mobileSearch": 1300,
+        "docCount": 2745,
+        "goldenRate": 0.6,
+        "grade": "A",
+        "bucket": "live_trend",
+        "sourceLabel": "연관",
         "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "수목원 사전예약 차량등록 무료입장 다자녀 증빙",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "주말 지자체 공공캠핑장 예약 취소표 오픈 시간",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "soulnote.kr": [
-      {
-        "keyword": "지게차운전기능사 필기 실기 국비지원 학원 비용",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "산업안전기사 응시자격 관련학과 경력 인정 서류",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "이직 시 건강보험 자격득실확인서 선택발급 제출법",
-        "totalSearch": 3800,
-        "pcSearch": 1100,
-        "mobileSearch": 2700,
-        "docCount": 28,
-        "goldenRate": 135.7,
-        "grade": "S",
-        "bucket": "domain_high_cpc",
-        "sourceLabel": "도메인 고단가 타깃",
-        "categories": [],
-        "demos": []
-      }
-    ],
-    "joynote.kr": [
-      {
-        "keyword": "심페리카 트리오가격",
-        "totalSearch": 3200,
-        "pcSearch": 80,
-        "mobileSearch": 3120,
-        "docCount": 3,
-        "goldenRate": 1066.7,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "심페리카트리오",
-        "totalSearch": 5190,
-        "pcSearch": 180,
-        "mobileSearch": 5010,
-        "docCount": 6,
-        "goldenRate": 865.0,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
-      },
-      {
-        "keyword": "홍금동물병원",
-        "totalSearch": 11650,
-        "pcSearch": 1150,
-        "mobileSearch": 10500,
-        "docCount": 113,
-        "goldenRate": 103.1,
-        "grade": "S",
-        "bucket": "cumulative",
-        "sourceLabel": "누적",
-        "categories": [],
-        "demos": []
+        "demos": [],
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "갤럭시 s27 사전예약",
+            "total": 1610,
+            "doc": 2745
+          }
+        }
       }
     ]
   },
   "pairedBridgeSets": [
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "허그 든든전세 11차",
+          "total": 1460,
+          "doc": 22
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 1,
       "keyword": "허그 든든전세 11차",
-      "grade": "A",
+      "grade": "S",
       "searchVolume": 1460,
       "docCount": 22,
       "goldenRate": 66.4,
@@ -1347,6 +1812,18 @@
       "naverBridgeFormat": "[허그 든든전세 11차] 핵심 체크포인트 3가지 정리 + woorinote.kr 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "세이브텍스 환급금 뜻",
+          "total": 850,
+          "doc": 7
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 2,
       "keyword": "세이브텍스 환급금 뜻",
       "grade": "S",
@@ -1359,6 +1836,18 @@
       "naverBridgeFormat": "[세이브텍스 환급금 뜻] 핵심 체크포인트 3가지 정리 + must-good.com 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "아이폰18 폴더 블",
+          "total": 19290,
+          "doc": 76
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 3,
       "keyword": "아이폰18 폴더 블",
       "grade": "S",
@@ -1371,88 +1860,124 @@
       "naverBridgeFormat": "[아이폰18 폴더 블] 핵심 체크포인트 3가지 정리 + must-pick.com 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "대출 계산기",
+          "total": 359300,
+          "doc": 10162
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 4,
-      "keyword": "리드코프 논스톱대출",
-      "grade": "A",
-      "searchVolume": 1180,
-      "docCount": 31,
-      "goldenRate": 38.1,
+      "keyword": "대출 계산기",
+      "grade": "S",
+      "searchVolume": 359300,
+      "docCount": 10162,
+      "goldenRate": 35.4,
       "cfPillarDomain": "baronote.kr",
-      "cfPillarFormat": "[리드코프 논스톱대출] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[대출 계산기] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "adinfo0905",
-      "naverBridgeFormat": "[리드코프 논스톱대출] 핵심 체크포인트 3가지 정리 + baronote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[대출 계산기] 핵심 체크포인트 3가지 정리 + baronote.kr 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "맥도날드 빅아치 단백질",
+          "total": 380,
+          "doc": 747
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 5,
-      "keyword": "위내시경 대장내시경 조직검사 실비보험 청구 서류",
-      "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
+      "keyword": "맥도날드 빅아치 단백질",
+      "grade": "A",
+      "searchVolume": 380,
+      "docCount": 747,
+      "goldenRate": 0.5,
       "cfPillarDomain": "healthcox.com",
-      "cfPillarFormat": "[위내시경 대장내시경 조직검사 실비보험 청구 서류] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[맥도날드 빅아치 단백질] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "stone0747",
-      "naverBridgeFormat": "[위내시경 대장내시경 조직검사 실비보험 청구 서류] 핵심 체크포인트 3가지 정리 + healthcox.com 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[맥도날드 빅아치 단백질] 핵심 체크포인트 3가지 정리 + healthcox.com 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "갤럭시 s27 출시일",
+          "total": 23230,
+          "doc": 7761
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 6,
-      "keyword": "주휴수당 지급조건 주 15시간 지각 조퇴 계산",
+      "keyword": "갤럭시 s27 출시일",
       "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
-      "cfPillarDomain": "justinfo.co.kr",
-      "cfPillarFormat": "[주휴수당 지급조건 주 15시간 지각 조퇴 계산] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
-      "naverBridgeAccount": "soul5373",
-      "naverBridgeFormat": "[주휴수당 지급조건 주 15시간 지각 조퇴 계산] 핵심 체크포인트 3가지 정리 + justinfo.co.kr 상세 판독표 브릿지 연결"
-    },
-    {
-      "setIndex": 7,
-      "keyword": "윈도우11 네트워크 프린터 스캔 연결 오류 해결",
-      "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
+      "searchVolume": 23230,
+      "docCount": 7761,
+      "goldenRate": 3.0,
       "cfPillarDomain": "topnote.kr",
-      "cfPillarFormat": "[윈도우11 네트워크 프린터 스캔 연결 오류 해결] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[갤럭시 s27 출시일] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "yoon_master",
-      "naverBridgeFormat": "[윈도우11 네트워크 프린터 스캔 연결 오류 해결] 핵심 체크포인트 3가지 정리 + topnote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[갤럭시 s27 출시일] 핵심 체크포인트 3가지 정리 + topnote.kr 상세 판독표 브릿지 연결"
     },
     {
-      "setIndex": 8,
-      "keyword": "대형폐기물 스티커 인터넷 신고 환불 취소 방법",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "부천 벽걸이에어컨청소 달인",
+          "total": 700,
+          "doc": 7
+        }
+      },
+      "measurementStatus": "reported",
+      "setIndex": 7,
+      "keyword": "부천 벽걸이에어컨청소 달인",
       "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
+      "searchVolume": 700,
+      "docCount": 7,
+      "goldenRate": 100.0,
       "cfPillarDomain": "daynote.kr",
-      "cfPillarFormat": "[대형폐기물 스티커 인터넷 신고 환불 취소 방법] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[부천 벽걸이에어컨청소 달인] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "soultin",
-      "naverBridgeFormat": "[대형폐기물 스티커 인터넷 신고 환불 취소 방법] 핵심 체크포인트 3가지 정리 + daynote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[부천 벽걸이에어컨청소 달인] 핵심 체크포인트 3가지 정리 + daynote.kr 상세 판독표 브릿지 연결"
     },
     {
-      "setIndex": 9,
-      "keyword": "아우디 A5 850만원 할인 후기",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "제네시스 GV90 예상 가격 13억~3억",
+          "total": 13600,
+          "doc": 25
+        }
+      },
+      "measurementStatus": "reported",
+      "setIndex": 8,
+      "keyword": "제네시스 GV90 예상 가격 13억~3억",
       "grade": "S",
-      "searchVolume": 2560,
-      "docCount": 9,
-      "goldenRate": 284.4,
+      "searchVolume": 13600,
+      "docCount": 25,
+      "goldenRate": 544.0,
       "cfPillarDomain": "meganote.kr",
-      "cfPillarFormat": "[아우디 A5 850만원 할인 후기] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[제네시스 GV90 예상 가격 13억~3억] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "adinfo0905",
-      "naverBridgeFormat": "[아우디 A5 850만원 할인 후기] 핵심 체크포인트 3가지 정리 + meganote.kr 상세 판독표 브릿지 연결"
-    },
-    {
-      "setIndex": 10,
-      "keyword": "노인장기요양보험 등급 판정 방문조사 질문 체크표",
-      "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
-      "cfPillarDomain": "smilenote.kr",
-      "cfPillarFormat": "[노인장기요양보험 등급 판정 방문조사 질문 체크표] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
-      "naverBridgeAccount": "stone0747",
-      "naverBridgeFormat": "[노인장기요양보험 등급 판정 방문조사 질문 체크표] 핵심 체크포인트 3가지 정리 + smilenote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[제네시스 GV90 예상 가격 13억~3억] 핵심 체크포인트 3가지 정리 + meganote.kr 상세 판독표 브릿지 연결"
     }
   ]
 }

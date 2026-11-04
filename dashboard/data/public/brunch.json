@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-11-02T14:46:55.110660+09:00",
+  "checkedAt": "2026-11-05T05:22:20.289618+09:00",
   "account": {
     "account_key": "baro76650",
     "email": "baro76650@gmail.com",
@@ -38,7 +38,7 @@
   },
   "kpi": {
     "drawerCount": 0,
-    "publishedCount": 5,
+    "publishedCount": 7,
     "curriculumTotal": 10,
     "dailyTargetCount": 2,
     "pureEssayRatio": 70,
@@ -60,11 +60,11 @@
       "09:30",
       "16:30"
     ],
-    "lastRunAt": "2026-11-02T09:01:21.042664+09:00",
-    "lastRunTitle": "부모님 집, 주택연금과 증여 사이 계산",
-    "lastRunUrl": "https://brunch.co.kr/@31d1f5fb288c4fc/5",
-    "todayDate": "2026-11-02",
-    "todayPublishedCount": 1,
+    "lastRunAt": "2026-11-04T03:52:43.541120+09:00",
+    "lastRunTitle": "국가건강검진 결과표 보는법 공복혈당·사구체여과율",
+    "lastRunUrl": "https://brunch.co.kr/@31d1f5fb288c4fc/7",
+    "todayDate": "2026-11-04",
+    "todayPublishedCount": 2,
     "history": [
       {
         "at": "2026-11-01T09:38:49.525899+09:00",
@@ -105,11 +105,118 @@
         "title": "부모님 집, 주택연금과 증여 사이 계산",
         "mode": "published",
         "url": "https://brunch.co.kr/@31d1f5fb288c4fc/5"
+      },
+      {
+        "at": "2026-11-02T16:08:59.700137+09:00",
+        "date": "2026-11-02",
+        "part": 6,
+        "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+        "mode": "published",
+        "url": "https://brunch.co.kr/write",
+        "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+        "cafeBridges": []
+      },
+      {
+        "at": "2026-11-03T09:10:38.006459+09:00",
+        "date": "2026-11-03",
+        "part": 6,
+        "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+        "mode": "published",
+        "url": "https://brunch.co.kr/write",
+        "bridgeUrl": "https://www.meganote.kr/annual-car-tax-refund-sale-scrappage",
+        "cafeBridges": []
+      },
+      {
+        "at": "2026-11-03T16:02:36.909549+09:00",
+        "date": "2026-11-03",
+        "part": 6,
+        "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+        "mode": "published",
+        "url": "https://brunch.co.kr/write",
+        "bridgeUrl": "https://www.meganote.kr/annual-car-tax-refund-sale-scrappage",
+        "cafeBridges": [
+          {
+            "cafe": "boutiqueinfo",
+            "url": "https://cafe.naver.com/boutiqueinfo?iframe_url_utf8=%2Fca-fe%2Fcafes%2F31608088%2Farticles%2F2340%253Fmenuid%3D4%2526boardtype%3DL%2526oldPath%3D%252FArticleRead.nhn%253Fclubid%253D31608088%2526articleid%253D2340%2526menuid%253D4%2526boardtype%253DL"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-04T03:49:06.829347+09:00",
+        "date": "2026-11-04",
+        "part": 6,
+        "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+        "mode": "published",
+        "url": "https://brunch.co.kr/write",
+        "bridgeUrl": "https://www.meganote.kr/annual-car-tax-refund-sale-scrappage",
+        "cafeBridges": [
+          {
+            "cafe": "dekilab",
+            "url": "https://cafe.naver.com/dekilab?iframe_url_utf8=%2Fca-fe%2Fcafes%2F31529204%2Farticles%2F9823%253Fmenuid%3D18%2526boardtype%3DL%2526oldPath%3D%252FArticleRead.nhn%253Fclubid%253D31529204%2526articleid%253D9823%2526menuid%253D18%2526boardtype%253DL"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-04T03:51:21.835427+09:00",
+        "date": "2026-11-04",
+        "part": 6,
+        "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+        "mode": "published",
+        "url": "https://brunch.co.kr/@31d1f5fb288c4fc/6",
+        "bridgeUrl": "https://www.meganote.kr/annual-car-tax-refund-sale-scrappage",
+        "cafeBridges": []
+      },
+      {
+        "at": "2026-11-04T03:52:43.541120+09:00",
+        "date": "2026-11-04",
+        "part": 7,
+        "title": "국가건강검진 결과표 보는법 공복혈당·사구체여과율",
+        "mode": "published",
+        "url": "https://brunch.co.kr/@31d1f5fb288c4fc/7",
+        "bridgeUrl": "https://www.healthcox.com/hba1c-6-5-normal-fasting-glucose",
+        "cafeBridges": [
+          {
+            "cafe": "boutiqueinfo",
+            "url": "https://cafe.naver.com/boutiqueinfo?iframe_url_utf8=%2FArticleRead.nhn%253Fclubid%3D31608088%2526articleid%3D2362%2526menuid%3D4%2526boardtype%3DL"
+          },
+          {
+            "cafe": "dekilab",
+            "url": "https://cafe.naver.com/dekilab?iframe_url_utf8=%2Fca-fe%2Fcafes%2F31529204%2Farticles%2F9824%253Fmenuid%3D18%2526boardtype%3DL%2526oldPath%3D%252FArticleRead.nhn%253Fclubid%253D31529204%2526articleid%253D9824%2526menuid%253D18%2526boardtype%253DL"
+          }
+        ]
       }
     ]
   },
   "drawerArticles": [],
   "publishedArticles": [
+    {
+      "articleNo": 7,
+      "title": "국가건강검진 결과표 보는법 공복혈당·사구체여과율",
+      "subtitle": "공복혈당·신장 크레아티닌·LDL 콜레스테롤 정상수치와 확진검사",
+      "excerpt": "공복혈당·신장 크레아티닌·LDL 콜레스테롤 정상수치와 확진검사매년 찬 바람이 불기 시작하는 10월과 11월이 되면 동네 내과와 건강검진 센터는 한 해 동안 미뤄둔 국가건강검진을 받으려는 사람들로 북적인다. 연말이 임박할수록 예약은 전쟁터가 되고, 바쁜 일정 속에 검진을 마치고 나면 몇 ",
+      "url": "https://brunch.co.kr/@31d1f5fb288c4fc/7",
+      "targetDomain": "healthcox.com",
+      "category": "중장년건강·검진",
+      "pacingMode": "strategic_bridge",
+      "status": "published",
+      "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
+      "charCount": 2038,
+      "publishedAt": "2026-11-05"
+    },
+    {
+      "articleNo": 6,
+      "title": "희망리턴패키지 점포철거비 지원금·폐업 부가세 신고",
+      "subtitle": "폐업신고 전 철거비 신청 순서와 부가세 잔존재화·건보료 조정",
+      "excerpt": "폐업신고 전 철거비 신청 순서와 부가세 잔존재화·건보료 조정수년간 새벽마다 불을 밝히던 가게 문을 닫기로 결심하는 날은 누구에게나 무겁다. 임대차 계약 만료와 매출 감소, 불어난 대출 이자 사이에서 밤잠을 설치다 결단을 내린 사장님들은 마음이 급한 나머지 세무서부터 찾아가 폐업신고서를 ",
+      "url": "https://brunch.co.kr/@31d1f5fb288c4fc/6",
+      "targetDomain": "meganote.kr",
+      "category": "소상공인·세무",
+      "pacingMode": "strategic_bridge",
+      "status": "published",
+      "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
+      "charCount": 1850,
+      "publishedAt": "2026-11-05"
+    },
     {
       "articleNo": 5,
       "title": "부모님 집, 주택연금과 증여 사이 계산",
@@ -122,7 +229,7 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 1772,
-      "publishedAt": "2026-11-02"
+      "publishedAt": "2026-11-05"
     },
     {
       "articleNo": 4,
@@ -136,7 +243,7 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 2049,
-      "publishedAt": "2026-11-02"
+      "publishedAt": "2026-11-05"
     },
     {
       "articleNo": 3,
@@ -150,7 +257,7 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 1851,
-      "publishedAt": "2026-11-02"
+      "publishedAt": "2026-11-05"
     },
     {
       "articleNo": 2,
@@ -164,7 +271,7 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 1987,
-      "publishedAt": "2026-11-02"
+      "publishedAt": "2026-11-05"
     },
     {
       "articleNo": 1,
@@ -178,7 +285,7 @@
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료 (Daum·구글 색인 대상)",
       "charCount": 2092,
-      "publishedAt": "2026-11-02"
+      "publishedAt": "2026-11-05"
     }
   ],
   "curriculum": [
@@ -190,7 +297,7 @@
       "category": "연금·노후설계",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+      "bridgeUrl": "https://www.must-good.com/samjeomsam-medical-expense-refund-check",
       "charCount": 2092,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -213,7 +320,7 @@
       "category": "건보료·절세실무",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
+      "bridgeUrl": "https://www.baronote.kr/irp-early-withdrawal-homeless-jeonse-deposit-documents",
       "charCount": 1987,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -236,7 +343,7 @@
       "category": "정책환급·복지",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.must-pick.com/employment-support-no-work-experience-type-check",
+      "bridgeUrl": "https://www.must-pick.com/iphone-18-foldable-price-features-comparison",
       "charCount": 1851,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -259,7 +366,7 @@
       "category": "시니어의료·돌봄",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.smilenote.kr/housing-pension-preferential-eligibility-home-value-payment",
+      "bridgeUrl": "https://www.smilenote.kr/national-pension-deferral-application-guide",
       "charCount": 2049,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -282,7 +389,7 @@
       "category": "주거·주택연금",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.topnote.kr/excel-vlookup-na-error-hidden-spaces",
+      "bridgeUrl": "https://www.topnote.kr/windows-11-network-printer-share-error-0x0000011b",
       "charCount": 1772,
       "status": "published",
       "statusLabel": "🟢 공개 발행 완료",
@@ -305,10 +412,10 @@
       "category": "소상공인·세무",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
+      "bridgeUrl": "https://www.meganote.kr/audi-a5-850-discount-quote-check",
       "charCount": 1850,
-      "status": "queued_for_publish",
-      "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",
+      "status": "published",
+      "statusLabel": "🟢 공개 발행 완료",
       "paragraphs": [
         "수년간 새벽마다 불을 밝히던 가게 문을 닫기로 결심하는 날은 누구에게나 무겁다. 임대차 계약 만료와 매출 감소, 불어난 대출 이자 사이에서 밤잠을 설치다 결단을 내린 사장님들은 마음이 급한 나머지 세무서부터 찾아가 폐업신고서를 제출하곤 한다. 하지만 현장에서 만난 자영업자분들이 가장 땅을 치며 안타까워하는 순간은, 바로 그 '세무서 폐업신고'를 먼저 끝내버리는 바람에 받을 수 있었던 수백만 원의 점포 철거비 지원금을 눈앞에서 날렸을 때다.",
         "소상공인시장진흥공단이 운영하는 '희망리턴패키지 원스톱 폐업지원(점포철거비 지원)'은 폐업 소상공인의 원상복구 부담을 덜어주기 위해 전용면적 평당 단가 기준 최대 수백만 원(연도별 공고 한도 내)의 철거 비용을 무상으로 지원해 주는 핵심 안전망이다. 그런데 이 지원금의 가장 엄격한 자격 요건은 '신청 시점에 사업자등록증상 폐업일 이전(영업 중 또는 폐업 예정 상태)이어야 한다'는 점이다.",
@@ -328,10 +435,10 @@
       "category": "중장년건강·검진",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.healthcox.com/knee-hyaluronic-acid-injection-coverage-interval",
+      "bridgeUrl": "https://www.healthcox.com/shingrix-vaccine-interval-insurance-cost",
       "charCount": 2038,
-      "status": "queued_for_publish",
-      "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",
+      "status": "published",
+      "statusLabel": "🟢 공개 발행 완료",
       "paragraphs": [
         "매년 찬 바람이 불기 시작하는 10월과 11월이 되면 동네 내과와 건강검진 센터는 한 해 동안 미뤄둔 국가건강검진을 받으려는 사람들로 북적인다. 연말이 임박할수록 예약은 전쟁터가 되고, 바쁜 일정 속에 검진을 마치고 나면 몇 주 뒤 우편이나 카카오톡 알림톡으로 결과표가 도착한다. 하지만 막상 결과표를 받아 든 부모님들은 첫 장 맨 위에 적힌 '정상B(경계)'나 '일반질환 의심'이라는 짧은 판정 문구만 흘긋 확인하고는 서랍 깊숙이 넣어두기 일쑤다.",
         "문제는 중장년과 시니어의 몸이 보내는 진짜 위험 신호는 '정상'과 '질환'이라는 단편적인 도장이 아니라, 지난 3년~5년 동안 조금씩 움직여 온 숫자의 기울기 속에 숨어 있다는 점이다. 고혈압이나 당뇨, 만성 신장질환은 통증이라는 경고음을 울리지 않은 채 혈관을 서서히 마모시키다가 어느 날 갑자기 응급실 청구서로 모습을 드러낸다.",
@@ -351,7 +458,7 @@
       "category": "은퇴자산·예적금",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.woorinote.kr/housing-subscription-ineligible-win-account-restoration",
+      "bridgeUrl": "https://www.woorinote.kr/hug-deundeun-jeonse-round-11-checklist",
       "charCount": 1880,
       "status": "queued_for_publish",
       "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",
@@ -374,7 +481,7 @@
       "category": "상속·증여·절세",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract",
+      "bridgeUrl": "https://www.baronote.kr/irp-early-withdrawal-homeless-jeonse-deposit-documents",
       "charCount": 2048,
       "status": "queued_for_publish",
       "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",
@@ -397,7 +504,7 @@
       "category": "에너지·공과금절약",
       "pacingMode": "strategic_bridge",
       "pacingLabel": "30% CF 고단가 브릿지 (og:link 카드)",
-      "bridgeUrl": "https://www.joynote.kr/kepco-appliance-rebate-after-moving",
+      "bridgeUrl": "https://www.joynote.kr/pet-insurance-patella-exclusion-deductible",
       "charCount": 1925,
       "status": "queued_for_publish",
       "statusLabel": "⏳ 자동 연재 대기 (하루 2편)",

@@ -1,0 +1,131 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="spatial" from="@hypit/spatial@1"/>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="mediaop" from="@hypit/media-operations@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="shorts" from="@barolab/shorts-scene@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="html" from="@hypit/html-video@1"/>
+  <import as="style" source="./look.svs"/>
+
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="animation" clock={clock} end="1715f">
+    <time:Instant id="beat-compare" at="324f"/>
+    <time:Instant id="beat-steps" at="671f"/>
+    <time:Instant id="step-1-at" at="671f"/>
+    <time:Instant id="step-2-at" at="828f"/>
+    <time:Instant id="step-3-at" at="989f"/>
+    <time:Instant id="beat-rule" at="1193f"/>
+    <time:Instant id="beat-closing" at="1504f"/>
+    <time:Instant id="cap-0-at" at="5f"/>
+    <time:Instant id="cap-1-at" at="130f"/>
+    <time:Instant id="cap-2-at" at="324f"/>
+    <time:Instant id="cap-3-at" at="475f"/>
+    <time:Instant id="cap-4-at" at="671f"/>
+    <time:Instant id="cap-5-at" at="828f"/>
+    <time:Instant id="cap-6-at" at="989f"/>
+    <time:Instant id="cap-7-at" at="1193f"/>
+    <time:Instant id="cap-8-at" at="1351f"/>
+    <time:Instant id="cap-9-at" at="1504f"/>
+  </time:Timeline>
+
+  <spatial:Canvas id="canvas" width="1080" height="1920"/>
+
+  <media:Font id="kr-bold-face" src="./assets/malgunbd.ttf" weight="700" style="normal"/>
+  <media:Font id="kr-reg-face" src="./assets/malgun.ttf" weight="400" style="normal"/>
+  <media:FontStack id="font-bold" primary={kr-bold-face}><media:Fallback font={kr-reg-face}/></media:FontStack>
+  <media:FontStack id="font-regular" primary={kr-reg-face}><media:Fallback font={kr-bold-face}/></media:FontStack>
+
+  <media:Image id="broll1" src="./assets/beat1.jpg"/>
+  <media:Image id="broll2" src="./assets/beat2.jpg"/>
+  <media:Image id="broll3" src="./assets/beat3.jpg"/>
+  <media:Image id="broll4" src="./assets/beat4.jpg"/>
+  <media:Image id="broll5" src="./assets/beat5.jpg"/>
+  <media:Audio id="voice-raw" src="./assets/narration.wav"/>
+  <media:Audio id="bgm-raw" src="./assets/bgm.wav"/>
+
+  <mediaop:Normalize id="voice-media" source={voice-raw} video="none" audio="default" span-authority="audio" clock={clock}/>
+  <mediaop:Normalize id="bgm-media" source={bgm-raw} video="none" audio="default" span-authority="audio" clock={clock}/>
+
+  <shorts:Scene id="scene"
+    timeline={animation.timeline}
+    within={canvas.bounds}
+    during={animation.window}
+    font-bold={font-bold}
+    font-regular={font-regular}
+    bg-beat1={broll1}
+    bg-beat2={broll2}
+    bg-beat3={broll3}
+    bg-beat4={broll4}
+    bg-beat5={broll5}
+    beat-compare={animation.beat-compare}
+    beat-steps={animation.beat-steps}
+    beat-rule={animation.beat-rule}
+    beat-closing={animation.beat-closing}
+    theme-mode="tech-cyber"
+    channel-name="윤랩 자동화 연구소"
+    category-pill="AI 에이전트 · 수익화 자동화"
+    accent-color="rgba(56,189,248,0.22)"
+    scene1-caption="SCENE 01 · AI 에이전트 6명 무인 아키텍처"
+    scene2-caption="SCENE 02 · 단순 복붙 저품질 vs 분업형 자동화"
+    scene3-caption="SCENE 03 · 트렌드 발굴 → 원고 → 멀티채널 배포"
+    scene4-caption="SCENE 04 · 색인·체류시간·RPM 실측 피드백 루프"
+    scene5-caption="SCENE 05 · 24시간 무인 파이프라인 3대 공식"
+    hook-badge="챗GPT 단순 복붙 수익화의 종말"
+    hook-stat="6 AGENTS"
+    hook-unit="24시간 자율 구동 멀티채널 수익화 파이프라인"
+    hook-title="챗GPT 복붙 블로그가 망할 때
+AI 에이전트 팀은 수익을 만듭니다"
+    hook-sub="프롬프트 한 줄로 찍어낸 양산형 글이 왜 검색에서 누락되는지 실측 아키텍처로 비교합니다"
+    compare-title="단순 챗GPT 복붙 vs 6-에이전트 분업 비교"
+    wrong-label="실패 패턴 · 프롬프트 단순 복붙"
+    wrong-title="AI 양산형 요약문 · 검색 색인 즉시 누락"
+    wrong-desc="팩트 검증 없는 천편일률적 요약문은 검색엔진 스팸 필터에 걸려 방문자 0명과 저품질 페널티로 직결됩니다."
+    right-label="승리 공식 · 역할 분담 6-에이전트 파이프라인"
+    right-title="빈집 키워드 채굴 + 실측 데이터 + OSMU 확산"
+    right-desc="트렌드 스카우터부터 전환율 감사·멀티채널 배포까지 6개 전문 에이전트가 분업해 고단가 유입을 만듭니다."
+    steps-title="24시간 무인 수익화 파이프라인 3단계"
+    rule-badge="발행량이 아닌 PV·RPM 실측 피드백 루프"
+    rule-title="단순 발행 완료는 0점,
+유입과 수익이 찍혀야 채택됩니다"
+    rule-desc="구글 애널리틱스·서치콘솔·애드센스 실측 지표를 지식그래프에 역반영해 우승 포맷만 스스로 진화시킵니다."
+    rule-pill1="우승 원고 공식 자동 학습 (+1점 가중치)"
+    rule-pill2="무유입·이탈 패턴 즉시 폐기 (-1점 피벗)"
+    closing-title="AI 수익화 파이프라인 구축 3대 체크리스트"
+    check1="단순 챗GPT 복붙 중단 · 역할별 멀티 에이전트 분업화"
+    check2="고단가 타깃 키워드 + 비교표·체크리스트 구조화"
+    check3="블로그·카페·쇼츠 원소스 멀티유즈(OSMU) 브릿지 연결"
+    cta-banner="윤랩 자동화 연구소 게시물 탭에서 전체 파이프라인 설계도를 확인하세요">
+    <shorts:Step id="step-1" badge="STEP 01" title="Radar · 고단가 빈집 키워드 실시간 포착" detail="검색 수요 대비 경쟁 문서가 적은 블루오션 주제와 실시간 질문 자동 수집" at={animation.step-1-at}/>
+    <shorts:Step id="step-2" badge="STEP 02" title="Publi &amp; Doctor · 비교표·수치 중심 원고 설계" detail="공무원식 요약을 배제하고 손실회피 훅·비교표·체크리스트로 체류시간 극대화" at={animation.step-2-at}/>
+    <shorts:Step id="step-3" badge="STEP 03" title="OSMU · 블로그·카페·스레드·쇼츠 동시 확산" detail="검증된 원본 데이터 1개를 매체별 문법으로 자동 변환해 외부유입 퍼널 완성" at={animation.step-3-at}/>
+    <shorts:Caption id="cap-1" highlight="HOOK · 왜 챗GPT 복붙 블로그는 수익이 0원일까?" text="챗GPT에 주제만 던져주고 복사해 붙여넣는 블로그, 왜 아무리 글을 찍어내도 수익이 나지 않을까요?" at={animation.cap-0-at}/>
+    <shorts:Caption id="cap-2" highlight="FACT · 단일 프롬프트 vs 6-에이전트 자율 파이프라인" text="검색엔진 알고리즘은 이제 단순 요약형 AI 문체를 즉시 걸러내지만, 역할을 나눈 여섯 명의 AI 에이전트 팀은 24시간 유입과 수익을 만들어냅니다." at={animation.cap-1-at}/>
+    <shorts:Caption id="cap-3" highlight="COMPARE · 양산형 스팸 필터링의 구조적 한계" text="혼자서 프롬프트 한 줄로 글을 뽑아내면 구체적인 수치와 비교표가 빠져 체류시간이 무너지고 색인에서 통째로 누락됩니다." at={animation.cap-2-at}/>
+    <shorts:Caption id="cap-4" highlight="SOLUTION · 6개 전문 에이전트 완벽 분업화" text="반면 윤랩 자동화 파이프라인은 트렌드 발굴부터 원고 작성, 품질 감사, 멀티채널 배포까지 여섯 단계를 전문 에이전트가 나눠 맡습니다." at={animation.cap-3-at}/>
+    <shorts:Caption id="cap-5" highlight="STEP 01 · Radar 에이전트의 빈집 황금키워드 포착" text="첫째, 레이더 에이전트가 검색량은 많지만 경쟁 문서가 비어 있는 고단가 블루오션 키워드와 실시간 질문을 먼저 포착합니다." at={animation.cap-4-at}/>
+    <shorts:Caption id="cap-6" highlight="STEP 02 · Publi &amp; Doctor의 비교표·수치 검증" text="둘째, 퍼블리와 닥터 에이전트가 뻔한 서론을 지우고 핵심 수치 비교표와 전환 동선을 설계해 독자의 체류시간을 극대화합니다." at={animation.cap-5-at}/>
+    <shorts:Caption id="cap-7" highlight="STEP 03 · 원소스 멀티유즈(OSMU) 전 채널 자동 확산" text="셋째, 완성된 하나의 원본 콘텐츠를 워드프레스와 클라우드플레어 블로그, 네이버 카페, 스레드, 유튜브 쇼츠로 동시에 확산시킵니다." at={animation.cap-6-at}/>
+    <shorts:Caption id="cap-8" highlight="METRIC · 발행 개수가 아닌 실측 PV와 달러 수익" text="가장 중요한 핵심은 글을 발행했다고 끝나는 것이 아니라, 실제 방문자와 광고 수익 데이터를 추적해 점수를 매긴다는 점입니다." at={animation.cap-7-at}/>
+    <shorts:Caption id="cap-9" highlight="LOOP · 지식그래프 자기진화 피드백 루프" text="트레이스 에이전트가 매일 조회수와 클릭률을 분석해 수익을 낸 우승 공식만 남기고, 반응 없는 패턴은 즉시 폐기합니다." at={animation.cap-8-at}/>
+    <shorts:Caption id="cap-10" highlight="FINAL · 3대 자동화 공식 &amp; 아키텍처 확인 안내" text="멀티 에이전트 분업, 비교표 구조화, 멀티채널 브릿지 세 가지를 기억하시고, 채널 게시물 탭에서 전체 자동화 설계도를 바로 확인해 보세요." at={animation.cap-9-at}/>
+  </shorts:Scene>
+
+  <audio:Track id="voice-track" timeline={animation.timeline}>
+    <audio:Clip id="voice-clip" source={voice-media.media} during={animation.window} gain="1"/>
+  </audio:Track>
+
+  <audio:Track id="bgm-track" timeline={animation.timeline}>
+    <audio:Clip id="bgm-clip" source={bgm-media.media} during={animation.window} gain="0.06" fade-in="15f" fade-out="25f"/>
+  </audio:Track>
+
+  <film:Film id="main" canvas={canvas.canvas} timeline={animation.timeline} appearance={style.film.main}>
+    <film:Track source={scene.visual}/>
+    <film:Track source={voice-track.audio}/>
+    <film:Track source={bgm-track.audio}/>
+  </film:Film>
+
+  <html:Video id="final" composition={main.composition} timeline={animation.timeline}/>
+</svml>

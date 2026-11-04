@@ -1,0 +1,38 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:bead2fc561cc51031b2c",
+  "recordedAt": "2026-11-02T22:11:40.024637+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+  "externalSources": [
+    {
+      "title": "2019 보건복지백서",
+      "url": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+      "source": "web_search"
+    },
+    {
+      "title": "2021년도 준정부기관 경영실적 평가보고서",
+      "url": "https://www.kspo.or.kr/kspo/cmmn/file/fileDown.do?atchFileId=FILE_000000000016462&fileSn=1",
+      "source": "web_search"
+    },
+    {
+      "title": "<B4EBB9FDBFF8C6C7B7CAC7D8BCB3313433C8A32DB9CEBBE72EB3EBB5BF2EC0CFB9DDC7E0C1A42DB3BBC1F6313131342DBBE7B1B3....",
+      "url": "https://www.taxnet.co.kr/upload-file-domain/20262/7d90e04c-9483-4f29-8889-ab1ec77209e9.pdf",
+      "source": "web_search"
+    },
+    {
+      "title": "우리 경제 의 선진화를 위한 정부역할의 재정립",
+      "url": "https://www.kdi.re.kr/file/download?atch_no=ZDslc%2F4kFX9Hv%2FBsw9dplg%3D%3D",
+      "source": "web_search"
+    },
+    {
+      "title": "sosin279 - 포스트메이트",
+      "url": "https://postmate.waffle-gl.org/link/naver/sosin279",
+      "source": "web_search"
+    }
+  ],
+  "title": "본인부담상한제 환급금과 실손보험, 중복 지급 여부를 가르는 비교표 실험",
+  "factCheckSummary": "제공된 자료에는 2026-11-02자 한양경제 기사 제목과 2026-11-03 07:11 KST 수집 기록만 있다. 기사 본문, 대법원 판결 원문, 적용 약관과 실시간 네이버 검색 1위는 확인되지 않았다. 검색량·경쟁도·키워드 RPM도 미확인이므로 이 주제의 고단가성이나 성과를 단정할 수 없다. 제공된 검색 결과는 해당 주제의 상위 문서라는 근거로 쓰기 어렵다.",
+  "evidenceText": "본인부담상한제 환급금과 실손보험, 중복 지급 여부를 가르는 비교표 실험\n제공된 자료에는 2026-11-02자 한양경제 기사 제목과 2026-11-03 07:11 KST 수집 기록만 있다. 기사 본문, 대법원 판결 원문, 적용 약관과 실시간 네이버 검색 1위는 확인되지 않았다. 검색량·경쟁도·키워드 RPM도 미확인이므로 이 주제의 고단가성이나 성과를 단정할 수 없다. 제공된 검색 결과는 해당 주제의 상위 문서라는 근거로 쓰기 어렵다.\n1. 네이버에서 ‘본인부담상한제 환급금 실손보험’을 검색해 확인 시각과 1위 문서 URL을 기록하고, 실제 관련 문서라면 제목의 질문 방식과 도입부 3줄을 관찰한다. 표현은 복사하지 않는다. 2. 한양경제 기사 원문과 대법원 판결문에서 사건번호, 판결일, 보험 가입 시기, 약관 조항, 환급금과 보험금의 관계를 확인하고 국민건강보험공단 자료로 상한제 적용 범위를 대조한다. 확인 전에는 모든 실손보험에 동일하게 적용된다고 쓰지 않는다. 3. woorinote.kr 원고의 시험 제목은 ‘병원비 환급받으면 실손보험금은? 가입 시기·약관별 확인표’로 잡는다. 도입부는 ‘환급 통지서를 받았다면 보험금 계산에도 영향이 있을 수 있습니다. 가입 시기와 약관, 실제 환급액부터 확인하세요’라는 3초 판독 문구를 가설로 사용한다. 4. 비교표는 가입 시기·해당 약관·상한제 적용 대상 진료비·환급 여부·판결에서 확인된 처리·출처로 구성한다. 금액 예시는 공식 근거로 계산 조건을 확인했을 때만 넣고 예시임을 표시한다. 확인되지 않은 칸은 미확인으로 둔다. 5. 네이버 블로그와 브런치는 핵심 판독을 독립적으로 완결하고 관련 CF 상세표를 추가 근거로 연결한다. 지식iN은 실제 질문에 맞춰 답한 뒤 관련성이 있을 때만 링크를 사용하고, Threads는 판독 질문과 핵심 한 줄을 시험한다. 게시와 공개 확인은 채널별로 별도 기록한다. 6. 발행 전 각 주장과 표의 출처·적용 조건을 다시 대조한다. 발행 후 채널별 노출·클릭·유입을 같은 기간으로 측정하고, 유입 및 수익 효과는 실측 전까지 가설로 유지한다.\n환급금 수령과 보험금 지급이 겹쳐 독자가 실제 손실 가능성을 판단해야 하는 주제에서, 판결문과 해당 약관의 적용 범위를 확인할 수 있을 때 사용한다. 파생 주제는 가입 시기별 약관 차이 또는 환급 전후 보험금 계산처럼 원문 근거를 확보한 항목부터 확장한다."
+}

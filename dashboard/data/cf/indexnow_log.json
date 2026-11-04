@@ -1,2933 +1,9 @@
 {
   "pings": [
     {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/munhwa-nuri-card-online-merchants",
-      "pingedAt": "2026-11-02T03:13:29.307489+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/mobile-carrier-billing-block-guide-2",
-      "pingedAt": "2026-11-02T03:13:31.215857+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/gov24-simple-auth-login-error",
-      "pingedAt": "2026-11-02T03:13:31.653106+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/tving-plan-ads-simultaneous-streaming-guide",
-      "pingedAt": "2026-11-02T03:13:32.100627+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/productivity-tools-for-office-work",
-      "pingedAt": "2026-11-02T03:13:32.796033+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-outing-entry-check-questions",
-      "pingedAt": "2026-11-02T03:13:34.113530+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-separation-anxiety-signs-alone-training",
-      "pingedAt": "2026-11-02T03:13:34.387980+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/cat-vomiting-hairball-warning-signs-vet",
-      "pingedAt": "2026-11-02T03:13:34.719785+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-howling-alone-separation-anxiety",
-      "pingedAt": "2026-11-02T03:13:35.070181+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/bluetooth-earbud-one-side-no-sound-check",
-      "pingedAt": "2026-11-02T03:13:35.954748+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/iphone-18-latest-news-specs-upgrade",
-      "pingedAt": "2026-11-02T03:13:36.364674+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/iphone-update-battery-drain-heat-check",
-      "pingedAt": "2026-11-02T03:13:36.901815+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/usb-c-monitor-no-display-troubleshooting",
-      "pingedAt": "2026-11-02T03:13:37.263463+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/seoul-public-hanok-visit-experience-booking",
-      "pingedAt": "2026-11-02T03:13:38.589134+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/sinsa-nolplace-booking-location",
-      "pingedAt": "2026-11-02T03:13:39.476173+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/sinsa-nolplace-booking-guide",
-      "pingedAt": "2026-11-02T03:13:40.091470+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
-      "pingedAt": "2026-11-02T03:13:40.746442+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/k-pass-refund-card-registration-rides-check",
-      "pingedAt": "2026-11-02T03:13:43.304675+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/hotel-deposit-refund-check",
-      "pingedAt": "2026-11-02T03:13:43.941745+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/hotel-booking-extra-fees-check",
-      "pingedAt": "2026-11-02T03:13:44.571617+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/overseas-hotel-free-cancellation-conditions",
-      "pingedAt": "2026-11-02T03:13:45.369741+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/early-national-pension-lifetime-reduction-break-even",
-      "pingedAt": "2026-11-02T03:13:46.595947+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/senior-home-exercise-guide",
-      "pingedAt": "2026-11-02T03:13:47.231298+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/senior-chair-strength-exercise",
-      "pingedAt": "2026-11-02T03:13:47.977921+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/senior-park-golf-warm-up-knee-care",
-      "pingedAt": "2026-11-02T03:13:48.651760+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/qnet-national-technical-qualification-confirmation",
-      "pingedAt": "2026-11-02T03:13:49.945459+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/unemployment-benefits-employment-support-overlap",
-      "pingedAt": "2026-11-02T03:13:50.232617+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/career-change-certifications-for-nonmajors",
-      "pingedAt": "2026-11-02T03:13:50.534527+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
-      "pingedAt": "2026-11-02T03:13:50.820525+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/youth-rent-support-eligibility-documents-status",
-      "pingedAt": "2026-11-02T03:14:45.874711+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/energy-voucher-eligibility-exclusion-check",
-      "pingedAt": "2026-11-02T03:14:46.509650+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/maternity-subsidy-noncovered-care-cost-check",
-      "pingedAt": "2026-11-02T03:14:47.387013+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/budget-mobile-esim-dual-sim-data-sharing-check",
-      "pingedAt": "2026-11-02T03:14:48.023231+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/energy-voucher-eligibility-balance-check-guide",
-      "pingedAt": "2026-11-02T03:14:48.051105+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
-      "pingedAt": "2026-11-02T03:16:56.395862+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/housing-pension-preferential-eligibility-home-value-payment",
-      "pingedAt": "2026-11-02T03:17:07.648774+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/excel-vlookup-na-error-hidden-spaces",
-      "pingedAt": "2026-11-02T03:31:07.637609+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/housing-subscription-ineligible-win-account-restoration",
-      "pingedAt": "2026-11-02T03:41:04.408383+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/severance-interim-settlement-jeonse-contract-deadline",
-      "pingedAt": "2026-11-02T03:51:10.714644+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/severance-interim-settlement-jeonse-contract-deadline",
-      "pingedAt": "2026-11-02T03:51:13.948092+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/administrative-fine-notice-payment-objection",
-      "pingedAt": "2026-11-02T03:51:14.608521+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/parking-fine-objection-deadline-documents",
-      "pingedAt": "2026-11-02T03:51:15.367900+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/unpaid-wages-final-pay-and-severance-complaint",
-      "pingedAt": "2026-11-02T03:51:16.019742+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/dishwasher-installation-extra-cost-quote-checklist",
-      "pingedAt": "2026-11-02T04:12:44.057451+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/refrigerator-odor-cleaning-repair-quote-checklist",
-      "pingedAt": "2026-11-02T04:12:44.751057+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/washing-machine-repair-or-replace-cost-checklist",
-      "pingedAt": "2026-11-02T04:12:45.297627+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/washing-machine-cleaning-service-quote-checklist",
-      "pingedAt": "2026-11-02T04:12:45.819149+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-credit-debit-card-check",
-      "pingedAt": "2026-11-02T04:12:52.089916+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-credit-debit-card-deduction",
-      "pingedAt": "2026-11-02T04:12:52.377658+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-credit-card-deduction-limit-ratio-2026",
-      "pingedAt": "2026-11-02T04:12:52.689575+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-pension-savings-irp-deduction-limit-guide",
-      "pingedAt": "2026-11-02T04:12:52.967437+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/post",
-      "pingedAt": "2026-11-02T04:12:56.897727+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/2026-second-consumption-coupon-eligibility-application-deadline",
-      "pingedAt": "2026-11-02T04:12:57.670272+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/2026-youth-housing-dream-subscription-account-criteria-conversion",
-      "pingedAt": "2026-11-02T04:12:58.329734+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
-      "pingedAt": "2026-11-02T04:12:58.968080+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/housing-subscription-account-cancellation",
-      "pingedAt": "2026-11-02T04:13:03.738350+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/unsold-housing-subscription-eligibility-and-application",
-      "pingedAt": "2026-11-02T04:13:04.421264+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/public-housing-subscription-monthly-payment-recognition",
-      "pingedAt": "2026-11-02T04:13:05.307217+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/private-housing-subscription-score-calculation",
-      "pingedAt": "2026-11-02T04:13:06.164136+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/income-tax-filing-after-midyear-resignation",
-      "pingedAt": "2026-11-02T04:13:11.803751+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/2026-subsidy-24-government-benefits-custom-inquiry-guide",
-      "pingedAt": "2026-11-02T04:13:12.441909+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
-      "pingedAt": "2026-11-02T04:13:13.304650+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/2026-k-pass-transport-card-benefit-guide-2",
-      "pingedAt": "2026-11-02T04:13:13.977045+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/kimchi-storage-without-kimchi-fridge",
-      "pingedAt": "2026-11-02T04:13:19.287316+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/sweet-potato-long-term-storage",
-      "pingedAt": "2026-11-02T04:13:20.087272+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/green-onion-fresh-storage-guide",
-      "pingedAt": "2026-11-02T04:13:20.710284+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/sink-drain-odor-cleaning-percarbonate-guide",
-      "pingedAt": "2026-11-02T04:13:21.311125+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/smartphone-photo-album-organization",
-      "pingedAt": "2026-11-02T04:13:24.658933+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/brake-fluid-replacement-interval-and-service-check",
-      "pingedAt": "2026-11-02T04:13:25.461376+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/ev-subsidy-check-by-region-and-vehicle-price",
-      "pingedAt": "2026-11-02T04:13:26.154860+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
-      "pingedAt": "2026-11-02T04:13:27.069743+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/national-health-screening-eligibility-preparation",
-      "pingedAt": "2026-11-02T04:13:38.758317+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/employee-health-screening-eligibility-check",
-      "pingedAt": "2026-11-02T04:13:39.411506+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/shoulder-pain-raising-arm-night-pain-care",
-      "pingedAt": "2026-11-02T04:13:40.189687+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/knee-clicking-without-pain-care-guide",
-      "pingedAt": "2026-11-02T04:13:40.747735+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/october-exhibition-popup-outing-guide",
-      "pingedAt": "2026-11-02T04:13:44.206436+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/kyoto-local-specialties-food-guide",
-      "pingedAt": "2026-11-02T04:13:44.934883+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/outskirts-cafe-parking-alternatives",
-      "pingedAt": "2026-11-02T04:13:45.751086+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/seoul-salt-bread-bakery-baking-times",
-      "pingedAt": "2026-11-02T04:13:46.372531+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/ai-meeting-notes-sensitive-data-privacy-check",
-      "pingedAt": "2026-11-02T04:13:49.497230+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/notion-recurring-work-automation",
-      "pingedAt": "2026-11-02T04:13:49.987471+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
-      "pingedAt": "2026-11-02T04:13:50.648113+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/excel-freeze-panes-row-column",
-      "pingedAt": "2026-11-02T04:13:51.130250+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-walk-refusal-indoor-alternatives",
-      "pingedAt": "2026-11-02T04:13:54.510436+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-indoor-nosework-beginner-starter-guide",
-      "pingedAt": "2026-11-02T04:13:54.820207+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/toxic-dangerous-foods-for-dogs-and-emergency-care-guide",
-      "pingedAt": "2026-11-02T04:13:55.123274+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-ear-cleaning-otitis-prevention-guide",
-      "pingedAt": "2026-11-02T04:13:55.469156+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/wifi-router-channel-speed-optimization-5ghz-settings",
-      "pingedAt": "2026-11-02T04:13:59.829036+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/smartphone-battery-lifespan-extending-charging-habits-guide",
-      "pingedAt": "2026-11-02T04:14:00.104453+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide-2",
-      "pingedAt": "2026-11-02T04:14:00.614481+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2",
-      "pingedAt": "2026-11-02T04:14:00.981126+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/sinsa-nolplace-booking-check",
-      "pingedAt": "2026-11-02T04:14:02.273221+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/silver-grass-festival-schedule-parking-shuttle",
-      "pingedAt": "2026-11-02T04:14:03.005523+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/autumn-foliage-spots-forecast-parking-reservation",
-      "pingedAt": "2026-11-02T04:14:03.681824+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/seoul-suburbs-foliage-drive-glamping-courses",
-      "pingedAt": "2026-11-02T04:14:04.427743+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/hotel-booking-total-cost-checklist",
-      "pingedAt": "2026-11-02T04:14:10.158491+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/weekend-arboretum-visit-reservation-and-family-route",
-      "pingedAt": "2026-11-02T04:14:10.799487+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
-      "pingedAt": "2026-11-02T04:14:11.390115+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
-      "pingedAt": "2026-11-02T04:14:12.136195+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/pension-savings-ira-tax-credit-withdrawal",
-      "pingedAt": "2026-11-02T04:14:13.352104+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
-      "pingedAt": "2026-11-02T04:14:14.261597+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
-      "pingedAt": "2026-11-02T04:14:15.119182+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/kidney-stone-water-prevention",
-      "pingedAt": "2026-11-02T04:14:15.779599+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/naeil-learning-card-out-of-pocket-cost",
-      "pingedAt": "2026-11-02T04:14:18.776692+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/reading-note-taking-method-2026",
-      "pingedAt": "2026-11-02T04:14:19.039658+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/overcoming-procrastination-five-second-rule-execution-skills",
-      "pingedAt": "2026-11-02T04:14:19.493322+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/miracle-morning-routine-success-guide",
-      "pingedAt": "2026-11-02T04:14:19.853524+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/electric-blanket-pre-use-safety-checklist",
-      "pingedAt": "2026-11-02T04:29:36.045892+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/youth-leap-account-matching-grant-income-limits-2026",
-      "pingedAt": "2026-11-02T04:29:36.680496+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/appliance-warranty-repair-service-cost-checklist",
-      "pingedAt": "2026-11-02T04:29:37.196011+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/youth-leap-account-transfer-hope-savings-guide-2026",
-      "pingedAt": "2026-11-02T04:29:37.869850+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
-      "pingedAt": "2026-11-02T04:29:45.164017+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract",
-      "pingedAt": "2026-11-02T04:29:45.622459+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-medical-expense-deduction-guide-2026",
-      "pingedAt": "2026-11-02T04:29:45.903665+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-credit-debit-card-deduction-comparison",
-      "pingedAt": "2026-11-02T04:29:46.187797+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/health-insurance-voluntary-continuation-deadline",
-      "pingedAt": "2026-11-02T04:29:53.994093+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/national-pension-basic-pension-reduction",
-      "pingedAt": "2026-11-02T04:29:54.658325+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/government-benefits-work-child-tax-credit-eligibility",
-      "pingedAt": "2026-11-02T04:29:55.394510+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/government-benefits-work-child-tax-credit",
-      "pingedAt": "2026-11-02T04:29:56.108566+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
-      "pingedAt": "2026-11-02T04:30:03.561902+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
-      "pingedAt": "2026-11-02T04:30:04.315457+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/jeonse-loan-renewal-increase-rules",
-      "pingedAt": "2026-11-02T04:30:05.034342+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "woorinote.kr",
-      "url": "https://www.woorinote.kr/newlywed-didimdol-income-rate-eligibility",
-      "pingedAt": "2026-11-02T04:30:05.853234+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/unemployment-benefit-employment-separation-certificate-delay",
-      "pingedAt": "2026-11-02T04:30:10.299179+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/topic-3",
-      "pingedAt": "2026-11-02T04:30:11.160583+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
-      "pingedAt": "2026-11-02T04:30:11.879444+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "justinfo.co.kr",
-      "url": "https://www.justinfo.co.kr/fatf-steering-group-korea-financial-crime-response",
-      "pingedAt": "2026-11-02T04:30:12.572751+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/window-frame-cleaning-dust-stains",
-      "pingedAt": "2026-11-02T04:30:16.012494+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/washing-machine-laundry-odor-check",
-      "pingedAt": "2026-11-02T04:30:16.818986+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
-      "pingedAt": "2026-11-02T04:30:17.454403+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "daynote.kr",
-      "url": "https://www.daynote.kr/proper-recycling-sorting-rules-guide",
-      "pingedAt": "2026-11-02T04:30:18.282791+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
-      "pingedAt": "2026-11-02T04:30:23.462237+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/refrigerator-energy-saving-temperature-settings-organizing-tips",
-      "pingedAt": "2026-11-02T04:30:24.060125+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
-      "pingedAt": "2026-11-02T04:30:24.920296+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "meganote.kr",
-      "url": "https://www.meganote.kr/smartphone-storage-space-cleanup-guide-2",
-      "pingedAt": "2026-11-02T04:30:25.730980+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/front-knee-pain-when-descending-stairs",
-      "pingedAt": "2026-11-02T04:30:50.069314+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
-      "pingedAt": "2026-11-02T04:30:50.704873+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/topic-2",
-      "pingedAt": "2026-11-02T04:30:51.196491+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/flu-symptoms-testing-antiviral-care-timing",
-      "pingedAt": "2026-11-02T04:30:51.856404+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
-      "pingedAt": "2026-11-02T04:30:57.401414+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
-      "pingedAt": "2026-11-02T04:30:58.260422+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/autumn-foliage-campsite-reservation-deck-view",
-      "pingedAt": "2026-11-02T04:30:58.835674+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-joy.com",
-      "url": "https://www.must-joy.com/autumn-camping-kerosene-heater-co-alarm-ventilation",
-      "pingedAt": "2026-11-02T04:30:59.587930+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/budget-mobile-number-transfer-termination-cost",
-      "pingedAt": "2026-11-02T04:31:05.966142+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
-      "pingedAt": "2026-11-02T04:31:06.426383+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/google-sheets-version-history-restore",
-      "pingedAt": "2026-11-02T04:31:06.949183+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "maxnote.kr",
-      "url": "https://www.maxnote.kr/windows-11-shortcuts-not-working",
-      "pingedAt": "2026-11-02T04:31:07.407307+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/pet-insurance-deductible-comparison",
-      "pingedAt": "2026-11-02T04:31:15.378960+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/dog-molting-season-grooming-skin-care-guide",
-      "pingedAt": "2026-11-02T04:31:15.744125+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/seoul-disposal-of-unused-medicines-postal-box-and-collection-bin-guide",
-      "pingedAt": "2026-11-02T04:31:16.096261+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "joynote.kr",
-      "url": "https://www.joynote.kr/kca-damage-relief-application-guide",
-      "pingedAt": "2026-11-02T04:31:16.654955+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/windows-mac-disable-sticky-keys",
-      "pingedAt": "2026-11-02T04:31:17.852101+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/windows-update-restart-loop-remove-problem-update",
-      "pingedAt": "2026-11-02T04:31:18.181270+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide",
-      "pingedAt": "2026-11-02T04:31:18.606464+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/chrome-incognito-download-history-scope",
-      "pingedAt": "2026-11-02T04:31:19.093807+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/jeju-sumokwon-theme-park-visit-guide",
-      "pingedAt": "2026-11-02T04:31:20.891370+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/2026-autumn-foliage-spots-parking-transit",
-      "pingedAt": "2026-11-02T04:31:21.573640+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/2026-local-currency-hotplace-tips",
-      "pingedAt": "2026-11-02T04:31:22.234451+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "nolplace.com",
-      "url": "https://www.nolplace.com/2026-seoul-suburbs-large-bakery-cafes-best-5-parking-guide",
-      "pingedAt": "2026-11-02T04:31:22.860862+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/ktx-train-standing-ticket-booking-guide",
-      "pingedAt": "2026-11-02T04:31:31.412654+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/naejangsan-autumn-foliage-trail-status-check",
-      "pingedAt": "2026-11-02T04:31:32.198324+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/incheon-airport-lost-passport-response",
-      "pingedAt": "2026-11-02T04:31:32.908233+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "tripmarvel.com",
-      "url": "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery",
-      "pingedAt": "2026-11-02T04:31:33.518139+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/2026-flu-vaccination-pregnant-children-schedule",
-      "pingedAt": "2026-11-02T04:31:37.795900+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/health-information-ontology-portal",
-      "pingedAt": "2026-11-02T04:31:38.747993+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/2026-2027-influenza-vaccination-schedule-eligibility",
-      "pingedAt": "2026-11-02T04:31:39.470737+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/jang-geon-gang-microbiome-2026",
-      "pingedAt": "2026-11-02T04:31:40.092419+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/mental-counseling-voucher-personal-cost",
-      "pingedAt": "2026-11-02T04:31:42.842256+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/employee-training-card-application-guide",
-      "pingedAt": "2026-11-02T04:31:43.291486+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/tomorrow-learning-card-eligibility-application",
-      "pingedAt": "2026-11-02T04:31:43.871536+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "soulnote.kr",
-      "url": "https://www.soulnote.kr/miracle-morning-15min-routine-habit-formation-principles",
-      "pingedAt": "2026-11-02T04:31:44.345927+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/employment-support-part-time-income-report",
-      "pingedAt": "2026-11-02T04:32:04.502640+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
       "domain": "must-good.com",
       "url": "https://www.must-good.com/national-museum-korea-reservation-weekend-check",
-      "pingedAt": "2026-11-02T04:32:05.161070+00:00",
+      "pingedAt": "2026-11-03T00:13:34.558076+00:00",
       "results": [
         {
           "endpoint": "https://searchadvisor.naver.com/indexnow",
@@ -2944,7 +20,7 @@
     {
       "domain": "must-good.com",
       "url": "https://www.must-good.com/basic-pension-income-assets-calculation",
-      "pingedAt": "2026-11-02T04:32:05.997925+00:00",
+      "pingedAt": "2026-11-03T00:13:35.579053+00:00",
       "results": [
         {
           "endpoint": "https://searchadvisor.naver.com/indexnow",
@@ -2961,398 +37,7 @@
     {
       "domain": "must-good.com",
       "url": "https://www.must-good.com/basic-pension-application-timing",
-      "pingedAt": "2026-11-02T04:32:06.776241+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/medical-insurance-claim-diagnosis-document",
-      "pingedAt": "2026-11-02T04:57:59.593455+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/protein-supplement-before-buying-in-your-fifties",
-      "pingedAt": "2026-11-02T04:58:00.034771+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/national-health-screening-guide",
-      "pingedAt": "2026-11-02T04:58:00.635308+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/flu-vaccine-side-effects-fever-muscle-pain-care",
-      "pingedAt": "2026-11-02T04:58:01.167024+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "healthcox.com",
-      "url": "https://www.healthcox.com/knee-hyaluronic-acid-injection-coverage-interval",
-      "pingedAt": "2026-11-02T05:00:24.250578+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/dual-income-couple-tax-estimate-comparison-checklist",
-      "pingedAt": "2026-11-02T05:03:20.855928+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/year-end-tax-dependent-duplicate-deduction-check",
-      "pingedAt": "2026-11-02T05:03:21.207605+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/basic-pension-reduction-rules-avoid-calculation",
-      "pingedAt": "2026-11-02T05:03:21.595032+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/midyear-resignation-year-end-tax-settlement",
-      "pingedAt": "2026-11-02T05:03:21.932494+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/universe-club-cancellation-guide",
-      "pingedAt": "2026-11-02T05:03:22.244249+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour",
-      "pingedAt": "2026-11-02T05:03:27.336528+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits",
-      "pingedAt": "2026-11-02T05:03:27.969085+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/scaling-health-insurance-cycle-copay-guide",
-      "pingedAt": "2026-11-02T05:03:28.593078+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/homeplus-chuseok-sale-2026-meat-discount-guide",
-      "pingedAt": "2026-11-02T05:03:29.263727+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "smilenote.kr",
-      "url": "https://www.smilenote.kr/hanaromart-chuseok-gift-set-sale-2026",
-      "pingedAt": "2026-11-02T05:03:29.880946+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
-      "pingedAt": "2026-11-02T05:03:32.686621+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/macos-expressvpn-setup-and-connection-check",
-      "pingedAt": "2026-11-02T05:03:33.001043+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/windows-11-startup-programs-disable-guide",
-      "pingedAt": "2026-11-02T05:03:33.351852+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/apple-watch-not-charging-magnetic-port-troubleshoot",
-      "pingedAt": "2026-11-02T05:03:33.658323+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "topnote.kr",
-      "url": "https://www.topnote.kr/google-photos-archive-vs-delete-guide",
-      "pingedAt": "2026-11-02T05:03:34.110332+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 403,
-          "accepted": false
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/youth-leap-account-cancellation-vs-special-termination-rules",
-      "pingedAt": "2026-11-02T05:14:17.492745+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/refrigerator-repair-vs-replacement-total-cost-checklist",
-      "pingedAt": "2026-11-02T05:14:18.231949+00:00",
-      "results": [
-        {
-          "endpoint": "https://searchadvisor.naver.com/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        },
-        {
-          "endpoint": "https://api.indexnow.org/indexnow",
-          "httpStatus": 200,
-          "accepted": true
-        }
-      ]
-    },
-    {
-      "domain": "must-pick.com",
-      "url": "https://www.must-pick.com/food-waste-disposer-buying-guide-cost-filter",
-      "pingedAt": "2026-11-02T05:14:18.913916+00:00",
+      "pingedAt": "2026-11-03T00:13:36.232470+00:00",
       "results": [
         {
           "endpoint": "https://searchadvisor.naver.com/indexnow",
@@ -3369,7 +54,58 @@
     {
       "domain": "must-pick.com",
       "url": "https://www.must-pick.com/robot-vacuum-running-cost-comparison-checklist",
-      "pingedAt": "2026-11-02T05:14:19.436429+00:00",
+      "pingedAt": "2026-11-03T01:14:11.864459+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/dishwasher-installation-extra-cost-quote-checklist",
+      "pingedAt": "2026-11-03T01:14:12.577498+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/refrigerator-odor-cleaning-repair-quote-checklist",
+      "pingedAt": "2026-11-03T01:14:13.117247+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/washing-machine-repair-or-replace-cost-checklist",
+      "pingedAt": "2026-11-03T01:14:13.931688+00:00",
       "results": [
         {
           "endpoint": "https://searchadvisor.naver.com/indexnow",
@@ -3385,8 +121,8 @@
     },
     {
       "domain": "baronote.kr",
-      "url": "https://www.baronote.kr/national-pension-basic-pension-eligibility",
-      "pingedAt": "2026-11-02T05:14:25.550350+00:00",
+      "url": "https://www.baronote.kr/dual-income-couple-tax-estimate-comparison-checklist",
+      "pingedAt": "2026-11-03T01:14:15.869817+00:00",
       "results": [
         {
           "endpoint": "https://searchadvisor.naver.com/indexnow",
@@ -3397,6 +133,3270 @@
           "endpoint": "https://api.indexnow.org/indexnow",
           "httpStatus": 403,
           "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/year-end-tax-dependent-duplicate-deduction-check",
+      "pingedAt": "2026-11-03T01:14:16.242081+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/basic-pension-reduction-rules-avoid-calculation",
+      "pingedAt": "2026-11-03T01:14:16.681412+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/midyear-resignation-year-end-tax-settlement",
+      "pingedAt": "2026-11-03T01:14:16.980239+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/military-service-certificate-online-issuance-guide",
+      "pingedAt": "2026-11-03T01:14:18.934466+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/hometax-fact-certificate-no-declaration-processing-time",
+      "pingedAt": "2026-11-03T01:14:19.717285+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/immigration-record-certificate-issuance-delay-gov24",
+      "pingedAt": "2026-11-03T01:14:20.369890+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/digital-document-wallet-issuance-submission-guide",
+      "pingedAt": "2026-11-03T01:14:21.145043+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/housing-subscription-ineligible-win-account-restoration",
+      "pingedAt": "2026-11-03T01:14:26.471788+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/samsung-card-cancel-apartment-fee",
+      "pingedAt": "2026-11-03T01:14:27.236392+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/gwangju-champions-city-price-payment-guide",
+      "pingedAt": "2026-11-03T01:14:27.921273+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/housing-subscription-account-cancellation",
+      "pingedAt": "2026-11-03T01:14:28.663881+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/severance-interim-settlement-jeonse-contract-deadline",
+      "pingedAt": "2026-11-03T01:14:32.818432+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/fatf-steering-group-korea-financial-crime-response",
+      "pingedAt": "2026-11-03T01:14:33.374487+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/unreported-crypto-site-block-user-checklist",
+      "pingedAt": "2026-11-03T01:14:34.099516+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/loan-application-financial-phishing-check",
+      "pingedAt": "2026-11-03T01:14:34.621732+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/washing-machine-laundry-odor-check",
+      "pingedAt": "2026-11-03T01:14:39.117209+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/kitchen-range-hood-filter-grease-cleaning",
+      "pingedAt": "2026-11-03T01:14:39.992240+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/washing-machine-detergent-drawer-cleaning-model-checklist",
+      "pingedAt": "2026-11-03T01:14:40.737796+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/bathroom-tile-mold-scale-removal-percarbonate-cleaning-guide",
+      "pingedAt": "2026-11-03T01:14:41.385123+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/employment-support-unemployment-benefit-application-timing",
+      "pingedAt": "2026-11-03T01:14:43.235709+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/smartphone-photo-album-organization",
+      "pingedAt": "2026-11-03T01:14:43.937185+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/brake-fluid-replacement-interval-and-service-check",
+      "pingedAt": "2026-11-03T01:14:44.658484+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/ev-subsidy-check-by-region-and-vehicle-price",
+      "pingedAt": "2026-11-03T01:14:45.465984+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/protein-supplement-guide-for-fifties",
+      "pingedAt": "2026-11-03T01:14:48.121761+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/national-health-screening-guide",
+      "pingedAt": "2026-11-03T01:14:48.844730+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/shoulder-pain-raising-arm-night-pain-care",
+      "pingedAt": "2026-11-03T01:14:49.315754+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/knee-clicking-without-pain-care-guide",
+      "pingedAt": "2026-11-03T01:14:49.853328+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/munhwa-nuri-card-online-merchants",
+      "pingedAt": "2026-11-03T01:14:51.530872+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/october-exhibition-popup-outing-guide",
+      "pingedAt": "2026-11-03T01:14:52.108457+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/seoul-salt-bread-bakery-baking-times",
+      "pingedAt": "2026-11-03T01:14:52.704321+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/seoul-nearby-autumn-festivals-day-trip-checklist-2026",
+      "pingedAt": "2026-11-03T01:14:53.457417+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/budget-mobile-number-transfer-termination-cost",
+      "pingedAt": "2026-11-03T01:14:55.140204+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/productivity-tools-for-office-work",
+      "pingedAt": "2026-11-03T01:14:56.807654+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/notion-recurring-work-automation",
+      "pingedAt": "2026-11-03T01:14:57.251811+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/windows-11-shortcuts-not-working",
+      "pingedAt": "2026-11-03T01:14:57.754105+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/dog-separation-anxiety-signs-alone-training",
+      "pingedAt": "2026-11-03T01:15:01.280918+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/cat-vomiting-hairball-warning-signs-vet",
+      "pingedAt": "2026-11-03T01:15:01.826354+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/dog-howling-alone-separation-anxiety",
+      "pingedAt": "2026-11-03T01:15:02.206171+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/dog-walk-refusal-indoor-alternatives",
+      "pingedAt": "2026-11-03T01:15:02.485174+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/usb-c-monitor-no-display-troubleshooting",
+      "pingedAt": "2026-11-03T01:15:06.548463+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide-2",
+      "pingedAt": "2026-11-03T01:15:06.971007+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/chrome-cache-cookie-clear-shortcuts-guide-2",
+      "pingedAt": "2026-11-03T01:15:07.322459+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/2026-chrome-incognito-mode-history-deletion-guide",
+      "pingedAt": "2026-11-03T01:15:07.665241+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/gyeongbokgung-night-visit-booking-free-entry",
+      "pingedAt": "2026-11-03T01:15:09.014348+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/seoul-suburbs-arboretum-family-half-day-guide",
+      "pingedAt": "2026-11-03T01:15:09.681346+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/namiseom-zipwire-booking-weight-limit-tips",
+      "pingedAt": "2026-11-03T01:15:10.283485+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/hwadamsup-ticket-monorail-reservation-tips",
+      "pingedAt": "2026-11-03T01:15:10.884573+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/incheon-airport-lost-property-online-search-delivery",
+      "pingedAt": "2026-11-03T01:15:13.509099+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/national-park-trail-closure-check-2026",
+      "pingedAt": "2026-11-03T01:15:14.105908+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/incheon-airport-easy-drop-eligibility-checklist",
+      "pingedAt": "2026-11-03T01:15:14.758097+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/incheon-airport-smartpass-facial-recognition-registration-guide",
+      "pingedAt": "2026-11-03T01:15:15.391081+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/jang-geon-gang-microbiome-2026",
+      "pingedAt": "2026-11-03T01:15:16.667638+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/chronic-fatigue-vitamin-d-daily-intake-sunlight-golden-hour",
+      "pingedAt": "2026-11-03T01:15:17.584541+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/warm-water-morning-empty-stomach-health-benefits",
+      "pingedAt": "2026-11-03T01:15:18.287253+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/scaling-health-insurance-cycle-copay-guide",
+      "pingedAt": "2026-11-03T01:15:19.194783+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/workers-tomorrow-learning-card-application-guide",
+      "pingedAt": "2026-11-03T01:15:20.428121+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/overcoming-procrastination-five-second-rule-execution-skills",
+      "pingedAt": "2026-11-03T01:15:20.841394+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/miracle-morning-routine-success-guide",
+      "pingedAt": "2026-11-03T01:15:21.430246+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/miracle-morning-15min-routine-habit-formation-principles",
+      "pingedAt": "2026-11-03T01:15:21.711816+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/healthcare-expense-cap-refund-payment-status",
+      "pingedAt": "2026-11-03T01:19:09.174831+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/government-benefits-work-child-tax-credit",
+      "pingedAt": "2026-11-03T01:19:09.802255+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/post",
+      "pingedAt": "2026-11-03T01:19:10.400723+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/2026-second-consumption-coupon-eligibility-application-deadline",
+      "pingedAt": "2026-11-03T01:19:11.036321+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/electric-blanket-pre-use-safety-checklist",
+      "pingedAt": "2026-11-03T02:15:24.068252+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/youth-leap-account-matching-grant-income-limits-2026",
+      "pingedAt": "2026-11-03T02:15:24.725104+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/appliance-warranty-repair-service-cost-checklist",
+      "pingedAt": "2026-11-03T02:15:25.433178+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/youth-leap-account-transfer-hope-savings-guide-2026",
+      "pingedAt": "2026-11-03T02:15:25.978067+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/deposit-secured-loan-cost-comparison",
+      "pingedAt": "2026-11-03T02:15:29.764679+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
+      "pingedAt": "2026-11-03T02:15:30.041354+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/year-end-rent-tax-credit-parent-contract",
+      "pingedAt": "2026-11-03T02:15:30.443664+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/universe-club-cancellation-guide",
+      "pingedAt": "2026-11-03T02:15:30.899980+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/2026-youth-housing-dream-subscription-account-criteria-conversion",
+      "pingedAt": "2026-11-03T02:19:23.770713+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/2026-earned-income-tax-credit-application-guide",
+      "pingedAt": "2026-11-03T02:19:24.683879+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/최대-45-우대금리에-2대-대출-연계까지-2026-청년-주택드림-청약통장-가입-조건-및-전환-방법-총정리",
+      "pingedAt": "2026-11-03T02:19:25.321978+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/2026-hidden-government-subsidy-inquiry-guide",
+      "pingedAt": "2026-11-03T02:19:26.093889+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/washing-machine-cleaning-service-quote-checklist",
+      "pingedAt": "2026-11-03T03:16:02.195839+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/youth-monthly-rent-income-asset-criteria",
+      "pingedAt": "2026-11-03T03:16:02.727972+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/youth-monthly-rent-deposit-criteria-exclusions",
+      "pingedAt": "2026-11-03T03:16:03.358012+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/youth-monthly-rent-transfer-certificate-guide",
+      "pingedAt": "2026-11-03T03:16:04.004904+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/year-end-tax-credit-debit-card-check",
+      "pingedAt": "2026-11-03T03:16:08.257494+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/year-end-tax-credit-debit-card-deduction",
+      "pingedAt": "2026-11-03T03:16:08.708155+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/national-pension-basic-pension-eligibility",
+      "pingedAt": "2026-11-03T03:16:09.135977+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/basic-pension-national-pension-linked-reduction",
+      "pingedAt": "2026-11-03T03:16:09.647308+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/2026-autumn-foliage-spots-guide",
+      "pingedAt": "2026-11-03T03:16:17.748747+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/gov24-simple-auth-popup-troubleshooting",
+      "pingedAt": "2026-11-03T03:16:18.404875+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/driving-record-certificate-online-issuance-guide",
+      "pingedAt": "2026-11-03T03:16:19.005142+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/health-insurance-payment-certificate-difference",
+      "pingedAt": "2026-11-03T03:16:19.613586+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/savings-early-withdrawal-versus-deposit-backed-loan",
+      "pingedAt": "2026-11-03T03:16:23.408233+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/unsold-housing-subscription-eligibility-and-application",
+      "pingedAt": "2026-11-03T03:16:24.066330+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/public-housing-subscription-monthly-payment-recognition",
+      "pingedAt": "2026-11-03T03:16:24.670690+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/private-housing-subscription-score-calculation",
+      "pingedAt": "2026-11-03T03:16:25.559003+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/employment-support-unemployment-benefit-overlap",
+      "pingedAt": "2026-11-03T03:16:33.069626+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/administrative-fine-notice-payment-objection",
+      "pingedAt": "2026-11-03T03:16:33.580142+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/parking-fine-objection-deadline-documents",
+      "pingedAt": "2026-11-03T03:16:34.393017+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/unpaid-wages-final-pay-and-severance-complaint",
+      "pingedAt": "2026-11-03T03:16:35.177863+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/gas-meter-replacement-cost-missed-self-reading",
+      "pingedAt": "2026-11-03T03:16:42.328525+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/winter-bedding-washing-checklist",
+      "pingedAt": "2026-11-03T03:16:43.605310+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/garmin-forerunner-970-vs-965",
+      "pingedAt": "2026-11-03T03:16:54.369479+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/proper-recycling-sorting-rules-guide",
+      "pingedAt": "2026-11-03T03:16:55.079538+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/car-periodic-inspection-ts-reservation-penalty",
+      "pingedAt": "2026-11-03T03:17:09.332684+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/boiler-error-code-troubleshooting-check",
+      "pingedAt": "2026-11-03T03:17:10.143906+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/dishwasher-12-vs-14-capacity-installation-storage",
+      "pingedAt": "2026-11-03T03:19:54.422931+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/washing-machine-laundry-odor-cleaning-checks",
+      "pingedAt": "2026-11-03T03:19:55.157767+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/refrigerator-door-not-closing-checks",
+      "pingedAt": "2026-11-03T03:19:55.714150+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/refrigerator-odor-troubleshooting-cleaning-drain-seal-filter",
+      "pingedAt": "2026-11-03T03:19:56.561770+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/basic-pension-application-spouse-financial-consent",
+      "pingedAt": "2026-11-03T03:20:00.470707+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/basic-pension-couple-benefit-reduction",
+      "pingedAt": "2026-11-03T03:20:00.874616+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/basic-pension-national-pension-reduction-check",
+      "pingedAt": "2026-11-03T03:20:01.323362+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/national-pension-early-receipt-reduction-calculator",
+      "pingedAt": "2026-11-03T03:20:01.755301+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/health-insurance-qualification-certificate-official-guide",
+      "pingedAt": "2026-11-03T03:20:09.884956+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
+      "pingedAt": "2026-11-03T03:20:10.502124+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/mobile-health-insurance-card-issuance-guide",
+      "pingedAt": "2026-11-03T03:20:11.109642+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/incheon-airport-emergency-passport-guide",
+      "pingedAt": "2026-11-03T03:20:11.721339+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/leasehold-registration-order-procedure-checklist",
+      "pingedAt": "2026-11-03T03:20:17.893805+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/monthly-rent-tax-credit-eligibility-documents",
+      "pingedAt": "2026-11-03T03:20:18.583515+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/jeonse-loan-renewal-increase-rules",
+      "pingedAt": "2026-11-03T03:20:19.219833+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/newlywed-didimdol-income-rate-eligibility",
+      "pingedAt": "2026-11-03T03:20:20.087794+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/income-tax-filing-after-midyear-resignation",
+      "pingedAt": "2026-11-03T03:20:25.593997+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/unemployment-benefit-employment-separation-certificate-delay",
+      "pingedAt": "2026-11-03T03:20:26.041137+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/topic-3",
+      "pingedAt": "2026-11-03T03:20:26.556972+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/jeonse-deposit-return-guarantee-eligibility-mobile-application",
+      "pingedAt": "2026-11-03T03:20:27.086608+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/kimchi-storage-without-kimchi-fridge",
+      "pingedAt": "2026-11-03T03:20:30.342957+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/sweet-potato-long-term-storage",
+      "pingedAt": "2026-11-03T03:20:31.008369+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/burned-pot-cleaning-baking-soda-vinegar-ratio-guide",
+      "pingedAt": "2026-11-03T03:20:31.559376+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/clear-pet-bottle-separation-guide",
+      "pingedAt": "2026-11-03T03:20:32.223236+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/annual-car-tax-refund-sale-scrappage",
+      "pingedAt": "2026-11-03T03:20:36.007755+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/refrigerator-energy-saving-temperature-settings-organizing-tips",
+      "pingedAt": "2026-11-03T03:20:36.920301+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/2026-waste-sorting-recycling-rules-guide-2",
+      "pingedAt": "2026-11-03T03:20:37.556697+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/smartphone-storage-space-cleanup-guide-2",
+      "pingedAt": "2026-11-03T03:20:38.300475+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/national-health-screening-eligibility-preparation",
+      "pingedAt": "2026-11-03T03:20:44.161834+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/employee-health-screening-eligibility-check",
+      "pingedAt": "2026-11-03T03:20:44.698613+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/front-knee-pain-when-descending-stairs",
+      "pingedAt": "2026-11-03T03:20:45.406720+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/plantar-fasciitis-morning-heel-pain-stretching",
+      "pingedAt": "2026-11-03T03:20:46.059151+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/kyoto-local-specialties-food-guide",
+      "pingedAt": "2026-11-03T03:20:49.599093+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/outskirts-cafe-parking-alternatives",
+      "pingedAt": "2026-11-03T03:20:50.199059+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/pottery-oneday-class-wheel-experience-guide",
+      "pingedAt": "2026-11-03T03:20:50.781019+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/film-camera-first-use-load-shoot-rewind",
+      "pingedAt": "2026-11-03T03:20:51.392451+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/ai-meeting-notes-sensitive-data-privacy-check",
+      "pingedAt": "2026-11-03T03:20:52.967768+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/chatgpt-meeting-notes-action-items-workflow",
+      "pingedAt": "2026-11-03T03:20:53.395891+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/excel-freeze-panes-row-column",
+      "pingedAt": "2026-11-03T03:20:54.183234+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/excel-find-remove-duplicate-values",
+      "pingedAt": "2026-11-03T03:20:54.843035+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/pet-insurance-deductible-comparison",
+      "pingedAt": "2026-11-03T03:21:00.129968+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/compare-vet-clinic-fees-public-items-cost-estimate",
+      "pingedAt": "2026-11-03T03:21:00.501680+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/dog-indoor-nosework-beginner-starter-guide",
+      "pingedAt": "2026-11-03T03:21:00.966310+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/toxic-dangerous-foods-for-dogs-and-emergency-care-guide",
+      "pingedAt": "2026-11-03T03:21:01.261361+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/excel-vlookup-na-error-hidden-spaces",
+      "pingedAt": "2026-11-03T03:21:03.933068+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/windows-mac-disable-sticky-keys",
+      "pingedAt": "2026-11-03T03:21:04.264068+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/windows-update-restart-loop-remove-problem-update",
+      "pingedAt": "2026-11-03T03:21:04.595417+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/windows-11-clipboard-history-enable-and-use",
+      "pingedAt": "2026-11-03T03:21:05.051869+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/sinsa-nolplace-booking-check",
+      "pingedAt": "2026-11-03T03:21:06.295234+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/jeju-sumokwon-theme-park-visit-guide",
+      "pingedAt": "2026-11-03T03:21:07.075893+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/hwadamsup-autumn-admission-monorail-booking-cancellation-tips",
+      "pingedAt": "2026-11-03T03:21:08.280751+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/silver-grass-festival-schedule-parking-shuttle",
+      "pingedAt": "2026-11-03T03:21:08.949242+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/ktx-delay-compensation-time-refund-rates",
+      "pingedAt": "2026-11-03T03:21:17.211313+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/hotel-booking-total-cost-checklist",
+      "pingedAt": "2026-11-03T03:21:17.872522+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/japan-jr-pass-exchange-and-start-date",
+      "pingedAt": "2026-11-03T03:21:18.527707+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/sejong-arboretum-greenhouse-reservation-admission-guide",
+      "pingedAt": "2026-11-03T03:21:19.203934+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/senior-park-golf-warm-up-knee-care",
+      "pingedAt": "2026-11-03T03:21:20.594271+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/pension-savings-ira-tax-credit-withdrawal",
+      "pingedAt": "2026-11-03T03:21:21.193277+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/senior-park-golf-beginner-guide-rules",
+      "pingedAt": "2026-11-03T03:21:21.865036+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/shingles-vaccine-senior-support-guide",
+      "pingedAt": "2026-11-03T03:21:22.478630+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/mental-counseling-voucher-personal-cost",
+      "pingedAt": "2026-11-03T03:21:23.804756+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/naeil-learning-card-out-of-pocket-cost",
+      "pingedAt": "2026-11-03T03:21:24.252529+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/employee-training-card-application-guide",
+      "pingedAt": "2026-11-03T03:21:24.565483+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/reading-note-taking-method-2026",
+      "pingedAt": "2026-11-03T03:21:24.927114+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/msafer-mobile-subscription-restriction-release",
+      "pingedAt": "2026-11-03T03:22:07.381201+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+      "pingedAt": "2026-11-03T03:23:46.802135+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/health-insurance-voluntary-continuation-deadline",
+      "pingedAt": "2026-11-03T03:23:47.545435+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/national-pension-basic-pension-reduction",
+      "pingedAt": "2026-11-03T03:23:48.273918+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/government-benefits-work-child-tax-credit-eligibility",
+      "pingedAt": "2026-11-03T03:23:48.947475+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/national-museum-childrens-museum-reservation-cancellation",
+      "pingedAt": "2026-11-03T06:01:12.558568+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/colonoscopy-polypectomy-surgery-insurance-claim",
+      "pingedAt": "2026-11-03T14:37:30.062063+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/hba1c-6-5-normal-fasting-glucose",
+      "pingedAt": "2026-11-03T15:31:46.466304+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/basic-pension-car-value-4000-limit",
+      "pingedAt": "2026-11-03T17:25:47.864549+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/hba1c-6-5-normal-fasting-glucose",
+      "pingedAt": "2026-11-03T18:16:45.437598+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/hba1c-6-5-normal-fasting-glucose",
+      "pingedAt": "2026-11-03T18:21:16.609937+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "smilenote.kr",
+      "url": "https://www.smilenote.kr/national-pension-deferral-application-guide",
+      "pingedAt": "2026-11-03T23:00:16.351714+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "soulnote.kr",
+      "url": "https://www.soulnote.kr/forklift-license-training-total-cost",
+      "pingedAt": "2026-11-03T23:10:19.123758+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/samjeomsam-medical-expense-refund-check",
+      "pingedAt": "2026-11-04T01:11:13.072650+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "baronote.kr",
+      "url": "https://www.baronote.kr/irp-early-withdrawal-homeless-jeonse-deposit-documents",
+      "pingedAt": "2026-11-04T01:21:21.170725+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "maxnote.kr",
+      "url": "https://www.maxnote.kr/excel-vlookup-xlookup-multiple-criteria",
+      "pingedAt": "2026-11-04T03:10:21.949337+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "topnote.kr",
+      "url": "https://www.topnote.kr/windows-11-network-printer-share-error-0x0000011b",
+      "pingedAt": "2026-11-04T03:30:36.963097+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "woorinote.kr",
+      "url": "https://www.woorinote.kr/hug-deundeun-jeonse-round-11-checklist",
+      "pingedAt": "2026-11-04T03:40:26.509851+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "justinfo.co.kr",
+      "url": "https://www.justinfo.co.kr/gym-pilates-early-cancellation-refund-check",
+      "pingedAt": "2026-11-04T03:50:33.891472+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "healthcox.com",
+      "url": "https://www.healthcox.com/shingrix-vaccine-interval-insurance-cost",
+      "pingedAt": "2026-11-04T05:00:38.322748+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-joy.com",
+      "url": "https://www.must-joy.com/traditional-market-onnuri-merchant-tax-deduction",
+      "pingedAt": "2026-11-04T06:00:37.469945+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "joynote.kr",
+      "url": "https://www.joynote.kr/pet-insurance-patella-exclusion-deductible",
+      "pingedAt": "2026-11-04T11:00:29.396981+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 403,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "domain": "nolplace.com",
+      "url": "https://www.nolplace.com/seoul-grand-park-camping-reservation-parking-etiquette",
+      "pingedAt": "2026-11-04T11:10:15.436171+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "tripmarvel.com",
+      "url": "https://www.tripmarvel.com/yeongju-area-hotel-checkin-parking",
+      "pingedAt": "2026-11-04T11:30:35.949324+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "daynote.kr",
+      "url": "https://www.daynote.kr/drum-washer-drain-filter-cleaning",
+      "pingedAt": "2026-11-04T12:00:30.534303+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "must-pick.com",
+      "url": "https://www.must-pick.com/iphone-18-foldable-price-features-comparison",
+      "pingedAt": "2026-11-04T12:10:40.154378+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "domain": "meganote.kr",
+      "url": "https://www.meganote.kr/audi-a5-850-discount-quote-check",
+      "pingedAt": "2026-11-04T12:35:50.378052+00:00",
+      "results": [
+        {
+          "endpoint": "https://searchadvisor.naver.com/indexnow",
+          "httpStatus": 200,
+          "accepted": true
+        },
+        {
+          "endpoint": "https://api.indexnow.org/indexnow",
+          "httpStatus": 200,
+          "accepted": true
         }
       ]
     }

@@ -1,0 +1,38 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:28d9f79cb9d16f1aa46d",
+  "recordedAt": "2026-11-02T15:28:38.454850+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+  "externalSources": [
+    {
+      "title": "2019 보건복지백서",
+      "url": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+      "source": "web_search"
+    },
+    {
+      "title": "2021년도 준정부기관 경영실적 평가보고서",
+      "url": "https://www.kspo.or.kr/kspo/cmmn/file/fileDown.do?atchFileId=FILE_000000000016462&fileSn=1",
+      "source": "web_search"
+    },
+    {
+      "title": "<B4EBB9FDBFF8C6C7B7CAC7D8BCB3313433C8A32DB9CEBBE72EB3EBB5BF2EC0CFB9DDC7E0C1A42DB3BBC1F6313131342DBBE7B1B3....",
+      "url": "https://www.taxnet.co.kr/upload-file-domain/20262/7d90e04c-9483-4f29-8889-ab1ec77209e9.pdf",
+      "source": "web_search"
+    },
+    {
+      "title": "우리 경제 의 선진화를 위한 정부역할의 재정립",
+      "url": "https://www.kdi.re.kr/file/download?atch_no=ZDslc%2F4kFX9Hv%2FBsw9dplg%3D%3D",
+      "source": "web_search"
+    },
+    {
+      "title": "sosin279 - 포스트메이트",
+      "url": "https://postmate.waffle-gl.org/link/naver/sosin279",
+      "source": "web_search"
+    }
+  ],
+  "title": "본인부담상한제 환급금과 실손보험금, 중복 지급 여부를 판정하는 비교표 실험",
+  "factCheckSummary": "제공된 자료에는 한양경제 기사 제목과 수집 시각만 있으며, 기사 본문·대법원 판결문·보험약관은 확인되지 않았다. 검색 결과에는 해당 주제의 네이버 1위 문서와 순위가 없어 후킹 공식을 실측할 수 없다. 황금키워드 여부, 검색량, 경쟁도, 광고 단가와 수익 효과도 미확인이다. 아래 기획은 발행 전 가설이며 독립적인 닥터 검수는 없었다. 기사 후보: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5",
+  "evidenceText": "본인부담상한제 환급금과 실손보험금, 중복 지급 여부를 판정하는 비교표 실험\n제공된 자료에는 한양경제 기사 제목과 수집 시각만 있으며, 기사 본문·대법원 판결문·보험약관은 확인되지 않았다. 검색 결과에는 해당 주제의 네이버 1위 문서와 순위가 없어 후킹 공식을 실측할 수 없다. 황금키워드 여부, 검색량, 경쟁도, 광고 단가와 수익 효과도 미확인이다. 아래 기획은 발행 전 가설이며 독립적인 닥터 검수는 없었다. 기사 후보: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5\n1. 실시간 네이버에서 ‘본인부담상한제 실손보험 환급금’과 ‘본인부담상한제 실손 중복’을 각각 검색해 시각, 검색어, 1위 관련 문서의 URL·제목·첫 3줄을 기록한다. 관련 없는 결과는 제외하고 실제 1위로 표시하지 않는다. 별도로 키워드 도구에서 검색량·문서 수와 집계 범위를 확인한다. 자료가 없으면 황금키워드나 고단가라고 부르지 않는다.\n2. 기사 원문에서 판결 선고일·사건번호·쟁점을 찾고 대법원 판결문으로 대조한다. 국민건강보험공단의 상한제 안내와 해당 보험상품의 가입 시기·약관도 확인한다. 판결의 적용 범위와 개인 계약의 차이를 구분할 수 없으면 보상 제외를 단정하지 않고 발행을 보류한다.\n3. 1위 문서의 제목이 제시하는 상황·손실·확인 행동과 도입부의 정보 순서를 분석한다. 이를 참고한 시험 제목은 ‘본인부담상한제 환급금 받으면 실손보험금은? 내 약관에서 먼저 볼 3가지’다. 첫 3줄은 ‘환급금과 실손보험금이 겹치면 실제 수령액이 궁금해집니다 / 판결이 다룬 계약과 내 약관이 같은지 먼저 확인하세요 / 지급 내역·환급 내역·약관 조항을 나란히 비교합니다’로 구성한다. 실제 체류 개선 효과는 측정 전까지 가설이다.\n4. 비교표는 ‘확인 항목 / 사례 입력값 / 독자 행동’ 3열로 만든다. 예시로 본인 지출 200만 원, 상한제 환급 50만 원, 실손 지급 100만 원을 넣되 모두 가상의 숫자이며 최종 보상액 계산 결과가 아니라고 표시한다. 독자는 실제 영수증·공단 환급 내역·보험금 지급 내역의 금액과 약관 조항을 채운다. 예/아니오 분기는 ‘환급 결정 내역이 있는가 → 지급 항목을 확인했는가 → 판결에서 다룬 약관과 내 약관이 같은가’ 순서로 두고, 차이가 있거나 확인되지 않으면 결론을 유보한다.\n5. 검증이 끝나면 CF 본진에는 판결 범위와 비교표를 싣고, 네이버에는 독립적으로 이해되는 핵심 요약과 상세표 링크를 배치한다. 지식iN에는 실제 질문에 맞는 답과 근거를 제공하고 관련성이 있을 때만 링크한다. Threads에는 ‘환급과 보험금, 같은 항\n판결문·공단 안내·해당 약관을 확인할 수 있고 환급금과 실손보험의 관계에 대한 실제 질문이 있을 때 사용한다. 네이버·CF·지식iN·Threads·브런치별 구성은 유입 실험이며 수익이나 노출을 보장하지 않는다."
+}

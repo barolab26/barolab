@@ -273,5 +273,115 @@
     "reason": "basic_format",
     "ready": true,
     "checked_at": "2026-11-02T05:14:17.035463+00:00"
+  },
+  "fafcf455b72bcc6d83bd1597beaad2c466eded90b896f1bf673e784b8423c0f3": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T06:51:29.313481+00:00"
+  },
+  "d4f32174b2195ad1cfec1a5ee5563fcfd5c7a342ae8cfe4110217650bf920dfe": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T08:31:49.056350+00:00"
+  },
+  "702d87dc31cfdc8da4405e7c0cc01cbba56743126d270e3c257d565bbf42fc7d": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T10:13:34.913181+00:00"
+  },
+  "64df7abf45d27b64e72d02d2e729c1ca0dee9b84bf79aa6b23096f5e6fec6503": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T15:04:35.206790+00:00"
+  },
+  "72e42a60de18e1b50fdc48170b49d7879c77cb75f6f7098afef902776cb4f8a7": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-02T23:43:41.168735+00:00"
+  },
+  "9b5a209d8ffe038d92e35886a592830f3a602888ed3f0085b163a7003f3ca627": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T00:14:21.082431+00:00"
+  },
+  "dd96f862aa0089f756d09b878857d8b47f98dbfe66dee4f73f85c604d1988607": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T01:54:20.703702+00:00"
+  },
+  "e607a1449e1e418da6839f9a3d4db01d635426d5938f5d97734b72d3a6e0c1a3": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T14:34:24.781674+00:00"
+  },
+  "f84bf3a675d32490c28dbd20427aab519b0a5ffa36c7397938a796a748091bdb": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T14:44:25.460063+00:00"
+  },
+  "e60e6b26a1075fcd2766a4c73eb0624241a20ec240b121bafd59b50eb89b38cd": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T14:49:35.870686+00:00"
+  },
+  "a80b048680800bc799fa5787a0060ee709931026e7b0054c88fcebb9bcbe04f6": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T14:54:32.053610+00:00"
+  },
+  "ca9da684a3fb9f5414e087722d485eb67cea27fa8e2f360aad4d503d60e8ff09": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T14:59:49.929697+00:00"
+  },
+  "874fecc86a075674b8deac09b7e7bf7577424fc220935ecc38c0d848d0c02adf": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-03T22:31:09.673057+00:00"
+  },
+  "1019b67359a87915dfcdec53763ab4f68a5cfd71e087f9bd7310373cdd0d399c": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T00:12:10.391426+00:00"
+  },
+  "dd6d95670e3619a8a574859532f3f681bd31321433b699b289d83a85f2f217ed": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T01:51:41.407128+00:00"
+  },
+  "f8a13b091cdf60d852863b1155e6350cd888cca09b298787348b381b44d24a67": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T03:31:40.905908+00:00"
+  },
+  "fab2a6df012f66625db1699f8c4910a9e89ed4e185da6977b794aaeb18331cbe": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T05:11:23.621656+00:00"
+  },
+  "b9f0f18a5aae46262a9440480332d1bb1d511565b2dc5714a42a0a789b101ab4": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T06:51:30.518026+00:00"
+  },
+  "7ec33567197e35e188a2afada225e1331d25e31080c51c24d44c1aa646688ccc": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T08:31:42.489663+00:00"
+  },
+  "ecbb104a3a753cc32a42f5a4ec3c1de0db6a29baa721c0b0d249a0fd72b2d0f9": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T10:11:28.126711+00:00"
+  },
+  "c188e3f1b2665d25daf20800b1a45721b40fe25273da074c569b2a4fee3a7bba": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T12:01:43.036011+00:00"
+  },
+  "27e0852c106bdf3dbf29edfbd56f41a90c2c7095f1fb87b514b991637e955f22": {
+    "reason": "basic_format",
+    "ready": true,
+    "checked_at": "2026-11-04T13:43:31.045119+00:00"
   }
 }

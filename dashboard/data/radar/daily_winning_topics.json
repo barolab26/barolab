@@ -1,88 +1,627 @@
 {
-  "updatedAt": "2026-11-02T13:21:19+09:00",
-  "date": "2026-11-02",
+  "updatedAt": "2026-11-05T04:07:38+09:00",
+  "date": "2026-11-05",
   "northStarGoalUsd": 100.0,
   "revenueLeaders": [
     {
-      "category": "naverBlog",
-      "label": "네이버 애드포스트",
-      "currency": null,
-      "yesterdayAmount": 0,
-      "cumulativeAmount": 0,
-      "lastCollectedAt": null
+      "id": "adpost-soul5373",
+      "category": "adpost",
+      "label": "soul5373 · 머스트 헬스뷰｜5060 건강·영양 팩트체크",
+      "currency": "KRW",
+      "scope": "soul5373 조회 · soul5373 계정 수익",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:47.901635+00:00",
+      "reportSource": "네이버 애드포스트 수입 보고서",
+      "periods": {
+        "yesterday": {
+          "amounts": {},
+          "status": "pending",
+          "observedDays": 0,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": "원천 보고서 집계 대기",
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · soul5373 계정 수익"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "KRW": "885"
+          },
+          "status": "partial",
+          "observedDays": 3,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": "885",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · soul5373 계정 수익"
+        },
+        "previousMonth": {
+          "amounts": {
+            "KRW": "6070"
+          },
+          "status": "collected",
+          "observedDays": 31,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "6070",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · soul5373 계정 수익"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-03",
+      "latestObservedCompletedAmount": "1",
+      "yesterdayAmount": null,
+      "previousMonthAmount": "6070",
+      "evidenceScope": "observed source reports; not company total or settled cash"
     },
     {
-      "category": "cfBlog",
-      "label": "CF 애드센스",
-      "currency": null,
-      "yesterdayAmount": 0,
-      "cumulativeAmount": 0,
-      "lastCollectedAt": null
+      "id": "adpost-soultin",
+      "category": "adpost",
+      "label": "soultin · 시니어 브리프｜5060 연금·복지·노후정보",
+      "currency": "KRW",
+      "scope": "soul5373 조회 · soultin 계정 수익",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:47.901635+00:00",
+      "reportSource": "네이버 애드포스트 수입 보고서",
+      "periods": {
+        "yesterday": {
+          "amounts": {},
+          "status": "pending",
+          "observedDays": 0,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": "원천 보고서 집계 대기",
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · soultin 계정 수익"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "KRW": "3"
+          },
+          "status": "partial",
+          "observedDays": 3,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": "3",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · soultin 계정 수익"
+        },
+        "previousMonth": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "partial",
+          "observedDays": 19,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · soultin 계정 수익"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-03",
+      "latestObservedCompletedAmount": "2",
+      "yesterdayAmount": null,
+      "previousMonthAmount": "0",
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "adpost-yoon_master",
+      "category": "adpost",
+      "label": "yoon_master · 윤뷰스｜5060 품격 라이프 & 리빙",
+      "currency": "KRW",
+      "scope": "soul5373 조회 · yoon_master 계정 수익",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:47.901635+00:00",
+      "reportSource": "네이버 애드포스트 수입 보고서",
+      "periods": {
+        "yesterday": {
+          "amounts": {},
+          "status": "pending",
+          "observedDays": 0,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": "원천 보고서 집계 대기",
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · yoon_master 계정 수익"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "KRW": "286"
+          },
+          "status": "partial",
+          "observedDays": 3,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": "286",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · yoon_master 계정 수익"
+        },
+        "previousMonth": {
+          "amounts": {
+            "KRW": "2391"
+          },
+          "status": "collected",
+          "observedDays": 31,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "2391",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:47.901635+00:00",
+          "scope": "soul5373 조회 · yoon_master 계정 수익"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-03",
+      "latestObservedCompletedAmount": "286",
+      "yesterdayAmount": null,
+      "previousMonthAmount": "2391",
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "adsense-aaa10291028",
+      "category": "adsense",
+      "label": "가족 aaa · 애드센스",
+      "currency": "USD",
+      "scope": "nolplace.com · 가족 계정 별도 수집",
+      "valueKind": "estimated",
+      "collectionStatus": "not_collected",
+      "lastCollectedAt": "2026-11-04T19:06:48.181450+00:00",
+      "reportSource": null,
+      "periods": {
+        "yesterday": {
+          "amounts": {},
+          "status": "not_collected",
+          "observedDays": 0,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.181450+00:00",
+          "scope": "nolplace.com · 가족 계정 별도 수집"
+        },
+        "throughYesterday": {
+          "amounts": {},
+          "status": "not_collected",
+          "observedDays": 0,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.181450+00:00",
+          "scope": "nolplace.com · 가족 계정 별도 수집"
+        },
+        "previousMonth": {
+          "amounts": {},
+          "status": "not_collected",
+          "observedDays": 0,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": false,
+          "reason": null,
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-10-31T14:36:51.436753+00:00",
+          "scope": "nolplace.com · 가족 계정 별도 수집"
+        }
+      },
+      "latestObservedCompletedDate": null,
+      "latestObservedCompletedAmount": null,
+      "yesterdayAmount": null,
+      "previousMonthAmount": null,
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "adsense-sj",
+      "category": "adsense",
+      "label": "SJ · CF 애드센스",
+      "currency": "USD",
+      "scope": "sj@must.biz · CF 조회 대상 15개 · READY 14개 · 심사 중 1개 (healthcox.com)",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:44.427172+00:00",
+      "reportSource": "AdSense Management API v2 · DATE/DOMAIN_NAME",
+      "periods": {
+        "yesterday": {
+          "amounts": {
+            "USD": "0.08"
+          },
+          "status": "collected",
+          "observedDays": 1,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0.08",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:44.427172+00:00",
+          "scope": "sj@must.biz · CF 조회 대상 15개 · READY 14개 · 심사 중 1개 (healthcox.com)"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "USD": "0.15"
+          },
+          "status": "collected",
+          "observedDays": 4,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0.15",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:44.427172+00:00",
+          "scope": "sj@must.biz · CF 조회 대상 15개 · READY 14개 · 심사 중 1개 (healthcox.com)"
+        },
+        "previousMonth": {
+          "amounts": {
+            "USD": "1.96"
+          },
+          "status": "collected",
+          "observedDays": 31,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "1.96",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:44.427172+00:00",
+          "scope": "sj@must.biz · CF 조회 대상 15개 · READY 14개 · 조치 필요 1개 (healthcox.com)"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-04",
+      "latestObservedCompletedAmount": "0.08",
+      "yesterdayAmount": "0.08",
+      "previousMonthAmount": "1.96",
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "coupang",
+      "category": "affiliate",
+      "label": "쿠팡 파트너스",
+      "currency": "KRW",
+      "scope": "쿠팡 계정 전체 · 모든 subId",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:48.181357+00:00",
+      "reportSource": "쿠팡 파트너스 Open API · commission",
+      "periods": {
+        "yesterday": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 1,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.181357+00:00",
+          "scope": "쿠팡 계정 전체 · 모든 subId"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 4,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.181357+00:00",
+          "scope": "쿠팡 계정 전체 · 모든 subId"
+        },
+        "previousMonth": {
+          "amounts": {
+            "KRW": "597.0"
+          },
+          "status": "collected",
+          "observedDays": 31,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "597.0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.181357+00:00",
+          "scope": "쿠팡 계정 전체 · 모든 subId"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-04",
+      "latestObservedCompletedAmount": "0",
+      "yesterdayAmount": "0",
+      "previousMonthAmount": "597.0",
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "replyalba",
+      "category": "affiliate",
+      "label": "제휴알바",
+      "currency": "KRW",
+      "scope": "제휴알바",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:50.462731+00:00",
+      "reportSource": "쉐어알바 실적/수익 · 신청일자별 수익금",
+      "periods": {
+        "yesterday": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 1,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:50.462731+00:00",
+          "scope": "제휴알바"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 4,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:50.462731+00:00",
+          "scope": "제휴알바"
+        },
+        "previousMonth": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 31,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:50.462731+00:00",
+          "scope": "제휴알바"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-04",
+      "latestObservedCompletedAmount": "0",
+      "yesterdayAmount": "0",
+      "previousMonthAmount": "0",
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "toss",
+      "category": "affiliate",
+      "label": "토스 쉐어링크",
+      "currency": "KRW",
+      "scope": "토스 쉐어링크",
+      "valueKind": "estimated",
+      "collectionStatus": "collected",
+      "lastCollectedAt": "2026-11-04T19:06:48.660656+00:00",
+      "reportSource": "토스 쉐어링크 공식 Open API · performance.summary.expectedCommissionAmount",
+      "periods": {
+        "yesterday": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 1,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.660656+00:00",
+          "scope": "토스 쉐어링크"
+        },
+        "throughYesterday": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 4,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.660656+00:00",
+          "scope": "토스 쉐어링크"
+        },
+        "previousMonth": {
+          "amounts": {
+            "KRW": "0"
+          },
+          "status": "collected",
+          "observedDays": 31,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": true,
+          "reason": null,
+          "amount": "0",
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.660656+00:00",
+          "scope": "토스 쉐어링크"
+        }
+      },
+      "latestObservedCompletedDate": "2026-11-04",
+      "latestObservedCompletedAmount": "0",
+      "yesterdayAmount": "0",
+      "previousMonthAmount": "0",
+      "evidenceScope": "observed source reports; not company total or settled cash"
+    },
+    {
+      "id": "trip",
+      "category": "affiliate",
+      "label": "Trip.com",
+      "currency": "KRW",
+      "scope": "Trip.com",
+      "valueKind": "estimated",
+      "collectionStatus": "configured_no_report_api",
+      "lastCollectedAt": "2026-11-04T19:06:48.660708+00:00",
+      "reportSource": null,
+      "periods": {
+        "yesterday": {
+          "amounts": {},
+          "status": "configured_no_report_api",
+          "observedDays": 0,
+          "expectedDays": 1,
+          "start": "2026-11-04",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": "정산서 미확인 · 설정됨",
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.660708+00:00",
+          "scope": "Trip.com"
+        },
+        "throughYesterday": {
+          "amounts": {},
+          "status": "configured_no_report_api",
+          "observedDays": 0,
+          "expectedDays": 4,
+          "start": "2026-11-01",
+          "end": "2026-11-04",
+          "estimated": true,
+          "complete": false,
+          "reason": "정산서 미확인 · 설정됨",
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-11-04T19:06:48.660708+00:00",
+          "scope": "Trip.com"
+        },
+        "previousMonth": {
+          "amounts": {},
+          "status": "configured_no_report_api",
+          "observedDays": 0,
+          "expectedDays": 31,
+          "start": "2026-10-01",
+          "end": "2026-10-31",
+          "estimated": true,
+          "complete": false,
+          "reason": "정산서 미확인 · 설정됨",
+          "amount": null,
+          "valueKind": "estimated",
+          "checkedAt": "2026-10-31T14:36:53.176614+00:00",
+          "scope": "Trip.com"
+        }
+      },
+      "latestObservedCompletedDate": null,
+      "latestObservedCompletedAmount": null,
+      "yesterdayAmount": null,
+      "previousMonthAmount": null,
+      "evidenceScope": "observed source reports; not company total or settled cash"
     }
   ],
   "provenTrafficWinners": [
     {
       "source": "ga4_top_pv",
-      "url": "https://www.justinfo.co.kr/2026-online-seal-certificate-issuance-guide-2",
-      "domain": "justinfo.co.kr",
-      "slugTopic": "2026 online seal certificate issuance guide 2",
-      "pageViews": 22,
-      "sessions": 8
+      "url": "https://www.smilenote.kr/national-pension-deferral-application-guide",
+      "domain": "smilenote.kr",
+      "slugTopic": "national pension deferral application guide",
+      "pageViews": 10,
+      "sessions": 2
     },
     {
       "source": "ga4_top_pv",
-      "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
-      "domain": "daynote.kr",
-      "slugTopic": "garmin forerunner 970 specs comparison",
-      "pageViews": 14,
-      "sessions": 12
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.must-pick.com/youth-monthly-rent-income-asset-criteria",
-      "domain": "must-pick.com",
-      "slugTopic": "youth monthly rent income asset criteria",
-      "pageViews": 13,
-      "sessions": 3
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.must-pick.com/youth-monthly-rent-transfer-certificate-guide",
-      "domain": "must-pick.com",
-      "slugTopic": "youth monthly rent transfer certificate guide",
-      "pageViews": 11,
-      "sessions": 3
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.meganote.kr/kt-netflix-cancel",
-      "domain": "meganote.kr",
-      "slugTopic": "kt netflix cancel",
-      "pageViews": 6,
-      "sessions": 5
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.maxnote.kr/windows-11-essential-shortcuts-productivity-guide-3",
-      "domain": "maxnote.kr",
-      "slugTopic": "windows 11 essential shortcuts productivity guide 3",
+      "url": "https://www.woorinote.kr/housing-subscription-ineligible-win-account-restoration",
+      "domain": "woorinote.kr",
+      "slugTopic": "housing subscription ineligible win account restoration",
       "pageViews": 5,
-      "sessions": 4
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.must-pick.com/youth-monthly-rent-deposit-criteria-exclusions",
-      "domain": "must-pick.com",
-      "slugTopic": "youth monthly rent deposit criteria exclusions",
-      "pageViews": 5,
-      "sessions": 1
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.baronote.kr/dual-income-couple-tax-estimate-comparison-checklist",
-      "domain": "baronote.kr",
-      "slugTopic": "dual income couple tax estimate comparison checklist",
-      "pageViews": 4,
       "sessions": 4
     },
     {
@@ -95,19 +634,11 @@
     },
     {
       "source": "ga4_top_pv",
-      "url": "https://www.healthcox.com/yoga-mat-cleaning-guide",
-      "domain": "healthcox.com",
-      "slugTopic": "yoga mat cleaning guide",
+      "url": "https://www.daynote.kr/garmin-forerunner-970-specs-comparison",
+      "domain": "daynote.kr",
+      "slugTopic": "garmin forerunner 970 specs comparison",
       "pageViews": 4,
       "sessions": 4
-    },
-    {
-      "source": "ga4_top_pv",
-      "url": "https://www.healthcox.com/단백질-보충제-추천-2026년-기준-50대를-위한-단백질-보",
-      "domain": "healthcox.com",
-      "slugTopic": "단백질 보충제 추천 2026년 기준 50대를 위한 단백질 보",
-      "pageViews": 4,
-      "sessions": 1
     },
     {
       "source": "ga4_top_pv",
@@ -118,20 +649,76 @@
       "sessions": 4
     },
     {
+      "source": "ga4_top_pv",
+      "url": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
+      "domain": "must-good.com",
+      "slugTopic": "parent benefit home care allowance application payment date",
+      "pageViews": 4,
+      "sessions": 4
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.must-good.com/samjeomsam-medical-expense-refund-check",
+      "domain": "must-good.com",
+      "slugTopic": "samjeomsam medical expense refund check",
+      "pageViews": 4,
+      "sessions": 3
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.woorinote.kr/parking-account-balance-tier-interest",
+      "domain": "woorinote.kr",
+      "slugTopic": "parking account balance tier interest",
+      "pageViews": 4,
+      "sessions": 4
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.woorinote.kr/hug-deundeun-jeonse-round-11-checklist",
+      "domain": "woorinote.kr",
+      "slugTopic": "hug deundeun jeonse round 11 checklist",
+      "pageViews": 4,
+      "sessions": 3
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
+      "domain": "baronote.kr",
+      "slugTopic": "credit card revolving cancellation lump sum credit score",
+      "pageViews": 3,
+      "sessions": 3
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.healthcox.com/colonoscopy-polypectomy-surgery-insurance-claim",
+      "domain": "healthcox.com",
+      "slugTopic": "colonoscopy polypectomy surgery insurance claim",
+      "pageViews": 3,
+      "sessions": 2
+    },
+    {
+      "source": "ga4_top_pv",
+      "url": "https://www.justinfo.co.kr/lee-taehan-special-prosecutor-profile",
+      "domain": "justinfo.co.kr",
+      "slugTopic": "lee taehan special prosecutor profile",
+      "pageViews": 3,
+      "sessions": 3
+    },
+    {
       "source": "gsc_top_clicks",
       "url": "https://www.must-good.com/%EC%9D%84%EC%A7%80%EB%A1%9C-%EB%85%B8%ED%8F%AC-%EB%A7%9B%EC%A7%91-%EB%B2%A0%EC%8A%A4%ED%8A%B8-10-2026%EB%85%84%EC%97%90%EB%8F%84-%EA%BC%AD-%EA%B0%80%EB%B4%90%EC%95%BC-%ED%95%A0-%EC%88%A8%EC%9D%80-%EB%B3%B4%EC%84%9D",
       "domain": "must-good.com",
       "slugTopic": "을지로 노포 맛집 베스트 10 2026년에도 꼭 가봐야 할 숨은 보석",
-      "clicks": 4,
-      "impressions": 30
+      "clicks": 3,
+      "impressions": 22
     },
     {
       "source": "gsc_top_clicks",
-      "url": "https://www.must-good.com/%EA%B0%95%EB%A6%89-%ED%9A%8C-%EB%A7%9B%EC%A7%91-BEST-10-%EC%8B%A0%EC%84%A0%EB%8F%84-%EB%81%9D%ED%8C%90%EC%99%95-%ED%9A%9F%EC%A7%91-2026-%EA%B3%B5%EA%B0%9C",
+      "url": "https://www.must-good.com/baekgang-handwriting-practice-method",
       "domain": "must-good.com",
-      "slugTopic": "강릉 회 맛집 BEST 10 신선도 끝판왕 횟집 2026 공개",
+      "slugTopic": "baekgang handwriting practice method",
       "clicks": 3,
-      "impressions": 23
+      "impressions": 11
     },
     {
       "source": "gsc_top_clicks",
@@ -147,18 +734,9 @@
       "domain": "must-good.com",
       "url": "https://www.must-good.com/national-museum-korea-reservation-backpack-photo-guide",
       "slugTopic": "national museum korea reservation backpack photo guide",
-      "impressions": 132,
+      "impressions": 86,
       "clicks": 1,
-      "ctrPct": 0.76,
-      "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/washing-machine-drain-filter-cleaning",
-      "slugTopic": "washing machine drain filter cleaning",
-      "impressions": 89,
-      "clicks": 1,
-      "ctrPct": 1.12,
+      "ctrPct": 1.16,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
     },
     {
@@ -172,27 +750,18 @@
     },
     {
       "domain": "must-good.com",
-      "url": "https://www.must-good.com/incheon-airport-emergency-passport-guide",
-      "slugTopic": "incheon airport emergency passport guide",
-      "impressions": 27,
-      "clicks": 0,
-      "ctrPct": 0.0,
+      "url": "https://www.must-good.com/washing-machine-drain-filter-cleaning",
+      "slugTopic": "washing machine drain filter cleaning",
+      "impressions": 64,
+      "clicks": 1,
+      "ctrPct": 1.56,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
     },
     {
       "domain": "must-good.com",
       "url": "https://www.must-good.com/%EB%B6%80%EC%82%B0-%EA%B4%91%EC%95%88%EB%A6%AC-%EC%B9%B4%ED%8E%98-%EB%B2%A0%EC%8A%A4%ED%8A%B8-10-%EC%98%A4%EC%85%98%EB%B7%B0-%EB%81%9D%ED%8C%90%EC%99%95-2026%EB%85%84-%EC%B6%94%EC%B2%9C",
       "slugTopic": "부산 광안리 카페 베스트 10 오션뷰 끝판왕 2026년 추천",
-      "impressions": 26,
-      "clicks": 0,
-      "ctrPct": 0.0,
-      "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
-    },
-    {
-      "domain": "must-good.com",
-      "url": "https://www.must-good.com/health-insurance-payment-certificate-difference",
-      "slugTopic": "health insurance payment certificate difference",
-      "impressions": 24,
+      "impressions": 25,
       "clicks": 0,
       "ctrPct": 0.0,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
@@ -201,9 +770,18 @@
       "domain": "must-good.com",
       "url": "https://www.must-good.com/digital-document-wallet-issuance-submission-guide",
       "slugTopic": "digital document wallet issuance submission guide",
-      "impressions": 21,
+      "impressions": 20,
       "clicks": 0,
       "ctrPct": 0.0,
+      "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
+    },
+    {
+      "domain": "must-good.com",
+      "url": "https://www.must-good.com/%EA%B0%95%EB%A6%89-%ED%9A%8C-%EB%A7%9B%EC%A7%91-BEST-10-%EC%8B%A0%EC%84%A0%EB%8F%84-%EB%81%9D%ED%8C%90%EC%99%95-%ED%9A%9F%EC%A7%91-2026-%EA%B3%B5%EA%B0%9C",
+      "slugTopic": "강릉 회 맛집 BEST 10 신선도 끝판왕 횟집 2026 공개",
+      "impressions": 15,
+      "clicks": 1,
+      "ctrPct": 6.67,
       "doctorAction": "노출 대비 클릭 저조(CTR<3%) — 자청 4대 결핍 제목·도입부 3초 후킹 및 판독기 표 즉시 리모델링"
     },
     {
@@ -218,730 +796,421 @@
   ],
   "goldenKeywords": [
     {
-      "keyword": "로봇청소기 직배수 키트 타공 원상복구 비용",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 160,
-      "saturation": 26.2,
-      "recommendedChannel": "CF(must-pick.com) + 네이버 브릿지"
+      "keyword": "올리브영 고유가지원금",
+      "searchVolume": 41190,
+      "totalSearch": 41190,
+      "docCount": 903,
+      "goldenRate": 45.6,
+      "grade": "A",
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "올리브영 고유가지원금",
+          "total": 41190,
+          "doc": 903
+        }
+      },
+      "reportedSearchVolume": 41190,
+      "blogTotal": 903,
+      "saturation": 45.6,
+      "recommendedChannel": "CF(must-good.com)"
     },
     {
-      "keyword": "올인원 세탁건조기 히트펌프 소비전력 누진세",
+      "keyword": "제네시스 GV90 예상 가격 13억~3억",
+      "searchVolume": 13600,
+      "totalSearch": 13600,
+      "docCount": 25,
+      "goldenRate": 544.0,
       "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 44,
-      "saturation": 95.5,
-      "recommendedChannel": "CF(must-pick.com) + 네이버 브릿지"
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "제네시스 GV90 예상 가격 13억~3억",
+          "total": 13600,
+          "doc": 25
+        }
+      },
+      "reportedSearchVolume": 13600,
+      "blogTotal": 25,
+      "saturation": 544.0,
+      "recommendedChannel": "CF(meganote.kr)"
     },
     {
-      "keyword": "본인부담상한제 사후환급금 지급신청서 입금기간",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 1582,
-      "saturation": 2.7,
-      "recommendedChannel": "CF(must-good.com) + 네이버 브릿지"
+      "keyword": "2027 그랜저 하이브리드 제원",
+      "searchVolume": 18530,
+      "totalSearch": 18530,
+      "docCount": 440,
+      "goldenRate": 42.1,
+      "grade": "A",
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "2027 그랜저 하이브리드 제원",
+          "total": 18530,
+          "doc": 440
+        }
+      },
+      "reportedSearchVolume": 18530,
+      "blogTotal": 440,
+      "saturation": 42.1,
+      "recommendedChannel": "CF(meganote.kr)"
     },
     {
-      "keyword": "근로장려금 반기신청 전세보증금 간주전세금 계산",
+      "keyword": "2027 그랜저 모의견적",
+      "searchVolume": 101300,
+      "totalSearch": 101300,
+      "docCount": 47,
+      "goldenRate": 2155.3,
       "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 1081,
-      "saturation": 3.9,
-      "recommendedChannel": "CF(must-good.com) + 네이버 브릿지"
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "2027 그랜저 모의견적",
+          "total": 101300,
+          "doc": 47
+        }
+      },
+      "reportedSearchVolume": 101300,
+      "blogTotal": 47,
+      "saturation": 2155.3,
+      "recommendedChannel": "네이버(yoon_master)"
     },
     {
-      "keyword": "대장내시경 용종절제술 수술비특약 질병수술비 청구",
+      "keyword": "제네시스 GV90 예상 가격 13억~3억",
+      "searchVolume": 13600,
+      "totalSearch": 13600,
+      "docCount": 25,
+      "goldenRate": 544.0,
       "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 2203,
-      "saturation": 1.9,
-      "recommendedChannel": "CF(healthcox.com) + 네이버 브릿지"
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "제네시스 GV90 예상 가격 13억~3억",
+          "total": 13600,
+          "doc": 25
+        }
+      },
+      "reportedSearchVolume": 13600,
+      "blogTotal": 25,
+      "saturation": 544.0,
+      "recommendedChannel": "네이버(yoon_master)"
     },
     {
-      "keyword": "국가건강검진 위내시경 조직검사 실비 청구서류",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 826,
-      "saturation": 5.1,
-      "recommendedChannel": "CF(healthcox.com) + 네이버 브릿지"
+      "keyword": "대출 계산기",
+      "searchVolume": 359300,
+      "totalSearch": 359300,
+      "docCount": 10162,
+      "goldenRate": 35.4,
+      "grade": "A",
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "대출 계산기",
+          "total": 359300,
+          "doc": 10162
+        }
+      },
+      "reportedSearchVolume": 359300,
+      "blogTotal": 10162,
+      "saturation": 35.4,
+      "recommendedChannel": "네이버(adinfo0905)"
     },
     {
-      "keyword": "국립박물관 어린이박물관 사전예약 취소표 시간",
+      "keyword": "세이브텍스 환급금 뜻",
+      "searchVolume": 850,
+      "totalSearch": 850,
+      "docCount": 7,
+      "goldenRate": 121.4,
       "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 3129,
-      "saturation": 1.3,
-      "recommendedChannel": "CF(must-joy.com) + 네이버 브릿지"
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "세이브텍스 환급금 뜻",
+          "total": 850,
+          "doc": 7
+        }
+      },
+      "reportedSearchVolume": 850,
+      "blogTotal": 7,
+      "saturation": 121.4,
+      "recommendedChannel": "네이버(stone0747)"
     },
     {
-      "keyword": "고궁 야간개장 경복궁 특별관람 무료입장 대상",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 2074,
-      "saturation": 2.0,
-      "recommendedChannel": "CF(must-joy.com) + 네이버 브릿지"
-    },
-    {
-      "keyword": "엠세이퍼 명의도용방지 가입제한 해제 비대면 방법",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 1118,
-      "saturation": 3.8,
-      "recommendedChannel": "CF(maxnote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "모바일 주민등록증 발급 IC칩 재발급 수수료",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 3312,
-      "saturation": 1.3,
-      "recommendedChannel": "CF(maxnote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "예금담보대출 중도상환수수료 한도 가산금리 계산",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 3138,
-      "saturation": 1.3,
-      "recommendedChannel": "CF(baronote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "청년도약계좌 일시납입 전환 정부기여금 계산",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 2109,
-      "saturation": 2.0,
-      "recommendedChannel": "CF(baronote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "아이폰 eSIM 기기변경 QR코드 재발급 수수료",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 252,
-      "saturation": 16.7,
-      "recommendedChannel": "CF(topnote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "구글 계정 2단계인증 백업코드 분실 복구절차",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 794,
-      "saturation": 5.3,
-      "recommendedChannel": "CF(topnote.kr) + 네이버 브릿지"
-    },
-    {
-      "keyword": "하이브리드 개별소비세 취등록세 감면 한도 연장",
-      "grade": "S",
-      "monthlySearch": 4200,
-      "blogTotal": 290,
-      "saturation": 14.5,
-      "recommendedChannel": "CF(meganote.kr) + 네이버 브릿지"
+      "keyword": "올리브영 고유가지원금",
+      "searchVolume": 41190,
+      "totalSearch": 41190,
+      "docCount": 903,
+      "goldenRate": 45.6,
+      "grade": "A",
+      "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+      "measurementStatus": "reported",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "올리브영 고유가지원금",
+          "total": 41190,
+          "doc": 903
+        }
+      },
+      "reportedSearchVolume": 41190,
+      "blogTotal": 903,
+      "saturation": 45.6,
+      "recommendedChannel": "네이버(stone0747)"
     }
   ],
   "naverAccountSlotKeywords": {
-    "soul5373": [
-      {
-        "keyword": "무릎 연골주사 히알루론산 급여 주기",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 459,
-        "goldenRate": 9.8
-      },
-      {
-        "keyword": "백내장 단초점 다초점 실손보험 청구서류",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1035,
-        "goldenRate": 4.3
-      },
-      {
-        "keyword": "위내시경 조직검사 용종절제 실비보험 청구",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1504,
-        "goldenRate": 3.0
-      },
-      {
-        "keyword": "도수치료 실손보험 10회 초과 소견서",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1504,
-        "goldenRate": 3.0
-      }
-    ],
+    "soul5373": [],
     "yoon_master": [
       {
-        "keyword": "가을 구스다운 세탁 중성세제 건조기 볼",
+        "keyword": "2027 그랜저 모의견적",
+        "searchVolume": 101300,
+        "totalSearch": 101300,
+        "docCount": 47,
+        "goldenRate": 2155.3,
         "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 410,
-        "goldenRate": 11.0
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "2027 그랜저 모의견적",
+            "total": 101300,
+            "doc": 47
+          }
+        }
       },
       {
-        "keyword": "국제선 기내수하물 보조배터리 단락방지 포장",
+        "keyword": "제네시스 GV90 예상 가격 13억~3억",
+        "searchVolume": 13600,
+        "totalSearch": 13600,
+        "docCount": 25,
+        "goldenRate": 544.0,
         "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 763,
-        "goldenRate": 5.9
-      },
-      {
-        "keyword": "친환경 콘덴싱보일러 보조금 세입자 신청",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 974,
-        "goldenRate": 4.6
-      },
-      {
-        "keyword": "빌트인 식기세척기 싱크대 리폼 설치조건",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 3679,
-        "goldenRate": 1.2
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "제네시스 GV90 예상 가격 13억~3억",
+            "total": 13600,
+            "doc": 25
+          }
+        }
       }
     ],
-    "soultin": [
-      {
-        "keyword": "노령연금 연기연금 신청 손익분기점",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 3062,
-        "goldenRate": 1.5
-      },
-      {
-        "keyword": "국민연금 추납 신청자격 반환일시금",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 4912,
-        "goldenRate": 0.9
-      },
-      {
-        "keyword": "국민연금 유족연금 중복수급 감액률",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1465,
-        "goldenRate": 3.1
-      }
-    ],
+    "soultin": [],
     "adinfo0905": [
       {
-        "keyword": "버팀목 전세자금대출 목적물변경 연장 조건",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 3212,
-        "goldenRate": 1.4
-      },
-      {
-        "keyword": "중소기업 청년 소득세 감면 경정청구 서류",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 4961,
-        "goldenRate": 0.9
-      },
-      {
-        "keyword": "청년주택드림 청약통장 전환 일시납 한도",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1137,
-        "goldenRate": 4.0
-      },
-      {
-        "keyword": "IRP 중도인출 무주택 전세보증금 서류",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 2316,
-        "goldenRate": 1.9
+        "keyword": "대출 계산기",
+        "searchVolume": 359300,
+        "totalSearch": 359300,
+        "docCount": 10162,
+        "goldenRate": 35.4,
+        "grade": "A",
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "대출 계산기",
+            "total": 359300,
+            "doc": 10162
+          }
+        }
       }
     ],
     "stone0747": [
       {
-        "keyword": "가족돌봄수당 신청 자격 조부모 손주 돌봄비",
+        "keyword": "세이브텍스 환급금 뜻",
+        "searchVolume": 850,
+        "totalSearch": 850,
+        "docCount": 7,
+        "goldenRate": 121.4,
         "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1954,
-        "goldenRate": 128.6
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "세이브텍스 환급금 뜻",
+            "total": 850,
+            "doc": 7
+          }
+        }
       },
       {
-        "keyword": "노란우산공제 해지 일시금 퇴직소득세율",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1105,
-        "goldenRate": 4.1
-      },
-      {
-        "keyword": "근로장려금 반기신청 전세보증금 간주전세금",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 1364,
-        "goldenRate": 3.3
-      },
-      {
-        "keyword": "소상공인 고용보험료 지원 신청 등급별 비율",
-        "grade": "S",
-        "searchVolume": 4500,
-        "docCount": 3403,
-        "goldenRate": 1.3
+        "keyword": "올리브영 고유가지원금",
+        "searchVolume": 41190,
+        "totalSearch": 41190,
+        "docCount": 903,
+        "goldenRate": 45.6,
+        "grade": "A",
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "올리브영 고유가지원금",
+            "total": 41190,
+            "doc": 903
+          }
+        }
       }
     ]
   },
   "cfDomainKeywords": {
-    "must-pick.com": [
-      {
-        "keyword": "로봇청소기 직배수 키트 타공 원상복구 비용",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 160,
-        "goldenRate": 26.2
-      },
-      {
-        "keyword": "올인원 세탁건조기 히트펌프 소비전력 누진세",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 44,
-        "goldenRate": 95.5
-      },
-      {
-        "keyword": "으뜸효율 가전제품 환급 세입자 신청서류",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 16,
-        "goldenRate": 262.5
-      },
-      {
-        "keyword": "아이폰18 폴더 블",
-        "grade": "S",
-        "searchVolume": 19290,
-        "docCount": 163,
-        "goldenRate": 253.8
-      }
-    ],
+    "must-pick.com": [],
     "must-good.com": [
       {
-        "keyword": "본인부담상한제 사후환급금 지급신청서 입금기간",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1582,
-        "goldenRate": 2.7
-      },
-      {
-        "keyword": "근로장려금 반기신청 전세보증금 간주전세금 계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1081,
-        "goldenRate": 3.9
-      },
-      {
-        "keyword": "청년내일저축계좌 중도해지 적립중지 신청사유",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1348,
-        "goldenRate": 3.1
-      },
-      {
-        "keyword": "세이브텍스 환급금 뜻",
-        "grade": "S",
-        "searchVolume": 850,
-        "docCount": 31,
-        "goldenRate": 121.4
+        "keyword": "올리브영 고유가지원금",
+        "searchVolume": 41190,
+        "totalSearch": 41190,
+        "docCount": 903,
+        "goldenRate": 45.6,
+        "grade": "A",
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "올리브영 고유가지원금",
+            "total": 41190,
+            "doc": 903
+          }
+        }
       }
     ],
-    "healthcox.com": [
-      {
-        "keyword": "대장내시경 용종절제술 수술비특약 질병수술비 청구",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2203,
-        "goldenRate": 1.9
-      },
-      {
-        "keyword": "국가건강검진 위내시경 조직검사 실비 청구서류",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 826,
-        "goldenRate": 5.1
-      },
-      {
-        "keyword": "당화혈색소 6.5 공복혈당 불일치 이유",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 147,
-        "goldenRate": 28.6
-      },
-      {
-        "keyword": "고지혈증 스타틴 복용 시간 코엔자임Q10 병용",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 499,
-        "goldenRate": 135.7
-      }
-    ],
-    "must-joy.com": [
-      {
-        "keyword": "국립박물관 어린이박물관 사전예약 취소표 시간",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3129,
-        "goldenRate": 1.3
-      },
-      {
-        "keyword": "고궁 야간개장 경복궁 특별관람 무료입장 대상",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2074,
-        "goldenRate": 2.0
-      },
-      {
-        "keyword": "전통시장 온누리상품권 가맹점 조회 소득공제율",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 2391,
-        "goldenRate": 135.7
-      }
-    ],
-    "maxnote.kr": [
-      {
-        "keyword": "엠세이퍼 명의도용방지 가입제한 해제 비대면 방법",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1118,
-        "goldenRate": 3.8
-      },
-      {
-        "keyword": "모바일 주민등록증 발급 IC칩 재발급 수수료",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3312,
-        "goldenRate": 1.3
-      },
-      {
-        "keyword": "모바일 운전면허증 IC운전면허증 은행 공항 사용처",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 1442,
-        "goldenRate": 135.7
-      },
-      {
-        "keyword": "구글 드라이브 원드라이브 용량 정리 자동동기화 해제",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 786,
-        "goldenRate": 135.7
-      }
-    ],
-    "baronote.kr": [
-      {
-        "keyword": "예금담보대출 중도상환수수료 한도 가산금리 계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3138,
-        "goldenRate": 1.3
-      },
-      {
-        "keyword": "청년도약계좌 일시납입 전환 정부기여금 계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2109,
-        "goldenRate": 2.0
-      },
-      {
-        "keyword": "IRP 중도인출 무주택 전세보증금 필요서류",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2258,
-        "goldenRate": 1.9
-      },
-      {
-        "keyword": "퇴직연금 DC형 IRP 수령 일시금 연금 세율",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 4986,
-        "goldenRate": 135.7
-      }
-    ],
-    "topnote.kr": [
-      {
-        "keyword": "아이폰 eSIM 기기변경 QR코드 재발급 수수료",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 252,
-        "goldenRate": 16.7
-      },
-      {
-        "keyword": "구글 계정 2단계인증 백업코드 분실 복구절차",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 794,
-        "goldenRate": 5.3
-      },
-      {
-        "keyword": "윈도우11 네트워크 프린터 공유 오류 0x0000011b 해결",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 82,
-        "goldenRate": 51.2
-      },
-      {
-        "keyword": "카카오톡 대화내용 백업 기기변경 사진 복원 기한",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 927,
-        "goldenRate": 135.7
-      }
-    ],
+    "healthcox.com": [],
+    "must-joy.com": [],
+    "maxnote.kr": [],
+    "baronote.kr": [],
+    "topnote.kr": [],
     "meganote.kr": [
       {
-        "keyword": "하이브리드 개별소비세 취등록세 감면 한도 연장",
+        "keyword": "제네시스 GV90 예상 가격 13억~3억",
+        "searchVolume": 13600,
+        "totalSearch": 13600,
+        "docCount": 25,
+        "goldenRate": 544.0,
         "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 290,
-        "goldenRate": 14.5
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "제네시스 GV90 예상 가격 13억~3억",
+            "total": 13600,
+            "doc": 25
+          }
+        }
       },
       {
-        "keyword": "운전자보험 교통사고처리지원금 중복가입 비례보상",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2311,
-        "goldenRate": 1.8
-      },
-      {
-        "keyword": "전기차 충전구역 과태료 완속 14시간 예외기준",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 515,
-        "goldenRate": 8.2
-      },
-      {
-        "keyword": "아우디 A5 850만원 할인 후기",
-        "grade": "S",
-        "searchVolume": 2560,
-        "docCount": 57,
-        "goldenRate": 284.4
-      }
-    ],
-    "justinfo.co.kr": [
-      {
-        "keyword": "가족간 부동산 저가양도 증여세 3억 30% 기준",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 14,
-        "goldenRate": 300.0
-      },
-      {
-        "keyword": "실업급여 조기재취업수당 자영업 프리랜서 서류",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 279,
-        "goldenRate": 15.1
-      },
-      {
-        "keyword": "헬스장 필라테스 중도해지 위약금 10% 환불 계산",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 334,
-        "goldenRate": 135.7
-      }
-    ],
-    "smilenote.kr": [
-      {
-        "keyword": "장기요양등급 가족요양비 복지용구 본인부담률",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3438,
-        "goldenRate": 1.2
-      },
-      {
-        "keyword": "기초연금 수급자격 자동차 시가표준액 4천만원",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 462,
-        "goldenRate": 9.1
-      },
-      {
-        "keyword": "노령연금 연기연금 신청 가산율 7.2% 손익분기점",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 987,
-        "goldenRate": 4.3
-      },
-      {
-        "keyword": "노인장기요양보험 등급 판정 방문조사 질문 체크표",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 1080,
-        "goldenRate": 135.7
-      }
-    ],
-    "tripmarvel.com": [
-      {
-        "keyword": "인천공항 긴급여권 발급 소요시간 필요서류 당일",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1350,
-        "goldenRate": 3.1
-      },
-      {
-        "keyword": "영주 아레아호텔",
+        "keyword": "2027 그랜저 하이브리드 제원",
+        "searchVolume": 18530,
+        "totalSearch": 18530,
+        "docCount": 440,
+        "goldenRate": 42.1,
         "grade": "A",
-        "searchVolume": 470,
-        "docCount": 30,
-        "goldenRate": 36.2
-      },
-      {
-        "keyword": "K패스 기후동행카드 환급 기준 경기 인천 광역버스",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 4508,
-        "goldenRate": 135.7
+        "gradeBasis": "local_search_to_document_ratio; not a revenue forecast",
+        "measurementStatus": "reported",
+        "metricEvidence": {
+          "sourceId": "blokey_golden",
+          "sourceUrl": "https://blokey.co.kr/api/golden/total",
+          "checkedAt": "2026-11-04T20:00:38+09:00",
+          "searchPeriod": "provider_reported_unspecified",
+          "raw": {
+            "keyword": "2027 그랜저 하이브리드 제원",
+            "total": 18530,
+            "doc": 440
+          }
+        }
       }
     ],
-    "daynote.kr": [
-      {
-        "keyword": "아파트 관리비 장기수선충당금 세입자 퇴거 환급",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1951,
-        "goldenRate": 2.2
-      },
-      {
-        "keyword": "가을 겨울 구스다운 패딩 세탁 중성세제 건조기",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 702,
-        "goldenRate": 6.0
-      },
-      {
-        "keyword": "통돌이 세탁기 배수필터 청소 거름망 과탄산소다",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 835,
-        "goldenRate": 5.0
-      },
-      {
-        "keyword": "대형폐기물 스티커 인터넷 신고 환불 취소 방법",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 920,
-        "goldenRate": 135.7
-      }
-    ],
-    "woorinote.kr": [
-      {
-        "keyword": "디딤돌대출 생애최초 무주택세대주 소득합산 예외",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3594,
-        "goldenRate": 1.2
-      },
-      {
-        "keyword": "전입신고 세대주 확인 온라인 확정일자 우선변제권",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3329,
-        "goldenRate": 1.3
-      },
-      {
-        "keyword": "버팀목 전세자금대출 목적물변경 추가대출 조건",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3478,
-        "goldenRate": 1.2
-      },
-      {
-        "keyword": "허그 든든전세 11차",
-        "grade": "A",
-        "searchVolume": 1460,
-        "docCount": 511,
-        "goldenRate": 66.4
-      }
-    ],
-    "nolplace.com": [
-      {
-        "keyword": "국립수목원 광릉숲 사전예약 차량등록 입장료 면제",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 58,
-        "goldenRate": 72.4
-      },
-      {
-        "keyword": "어린이대공원 주차장 만차시 주변 공영주차장 요금",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 412,
-        "goldenRate": 10.2
-      },
-      {
-        "keyword": "국립자연휴양림 숲나들e 우선예약 다자녀 대기예약",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 434,
-        "goldenRate": 9.7
-      },
-      {
-        "keyword": "서울 공영주차장 다둥이 저공해차 50% 자동감면 등록",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 713,
-        "goldenRate": 135.7
-      }
-    ],
-    "soulnote.kr": [
-      {
-        "keyword": "청년일자리도약장려금 근속지원금 재직기간 계산",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 795,
-        "goldenRate": 5.3
-      },
-      {
-        "keyword": "이직 확인서 처리기간 고용보험 상실신고 지연",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 3388,
-        "goldenRate": 1.2
-      },
-      {
-        "keyword": "산업안전기사 응시자격 관련학과 경력증명서 인정",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 2402,
-        "goldenRate": 1.7
-      },
-      {
-        "keyword": "지게차운전기능사 필기 실기 국비지원 학원 비용",
-        "grade": "S",
-        "searchVolume": 3800,
-        "docCount": 1655,
-        "goldenRate": 135.7
-      }
-    ],
-    "joynote.kr": [
-      {
-        "keyword": "강아지 심장사상충약 넥스가드 스펙트라 체중별 용량",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1146,
-        "goldenRate": 3.7
-      },
-      {
-        "keyword": "몬스테라 분갈이 흙배합 마사토 펄라이트 물주기",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1058,
-        "goldenRate": 4.0
-      },
-      {
-        "keyword": "펫보험 슬개골탈구 면책기간 1년 자기부담금 비교",
-        "grade": "S",
-        "searchVolume": 4200,
-        "docCount": 1339,
-        "goldenRate": 3.1
-      }
-    ]
+    "justinfo.co.kr": [],
+    "smilenote.kr": [],
+    "tripmarvel.com": [],
+    "daynote.kr": [],
+    "woorinote.kr": [],
+    "nolplace.com": [],
+    "soulnote.kr": [],
+    "joynote.kr": []
   },
   "pairedBridgeSets": [
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "허그 든든전세 11차",
+          "total": 1460,
+          "doc": 22
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 1,
       "keyword": "허그 든든전세 11차",
-      "grade": "A",
+      "grade": "S",
       "searchVolume": 1460,
       "docCount": 22,
       "goldenRate": 66.4,
@@ -951,6 +1220,18 @@
       "naverBridgeFormat": "[허그 든든전세 11차] 핵심 체크포인트 3가지 정리 + woorinote.kr 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "세이브텍스 환급금 뜻",
+          "total": 850,
+          "doc": 7
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 2,
       "keyword": "세이브텍스 환급금 뜻",
       "grade": "S",
@@ -963,6 +1244,18 @@
       "naverBridgeFormat": "[세이브텍스 환급금 뜻] 핵심 체크포인트 3가지 정리 + must-good.com 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "아이폰18 폴더 블",
+          "total": 19290,
+          "doc": 76
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 3,
       "keyword": "아이폰18 폴더 블",
       "grade": "S",
@@ -975,88 +1268,1030 @@
       "naverBridgeFormat": "[아이폰18 폴더 블] 핵심 체크포인트 3가지 정리 + must-pick.com 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "대출 계산기",
+          "total": 359300,
+          "doc": 10162
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 4,
-      "keyword": "리드코프 논스톱대출",
-      "grade": "A",
-      "searchVolume": 1180,
-      "docCount": 31,
-      "goldenRate": 38.1,
+      "keyword": "대출 계산기",
+      "grade": "S",
+      "searchVolume": 359300,
+      "docCount": 10162,
+      "goldenRate": 35.4,
       "cfPillarDomain": "baronote.kr",
-      "cfPillarFormat": "[리드코프 논스톱대출] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[대출 계산기] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "adinfo0905",
-      "naverBridgeFormat": "[리드코프 논스톱대출] 핵심 체크포인트 3가지 정리 + baronote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[대출 계산기] 핵심 체크포인트 3가지 정리 + baronote.kr 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "맥도날드 빅아치 단백질",
+          "total": 380,
+          "doc": 747
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 5,
-      "keyword": "위내시경 대장내시경 조직검사 실비보험 청구 서류",
-      "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
+      "keyword": "맥도날드 빅아치 단백질",
+      "grade": "A",
+      "searchVolume": 380,
+      "docCount": 747,
+      "goldenRate": 0.5,
       "cfPillarDomain": "healthcox.com",
-      "cfPillarFormat": "[위내시경 대장내시경 조직검사 실비보험 청구 서류] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[맥도날드 빅아치 단백질] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "stone0747",
-      "naverBridgeFormat": "[위내시경 대장내시경 조직검사 실비보험 청구 서류] 핵심 체크포인트 3가지 정리 + healthcox.com 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[맥도날드 빅아치 단백질] 핵심 체크포인트 3가지 정리 + healthcox.com 상세 판독표 브릿지 연결"
     },
     {
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden?period=year",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "갤럭시 s27 출시일",
+          "total": 23230,
+          "doc": 7761
+        }
+      },
+      "measurementStatus": "reported",
       "setIndex": 6,
-      "keyword": "주휴수당 지급조건 주 15시간 지각 조퇴 계산",
+      "keyword": "갤럭시 s27 출시일",
       "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
-      "cfPillarDomain": "justinfo.co.kr",
-      "cfPillarFormat": "[주휴수당 지급조건 주 15시간 지각 조퇴 계산] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
-      "naverBridgeAccount": "soul5373",
-      "naverBridgeFormat": "[주휴수당 지급조건 주 15시간 지각 조퇴 계산] 핵심 체크포인트 3가지 정리 + justinfo.co.kr 상세 판독표 브릿지 연결"
-    },
-    {
-      "setIndex": 7,
-      "keyword": "윈도우11 네트워크 프린터 스캔 연결 오류 해결",
-      "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
+      "searchVolume": 23230,
+      "docCount": 7761,
+      "goldenRate": 3.0,
       "cfPillarDomain": "topnote.kr",
-      "cfPillarFormat": "[윈도우11 네트워크 프린터 스캔 연결 오류 해결] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[갤럭시 s27 출시일] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "yoon_master",
-      "naverBridgeFormat": "[윈도우11 네트워크 프린터 스캔 연결 오류 해결] 핵심 체크포인트 3가지 정리 + topnote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[갤럭시 s27 출시일] 핵심 체크포인트 3가지 정리 + topnote.kr 상세 판독표 브릿지 연결"
     },
     {
-      "setIndex": 8,
-      "keyword": "대형폐기물 스티커 인터넷 신고 환불 취소 방법",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "부천 벽걸이에어컨청소 달인",
+          "total": 700,
+          "doc": 7
+        }
+      },
+      "measurementStatus": "reported",
+      "setIndex": 7,
+      "keyword": "부천 벽걸이에어컨청소 달인",
       "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
+      "searchVolume": 700,
+      "docCount": 7,
+      "goldenRate": 100.0,
       "cfPillarDomain": "daynote.kr",
-      "cfPillarFormat": "[대형폐기물 스티커 인터넷 신고 환불 취소 방법] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[부천 벽걸이에어컨청소 달인] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "soultin",
-      "naverBridgeFormat": "[대형폐기물 스티커 인터넷 신고 환불 취소 방법] 핵심 체크포인트 3가지 정리 + daynote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[부천 벽걸이에어컨청소 달인] 핵심 체크포인트 3가지 정리 + daynote.kr 상세 판독표 브릿지 연결"
     },
     {
-      "setIndex": 9,
-      "keyword": "아우디 A5 850만원 할인 후기",
+      "metricEvidence": {
+        "sourceId": "blokey_golden",
+        "sourceUrl": "https://blokey.co.kr/api/golden/total",
+        "checkedAt": "2026-11-04T20:00:38+09:00",
+        "searchPeriod": "provider_reported_unspecified",
+        "raw": {
+          "keyword": "제네시스 GV90 예상 가격 13억~3억",
+          "total": 13600,
+          "doc": 25
+        }
+      },
+      "measurementStatus": "reported",
+      "setIndex": 8,
+      "keyword": "제네시스 GV90 예상 가격 13억~3억",
       "grade": "S",
-      "searchVolume": 2560,
-      "docCount": 9,
-      "goldenRate": 284.4,
+      "searchVolume": 13600,
+      "docCount": 25,
+      "goldenRate": 544.0,
       "cfPillarDomain": "meganote.kr",
-      "cfPillarFormat": "[아우디 A5 850만원 할인 후기] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
+      "cfPillarFormat": "[제네시스 GV90 예상 가격 13억~3억] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
       "naverBridgeAccount": "adinfo0905",
-      "naverBridgeFormat": "[아우디 A5 850만원 할인 후기] 핵심 체크포인트 3가지 정리 + meganote.kr 상세 판독표 브릿지 연결"
+      "naverBridgeFormat": "[제네시스 GV90 예상 가격 13억~3억] 핵심 체크포인트 3가지 정리 + meganote.kr 상세 판독표 브릿지 연결"
+    }
+  ],
+  "unverifiedCandidates": [
+    {
+      "keyword": "당화혈색소 6.5 공복혈당 불일치 이유",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
     },
     {
-      "setIndex": 10,
-      "keyword": "노인장기요양보험 등급 판정 방문조사 질문 체크표",
-      "grade": "S",
-      "searchVolume": 3800,
-      "docCount": 28,
-      "goldenRate": 135.7,
-      "cfPillarDomain": "smilenote.kr",
-      "cfPillarFormat": "[노인장기요양보험 등급 판정 방문조사 질문 체크표] 심층 비용·조건 비교표 & 3초 자격/실구매 판독기 본진 글",
-      "naverBridgeAccount": "stone0747",
-      "naverBridgeFormat": "[노인장기요양보험 등급 판정 방문조사 질문 체크표] 핵심 체크포인트 3가지 정리 + smilenote.kr 상세 판독표 브릿지 연결"
+      "keyword": "대상포진 사백신 싱그릭스 접종간격 실비",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "무릎 연골주사 히알루론산 급여 주기",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "백내장 단초점 다초점 실손보험 청구서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "위내시경 조직검사 용종절제 실비보험 청구",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "도수치료 실손보험 10회 초과 소견서",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "고지혈증 스타틴 근육통 코엔자임Q10",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "호텔 디파짓 해외결제 승인취소 소요기간",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "로봇청소기 직배수 키트 타공 원상복구",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "인버터 제습기 일일제습량 소비전력 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "가을 구스다운 세탁 중성세제 건조기 볼",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국제선 기내수하물 보조배터리 단락방지 포장",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "친환경 콘덴싱보일러 보조금 세입자 신청",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "빌트인 식기세척기 싱크대 리폼 설치조건",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "한전 고효율 가전제품 환급 구매내역서 라벨",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국민연금 유족연금 중복수급 감액률",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "퇴직 후 건강보험 임의계속가입 해지",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "기초연금 수급자격 자동차 시가표준액",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "노령연금 연기연금 신청 손익분기점",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "주택연금 우대형 가입조건 수령액 차이",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국민연금 추납 신청자격 반환일시금",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "청년주택드림 청약통장 전환 일시납 한도",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "IRP 중도인출 무주택 전세보증금 서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "퇴직금 중간정산 무주택자 전세계약서 기간",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "버팀목 전세자금대출 목적물변경 연장 조건",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "중소기업 청년 소득세 감면 경정청구 서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "연말정산 부모님 인적공제 양도소득 100만원",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "청년월세 특별지원 이체확인증 보증금 감액",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "소상공인 대환대출 4.5% 보증서 발급절차",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "노란우산공제 해지 일시금 퇴직소득세율",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "근로장려금 반기신청 전세보증금 간주전세금",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "소상공인 고용보험료 지원 신청 등급별 비율",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "육아휴직급여 사후지급금 폐지 상한액 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "희망리턴패키지 원스톱 폐업지원 정산서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국민취업지원제도 1유형 조기취업성공수당 신청",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "으뜸효율 가전제품 환급 세입자 신청서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "식기세척기 빌트인 싱크대 걸레받이 절단 비용",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "인버터 제습기 일일제습량 소비전력 전기세 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "로봇청소기 직배수 키트 타공 원상복구 비용",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "올인원 세탁건조기 히트펌프 소비전력 누진세",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "건강보험 임의계속가입 해지 신청기한 퇴직후",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "청년내일저축계좌 중도해지 적립중지 신청사유",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "부모급여 가정양육수당 전환 신청일 25일 기준",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "본인부담상한제 사후환급금 지급신청서 입금기간",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "근로장려금 반기신청 전세보증금 간주전세금 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "무릎 연골주사 히알루론산 급여 주기 6개월",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "대장내시경 용종절제술 수술비특약 질병수술비 청구",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국가건강검진 위내시경 조직검사 실비 청구서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "문화누리카드 세대원 잔액 합산 온라인 신청방법",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "온누리상품권 카드형 충전할인 전통시장 소득공제율",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "공연 관람료 소득공제 신용카드 문화비 한도",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국립박물관 어린이박물관 사전예약 취소표 시간",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "고궁 야간개장 경복궁 특별관람 무료입장 대상",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "알뜰폰 번호이동 중립기관 제한 90일 해제 신청",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "모바일 주민등록증 발급 IC칩 재발급 수수료",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "휴대폰 소액결제 한도 차단 통신사별 원천차단",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "알뜰폰 eSIM 듀얼심 데이터 나눠쓰기 개통비용",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "엠세이퍼 명의도용방지 가입제한 해제 비대면 방법",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "IRP 중도인출 무주택 전세보증금 필요서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "퇴직연금 DC형 DB형 전환 신청시기 임금피크제",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "신용카드 리볼빙 해지 일시결제 신용점수 복구",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "예금담보대출 중도상환수수료 한도 가산금리 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "청년도약계좌 일시납입 전환 정부기여금 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "윈도우11 네트워크 프린터 공유 오류 0x0000011b 해결",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "카카오톡 대화내용 백업 복원 기한 14일 연장",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "아이폰 eSIM 기기변경 QR코드 재발급 수수료",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "엑셀 VLOOKUP N/A 오류 공백 문자 일괄제거",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "구글 계정 2단계인증 백업코드 분실 복구절차",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "자동차보험 마일리지 특약 환급금 주행거리 사진",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "전기차 충전구역 과태료 완속 14시간 예외기준",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "자동차세 연납 후 폐차 매매 환급금 일할계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "하이브리드 개별소비세 취등록세 감면 한도 연장",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "운전자보험 교통사고처리지원금 중복가입 비례보상",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "실업급여 조기재취업수당 자영업 프리랜서 서류",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "주휴수당 지급조건 주 15시간 지각 조퇴 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "가족간 부동산 저가양도 증여세 3억 30% 기준",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "퇴직금 중간정산 무주택자 전세계약서 신청기한",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "소상공인 폐업 점포철거비 지원금 부가세 제외",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "기초연금 수급자격 자동차 시가표준액 4천만원",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "노령연금 연기연금 신청 가산율 7.2% 손익분기점",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "주택연금 우대형 가입조건 공시가격 수령액 차이",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "장기요양등급 가족요양비 복지용구 본인부담률",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "만 65세 임플란트 건강보험 평생 2개 본인부담금",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "인천공항 긴급여권 발급 소요시간 필요서류 당일",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국제운전면허증 온라인 발급 영문운전면허증 국가",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "기내 보조배터리 용량 Wh 계산 160Wh 반입규정",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "호텔 디파짓 보증금 해외결제 가승인 취소 기간",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "KTX 지연배상금 기준 시간별 환불율 신청방법",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "통돌이 세탁기 배수필터 청소 거름망 과탄산소다",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "대형폐기물 인터넷신고 스티커 취소 환불 수수료",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "도시가스 계량기 교체비용 자가검침 누락 요금정산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "아파트 관리비 장기수선충당금 세입자 퇴거 환급",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "가을 겨울 구스다운 패딩 세탁 중성세제 건조기",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "버팀목 전세자금대출 목적물변경 추가대출 조건",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "전세보증금 반환보증 HUG HF 보증료율 가입기한",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "주택청약 부적격 당첨 청약통장 부활 신청기한",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "디딤돌대출 생애최초 무주택세대주 소득합산 예외",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "전입신고 세대주 확인 온라인 확정일자 우선변제권",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국립자연휴양림 숲나들e 우선예약 다자녀 대기예약",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "서울대공원 캠핑장 예약 매너타임 주차요금 할인",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "경복궁 야간관람 인터넷예매 현장발권 무료대상",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국립수목원 광릉숲 사전예약 차량등록 입장료 면제",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "어린이대공원 주차장 만차시 주변 공영주차장 요금",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국민내일배움카드 훈련장려금 단위기간 출석률 80%",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "산업안전기사 응시자격 관련학과 경력증명서 인정",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "국가기술자격증 취득자격확인서 큐넷 온라인 발급",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "청년일자리도약장려금 근속지원금 재직기간 계산",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "이직 확인서 처리기간 고용보험 상실신고 지연",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "펫보험 슬개골탈구 면책기간 1년 자기부담금 비교",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "강아지 광견병 무료접종 시군구 동물병원 지참물",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "반려동물 등록 내장형 마이크로칩 외장형 과태료",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "강아지 심장사상충약 넥스가드 스펙트라 체중별 용량",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
+    },
+    {
+      "keyword": "몬스테라 분갈이 흙배합 마사토 펄라이트 물주기",
+      "measurementStatus": "unverified",
+      "source": "editorial_pool",
+      "searchVolume": null,
+      "docCount": null,
+      "grade": null
     }
   ]
 }

@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "status": "error",
-  "lastAttemptAt": "2026-10-20T04:15:49.169534+00:00",
-  "error": "RuntimeError: collector_unavailable",
+  "status": "collected",
+  "lastAttemptAt": "2026-11-03T03:31:37.743497+00:00",
+  "error": null,
   "apps": {
     "bible_app": {
       "appId": "bible_app",
       "playAppId": "4975007773224005878",
       "status": "collected",
-      "checkedAt": "2026-10-20T01:30:55.665198+00:00",
-      "lastAttemptAt": "2026-10-20T04:15:49.169534+00:00",
-      "error": "RuntimeError: collector_unavailable",
-      "stale": true,
+      "checkedAt": "2026-11-03T03:31:37.750920+00:00",
+      "lastAttemptAt": "2026-11-03T03:31:37.743497+00:00",
+      "error": null,
+      "stale": false,
       "alpha": {
         "reviewStatus": "approved",
-        "trackActive": true,
+        "trackActive": null,
         "released": true,
         "versionCode": 5,
         "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
@@ -24,15 +24,15 @@
         "versionCode": 5,
         "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
       },
-      "googleOptInCount": 6,
+      "googleOptInCount": 12,
       "googleInstallCount": null,
       "continuousTestDays": null,
       "evidence": [
         {
           "page": "releases",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/releases/overview",
-          "checkedAt": "2026-10-20T01:30:55.665198+00:00",
-          "textSha256": "10c5738ac69aa45467343b8d21f64662704a543e0609626c910b1cb44f76485d",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4975007773224005878/releases/overview",
+          "checkedAt": "2026-11-03T03:31:37.750920+00:00",
+          "textSha256": "7329326acbc831cd23fc0ef5eb4391ab905fc7bbff1ebed93de080f5d5dc59b4",
           "signals": {
             "alpha.latestRelease": "0.5.0 정식 광고 및 첫 화면 사용성 개선 | 5 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:01",
             "internal.latestRelease": "0.5.0 정식 광고 및 첫 화면 사용성 개선 | 5 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:30"
@@ -40,12 +40,11 @@
         },
         {
           "page": "dashboard",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/app-dashboard",
-          "checkedAt": "2026-10-20T01:30:55.665198+00:00",
-          "textSha256": "df8610b1f91f36d131065c95ee0b7d50bc191c927d456661d7277e8616454563",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4975007773224005878/app-dashboard",
+          "checkedAt": "2026-11-03T03:31:37.750920+00:00",
+          "textSha256": "0afadc4589049f77b98bb2fecf132c1d9a5218ff23d12f4a75016a3dd66175cf",
           "signals": {
-            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
-            "googleOptInCount": "현재 참여를 선택한 테스터 6명"
+            "googleOptInCount": "check\n12명 이상의 테스터가 비공개 테스트 참여를 선택"
           }
         }
       ]
@@ -54,13 +53,13 @@
       "appId": "greeting",
       "playAppId": "4973731498485355571",
       "status": "collected",
-      "checkedAt": "2026-10-20T01:31:01.196099+00:00",
-      "lastAttemptAt": "2026-10-20T04:15:49.169534+00:00",
-      "error": "RuntimeError: collector_unavailable",
-      "stale": true,
+      "checkedAt": "2026-11-03T03:31:37.752508+00:00",
+      "lastAttemptAt": "2026-11-03T03:31:37.743497+00:00",
+      "error": null,
+      "stale": false,
       "alpha": {
         "reviewStatus": "approved",
-        "trackActive": true,
+        "trackActive": null,
         "released": true,
         "versionCode": 3,
         "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
@@ -70,15 +69,15 @@
         "versionCode": 3,
         "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
       },
-      "googleOptInCount": 5,
+      "googleOptInCount": 12,
       "googleInstallCount": null,
       "continuousTestDays": null,
       "evidence": [
         {
           "page": "releases",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/releases/overview",
-          "checkedAt": "2026-10-20T01:31:01.196099+00:00",
-          "textSha256": "15f91f299b38cf24c007d15761e66999c090990b6c6598d9b4462f7d1c088d3f",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4973731498485355571/releases/overview",
+          "checkedAt": "2026-11-03T03:31:37.752508+00:00",
+          "textSha256": "9c454db4a5f4c7b6611c49d31e00627722bdad015d0a31debff15d176e45b558",
           "signals": {
             "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:18",
             "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:45"
@@ -86,12 +85,11 @@
         },
         {
           "page": "dashboard",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4973731498485355571/app-dashboard",
-          "checkedAt": "2026-10-20T01:31:01.196099+00:00",
-          "textSha256": "eddec60b39e268e95adc0a5aaeee18d36a33bcd352eba20f954bbadad058fb92",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4973731498485355571/app-dashboard",
+          "checkedAt": "2026-11-03T03:31:37.752508+00:00",
+          "textSha256": "fbdbc2dd92a987fc4a6c1a6ef03a87a80f8308945ac84587135084a8efa31a26",
           "signals": {
-            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
-            "googleOptInCount": "현재 참여를 선택한 테스터 5명"
+            "googleOptInCount": "check\n12명 이상의 테스터가 비공개 테스트 참여를 선택"
           }
         }
       ]
@@ -100,13 +98,13 @@
       "appId": "magnifier",
       "playAppId": "4972819523776643880",
       "status": "collected",
-      "checkedAt": "2026-10-20T01:31:06.688166+00:00",
-      "lastAttemptAt": "2026-10-20T04:15:49.169534+00:00",
-      "error": "RuntimeError: collector_unavailable",
-      "stale": true,
+      "checkedAt": "2026-11-03T03:31:37.752627+00:00",
+      "lastAttemptAt": "2026-11-03T03:31:37.743497+00:00",
+      "error": null,
+      "stale": false,
       "alpha": {
         "reviewStatus": "approved",
-        "trackActive": true,
+        "trackActive": null,
         "released": true,
         "versionCode": 3,
         "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
@@ -116,15 +114,15 @@
         "versionCode": 3,
         "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
       },
-      "googleOptInCount": 6,
+      "googleOptInCount": 12,
       "googleInstallCount": null,
       "continuousTestDays": null,
       "evidence": [
         {
           "page": "releases",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/releases/overview",
-          "checkedAt": "2026-10-20T01:31:06.688166+00:00",
-          "textSha256": "15f91f299b38cf24c007d15761e66999c090990b6c6598d9b4462f7d1c088d3f",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4972819523776643880/releases/overview",
+          "checkedAt": "2026-11-03T03:31:37.752627+00:00",
+          "textSha256": "6c031de833b970d4bec645e4a41fbffbcac42405a089cf6b2d09d642dd2f4fd7",
           "signals": {
             "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:11",
             "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:45"
@@ -132,12 +130,11 @@
         },
         {
           "page": "dashboard",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972819523776643880/app-dashboard",
-          "checkedAt": "2026-10-20T01:31:06.688166+00:00",
-          "textSha256": "3f6d5f7719bdce600217b1e57abca56930d07d294a6a48a4e147ff1d8fe01a1c",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4972819523776643880/app-dashboard",
+          "checkedAt": "2026-11-03T03:31:37.752627+00:00",
+          "textSha256": "f0be786f0a377353611affbe2121eb62e2fca1d5927bf58a0c741f739624c0f0",
           "signals": {
-            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
-            "googleOptInCount": "현재 참여를 선택한 테스터 6명"
+            "googleOptInCount": "check\n12명 이상의 테스터가 비공개 테스트 참여를 선택"
           }
         }
       ]
@@ -146,13 +143,13 @@
       "appId": "shopping",
       "playAppId": "4972748430542309887",
       "status": "collected",
-      "checkedAt": "2026-10-20T01:31:12.139794+00:00",
-      "lastAttemptAt": "2026-10-20T04:15:49.169534+00:00",
-      "error": "RuntimeError: collector_unavailable",
-      "stale": true,
+      "checkedAt": "2026-11-03T03:31:37.752697+00:00",
+      "lastAttemptAt": "2026-11-03T03:31:37.743497+00:00",
+      "error": null,
+      "stale": false,
       "alpha": {
         "reviewStatus": "approved",
-        "trackActive": true,
+        "trackActive": null,
         "released": true,
         "versionCode": 3,
         "releaseStatus": "check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시"
@@ -162,15 +159,15 @@
         "versionCode": 3,
         "releaseStatus": "check_circle\n내부 테스터에게 제공됨\n전체 출시"
       },
-      "googleOptInCount": 6,
+      "googleOptInCount": 12,
       "googleInstallCount": null,
       "continuousTestDays": null,
       "evidence": [
         {
           "page": "releases",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/releases/overview",
-          "checkedAt": "2026-10-20T01:31:12.139794+00:00",
-          "textSha256": "10c5738ac69aa45467343b8d21f64662704a543e0609626c910b1cb44f76485d",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4972748430542309887/releases/overview",
+          "checkedAt": "2026-11-03T03:31:37.752697+00:00",
+          "textSha256": "e31d8b7d3a56ebcabc3af49a48a9a332316b9454b4194ecd2b1f66eb145b1009",
           "signals": {
             "alpha.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 비공개 테스트 - Alpha | check_circle\nGoogle Play에서 테스터에게 제공\n전체 출시 | 2026년 10월 19일\n오전 3:20",
             "internal.latestRelease": "0.3.0 정식 광고 및 첫 화면 사용성 개선 | 3 | 내부 테스트 | check_circle\n내부 테스터에게 제공됨\n전체 출시 | 2026년 10월 19일\n오전 2:47"
@@ -178,12 +175,11 @@
         },
         {
           "page": "dashboard",
-          "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4972748430542309887/app-dashboard",
-          "checkedAt": "2026-10-20T01:31:12.139794+00:00",
-          "textSha256": "c7a16713401477ab2657924b14dae28504c38cab64f5ad32a541cb47bb4026b4",
+          "url": "https://play.google.com/console/u/1/developers/7752283694845461925/app/4972748430542309887/app-dashboard",
+          "checkedAt": "2026-11-03T03:31:37.752697+00:00",
+          "textSha256": "a5d7c74e943b6cf0472a60505d26e6c0feb614db4e9bede358c3978b69a1170d",
           "signals": {
-            "alpha.trackActive": "비공개 테스트\n활성\nbrightness_1\n트랙 1개",
-            "googleOptInCount": "현재 참여를 선택한 테스터 6명"
+            "googleOptInCount": "check\n12명 이상의 테스터가 비공개 테스트 참여를 선택"
           }
         }
       ]
@@ -191,13 +187,9 @@
   },
   "browser": {
     "port": 9226,
-    "profile": "sj",
-    "existingTabCount": 5,
-    "existingIdentityUrlSha256": "63fff6d2f45923bea45c4fc50cc334c0bce4dfcf843d8f1b1cd7f2b7c5747196",
-    "existingTabsPreserved": true,
-    "tabOwnership": "owned_and_closed",
-    "ownedPageClosed": true
+    "profile": "Profile 3 (u/1 YoonLab)",
+    "tabOwnership": "owned_and_closed"
   },
-  "checkedAt": "2026-10-20T01:31:12.169026+00:00",
-  "lastSuccessAt": "2026-10-20T01:31:12.169026+00:00"
+  "checkedAt": "2026-11-03T03:31:37.752769+00:00",
+  "lastSuccessAt": "2026-11-03T03:31:37.752769+00:00"
 }

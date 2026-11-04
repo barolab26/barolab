@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "status": "reconciled_expired",
+  "project": "naver_blog",
+  "workId": "f480864a777b8739831228f0877bee243bd5beb0ff54b1470f86252dc5cd6ce5",
+  "account": "adinfo0905",
+  "date": "2026-11-03",
+  "slot": "19:20",
+  "conference": {
+    "status": "conference_failed",
+    "agendaId": "3051879ac55fadad776922a532973cac23c28cbad877418eb388e802a5c2a941",
+    "requestedAt": 1793631697.95562,
+    "businessAgendaId": "b63ca298f39a0b440329df1ab45a811d4a1fa1a84e80416019ec7e1ad189121c"
+  },
+  "publicationVerified": false,
+  "requestedAt": 1793637393.8602939,
+  "attempts": 2,
+  "attemptHistory": [],
+  "reconciledAt": "2026-11-04T12:03:54.893584+00:00",
+  "resolutionReason": "prior_day_slot_window_expired_and_superseded_by_today_verified_schedule"
+}

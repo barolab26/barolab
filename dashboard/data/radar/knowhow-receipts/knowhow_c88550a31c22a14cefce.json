@@ -1,0 +1,38 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:c88550a31c22a14cefce",
+  "recordedAt": "2026-11-02T23:11:06.618053+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+  "externalSources": [
+    {
+      "title": "2019 보건복지백서",
+      "url": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+      "source": "web_search"
+    },
+    {
+      "title": "2021년도 준정부기관 경영실적 평가보고서",
+      "url": "https://www.kspo.or.kr/kspo/cmmn/file/fileDown.do?atchFileId=FILE_000000000016462&fileSn=1",
+      "source": "web_search"
+    },
+    {
+      "title": "<B4EBB9FDBFF8C6C7B7CAC7D8BCB3313433C8A32DB9CEBBE72EB3EBB5BF2EC0CFB9DDC7E0C1A42DB3BBC1F6313131342DBBE7B1B3....",
+      "url": "https://www.taxnet.co.kr/upload-file-domain/20262/7d90e04c-9483-4f29-8889-ab1ec77209e9.pdf",
+      "source": "web_search"
+    },
+    {
+      "title": "우리 경제 의 선진화를 위한 정부역할의 재정립",
+      "url": "https://www.kdi.re.kr/file/download?atch_no=ZDslc%2F4kFX9Hv%2FBsw9dplg%3D%3D",
+      "source": "web_search"
+    },
+    {
+      "title": "sosin279 - 포스트메이트",
+      "url": "https://postmate.waffle-gl.org/link/naver/sosin279",
+      "source": "web_search"
+    }
+  ],
+  "title": "환급금과 실손보험의 중복 보상 여부를 따져보는 비교표 실험",
+  "factCheckSummary": "제공된 자료에는 2026-11-03 08:10 KST에 수집된 한양경제 기사 제목과 피드만 있다. 기사 본문, 판결 원문, 네이버 검색 1위, 블로키 등급·검색량, 실손보험 약관 및 실제 수익은 확인되지 않았다. 따라서 보상 대상 제외를 모든 계약에 적용되는 사실로 단정할 수 없다. 기사 후보: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5",
+  "evidenceText": "환급금과 실손보험의 중복 보상 여부를 따져보는 비교표 실험\n제공된 자료에는 2026-11-03 08:10 KST에 수집된 한양경제 기사 제목과 피드만 있다. 기사 본문, 판결 원문, 네이버 검색 1위, 블로키 등급·검색량, 실손보험 약관 및 실제 수익은 확인되지 않았다. 따라서 보상 대상 제외를 모든 계약에 적용되는 사실로 단정할 수 없다. 기사 후보: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5\n1. ‘본인부담상한제 환급금 실손보험’을 네이버에서 검색해 시각·1위 URL·제목·도입부를 기록하고, 기사 원문과 대법원 판결의 사건번호·선고일·적용 약관을 확인한다. 블로키 검색량·문서 수·등급과 집계 범위도 별도로 기록한다. 현재는 어느 항목도 확인되지 않았다. 2. 확인된 문서의 첫 질문과 정보 배치만 분석해 독자적으로 제목을 만든다. 제목 가안은 ‘병원비 환급받으면 실손보험금도 줄어들까? 판결과 내 약관 확인 순서’다. 도입 3줄에는 독자의 질문, 판결의 적용 범위, 아래에서 확인할 서류 순서를 배치한다. 3. 비교표는 ‘확인 항목 | 내 자료 | 판단에 필요한 조건 | 다음 행동’으로 구성하고 보험 가입 시기·약관 문구·건강보험 환급 여부·보험금 지급 내역을 나란히 적는다. 판결과 약관으로 확인되지 않은 금액이나 보상 결과는 빈칸으로 둔다. 4. CF에는 출처와 판결 적용 범위를 명시한 상세 안내를 싣고, 네이버와 브런치에는 독립적으로 완결되는 요약과 관련 CF 링크를 구성한다. 지식iN은 실제 질문에 맞게 답하고, Threads는 확인된 핵심 한 가지와 출처를 제시한다. 5. 판결·약관과 상충하는 단정, 출처 없는 수치, 불명확한 적용 범위를 수정한 뒤에만 발행 후보로 넘긴다. 이후 파생 주제인 가입 시기별 약관 차이와 보험금 지급 내역 확인법은 공식 자료와 실제 검색 수요가 확인된 경우에만 별도 실험한다. 게시·클릭·유입·수익은 각각 실제 증거로 따로 측정한다.\n판결 원문과 관련 약관을 확보하고 네이버 검색 결과를 직접 관찰할 수 있을 때, woorinote.kr을 우선 후보로 기획한다. 현재는 발행 전 가설이며 독립적인 닥터 검수나 성과가 확인된 상태가 아니다."
+}

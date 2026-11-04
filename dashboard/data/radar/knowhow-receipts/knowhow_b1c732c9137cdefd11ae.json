@@ -1,0 +1,38 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:b1c732c9137cdefd11ae",
+  "recordedAt": "2026-11-02T18:11:50.052217+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+  "externalSources": [
+    {
+      "title": "2019 보건복지백서",
+      "url": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+      "source": "web_search"
+    },
+    {
+      "title": "2021년도 준정부기관 경영실적 평가보고서",
+      "url": "https://www.kspo.or.kr/kspo/cmmn/file/fileDown.do?atchFileId=FILE_000000000016462&fileSn=1",
+      "source": "web_search"
+    },
+    {
+      "title": "<B4EBB9FDBFF8C6C7B7CAC7D8BCB3313433C8A32DB9CEBBE72EB3EBB5BF2EC0CFB9DDC7E0C1A42DB3BBC1F6313131342DBBE7B1B3....",
+      "url": "https://www.taxnet.co.kr/upload-file-domain/20262/7d90e04c-9483-4f29-8889-ab1ec77209e9.pdf",
+      "source": "web_search"
+    },
+    {
+      "title": "우리 경제 의 선진화를 위한 정부역할의 재정립",
+      "url": "https://www.kdi.re.kr/file/download?atch_no=ZDslc%2F4kFX9Hv%2FBsw9dplg%3D%3D",
+      "source": "web_search"
+    },
+    {
+      "title": "sosin279 - 포스트메이트",
+      "url": "https://postmate.waffle-gl.org/link/naver/sosin279",
+      "source": "web_search"
+    }
+  ],
+  "title": "본인부담상한제 환급금 × 실손보험: 실제 지급액 비교표로 확장하는 발행 전 실험",
+  "factCheckSummary": "2026-11-03 03:11 KST 수집 자료에서 한양경제 기사 제목과 피드만 확인됐다. 기사 본문, 대법원 판결 원문, 현재 네이버 검색 1위와 블로키 등급은 확인되지 않았다. 검색량·경쟁도·키워드 RPM·수익도 미확인이다. 따라서 실손 보상 제외 범위와 콘텐츠 성과는 확정할 수 없다. 후보 출처: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5",
+  "evidenceText": "본인부담상한제 환급금 × 실손보험: 실제 지급액 비교표로 확장하는 발행 전 실험\n2026-11-03 03:11 KST 수집 자료에서 한양경제 기사 제목과 피드만 확인됐다. 기사 본문, 대법원 판결 원문, 현재 네이버 검색 1위와 블로키 등급은 확인되지 않았다. 검색량·경쟁도·키워드 RPM·수익도 미확인이다. 따라서 실손 보상 제외 범위와 콘텐츠 성과는 확정할 수 없다. 후보 출처: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5\n1. 네이버에서 ‘본인부담상한제 환급금 실손보험’을 검색해 확인 시각, 1위 URL, 제목과 첫 3줄을 기록한다. 실제 1위가 확인되지 않으면 후킹 공식은 가설로 둔다. 2. 기사 원문에서 사건번호를 찾고 대법원 판결 원문, 국민건강보험공단 안내, 해당 실손보험 약관을 대조한다. 판결의 적용 대상과 예외를 확인하기 전에는 모든 실손보험에 일괄 적용한다고 쓰지 않는다. 3. CF 본진 후보 제목은 ‘건보 환급받으면 실손보험금은 얼마나 달라질까? 판결·약관별 확인’으로 잡는다. 첫 3줄에는 ‘환급금 수령 여부 → 실손 청구·지급 여부 → 가입 약관과 판결 적용 범위’ 순서의 예·아니오 판독기를 배치한다. 4. 비교표는 ‘환급 전 본인 부담액 / 건보 환급액 / 실손 청구액 / 보험사 지급액 / 최종 본인 부담액’으로 설계한다. 숫자 예시는 가상임을 표시하고, 확인된 약관과 판결 범위에 따라 계산한다. 확정할 수 없는 칸은 미확인으로 둔다. 5. 네이버와 브런치는 각각 독립적으로 질문에 답하는 글로 재구성하고 CF 상세표를 관련 근거로 연결한다. 지식iN은 실제 질문에 맞춰 답하고, Threads는 핵심 확인 항목과 관련 링크를 제시한다. 6. 파생 후보인 ‘이미 받은 실손보험금 반환 여부’, ‘보험 가입 시기별 약관 차이’, ‘환급 전후 실제 부담액 계산’을 각각 공식 근거와 검색 결과로 검증한다. 블로키 검색량·문서 수·집계 기간과 실제 유입·수익을 확인하기 전에는 황금키워드나 고단가라고 부르지 않는다.\n판결 원문과 적용 약관을 확보하고 독자의 실제 질문을 확인한 뒤, woorinote.kr 심층 글과 채널별 브릿지를 기획할 때 사용한다. 현재는 발행 전 가설이며 독립 닥터 검수나 실시간 순위 검증은 이뤄지지 않았다."
+}

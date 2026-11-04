@@ -1,0 +1,38 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:f25708abeb8b57a72a30",
+  "recordedAt": "2026-11-02T11:16:33.776927+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+  "externalSources": [
+    {
+      "title": "2019 보건복지백서",
+      "url": "https://www.khidi.or.kr/kohes/fileDownload?titleId=442680&fileId=1&fileDownType=C&paramMenuId=MENU02386",
+      "source": "web_search"
+    },
+    {
+      "title": "2021년도 준정부기관 경영실적 평가보고서",
+      "url": "https://www.kspo.or.kr/kspo/cmmn/file/fileDown.do?atchFileId=FILE_000000000016462&fileSn=1",
+      "source": "web_search"
+    },
+    {
+      "title": "<B4EBB9FDBFF8C6C7B7CAC7D8BCB3313433C8A32DB9CEBBE72EB3EBB5BF2EC0CFB9DDC7E0C1A42DB3BBC1F6313131342DBBE7B1B3....",
+      "url": "https://www.taxnet.co.kr/upload-file-domain/20262/7d90e04c-9483-4f29-8889-ab1ec77209e9.pdf",
+      "source": "web_search"
+    },
+    {
+      "title": "우리 경제 의 선진화를 위한 정부역할의 재정립",
+      "url": "https://www.kdi.re.kr/file/download?atch_no=ZDslc%2F4kFX9Hv%2FBsw9dplg%3D%3D",
+      "source": "web_search"
+    },
+    {
+      "title": "sosin279 - 포스트메이트",
+      "url": "https://postmate.waffle-gl.org/link/naver/sosin279",
+      "source": "web_search"
+    }
+  ],
+  "title": "본인부담상한제 환급금과 실손보험: 실제 수령액부터 확인하는 비교표 실험",
+  "factCheckSummary": "발행 전 가설이다. 제공 자료에서 확인되는 것은 한양경제 기사의 제목과 피드 정보뿐이며, 기사 본문·대법원 판결문·보험 약관은 확인되지 않았다. 네이버 실시간 검색 1위와 황금키워드 등급도 확인되지 않았다. 따라서 실손 보상 제외를 모든 계약에 적용되는 사실로 단정하거나 고단가·수익 효과를 주장하지 않는다. 기사 피드: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5",
+  "evidenceText": "본인부담상한제 환급금과 실손보험: 실제 수령액부터 확인하는 비교표 실험\n발행 전 가설이다. 제공 자료에서 확인되는 것은 한양경제 기사의 제목과 피드 정보뿐이며, 기사 본문·대법원 판결문·보험 약관은 확인되지 않았다. 네이버 실시간 검색 1위와 황금키워드 등급도 확인되지 않았다. 따라서 실손 보상 제외를 모든 계약에 적용되는 사실로 단정하거나 고단가·수익 효과를 주장하지 않는다. 기사 피드: https://news.google.com/rss/articles/CBMickFVX3lxTE85U2pjcm9sVHJUNjliRlZLc0h0dFk2VHQ5Q3hkcF84NHlSM3ZGUWpuUUJFd2Y5N1lwdWdILTkwNGJCbkJrbElDd1ZUa014UWQ0THpTa1hfTXlaN0dlNEc0cmhfN2lKN1JTLTJIZlZtNFpVUQ?oc=5\n1. 네이버에서 ‘본인부담상한제 환급금 실손보험’을 검색해 시각과 1위 문서의 URL·제목·첫 3줄을 기록한다. 제목의 질문 방식과 정보 배치를 관찰하되 순위와 효과는 해당 시점의 관측으로만 취급한다. 2. 한양경제 원문에서 사건번호를 찾고 대법원 판결문, 국민건강보험공단의 상한제 안내, 해당 실손보험 약관 원문을 대조해 적용 대상·계약 조건·예외를 확인한다. 확인되지 않으면 해당 결론은 게시하지 않는다. 3. CF 본진의 시험 제목은 ‘병원비 환급받으면 실손보험금은? 내 계약에서 먼저 볼 3가지’로 잡고, 첫 3줄에 ‘상한제 환급 여부 → 가입 약관 → 지급 내역’을 확인 순서로 배치한다. 4. 비교표는 ‘확인 항목 / 내 자료 / 결과에 영향을 주는 조건 / 다음 행동’ 네 열로 만든다. 행은 환급 결정 통지, 실손 가입 시기·약관, 보험금 지급 내역으로 구성하고 금액은 독자가 실제 문서에서 입력하게 한다. 예시 금액을 쓰면 가정임을 표시하고 법적 지급액 계산으로 제시하지 않는다. 5. 네이버·브런치에는 핵심 판단과 확인 순서를 완결형으로 재구성하고 CF 상세표를 연결한다. 지식iN은 실제 질문에 맞게 답하고 관련성이 있을 때만 출처를 붙이며, Threads는 확인할 세 가지를 짧게 요약한다. 6. 검증된 조건을 바탕으로 ‘환급 결정 전후 실손 청구’와 ‘가입 시기별 약관 확인’ 파생 주제를 후보화한다. 각 후보의 검색량·경쟁·RPM은 별도 실측 전까지 미확인으로 둔다. 발행 후 채널별 공개 여부와 유입을 구분해 확인한다.\n의료비 환급과 실손보험의 관계를 묻는 독자에게 적용한다. 판결문과 약관의 적용 범위를 확인한 뒤 발행하며, 채널별 유입·수익 효과는 실제 측정 전까지 가설로 둔다."
+}

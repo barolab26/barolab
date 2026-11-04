@@ -1,0 +1,131 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="spatial" from="@hypit/spatial@1"/>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="mediaop" from="@hypit/media-operations@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="shorts" from="@barolab/shorts-scene@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="html" from="@hypit/html-video@1"/>
+  <import as="style" source="./look.svs"/>
+
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="animation" clock={clock} end="1715f">
+    <time:Instant id="beat-compare" at="294f"/>
+    <time:Instant id="beat-steps" at="601f"/>
+    <time:Instant id="step-1-at" at="601f"/>
+    <time:Instant id="step-2-at" at="813f"/>
+    <time:Instant id="step-3-at" at="984f"/>
+    <time:Instant id="beat-rule" at="1166f"/>
+    <time:Instant id="beat-closing" at="1515f"/>
+    <time:Instant id="cap-0-at" at="5f"/>
+    <time:Instant id="cap-1-at" at="134f"/>
+    <time:Instant id="cap-2-at" at="294f"/>
+    <time:Instant id="cap-3-at" at="441f"/>
+    <time:Instant id="cap-4-at" at="601f"/>
+    <time:Instant id="cap-5-at" at="813f"/>
+    <time:Instant id="cap-6-at" at="984f"/>
+    <time:Instant id="cap-7-at" at="1166f"/>
+    <time:Instant id="cap-8-at" at="1345f"/>
+    <time:Instant id="cap-9-at" at="1515f"/>
+  </time:Timeline>
+
+  <spatial:Canvas id="canvas" width="1080" height="1920"/>
+
+  <media:Font id="kr-bold-face" src="./assets/malgunbd.ttf" weight="700" style="normal"/>
+  <media:Font id="kr-reg-face" src="./assets/malgun.ttf" weight="400" style="normal"/>
+  <media:FontStack id="font-bold" primary={kr-bold-face}><media:Fallback font={kr-reg-face}/></media:FontStack>
+  <media:FontStack id="font-regular" primary={kr-reg-face}><media:Fallback font={kr-bold-face}/></media:FontStack>
+
+  <media:Image id="broll1" src="./assets/beat1.jpg"/>
+  <media:Image id="broll2" src="./assets/beat2.jpg"/>
+  <media:Image id="broll3" src="./assets/beat3.jpg"/>
+  <media:Image id="broll4" src="./assets/beat4.jpg"/>
+  <media:Image id="broll5" src="./assets/beat5.jpg"/>
+  <media:Audio id="voice-raw" src="./assets/narration.wav"/>
+  <media:Audio id="bgm-raw" src="./assets/bgm.wav"/>
+
+  <mediaop:Normalize id="voice-media" source={voice-raw} video="none" audio="default" span-authority="audio" clock={clock}/>
+  <mediaop:Normalize id="bgm-media" source={bgm-raw} video="none" audio="default" span-authority="audio" clock={clock}/>
+
+  <shorts:Scene id="scene"
+    timeline={animation.timeline}
+    within={canvas.bounds}
+    during={animation.window}
+    font-bold={font-bold}
+    font-regular={font-regular}
+    bg-beat1={broll1}
+    bg-beat2={broll2}
+    bg-beat3={broll3}
+    bg-beat4={broll4}
+    bg-beat5={broll5}
+    beat-compare={animation.beat-compare}
+    beat-steps={animation.beat-steps}
+    beat-rule={animation.beat-rule}
+    beat-closing={animation.beat-closing}
+    theme-mode="vibe-terminal"
+    channel-name="윤랩 자동화 연구소"
+    category-pill="바이브코딩 · 쇼츠 자동화 엔진"
+    accent-color="rgba(99,102,241,0.24)"
+    scene1-caption="SCENE 01 · 바이브코딩 무인 미디어 스튜디오"
+    scene2-caption="SCENE 02 · 수작업 편집 vs 코드 기반 자동 렌더링"
+    scene3-caption="SCENE 03 · Google Flow + SVML + TTS 3단계 조립"
+    scene4-caption="SCENE 04 · 30fps 프레임 단위 자막·모션 동기화"
+    scene5-caption="SCENE 05 · 1인 자동화 크리에이터 3대 체크리스트"
+    hook-badge="수작업 영상 편집 노가다 완벽 탈출"
+    hook-stat="3 STEPS"
+    hook-unit="Google Flow AI 비주얼 + SVML 모션그래픽 자동 빌드"
+    hook-title="아직도 타임라인 자르고 붙이세요?
+코드가 쇼츠를 통째로 렌더링합니다"
+    hook-sub="단순 정지화면 짜깁기가 아닌 5개 씬 AI 비주얼과 30프레임 모션그래픽을 자동 조립하는 비결"
+    compare-title="기존 수작업·저품질 양산 vs 코드 기반 스튜디오"
+    wrong-label="기존 실패 방식 · 정지화면 텍스트 얹기"
+    wrong-title="단조로운 배경 1장 + 기계식 자막 나열"
+    wrong-desc="화면 변화가 없는 슬라이드쇼 형태는 초반 3초 이탈률이 80%를 넘고 유튜브 알고리즘 추천에서 즉시 배제됩니다."
+    right-label="윤랩 바이브코딩 · Google Flow + SVML 엔진"
+    right-title="5-비트 AI 시네마 뷰포트 + 동적 모션 카드"
+    right-desc="대본의 맥락마다 구글 플로우 AI 장면이 전환되고 비교표와 단계별 카드가 음성에 맞춰 프레임 단위로 살아 움직입니다."
+    steps-title="바이브코딩 무인 쇼츠 제작 3단계 파이프라인"
+    rule-badge="시청 지속시간을 끌어올리는 3단 분할 레이아웃 공식"
+    rule-title="상단 시네마 · 중단 인포그래픽 · 하단 자막,
+시선이 멈출 틈을 주지 마세요"
+    rule-desc="상단에서는 구글 플로우 AI 장면이 줌인되며 몰입감을 주고, 중단에서는 비교표와 체크리스트가 순차 등장해 정보 밀도를 완성합니다."
+    rule-pill1="상단 뷰포트: 5개 씬 Ken Burns 모션 &amp; 크로스페이드"
+    rule-pill2="중·하단 스테이지: 음성 동기화 비교 카드 &amp; 가라오케 자막"
+    closing-title="고밀도 자동화 쇼츠 제작 3대 체크리스트"
+    check1="단일 배경 금지 · 대본 비트별 5개 이상 AI 장면 전환"
+    check2="음성 길이 기반 30fps 프레임 단위 카드·자막 정밀 싱크"
+    check3="쇼츠 하단에서 커뮤니티 게시물·블로그 원문으로 퍼널 연결"
+    cta-banner="윤랩 자동화 연구소 게시물 탭에서 SVML 템플릿과 자동화 코드를 확인하세요">
+    <shorts:Step id="step-1" badge="STEP 01" title="Google Flow AI · 5개 장면 비주얼 생성" detail="대본의 5대 비트(훅·비교·단계·기준·요약)에 맞춘 고해상도 시네마 이미지 자동 생성" at={animation.step-1-at}/>
+    <shorts:Step id="step-2" badge="STEP 02" title="뉴럴 음성 합성 &amp; 문장별 타임스탬프 추출" detail="문장 단위 음성 길이를 밀리초 단위로 계측해 30fps 프레임 타임라인에 자동 매핑" at={animation.step-2-at}/>
+    <shorts:Step id="step-3" badge="STEP 03" title="Hypit SVML · 모션그래픽 &amp; 자막 통합 빌드" detail="상단 AI 시네마 뷰포트, 중단 인터랙티브 카드, 하단 싱크 자막을 1080x1920 MP4로 렌더링" at={animation.step-3-at}/>
+    <shorts:Caption id="cap-1" highlight="HOOK · 쇼츠 1편 만드는 데 아직도 3시간씩 쓰시나요?" text="유튜브 쇼츠 한 편 만들려고 아직도 영상 편집 프로그램에서 타임라인을 일일이 자르고 자막을 맞추고 계신가요?" at={animation.cap-0-at}/>
+    <shorts:Caption id="cap-2" highlight="CORE · 바이브코딩으로 완성하는 무인 쇼츠 스튜디오" text="이제는 코딩을 한 줄도 몰라도 바이브코딩과 구글 플로우 AI를 결합해 방송국 수준의 인포그래픽 쇼츠를 자동으로 렌더링할 수 있습니다." at={animation.cap-1-at}/>
+    <shorts:Caption id="cap-3" highlight="PROBLEM · 배경 1장짜리 양산형 쇼츠가 망하는 이유" text="기존의 공장식 쇼츠들은 어두운 정지 이미지 한 장 위에 글자만 바꿔 띄우기 때문에 시청자가 3초 만에 이탈해 버립니다." at={animation.cap-2-at}/>
+    <shorts:Caption id="cap-4" highlight="SOLUTION · Google Flow 5-씬 시네마 + SVML 모션" text="반면 윤랩의 코드 기반 비디오 엔진은 대본의 다섯 가지 흐름에 맞춰 구글 플로우 AI 장면과 모션 그래픽 카드를 동시에 전환합니다." at={animation.cap-3-at}/>
+    <shorts:Caption id="cap-5" highlight="STEP 01 · Google Flow AI로 비트별 맞춤 장면 생성" text="첫 단계로 대본의 도입 훅, 전후 비교, 실행 단계, 핵심 지표, 최종 요약에 어울리는 다섯 장의 시네마 비주얼을 구글 플로우로 생성합니다." at={animation.cap-4-at}/>
+    <shorts:Caption id="cap-6" highlight="STEP 02 · 음성 타임스탬프 계측 &amp; 30fps 프레임 매핑" text="둘째, 뉴럴 음성 합성으로 문장별 오디오를 생성한 뒤 정확한 발화 시각을 추출해 30프레임 타임라인에 자동으로 꽂아 넣습니다." at={animation.cap-5-at}/>
+    <shorts:Caption id="cap-7" highlight="STEP 03 · Hypit SVML 컴파일러로 1080p MP4 빌드" text="셋째, 하이핏 SVML 엔진이 상단 시네마 뷰포트와 중단 인터랙티브 카드, 하단 자막 바를 결합해 풀 HD 영상을 한 번에 뽑아냅니다." at={animation.cap-6-at}/>
+    <shorts:Caption id="cap-8" highlight="LAYOUT · 이탈률을 잡는 3단 분할 시각 아키텍처" text="핵심은 화면 상단에서 생생한 AI 비주얼이 역동적으로 움직이는 동안, 중단에서는 핵심 숫자와 비교표가 음성에 맞춰 딱딱 떨어지는 것입니다." at={animation.cap-7-at}/>
+    <shorts:Caption id="cap-9" highlight="FUNNEL · 쇼츠 시청자를 블로그·커뮤니티로 전환" text="이렇게 제작된 고밀도 쇼츠는 시청 지속시간을 높일 뿐 아니라, 채널 게시물과 전문 기술 블로그로 트래픽을 보내는 강력한 엔진이 됩니다." at={animation.cap-8-at}/>
+    <shorts:Caption id="cap-10" highlight="FINAL · 3대 제작 공식 &amp; SVML 설계도 확인 안내" text="구글 플로우 다중 씬, 프레임 정밀 싱크, 3단 레이아웃 세 가지를 기억하시고 채널 게시물 탭에서 전체 자동화 설계도를 확인해 보세요." at={animation.cap-9-at}/>
+  </shorts:Scene>
+
+  <audio:Track id="voice-track" timeline={animation.timeline}>
+    <audio:Clip id="voice-clip" source={voice-media.media} during={animation.window} gain="1"/>
+  </audio:Track>
+
+  <audio:Track id="bgm-track" timeline={animation.timeline}>
+    <audio:Clip id="bgm-clip" source={bgm-media.media} during={animation.window} gain="0.06" fade-in="15f" fade-out="25f"/>
+  </audio:Track>
+
+  <film:Film id="main" canvas={canvas.canvas} timeline={animation.timeline} appearance={style.film.main}>
+    <film:Track source={scene.visual}/>
+    <film:Track source={voice-track.audio}/>
+    <film:Track source={bgm-track.audio}/>
+  </film:Film>
+
+  <html:Video id="final" composition={main.composition} timeline={animation.timeline}/>
+</svml>

@@ -1,8 +1,8 @@
 {
   "schema": "barolab-system-watchdog-v1",
   "triggerSource": "heal-now",
-  "startedAt": "2026-11-02T14:07:02+09:00",
-  "finishedAt": "2026-11-02T14:07:12+09:00",
+  "startedAt": "2026-11-05T05:27:01+09:00",
+  "finishedAt": "2026-11-05T05:27:10+09:00",
   "status": "healthy",
   "server": {
     "port8790": true,
@@ -22,6 +22,12 @@
   "zombieRecoveries": [],
   "missedSlotCatchups": [
     {
+      "channel": "4portal_indexing",
+      "owner": "@trace",
+      "action": "일일 4대 포털(Google·Naver·Bing·Daum) 전 도메인 색인 작업 자동 기동",
+      "detail": "2026-11-05 KST 당일 미실행 감지 → auto_indexer + indexing_dispatch 즉시 실행"
+    },
+    {
       "channel": "cf_blog",
       "owner": "@publi",
       "status": "conference_requested",
@@ -37,12 +43,12 @@
       "magnifier",
       "shopping"
     ],
-    "countdownStarted": false,
-    "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 제출",
-    "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
+    "countdownStarted": true,
+    "currentTrackLabel": "비공개 테스트 가동 중 (테스터 12/12명)",
+    "closedTrackStatusLabel": "비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)"
   },
   "projectHealthSummary": {
-    "totalProjects": 8,
+    "totalProjects": 11,
     "ceoActionCount": 0,
     "autoRecoveringCount": 0,
     "appTrackTruth": {
@@ -53,9 +59,9 @@
         "magnifier",
         "shopping"
       ],
-      "countdownStarted": false,
-      "currentTrackLabel": "내부 v5 제공 · Alpha v5 검토 제출",
-      "closedTrackStatusLabel": "Alpha v5 검토 제출 · 등록명단 13명 · 실제 참여 수 미확인"
+      "countdownStarted": true,
+      "currentTrackLabel": "비공개 테스트 가동 중 (테스터 12/12명)",
+      "closedTrackStatusLabel": "비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)"
     }
   },
   "broadcastedToChat": true

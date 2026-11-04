@@ -1,7 +1,7 @@
 {
   "openrouter": {
     "status": "collected",
-    "checkedAt": 1793596405.8959434,
+    "checkedAt": 1793824504.0289922,
     "usage": 34.985513286,
     "usage_daily": 0,
     "limit": null,
@@ -13,9 +13,9 @@
     "buckets": {
       "codex": {
         "primary": {
-          "usedPercent": 32,
+          "usedPercent": 4,
           "windowDurationMins": 10080,
-          "resetsAt": 1793774189
+          "resetsAt": 1794379868
         },
         "credits": {
           "hasCredits": true,
@@ -33,13 +33,13 @@
         "usable": true,
         "activeRotation": true,
         "isLastUsed": true,
-        "callCount": 221,
+        "callCount": 16,
         "buckets": {
           "codex": {
             "primary": {
-              "usedPercent": 32,
+              "usedPercent": 4,
               "windowDurationMins": 10080,
-              "resetsAt": 1793774189
+              "resetsAt": 1794379868
             },
             "credits": {
               "hasCredits": true,
@@ -49,7 +49,7 @@
             "planType": "pro"
           }
         },
-        "checkedAt": 1793596411.2112274
+        "checkedAt": 1793824508.7511754
       },
       {
         "email": "choiggerh@naver.com",
@@ -58,13 +58,13 @@
         "usable": true,
         "activeRotation": true,
         "isLastUsed": false,
-        "callCount": 225,
+        "callCount": 17,
         "buckets": {
           "codex": {
             "primary": {
-              "usedPercent": 20,
+              "usedPercent": 3,
               "windowDurationMins": 10080,
-              "resetsAt": 1793774249
+              "resetsAt": 1794379068
             },
             "credits": {
               "hasCredits": false,
@@ -74,11 +74,11 @@
             "planType": "pro"
           }
         },
-        "checkedAt": 1793596411.9835339
+        "checkedAt": 1793824509.3334155
       }
     ],
     "lastUsedAccount": "baro76650@gmail.com",
-    "checkedAt": 1793596411.9835365
+    "checkedAt": 1793824509.3334188
   },
   "agy": {
     "status": "collected",
@@ -88,13 +88,13 @@
         "buckets": [
           {
             "window": "weekly",
-            "remainingPercent": 43.6,
-            "resetAt": "2026-11-02T09:00:01+00:00"
+            "remainingPercent": 95.9,
+            "resetAt": "2026-11-09T09:00:01+00:00"
           },
           {
             "window": "5h",
             "remainingPercent": 100,
-            "resetAt": "2026-11-02T10:13:34+00:00"
+            "resetAt": "2026-11-05T01:17:00+00:00"
           }
         ]
       },
@@ -109,7 +109,7 @@
           {
             "window": "5h",
             "remainingPercent": 100,
-            "resetAt": "2026-11-02T10:13:34+00:00"
+            "resetAt": "2026-11-05T01:35:17+00:00"
           }
         ]
       }
@@ -120,21 +120,21 @@
         "status": "collected",
         "usable": true,
         "activeRotation": true,
-        "isLastUsed": false,
-        "callCount": 81,
+        "isLastUsed": true,
+        "callCount": 146,
         "groups": [
           {
             "name": "Gemini Models",
             "buckets": [
               {
                 "window": "weekly",
-                "remainingPercent": 43.6,
-                "resetAt": "2026-11-02T09:00:01+00:00"
+                "remainingPercent": 95.9,
+                "resetAt": "2026-11-09T09:00:01+00:00"
               },
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-11-02T10:13:34+00:00"
+                "resetAt": "2026-11-05T01:17:00+00:00"
               }
             ]
           },
@@ -149,33 +149,33 @@
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-11-02T10:13:34+00:00"
+                "resetAt": "2026-11-05T01:35:17+00:00"
               }
             ]
           }
         ],
-        "checkedAt": 1793596412.6832805
+        "checkedAt": 1793824509.7198417
       },
       {
         "email": "barolab26@gmail.com",
         "status": "collected",
         "usable": true,
         "activeRotation": true,
-        "isLastUsed": true,
-        "callCount": 212,
+        "isLastUsed": false,
+        "callCount": 288,
         "groups": [
           {
             "name": "Gemini Models",
             "buckets": [
               {
                 "window": "weekly",
-                "remainingPercent": 51.0,
+                "remainingPercent": 2.8,
                 "resetAt": "2026-11-06T22:01:25+00:00"
               },
               {
                 "window": "5h",
-                "remainingPercent": 79.0,
-                "resetAt": "2026-11-02T05:58:00+00:00"
+                "remainingPercent": 89.5,
+                "resetAt": "2026-11-04T21:22:08+00:00"
               }
             ]
           },
@@ -184,34 +184,34 @@
             "buckets": [
               {
                 "window": "weekly",
-                "remainingPercent": 17.4,
-                "resetAt": "2026-11-04T10:53:32+00:00"
+                "remainingPercent": 93.6,
+                "resetAt": "2026-11-11T10:53:32+00:00"
               },
               {
                 "window": "5h",
                 "remainingPercent": 100,
-                "resetAt": "2026-11-02T10:13:41+00:00"
+                "resetAt": "2026-11-05T01:35:23+00:00"
               }
             ]
           }
         ],
-        "checkedAt": 1793596418.5594923
+        "checkedAt": 1793824515.897446
       }
     ],
-    "lastUsedAccount": "barolab26@gmail.com",
-    "checkedAt": 1793596418.5594945
+    "lastUsedAccount": "baro76650@gmail.com",
+    "checkedAt": 1793824515.8974476
   },
   "kie": {
     "status": "collected",
     "balance": 91.97,
-    "checkedAt": 1793596405.8447452,
+    "checkedAt": 1793824503.7884881,
     "unit": "credits",
     "source": "https://api.kie.ai/api/v1/chat/credit"
   },
   "jev": {
     "status": "잔액 미수집 · 콘솔 로그인 필요",
     "balance": null,
-    "checkedAt": 1793596405.8446248,
+    "checkedAt": 1793824503.7883985,
     "unit": "credits",
     "usable": true,
     "apiKeySet": true,
@@ -289,5 +289,5 @@
       "selection": "EGO 내부 스페이스 상주"
     }
   ],
-  "updatedAt": 1793596447.2493913
+  "updatedAt": 1793824622.4276564
 }

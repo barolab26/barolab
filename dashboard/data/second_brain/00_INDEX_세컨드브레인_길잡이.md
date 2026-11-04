@@ -3,7 +3,7 @@ name: second-brain-index-moc
 target_models: [claude-opus-4-6, gpt-5.4, gemini-3.1-pro]
 hop_depth: 1
 freedom_tier: medium-template
-updated_at: "2026-11-02 15:57:25 KST"
+updated_at: "2026-11-05 05:35:38 KST"
 ---
 # 🧠 BaroLab 세컨드 브레인 1-Hop 마스터 길잡이 (Map of Content)
 

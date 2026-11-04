@@ -1,0 +1,43 @@
+{
+  "schema": "external-knowhow-study-receipt-v1",
+  "id": "knowhow:bf2a5366f4114206a4e8",
+  "recordedAt": "2026-11-02T05:18:43.859483+00:00",
+  "recordedBy": "radar",
+  "sourceType": "radar_autonomous_study",
+  "sourceUrl": "https://www.korea.kr/news/policyNewsView.do?newsId=148974363",
+  "externalSources": [
+    {
+      "title": "한우·수산물·의류 최대 50% 할인…'코리아 그랜드 페스티벌' 개막 - 정책뉴스 | ....",
+      "url": "https://www.korea.kr/news/policyNewsView.do?newsId=148974363",
+      "source": "web_search"
+    },
+    {
+      "title": "자동차·가전부터 한우·수산물 까지... 최대 50% 할인 정부, 「제2회 코리아 그랜....",
+      "url": "https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/172335/view",
+      "source": "web_search"
+    },
+    {
+      "title": "한우·수산물 최대 50% 할인… 29일 ' 코리아 그랜드 페스티벌' 개막",
+      "url": "https://www.ajunews.com/view/20261027085909783",
+      "source": "web_search"
+    },
+    {
+      "title": "자동차·가전부터 한우·수산물 까지... 최대 50% 할인 정부, 「제2회 코리아 그랜....",
+      "url": "https://www.mss.go.kr/site/smba/ex/bbs/View.do?cbIdx=86&bcIdx=1072057",
+      "source": "web_search"
+    },
+    {
+      "title": "한우 ㆍ 수산물 ㆍ 의류 최대 50% 할인 , ' 코리아 그랜드 페스티벌' 개막",
+      "url": "https://news.lifekcr.co.kr/@/bbs/list/10538248",
+      "source": "web_search"
+    },
+    {
+      "title": "한우·수산물·의류 최대 50% 할인…'코리아 그랜드 페스티벌' 개막",
+      "url": "https://www.korea-news.com/news/articleView.html?idxno=105244",
+      "source": "web_search"
+    }
+  ],
+  "title": "명절 장보기 할인, 품목별 실제 결제액 비교 콘텐츠 실험",
+  "factCheckSummary": "2026-11-02 14:18 KST에 수집된 자료에는 정책브리핑과 산업통상자원부의 ‘최대 50% 할인’ 관련 제목이 있다. 상세 원문, 행사 기간·참여처·품목별 할인율과 조건은 확인되지 않았다. 네이버 실시간 1위 문서와 도입부, 황금키워드 검색량·경쟁도·광고 단가도 미검증이므로 아래는 발행 전 가설이다. 출처: https://www.korea.kr/news/policyNewsView.do?newsId=148974363 , https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/172335/view",
+  "evidenceText": "명절 장보기 할인, 품목별 실제 결제액 비교 콘텐츠 실험\n2026-11-02 14:18 KST에 수집된 자료에는 정책브리핑과 산업통상자원부의 ‘최대 50% 할인’ 관련 제목이 있다. 상세 원문, 행사 기간·참여처·품목별 할인율과 조건은 확인되지 않았다. 네이버 실시간 1위 문서와 도입부, 황금키워드 검색량·경쟁도·광고 단가도 미검증이므로 아래는 발행 전 가설이다. 출처: https://www.korea.kr/news/policyNewsView.do?newsId=148974363 , https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/172335/view\n1. 정책브리핑과 산업통상자원부 원문에서 행사 기간, 품목·참여처별 할인율, 할인 한도, 중복 적용 여부를 확인하고 확인 시각과 원문 URL을 기록한다. 2. 네이버에서 ‘한우 할인 행사’, ‘수산물 할인 행사’ 등으로 직접 검색해 검색 시각과 실제 1위 문서 URL을 기록하고 제목의 질문 방식과 첫 3줄의 정보 배치를 관찰한다. 현재 자료만으로 1위 공식을 확정하지 않는다. 3. 확인된 조건에 맞춰 CF 원고의 제목을 ‘[품목] 할인, 10만 원 장바구니에서 얼마 줄까? 참여처·한도 확인’으로 시험한다. 첫 3줄에는 행사 기간, 내 품목의 적용 여부, 참여처 확인 경로를 넣는다. 4. 비교표는 품목·정상가·확인된 할인율·할인 한도·예상 결제액·참여처로 구성한다. 계산 예시는 정상가 10만 원에 50%가 한도 없이 적용된다는 가정에서 할인 5만 원, 결제 5만 원이다. 실제 행사 결과로 표시하지 않는다. 5. 네이버에는 독립적으로 완결된 요약과 관련 CF 상세표를, 지식iN에는 관련 질문에 대한 맞춤 답변과 필요한 출처를, Threads에는 핵심 조건과 링크를, 브런치에는 장보기 선택 과정을 재구성한다. 6. 파생 후보인 품목별 할인 한도·중복 할인·참여처 비교를 블로키 검색량과 문서 수, 공식 조건으로 각각 검증한다. 확인 전에는 고단가·황금키워드로 부르지 않는다. 발행 후 URL별 클릭과 유입을 기간·출처별로 확인한다.\n행사 원문과 실제 검색 결과를 확인할 수 있고, 독자가 품목별 할인 조건과 결제액을 비교하려는 시점에 사용한다. 실험 전 가설이며 수익이나 상위노출 효과는 검증되지 않았다."
+}
