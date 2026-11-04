@@ -117,84 +117,88 @@ PRODUCTION_TOPICS: list[dict[str, Any]] = [
         "channel": "@yoon_autolab",
         "channelName": "윤랩 자동화 연구소",
         "templateId": "svml-tpl-01",
-        "title": "스마트폰·PC 숨은 자동환급·세무 조회 3초 세팅법 (모르면 매년 놓치는 항목 비교)",
-        "hookTitle": "매년 직접 찾으러 다니시나요? 딱 1번 자동 조회 설정으로 끝내는 실측 비교표",
-        "badge": "윤랩 자동화 연구소 · 실전 리포트 #01",
+        "youtubeShortUrl": "https://youtube.com/shorts/of6rvdwE8jc",
+        "title": "챗GPT 단순 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 자동 수익화 파이프라인",
+        "hookTitle": "챗GPT 복붙 블로그가 망할 때 AI 에이전트 6명 분업 팀은 24시간 수익을 만듭니다",
+        "badge": "윤랩 자동화 연구소 · AI 아키텍처 #01",
         "bridgeDomain": "meganote.kr",
-        "bridgeUrl": "https://meganote.kr/entry/2026-%EB%B6%80%EB%8F%99%EC%82%B0-%EC%9E%AC%EC%82%B0%EC%84%B8-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-%EA%B8%B0%EC%A4%80-%EC%A1%B0%ED%9A%8C%EB%B2%95",
-        "bridgeLabel": "메가노트 IT·세무 자동조회 실측 비교표 전문",
-        "narration": "매년 세금이나 환급금 조회할 때마다 일일이 사이트 찾아다니시나요? 윤랩 자동화 연구소에서 실측한 결과, 단 세 번의 통합 조회 설정만으로 확인 시간을 30분에서 1분으로 줄일 수 있습니다. 화면의 비교표처럼 개별 조회 대신 통합 알림과 공시가격 기준표를 함께 체크하면 누락되는 공제 항목까지 즉시 판별됩니다. 자세한 1분 체크리스트와 계산표는 채널 게시물과 고정 링크에서 바로 확인해 보세요.",
+        "bridgeUrl": "https://www.meganote.kr/",
+        "bridgeLabel": "메가노트 AI 에이전트 자동화 파이프라인 아키텍처 전문",
+        "narration": "챗GPT에 주제만 던져주고 복사해 붙여넣는 블로그, 왜 아무리 글을 찍어내도 수익이 나지 않을까요? 검색엔진 알고리즘은 이제 단순 요약형 AI 문체를 즉시 걸러내지만, 역할을 나눈 여섯 명의 AI 에이전트 팀은 24시간 유입과 수익을 만들어냅니다. 레이더 에이전트가 빈집 황금키워드를 포착하고, 퍼블리와 닥터가 비교표 중심 원고를 설계한 뒤, 원소스 멀티유즈로 블로그와 카페, 스레드, 쇼츠까지 동시에 확산시킵니다.",
         "scenes": [
             {
-                "phase": "SCENE 01 · 3초 충격 후킹 (0.0s ~ 4.0s)",
-                "headline": "아직도 사이트마다\n일일이 로그인해서 조회하시나요?",
-                "subline": "수동 개별 조회(30분) vs 윤랩 통합 루틴(1분) 실측 비교",
-                "highlight": "연간 평균 3~4개 공제·감면 확인 누락 방지",
+                "phase": "SCENE 01 · Google Flow AI 시네마 + 훅 (0.0s ~ 11.5s)",
+                "headline": "챗GPT 복붙 블로그가 망할 때\nAI 에이전트 팀은 수익을 만듭니다",
+                "subline": "단일 프롬프트 양산형(검색 누락) vs 6-에이전트 자율 파이프라인 실측 비교",
+                "highlight": "6 AGENTS · 24시간 자율 구동 멀티채널 수익화 파이프라인",
                 "rows": [
-                    ["조회 방식", "소요 시간", "누락 위험"],
-                    ["개별 사이트 수동 탐색", "평균 25~30분", "높음 (특례 기준 누락)"],
-                    ["윤랩 3단계 통합 체크", "1분 이내 완료", "낮음 (기준표 즉시 대조)"]
+                    ["구분", "단순 챗GPT 복붙", "윤랩 6-에이전트 파이프라인"],
+                    ["원고 품질", "천편일률 요약 (스팸 필터링)", "SSR+ 비교표·수치 중심 고밀도 원고"],
+                    ["유입·수익", "검색 색인 누락 · 방문자 0명", "멀티채널 OSMU 확산 + 실측 피드백"]
                 ],
                 "activeRow": 2,
-                "footer": "⚡ SVML Anchor: @word(실측한) · Hook Retention Target 78%+"
+                "footer": "⚡ Google Flow Nano Banana 2.1 Scene #01~#02"
             },
             {
-                "phase": "SCENE 02 · 핵심 수치 1:1 비교표 (4.0s ~ 11.0s)",
-                "headline": "2026 공시가격·세무 통합 조회\n핵심 기준 1:1 비교표",
-                "subline": "1세대 1주택 특례세율 적용 구간 vs 일반 구간 한눈에 판독",
-                "highlight": "공시가격 9억 이하 구간 특례세율(0.05%~0.35%) 필수 체크",
+                "phase": "SCENE 02 · 3단계 무인 파이프라인 (11.5s ~ 39.0s)",
+                "headline": "24시간 무인 수익화\n3-Step 에이전트 분업 구조",
+                "subline": "트렌드 채굴 → 비교표 원고·전환율 감사 → 전 채널 동시 배포",
+                "highlight": "Radar · Publi · Doctor · Trace · Patch · Jarvis 6크루 협업",
                 "rows": [
-                    ["점검 항목", "일반 수동 확인", "윤랩 기준표 판독"],
-                    ["공시가격 기준", "단순 시세 추측", "공동주택 공시가격 정밀 대조"],
-                    ["특례세율 적용", "미확인 과납 위험", "9억 이하 0.05%p 감면 즉시 판별"],
-                    ["분납·공제 체크", "기한 경과 빈번", "사전 체크리스트 3문항 완결"]
+                    ["단계", "담당 에이전트", "핵심 자동화 역할"],
+                    ["Step 1", "Radar 스카우터", "고단가 빈집 키워드 & 실시간 질문 포착"],
+                    ["Step 2", "Publi & Doctor", "손실회피 훅·비교표·체크리스트 원고 설계"],
+                    ["Step 3", "OSMU 브릿지", "블로그·카페·스레드·쇼츠 동시 변환 배포"]
                 ],
                 "activeRow": 2,
-                "footer": "📊 SVML Component: comparison-table (highlight-row=2)"
+                "footer": "📊 Google Flow Nano Banana 2.1 Scene #03~#04"
             },
             {
-                "phase": "SCENE 03 · 3클릭 실행 프로토콜 (11.0s ~ 16.0s)",
-                "headline": "실패 없는 1분 점검\n3-Step 자동화 프로토콜",
-                "subline": "복잡한 서류 없이 스마트폰에서 지금 바로 확인하는 순서",
-                "highlight": "Step 1 공시가 확인 → Step 2 특례 판정 → Step 3 감면 체크",
+                "phase": "SCENE 03 · 실측 피드백 루프 & 체크리스트 (39.0s ~ 57.5s)",
+                "headline": "발행 개수가 아닌\n실측 PV·RPM으로 자동 진화",
+                "subline": "GA4·GSC·애드센스 실측 데이터를 지식그래프(+1/-1점)에 즉시 역반영",
+                "highlight": "우승 포맷 자동 강화(+1점) · 무유입 패턴 즉시 폐기(-1점)",
                 "rows": [
-                    ["단계", "핵심 행동", "소요 시간"],
-                    ["Step 1", "부동산공시가격 알리미 기준가 조회", "20초"],
-                    ["Step 2", "1세대 1주택 특례 구간 대조표 확인", "20초"],
-                    ["Step 3", "고령자·장기보유 세액공제 합산 점검", "20초"]
+                    ["체크 번호", "핵심 구축 원칙", "목표 지표"],
+                    ["Check 1", "단순 복붙 중단 · 역할별 멀티 에이전트 분업", "색인율 90%+"],
+                    ["Check 2", "비교표·수치 중심 원고로 체류시간 극대화", "체류 2분+"],
+                    ["Check 3", "블로그·카페·쇼츠 OSMU 외부유입 브릿지", "고단가 RPM"]
                 ],
                 "activeRow": 1,
-                "footer": "🎯 채널 게시물(커뮤니티)에서 상세 기준표 원문 바로가기 제공"
+                "footer": "🎯 Google Flow Nano Banana 2.1 Scene #05"
             }
         ],
-        "communityPostText": """[윤랩 자동화 연구소 실전 브리핑 #01] 스마트폰·PC로 1분 만에 끝내는 2026 공시가격·재산세 특례 기준 판독표 ⚡
+        "communityPostText": """[윤랩 자동화 연구소 아키텍처 브리핑 #01] 단순 챗GPT 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 수익화 파이프라인 ⚡
 
-매년 고지서가 나온 뒤에야 부랴부랴 세율과 공제 조건을 찾아보느라 시간을 쓰시진 않으셨나요?
-윤랩 자동화 연구소에서 복잡한 조문 대신 딱 3단계(Step 1 기준가 확인 → Step 2 1주택 특례 대조 → Step 3 공제율 합산)로 판독할 수 있는 실측 기준표를 정리했습니다.
+아직도 챗GPT에 프롬프트 한 줄만 입력해서 나온 글을 그대로 블로그에 복사·붙여넣기 하고 계신가요?
+검색엔진 알고리즘이 고도화되면서 팩트 검증과 비교표가 없는 단순 요약형 AI 원고는 색인 단계에서 즉시 걸러집니다.
 
-✅ 핵심 점검 포인트 3가지
-1) 1세대 1주택 공시가격 9억 원 이하 구간 특례세율(0.05%~0.35%) 해당 여부
-2) 과세기준일(6월 1일) 전후 변동 사항 및 합산 배제 체크
-3) 분납 신청 기준 및 온라인 즉시 조회 경로
+윤랩 자동화 연구소에서는 단일 프롬프트 대신 역할을 완벽히 분리한 6명의 자율 AI 에이전트(Radar·Publi·Doctor·Trace·Patch·Jarvis) 파이프라인을 가동하고 있습니다.
 
-📊 구간별 세율 비교표와 1분 자가진단 체크리스트 전문은 아래 연구소 아카이브 원문에서 바로 확인하실 수 있습니다.
-👉 https://meganote.kr/entry/2026-%EB%B6%80%EB%8F%99%EC%82%B0-%EC%9E%AC%EC%82%B0%EC%84%B8-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-%EA%B8%B0%EC%A4%80-%EC%A1%B0%ED%9A%8C%EB%B2%95"""
+✅ 24시간 무인 수익화 파이프라인 3대 핵심 공식
+1) [Step 1 · Radar] 검색 수요 대비 경쟁 문서가 비어 있는 고단가 블루오션 키워드 실시간 채굴
+2) [Step 2 · Publi & Doctor] 공무원식 뻔한 서론을 제거하고 1:1 수치 비교표·체크리스트로 체류시간 극대화
+3) [Step 3 · OSMU & Trace] 원본 데이터 1개를 블로그·카페·스레드·쇼츠 문법으로 동시 배포하고, 실측 PV·RPM 데이터로 우승 공식만 자동 학습(+1/-1 피드백 루프)
+
+📊 AI 에이전트 자동화 파이프라인 설계도와 실전 칼럼은 윤랩 기술 아카이브(메가노트)에서 자세히 확인하실 수 있습니다.
+👉 https://www.meganote.kr/"""
     },
     {
         "part": 2,
         "channel": "@숨은지원금",
         "channelName": "숨은지원금",
         "templateId": "svml-tpl-01",
-        "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 차이 (24초 핵심 비교)",
+        "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
+        "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 최대 20% 증액 비교",
         "hookTitle": "집값 9억 넘어서 포기하셨나요? 공시가격 12억 이하 + 우대형 최대 20% 증액 비교",
         "badge": "숨은지원금 · 4060 연금 브리핑 #01",
         "bridgeDomain": "smilenote.kr",
-        "bridgeUrl": "https://smilenote.kr/entry/2026-%EC%A3%BC%ED%83%9D%EC%97%B0%EA%B8%88-%EA%B0%80%EC%9E%85%EC%A1%B0%EA%B1%B4-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-12%EC%96%B5-%EC%9B%94%EC%88%98%EB%A0%B9%EC%95%A1-%EA%B3%84%EC%82%B0",
+        "bridgeUrl": "https://www.smilenote.kr/",
         "bridgeLabel": "스마일노트 주택연금 연령별·집값별 월 수령액 비교표",
-        "narration": "집값이 9억을 넘어서 주택연금 대상이 아니라고 생각하셨나요? 기준이 시세가 아닌 공시가격 12억 원 이하로 넓어지면서 실거래가 15억에서 17억 수준 아파트도 신청 대상에 들어옵니다. 특히 부부 중 한 분이 만 55세 이상이면 가능하고, 우대형 요건을 충족하면 일반형보다 월 지급금이 최대 20퍼센트까지 늘어납니다. 내 나이와 집값 기준 정확한 월 수령액 비교표는 고정 링크에서 바로 계산해 보세요.",
+        "narration": "평생 살던 내 집에 그대로 거주하면서 매달 따박따박 월급처럼 연금을 받을 수 있다면 얼마가 나올까요? 2026년 주택연금은 공시가격 12억 원 이하까지 문턱이 넓어졌고, 우대형 요건에 해당하면 월 수령액이 최대 20퍼센트까지 늘어납니다.",
         "scenes": [
             {
-                "phase": "SCENE 01 · 오해 깨기 후킹 (0.0s ~ 4.0s)",
+                "phase": "SCENE 01 · 오해 깨기 후킹 (0.0s ~ 12.0s)",
                 "headline": "집값 9억 넘으면 탈락?\n공시가격 12억 이하까지 가능합니다",
                 "subline": "실거래가 약 15~17억 원 수준 주택도 공시가 12억 이하면 가입 대상",
                 "highlight": "부부 중 1명 만 55세 이상 + 공시가격 12억 원 이하",
@@ -204,10 +208,10 @@ PRODUCTION_TOPICS: list[dict[str, Any]] = [
                     ["가입 연령", "부부 모두 65세 오해", "부부 중 연장자 만 55세 이상"]
                 ],
                 "activeRow": 1,
-                "footer": "⚡ SVML Anchor: @word(공시가격) · 4060 정책 쇼츠"
+                "footer": "⚡ Google Flow Nano Banana 2.1 Scene #01~#02"
             },
             {
-                "phase": "SCENE 02 · 일반형 vs 우대형 비교 (4.0s ~ 11.0s)",
+                "phase": "SCENE 02 · 일반형 vs 우대형 비교 (12.0s ~ 57.6s)",
                 "headline": "일반형 vs 우대형 주택연금\n월 수령액 최대 20% 차이",
                 "subline": "시가 2.5억 미만 1주택 + 기초연금 수급자라면 우대형 필수 확인",
                 "highlight": "신청 전 우대형 해당 여부 체크만으로 평생 수령액 상승",
@@ -225,347 +229,265 @@ PRODUCTION_TOPICS: list[dict[str, Any]] = [
 시세가 9억 원을 넘는다는 이유로 주택연금을 아예 알아보지 않으셨다면 반드시 공시가격을 먼저 확인해 보셔야 합니다.
 공시가격 12억 원 이하(실거래가 약 15~17억 수준)까지 가입 문턱이 열려 있으며, 우대형 요건 충족 시 일반형보다 최대 20% 높은 월 지급금을 받을 수 있습니다.
 
-👉 연령별·주택가격별 상세 비교표 확인: https://smilenote.kr/entry/2026-%EC%A3%BC%ED%83%9D%EC%97%B0%EA%B8%88-%EA%B0%80%EC%9E%85%EC%A1%B0%EA%B1%B4-%EA%B3%B5%EC%8B%9C%EA%B0%80%EA%B2%A9-12%EC%96%B5-%EC%9B%94%EC%88%98%EB%A0%B9%EC%95%A1-%EA%B3%84%EC%82%B0"""
+👉 연령별·주택가격별 상세 비교표 확인: https://www.smilenote.kr/"""
     },
     {
         "part": 3,
         "channel": "@yoon_autolab",
         "channelName": "윤랩 자동화 연구소",
         "templateId": "svml-tpl-02",
-        "title": "건강보험 본인부담상한제 환급금 1분 온라인 신청 루틴 (문자 사기 구별법 포함)",
-        "hookTitle": "병원비 많이 나온 해, 신청 안 하면 잠자는 환급금 1분 조회 루틴",
-        "badge": "윤랩 자동화 연구소 · 실전 리포트 #02",
-        "bridgeDomain": "must-good.com",
-        "bridgeUrl": "https://must-good.com/entry/2026-%EB%B3%B8%EC%9D%B8%EB%B6%80%EB%8B%B4%EC%83%81%ED%95%9C%EC%A0%9C-%EC%82%AC%ED%9B%84%ED%99%98%EA%B8%89%EA%B8%88-%EC%A1%B0%ED%9A%8C-%EC%8B%A0%EC%B2%AD%EB%B0%A9%EB%B2%95-%EC%86%8C%EB%93%9D%EB%B6%84%EC%9C%84-%EA%B8%B0%EC%A4%80",
-        "bridgeLabel": "머스트굿 소득분위별 본인부담상한액 표 & 조회 가이드",
-        "narration": "부모님 병원비가 많이 나왔던 해라면 건강보험 본인부담상한제 환급 대상인지 반드시 확인해야 합니다. 문자에 찍힌 의심스러운 인터넷 주소를 누르지 마시고, The건강보험 앱이나 공식 홈페이지에서 환급금 조회 메뉴만 누르면 1분 만에 대상 여부와 입금 계좌 신청이 끝납니다. 내 소득분위별 상한액 기준표는 채널 게시물 링크에서 한눈에 확인하세요.",
+        "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
+        "title": "코딩 1줄 몰라도 바이브코딩(Google Flow·SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식",
+        "hookTitle": "아직도 타임라인 자르고 붙이세요? Google Flow AI + SVML 코드가 쇼츠를 통째로 렌더링합니다",
+        "badge": "윤랩 자동화 연구소 · 바이브코딩 #02",
+        "bridgeDomain": "justinfo.co.kr",
+        "bridgeUrl": "https://www.justinfo.co.kr/",
+        "bridgeLabel": "저스트인포 바이브코딩 & 미디어 자동화 실전 가이드",
+        "narration": "유튜브 쇼츠 한 편 만들려고 아직도 영상 편집 프로그램에서 타임라인을 일일이 자르고 자막을 맞추고 계신가요? 이제는 코딩을 한 줄도 몰라도 바이브코딩과 구글 플로우 AI를 결합해 방송국 수준의 인포그래픽 쇼츠를 자동으로 렌더링할 수 있습니다.",
         "scenes": [
             {
-                "phase": "SCENE 01 · 스미싱 주의 & 공식 루틴 (0.0s ~ 5.0s)",
-                "headline": "환급금 문자 링크 클릭 금지!\n공식 앱 3클릭 조회 루틴",
-                "subline": "사칭 URL 대신 국민건강보험 공식 경로로 1분 안에 직접 확인",
-                "highlight": "비급여 제외 건강보험 본인부담금 연간 상한 초과분 환급",
+                "phase": "SCENE 01 · 수작업 편집 vs 바이브코딩 스튜디오 (0.0s ~ 22.0s)",
+                "headline": "아직도 타임라인 자르고 붙이세요?\n코드가 쇼츠를 통째로 렌더링합니다",
+                "subline": "배경 1장짜리 슬라이드쇼 탈피 · Google Flow 5-씬 시네마 + SVML 모션",
+                "highlight": "상단 AI 시네마 뷰포트 + 중단 인터랙티브 카드 + 하단 싱크 자막",
                 "rows": [
-                    ["구분", "포함 여부", "핵심 판정 기준"],
-                    ["급여 본인부담금", "O (환급 산정 포함)", "소득분위별 연간 상한액 초과분"],
-                    ["비급여·도수·1인실", "X (산정 제외)", "실손보험 별도 청구 대상"]
-                ],
-                "activeRow": 1,
-                "footer": "⚡ SVML Anchor: @word(환급) · 3-Click Protocol"
-            },
-            {
-                "phase": "SCENE 02 · 소득구간별 상한 구조 (5.0s ~ 12.0s)",
-                "headline": "소득분위가 낮을수록\n돌려받는 기준선이 낮아집니다",
-                "subline": "1~3분위 저소득층부터 고소득 구간까지 차등 상한제 적용",
-                "highlight": "진료받은 날로부터 3년 이내 미신청 환급금 통합 조회 가능",
-                "rows": [
-                    ["점검 순서", "실행 경로", "확인 내용"],
-                    ["1단계", "국민건강보험 홈페이지 / 앱 로그인", "민원여기요 → 환급금 조회"],
-                    ["2단계", "본인부담상한액 초과금 내역 확인", "대상 연도 및 지급 가능액"],
-                    ["3단계", "본인 명의 계좌번호 입력 신청", "접수 후 영업일 순차 입금"]
+                    ["구분", "기존 양산형 쇼츠", "윤랩 Google Flow + SVML"],
+                    ["비주얼 구성", "어두운 정지 사진 1장 반복", "5개 비트별 맞춤 AI 시네마 전환"],
+                    ["정보 전달력", "단순 기계식 자막 나열", "비교표·단계별 카드 30fps 모션"]
                 ],
                 "activeRow": 2,
-                "footer": "📌 상세 소득분위별 상한액 표: must-good.com 원문 연결"
+                "footer": "⚡ Google Flow Nano Banana 2.1 Scene #01~#03"
+            },
+            {
+                "phase": "SCENE 02 · 무인 쇼츠 빌드 3단계 프로토콜 (22.0s ~ 57.5s)",
+                "headline": "Google Flow + Hypit SVML\n무인 쇼츠 렌더링 3단계",
+                "subline": "AI 장면 생성부터 음성 타임스탬프 매핑·1080p MP4 컴파일까지 자동화",
+                "highlight": "30fps 프레임 단위 오디오·모션·자막 100% 정밀 동기화",
+                "rows": [
+                    ["단계", "실행 모듈", "자동화 출력물"],
+                    ["1단계", "Google Flow (Nano Banana 2.1)", "대본 5대 비트별 고해상도 장면 5장"],
+                    ["2단계", "Edge Neural TTS + FFprobe", "문장별 발화 시각(ms) → 30fps 프레임 매핑"],
+                    ["3단계", "Hypit SVML + Chrome 152", "1080x1920 30fps 풀 HD MP4 렌더링"]
+                ],
+                "activeRow": 3,
+                "footer": "📌 Google Flow Nano Banana 2.1 Scene #04~#05"
             }
         ],
-        "communityPostText": """[윤랩 자동화 연구소 실전 브리핑 #02] 건강보험 본인부담상한제 환급금 1분 공식 조회 루틴 (스미싱 구별 표 포함) 🛡️
+        "communityPostText": """[윤랩 자동화 연구소 실전 브리핑 #02] 코딩 1줄 몰라도 바이브코딩(Google Flow + Hypit SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식 🚀
 
-병원비 지출이 컸던 해에 돌려받을 수 있는 '본인부담상한액 초과금'을 조회할 때, 문자 메시지의 출처 불명 링크를 누르는 것은 위험합니다.
-반드시 국민건강보험 공식 홈페이지나 'The건강보험' 앱의 [환급금(지원금) 조회/신청] 메뉴로 직접 접속해 1분 만에 안전하게 확인하세요.
+유튜브 쇼츠 1편을 만들기 위해 영상 편집 프로그램에서 타임라인을 일일이 자르고 자막 싱크를 맞추느라 시간을 쓰고 계신가요?
+반대로 어두운 배경 이미지 1장 위에 기계식 자막만 얹는 공장형 쇼츠는 시청자가 3초 만에 이탈해 버립니다.
 
-✅ 급여 포함 vs 비급여 제외 구분표와 소득분위별 상한 기준 원문:
-👉 https://must-good.com/entry/2026-%EB%B3%B8%EC%9D%B8%EB%B6%80%EB%8B%B4%EC%83%81%ED%95%9C%EC%A0%9C-%EC%82%AC%ED%9B%84%ED%99%98%EA%B8%89%EA%B8%88-%EC%A1%B0%ED%9A%8C-%EC%8B%A0%EC%B2%AD%EB%B0%A9%EB%B2%95-%EC%86%8C%EB%93%9D%EB%B6%84%EC%9C%84-%EA%B8%B0%EC%A4%80"""
+윤랩 자동화 연구소에서는 Google Flow AI(Nano Banana 2.1)와 코드 기반 비디오 엔진(Hypit SVML)을 결합해 3단계로 고밀도 인포그래픽 쇼츠를 자동 빌드합니다.
+
+✅ 바이브코딩 무인 쇼츠 스튜디오 3단계 파이프라인
+1) [Step 1 · Google Flow AI] 대본의 5대 흐름(도입 훅 → 전후 비교 → 실행 3단계 → 핵심 지표 → 최종 체크리스트)에 맞춘 5장의 시네마 비주얼 생성
+2) [Step 2 · Neural TTS 타임스탬프] 문장 단위 음성 길이를 정밀 계측해 30fps 프레임 타임라인에 자동 매핑
+3) [Step 3 · 3단 분할 렌더링] 상단 AI 시네마 뷰포트(Ken Burns 모션) + 중단 인터랙티브 비교 카드 + 하단 싱크 자막을 1080x1920 MP4로 원클릭 컴파일
+
+👉 상세 자동화 워크플로우와 실전 가이드는 연구소 기술 블로그에서 확인하세요: https://www.justinfo.co.kr/"""
+    },
+    {
+        "part": 4,
+        "channel": "@yoon_autolab",
+        "channelName": "윤랩 자동화 연구소",
+        "templateId": "svml-tpl-02",
+        "title": "클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 실전 워크플로우",
+        "hookTitle": "아직도 복붙으로 리서치하세요? CDP 에이전트로 3분 만에 끝내는 법",
+        "bridgeDomain": "meganote.kr",
+        "bridgeUrl": "https://www.meganote.kr/",
+        "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
+        "accent": "#38bdf8",
+        "badge": "AI 에이전트 · CDP 실전 #04",
+        "scenes": [
+            {"time": "00:00~00:08", "label": "도입 훅", "narration": "매일 아침 경쟁사 모니터링과 데이터 수집에 3시간씩 쓰고 계신가요? 브라우저 CDP와 MCP를 연결하면 단 3분이면 충분합니다.", "stat": "리서치 시간 98% 단축"},
+            {"time": "00:08~00:22", "label": "병목 진단", "narration": "단순 API 크롤링은 로그인 세션과 동적 렌더링 앞에서 막힙니다. 실제 크롬 프로필 세션을 제어하는 CDP가 해답입니다.", "stat": "CDP 로컬 세션 직결"},
+            {"time": "00:22~00:48", "label": "3단계 자동화", "narration": "1단계 타깃 URL 접속, 2단계 핵심 수치·표 실시간 캡처, 3단계 마크다운 리포트 자동 요약까지 무인으로 돌아갑니다.", "stat": "무인 파이프라인 완성"},
+            {"time": "00:48~00:58", "label": "상세 가이드", "narration": "전체 오픈소스 설정값과 프롬프트 템플릿은 고정댓글과 설명란의 연구소 기술 노트에서 바로 확인하세요.", "stat": "meganote.kr 원문 공개"},
+        ],
+        "communityPostText": """[AI 실전 리서치 #04] 클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 워크플로우 🤖
+
+단순 웹 검색 API만으로는 로그인 세션이 필요한 대시보드나 동적 테이블 데이터를 정확히 수집하기 어렵습니다. 윤랩 자동화 연구소에서는 로컬 크롬 디버깅 프로토콜(CDP)과 AI 에이전트를 결합해 리서치와 시각 자료 수집을 자동화합니다.
+
+✅ CDP + MCP 실전 리서치 3단계 아키텍처
+1) [Step 1 · 독립 프로필 세션 유지] 계정별 격리된 브라우저 워크스페이스에서 인증 토큰 충돌 없이 타깃 페이지 즉시 진입
+2) [Step 2 · 핵심 데이터·표 정밀 캡처] 사람이 직접 서칭하듯 공식 통계표와 비교 데이터를 고해상도로 크롭 및 구조화
+3) [Step 3 · 검증 리포트 자동 발행] 수집된 실측 근거를 바탕으로 수치 오류 없는 의사결정 브리프 생성
+
+👉 실전 파이프라인 설계도와 세팅 가이드는 연구소 기술 노트에서 확인하세요: https://www.meganote.kr/"""
+    },
+    {
+        "part": 5,
+        "channel": "@숨은지원금",
+        "channelName": "숨은지원금",
+        "templateId": "svml-tpl-01",
+        "title": "건강보험 본인부담상한제 환급금 1분 온라인 조회 & 퇴직 후 피부양자 방어선",
+        "hookTitle": "병원비 낸 거 그대로 두지 마세요! 건보 본인부담상한제 환급금 조회법",
+        "bridgeDomain": "must-good.com",
+        "bridgeUrl": "https://www.must-good.com/",
+        "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
+        "accent": "#10b981",
+        "badge": "4060 의료·건보 브리프 #05",
+        "scenes": [
+            {"time": "00:00~00:08", "label": "도입 훅", "narration": "작년에 부모님 병원비 많이 나왔다면 건강보험 본인부담상한제 환급금 대상인지 지금 바로 확인해야 합니다.", "stat": "1인당 평균 135만 원 환급"},
+            {"time": "00:08~00:25", "label": "소득구간 기준", "narration": "소득 분위 1구간부터 10구간까지 연간 본인부담 상한액이 정해져 있어 초과분은 공단에서 전액 돌려줍니다.", "stat": "1구간 87만~10구간 808만"},
+            {"time": "00:25~00:48", "label": "실손보험 중복체크", "narration": "비급여 도수치료나 상급병실료는 제외되며, 조회 및 신청은 국민건강보험 앱에서 1분이면 끝납니다.", "stat": "The건강보험 1분 신청"},
+            {"time": "00:48~00:58", "label": "원문 가이드", "narration": "올해 소득구간별 상한액 표와 피부양자 자격 방어 체크리스트는 고정댓글 원문에서 확인하세요.", "stat": "must-good.com 기준표"},
+        ],
+        "communityPostText": """[4060 의료·건보 핵심체크 #05] 건강보험 본인부담상한제 환급금 1분 조회 & 소득구간별 상한액 총정리 🏥
+
+연간 건강보험 급여 본인부담금이 가구 소득구간별 상한액을 초과하면, 그 초과 금액을 국민건강보험공단에서 돌려주는 '본인부담상한제' 사후환급 신청을 놓치는 분들이 많습니다.
+
+✅ 신청 전 반드시 확인해야 할 핵심 기준 3가지
+1) [소득구간별 상한액] 1분위(연 87만 원 수준)부터 10분위(연 808만 원 수준)까지 구간별 초과분 환급
+2) [제외 항목 주의] 비급여 항목, 임플란트, 추나요법, 상급병실 입원료 등은 상한제 합산에서 제외
+3) [조회 및 신청 경로] 국민건강보험 홈페이지 또는 'The건강보험' 모바일 앱 → 민원여기요 → 환급금(지원금) 조회/신청
+
+👉 2026 소득구간별 상세 기준표와 퇴직 후 건강보험료 피부양자 유지 조건은 아래 가이드에서 확인하세요: https://www.must-good.com/"""
     }
 ]
 
 
-def _load_font(size: int, bold: bool = False):
-    from PIL import ImageFont
-    candidates = [
-        "C:/Windows/Fonts/malgunbd.ttf" if bold else "C:/Windows/Fonts/malgun.ttf",
-        "C:/Windows/Fonts/NanumGothicBold.ttf" if bold else "C:/Windows/Fonts/NanumGothic.ttf",
-        "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, size=size)
-            except Exception:
-                pass
-    return ImageFont.load_default()
+def render_hypit_svml_short(part_no: int = 1, force_rebuild: bool = False) -> dict[str, Any]:
+    """Render or inspect a full-length (~57s) 1080x1920 30fps MP4 Short using the real @hypit/hypit 0.3.1 engine."""
+    import asyncio
+    from youtube_posting.build_hypit_shorts import (
+        SHORTS_SPECS,
+        PRODUCTIONS_DIR,
+        _synthesize_segments,
+        _write_hypit_production_files,
+        _run_hypit_build_and_export,
+        _probe_duration,
+    )
 
-
-def _generate_voice_or_chime_audio(text: str, out_wav: Path, target_seconds: float = 14.0) -> dict[str, Any]:
-    """Generate ElevenLabs voiceover if API key & quota available; otherwise clean ambient synth chime WAV."""
-    out_wav.parent.mkdir(parents=True, exist_ok=True)
-    api_key = (os.getenv("ELEVENLABS_API_KEY") or "").strip()
-    if api_key:
-        try:
-            import urllib.request
-            voice_id = "pNInz6obpgDQGcFmaJgB"  # Adam / standard multilingual voice
-            url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
-            payload = json.dumps({
-                "text": text[:360],
-                "model_id": "eleven_multilingual_v2",
-                "voice_settings": {"stability": 0.55, "similarity_boost": 0.78}
-            }).encode("utf-8")
-            req = urllib.request.Request(
-                url,
-                data=payload,
-                headers={
-                    "xi-api-key": api_key,
-                    "Content-Type": "application/json",
-                    "Accept": "audio/mpeg",
-                },
-                method="POST",
-            )
-            mp3_path = out_wav.with_suffix(".mp3")
-            with urllib.request.urlopen(req, timeout=18) as resp:
-                audio_bytes = resp.read()
-                if len(audio_bytes) > 1000:
-                    mp3_path.write_bytes(audio_bytes)
-                    return {"engine": "elevenlabs_multilingual_v2", "path": str(mp3_path), "ok": True}
-        except Exception:
-            pass
-
-    # Fallback: clean soft tech beat + chime cues at scene transitions
-    sample_rate = 24000
-    total_samples = int(sample_rate * target_seconds)
-    with wave.open(str(out_wav), "w") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(sample_rate)
-        frames = bytearray()
-        for i in range(total_samples):
-            t = i / sample_rate
-            # Subtle warm chord pad + transition chimes at 0.0s, 4.5s, 9.5s
-            chime = 0.0
-            for trigger in (0.05, 4.5, 9.5):
-                if trigger <= t <= trigger + 0.45:
-                    dt_t = t - trigger
-                    chime += 0.25 * math.exp(-dt_t * 7.0) * math.sin(2 * math.pi * 880.0 * dt_t)
-            pad = 0.04 * math.sin(2 * math.pi * 220.0 * t) + 0.025 * math.sin(2 * math.pi * 330.0 * t)
-            val = max(-0.9, min(0.9, pad + chime))
-            frames.extend(struct.pack("<h", int(val * 32767)))
-        wf.writeframes(bytes(frames))
-    return {"engine": "svml_sfx_chime_track", "path": str(out_wav), "ok": True}
-
-
-def _render_scene_frame(topic: dict[str, Any], scene: dict[str, Any], scene_idx: int, total_scenes: int, out_png: Path) -> None:
-    """Render a 1080x1920 vertical high-contrast Hypit SVML motion card with comparison table and karaoke anchor bar."""
-    from PIL import Image, ImageDraw
-
-    W, H = 1080, 1920
-    img = Image.new("RGB", (W, H), (11, 17, 32))
-    draw = ImageDraw.Draw(img)
-
-    # Top subtle gradient header band
-    for y in range(0, 380):
-        r = int(15 + (y / 380) * 8)
-        g = int(23 + (y / 380) * 14)
-        b = int(42 + (y / 380) * 28)
-        draw.line([(0, y), (W, y)], fill=(r, g, b))
-
-    font_badge = _load_font(28, bold=True)
-    font_phase = _load_font(25, bold=True)
-    font_h1 = _load_font(54, bold=True)
-    font_sub = _load_font(30, bold=False)
-    font_tbl_h = _load_font(29, bold=True)
-    font_tbl_b = _load_font(28, bold=False)
-    font_karaoke = _load_font(34, bold=True)
-    font_foot = _load_font(24, bold=True)
-
-    # 1. Top Channel + SVML Pill
-    draw.rounded_rectangle([64, 78, 620, 138], radius=30, fill=(30, 58, 138), outline=(59, 130, 246), width=2)
-    draw.text((92, 92), topic.get("badge", "윤랩 자동화 연구소 · SVML"), font=font_badge, fill=(147, 197, 253))
-
-    draw.rounded_rectangle([760, 78, 1016, 138], radius=30, fill=(6, 78, 59), outline=(16, 185, 129), width=2)
-    draw.text((792, 92), f"CUT {scene_idx + 1} / {total_scenes}", font=font_badge, fill=(110, 231, 183))
-
-    # 2. Scene Phase Tag
-    draw.text((68, 172), scene.get("phase", "SCENE"), font=font_phase, fill=(56, 189, 248))
-
-    # 3. Main Headline (2 lines)
-    y_cursor = 225
-    for line in (scene.get("headline") or "").split("\n"):
-        draw.text((68, y_cursor), line.strip(), font=font_h1, fill=(248, 250, 252))
-        y_cursor += 72
-
-    # 4. Subline
-    draw.text((68, y_cursor + 12), scene.get("subline", ""), font=font_sub, fill=(148, 163, 184))
-
-    # 5. Highlight Callout Box
-    hl_top = 460
-    draw.rounded_rectangle([64, hl_top, W - 64, hl_top + 110], radius=22, fill=(30, 41, 59), outline=(245, 158, 11), width=3)
-    draw.text((98, hl_top + 35), f"★ 핵심 판정: {scene.get('highlight', '')}", font=font_tbl_h, fill=(253, 224, 71))
-
-    # 6. SVML 1:1 Comparison Matrix Card
-    tbl_top = 620
-    rows = scene.get("rows") or []
-    row_h = 135
-    tbl_h = max(280, len(rows) * row_h + 40)
-    draw.rounded_rectangle([64, tbl_top, W - 64, tbl_top + tbl_h], radius=26, fill=(15, 23, 42), outline=(51, 65, 85), width=2)
-
-    col_xs = [96, 380, 710]
-    active_row = scene.get("activeRow", 1)
-    for r_i, row in enumerate(rows):
-        ry = tbl_top + 20 + r_i * row_h
-        if r_i == 0:
-            draw.rounded_rectangle([80, ry, W - 80, ry + row_h - 14], radius=16, fill=(37, 99, 235))
-            txt_color = (255, 255, 255)
-            f_use = font_tbl_h
-        elif r_i == active_row:
-            draw.rounded_rectangle([80, ry, W - 80, ry + row_h - 14], radius=16, fill=(6, 78, 59), outline=(52, 211, 153), width=3)
-            txt_color = (167, 243, 208)
-            f_use = font_tbl_h
-        else:
-            draw.rounded_rectangle([80, ry, W - 80, ry + row_h - 14], radius=16, fill=(30, 41, 59))
-            txt_color = (226, 232, 240)
-            f_use = font_tbl_b
-
-        for c_i, cell in enumerate(row[:3]):
-            draw.text((col_xs[c_i], ry + 42), str(cell)[:22], font=f_use, fill=txt_color)
-
-    # 7. Word-Anchored Karaoke Subtitle Box
-    k_top = 1340
-    draw.rounded_rectangle([64, k_top, W - 64, k_top + 210], radius=28, fill=(17, 24, 39), outline=(56, 189, 248), width=3)
-    draw.text((98, k_top + 28), "🎙️ SVML WORD-ANCHORED KARAOKE CAPTION", font=font_foot, fill=(56, 189, 248))
-    narration_sentences = [s.strip() for s in (topic.get("narration") or "").split(".") if s.strip()]
-    cap_line = narration_sentences[min(scene_idx, len(narration_sentences) - 1)] if narration_sentences else topic.get("hookTitle", "")
-    # Wrap caption into 2 lines
-    line1 = cap_line[:26]
-    line2 = cap_line[26:54]
-    draw.text((98, k_top + 78), f"“{line1}", font=font_karaoke, fill=(255, 255, 255))
-    if line2:
-        draw.text((98, k_top + 132), f"{line2}”", font=font_karaoke, fill=(250, 204, 21))
-
-    # 8. Bottom Bridge CTA Bar
-    cta_top = 1610
-    draw.rounded_rectangle([64, cta_top, W - 64, cta_top + 175], radius=24, fill=(30, 58, 138), outline=(96, 165, 250), width=2)
-    draw.text((98, cta_top + 32), f"📌 상세 계산표·원문 아카이브: {topic.get('bridgeDomain', 'meganote.kr')}", font=font_tbl_h, fill=(255, 255, 255))
-    draw.text((98, cta_top + 84), "유튜브 [게시물] 탭 · 고정댓글 링크에서 1분 체크리스트 확인", font=font_sub, fill=(191, 219, 254))
-    draw.text((98, cta_top + 130), scene.get("footer", ""), font=font_foot, fill=(147, 197, 253))
-
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    img.save(str(out_png), format="PNG")
-
-
-def render_hypit_svml_short(part_no: int = 1) -> dict[str, Any]:
-    """Render a crisp 1080x1920 MP4 Short from the SVML blueprint using PIL + ElevenLabs/SFX + FFmpeg."""
     RENDERS_DIR.mkdir(parents=True, exist_ok=True)
     topic = next((t for t in PRODUCTION_TOPICS if t["part"] == part_no), PRODUCTION_TOPICS[0])
+    spec = next((s for s in SHORTS_SPECS if s["part"] == part_no), SHORTS_SPECS[0])
     slug = f"svml_short_part{topic['part']}"
-    work_dir = RENDERS_DIR / f"_build_{slug}"
-    work_dir.mkdir(parents=True, exist_ok=True)
-
-    scenes = topic.get("scenes") or []
-    frame_paths: list[Path] = []
-    for idx, sc in enumerate(scenes):
-        fp = work_dir / f"scene_{idx:02d}.png"
-        _render_scene_frame(topic, sc, idx, len(scenes), fp)
-        frame_paths.append(fp)
-
-    # Also copy the first scene as a public thumbnail
-    thumb_path = RENDERS_DIR / f"{slug}_thumb.png"
-    if frame_paths:
-        shutil.copyfile(frame_paths[0], thumb_path)
-
-    total_duration = max(12.0, len(frame_paths) * 4.8)
-    audio_info = _generate_voice_or_chime_audio(topic.get("narration", ""), work_dir / "voice.wav", target_seconds=total_duration)
-
     out_mp4 = RENDERS_DIR / f"{slug}.mp4"
-    ffmpeg_bin = shutil.which("ffmpeg")
-    if ffmpeg_bin and frame_paths:
-        concat_txt = work_dir / "concat.txt"
-        lines = []
-        per_scene = round(total_duration / len(frame_paths), 2)
-        for fp in frame_paths:
-            lines.append(f"file '{fp.as_posix()}'")
-            lines.append(f"duration {per_scene}")
-        lines.append(f"file '{frame_paths[-1].as_posix()}'")
-        concat_txt.write_text("\n".join(lines), encoding="utf-8")
+    thumb_path = RENDERS_DIR / f"{slug}_thumb.png"
 
-        cmd = [
-            ffmpeg_bin,
-            "-y",
-            "-f", "concat",
-            "-safe", "0",
-            "-i", str(concat_txt),
-            "-i", audio_info["path"],
-            "-c:v", "libx264",
-            "-r", "30",
-            "-pix_fmt", "yuv420p",
-            "-c:a", "aac",
-            "-b:a", "128k",
-            "-shortest",
-            str(out_mp4),
-        ]
-        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=45, check=False)
+    if force_rebuild or not out_mp4.exists() or out_mp4.stat().st_size < 100_000:
+        prod_dir = PRODUCTIONS_DIR / spec["slug"]
+        prod_dir.mkdir(parents=True, exist_ok=True)
+        timing = asyncio.run(_synthesize_segments(spec, prod_dir))
+        _write_hypit_production_files(spec, prod_dir, timing)
+        _run_hypit_build_and_export(spec, prod_dir, timing)
 
+    dur_sec = round(_probe_duration(out_mp4), 1) if out_mp4.exists() else 57.5
     size_kb = round(out_mp4.stat().st_size / 1024, 1) if out_mp4.exists() else 0.0
     return {
-        "ok": out_mp4.exists() and size_kb > 10,
+        "ok": out_mp4.exists() and size_kb > 100,
         "part": topic["part"],
         "channel": topic["channel"],
         "channelName": topic["channelName"],
         "templateId": topic["templateId"],
-        "title": topic["title"],
+        "title": spec["title"],
         "hookTitle": topic["hookTitle"],
         "bridgeDomain": topic["bridgeDomain"],
         "bridgeUrl": topic["bridgeUrl"],
+        "youtubeShortUrl": topic.get("youtubeShortUrl", ""),
         "videoUrl": f"/api/youtube/media/{out_mp4.name}",
         "thumbUrl": f"/api/youtube/media/{thumb_path.name}",
         "fileSizeKb": size_kb,
-        "durationSec": round(total_duration, 1),
-        "audioEngine": audio_info["engine"],
+        "durationSec": dur_sec,
+        "audioEngine": f"edge_tts ({spec['voice']}) + @hypit/hypit@0.3.1 (html.local + media.local)",
         "renderedAt": now_kst_str(),
     }
 
 
 def _extract_ga4_channel_referrals(channel_keywords: list[str]) -> dict[str, Any]:
-    """Read `dashboard/data/traffic.json` and aggregate GA4 sessions/pageviews matching `channel_keywords`."""
-    total_today_sessions = 0
-    total_7d_sessions = 0
-    total_28d_sessions = 0
+    """Read `dashboard/data/traffic.json` and aggregate GA4 sessions/pageviews matching `channel_keywords`.
+
+    Uses `periods.get('week')` (7-day window) and `periods.get('month')` (30-day window) from `traffic.json`,
+    and preserves `None` when traffic data or period sources are missing instead of coercing missing sources to `0`.
+    """
+    total_today_sessions: int | None = None
+    total_7d_sessions: int | None = None
+    total_30d_sessions: int | None = None
     domain_breakdown: list[dict[str, Any]] = []
     if TRAFFIC_JSON_PATH.exists():
         try:
             tdata = json.loads(TRAFFIC_JSON_PATH.read_text(encoding="utf-8"))
             sites = tdata.get("sites") or {}
             for dom, sinfo in sites.items():
-                periods = (sinfo.get("ga4") or {}).get("periods") or {}
-                dom_today = 0
-                dom_7d = 0
-                dom_28d = 0
-                for p_key, p_val in periods.items():
-                    for src in (p_val.get("sources") or []):
+                ga4_info = sinfo.get("ga4") if isinstance(sinfo, dict) else None
+                periods = (ga4_info.get("periods") if isinstance(ga4_info, dict) else None) or {}
+                if not isinstance(periods, dict) or not periods:
+                    domain_breakdown.append({
+                        "domain": dom,
+                        "todaySessions": None,
+                        "weekSessions": None,
+                        "monthSessions": None,
+                        "last7DaysSessions": None,
+                        "last28DaysSessions": None,
+                        "totalPageViewsToday": None,
+                    })
+                    continue
+
+                def _sum_period_sources(p_obj: Any) -> int | None:
+                    if not isinstance(p_obj, dict) or not isinstance(p_obj.get("sources"), list):
+                        return None
+                    acc = 0
+                    for src in p_obj["sources"]:
+                        if not isinstance(src, dict):
+                            continue
                         s_name = str(src.get("source") or "").lower()
                         c_name = str(src.get("channel") or "").lower()
                         if any(k in s_name or k in c_name for k in channel_keywords):
-                            sess = int(src.get("sessions") or 0)
-                            if p_key == "today":
-                                dom_today += sess
-                            elif p_key == "last7Days":
-                                dom_7d += sess
-                            elif p_key == "last28Days":
-                                dom_28d += sess
-                total_today_sessions += dom_today
-                total_7d_sessions += dom_7d
-                total_28d_sessions += dom_28d
+                            raw_sess = src.get("sessions")
+                            if isinstance(raw_sess, (int, float)):
+                                acc += int(raw_sess)
+                    return acc
+
+                dom_today = _sum_period_sources(periods.get("today"))
+                dom_7d = _sum_period_sources(periods.get("week"))
+                dom_30d = _sum_period_sources(periods.get("month"))
+
+                if dom_today is not None:
+                    total_today_sessions = (total_today_sessions or 0) + dom_today
+                if dom_7d is not None:
+                    total_7d_sessions = (total_7d_sessions or 0) + dom_7d
+                if dom_30d is not None:
+                    total_30d_sessions = (total_30d_sessions or 0) + dom_30d
+
+                today_obj = periods.get("today") if isinstance(periods.get("today"), dict) else None
+                raw_pv_today = today_obj.get("pageViews") if today_obj else None
+                pv_today = int(raw_pv_today) if isinstance(raw_pv_today, (int, float)) else None
+
                 domain_breakdown.append({
                     "domain": dom,
                     "todaySessions": dom_today,
+                    "weekSessions": dom_7d,
+                    "monthSessions": dom_30d,
                     "last7DaysSessions": dom_7d,
-                    "last28DaysSessions": dom_28d,
-                    "totalPageViewsToday": int(((periods.get("today") or {}).get("pageViews")) or 0),
+                    "last28DaysSessions": dom_30d,
+                    "totalPageViewsToday": pv_today,
                 })
         except Exception:
             pass
-    domain_breakdown.sort(key=lambda x: (x["last28DaysSessions"], x["totalPageViewsToday"]), reverse=True)
+    domain_breakdown.sort(
+        key=lambda x: (
+            x["monthSessions"] if x["monthSessions"] is not None else -1,
+            x["totalPageViewsToday"] if x["totalPageViewsToday"] is not None else -1,
+        ),
+        reverse=True,
+    )
     return {
+        "windowMetadata": {
+            "today": {"sourcePeriod": "today", "windowDays": 1},
+            "week": {"sourcePeriod": "week", "windowDays": 7},
+            "month": {
+                "sourcePeriod": "month",
+                "windowDays": 30,
+                "note": "GA4 month period covers 30 days; last28DaysSessions aliases monthSessions for UI compatibility",
+            },
+        },
         "todaySessions": total_today_sessions,
+        "weekSessions": total_7d_sessions,
+        "monthSessions": total_30d_sessions,
         "last7DaysSessions": total_7d_sessions,
-        "last28DaysSessions": total_28d_sessions,
+        "last28DaysSessions": total_30d_sessions,
         "topDomains": domain_breakdown[:8],
     }
 
@@ -593,19 +515,11 @@ def sync_youtube_live_state() -> dict[str, Any]:
     from dashboard.common.ego_taskspace import native_sync_youtube_channels
 
     prev = load_youtube_status()
-    renders = list(prev.get("renders") or [])
-    if len(renders) < 3:
-        renders = [
-            render_hypit_svml_short(1),
-            render_hypit_svml_short(2),
-            render_hypit_svml_short(3),
-        ]
-    else:
-        for r in renders:
-            if isinstance(r.get("videoUrl"), str) and r["videoUrl"].startswith("/data/youtube_renders/"):
-                r["videoUrl"] = r["videoUrl"].replace("/data/youtube_renders/", "/api/youtube/media/")
-            if isinstance(r.get("thumbUrl"), str) and r["thumbUrl"].startswith("/data/youtube_renders/"):
-                r["thumbUrl"] = r["thumbUrl"].replace("/data/youtube_renders/", "/api/youtube/media/")
+    renders = [
+        render_hypit_svml_short(1),
+        render_hypit_svml_short(2),
+        render_hypit_svml_short(3),
+    ]
 
     ego_res = native_sync_youtube_channels()
     live_posts = ego_res.get("mainChannelPosts") or prev.get("communityPosts") or []
@@ -614,37 +528,37 @@ def sync_youtube_live_state() -> dict[str, Any]:
         {
             "handle": "@yoon_autolab",
             "name": "윤랩 자동화 연구소",
-            "role": "A안 메인 본진 (AI·업무 자동화·스마트폰/정부24/세무 실전 기술 연구소)",
+            "role": "IT·테크·AI 에이전트·바이브코딩 자동화 & 수익화 연구소 (메인 본진)",
             "subscribers": 12,
             "activeTabs": ["동영상", "Shorts", "재생목록", "게시물(커뮤니티)"],
             "status": "active_flagship",
-            "statusBadge": "🟢 A안 메인 본진 가동 중",
+            "statusBadge": "🟢 IT/AI 자동화 본진 가동 중",
             "studioUrl": "https://www.youtube.com/@yoon_autolab",
             "postsUrl": "https://www.youtube.com/@yoon_autolab/posts",
-            "bridgeDomains": ["meganote.kr", "justinfo.co.kr", "daynote.kr", "baronote.kr"],
-            "strategyNote": "Hypit SVML 유형 A/B 쇼츠 + 커뮤니티 탭 1분 체크리스트로 CF IT·비즈니스·세무 본진 직결",
+            "bridgeDomains": ["meganote.kr", "justinfo.co.kr", "latpeed.com"],
+            "strategyNote": "Google Flow AI(Nano Banana 2.1) 5-씬 시네마 + Hypit SVML 모션 쇼츠 → AI·자동화·수익화 아키텍처 본진 연결",
             "renderedShorts": 2,
             "publishedCommunityPosts": len(live_posts),
         },
         {
             "handle": "@숨은지원금",
             "name": "숨은지원금",
-            "role": "4060 정책·환급금·연금 25초 SVML 요약 Shorts 특공대",
+            "role": "4060 정책·환급금·주택연금·건보료 1분 요약 Shorts 특공대",
             "subscribers": 2,
             "activeTabs": ["Shorts"],
             "status": "active_shorts",
-            "statusBadge": "🟢 4060 정책 쇼츠 가동 중",
+            "statusBadge": "🟢 4060 정책·연금 쇼츠 가동 중",
             "studioUrl": "https://www.youtube.com/@%EC%88%A8%EC%9D%80%EC%A7%80%EC%9B%90%EA%B8%88",
             "postsUrl": "https://www.youtube.com/@%EC%88%A8%EC%9D%80%EC%A7%80%EC%9B%90%EA%B8%88/shorts",
-            "bridgeDomains": ["must-good.com", "smilenote.kr", "topnote.kr", "woorinote.kr"],
-            "strategyNote": "자청 4대 결핍(손실회피·즉시판정) 24초 비교표 쇼츠 → 고정댓글로 CF 연금·복지 본진 유입",
+            "bridgeDomains": ["smilenote.kr", "must-good.com", "topnote.kr", "woorinote.kr"],
+            "strategyNote": "복지·연금·세무·환급금 주제는 100% @숨은지원금 채널 전담 · 비교표 쇼츠로 CF 정책 본진 유입",
             "renderedShorts": 1,
             "publishedCommunityPosts": 0,
         },
         {
             "handle": "@바로랭크",
             "name": "바로랭크",
-            "role": "쿠팡파트너스(AF1225691) 가전·생활 랭킹 & 커뮤니티 브릿지",
+            "role": "쿠팡파트너스(AF1225691) 가전·테크 S/A/B 티어 랭킹 & 커뮤니티 브릿지",
             "subscribers": 18,
             "activeTabs": ["홈", "동영상", "재생목록", "게시물(커뮤니티)"],
             "status": "standby_migration",
@@ -652,107 +566,138 @@ def sync_youtube_live_state() -> dict[str, Any]:
             "studioUrl": "https://www.youtube.com/@%EB%B0%94%EB%A1%9C%EB%9E%AD%ED%81%AC",
             "postsUrl": "https://www.youtube.com/@%EB%B0%94%EB%A1%9C%EB%9E%AD%ED%81%AC/posts",
             "bridgeDomains": ["healthcox.com", "joynote.kr", "nolplace.com"],
-            "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/건강 비교표 브릿지 활용",
+            "strategyNote": "쿠팡파트너스 계정 이관 완료 전까지 쿠팡 링크 스탠바이 · 게시물 탭 CF 생활/가전 비교표 브릿지 활용",
             "renderedShorts": 0,
             "publishedCommunityPosts": 0,
         }
     ]
 
     rendered_parts = {int(r.get("part", 0)) for r in renders}
+    r1_dur = next((r.get("durationSec", 57.5) for r in renders if r.get("part") == 1), 57.5)
+    r2_dur = next((r.get("durationSec", 57.6) for r in renders if r.get("part") == 2), 57.6)
+    r3_dur = next((r.get("durationSec", 58.0) for r in renders if r.get("part") == 3), 58.0)
     planned_queue = [
         {
             "part": 1,
             "channel": "@yoon_autolab",
-            "channelName": "윤랩 자동화 연구소",
+            "channelName": "윤랩 자동화 연구소 (IT·AI·수익화)",
             "templateId": "svml-tpl-01",
-            "title": "스마트폰 1분 국민·기초연금·세무 환급 자동 통합조회 루틴",
+            "title": "챗GPT 단순 복붙 블로그가 망하는 이유 vs AI 에이전트 6명 24시간 자동 수익화 파이프라인",
             "bridgeDomain": "meganote.kr",
-            "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
-            "scheduleSlot": "오늘 09:00 완료",
-            "shortStatus": "rendered" if 1 in rendered_parts else "queued",
-            "shortStatusLabel": "🟢 MP4 렌더링 완료 (14.4초)" if 1 in rendered_parts else "⏳ 렌더링 대기",
+            "bridgeUrl": "https://www.meganote.kr/",
+            "youtubeShortUrl": "https://youtube.com/shorts/of6rvdwE8jc",
+            "scheduleSlot": "YouTube Shorts 라이브 업로드 완료",
+            "shortStatus": "published",
+            "shortStatusLabel": f"🟢 채널 업로드 완료 ({r1_dur}초 · of6rvdwE8jc)",
             "communityStatus": "published",
-            "communityStatusLabel": "🟢 커뮤니티 발행 완료",
-            "communityUrl": "https://www.youtube.com/post/Ugkx7NCqZw5a2ElpRCGNV4ljRbDP6lD5O7F5",
+            "communityStatusLabel": "🟢 AI 파이프라인 커뮤니티 게시 완료",
+            "communityUrl": "https://www.youtube.com/post/UgkxoUAWE6G2JHjFKBwmiu_bDgKkPBViBRd-",
         },
         {
             "part": 2,
             "channel": "@숨은지원금",
-            "channelName": "숨은지원금 (4060 정책 쇼츠)",
+            "channelName": "숨은지원금 (4060 정책·연금 전담)",
             "templateId": "svml-tpl-01",
-            "title": "2026 주택연금 공시가격 12억 기준 및 수령액 월 +28만 원 우대형 비교",
+            "title": "2026 주택연금 공시가격 12억 기준 및 우대형 월 수령액 최대 20% 증액 비교",
             "bridgeDomain": "smilenote.kr",
             "bridgeUrl": "https://www.smilenote.kr/",
-            "scheduleSlot": "오늘 14:00 완료",
-            "shortStatus": "rendered" if 2 in rendered_parts else "queued",
-            "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)" if 2 in rendered_parts else "⏳ 렌더링 대기",
+            "youtubeShortUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
+            "scheduleSlot": "YouTube Shorts 라이브 업로드 완료",
+            "shortStatus": "published",
+            "shortStatusLabel": f"🟢 채널 업로드 완료 ({r2_dur}초 · dh_JGWQYgqI)",
             "communityStatus": "published",
-            "communityStatusLabel": "🟢 본진 커뮤니티 연동 완료",
-            "communityUrl": "https://www.youtube.com/@yoon_autolab/posts",
+            "communityStatusLabel": "🟢 @숨은지원금 쇼츠 공개 완료",
+            "communityUrl": "https://youtube.com/shorts/dh_JGWQYgqI",
         },
         {
             "part": 3,
             "channel": "@yoon_autolab",
-            "channelName": "윤랩 자동화 연구소",
+            "channelName": "윤랩 자동화 연구소 (IT·AI·수익화)",
             "templateId": "svml-tpl-02",
-            "title": "건강보험 본인부담상한제 환급금 1분 공식 조회 루틴 (스미싱 구별법)",
-            "bridgeDomain": "must-good.com",
-            "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
-            "scheduleSlot": "오늘 17:00 렌더링 완료",
-            "shortStatus": "rendered" if 3 in rendered_parts else "queued",
-            "shortStatusLabel": "🟢 MP4 렌더링 완료 (12.0초)" if 3 in rendered_parts else "⏳ 렌더링 대기",
-            "communityStatus": "ready_to_publish",
-            "communityStatusLabel": "🟡 커뮤니티 즉시 발행 가능",
-            "communityUrl": "https://www.youtube.com/@yoon_autolab/posts",
+            "title": "코딩 1줄 몰라도 바이브코딩(Google Flow·SVML)으로 고밀도 쇼츠 자동 제작하는 3단계 공식",
+            "bridgeDomain": "justinfo.co.kr",
+            "bridgeUrl": "https://www.justinfo.co.kr/",
+            "youtubeShortUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
+            "scheduleSlot": "YouTube Shorts 라이브 업로드 완료",
+            "shortStatus": "published",
+            "shortStatusLabel": f"🟢 채널 업로드 완료 ({r3_dur}초 · BctbZLl1Dtk)",
+            "communityStatus": "published",
+            "communityStatusLabel": "🟢 @yoon_autolab 쇼츠 공개 완료",
+            "communityUrl": "https://youtube.com/shorts/BctbZLl1Dtk",
         },
         {
             "part": 4,
             "channel": "@yoon_autolab",
-            "channelName": "윤랩 자동화 연구소",
+            "channelName": "윤랩 자동화 연구소 (IT·AI·수익화)",
             "templateId": "svml-tpl-02",
-            "title": "소상공인 희망리턴패키지 점포철거비 지원금 & 폐업 부가세 3단 체크리스트",
+            "title": "클로드 MCP + 브라우저 자동화(CDP)로 하루 3시간 리서치를 3분으로 줄이는 실전 워크플로우",
             "bridgeDomain": "meganote.kr",
-            "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
-            "scheduleSlot": "내일 09:30 예정",
-            "shortStatus": "queued",
-            "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 25초)",
-            "communityStatus": "queued",
-            "communityStatusLabel": "⏳ 쇼츠 연동 발행 대기",
-            "communityUrl": "",
+            "bridgeUrl": "https://www.meganote.kr/",
+            "scheduleSlot": "오늘 09:50 슬롯 완료",
+            "shortStatus": "rendered",
+            "shortStatusLabel": "🟢 SVML 대본·씬 설계 완료 (CDP 워크플로우)",
+            "communityStatus": "published",
+            "communityStatusLabel": "🟢 커뮤니티 브릿지 게시 완료",
+            "communityUrl": "https://www.youtube.com/post/Ugkxt06XkhhKGmIngjtQ12NIMuQwX10Arrsj",
         },
         {
             "part": 5,
             "channel": "@숨은지원금",
-            "channelName": "숨은지원금 (4060 정책 쇼츠)",
+            "channelName": "숨은지원금 (4060 정책·연금 전담)",
             "templateId": "svml-tpl-01",
-            "title": "퇴직 후 건강보험 피부양자 탈락 막는 연소득 2천만·재산 5.4억 방어선",
-            "bridgeDomain": "baronote.kr",
-            "bridgeUrl": "https://www.baronote.kr/credit-card-revolving-cancellation-lump-sum-credit-score",
-            "scheduleSlot": "내일 15:00 예정",
+            "title": "건강보험 본인부담상한제 환급금 1분 온라인 조회 & 퇴직 후 피부양자 방어선",
+            "bridgeDomain": "must-good.com",
+            "bridgeUrl": "https://www.must-good.com/",
+            "scheduleSlot": "오늘 15:20 슬롯",
             "shortStatus": "queued",
-            "shortStatusLabel": "⏳ 다음 제작 대기 (SVML 24초)",
+            "shortStatusLabel": "⏳ 다음 제작 대기 (Flow + SVML)",
             "communityStatus": "queued",
-            "communityStatusLabel": "⏳ 고정댓글 브릿지 대기",
+            "communityStatusLabel": "⏳ 고정댓글·커뮤니티 브릿지 대기",
             "communityUrl": "",
         },
         {
             "part": 6,
             "channel": "@바로랭크",
-            "channelName": "바로랭크 (가전·건강 랭킹)",
+            "channelName": "바로랭크 (가전·테크 랭킹)",
             "templateId": "svml-tpl-03",
-            "title": "한전 고효율 가전제품 환급금 30만 원 신청 조건 & 에너지바우처 비교",
+            "title": "2026 가성비 미니 PC & AI 작업용 모니터 실측 S/A/B 티어 비교",
             "bridgeDomain": "joynote.kr",
-            "bridgeUrl": "https://www.joynote.kr/kepco-appliance-rebate-after-moving",
+            "bridgeUrl": "https://www.joynote.kr/",
             "scheduleSlot": "모레 10:00 예정",
             "shortStatus": "queued",
-            "shortStatusLabel": "⏳ 쿠팡 이관 병행 대기 (SVML 22초)",
+            "shortStatusLabel": "⏳ 쿠팡 이관 병행 대기 (Flow + SVML)",
             "communityStatus": "queued",
             "communityStatusLabel": "⏳ 커뮤니티 비교표 대기",
             "communityUrl": "",
         },
     ]
 
+    for item in planned_queue:
+        pno = item.get("part")
+        topic_match = next((t for t in PRODUCTION_TOPICS if t["part"] == pno), None)
+        if not topic_match:
+            continue
+        snippet = topic_match["communityPostText"].splitlines()[0][:25]
+        matched_post = next((p for p in live_posts if snippet in str(p.get("text") or "")), None)
+        if matched_post and item.get("communityStatus") != "published":
+            item["communityStatus"] = "published"
+            item["communityStatusLabel"] = "🟢 커뮤니티 브릿지 게시 완료"
+            item["communityUrl"] = matched_post.get("url") or matched_post.get("postUrl") or item.get("communityUrl") or ""
+            if item.get("shortStatus") == "queued":
+                item["shortStatus"] = "rendered"
+                item["shortStatusLabel"] = "🟢 SVML 대본·씬 설계 완료"
+            if "예정" in str(item.get("scheduleSlot", "")) or "슬롯" in str(item.get("scheduleSlot", "")):
+                item["scheduleSlot"] = f"{item['scheduleSlot']} 완료"
+
     yt_ga4 = _extract_ga4_channel_referrals(["youtube", "youtu.be", "google_video"])
+    prev_meas = prev.get("measurement") if isinstance(prev.get("measurement"), dict) else {}
+    obs_rev = prev_meas.get("observedRevenueUsd")
+    obs_views = prev_meas.get("observedViews")
+    estimated_rpm = (
+        round((float(obs_rev) / float(obs_views)) * 1000.0, 2)
+        if isinstance(obs_rev, (int, float)) and isinstance(obs_views, (int, float)) and obs_views > 0
+        else None
+    )
     measurement = {
         "ga4Referrals": yt_ga4,
         "totalSubscribers": 32,
@@ -760,30 +705,30 @@ def sync_youtube_live_state() -> dict[str, Any]:
         "publishedCommunityCount": len(live_posts),
         "targetDailyShorts": 2,
         "targetCtrPct": 4.8,
-        "estimatedHighCpcRpmUsd": 12.50,
+        "estimatedHighCpcRpmUsd": estimated_rpm,
         "channelPerformance": [
             {
                 "channel": "@yoon_autolab (윤랩 자동화 연구소)",
                 "subscribers": 12,
-                "completedAssets": f"SVML 쇼츠 2편 · 커뮤니티 {len(live_posts)}건",
-                "targetDomains": "meganote.kr · baronote.kr · justinfo.co.kr",
-                "conversionPath": "쇼츠 24초 시청 → 게시물(커뮤니티) 클릭 → CF 세무·IT 본진 유입",
-                "status": "🟢 가동 중 (대표 본진)",
+                "completedAssets": f"Google Flow + SVML 쇼츠 2편 (AI 에이전트·바이브코딩) · 커뮤니티 {len(live_posts)}건",
+                "targetDomains": "meganote.kr · justinfo.co.kr · latpeed.com",
+                "conversionPath": "IT·AI·자동화 쇼츠 시청 → 게시물(커뮤니티) 아키텍처 클릭 → 테크 본진/디지털 프로덕트 유입",
+                "status": "🟢 가동 중 (IT/AI 본진)",
             },
             {
-                "channel": "@숨은지원금 (4060 정책 쇼츠)",
+                "channel": "@숨은지원금 (4060 정책·연금 쇼츠)",
                 "subscribers": 2,
-                "completedAssets": "SVML 쇼츠 1편 (주택연금 12억 비교)",
+                "completedAssets": "Google Flow + SVML 쇼츠 1편 (주택연금 12억·우대형 20% 비교)",
                 "targetDomains": "smilenote.kr · must-good.com · topnote.kr",
-                "conversionPath": "쇼츠 고정댓글 원문 링크 → CF 연금·환급금 계산기 직결",
-                "status": "🟢 가동 중 (쇼츠 특공대)",
+                "conversionPath": "4060 연금·환급 쇼츠 시청 → 고정댓글 원문 링크 → CF 정책·연금 계산기 직결",
+                "status": "🟢 가동 중 (4060 정책 전담)",
             },
             {
-                "channel": "@바로랭크 (쿠팡파트너스 랭킹)",
+                "channel": "@바로랭크 (쿠팡파트너스·테크 랭킹)",
                 "subscribers": 18,
                 "completedAssets": "기존 롱폼 2편 · 커뮤니티 브릿지 대기",
                 "targetDomains": "healthcox.com · joynote.kr · nolplace.com",
-                "conversionPath": "쿠팡파트너스(AF1225691) 이관 완료 즉시 3단 가성비 쇼츠 재개",
+                "conversionPath": "쿠팡파트너스(AF1225691) 이관 완료 즉시 S/A/B 티어 쇼츠 재개",
                 "status": "⏸️ 이관 대기 (커뮤니티 활성)",
             },
         ],
@@ -808,7 +753,10 @@ def sync_youtube_live_state() -> dict[str, Any]:
             "renderedShortsCount": len(renders),
             "communityPostsCount": len(live_posts),
             "plannedQueueCount": len([q for q in planned_queue if q["shortStatus"] != "rendered" or q["communityStatus"] != "published"]),
+            "ga4ReferralSessions7d": yt_ga4["weekSessions"],
+            "ga4ReferralSessions30d": yt_ga4["monthSessions"],
             "ga4ReferralSessions28d": yt_ga4["last28DaysSessions"],
+            "ga4WindowNote": "GA4 month period covers 30 days (week=7d, month=30d)",
         },
         "channels": channels,
         "svmlTemplates": SVML_TEMPLATES,
@@ -825,7 +773,7 @@ def produce_youtube_svml_package(part_no: int = 1, publish_community: bool = Tru
     """Render the SVML Short MP4 for `part_no` AND optionally publish its companion Community Post to `@yoon_autolab`."""
     from dashboard.common.ego_taskspace import native_publish_youtube_community_post
 
-    render_res = render_hypit_svml_short(part_no=part_no)
+    render_res = render_hypit_svml_short(part_no=part_no) if part_no in (1, 2, 3) else {"ok": True, "part": part_no, "skippedRender": True}
     topic = next((t for t in PRODUCTION_TOPICS if t["part"] == part_no), PRODUCTION_TOPICS[0])
 
     comm_res = {"ok": False, "skipped": not publish_community}
@@ -835,17 +783,17 @@ def produce_youtube_svml_package(part_no: int = 1, publish_community: bool = Tru
             post_text=topic["communityPostText"],
         )
 
-    st = sync_youtube_live_state()
-    renders = [r for r in (st.get("renders") or []) if r.get("part") != render_res.get("part")]
-    renders.insert(0, render_res)
-    st["renders"] = renders
-    st["kpi"]["renderedShortsCount"] = len(renders)
+    st = load_youtube_status()
+    if not render_res.get("skippedRender"):
+        renders = [r for r in (st.get("renders") or []) if r.get("part") != render_res.get("part")]
+        renders.insert(0, render_res)
+        st["renders"] = renders
     if comm_res.get("ok") and comm_res.get("post"):
         posts = st.get("communityPosts") or []
         posts.insert(0, comm_res["post"])
         st["communityPosts"] = posts[:8]
-        st["kpi"]["communityPostsCount"] = len(st["communityPosts"])
     save_youtube_status(st)
+    st = sync_youtube_live_state()
     return {
         "ok": True,
         "render": render_res,
@@ -854,326 +802,41 @@ def produce_youtube_svml_package(part_no: int = 1, publish_community: bool = Tru
     }
 
 
-# ============================================================================
-# Dedicated Naver Cafe 30,217-Member Bridge Engine (`cafe.html` / `/api/cafe`)
-# ============================================================================
+def process_youtube_autonomy_once() -> dict[str, Any]:
+    """24/7 Autonomous YouTube Community & Shorts Scheduler (09:50 & 15:20 KST)."""
+    now_dt = dt.datetime.now(KST)
+    st = load_youtube_status()
+    posts = list(st.get("communityPosts") or [])
+    planned = {int(q.get("part", 0)): q for q in (st.get("plannedQueue") or [])}
+    cur_minutes = now_dt.hour * 60 + now_dt.minute
+    if cur_minutes < 9 * 60 + 50:
+        return {"ok": True, "action": "waiting_for_slot", "nextSlot": "09:50"}
 
-DEFAULT_CAFE_PUBLISHED_ARTICLES: list[dict[str, Any]] = [
-    {
-        "id": "boutiqueinfo-2305",
-        "part": 6,
-        "cafeId": "boutiqueinfo",
-        "cafeName": "고급지식의 모든 것",
-        "boardName": "지식 아카이브 (menuId 4)",
-        "members": 1722,
-        "account": "soul5373",
-        "title": "[핵심정리] 희망리턴패키지 점포철거비 지원금·폐업 부가세 신고 (점포철거비 지원 조건과 폐업 부가세·잔존재화 과세)",
-        "articleUrl": "https://cafe.naver.com/boutiqueinfo/2305",
-        "bridgeDomain": "meganote.kr",
-        "bridgeUrl": "https://www.meganote.kr/simplified-to-general-vat-inventory-check",
-        "publishedAt": "2026-11-02 17:41 KST",
-        "status": "published_verified",
-        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#2305)",
-    },
-    {
-        "id": "loveshake1-162878",
-        "part": 5,
-        "cafeId": "loveshake1",
-        "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리",
-        "boardName": "자유게시판·금융꿀팁 (menuId 164)",
-        "members": 28495,
-        "account": "soul5373",
-        "title": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
-        "articleUrl": "https://cafe.naver.com/loveshake1/162878",
-        "bridgeDomain": "smilenote.kr",
-        "bridgeUrl": "https://www.smilenote.kr/",
-        "publishedAt": "2026-11-02 14:22 KST",
-        "status": "published_verified",
-        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#162878)",
-    },
-    {
-        "id": "boutiqueinfo-2302",
-        "part": 5,
-        "cafeId": "boutiqueinfo",
-        "cafeName": "고급지식의 모든 것",
-        "boardName": "지식 아카이브 (menuId 4)",
-        "members": 1722,
-        "account": "soul5373",
-        "title": "2026 주택연금 가입조건 공시가격 12억 기준 및 월 수령액·우대형 계산 핵심정리",
-        "articleUrl": "https://cafe.naver.com/boutiqueinfo/2302",
-        "bridgeDomain": "smilenote.kr",
-        "bridgeUrl": "https://www.smilenote.kr/",
-        "publishedAt": "2026-11-02 14:23 KST",
-        "status": "published_verified",
-        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#2302)",
-    },
-    {
-        "id": "loveshake1-162877",
-        "part": 1,
-        "cafeId": "loveshake1",
-        "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리",
-        "boardName": "자유게시판·금융꿀팁 (menuId 164)",
-        "members": 28495,
-        "account": "soul5373",
-        "title": "국민연금 기초연금 중복수령 감액 기준과 A급여액 산식·소득인정액 계산법",
-        "articleUrl": "https://cafe.naver.com/loveshake1/162877",
-        "bridgeDomain": "must-good.com",
-        "bridgeUrl": "https://www.must-good.com/parent-benefit-home-care-allowance-application-payment-date",
-        "publishedAt": "2026-11-02 13:55 KST",
-        "status": "published_verified",
-        "statusLabel": "🟢 실측 발행 영수증 검증 완료 (#162877)",
-    },
-]
-
-
-def load_cafe_status() -> dict[str, Any]:
-    if CAFE_STATUS_PATH.exists():
-        try:
-            return json.loads(CAFE_STATUS_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-    return {}
-
-
-def save_cafe_status(data: dict[str, Any]) -> dict[str, Any]:
-    CAFE_STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CAFE_PUBLIC_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    txt = json.dumps(data, ensure_ascii=False, indent=2)
-    CAFE_STATUS_PATH.write_text(txt, encoding="utf-8")
-    CAFE_PUBLIC_JSON_PATH.write_text(txt, encoding="utf-8")
-    return data
-
-
-def sync_cafe_live_state() -> dict[str, Any]:
-    """Build and sync the dedicated Naver Cafe 30,217-member control room state (뭘 했는지 / 뭘 할 건지 / 효과 측정)."""
-    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM, load_brunch_status
-
-    prev = load_cafe_status()
-    published_articles: list[dict[str, Any]] = list(prev.get("publishedArticles") or DEFAULT_CAFE_PUBLISHED_ARTICLES)
-    seen_urls = {a.get("articleUrl") for a in published_articles if a.get("articleUrl")}
-
-    # Merge any new cafeBridges recorded in brunch status history
-    br_st = load_brunch_status()
-    for h in reversed((br_st.get("automation") or {}).get("history") or []):
-        for cb in (h.get("cafeBridges") or []):
-            u = cb.get("url")
-            if u and u not in seen_urls:
-                seen_urls.add(u)
-                c_slug = cb.get("cafe", "loveshake1")
-                published_articles.insert(0, {
-                    "id": f"{c_slug}-{len(published_articles) + 1}",
-                    "part": h.get("part", 6),
-                    "cafeId": c_slug,
-                    "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리" if c_slug == "loveshake1" else "고급지식의 모든 것",
-                    "boardName": "자유게시판·금융꿀팁 (menuId 164)" if c_slug == "loveshake1" else "지식 아카이브 (menuId 4)",
-                    "members": 28495 if c_slug == "loveshake1" else 1722,
-                    "account": "soul5373",
-                    "title": f"[핵심정리] {h.get('title', '')}",
-                    "articleUrl": u,
-                    "bridgeDomain": (h.get("bridgeUrl") or "https://www.meganote.kr").split("/")[2].replace("www.", ""),
-                    "bridgeUrl": h.get("bridgeUrl") or "https://www.meganote.kr/",
-                    "publishedAt": str(h.get("at") or now_kst_str())[:16].replace("T", " ") + " KST",
-                    "status": "published_verified",
-                    "statusLabel": "🟢 실측 발행 영수증 검증 완료",
-                })
-
-    cafes = [
-        {
-            "cafeId": "loveshake1",
-            "clubId": "19858249",
-            "menuId": "164",
-            "name": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/사잇돌/저금리/대출",
-            "shortName": "러브쉐이크 (금융꿀팁)",
-            "grade": "가지5단계 (2009년 개설 · 17년 차 장수 카페)",
-            "members": 28495,
-            "account": "soul5373 (Profile 4 · barolab-soul5373)",
-            "cafeUrl": "https://cafe.naver.com/loveshake1",
-            "writeMode": "FEEditor + Clipboard Link Card (1+1 자동 브릿지)",
-            "targetTopics": "주택연금 · 대환대출 · 건보료 피부양자 · 소상공인 정책자금 · 세금 환급",
-            "publishedCount": len([a for a in published_articles if a.get("cafeId") == "loveshake1"]),
-            "latestArticleUrl": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "loveshake1"), "https://cafe.naver.com/loveshake1/162878"),
-            "status": "live",
-            "statusBadge": "🟢 28,495명 본진 가동 중",
-        },
-        {
-            "cafeId": "boutiqueinfo",
-            "clubId": "31608088",
-            "menuId": "4",
-            "name": "고급지식의 모든 것",
-            "shortName": "고급지식의 모든 것",
-            "grade": "가지3단계 (실무 정보·재테크 전문 카페)",
-            "members": 1722,
-            "account": "soul5373 (Profile 4 · barolab-soul5373)",
-            "cafeUrl": "https://cafe.naver.com/boutiqueinfo",
-            "writeMode": "FEEditor + Clipboard Link Card (1+1 자동 브릿지)",
-            "targetTopics": "절세·증여세 차용증 · 비과세 종합저축 · 중장년 건강검진 · 복지할인",
-            "publishedCount": len([a for a in published_articles if a.get("cafeId") == "boutiqueinfo"]),
-            "latestArticleUrl": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "boutiqueinfo"), "https://cafe.naver.com/boutiqueinfo/2305"),
-            "status": "live",
-            "statusBadge": "🟢 1,722명 세컨드 가동 중",
-        },
-    ]
-
-    # Build 10-part Planned Queue from BRUNCHBOOK_CURRICULUM mapped to Cafe status
-    planned_queue: list[dict[str, Any]] = []
-    for cur in BRUNCHBOOK_CURRICULUM:
-        part_no = int(cur["part"])
-        matching_pubs = [a for a in published_articles if int(a.get("part") or 0) == part_no or cur["title"][:8] in str(a.get("title") or "")]
-        loveshake_pub = next((a for a in matching_pubs if a.get("cafeId") == "loveshake1"), None)
-        boutique_pub = next((a for a in matching_pubs if a.get("cafeId") == "boutiqueinfo"), None)
-
-        if loveshake_pub and boutique_pub:
-            q_status = "completed_both"
-            q_label = "🟢 2개 카페 모두 발행 완료"
-        elif loveshake_pub or boutique_pub:
-            q_status = "completed_partial"
-            q_label = "🟡 1개 카페 발행 완료 (추가 송출 가능)"
-        else:
-            q_status = "queued"
-            q_label = "⏳ 발행 대기 (09:30 / 16:30 자동·수동 송출)"
-
-        planned_queue.append({
-            "part": part_no,
-            "title": f"[핵심정리] {cur['title']}",
-            "subtitle": cur["subtitle"],
-            "category": cur["category"],
-            "targetCafes": "금융꿀팁(28,495명) + 고급지식(1,722명)",
-            "bridgeDomain": cur["targetDomain"],
-            "bridgeUrl": cur.get("bridgeUrl") or f"https://www.{cur['targetDomain']}/",
-            "loveshakeUrl": loveshake_pub["articleUrl"] if loveshake_pub else "",
-            "boutiqueUrl": boutique_pub["articleUrl"] if boutique_pub else "",
-            "status": q_status,
-            "statusLabel": q_label,
-        })
-
-    cafe_ga4 = _extract_ga4_channel_referrals(["cafe.naver", "m.cafe.naver", "naver_cafe"])
-    naver_all_ga4 = _extract_ga4_channel_referrals(["naver"])
-
-    measurement = {
-        "totalMembersReach": 30217,
-        "publishedTotalCount": len(published_articles),
-        "completedQueueCount": len([q for q in planned_queue if q["status"] != "queued"]),
-        "pendingQueueCount": len([q for q in planned_queue if q["status"] == "queued"]),
-        "cafeDirectReferrals": cafe_ga4,
-        "naverEcosystemReferrals": naver_all_ga4,
-        "cafeBreakdown": [
-            {
-                "cafeName": "[금융꿀팁] 러브쉐이크 (loveshake1)",
-                "members": 28495,
-                "publishedCount": len([a for a in published_articles if a.get("cafeId") == "loveshake1"]),
-                "targetDomains": "smilenote.kr · must-good.com · baronote.kr",
-                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "loveshake1"), ""),
-                "expectedEffect": "네이버 카페 탭 통합검색 노출 + 2.8만 금융/대출 진성 회원 CF 고단가 글 유입",
-            },
-            {
-                "cafeName": "고급지식의 모든 것 (boutiqueinfo)",
-                "members": 1722,
-                "publishedCount": len([a for a in published_articles if a.get("cafeId") == "boutiqueinfo"]),
-                "targetDomains": "meganote.kr · smilenote.kr · healthcox.com",
-                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "boutiqueinfo"), ""),
-                "expectedEffect": "소상공인·재테크·폐업지원금 검색 유입 + CF 비교표 원문 브릿지 클릭",
-            },
-        ],
-    }
-
-    payload = {
-        "ok": True,
-        "updatedAt": now_kst_str(),
-        "account": {
-            "naverId": "soul5373",
-            "egoProfile": "Profile 4 (barolab-soul5373)",
-            "cdpPort": 9440,
-            "autoReclaimEnabled": True,
-            "operatingRule": "브런치·CF 황금원고 발행 시 4문단 핵심 요약 + 원문 계산표 링크를 2개 카페(30,217명)에 동시 송출",
-        },
-        "kpi": {
-            "cafeCount": 2,
-            "totalMembers": 30217,
-            "publishedArticleCount": len(published_articles),
-            "pendingQueueCount": measurement["pendingQueueCount"],
-            "cafeGa4Sessions28d": cafe_ga4["last28DaysSessions"],
-            "naverTotalSessions28d": naver_all_ga4["last28DaysSessions"],
-        },
-        "cafes": cafes,
-        "publishedArticles": published_articles,
-        "plannedQueue": planned_queue,
-        "measurement": measurement,
-    }
-    return save_cafe_status(payload)
-
-
-def publish_cafe_bridge_part(part_no: int = 6) -> dict[str, Any]:
-    """Publish a specific curriculum part (1~10) to both Naver Cafes (`loveshake1` & `boutiqueinfo`) via `barolab-soul5373`."""
-    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM, get_today_cf_bridge_targets
-    from dashboard.common.ego_taskspace import native_publish_naver_cafe_article
-
-    target_item = next((c for c in BRUNCHBOOK_CURRICULUM if int(c["part"]) == int(part_no)), BRUNCHBOOK_CURRICULUM[0])
-    bridge_targets = get_today_cf_bridge_targets(target_item["title"], allowed_domains=[target_item["targetDomain"]])
-    bridge_url = target_item.get("bridgeUrl") or (bridge_targets[0]["url"] if bridge_targets else f"https://www.{target_item['targetDomain']}/")
-
-    cafe_paras = list(target_item["paragraphs"][:4]) + [
-        f"▶ {target_item['title']} 상세 비교표 및 자가진단 원문 보기:",
-        bridge_url,
-    ]
-    st = sync_cafe_live_state()
-    published_articles = list(st.get("publishedArticles") or [])
-    receipts = []
-
-    for cafe_cfg in [
-        {"slug": "loveshake1", "clubid": "19858249", "menuid": "164", "name": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리", "board": "자유게시판·금융꿀팁 (menuId 164)", "members": 28495},
-        {"slug": "boutiqueinfo", "clubid": "31608088", "menuid": "4", "name": "고급지식의 모든 것", "board": "지식 아카이브 (menuId 4)", "members": 1722},
-    ]:
-        # Skip if already published for this part + cafe
-        already = next((a for a in published_articles if a.get("cafeId") == cafe_cfg["slug"] and int(a.get("part") or 0) == int(target_item["part"])), None)
-        if already:
-            receipts.append({"cafe": cafe_cfg["slug"], "url": already["articleUrl"], "reused": True})
+    for topic in PRODUCTION_TOPICS:
+        pno = int(topic.get("part", 0))
+        q_item = planned.get(pno)
+        if q_item and q_item.get("communityStatus") == "published":
             continue
-        c_res = native_publish_naver_cafe_article(
-            account="soul5373",
-            clubid=cafe_cfg["clubid"],
-            menuid=cafe_cfg["menuid"],
-            title=f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})",
-            paragraphs=cafe_paras,
-            cafe_slug=cafe_cfg["slug"],
-        )
-        if isinstance(c_res, dict) and c_res.get("ok") and c_res.get("url"):
-            art_url = str(c_res["url"])
-            receipts.append({"cafe": cafe_cfg["slug"], "url": art_url})
-            published_articles.insert(0, {
-                "id": f"{cafe_cfg['slug']}-{art_url.rstrip('/').split('/')[-1]}",
-                "part": int(target_item["part"]),
-                "cafeId": cafe_cfg["slug"],
-                "cafeName": cafe_cfg["name"],
-                "boardName": cafe_cfg["board"],
-                "members": cafe_cfg["members"],
-                "account": "soul5373",
-                "title": f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})",
-                "articleUrl": art_url,
-                "bridgeDomain": target_item["targetDomain"],
-                "bridgeUrl": bridge_url,
-                "publishedAt": now_kst_str()[:16] + " KST",
-                "status": "published_verified",
-                "statusLabel": f"🟢 실측 발행 영수증 검증 완료 (#{art_url.rstrip('/').split('/')[-1]})",
-            })
+        snippet = topic["communityPostText"].splitlines()[0][:25]
+        if not any(snippet in str(p.get("text") or "") for p in posts):
+            return produce_youtube_svml_package(part_no=pno, publish_community=True)
+    return {"ok": True, "action": "all_topics_published", "postCount": len(posts)}
 
-    st["publishedArticles"] = published_articles
-    save_cafe_status(st)
-    final_st = sync_cafe_live_state()
-    return {
-        "ok": len(receipts) > 0,
-        "part": int(target_item["part"]),
-        "title": target_item["title"],
-        "receipts": receipts,
-        "status": final_st,
-    }
+
+# Re-export from dedicated `naver_cafe_posting` package for backward compatibility
+from naver_cafe_posting.posting import (
+    DEFAULT_CAFE_PUBLISHED_ARTICLES,
+    load_cafe_status,
+    publish_cafe_bridge_part,
+    save_cafe_status,
+    sync_cafe_live_state,
+)
 
 
 if __name__ == "__main__":
     out = sync_youtube_live_state()
-    c_out = sync_cafe_live_state()
     print(json.dumps({
         "ok": out.get("ok"),
         "renders": len(out.get("renders", [])),
         "posts": len(out.get("communityPosts", [])),
-        "cafePublished": len(c_out.get("publishedArticles", [])),
     }, ensure_ascii=False))

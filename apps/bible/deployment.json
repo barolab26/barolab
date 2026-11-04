@@ -33,7 +33,7 @@
     "productionReleased": false,
     "requiredClosedTesters": 12,
     "requiredClosedTestDays": 14,
-    "optedInClosedTestersObserved": null,
+    "optedInClosedTestersObserved": 12,
     "url": "https://play.google.com/console/u/0/developers/7752283694845461925/app/4975007773224005878/app-dashboard",
     "bundle": {
       "versionCode": 5,
@@ -203,7 +203,9 @@
       "checkedAt": "2026-10-18T17:36:09.669Z",
       "evidence": "apps/qa/2026-10-19-play-console-status.json",
       "googleReviewConfirmed": true,
-      "reviewSubmitted": true
+      "reviewSubmitted": true,
+      "optedInTesters": 12,
+      "startedAt": "2026-11-03T11:45:00+09:00"
     },
     "closedJoinUrl": "https://play.google.com/apps/testing/com.barolab.harubible",
     "historicalOptedInClosedTestersObserved": {

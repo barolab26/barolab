@@ -118,7 +118,9 @@
         "testerListCount": 13,
         "linkCopyEnabled": true,
         "checkedAt": "2026-10-18T18:01:50.820Z",
-        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+        "evidence": "apps/qa/2026-10-19-play-console-status.json",
+        "optedInTesters": 12,
+        "startedAt": "2026-11-03T12:31:00+09:00"
       },
       "versionCode": 3,
       "testAdsOnly": false,
@@ -328,7 +330,9 @@
         "quickChecksPending": false,
         "googleReviewConfirmed": true,
         "trackActive": true,
-        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+        "evidence": "apps/qa/2026-10-19-play-console-status.json",
+        "optedInTesters": 12,
+        "startedAt": "2026-11-03T12:18:00+09:00"
       },
       "versionCode": 3,
       "testAdsOnly": false,
@@ -569,7 +573,9 @@
         "testerListCount": 13,
         "linkCopyEnabled": false,
         "checkedAt": "2026-10-18T18:01:21.266Z",
-        "evidence": "apps/qa/2026-10-19-play-console-status.json"
+        "evidence": "apps/qa/2026-10-19-play-console-status.json",
+        "optedInTesters": 12,
+        "startedAt": "2026-11-03T12:18:00+09:00"
       },
       "versionCode": 3,
       "testAdsOnly": false,
