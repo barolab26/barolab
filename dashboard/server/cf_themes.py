@@ -842,8 +842,6 @@ DOMAIN_IDENTITY_SPECS: Dict[str, Dict[str, Any]] = {
         "catTabStyle": "dpg-spec-tabs",
         "cardVariant": "dpg-scoreboard-card",
         "thumbRatio": "16/10",
-        "scoreRating": "4.9 / 5.0 (★★★★★)",
-        "scoreDifficulty": "쉬움 (공식 기준 5분 확인)",
         "colors": {
             "primary": "#0D1B2A",
             "secondary": "#00A896",
@@ -895,8 +893,6 @@ DOMAIN_IDENTITY_SPECS: Dict[str, Dict[str, Any]] = {
         "catTabStyle": "dpg-spec-tabs",
         "cardVariant": "dpg-scoreboard-card",
         "thumbRatio": "16/10",
-        "scoreRating": "4.8 / 5.0 (★★★★★)",
-        "scoreDifficulty": "보통 (온라인 즉시 조회 가능)",
         "colors": {
             "primary": "#0C4A6E",
             "secondary": "#0284C7",
@@ -2503,11 +2499,80 @@ body {{
 /* Indirect Experience Capture Images (`.guide-capture-img`) */
 figure.post-image {{
   margin: 26px 0 !important;
-  padding: 10px;
+  padding: 12px 12px 10px !important;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: {r0};
   box-shadow: var(--card-shadow);
+  text-align: center !important;
+}}
+figure.post-image img {{
+  display: block !important;
+  margin: 0 auto !important;
+  border-radius: 6px;
+}}
+figure.post-image figcaption,
+.content figure figcaption,
+article.gs-article figure figcaption {{
+  display: block !important;
+  font-size: 12.5px !important;
+  line-height: 1.55 !important;
+  color: #64748B !important;
+  text-align: center !important;
+  margin: 10px auto 2px !important;
+  padding: 8px 12px 0 !important;
+  border-top: 1px dashed #E2E8F0 !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}}
+figure.post-image figcaption a[href*="flow.google.com"] {{
+  display: none !important;
+}}
+figure > .google-auto-placed,
+figure > .ap_container,
+figure > ins.adsbygoogle {{
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}}
+.content table,
+article.gs-article table {{
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 22px 0 !important;
+  border: 1px solid {c['border']} !important;
+  background: {c['surface']} !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+}}
+.content table th,
+article.gs-article table th {{
+  border: 1px solid {c['border']} !important;
+  padding: 11px 14px !important;
+  background: {c['tableHeaderBg']} !important;
+  color: {c['tableHeaderTxt']} !important;
+  font-weight: 800 !important;
+  text-align: left !important;
+}}
+.content table td,
+article.gs-article table td {{
+  border: 1px solid {c['border']} !important;
+  padding: 11px 14px !important;
+  color: {c['text']} !important;
+  vertical-align: top !important;
+}}
+.content table tr:nth-child(even) td,
+article.gs-article table tr:nth-child(even) td {{
+  background: #F8FAFC !important;
+}}
+.wt-share-col {{
+  display: none !important;
+}}
+body[data-shell-family="arch1-wikitree"][data-page-type="article"] .layout {{
+  grid-template-columns: {"300px minmax(0, 760px)" if var == "wikitree-navy-left" else "minmax(0, 760px) 300px"} !important;
 }}
 img.guide-capture-img,
 figure.post-image a[aria-label*="원본 화면 크게 보기"] img {{
@@ -3304,26 +3369,6 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
 
     var layout = document.querySelector('.layout');
     if (layout) layout.querySelectorAll(':scope > .sidebar').forEach(function(s){{ s.remove(); }});
-
-    if (!isHome) {{
-      var wrap = document.querySelector('.main .wrap, main.page');
-      var info = extractArticleMeta();
-      var contentEl = document.querySelector('.content, article.gs-article');
-      if (wrap && contentEl && !wrap.querySelector('.dpg-scoreboard-box')) {{
-        var scoreBox = document.createElement('div');
-        scoreBox.innerHTML =
-          '<div class="dpg-scoreboard-box">' +
-          '<div class="dpg-score-cell"><span class="dpg-score-label">컨슈머리포트 추천지수</span><strong class="dpg-score-val">' + CFG.scoreRating + '</strong></div>' +
-          '<div class="dpg-score-cell"><span class="dpg-score-label">핵심 혜택·스펙 요약</span><strong class="dpg-score-val" style="color:#38BDF8;">' + info.cat + ' 공식 검증</strong></div>' +
-          '<div class="dpg-score-cell"><span class="dpg-score-label">신청·적용 난이도</span><strong class="dpg-score-val" style="color:#4ADE80;">' + CFG.scoreDifficulty + '</strong></div>' +
-          '</div>' +
-          '<div class="dpg-pros-cons-grid">' +
-          '<div class="dpg-pros-box"><strong style="color:#065F46;display:block;margin-bottom:6px;">👍 핵심 강점 및 혜택 포인트</strong><span>• 공식 기준 충족 시 비용·수수료 절감 및 즉시 혜택 적용<br/>• 모바일/PC 비대면 원스톱 조회 지원</span></div>' +
-          '<div class="dpg-cons-box"><strong style="color:#92400E;display:block;margin-bottom:6px;">⚠️ 신청·선택 전 필수 체크사항</strong><span>• 예산 소진 또는 기준일 경과 전 사전 확인 필수<br/>• 세부 등급·모델별 조건표 대조 권장</span></div>' +
-          '</div>';
-        contentEl.insertBefore(scoreBox, contentEl.firstChild);
-      }}
-    }}
   }}
 
   /* ========================================================================
@@ -3389,6 +3434,31 @@ def build_live_cf_head_injection(domain: str, existing_adsense_code: str, ad_mid
       contentEl.querySelectorAll('figure.post-image a[aria-label*="원본"] img, figure img').forEach(function(img){{
         if (img.closest('a[aria-label*="원본"]')) img.classList.add('guide-capture-img');
       }});
+      contentEl.querySelectorAll('figure.post-image figcaption, figure figcaption').forEach(function(fc){{
+        fc.querySelectorAll('a[href*="flow.google.com"]').forEach(function(a){{ a.remove(); }});
+        var cleaned = (fc.innerHTML || '').replace(/\\s*·\\s*참고\\s*$/g, '').replace(/\\s*참고\\s*$/g, '').replace(/\\s*·\\s*$/g, '').trim();
+        if (cleaned && !cleaned.startsWith('▲') && !cleaned.startsWith('<')) {{
+          cleaned = '▲ ' + cleaned;
+        }}
+        fc.innerHTML = cleaned;
+      }});
+      var relSections = Array.from(document.querySelectorAll('.related, .related-posts, section.related'));
+      if (relSections.length > 1) {{
+        relSections.slice(1).forEach(function(r){{ r.remove(); }});
+      }}
+      var cleanAutoAdsInFigures = function() {{
+        document.querySelectorAll('figure > .google-auto-placed, figure > .ap_container, figure > ins.adsbygoogle').forEach(function(ad){{
+          var fig = ad.closest('figure');
+          if (fig && fig.parentNode) {{
+            fig.parentNode.insertBefore(ad, fig.nextSibling);
+          }} else {{
+            ad.remove();
+          }}
+        }});
+      }};
+      cleanAutoAdsInFigures();
+      setTimeout(cleanAutoAdsInFigures, 1200);
+      setTimeout(cleanAutoAdsInFigures, 3000);
     }}
   }}
 
@@ -3559,7 +3629,7 @@ def _scrub_worker_ssr_public_html(js_code: str) -> str:
     """Bust Cloudflare Worker Edge Cache (`caches.default`) so new 8-architecture DOM layouts appear in 0s."""
     js_code = re.sub(
         r'const cacheKey = new Request\(url\.toString\(\)[^,]*,\s*\{\s*method:\s*"GET"\s*\}\);',
-        'const cacheKey = new Request(url.toString() + (url.search ? "&" : "?") + "_baro_v=20261018_arch8_v3", { method: "GET" });',
+        'const cacheKey = new Request(url.toString() + (url.search ? "&" : "?") + "_baro_v=20261104_arch8_v6", { method: "GET" });',
         js_code,
     )
     return js_code

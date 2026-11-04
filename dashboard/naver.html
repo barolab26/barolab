@@ -1302,7 +1302,7 @@
 <link rel="stylesheet" href="css/traffic.css">
 <link rel="stylesheet" href="css/sidebar.css?v=20261017-unified-2">
 <link rel="stylesheet" href="css/signature_deck.css?v=20261018-stepper7-v2">
-<script src="js/signature_deck.js?v=20261103-account-metrics" defer></script>
+<script src="js/signature_deck.js?v=20261104-golden9-v2" defer></script>
 </head>
 <body class="control-room channel-page" data-summary-platform="naver">
 
@@ -1658,7 +1658,7 @@
   </div>
 </div>
 
-<script src="js/naver_schedule.js?v=20261102-slot-preview-fix"></script>
+<script src="js/naver_schedule.js?v=20261104-golden9-v2"></script>
 <script src="js/history_manager.js?v=20261017-live-sync"></script>
 <script>
   function updateClock() {
@@ -1705,14 +1705,14 @@
   }
 
   // ==============================================================================
-  // Daily 7-Post Quota Management System (LocalStorage Persistence)
+  // Daily 9-Post Quota Management System (LocalStorage Persistence)
   // ==============================================================================
   const QUOTA_CONFIG = {
-    acc1: { name: "soultin", title: "시니어브리프", target: 1, type: "REAL", cooldownHours: 4 },
-    acc2: { name: "soul5373", title: "머스트팁스뷰", target: 1, type: "REAL", cooldownHours: 4 },
-    acc3: { name: "yoon_master", title: "윤뷰스", target: 1, type: "REAL", cooldownHours: 4 },
+    acc1: { name: "soultin", title: "시니어브리프", target: 2, type: "REAL", cooldownHours: 4 },
+    acc2: { name: "soul5373", title: "머스트팁스뷰", target: 2, type: "REAL", cooldownHours: 4 },
+    acc3: { name: "yoon_master", title: "윤뷰스", target: 2, type: "REAL", cooldownHours: 4 },
     acc4: { name: "adinfo0905", title: "직장인루틴", target: 2, type: "BRIDGE", cooldownHours: 4 },
-    acc5: { name: "stone0747", title: "자금숲속보", target: 2, type: "BRIDGE", cooldownHours: 4 }
+    acc5: { name: "stone0747", title: "자금숲속보", target: 1, type: "BRIDGE", cooldownHours: 4 }
   };
 
   function getTodayKey() {
@@ -1972,8 +1972,12 @@
       acc.selectedSlot = active.time;
       acc.statusLabel = `${naverRelativeDate(publicationDate)} ${active.actualTime} 공개분 · ${active.period} ${active.label}`;
       acc.reserveTime = `${publicationDate} ${active.actualTime}`;
-      acc.postTitle = info.topic || (active.state === 'wait' ? '주제 준비 전 · 예약 전' : '현재 작업 주제 미확인');
-      acc.postSub = `${naverRelativeDate(publicationDate)} ${active.actualTime} 공개분 · ${naverSlotSummary(active)}`;
+      acc.abArm = active.abArm || 'codex';
+      acc.writerBadge = active.writerBadge || (acc.abArm === 'claude' ? '🟣 Claude Sonnet 5.5' : '🟢 Codex GPT-6.1');
+      acc.writerShortBadge = active.writerShortBadge || (acc.abArm === 'claude' ? '🟣 Claude 5.5' : '🟢 Codex 6.1');
+      acc.writerModel = active.writerModel || '';
+      acc.postTitle = `${acc.writerShortBadge} · ` + (info.topic || (active.state === 'wait' ? '주제 준비 전 · 예약 전' : '현재 작업 주제 미확인'));
+      acc.postSub = `집필 엔진: ${acc.writerBadge} (${acc.writerModel}) · ${naverRelativeDate(publicationDate)} ${active.actualTime} 공개분 · ${naverSlotSummary(active)}`;
       const stoppedStage = !done && !processing && info.stageEvidence === true;
       acc.currentStage = done ? 6 : processing || stoppedStage ? Number(info.currentStage || 0) : 0;
       acc.currentStageName = info.stageName || active.label;
@@ -2234,21 +2238,27 @@
     const todayCounts = counts(countFor(today)), tomorrowCounts = counts(countFor(tomorrow));
     const selectedCounts = publicationDate === today ? todayCounts : tomorrowCounts;
     const title = document.getElementById('naver-schedule-title');
-    if (title) title.textContent = `📅 ${naverRelativeDate(publicationDate)} 공개분 · 예약 / 공개 확인 (실명 3×1포 + 비실명 2×2포 = 총 7편)`;
+    if (title) title.textContent = `📅 ${naverRelativeDate(publicationDate)} 공개분 · 예약 / 공개 확인 (실명 3×2포 + 브릿지 2+1포 = 총 9편)`;
     for (const [id,date,value,offset] of [['naver-date-today',today,todayCounts,0],['naver-date-tomorrow',tomorrow,tomorrowCounts,1]]) {
       const tab = document.getElementById(id);
-      if (tab) { tab.classList.toggle('active', selectedNaverDateOffset === offset); tab.setAttribute('aria-pressed',String(selectedNaverDateOffset === offset)); tab.textContent = `${offset === 0 ? '오늘' : '내일'} ${shortNaverDate(date)} ${offset === 0 ? '공개분' : '예약분'} · ${!naverScheduleLoaded ? '조회 중' : !naverScheduleSource && !naverJournalSource ? '집계 미확인' : '예약 '+value.reserved+'/7'}`; }
+      if (tab) { tab.classList.toggle('active', selectedNaverDateOffset === offset); tab.setAttribute('aria-pressed',String(selectedNaverDateOffset === offset)); tab.textContent = `${offset === 0 ? '오늘' : '내일'} ${shortNaverDate(date)} ${offset === 0 ? '공개분' : '예약분'} · ${!naverScheduleLoaded ? '조회 중' : !naverScheduleSource && !naverJournalSource ? '집계 미확인' : '예약 '+value.reserved+'/9'}`; }
     }
     const html = [];
+    let claudeSlotCount = 0, codexSlotCount = 0;
     NAVER_ACCOUNTS.forEach((acc, idx) => {
       const list = naverSlots(acc, publicationDate);
       if (currentGroupFilter !== 'ALL' && acc.group !== currentGroupFilter) return;
       list.forEach((slot, i) => {
+        const isClaude = slot.abArm === 'claude' || String(slot.writerBadge || '').includes('Claude');
+        if (isClaude) claudeSlotCount += 1; else codexSlotCount += 1;
+        const writerPill = isClaude
+          ? `<span style="background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:800;margin-right:5px;display:inline-block" title="Antigravity 구독 (${escapeNaverText(slot.writerModel || 'claude-sonnet-5-5-high')}) · 탈제약 에디토리얼 모드">${escapeNaverText(slot.writerShortBadge || '🟣 Claude 5.5')}${slot.plannedOnly ? ' (배정)' : ''}</span>`
+          : `<span style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:800;margin-right:5px;display:inline-block" title="Codex CLI (${escapeNaverText(slot.writerModel || 'gpt-6.1-sol')})">${escapeNaverText(slot.writerShortBadge || '🟢 Codex 6.1')}${slot.plannedOnly ? ' (배정)' : ''}</span>`;
         const color = ['reserved','public'].includes(slot.state) ? '#15803d' : slot.state === 'failed' ? '#b91c1c' : slot.state === 'processing' ? '#1d4ed8' : '#92400e';
         html.push(`<tr class="tbl-acc-row ${idx === selectedAccountIndex && slot.time === acc.selectedSlot ? 'selected-row' : ''}" data-account-index="${idx}" data-slot="${slot.time}" style="cursor:pointer">
           ${i === 0 ? `<td rowspan="${list.length}" style="text-align:center">${acc.id}</td><td rowspan="${list.length}" style="white-space:normal"><strong>${escapeNaverText(({acc1:"mustpickinfo",acc2:"mustinfo",acc3:"yoonviews",acc4:"adinfo0905",acc5:"stone0747"})[acc.accId])}</strong><small style="display:block">${escapeNaverText(acc.siteTitle)}</small><small style="display:block;color:#64748b">${acc.group === 'REAL' ? '실명 · 일 1편' : 'CF 브릿지 · 일 2편'}</small></td>` : ''}
           <td style="white-space:normal"><strong>${naverRelativeDate(publicationDate)}</strong><small style="display:block;font-size:11.5px;color:#0f172a;font-weight:700">${escapeNaverText(slot.scheduleTransition || (slot.actualTime+' 공개분'))}</small><small>${slot.period}${slot.actualTime !== slot.time ? ' (원래 '+slot.time+')' : ''}</small></td>
-          <td style="white-space:normal;overflow-wrap:anywhere;line-height:1.6">${escapeNaverText(slot.info.topic || (slot.state === 'wait' ? '주제 근거 미확인' : '현재 작업 주제 미확인'))}<small style="display:block;color:#64748b">${escapeNaverText(slot.track || acc.category)}</small></td>
+          <td style="white-space:normal;overflow-wrap:anywhere;line-height:1.6">${writerPill}${escapeNaverText(slot.info.topic || (slot.state === 'wait' ? '주제 근거 미확인' : '현재 작업 주제 미확인'))}<small style="display:block;color:#64748b">${escapeNaverText(slot.track || acc.category)}</small></td>
           <td style="white-space:normal;line-height:1.7"><strong style="color:${color}">${slot.period} ${escapeNaverText(slot.label)}</strong><small style="display:block">${escapeNaverText(naverSlotSummary(slot))}</small><small style="display:block;color:#64748b">${slot.state === 'reserved' ? '예약 근거 확인 · 공개 시각 도달 시 자동 🟢공개완료 승격' : slot.state === 'public' ? '실제 공개 근거 확인' : '선택 공개분의 서버 작업 기록 기준'}</small>${slot.state === 'public' && NaverSchedule.publicVerified(slot.info) ? `<a href="https://blog.naver.com/${NaverSchedule.publicKey(slot.info.publicUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:#0872ff" onclick="event.stopPropagation()">공개 글 보기 ↗</a>` : ''}</td>
         </tr>`);
       });
@@ -2256,7 +2266,7 @@
     tbody.innerHTML = html.join('');
     tbody.querySelectorAll('[data-account-index]').forEach(row => row.onclick = () => selectAccount(Number(row.dataset.accountIndex),row.dataset.slot));
     const sub = document.getElementById('table-panel-sub');
-    if (sub) sub.textContent = `${publicationDate} (KST) 공개분 · ` + (!naverScheduleLoaded ? '서버 기록 조회 중' : !naverScheduleSource && !naverJournalSource ? '예약 / 공개 집계 미확인' : `예약 근거 확인 ${selectedCounts.reserved}/7편 · 실제 공개 확인 ${selectedCounts.published}/7편`) + (naverScheduleError ? ' · '+naverScheduleError : '');
+    if (sub) sub.textContent = `${publicationDate} (KST) 공개분 · ` + (!naverScheduleLoaded ? '서버 기록 조회 중' : !naverScheduleSource && !naverJournalSource ? '예약 / 공개 집계 미확인' : `예약 근거 확인 ${selectedCounts.reserved}/9편 · 실제 공개 확인 ${selectedCounts.published}/9편 · 🟣Claude ${claudeSlotCount}슬롯 / 🟢Codex ${codexSlotCount}슬롯`) + (naverScheduleError ? ' · '+naverScheduleError : '');
   }
 
   function selectAccount(index, slot) {

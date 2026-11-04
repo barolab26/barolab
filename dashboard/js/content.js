@@ -43,9 +43,18 @@
     const body = $('content-rows');body.replaceChildren();
     for (const row of rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)) {
       const tr=document.createElement('tr'), title=document.createElement('td');
+      if (row.writerShortBadge || row.writerBadge) {
+        const badge = document.createElement('span');
+        const isClaude = row.abArm === 'claude' || String(row.writerBadge || '').includes('Claude');
+        badge.textContent = row.writerShortBadge || row.writerBadge;
+        badge.style.cssText = isClaude
+          ? 'background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:800;margin-right:5px;display:inline-block'
+          : 'background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:800;margin-right:5px;display:inline-block';
+        title.appendChild(badge);
+      }
       const link=text(title,'a',decoded(new URL(row.url).pathname).slice(1) || row.domain);
       link.href=row.url;link.target='_blank';link.rel='noopener noreferrer';
-      text(title,'small',`${row.domain}${row.inventoryStale?' · 글 목록 재확인 필요':''}`);tr.appendChild(title);
+      text(title,'small',`${row.domain}${row.title ? ' · ' + row.title : ''}${row.inventoryStale?' · 글 목록 재확인 필요':''}`);tr.appendChild(title);
       const requestCell = (request) => {
         const cell=document.createElement('td'), status=request?.status || 'unknown';
         const names={requested:'요청 접수',request_received:'수집 요청 접수',reserved:'제출 결과 미확인',unknown:'미확인',failed:'요청 실패',blocked:'요청 보류'};

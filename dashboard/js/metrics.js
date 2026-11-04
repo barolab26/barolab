@@ -362,7 +362,13 @@
       link.href = item.url || `https://www.${item.domain}${item.path}`;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
-      link.textContent = item.title || item.path;
+      let cleanTitle = item.title || item.path || '';
+      if (cleanTitle.includes('???') || cleanTitle.includes('\ufffd')) {
+        cleanTitle = String(item.path || '').includes('national-pension-deferral-application-guide')
+          ? '국민연금 연기연금 신청 연령과 예상액 조회, 지금 받을지 미룰지 확인하는 순서'
+          : decodeURIComponent(String(item.path || '').replace(/^\//, '')).replace(/-/g, ' ');
+      }
+      link.textContent = cleanTitle;
       link.title = `[${item.domain}] ${item.title || item.path} (${item.sessions} 세션 · ${item.pageViews} PV)`;
       titleWrap.append(badge, link);
       const barBg = document.createElement('div');

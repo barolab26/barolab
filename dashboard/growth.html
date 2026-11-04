@@ -553,15 +553,27 @@
         <div id="growth-doctor-bar" style="height:100%; width:10%; background:linear-gradient(90deg,#0d9488,#10b981,#2563eb); transition:width 0.4s;"></div>
       </div>
       <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; font-size:12px; font-weight:800; text-align:center;">
-        <div style="padding:7px; border-radius:8px; background:#ecfdf5; border:1px solid #a7f3d0; color:#047857;" id="growth-doc-a">🟢 A등급 (정상 유지): 0건</div>
-        <div style="padding:7px; border-radius:8px; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8;" id="growth-doc-b">🔵 B등급 (카테고리 패치): 0건</div>
-        <div style="padding:7px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#b45309;" id="growth-doc-c">🟡 C등급 (@퍼블리 리모델링): 0건</div>
-        <div style="padding:7px; border-radius:8px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;" id="growth-doc-d">🔴 D등급 (주제이탈 격리): 0건</div>
+        <button type="button" onclick="window.filterGrowthDoctorGrade('A')" style="padding:8px; border-radius:8px; background:#ecfdf5; border:2px solid #059669; color:#047857; font-weight:800; cursor:pointer;" id="growth-doc-a">🟢 A정상 (수익형 합격): 0건 🔍</button>
+        <button type="button" onclick="window.filterGrowthDoctorGrade('B')" style="padding:8px; border-radius:8px; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-weight:800; cursor:pointer;" id="growth-doc-b">🔵 B수선→A승격 (표·캡션 보완): 0건 🔍</button>
+        <button type="button" onclick="window.filterGrowthDoctorGrade('C')" style="padding:8px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#b45309; font-weight:800; cursor:pointer;" id="growth-doc-c">🟡 C리모델링→A승격 (본문·표 재작성): 0건 🔍</button>
+        <button type="button" onclick="window.filterGrowthDoctorGrade('D')" style="padding:8px; border-radius:8px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-weight:800; cursor:pointer;" id="growth-doc-d">🔴 D격리 (주제이탈 비공개): 0건 🔍</button>
       </div>
-      <div class="revenue-table-wrap">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <button type="button" onclick="window.filterGrowthDoctorGrade('ALL')" id="growth-doc-all" style="padding:4px 10px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#334155; font-size:11.5px; font-weight:800; cursor:pointer;">전체 실존 공개글</button>
+          <span id="growth-doctor-filter-summary" style="font-size:12px; font-weight:800; color:#0f766e;">🟢 A정상 리스트 검증 중</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <select id="growth-doctor-domain-select" onchange="window.filterGrowthDoctorGrade(window._growthDocGrade || 'A')" style="font-size:11.5px; padding:4px 8px; border-radius:6px; border:1px solid #cbd5e1;">
+            <option value="">전체 16개 도메인</option>
+          </select>
+          <input type="search" id="growth-doctor-search-input" placeholder="제목/URL/처방 검색..." oninput="window.filterGrowthDoctorGrade(window._growthDocGrade || 'A')" style="font-size:11.5px; padding:4px 8px; border-radius:6px; border:1px solid #cbd5e1; width:190px;" />
+        </div>
+      </div>
+      <div class="revenue-table-wrap" style="max-height:460px; overflow-y:auto;">
         <table class="traffic-table">
-          <thead><tr><th>검진 도메인 · 브랜드</th><th>기존 글 제목</th><th>처방 등급</th><th>카테고리 재매핑</th><th>7대 정밀 처방 내역</th></tr></thead>
-          <tbody id="growth-doctor-rows"><tr><td colspan="5">닥터 검진 원장 조회 중...</td></tr></tbody>
+          <thead><tr><th>#</th><th>검진 도메인 · 카테고리</th><th>실존 공개 글 제목 · URL</th><th>품질 지표 (점수·표·수치·분량·이미지)</th><th>처방 등급</th><th>검진 사유 · 리모델링 처방</th><th>바로가기</th></tr></thead>
+          <tbody id="growth-doctor-rows"><tr><td colspan="7">닥터 검진 원장 조회 중...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -811,6 +823,68 @@
     } catch (_) {}
   }
 
+  
+  window._growthDocGrade = 'A';
+  window.filterGrowthDoctorGrade = async function(grade) {
+    window._growthDocGrade = grade || 'A';
+    const domain = $('growth-doctor-domain-select')?.value || '';
+    const q = ($('growth-doctor-search-input')?.value || '').trim();
+    const tbody = $('growth-doctor-rows');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px; color:#64748b;">등급별 실존 공개글 목록 불러오는 중...</td></tr>';
+    try {
+      const params = new URLSearchParams({ grade: window._growthDocGrade, domain, q, limit: '500' });
+      const res = await fetch('/api/auditor/posts?' + params.toString(), { cache: 'no-store' });
+      const data = await res.json();
+      const rows = data.posts || data.rows || [];
+      const domSel = $('growth-doctor-domain-select');
+      if (domSel && domSel.options.length <= 1 && data.byDomain) {
+        Object.keys(data.byDomain).sort().forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d;
+          opt.textContent = `${d} (${data.byDomain[d]}건)`;
+          domSel.appendChild(opt);
+        });
+      }
+      const labelMap = {
+        'A': '🟢 A정상 (수익형 합격 — 표·수치·주제정합 100% 통과)',
+        'B': '🔵 B수선→A승격 대기 (비교표·캡션 보완 대상)',
+        'C': '🟡 C리모델링→A승격 대기 (본문·표·이미지 전면 보강 대상)',
+        'D': '🔴 D격리 (주제이탈·가십 비공개 격리 대상)',
+        'ALL': '전체 실존 공개글'
+      };
+      if ($('growth-doctor-filter-summary')) {
+        $('growth-doctor-filter-summary').textContent = `${labelMap[window._growthDocGrade] || window._growthDocGrade} — 총 ${data.totalMatched ?? rows.length}건`;
+      }
+      if (!tbody) return;
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px; color:#64748b;">조건에 해당하는 게시물이 없습니다.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map((r, idx) => {
+        const badgeColor = r.grade === 'A' ? '#047857' : r.grade === 'B' ? '#1d4ed8' : r.grade === 'C' ? '#b45309' : '#b91c1c';
+        const badgeBg = r.grade === 'A' ? '#ecfdf5' : r.grade === 'B' ? '#eff6ff' : r.grade === 'C' ? '#fffbeb' : '#fef2f2';
+        const issues = (r.issues && r.issues.length) ? r.issues.join(' · ') : (r.prescription || '정상 합격');
+        return `<tr>
+          <td style="color:#64748b; font-weight:700;">${idx + 1}</td>
+          <td><strong>${r.domain}</strong><br><small style="color:#0f766e; font-weight:700;">${r.category || '-'}</small></td>
+          <td>
+            <a href="${r.url}" target="_blank" rel="noopener" style="font-weight:800; color:#0f172a; text-decoration:none;">${r.title}</a>
+            <div style="font-size:10.5px; color:#64748b; margin-top:2px;">${r.url}</div>
+          </td>
+          <td style="font-size:11.5px; white-space:nowrap;">
+            <strong>${r.qualityScore ?? 0}점</strong> · 표 <strong>${r.tableCount ?? 0}개</strong> · 수치 <strong>${r.numFactCount ?? 0}건</strong><br>
+            <span style="color:#64748b;">${(r.charCount ?? 0).toLocaleString()}자 · 이미지 ${r.imageCount ?? 0}장</span>
+          </td>
+          <td><span style="display:inline-block; padding:3px 7px; border-radius:6px; font-size:11px; font-weight:800; background:${badgeBg}; color:${badgeColor};">${r.grade}등급</span></td>
+          <td style="font-size:11.5px; color:#334155;">${issues}</td>
+          <td><a href="${r.url}" target="_blank" rel="noopener" style="display:inline-block; padding:4px 8px; border-radius:6px; background:#f8fafc; border:1px solid #cbd5e1; color:#0f172a; font-size:11px; font-weight:800; text-decoration:none;">글 보기 ↗</a></td>
+        </tr>`;
+      }).join('');
+    } catch (e) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px; color:#dc2626;">목록 조회 실패</td></tr>';
+    }
+  };
+
   async function loadGrowthDoctorPanel() {
     try {
       const res = await fetch('/api/auditor/status', { cache: 'no-store' });
@@ -826,37 +900,12 @@
         $('growth-doctor-quota').textContent = `오늘 감사 ${doc.todayAudited ?? '미확인'} / ${doc.dailyQuotaTarget ?? '미확인'} · 오늘 CF 공개 검증 완료 ${doc.cfDoctorEvidence?.todayVerified ?? '미확인'}건`;
       }
       if ($('growth-doctor-bar')) $('growth-doctor-bar').style.width = `${quotaPct}%`;
-      if ($('growth-doc-a')) $('growth-doc-a').textContent = `🟢 A등급 (정상 유지): ${gc.A ?? '미확인'}건`;
-      if ($('growth-doc-b')) $('growth-doc-b').textContent = `🔵 B등급 (카테고리 패치): ${gc.B ?? '미확인'}건`;
-      if ($('growth-doc-c')) $('growth-doc-c').textContent = `🟡 C등급 (@퍼블리 리모델링): ${gc.C ?? '미확인'}건`;
-      if ($('growth-doc-d')) $('growth-doc-d').textContent = `🔴 D등급 (주제이탈 격리): ${gc.D ?? '미확인'}건`;
-      const tbody = $('growth-doctor-rows');
-      const rows = doc.recentAudits || [];
-      if (doc.cfDoctorEvidence?.rows?.length && tbody) {
-        const headings=['검진 도메인','대상 URL','공개 검증 단계','감사 분류와 관계','최종 근거 시각'];
-        tbody.closest('table').querySelectorAll('thead th').forEach((th,i)=>{th.textContent=headings[i];});
-        tbody.replaceChildren();
-        for (const r of doc.cfDoctorEvidence.rows) {
-          const tr=document.createElement('tr');
-          for(const value of [r.domain, r.url, r.status==='verified'?'공개 검증 완료':r.status==='partial'?'제목만 보완 · 부분':'결과 미확정', '감사 등급과 별도', r.verifiedAt || '시각 미확인']) {
-            const td=document.createElement('td');td.textContent=value;tr.appendChild(td);
-          }
-          tbody.appendChild(tr);
-        }
-      }
-      if (tbody && rows.length && !doc.cfDoctorEvidence?.rows?.length) {
-        tbody.innerHTML = rows.map(r => {
-          const cCat = r.checklist?.['3_categoryRemap'] || {};
-          const catTxt = cCat.patched ? `${cCat.oldCategory} ➔ ${cCat.newCategory} (패치완료)` : (cCat.newCategory || cCat.oldCategory || '-');
-          return `<tr>
-            <td><strong>${r.domain}</strong><br><small style="color:#64748b;">${r.brandName || ''}</small></td>
-            <td><a href="${r.url}" target="_blank" rel="noopener" style="font-weight:700; color:#0f172a;">${r.title}</a></td>
-            <td><strong>${r.gradeBadge}</strong></td>
-            <td>${catTxt}</td>
-            <td style="font-size:12px;">${r.prescription}</td>
-          </tr>`;
-        }).join('');
-      }
+      if ($('growth-doc-a')) $('growth-doc-a').textContent = `🟢 A정상 (수익형 합격): ${gc.A ?? 0}건 🔍`;
+      if ($('growth-doc-b')) $('growth-doc-b').textContent = `🔵 B수선→A승격 (표·캡션 보완): ${gc.B ?? 0}건 🔍`;
+      if ($('growth-doc-c')) $('growth-doc-c').textContent = `🟡 C리모델링→A승격 (본문·표 재작성): ${gc.C ?? 0}건 🔍`;
+      if ($('growth-doc-d')) $('growth-doc-d').textContent = `🔴 D격리 (주제이탈 비공개): ${gc.D ?? 0}건 🔍`;
+      if ($('growth-doc-all')) $('growth-doc-all').textContent = `전체 실존 공개글 (${doc.auditedCount ?? 0}건)`;
+      await window.filterGrowthDoctorGrade(window._growthDocGrade || 'A');
       renderTopKpiStrip();
     } catch (_) {}
   }

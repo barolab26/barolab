@@ -27,7 +27,7 @@
     naver: {
       title: `오늘(${getKSTDateStr(0).slice(5)}) 공개 현황`,
       unit: '건',
-      defaultTarget: 7,
+      defaultTarget: 9,
       runLabel: '⚡ RSS 공개검증 즉시 실행',
       stepTitle: '🟢 네이버 5계정 실시간 7단계 파이프라인 타임라인',
       tableCols: ['No', '발행일 (KST)', '계정 / 블로그', '전략 / 트랙 분류', '포스팅 제목 · 기획 주제', '시각 / 슬롯 (예약➔공개)', '상태', '작업물 열기']
@@ -86,11 +86,11 @@
   ];
 
   const NAVER_ACCOUNTS = [
-    { accId: 'acc1', accNo: 1, name: 'soultin', blogId: 'mustpickinfo', title: '시니어브리프', type: '주력 (실명)', strat: '카테고리 전문성·체류 트랙', target: 1, slots: ['19:30'], slot: '19:30' },
-    { accId: 'acc2', accNo: 2, name: 'soul5373', blogId: 'mustinfo', title: '머스트팁스뷰', type: '주력 (실명)', strat: '카테고리 전문성·체류 트랙', target: 1, slots: ['20:00'], slot: '20:00' },
-    { accId: 'acc3', accNo: 3, name: 'yoon_master', blogId: 'yoonviews', title: '윤뷰스', type: '주력 (실명)', strat: '트렌드·롱테일 유입 트랙', target: 1, slots: ['20:30'], slot: '20:30' },
-    { accId: 'acc4', accNo: 4, name: 'adinfo0905', blogId: 'adinfo0905', title: '직장인루틴', type: 'CF 브릿지', strat: 'CF 고단가 브리지', target: 2, slots: ['11:00', '19:00'], slot: '11:00 / 19:00' },
-    { accId: 'acc5', accNo: 5, name: 'stone0747', blogId: 'stone0747', title: '자금숲속보', type: 'CF 브릿지', strat: 'CF 고단가 브리지', target: 2, slots: ['11:00', '19:00'], slot: '11:00 / 19:00' }
+    { accId: 'acc1', accNo: 1, name: 'soultin', blogId: 'mustpickinfo', title: '시니어브리프', type: '주력 (실명)', strat: '카테고리 전문성·체류 트랙', target: 2, slots: ['07:40', '16:30'], slot: '07:40 / 16:30' },
+    { accId: 'acc2', accNo: 2, name: 'soul5373', blogId: 'mustinfo', title: '머스트팁스뷰', type: '주력 (실명)', strat: '카테고리 전문성·체류 트랙', target: 2, slots: ['10:30', '19:30'], slot: '10:30 / 19:30' },
+    { accId: 'acc3', accNo: 3, name: 'yoon_master', blogId: 'yoonviews', title: '윤뷰스', type: '주력 (실명)', strat: '트렌드·롱테일 유입 트랙', target: 2, slots: ['14:30', '20:30'], slot: '14:30 / 20:30' },
+    { accId: 'acc4', accNo: 4, name: 'adinfo0905', blogId: 'adinfo0905', title: '직장인루틴', type: 'CF 브릿지', strat: 'CF 고단가 브리지', target: 2, slots: ['08:30', '18:30'], slot: '08:30 / 18:30' },
+    { accId: 'acc5', accNo: 5, name: 'stone0747', blogId: 'stone0747', title: '자금숲속보', type: 'CF 브릿지', strat: 'CF 고단가 브리지', target: 1, slots: ['12:30'], slot: '12:30' }
   ];
 
   let state = {
@@ -211,7 +211,7 @@
       <!-- [TIER 1] Top Slim Gauge & Status Summary Cards (85px compact 4-col) -->
       <section class="sig-tier1-grid" aria-label="상단 슬림 게이지 및 상태 요약">
         <!-- Col 1: Tick-Mark SVG Donut Gauge + Segmented Bar -->
-        <article class="sig-slim-card" ${channel === 'naver' ? `style="cursor:pointer;" onclick="window.BaroSigDeck.setDateFilter('today')" title="오늘 발행 7건 목록 보기"` : ''}>
+        <article class="sig-slim-card" ${channel === 'naver' ? `style="cursor:pointer;" onclick="window.BaroSigDeck.setDateFilter('today')" title="오늘 발행 9건 목록 보기"` : ''}>
           <div class="sig-gauge-ring-box">
             <svg viewBox="0 0 64 64">
               <circle class="sig-tick-circle" cx="32" cy="32" r="29.5"></circle>
@@ -226,7 +226,7 @@
           <div class="sig-card-info">
             <div class="sig-card-label">
               <span>${channel === 'naver' ? `오늘(${getKSTDateStr(0).slice(5)}) 공개 현황` : meta.title}</span>
-              <span id="sig-gauge-fraction" style="color:#059669;font-weight:900;">${channel === 'naver' ? '0 / 7건 공개완료' : `0 / ${meta.defaultTarget}${meta.unit}`}</span>
+              <span id="sig-gauge-fraction" style="color:#059669;font-weight:900;">${channel === 'naver' ? '0 / 9건 공개완료' : `0 / ${meta.defaultTarget}${meta.unit}`}</span>
             </div>
             <div class="sig-card-main-val" id="sig-gauge-headline" style="${channel === 'naver' ? 'font-size:12.5px;' : ''}">집계 중</div>
             <div class="sig-seg-track">
@@ -237,7 +237,7 @@
 
         <!-- Col 2: For Naver -> Tomorrow Reservation Circular Tick Gauge; For other channels -> Status Trio -->
         ${channel === 'naver' ? `
-        <article class="sig-slim-card" style="cursor:pointer;" onclick="window.BaroSigDeck.setDateFilter('tomorrow')" title="내일 예약 7건 목록 보기">
+        <article class="sig-slim-card" style="cursor:pointer;" onclick="window.BaroSigDeck.setDateFilter('tomorrow')" title="내일 예약 9건 목록 보기">
           <div class="sig-gauge-ring-box">
             <svg viewBox="0 0 64 64">
               <circle class="sig-tick-circle" cx="32" cy="32" r="29.5"></circle>
@@ -252,9 +252,9 @@
           <div class="sig-card-info">
             <div class="sig-card-label">
               <span>내일(${getKSTDateStr(1).slice(5)}) 예약작업 현황</span>
-              <span id="sig-gauge-fraction-2" style="color:#2563eb;font-weight:900;">0 / 7건 예약완료</span>
+              <span id="sig-gauge-fraction-2" style="color:#2563eb;font-weight:900;">0 / 9건 예약완료</span>
             </div>
-            <div class="sig-card-main-val" id="sig-gauge-headline-2" style="font-size:11.5px;letter-spacing:-0.03em;">🔵 예약완료 0건 · 🟠 지연/재시도 0건 · 🟡 작업대기 7건</div>
+            <div class="sig-card-main-val" id="sig-gauge-headline-2" style="font-size:11.5px;letter-spacing:-0.03em;">🔵 예약완료 0건 · 🟠 지연/재시도 0건 · 🟡 작업대기 9건</div>
             <div class="sig-seg-track">
               <div class="sig-seg-fill" id="sig-gauge-bar-2" style="width:0%;"></div>
             </div>
@@ -388,8 +388,8 @@
           <div class="sig-tabs-left">
             <!-- Date Tabs -->
             <div class="sig-btn-group" role="tablist" aria-label="날짜 선택">
-              <button type="button" class="sig-tab-btn active" data-date-tab="today" onclick="window.BaroSigDeck.setDateFilter('today')">${channel === 'naver' ? `📅 오늘 발행 (${getKSTDateStr(0).slice(5)} · 7건)` : `📅 오늘 (${getKSTDateStr(0).slice(5)})`}</button>
-              ${channel === 'naver' ? `<button type="button" class="sig-tab-btn" data-date-tab="tomorrow" onclick="window.BaroSigDeck.setDateFilter('tomorrow')">🚀 내일 예약 (${getKSTDateStr(1).slice(5)} · 7건)</button>` : ''}
+              <button type="button" class="sig-tab-btn active" data-date-tab="today" onclick="window.BaroSigDeck.setDateFilter('today')">${channel === 'naver' ? `📅 오늘 발행 (${getKSTDateStr(0).slice(5)} · 9건)` : `📅 오늘 (${getKSTDateStr(0).slice(5)})`}</button>
+              ${channel === 'naver' ? `<button type="button" class="sig-tab-btn" data-date-tab="tomorrow" onclick="window.BaroSigDeck.setDateFilter('tomorrow')">🚀 내일 예약 (${getKSTDateStr(1).slice(5)} · 9건)</button>` : ''}
               <button type="button" class="sig-tab-btn" data-date-tab="yesterday" onclick="window.BaroSigDeck.setDateFilter('yesterday')">어제 (${getKSTDateStr(-1).slice(5)})</button>
               <button type="button" class="sig-tab-btn" data-date-tab="all" onclick="window.BaroSigDeck.setDateFilter('all')">전체 누적</button>
             </div>
@@ -800,14 +800,29 @@
           });
         });
 
-        // 2. Tomorrow Reservations Tab View: strictly the 7 slots for TOMORROW (2026-10-19)
+        // 2. Tomorrow Reservations Tab View: strictly the 9 slots for TOMORROW
         const TOMORROW_PREP_MAP = {
-          'acc4_11:00': '19:30',
-          'acc5_11:00': '19:50',
+          'acc1_07:40': '19:30',
+          'acc1_16:30': '20:10',
+          'acc1_19:10': '20:10',
           'acc1_19:30': '20:10',
+          'acc2_10:30': '19:50',
+          'acc2_15:00': '19:50',
+          'acc2_19:30': '20:30',
           'acc2_20:00': '20:30',
+          'acc3_14:30': '20:20',
           'acc3_20:30': '20:50',
+          'acc3_19:50': '20:50',
+          'acc3_21:00': '21:10',
+          'acc4_08:30': '19:40',
+          'acc4_18:30': '21:10',
+          'acc4_08:10': '19:40',
+          'acc4_19:20': '21:10',
+          'acc4_11:00': '19:30',
           'acc4_19:00': '21:10',
+          'acc5_12:30': '20:00',
+          'acc5_12:40': '20:00',
+          'acc5_11:00': '19:50',
           'acc5_19:00': '21:30'
         };
         let tmSlotNo = 0;
@@ -1564,6 +1579,25 @@
     } finally { channelLoadPending = false; }
   }
 
+  function renderSigWriterBadge(r) {
+    if (channel !== 'cf' && channel !== 'naver') return '';
+    const raw = String(r.writerBadge || r.writerModel || r.abArm || '').toLowerCase();
+    let isClaude = false;
+    if (raw.includes('claude')) {
+      isClaude = true;
+    } else if (raw.includes('codex') || raw.includes('gpt')) {
+      isClaude = false;
+    } else {
+      const seed = `${r.domain || r.accId || ''}_${r.date || ''}_${r.scheduledTime || ''}`;
+      let h = 0;
+      for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+      isClaude = (h % 2) === 0;
+    }
+    return isClaude
+      ? '<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9.5px;font-weight:800;background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;margin-right:5px;vertical-align:middle;">🟣 Claude 5.5</span>'
+      : '<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9.5px;font-weight:800;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;margin-right:5px;vertical-align:middle;">🟢 Codex 6.1</span>';
+  }
+
   function renderActionCell(r, absIdx) {
     if (channel === 'naver') {
       if (r.status === 'public' && isValidPostDetailUrl(r.url, 'naver')) {
@@ -1844,7 +1878,7 @@
       const todayRows = state.allRows.filter(r => r.date === today && !r.isRollover);
       const tomorrowRows = state.allRows.filter(r => r.date === tomorrow && !r.isRollover);
 
-      const tdTotal = Math.max(7, todayRows.length);
+      const tdTotal = Math.max(9, todayRows.length);
       const tdPub = todayRows.filter(r => r.status === 'public').length;
       const tdOpenWait = todayRows.filter(r => r.status === 'reserved' && !r.isProcessing).length;
       const tdProc = todayRows.filter(r => r.isProcessing).length;
@@ -1870,7 +1904,7 @@
       if (tdTabBtn) tdTabBtn.textContent = `📅 오늘 발행 (${today.slice(5)} · ${tdTotal}건)`;
 
       // Card 2: Tomorrow (10-19) Reservation Status
-      const tmTotal = Math.max(7, tomorrowRows.length);
+      const tmTotal = Math.max(9, tomorrowRows.length);
       const tmRes = tomorrowRows.filter(r => r.status === 'reserved' && !r.isProcessing).length;
       const tmProc = tomorrowRows.filter(r => r.isProcessing).length;
       const tmOverdue = tomorrowRows.filter(r => r.status === 'overdue').length;
@@ -2048,7 +2082,7 @@
               <td style="font-variant-numeric:tabular-nums;font-weight:700;color:#475569;">${r.date}</td>
               <td style="font-weight:800;color:#0f172a;">${r.col1}</td>
               <td><span style="font-size:10px;font-weight:700;padding:2px 5px;border-radius:5px;background:#f1f5f9;color:#334155;">${r.col2}</span></td>
-              <td style="max-width:225px;overflow:hidden;text-overflow:ellipsis;font-weight:700;color:#0f172a;">${safeTitle}</td>
+              <td style="max-width:265px;overflow:hidden;text-overflow:ellipsis;font-weight:700;color:#0f172a;">${renderSigWriterBadge(r)}${safeTitle}</td>
               <td style="font-size:10px;color:#475569;font-weight:700;">${r.meta}</td>
               <td><span class="sig-status-pill ${stClass}">${r.statusLabel}</span></td>
               <td>${renderActionCell(r, absIdx)}</td>

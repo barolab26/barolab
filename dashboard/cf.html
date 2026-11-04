@@ -1057,6 +1057,22 @@
       </div>
     </section>
 
+    <!-- A/B Writer Experiment Status Bar (Claude Sonnet 5.5 vs Codex GPT-6.1) -->
+    <section class="panel" id="ab-writer-experiment-bar" style="padding:10px 14px; background:linear-gradient(90deg,#faf5ff 0%,#f8fafc 50%,#ecfdf5 100%); border:1px solid #ddd6fe; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span style="background:#6b21a8; color:#fff; font-size:11px; font-weight:800; padding:3px 8px; border-radius:5px;">🧪 A/B 집필 엔진 실험 (50:50)</span>
+        <span style="font-size:12px; color:#1e293b; font-weight:700;" id="ab-claude-stat">🟣 Claude Sonnet 5.5 (AGY 구독 · 탈제약): 집계 중</span>
+        <span style="color:#cbd5e1;">|</span>
+        <span style="font-size:12px; color:#1e293b; font-weight:700;" id="ab-codex-stat">🟢 Codex GPT-6.1-Sol: 집계 중</span>
+        <span style="font-size:11px; color:#64748b;">· 기계적 글자 수/문단 수 족쇄 해제 (자청 4대 결핍 + 한국형 에디토리얼 호흡)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;" id="ab-writer-filter-group">
+        <button type="button" class="btn-filter active" data-ab-filter="all" style="padding:3px 9px; font-size:11px;">전체 보기</button>
+        <button type="button" class="btn-filter" data-ab-filter="claude" style="padding:3px 9px; font-size:11px; color:#6b21a8;">🟣 Claude 집필만</button>
+        <button type="button" class="btn-filter" data-ab-filter="codex" style="padding:3px 9px; font-size:11px; color:#047857;">🟢 Codex 집필만</button>
+      </div>
+    </section>
+
     <section class="panel wf-timeline-panel" aria-label="선택 블로그 워크플로우 타임라인">
       <div class="panel-head">
         <h2>선택 블로그 워크플로우 타임라인</h2>
@@ -1282,10 +1298,14 @@ function renderDomainTable() {
   const searchKeyword = document.getElementById('post-search').value.toLowerCase().trim();
 
   const filtered = CF_SITES.filter(site => {
+    if (window.currentAbFilter && window.currentAbFilter !== 'all') {
+      if (getSiteWriterArm(site) !== window.currentAbFilter) return false;
+    }
     if (!searchKeyword) return true;
     return site.title.toLowerCase().includes(searchKeyword) || 
            site.domain.toLowerCase().includes(searchKeyword) ||
-           site.name.toLowerCase().includes(searchKeyword);
+           site.name.toLowerCase().includes(searchKeyword) ||
+           (site.writerBadge || '').toLowerCase().includes(searchKeyword);
   });
 
   filtered.forEach((site) => {
@@ -1330,6 +1350,7 @@ function renderDomainTable() {
     }
 
     const orderNum = site.order || site.id;
+    const writerPillHtml = renderWriterPill(site);
 
     tr.innerHTML = `
       <td style="text-align:center; font-weight:700; color:#64748b;">${orderNum}</td>
@@ -1345,7 +1366,7 @@ function renderDomainTable() {
       <td><code style="font-size:10.5px; color:#475569; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${site.domain}</code></td>
       <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${site.title}">
         <strong style="color: ${site.title.includes('실시간 AI') ? '#4338ca' : '#0f172a'}; font-size:11.5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-          ${site.title.includes('실시간 AI') ? '<span style="background:#e0e7ff; color:#3730a3; padding:1px 5px; border-radius:4px; font-size:10px; font-weight:700; margin-right:4px; border:1px solid #c7d2fe;">⚡ AI 기획 대기</span> ' + site.title.replace('⚡ [실시간 AI 기획 대기] ', '') : site.title}
+          ${writerPillHtml}${site.title.includes('실시간 AI') ? '<span style="background:#e0e7ff; color:#3730a3; padding:1px 5px; border-radius:4px; font-size:10px; font-weight:700; margin-right:4px; border:1px solid #c7d2fe;">⚡ AI 기획 대기</span> ' + site.title.replace('⚡ [실시간 AI 기획 대기] ', '') : site.title}
         </strong>
         ${subText}
       </td>
@@ -1478,6 +1499,27 @@ function renderWorkflowTimeline() {
   });
 }
 
+window.currentAbFilter = 'all';
+
+function getSiteWriterArm(site) {
+  if (!site) return 'codex';
+  if (site.abArm === 'claude' || String(site.writerBadge || '').includes('Claude') || String(site.writerModel || '').includes('claude')) return 'claude';
+  if (site.abArm === 'codex' || String(site.writerBadge || '').includes('Codex') || String(site.writerModel || '').includes('gpt')) return 'codex';
+  const order = Number(site.order || site.id || 0);
+  return (order % 2 === 1) ? 'claude' : 'codex';
+}
+
+function renderWriterPill(site) {
+  const arm = getSiteWriterArm(site);
+  const isPlanned = Boolean(site.plannedOnly) && !isCFPublished(site);
+  if (arm === 'claude') {
+    const label = site.writerShortBadge || '🟣 Claude 5.5';
+    return `<span style="background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:800; margin-right:5px; display:inline-block;" title="Antigravity 구독 (${site.writerModel || 'claude-sonnet-5-5-high'}) · 탈제약 에디토리얼 모드">${label}${isPlanned ? ' (배정)' : ''}</span>`;
+  }
+  const label = site.writerShortBadge || '🟢 Codex 6.1';
+  return `<span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:800; margin-right:5px; display:inline-block;" title="Codex CLI (${site.writerModel || 'gpt-6.1-sol'})">${label}${isPlanned ? ' (배정)' : ''}</span>`;
+}
+
 // Dynamic Real-time Counter and KPI Updater
 function updateDynamicCounters() {
   const set = (id, value) => { const el=document.getElementById(id); if (el) el.textContent=value; };
@@ -1489,6 +1531,12 @@ function updateDynamicCounters() {
   const waitingSites = CF_SITES.filter(site => !isCFPublished(site));
   const processingSite = CF_SITES.find(site => ['processing', 'publishing'].includes(site.status));
   const doneCount = publishedSites.length, waitCount = waitingSites.length, total = CF_SITES.length;
+  const claudeAll = CF_SITES.filter(s => getSiteWriterArm(s) === 'claude');
+  const codexAll = CF_SITES.filter(s => getSiteWriterArm(s) === 'codex');
+  const claudePub = claudeAll.filter(s => isCFPublished(s)).length;
+  const codexPub = codexAll.filter(s => isCFPublished(s)).length;
+  set('ab-claude-stat', `🟣 Claude Sonnet 5.5 (AGY 구독): 발행 ${claudePub}건 / 전체 ${claudeAll.length}건`);
+  set('ab-codex-stat', `🟢 Codex GPT-6.1-Sol: 발행 ${codexPub}건 / 전체 ${codexAll.length}건`);
   const dateNote = `${cfDayView.today} KST · 원본 날짜 ${cfDayView.sourceDate || '미확인'}`;
   const liveTag = processingSite ? ` · ⚡ ${processingSite.domain} (${processingSite.stageName || '진행중'} ${processingSite.progressPct || 10}%)` : '';
   set('kpi-done-count', `${doneCount}건`);
@@ -1500,7 +1548,7 @@ function updateDynamicCounters() {
   set('live-notice-box', cfDayView.current
     ? `${dateNote} · 공개 확인 ${doneCount}건 / 완료 미확인 ${waitCount}건${processingSite ? ` · ⚡ 실시간 실행: [${processingSite.name}] ${processingSite.stageName || '작업 중'} (${processingSite.progressPct || 10}%) — ${processingSite.detailMessage || ''}` : ''}`
     : `${dateNote} · 오늘 일정이 아직 확인되지 않았습니다. 이전 날짜의 발행 내역은 오늘 집계에서 제외합니다.`);
-  set('table-panel-sub', cfDayView.current ? `(오늘 완료 ${doneCount}건 / 대기 ${waitCount}건${liveTag})` : '(오늘 일정 대기 · 예정 건수 미확인)');
+  set('table-panel-sub', cfDayView.current ? `(오늘 완료 ${doneCount}건 / 대기 ${waitCount}건 · 🟣Claude ${claudePub}건 / 🟢Codex ${codexPub}건${liveTag})` : '(오늘 일정 대기 · 예정 건수 미확인)');
   set('kpi-done-subline', `오늘 공개 확인 ${doneCount}건`);
   set('kpi-wait-subline', cfDayView.current ? `오늘 완료 미확인 ${waitCount}건` : '오늘 예정 건수 미확인');
   set('kpi-current-domain', cfDayView.current ? ((processingSite || waitingSites[0])?.domain || '오늘 대기 작업 없음') : '오늘 일정 대기');
@@ -1567,8 +1615,9 @@ function openTaskModal(index) {
   title.textContent = `[${site.id}] ${site.name} (${site.domain}) 포스팅 상세 내역`;
   content.innerHTML = `
     <div style="background:#f8fafc; padding:12px; border-radius:6px; margin-bottom:12px; border:1px solid #e2e8f0;">
-      <h3 style="font-size:14px; color:#0f172a; margin-bottom:4px;">${isPublished ? '[발행 완료]' : '[예정]'} ${site.title}</h3>
+      <h3 style="font-size:14px; color:#0f172a; margin-bottom:4px;">${renderWriterPill(site)} ${isPublished ? '[발행 완료]' : '[예정]'} ${site.title}</h3>
       <div style="font-size:11px; color:#64748b;">
+        <span>집필 모델: <strong>${site.writerBadge || (getSiteWriterArm(site)==='claude'?'🟣 Claude Sonnet 5.5':'🟢 Codex GPT-6.1')} (${site.writerModel || ''})</strong></span> | 
         <span>카테고리: <strong>${site.category}</strong></span> | 
         <span>순번: <strong>${site.id}번</strong></span> | 
         <span>상태: ${isPublished ? '<strong style="color:#16a34a;">✓ 발행 완료 (200 OK)</strong>' : '<strong style="color:#d97706;">⏳ 발행 대기 중 (0/1)</strong>'}</span>
@@ -1612,6 +1661,14 @@ function closeTaskModal() {
 // Event Listeners
 document.getElementById('post-search').addEventListener('input', () => {
   renderDomainTable();
+});
+document.querySelectorAll('#ab-writer-filter-group button[data-ab-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#ab-writer-filter-group button[data-ab-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.currentAbFilter = btn.dataset.abFilter || 'all';
+    renderDomainTable();
+  });
 });
 
 document.getElementById('btn-manual-refresh').addEventListener('click', () => {

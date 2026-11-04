@@ -674,7 +674,7 @@ def _score_domain_alignment(domain: str, title: str, category: str, body_text: s
 
     # Check explicit gossip / spam / slop patterns
     if domain != "must-joy.com" and (
-        any(m in combined for m in GOSSIP_OFF_TOPIC_MARKERS)
+        (any(m in combined for m in GOSSIP_OFF_TOPIC_MARKERS) and own_score < 3)
         or (category == "방송정보" and own_score == 0)
     ):
         return {
@@ -961,14 +961,18 @@ def _check_title_and_indirect_experience(domain: str, title: str, content_html: 
     lists = soup.find_all(["ul", "ol"])
 
     is_mechanical_title = any(re.search(pat, title) for pat in MECHANICAL_TITLE_PATTERNS)
+    has_broken_question_marks = ("???" in title) or ("???" in (content_html or "")) or ("\ufffd" in title) or ("\ufffd" in (content_html or ""))
     has_numbers_in_body = len(re.findall(r"\d+(?:,\d{3})*\s*(?:원|만원|%|분|시간|일|개월|세|점|건|단계|달러|\$)", body_text)) >= 4
     has_action_markers = sum(1 for w in ("경로", "순서", "단계", "클릭", "선택", "주의", "꿀팁", "비교", "직접", "확인") if w in body_text)
     evasive_phrases = [
         w for w in (
             "담당자에게", "질문하세요", "문의하세요", "달라질 수 있습니다", "조건에 따라 달라집니다",
-            "확인해야 합니다", "공식 공고를 참고", "개인별 조회 서비스가 아닙니다", "안내를 바탕으로", "제공된 자료"
+            "확인해야 합니다", "공식 공고를 참고", "개인별 조회 서비스가 아닙니다", "안내를 바탕으로", "제공된 자료",
+            "research가 비어"
         ) if w in body_text
     ]
+    if has_broken_question_marks:
+        evasive_phrases.append("깨진 문자(???) 잔존")
     deficiency_hits = {
         "lossAvoidance": any(w in body_text for w in ("수수료", "위약금", "감액", "환수", "손해", "불이익", "추가요금", "반려", "탈락", "떼이는", "날리는")),
         "infoAsymmetry": len(tables) >= 1 and has_numbers_in_body,
@@ -1999,7 +2003,7 @@ def get_auditor_status() -> Dict[str, Any]:
                 remodeled_total += 1
 
         audited_count = sum(grade_counts.values())
-        total_inventory = max(total_inventory, audited_count)
+        total_inventory = audited_count if audited_count > 0 else int(ledger.get("totalInventory") or 0)
         daily_target = int(ledger.get("dailyQuotaTarget") or 20)
         today_audited = int(daily_rec.get("audited") or 0)
         today_remodeled = sum(1 for r in audited_posts
@@ -2687,6 +2691,80 @@ class OverrideRequest(BaseModel):
 @auditor_router.get("/status")
 def api_auditor_status():
     return get_auditor_status()
+
+
+@auditor_router.get("/posts")
+def api_auditor_posts(
+    grade: str = "ALL",
+    domain: str = "",
+    q: str = "",
+    limit: int = 500,
+):
+    """
+    Return filterable list of live audited posts for the interactive Doctor Remodeling Gauge UI.
+    `grade` can be 'ALL', 'A', 'B', 'C', 'D', or 'BC' (all remodeling targets waiting for A promotion).
+    """
+    ledger = load_doctor_ledger()
+    all_posts = list((ledger.get("auditedPosts") or {}).values())
+    grade_norm = (grade or "ALL").strip().upper()
+    dom_norm = (domain or "").strip().lower()
+    q_norm = (q or "").strip().lower()
+
+    filtered = []
+    for r in all_posts:
+        rg = str(r.get("grade") or r.get("checklist", {}).get("7_finalGrade", {}).get("grade") or "C").upper()[:1]
+        if grade_norm == "BC":
+            if rg not in ("B", "C"):
+                continue
+        elif grade_norm in ("A", "B", "C", "D"):
+            if rg != grade_norm:
+                continue
+        if dom_norm and (r.get("domain") or "").lower() != dom_norm:
+            continue
+        if q_norm:
+            hay = f"{r.get('domain','')} {r.get('title','')} {r.get('slug','')} {r.get('category','')} {r.get('prescription','')}".lower()
+            if q_norm not in hay:
+                continue
+        c_qual = r.get("checklist", {}).get("5_titleAndBodyQuality", {})
+        c_img = r.get("checklist", {}).get("4_imageSuitability", {})
+        c_cat = r.get("checklist", {}).get("3_categoryRemap", {})
+        c_idx = r.get("checklist", {}).get("6_indexAndPotential", {})
+        filtered.append({
+            "url": r.get("url"),
+            "domain": r.get("domain"),
+            "brandName": r.get("brandName") or r.get("domain"),
+            "postId": r.get("postId"),
+            "slug": r.get("slug"),
+            "title": r.get("title"),
+            "category": r.get("category") or c_cat.get("newCategory") or c_cat.get("oldCategory") or "",
+            "recommendedCategory": r.get("recommendedCategory") or c_cat.get("newCategory") or "",
+            "grade": rg,
+            "gradeBadge": r.get("gradeBadge") or f"{rg}등급",
+            "qualityScore": r.get("qualityScore") or c_qual.get("qualityScore") or 0,
+            "charCount": r.get("charCount") or c_qual.get("charCount") or 0,
+            "tableCount": r.get("tableCount") if r.get("tableCount") is not None else (c_qual.get("tableCount") or 0),
+            "numFactCount": r.get("numFactCount") if r.get("numFactCount") is not None else (c_qual.get("numFactCount") or 0),
+            "imageCount": r.get("imageCount") if r.get("imageCount") is not None else (c_img.get("totalImages") or 0),
+            "hasValidThumbnail": r.get("hasValidThumbnail", True),
+            "indexStatus": c_idx.get("indexStatus", "unknown"),
+            "clicks": c_idx.get("clicks", 0),
+            "impressions": c_idx.get("impressions", 0),
+            "issues": r.get("issues") or [],
+            "prescription": r.get("prescription") or "",
+            "auditedAt": r.get("auditedAt"),
+        })
+
+    filtered.sort(key=lambda x: (-int(x.get("qualityScore") or 0), x.get("domain") or "", -int(x.get("postId") or 0)))
+    max_lim = max(1, min(2000, int(limit or 500)))
+    return {
+        "ok": True,
+        "gradeFilter": grade_norm,
+        "domainFilter": dom_norm,
+        "query": q_norm,
+        "totalMatched": len(filtered),
+        "totalInventory": len(all_posts),
+        "posts": filtered[:max_lim],
+    }
 
 
 @auditor_router.post("/patrol")

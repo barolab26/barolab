@@ -449,7 +449,7 @@
                     <td style="padding:6px 10px; text-align:center; color:#64748b; font-weight:700;">${it.id}</td>
                     <td style="padding:6px 10px; font-weight:700; color:#0f172a;">${it.name}</td>
                     <td style="padding:6px 10px; color:#475569;"><code>${it.domain}</code></td>
-                    <td style="padding:6px 10px; color:#1e293b; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${it.title}">${it.title}</td>
+                    <td style="padding:6px 10px; color:#1e293b; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${it.title}"><span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:800;margin-right:4px;${(it.abArm==='claude'||String(it.writerBadge||'').includes('Claude')||((it.id||0)%2===0))?'background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;':'background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;'}">${(it.abArm==='claude'||String(it.writerBadge||'').includes('Claude')||((it.id||0)%2===0))?'🟣 Claude 5.5':'🟢 Codex 6.1'}</span>${it.title}</td>
                     <td style="padding:6px 10px; text-align:center; color:#64748b; font-size:10.5px;">${it.time || '--:--'}</td>
                     <td style="padding:6px 10px; text-align:center;">
                       <a href="${it.url}" target="_blank" style="display:inline-block; padding:2px 7px; background:#ecfdf5; color:#047857; border:1px solid #86efac; border-radius:4px; font-size:10px; text-decoration:none; font-weight:700;">글 보기 ↗</a>
@@ -486,7 +486,7 @@
                     <td style="padding:6px 10px; text-align:center; color:#64748b; font-weight:700;">${it.accountNo || it.id}</td>
                     <td style="padding:6px 10px; font-weight:700; color:#0f172a;">${it.accountNo || it.id}호기 ${it.name} (${it.siteTitle || ''})</td>
                     <td style="padding:6px 10px; color:#475569; font-size:10.5px;">${it.schedule}</td>
-                    <td style="padding:6px 10px; color:#1e293b; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${it.title}">${it.title}</td>
+                    <td style="padding:6px 10px; color:#1e293b; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${it.title}"><span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:800;margin-right:4px;${(it.abArm==='claude'||String(it.writerBadge||'').includes('Claude')||((it.id||0)%2===0))?'background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;':'background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;'}">${(it.abArm==='claude'||String(it.writerBadge||'').includes('Claude')||((it.id||0)%2===0))?'🟣 Claude 5.5':'🟢 Codex 6.1'}</span>${it.title}</td>
                     <td style="padding:6px 10px; text-align:center;">
                       <span style="display:inline-block; padding:2px 8px; background:#dcfce7; color:#15803d; border-radius:12px; font-size:10px; font-weight:700;">✓ ${it.displayStatus || it.status}</span>
                     </td>

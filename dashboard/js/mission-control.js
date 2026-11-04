@@ -15,28 +15,32 @@
       for(const id of ['bar-pub-cf','cf-master-gauge-fill']){const el=document.getElementById(id);if(el)el.style.width=`${Math.min(100,cfDone/cfBase*100)}%`;}
     }
     if(nv) {
-      const nvDone=nv.done||0, nvRes=nv.reserved||0, nvTotal=nvDone+nvRes, nvTarget=nv.target||7;
+      const nvDone=nv.done||0, nvRes=nv.reserved||0, nvTotal=nvDone+nvRes, nvTarget=nv.target||9;
       const nvLabel=nvRes>0?`${nvTotal}/${nvTarget}편 (🟢공개 ${nvDone}·🔵예약 ${nvRes})`:`${nvDone}/${nvTarget}편`;
       text('val-pub-naver',nvLabel);text('nv-summary-total-progress',nvLabel);
       const nvBar=document.getElementById('bar-pub-naver');
       if(nvBar)nvBar.style.width=`${Math.min(100,Math.round(nvTotal/nvTarget*100))}%`;
     }
-    let realAchieved=0, bridgeAchieved=0;
+    let realAchieved=0, bridgeAchieved=0, realTarget=0, bridgeTarget=0;
     for(const account of snapshot.naverAccounts || []) {
       const slots=account.slots.filter(s=>s.publicationDate===snapshot.date);
       const published=slots.filter(s=>s.publicPublicationVerified===true).length;
       const reserved=slots.filter(s=>s.publicationStatus==='reserved' || (s.status==='verified' && !s.publicPublicationVerified)).length;
       const achieved=published+reserved;
-      const expected=account.expected || slots.length || 1;
-      if(['acc1','acc2','acc3'].includes(account.accId))realAchieved+=Math.min(expected,achieved);
-      else bridgeAchieved+=Math.min(expected,achieved);
+      const expected=account.expected || slots.length || (account.accId==='acc5'?1:2);
+      if(['acc1','acc2','acc3'].includes(account.accId)){realAchieved+=Math.min(expected,achieved);realTarget+=expected;}
+      else{bridgeAchieved+=Math.min(expected,achieved);bridgeTarget+=expected;}
       text(`mini-count-${account.accId}`,String(achieved));
       text(`mini-status-${account.accId}`,published>=expected?`🟢 공개 ${published}완료`:achieved>=expected?(published>0?`🟢공개${published}·🔵예약${reserved}`:`🔵 예약 ${reserved}완료`):`공개 ${published} · 예약 ${reserved}`);
       const battery=document.getElementById(`nv-batt-${account.accId}`);
-      if(battery)Array.from(battery.children).forEach((cell,index)=>{
-        cell.className='batt-cell'+(index<published?' filled':index<achieved?' reserved':'');
-        cell.textContent=index<achieved?'✓':'';
-      });
+      if(battery){
+        while(battery.children.length<expected)battery.appendChild(document.createElement('span'));
+        while(battery.children.length>expected)battery.lastElementChild.remove();
+        Array.from(battery.children).forEach((cell,index)=>{
+          cell.className='batt-cell'+(index<published?' filled':index<achieved?' reserved':'');
+          cell.textContent=index<achieved?'✓':'';
+        });
+      }
       const coolBar=document.getElementById(`nv-coolbar-${account.accId}`);
       if(coolBar){
         coolBar.style.width=`${Math.min(100,Math.round(achieved/expected*100))}%`;
@@ -48,8 +52,8 @@
         miniBox.classList.toggle('is-reserved',achieved>=expected && published<expected);
       }
     }
-    text('nv-summary-real-progress',`${realAchieved}/3편`);
-    text('nv-summary-bridge-progress',`${bridgeAchieved}/4편`);
+    text('nv-summary-real-progress',`${realAchieved}/${realTarget||6}편`);
+    text('nv-summary-bridge-progress',`${bridgeAchieved}/${bridgeTarget||3}편`);
     const kin=snapshot.channels.find(r=>r.id==='kin');
     const threads=snapshot.channels.find(r=>r.id==='threads');
     if(kin) {
@@ -113,7 +117,7 @@
     const done=snapshot.channels.reduce((sum,r)=>sum+(r.done||0)+(r.reserved||0),0),target=snapshot.channels.reduce((sum,r)=>sum+r.target,0);
     const totalReserved=snapshot.channels.reduce((sum,r)=>sum+(r.reserved||0),0);
     text('gauge-pub-pct',`${Math.round(done/target*100)}%`);
-    for(const [id,value,max] of [['ring-pub-cf',cf?.done||0,16],['ring-pub-naver',(nv?.done||0)+(nv?.reserved||0),7]]) {
+    for(const [id,value,max] of [['ring-pub-cf',cf?.done||0,16],['ring-pub-naver',(nv?.done||0)+(nv?.reserved||0),nv?.target||9]]) {
       const ring=document.getElementById(id);
       if(ring){const length=id==='ring-pub-cf'?219.9:157.1;ring.style.strokeDashoffset=String(length*(1-Math.min(1,value/max)));}
     }

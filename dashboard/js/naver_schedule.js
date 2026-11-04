@@ -9,11 +9,11 @@
   };
   const legacySingleSlots = {acc1:['07:40','19:30','11:30','08:00','10:00','11:00'], acc2:['15:00','20:00','12:00','08:30','12:30'], acc3:['21:00','20:30','12:30','09:00','14:00']};
   const legacySlotMap = {
-    acc1: { '07:40': ['07:40','11:00','11:30','08:00','10:00'], '19:10': ['19:10','19:30','13:10'], '11:00': ['11:00','19:30','11:30','08:00','10:00','07:40'], '19:30': ['19:30', '19:10', '13:10', '11:30', '08:00', '10:00', '11:00'] },
-    acc2: { '15:00': ['15:00', '12:00', '08:30', '12:30'], '19:30': ['19:30', '20:00'], '20:00': ['20:00', '19:30'] },
-    acc3: { '19:50': ['19:50', '12:30', '09:00', '14:00'], '21:00': ['21:00', '20:30'], '20:30': ['20:30', '21:00'] },
-    acc4: { '08:10': ['08:10', '11:00', '12:30'], '19:20': ['19:20', '13:20', '12:20', '19:00', '14:30', '15:30', '18:30', '19:30'], '12:20': ['12:20', '19:20', '13:20', '19:00', '14:30', '15:30', '18:30', '19:30'], '11:00': ['11:00', '08:10', '12:30', '15:30'], '19:00': ['19:00', '19:20', '12:20', '18:30', '19:30'] },
-    acc5: { '08:20': ['08:20', '11:00', '11:15', '14:40'], '12:40': ['12:40', '19:00', '14:30', '16:30', '20:30'], '11:00': ['11:00', '08:20', '11:15', '14:30', '16:30'], '19:00': ['19:00', '12:40', '20:30'] }
+    acc1: { '07:40': ['07:40','11:00','11:30','08:00','10:00'], '16:30': ['16:30','19:10','19:30','13:10'], '19:10': ['19:10','16:30','19:30','13:10'], '11:00': ['11:00','19:30','11:30','08:00','10:00','07:40'], '19:30': ['19:30', '19:10', '16:30', '13:10', '11:30', '08:00', '10:00', '11:00'] },
+    acc2: { '10:30': ['10:30', '15:00', '12:00', '08:30', '12:30'], '15:00': ['15:00', '10:30', '12:00', '08:30', '12:30'], '19:30': ['19:30', '20:00'], '20:00': ['20:00', '19:30'] },
+    acc3: { '14:30': ['14:30', '19:50', '12:30', '09:00', '14:00'], '19:50': ['19:50', '14:30', '12:30', '09:00', '14:00'], '20:30': ['20:30', '21:00'], '21:00': ['21:00', '20:30'] },
+    acc4: { '08:30': ['08:30', '08:10', '11:00', '12:30', '14:30'], '08:10': ['08:10', '08:30', '11:00', '12:30', '14:30'], '18:30': ['18:30', '19:20', '13:20', '12:20', '19:00', '14:30', '15:30', '19:30'], '19:20': ['19:20', '18:30', '13:20', '12:20', '19:00', '14:30', '15:30', '19:30'], '12:20': ['12:20', '19:20', '18:30', '13:20', '19:00', '14:30', '15:30', '19:30'], '11:00': ['11:00', '08:10', '08:30', '12:30', '15:30'], '19:00': ['19:00', '19:20', '18:30', '12:20', '19:30'] },
+    acc5: { '12:30': ['12:30', '12:40', '13:00', '19:00', '14:30', '16:30', '20:30'], '08:20': ['08:20', '11:00', '11:15', '14:40'], '12:40': ['12:40', '12:30', '13:00', '19:00', '14:30', '16:30', '20:30'], '11:00': ['11:00', '08:20', '11:15', '14:30', '16:30'], '19:00': ['19:00', '12:40', '12:30', '20:30'] }
   };
   const folderSlot = folder => {
     const m = String(folder || '').match(/-([01]\d|2[0-3])([0-5]\d)(?:[\\/]|$)/);
@@ -22,10 +22,11 @@
   const slotMatches = (accId, candidateSlot, targetSlot, artifactFolder = null, activeSlotCount = null) => {
     const fSlot = folderSlot(artifactFolder);
     if (fSlot && fSlot === targetSlot) return true;
+    const mapped = legacySlotMap[accId]?.[targetSlot];
+    if (fSlot && mapped && mapped.includes(fSlot)) return true;
     if (fSlot && fSlot !== targetSlot) return false;
     if (!candidateSlot || !targetSlot) return false;
     if (candidateSlot === targetSlot) return true;
-    const mapped = legacySlotMap[accId]?.[targetSlot];
     if (mapped && mapped.includes(candidateSlot)) return true;
     const slotCnt = activeSlotCount ?? (slots[accId] || []).length;
     if (slotCnt === 1 && (legacySingleSlots[accId] || []).includes(candidateSlot)) return true;
@@ -33,21 +34,26 @@
   };
   const slotMeta = {
     acc1: {
-      '07:40': { prepTime: '05:20', track: '카테고리 전문성·체류 1차', desc: '5060 연금·복지 심층 간접체험 가이드 (오전 슬롯)' },
+      '07:40': { prepTime: '05:20', track: '카테고리 전문성·체류 1차', desc: '5060 연금·복지 심층 간접체험 가이드 (아침 1차)' },
+      '16:30': { prepTime: '06:10', track: '카테고리 전문성·체류 2차', desc: '5060 노후재정·환급·세무 핵심 판독 가이드 (오후 2차)' },
       '19:10': { prepTime: '05:35', track: '카테고리 전문성·체류 2차', desc: '5060 노후재정·환급·세무 핵심 판독 가이드 (오후 슬롯)' },
       '19:30': { prepTime: '08:30', track: '카테고리 전문성·체류 트랙', desc: '5060 연금·복지 심층 간접체험 가이드' }
     },
     acc2: {
+      '10:30': { prepTime: '05:50', track: '카테고리 전문성·체류 1차', desc: '5060 건강·실손보험·의료비 핵심 체크 가이드 (오전 1차)' },
       '15:00': { prepTime: '05:50', track: '카테고리 전문성·체류 1차', desc: '5060 건강·실손보험·의료비 핵심 체크 가이드 (오후 1차)' },
-      '19:30': { prepTime: '06:35', track: '카테고리 전문성·체류 2차', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (오후 2차)' },
+      '19:30': { prepTime: '06:35', track: '카테고리 전문성·체류 2차', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드 (저녁 2차)' },
       '20:00': { prepTime: '09:00', track: '카테고리 전문성·체류 트랙', desc: '5060 건기식·혈압혈당 심층 간접체험 가이드' }
     },
     acc3: {
+      '14:30': { prepTime: '06:20', track: '트렌드·롱테일 유입 1차', desc: '5060 프리미엄 가전·리빙 실전 비교 가이드 (오후 1차)' },
+      '20:30': { prepTime: '07:10', track: '트렌드·롱테일 유입 2차', desc: '5060 데일리룩·라이프스타일 심층 가이드 (저녁 2차)' },
       '19:50': { prepTime: '06:50', track: '트렌드·롱테일 유입 1차', desc: '5060 프리미엄 가전·리빙 실전 비교 가이드 (저녁 1차)' },
-      '21:00': { prepTime: '07:10', track: '트렌드·롱테일 유입 2차', desc: '5060 데일리룩·라이프스타일 심층 가이드 (저녁 2차)' },
-      '20:30': { prepTime: '09:30', track: '트렌드·롱테일 유입 트랙', desc: '5060 데일리룩·리빙 심층 간접체험 가이드' }
+      '21:00': { prepTime: '07:10', track: '트렌드·롱테일 유입 2차', desc: '5060 데일리룩·라이프스타일 심층 가이드 (저녁 2차)' }
     },
     acc4: {
+      '08:30': { prepTime: '05:40', track: 'CF 고단가 브리지 1차', desc: '출근길 지원금·청약·금융 핵심 요약 + CF 상세표 브리지' },
+      '18:30': { prepTime: '06:40', track: 'CF 고단가 브리지 2차', desc: '퇴근길 퇴직금·연말정산·실무서식 핵심 요약 + CF 계산기 브리지' },
       '08:10': { prepTime: '05:40', track: 'CF 고단가 브리지 1차', desc: '지원금·청약·금융 핵심 요약 + CF 상세표 브리지' },
       '19:20': { prepTime: '05:46', track: 'CF 고단가 브리지 2차', desc: '퇴직금·연말정산·실무서식 핵심 요약 + CF 계산기 브리지' },
       '12:20': { prepTime: '11:30', track: 'CF 고단가 브리지 2차', desc: '연말정산·IT·실무서식 핵심 요약 + CF 계산기 브리지' },
@@ -55,6 +61,7 @@
       '19:00': { prepTime: '13:00', track: 'CF 고단가 브리지 2차', desc: '연말정산·IT·실무서식 핵심 요약 + CF 계산기 브리지' }
     },
     acc5: {
+      '12:30': { prepTime: '06:00', track: 'CF 고단가 브리지 (완결형)', desc: '점심시간 지원금 조건·수당·생활세무 핵심 판독 가이드' },
       '08:20': { prepTime: '08:15', track: 'CF 고단가 브리지 1차', desc: '소상공인·지자체 정책자금 요약 + CF 자격표 브리지' },
       '12:40': { prepTime: '05:50', track: 'CF 고단가 브리지 (완결형)', desc: '지원금 조건·수당·생활세무 핵심 판독 가이드' },
       '11:00': { prepTime: '08:15', track: 'CF 고단가 브리지 1차', desc: '소상공인·지자체 정책자금 요약 + CF 자격표 브리지' },
@@ -178,7 +185,11 @@
       .filter(item => item && (!item.accId || item.accId === accId) && publicationDay(item) === publicationDate);
     const attempts = (journal?.attempts || []).filter(item => (item.account === names[accId] || item.accId === accId) && publicationDay(item) === publicationDate);
     const approved = monitor?.schedulePolicy;
-    const times = (approved && publicationDate >= approved.effectiveDate ? approved.naver?.[names[accId]]?.slots : null) || slots[accId] || [];
+    const effDate = approved?.naverEffectiveDate || (publicationDate <= '2026-11-04' ? '2026-11-05' : approved?.effectiveDate);
+    const activeMap = approved && effDate && publicationDate < effDate
+      ? (approved.naverPrior || null)
+      : approved?.naver;
+    const times = (approved && publicationDate >= approved.effectiveDate ? activeMap?.[names[accId]]?.slots : null) || slots[accId] || [];
     return times.map(time => {
       let receipt = null;
       for (const record of records) {
@@ -298,8 +309,16 @@
           : state === 'processing'
             ? `실시간집필 ${reservedAtKst || '진행중'} ➔ 공개 ${actualTime} 예정`
             : `당일집필 ${metaCfg.prepTime} ➔ 공개 ${actualTime} 예정`;
+      const slotIndex = times.indexOf(time);
+      const fallbackArm = ((accId + slotIndex) % 2 === 0) ? 'claude' : 'codex';
+      const abArm = info.abArm || (String(info.writerBadge || '').includes('Claude') ? 'claude' : String(info.writerBadge || '').includes('Codex') ? 'codex' : fallbackArm);
+      const writerShortBadge = info.writerShortBadge || (abArm === 'claude' ? '🟣 Claude 5.5' : '🟢 Codex 6.1');
+      const writerBadge = info.writerBadge || (abArm === 'claude' ? '🟣 Claude Sonnet 5.5' : '🟢 Codex GPT-6.1');
+      const writerModel = info.writerModel || (abArm === 'claude' ? 'claude-sonnet-5-5-high' : 'gpt-6.1-sol');
+      const plannedOnly = !['public', 'reserved'].includes(state) && (info.plannedOnly !== false);
       return {time, publicationDate, state, label, info, recovery, actionDay, reservedAtKst, scheduleTransition,
         track: metaCfg.track, trackDesc: metaCfg.desc, prepTime: metaCfg.prepTime,
+        abArm, writerBadge, writerShortBadge, writerModel, plannedOnly,
         revisionPending, revisionActive:revisionPending && live,
         actualTime, period:Number(time.slice(0,2)) < 13 ? '오전분' : '오후분'};
     });
