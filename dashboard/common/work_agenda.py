@@ -414,11 +414,13 @@ def _pending_owned_work(goal):
 def occupies_lane(row):
     if running(row):
         return True
-    if row.get('status') != 'blocked':
-        return not waiting_investigation(row)
-    identity = row.get('controllerGoalId') or row.get('source', {}).get('goalId')
-    goal = load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}', identity) else {}
-    return _pending_owned_work(goal) or _pending_owned_work(row)
+    if row.get('status') in ('blocked', 'recovering'):
+        identity = row.get('controllerGoalId') or row.get('recoveryGoalId') or row.get('source', {}).get('goalId')
+        goal = load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}', identity) else {}
+        if goal.get('status') in ('ready', 'running'):
+            return True
+        return _pending_owned_work(goal) or _pending_owned_work(row)
+    return not waiting_investigation(row)
 
 
 def current():
@@ -2329,6 +2331,29 @@ def company_executive_check_once(force=False):
         from common.crew_chat_bridge import emit_work_event, emit_ceo_proposal
         company = overview()
         health_checked = executive_health_check(company, now)
+        try:
+            from common.repair_workflow import agenda_recovery_blocker
+            with locked(ROWS):
+                st_heal = load(STATE)
+                for arow in active_rows(st_heal):
+                    if arow.get('kind') == 'conference' and arow.get('status') in ('blocked', 'recovering') and not running(arow) and not agenda_recovery_blocker(arow):
+                        conf_id = (arow.get('source') or {}).get('conferenceId')
+                        cpath = ROWS.parent / f'{conf_id}.json' if conf_id else None
+                        crow = load(cpath) if cpath else {}
+                        if (crow and crow.get('status') == 'failed' and crow.get('submissionStarted') is not True
+                                and crow.get('attempts', 1) < 3 and now >= crow.get('retryAt', 0)):
+                            crow.update(status='queued', attempts=crow.get('attempts', 1) + 1, retryAt=0, requestedAt=now)
+                            for ck in ('errorType', 'failureReason', 'failureDiagnostic', 'failureReport', 'interruptedAt', 'completedAt'):
+                                crow.pop(ck, None)
+                            write(cpath, crow)
+                            arow.update(status='executing', controllerFailures=0, nextCheckAt=0)
+                            for hk in ('blocker', 'recoveryGoalId', 'controllerGoalId', 'recoveryWatch', 'recoveryPreparation'):
+                                arow.pop(hk, None)
+                            if isinstance(arow.get('events'), dict):
+                                arow['events'].pop('blocked', None)
+                            _save(arow)
+        except Exception:
+            pass
         live_diag = _build_live_executive_diagnostics()
         projects_summary = [
             {
@@ -2727,7 +2752,13 @@ def process_once():
                 close_and_advance(r['id'], status='closed', reason=r.get('blocker') or r.get('controllerError') or 'auto_advance')
         company_executive_check_once()
         _top_up_channel_lanes()
-        for identity in list(load(STATE).get('pending', [])):
+        def _pending_sort_key(aid):
+            r = get(aid) or {}
+            args = (r.get('workTarget') or r.get('source') or {}).get('arguments') or {}
+            act = str(args.get('action') or '')
+            slot = str(args.get('slot') or '00:00')
+            return (0 if r.get('kind') == 'conference' else 1, 0 if act == 'cf' else 1, r.get('priority', 10), slot, r.get('createdAt', 0))
+        for identity in sorted(list(load(STATE).get('pending', [])), key=_pending_sort_key):
             admit(identity)
         rows = active_rows()
         if not rows:

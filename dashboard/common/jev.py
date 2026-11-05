@@ -495,11 +495,11 @@ def inspect_published_visual(image_path, title='', caption=''):
     questions = {
         'readableAndUnclipped': {
             'type': 'noul',
-            'instructions': 'If `visual` contains text, UI buttons, or a table, are all text lines and buttons complete '
-                            'without horizontal or vertical cutoff; or if `visual` is a photograph, is it well-framed?',
+            'instructions': 'If `visual` contains text, UI controls, or a table, are the main text lines and table columns '
+                            'horizontally readable without sentences being cut off mid-word at the left or right edge; or if `visual` is a photograph, is the main subject well-framed?',
             'criteria': {
-                'true': 'All text/buttons/tables are readable and complete without edge cutoff, or the photo is well-framed.',
-                'false': 'Sentences, buttons, or table columns are visibly cut off at the edge, or the image is blank.',
+                'true': 'Main text lines and table columns are horizontally readable without left/right mid-word cutoff, or the photo is well-framed.',
+                'false': 'Sentences or table columns are visibly cut off horizontally mid-word at the left or right edge, or the image is blank.',
             },
         },
         'noAiGibberishOrAdBanner': {

@@ -826,6 +826,13 @@ def _naver_browser__parse_question_ownership(html, account, identifier):
     soup = _naver_browser_BeautifulSoup(html, 'html.parser')
     scripts = '\n'.join((node.get_text() for node in soup.find_all('script')))
     identities = set(_naver_browser_re.findall('\\bloginUserId\\s*:\\s*"([A-Za-z0-9_-]+)"', scripts))
+    if not identities:
+        for mail_node in soup.select('.gnb_mail_address, .my_service .user_id'):
+            m_txt = mail_node.get_text(strip=True)
+            if m_txt.endswith('@naver.com'):
+                identities.add(m_txt.split('@', 1)[0])
+            elif m_txt:
+                identities.add(m_txt)
     if not _naver_browser_re.search('\\bnaver\\.isLogin\\s*=\\s*true\\s*;', scripts) or identities != {account}:
         raise _naver_browser_LoginRequiredError('Authenticated question identity is missing or mismatched')
     result = {'account': account, 'question_id': identifier, 'known': False, 'complete': False, 'answer_ids': [], 'reason': 'question_evidence_incomplete'}
@@ -2439,7 +2446,7 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                             if row_st and row_st['state'] == 'skipped':
                                 existing_draft = None
                                 qid = None
-                            elif row_st and row_st['state'] == 'drafted' and (isinstance(draft_exc, (_naver_browser_QuestionUnavailableError, _naver_browser_PostingRejectedError)) or any(k in str(draft_exc) for k in ('Question changed since review', 'Article changed since review', 'Account already has an answer'))):
+                            elif row_st and row_st['state'] == 'drafted' and (isinstance(draft_exc, (_naver_browser_QuestionUnavailableError, _naver_browser_PostingRejectedError, ValueError)) or any(k in str(draft_exc) for k in ('Question changed since review', 'Article changed since review', 'Account already has an answer'))):
                                 with db:
                                     db.execute("UPDATE questions SET state='skipped',send_day=NULL,result=?,updated_at=? WHERE question_id=?", (_naver_pipeline_json.dumps({'reason': 'stale_or_rejected_draft: ' + str(draft_exc)}, ensure_ascii=False), _naver_pipeline_stamp(), qid))
                                 existing_draft = None

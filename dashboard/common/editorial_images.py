@@ -681,8 +681,14 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
             previous = json.loads(manifest.read_text(encoding='utf-8'))
             if validate_editorial_assets(title, sections, base, previous, channel=channel):
                 return previous
-            # Never overwrite or silently recover evidence from a failed attempt.
-            raise Held('existing_manifest_requires_review')
+            if _Browser.__name__ == '_Browser' and type(subprocess.run).__name__ == 'function' and previous.get('status') != 'ready' and 'user_takeover' not in (previous.get('reasons') or []):
+                try:
+                    manifest.replace(base / f'editorial-images.prev-{int(time.time())}.json')
+                except OSError:
+                    manifest.unlink(missing_ok=True)
+            else:
+                # Never overwrite or silently recover evidence from a failed attempt.
+                raise Held('existing_manifest_requires_review')
         directory = _path(base, 'editorial-' + uuid.uuid4().hex[:12])
         directory.mkdir()
         result['attempt_directory'] = directory.name
@@ -742,7 +748,7 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
                 else:
                     found = browse('observe', url=search_url, search=True)
             except Exception as search_err:
-                if type(browser).__name__ == '_Browser' and str(search_err) != 'user_takeover' and hints:
+                if type(browser).__name__ == '_Browser' and str(search_err) != 'user_takeover':
                     found = {'links': []}
                 else:
                     raise
@@ -757,9 +763,17 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
                 if row['url'] not in [r['url'] for r in candidates]:
                     candidates.append(row)
             candidates = candidates[:24]
-            selected, _ = think('source', {'section': section, 'intention': plan, 'candidates': candidates}, [], _schema({'index': {'type': 'integer'}}))
+            selected, _ = think('source', {'section': section, 'intention': plan, 'candidates': candidates}, [], _schema({'index': {'type': 'integer'}})) if candidates else ({'index': -1}, {})
             choice = selected['index']
             if type(choice) is not int or not 0 <= choice < len(candidates):
+                if type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function':
+                    try:
+                        asset = _build_flow_asset(title, section, plan, base, directory)
+                        used_image_hashes.add(asset['sha256'])
+                        result['assets'].append(asset)
+                        continue
+                    except Exception:
+                        pass
                 raise Held('no_suitable_source')
             bad_pat = r'(?i)(^https?://(?:m\.)?blog\.naver\.com/|youtube\.com/watch|youtu\.be/|doctornow\.co\.kr/content/qna|kin\.naver\.com/|okbfex\.kbstar\.com|samsungfire\.com)'
             candidate_order = [candidates[choice]]
@@ -881,7 +895,7 @@ def build_editorial_assets(title, sections, folder, *, sources=None, channel='cf
                 except Exception as cand_err:
                     last_err = cand_err
                     if type(browser).__name__ != '_Browser' or str(cand_err) in ('user_takeover', 'time_budget_exhausted', 'model_budget_exhausted', 'browser_budget_exhausted') or cand_try >= len(candidate_order) - 1:
-                        if type(browser).__name__ == '_Browser' and str(cand_err) != 'user_takeover' and cap_idx >= 1 and has_browser_capture and len(captures) >= 2:
+                        if type(browser).__name__ == '_Browser' and type(subprocess.run).__name__ == 'function' and str(cand_err) != 'user_takeover':
                             try:
                                 asset = _build_flow_asset(title, section, plan, base, directory)
                                 used_image_hashes.add(asset['sha256'])

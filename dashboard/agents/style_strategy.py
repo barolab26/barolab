@@ -246,11 +246,20 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             'message': message,
             'writingGuide': {'type': 'string', 'minLength': 1, 'maxLength': 5000},
         })
-        keyword = fast_res.get('keyword') or (candidate_keywords[0] if candidate_keywords else topic[:50])
+        raw_kw = str(fast_res.get('keyword') or '').strip()
+        keyword = raw_kw or (candidate_keywords[0] if candidate_keywords else topic[:50])
         if channel == 'naver':
             keyword = select_verified_naver_keyword(identity, keyword, candidate_keywords, used_today, max_docs=5000)
         elif channel == 'cf':
             keyword = select_verified_cf_keyword(identity, keyword, candidate_keywords, used_today, max_docs=5000)
+        guide_text = str(fast_res.get('writingGuide') or '')
+        if raw_kw and keyword != raw_kw:
+            guide_text = (
+                f"1. [네이버 1페이지 상위노출 공식 제목]: 반드시 '{keyword}, [자청식 후킹 부제]' 구조로 작성하라.\n"
+                f"2. [자청 4대 결핍 타격 도입부]: '{keyword}'를 검색한 독자의 손실 회피·정보 비대칭·시간 단축·즉시 판정 결핍에서 출발하라.\n"
+                f"3. [본문 실전 수치 & 3초 판독기]: '{keyword}' 관련 구체적 금액·비율·기한 수치와 3초 자가진단 비교표를 제시하라.\n"
+                f"4. [마무리 Action Item]: 오늘 당장 실행할 구체적 준비 행동으로 마무리하라."
+            )
         observed = {'query': keyword, 'checkedAt': datetime.now(ZoneInfo('Asia/Seoul')).isoformat(), 'articles': [], 'status': 'fast_revenue_lane'}
         result = {
             'status': 'agreed',
@@ -261,7 +270,7 @@ def plan_post(identity, topic, folder, parameters, channel='naver'):
             'identity': identity,
             'channel': channel,
             'parameters': parameters,
-            'writingGuide': fast_res['writingGuide'] + f"\n[필수 고정 검색 명사 키워드] 제목 맨 앞머리는 반드시 '{keyword}, '로 시작하라." + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
+            'writingGuide': guide_text + f"\n[필수 고정 검색 명사 키워드] 제목 맨 앞머리는 반드시 '{keyword}, '로 시작하라." + (f"\n[당일 CF 일점사 브릿지 타깃] {primary_bridge.get('title')} ({primary_bridge.get('url')})" if channel != 'cf' and primary_bridge.get('url') else ''),
             'bridgeTarget': primary_bridge if channel != 'cf' else None,
             'benchmark': observed,
             'transcript': transcript,

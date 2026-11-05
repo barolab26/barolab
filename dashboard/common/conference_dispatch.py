@@ -42,7 +42,7 @@ def request(kind, arguments, *, one=False, automatic=None):
                 continue
         rec = _request_single(kind,item,automatic=automatic and not existing)
         receipts.append(rec)
-        if one and rec.get('status') in ('conference_requested', 'conference_pending'):
+        if one and rec.get('status') == 'conference_requested':
             break
     if not receipts:return {'status':'held','reason':'cf_preparation_window_waiting' if deferred_preparation else 'new_automatic_work_requires_focused_experiment'}
     if one:
@@ -527,6 +527,10 @@ def install_channel_conferences(kind):
             if target.get('partId') and target['partId']!=part_id:raise ValueError('Different Threads part is outside the current agenda')
         engine._conference_context = {'channel':'Threads', 'account':part['account_key'], 'slot':part['slot'],
             'reserveTime':part['publication_date']+' '+part['slot'], 'title':part['text'].splitlines()[0], 'partId':part_id}
+        if part.get('state') == 'published_verified' and part.get('permalink'):
+            result = {**engine._conference_context, 'state': 'published_verified', 'permalink': part['permalink'], 'publicUrl': part['permalink'], 'platform_id': part.get('platform_id')}
+            engine._conference_results.append(result)
+            return result
         readiness = engine._namespace_adapter.readiness_status(config)
         if readiness.get('publishReady') is not True:
             raise RuntimeError(readiness.get('reason') or 'threads_readiness_incomplete')

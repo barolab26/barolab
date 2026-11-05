@@ -845,7 +845,7 @@ try {{
         return {{ ok: false }};
       }}
     }}, {json.dumps(url)});
-    if (fast && fast.ok && !fast.needsPagination && fast.html.includes("naver.isLogin")) {{
+    if (fast && fast.ok && !fast.needsPagination && /naver\\.isLogin\\s*=\\s*true/.test(fast.html) && fast.html.includes("loginUserId")) {{
       console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{
         ok: true,
         account: {json.dumps(account)},

@@ -555,7 +555,10 @@ def basic_article(domain, item, folder):
                     verified_cands.append(kw_c)
     except Exception:
         pass
-    keyword = select_verified_cf_keyword(domain, keyword, verified_cands, used_today, max_docs=300)
+    if planned_kw and not is_duplicate_naver_topic(planned_kw, used_today):
+        keyword = planned_kw
+    else:
+        keyword = select_verified_cf_keyword(domain, keyword, verified_cands, used_today, max_docs=5000)
     if plan_file.is_file() and clean_naver_search_keyword(keyword) != clean_naver_search_keyword(planned_kw):
         plan_obj = json.loads(plan_file.read_text(encoding='utf-8'))
         plan_obj['keyword'] = keyword
